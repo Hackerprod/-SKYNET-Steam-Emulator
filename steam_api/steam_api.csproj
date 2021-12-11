@@ -1,0 +1,241 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A14D2163-7A4E-489C-9AA0-B512D807BCE3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SKYNET</RootNamespace>
+    <AssemblyName>steam_api</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\[SKYNET] Steam Emulator\bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DllExportIdent>B82B23B5-C476-47AF-89F7-7D3DB210B74B</DllExportIdent>
+    <DllExportMetaLibName>DllExport.dll</DllExportMetaLibName>
+    <DllExportNamespace />
+    <DllExportDDNSCecil>false</DllExportDDNSCecil>
+    <DllExportSkipOnAnyCpu>false</DllExportSkipOnAnyCpu>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DllExportOrdinalsBase>1</DllExportOrdinalsBase>
+    <DllExportGenExpLib>false</DllExportGenExpLib>
+    <DllExportOurILAsm>false</DllExportOurILAsm>
+    <DllExportSysObjRebase>false</DllExportSysObjRebase>
+    <DllExportLeaveIntermediateFiles>true</DllExportLeaveIntermediateFiles>
+    <DllExportTimeout>30000</DllExportTimeout>
+    <DllExportPeCheck>2</DllExportPeCheck>
+    <DllExportPatches>0</DllExportPatches>
+    <DllExportPreProcType>0</DllExportPreProcType>
+    <DllExportPostProcType>0</DllExportPostProcType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BaseCalls.cs" />
+    <Compile Include="Callback\CallbackType.cs" />
+    <Compile Include="Callback\CallbackIdentityAttribute.cs" />
+    <Compile Include="Callback\CCallbackBase.cs" />
+    <Compile Include="Callback\SteamAPICall_t.cs" />
+    <Compile Include="Helper\Log.cs" />
+    <Compile Include="Helper\modCommon.cs" />
+    <Compile Include="Helper\RegistrySettings.cs" />
+    <Compile Include="Managers\Interface\ISteamAppList.cs" />
+    <Compile Include="Managers\Interface\ISteamApps.cs" />
+    <Compile Include="Managers\Interface\ISteamController.cs" />
+    <Compile Include="Managers\Interface\ISteamFriends.cs" />
+    <Compile Include="Managers\Interface\ISteamGameSearch.cs" />
+    <Compile Include="Managers\Interface\ISteamGameServer.cs" />
+    <Compile Include="Managers\Interface\ISteamGameServerStats.cs" />
+    <Compile Include="Managers\Interface\ISteamHTMLSurface.cs" />
+    <Compile Include="Managers\Interface\ISteamHTTP.cs" />
+    <Compile Include="Managers\Interface\ISteamInput.cs" />
+    <Compile Include="Managers\Interface\ISteamInventory.cs" />
+    <Compile Include="Managers\Interface\ISteamMatchmaking.cs" />
+    <Compile Include="Managers\Interface\ISteamMatchmakingServers.cs" />
+    <Compile Include="Managers\Interface\ISteamMusic.cs" />
+    <Compile Include="Managers\Interface\ISteamMusicRemote.cs" />
+    <Compile Include="Managers\Interface\ISteamNetworking.cs" />
+    <Compile Include="Managers\Interface\ISteamNetworkingMessages.cs" />
+    <Compile Include="Managers\Interface\ISteamNetworkingSockets.cs" />
+    <Compile Include="Managers\Interface\ISteamNetworkingUtils.cs" />
+    <Compile Include="Managers\Interface\ISteamParentalSettings.cs" />
+    <Compile Include="Managers\Interface\ISteamParties.cs" />
+    <Compile Include="Managers\Interface\ISteamRemotePlay.cs" />
+    <Compile Include="Managers\Interface\ISteamRemoteStorage.cs" />
+    <Compile Include="Managers\Interface\ISteamScreenshots.cs" />
+    <Compile Include="Managers\Interface\ISteamTV.cs" />
+    <Compile Include="Managers\Interface\ISteamUGC.cs" />
+    <Compile Include="Managers\Interface\ISteamUser.cs" />
+    <Compile Include="Managers\Interface\ISteamUser012.cs" />
+    <Compile Include="Managers\Interface\ISteamUserStats.cs" />
+    <Compile Include="Managers\Interface\ISteamUserStats007.cs" />
+    <Compile Include="Managers\Interface\ISteamUtils.cs" />
+    <Compile Include="Managers\Interface\ISteamClient.cs" />
+    <Compile Include="Managers\Interface\ISteamUtils005.cs" />
+    <Compile Include="Managers\Interface\ISteamVideo.cs" />
+    <Compile Include="Managers\Interface\ISteamGameCoordinator.cs" />
+    <Compile Include="SteamClient.cs" />
+    <Compile Include="Managers\Steam_AppList.cs" />
+    <Compile Include="Managers\Steam_Apps.cs" />
+    <Compile Include="Managers\Steam_Controller.cs" />
+    <Compile Include="Managers\Steam_Friends.cs" />
+    <Compile Include="Managers\Steam_Input.cs" />
+    <Compile Include="SteamAPI_ISteamGameServer.cs" />
+    <Compile Include="Managers\Steam_GameServerStats.cs" />
+    <Compile Include="Managers\Steam_Game_Coordinator.cs" />
+    <Compile Include="Managers\Steam_GameSearch.cs" />
+    <Compile Include="Managers\Steam_HTMLSurface.cs" />
+    <Compile Include="Managers\Steam_HTTP.cs" />
+    <Compile Include="Managers\Steam_Inventory.cs" />
+    <Compile Include="Managers\Steam_Masterserver_Updater.cs" />
+    <Compile Include="Managers\Steam_Matchmaking.cs" />
+    <Compile Include="Managers\Steam_Matchmaking_Servers.cs" />
+    <Compile Include="Managers\Steam_Music.cs" />
+    <Compile Include="Managers\Steam_MusicRemote.cs" />
+    <Compile Include="Managers\Steam_Networking.cs" />
+    <Compile Include="Managers\Steam_NetworkingMessages.cs" />
+    <Compile Include="Managers\Steam_NetworkingSockets.cs" />
+    <Compile Include="Managers\Steam_NetworkingSocketsSerialized.cs" />
+    <Compile Include="Managers\Steam_NetworkingUtils.cs" />
+    <Compile Include="Managers\Steam_Overlay.cs" />
+    <Compile Include="Managers\Steam_ParentalSettings.cs" />
+    <Compile Include="Managers\Steam_Parties.cs" />
+    <Compile Include="Managers\Steam_RemotePlay.cs" />
+    <Compile Include="Managers\Steam_RemoteStorage.cs" />
+    <Compile Include="Managers\Steam_Screenshots.cs" />
+    <Compile Include="Managers\Steam_TV.cs" />
+    <Compile Include="Managers\Steam_UGC.cs" />
+    <Compile Include="Managers\Steam_Unified_Messages.cs" />
+    <Compile Include="Managers\Steam_User.cs" />
+    <Compile Include="Managers\Steam_User_Stats.cs" />
+    <Compile Include="Managers\Steam_Utils.cs" />
+    <Compile Include="Managers\Steam_Video.cs" />
+    <Compile Include="Callback\SteamCallbacks.cs" />
+    <Compile Include="SteamInternal.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SteamAPI.cs" />
+    <Compile Include="SteamAPI_ISteamClient.cs" />
+    <Compile Include="SteamAPI_ISteamHTTP.cs" />
+    <Compile Include="SteamAPI_ISteamUser.cs" />
+    <Compile Include="Types\CallbackMsg_t.cs" />
+    <Compile Include="Types\CSteamAPIContext.cs" />
+    <Compile Include="Types\EAccountType.cs" />
+    <Compile Include="Types\EGCResults.cs" />
+    <Compile Include="Types\EUniverse.cs" />
+    <Compile Include="Types\Friend.cs" />
+    <Compile Include="Types\MatchmakingTypes\gameserveritem_t.cs" />
+    <Compile Include="Types\MatchmakingTypes\servernetadr_t.cs" />
+    <Compile Include="Types\SteamAPICallCompleted_t.cs" />
+    <Compile Include="Types\SteamClientPublic\CGameID.cs" />
+    <Compile Include="Types\SteamClientPublic\CSteamID.cs" />
+    <Compile Include="Types\SteamClientPublic\HAuthTicket.cs" />
+    <Compile Include="Types\SteamClient\HSteamPipe.cs" />
+    <Compile Include="Types\SteamClient\HSteamUser.cs" />
+    <Compile Include="Types\SteamClient\SteamAPIWarningMessageHook_t.cs" />
+    <Compile Include="Types\SteamClient\SteamAPI_CheckCallbackRegistered_t.cs" />
+    <Compile Include="Types\SteamClient\SteamAPI_PostAPIResultInProcess_t.cs" />
+    <Compile Include="Types\SteamConstants.cs" />
+    <Compile Include="Types\SteamEnums.cs" />
+    <Compile Include="Types\SteamHTMLSurface\HHTMLBrowser.cs" />
+    <Compile Include="Types\SteamHTTP\HTTPCookieContainerHandle.cs" />
+    <Compile Include="Types\SteamHTTP\HTTPRequestHandle.cs" />
+    <Compile Include="Types\SteamInventory\SteamInventoryResult_t.cs" />
+    <Compile Include="Types\SteamInventory\SteamItemDef_t.cs" />
+    <Compile Include="Types\SteamInventory\SteamItemInstanceID_t.cs" />
+    <Compile Include="Types\SteamMatchmaking\HServerListRequest.cs" />
+    <Compile Include="Types\SteamMatchmaking\HServerQuery.cs" />
+    <Compile Include="Types\SteamNetworking\SNetListenSocket_t.cs" />
+    <Compile Include="Types\SteamNetworking\SNetSocket_t.cs" />
+    <Compile Include="Types\SteamRemoteStorage\PublishedFileId_t.cs" />
+    <Compile Include="Types\SteamRemoteStorage\PublishedFileUpdateHandle_t.cs" />
+    <Compile Include="Types\SteamRemoteStorage\UGCFileWriteStreamHandle_t.cs" />
+    <Compile Include="Types\SteamRemoteStorage\UGCHandle_t.cs" />
+    <Compile Include="Types\SteamScreenshots\ScreenshotHandle.cs" />
+    <Compile Include="Types\SteamStructs.cs" />
+    <Compile Include="Types\SteamTypes.cs" />
+    <Compile Include="Types\SteamTypes\AccountID_t.cs" />
+    <Compile Include="Types\SteamTypes\AppId_t.cs" />
+    <Compile Include="Types\SteamTypes\DepotId_t.cs" />
+    <Compile Include="Types\SteamTypes\ManifestId_t.cs" />
+    <Compile Include="Types\SteamUGC\UGCQueryHandle_t.cs" />
+    <Compile Include="Types\SteamUGC\UGCUpdateHandle_t.cs" />
+    <Compile Include="Types\SteamUnifiedMessages\ClientUnifiedMessageHandle.cs" />
+    <Compile Include="Types\SteamUserStats\SteamLeaderboardEntries_t.cs" />
+    <Compile Include="Types\SteamUserStats\SteamLeaderboard_t.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Types\SteamFriends\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <ImportGroup Label=".NET DllExport">
+    <Import Project="$(SolutionDir)packages\DllExport\tools\net.r_eg.DllExport.targets" Condition="Exists($([MSBuild]::Escape('$(SolutionDir)packages\DllExport\tools\net.r_eg.DllExport.targets')))" Label="8337224c9ad9e356" />
+  </ImportGroup>
+  <Target Name="DllExportRestorePkg" BeforeTargets="PrepareForBuild">
+    <Error Condition="!Exists('$(SolutionDir)DllExport.bat')" Text="DllExport.bat is not found. Path: '$(SolutionDir)' - https://github.com/3F/DllExport" />
+    <Exec Condition="('$(DllExportModImported)' != 'true' Or !Exists('$(SolutionDir)packages\DllExport\tools\net.r_eg.DllExport.targets')) And Exists('$(SolutionDir)DllExport.bat')" Command=".\DllExport.bat -packages packages -dxp-version actual  -action Restore" WorkingDirectory="$(SolutionDir)" />
+    <MSBuild Condition="'$(DllExportModImported)' != 'true'" Projects="$(SolutionDir)packages\DllExport\tools\net.r_eg.DllExport.targets" Targets="DllExportMetaXBaseTarget" Properties="TargetFramework=$(TargetFramework)">
+      <Output TaskParameter="TargetOutputs" PropertyName="DllExportMetaXBase" />
+    </MSBuild>
+    <ItemGroup>
+      <Reference Include="DllExport, PublicKeyToken=8337224c9ad9e356">
+        <HintPath>$(SolutionDir)packages\DllExport\gcache\$(DllExportMetaXBase)\$(DllExportNamespace)\$(DllExportMetaLibName)</HintPath>
+        <Private>False</Private>
+        <SpecificVersion>False</SpecificVersion>
+      </Reference>
+    </ItemGroup>
+  </Target>
+  <Target Name="DllExportRPkgDynamicImport" BeforeTargets="PostBuildEvent" DependsOnTargets="GetFrameworkPaths" Condition="'$(DllExportModImported)' != 'true' And '$(DllExportRPkgDyn)' != 'false'">
+    <MSBuild BuildInParallel="true" UseResultsCache="true" Projects="$(MSBuildProjectFullPath)" Properties="DllExportRPkgDyn=true" Targets="Build" />
+  </Target>
+</Project>

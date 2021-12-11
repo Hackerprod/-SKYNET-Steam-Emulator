@@ -1,0 +1,186 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SKYNET.Pages
+{
+    public class style
+    {
+        public static string css()
+        {
+            string result = @"
+
+html, body {
+    width: 100%;
+    height: 100%;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+header {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 357px;
+}
+
+header > .logo {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+header > .logo > img {
+    height: 80%;
+}
+
+nav {
+    padding: 12px 16px;
+    background-color: #5c5c5c4d;
+}
+
+nav ul {
+    display: flex;
+    flex-direction: row;
+    list-style: none;
+    gap: 40px;
+}
+
+nav > ul > li {
+    font-size: 12px;
+    font-weight: 700;
+    color: #9c9c9c;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: all .2s ease-in-out;
+}
+
+nav > ul > li:hover {
+    color: white;
+    background-color: #b8b8b844;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    background: #262e31 url('c:/bg2.jpg') no-repeat center 0;
+    background-size: contain;
+}
+
+svg {
+    fill: #ffffffe1;
+}
+
+/* CSS Classes */
+.content {
+    flex: 1 0 100%;
+    backdrop-filter: blur(30px);
+    background-color: #2e2e2e83;
+}
+
+.actions-bar {
+    display: flex;
+    color: white;
+    flex-direction: row;
+}
+
+.action-btn {
+    font-size: 20px;
+    line-height: 20px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height: 45px;
+    width: 158px;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    position: relative;
+}
+
+.action-btn > span, .action-btn > svg {
+    z-index: 2;
+}
+
+.play-game {
+    background: #44e71e;
+    background: linear-gradient(90deg, #44e71e 0%, #4cbe26 50%, #209424 100%);
+}
+
+.play-game-fade {
+    opacity: 0;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    z-index: 1;
+    background-color: #44e71e;
+    transition: all .2s ease-in-out;
+}
+
+.action-btn:hover > .play-game-fade,
+.action-btn:hover > .stop-game-fade {
+    opacity: .6;
+}
+
+.stop-game {
+    background: #3a9aec;
+    background: linear-gradient(90deg, #3a9aec 0%, #2e7bdc 50%, #245ece 100%);
+}
+
+.stop-game-fade {
+    opacity: 0;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    z-index: 1;
+    background-color: #3a9aec;
+    transition: all .2s ease-in-out;
+}
+
+.last-played, .play-time {
+    display: flex;
+    flex-direction: row;
+}
+
+.last-played, .play-time > .container {
+    display: flex;
+    flex-direction: column;
+}
+
+.toolbox {
+    margin-left: auto;
+}
+
+.toolbox > button {
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    background-color: #ffffff21;
+    transition: all ease .2s;
+}
+
+.toolbox > button > svg {
+    margin-top: 2px;
+    opacity: .5;
+    transition: all ease .2s;
+}
+
+.toolbox > button:hover {
+    background-color: #ffffff60;
+}
+
+.toolbox > button:hover > svg {
+    opacity: 1;
+}
+
+";
+            return result;
+        }
+    }
+}
