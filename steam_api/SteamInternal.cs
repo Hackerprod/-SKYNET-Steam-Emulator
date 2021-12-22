@@ -15,7 +15,6 @@ public class SteamInternal : BaseCalls
     public static IntPtr SteamInternal_FindOrCreateUserInterface(IntPtr hSteamUser, [MarshalAs(UnmanagedType.FunctionPtr)] string pszVersion)
     {
         DEBUG($"SteamInternal_FindOrCreateUserInterface {pszVersion}");
-        DEBUG($"SteamInternal_FindOrCreateUserInterface {pszVersion}");
         return IntPtr.Zero;
     }
 
@@ -23,7 +22,6 @@ public class SteamInternal : BaseCalls
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static IntPtr SteamInternal_FindOrCreateGameServerInterface(IntPtr hSteamUser, [MarshalAs(UnmanagedType.FunctionPtr)] string pszVersion)
     {
-        DEBUG($"SteamInternal_FindOrCreateGameServerInterface {pszVersion}");
         DEBUG($"SteamInternal_FindOrCreateGameServerInterface {pszVersion}");
         return IntPtr.Zero;
     }
@@ -50,14 +48,12 @@ public class SteamInternal : BaseCalls
     public static IntPtr SteamInternal_CreateInterface([MarshalAs(UnmanagedType.FunctionPtr)] string ver)
     {
         DEBUG($"SteamInternal_CreateInterface {ver}");
-        DEBUG($"SteamInternal_CreateInterface {ver}");
         return (IntPtr)4516351; //Testing
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamInternal_GameServer_Init(IntPtr unIP, IntPtr usPort, IntPtr usGamePort, IntPtr usQueryPort, IntPtr eServerMode, IntPtr pchVersionString)
     {
-        DEBUG($"SteamInternal_GameServer_Init");
         DEBUG($"SteamInternal_GameServer_Init");
         return true;
     }
