@@ -2,7 +2,7 @@
 
 namespace SKYNET.Managers
 {
-    public class Steam_HTMLSurface : ISteamHTMLSurface
+    public class Steam_HTMLSurface : SteamInterface, ISteamHTMLSurface
     {
     }
 }

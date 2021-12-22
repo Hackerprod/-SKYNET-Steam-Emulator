@@ -13,18 +13,21 @@ namespace SKYNET.Helper
 
         static Log()
         {
-            outputStream = new FileStream($"c:/steamEmu.log", FileMode.OpenOrCreate);
+            outputStream = new FileStream($"SKYNET.log", FileMode.OpenOrCreate);
         }
 
         public static void Write(object msg)
         {
-            string _msg = "";
-            if (msg != null)
+            if (File.Exists("SKYNET.log"))
             {
-                _msg = msg.ToString();
+                string _msg = "";
+                if (msg != null)
+                {
+                    _msg = msg.ToString();
+                }
+                byte[] bytes = Encoding.Default.GetBytes(msg + Environment.NewLine);
+                outputStream.Write(bytes, 0, bytes.Length);
             }
-            byte[] bytes = Encoding.Default.GetBytes(msg + Environment.NewLine);
-            outputStream.Write(bytes, 0, bytes.Length);
         }
 
     }

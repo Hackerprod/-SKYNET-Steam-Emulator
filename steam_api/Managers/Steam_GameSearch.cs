@@ -2,7 +2,7 @@
 
 namespace SKYNET.Managers
 {
-    public class Steam_GameSearch : ISteamGameSearch
+    public class Steam_GameSearch : SteamInterface, ISteamGameSearch
     {
     }
 }

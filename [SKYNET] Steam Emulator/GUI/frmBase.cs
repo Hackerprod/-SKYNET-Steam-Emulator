@@ -11,6 +11,8 @@ namespace SKYNET.GUI
         private bool mouseDown;
         private Point lastLocation;
         private Color _backColor;
+        private bool _blur;
+        private bool _shadows;
 
         [Category("SKYNET")]
         public bool BlurEffect 
@@ -31,7 +33,6 @@ namespace SKYNET.GUI
                 }
             }
         }
-        private bool _blur;
 
         public override Color BackColor
         {
@@ -48,15 +49,19 @@ namespace SKYNET.GUI
                 }
             }
         }
+
+        [Category("SKYNET")]
+        public bool EnableShadows
+        {
+            get { return _shadows; }
+            set { _shadows = value; }
+        }
+
         public frmBase()
         {
             InitializeComponent();
-
+            CheckForIllegalCrossThreadCalls = false;
         }
-        //public virtual void ApplyTheme(ColorTheme theme)
-        //{
-
-        //}
         private void EnableBlur()
         {
             var accent = new AccentPolicy();
@@ -125,6 +130,40 @@ namespace SKYNET.GUI
         internal enum WindowCompositionAttribute
         {
             WCA_ACCENT_POLICY = 19
+        }
+        protected override void OnActivated(EventArgs e)
+        {
+            base.OnActivated(e);
+            if (EnableShadows)
+            {
+                int attrValue = 2;
+                DwmSetWindowAttribute(base.Handle, 2, ref attrValue, 4);
+                MARGINS marInset = new MARGINS()
+                {
+                    cyBottomHeight = 1,
+                    cxLeftWidth = 0,
+                    cxRightWidth = 0,
+                    cyTopHeight = 0
+                };
+                DwmExtendFrameIntoClientArea(base.Handle, ref marInset);
+            }
+        }
+
+        [DllImport("dwmapi.dll")]
+        public static extern int DwmExtendFrameIntoClientArea(IntPtr hdc, ref MARGINS marInset);
+
+        [DllImport("dwmapi.dll")]
+        public static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+
+        public struct MARGINS
+        {
+            public int cxLeftWidth;
+
+            public int cxRightWidth;
+
+            public int cyTopHeight;
+
+            public int cyBottomHeight;
         }
     }
 }

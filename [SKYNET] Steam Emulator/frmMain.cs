@@ -162,7 +162,7 @@ namespace SKYNET
 
             try
             {
-                InjectedProcess.Kill();
+                InjectedProcess?.Kill();
             }
             catch (Exception)
             {

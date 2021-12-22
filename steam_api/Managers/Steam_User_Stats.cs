@@ -2,7 +2,7 @@
 
 namespace SKYNET.Managers
 {
-    public class Steam_User_Stats : ISteamUserStats
+    public class Steam_User_Stats : SteamInterface, ISteamUserStats
     {
     }
 }

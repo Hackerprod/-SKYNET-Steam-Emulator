@@ -1,6 +1,8 @@
-﻿namespace SKYNET.Managers
+﻿using SKYNET.Interface;
+
+namespace SKYNET.Managers
 {
-    internal class Steam_Masterserver_Updater
+    public class Steam_Masterserver_Updater : SteamInterface
     {
     }
 }

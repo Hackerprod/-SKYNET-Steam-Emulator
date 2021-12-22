@@ -2,7 +2,7 @@
 
 namespace SKYNET.Managers
 {
-    public class Steam_NetworkingUtils : ISteamNetworkingUtils
+    public class Steam_NetworkingUtils : SteamInterface, ISteamNetworkingUtils
     {
     }
 }

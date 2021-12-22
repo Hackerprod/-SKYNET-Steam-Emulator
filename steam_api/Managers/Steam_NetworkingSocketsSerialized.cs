@@ -1,6 +1,8 @@
-﻿namespace SKYNET.Managers
+﻿using SKYNET.Interface;
+
+namespace SKYNET.Managers
 {
-    internal class Steam_Networking_Sockets_Serialized
+    public class Steam_Networking_Sockets_Serialized : SteamInterface
     {
     }
 }

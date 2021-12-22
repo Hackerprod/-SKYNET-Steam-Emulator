@@ -1,22 +1,27 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using SKYNET.Interface;
 using SKYNET.Types;
 
 namespace SKYNET.Managers
 {
-    public class Steam_GameCoordinator : ISteamGameCoordinator
+    public class Steam_GameCoordinator : SteamInterface//, ISteamGameCoordinator
     {
-        public bool IsMessageAvailable(uint pcubMsgSize)
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool IsMessageAvailable(uint pcubMsgSize)
         {
             return false;
         }
 
-        public EGCResults RetrieveMessage(uint punMsgType, IntPtr pubDest, uint cubDest, uint pcubMsgSize)
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static EGCResults RetrieveMessage(uint punMsgType, IntPtr pubDest, uint cubDest, uint pcubMsgSize)
         {
             return EGCResults.k_EGCResultNoMessage;
         }
 
-        public EGCResults SendMessage_(uint unMsgType, IntPtr pubData, uint cubData)
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static EGCResults SendMessage_(uint unMsgType, IntPtr pubData, uint cubData)
         {
             return EGCResults.k_EGCResultOK;
         }

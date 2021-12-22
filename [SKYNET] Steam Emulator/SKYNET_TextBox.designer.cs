@@ -28,33 +28,33 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.P_Container = new System.Windows.Forms.Panel();
+            this.PN_Container = new System.Windows.Forms.Panel();
             this.textBox = new System.Windows.Forms.TextBox();
             this.logo_box = new System.Windows.Forms.PictureBox();
-            this.panel4 = new System.Windows.Forms.Panel();
-            this.panel3 = new System.Windows.Forms.Panel();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.panel1 = new System.Windows.Forms.Panel();
+            this.PN_Right = new System.Windows.Forms.Panel();
+            this.PN_Left = new System.Windows.Forms.Panel();
+            this.PN_Buttom = new System.Windows.Forms.Panel();
+            this.PN_Top = new System.Windows.Forms.Panel();
             this.Container = new System.Windows.Forms.Panel();
-            this.P_Container.SuspendLayout();
+            this.PN_Container.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.logo_box)).BeginInit();
             this.Container.SuspendLayout();
             this.SuspendLayout();
             // 
-            // P_Container
+            // PN_Container
             // 
-            this.P_Container.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.P_Container.Controls.Add(this.textBox);
-            this.P_Container.Controls.Add(this.logo_box);
-            this.P_Container.Controls.Add(this.panel4);
-            this.P_Container.Controls.Add(this.panel3);
-            this.P_Container.Controls.Add(this.panel2);
-            this.P_Container.Controls.Add(this.panel1);
-            this.P_Container.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.P_Container.Location = new System.Drawing.Point(1, 1);
-            this.P_Container.Name = "P_Container";
-            this.P_Container.Size = new System.Drawing.Size(218, 33);
-            this.P_Container.TabIndex = 0;
+            this.PN_Container.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.PN_Container.Controls.Add(this.textBox);
+            this.PN_Container.Controls.Add(this.logo_box);
+            this.PN_Container.Controls.Add(this.PN_Right);
+            this.PN_Container.Controls.Add(this.PN_Left);
+            this.PN_Container.Controls.Add(this.PN_Buttom);
+            this.PN_Container.Controls.Add(this.PN_Top);
+            this.PN_Container.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.PN_Container.Location = new System.Drawing.Point(1, 1);
+            this.PN_Container.Name = "PN_Container";
+            this.PN_Container.Size = new System.Drawing.Size(218, 33);
+            this.PN_Container.TabIndex = 0;
             // 
             // textBox
             // 
@@ -81,49 +81,49 @@
             this.logo_box.TabStop = false;
             this.logo_box.MouseClick += new System.Windows.Forms.MouseEventHandler(this.LogoClick);
             // 
-            // panel4
+            // PN_Right
             // 
-            this.panel4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.panel4.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel4.Location = new System.Drawing.Point(208, 6);
-            this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(10, 21);
-            this.panel4.TabIndex = 4;
-            this.panel4.MouseClick += new System.Windows.Forms.MouseEventHandler(this.OnMouseClick);
+            this.PN_Right.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.PN_Right.Dock = System.Windows.Forms.DockStyle.Right;
+            this.PN_Right.Location = new System.Drawing.Point(208, 6);
+            this.PN_Right.Name = "PN_Right";
+            this.PN_Right.Size = new System.Drawing.Size(10, 21);
+            this.PN_Right.TabIndex = 4;
+            this.PN_Right.MouseClick += new System.Windows.Forms.MouseEventHandler(this.OnMouseClick);
             // 
-            // panel3
+            // PN_Left
             // 
-            this.panel3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.panel3.Dock = System.Windows.Forms.DockStyle.Left;
-            this.panel3.Location = new System.Drawing.Point(0, 6);
-            this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(10, 21);
-            this.panel3.TabIndex = 3;
-            this.panel3.MouseClick += new System.Windows.Forms.MouseEventHandler(this.OnMouseClick);
+            this.PN_Left.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.PN_Left.Dock = System.Windows.Forms.DockStyle.Left;
+            this.PN_Left.Location = new System.Drawing.Point(0, 6);
+            this.PN_Left.Name = "PN_Left";
+            this.PN_Left.Size = new System.Drawing.Size(10, 21);
+            this.PN_Left.TabIndex = 3;
+            this.PN_Left.MouseClick += new System.Windows.Forms.MouseEventHandler(this.OnMouseClick);
             // 
-            // panel2
+            // PN_Buttom
             // 
-            this.panel2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel2.Location = new System.Drawing.Point(0, 27);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(218, 6);
-            this.panel2.TabIndex = 2;
-            this.panel2.MouseClick += new System.Windows.Forms.MouseEventHandler(this.OnMouseClick);
+            this.PN_Buttom.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.PN_Buttom.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.PN_Buttom.Location = new System.Drawing.Point(0, 27);
+            this.PN_Buttom.Name = "PN_Buttom";
+            this.PN_Buttom.Size = new System.Drawing.Size(218, 6);
+            this.PN_Buttom.TabIndex = 2;
+            this.PN_Buttom.MouseClick += new System.Windows.Forms.MouseEventHandler(this.OnMouseClick);
             // 
-            // panel1
+            // PN_Top
             // 
-            this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel1.Location = new System.Drawing.Point(0, 0);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(218, 6);
-            this.panel1.TabIndex = 1;
-            this.panel1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.OnMouseClick);
+            this.PN_Top.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.PN_Top.Dock = System.Windows.Forms.DockStyle.Top;
+            this.PN_Top.Location = new System.Drawing.Point(0, 0);
+            this.PN_Top.Name = "PN_Top";
+            this.PN_Top.Size = new System.Drawing.Size(218, 6);
+            this.PN_Top.TabIndex = 1;
+            this.PN_Top.MouseClick += new System.Windows.Forms.MouseEventHandler(this.OnMouseClick);
             // 
             // Container
             // 
-            this.Container.Controls.Add(this.P_Container);
+            this.Container.Controls.Add(this.PN_Container);
             this.Container.Dock = System.Windows.Forms.DockStyle.Fill;
             this.Container.Location = new System.Drawing.Point(0, 0);
             this.Container.Name = "Container";
@@ -137,8 +137,8 @@
             this.Controls.Add(this.Container);
             this.Name = "SKYNET_TextBox";
             this.Size = new System.Drawing.Size(220, 35);
-            this.P_Container.ResumeLayout(false);
-            this.P_Container.PerformLayout();
+            this.PN_Container.ResumeLayout(false);
+            this.PN_Container.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.logo_box)).EndInit();
             this.Container.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -147,13 +147,13 @@
 
         #endregion
 
-        private System.Windows.Forms.Panel P_Container;
-        private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Panel panel3;
-        private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.Panel panel4;
+        private System.Windows.Forms.Panel PN_Container;
+        private System.Windows.Forms.Panel PN_Top;
+        private System.Windows.Forms.Panel PN_Left;
+        private System.Windows.Forms.Panel PN_Buttom;
+        private System.Windows.Forms.Panel PN_Right;
         private System.Windows.Forms.PictureBox logo_box;
-        public System.Windows.Forms.TextBox textBox;
+        private System.Windows.Forms.TextBox textBox;
         private System.Windows.Forms.Panel Container;
     }
 }

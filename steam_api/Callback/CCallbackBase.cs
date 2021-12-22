@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace Steamworks
 {
-	public class CCallbackBase 
+	public struct CCallbackBase 
 	{
 		// Fields
 		public const byte k_ECallbackFlagsRegistered = 1; 

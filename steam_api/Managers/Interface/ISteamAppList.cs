@@ -7,10 +7,10 @@ using Steamworks;
 
 namespace SKYNET.Interface
 {
-    public interface ISteamAppList
+    public interface ISteamAppList 
     {
-        UInt32 GetNumInstalledApps();
-        UInt32 GetInstalledApps(AppId_t pvecAppID, UInt32 unMaxAppIDs);
+        uint GetNumInstalledApps();
+        uint GetInstalledApps(AppId_t pvecAppID, UInt32 unMaxAppIDs);
 
         int GetAppName(AppId_t nAppID, IntPtr pchName, int cchNameMax); // returns -1 if no name was found
         int GetAppInstallDir(AppId_t nAppID, IntPtr pchDirectory, int cchNameMax); // returns -1 if no dir was found

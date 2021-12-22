@@ -8,5 +8,6 @@ namespace SKYNET.Interface
 {
     public interface ISteamHTTP
     {
+
     }
 }

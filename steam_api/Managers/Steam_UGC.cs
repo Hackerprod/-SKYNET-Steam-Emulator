@@ -2,7 +2,7 @@
 
 namespace SKYNET.Managers
 {
-    internal class Steam_UGC : ISteamUGC
+    public class Steam_UGC : SteamInterface, ISteamUGC
     {
     }
 }

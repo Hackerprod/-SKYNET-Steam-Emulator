@@ -126,17 +126,17 @@ public class SteamAPI_ISteamClient : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamGameServerStats SteamAPI_ISteamClient_GetISteamGameServerStats(IntPtr instancePtr, HSteamUser hSteamuser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+    public static ISteamGameServerStats SteamAPI_ISteamClient_GetISteamGameServerStats(IntPtr instancePtr, HSteamUser hSteamuser, HSteamPipe hSteamPipe, [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
     {
         DEBUG($"SteamAPI_ISteamClient_GetISteamGameServerStats");
-        return SteamClient.GetISteamGameServerStats(hSteamuser, hSteamPipe, pchVersion);
+        return default;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamApps SteamAPI_ISteamClient_GetISteamApps(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+    public static ISteamApps SteamAPI_ISteamClient_GetISteamApps(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe, [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
     {
         DEBUG($"SteamAPI_ISteamClient_GetISteamApps");
-        return SteamClient.GetISteamApps(hSteamUser, hSteamPipe, pchVersion);
+        return default;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -209,12 +209,12 @@ public class SteamAPI_ISteamClient : BaseCalls
         return SteamClient.GetISteamUGC(hSteamUser, hSteamPipe, pchVersion);
     }
 
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamAppList SteamAPI_ISteamClient_GetISteamAppList(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
-    {
-        DEBUG($"SteamAPI_ISteamClient_GetISteamAppList");
-        return SteamClient.GetISteamAppList(hSteamUser, hSteamPipe, pchVersion);
-    }
+    //[DllExport(CallingConvention = CallingConvention.Cdecl)]
+    //public static ISteamAppList SteamAPI_ISteamClient_GetISteamAppList(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+    //{
+    //    DEBUG($"SteamAPI_ISteamClient_GetISteamAppList");
+    //    return SteamClient.GetISteamAppList(hSteamUser, hSteamPipe, pchVersion);
+    //}
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static ISteamMusic SteamAPI_ISteamClient_GetISteamMusic(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)

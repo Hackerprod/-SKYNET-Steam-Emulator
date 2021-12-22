@@ -2,7 +2,7 @@
 
 namespace SKYNET.Managers
 {
-    public class Steam_Parties : ISteamParties
+    public class Steam_Parties : SteamInterface, ISteamParties
     {
     }
 }

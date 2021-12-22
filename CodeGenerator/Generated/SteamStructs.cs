@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Steamworks.Data
 {
 	[StructLayout( LayoutKind.Sequential, Pack = Platform.StructPackSize )]
-	public struct FriendGameInfo_t
+	internal struct FriendGameInfo_t
 	{
 		internal GameId GameID; // m_gameID CGameID
 		internal uint GameIP; // m_unGameIP uint32
@@ -16,8 +16,8 @@ namespace Steamworks.Data
 		internal ulong SteamIDLobby; // m_steamIDLobby CSteamID
 		
 	}
-
-    [StructLayout( LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize )]
+	
+	[StructLayout( LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize )]
 	internal partial struct servernetadr_t
 	{
 		internal ushort ConnectionPort; // m_usConnectionPort uint16
@@ -111,7 +111,7 @@ namespace Steamworks.Data
 		internal ulong ControllerHandle; // controllerHandle InputHandle_t
 		internal SteamInputActionEventType EEventType; // eEventType ESteamInputActionEventType
 		internal ulong AnalogAction_actionHandle; // analogAction_actionHandle InputAnalogActionHandle_t
-		//internal AnalogState AnalogAction_analogActionData; // analogAction_analogActionData InputAnalogActionData_t
+		internal AnalogState AnalogAction_analogActionData; // analogAction_analogActionData InputAnalogActionData_t
 		
 	}
 	
@@ -171,6 +171,27 @@ namespace Steamworks.Data
 	}
 	
 	[StructLayout( LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize )]
+	internal struct SteamNetworkingQuickConnectionStatus
+	{
+		internal ConnectionState State; // m_eState ESteamNetworkingConnectionState
+		internal int Ping; // m_nPing int
+		internal float ConnectionQualityLocal; // m_flConnectionQualityLocal float
+		internal float ConnectionQualityRemote; // m_flConnectionQualityRemote float
+		internal float OutPacketsPerSec; // m_flOutPacketsPerSec float
+		internal float OutBytesPerSec; // m_flOutBytesPerSec float
+		internal float InPacketsPerSec; // m_flInPacketsPerSec float
+		internal float InBytesPerSec; // m_flInBytesPerSec float
+		internal int SendRateBytesPerSecond; // m_nSendRateBytesPerSecond int
+		internal int CbPendingUnreliable; // m_cbPendingUnreliable int
+		internal int CbPendingReliable; // m_cbPendingReliable int
+		internal int CbSentUnackedReliable; // m_cbSentUnackedReliable int
+		internal long EcQueueTime; // m_usecQueueTime SteamNetworkingMicroseconds
+		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 16, ArraySubType = UnmanagedType.U4)]
+		internal uint[] Reserved; // reserved uint32 [16]
+		
+	}
+	
+	[StructLayout( LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize )]
 	internal partial struct SteamNetworkingPOPIDRender
 	{
 		internal string BufUTF8() => System.Text.Encoding.UTF8.GetString( Buf, 0, System.Array.IndexOf<byte>( Buf, 0 ) );
@@ -210,7 +231,7 @@ namespace Steamworks.Data
 	[StructLayout( LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize )]
 	internal struct SteamDatagramGameCoordinatorServerLogin
 	{
-		//internal NetIdentity Dentity; // m_identity SteamNetworkingIdentity
+		internal NetIdentity Dentity; // m_identity SteamNetworkingIdentity
 		internal SteamDatagramHostedAddress Outing; // m_routing SteamDatagramHostedAddress
 		internal AppId AppID; // m_nAppID AppId_t
 		internal uint Time; // m_rtime RTime32

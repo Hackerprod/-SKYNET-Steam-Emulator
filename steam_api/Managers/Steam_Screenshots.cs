@@ -2,7 +2,7 @@
 
 namespace SKYNET.Managers
 {
-    public class Steam_Screenshots : ISteamScreenshots
+    public class Steam_Screenshots : SteamInterface, ISteamScreenshots
     {
     }
 }

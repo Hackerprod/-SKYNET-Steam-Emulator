@@ -2,7 +2,7 @@
 
 namespace SKYNET.Managers
 {
-    public class Steam_MusicRemote : ISteamMusicRemote
+    public class Steam_MusicRemote : SteamInterface, ISteamMusicRemote
     {
     }
 }

@@ -1,7 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Linq;
-using Steamworks.Data;
 using System.Threading.Tasks;
 
 namespace Steamworks
@@ -9,7 +8,7 @@ namespace Steamworks
 	//
 	// ESteamIPType
 	//
-	internal enum SteamIPType : int
+	public enum SteamIPType : int
 	{
 		Type4 = 0,
 		Type6 = 1,
@@ -160,7 +159,7 @@ namespace Steamworks
 	//
 	// EVoiceResult
 	//
-	internal enum VoiceResult : int
+	public enum VoiceResult : int
 	{
 		OK = 0,
 		NotInitialized = 1,
@@ -177,7 +176,7 @@ namespace Steamworks
 	//
 	// EDenyReason
 	//
-	internal enum DenyReason : int
+	public enum DenyReason : int
 	{
 		Invalid = 0,
 		InvalidVersion = 1,
@@ -240,7 +239,7 @@ namespace Steamworks
 	//
 	// EAccountType
 	//
-	internal enum AccountType : int
+	public enum AccountType : int
 	{
 		Invalid = 0,
 		Individual = 1,
@@ -259,7 +258,7 @@ namespace Steamworks
 	//
 	// EChatEntryType
 	//
-	internal enum ChatEntryType : int
+	public enum ChatEntryType : int
 	{
 		Invalid = 0,
 		ChatMsg = 1,
@@ -297,7 +296,7 @@ namespace Steamworks
 	//
 	// EChatSteamIDInstanceFlags
 	//
-	internal enum ChatSteamIDInstanceFlags : int
+	public enum ChatSteamIDInstanceFlags : int
 	{
 		AccountInstanceMask = 4095,
 		InstanceFlagClan = 524288,
@@ -350,7 +349,7 @@ namespace Steamworks
 	//
 	// EMarketNotAllowedReasonFlags
 	//
-	internal enum MarketNotAllowedReasonFlags : int
+	public enum MarketNotAllowedReasonFlags : int
 	{
 		None = 0,
 		TemporaryFailure = 1,
@@ -387,7 +386,7 @@ namespace Steamworks
 	//
 	// EDurationControlNotification
 	//
-	internal enum DurationControlNotification : int
+	public enum DurationControlNotification : int
 	{
 		None = 0,
 		DurationControlNotification1Hour = 1,
@@ -402,7 +401,7 @@ namespace Steamworks
 	//
 	// EDurationControlOnlineState
 	//
-	internal enum DurationControlOnlineState : int
+	public enum DurationControlOnlineState : int
 	{
 		Invalid = 0,
 		Offline = 1,
@@ -413,7 +412,7 @@ namespace Steamworks
 	//
 	// EGameSearchErrorCode_t
 	//
-	internal enum GameSearchErrorCode_t : int
+	public enum GameSearchErrorCode_t : int
 	{
 		OK = 1,
 		Failed_Search_Already_In_Progress = 2,
@@ -429,7 +428,7 @@ namespace Steamworks
 	//
 	// EPlayerResult_t
 	//
-	internal enum PlayerResult_t : int
+	public enum PlayerResult_t : int
 	{
 		FailedToConnect = 1,
 		Abandoned = 2,
@@ -441,7 +440,7 @@ namespace Steamworks
 	//
 	// ESteamIPv6ConnectivityProtocol
 	//
-	internal enum SteamIPv6ConnectivityProtocol : int
+	public enum SteamIPv6ConnectivityProtocol : int
 	{
 		Invalid = 0,
 		HTTP = 1,
@@ -451,7 +450,7 @@ namespace Steamworks
 	//
 	// ESteamIPv6ConnectivityState
 	//
-	internal enum SteamIPv6ConnectivityState : int
+	public enum SteamIPv6ConnectivityState : int
 	{
 		Unknown = 0,
 		Good = 1,
@@ -493,7 +492,7 @@ namespace Steamworks
 	//
 	// EFriendFlags
 	//
-	internal enum FriendFlags : int
+	public enum FriendFlags : int
 	{
 		None = 0,
 		Blocked = 1,
@@ -512,7 +511,7 @@ namespace Steamworks
 	//
 	// EUserRestriction
 	//
-	internal enum UserRestriction : int
+	public enum UserRestriction : int
 	{
 		None = 0,
 		Unknown = 1,
@@ -537,7 +536,7 @@ namespace Steamworks
 	//
 	// EActivateGameOverlayToWebPageMode
 	//
-	internal enum ActivateGameOverlayToWebPageMode : int
+	public enum ActivateGameOverlayToWebPageMode : int
 	{
 		Default = 0,
 		Modal = 1,
@@ -546,7 +545,7 @@ namespace Steamworks
 	//
 	// EPersonaChange
 	//
-	internal enum PersonaChange : int
+	public enum PersonaChange : int
 	{
 		Name = 1,
 		Status = 2,
@@ -568,7 +567,7 @@ namespace Steamworks
 	//
 	// ESteamAPICallFailure
 	//
-	internal enum SteamAPICallFailure : int
+	public enum SteamAPICallFailure : int
 	{
 		None = -1,
 		SteamGone = 0,
@@ -621,7 +620,7 @@ namespace Steamworks
 	//
 	// EMatchMakingServerResponse
 	//
-	internal enum MatchMakingServerResponse : int
+	public enum MatchMakingServerResponse : int
 	{
 		ServerResponded = 0,
 		ServerFailedToRespond = 1,
@@ -631,7 +630,7 @@ namespace Steamworks
 	//
 	// ELobbyType
 	//
-	internal enum LobbyType : int
+	public enum LobbyType : int
 	{
 		Private = 0,
 		FriendsOnly = 1,
@@ -643,7 +642,7 @@ namespace Steamworks
 	//
 	// ELobbyComparison
 	//
-	internal enum LobbyComparison : int
+	public enum LobbyComparison : int
 	{
 		EqualToOrLessThan = -2,
 		LessThan = -1,
@@ -656,7 +655,7 @@ namespace Steamworks
 	//
 	// ELobbyDistanceFilter
 	//
-	internal enum LobbyDistanceFilter : int
+	public enum LobbyDistanceFilter : int
 	{
 		Close = 0,
 		Default = 1,
@@ -667,7 +666,7 @@ namespace Steamworks
 	//
 	// EChatMemberStateChange
 	//
-	internal enum ChatMemberStateChange : int
+	public enum ChatMemberStateChange : int
 	{
 		Entered = 1,
 		Left = 2,
@@ -679,7 +678,7 @@ namespace Steamworks
 	//
 	// ESteamPartyBeaconLocationType
 	//
-	internal enum SteamPartyBeaconLocationType : int
+	public enum SteamPartyBeaconLocationType : int
 	{
 		Invalid = 0,
 		ChatGroup = 1,
@@ -689,7 +688,7 @@ namespace Steamworks
 	//
 	// ESteamPartyBeaconLocationData
 	//
-	internal enum SteamPartyBeaconLocationData : int
+	public enum SteamPartyBeaconLocationData : int
 	{
 		Invalid = 0,
 		Name = 1,
@@ -701,7 +700,7 @@ namespace Steamworks
 	//
 	// ERemoteStoragePlatform
 	//
-	internal enum RemoteStoragePlatform : int
+	public enum RemoteStoragePlatform : int
 	{
 		None = 0,
 		Windows = 1,
@@ -717,7 +716,7 @@ namespace Steamworks
 	//
 	// ERemoteStoragePublishedFileVisibility
 	//
-	internal enum RemoteStoragePublishedFileVisibility : int
+	public enum RemoteStoragePublishedFileVisibility : int
 	{
 		Public = 0,
 		FriendsOnly = 1,
@@ -728,7 +727,7 @@ namespace Steamworks
 	//
 	// EWorkshopFileType
 	//
-	internal enum WorkshopFileType : int
+	public enum WorkshopFileType : int
 	{
 		First = 0,
 		Community = 0,
@@ -753,7 +752,7 @@ namespace Steamworks
 	//
 	// EWorkshopVote
 	//
-	internal enum WorkshopVote : int
+	public enum WorkshopVote : int
 	{
 		Unvoted = 0,
 		For = 1,
@@ -764,7 +763,7 @@ namespace Steamworks
 	//
 	// EWorkshopFileAction
 	//
-	internal enum WorkshopFileAction : int
+	public enum WorkshopFileAction : int
 	{
 		Played = 0,
 		Completed = 1,
@@ -773,7 +772,7 @@ namespace Steamworks
 	//
 	// EWorkshopEnumerationType
 	//
-	internal enum WorkshopEnumerationType : int
+	public enum WorkshopEnumerationType : int
 	{
 		RankedByVote = 0,
 		Recent = 1,
@@ -787,7 +786,7 @@ namespace Steamworks
 	//
 	// EWorkshopVideoProvider
 	//
-	internal enum WorkshopVideoProvider : int
+	public enum WorkshopVideoProvider : int
 	{
 		None = 0,
 		Youtube = 1,
@@ -796,7 +795,7 @@ namespace Steamworks
 	//
 	// EUGCReadAction
 	//
-	internal enum UGCReadAction : int
+	public enum UGCReadAction : int
 	{
 		ontinueReadingUntilFinished = 0,
 		ontinueReading = 1,
@@ -806,7 +805,7 @@ namespace Steamworks
 	//
 	// ERemoteStorageLocalFileChange
 	//
-	internal enum RemoteStorageLocalFileChange : int
+	public enum RemoteStorageLocalFileChange : int
 	{
 		Invalid = 0,
 		FileUpdated = 1,
@@ -816,7 +815,7 @@ namespace Steamworks
 	//
 	// ERemoteStorageFilePathType
 	//
-	internal enum RemoteStorageFilePathType : int
+	public enum RemoteStorageFilePathType : int
 	{
 		Invalid = 0,
 		Absolute = 1,
@@ -826,7 +825,7 @@ namespace Steamworks
 	//
 	// ELeaderboardDataRequest
 	//
-	internal enum LeaderboardDataRequest : int
+	public enum LeaderboardDataRequest : int
 	{
 		Global = 0,
 		GlobalAroundUser = 1,
@@ -843,7 +842,7 @@ namespace Steamworks
 	//
 	// ELeaderboardUploadScoreMethod
 	//
-	internal enum LeaderboardUploadScoreMethod : int
+	public enum LeaderboardUploadScoreMethod : int
 	{
 		None = 0,
 		KeepBest = 1,
@@ -853,7 +852,7 @@ namespace Steamworks
 	//
 	// ERegisterActivationCodeResult
 	//
-	internal enum RegisterActivationCodeResult : int
+	public enum RegisterActivationCodeResult : int
 	{
 		ResultOK = 0,
 		ResultFail = 1,
@@ -895,7 +894,7 @@ namespace Steamworks
 	//
 	// EVRScreenshotType
 	//
-	internal enum VRScreenshotType : int
+	public enum VRScreenshotType : int
 	{
 		None = 0,
 		Mono = 1,
@@ -919,7 +918,7 @@ namespace Steamworks
 	//
 	// EHTTPMethod
 	//
-	internal enum HTTPMethod : int
+	public enum HTTPMethod : int
 	{
 		Invalid = 0,
 		GET = 1,
@@ -934,7 +933,7 @@ namespace Steamworks
 	//
 	// EHTTPStatusCode
 	//
-	internal enum HTTPStatusCode : int
+	public enum HTTPStatusCode : int
 	{
 		Invalid = 0,
 		Code100Continue = 100,
@@ -974,7 +973,7 @@ namespace Steamworks
 		Code4xxUnknown = 418,
 		Code429TooManyRequests = 429,
 		Code444ConnectionClosed = 444,
-		Code500InternalServerError = 500,
+		Code500publicServerError = 500,
 		Code501NotImplemented = 501,
 		Code502BadGateway = 502,
 		Code503ServiceUnavailable = 503,
@@ -1010,7 +1009,7 @@ namespace Steamworks
 	//
 	// EInputActionOrigin
 	//
-	internal enum InputActionOrigin : int
+	public enum InputActionOrigin : int
 	{
 		None = 0,
 		SteamController_A = 1,
@@ -1352,7 +1351,7 @@ namespace Steamworks
 	//
 	// EXboxOrigin
 	//
-	internal enum XboxOrigin : int
+	public enum XboxOrigin : int
 	{
 		A = 0,
 		B = 1,
@@ -1388,7 +1387,7 @@ namespace Steamworks
 	//
 	// ESteamControllerPad
 	//
-	internal enum SteamControllerPad : int
+	public enum SteamControllerPad : int
 	{
 		Left = 0,
 		Right = 1,
@@ -1397,7 +1396,7 @@ namespace Steamworks
 	//
 	// EControllerHapticLocation
 	//
-	internal enum ControllerHapticLocation : int
+	public enum ControllerHapticLocation : int
 	{
 		Left = 1,
 		Right = 2,
@@ -1407,7 +1406,7 @@ namespace Steamworks
 	//
 	// EControllerHapticType
 	//
-	internal enum ControllerHapticType : int
+	public enum ControllerHapticType : int
 	{
 		Off = 0,
 		Tick = 1,
@@ -1440,7 +1439,7 @@ namespace Steamworks
 	//
 	// ESteamInputConfigurationEnableType
 	//
-	internal enum SteamInputConfigurationEnableType : int
+	public enum SteamInputConfigurationEnableType : int
 	{
 		None = 0,
 		Playstation = 1,
@@ -1452,7 +1451,7 @@ namespace Steamworks
 	//
 	// ESteamInputLEDFlag
 	//
-	internal enum SteamInputLEDFlag : int
+	public enum SteamInputLEDFlag : int
 	{
 		SetColor = 0,
 		RestoreUserDefault = 1,
@@ -1471,7 +1470,7 @@ namespace Steamworks
 	//
 	// ESteamInputActionEventType
 	//
-	internal enum SteamInputActionEventType : int
+	public enum SteamInputActionEventType : int
 	{
 		DigitalAction = 0,
 		AnalogAction = 1,
@@ -1480,7 +1479,7 @@ namespace Steamworks
 	//
 	// EControllerActionOrigin
 	//
-	internal enum ControllerActionOrigin : int
+	public enum ControllerActionOrigin : int
 	{
 		None = 0,
 		A = 1,
@@ -1794,7 +1793,7 @@ namespace Steamworks
 	//
 	// ESteamControllerLEDFlag
 	//
-	internal enum SteamControllerLEDFlag : int
+	public enum SteamControllerLEDFlag : int
 	{
 		SetColor = 0,
 		RestoreUserDefault = 1,
@@ -1824,7 +1823,7 @@ namespace Steamworks
 	//
 	// EUserUGCList
 	//
-	internal enum UserUGCList : int
+	public enum UserUGCList : int
 	{
 		Published = 0,
 		VotedOn = 1,
@@ -1840,7 +1839,7 @@ namespace Steamworks
 	//
 	// EUserUGCListSortOrder
 	//
-	internal enum UserUGCListSortOrder : int
+	public enum UserUGCListSortOrder : int
 	{
 		CreationOrderDesc = 0,
 		CreationOrderAsc = 1,
@@ -1854,7 +1853,7 @@ namespace Steamworks
 	//
 	// EUGCQuery
 	//
-	internal enum UGCQuery : int
+	public enum UGCQuery : int
 	{
 		RankedByVote = 0,
 		RankedByPublicationDate = 1,
@@ -1881,7 +1880,7 @@ namespace Steamworks
 	//
 	// EItemUpdateStatus
 	//
-	internal enum ItemUpdateStatus : int
+	public enum ItemUpdateStatus : int
 	{
 		Invalid = 0,
 		PreparingConfig = 1,
@@ -1894,7 +1893,7 @@ namespace Steamworks
 	//
 	// EItemState
 	//
-	internal enum ItemState : int
+	public enum ItemState : int
 	{
 		None = 0,
 		Subscribed = 1,
@@ -1908,7 +1907,7 @@ namespace Steamworks
 	//
 	// EItemStatistic
 	//
-	internal enum ItemStatistic : int
+	public enum ItemStatistic : int
 	{
 		NumSubscriptions = 0,
 		NumFavorites = 1,
@@ -1941,7 +1940,7 @@ namespace Steamworks
 	//
 	// ESteamItemFlags
 	//
-	internal enum SteamItemFlags : int
+	public enum SteamItemFlags : int
 	{
 		NoTrade = 1,
 		Removed = 256,
@@ -2002,7 +2001,7 @@ namespace Steamworks
 	//
 	// ESteamNetworkingIdentityType
 	//
-	internal enum NetIdentityType : int
+	public enum NetIdentityType : int
 	{
 		Invalid = 0,
 		SteamID = 16,
@@ -2061,7 +2060,7 @@ namespace Steamworks
 		Remote_Max = 4999,
 		Misc_Min = 5000,
 		Misc_Generic = 5001,
-		Misc_InternalError = 5002,
+		Misc_publicError = 5002,
 		Misc_Timeout = 5003,
 		Misc_SteamConnectivity = 5005,
 		Misc_NoRelaySessionsToClient = 5006,
@@ -2074,7 +2073,7 @@ namespace Steamworks
 	//
 	// ESteamNetworkingConfigScope
 	//
-	internal enum NetConfigScope : int
+	public enum NetConfigScope : int
 	{
 		Global = 1,
 		SocketsInterface = 2,
@@ -2085,7 +2084,7 @@ namespace Steamworks
 	//
 	// ESteamNetworkingConfigDataType
 	//
-	internal enum NetConfigType : int
+	public enum NetConfigType : int
 	{
 		Int32 = 1,
 		Int64 = 2,
@@ -2097,7 +2096,7 @@ namespace Steamworks
 	//
 	// ESteamNetworkingConfigValue
 	//
-	internal enum NetConfig : int
+	public enum NetConfig : int
 	{
 		Invalid = 0,
 		TimeoutInitial = 24,
@@ -2159,7 +2158,7 @@ namespace Steamworks
 	//
 	// ESteamNetworkingGetConfigValueResult
 	//
-	internal enum NetConfigResult : int
+	public enum NetConfigResult : int
 	{
 		BadValue = -1,
 		BadScopeObj = -2,
@@ -2187,7 +2186,7 @@ namespace Steamworks
 	//
 	// EServerMode
 	//
-	internal enum ServerMode : int
+	public enum ServerMode : int
 	{
 		Invalid = 0,
 		NoAuthentication = 1,

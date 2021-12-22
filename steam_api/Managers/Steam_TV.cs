@@ -2,7 +2,7 @@
 
 namespace SKYNET.Managers
 {
-    public class Steam_TV : ISteamTV
+    public class Steam_TV : SteamInterface, ISteamTV
     {
     }
 }

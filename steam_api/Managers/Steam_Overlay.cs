@@ -1,6 +1,8 @@
-﻿namespace SKYNET.Managers
+﻿using SKYNET.Interface;
+
+namespace SKYNET.Managers
 {
-    internal class Steam_Overlay
+    public class Steam_Overlay : SteamInterface
     {
     }
 }

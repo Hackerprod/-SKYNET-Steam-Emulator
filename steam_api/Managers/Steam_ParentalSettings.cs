@@ -2,7 +2,7 @@
 
 namespace SKYNET.Managers
 {
-    public class Steam_ParentalSettings : ISteamParentalSettings
+    public class Steam_ParentalSettings : SteamInterface, ISteamParentalSettings
     {
     }
 }

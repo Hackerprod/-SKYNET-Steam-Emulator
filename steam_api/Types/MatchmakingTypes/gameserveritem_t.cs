@@ -40,7 +40,7 @@ namespace Steamworks {
 		public string GetServerName() {
 			// Use the IP address as the name if nothing is set yet.
 			if (m_szServerName[0] == 0)
-				return m_NetAdr.GetConnectionAddressString();
+				return m_NetAdr .GetConnectionAddressString();
 			else
 				return Encoding.UTF8.GetString(m_szServerName, 0, System.Array.IndexOf<byte>(m_szServerName, 0));
 		}

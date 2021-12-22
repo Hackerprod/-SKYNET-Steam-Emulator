@@ -38,6 +38,21 @@ namespace Steamworks.Data
 		public int CompareTo( RTime32 other ) => Value.CompareTo( other.Value );
 	}
 	
+	internal struct SteamAPICall_t : IEquatable<SteamAPICall_t>, IComparable<SteamAPICall_t>
+	{
+		// Name: SteamAPICall_t, Type: unsigned long long
+		public ulong Value;
+		
+		public static implicit operator SteamAPICall_t( ulong value ) => new SteamAPICall_t(){ Value = value };
+		public static implicit operator ulong( SteamAPICall_t value ) => value.Value;
+		public override string ToString() => Value.ToString();
+		public override int GetHashCode() => Value.GetHashCode();
+		public override bool Equals( object p ) => this.Equals( (SteamAPICall_t) p );
+		public bool Equals( SteamAPICall_t p ) => p.Value == Value;
+		public static bool operator ==( SteamAPICall_t a, SteamAPICall_t b ) => a.Equals( b );
+		public static bool operator !=( SteamAPICall_t a, SteamAPICall_t b ) => !a.Equals( b );
+		public int CompareTo( SteamAPICall_t other ) => Value.CompareTo( other.Value );
+	}
 	
 	internal struct AccountID_t : IEquatable<AccountID_t>, IComparable<AccountID_t>
 	{
@@ -118,8 +133,8 @@ namespace Steamworks.Data
 		public static bool operator !=( HSteamUser a, HSteamUser b ) => !a.Equals( b );
 		public int CompareTo( HSteamUser other ) => Value.CompareTo( other.Value );
 	}
-
-    public struct FriendsGroupID_t : IEquatable<FriendsGroupID_t>, IComparable<FriendsGroupID_t>
+	
+	internal struct FriendsGroupID_t : IEquatable<FriendsGroupID_t>, IComparable<FriendsGroupID_t>
 	{
 		// Name: FriendsGroupID_t, Type: short
 		public short Value;
@@ -198,29 +213,8 @@ namespace Steamworks.Data
 		public static bool operator !=( PublishedFileUpdateHandle_t a, PublishedFileUpdateHandle_t b ) => !a.Equals( b );
 		public int CompareTo( PublishedFileUpdateHandle_t other ) => Value.CompareTo( other.Value );
 	}
-    public struct AppId
-    {
-        public uint Value;
-
-        public override string ToString() => Value.ToString();
-
-        public static implicit operator AppId(uint value)
-        {
-            return new AppId { Value = value };
-        }
-
-        public static implicit operator AppId(int value)
-        {
-            return new AppId { Value = (uint)value };
-        }
-
-        public static implicit operator uint(AppId value)
-        {
-            return value.Value;
-        }
-    }
-
-    public struct PublishedFileId : IEquatable<PublishedFileId>, IComparable<PublishedFileId>
+	
+	public struct PublishedFileId : IEquatable<PublishedFileId>, IComparable<PublishedFileId>
 	{
 		// Name: PublishedFileId_t, Type: unsigned long long
 		public ulong Value;

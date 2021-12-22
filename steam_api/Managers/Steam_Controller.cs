@@ -2,7 +2,7 @@
 
 namespace SKYNET.Managers
 {
-    public class Steam_Controller : ISteamController
+    public class Steam_Controller : SteamInterface, ISteamController
     {
 
     }

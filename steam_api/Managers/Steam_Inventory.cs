@@ -2,7 +2,7 @@
 
 namespace SKYNET.Managers
 {
-    public class Steam_Inventory : ISteamInventory
+    public class Steam_Inventory : SteamInterface, ISteamInventory
     {
     }
 }

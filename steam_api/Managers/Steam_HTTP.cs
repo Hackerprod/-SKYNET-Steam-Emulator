@@ -2,7 +2,7 @@
 
 namespace SKYNET.Managers
 {
-    public class Steam_HTTP : ISteamHTTP
+    public class Steam_HTTP : SteamInterface, ISteamHTTP
     {
     }
 }

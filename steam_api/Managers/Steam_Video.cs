@@ -2,7 +2,7 @@
 
 namespace SKYNET.Managers
 {
-    public class Steam_Video : ISteamVideo
+    public class Steam_Video : SteamInterface, ISteamVideo
     {
     }
 }

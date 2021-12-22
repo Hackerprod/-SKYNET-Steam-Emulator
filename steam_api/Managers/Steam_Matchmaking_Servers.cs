@@ -2,7 +2,7 @@
 
 namespace SKYNET.Managers
 {
-    public class Steam_Matchmaking_Servers : ISteamMatchmakingServers
+    public class Steam_Matchmaking_Servers : SteamInterface, ISteamMatchmakingServers
     {
     }
 }

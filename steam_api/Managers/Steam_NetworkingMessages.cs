@@ -2,7 +2,7 @@
 
 namespace SKYNET.Managers
 {
-    public class Steam_NetworkingMessages : ISteamNetworkingMessages
+    public class Steam_NetworkingMessages : SteamInterface, ISteamNetworkingMessages
     {
     }
 }

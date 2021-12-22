@@ -7,7 +7,7 @@ using SKYNET.Interface;
 
 namespace SKYNET.Managers
 {
-    public class Steam_Input : ISteamInput
+    public class Steam_Input : SteamInterface, ISteamInput
     {
     }
 }

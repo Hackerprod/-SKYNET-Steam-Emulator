@@ -1,6 +1,8 @@
-﻿namespace SKYNET.Managers
+﻿using SKYNET.Interface;
+
+namespace SKYNET.Managers
 {
-    internal class Steam_Unified_Messages
+    public class Steam_Unified_Messages : SteamInterface
     {
     }
 }

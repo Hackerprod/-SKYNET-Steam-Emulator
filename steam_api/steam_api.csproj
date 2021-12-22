@@ -31,24 +31,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup>
-    <DllExportIdent>B82B23B5-C476-47AF-89F7-7D3DB210B74B</DllExportIdent>
-    <DllExportMetaLibName>DllExport.dll</DllExportMetaLibName>
-    <DllExportNamespace />
-    <DllExportDDNSCecil>false</DllExportDDNSCecil>
-    <DllExportSkipOnAnyCpu>false</DllExportSkipOnAnyCpu>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DllExportOrdinalsBase>1</DllExportOrdinalsBase>
-    <DllExportGenExpLib>false</DllExportGenExpLib>
-    <DllExportOurILAsm>false</DllExportOurILAsm>
-    <DllExportSysObjRebase>false</DllExportSysObjRebase>
-    <DllExportLeaveIntermediateFiles>true</DllExportLeaveIntermediateFiles>
-    <DllExportTimeout>30000</DllExportTimeout>
-    <DllExportPeCheck>2</DllExportPeCheck>
-    <DllExportPatches>0</DllExportPatches>
-    <DllExportPreProcType>0</DllExportPreProcType>
-    <DllExportPostProcType>0</DllExportPostProcType>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x86\Debug\</OutputPath>
@@ -68,6 +50,24 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup>
+    <DllExportIdent>620077B2-A822-4E7F-90CE-3D9193881EAD</DllExportIdent>
+    <DllExportMetaLibName>DllExport.dll</DllExportMetaLibName>
+    <DllExportNamespace>System.Runtime.InteropServices</DllExportNamespace>
+    <DllExportDDNSCecil>true</DllExportDDNSCecil>
+    <DllExportSkipOnAnyCpu>false</DllExportSkipOnAnyCpu>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DllExportOrdinalsBase>1</DllExportOrdinalsBase>
+    <DllExportGenExpLib>false</DllExportGenExpLib>
+    <DllExportOurILAsm>false</DllExportOurILAsm>
+    <DllExportSysObjRebase>false</DllExportSysObjRebase>
+    <DllExportLeaveIntermediateFiles>false</DllExportLeaveIntermediateFiles>
+    <DllExportTimeout>30000</DllExportTimeout>
+    <DllExportPeCheck>2</DllExportPeCheck>
+    <DllExportPatches>0</DllExportPatches>
+    <DllExportPreProcType>0</DllExportPreProcType>
+    <DllExportPostProcType>0</DllExportPostProcType>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -82,11 +82,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BaseCalls.cs" />
+    <Compile Include="Callback\CallbackManager.cs" />
     <Compile Include="Callback\CallbackType.cs" />
+    <Compile Include="Callback\SteamAPICall_t.cs" />
+    <Compile Include="BaseCalls.cs" />
     <Compile Include="Callback\CallbackIdentityAttribute.cs" />
     <Compile Include="Callback\CCallbackBase.cs" />
-    <Compile Include="Callback\SteamAPICall_t.cs" />
+    <Compile Include="Helper\Helpers.cs" />
     <Compile Include="Helper\Log.cs" />
     <Compile Include="Helper\modCommon.cs" />
     <Compile Include="Helper\RegistrySettings.cs" />
@@ -125,6 +127,7 @@
     <Compile Include="Managers\Interface\ISteamUtils005.cs" />
     <Compile Include="Managers\Interface\ISteamVideo.cs" />
     <Compile Include="Managers\Interface\ISteamGameCoordinator.cs" />
+    <Compile Include="Managers\Interface\SteamInterface.cs" />
     <Compile Include="SteamClient.cs" />
     <Compile Include="Managers\Steam_AppList.cs" />
     <Compile Include="Managers\Steam_Apps.cs" />
@@ -161,7 +164,6 @@
     <Compile Include="Managers\Steam_User_Stats.cs" />
     <Compile Include="Managers\Steam_Utils.cs" />
     <Compile Include="Managers\Steam_Video.cs" />
-    <Compile Include="Callback\SteamCallbacks.cs" />
     <Compile Include="SteamInternal.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SteamAPI.cs" />
@@ -174,8 +176,9 @@
     <Compile Include="Types\EGCResults.cs" />
     <Compile Include="Types\EUniverse.cs" />
     <Compile Include="Types\Friend.cs" />
+    <Compile Include="Types\GameId.cs" />
     <Compile Include="Types\MatchmakingTypes\gameserveritem_t.cs" />
-    <Compile Include="Types\MatchmakingTypes\servernetadr_t.cs" />
+    <Compile Include="Types\servernetadr_t.cs" />
     <Compile Include="Types\SteamAPICallCompleted_t.cs" />
     <Compile Include="Types\SteamClientPublic\CGameID.cs" />
     <Compile Include="Types\SteamClientPublic\CSteamID.cs" />
@@ -187,6 +190,8 @@
     <Compile Include="Types\SteamClient\SteamAPI_PostAPIResultInProcess_t.cs" />
     <Compile Include="Types\SteamConstants.cs" />
     <Compile Include="Types\SteamEnums.cs" />
+    <Compile Include="Types\SteamFriends\FriendGameInfo_t.cs" />
+    <Compile Include="Types\SteamFriends\FriendsGroupID_t.cs" />
     <Compile Include="Types\SteamHTMLSurface\HHTMLBrowser.cs" />
     <Compile Include="Types\SteamHTTP\HTTPCookieContainerHandle.cs" />
     <Compile Include="Types\SteamHTTP\HTTPRequestHandle.cs" />
@@ -202,11 +207,8 @@
     <Compile Include="Types\SteamRemoteStorage\UGCFileWriteStreamHandle_t.cs" />
     <Compile Include="Types\SteamRemoteStorage\UGCHandle_t.cs" />
     <Compile Include="Types\SteamScreenshots\ScreenshotHandle.cs" />
-    <Compile Include="Types\SteamStructs.cs" />
-    <Compile Include="Types\SteamTypes.cs" />
     <Compile Include="Types\SteamTypes\AccountID_t.cs" />
     <Compile Include="Types\SteamTypes\AppId_t.cs" />
-    <Compile Include="Types\SteamTypes\DepotId_t.cs" />
     <Compile Include="Types\SteamTypes\ManifestId_t.cs" />
     <Compile Include="Types\SteamUGC\UGCQueryHandle_t.cs" />
     <Compile Include="Types\SteamUGC\UGCUpdateHandle_t.cs" />
@@ -214,9 +216,7 @@
     <Compile Include="Types\SteamUserStats\SteamLeaderboardEntries_t.cs" />
     <Compile Include="Types\SteamUserStats\SteamLeaderboard_t.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Types\SteamFriends\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ImportGroup Label=".NET DllExport">
     <Import Project="$(SolutionDir)packages\DllExport\tools\net.r_eg.DllExport.targets" Condition="Exists($([MSBuild]::Escape('$(SolutionDir)packages\DllExport\tools\net.r_eg.DllExport.targets')))" Label="8337224c9ad9e356" />

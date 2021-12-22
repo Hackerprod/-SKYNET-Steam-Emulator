@@ -1,101 +1,121 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using SKYNET.Interface;
 
 namespace SKYNET.Managers
 {
-    public class Steam_Utils : ISteamUtils
+    public class Steam_Utils : SteamInterface//, ISteamUtils
     {
-        public IntPtr GetAPICallFailureReason()
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr GetAPICallFailureReason()
         {
-            throw new NotImplementedException();
+            return (IntPtr)1;
         }
 
-        public IntPtr GetAPICallResult()
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr GetAPICallResult()
         {
-            throw new NotImplementedException();
+            return (IntPtr)1;
         }
 
-        public IntPtr GetAppID()
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr GetAppID()
         {
-            throw new NotImplementedException();
+            return (IntPtr)1;
         }
 
-        public IntPtr GetConnectedUniverse()
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr GetConnectedUniverse()
         {
-            throw new NotImplementedException();
+            return (IntPtr)1;
         }
 
-        public IntPtr GetCSERIPPort()
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr GetCSERIPPort()
         {
-            throw new NotImplementedException();
+            return (IntPtr)1;
         }
 
-        public IntPtr GetCurrentBatteryPower()
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr GetCurrentBatteryPower()
         {
-            throw new NotImplementedException();
+            return (IntPtr)1;
         }
 
-        public IntPtr GetImageRGBA()
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr GetImageRGBA()
         {
-            throw new NotImplementedException();
+            return (IntPtr)1;
         }
 
-        public IntPtr GetImageSize()
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr GetImageSize()
         {
-            throw new NotImplementedException();
+            return (IntPtr)1;
         }
 
-        public IntPtr GetIPCCallCount()
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr GetIPCCallCount()
         {
-            throw new NotImplementedException();
+            return (IntPtr)1;
         }
 
-        public IntPtr GetIPCountry()
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr GetIPCountry()
         {
-            throw new NotImplementedException();
+            return (IntPtr)1;
         }
 
-        public IntPtr GetSecondsSinceAppActive()
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr GetSecondsSinceAppActive()
         {
-            throw new NotImplementedException();
+            return (IntPtr)1;
         }
 
-        public IntPtr GetSecondsSinceComputerActive()
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr GetSecondsSinceComputerActive()
         {
-            throw new NotImplementedException();
+            return (IntPtr)1;
         }
 
-        public IntPtr GetServerRealTime()
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr GetServerRealTime()
         {
-            throw new NotImplementedException();
+            return (IntPtr)1;
         }
 
-        public IntPtr IsAPICallCompleted()
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr IsAPICallCompleted()
         {
-            throw new NotImplementedException();
+            return (IntPtr)1;
         }
 
-        public IntPtr IsOverlayEnabled()
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr IsOverlayEnabled()
         {
-            throw new NotImplementedException();
+            return (IntPtr)1;
         }
 
-        public IntPtr OverlayNeedsPresent()
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr OverlayNeedsPresent()
         {
-            throw new NotImplementedException();
+            return (IntPtr)1;
         }
 
-        public IntPtr RunFrame()
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr RunFrame()
         {
-            throw new NotImplementedException();
+            return (IntPtr)1;
         }
 
-        public IntPtr SetOverlayNotificationPosition()
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SetOverlayNotificationPosition()
         {
-            throw new NotImplementedException();
+            return (IntPtr)1;
         }
 
-        public void SetWarningMessageHook()
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SetWarningMessageHook()
         {
             //
         }

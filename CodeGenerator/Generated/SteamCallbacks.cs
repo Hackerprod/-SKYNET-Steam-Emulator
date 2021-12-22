@@ -3,13 +3,10 @@ using System.Runtime.InteropServices;
 using System.Linq;
 using Steamworks.Data;
 using System.Threading.Tasks;
-using SKYNET;
 
 namespace Steamworks.Data
 {
-   
-
-    [StructLayout( LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize )]
+	[StructLayout( LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize )]
 	internal struct SteamServersConnected_t : ICallbackData
 	{
 		
@@ -19,10 +16,8 @@ namespace Steamworks.Data
 		public CallbackType CallbackType => CallbackType.SteamServersConnected;
 		#endregion
 	}
-
-
-
-    [StructLayout( LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize )]
+	
+	[StructLayout( LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize )]
 	internal struct SteamServerConnectFailure_t : ICallbackData
 	{
 		internal Result Result; // m_eResult EResult
@@ -2731,43 +2726,43 @@ namespace Steamworks.Data
 		#endregion
 	}
 	
-	//[StructLayout( LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize )]
-	//internal struct SteamNetworkingMessagesSessionRequest_t : ICallbackData
-	//{
-	//	internal NetIdentity DentityRemote; // m_identityRemote SteamNetworkingIdentity
+	[StructLayout( LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize )]
+	internal struct SteamNetworkingMessagesSessionRequest_t : ICallbackData
+	{
+		internal NetIdentity DentityRemote; // m_identityRemote SteamNetworkingIdentity
 		
-	//	#region SteamCallback
-	//	public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf( typeof(SteamNetworkingMessagesSessionRequest_t) );
-	//	public int DataSize => _datasize;
-	//	public CallbackType CallbackType => CallbackType.SteamNetworkingMessagesSessionRequest;
-	//	#endregion
-	//}
+		#region SteamCallback
+		public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf( typeof(SteamNetworkingMessagesSessionRequest_t) );
+		public int DataSize => _datasize;
+		public CallbackType CallbackType => CallbackType.SteamNetworkingMessagesSessionRequest;
+		#endregion
+	}
 	
-	//[StructLayout( LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize )]
-	//internal struct SteamNetworkingMessagesSessionFailed_t : ICallbackData
-	//{
-	//	internal ConnectionInfo Nfo; // m_info SteamNetConnectionInfo_t
+	[StructLayout( LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize )]
+	internal struct SteamNetworkingMessagesSessionFailed_t : ICallbackData
+	{
+		internal ConnectionInfo Nfo; // m_info SteamNetConnectionInfo_t
 		
-	//	#region SteamCallback
-	//	public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf( typeof(SteamNetworkingMessagesSessionFailed_t) );
-	//	public int DataSize => _datasize;
-	//	public CallbackType CallbackType => CallbackType.SteamNetworkingMessagesSessionFailed;
-	//	#endregion
-	//}
+		#region SteamCallback
+		public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf( typeof(SteamNetworkingMessagesSessionFailed_t) );
+		public int DataSize => _datasize;
+		public CallbackType CallbackType => CallbackType.SteamNetworkingMessagesSessionFailed;
+		#endregion
+	}
 	
-	//[StructLayout( LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize )]
-	//internal struct SteamNetConnectionStatusChangedCallback_t : ICallbackData
-	//{
-	//	internal Connection Conn; // m_hConn HSteamNetConnection
-	//	internal ConnectionInfo Nfo; // m_info SteamNetConnectionInfo_t
-	//	internal ConnectionState OldState; // m_eOldState ESteamNetworkingConnectionState
+	[StructLayout( LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize )]
+	internal struct SteamNetConnectionStatusChangedCallback_t : ICallbackData
+	{
+		internal Connection Conn; // m_hConn HSteamNetConnection
+		internal ConnectionInfo Nfo; // m_info SteamNetConnectionInfo_t
+		internal ConnectionState OldState; // m_eOldState ESteamNetworkingConnectionState
 		
-	//	#region SteamCallback
-	//	public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf( typeof(SteamNetConnectionStatusChangedCallback_t) );
-	//	public int DataSize => _datasize;
-	//	public CallbackType CallbackType => CallbackType.SteamNetConnectionStatusChangedCallback;
-	//	#endregion
-	//}
+		#region SteamCallback
+		public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf( typeof(SteamNetConnectionStatusChangedCallback_t) );
+		public int DataSize => _datasize;
+		public CallbackType CallbackType => CallbackType.SteamNetConnectionStatusChangedCallback;
+		#endregion
+	}
 	
 	[StructLayout( LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize )]
 	internal struct SteamNetAuthenticationStatus_t : ICallbackData
@@ -2830,46 +2825,8 @@ namespace Steamworks.Data
 		public CallbackType CallbackType => CallbackType.GSClientDeny;
 		#endregion
 	}
-
-    public struct GameId
-    {
-        // TODO - Be able to access these vars
-
-        /*
-		 
-		enum EGameIDType
-		{
-			k_EGameIDTypeApp		= 0,
-			k_EGameIDTypeGameMod	= 1,
-			k_EGameIDTypeShortcut	= 2,
-			k_EGameIDTypeP2P		= 3,
-		};
-
-		# ifdef VALVE_BIG_ENDIAN
-			unsigned int m_nModID : 32;
-			unsigned int m_nType : 8;
-			unsigned int m_nAppID : 24;
-		#else
-			unsigned int m_nAppID : 24;
-			unsigned int m_nType : 8;
-			unsigned int m_nModID : 32;
-		#endif
-		*/
-        public ulong Value;
-
-        public static implicit operator GameId(ulong value)
-        {
-            return new GameId { Value = value };
-        }
-
-        public static implicit operator ulong(GameId value)
-        {
-            return value.Value;
-        }
-    }
-
-
-    [StructLayout( LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize )]
+	
+	[StructLayout( LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize )]
 	internal struct GSClientKick_t : ICallbackData
 	{
 		internal ulong SteamID; // m_SteamID CSteamID
@@ -3027,367 +2984,5 @@ namespace Steamworks.Data
 		public CallbackType CallbackType => CallbackType.GSStatsUnloaded;
 		#endregion
 	}
-    internal interface ICallbackData
-    {
-        CallbackType CallbackType { get; }
-        int DataSize { get; }
-    }
-    internal class Platform
-    {
-        public const int StructPlatformPackSize = 8;
-        public const CallingConvention CC = CallingConvention.Cdecl;
-        public const int StructPackSize = 4;
-    }
-    public enum Result : int
-    {
-        None = 0,
-        OK = 1,
-        Fail = 2,
-        NoConnection = 3,
-        InvalidPassword = 5,
-        LoggedInElsewhere = 6,
-        InvalidProtocolVer = 7,
-        InvalidParam = 8,
-        FileNotFound = 9,
-        Busy = 10,
-        InvalidState = 11,
-        InvalidName = 12,
-        InvalidEmail = 13,
-        DuplicateName = 14,
-        AccessDenied = 15,
-        Timeout = 16,
-        Banned = 17,
-        AccountNotFound = 18,
-        InvalidSteamID = 19,
-        ServiceUnavailable = 20,
-        NotLoggedOn = 21,
-        Pending = 22,
-        EncryptionFailure = 23,
-        InsufficientPrivilege = 24,
-        LimitExceeded = 25,
-        Revoked = 26,
-        Expired = 27,
-        AlreadyRedeemed = 28,
-        DuplicateRequest = 29,
-        AlreadyOwned = 30,
-        IPNotFound = 31,
-        PersistFailed = 32,
-        LockingFailed = 33,
-        LogonSessionReplaced = 34,
-        ConnectFailed = 35,
-        HandshakeFailed = 36,
-        IOFailure = 37,
-        RemoteDisconnect = 38,
-        ShoppingCartNotFound = 39,
-        Blocked = 40,
-        Ignored = 41,
-        NoMatch = 42,
-        AccountDisabled = 43,
-        ServiceReadOnly = 44,
-        AccountNotFeatured = 45,
-        AdministratorOK = 46,
-        ContentVersion = 47,
-        TryAnotherCM = 48,
-        PasswordRequiredToKickSession = 49,
-        AlreadyLoggedInElsewhere = 50,
-        Suspended = 51,
-        Cancelled = 52,
-        DataCorruption = 53,
-        DiskFull = 54,
-        RemoteCallFailed = 55,
-        PasswordUnset = 56,
-        ExternalAccountUnlinked = 57,
-        PSNTicketInvalid = 58,
-        ExternalAccountAlreadyLinked = 59,
-        RemoteFileConflict = 60,
-        IllegalPassword = 61,
-        SameAsPreviousValue = 62,
-        AccountLogonDenied = 63,
-        CannotUseOldPassword = 64,
-        InvalidLoginAuthCode = 65,
-        AccountLogonDeniedNoMail = 66,
-        HardwareNotCapableOfIPT = 67,
-        IPTInitError = 68,
-        ParentalControlRestricted = 69,
-        FacebookQueryError = 70,
-        ExpiredLoginAuthCode = 71,
-        IPLoginRestrictionFailed = 72,
-        AccountLockedDown = 73,
-        AccountLogonDeniedVerifiedEmailRequired = 74,
-        NoMatchingURL = 75,
-        BadResponse = 76,
-        RequirePasswordReEntry = 77,
-        ValueOutOfRange = 78,
-        UnexpectedError = 79,
-        Disabled = 80,
-        InvalidCEGSubmission = 81,
-        RestrictedDevice = 82,
-        RegionLocked = 83,
-        RateLimitExceeded = 84,
-        AccountLoginDeniedNeedTwoFactor = 85,
-        ItemDeleted = 86,
-        AccountLoginDeniedThrottle = 87,
-        TwoFactorCodeMismatch = 88,
-        TwoFactorActivationCodeMismatch = 89,
-        AccountAssociatedToMultiplePartners = 90,
-        NotModified = 91,
-        NoMobileDevice = 92,
-        TimeNotSynced = 93,
-        SmsCodeFailed = 94,
-        AccountLimitExceeded = 95,
-        AccountActivityLimitExceeded = 96,
-        PhoneActivityLimitExceeded = 97,
-        RefundToWallet = 98,
-        EmailSendFailure = 99,
-        NotSettled = 100,
-        NeedCaptcha = 101,
-        GSLTDenied = 102,
-        GSOwnerDenied = 103,
-        InvalidItemType = 104,
-        IPBanned = 105,
-        GSLTExpired = 106,
-        InsufficientFunds = 107,
-        TooManyPending = 108,
-        NoSiteLicensesFound = 109,
-        WGNetworkSendExceeded = 110,
-        AccountNotFriends = 111,
-        LimitedUserAccount = 112,
-        CantRemoveItem = 113,
-        AccountDeleted = 114,
-        ExistingUserCancelledLicense = 115,
-        CommunityCooldown = 116,
-        NoLauncherSpecified = 117,
-        MustAgreeToSSA = 118,
-        LauncherMigrated = 119,
-        SteamRealmMismatch = 120,
-        InvalidSignature = 121,
-        ParseFailure = 122,
-    }
-    public enum CallbackType
-    {
-        SteamServersConnected = 101,
-        SteamServerConnectFailure = 102,
-        SteamServersDisconnected = 103,
-        ClientGameServerDeny = 113,
-        GSPolicyResponse = 115,
-        IPCFailure = 117,
-        LicensesUpdated = 125,
-        ValidateAuthTicketResponse = 143,
-        MicroTxnAuthorizationResponse = 152,
-        EncryptedAppTicketResponse = 154,
-        GetAuthSessionTicketResponse = 163,
-        GameWebCallback = 164,
-        StoreAuthURLResponse = 165,
-        MarketEligibilityResponse = 166,
-        DurationControl = 167,
-        GSClientApprove = 201,
-        GSClientDeny = 202,
-        GSClientKick = 203,
-        GSClientAchievementStatus = 206,
-        GSGameplayStats = 207,
-        GSClientGroupStatus = 208,
-        GSReputation = 209,
-        AssociateWithClanResult = 210,
-        ComputeNewPlayerCompatibilityResult = 211,
-        PersonaStateChange = 304,
-        GameOverlayActivated = 331,
-        GameServerChangeRequested = 332,
-        GameLobbyJoinRequested = 333,
-        AvatarImageLoaded = 334,
-        ClanOfficerListResponse = 335,
-        FriendRichPresenceUpdate = 336,
-        GameRichPresenceJoinRequested = 337,
-        GameConnectedClanChatMsg = 338,
-        GameConnectedChatJoin = 339,
-        GameConnectedChatLeave = 340,
-        DownloadClanActivityCountsResult = 341,
-        JoinClanChatRoomCompletionResult = 342,
-        GameConnectedFriendChatMsg = 343,
-        FriendsGetFollowerCount = 344,
-        FriendsIsFollowing = 345,
-        FriendsEnumerateFollowingList = 346,
-        SetPersonaNameResponse = 347,
-        UnreadChatMessagesChanged = 348,
-        OverlayBrowserProtocolNavigation = 349,
-        FavoritesListChanged = 502,
-        LobbyInvite = 503,
-        LobbyEnter = 504,
-        LobbyDataUpdate = 505,
-        LobbyChatUpdate = 506,
-        LobbyChatMsg = 507,
-        LobbyGameCreated = 509,
-        LobbyMatchList = 510,
-        LobbyKicked = 512,
-        LobbyCreated = 513,
-        PSNGameBootInviteResult = 515,
-        FavoritesListAccountsUpdated = 516,
-        IPCountry = 701,
-        LowBatteryPower = 702,
-        SteamAPICallCompleted = 703,
-        SteamShutdown = 704,
-        CheckFileSignature = 705,
-        GamepadTextInputDismissed = 714,
-        AppResumingFromSuspend = 736,
-        ModalGamepadTextInputDismissed = 738,
-        DlcInstalled = 1005,
-        RegisterActivationCodeResponse = 1008,
-        NewUrlLaunchParameters = 1014,
-        AppProofOfPurchaseKeyResponse = 1021,
-        FileDetailsResult = 1023,
-        TimedTrialStatus = 1030,
-        UserStatsReceived = 1101,
-        UserStatsStored = 1102,
-        UserAchievementStored = 1103,
-        LeaderboardFindResult = 1104,
-        LeaderboardScoresDownloaded = 1105,
-        LeaderboardScoreUploaded = 1106,
-        NumberOfCurrentPlayers = 1107,
-        UserStatsUnloaded = 1108,
-        GSStatsUnloaded = 1108,
-        UserAchievementIconFetched = 1109,
-        GlobalAchievementPercentagesReady = 1110,
-        LeaderboardUGCSet = 1111,
-        // PS3TrophiesInstalled = 1112,
-        GlobalStatsReceived = 1112,
-        // SocketStatusCallback = 1201,
-        P2PSessionRequest = 1202,
-        P2PSessionConnectFail = 1203,
-        SteamNetConnectionStatusChangedCallback = 1221,
-        SteamNetAuthenticationStatus = 1222,
-        SteamNetworkingMessagesSessionRequest = 1251,
-        SteamNetworkingMessagesSessionFailed = 1252,
-        SteamRelayNetworkStatus = 1281,
-        RemoteStorageFileShareResult = 1307,
-        RemoteStoragePublishFileResult = 1309,
-        RemoteStorageDeletePublishedFileResult = 1311,
-        RemoteStorageEnumerateUserPublishedFilesResult = 1312,
-        RemoteStorageSubscribePublishedFileResult = 1313,
-        RemoteStorageEnumerateUserSubscribedFilesResult = 1314,
-        RemoteStorageUnsubscribePublishedFileResult = 1315,
-        RemoteStorageUpdatePublishedFileResult = 1316,
-        RemoteStorageDownloadUGCResult = 1317,
-        RemoteStorageGetPublishedFileDetailsResult = 1318,
-        RemoteStorageEnumerateWorkshopFilesResult = 1319,
-        RemoteStorageGetPublishedItemVoteDetailsResult = 1320,
-        RemoteStoragePublishedFileSubscribed = 1321,
-        RemoteStoragePublishedFileUnsubscribed = 1322,
-        RemoteStoragePublishedFileDeleted = 1323,
-        RemoteStorageUpdateUserPublishedItemVoteResult = 1324,
-        RemoteStorageUserVoteDetails = 1325,
-        RemoteStorageEnumerateUserSharedWorkshopFilesResult = 1326,
-        RemoteStorageSetUserPublishedFileActionResult = 1327,
-        RemoteStorageEnumeratePublishedFilesByUserActionResult = 1328,
-        RemoteStoragePublishFileProgress = 1329,
-        RemoteStoragePublishedFileUpdated = 1330,
-        RemoteStorageFileWriteAsyncComplete = 1331,
-        RemoteStorageFileReadAsyncComplete = 1332,
-        RemoteStorageLocalFileChange = 1333,
-        GSStatsReceived = 1800,
-        GSStatsStored = 1801,
-        HTTPRequestCompleted = 2101,
-        HTTPRequestHeadersReceived = 2102,
-        HTTPRequestDataReceived = 2103,
-        ScreenshotReady = 2301,
-        ScreenshotRequested = 2302,
-        SteamInputDeviceConnected = 2801,
-        SteamInputDeviceDisconnected = 2802,
-        SteamInputConfigurationLoaded = 2803,
-        SteamUGCQueryCompleted = 3401,
-        SteamUGCRequestUGCDetailsResult = 3402,
-        CreateItemResult = 3403,
-        SubmitItemUpdateResult = 3404,
-        ItemInstalled = 3405,
-        DownloadItemResult = 3406,
-        UserFavoriteItemsListChanged = 3407,
-        SetUserItemVoteResult = 3408,
-        GetUserItemVoteResult = 3409,
-        StartPlaytimeTrackingResult = 3410,
-        StopPlaytimeTrackingResult = 3411,
-        AddUGCDependencyResult = 3412,
-        RemoveUGCDependencyResult = 3413,
-        AddAppDependencyResult = 3414,
-        RemoveAppDependencyResult = 3415,
-        GetAppDependenciesResult = 3416,
-        DeleteItemResult = 3417,
-        UserSubscribedItemsListChanged = 3418,
-        WorkshopEULAStatus = 3420,
-        SteamAppInstalled = 3901,
-        SteamAppUninstalled = 3902,
-        PlaybackStatusHasChanged = 4001,
-        VolumeHasChanged = 4002,
-        MusicPlayerWantsVolume = 4011,
-        MusicPlayerSelectsQueueEntry = 4012,
-        MusicPlayerSelectsPlaylistEntry = 4013,
-        MusicPlayerRemoteWillActivate = 4101,
-        MusicPlayerRemoteWillDeactivate = 4102,
-        MusicPlayerRemoteToFront = 4103,
-        MusicPlayerWillQuit = 4104,
-        MusicPlayerWantsPlay = 4105,
-        MusicPlayerWantsPause = 4106,
-        MusicPlayerWantsPlayPrevious = 4107,
-        MusicPlayerWantsPlayNext = 4108,
-        MusicPlayerWantsShuffled = 4109,
-        MusicPlayerWantsLooped = 4110,
-        MusicPlayerWantsPlayingRepeatStatus = 4114,
-        HTML_BrowserReady = 4501,
-        HTML_NeedsPaint = 4502,
-        HTML_StartRequest = 4503,
-        HTML_CloseBrowser = 4504,
-        HTML_URLChanged = 4505,
-        HTML_FinishedRequest = 4506,
-        HTML_OpenLinkInNewTab = 4507,
-        HTML_ChangedTitle = 4508,
-        HTML_SearchResults = 4509,
-        HTML_CanGoBackAndForward = 4510,
-        HTML_HorizontalScroll = 4511,
-        HTML_VerticalScroll = 4512,
-        HTML_LinkAtPosition = 4513,
-        HTML_JSAlert = 4514,
-        HTML_JSConfirm = 4515,
-        HTML_FileOpenDialog = 4516,
-        HTML_NewWindow = 4521,
-        HTML_SetCursor = 4522,
-        HTML_StatusText = 4523,
-        HTML_ShowToolTip = 4524,
-        HTML_UpdateToolTip = 4525,
-        HTML_HideToolTip = 4526,
-        HTML_BrowserRestarted = 4527,
-        GetVideoURLResult = 4611,
-        GetOPFSettingsResult = 4624,
-        SteamInventoryResultReady = 4700,
-        SteamInventoryFullUpdate = 4701,
-        SteamInventoryDefinitionUpdate = 4702,
-        SteamInventoryEligiblePromoItemDefIDs = 4703,
-        SteamInventoryStartPurchaseResult = 4704,
-        SteamInventoryRequestPricesResult = 4705,
-        SteamParentalSettingsChanged = 5001,
-        SearchForGameProgressCallback = 5201,
-        SearchForGameResultCallback = 5202,
-        RequestPlayersForGameProgressCallback = 5211,
-        RequestPlayersForGameResultCallback = 5212,
-        RequestPlayersForGameFinalResultCallback = 5213,
-        SubmitPlayerResultResultCallback = 5214,
-        EndGameResultCallback = 5215,
-        JoinPartyCallback = 5301,
-        CreateBeaconCallback = 5302,
-        ReservationNotificationCallback = 5303,
-        ChangeNumOpenSlotsCallback = 5304,
-        AvailableBeaconLocationsUpdated = 5305,
-        ActiveBeaconsUpdated = 5306,
-        SteamRemotePlaySessionConnected = 5701,
-        SteamRemotePlaySessionDisconnected = 5702,
-    }
-    public enum SteamNetworkingAvailability : int
-    {
-        CannotTry = -102,
-        Failed = -101,
-        Previously = -100,
-        Retrying = -10,
-        NeverTried = 1,
-        Waiting = 2,
-        Attempting = 3,
-        Current = 100,
-        Unknown = 0,
-        Force32bit = 2147483647,
-    }
+	
 }
