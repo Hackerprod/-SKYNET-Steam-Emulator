@@ -32,7 +32,6 @@ public class SteamAPI : SteamInterface
 
         SteamClient.Initialize();
         SteamClient.Initialized = true;
-        Crack_SteamAPI_Init();
 
         user_steam_pipe = SteamClient.CreateSteamPipe();
         SteamClient.CreateLocalUser(out _, EAccountType.k_EAccountTypeIndividual);
@@ -40,24 +39,6 @@ public class SteamAPI : SteamInterface
 
         SteamInternal.global_counter++;
         PRINT_DEBUG($"{"SteamAPI_Init [FALSE]"}");
-        return false;
-    }
-
-    private static void Crack_SteamAPI_Init()
-    {
-        if (crack_dll_handle)
-        {
-            bool(__stdcall * init_app)() = (bool(__stdcall *)())GetProcAddress(crack_dll_handle, "SteamAPI_Init");
-            if (init_app)
-            {
-                PRINT_DEBUG("Call crack SteamAPI_Init\n");
-                redirect_crackdll();
-                bool ret = init_app();
-                unredirect_crackdll();
-                return ret;
-            }
-        }
-
         return false;
     }
 
