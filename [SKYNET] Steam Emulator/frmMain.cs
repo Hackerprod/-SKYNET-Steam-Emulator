@@ -13,10 +13,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
-using _SKYNET__Steam_Emulator;
 using SKYNET;
 using SKYNET.GUI;
-using SKYNET.GUI.Controls;
 using SKYNET.Properties;
 
 namespace SKYNET
@@ -55,9 +53,7 @@ namespace SKYNET
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            WebControl control = new WebControl();
-            control.Dock = DockStyle.Fill;
-            this.webContainer.Controls.Add(control);
+
         }
         private void GameBox_Clicked(object sender, GameBox e)
         {
@@ -154,9 +150,16 @@ namespace SKYNET
         }
         private void Close_Clicked(object sender, EventArgs e)
         {
-            modCommon.EnsureDirectoryExists("Data");
+            // For test purposes
+            //Games.Add(new Game()
+            //{
+            //     AppId = 570, Name = "Dota2", Parametters = "", Path = @"D:\Instaladores\Steam\steamapps\Common\dota 2 beta\game\bin\win64\dota2.exe"
+            //});
 
-            string game = Path.Combine("Data", "Games.json");
+            string path = Path.Combine(modCommon.GetPath(), "Data");
+            modCommon.EnsureDirectoryExists(path);
+
+            string game = Path.Combine(path, "Games.json");
             string json = new JavaScriptSerializer().Serialize(Games);
             File.WriteAllText(game, json);
 

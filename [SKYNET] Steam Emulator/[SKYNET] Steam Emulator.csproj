@@ -63,22 +63,6 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CefSharp">
-      <HintPath>bin\Debug\Data\Assemblies\CefSharp.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="CefSharp.Core">
-      <HintPath>bin\Debug\Data\Assemblies\CefSharp.Core.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="CefSharp.Core.Runtime">
-      <HintPath>bin\Debug\Data\Assemblies\CefSharp.Core.Runtime.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="CefSharp.WinForms">
-      <HintPath>bin\Debug\Data\Assemblies\CefSharp.WinForms.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Microsoft.mshtml, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
@@ -136,17 +120,6 @@
     </Compile>
     <Compile Include="GUI\Controls\SKYNET_ShadowBox.designer.cs">
       <DependentUpon>SKYNET_ShadowBox.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GUI\Controls\WebBrowser\Pages\js\jquery-3.6.0.min.cs" />
-    <Compile Include="GUI\Controls\WebBrowser\Pages\js\main.cs" />
-    <Compile Include="GUI\Controls\WebBrowser\Pages\css\style.cs" />
-    <Compile Include="GUI\Controls\WebBrowser\Pages\css\helpers.cs" />
-    <Compile Include="GUI\Controls\WebBrowser\Pages\Index.cs" />
-    <Compile Include="GUI\Controls\WebBrowser\WebControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="GUI\Controls\WebBrowser\WebControl.Designer.cs">
-      <DependentUpon>WebControl.cs</DependentUpon>
     </Compile>
     <Compile Include="GUI\frmBase.cs">
       <SubType>Form</SubType>
@@ -206,9 +179,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\Controls\SKYNET_ShadowBox.resx">
       <DependentUpon>SKYNET_ShadowBox.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GUI\Controls\WebBrowser\WebControl.resx">
-      <DependentUpon>WebControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\frmBase.resx">
       <DependentUpon>frmBase.cs</DependentUpon>

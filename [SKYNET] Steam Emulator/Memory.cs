@@ -150,10 +150,11 @@ namespace SKYNET
             if (true)
             {
                 IntPtr result = InjectDll((int)targetProcess.dwProcessId, dllPath);
-                if (!(result != IntPtr.Zero))
+                if (result == IntPtr.Zero)
                 {
-                    Process.GetProcessById((int)targetProcess.dwProcessId)?.Kill();
-                    throw new Exception("Error injecting dll file");
+                    //Process.GetProcessById((int)targetProcess.dwProcessId)?.Kill();
+                    modCommon.Show("Error injecting dll file");
+                    return;
                 }
                 WakeUpProcess(targetProcess.hThread);
             }
