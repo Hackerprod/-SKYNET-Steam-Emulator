@@ -29,6 +29,5 @@ namespace SKYNET.Helper
                 outputStream.Write(bytes, 0, bytes.Length);
             }
         }
-
     }
 }
