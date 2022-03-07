@@ -9,7 +9,7 @@ using SKYNET.Types;
 
 public class SteamInternal : BaseCalls
 {
-    public static uint global_counter { get; set; }
+    public static uint global_counter;
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static IntPtr SteamInternal_FindOrCreateUserInterface(IntPtr hSteamUser, [MarshalAs(UnmanagedType.FunctionPtr)] string pszVersion)
@@ -27,22 +27,25 @@ public class SteamInternal : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static IntPtr SteamInternal_ContextInit(ContextInitData pContextInitData)
+    public static IntPtr SteamInternal_ContextInit(IntPtr pContextInitData)
     {
-        DEBUG("SteamInternal_ContextInit");
-
-        if (pContextInitData.counter != global_counter)
+        ContextInitData contextInitData = Marshal.PtrToStructure<ContextInitData>(pContextInitData);
+        if (contextInitData.counter != global_counter)
         {
-            pContextInitData.counter = global_counter;
+            DEBUG("SteamInternal_ContextInit initializing\n");
+            contextInitData.counter = global_counter;
         }
 
-        return pContextInitData.ctx;
+        return contextInitData.ctx;
     }
+
+
     public struct ContextInitData
     {
         public uint counter;
         public IntPtr ctx;
     }
+
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static IntPtr SteamInternal_CreateInterface([MarshalAs(UnmanagedType.FunctionPtr)] string ver)
