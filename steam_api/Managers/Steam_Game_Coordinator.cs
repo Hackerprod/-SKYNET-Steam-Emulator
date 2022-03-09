@@ -5,24 +5,24 @@ using SKYNET.Types;
 
 namespace SKYNET.Managers
 {
-    public class Steam_GameCoordinator : SteamInterface//, ISteamGameCoordinator
+    public class Steam_GameCoordinator : SteamInterface, ISteamGameCoordinator
     {
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool IsMessageAvailable(uint pcubMsgSize)
+        public bool IsMessageAvailable(uint pcubMsgSize)
         {
+            Write("IsMessageAvailable");
             return false;
         }
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static EGCResults RetrieveMessage(uint punMsgType, IntPtr pubDest, uint cubDest, uint pcubMsgSize)
+        public EGCResults RetrieveMessage(uint punMsgType, IntPtr pubDest, uint cubDest, uint pcubMsgSize)
         {
+            Write("RetrieveMessage");
             return EGCResults.k_EGCResultNoMessage;
         }
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static EGCResults SendMessage_(uint unMsgType, IntPtr pubData, uint cubData)
+        public EGCResults SendMessage_(uint unMsgType, IntPtr pubData, uint cubData)
         {
+            Write("SendMessage_");
             return EGCResults.k_EGCResultOK;
         }
     }

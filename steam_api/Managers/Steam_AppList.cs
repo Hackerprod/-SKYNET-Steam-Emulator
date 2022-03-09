@@ -20,7 +20,7 @@ namespace SKYNET.Managers
         public static int GetAppInstallDir(AppId_t nAppID, IntPtr pchDirectory, int cchNameMax)
         {
             var mempchDirectory = Helpers.TakeMemory();
-            PRINT_DEBUG("Steam_AppList::GetAppInstallDir");
+            Write("Steam_AppList::GetAppInstallDir");
             return -1;
         }
 
@@ -28,21 +28,21 @@ namespace SKYNET.Managers
         public static int GetAppName(AppId_t nAppID, IntPtr pchName, int cchNameMax)
         {
             var mempchName = Helpers.TakeMemory();
-            PRINT_DEBUG("Steam_AppList::GetAppName\n");
+            Write("Steam_AppList::GetAppName\n");
             return -1;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static uint GetInstalledApps(AppId_t pvecAppID, uint unMaxAppIDs)
         {
-            PRINT_DEBUG("Steam_Applist::GetInstalledApps\n");
+            Write("Steam_Applist::GetInstalledApps\n");
             return 0;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static uint GetNumInstalledApps()
         {
-            PRINT_DEBUG("Steam_Applist::GetNumInstalledApps\n");
+            Write("Steam_Applist::GetNumInstalledApps\n");
             return 0;
         }
 

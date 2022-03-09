@@ -11,182 +11,182 @@ public class SteamAPI_ISteamHTTP : BaseCalls
     [DllExport("SteamAPI_ISteamHTTP_GetHTTPRequestWasTimedOut", CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamHTTP_GetHTTPRequestWasTimedOut(IntPtr instancePtr, uint hRequest, ref bool pbWasTimedOut)
     {
-        DEBUG($"SteamAPI_ISteamHTTP_GetHTTPRequestWasTimedOut");
+        Write($"SteamAPI_ISteamHTTP_GetHTTPRequestWasTimedOut");
         return true;
     }
 
     [DllExport("SteamAPI_ISteamHTTP_SetHTTPRequestAbsoluteTimeoutMS", CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamHTTP_SetHTTPRequestAbsoluteTimeoutMS(IntPtr instancePtr, uint hRequest, uint unMilliseconds)
     {
-        DEBUG($"SteamAPI_ISteamHTTP_SetHTTPRequestAbsoluteTimeoutMS");
+        Write($"SteamAPI_ISteamHTTP_SetHTTPRequestAbsoluteTimeoutMS");
         return true;
     }
 
     [DllExport("SteamAPI_ISteamHTTP_SetHTTPRequestRequiresVerifiedCertificate", CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamHTTP_SetHTTPRequestRequiresVerifiedCertificate(IntPtr instancePtr, uint hRequest, bool bRequireVerifiedCertificate)
     {
-        DEBUG($"SteamAPI_ISteamHTTP_SetHTTPRequestRequiresVerifiedCertificate");
+        Write($"SteamAPI_ISteamHTTP_SetHTTPRequestRequiresVerifiedCertificate");
         return true;
     }
 
     [DllExport("SteamAPI_ISteamHTTP_SetHTTPRequestUserAgentInfo", CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamHTTP_SetHTTPRequestUserAgentInfo(IntPtr instancePtr, uint hRequest, string pchUserAgentInfo)
     {
-        DEBUG($"SteamAPI_ISteamHTTP_SetHTTPRequestUserAgentInfo");
+        Write($"SteamAPI_ISteamHTTP_SetHTTPRequestUserAgentInfo");
         return true;
     }
 
     [DllExport("SteamAPI_ISteamHTTP_SetHTTPRequestCookieContainer", CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamHTTP_SetHTTPRequestCookieContainer(IntPtr instancePtr, uint hRequest, uint hCookieContainer)
     {
-        DEBUG($"SteamAPI_ISteamHTTP_SetHTTPRequestCookieContainer");
+        Write($"SteamAPI_ISteamHTTP_SetHTTPRequestCookieContainer");
         return true;
     }
 
     [DllExport("SteamAPI_ISteamHTTP_SetCookie", CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamHTTP_SetCookie(IntPtr instancePtr, uint hCookieContainer, string pchHost, string pchUrl, string pchCookie)
     {
-        DEBUG($"SteamAPI_ISteamHTTP_SetCookie");
+        Write($"SteamAPI_ISteamHTTP_SetCookie");
         return true;
     }
 
     [DllExport("SteamAPI_ISteamHTTP_ReleaseCookieContainer", CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamHTTP_ReleaseCookieContainer(IntPtr instancePtr, uint hCookieContainer)
     {
-        DEBUG($"SteamAPI_ISteamHTTP_ReleaseCookieContainer");
+        Write($"SteamAPI_ISteamHTTP_ReleaseCookieContainer");
         return true;
     }
 
     [DllExport("SteamAPI_ISteamHTTP_CreateCookieContainer", CallingConvention = CallingConvention.Cdecl)]
     public static uint SteamAPI_ISteamHTTP_CreateCookieContainer(IntPtr instancePtr, bool bAllowResponsesToModify)
     {
-        DEBUG($"SteamAPI_ISteamHTTP_CreateCookieContainer");
+        Write($"SteamAPI_ISteamHTTP_CreateCookieContainer");
         return 1;
     }
 
     [DllExport("SteamAPI_ISteamHTTP_SetHTTPRequestRawPostBody", CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamHTTP_SetHTTPRequestRawPostBody(IntPtr instancePtr, uint hRequest, string pchContentType, IntPtr pubBody, uint unBodyLen)
     {
-        DEBUG($"SteamAPI_ISteamHTTP_SetHTTPRequestRawPostBody");
+        Write($"SteamAPI_ISteamHTTP_SetHTTPRequestRawPostBody");
         return true;
     }
 
     [DllExport("SteamAPI_ISteamHTTP_GetHTTPDownloadProgressPct", CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamHTTP_GetHTTPDownloadProgressPct(IntPtr instancePtr, uint hRequest, ref float pflPercentOut)
     {
-        DEBUG($"SteamAPI_ISteamHTTP_GetHTTPDownloadProgressPct");
+        Write($"SteamAPI_ISteamHTTP_GetHTTPDownloadProgressPct");
         return true;
     }
 
     [DllExport("SteamAPI_ISteamHTTP_ReleaseHTTPRequest", CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamHTTP_ReleaseHTTPRequest(IntPtr instancePtr, uint hRequest)
     {
-        DEBUG($"SteamAPI_ISteamHTTP_ReleaseHTTPRequest");
+        Write($"SteamAPI_ISteamHTTP_ReleaseHTTPRequest");
         return true;
     }
 
     [DllExport("SteamAPI_ISteamHTTP_GetHTTPStreamingResponseBodyData", CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamHTTP_GetHTTPStreamingResponseBodyData(IntPtr instancePtr, uint hRequest, uint cOffset, IntPtr pBodyDataBuffer, uint unBufferSize)
     {
-        DEBUG($"SteamAPI_ISteamHTTP_GetHTTPStreamingResponseBodyData");
+        Write($"SteamAPI_ISteamHTTP_GetHTTPStreamingResponseBodyData");
         return true;
     }
 
     [DllExport("SteamAPI_ISteamHTTP_GetHTTPResponseBodyData", CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamHTTP_GetHTTPResponseBodyData(IntPtr instancePtr, uint hRequest, IntPtr pBodyDataBuffer, uint unBufferSize)
     {
-        DEBUG($"SteamAPI_ISteamHTTP_GetHTTPResponseBodyData");
+        Write($"SteamAPI_ISteamHTTP_GetHTTPResponseBodyData");
         return true;
     }
 
     [DllExport("SteamAPI_ISteamHTTP_GetHTTPResponseBodySize", CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamHTTP_GetHTTPResponseBodySize(IntPtr instancePtr, uint hRequest, ref uint unBodySize)
     {
-        DEBUG($"SteamAPI_ISteamHTTP_GetHTTPResponseBodySize");
+        Write($"SteamAPI_ISteamHTTP_GetHTTPResponseBodySize");
         return true;
     }
 
     [DllExport("SteamAPI_ISteamHTTP_GetHTTPResponseHeaderValue", CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamHTTP_GetHTTPResponseHeaderValue(IntPtr instancePtr, uint hRequest, string pchHeaderName, IntPtr pHeaderValueBuffer, uint unBufferSize)
     {
-        DEBUG($"SteamAPI_ISteamHTTP_GetHTTPResponseHeaderValue");
+        Write($"SteamAPI_ISteamHTTP_GetHTTPResponseHeaderValue");
         return true;
     }
 
     [DllExport("SteamAPI_ISteamHTTP_GetHTTPResponseHeaderSize", CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamHTTP_GetHTTPResponseHeaderSize(IntPtr instancePtr, uint hRequest, string pchHeaderName, ref uint unResponseHeaderSize)
     {
-        DEBUG($"SteamAPI_ISteamHTTP_GetHTTPResponseHeaderSize");
+        Write($"SteamAPI_ISteamHTTP_GetHTTPResponseHeaderSize");
         return true;
     }
 
     [DllExport("SteamAPI_ISteamHTTP_PrioritizeHTTPRequest", CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamHTTP_PrioritizeHTTPRequest(IntPtr instancePtr, uint hRequest)
     {
-        DEBUG($"SteamAPI_ISteamHTTP_PrioritizeHTTPRequest");
+        Write($"SteamAPI_ISteamHTTP_PrioritizeHTTPRequest");
         return true;
     }
 
     [DllExport("SteamAPI_ISteamHTTP_DeferHTTPRequest", CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamHTTP_DeferHTTPRequest(IntPtr instancePtr, uint hRequest)
     {
-        DEBUG($"SteamAPI_ISteamHTTP_DeferHTTPRequest");
+        Write($"SteamAPI_ISteamHTTP_DeferHTTPRequest");
         return true;
     }
 
     [DllExport("SteamAPI_ISteamHTTP_SendHTTPRequestAndStreamResponse", CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamHTTP_SendHTTPRequestAndStreamResponse(IntPtr instancePtr, uint hRequest, ref ulong pCallHandle)
     {
-        DEBUG($"SteamAPI_ISteamHTTP_SendHTTPRequestAndStreamResponse");
+        Write($"SteamAPI_ISteamHTTP_SendHTTPRequestAndStreamResponse");
         return true;
     }
 
     [DllExport("SteamAPI_ISteamHTTP_SendHTTPRequest", CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamHTTP_SendHTTPRequest(IntPtr instancePtr, uint hRequest, ref ulong pCallHandle)
     {
-        DEBUG($"SteamAPI_ISteamHTTP_SendHTTPRequest");
+        Write($"SteamAPI_ISteamHTTP_SendHTTPRequest");
         return true;
     }
 
     [DllExport("SteamAPI_ISteamHTTP_SetHTTPRequestGetOrPostParameter", CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamHTTP_SetHTTPRequestGetOrPostParameter(IntPtr instancePtr, uint hRequest, string pchParamName, string pchParamValue)
     {
-        DEBUG($"SteamAPI_ISteamHTTP_SetHTTPRequestGetOrPostParameter");
+        Write($"SteamAPI_ISteamHTTP_SetHTTPRequestGetOrPostParameter");
         return true;
     }
 
     [DllExport("SteamAPI_ISteamHTTP_SetHTTPRequestHeaderValue", CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamHTTP_SetHTTPRequestHeaderValue(IntPtr instancePtr, uint hRequest, string pchHeaderName, string pchHeaderValue)
     {
-        DEBUG($"SteamAPI_ISteamHTTP_SetHTTPRequestHeaderValue");
+        Write($"SteamAPI_ISteamHTTP_SetHTTPRequestHeaderValue");
         return true;
     }
 
     [DllExport("SteamAPI_ISteamHTTP_SetHTTPRequestNetworkActivityTimeout", CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamHTTP_SetHTTPRequestNetworkActivityTimeout(IntPtr instancePtr, uint hRequest, uint unTimeoutSeconds)
     {
-        DEBUG($"SteamAPI_ISteamHTTP_SetHTTPRequestNetworkActivityTimeout");
+        Write($"SteamAPI_ISteamHTTP_SetHTTPRequestNetworkActivityTimeout");
         return true;
     }
 
     [DllExport("SteamAPI_SteamGameServerHTTP_v003", CallingConvention = CallingConvention.Cdecl)]
     public static IntPtr SteamAPI_SteamGameServerHTTP_v003()
     {
-        DEBUG($"SteamAPI_SteamGameServerHTTP_v003");
+        Write($"SteamAPI_SteamGameServerHTTP_v003");
         return IntPtr.Zero;
     }
 
     [DllExport("SteamAPI_ISteamHTTP_CreateHTTPRequest", CallingConvention = CallingConvention.Cdecl)]
     public static IntPtr SteamAPI_ISteamHTTP_CreateHTTPRequest(IntPtr self, /*HTTPMethod*/uint eHTTPRequestMethod, string pchAbsoluteURL)
     {
-        DEBUG($"SteamAPI_ISteamHTTP_CreateHTTPRequest");
+        Write($"SteamAPI_ISteamHTTP_CreateHTTPRequest");
         return IntPtr.Zero;
     }
 
     [DllExport("SteamAPI_ISteamHTTP_SetHTTPRequestContextValue", CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamHTTP_SetHTTPRequestContextValue(IntPtr instancePtr, uint hRequest, ulong ulContextValue)
     {
-        DEBUG($"SteamAPI_ISteamHTTP_SetHTTPRequestContextValue");
+        Write($"SteamAPI_ISteamHTTP_SetHTTPRequestContextValue");
         return true;
     }
     internal enum HTTPMethod : int

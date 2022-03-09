@@ -2,7 +2,7 @@
 
 public class BaseCalls
 {
-    public static void DEBUG(object msg)
+    public static void Write(object msg)
     {
         Log.Write(msg);
     }

@@ -4,7 +4,7 @@ namespace SKYNET.Interface
 {
     public class SteamInterface
     {
-        public static void PRINT_DEBUG(object v)
+        public static void Write(object v)
         {
             Log.Write(v);
         }

@@ -12,42 +12,42 @@ namespace SKYNET.Managers
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool BIsSubscribed()
         {
-            PRINT_DEBUG("BIsSubscribed");
+            Write("BIsSubscribed");
             return true;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool BIsLowViolence()
         {
-            PRINT_DEBUG("BIsLowViolence");
+            Write("BIsLowViolence");
             return false;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool BIsCybercafe()
         {
-            PRINT_DEBUG("BIsCybercafe");
+            Write("BIsCybercafe");
             return false;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool BIsVACBanned()
         {
-            PRINT_DEBUG("BIsVACBanned");
+            Write("BIsVACBanned");
             return false;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static string GetCurrentGameLanguage()
         {
-            PRINT_DEBUG("GetCurrentGameLanguage");
+            Write("GetCurrentGameLanguage");
             return SteamClient.Language; ;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static string GetAvailableGameLanguages()
         {
-            PRINT_DEBUG("GetAvailableGameLanguages");
+            Write("GetAvailableGameLanguages");
             //TODO?
             return "";
         }
@@ -56,7 +56,7 @@ namespace SKYNET.Managers
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool BIsSubscribedApp(AppId_t appID)
         {
-            PRINT_DEBUG("BIsSubscribedApp " + appID);
+            Write("BIsSubscribedApp " + appID);
             return false;
         }
 
@@ -65,7 +65,7 @@ namespace SKYNET.Managers
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool BIsDlcInstalled(AppId_t appID)
         {
-            PRINT_DEBUG("BIsDlcInstalled " + appID);
+            Write("BIsDlcInstalled " + appID);
             return false;
 
         }
@@ -74,7 +74,7 @@ namespace SKYNET.Managers
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static UInt32 GetEarliestPurchaseUnixTime(AppId_t nAppID)
         {
-            PRINT_DEBUG("GetEarliestPurchaseUnixTime");
+            Write("GetEarliestPurchaseUnixTime");
             //TODO ?
             return 1;
         }
@@ -86,7 +86,7 @@ namespace SKYNET.Managers
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool BIsSubscribedFromFreeWeekend()
         {
-            PRINT_DEBUG("BIsSubscribedFromFreeWeekend");
+            Write("BIsSubscribedFromFreeWeekend");
             return false;
         }
 
@@ -95,7 +95,7 @@ namespace SKYNET.Managers
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int GetDLCCount()
         {
-            PRINT_DEBUG("GetDLCCount");
+            Write("GetDLCCount");
             return 0;
         }
 
@@ -104,7 +104,7 @@ namespace SKYNET.Managers
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool BGetDLCDataByIndex(int iDLC, IntPtr pAppID, bool pbAvailable, IntPtr pchName, int cchNameBufferSize)
         {
-            PRINT_DEBUG("BGetDLCDataByIndex");
+            Write("BGetDLCDataByIndex");
             return true;
         }
 
@@ -113,13 +113,13 @@ namespace SKYNET.Managers
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void InstallDLC(AppId_t nAppID)
         {
-            PRINT_DEBUG("InstallDLC");
+            Write("InstallDLC");
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void UninstallDLC(AppId_t nAppID)
         {
-            PRINT_DEBUG("UninstallDLC");
+            Write("UninstallDLC");
         }
 
 
@@ -131,14 +131,14 @@ namespace SKYNET.Managers
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void RequestAppProofOfPurchaseKey(AppId_t nAppID)
         {
-            PRINT_DEBUG("RequestAppProofOfPurchaseKey");
+            Write("RequestAppProofOfPurchaseKey");
         }
 
         // returns current beta branch name, 'public' is the default branch
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool GetCurrentBetaName(IntPtr pchName, int cchNameBufferSize)
         {
-            PRINT_DEBUG("GetCurrentBetaName " + cchNameBufferSize);
+            Write("GetCurrentBetaName " + cchNameBufferSize);
             return true;
         }
 
@@ -146,7 +146,7 @@ namespace SKYNET.Managers
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool MarkContentCorrupt(bool bMissingFilesOnly)
         {
-            PRINT_DEBUG("MarkContentCorrupt");
+            Write("MarkContentCorrupt");
             //TODO: warn user
             return true;
         }
@@ -155,7 +155,7 @@ namespace SKYNET.Managers
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static UInt32 GetInstalledDepots(AppId_t appID, IntPtr pvecDepots, uint cMaxDepots)
         {
-            PRINT_DEBUG($"GetInstalledDepots {appID}, {cMaxDepots}");
+            Write($"GetInstalledDepots {appID}, {cMaxDepots}");
             //TODO not sure about the behavior of this function, I didn't actually test this.
             return 0;
         }
@@ -171,7 +171,7 @@ namespace SKYNET.Managers
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static UInt32 GetAppInstallDir(AppId_t appID, IntPtr pchFolder, uint cchFolderBufferSize)
         {
-            PRINT_DEBUG($"GetAppInstallDir {appID} {pchFolder} {cchFolderBufferSize}");
+            Write($"GetAppInstallDir {appID} {pchFolder} {cchFolderBufferSize}");
             //TODO return real path instead of dll path
             string installed_path = "xd";
             return (UInt32)installed_path.Length; //Real steam always returns the actual path length, not the copied one.
@@ -181,7 +181,7 @@ namespace SKYNET.Managers
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool BIsAppInstalled(AppId_t appID)
         {
-            PRINT_DEBUG($"BIsAppInstalled {appID}");
+            Write($"BIsAppInstalled {appID}");
             return true;
         }
 
@@ -189,7 +189,7 @@ namespace SKYNET.Managers
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static CSteamID GetAppOwner()
         {
-            PRINT_DEBUG("GetAppOwner");
+            Write("GetAppOwner");
             return new CSteamID(SteamClient.SteamId);
         }
 
@@ -200,7 +200,7 @@ namespace SKYNET.Managers
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static string GetLaunchQueryParam(string pchKey)
         {
-            PRINT_DEBUG("GetLaunchQueryParam");
+            Write("GetLaunchQueryParam");
             return "";
         }
 
@@ -209,7 +209,7 @@ namespace SKYNET.Managers
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool GetDlcDownloadProgress(AppId_t nAppID, UInt64 punBytesDownloaded, UInt64 punBytesTotal)
         {
-            PRINT_DEBUG("GetDlcDownloadProgress");
+            Write("GetDlcDownloadProgress");
             return false;
         }
 
@@ -218,7 +218,7 @@ namespace SKYNET.Managers
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int GetAppBuildId()
         {
-            PRINT_DEBUG("GetAppBuildId");
+            Write("GetAppBuildId");
             return 10;
         }
 
@@ -230,7 +230,7 @@ namespace SKYNET.Managers
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void RequestAllProofOfPurchaseKeys()
         {
-            PRINT_DEBUG("RequestAllProofOfPurchaseKeys");
+            Write("RequestAllProofOfPurchaseKeys");
         }
 
 
@@ -238,7 +238,7 @@ namespace SKYNET.Managers
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static SteamAPICall_t GetFileDetails(string pszFileName)
         {
-            PRINT_DEBUG("GetFileDetails");
+            Write("GetFileDetails");
             return (SteamAPICall_t)0;
         }
 
@@ -253,7 +253,7 @@ namespace SKYNET.Managers
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int GetLaunchCommandLine(IntPtr pszCommandLine, int cubCommandLine)
         {
-            PRINT_DEBUG("GetLaunchCommandLine");
+            Write("GetLaunchCommandLine");
             return 0;
         }
 
@@ -261,7 +261,7 @@ namespace SKYNET.Managers
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool BIsSubscribedFromFamilySharing()
         {
-            PRINT_DEBUG("BIsSubscribedFromFamilySharing");
+            Write("BIsSubscribedFromFamilySharing");
             return false;
         }
 
@@ -269,7 +269,7 @@ namespace SKYNET.Managers
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool BIsTimedTrial(UInt32 punSecondsAllowed, UInt32 punSecondsPlayed)
         {
-            PRINT_DEBUG("BIsTimedTrial");
+            Write("BIsTimedTrial");
             return false;
         }
     }

@@ -91,11 +91,9 @@ public class SteamClient
     }
     public static void Initialize()
     {
-        PRINT_DEBUG($"{"Initializing SteamClient"}");
-
         modCommon.LoadSettings();
 
-        Console.WriteLine("Testing");
+        Write($"{"Initializing SteamClient"}");
 
         if (Client_Callback == null) Client_Callback = new CallbackManager();
         if (Server_Callback == null) Server_Callback = new CallbackManager();
@@ -147,11 +145,13 @@ public class SteamClient
         steam_GameServerNetworkingMessages = new Steam_NetworkingMessages();
         steam_GameServerGamecoordinator = new Steam_GameCoordinator();
         steam_MasterServerUpdater = new Steam_Masterserver_Updater();
+
+        Initialized = true;
     }
 
 
 
-    private static void PRINT_DEBUG(object v)
+    private static void Write(object v)
     {
         Log.Write(v);
     }

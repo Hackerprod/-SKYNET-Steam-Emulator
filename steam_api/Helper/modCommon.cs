@@ -119,8 +119,6 @@ public class modCommon
 
         LogToFile = (bool)IniParser["LOG"]["File"];
 
-        modCommon.Show(LogToFile);
-
         bool ConsoleOutput = (bool)IniParser["LOG"]["Console"];
 
         if (ConsoleOutput)
