@@ -9,6 +9,8 @@ using System.Windows.Forms;
 
 public class modCommon
 {
+    private static bool ConsoleEnabled;
+
     public static IntPtr GetObjectPtr(object Obj)
     {
         IntPtr Ptr = IntPtr.Zero;
@@ -48,5 +50,18 @@ public class modCommon
     {
         MessageBox.Show(name.ToString());
     }
+
+    public static void ActiveConsoleOutput()
+    {
+        if (!ConsoleEnabled)
+        {
+            ConsoleEnabled = true;
+            AllocConsole();
+        }
+    }
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    static extern bool AllocConsole();
 }
 

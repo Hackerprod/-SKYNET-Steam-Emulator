@@ -93,6 +93,9 @@ public class SteamClient
     {
         PRINT_DEBUG($"{"Initializing SteamClient"}");
 
+        modCommon.ActiveConsoleOutput();
+        Console.WriteLine("Testing");
+
         if (Client_Callback == null) Client_Callback = new CallbackManager();
         if (Server_Callback == null) Server_Callback = new CallbackManager();
         
@@ -144,6 +147,8 @@ public class SteamClient
         steam_GameServerGamecoordinator = new Steam_GameCoordinator();
         steam_MasterServerUpdater = new Steam_Masterserver_Updater();
     }
+
+
 
     private static void PRINT_DEBUG(object v)
     {

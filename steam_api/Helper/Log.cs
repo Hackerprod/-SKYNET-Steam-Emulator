@@ -18,6 +18,7 @@ namespace SKYNET.Helper
 
         public static void Write(object msg)
         {
+            Console.WriteLine(msg);
             if (File.Exists("steam_api.log"))
             {
                 string _msg = "";

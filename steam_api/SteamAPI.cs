@@ -30,6 +30,7 @@ public class SteamAPI : SteamInterface
             return true;
         }
 
+        PRINT_DEBUG($"{"SteamAPI_Init [FALSE]"}");
         SteamClient.Initialize();
         SteamClient.Initialized = true;
 
@@ -38,7 +39,6 @@ public class SteamAPI : SteamInterface
         SteamClient.ConnectToGlobalUser(user_steam_pipe);
 
         SteamInternal.global_counter++;
-        PRINT_DEBUG($"{"SteamAPI_Init [FALSE]"}");
         return false;
     }
 
@@ -58,6 +58,8 @@ public class SteamAPI : SteamInterface
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public unsafe static void SteamAPI_RegisterCallback(IntPtr pCallback, int iCallback)
     {
+        modCommon.ActiveConsoleOutput();
+
         CCallbackBase Base = Marshal.PtrToStructure<CCallbackBase>(pCallback);
         string callMessage = $"SteamAPI_RegisterCallback: ";
 
@@ -127,8 +129,6 @@ public class SteamAPI : SteamInterface
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static HSteamPipe SteamAPI_GetHSteamPipe()
     {
-        //SteamAPIInterop.SteamAPI_ISteamClient_CreateSteamPipe();
-
         PRINT_DEBUG("SteamAPI_GetHSteamPipe");
         if (user_steam_pipe == null)
         {
@@ -235,12 +235,11 @@ public class SteamAPI : SteamInterface
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static void SteamAPI_SetMiniDumpComment([MarshalAs(UnmanagedType.LPStr)] string pchMsg )
     {
-        PRINT_DEBUG($"SteamAPI_SetMiniDumpComment");
-        PRINT_DEBUG($"");
-        PRINT_DEBUG("////////////////////////////// Mini Dump Content \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
-        PRINT_DEBUG($"{pchMsg}");
-        PRINT_DEBUG("//////////////////////////////   End Mini Dump   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
-        PRINT_DEBUG($"");
+        string Msg = "SteamAPI_SetMiniDumpComment" + Environment.NewLine;
+        Msg += "////////////////////////////// Mini Dump Content \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + Environment.NewLine;
+        Msg += $"{pchMsg}" + Environment.NewLine;
+        Msg += "//////////////////////////////   End Mini Dump   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\";
+        PRINT_DEBUG(Msg);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
