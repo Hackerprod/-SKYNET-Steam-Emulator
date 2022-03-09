@@ -58,7 +58,7 @@ public class SteamAPI : SteamInterface
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public unsafe static void SteamAPI_RegisterCallback(IntPtr pCallback, int iCallback)
     {
-        modCommon.ActiveConsoleOutput();
+        modCommon.LoadSettings();
 
         CCallbackBase Base = Marshal.PtrToStructure<CCallbackBase>(pCallback);
         string callMessage = $"SteamAPI_RegisterCallback: ";

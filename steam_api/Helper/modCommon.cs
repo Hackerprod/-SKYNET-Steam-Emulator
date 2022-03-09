@@ -1,5 +1,8 @@
-﻿using System;
+﻿using SKYNET;
+using SKYNET.Helper;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -9,7 +12,12 @@ using System.Windows.Forms;
 
 public class modCommon
 {
+    public static bool LogToFile { get; set; }
+
     private static bool ConsoleEnabled;
+    private static bool SettingsLoaded;
+    private static INIParser IniParser;
+
 
     public static IntPtr GetObjectPtr(object Obj)
     {
@@ -63,5 +71,83 @@ public class modCommon
     [DllImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     static extern bool AllocConsole();
+
+    internal static void LoadSettings()
+    {
+        if (SettingsLoaded)
+        {
+            return;
+        }
+
+        string _file = Path.Combine(modCommon.GetPath(), "[SKYNET] steam_api.ini");
+        if (!File.Exists(_file))
+        {
+            StringBuilder config = new StringBuilder();
+
+            // User Configuration
+
+            config.AppendLine("[STEAM USER]");
+            config.AppendLine($"Nickname = {Environment.UserName}");
+            config.AppendLine($"SteamID = {GenerateSteamID()}");
+            config.AppendLine($"Languaje = English");
+            config.AppendLine();
+
+            // Network Configuration
+
+            config.AppendLine("[NETWORK]");
+            config.AppendLine("# When the emulator is in LAN mode (without dedicated server) it sends and receives data through broadcast ");
+            config.AppendLine("ServerIP = 127.0.0.1");
+            config.AppendLine("BroadCastPort = 28025");
+            config.AppendLine();
+
+            // Log Configuration
+
+            config.AppendLine("[LOG]");
+            config.AppendLine("Console = false");
+            config.AppendLine("File = false");
+            config.AppendLine();
+
+            File.WriteAllText(_file, config.ToString());
+        }
+
+        IniParser = new INIParser();
+        IniParser.Load(_file);
+
+        SteamClient.SteamId = (ulong)IniParser["STEAM USER"]["SteamID"];
+        SteamClient.PersonaName = (string)IniParser["STEAM USER"]["Nickname"];
+        SteamClient.Language = (string)IniParser["STEAM USER"]["Languaje"];
+
+        LogToFile = (bool)IniParser["LOG"]["File"];
+
+        modCommon.Show(LogToFile);
+
+        bool ConsoleOutput = (bool)IniParser["LOG"]["Console"];
+
+        if (ConsoleOutput)
+        {
+            ActiveConsoleOutput();
+        }
+
+        string data = $"Loaded user data from file \nNickName: {SteamClient.PersonaName} \nSteamId:  {SteamClient.SteamId} \nLanguaje: {SteamClient.Language} \n";
+        Log.Write(data);
+
+        SettingsLoaded = true;
+    }
+
+    private static string GenerateSteamID()
+    {
+        return "76561" + new Random().Next(100000, 999999) + new Random().Next(100000, 999999);
+    }
+
+    public static string GetPath()
+    {
+        Process currentProcess;
+        try
+        {
+            currentProcess = Process.GetCurrentProcess();
+            return new FileInfo(currentProcess.MainModule.FileName).Directory?.FullName;
+        }
+        finally { currentProcess = null; }
+    }
 }
 

@@ -93,7 +93,8 @@ public class SteamClient
     {
         PRINT_DEBUG($"{"Initializing SteamClient"}");
 
-        modCommon.ActiveConsoleOutput();
+        modCommon.LoadSettings();
+
         Console.WriteLine("Testing");
 
         if (Client_Callback == null) Client_Callback = new CallbackManager();

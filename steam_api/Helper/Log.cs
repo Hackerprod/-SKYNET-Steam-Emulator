@@ -13,13 +13,19 @@ namespace SKYNET.Helper
 
         static Log()
         {
-            outputStream = new FileStream($"steam_api.log", FileMode.OpenOrCreate);
+            outputStream = new FileStream($"[SKYNET] steam_api.log", FileMode.OpenOrCreate);
         }
 
         public static void Write(object msg)
         {
             Console.WriteLine(msg);
-            if (File.Exists("steam_api.log"))
+
+            if (!modCommon.LogToFile)
+            {
+                //return;
+            }
+
+            if (File.Exists("[SKYNET] steam_api.log"))
             {
                 string _msg = "";
                 if (msg != null)

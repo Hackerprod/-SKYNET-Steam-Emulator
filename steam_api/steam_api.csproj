@@ -89,6 +89,7 @@
     <Compile Include="Callback\CallbackIdentityAttribute.cs" />
     <Compile Include="Callback\CCallbackBase.cs" />
     <Compile Include="Helper\Helpers.cs" />
+    <Compile Include="Helper\INIParser.cs" />
     <Compile Include="Helper\Log.cs" />
     <Compile Include="Helper\modCommon.cs" />
     <Compile Include="Helper\RegistrySettings.cs" />
