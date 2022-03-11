@@ -16,10 +16,8 @@ public class SteamAPI : SteamInterface
     private static HSteamPipe user_steam_pipe;
     private static HSteamUser flat_hsteamuser() => SteamAPI_GetHSteamUser();
     private static HSteamPipe flat_hsteampipe() => SteamAPI_GetHSteamPipe();
-    private static HSteamUser flat_gs_hsteamuser() => Steam_GameServer.SteamGameServer_GetHSteamUser();
+    private static HSteamUser flat_gs_hsteamuser() => SteamClient.steam_GameServer.SteamGameServer_GetHSteamUser();
     private static HSteamPipe flat_gs_hsteampipe() => Steam_GameServer.SteamGameServer_GetHSteamPipe();
-
-
 
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

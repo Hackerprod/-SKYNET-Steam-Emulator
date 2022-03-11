@@ -5,7 +5,7 @@ using SKYNET.Interface;
 
 namespace SKYNET.Managers
 {
-    public  class SteamAPI_ISteam_GameSearch : BaseCalls
+    public class SteamAPI_ISteamGameSearch : BaseCalls
     {
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public  static GameSearchErrorCode_t SteamAPI_ISteamGameSearch_AcceptGame(IntPtr self)

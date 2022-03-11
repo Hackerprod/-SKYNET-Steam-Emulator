@@ -157,12 +157,13 @@
     <Compile Include="Managers\Interface\ISteamVideo.cs" />
     <Compile Include="Managers\Interface\ISteamGameCoordinator.cs" />
     <Compile Include="Managers\Interface\SteamInterface.cs" />
+    <Compile Include="Managers\Steam_GameServer.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="SteamAPI_ISteam_Apps.cs" />
+    <Compile Include="SteamAPI_ISteamApps.cs" />
     <Compile Include="SteamClient.cs" />
     <Compile Include="Managers\Steam_AppList.cs" />
     <Compile Include="Managers\Steam_Apps.cs" />
@@ -205,10 +206,12 @@
     <Compile Include="SteamAPI_ISteamClient.cs" />
     <Compile Include="SteamAPI_ISteamHTTP.cs" />
     <Compile Include="SteamAPI_ISteamUser.cs" />
-    <Compile Include="SteamAPI_ISteam_AppList.cs" />
-    <Compile Include="SteamAPI_ISteam_Friends.cs" />
-    <Compile Include="SteamAPI_ISteam_Controller.cs" />
-    <Compile Include="SteamAPI_ISteam_GameSearch.cs" />
+    <Compile Include="SteamAPI_ISteamAppList.cs" />
+    <Compile Include="SteamAPI_ISteamFriends.cs" />
+    <Compile Include="SteamAPI_ISteamController.cs" />
+    <Compile Include="SteamAPI_ISteamGameSearch.cs" />
+    <Compile Include="SteamAPI_ISteamGameServerStats.cs" />
+    <Compile Include="SteamAPI_ISteamHTMLSurface.cs" />
     <Compile Include="Types\CallbackMsg_t.cs" />
     <Compile Include="Types\CSteamAPIContext.cs" />
     <Compile Include="Types\EAccountType.cs" />

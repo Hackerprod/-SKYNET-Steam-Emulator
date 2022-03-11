@@ -7,7 +7,7 @@ using System.Windows.Forms;
 using SKYNET.Interface;
 using Steamworks;
 
-public class SteamAPI_ISteam_Apps : BaseCalls
+public class SteamAPI_ISteamApps : BaseCalls
 {
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamApps_BIsSubscribed()
