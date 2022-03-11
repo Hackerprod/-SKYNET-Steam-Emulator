@@ -1,4 +1,5 @@
 ﻿using SKYNET;
+using SKYNET.GUI;
 using SKYNET.Helper;
 using System;
 using System.Collections.Generic;
@@ -79,60 +80,69 @@ public class modCommon
             return;
         }
 
-        string _file = Path.Combine(modCommon.GetPath(), "[SKYNET] steam_api.ini");
-        if (!File.Exists(_file))
+        try
         {
-            StringBuilder config = new StringBuilder();
+            string _file = Path.Combine(GetPath(), "[SKYNET] steam_api.ini");
 
-            // User Configuration
+            if (!File.Exists(_file))
+            {
+                StringBuilder config = new StringBuilder();
 
-            config.AppendLine("[STEAM USER]");
-            config.AppendLine($"Nickname = {Environment.UserName}");
-            config.AppendLine($"SteamID = {GenerateSteamID()}");
-            config.AppendLine($"Languaje = English");
-            config.AppendLine();
+                // User Configuration
 
-            // Network Configuration
+                config.AppendLine("[STEAM USER]");
+                config.AppendLine($"Nickname = {Environment.UserName}");
+                config.AppendLine($"SteamID = {modCommon.GenerateSteamID()}");
+                config.AppendLine($"Languaje = English");
+                config.AppendLine();
 
-            config.AppendLine("[NETWORK]");
-            config.AppendLine("# When the emulator is in LAN mode (without dedicated server) it sends and receives data through broadcast ");
-            config.AppendLine("ServerIP = 127.0.0.1");
-            config.AppendLine("BroadCastPort = 28025");
-            config.AppendLine();
+                // Network Configuration
 
-            // Log Configuration
+                config.AppendLine("[NETWORK]");
+                config.AppendLine("# When the emulator is in LAN mode (without dedicated server) it sends and receives data through broadcast ");
+                config.AppendLine("ServerIP = 127.0.0.1");
+                config.AppendLine("BroadCastPort = 28025");
+                config.AppendLine();
 
-            config.AppendLine("[LOG]");
-            config.AppendLine("Console = false");
-            config.AppendLine("File = false");
-            config.AppendLine();
+                // Log Configuration
 
-            File.WriteAllText(_file, config.ToString());
+                config.AppendLine("[LOG]");
+                config.AppendLine("Console = false");
+                config.AppendLine("File = false");
+                config.AppendLine();
+
+                File.WriteAllText(_file, config.ToString());
+            }
+
+            IniParser = new INIParser();
+            IniParser.Load(_file);
+
+            SteamClient.SteamId = (ulong)IniParser["STEAM USER"]["SteamID"];
+            SteamClient.PersonaName = (string)IniParser["STEAM USER"]["Nickname"];
+            SteamClient.Language = (string)IniParser["STEAM USER"]["Languaje"];
+
+            LogToFile = (bool)IniParser["LOG"]["File"];
+
+            bool ConsoleOutput = (bool)IniParser["LOG"]["Console"];
+
+            if (ConsoleOutput)
+            {
+                ActiveConsoleOutput();
+            }
+
+            string data = $"Loaded user data from file \nNickName: {SteamClient.PersonaName} \nSteamId:  {SteamClient.SteamId} \nLanguaje: {SteamClient.Language} \n";
+            Log.Write(data);
+
+            SettingsLoaded = true;
+        }
+        catch (Exception e)
+        {
+            modCommon.Show(e);
         }
 
-        IniParser = new INIParser();
-        IniParser.Load(_file);
-
-        SteamClient.SteamId = (ulong)IniParser["STEAM USER"]["SteamID"];
-        SteamClient.PersonaName = (string)IniParser["STEAM USER"]["Nickname"];
-        SteamClient.Language = (string)IniParser["STEAM USER"]["Languaje"];
-
-        LogToFile = (bool)IniParser["LOG"]["File"];
-
-        bool ConsoleOutput = (bool)IniParser["LOG"]["Console"];
-
-        if (ConsoleOutput)
-        {
-            ActiveConsoleOutput();
-        }
-
-        string data = $"Loaded user data from file \nNickName: {SteamClient.PersonaName} \nSteamId:  {SteamClient.SteamId} \nLanguaje: {SteamClient.Language} \n";
-        Log.Write(data);
-
-        SettingsLoaded = true;
     }
 
-    private static string GenerateSteamID()
+    public static string GenerateSteamID()
     {
         return "76561" + new Random().Next(100000, 999999) + new Random().Next(100000, 999999);
     }

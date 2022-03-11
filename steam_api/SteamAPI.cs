@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using SKYNET;
+using SKYNET.GUI;
 using SKYNET.Interface;
 using Steamworks;
 
@@ -51,14 +52,11 @@ public class SteamAPI : SteamInterface
     public static void SteamAPI_Shutdown(IntPtr pContextInitData)
     {
         Write("SteamAPI_Shutdown");
-
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public unsafe static void SteamAPI_RegisterCallback(IntPtr pCallback, int iCallback)
     {
-        modCommon.LoadSettings();
-
         CCallbackBase Base = Marshal.PtrToStructure<CCallbackBase>(pCallback);
         string callMessage = $"SteamAPI_RegisterCallback: ";
 

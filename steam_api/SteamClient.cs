@@ -6,7 +6,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using SKYNET;
 using SKYNET.Callback;
+using SKYNET.GUI;
 using SKYNET.Helper;
 using SKYNET.Interface;
 using SKYNET.Managers;
@@ -91,6 +93,13 @@ public class SteamClient
     }
     public static void Initialize()
     {
+        string _file = Path.Combine(modCommon.GetPath(), "[SKYNET] steam_api.ini");
+
+        if (!File.Exists(_file))
+        {
+            new frmLogin().ShowDialog();
+        }
+
         modCommon.LoadSettings();
 
         Write($"{"Initializing SteamClient"}");

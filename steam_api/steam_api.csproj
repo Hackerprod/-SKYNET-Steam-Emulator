@@ -72,6 +72,7 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
@@ -88,6 +89,33 @@
     <Compile Include="BaseCalls.cs" />
     <Compile Include="Callback\CallbackIdentityAttribute.cs" />
     <Compile Include="Callback\CCallbackBase.cs" />
+    <Compile Include="GUI\Controls\SKYNET_Button.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="GUI\Controls\SKYNET_TextBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\Controls\SKYNET_TextBox.designer.cs">
+      <DependentUpon>SKYNET_TextBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\DwmApi.cs" />
+    <Compile Include="GUI\frmLogin.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\frmLogin.Designer.cs">
+      <DependentUpon>frmLogin.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Controls\SKYNET_CloseBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\Controls\SKYNET_CloseBox.designer.cs">
+      <DependentUpon>SKYNET_CloseBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Helper\Helpers.cs" />
     <Compile Include="Helper\INIParser.cs" />
     <Compile Include="Helper\Log.cs" />
@@ -129,6 +157,11 @@
     <Compile Include="Managers\Interface\ISteamVideo.cs" />
     <Compile Include="Managers\Interface\ISteamGameCoordinator.cs" />
     <Compile Include="Managers\Interface\SteamInterface.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="SteamClient.cs" />
     <Compile Include="Managers\Steam_AppList.cs" />
     <Compile Include="Managers\Steam_Apps.cs" />
@@ -217,7 +250,32 @@
     <Compile Include="Types\SteamUserStats\SteamLeaderboardEntries_t.cs" />
     <Compile Include="Types\SteamUserStats\SteamLeaderboard_t.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="GUI\Controls\SKYNET_TextBox.resx">
+      <DependentUpon>SKYNET_TextBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\frmLogin.resx">
+      <DependentUpon>frmLogin.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\Controls\SKYNET_CloseBox.resx">
+      <DependentUpon>SKYNET_CloseBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\close.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\male_user_100px.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ImportGroup Label=".NET DllExport">
     <Import Project="$(SolutionDir)packages\DllExport\tools\net.r_eg.DllExport.targets" Condition="Exists($([MSBuild]::Escape('$(SolutionDir)packages\DllExport\tools\net.r_eg.DllExport.targets')))" Label="8337224c9ad9e356" />
