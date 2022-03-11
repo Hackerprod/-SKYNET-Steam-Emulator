@@ -9,7 +9,7 @@ using Steamworks.Data;
 
 namespace SKYNET.Managers
 {
-    public class SteamAPI_Steam_Friends : BaseCalls
+    public class SteamAPI_ISteam_Friends : BaseCalls
     {
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_ISteamFriends_ActivateGameOverlay([MarshalAs(UnmanagedType.LPStr)] string friendsGroupID)

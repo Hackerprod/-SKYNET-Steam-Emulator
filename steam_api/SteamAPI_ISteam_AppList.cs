@@ -7,7 +7,7 @@ using Steamworks;
 
 namespace SKYNET.Managers
 {
-    public class SteamAPI_Steam_AppList : BaseCalls
+    public class SteamAPI_ISteam_AppList : BaseCalls
     {
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int SteamAPI_ISteamAppList_GetAppBuildId(AppId_t nAppID)
