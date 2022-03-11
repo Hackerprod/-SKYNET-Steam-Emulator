@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using SKYNET;
+using SKYNET.Interface;
 using SKYNET.Types;
 
 public class SteamInternal : BaseCalls
@@ -30,48 +31,35 @@ public class SteamInternal : BaseCalls
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static IntPtr SteamInternal_ContextInit(IntPtr pContextInitData)
     {
-        //var LUser = SteamClient.LocalUser;
-        //SteamContext contextInitData = Marshal.PtrToStructure<SteamContext>(pContextInitData);
-
-        //Write($"SteamInternal_ContextInit LocalUser:{(IntPtr)LUser.m_HSteamUser}, Flag:{contextInitData.Flag}, InitContext:{contextInitData.InitContext}, Out:{contextInitData.Out}");
-
-        //if (contextInitData.Flag != (IntPtr)LUser.m_HSteamUser)
-        //{
-        //    contextInitData.Flag = (IntPtr)LUser.m_HSteamUser;
-        //    //Initializar Context
-        //}
-
-        //return contextInitData.InitContext;
-
         ContextInitData contextInitData = Marshal.PtrToStructure<ContextInitData>(pContextInitData);
 
-        Write($"SteamInternal_ContextInit GlobalCounter:{global_counter}, Counter:{contextInitData.counter}, Context:{contextInitData.ctx}");
+        Write($"SteamInternal_ContextInit Counter: {contextInitData.counter}, ctx: {contextInitData.Context}");
 
-        if (contextInitData.counter != global_counter)
+        var LUser = SteamClient.LocalUser;
+        if (contextInitData.counter != LUser.m_HSteamUser)
         {
-            contextInitData.counter = global_counter;
+            contextInitData.counter = (uint)LUser.m_HSteamUser;
+            //Initializar Context
         }
 
-        return contextInitData.ctx;
+        //CSteamAPIContext c = Marshal.PtrToStructure<CSteamAPIContext>(contextInitData.Context);
+        //Write($"looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooool");
+
+        return contextInitData.Context;
+
     }
-    struct SteamContext
-    {
-        public IntPtr InitContext;
-        public IntPtr Flag;
-        public IntPtr Out;
-    };
 
     public struct ContextInitData
     {
+        public IntPtr Context;
         public uint counter;
-        public IntPtr ctx;
     }
 
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static IntPtr SteamInternal_CreateInterface([MarshalAs(UnmanagedType.FunctionPtr)] string ver)
+    public static IntPtr SteamInternal_CreateInterface(string version)
     {
-        Write($"SteamInternal_CreateInterface {ver}");
+        Write($"SteamInternal_CreateInterface {version}");
         return (IntPtr)4516351; //Testing
     }
 
@@ -82,4 +70,69 @@ public class SteamInternal : BaseCalls
         return true;
     }
 }
+
+
+
+[StructLayout(LayoutKind.Sequential)]
+public struct CSteamApiContext
+{
+    public IntPtr m_pSteamClient; // class ISteamClient *
+    public IntPtr m_pSteamUser; // class ISteamUser *
+    public IntPtr m_pSteamFriends; // class ISteamFriends *
+    public IntPtr m_pSteamUtils; // class ISteamUtils *
+    public IntPtr m_pSteamMatchmaking; // class ISteamMatchmaking *
+    public IntPtr m_pSteamUserStats; // class ISteamUserStats *
+    public IntPtr m_pSteamApps; // class ISteamApps *
+    public IntPtr m_pSteamMatchmakingServers; // class ISteamMatchmakingServers *
+    public IntPtr m_pSteamNetworking; // class ISteamNetworking *
+    public IntPtr m_pSteamRemoteStorage; // class ISteamRemoteStorage *
+    public IntPtr m_pSteamScreenshots; // class ISteamScreenshots *
+    public IntPtr m_pSteamHTTP; // class ISteamHTTP *
+    public IntPtr m_pSteamUnifiedMessages; // class ISteamUnifiedMessages *
+    public IntPtr m_pController; // class ISteamController *
+    public IntPtr m_pSteamUGC; // class ISteamUgc *
+    public IntPtr m_pSteamAppList; // class ISteamAppList *
+    public IntPtr m_pSteamMusic; // class ISteamMusic *
+    public IntPtr m_pSteamMusicRemote; // class ISteamMusicRemote *
+    public IntPtr m_pSteamHTMLSurface; // class ISteamHTMLSurface *
+    public IntPtr m_pSteamInventory; // class ISteamInventory *
+    public IntPtr m_pSteamVideo; // class ISteamVideo *
+
+    public void Clear()
+    {
+        m_pSteamClient = IntPtr.Zero;
+        m_pSteamUser = IntPtr.Zero;
+        m_pSteamFriends = IntPtr.Zero;
+        m_pSteamUtils = IntPtr.Zero;
+        m_pSteamMatchmaking = IntPtr.Zero;
+        m_pSteamUserStats = IntPtr.Zero;
+        m_pSteamApps = IntPtr.Zero;
+        m_pSteamMatchmakingServers = IntPtr.Zero;
+        m_pSteamNetworking = IntPtr.Zero;
+        m_pSteamRemoteStorage = IntPtr.Zero;
+        m_pSteamScreenshots = IntPtr.Zero;
+        m_pSteamHTTP = IntPtr.Zero;
+        m_pSteamUnifiedMessages = IntPtr.Zero;
+        m_pController = IntPtr.Zero;
+        m_pSteamUGC = IntPtr.Zero;
+        m_pSteamAppList = IntPtr.Zero;
+        m_pSteamMusic = IntPtr.Zero;
+        m_pSteamMusicRemote = IntPtr.Zero;
+        m_pSteamHTMLSurface = IntPtr.Zero;
+        m_pSteamInventory = IntPtr.Zero;
+        m_pSteamVideo = IntPtr.Zero;
+    }
+
+    public bool Init()
+    {
+        modCommon.Show("Init()");
+        var a_steamUser = SteamAPI.GetHSteamUser();
+        var a_steamPipe = SteamAPI.GetHSteamPipe();
+
+        
+
+        return true;
+    }
+}
+
 

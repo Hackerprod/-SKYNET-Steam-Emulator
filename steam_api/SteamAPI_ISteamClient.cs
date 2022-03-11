@@ -84,7 +84,7 @@ public class SteamAPI_ISteamClient : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static IntPtr SteamAPI_ISteamClient_GetISteamFriends(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+    public static ISteamFriends SteamAPI_ISteamClient_GetISteamFriends(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
     {
         Write($"SteamAPI_ISteamClient_GetISteamFriends");
         return SteamClient.GetISteamFriends(hSteamUser, hSteamPipe, pchVersion);

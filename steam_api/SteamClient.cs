@@ -14,8 +14,11 @@ using SKYNET.Interface;
 using SKYNET.Managers;
 using Steamworks;
 
-public class SteamClient 
+public class SteamClient
 {
+    //Instance
+    public static SteamClient Instance;
+
     // Callbacks
     public static CallbackManager Client_Callback;
     public static CallbackManager Server_Callback;
@@ -58,7 +61,6 @@ public class SteamClient
     public static Steam_Unified_Messages steam_UnifiedMessages;
     public static Steam_GameSearch steam_GameSearch;
     public static Steam_Input steam_Input;
-
 
     public static Steam_Parties steam_Parties;
     public static Steam_RemotePlay steam_RemotePlay;
@@ -158,9 +160,7 @@ public class SteamClient
         Initialized = true;
     }
 
-
-
-    private static void Write(object v)
+    public static void Write(object v)
     {
         Log.Write(v);
     }
@@ -238,41 +238,35 @@ public class SteamClient
         DEBUG("GetISteamGameServer");
         return steam_GameServer;
     }
-
     
     public static void SetLocalIPBinding(uint unIP, ushort usPort)
     {
         DEBUG("SetLocalIPBinding");
     }
-
     
-    public static IntPtr GetISteamFriends(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
+    public static ISteamFriends GetISteamFriends(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamFriends");
-        return IntPtr.Zero;
+        return steam_Friends;
     }
-
     
     public static ISteamGameSearch GetISteamGameSearch(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamFriends");
         return steam_GameSearch;
     }
-
     
     public static ISteamUtils GetISteamUtils(HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamUtils");
         return default;
     }
-
     
     public static ISteamMatchmaking GetISteamMatchmaking(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamMatchmaking");
         return steam_Matchmaking;
     }
-
     
     public static ISteamMatchmakingServers GetISteamMatchmakingServers(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
@@ -286,48 +280,42 @@ public class SteamClient
         DEBUG("GetISteamGenericInterface");
         return steam_Video;
     }
-
     
     public static ISteamUserStats GetISteamUserStats(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamUserStats");
         return steam_UserStats;
     }
-    
+
     //public static ISteamGameServerStats GetISteamGameServerStats(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     //{
     //    DEBUG("GetISteamGameServerStats");
     //    return steam_GameServerStats;
     //}
 
-    //
-    //public static ISteamApps GetISteamApps(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
-    //{
-    //    DEBUG("GetISteamApps");
-    //    return steam_Apps;
-    //}
+    public static ISteamApps GetISteamApps(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
+    {
+        DEBUG("GetISteamApps");
+        return steam_Apps;
+    }
 
-    
     public static ISteamNetworking GetISteamNetworking(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamNetworking");
         return steam_Networking;
     }
 
-    
     public static ISteamRemoteStorage GetISteamRemoteStorage(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamRemoteStorage");
         return steam_RemoteStorage;
     }
-
     
     public static ISteamScreenshots GetISteamScreenshots(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamScreenshots");
         return steam_Screenshots;
     }
-
     
     public static uint GetIPCCallCount()
     {
@@ -341,27 +329,23 @@ public class SteamClient
 
     //}
 
-    
     public static bool BShutdownIfAllPipesClosed()
     {
         DEBUG("BShutdownIfAllPipesClosed");
         return false;
     }
-
     
     public static ISteamHTTP GetISteamHTTP(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamHTTP");
         return steam_Http;
     }
-
     
     public static ISteamController GetISteamController(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamController");
         return steam_Controller;
     }
-
     
     public static ISteamUGC GetISteamUGC(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
@@ -369,20 +353,17 @@ public class SteamClient
         return steam_Ugc;
     }
 
-    //
-    //public static ISteamAppList GetISteamAppList(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
-    //{
-    //    DEBUG("GetISteamAppList");
-    //    return steam_AppList;
-    //}
+    public static ISteamAppList GetISteamAppList(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
+    {
+        DEBUG("GetISteamAppList");
+        return steam_AppList;
+    }
 
-    
     public static ISteamMusic GetISteamMusic(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamMusic");
         return steam_Music;
     }
-
     
     public static ISteamMusicRemote GetISteamMusicRemote(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
@@ -390,13 +371,11 @@ public class SteamClient
         return steam_MusicRemote;
     }
 
-    
     public static ISteamInput GetISteamInput(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamInput");
         return steam_Input;
     }
-
     
     public static ISteamHTMLSurface GetISteamHTMLSurface(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
@@ -404,34 +383,29 @@ public class SteamClient
         return steam_HTMLsurface;
     }
 
-    
     public static ISteamParties GetISteamParties(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamParties");
         return steam_Parties;
     }
-
     
     public static ISteamInventory GetISteamInventory(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamInventory");
         return steam_Inventory;
     }
-
     
     public static ISteamRemotePlay GetISteamRemotePlay(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamRemotePlay");
         return steam_RemotePlay;
     }
-
     
     public static ISteamVideo GetISteamVideo(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamVideo");
         return steam_Video;
     }
-
     
     public static ISteamParentalSettings GetISteamParentalSettings(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {

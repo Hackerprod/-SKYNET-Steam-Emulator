@@ -162,6 +162,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="SteamAPI_ISteam_Apps.cs" />
     <Compile Include="SteamClient.cs" />
     <Compile Include="Managers\Steam_AppList.cs" />
     <Compile Include="Managers\Steam_Apps.cs" />
@@ -204,6 +205,8 @@
     <Compile Include="SteamAPI_ISteamClient.cs" />
     <Compile Include="SteamAPI_ISteamHTTP.cs" />
     <Compile Include="SteamAPI_ISteamUser.cs" />
+    <Compile Include="SteamAPI_Steam_AppList.cs" />
+    <Compile Include="SteamAPI_Steam_Friends.cs" />
     <Compile Include="Types\CallbackMsg_t.cs" />
     <Compile Include="Types\CSteamAPIContext.cs" />
     <Compile Include="Types\EAccountType.cs" />

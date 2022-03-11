@@ -7,40 +7,35 @@ using Steamworks;
 
 namespace SKYNET.Managers
 {
-    public class Steam_AppList : SteamInterface//, ISteamAppList
+    public class Steam_AppList : SteamInterface, ISteamAppList
     {
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int GetAppBuildId(AppId_t nAppID)
+        public int GetAppBuildId(AppId_t nAppID)
         {
             Log.Write("Steam_AppList::GetAppBuildId");
             return 10;
         }
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int GetAppInstallDir(AppId_t nAppID, IntPtr pchDirectory, int cchNameMax)
+        public int GetAppInstallDir(AppId_t nAppID, IntPtr pchDirectory, int cchNameMax)
         {
             var mempchDirectory = Helpers.TakeMemory();
             Write("Steam_AppList::GetAppInstallDir");
             return -1;
         }
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int GetAppName(AppId_t nAppID, IntPtr pchName, int cchNameMax)
+        public int GetAppName(AppId_t nAppID, IntPtr pchName, int cchNameMax)
         {
             var mempchName = Helpers.TakeMemory();
             Write("Steam_AppList::GetAppName\n");
             return -1;
         }
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static uint GetInstalledApps(AppId_t pvecAppID, uint unMaxAppIDs)
+        public uint GetInstalledApps(AppId_t pvecAppID, uint unMaxAppIDs)
         {
             Write("Steam_Applist::GetInstalledApps\n");
             return 0;
         }
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static uint GetNumInstalledApps()
+        public uint GetNumInstalledApps()
         {
             Write("Steam_Applist::GetNumInstalledApps\n");
             return 0;

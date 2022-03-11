@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SKYNET.Interface;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,27 +9,27 @@ namespace SKYNET.Types
 {
     public class CSteamAPIContext // TypeDefIndex: 4364
     {
-        public IntPtr m_pSteamClient;
-        public IntPtr m_pSteamUser;
-        public IntPtr m_pSteamFriends;
-        public IntPtr m_pSteamUtils;
-        public IntPtr m_pSteamMatchmaking;
-        public IntPtr m_pSteamUserStats;
-        public IntPtr m_pSteamApps;
-        public IntPtr m_pSteamMatchmakingServers;
-        public IntPtr m_pSteamNetworking;
-        public IntPtr m_pSteamRemoteStorage;
-        public IntPtr m_pSteamScreenshots;
-        public IntPtr m_pSteamHTTP;
-        public IntPtr m_pController;
-        public IntPtr m_pSteamUGC;
-        public IntPtr m_pSteamAppList;
-        public IntPtr m_pSteamMusic;
-        public IntPtr m_pSteamMusicRemote;
-        public IntPtr m_pSteamHTMLSurface;
-        public IntPtr m_pSteamInventory;
-        public IntPtr m_pSteamVideo;
-        public IntPtr m_pSteamParentalSettings;
+        //public ISteamClient m_pSteamClient;
+        public ISteamUser m_pSteamUser;
+        public ISteamFriends m_pSteamFriends;
+        public ISteamUtils m_pSteamUtils;
+        public ISteamMatchmaking m_pSteamMatchmaking;
+        public ISteamUserStats m_pSteamUserStats;
+        public ISteamApps m_pSteamApps;
+        public ISteamMatchmakingServers m_pSteamMatchmakingServers;
+        public ISteamNetworking m_pSteamNetworking;
+        public ISteamRemoteStorage m_pSteamRemoteStorage;
+        public ISteamScreenshots m_pSteamScreenshots;
+        public ISteamHTTP m_pSteamHTTP;
+        public ISteamController m_pController;
+        public ISteamUGC m_pSteamUGC;
+        public ISteamAppList m_pSteamAppList;
+        public ISteamMusic m_pSteamMusic;
+        public ISteamMusicRemote m_pSteamMusicRemote;
+        public ISteamHTMLSurface m_pSteamHTMLSurface;
+        public ISteamInventory m_pSteamInventory;
+        public ISteamVideo m_pSteamVideo;
+        public ISteamParentalSettings m_pSteamParentalSettings;
 
         private const string SteamclientInterfaceVersion = "SteamClient017";
         private const string SteamuserInterfaceVersion = "SteamUser019";
@@ -52,135 +53,134 @@ namespace SKYNET.Types
         private const string SteamvideoInterfaceVersion = "STEAMVIDEO_INTERFACE_V002";
         private const string SteamparentalsettingsInterfaceVersion = "STEAMPARENTALSETTINGS_INTERFACE_VERSION001";
 
-        //public bool Initialize()
-        //{
-        //  var hSteamUser = (uint)NativeEntrypoints.SteamAPI_GetHSteamUser();
+        public bool Initialize()
+        {
+            var hSteamUser = SteamAPI.SteamAPI_GetHSteamUser();
 
-        //  var hSteamPipe = (uint)NativeEntrypoints.SteamAPI_GetHSteamPipe();
+            var hSteamPipe = SteamAPI.SteamAPI_GetHSteamPipe();
 
-        //  Plugin.Write($"HSteamPipe: {hSteamPipe}, returning");
+            SteamAPI.Write($"HSteamPipe: {hSteamPipe}, returning");
 
-        //  if (hSteamPipe == 0)
-        //    return false;
+            if (hSteamPipe.m_HSteamPipe == 0)
+                return false;
 
-        //  m_pSteamClient = NativeEntrypoints.SteamInternal_CreateInterface(SteamclientInterfaceVersion);
-        //  if (m_pSteamClient == IntPtr.Zero)
-        //    return false;
+            //m_pSteamClient = SteamClient.Instance;
+            //if (m_pSteamClient == null)
+            //    return false;
 
-        //  m_pSteamUser = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamUser(m_pSteamClient, hSteamUser, hSteamPipe, SteamuserInterfaceVersion);
-        //  if (m_pSteamUser == IntPtr.Zero)
-        //    return false;
+            m_pSteamUser = SteamClient.GetISteamUser(hSteamUser, hSteamPipe, SteamuserInterfaceVersion);
+            if (m_pSteamUser == null)
+                return false;
 
-        //  m_pSteamFriends = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamFriends(m_pSteamClient, hSteamUser, hSteamPipe, SteamfriendsInterfaceVersion);
-        //  if (m_pSteamFriends == IntPtr.Zero)
-        //    return false;
+            m_pSteamFriends = SteamClient.GetISteamFriends(hSteamUser, hSteamPipe, SteamfriendsInterfaceVersion);
+            if (m_pSteamFriends == null)
+                return false;
 
-        //  m_pSteamUtils = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamUtils(m_pSteamClient, hSteamPipe, SteamutilsInterfaceVersion);
-        //  if (m_pSteamUtils == IntPtr.Zero)
-        //    return false;
+            m_pSteamUtils = SteamClient.GetISteamUtils(hSteamPipe, SteamutilsInterfaceVersion);
+            if (m_pSteamUtils == null)
+                return false;
 
-        //  m_pSteamMatchmaking = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamMatchmaking(m_pSteamClient, hSteamUser, hSteamPipe, SteammatchmakingInterfaceVersion);
-        //  if (m_pSteamMatchmaking == IntPtr.Zero)
-        //    return false;
+            m_pSteamMatchmaking = SteamClient.GetISteamMatchmaking(hSteamUser, hSteamPipe, SteammatchmakingInterfaceVersion);
+            if (m_pSteamMatchmaking == null)
+                return false;
 
-        //  m_pSteamMatchmakingServers = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamMatchmakingServers(m_pSteamClient, hSteamUser, hSteamPipe, SteammatchmakingserversInterfaceVersion);
-        //  if (m_pSteamMatchmakingServers == IntPtr.Zero)
-        //    return false;
+            m_pSteamMatchmakingServers = SteamClient.GetISteamMatchmakingServers(hSteamUser, hSteamPipe, SteammatchmakingserversInterfaceVersion);
+            if (m_pSteamMatchmakingServers == null)
+                return false;
 
-        //  m_pSteamUserStats = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamUserStats(m_pSteamClient, hSteamUser, hSteamPipe, SteamuserstatsInterfaceVersion);
-        //  if (m_pSteamUserStats == IntPtr.Zero)
-        //    return false;
+            m_pSteamUserStats = SteamClient.GetISteamUserStats(hSteamUser, hSteamPipe, SteamuserstatsInterfaceVersion);
+            if (m_pSteamUserStats == null)
+                return false;
 
-        //  m_pSteamApps = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamApps(m_pSteamClient, hSteamUser, hSteamPipe, SteamappsInterfaceVersion);
-        //  if (m_pSteamApps == IntPtr.Zero)
-        //    return false;
+            m_pSteamApps = SteamClient.GetISteamApps(hSteamUser, hSteamPipe, SteamappsInterfaceVersion);
+            if (m_pSteamApps == null)
+                return false;
 
-        //  m_pSteamNetworking = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamNetworking(m_pSteamClient, hSteamUser, hSteamPipe, SteamnetworkingInterfaceVersion);
-        //  if (m_pSteamNetworking == IntPtr.Zero)
-        //    return false;
+            m_pSteamNetworking = SteamClient.GetISteamNetworking(hSteamUser, hSteamPipe, SteamnetworkingInterfaceVersion);
+            if (m_pSteamNetworking == null)
+                return false;
 
-        //  m_pSteamRemoteStorage = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamRemoteStorage(m_pSteamClient, hSteamUser, hSteamPipe, SteamremotestorageInterfaceVersion);
-        //  if (m_pSteamRemoteStorage == IntPtr.Zero)
-        //    return false;
+            m_pSteamRemoteStorage = SteamClient.GetISteamRemoteStorage(hSteamUser, hSteamPipe, SteamremotestorageInterfaceVersion);
+            if (m_pSteamRemoteStorage == null)
+                return false;
 
-        //  m_pSteamScreenshots = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamScreenshots(m_pSteamClient, hSteamUser, hSteamPipe, SteamscreenshotsInterfaceVersion);
-        //  if (m_pSteamScreenshots == IntPtr.Zero)
-        //    return false;
+            m_pSteamScreenshots = SteamClient.GetISteamScreenshots(hSteamUser, hSteamPipe, SteamscreenshotsInterfaceVersion);
+            if (m_pSteamScreenshots == null)
+                return false;
 
-        //  m_pSteamHTTP = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamHTTP(m_pSteamClient, hSteamUser, hSteamPipe, SteamhttpInterfaceVersion);
-        //  if (m_pSteamHTTP == IntPtr.Zero)
-        //    return false;
+            m_pSteamHTTP = SteamClient.GetISteamHTTP(hSteamUser, hSteamPipe, SteamhttpInterfaceVersion);
+            if (m_pSteamHTTP == null)
+                return false;
 
-        //  m_pController = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamController(m_pSteamClient, hSteamUser, hSteamPipe, SteamcontrollerInterfaceVersion);
-        //  if (m_pController == IntPtr.Zero)
-        //    return false;
+            m_pController = SteamClient.GetISteamController(hSteamUser, hSteamPipe, SteamcontrollerInterfaceVersion);
+            if (m_pController == null)
+                return false;
 
-        //  m_pSteamUGC = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamUGC(m_pSteamClient, hSteamUser, hSteamPipe, SteamugcInterfaceVersion);
-        //  if (m_pSteamUGC == IntPtr.Zero)
-        //    return false;
+            m_pSteamUGC = SteamClient.GetISteamUGC(hSteamUser, hSteamPipe, SteamugcInterfaceVersion);
+            if (m_pSteamUGC == null)
+                return false;
 
-        //  m_pSteamAppList = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamAppList(m_pSteamClient, hSteamUser, hSteamPipe, SteamapplistInterfaceVersion);
-        //  if (m_pSteamAppList == IntPtr.Zero)
-        //    return false;
+            m_pSteamAppList = SteamClient.GetISteamAppList(hSteamUser, hSteamPipe, SteamapplistInterfaceVersion);
+            if (m_pSteamAppList == null)
+                return false;
 
-        //  m_pSteamMusic = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamMusic(m_pSteamClient, hSteamUser, hSteamPipe, SteammusicInterfaceVersion);
-        //  if (m_pSteamMusic == IntPtr.Zero)
-        //    return false;
+            m_pSteamMusic = SteamClient.GetISteamMusic(hSteamUser, hSteamPipe, SteammusicInterfaceVersion);
+            if (m_pSteamMusic == null)
+                return false;
 
-        //  m_pSteamMusicRemote = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamMusicRemote(m_pSteamClient, hSteamUser, hSteamPipe, SteammusicremoteInterfaceVersion);
-        //  if (m_pSteamMusicRemote == IntPtr.Zero)
-        //    return false;
+            m_pSteamMusicRemote = SteamClient.GetISteamMusicRemote(hSteamUser, hSteamPipe, SteammusicremoteInterfaceVersion);
+            if (m_pSteamMusicRemote == null)
+                return false;
 
-        //  m_pSteamHTMLSurface = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamHTMLSurface(m_pSteamClient, hSteamUser, hSteamPipe, SteamhtmlsurfaceInterfaceVersion);
-        //  if (m_pSteamHTMLSurface == IntPtr.Zero)
-        //    return false;
+            m_pSteamHTMLSurface = SteamClient.GetISteamHTMLSurface(hSteamUser, hSteamPipe, SteamhtmlsurfaceInterfaceVersion);
+            if (m_pSteamHTMLSurface == null)
+                return false;
 
-        //  m_pSteamInventory = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamInventory(m_pSteamClient, hSteamUser, hSteamPipe, SteaminventoryInterfaceVersion);
-        //  if (m_pSteamInventory == IntPtr.Zero)
-        //    return false;
+            m_pSteamInventory = SteamClient.GetISteamInventory(hSteamUser, hSteamPipe, SteaminventoryInterfaceVersion);
+            if (m_pSteamInventory == null)
+                return false;
 
-        //  m_pSteamVideo = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamVideo(m_pSteamClient, hSteamUser, hSteamPipe, SteamvideoInterfaceVersion);
-        //  if (m_pSteamVideo == IntPtr.Zero)
-        //    return false;
+            m_pSteamVideo = SteamClient.GetISteamVideo(hSteamUser, hSteamPipe, SteamvideoInterfaceVersion);
+            if (m_pSteamVideo == null)
+                return false;
 
-        //  m_pSteamParentalSettings = NativeEntrypoints.SteamAPI_ISteamClient_GetISteamParentalSettings(m_pSteamClient, hSteamUser, hSteamPipe, SteamparentalsettingsInterfaceVersion);
-        //  if (m_pSteamParentalSettings == IntPtr.Zero)
-        //    return false;
+            m_pSteamParentalSettings = SteamClient.GetISteamParentalSettings(hSteamUser, hSteamPipe, SteamparentalsettingsInterfaceVersion);
+            if (m_pSteamParentalSettings == null)
+                return false;
 
-        //  return true;
-        //}
+            return true;
+        }
 
-        // Methods
         internal void Clear()
         {
-            //SteamClient.pr("CSteamAPIContext.Clear()");
+            SteamClient.Write("CSteamAPIContext.Clear()");
         }
         internal bool Init()
         {
-            // SteamClient.Write("CSteamAPIContext.Init()");
+            SteamClient.Write("CSteamAPIContext.Init()");
             return true;
         }
-        internal IntPtr GetSteamClient() { return m_pSteamClient; }
-        internal IntPtr GetSteamUser() { return m_pSteamUser; }
-        internal IntPtr GetSteamFriends() { return m_pSteamFriends; }
-        internal IntPtr GetSteamUtils() { return m_pSteamUtils; }
-        internal IntPtr GetSteamMatchmaking() { return m_pSteamMatchmaking; }
-        internal IntPtr GetSteamUserStats() { return m_pSteamUserStats; }
-        internal IntPtr GetSteamApps() { return m_pSteamApps; }
-        internal IntPtr GetSteamMatchmakingServers() { return m_pSteamMatchmakingServers; }
-        internal IntPtr GetSteamNetworking() { return m_pSteamNetworking; }
-        internal IntPtr GetSteamRemoteStorage() { return m_pSteamRemoteStorage; }
-        internal IntPtr GetSteamScreenshots() { return m_pSteamScreenshots; }
-        internal IntPtr GetSteamHTTP() { return m_pSteamHTTP; }
-        internal IntPtr GetSteamController() { return m_pController; }
-        internal IntPtr GetSteamUGC() { return m_pSteamUGC; }
-        internal IntPtr GetSteamAppList() { return m_pSteamAppList; }
-        internal IntPtr GetSteamMusic() { return m_pSteamMusic; }
-        internal IntPtr GetSteamMusicRemote() { return m_pSteamMusicRemote; }
-        internal IntPtr GetSteamHTMLSurface() { return m_pSteamHTMLSurface; }
-        internal IntPtr GetSteamInventory() { return m_pSteamInventory; }
-        internal IntPtr GetSteamVideo() { return m_pSteamVideo; }
-        internal IntPtr GetSteamParentalSettings() { return m_pSteamParentalSettings; }
+        //internal ISteamClient GetSteamClient() { return m_pSteamClient; }
+        internal ISteamUser GetSteamUser() { return m_pSteamUser; }
+        internal ISteamFriends GetSteamFriends() { return m_pSteamFriends; }
+        internal ISteamUtils GetSteamUtils() { return m_pSteamUtils; }
+        internal ISteamMatchmaking GetSteamMatchmaking() { return m_pSteamMatchmaking; }
+        internal ISteamUserStats GetSteamUserStats() { return m_pSteamUserStats; }
+        internal ISteamApps GetSteamApps() { return m_pSteamApps; }
+        internal ISteamMatchmakingServers GetSteamMatchmakingServers() { return m_pSteamMatchmakingServers; }
+        internal ISteamNetworking GetSteamNetworking() { return m_pSteamNetworking; }
+        internal ISteamRemoteStorage GetSteamRemoteStorage() { return m_pSteamRemoteStorage; }
+        internal ISteamScreenshots GetSteamScreenshots() { return m_pSteamScreenshots; }
+        internal ISteamHTTP GetSteamHTTP() { return m_pSteamHTTP; }
+        internal ISteamController GetSteamController() { return m_pController; }
+        internal ISteamUGC GetSteamUGC() { return m_pSteamUGC; }
+        internal ISteamAppList GetSteamAppList() { return m_pSteamAppList; }
+        internal ISteamMusic GetSteamMusic() { return m_pSteamMusic; }
+        internal ISteamMusicRemote GetSteamMusicRemote() { return m_pSteamMusicRemote; }
+        internal ISteamHTMLSurface GetSteamHTMLSurface() { return m_pSteamHTMLSurface; }
+        internal ISteamInventory GetSteamInventory() { return m_pSteamInventory; }
+        internal ISteamVideo GetSteamVideo() { return m_pSteamVideo; }
+        internal ISteamParentalSettings GetSteamParentalSettings() { return m_pSteamParentalSettings; }
     }
 
 }

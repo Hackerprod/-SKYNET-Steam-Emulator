@@ -40,32 +40,32 @@ namespace SKYNET.Interface
         // returns the steamID of a user
         // iFriend is a index of range [0, GetFriendCount())
         // iFriendsFlags must be the same value as used in GetFriendCount()
-        // the returned CSteamID can then be used by all the functions below to access details about the user
-        CSteamID GetFriendByIndex(int iFriend, int iFriendFlags);
+        // the returned IntPtr can then be used by all the functions below to access details about the user
+        IntPtr GetFriendByIndex(int iFriend, int iFriendFlags);
 
         // returns a relationship to a user
-        EFriendRelationship GetFriendRelationship(CSteamID steamIDFriend);
+        EFriendRelationship GetFriendRelationship(IntPtr steamIDFriend);
 
         // returns the current status of the specified user
         // this will only be known by the local user if steamIDFriend is in their friends list; on the same game server; in a chat room or lobby; or in a small group with the local user
-        EPersonaState GetFriendPersonaState(CSteamID steamIDFriend);
+        EPersonaState GetFriendPersonaState(IntPtr steamIDFriend);
 
         // returns the name another user - guaranteed to not be NULL.
         // same rules as GetFriendPersonaState() apply as to whether or not the user knowns the name of the other user
         // note that on first joining a lobby, chat room or game server the local user will not known the name of the other users automatically; that information will arrive asyncronously
         // 
-        string GetFriendPersonaName(CSteamID steamIDFriend);
+        string GetFriendPersonaName(IntPtr steamIDFriend);
 
         // returns true if the friend is actually in a game, and fills in pFriendGameInfo with an extra details 
-        bool GetFriendGamePlayed(CSteamID steamIDFriend, out FriendGameInfo_t pFriendGameInfo );
+        bool GetFriendGamePlayed(IntPtr steamIDFriend, out FriendGameInfo_t pFriendGameInfo );
         // accesses old friends names - returns an empty string when their are no more items in the history
-        string GetFriendPersonaNameHistory(CSteamID steamIDFriend, int iPersonaName);
+        string GetFriendPersonaNameHistory(IntPtr steamIDFriend, int iPersonaName);
         // friends steam level
-        int GetFriendSteamLevel(CSteamID steamIDFriend);
+        int GetFriendSteamLevel(IntPtr steamIDFriend);
 
         // Returns nickname the current user has set for the specified player. Returns NULL if the no nickname has been set for that player.
         // DEPRECATED: GetPersonaName follows the Steam nickname preferences, so apps shouldn't need to care about nicknames explicitly.
-        string GetPlayerNickname(CSteamID steamIDPlayer);
+        string GetPlayerNickname(IntPtr steamIDPlayer);
 
         // friend grouping (tag) apis
         // returns the number of friends groups
@@ -77,34 +77,34 @@ namespace SKYNET.Interface
         // returns the number of members in a given friends group
         int GetFriendsGroupMembersCount(FriendsGroupID_t friendsGroupID);
         // gets up to nMembersCount members of the given friends group, if fewer exist than requested those positions' SteamIDs will be invalid
-        void GetFriendsGroupMembersList(FriendsGroupID_t friendsGroupID, CSteamID[] pOutSteamIDMembers, int nMembersCount);
+        void GetFriendsGroupMembersList(FriendsGroupID_t friendsGroupID, IntPtr[] pOutSteamIDMembers, int nMembersCount);
 
         // returns true if the specified user meets any of the criteria specified in iFriendFlags
         // iFriendFlags can be the union (binary or, |) of one or more k_EFriendFlags values
-        bool HasFriend(CSteamID steamIDFriend, int iFriendFlags);
+        bool HasFriend(IntPtr steamIDFriend, int iFriendFlags);
 
         // clan (group) iteration and access functions
         int GetClanCount();
-        CSteamID GetClanByIndex(int iClan);
-        string GetClanName(CSteamID steamIDClan);
-        string GetClanTag(CSteamID steamIDClan);
+        IntPtr GetClanByIndex(int iClan);
+        string GetClanName(IntPtr steamIDClan);
+        string GetClanTag(IntPtr steamIDClan);
         // returns the most recent information we have about what's happening in a clan
-        bool GetClanActivityCounts(CSteamID steamIDClan, int pnOnline, int pnInGame, int pnChatting);
+        bool GetClanActivityCounts(IntPtr steamIDClan, int pnOnline, int pnInGame, int pnChatting);
 
-        SteamAPICall_t DownloadClanActivityCounts(CSteamID[] psteamIDClans, int cClansToRequest);
+        SteamAPICall_t DownloadClanActivityCounts(IntPtr[] psteamIDClans, int cClansToRequest);
 
         // iterators for getting users in a chat room, lobby, game server or clan
         // note that large clans that cannot be iterated by the local user
-        // note that the current user must be in a lobby to retrieve CSteamIDs of other users in that lobby
+        // note that the current user must be in a lobby to retrieve IntPtrs of other users in that lobby
         // steamIDSource can be the steamID of a group, game server, lobby or chat room
-        int GetFriendCountFromSource(CSteamID steamIDSource);
-        CSteamID GetFriendFromSourceByIndex(CSteamID steamIDSource, int iFriend);
+        int GetFriendCountFromSource(IntPtr steamIDSource);
+        IntPtr GetFriendFromSourceByIndex(IntPtr steamIDSource, int iFriend);
 
         // returns true if the local user can see that steamIDUser is a member or in steamIDSource
-        bool IsUserInSource(CSteamID steamIDUser, CSteamID steamIDSource);
+        bool IsUserInSource(IntPtr steamIDUser, IntPtr steamIDSource);
 
         // User is in a game pressing the talk button (will suppress the microphone for all voice comms from the Steam friends UI)
-        void SetInGameVoiceSpeaking(CSteamID steamIDUser, bool bSpeaking);
+        void SetInGameVoiceSpeaking(IntPtr steamIDUser, bool bSpeaking);
 
         // activates the game overlay, with an optional dialog to open 
         // valid options include "Friends", "Community", "Players", "Settings", "OfficialGameGroup", "Stats", "Achievements",
@@ -122,7 +122,7 @@ namespace SKYNET.Interface
         //		"friendremove" - opens the overlay in minimal mode prompting the user to remove the target friend
         //		"friendrequestaccept" - opens the overlay in minimal mode prompting the user to accept an incoming friend invite
         //		"friendrequestignore" - opens the overlay in minimal mode prompting the user to ignore an incoming friend invite
-        void ActivateGameOverlayToUser([MarshalAs(UnmanagedType.LPStr)] string pchDialog, CSteamID steamID);
+        void ActivateGameOverlayToUser([MarshalAs(UnmanagedType.LPStr)] string pchDialog, IntPtr steamID);
 
         // activates game overlay web browser directly to the specified URL
         // full address with protocol type is required, e.g. http://www.steamgames.com/
@@ -133,38 +133,38 @@ namespace SKYNET.Interface
 
         // Mark a target user as 'played with'. This is a client-side only feature that requires that the calling user is 
         // in game 
-        void SetPlayedWith(CSteamID steamIDUserPlayedWith);
+        void SetPlayedWith(IntPtr steamIDUserPlayedWith);
 
         // activates game overlay to open the invite dialog. Invitations will be sent for the provided lobby.
-        void ActivateGameOverlayInviteDialog(CSteamID steamIDLobby);
+        void ActivateGameOverlayInviteDialog(IntPtr steamIDLobby);
 
         // gets the small (32x32) avatar of the current user, which is a handle to be used in IClientUtils::GetImageRGBA(), or 0 if none set
-        int GetSmallFriendAvatar(CSteamID steamIDFriend);
+        int GetSmallFriendAvatar(IntPtr steamIDFriend);
 
         // gets the medium (64x64) avatar of the current user, which is a handle to be used in IClientUtils::GetImageRGBA(), or 0 if none set
-        int GetMediumFriendAvatar(CSteamID steamIDFriend);
+        int GetMediumFriendAvatar(IntPtr steamIDFriend);
 
         // gets the large (184x184) avatar of the current user, which is a handle to be used in IClientUtils::GetImageRGBA(), or 0 if none set
         // returns -1 if this image has yet to be loaded, in this case wait for a AvatarImageLoaded_t callback and then call this again
-        int GetLargeFriendAvatar(CSteamID steamIDFriend);
+        int GetLargeFriendAvatar(IntPtr steamIDFriend);
 
         // requests information about a user - persona name & avatar
         // if bRequireNameOnly is set, then the avatar of a user isn't downloaded 
         // - it's a lot slower to download avatars and churns the local cache, so if you don't need avatars, don't request them
         // if returns true, it means that data is being requested, and a PersonaStateChanged_t callback will be posted when it's retrieved
         // if returns false, it means that we already have all the details about that user, and functions can be called immediately
-        bool RequestUserInformation(CSteamID steamIDUser, bool bRequireNameOnly);
+        bool RequestUserInformation(IntPtr steamIDUser, bool bRequireNameOnly);
 
-        SteamAPICall_t RequestClanOfficerList(CSteamID steamIDClan);
+        SteamAPICall_t RequestClanOfficerList(IntPtr steamIDClan);
 
         // iteration of clan officers - can only be done when a RequestClanOfficerList() call has completed
 
         // returns the steamID of the clan owner
-        CSteamID GetClanOwner(CSteamID steamIDClan);
+        IntPtr GetClanOwner(IntPtr steamIDClan);
         // returns the number of officers in a clan (including the owner)
-        int GetClanOfficerCount(CSteamID steamIDClan);
+        int GetClanOfficerCount(IntPtr steamIDClan);
         // returns the steamID of a clan officer, by index, of range [0,GetClanOfficerCount)
-        CSteamID GetClanOfficerByIndex(CSteamID steamIDClan, int iOfficer);
+        IntPtr GetClanOfficerByIndex(IntPtr steamIDClan, int iOfficer);
         // if current user is chat restricted, he can't send or receive any text/voice chat messages.
         // the user can't see custom avatars. But the user can be online and send/recv game invites.
         // a chat restricted user can't add friends or join any groups.
@@ -188,51 +188,51 @@ namespace SKYNET.Interface
         // and GetFriendRichPresenceKeyByIndex() (typically only used for debugging)
         bool SetRichPresence([MarshalAs(UnmanagedType.LPStr)] string pchKey, [MarshalAs(UnmanagedType.LPStr)] string pchValue);
         void ClearRichPresence();
-        string GetFriendRichPresence(CSteamID steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchKey);
-        int GetFriendRichPresenceKeyCount(CSteamID steamIDFriend);
-        string GetFriendRichPresenceKeyByIndex(CSteamID steamIDFriend, int iKey);
+        string GetFriendRichPresence(IntPtr steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchKey);
+        int GetFriendRichPresenceKeyCount(IntPtr steamIDFriend);
+        string GetFriendRichPresenceKeyByIndex(IntPtr steamIDFriend, int iKey);
         // Requests rich presence for a specific user.
-        void RequestFriendRichPresence(CSteamID steamIDFriend);
+        void RequestFriendRichPresence(IntPtr steamIDFriend);
 
         // Rich invite support.
         // If the target accepts the invite, a GameRichPresenceJoinRequested_t callback is posted containing the connect string.
         // (Or you can configure your game so that it is passed on the command line instead.  This is a deprecated path; ask us if you really need this.)
-        bool InviteUserToGame(CSteamID steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchConnectString);
+        bool InviteUserToGame(IntPtr steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchConnectString);
 
         // recently-played-with friends iteration
         // this iterates the entire list of users recently played with, across games
         // GetFriendCoplayTime() returns as a unix time
         int GetCoplayFriendCount();
-        CSteamID GetCoplayFriend(int iCoplayFriend);
-        int GetFriendCoplayTime(CSteamID steamIDFriend);
-        AppId_t GetFriendCoplayGame(CSteamID steamIDFriend);
+        IntPtr GetCoplayFriend(int iCoplayFriend);
+        int GetFriendCoplayTime(IntPtr steamIDFriend);
+        AppId_t GetFriendCoplayGame(IntPtr steamIDFriend);
 
-        SteamAPICall_t JoinClanChatRoom(CSteamID steamIDClan);
-        bool LeaveClanChatRoom(CSteamID steamIDClan);
-        int GetClanChatMemberCount(CSteamID steamIDClan);
-        CSteamID GetChatMemberByIndex(CSteamID steamIDClan, int iUser);
-        bool SendClanChatMessage(CSteamID steamIDClanChat, [MarshalAs(UnmanagedType.LPStr)] string pchText);
-        int GetClanChatMessage(CSteamID steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, EChatEntryType peChatEntryType, CSteamID[] psteamidChatter );
-        bool IsClanChatAdmin(CSteamID steamIDClanChat, CSteamID steamIDUser);
+        SteamAPICall_t JoinClanChatRoom(IntPtr steamIDClan);
+        bool LeaveClanChatRoom(IntPtr steamIDClan);
+        int GetClanChatMemberCount(IntPtr steamIDClan);
+        IntPtr GetChatMemberByIndex(IntPtr steamIDClan, int iUser);
+        bool SendClanChatMessage(IntPtr steamIDClanChat, [MarshalAs(UnmanagedType.LPStr)] string pchText);
+        int GetClanChatMessage(IntPtr steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, EChatEntryType peChatEntryType, IntPtr[] psteamidChatter );
+        bool IsClanChatAdmin(IntPtr steamIDClanChat, IntPtr steamIDUser);
 
         // interact with the Steam (game overlay / desktop)
-        bool IsClanChatWindowOpenInSteam(CSteamID steamIDClanChat);
-        bool OpenClanChatWindowInSteam(CSteamID steamIDClanChat);
-        bool CloseClanChatWindowInSteam(CSteamID steamIDClanChat);
+        bool IsClanChatWindowOpenInSteam(IntPtr steamIDClanChat);
+        bool OpenClanChatWindowInSteam(IntPtr steamIDClanChat);
+        bool CloseClanChatWindowInSteam(IntPtr steamIDClanChat);
 
         // peer-to-peer chat interception
         // this is so you can show P2P chats inline in the game
         bool SetListenForFriendsMessages(bool bInterceptEnabled);
-        bool ReplyToFriendMessage(CSteamID steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchMsgToSend);
-        int GetFriendMessage(CSteamID steamIDFriend, int iMessageID, IntPtr pvData, int cubData, EChatEntryType peChatEntryType);
+        bool ReplyToFriendMessage(IntPtr steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchMsgToSend);
+        int GetFriendMessage(IntPtr steamIDFriend, int iMessageID, IntPtr pvData, int cubData, EChatEntryType peChatEntryType);
 
-        SteamAPICall_t GetFollowerCount(CSteamID steamID);
-        SteamAPICall_t IsFollowing(CSteamID steamID);
+        SteamAPICall_t GetFollowerCount(IntPtr steamID);
+        SteamAPICall_t IsFollowing(IntPtr steamID);
 
         SteamAPICall_t EnumerateFollowingList(UInt32 unStartIndex);
 
-        bool IsClanPublic(CSteamID steamIDClan);
-        bool IsClanOfficialGameGroup(CSteamID steamIDClan);
+        bool IsClanPublic(IntPtr steamIDClan);
+        bool IsClanOfficialGameGroup(IntPtr steamIDClan);
 
         /// Return the number of chats (friends or chat rooms) with unread messages.
         /// A "priority" message is one that would generate some sort of toast or
@@ -243,7 +243,7 @@ namespace SKYNET.Interface
         int GetNumChatsWithUnreadPriorityMessages();
 
         // activates game overlay to open the remote play together invite dialog. Invitations will be sent for remote play together
-        void ActivateGameOverlayRemotePlayTogetherInviteDialog(CSteamID steamIDLobby);
+        void ActivateGameOverlayRemotePlayTogetherInviteDialog(IntPtr steamIDLobby);
 
         // Call this before calling ActivateGameOverlayToWebPage() to have the Steam Overlay Browser block navigations
         // to your specified protocol (scheme) uris and instead dispatch a OverlayBrowserProtocolNavigation_t callback to your game.

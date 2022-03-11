@@ -4,118 +4,118 @@ using SKYNET.Interface;
 
 namespace SKYNET.Managers
 {
-    public class Steam_Utils : SteamInterface//, ISteamUtils
+    public class Steam_Utils : SteamInterface, ISteamUtils
     {
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr GetAPICallFailureReason()
+        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public IntPtr GetAPICallFailureReason()
         {
             return (IntPtr)1;
         }
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr GetAPICallResult()
+        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public IntPtr GetAPICallResult()
         {
             return (IntPtr)1;
         }
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr GetAppID()
+        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public IntPtr GetAppID()
         {
             return (IntPtr)1;
         }
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr GetConnectedUniverse()
+        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public IntPtr GetConnectedUniverse()
         {
             return (IntPtr)1;
         }
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr GetCSERIPPort()
+        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public IntPtr GetCSERIPPort()
         {
             return (IntPtr)1;
         }
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr GetCurrentBatteryPower()
+        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public IntPtr GetCurrentBatteryPower()
         {
             return (IntPtr)1;
         }
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr GetImageRGBA()
+        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public IntPtr GetImageRGBA()
         {
             return (IntPtr)1;
         }
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr GetImageSize()
+        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public IntPtr GetImageSize()
         {
             return (IntPtr)1;
         }
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr GetIPCCallCount()
+        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public IntPtr GetIPCCallCount()
         {
             return (IntPtr)1;
         }
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr GetIPCountry()
+        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public IntPtr GetIPCountry()
         {
             return (IntPtr)1;
         }
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr GetSecondsSinceAppActive()
+        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public IntPtr GetSecondsSinceAppActive()
         {
             return (IntPtr)1;
         }
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr GetSecondsSinceComputerActive()
+        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public IntPtr GetSecondsSinceComputerActive()
         {
             return (IntPtr)1;
         }
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr GetServerRealTime()
+        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public IntPtr GetServerRealTime()
         {
             return (IntPtr)1;
         }
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr IsAPICallCompleted()
+        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public IntPtr IsAPICallCompleted()
         {
             return (IntPtr)1;
         }
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr IsOverlayEnabled()
+        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public IntPtr IsOverlayEnabled()
         {
             return (IntPtr)1;
         }
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr OverlayNeedsPresent()
+        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public IntPtr OverlayNeedsPresent()
         {
             return (IntPtr)1;
         }
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr RunFrame()
+        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public IntPtr RunFrame()
         {
             return (IntPtr)1;
         }
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr SetOverlayNotificationPosition()
+        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public IntPtr SetOverlayNotificationPosition()
         {
             return (IntPtr)1;
         }
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SetWarningMessageHook()
+        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public void SetWarningMessageHook()
         {
             //
         }
