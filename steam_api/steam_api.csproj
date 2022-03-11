@@ -208,6 +208,7 @@
     <Compile Include="SteamAPI_ISteam_AppList.cs" />
     <Compile Include="SteamAPI_ISteam_Friends.cs" />
     <Compile Include="SteamAPI_ISteam_Controller.cs" />
+    <Compile Include="SteamAPI_ISteam_GameSearch.cs" />
     <Compile Include="Types\CallbackMsg_t.cs" />
     <Compile Include="Types\CSteamAPIContext.cs" />
     <Compile Include="Types\EAccountType.cs" />
