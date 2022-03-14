@@ -5,14 +5,13 @@ using System.IO;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Windows.Forms;
 using SKYNET;
 using SKYNET.GUI;
 using SKYNET.Interface;
 using SKYNET.Managers;
 using Steamworks;
 
-Implementar SteamAPI_SteamNetworkingIPAddr
+//Implementar SteamAPI_SteamNetworkingIPAddr
 public class SteamAPI : SteamInterface
 {
     private static HSteamPipe user_steam_pipe;
