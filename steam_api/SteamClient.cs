@@ -33,55 +33,53 @@ public class SteamClient
     private static Dictionary<HSteamPipe, Steam_Pipe> steam_pipes;
 
     //Client
-    public static Steam_User steam_User;
-    public static Steam_Friends steam_Friends;
-    public static Steam_Utils steam_Utils;
-    public static Steam_Matchmaking steam_Matchmaking;
-    public static Steam_Matchmaking_Servers steam_MatchmakingServers;
-    public static Steam_User_Stats steam_UserStats;
-    public static Steam_Apps steam_Apps;
-    public static Steam_Networking steam_Networking;
-    public static Steam_RemoteStorage steam_RemoteStorage;
-    public static Steam_Screenshots steam_Screenshots;
-    public static Steam_HTTP steam_Http;
-    public static Steam_Controller steam_Controller;
-    public static Steam_UGC steam_Ugc;
-    public static Steam_AppList steam_AppList;
-    public static Steam_Music steam_Music;
-    public static Steam_MusicRemote steam_MusicRemote;
-    public static Steam_HTMLSurface steam_HTMLsurface;
-    public static Steam_Inventory steam_Inventory;
-    public static Steam_Video steam_Video;
-    public static Steam_ParentalSettings steam_Parental;
-    public static Steam_NetworkingSockets steam_NetworkingSockets;
-    public static Steam_Networking_Sockets_Serialized steam_NetworkingSocketsSerialized;
-    public static Steam_NetworkingMessages steam_NetworkingMessages;
-    public static Steam_GameCoordinator steam_Gamecoordinator;
-    public static Steam_NetworkingUtils steam_NetworkingUtils;
-    public static Steam_Unified_Messages steam_UnifiedMessages;
-    public static Steam_GameSearch steam_GameSearch;
-    public static Steam_Input steam_Input;
+    public static SteamUser SteamUser;
+    public static SteamFriends SteamFriends;
+    public static SteamUtils SteamUtils;
+    public static SteamMatchmaking SteamMatchmaking;
+    public static SteamMatchmakingServers SteamMatchmakingServers;
+    public static SteamUserStats SteamUserStats;
+    public static SteamApps SteamApps;
+    public static SteamNetworking SteamNetworking;
+    public static SteamRemoteStorage SteamRemoteStorage;
+    public static SteamScreenshots SteamScreenshots;
+    public static SteamHTTP SteamHTTP;
+    public static SteamController SteamController;
+    public static SteamUGC SteamUGC;
+    public static SteamAppList SteamAppList;
+    public static SteamMusic SteamMusic;
+    public static SteamMusicRemote SteamMusicRemote;
+    public static SteamHTMLSurface SteamHTMLSurface;
+    public static SteamInventory SteamInventory;
+    public static SteamVideo SteamVideo;
+    public static SteamParentalSettings SteamParentalSettings;
+    public static SteamNetworkingSockets SteamNetworkingSockets;
+    public static SteamNetworkingSocketsSerialized SteamNetworkingSocketsSerialized;
+    public static SteamNetworkingMessages SteamNetworkingMessages;
+    public static SteamGameCoordinator SteamGameCoordinator;
+    public static SteamNetworkingUtils SteamNetworkingUtils;
+    public static SteamGameSearch SteamGameSearch;
+    public static SteamInput SteamInput;
 
-    public static Steam_Parties steam_Parties;
-    public static Steam_RemotePlay steam_RemotePlay;
-    public static Steam_TV steam_Tv;
+    public static SteamParties SteamParties;
+    public static SteamRemotePlay SteamRemotePlay;
+    public static SteamTV SteamTV;
 
     //GameServer
-    public static Steam_GameServer steam_GameServer;
+    public static SteamGameServer SteamGameServer;
 
-    public static Steam_Utils steam_GameServerUtils;
-    public static Steam_GameServerStats steam_GameServerStats;
-    public static Steam_Networking steam_GameServerNetworking;
-    public static Steam_HTTP steam_GameServerHttp;
-    public static Steam_Inventory steam_GameServerInventory;
-    public static Steam_UGC steam_GameServerUgc;
-    public static Steam_Apps steam_GameServerApps;
-    public static Steam_NetworkingSockets steam_GameServerNetworkingSockets;
-    public static Steam_Networking_Sockets_Serialized steam_GameServerNetworkingSocketsSerialized;
-    public static Steam_NetworkingMessages steam_GameServerNetworkingMessages;
-    public static Steam_GameCoordinator steam_GameServerGamecoordinator;
-    public static Steam_Masterserver_Updater steam_MasterServerUpdater;
-    public static Steam_Overlay steam_Overlay;
+    public static SteamUtils SteamGameServerUtils;
+    public static SteamGameServerStats SteamGameServerStats;
+    public static SteamNetworking SteamGameServerNetworking;
+    public static SteamHTTP SteamGameServerHttp;
+    public static SteamInventory SteamGameServerInventory;
+    public static SteamUGC SteamGameServerUgc;
+    public static SteamApps SteamGameServerApps;
+    public static SteamNetworkingSockets SteamGameServerNetworkingSockets;
+    public static SteamNetworkingSocketsSerialized SteamGameServerNetworkingSocketsSerialized;
+    public static SteamNetworkingMessages SteamGameServerNetworkingMessages;
+    public static SteamGameCoordinator SteamGameServerGamecoordinator;
+    public static SteamMasterServerUpdater SteamMasterServerUpdater;
 
     public static string Language { get; set; }
     public static string PersonaName { get; set; }
@@ -111,51 +109,50 @@ public class SteamClient
         
         steam_pipes = new Dictionary<HSteamPipe, Steam_Pipe>();
 
-        steam_User = new Steam_User();
-        steam_Friends = new Steam_Friends();
-        steam_Utils = new Steam_Utils();
-        steam_Matchmaking = new Steam_Matchmaking();
-        steam_MatchmakingServers = new Steam_Matchmaking_Servers();
-        steam_UserStats = new Steam_User_Stats();
-        steam_Apps = new Steam_Apps();
-        steam_Networking = new Steam_Networking();
-        steam_RemoteStorage = new Steam_RemoteStorage();
-        steam_Screenshots = new Steam_Screenshots();
-        steam_Http = new Steam_HTTP();
-        steam_Controller = new Steam_Controller();
-        steam_Ugc = new Steam_UGC();
-        steam_AppList = new Steam_AppList();
-        steam_Music = new Steam_Music();
-        steam_MusicRemote = new Steam_MusicRemote();
-        steam_HTMLsurface = new Steam_HTMLSurface();
-        steam_Inventory = new Steam_Inventory();
-        steam_Video = new Steam_Video();
-        steam_Parental = new Steam_ParentalSettings();
-        steam_NetworkingSockets = new Steam_NetworkingSockets();
-        steam_NetworkingSocketsSerialized = new Steam_Networking_Sockets_Serialized();
-        steam_NetworkingMessages = new Steam_NetworkingMessages();
-        steam_Gamecoordinator = new Steam_GameCoordinator();
-        steam_NetworkingUtils = new Steam_NetworkingUtils();
-        steam_UnifiedMessages = new Steam_Unified_Messages();
-        steam_GameSearch = new Steam_GameSearch();
-        steam_Parties = new Steam_Parties();
-        steam_RemotePlay = new Steam_RemotePlay();
-        steam_Tv = new Steam_TV();
-        steam_Input = new Steam_Input();
+        SteamUser = new SteamUser();
+        SteamFriends = new SteamFriends();
+        SteamUtils = new SteamUtils();
+        SteamMatchmaking = new SteamMatchmaking();
+        SteamMatchmakingServers = new SteamMatchmakingServers();
+        SteamUserStats = new SteamUserStats();
+        SteamApps = new SteamApps();
+        SteamNetworking = new SteamNetworking();
+        SteamRemoteStorage = new SteamRemoteStorage();
+        SteamScreenshots = new SteamScreenshots();
+        SteamHTTP = new SteamHTTP();
+        SteamController = new SteamController();
+        SteamUGC = new SteamUGC();
+        SteamAppList = new SteamAppList();
+        SteamMusic = new SteamMusic();
+        SteamMusicRemote = new SteamMusicRemote();
+        SteamHTMLSurface = new SteamHTMLSurface();
+        SteamInventory = new SteamInventory();
+        SteamVideo = new SteamVideo();
+        SteamParentalSettings = new SteamParentalSettings();
+        SteamNetworkingSockets = new SteamNetworkingSockets();
+        SteamNetworkingSocketsSerialized = new SteamNetworkingSocketsSerialized();
+        SteamNetworkingMessages = new SteamNetworkingMessages();
+        SteamGameCoordinator = new SteamGameCoordinator();
+        SteamNetworkingUtils = new SteamNetworkingUtils();
+        SteamGameSearch = new SteamGameSearch();
+        SteamParties = new SteamParties();
+        SteamRemotePlay = new SteamRemotePlay();
+        SteamTV = new SteamTV();
+        SteamInput = new SteamInput();
 
-        steam_GameServer = new Steam_GameServer();
-        steam_GameServerUtils = new Steam_Utils();
-        steam_GameServerStats = new Steam_GameServerStats();
-        steam_GameServerNetworking = new Steam_Networking();
-        steam_GameServerHttp = new Steam_HTTP();
-        steam_GameServerInventory = new Steam_Inventory();
-        steam_GameServerUgc = new Steam_UGC();
-        steam_GameServerApps = new Steam_Apps();
-        steam_GameServerNetworkingSockets = new Steam_NetworkingSockets();
-        steam_GameServerNetworkingSocketsSerialized = new Steam_Networking_Sockets_Serialized();
-        steam_GameServerNetworkingMessages = new Steam_NetworkingMessages();
-        steam_GameServerGamecoordinator = new Steam_GameCoordinator();
-        steam_MasterServerUpdater = new Steam_Masterserver_Updater();
+        SteamGameServer = new SteamGameServer();
+        SteamGameServerUtils = new SteamUtils();
+        SteamGameServerStats = new SteamGameServerStats();
+        SteamGameServerNetworking = new SteamNetworking();
+        SteamGameServerHttp = new SteamHTTP();
+        SteamGameServerInventory = new SteamInventory();
+        SteamGameServerUgc = new SteamUGC();
+        SteamGameServerApps = new SteamApps();
+        SteamGameServerNetworkingSockets = new SteamNetworkingSockets();
+        SteamGameServerNetworkingSocketsSerialized = new SteamNetworkingSocketsSerialized();
+        SteamGameServerNetworkingMessages = new SteamNetworkingMessages();
+        SteamGameServerGamecoordinator = new SteamGameCoordinator();
+        SteamMasterServerUpdater = new SteamMasterServerUpdater();
 
         Initialized = true;
     }
@@ -230,13 +227,13 @@ public class SteamClient
     public static ISteamUser GetISteamUser(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamUser");
-        return steam_User;
+        return SteamUser;
     }
     
     public static ISteamGameServer GetISteamGameServer(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamGameServer");
-        return steam_GameServer;
+        return SteamGameServer;
     }
     
     public static void SetLocalIPBinding(uint unIP, ushort usPort)
@@ -247,13 +244,13 @@ public class SteamClient
     public static ISteamFriends GetISteamFriends(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamFriends");
-        return steam_Friends;
+        return SteamFriends;
     }
     
     public static ISteamGameSearch GetISteamGameSearch(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamFriends");
-        return steam_GameSearch;
+        return SteamGameSearch;
     }
     
     public static ISteamUtils GetISteamUtils(HSteamPipe hSteamPipe, string pchVersion)
@@ -265,26 +262,26 @@ public class SteamClient
     public static ISteamMatchmaking GetISteamMatchmaking(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamMatchmaking");
-        return steam_Matchmaking;
+        return SteamMatchmaking;
     }
     
     public static ISteamMatchmakingServers GetISteamMatchmakingServers(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamMatchmakingServers");
-        return steam_MatchmakingServers;
+        return SteamMatchmakingServers;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static object GetISteamGenericInterface(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamGenericInterface");
-        return steam_Video;
+        return SteamVideo;
     }
     
     public static ISteamUserStats GetISteamUserStats(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamUserStats");
-        return steam_UserStats;
+        return SteamUserStats;
     }
 
     //public static ISteamGameServerStats GetISteamGameServerStats(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
@@ -296,25 +293,25 @@ public class SteamClient
     public static ISteamApps GetISteamApps(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamApps");
-        return steam_Apps;
+        return SteamApps;
     }
 
     public static ISteamNetworking GetISteamNetworking(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamNetworking");
-        return steam_Networking;
+        return SteamNetworking;
     }
 
     public static ISteamRemoteStorage GetISteamRemoteStorage(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamRemoteStorage");
-        return steam_RemoteStorage;
+        return SteamRemoteStorage;
     }
     
     public static ISteamScreenshots GetISteamScreenshots(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamScreenshots");
-        return steam_Screenshots;
+        return SteamScreenshots;
     }
     
     public static uint GetIPCCallCount()
@@ -338,79 +335,79 @@ public class SteamClient
     public static ISteamHTTP GetISteamHTTP(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamHTTP");
-        return steam_Http;
+        return SteamHTTP;
     }
     
     public static ISteamController GetISteamController(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamController");
-        return steam_Controller;
+        return SteamController;
     }
     
     public static ISteamUGC GetISteamUGC(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamUGC");
-        return steam_Ugc;
+        return SteamUGC;
     }
 
     public static ISteamAppList GetISteamAppList(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamAppList");
-        return steam_AppList;
+        return SteamAppList;
     }
 
     public static ISteamMusic GetISteamMusic(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamMusic");
-        return steam_Music;
+        return SteamMusic;
     }
     
     public static ISteamMusicRemote GetISteamMusicRemote(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamMusicRemote");
-        return steam_MusicRemote;
+        return SteamMusicRemote;
     }
 
     public static ISteamInput GetISteamInput(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamInput");
-        return steam_Input;
+        return SteamInput;
     }
     
     public static ISteamHTMLSurface GetISteamHTMLSurface(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamHTMLSurface");
-        return steam_HTMLsurface;
+        return SteamHTMLSurface;
     }
 
     public static ISteamParties GetISteamParties(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamParties");
-        return steam_Parties;
+        return SteamParties;
     }
     
     public static ISteamInventory GetISteamInventory(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamInventory");
-        return steam_Inventory;
+        return SteamInventory;
     }
     
     public static ISteamRemotePlay GetISteamRemotePlay(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamRemotePlay");
-        return steam_RemotePlay;
+        return SteamRemotePlay;
     }
     
     public static ISteamVideo GetISteamVideo(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamVideo");
-        return steam_Video;
+        return SteamVideo;
     }
     
     public static ISteamParentalSettings GetISteamParentalSettings(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
         DEBUG("GetISteamParentalSettings");
-        return steam_Parental;
+        return SteamParentalSettings;
     }
     
     public static void SetPersonaName(string pchPersonaName)

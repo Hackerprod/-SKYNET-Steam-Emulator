@@ -9,15 +9,15 @@ using System.Windows.Forms;
 using SKYNET;
 using SKYNET.GUI;
 using SKYNET.Interface;
+using SKYNET.Managers;
 using Steamworks;
 
+Implementar SteamAPI_SteamNetworkingIPAddr
 public class SteamAPI : SteamInterface
 {
     private static HSteamPipe user_steam_pipe;
-    private static HSteamUser flat_hsteamuser() => SteamAPI_GetHSteamUser();
-    private static HSteamPipe flat_hsteampipe() => SteamAPI_GetHSteamPipe();
-    private static HSteamUser flat_gs_hsteamuser() => SteamClient.steam_GameServer.SteamGameServer_GetHSteamUser();
-    private static HSteamPipe flat_gs_hsteampipe() => Steam_GameServer.SteamGameServer_GetHSteamPipe();
+    private static HSteamUser flat_gs_hsteamuser() => SteamClient.SteamGameServer.GetHSteamUser();
+    private static HSteamPipe flat_gs_hsteampipe() => SteamClient.SteamGameServer.GetHSteamPipe();
 
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -76,11 +76,11 @@ public class SteamAPI : SteamInterface
 
         if (GameServer)
         {
-            SteamClient.Server_Callback.RegisterCallback(pCallback, iCallback);
+            //SteamClient.Server_Callback.RegisterCallback(pCallback, iCallback);
         }
         else
         {
-            SteamClient.Client_Callback.RegisterCallback(pCallback, iCallback);
+            //SteamClient.Client_Callback.RegisterCallback(pCallback, iCallback);
         }
         
         Write(callMessage);
@@ -120,12 +120,23 @@ public class SteamAPI : SteamInterface
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static string SteamAPI_GetSteamInstallPath()
+    public static IntPtr SteamAPI_GetSteamInstallPath()
     {
         Write($"{"SteamAPI_GetSteamInstallPath"}");
 
         string path = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
-        return path;
+        return IntPtr.Zero;
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static HSteamUser SteamAPI_GetHSteamUser(int p = 0)
+    {
+        Write("SteamAPI_GetHSteamUser");
+        if (SteamClient.LocalUser == null)
+        {
+            SteamClient.CreateLocalUser(out _, EAccountType.k_EAccountTypeIndividual);
+        }
+        return SteamClient.LocalUser;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -137,17 +148,6 @@ public class SteamAPI : SteamInterface
             user_steam_pipe = new HSteamPipe(1);
         }
         return user_steam_pipe;
-    }
-
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static HSteamUser SteamAPI_GetHSteamUser()
-    {
-        Write("SteamAPI_GetHSteamUser");
-        if (SteamClient.LocalUser == null)
-        {
-            SteamClient.CreateLocalUser(out _, EAccountType.k_EAccountTypeIndividual);
-        }
-        return SteamClient.LocalUser;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -164,15 +164,8 @@ public class SteamAPI : SteamInterface
         return SteamAPI_GetHSteamUser();
     }
 
-    //[DllExport("SteamClient", CallingConvention = CallingConvention.Cdecl)]
-    //public static IntPtr _SteamClient()
-    //{
-    //    Write("SteamClient");
-    //    return IntPtr.Zero;
-    //}
-
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static IntPtr SteamInternal_CreateInterface([MarshalAs(UnmanagedType.LPStr)] string ver)
+    public static IntPtr SteamInternal_CreateInterface(IntPtr ver)
     {
         Write($"SteamInternal_CreateInterface {ver}");
 
@@ -192,7 +185,7 @@ public class SteamAPI : SteamInterface
     {
         Write($"SteamAPI_SetBreakpadAppID {unAppID}");
     }
-    //
+
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static void SteamAPI_UseBreakpadCrashHandler([MarshalAs(UnmanagedType.LPStr)] string pchVersion, [MarshalAs(UnmanagedType.LPStr)] string pchDate, [MarshalAs(UnmanagedType.LPStr)] string pchTime, bool bFullMemoryDumps, IntPtr pvContext, IntPtr m_pfnPreMinidumpCallback)
     {
@@ -206,7 +199,7 @@ public class SteamAPI : SteamInterface
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ManualDispatch_GetNextCallback(HSteamPipe hSteamPipe, CallbackMsg_t pCallbackMsg)
+    public static bool SteamAPI_ManualDispatch_GetNextCallback(HSteamPipe hSteamPipe, IntPtr pCallbackMsg)
     {
         Write($"SteamAPI_ManualDispatch_GetNextCallback");
         return true;
@@ -263,24 +256,22 @@ public class SteamAPI : SteamInterface
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static void SteamAPI_gameserveritem_t_Construct(gameserveritem_t self)
+    public static void SteamAPI_gameserveritem_t_Construct(IntPtr self)
     {
         Write($"SteamAPI_gameserveritem_t_Construct");
-        new gameserveritem_t();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static string SteamAPI_gameserveritem_t_GetName(gameserveritem_t self)
+    public static string SteamAPI_gameserveritem_t_GetName(IntPtr self)
     {
         Write($"SteamAPI_gameserveritem_t_GetName");
-        return self.GetServerName();
+        return "";
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static void SteamAPI_gameserveritem_t_SetName(gameserveritem_t self, [MarshalAs(UnmanagedType.LPStr)] string pName)
+    public static void SteamAPI_gameserveritem_t_SetName(IntPtr self, IntPtr pName)
     {
         Write($"SteamAPI_gameserveritem_t_SetName");
-        self.SetServerName(pName);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -290,20 +281,40 @@ public class SteamAPI : SteamInterface
         return IntPtr.Zero;
     }
 
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static void Steam_RegisterInterfaceFuncs(IntPtr hModule)
+    {
+        Write($"Steam_RegisterInterfaceFuncs");
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static void Steam_RunCallbacks(IntPtr hSteamPipe, bool bGameServerCallbacks)
+    {
+        Write("Steam_RunCallbacks\n");
+
+        SteamAPI_RunCallbacks();
+
+        if (bGameServerCallbacks)
+           SteamClient.SteamGameServer.RunCallbacks();
+    }
+
+
+
+
     #region Interfaces
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static ISteamAppList SteamAPI_SteamAppList_v001()
     {
         Write($"SteamAPI_SteamAppList_v001");
-        return SteamClient.GetISteamAppList(flat_hsteamuser(), flat_hsteampipe(), "STEAMAPPLIST_INTERFACE_VERSION001");
+        return SteamClient.GetISteamAppList(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "STEAMAPPLIST_INTERFACE_VERSION001");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static ISteamApps SteamAPI_SteamApps_v008()
     {
         Write($"SteamAPI_SteamApps_v008");
-        return SteamClient.GetISteamApps(flat_hsteamuser(), flat_hsteampipe(), "STEAMAPPS_INTERFACE_VERSION008");
+        return SteamClient.GetISteamApps(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "STEAMAPPS_INTERFACE_VERSION008");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -317,14 +328,14 @@ public class SteamAPI : SteamInterface
     public static ISteamController SteamAPI_SteamController_v007()
     {
         Write($"SteamAPI_SteamController_v007");
-        return SteamClient.GetISteamController(flat_hsteamuser(), flat_hsteampipe(), "SteamController007");
+        return SteamClient.GetISteamController(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamController007");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static ISteamController SteamAPI_SteamController_v008()
     {
         Write($"SteamAPI_SteamController_v008");
-        return SteamClient.GetISteamController(flat_hsteamuser(), flat_hsteampipe(), "SteamController008");
+        return SteamClient.GetISteamController(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamController008");
     }
 
 
@@ -332,14 +343,14 @@ public class SteamAPI : SteamInterface
     public static ISteamFriends SteamAPI_SteamFriends_v017()
     {
         Write($"SteamAPI_SteamFriends_v017");
-        return SteamClient.GetISteamFriends(flat_hsteamuser(), flat_hsteampipe(), "SteamFriends017");
+        return SteamClient.GetISteamFriends(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamFriends017");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static ISteamUtils SteamAPI_SteamUtils_v010()
     {
         Write($"SteamAPI_SteamUtils_v010");
-        return SteamClient.GetISteamUtils(flat_hsteampipe(), "SteamUtils010");
+        return SteamClient.GetISteamUtils(SteamAPI_GetHSteamPipe(), "SteamUtils010");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -353,7 +364,7 @@ public class SteamAPI : SteamInterface
     public static ISteamUtils SteamAPI_SteamUtils_v009()
     {
         Write($"SteamAPI_SteamUtils_v009");
-        return SteamClient.GetISteamUtils(flat_hsteampipe(), "SteamUtils009");
+        return SteamClient.GetISteamUtils(SteamAPI_GetHSteamPipe(), "SteamUtils009");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -367,21 +378,21 @@ public class SteamAPI : SteamInterface
     public static ISteamMatchmaking SteamAPI_SteamMatchmaking_v009()
     {
         Write($"SteamAPI_SteamMatchmaking_v009");
-        return SteamClient.GetISteamMatchmaking(flat_hsteamuser(), flat_hsteampipe(), "SteamMatchMaking009");
+        return SteamClient.GetISteamMatchmaking(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamMatchMaking009");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static ISteamMatchmakingServers SteamAPI_SteamMatchmakingServers_v002()
     {
         Write($"SteamAPI_SteamMatchmakingServers_v002");
-        return SteamClient.GetISteamMatchmakingServers(flat_hsteamuser(), flat_hsteampipe(), "SteamMatchMakingServers002");
+        return SteamClient.GetISteamMatchmakingServers(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamMatchMakingServers002");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static ISteamGameSearch SteamAPI_SteamGameSearch_v001()
     {
         Write($"SteamAPI_SteamGameSearch_v001");
-        return SteamClient.GetISteamGameSearch(flat_hsteamuser(), flat_hsteampipe(), "SteamMatchGameSearch001");
+        return SteamClient.GetISteamGameSearch(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamMatchGameSearch001");
     }
 
 
@@ -389,14 +400,14 @@ public class SteamAPI : SteamInterface
     public static ISteamParties SteamAPI_SteamParties_v002()
     {
         Write($"SteamAPI_SteamParties_v002");
-        return SteamClient.GetISteamParties(flat_hsteamuser(), flat_hsteampipe(), "SteamParties002");
+        return SteamClient.GetISteamParties(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamParties002");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static ISteamNetworking SteamAPI_SteamNetworking_v006()
     {
         Write($"SteamAPI_SteamNetworking_v006");
-        return SteamClient.GetISteamNetworking(flat_hsteamuser(), flat_hsteampipe(), "SteamNetworking006");
+        return SteamClient.GetISteamNetworking(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamNetworking006");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -410,28 +421,28 @@ public class SteamAPI : SteamInterface
     public static ISteamScreenshots SteamAPI_SteamScreenshots_v003()
     {
         Write($"SteamAPI_SteamScreenshots_v003");
-        return SteamClient.GetISteamScreenshots(flat_hsteamuser(), flat_hsteampipe(), "STEAMSCREENSHOTS_INTERFACE_VERSION003");
+        return SteamClient.GetISteamScreenshots(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "STEAMSCREENSHOTS_INTERFACE_VERSION003");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static ISteamMusic SteamAPI_SteamMusic_v001()
     {
         Write($"SteamAPI_SteamMusic_v001");
-        return SteamClient.GetISteamMusic(flat_hsteamuser(), flat_hsteampipe(), "STEAMMUSIC_INTERFACE_VERSION001");
+        return SteamClient.GetISteamMusic(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "STEAMMUSIC_INTERFACE_VERSION001");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static ISteamMusicRemote SteamAPI_SteamMusicRemote_v001()
     {
         Write($"SteamAPI_SteamMusicRemote_v001");
-        return SteamClient.GetISteamMusicRemote(flat_hsteamuser(), flat_hsteampipe(), "STEAMMUSICREMOTE_INTERFACE_VERSION001");
+        return SteamClient.GetISteamMusicRemote(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "STEAMMUSICREMOTE_INTERFACE_VERSION001");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static ISteamHTTP SteamAPI_SteamHTTP_v003()
     {
         Write($"SteamAPI_SteamHTTP_v003");
-        return SteamClient.GetISteamHTTP(flat_hsteamuser(), flat_hsteampipe(), "STEAMHTTP_INTERFACE_VERSION003");
+        return SteamClient.GetISteamHTTP(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "STEAMHTTP_INTERFACE_VERSION003");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -445,28 +456,28 @@ public class SteamAPI : SteamInterface
     public static ISteamInput SteamAPI_SteamInput_v001()
     {
         Write($"SteamAPI_SteamInput_v001");
-        return SteamClient.GetISteamInput(flat_hsteamuser(), flat_hsteampipe(), "SteamInput001");
+        return SteamClient.GetISteamInput(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamInput001");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static ISteamInput SteamAPI_SteamInput_v002()
     {
         Write($"SteamAPI_SteamInput_v002");
-        return SteamClient.GetISteamInput(flat_hsteamuser(), flat_hsteampipe(), "SteamInput002");
+        return SteamClient.GetISteamInput(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamInput002");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static ISteamHTMLSurface SteamAPI_SteamHTMLSurface_v005()
     {
         Write($"SteamAPI_SteamHTMLSurface_v005");
-        return SteamClient.GetISteamHTMLSurface(flat_hsteamuser(), flat_hsteampipe(), "STEAMHTMLSURFACE_INTERFACE_VERSION_005");
+        return SteamClient.GetISteamHTMLSurface(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "STEAMHTMLSURFACE_INTERFACE_VERSION_005");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static ISteamInventory SteamAPI_SteamInventory_v003()
     {
         Write($"SteamAPI_SteamInventory_v003");
-        return SteamClient.GetISteamInventory(flat_hsteamuser(), flat_hsteampipe(), "STEAMINVENTORY_INTERFACE_V003");
+        return SteamClient.GetISteamInventory(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "STEAMINVENTORY_INTERFACE_V003");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -480,42 +491,42 @@ public class SteamAPI : SteamInterface
     public static ISteamVideo SteamAPI_SteamVideo_v002()
     {
         Write($"SteamAPI_SteamVideo_v002");
-        return SteamClient.GetISteamVideo(flat_hsteamuser(), flat_hsteampipe(), "STEAMVIDEO_INTERFACE_V002");
+        return SteamClient.GetISteamVideo(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "STEAMVIDEO_INTERFACE_V002");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static ISteamTV SteamAPI_SteamTV_v001()
     {
         Write($"SteamAPI_SteamTV_v001");
-        return (ISteamTV)SteamClient.GetISteamGenericInterface(flat_hsteamuser(), flat_hsteampipe(), "STEAMTV_INTERFACE_V001");
+        return (ISteamTV)SteamClient.GetISteamGenericInterface(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "STEAMTV_INTERFACE_V001");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static ISteamParentalSettings SteamAPI_SteamParentalSettings_v001()
     {
         Write($"SteamAPI_SteamParentalSettings_v001");
-        return SteamClient.GetISteamParentalSettings(flat_hsteamuser(), flat_hsteampipe(), "STEAMPARENTALSETTINGS_INTERFACE_VERSION001");
+        return SteamClient.GetISteamParentalSettings(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "STEAMPARENTALSETTINGS_INTERFACE_VERSION001");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static ISteamRemotePlay SteamAPI_SteamRemotePlay_v001()
     {
         Write($"SteamAPI_SteamRemotePlay_v001");
-        return SteamClient.GetISteamRemotePlay(flat_hsteamuser(), flat_hsteampipe(), "STEAMREMOTEPLAY_INTERFACE_VERSION001");
+        return SteamClient.GetISteamRemotePlay(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "STEAMREMOTEPLAY_INTERFACE_VERSION001");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static ISteamNetworkingMessages SteamAPI_SteamNetworkingMessages_v002()
     {
         Write($"SteamAPI_SteamNetworkingMessages_v002");
-        return (ISteamNetworkingMessages)SteamClient.GetISteamGenericInterface(flat_hsteamuser(), flat_hsteampipe(), "SteamNetworkingMessages002");
+        return (ISteamNetworkingMessages)SteamClient.GetISteamGenericInterface(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamNetworkingMessages002");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static ISteamNetworkingMessages SteamAPI_SteamNetworkingMessages_SteamAPI_v002()
     {
         Write($"SteamAPI_SteamNetworkingMessages_SteamAPI_v002");
-        return (ISteamNetworkingMessages)SteamClient.GetISteamGenericInterface(flat_hsteamuser(), flat_hsteampipe(), "SteamNetworkingMessages002");
+        return (ISteamNetworkingMessages)SteamClient.GetISteamGenericInterface(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamNetworkingMessages002");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -536,7 +547,7 @@ public class SteamAPI : SteamInterface
     public static ISteamNetworkingSockets SteamAPI_SteamNetworkingSockets_SteamAPI_v009()
     {
         Write($"SteamAPI_SteamNetworkingSockets_SteamAPI_v009");
-        return (ISteamNetworkingSockets)SteamClient.GetISteamGenericInterface(flat_hsteamuser(), flat_hsteampipe(), "SteamNetworkingSockets009");
+        return (ISteamNetworkingSockets)SteamClient.GetISteamGenericInterface(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamNetworkingSockets009");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -550,7 +561,7 @@ public class SteamAPI : SteamInterface
     public static ISteamNetworkingSockets SteamAPI_SteamNetworkingSockets_v009()
     {
         Write($"SteamAPI_SteamNetworkingSockets_v009");
-        return (ISteamNetworkingSockets)SteamClient.GetISteamGenericInterface(flat_hsteamuser(), flat_hsteampipe(), "SteamNetworkingSockets009");
+        return (ISteamNetworkingSockets)SteamClient.GetISteamGenericInterface(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamNetworkingSockets009");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -564,7 +575,7 @@ public class SteamAPI : SteamInterface
     public static ISteamNetworkingSockets SteamAPI_SteamNetworkingSockets_v008()
     {
         Write($"SteamAPI_SteamNetworkingSockets_v008");
-        return (ISteamNetworkingSockets)SteamClient.GetISteamGenericInterface(flat_hsteamuser(), flat_hsteampipe(), "SteamNetworkingSockets008");
+        return (ISteamNetworkingSockets)SteamClient.GetISteamGenericInterface(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamNetworkingSockets008");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -578,14 +589,14 @@ public class SteamAPI : SteamInterface
     public static ISteamNetworkingUtils SteamAPI_SteamNetworkingUtils_SteamAPI_v003()
     {
         Write($"SteamAPI_SteamNetworkingUtils_SteamAPI_v003");
-        return (ISteamNetworkingUtils)SteamClient.GetISteamGenericInterface(flat_hsteamuser(), flat_hsteampipe(), "SteamNetworkingUtils003");
+        return (ISteamNetworkingUtils)SteamClient.GetISteamGenericInterface(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamNetworkingUtils003");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static ISteamNetworkingUtils SteamAPI_SteamNetworkingUtils_v003()
     {
         Write($"SteamAPI_SteamNetworkingUtils_v003");
-        return (ISteamNetworkingUtils)SteamClient.GetISteamGenericInterface(flat_hsteamuser(), flat_hsteampipe(), "SteamNetworkingUtils003");
+        return (ISteamNetworkingUtils)SteamClient.GetISteamGenericInterface(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamNetworkingUtils003");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -595,198 +606,259 @@ public class SteamAPI : SteamInterface
         return default;
     }
 
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamAppList SteamAppList()
+    {
+        Write($"SteamAppList");
+        return SteamClient.SteamAppList;
+    }
 
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamApps SteamApps()
+    {
+        Write($"ISteamApps");
+        return SteamClient.SteamApps;
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-    #endregion
-
-    #region Interfaces 
-
-    //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-    //public static ISteamClient SteamClient()
-    //{
-    //    return SteamClient.steam_STEAM_CLIENT);
-    //}
-
-    //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-    //public static ISteamApps SteamApps()
-    //{
-    //    return SteamClient.steam_Apps;
-    //}
+    [DllExport("SteamClient", CallingConvention = CallingConvention.Cdecl)]
+    public static SteamClient steamClient()
+    {
+        Write($"SteamClient");
+        return SteamClient.Instance;
+    }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static ISteamController SteamController()
     {
-        return SteamClient.steam_Controller;
+        Write($"SteamController");
+        return SteamClient.SteamController;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static ISteamFriends SteamFriends()
     {
-        return SteamClient.steam_Friends;
-    }
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamParentalSettings SteamParentalSettings()
-    {
-        return SteamClient.steam_Parental;
-    }
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamGameSearch SteamGameSearch()
-    {
-        return SteamClient.steam_GameSearch;
-    }
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamInput SteamInput()
-    {
-        return SteamClient.steam_Input;
-    }
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamParties SteamParties()
-    {
-        return SteamClient.steam_Parties;
-    }
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamGameServer SteamGameServer()
-    {
-        return SteamClient.steam_GameServer;
-    }
-    //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-    //public static ISteamGameServerHTTP SteamGameServerHTTP()
-    //{
-    //    return SteamClient.steam_GameServerHTTP;
-    //}
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamGameCoordinator SteamGameCoordinator()
-    {
-        return SteamClient.steam_Gamecoordinator;
-    }
-    //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-    //public static ISteamGameServerInventory SteamGameServerInventory()
-    //{
-    //    return SteamClient.steam_STEAM_GAMESERVERINVENTORY);
-    //}
-    //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-    //public static ISteamGameServerNetworking SteamGameServerNetworking()
-    //{
-    //    return SteamClient.steam_STEAM_GAMESERVERNETWORKING);
-    //}
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamGameServerStats SteamGameServerStats()
-    {
-        return SteamClient.steam_GameServerStats;
-    }
-    //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-    //public static ISteamGameServerUGC SteamGameServerUGC()
-    //{
-    //    return SteamClient.steam_STEAM_GAMESERVERUGC);
-    //}
-    //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-    //public static ISteamGameServerUtils SteamGameServerUtils()
-    //{
-    //    return SteamClient.steam_STEAM_GAMESERVERUTILS);
-    //}
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamHTMLSurface SteamHTMLSurface()
-    {
-        return SteamClient.steam_HTMLsurface;
-    }
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamAppList SteamAppList()
-    {
-        return SteamClient.steam_AppList;
-    }
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamHTTP SteamHTTP()
-    {
-        return SteamClient.steam_Http;
-    }
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamInventory SteamInventory()
-    {
-        return SteamClient.steam_Inventory;
-    }
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamMatchmaking SteamMatchmaking()
-    {
-        return SteamClient.steam_Matchmaking;
-    }
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamMatchmakingServers SteamMatchmakingServers()
-    {
-        return SteamClient.steam_MatchmakingServers;
-    }
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamMusic SteamMusic()
-    {
-        return SteamClient.steam_Music;
-    }
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamMusicRemote SteamMusicRemote()
-    {
-        return SteamClient.steam_MusicRemote;
-    }
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamNetworking SteamNetworking()
-    {
-        return SteamClient.steam_Networking;
-    }
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamRemoteStorage SteamRemoteStorage()
-    {
-        return SteamClient.steam_RemoteStorage;
-    }
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamScreenshots SteamScreenshots()
-    {
-        return SteamClient.steam_Screenshots;
-    }
-    //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-    //public static ISteamUnifiedMessages SteamUnifiedMessages()
-    //{
-    //    return SteamClient.steam_STEAM_UNIFIEDMESSAGES);
-    //}
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamUGC SteamUGC()
-    {
-        return SteamClient.steam_Ugc;
-    }
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamUser SteamUser()
-    {
-        return SteamClient.steam_User;
-    }
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamUserStats SteamUserStats()
-    {
-        return SteamClient.steam_UserStats;
-    }
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamUtils SteamUtils()
-    {
-        return SteamClient.steam_Utils;
-    }
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamVideo SteamVideo()
-    {
-        return SteamClient.steam_Video;
+        Write($"SteamFriends");
+        return SteamClient.SteamFriends;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamRemotePlay SteamRemotePlay()
+    public static ISteamGameServer SteamGameServer()
     {
-        return SteamClient.steam_RemotePlay;
+        Write($"SteamGameServer");
+        return SteamClient.SteamGameServer;
     }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamApps SteamGameServerApps()
+    {
+        Write($"SteamGameServerApps");
+        return SteamClient.SteamGameServerApps;
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamHTTP SteamGameServerHTTP()
+    {
+        Write($"SteamGameServerHTTP");
+        return SteamClient.SteamHTTP;
+    }
+
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamInventory SteamGameServerInventory()
+    {
+        Write($"SteamGameServerInventory");
+        return SteamClient.SteamGameServerInventory;
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamNetworking SteamGameServerNetworking()
+    {
+        Write($"SteamGameServerNetworking");
+        return SteamClient.SteamGameServerNetworking;
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamGameServerStats SteamGameServerStats()
+    {
+        Write($"SteamGameServerStats");
+        return SteamClient.SteamGameServerStats;
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamUGC SteamGameServerUGC()
+    {
+        Write($"SteamGameServerUGC");
+        return SteamClient.SteamUGC;
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamUtils SteamGameServerUtils()
+    {
+        Write($"SteamGameServerUtils");
+        return SteamClient.SteamGameServerUtils;
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamHTTP SteamHTTP()
+    {
+        Write($"SteamHTTP");
+        return SteamClient.SteamHTTP;
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamHTMLSurface SteamHTMLSurface()
+    {
+        Write($"SteamHTMLSurface");
+        return SteamClient.SteamHTMLSurface;
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamInventory SteamInventory()
+    {
+        Write($"SteamInventory");
+        return SteamClient.SteamInventory;
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamMasterServerUpdater SteamMasterServerUpdater()
+    {
+        Write($"SteamMasterServerUpdater");
+        return SteamClient.SteamMasterServerUpdater;
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamMatchmaking SteamMatchmaking()
+    {
+        Write($"SteamMatchmaking");
+        return SteamClient.SteamMatchmaking;
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamMatchmakingServers SteamMatchmakingServers()
+    {
+        Write($"SteamMatchmakingServers");
+        return SteamClient.SteamMatchmakingServers;
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamMusic SteamMusic()
+    {
+        Write($"SteamMusic");
+        return SteamClient.SteamMusic;
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamMusicRemote SteamMusicRemote()
+    {
+        Write($"SteamMusicRemote");
+        return SteamClient.SteamMusicRemote;
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamNetworking SteamNetworking()
+    {
+        Write($"SteamNetworking");
+        return SteamClient.SteamNetworking;
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamParentalSettings SteamParentalSettings()
+    {
+        Write($"SteamParentalSettings");
+        return SteamClient.SteamParentalSettings;
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamRemoteStorage SteamRemoteStorage()
+    {
+        Write($"SteamRemoteStorage");
+        return SteamClient.SteamRemoteStorage;
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamScreenshots SteamScreenshots()
+    {
+        Write($"SteamScreenshots");
+        return SteamClient.SteamScreenshots;
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamUGC SteamUGC()
+    {
+        Write($"SteamUGC");
+        return SteamClient.SteamUGC;
+    }
+
+    //[DllExport(CallingConvention = CallingConvention.Cdecl)]
+    //public static ISteamUnifiedMessages SteamUnifiedMessages()
+    //{
+    //    Write($"SteamUnifiedMessages");
+    //    return SteamClient.SteamUnifiedMessages;
+    //}
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamUser SteamUser()
+    {
+        Write($"SteamUser");
+        return SteamClient.SteamUser;
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamUserStats SteamUserStats()
+    {
+        Write($"SteamUserStats");
+        return SteamClient.SteamUserStats;
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamUtils SteamUtils()
+    {
+        Write($"SteamUtils");
+        return SteamClient.SteamUtils;
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static ISteamVideo SteamVideo()
+    {
+        Write($"SteamVideo");
+        return SteamClient.SteamVideo;
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static void VR_GetGenericInterface(string pchInterfaceVersion, int peError )
+    {
+        Write($"VR_GetGenericInterface version {pchInterfaceVersion}");
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static string VR_GetStringForHmdError(int error)
+    {
+        Write($"VR_GetStringForHmdError");
+        return "";
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static void VR_Init(int error, int type)
+    {
+        Write($"VR_Init");
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static bool VR_IsHmdPresent()
+    {
+        Write($"VR_IsHmdPresent");
+        return false;
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static void VR_Shutdown()
+    {
+        Write($"VR_Shutdown");
+    }
+
+
     #endregion
+
 
 }
 

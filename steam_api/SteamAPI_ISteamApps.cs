@@ -187,10 +187,10 @@ public class SteamAPI_ISteamApps : BaseCalls
 
     // returns the SteamID of the original owner. If different from current user, it's borrowed
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static CSteamID SteamAPI_ISteamApps_GetAppOwner()
+    public static IntPtr SteamAPI_ISteamApps_GetAppOwner()
     {
         Write("SteamAPI_ISteamApps_GetAppOwner");
-        return new CSteamID(SteamClient.SteamId);
+        return IntPtr.Zero;
     }
 
     // Returns the associated launch param if the game is run via steam://run/<appid>//?param1=value1;param2=value2;param3=value3 etc.

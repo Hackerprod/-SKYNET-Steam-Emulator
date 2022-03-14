@@ -14,7 +14,7 @@ public class SteamInternal : BaseCalls
     public static uint global_counter;
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static IntPtr SteamInternal_FindOrCreateUserInterface(IntPtr hSteamUser, [MarshalAs(UnmanagedType.FunctionPtr)] string pszVersion)
+    public static IntPtr SteamInternal_FindOrCreateUserInterface(IntPtr hSteamUser, IntPtr pszVersion)
     {
         Write($"SteamInternal_FindOrCreateUserInterface {pszVersion}");
         return IntPtr.Zero;
@@ -22,7 +22,7 @@ public class SteamInternal : BaseCalls
 
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static IntPtr SteamInternal_FindOrCreateGameServerInterface(IntPtr hSteamUser, [MarshalAs(UnmanagedType.FunctionPtr)] string pszVersion)
+    public static IntPtr SteamInternal_FindOrCreateGameServerInterface(IntPtr hSteamUser, IntPtr pszVersion)
     {
         Write($"SteamInternal_FindOrCreateGameServerInterface {pszVersion}");
         return IntPtr.Zero;
@@ -57,7 +57,7 @@ public class SteamInternal : BaseCalls
 
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static IntPtr SteamInternal_CreateInterface(string version)
+    public static IntPtr SteamInternal_CreateInterface(IntPtr version)
     {
         Write($"SteamInternal_CreateInterface {version}");
         return (IntPtr)4516351; //Testing
@@ -129,7 +129,7 @@ public struct CSteamApiContext
         var a_steamUser = SteamAPI.GetHSteamUser();
         var a_steamPipe = SteamAPI.GetHSteamPipe();
 
-        
+
 
         return true;
     }

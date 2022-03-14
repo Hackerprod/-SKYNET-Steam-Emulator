@@ -10,273 +10,221 @@ using Steamworks;
 public class SteamAPI_ISteamClient : BaseCalls
 {
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static HSteamPipe SteamAPI_ISteamClient_CreateSteamPipe(IntPtr instancePtr)
+    public static HSteamPipe SteamAPI_ISteamClient_CreateSteamPipe()
     {
-        Write($"SteamAPI_ISteamClient_CreateSteamPipe");
-        return (HSteamPipe)1;
+        Write("SteamAPI_ISteamClient_CreateSteamPipe");
+        return SteamClient.CreateSteamPipe();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamClient_BReleaseSteamPipe(IntPtr instancePtr, HSteamPipe hSteamPipe)
+    public static bool SteamAPI_ISteamClient_BReleaseSteamPipe(HSteamPipe hSteamPipe)
     {
-        Write($"SteamAPI_ISteamClient_BReleaseSteamPipe");
-        return true;
+        Write("SteamAPI_ISteamClient_BReleaseSteamPipe");
+        return SteamClient.BReleaseSteamPipe(hSteamPipe);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static HSteamUser SteamAPI_ISteamClient_ConnectToGlobalUser(IntPtr instancePtr, HSteamPipe hSteamPipe)
+    public static HSteamUser SteamAPI_ISteamClient_ConnectToGlobalUser(HSteamPipe hSteamPipe)
     {
-        Write($"SteamAPI_ISteamClient_ConnectToGlobalUser");
-        return (HSteamUser)(int)1;
+        Write("SteamAPI_ISteamClient_ConnectToGlobalUser");
+        return SteamClient.ConnectToGlobalUser(hSteamPipe);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static HSteamUser SteamAPI_ISteamClient_CreateLocalUser(IntPtr instancePtr, ref HSteamPipe phSteamPipe, EAccountType eAccountType)
+    public static HSteamUser SteamAPI_ISteamClient_CreateLocalUser(out HSteamPipe phSteamPipe, EAccountType eAccountType)
     {
-        Write($"SteamAPI_ISteamClient_CreateLocalUser");
-        return (HSteamUser)(int)1;
+        Write("SteamAPI_ISteamClient_CreateLocalUser");
+        return SteamClient.CreateLocalUser(out phSteamPipe, eAccountType);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static void SteamAPI_ISteamClient_ReleaseUser(IntPtr instancePtr, HSteamPipe hSteamPipe, HSteamUser hUser)
+    public static void SteamAPI_ISteamClient_ReleaseUser(HSteamPipe hSteamPipe, HSteamUser hUser)
     {
-        Write($"SteamAPI_ISteamClient_ReleaseUser");
-        // Not Implemented
-    }
-
-    [DllExport("SteamAPI_ISteamClient_GetISteamUser", CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamUserStats SteamAPI_ISteamClient_GetISteamUser(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe, [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
-    {
-        Write($"SteamAPI_ISteamClient_GetISteamUser {pchVersion}");
-        switch (pchVersion)
-        {
-            case "SteamUser009": break;
-            case "SteamUser010": break;
-            case "SteamUser011": break;
-            case "SteamUser012": break;
-            case "SteamUser013": break;
-            case "SteamUser014": break;
-            case "SteamUser015": break;
-            case "SteamUser016": break;
-            case "SteamUser017": break;
-            case "SteamUser018": break;
-            case "SteamUser019": break;
-            case "SteamUser020": break;
-            case "SteamUser021": break;
-            default:
-                break;
-        }
-        return SteamClient.GetISteamUserStats(hSteamUser, hSteamPipe, pchVersion);
+        Write("SteamAPI_ISteamClient_ReleaseUser");
+        SteamClient.ReleaseUser(hSteamPipe, hUser);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamGameServer SteamAPI_ISteamClient_GetISteamGameServer(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe, [MarshalAs(UnmanagedType.LPStr)]  string pchVersion)
+    public static IntPtr SteamAPI_ISteamClient_GetISteamUser(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
-        Write($"SteamAPI_ISteamClient_GetISteamGameServer");
-        return SteamClient.GetISteamGameServer(hSteamUser, hSteamPipe, pchVersion);
+        Write("SteamAPI_ISteamClient_GetISteamUser");
+        return IntPtr.Zero; // SteamClient.GetISteamUser(hSteamUser, hSteamPipe, pchVersion);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static void SteamAPI_ISteamClient_SetLocalIPBinding(IntPtr instancePtr, ref uint unIP, ushort usPort)
+    public static IntPtr SteamAPI_ISteamClient_GetISteamGameServer(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
-        Write($"SteamAPI_ISteamClient_SetLocalIPBinding");
-        // Not implemented
+        Write("SteamAPI_ISteamClient_GetISteamGameServer");
+        return IntPtr.Zero; // SteamClient.GetISteamGameServer(hSteamUser, hSteamPipe, pchVersion);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamFriends SteamAPI_ISteamClient_GetISteamFriends(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+    public static void SteamAPI_ISteamClient_SetLocalIPBinding(uint unIP, ushort usPort)
     {
-        Write($"SteamAPI_ISteamClient_GetISteamFriends");
-        return SteamClient.GetISteamFriends(hSteamUser, hSteamPipe, pchVersion);
+        Write("SteamAPI_ISteamClient_SetLocalIPBinding");
+        SteamClient.SetLocalIPBinding(unIP, usPort);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamUtils SteamAPI_ISteamClient_GetISteamUtils(IntPtr instancePtr, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+    public static IntPtr SteamAPI_ISteamClient_GetISteamFriends(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
-        Write($"SteamAPI_ISteamClient_GetISteamUtils");
-        return SteamClient.GetISteamUtils(hSteamPipe, pchVersion);
+        Write("SteamAPI_ISteamClient_GetISteamFriends");
+        return IntPtr.Zero; // SteamClient.GetISteamFriends(hSteamUser, hSteamPipe, pchVersion);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamMatchmaking SteamAPI_ISteamClient_GetISteamMatchmaking(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+    public static IntPtr SteamAPI_ISteamClient_GetISteamUtils(HSteamPipe hSteamPipe, string pchVersion)
     {
-        Write($"SteamAPI_ISteamClient_GetISteamMatchmaking");
-        return SteamClient.GetISteamMatchmaking(hSteamUser, hSteamPipe, pchVersion);
+        Write("SteamAPI_ISteamClient_GetISteamUtils");
+        return IntPtr.Zero; // SteamClient.GetISteamUtils(hSteamPipe, pchVersion);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamMatchmakingServers SteamAPI_ISteamClient_GetISteamMatchmakingServers(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+    public static IntPtr SteamAPI_ISteamClient_GetISteamMatchmaking(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
-        Write($"SteamAPI_ISteamClient_GetISteamMatchmakingServers");
-        return SteamClient.GetISteamMatchmakingServers(hSteamUser, hSteamPipe, pchVersion);
+        Write("SteamAPI_ISteamClient_GetISteamMatchmaking");
+        return IntPtr.Zero; // SteamClient.GetISteamMatchmaking(hSteamUser, hSteamPipe, pchVersion);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static IntPtr SteamAPI_ISteamClient_GetISteamGenericInterface(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+    public static IntPtr SteamAPI_ISteamClient_GetISteamMatchmakingServers(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
-        Write($"SteamAPI_ISteamClient_GetISteamGenericInterface");
-        return (IntPtr)SteamClient.GetISteamGenericInterface(hSteamUser, hSteamPipe, pchVersion);
+        Write("SteamAPI_ISteamClient_GetISteamMatchmakingServers");
+        return IntPtr.Zero; // SteamClient.GetISteamMatchmakingServers(hSteamUser, hSteamPipe, pchVersion);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamUserStats SteamAPI_ISteamClient_GetISteamUserStats(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+    public static IntPtr SteamAPI_ISteamClient_GetISteamGenericInterface(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
-        Write($"SteamAPI_ISteamClient_GetISteamUserStats");
-        return SteamClient.GetISteamUserStats(hSteamUser, hSteamPipe, pchVersion);
+        Write("SteamAPI_ISteamClient_GetISteamGenericInterface");
+        return IntPtr.Zero; // SteamClient.GetISteamGenericInterface(hSteamUser, hSteamPipe, pchVersion);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamGameServerStats SteamAPI_ISteamClient_GetISteamGameServerStats(IntPtr instancePtr, HSteamUser hSteamuser, HSteamPipe hSteamPipe, [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+    public static IntPtr SteamAPI_ISteamClient_GetISteamUserStats(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
-        Write($"SteamAPI_ISteamClient_GetISteamGameServerStats");
-        return default;
+        Write("SteamAPI_ISteamClient_GetISteamUserStats");
+        return IntPtr.Zero; // SteamClient.GetISteamUserStats(hSteamUser, hSteamPipe, pchVersion);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamApps SteamAPI_ISteamClient_GetISteamApps(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe, [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+    public static IntPtr SteamAPI_ISteamClient_GetISteamGameServerStats(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
-        Write($"SteamAPI_ISteamClient_GetISteamApps");
-        return default;
+        Write("SteamAPI_ISteamClient_GetISteamGameServerStats");
+        return IntPtr.Zero; // SteamClient.GetISteamGameServerStats(hSteamuser, hSteamPipe, pchVersion);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamNetworking SteamAPI_ISteamClient_GetISteamNetworking(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+    public static IntPtr SteamAPI_ISteamClient_GetISteamApps(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
-        Write($"SteamAPI_ISteamClient_GetISteamNetworking");
-        return SteamClient.GetISteamNetworking(hSteamUser, hSteamPipe, pchVersion);
+        Write("SteamAPI_ISteamClient_GetISteamApps");
+        return IntPtr.Zero; // SteamClient.GetISteamApps(hSteamUser, hSteamPipe, pchVersion);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamRemoteStorage SteamAPI_ISteamClient_GetISteamRemoteStorage(IntPtr instancePtr, HSteamUser hSteamuser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+    public static IntPtr SteamAPI_ISteamClient_GetISteamNetworking(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
-        Write($"SteamAPI_ISteamClient_GetISteamRemoteStorage");
-        return SteamClient.GetISteamRemoteStorage(hSteamuser, hSteamPipe, pchVersion);
+        Write("SteamAPI_ISteamClient_GetISteamNetworking");
+        return IntPtr.Zero; // SteamClient.GetISteamNetworking(hSteamUser, hSteamPipe, pchVersion);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamScreenshots SteamAPI_ISteamClient_GetISteamScreenshots(IntPtr instancePtr, HSteamUser hSteamuser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+    public static IntPtr SteamAPI_ISteamClient_GetISteamRemoteStorage(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
-        Write($"SteamAPI_ISteamClient_GetISteamScreenshots");
-        return SteamClient.GetISteamScreenshots(hSteamuser, hSteamPipe, pchVersion);
+        Write("SteamAPI_ISteamClient_GetISteamRemoteStorage");
+        return IntPtr.Zero; // SteamClient.GetISteamRemoteStorage(hSteamuser, hSteamPipe, pchVersion);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamGameSearch SteamAPI_ISteamClient_GetISteamGameSearch(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+    public static IntPtr SteamAPI_ISteamClient_GetISteamScreenshots(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
-        Write($"SteamAPI_ISteamClient_GetISteamGameSearch");
-        return SteamClient.GetISteamGameSearch(hSteamUser, hSteamPipe, pchVersion);
+        Write("SteamAPI_ISteamClient_GetISteamScreenshots");
+        return IntPtr.Zero; // SteamClient.GetISteamScreenshots(hSteamuser, hSteamPipe, pchVersion);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static uint SteamAPI_ISteamClient_GetIPCCallCount(IntPtr instancePtr)
+    public static uint SteamAPI_ISteamClient_GetIPCCallCount()
     {
-        Write($"SteamAPI_ISteamClient_GetIPCCallCount");
-        return 15;
+        Write("SteamAPI_ISteamClient_GetIPCCallCount");
+        return SteamClient.GetIPCCallCount();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static void SteamAPI_ISteamClient_SetWarningMessageHook(IntPtr instancePtr, IntPtr pFunction)
+    public static bool SteamAPI_ISteamClient_BShutdownIfAllPipesClosed()
     {
-        Write($"SteamAPI_ISteamClient_SetWarningMessageHook");
-        // Not implemented
+        Write("SteamAPI_ISteamClient_BShutdownIfAllPipesClosed");
+        return SteamClient.BShutdownIfAllPipesClosed();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamClient_BShutdownIfAllPipesClosed(IntPtr instancePtr)
+    public static IntPtr SteamAPI_ISteamClient_GetISteamHTTP(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
-        Write($"SteamAPI_ISteamClient_BShutdownIfAllPipesClosed");
-        return true;
+        Write("SteamAPI_ISteamClient_GetISteamHTTP");
+        return IntPtr.Zero; // SteamClient.GetISteamHTTP(hSteamuser, hSteamPipe, pchVersion);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamHTTP SteamAPI_ISteamClient_GetISteamHTTP(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+    public static IntPtr SteamAPI_ISteamClient_GetISteamController(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
-        Write($"SteamAPI_ISteamClient_GetISteamHTTP");
-        return SteamClient.GetISteamHTTP(hSteamUser, hSteamPipe, pchVersion);
+        Write("SteamAPI_ISteamClient_GetISteamController");
+        return IntPtr.Zero; // SteamClient.GetISteamController(hSteamUser, hSteamPipe, pchVersion);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamController SteamAPI_ISteamClient_GetISteamController(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+    public static IntPtr SteamAPI_ISteamClient_GetISteamUGC(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
-        Write($"SteamAPI_ISteamClient_GetISteamController");
-        return SteamClient.GetISteamController(hSteamUser, hSteamPipe, pchVersion);
+        Write("SteamAPI_ISteamClient_GetISteamUGC");
+        return IntPtr.Zero; // SteamClient.GetISteamUGC(hSteamUser, hSteamPipe, pchVersion);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamUGC SteamAPI_ISteamClient_GetISteamUGC(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+    public static IntPtr SteamAPI_ISteamClient_GetISteamAppList(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
     {
-        Write($"SteamAPI_ISteamClient_GetISteamUGC");
-        return SteamClient.GetISteamUGC(hSteamUser, hSteamPipe, pchVersion);
-    }
-
-    //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-    //public static ISteamAppList SteamAPI_ISteamClient_GetISteamAppList(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
-    //{
-    //    DEBUG($"SteamAPI_ISteamClient_GetISteamAppList");
-    //    return SteamClient.GetISteamAppList(hSteamUser, hSteamPipe, pchVersion);
-    //}
-
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamMusic SteamAPI_ISteamClient_GetISteamMusic(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
-    {
-        Write($"SteamAPI_ISteamClient_GetISteamMusic");
-        return SteamClient.GetISteamMusic(hSteamUser, hSteamPipe, pchVersion);
+        Write("SteamAPI_ISteamClient_GetISteamAppList");
+        return IntPtr.Zero; // SteamClient.GetISteamAppList(hSteamUser, hSteamPipe, pchVersion);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamMusicRemote SteamAPI_ISteamClient_GetISteamMusicRemote(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+    public static IntPtr SteamAPI_ISteamClient_GetISteamMusic(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
-        Write($"SteamAPI_ISteamClient_GetISteamMusicRemote");
-        return SteamClient.GetISteamMusicRemote(hSteamUser, hSteamPipe, pchVersion);
+        Write("SteamAPI_ISteamClient_GetISteamMusic");
+        return IntPtr.Zero; // SteamClient.GetISteamMusic(hSteamuser, hSteamPipe, pchVersion);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamHTMLSurface SteamAPI_ISteamClient_GetISteamHTMLSurface(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+    public static IntPtr SteamAPI_ISteamClient_GetISteamMusicRemote(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
-        Write($"SteamAPI_ISteamClient_GetISteamHTMLSurface");
-        return SteamClient.GetISteamHTMLSurface(hSteamUser, hSteamPipe, pchVersion);
+        Write("SteamAPI_ISteamClient_GetISteamMusicRemote");
+        return IntPtr.Zero; // SteamClient.GetISteamMusicRemote(hSteamuser, hSteamPipe, pchVersion);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamInventory SteamAPI_ISteamClient_GetISteamInventory(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+    public static IntPtr SteamAPI_ISteamClient_GetISteamHTMLSurface(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
-        Write($"SteamAPI_ISteamClient_GetISteamInventory");
-        return SteamClient.GetISteamInventory(hSteamUser, hSteamPipe, pchVersion);
+        Write("SteamAPI_ISteamClient_GetISteamHTMLSurface");
+        return IntPtr.Zero; // SteamClient.GetISteamHTMLSurface(hSteamuser, hSteamPipe, pchVersion);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamVideo SteamAPI_ISteamClient_GetISteamVideo(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+    public static IntPtr SteamAPI_ISteamClient_GetISteamInventory(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
-        Write($"SteamAPI_ISteamClient_GetISteamVideo");
-        return SteamClient.GetISteamVideo(hSteamUser, hSteamPipe, pchVersion);
+        Write("SteamAPI_ISteamClient_GetISteamInventory");
+        return IntPtr.Zero; // SteamClient.GetISteamInventory(hSteamuser, hSteamPipe, pchVersion);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamParentalSettings SteamAPI_ISteamClient_GetISteamParentalSettings(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+    public static IntPtr SteamAPI_ISteamClient_GetISteamVideo(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
-        Write($"SteamAPI_ISteamClient_GetISteamParentalSettings");
-        return SteamClient.GetISteamParentalSettings(hSteamUser, hSteamPipe, pchVersion);
+        Write("SteamAPI_ISteamClient_GetISteamVideo");
+        return IntPtr.Zero; // SteamClient.GetISteamVideo(hSteamuser, hSteamPipe, pchVersion);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamInput SteamAPI_ISteamClient_GetISteamInput(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+    public static IntPtr SteamAPI_ISteamClient_GetISteamParentalSettings(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
     {
-        Write($"SteamAPI_ISteamClient_GetISteamInput");
-        return SteamClient.GetISteamInput(hSteamUser, hSteamPipe, pchVersion);
+        Write("SteamAPI_ISteamClient_GetISteamParentalSettings");
+        return IntPtr.Zero; // SteamClient.GetISteamParentalSettings(hSteamuser, hSteamPipe, pchVersion);
     }
 
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamParties SteamAPI_ISteamClient_GetISteamParties(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
-    {
-        Write($"SteamAPI_ISteamClient_GetISteamParties");
-        return SteamClient.GetISteamParties(hSteamUser, hSteamPipe, pchVersion);
-    }
-
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamRemotePlay SteamAPI_ISteamClient_GetISteamRemotePlay(IntPtr instancePtr, HSteamUser hSteamUser, HSteamPipe hSteamPipe,  [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
-    {
-        Write($"SteamAPI_ISteamClient_GetISteamRemotePlay");
-        return SteamClient.GetISteamRemotePlay(hSteamUser, hSteamPipe, pchVersion);
-    }
 }
 

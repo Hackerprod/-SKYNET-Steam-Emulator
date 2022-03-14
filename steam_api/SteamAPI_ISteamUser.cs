@@ -11,235 +11,227 @@ using Steamworks;
 public class SteamAPI_ISteamUser : BaseCalls
 {
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ulong SteamAPI_ISteamUser_GetSteamID(ISteamUser self)
+    public static HSteamUser SteamAPI_ISteamUser_GetHSteamUser()
     {
-        Write($"{"SteamAPI_ISteamUser_GetSteamID"}");
-        return SteamClient.SteamId;
+        Write("SteamAPI_ISteamUser_Get");
+        return SteamClient.SteamUser.GetHSteamUser();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamUser SteamAPI_SteamUser_v021()
+    public static bool SteamAPI_ISteamUser_BLoggedOn()
     {
-        Write($"{"SteamAPI_SteamUser_v021"}");
-        return SteamClient.GetISteamUser(SteamClient.LocalUser, SteamClient.LocalPipe, "SteamUser021");
+        Write("SteamAPI_ISteamUser_BLoggedOn");
+        return SteamClient.SteamUser.BLoggedOn();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamUser SteamAPI_SteamUser_v020()
+    public static IntPtr SteamAPI_ISteamUser_GetSteamID()
     {
-        Write($"{"SteamAPI_SteamUser_v020"}");
-        return SteamClient.GetISteamUser(SteamClient.LocalUser, SteamClient.LocalPipe, "SteamUser020");
+        Write("SteamAPI_ISteamUser_GetSteamID");
+        return SteamClient.SteamUser.GetSteamID();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static HSteamUser SteamAPI_ISteamUser_GetHSteamUser(ISteamUser self)
+    public static int SteamAPI_ISteamUser_InitiateGameConnection(IntPtr pAuthBlob, int cbMaxAuthBlob, IntPtr steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)
     {
-        Write($"{"SteamAPI_ISteamUser_GetHSteamUser"}");
-        return SteamClient.LocalUser;
+        Write("SteamAPI_ISteamUser_InitiateGameConnection");
+        return SteamClient.SteamUser.InitiateGameConnection(pAuthBlob, cbMaxAuthBlob, steamIDGameServer, unIPServer, usPortServer, bSecure);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamUser_BLoggedOn(ISteamUser self)
+    public static void SteamAPI_ISteamUser_TerminateGameConnection(uint unIPServer, uint usPortServer)
     {
-        Write($"{"SteamAPI_ISteamUser_BLoggedOn"}");
-        return true;
+        Write("SteamAPI_ISteamUser_TerminateGameConnection");
+        //
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static int SteamAPI_ISteamUser_InitiateGameConnection(ISteamUser self, IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, int usPortServer, bool bSecure)
+    public static void SteamAPI_ISteamUser_TrackAppUsageEvent(IntPtr gameID, int eAppUsageEvent, string pchExtraInfo = "")
     {
-        Write($"{"SteamAPI_ISteamUser_InitiateGameConnection"}");
-        return 1;
+        Write("SteamAPI_ISteamUser_TrackAppUsageEvent");
+        //
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static void SteamAPI_ISteamUser_TerminateGameConnection(ISteamUser self, uint unIPServer, int usPortServer)
+    public static bool SteamAPI_ISteamUser_GetUserDataFolder(string pchBuffer, int cubBuffer)
     {
-        Write($"{"SteamAPI_ISteamUser_TerminateGameConnection"}");
+        Write("SteamAPI_ISteamUser_GetUserDataFolder");
+        return SteamClient.SteamUser.GetUserDataFolder(pchBuffer, cubBuffer);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static void SteamAPI_ISteamUser_TrackAppUsageEvent(ISteamUser self, ulong gameID, int eAppUsageEvent, IntPtr pchExtraInfo)
+    public static void SteamAPI_ISteamUser_StartVoiceRecording()
     {
-        Write($"{"SteamAPI_ISteamUser_TrackAppUsageEvent"}");
+        Write("SteamAPI_ISteamUser_StartVoiceRecording");
+        //
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamUser_GetUserDataFolder(ISteamUser self, IntPtr pchBuffer, int cubBuffer)
+    public static void SteamAPI_ISteamUser_StopVoiceRecording()
     {
-        Write($"{"SteamAPI_ISteamUser_GetUserDataFolder"}");
-        return true;
+        Write("SteamAPI_ISteamUser_StopVoiceRecording");
+        //
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static void SteamAPI_ISteamUser_StartVoiceRecording(ISteamUser self)
+    public static EVoiceResult SteamAPI_ISteamUser_GetAvailableVoice(uint pcbCompressed, uint pcbUncompressed_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
     {
-        Write($"{"SteamAPI_ISteamUser_StartVoiceRecording"}");
+        Write("SteamAPI_ISteamUser_GetAvailableVoice");
+        return SteamClient.SteamUser.GetAvailableVoice(pcbCompressed, pcbUncompressed_Deprecated, nUncompressedVoiceDesiredSampleRate_Deprecated);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static void SteamAPI_ISteamUser_StopVoiceRecording(ISteamUser self)
+    public static EVoiceResult SteamAPI_ISteamUser_GetVoice(bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, uint nBytesWritten, bool bWantUncompressed_Deprecated, IntPtr pUncompressedDestBuffer_Deprecated, uint cbUncompressedDestBufferSize_Deprecated, uint nUncompressBytesWritten_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
     {
-        Write($"{"SteamAPI_ISteamUser_StopVoiceRecording"}");
+        Write("SteamAPI_ISteamUser_GetVoice");
+        return SteamClient.SteamUser.GetVoice(bWantCompressed, pDestBuffer, cbDestBufferSize, nBytesWritten, bWantUncompressed_Deprecated, pUncompressedDestBuffer_Deprecated, cbUncompressedDestBufferSize_Deprecated, nUncompressBytesWritten_Deprecated, nUncompressedVoiceDesiredSampleRate_Deprecated);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static VoiceResult SteamAPI_ISteamUser_GetAvailableVoice(ISteamUser self, uint pcbCompressed, uint pcbUncompressed_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
+    public static EVoiceResult SteamAPI_ISteamUser_DecompressVoice(IntPtr pCompressed, uint cbCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, uint nBytesWritten, uint nDesiredSampleRate)
     {
-        Write($"{"SteamAPI_ISteamUser_GetAvailableVoice"}");
-        return VoiceResult.NotInitialized;
+        Write("SteamAPI_ISteamUser_DecompressVoice");
+        return SteamClient.SteamUser.DecompressVoice(pCompressed, cbCompressed, pDestBuffer, cbDestBufferSize, nBytesWritten, nDesiredSampleRate);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static VoiceResult SteamAPI_ISteamUser_GetVoice(ISteamUser self, bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, uint nBytesWritten, bool bWantUncompressed_Deprecated, IntPtr pUncompressedDestBuffer_Deprecated, uint cbUncompressedDestBufferSize_Deprecated, uint nUncompressBytesWritten_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
+    public static uint SteamAPI_ISteamUser_GetVoiceOptimalSampleRate()
     {
-        Write($"{"SteamAPI_ISteamUser_GetVoice"}");
-        return VoiceResult.NotInitialized;
+        Write("SteamAPI_ISteamUser_GetVoiceOptimalSampleRate");
+        return SteamClient.SteamUser.GetVoiceOptimalSampleRate();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static VoiceResult SteamAPI_ISteamUser_DecompressVoice(ISteamUser self, IntPtr pCompressed, uint cbCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, uint nBytesWritten, uint nDesiredSampleRate)
+    public static HAuthTicket SteamAPI_ISteamUser_GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
     {
-        Write($"{"SteamAPI_ISteamUser_DecompressVoice"}");
-        return VoiceResult.NotInitialized;
+        Write("SteamAPI_ISteamUser_GetAuthSessionTicket");
+        return SteamClient.SteamUser.GetAuthSessionTicket(pTicket, cbMaxTicket, pcbTicket);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static uint SteamAPI_ISteamUser_GetVoiceOptimalSampleRate(ISteamUser self)
+    public static EBeginAuthSessionResult SteamAPI_ISteamUser_BeginAuthSession(IntPtr pAuthTicket, int cbAuthTicket, IntPtr steamID)
     {
-        Write($"{"SteamAPI_ISteamUser_GetVoiceOptimalSampleRate"}");
-        return 10;
+        Write("SteamAPI_ISteamUser_BeginAuthSession");
+        return SteamClient.SteamUser.BeginAuthSession(pAuthTicket, cbAuthTicket, steamID);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static HAuthTicket SteamAPI_ISteamUser_GetAuthSessionTicket(ISteamUser self, IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
+    public static void SteamAPI_ISteamUser_EndAuthSession(IntPtr steamID)
     {
-        Write($"{"SteamAPI_ISteamUser_GetAuthSessionTicket"}");
-        return (HAuthTicket)1;
+        Write("SteamAPI_ISteamUser_EndAuthSession");
+        //
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static BeginAuthResult SteamAPI_ISteamUser_BeginAuthSession(ISteamUser self, IntPtr pAuthTicket, int cbAuthTicket, ulong steamID)
+    public static void SteamAPI_ISteamUser_CancelAuthTicket(HAuthTicket hAuthTicket)
     {
-        Write($"{"SteamAPI_ISteamUser_BeginAuthSession"}");
-        return BeginAuthResult.OK;
+        Write("SteamAPI_ISteamUser_CancelAuthTicket");
+        //
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static void SteamAPI_ISteamUser_EndAuthSession(ISteamUser self, ulong steamID)
+    public static EUserHasLicenseForAppResult SteamAPI_ISteamUser_UserHasLicenseForApp(IntPtr steamID, AppId_t appID)
     {
-        Write($"{"SteamAPI_ISteamUser_EndAuthSession"}");
+        Write("SteamAPI_ISteamUser_UserHasLicenseForApp");
+        return SteamClient.SteamUser.UserHasLicenseForApp(steamID, appID);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static void SteamAPI_ISteamUser_CancelAuthTicket(ISteamUser self, HAuthTicket hAuthTicket)
+    public static bool SteamAPI_ISteamUser_BIsBehindNAT()
     {
-        Write($"{"SteamAPI_ISteamUser_CancelAuthTicket"}");
+        Write("SteamAPI_ISteamUser_BIsBehindNAT");
+        return SteamClient.SteamUser.BIsBehindNAT();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static UserHasLicenseForAppResult SteamAPI_ISteamUser_UserHasLicenseForApp(ISteamUser self, ulong steamID, AppId_t appID)
+    public static void SteamAPI_ISteamUser_AdvertiseGame(IntPtr steamIDGameServer, uint unIPServer, uint usPortServer)
     {
-        Write($"{"SteamAPI_ISteamUser_UserHasLicenseForApp"}");
-        return UserHasLicenseForAppResult.HasLicense;
+        Write("SteamAPI_ISteamUser_AdvertiseGame");
+        //
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamUser_BIsBehindNAT(ISteamUser self)
+    public static SteamAPICall_t SteamAPI_ISteamUser_RequestEncryptedAppTicket(IntPtr pDataToInclude, int cbDataToInclude)
     {
-        Write($"{"SteamAPI_ISteamUser_BIsBehindNAT"}");
-        return false;
+        Write("SteamAPI_ISteamUser_RequestEncryptedAppTicket");
+        return SteamClient.SteamUser.RequestEncryptedAppTicket(pDataToInclude, cbDataToInclude);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static void SteamAPI_ISteamUser_AdvertiseGame(ISteamUser self, ulong steamIDGameServer, uint unIPServer, int usPortServer)
+    public static bool SteamAPI_ISteamUser_GetEncryptedAppTicket(IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
     {
-        Write($"{"SteamAPI_ISteamUser_AdvertiseGame"}");
+        Write("SteamAPI_ISteamUser_GetEncryptedAppTicket");
+        return SteamClient.SteamUser.GetEncryptedAppTicket(pTicket, cbMaxTicket, pcbTicket);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static SteamAPICall_t SteamAPI_ISteamUser_RequestEncryptedAppTicket(ISteamUser self, IntPtr pDataToInclude, int cbDataToInclude)
+    public static int SteamAPI_ISteamUser_GetGameBadgeLevel(int nSeries, bool bFoil)
     {
-        Write($"{"SteamAPI_ISteamUser_RequestEncryptedAppTicket"}");
-        return (SteamAPICall_t)1;
+        Write("SteamAPI_ISteamUser_GetGameBadgeLevel");
+        return SteamClient.SteamUser.GetGameBadgeLevel(nSeries, bFoil);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamUser_GetEncryptedAppTicket(ISteamUser self, IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
+    public static int SteamAPI_ISteamUser_GetPlayerSteamLevel()
     {
-        Write($"{"SteamAPI_ISteamUser_GetEncryptedAppTicket"}");
-        return true;
+        Write("SteamAPI_ISteamUser_GetPlayerSteamLevel");
+        return SteamClient.SteamUser.GetPlayerSteamLevel();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static int SteamAPI_ISteamUser_GetGameBadgeLevel(ISteamUser self, int nSeries, bool bFoil)
+    public static SteamAPICall_t SteamAPI_ISteamUser_RequestStoreAuthURL(string pchRedirectURL)
     {
-        Write($"{"SteamAPI_ISteamUser_GetGameBadgeLevel"}");
-        return 90;
+        Write("SteamAPI_ISteamUser_RequestStoreAuthURL");
+        return SteamClient.SteamUser.RequestStoreAuthURL(pchRedirectURL);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static int SteamAPI_ISteamUser_GetPlayerSteamLevel(ISteamUser self)
+    public static bool SteamAPI_ISteamUser_BIsPhoneVerified()
     {
-        Write($"{"SteamAPI_ISteamUser_GetPlayerSteamLevel"}");
-        return 100;
+        Write("SteamAPI_ISteamUser_BIsPhoneVerified");
+        return SteamClient.SteamUser.BIsPhoneVerified();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static SteamAPICall_t SteamAPI_ISteamUser_RequestStoreAuthURL(ISteamUser self, IntPtr pchRedirectURL)
+    public static bool SteamAPI_ISteamUser_BIsTwoFactorEnabled()
     {
-        Write($"{"SteamAPI_ISteamUser_RequestStoreAuthURL"}");
-        return (SteamAPICall_t)1;
+        Write("SteamAPI_ISteamUser_BIsTwoFactorEnabled");
+        return SteamClient.SteamUser.BIsTwoFactorEnabled();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamUser_BIsPhoneVerified(ISteamUser self)
+    public static bool SteamAPI_ISteamUser_BIsPhoneIdentifying()
     {
-        Write($"{"SteamAPI_ISteamUser_BIsPhoneVerified"}");
-        return true;
+        Write("SteamAPI_ISteamUser_BIsPhoneIdentifying");
+        return SteamClient.SteamUser.BIsPhoneIdentifying();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamUser_BIsTwoFactorEnabled(ISteamUser self)
+    public static bool SteamAPI_ISteamUser_BIsPhoneRequiringVerification()
     {
-        Write($"{"SteamAPI_ISteamUser_BIsTwoFactorEnabled"}");
-        return false;
+        Write("SteamAPI_ISteamUser_BIsPhoneRequiringVerification");
+        return SteamClient.SteamUser.BIsPhoneRequiringVerification();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamUser_BIsPhoneIdentifying(ISteamUser self)
+    public static SteamAPICall_t SteamAPI_ISteamUser_GetMarketEligibility()
     {
-        Write($"{"SteamAPI_ISteamUser_BIsPhoneIdentifying"}");
-        return false;
+        Write("SteamAPI_ISteamUser_GetMarketEligibility");
+        return SteamClient.SteamUser.GetMarketEligibility();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamUser_BIsPhoneRequiringVerification(ISteamUser self)
+    public static SteamAPICall_t SteamAPI_ISteamUser_GetDurationControl()
     {
-        Write($"{"SteamAPI_ISteamUser_BIsPhoneRequiringVerification"}");
-        return false;
+        Write("SteamAPI_ISteamUser_GetDurationControl");
+        return SteamClient.SteamUser.GetDurationControl();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static SteamAPICall_t SteamAPI_ISteamUser_GetMarketEligibility(ISteamUser self)
+    public static bool SteamAPI_ISteamUser_BSetDurationControlOnlineState(EDurationControlOnlineState eNewState)
     {
-        Write($"{"SteamAPI_ISteamUser_GetMarketEligibility"}");
-        return (SteamAPICall_t)1;
+        Write("SteamAPI_ISteamUser_BSetDurationControlOnlineState");
+        return SteamClient.SteamUser.BSetDurationControlOnlineState(eNewState);
     }
-
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static SteamAPICall_t SteamAPI_ISteamUser_GetDurationControl(ISteamUser self)
-    {
-        Write($"{"SteamAPI_ISteamUser_GetDurationControl"}");
-        return (SteamAPICall_t)1;
-    }
-
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamUser_BSetDurationControlOnlineState(ISteamUser self, DurationControlOnlineState eNewState)
-    {
-        Write($"{"SteamAPI_ISteamUser_BSetDurationControlOnlineState"}");
-        return true;
-    }
-
 
 }

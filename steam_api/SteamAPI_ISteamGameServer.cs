@@ -5,7 +5,7 @@ using SKYNET.Helper;
 using SKYNET.Interface;
 using Steamworks;
 
-public class SteamGameServer : BaseCalls
+public partial class SteamAPI_SteamGameServer : BaseCalls
 {
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static HSteamUser SteamGameServer_GetHSteamUser()
