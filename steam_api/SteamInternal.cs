@@ -17,7 +17,7 @@ public class SteamInternal : BaseCalls
     public static IntPtr SteamInternal_FindOrCreateUserInterface(IntPtr hSteamUser, IntPtr pszVersion)
     {
         Write($"SteamInternal_FindOrCreateUserInterface {pszVersion}");
-        return IntPtr.Zero;
+        return (IntPtr)Activator.CreateInstance(typeof(SteamInterface));
     }
 
 
