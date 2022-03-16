@@ -218,11 +218,6 @@ namespace SKYNET.Managers
             return false;
         }
 
-        public bool GetAchievementProgressLimits(string pchName, float pfMinProgress, float pfMaxProgress)
-        {
-            return false;
-        }
-
     }
 
 }

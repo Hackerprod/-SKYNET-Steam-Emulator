@@ -213,10 +213,6 @@ namespace SKYNET.Interface
 
         bool GetAchievementProgressLimits(string pchName, uint pnMinProgress, uint pnMaxProgress);
 
-
-        bool GetAchievementProgressLimits(string pchName, float pfMinProgress, float pfMaxProgress);
-
-
     }
     // the sort order of a leaderboard
     public enum ELeaderboardSortMethod : int
