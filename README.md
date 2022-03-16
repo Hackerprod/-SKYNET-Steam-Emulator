@@ -3,10 +3,10 @@ This project is created with the aim of replacing the original `steam_api.dll` f
 This is not a steamworks wrapper like `Steamworks.Net` or `Facepunch`.
 The project is in an initial stage, so it is not functional yet.
 
-## Settings:
+## Settings
 This emulator reads settings from `[SKYNET] steam_api.ini` file, data like Nickname, SteamId, Language etc.
 
-## LOG:
+## Log
 When File log option si enabled in settings, a log file will be created in the root of the game executable with the following name `[SKYNET] steam_api.log`
 
 ## Implemented Interfaces
