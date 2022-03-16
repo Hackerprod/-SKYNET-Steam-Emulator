@@ -1,4 +1,5 @@
-﻿using SKYNET.Interface;
+﻿using SKYNET;
+using SKYNET.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,49 +13,49 @@ public class SteamAPI_ISteamRemotePlay : BaseCalls
     public static uint SteamAPI_ISteamRemotePlay_GetSessionCount()
     {
         Write("SteamAPI_ISteamRemotePlay_GetSessionCount");
-        return SteamClient.SteamRemotePlay.GetSessionCount();
+        return SteamEmulator.SteamRemotePlay.GetSessionCount();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static uint SteamAPI_ISteamRemotePlay_GetSessionID(int iSessionIndex)
     {
         Write("SteamAPI_ISteamRemotePlay_GetSessionID");
-        return SteamClient.SteamRemotePlay.GetSessionID(iSessionIndex);
+        return SteamEmulator.SteamRemotePlay.GetSessionID(iSessionIndex);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static IntPtr SteamAPI_ISteamRemotePlay_GetSessionSteamID(uint unSessionID)
     {
         Write("SteamAPI_ISteamRemotePlay_IntPtrGetSessionSteamID");
-        return SteamClient.SteamRemotePlay.GetSessionSteamID(unSessionID);
+        return SteamEmulator.SteamRemotePlay.GetSessionSteamID(unSessionID);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static  string SteamAPI_ISteamRemotePlay_GetSessionClientName(uint unSessionID)
     {
         Write("SteamAPI_ISteamRemotePlay_stringGetSessionClientName");
-        return SteamClient.SteamRemotePlay.GetSessionClientName(unSessionID);
+        return SteamEmulator.SteamRemotePlay.GetSessionClientName(unSessionID);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static ESteamDeviceFormFactor SteamAPI_ISteamRemotePlay_GetSessionClientFormFactor(uint unSessionID)
     {
         Write("SteamAPI_ISteamRemotePlay_GetSessionClientFormFactor");
-        return SteamClient.SteamRemotePlay.GetSessionClientFormFactor(unSessionID);
+        return SteamEmulator.SteamRemotePlay.GetSessionClientFormFactor(unSessionID);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamRemotePlay_BGetSessionClientResolution(uint unSessionID, int pnResolutionX, int pnResolutionY)
     {
         Write("SteamAPI_ISteamRemotePlay_BGetSessionClientResolution");
-        return SteamClient.SteamRemotePlay.BGetSessionClientResolution(unSessionID, pnResolutionX, pnResolutionY);
+        return SteamEmulator.SteamRemotePlay.BGetSessionClientResolution(unSessionID, pnResolutionX, pnResolutionY);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamRemotePlay_BSendRemotePlayTogetherInvite(IntPtr steamIDFriend)
     {
         Write("SteamAPI_ISteamRemotePlay_BSendRemotePlayTogetherInvite");
-        return SteamClient.SteamRemotePlay.BSendRemotePlayTogetherInvite(steamIDFriend);
+        return SteamEmulator.SteamRemotePlay.BSendRemotePlayTogetherInvite(steamIDFriend);
     }
 
 }

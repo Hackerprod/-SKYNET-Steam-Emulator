@@ -1,4 +1,5 @@
-﻿using SKYNET.Interface;
+﻿using SKYNET;
+using SKYNET.Interface;
 using System.Runtime.InteropServices;
 
 public class SteamAPI_ISteamMusic : BaseCalls
@@ -7,28 +8,28 @@ public class SteamAPI_ISteamMusic : BaseCalls
     public static bool SteamAPI_ISteamMusic_BIsEnabled()
     {
         Write("SteamAPI_ISteamMusic_BIsEnabled");
-        return SteamClient.SteamMusic.BIsEnabled();
+        return SteamEmulator.SteamMusic.BIsEnabled();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamMusic_BIsPlaying()
     {
         Write("SteamAPI_ISteamMusic_BIsPlaying");
-        return SteamClient.SteamMusic.BIsPlaying();
+        return SteamEmulator.SteamMusic.BIsPlaying();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static AudioPlayback_Status SteamAPI_ISteamMusic_GetPlaybackStatus()
     {
         Write("SteamAPI_ISteamMusic_GetPlaybackStatus");
-        return SteamClient.SteamMusic.GetPlaybackStatus();
+        return SteamEmulator.SteamMusic.GetPlaybackStatus();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static float SteamAPI_ISteamMusic_GetVolume()
     {
         Write("SteamAPI_ISteamMusic_GetVolume");
-        return SteamClient.SteamMusic.GetVolume();
+        return SteamEmulator.SteamMusic.GetVolume();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

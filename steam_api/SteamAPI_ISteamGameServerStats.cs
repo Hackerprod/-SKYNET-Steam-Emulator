@@ -1,4 +1,5 @@
-﻿using SKYNET.Interface;
+﻿using SKYNET;
+using SKYNET.Interface;
 using Steamworks;
 using System;
 using System.Runtime.InteropServices;
@@ -9,55 +10,55 @@ public class SteamAPI_ISteamGameServerStats : BaseCalls
     public static bool SteamAPI_ISteamGameServerStats_ClearUserAchievement(IntPtr steamIDUser, string pchName)
     {
         Write("SteamAPI_ISteamGameServerStats_ClearUserAchievement");
-        return SteamClient.SteamGameServerStats.ClearUserAchievement(steamIDUser, pchName);
+        return SteamEmulator.SteamGameServerStats.ClearUserAchievement(steamIDUser, pchName);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamGameServerStats_GetUserAchievement(IntPtr steamIDUser, string pchName, bool pbAchieved)
     {
         Write("SteamAPI_ISteamGameServerStats_GetUserAchievement");
-        return SteamClient.SteamGameServerStats.GetUserAchievement(steamIDUser, pchName, pbAchieved);
+        return SteamEmulator.SteamGameServerStats.GetUserAchievement(steamIDUser, pchName, pbAchieved);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamGameServerStats_GetUserStat(IntPtr steamIDUser, string pchName, int pData)
     {
         Write("SteamAPI_ISteamGameServerStats_GetUserStat");
-        return SteamClient.SteamGameServerStats.GetUserStat(steamIDUser, pchName, pData);
+        return SteamEmulator.SteamGameServerStats.GetUserStat(steamIDUser, pchName, pData);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static SteamAPICall_t SteamAPI_ISteamGameServerStats_RequestUserStats(IntPtr steamIDUser)
     {
         Write("SteamAPI_ISteamGameServerStats_RequestUserStats");
-        return SteamClient.SteamGameServerStats.RequestUserStats(steamIDUser);
+        return SteamEmulator.SteamGameServerStats.RequestUserStats(steamIDUser);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamGameServerStats_SetUserAchievement(IntPtr steamIDUser, string pchName)
     {
         Write("SteamAPI_ISteamGameServerStats_SetUserAchievement");
-        return SteamClient.SteamGameServerStats.SetUserAchievement(steamIDUser, pchName);
+        return SteamEmulator.SteamGameServerStats.SetUserAchievement(steamIDUser, pchName);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamGameServerStats_SetUserStat(IntPtr steamIDUser, string pchName, float fData)
     {
         Write("SteamAPI_ISteamGameServerStats_SetUserStat");
-        return SteamClient.SteamGameServerStats.SetUserStat(steamIDUser, pchName, fData);
+        return SteamEmulator.SteamGameServerStats.SetUserStat(steamIDUser, pchName, fData);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static SteamAPICall_t SteamAPI_ISteamGameServerStats_StoreUserStats(IntPtr steamIDUser)
     {
         Write("SteamAPI_ISteamGameServerStats_StoreUserStats");
-        return SteamClient.SteamGameServerStats.StoreUserStats(steamIDUser);
+        return SteamEmulator.SteamGameServerStats.StoreUserStats(steamIDUser);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamGameServerStats_UpdateUserAvgRateStat(IntPtr steamIDUser, string pchName, float flCountThisSession, double dSessionLength)
     {
         Write("SteamAPI_ISteamGameServerStats_UpdateUserAvgRateStat");
-        return SteamClient.SteamGameServerStats.UpdateUserAvgRateStat(steamIDUser, pchName, flCountThisSession, dSessionLength);
+        return SteamEmulator.SteamGameServerStats.UpdateUserAvgRateStat(steamIDUser, pchName, flCountThisSession, dSessionLength);
     }
 }

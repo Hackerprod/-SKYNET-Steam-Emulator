@@ -5,11 +5,11 @@ using System.Collections.Generic;
 
 namespace Steamworks
 {
-	internal static class Helpers
+    public static class Helpers
 	{
 		public const int MemoryBufferSize = 1024 * 32;
 
-		internal struct Memory : IDisposable
+        public struct Memory : IDisposable
 		{
 			private const int MaxBagSize = 4;
 			private static readonly Queue<IntPtr> BufferBag = new Queue<IntPtr>();

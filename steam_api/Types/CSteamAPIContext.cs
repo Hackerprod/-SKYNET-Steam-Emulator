@@ -68,119 +68,119 @@ namespace SKYNET.Types
             //if (m_pSteamClient == null)
             //    return false;
 
-            m_pSteamUser = SteamClient.GetISteamUser(hSteamUser, hSteamPipe, SteamuserInterfaceVersion);
+            m_pSteamUser = SteamEmulator.SteamClient.GetISteamUser(hSteamUser, hSteamPipe, SteamuserInterfaceVersion);
             if (m_pSteamUser == null)
                 return false;
 
-            m_pSteamFriends = SteamClient.GetISteamFriends(hSteamUser, hSteamPipe, SteamfriendsInterfaceVersion);
+            m_pSteamFriends = SteamEmulator.SteamClient.GetISteamFriends(hSteamUser, hSteamPipe, SteamfriendsInterfaceVersion);
             if (m_pSteamFriends == null)
                 return false;
 
-            m_pSteamUtils = SteamClient.GetISteamUtils(hSteamPipe, SteamutilsInterfaceVersion);
+            m_pSteamUtils = SteamEmulator.SteamClient.GetISteamUtils(hSteamPipe, SteamutilsInterfaceVersion);
             if (m_pSteamUtils == null)
                 return false;
 
-            m_pSteamMatchmaking = SteamClient.GetISteamMatchmaking(hSteamUser, hSteamPipe, SteammatchmakingInterfaceVersion);
+            m_pSteamMatchmaking = SteamEmulator.SteamClient.GetISteamMatchmaking(hSteamUser, hSteamPipe, SteammatchmakingInterfaceVersion);
             if (m_pSteamMatchmaking == null)
                 return false;
 
-            m_pSteamMatchmakingServers = SteamClient.GetISteamMatchmakingServers(hSteamUser, hSteamPipe, SteammatchmakingserversInterfaceVersion);
+            m_pSteamMatchmakingServers = SteamEmulator.SteamClient.GetISteamMatchmakingServers(hSteamUser, hSteamPipe, SteammatchmakingserversInterfaceVersion);
             if (m_pSteamMatchmakingServers == null)
                 return false;
 
-            m_pSteamUserStats = SteamClient.GetISteamUserStats(hSteamUser, hSteamPipe, SteamuserstatsInterfaceVersion);
+            m_pSteamUserStats = SteamEmulator.SteamClient.GetISteamUserStats(hSteamUser, hSteamPipe, SteamuserstatsInterfaceVersion);
             if (m_pSteamUserStats == null)
                 return false;
 
-            m_pSteamApps = SteamClient.GetISteamApps(hSteamUser, hSteamPipe, SteamappsInterfaceVersion);
+            m_pSteamApps = SteamEmulator.SteamClient.GetISteamApps(hSteamUser, hSteamPipe, SteamappsInterfaceVersion);
             if (m_pSteamApps == null)
                 return false;
 
-            m_pSteamNetworking = SteamClient.GetISteamNetworking(hSteamUser, hSteamPipe, SteamnetworkingInterfaceVersion);
+            m_pSteamNetworking = SteamEmulator.SteamClient.GetISteamNetworking(hSteamUser, hSteamPipe, SteamnetworkingInterfaceVersion);
             if (m_pSteamNetworking == null)
                 return false;
 
-            m_pSteamRemoteStorage = SteamClient.GetISteamRemoteStorage(hSteamUser, hSteamPipe, SteamremotestorageInterfaceVersion);
+            m_pSteamRemoteStorage = SteamEmulator.SteamClient.GetISteamRemoteStorage(hSteamUser, hSteamPipe, SteamremotestorageInterfaceVersion);
             if (m_pSteamRemoteStorage == null)
                 return false;
 
-            m_pSteamScreenshots = SteamClient.GetISteamScreenshots(hSteamUser, hSteamPipe, SteamscreenshotsInterfaceVersion);
+            m_pSteamScreenshots = SteamEmulator.SteamClient.GetISteamScreenshots(hSteamUser, hSteamPipe, SteamscreenshotsInterfaceVersion);
             if (m_pSteamScreenshots == null)
                 return false;
 
-            m_pSteamHTTP = SteamClient.GetISteamHTTP(hSteamUser, hSteamPipe, SteamhttpInterfaceVersion);
+            m_pSteamHTTP = SteamEmulator.SteamClient.GetISteamHTTP(hSteamUser, hSteamPipe, SteamhttpInterfaceVersion);
             if (m_pSteamHTTP == null)
                 return false;
 
-            m_pController = SteamClient.GetISteamController(hSteamUser, hSteamPipe, SteamcontrollerInterfaceVersion);
+            m_pController = SteamEmulator.SteamClient.GetISteamController(hSteamUser, hSteamPipe, SteamcontrollerInterfaceVersion);
             if (m_pController == null)
                 return false;
 
-            m_pSteamUGC = SteamClient.GetISteamUGC(hSteamUser, hSteamPipe, SteamugcInterfaceVersion);
+            m_pSteamUGC = SteamEmulator.SteamClient.GetISteamUGC(hSteamUser, hSteamPipe, SteamugcInterfaceVersion);
             if (m_pSteamUGC == null)
                 return false;
 
-            m_pSteamAppList = SteamClient.GetISteamAppList(hSteamUser, hSteamPipe, SteamapplistInterfaceVersion);
+            m_pSteamAppList = SteamEmulator.SteamClient.GetISteamAppList(hSteamUser, hSteamPipe, SteamapplistInterfaceVersion);
             if (m_pSteamAppList == null)
                 return false;
 
-            m_pSteamMusic = SteamClient.GetISteamMusic(hSteamUser, hSteamPipe, SteammusicInterfaceVersion);
+            m_pSteamMusic = SteamEmulator.SteamClient.GetISteamMusic(hSteamUser, hSteamPipe, SteammusicInterfaceVersion);
             if (m_pSteamMusic == null)
                 return false;
 
-            m_pSteamMusicRemote = SteamClient.GetISteamMusicRemote(hSteamUser, hSteamPipe, SteammusicremoteInterfaceVersion);
+            m_pSteamMusicRemote = SteamEmulator.SteamClient.GetISteamMusicRemote(hSteamUser, hSteamPipe, SteammusicremoteInterfaceVersion);
             if (m_pSteamMusicRemote == null)
                 return false;
 
-            m_pSteamHTMLSurface = SteamClient.GetISteamHTMLSurface(hSteamUser, hSteamPipe, SteamhtmlsurfaceInterfaceVersion);
+            m_pSteamHTMLSurface = SteamEmulator.SteamClient.GetISteamHTMLSurface(hSteamUser, hSteamPipe, SteamhtmlsurfaceInterfaceVersion);
             if (m_pSteamHTMLSurface == null)
                 return false;
 
-            m_pSteamInventory = SteamClient.GetISteamInventory(hSteamUser, hSteamPipe, SteaminventoryInterfaceVersion);
+            m_pSteamInventory = SteamEmulator.SteamClient.GetISteamInventory(hSteamUser, hSteamPipe, SteaminventoryInterfaceVersion);
             if (m_pSteamInventory == null)
                 return false;
 
-            m_pSteamVideo = SteamClient.GetISteamVideo(hSteamUser, hSteamPipe, SteamvideoInterfaceVersion);
+            m_pSteamVideo = SteamEmulator.SteamClient.GetISteamVideo(hSteamUser, hSteamPipe, SteamvideoInterfaceVersion);
             if (m_pSteamVideo == null)
                 return false;
 
-            m_pSteamParentalSettings = SteamClient.GetISteamParentalSettings(hSteamUser, hSteamPipe, SteamparentalsettingsInterfaceVersion);
+            m_pSteamParentalSettings = SteamEmulator.SteamClient.GetISteamParentalSettings(hSteamUser, hSteamPipe, SteamparentalsettingsInterfaceVersion);
             if (m_pSteamParentalSettings == null)
                 return false;
 
             return true;
         }
 
-        internal void Clear()
+        public void Clear()
         {
-            SteamClient.Write("CSteamAPIContext.Clear()");
+            SteamEmulator.Write("CSteamAPIContext.Clear()");
         }
-        internal bool Init()
+        public bool Init()
         {
-            SteamClient.Write("CSteamAPIContext.Init()");
+            SteamEmulator.Write("CSteamAPIContext.Init()");
             return true;
         }
-        //internal ISteamClient GetSteamClient() { return m_pSteamClient; }
-        internal ISteamUser GetSteamUser() { return m_pSteamUser; }
-        internal ISteamFriends GetSteamFriends() { return m_pSteamFriends; }
-        internal ISteamUtils GetSteamUtils() { return m_pSteamUtils; }
-        internal ISteamMatchmaking GetSteamMatchmaking() { return m_pSteamMatchmaking; }
-        internal ISteamUserStats GetSteamUserStats() { return m_pSteamUserStats; }
-        internal ISteamApps GetSteamApps() { return m_pSteamApps; }
-        internal ISteamMatchmakingServers GetSteamMatchmakingServers() { return m_pSteamMatchmakingServers; }
-        internal ISteamNetworking GetSteamNetworking() { return m_pSteamNetworking; }
-        internal ISteamRemoteStorage GetSteamRemoteStorage() { return m_pSteamRemoteStorage; }
-        internal ISteamScreenshots GetSteamScreenshots() { return m_pSteamScreenshots; }
-        internal ISteamHTTP GetSteamHTTP() { return m_pSteamHTTP; }
-        internal ISteamController GetSteamController() { return m_pController; }
-        internal ISteamUGC GetSteamUGC() { return m_pSteamUGC; }
-        internal ISteamAppList GetSteamAppList() { return m_pSteamAppList; }
-        internal ISteamMusic GetSteamMusic() { return m_pSteamMusic; }
-        internal ISteamMusicRemote GetSteamMusicRemote() { return m_pSteamMusicRemote; }
-        internal ISteamHTMLSurface GetSteamHTMLSurface() { return m_pSteamHTMLSurface; }
-        internal ISteamInventory GetSteamInventory() { return m_pSteamInventory; }
-        internal ISteamVideo GetSteamVideo() { return m_pSteamVideo; }
-        internal ISteamParentalSettings GetSteamParentalSettings() { return m_pSteamParentalSettings; }
+        //public ISteamClient GetSteamClient() { return m_pSteamClient; }
+        public ISteamUser GetSteamUser() { return m_pSteamUser; }
+        public ISteamFriends GetSteamFriends() { return m_pSteamFriends; }
+        public ISteamUtils GetSteamUtils() { return m_pSteamUtils; }
+        public ISteamMatchmaking GetSteamMatchmaking() { return m_pSteamMatchmaking; }
+        public ISteamUserStats GetSteamUserStats() { return m_pSteamUserStats; }
+        public ISteamApps GetSteamApps() { return m_pSteamApps; }
+        public ISteamMatchmakingServers GetSteamMatchmakingServers() { return m_pSteamMatchmakingServers; }
+        public ISteamNetworking GetSteamNetworking() { return m_pSteamNetworking; }
+        public ISteamRemoteStorage GetSteamRemoteStorage() { return m_pSteamRemoteStorage; }
+        public ISteamScreenshots GetSteamScreenshots() { return m_pSteamScreenshots; }
+        public ISteamHTTP GetSteamHTTP() { return m_pSteamHTTP; }
+        public ISteamController GetSteamController() { return m_pController; }
+        public ISteamUGC GetSteamUGC() { return m_pSteamUGC; }
+        public ISteamAppList GetSteamAppList() { return m_pSteamAppList; }
+        public ISteamMusic GetSteamMusic() { return m_pSteamMusic; }
+        public ISteamMusicRemote GetSteamMusicRemote() { return m_pSteamMusicRemote; }
+        public ISteamHTMLSurface GetSteamHTMLSurface() { return m_pSteamHTMLSurface; }
+        public ISteamInventory GetSteamInventory() { return m_pSteamInventory; }
+        public ISteamVideo GetSteamVideo() { return m_pSteamVideo; }
+        public ISteamParentalSettings GetSteamParentalSettings() { return m_pSteamParentalSettings; }
     }
 
 }

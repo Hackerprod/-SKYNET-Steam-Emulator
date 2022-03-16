@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SKYNET;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -25,14 +26,14 @@ public class SteamAPI_ISteamMasterServerUpdater : BaseCalls
     public static bool SteamAPI_ISteamMasterServerUpdater_HandleIncomingPacket(IntPtr pData, int cbData, uint srcIP, uint srcPort)
     {
         Write("SteamAPI_ISteamMasterServerUpdater_HandleIncomingPacket");
-        return SteamClient.SteamMasterServerUpdater.HandleIncomingPacket(pData, cbData, srcIP, srcPort);
+        return SteamEmulator.SteamMasterServerUpdater.HandleIncomingPacket(pData, cbData, srcIP, srcPort);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static int SteamAPI_ISteamMasterServerUpdater_GetNextOutgoingPacket(IntPtr pOut, int cbMaxOut, uint pNetAdr, uint pPort)
     {
         Write("SteamAPI_ISteamMasterServerUpdater_GetNextOutgoingPacket");
-        return SteamClient.SteamMasterServerUpdater.GetNextOutgoingPacket(pOut, cbMaxOut, pNetAdr, pPort);
+        return SteamEmulator.SteamMasterServerUpdater.GetNextOutgoingPacket(pOut, cbMaxOut, pNetAdr, pPort);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -67,7 +68,7 @@ public class SteamAPI_ISteamMasterServerUpdater : BaseCalls
     public static bool SteamAPI_ISteamMasterServerUpdater_WasRestartRequested()
     {
         Write("SteamAPI_ISteamMasterServerUpdater_WasRestartRequested");
-        return SteamClient.SteamMasterServerUpdater.WasRestartRequested();
+        return SteamEmulator.SteamMasterServerUpdater.WasRestartRequested();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -81,28 +82,28 @@ public class SteamAPI_ISteamMasterServerUpdater : BaseCalls
     public static bool SteamAPI_ISteamMasterServerUpdater_AddMasterServer(string pServerAddress)
     {
         Write("SteamAPI_ISteamMasterServerUpdater_AddMasterServer");
-        return SteamClient.SteamMasterServerUpdater.AddMasterServer(pServerAddress);
+        return SteamEmulator.SteamMasterServerUpdater.AddMasterServer(pServerAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamMasterServerUpdater_RemoveMasterServer(string pServerAddress)
     {
         Write("SteamAPI_ISteamMasterServerUpdater_RemoveMasterServer");
-        return SteamClient.SteamMasterServerUpdater.RemoveMasterServer(pServerAddress);
+        return SteamEmulator.SteamMasterServerUpdater.RemoveMasterServer(pServerAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static int SteamAPI_ISteamMasterServerUpdater_GetNumMasterServers()
     {
         Write("SteamAPI_ISteamMasterServerUpdater_GetNumMasterServers");
-        return SteamClient.SteamMasterServerUpdater.GetNumMasterServers();
+        return SteamEmulator.SteamMasterServerUpdater.GetNumMasterServers();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static int SteamAPI_ISteamMasterServerUpdater_GetMasterServerAddress(int iServer, string pOut, int outBufferSize)
     {
         Write("SteamAPI_ISteamMasterServerUpdater_GetMasterServerAddress");
-        return SteamClient.SteamMasterServerUpdater.GetMasterServerAddress(iServer, pOut, outBufferSize);
+        return SteamEmulator.SteamMasterServerUpdater.GetMasterServerAddress(iServer, pOut, outBufferSize);
     }
 
 }

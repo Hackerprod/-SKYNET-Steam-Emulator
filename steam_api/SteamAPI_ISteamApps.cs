@@ -4,6 +4,7 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
+using SKYNET;
 using SKYNET.Interface;
 using Steamworks;
 
@@ -41,7 +42,7 @@ public class SteamAPI_ISteamApps : BaseCalls
     public static string SteamAPI_ISteamApps_GetCurrentGameLanguage()
     {
         Write("SteamAPI_ISteamApps_GetCurrentGameLanguage");
-        return SteamClient.Language; ;
+        return SteamEmulator.Language;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

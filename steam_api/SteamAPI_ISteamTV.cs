@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SKYNET;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -11,7 +12,7 @@ public class SteamAPI_ISteamTV : BaseCalls
     public static bool SteamAPI_ISteamTV_IsBroadcasting(int pnNumViewers)
     {
         Write("SteamAPI_ISteamTV_IsBroadcasting");
-        return SteamClient.SteamTV.IsBroadcasting(pnNumViewers);
+        return SteamEmulator.SteamTV.IsBroadcasting(pnNumViewers);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -46,7 +47,7 @@ public class SteamAPI_ISteamTV : BaseCalls
     public static uint SteamAPI_ISteamTV_AddRegion(string pchElementName, string pchTimelineDataSection, IntPtr pSteamTVRegion, int eSteamTVRegionBehavior)
     {
         Write("SteamAPI_ISteamTV_AddRegion");
-        return SteamClient.SteamTV.AddRegion(pchElementName, pchTimelineDataSection, pSteamTVRegion, eSteamTVRegionBehavior);
+        return SteamEmulator.SteamTV.AddRegion(pchElementName, pchTimelineDataSection, pSteamTVRegion, eSteamTVRegionBehavior);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

@@ -1,4 +1,5 @@
-﻿using Steamworks;
+﻿using SKYNET;
+using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,14 +27,14 @@ public class SteamAPI_ISteamNetworkingSocketsSerialized : BaseCalls
     public static SteamAPICall_t SteamAPI_ISteamNetworkingSocketsSerialized_GetCertAsync()
     {
         Write("SteamAPI_ISteamNetworkingSocketsSerialized_GetCertAsync");
-        return SteamClient.SteamNetworkingSocketsSerialized.GetCertAsync();
+        return SteamEmulator.SteamNetworkingSocketsSerialized.GetCertAsync();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static int SteamAPI_ISteamNetworkingSocketsSerialized_GetNetworkConfigJSON(IntPtr buf, uint cbBuf)
     {
         Write("SteamAPI_ISteamNetworkingSocketsSerialized_GetNetworkConfigJSON");
-        return SteamClient.SteamNetworkingSocketsSerialized.GetNetworkConfigJSON(buf, cbBuf);
+        return SteamEmulator.SteamNetworkingSocketsSerialized.GetNetworkConfigJSON(buf, cbBuf);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -47,14 +48,14 @@ public class SteamAPI_ISteamNetworkingSocketsSerialized : BaseCalls
     public static uint SteamAPI_ISteamNetworkingSocketsSerialized_GetCachedRelayTicketCount()
     {
         Write("SteamAPI_ISteamNetworkingSocketsSerialized_GetCachedRelayTicketCount");
-        return SteamClient.SteamNetworkingSocketsSerialized.GetCachedRelayTicketCount();
+        return SteamEmulator.SteamNetworkingSocketsSerialized.GetCachedRelayTicketCount();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static int SteamAPI_ISteamNetworkingSocketsSerialized_GetCachedRelayTicket(uint idxTicket, IntPtr buf, uint cbBuf)
     {
         Write("SteamAPI_ISteamNetworkingSocketsSerialized_GetCachedRelayTicket");
-        return SteamClient.SteamNetworkingSocketsSerialized.GetCachedRelayTicket(idxTicket, buf, cbBuf);
+        return SteamEmulator.SteamNetworkingSocketsSerialized.GetCachedRelayTicket(idxTicket, buf, cbBuf);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

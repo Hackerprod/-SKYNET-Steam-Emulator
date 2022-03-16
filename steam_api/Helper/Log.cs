@@ -22,7 +22,7 @@ namespace SKYNET.Helper
 
             if (!modCommon.LogToFile)
             {
-                //return;
+                return;
             }
 
             if (File.Exists("[SKYNET] steam_api.log"))

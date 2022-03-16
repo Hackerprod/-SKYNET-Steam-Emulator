@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using SKYNET;
 using SKYNET.Helper;
 using SKYNET.Interface;
 using Steamworks;
@@ -11,7 +12,7 @@ public class SteamAPI_ISteamAppList : BaseCalls
     public static int SteamAPI_ISteamAppList_GetAppBuildId(AppId_t nAppID)
     {
         Log.Write("Steam_AppList::GetAppBuildId");
-        return SteamClient.SteamAppList.GetAppBuildId(nAppID);
+        return SteamEmulator.SteamAppList.GetAppBuildId(nAppID);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -19,7 +20,7 @@ public class SteamAPI_ISteamAppList : BaseCalls
     {
         var mempchDirectory = Helpers.TakeMemory();
         Write("SteamAPI_ISteamAppList_GetAppInstallDir");
-        return SteamClient.SteamAppList.GetAppInstallDir(nAppID, pchDirectory, cchNameMax);
+        return SteamEmulator.SteamAppList.GetAppInstallDir(nAppID, pchDirectory, cchNameMax);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -27,21 +28,21 @@ public class SteamAPI_ISteamAppList : BaseCalls
     {
         var mempchName = Helpers.TakeMemory();
         Write("SteamAPI_ISteamAppList_GetAppName");
-        return SteamClient.SteamAppList.GetAppName(nAppID, pchName, cchNameMax);
+        return SteamEmulator.SteamAppList.GetAppName(nAppID, pchName, cchNameMax);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static uint SteamAPI_ISteamAppList_GetInstalledApps(AppId_t pvecAppID, uint unMaxAppIDs)
     {
         Write("SteamAPI_ISteamAppList_GetInstalledAppsn");
-        return SteamClient.SteamAppList.GetInstalledApps(pvecAppID, unMaxAppIDs);
+        return SteamEmulator.SteamAppList.GetInstalledApps(pvecAppID, unMaxAppIDs);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static uint SteamAPI_ISteamAppList_GetNumInstalledApps()
     {
         Write("SteamAPI_ISteamAppList_GetNumInstalledApps");
-        return SteamClient.SteamAppList.GetNumInstalledApps();
+        return SteamEmulator.SteamAppList.GetNumInstalledApps();
     }
 
 

@@ -1,4 +1,5 @@
-﻿using SKYNET.Interface;
+﻿using SKYNET;
+using SKYNET.Interface;
 using Steamworks;
 using System;
 using System.Collections.Generic;
@@ -20,70 +21,70 @@ public class SteamAPI_ISteamParties : BaseCalls
     public static SteamAPICall_t SteamAPI_ISteamParties_ChangeNumOpenSlots(uint ulBeacon, uint unOpenSlots)
     {
         Write("SteamAPI_ISteamParties_ChangeNumOpenSlots");
-        return SteamClient.SteamParties.ChangeNumOpenSlots(ulBeacon, unOpenSlots);
+        return SteamEmulator.SteamParties.ChangeNumOpenSlots(ulBeacon, unOpenSlots);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static SteamAPICall_t SteamAPI_ISteamParties_CreateBeacon(uint unOpenSlots, SteamPartyBeaconLocation_t pBeaconLocation, string pchConnectString, string pchMetadata)
     {
         Write("SteamAPI_ISteamParties_CreateBeacon");
-        return SteamClient.SteamParties.CreateBeacon(unOpenSlots, pBeaconLocation, pchConnectString, pchMetadata);
+        return SteamEmulator.SteamParties.CreateBeacon(unOpenSlots, pBeaconLocation, pchConnectString, pchMetadata);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamParties_DestroyBeacon(uint ulBeacon)
     {
         Write("SteamAPI_ISteamParties_DestroyBeacon");
-        return SteamClient.SteamParties.DestroyBeacon(ulBeacon);
+        return SteamEmulator.SteamParties.DestroyBeacon(ulBeacon);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamParties_GetAvailableBeaconLocations(SteamPartyBeaconLocation_t pLocationList, uint uMaxNumLocations)
     {
         Write("SteamAPI_ISteamParties_GetAvailableBeaconLocations");
-        return SteamClient.SteamParties.GetAvailableBeaconLocations(pLocationList, uMaxNumLocations);
+        return SteamEmulator.SteamParties.GetAvailableBeaconLocations(pLocationList, uMaxNumLocations);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static uint SteamAPI_ISteamParties_GetBeaconByIndex(uint unIndex)
     {
         Write("SteamAPI_ISteamParties_GetBeaconByIndex");
-        return SteamClient.SteamParties.GetBeaconByIndex(unIndex);
+        return SteamEmulator.SteamParties.GetBeaconByIndex(unIndex);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamParties_GetBeaconDetails(uint ulBeaconID, IntPtr pSteamIDBeaconOwner, SteamPartyBeaconLocation_t pLocation, string pchMetadata, int cchMetadata)
     {
         Write("SteamAPI_ISteamParties_GetBeaconDetails");
-        return SteamClient.SteamParties.GetBeaconDetails(ulBeaconID, pSteamIDBeaconOwner, pLocation, pchMetadata, cchMetadata);
+        return SteamEmulator.SteamParties.GetBeaconDetails(ulBeaconID, pSteamIDBeaconOwner, pLocation, pchMetadata, cchMetadata);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamParties_GetBeaconLocationData(SteamPartyBeaconLocation_t BeaconLocation, ESteamPartyBeaconLocationData eData, string pchDataStringOut, int cchDataStringOut)
     {
         Write("SteamAPI_ISteamParties_GetBeaconLocationData");
-        return SteamClient.SteamParties.GetBeaconLocationData(BeaconLocation, eData, pchDataStringOut, cchDataStringOut);
+        return SteamEmulator.SteamParties.GetBeaconLocationData(BeaconLocation, eData, pchDataStringOut, cchDataStringOut);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static uint SteamAPI_ISteamParties_GetNumActiveBeacons()
     {
         Write("SteamAPI_ISteamParties_GetNumActiveBeacons");
-        return SteamClient.SteamParties.GetNumActiveBeacons();
+        return SteamEmulator.SteamParties.GetNumActiveBeacons();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamParties_GetNumAvailableBeaconLocations(uint puNumLocations)
     {
         Write("SteamAPI_ISteamParties_GetNumAvailableBeaconLocations");
-        return SteamClient.SteamParties.GetNumAvailableBeaconLocations(puNumLocations);
+        return SteamEmulator.SteamParties.GetNumAvailableBeaconLocations(puNumLocations);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static SteamAPICall_t SteamAPI_ISteamParties_JoinParty(uint ulBeaconID)
     {
         Write("SteamAPI_ISteamParties_JoinParty");
-        return SteamClient.SteamParties.JoinParty(ulBeaconID);
+        return SteamEmulator.SteamParties.JoinParty(ulBeaconID);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

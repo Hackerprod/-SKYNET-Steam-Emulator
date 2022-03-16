@@ -11,7 +11,7 @@ namespace SKYNET
     public static class AssemblyResolver
     {
         static string[] Folders;
-        internal static void Hook(params string[] folders)
+        public static void Hook(params string[] folders)
         {
             Folders = folders;
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;

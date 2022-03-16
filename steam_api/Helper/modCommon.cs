@@ -73,7 +73,7 @@ public class modCommon
     [return: MarshalAs(UnmanagedType.Bool)]
     static extern bool AllocConsole();
 
-    internal static void LoadSettings()
+    public static void LoadSettings()
     {
         if (SettingsLoaded)
         {
@@ -117,9 +117,9 @@ public class modCommon
             IniParser = new INIParser();
             IniParser.Load(_file);
 
-            SteamClient.SteamId = (ulong)IniParser["STEAM USER"]["SteamID"];
-            SteamClient.PersonaName = (string)IniParser["STEAM USER"]["Nickname"];
-            SteamClient.Language = (string)IniParser["STEAM USER"]["Languaje"];
+            SteamEmulator.SteamId = (ulong)IniParser["STEAM USER"]["SteamID"];
+            SteamEmulator.PersonaName = (string)IniParser["STEAM USER"]["Nickname"];
+            SteamEmulator.Language = (string)IniParser["STEAM USER"]["Languaje"];
 
             LogToFile = (bool)IniParser["LOG"]["File"];
 
@@ -130,7 +130,7 @@ public class modCommon
                 ActiveConsoleOutput();
             }
 
-            string data = $"Loaded user data from file \nNickName: {SteamClient.PersonaName} \nSteamId:  {SteamClient.SteamId} \nLanguaje: {SteamClient.Language} \n";
+            string data = $"Loaded user data from file \nNickName: {SteamEmulator.PersonaName} \nSteamId:  {SteamEmulator.SteamId} \nLanguaje: {SteamEmulator.Language} \n";
             Log.Write(data);
 
             SettingsLoaded = true;
@@ -145,6 +145,10 @@ public class modCommon
     public static string GenerateSteamID()
     {
         return "76561" + new Random().Next(100000, 999999) + new Random().Next(100000, 999999);
+    }
+    public static ulong CreateSteamID()
+    {
+        return ulong.Parse(GenerateSteamID());
     }
 
     public static string GetPath()

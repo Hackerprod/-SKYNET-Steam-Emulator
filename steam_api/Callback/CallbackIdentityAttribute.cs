@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 namespace Steamworks
 {
     [AttributeUsage(AttributeTargets.Class)]
-    internal class CallbackIdentityAttribute : Attribute 
+    public class CallbackIdentityAttribute : Attribute 
 	{
 		private int _Identity_k__BackingField; 
 	

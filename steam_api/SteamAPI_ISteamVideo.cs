@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SKYNET;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -18,7 +19,7 @@ public class SteamAPI_ISteamVideo : BaseCalls
     public static bool SteamAPI_ISteamVideo_IsBroadcasting(int pnNumViewers)
     {
         Write("SteamAPI_ISteamVideo_IsBroadcasting");
-        return SteamClient.SteamVideo.IsBroadcasting(pnNumViewers);
+        return SteamEmulator.SteamVideo.IsBroadcasting(pnNumViewers);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -32,7 +33,7 @@ public class SteamAPI_ISteamVideo : BaseCalls
     public static bool SteamAPI_ISteamVideo_GetOPFStringForApp(IntPtr unVideoAppID, string pchBuffer, uint pnBufferSize)
     {
         Write("SteamAPI_ISteamVideo_GetOPFStringForApp");
-        return SteamClient.SteamVideo.GetOPFStringForApp(unVideoAppID, pchBuffer, pnBufferSize);
+        return SteamEmulator.SteamVideo.GetOPFStringForApp(unVideoAppID, pchBuffer, pnBufferSize);
     }
 
 }

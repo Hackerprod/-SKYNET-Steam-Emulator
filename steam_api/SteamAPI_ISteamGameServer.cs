@@ -58,7 +58,7 @@ public partial class SteamAPI_SteamGameServer : BaseCalls
     public static ulong SteamGameServer_GetSteamID()
     {
         DEBUG("SteamGameServer_GetSteamID\n");
-        return 890415511851315;
+        return modCommon.CreateSteamID();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

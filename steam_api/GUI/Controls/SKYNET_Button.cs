@@ -378,7 +378,7 @@ namespace SKYNET.Controls
                 B.Dispose();
             }
         }
-        internal static StringFormat NearSF = new StringFormat
+        public static StringFormat NearSF = new StringFormat
         {
             Alignment = StringAlignment.Near,
             LineAlignment = StringAlignment.Near
@@ -397,13 +397,13 @@ namespace SKYNET.Controls
                 return graphicsPath;
             }
         }
-        internal static StringFormat CenterSF = new StringFormat
+        public static StringFormat CenterSF = new StringFormat
         {
             Alignment = StringAlignment.Center,
             LineAlignment = StringAlignment.Center
         };
 
-        internal enum MouseState : byte
+        public enum MouseState : byte
         {
             None,
             Over,
