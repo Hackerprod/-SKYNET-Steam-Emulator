@@ -1,14 +1,15 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using Core.Interface;
 using SKYNET.Helper;
 using SKYNET.Interface;
 using Steamworks;
 
 namespace SKYNET.Managers
 {
-    [Interface("SteamAppList")]
-    public class SteamAppList : SteamInterface, ISteamAppList
+    [Interface.MapAttribute("SteamAppList")]
+    public class SteamAppList : IBaseInterface, ISteamAppList
     {
         public int GetAppBuildId(AppId_t nAppID)
         {

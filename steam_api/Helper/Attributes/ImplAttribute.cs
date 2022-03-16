@@ -1,22 +1,20 @@
-﻿using Core.Interface;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace SKYNET.Interface
+namespace Core.Interface
 {
+    /// <summary>
+    /// Used to signal to <see cref="Loader"/> that this class is used for interface implementations
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
-    public class MapAttribute : Attribute
+    public class ImplAttribute : Attribute
     {
-        public MapAttribute(string name)
-        {
-            Name = name;
-        }
         /// <summary>
         /// Name that this interface wants to be exported as
         /// </summary>
         public string Name { get; set; }
+
+        public bool ServerMapped { get; set; }
     }
 }

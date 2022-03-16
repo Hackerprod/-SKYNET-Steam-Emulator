@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamUGC")]
-    public class DSteamUGC : SteamDelegate
+    public class DSteamUGC : IBaseInterfaceMap
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate UGCQueryHandle_t CreateQueryUserUGCRequest(IntPtr unAccountID, IntPtr eListType, int eMatchingUGCType, int eSortOrder, AppId_t nCreatorAppID, AppId_t nConsumerAppID, uint unPage);

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamScreenshots")]
-    public class ISteamScreenshots : SteamDelegate
+    public class ISteamScreenshots : IBaseInterfaceMap
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate uint WriteScreenshot(IntPtr pubRGB, uint cubRGB, int nWidth, int nHeight);

@@ -2,11 +2,11 @@
 
 namespace SKYNET.Interface
 {
-    public class SteamInterface
-    {
-        public static void Write(object v)
-        {
-            Log.Write(v);
-        }
-    }
+    //public class IBaseInterface
+    //{
+    //    public static void Write(object v)
+    //    {
+    //        Log.Write(v);
+    //    }
+    //}
 }

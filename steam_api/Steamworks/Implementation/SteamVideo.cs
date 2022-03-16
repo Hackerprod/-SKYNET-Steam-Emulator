@@ -3,9 +3,9 @@ using System;
 
 namespace SKYNET.Managers
 {
-    [Interface("STEAMVIDEO_INTERFACE")]
-    [Interface("SteamVideo")]
-    public class SteamVideo : SteamInterface, ISteamVideo
+    [Map("STEAMVIDEO_INTERFACE")]
+    [Map("SteamVideo")]
+    public class SteamVideo : IBaseInterface, ISteamVideo
     {
         public void GetVideoURL(IntPtr unVideoAppID)
         {

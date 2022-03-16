@@ -5,8 +5,8 @@ using Steamworks;
 
 namespace SKYNET.Managers
 {
-    [Interface("SteamUtils")]
-    public class SteamUtils : SteamInterface, ISteamUtils
+    [Map("SteamUtils")]
+    public class SteamUtils : IBaseInterface, ISteamUtils
     {
         public uint GetSecondsSinceAppActive()
         {

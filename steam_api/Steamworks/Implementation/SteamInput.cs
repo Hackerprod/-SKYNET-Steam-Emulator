@@ -8,8 +8,8 @@ using SKYNET.Interface;
 
 namespace SKYNET.Managers
 {
-    [Interface("SteamInput")]
-    public class SteamInput : SteamInterface, ISteamInput
+    [Map("SteamInput")]
+    public class SteamInput : IBaseInterface, ISteamInput
     {
         public void ActivateActionSet(IntPtr inputHandle, IntPtr actionSetHandle)
         {

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamInventory")]
-    public class DSteamInventory : SteamDelegate
+    public class DSteamInventory : IBaseInterfaceMap
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate Result GetResultStatus(SteamInventoryResult_t resultHandle);

@@ -6,7 +6,7 @@ using Steamworks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamGameCoordinator")]
-    public class DSteamGameCoordinator : SteamDelegate
+    public class DSteamGameCoordinator : IBaseInterfaceMap
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate EGCResults SendMessage_(UInt32 unMsgType, IntPtr pubData, UInt32 cubData);

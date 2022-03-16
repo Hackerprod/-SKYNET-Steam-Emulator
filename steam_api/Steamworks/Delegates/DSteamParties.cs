@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamParties")]
-    public class DSteamParties : SteamDelegate
+    public class DSteamParties : IBaseInterfaceMap
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate void CancelReservation(uint ulBeacon, IntPtr steamIDUser);

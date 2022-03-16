@@ -3,8 +3,8 @@ using System;
 
 namespace SKYNET.Managers
 {
-    [Interface("SteamMatchMakingServers")]
-    public class SteamMatchmakingServers : SteamInterface, ISteamMatchmakingServers
+    [Map("SteamMatchMakingServers")]
+    public class SteamMatchmakingServers : IBaseInterface, ISteamMatchmakingServers
     {
         public IntPtr RequestInternetServerList(IntPtr iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
         {

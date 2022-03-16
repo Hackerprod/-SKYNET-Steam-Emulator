@@ -4,8 +4,8 @@ using System;
 
 namespace SKYNET.Managers
 {
-    [Interface("SteamGameServerStats")]
-    public class SteamGameServerStats : SteamInterface, ISteamGameServerStats
+    [Map("SteamGameServerStats")]
+    public class SteamGameServerStats : IBaseInterface, ISteamGameServerStats
     {
         public bool ClearUserAchievement(IntPtr steamIDUser, string pchName)
         {

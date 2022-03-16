@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamHTMLSurface")]
-    public class DSteamHTMLSurface : SteamDelegate
+    public class DSteamHTMLSurface : IBaseInterfaceMap
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool Init();

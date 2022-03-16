@@ -6,8 +6,8 @@ using Steamworks;
 
 namespace SKYNET.Managers
 {
-    [Interface("SteamApps")]
-    public class SteamApps : SteamInterface, ISteamApps
+    [Map("SteamApps")]
+    public class SteamApps : IBaseInterface, ISteamApps
     {
 
         public bool BIsSubscribed()

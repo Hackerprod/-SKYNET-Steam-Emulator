@@ -103,7 +103,7 @@ namespace SKYNET
 
             modCommon.LoadSettings();
 
-            Write($"{"Initializing SteamClient"}");
+            InterfaceManager.Initialize();
 
             if (Client_Callback == null) Client_Callback = new CallbackManager();
             if (Server_Callback == null) Server_Callback = new CallbackManager();
@@ -256,15 +256,11 @@ namespace SKYNET
 
             Initialized = true;
 
-            var inter = InterfaceManager.GetInterface("SteamClient020");
-            if (inter != null)
-            {
-                var ds = Activator.CreateInstance(inter.GetType());
-                //((SteamClient)ds).SetLocalIPBinding(0, 0);
-            }
+            InterfaceManager.Initialize();
+
         }
 
-        private void AddInterface(SteamInterface steamInterface)
+        private void AddInterface(IBaseInterface steamInterface)
         {
             InterfaceManager.Interfaces.Add(steamInterface);
         }

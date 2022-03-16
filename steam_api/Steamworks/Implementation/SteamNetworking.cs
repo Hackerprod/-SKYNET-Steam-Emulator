@@ -3,8 +3,8 @@ using System;
 
 namespace SKYNET.Managers
 {
-    [Interface("SteamNetworking")]
-    public class SteamNetworking : SteamInterface, ISteamNetworking
+    [Map("SteamNetworking")]
+    public class SteamNetworking : IBaseInterface, ISteamNetworking
     {
         public bool SendP2PPacket(IntPtr steamIDRemote, IntPtr pubData, uint cubData, EP2PSend eP2PSendType, int nChannel)
         {

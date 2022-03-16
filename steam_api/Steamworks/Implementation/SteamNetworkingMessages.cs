@@ -3,7 +3,7 @@ using System;
 
 namespace SKYNET.Managers
 {
-    public class SteamNetworkingMessages : SteamInterface, ISteamNetworkingMessages
+    public class SteamNetworkingMessages : IBaseInterface, ISteamNetworkingMessages
     {
         public int SendMessageToUser(IntPtr identityRemote, IntPtr pubData, uint cubData, int nSendFlags, int nRemoteChannel)
         {

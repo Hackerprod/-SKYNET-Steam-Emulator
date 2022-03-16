@@ -5,7 +5,7 @@ using Steamworks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamAppList")]
-    public class DSteamApps : SteamDelegate
+    public class DSteamApps : IBaseInterfaceMap
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool BIsSubscribed();

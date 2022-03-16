@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SKYNET.Interface;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamVideo")]
-    public class DSteamVideo : SteamDelegate
+    public class DSteamVideo : IBaseInterfaceMap
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate void GetVideoURL(IntPtr unVideoAppID);

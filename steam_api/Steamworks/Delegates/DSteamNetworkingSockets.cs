@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamNetworkingSockets")]
-    public class DSteamNetworkingSockets : SteamDelegate
+    public class DSteamNetworkingSockets : IBaseInterfaceMap
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate uint CreateListenSocketIP(IntPtr localAddress, int nOptions, IntPtr pOptions);

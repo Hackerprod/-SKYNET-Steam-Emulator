@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamUtils")]
-    public class DSteamUtils : SteamDelegate
+    public class DSteamUtils : IBaseInterfaceMap
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate uint GetSecondsSinceAppActive();

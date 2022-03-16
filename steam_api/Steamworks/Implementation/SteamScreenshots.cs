@@ -3,9 +3,9 @@ using System;
 
 namespace SKYNET.Managers
 {
-    [Interface("STEAMSCREENSHOTS_INTERFACE_VERSION")]
-    [Interface("SteamScreenshots")]
-    public class SteamScreenshots : SteamInterface, ISteamScreenshots
+    [Map("STEAMSCREENSHOTS_INTERFACE_VERSION")]
+    [Map("SteamScreenshots")]
+    public class SteamScreenshots : IBaseInterface, ISteamScreenshots
     {
         public uint WriteScreenshot(IntPtr pubRGB, uint cubRGB, int nWidth, int nHeight)
         {

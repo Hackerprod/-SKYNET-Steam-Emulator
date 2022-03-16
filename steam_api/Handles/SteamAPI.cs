@@ -12,7 +12,7 @@ using SKYNET.Managers;
 using Steamworks;
 
 //Implementar SteamAPI_SteamNetworkingIPAddr
-public class SteamAPI : SteamInterface
+public class SteamAPI : IBaseInterface
 {
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_Init()

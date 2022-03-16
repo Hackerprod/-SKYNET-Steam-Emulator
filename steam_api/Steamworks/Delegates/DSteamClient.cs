@@ -10,7 +10,7 @@ using Steamworks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamClient")]
-    public class DSteamClient : SteamDelegate
+    public class DSteamClient : IBaseInterfaceMap
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate HSteamPipe CreateSteamPipe();

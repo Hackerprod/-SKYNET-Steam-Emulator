@@ -3,9 +3,9 @@ using System;
 
 namespace SKYNET.Managers
 {
-    [Interface("STEAMTV_INTERFACE_V001")]
-    [Interface("SteamScreenshots")]
-    public class SteamTV : SteamInterface, ISteamTV
+    [Map("STEAMTV_INTERFACE_V001")]
+    [Map("SteamScreenshots")]
+    public class SteamTV : IBaseInterface, ISteamTV
     {
         public bool IsBroadcasting(int pnNumViewers)
         {

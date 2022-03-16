@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamMusicRemote")]
-    public class DSteamMusicRemote : SteamDelegate
+    public class DSteamMusicRemote : IBaseInterfaceMap
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool RegisterSteamMusicRemote(string pchName);

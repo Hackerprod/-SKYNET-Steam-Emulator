@@ -3,8 +3,8 @@ using System;
 
 namespace SKYNET.Managers
 {
-    [Interface("SteamNetworkingUtils")]
-    public class SteamNetworkingUtils : SteamInterface, ISteamNetworkingUtils
+    [Map("SteamNetworkingUtils")]
+    public class SteamNetworkingUtils : IBaseInterface, ISteamNetworkingUtils
     {
         public IntPtr AllocateMessage(int cbAllocateBuffer)
         {

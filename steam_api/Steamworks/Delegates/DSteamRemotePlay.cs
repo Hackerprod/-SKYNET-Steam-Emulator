@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamRemotePlay")]
-    public class DSteamRemotePlay : SteamDelegate
+    public class DSteamRemotePlay : IBaseInterfaceMap
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate uint GetSessionCount();

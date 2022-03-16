@@ -5,8 +5,8 @@ using Steamworks;
 
 namespace SKYNET.Managers
 {
-    [Interface("SteamUser")]
-    public class SteamUser : SteamInterface, ISteamUser
+    [Map("SteamUser")]
+    public class SteamUser : IBaseInterface, ISteamUser
     {
         public HSteamUser GetHSteamUser()
         {

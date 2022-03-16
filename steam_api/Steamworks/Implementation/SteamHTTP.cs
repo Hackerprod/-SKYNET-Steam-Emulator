@@ -3,9 +3,9 @@ using SKYNET.Interface;
 
 namespace SKYNET.Managers
 {
-    [Interface("STEAMHTTP_INTERFACE_VERSION")]
-    [Interface("SteamHTTP")]
-    public class SteamHTTP : SteamInterface, ISteamHTTP
+    [Map("STEAMHTTP_INTERFACE_VERSION")]
+    [Map("SteamHTTP")]
+    public class SteamHTTP : IBaseInterface, ISteamHTTP
     {
         public uint CreateCookieContainer(bool bAllowResponsesToModify)
         {

@@ -3,8 +3,8 @@ using System;
 
 namespace SKYNET.Managers
 {
-    [Interface("SteamMasterServerUpdater")]
-    public class SteamMasterServerUpdater : SteamInterface, ISteamMasterServerUpdater
+    [Map("SteamMasterServerUpdater")]
+    public class SteamMasterServerUpdater : IBaseInterface, ISteamMasterServerUpdater
     {
         public void SetActive(bool bActive)
         {

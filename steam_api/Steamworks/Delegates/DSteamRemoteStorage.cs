@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamRemoteStorage")]
-    public class DSteamRemoteStorage : SteamDelegate
+    public class DSteamRemoteStorage : IBaseInterfaceMap
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool FileWrite(string pchFile, IntPtr pvData, int cubData);

@@ -5,9 +5,9 @@ using Steamworks;
 
 namespace SKYNET.Managers
 {
-    [Interface("STEAMINVENTORY_INTERFACE")]
-    [Interface("SteamInventory")]
-    public class SteamInventory : SteamInterface, ISteamInventory
+    [Map("STEAMINVENTORY_INTERFACE")]
+    [Map("SteamInventory")]
+    public class SteamInventory : IBaseInterface, ISteamInventory
     {
         public bool AddPromoItem(ref SteamInventoryResult_t pResultHandle, uint itemDef)
         {

@@ -8,8 +8,8 @@ using Steamworks;
 
 namespace SKYNET.Managers
 {
-    [Interface("SteamFriends")]
-    public class SteamFriends : SteamInterface, ISteamFriends
+    [Map("SteamFriends")]
+    public class SteamFriends : IBaseInterface, ISteamFriends
     {
         public string ISteamFriends004 = "ISteamFriends004";
         public string ISteamFriends005 = "ISteamFriends005";

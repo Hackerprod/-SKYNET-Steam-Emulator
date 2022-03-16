@@ -3,9 +3,9 @@ using System;
 
 namespace SKYNET.Managers
 {
-    [Interface("STEAMPARENTALSETTINGS_INTERFACE_VERSION")]
-    [Interface("SteamParentalSettings")]
-    public class SteamParentalSettings : SteamInterface, ISteamParentalSettings
+    [Map("STEAMPARENTALSETTINGS_INTERFACE_VERSION")]
+    [Map("SteamParentalSettings")]
+    public class SteamParentalSettings : IBaseInterface, ISteamParentalSettings
     {
         public bool BIsParentalLockEnabled()
         {

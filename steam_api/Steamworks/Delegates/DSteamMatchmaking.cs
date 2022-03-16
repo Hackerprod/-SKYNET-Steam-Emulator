@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamMatchmaking")]
-    public class DSteamMatchmaking : SteamDelegate
+    public class DSteamMatchmaking : IBaseInterfaceMap
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate int GetFavoriteGameCount();

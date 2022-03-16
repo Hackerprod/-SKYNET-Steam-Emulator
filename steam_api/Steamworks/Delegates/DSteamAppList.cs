@@ -10,7 +10,7 @@ using Steamworks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamAppList")]
-    public class DSteamAppList : SteamDelegate
+    public class DSteamAppList : IBaseInterfaceMap
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate uint GetNumInstalledApps();

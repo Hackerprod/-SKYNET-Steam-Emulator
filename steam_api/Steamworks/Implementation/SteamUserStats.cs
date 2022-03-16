@@ -4,9 +4,9 @@ using System;
 
 namespace SKYNET.Managers
 {
-    [Interface("STEAMUSERSTATS_INTERFACE_VERSION")]
-    [Interface("SteamUserStats")]
-    public class SteamUserStats : SteamInterface, ISteamUserStats
+    [Map("STEAMUSERSTATS_INTERFACE_VERSION")]
+    [Map("SteamUserStats")]
+    public class SteamUserStats : IBaseInterface, ISteamUserStats
     {
         public bool RequestCurrentStats()
         {

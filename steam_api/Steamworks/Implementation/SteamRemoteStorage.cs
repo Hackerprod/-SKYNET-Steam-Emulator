@@ -4,9 +4,9 @@ using System;
 
 namespace SKYNET.Managers
 {
-    [Interface("STEAMREMOTESTORAGE_INTERFACE_VERSION")]
-    [Interface("SteamRemoteStorage")]
-    public class SteamRemoteStorage : SteamInterface, ISteamRemoteStorage
+    [Map("STEAMREMOTESTORAGE_INTERFACE_VERSION")]
+    [Map("SteamRemoteStorage")]
+    public class SteamRemoteStorage : IBaseInterface, ISteamRemoteStorage
     {
         public bool FileWrite(string pchFile, IntPtr pvData, int cubData)
         {

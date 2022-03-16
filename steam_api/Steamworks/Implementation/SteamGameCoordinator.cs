@@ -6,8 +6,8 @@ using Steamworks;
 
 namespace SKYNET.Managers
 {
-    [Interface("SteamGameCoordinator")]
-    public class SteamGameCoordinator : SteamInterface, ISteamGameCoordinator
+    [Map("SteamGameCoordinator")]
+    public class SteamGameCoordinator : IBaseInterface, ISteamGameCoordinator
     {
         public bool IsMessageAvailable(uint pcubMsgSize)
         {

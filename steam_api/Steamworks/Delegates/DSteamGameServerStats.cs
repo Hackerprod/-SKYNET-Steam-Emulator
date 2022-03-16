@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamGameCoordinator")]
-    public class DSteamGameServerStats : SteamDelegate
+    public class DSteamGameServerStats : IBaseInterfaceMap
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate SteamAPICall_t RequestUserStats(IntPtr steamIDUser);

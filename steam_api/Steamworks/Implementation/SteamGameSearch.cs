@@ -4,9 +4,9 @@ using SKYNET.Interface;
 namespace SKYNET.Managers
 {
 
-    [Interface("SteamGameSearch")]
-    [Interface("SteamMatchGameSearch")]
-    public class SteamGameSearch : SteamInterface, ISteamGameSearch
+    [Map("SteamGameSearch")]
+    [Map("SteamMatchGameSearch")]
+    public class SteamGameSearch : IBaseInterface, ISteamGameSearch
     {
         public GameSearchErrorCode_t AcceptGame(IntPtr self)
         {

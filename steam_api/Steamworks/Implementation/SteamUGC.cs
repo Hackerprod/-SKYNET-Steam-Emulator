@@ -4,9 +4,9 @@ using System;
 
 namespace SKYNET.Managers
 {
-    [Interface("STEAMUGC_INTERFACE_VERSION")]
-    [Interface("SteamUGC")]
-    public class SteamUGC : SteamInterface, ISteamUGC
+    [Map("STEAMUGC_INTERFACE_VERSION")]
+    [Map("SteamUGC")]
+    public class SteamUGC : IBaseInterface, ISteamUGC
     {
         public UGCQueryHandle_t CreateQueryUserUGCRequest(IntPtr unAccountID, IntPtr eListType, int eMatchingUGCType, int eSortOrder, AppId_t nCreatorAppID, AppId_t nConsumerAppID, uint unPage)
         {

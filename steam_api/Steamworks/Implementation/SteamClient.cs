@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Core.Interface;
 using SKYNET;
 using SKYNET.Callback;
 using SKYNET.GUI;
@@ -16,8 +17,8 @@ using Steamworks;
 
 namespace SKYNET.Managers
 {
-    [Interface("SteamClient")]
-    public class SteamClient : SteamInterface, ISteamClient
+    [Interface.MapAttribute("SteamClient")]
+    public class SteamClient : IBaseInterface, ISteamClient
     {
         public void SetAppId(uint appId)
         {
@@ -245,9 +246,6 @@ namespace SKYNET.Managers
         {
             // Save to registry
         }
-        public void Write(object v)
-        {
-            Log.Write(v);
-        }
+
     }
 }

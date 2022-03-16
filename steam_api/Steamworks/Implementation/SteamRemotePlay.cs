@@ -3,9 +3,9 @@ using System;
 
 namespace SKYNET.Managers
 {
-    [Interface("STEAMREMOTEPLAY_INTERFACE_VERSION")]
-    [Interface("SteamRemotePlay")]
-    public class SteamRemotePlay : SteamInterface, ISteamRemotePlay
+    [Map("STEAMREMOTEPLAY_INTERFACE_VERSION")]
+    [Map("SteamRemotePlay")]
+    public class SteamRemotePlay : IBaseInterface, ISteamRemotePlay
     {
         public uint GetSessionCount()
         {

@@ -4,8 +4,8 @@ using Steamworks;
 
 namespace SKYNET.Managers
 {
-    [Interface("SteamHTMLSurface")]
-    public class SteamHTMLSurface : SteamInterface, ISteamHTMLSurface
+    [Map("SteamHTMLSurface")]
+    public class SteamHTMLSurface : IBaseInterface, ISteamHTMLSurface
     {
         public void AddHeader(IntPtr unBrowserHandle, string pchKey, string pchValue)
         {

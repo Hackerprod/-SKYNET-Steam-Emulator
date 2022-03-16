@@ -3,9 +3,9 @@ using SKYNET.Interface;
 
 namespace SKYNET.Managers
 {
-    [Interface("STEAMMUSICREMOTE_INTERFACE_VERSION")]
-    [Interface("SteamMusicRemote")]
-    public class SteamMusicRemote : SteamInterface, ISteamMusicRemote
+    [Map("STEAMMUSICREMOTE_INTERFACE_VERSION")]
+    [Map("SteamMusicRemote")]
+    public class SteamMusicRemote : IBaseInterface, ISteamMusicRemote
     {
         public bool RegisterSteamMusicRemote(string pchName)
         {

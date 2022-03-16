@@ -4,8 +4,8 @@ using System;
 
 namespace SKYNET.Managers
 {
-    [Interface("SteamNetworkingSockets")]
-    public class SteamNetworkingSockets : SteamInterface, ISteamNetworkingSockets
+    [Map("SteamNetworkingSockets")]
+    public class SteamNetworkingSockets : IBaseInterface, ISteamNetworkingSockets
     {
         public uint CreateListenSocketIP(IntPtr localAddress, int nOptions, IntPtr pOptions)
         {
