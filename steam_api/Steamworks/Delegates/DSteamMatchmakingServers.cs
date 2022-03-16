@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamMatchmakingServers")]
-    public class DSteamMatchmakingServers
+    public class DSteamMatchmakingServers : SteamDelegate
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate IntPtr RequestInternetServerList(IntPtr iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse);

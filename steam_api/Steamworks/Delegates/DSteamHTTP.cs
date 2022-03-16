@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamHTMLSurface")]
-    public class DSteamHTTP
+    public class DSteamHTTP : SteamDelegate
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool GetHTTPRequestWasTimedOut(uint hRequest, ref bool pbWasTimedOut);

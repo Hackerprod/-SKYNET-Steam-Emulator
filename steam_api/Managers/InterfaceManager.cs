@@ -9,10 +9,19 @@ using System.Runtime.InteropServices;
 public class InterfaceManager
 {
     public static List<SteamInterface> Interfaces;
+    public static List<SteamInterface> Delegates;
     static InterfaceManager()
     {
         Interfaces = new List<SteamInterface>();
+        Delegates = new List<SteamInterface>();
+        InitializeDelegates();
     }
+
+    public static void InitializeDelegates()
+    {
+        
+    }
+
     public static SteamInterface GetInterface(string Name)
     {
         foreach (var inter in Interfaces)

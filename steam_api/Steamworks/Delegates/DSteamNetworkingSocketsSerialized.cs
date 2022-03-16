@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamNetworkingSocketsSerialized")]
-    public class DSteamNetworkingSocketsSerialized
+    public class DSteamNetworkingSocketsSerialized : SteamDelegate
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate void SendP2PRendezvous(IntPtr steamIDRemote, uint unConnectionIDSrc, IntPtr pMsgRendezvous, uint cbRendezvous);

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamGameCoordinator")]
-    public class DSteamGameSearch
+    public class DSteamGameSearch : SteamDelegate
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate GameSearchErrorCode_t AddGameSearchParams(string pchKeyToFind,  string pchValuesToFind);

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamVideo")]
-    public class DSteamVideo
+    public class DSteamVideo : SteamDelegate
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate void GetVideoURL(IntPtr unVideoAppID);

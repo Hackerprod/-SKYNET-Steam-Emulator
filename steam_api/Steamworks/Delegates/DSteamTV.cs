@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamTV")]
-    public class DSteamTV
+    public class DSteamTV : SteamDelegate
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool IsBroadcasting(int pnNumViewers);

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamNetworkingUtils")]
-    public class DSteamNetworkingUtils
+    public class DSteamNetworkingUtils : SteamDelegate
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate IntPtr AllocateMessage(int cbAllocateBuffer);

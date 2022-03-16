@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamUser")]
-    public class DSteamUser
+    public class DSteamUser : SteamDelegate
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate HSteamUser GetHSteamUser();

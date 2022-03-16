@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamMusic")]
-    public class DSteamMusic
+    public class DSteamMusic : SteamDelegate
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool BIsEnabled();

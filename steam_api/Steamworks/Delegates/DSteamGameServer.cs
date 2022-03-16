@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamGameServer")]
-    public class DSteamGameServer
+    public class DSteamGameServer : SteamDelegate
     {
 
     }

@@ -10,7 +10,7 @@ using Steamworks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamController")]
-    public class DSteamFriends
+    public class DSteamFriends : SteamDelegate
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate string GetPersonaName();

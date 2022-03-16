@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamNetworkingMessages")]
-    public class DSteamNetworkingMessages
+    public class DSteamNetworkingMessages : SteamDelegate
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate int SendMessageToUser( IntPtr identityRemote, IntPtr pubData, uint cubData, int nSendFlags, int nRemoteChannel );

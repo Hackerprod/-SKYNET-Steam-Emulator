@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamMasterServerUpdater")]
-    public class DSteamMasterServerUpdater
+    public class DSteamMasterServerUpdater : SteamDelegate
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate void SetActive(bool bActive);

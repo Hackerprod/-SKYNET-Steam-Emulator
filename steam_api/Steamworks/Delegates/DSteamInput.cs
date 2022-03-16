@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamInput")]
-    public class DSteamInput
+    public class DSteamInput : SteamDelegate
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool Init([MarshalAs(UnmanagedType.U1)] bool bExplicitlyCallRunFrame);

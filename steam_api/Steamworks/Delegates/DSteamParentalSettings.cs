@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace SKYNET.Delegate
 {
     [Delegate("SteamParentalSettings")]
-    public class DSteamParentalSettings
+    public class DSteamParentalSettings : SteamDelegate
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool BIsParentalLockEnabled();
