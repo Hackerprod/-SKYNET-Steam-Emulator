@@ -95,7 +95,7 @@
     <Compile Include="Managers\InterfaceManager.cs" />
     <Compile Include="Handles\SteamAPI_ISteamNetworkingUtils.cs" />
     <Compile Include="Handles\SteamAPI_SteamNetworkingIdentity.cs" />
-    <Compile Include="Managers\Plugin.cs" />
+    <Compile Include="Helper\Context\Plugin.cs" />
     <Compile Include="SteamEmulator.cs" />
     <Compile Include="Steamworks\DelegateClass.cs" />
     <Compile Include="Steamworks\Delegates\DSteamAppList.cs" />

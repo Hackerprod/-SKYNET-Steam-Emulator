@@ -37,6 +37,8 @@ public class SteamInternal : BaseCalls
         {
             Write($"SteamInternal_ContextInit Counter: {contextInitData.counter}, Context pointer: {contextInitData.Context}");
 
+            // Temp implementation 
+            return steamInternal_ContextInit(pContextInitData);
             contextInitData.counter = 1;
 
             int ptr_size = Marshal.SizeOf(typeof(IntPtr));
@@ -48,6 +50,8 @@ public class SteamInternal : BaseCalls
         }
         return contextInitData.Context;
     }
+    [DllImport("steam_api_GC.dll", EntryPoint = "SteamInternal_ContextInit", CallingConvention = CallingConvention.Cdecl)]
+    public static extern IntPtr steamInternal_ContextInit(IntPtr pContextInitData);
 
     public struct ContextInitData
     {

@@ -19,5 +19,20 @@ namespace SKYNET.Callback
             SteamAPICall_t t = new SteamAPICall_t((ulong)iCallback);
             Callbacks.Add(pCallback);
         }
+
+        internal void UnregisterCallResult(IntPtr pCallback, SteamAPICall_t hAPICall)
+        {
+
+        }
+
+        internal void UnregisterCallback(IntPtr pCallback)
+        {
+
+        }
+
+        internal void RegisterCallResult(IntPtr pCallback, SteamAPICall_t hAPICall)
+        {
+
+        }
     }
 }

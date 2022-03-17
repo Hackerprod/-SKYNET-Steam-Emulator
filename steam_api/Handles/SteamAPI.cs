@@ -36,12 +36,33 @@ public class SteamAPI : IBaseInterface
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static void SteamAPI_RegisterCallResult( IntPtr pCallback, SteamAPICall_t hAPICall )
+    {
+        Write("SteamAPI_RegisterCallResult");
+        SteamEmulator.Client_Callback.RegisterCallResult(pCallback, hAPICall);
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static void SteamAPI_Shutdown(IntPtr pContextInitData)
     {
         Write("SteamAPI_Shutdown");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static void SteamAPI_UnregisterCallback(IntPtr pCallback )
+    {
+        Write($"SteamAPI_UnregisterCallback {pCallback}");
+        SteamEmulator.Client_Callback.UnregisterCallback(pCallback);
+    }
+
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static void SteamAPI_UnregisterCallResult(IntPtr pCallback, SteamAPICall_t hAPICall )
+    {
+        Write("SteamAPI_UnregisterCallResult\n");
+        SteamEmulator.Client_Callback.UnregisterCallResult(pCallback, hAPICall);
+    }
+
+[DllExport(CallingConvention = CallingConvention.Cdecl)]
     public unsafe static void SteamAPI_RegisterCallback(IntPtr pCallback, int iCallback)
     {
         string _file = Path.Combine(modCommon.GetPath(), "[SKYNET] steam_api.ini");
@@ -226,12 +247,6 @@ public class SteamAPI : IBaseInterface
     public static void SteamAPI_ReleaseCurrentThreadMemory()
     {
         Write($"SteamAPI_ReleaseCurrentThreadMemory");
-    }
-
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static void SteamAPI_UnregisterCallback( CCallbackBase pCallback )
-    {
-        Write($"SteamAPI_UnregisterCallback");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
