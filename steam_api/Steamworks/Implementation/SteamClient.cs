@@ -39,14 +39,12 @@ namespace SKYNET.Managers
 
         public HSteamUser ConnectToGlobalUser(HSteamPipe hSteamPipe)
         {
-            Write("ConnectToGlobalUser");
-
             if (SteamEmulator.steam_pipes.ContainsKey(hSteamPipe))
             {
                 return (HSteamUser)0;
             }
 
-            SteamEmulator.steam_pipes[hSteamPipe] = Steam_Pipe.CLIENT;
+            SteamEmulator.steam_pipes.Add(hSteamPipe, Steam_Pipe.CLIENT);
 
             return (HSteamUser)(int)Steam_Pipe.CLIENT;
         }

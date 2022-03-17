@@ -5,13 +5,14 @@ using System.IO;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Windows.Forms;
 using SKYNET;
 using SKYNET.GUI;
 using SKYNET.Interface;
 using SKYNET.Managers;
 using Steamworks;
 
-//Implementar SteamAPI_SteamNetworkingIPAddr
+//Implement SteamAPI_SteamNetworkingIPAddr
 public class SteamAPI : IBaseInterface
 {
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -33,10 +34,11 @@ public class SteamAPI : IBaseInterface
     public static void SteamAPI_RunCallbacks()
     {
         Write("SteamAPI_RunCallbacks");
+        SteamEmulator.Client_Callback.RunCallbacks();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static void SteamAPI_RegisterCallResult( IntPtr pCallback, SteamAPICall_t hAPICall )
+    public static void SteamAPI_RegisterCallResult(CCallbackBase pCallback, SteamAPICall_t hAPICall )
     {
         Write("SteamAPI_RegisterCallResult");
         SteamEmulator.Client_Callback.RegisterCallResult(pCallback, hAPICall);
@@ -62,7 +64,7 @@ public class SteamAPI : IBaseInterface
         SteamEmulator.Client_Callback.UnregisterCallResult(pCallback, hAPICall);
     }
 
-[DllExport(CallingConvention = CallingConvention.Cdecl)]
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public unsafe static void SteamAPI_RegisterCallback(IntPtr pCallback, int iCallback)
     {
         string _file = Path.Combine(modCommon.GetPath(), "[SKYNET] steam_api.ini");
@@ -71,7 +73,7 @@ public class SteamAPI : IBaseInterface
         {
             modCommon.LoadSettings();
         }
-        
+
         CCallbackBase Base = Marshal.PtrToStructure<CCallbackBase>(pCallback);
         string callMessage = $"SteamAPI_RegisterCallback: ";
 
@@ -92,7 +94,7 @@ public class SteamAPI : IBaseInterface
         {
             SteamEmulator.Client_Callback.RegisterCallback(pCallback, iCallback);
         }
-        
+
         Write(callMessage);
     }
 
@@ -102,8 +104,7 @@ public class SteamAPI : IBaseInterface
     public static bool SteamAPI_InitSafe()
     {
         Write("SteamAPI_InitSafe");
-        SteamAPI_Init();
-        return true;
+        return SteamAPI_Init();
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

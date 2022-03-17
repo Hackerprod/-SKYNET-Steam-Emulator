@@ -137,7 +137,8 @@ public class modCommon
         }
         catch (Exception e)
         {
-            modCommon.Show(e);
+            string errorMessage = e.Message + " " + e.StackTrace;
+            Log.Write(errorMessage);
         }
 
     }

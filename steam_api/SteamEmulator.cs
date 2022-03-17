@@ -31,6 +31,7 @@ namespace SKYNET
 
         public static ulong SteamId;
         public static ulong SteamId_GS;
+
         public static uint AppId;
         public static Dictionary<HSteamPipe, Steam_Pipe> steam_pipes;
 

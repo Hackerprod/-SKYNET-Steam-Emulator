@@ -13,7 +13,12 @@ namespace SKYNET.Helper
 
         static Log()
         {
-            outputStream = new FileStream($"[SKYNET] steam_api.log", FileMode.OpenOrCreate);
+            string _file = Path.Combine(modCommon.GetPath(), "[SKYNET] steam_api.log");
+            //if (File.Exists(_file))
+            //{
+            //    File.WriteAllText(_file, "");
+            //}
+            outputStream = new FileStream(_file, FileMode.OpenOrCreate);
         }
 
         public static void Write(object msg)
