@@ -86,12 +86,14 @@
     <Compile Include="Callback\CallbackManager.cs" />
     <Compile Include="Callback\CallbackType.cs" />
     <Compile Include="Callback\SteamAPICall_t.cs" />
+    <Compile Include="CSteamAPIContext.cs" />
     <Compile Include="Helper\Attributes\DelegateAttribute.cs" />
     <Compile Include="Helper\Attributes\ImplAttribute.cs" />
     <Compile Include="Helper\Attributes\InterfaceAttribute.cs" />
     <Compile Include="Helper\Attributes\MapAttribute.cs" />
     <Compile Include="Helper\Context\Context.cs" />
     <Compile Include="Helper\Context\IBaseInterface.cs" />
+    <Compile Include="Helper\MemoryHelper.cs" />
     <Compile Include="Managers\InterfaceManager.cs" />
     <Compile Include="Handles\SteamAPI_ISteamNetworkingUtils.cs" />
     <Compile Include="Handles\SteamAPI_SteamNetworkingIdentity.cs" />

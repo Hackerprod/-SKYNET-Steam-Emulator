@@ -4,6 +4,7 @@ using SKYNET.Helper;
 using SKYNET.Interface;
 using SKYNET.Managers;
 using Steamworks;
+using Steamworks.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,8 +14,14 @@ using System.Threading.Tasks;
 
 namespace SKYNET
 {
+    public class Test
+    {
+        public string test;
+    }
     public class SteamEmulator
     {
+        Test test = new Test();
+        AddressHelper.GetAddress(test);
         //Instance
         public static SteamEmulator Instance;
 
@@ -34,6 +41,8 @@ namespace SKYNET
 
         public static uint AppId;
         public static Dictionary<HSteamPipe, Steam_Pipe> steam_pipes;
+
+        public static CSteamApiContext Context;
 
         //Client
         public static SteamClient SteamClient;
@@ -247,13 +256,25 @@ namespace SKYNET
             SteamMasterServerUpdater = new SteamMasterServerUpdater();
             AddInterface(SteamMasterServerUpdater);
 
-            CreateSteamUser();
-            CreateSteamPipe();
+            HSteamUser = (HSteamUser)1;
+            HSteamPipe = (HSteamPipe)1;
 
             HSteamUser_GS = (HSteamUser)1;
             HSteamPipe_GS = (HSteamPipe)1;
 
             SteamClient.ConnectToGlobalUser(HSteamPipe);
+
+            Context = new CSteamApiContext();
+            var success = Context.Init();
+
+            if (success)
+            {
+                Write("SteamApi Context created successfully");
+            }
+            else
+            {
+                Write("Error creating SteamApi Context");
+            }
 
             Initialized = true;
 

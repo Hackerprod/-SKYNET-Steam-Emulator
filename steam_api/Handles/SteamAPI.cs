@@ -143,7 +143,7 @@ public class SteamAPI : IBaseInterface
     public static HSteamUser SteamAPI_GetHSteamUser()
     {
         Write("SteamAPI_GetHSteamUser");
-        if (SteamEmulator.HSteamUser == null)
+        if (SteamEmulator.HSteamUser == null || (int)SteamEmulator.HSteamUser == 0)
         {
             SteamEmulator.CreateSteamUser();
         }
@@ -154,7 +154,7 @@ public class SteamAPI : IBaseInterface
     public static HSteamPipe SteamAPI_GetHSteamPipe()
     {
         Write("SteamAPI_GetHSteamPipe");
-        if (SteamEmulator.HSteamPipe == null)
+        if (SteamEmulator.HSteamPipe == null || (int)SteamEmulator.HSteamPipe == 0)
         {
             SteamEmulator.CreateSteamPipe();
         }
