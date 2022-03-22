@@ -20,11 +20,11 @@ public class SteamInternal : BaseCalls
         Write($"SteamInternal_FindOrCreateUserInterface {pszVersion}");
 
         
-        return SteamEmulator.SteamClient.GetISteamGenericInterface(SteamEmulator.HSteamUser, SteamEmulator.HSteamPipe, pszVersion);
+        return SteamEmulator.SteamClient.GetISteamGenericInterface((int)SteamEmulator.HSteamUser, (int)SteamEmulator.HSteamPipe, pszVersion);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static IntPtr SteamInternal_FindOrCreateGameServerInterface(IntPtr hSteamUser, IntPtr pszVersion)
+    public static IntPtr SteamInternal_FindOrCreateGameServerInterface(int hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion)
     {
         Write($"SteamInternal_FindOrCreateGameServerInterface {pszVersion}");
         return InterfaceManager.FindOrCreateGameServerInterface(hSteamUser, pszVersion);

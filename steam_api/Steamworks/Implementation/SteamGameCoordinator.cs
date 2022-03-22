@@ -5,27 +5,24 @@ using SKYNET.Interface;
 using SKYNET.Types;
 using Steamworks;
 
-namespace SKYNET.Managers
+//[Map("SteamGameCoordinator")]
+public class SteamGameCoordinator : IBaseInterface, ISteamGameCoordinator
 {
-    //[Map("SteamGameCoordinator")]
-    public class SteamGameCoordinator : IBaseInterface, ISteamGameCoordinator
+    public bool IsMessageAvailable(uint pcubMsgSize)
     {
-        public bool IsMessageAvailable(uint pcubMsgSize)
-        {
-            Write("IsMessageAvailable");
-            return false;
-        }
+        Write("IsMessageAvailable");
+        return false;
+    }
 
-        public EGCResults RetrieveMessage(uint punMsgType, IntPtr pubDest, uint cubDest, uint pcubMsgSize)
-        {
-            Write("RetrieveMessage");
-            return EGCResults.k_EGCResultNoMessage;
-        }
+    public EGCResults RetrieveMessage(uint punMsgType, IntPtr pubDest, uint cubDest, uint pcubMsgSize)
+    {
+        Write("RetrieveMessage");
+        return EGCResults.k_EGCResultNoMessage;
+    }
 
-        public EGCResults SendMessage_(uint unMsgType, IntPtr pubData, uint cubData)
-        {
-            Write("SendMessage_");
-            return EGCResults.k_EGCResultOK;
-        }
+    public EGCResults SendMessage_(uint unMsgType, IntPtr pubData, uint cubData)
+    {
+        Write("SendMessage_");
+        return EGCResults.k_EGCResultOK;
     }
 }

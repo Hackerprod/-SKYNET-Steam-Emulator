@@ -212,7 +212,6 @@
     <Compile Include="Steamworks\Delegates\DSteamUserStats.cs" />
     <Compile Include="Steamworks\Delegates\DSteamUtils.cs" />
     <Compile Include="Steamworks\Delegates\DSteamVideo.cs" />
-    <Compile Include="Steamworks\Delegates\SteamDelegate.cs" />
     <Compile Include="Types\BaseCalls.cs" />
     <Compile Include="Callback\CallbackIdentityAttribute.cs" />
     <Compile Include="Callback\CCallbackBase.cs" />
@@ -360,7 +359,6 @@
     <Compile Include="Handles\SteamAPI_ISteamInput.cs" />
     <Compile Include="Handles\SteamAPI_ISteamInventory.cs" />
     <Compile Include="Handles\SteamAPI_ISteamMusic.cs" />
-    <Compile Include="Types\CSteamAPIContext_Typed.cs" />
     <Compile Include="Types\EAccountType.cs" />
     <Compile Include="Types\EResult.cs" />
     <Compile Include="Types\Friend.cs" />

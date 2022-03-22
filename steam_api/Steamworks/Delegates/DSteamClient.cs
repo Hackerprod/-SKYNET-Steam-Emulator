@@ -4,75 +4,88 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Core.Interface;
 using SKYNET.Interface;
 using Steamworks;
 
 namespace SKYNET.Delegate
 {
-    //[Delegate("SteamClient")]
-    //public class DSteamClient : IBaseInterfaceMap
-    //{
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate HSteamPipe CreateSteamPipe();
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate bool BReleaseSteamPipe(HSteamPipe hSteamPipe);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate HSteamUser ConnectToGlobalUser(HSteamPipe hSteamPipe);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate HSteamUser CreateLocalUser(out HSteamPipe phSteamPipe, EAccountType eAccountType);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate void ReleaseUser(HSteamPipe hSteamPipe, HSteamUser hUser);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate ISteamUser GetISteamUser(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate ISteamGameServer GetISteamGameServer(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate void SetLocalIPBinding(uint unIP, ushort usPort);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate ISteamFriends GetISteamFriends(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate ISteamUtils GetISteamUtils(HSteamPipe hSteamPipe, string pchVersion);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate ISteamMatchmaking GetISteamMatchmaking(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate ISteamMatchmakingServers GetISteamMatchmakingServers(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate IntPtr GetISteamGenericInterface(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate ISteamUserStats GetISteamUserStats(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate ISteamGameServerStats GetISteamGameServerStats(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate ISteamApps GetISteamApps(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate ISteamNetworking GetISteamNetworking(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate ISteamRemoteStorage GetISteamRemoteStorage(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate ISteamScreenshots GetISteamScreenshots(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate uint GetIPCCallCount();
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate bool BShutdownIfAllPipesClosed();
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate ISteamHTTP GetISteamHTTP(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate ISteamController GetISteamController(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate ISteamUGC GetISteamUGC(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate ISteamAppList GetISteamAppList(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate ISteamMusic GetISteamMusic(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate ISteamMusicRemote GetISteamMusicRemote(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate ISteamHTMLSurface GetISteamHTMLSurface(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate ISteamInventory GetISteamInventory(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate ISteamVideo GetISteamVideo(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion);
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate ISteamParentalSettings GetISteamParentalSettings(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion);
-    //}
+    [Delegate(Name = "SteamClient")]
+    public class DSteamClient
+    {
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate void SetAppId(uint appId);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate int CreateSteamPipe(IntPtr _);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate bool BReleaseSteamPipe(int hSteamPipe);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate int ConnectToGlobalUser(int hSteamPipe);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate int CreateLocalUser(out int phSteamPipe, EAccountType eAccountType);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate void ReleaseUser(int hSteamPipe, int hUser);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamUser(int hSteamUser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamGameServer(int hSteamUser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate void SetLocalIPBinding(uint unIP, ushort usPort);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamFriends(int hSteamUser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamGameSearch(int hSteamUser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamUtils(int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamMatchmaking(int hSteamUser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamMatchmakingServers(int hSteamUser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamGenericInterface(int hSteamUser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamUserStats(int hSteamUser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamGameServerStats(int hSteamuser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamApps(int hSteamUser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamNetworking(int hSteamUser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamRemoteStorage(int hSteamuser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamScreenshots(int hSteamuser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate uint GetIPCCallCount(IntPtr _);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate bool BShutdownIfAllPipesClosed(IntPtr _);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamHTTP(int hSteamuser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamController(int hSteamUser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamUGC(int hSteamUser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamAppList(int hSteamUser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamMusic(int hSteamuser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamMusicRemote(int hSteamuser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamInput(int hSteamUser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamHTMLSurface(int hSteamuser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamParties(int hSteamUser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamInventory(int hSteamuser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamRemotePlay(int hSteamUser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamVideo(int hSteamuser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr GetISteamParentalSettings(int hSteamuser, int hSteamPipe, string pchVersion);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate void SetPersonaName(string pchPersonaName);
+    }
 }

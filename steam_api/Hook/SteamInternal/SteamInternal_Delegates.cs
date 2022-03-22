@@ -20,7 +20,7 @@ namespace SKYNET.Hook
         private delegate IntPtr SteamInternal_FindOrCreateUserInterfaceDelegate(IntPtr hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        private delegate IntPtr SteamInternal_FindOrCreateGameServerInterfaceDelegate(IntPtr hSteamUser, IntPtr pszVersion);
+        private delegate IntPtr SteamInternal_FindOrCreateGameServerInterfaceDelegate(int hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
         private delegate IntPtr SteamInternal_CreateInterfaceDelegate([MarshalAs(UnmanagedType.LPStr)] string version);

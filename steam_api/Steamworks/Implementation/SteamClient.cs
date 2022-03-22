@@ -12,242 +12,234 @@ using SKYNET.Callback;
 using SKYNET.GUI;
 using SKYNET.Helper;
 using SKYNET.Interface;
-using SKYNET.Managers;
 using Steamworks;
 
-namespace SKYNET.Managers
+//[Interface.MapAttribute("SteamClient")]
+public class SteamClient : IBaseInterface, ISteamClient
 {
-    //[Interface.MapAttribute("SteamClient")]
-    public class SteamClient : IBaseInterface, ISteamClient
+    public void SetAppId(uint appId)
     {
-        public void SetAppId(uint appId)
+        SteamEmulator.AppId = appId;
+    }
+
+    public int CreateSteamPipe(IntPtr _)
+    {
+        Write("CreateSteamPipe");
+        return (int)SteamEmulator.CreateSteamPipe();
+    }
+
+    public bool BReleaseSteamPipe(int hSteamPipe)
+    {
+        Write("BReleaseSteamPipe");
+        return false;
+    }
+
+    public int ConnectToGlobalUser(int hSteamPipe)
+    {
+        if (SteamEmulator.steam_pipes.ContainsKey((HSteamPipe)hSteamPipe))
         {
-            SteamEmulator.AppId = appId;
-        }
-
-        public HSteamPipe CreateSteamPipe()
-        {
-            Write("CreateSteamPipe");
-            return SteamEmulator.CreateSteamPipe();
-        }
-
-        public bool BReleaseSteamPipe(HSteamPipe hSteamPipe)
-        {
-            Write("BReleaseSteamPipe");
-            return false;
-        }
-
-        public HSteamUser ConnectToGlobalUser(HSteamPipe hSteamPipe)
-        {
-            if (SteamEmulator.steam_pipes.ContainsKey(hSteamPipe))
-            {
-                return (HSteamUser)0;
-            }
-
-            SteamEmulator.steam_pipes.Add(hSteamPipe, Steam_Pipe.CLIENT);
-
-            return (HSteamUser)(int)Steam_Pipe.CLIENT;
-        }
-
-        public HSteamUser CreateLocalUser(out HSteamPipe phSteamPipe, EAccountType eAccountType)
-        {
-            Write("CreateLocalUser");
-            phSteamPipe = (HSteamPipe)1;
-            return SteamEmulator.CreateSteamUser();
-        }
-
-        public void ReleaseUser(HSteamPipe hSteamPipe, HSteamUser hUser)
-        {
-            Write("ReleaseUser");
-        }
-
-        public ISteamUser GetISteamUser(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamUser");
-            return SteamEmulator.SteamUser;
-        }
-
-        public ISteamGameServer GetISteamGameServer(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamGameServer");
-            return SteamEmulator.SteamGameServer;
-        }
-
-        public void SetLocalIPBinding(uint unIP, ushort usPort)
-        {
-            Write("SetLocalIPBinding");
-        }
-
-        public ISteamFriends GetISteamFriends(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamFriends");
-            return SteamEmulator.SteamFriends;
-        }
-
-        public ISteamGameSearch GetISteamGameSearch(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamFriends");
-            return SteamEmulator.SteamGameSearch;
-        }
-
-        public ISteamUtils GetISteamUtils(HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamUtils");
-            return SteamEmulator.SteamUtils;
-        }
-
-        public ISteamMatchmaking GetISteamMatchmaking(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamMatchmaking");
-            return SteamEmulator.SteamMatchmaking;
-        }
-
-        public ISteamMatchmakingServers GetISteamMatchmakingServers(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamMatchmakingServers");
-            return SteamEmulator.SteamMatchMakingServers;
-        }
-
-        public IntPtr GetISteamGenericInterface(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamGenericInterface");
-            return InterfaceManager.GetGenericInterface(hSteamUser, hSteamPipe, pchVersion);
-        }
-
-        public ISteamUserStats GetISteamUserStats(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamUserStats");
-            return SteamEmulator.SteamUserStats;
-        }
-
-        public ISteamGameServerStats GetISteamGameServerStats(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamGameServerStats");
-            return SteamEmulator.SteamGameServerStats;
-        }
-
-        public ISteamApps GetISteamApps(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamApps");
-            return SteamEmulator.SteamApps;
-        }
-
-        public ISteamNetworking GetISteamNetworking(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamNetworking");
-            return SteamEmulator.SteamNetworking;
-        }
-
-        public ISteamRemoteStorage GetISteamRemoteStorage(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamRemoteStorage");
-            return SteamEmulator.SteamRemoteStorage;
-        }
-
-        public ISteamScreenshots GetISteamScreenshots(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamScreenshots");
-            return SteamEmulator.SteamScreenshots;
-        }
-
-        public uint GetIPCCallCount()
-        {
-            Write("GetIPCCallCount");
             return 0;
         }
 
-        public bool BShutdownIfAllPipesClosed()
-        {
-            Write("BShutdownIfAllPipesClosed");
-            return false;
-        }
+        SteamEmulator.steam_pipes.Add((HSteamPipe)hSteamPipe, Steam_Pipe.CLIENT);
 
-        public ISteamHTTP GetISteamHTTP(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamHTTP");
-            return SteamEmulator.SteamHTTP;
-        }
+        return (int)Steam_Pipe.CLIENT;
+    }
 
-        public ISteamController GetISteamController(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamController");
-            return SteamEmulator.SteamController;
-        }
+    public int CreateLocalUser(out int phSteamPipe, EAccountType eAccountType)
+    {
+        Write("CreateLocalUser");
+        phSteamPipe = 1;
+        return (int)SteamEmulator.CreateSteamUser();
+    }
 
-        public ISteamUGC GetISteamUGC(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamUGC");
-            return SteamEmulator.SteamUGC;
-        }
+    public void ReleaseUser(int hSteamPipe, int hUser)
+    {
+        Write("ReleaseUser");
+    }
 
-        public ISteamAppList GetISteamAppList(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamAppList");
-            return SteamEmulator.SteamAppList;
-        }
+    public IntPtr GetISteamUser(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamUser");
+        return SteamEmulator.SteamUser.BaseAddress;
+    }
 
-        public ISteamMusic GetISteamMusic(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamMusic");
-            return SteamEmulator.SteamMusic;
-        }
+    public IntPtr GetISteamGameServer(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamGameServer");
+        return SteamEmulator.SteamGameServer.BaseAddress;
+    }
 
-        public ISteamMusicRemote GetISteamMusicRemote(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamMusicRemote");
-            return SteamEmulator.SteamMusicRemote;
-        }
+    public void SetLocalIPBinding(uint unIP, ushort usPort)
+    {
+        Write("SetLocalIPBinding");
+    }
 
-        public ISteamInput GetISteamInput(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamInput");
-            return SteamEmulator.SteamInput;
-        }
+    public IntPtr GetISteamFriends(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamFriends");
+        return SteamEmulator.SteamFriends.BaseAddress;
+    }
 
-        public ISteamHTMLSurface GetISteamHTMLSurface(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamHTMLSurface");
-            return SteamEmulator.SteamHTMLSurface;
-        }
+    public IntPtr GetISteamGameSearch(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamFriends");
+        return SteamEmulator.SteamGameSearch.BaseAddress;
+    }
 
-        public ISteamParties GetISteamParties(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamParties");
-            return SteamEmulator.SteamParties;
-        }
+    public IntPtr GetISteamUtils(int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamUtils");
+        return SteamEmulator.SteamUtils.BaseAddress;
+    }
 
-        public ISteamInventory GetISteamInventory(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamInventory");
-            return SteamEmulator.SteamInventory;
-        }
+    public IntPtr GetISteamMatchmaking(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamMatchmaking");
+        return SteamEmulator.SteamMatchmaking.BaseAddress;
+    }
 
-        public ISteamRemotePlay GetISteamRemotePlay(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamRemotePlay");
-            return SteamEmulator.SteamRemotePlay;
-        }
+    public IntPtr GetISteamMatchmakingServers(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamMatchmakingServers");
+        return SteamEmulator.SteamMatchMakingServers.BaseAddress;
+    }
 
-        public ISteamVideo GetISteamVideo(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamVideo");
-            return SteamEmulator.SteamVideo;
-        }
+    public IntPtr GetISteamGenericInterface(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamGenericInterface");
+        return InterfaceManager.GetGenericInterface(hSteamUser, hSteamPipe, pchVersion);
+    }
 
-        public ISteamParentalSettings GetISteamParentalSettings(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            Write("GetISteamParentalSettings");
-            return SteamEmulator.SteamParentalSettings;
-        }
+    public IntPtr GetISteamUserStats(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamUserStats");
+        return SteamEmulator.SteamUserStats.BaseAddress;
+    }
 
-        public void SetPersonaName(string pchPersonaName)
-        {
-            // Save to registry
-        }
+    public IntPtr GetISteamGameServerStats(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamGameServerStats");
+        return SteamEmulator.SteamGameServerStats.BaseAddress;
+    }
 
-        private static void Write(string v)
-        {
-            Main.Write("SteamClient", v);
-        }
+    public IntPtr GetISteamApps(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamApps");
+        return SteamEmulator.SteamApps.BaseAddress;
+    }
+
+    public IntPtr GetISteamNetworking(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamNetworking");
+        return SteamEmulator.SteamNetworking.BaseAddress;
+    }
+
+    public IntPtr GetISteamRemoteStorage(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamRemoteStorage");
+        return SteamEmulator.SteamRemoteStorage.BaseAddress;
+    }
+
+    public IntPtr GetISteamScreenshots(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamScreenshots");
+        return SteamEmulator.SteamScreenshots.BaseAddress;
+    }
+
+    public uint GetIPCCallCount(IntPtr _)
+    {
+        Write("GetIPCCallCount");
+        return 0;
+    }
+
+    public bool BShutdownIfAllPipesClosed(IntPtr _)
+    {
+        Write("BShutdownIfAllPipesClosed");
+        return false;
+    }
+
+    public IntPtr GetISteamHTTP(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamHTTP");
+        return SteamEmulator.SteamHTTP.BaseAddress;
+    }
+
+    public IntPtr GetISteamController(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamController");
+        return SteamEmulator.SteamController.BaseAddress;
+    }
+
+    public IntPtr GetISteamUGC(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamUGC");
+        return SteamEmulator.SteamUGC.BaseAddress;
+    }
+
+    public IntPtr GetISteamAppList(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamAppList");
+        return SteamEmulator.SteamAppList.BaseAddress;
+    }
+
+    public IntPtr GetISteamMusic(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamMusic");
+        return SteamEmulator.SteamMusic.BaseAddress;
+    }
+
+    public IntPtr GetISteamMusicRemote(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamMusicRemote");
+        return SteamEmulator.SteamMusicRemote.BaseAddress;
+    }
+
+    public IntPtr GetISteamInput(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamInput");
+        return SteamEmulator.SteamInput.BaseAddress;
+    }
+
+    public IntPtr GetISteamHTMLSurface(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamHTMLSurface");
+        return SteamEmulator.SteamHTMLSurface.BaseAddress;
+    }
+
+    public IntPtr GetISteamParties(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamParties");
+        return SteamEmulator.SteamParties.BaseAddress;
+    }
+
+    public IntPtr GetISteamInventory(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamInventory");
+        return SteamEmulator.SteamInventory.BaseAddress;
+    }
+
+    public IntPtr GetISteamRemotePlay(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamRemotePlay");
+        return SteamEmulator.SteamRemotePlay.BaseAddress;
+    }
+
+    public IntPtr GetISteamVideo(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamVideo");
+        return SteamEmulator.SteamVideo.BaseAddress;
+    }
+
+    public IntPtr GetISteamParentalSettings(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        Write("GetISteamParentalSettings");
+        return SteamEmulator.SteamParentalSettings.BaseAddress;
+    }
+
+    public void SetPersonaName(string pchPersonaName)
+    {
+        modCommon.Show("SetPersonaName " + pchPersonaName);
     }
 }
+

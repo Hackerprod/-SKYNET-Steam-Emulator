@@ -2,47 +2,43 @@
 using SKYNET.Interface;
 using System;
 
-namespace SKYNET.Managers
+//[Map("STEAMTV_INTERFACE_V001")]
+//[Map("SteamScreenshots")]
+public class SteamTV : IBaseInterface, ISteamTV
 {
-    //[Map("STEAMTV_INTERFACE_V001")]
-    //[Map("SteamScreenshots")]
-    public class SteamTV : IBaseInterface, ISteamTV
+    public bool IsBroadcasting(int pnNumViewers)
     {
-        public bool IsBroadcasting(int pnNumViewers)
-        {
-            return false;
-        }
+        return false;
+    }
 
-        public void AddBroadcastGameData(string pchKey, string pchValue)
-        {
-            //
-        }
+    public void AddBroadcastGameData(string pchKey, string pchValue)
+    {
+        //
+    }
 
-        public void RemoveBroadcastGameData(string pchKey)
-        {
-            //
-        }
+    public void RemoveBroadcastGameData(string pchKey)
+    {
+        //
+    }
 
-        public void AddTimelineMarker(string pchTemplateName, bool bPersistent, uint nColorR, uint nColorG, uint nColorB)
-        {
-            //
-        }
+    public void AddTimelineMarker(string pchTemplateName, bool bPersistent, uint nColorR, uint nColorG, uint nColorB)
+    {
+        //
+    }
 
-        public void RemoveTimelineMarker()
-        {
-            //
-        }
+    public void RemoveTimelineMarker()
+    {
+        //
+    }
 
-        public uint AddRegion(string pchElementName, string pchTimelineDataSection, IntPtr pSteamTVRegion, int eSteamTVRegionBehavior)
-        {
-            return 0;
-        }
+    public uint AddRegion(string pchElementName, string pchTimelineDataSection, IntPtr pSteamTVRegion, int eSteamTVRegionBehavior)
+    {
+        return 0;
+    }
 
-        public void RemoveRegion(uint unRegionHandle)
-        {
-            //
-        }
-
+    public void RemoveRegion(uint unRegionHandle)
+    {
+        //
     }
 
 }

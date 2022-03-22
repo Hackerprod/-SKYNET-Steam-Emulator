@@ -64,7 +64,7 @@ namespace InterfaceClient
             Write(string.Format("CreateInterface {0}", version));
             try
             {
-                return InterfaceManager.CreateInterface(pipe, version);
+                return InterfaceManager.CreateInterface(user, pipe, version);
             }
             catch (Exception e)
             {

@@ -10,23 +10,23 @@ using Steamworks;
 
 namespace SKYNET.Delegate
 {
-    //[Delegate("SteamAppList")]
-    //public class DSteamAppList : IBaseInterfaceMap
-    //{
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate uint GetNumInstalledApps();
+    [Delegate(Name = "SteamAppList")]
+    public class DSteamAppList 
+    {
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate uint GetNumInstalledApps();
 
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate uint GetInstalledApps(AppId_t pvecAppID, UInt32 unMaxAppIDs);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate uint GetInstalledApps(AppId_t pvecAppID, UInt32 unMaxAppIDs);
 
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate int GetAppName(AppId_t nAppID, IntPtr pchName, int cchNameMax);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate int GetAppName(AppId_t nAppID, IntPtr pchName, int cchNameMax);
 
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate int GetAppInstallDir(AppId_t nAppID, IntPtr pchDirectory, int cchNameMax);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate int GetAppInstallDir(AppId_t nAppID, IntPtr pchDirectory, int cchNameMax);
 
-    //    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    //    public delegate int GetAppBuildId(AppId_t nAppID);
-    //}
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate int GetAppBuildId(AppId_t nAppID);
+    }
 
 }

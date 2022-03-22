@@ -9,36 +9,36 @@ namespace SKYNET.Interface
 {
     public interface ISteamClient
     {
-        HSteamPipe CreateSteamPipe();
-        bool BReleaseSteamPipe(HSteamPipe hSteamPipe);
-        HSteamUser ConnectToGlobalUser(HSteamPipe hSteamPipe);
-        HSteamUser CreateLocalUser(out HSteamPipe phSteamPipe, EAccountType eAccountType);
-        void ReleaseUser(HSteamPipe hSteamPipe, HSteamUser hUser);
-        ISteamUser GetISteamUser(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion);
-        ISteamGameServer GetISteamGameServer(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion);
+        int CreateSteamPipe(IntPtr _);
+        bool BReleaseSteamPipe(int hSteamPipe);
+        int ConnectToGlobalUser(int hSteamPipe);
+        int CreateLocalUser(out int phSteamPipe, EAccountType eAccountType);
+        void ReleaseUser(int hSteamPipe, int hUser);
+        IntPtr GetISteamUser(int hSteamuser, int hSteamPipe, string pchVersion);
+        IntPtr GetISteamGameServer(int hSteamuser, int hSteamPipe, string pchVersion);
         void SetLocalIPBinding(uint unIP, ushort usPort);
-        ISteamFriends GetISteamFriends(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion);
-        ISteamUtils GetISteamUtils(HSteamPipe hSteamPipe, string pchVersion);
-        ISteamMatchmaking GetISteamMatchmaking(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion);
-        ISteamMatchmakingServers GetISteamMatchmakingServers(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion);
-        IntPtr GetISteamGenericInterface(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion);
-        ISteamUserStats GetISteamUserStats(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion);
-        ISteamGameServerStats GetISteamGameServerStats(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion);
-        ISteamApps GetISteamApps(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion);
-        ISteamNetworking GetISteamNetworking(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion);
-        ISteamRemoteStorage GetISteamRemoteStorage(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion);
-        ISteamScreenshots GetISteamScreenshots(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion);
-        uint GetIPCCallCount();
-        bool BShutdownIfAllPipesClosed();
-        ISteamHTTP GetISteamHTTP(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion);
-        ISteamController GetISteamController(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion);
-        ISteamUGC GetISteamUGC(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion);
-        ISteamAppList GetISteamAppList(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion);
-        ISteamMusic GetISteamMusic(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion);
-        ISteamMusicRemote GetISteamMusicRemote(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion);
-        ISteamHTMLSurface GetISteamHTMLSurface(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion);
-        ISteamInventory GetISteamInventory(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion);
-        ISteamVideo GetISteamVideo(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion);
-        ISteamParentalSettings GetISteamParentalSettings(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion);
+        IntPtr GetISteamFriends(int hSteamuser, int hSteamPipe, string pchVersion);
+        IntPtr GetISteamUtils(int hSteamPipe, string pchVersion);
+        IntPtr GetISteamMatchmaking(int hSteamUser, int hSteamPipe, string pchVersion);
+        IntPtr GetISteamMatchmakingServers(int hSteamUser, int hSteamPipe, string pchVersion);
+        IntPtr GetISteamGenericInterface(int hSteamUser, int hSteamPipe, string pchVersion);
+        IntPtr GetISteamUserStats(int hSteamUser, int hSteamPipe, string pchVersion);
+        IntPtr GetISteamGameServerStats(int hSteamuser, int hSteamPipe, string pchVersion);
+        IntPtr GetISteamApps(int hSteamUser, int hSteamPipe, string pchVersion);
+        IntPtr GetISteamNetworking(int hSteamUser, int hSteamPipe, string pchVersion);
+        IntPtr GetISteamRemoteStorage(int hSteamuser, int hSteamPipe, string pchVersion);
+        IntPtr GetISteamScreenshots(int hSteamuser, int hSteamPipe, string pchVersion);
+        uint GetIPCCallCount(IntPtr _);
+        bool BShutdownIfAllPipesClosed(IntPtr _);
+        IntPtr GetISteamHTTP(int hSteamuser, int hSteamPipe, string pchVersion);
+        IntPtr GetISteamController(int hSteamuser, int hSteamPipe, string pchVersion);
+        IntPtr GetISteamUGC(int hSteamuser, int hSteamPipe, string pchVersion);
+        IntPtr GetISteamAppList(int hSteamuser, int hSteamPipe, string pchVersion);
+        IntPtr GetISteamMusic(int hSteamuser, int hSteamPipe, string pchVersion);
+        IntPtr GetISteamMusicRemote(int hSteamuser, int hSteamPipe, string pchVersion);
+        IntPtr GetISteamHTMLSurface(int hSteamuser, int hSteamPipe, string pchVersion);
+        IntPtr GetISteamInventory(int hSteamuser, int hSteamPipe, string pchVersion);
+        IntPtr GetISteamVideo(int hSteamuser, int hSteamPipe, string pchVersion);
+        IntPtr GetISteamParentalSettings(int hSteamuser, int hSteamPipe, string pchVersion);
     }
 }

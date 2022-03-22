@@ -40,6 +40,7 @@ namespace Core.Interface
                 var mi = impl.methods[i];
 
                 var type = iface.delegate_types.Find(x => x.Name.Equals(mi.Name));
+                //Write($"Finding delegate for type {mi.Name}");
 
                 if (type == null)
                 {
@@ -56,7 +57,7 @@ namespace Core.Interface
                 }
                 catch (Exception e)
                 {
-                    Write(string.Format("EXCEPTION whilst binding function {0}, class {1}", mi.Name, impl));
+                    Write(string.Format("EXCEPTION whilst binding function {0}, class {1}", mi.Name, impl) + Environment.NewLine + e.Message);
                 }
             }
 
@@ -71,18 +72,18 @@ namespace Core.Interface
             //   2
             //   3
             //   ...
-
+            
             var ptr_size = Marshal.SizeOf(typeof(IntPtr));
 
             // Allocate enough space for the new pointers in local memory
             var vtable = Marshal.AllocHGlobal(impl.methods.Count * ptr_size);
-
+            
             for (var i = 0; i < new_delegates.Count; i++)
             {
                 // Create all function pointers as neccessary
+                Main.Write ("Testing " + new_delegates[i].Method);
                 Marshal.WriteIntPtr(vtable, i * ptr_size, Marshal.GetFunctionPointerForDelegate(new_delegates[i]));
             }
-
             impl.stored_function_pointers.Add(vtable);
 
             // create the context
@@ -240,24 +241,28 @@ namespace Core.Interface
             return (context, instance);
         }
 
-        public static (IntPtr, IBaseInterface) CreateInterface(IBaseInterface impl)
+        public static (IntPtr, IBaseInterface) CreateInterface(Type type)
         {
-            if (impl == null)
-            {
-                Write(string.Format("Unable to find map or impl for interface {0}", name));
-                return (IntPtr.Zero, null);
-            }
+            string Name = type.ToString();
 
-            var iface = FindInterfaceDelegates(impl.name);
+            var iface = FindInterfaceDelegates(Name);
 
             if (iface == null)
             {
-                Write(string.Format("Unable to find delegates for interface that implements {0}", impl.name));
+                Write(string.Format("Unable to find delegates for interface that implements {0}", Name));
                 return (IntPtr.Zero, null);
             }
 
+            var impl = new Plugin.InterfaceImpl
+            {
+                name = Name,
+                this_type = type,
+                methods = Loader.InterfaceMethodsForType(type)
+            };
+
             // Try to create a new context based on this interface + impl pair
             var (context, instance) = Create(iface, impl);
+
             return (context, instance);
         }
 

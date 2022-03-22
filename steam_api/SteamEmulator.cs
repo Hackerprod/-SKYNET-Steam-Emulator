@@ -3,7 +3,6 @@ using SKYNET.Callback;
 using SKYNET.GUI;
 using SKYNET.Helper;
 using SKYNET.Interface;
-using SKYNET.Managers;
 using Steamworks;
 using Steamworks.Core;
 using System;
@@ -116,95 +115,95 @@ public class SteamEmulator
 
         // CLIENT
 
-        CreateInterface(SteamClient, typeof(SteamClient));
+        SteamClient = CreateInterface<SteamClient>();
 
-        CreateInterface(SteamUser, typeof(SteamUser));
+        SteamUser = CreateInterface<SteamUser>();
 
-        CreateInterface(SteamFriends, typeof(SteamFriends));
+        SteamFriends = CreateInterface<SteamFriends>();
 
-        CreateInterface(SteamUtils, typeof(SteamUtils));
+        //SteamUtils = CreateInterface<SteamUtils>();
 
-        CreateInterface(SteamMatchmaking, typeof(SteamMatchmaking));
+        //SteamMatchmaking = CreateInterface<SteamMatchmaking>();   
 
-        CreateInterface(SteamMatchMakingServers, typeof(SteamMatchMakingServers));
+        //SteamMatchMakingServers = CreateInterface<SteamMatchMakingServers>();    
 
-        CreateInterface(SteamUserStats, typeof(SteamUserStats));
+        //SteamUserStats = CreateInterface<SteamUserStats>();  
 
-        CreateInterface(SteamApps, typeof(SteamApps));
+        //SteamApps = CreateInterface<SteamApps>();   
 
-        CreateInterface(SteamNetworking, typeof(SteamNetworking));
+        //SteamNetworking = CreateInterface<SteamNetworking>();   
 
-        CreateInterface(SteamRemoteStorage, typeof(SteamRemoteStorage));
+        //SteamRemoteStorage = CreateInterface<SteamRemoteStorage>();  
 
-        CreateInterface(SteamScreenshots, typeof(SteamScreenshots));
+        //SteamScreenshots = CreateInterface<SteamScreenshots>();   
 
-        CreateInterface(SteamHTTP, typeof(SteamHTTP));
+        //SteamHTTP = CreateInterface<SteamHTTP>();   
 
-        CreateInterface(SteamController, typeof(SteamController));
+        //SteamController = CreateInterface<SteamController>();   
 
-        CreateInterface(SteamUGC, typeof(SteamUGC));
+        //SteamUGC = CreateInterface<SteamUGC>();  
 
-        CreateInterface(SteamAppList, typeof(SteamAppList));
+        //SteamAppList = CreateInterface<SteamAppList>();  
 
-        CreateInterface(SteamMusic, typeof(SteamMusic));
+        //SteamMusic = CreateInterface<SteamMusic>();  
 
-        CreateInterface(SteamMusicRemote, typeof(SteamMusicRemote));
+        //SteamMusicRemote = CreateInterface<SteamMusicRemote>();    
 
-        CreateInterface(SteamHTMLSurface, typeof(SteamHTMLSurface));
+        //SteamHTMLSurface = CreateInterface<SteamHTMLSurface>();   
 
-        CreateInterface(SteamInventory, typeof(SteamInventory));
+        //SteamInventory = CreateInterface<SteamInventory>();   
 
-        CreateInterface(SteamVideo, typeof(SteamVideo));
+        //SteamVideo = CreateInterface<SteamVideo>();    
 
-        CreateInterface(SteamParentalSettings, typeof(SteamParentalSettings));
+        //SteamParentalSettings = CreateInterface<SteamParentalSettings>();  
 
-        CreateInterface(SteamNetworkingSockets, typeof(SteamNetworkingSockets));
+        //SteamNetworkingSockets = CreateInterface<SteamNetworkingSockets>();   
 
-        CreateInterface(SteamNetworkingSocketsSerialized, typeof(SteamNetworkingSocketsSerialized));
+        //SteamNetworkingSocketsSerialized = CreateInterface<SteamNetworkingSocketsSerialized>();    
 
-        CreateInterface(SteamNetworkingMessages, typeof(SteamNetworkingMessages));
+        //SteamNetworkingMessages = CreateInterface<SteamNetworkingMessages>();   
 
-        CreateInterface(SteamGameCoordinator, typeof(SteamGameCoordinator));
+        //SteamGameCoordinator = CreateInterface<SteamGameCoordinator>();   
 
-        CreateInterface(SteamNetworkingUtils, typeof(SteamNetworkingUtils));
+        //SteamNetworkingUtils = CreateInterface<SteamNetworkingUtils>();    
 
-        CreateInterface(SteamGameSearch, typeof(SteamGameSearch));
+        //SteamGameSearch = CreateInterface<SteamGameSearch>();   
 
-        CreateInterface(SteamParties, typeof(SteamParties));
+        //SteamParties = CreateInterface<SteamParties>();    
 
-        CreateInterface(SteamRemotePlay, typeof(SteamRemotePlay));
+        //SteamRemotePlay = CreateInterface<SteamRemotePlay>();   
 
-        CreateInterface(SteamTV, typeof(SteamTV));
+        //SteamTV = CreateInterface<SteamTV>();   
 
-        CreateInterface(SteamInput, typeof(SteamInput));
+        //SteamInput = CreateInterface<SteamInput>();   
 
-        // GAMESERVER
+        
 
-        CreateInterface(SteamGameServer, typeof(SteamGameServer));
+        //SteamGameServer = CreateInterface<SteamGameServer>();   
 
-        CreateInterface(SteamGameServerUtils, typeof(SteamUtils));
+        //SteamGameServerUtils = CreateInterface<SteamUtils>();   
 
-        CreateInterface(SteamGameServerStats, typeof(SteamGameServerStats));
+        //SteamGameServerStats = CreateInterface<SteamGameServerStats>();   
 
-        CreateInterface(SteamGameServerNetworking, typeof(SteamNetworking));
+        //SteamGameServerNetworking = CreateInterface<SteamNetworking>(); 
 
-        CreateInterface(SteamGameServerHttp, typeof(SteamHTTP));
+        //SteamHTTP = CreateInterface<SteamHTTP>(); 
 
-        CreateInterface(SteamGameServerInventory, typeof(SteamInventory));
+        //SteamGameServerInventory = CreateInterface<SteamInventory>(); 
 
-        CreateInterface(SteamGameServerUgc, typeof(SteamUGC));
+        //SteamGameServerUgc = CreateInterface<SteamUGC>();  
 
-        CreateInterface(SteamGameServerApps, typeof(SteamApps));
+        //SteamGameServerApps = CreateInterface<SteamApps>(); 
 
-        CreateInterface(SteamGameServerNetworkingSockets, typeof(SteamNetworkingSockets));
+        //SteamGameServerNetworkingSockets = CreateInterface<SteamNetworkingSockets>();  
 
-        CreateInterface(SteamGameServerNetworkingSocketsSerialized, typeof(SteamNetworkingSocketsSerialized));
+        //SteamGameServerNetworkingSocketsSerialized = CreateInterface<SteamNetworkingSocketsSerialized>(); 
 
-        CreateInterface(SteamGameServerNetworkingMessages, typeof(SteamNetworkingMessages));
+        //SteamGameServerNetworkingMessages = CreateInterface<SteamNetworkingMessages>();  
 
-        CreateInterface(SteamGameServerGamecoordinator, typeof(SteamGameCoordinator));
+        //SteamGameServerGamecoordinator = CreateInterface<SteamGameCoordinator>();   
 
-        CreateInterface(SteamMasterServerUpdater, typeof(SteamMasterServerUpdater));
+        //SteamMasterServerUpdater = CreateInterface<SteamMasterServerUpdater>(); 
 
         HSteamUser = (HSteamUser)1;
         HSteamPipe = (HSteamPipe)1;
@@ -212,7 +211,7 @@ public class SteamEmulator
         HSteamUser_GS = (HSteamUser)1;
         HSteamPipe_GS = (HSteamPipe)1;
 
-        SteamClient.ConnectToGlobalUser(HSteamPipe);
+        SteamClient.ConnectToGlobalUser((int)HSteamPipe);
 
         Context = new CSteamApiContext();
         //var success = Context.Init();
@@ -232,11 +231,12 @@ public class SteamEmulator
 
     }
 
-    private void CreateInterface(IBaseInterface baseClass, Type steamInterface)
+    private T CreateInterface<T>()  where T : IBaseInterface
     {
-        var (context, iface) = Core.Interface.Context.CreateInterface(baseClass);
-        baseClass = iface;
-        iface.BaseAddress = context;
+        var (context, iface) = Core.Interface.Context.CreateInterface(typeof(T));
+        T baseClass = (T)iface;
+        baseClass.BaseAddress = context;
+        return (T)baseClass;
     }
 
     private void AddInterface(object steamInterface)

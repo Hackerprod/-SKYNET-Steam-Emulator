@@ -43,7 +43,7 @@ namespace SKYNET.Hook
             return GetInterface(pszVersion);
         }
 
-        public IntPtr SteamInternal_FindOrCreateGameServerInterface(IntPtr hSteamUser, IntPtr pszVersion)
+        public IntPtr SteamInternal_FindOrCreateGameServerInterface(int hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion)
         {
             Write($"SteamInternal_FindOrCreateGameServerInterface {pszVersion}");
             return InterfaceManager.FindOrCreateGameServerInterface(hSteamUser, pszVersion);

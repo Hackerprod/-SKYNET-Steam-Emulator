@@ -3,7 +3,6 @@ using SKYNET;
 using SKYNET.Delegate;
 using SKYNET.Helper;
 using SKYNET.Interface;
-using SKYNET.Managers;
 using Steamworks;
 using System;
 using System.Collections.Generic;
@@ -16,8 +15,9 @@ public class InterfaceManager
 {
     public static List<Plugin> LoadedPlugins { get; set; }
 
-    public static List<IBaseInterface> Interfaces;
     public static List<IBaseInterfaceMap> Delegates;
+
+    private static Dictionary<string, IntPtr> Interfaces;
 
     private static string filePath;
 
@@ -26,7 +26,7 @@ public class InterfaceManager
 
     static InterfaceManager()
     {
-        Interfaces = new List<IBaseInterface>();
+        Interfaces = new Dictionary<string, IntPtr>();
         Delegates = new List<IBaseInterfaceMap>();
         LoadedPlugins = new List<Plugin>();
     }
@@ -119,9 +119,20 @@ public class InterfaceManager
         
     }
 
+    internal static IntPtr FindOrCreateInterface(int hSteamUser, int hSteamPipe, string pchVersion)
+    {
+        if (Interfaces.ContainsKey(pchVersion))
+        {
+            return Interfaces[pchVersion];
+        }
+        var(Address, IBaseInterface) = Context.CreateInterface(pchVersion);
+        Interfaces.Add(pchVersion, Address);
+        return Address;
+    }
+
     internal static IntPtr CreateInterfaceNoUser(int pipe, string version)
     {
-        return CreateInterface(pipe, version);
+        return FindOrCreateInterface(1, pipe, version);
     }
 
     public static bool IsInterfaceImpl(Type t)
@@ -149,66 +160,29 @@ public class InterfaceManager
         return all_methods;
     }
 
-    public static IBaseInterface GetInterface(string Name)
-    {
-        foreach (var inter in Interfaces)
-        {
-            Type type = inter.GetType();
-            var attributes = type.GetCustomAttributes(true);
-            foreach (var attribute in attributes)
-            {
-                MapAttribute attr = (MapAttribute)attribute;
-                if (attr != null)
-                {
-                    if (Name == attr.Name)
-                    {
-                        return inter;
-                    }
-                    if (Name.StartsWith(attr.Name))
-                    {
-                        //Check if is valid version number
-                        if (int.TryParse(Name.Replace(attr.Name, ""), out _))
-                        {
-                            return inter;
-                        }
-                    }
-                }
-            }
-        }
-        return null;
-    }
     public static IntPtr CreateInterface(string version)
     {
-        return CreateInterface(1, version);
+        return FindOrCreateInterface(1, 1, version);
     }
 
-    public static IntPtr CreateInterface(IntPtr hSteamUser, IntPtr pszVersion)
+    public static IntPtr CreateInterface(int hSteamUser, int hSteamPipe, string version)
     {
-        string version = Marshal.PtrToStringBSTR(pszVersion);
-        IBaseInterface inter = GetInterface(version);
-        return CreateInterface(1, version);
+        return FindOrCreateInterface(hSteamUser, hSteamPipe, version);
     }
 
-    public static IntPtr FindOrCreateGameServerInterface(IntPtr hSteamUser, IntPtr pszVersion)
+    public static IntPtr CreateInterface(int hSteamUser, string pszVersion)
     {
-        string version = Marshal.PtrToStringBSTR(pszVersion);
-        return CreateInterface(1, version);
+        return FindOrCreateInterface(hSteamUser, 1, pszVersion);
     }
 
-    public static IntPtr GetGenericInterface(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
+    public static IntPtr FindOrCreateGameServerInterface(int hSteamUser, string pszVersion)
     {
-        return CreateInterface(hSteamPipe.m_HSteamPipe, pchVersion);
+        return FindOrCreateInterface(hSteamUser, 1, pszVersion);
     }
-    public static IntPtr CreateInterface(int pipe_id, string name)
+
+    public static IntPtr GetGenericInterface(int hSteamUser, int hSteamPipe, string pchVersion)
     {
-        var (context, iface) = Context.CreateInterface(name);
-
-        if (context == IntPtr.Zero) return IntPtr.Zero;
-
-        iface.InterfaceId = -1;
-
-        Interfaces.Add(iface);
-
-        return context;
+        return FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
     }
+
 }
