@@ -121,7 +121,7 @@ public class SteamEmulator
 
         SteamFriends = CreateInterface<SteamFriends>();
 
-        //SteamUtils = CreateInterface<SteamUtils>();
+        SteamUtils = CreateInterface<SteamUtils>();
 
         //SteamMatchmaking = CreateInterface<SteamMatchmaking>();   
 

@@ -10,102 +10,102 @@ namespace SKYNET.Delegate
     public class DSteamUtils 
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate uint GetSecondsSinceAppActive();
+        public delegate uint GetSecondsSinceAppActive(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate uint GetSecondsSinceComputerActive();
+        public delegate uint GetSecondsSinceComputerActive(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate EUniverse GetConnectedUniverse();
+        public delegate EUniverse GetConnectedUniverse(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate uint GetServerRealTime();
+        public delegate uint GetServerRealTime(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate string GetIPCountry();
+        public delegate string GetIPCountry(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool GetImageSize(int iImage, uint pnWidth, uint pnHeight);
+        public delegate bool GetImageSize(IntPtr _, int iImage, uint pnWidth, uint pnHeight);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool GetImageRGBA(int iImage, uint pubDest, int nDestBufferSize);
+        public delegate bool GetImageRGBA(IntPtr _, int iImage, uint pubDest, int nDestBufferSize);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool GetCSERIPPort(uint unIP, uint usPort);
+        public delegate bool GetCSERIPPort(IntPtr _, uint unIP, uint usPort);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate uint GetCurrentBatteryPower();
+        public delegate uint GetCurrentBatteryPower(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate uint GetAppID();
+        public delegate uint GetAppID(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate void SetOverlayNotificationPosition(ENotificationPosition eNotificationPosition);
+        public delegate void SetOverlayNotificationPosition(IntPtr _, ENotificationPosition eNotificationPosition);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool IsAPICallCompleted(SteamAPICall_t hSteamAPICall, bool pbFailed);
+        public delegate bool IsAPICallCompleted(IntPtr _, SteamAPICall_t hSteamAPICall, bool pbFailed);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate ESteamAPICallFailure GetAPICallFailureReason(SteamAPICall_t hSteamAPICall);
+        public delegate ESteamAPICallFailure GetAPICallFailureReason(IntPtr _, SteamAPICall_t hSteamAPICall);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool GetAPICallResult(SteamAPICall_t hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, bool pbFailed);
+        public delegate bool GetAPICallResult(IntPtr _, SteamAPICall_t hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, bool pbFailed);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate uint GetIPCCallCount();
+        public delegate uint GetIPCCallCount(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate void SetWarningMessageHook(SteamAPIWarningMessageHook_t pFunction);
+        public delegate void SetWarningMessageHook(IntPtr _, SteamAPIWarningMessageHook_t pFunction);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool IsOverlayEnabled();
+        public delegate bool IsOverlayEnabled(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool BOverlayNeedsPresent();
+        public delegate bool BOverlayNeedsPresent(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate SteamAPICall_t CheckFileSignature(string szFileName);
+        public delegate SteamAPICall_t CheckFileSignature(IntPtr _, string szFileName);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool ShowGamepadTextInput(EGamepadTextInputMode eInputMode, EGamepadTextInputLineMode eLineInputMode, string pchDescription, uint unCharMax, string pchExistingText);
+        public delegate bool ShowGamepadTextInput(IntPtr _, EGamepadTextInputMode eInputMode, EGamepadTextInputLineMode eLineInputMode, string pchDescription, uint unCharMax, string pchExistingText);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate uint GetEnteredGamepadTextLength();
+        public delegate uint GetEnteredGamepadTextLength(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool GetEnteredGamepadTextInput(string pchText, uint cchText);
+        public delegate bool GetEnteredGamepadTextInput(IntPtr _, string pchText, uint cchText);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate string GetSteamUILanguage();
+        public delegate string GetSteamUILanguage(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool IsSteamRunningInVR();
+        public delegate bool IsSteamRunningInVR(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate void SetOverlayNotificationInset(int nHorizontalInset, int nVerticalInset);
+        public delegate void SetOverlayNotificationInset(IntPtr _, int nHorizontalInset, int nVerticalInset);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool IsSteamInBigPictureMode();
+        public delegate bool IsSteamInBigPictureMode(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate void StartVRDashboard();
+        public delegate void StartVRDashboard(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool IsVRHeadsetStreamingEnabled();
+        public delegate bool IsVRHeadsetStreamingEnabled(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate void SetVRHeadsetStreamingEnabled(bool bEnabled);
+        public delegate void SetVRHeadsetStreamingEnabled(IntPtr _, bool bEnabled);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool IsSteamChinaLauncher();
+        public delegate bool IsSteamChinaLauncher(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool InitFilterText();
+        public delegate bool InitFilterText(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate int FilterText(string pchOutFilteredText, uint nByteSizeOutFilteredText, string pchInputMessage, bool bLegalOnly);
+        public delegate int FilterText(IntPtr _, string pchOutFilteredText, uint nByteSizeOutFilteredText, string pchInputMessage, bool bLegalOnly);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate ESteamIPv6ConnectivityState GetIPv6ConnectivityState(ESteamIPv6ConnectivityProtocol eProtocol);
+        public delegate ESteamIPv6ConnectivityState GetIPv6ConnectivityState(IntPtr _, ESteamIPv6ConnectivityProtocol eProtocol);
     }
 }

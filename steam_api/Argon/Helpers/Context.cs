@@ -81,7 +81,7 @@ namespace Core.Interface
             for (var i = 0; i < new_delegates.Count; i++)
             {
                 // Create all function pointers as neccessary
-                Main.Write ("Testing " + new_delegates[i].Method);
+                // Main.Write ("Testing " + new_delegates[i].Method);
                 Marshal.WriteIntPtr(vtable, i * ptr_size, Marshal.GetFunctionPointerForDelegate(new_delegates[i]));
             }
             impl.stored_function_pointers.Add(vtable);

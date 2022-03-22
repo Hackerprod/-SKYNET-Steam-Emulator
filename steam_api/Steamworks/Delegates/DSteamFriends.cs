@@ -10,236 +10,236 @@ using Steamworks;
 
 namespace SKYNET.Delegate
 {
-    [Delegate(Name = "SteamController")]
+    [Delegate(Name = "SteamFriends")]
     public class DSteamFriends 
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate string GetPersonaName();
+        public delegate string GetPersonaName(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate SteamAPICall_t SetPersonaName([MarshalAs(UnmanagedType.LPStr)] string pchPersonaName);
+        public delegate SteamAPICall_t SetPersonaName(IntPtr _, [MarshalAs(UnmanagedType.LPStr)] string pchPersonaName);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate EPersonaState GetPersonaState();
+        public delegate EPersonaState GetPersonaState(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate int GetFriendCount(int iFriendFlags);
+        public delegate int GetFriendCount(IntPtr _, int iFriendFlags);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate IntPtr GetFriendByIndex(int iFriend, int iFriendFlags);
+        public delegate IntPtr GetFriendByIndex(IntPtr _, int iFriend, int iFriendFlags);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate EFriendRelationship GetFriendRelationship(IntPtr steamIDFriend);
+        public delegate EFriendRelationship GetFriendRelationship(IntPtr _, IntPtr steamIDFriend);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate EPersonaState GetFriendPersonaState(IntPtr steamIDFriend);
+        public delegate EPersonaState GetFriendPersonaState(IntPtr _, IntPtr steamIDFriend);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate string GetFriendPersonaName(IntPtr steamIDFriend);
+        public delegate string GetFriendPersonaName(IntPtr _, IntPtr steamIDFriend);
 
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool GetFriendGamePlayed(IntPtr steamIDFriend, out FriendGameInfo_t pFriendGameInfo);
+        public delegate bool GetFriendGamePlayed(IntPtr _, IntPtr steamIDFriend, out FriendGameInfo_t pFriendGameInfo);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate string GetFriendPersonaNameHistory(IntPtr steamIDFriend, int iPersonaName);
+        public delegate string GetFriendPersonaNameHistory(IntPtr _, IntPtr steamIDFriend, int iPersonaName);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate int GetFriendSteamLevel(IntPtr steamIDFriend);
+        public delegate int GetFriendSteamLevel(IntPtr _, IntPtr steamIDFriend);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate string GetPlayerNickname(IntPtr steamIDPlayer);
+        public delegate string GetPlayerNickname(IntPtr _, IntPtr steamIDPlayer);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate int GetFriendsGroupCount();
+        public delegate int GetFriendsGroupCount(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate FriendsGroupID_t GetFriendsGroupIDByIndex(int iFG);
+        public delegate FriendsGroupID_t GetFriendsGroupIDByIndex(IntPtr _, int iFG);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate string GetFriendsGroupName(FriendsGroupID_t friendsGroupID);
+        public delegate string GetFriendsGroupName(IntPtr _, FriendsGroupID_t friendsGroupID);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate int GetFriendsGroupMembersCount(FriendsGroupID_t friendsGroupID);
+        public delegate int GetFriendsGroupMembersCount(IntPtr _, FriendsGroupID_t friendsGroupID);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate void GetFriendsGroupMembersList(FriendsGroupID_t friendsGroupID, IntPtr[] pOutSteamIDMembers, int nMembersCount);
+        public delegate void GetFriendsGroupMembersList(IntPtr _, FriendsGroupID_t friendsGroupID, IntPtr[] pOutSteamIDMembers, int nMembersCount);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool HasFriend(IntPtr steamIDFriend, int iFriendFlags);
+        public delegate bool HasFriend(IntPtr _, IntPtr steamIDFriend, int iFriendFlags);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate int GetClanCount();
+        public delegate int GetClanCount(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate IntPtr GetClanByIndex(int iClan);
+        public delegate IntPtr GetClanByIndex(IntPtr _, int iClan);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate string GetClanName(IntPtr steamIDClan);
+        public delegate string GetClanName(IntPtr _, IntPtr steamIDClan);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate string GetClanTag(IntPtr steamIDClan);
+        public delegate string GetClanTag(IntPtr _, IntPtr steamIDClan);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool GetClanActivityCounts(IntPtr steamIDClan, int pnOnline, int pnInGame, int pnChatting);
+        public delegate bool GetClanActivityCounts(IntPtr _, IntPtr steamIDClan, int pnOnline, int pnInGame, int pnChatting);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate SteamAPICall_t DownloadClanActivityCounts(IntPtr[] psteamIDClans, int cClansToRequest);
+        public delegate SteamAPICall_t DownloadClanActivityCounts(IntPtr _, IntPtr[] psteamIDClans, int cClansToRequest);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate int GetFriendCountFromSource(IntPtr steamIDSource);
+        public delegate int GetFriendCountFromSource(IntPtr _, IntPtr steamIDSource);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate IntPtr GetFriendFromSourceByIndex(IntPtr steamIDSource, int iFriend);
+        public delegate IntPtr GetFriendFromSourceByIndex(IntPtr _, IntPtr steamIDSource, int iFriend);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool IsUserInSource(IntPtr steamIDUser, IntPtr steamIDSource);
+        public delegate bool IsUserInSource(IntPtr _, IntPtr steamIDUser, IntPtr steamIDSource);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate void SetInGameVoiceSpeaking(IntPtr steamIDUser, bool bSpeaking);
+        public delegate void SetInGameVoiceSpeaking(IntPtr _, IntPtr steamIDUser, bool bSpeaking);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate void ActivateGameOverlay([MarshalAs(UnmanagedType.LPStr)] string pchDialog);
+        public delegate void ActivateGameOverlay(IntPtr _, [MarshalAs(UnmanagedType.LPStr)] string pchDialog);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate void ActivateGameOverlayToUser([MarshalAs(UnmanagedType.LPStr)] string pchDialog, IntPtr steamID);
+        public delegate void ActivateGameOverlayToUser(IntPtr _, [MarshalAs(UnmanagedType.LPStr)] string pchDialog, IntPtr steamID);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate void ActivateGameOverlayToWebPage([MarshalAs(UnmanagedType.LPStr)] string pchURL, EActivateGameOverlayToWebPageMode eMode = EActivateGameOverlayToWebPageMode.k_EActivateGameOverlayToWebPageMode_Default);
+        public delegate void ActivateGameOverlayToWebPage(IntPtr _, [MarshalAs(UnmanagedType.LPStr)] string pchURL, EActivateGameOverlayToWebPageMode eMode = EActivateGameOverlayToWebPageMode.k_EActivateGameOverlayToWebPageMode_Default);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate void ActivateGameOverlayToStore(AppId_t nAppID, EOverlayToStoreFlag eFlag);
+        public delegate void ActivateGameOverlayToStore(IntPtr _, AppId_t nAppID, EOverlayToStoreFlag eFlag);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate void SetPlayedWith(IntPtr steamIDUserPlayedWith);
+        public delegate void SetPlayedWith(IntPtr _, IntPtr steamIDUserPlayedWith);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate void ActivateGameOverlayInviteDialog(IntPtr steamIDLobby);
+        public delegate void ActivateGameOverlayInviteDialog(IntPtr _, IntPtr steamIDLobby);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate int GetSmallFriendAvatar(IntPtr steamIDFriend);
+        public delegate int GetSmallFriendAvatar(IntPtr _, IntPtr steamIDFriend);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate int GetMediumFriendAvatar(IntPtr steamIDFriend);
+        public delegate int GetMediumFriendAvatar(IntPtr _, IntPtr steamIDFriend);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate int GetLargeFriendAvatar(IntPtr steamIDFriend);
+        public delegate int GetLargeFriendAvatar(IntPtr _, IntPtr steamIDFriend);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool RequestUserInformation(IntPtr steamIDUser, bool bRequireNameOnly);
+        public delegate bool RequestUserInformation(IntPtr _, IntPtr steamIDUser, bool bRequireNameOnly);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate SteamAPICall_t RequestClanOfficerList(IntPtr steamIDClan);
+        public delegate SteamAPICall_t RequestClanOfficerList(IntPtr _, IntPtr steamIDClan);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate IntPtr GetClanOwner(IntPtr steamIDClan);
+        public delegate IntPtr GetClanOwner(IntPtr _, IntPtr steamIDClan);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate int GetClanOfficerCount(IntPtr steamIDClan);
+        public delegate int GetClanOfficerCount(IntPtr _, IntPtr steamIDClan);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate IntPtr GetClanOfficerByIndex(IntPtr steamIDClan, int iOfficer);
+        public delegate IntPtr GetClanOfficerByIndex(IntPtr _, IntPtr steamIDClan, int iOfficer);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate UInt32 GetUserRestrictions();
+        public delegate UInt32 GetUserRestrictions(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool SetRichPresence([MarshalAs(UnmanagedType.LPStr)] string pchKey, [MarshalAs(UnmanagedType.LPStr)] string pchValue);
+        public delegate bool SetRichPresence(IntPtr _, [MarshalAs(UnmanagedType.LPStr)] string pchKey, [MarshalAs(UnmanagedType.LPStr)] string pchValue);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate void ClearRichPresence();
+        public delegate void ClearRichPresence(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate string GetFriendRichPresence(IntPtr steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchKey);
+        public delegate string GetFriendRichPresence(IntPtr _, IntPtr steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchKey);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate int GetFriendRichPresenceKeyCount(IntPtr steamIDFriend);
+        public delegate int GetFriendRichPresenceKeyCount(IntPtr _, IntPtr steamIDFriend);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate string GetFriendRichPresenceKeyByIndex(IntPtr steamIDFriend, int iKey);
+        public delegate string GetFriendRichPresenceKeyByIndex(IntPtr _, IntPtr steamIDFriend, int iKey);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate void RequestFriendRichPresence(IntPtr steamIDFriend);
+        public delegate void RequestFriendRichPresence(IntPtr _, IntPtr steamIDFriend);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool InviteUserToGame(IntPtr steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchConnectString);
+        public delegate bool InviteUserToGame(IntPtr _, IntPtr steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchConnectString);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate int GetCoplayFriendCount();
+        public delegate int GetCoplayFriendCount(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate IntPtr GetCoplayFriend(int iCoplayFriend);
+        public delegate IntPtr GetCoplayFriend(IntPtr _, int iCoplayFriend);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate int GetFriendCoplayTime(IntPtr steamIDFriend);
+        public delegate int GetFriendCoplayTime(IntPtr _, IntPtr steamIDFriend);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate AppId_t GetFriendCoplayGame(IntPtr steamIDFriend);
+        public delegate AppId_t GetFriendCoplayGame(IntPtr _, IntPtr steamIDFriend);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate SteamAPICall_t JoinClanChatRoom(IntPtr steamIDClan);
+        public delegate SteamAPICall_t JoinClanChatRoom(IntPtr _, IntPtr steamIDClan);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool LeaveClanChatRoom(IntPtr steamIDClan);
+        public delegate bool LeaveClanChatRoom(IntPtr _, IntPtr steamIDClan);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate int GetClanChatMemberCount(IntPtr steamIDClan);
+        public delegate int GetClanChatMemberCount(IntPtr _, IntPtr steamIDClan);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate IntPtr GetChatMemberByIndex(IntPtr steamIDClan, int iUser);
+        public delegate IntPtr GetChatMemberByIndex(IntPtr _, IntPtr steamIDClan, int iUser);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool SendClanChatMessage(IntPtr steamIDClanChat, [MarshalAs(UnmanagedType.LPStr)] string pchText);
+        public delegate bool SendClanChatMessage(IntPtr _, IntPtr steamIDClanChat, [MarshalAs(UnmanagedType.LPStr)] string pchText);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate int GetClanChatMessage(IntPtr steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, EChatEntryType peChatEntryType, IntPtr[] psteamidChatter);
+        public delegate int GetClanChatMessage(IntPtr _, IntPtr steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, EChatEntryType peChatEntryType, IntPtr[] psteamidChatter);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool IsClanChatAdmin(IntPtr steamIDClanChat, IntPtr steamIDUser);
+        public delegate bool IsClanChatAdmin(IntPtr _, IntPtr steamIDClanChat, IntPtr steamIDUser);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool IsClanChatWindowOpenInSteam(IntPtr steamIDClanChat);
+        public delegate bool IsClanChatWindowOpenInSteam(IntPtr _, IntPtr steamIDClanChat);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool OpenClanChatWindowInSteam(IntPtr steamIDClanChat);
+        public delegate bool OpenClanChatWindowInSteam(IntPtr _, IntPtr steamIDClanChat);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool CloseClanChatWindowInSteam(IntPtr steamIDClanChat);
+        public delegate bool CloseClanChatWindowInSteam(IntPtr _, IntPtr steamIDClanChat);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool SetListenForFriendsMessages(bool bInterceptEnabled);
+        public delegate bool SetListenForFriendsMessages(IntPtr _, bool bInterceptEnabled);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool ReplyToFriendMessage(IntPtr steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchMsgToSend);
+        public delegate bool ReplyToFriendMessage(IntPtr _, IntPtr steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchMsgToSend);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate int GetFriendMessage(IntPtr steamIDFriend, int iMessageID, IntPtr pvData, int cubData, EChatEntryType peChatEntryType);
+        public delegate int GetFriendMessage(IntPtr _, IntPtr steamIDFriend, int iMessageID, IntPtr pvData, int cubData, EChatEntryType peChatEntryType);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate SteamAPICall_t GetFollowerCount(IntPtr steamID);
+        public delegate SteamAPICall_t GetFollowerCount(IntPtr _, IntPtr steamID);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate SteamAPICall_t IsFollowing(IntPtr steamID);
+        public delegate SteamAPICall_t IsFollowing(IntPtr _, IntPtr steamID);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate SteamAPICall_t EnumerateFollowingList(UInt32 unStartIndex);
+        public delegate SteamAPICall_t EnumerateFollowingList(IntPtr _, uint unStartIndex);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool IsClanPublic(IntPtr steamIDClan);
+        public delegate bool IsClanPublic(IntPtr _, IntPtr steamIDClan);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool IsClanOfficialGameGroup(IntPtr steamIDClan);
+        public delegate bool IsClanOfficialGameGroup(IntPtr _, IntPtr steamIDClan);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate int GetNumChatsWithUnreadPriorityMessages();
+        public delegate int GetNumChatsWithUnreadPriorityMessages(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate void ActivateGameOverlayRemotePlayTogetherInviteDialog(IntPtr steamIDLobby);
+        public delegate void ActivateGameOverlayRemotePlayTogetherInviteDialog(IntPtr _, IntPtr steamIDLobby);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool RegisterProtocolInOverlayBrowser([MarshalAs(UnmanagedType.LPStr)] string pchProtocol);
+        public delegate bool RegisterProtocolInOverlayBrowser(IntPtr _, [MarshalAs(UnmanagedType.LPStr)] string pchProtocol);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate void ActivateGameOverlayInviteDialogConnectString([MarshalAs(UnmanagedType.LPStr)] string pchConnectString);
+        public delegate void ActivateGameOverlayInviteDialogConnectString(IntPtr _, [MarshalAs(UnmanagedType.LPStr)] string pchConnectString);
     }
 }

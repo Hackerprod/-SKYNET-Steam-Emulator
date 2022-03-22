@@ -10,192 +10,178 @@ using Steamworks;
 //[Map("SteamFriends")]
 public class SteamFriends : IBaseInterface, ISteamFriends
 {
-    public string ISteamFriends004 = "ISteamFriends004";
-    public string ISteamFriends005 = "ISteamFriends005";
-    public string ISteamFriends006 = "ISteamFriends006";
-    public string ISteamFriends007 = "ISteamFriends007";
-    public string ISteamFriends008 = "ISteamFriends008";
-    public string ISteamFriends009 = "ISteamFriends009";
-    public string ISteamFriends010 = "ISteamFriends010";
-    public string ISteamFriends011 = "ISteamFriends011";
-    public string ISteamFriends012 = "ISteamFriends012";
-    public string ISteamFriends013 = "ISteamFriends013";
-    public string ISteamFriends014 = "ISteamFriends014";
-    public string ISteamFriends015 = "ISteamFriends015";
-    public string ISteamFriends016 = "ISteamFriends016";
-
     public List<Friend> Friends;
     public List<IntPtr> Users;
 
 
-    public void ActivateGameOverlay([MarshalAs(UnmanagedType.LPStr)] string friendsGroupID)
+    public void ActivateGameOverlay(IntPtr _, [MarshalAs(UnmanagedType.LPStr)] string friendsGroupID)
     {
         Write($"Steam_Friends.ActivateGameOverlay {friendsGroupID}");
     }
 
 
-    public void ActivateGameOverlayInviteDialog(IntPtr steamIDLobby)
+    public void ActivateGameOverlayInviteDialog(IntPtr _, IntPtr steamIDLobby)
     {
         Write($"Steam_Friends.ActivateGameOverlayInviteDialog {steamIDLobby}");
     }
 
 
-    public void ActivateGameOverlayInviteDialogConnectString([MarshalAs(UnmanagedType.LPStr)] string pchConnectString)
+    public void ActivateGameOverlayInviteDialogConnectString(IntPtr _, [MarshalAs(UnmanagedType.LPStr)] string pchConnectString)
     {
         Write($"Steam_Friends.ActivateGameOverlayInviteDialogConnectString {pchConnectString}");
     }
 
 
-    public void ActivateGameOverlayRemotePlayTogetherInviteDialog(IntPtr steamIDLobby)
+    public void ActivateGameOverlayRemotePlayTogetherInviteDialog(IntPtr _, IntPtr steamIDLobby)
     {
         Write($"Steam_Friends.ActivateGameOverlayRemotePlayTogetherInviteDialog {steamIDLobby}");
     }
 
 
-    public void ActivateGameOverlayToStore(AppId_t nAppID, EOverlayToStoreFlag eFlag)
+    public void ActivateGameOverlayToStore(IntPtr _, AppId_t nAppID, EOverlayToStoreFlag eFlag)
     {
         Write($"Steam_Friends.ActivateGameOverlayToStore {nAppID} {eFlag}");
     }
 
 
-    public void ActivateGameOverlayToUser([MarshalAs(UnmanagedType.LPStr)] string friendsGroupID, IntPtr steamID)
+    public void ActivateGameOverlayToUser(IntPtr _, [MarshalAs(UnmanagedType.LPStr)] string friendsGroupID, IntPtr steamID)
     {
         Write($"Steam_Friends.ActivateGameOverlayToUser {friendsGroupID} {steamID}");
     }
 
 
-    public void ActivateGameOverlayToWebPage([MarshalAs(UnmanagedType.LPStr)] string pchURL, EActivateGameOverlayToWebPageMode eMode = EActivateGameOverlayToWebPageMode.k_EActivateGameOverlayToWebPageMode_Default)
+    public void ActivateGameOverlayToWebPage(IntPtr _, [MarshalAs(UnmanagedType.LPStr)] string pchURL, EActivateGameOverlayToWebPageMode eMode = EActivateGameOverlayToWebPageMode.k_EActivateGameOverlayToWebPageMode_Default)
     {
         Write($"Steam_Friends.ActivateGameOverlayToWebPage {pchURL}");
     }
 
 
-    public void ClearRichPresence()
+    public void ClearRichPresence(IntPtr _)
     {
         Write($"Steam_Friends.ClearRichPresence");
     }
 
 
-    public bool CloseClanChatWindowInSteam(IntPtr steamIDClanChat)
+    public bool CloseClanChatWindowInSteam(IntPtr _, IntPtr steamIDClanChat)
     {
         Write($"Steam_Friends.CloseClanChatWindowInSteam {steamIDClanChat}");
         return true;
     }
 
 
-    public SteamAPICall_t DownloadClanActivityCounts(IntPtr[] psteamIDClans, int cClansToRequest)
+    public SteamAPICall_t DownloadClanActivityCounts(IntPtr _, IntPtr[] psteamIDClans, int cClansToRequest)
     {
         Write($"Steam_Friends.DownloadClanActivityCounts {cClansToRequest}");
         return (SteamAPICall_t)0;
     }
 
 
-    public SteamAPICall_t EnumerateFollowingList(uint unStartIndex)
+    public SteamAPICall_t EnumerateFollowingList(IntPtr _, uint unStartIndex)
     {
         Write($"Steam_Friends.EnumerateFollowingList {unStartIndex}");
         return (SteamAPICall_t)0;
     }
 
 
-    public IntPtr GetChatMemberByIndex(IntPtr steamIDClan, int iUser)
+    public IntPtr GetChatMemberByIndex(IntPtr _, IntPtr steamIDClan, int iUser)
     {
         Write($"Steam_Friends.GetChatMemberByIndex {steamIDClan}");
         return IntPtr.Zero;
     }
 
 
-    public bool GetClanActivityCounts(IntPtr steamIDClan, int pnOnline, int pnInGame, int pnChatting)
+    public bool GetClanActivityCounts(IntPtr _, IntPtr steamIDClan, int pnOnline, int pnInGame, int pnChatting)
     {
         Write($"Steam_Friends.ActivateGameOverlay {steamIDClan}");
         return false;
     }
 
 
-    public IntPtr GetClanByIndex(int iClan)
+    public IntPtr GetClanByIndex(IntPtr _, int iClan)
     {
         Write($"Steam_Friends.GetClanByIndex {iClan}");
         return IntPtr.Zero;
     }
 
 
-    public int GetClanChatMemberCount(IntPtr steamIDClan)
+    public int GetClanChatMemberCount(IntPtr _, IntPtr steamIDClan)
     {
         Write($"Steam_Friends.GetClanChatMemberCount {steamIDClan}");
         return 0;
     }
 
 
-    public int GetClanChatMessage(IntPtr steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, EChatEntryType peChatEntryType, IntPtr[] psteamidChatter)
+    public int GetClanChatMessage(IntPtr _, IntPtr steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, EChatEntryType peChatEntryType, IntPtr[] psteamidChatter)
     {
         Write($"Steam_Friends.GetClanChatMessage {steamIDClanChat}");
         return 0;
     }
 
 
-    public int GetClanCount()
+    public int GetClanCount(IntPtr _)
     {
         Write($"Steam_Friends.GetClanCount");
         return 0;
     }
 
 
-    public string GetClanName(IntPtr steamIDClan)
+    public string GetClanName(IntPtr _, IntPtr steamIDClan)
     {
         Write($"Steam_Friends.GetClanName {steamIDClan}");
         return "";
     }
 
 
-    public IntPtr GetClanOfficerByIndex(IntPtr steamIDClan, int iOfficer)
+    public IntPtr GetClanOfficerByIndex(IntPtr _, IntPtr steamIDClan, int iOfficer)
     {
         Write($"Steam_Friends.GetClanOfficerByIndex {steamIDClan}");
         return IntPtr.Zero;
     }
 
 
-    public int GetClanOfficerCount(IntPtr steamIDClan)
+    public int GetClanOfficerCount(IntPtr _, IntPtr steamIDClan)
     {
         Write($"Steam_Friends.GetClanOfficerCount {steamIDClan}");
         return 0;
     }
 
 
-    public IntPtr GetClanOwner(IntPtr steamIDClan)
+    public IntPtr GetClanOwner(IntPtr _, IntPtr steamIDClan)
     {
         Write($"Steam_Friends.GetClanOwner {steamIDClan}");
         return IntPtr.Zero;
     }
 
 
-    public string GetClanTag(IntPtr steamIDClan)
+    public string GetClanTag(IntPtr _, IntPtr steamIDClan)
     {
         Write($"Steam_Friends.GetClanTag {steamIDClan}");
         return "";
     }
 
 
-    public IntPtr GetCoplayFriend(int iCoplayFriend)
+    public IntPtr GetCoplayFriend(IntPtr _, int iCoplayFriend)
     {
         Write($"Steam_Friends.GetCoplayFriend {iCoplayFriend}");
         return IntPtr.Zero;
     }
 
 
-    public int GetCoplayFriendCount()
+    public int GetCoplayFriendCount(IntPtr _)
     {
         Write($"Steam_Friends.GetCoplayFriendCount");
         return 0;
     }
 
 
-    public SteamAPICall_t GetFollowerCount(IntPtr steamID)
+    public SteamAPICall_t GetFollowerCount(IntPtr _, IntPtr steamID)
     {
         Write($"Steam_Friends.GetFollowerCount {steamID}");
         return (SteamAPICall_t)0;
     }
 
 
-    public IntPtr GetFriendByIndex(int iFriend, int iFriendFlags)
+    public IntPtr GetFriendByIndex(IntPtr _, int iFriend, int iFriendFlags)
     {
         Write($"Steam_Friends.GetFriendByIndex {iFriend}");
         Friend friend = Friends.Find(f => f.AccountId == (uint)iFriend);
@@ -207,42 +193,42 @@ public class SteamFriends : IBaseInterface, ISteamFriends
     }
 
 
-    public AppId_t GetFriendCoplayGame(IntPtr steamIDFriend)
+    public AppId_t GetFriendCoplayGame(IntPtr _, IntPtr steamIDFriend)
     {
         Write($"Steam_Friends.GetFriendCoplayGame {steamIDFriend}");
         return (AppId_t)0;
     }
 
 
-    public int GetFriendCoplayTime(IntPtr steamIDFriend)
+    public int GetFriendCoplayTime(IntPtr _, IntPtr steamIDFriend)
     {
         Write($"Steam_Friends.GetFriendCoplayTime {steamIDFriend}");
         return 0;
     }
 
 
-    public int GetFriendCount(int iFriendFlags)
+    public int GetFriendCount(IntPtr _, int iFriendFlags)
     {
         Write($"Steam_Friends.GetFriendCount {iFriendFlags}");
         return 0;
     }
 
 
-    public int GetFriendCountFromSource(IntPtr steamIDSource)
+    public int GetFriendCountFromSource(IntPtr _, IntPtr steamIDSource)
     {
         Write($"Steam_Friends.GetFriendCountFromSource {steamIDSource}");
         return 0;
     }
 
 
-    public IntPtr GetFriendFromSourceByIndex(IntPtr steamIDSource, int iFriend)
+    public IntPtr GetFriendFromSourceByIndex(IntPtr _, IntPtr steamIDSource, int iFriend)
     {
         Write($"Steam_Friends.GetFriendFromSourceByIndex {steamIDSource} {iFriend}");
         return IntPtr.Zero;
     }
 
 
-    public bool GetFriendGamePlayed(IntPtr steamIDFriend, out FriendGameInfo_t pFriendGameInfo)
+    public bool GetFriendGamePlayed(IntPtr _, IntPtr steamIDFriend, out FriendGameInfo_t pFriendGameInfo)
     {
         Write($"Steam_Friends.GetFriendGamePlayed {(uint)steamIDFriend}");
         pFriendGameInfo = new FriendGameInfo_t();
@@ -262,14 +248,14 @@ public class SteamFriends : IBaseInterface, ISteamFriends
     }
 
 
-    public int GetFriendMessage(IntPtr steamIDFriend, int iMessageID, IntPtr pvData, int cubData, EChatEntryType peChatEntryType)
+    public int GetFriendMessage(IntPtr _, IntPtr steamIDFriend, int iMessageID, IntPtr pvData, int cubData, EChatEntryType peChatEntryType)
     {
         Write($"Steam_Friends.GetFriendMessage {steamIDFriend}");
         return 0;
     }
 
 
-    public string GetFriendPersonaName(IntPtr steamIDFriend)
+    public string GetFriendPersonaName(IntPtr _, IntPtr steamIDFriend)
     {
         Write($"Steam_Friends.GetFriendPersonaName {(uint)steamIDFriend}");
         Friend friend = Friends.Find(f => f.AccountId == (uint)steamIDFriend);
@@ -281,132 +267,132 @@ public class SteamFriends : IBaseInterface, ISteamFriends
     }
 
 
-    public string GetFriendPersonaNameHistory(IntPtr steamIDFriend, int iPersonaName)
+    public string GetFriendPersonaNameHistory(IntPtr _, IntPtr steamIDFriend, int iPersonaName)
     {
         Write($"Steam_Friends.GetFriendPersonaNameHistory {steamIDFriend}");
         return "SKYNET";
     }
 
 
-    public EPersonaState GetFriendPersonaState(IntPtr steamIDFriend)
+    public EPersonaState GetFriendPersonaState(IntPtr _, IntPtr steamIDFriend)
     {
         Write($"Steam_Friends.GetFriendPersonaState {steamIDFriend}");
         return Users.Find(f => f == steamIDFriend) == null ? EPersonaState.k_EPersonaStateOffline : EPersonaState.k_EPersonaStateOnline;
     }
 
 
-    public EFriendRelationship GetFriendRelationship(IntPtr steamIDFriend)
+    public EFriendRelationship GetFriendRelationship(IntPtr _, IntPtr steamIDFriend)
     {
         Write($"Steam_Friends.GetFriendRelationship {steamIDFriend}");
         return EFriendRelationship.k_EFriendRelationshipNone;
     }
 
 
-    public string GetFriendRichPresence(IntPtr steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchKey)
+    public string GetFriendRichPresence(IntPtr _, IntPtr steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchKey)
     {
         Write($"Steam_Friends.GetFriendRichPresence {steamIDFriend} {pchKey}");
         return "";
     }
 
 
-    public string GetFriendRichPresenceKeyByIndex(IntPtr steamIDFriend, int iKey)
+    public string GetFriendRichPresenceKeyByIndex(IntPtr _, IntPtr steamIDFriend, int iKey)
     {
         Write($"Steam_Friends.GetFriendRichPresenceKeyByIndex {steamIDFriend} {iKey}");
         return "";
     }
 
 
-    public int GetFriendRichPresenceKeyCount(IntPtr steamIDFriend)
+    public int GetFriendRichPresenceKeyCount(IntPtr _, IntPtr steamIDFriend)
     {
         Write($"Steam_Friends.GetFriendRichPresenceKeyCount {steamIDFriend}");
         return 0;
     }
 
 
-    public int GetFriendsGroupCount()
+    public int GetFriendsGroupCount(IntPtr _)
     {
         Write($"Steam_Friends.GetFriendsGroupCount");
         return 0;
     }
 
 
-    public FriendsGroupID_t GetFriendsGroupIDByIndex(int iFG)
+    public FriendsGroupID_t GetFriendsGroupIDByIndex(IntPtr _, int iFG)
     {
         Write($"Steam_Friends.GetFriendsGroupIDByIndex {iFG}");
         return (FriendsGroupID_t)0;
     }
 
 
-    public int GetFriendsGroupMembersCount(FriendsGroupID_t friendsGroupID)
+    public int GetFriendsGroupMembersCount(IntPtr _, FriendsGroupID_t friendsGroupID)
     {
         Write($"Steam_Friends.GetFriendsGroupMembersCount {friendsGroupID}");
         return 0;
     }
 
 
-    public void GetFriendsGroupMembersList(FriendsGroupID_t friendsGroupID, IntPtr[] pOutSteamIDMembers, int nMembersCount)
+    public void GetFriendsGroupMembersList(IntPtr _, FriendsGroupID_t friendsGroupID, IntPtr[] pOutSteamIDMembers, int nMembersCount)
     {
         Write($"Steam_Friends.GetFriendsGroupMembersList {friendsGroupID}");
     }
 
 
-    public string GetFriendsGroupName(FriendsGroupID_t friendsGroupID)
+    public string GetFriendsGroupName(IntPtr _, FriendsGroupID_t friendsGroupID)
     {
         Write($"Steam_Friends.GetFriendsGroupName {friendsGroupID}");
         return "";
     }
 
 
-    public int GetFriendSteamLevel(IntPtr steamIDFriend)
+    public int GetFriendSteamLevel(IntPtr _, IntPtr steamIDFriend)
     {
         Write($"Steam_Friends.GetFriendSteamLevel {steamIDFriend}");
         return 100;
     }
 
 
-    public int GetSmallFriendAvatar(IntPtr steamIDFriend)
+    public int GetSmallFriendAvatar(IntPtr _, IntPtr steamIDFriend)
     {
         Write($"Steam_Friends.GetSmallFriendAvatar {steamIDFriend}");
         return 0;
     }
 
 
-    public int GetMediumFriendAvatar(IntPtr steamIDFriend)
+    public int GetMediumFriendAvatar(IntPtr _, IntPtr steamIDFriend)
     {
         Write($"Steam_Friends.GetMediumFriendAvatar {steamIDFriend}");
         return 0;
     }
 
 
-    public int GetLargeFriendAvatar(IntPtr steamIDFriend)
+    public int GetLargeFriendAvatar(IntPtr _, IntPtr steamIDFriend)
     {
         Write($"Steam_Friends.GetLargeFriendAvatar {steamIDFriend}");
         return 0;
     }
 
 
-    public int GetNumChatsWithUnreadPriorityMessages()
+    public int GetNumChatsWithUnreadPriorityMessages(IntPtr _)
     {
         Write($"Steam_Friends.GetNumChatsWithUnreadPriorityMessages");
         return 0;
     }
 
 
-    public string GetPersonaName()
+    public string GetPersonaName(IntPtr _)
     {
         Write($"Steam_Friends.GetPersonaName");
         return SteamEmulator.PersonaName;
     }
 
 
-    public EPersonaState GetPersonaState()
+    public EPersonaState GetPersonaState(IntPtr _)
     {
         Write($"Steam_Friends.GetPersonaState");
         return EPersonaState.k_EPersonaStateOnline;
     }
 
 
-    public string GetPlayerNickname(IntPtr steamIDPlayer)
+    public string GetPlayerNickname(IntPtr _, IntPtr steamIDPlayer)
     {
         Write($"Steam_Friends.GetPlayerNickname {steamIDPlayer}");
         Friend friend = Friends.Find(f => f.AccountId == (uint)steamIDPlayer);
@@ -418,14 +404,14 @@ public class SteamFriends : IBaseInterface, ISteamFriends
     }
 
 
-    public uint GetUserRestrictions()
+    public uint GetUserRestrictions(IntPtr _)
     {
         Write($"Steam_Friends.GetUserRestrictions");
         return 0;
     }
 
 
-    public bool HasFriend(IntPtr steamIDFriend, int iFriendFlags)
+    public bool HasFriend(IntPtr _, IntPtr steamIDFriend, int iFriendFlags)
     {
         Write($"Steam_Friends.HasFriend {steamIDFriend}");
         Friend friend = Friends.Find(f => f.AccountId == (uint)steamIDFriend);
@@ -433,131 +419,131 @@ public class SteamFriends : IBaseInterface, ISteamFriends
     }
 
 
-    public bool InviteUserToGame(IntPtr steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchConnectString)
+    public bool InviteUserToGame(IntPtr _, IntPtr steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchConnectString)
     {
         Write($"Steam_Friends.InviteUserToGame {steamIDFriend} {pchConnectString}");
         return false;
     }
 
 
-    public bool IsClanChatAdmin(IntPtr steamIDClanChat, IntPtr steamIDUser)
+    public bool IsClanChatAdmin(IntPtr _, IntPtr steamIDClanChat, IntPtr steamIDUser)
     {
         Write($"Steam_Friends.IsClanChatAdmin {steamIDClanChat}");
         return false;
     }
 
 
-    public bool IsClanChatWindowOpenInSteam(IntPtr steamIDClanChat)
+    public bool IsClanChatWindowOpenInSteam(IntPtr _, IntPtr steamIDClanChat)
     {
         Write($"Steam_Friends.IsClanChatWindowOpenInSteam {steamIDClanChat}");
         return false;
     }
 
 
-    public bool IsClanOfficialGameGroup(IntPtr steamIDClan)
+    public bool IsClanOfficialGameGroup(IntPtr _, IntPtr steamIDClan)
     {
         Write($"Steam_Friends.IsClanOfficialGameGroup {steamIDClan}");
         return false;
     }
 
 
-    public bool IsClanPublic(IntPtr steamIDClan)
+    public bool IsClanPublic(IntPtr _, IntPtr steamIDClan)
     {
         Write($"Steam_Friends.IsClanpublic {steamIDClan}");
         return false;
     }
 
 
-    public SteamAPICall_t IsFollowing(IntPtr steamID)
+    public SteamAPICall_t IsFollowing(IntPtr _, IntPtr steamID)
     {
         Write($"Steam_Friends.IsFollowing {steamID}");
         return (SteamAPICall_t)0;
     }
 
 
-    public bool IsUserInSource(IntPtr steamIDUser, IntPtr steamIDSource)
+    public bool IsUserInSource(IntPtr _, IntPtr steamIDUser, IntPtr steamIDSource)
     {
         Write($"Steam_Friends.IsUserInSource {steamIDUser}");
         return false;
     }
 
 
-    public SteamAPICall_t JoinClanChatRoom(IntPtr steamIDClan)
+    public SteamAPICall_t JoinClanChatRoom(IntPtr _, IntPtr steamIDClan)
     {
         Write($"Steam_Friends.JoinClanChatRoom {steamIDClan}");
         return (SteamAPICall_t)0;
     }
 
 
-    public bool LeaveClanChatRoom(IntPtr steamIDClan)
+    public bool LeaveClanChatRoom(IntPtr _, IntPtr steamIDClan)
     {
         Write($"Steam_Friends.LeaveClanChatRoom {steamIDClan}");
         return true;
     }
 
 
-    public bool OpenClanChatWindowInSteam(IntPtr steamIDClanChat)
+    public bool OpenClanChatWindowInSteam(IntPtr _, IntPtr steamIDClanChat)
     {
         Write($"Steam_Friends.OpenClanChatWindowInSteam {steamIDClanChat}");
         return false;
     }
 
 
-    public bool RegisterProtocolInOverlayBrowser([MarshalAs(UnmanagedType.LPStr)] string pchProtocol)
+    public bool RegisterProtocolInOverlayBrowser(IntPtr _, [MarshalAs(UnmanagedType.LPStr)] string pchProtocol)
     {
         Write($"Steam_Friends.RegisterProtocolInOverlayBrowser {pchProtocol}");
         return false;
     }
 
 
-    public bool ReplyToFriendMessage(IntPtr steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchMsgToSend)
+    public bool ReplyToFriendMessage(IntPtr _, IntPtr steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchMsgToSend)
     {
         Write($"Steam_Friends.ReplyToFriendMessage {steamIDFriend} {pchMsgToSend}");
         return false;
     }
 
 
-    public SteamAPICall_t RequestClanOfficerList(IntPtr steamIDClan)
+    public SteamAPICall_t RequestClanOfficerList(IntPtr _, IntPtr steamIDClan)
     {
         Write($"Steam_Friends.RequestClanOfficerList {steamIDClan}");
         return (SteamAPICall_t)0;
     }
 
 
-    public void RequestFriendRichPresence(IntPtr steamIDFriend)
+    public void RequestFriendRichPresence(IntPtr _, IntPtr steamIDFriend)
     {
         Write($"Steam_Friends.RequestFriendRichPresence {steamIDFriend}");
     }
 
 
-    public bool RequestUserInformation(IntPtr steamIDUser, bool bRequireNameOnly)
+    public bool RequestUserInformation(IntPtr _, IntPtr steamIDUser, bool bRequireNameOnly)
     {
         Write($"Steam_Friends.RequestUserInformation {steamIDUser}");
         return false;
     }
 
 
-    public bool SendClanChatMessage(IntPtr steamIDClanChat, [MarshalAs(UnmanagedType.LPStr)] string pchText)
+    public bool SendClanChatMessage(IntPtr _, IntPtr steamIDClanChat, [MarshalAs(UnmanagedType.LPStr)] string pchText)
     {
         Write($"Steam_Friends.SendClanChatMessage {steamIDClanChat} {pchText}");
         return false;
     }
 
 
-    public void SetInGameVoiceSpeaking(IntPtr steamIDUser, bool bSpeaking)
+    public void SetInGameVoiceSpeaking(IntPtr _, IntPtr steamIDUser, bool bSpeaking)
     {
         Write($"Steam_Friends.SetInGameVoiceSpeaking {steamIDUser}");
     }
 
 
-    public bool SetListenForFriendsMessages(bool bInterceptEnabled)
+    public bool SetListenForFriendsMessages(IntPtr _, bool bInterceptEnabled)
     {
         Write($"Steam_Friends.SetListenForFriendsMessages {bInterceptEnabled}");
         return true;
     }
 
 
-    public SteamAPICall_t SetPersonaName([MarshalAs(UnmanagedType.LPStr)] string pchPersonaName)
+    public SteamAPICall_t SetPersonaName(IntPtr _, [MarshalAs(UnmanagedType.LPStr)] string pchPersonaName)
     {
         Write($"Steam_Friends.SetPersonaName {pchPersonaName}");
         SteamEmulator.PersonaName = pchPersonaName;
@@ -565,13 +551,13 @@ public class SteamFriends : IBaseInterface, ISteamFriends
     }
 
 
-    public void SetPlayedWith(IntPtr steamIDUserPlayedWith)
+    public void SetPlayedWith(IntPtr _, IntPtr steamIDUserPlayedWith)
     {
         Write($"Steam_Friends.SetPlayedWith {steamIDUserPlayedWith}");
     }
 
 
-    public bool SetRichPresence([MarshalAs(UnmanagedType.LPStr)] string pchKey, [MarshalAs(UnmanagedType.LPStr)] string pchValue)
+    public bool SetRichPresence(IntPtr _, [MarshalAs(UnmanagedType.LPStr)] string pchKey, [MarshalAs(UnmanagedType.LPStr)] string pchValue)
     {
         Write($"Steam_Friends.SetRichPresence {pchKey} {pchValue}");
         return true;
