@@ -13,13 +13,13 @@ namespace SKYNET.Delegate
     public class DSteamController 
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool Init();
+        public delegate bool Init(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool Shutdown();
+        public delegate bool Shutdown(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate void RunFrame();
+        public delegate void RunFrame(IntPtr _);
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate int GetConnectedControllers(IntPtr handles, IntPtr handlesOut);
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
@@ -40,7 +40,7 @@ namespace SKYNET.Delegate
         public delegate int GetDigitalActionHandle(string pszActionName);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate ControllerDigitalActionData_t GetDigitalActionData(IntPtr controllerHandle, int digitalActionHandle);
+        public delegate IntPtr GetDigitalActionData(IntPtr _, IntPtr controllerHandle, int digitalActionHandle);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate int GetDigitalActionOrigins(IntPtr controllerHandle, int actionSetHandle, int digitalActionHandle, EControllerActionOrigin originsOut);
@@ -49,7 +49,7 @@ namespace SKYNET.Delegate
         public delegate int GetAnalogActionHandle(string pszActionName);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate ControllerAnalogActionData_t GetAnalogActionData(uint controllerHandle, uint analogActionHandle);
+        public delegate IntPtr GetAnalogActionData(IntPtr _, uint controllerHandle, uint analogActionHandle);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate int GetAnalogActionOrigins(IntPtr controllerHandle, int actionSetHandle, uint analogActionHandle, EControllerActionOrigin originsOut);

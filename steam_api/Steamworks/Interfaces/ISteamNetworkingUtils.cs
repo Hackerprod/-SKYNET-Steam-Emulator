@@ -58,7 +58,7 @@ namespace SKYNET.Interface
         /// to call this, since they do not make routing decisions.  However, if
         /// the dedicated server will be using P2P functionality, it will act as
         /// a "client" and this should be called.
-        void InitRelayNetworkAccess();
+        void InitRelayNetworkAccess(IntPtr _);
 
         /// Fetch current status of the relay network.
         ///
@@ -177,7 +177,7 @@ namespace SKYNET.Interface
         int GetDirectPingToPOP(IntPtr popID);
 
         /// Get number of network points of presence in the config
-        int GetPOPCount();
+        int GetPOPCount(IntPtr _);
 
         /// Get list of all POP IDs.  Returns the number of entries that were filled into
         /// your list.
@@ -205,7 +205,7 @@ namespace SKYNET.Interface
         ///
         /// The value is only meaningful for this run of the process.  Don't compare
         /// it to values obtained on another computer, or other runs of the same process.
-        uint GetLocalTimestamp();
+        uint GetLocalTimestamp(IntPtr _);
 
         /// Set a function to receive network-related information that is useful for debugging.
         /// This can be very useful during development, but it can also be useful for troubleshooting
@@ -281,7 +281,7 @@ namespace SKYNET.Interface
         bool GetConfigValueInfo(int eValue, char pOutName, IntPtr pOutDataType, IntPtr pOutScope, int pOutNextValue);
 
         /// Return the lowest numbered configuration value available in the current environment.
-        int GetFirstConfigValue();
+        int GetFirstConfigValue(IntPtr _);
 
         // String conversions.  You'll usually access these using the respective
         // inline methods.

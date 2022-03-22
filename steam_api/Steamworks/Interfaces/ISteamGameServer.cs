@@ -8,6 +8,10 @@ namespace SKYNET.Interface
 {
     public interface ISteamGameServer
     {
+        int GetHSteamUser(IntPtr _);
 
+        int GetHSteamPipe(IntPtr _);
+
+        void RunCallbacks(IntPtr _);
     }
 }

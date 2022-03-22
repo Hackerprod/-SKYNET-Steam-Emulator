@@ -24,10 +24,10 @@ public class SteamAPI_ISteamNetworkingSocketsSerialized : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static SteamAPICall_t SteamAPI_ISteamNetworkingSocketsSerialized_GetCertAsync()
+    public static SteamAPICall_t SteamAPI_ISteamNetworkingSocketsSerialized_GetCertAsync(IntPtr _)
     {
         Write("SteamAPI_ISteamNetworkingSocketsSerialized_GetCertAsync");
-        return SteamEmulator.SteamNetworkingSocketsSerialized.GetCertAsync();
+        return SteamEmulator.SteamNetworkingSocketsSerialized.GetCertAsync(_);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -45,10 +45,10 @@ public class SteamAPI_ISteamNetworkingSocketsSerialized : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static uint SteamAPI_ISteamNetworkingSocketsSerialized_GetCachedRelayTicketCount()
+    public static uint SteamAPI_ISteamNetworkingSocketsSerialized_GetCachedRelayTicketCount(IntPtr _)
     {
         Write("SteamAPI_ISteamNetworkingSocketsSerialized_GetCachedRelayTicketCount");
-        return SteamEmulator.SteamNetworkingSocketsSerialized.GetCachedRelayTicketCount();
+        return SteamEmulator.SteamNetworkingSocketsSerialized.GetCachedRelayTicketCount(_);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

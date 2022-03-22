@@ -67,10 +67,10 @@ public class SteamAPI_ISteamParties : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static uint SteamAPI_ISteamParties_GetNumActiveBeacons()
+    public static uint SteamAPI_ISteamParties_GetNumActiveBeacons(IntPtr _)
     {
         Write("SteamAPI_ISteamParties_GetNumActiveBeacons");
-        return SteamEmulator.SteamParties.GetNumActiveBeacons();
+        return SteamEmulator.SteamParties.GetNumActiveBeacons(_);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

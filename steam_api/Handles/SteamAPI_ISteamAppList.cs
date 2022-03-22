@@ -39,10 +39,10 @@ public class SteamAPI_ISteamAppList : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static uint SteamAPI_ISteamAppList_GetNumInstalledApps()
+    public static uint SteamAPI_ISteamAppList_GetNumInstalledApps(IntPtr _)
     {
         Write("SteamAPI_ISteamAppList_GetNumInstalledApps");
-        return SteamEmulator.SteamAppList.GetNumInstalledApps();
+        return SteamEmulator.SteamAppList.GetNumInstalledApps(_);
     }
 
 

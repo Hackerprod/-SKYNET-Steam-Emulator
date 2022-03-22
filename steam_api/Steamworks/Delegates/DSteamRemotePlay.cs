@@ -13,7 +13,7 @@ namespace SKYNET.Delegate
     public class DSteamRemotePlay 
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate uint GetSessionCount();
+        public delegate uint GetSessionCount(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate uint GetSessionID(int iSessionIndex);

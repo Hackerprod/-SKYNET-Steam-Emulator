@@ -71,7 +71,7 @@ namespace SKYNET.Interface
 
         bool GetItemPrice(uint iDefinition, ref ulong pCurrentPrice, ref ulong pBasePrice);
 
-        IntPtr StartUpdateProperties();
+        IntPtr StartUpdateProperties(IntPtr _);
 
         bool RemoveProperty(IntPtr handle, uint nItemID, string pchPropertyName);
 

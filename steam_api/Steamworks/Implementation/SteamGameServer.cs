@@ -9,17 +9,17 @@ using Steamworks;
 //[Map("SteamGameServer")]
 public class SteamGameServer : IBaseInterface, ISteamGameServer
 {
-    public HSteamUser GetHSteamUser()
+    public int GetHSteamUser(IntPtr _)
     {
-        return (HSteamUser)1;
+        return 1;
     }
 
-    public HSteamPipe GetHSteamPipe()
+    public int GetHSteamPipe(IntPtr _)
     {
-        return (HSteamPipe)1;
+        return 1;
     }
 
-    public void RunCallbacks()
+    public void RunCallbacks(IntPtr _)
     {
 
     }

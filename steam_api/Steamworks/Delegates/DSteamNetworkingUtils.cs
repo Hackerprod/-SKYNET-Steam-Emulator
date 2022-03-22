@@ -16,7 +16,7 @@ namespace SKYNET.Delegate
         public delegate IntPtr AllocateMessage(int cbAllocateBuffer);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate void InitRelayNetworkAccess();
+        public delegate void InitRelayNetworkAccess(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate ESteamNetworkingAvailability GetRelayNetworkStatus(SteamRelayNetworkStatus_t pDetails);
@@ -46,13 +46,13 @@ namespace SKYNET.Delegate
         public delegate int GetDirectPingToPOP(IntPtr popID);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate int GetPOPCount();
+        public delegate int GetPOPCount(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate int GetPOPList(IntPtr list, int nListSz);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate uint GetLocalTimestamp();
+        public delegate uint GetLocalTimestamp(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate void SetDebugOutputFunction(ESteamNetworkingSocketsDebugOutputType eDetailLevel, IntPtr pfnFunc);
@@ -88,7 +88,7 @@ namespace SKYNET.Delegate
         public delegate bool GetConfigValueInfo(int eValue, char pOutName, IntPtr pOutDataType, IntPtr pOutScope, int pOutNextValue);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate int GetFirstConfigValue();
+        public delegate int GetFirstConfigValue(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate void SteamNetworkingIPAddr_ToString(IntPtr addr, char buf, IntPtr cbBuf, bool bWithPort);

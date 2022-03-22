@@ -10,10 +10,10 @@ using System.Threading.Tasks;
 public class SteamAPI_ISteamRemotePlay : BaseCalls
 {
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static uint SteamAPI_ISteamRemotePlay_GetSessionCount()
+    public static uint SteamAPI_ISteamRemotePlay_GetSessionCount(IntPtr _)
     {
         Write("SteamAPI_ISteamRemotePlay_GetSessionCount");
-        return SteamEmulator.SteamRemotePlay.GetSessionCount();
+        return SteamEmulator.SteamRemotePlay.GetSessionCount(_);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

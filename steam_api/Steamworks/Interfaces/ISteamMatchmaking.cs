@@ -9,7 +9,7 @@ namespace SKYNET.Interface
         // saves basic details about a multiplayer game server locally
 
         // returns the number of favorites servers the user has stored
-        int GetFavoriteGameCount();
+        int GetFavoriteGameCount(IntPtr _);
 
         // returns the details of the game server
         // iGame is of range [0,GetFavoriteGameCount())
@@ -52,7 +52,7 @@ namespace SKYNET.Interface
         */
         // 
 
-        SteamAPICall_t RequestLobbyList();
+        SteamAPICall_t RequestLobbyList(IntPtr _);
         // filters for lobbies
         // this needs to be called before RequestLobbyList() to take effect
         // these are cleared on each call to RequestLobbyList()

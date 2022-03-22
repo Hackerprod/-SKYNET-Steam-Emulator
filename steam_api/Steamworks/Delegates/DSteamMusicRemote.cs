@@ -16,10 +16,10 @@ namespace SKYNET.Delegate
         public delegate bool RegisterSteamMusicRemote(string pchName);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool DeregisterSteamMusicRemote();
+        public delegate bool DeregisterSteamMusicRemote(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool BIsCurrentMusicRemote();
+        public delegate bool BIsCurrentMusicRemote(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool BActivationSuccess(bool bValue);
@@ -61,7 +61,7 @@ namespace SKYNET.Delegate
         public delegate bool UpdateVolume(float flValue); // volume is between 0.0 and 1.0
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool CurrentEntryWillChange();
+        public delegate bool CurrentEntryWillChange(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool CurrentEntryIsAvailable(bool bAvailable);
@@ -76,13 +76,13 @@ namespace SKYNET.Delegate
         public delegate bool UpdateCurrentEntryCoverArt(IntPtr pvBuffer, uint cbBufferLength);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool CurrentEntryDidChange();
+        public delegate bool CurrentEntryDidChange(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool QueueWillChange();
+        public delegate bool QueueWillChange(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool ResetQueueEntries();
+        public delegate bool ResetQueueEntries(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool SetQueueEntry(int nID, int nPosition, string pchEntryText);
@@ -91,13 +91,13 @@ namespace SKYNET.Delegate
         public delegate bool SetCurrentQueueEntry(int nID);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool QueueDidChange();
+        public delegate bool QueueDidChange(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool PlaylistWillChange();
+        public delegate bool PlaylistWillChange(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool ResetPlaylistEntries();
+        public delegate bool ResetPlaylistEntries(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool SetPlaylistEntry(int nID, int nPosition, string pchEntryText);
@@ -106,6 +106,6 @@ namespace SKYNET.Delegate
         public delegate bool SetCurrentPlaylistEntry(int nID);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool PlaylistDidChange();
+        public delegate bool PlaylistDidChange(IntPtr _);
     }
 }

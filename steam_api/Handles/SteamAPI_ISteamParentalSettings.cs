@@ -10,17 +10,17 @@ using System.Threading.Tasks;
 public class SteamAPI_ISteamParentalSettings : BaseCalls
 {
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamParentalSettings_BIsParentalLockEnabled()
+    public static bool SteamAPI_ISteamParentalSettings_BIsParentalLockEnabled(IntPtr _)
     {
         Write("SteamAPI_ISteamParentalSettings_BIsParentalLockEnabled");
-        return SteamEmulator.SteamParentalSettings.BIsParentalLockEnabled();
+        return SteamEmulator.SteamParentalSettings.BIsParentalLockEnabled(_);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamParentalSettings_BIsParentalLockLocked()
+    public static bool SteamAPI_ISteamParentalSettings_BIsParentalLockLocked(IntPtr _)
     {
         Write("SteamAPI_ISteamParentalSettings_BIsParentalLockLocked");
-        return SteamEmulator.SteamParentalSettings.BIsParentalLockLocked();
+        return SteamEmulator.SteamParentalSettings.BIsParentalLockLocked(_);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

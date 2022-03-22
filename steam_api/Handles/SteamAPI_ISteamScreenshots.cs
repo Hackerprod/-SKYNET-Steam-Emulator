@@ -59,10 +59,10 @@ public class SteamAPI_ISteamScreenshots : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamScreenshots_IsScreenshotsHooked()
+    public static bool SteamAPI_ISteamScreenshots_IsScreenshotsHooked(IntPtr _)
     {
         Write("SteamAPI_ISteamScreenshots_IsScreenshotsHooked");
-        return SteamEmulator.SteamScreenshots.IsScreenshotsHooked();
+        return SteamEmulator.SteamScreenshots.IsScreenshotsHooked(_);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

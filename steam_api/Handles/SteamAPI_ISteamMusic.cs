@@ -1,35 +1,36 @@
 ﻿using SKYNET;
 using SKYNET.Interface;
+using System;
 using System.Runtime.InteropServices;
 
 public class SteamAPI_ISteamMusic : BaseCalls
 {
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamMusic_BIsEnabled()
+    public static bool SteamAPI_ISteamMusic_BIsEnabled(IntPtr _)
     {
         Write("SteamAPI_ISteamMusic_BIsEnabled");
-        return SteamEmulator.SteamMusic.BIsEnabled();
+        return SteamEmulator.SteamMusic.BIsEnabled(_);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamMusic_BIsPlaying()
+    public static bool SteamAPI_ISteamMusic_BIsPlaying(IntPtr _)
     {
         Write("SteamAPI_ISteamMusic_BIsPlaying");
-        return SteamEmulator.SteamMusic.BIsPlaying();
+        return SteamEmulator.SteamMusic.BIsPlaying(_);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static AudioPlayback_Status SteamAPI_ISteamMusic_GetPlaybackStatus()
+    public static AudioPlayback_Status SteamAPI_ISteamMusic_GetPlaybackStatus(IntPtr _)
     {
         Write("SteamAPI_ISteamMusic_GetPlaybackStatus");
-        return SteamEmulator.SteamMusic.GetPlaybackStatus();
+        return SteamEmulator.SteamMusic.GetPlaybackStatus(_);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static float SteamAPI_ISteamMusic_GetVolume()
+    public static float SteamAPI_ISteamMusic_GetVolume(IntPtr _)
     {
         Write("SteamAPI_ISteamMusic_GetVolume");
-        return SteamEmulator.SteamMusic.GetVolume();
+        return SteamEmulator.SteamMusic.GetVolume(_);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

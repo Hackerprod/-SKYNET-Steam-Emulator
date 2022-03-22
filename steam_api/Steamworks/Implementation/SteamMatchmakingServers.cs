@@ -40,7 +40,7 @@ public class SteamMatchMakingServers : IBaseInterface, ISteamMatchmakingServers
         //
     }
 
-    public IntPtr GetServerDetails(IntPtr hRequest, int iServer)
+    public IntPtr GetServerDetails(IntPtr _, IntPtr hRequest, int iServer)
     {
         return IntPtr.Zero;
     }

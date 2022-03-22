@@ -194,7 +194,7 @@ namespace SKYNET.Delegate
         public delegate SteamAPICall_t UnsubscribeItem(PublishedFileId_t nPublishedFileID); // unsubscribe from this item, will be uninstalled after game quits
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate uint GetNumSubscribedItems(); // number of subscribed items 
+        public delegate uint GetNumSubscribedItems(IntPtr _); // number of subscribed items 
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate uint GetSubscribedItems(PublishedFileId_t pvecPublishedFileID, uint cMaxEntries); // all subscribed item PublishFileIDs
@@ -224,7 +224,7 @@ namespace SKYNET.Delegate
         public delegate SteamAPICall_t StopPlaytimeTracking(PublishedFileId_t pvecPublishedFileID, uint unNumPublishedFileIDs);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate SteamAPICall_t StopPlaytimeTrackingForAllItems();
+        public delegate SteamAPICall_t StopPlaytimeTrackingForAllItems(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate SteamAPICall_t AddDependency(PublishedFileId_t nParentPublishedFileID, PublishedFileId_t nChildPublishedFileID);

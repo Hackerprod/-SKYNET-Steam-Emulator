@@ -38,7 +38,7 @@ namespace SKYNET.Delegate
         public delegate bool GetBeaconLocationData(SteamPartyBeaconLocation_t BeaconLocation, ESteamPartyBeaconLocationData eData, string pchDataStringOut, int cchDataStringOut);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate uint GetNumActiveBeacons();
+        public delegate uint GetNumActiveBeacons(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool GetNumAvailableBeaconLocations(uint puNumLocations);

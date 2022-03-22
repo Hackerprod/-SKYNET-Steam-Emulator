@@ -16,7 +16,7 @@ public class SteamScreenshots : IBaseInterface, ISteamScreenshots
         return 0;
     }
 
-    public void TriggerScreenshot()
+    public void TriggerScreenshot(IntPtr _)
     {
         //
     }
@@ -41,7 +41,7 @@ public class SteamScreenshots : IBaseInterface, ISteamScreenshots
         return false;
     }
 
-    public bool IsScreenshotsHooked()
+    public bool IsScreenshotsHooked(IntPtr _)
     {
         return false;
     }

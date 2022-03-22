@@ -9,8 +9,8 @@ namespace SKYNET.Interface
 {
     public interface ISteamHTMLSurface
     {
-        bool Init();
-        bool Shutdown();
+        bool Init(IntPtr _);
+        bool Shutdown(IntPtr _);
 
         // Create a browser object for display of a html page, when creation is complete the call handle
         // will return a HTML_BrowserReady_t callback for the IntPtr of your new browser.

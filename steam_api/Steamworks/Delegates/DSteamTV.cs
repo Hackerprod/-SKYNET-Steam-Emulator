@@ -24,7 +24,7 @@ namespace SKYNET.Delegate
         public delegate void AddTimelineMarker(string pchTemplateName, bool bPersistent, uint nColorR, uint nColorG, uint nColorB);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate void RemoveTimelineMarker();
+        public delegate void RemoveTimelineMarker(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate uint AddRegion(string pchElementName, string pchTimelineDataSection, IntPtr pSteamTVRegion, int eSteamTVRegionBehavior);

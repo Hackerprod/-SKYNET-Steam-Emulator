@@ -20,7 +20,7 @@ public class SteamInput : IBaseInterface, ISteamInput
         //
     }
 
-    public bool BNewDataAvailable()
+    public bool BNewDataAvailable(IntPtr _)
     {
         return false;
     }
@@ -40,7 +40,7 @@ public class SteamInput : IBaseInterface, ISteamInput
         //
     }
 
-    public void EnableDeviceCallbacks()
+    public void EnableDeviceCallbacks(IntPtr _)
     {
         //
     }
@@ -60,9 +60,9 @@ public class SteamInput : IBaseInterface, ISteamInput
         return 0;
     }
 
-    public InputAnalogActionData_t GetAnalogActionData(IntPtr inputHandle, IntPtr analogActionHandle)
+    public IntPtr GetAnalogActionData(IntPtr inputHandle, IntPtr analogActionHandle)
     {
-        return new InputAnalogActionData_t();
+        return IntPtr.Zero;
     }
 
     public IntPtr GetAnalogActionHandle(string pszActionName)
@@ -95,9 +95,9 @@ public class SteamInput : IBaseInterface, ISteamInput
         return false;
     }
 
-    public InputDigitalActionData_t GetDigitalActionData(IntPtr inputHandle, IntPtr digitalActionHandle)
+    public IntPtr GetDigitalActionData(IntPtr inputHandle, IntPtr digitalActionHandle)
     {
-        return new InputDigitalActionData_t();
+        return IntPtr.Zero;
     }
 
     public IntPtr GetDigitalActionHandle(string pszActionName)
@@ -150,7 +150,7 @@ public class SteamInput : IBaseInterface, ISteamInput
         return 0;
     }
 
-    public ushort GetSessionInputConfigurationSettings()
+    public ushort GetSessionInputConfigurationSettings(IntPtr _)
     {
         return 0;
     }
@@ -210,7 +210,7 @@ public class SteamInput : IBaseInterface, ISteamInput
         return false;
     }
 
-    public bool Shutdown()
+    public bool Shutdown(IntPtr _)
     {
         return true;
     }
@@ -240,7 +240,7 @@ public class SteamInput : IBaseInterface, ISteamInput
         //
     }
 
-    public IntPtr SteamAPI_SteamInput_v005()
+    public IntPtr SteamAPI_SteamInput_v005(IntPtr _)
     {
         return IntPtr.Zero;
     }

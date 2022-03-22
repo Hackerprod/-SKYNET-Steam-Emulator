@@ -12,7 +12,7 @@ namespace SKYNET.Interface
         void AddBroadcastGameData(string pchKey, string pchValue);
         void RemoveBroadcastGameData(string pchKey);
         void AddTimelineMarker(string pchTemplateName, bool bPersistent, uint nColorR, uint nColorG, uint nColorB);
-        void RemoveTimelineMarker();
+        void RemoveTimelineMarker(IntPtr _);
         uint AddRegion(string pchElementName, string pchTimelineDataSection, IntPtr pSteamTVRegion, int eSteamTVRegionBehavior);
         void RemoveRegion(uint unRegionHandle);
     }

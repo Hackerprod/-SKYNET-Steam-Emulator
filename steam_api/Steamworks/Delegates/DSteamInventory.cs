@@ -104,7 +104,7 @@ namespace SKYNET.Delegate
         public delegate bool GetItemPrice(uint iDefinition, ref ulong pCurrentPrice, ref ulong pBasePrice);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate IntPtr StartUpdateProperties();
+        public delegate IntPtr StartUpdateProperties(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool RemoveProperty(IntPtr handle, uint nItemID, string pchPropertyName);

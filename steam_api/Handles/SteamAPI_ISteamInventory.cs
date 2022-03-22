@@ -236,10 +236,10 @@ public class SteamAPI_ISteamInventory : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static IntPtr SteamAPI_ISteamInventory_StartUpdateProperties()
+    public static IntPtr SteamAPI_ISteamInventory_StartUpdateProperties(IntPtr _)
     {
         Write("SteamAPI_ISteamInventory_StartUpdateProperties");
-        return SteamEmulator.SteamInventory.StartUpdateProperties();
+        return SteamEmulator.SteamInventory.StartUpdateProperties(_);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

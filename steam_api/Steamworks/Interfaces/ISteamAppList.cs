@@ -11,7 +11,7 @@ namespace SKYNET.Interface
 {
     public interface ISteamAppList
     {
-        uint GetNumInstalledApps();
+        uint GetNumInstalledApps(IntPtr _);
         uint GetInstalledApps(AppId_t pvecAppID, UInt32 unMaxAppIDs);
         int GetAppName(AppId_t nAppID, IntPtr pchName, int cchNameMax); // returns -1 if no name was found
         int GetAppInstallDir(AppId_t nAppID, IntPtr pchDirectory, int cchNameMax); // returns -1 if no dir was found

@@ -123,87 +123,87 @@ public class SteamEmulator
 
         SteamUtils = CreateInterface<SteamUtils>();
 
-        //SteamMatchmaking = CreateInterface<SteamMatchmaking>();   
+        SteamMatchmaking = CreateInterface<SteamMatchmaking>();   
 
-        //SteamMatchMakingServers = CreateInterface<SteamMatchMakingServers>();    
+        SteamMatchMakingServers = CreateInterface<SteamMatchMakingServers>();    
 
-        //SteamUserStats = CreateInterface<SteamUserStats>();  
+        SteamUserStats = CreateInterface<SteamUserStats>();  
 
-        //SteamApps = CreateInterface<SteamApps>();   
+        SteamApps = CreateInterface<SteamApps>();   
 
-        //SteamNetworking = CreateInterface<SteamNetworking>();   
+        SteamNetworking = CreateInterface<SteamNetworking>();   
 
-        //SteamRemoteStorage = CreateInterface<SteamRemoteStorage>();  
+        SteamRemoteStorage = CreateInterface<SteamRemoteStorage>();  
 
-        //SteamScreenshots = CreateInterface<SteamScreenshots>();   
+        SteamScreenshots = CreateInterface<SteamScreenshots>();   
 
-        //SteamHTTP = CreateInterface<SteamHTTP>();   
+        SteamHTTP = CreateInterface<SteamHTTP>();
 
-        //SteamController = CreateInterface<SteamController>();   
+        SteamController = CreateInterface<SteamController>();
 
-        //SteamUGC = CreateInterface<SteamUGC>();  
+        SteamUGC = CreateInterface<SteamUGC>();
 
-        //SteamAppList = CreateInterface<SteamAppList>();  
+        SteamAppList = CreateInterface<SteamAppList>();
 
-        //SteamMusic = CreateInterface<SteamMusic>();  
+        SteamMusic = CreateInterface<SteamMusic>();
 
-        //SteamMusicRemote = CreateInterface<SteamMusicRemote>();    
+        SteamMusicRemote = CreateInterface<SteamMusicRemote>();
 
-        //SteamHTMLSurface = CreateInterface<SteamHTMLSurface>();   
+        SteamHTMLSurface = CreateInterface<SteamHTMLSurface>();
 
-        //SteamInventory = CreateInterface<SteamInventory>();   
+        SteamInventory = CreateInterface<SteamInventory>();
 
-        //SteamVideo = CreateInterface<SteamVideo>();    
+        SteamVideo = CreateInterface<SteamVideo>();
 
-        //SteamParentalSettings = CreateInterface<SteamParentalSettings>();  
+        SteamParentalSettings = CreateInterface<SteamParentalSettings>();
 
-        //SteamNetworkingSockets = CreateInterface<SteamNetworkingSockets>();   
+        SteamNetworkingSockets = CreateInterface<SteamNetworkingSockets>();
 
-        //SteamNetworkingSocketsSerialized = CreateInterface<SteamNetworkingSocketsSerialized>();    
+        SteamNetworkingSocketsSerialized = CreateInterface<SteamNetworkingSocketsSerialized>();
 
-        //SteamNetworkingMessages = CreateInterface<SteamNetworkingMessages>();   
+        SteamNetworkingMessages = CreateInterface<SteamNetworkingMessages>();
 
-        //SteamGameCoordinator = CreateInterface<SteamGameCoordinator>();   
+        SteamGameCoordinator = CreateInterface<SteamGameCoordinator>();
 
-        //SteamNetworkingUtils = CreateInterface<SteamNetworkingUtils>();    
+        SteamNetworkingUtils = CreateInterface<SteamNetworkingUtils>();
 
-        //SteamGameSearch = CreateInterface<SteamGameSearch>();   
+        SteamGameSearch = CreateInterface<SteamGameSearch>();
 
-        //SteamParties = CreateInterface<SteamParties>();    
+        SteamParties = CreateInterface<SteamParties>();
 
-        //SteamRemotePlay = CreateInterface<SteamRemotePlay>();   
+        SteamRemotePlay = CreateInterface<SteamRemotePlay>();
 
-        //SteamTV = CreateInterface<SteamTV>();   
+        SteamTV = CreateInterface<SteamTV>();
 
-        //SteamInput = CreateInterface<SteamInput>();   
+        SteamInput = CreateInterface<SteamInput>();
 
-        
 
-        //SteamGameServer = CreateInterface<SteamGameServer>();   
 
-        //SteamGameServerUtils = CreateInterface<SteamUtils>();   
+        SteamGameServer = CreateInterface<SteamGameServer>();
 
-        //SteamGameServerStats = CreateInterface<SteamGameServerStats>();   
+        SteamGameServerUtils = CreateInterface<SteamUtils>();
 
-        //SteamGameServerNetworking = CreateInterface<SteamNetworking>(); 
+        SteamGameServerStats = CreateInterface<SteamGameServerStats>();
 
-        //SteamHTTP = CreateInterface<SteamHTTP>(); 
+        SteamGameServerNetworking = CreateInterface<SteamNetworking>();
 
-        //SteamGameServerInventory = CreateInterface<SteamInventory>(); 
+        SteamHTTP = CreateInterface<SteamHTTP>();
 
-        //SteamGameServerUgc = CreateInterface<SteamUGC>();  
+        SteamGameServerInventory = CreateInterface<SteamInventory>();
 
-        //SteamGameServerApps = CreateInterface<SteamApps>(); 
+        SteamGameServerUgc = CreateInterface<SteamUGC>();
 
-        //SteamGameServerNetworkingSockets = CreateInterface<SteamNetworkingSockets>();  
+        SteamGameServerApps = CreateInterface<SteamApps>();
 
-        //SteamGameServerNetworkingSocketsSerialized = CreateInterface<SteamNetworkingSocketsSerialized>(); 
+        SteamGameServerNetworkingSockets = CreateInterface<SteamNetworkingSockets>();
 
-        //SteamGameServerNetworkingMessages = CreateInterface<SteamNetworkingMessages>();  
+        SteamGameServerNetworkingSocketsSerialized = CreateInterface<SteamNetworkingSocketsSerialized>();
 
-        //SteamGameServerGamecoordinator = CreateInterface<SteamGameCoordinator>();   
+        SteamGameServerNetworkingMessages = CreateInterface<SteamNetworkingMessages>();
 
-        //SteamMasterServerUpdater = CreateInterface<SteamMasterServerUpdater>(); 
+        SteamGameServerGamecoordinator = CreateInterface<SteamGameCoordinator>();
+
+        SteamMasterServerUpdater = CreateInterface<SteamMasterServerUpdater>();
 
         HSteamUser = (HSteamUser)1;
         HSteamPipe = (HSteamPipe)1;
@@ -233,6 +233,7 @@ public class SteamEmulator
 
     private T CreateInterface<T>()  where T : IBaseInterface
     {
+        Write(typeof(T));
         var (context, iface) = Core.Interface.Context.CreateInterface(typeof(T));
         T baseClass = (T)iface;
         baseClass.BaseAddress = context;

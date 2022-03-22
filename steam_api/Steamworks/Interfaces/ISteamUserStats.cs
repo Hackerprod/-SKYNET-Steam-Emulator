@@ -11,21 +11,17 @@ namespace SKYNET.Interface
     {
         // Ask the server to send down this user's data and achievements for this game
 
-        bool RequestCurrentStats();
+        bool RequestCurrentStats(IntPtr _);
 
         // Data accessors
 
-        bool GetStat(string pchName, uint pData);
+        bool GetStat(IntPtr _, string pchName, uint pData);
 
-
-        bool GetStat(string pchName, float pData);
 
         // Set / update data
 
-        bool SetStat(string pchName, uint nData);
+        bool SetStat(IntPtr _, string pchName, uint nData);
 
-
-        bool SetStat(string pchName, float fData);
 
         bool UpdateAvgRateStat(string pchName, float flCountThisSession, double dSessionLength);
 
@@ -46,7 +42,7 @@ namespace SKYNET.Interface
         // uploaded has been rejected, either because they broke raints
         // or were out of date. In this case the server sends back updated values.
         // The stats should be re-iterated to keep in sync.
-        bool StoreStats();
+        bool StoreStats(IntPtr _);
 
         // Achievement / GroupAchievement metadata
 
@@ -67,7 +63,7 @@ namespace SKYNET.Interface
 
         // Used for iterating achievements. In general games should not need these functions because they should have a
         // list of existing achievements compiled into them
-        uint GetNumAchievements();
+        uint GetNumAchievements(IntPtr _);
         // Get achievement name iAchievement in [0,GetNumAchievements)
         string GetAchievementName(uint iAchievement);
 
@@ -82,10 +78,8 @@ namespace SKYNET.Interface
 
         // requests stat information for a user, usable after a successful call to RequestUserStats()
 
-        bool GetUserStat(IntPtr steamIDUser, string pchName, uint pData);
+        bool GetUserStat(IntPtr _, IntPtr steamIDUser, string pchName, uint pData);
 
-
-        bool GetUserStat(IntPtr steamIDUser, string pchName, float pData);
 
         bool GetUserAchievement(IntPtr steamIDUser, string pchName, bool pbAchieved);
         // See notes for GetAchievementAndUnlockTime above
@@ -167,13 +161,13 @@ namespace SKYNET.Interface
         // Retrieves the number of players currently playing your game (online + offline)
         // This call is asynchronous, with the result returned in NumberOfCurrentPlayers_t
 
-        SteamAPICall_t GetNumberOfCurrentPlayers();
+        SteamAPICall_t GetNumberOfCurrentPlayers(IntPtr _);
 
         // Requests that Steam fetch data on the percentage of players who have received each achievement
         // for the game globally.
         // This call is asynchronous, with the result returned in GlobalAchievementPercentagesReady_t.
 
-        SteamAPICall_t RequestGlobalAchievementPercentages();
+        SteamAPICall_t RequestGlobalAchievementPercentages(IntPtr _);
 
         // Get the info on the most achieved achievement for the game, returns an iterator index you can use to fetch
         // the next most achieved afterwards.  Will return -1 if there is no data on achievement 

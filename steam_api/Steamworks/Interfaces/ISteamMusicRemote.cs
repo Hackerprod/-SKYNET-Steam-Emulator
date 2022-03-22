@@ -10,8 +10,8 @@ namespace SKYNET.Interface
     {
         // Service Definition
         bool RegisterSteamMusicRemote(string pchName);
-        bool DeregisterSteamMusicRemote();
-        bool BIsCurrentMusicRemote();
+        bool DeregisterSteamMusicRemote(IntPtr _);
+        bool BIsCurrentMusicRemote(IntPtr _);
         bool BActivationSuccess(bool bValue);
 
         bool SetDisplayName(string pchDisplayName);
@@ -32,25 +32,25 @@ namespace SKYNET.Interface
         bool UpdateVolume(float flValue); // volume is between 0.0 and 1.0
 
         // Current Entry
-        bool CurrentEntryWillChange();
+        bool CurrentEntryWillChange(IntPtr _);
         bool CurrentEntryIsAvailable(bool bAvailable);
         bool UpdateCurrentEntryText(string pchText);
         bool UpdateCurrentEntryElapsedSeconds(int nValue);
         bool UpdateCurrentEntryCoverArt(IntPtr pvBuffer, uint cbBufferLength);
-        bool CurrentEntryDidChange();
+        bool CurrentEntryDidChange(IntPtr _);
 
         // Queue
-        bool QueueWillChange();
-        bool ResetQueueEntries();
+        bool QueueWillChange(IntPtr _);
+        bool ResetQueueEntries(IntPtr _);
         bool SetQueueEntry(int nID, int nPosition, string pchEntryText);
         bool SetCurrentQueueEntry(int nID);
-        bool QueueDidChange();
+        bool QueueDidChange(IntPtr _);
 
         // Playlist
-        bool PlaylistWillChange();
-        bool ResetPlaylistEntries();
+        bool PlaylistWillChange(IntPtr _);
+        bool ResetPlaylistEntries(IntPtr _);
         bool SetPlaylistEntry(int nID, int nPosition, string pchEntryText);
         bool SetCurrentPlaylistEntry(int nID);
-        bool PlaylistDidChange();
+        bool PlaylistDidChange(IntPtr _);
     }
 }

@@ -10,7 +10,7 @@ public class SteamNetworkingUtils : IBaseInterface, ISteamNetworkingUtils
         return IntPtr.Zero;
     }
 
-    public void InitRelayNetworkAccess()
+    public void InitRelayNetworkAccess(IntPtr _)
     {
         //
     }
@@ -60,7 +60,7 @@ public class SteamNetworkingUtils : IBaseInterface, ISteamNetworkingUtils
         return 0;
     }
 
-    public int GetPOPCount()
+    public int GetPOPCount(IntPtr _)
     {
         return 0;
     }
@@ -70,7 +70,7 @@ public class SteamNetworkingUtils : IBaseInterface, ISteamNetworkingUtils
         return 0;
     }
 
-    public uint GetLocalTimestamp()
+    public uint GetLocalTimestamp(IntPtr _)
     {
         return 0;
     }
@@ -130,7 +130,7 @@ public class SteamNetworkingUtils : IBaseInterface, ISteamNetworkingUtils
         return false;
     }
 
-    public int GetFirstConfigValue()
+    public int GetFirstConfigValue(IntPtr _)
     {
         return 0;
     }

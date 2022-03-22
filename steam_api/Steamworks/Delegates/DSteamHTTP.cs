@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SKYNET.Delegate
 {
-    [Delegate(Name = "SteamHTMLSurface")]
+    [Delegate(Name = "SteamHTTP")]
     public class DSteamHTTP 
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
@@ -81,7 +81,7 @@ namespace SKYNET.Delegate
         public delegate bool SetHTTPRequestNetworkActivityTimeout(uint hRequest, uint unTimeoutSeconds);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate IntPtr SteamAPI_SteamGameServerHTTP_v003();
+        public delegate IntPtr SteamAPI_SteamGameServerHTTP_v003(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate IntPtr CreateHTTPRequest(/*HTTPMethod*/uint eHTTPRequestMethod, string pchAbsoluteURL);

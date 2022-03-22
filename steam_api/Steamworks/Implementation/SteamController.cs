@@ -63,14 +63,14 @@ public class SteamController : IBaseInterface, ISteamController
         return 0;
     }
 
-    public ControllerAnalogActionData_t GetAnalogActionData(uint controllerHandle, uint analogActionHandle)
+    public IntPtr GetAnalogActionData(IntPtr _, uint controllerHandle, uint analogActionHandle)
     {
         Write("GetAnalogActionData");
-        ControllerAnalogActionData_t data = new ControllerAnalogActionData_t();
-        data.eMode = 0;
-        data.x = data.y = 0;
-        data.bActive = false;
-        return data;
+        //ControllerAnalogActionData_t data = new ControllerAnalogActionData_t();
+        //data.eMode = 0;
+        //data.x = data.y = 0;
+        //data.bActive = false;
+        return IntPtr.Zero;
     }
 
     public int GetAnalogActionHandle(string pszActionName)
@@ -117,13 +117,13 @@ public class SteamController : IBaseInterface, ISteamController
         return 0;
     }
 
-    public ControllerDigitalActionData_t GetDigitalActionData(IntPtr controllerHandle, int digitalActionHandle)
+    public IntPtr GetDigitalActionData(IntPtr _, IntPtr controllerHandle, int digitalActionHandle)
     {
         Write("GetDigitalActionData");
         ControllerDigitalActionData_t digitalData = new ControllerDigitalActionData_t();
         digitalData.bActive = false;
         digitalData.bState = false;
-        return digitalData;
+        return IntPtr.Zero;
     }
 
     public int GetDigitalActionHandle(string pszActionName)
@@ -188,13 +188,13 @@ public class SteamController : IBaseInterface, ISteamController
         return "";
     }
 
-    public bool Init()
+    public bool Init(IntPtr _)
     {
         Write("Init");
         return true;
     }
 
-    public void RunFrame()
+    public void RunFrame(IntPtr _)
     {
         Write("RunFrame");
     }
@@ -210,7 +210,7 @@ public class SteamController : IBaseInterface, ISteamController
         return true;
     }
 
-    public bool Shutdown()
+    public bool Shutdown(IntPtr _)
     {
         Write("Shutdown");
         return true;

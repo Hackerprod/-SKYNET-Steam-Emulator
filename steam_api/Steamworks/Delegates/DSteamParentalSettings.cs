@@ -13,10 +13,10 @@ namespace SKYNET.Delegate
     public class DSteamParentalSettings 
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool BIsParentalLockEnabled();
+        public delegate bool BIsParentalLockEnabled(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool BIsParentalLockLocked();
+        public delegate bool BIsParentalLockLocked(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool BIsAppBlocked(IntPtr nAppID);

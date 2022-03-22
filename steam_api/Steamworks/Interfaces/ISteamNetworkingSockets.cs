@@ -351,7 +351,7 @@ namespace SKYNET.Interface
         /// to monitor the status.
         ///
         /// Returns the current value that would be returned from GetAuthenticationStatus.
-        ESteamNetworkingAvailability InitAuthentication();
+        ESteamNetworkingAvailability InitAuthentication(IntPtr _);
 
         /// Query our readiness to participate in authenticated communications.  A
         /// IntPtr callback is posted any time this status changes,
@@ -371,7 +371,7 @@ namespace SKYNET.Interface
         /// Create a new poll group.
         ///
         /// You should destroy the poll group when you are done using DestroyPollGroup
-        uint CreatePollGroup();
+        uint CreatePollGroup(IntPtr _);
 
         /// Destroy a poll group created with CreatePollGroup().
         ///
@@ -460,11 +460,11 @@ namespace SKYNET.Interface
         /// In development, you'll need to set it yourself.  See
         /// https://partner.steamgames.com/doc/api/ISteamNetworkingSockets
         /// for more information on how to configure dev environments.
-        uint GetHostedDedicatedServerPort();
+        uint GetHostedDedicatedServerPort(IntPtr _);
 
         /// Returns 0 if SDR_LISTEN_PORT is not set.  Otherwise, returns the data center the server
         /// is running in.  This will be k_SteamDatagramPOPID_dev in non-production environment.
-        uint GetHostedDedicatedServerPOPID();
+        uint GetHostedDedicatedServerPOPID(IntPtr _);
 
         /// Return info about the hosted server.  This contains the PoPID of the server,
         /// and opaque routing information that can be used by the relays to send traffic

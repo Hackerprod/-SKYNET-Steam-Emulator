@@ -8,19 +8,19 @@ namespace SKYNET.Interface
 {
     public interface ISteamMusic
     {
-        bool BIsEnabled();
-        bool BIsPlaying();
+        bool BIsEnabled(IntPtr _);
+        bool BIsPlaying(IntPtr _);
 
-        AudioPlayback_Status GetPlaybackStatus();
+        AudioPlayback_Status GetPlaybackStatus(IntPtr _);
 
-        void Play();
-        void Pause();
-        void PlayPrevious();
-        void PlayNext();
+        void Play(IntPtr _);
+        void Pause(IntPtr _);
+        void PlayPrevious(IntPtr _);
+        void PlayNext(IntPtr _);
 
         // volume is between 0.0 and 1.0
         void SetVolume(float flVolume);
-        float GetVolume();
+        float GetVolume(IntPtr _);
 
     }
     public enum AudioPlayback_Status

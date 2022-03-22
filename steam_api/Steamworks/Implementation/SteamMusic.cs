@@ -1,46 +1,47 @@
 ﻿using Core.Interface;
 using SKYNET.Interface;
+using System;
 
 //[Map("STEAMMUSIC_INTERFACE_VERSION")]
 //[Map("SteamMusic")]
 public class SteamMusic : IBaseInterface, ISteamMusic
 {
-    public bool BIsEnabled()
+    public bool BIsEnabled(IntPtr _)
     {
         return true;
     }
 
-    public bool BIsPlaying()
+    public bool BIsPlaying(IntPtr _)
     {
         return true;
     }
 
-    public AudioPlayback_Status GetPlaybackStatus()
+    public AudioPlayback_Status GetPlaybackStatus(IntPtr _)
     {
         return AudioPlayback_Status.AudioPlayback_Undefined;
     }
 
-    public float GetVolume()
+    public float GetVolume(IntPtr _)
     {
         return 0;
     }
 
-    public void Pause()
+    public void Pause(IntPtr _)
     {
         //
     }
 
-    public void Play()
+    public void Play(IntPtr _)
     {
         //
     }
 
-    public void PlayNext()
+    public void PlayNext(IntPtr _)
     {
         //
     }
 
-    public void PlayPrevious()
+    public void PlayPrevious(IntPtr _)
     {
         //
     }

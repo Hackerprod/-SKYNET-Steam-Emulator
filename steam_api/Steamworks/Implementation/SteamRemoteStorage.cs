@@ -97,7 +97,7 @@ public class SteamRemoteStorage : IBaseInterface, ISteamRemoteStorage
         return default;
     }
 
-    public int GetFileCount()
+    public int GetFileCount(IntPtr _)
     {
         return 0;
     }
@@ -112,12 +112,12 @@ public class SteamRemoteStorage : IBaseInterface, ISteamRemoteStorage
         return false;
     }
 
-    public bool IsCloudEnabledForAccount()
+    public bool IsCloudEnabledForAccount(IntPtr _)
     {
         return default;
     }
 
-    public bool IsCloudEnabledForApp()
+    public bool IsCloudEnabledForApp(IntPtr _)
     {
         return default;
     }
@@ -147,7 +147,7 @@ public class SteamRemoteStorage : IBaseInterface, ISteamRemoteStorage
         return default;
     }
 
-    public int GetCachedUGCCount()
+    public int GetCachedUGCCount(IntPtr _)
     {
         return default;
     }

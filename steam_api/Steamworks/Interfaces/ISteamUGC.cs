@@ -38,8 +38,6 @@ namespace SKYNET.Interface
 
         // Return the first value matching the pchKey. Note that a key may map to multiple values.  Returns false if there was an error or no matching value was found.
 
-        bool GetQueryUGCKeyValueTag(UGCQueryHandle_t handle, uint index, string pchKey, string pchValue, uint cchValueSize);
-
         // Release the request to free up memory, after retrieving results
         bool ReleaseQueryUGCRequest(UGCQueryHandle_t handle);
 
@@ -112,7 +110,7 @@ namespace SKYNET.Interface
         SteamAPICall_t SubscribeItem(PublishedFileId_t nPublishedFileID); // subscribe to this item, will be installed ASAP
 
         SteamAPICall_t UnsubscribeItem(PublishedFileId_t nPublishedFileID); // unsubscribe from this item, will be uninstalled after game quits
-        uint GetNumSubscribedItems(); // number of subscribed items 
+        uint GetNumSubscribedItems(IntPtr _); // number of subscribed items 
         uint GetSubscribedItems(PublishedFileId_t pvecPublishedFileID, uint cMaxEntries); // all subscribed item PublishFileIDs
 
         // get EItemState flags about item on this client
@@ -143,7 +141,7 @@ namespace SKYNET.Interface
 
         SteamAPICall_t StopPlaytimeTracking(PublishedFileId_t pvecPublishedFileID, uint unNumPublishedFileIDs);
 
-        SteamAPICall_t StopPlaytimeTrackingForAllItems();
+        SteamAPICall_t StopPlaytimeTrackingForAllItems(IntPtr _);
 
         // parent-child relationship or dependency management
 

@@ -95,7 +95,7 @@ namespace SKYNET.Interface
         // Get details on a given server in the list, you can get the valid range of index
         // values by calling GetServerCount().  You will also receive index values in 
         // IntPtr::ServerResponded() callbacks
-        IntPtr GetServerDetails(IntPtr hRequest, int iServer);
+        IntPtr GetServerDetails(IntPtr _, IntPtr hRequest, int iServer);
 
         // Cancel an request which is operation on the given list type.  You should call this to cancel
         // any in-progress requests before destructing a callback object that may have been passed 

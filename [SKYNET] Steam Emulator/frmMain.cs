@@ -101,36 +101,39 @@ namespace SKYNET
 
         private void Inject(GameBox e)
         {
-            Write("Opening " + e.GameName);
-
-            HookInterface = new HookInterface();
-            HookInterface.InjectionOptions = InjectionOptions.Default;
-            HookInterface.AppId = e.AppId;
-            HookInterface.OnMessage += this.HookInterface_OnMessage;
-
-            channel = null;
-
-            string InjectorPath = Path.Combine(modCommon.GetPath(), "steam_api.dll");
-
-            try
+            Task.Run(() =>
             {
-                var InObject = WellKnownObjectMode.Singleton;
-                RemoteHooking.IpcCreateServer(ref channel, InObject, HookInterface);
-                HookInterface.ChannelName = channel;
-                RemoteHooking.CreateAndInject(e.GamePath, e.Parametters, 0, HookInterface.InjectionOptions, InjectorPath, InjectorPath, out ProcessId, channel);
-                InjectedProcess = Process.GetProcessById(ProcessId);
-                WaitForExit();
-                RunningGames.Add(new RunningGame() { Game = e.GetGame(), Process = InjectedProcess });
+                richTextBox1.Clear();
+                Write("Opening " + e.GameName);
 
-                BT_GameAction.Text = "CLOSE";
-                BT_GameAction.BackColor = Color.Red;
-            }
-            catch (Exception ex)
-            {
-                Write($"Error Injecting {Path.GetFileName(e.GamePath)}");
-                Write(ex.Message);
-            }
+                HookInterface = new HookInterface();
+                HookInterface.InjectionOptions = InjectionOptions.Default;
+                HookInterface.AppId = e.AppId;
+                HookInterface.OnMessage += this.HookInterface_OnMessage;
 
+                channel = null;
+
+                string InjectorPath = Path.Combine(modCommon.GetPath(), "steam_api.dll");
+
+                try
+                {
+                    var InObject = WellKnownObjectMode.Singleton;
+                    RemoteHooking.IpcCreateServer(ref channel, InObject, HookInterface);
+                    HookInterface.ChannelName = channel;
+                    RemoteHooking.CreateAndInject(e.GamePath, e.Parametters, 0, HookInterface.InjectionOptions, InjectorPath, InjectorPath, out ProcessId, channel);
+                    InjectedProcess = Process.GetProcessById(ProcessId);
+                    WaitForExit();
+                    RunningGames.Add(new RunningGame() { Game = e.GetGame(), Process = InjectedProcess });
+
+                    BT_GameAction.Text = "CLOSE";
+                    BT_GameAction.BackColor = Color.Red;
+                }
+                catch (Exception ex)
+                {
+                    Write($"Error Injecting {Path.GetFileName(e.GamePath)}");
+                    Write(ex.Message);
+                }
+            });
         }
 
         private void HookInterface_OnMessage(object sender, ConsoleMessage e)

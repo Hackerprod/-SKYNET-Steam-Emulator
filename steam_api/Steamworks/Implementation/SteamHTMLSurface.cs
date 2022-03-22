@@ -57,7 +57,7 @@ public class SteamHTMLSurface : IBaseInterface, ISteamHTMLSurface
         Write("GoForward");
     }
 
-    public bool Init()
+    public bool Init(IntPtr _)
     {
         Write("Init");
         return true;
@@ -173,7 +173,7 @@ public class SteamHTMLSurface : IBaseInterface, ISteamHTMLSurface
         Write("SetVerticalScroll");
     }
 
-    public bool Shutdown()
+    public bool Shutdown(IntPtr _)
     {
         Write("Shutdown");
         return true;

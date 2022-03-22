@@ -15,13 +15,13 @@ namespace SKYNET.Delegate
     {
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool RequestCurrentStats();
+        public delegate bool RequestCurrentStats(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool GetStat(string pchName, uint pData);
+        public delegate bool GetStat(IntPtr _, string pchName, uint pData);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool SetStat(string pchName, uint nData);
+        public delegate bool SetStat(IntPtr _, string pchName, uint nData);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool UpdateAvgRateStat(string pchName, float flCountThisSession, double dSessionLength);
@@ -39,7 +39,7 @@ namespace SKYNET.Delegate
         public delegate bool GetAchievementAndUnlockTime(string pchName, bool pbAchieved, uint punUnlockTime);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool StoreStats();
+        public delegate bool StoreStats(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate int GetAchievementIcon(string pchName);
@@ -51,7 +51,7 @@ namespace SKYNET.Delegate
         public delegate bool IndicateAchievementProgress(string pchName, uint nCurProgress, uint nMaxProgress);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate uint GetNumAchievements();
+        public delegate uint GetNumAchievements(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate string GetAchievementName(uint iAchievement);
@@ -60,7 +60,7 @@ namespace SKYNET.Delegate
         public delegate SteamAPICall_t RequestUserStats(IntPtr steamIDUser);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool GetUserStat(IntPtr steamIDUser, string pchName, uint pData);
+        public delegate bool GetUserStat(IntPtr _, IntPtr steamIDUser, string pchName, uint pData);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool GetUserAchievement(IntPtr steamIDUser, string pchName, bool pbAchieved);
@@ -105,10 +105,10 @@ namespace SKYNET.Delegate
         public delegate SteamAPICall_t AttachLeaderboardUGC(IntPtr hSteamLeaderboard, UGCHandle_t hUGC);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate SteamAPICall_t GetNumberOfCurrentPlayers();
+        public delegate SteamAPICall_t GetNumberOfCurrentPlayers(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate SteamAPICall_t RequestGlobalAchievementPercentages();
+        public delegate SteamAPICall_t RequestGlobalAchievementPercentages(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate int GetMostAchievedAchievementInfo(string pchName, uint unNameBufLen, float pflPercent, bool pbAchieved);

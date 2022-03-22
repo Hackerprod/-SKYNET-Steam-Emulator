@@ -14,10 +14,10 @@ namespace SKYNET.Delegate
     public class DSteamHTMLSurface
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool Init();
+        public delegate bool Init(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool Shutdown();
+        public delegate bool Shutdown(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate SteamAPICall_t CreateBrowser(string pchUserAgent, string pchUserCSS);

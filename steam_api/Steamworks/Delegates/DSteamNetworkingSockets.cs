@@ -77,13 +77,13 @@ namespace SKYNET.Delegate
         public delegate bool GetIdentity(IntPtr pIdentity);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate ESteamNetworkingAvailability InitAuthentication();
+        public delegate ESteamNetworkingAvailability InitAuthentication(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate ESteamNetworkingAvailability GetAuthenticationStatus(IntPtr pDetails);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate uint CreatePollGroup();
+        public delegate uint CreatePollGroup(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool DestroyPollGroup(uint hPollGroup);
@@ -104,10 +104,10 @@ namespace SKYNET.Delegate
         public delegate uint ConnectToHostedDedicatedServer(IntPtr identityTarget, int nVirtualPort, int nOptions, IntPtr pOptions);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate uint GetHostedDedicatedServerPort();
+        public delegate uint GetHostedDedicatedServerPort(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate uint GetHostedDedicatedServerPOPID();
+        public delegate uint GetHostedDedicatedServerPOPID(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate EResult GetHostedDedicatedServerAddress(SteamDatagramHostedAddress pRouting);

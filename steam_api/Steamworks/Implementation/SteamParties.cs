@@ -46,7 +46,7 @@ public class SteamParties : IBaseInterface, ISteamParties
         return false;
     }
 
-    public uint GetNumActiveBeacons()
+    public uint GetNumActiveBeacons(IntPtr _)
     {
         return 0;
     }

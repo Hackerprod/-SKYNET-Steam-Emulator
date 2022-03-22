@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace SKYNET.Delegate
 {
-    [Delegate(Name = "SteamGameCoordinator")]
+    [Delegate(Name = "SteamGameServerStats")]
     public class DSteamGameServerStats
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]

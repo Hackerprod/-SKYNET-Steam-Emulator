@@ -19,7 +19,7 @@ namespace SKYNET.Interface
         uint AddScreenshotToLibrary(char pchFilename, char pchThumbnailFilename, int nWidth, int nHeight);
 
         // Causes the Steam overlay to take a screenshot.  If screenshots are being hooked by the game then a ScreenshotRequested_t callback is sent back to the game instead. 
-        void TriggerScreenshot();
+        void TriggerScreenshot(IntPtr _);
 
         // Toggles whether the overlay handles screenshots when the user presses the screenshot hotkey, or the game handles them.  If the game is hooking screenshots,
         // then the ScreenshotRequested_t callback will be sent if the user presses the hotkey, and the game is expected to call WriteScreenshot or AddScreenshotToLibrary
@@ -36,7 +36,7 @@ namespace SKYNET.Interface
         bool TagPublishedFile(uint hScreenshot, uint unPublishedFileID);
 
         // Returns true if the app has hooked the screenshot
-        bool IsScreenshotsHooked();
+        bool IsScreenshotsHooked(IntPtr _);
 
         // Adds a VR screenshot to the user's screenshot library from disk in the supported type.
         // pchFilename should be the normal 2D image used in the library view

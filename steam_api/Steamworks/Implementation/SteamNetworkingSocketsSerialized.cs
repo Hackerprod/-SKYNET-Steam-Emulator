@@ -16,7 +16,7 @@ public class SteamNetworkingSocketsSerialized : IBaseInterface, ISteamNetworking
         //
     }
 
-    public SteamAPICall_t GetCertAsync()
+    public SteamAPICall_t GetCertAsync(IntPtr _)
     {
         return default;
     }
@@ -31,7 +31,7 @@ public class SteamNetworkingSocketsSerialized : IBaseInterface, ISteamNetworking
         //
     }
 
-    public uint GetCachedRelayTicketCount()
+    public uint GetCachedRelayTicketCount(IntPtr _)
     {
         return 0;
     }

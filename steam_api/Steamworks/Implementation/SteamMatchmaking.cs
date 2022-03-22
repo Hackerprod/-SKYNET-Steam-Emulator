@@ -64,7 +64,7 @@ public class SteamMatchmaking : IBaseInterface, ISteamMatchmaking
         return true;
     }
 
-    public int GetFavoriteGameCount()
+    public int GetFavoriteGameCount(IntPtr _)
     {
         return 1;
     }
@@ -149,7 +149,7 @@ public class SteamMatchmaking : IBaseInterface, ISteamMatchmaking
         return true;
     }
 
-    public SteamAPICall_t RequestLobbyList()
+    public SteamAPICall_t RequestLobbyList(IntPtr _)
     {
         return new SteamAPICall_t();
     }

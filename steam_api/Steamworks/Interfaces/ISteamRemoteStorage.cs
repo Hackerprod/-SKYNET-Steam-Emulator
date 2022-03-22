@@ -42,13 +42,13 @@ namespace SKYNET.Interface
         ERemoteStoragePlatform GetSyncPlatforms(string pchFile);
 
         // iteration
-        int GetFileCount();
+        int GetFileCount(IntPtr _);
         string GetFileNameAndSize(int iFile, int pnFileSizeInBytes);
 
         // configuration management
         bool GetQuota(uint pnTotalBytes, uint puAvailableBytes);
-        bool IsCloudEnabledForAccount();
-        bool IsCloudEnabledForApp();
+        bool IsCloudEnabledForAccount(IntPtr _);
+        bool IsCloudEnabledForApp(IntPtr _);
         void SetCloudEnabledForApp(bool bEnabled);
 
         // user generated content
@@ -75,7 +75,7 @@ namespace SKYNET.Interface
         int UGCRead(UGCHandle_t hContent, IntPtr pvData, int cubDataToRead, uint cOffset, IntPtr eAction);
 
         // Functions to iterate through UGC that has finished downloading but has not yet been read via UGCRead()
-        int GetCachedUGCCount();
+        int GetCachedUGCCount(IntPtr _);
         UGCHandle_t GetCachedUGCHandle(int iCachedContent);
 
         // The following functions are only necessary on the Playstation 3. On PC & Mac, the Steam client will handle these operations for you

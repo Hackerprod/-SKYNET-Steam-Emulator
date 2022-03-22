@@ -57,7 +57,7 @@ namespace Core.Interface
                 }
                 catch (Exception e)
                 {
-                    Write(string.Format("EXCEPTION whilst binding function {0}, class {1}", mi.Name, impl) + Environment.NewLine + e.Message);
+                    Write(string.Format("EXCEPTION whilst binding function {0}, class {1}", mi.Name, impl.name));
                 }
             }
 
@@ -80,9 +80,16 @@ namespace Core.Interface
             
             for (var i = 0; i < new_delegates.Count; i++)
             {
+                try
+                {
+                    // Main.Write ("Testing " + new_delegates[i].Method);
+                    Marshal.WriteIntPtr(vtable, i * ptr_size, Marshal.GetFunctionPointerForDelegate(new_delegates[i]));
+                }
+                catch (Exception)
+                {
+                    Write($"Error Injecting Delegate {new_delegates[i]}");
+                }
                 // Create all function pointers as neccessary
-                // Main.Write ("Testing " + new_delegates[i].Method);
-                Marshal.WriteIntPtr(vtable, i * ptr_size, Marshal.GetFunctionPointerForDelegate(new_delegates[i]));
             }
             impl.stored_function_pointers.Add(vtable);
 

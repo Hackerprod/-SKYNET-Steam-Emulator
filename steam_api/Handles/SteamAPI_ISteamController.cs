@@ -52,10 +52,10 @@ public class SteamAPI_ISteamController : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ControllerAnalogActionData_t SteamAPI_ISteamController_GetAnalogActionData(uint controllerHandle, uint analogActionHandle)
+    public static IntPtr SteamAPI_ISteamController_GetAnalogActionData(IntPtr _, uint controllerHandle, uint analogActionHandle)
     {
         Write("SteamAPI_ISteamController_GetAnalogActionData");
-        return SteamEmulator.SteamController.GetAnalogActionData(controllerHandle, analogActionHandle);
+        return SteamEmulator.SteamController.GetAnalogActionData(_, controllerHandle, analogActionHandle);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -101,10 +101,10 @@ public class SteamAPI_ISteamController : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ControllerDigitalActionData_t SteamAPI_ISteamController_GetDigitalActionData(IntPtr controllerHandle, int digitalActionHandle)
+    public static IntPtr SteamAPI_ISteamController_GetDigitalActionData(IntPtr _, IntPtr controllerHandle, int digitalActionHandle)
     {
         Write("SteamAPI_ISteamController_GetDigitalActionData");
-        return SteamEmulator.SteamController.GetDigitalActionData(controllerHandle, digitalActionHandle);
+        return SteamEmulator.SteamController.GetDigitalActionData(_, controllerHandle, digitalActionHandle);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -171,10 +171,10 @@ public class SteamAPI_ISteamController : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamController_Init()
+    public static bool SteamAPI_ISteamController_Init(IntPtr _)
     {
         Write("SteamAPI_ISteamController_Init");
-        return SteamEmulator.SteamController.Init();
+        return SteamEmulator.SteamController.Init(_);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -197,10 +197,10 @@ public class SteamAPI_ISteamController : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamController_Shutdown()
+    public static bool SteamAPI_ISteamController_Shutdown(IntPtr _)
     {
         Write("SteamAPI_ISteamController_Shutdown");
-        return SteamEmulator.SteamController.Shutdown();
+        return SteamEmulator.SteamController.Shutdown(_);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

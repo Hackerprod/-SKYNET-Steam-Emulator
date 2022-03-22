@@ -8,10 +8,10 @@ namespace SKYNET.Interface
         void SendP2PRendezvous(IntPtr steamIDRemote, uint unConnectionIDSrc, IntPtr pMsgRendezvous, uint cbRendezvous);
         void SendP2PConnectionFailure(IntPtr steamIDRemote, uint unConnectionIDDest, uint nReason, char pszReason);
         //SteamNetworkingSocketsCert_t
-        SteamAPICall_t GetCertAsync();
+        SteamAPICall_t GetCertAsync(IntPtr _);
         int GetNetworkConfigJSON(IntPtr buf, uint cbBuf);
         void CacheRelayTicket(IntPtr pTicket, uint cbTicket);
-        uint GetCachedRelayTicketCount();
+        uint GetCachedRelayTicketCount(IntPtr _);
         int GetCachedRelayTicket(uint idxTicket, IntPtr buf, uint cbBuf);
         void PostConnectionStateMsg(IntPtr pMsg, uint cbMsg);
     }

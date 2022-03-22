@@ -10,7 +10,7 @@ namespace SKYNET.Delegate
     public class DSteamMatchmaking
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate int GetFavoriteGameCount();
+        public delegate int GetFavoriteGameCount(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool GetFavoriteGame(int iGame, AppId_t pnAppID, uint pnIP, uint pnConnPort, uint pnQueryPort, uint punFlags, uint pRTime32LastPlayedOnServer);
@@ -22,7 +22,7 @@ namespace SKYNET.Delegate
         public delegate bool RemoveFavoriteGame(AppId_t nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate SteamAPICall_t RequestLobbyList();
+        public delegate SteamAPICall_t RequestLobbyList(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate void AddRequestLobbyListStringFilter(string pchKeyToMatch, string pchValueToMatch, ELobbyComparison eComparisonType);

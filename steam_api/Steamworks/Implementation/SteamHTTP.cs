@@ -131,7 +131,7 @@ public class SteamHTTP : IBaseInterface, ISteamHTTP
         return true;
     }
 
-    public IntPtr SteamAPI_SteamGameServerHTTP_v003()
+    public IntPtr SteamAPI_SteamGameServerHTTP_v003(IntPtr _)
     {
         return IntPtr.Zero;
     }

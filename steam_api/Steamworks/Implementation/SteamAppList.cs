@@ -36,7 +36,7 @@ public class SteamAppList : IBaseInterface, ISteamAppList
         return 0;
     }
 
-    public uint GetNumInstalledApps()
+    public uint GetNumInstalledApps(IntPtr _)
     {
         Write("Steam_Applist::GetNumInstalledApps\n");
         return 0;

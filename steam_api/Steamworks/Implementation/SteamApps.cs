@@ -9,37 +9,37 @@ using Steamworks;
 public class SteamApps : IBaseInterface, ISteamApps
 {
 
-    public bool BIsSubscribed()
+    public bool BIsSubscribed(IntPtr _)
     {
         Write("BIsSubscribed");
         return true;
     }
 
-    public bool BIsLowViolence()
+    public bool BIsLowViolence(IntPtr _)
     {
         Write("BIsLowViolence");
         return false;
     }
 
-    public bool BIsCybercafe()
+    public bool BIsCybercafe(IntPtr _)
     {
         Write("BIsCybercafe");
         return false;
     }
 
-    public bool BIsVACBanned()
+    public bool BIsVACBanned(IntPtr _)
     {
         Write("BIsVACBanned");
         return false;
     }
 
-    public string GetCurrentGameLanguage()
+    public string GetCurrentGameLanguage(IntPtr _)
     {
         Write("GetCurrentGameLanguage");
         return SteamEmulator.Language;
     }
 
-    public string GetAvailableGameLanguages()
+    public string GetAvailableGameLanguages(IntPtr _)
     {
         Write("GetAvailableGameLanguages");
         //TODO?
@@ -66,13 +66,13 @@ public class SteamApps : IBaseInterface, ISteamApps
         return 1;
     }
 
-    public bool BIsSubscribedFromFreeWeekend()
+    public bool BIsSubscribedFromFreeWeekend(IntPtr _)
     {
         Write("BIsSubscribedFromFreeWeekend");
         return false;
     }
 
-    public int GetDLCCount()
+    public int GetDLCCount(IntPtr _)
     {
         Write("GetDLCCount");
         return 0;
@@ -158,7 +158,7 @@ public class SteamApps : IBaseInterface, ISteamApps
 
     // returns the SteamID of the original owner. If different from current user, it's borrowed
 
-    public IntPtr GetAppOwner()
+    public IntPtr GetAppOwner(IntPtr _)
     {
         Write("GetAppOwner");
         return IntPtr.Zero;
@@ -187,7 +187,7 @@ public class SteamApps : IBaseInterface, ISteamApps
 
     // return the buildid of this app, may change at any time based on backend updates to the game
 
-    public int GetAppBuildId()
+    public int GetAppBuildId(IntPtr _)
     {
         Write("GetAppBuildId");
         return 10;
@@ -199,7 +199,7 @@ public class SteamApps : IBaseInterface, ISteamApps
     // appropriate appid values, ending with a final callback where the m_nAppId
     // member is k_uAppIdInvalid (zero).
 
-    public void RequestAllProofOfPurchaseKeys()
+    public void RequestAllProofOfPurchaseKeys(IntPtr _)
     {
         Write("RequestAllProofOfPurchaseKeys");
     }
@@ -228,9 +228,9 @@ public class SteamApps : IBaseInterface, ISteamApps
         return 0;
     }
 
-    // Check if user borrowed this game via Family Sharing, If true, call GetAppOwner() to get the lender SteamID
+    // Check if user borrowed this game via Family Sharing, If true, call GetAppOwner(IntPtr _) to get the lender SteamID
 
-    public bool BIsSubscribedFromFamilySharing()
+    public bool BIsSubscribedFromFamilySharing(IntPtr _)
     {
         Write("BIsSubscribedFromFamilySharing");
         return false;

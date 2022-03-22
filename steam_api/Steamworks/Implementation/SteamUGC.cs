@@ -17,11 +17,6 @@ public class SteamUGC : IBaseInterface, ISteamUGC
         return default;
     }
 
-    public UGCQueryHandle_t CreateQueryAllUGCRequest(int eQueryType, int eMatchingeMatchingUGCTypeFileType, AppId_t nCreatorAppID, AppId_t nConsumerAppID, string pchCursor)
-    {
-        return default;
-    }
-
     public UGCQueryHandle_t CreateQueryUGCDetailsRequest(PublishedFileId_t pvecPublishedFileID, uint unNumPublishedFileIDs)
     {
         return default;
@@ -77,10 +72,6 @@ public class SteamUGC : IBaseInterface, ISteamUGC
         return false;
     }
 
-    public bool GetQueryUGCKeyValueTag(UGCQueryHandle_t handle, uint index, string pchKey, string pchValue, uint cchValueSize)
-    {
-        return false;
-    }
 
     public bool ReleaseQueryUGCRequest(UGCQueryHandle_t handle)
     {
@@ -187,7 +178,7 @@ public class SteamUGC : IBaseInterface, ISteamUGC
         return default;
     }
 
-    public UGCUpdateHandle_t StartItemUpdate(AppId_t nConsumerAppId, PublishedFileId_t nPublishedFileID) // start an UGC item update. Set changed properties before commiting update with CommitItemUpdate() 
+    public UGCUpdateHandle_t StartItemUpdate(AppId_t nConsumerAppId, PublishedFileId_t nPublishedFileID) // start an UGC item update. Set changed properties before commiting update with CommitItemUpdate(IntPtr _) 
     {
         return default;
     }
@@ -232,7 +223,7 @@ public class SteamUGC : IBaseInterface, ISteamUGC
         return false;
     }
 
-    public bool SetAllowLegacyUpload(UGCUpdateHandle_t handle, bool bAllowLegacyUpload) //  use legacy upload for a single small file. The parameter to SetItemContent() should either be a directory with one file or the full path to the file.  The file must also be less than 10MB in size. 
+    public bool SetAllowLegacyUpload(UGCUpdateHandle_t handle, bool bAllowLegacyUpload) //  use legacy upload for a single small file. The parameter to SetItemContent(IntPtr _) should either be a directory with one file or the full path to the file.  The file must also be less than 10MB in size. 
     {
         return false;
     }
@@ -277,7 +268,7 @@ public class SteamUGC : IBaseInterface, ISteamUGC
         return false;
     }
 
-    public SteamAPICall_t SubmitItemUpdate(UGCUpdateHandle_t handle, string pchChangeNote) // commit update process started with StartItemUpdate() 
+    public SteamAPICall_t SubmitItemUpdate(UGCUpdateHandle_t handle, string pchChangeNote) // commit update process started with StartItemUpdate(IntPtr _) 
     {
         return default;
     }
@@ -317,7 +308,7 @@ public class SteamUGC : IBaseInterface, ISteamUGC
         return default;
     }
 
-    public uint GetNumSubscribedItems() // number of subscribed items  
+    public uint GetNumSubscribedItems(IntPtr _) // number of subscribed items  
     {
         return 0;
     }
@@ -367,7 +358,7 @@ public class SteamUGC : IBaseInterface, ISteamUGC
         return default;
     }
 
-    public SteamAPICall_t StopPlaytimeTrackingForAllItems()
+    public SteamAPICall_t StopPlaytimeTrackingForAllItems(IntPtr _)
     {
         return default;
     }

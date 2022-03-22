@@ -6,12 +6,12 @@ namespace SKYNET.Interface
 {
     public interface ISteamApps
     {
-        bool BIsSubscribed();
-        bool BIsLowViolence();
-        bool BIsCybercafe();
-        bool BIsVACBanned();
-        string GetCurrentGameLanguage();
-        string GetAvailableGameLanguages();
+        bool BIsSubscribed(IntPtr _);
+        bool BIsLowViolence(IntPtr _);
+        bool BIsCybercafe(IntPtr _);
+        bool BIsVACBanned(IntPtr _);
+        string GetCurrentGameLanguage(IntPtr _);
+        string GetAvailableGameLanguages(IntPtr _);
 
         // only use this member if you need to check ownership of another game related to yours, a demo for example
         bool BIsSubscribedApp(AppId_t appID);
@@ -25,10 +25,10 @@ namespace SKYNET.Interface
         // Checks if the user is subscribed to the current app through a free weekend
         // This function will return false for users who have a retail or other type of license
         // Before using, please ask your Valve technical contact how to package and secure your free weekened
-        bool BIsSubscribedFromFreeWeekend();
+        bool BIsSubscribedFromFreeWeekend(IntPtr _);
 
         // Returns the number of DLC pieces for the running app
-        int GetDLCCount();
+        int GetDLCCount(IntPtr _);
 
         // Returns metadata for DLC by index, of range [0, GetDLCCount()]
         bool BGetDLCDataByIndex(int iDLC, IntPtr pAppID, bool pbAvailable, IntPtr pchName, int cchNameBufferSize);
@@ -54,7 +54,7 @@ namespace SKYNET.Interface
 
         // returns the SteamID of the original owner. If this CSteamID is different from ISteamUser::GetSteamID(),
         // the user has a temporary license borrowed via Family Sharing
-        IntPtr GetAppOwner();
+        IntPtr GetAppOwner(IntPtr _);
 
         // Returns the associated launch param if the game is run via steam://run/<appid>//?param1=value1&param2=value2&param3=value3 etc.
         // Parameter names starting with the character '@' are reserved for internal use and will always return and empty string.
@@ -67,13 +67,13 @@ namespace SKYNET.Interface
         bool GetDlcDownloadProgress(AppId_t nAppID, UInt64 punBytesDownloaded, UInt64 punBytesTotal);
 
         // return the buildid of this app, may change at any time based on backend updates to the game
-        int GetAppBuildId();
+        int GetAppBuildId(IntPtr _);
 
         // Request all proof of purchase keys for the calling appid and asociated DLC.
         // A series of AppProofOfPurchaseKeyResponse_t callbacks will be sent with
         // appropriate appid values, ending with a final callback where the m_nAppId
         // member is k_uAppIdInvalid (zero).
-        void RequestAllProofOfPurchaseKeys();
+        void RequestAllProofOfPurchaseKeys(IntPtr _);
 
         //STEAM_CALL_RESULT(FileDetailsResult_t )
 
@@ -90,7 +90,7 @@ namespace SKYNET.Interface
         int GetLaunchCommandLine(IntPtr pszCommandLine, int cubCommandLine);
 
         // Check if user borrowed this game via Family Sharing, If true, call GetAppOwner() to get the lender SteamID
-        bool BIsSubscribedFromFamilySharing();
+        bool BIsSubscribedFromFamilySharing(IntPtr _);
 
         // check if game is a timed trial with limited playtime
         bool BIsTimedTrial(UInt32 punSecondsAllowed, UInt32 punSecondsPlayed);

@@ -14,7 +14,7 @@ namespace SKYNET.Delegate
     public class DSteamAppList 
     {
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate uint GetNumInstalledApps();
+        public delegate uint GetNumInstalledApps(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate uint GetInstalledApps(AppId_t pvecAppID, UInt32 unMaxAppIDs);

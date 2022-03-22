@@ -87,10 +87,10 @@ public class SteamAPI_ISteamNetworkingUtils : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static int SteamAPI_ISteamNetworkingUtils_GetPOPCount()
+    public static int SteamAPI_ISteamNetworkingUtils_GetPOPCount(IntPtr _)
     {
         Write("SteamAPI_ISteamNetworkingUtils_GetPOPCount");
-        return SteamEmulator.SteamNetworkingUtils.GetPOPCount();
+        return SteamEmulator.SteamNetworkingUtils.GetPOPCount(_);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -101,10 +101,10 @@ public class SteamAPI_ISteamNetworkingUtils : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static uint SteamAPI_ISteamNetworkingUtils_GetLocalTimestamp()
+    public static uint SteamAPI_ISteamNetworkingUtils_GetLocalTimestamp(IntPtr _)
     {
         Write("SteamAPI_ISteamNetworkingUtils_GetLocalTimestamp");
-        return SteamEmulator.SteamNetworkingUtils.GetLocalTimestamp();
+        return SteamEmulator.SteamNetworkingUtils.GetLocalTimestamp(_);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -185,10 +185,10 @@ public class SteamAPI_ISteamNetworkingUtils : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static int SteamAPI_ISteamNetworkingUtils_GetFirstConfigValue()
+    public static int SteamAPI_ISteamNetworkingUtils_GetFirstConfigValue(IntPtr _)
     {
         Write("SteamAPI_ISteamNetworkingUtils_GetFirstConfigValue");
-        return SteamEmulator.SteamNetworkingUtils.GetFirstConfigValue();
+        return SteamEmulator.SteamNetworkingUtils.GetFirstConfigValue(_);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

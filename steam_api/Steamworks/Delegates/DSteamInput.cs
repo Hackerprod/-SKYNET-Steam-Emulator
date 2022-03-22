@@ -16,7 +16,7 @@ namespace SKYNET.Delegate
         public delegate bool Init([MarshalAs(UnmanagedType.U1)] bool bExplicitlyCallRunFrame);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool Shutdown();
+        public delegate bool Shutdown(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool SetInputActionManifestFilePath(string pchInputActionManifestAbsolutePath);
@@ -28,13 +28,13 @@ namespace SKYNET.Delegate
         public delegate bool BWaitForData([MarshalAs(UnmanagedType.U1)] bool bWaitForever, uint unTimeout);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool BNewDataAvailable();
+        public delegate bool BNewDataAvailable(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate int GetConnectedControllers([In, Out] IntPtr[] handlesOut);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate void EnableDeviceCallbacks();
+        public delegate void EnableDeviceCallbacks(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate IntPtr GetActionSetHandle(string pszActionSetName);
@@ -61,7 +61,7 @@ namespace SKYNET.Delegate
         public delegate IntPtr GetDigitalActionHandle(string pszActionName);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate InputDigitalActionData_t GetDigitalActionData(IntPtr inputHandle, IntPtr digitalActionHandle);
+        public delegate IntPtr GetDigitalActionData(IntPtr inputHandle, IntPtr digitalActionHandle);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate int GetDigitalActionOrigins(IntPtr inputHandle, IntPtr actionSetHandle, IntPtr digitalActionHandle, ref int originsOut);
@@ -73,7 +73,7 @@ namespace SKYNET.Delegate
         public delegate IntPtr GetAnalogActionHandle(string pszActionName);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate InputAnalogActionData_t GetAnalogActionData(IntPtr inputHandle, IntPtr analogActionHandle);
+        public delegate IntPtr GetAnalogActionData(IntPtr inputHandle, IntPtr analogActionHandle);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate int GetAnalogActionOrigins(IntPtr inputHandle, IntPtr actionSetHandle, IntPtr analogActionHandle, ref int originsOut);
@@ -148,7 +148,10 @@ namespace SKYNET.Delegate
         public delegate uint GetRemotePlaySessionID(IntPtr inputHandle);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate ushort GetSessionInputConfigurationSettings();
+        public delegate ushort GetSessionInputConfigurationSettings(IntPtr _);
+
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate IntPtr SteamAPI_SteamInput_v005(IntPtr _);
 
     }
 }

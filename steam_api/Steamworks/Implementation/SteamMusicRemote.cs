@@ -11,12 +11,12 @@ public class SteamMusicRemote : IBaseInterface, ISteamMusicRemote
         return false;
     }
 
-    public bool DeregisterSteamMusicRemote()
+    public bool DeregisterSteamMusicRemote(IntPtr _)
     {
         return false;
     }
 
-    public bool BIsCurrentMusicRemote()
+    public bool BIsCurrentMusicRemote(IntPtr _)
     {
         return false;
     }
@@ -86,7 +86,7 @@ public class SteamMusicRemote : IBaseInterface, ISteamMusicRemote
         return false;
     }
 
-    public bool CurrentEntryWillChange()
+    public bool CurrentEntryWillChange(IntPtr _)
     {
         return false;
     }
@@ -111,17 +111,17 @@ public class SteamMusicRemote : IBaseInterface, ISteamMusicRemote
         return false;
     }
 
-    public bool CurrentEntryDidChange()
+    public bool CurrentEntryDidChange(IntPtr _)
     {
         return false;
     }
 
-    public bool QueueWillChange()
+    public bool QueueWillChange(IntPtr _)
     {
         return false;
     }
 
-    public bool ResetQueueEntries()
+    public bool ResetQueueEntries(IntPtr _)
     {
         return false;
     }
@@ -136,17 +136,17 @@ public class SteamMusicRemote : IBaseInterface, ISteamMusicRemote
         return false;
     }
 
-    public bool QueueDidChange()
+    public bool QueueDidChange(IntPtr _)
     {
         return false;
     }
 
-    public bool PlaylistWillChange()
+    public bool PlaylistWillChange(IntPtr _)
     {
         return false;
     }
 
-    public bool ResetPlaylistEntries()
+    public bool ResetPlaylistEntries(IntPtr _)
     {
         return false;
     }
@@ -161,7 +161,7 @@ public class SteamMusicRemote : IBaseInterface, ISteamMusicRemote
         return false;
     }
 
-    public bool PlaylistDidChange()
+    public bool PlaylistDidChange(IntPtr _)
     {
         return false;
     }

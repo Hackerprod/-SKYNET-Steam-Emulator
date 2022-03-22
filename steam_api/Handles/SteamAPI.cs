@@ -290,7 +290,7 @@ public class SteamAPI : IBaseInterface
         SteamAPI_RunCallbacks();
 
         if (bGameServerCallbacks)
-           SteamEmulator.SteamGameServer.RunCallbacks();
+           SteamEmulator.SteamGameServer.RunCallbacks(IntPtr.Zero);
     }
 
 

@@ -158,10 +158,10 @@ public class SteamAPI_ISteamNetworkingSockets : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ESteamNetworkingAvailability SteamAPI_ISteamNetworkingSockets_InitAuthentication()
+    public static ESteamNetworkingAvailability SteamAPI_ISteamNetworkingSockets_InitAuthentication(IntPtr _)
     {
         Write("SteamAPI_ISteamNetworkingSockets_InitAuthentication");
-        return SteamEmulator.SteamNetworkingSockets.InitAuthentication();
+        return SteamEmulator.SteamNetworkingSockets.InitAuthentication(_);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -172,10 +172,10 @@ public class SteamAPI_ISteamNetworkingSockets : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static uint SteamAPI_ISteamNetworkingSockets_CreatePollGroup()
+    public static uint SteamAPI_ISteamNetworkingSockets_CreatePollGroup(IntPtr _)
     {
         Write("SteamAPI_ISteamNetworkingSockets_CreatePollGroup");
-        return SteamEmulator.SteamNetworkingSockets.CreatePollGroup();
+        return SteamEmulator.SteamNetworkingSockets.CreatePollGroup(_);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -221,17 +221,17 @@ public class SteamAPI_ISteamNetworkingSockets : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static uint SteamAPI_ISteamNetworkingSockets_GetHostedDedicatedServerPort()
+    public static uint SteamAPI_ISteamNetworkingSockets_GetHostedDedicatedServerPort(IntPtr _)
     {
         Write("SteamAPI_ISteamNetworkingSockets_GetHostedDedicatedServerPort");
-        return SteamEmulator.SteamNetworkingSockets.GetHostedDedicatedServerPort();
+        return SteamEmulator.SteamNetworkingSockets.GetHostedDedicatedServerPort(_);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static uint SteamAPI_ISteamNetworkingSockets_GetHostedDedicatedServerPOPID()
+    public static uint SteamAPI_ISteamNetworkingSockets_GetHostedDedicatedServerPOPID(IntPtr _)
     {
         Write("SteamAPI_ISteamNetworkingSockets_GetHostedDedicatedServerPOPID");
-        return SteamEmulator.SteamNetworkingSockets.GetHostedDedicatedServerPOPID();
+        return SteamEmulator.SteamNetworkingSockets.GetHostedDedicatedServerPOPID(_);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

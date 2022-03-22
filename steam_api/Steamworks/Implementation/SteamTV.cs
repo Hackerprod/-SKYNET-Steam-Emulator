@@ -26,7 +26,7 @@ public class SteamTV : IBaseInterface, ISteamTV
         //
     }
 
-    public void RemoveTimelineMarker()
+    public void RemoveTimelineMarker(IntPtr _)
     {
         //
     }

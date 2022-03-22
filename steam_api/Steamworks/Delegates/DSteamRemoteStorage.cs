@@ -68,7 +68,7 @@ namespace SKYNET.Delegate
         public delegate ERemoteStoragePlatform GetSyncPlatforms(string pchFile);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate int GetFileCount();
+        public delegate int GetFileCount(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate string GetFileNameAndSize(int iFile, int pnFileSizeInBytes);
@@ -77,10 +77,10 @@ namespace SKYNET.Delegate
         public delegate bool GetQuota(uint pnTotalBytes, uint puAvailableBytes);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool IsCloudEnabledForAccount();
+        public delegate bool IsCloudEnabledForAccount(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool IsCloudEnabledForApp();
+        public delegate bool IsCloudEnabledForApp(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate void SetCloudEnabledForApp(bool bEnabled);
@@ -98,7 +98,7 @@ namespace SKYNET.Delegate
         public delegate int UGCRead(UGCHandle_t hContent, IntPtr pvData, int cubDataToRead, uint cOffset, IntPtr eAction);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate int GetCachedUGCCount();
+        public delegate int GetCachedUGCCount(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate UGCHandle_t GetCachedUGCHandle(int iCachedContent);

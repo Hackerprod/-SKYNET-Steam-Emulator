@@ -111,7 +111,7 @@ public class SteamNetworkingSockets : IBaseInterface, ISteamNetworkingSockets
         return false;
     }
 
-    public ESteamNetworkingAvailability InitAuthentication()
+    public ESteamNetworkingAvailability InitAuthentication(IntPtr _)
     {
         return default;
     }
@@ -121,7 +121,7 @@ public class SteamNetworkingSockets : IBaseInterface, ISteamNetworkingSockets
         return default;
     }
 
-    public uint CreatePollGroup()
+    public uint CreatePollGroup(IntPtr _)
     {
         return 0;
     }
@@ -156,12 +156,12 @@ public class SteamNetworkingSockets : IBaseInterface, ISteamNetworkingSockets
         return 0;
     }
 
-    public uint GetHostedDedicatedServerPort()
+    public uint GetHostedDedicatedServerPort(IntPtr _)
     {
         return 0;
     }
 
-    public uint GetHostedDedicatedServerPOPID()
+    public uint GetHostedDedicatedServerPOPID(IntPtr _)
     {
         return 0;
     }

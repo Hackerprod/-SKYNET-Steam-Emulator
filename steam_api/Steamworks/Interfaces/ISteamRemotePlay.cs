@@ -8,7 +8,7 @@ namespace SKYNET.Interface
 {
     public interface ISteamRemotePlay
     {
-        uint GetSessionCount();
+        uint GetSessionCount(IntPtr _);
 
         // Get the currently connected Steam Remote Play session ID at the specified index. Returns zero if index is out of bounds.
         uint GetSessionID(int iSessionIndex);

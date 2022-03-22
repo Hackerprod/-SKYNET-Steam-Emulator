@@ -8,8 +8,8 @@ namespace SKYNET.Interface
 {
     public interface ISteamParentalSettings
     {
-        bool BIsParentalLockEnabled();
-        bool BIsParentalLockLocked();
+        bool BIsParentalLockEnabled(IntPtr _);
+        bool BIsParentalLockLocked(IntPtr _);
         bool BIsAppBlocked(IntPtr nAppID);
         bool BIsAppInBlockList(IntPtr nAppID);
         bool BIsFeatureBlocked(EParentalFeature eFeature);

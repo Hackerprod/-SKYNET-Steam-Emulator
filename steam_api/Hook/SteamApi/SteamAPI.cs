@@ -316,7 +316,7 @@ namespace SKYNET.Hook
             SteamAPI_RunCallbacks();
 
             if (bGameServerCallbacks)
-                SteamEmulator.SteamGameServer.RunCallbacks();
+                SteamEmulator.SteamGameServer.RunCallbacks(IntPtr.Zero);
         }
 
 

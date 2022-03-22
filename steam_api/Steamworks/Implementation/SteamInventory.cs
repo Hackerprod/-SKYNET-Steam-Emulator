@@ -173,7 +173,7 @@ public class SteamInventory : IBaseInterface, ISteamInventory
         return new SteamAPICall_t();
     }
 
-    public IntPtr StartUpdateProperties()
+    public IntPtr StartUpdateProperties(IntPtr _)
     {
         return IntPtr.Zero;
     }

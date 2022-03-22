@@ -7,27 +7,17 @@ using System;
 //[Map("SteamUserStats")]
 public class SteamUserStats : IBaseInterface, ISteamUserStats
 {
-    public bool RequestCurrentStats()
+    public bool RequestCurrentStats(IntPtr _)
     {
         return false;
     }
 
-    public bool GetStat(string pchName, uint pData)
+    public bool GetStat(IntPtr _, string pchName, uint pData)
     {
         return false;
     }
 
-    public bool GetStat(string pchName, float pData)
-    {
-        return false;
-    }
-
-    public bool SetStat(string pchName, uint nData)
-    {
-        return false;
-    }
-
-    public bool SetStat(string pchName, float fData)
+    public bool SetStat(IntPtr _, string pchName, uint nData)
     {
         return false;
     }
@@ -57,7 +47,7 @@ public class SteamUserStats : IBaseInterface, ISteamUserStats
         return false;
     }
 
-    public bool StoreStats()
+    public bool StoreStats(IntPtr _)
     {
         return false;
     }
@@ -77,7 +67,7 @@ public class SteamUserStats : IBaseInterface, ISteamUserStats
         return false;
     }
 
-    public uint GetNumAchievements()
+    public uint GetNumAchievements(IntPtr _)
     {
         return 0;
     }
@@ -92,12 +82,7 @@ public class SteamUserStats : IBaseInterface, ISteamUserStats
         return default;
     }
 
-    public bool GetUserStat(IntPtr steamIDUser, string pchName, uint pData)
-    {
-        return false;
-    }
-
-    public bool GetUserStat(IntPtr steamIDUser, string pchName, float pData)
+    public bool GetUserStat(IntPtr _, IntPtr steamIDUser, string pchName, uint pData)
     {
         return false;
     }
@@ -172,12 +157,12 @@ public class SteamUserStats : IBaseInterface, ISteamUserStats
         return default;
     }
 
-    public SteamAPICall_t GetNumberOfCurrentPlayers()
+    public SteamAPICall_t GetNumberOfCurrentPlayers(IntPtr _)
     {
         return default;
     }
 
-    public SteamAPICall_t RequestGlobalAchievementPercentages()
+    public SteamAPICall_t RequestGlobalAchievementPercentages(IntPtr _)
     {
         return default;
     }

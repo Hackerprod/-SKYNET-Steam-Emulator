@@ -11,7 +11,7 @@ namespace SKYNET.Interface
     {
         bool Init([MarshalAs(UnmanagedType.U1)] bool bExplicitlyCallRunFrame);
 
-        bool Shutdown();
+        bool Shutdown(IntPtr _);
 
         bool SetInputActionManifestFilePath( string pchInputActionManifestAbsolutePath);
         
@@ -19,11 +19,11 @@ namespace SKYNET.Interface
         
         bool BWaitForData([MarshalAs(UnmanagedType.U1)] bool bWaitForever, uint unTimeout);
         
-        bool BNewDataAvailable();
+        bool BNewDataAvailable(IntPtr _);
 
         int GetConnectedControllers([In, Out] IntPtr[] handlesOut);
 
-        void EnableDeviceCallbacks();
+        void EnableDeviceCallbacks(IntPtr _);
        
         IntPtr GetActionSetHandle( string pszActionSetName);
 
@@ -41,7 +41,7 @@ namespace SKYNET.Interface
 
         IntPtr GetDigitalActionHandle( string pszActionName);
 
-        InputDigitalActionData_t GetDigitalActionData(IntPtr inputHandle, IntPtr digitalActionHandle);
+        IntPtr GetDigitalActionData(IntPtr inputHandle, IntPtr digitalActionHandle);
 
         int GetDigitalActionOrigins(IntPtr inputHandle, IntPtr actionSetHandle, IntPtr digitalActionHandle, ref int originsOut);
 
@@ -49,7 +49,7 @@ namespace SKYNET.Interface
 
         IntPtr GetAnalogActionHandle( string pszActionName);
 
-        InputAnalogActionData_t GetAnalogActionData(IntPtr inputHandle, IntPtr analogActionHandle);
+        IntPtr GetAnalogActionData(IntPtr inputHandle, IntPtr analogActionHandle);
 
         int GetAnalogActionOrigins(IntPtr inputHandle, IntPtr actionSetHandle, IntPtr analogActionHandle, ref int originsOut);
         
@@ -99,7 +99,7 @@ namespace SKYNET.Interface
 
         uint GetRemotePlaySessionID(IntPtr inputHandle);
 
-        ushort GetSessionInputConfigurationSettings();
+        ushort GetSessionInputConfigurationSettings(IntPtr _);
 
     }
     public struct InputDigitalActionData_t

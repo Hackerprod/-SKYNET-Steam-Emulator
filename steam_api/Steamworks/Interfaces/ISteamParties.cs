@@ -17,7 +17,7 @@ namespace SKYNET.Interface
         uint GetBeaconByIndex(uint unIndex);
         bool GetBeaconDetails(uint ulBeaconID, IntPtr pSteamIDBeaconOwner, SteamPartyBeaconLocation_t pLocation, string pchMetadata, int cchMetadata);
         bool GetBeaconLocationData(SteamPartyBeaconLocation_t BeaconLocation, ESteamPartyBeaconLocationData eData, string pchDataStringOut, int cchDataStringOut);
-        uint GetNumActiveBeacons();
+        uint GetNumActiveBeacons(IntPtr _);
         bool GetNumAvailableBeaconLocations(uint puNumLocations);
         SteamAPICall_t JoinParty(uint ulBeaconID);
         void OnReservationCompleted(uint ulBeacon, IntPtr steamIDUser);

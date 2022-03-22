@@ -31,7 +31,7 @@ namespace SKYNET.Interface
         bool SetHTTPRequestGetOrPostParameter(uint hRequest, string pchParamName, string pchParamValue);
         bool SetHTTPRequestHeaderValue(uint hRequest, string pchHeaderName, string pchHeaderValue);
         bool SetHTTPRequestNetworkActivityTimeout(uint hRequest, uint unTimeoutSeconds);
-        IntPtr SteamAPI_SteamGameServerHTTP_v003();
+        IntPtr SteamAPI_SteamGameServerHTTP_v003(IntPtr _);
         IntPtr CreateHTTPRequest(/*HTTPMethod*/uint eHTTPRequestMethod, string pchAbsoluteURL);
         bool SetHTTPRequestContextValue(uint hRequest, ulong ulContextValue);
 

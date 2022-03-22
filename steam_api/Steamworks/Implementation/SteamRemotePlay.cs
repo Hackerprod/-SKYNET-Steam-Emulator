@@ -6,7 +6,7 @@ using System;
 //[Map("SteamRemotePlay")]
 public class SteamRemotePlay : IBaseInterface, ISteamRemotePlay
 {
-    public uint GetSessionCount()
+    public uint GetSessionCount(IntPtr _)
     {
         return 0;
     }

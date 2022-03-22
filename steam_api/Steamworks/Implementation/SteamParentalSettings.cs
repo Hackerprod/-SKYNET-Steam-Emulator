@@ -6,12 +6,12 @@ using System;
 //[Map("SteamParentalSettings")]
 public class SteamParentalSettings : IBaseInterface, ISteamParentalSettings
 {
-    public bool BIsParentalLockEnabled()
+    public bool BIsParentalLockEnabled(IntPtr _)
     {
         return false;
     }
 
-    public bool BIsParentalLockLocked()
+    public bool BIsParentalLockLocked(IntPtr _)
     {
         return false;
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,9 +9,9 @@ namespace SKYNET.Interface
 {
     public interface ISteamController
     {
-        bool Init();
-        bool Shutdown();
-        void RunFrame();
+        bool Init(IntPtr _);
+        bool Shutdown(IntPtr _);
+        void RunFrame(IntPtr _);
         int GetConnectedControllers(IntPtr handles, IntPtr handlesOut);
         int GetActionSetHandle(string pszActionSetName);
         void ActivateActionSet(IntPtr controllerHandle, int actionSetHandle);
@@ -21,13 +22,13 @@ namespace SKYNET.Interface
         int GetActiveActionSetLayers(IntPtr controllerHandle, int handlesOut );
         int GetDigitalActionHandle(string pszActionName);
 
-        ControllerDigitalActionData_t GetDigitalActionData(IntPtr controllerHandle, int digitalActionHandle);
+        IntPtr GetDigitalActionData(IntPtr _, IntPtr controllerHandle, int digitalActionHandle);
 
         int GetDigitalActionOrigins(IntPtr controllerHandle, int actionSetHandle, int digitalActionHandle, EControllerActionOrigin originsOut );
 
         int GetAnalogActionHandle(string pszActionName);
 
-        ControllerAnalogActionData_t GetAnalogActionData(uint controllerHandle, uint analogActionHandle);
+        IntPtr GetAnalogActionData(IntPtr _, uint controllerHandle, uint analogActionHandle);
 
         int GetAnalogActionOrigins(IntPtr controllerHandle, int actionSetHandle, uint analogActionHandle, EControllerActionOrigin originsOut );
 
@@ -71,6 +72,8 @@ namespace SKYNET.Interface
 
 
     }
+
+    [StructLayout(LayoutKind.Sequential)]
     public struct ControllerDigitalActionData_t
     {
         // The current state of this action; will be true if currently pressed
