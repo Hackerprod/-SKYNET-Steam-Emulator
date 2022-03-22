@@ -41,38 +41,51 @@ namespace SKYNET
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
+            this.PN_LeftContainer = new System.Windows.Forms.Panel();
+            this.panel6 = new System.Windows.Forms.Panel();
+            this.LB_Add = new System.Windows.Forms.Label();
+            this.PB_Add = new System.Windows.Forms.PictureBox();
+            this.PN_GameContainer = new System.Windows.Forms.Panel();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.TB_Search = new SKYNET.Controls.SKYNET_TextBox();
+            this.panel7 = new System.Windows.Forms.Panel();
+            this.pictureBox3 = new System.Windows.Forms.PictureBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.gradiantBox1 = new SKYNET.Controls.GradiantBox();
             this.label5 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.PN_LeftContainer = new System.Windows.Forms.Panel();
-            this.LB_Add = new System.Windows.Forms.Label();
-            this.PB_Add = new System.Windows.Forms.PictureBox();
-            this.PN_GameContainer = new System.Windows.Forms.Panel();
-            this.panel6 = new System.Windows.Forms.Panel();
-            this.TB_Search = new SKYNET.Controls.SKYNET_TextBox();
             this.panel5 = new System.Windows.Forms.Panel();
             this.PB_Banner = new System.Windows.Forms.PictureBox();
             this.PB_Logo = new System.Windows.Forms.PictureBox();
+            this.LB_GameTittle = new System.Windows.Forms.Label();
             this.shadowBox1 = new System.Windows.Forms.Panel();
-            this.skyneT_Button1 = new SKYNET_Button();
+            this.BT_GameAction = new SKYNET_Button();
+            this.PN_BodyContainer = new System.Windows.Forms.Panel();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
-            this.webContainer = new System.Windows.Forms.Panel();
+            this.label9 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.BT_Connect = new SKYNET_Button();
+            this.skyneT_Button1 = new SKYNET_Button();
             this.PN_Top.SuspendLayout();
             this.panel3.SuspendLayout();
             this.panel4.SuspendLayout();
+            this.PN_LeftContainer.SuspendLayout();
+            this.panel6.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Add)).BeginInit();
             this.panel1.SuspendLayout();
+            this.panel7.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.gradiantBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            this.PN_LeftContainer.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.PB_Add)).BeginInit();
-            this.panel6.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Banner)).BeginInit();
             this.PB_Banner.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Logo)).BeginInit();
             this.shadowBox1.SuspendLayout();
+            this.PN_BodyContainer.SuspendLayout();
             this.SuspendLayout();
             // 
             // PN_Top
@@ -162,6 +175,7 @@ namespace SKYNET
             // label4
             // 
             this.label4.AutoSize = true;
+            this.label4.Cursor = System.Windows.Forms.Cursors.Hand;
             this.label4.Font = new System.Drawing.Font("Segoe UI Emoji", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(208)))), ((int)(((byte)(218)))));
             this.label4.Location = new System.Drawing.Point(253, 5);
@@ -173,6 +187,7 @@ namespace SKYNET
             // label3
             // 
             this.label3.AutoSize = true;
+            this.label3.Cursor = System.Windows.Forms.Cursors.Hand;
             this.label3.Font = new System.Drawing.Font("Segoe UI Emoji", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(208)))), ((int)(((byte)(218)))));
             this.label3.Location = new System.Drawing.Point(104, 5);
@@ -184,6 +199,7 @@ namespace SKYNET
             // label2
             // 
             this.label2.AutoSize = true;
+            this.label2.Cursor = System.Windows.Forms.Cursors.Hand;
             this.label2.Font = new System.Drawing.Font("Segoe UI Emoji", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(208)))), ((int)(((byte)(218)))));
             this.label2.Location = new System.Drawing.Point(13, 5);
@@ -192,30 +208,156 @@ namespace SKYNET
             this.label2.TabIndex = 0;
             this.label2.Text = "STORE";
             // 
+            // PN_LeftContainer
+            // 
+            this.PN_LeftContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(42)))), ((int)(((byte)(46)))), ((int)(((byte)(51)))));
+            this.PN_LeftContainer.Controls.Add(this.panel6);
+            this.PN_LeftContainer.Controls.Add(this.PN_GameContainer);
+            this.PN_LeftContainer.Controls.Add(this.panel1);
+            this.PN_LeftContainer.Controls.Add(this.panel7);
+            this.PN_LeftContainer.Controls.Add(this.gradiantBox1);
+            this.PN_LeftContainer.Controls.Add(this.panel2);
+            this.PN_LeftContainer.Controls.Add(this.panel5);
+            this.PN_LeftContainer.Dock = System.Windows.Forms.DockStyle.Left;
+            this.PN_LeftContainer.Location = new System.Drawing.Point(0, 0);
+            this.PN_LeftContainer.Name = "PN_LeftContainer";
+            this.PN_LeftContainer.Size = new System.Drawing.Size(249, 609);
+            this.PN_LeftContainer.TabIndex = 6;
+            // 
+            // panel6
+            // 
+            this.panel6.Controls.Add(this.LB_Add);
+            this.panel6.Controls.Add(this.PB_Add);
+            this.panel6.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panel6.Location = new System.Drawing.Point(0, 565);
+            this.panel6.Name = "panel6";
+            this.panel6.Size = new System.Drawing.Size(249, 44);
+            this.panel6.TabIndex = 17;
+            // 
+            // LB_Add
+            // 
+            this.LB_Add.AutoSize = true;
+            this.LB_Add.Font = new System.Drawing.Font("Segoe UI Emoji", 8.25F);
+            this.LB_Add.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
+            this.LB_Add.Location = new System.Drawing.Point(50, 12);
+            this.LB_Add.Name = "LB_Add";
+            this.LB_Add.Size = new System.Drawing.Size(92, 15);
+            this.LB_Add.TabIndex = 9;
+            this.LB_Add.Text = "ADD NEW GAME";
+            this.LB_Add.MouseLeave += new System.EventHandler(this.Add_MouseLeave);
+            this.LB_Add.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Add_MouseMove);
+            // 
+            // PB_Add
+            // 
+            this.PB_Add.Image = global::SKYNET.Properties.Resources.add;
+            this.PB_Add.Location = new System.Drawing.Point(20, 5);
+            this.PB_Add.Name = "PB_Add";
+            this.PB_Add.Size = new System.Drawing.Size(28, 28);
+            this.PB_Add.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.PB_Add.TabIndex = 9;
+            this.PB_Add.TabStop = false;
+            this.PB_Add.MouseLeave += new System.EventHandler(this.Add_MouseLeave);
+            this.PB_Add.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Add_MouseMove);
+            // 
+            // PN_GameContainer
+            // 
+            this.PN_GameContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(36)))), ((int)(((byte)(40)))), ((int)(((byte)(47)))));
+            this.PN_GameContainer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.PN_GameContainer.Location = new System.Drawing.Point(0, 222);
+            this.PN_GameContainer.Name = "PN_GameContainer";
+            this.PN_GameContainer.Size = new System.Drawing.Size(249, 387);
+            this.PN_GameContainer.TabIndex = 16;
+            // 
             // panel1
             // 
-            this.panel1.Controls.Add(this.gradiantBox1);
-            this.panel1.Controls.Add(this.panel2);
+            this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(42)))), ((int)(((byte)(46)))), ((int)(((byte)(51)))));
+            this.panel1.Controls.Add(this.TB_Search);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel1.Location = new System.Drawing.Point(0, 0);
+            this.panel1.Location = new System.Drawing.Point(0, 175);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(249, 89);
-            this.panel1.TabIndex = 7;
+            this.panel1.Size = new System.Drawing.Size(249, 47);
+            this.panel1.TabIndex = 15;
+            // 
+            // TB_Search
+            // 
+            this.TB_Search.ActivatedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(35)))), ((int)(((byte)(40)))));
+            this.TB_Search.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(35)))), ((int)(((byte)(40)))));
+            this.TB_Search.Color = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(35)))), ((int)(((byte)(40)))));
+            this.TB_Search.IsPassword = false;
+            this.TB_Search.Location = new System.Drawing.Point(13, 6);
+            this.TB_Search.Logo = global::SKYNET.Properties.Resources.search;
+            this.TB_Search.LogoCursor = System.Windows.Forms.Cursors.Default;
+            this.TB_Search.Name = "TB_Search";
+            this.TB_Search.OnlyNumbers = false;
+            this.TB_Search.ShowLogo = true;
+            this.TB_Search.Size = new System.Drawing.Size(225, 35);
+            this.TB_Search.TabIndex = 9;
+            this.TB_Search.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
+            this.TB_Search.KeyUp += new System.Windows.Forms.KeyEventHandler(this.TB_Search_KeyUp);
+            // 
+            // panel7
+            // 
+            this.panel7.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(36)))), ((int)(((byte)(40)))), ((int)(((byte)(47)))));
+            this.panel7.Controls.Add(this.skyneT_Button1);
+            this.panel7.Controls.Add(this.BT_Connect);
+            this.panel7.Controls.Add(this.label8);
+            this.panel7.Controls.Add(this.label9);
+            this.panel7.Controls.Add(this.pictureBox3);
+            this.panel7.Controls.Add(this.label7);
+            this.panel7.Controls.Add(this.pictureBox2);
+            this.panel7.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panel7.Location = new System.Drawing.Point(0, 40);
+            this.panel7.Name = "panel7";
+            this.panel7.Size = new System.Drawing.Size(249, 135);
+            this.panel7.TabIndex = 14;
+            // 
+            // pictureBox3
+            // 
+            this.pictureBox3.BackColor = System.Drawing.Color.Transparent;
+            this.pictureBox3.Image = global::SKYNET.Properties.Resources.coins;
+            this.pictureBox3.Location = new System.Drawing.Point(80, 58);
+            this.pictureBox3.Name = "pictureBox3";
+            this.pictureBox3.Size = new System.Drawing.Size(35, 35);
+            this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox3.TabIndex = 14;
+            this.pictureBox3.TabStop = false;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Font = new System.Drawing.Font("Segoe UI Emoji", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label7.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.label7.Location = new System.Drawing.Point(84, 13);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(120, 26);
+            this.label7.TabIndex = 12;
+            this.label7.Text = "Hackerprod";
+            // 
+            // pictureBox2
+            // 
+            this.pictureBox2.BackColor = System.Drawing.Color.Transparent;
+            this.pictureBox2.Image = global::SKYNET.Properties.Resources.logo;
+            this.pictureBox2.Location = new System.Drawing.Point(6, 16);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(73, 67);
+            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox2.TabIndex = 11;
+            this.pictureBox2.TabStop = false;
             // 
             // gradiantBox1
             // 
-            this.gradiantBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(36)))), ((int)(((byte)(40)))), ((int)(((byte)(47)))));
+            this.gradiantBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(95)))), ((int)(((byte)(111)))), ((int)(((byte)(124)))));
             this.gradiantBox1.Controls.Add(this.label5);
             this.gradiantBox1.Controls.Add(this.label1);
             this.gradiantBox1.Controls.Add(this.pictureBox1);
-            this.gradiantBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gradiantBox1.Dock = System.Windows.Forms.DockStyle.Top;
             this.gradiantBox1.LeftColor = System.Drawing.Color.FromArgb(((int)(((byte)(95)))), ((int)(((byte)(111)))), ((int)(((byte)(124)))));
-            this.gradiantBox1.Location = new System.Drawing.Point(0, 10);
+            this.gradiantBox1.Location = new System.Drawing.Point(0, 15);
             this.gradiantBox1.Mode = SKYNET.Controls.Mode.Vertical;
             this.gradiantBox1.Name = "gradiantBox1";
             this.gradiantBox1.RigthColor = System.Drawing.Color.FromArgb(((int)(((byte)(36)))), ((int)(((byte)(40)))), ((int)(((byte)(47)))));
-            this.gradiantBox1.Size = new System.Drawing.Size(249, 79);
-            this.gradiantBox1.TabIndex = 9;
+            this.gradiantBox1.Size = new System.Drawing.Size(249, 25);
+            this.gradiantBox1.TabIndex = 11;
             // 
             // label5
             // 
@@ -255,90 +397,16 @@ namespace SKYNET
             // 
             this.panel2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(95)))), ((int)(((byte)(111)))), ((int)(((byte)(124)))));
             this.panel2.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel2.Location = new System.Drawing.Point(0, 0);
+            this.panel2.Location = new System.Drawing.Point(0, 5);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(249, 10);
-            this.panel2.TabIndex = 8;
-            // 
-            // PN_LeftContainer
-            // 
-            this.PN_LeftContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(42)))), ((int)(((byte)(46)))), ((int)(((byte)(51)))));
-            this.PN_LeftContainer.Controls.Add(this.LB_Add);
-            this.PN_LeftContainer.Controls.Add(this.PB_Add);
-            this.PN_LeftContainer.Controls.Add(this.PN_GameContainer);
-            this.PN_LeftContainer.Controls.Add(this.panel6);
-            this.PN_LeftContainer.Controls.Add(this.panel5);
-            this.PN_LeftContainer.Controls.Add(this.panel1);
-            this.PN_LeftContainer.Dock = System.Windows.Forms.DockStyle.Left;
-            this.PN_LeftContainer.Location = new System.Drawing.Point(0, 0);
-            this.PN_LeftContainer.Name = "PN_LeftContainer";
-            this.PN_LeftContainer.Size = new System.Drawing.Size(249, 609);
-            this.PN_LeftContainer.TabIndex = 6;
-            // 
-            // LB_Add
-            // 
-            this.LB_Add.AutoSize = true;
-            this.LB_Add.Font = new System.Drawing.Font("Segoe UI Emoji", 8.25F);
-            this.LB_Add.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.LB_Add.Location = new System.Drawing.Point(40, 578);
-            this.LB_Add.Name = "LB_Add";
-            this.LB_Add.Size = new System.Drawing.Size(92, 15);
-            this.LB_Add.TabIndex = 9;
-            this.LB_Add.Text = "ADD NEW GAME";
-            this.LB_Add.MouseLeave += new System.EventHandler(this.Add_MouseLeave);
-            this.LB_Add.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Add_MouseMove);
-            // 
-            // PB_Add
-            // 
-            this.PB_Add.Image = global::SKYNET.Properties.Resources.add;
-            this.PB_Add.Location = new System.Drawing.Point(10, 571);
-            this.PB_Add.Name = "PB_Add";
-            this.PB_Add.Size = new System.Drawing.Size(28, 28);
-            this.PB_Add.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.PB_Add.TabIndex = 9;
-            this.PB_Add.TabStop = false;
-            this.PB_Add.MouseLeave += new System.EventHandler(this.Add_MouseLeave);
-            this.PB_Add.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Add_MouseMove);
-            // 
-            // PN_GameContainer
-            // 
-            this.PN_GameContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(36)))), ((int)(((byte)(40)))), ((int)(((byte)(47)))));
-            this.PN_GameContainer.Dock = System.Windows.Forms.DockStyle.Top;
-            this.PN_GameContainer.Location = new System.Drawing.Point(0, 141);
-            this.PN_GameContainer.Name = "PN_GameContainer";
-            this.PN_GameContainer.Size = new System.Drawing.Size(249, 424);
-            this.PN_GameContainer.TabIndex = 12;
-            // 
-            // panel6
-            // 
-            this.panel6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(36)))), ((int)(((byte)(40)))), ((int)(((byte)(47)))));
-            this.panel6.Controls.Add(this.TB_Search);
-            this.panel6.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel6.Location = new System.Drawing.Point(0, 94);
-            this.panel6.Name = "panel6";
-            this.panel6.Size = new System.Drawing.Size(249, 47);
-            this.panel6.TabIndex = 11;
-            // 
-            // TB_Search
-            // 
-            this.TB_Search.ActivatedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(35)))), ((int)(((byte)(40)))));
-            this.TB_Search.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(35)))), ((int)(((byte)(40)))));
-            this.TB_Search.Color = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(35)))), ((int)(((byte)(40)))));
-            this.TB_Search.IsPassword = false;
-            this.TB_Search.Location = new System.Drawing.Point(12, 6);
-            this.TB_Search.Logo = global::SKYNET.Properties.Resources.search;
-            this.TB_Search.LogoCursor = System.Windows.Forms.Cursors.Default;
-            this.TB_Search.Name = "TB_Search";
-            this.TB_Search.ShowLogo = true;
-            this.TB_Search.Size = new System.Drawing.Size(225, 35);
-            this.TB_Search.TabIndex = 9;
-            this.TB_Search.KeyUp += new System.Windows.Forms.KeyEventHandler(this.TB_Search_KeyUp);
+            this.panel2.TabIndex = 13;
             // 
             // panel5
             // 
-            this.panel5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(36)))), ((int)(((byte)(40)))), ((int)(((byte)(47)))));
+            this.panel5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(95)))), ((int)(((byte)(111)))), ((int)(((byte)(124)))));
             this.panel5.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel5.Location = new System.Drawing.Point(0, 89);
+            this.panel5.Location = new System.Drawing.Point(0, 0);
             this.panel5.Name = "panel5";
             this.panel5.Size = new System.Drawing.Size(249, 5);
             this.panel5.TabIndex = 10;
@@ -346,12 +414,13 @@ namespace SKYNET
             // PB_Banner
             // 
             this.PB_Banner.Controls.Add(this.PB_Logo);
+            this.PB_Banner.Controls.Add(this.LB_GameTittle);
             this.PB_Banner.Controls.Add(this.shadowBox1);
             this.PB_Banner.Dock = System.Windows.Forms.DockStyle.Top;
-            this.PB_Banner.Image = global::SKYNET.Properties.Resources._570_library_hero;
+            this.PB_Banner.Image = global::SKYNET.Properties.Resources.Banner;
             this.PB_Banner.Location = new System.Drawing.Point(249, 66);
             this.PB_Banner.Name = "PB_Banner";
-            this.PB_Banner.Size = new System.Drawing.Size(893, 0);
+            this.PB_Banner.Size = new System.Drawing.Size(893, 269);
             this.PB_Banner.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.PB_Banner.TabIndex = 9;
             this.PB_Banner.TabStop = false;
@@ -359,63 +428,136 @@ namespace SKYNET
             // PB_Logo
             // 
             this.PB_Logo.BackColor = System.Drawing.Color.Transparent;
-            this.PB_Logo.Image = global::SKYNET.Properties.Resources._570_logo;
-            this.PB_Logo.Location = new System.Drawing.Point(255, 183);
+            this.PB_Logo.Image = global::SKYNET.Properties.Resources.logo;
+            this.PB_Logo.Location = new System.Drawing.Point(121, 137);
             this.PB_Logo.Name = "PB_Logo";
-            this.PB_Logo.Size = new System.Drawing.Size(309, 67);
+            this.PB_Logo.Size = new System.Drawing.Size(73, 67);
             this.PB_Logo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.PB_Logo.TabIndex = 10;
             this.PB_Logo.TabStop = false;
             // 
+            // LB_GameTittle
+            // 
+            this.LB_GameTittle.AutoSize = true;
+            this.LB_GameTittle.BackColor = System.Drawing.Color.Transparent;
+            this.LB_GameTittle.Font = new System.Drawing.Font("Segoe UI Emoji", 36F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LB_GameTittle.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.LB_GameTittle.Location = new System.Drawing.Point(202, 139);
+            this.LB_GameTittle.Name = "LB_GameTittle";
+            this.LB_GameTittle.Size = new System.Drawing.Size(376, 64);
+            this.LB_GameTittle.TabIndex = 11;
+            this.LB_GameTittle.Text = "Steam Emulator";
+            // 
             // shadowBox1
             // 
             this.shadowBox1.BackColor = System.Drawing.Color.Transparent;
-            this.shadowBox1.Controls.Add(this.skyneT_Button1);
+            this.shadowBox1.Controls.Add(this.BT_GameAction);
             this.shadowBox1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.shadowBox1.Location = new System.Drawing.Point(0, -50);
+            this.shadowBox1.Location = new System.Drawing.Point(0, 219);
             this.shadowBox1.Name = "shadowBox1";
             this.shadowBox1.Size = new System.Drawing.Size(893, 50);
             this.shadowBox1.TabIndex = 10;
             // 
+            // BT_GameAction
+            // 
+            this.BT_GameAction.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(186)))), ((int)(((byte)(65)))));
+            this.BT_GameAction.BackColorMouseOver = System.Drawing.Color.Empty;
+            this.BT_GameAction.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.BT_GameAction.Font = new System.Drawing.Font("Segoe UI Semibold", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.BT_GameAction.ForeColor = System.Drawing.Color.White;
+            this.BT_GameAction.ForeColorMouseOver = System.Drawing.Color.Empty;
+            this.BT_GameAction.ImageAlignment = SKYNET_Button._ImgAlign.Left;
+            this.BT_GameAction.ImageIcon = null;
+            this.BT_GameAction.Location = new System.Drawing.Point(18, 11);
+            this.BT_GameAction.MenuMode = false;
+            this.BT_GameAction.Name = "BT_GameAction";
+            this.BT_GameAction.Rounded = false;
+            this.BT_GameAction.Size = new System.Drawing.Size(100, 32);
+            this.BT_GameAction.Style = SKYNET_Button._Style.TextOnly;
+            this.BT_GameAction.TabIndex = 0;
+            this.BT_GameAction.Text = "PLAY";
+            this.BT_GameAction.Click += new System.EventHandler(this.GameAction_Click);
+            // 
+            // PN_BodyContainer
+            // 
+            this.PN_BodyContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(50)))), ((int)(((byte)(57)))));
+            this.PN_BodyContainer.Controls.Add(this.richTextBox1);
+            this.PN_BodyContainer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.PN_BodyContainer.Location = new System.Drawing.Point(249, 335);
+            this.PN_BodyContainer.Name = "PN_BodyContainer";
+            this.PN_BodyContainer.Size = new System.Drawing.Size(893, 230);
+            this.PN_BodyContainer.TabIndex = 10;
+            // 
+            // richTextBox1
+            // 
+            this.richTextBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(50)))), ((int)(((byte)(57)))));
+            this.richTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.richTextBox1.ForeColor = System.Drawing.SystemColors.Menu;
+            this.richTextBox1.Location = new System.Drawing.Point(8, 7);
+            this.richTextBox1.Name = "richTextBox1";
+            this.richTextBox1.Size = new System.Drawing.Size(875, 215);
+            this.richTextBox1.TabIndex = 0;
+            this.richTextBox1.Text = "";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Font = new System.Drawing.Font("Segoe UI Emoji", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label9.ForeColor = System.Drawing.Color.NavajoWhite;
+            this.label9.Location = new System.Drawing.Point(115, 66);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(17, 20);
+            this.label9.TabIndex = 15;
+            this.label9.Text = "0";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("Segoe UI Emoji", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label8.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.label8.Location = new System.Drawing.Point(85, 42);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(145, 20);
+            this.label8.TabIndex = 16;
+            this.label8.Text = "76513692034573246";
+            // 
+            // BT_Connect
+            // 
+            this.BT_Connect.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(75)))), ((int)(((byte)(91)))), ((int)(((byte)(104)))));
+            this.BT_Connect.BackColorMouseOver = System.Drawing.Color.Empty;
+            this.BT_Connect.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.BT_Connect.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.BT_Connect.ForeColor = System.Drawing.Color.White;
+            this.BT_Connect.ForeColorMouseOver = System.Drawing.Color.Empty;
+            this.BT_Connect.ImageAlignment = SKYNET_Button._ImgAlign.Left;
+            this.BT_Connect.ImageIcon = null;
+            this.BT_Connect.Location = new System.Drawing.Point(138, 97);
+            this.BT_Connect.MenuMode = false;
+            this.BT_Connect.Name = "BT_Connect";
+            this.BT_Connect.Rounded = false;
+            this.BT_Connect.Size = new System.Drawing.Size(100, 30);
+            this.BT_Connect.Style = SKYNET_Button._Style.TextOnly;
+            this.BT_Connect.TabIndex = 17;
+            this.BT_Connect.Text = "CONNECT";
+            // 
             // skyneT_Button1
             // 
-            this.skyneT_Button1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(186)))), ((int)(((byte)(65)))));
+            this.skyneT_Button1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(75)))), ((int)(((byte)(91)))), ((int)(((byte)(104)))));
             this.skyneT_Button1.BackColorMouseOver = System.Drawing.Color.Empty;
             this.skyneT_Button1.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.skyneT_Button1.Font = new System.Drawing.Font("Segoe UI Semibold", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.skyneT_Button1.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.skyneT_Button1.ForeColor = System.Drawing.Color.White;
             this.skyneT_Button1.ForeColorMouseOver = System.Drawing.Color.Empty;
             this.skyneT_Button1.ImageAlignment = SKYNET_Button._ImgAlign.Left;
             this.skyneT_Button1.ImageIcon = null;
-            this.skyneT_Button1.Location = new System.Drawing.Point(18, 11);
+            this.skyneT_Button1.Location = new System.Drawing.Point(13, 97);
             this.skyneT_Button1.MenuMode = false;
             this.skyneT_Button1.Name = "skyneT_Button1";
             this.skyneT_Button1.Rounded = false;
-            this.skyneT_Button1.Size = new System.Drawing.Size(100, 32);
+            this.skyneT_Button1.Size = new System.Drawing.Size(100, 30);
             this.skyneT_Button1.Style = SKYNET_Button._Style.TextOnly;
-            this.skyneT_Button1.TabIndex = 0;
-            this.skyneT_Button1.Text = "JUGAR";
-            // 
-            // richTextBox1
-            // 
-            this.richTextBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(65)))), ((int)(((byte)(73)))));
-            this.richTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.richTextBox1.ForeColor = System.Drawing.SystemColors.ScrollBar;
-            this.richTextBox1.Location = new System.Drawing.Point(255, 486);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
-            this.richTextBox1.Size = new System.Drawing.Size(158, 27);
-            this.richTextBox1.TabIndex = 5;
-            this.richTextBox1.Text = "";
-            this.richTextBox1.Visible = false;
-            // 
-            // webContainer
-            // 
-            this.webContainer.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webContainer.Location = new System.Drawing.Point(249, 66);
-            this.webContainer.Name = "webContainer";
-            this.webContainer.Size = new System.Drawing.Size(893, 499);
-            this.webContainer.TabIndex = 10;
+            this.skyneT_Button1.TabIndex = 18;
+            this.skyneT_Button1.Text = "CONNECT";
             // 
             // frmMain
             // 
@@ -423,10 +565,9 @@ namespace SKYNET
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(65)))), ((int)(((byte)(73)))));
             this.ClientSize = new System.Drawing.Size(1142, 609);
-            this.Controls.Add(this.webContainer);
+            this.Controls.Add(this.PN_BodyContainer);
             this.Controls.Add(this.PB_Banner);
             this.Controls.Add(this.panel4);
-            this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.panel3);
             this.Controls.Add(this.PN_Top);
             this.Controls.Add(this.PN_LeftContainer);
@@ -435,23 +576,28 @@ namespace SKYNET
             this.Name = "frmMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FrmMain_FormClosing);
-            this.Load += new System.EventHandler(this.Form1_Load);
             this.PN_Top.ResumeLayout(false);
             this.panel3.ResumeLayout(false);
             this.panel4.ResumeLayout(false);
             this.panel4.PerformLayout();
+            this.PN_LeftContainer.ResumeLayout(false);
+            this.panel6.ResumeLayout(false);
+            this.panel6.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Add)).EndInit();
             this.panel1.ResumeLayout(false);
+            this.panel7.ResumeLayout(false);
+            this.panel7.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.gradiantBox1.ResumeLayout(false);
             this.gradiantBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-            this.PN_LeftContainer.ResumeLayout(false);
-            this.PN_LeftContainer.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.PB_Add)).EndInit();
-            this.panel6.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.PB_Banner)).EndInit();
             this.PB_Banner.ResumeLayout(false);
+            this.PB_Banner.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Logo)).EndInit();
             this.shadowBox1.ResumeLayout(false);
+            this.PN_BodyContainer.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -466,27 +612,36 @@ namespace SKYNET
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Panel panel1;
-        private Controls.GradiantBox gradiantBox1;
-        private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Panel PN_LeftContainer;
         private System.Windows.Forms.Panel panel5;
-        private System.Windows.Forms.Panel PN_GameContainer;
-        private System.Windows.Forms.Panel panel6;
         private Controls.SKYNET_TextBox TB_Search;
         private System.Windows.Forms.PictureBox PB_Add;
         private System.Windows.Forms.Label LB_Add;
-        private System.Windows.Forms.Label label5;
         private System.Windows.Forms.PictureBox PB_Banner;
         private System.Windows.Forms.PictureBox PB_Logo;
         private System.Windows.Forms.Label LB_Status;
         private Panel shadowBox1;
-        private SKYNET_Button skyneT_Button1;
+        private SKYNET_Button BT_GameAction;
         private Label label6;
+        private Panel PN_BodyContainer;
         private RichTextBox richTextBox1;
-        private Panel webContainer;
+        private Label LB_GameTittle;
+        private Panel panel7;
+        private Controls.GradiantBox gradiantBox1;
+        private Label label5;
+        private Label label1;
+        private PictureBox pictureBox1;
+        private Panel panel2;
+        private Panel panel1;
+        private Panel panel6;
+        private Panel PN_GameContainer;
+        private Label label7;
+        private PictureBox pictureBox2;
+        private PictureBox pictureBox3;
+        private Label label8;
+        private Label label9;
+        private SKYNET_Button skyneT_Button1;
+        private SKYNET_Button BT_Connect;
     }
 }
 

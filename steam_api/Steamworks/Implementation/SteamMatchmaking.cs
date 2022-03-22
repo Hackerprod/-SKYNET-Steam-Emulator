@@ -1,13 +1,14 @@
 ﻿using System;
+using Core.Interface;
 using SKYNET.Interface;
 using Steamworks;
 
 namespace SKYNET.Managers
 {
-    [Map("SteamMatchmaking")]
-    [Map("SteamMatchmaking006")]
-    [Map("SteamMatchmaking007")]
-    [Map("SteamMatchmaking008")]
+    //[Map("SteamMatchmaking")]
+    //[Map("SteamMatchmaking006")]
+    //[Map("SteamMatchmaking007")]
+    //[Map("SteamMatchmaking008")]
     public class SteamMatchmaking : IBaseInterface, ISteamMatchmaking
     {
         public int AddFavoriteGame(AppId_t nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags, uint rTime32LastPlayedOnServer)

@@ -6,7 +6,7 @@
 
 #ifndef ISTEAMNETWORKING
 #define ISTEAMNETWORKING
-#ifdef _WIN32
+#ifdef STEAM_WIN32
 #pragma once
 #endif
 
@@ -17,16 +17,12 @@
 enum EP2PSessionError
 {
 	k_EP2PSessionErrorNone = 0,
+	k_EP2PSessionErrorNotRunningApp = 1,			// target is not running the same game
 	k_EP2PSessionErrorNoRightsToApp = 2,			// local user doesn't own the app that is running
+	k_EP2PSessionErrorDestinationNotLoggedIn = 3,	// target user isn't connected to Steam
 	k_EP2PSessionErrorTimeout = 4,					// target isn't responding, perhaps not calling AcceptP2PSessionWithUser()
 													// corporate firewalls can also block this (NAT traversal is not firewall traversal)
 													// make sure that UDP ports 3478, 4379, and 4380 are open in an outbound direction
-
-	// The following error codes were removed and will never be sent.
-	// For privacy reasons, there is no reply if the user is offline or playing another game.
-	k_EP2PSessionErrorNotRunningApp_DELETED = 1,
-	k_EP2PSessionErrorDestinationNotLoggedIn_DELETED = 3,
-
 	k_EP2PSessionErrorMax = 5
 };
 
@@ -290,6 +286,7 @@ public:
 };
 #define STEAMNETWORKING_INTERFACE_VERSION "SteamNetworking006"
 
+#ifndef STEAM_API_EXPORTS
 // Global interface accessor
 inline ISteamNetworking *SteamNetworking();
 STEAM_DEFINE_USER_INTERFACE_ACCESSOR( ISteamNetworking *, SteamNetworking, STEAMNETWORKING_INTERFACE_VERSION );
@@ -297,6 +294,7 @@ STEAM_DEFINE_USER_INTERFACE_ACCESSOR( ISteamNetworking *, SteamNetworking, STEAM
 // Global accessor for the gameserver client
 inline ISteamNetworking *SteamGameServerNetworking();
 STEAM_DEFINE_GAMESERVER_INTERFACE_ACCESSOR( ISteamNetworking *, SteamGameServerNetworking, STEAMNETWORKING_INTERFACE_VERSION );
+#endif
 
 // callbacks
 #if defined( VALVE_CALLBACK_PACK_SMALL )

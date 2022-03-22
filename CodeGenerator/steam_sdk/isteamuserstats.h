@@ -6,7 +6,7 @@
 
 #ifndef ISTEAMUSERSTATS_H
 #define ISTEAMUSERSTATS_H
-#ifdef _WIN32
+#ifdef STEAM_WIN32
 #pragma once
 #endif
 
@@ -210,7 +210,8 @@ public:
 	// as above, but downloads leaderboard entries for an arbitrary set of users - ELeaderboardDataRequest is k_ELeaderboardDataRequestUsers
 	// if a user doesn't have a leaderboard entry, they won't be included in the result
 	// a max of 100 users can be downloaded at a time, with only one outstanding call at a time
-	STEAM_CALL_RESULT( LeaderboardScoresDownloaded_t )
+	STEAM_METHOD_DESC(Downloads leaderboard entries for an arbitrary set of users - ELeaderboardDataRequest is k_ELeaderboardDataRequestUsers)
+		STEAM_CALL_RESULT( LeaderboardScoresDownloaded_t )
 	virtual SteamAPICall_t DownloadLeaderboardEntriesForUsers( SteamLeaderboard_t hSteamLeaderboard,
 															   STEAM_ARRAY_COUNT_D(cUsers, Array of users to retrieve) CSteamID *prgUsers, int cUsers ) = 0;
 
@@ -305,9 +306,11 @@ public:
 
 #define STEAMUSERSTATS_INTERFACE_VERSION "STEAMUSERSTATS_INTERFACE_VERSION012"
 
+#ifndef STEAM_API_EXPORTS
 // Global interface accessor
 inline ISteamUserStats *SteamUserStats();
 STEAM_DEFINE_USER_INTERFACE_ACCESSOR( ISteamUserStats *, SteamUserStats, STEAMUSERSTATS_INTERFACE_VERSION );
+#endif
 
 // callbacks
 #if defined( VALVE_CALLBACK_PACK_SMALL )

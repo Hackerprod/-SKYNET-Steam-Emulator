@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using Core.Interface;
 using SKYNET.Helper;
 using SKYNET.Interface;
 using Steamworks;
 
 namespace SKYNET.Managers
 {
-    [Map("SteamGameServer")]
+    //[Map("SteamGameServer")]
     public class SteamGameServer : IBaseInterface, ISteamGameServer
     {
         public HSteamUser GetHSteamUser()

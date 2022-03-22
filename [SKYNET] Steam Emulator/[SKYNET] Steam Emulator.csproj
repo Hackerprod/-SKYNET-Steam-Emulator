@@ -63,6 +63,9 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EasyHook">
+      <HintPath>..\..\SKYNET.Net.Redirector\EasyHook.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.mshtml, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
@@ -147,18 +150,13 @@
     <Compile Include="NativeMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SKYNET_TextBox.cs">
+    <Compile Include="GUI\Controls\SKYNET_TextBox.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="SKYNET_TextBox.designer.cs">
+    <Compile Include="GUI\Controls\SKYNET_TextBox.designer.cs">
       <DependentUpon>SKYNET_TextBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="TXTMessage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="TXTMessage.designer.cs">
-      <DependentUpon>TXTMessage.cs</DependentUpon>
-    </Compile>
+    <Compile Include="Types\RunningGame.cs" />
     <EmbeddedResource Include="frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
     </EmbeddedResource>
@@ -193,11 +191,8 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="SKYNET_TextBox.resx">
+    <EmbeddedResource Include="GUI\Controls\SKYNET_TextBox.resx">
       <DependentUpon>SKYNET_TextBox.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="TXTMessage.resx">
-      <DependentUpon>TXTMessage.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -235,14 +230,20 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="game.ico" />
+    <None Include="Resources\coins.png" />
+    <None Include="Resources\Banner.jpg" />
     <None Include="Resources\main.js" />
     <None Include="Resources\jquery-3.6.0.min.js" />
     <None Include="Resources\style.css" />
     <None Include="Resources\helpers.css" />
-    <None Include="Resources\570_library_hero.jpg" />
-    <None Include="Resources\570_logo.png" />
     <None Include="Resources\add_Selected.png" />
     <None Include="Resources\add.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\steam_api\steam_api.csproj">
+      <Project>{a14d2163-7a4e-489c-9aa0-b512d807bce3}</Project>
+      <Name>steam_api</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

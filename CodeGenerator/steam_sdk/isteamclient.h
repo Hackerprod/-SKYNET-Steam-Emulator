@@ -8,7 +8,7 @@
 
 #ifndef ISTEAMCLIENT_H
 #define ISTEAMCLIENT_H
-#ifdef _WIN32
+#ifdef STEAM_WIN32
 #pragma once
 #endif
 

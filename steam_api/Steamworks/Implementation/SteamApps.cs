@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using Core.Interface;
 using SKYNET.Helper;
 using SKYNET.Interface;
 using Steamworks;
 
 namespace SKYNET.Managers
 {
-    [Map("SteamApps")]
+    //[Map("SteamApps")]
     public class SteamApps : IBaseInterface, ISteamApps
     {
 

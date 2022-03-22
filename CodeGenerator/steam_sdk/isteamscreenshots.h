@@ -6,7 +6,7 @@
 
 #ifndef ISTEAMSCREENSHOTS_H
 #define ISTEAMSCREENSHOTS_H
-#ifdef _WIN32
+#ifdef STEAM_WIN32
 #pragma once
 #endif
 
@@ -81,9 +81,11 @@ public:
 
 #define STEAMSCREENSHOTS_INTERFACE_VERSION "STEAMSCREENSHOTS_INTERFACE_VERSION003"
 
+#ifndef STEAM_API_EXPORTS
 // Global interface accessor
 inline ISteamScreenshots *SteamScreenshots();
 STEAM_DEFINE_USER_INTERFACE_ACCESSOR( ISteamScreenshots *, SteamScreenshots, STEAMSCREENSHOTS_INTERFACE_VERSION );
+#endif
 
 // callbacks
 #if defined( VALVE_CALLBACK_PACK_SMALL )

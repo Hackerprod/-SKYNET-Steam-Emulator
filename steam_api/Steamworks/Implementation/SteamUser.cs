@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using Core.Interface;
 using SKYNET.Interface;
 using Steamworks;
 
 namespace SKYNET.Managers
 {
-    [Map("SteamUser")]
+    //[Map("SteamUser")]
     public class SteamUser : IBaseInterface, ISteamUser
     {
         public HSteamUser GetHSteamUser()

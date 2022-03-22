@@ -1,10 +1,11 @@
-﻿using SKYNET.Interface;
+﻿using Core.Interface;
+using SKYNET.Interface;
 using Steamworks;
 using System;
 
 namespace SKYNET.Managers
 {
-    [Map("SteamGameServerStats")]
+    //[Map("SteamGameServerStats")]
     public class SteamGameServerStats : IBaseInterface, ISteamGameServerStats
     {
         public bool ClearUserAchievement(IntPtr steamIDUser, string pchName)

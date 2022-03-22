@@ -6,7 +6,7 @@
 
 #ifndef ISTEAMGAMESERVERSTATS_H
 #define ISTEAMGAMESERVERSTATS_H
-#ifdef _WIN32
+#ifdef STEAM_WIN32
 #pragma once
 #endif
 
@@ -62,9 +62,11 @@ public:
 };
 #define STEAMGAMESERVERSTATS_INTERFACE_VERSION "SteamGameServerStats001"
 
+#ifndef STEAM_API_EXPORTS
 // Global accessor
 inline ISteamGameServerStats *SteamGameServerStats();
 STEAM_DEFINE_GAMESERVER_INTERFACE_ACCESSOR( ISteamGameServerStats *, SteamGameServerStats, STEAMGAMESERVERSTATS_INTERFACE_VERSION );
+#endif
 
 
 // callbacks

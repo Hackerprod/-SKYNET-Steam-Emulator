@@ -118,6 +118,12 @@ public class InterfaceManager
 
         
     }
+
+    internal static IntPtr CreateInterfaceNoUser(int pipe, string version)
+    {
+        return CreateInterface(pipe, version);
+    }
+
     public static bool IsInterfaceImpl(Type t)
     {
         var has_attribute = t.IsDefined(typeof(ImplAttribute));
@@ -151,7 +157,7 @@ public class InterfaceManager
             var attributes = type.GetCustomAttributes(true);
             foreach (var attribute in attributes)
             {
-                SKYNET.Interface.MapAttribute attr = (SKYNET.Interface.MapAttribute)attribute;
+                MapAttribute attr = (MapAttribute)attribute;
                 if (attr != null)
                 {
                     if (Name == attr.Name)
@@ -171,9 +177,8 @@ public class InterfaceManager
         }
         return null;
     }
-    public static IntPtr CreateInterface(IntPtr ver)
+    public static IntPtr CreateInterface(string version)
     {
-        string version = Marshal.PtrToStringBSTR(ver);
         return CreateInterface(1, version);
     }
 
@@ -196,15 +201,9 @@ public class InterfaceManager
     }
     public static IntPtr CreateInterface(int pipe_id, string name)
     {
-        var (context, iface, is_map) = Context.CreateInterface(name, true);
+        var (context, iface) = Context.CreateInterface(name);
 
         if (context == IntPtr.Zero) return IntPtr.Zero;
-
-        if (!is_map)
-        {
-            Log.Write("Context.CreateInterface didnt create map (is_map expected to be true)");
-            return IntPtr.Zero;
-        }
 
         iface.InterfaceId = -1;
 

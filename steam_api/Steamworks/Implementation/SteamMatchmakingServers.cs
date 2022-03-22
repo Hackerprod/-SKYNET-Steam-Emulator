@@ -1,10 +1,11 @@
-﻿using SKYNET.Interface;
+﻿using Core.Interface;
+using SKYNET.Interface;
 using System;
 
 namespace SKYNET.Managers
 {
-    [Map("SteamMatchMakingServers")]
-    public class SteamMatchmakingServers : IBaseInterface, ISteamMatchmakingServers
+    //[Map("SteamMatchMakingServers")]
+    public class SteamMatchMakingServers : IBaseInterface, ISteamMatchmakingServers
     {
         public IntPtr RequestInternetServerList(IntPtr iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
         {

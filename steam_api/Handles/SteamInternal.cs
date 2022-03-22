@@ -15,11 +15,12 @@ using Steamworks.Core;
 public class SteamInternal : BaseCalls
 {
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static IntPtr SteamInternal_FindOrCreateUserInterface(IntPtr hSteamUser, IntPtr pszVersion)
+    public static IntPtr SteamInternal_FindOrCreateUserInterface(IntPtr hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion)
     {
         Write($"SteamInternal_FindOrCreateUserInterface {pszVersion}");
-        string version = Marshal.PtrToStringBSTR(pszVersion);
-        return SteamEmulator.SteamClient.GetISteamGenericInterface(SteamEmulator.HSteamUser, SteamEmulator.HSteamPipe, version);
+
+        
+        return SteamEmulator.SteamClient.GetISteamGenericInterface(SteamEmulator.HSteamUser, SteamEmulator.HSteamPipe, pszVersion);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -30,7 +31,7 @@ public class SteamInternal : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static IntPtr SteamInternal_CreateInterface(IntPtr version)
+    public static IntPtr SteamInternal_CreateInterface([MarshalAs(UnmanagedType.LPStr)] string version)
     {
         Write($"SteamInternal_CreateInterface {version}");
         return InterfaceManager.CreateInterface(version);

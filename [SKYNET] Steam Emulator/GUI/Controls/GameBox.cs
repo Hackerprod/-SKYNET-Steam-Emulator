@@ -14,8 +14,19 @@ namespace SKYNET
 {
     public partial class GameBox : UserControl
     {
+        private Color _Color_MouseHover;
+        private Game _game;
+        private Color _backColor;
+        private string _parametters;
+        private uint _appId;
+        private string _gamePath;
+        private string _gameName;
+
         [Category("SKYNET")]
         public event EventHandler<GameBox> BoxClicked;
+
+        [Category("SKYNET")]
+        public event EventHandler<GameBox> BoxDoubleClicked;
 
         [Category("SKYNET")]
         public Bitmap Image
@@ -42,7 +53,6 @@ namespace SKYNET
                 LB_Name.Text = value;
             }
         }
-        private string _gameName;
 
         [Category("SKYNET")]
         public string GamePath
@@ -64,7 +74,6 @@ namespace SKYNET
                 }
             }
         }
-        private string _gamePath;
 
         [Category("SKYNET")]
         public uint AppId
@@ -78,7 +87,6 @@ namespace SKYNET
                 _appId = value;
             }
         }
-        private uint _appId;
 
         [Category("SKYNET")]
         public string Parametters
@@ -92,7 +100,6 @@ namespace SKYNET
                 _parametters = value;
             }
         }
-        private string _parametters;
 
         [Category("SKYNET")]
         public Color Color
@@ -106,7 +113,6 @@ namespace SKYNET
                 _backColor = value;
             }
         }
-        private Color _backColor;
 
         [Category("SKYNET")]
         public Color Color_MouseHover
@@ -121,7 +127,7 @@ namespace SKYNET
 
             }
         }
-        private Color _Color_MouseHover;
+
 
         public GameBox()
         {
@@ -191,6 +197,20 @@ namespace SKYNET
         private void Avatar_MouseLeave(object sender, EventArgs e)
         {
             BackColor = Color;
+        }
+
+        private void Box_DoubleClicked(object sender, MouseEventArgs e)
+        {
+            BoxDoubleClicked?.Invoke(this, this);
+        }
+
+        public Game GetGame()
+        {
+            return _game;
+        }
+        public void SetGame(Game g)
+        {
+            _game = g;
         }
     }
 }

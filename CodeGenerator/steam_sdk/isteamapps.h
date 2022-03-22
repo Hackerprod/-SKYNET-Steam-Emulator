@@ -6,7 +6,7 @@
 
 #ifndef ISTEAMAPPS_H
 #define ISTEAMAPPS_H
-#ifdef _WIN32
+#ifdef STEAM_WIN32
 #pragma once
 #endif
 
@@ -112,9 +112,15 @@ public:
 
 #define STEAMAPPS_INTERFACE_VERSION "STEAMAPPS_INTERFACE_VERSION008"
 
+#ifndef STEAM_API_EXPORTS
 // Global interface accessor
 inline ISteamApps *SteamApps();
 STEAM_DEFINE_USER_INTERFACE_ACCESSOR( ISteamApps *, SteamApps, STEAMAPPS_INTERFACE_VERSION );
+
+// Global accessor for the gameserver client
+inline ISteamApps *SteamGameServerApps();
+STEAM_DEFINE_GAMESERVER_INTERFACE_ACCESSOR( ISteamApps *, SteamGameServerApps, STEAMAPPS_INTERFACE_VERSION );
+#endif
 
 // callbacks
 #if defined( VALVE_CALLBACK_PACK_SMALL )

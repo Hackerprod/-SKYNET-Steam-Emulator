@@ -1,11 +1,12 @@
-﻿using SKYNET.Interface;
+﻿using Core.Interface;
+using SKYNET.Interface;
 using Steamworks;
 using System;
 
 namespace SKYNET.Managers
 {
-    [Map("STEAMUGC_INTERFACE_VERSION")]
-    [Map("SteamUGC")]
+    //[Map("STEAMUGC_INTERFACE_VERSION")]
+    //[Map("SteamUGC")]
     public class SteamUGC : IBaseInterface, ISteamUGC
     {
         public UGCQueryHandle_t CreateQueryUserUGCRequest(IntPtr unAccountID, IntPtr eListType, int eMatchingUGCType, int eSortOrder, AppId_t nCreatorAppID, AppId_t nConsumerAppID, uint unPage)

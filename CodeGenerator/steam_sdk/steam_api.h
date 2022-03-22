@@ -13,7 +13,7 @@
 
 #ifndef STEAM_API_H
 #define STEAM_API_H
-#ifdef _WIN32
+#ifdef STEAM_WIN32
 #pragma once
 #endif
 
@@ -22,30 +22,154 @@
 
 // All of the interfaces
 #include "isteamclient.h"
+#include "isteamclient007.h"
+#include "isteamclient008.h"
+#include "isteamclient009.h"
+#include "isteamclient010.h"
+#include "isteamclient011.h"
+#include "isteamclient012.h"
+#include "isteamclient013.h"
+#include "isteamclient014.h"
+#include "isteamclient015.h"
+#include "isteamclient016.h"
+#include "isteamclient017.h"
+#include "isteamclient018.h"
+#include "isteamclient019.h"
 #include "isteamuser.h"
+#include "isteamuser009.h"
+#include "isteamuser010.h"
+#include "isteamuser011.h"
+#include "isteamuser012.h"
+#include "isteamuser013.h"
+#include "isteamuser014.h"
+#include "isteamuser015.h"
+#include "isteamuser016.h"
+#include "isteamuser017.h"
+#include "isteamuser018.h"
+#include "isteamuser019.h"
+#include "isteamuser020.h"
 #include "isteamfriends.h"
+#include "isteamfriends004.h"
+#include "isteamfriends005.h"
+#include "isteamfriends006.h"
+#include "isteamfriends007.h"
+#include "isteamfriends008.h"
+#include "isteamfriends009.h"
+#include "isteamfriends010.h"
+#include "isteamfriends011.h"
+#include "isteamfriends012.h"
+#include "isteamfriends013.h"
+#include "isteamfriends014.h"
+#include "isteamfriends015.h"
+#include "isteamfriends016.h"
 #include "isteamutils.h"
+#include "isteamutils002.h"
+#include "isteamutils003.h"
+#include "isteamutils004.h"
+#include "isteamutils005.h"
+#include "isteamutils006.h"
+#include "isteamutils007.h"
+#include "isteamutils008.h"
+#include "isteamutils009.h"
 #include "isteammatchmaking.h"
+#include "isteammatchmaking006.h"
+#include "isteammatchmaking007.h"
+#include "isteammatchmaking008.h"
 #include "isteamuserstats.h"
+#include "isteamuserstats011.h"
+#include "isteamuserstats010.h"
+#include "isteamuserstats009.h"
+#include "isteamuserstats008.h"
+#include "isteamuserstats007.h"
+#include "isteamuserstats006.h"
+#include "isteamuserstats005.h"
+#include "isteamuserstats004.h"
+#include "isteamuserstats003.h"
 #include "isteamapps.h"
+#include "isteamapps007.h"
+#include "isteamapps006.h"
+#include "isteamapps005.h"
+#include "isteamapps004.h"
+#include "isteamapps003.h"
+#include "isteamapps002.h"
+#include "isteamapps001.h"
 #include "isteamnetworking.h"
+#include "isteamnetworking005.h"
+#include "isteamnetworking004.h"
+#include "isteamnetworking003.h"
+#include "isteamnetworking002.h"
+#include "isteamnetworking001.h"
+#include "isteamnetworkingsockets.h"
+#include "isteamnetworkingsocketsserialized.h"
+#include "isteamnetworkingutils.h"
+#include "isteamnetworkingutils001.h"
+#include "isteamnetworkingutils002.h"
+#include "isteamnetworkingsockets001.h"
+#include "isteamnetworkingsockets002.h"
+#include "isteamnetworkingsockets003.h"
+#include "isteamnetworkingsockets004.h"
+#include "isteamnetworkingsockets006.h"
+#include "isteamnetworkingsockets008.h"
 #include "isteamremotestorage.h"
+#include "isteamremotestorage001.h"
+#include "isteamremotestorage002.h"
+#include "isteamremotestorage003.h"
+#include "isteamremotestorage004.h"
+#include "isteamremotestorage005.h"
+#include "isteamremotestorage006.h"
+#include "isteamremotestorage007.h"
+#include "isteamremotestorage008.h"
+#include "isteamremotestorage009.h"
+#include "isteamremotestorage010.h"
+#include "isteamremotestorage011.h"
+#include "isteamremotestorage012.h"
+#include "isteamremotestorage013.h"
 #include "isteamscreenshots.h"
 #include "isteammusic.h"
 #include "isteammusicremote.h"
 #include "isteamhttp.h"
 #include "isteamcontroller.h"
+#include "isteamcontroller001.h"
+#include "isteamcontroller003.h"
+#include "isteamcontroller004.h"
+#include "isteamcontroller005.h"
+#include "isteamcontroller006.h"
+#include "isteamcontroller007.h"
 #include "isteamugc.h"
+#include "isteamugc001.h"
+#include "isteamugc002.h"
+#include "isteamugc003.h"
+#include "isteamugc004.h"
+#include "isteamugc005.h"
+#include "isteamugc006.h"
+#include "isteamugc007.h"
+#include "isteamugc008.h"
+#include "isteamugc009.h"
+#include "isteamugc010.h"
+#include "isteamugc012.h"
+#include "isteamugc013.h"
+#include "isteamugc014.h"
 #include "isteamapplist.h"
 #include "isteamhtmlsurface.h"
+#include "isteamhtmlsurface001.h"
+#include "isteamhtmlsurface002.h"
+#include "isteamhtmlsurface003.h"
+#include "isteamhtmlsurface004.h"
 #include "isteaminventory.h"
+#include "isteaminventory001.h"
+#include "isteaminventory002.h"
 #include "isteamvideo.h"
 #include "isteamparentalsettings.h"
+#include "isteamgamecoordinator.h"
+#include "isteammasterserverupdater.h"
+#include "isteamunifiedmessages.h"
 #include "isteaminput.h"
+#include "isteaminput001.h"
 #include "isteamremoteplay.h"
 #include "isteamnetworkingmessages.h"
 #include "isteamnetworkingsockets.h"
 #include "isteamnetworkingutils.h"
+#include "isteamtv.h"
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
@@ -95,6 +219,16 @@ S_API void S_CALLTYPE SteamAPI_SetMiniDumpComment( const char *pchMsg );
 // SteamAPI_IsSteamRunning() returns true if Steam is currently running
 S_API bool S_CALLTYPE SteamAPI_IsSteamRunning();
 
+// Pumps out all the steam messages, calling registered callbacks.
+// NOT THREADSAFE - do not call from multiple threads simultaneously.
+S_API void Steam_RunCallbacks( HSteamPipe hSteamPipe, bool bGameServerCallbacks );
+
+// register the callback funcs to use to interact with the steam dll
+S_API void Steam_RegisterInterfaceFuncs( void *hModule );
+
+// returns the HSteamUser of the last user to dispatch a callback
+S_API HSteamUser Steam_GetHSteamUserCurrent();
+
 // returns the filename path of the current running Steam process, used if you need to load an explicit steam dll by name.
 // DEPRECATED - implementation is Windows only, and the path returned is a UTF-8 string which must be converted to UTF-16 for use with Win32 APIs
 S_API const char *SteamAPI_GetSteamInstallPath();
@@ -102,6 +236,11 @@ S_API const char *SteamAPI_GetSteamInstallPath();
 // sets whether or not Steam_RunCallbacks() should do a try {} catch (...) {} around calls to issuing callbacks
 // This is ignored if you are using the manual callback dispatch method
 S_API void SteamAPI_SetTryCatchCallbacks( bool bTryCatchCallbacks );
+
+// backwards compat export, passes through to SteamAPI_ variants
+S_API HSteamPipe GetHSteamPipe();
+S_API HSteamUser GetHSteamUser();
+
 
 #if defined( VERSION_SAFE_STEAM_API_INTERFACES )
 // exists only for backwards compat with code written against older SDKs
@@ -172,14 +311,14 @@ S_API void S_CALLTYPE SteamAPI_ManualDispatch_RunFrame( HSteamPipe hSteamPipe );
 /// Fetch the next pending callback on the given pipe, if any.  If a callback is available, true is returned
 /// and the structure is populated.  In this case, you MUST call SteamAPI_ManualDispatch_FreeLastCallback
 /// (after dispatching the callback) before calling SteamAPI_ManualDispatch_GetNextCallback again.
-S_API bool S_CALLTYPE SteamAPI_ManualDispatch_GetNextCallback( HSteamPipe hSteamPipe, CallbackMsg_t *pCallbackMsg );
+S_API steam_bool S_CALLTYPE SteamAPI_ManualDispatch_GetNextCallback( HSteamPipe hSteamPipe, CallbackMsg_t *pCallbackMsg );
 
 /// You must call this after dispatching the callback, if SteamAPI_ManualDispatch_GetNextCallback returns true.
 S_API void S_CALLTYPE SteamAPI_ManualDispatch_FreeLastCallback( HSteamPipe hSteamPipe );
 
 /// Return the call result for the specified call on the specified pipe.  You really should
 /// only call this in a handler for SteamAPICallCompleted_t callback.
-S_API bool S_CALLTYPE SteamAPI_ManualDispatch_GetAPICallResult( HSteamPipe hSteamPipe, SteamAPICall_t hSteamAPICall, void *pCallback, int cubCallback, int iCallbackExpected, bool *pbFailed );
+S_API steam_bool S_CALLTYPE SteamAPI_ManualDispatch_GetAPICallResult( HSteamPipe hSteamPipe, SteamAPICall_t hSteamAPICall, void *pCallback, int cubCallback, int iCallbackExpected, bool *pbFailed );
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 //

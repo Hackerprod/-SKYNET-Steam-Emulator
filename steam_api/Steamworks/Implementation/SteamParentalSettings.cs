@@ -1,10 +1,11 @@
-﻿using SKYNET.Interface;
+﻿using Core.Interface;
+using SKYNET.Interface;
 using System;
 
 namespace SKYNET.Managers
 {
-    [Map("STEAMPARENTALSETTINGS_INTERFACE_VERSION")]
-    [Map("SteamParentalSettings")]
+    //[Map("STEAMPARENTALSETTINGS_INTERFACE_VERSION")]
+    //[Map("SteamParentalSettings")]
     public class SteamParentalSettings : IBaseInterface, ISteamParentalSettings
     {
         public bool BIsParentalLockEnabled()

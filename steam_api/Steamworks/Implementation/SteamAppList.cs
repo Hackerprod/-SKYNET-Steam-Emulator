@@ -8,7 +8,7 @@ using Steamworks;
 
 namespace SKYNET.Managers
 {
-    [Interface.MapAttribute("SteamAppList")]
+    //[Interface.MapAttribute("SteamAppList")]
     public class SteamAppList : IBaseInterface, ISteamAppList
     {
         public int GetAppBuildId(AppId_t nAppID)
@@ -43,6 +43,9 @@ namespace SKYNET.Managers
             return 0;
         }
 
-
+        private static void Write(string v)
+        {
+            Main.Write("SteamAppList", v);
+        }
     }
 }

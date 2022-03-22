@@ -1,4 +1,4 @@
-//====== Copyright ©, Valve Corporation, All rights reserved. =======
+//====== Copyright ï¿½, Valve Corporation, All rights reserved. =======
 //
 // Purpose: interface to the game coordinator for this application
 //
@@ -6,7 +6,7 @@
 
 #ifndef ISTEAMGAMECOORDINATOR
 #define ISTEAMGAMECOORDINATOR
-#ifdef _WIN32
+#ifdef STEAM_WIN32
 #pragma once
 #endif
 
@@ -33,7 +33,7 @@ class ISteamGameCoordinator
 public:
 
 	// sends a message to the Game Coordinator
-	virtual EGCResults SendMessage( uint32 unMsgType, const void *pubData, uint32 cubData ) = 0;
+	virtual EGCResults SendMessage_( uint32 unMsgType, const void *pubData, uint32 cubData ) = 0;
 
 	// returns true if there is a message waiting from the game coordinator
 	virtual bool IsMessageAvailable( uint32 *pcubMsgSize ) = 0; 

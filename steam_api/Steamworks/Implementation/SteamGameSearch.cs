@@ -1,11 +1,12 @@
 ﻿using System;
+using Core.Interface;
 using SKYNET.Interface;
 
 namespace SKYNET.Managers
 {
 
-    [Map("SteamGameSearch")]
-    [Map("SteamMatchGameSearch")]
+    //[Map("SteamGameSearch")]
+    //[Map("SteamMatchGameSearch")]
     public class SteamGameSearch : IBaseInterface, ISteamGameSearch
     {
         public GameSearchErrorCode_t AcceptGame(IntPtr self)

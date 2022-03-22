@@ -76,36 +76,12 @@ namespace SKYNET.Helper
 
         public static IntPtr MemoryAddress(object obj)
         {
-            IntPtr address = IntPtr.Zero;
+            //return AddressHelper.GetAddress(obj);
 
-
-            ReferenceHelpers.GetPinnedPtr(obj, ptr => address = ptr);   //the first pointer in the managed object header in .NET points to its run-time type info
-            return address;
-
-            return AddressOf(obj);
+            //return AddressOf(obj);
 
             GCHandle Handle = GCHandle.Alloc(obj, GCHandleType.Pinned);
-            address = GCHandle.ToIntPtr(Handle);
-            return address;
-        }
-        public static class ReferenceHelpers
-        {
-            public static readonly Action<object, Action<IntPtr>> GetPinnedPtr;
-
-            static ReferenceHelpers()
-            {
-                var dyn = new DynamicMethod("GetPinnedPtr", typeof(void), new[] { typeof(object), typeof(Action<IntPtr>) }, typeof(ReferenceHelpers).Module);
-                var il = dyn.GetILGenerator();
-                il.DeclareLocal(typeof(object), true);
-                il.Emit(OpCodes.Ldarg_0);
-                il.Emit(OpCodes.Stloc_0);
-                il.Emit(OpCodes.Ldarg_1);
-                il.Emit(OpCodes.Ldloc_0);
-                il.Emit(OpCodes.Conv_I);
-                il.Emit(OpCodes.Call, typeof(Action<IntPtr>).GetMethod("Invoke"));
-                il.Emit(OpCodes.Ret);
-                GetPinnedPtr = (Action<object, Action<IntPtr>>)dyn.CreateDelegate(typeof(Action<object, Action<IntPtr>>));
-            }
+            return GCHandle.ToIntPtr(Handle);
         }
     }
     public class AddressHelper

@@ -6,11 +6,12 @@
 
 #ifndef ISTEAMAPPLIST_H
 #define ISTEAMAPPLIST_H
-#ifdef _WIN32
+#ifdef STEAM_WIN32
 #pragma once
 #endif
 
 #include "steam_api_common.h"
+#include "steamtypes.h"
 
 //-----------------------------------------------------------------------------
 // Purpose: This is a restricted interface that can only be used by previously approved apps,
@@ -32,10 +33,11 @@ public:
 
 #define STEAMAPPLIST_INTERFACE_VERSION "STEAMAPPLIST_INTERFACE_VERSION001"
 
+#ifndef STEAM_API_EXPORTS
 // Global interface accessor
 inline ISteamAppList *SteamAppList();
 STEAM_DEFINE_USER_INTERFACE_ACCESSOR( ISteamAppList *, SteamAppList, STEAMAPPLIST_INTERFACE_VERSION );
-
+#endif
 // callbacks
 #if defined( VALVE_CALLBACK_PACK_SMALL )
 #pragma pack( push, 4 )
@@ -50,18 +52,16 @@ STEAM_DEFINE_USER_INTERFACE_ACCESSOR( ISteamAppList *, SteamAppList, STEAMAPPLIS
 // Purpose: Sent when a new app is installed
 //---------------------------------------------------------------------------------
 STEAM_CALLBACK_BEGIN( SteamAppInstalled_t, k_iSteamAppListCallbacks + 1 )
-STEAM_CALLBACK_MEMBER( 0, AppId_t, m_nAppID )			// ID of the app that installs
-STEAM_CALLBACK_MEMBER( 1, int, m_iInstallFolderIndex ) // library folder the app is installed 
-STEAM_CALLBACK_END( 2 )
+	STEAM_CALLBACK_MEMBER( 0,	AppId_t,	m_nAppID )			// ID of the app that installs
+STEAM_CALLBACK_END(1)
 
 
 //---------------------------------------------------------------------------------
 // Purpose: Sent when an app is uninstalled
 //---------------------------------------------------------------------------------
 STEAM_CALLBACK_BEGIN( SteamAppUninstalled_t, k_iSteamAppListCallbacks + 2 )
-STEAM_CALLBACK_MEMBER( 0, AppId_t, m_nAppID )			// ID of the app that installs
-STEAM_CALLBACK_MEMBER( 1, int, m_iInstallFolderIndex ) // library folder the app was installed 
-STEAM_CALLBACK_END(2)
+	STEAM_CALLBACK_MEMBER( 0,	AppId_t,	m_nAppID )			// ID of the app that installs
+STEAM_CALLBACK_END(1)
 
 
 #pragma pack( pop )

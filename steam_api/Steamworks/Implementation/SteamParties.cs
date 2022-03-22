@@ -1,10 +1,11 @@
-﻿using SKYNET.Interface;
+﻿using Core.Interface;
+using SKYNET.Interface;
 using Steamworks;
 using System;
 
 namespace SKYNET.Managers
 {
-    [Map("SteamParties")]
+    //[Map("SteamParties")]
     public class SteamParties : IBaseInterface, ISteamParties
     {
         public void CancelReservation(uint ulBeacon, IntPtr steamIDUser)

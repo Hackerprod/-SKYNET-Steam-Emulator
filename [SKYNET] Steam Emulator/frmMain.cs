@@ -13,16 +13,23 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
+using EasyHook;
 using SKYNET;
 using SKYNET.GUI;
 using SKYNET.Properties;
+using SKYNET.Types;
 
 namespace SKYNET
 {
     public partial class frmMain : frmBase
     {
-        List<Game> Games;
-        public Process InjectedProcess { get; private set; }
+        private List<Game> Games;
+        private List<RunningGame> RunningGames;
+
+        public Process InjectedProcess { get; set; }
+        internal HookInterface HookInterface { get; set; }
+
+        private GameBox SelectedBox;
 
         private string channel;
         private int ProcessId;
@@ -32,9 +39,14 @@ namespace SKYNET
             InitializeComponent();
             CheckForIllegalCrossThreadCalls = false;
             SetMouseMove(PN_Top);
-            Games = new List<Game>();
 
-            modCommon.EnsureDirectoryExists("Data");
+            Games = new List<Game>();
+            RunningGames = new List<RunningGame>();
+                 
+            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data"));
+            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images"));
+            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "Banner"));
+
             string game = Path.Combine("Data", "Games.json");
             if (File.Exists(game))
             {
@@ -44,49 +56,87 @@ namespace SKYNET
 
             FindGame("");
 
-
             shadowBox1.BackColor = Color.FromArgb(100, 0, 0, 0);
 
-            //Size = new Size(1600, this.Height);
         }
 
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
         private void GameBox_Clicked(object sender, GameBox e)
         {
-            //Inject(e);
-            CreateInMemoryInterface(e);
+            SelectBox(e);
         }
 
-        //private void Inject(GameBox e)
-        //{
-        //    HookInterface = new HookInterface();
-        //    HookInterface.MessageReceived += HookInterface_MessageReceived;
-        //    HookInterface.InjectionOptions = InjectionOptions.Default;
-        //    HookInterface.AppId = e.AppId;
-        //    channel = null;
+        private void GameBox_DoubleClicked(object sender, GameBox e)
+        {
+            SelectBox(e);
+            Inject(e);
+        }
 
-        //    string InjectorPath = Process.GetCurrentProcess().MainModule.FileName;
-        //    //InjectorPath = @"C:\Users\Administrador\source\repos\[SKYNET] Steam Emulator\[SKYNET] Steam Emulator\bin\Debug\steam_api.dll";
+        private void SelectBox(GameBox e)
+        {
+            SelectedBox = e;
+            if (RunningGames.Find(x => x.Game == e.GetGame()) != null)
+            {
+                BT_GameAction.Text = "CLOSE";
+                BT_GameAction.BackColor = Color.Red;
+            }
+            else
+            {
+                BT_GameAction.Text = "PLAY";
+                BT_GameAction.BackColor = Color.FromArgb(46, 186, 65);
+            }
+            PB_Logo.Image = e.Image;
+            LB_GameTittle.Text = e.GameName;
 
-        //    try
-        //    {
-        //        var InObject = WellKnownObjectMode.Singleton;
-        //        RemoteHooking.IpcCreateServer(ref channel, InObject, HookInterface);
-        //        RemoteHooking.CreateAndInject(e.GamePath, e.Parametters, 0, HookInterface.InjectionOptions, InjectorPath, InjectorPath, out ProcessId, channel);
-        //        InjectedProcess = Process.GetProcessById(ProcessId);
-        //        WaitForExit();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Write($"Error Injecting {Path.GetFileName(e.GamePath)}");
-        //        Write(ex.Message);
-        //    }
+            string imagePath = Path.Combine(modCommon.GetPath(), "Data", "Images", "Banner", e.AppId + "_library_hero.jpg");
+            if (File.Exists(imagePath))
+            {
+                PB_Banner.Image = Image.FromFile(imagePath);
+            }
+            else
+            {
+                PB_Banner.Image = Resources.Banner;
+            }
 
-        //}
+        }
+
+        private void Inject(GameBox e)
+        {
+            Write("Opening " + e.GameName);
+
+            HookInterface = new HookInterface();
+            HookInterface.InjectionOptions = InjectionOptions.Default;
+            HookInterface.AppId = e.AppId;
+            HookInterface.OnMessage += this.HookInterface_OnMessage;
+
+            channel = null;
+
+            string InjectorPath = Path.Combine(modCommon.GetPath(), "steam_api.dll");
+
+            try
+            {
+                var InObject = WellKnownObjectMode.Singleton;
+                RemoteHooking.IpcCreateServer(ref channel, InObject, HookInterface);
+                HookInterface.ChannelName = channel;
+                RemoteHooking.CreateAndInject(e.GamePath, e.Parametters, 0, HookInterface.InjectionOptions, InjectorPath, InjectorPath, out ProcessId, channel);
+                InjectedProcess = Process.GetProcessById(ProcessId);
+                WaitForExit();
+                RunningGames.Add(new RunningGame() { Game = e.GetGame(), Process = InjectedProcess });
+
+                BT_GameAction.Text = "CLOSE";
+                BT_GameAction.BackColor = Color.Red;
+            }
+            catch (Exception ex)
+            {
+                Write($"Error Injecting {Path.GetFileName(e.GamePath)}");
+                Write(ex.Message);
+            }
+
+        }
+
+        private void HookInterface_OnMessage(object sender, ConsoleMessage e)
+        {
+            Write(e.Sender + ":  " + e.Msg);
+        }
 
         private void WaitForExit()
         {
@@ -108,16 +158,17 @@ namespace SKYNET
                     }
                 }
                 Write($"The injected process {processName} are closed");
+
+                BT_GameAction.Text = "PLAY";
+                BT_GameAction.BackColor = Color.FromArgb(46, 186, 65);
             });
-
-
         }
 
         private void Write(object msg)
         {
             try
             {
-                richTextBox1.Text += " ---      " + msg.ToString() + Environment.NewLine;
+                richTextBox1.Text += "   " + msg.ToString() + Environment.NewLine;
             }
             catch (Exception)
             {
@@ -125,14 +176,10 @@ namespace SKYNET
             }
         }
 
-        private void HookInterface_MessageReceived(object sender, object msg)
-        {
-            Write(msg);
-        }
-
         private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             modCommon.EnsureDirectoryExists("Data");
+
             string game = Path.Combine("Data", "Games.json");
             if (File.Exists(game))
             {
@@ -150,12 +197,6 @@ namespace SKYNET
         }
         private void Close_Clicked(object sender, EventArgs e)
         {
-            // For test purposes
-            //Games.Add(new Game()
-            //{
-            //     AppId = 570, Name = "Dota2", Parametters = "", Path = @"D:\Instaladores\Steam\steamapps\Common\dota 2 beta\game\bin\win64\dota2.exe"
-            //});
-
             string path = Path.Combine(modCommon.GetPath(), "Data");
             modCommon.EnsureDirectoryExists(path);
 
@@ -194,21 +235,6 @@ namespace SKYNET
         }
 
 
-
-
-
-
-        private void CreateInMemoryInterface(GameBox e)
-        {
-
-            string DllPath = @"D:\Instaladores\Programación\Projects\[SKYNET] Steam Emulator\[SKYNET] Steam Emulator\bin\Debug\x86\steam_api.dll";
-            //DllPath = @"D:\Instaladores\Programación\Projects\[SKYNET] Dota2 GameCoordinator Server\steam_api.dll";
-
-            string ExePath = @"C:\Steam\steamapps\Common\dota 2 beta\game\bin\win32\dota2.exe";
-
-            Memory.CreateAndInject(ExePath, DllPath, "-novid");
-        }
-
         private void TB_Search_KeyUp(object sender, KeyEventArgs e)
         {
             FindGame(TB_Search.Text);
@@ -229,9 +255,11 @@ namespace SKYNET
                 };
                 module.Dock = DockStyle.Top;
                 module.BoxClicked += GameBox_Clicked;
+                module.BoxDoubleClicked += GameBox_DoubleClicked;
                 module.BackColor = Color.FromArgb(36, 40, 47);
                 module.Color = Color.FromArgb(36, 40, 47);
                 module.Color_MouseHover = Color.FromArgb(50, 57, 74);
+                module.SetGame(game);
 
                 if (string.IsNullOrEmpty(word))
                 {
@@ -240,6 +268,11 @@ namespace SKYNET
                 else if (game.Name.ToLower().Contains(word.ToLower()))
                 {
                     PN_GameContainer.Controls.Add(module);
+                }
+
+                if (SelectedBox == null)
+                {
+                    SelectBox(module);
                 }
             }
         }
@@ -254,6 +287,27 @@ namespace SKYNET
         {
             LB_Add.ForeColor = Color.FromArgb(200, 200, 200);
             PB_Add.Image = Resources.add;
+        }
+
+        private void GameAction_Click(object sender, EventArgs e)
+        {
+            if (BT_GameAction.Text == "PLAY")
+            {
+                Inject(SelectedBox);
+            }
+            else
+            {
+                var Game = RunningGames.Find(x => x.Game == SelectedBox.GetGame());
+                if (Game != null)
+                {
+                    try
+                    {
+                        Game.Process.Kill();
+                        RunningGames.Remove(Game);
+                    }
+                    catch { }
+                }
+            }
         }
     }
 }

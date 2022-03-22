@@ -6,6 +6,7 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
+using Core.Interface;
 using SKYNET;
 using SKYNET.GUI;
 using SKYNET.Interface;
@@ -732,7 +733,7 @@ public class SteamAPI : IBaseInterface
     public static ISteamMatchmakingServers SteamMatchmakingServers()
     {
         Write($"SteamMatchmakingServers");
-        return SteamEmulator.SteamMatchmakingServers;
+        return SteamEmulator.SteamMatchMakingServers;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -854,6 +855,10 @@ public class SteamAPI : IBaseInterface
 
     #endregion
 
+    private static void Write(string v)
+    {
+        Main.Write("SteamAPI", v);
+    }
 
 }
 

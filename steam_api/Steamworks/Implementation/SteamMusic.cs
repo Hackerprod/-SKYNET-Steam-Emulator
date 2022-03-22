@@ -1,9 +1,10 @@
-﻿using SKYNET.Interface;
+﻿using Core.Interface;
+using SKYNET.Interface;
 
 namespace SKYNET.Managers
 {
-    [Map("STEAMMUSIC_INTERFACE_VERSION")]
-    [Map("SteamMusic")]
+    //[Map("STEAMMUSIC_INTERFACE_VERSION")]
+    //[Map("SteamMusic")]
     public class SteamMusic : IBaseInterface, ISteamMusic
     {
         public bool BIsEnabled()

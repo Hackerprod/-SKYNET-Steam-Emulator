@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using Core.Interface;
 using SKYNET.Interface;
 using SKYNET.Types;
 using Steamworks;
 
 namespace SKYNET.Managers
 {
-    [Map("SteamGameCoordinator")]
+    //[Map("SteamGameCoordinator")]
     public class SteamGameCoordinator : IBaseInterface, ISteamGameCoordinator
     {
         public bool IsMessageAvailable(uint pcubMsgSize)

@@ -1,10 +1,11 @@
-﻿using SKYNET.Interface;
+﻿using Core.Interface;
+using SKYNET.Interface;
 using Steamworks;
 using System;
 
 namespace SKYNET.Managers
 {
-    [Map("SteamNetworkingSocketsSerialized")]
+    //[Map("SteamNetworkingSocketsSerialized")]
     public class SteamNetworkingSocketsSerialized : IBaseInterface, ISteamNetworkingSocketsSerialized
     {
         public void SendP2PRendezvous(IntPtr steamIDRemote, uint unConnectionIDSrc, IntPtr pMsgRendezvous, uint cbRendezvous)

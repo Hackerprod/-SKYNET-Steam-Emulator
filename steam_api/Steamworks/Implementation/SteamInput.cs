@@ -4,11 +4,12 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Core.Interface;
 using SKYNET.Interface;
 
 namespace SKYNET.Managers
 {
-    [Map("SteamInput")]
+    //[Map("SteamInput")]
     public class SteamInput : IBaseInterface, ISteamInput
     {
         public void ActivateActionSet(IntPtr inputHandle, IntPtr actionSetHandle)

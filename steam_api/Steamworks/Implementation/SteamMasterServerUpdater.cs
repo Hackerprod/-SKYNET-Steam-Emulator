@@ -1,9 +1,10 @@
-﻿using SKYNET.Interface;
+﻿using Core.Interface;
+using SKYNET.Interface;
 using System;
 
 namespace SKYNET.Managers
 {
-    [Map("SteamMasterServerUpdater")]
+    //[Map("SteamMasterServerUpdater")]
     public class SteamMasterServerUpdater : IBaseInterface, ISteamMasterServerUpdater
     {
         public void SetActive(bool bActive)

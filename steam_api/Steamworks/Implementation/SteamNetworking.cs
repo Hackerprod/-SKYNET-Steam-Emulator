@@ -1,9 +1,10 @@
-﻿using SKYNET.Interface;
+﻿using Core.Interface;
+using SKYNET.Interface;
 using System;
 
 namespace SKYNET.Managers
 {
-    [Map("SteamNetworking")]
+    //[Map("SteamNetworking")]
     public class SteamNetworking : IBaseInterface, ISteamNetworking
     {
         public bool SendP2PPacket(IntPtr steamIDRemote, IntPtr pubData, uint cubData, EP2PSend eP2PSendType, int nChannel)

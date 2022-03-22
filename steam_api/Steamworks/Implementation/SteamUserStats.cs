@@ -1,11 +1,12 @@
-﻿using SKYNET.Interface;
+﻿using Core.Interface;
+using SKYNET.Interface;
 using Steamworks;
 using System;
 
 namespace SKYNET.Managers
 {
-    [Map("STEAMUSERSTATS_INTERFACE_VERSION")]
-    [Map("SteamUserStats")]
+    //[Map("STEAMUSERSTATS_INTERFACE_VERSION")]
+    //[Map("SteamUserStats")]
     public class SteamUserStats : IBaseInterface, ISteamUserStats
     {
         public bool RequestCurrentStats()

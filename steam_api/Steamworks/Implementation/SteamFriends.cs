@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Core.Interface;
 using SKYNET.Helper;
 using SKYNET.Interface;
 using SKYNET.Types;
@@ -8,7 +9,7 @@ using Steamworks;
 
 namespace SKYNET.Managers
 {
-    [Map("SteamFriends")]
+    //[Map("SteamFriends")]
     public class SteamFriends : IBaseInterface, ISteamFriends
     {
         public string ISteamFriends004 = "ISteamFriends004";

@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace SKYNET.Delegate
 {
-    [Delegate("SteamGameServer")]
-    public class DSteamGameServer : IBaseInterfaceMap
-    {
+    //[Delegate("SteamGameServer")]
+    //public class DSteamGameServer : IBaseInterfaceMap
+    //{
 
-    }
+    //}
 }

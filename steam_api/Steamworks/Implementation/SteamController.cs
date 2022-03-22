@@ -5,7 +5,7 @@ using SKYNET.Interface;
 
 namespace SKYNET.Managers
 {
-    [Interface.MapAttribute("SteamController")]
+    //[Interface.MapAttribute("SteamController")]
     public class SteamController : IBaseInterface, ISteamController
     {
         private Dictionary<string, int> action_handles;

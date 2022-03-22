@@ -69,6 +69,10 @@
     <DllExportPostProcType>0</DllExportPostProcType>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EasyHook, Version=2.7.7097.0, Culture=neutral, PublicKeyToken=4b580fca19d0b0c5, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\SKYNET.Net.Redirector\EasyHook.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
@@ -83,21 +87,95 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Argon\CallbackMsg.cs" />
+    <Compile Include="Argon\Helpers\BufferAttribute.cs" />
+    <Compile Include="Argon\Helpers\Context.cs" />
+    <Compile Include="Argon\Helpers\DelegateAttribute.cs" />
+    <Compile Include="Argon\Helpers\IBaseInterface.cs" />
+    <Compile Include="Argon\Helpers\ImplAttribute.cs" />
+    <Compile Include="Argon\Helpers\Loader.cs" />
+    <Compile Include="Argon\Helpers\MapAttribute.cs" />
+    <Compile Include="Argon\Helpers\Plugin.cs" />
+    <Compile Include="Argon\Implementation\AppList\SteamAppList001.cs" />
+    <Compile Include="Argon\Implementation\Apps\SteamApps008.cs" />
+    <Compile Include="Argon\Implementation\ArgonCore\ArgonClient001.cs" />
+    <Compile Include="Argon\Implementation\Client\ClientEngine005.cs" />
+    <Compile Include="Argon\Implementation\Client\SteamClient017.cs" />
+    <Compile Include="Argon\Implementation\Controller\SteamController006.cs" />
+    <Compile Include="Argon\Implementation\Friends\ClientFriends001.cs" />
+    <Compile Include="Argon\Implementation\Friends\SteamFriends001.cs" />
+    <Compile Include="Argon\Implementation\Friends\SteamFriends015.cs" />
+    <Compile Include="Argon\Implementation\GameServerStats\SteamGameServerStats001.cs" />
+    <Compile Include="Argon\Implementation\GameServer\SteamGameServer012.cs" />
+    <Compile Include="Argon\Implementation\HTMLSurface\SteamHTMLSurface004.cs" />
+    <Compile Include="Argon\Implementation\HTTP\SteamHTTP002.cs" />
+    <Compile Include="Argon\Implementation\Inventory\SteamInventory003.cs" />
+    <Compile Include="Argon\Implementation\MatchmakingServers\SteamMatchmakingServers002.cs" />
+    <Compile Include="Argon\Implementation\Matchmaking\SteamMatchmaking009.cs" />
+    <Compile Include="Argon\Implementation\MusicRemote\SteamMusicRemote001.cs" />
+    <Compile Include="Argon\Implementation\Music\SteamMusic001.cs" />
+    <Compile Include="Argon\Implementation\Networking\SteamNetworking005.cs" />
+    <Compile Include="Argon\Implementation\RemoteStorage\SteamRemoteStorage014.cs" />
+    <Compile Include="Argon\Implementation\Screenshots\SteamScreenshots003.cs" />
+    <Compile Include="Argon\Implementation\UGC\SteamUGC010.cs" />
+    <Compile Include="Argon\Implementation\UnifiedMessages\SteamUnifiedMessages001.cs" />
+    <Compile Include="Argon\Implementation\UserStats\SteamUserStats011.cs" />
+    <Compile Include="Argon\Implementation\User\AuthTicket.cs" />
+    <Compile Include="Argon\Implementation\User\ClientUser001.cs" />
+    <Compile Include="Argon\Implementation\User\SteamUser019.cs" />
+    <Compile Include="Argon\Implementation\Utils\SteamUtils009.cs" />
+    <Compile Include="Argon\Implementation\Utils\Utils.cs" />
+    <Compile Include="Argon\Implementation\Video\SteamVideo002.cs" />
+    <Compile Include="Argon\InterfaceDelegates\ArgonClient001Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\ClientEngine005Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\ClientFriends001Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\ClientUser001Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\MappedTest001Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\SteamAppList001Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\SteamApps008Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\SteamClient017Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\SteamController006Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\SteamFriends001Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\SteamFriends015Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\SteamGameServer012Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\SteamGameServerStats001Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\SteamHTMLSurface004Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\SteamHTTP002Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\SteamInventory003Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\SteamMatchmaking009Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\SteamMatchmakingServers002Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\SteamMusic001Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\SteamMusicRemote001Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\SteamNetworking005Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\SteamRemoteStorage014Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\SteamScreenshots003Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\SteamUGC010Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\SteamUnifiedMessages001Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\SteamUser019Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\SteamUserStats011Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\SteamUtils009Delegates.cs" />
+    <Compile Include="Argon\InterfaceDelegates\SteamVideo002Delegates.cs" />
     <Compile Include="Callback\CallbackManager.cs" />
     <Compile Include="Callback\CallbackType.cs" />
     <Compile Include="Callback\SteamAPICall_t.cs" />
-    <Compile Include="CSteamAPIContext.cs" />
-    <Compile Include="Helper\Attributes\DelegateAttribute.cs" />
-    <Compile Include="Helper\Attributes\ImplAttribute.cs" />
-    <Compile Include="Helper\Attributes\InterfaceAttribute.cs" />
-    <Compile Include="Helper\Attributes\MapAttribute.cs" />
-    <Compile Include="Helper\Context\Context.cs" />
-    <Compile Include="Helper\Context\IBaseInterface.cs" />
+    <Compile Include="Helper\Memory.cs" />
+    <Compile Include="Helper\NativeMethods.cs" />
+    <Compile Include="Hook\HookManager.cs" />
+    <Compile Include="Hook\ConsoleMessage.cs" />
+    <Compile Include="Hook\BaseHook.cs" />
+    <Compile Include="Hook\SteamApi\SteamAPI_Delegates.cs" />
+    <Compile Include="Hook\SteamApi\SteamAPI.cs" />
+    <Compile Include="Hook\SteamInternal\SteamInternal_Delegates.cs" />
+    <Compile Include="Hook\SteamInternal\SteamInternal.cs" />
+    <Compile Include="Hook\SteamInternal_ContextInit.cs" />
+    <Compile Include="Hook\SteamInternal_CreateInterface.cs" />
+    <Compile Include="Hook\LdrLoadDll.cs" />
+    <Compile Include="Types\CSteamAPIContext.cs" />
     <Compile Include="Helper\MemoryHelper.cs" />
+    <Compile Include="Hook\Main.cs" />
     <Compile Include="Managers\InterfaceManager.cs" />
     <Compile Include="Handles\SteamAPI_ISteamNetworkingUtils.cs" />
     <Compile Include="Handles\SteamAPI_SteamNetworkingIdentity.cs" />
-    <Compile Include="Helper\Context\Plugin.cs" />
     <Compile Include="SteamEmulator.cs" />
     <Compile Include="Steamworks\DelegateClass.cs" />
     <Compile Include="Steamworks\Delegates\DSteamAppList.cs" />
@@ -282,10 +360,12 @@
     <Compile Include="Handles\SteamAPI_ISteamInput.cs" />
     <Compile Include="Handles\SteamAPI_ISteamInventory.cs" />
     <Compile Include="Handles\SteamAPI_ISteamMusic.cs" />
-    <Compile Include="Types\CSteamAPIContext.cs" />
+    <Compile Include="Types\CSteamAPIContext_Typed.cs" />
     <Compile Include="Types\EAccountType.cs" />
     <Compile Include="Types\EResult.cs" />
     <Compile Include="Types\Friend.cs" />
+    <Compile Include="Hook\HookInterface.cs" />
+    <Compile Include="Hook\IHook.cs" />
     <Compile Include="Types\SteamClientPublic\HAuthTicket.cs" />
     <Compile Include="Types\SteamClient\HSteamPipe.cs" />
     <Compile Include="Types\SteamClient\HSteamUser.cs" />
@@ -333,7 +413,6 @@
   <ItemGroup>
     <None Include="Resources\male_user_100px.png" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ImportGroup Label=".NET DllExport">
     <Import Project="$(SolutionDir)packages\DllExport\tools\net.r_eg.DllExport.targets" Condition="Exists($([MSBuild]::Escape('$(SolutionDir)packages\DllExport\tools\net.r_eg.DllExport.targets')))" Label="8337224c9ad9e356" />

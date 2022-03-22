@@ -1,10 +1,11 @@
-﻿using SKYNET.Interface;
+﻿using Core.Interface;
+using SKYNET.Interface;
 using System;
 
 namespace SKYNET.Managers
 {
-    [Map("STEAMSCREENSHOTS_INTERFACE_VERSION")]
-    [Map("SteamScreenshots")]
+    //[Map("STEAMSCREENSHOTS_INTERFACE_VERSION")]
+    //[Map("SteamScreenshots")]
     public class SteamScreenshots : IBaseInterface, ISteamScreenshots
     {
         public uint WriteScreenshot(IntPtr pubRGB, uint cubRGB, int nWidth, int nHeight)

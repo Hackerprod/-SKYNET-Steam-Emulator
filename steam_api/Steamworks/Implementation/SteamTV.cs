@@ -1,10 +1,11 @@
-﻿using SKYNET.Interface;
+﻿using Core.Interface;
+using SKYNET.Interface;
 using System;
 
 namespace SKYNET.Managers
 {
-    [Map("STEAMTV_INTERFACE_V001")]
-    [Map("SteamScreenshots")]
+    //[Map("STEAMTV_INTERFACE_V001")]
+    //[Map("SteamScreenshots")]
     public class SteamTV : IBaseInterface, ISteamTV
     {
         public bool IsBroadcasting(int pnNumViewers)

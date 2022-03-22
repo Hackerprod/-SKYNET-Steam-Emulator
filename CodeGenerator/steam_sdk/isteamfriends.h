@@ -6,7 +6,7 @@
 
 #ifndef ISTEAMFRIENDS_H
 #define ISTEAMFRIENDS_H
-#ifdef _WIN32
+#ifdef STEAM_WIN32
 #pragma once
 #endif
 
@@ -126,6 +126,17 @@ enum EUserRestriction
 	k_nUserRestrictionGameInvites	= 32,	// user cannot send or recv game invites (e.g. mobile)
 	k_nUserRestrictionTrading	= 64,	// user cannot participate in trading (console, mobile)
 };
+
+//-----------------------------------------------------------------------------
+// Purpose: information about user sessions
+//-----------------------------------------------------------------------------
+struct FriendSessionStateInfo_t
+{
+	uint32 m_uiOnlineSessionInstances;
+	uint8 m_uiPublishedToFriendsSessionInstance;
+};
+
+
 
 // size limit on chat room or member metadata
 const uint32 k_cubChatMetadataMax = 8192;
@@ -426,9 +437,11 @@ public:
 
 #define STEAMFRIENDS_INTERFACE_VERSION "SteamFriends017"
 
+#ifndef STEAM_API_EXPORTS
 // Global interface accessor
 inline ISteamFriends *SteamFriends();
 STEAM_DEFINE_USER_INTERFACE_ACCESSOR( ISteamFriends *, SteamFriends, STEAMFRIENDS_INTERFACE_VERSION );
+#endif
 
 // callbacks
 #if defined( VALVE_CALLBACK_PACK_SMALL )

@@ -6,7 +6,7 @@
 
 #ifndef ISTEAMPARENTALSETTINGS_H
 #define ISTEAMPARENTALSETTINGS_H
-#ifdef _WIN32
+#ifdef STEAM_WIN32
 #pragma once
 #endif
 
@@ -47,9 +47,11 @@ public:
 
 #define STEAMPARENTALSETTINGS_INTERFACE_VERSION "STEAMPARENTALSETTINGS_INTERFACE_VERSION001"
 
+#ifndef STEAM_API_EXPORTS
 // Global interface accessor
 inline ISteamParentalSettings *SteamParentalSettings();
 STEAM_DEFINE_USER_INTERFACE_ACCESSOR( ISteamParentalSettings *, SteamParentalSettings, STEAMPARENTALSETTINGS_INTERFACE_VERSION );
+#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: Callback for querying UGC

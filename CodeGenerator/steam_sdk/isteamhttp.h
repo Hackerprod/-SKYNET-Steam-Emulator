@@ -6,7 +6,7 @@
 
 #ifndef ISTEAMHTTP_H
 #define ISTEAMHTTP_H
-#ifdef _WIN32
+#ifdef STEAM_WIN32
 #pragma once
 #endif
 
@@ -142,6 +142,7 @@ public:
 
 #define STEAMHTTP_INTERFACE_VERSION "STEAMHTTP_INTERFACE_VERSION003"
 
+#ifndef STEAM_API_EXPORTS
 // Global interface accessor
 inline ISteamHTTP *SteamHTTP();
 STEAM_DEFINE_USER_INTERFACE_ACCESSOR( ISteamHTTP *, SteamHTTP, STEAMHTTP_INTERFACE_VERSION );
@@ -149,6 +150,7 @@ STEAM_DEFINE_USER_INTERFACE_ACCESSOR( ISteamHTTP *, SteamHTTP, STEAMHTTP_INTERFA
 // Global accessor for the gameserver client
 inline ISteamHTTP *SteamGameServerHTTP();
 STEAM_DEFINE_GAMESERVER_INTERFACE_ACCESSOR( ISteamHTTP *, SteamGameServerHTTP, STEAMHTTP_INTERFACE_VERSION );
+#endif
 
 // callbacks
 #if defined( VALVE_CALLBACK_PACK_SMALL )

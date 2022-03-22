@@ -17,7 +17,7 @@ using Steamworks;
 
 namespace SKYNET.Managers
 {
-    [Interface.MapAttribute("SteamClient")]
+    //[Interface.MapAttribute("SteamClient")]
     public class SteamClient : IBaseInterface, ISteamClient
     {
         public void SetAppId(uint appId)
@@ -105,7 +105,7 @@ namespace SKYNET.Managers
         public ISteamMatchmakingServers GetISteamMatchmakingServers(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
             Write("GetISteamMatchmakingServers");
-            return SteamEmulator.SteamMatchmakingServers;
+            return SteamEmulator.SteamMatchMakingServers;
         }
 
         public IntPtr GetISteamGenericInterface(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
@@ -245,5 +245,9 @@ namespace SKYNET.Managers
             // Save to registry
         }
 
+        private static void Write(string v)
+        {
+            Main.Write("SteamClient", v);
+        }
     }
 }
