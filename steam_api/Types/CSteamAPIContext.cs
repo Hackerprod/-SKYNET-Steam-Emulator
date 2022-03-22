@@ -116,121 +116,121 @@ namespace Steamworks.Core
                 return false;
             }
 
-            var (m_pSteamClient, _) = CreateInterface(STEAMCLIENT_INTERFACE_VERSION);
+            m_pSteamClient = SteamEmulator.SteamClient.BaseAddress;
             if (m_pSteamClient == IntPtr.Zero)
             {
                 return false;
             }
 
-            var (m_pSteamUser, _) = CreateInterface(STEAMUSER_INTERFACE_VERSION);
+            m_pSteamUser = SteamEmulator.SteamUser.BaseAddress;
             if (m_pSteamUser == IntPtr.Zero)
             {
                 return false;
             }
 
-            var (m_pSteamFriends, _) = CreateInterface(STEAMFRIENDS_INTERFACE_VERSION);
+            m_pSteamFriends = SteamEmulator.SteamFriends.BaseAddress;
             if (m_pSteamFriends == IntPtr.Zero)
             {
                 return false;
             }
 
-            var (m_pSteamUtils, _) = CreateInterface(STEAMUTILS_INTERFACE_VERSION);
+            m_pSteamUtils = SteamEmulator.SteamUtils.BaseAddress;
             if (m_pSteamUtils == IntPtr.Zero)
             {
                 return false;
             }
 
-            var (m_pSteamMatchmaking, _) = CreateInterface(STEAMMATCHMAKING_INTERFACE_VERSION);
+            m_pSteamMatchmaking = SteamEmulator.SteamMatchmaking.BaseAddress;
             if (m_pSteamMatchmaking == IntPtr.Zero)
             {
                 return false;
             }
 
-            var (m_pSteamMatchmakingServers, _) = CreateInterface(STEAMMATCHMAKINGSERVERS_INTERFACE_VERSION);
+            m_pSteamMatchmakingServers = SteamEmulator.SteamMatchMakingServers.BaseAddress;
             if (m_pSteamMatchmakingServers == IntPtr.Zero)
             {
                 return false;
             }
 
-            var (m_pSteamUserStats, _) = CreateInterface(STEAMUSERSTATS_INTERFACE_VERSION);
+            m_pSteamUserStats = SteamEmulator.SteamUserStats.BaseAddress;
             if (m_pSteamUserStats == IntPtr.Zero)
             {
                 return false;
             }
 
-            var (m_pSteamApps, _) = CreateInterface(STEAMAPPS_INTERFACE_VERSION);
+            m_pSteamApps = SteamEmulator.SteamApps.BaseAddress;
             if (m_pSteamApps == IntPtr.Zero)
             {
                 return false;
             }
 
-            var (m_pSteamNetworking, _) = CreateInterface(STEAMNETWORKING_INTERFACE_VERSION);
+            m_pSteamNetworking = SteamEmulator.SteamNetworking.BaseAddress;
             if (m_pSteamNetworking == IntPtr.Zero)
             {
                 return false;
             }
 
-            var (m_pSteamRemoteStorage, _) = CreateInterface(STEAMREMOTESTORAGE_INTERFACE_VERSION);
+            m_pSteamRemoteStorage = SteamEmulator.SteamMusicRemote.BaseAddress;
             if (m_pSteamRemoteStorage == IntPtr.Zero)
             {
                 return false;
             }
 
-            var (m_pSteamScreenshots, _) = CreateInterface(STEAMSCREENSHOTS_INTERFACE_VERSION);
+            m_pSteamScreenshots = SteamEmulator.SteamScreenshots.BaseAddress;
             if (m_pSteamScreenshots == IntPtr.Zero)
             {
                 return false;
             }
 
-            var (m_pSteamHTTP, _) = CreateInterface(STEAMHTTP_INTERFACE_VERSION);
+            m_pSteamHTTP = SteamEmulator.SteamHTTP.BaseAddress;
             if (m_pSteamHTTP == IntPtr.Zero)
             {
                 return false;
             }
 
-            var (m_pSteamController, _) = CreateInterface(STEAMCONTROLLER_INTERFACE_VERSION);
+            m_pSteamController = SteamEmulator.SteamController.BaseAddress;
             if (m_pSteamController == IntPtr.Zero)
             {
                 return false;
             }
 
-            var (m_pSteamUGC, _) = CreateInterface(STEAMUGC_INTERFACE_VERSION);
+            m_pSteamUGC = SteamEmulator.SteamUGC.BaseAddress;
             if (m_pSteamUGC == IntPtr.Zero)
             {
                 return false;
             }
 
-            var (m_pSteamAppList, _) = CreateInterface(STEAMAPPLIST_INTERFACE_VERSION);
+            m_pSteamAppList = SteamEmulator.SteamAppList.BaseAddress;
             if (m_pSteamAppList == IntPtr.Zero)
             {
                 return false;
             }
 
-            var (m_pSteamMusic, _) = CreateInterface(STEAMMUSIC_INTERFACE_VERSION);
+            m_pSteamMusic = SteamEmulator.SteamMusic.BaseAddress;
             if (m_pSteamMusic == IntPtr.Zero)
             {
                 return false;
             }
 
-            var (m_pSteamMusicRemote, _) = CreateInterface(STEAMMUSICREMOTE_INTERFACE_VERSION);
+            m_pSteamMusicRemote = SteamEmulator.SteamMusicRemote.BaseAddress;
             if (m_pSteamMusicRemote == IntPtr.Zero)
             {
                 return false;
             }
 
-            var (m_pSteamHTMLSurface, _) = CreateInterface(STEAMHTMLSURFACE_INTERFACE_VERSION);
+            m_pSteamHTMLSurface = SteamEmulator.SteamHTMLSurface.BaseAddress;
             if (m_pSteamHTMLSurface == IntPtr.Zero)
             {
                 return false;
             }
 
-            var (m_pSteamInventory, _) = CreateInterface(STEAMINVENTORY_INTERFACE_VERSION);
+            m_pSteamInventory = SteamEmulator.SteamInventory.BaseAddress;
             if (m_pSteamInventory == IntPtr.Zero)
             {
                 return false;
             }
 
-            var (m_pSteamVideo, _) = CreateInterface(STEAMVIDEO_INTERFACE_VERSION);
+            m_pSteamVideo = SteamEmulator.SteamVideo.BaseAddress;
             if (m_pSteamVideo == IntPtr.Zero)
             {
                 return false;
@@ -238,82 +238,5 @@ namespace Steamworks.Core
 
             return true;
         }
-
-        private (IntPtr, IBaseInterface) CreateInterface(string pszVersion)
-        {
-            if (pszVersion.StartsWith("SteamUtils"))
-            {
-                pszVersion = "";
-            }
-            if (pszVersion.StartsWith("SteamUser"))
-            { pszVersion = "SteamUser019"; }
-            if (pszVersion.StartsWith("SteamClient"))
-            { pszVersion = "SteamClient017"; }
-            if (pszVersion.StartsWith("SteamFriends"))
-            { pszVersion = "SteamFriends015"; }
-            if (pszVersion.StartsWith("SteamMatchMaking"))
-            { pszVersion = "SteamMatchmaking009"; }
-            if (pszVersion.StartsWith("SteamMatchGameSearch"))
-            { pszVersion = "SteamMatchmakingServers002"; }
-            if (pszVersion.StartsWith("SteamMatchMakingServers"))
-            { pszVersion = "SteamMatchmakingServers002"; }
-            if (pszVersion.StartsWith("STEAMUSERSTATS_INTERFACE_VERSION"))
-            { pszVersion = "SteamUserStats011"; }
-            if (pszVersion.StartsWith("STEAMAPPS_INTERFACE_VERSION"))
-            { pszVersion = "SteamApps008"; }
-            if (pszVersion.StartsWith("SteamNetworking"))
-            { pszVersion = "SteamNetworking005"; }
-            if (pszVersion.StartsWith("STEAMREMOTESTORAGE_INTERFACE_VERSION"))
-            { pszVersion = "SteamRemoteStorage014"; }
-            if (pszVersion.StartsWith("STEAMSCREENSHOTS_INTERFACE_VERSION"))
-            { pszVersion = "SteamScreenshots003"; }
-            if (pszVersion.StartsWith("STEAMHTTP_INTERFACE_VERSION"))
-            { pszVersion = "SteamHTTP002"; }
-            if (pszVersion.StartsWith("SteamController"))
-            { pszVersion = "SteamController006"; }
-            if (pszVersion.StartsWith("STEAMUGC_INTERFACE_VERSION"))
-            { pszVersion = "SteamUGC010"; }
-            if (pszVersion.StartsWith("STEAMAPPLIST_INTERFACE_VERSION"))
-            { pszVersion = "SteamAppList001"; }
-            if (pszVersion.StartsWith("STEAMMUSIC_INTERFACE_VERSION"))
-            { pszVersion = "SteamMusic001"; }
-            if (pszVersion.StartsWith("STEAMMUSICREMOTE_INTERFACE_VERSION"))
-            { pszVersion = "SteamMusicRemote001"; }
-            if (pszVersion.StartsWith("STEAMHTMLSURFACE_INTERFACE_VERSION_"))
-            { pszVersion = "SteamHTMLSurface004"; }
-            if (pszVersion.StartsWith("STEAMINVENTORY_INTERFACE_V"))
-            { pszVersion = "SteamInventory003"; }
-            if (pszVersion.StartsWith("STEAMVIDEO_INTERFACE_V"))
-            { pszVersion = "SteamVideo002"; }
-            //if (pszVersion.StartsWith("STEAMPARENTALSETTINGS_INTERFACE_VERSION"))
-            //{ pszVersion = ""; }
-
-            IntPtr context;
-            IBaseInterface iface;
-
-            return (context, iface) = Context.CreateInterface(pszVersion);
-        }
-
-        public const string STEAMCLIENT_INTERFACE_VERSION = "SteamClient017";
-        public const string STEAMUSER_INTERFACE_VERSION = "SteamUser019";
-        public const string STEAMFRIENDS_INTERFACE_VERSION = "SteamFriends015";
-        public const string STEAMUTILS_INTERFACE_VERSION = "SteamUtils008";
-        public const string STEAMMATCHMAKING_INTERFACE_VERSION = "SteamMatchMaking009";
-        public const string STEAMMATCHMAKINGSERVERS_INTERFACE_VERSION = "SteamMatchMakingServers002";
-        public const string STEAMUSERSTATS_INTERFACE_VERSION = "STEAMUSERSTATS_INTERFACE_VERSION011";
-        public const string STEAMAPPS_INTERFACE_VERSION = "STEAMAPPS_INTERFACE_VERSION008";
-        public const string STEAMNETWORKING_INTERFACE_VERSION = "SteamNetworking005";
-        public const string STEAMREMOTESTORAGE_INTERFACE_VERSION = "STEAMREMOTESTORAGE_INTERFACE_VERSION014";
-        public const string STEAMSCREENSHOTS_INTERFACE_VERSION = "STEAMSCREENSHOTS_INTERFACE_VERSION003";
-        public const string STEAMHTTP_INTERFACE_VERSION = "STEAMHTTP_INTERFACE_VERSION002";
-        public const string STEAMUNIFIEDMESSAGES_INTERFACE_VERSION = "STEAMUNIFIEDMESSAGES_INTERFACE_VERSION001";
-        public const string STEAMCONTROLLER_INTERFACE_VERSION = "SteamController004";
-        public const string STEAMUGC_INTERFACE_VERSION = "STEAMUGC_INTERFACE_VERSION009";
-        public const string STEAMAPPLIST_INTERFACE_VERSION = "STEAMAPPLIST_INTERFACE_VERSION001";
-        public const string STEAMMUSIC_INTERFACE_VERSION = "STEAMMUSIC_INTERFACE_VERSION001";
-        public const string STEAMMUSICREMOTE_INTERFACE_VERSION = "STEAMMUSICREMOTE_INTERFACE_VERSION001";
-        public const string STEAMHTMLSURFACE_INTERFACE_VERSION = "STEAMHTMLSURFACE_INTERFACE_VERSION_003";
-        public const string STEAMINVENTORY_INTERFACE_VERSION = "STEAMINVENTORY_INTERFACE_V001";
-        public const string STEAMVIDEO_INTERFACE_VERSION = "STEAMVIDEO_INTERFACE_V001";
     }
 }
