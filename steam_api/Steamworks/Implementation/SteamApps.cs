@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using Core.Interface;
+using SKYNET;
 using SKYNET.Helper;
 using SKYNET.Interface;
 using Steamworks;
@@ -242,5 +243,10 @@ public class SteamApps : IBaseInterface, ISteamApps
     {
         Write("BIsTimedTrial");
         return false;
+    }
+
+    private void Write(string v)
+    {
+        Main.Write(InterfaceVersion, v);
     }
 }

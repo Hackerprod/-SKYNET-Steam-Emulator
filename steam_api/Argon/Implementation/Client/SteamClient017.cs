@@ -55,7 +55,7 @@ namespace InterfaceClient
         {
             try
             {
-                return InterfaceManager.CreateInterface(pipe, version);
+                return InterfaceManager.FindOrCreateInterface(version);
             }
             catch (Exception e)
             {
@@ -245,6 +245,11 @@ namespace InterfaceClient
         {
             Write("GetSteamVideo");
             return CreateInterface(pipe, user, version);
+        }
+
+        private void Write(string v)
+        {
+            Main.Write(InterfaceVersion, v);
         }
     }
 }

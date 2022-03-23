@@ -21,15 +21,8 @@ namespace Core.Interface
 
         public Plugin.InterfaceImpl Implementation { get; set; }
         public IntPtr BaseAddress { get; set; }
+        public string InterfaceVersion { get; set; }
 
-        public void Write(string v)
-        {
-            Main.Write(v);
-        }
-        public void Write(string sender, string v)
-        {
-            Main.Write(sender, v);
-        }
     }
 
     public class IBaseInterfaceMap : IBaseInterface

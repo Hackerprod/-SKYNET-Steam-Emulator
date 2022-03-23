@@ -1,4 +1,5 @@
 ﻿using Core.Interface;
+using SKYNET;
 using SKYNET.Interface;
 using System;
 
@@ -36,4 +37,8 @@ public class SteamParentalSettings : IBaseInterface, ISteamParentalSettings
         return false;
     }
 
+    private void Write(string v)
+    {
+        Main.Write(InterfaceVersion, v);
+    }
 }

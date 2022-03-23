@@ -1,5 +1,6 @@
 ﻿using System;
 using Core.Interface;
+using SKYNET;
 using SKYNET.Interface;
 using Steamworks;
 
@@ -192,5 +193,10 @@ public class SteamHTMLSurface : IBaseInterface, ISteamHTMLSurface
     public void ViewSource(IntPtr unBrowserHandle)
     {
         Write("ViewSource");
+    }
+
+    private void Write(string v)
+    {
+        Main.Write(InterfaceVersion, v);
     }
 }

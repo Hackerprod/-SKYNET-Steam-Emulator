@@ -22,10 +22,9 @@ namespace SKYNET
             PluginHooks = new List<IHook>();
 
             InstallHook(new LdrLoadDll());
-            //InstallHook(new SteamInternal_ContextInit());
 
             Hooks.Add(new SKYNET.Hook.SteamInternal());
-            //Hooks.Add(new SKYNET.Hook.SteamAPI());
+            Hooks.Add(new SKYNET.Hook.SteamAPI());
 
             if (!Modules.Contains("steam_api.dll") || !Modules.Contains("steam_api64.dll"))
             {

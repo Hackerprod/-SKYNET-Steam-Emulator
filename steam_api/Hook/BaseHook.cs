@@ -39,9 +39,6 @@ namespace SKYNET.Hook
         }
         public abstract void Install();
 
-        public void Write(string v)
-        {
-            Main.Write("BaseHook", v);
-        }
+        public abstract void Write(object v);
     }
 }

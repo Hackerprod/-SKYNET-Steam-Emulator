@@ -55,7 +55,7 @@ namespace SKYNET.Interface
             string pGameDescription);
 
         // Call this to clear the whole list of key/values that are sent in rules queries.
-        void ClearAllKeyValues();
+        void ClearAllKeyValues(IntPtr _);
 
         // Call this to add/update a key/value pair.
         void SetKeyValue(string pKey, string pValue);
@@ -63,21 +63,21 @@ namespace SKYNET.Interface
 
         // You can call this upon shutdown to clear out data stored for this game server and
         // to tell the master servers that this server is going away.
-        void NotifyShutdown();
+        void NotifyShutdown(IntPtr _);
 
         // Returns true if the master server has requested a restart.
         // Only returns true once per request.
-        bool WasRestartRequested();
+        bool WasRestartRequested(IntPtr _);
 
         // Force it to request a heartbeat from the master servers.
-        void ForceHeartbeat();
+        void ForceHeartbeat(IntPtr _);
 
         // Manually edit and query the master server list.
         // It will provide name resolution and use the default master server port if none is provided.
         bool AddMasterServer(string pServerAddress);
         bool RemoveMasterServer(string pServerAddress);
 
-        int GetNumMasterServers();
+        int GetNumMasterServers(IntPtr _);
 
         // Returns the # of bytes written to pOut.
         int GetMasterServerAddress(int iServer, string pOut, int outBufferSize);

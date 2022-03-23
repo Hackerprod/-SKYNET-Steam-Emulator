@@ -41,4 +41,9 @@ public class SteamAppList : IBaseInterface, ISteamAppList
         Write("Steam_Applist::GetNumInstalledApps\n");
         return 0;
     }
+
+    private void Write(string v)
+    {
+        Main.Write(InterfaceVersion, v);
+    }
 }

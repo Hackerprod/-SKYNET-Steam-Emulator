@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using Core.Interface;
+using SKYNET;
 using SKYNET.Interface;
 using SKYNET.Types;
 using Steamworks;
@@ -24,5 +25,10 @@ public class SteamGameCoordinator : IBaseInterface, ISteamGameCoordinator
     {
         Write("SendMessage_");
         return EGCResults.k_EGCResultOK;
+    }
+
+    private void Write(string v)
+    {
+        Main.Write(InterfaceVersion, v);
     }
 }

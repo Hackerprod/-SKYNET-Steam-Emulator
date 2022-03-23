@@ -1,6 +1,7 @@
 using System;
 
 using Core.Interface;
+using SKYNET;
 
 namespace InterfaceUser
 {
@@ -363,6 +364,11 @@ namespace InterfaceUser
         public void SetComputerInUse()
         {
 
+        }
+
+        private void Write(string v)
+        {
+            Main.Write(InterfaceVersion, v);
         }
     }
 }

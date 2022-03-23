@@ -119,16 +119,6 @@ public class InterfaceManager
         
     }
 
-    internal static IntPtr FindOrCreateInterface(int hSteamUser, int hSteamPipe, string pchVersion)
-    {
-        if (Interfaces.ContainsKey(pchVersion))
-        {
-            return Interfaces[pchVersion];
-        }
-        var(Address, IBaseInterface) = Context.CreateInterface(pchVersion);
-        Interfaces.Add(pchVersion, Address);
-        return Address;
-    }
 
     internal static IntPtr CreateInterfaceNoUser(int pipe, string version)
     {
@@ -160,29 +150,140 @@ public class InterfaceManager
         return all_methods;
     }
 
-    public static IntPtr CreateInterface(string version)
-    {
-        return FindOrCreateInterface(1, 1, version);
-    }
-
-    public static IntPtr CreateInterface(int hSteamUser, int hSteamPipe, string version)
-    {
-        return FindOrCreateInterface(hSteamUser, hSteamPipe, version);
-    }
-
-    public static IntPtr CreateInterface(int hSteamUser, string pszVersion)
-    {
-        return FindOrCreateInterface(hSteamUser, 1, pszVersion);
-    }
-
     public static IntPtr FindOrCreateGameServerInterface(int hSteamUser, string pszVersion)
     {
         return FindOrCreateInterface(hSteamUser, 1, pszVersion);
     }
 
-    public static IntPtr GetGenericInterface(int hSteamUser, int hSteamPipe, string pchVersion)
+    public static IntPtr FindOrCreateInterface(string pchVersion)
     {
-        return FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
+        return FindOrCreateInterface(1, 1, pchVersion);
     }
+    public static IntPtr FindOrCreateInterface(int hSteamUser, int hSteamPipe, string pszVersion)
+    {
+        if (pszVersion.StartsWith("SteamUtils"))
+        {
+            SteamEmulator.SteamUtils.InterfaceVersion = pszVersion;
+            return SteamEmulator.SteamUtils.BaseAddress;
+        }
+        if (pszVersion.StartsWith("SteamUser"))
+        {
+            SteamEmulator.SteamUser.InterfaceVersion = pszVersion;
+            return SteamEmulator.SteamUser.BaseAddress;
+        }
+        if (pszVersion.StartsWith("SteamClient"))
+        {
+            SteamEmulator.SteamClient.InterfaceVersion = pszVersion;
+            return SteamEmulator.SteamClient.BaseAddress;
+        }
+        if (pszVersion.StartsWith("SteamFriends"))
+        {
+            SteamEmulator.SteamFriends.InterfaceVersion = pszVersion;
+            return SteamEmulator.SteamFriends.BaseAddress;
+        }
+        if (pszVersion.StartsWith("SteamMatchMaking"))
+        {
+            SteamEmulator.SteamMatchmaking.InterfaceVersion = pszVersion;
+            return SteamEmulator.SteamMatchmaking.BaseAddress;
+        }
+        if (pszVersion.StartsWith("SteamMatchGameSearch"))
+        {
+            SteamEmulator.SteamGameSearch.InterfaceVersion = pszVersion;
+            return SteamEmulator.SteamGameSearch.BaseAddress;
+        }
+        if (pszVersion.StartsWith("SteamMatchMakingServers"))
+        {
+            SteamEmulator.SteamMatchMakingServers.InterfaceVersion = pszVersion;
+            return SteamEmulator.SteamMatchMakingServers.BaseAddress;
+        }
+        if (pszVersion.StartsWith("STEAMUSERSTATS_INTERFACE_VERSION"))
+        {
+            SteamEmulator.SteamUserStats.InterfaceVersion = pszVersion;
+            return SteamEmulator.SteamUserStats.BaseAddress;
+        }
+        if (pszVersion.StartsWith("STEAMAPPS_INTERFACE_VERSION"))
+        {
+            SteamEmulator.SteamApps.InterfaceVersion = pszVersion;
+            return SteamEmulator.SteamApps.BaseAddress;
+        }
+        if (pszVersion.StartsWith("SteamNetworking"))
+        {
+            SteamEmulator.SteamNetworking.InterfaceVersion = pszVersion;
+            return SteamEmulator.SteamNetworking.BaseAddress;
+        }
+        if (pszVersion.StartsWith("STEAMREMOTESTORAGE_INTERFACE_VERSION"))
+        {
+            SteamEmulator.SteamRemoteStorage.InterfaceVersion = pszVersion;
+            return SteamEmulator.SteamRemoteStorage.BaseAddress;
+        }
+        if (pszVersion.StartsWith("STEAMSCREENSHOTS_INTERFACE_VERSION"))
+        {
+            SteamEmulator.SteamScreenshots.InterfaceVersion = pszVersion;
+            return SteamEmulator.SteamScreenshots.BaseAddress;
+        }
+        if (pszVersion.StartsWith("STEAMHTTP_INTERFACE_VERSION"))
+        {
+            SteamEmulator.SteamFriends.InterfaceVersion = pszVersion;
+            return SteamEmulator.SteamFriends.BaseAddress;
+        }
+        if (pszVersion.StartsWith("SteamController"))
+        {
+            SteamEmulator.SteamController.InterfaceVersion = pszVersion;
+            return SteamEmulator.SteamController.BaseAddress;
+        }
+        if (pszVersion.StartsWith("STEAMUGC_INTERFACE_VERSION"))
+        {
+            SteamEmulator.SteamUGC.InterfaceVersion = pszVersion;
+            return SteamEmulator.SteamUGC.BaseAddress;
+        }
+        if (pszVersion.StartsWith("STEAMAPPLIST_INTERFACE_VERSION"))
+        {
+            SteamEmulator.SteamAppList.InterfaceVersion = pszVersion;
+            return SteamEmulator.SteamAppList.BaseAddress;
+        }
+        if (pszVersion.StartsWith("STEAMMUSIC_INTERFACE_VERSION"))
+        {
+            SteamEmulator.SteamMusic.InterfaceVersion = pszVersion;
+            return SteamEmulator.SteamMusic.BaseAddress;
+        }
+        if (pszVersion.StartsWith("STEAMMUSICREMOTE_INTERFACE_VERSION"))
+        {
+            SteamEmulator.SteamMusicRemote.InterfaceVersion = pszVersion;
+            return SteamEmulator.SteamMusicRemote.BaseAddress;
+        }
+        if (pszVersion.StartsWith("STEAMHTMLSURFACE_INTERFACE_VERSION_"))
+        {
+            SteamEmulator.SteamHTMLSurface.InterfaceVersion = pszVersion;
+            return SteamEmulator.SteamHTMLSurface.BaseAddress;
+        }
+        if (pszVersion.StartsWith("STEAMINVENTORY_INTERFACE_V"))
+        {
+            SteamEmulator.SteamInventory.InterfaceVersion = pszVersion;
+            return SteamEmulator.SteamInventory.BaseAddress;
+        }
+        if (pszVersion.StartsWith("STEAMVIDEO_INTERFACE_V"))
+        {
+            SteamEmulator.SteamVideo.InterfaceVersion = pszVersion;
+            return SteamEmulator.SteamVideo.BaseAddress;
+        }
+        if (pszVersion.StartsWith("STEAMPARENTALSETTINGS_INTERFACE_VERSION"))
+        {
+            SteamEmulator.SteamParentalSettings.InterfaceVersion = pszVersion;
+            return SteamEmulator.SteamParentalSettings.BaseAddress;
+        }
+
+        var (context, iface) = Context.CreateInterface(pszVersion);
+        return context;
+
+
+        //if (Interfaces.ContainsKey(pchVersion))
+        //{
+        //    return Interfaces[pchVersion];
+        //}
+        //var (Address, IBaseInterface) = Context.CreateInterface(pchVersion);
+        //Interfaces.Add(pchVersion, Address);
+        //return Address;
+    }
+
 
 }

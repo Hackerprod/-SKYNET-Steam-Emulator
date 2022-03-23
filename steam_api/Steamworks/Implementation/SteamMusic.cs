@@ -1,4 +1,5 @@
 ﻿using Core.Interface;
+using SKYNET;
 using SKYNET.Interface;
 using System;
 
@@ -49,5 +50,10 @@ public class SteamMusic : IBaseInterface, ISteamMusic
     public void SetVolume(float flVolume)
     {
         //
+    }
+
+    private void Write(string v)
+    {
+        Main.Write(InterfaceVersion, v);
     }
 }

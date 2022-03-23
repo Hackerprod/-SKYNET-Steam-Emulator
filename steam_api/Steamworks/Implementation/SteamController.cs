@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Core.Interface;
+using SKYNET;
 using SKYNET.Interface;
 
 //[Interface.MapAttribute("SteamController")]
@@ -240,5 +241,10 @@ public class SteamController : IBaseInterface, ISteamController
     public void TriggerVibration(IntPtr controllerHandle, uint usLeftSpeed, uint usRightSpeed)
     {
         Write("TriggerVibration");
+    }
+
+    private void Write(string v)
+    {
+        Main.Write(InterfaceVersion, v);
     }
 }

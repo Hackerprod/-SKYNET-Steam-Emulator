@@ -132,5 +132,11 @@ namespace SKYNET.Delegate
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate void RunCallbacks(IntPtr pCallbacks);
+
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate bool SteamDatagramClient_Init(bool bNoSteamSupport, IntPtr errMsg);
+
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate bool SteamDatagramServer_Init(bool bNoSteamSupport, IntPtr errMsg);
     }
 }

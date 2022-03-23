@@ -1,5 +1,6 @@
 ﻿using System;
 using Core.Interface;
+using SKYNET;
 using SKYNET.Interface;
 
 //[Map("STEAMMUSICREMOTE_INTERFACE_VERSION")]
@@ -166,4 +167,8 @@ public class SteamMusicRemote : IBaseInterface, ISteamMusicRemote
         return false;
     }
 
+    private void Write(string v)
+    {
+        Main.Write(InterfaceVersion, v);
+    }
 }

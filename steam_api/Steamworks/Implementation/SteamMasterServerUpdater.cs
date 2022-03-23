@@ -25,7 +25,7 @@ public class SteamMasterServerUpdater : IBaseInterface, ISteamMasterServerUpdate
         return 0;
     }
 
-    public void ClearAllKeyValues()
+    public void ClearAllKeyValues(IntPtr _)
     {
         //
     }
@@ -35,17 +35,17 @@ public class SteamMasterServerUpdater : IBaseInterface, ISteamMasterServerUpdate
         //
     }
 
-    public void NotifyShutdown()
+    public void NotifyShutdown(IntPtr _)
     {
         //
     }
 
-    public bool WasRestartRequested()
+    public bool WasRestartRequested(IntPtr _)
     {
         return false;
     }
 
-    public void ForceHeartbeat()
+    public void ForceHeartbeat(IntPtr _)
     {
         //
     }
@@ -60,7 +60,7 @@ public class SteamMasterServerUpdater : IBaseInterface, ISteamMasterServerUpdate
         return false;
     }
 
-    public int GetNumMasterServers()
+    public int GetNumMasterServers(IntPtr _)
     {
         return 0;
     }

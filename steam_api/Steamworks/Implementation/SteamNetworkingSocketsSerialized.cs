@@ -1,4 +1,5 @@
 ﻿using Core.Interface;
+using SKYNET;
 using SKYNET.Interface;
 using Steamworks;
 using System;
@@ -46,4 +47,8 @@ public class SteamNetworkingSocketsSerialized : IBaseInterface, ISteamNetworking
         //
     }
 
+    private void Write(string v)
+    {
+        Main.Write(InterfaceVersion, v);
+    }
 }

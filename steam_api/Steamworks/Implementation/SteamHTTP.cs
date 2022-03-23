@@ -1,5 +1,6 @@
 ﻿using System;
 using Core.Interface;
+using SKYNET;
 using SKYNET.Interface;
 
 //[Map("STEAMHTTP_INTERFACE_VERSION")]
@@ -134,5 +135,10 @@ public class SteamHTTP : IBaseInterface, ISteamHTTP
     public IntPtr SteamAPI_SteamGameServerHTTP_v003(IntPtr _)
     {
         return IntPtr.Zero;
+    }
+
+    private void Write(string v)
+    {
+        Main.Write(InterfaceVersion, v);
     }
 }

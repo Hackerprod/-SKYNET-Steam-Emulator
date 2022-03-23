@@ -42,7 +42,7 @@ public class SteamAPI_ISteamGameServerStats : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamGameServerStats_SetUserStat(IntPtr steamIDUser, string pchName, float fData)
+    public static bool SteamAPI_ISteamGameServerStats_SetUserStat(IntPtr steamIDUser, string pchName, int fData)
     {
         Write("SteamAPI_ISteamGameServerStats_SetUserStat");
         return SteamEmulator.SteamGameServerStats.SetUserStat(steamIDUser, pchName, fData);

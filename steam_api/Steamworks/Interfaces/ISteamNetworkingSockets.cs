@@ -673,6 +673,9 @@ namespace SKYNET.Interface
         ///
         /// Also note that callbacks will be posted when connections are created and destroyed by your own API calls.
 
+        bool SteamDatagramClient_Init(bool bNoSteamSupport, IntPtr errMsg);
+
+        bool SteamDatagramServer_Init(bool bNoSteamSupport, IntPtr errMsg);
     }
     /// Different methods of describing the identity of a network host
     public enum EIntPtrType

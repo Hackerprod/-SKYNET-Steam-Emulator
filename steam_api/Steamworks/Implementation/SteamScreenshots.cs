@@ -1,4 +1,5 @@
 ﻿using Core.Interface;
+using SKYNET;
 using SKYNET.Interface;
 using System;
 
@@ -51,4 +52,8 @@ public class SteamScreenshots : IBaseInterface, ISteamScreenshots
         return 0;
     }
 
+    private void Write(string v)
+    {
+        Main.Write(InterfaceVersion, v);
+    }
 }

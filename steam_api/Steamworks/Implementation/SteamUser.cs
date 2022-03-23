@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using Core.Interface;
+using SKYNET;
 using SKYNET.Interface;
 using Steamworks;
 
@@ -165,6 +166,10 @@ public class SteamUser : IBaseInterface, ISteamUser
     public bool BSetDurationControlOnlineState(IntPtr _, EDurationControlOnlineState eNewState)
     {
         return false;
+    }
+    private void Write(string v)
+    {
+        Main.Write(InterfaceVersion, v);
     }
 
 }

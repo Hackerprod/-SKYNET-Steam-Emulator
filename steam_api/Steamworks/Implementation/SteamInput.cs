@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Core.Interface;
+using SKYNET;
 using SKYNET.Interface;
 
 //[Map("SteamInput")]
@@ -243,5 +244,10 @@ public class SteamInput : IBaseInterface, ISteamInput
     public IntPtr SteamAPI_SteamInput_v005(IntPtr _)
     {
         return IntPtr.Zero;
+    }
+
+    private void Write(string v)
+    {
+        Main.Write(InterfaceVersion, v);
     }
 }

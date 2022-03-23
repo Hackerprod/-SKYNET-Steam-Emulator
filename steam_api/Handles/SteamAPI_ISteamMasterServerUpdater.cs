@@ -65,10 +65,10 @@ public class SteamAPI_ISteamMasterServerUpdater : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamMasterServerUpdater_WasRestartRequested()
+    public static bool SteamAPI_ISteamMasterServerUpdater_WasRestartRequested(IntPtr _)
     {
         Write("SteamAPI_ISteamMasterServerUpdater_WasRestartRequested");
-        return SteamEmulator.SteamMasterServerUpdater.WasRestartRequested();
+        return SteamEmulator.SteamMasterServerUpdater.WasRestartRequested(_);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -93,10 +93,10 @@ public class SteamAPI_ISteamMasterServerUpdater : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static int SteamAPI_ISteamMasterServerUpdater_GetNumMasterServers()
+    public static int SteamAPI_ISteamMasterServerUpdater_GetNumMasterServers(IntPtr _)
     {
         Write("SteamAPI_ISteamMasterServerUpdater_GetNumMasterServers");
-        return SteamEmulator.SteamMasterServerUpdater.GetNumMasterServers();
+        return SteamEmulator.SteamMasterServerUpdater.GetNumMasterServers(_);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

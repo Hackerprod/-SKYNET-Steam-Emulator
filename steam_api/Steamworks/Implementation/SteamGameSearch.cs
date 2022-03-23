@@ -1,5 +1,6 @@
 ﻿using System;
 using Core.Interface;
+using SKYNET;
 using SKYNET.Interface;
 
 //[Map("SteamGameSearch")]
@@ -74,5 +75,10 @@ public class SteamGameSearch : IBaseInterface, ISteamGameSearch
     public GameSearchErrorCode_t SubmitPlayerResult(ulong ullUniqueGameID, IntPtr steamIDPlayer, PlayerResult_t EPlayerResult)
     {
         return GameSearchErrorCode_t.OK;
+    }
+
+    private void Write(string v)
+    {
+        Main.Write(InterfaceVersion, v);
     }
 }

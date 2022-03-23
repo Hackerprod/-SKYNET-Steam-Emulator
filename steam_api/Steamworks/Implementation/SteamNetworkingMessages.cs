@@ -1,4 +1,5 @@
 ﻿using Core.Interface;
+using SKYNET;
 using SKYNET.Interface;
 using System;
 
@@ -34,4 +35,8 @@ public class SteamNetworkingMessages : IBaseInterface, ISteamNetworkingMessages
         return IntPtr.Zero;
     }
 
+    private void Write(string v)
+    {
+        Main.Write(InterfaceVersion, v);
+    }
 }

@@ -167,8 +167,6 @@
     <Compile Include="Hook\SteamApi\SteamAPI.cs" />
     <Compile Include="Hook\SteamInternal\SteamInternal_Delegates.cs" />
     <Compile Include="Hook\SteamInternal\SteamInternal.cs" />
-    <Compile Include="Hook\SteamInternal_ContextInit.cs" />
-    <Compile Include="Hook\SteamInternal_CreateInterface.cs" />
     <Compile Include="Hook\LdrLoadDll.cs" />
     <Compile Include="Types\CSteamAPIContext.cs" />
     <Compile Include="Helper\MemoryHelper.cs" />

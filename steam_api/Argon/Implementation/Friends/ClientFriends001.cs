@@ -3,6 +3,7 @@ using System;
 using System.Runtime.InteropServices;
 
 using Core.Interface;
+using SKYNET;
 
 namespace InterfaceFriends
 {
@@ -11,40 +12,44 @@ namespace InterfaceFriends
     {
         public string GetPersonaName()
         {
-            Write("ClientFriends001", "GetPersonaName");
+            Write("GetPersonaName");
             //f.GetLocalName();
             return "";
         }
 
         public void SetPersonaName(string name)
         {
-            Write("ClientFriends001", "SetPersonaName");
+            Write("SetPersonaName");
         }
 
         public int SetPersonaNameEx(string name, bool send_cb)
         {
-            Write("ClientFriends001", "SetPersonaNameEx");
+            Write("SetPersonaNameEx");
             return 1;
         }
 
 
         public bool IsPersonaNameSet()
         {
-            Write("ClientFriends001", "IsPersonaNameSet");
+            Write("IsPersonaNameSet");
             return true;
         }
 
 
         public int GetPersonaState()
         {
-            Write("ClientFriends001", "GetPersonaState");
+            Write("GetPersonaState");
             return 1;
         }
 
         public void SetPersonaState(int state)
         {
-            Write("ClientFriends001", "SetPersonaState");
+            Write("SetPersonaState");
         }
 
+        private void Write(string v)
+        {
+            Main.Write(InterfaceVersion, v);
+        }
     }
 }

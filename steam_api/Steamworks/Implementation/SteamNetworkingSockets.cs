@@ -1,4 +1,5 @@
 ﻿using Core.Interface;
+using SKYNET;
 using SKYNET.Interface;
 using SKYNET.Types;
 using System;
@@ -206,4 +207,20 @@ public class SteamNetworkingSockets : IBaseInterface, ISteamNetworkingSockets
         //
     }
 
+    public bool SteamDatagramClient_Init(bool bNoSteamSupport, IntPtr errMsg )
+    {
+        Write("SteamDatagramClient_Init");
+        return true;
+    }
+
+    public bool SteamDatagramServer_Init(bool bNoSteamSupport, IntPtr errMsg )
+    {
+        Write("SteamDatagramServer_Init");
+        return true;
+    }
+
+    private void Write(string v)
+    {
+        Main.Write(InterfaceVersion, v);
+    }
 }

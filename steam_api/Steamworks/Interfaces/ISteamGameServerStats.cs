@@ -15,9 +15,6 @@ namespace SKYNET.Interface
 
         bool GetUserStat(IntPtr steamIDUser, string pchName, int pData);
 
-
-        bool GetUserStat(IntPtr steamIDUser, string pchName, float pData);
-
         bool GetUserAchievement(IntPtr steamIDUser, string pchName, bool pbAchieved);
 
         // Set / update stats and achievements. 
@@ -27,9 +24,6 @@ namespace SKYNET.Interface
 
 
         bool SetUserStat(IntPtr steamIDUser, string pchName, int nData);
-
-
-        bool SetUserStat(IntPtr steamIDUser, string pchName, float fData);
 
         bool UpdateUserAvgRateStat(IntPtr steamIDUser, string pchName, float flCountThisSession, double dSessionLength);
 

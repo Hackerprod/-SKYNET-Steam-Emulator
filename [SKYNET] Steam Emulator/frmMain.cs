@@ -23,13 +23,14 @@ namespace SKYNET
 {
     public partial class frmMain : frmBase
     {
-        private List<Game> Games;
+        public static frmMain frm;
         private List<RunningGame> RunningGames;
 
         public Process InjectedProcess { get; set; }
         internal HookInterface HookInterface { get; set; }
 
         private GameBox SelectedBox;
+        private GameBox MenuBox;
 
         private string channel;
         private int ProcessId;
@@ -39,41 +40,65 @@ namespace SKYNET
             InitializeComponent();
             CheckForIllegalCrossThreadCalls = false;
             SetMouseMove(PN_Top);
+            frm = this;
 
-            Games = new List<Game>();
             RunningGames = new List<RunningGame>();
                  
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "Banner"));
 
+            List<Game> Games = new List<Game>();
             string game = Path.Combine("Data", "Games.json");
             if (File.Exists(game))
             {
-                string json = File.ReadAllText(game);
-                Games = new JavaScriptSerializer().Deserialize<List<Game>>(json);
+                try
+                {
+                    string json = File.ReadAllText(game);
+                    Games = new JavaScriptSerializer().Deserialize<List<Game>>(json);
+                }
+                catch (Exception)
+                {
+                    Games = new List<Game>();
+                    modCommon.Show("Error loading Game stored data");
+                }
             }
 
-            FindGame("");
+            foreach (var Game in Games)
+            {
+                AddBoxGame(Game);
+            }
 
             shadowBox1.BackColor = Color.FromArgb(100, 0, 0, 0);
 
         }
 
-        private void GameBox_Clicked(object sender, GameBox e)
+        private void GameBox_Clicked(object sender, MouseEventArgs e )
         {
-            SelectBox(e);
+            GameBox b = (GameBox)sender;
+            if (e.Button == MouseButtons.Left)
+            {
+                SelectBox(b);
+            }
+            if (e.Button == MouseButtons.Right)
+            {
+                MenuBox = b;
+                CM_MenuGame.Show(b, new Point(e.Location.X, e.Location.Y));
+            }
+            
+
         }
 
         private void GameBox_DoubleClicked(object sender, GameBox e)
         {
             SelectBox(e);
-            Inject(e);
+            OpenGame(e);
         }
 
         private void SelectBox(GameBox e)
         {
             SelectedBox = e;
+
             if (RunningGames.Find(x => x.Game == e.GetGame()) != null)
             {
                 BT_GameAction.Text = "CLOSE";
@@ -84,6 +109,7 @@ namespace SKYNET
                 BT_GameAction.Text = "PLAY";
                 BT_GameAction.BackColor = Color.FromArgb(46, 186, 65);
             }
+
             PB_Logo.Image = e.Image;
             LB_GameTittle.Text = e.GameName;
 
@@ -97,18 +123,68 @@ namespace SKYNET
                 PB_Banner.Image = Resources.Banner;
             }
 
+            foreach (var control in PN_GameContainer.Controls)
+            {
+                if (control is GameBox)
+                {
+                    ((GameBox)control).Selected = false;
+                }
+            }
+
+            e.Selected = true;
+            BT_GameAction.Visible = true;
+
         }
 
-        private void Inject(GameBox e)
+        public void AddGame(Game game)
         {
+            AddBoxGame(game);
+        }
+        public void UpdateGame(int boxHandle, Game game)
+        {
+            foreach (var control in PN_GameContainer.Controls)
+            {
+                if (control is GameBox && ((GameBox)control).Handle.ToInt32() == boxHandle)
+                {
+                    ((GameBox)control).SetGame(game);
+                    return;
+                }
+            }
+        }
+
+        private void AddBoxGame(Game game)
+        {
+            var module = new GameBox();
+            module.SetGame(game);
+            module.Dock = DockStyle.Top;
+            module.BoxClicked += GameBox_Clicked;
+            module.BoxDoubleClicked += GameBox_DoubleClicked;
+            module.BackColor = Color.FromArgb(36, 40, 47);
+            module.Color = Color.FromArgb(36, 40, 47);
+            module.Color_MouseHover = Color.FromArgb(50, 57, 74);
+            
+            PN_GameContainer.Controls.Add(module);
+        }
+
+
+        private void OpenGame(GameBox e)
+        {
+            Game game = e.GetGame();
+
+            if (game.LaunchWithoutEmu)
+            {
+                Process.Start(game.ExecutablePath, game.Parameters);
+                return;
+            }
+
             Task.Run(() =>
             {
                 richTextBox1.Clear();
-                Write("Opening " + e.GameName);
+                Write("Opening " + game.Name);
 
                 HookInterface = new HookInterface();
                 HookInterface.InjectionOptions = InjectionOptions.Default;
-                HookInterface.AppId = e.AppId;
+                HookInterface.AppId = game.AppId;
                 HookInterface.OnMessage += this.HookInterface_OnMessage;
 
                 channel = null;
@@ -120,7 +196,7 @@ namespace SKYNET
                     var InObject = WellKnownObjectMode.Singleton;
                     RemoteHooking.IpcCreateServer(ref channel, InObject, HookInterface);
                     HookInterface.ChannelName = channel;
-                    RemoteHooking.CreateAndInject(e.GamePath, e.Parametters, 0, HookInterface.InjectionOptions, InjectorPath, InjectorPath, out ProcessId, channel);
+                    RemoteHooking.CreateAndInject(game.ExecutablePath, game.Parameters, 0, HookInterface.InjectionOptions, InjectorPath, InjectorPath, out ProcessId, channel);
                     InjectedProcess = Process.GetProcessById(ProcessId);
                     WaitForExit();
                     RunningGames.Add(new RunningGame() { Game = e.GetGame(), Process = InjectedProcess });
@@ -179,42 +255,23 @@ namespace SKYNET
             }
         }
 
-        private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            modCommon.EnsureDirectoryExists("Data");
-
-            string game = Path.Combine("Data", "Games.json");
-            if (File.Exists(game))
-            {
-                string json = new JavaScriptSerializer().Serialize(Games);
-                File.WriteAllText(game, json);
-            }
-            try
-            {
-                InjectedProcess.Kill();
-            }
-            catch (Exception)
-            {
-
-            }
-        }
         private void Close_Clicked(object sender, EventArgs e)
         {
             string path = Path.Combine(modCommon.GetPath(), "Data");
             modCommon.EnsureDirectoryExists(path);
 
             string game = Path.Combine(path, "Games.json");
+
+            List<Game> Games = new List<Game>();
+            foreach (var control in PN_GameContainer.Controls)
+            {
+                if (control is GameBox)
+                {
+                    Games.Add(((GameBox)control).GetGame());
+                }
+            }
             string json = new JavaScriptSerializer().Serialize(Games);
             File.WriteAllText(game, json);
-
-            try
-            {
-                InjectedProcess?.Kill();
-            }
-            catch (Exception)
-            {
-
-            }
 
             Process.GetCurrentProcess().Kill();
         }
@@ -243,39 +300,29 @@ namespace SKYNET
             FindGame(TB_Search.Text);
         }
 
-        private void FindGame(string word)
+        private void FindGame(string word = "")
         {
-            PN_GameContainer.Controls.Clear();
-
-            foreach (var game in Games)
+            foreach (var control in PN_GameContainer.Controls)
             {
-                var module = new GameBox()
+                if (control is GameBox)
                 {
-                    GameName = game.Name,
-                    GamePath = game.Path,
-                    AppId = game.AppId,
-                    Parametters = game.Parametters
-                };
-                module.Dock = DockStyle.Top;
-                module.BoxClicked += GameBox_Clicked;
-                module.BoxDoubleClicked += GameBox_DoubleClicked;
-                module.BackColor = Color.FromArgb(36, 40, 47);
-                module.Color = Color.FromArgb(36, 40, 47);
-                module.Color_MouseHover = Color.FromArgb(50, 57, 74);
-                module.SetGame(game);
+                    GameBox Game = (GameBox)control;
 
-                if (string.IsNullOrEmpty(word))
-                {
-                    PN_GameContainer.Controls.Add(module);
-                }
-                else if (game.Name.ToLower().Contains(word.ToLower()))
-                {
-                    PN_GameContainer.Controls.Add(module);
-                }
-
-                if (SelectedBox == null)
-                {
-                    SelectBox(module);
+                    if (string.IsNullOrEmpty(word))
+                    {
+                        Game.Visible = true;
+                    }
+                    else
+                    {
+                        if (Game.Name.ToLower().Contains(word.ToLower()))
+                        {
+                            Game.Visible = true;
+                        }
+                        else
+                        {
+                            Game.Visible = false;
+                        }
+                    }
                 }
             }
         }
@@ -296,7 +343,7 @@ namespace SKYNET
         {
             if (BT_GameAction.Text == "PLAY")
             {
-                Inject(SelectedBox);
+                OpenGame(SelectedBox);
             }
             else
             {
@@ -312,5 +359,72 @@ namespace SKYNET
                 }
             }
         }
+
+        private void AddGame_Clicked(object sender, MouseEventArgs e)
+        {
+            OpenFileDialog fileDialog = new OpenFileDialog()
+            {
+                 Filter = "exe file | *.exe",
+                 Multiselect = false
+            };
+            if (fileDialog.ShowDialog() == DialogResult.OK)
+            {
+                new frmGameManager(fileDialog.FileName).ShowDialog();
+            }
+        }
+
+        #region Menu items events
+        private void ToTopMenuItem_Click(object sender, EventArgs e)
+        {
+            MenuBox.SendToBack();
+        }
+
+        private void OpenMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenGame(MenuBox);
+        }
+
+        private void OpenWithoutEmuMenuItem_Click(object sender, EventArgs e)
+        {
+            var game = MenuBox.GetGame();
+            Process.Start(game.ExecutablePath, game.Parameters);
+            return;
+        }
+
+        private void OpenFileLocationMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void ConfigureMenuItem_Click(object sender, EventArgs e)
+        {
+            new frmGameManager(MenuBox).ShowDialog();
+        }
+
+        private void RemoveMenuItem_Click(object sender, EventArgs e)
+        {
+            var dialog = MessageBox.Show("You are sure you want to remove this game", "", MessageBoxButtons.OKCancel);
+            if (dialog == DialogResult.OK)
+            {
+                for (int i = 0; i < PN_GameContainer.Controls.Count; i++)
+                {
+                    object control = PN_GameContainer.Controls[i];
+                    if (control is GameBox && ((GameBox)control).Handle == MenuBox.Handle)
+                    {
+                        PN_GameContainer.Controls.RemoveAt(i);
+                    }
+                }
+            }
+        }
+
+        private void ToButtomMenuItem_Click(object sender, EventArgs e)
+        {
+            MenuBox.BringToFront();
+        }
+
+
+        #endregion
+
+
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Core;
 using Core.Interface;
+using SKYNET;
 
 namespace InterfaceClient
 {
@@ -64,7 +65,7 @@ namespace InterfaceClient
             Write(string.Format("CreateInterface {0}", version));
             try
             {
-                return InterfaceManager.CreateInterface(user, pipe, version);
+                return InterfaceManager.FindOrCreateInterface(user, pipe, version);
             }
             catch (Exception e)
             {
@@ -427,5 +428,9 @@ namespace InterfaceClient
 
         }
 
+        private void Write(string v)
+        {
+            Main.Write(InterfaceVersion, v);
+        }
     }
 }

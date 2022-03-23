@@ -21,9 +21,10 @@ namespace SKYNET
         private uint _appId;
         private string _gamePath;
         private string _gameName;
+        private bool _selected;
 
         [Category("SKYNET")]
-        public event EventHandler<GameBox> BoxClicked;
+        public event EventHandler<MouseEventArgs> BoxClicked;
 
         [Category("SKYNET")]
         public event EventHandler<GameBox> BoxDoubleClicked;
@@ -55,6 +56,23 @@ namespace SKYNET
         }
 
         [Category("SKYNET")]
+        public bool Selected
+        {
+            get
+            {
+                return _selected;
+            }
+            set
+            {
+                _selected = value;
+                if (value)
+                    BackColor = Color_MouseHover;
+                else
+                    BackColor = Color;
+            }
+        }
+
+        [Category("SKYNET")]
         public string GamePath
         {
             get
@@ -66,7 +84,7 @@ namespace SKYNET
                 _gamePath = value;
                 if (File.Exists(value))
                 {
-                    Image = (Bitmap)IconFromFile(_gamePath);
+                    Image = (Bitmap)IconFromFile(value);
                 }
                 if (string.IsNullOrEmpty(LB_Name.Text))
                 {
@@ -89,7 +107,7 @@ namespace SKYNET
         }
 
         [Category("SKYNET")]
-        public string Parametters
+        public string Parameters
         {
             get
             {
@@ -137,7 +155,7 @@ namespace SKYNET
 
         private void Box_Clicked(object sender, MouseEventArgs e)
         {
-            BoxClicked?.Invoke(this, this);
+            BoxClicked?.Invoke(this, e);
         }
         public static Image IconFromFile(string filePath)
         {
@@ -191,11 +209,13 @@ namespace SKYNET
 
         private void Avatar_MouseMove(object sender, MouseEventArgs e)
         {
+            if (_selected) return;
             BackColor = Color_MouseHover;
         }
 
         private void Avatar_MouseLeave(object sender, EventArgs e)
         {
+            if (_selected) return;
             BackColor = Color;
         }
 
@@ -208,9 +228,13 @@ namespace SKYNET
         {
             return _game;
         }
-        public void SetGame(Game g)
+        public void SetGame(Game game)
         {
-            _game = g;
+            GameName = game.Name;
+            GamePath = game.ExecutablePath;
+            AppId = game.AppId;
+            Parameters = game.Parameters;
+            _game = game;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Core.Interface;
+using SKYNET;
 using SKYNET.Interface;
 using Steamworks;
 using System;
@@ -202,4 +203,8 @@ public class SteamUserStats : IBaseInterface, ISteamUserStats
         return false;
     }
 
+    private void Write(string v)
+    {
+        Main.Write(InterfaceVersion, v);
+    }
 }

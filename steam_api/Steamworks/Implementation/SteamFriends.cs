@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Core.Interface;
+using SKYNET;
 using SKYNET.Helper;
 using SKYNET.Interface;
 using SKYNET.Types;
@@ -561,6 +562,11 @@ public class SteamFriends : IBaseInterface, ISteamFriends
     {
         Write($"Steam_Friends.SetRichPresence {pchKey} {pchValue}");
         return true;
+    }
+
+    private void Write(string v)
+    {
+        Main.Write(InterfaceVersion, v);
     }
 }
 

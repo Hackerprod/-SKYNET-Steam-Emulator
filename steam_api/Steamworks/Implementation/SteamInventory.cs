@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using Core.Interface;
+using SKYNET;
 using SKYNET.Interface;
 using Steamworks;
 
@@ -196,5 +197,10 @@ public class SteamInventory : IBaseInterface, ISteamInventory
     public bool TriggerItemDrop(ref SteamInventoryResult_t pResultHandle, uint dropListDefinition)
     {
         return false;
+    }
+
+    private void Write(string v)
+    {
+        Main.Write(InterfaceVersion, v);
     }
 }

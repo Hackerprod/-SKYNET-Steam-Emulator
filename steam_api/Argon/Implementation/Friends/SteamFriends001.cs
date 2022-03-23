@@ -3,6 +3,7 @@
 using System.Runtime.InteropServices;
 
 using Core.Interface;
+using SKYNET;
 
 namespace InterfaceFriends
 {
@@ -15,60 +16,60 @@ namespace InterfaceFriends
 
         public string GetPersonaName()
         {
-            Write("SteamFriends001", "GetPersonaName");
+            Write("GetPersonaName");
             return "Federiko";
         }
 
         public uint GetPersonaState()
         {
-            Write("SteamFriends001", "GetPersonaState");
+            Write("GetPersonaState");
             return (uint)1;
         }
 
         public void SetPersonaState(uint state)
         {
-            Write("SteamFriends001", "SetPersonaState");
+            Write("SetPersonaState");
         }
 
         public bool AddFriend(ulong steam_id)
         {
-            Write("SteamFriends001", "AddFriend");
+            Write("AddFriend");
             return true;
         }
 
         public bool RemoveFriend(ulong steam_id)
         {
-            Write("SteamFriends001", "RemoveFriend");
+            Write("RemoveFriend");
             return true;
         }
 
         public bool HasFriend(ulong steam_id)
         {
-            Write("SteamFriends001", "HasFriend");
+            Write("HasFriend");
             return true;
         }
 
         public uint GetFriendRelationship(ulong steam_id)
         {
-            Write("SteamFriends001", "GetFriendRelationship");
+            Write("GetFriendRelationship");
             return (uint)0;
         }
 
         public uint GetFriendPersonaState(ulong steam_id)
         {
-            Write("SteamFriends001", "GetFriendPersonaState");
+            Write("GetFriendPersonaState");
             return (uint)1;
         }
 
         public bool Deprecated_GetFriendGamePlayed(ulong steam_id, ref uint app_id, ref uint game_ip, ref uint game_port)
         {
-            Write("SteamFriends001", "Deprecated_GetFriendGamePlayed");
+            Write("Deprecated_GetFriendGamePlayed");
             return false;
         }
 
         public string GetFriendPersonaName(ulong steam_id)
         {
-            Write("SteamFriends001", "GetFriendPersonaName");
+            Write("GetFriendPersonaName");
             return "Fede";
         }
 
@@ -76,25 +77,25 @@ namespace InterfaceFriends
         // For now we just perform the action and then return 0
         public int AddFriendByName(string name)
         {
-            Write("SteamFriends001", "AddFriendByName");
+            Write("AddFriendByName");
             return 0;
         }
 
         public int GetFriendCount()
         {
-            Write("SteamFriends001", "GetFriendCount");
+            Write("GetFriendCount");
             return 100;
         }
 
         public ulong GetFriendByIndex(int index)
         {
-            Write("SteamFriends001", "GetFriendByIndex");
+            Write("GetFriendByIndex");
             return 0;
         }
 
         public void SendMsgToFriend(ulong dest_steam_id, uint msg_type, string message_body)
         {
-            Write("SteamFriends001", "SendMsgToFriend");
+            Write("SendMsgToFriend");
         }
 
         public void SetFriendRegValue(ulong steam_id, string key, string value)
@@ -117,13 +118,13 @@ namespace InterfaceFriends
         [Buffer(Index = 2, NewPointerIndex = 2, NewSizeIndex = 3)]
         public int GetChatMessage(ulong steam_id, int msg_index, ref IntPtr b, ref uint msg_type)
         {
-            Write("SteamFriends001", "GetChatMessage");
+            Write("GetChatMessage");
             return 0;
         }
 
         public bool SendMsgToFriend2(ulong steam_id, uint type, string message, int length)
         {
-            Write("SteamFriends001", "SendMsgToFriend2");
+            Write("SendMsgToFriend2");
             return true;
         }
 
@@ -144,27 +145,31 @@ namespace InterfaceFriends
 
         public int InviteFriendByEmail(string email)
         {
-            Write("SteamFriends001", "InviteFriendByEmail");
+            Write("InviteFriendByEmail");
 
             return 0;
         }
 
         public int GetBlockedFriendCount()
         {
-            Write("SteamFriends001", "GetBlockedFriendCount");
+            Write("GetBlockedFriendCount");
             return 0;
         }
 
         public bool GetFriendGamePlayed(ulong steam_id, ref ulong game_id, ref uint server_ip, ref ushort server_port)
         {
-            Write("SteamFriends001", "GetFriendGamePlayed");
+            Write("GetFriendGamePlayed");
             return true;
         }
         public bool GetFriendGamePlayed2(ulong steam_id, ref ulong game_id, ref uint server_ip, ref ushort server_port)
         {
-            Write("SteamFriends001", "GetFriendGamePlayed2");
+            Write("GetFriendGamePlayed2");
             return GetFriendGamePlayed(steam_id, ref game_id, ref server_ip, ref server_port);
         }
 
+        private void Write(string v)
+        {
+            Main.Write(InterfaceVersion, v);
+        }
     }
 }

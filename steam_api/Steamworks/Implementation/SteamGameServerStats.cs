@@ -1,4 +1,5 @@
 ﻿using Core.Interface;
+using SKYNET;
 using SKYNET.Interface;
 using Steamworks;
 using System;
@@ -19,12 +20,6 @@ public class SteamGameServerStats : IBaseInterface, ISteamGameServerStats
     }
 
     public bool GetUserStat(IntPtr steamIDUser, string pchName, int pData)
-    {
-        Write("GetUserStat");
-        return false;
-    }
-
-    public bool GetUserStat(IntPtr steamIDUser, string pchName, float pData)
     {
         Write("GetUserStat");
         return false;
@@ -51,12 +46,6 @@ public class SteamGameServerStats : IBaseInterface, ISteamGameServerStats
         return false;
     }
 
-    public bool SetUserStat(IntPtr steamIDUser, string pchName, float fData)
-    {
-        Write("SetUserStat");
-        return false;
-    }
-
     public SteamAPICall_t StoreUserStats(IntPtr steamIDUser)
     {
         Write("StoreUserStats");
@@ -67,5 +56,10 @@ public class SteamGameServerStats : IBaseInterface, ISteamGameServerStats
     {
         Write("UpdateUserAvgRateStat");
         return false;
+    }
+
+    private void Write(string v)
+    {
+        Main.Write(InterfaceVersion, v);
     }
 }

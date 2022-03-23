@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using Core.Interface;
+using SKYNET;
 using SKYNET.Interface;
 using Steamworks;
 
@@ -172,4 +173,8 @@ public class SteamUtils : IBaseInterface, ISteamUtils
         return default;
     }
 
+    private void Write(string v)
+    {
+        Main.Write(InterfaceVersion, v);
+    }
 }

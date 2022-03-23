@@ -4,6 +4,7 @@ using Core;
 using Core.Interface;
 
 using System.Runtime.InteropServices;
+using SKYNET;
 
 namespace InterfaceUser
 {
@@ -194,6 +195,11 @@ namespace InterfaceUser
         {
             Write("IsPhoneRequiringVerification");
             return false;
+        }
+
+        private void Write(string v)
+        {
+            Main.Write(InterfaceVersion, v);
         }
     }
 }

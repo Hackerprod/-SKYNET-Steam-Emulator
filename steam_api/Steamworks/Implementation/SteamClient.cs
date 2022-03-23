@@ -108,7 +108,7 @@ public class SteamClient : IBaseInterface, ISteamClient
     public IntPtr GetISteamGenericInterface(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write("GetISteamGenericInterface");
-        return InterfaceManager.GetGenericInterface(hSteamUser, hSteamPipe, pchVersion);
+        return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
     }
 
     public IntPtr GetISteamUserStats(int hSteamUser, int hSteamPipe, string pchVersion)
@@ -240,6 +240,11 @@ public class SteamClient : IBaseInterface, ISteamClient
     public void SetPersonaName(string pchPersonaName)
     {
         modCommon.Show("SetPersonaName " + pchPersonaName);
+    }
+
+    private void Write(string v)
+    {
+        Main.Write(InterfaceVersion, v);
     }
 }
 
