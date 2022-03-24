@@ -51,6 +51,7 @@
             // LB_Name
             // 
             this.LB_Name.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.LB_Name.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
             this.LB_Name.ForeColor = System.Drawing.SystemColors.ButtonFace;
             this.LB_Name.Location = new System.Drawing.Point(45, 6);
             this.LB_Name.Name = "LB_Name";

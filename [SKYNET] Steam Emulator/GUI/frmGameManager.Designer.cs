@@ -38,6 +38,7 @@ namespace SKYNET
             this.BT_AddGame = new SKYNET_Button();
             this.PN_LeftContainer = new System.Windows.Forms.Panel();
             this.PN_BodyContainer = new System.Windows.Forms.Panel();
+            this.CHB_WithoutEmu = new SKYNET.Controls.SKYNET_Check();
             this.label6 = new System.Windows.Forms.Label();
             this.LB_Name = new System.Windows.Forms.Label();
             this.PB_Avatar = new System.Windows.Forms.PictureBox();
@@ -51,7 +52,6 @@ namespace SKYNET
             this.label2 = new System.Windows.Forms.Label();
             this.TB_Name = new SKYNET.Controls.SKYNET_TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.CHB_WithoutEmu = new SKYNET.Controls.SKYNET_Check();
             this.PN_Top.SuspendLayout();
             this.panel3.SuspendLayout();
             this.PN_BodyContainer.SuspendLayout();
@@ -165,14 +165,23 @@ namespace SKYNET
             this.PN_BodyContainer.Size = new System.Drawing.Size(741, 483);
             this.PN_BodyContainer.TabIndex = 10;
             // 
+            // CHB_WithoutEmu
+            // 
+            this.CHB_WithoutEmu.BackColor = System.Drawing.Color.Transparent;
+            this.CHB_WithoutEmu.Checked = false;
+            this.CHB_WithoutEmu.Location = new System.Drawing.Point(640, 438);
+            this.CHB_WithoutEmu.Name = "CHB_WithoutEmu";
+            this.CHB_WithoutEmu.Size = new System.Drawing.Size(34, 25);
+            this.CHB_WithoutEmu.TabIndex = 15;
+            // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Font = new System.Drawing.Font("Segoe UI Emoji", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label6.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
             this.label6.ForeColor = System.Drawing.SystemColors.ButtonFace;
             this.label6.Location = new System.Drawing.Point(63, 441);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(184, 16);
+            this.label6.Size = new System.Drawing.Size(196, 17);
             this.label6.TabIndex = 13;
             this.label6.Text = "Launch game without emulation ";
             // 
@@ -215,11 +224,11 @@ namespace SKYNET
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Font = new System.Drawing.Font("Segoe UI Emoji", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
             this.label5.ForeColor = System.Drawing.SystemColors.ButtonFace;
             this.label5.Location = new System.Drawing.Point(63, 367);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(44, 16);
+            this.label5.Size = new System.Drawing.Size(48, 17);
             this.label5.TabIndex = 9;
             this.label5.Text = "App ID";
             // 
@@ -242,11 +251,11 @@ namespace SKYNET
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Segoe UI Emoji", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
             this.label3.ForeColor = System.Drawing.SystemColors.ButtonFace;
             this.label3.Location = new System.Drawing.Point(63, 299);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(101, 16);
+            this.label3.Size = new System.Drawing.Size(112, 17);
             this.label3.TabIndex = 7;
             this.label3.Text = "Game Parameters";
             // 
@@ -269,11 +278,11 @@ namespace SKYNET
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Segoe UI Emoji", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
             this.label4.ForeColor = System.Drawing.SystemColors.ButtonFace;
             this.label4.Location = new System.Drawing.Point(63, 232);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(86, 16);
+            this.label4.Size = new System.Drawing.Size(92, 17);
             this.label4.TabIndex = 5;
             this.label4.Text = "SteamApi Path";
             // 
@@ -296,11 +305,11 @@ namespace SKYNET
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Segoe UI Emoji", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
             this.label2.ForeColor = System.Drawing.SystemColors.ButtonFace;
             this.label2.Location = new System.Drawing.Point(63, 164);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(91, 16);
+            this.label2.Size = new System.Drawing.Size(99, 17);
             this.label2.TabIndex = 3;
             this.label2.Text = "Executable Path";
             // 
@@ -324,22 +333,13 @@ namespace SKYNET
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Segoe UI Emoji", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
             this.label1.ForeColor = System.Drawing.SystemColors.ButtonFace;
             this.label1.Location = new System.Drawing.Point(63, 97);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(40, 16);
+            this.label1.Size = new System.Drawing.Size(43, 17);
             this.label1.TabIndex = 1;
             this.label1.Text = "Name";
-            // 
-            // CHB_WithoutEmu
-            // 
-            this.CHB_WithoutEmu.BackColor = System.Drawing.Color.Transparent;
-            this.CHB_WithoutEmu.Checked = false;
-            this.CHB_WithoutEmu.Location = new System.Drawing.Point(640, 438);
-            this.CHB_WithoutEmu.Name = "CHB_WithoutEmu";
-            this.CHB_WithoutEmu.Size = new System.Drawing.Size(34, 25);
-            this.CHB_WithoutEmu.TabIndex = 15;
             // 
             // frmGameManager
             // 

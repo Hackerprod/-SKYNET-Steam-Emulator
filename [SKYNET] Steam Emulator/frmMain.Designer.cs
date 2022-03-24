@@ -71,13 +71,13 @@ namespace SKYNET
             this.PN_BodyContainer = new System.Windows.Forms.Panel();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.CM_MenuGame = new SKYNET_ContextMenuStrip();
-            this.ToTopMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.OpenMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.ConfigureMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.RemoveMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.ToButtomMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.OpenWithoutEmuMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.OpenFileLocationMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.RemoveMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToTopMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToButtomMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ConfigureMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.PN_Top.SuspendLayout();
             this.panel3.SuspendLayout();
             this.panel4.SuspendLayout();
@@ -239,16 +239,16 @@ namespace SKYNET
             // 
             this.PN_GameContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(36)))), ((int)(((byte)(40)))), ((int)(((byte)(47)))));
             this.PN_GameContainer.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.PN_GameContainer.Location = new System.Drawing.Point(0, 227);
+            this.PN_GameContainer.Location = new System.Drawing.Point(0, 226);
             this.PN_GameContainer.Name = "PN_GameContainer";
-            this.PN_GameContainer.Size = new System.Drawing.Size(249, 338);
+            this.PN_GameContainer.Size = new System.Drawing.Size(249, 339);
             this.PN_GameContainer.TabIndex = 19;
             // 
             // panel8
             // 
             this.panel8.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(36)))), ((int)(((byte)(40)))), ((int)(((byte)(47)))));
             this.panel8.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel8.Location = new System.Drawing.Point(0, 222);
+            this.panel8.Location = new System.Drawing.Point(0, 221);
             this.panel8.Name = "panel8";
             this.panel8.Size = new System.Drawing.Size(249, 5);
             this.panel8.TabIndex = 18;
@@ -295,9 +295,9 @@ namespace SKYNET
             this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(42)))), ((int)(((byte)(46)))), ((int)(((byte)(51)))));
             this.panel1.Controls.Add(this.TB_Search);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel1.Location = new System.Drawing.Point(0, 175);
+            this.panel1.Location = new System.Drawing.Point(0, 169);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(249, 47);
+            this.panel1.Size = new System.Drawing.Size(249, 52);
             this.panel1.TabIndex = 15;
             // 
             // TB_Search
@@ -330,12 +330,12 @@ namespace SKYNET
             this.panel7.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel7.Location = new System.Drawing.Point(0, 40);
             this.panel7.Name = "panel7";
-            this.panel7.Size = new System.Drawing.Size(249, 135);
+            this.panel7.Size = new System.Drawing.Size(249, 129);
             this.panel7.TabIndex = 14;
             // 
             // skyneT_Button1
             // 
-            this.skyneT_Button1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(57)))), ((int)(((byte)(61)))), ((int)(((byte)(66)))));
+            this.skyneT_Button1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(46)))), ((int)(((byte)(88)))));
             this.skyneT_Button1.BackColorMouseOver = System.Drawing.Color.Empty;
             this.skyneT_Button1.Cursor = System.Windows.Forms.Cursors.Hand;
             this.skyneT_Button1.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -347,14 +347,14 @@ namespace SKYNET
             this.skyneT_Button1.MenuMode = false;
             this.skyneT_Button1.Name = "skyneT_Button1";
             this.skyneT_Button1.Rounded = false;
-            this.skyneT_Button1.Size = new System.Drawing.Size(100, 25);
+            this.skyneT_Button1.Size = new System.Drawing.Size(110, 25);
             this.skyneT_Button1.Style = SKYNET_Button._Style.TextOnly;
             this.skyneT_Button1.TabIndex = 18;
             this.skyneT_Button1.Text = "CONNECT";
             // 
             // BT_Connect
             // 
-            this.BT_Connect.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(57)))), ((int)(((byte)(61)))), ((int)(((byte)(66)))));
+            this.BT_Connect.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(34)))), ((int)(((byte)(131)))), ((int)(((byte)(246)))));
             this.BT_Connect.BackColorMouseOver = System.Drawing.Color.Empty;
             this.BT_Connect.Cursor = System.Windows.Forms.Cursors.Hand;
             this.BT_Connect.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -362,11 +362,11 @@ namespace SKYNET
             this.BT_Connect.ForeColorMouseOver = System.Drawing.Color.Empty;
             this.BT_Connect.ImageAlignment = SKYNET_Button._ImgAlign.Left;
             this.BT_Connect.ImageIcon = null;
-            this.BT_Connect.Location = new System.Drawing.Point(138, 100);
+            this.BT_Connect.Location = new System.Drawing.Point(128, 100);
             this.BT_Connect.MenuMode = false;
             this.BT_Connect.Name = "BT_Connect";
             this.BT_Connect.Rounded = false;
-            this.BT_Connect.Size = new System.Drawing.Size(100, 25);
+            this.BT_Connect.Size = new System.Drawing.Size(110, 25);
             this.BT_Connect.Style = SKYNET_Button._Style.TextOnly;
             this.BT_Connect.TabIndex = 17;
             this.BT_Connect.Text = "PROFILE";
@@ -499,7 +499,7 @@ namespace SKYNET
             this.PB_Banner.Controls.Add(this.LB_GameTittle);
             this.PB_Banner.Controls.Add(this.shadowBox1);
             this.PB_Banner.Dock = System.Windows.Forms.DockStyle.Top;
-            this.PB_Banner.Image = global::SKYNET.Properties.Resources.Banner;
+            this.PB_Banner.Image = global::SKYNET.Properties.Resources.Header_1;
             this.PB_Banner.Location = new System.Drawing.Point(249, 66);
             this.PB_Banner.Name = "PB_Banner";
             this.PB_Banner.Size = new System.Drawing.Size(893, 269);
@@ -511,7 +511,7 @@ namespace SKYNET
             // 
             this.PB_Logo.BackColor = System.Drawing.Color.Transparent;
             this.PB_Logo.Image = global::SKYNET.Properties.Resources.logo;
-            this.PB_Logo.Location = new System.Drawing.Point(121, 137);
+            this.PB_Logo.Location = new System.Drawing.Point(83, 137);
             this.PB_Logo.Name = "PB_Logo";
             this.PB_Logo.Size = new System.Drawing.Size(73, 67);
             this.PB_Logo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -520,13 +520,12 @@ namespace SKYNET
             // 
             // LB_GameTittle
             // 
-            this.LB_GameTittle.AutoSize = true;
             this.LB_GameTittle.BackColor = System.Drawing.Color.Transparent;
-            this.LB_GameTittle.Font = new System.Drawing.Font("Segoe UI Emoji", 36F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LB_GameTittle.Font = new System.Drawing.Font("Sitka Text", 36F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.LB_GameTittle.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.LB_GameTittle.Location = new System.Drawing.Point(202, 138);
+            this.LB_GameTittle.Location = new System.Drawing.Point(170, 131);
             this.LB_GameTittle.Name = "LB_GameTittle";
-            this.LB_GameTittle.Size = new System.Drawing.Size(592, 64);
+            this.LB_GameTittle.Size = new System.Drawing.Size(672, 75);
             this.LB_GameTittle.TabIndex = 11;
             this.LB_GameTittle.Text = "[SKYNET] Steam Emulator";
             // 
@@ -596,15 +595,7 @@ namespace SKYNET
             this.ConfigureMenuItem});
             this.CM_MenuGame.Name = "CM_MenuGame";
             this.CM_MenuGame.ShowImageMargin = false;
-            this.CM_MenuGame.Size = new System.Drawing.Size(193, 180);
-            // 
-            // ToTopMenuItem
-            // 
-            this.ToTopMenuItem.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
-            this.ToTopMenuItem.Name = "ToTopMenuItem";
-            this.ToTopMenuItem.Size = new System.Drawing.Size(192, 22);
-            this.ToTopMenuItem.Text = "Move to Top List";
-            this.ToTopMenuItem.Click += new System.EventHandler(this.ToTopMenuItem_Click);
+            this.CM_MenuGame.Size = new System.Drawing.Size(193, 158);
             // 
             // OpenMenuItem
             // 
@@ -613,30 +604,6 @@ namespace SKYNET
             this.OpenMenuItem.Size = new System.Drawing.Size(192, 22);
             this.OpenMenuItem.Text = "Open";
             this.OpenMenuItem.Click += new System.EventHandler(this.OpenMenuItem_Click);
-            // 
-            // ConfigureMenuItem
-            // 
-            this.ConfigureMenuItem.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
-            this.ConfigureMenuItem.Name = "ConfigureMenuItem";
-            this.ConfigureMenuItem.Size = new System.Drawing.Size(192, 22);
-            this.ConfigureMenuItem.Text = "Properties";
-            this.ConfigureMenuItem.Click += new System.EventHandler(this.ConfigureMenuItem_Click);
-            // 
-            // RemoveMenuItem
-            // 
-            this.RemoveMenuItem.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
-            this.RemoveMenuItem.Name = "RemoveMenuItem";
-            this.RemoveMenuItem.Size = new System.Drawing.Size(192, 22);
-            this.RemoveMenuItem.Text = "Delete";
-            this.RemoveMenuItem.Click += new System.EventHandler(this.RemoveMenuItem_Click);
-            // 
-            // ToButtomMenuItem
-            // 
-            this.ToButtomMenuItem.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
-            this.ToButtomMenuItem.Name = "ToButtomMenuItem";
-            this.ToButtomMenuItem.Size = new System.Drawing.Size(192, 22);
-            this.ToButtomMenuItem.Text = "Move to Bottom List";
-            this.ToButtomMenuItem.Click += new System.EventHandler(this.ToButtomMenuItem_Click);
             // 
             // OpenWithoutEmuMenuItem
             // 
@@ -653,6 +620,38 @@ namespace SKYNET
             this.OpenFileLocationMenuItem.Size = new System.Drawing.Size(192, 22);
             this.OpenFileLocationMenuItem.Text = "Open File Location";
             this.OpenFileLocationMenuItem.Click += new System.EventHandler(this.OpenFileLocationMenuItem_Click);
+            // 
+            // RemoveMenuItem
+            // 
+            this.RemoveMenuItem.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
+            this.RemoveMenuItem.Name = "RemoveMenuItem";
+            this.RemoveMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.RemoveMenuItem.Text = "Delete";
+            this.RemoveMenuItem.Click += new System.EventHandler(this.RemoveMenuItem_Click);
+            // 
+            // ToTopMenuItem
+            // 
+            this.ToTopMenuItem.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
+            this.ToTopMenuItem.Name = "ToTopMenuItem";
+            this.ToTopMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.ToTopMenuItem.Text = "Move to Top List";
+            this.ToTopMenuItem.Click += new System.EventHandler(this.ToTopMenuItem_Click);
+            // 
+            // ToButtomMenuItem
+            // 
+            this.ToButtomMenuItem.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
+            this.ToButtomMenuItem.Name = "ToButtomMenuItem";
+            this.ToButtomMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.ToButtomMenuItem.Text = "Move to Bottom List";
+            this.ToButtomMenuItem.Click += new System.EventHandler(this.ToButtomMenuItem_Click);
+            // 
+            // ConfigureMenuItem
+            // 
+            this.ConfigureMenuItem.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
+            this.ConfigureMenuItem.Name = "ConfigureMenuItem";
+            this.ConfigureMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.ConfigureMenuItem.Text = "Properties";
+            this.ConfigureMenuItem.Click += new System.EventHandler(this.ConfigureMenuItem_Click);
             // 
             // frmMain
             // 
@@ -688,7 +687,6 @@ namespace SKYNET
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Banner)).EndInit();
             this.PB_Banner.ResumeLayout(false);
-            this.PB_Banner.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Logo)).EndInit();
             this.shadowBox1.ResumeLayout(false);
             this.PN_BodyContainer.ResumeLayout(false);

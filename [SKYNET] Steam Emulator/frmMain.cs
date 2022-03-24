@@ -120,7 +120,7 @@ namespace SKYNET
             }
             else
             {
-                PB_Banner.Image = Resources.Banner;
+                PB_Banner.Image = Resources.Header_1;
             }
 
             foreach (var control in PN_GameContainer.Controls)
@@ -393,7 +393,7 @@ namespace SKYNET
 
         private void OpenFileLocationMenuItem_Click(object sender, EventArgs e)
         {
-
+            modCommon.OpenFolderAndSelectFile(MenuBox.GetGame().ExecutablePath);
         }
 
         private void ConfigureMenuItem_Click(object sender, EventArgs e)

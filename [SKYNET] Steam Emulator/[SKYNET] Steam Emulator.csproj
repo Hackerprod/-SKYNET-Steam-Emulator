@@ -251,8 +251,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="game.ico" />
+    <None Include="Resources\Header_1.jpg" />
     <None Include="Resources\coins.png" />
-    <None Include="Resources\Banner.jpg" />
     <None Include="Resources\main.js" />
     <None Include="Resources\jquery-3.6.0.min.js" />
     <None Include="Resources\style.css" />
