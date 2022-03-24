@@ -1,12 +1,13 @@
 ﻿using Core.Interface;
 using SKYNET;
-using SKYNET.Interface;
+
+using SKYNET.Steamworks;
 using Steamworks;
 using System;
 
 //[Map("STEAMREMOTESTORAGE_INTERFACE_VERSION")]
 //[Map("SteamRemoteStorage")]
-public class SteamRemoteStorage : IBaseInterface, ISteamRemoteStorage
+public class SteamRemoteStorage : IBaseInterface
 {
     public bool FileWrite(string pchFile, IntPtr pvData, int cubData)
     {

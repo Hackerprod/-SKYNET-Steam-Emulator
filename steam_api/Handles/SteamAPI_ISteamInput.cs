@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using SKYNET;
-using SKYNET.Interface;
 
 //public class SteamAPI_ISteamInput : BaseCalls
 //{

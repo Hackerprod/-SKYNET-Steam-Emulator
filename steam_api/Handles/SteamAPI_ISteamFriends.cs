@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using SKYNET;
 using SKYNET.Helper;
-using SKYNET.Interface;
+using SKYNET.Steamworks;
 using SKYNET.Types;
 using Steamworks;
 

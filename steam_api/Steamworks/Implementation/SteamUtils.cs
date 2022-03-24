@@ -2,11 +2,11 @@
 using System.Runtime.InteropServices;
 using Core.Interface;
 using SKYNET;
-using SKYNET.Interface;
+using SKYNET.Steamworks;
 using Steamworks;
 
 //[Map("SteamUtils")]
-public class SteamUtils : IBaseInterface, ISteamUtils
+public class SteamUtils : IBaseInterface
 {
     public uint GetSecondsSinceAppActive(IntPtr _)
     {

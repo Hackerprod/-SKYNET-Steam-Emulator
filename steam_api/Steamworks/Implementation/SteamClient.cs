@@ -11,11 +11,10 @@ using SKYNET;
 using SKYNET.Callback;
 using SKYNET.GUI;
 using SKYNET.Helper;
-using SKYNET.Interface;
+using SKYNET.Steamworks;
 using Steamworks;
 
-//[Interface.MapAttribute("SteamClient")]
-public class SteamClient : IBaseInterface, ISteamClient
+public class SteamClient : IBaseInterface
 {
     public void SetAppId(uint appId)
     {
@@ -239,7 +238,12 @@ public class SteamClient : IBaseInterface, ISteamClient
 
     public void SetPersonaName(string pchPersonaName)
     {
-        modCommon.Show("SetPersonaName " + pchPersonaName);
+        Write("pchPersonaName");
+    }
+
+    public void SetWarningMessageHook(SteamAPIWarningMessageHook_t pFunction)
+    {
+        Write("SetWarningMessageHook");
     }
 
     private void Write(string v)

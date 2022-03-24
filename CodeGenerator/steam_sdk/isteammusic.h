@@ -2,7 +2,7 @@
 
 #ifndef ISTEAMMUSIC_H
 #define ISTEAMMUSIC_H
-#ifdef STEAM_WIN32
+#ifdef _WIN32
 #pragma once
 #endif
 
@@ -44,11 +44,9 @@ public:
 
 #define STEAMMUSIC_INTERFACE_VERSION "STEAMMUSIC_INTERFACE_VERSION001"
 
-#ifndef STEAM_API_EXPORTS
 // Global interface accessor
 inline ISteamMusic *SteamMusic();
 STEAM_DEFINE_USER_INTERFACE_ACCESSOR( ISteamMusic *, SteamMusic, STEAMMUSIC_INTERFACE_VERSION );
-#endif
 
 // callbacks
 #if defined( VALVE_CALLBACK_PACK_SMALL )

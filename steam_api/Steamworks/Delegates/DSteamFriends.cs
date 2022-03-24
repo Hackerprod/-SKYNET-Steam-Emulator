@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Core.Interface;
-using SKYNET.Interface;
+using SKYNET.Steamworks;
 using Steamworks;
 
 namespace SKYNET.Delegate

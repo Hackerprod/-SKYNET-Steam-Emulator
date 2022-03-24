@@ -1,11 +1,10 @@
 ﻿using Core.Interface;
 using SKYNET;
-using SKYNET.Interface;
 using System;
 
 //[Map("STEAMVIDEO_INTERFACE")]
 //[Map("SteamVideo")]
-public class SteamVideo : IBaseInterface, ISteamVideo
+public class SteamVideo : IBaseInterface
 {
     public void GetVideoURL(IntPtr unVideoAppID)
     {

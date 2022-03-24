@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Core.Interface;
-using SKYNET.Interface;
+using SKYNET.Steamworks;
 using Steamworks;
 
 namespace SKYNET.Delegate
@@ -87,5 +87,7 @@ namespace SKYNET.Delegate
         public delegate IntPtr GetISteamParentalSettings(int hSteamuser, int hSteamPipe, string pchVersion);
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate void SetPersonaName(string pchPersonaName);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate void SetWarningMessageHook(SteamAPIWarningMessageHook_t pFunction);
     }
 }

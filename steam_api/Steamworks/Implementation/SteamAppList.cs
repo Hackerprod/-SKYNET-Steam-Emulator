@@ -4,11 +4,10 @@ using System.Runtime.InteropServices;
 using Core.Interface;
 using SKYNET;
 using SKYNET.Helper;
-using SKYNET.Interface;
 using Steamworks;
 
 //[Interface.MapAttribute("SteamAppList")]
-public class SteamAppList : IBaseInterface, ISteamAppList
+public class SteamAppList : IBaseInterface
 {
     public int GetAppBuildId(AppId_t nAppID)
     {

@@ -2,12 +2,13 @@
 using System.Runtime.InteropServices;
 using Core.Interface;
 using SKYNET;
-using SKYNET.Interface;
+
+using SKYNET.Steamworks;
 using Steamworks;
 
 //[Map("STEAMINVENTORY_INTERFACE")]
 //[Map("SteamInventory")]
-public class SteamInventory : IBaseInterface, ISteamInventory
+public class SteamInventory : IBaseInterface
 {
     public bool AddPromoItem(ref SteamInventoryResult_t pResultHandle, uint itemDef)
     {

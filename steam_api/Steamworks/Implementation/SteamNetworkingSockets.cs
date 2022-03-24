@@ -1,11 +1,12 @@
 ﻿using Core.Interface;
 using SKYNET;
-using SKYNET.Interface;
+
+using SKYNET.Steamworks;
 using SKYNET.Types;
 using System;
 
 //[Map("SteamNetworkingSockets")]
-public class SteamNetworkingSockets : IBaseInterface, ISteamNetworkingSockets
+public class SteamNetworkingSockets : IBaseInterface
 {
     public uint CreateListenSocketIP(IntPtr localAddress, int nOptions, IntPtr pOptions)
     {

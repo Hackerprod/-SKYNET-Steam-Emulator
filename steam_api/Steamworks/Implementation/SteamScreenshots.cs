@@ -1,11 +1,12 @@
 ﻿using Core.Interface;
 using SKYNET;
-using SKYNET.Interface;
+
+using SKYNET.Steamworks;
 using System;
 
 //[Map("STEAMSCREENSHOTS_INTERFACE_VERSION")]
 //[Map("SteamScreenshots")]
-public class SteamScreenshots : IBaseInterface, ISteamScreenshots
+public class SteamScreenshots : IBaseInterface
 {
     public uint WriteScreenshot(IntPtr pubRGB, uint cubRGB, int nWidth, int nHeight)
     {

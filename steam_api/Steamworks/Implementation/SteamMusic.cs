@@ -1,11 +1,12 @@
 ﻿using Core.Interface;
 using SKYNET;
-using SKYNET.Interface;
+
+using SKYNET.Steamworks;
 using System;
 
 //[Map("STEAMMUSIC_INTERFACE_VERSION")]
 //[Map("SteamMusic")]
-public class SteamMusic : IBaseInterface, ISteamMusic
+public class SteamMusic : IBaseInterface
 {
     public bool BIsEnabled(IntPtr _)
     {

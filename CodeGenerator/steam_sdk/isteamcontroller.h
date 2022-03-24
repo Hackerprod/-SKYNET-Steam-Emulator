@@ -12,7 +12,7 @@
 
 #ifndef ISTEAMCONTROLLER_H
 #define ISTEAMCONTROLLER_H
-#ifdef STEAM_WIN32
+#ifdef _WIN32
 #pragma once
 #endif
 
@@ -42,49 +42,6 @@ enum ESteamControllerPad
 	k_ESteamControllerPad_Right
 };
 #endif
-
-enum EControllerSource
-{
-	k_EControllerSource_None,
-	k_EControllerSource_LeftTrackpad,
-	k_EControllerSource_RightTrackpad,
-	k_EControllerSource_Joystick,
-	k_EControllerSource_ABXY,
-	k_EControllerSource_Switch,
-	k_EControllerSource_LeftTrigger,
-	k_EControllerSource_RightTrigger,
-	k_EControllerSource_LeftBumper,
-	k_EControllerSource_RightBumper,
-	k_EControllerSource_Gyro,
-	k_EControllerSource_CenterTrackpad,		// PS4
-	k_EControllerSource_RightJoystick,		// Traditional Controllers
-	k_EControllerSource_DPad,				// Traditional Controllers
-	k_EControllerSource_Key,                // Keyboards with scan codes - Unused
-	k_EControllerSource_Mouse,              // Traditional mouse - Unused
-	k_EControllerSource_LeftGyro,			// Secondary Gyro - Switch - Unused
-	k_EControllerSource_Count
-};
-
-enum EControllerSourceMode
-{
-	k_EControllerSourceMode_None,
-	k_EControllerSourceMode_Dpad,
-	k_EControllerSourceMode_Buttons,
-	k_EControllerSourceMode_FourButtons,
-	k_EControllerSourceMode_AbsoluteMouse,
-	k_EControllerSourceMode_RelativeMouse,
-	k_EControllerSourceMode_JoystickMove,
-	k_EControllerSourceMode_JoystickMouse,
-	k_EControllerSourceMode_JoystickCamera,
-	k_EControllerSourceMode_ScrollWheel,
-	k_EControllerSourceMode_Trigger,
-	k_EControllerSourceMode_TouchMenu,
-	k_EControllerSourceMode_MouseJoystick,
-	k_EControllerSourceMode_MouseRegion,
-	k_EControllerSourceMode_RadialMenu,
-	k_EControllerSourceMode_SingleButton,
-	k_EControllerSourceMode_Switches
-};
 
 // Note: Please do not use action origins as a way to identify controller types. There is no
 // guarantee that they will be added in a contiguous manner - use GetInputTypeForHandle instead
@@ -410,6 +367,86 @@ enum EControllerActionOrigin
 	k_EControllerActionOrigin_PS5_Gyro_Yaw,
 	k_EControllerActionOrigin_PS5_Gyro_Roll,
 
+	k_EControllerActionOrigin_XBoxOne_LeftGrip_Lower, 
+	k_EControllerActionOrigin_XBoxOne_LeftGrip_Upper, 
+	k_EControllerActionOrigin_XBoxOne_RightGrip_Lower,
+	k_EControllerActionOrigin_XBoxOne_RightGrip_Upper,
+	k_EControllerActionOrigin_XBoxOne_Share,
+
+	// Added in SDK 1.53
+	k_EControllerActionOrigin_SteamDeck_A,
+	k_EControllerActionOrigin_SteamDeck_B,
+	k_EControllerActionOrigin_SteamDeck_X,
+	k_EControllerActionOrigin_SteamDeck_Y,
+	k_EControllerActionOrigin_SteamDeck_L1,
+	k_EControllerActionOrigin_SteamDeck_R1,
+	k_EControllerActionOrigin_SteamDeck_Menu,
+	k_EControllerActionOrigin_SteamDeck_View,
+	k_EControllerActionOrigin_SteamDeck_LeftPad_Touch,
+	k_EControllerActionOrigin_SteamDeck_LeftPad_Swipe,
+	k_EControllerActionOrigin_SteamDeck_LeftPad_Click,
+	k_EControllerActionOrigin_SteamDeck_LeftPad_DPadNorth,
+	k_EControllerActionOrigin_SteamDeck_LeftPad_DPadSouth,
+	k_EControllerActionOrigin_SteamDeck_LeftPad_DPadWest,
+	k_EControllerActionOrigin_SteamDeck_LeftPad_DPadEast,
+	k_EControllerActionOrigin_SteamDeck_RightPad_Touch,
+	k_EControllerActionOrigin_SteamDeck_RightPad_Swipe,
+	k_EControllerActionOrigin_SteamDeck_RightPad_Click,
+	k_EControllerActionOrigin_SteamDeck_RightPad_DPadNorth,
+	k_EControllerActionOrigin_SteamDeck_RightPad_DPadSouth,
+	k_EControllerActionOrigin_SteamDeck_RightPad_DPadWest,
+	k_EControllerActionOrigin_SteamDeck_RightPad_DPadEast,
+	k_EControllerActionOrigin_SteamDeck_L2_SoftPull,
+	k_EControllerActionOrigin_SteamDeck_L2,
+	k_EControllerActionOrigin_SteamDeck_R2_SoftPull,
+	k_EControllerActionOrigin_SteamDeck_R2,
+	k_EControllerActionOrigin_SteamDeck_LeftStick_Move,
+	k_EControllerActionOrigin_SteamDeck_L3,
+	k_EControllerActionOrigin_SteamDeck_LeftStick_DPadNorth,
+	k_EControllerActionOrigin_SteamDeck_LeftStick_DPadSouth,
+	k_EControllerActionOrigin_SteamDeck_LeftStick_DPadWest,
+	k_EControllerActionOrigin_SteamDeck_LeftStick_DPadEast,
+	k_EControllerActionOrigin_SteamDeck_LeftStick_Touch,
+	k_EControllerActionOrigin_SteamDeck_RightStick_Move,
+	k_EControllerActionOrigin_SteamDeck_R3,
+	k_EControllerActionOrigin_SteamDeck_RightStick_DPadNorth,
+	k_EControllerActionOrigin_SteamDeck_RightStick_DPadSouth,
+	k_EControllerActionOrigin_SteamDeck_RightStick_DPadWest,
+	k_EControllerActionOrigin_SteamDeck_RightStick_DPadEast,
+	k_EControllerActionOrigin_SteamDeck_RightStick_Touch,
+	k_EControllerActionOrigin_SteamDeck_L4,
+	k_EControllerActionOrigin_SteamDeck_R4,
+	k_EControllerActionOrigin_SteamDeck_L5,
+	k_EControllerActionOrigin_SteamDeck_R5,
+	k_EControllerActionOrigin_SteamDeck_DPad_Move,
+	k_EControllerActionOrigin_SteamDeck_DPad_North,
+	k_EControllerActionOrigin_SteamDeck_DPad_South,
+	k_EControllerActionOrigin_SteamDeck_DPad_West,
+	k_EControllerActionOrigin_SteamDeck_DPad_East,
+	k_EControllerActionOrigin_SteamDeck_Gyro_Move,
+	k_EControllerActionOrigin_SteamDeck_Gyro_Pitch,
+	k_EControllerActionOrigin_SteamDeck_Gyro_Yaw,
+	k_EControllerActionOrigin_SteamDeck_Gyro_Roll,
+	k_EControllerActionOrigin_SteamDeck_Reserved1,
+	k_EControllerActionOrigin_SteamDeck_Reserved2,
+	k_EControllerActionOrigin_SteamDeck_Reserved3,
+	k_EControllerActionOrigin_SteamDeck_Reserved4,
+	k_EControllerActionOrigin_SteamDeck_Reserved5,
+	k_EControllerActionOrigin_SteamDeck_Reserved6,
+	k_EControllerActionOrigin_SteamDeck_Reserved7,
+	k_EControllerActionOrigin_SteamDeck_Reserved8,
+	k_EControllerActionOrigin_SteamDeck_Reserved9,
+	k_EControllerActionOrigin_SteamDeck_Reserved10,
+	k_EControllerActionOrigin_SteamDeck_Reserved11,
+	k_EControllerActionOrigin_SteamDeck_Reserved12,
+	k_EControllerActionOrigin_SteamDeck_Reserved13,
+	k_EControllerActionOrigin_SteamDeck_Reserved14,
+	k_EControllerActionOrigin_SteamDeck_Reserved15,
+	k_EControllerActionOrigin_SteamDeck_Reserved16,
+	k_EControllerActionOrigin_SteamDeck_Reserved17,
+	k_EControllerActionOrigin_SteamDeck_Reserved18,
+	k_EControllerActionOrigin_SteamDeck_Reserved19,
+	k_EControllerActionOrigin_SteamDeck_Reserved20,
 
 	k_EControllerActionOrigin_Count, // If Steam has added support for new controllers origins will go here.
 	k_EControllerActionOrigin_MaximumPossibleValue = 32767, // Origins are currently a maximum of 16 bits.
@@ -635,7 +672,7 @@ public:
 	virtual void SetLEDColor( ControllerHandle_t controllerHandle, uint8 nColorR, uint8 nColorG, uint8 nColorB, unsigned int nFlags ) = 0;
 
 	//-----------------------------------------------------------------------------
-	// Utility functions availible without using the rest of Steam Input API
+	// Utility functions available without using the rest of Steam Input API
 	//-----------------------------------------------------------------------------
 
 	// Invokes the Steam overlay and brings up the binding screen if the user is using Big Picture Mode
@@ -661,7 +698,7 @@ public:
 
 	// Get the equivalent ActionOrigin for a given Xbox controller origin this can be chained with GetGlyphForActionOrigin to provide future proof glyphs for
 	// non-Steam Input API action games. Note - this only translates the buttons directly and doesn't take into account any remapping a user has made in their configuration
-	virtual EControllerActionOrigin GetActionOriginFromXboxOrigin_( ControllerHandle_t controllerHandle, EXboxOrigin eOrigin ) = 0;
+	virtual EControllerActionOrigin GetActionOriginFromXboxOrigin( ControllerHandle_t controllerHandle, EXboxOrigin eOrigin ) = 0;
 
 	// Convert an origin to another controller type - for inputs not present on the other controller type this will return k_EControllerActionOrigin_None
 	virtual EControllerActionOrigin TranslateActionOrigin( ESteamInputType eDestinationInputType, EControllerActionOrigin eSourceOrigin ) = 0;
@@ -672,10 +709,8 @@ public:
 
 #define STEAMCONTROLLER_INTERFACE_VERSION "SteamController008"
 
-#ifndef STEAM_API_EXPORTS
 // Global interface accessor
 inline ISteamController *SteamController();
 STEAM_DEFINE_USER_INTERFACE_ACCESSOR( ISteamController *, SteamController, STEAMCONTROLLER_INTERFACE_VERSION );
-#endif
 
 #endif // ISTEAMCONTROLLER_H

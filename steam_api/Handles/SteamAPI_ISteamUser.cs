@@ -6,7 +6,7 @@ using System.Text;
 using System.Windows.Forms;
 using SKYNET;
 using SKYNET.Helper;
-using SKYNET.Interface;
+using SKYNET.Steamworks;
 using Steamworks;
 
 public class SteamAPI_ISteamUser : BaseCalls

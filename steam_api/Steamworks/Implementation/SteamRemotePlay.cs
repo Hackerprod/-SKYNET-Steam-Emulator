@@ -1,11 +1,12 @@
 ﻿using Core.Interface;
 using SKYNET;
-using SKYNET.Interface;
+
+using SKYNET.Steamworks;
 using System;
 
 //[Map("STEAMREMOTEPLAY_INTERFACE_VERSION")]
 //[Map("SteamRemotePlay")]
-public class SteamRemotePlay : IBaseInterface, ISteamRemotePlay
+public class SteamRemotePlay : IBaseInterface
 {
     public uint GetSessionCount(IntPtr _)
     {

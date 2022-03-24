@@ -1,5 +1,4 @@
 ﻿using EasyHook;
-using SKYNET.Interface;
 using SKYNET.Types;
 using Steamworks;
 using System;
@@ -607,200 +606,200 @@ namespace SKYNET.Hook
             return SteamEmulator.SteamClient.GetISteamGenericInterface(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamNetworkingUtils003");
         }
 
-        public ISteamGameServerStats SteamAPI_SteamGameServerStats_v001()
+        public IntPtr SteamAPI_SteamGameServerStats_v001()
         {
             Write($"SteamAPI_SteamGameServerStats_v001");
             return default;
         }
         
-        public ISteamAppList SteamAppList()
+        public IntPtr SteamAppList()
         {
             Write($"SteamAppList");
-            return SteamEmulator.SteamAppList;
+            return SteamEmulator.SteamAppList.BaseAddress;
         }
 
-        public ISteamApps SteamApps()
+        public IntPtr SteamApps()
         {
             Write($"ISteamApps");
-            return SteamEmulator.SteamApps;
+            return SteamEmulator.SteamApps.BaseAddress;
         }
 
-        [DllExport("SteamClient", CallingConvention = CallingConvention.Cdecl)]
-        public SteamClient steamClient()
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public IntPtr SteamClient()
         {
             Write($"SteamClient");
-            return SteamEmulator.SteamClient;
+            return SteamEmulator.SteamClient.BaseAddress;
         }
 
-        public ISteamController SteamController()
+        public IntPtr SteamController()
         {
             Write($"SteamController");
-            return SteamEmulator.SteamController;
+            return SteamEmulator.SteamController.BaseAddress;
         }
 
         
-        public ISteamFriends SteamFriends()
+        public IntPtr SteamFriends()
         {
             Write($"SteamFriends");
-            return SteamEmulator.SteamFriends;
+            return SteamEmulator.SteamFriends.BaseAddress;
         }
 
-        public ISteamGameServer SteamGameServer()
+        public IntPtr SteamGameServer()
         {
             Write($"SteamGameServer");
-            return SteamEmulator.SteamGameServer;
+            return SteamEmulator.SteamGameServer.BaseAddress;
         }
         
-        public ISteamApps SteamGameServerApps()
+        public IntPtr SteamGameServerApps()
         {
             Write($"SteamGameServerApps");
-            return SteamEmulator.SteamGameServerApps;
+            return SteamEmulator.SteamGameServerApps.BaseAddress;
         }
         
-        public ISteamHTTP SteamGameServerHTTP()
+        public IntPtr SteamGameServerHTTP()
         {
             Write($"SteamGameServerHTTP");
-            return SteamEmulator.SteamHTTP;
+            return SteamEmulator.SteamHTTP.BaseAddress;
         }
 
-        public ISteamInventory SteamGameServerInventory()
+        public IntPtr SteamGameServerInventory()
         {
             Write($"SteamGameServerInventory");
-            return SteamEmulator.SteamGameServerInventory;
+            return SteamEmulator.SteamGameServerInventory.BaseAddress;
         }
         
-        public ISteamNetworking SteamGameServerNetworking()
+        public IntPtr SteamGameServerNetworking()
         {
             Write($"SteamGameServerNetworking");
-            return SteamEmulator.SteamGameServerNetworking;
+            return SteamEmulator.SteamGameServerNetworking.BaseAddress;
         }
 
-        public ISteamGameServerStats SteamGameServerStats()
+        public IntPtr SteamGameServerStats()
         {
             Write($"SteamGameServerStats");
-            return SteamEmulator.SteamGameServerStats;
+            return SteamEmulator.SteamGameServerStats.BaseAddress;
         }
 
-        public ISteamUGC SteamGameServerUGC()
+        public IntPtr SteamGameServerUGC()
         {
             Write($"SteamGameServerUGC");
-            return SteamEmulator.SteamUGC;
+            return SteamEmulator.SteamUGC.BaseAddress;
         }
         
-        public ISteamUtils SteamGameServerUtils()
+        public IntPtr SteamGameServerUtils()
         {
             Write($"SteamGameServerUtils");
-            return SteamEmulator.SteamGameServerUtils;
+            return SteamEmulator.SteamGameServerUtils.BaseAddress;
         }
 
-        public ISteamHTTP SteamHTTP()
+        public IntPtr SteamHTTP()
         {
             Write($"SteamHTTP");
-            return SteamEmulator.SteamHTTP;
+            return SteamEmulator.SteamHTTP.BaseAddress;
         }
         
-        public ISteamHTMLSurface SteamHTMLSurface()
+        public IntPtr SteamHTMLSurface()
         {
             Write($"SteamHTMLSurface");
-            return SteamEmulator.SteamHTMLSurface;
+            return SteamEmulator.SteamHTMLSurface.BaseAddress;
         }
 
-        public ISteamInventory SteamInventory()
+        public IntPtr SteamInventory()
         {
             Write($"SteamInventory");
-            return SteamEmulator.SteamInventory;
+            return SteamEmulator.SteamInventory.BaseAddress;
         }
 
-        public ISteamMasterServerUpdater SteamMasterServerUpdater()
+        public IntPtr SteamMasterServerUpdater()
         {
             Write($"SteamMasterServerUpdater");
-            return SteamEmulator.SteamMasterServerUpdater;
+            return SteamEmulator.SteamMasterServerUpdater.BaseAddress;
         }
 
-        public ISteamMatchmaking SteamMatchmaking()
+        public IntPtr SteamMatchmaking()
         {
             Write($"SteamMatchmaking");
-            return SteamEmulator.SteamMatchmaking;
+            return SteamEmulator.SteamMatchmaking.BaseAddress;
         }
         
-        public ISteamMatchmakingServers SteamMatchmakingServers()
+        public IntPtr SteamMatchmakingServers()
         {
             Write($"SteamMatchmakingServers");
-            return SteamEmulator.SteamMatchMakingServers;
+            return SteamEmulator.SteamMatchMakingServers.BaseAddress;
         }
 
-        public ISteamMusic SteamMusic()
+        public IntPtr SteamMusic()
         {
             Write($"SteamMusic");
-            return SteamEmulator.SteamMusic;
+            return SteamEmulator.SteamMusic.BaseAddress;
         }
         
-        public ISteamMusicRemote SteamMusicRemote()
+        public IntPtr SteamMusicRemote()
         {
             Write($"SteamMusicRemote");
-            return SteamEmulator.SteamMusicRemote;
+            return SteamEmulator.SteamMusicRemote.BaseAddress;
         }
 
         
-        public ISteamNetworking SteamNetworking()
+        public IntPtr SteamNetworking()
         {
             Write($"SteamNetworking");
-            return SteamEmulator.SteamNetworking;
+            return SteamEmulator.SteamNetworking.BaseAddress;
         }
 
         
-        public ISteamParentalSettings SteamParentalSettings()
+        public IntPtr SteamParentalSettings()
         {
             Write($"SteamParentalSettings");
-            return SteamEmulator.SteamParentalSettings;
+            return SteamEmulator.SteamParentalSettings.BaseAddress;
         }
 
         
-        public ISteamRemoteStorage SteamRemoteStorage()
+        public IntPtr SteamRemoteStorage()
         {
             Write($"SteamRemoteStorage");
-            return SteamEmulator.SteamRemoteStorage;
+            return SteamEmulator.SteamRemoteStorage.BaseAddress;
         }
 
         
-        public ISteamScreenshots SteamScreenshots()
+        public IntPtr SteamScreenshots()
         {
             Write($"SteamScreenshots");
-            return SteamEmulator.SteamScreenshots;
+            return SteamEmulator.SteamScreenshots.BaseAddress;
         }
 
         
-        public ISteamUGC SteamUGC()
+        public IntPtr SteamUGC()
         {
             Write($"SteamUGC");
-            return SteamEmulator.SteamUGC;
+            return SteamEmulator.SteamUGC.BaseAddress;
         }
         
-        public ISteamUser SteamUser()
+        public IntPtr SteamUser()
         {
             Write($"SteamUser");
-            return SteamEmulator.SteamUser;
+            return SteamEmulator.SteamUser.BaseAddress;
         }
 
         
-        public ISteamUserStats SteamUserStats()
+        public IntPtr SteamUserStats()
         {
             Write($"SteamUserStats");
-            return SteamEmulator.SteamUserStats;
+            return SteamEmulator.SteamUserStats.BaseAddress;
         }
 
         
-        public ISteamUtils SteamUtils()
+        public IntPtr SteamUtils()
         {
             Write($"SteamUtils");
-            return SteamEmulator.SteamUtils;
+            return SteamEmulator.SteamUtils.BaseAddress;
         }
 
         
-        public ISteamVideo SteamVideo()
+        public IntPtr SteamVideo()
         {
             Write($"SteamVideo");
-            return SteamEmulator.SteamVideo;
+            return SteamEmulator.SteamVideo.BaseAddress;
         }
 
         #endregion

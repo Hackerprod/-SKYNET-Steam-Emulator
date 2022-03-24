@@ -1,10 +1,11 @@
 ﻿using Core.Interface;
 using SKYNET;
-using SKYNET.Interface;
+
+using SKYNET.Steamworks;
 using System;
 
 //[Map("SteamNetworkingUtils")]
-public class SteamNetworkingUtils : IBaseInterface, ISteamNetworkingUtils
+public class SteamNetworkingUtils : IBaseInterface
 {
     public IntPtr AllocateMessage(int cbAllocateBuffer)
     {

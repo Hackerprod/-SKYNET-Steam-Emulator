@@ -1,11 +1,11 @@
 ﻿using Core.Interface;
 using SKYNET;
-using SKYNET.Interface;
+using SKYNET.Steamworks;
 using System;
 
 //[Map("STEAMPARENTALSETTINGS_INTERFACE_VERSION")]
 //[Map("SteamParentalSettings")]
-public class SteamParentalSettings : IBaseInterface, ISteamParentalSettings
+public class SteamParentalSettings : IBaseInterface
 {
     public bool BIsParentalLockEnabled(IntPtr _)
     {

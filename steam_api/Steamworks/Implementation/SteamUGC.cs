@@ -1,12 +1,13 @@
 ﻿using Core.Interface;
 using SKYNET;
-using SKYNET.Interface;
+
+using SKYNET.Steamworks;
 using Steamworks;
 using System;
 
 //[Map("STEAMUGC_INTERFACE_VERSION")]
 //[Map("SteamUGC")]
-public class SteamUGC : IBaseInterface, ISteamUGC
+public class SteamUGC : IBaseInterface
 {
     public UGCQueryHandle_t CreateQueryUserUGCRequest(IntPtr unAccountID, IntPtr eListType, int eMatchingUGCType, int eSortOrder, AppId_t nCreatorAppID, AppId_t nConsumerAppID, uint unPage)
     {

@@ -6,10 +6,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Core.Interface;
 using SKYNET;
-using SKYNET.Interface;
+
+using SKYNET.Steamworks;
 
 //[Map("SteamInput")]
-public class SteamInput : IBaseInterface, ISteamInput
+public class SteamInput : IBaseInterface
 {
     public void ActivateActionSet(IntPtr inputHandle, IntPtr actionSetHandle)
     {

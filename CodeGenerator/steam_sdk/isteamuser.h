@@ -6,7 +6,7 @@
 
 #ifndef ISTEAMUSER_H
 #define ISTEAMUSER_H
-#ifdef STEAM_WIN32
+#ifdef _WIN32
 #pragma once
 #endif
 
@@ -47,11 +47,17 @@ public:
 	//
 	// return value - returns the number of bytes written to pBlob. If the return is 0, then the buffer passed in was too small, and the call has failed
 	// The contents of pBlob should then be sent to the game server, for it to use to complete the authentication process.
-	virtual int InitiateGameConnection( void *pAuthBlob, int cbMaxAuthBlob, CSteamID steamIDGameServer, uint32 unIPServer, uint16 usPortServer, bool bSecure ) = 0;
+	//
+	// DEPRECATED!  This function will be removed from the SDK in an upcoming version.
+	//              Please migrate to BeginAuthSession and related functions.
+	virtual int InitiateGameConnection_DEPRECATED( void *pAuthBlob, int cbMaxAuthBlob, CSteamID steamIDGameServer, uint32 unIPServer, uint16 usPortServer, bool bSecure ) = 0;
 
 	// notify of disconnect
 	// needs to occur when the game client leaves the specified game server, needs to match with the InitiateGameConnection() call
-	virtual void TerminateGameConnection( uint32 unIPServer, uint16 usPortServer ) = 0;
+	//
+	// DEPRECATED!  This function will be removed from the SDK in an upcoming version.
+	//              Please migrate to BeginAuthSession and related functions.
+	virtual void TerminateGameConnection_DEPRECATED( uint32 unIPServer, uint16 usPortServer ) = 0;
 
 	// Legacy functions
 
@@ -206,11 +212,9 @@ public:
 
 #define STEAMUSER_INTERFACE_VERSION "SteamUser021"
 
-#ifndef STEAM_API_EXPORTS
 // Global interface accessor
 inline ISteamUser *SteamUser();
 STEAM_DEFINE_USER_INTERFACE_ACCESSOR( ISteamUser *, SteamUser, STEAMUSER_INTERFACE_VERSION );
-#endif
 
 // callbacks
 #if defined( VALVE_CALLBACK_PACK_SMALL )

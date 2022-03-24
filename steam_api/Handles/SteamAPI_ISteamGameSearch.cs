@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using SKYNET;
 using SKYNET.Helper;
-using SKYNET.Interface;
+using SKYNET.Steamworks;
 
 public class SteamAPI_ISteamGameSearch : BaseCalls
 {

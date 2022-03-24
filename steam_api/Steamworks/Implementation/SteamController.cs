@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using Core.Interface;
 using SKYNET;
-using SKYNET.Interface;
+using SKYNET.Steamworks;
 
 //[Interface.MapAttribute("SteamController")]
-public class SteamController : IBaseInterface, ISteamController
+public class SteamController : IBaseInterface
 {
     private Dictionary<string, int> action_handles;
     private Dictionary<string, int> digital_action_handles;

@@ -1,11 +1,12 @@
 ﻿using System;
 using Core.Interface;
 using SKYNET;
-using SKYNET.Interface;
+
+using SKYNET.Steamworks;
 
 //[Map("STEAMMUSICREMOTE_INTERFACE_VERSION")]
 //[Map("SteamMusicRemote")]
-public class SteamMusicRemote : IBaseInterface, ISteamMusicRemote
+public class SteamMusicRemote : IBaseInterface
 {
     public bool RegisterSteamMusicRemote(string pchName)
     {

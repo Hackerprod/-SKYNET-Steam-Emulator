@@ -1,12 +1,13 @@
 ﻿using Core.Interface;
 using SKYNET;
-using SKYNET.Interface;
+
+using SKYNET.Steamworks;
 using Steamworks;
 using System;
 
 //[Map("STEAMUSERSTATS_INTERFACE_VERSION")]
 //[Map("SteamUserStats")]
-public class SteamUserStats : IBaseInterface, ISteamUserStats
+public class SteamUserStats : IBaseInterface
 {
     public bool RequestCurrentStats(IntPtr _)
     {

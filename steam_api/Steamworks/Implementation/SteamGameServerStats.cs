@@ -1,11 +1,11 @@
 ﻿using Core.Interface;
 using SKYNET;
-using SKYNET.Interface;
+
 using Steamworks;
 using System;
 
 //[Map("SteamGameServerStats")]
-public class SteamGameServerStats : IBaseInterface, ISteamGameServerStats
+public class SteamGameServerStats : IBaseInterface
 {
     public bool ClearUserAchievement(IntPtr steamIDUser, string pchName)
     {
@@ -28,9 +28,9 @@ public class SteamGameServerStats : IBaseInterface, ISteamGameServerStats
     public SteamAPICall_t RequestUserStats(IntPtr steamIDUser)
     {
         Write("RequestUserStats");
-        GSStatsReceived_t data;
-        data.m_eResult = 0;//k_EResultOK;
-        data.m_steamIDUser = steamIDUser;
+        //GSStatsReceived_t data;
+        //data.m_eResult = 0;//k_EResultOK;
+        //data.m_steamIDUser = steamIDUser;
         return SteamAPICall_t.Invalid;
     }
 

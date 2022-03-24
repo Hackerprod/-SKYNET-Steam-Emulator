@@ -3,7 +3,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using SKYNET;
 using SKYNET.Helper;
-using SKYNET.Interface;
 using Steamworks;
 
 public class SteamAPI_ISteamAppList : BaseCalls

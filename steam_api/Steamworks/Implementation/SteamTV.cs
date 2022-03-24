@@ -1,11 +1,11 @@
 ﻿using Core.Interface;
 using SKYNET;
-using SKYNET.Interface;
+
 using System;
 
 //[Map("STEAMTV_INTERFACE_V001")]
 //[Map("SteamScreenshots")]
-public class SteamTV : IBaseInterface, ISteamTV
+public class SteamTV : IBaseInterface
 {
     public bool IsBroadcasting(int pnNumViewers)
     {

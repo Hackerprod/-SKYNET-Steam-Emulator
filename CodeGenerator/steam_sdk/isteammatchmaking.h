@@ -6,7 +6,7 @@
 
 #ifndef ISTEAMMATCHMAKING
 #define ISTEAMMATCHMAKING
-#ifdef STEAM_WIN32
+#ifdef _WIN32
 #pragma once
 #endif
 
@@ -259,11 +259,9 @@ public:
 };
 #define STEAMMATCHMAKING_INTERFACE_VERSION "SteamMatchMaking009"
 
-#ifndef STEAM_API_EXPORTS
 // Global interface accessor
 inline ISteamMatchmaking *SteamMatchmaking();
 STEAM_DEFINE_USER_INTERFACE_ACCESSOR( ISteamMatchmaking *, SteamMatchmaking, STEAMMATCHMAKING_INTERFACE_VERSION );
-#endif
 
 //-----------------------------------------------------------------------------
 // Callback interfaces for server list functions (see ISteamMatchmakingServers below)
@@ -526,11 +524,9 @@ public:
 };
 #define STEAMMATCHMAKINGSERVERS_INTERFACE_VERSION "SteamMatchMakingServers002"
 
-#ifndef STEAM_API_EXPORTS
 // Global interface accessor
 inline ISteamMatchmakingServers *SteamMatchmakingServers();
 STEAM_DEFINE_USER_INTERFACE_ACCESSOR( ISteamMatchmakingServers *, SteamMatchmakingServers, STEAMMATCHMAKINGSERVERS_INTERFACE_VERSION );
-#endif
 
 // game server flags
 const uint32 k_unFavoriteFlagNone			= 0x00;
@@ -722,11 +718,10 @@ public:
 };
 #define STEAMPARTIES_INTERFACE_VERSION "SteamParties002"
 
-#ifndef STEAM_API_EXPORTS
 // Global interface accessor
 inline ISteamParties *SteamParties();
 STEAM_DEFINE_USER_INTERFACE_ACCESSOR( ISteamParties *, SteamParties, STEAMPARTIES_INTERFACE_VERSION );
-#endif
+
 
 //-----------------------------------------------------------------------------
 // Callbacks for ISteamMatchmaking (which go through the regular Steam callback registration system)

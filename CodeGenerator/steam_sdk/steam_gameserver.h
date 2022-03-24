@@ -1,4 +1,4 @@
-//====== Copyright ï¿½ 1996-2008, Valve Corporation, All rights reserved. =======
+//====== Copyright © 1996-2008, Valve Corporation, All rights reserved. =======
 //
 // Purpose: 
 //
@@ -6,18 +6,12 @@
 
 #ifndef STEAM_GAMESERVER_H
 #define STEAM_GAMESERVER_H
-#ifdef STEAM_WIN32
+#ifdef _WIN32
 #pragma once
 #endif
 
 #include "steam_api.h"
 #include "isteamgameserver.h"
-#include "isteamgameserver012.h"
-#include "isteamgameserver011.h"
-#include "isteamgameserver010.h"
-#include "isteamgameserver009.h"
-#include "isteamgameserver008.h"
-#include "isteamgameserver005.h"
 #include "isteamgameserverstats.h"
 
 enum EServerMode
@@ -29,37 +23,32 @@ enum EServerMode
 };													
 
 /// Pass to SteamGameServer_Init to indicate that the same UDP port will be used for game traffic
-/// UDP queries.  In this case, Steam will not open up a socket to handle server browser queries,
-/// and you must use ISteamGameServer::HandleIncomingPacket and ISteamGameServer::GetNextOutgoingPacket
-/// to handle packets related to server discovery on your socket.
-#define MASTERSERVERUPDATERPORT_USEGAMESOCKETSHARE	((uint16)-1)
+/// UDP queries for server browser pings and LAN discovery.  In this case, Steam will not open up a
+/// socket to handle server browser queries, and you must use ISteamGameServer::HandleIncomingPacket
+/// and ISteamGameServer::GetNextOutgoingPacket to handle packets related to server discovery on your socket.
+const uint16 STEAMGAMESERVER_QUERY_PORT_SHARED = 0xffff;
+
+// DEPRECATED: This old name was really confusing.
+const uint16 MASTERSERVERUPDATERPORT_USEGAMESOCKETSHARE = STEAMGAMESERVER_QUERY_PORT_SHARED;
 
 // Initialize SteamGameServer client and interface objects, and set server properties which may not be changed.
 //
 // After calling this function, you should set any additional server parameters, and then
 // call ISteamGameServer::LogOnAnonymous() or ISteamGameServer::LogOn()
 //
-// - usSteamPort is the local port used to communicate with the steam servers.
-//   NOTE: unless you are using ver old Steam client binaries, this parameter is ignored, and
-//         you should pass 0.  Gameservers now always use WebSockets to talk to Steam.
-//         This protocol is TCP-based and thus always uses an ephemeral local port.
-//         Older steam client binaries used UDP to talk to Steam, and this argument was useful.
-//         A future version of the SDK will remove this argument.
 // - unIP will usually be zero.  If you are on a machine with multiple IP addresses, you can pass a non-zero
 //   value here and the relevant sockets will be bound to that IP.  This can be used to ensure that
 //   the IP you desire is the one used in the server browser.
 // - usGamePort is the port that clients will connect to for gameplay.  You will usually open up your
 //   own socket bound to this port.
 // - usQueryPort is the port that will manage server browser related duties and info
-//		pings from clients.  If you pass MASTERSERVERUPDATERPORT_USEGAMESOCKETSHARE for usQueryPort, then it
+//		pings from clients.  If you pass STEAMGAMESERVER_QUERY_PORT_SHARED for usQueryPort, then it
 //		will use "GameSocketShare" mode, which means that the game is responsible for sending and receiving
-//		UDP packets for the master  server updater. See references to GameSocketShare in isteamgameserver.h.
+//		UDP packets for the master  server updater.  (See ISteamGameServer::HandleIncomingPacket and
+//		ISteamGameServer::GetNextOutgoingPacket.)
 // - The version string should be in the form x.x.x.x, and is used by the master server to detect when the
 //		server is out of date.  (Only servers with the latest version will be listed.)
-#ifndef STEAM_API_EXPORTS
-S_API bool SteamGameServer_Init( uint32 unIP, uint16 usSteamPort, uint16 usGamePort, uint16 usQueryPort, EServerMode eServerMode, const char *pchVersionString );
-#endif
-S_API bool S_CALLTYPE SteamInternal_GameServer_Init( uint32 unIP, uint16 usPort, uint16 usGamePort, uint16 usQueryPort, EServerMode eServerMode, const char *pchVersionString );
+inline bool SteamGameServer_Init( uint32 unIP, uint16 usGamePort, uint16 usQueryPort, EServerMode eServerMode, const char *pchVersionString );
 
 // Shutdown SteamGameSeverXxx interfaces, log out, and free resources.
 S_API void SteamGameServer_Shutdown();
@@ -104,18 +93,18 @@ inline bool CSteamGameServerAPIContext::Init()
 	m_pSteamHTTP = ::SteamGameServerHTTP();
 	m_pSteamInventory = ::SteamGameServerInventory();
 	m_pSteamUGC = ::SteamGameServerUGC();
-	m_pSteamApps = ::SteamGameServerApps();
 	if ( !m_pSteamGameServer || !m_pSteamGameServerUtils || !m_pSteamGameServerNetworking || !m_pSteamGameServerStats
-		|| !m_pSteamHTTP || !m_pSteamInventory || !m_pSteamUGC || !m_pSteamApps )
+		|| !m_pSteamHTTP || !m_pSteamInventory || !m_pSteamUGC )
 		return false;
 
 	return true;
 }
+#endif
 
-
-inline bool SteamGameServer_Init( uint32 unIP, uint16 usSteamPort, uint16 usGamePort, uint16 usQueryPort, EServerMode eServerMode, const char *pchVersionString )
+S_API bool S_CALLTYPE SteamInternal_GameServer_Init( uint32 unIP, uint16 usLegacySteamPort, uint16 usGamePort, uint16 usQueryPort, EServerMode eServerMode, const char *pchVersionString );
+inline bool SteamGameServer_Init( uint32 unIP, uint16 usGamePort, uint16 usQueryPort, EServerMode eServerMode, const char *pchVersionString )
 {
-	if ( !SteamInternal_GameServer_Init( unIP, usSteamPort, usGamePort, usQueryPort, eServerMode, pchVersionString ) )
+	if ( !SteamInternal_GameServer_Init( unIP, 0, usGamePort, usQueryPort, eServerMode, pchVersionString ) )
 		return false;
 
 	return true;
@@ -124,6 +113,5 @@ inline void SteamGameServer_ReleaseCurrentThreadMemory()
 {
 	SteamAPI_ReleaseCurrentThreadMemory();
 }
-#endif
 
 #endif // STEAM_GAMESERVER_H

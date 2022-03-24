@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using SKYNET.Interface;
+using SKYNET.Steamworks;
 using Steamworks;
 
 public class SteamAPI_ISteamHTMLSurface : BaseCalls

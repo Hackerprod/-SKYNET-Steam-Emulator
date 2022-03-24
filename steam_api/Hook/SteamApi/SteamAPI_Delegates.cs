@@ -1,5 +1,4 @@
 ﻿using EasyHook;
-using SKYNET.Interface;
 using SKYNET.Types;
 using Steamworks;
 using System;
@@ -115,94 +114,94 @@ namespace SKYNET.Hook
         public delegate void Steam_RunCallbacksDelegate(IntPtr hSteamPipe, bool bGameServerCallbacks);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamAppList SteamAPI_SteamAppList_v001Delegate();
+        public delegate IntPtr SteamAPI_SteamAppList_v001Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamApps SteamAPI_SteamApps_v008Delegate();
+        public delegate IntPtr SteamAPI_SteamApps_v008Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamApps SteamAPI_SteamGameServerApps_v008Delegate();
+        public delegate IntPtr SteamAPI_SteamGameServerApps_v008Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamController SteamAPI_SteamController_v007Delegate();
+        public delegate IntPtr SteamAPI_SteamController_v007Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamController SteamAPI_SteamController_v008Delegate();
+        public delegate IntPtr SteamAPI_SteamController_v008Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamFriends SteamAPI_SteamFriends_v017Delegate();
+        public delegate IntPtr SteamAPI_SteamFriends_v017Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamUtils SteamAPI_SteamUtils_v010Delegate();
+        public delegate IntPtr SteamAPI_SteamUtils_v010Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamUtils SteamAPI_SteamGameServerUtils_v010Delegate();
+        public delegate IntPtr SteamAPI_SteamGameServerUtils_v010Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamUtils SteamAPI_SteamUtils_v009Delegate();
+        public delegate IntPtr SteamAPI_SteamUtils_v009Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamUtils SteamAPI_SteamGameServerUtils_v009Delegate();
+        public delegate IntPtr SteamAPI_SteamGameServerUtils_v009Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamMatchmaking SteamAPI_SteamMatchmaking_v009Delegate();
+        public delegate IntPtr SteamAPI_SteamMatchmaking_v009Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamMatchmakingServers SteamAPI_SteamMatchmakingServers_v002Delegate();
+        public delegate IntPtr SteamAPI_SteamMatchmakingServers_v002Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamGameSearch SteamAPI_SteamGameSearch_v001Delegate();
+        public delegate IntPtr SteamAPI_SteamGameSearch_v001Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamParties SteamAPI_SteamParties_v002Delegate();
+        public delegate IntPtr SteamAPI_SteamParties_v002Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamNetworking SteamAPI_SteamNetworking_v006Delegate();
+        public delegate IntPtr SteamAPI_SteamNetworking_v006Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamNetworking SteamAPI_SteamGameServerNetworking_v006Delegate();
+        public delegate IntPtr SteamAPI_SteamGameServerNetworking_v006Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamScreenshots SteamAPI_SteamScreenshots_v003Delegate();
+        public delegate IntPtr SteamAPI_SteamScreenshots_v003Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamMusic SteamAPI_SteamMusic_v001Delegate();
+        public delegate IntPtr SteamAPI_SteamMusic_v001Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamMusicRemote SteamAPI_SteamMusicRemote_v001Delegate();
+        public delegate IntPtr SteamAPI_SteamMusicRemote_v001Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamHTTP SteamAPI_SteamHTTP_v003Delegate();
+        public delegate IntPtr SteamAPI_SteamHTTP_v003Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamHTTP SteamAPI_SteamGameServerHTTP_v003Delegate();
+        public delegate IntPtr SteamAPI_SteamGameServerHTTP_v003Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamInput SteamAPI_SteamInput_v001Delegate();
+        public delegate IntPtr SteamAPI_SteamInput_v001Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamInput SteamAPI_SteamInput_v002Delegate();
+        public delegate IntPtr SteamAPI_SteamInput_v002Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamHTMLSurface SteamAPI_SteamHTMLSurface_v005Delegate();
+        public delegate IntPtr SteamAPI_SteamHTMLSurface_v005Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamInventory SteamAPI_SteamInventory_v003Delegate();
+        public delegate IntPtr SteamAPI_SteamInventory_v003Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamInventory SteamAPI_SteamGameServerInventory_v003Delegate();
+        public delegate IntPtr SteamAPI_SteamGameServerInventory_v003Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamVideo SteamAPI_SteamVideo_v002Delegate();
+        public delegate IntPtr SteamAPI_SteamVideo_v002Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamTV SteamAPI_SteamTV_v001Delegate();
+        public delegate IntPtr SteamAPI_SteamTV_v001Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamParentalSettings SteamAPI_SteamParentalSettings_v001Delegate();
+        public delegate IntPtr SteamAPI_SteamParentalSettings_v001Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamRemotePlay SteamAPI_SteamRemotePlay_v001Delegate();
+        public delegate IntPtr SteamAPI_SteamRemotePlay_v001Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
         public delegate IntPtr SteamAPI_SteamNetworkingMessages_v002Delegate();
@@ -241,97 +240,97 @@ namespace SKYNET.Hook
         public delegate IntPtr SteamAPI_SteamNetworkingUtils_v003Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamGameServerStats SteamAPI_SteamGameServerStats_v001Delegate();
+        public delegate IntPtr SteamAPI_SteamGameServerStats_v001Delegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamAppList SteamAppListDelegate();
+        public delegate IntPtr SteamAppListDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamApps SteamAppsDelegate();
+        public delegate IntPtr SteamAppsDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
         public delegate SteamClient steamClientDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamController SteamControllerDelegate();
+        public delegate IntPtr SteamControllerDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamFriends SteamFriendsDelegate();
+        public delegate IntPtr SteamFriendsDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamGameServer SteamGameServerDelegate();
+        public delegate IntPtr SteamGameServerDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamApps SteamGameServerAppsDelegate();
+        public delegate IntPtr SteamGameServerAppsDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamHTTP SteamGameServerHTTPDelegate();
+        public delegate IntPtr SteamGameServerHTTPDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamInventory SteamGameServerInventoryDelegate();
+        public delegate IntPtr SteamGameServerInventoryDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamNetworking SteamGameServerNetworkingDelegate();
+        public delegate IntPtr SteamGameServerNetworkingDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamGameServerStats SteamGameServerStatsDelegate();
+        public delegate IntPtr SteamGameServerStatsDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamUGC SteamGameServerUGCDelegate();
+        public delegate IntPtr SteamGameServerUGCDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamUtils SteamGameServerUtilsDelegate();
+        public delegate IntPtr SteamGameServerUtilsDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamHTTP SteamHTTPDelegate();
+        public delegate IntPtr SteamHTTPDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamHTMLSurface SteamHTMLSurfaceDelegate();
+        public delegate IntPtr SteamHTMLSurfaceDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamInventory SteamInventoryDelegate();
+        public delegate IntPtr SteamInventoryDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamMasterServerUpdater SteamMasterServerUpdaterDelegate();
+        public delegate IntPtr SteamMasterServerUpdaterDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamMatchmaking SteamMatchmakingDelegate();
+        public delegate IntPtr SteamMatchmakingDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamMatchmakingServers SteamMatchmakingServersDelegate();
+        public delegate IntPtr SteamMatchmakingServersDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamMusic SteamMusicDelegate();
+        public delegate IntPtr SteamMusicDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamMusicRemote SteamMusicRemoteDelegate();
+        public delegate IntPtr SteamMusicRemoteDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamNetworking SteamNetworkingDelegate();
+        public delegate IntPtr SteamNetworkingDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamParentalSettings SteamParentalSettingsDelegate();
+        public delegate IntPtr SteamParentalSettingsDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamRemoteStorage SteamRemoteStorageDelegate();
+        public delegate IntPtr SteamRemoteStorageDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamScreenshots SteamScreenshotsDelegate();
+        public delegate IntPtr SteamScreenshotsDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamUGC SteamUGCDelegate();
+        public delegate IntPtr SteamUGCDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamUser SteamUserDelegate();
+        public delegate IntPtr SteamUserDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamUserStats SteamUserStatsDelegate();
+        public delegate IntPtr SteamUserStatsDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamUtils SteamUtilsDelegate();
+        public delegate IntPtr SteamUtilsDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ISteamVideo SteamVideoDelegate();
+        public delegate IntPtr SteamVideoDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
         public delegate void VR_GetGenericInterfaceDelegate(string pchInterfaceVersion, int peError);

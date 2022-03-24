@@ -1,5 +1,4 @@
 ﻿using SKYNET;
-using SKYNET.Interface;
 using Steamworks;
 using System;
 using System.Runtime.InteropServices;

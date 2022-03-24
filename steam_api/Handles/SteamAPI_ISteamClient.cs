@@ -3,9 +3,7 @@ using System.Drawing;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Windows.Forms;
 using SKYNET;
-using SKYNET.Interface;
 using Steamworks;
 
 public class SteamAPI_ISteamClient : BaseCalls

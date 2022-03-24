@@ -9,7 +9,6 @@ using System.Windows.Forms;
 using Core.Interface;
 using SKYNET;
 using SKYNET.GUI;
-using SKYNET.Interface;
 using Steamworks;
 
 //Implement SteamAPI_SteamNetworkingIPAddr
@@ -490,10 +489,10 @@ public class SteamAPI : IBaseInterface
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamTV SteamAPI_SteamTV_v001()
+    public static IntPtr SteamAPI_SteamTV_v001()
     {
         Write($"SteamAPI_SteamTV_v001");
-        return SteamEmulator.SteamTV;
+        return SteamEmulator.SteamTV.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -595,193 +594,193 @@ public class SteamAPI : IBaseInterface
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamGameServerStats SteamAPI_SteamGameServerStats_v001()
+    public static IntPtr SteamAPI_SteamGameServerStats_v001()
     {
         Write($"SteamAPI_SteamGameServerStats_v001");
-        return default;
+        return SteamEmulator.SteamGameServerStats.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamAppList SteamAppList()
+    public static IntPtr SteamAppList()
     {
         Write($"SteamAppList");
-        return SteamEmulator.SteamAppList;
+        return SteamEmulator.SteamAppList.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamApps SteamApps()
+    public static IntPtr SteamApps()
     {
         Write($"ISteamApps");
-        return SteamEmulator.SteamApps;
+        return SteamEmulator.SteamApps.BaseAddress;
     }
 
-    [DllExport("SteamClient", CallingConvention = CallingConvention.Cdecl)]
-    public static SteamClient steamClient()
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static IntPtr SteamClient()
     {
         Write($"SteamClient");
-        return SteamEmulator.SteamClient;
+        return SteamEmulator.SteamClient.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamController SteamController()
+    public static IntPtr SteamController()
     {
         Write($"SteamController");
-        return SteamEmulator.SteamController;
+        return SteamEmulator.SteamController.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamFriends SteamFriends()
+    public static IntPtr SteamFriends()
     {
         Write($"SteamFriends");
-        return SteamEmulator.SteamFriends;
+        return SteamEmulator.SteamFriends.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamGameServer SteamGameServer()
+    public static IntPtr SteamGameServer()
     {
         Write($"SteamGameServer");
-        return SteamEmulator.SteamGameServer;
+        return SteamEmulator.SteamGameServer.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamApps SteamGameServerApps()
+    public static IntPtr SteamGameServerApps()
     {
         Write($"SteamGameServerApps");
-        return SteamEmulator.SteamGameServerApps;
+        return SteamEmulator.SteamGameServerApps.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamHTTP SteamGameServerHTTP()
+    public static IntPtr SteamGameServerHTTP()
     {
         Write($"SteamGameServerHTTP");
-        return SteamEmulator.SteamHTTP;
+        return SteamEmulator.SteamHTTP.BaseAddress;
     }
 
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamInventory SteamGameServerInventory()
+    public static IntPtr SteamGameServerInventory()
     {
         Write($"SteamGameServerInventory");
-        return SteamEmulator.SteamGameServerInventory;
+        return SteamEmulator.SteamGameServerInventory.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamNetworking SteamGameServerNetworking()
+    public static IntPtr SteamGameServerNetworking()
     {
         Write($"SteamGameServerNetworking");
-        return SteamEmulator.SteamGameServerNetworking;
+        return SteamEmulator.SteamGameServerNetworking.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamGameServerStats SteamGameServerStats()
+    public static IntPtr SteamGameServerStats()
     {
         Write($"SteamGameServerStats");
-        return SteamEmulator.SteamGameServerStats;
+        return SteamEmulator.SteamGameServerStats.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamUGC SteamGameServerUGC()
+    public static IntPtr SteamGameServerUGC()
     {
         Write($"SteamGameServerUGC");
-        return SteamEmulator.SteamUGC;
+        return SteamEmulator.SteamUGC.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamUtils SteamGameServerUtils()
+    public static IntPtr SteamGameServerUtils()
     {
         Write($"SteamGameServerUtils");
-        return SteamEmulator.SteamGameServerUtils;
+        return SteamEmulator.SteamGameServerUtils.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamHTTP SteamHTTP()
+    public static IntPtr SteamHTTP()
     {
         Write($"SteamHTTP");
-        return SteamEmulator.SteamHTTP;
+        return SteamEmulator.SteamHTTP.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamHTMLSurface SteamHTMLSurface()
+    public static IntPtr SteamHTMLSurface()
     {
         Write($"SteamHTMLSurface");
-        return SteamEmulator.SteamHTMLSurface;
+        return SteamEmulator.SteamHTMLSurface.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamInventory SteamInventory()
+    public static IntPtr SteamInventory()
     {
         Write($"SteamInventory");
-        return SteamEmulator.SteamInventory;
+        return SteamEmulator.SteamInventory.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamMasterServerUpdater SteamMasterServerUpdater()
+    public static IntPtr SteamMasterServerUpdater()
     {
         Write($"SteamMasterServerUpdater");
-        return SteamEmulator.SteamMasterServerUpdater;
+        return SteamEmulator.SteamMasterServerUpdater.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamMatchmaking SteamMatchmaking()
+    public static IntPtr SteamMatchmaking()
     {
         Write($"SteamMatchmaking");
-        return SteamEmulator.SteamMatchmaking;
+        return SteamEmulator.SteamMatchmaking.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamMatchmakingServers SteamMatchmakingServers()
+    public static IntPtr SteamMatchmakingServers()
     {
         Write($"SteamMatchmakingServers");
-        return SteamEmulator.SteamMatchMakingServers;
+        return SteamEmulator.SteamMatchMakingServers.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamMusic SteamMusic()
+    public static IntPtr SteamMusic()
     {
         Write($"SteamMusic");
-        return SteamEmulator.SteamMusic;
+        return SteamEmulator.SteamMusic.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamMusicRemote SteamMusicRemote()
+    public static IntPtr SteamMusicRemote()
     {
         Write($"SteamMusicRemote");
-        return SteamEmulator.SteamMusicRemote;
+        return SteamEmulator.SteamMusicRemote.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamNetworking SteamNetworking()
+    public static IntPtr SteamNetworking()
     {
         Write($"SteamNetworking");
-        return SteamEmulator.SteamNetworking;
+        return SteamEmulator.SteamNetworking.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamParentalSettings SteamParentalSettings()
+    public static IntPtr SteamParentalSettings()
     {
         Write($"SteamParentalSettings");
-        return SteamEmulator.SteamParentalSettings;
+        return SteamEmulator.SteamParentalSettings.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamRemoteStorage SteamRemoteStorage()
+    public static IntPtr SteamRemoteStorage()
     {
         Write($"SteamRemoteStorage");
-        return SteamEmulator.SteamRemoteStorage;
+        return SteamEmulator.SteamRemoteStorage.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamScreenshots SteamScreenshots()
+    public static IntPtr SteamScreenshots()
     {
         Write($"SteamScreenshots");
-        return SteamEmulator.SteamScreenshots;
+        return SteamEmulator.SteamScreenshots.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamUGC SteamUGC()
+    public static IntPtr SteamUGC()
     {
         Write($"SteamUGC");
-        return SteamEmulator.SteamUGC;
+        return SteamEmulator.SteamUGC.BaseAddress;
     }
 
     //[DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -792,31 +791,31 @@ public class SteamAPI : IBaseInterface
     //}
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamUser SteamUser()
+    public static IntPtr SteamUser()
     {
         Write($"SteamUser");
-        return SteamEmulator.SteamUser;
+        return SteamEmulator.SteamUser.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamUserStats SteamUserStats()
+    public static IntPtr SteamUserStats()
     {
         Write($"SteamUserStats");
-        return SteamEmulator.SteamUserStats;
+        return SteamEmulator.SteamUserStats.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamUtils SteamUtils()
+    public static IntPtr SteamUtils()
     {
         Write($"SteamUtils");
-        return SteamEmulator.SteamUtils;
+        return SteamEmulator.SteamUtils.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static ISteamVideo SteamVideo()
+    public static IntPtr SteamVideo()
     {
         Write($"SteamVideo");
-        return SteamEmulator.SteamVideo;
+        return SteamEmulator.SteamVideo.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

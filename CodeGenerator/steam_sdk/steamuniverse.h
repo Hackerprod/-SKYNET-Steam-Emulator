@@ -6,7 +6,7 @@
 
 #ifndef STEAMUNIVERSE_H
 #define STEAMUNIVERSE_H
-#ifdef STEAM_WIN32
+#ifdef _WIN32
 #pragma once
 #endif
 

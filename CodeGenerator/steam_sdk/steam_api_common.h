@@ -9,7 +9,7 @@
 
 #ifndef STEAM_API_COMMON_H
 #define STEAM_API_COMMON_H
-#ifdef STEAM_WIN32
+#ifdef _WIN32
 #pragma once
 #endif
 
@@ -17,40 +17,26 @@
 #include "steamclientpublic.h"
 
 // S_API defines the linkage and calling conventions for steam_api.dll exports
-#if defined( STEAM_WIN32 ) && !defined( _X360 )
+#if defined( _WIN32 ) && !defined( _X360 )
 	#if defined( STEAM_API_EXPORTS )
-	#define S_API_EXPORT extern "C" __declspec( dllexport ) 
+	#define S_API extern "C" __declspec( dllexport ) 
 	#elif defined( STEAM_API_NODLL )
-	#define S_API_EXPORT extern "C"
+	#define S_API extern "C"
 	#else
-	#define S_API_EXPORT extern "C" __declspec( dllimport ) 
+	#define S_API extern "C" __declspec( dllimport ) 
 	#endif // STEAM_API_EXPORTS
 #elif defined( GNUC )
 	#if defined( STEAM_API_EXPORTS )
-	#define S_API_EXPORT extern "C" __attribute__ ((visibility("default"))) 
+	#define S_API extern "C" __attribute__ ((visibility("default"))) 
 	#else
-	#define S_API_EXPORT extern "C" 
+	#define S_API extern "C" 
 	#endif // STEAM_API_EXPORTS
 #else // !WIN32
 	#if defined( STEAM_API_EXPORTS )
-	#define S_API_EXPORT extern "C"  
+	#define S_API extern "C"  
 	#else
-	#define S_API_EXPORT extern "C" 
+	#define S_API extern "C" 
 	#endif // STEAM_API_EXPORTS
-#endif
-
-#ifdef STEAM_API_EXPORTS
-#ifdef STEAM_API_FUNCTIONS_IMPL
-#ifdef STEAMCLIENT_DLL
-#define S_API static
-#else
-#define S_API S_API_EXPORT
-#endif
-#else
-#define S_API
-#endif
-#else
-#define S_API S_API_EXPORT
 #endif
 
 #if ( defined(STEAM_API_EXPORTS) || defined(STEAM_API_NODLL) ) && !defined(API_GEN)

@@ -9,7 +9,6 @@ using System.Windows.Forms;
 using Core.Interface;
 using SKYNET;
 using SKYNET.Helper;
-using SKYNET.Interface;
 using SKYNET.Types;
 
 namespace SKYNET.Hook

@@ -1,11 +1,11 @@
 ﻿using System;
 using Core.Interface;
 using SKYNET;
-using SKYNET.Interface;
+
 
 //[Map("STEAMHTTP_INTERFACE_VERSION")]
 //[Map("SteamHTTP")]
-public class SteamHTTP : IBaseInterface, ISteamHTTP
+public class SteamHTTP : IBaseInterface
 {
     public uint CreateCookieContainer(bool bAllowResponsesToModify)
     {

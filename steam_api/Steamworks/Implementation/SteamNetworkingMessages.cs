@@ -1,9 +1,9 @@
 ﻿using Core.Interface;
 using SKYNET;
-using SKYNET.Interface;
+
 using System;
 
-public class SteamNetworkingMessages : IBaseInterface, ISteamNetworkingMessages
+public class SteamNetworkingMessages : IBaseInterface
 {
     public int SendMessageToUser(IntPtr identityRemote, IntPtr pubData, uint cubData, int nSendFlags, int nRemoteChannel)
     {
