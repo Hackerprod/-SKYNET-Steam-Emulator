@@ -85,8 +85,6 @@ namespace SKYNET
                 MenuBox = b;
                 CM_MenuGame.Show(b, new Point(e.Location.X, e.Location.Y));
             }
-            
-
         }
 
         private void GameBox_DoubleClicked(object sender, GameBox e)
