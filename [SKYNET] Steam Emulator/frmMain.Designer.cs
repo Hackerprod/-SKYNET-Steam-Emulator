@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using SKYNET.GUI.Controls;
+using System.Windows.Forms;
 
 namespace SKYNET
 {
@@ -65,7 +66,7 @@ namespace SKYNET
             this.panel5 = new System.Windows.Forms.Panel();
             this.PB_Banner = new System.Windows.Forms.PictureBox();
             this.PB_Logo = new System.Windows.Forms.PictureBox();
-            this.LB_GameTittle = new System.Windows.Forms.Label();
+            this.LB_GameTittle = new SKYNET.GUI.Controls.SKYNET_Label();
             this.shadowBox1 = new System.Windows.Forms.Panel();
             this.BT_GameAction = new SKYNET_Button();
             this.PN_BodyContainer = new System.Windows.Forms.Panel();
@@ -77,6 +78,7 @@ namespace SKYNET
             this.RemoveMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ToTopMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ToButtomMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.GameCacheMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ConfigureMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.PN_Top.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -507,7 +509,7 @@ namespace SKYNET
             // 
             this.PB_Logo.BackColor = System.Drawing.Color.Transparent;
             this.PB_Logo.Image = global::SKYNET.Properties.Resources.logo;
-            this.PB_Logo.Location = new System.Drawing.Point(83, 137);
+            this.PB_Logo.Location = new System.Drawing.Point(83, 132);
             this.PB_Logo.Name = "PB_Logo";
             this.PB_Logo.Size = new System.Drawing.Size(73, 67);
             this.PB_Logo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -517,9 +519,11 @@ namespace SKYNET
             // LB_GameTittle
             // 
             this.LB_GameTittle.BackColor = System.Drawing.Color.Transparent;
+            this.LB_GameTittle.BorderColor = System.Drawing.Color.DarkGray;
+            this.LB_GameTittle.CreateBorder = true;
             this.LB_GameTittle.Font = new System.Drawing.Font("Sitka Text", 36F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.LB_GameTittle.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.LB_GameTittle.Location = new System.Drawing.Point(170, 131);
+            this.LB_GameTittle.ForeColor = System.Drawing.Color.White;
+            this.LB_GameTittle.Location = new System.Drawing.Point(170, 142);
             this.LB_GameTittle.Name = "LB_GameTittle";
             this.LB_GameTittle.Size = new System.Drawing.Size(672, 75);
             this.LB_GameTittle.TabIndex = 11;
@@ -588,10 +592,11 @@ namespace SKYNET
             this.RemoveMenuItem,
             this.ToTopMenuItem,
             this.ToButtomMenuItem,
+            this.GameCacheMenuItem,
             this.ConfigureMenuItem});
             this.CM_MenuGame.Name = "CM_MenuGame";
             this.CM_MenuGame.ShowImageMargin = false;
-            this.CM_MenuGame.Size = new System.Drawing.Size(193, 158);
+            this.CM_MenuGame.Size = new System.Drawing.Size(193, 180);
             // 
             // OpenMenuItem
             // 
@@ -640,6 +645,14 @@ namespace SKYNET
             this.ToButtomMenuItem.Size = new System.Drawing.Size(192, 22);
             this.ToButtomMenuItem.Text = "Move to Bottom List";
             this.ToButtomMenuItem.Click += new System.EventHandler(this.ToButtomMenuItem_Click);
+            // 
+            // GameCacheMenuItem
+            // 
+            this.GameCacheMenuItem.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
+            this.GameCacheMenuItem.Name = "GameCacheMenuItem";
+            this.GameCacheMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.GameCacheMenuItem.Text = "Download Game Cache";
+            this.GameCacheMenuItem.Click += new System.EventHandler(this.GameCacheMenuItem_Click);
             // 
             // ConfigureMenuItem
             // 
@@ -713,7 +726,7 @@ namespace SKYNET
         private Label label6;
         private Panel PN_BodyContainer;
         private RichTextBox richTextBox1;
-        private Label LB_GameTittle;
+        private SKYNET_Label LB_GameTittle;
         private Panel panel7;
         private Controls.GradiantBox gradiantBox1;
         private Label label5;
@@ -739,6 +752,7 @@ namespace SKYNET
         private ToolStripMenuItem OpenFileLocationMenuItem;
         private CircularPictureBox PB_Avatar;
         private PictureBox pictureBox3;
+        private ToolStripMenuItem GameCacheMenuItem;
     }
 }
 

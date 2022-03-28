@@ -2,7 +2,7 @@
 
 namespace SKYNET.GUI
 {
-    partial class frmMessage
+    partial class frmGameDownload
     {
         /// <summary>
         /// Required designer variable.
@@ -35,12 +35,15 @@ namespace SKYNET.GUI
             this.PN_Right = new System.Windows.Forms.Panel();
             this.PN_Left = new System.Windows.Forms.Panel();
             this.PN_Container = new System.Windows.Forms.Panel();
+            this.LB_Info = new System.Windows.Forms.Label();
+            this.LB_Name = new System.Windows.Forms.Label();
+            this.PB_Avatar = new System.Windows.Forms.PictureBox();
             this.cancel = new System.Windows.Forms.Button();
             this.ok = new System.Windows.Forms.Button();
             this.BT_Cancel = new SKYNET_Button();
-            this.BT_Ok = new SKYNET_Button();
-            this.LB_Message = new System.Windows.Forms.Label();
+            this.PB_Progress = new SKYNET.Controls.SKYNET_ProgressBar();
             this.PN_Container.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Avatar)).BeginInit();
             this.SuspendLayout();
             // 
             // PN_Top
@@ -84,16 +87,49 @@ namespace SKYNET.GUI
             // PN_Container
             // 
             this.PN_Container.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(44)))), ((int)(((byte)(50)))), ((int)(((byte)(57)))));
+            this.PN_Container.Controls.Add(this.PB_Progress);
+            this.PN_Container.Controls.Add(this.LB_Info);
+            this.PN_Container.Controls.Add(this.LB_Name);
+            this.PN_Container.Controls.Add(this.PB_Avatar);
             this.PN_Container.Controls.Add(this.cancel);
             this.PN_Container.Controls.Add(this.ok);
             this.PN_Container.Controls.Add(this.BT_Cancel);
-            this.PN_Container.Controls.Add(this.BT_Ok);
-            this.PN_Container.Controls.Add(this.LB_Message);
             this.PN_Container.Dock = System.Windows.Forms.DockStyle.Fill;
             this.PN_Container.Location = new System.Drawing.Point(1, 2);
             this.PN_Container.Name = "PN_Container";
             this.PN_Container.Size = new System.Drawing.Size(521, 230);
             this.PN_Container.TabIndex = 4;
+            // 
+            // LB_Info
+            // 
+            this.LB_Info.AutoSize = true;
+            this.LB_Info.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
+            this.LB_Info.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.LB_Info.Location = new System.Drawing.Point(25, 110);
+            this.LB_Info.Name = "LB_Info";
+            this.LB_Info.Size = new System.Drawing.Size(62, 17);
+            this.LB_Info.TabIndex = 15;
+            this.LB_Info.Text = "Starting...";
+            // 
+            // LB_Name
+            // 
+            this.LB_Name.AutoSize = true;
+            this.LB_Name.Font = new System.Drawing.Font("Segoe UI Emoji", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LB_Name.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.LB_Name.Location = new System.Drawing.Point(107, 46);
+            this.LB_Name.Name = "LB_Name";
+            this.LB_Name.Size = new System.Drawing.Size(83, 32);
+            this.LB_Name.TabIndex = 14;
+            this.LB_Name.Text = "Name";
+            // 
+            // PB_Avatar
+            // 
+            this.PB_Avatar.Location = new System.Drawing.Point(28, 32);
+            this.PB_Avatar.Name = "PB_Avatar";
+            this.PB_Avatar.Size = new System.Drawing.Size(60, 60);
+            this.PB_Avatar.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.PB_Avatar.TabIndex = 13;
+            this.PB_Avatar.TabStop = false;
             // 
             // cancel
             // 
@@ -125,7 +161,7 @@ namespace SKYNET.GUI
             this.BT_Cancel.ForeColorMouseOver = System.Drawing.Color.Empty;
             this.BT_Cancel.ImageAlignment = SKYNET_Button._ImgAlign.Left;
             this.BT_Cancel.ImageIcon = null;
-            this.BT_Cancel.Location = new System.Drawing.Point(223, 174);
+            this.BT_Cancel.Location = new System.Drawing.Point(380, 167);
             this.BT_Cancel.MenuMode = false;
             this.BT_Cancel.Name = "BT_Cancel";
             this.BT_Cancel.Rounded = false;
@@ -135,36 +171,25 @@ namespace SKYNET.GUI
             this.BT_Cancel.Text = "CANCEL";
             this.BT_Cancel.Click += new System.EventHandler(this.Cancel_Click);
             // 
-            // BT_Ok
+            // PB_Progress
             // 
-            this.BT_Ok.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
-            this.BT_Ok.BackColorMouseOver = System.Drawing.Color.Empty;
-            this.BT_Ok.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.BT_Ok.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.BT_Ok.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.BT_Ok.ForeColorMouseOver = System.Drawing.Color.Empty;
-            this.BT_Ok.ImageAlignment = SKYNET_Button._ImgAlign.Left;
-            this.BT_Ok.ImageIcon = null;
-            this.BT_Ok.Location = new System.Drawing.Point(349, 174);
-            this.BT_Ok.MenuMode = false;
-            this.BT_Ok.Name = "BT_Ok";
-            this.BT_Ok.Rounded = false;
-            this.BT_Ok.Size = new System.Drawing.Size(115, 32);
-            this.BT_Ok.Style = SKYNET_Button._Style.TextOnly;
-            this.BT_Ok.TabIndex = 1;
-            this.BT_Ok.Text = "OK";
-            this.BT_Ok.Click += new System.EventHandler(this.Ok_Click);
+            this.PB_Progress.BackColor = System.Drawing.Color.Transparent;
+            this.PB_Progress.DrawHatch = true;
+            this.PB_Progress.ForeColor = System.Drawing.SystemColors.Control;
+            this.PB_Progress.Location = new System.Drawing.Point(28, 135);
+            this.PB_Progress.Maximum = 100;
+            this.PB_Progress.Minimum = 0;
+            this.PB_Progress.Name = "PB_Progress";
+            this.PB_Progress.ProgressColor1 = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(255)))));
+            this.PB_Progress.ProgressColor2 = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(200)))));
+            this.PB_Progress.ShowPercentage = true;
+            this.PB_Progress.Size = new System.Drawing.Size(467, 23);
+            this.PB_Progress.TabIndex = 16;
+            this.PB_Progress.Text = "skyneT_ProgressBar1";
+            this.PB_Progress.Value = 0;
+            this.PB_Progress.ValueAlignment = SKYNET.Controls.SKYNET_ProgressBar.Alignment.Right;
             // 
-            // LB_Message
-            // 
-            this.LB_Message.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
-            this.LB_Message.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.LB_Message.Location = new System.Drawing.Point(24, 38);
-            this.LB_Message.Name = "LB_Message";
-            this.LB_Message.Size = new System.Drawing.Size(470, 118);
-            this.LB_Message.TabIndex = 0;
-            // 
-            // frmMessage
+            // frmGameDownload
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -174,10 +199,12 @@ namespace SKYNET.GUI
             this.Controls.Add(this.PN_Right);
             this.Controls.Add(this.PN_Bottom);
             this.Controls.Add(this.PN_Top);
-            this.Name = "frmMessage";
+            this.Name = "frmGameDownload";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "frmMessage";
             this.PN_Container.ResumeLayout(false);
+            this.PN_Container.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Avatar)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -189,10 +216,12 @@ namespace SKYNET.GUI
         private System.Windows.Forms.Panel PN_Right;
         private System.Windows.Forms.Panel PN_Left;
         private System.Windows.Forms.Panel PN_Container;
-        private System.Windows.Forms.Label LB_Message;
         private SKYNET_Button BT_Cancel;
-        private SKYNET_Button BT_Ok;
         private System.Windows.Forms.Button cancel;
         private System.Windows.Forms.Button ok;
+        private System.Windows.Forms.Label LB_Name;
+        private System.Windows.Forms.PictureBox PB_Avatar;
+        private System.Windows.Forms.Label LB_Info;
+        private SKYNET_ProgressBar PB_Progress;
     }
 }

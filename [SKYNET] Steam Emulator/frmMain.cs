@@ -435,7 +435,15 @@ namespace SKYNET
             MenuBox.BringToFront();
         }
 
-
+        private void GameCacheMenuItem_Click(object sender, EventArgs e)
+        {
+            if (MenuBox.AppId == 0)
+            {
+                modCommon.Show("Please configure a valid AppId for this game.");
+                return;
+            }
+            new frmGameDownload(MenuBox).ShowDialog();
+        }
 
         #endregion
 
@@ -444,5 +452,7 @@ namespace SKYNET
             var dialog = new frmMessage("This is a example").ShowDialog();
             MessageBox.Show(dialog.ToString());
         }
+
+        
     }
 }

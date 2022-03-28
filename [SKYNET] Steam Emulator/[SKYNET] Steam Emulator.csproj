@@ -86,8 +86,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssemblyResolver.cs" />
-    <Compile Include="FileIcon.cs" />
+    <Compile Include="Helpers\AssemblyResolver.cs" />
+    <Compile Include="Helpers\FileIcon.cs" />
     <Compile Include="GUI\Controls\CircularPictureBox.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -97,13 +97,19 @@
     <Compile Include="GUI\Controls\SKYNET_ContextMenuStrip.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="GUI\Controls\SKYNET_Label.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="GUI\Controls\SKYNET_ProgressBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="GUI\frmGameManager.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="GUI\frmGameManager.Designer.cs">
       <DependentUpon>frmGameManager.cs</DependentUpon>
     </Compile>
-    <Compile Include="Game.cs" />
+    <Compile Include="Types\Game.cs" />
     <Compile Include="GUI\Controls\DwmApi.cs" />
     <Compile Include="GUI\Controls\GradiantBox.cs">
       <SubType>UserControl</SubType>
@@ -145,13 +151,19 @@
     <Compile Include="GUI\frmBase.designer.cs">
       <DependentUpon>frmBase.cs</DependentUpon>
     </Compile>
+    <Compile Include="GUI\frmGameDownload.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\frmGameDownload.Designer.cs">
+      <DependentUpon>frmGameDownload.cs</DependentUpon>
+    </Compile>
     <Compile Include="GUI\frmMessage.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="GUI\frmMessage.Designer.cs">
       <DependentUpon>frmMessage.cs</DependentUpon>
     </Compile>
-    <Compile Include="Memory.cs" />
+    <Compile Include="Helpers\Memory.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -164,11 +176,11 @@
     <Compile Include="GUI\Controls\GameBox.Designer.cs">
       <DependentUpon>GameBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="IconExtractor\IconExtractor.cs" />
-    <Compile Include="IconExtractor\IconUtil.cs" />
-    <Compile Include="IconExtractor\NativeMethods.cs" />
-    <Compile Include="modCommon.cs" />
-    <Compile Include="NativeMethods.cs" />
+    <Compile Include="Helpers\IconExtractor\IconExtractor.cs" />
+    <Compile Include="Helpers\IconExtractor\IconUtil.cs" />
+    <Compile Include="Helpers\IconExtractor\NativeMethods.cs" />
+    <Compile Include="Helpers\modCommon.cs" />
+    <Compile Include="Helpers\NativeMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GUI\Controls\SKYNET_TextBox.cs">
@@ -213,6 +225,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\frmBase.resx">
       <DependentUpon>frmBase.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\frmGameDownload.resx">
+      <DependentUpon>frmGameDownload.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\frmMessage.resx">
       <DependentUpon>frmMessage.cs</DependentUpon>

@@ -215,7 +215,7 @@ namespace SKYNET
             this.TB_AppId.Logo = null;
             this.TB_AppId.LogoCursor = System.Windows.Forms.Cursors.Default;
             this.TB_AppId.Name = "TB_AppId";
-            this.TB_AppId.OnlyNumbers = true;
+            this.TB_AppId.OnlyNumbers = false;
             this.TB_AppId.ShowLogo = false;
             this.TB_AppId.Size = new System.Drawing.Size(608, 35);
             this.TB_AppId.TabIndex = 10;
