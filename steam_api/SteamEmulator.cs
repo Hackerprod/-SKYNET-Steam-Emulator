@@ -1,6 +1,5 @@
 ﻿using SKYNET;
 using SKYNET.Callback;
-using SKYNET.GUI;
 using SKYNET.Helper;
 using Steamworks;
 using System;
@@ -94,11 +93,6 @@ public class SteamEmulator
     public void Initialize()
     {
         string _file = Path.Combine(modCommon.GetPath(), "[SKYNET] steam_api.ini");
-
-        if (!File.Exists(_file))
-        {
-            new frmLogin().ShowDialog();
-        }
 
         modCommon.LoadSettings();
 

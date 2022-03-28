@@ -7,7 +7,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using SKYNET;
-using SKYNET.GUI;
 using Steamworks;
 
 public class SteamAPI : SteamInterface

@@ -12,14 +12,12 @@ public class SteamAPI_ISteamMasterServerUpdater : BaseCalls
     public static void SteamAPI_ISteamMasterServerUpdater_SetActive(bool bActive)
     {
         Write("SteamAPI_ISteamMasterServerUpdater_SetActive");
-        //
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static void SteamAPI_ISteamMasterServerUpdater_SetHeartbeatInterval(int iHeartbeatInterval)
     {
         Write("SteamAPI_ISteamMasterServerUpdater_SetHeartbeatInterval");
-        //
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -40,28 +38,24 @@ public class SteamAPI_ISteamMasterServerUpdater : BaseCalls
     public static void SteamAPI_ISteamMasterServerUpdater_SetBasicServerData(uint nProtocolVersion, bool bDedicatedServer, string pRegionName, string pProductName, uint nMaxReportedClients, bool bPasswordProtected, string pGameDescription)
     {
         Write("SteamAPI_ISteamMasterServerUpdater_SetBasicServerData");
-        //
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static void SteamAPI_ISteamMasterServerUpdater_ClearAllKeyValues()
     {
         Write("SteamAPI_ISteamMasterServerUpdater_ClearAllKeyValues");
-        //
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static void SteamAPI_ISteamMasterServerUpdater_SetKeyValue(string pKey, string pValue)
     {
         Write("SteamAPI_ISteamMasterServerUpdater_SetKeyValue");
-        //
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static void SteamAPI_ISteamMasterServerUpdater_NotifyShutdown()
     {
         Write("SteamAPI_ISteamMasterServerUpdater_NotifyShutdown");
-        //
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -75,7 +69,6 @@ public class SteamAPI_ISteamMasterServerUpdater : BaseCalls
     public static void SteamAPI_ISteamMasterServerUpdater_ForceHeartbeat()
     {
         Write("SteamAPI_ISteamMasterServerUpdater_ForceHeartbeat");
-        //
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -105,6 +98,5 @@ public class SteamAPI_ISteamMasterServerUpdater : BaseCalls
         Write("SteamAPI_ISteamMasterServerUpdater_GetMasterServerAddress");
         return SteamEmulator.SteamMasterServerUpdater.GetMasterServerAddress(iServer, pOut, outBufferSize);
     }
-
 }
 
