@@ -26,7 +26,7 @@ namespace SKYNET.GUI
                 case MessageBoxButtons.OKCancel:
                     break;
                 case MessageBoxButtons.YesNo:
-                    BT_Cancel.Text = "YES";
+                    BT_Ok.Text = "YES";
                     BT_Cancel.Text = "NO";
                     break;
                 default:

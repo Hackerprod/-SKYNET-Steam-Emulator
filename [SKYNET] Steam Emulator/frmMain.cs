@@ -416,7 +416,7 @@ namespace SKYNET
 
         private void RemoveMenuItem_Click(object sender, EventArgs e)
         {
-            var dialog = MessageBox.Show("You are sure you want to remove this game", "", MessageBoxButtons.OKCancel);
+            var dialog = modCommon.Show("You are sure you want to remove this game?", MessageBoxButtons.YesNo);
             if (dialog == DialogResult.OK)
             {
                 for (int i = 0; i < PN_GameContainer.Controls.Count; i++)

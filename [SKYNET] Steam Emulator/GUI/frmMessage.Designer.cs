@@ -115,7 +115,7 @@
             // 
             // BT_Cancel
             // 
-            this.BT_Cancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(49)))), ((int)(((byte)(70)))), ((int)(((byte)(86)))));
+            this.BT_Cancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
             this.BT_Cancel.BackColorMouseOver = System.Drawing.Color.Empty;
             this.BT_Cancel.Cursor = System.Windows.Forms.Cursors.Hand;
             this.BT_Cancel.Font = new System.Drawing.Font("Segoe UI", 9F);
@@ -135,7 +135,7 @@
             // 
             // BT_Ok
             // 
-            this.BT_Ok.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(49)))), ((int)(((byte)(70)))), ((int)(((byte)(86)))));
+            this.BT_Ok.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
             this.BT_Ok.BackColorMouseOver = System.Drawing.Color.Empty;
             this.BT_Ok.Cursor = System.Windows.Forms.Cursors.Hand;
             this.BT_Ok.Font = new System.Drawing.Font("Segoe UI", 9F);
@@ -155,7 +155,7 @@
             // 
             // LB_Message
             // 
-            this.LB_Message.Font = new System.Drawing.Font("Segoe UI Emoji", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LB_Message.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
             this.LB_Message.ForeColor = System.Drawing.SystemColors.ButtonFace;
             this.LB_Message.Location = new System.Drawing.Point(24, 38);
             this.LB_Message.Name = "LB_Message";
