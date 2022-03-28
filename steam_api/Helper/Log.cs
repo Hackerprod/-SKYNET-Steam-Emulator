@@ -20,11 +20,11 @@ namespace SKYNET.Helper
             }
         }
 
-        public static void Write(object msg)
+        public static void Write(object msg, bool force = false)
         {
             Console.WriteLine(msg);
 
-            if (!modCommon.LogToFile)
+            if (!modCommon.LogToFile && !force)
             {
                 return;
             }

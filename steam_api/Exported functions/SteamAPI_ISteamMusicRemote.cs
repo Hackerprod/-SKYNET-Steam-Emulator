@@ -17,17 +17,17 @@ public class SteamAPI_ISteamMusicRemote : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamMusicRemote_DeregisterSteamMusicRemote(IntPtr _)
+    public static bool SteamAPI_ISteamMusicRemote_DeregisterSteamMusicRemote()
     {
         Write("SteamAPI_ISteamMusicRemote_DeregisterSteamMusicRemote");
-        return SteamEmulator.SteamMusicRemote.DeregisterSteamMusicRemote(_);
+        return SteamEmulator.SteamMusicRemote.DeregisterSteamMusicRemote(SteamEmulator.SteamFriends.BaseAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamMusicRemote_BIsCurrentMusicRemote(IntPtr _)
+    public static bool SteamAPI_ISteamMusicRemote_BIsCurrentMusicRemote()
     {
         Write("SteamAPI_ISteamMusicRemote_BIsCurrentMusicRemote");
-        return SteamEmulator.SteamMusicRemote.BIsCurrentMusicRemote(_);
+        return SteamEmulator.SteamMusicRemote.BIsCurrentMusicRemote(SteamEmulator.SteamFriends.BaseAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -122,10 +122,10 @@ public class SteamAPI_ISteamMusicRemote : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamMusicRemote_CurrentEntryWillChange(IntPtr _)
+    public static bool SteamAPI_ISteamMusicRemote_CurrentEntryWillChange()
     {
         Write("SteamAPI_ISteamMusicRemote_CurrentEntryWillChange");
-        return SteamEmulator.SteamMusicRemote.CurrentEntryWillChange(_);
+        return SteamEmulator.SteamMusicRemote.CurrentEntryWillChange(SteamEmulator.SteamFriends.BaseAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -157,24 +157,24 @@ public class SteamAPI_ISteamMusicRemote : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamMusicRemote_CurrentEntryDidChange(IntPtr _)
+    public static bool SteamAPI_ISteamMusicRemote_CurrentEntryDidChange()
     {
         Write("SteamAPI_ISteamMusicRemote_CurrentEntryDidChange");
-        return SteamEmulator.SteamMusicRemote.CurrentEntryDidChange(_);
+        return SteamEmulator.SteamMusicRemote.CurrentEntryDidChange(SteamEmulator.SteamFriends.BaseAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamMusicRemote_QueueWillChange(IntPtr _)
+    public static bool SteamAPI_ISteamMusicRemote_QueueWillChange()
     {
         Write("SteamAPI_ISteamMusicRemote_QueueWillChange");
-        return SteamEmulator.SteamMusicRemote.QueueWillChange(_);
+        return SteamEmulator.SteamMusicRemote.QueueWillChange(SteamEmulator.SteamFriends.BaseAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamMusicRemote_ResetQueueEntries(IntPtr _)
+    public static bool SteamAPI_ISteamMusicRemote_ResetQueueEntries()
     {
         Write("SteamAPI_ISteamMusicRemote_ResetQueueEntries");
-        return SteamEmulator.SteamMusicRemote.ResetQueueEntries(_);
+        return SteamEmulator.SteamMusicRemote.ResetQueueEntries(SteamEmulator.SteamFriends.BaseAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -192,24 +192,24 @@ public class SteamAPI_ISteamMusicRemote : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamMusicRemote_QueueDidChange(IntPtr _)
+    public static bool SteamAPI_ISteamMusicRemote_QueueDidChange()
     {
         Write("SteamAPI_ISteamMusicRemote_QueueDidChange");
-        return SteamEmulator.SteamMusicRemote.QueueDidChange(_);
+        return SteamEmulator.SteamMusicRemote.QueueDidChange(SteamEmulator.SteamFriends.BaseAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamMusicRemote_PlaylistWillChange(IntPtr _)
+    public static bool SteamAPI_ISteamMusicRemote_PlaylistWillChange()
     {
         Write("SteamAPI_ISteamMusicRemote_PlaylistWillChange");
-        return SteamEmulator.SteamMusicRemote.PlaylistWillChange(_);
+        return SteamEmulator.SteamMusicRemote.PlaylistWillChange(SteamEmulator.SteamFriends.BaseAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamMusicRemote_ResetPlaylistEntries(IntPtr _)
+    public static bool SteamAPI_ISteamMusicRemote_ResetPlaylistEntries()
     {
         Write("SteamAPI_ISteamMusicRemote_ResetPlaylistEntries");
-        return SteamEmulator.SteamMusicRemote.ResetPlaylistEntries(_);
+        return SteamEmulator.SteamMusicRemote.ResetPlaylistEntries(SteamEmulator.SteamFriends.BaseAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -227,10 +227,10 @@ public class SteamAPI_ISteamMusicRemote : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamMusicRemote_PlaylistDidChange(IntPtr _)
+    public static bool SteamAPI_ISteamMusicRemote_PlaylistDidChange()
     {
         Write("SteamAPI_ISteamMusicRemote_PlaylistDidChange");
-        return SteamEmulator.SteamMusicRemote.PlaylistDidChange(_);
+        return SteamEmulator.SteamMusicRemote.PlaylistDidChange(SteamEmulator.SteamFriends.BaseAddress);
     }
 
 }

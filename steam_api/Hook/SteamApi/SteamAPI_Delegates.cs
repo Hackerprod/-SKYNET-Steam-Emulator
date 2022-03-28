@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace SKYNET.Hook
+namespace SKYNET.Hook.Handles
 {
     public partial class SteamAPI
     {
@@ -75,13 +75,13 @@ namespace SKYNET.Hook
         public delegate void SteamAPI_ManualDispatch_RunFrameDelegate(IntPtr hSteamPipe);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate bool SteamAPI_ManualDispatch_GetNextCallbackDelegate(int hSteamPipe, IntPtr pCallbackMsg);
+        public delegate bool SteamAPI_ManualDispatch_GetNextCallbackDelegate(HSteamPipe hSteamPipe, IntPtr pCallbackMs);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate void SteamAPI_ManualDispatch_FreeLastCallbackDelegate(int hSteamPipe);
+        public delegate void SteamAPI_ManualDispatch_FreeLastCallbackDelegate(HSteamPipe hSteamPipe);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate bool SteamAPI_ManualDispatch_GetAPICallResultDelegate(int hSteamPipe, IntPtr hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, bool pbFailed);
+        public delegate bool SteamAPI_ManualDispatch_GetAPICallResultDelegate(HSteamPipe hSteamPipe, IntPtr hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, bool pbFailed);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
         public delegate bool SteamAPI_RestartAppDelegate(UInt32 appid);
@@ -249,7 +249,7 @@ namespace SKYNET.Hook
         public delegate IntPtr SteamAppsDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate SteamClient steamClientDelegate();
+        public delegate IntPtr SteamClientDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
         public delegate IntPtr SteamControllerDelegate();
@@ -346,7 +346,6 @@ namespace SKYNET.Hook
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
         public delegate void VR_ShutdownDelegate();
-
 
 
 
@@ -465,7 +464,7 @@ namespace SKYNET.Hook
 
         public static SteamAppsDelegate _SteamAppsDelegate;
 
-        public static steamClientDelegate _steamClientDelegate;
+        public static SteamClientDelegate _SteamClientDelegate;
 
         public static SteamControllerDelegate _SteamControllerDelegate;
 
@@ -530,6 +529,8 @@ namespace SKYNET.Hook
         public static VR_IsHmdPresentDelegate _VR_IsHmdPresentDelegate;
 
         public static VR_ShutdownDelegate _VR_ShutdownDelegate;
+
+
     }
 }
 

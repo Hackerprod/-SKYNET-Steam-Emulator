@@ -87,6 +87,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Hook\SteamAppList\SteamAPI_ISteamAppList_Delegates.cs" />
+    <Compile Include="Hook\SteamAppList\SteamAPI_ISteamAppList.cs" />
+    <Compile Include="Hook\SteamApps\SteamAPI_ISteamApps.cs" />
+    <Compile Include="Hook\SteamApps\SteamAPI_ISteamApps_Delegates.cs" />
     <Compile Include="Steamworks\Helpers\DelegateAttribute.cs" />
     <Compile Include="Steamworks\Helpers\IBaseInterface.cs" />
     <Compile Include="Steamworks\Helpers\InterfaceImplementation.cs" />

@@ -145,14 +145,14 @@ public class SteamAPI_ISteamClient : BaseCalls
     public static uint SteamAPI_ISteamClient_GetIPCCallCount()
     {
         Write("SteamAPI_ISteamClient_GetIPCCallCount");
-        return SteamEmulator.SteamClient.GetIPCCallCount(IntPtr.Zero);
+        return SteamEmulator.SteamClient.GetIPCCallCount(SteamEmulator.SteamClient.BaseAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamClient_BShutdownIfAllPipesClosed(IntPtr _)
+    public static bool SteamAPI_ISteamClient_BShutdownIfAllPipesClosed()
     {
         Write("SteamAPI_ISteamClient_BShutdownIfAllPipesClosed");
-        return SteamEmulator.SteamClient.BShutdownIfAllPipesClosed(_);
+        return SteamEmulator.SteamClient.BShutdownIfAllPipesClosed(SteamEmulator.SteamClient.BaseAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

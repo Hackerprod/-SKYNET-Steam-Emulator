@@ -17,7 +17,7 @@ namespace SKYNET.Hook
                 var ProcAddress = NativeMethods.GetProcAddress("steam_api64.dll", Method);
                 if (ProcAddress == IntPtr.Zero)
                 {
-                    Main.Write("HookManager", "Method " + Method + " not found");
+                    //Main.Write("HookManager", "Method " + Method + " not found");
                     return;
                 }
                 try

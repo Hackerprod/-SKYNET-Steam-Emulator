@@ -31,7 +31,7 @@ namespace SKYNET.Helper
             IntPtr procAddress = GetProcAddress(moduleHandle, InSymbolName);
             if (procAddress == IntPtr.Zero)
             {
-                Main.Write("HookManager", InSymbolName + " does not exist.");
+                //Main.Write("HookManager", InSymbolName + " does not exist.");
                 return IntPtr.Zero;
             }
             return procAddress;

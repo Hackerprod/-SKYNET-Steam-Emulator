@@ -25,8 +25,11 @@ namespace SKYNET
             InstallHook(new steamnetworkingsockets());
             
 
-            Hooks.Add(new SKYNET.Hook.SteamInternal());
-            Hooks.Add(new SKYNET.Hook.SteamAPI());
+            Hooks.Add(new SKYNET.Hook.Handles.SteamInternal());
+            //Hooks.Add(new SKYNET.Hook.Handles.SteamAPI());
+            //Hooks.Add(new SKYNET.Hook.Handles.SteamAPI_ISteamAppList()); 
+            //Hooks.Add(new SKYNET.Hook.Handles.SteamAPI_ISteamApps());
+
 
             if (!Modules.Contains("steam_api.dll") || !Modules.Contains("steam_api64.dll"))
             {

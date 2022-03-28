@@ -10,7 +10,7 @@ using SKYNET;
 using SKYNET.Helper;
 using SKYNET.Types;
 
-namespace SKYNET.Hook
+namespace SKYNET.Hook.Handles
 {
     public partial class SteamInternal 
     {

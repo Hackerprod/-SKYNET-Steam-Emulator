@@ -58,59 +58,59 @@ public class SteamAPI_ISteamFriends : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamFriends_CloseClanChatWindowInSteam(IntPtr _, IntPtr steamIDClanChat)
+    public static bool SteamAPI_ISteamFriends_CloseClanChatWindowInSteam(IntPtr steamIDClanChat)
     {
         Write($"SteamAPI_ISteamFriends_CloseClanChatWindowInSteam {steamIDClanChat}");
-        return SteamEmulator.SteamFriends.CloseClanChatWindowInSteam(_, steamIDClanChat);
+        return SteamEmulator.SteamFriends.CloseClanChatWindowInSteam(SteamEmulator.SteamFriends.BaseAddress, steamIDClanChat);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static SteamAPICall_t SteamAPI_ISteamFriends_DownloadClanActivityCounts(IntPtr _, IntPtr[] psteamIDClans, int cClansToRequest)
+    public static SteamAPICall_t SteamAPI_ISteamFriends_DownloadClanActivityCounts(IntPtr[] psteamIDClans, int cClansToRequest)
     {
         Write($"SteamAPI_ISteamFriends_DownloadClanActivityCounts {cClansToRequest}");
-        return SteamEmulator.SteamFriends.DownloadClanActivityCounts(_, psteamIDClans, cClansToRequest);
+        return SteamEmulator.SteamFriends.DownloadClanActivityCounts(SteamEmulator.SteamFriends.BaseAddress, psteamIDClans, cClansToRequest);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static SteamAPICall_t SteamAPI_ISteamFriends_EnumerateFollowingList(IntPtr _, uint unStartIndex)
+    public static SteamAPICall_t SteamAPI_ISteamFriends_EnumerateFollowingList(uint unStartIndex)
     {
         Write($"SteamAPI_ISteamFriends_EnumerateFollowingList {unStartIndex}");
-        return SteamEmulator.SteamFriends.EnumerateFollowingList(_, unStartIndex);
+        return SteamEmulator.SteamFriends.EnumerateFollowingList(SteamEmulator.SteamFriends.BaseAddress, unStartIndex);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static IntPtr SteamAPI_ISteamFriends_GetChatMemberByIndex(IntPtr _, IntPtr steamIDClan, int iUser)
+    public static IntPtr SteamAPI_ISteamFriends_GetChatMemberByIndex(IntPtr steamIDClan, int iUser)
     {
         Write($"SteamAPI_ISteamFriends_GetChatMemberByIndex {steamIDClan}");
-        return SteamEmulator.SteamFriends.GetChatMemberByIndex(_, steamIDClan, iUser);
+        return SteamEmulator.SteamFriends.GetChatMemberByIndex(SteamEmulator.SteamFriends.BaseAddress, steamIDClan, iUser);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamFriends_GetClanActivityCounts(IntPtr _, IntPtr steamIDClan, int pnOnline, int pnInGame, int pnChatting)
+    public static bool SteamAPI_ISteamFriends_GetClanActivityCounts(IntPtr steamIDClan, int pnOnline, int pnInGame, int pnChatting)
     {
         Write($"SteamAPI_ISteamFriends_ActivateGameOverlay {steamIDClan}");
-        return SteamEmulator.SteamFriends.GetClanActivityCounts(_, steamIDClan, pnOnline, pnInGame, pnChatting);
+        return SteamEmulator.SteamFriends.GetClanActivityCounts(SteamEmulator.SteamFriends.BaseAddress, steamIDClan, pnOnline, pnInGame, pnChatting);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static IntPtr SteamAPI_ISteamFriends_GetClanByIndex(IntPtr _, int iClan)
+    public static IntPtr SteamAPI_ISteamFriends_GetClanByIndex(int iClan)
     {
         Write($"SteamAPI_ISteamFriends_GetClanByIndex {iClan}");
-        return SteamEmulator.SteamFriends.GetClanByIndex(_, iClan);
+        return SteamEmulator.SteamFriends.GetClanByIndex(SteamEmulator.SteamFriends.BaseAddress, iClan);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static int SteamAPI_ISteamFriends_GetClanChatMemberCount(IntPtr _, IntPtr steamIDClan)
+    public static int SteamAPI_ISteamFriends_GetClanChatMemberCount(IntPtr steamIDClan)
     {
         Write($"SteamAPI_ISteamFriends_GetClanChatMemberCount {steamIDClan}");
-        return SteamEmulator.SteamFriends.GetClanChatMemberCount(_, steamIDClan);
+        return SteamEmulator.SteamFriends.GetClanChatMemberCount(SteamEmulator.SteamFriends.BaseAddress, steamIDClan);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static int SteamAPI_ISteamFriends_GetClanChatMessage(IntPtr _, IntPtr steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, EChatEntryType peChatEntryType, IntPtr[] psteamidChatter)
+    public static int SteamAPI_ISteamFriends_GetClanChatMessage(IntPtr steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, EChatEntryType peChatEntryType, IntPtr[] psteamidChatter)
     {
         Write($"SteamAPI_ISteamFriends_GetClanChatMessage {steamIDClanChat}");
-        return SteamEmulator.SteamFriends.GetClanChatMessage(_, steamIDClanChat, iMessage, prgchText, cchTextMax, peChatEntryType, psteamidChatter);
+        return SteamEmulator.SteamFriends.GetClanChatMessage(SteamEmulator.SteamFriends.BaseAddress, steamIDClanChat, iMessage, prgchText, cchTextMax, peChatEntryType, psteamidChatter);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -121,45 +121,45 @@ public class SteamAPI_ISteamFriends : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static string SteamAPI_ISteamFriends_GetClanName(IntPtr _, IntPtr steamIDClan)
+    public static string SteamAPI_ISteamFriends_GetClanName(IntPtr steamIDClan)
     {
         Write($"SteamAPI_ISteamFriends_GetClanName {steamIDClan}");
-        return SteamEmulator.SteamFriends.GetClanName(_, steamIDClan);
+        return SteamEmulator.SteamFriends.GetClanName(SteamEmulator.SteamFriends.BaseAddress, steamIDClan);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static IntPtr SteamAPI_ISteamFriends_GetClanOfficerByIndex(IntPtr _, IntPtr steamIDClan, int iOfficer)
+    public static IntPtr SteamAPI_ISteamFriends_GetClanOfficerByIndex(IntPtr steamIDClan, int iOfficer)
     {
         Write($"SteamAPI_ISteamFriends_GetClanOfficerByIndex {steamIDClan}");
-        return SteamEmulator.SteamFriends.GetClanOfficerByIndex(_, steamIDClan, iOfficer);
+        return SteamEmulator.SteamFriends.GetClanOfficerByIndex(SteamEmulator.SteamFriends.BaseAddress, steamIDClan, iOfficer);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static int SteamAPI_ISteamFriends_GetClanOfficerCount(IntPtr _, IntPtr steamIDClan)
+    public static int SteamAPI_ISteamFriends_GetClanOfficerCount(IntPtr steamIDClan)
     {
         Write($"SteamAPI_ISteamFriends_GetClanOfficerCount {steamIDClan}");
-        return SteamEmulator.SteamFriends.GetClanOfficerCount(_, steamIDClan);
+        return SteamEmulator.SteamFriends.GetClanOfficerCount(SteamEmulator.SteamFriends.BaseAddress, steamIDClan);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static IntPtr SteamAPI_ISteamFriends_GetClanOwner(IntPtr _, IntPtr steamIDClan)
+    public static IntPtr SteamAPI_ISteamFriends_GetClanOwner(IntPtr steamIDClan)
     {
         Write($"SteamAPI_ISteamFriends_GetClanOwner {steamIDClan}");
-        return SteamEmulator.SteamFriends.GetClanOwner(_, steamIDClan);
+        return SteamEmulator.SteamFriends.GetClanOwner(SteamEmulator.SteamFriends.BaseAddress, steamIDClan);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static string SteamAPI_ISteamFriends_GetClanTag(IntPtr _, IntPtr steamIDClan)
+    public static string SteamAPI_ISteamFriends_GetClanTag(IntPtr steamIDClan)
     {
         Write($"SteamAPI_ISteamFriends_GetClanTag {steamIDClan}");
-        return SteamEmulator.SteamFriends.GetClanTag(_, steamIDClan);
+        return SteamEmulator.SteamFriends.GetClanTag(SteamEmulator.SteamFriends.BaseAddress, steamIDClan);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static IntPtr SteamAPI_ISteamFriends_GetCoplayFriend(IntPtr _, int iCoplayFriend)
+    public static IntPtr SteamAPI_ISteamFriends_GetCoplayFriend(int iCoplayFriend)
     {
         Write($"SteamAPI_ISteamFriends_GetCoplayFriend {iCoplayFriend}");
-        return SteamEmulator.SteamFriends.GetCoplayFriend(_, iCoplayFriend);
+        return SteamEmulator.SteamFriends.GetCoplayFriend(SteamEmulator.SteamFriends.BaseAddress, iCoplayFriend);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -170,115 +170,115 @@ public class SteamAPI_ISteamFriends : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static SteamAPICall_t SteamAPI_ISteamFriends_GetFollowerCount(IntPtr _, IntPtr steamID)
+    public static SteamAPICall_t SteamAPI_ISteamFriends_GetFollowerCount(IntPtr steamID)
     {
         Write($"SteamAPI_ISteamFriends_GetFollowerCount {steamID}");
-        return SteamEmulator.SteamFriends.GetFollowerCount(_, steamID);
+        return SteamEmulator.SteamFriends.GetFollowerCount(SteamEmulator.SteamFriends.BaseAddress, steamID);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static IntPtr SteamAPI_ISteamFriends_GetFriendByIndex(IntPtr _, int iFriend, int iFriendFlags)
+    public static IntPtr SteamAPI_ISteamFriends_GetFriendByIndex(int iFriend, int iFriendFlags)
     {
         Write($"SteamAPI_ISteamFriends_GetFriendByIndex {iFriend}");
-        return SteamEmulator.SteamFriends.GetFriendByIndex(_, iFriend, iFriendFlags);
+        return SteamEmulator.SteamFriends.GetFriendByIndex(SteamEmulator.SteamFriends.BaseAddress, iFriend, iFriendFlags);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static AppId_t SteamAPI_ISteamFriends_GetFriendCoplayGame(IntPtr _, IntPtr steamIDFriend)
+    public static AppId_t SteamAPI_ISteamFriends_GetFriendCoplayGame(IntPtr steamIDFriend)
     {
         Write($"SteamAPI_ISteamFriends_GetFriendCoplayGame {steamIDFriend}");
-        return SteamEmulator.SteamFriends.GetFriendCoplayGame(_, steamIDFriend);
+        return SteamEmulator.SteamFriends.GetFriendCoplayGame(SteamEmulator.SteamFriends.BaseAddress, steamIDFriend);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static int SteamAPI_ISteamFriends_GetFriendCoplayTime(IntPtr _, IntPtr steamIDFriend)
+    public static int SteamAPI_ISteamFriends_GetFriendCoplayTime(IntPtr steamIDFriend)
     {
         Write($"SteamAPI_ISteamFriends_GetFriendCoplayTime {steamIDFriend}");
-        return SteamEmulator.SteamFriends.GetFriendCoplayTime(_, steamIDFriend);
+        return SteamEmulator.SteamFriends.GetFriendCoplayTime(SteamEmulator.SteamFriends.BaseAddress, steamIDFriend);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static int SteamAPI_ISteamFriends_GetFriendCount(IntPtr _, int iFriendFlags)
+    public static int SteamAPI_ISteamFriends_GetFriendCount(int iFriendFlags)
     {
         Write($"SteamAPI_ISteamFriends_GetFriendCount {iFriendFlags}");
-        return SteamEmulator.SteamFriends.GetFriendCount(_, iFriendFlags);
+        return SteamEmulator.SteamFriends.GetFriendCount(SteamEmulator.SteamFriends.BaseAddress, iFriendFlags);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static int SteamAPI_ISteamFriends_GetFriendCountFromSource(IntPtr _, IntPtr steamIDSource)
+    public static int SteamAPI_ISteamFriends_GetFriendCountFromSource(IntPtr steamIDSource)
     {
         Write($"SteamAPI_ISteamFriends_GetFriendCountFromSource {steamIDSource}");
-        return SteamEmulator.SteamFriends.GetFriendCountFromSource(_, steamIDSource);
+        return SteamEmulator.SteamFriends.GetFriendCountFromSource(SteamEmulator.SteamFriends.BaseAddress, steamIDSource);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static IntPtr SteamAPI_ISteamFriends_GetFriendFromSourceByIndex(IntPtr _, IntPtr steamIDSource, int iFriend)
+    public static IntPtr SteamAPI_ISteamFriends_GetFriendFromSourceByIndex(IntPtr steamIDSource, int iFriend)
     {
         Write($"SteamAPI_ISteamFriends_GetFriendFromSourceByIndex {steamIDSource} {iFriend}");
-        return SteamEmulator.SteamFriends.GetFriendFromSourceByIndex(_, steamIDSource, iFriend);
+        return SteamEmulator.SteamFriends.GetFriendFromSourceByIndex(SteamEmulator.SteamFriends.BaseAddress, steamIDSource, iFriend);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamFriends_GetFriendGamePlayed(IntPtr _, IntPtr steamIDFriend, out FriendGameInfo_t pFriendGameInfo)
+    public static bool SteamAPI_ISteamFriends_GetFriendGamePlayed(IntPtr steamIDFriend, out FriendGameInfo_t pFriendGameInfo)
     {
         Write($"SteamAPI_ISteamFriends_GetFriendGamePlayed {(uint)steamIDFriend}");
-        return SteamEmulator.SteamFriends.GetFriendGamePlayed(_, steamIDFriend, out pFriendGameInfo);
+        return SteamEmulator.SteamFriends.GetFriendGamePlayed(SteamEmulator.SteamFriends.BaseAddress, steamIDFriend, out pFriendGameInfo);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static int SteamAPI_ISteamFriends_GetFriendMessage(IntPtr _, IntPtr steamIDFriend, int iMessageID, IntPtr pvData, int cubData, EChatEntryType peChatEntryType)
+    public static int SteamAPI_ISteamFriends_GetFriendMessage(IntPtr steamIDFriend, int iMessageID, IntPtr pvData, int cubData, EChatEntryType peChatEntryType)
     {
         Write($"SteamAPI_ISteamFriends_GetFriendMessage {steamIDFriend}");
-        return SteamEmulator.SteamFriends.GetFriendMessage(_, steamIDFriend, iMessageID, pvData, cubData, peChatEntryType);
+        return SteamEmulator.SteamFriends.GetFriendMessage(SteamEmulator.SteamFriends.BaseAddress, steamIDFriend, iMessageID, pvData, cubData, peChatEntryType);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static string SteamAPI_ISteamFriends_GetFriendPersonaName(IntPtr _, IntPtr steamIDFriend)
+    public static string SteamAPI_ISteamFriends_GetFriendPersonaName(IntPtr steamIDFriend)
     {
         Write($"SteamAPI_ISteamFriends_GetFriendPersonaName {(uint)steamIDFriend}");
-        return SteamEmulator.SteamFriends.GetFriendPersonaName(_, steamIDFriend);
+        return SteamEmulator.SteamFriends.GetFriendPersonaName(SteamEmulator.SteamFriends.BaseAddress, steamIDFriend);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static string SteamAPI_ISteamFriends_GetFriendPersonaNameHistory(IntPtr _, IntPtr steamIDFriend, int iPersonaName)
+    public static string SteamAPI_ISteamFriends_GetFriendPersonaNameHistory(IntPtr steamIDFriend, int iPersonaName)
     {
         Write($"SteamAPI_ISteamFriends_GetFriendPersonaNameHistory {steamIDFriend}");
-        return SteamEmulator.SteamFriends.GetFriendPersonaNameHistory(_, steamIDFriend, iPersonaName);
+        return SteamEmulator.SteamFriends.GetFriendPersonaNameHistory(SteamEmulator.SteamFriends.BaseAddress, steamIDFriend, iPersonaName);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static EPersonaState SteamAPI_ISteamFriends_GetFriendPersonaState(IntPtr _, IntPtr steamIDFriend)
+    public static EPersonaState SteamAPI_ISteamFriends_GetFriendPersonaState(IntPtr steamIDFriend)
     {
         Write($"SteamAPI_ISteamFriends_GetFriendPersonaState {steamIDFriend}");
-        return SteamEmulator.SteamFriends.GetFriendPersonaState(_, steamIDFriend);
+        return SteamEmulator.SteamFriends.GetFriendPersonaState(SteamEmulator.SteamFriends.BaseAddress, steamIDFriend);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static EFriendRelationship SteamAPI_ISteamFriends_GetFriendRelationship(IntPtr _, IntPtr steamIDFriend)
+    public static EFriendRelationship SteamAPI_ISteamFriends_GetFriendRelationship(IntPtr steamIDFriend)
     {
         Write($"SteamAPI_ISteamFriends_GetFriendRelationship {steamIDFriend}");
-        return SteamEmulator.SteamFriends.GetFriendRelationship(_, steamIDFriend);
+        return SteamEmulator.SteamFriends.GetFriendRelationship(SteamEmulator.SteamFriends.BaseAddress, steamIDFriend);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static string SteamAPI_ISteamFriends_GetFriendRichPresence(IntPtr _, IntPtr steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchKey)
+    public static string SteamAPI_ISteamFriends_GetFriendRichPresence(IntPtr steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchKey)
     {
         Write($"SteamAPI_ISteamFriends_GetFriendRichPresence {steamIDFriend} {pchKey}");
-        return SteamEmulator.SteamFriends.GetFriendRichPresence(_, steamIDFriend, pchKey);
+        return SteamEmulator.SteamFriends.GetFriendRichPresence(SteamEmulator.SteamFriends.BaseAddress, steamIDFriend, pchKey);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static string SteamAPI_ISteamFriends_GetFriendRichPresenceKeyByIndex(IntPtr _, IntPtr steamIDFriend, int iKey)
+    public static string SteamAPI_ISteamFriends_GetFriendRichPresenceKeyByIndex(IntPtr steamIDFriend, int iKey)
     {
         Write($"SteamAPI_ISteamFriends_GetFriendRichPresenceKeyByIndex {steamIDFriend} {iKey}");
-        return SteamEmulator.SteamFriends.GetFriendRichPresenceKeyByIndex(_, steamIDFriend, iKey);
+        return SteamEmulator.SteamFriends.GetFriendRichPresenceKeyByIndex(SteamEmulator.SteamFriends.BaseAddress, steamIDFriend, iKey);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static int SteamAPI_ISteamFriends_GetFriendRichPresenceKeyCount(IntPtr _, IntPtr steamIDFriend)
+    public static int SteamAPI_ISteamFriends_GetFriendRichPresenceKeyCount(IntPtr steamIDFriend)
     {
         Write($"SteamAPI_ISteamFriends_GetFriendRichPresenceKeyCount {steamIDFriend}");
-        return SteamEmulator.SteamFriends.GetFriendRichPresenceKeyCount(_, steamIDFriend);
+        return SteamEmulator.SteamFriends.GetFriendRichPresenceKeyCount(SteamEmulator.SteamFriends.BaseAddress, steamIDFriend);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -289,58 +289,58 @@ public class SteamAPI_ISteamFriends : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static FriendsGroupID_t SteamAPI_ISteamFriends_GetFriendsGroupIDByIndex(IntPtr _, int iFG)
+    public static FriendsGroupID_t SteamAPI_ISteamFriends_GetFriendsGroupIDByIndex(int iFG)
     {
         Write($"SteamAPI_ISteamFriends_GetFriendsGroupIDByIndex {iFG}");
-        return SteamEmulator.SteamFriends.GetFriendsGroupIDByIndex(_, iFG);
+        return SteamEmulator.SteamFriends.GetFriendsGroupIDByIndex(SteamEmulator.SteamFriends.BaseAddress, iFG);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static int SteamAPI_ISteamFriends_GetFriendsGroupMembersCount(IntPtr _, FriendsGroupID_t friendsGroupID)
+    public static int SteamAPI_ISteamFriends_GetFriendsGroupMembersCount(FriendsGroupID_t friendsGroupID)
     {
         Write($"SteamAPI_ISteamFriends_GetFriendsGroupMembersCount {friendsGroupID}");
-        return SteamEmulator.SteamFriends.GetFriendsGroupMembersCount(_, friendsGroupID);
+        return SteamEmulator.SteamFriends.GetFriendsGroupMembersCount(SteamEmulator.SteamFriends.BaseAddress, friendsGroupID);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static void SteamAPI_ISteamFriends_GetFriendsGroupMembersList(IntPtr _, FriendsGroupID_t friendsGroupID, IntPtr[] pOutSteamIDMembers, int nMembersCount)
+    public static void SteamAPI_ISteamFriends_GetFriendsGroupMembersList(FriendsGroupID_t friendsGroupID, IntPtr[] pOutSteamIDMembers, int nMembersCount)
     {
         Write($"SteamAPI_ISteamFriends_GetFriendsGroupMembersList {friendsGroupID}");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static string SteamAPI_ISteamFriends_GetFriendsGroupName(IntPtr _, FriendsGroupID_t friendsGroupID)
+    public static string SteamAPI_ISteamFriends_GetFriendsGroupName(FriendsGroupID_t friendsGroupID)
     {
         Write($"SteamAPI_ISteamFriends_GetFriendsGroupName {friendsGroupID}");
-        return SteamEmulator.SteamFriends.GetFriendsGroupName(_, friendsGroupID);
+        return SteamEmulator.SteamFriends.GetFriendsGroupName(SteamEmulator.SteamFriends.BaseAddress, friendsGroupID);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static int SteamAPI_ISteamFriends_GetFriendSteamLevel(IntPtr _, IntPtr steamIDFriend)
+    public static int SteamAPI_ISteamFriends_GetFriendSteamLevel(IntPtr steamIDFriend)
     {
         Write($"SteamAPI_ISteamFriends_GetFriendSteamLevel {steamIDFriend}");
-        return SteamEmulator.SteamFriends.GetFriendSteamLevel(_, steamIDFriend);
+        return SteamEmulator.SteamFriends.GetFriendSteamLevel(SteamEmulator.SteamFriends.BaseAddress, steamIDFriend);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static int SteamAPI_ISteamFriends_GetSmallFriendAvatar(IntPtr _, IntPtr steamIDFriend)
+    public static int SteamAPI_ISteamFriends_GetSmallFriendAvatar(IntPtr steamIDFriend)
     {
         Write($"SteamAPI_ISteamFriends_GetSmallFriendAvatar {steamIDFriend}");
-        return SteamEmulator.SteamFriends.GetSmallFriendAvatar(_, steamIDFriend);
+        return SteamEmulator.SteamFriends.GetSmallFriendAvatar(SteamEmulator.SteamFriends.BaseAddress, steamIDFriend);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static int SteamAPI_ISteamFriends_GetMediumFriendAvatar(IntPtr _, IntPtr steamIDFriend)
+    public static int SteamAPI_ISteamFriends_GetMediumFriendAvatar(IntPtr steamIDFriend)
     {
         Write($"SteamAPI_ISteamFriends_GetMediumFriendAvatar {steamIDFriend}");
-        return SteamEmulator.SteamFriends.GetMediumFriendAvatar(_, steamIDFriend);
+        return SteamEmulator.SteamFriends.GetMediumFriendAvatar(SteamEmulator.SteamFriends.BaseAddress, steamIDFriend);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static int SteamAPI_ISteamFriends_GetLargeFriendAvatar(IntPtr _, IntPtr steamIDFriend)
+    public static int SteamAPI_ISteamFriends_GetLargeFriendAvatar(IntPtr steamIDFriend)
     {
         Write($"SteamAPI_ISteamFriends_GetLargeFriendAvatar {steamIDFriend}");
-        return SteamEmulator.SteamFriends.GetLargeFriendAvatar(_, steamIDFriend);
+        return SteamEmulator.SteamFriends.GetLargeFriendAvatar(SteamEmulator.SteamFriends.BaseAddress, steamIDFriend);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -365,10 +365,10 @@ public class SteamAPI_ISteamFriends : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static string SteamAPI_ISteamFriends_GetPlayerNickname(IntPtr _, IntPtr steamIDPlayer)
+    public static string SteamAPI_ISteamFriends_GetPlayerNickname(IntPtr steamIDPlayer)
     {
         Write($"SteamAPI_ISteamFriends_GetPlayerNickname {steamIDPlayer}");
-        return SteamEmulator.SteamFriends.GetPlayerNickname(_, steamIDPlayer);
+        return SteamEmulator.SteamFriends.GetPlayerNickname(SteamEmulator.SteamFriends.BaseAddress, steamIDPlayer);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -379,154 +379,154 @@ public class SteamAPI_ISteamFriends : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamFriends_HasFriend(IntPtr _, IntPtr steamIDFriend, int iFriendFlags)
+    public static bool SteamAPI_ISteamFriends_HasFriend(IntPtr steamIDFriend, int iFriendFlags)
     {
         Write($"SteamAPI_ISteamFriends_HasFriend {steamIDFriend}");
-        return SteamEmulator.SteamFriends.HasFriend(_, steamIDFriend, iFriendFlags);
+        return SteamEmulator.SteamFriends.HasFriend(SteamEmulator.SteamFriends.BaseAddress, steamIDFriend, iFriendFlags);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamFriends_InviteUserToGame(IntPtr _, IntPtr steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchConnectString)
+    public static bool SteamAPI_ISteamFriends_InviteUserToGame(IntPtr steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchConnectString)
     {
         Write($"SteamAPI_ISteamFriends_InviteUserToGame {steamIDFriend} {pchConnectString}");
-        return SteamEmulator.SteamFriends.InviteUserToGame(_, steamIDFriend, pchConnectString);
+        return SteamEmulator.SteamFriends.InviteUserToGame(SteamEmulator.SteamFriends.BaseAddress, steamIDFriend, pchConnectString);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamFriends_IsClanChatAdmin(IntPtr _, IntPtr steamIDClanChat, IntPtr steamIDUser)
+    public static bool SteamAPI_ISteamFriends_IsClanChatAdmin(IntPtr steamIDClanChat, IntPtr steamIDUser)
     {
         Write($"SteamAPI_ISteamFriends_IsClanChatAdmin {steamIDClanChat}");
-        return SteamEmulator.SteamFriends.IsClanChatAdmin(_, steamIDClanChat, steamIDUser);
+        return SteamEmulator.SteamFriends.IsClanChatAdmin(SteamEmulator.SteamFriends.BaseAddress, steamIDClanChat, steamIDUser);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamFriends_IsClanChatWindowOpenInSteam(IntPtr _, IntPtr steamIDClanChat)
+    public static bool SteamAPI_ISteamFriends_IsClanChatWindowOpenInSteam(IntPtr steamIDClanChat)
     {
         Write($"SteamAPI_ISteamFriends_IsClanChatWindowOpenInSteam {steamIDClanChat}");
-        return SteamEmulator.SteamFriends.IsClanChatWindowOpenInSteam(_, steamIDClanChat);
+        return SteamEmulator.SteamFriends.IsClanChatWindowOpenInSteam(SteamEmulator.SteamFriends.BaseAddress, steamIDClanChat);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamFriends_IsClanOfficialGameGroup(IntPtr _, IntPtr steamIDClan)
+    public static bool SteamAPI_ISteamFriends_IsClanOfficialGameGroup(IntPtr steamIDClan)
     {
         Write($"SteamAPI_ISteamFriends_IsClanOfficialGameGroup {steamIDClan}");
-        return SteamEmulator.SteamFriends.IsClanOfficialGameGroup(_, steamIDClan);
+        return SteamEmulator.SteamFriends.IsClanOfficialGameGroup(SteamEmulator.SteamFriends.BaseAddress, steamIDClan);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamFriends_IsClanPublic(IntPtr _, IntPtr steamIDClan)
+    public static bool SteamAPI_ISteamFriends_IsClanPublic(IntPtr steamIDClan)
     {
         Write($"SteamAPI_ISteamFriends_IsClanpublic static {steamIDClan}");
-        return SteamEmulator.SteamFriends.IsClanPublic(_, steamIDClan);
+        return SteamEmulator.SteamFriends.IsClanPublic(SteamEmulator.SteamFriends.BaseAddress, steamIDClan);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static SteamAPICall_t SteamAPI_ISteamFriends_IsFollowing(IntPtr _, IntPtr steamID)
+    public static SteamAPICall_t SteamAPI_ISteamFriends_IsFollowing(IntPtr steamID)
     {
         Write($"SteamAPI_ISteamFriends_IsFollowing {steamID}");
-        return SteamEmulator.SteamFriends.IsFollowing(_, steamID);
+        return SteamEmulator.SteamFriends.IsFollowing(SteamEmulator.SteamFriends.BaseAddress, steamID);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamFriends_IsUserInSource(IntPtr _, IntPtr steamIDUser, IntPtr steamIDSource)
+    public static bool SteamAPI_ISteamFriends_IsUserInSource(IntPtr steamIDUser, IntPtr steamIDSource)
     {
         Write($"SteamAPI_ISteamFriends_IsUserInSource {steamIDUser}");
-        return SteamEmulator.SteamFriends.IsUserInSource(_, steamIDUser, steamIDSource);
+        return SteamEmulator.SteamFriends.IsUserInSource(SteamEmulator.SteamFriends.BaseAddress, steamIDUser, steamIDSource);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static SteamAPICall_t SteamAPI_ISteamFriends_JoinClanChatRoom(IntPtr _, IntPtr steamIDClan)
+    public static SteamAPICall_t SteamAPI_ISteamFriends_JoinClanChatRoom(IntPtr steamIDClan)
     {
         Write($"SteamAPI_ISteamFriends_JoinClanChatRoom {steamIDClan}");
-        return SteamEmulator.SteamFriends.JoinClanChatRoom(_, steamIDClan);
+        return SteamEmulator.SteamFriends.JoinClanChatRoom(SteamEmulator.SteamFriends.BaseAddress, steamIDClan);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamFriends_LeaveClanChatRoom(IntPtr _, IntPtr steamIDClan)
+    public static bool SteamAPI_ISteamFriends_LeaveClanChatRoom(IntPtr steamIDClan)
     {
         Write($"SteamAPI_ISteamFriends_LeaveClanChatRoom {steamIDClan}");
-        return SteamEmulator.SteamFriends.LeaveClanChatRoom(_, steamIDClan);
+        return SteamEmulator.SteamFriends.LeaveClanChatRoom(SteamEmulator.SteamFriends.BaseAddress, steamIDClan);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamFriends_OpenClanChatWindowInSteam(IntPtr _, IntPtr steamIDClanChat)
+    public static bool SteamAPI_ISteamFriends_OpenClanChatWindowInSteam(IntPtr steamIDClanChat)
     {
         Write($"SteamAPI_ISteamFriends_OpenClanChatWindowInSteam {steamIDClanChat}");
-        return SteamEmulator.SteamFriends.OpenClanChatWindowInSteam(_, steamIDClanChat);
+        return SteamEmulator.SteamFriends.OpenClanChatWindowInSteam(SteamEmulator.SteamFriends.BaseAddress, steamIDClanChat);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamFriends_RegisterProtocolInOverlayBrowser(IntPtr _, [MarshalAs(UnmanagedType.LPStr)] string pchProtocol)
+    public static bool SteamAPI_ISteamFriends_RegisterProtocolInOverlayBrowser([MarshalAs(UnmanagedType.LPStr)] string pchProtocol)
     {
         Write($"SteamAPI_ISteamFriends_RegisterProtocolInOverlayBrowser {pchProtocol}");
-        return SteamEmulator.SteamFriends.RegisterProtocolInOverlayBrowser(_, pchProtocol);
+        return SteamEmulator.SteamFriends.RegisterProtocolInOverlayBrowser(SteamEmulator.SteamFriends.BaseAddress, pchProtocol);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamFriends_ReplyToFriendMessage(IntPtr _, IntPtr steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchMsgToSend)
+    public static bool SteamAPI_ISteamFriends_ReplyToFriendMessage(IntPtr steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchMsgToSend)
     {
         Write($"SteamAPI_ISteamFriends_ReplyToFriendMessage {steamIDFriend} {pchMsgToSend}");
-        return SteamEmulator.SteamFriends.ReplyToFriendMessage(_, steamIDFriend, pchMsgToSend);
+        return SteamEmulator.SteamFriends.ReplyToFriendMessage(SteamEmulator.SteamFriends.BaseAddress, steamIDFriend, pchMsgToSend);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static SteamAPICall_t SteamAPI_ISteamFriends_RequestClanOfficerList(IntPtr _, IntPtr steamIDClan)
+    public static SteamAPICall_t SteamAPI_ISteamFriends_RequestClanOfficerList(IntPtr steamIDClan)
     {
         Write($"SteamAPI_ISteamFriends_RequestClanOfficerList {steamIDClan}");
-        return SteamEmulator.SteamFriends.RequestClanOfficerList(_, steamIDClan);
+        return SteamEmulator.SteamFriends.RequestClanOfficerList(SteamEmulator.SteamFriends.BaseAddress, steamIDClan);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static void SteamAPI_ISteamFriends_RequestFriendRichPresence(IntPtr _, IntPtr steamIDFriend)
+    public static void SteamAPI_ISteamFriends_RequestFriendRichPresence(IntPtr steamIDFriend)
     {
         Write($"SteamAPI_ISteamFriends_RequestFriendRichPresence {steamIDFriend}");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamFriends_RequestUserInformation(IntPtr _, IntPtr steamIDUser, bool bRequireNameOnly)
+    public static bool SteamAPI_ISteamFriends_RequestUserInformation(IntPtr steamIDUser, bool bRequireNameOnly)
     {
         Write($"SteamAPI_ISteamFriends_RequestUserInformation {steamIDUser}");
-        return SteamEmulator.SteamFriends.RequestUserInformation(_, steamIDUser, bRequireNameOnly);
+        return SteamEmulator.SteamFriends.RequestUserInformation(SteamEmulator.SteamFriends.BaseAddress, steamIDUser, bRequireNameOnly);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamFriends_SendClanChatMessage(IntPtr _, IntPtr steamIDClanChat, [MarshalAs(UnmanagedType.LPStr)] string pchText)
+    public static bool SteamAPI_ISteamFriends_SendClanChatMessage(IntPtr steamIDClanChat, [MarshalAs(UnmanagedType.LPStr)] string pchText)
     {
         Write($"SteamAPI_ISteamFriends_SendClanChatMessage {steamIDClanChat} {pchText}");
-        return SteamEmulator.SteamFriends.SendClanChatMessage(_, steamIDClanChat, pchText);
+        return SteamEmulator.SteamFriends.SendClanChatMessage(SteamEmulator.SteamFriends.BaseAddress, steamIDClanChat, pchText);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static void SteamAPI_ISteamFriends_SetInGameVoiceSpeaking(IntPtr _, IntPtr steamIDUser, bool bSpeaking)
+    public static void SteamAPI_ISteamFriends_SetInGameVoiceSpeaking(IntPtr steamIDUser, bool bSpeaking)
     {
         Write($"SteamAPI_ISteamFriends_SetInGameVoiceSpeaking {steamIDUser}");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamFriends_SetListenForFriendsMessages(IntPtr _, bool bInterceptEnabled)
+    public static bool SteamAPI_ISteamFriends_SetListenForFriendsMessages(bool bInterceptEnabled)
     {
         Write($"SteamAPI_ISteamFriends_SetListenForFriendsMessages {bInterceptEnabled}");
-        return SteamEmulator.SteamFriends.SetListenForFriendsMessages(_, bInterceptEnabled);
+        return SteamEmulator.SteamFriends.SetListenForFriendsMessages(SteamEmulator.SteamFriends.BaseAddress, bInterceptEnabled);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static SteamAPICall_t SteamAPI_ISteamFriends_SetPersonaName(IntPtr _, [MarshalAs(UnmanagedType.LPStr)] string pchPersonaName)
+    public static SteamAPICall_t SteamAPI_ISteamFriends_SetPersonaName([MarshalAs(UnmanagedType.LPStr)] string pchPersonaName)
     {
         Write($"SteamAPI_ISteamFriends_SetPersonaName {pchPersonaName}");
-        return SteamEmulator.SteamFriends.SetPersonaName(_, pchPersonaName);
+        return SteamEmulator.SteamFriends.SetPersonaName(SteamEmulator.SteamFriends.BaseAddress, pchPersonaName);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static void SteamAPI_ISteamFriends_SetPlayedWith(IntPtr _, IntPtr steamIDUserPlayedWith)
+    public static void SteamAPI_ISteamFriends_SetPlayedWith(IntPtr steamIDUserPlayedWith)
     {
         Write($"SteamAPI_ISteamFriends_SetPlayedWith {steamIDUserPlayedWith}");
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamFriends_SetRichPresence(IntPtr _, [MarshalAs(UnmanagedType.LPStr)] string pchKey, [MarshalAs(UnmanagedType.LPStr)] string pchValue)
+    public static bool SteamAPI_ISteamFriends_SetRichPresence([MarshalAs(UnmanagedType.LPStr)] string pchKey, [MarshalAs(UnmanagedType.LPStr)] string pchValue)
     {
         Write($"SteamAPI_ISteamFriends_SetRichPresence {pchKey} {pchValue}");
-        return SteamEmulator.SteamFriends.SetRichPresence(_, pchKey, pchValue);
+        return SteamEmulator.SteamFriends.SetRichPresence(SteamEmulator.SteamFriends.BaseAddress, pchKey, pchValue);
     }
 }
 

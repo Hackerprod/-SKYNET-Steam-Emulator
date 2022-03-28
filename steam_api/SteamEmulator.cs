@@ -221,8 +221,6 @@ public class SteamEmulator
         Initialized = true;
 
         InterfaceManager.Initialize();
-
-        modCommon.Show("Game injected sucessfully");
     }
 
     private T CreateInterface<T>()  where T : SteamInterface
@@ -256,6 +254,10 @@ public class SteamEmulator
     public static void Write(object v)
     {
         Log.Write(v);
+        if (AsClient)
+        {
+            Main.Write(v);
+        }
     }
 }
 public enum Steam_Pipe : int
