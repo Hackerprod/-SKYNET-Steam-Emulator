@@ -6,13 +6,11 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
-using Core.Interface;
 using SKYNET;
 using SKYNET.GUI;
 using Steamworks;
 
-//Implement SteamAPI_SteamNetworkingIPAddr
-public class SteamAPI : IBaseInterface
+public class SteamAPI : SteamInterface
 {
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_Init()
@@ -272,7 +270,7 @@ public class SteamAPI : IBaseInterface
     public static IntPtr g_pSteamClientGameServer()
     {
         Write($"g_pSteamClientGameServer");
-        return IntPtr.Zero;
+        return SteamEmulator.SteamGameServer.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

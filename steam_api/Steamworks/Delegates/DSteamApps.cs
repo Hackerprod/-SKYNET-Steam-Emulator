@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Core.Interface;
 using Steamworks;
 
 namespace SKYNET.Delegate

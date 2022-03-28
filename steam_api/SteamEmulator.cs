@@ -1,8 +1,7 @@
-﻿using Core.Interface;
+﻿using SKYNET;
 using SKYNET.Callback;
 using SKYNET.GUI;
 using SKYNET.Helper;
-
 using Steamworks;
 using System;
 using System.Collections.Generic;
@@ -101,8 +100,6 @@ public class SteamEmulator
             new frmLogin().ShowDialog();
         }
 
-        Loader.Load();
-
         modCommon.LoadSettings();
 
         InterfaceManager.Initialize();
@@ -112,7 +109,7 @@ public class SteamEmulator
 
         steam_pipes = new Dictionary<HSteamPipe, Steam_Pipe>();
 
-        // CLIENT
+        // Client Interfaces
 
         SteamClient = CreateInterface<SteamClient>();
 
@@ -177,6 +174,7 @@ public class SteamEmulator
         SteamInput = CreateInterface<SteamInput>();
 
 
+        // Server Interfaces
 
         SteamGameServer = CreateInterface<SteamGameServer>();
 
@@ -230,18 +228,11 @@ public class SteamEmulator
 
     }
 
-    private T CreateInterface<T>()  where T : IBaseInterface
+    private T CreateInterface<T>()  where T : SteamInterface
     {
-        Write(typeof(T));
-        var (context, iface) = Core.Interface.Context.CreateInterface(typeof(T));
-        T baseClass = (T)iface;
-        baseClass.BaseAddress = context;
+        T baseClass = InterfaceManager.CreateInterface<T>(out IntPtr BaseAddress);
+        baseClass.BaseAddress = BaseAddress;
         return (T)baseClass;
-    }
-
-    private void AddInterface(object steamInterface)
-    {
-        //
     }
 
     public static HSteamUser CreateSteamUser()

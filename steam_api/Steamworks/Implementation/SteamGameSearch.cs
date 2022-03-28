@@ -1,12 +1,8 @@
 ﻿using System;
-using Core.Interface;
 using SKYNET;
-
 using SKYNET.Steamworks;
 
-//[Map("SteamGameSearch")]
-//[Map("SteamMatchGameSearch")]
-public class SteamGameSearch : IBaseInterface
+public class SteamGameSearch : SteamInterface
 {
     public GameSearchErrorCode_t AcceptGame(IntPtr self)
     {

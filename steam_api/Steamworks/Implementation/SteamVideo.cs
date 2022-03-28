@@ -1,28 +1,27 @@
-﻿using Core.Interface;
-using SKYNET;
+﻿using SKYNET;
 using System;
 
-//[Map("STEAMVIDEO_INTERFACE")]
-//[Map("SteamVideo")]
-public class SteamVideo : IBaseInterface
+public class SteamVideo : SteamInterface
 {
     public void GetVideoURL(IntPtr unVideoAppID)
     {
-        //
+        Write($"GetVideoURL");
     }
 
     public bool IsBroadcasting(int pnNumViewers)
     {
+        Write($"IsBroadcasting");
         return false;
     }
 
     public void GetOPFSettings(IntPtr unVideoAppID)
     {
-        //
+        Write($"GetOPFSettings");
     }
 
     public bool GetOPFStringForApp(IntPtr unVideoAppID, string pchBuffer, uint pnBufferSize)
     {
+        Write($"GetOPFStringForApp");
         return false;
     }
 

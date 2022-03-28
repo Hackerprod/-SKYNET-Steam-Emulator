@@ -1,11 +1,9 @@
 ﻿using System;
-using Core.Interface;
 using SKYNET;
-
 using SKYNET.Steamworks;
 using Steamworks;
 
-public class SteamMatchmaking : IBaseInterface
+public class SteamMatchmaking : SteamInterface
 {
     public int AddFavoriteGame(AppId_t nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags, uint rTime32LastPlayedOnServer)
     {

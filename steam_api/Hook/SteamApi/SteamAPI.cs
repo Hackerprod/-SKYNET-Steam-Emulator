@@ -290,7 +290,7 @@ namespace SKYNET.Hook
         public IntPtr g_pSteamClientGameServer()
         {
             Write($"g_pSteamClientGameServer");
-            return IntPtr.Zero;
+            return SteamEmulator.SteamGameServer.BaseAddress;
         }
 
         
@@ -349,15 +349,12 @@ namespace SKYNET.Hook
             Write($"SteamAPI_SteamController_v008");
             return SteamEmulator.SteamClient.GetISteamController(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamController008");
         }
-
-
         
         public IntPtr SteamAPI_SteamFriends_v017()
         {
             Write($"SteamAPI_SteamFriends_v017");
             return SteamEmulator.SteamClient.GetISteamFriends(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamFriends017");
         }
-
         
         public IntPtr SteamAPI_SteamUtils_v010()
         {

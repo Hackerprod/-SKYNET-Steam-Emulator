@@ -1,5 +1,6 @@
-﻿using Core.Interface;
+﻿
 using SKYNET.Steamworks;
+using SKYNET.Types;
 using Steamworks;
 using System;
 using System.Collections.Generic;
@@ -20,7 +21,7 @@ namespace SKYNET.Delegate
         public delegate bool BLoggedOn(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate IntPtr GetSteamID(IntPtr _);
+        public delegate SteamId GetSteamID(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate int InitiateGameConnection(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, IntPtr steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure);

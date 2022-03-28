@@ -1,11 +1,9 @@
 ﻿using System;
-using Core.Interface;
 using SKYNET;
 using SKYNET.Steamworks;
 using Steamworks;
 
-//[Map("SteamHTMLSurface")]
-public class SteamHTMLSurface : IBaseInterface
+public class SteamHTMLSurface : SteamInterface
 {
     public void AddHeader(IntPtr unBrowserHandle, string pchKey, string pchValue)
     {

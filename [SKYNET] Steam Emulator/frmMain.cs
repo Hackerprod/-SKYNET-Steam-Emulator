@@ -187,14 +187,13 @@ namespace SKYNET
 
                 channel = null;
 
-                string InjectorPath = Path.Combine(modCommon.GetPath(), "steam_api.dll");
-
                 try
                 {
                     var InObject = WellKnownObjectMode.Singleton;
                     RemoteHooking.IpcCreateServer(ref channel, InObject, HookInterface);
                     HookInterface.ChannelName = channel;
-                    RemoteHooking.CreateAndInject(game.ExecutablePath, game.Parameters, 0, HookInterface.InjectionOptions, InjectorPath, InjectorPath, out ProcessId, channel);
+                    HookInterface.DllPath = Path.Combine(modCommon.GetPath(), "steam_api.dll");
+                    RemoteHooking.CreateAndInject(game.ExecutablePath, game.Parameters, 0, HookInterface.InjectionOptions, HookInterface.DllPath, HookInterface.DllPath, out ProcessId, channel);
                     InjectedProcess = Process.GetProcessById(ProcessId);
                     WaitForExit();
                     RunningGames.Add(new RunningGame() { Game = e.GetGame(), Process = InjectedProcess });

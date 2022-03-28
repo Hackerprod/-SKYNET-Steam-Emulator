@@ -1,8 +1,6 @@
-﻿using Core.Interface;
-using SKYNET;
+﻿using SKYNET;
 using SKYNET.Delegate;
 using SKYNET.Helper;
-
 using Steamworks;
 using System;
 using System.Collections.Generic;
@@ -13,9 +11,7 @@ using System.Runtime.InteropServices;
 
 public class InterfaceManager
 {
-    public static List<Plugin> LoadedPlugins { get; set; }
-
-    public static List<IBaseInterfaceMap> Delegates;
+    public static List<InterfaceDelegates> interface_delegates;
 
     private static Dictionary<string, IntPtr> Interfaces;
 
@@ -27,13 +23,11 @@ public class InterfaceManager
     static InterfaceManager()
     {
         Interfaces = new Dictionary<string, IntPtr>();
-        Delegates = new List<IBaseInterfaceMap>();
-        LoadedPlugins = new List<Plugin>();
+        interface_delegates = new List<InterfaceDelegates>();
     }
 
     public static void Initialize()
     {
-        return;
         filePath = modCommon.GetPath();
         if (File.Exists(Path.Combine(filePath, x86)))
         {
@@ -44,115 +38,136 @@ public class InterfaceManager
             filePath = Path.Combine(filePath, x64);
         }
 
-        Assembly a = Assembly.LoadFile(filePath);
+        Assembly a = Assembly.LoadFile(Main.HookInterface.DllPath);
 
-        var p = new Plugin { name = a.GetName().Name };
         foreach (var t in a.GetTypes())
         {
-            var attributes = t.GetCustomAttributes(true);
-            foreach (Attribute item in attributes)
+            if (t.IsDefined(typeof(DelegateAttribute)))
             {
-                if (item.ToString() == "SKYNET.Delegate.DelegateAttribute")
-                {
-                    modCommon.Show(t + " " + item);
-                }
-            }
-
-
-
-            if (IsInterfaceDelegate(t))
-            {
-                
                 var attribute = t.GetCustomAttribute<DelegateAttribute>();
                 var name = attribute.Name;
 
-                var new_interface = new Plugin.InterfaceDelegates { name = name };
+                var new_interface = new InterfaceDelegates { Name = name };
 
-                Log.Write($"Found interface delegates \"{name}\"");
+                //Main.Write(string.Format("Found interface delegates \"{0}\"", name));
 
                 var types = t.GetNestedTypes(BindingFlags.Public);
 
                 foreach (var type in types)
                 {
                     // Filter out types that are not delegates
-                    if (type.IsSubclassOf(typeof(System.Delegate))) new_interface.delegate_types.Add(type);
+                    if (type.IsSubclassOf(typeof(System.Delegate))) new_interface.DelegateTypes.Add(type);
                 }
 
                 // Just assume all members are delegate types
-                p.interface_delegates.Add(new_interface);
+                interface_delegates.Add(new_interface);
             }
-            else if (IsInterfaceMap(t))
-            {
-                var attribute = t.GetCustomAttribute<MapAttribute>();
-                var name = attribute.Name;
+        }
+    }
 
-                var new_interface_map = new Plugin.InterfaceMap
-                {
-                    name = name,
-                    this_type = t,
-                    methods = InterfaceMethodsForType(t),
-                };
+    public static T CreateInterface<T>(out IntPtr BaseAddress) where T : SteamInterface
+    {
+        var (context, iface) = CreateInterface(typeof(T));
+        BaseAddress = context;
+        T baseClass = (T)iface;
+        baseClass.BaseAddress = context;
+        return (T)baseClass;
+    }
 
-                Log.Write($"Found interface map \"{name}\"");
+    public static (IntPtr, SteamInterface) CreateInterface(Type type)
+    {
+        string Name = type.ToString();
 
-                p.interface_maps.Add(new_interface_map);
-            }
-            else if (IsInterfaceImpl(t))
-            {
-                var attribute = t.GetCustomAttribute<MapAttribute>();
-                var name = attribute.Name;
+        var iface = interface_delegates.Find(d => d.Name == Name);
 
-                var new_interface_impl = new Plugin.InterfaceImpl
-                {
-                    name = name,
-                    this_type = t,
-                    methods = InterfaceMethodsForType(t)
-                };
-
-                Log.Write($"Found interface impl \"{name}\"");
-
-                p.interface_impls.Add(new_interface_impl);
-            }
-            LoadedPlugins.Add(p);
+        if (iface == null)
+        {
+            Main.Write(string.Format("Unable to find delegates for interface that implements {0}", Name));
+            return (IntPtr.Zero, null);
         }
 
-        
+        var impl = new InterfaceImplementation
+        {
+            Name = Name,
+            Type = type,
+            Methods = InterfaceMethodsForType(type)
+        };
+
+        // Try to create a new context based on this interface + impl pair
+        var (context, instance) = Create(iface, impl);
+
+        return (context, instance);
     }
 
-
-    internal static IntPtr CreateInterfaceNoUser(int pipe, string version)
+    private static (IntPtr, SteamInterface) Create(InterfaceDelegates iface, InterfaceImplementation impl)
     {
-        return FindOrCreateInterface(1, pipe, version);
-    }
+        var instance = Activator.CreateInstance(impl.Type);
 
-    public static bool IsInterfaceImpl(Type t)
-    {
-        var has_attribute = t.IsDefined(typeof(ImplAttribute));
-        return has_attribute;
-    }
+        var new_delegates = new List<Delegate>();
 
-    public static bool IsInterfaceDelegate(Type t) => t.IsDefined(typeof(DelegateAttribute));
+        for (var i = 0; i < impl.Methods.Count; i++)
+        {
+            // Find the delegate type that matches the method
+            var mi = impl.Methods[i];
 
-    public static bool IsInterfaceMap(Type t)
-    {
-        var has_attribute = t.IsDefined(typeof(MapAttribute));
-        return has_attribute;
+            var type = iface.DelegateTypes.Find(x => x.Name.Equals(mi.Name));
+            //Write($"Finding delegate for type {mi.Name}");
+
+            if (type == null)
+            {
+                Main.Write(string.Format("Unable to find delegate for {0} in {1}!", mi.Name, iface.Name));
+                return (IntPtr.Zero, null);
+            }
+
+            // Create new delegates that are bounded to this instance
+            Delegate new_delegate;
+            try
+            {
+                new_delegate = Delegate.CreateDelegate(type, instance, mi, true);
+                new_delegates.Add(new_delegate);
+            }
+            catch (Exception e)
+            {
+                Main.Write(string.Format("EXCEPTION whilst binding function {0}, class {1}", mi.Name, impl.Name));
+            }
+        }
+
+        impl.Delegates.Add(new_delegates);
+
+        var ptr_size = Marshal.SizeOf(typeof(IntPtr));
+
+        // Allocate enough space for the new pointers in local memory
+        var vtable = Marshal.AllocHGlobal(impl.Methods.Count * ptr_size);
+
+        for (var i = 0; i < new_delegates.Count; i++)
+        {
+            try
+            {
+                // Main.Write ("Testing " + new_delegates[i].Method);
+                Marshal.WriteIntPtr(vtable, i * ptr_size, Marshal.GetFunctionPointerForDelegate(new_delegates[i]));
+            }
+            catch (Exception)
+            {
+                Main.Write($"Error Injecting Delegate {new_delegates[i]}");
+            }
+            // Create all function pointers as neccessary
+        }
+        //impl.stored_function_pointers.Add(vtable);
+
+        // create the context
+        var new_context = Marshal.AllocHGlobal(ptr_size);
+
+        // Write the pointer to the vtable at the address pointed to by new_context;
+        Marshal.WriteIntPtr(new_context, vtable);
+
+        return (new_context, (SteamInterface)instance);
     }
 
     public static List<MethodInfo> InterfaceMethodsForType(Type t)
     {
         var all_methods = new List<MethodInfo>(t.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly));
-
-        // Remove methods that we dont want to deal with
-        // This includes setters and getters for properties
         all_methods.RemoveAll(x => x.Name.StartsWith("get_") || x.Name.StartsWith("set_"));
-
         return all_methods;
-    }
-
-    public static IntPtr FindOrCreateGameServerInterface(int hSteamUser, string pszVersion)
-    {
-        return FindOrCreateInterface(hSteamUser, 1, pszVersion);
     }
 
     public static IntPtr FindOrCreateInterface(string pchVersion)
@@ -272,18 +287,7 @@ public class InterfaceManager
             return SteamEmulator.SteamParentalSettings.BaseAddress;
         }
 
-        var (context, iface) = Context.CreateInterface(pszVersion);
-        return context;
-
-
-        //if (Interfaces.ContainsKey(pchVersion))
-        //{
-        //    return Interfaces[pchVersion];
-        //}
-        //var (Address, IBaseInterface) = Context.CreateInterface(pchVersion);
-        //Interfaces.Add(pchVersion, Address);
-        //return Address;
+        Main.Write($"Not found Interface for {pszVersion}");
+        return default;
     }
-
-
 }

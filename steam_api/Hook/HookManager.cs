@@ -22,6 +22,8 @@ namespace SKYNET
             PluginHooks = new List<IHook>();
 
             InstallHook(new LdrLoadDll());
+            InstallHook(new steamnetworkingsockets());
+            
 
             Hooks.Add(new SKYNET.Hook.SteamInternal());
             Hooks.Add(new SKYNET.Hook.SteamAPI());

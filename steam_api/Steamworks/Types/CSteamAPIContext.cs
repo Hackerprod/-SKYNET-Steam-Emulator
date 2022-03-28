@@ -2,7 +2,7 @@
 using SKYNET.Helper;
 using System;
 using System.Runtime.InteropServices;
-using Core.Interface;
+
 
 // CSteamAPIContext encapsulates the Steamworks API global accessors into
 // a single object.
@@ -12,7 +12,7 @@ using Core.Interface;
 // This will be removed in a future iteration of the SDK
 
 ///[StructLayout(LayoutKind.Sequential)]
-public class CSteamApiContext : IBaseInterface
+public class CSteamApiContext : SteamInterface
 {
     private IntPtr m_pSteamClient;              //ISteamClient* 
     private IntPtr m_pSteamUser;                //ISteamUser* 

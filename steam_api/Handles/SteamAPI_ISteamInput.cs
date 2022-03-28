@@ -321,7 +321,7 @@ using SKYNET;
 //    public static IntPtr SteamAPI_SteamInput_v005()
 //    {
 //        Write($"SteamAPI_SteamInput_v005");
-//        return IntPtr.Zero;
+//        return SteamEmulator.SteamSteamInput.BaseAddress;
 //    }
 //}
 

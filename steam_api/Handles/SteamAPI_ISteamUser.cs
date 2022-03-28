@@ -26,7 +26,7 @@ public class SteamAPI_ISteamUser : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static IntPtr SteamAPI_ISteamUser_GetSteamID(IntPtr _)
+    public static ulong SteamAPI_ISteamUser_GetSteamID(IntPtr _)
     {
         Write("SteamAPI_ISteamUser_GetSteamID");
         return SteamEmulator.SteamUser.GetSteamID(_);

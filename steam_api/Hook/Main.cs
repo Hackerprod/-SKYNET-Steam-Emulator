@@ -32,7 +32,6 @@ namespace SKYNET
             callbackChannel = null;
             Instance = this;
             HookInterface = (HookInterface)Activator.GetObject(typeof(HookInterface), "ipc://" + inChannelName + "/" + inChannelName);
-
             //HookCallback = new HookCallback();
             //HookCallback.ReleaseHooks += HookCallback_ReleaseHooks;
             //HookCallback.ReleaseHook += HookCallback_ReleaseHook;
@@ -93,6 +92,8 @@ namespace SKYNET
                 if (!SteamEmulator.Initialized)
                 {
                     new SteamEmulator().Initialize();
+                    SteamEmulator.AppId = HookInterface.AppId;
+
                 }
 
                 HookManager.Install();

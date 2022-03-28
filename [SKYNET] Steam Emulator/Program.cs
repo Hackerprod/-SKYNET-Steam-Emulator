@@ -12,16 +12,6 @@ namespace SKYNET
 {
     class Program
     {
-        public class Person 
-        {
-            public int Age;
-            public string Name;
-            public SexType Sex;
-            public enum SexType
-            {
-                F, M
-            }
-        }
         /// <summary>
         /// The main entry point for the application.
         /// </summary>

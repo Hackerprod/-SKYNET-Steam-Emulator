@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using Core.Interface;
 using SKYNET;
 using SKYNET.Helper;
 using SKYNET.Steamworks;
 using SKYNET.Types;
 using Steamworks;
 
-//[Map("SteamFriends")]
-public class SteamFriends : IBaseInterface
+public class SteamFriends : SteamInterface
 {
     public List<Friend> Friends;
     public List<IntPtr> Users;

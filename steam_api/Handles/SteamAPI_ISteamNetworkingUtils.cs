@@ -79,12 +79,12 @@ public class SteamAPI_ISteamNetworkingUtils : BaseCalls
         return SteamEmulator.SteamNetworkingUtils.GetPingToDataCenter(popID, pViaRelayPoP);
     }
 
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static int SteamAPI_ISteamNetworkingUtils_GetDirectPingToPOP(IntPtr popID)
-    {
-        Write("SteamAPI_ISteamNetworkingUtils_GetDirectPingToPOP");
-        return SteamEmulator.SteamNetworkingUtils.GetDirectPingToPOP(popID);
-    }
+    //[DllExport(CallingConvention = CallingConvention.Cdecl)]
+    //public static int SteamAPI_ISteamNetworkingUtils_GetDirectPingToPOP(IntPtr popID)
+    //{
+    //    Write("SteamAPI_ISteamNetworkingUtils_GetDirectPingToPOP");
+    //    return SteamEmulator.SteamNetworkingUtils.GetDirectPingToPOP(popID);
+    //}
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static int SteamAPI_ISteamNetworkingUtils_GetPOPCount(IntPtr _)

@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Core.Interface;
 using SKYNET;
 using Steamworks;
 
-//[Map("SteamApps")]
-public class SteamApps : IBaseInterface
+public class SteamApps : SteamInterface
 {
     public bool BIsSubscribed(IntPtr _)
     {
