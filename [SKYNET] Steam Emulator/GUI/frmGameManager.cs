@@ -73,7 +73,7 @@ namespace SKYNET
             TB_AppId.Text = Game.AppId.ToString();
             CHB_WithoutEmu.Checked = Game.LaunchWithoutEmu;
             LoadLogo(Game.ExecutablePath);
-            BT_AddGame.Text = "UPDATE";
+            BT_AddGame.Text = "Update";
 
             boxHandle = game.Handle.ToInt32();
         }
