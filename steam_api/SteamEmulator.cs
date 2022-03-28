@@ -83,11 +83,13 @@ public class SteamEmulator
     public static string Language { get; set; }
     public static string PersonaName { get; set; }
     public static bool Initialized { get; set; }
+    public static bool AsClient { get; set; }
 
-    public SteamEmulator()
+    public SteamEmulator(bool asClient)
     {
         steam_pipes = new Dictionary<HSteamPipe, Steam_Pipe>();
         Instance = this;
+        AsClient = asClient;
     }
 
     public void Initialize()
@@ -220,6 +222,7 @@ public class SteamEmulator
 
         InterfaceManager.Initialize();
 
+        modCommon.Show("Game injected sucessfully");
     }
 
     private T CreateInterface<T>()  where T : SteamInterface

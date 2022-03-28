@@ -54,9 +54,14 @@ public class modCommon
         }
     }
 
-    public static void Show(object name)
+    public static void Show(object msg)
     {
-        MessageBox.Show(name.ToString());
+        if (SteamEmulator.AsClient)
+        {
+            Main.OnShowMessage(msg);
+        }
+        else
+            MessageBox.Show(msg.ToString());
     }
 
     public static void ActiveConsoleOutput()

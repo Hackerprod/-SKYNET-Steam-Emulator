@@ -47,9 +47,10 @@ namespace SKYNET
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "Banner"));
+            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "Avatars"));
 
             List<Game> Games = new List<Game>();
-            string game = Path.Combine("Data", "Games.json");
+            string game = Path.Combine(modCommon.GetPath(), "Data", "Games.json");
             if (File.Exists(game))
             {
                 try
@@ -61,6 +62,15 @@ namespace SKYNET
                 {
                     Games = new List<Game>();
                     modCommon.Show("Error loading Game stored data");
+                }
+            }
+
+            string AvatarDirectory = Path.Combine(modCommon.GetPath(), "Data", "Images", "Avatars");
+            if (Directory.Exists(AvatarDirectory))
+            {
+                if (File.Exists(Path.Combine(AvatarDirectory, "Avatar.png")))
+                {
+                    PB_Avatar.Image = Image.FromFile(Path.Combine(AvatarDirectory, "Avatar.png"));
                 }
             }
 
@@ -184,6 +194,7 @@ namespace SKYNET
                 HookInterface.InjectionOptions = InjectionOptions.Default;
                 HookInterface.AppId = game.AppId;
                 HookInterface.OnMessage += this.HookInterface_OnMessage;
+                HookInterface.OnShowMessage += this.HookInterface_OnShowMessage;
 
                 channel = null;
 
@@ -207,6 +218,11 @@ namespace SKYNET
                     Write(ex.Message);
                 }
             });
+        }
+
+        private void HookInterface_OnShowMessage(object sender, string e)
+        {
+            new frmMessage(e).ShowDialog();
         }
 
         private void HookInterface_OnMessage(object sender, ConsoleMessage e)
@@ -420,8 +436,13 @@ namespace SKYNET
         }
 
 
+
         #endregion
 
-
+        private void PictureBox2_Click(object sender, EventArgs e)
+        {
+            var dialog = new frmMessage("This is a example").ShowDialog();
+            MessageBox.Show(dialog.ToString());
+        }
     }
 }

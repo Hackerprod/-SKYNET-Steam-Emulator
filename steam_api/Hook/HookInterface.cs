@@ -22,6 +22,8 @@ namespace SKYNET
 
         public event EventHandler<ConsoleMessage> OnMessage;
 
+        public event EventHandler<string> OnShowMessage;
+        
         public event EventHandler<string> OnUninstall;
 
         public void Ping(string callbackChannel)
@@ -33,6 +35,11 @@ namespace SKYNET
         public void InvokeMessage(string sender, object msg)
         {
             this.OnMessage?.Invoke(this, new ConsoleMessage(sender, msg));
+        }
+
+        public void InvokeShowMessage(object msg)
+        {
+            OnShowMessage?.Invoke(this, msg.ToString());
         }
     }
 }

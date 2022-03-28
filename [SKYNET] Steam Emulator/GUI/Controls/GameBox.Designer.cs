@@ -28,25 +28,25 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.Avatar = new System.Windows.Forms.PictureBox();
+            this.PB_Avatar = new System.Windows.Forms.PictureBox();
             this.LB_Name = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this.Avatar)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Avatar)).BeginInit();
             this.SuspendLayout();
             // 
-            // Avatar
+            // PB_Avatar
             // 
-            this.Avatar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(29)))), ((int)(((byte)(39)))), ((int)(((byte)(51)))));
-            this.Avatar.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.Avatar.Location = new System.Drawing.Point(9, 4);
-            this.Avatar.Name = "Avatar";
-            this.Avatar.Size = new System.Drawing.Size(30, 30);
-            this.Avatar.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.Avatar.TabIndex = 0;
-            this.Avatar.TabStop = false;
-            this.Avatar.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Box_Clicked);
-            this.Avatar.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.Box_DoubleClicked);
-            this.Avatar.MouseLeave += new System.EventHandler(this.Avatar_MouseLeave);
-            this.Avatar.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Avatar_MouseMove);
+            this.PB_Avatar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(29)))), ((int)(((byte)(39)))), ((int)(((byte)(51)))));
+            this.PB_Avatar.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.PB_Avatar.Location = new System.Drawing.Point(9, 4);
+            this.PB_Avatar.Name = "PB_Avatar";
+            this.PB_Avatar.Size = new System.Drawing.Size(30, 30);
+            this.PB_Avatar.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.PB_Avatar.TabIndex = 0;
+            this.PB_Avatar.TabStop = false;
+            this.PB_Avatar.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Box_Clicked);
+            this.PB_Avatar.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.Box_DoubleClicked);
+            this.PB_Avatar.MouseLeave += new System.EventHandler(this.Avatar_MouseLeave);
+            this.PB_Avatar.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Avatar_MouseMove);
             // 
             // LB_Name
             // 
@@ -67,7 +67,7 @@
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.Controls.Add(this.LB_Name);
-            this.Controls.Add(this.Avatar);
+            this.Controls.Add(this.PB_Avatar);
             this.Cursor = System.Windows.Forms.Cursors.Hand;
             this.Name = "GameBox";
             this.Padding = new System.Windows.Forms.Padding(6);
@@ -76,14 +76,14 @@
             this.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.Box_DoubleClicked);
             this.MouseLeave += new System.EventHandler(this.Avatar_MouseLeave);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Avatar_MouseMove);
-            ((System.ComponentModel.ISupportInitialize)(this.Avatar)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Avatar)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.PictureBox Avatar;
+        private System.Windows.Forms.PictureBox PB_Avatar;
         private System.Windows.Forms.Label LB_Name;
     }
 }

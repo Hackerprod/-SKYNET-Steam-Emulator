@@ -91,7 +91,7 @@ namespace SKYNET
 
                 if (!SteamEmulator.Initialized)
                 {
-                    new SteamEmulator().Initialize();
+                    new SteamEmulator(true).Initialize();
                     SteamEmulator.AppId = HookInterface.AppId;
 
                 }
@@ -168,7 +168,8 @@ namespace SKYNET
         public static void Write(object msg)
         {
             Write(Process.GetCurrentProcess().ProcessName.ToUpper(), msg);
-                }
+        }
+
         public static void Write(object sender, object msg)
         {
             HookInterface.InvokeMessage(sender.ToString(), msg);
@@ -189,5 +190,9 @@ namespace SKYNET
             HookInterface.DumpToFile = DumpToFile;
         }
 
+        public static void OnShowMessage(object msg)
+        {
+            HookInterface.InvokeShowMessage(msg);
+        }
     }
 }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SKYNET;
+using SKYNET.GUI;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -6,9 +8,9 @@ using System.Windows.Forms;
 
 public class modCommon
 {
-    public static void Show(object msg)
+    public static DialogResult Show(object msg, MessageBoxButtons buttons = MessageBoxButtons.OK)
     {
-        MessageBox.Show(msg.ToString());
+       return new frmMessage(msg, buttons).ShowDialog();
     }
     public static void EnsureDirectoryExists(string filePath, bool isFile = false)
     {

@@ -50,13 +50,13 @@ namespace SKYNET
             this.panel1 = new System.Windows.Forms.Panel();
             this.TB_Search = new SKYNET.Controls.SKYNET_TextBox();
             this.panel7 = new System.Windows.Forms.Panel();
+            this.pictureBox3 = new System.Windows.Forms.PictureBox();
+            this.PB_Avatar = new CircularPictureBox();
             this.skyneT_Button1 = new SKYNET_Button();
             this.BT_Connect = new SKYNET_Button();
             this.label8 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
-            this.pictureBox3 = new System.Windows.Forms.PictureBox();
             this.label7 = new System.Windows.Forms.Label();
-            this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.gradiantBox1 = new SKYNET.Controls.GradiantBox();
             this.label5 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
@@ -87,7 +87,6 @@ namespace SKYNET
             this.panel1.SuspendLayout();
             this.panel7.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.gradiantBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Banner)).BeginInit();
@@ -320,18 +319,37 @@ namespace SKYNET
             // panel7
             // 
             this.panel7.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(42)))), ((int)(((byte)(46)))), ((int)(((byte)(51)))));
+            this.panel7.Controls.Add(this.pictureBox3);
+            this.panel7.Controls.Add(this.PB_Avatar);
             this.panel7.Controls.Add(this.skyneT_Button1);
             this.panel7.Controls.Add(this.BT_Connect);
             this.panel7.Controls.Add(this.label8);
             this.panel7.Controls.Add(this.label9);
-            this.panel7.Controls.Add(this.pictureBox3);
             this.panel7.Controls.Add(this.label7);
-            this.panel7.Controls.Add(this.pictureBox2);
             this.panel7.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel7.Location = new System.Drawing.Point(0, 40);
             this.panel7.Name = "panel7";
             this.panel7.Size = new System.Drawing.Size(249, 129);
             this.panel7.TabIndex = 14;
+            // 
+            // pictureBox3
+            // 
+            this.pictureBox3.BackColor = System.Drawing.Color.Transparent;
+            this.pictureBox3.Image = global::SKYNET.Properties.Resources.coins;
+            this.pictureBox3.Location = new System.Drawing.Point(83, 49);
+            this.pictureBox3.Name = "pictureBox3";
+            this.pictureBox3.Size = new System.Drawing.Size(30, 30);
+            this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox3.TabIndex = 20;
+            this.pictureBox3.TabStop = false;
+            // 
+            // PB_Avatar
+            // 
+            this.PB_Avatar.Image = null;
+            this.PB_Avatar.Location = new System.Drawing.Point(11, 2);
+            this.PB_Avatar.Name = "PB_Avatar";
+            this.PB_Avatar.Size = new System.Drawing.Size(73, 73);
+            this.PB_Avatar.TabIndex = 19;
             // 
             // skyneT_Button1
             // 
@@ -393,17 +411,6 @@ namespace SKYNET
             this.label9.TabIndex = 15;
             this.label9.Text = "0";
             // 
-            // pictureBox3
-            // 
-            this.pictureBox3.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBox3.Image = global::SKYNET.Properties.Resources.coins;
-            this.pictureBox3.Location = new System.Drawing.Point(80, 48);
-            this.pictureBox3.Name = "pictureBox3";
-            this.pictureBox3.Size = new System.Drawing.Size(30, 30);
-            this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox3.TabIndex = 14;
-            this.pictureBox3.TabStop = false;
-            // 
             // label7
             // 
             this.label7.AutoSize = true;
@@ -414,17 +421,6 @@ namespace SKYNET
             this.label7.Size = new System.Drawing.Size(120, 26);
             this.label7.TabIndex = 12;
             this.label7.Text = "Hackerprod";
-            // 
-            // pictureBox2
-            // 
-            this.pictureBox2.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBox2.Image = global::SKYNET.Properties.Resources.logo;
-            this.pictureBox2.Location = new System.Drawing.Point(6, 2);
-            this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(73, 67);
-            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox2.TabIndex = 11;
-            this.pictureBox2.TabStop = false;
             // 
             // gradiantBox1
             // 
@@ -681,7 +677,6 @@ namespace SKYNET
             this.panel7.ResumeLayout(false);
             this.panel7.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.gradiantBox1.ResumeLayout(false);
             this.gradiantBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -728,8 +723,6 @@ namespace SKYNET
         private Panel panel1;
         private Panel panel6;
         private Label label7;
-        private PictureBox pictureBox2;
-        private PictureBox pictureBox3;
         private Label label8;
         private Label label9;
         private SKYNET_Button BT_Connect;
@@ -744,6 +737,8 @@ namespace SKYNET
         private ToolStripMenuItem ToButtomMenuItem;
         private ToolStripMenuItem OpenWithoutEmuMenuItem;
         private ToolStripMenuItem OpenFileLocationMenuItem;
+        private CircularPictureBox PB_Avatar;
+        private PictureBox pictureBox3;
     }
 }
 

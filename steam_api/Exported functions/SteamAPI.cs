@@ -21,7 +21,7 @@ public class SteamAPI : SteamInterface
         }
 
         Write($"{"SteamAPI_Init [FALSE]"}");
-        new SteamEmulator().Initialize();
+        new SteamEmulator(false).Initialize();
 
         return false;
     }

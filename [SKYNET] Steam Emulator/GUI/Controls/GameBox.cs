@@ -34,11 +34,11 @@ namespace SKYNET
         {
             get
             {
-                return (Bitmap)Avatar.Image;
+                return (Bitmap)PB_Avatar.Image;
             }
             set
             {
-                Avatar.Image = value;
+                PB_Avatar.Image = value;
             }
         }
         [Category("SKYNET")]
@@ -69,6 +69,8 @@ namespace SKYNET
                     BackColor = Color_MouseHover;
                 else
                     BackColor = Color;
+
+                PB_Avatar.BackColor = BackColor;
             }
         }
 
@@ -211,12 +213,14 @@ namespace SKYNET
         {
             if (_selected) return;
             BackColor = Color_MouseHover;
+            PB_Avatar.BackColor = BackColor;
         }
 
         private void Avatar_MouseLeave(object sender, EventArgs e)
         {
             if (_selected) return;
             BackColor = Color;
+            PB_Avatar.BackColor = BackColor;
         }
 
         private void Box_DoubleClicked(object sender, MouseEventArgs e)
