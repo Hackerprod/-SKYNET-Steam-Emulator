@@ -70,7 +70,7 @@ public class SteamClient : SteamInterface
     public IntPtr GetISteamUser(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write($"GetISteamUser {pchVersion}");
-        return SteamEmulator.SteamUser.BaseAddress;
+        return InterfaceManager.FindOrCreateInterface(pchVersion);
     }
 
     public IntPtr GetISteamGameServer(int hSteamUser, int hSteamPipe, string pchVersion)
