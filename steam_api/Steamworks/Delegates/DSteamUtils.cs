@@ -107,5 +107,25 @@ namespace SKYNET.Delegate
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate ESteamIPv6ConnectivityState GetIPv6ConnectivityState(IntPtr _, ESteamIPv6ConnectivityProtocol eProtocol);
+
+        #region New
+
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate void RunFrame(IntPtr _);
+
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate int GetSteamRealm(IntPtr _);
+
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate uint SetAppIDForCurrentPipe(uint AppId, bool @bool);
+
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate void RecordSteamInterfaceCreation(string version, string @string);
+
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate uint GetLauncherType(IntPtr _);
+
+        #endregion
+
     }
 }

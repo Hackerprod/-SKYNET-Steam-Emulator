@@ -192,12 +192,12 @@ public class SteamUtils : SteamInterface
     public bool InitFilterText(IntPtr _)
     {
         Write("InitFilterText");
-        return false;
+        return true;
     }
 
     public int FilterText(IntPtr _, string pchOutFilteredText, uint nByteSizeOutFilteredText, string pchInputMessage, bool bLegalOnly)
     {
-        Write("FilterText");
+        Write($"FilterText {pchInputMessage}");
         return 0;
     }
 
@@ -206,6 +206,38 @@ public class SteamUtils : SteamInterface
         Write("GetIPv6ConnectivityState");
         return default;
     }
+
+    #region New
+
+    public void RunFrame(IntPtr _)
+    {
+        Write("RunFrame");
+    }
+
+    public int GetSteamRealm(IntPtr _)
+    {
+        Write("GetSteamRealm");
+        return 1;
+    }
+
+    public uint SetAppIDForCurrentPipe(uint AppId, bool @bool)
+    {
+        Write("GetSteamRealm");
+        return AppId;
+    }
+
+    public void RecordSteamInterfaceCreation(string version, string @string)
+    {
+        Write("RecordSteamInterfaceCreation");
+    }
+
+    public uint GetLauncherType(IntPtr _)
+    {
+        Write("GetLauncherType");
+        return 0;
+    }
+    
+    #endregion
 
     private void Write(string v)
     {

@@ -48,33 +48,21 @@ namespace SKYNET.Hook.Handles
             return true;
         }
 
-        //public IntPtr SteamInternal_ContextInit(IntPtr pContextInitData)
-        //{
-        //    Write($"SteamInternal_ContextInit");
-        //    return SteamEmulator.Context.BaseAddress;
-        //}
-
-        public unsafe CSteamApiContext* SteamInternal_ContextInit(ContextInitData* pContextInitData)
+        public IntPtr SteamInternal_ContextInit(IntPtr pContextInitData)
         {
-            Write($"SteamInternal_ContextInit Counter: {pContextInitData->counter}, SteamUGC {pContextInitData->Context->SteamClient()}");
-
-            ////var sa = pContextInitData->Context->m_pSteamClient.ToInt32();
-            ////Write($"wuassa");
-
-            //pContextInitData->Context->Clear();
-
-            //if (pContextInitData->counter == 0)
-            //{
-            //    pContextInitData->counter = 1;
-            //    pContextInitData->Context->Init();
-            //}
-
-            return pContextInitData->Context;
+            Write($"SteamInternal_ContextInit");
+            ContextInitData dara = new ContextInitData();
+            dara.counter = 0;
+            dara.Context = SteamEmulator.Context.BaseAddress;
+            var Ptr = IntPtr.Zero;
+            Marshal.StructureToPtr(dara, Ptr, true);
+            return _SteamInternal_ContextInitDelegate(Ptr);
+            return SteamEmulator.Context.BaseAddress;
         }
 
-        public unsafe struct ContextInitData
+        public struct ContextInitData
         {
-            public CSteamApiContext* Context;
+            public IntPtr Context;
             public uint counter;
         }
 

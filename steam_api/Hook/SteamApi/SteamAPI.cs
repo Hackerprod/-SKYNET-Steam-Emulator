@@ -529,7 +529,7 @@ namespace SKYNET.Hook.Handles
         public IntPtr SteamAPI_SteamScreenshots_v003()
         {
             Write($"SteamAPI_SteamScreenshots_v003");
-            return SteamEmulator.SteamClient.GetISteamScreenshots(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "STEAMSCREENSHOTS_INTERFACE_VERSION003");
+            return SteamEmulator.SteamScreenshots.BaseAddress;
         }
 
         
@@ -550,14 +550,14 @@ namespace SKYNET.Hook.Handles
         public IntPtr SteamAPI_SteamHTTP_v003()
         {
             Write($"SteamAPI_SteamHTTP_v003");
-            return SteamEmulator.SteamClient.GetISteamHTTP(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "STEAMHTTP_INTERFACE_VERSION003");
+            return SteamEmulator.SteamHTTP.BaseAddress;
         }
 
         
         public IntPtr SteamAPI_SteamGameServerHTTP_v003()
         {
             Write($"SteamAPI_SteamGameServerHTTP_v003");
-            return SteamEmulator.SteamClient.GetISteamHTTP((int)SteamEmulator.HSteamUser_GS, (int)SteamEmulator.HSteamPipe_GS, "STEAMHTTP_INTERFACE_VERSION003");
+            return SteamEmulator.SteamHTTP.BaseAddress;
         }
 
         
