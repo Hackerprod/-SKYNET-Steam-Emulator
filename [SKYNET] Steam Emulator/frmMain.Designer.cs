@@ -519,7 +519,7 @@ namespace SKYNET
             // LB_GameTittle
             // 
             this.LB_GameTittle.BackColor = System.Drawing.Color.Transparent;
-            this.LB_GameTittle.BorderColor = System.Drawing.Color.DarkGray;
+            this.LB_GameTittle.BorderColor = System.Drawing.Color.Black;
             this.LB_GameTittle.CreateBorder = true;
             this.LB_GameTittle.Font = new System.Drawing.Font("Sitka Text", 36F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.LB_GameTittle.ForeColor = System.Drawing.Color.White;
