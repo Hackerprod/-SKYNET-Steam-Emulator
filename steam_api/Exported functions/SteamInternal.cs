@@ -29,16 +29,16 @@ public class SteamInternal : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static IntPtr SteamInternal_CreateInterface([MarshalAs(UnmanagedType.LPStr)] string version)
+    public static IntPtr SteamInternal_CreateInterface([MarshalAs(UnmanagedType.LPStr)] string pszVersion)
     {
-        Write($"SteamInternal_CreateInterface {version}");
-        return InterfaceManager.FindOrCreateInterface(version);
+        Write($"SteamInternal_CreateInterface {pszVersion}");
+        return InterfaceManager.FindOrCreateInterface(pszVersion);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamInternal_GameServer_Init(IntPtr unIP, IntPtr usPort, IntPtr usGamePort, IntPtr usQueryPort, IntPtr eServerMode, IntPtr pchVersionString)
+    public static bool SteamInternal_GameServer_Init(IntPtr unIP, IntPtr usPort, IntPtr usGamePort, IntPtr usQueryPort, IntPtr eServerMode, [MarshalAs(UnmanagedType.LPStr)] string pchVersionString)
     {
-        Write($"SteamInternal_GameServer_Init");
+        Write($"SteamInternal_GameServer_Init {pchVersionString}");
         return true;
     }
 

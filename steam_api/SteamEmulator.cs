@@ -17,20 +17,30 @@ public class SteamEmulator
     public static CallbackManager Client_Callback = new CallbackManager();
     public static CallbackManager Server_Callback = new CallbackManager();
 
-    // Local Data
+    #region Client Info
+
+    public static string Language { get; set; }
+    public static string PersonaName { get; set; }
+    public static ulong SteamId { get; set; }
+    public static ulong SteamId_GS { get; set; }
+    public static bool AsClient { get; set; }
+    public static uint AppId { get; set; }
+
     public static HSteamUser HSteamUser;
     public static HSteamPipe HSteamPipe;
 
-    public static HSteamUser HSteamUser_GS;
+    public static HSteamUser HSteamUser_GS{ get; set; }
     public static HSteamPipe HSteamPipe_GS;
 
-    public static ulong SteamId;
-    public static ulong SteamId_GS;
+    #endregion
 
-    public static uint AppId;
+    public static bool Initialized { get; set; }
+
     public static Dictionary<HSteamPipe, Steam_Pipe> steam_pipes;
 
     public static CSteamApiContext Context;
+
+    #region Interfaces 
 
     //Client
     public static SteamClient SteamClient;
@@ -80,10 +90,7 @@ public class SteamEmulator
     public static SteamGameCoordinator SteamGameServerGamecoordinator;
     public static SteamMasterServerUpdater SteamMasterServerUpdater;
 
-    public static string Language { get; set; }
-    public static string PersonaName { get; set; }
-    public static bool Initialized { get; set; }
-    public static bool AsClient { get; set; }
+    #endregion
 
     public SteamEmulator(bool asClient)
     {
@@ -104,6 +111,8 @@ public class SteamEmulator
         if (Server_Callback == null) Server_Callback = new CallbackManager();
 
         steam_pipes = new Dictionary<HSteamPipe, Steam_Pipe>();
+
+        #region Interface Initialization
 
         // Client Interfaces
 
@@ -198,6 +207,8 @@ public class SteamEmulator
 
         SteamMasterServerUpdater = CreateInterface<SteamMasterServerUpdater>();
 
+        #endregion
+
         HSteamUser = (HSteamUser)1;
         HSteamPipe = (HSteamPipe)1;
 
@@ -206,17 +217,17 @@ public class SteamEmulator
 
         SteamClient.ConnectToGlobalUser((int)HSteamPipe);
 
-        Context = CreateInterface<CSteamApiContext>();
-        var success = Context.Init(IntPtr.Zero);
+        //Context = CreateInterface<CSteamApiContext>();
+        //var success = Context.Init(IntPtr.Zero);
 
-        if (success)
-        {
-            Write("SteamApi Context created successfully");
-        }
-        else
-        {
-            Write("Error creating SteamApi Context");
-        }
+        //if (success)
+        //{
+        //    Write("SteamApi Context created successfully");
+        //}
+        //else
+        //{
+        //    Write("Error creating SteamApi Context");
+        //}
 
         Initialized = true;
 

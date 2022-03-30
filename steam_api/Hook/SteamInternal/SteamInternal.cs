@@ -22,7 +22,8 @@ namespace SKYNET.Hook.Handles
             base.Install<SteamInternal_FindOrCreateGameServerInterfaceDelegate>("SteamInternal_FindOrCreateGameServerInterface", _SteamInternal_FindOrCreateGameServerInterfaceDelegate, new SteamInternal_FindOrCreateGameServerInterfaceDelegate(SteamInternal_FindOrCreateGameServerInterface));
             base.Install<SteamInternal_CreateInterfaceDelegate>("SteamInternal_CreateInterface", _SteamInternal_CreateInterfaceDelegate, new SteamInternal_CreateInterfaceDelegate(SteamInternal_CreateInterface));
             base.Install<SteamInternal_GameServer_InitDelegate>("SteamInternal_GameServer_Init", _SteamInternal_GameServer_InitDelegate, new SteamInternal_GameServer_InitDelegate(SteamInternal_GameServer_Init));
-            base.Install<SteamInternal_ContextInitDelegate>("SteamInternal_ContextInit", _SteamInternal_ContextInitDelegate, new SteamInternal_ContextInitDelegate(SteamInternal_ContextInit));
+            //base.Install<SteamInternal_ContextInitDelegate>("SteamInternal_ContextInit", _SteamInternal_ContextInitDelegate, new SteamInternal_ContextInitDelegate(SteamInternal_ContextInit));
+            ContextInitTest.Init();
         }
         public IntPtr SteamInternal_FindOrCreateUserInterface(int hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion)
         {
@@ -42,9 +43,9 @@ namespace SKYNET.Hook.Handles
             return InterfaceManager.FindOrCreateInterface(pszVersion);
         }
 
-        public bool SteamInternal_GameServer_Init(IntPtr unIP, IntPtr usPort, IntPtr usGamePort, IntPtr usQueryPort, IntPtr eServerMode, IntPtr pchVersionString)
+        public bool SteamInternal_GameServer_Init(IntPtr unIP, IntPtr usPort, IntPtr usGamePort, IntPtr usQueryPort, IntPtr eServerMode, [MarshalAs(UnmanagedType.LPStr)] string pchVersionString)
         {
-            Write($"SteamInternal_GameServer_Init");
+            Write($"SteamInternal_GameServer_Init {pchVersionString}");
             return true;
         }
 
@@ -85,33 +86,33 @@ namespace SKYNET.Hook.Handles
             Main.Write("SteamInternal", v);
         }
     }
-    [StructLayout(LayoutKind.Auto)]
+    [StructLayout(LayoutKind.Sequential)]
     public struct CSteamApiContext 
     {
-        private IntPtr m_pSteamClient;              //ISteamClient* 
-        private IntPtr m_pSteamUser;                //ISteamUser* 
-        private IntPtr m_pSteamFriends;             //ISteamFriends* 
-        private IntPtr m_pSteamUtils;               //ISteamUtils* 
-        private IntPtr m_pSteamMatchmaking;         //ISteamMatchmaking* 
-        private IntPtr m_pSteamGameSearch;          //ISteamGameSearch* 
-        private IntPtr m_pSteamUserStats;           //ISteamUserStats* 
-        private IntPtr m_pSteamApps;                //ISteamApps* 
-        private IntPtr m_pSteamMatchmakingServers;  //ISteamMatchmakingServers* 
-        private IntPtr m_pSteamNetworking;          //ISteamNetworking* 
-        private IntPtr m_pSteamRemoteStorage;       //ISteamRemoteStorage* 
-        private IntPtr m_pSteamScreenshots;         //ISteamScreenshots* 
-        private IntPtr m_pSteamHTTP;                //ISteamHTTP* 
-        private IntPtr m_pSteamController;          //ISteamController* 
-        private IntPtr m_pSteamUGC;                 //ISteamUGC* 
-        private IntPtr m_pSteamAppList;             //ISteamAppList* 
-        private IntPtr m_pSteamMusic;               //ISteamMusic* 
-        private IntPtr m_pSteamMusicRemote;         //ISteamMusicRemote* 
-        private IntPtr m_pSteamHTMLSurface;         //ISteamHTMLSurface* 
-        private IntPtr m_pSteamInventory;           //ISteamInventory* 
-        private IntPtr m_pSteamVideo;               //ISteamVideo* 
-        private IntPtr m_pSteamTV;                  //ISteamTV* 
-        private IntPtr m_pSteamParentalSettings;    //ISteamParentalSettings* 
-        private IntPtr m_pSteamInput;               //ISteamInput* 
+        public IntPtr m_pSteamClient;              //ISteamClient* 
+        public IntPtr m_pSteamUser;                //ISteamUser* 
+        public IntPtr m_pSteamFriends;             //ISteamFriends* 
+        public IntPtr m_pSteamUtils;               //ISteamUtils* 
+        public IntPtr m_pSteamMatchmaking;         //ISteamMatchmaking* 
+        public IntPtr m_pSteamGameSearch;          //ISteamGameSearch* 
+        public IntPtr m_pSteamUserStats;           //ISteamUserStats* 
+        public IntPtr m_pSteamApps;                //ISteamApps* 
+        public IntPtr m_pSteamMatchmakingServers;  //ISteamMatchmakingServers* 
+        public IntPtr m_pSteamNetworking;          //ISteamNetworking* 
+        public IntPtr m_pSteamRemoteStorage;       //ISteamRemoteStorage* 
+        public IntPtr m_pSteamScreenshots;         //ISteamScreenshots* 
+        public IntPtr m_pSteamHTTP;                //ISteamHTTP* 
+        public IntPtr m_pSteamController;          //ISteamController* 
+        public IntPtr m_pSteamUGC;                 //ISteamUGC* 
+        public IntPtr m_pSteamAppList;             //ISteamAppList* 
+        public IntPtr m_pSteamMusic;               //ISteamMusic* 
+        public IntPtr m_pSteamMusicRemote;         //ISteamMusicRemote* 
+        public IntPtr m_pSteamHTMLSurface;         //ISteamHTMLSurface* 
+        public IntPtr m_pSteamInventory;           //ISteamInventory* 
+        public IntPtr m_pSteamVideo;               //ISteamVideo* 
+        public IntPtr m_pSteamTV;                  //ISteamTV* 
+        public IntPtr m_pSteamParentalSettings;    //ISteamParentalSettings* 
+        public IntPtr m_pSteamInput;               //ISteamInput* 
 
         public IntPtr SteamClient() => m_pSteamClient;
         public IntPtr SteamUser() => m_pSteamUser;
