@@ -25,6 +25,8 @@ namespace SKYNET
 
         private string callbackChannel;
 
+        public static Game Game;
+
         //private List<IPlugin> Plugins;
 
         public Main(RemoteHooking.IContext inContext, string inChannelName)
@@ -32,6 +34,8 @@ namespace SKYNET
             callbackChannel = null;
             Instance = this;
             HookInterface = (HookInterface)Activator.GetObject(typeof(HookInterface), "ipc://" + inChannelName + "/" + inChannelName);
+            Game = HookInterface.Game;
+            
             //HookCallback = new HookCallback();
             //HookCallback.ReleaseHooks += HookCallback_ReleaseHooks;
             //HookCallback.ReleaseHook += HookCallback_ReleaseHook;
@@ -53,7 +57,11 @@ namespace SKYNET
         {
             string dllPath = modCommon.GetPath();
 
-            if (File.Exists(Path.Combine(dllPath, "steam_api.dll")))
+            if (File.Exists(Game.SteamApiPath))
+            {
+                dllPath = Game.SteamApiPath;
+            }
+            else if (File.Exists(Path.Combine(dllPath, "steam_api.dll")))
             {
                 dllPath = Path.Combine(dllPath, "steam_api.dll");
             }
@@ -66,6 +74,7 @@ namespace SKYNET
                 Write("Error forcing steam_api load");
                 return;
             }
+            SteamEmulator.SteamApiPath = dllPath;
 
             Memory.CreateInMemoryInterface(dllPath);
         }
@@ -92,7 +101,7 @@ namespace SKYNET
                 if (!SteamEmulator.Initialized)
                 {
                     new SteamEmulator(true).Initialize();
-                    SteamEmulator.AppId = HookInterface.AppId;
+                    SteamEmulator.AppId = HookInterface.Game.AppId;
 
                 }
 

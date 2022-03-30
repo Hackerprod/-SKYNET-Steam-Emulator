@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Runtime.Remoting;
 using System.Text;
 using System.Threading.Tasks;
@@ -192,7 +188,7 @@ namespace SKYNET
 
                 HookInterface = new HookInterface();
                 HookInterface.InjectionOptions = InjectionOptions.Default;
-                HookInterface.AppId = game.AppId;
+                HookInterface.Game = game;
                 HookInterface.OnMessage += this.HookInterface_OnMessage;
                 HookInterface.OnShowMessage += this.HookInterface_OnShowMessage;
 

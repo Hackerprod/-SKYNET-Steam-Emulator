@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace SKYNET
 {
     [Serializable]
-    public class Game
+    public class Game : MarshalByRefObject
     {
         public string Name { get; set; }
         public string ExecutablePath { get; set; }

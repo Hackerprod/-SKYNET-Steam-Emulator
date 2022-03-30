@@ -25,10 +25,7 @@ namespace SKYNET.Hook.Handles
             base.Install<SteamInternal_FindOrCreateGameServerInterfaceDelegate>("SteamInternal_FindOrCreateGameServerInterface", _SteamInternal_FindOrCreateGameServerInterfaceDelegate, new SteamInternal_FindOrCreateGameServerInterfaceDelegate(SteamInternal_FindOrCreateGameServerInterface));
             base.Install<SteamInternal_CreateInterfaceDelegate>("SteamInternal_CreateInterface", _SteamInternal_CreateInterfaceDelegate, new SteamInternal_CreateInterfaceDelegate(SteamInternal_CreateInterface));
             base.Install<SteamInternal_GameServer_InitDelegate>("SteamInternal_GameServer_Init", _SteamInternal_GameServer_InitDelegate, new SteamInternal_GameServer_InitDelegate(SteamInternal_GameServer_Init));
-
-            //base.Install<OnContextInitFunc>("SteamInternal_ContextInit", OnContextInitPtr, new OnContextInitFunc(SteamInternal_ContextInit));
-
-
+            //base.Install<SteamInternal_ContextInitDelegate>("SteamInternal_ContextInit", _SteamInternal_ContextInitDelegate, new SteamInternal_ContextInitDelegate(SteamInternal_ContextInit));
         }
 
         public IntPtr SteamInternal_FindOrCreateUserInterface(int hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion)
@@ -55,12 +52,6 @@ namespace SKYNET.Hook.Handles
             return true;
         }
 
-
-        [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public unsafe delegate void* OnContextInitFunc(void* c_contextPtr);
-
-        public static unsafe OnContextInitFunc OnContextInitPtr = SteamInternal_ContextInit;
-
         public static unsafe void* SteamInternal_ContextInit(void* c_contextPointer)
         {
             ContextInitData* CreatedContext = (ContextInitData*)c_contextPointer;
@@ -72,9 +63,16 @@ namespace SKYNET.Hook.Handles
                 CreatedContext->counter = 1;
             }
 
-            void* firstPtr = Unsafe.AsPointer(ref CreatedContext->Context);
+            //CSteamApiContext ContextPointer = SteamEmulator.Context;
 
-            return firstPtr;
+            //void* c = &CreatedContext->Context;
+
+            //Unsafe.Write(c, ContextPointer);
+
+            //return c;
+
+
+            return &CreatedContext->Context;
         }
 
         public unsafe struct ContextInitData
@@ -82,8 +80,6 @@ namespace SKYNET.Hook.Handles
             public CSteamApiContext Context;
             public uint counter;
         }
-
-
 
         public override void Write(object v)
         {

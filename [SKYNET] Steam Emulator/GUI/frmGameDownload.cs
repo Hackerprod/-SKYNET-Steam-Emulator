@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -29,11 +30,14 @@ namespace SKYNET.GUI
 
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "Banner"));
 
-            StartDownloading();
+            Thread DownloadThread = new Thread(StartDownloading);
+            DownloadThread.IsBackground = true;
+            DownloadThread.Start();
         }
 
         private async void StartDownloading()
         {
+            string errorTask = "";
             string BannerPath = Path.Combine(modCommon.GetPath(), "Data", "Images", "Banner");
 
             WebClient.DownloadDataCompleted += WebClient_DownloadDataCompleted;
@@ -49,7 +53,7 @@ namespace SKYNET.GUI
             }
             catch (Exception ex)
             {
-                modCommon.Show("Error downloading file. " + ex.Message);
+                errorTask = "Error downloading file. " + ex.Message;
             }
 
             try
@@ -63,9 +67,14 @@ namespace SKYNET.GUI
             }
             catch (Exception ex)
             {
-                modCommon.Show("Error downloading file. " + ex.Message);
+                errorTask = "Error downloading file. " + ex.Message;
             }
 
+            if (string.IsNullOrEmpty(errorTask))
+            {
+                modCommon.Show(errorTask);
+
+            }
         }
 
         private void WebClient_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)

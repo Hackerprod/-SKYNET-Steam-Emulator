@@ -108,7 +108,6 @@
     <Compile Include="GUI\frmGameManager.Designer.cs">
       <DependentUpon>frmGameManager.cs</DependentUpon>
     </Compile>
-    <Compile Include="Types\Game.cs" />
     <Compile Include="GUI\Controls\DwmApi.cs" />
     <Compile Include="GUI\Controls\GradiantBox.cs">
       <SubType>UserControl</SubType>

@@ -37,6 +37,7 @@ public class SteamEmulator
     #endregion
 
     public static bool Initialized { get; set; }
+    public static string SteamApiPath { get; set; }
 
     public static Dictionary<HSteamPipe, Steam_Pipe> steam_pipes;
 

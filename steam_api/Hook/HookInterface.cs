@@ -14,7 +14,7 @@ namespace SKYNET
 
         public string DllPath { get; set; }
 
-        public uint AppId { get; set; }
+        public Game Game { get; set; }
 
         public InjectionOptions InjectionOptions { get; set; }
 

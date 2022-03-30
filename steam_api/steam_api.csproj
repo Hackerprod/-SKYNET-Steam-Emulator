@@ -259,6 +259,7 @@
     <Compile Include="Steamworks\Types\AppId_t.cs" />
     <Compile Include="Steamworks\Types\UGCQueryHandle_t.cs" />
     <Compile Include="Steamworks\Types\UGCUpdateHandle_t.cs" />
+    <Compile Include="Types\Game.cs" />
     <Compile Include="Types\SteamId.cs" />
   </ItemGroup>
   <ItemGroup>
