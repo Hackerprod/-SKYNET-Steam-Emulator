@@ -170,7 +170,7 @@ namespace SKYNET.Hook.Handles
 
         public UInt32 SteamAPI_ISteamApps_GetAppInstallDir(AppId_t appID, IntPtr pchFolder, uint cchFolderBufferSize)
         {
-            Write($"SteamAPI_ISteamApps_GetAppInstallDir {appID} {pchFolder} {cchFolderBufferSize}");
+            Write($"SteamAPI_ISteamApps_GetAppInstallDir {appID.m_AppId} ");
             //TODO return real path instead of dll path
             string installed_path = "xd";
             return (UInt32)installed_path.Length; //Real steam always returns the actual path length, not the copied one.
@@ -220,11 +220,11 @@ namespace SKYNET.Hook.Handles
             return (SteamAPICall_t)0;
         }
 
-        //
         public int SteamAPI_ISteamApps_GetLaunchCommandLine(IntPtr pszCommandLine, int cubCommandLine)
         {
-            Write("SteamAPI_ISteamApps_GetLaunchCommandLine");
-            return 0;
+            string commandLine = Marshal.PtrToStringUni(pszCommandLine);
+            Write($"SteamAPI_ISteamApps_GetLaunchCommandLine {commandLine}");
+            return SteamEmulator.SteamApps.GetLaunchCommandLine(pszCommandLine, cubCommandLine);
         }
 
         public bool SteamAPI_ISteamApps_BIsSubscribedFromFamilySharing()

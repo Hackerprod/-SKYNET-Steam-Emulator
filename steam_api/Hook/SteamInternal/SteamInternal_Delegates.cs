@@ -27,13 +27,13 @@ namespace SKYNET.Hook.Handles
         public delegate bool SteamInternal_GameServer_InitDelegate(IntPtr unIP, IntPtr usPort, IntPtr usGamePort, IntPtr usQueryPort, IntPtr eServerMode, [MarshalAs(UnmanagedType.LPStr)] string pchVersionString);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate IntPtr SteamInternal_ContextInitDelegate(IntPtr pContextInitData);
+        public unsafe delegate CSteamApiContext* SteamInternal_ContextInitDelegate(ContextInitData* pContextInitData);
 
 
         public SteamInternal_FindOrCreateUserInterfaceDelegate _SteamInternal_FindOrCreateUserInterface;
         public SteamInternal_FindOrCreateGameServerInterfaceDelegate _SteamInternal_FindOrCreateGameServerInterfaceDelegate;
         public SteamInternal_CreateInterfaceDelegate _SteamInternal_CreateInterfaceDelegate;
         public SteamInternal_GameServer_InitDelegate _SteamInternal_GameServer_InitDelegate;
-        public SteamInternal_ContextInitDelegate _SteamInternal_ContextInitDelegate;
+        public unsafe SteamInternal_ContextInitDelegate _SteamInternal_ContextInitDelegate;
     }
 }

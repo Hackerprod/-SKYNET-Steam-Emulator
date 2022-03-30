@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SKYNET.Types;
+using System;
 using System.Runtime.InteropServices;
 
 namespace SKYNET.Hook.Handles

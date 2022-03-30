@@ -1,6 +1,8 @@
-﻿using SKYNET;
+﻿using DotNetCross.Memory;
+using SKYNET;
 using SKYNET.Callback;
 using SKYNET.Helper;
+using SKYNET.Types;
 using Steamworks;
 using System;
 using System.Collections.Generic;
@@ -217,8 +219,8 @@ public class SteamEmulator
 
         SteamClient.ConnectToGlobalUser((int)HSteamPipe);
 
-        //Context = CreateInterface<CSteamApiContext>();
-        //var success = Context.Init(IntPtr.Zero);
+        Context = new CSteamApiContext();
+        var success = Context.Init();
 
         //if (success)
         //{

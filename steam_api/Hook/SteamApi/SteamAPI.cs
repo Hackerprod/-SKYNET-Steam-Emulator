@@ -132,16 +132,20 @@ namespace SKYNET.Hook.Handles
             base.Install<VR_IsHmdPresentDelegate>("VR_IsHmdPresent", _VR_IsHmdPresentDelegate, new VR_IsHmdPresentDelegate(VR_IsHmdPresent));
             base.Install<VR_ShutdownDelegate>("VR_Shutdown", _VR_ShutdownDelegate, new VR_ShutdownDelegate(VR_Shutdown));
         }
+        int steps = 0;
         public bool SteamAPI_Init()
         {
-            ////if (SteamEmulator.Initialized)
-            ////{
-            ////    Write($"{"SteamAPI_Init [TRUE]"}");
-            ////    return true;
-            ////}
-
-            ////Write($"{"SteamAPI_Init [FALSE]"}");
-            ////new SteamEmulator().Initialize();
+            if (SteamEmulator.Initialized && steps == 2)
+            {
+                Write($"{"SteamAPI_Init [TRUE]"}");
+                return true;
+            }
+            if (!SteamEmulator.Initialized)
+            {
+                new SteamEmulator(false).Initialize();
+            }
+            steps++;
+            Write($"{"SteamAPI_Init [FALSE]"}");
 
             return false;
         }

@@ -167,11 +167,10 @@ public class SteamAPI_ISteamApps : BaseCalls
     //    return 0;
     //}
 
-    // returns current app install folder for AppID, returns folder name length
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static UInt32 SteamAPI_ISteamApps_GetAppInstallDir(AppId_t appID, IntPtr pchFolder, uint cchFolderBufferSize)
     {
-        Write($"SteamAPI_ISteamApps_GetAppInstallDir {appID} {pchFolder} {cchFolderBufferSize}");
+        Write($"SteamAPI_ISteamApps_GetAppInstallDir {appID.m_AppId} {pchFolder} {cchFolderBufferSize}");
         //TODO return real path instead of dll path
         string installed_path = "xd";
         return (UInt32)installed_path.Length; //Real steam always returns the actual path length, not the copied one.

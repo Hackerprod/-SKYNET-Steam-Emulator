@@ -162,12 +162,6 @@ public class SteamApps : SteamInterface
         return (SteamAPICall_t)0;
     }
 
-    public int GetLaunchCommandLine(IntPtr pszCommandLine, int cubCommandLine)
-    {
-        Write("GetLaunchCommandLine");
-        return 0;
-    }
-
     public bool BIsSubscribedFromFamilySharing(IntPtr _)
     {
         Write("BIsSubscribedFromFamilySharing");
@@ -178,6 +172,12 @@ public class SteamApps : SteamInterface
     {
         Write("BIsTimedTrial");
         return false;
+    }
+
+    public int GetLaunchCommandLine(IntPtr pszCommandLine, int cubCommandLine)
+    {
+        Write("GetLaunchCommandLine");
+        return 0;
     }
 
     private void Write(string v)

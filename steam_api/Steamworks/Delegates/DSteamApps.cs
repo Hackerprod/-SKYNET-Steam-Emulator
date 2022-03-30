@@ -77,12 +77,14 @@ namespace SKYNET.Delegate
         public delegate SteamAPICall_t GetFileDetails(string pszFileName);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate int GetLaunchCommandLine(IntPtr pszCommandLine, int cubCommandLine);
-
-        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool BIsSubscribedFromFamilySharing(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool BIsTimedTrial(UInt32 punSecondsAllowed, UInt32 punSecondsPlayed);
+
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate int GetLaunchCommandLine(IntPtr pszCommandLine, int cubCommandLine);
+
+        
     }
 }
