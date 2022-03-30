@@ -88,13 +88,6 @@ namespace SKYNET.Types
 
         public bool Init()
         {
-            var a_steamUser = SteamEmulator.HSteamUser;
-            var a_steamPipe = SteamEmulator.HSteamPipe;
-
-            if ((int)a_steamPipe == 0)
-            {
-                return false;
-            }
 
             m_pSteamClient = SteamEmulator.SteamClient.BaseAddress;
             if (m_pSteamClient == IntPtr.Zero)

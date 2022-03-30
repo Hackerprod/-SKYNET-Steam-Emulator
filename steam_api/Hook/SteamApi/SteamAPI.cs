@@ -164,12 +164,10 @@ namespace SKYNET.Hook.Handles
             SteamEmulator.Client_Callback.RegisterCallResult(pCallback, hAPICall);
         }
 
-        
         public void SteamAPI_Shutdown(IntPtr pContextInitData)
         {
             Write("SteamAPI_Shutdown");
         }
-
         
         public void SteamAPI_UnregisterCallback(IntPtr pCallback)
         {
@@ -177,13 +175,11 @@ namespace SKYNET.Hook.Handles
             SteamEmulator.Client_Callback.UnregisterCallback(pCallback);
         }
 
-        
         public void SteamAPI_UnregisterCallResult(IntPtr pCallback, SteamAPICall_t hAPICall)
         {
             Write("SteamAPI_UnregisterCallResult\n");
             SteamEmulator.Client_Callback.UnregisterCallResult(pCallback, hAPICall);
         }
-
         
         public unsafe void SteamAPI_RegisterCallback(IntPtr pCallback, int iCallback)
         {
@@ -218,15 +214,11 @@ namespace SKYNET.Hook.Handles
             Write(callMessage);
         }
 
-
-
-        
         public bool SteamAPI_InitSafe()
         {
             Write("SteamAPI_InitSafe");
             return SteamAPI_Init();
         }
-
         
         public bool SteamAPI_InitAnonymousUser()
         {
@@ -235,7 +227,6 @@ namespace SKYNET.Hook.Handles
             return true;
         }
 
-        
         public bool SteamAPI_IsSteamRunning()
         {
             Write($"{"SteamAPI_IsSteamRunning"}");
@@ -249,7 +240,6 @@ namespace SKYNET.Hook.Handles
             SteamEmulator.AppId = appId;
             return false;
         }
-
         
         public string SteamAPI_GetSteamInstallPath()
         {
@@ -258,7 +248,6 @@ namespace SKYNET.Hook.Handles
             string path = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
             return path;
         }
-
         
         public int SteamAPI_GetHSteamUser()
         {
@@ -270,7 +259,6 @@ namespace SKYNET.Hook.Handles
             return (int)SteamEmulator.HSteamUser;
         }
 
-        
         public int SteamAPI_GetHSteamPipe()
         {
             Write("SteamAPI_GetHSteamPipe");
@@ -281,33 +269,28 @@ namespace SKYNET.Hook.Handles
             return (int)SteamEmulator.HSteamPipe;
         }
 
-        
         public int GetHSteamPipe()
         {
             Write("GetHSteamPipe");
             return SteamAPI_GetHSteamPipe();
         }
 
-        
         public int GetHSteamUser()
         {
             Write("GetHSteamUser");
             return SteamAPI_GetHSteamUser();
         }
 
-        
         public void SteamAPI_SetTryCatchCallbacks(bool bTryCatchCallbacks)
         {
             Write($"SteamAPI_SetTryCatchCallbacks");
         }
 
-        
         public void SteamAPI_SetBreakpadAppID(UInt32 unAppID)
         {
             Write($"SteamAPI_SetBreakpadAppID {unAppID}");
         }
 
-        
         public void SteamAPI_UseBreakpadCrashHandler([MarshalAs(UnmanagedType.LPStr)] string pchVersion, [MarshalAs(UnmanagedType.LPStr)] string pchDate, [MarshalAs(UnmanagedType.LPStr)] string pchTime, bool bFullMemoryDumps, IntPtr pvContext, IntPtr m_pfnPreMinidumpCallback)
         {
             Write($"SteamAPI_UseBreakpadCrashHandler | Date: {pchDate} | Time: {pchTime} | Version : {pchVersion}");
@@ -318,37 +301,30 @@ namespace SKYNET.Hook.Handles
         {
             Write($"SteamAPI_ManualDispatch_RunFrame");
         }
-
         
         public bool SteamAPI_ManualDispatch_GetNextCallback(HSteamPipe hSteamPipe, IntPtr pCallbackMsg)
         {
             Write($"SteamAPI_ManualDispatch_GetNextCallback");
             return true;
         }
-
         
         public void SteamAPI_ManualDispatch_FreeLastCallback(HSteamPipe hSteamPipe)
         {
             Write($"SteamAPI_ManualDispatch_FreeLastCallback");
         }
 
-
-        
         public bool SteamAPI_ManualDispatch_GetAPICallResult(HSteamPipe hSteamPipe, IntPtr hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, bool pbFailed)
         {
             Write($"SteamAPI_ManualDispatch_GetAPICallResult");
             return true;
         }
 
-
-        
         public bool SteamAPI_RestartApp(UInt32 appid)
         {
             Write($"SteamAPI_RestartApp");
             return SteamAPI_RestartAppIfNecessary(appid);
         }
 
-        
         public void SteamAPI_SetMiniDumpComment([MarshalAs(UnmanagedType.LPStr)] string pchMsg)
         {
             string Msg = "SteamAPI_SetMiniDumpComment" + Environment.NewLine;
@@ -358,25 +334,21 @@ namespace SKYNET.Hook.Handles
             Write(Msg);
             //Log.Write(Msg, true);
         }
-
         
         public void SteamAPI_WriteMiniDump(UInt32 uStructuredExceptionCode, IntPtr pvExceptionInfo, UInt32 uBuildID)
         {
             Write($"SteamAPI_WriteMiniDump");
         }
 
-        
         public void SteamAPI_ReleaseCurrentThreadMemory()
         {
             Write($"SteamAPI_ReleaseCurrentThreadMemory");
         }
 
-        
         public void SteamAPI_gameserveritem_t_Construct(IntPtr self)
         {
             Write($"SteamAPI_gameserveritem_t_Construct");
         }
-
         
         public string SteamAPI_gameserveritem_t_GetName(IntPtr self)
         {
@@ -384,26 +356,22 @@ namespace SKYNET.Hook.Handles
             return "";
         }
 
-        
         public void SteamAPI_gameserveritem_t_SetName(IntPtr self, IntPtr pName)
         {
             Write($"SteamAPI_gameserveritem_t_SetName");
         }
 
-        
         public IntPtr g_pSteamClientGameServer()
         {
             Write($"g_pSteamClientGameServer");
             return SteamEmulator.SteamGameServer.BaseAddress;
         }
 
-        
         public void Steam_RegisterInterfaceFuncs(IntPtr hModule)
         {
             Write($"Steam_RegisterInterfaceFuncs");
         }
 
-        
         public void Steam_RunCallbacks(IntPtr hSteamPipe, bool bGameServerCallbacks)
         {
             Write("Steam_RunCallbacks\n");
@@ -413,8 +381,6 @@ namespace SKYNET.Hook.Handles
             if (bGameServerCallbacks)
                 SteamEmulator.SteamGameServer.RunCallbacks(IntPtr.Zero);
         }
-
-
 
 
         #region Interfaces
@@ -909,27 +875,23 @@ namespace SKYNET.Hook.Handles
         {
             Write($"VR_GetGenericInterface version {pchInterfaceVersion}");
         }
-
         
         public string VR_GetStringForHmdError(int error)
         {
             Write($"VR_GetStringForHmdError");
             return "";
         }
-
         
         public void VR_Init(int error, int type)
         {
             Write($"VR_Init");
         }
-
         
         public bool VR_IsHmdPresent()
         {
             Write($"VR_IsHmdPresent");
             return false;
         }
-
         
         public void VR_Shutdown()
         {

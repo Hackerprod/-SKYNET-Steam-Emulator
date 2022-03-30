@@ -23,6 +23,11 @@ namespace SKYNET.GUI
         {
             InitializeComponent();
 
+            foreach (Control control in Controls)
+            {
+                base.SetMouseMove(control);
+            }
+
             WebClient = new WebClient();
             PB_Avatar.Image = Box.Image;
             AppId = Box.AppId;

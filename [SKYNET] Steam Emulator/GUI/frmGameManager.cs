@@ -15,7 +15,11 @@ namespace SKYNET
         {
             InitializeComponent();
             CheckForIllegalCrossThreadCalls = false;
-            SetMouseMove(PN_Top);
+
+            foreach (Control control in Controls)
+            {
+                base.SetMouseMove(control);
+            }
 
             string FileName = Path.GetFileNameWithoutExtension(filePath);
             var PathDirectory = Directory.GetParent(filePath).ToString();
