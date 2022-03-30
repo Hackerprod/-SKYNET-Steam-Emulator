@@ -53,13 +53,13 @@ namespace SKYNET.Delegate
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate IntPtr GetISteamRemoteStorage(int hSteamuser, int hSteamPipe, string pchVersion);
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate IntPtr GetISteamScreenshots(int hSteamuser, int hSteamPipe, string pchVersion);
+        public delegate IntPtr GetISteamScreenshots(int hSteamuser, int hSteamPipe, [MarshalAs(UnmanagedType.LPStr)] string pchVersion);
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate uint GetIPCCallCount(IntPtr _);
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool BShutdownIfAllPipesClosed(IntPtr _);
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate IntPtr GetISteamHTTP(int hSteamuser, int hSteamPipe, string pchVersion);
+        public delegate IntPtr GetISteamHTTP(int hSteamuser, int hSteamPipe, IntPtr pchVersion);
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate IntPtr GetISteamController(int hSteamUser, int hSteamPipe, string pchVersion);
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]

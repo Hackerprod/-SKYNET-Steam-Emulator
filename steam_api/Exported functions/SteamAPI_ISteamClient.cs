@@ -138,7 +138,7 @@ public class SteamAPI_ISteamClient : BaseCalls
     public static IntPtr SteamAPI_ISteamClient_GetISteamScreenshots(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write("SteamAPI_ISteamClient_GetISteamScreenshots");
-        return SteamEmulator.SteamClient.GetISteamScreenshots(hSteamUser, hSteamPipe, pchVersion);
+        return SteamEmulator.SteamScreenshots.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -159,7 +159,7 @@ public class SteamAPI_ISteamClient : BaseCalls
     public static IntPtr SteamAPI_ISteamClient_GetISteamHTTP(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write("SteamAPI_ISteamClient_GetISteamHTTP");
-        return SteamEmulator.SteamClient.GetISteamHTTP(hSteamUser, hSteamPipe, pchVersion);
+        return SteamEmulator.SteamHTTP.BaseAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

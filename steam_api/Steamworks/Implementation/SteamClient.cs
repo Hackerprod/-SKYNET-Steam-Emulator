@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using SKYNET;
 using SKYNET.Steamworks;
 using Steamworks;
@@ -145,15 +146,17 @@ public class SteamClient : SteamInterface
         return SteamEmulator.SteamRemoteStorage.BaseAddress;
     }
 
-    public IntPtr GetISteamScreenshots(int hSteamUser, int hSteamPipe, string pchVersion)
+    public IntPtr GetISteamScreenshots(int hSteamUser, int hSteamPipe, [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
     {
         Write($"GetISteamScreenshots {pchVersion}");
         return SteamEmulator.SteamScreenshots.BaseAddress;
     }
 
-    public IntPtr GetISteamHTTP(int hSteamUser, int hSteamPipe, string pchVersion)
+    public IntPtr GetISteamHTTP(int hSteamUser, int hSteamPipe, IntPtr pchVersion)
     {
-        Write($"GetISteamHTTP {pchVersion}");
+        string version = Marshal.PtrToStringAnsi(pchVersion);
+        Write($"GetISteamHTTP {version}");
+
         return SteamEmulator.SteamHTTP.BaseAddress;
     }
 

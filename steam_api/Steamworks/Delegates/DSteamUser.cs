@@ -110,5 +110,36 @@ namespace SKYNET.Delegate
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool BSetDurationControlOnlineState(IntPtr _, EDurationControlOnlineState eNewState);
 
+
+        #region New
+
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate bool LogOn(ulong SteamId);
+
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate void LogOff(IntPtr _);
+
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate bool GetLogonState(IntPtr _);
+
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate ulong GetClientInstanceID(IntPtr _);
+
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate bool IsVACBanned(int @int);
+
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate uint GetCountUserNotifications(IntPtr _);
+
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate uint GetCountUserNotification(int @int);
+
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate bool SetLanguage(string @string);
+
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate string GetLanguage(string @string, int @int);
+
+        #endregion
     }
 }
