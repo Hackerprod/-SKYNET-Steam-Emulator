@@ -7,15 +7,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 
 public class InterfaceManager
 {
-    public static List<InterfaceDelegates> interface_delegates;
+    public static List<InterfaceDelegates> LoadedDelegates;
+    public static List<Delegate> StoredDelegates;
 
     static InterfaceManager()
     {
-        interface_delegates = new List<InterfaceDelegates>();
+        LoadedDelegates = new List<InterfaceDelegates>();
+        StoredDelegates = new List<Delegate>();
     }
 
     public static void Initialize()
@@ -42,11 +46,19 @@ public class InterfaceManager
                 }
 
                 // Just assume all members are delegate types
-                interface_delegates.Add(new_interface);
+                LoadedDelegates.Add(new_interface);
             }
         }
     }
 
+    public static T CreateInstance<T>(out IntPtr BaseAddress) 
+    {
+        var instance = Activator.CreateInstance(typeof(T));
+        IntPtr pointer = IntPtr.Zero;
+        ReferenceHelpers.GetPinnedPtr(instance, ptr => pointer = ptr);
+        BaseAddress = pointer;
+        return (T)instance;
+    }
     public static T CreateInterface<T>(out IntPtr BaseAddress) where T : SteamInterface
     {
         var (context, iface) = CreateInterface(typeof(T));
@@ -60,7 +72,7 @@ public class InterfaceManager
     {
         string Name = type.ToString();
 
-        var iface = interface_delegates.Find(d => d.Name == Name);
+        var iface = LoadedDelegates.Find(d => d.Name == Name);
 
         if (iface == null)
         {
@@ -68,36 +80,22 @@ public class InterfaceManager
             return (IntPtr.Zero, null);
         }
 
-        var impl = new InterfaceImplementation
-        {
-            Name = Name,
-            Type = type,
-            Methods = InterfaceMethodsForType(type)
-        };
+        var instance = Activator.CreateInstance(type);
 
-        // Try to create a new context based on this interface + impl pair
-        var (context, instance) = Create(iface, impl);
-
-        return (context, instance);
-    }
-
-    private static (IntPtr, SteamInterface) Create(InterfaceDelegates iface, InterfaceImplementation impl)
-    {
-        var instance = Activator.CreateInstance(impl.Type);
+        var Methods = InterfaceMethodsForType(type);
 
         var new_delegates = new List<Delegate>();
 
-        for (var i = 0; i < impl.Methods.Count; i++)
+        foreach (var MethodInfo in Methods)
         {
             // Find the delegate type that matches the method
-            var mi = impl.Methods[i];
+            var delegateType = iface.DelegateTypes.Find(x => x.Name.Equals(MethodInfo.Name));
 
-            var type = iface.DelegateTypes.Find(x => x.Name.Equals(mi.Name));
             //Write($"Finding delegate for type {mi.Name}");
 
-            if (type == null)
+            if (delegateType == null)
             {
-                Main.Write(string.Format("Unable to find delegate for {0} in {1}!", mi.Name, iface.Name));
+                Main.Write(string.Format("Unable to find delegate for {0} in {1}!", MethodInfo.Name, iface.Name));
                 return (IntPtr.Zero, null);
             }
 
@@ -105,21 +103,21 @@ public class InterfaceManager
             Delegate new_delegate;
             try
             {
-                new_delegate = Delegate.CreateDelegate(type, instance, mi, true);
+                new_delegate = Delegate.CreateDelegate(delegateType, instance, MethodInfo, true);
                 new_delegates.Add(new_delegate);
             }
             catch (Exception e)
             {
-                Main.Write(string.Format("EXCEPTION whilst binding function {0}, class {1}", mi.Name, impl.Name));
+                Main.Write(string.Format("EXCEPTION whilst binding function {0}, class {1}", MethodInfo.Name, Name));
             }
         }
 
-        impl.Delegates.Add(new_delegates);
+        StoredDelegates.AddRange(new_delegates);
 
         var ptr_size = Marshal.SizeOf(typeof(IntPtr));
 
         // Allocate enough space for the new pointers in local memory
-        var vtable = Marshal.AllocHGlobal(impl.Methods.Count * ptr_size);
+        var vtable = Marshal.AllocHGlobal(Methods.Count * ptr_size);
 
         for (var i = 0; i < new_delegates.Count; i++)
         {
@@ -154,6 +152,7 @@ public class InterfaceManager
     {
         return FindOrCreateInterface(1, 1, pchVersion);
     }
+
     public static IntPtr FindOrCreateInterface(int hSteamUser, int hSteamPipe, string pszVersion)
     {
         if (pszVersion.StartsWith("SteamUtils"))
@@ -269,5 +268,24 @@ public class InterfaceManager
 
         Main.Write($"Not found Interface for {pszVersion}");
         return default;
+    }
+}
+public static class ReferenceHelpers
+{
+    public static readonly Action<object, Action<IntPtr>> GetPinnedPtr;
+
+    static ReferenceHelpers()
+    {
+        var dyn = new DynamicMethod("GetPinnedPtr", typeof(void), new[] { typeof(object), typeof(Action<IntPtr>) }, typeof(ReferenceHelpers).Module);
+        var il = dyn.GetILGenerator();
+        il.DeclareLocal(typeof(object), true);
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Stloc_0);
+        il.Emit(OpCodes.Ldarg_1);
+        il.Emit(OpCodes.Ldloc_0);
+        il.Emit(OpCodes.Conv_I);
+        il.Emit(OpCodes.Call, typeof(Action<IntPtr>).GetMethod("Invoke"));
+        il.Emit(OpCodes.Ret);
+        GetPinnedPtr = (Action<object, Action<IntPtr>>)dyn.CreateDelegate(typeof(Action<object, Action<IntPtr>>));
     }
 }

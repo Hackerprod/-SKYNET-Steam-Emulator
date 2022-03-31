@@ -16,8 +16,6 @@ public class SteamInternal : BaseCalls
     public static IntPtr SteamInternal_FindOrCreateUserInterface(IntPtr hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion)
     {
         Write($"SteamInternal_FindOrCreateUserInterface {pszVersion}");
-
-
         return SteamEmulator.SteamClient.GetISteamGenericInterface((int)SteamEmulator.HSteamUser, (int)SteamEmulator.HSteamPipe, pszVersion);
     }
 
@@ -42,56 +40,24 @@ public class SteamInternal : BaseCalls
         return true;
     }
 
-    #region For test purposes
-
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static IntPtr SteamInternal_ContextInit(IntPtr pContextInitData)
+    public static unsafe void* SteamInternal_ContextInit(void* c_contextPointer)
     {
-        ContextInitData contextInitData = Marshal.PtrToStructure<ContextInitData>(pContextInitData);
+        ContextInitData* CreatedContext = (ContextInitData*)c_contextPointer;
 
-        if (contextInitData.counter != 1)
+        if (CreatedContext->Context.SteamClient() != SteamEmulator.SteamClient.BaseAddress)
         {
-            Write($"SteamInternal_ContextInit");
-
-            IntPtr MemoryAddress = MemoryHelper.MemoryAddress(SteamEmulator.Context);
-
-            return MemoryAddress == IntPtr.Zero ? contextInitData.Context : MemoryAddress;
+            Main.Write("SteamInternal_ContextInit initializing");
+            CreatedContext->Context.Init();
+            CreatedContext->counter = 1;
         }
-        return contextInitData.Context;
+
+        return &CreatedContext->Context;
     }
 
-    public unsafe struct ContextInitData
+    public struct ContextInitData
     {
-        public IntPtr Context;
+        public CSteamApiContext Context;
         public uint counter;
     }
-
-    #endregion
-
-    //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-    //public unsafe static CSteamApiContext* SteamInternal_ContextInit(ContextInitData* pContextInitData)
-    //{
-    //    Write($"SteamInternal_ContextInit Counter: {pContextInitData->counter}, SteamUGC {pContextInitData->Context->SteamClient()}");
-
-    //    ////var sa = pContextInitData->Context->m_pSteamClient.ToInt32();
-    //    ////Write($"wuassa");
-
-    //    return steamInternal_ContextInit(pContextInitData);
-
-    //    //pContextInitData->Context->Clear();
-
-    //    //if (pContextInitData->counter == 0)
-    //    //{
-    //    //    pContextInitData->counter = 1;
-    //    //    pContextInitData->Context->Init();
-    //    //}
-
-    //    return pContextInitData->Context;
-    //}
-
-    //public unsafe struct ContextInitData
-    //{
-    //    public CSteamApiContext* Context;
-    //    public uint counter;
-    //}
 }

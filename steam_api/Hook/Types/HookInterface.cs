@@ -31,7 +31,6 @@ namespace SKYNET
             this.PingNotify?.Invoke(this, callbackChannel);
         }
 
-
         public void InvokeMessage(string sender, object msg)
         {
             this.OnMessage?.Invoke(this, new ConsoleMessage(sender, msg));

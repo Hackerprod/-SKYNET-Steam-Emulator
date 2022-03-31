@@ -1,5 +1,4 @@
-﻿using DotNetCross.Memory;
-using SKYNET;
+﻿using SKYNET;
 using SKYNET.Callback;
 using SKYNET.Helper;
 using SKYNET.Types;
@@ -14,6 +13,8 @@ using System.Threading.Tasks;
 public class SteamEmulator
 {
     public static SteamEmulator Instance;
+
+    public static IntPtr ContextAddress;
 
     // Callbacks
     public static CallbackManager Client_Callback = new CallbackManager();
@@ -218,7 +219,7 @@ public class SteamEmulator
 
         SteamClient.ConnectToGlobalUser((int)HSteamPipe);
 
-        Context = new CSteamApiContext();
+        Context = InterfaceManager.CreateInstance<CSteamApiContext>(out ContextAddress);
         var success = Context.Init();
 
         #if Debug

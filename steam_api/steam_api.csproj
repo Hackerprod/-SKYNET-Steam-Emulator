@@ -70,9 +70,6 @@
     <DllExportPostProcType>0</DllExportPostProcType>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DotNetCross.Memory.Unsafe, Version=0.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DotNetCross.Memory.Unsafe.0.3.1\lib\net45\DotNetCross.Memory.Unsafe.dll</HintPath>
-    </Reference>
     <Reference Include="EasyHook, Version=2.7.7097.0, Culture=neutral, PublicKeyToken=4b580fca19d0b0c5, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\SKYNET.Net.Redirector\EasyHook.dll</HintPath>
@@ -116,7 +113,6 @@
     <Compile Include="Steamworks\Types\SteamEnums.cs" />
     <Compile Include="Steamworks\Types\SteamTypes.cs" />
     <Compile Include="Steamworks\Types\CSteamAPIContext.cs" />
-    <Compile Include="Helper\MemoryHelper.cs" />
     <Compile Include="Hook\Main.cs" />
     <Compile Include="Managers\InterfaceManager.cs" />
     <Compile Include="Exported functions\SteamAPI_ISteamNetworkingUtils.cs" />
@@ -163,7 +159,6 @@
     <Compile Include="Helper\INIParser.cs" />
     <Compile Include="Helper\Log.cs" />
     <Compile Include="Helper\modCommon.cs" />
-    <Compile Include="Helper\RegistrySettings.cs" />
     <Compile Include="Steamworks\Implementation\SteamGameServer.cs" />
     <Compile Include="Steamworks\Implementation\SteamMasterServerUpdater.cs" />
     <Compile Include="Steamworks\Implementation\SteamNetworkingMessages.cs" />

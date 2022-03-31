@@ -23,8 +23,8 @@ public class SteamAppList : SteamInterface
 
     public int GetAppName(AppId_t nAppID, IntPtr pchName, int cchNameMax)
     {
-        var mempchName = Helpers.TakeMemory();
         Write("GetAppName\n");
+        var mempchName = Helpers.TakeMemory();
         return -1;
     }
 

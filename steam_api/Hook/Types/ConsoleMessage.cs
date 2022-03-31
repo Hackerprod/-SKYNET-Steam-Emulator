@@ -2,7 +2,7 @@
 {
     public class ConsoleMessage
     {
-        public string Sender { get; }
+        public string Sender;
         public object Msg;
 
         public ConsoleMessage(string sender, object msg)

@@ -22,7 +22,7 @@ public class SteamUser : SteamInterface
         return true;
     }
 
-    public SteamId GetSteamID(IntPtr _)
+    public ulong GetSteamID(IntPtr _)
     {
         var SId = new SteamId();
         SId.Value = SteamEmulator.SteamId;

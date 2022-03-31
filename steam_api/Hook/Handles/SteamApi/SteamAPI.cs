@@ -19,7 +19,7 @@ namespace SKYNET.Hook.Handles
         public override bool Installed { get; set; }
         public override void Install()
         {
-            return;
+            //return;
             // SteamApi Handles
             base.Install<SteamAPI_InitDelegate>("SteamAPI_Init", _SteamAPI_InitDelegate, new SteamAPI_InitDelegate(SteamAPI_Init));
             base.Install<SteamAPI_RunCallbacksDelegate>("SteamAPI_RunCallbacks", _SteamAPI_RunCallbacksDelegate, new SteamAPI_RunCallbacksDelegate(SteamAPI_RunCallbacks));
