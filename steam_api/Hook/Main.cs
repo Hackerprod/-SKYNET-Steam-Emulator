@@ -31,26 +31,17 @@ namespace SKYNET
 
         public Main(RemoteHooking.IContext inContext, string inChannelName)
         {
+            Write("xd");
             callbackChannel = null;
             Instance = this;
             HookInterface = (HookInterface)Activator.GetObject(typeof(HookInterface), "ipc://" + inChannelName + "/" + inChannelName);
             Game = HookInterface.Game;
-            
-            //HookCallback = new HookCallback();
-            //HookCallback.ReleaseHooks += HookCallback_ReleaseHooks;
-            //HookCallback.ReleaseHook += HookCallback_ReleaseHook;
-            //HookCallback.DumpToConsoleChanged += HookCallback_DumpToConsoleChanged;
-            //HookCallback.DumpToFileChanged += HookCallback_DumpToFileChanged;
-            //HookCallback.DnsRedirectionChanged += HookCallback_DnsRedirectionChanged;
-            //HookCallback.IpRedirectionChanged += HookCallback_IpRedirectionChanged;
-            //HookCallback.PortRedirectionChanged += HookCallback_PortRedirectionChanged;
-            //RemoteHooking.IpcCreateServer(ref callbackChannel, WellKnownObjectMode.SingleCall, HookCallback);
 
-            HookInterface.Ping(callbackChannel);
             Config.HelperLibraryLocation = Path.GetDirectoryName(HookInterface.DllPath);
             Config.DependencyPath = Path.GetDirectoryName(HookInterface.DllPath);
+
             HookManager = new HookManager();
-            //Plugins = new List<IPlugin>();
+            HookInterface.Ping(callbackChannel);
         }
 
         internal static void ForceSteamAPILoad()
@@ -79,30 +70,14 @@ namespace SKYNET
             Memory.CreateInMemoryInterface(dllPath);
         }
 
-        internal static void ModuleLoaded(string v)
-        {
-            //if (!Instance.Plugins.Any())
-            //{
-            //    return;
-            //}
-            //foreach (IPlugin plugin in Instance.Plugins)
-            //{
-            //    plugin.ModuleLoaded(v);
-            //}
-        }
-
         public void Run(RemoteHooking.IContext inContext, string inChannelName)
         {
             try
             {
-                InstallPlugins();
-
-
                 if (!SteamEmulator.Initialized)
                 {
                     new SteamEmulator(true).Initialize();
                     SteamEmulator.AppId = HookInterface.Game.AppId;
-
                 }
 
                 HookManager.Install();
@@ -111,7 +86,9 @@ namespace SKYNET
             {
                 Write(msg);
             }
+
             RemoteHooking.WakeUpProcess();
+
             try
             {
                 while (true)
@@ -123,55 +100,9 @@ namespace SKYNET
             catch
             {
             }
+
             HookManager.UninstallHooks();
             LocalHook.Release();
-        }
-
-        private void InstallPlugins()
-        {
-            //string path = Path.GetDirectoryName(HookInterface.DllPath) + "/Plugins";
-            //if (!Directory.Exists(path))
-            //{
-            //    return;
-            //}
-            //string[] files = Directory.GetFiles(path, "*.dll");
-            //foreach (string path2 in files)
-            //{
-            //    try
-            //    {
-            //        Assembly assembly = Assembly.LoadFile(path2);
-            //        Type type = assembly.GetType("SKYNET.Plugin");
-            //        if (type != null)
-            //        {
-            //            IPlugin plugin = (IPlugin)Activator.CreateInstance(type);
-            //            if (plugin == null)
-            //            {
-            //                Write("PLUGINS", "Failed to load plugin " + Path.GetFileNameWithoutExtension(path2), Color.Red);
-            //                continue;
-            //            }
-            //            plugin.Initialize(this, HookInterface);
-            //            HookManager.PluginHooks.AddRange(plugin.Hooks);
-            //            Write("PLUGINS", "Loaded " + Path.GetFileNameWithoutExtension(path2), ColorTranslator.FromHtml("#27B8EF"));
-            //            Plugins.Add(plugin);
-            //        }
-            //    }
-            //    catch (Exception)
-            //    {
-            //        Write("PLUGINS", "Failed to load plugin " + Path.GetFileNameWithoutExtension(path2) + " \n", Color.Red);
-            //    }
-            //}
-        }
-
-        public static void InjectToProcess(uint ProcessId, string name)
-        {
-            try
-            {
-                RemoteHooking.Inject((int)ProcessId, HookInterface.InjectionOptions, HookInterface.DllPath, HookInterface.DllPath, HookInterface.ChannelName);
-            }
-            catch (Exception ex)
-            {
-                Write("NET REDIRECTOR", "Error injecting process in " + name + " " + Environment.NewLine + " " + new string(' ', 17) + ex.Message);
-            }
         }
 
         public static void Write(object msg)
@@ -182,21 +113,6 @@ namespace SKYNET
         public static void Write(object sender, object msg)
         {
             HookInterface.InvokeMessage(sender.ToString(), msg);
-        }
-
-        private void HookCallback_ReleaseHooks(object sender, EventArgs e)
-        {
-            HookManager.UninstallHooks();
-        }
-
-        private void HookCallback_ReleaseHook(object sender, string hook)
-        {
-            HookManager.Uninstall(hook);
-        }
-
-        private void HookCallback_DumpToFileChanged(object sender, bool DumpToFile)
-        {
-            HookInterface.DumpToFile = DumpToFile;
         }
 
         public static void OnShowMessage(object msg)
