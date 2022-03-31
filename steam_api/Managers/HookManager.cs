@@ -13,7 +13,6 @@ namespace SKYNET
     public class HookManager
     {
         public List<BaseHook> Hooks;
-
         public List<IHook> PluginHooks;
 
         public HookManager()
@@ -21,8 +20,8 @@ namespace SKYNET
             Hooks = new List<BaseHook>();
             PluginHooks = new List<IHook>();
 
-            InstallHook(new LdrLoadDll());
-            InstallHook(new steamnetworkingsockets());
+            InstallHook(new SKYNET.Hook.Handles.LdrLoadDll());
+            InstallHook(new SKYNET.Hook.Handles.steamnetworkingsockets());
             
 
             Hooks.Add(new SKYNET.Hook.Handles.SteamInternal());
@@ -59,8 +58,8 @@ namespace SKYNET
                     hook.Install();
                 }
             }
-
         }
+
         public void Install(string UpperDllName)
         {
             if (!string.IsNullOrEmpty(UpperDllName))
@@ -84,6 +83,7 @@ namespace SKYNET
                 }
             }
         }
+
         private void InstallHook(IHook hook)
         {
             try
@@ -102,7 +102,7 @@ namespace SKYNET
                 }
                 catch
                 {
-                    Main.Write("HookManager", "Failed injecting " + hook.Method + " in " + hook.Library);
+                    Main.Write("HookManager", $"Failed injecting {hook.Method} in {hook.Library}");
                     hook.Installed = false;
                 }
             }
@@ -110,13 +110,13 @@ namespace SKYNET
             {
             }
         }
+
         public void UninstallHooks()
         {
             foreach (var hook in Hooks)
             {
                 try
                 {
-                    //hook.Hook.Dispose();
                     hook.Installed = false;
                 }
                 catch
@@ -134,38 +134,6 @@ namespace SKYNET
                 {
                 }
             }
-        }
-        public void Uninstall(string Method)
-        {
-            //if (!string.IsNullOrEmpty(Method))
-            //{
-            //    foreach (IHook hook in Hooks)
-            //    {
-            //        if (hook.Method == Method)
-            //        {
-            //            try
-            //            {
-            //                hook.Hook.Dispose();
-            //                hook.Installed = false;
-            //            }
-            //            catch
-            //            {
-            //            }
-            //        }
-            //    }
-            //    return;
-            //}
-            //foreach (IHook hook2 in Hooks)
-            //{
-            //    try
-            //    {
-            //        hook2.Hook.Dispose();
-            //        hook2.Installed = false;
-            //    }
-            //    catch
-            //    {
-            //    }
-            //}
         }
     }
 }

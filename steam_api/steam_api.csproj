@@ -91,10 +91,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Hook\SteamAppList\SteamAPI_ISteamAppList_Delegates.cs" />
-    <Compile Include="Hook\SteamAppList\SteamAPI_ISteamAppList.cs" />
-    <Compile Include="Hook\SteamApps\SteamAPI_ISteamApps.cs" />
-    <Compile Include="Hook\SteamApps\SteamAPI_ISteamApps_Delegates.cs" />
+    <Compile Include="Hook\Handles\SteamAppList\SteamAPI_ISteamAppList_Delegates.cs" />
+    <Compile Include="Hook\Handles\SteamAppList\SteamAPI_ISteamAppList.cs" />
+    <Compile Include="Hook\Handles\SteamApps\SteamAPI_ISteamApps.cs" />
+    <Compile Include="Hook\Handles\SteamApps\SteamAPI_ISteamApps_Delegates.cs" />
     <Compile Include="Steamworks\Helpers\DelegateAttribute.cs" />
     <Compile Include="Steamworks\Helpers\IBaseInterface.cs" />
     <Compile Include="Steamworks\Helpers\InterfaceImplementation.cs" />
@@ -105,14 +105,14 @@
     <Compile Include="Helper\Memory.cs" />
     <Compile Include="Helper\NativeMethods.cs" />
     <Compile Include="Managers\HookManager.cs" />
-    <Compile Include="Hook\ConsoleMessage.cs" />
-    <Compile Include="Hook\BaseHook.cs" />
-    <Compile Include="Hook\steamnetworkingsockets.cs" />
-    <Compile Include="Hook\SteamApi\SteamAPI_Delegates.cs" />
-    <Compile Include="Hook\SteamApi\SteamAPI.cs" />
-    <Compile Include="Hook\SteamInternal\SteamInternal_Delegates.cs" />
-    <Compile Include="Hook\SteamInternal\SteamInternal.cs" />
-    <Compile Include="Hook\LdrLoadDll.cs" />
+    <Compile Include="Hook\Types\ConsoleMessage.cs" />
+    <Compile Include="Hook\Types\BaseHook.cs" />
+    <Compile Include="Hook\Handles\steamnetworkingsockets.cs" />
+    <Compile Include="Hook\Handles\SteamApi\SteamAPI_Delegates.cs" />
+    <Compile Include="Hook\Handles\SteamApi\SteamAPI.cs" />
+    <Compile Include="Hook\Handles\SteamInternal\SteamInternal_Delegates.cs" />
+    <Compile Include="Hook\Handles\SteamInternal\SteamInternal.cs" />
+    <Compile Include="Hook\Handles\LdrLoadDll.cs" />
     <Compile Include="Steamworks\Types\SteamEnums.cs" />
     <Compile Include="Steamworks\Types\SteamTypes.cs" />
     <Compile Include="Steamworks\Types\CSteamAPIContext.cs" />
@@ -241,8 +241,8 @@
     <Compile Include="Steamworks\Types\EAccountType.cs" />
     <Compile Include="Steamworks\Types\EResult.cs" />
     <Compile Include="Types\Friend.cs" />
-    <Compile Include="Hook\HookInterface.cs" />
-    <Compile Include="Hook\IHook.cs" />
+    <Compile Include="Hook\Types\HookInterface.cs" />
+    <Compile Include="Hook\Types\IHook.cs" />
     <Compile Include="Steamworks\Types\HAuthTicket.cs" />
     <Compile Include="Steamworks\Types\HSteamPipe.cs" />
     <Compile Include="Steamworks\Types\HSteamUser.cs" />

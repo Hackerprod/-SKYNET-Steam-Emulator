@@ -13,31 +13,13 @@ public class InterfaceManager
 {
     public static List<InterfaceDelegates> interface_delegates;
 
-    private static Dictionary<string, IntPtr> Interfaces;
-
-    private static string filePath;
-
-    private const string x86 = "steam_api.dll";
-    private const string x64 = "steam_api64.dll";
-
     static InterfaceManager()
     {
-        Interfaces = new Dictionary<string, IntPtr>();
         interface_delegates = new List<InterfaceDelegates>();
     }
 
     public static void Initialize()
     {
-        filePath = modCommon.GetPath();
-        if (File.Exists(Path.Combine(filePath, x86)))
-        {
-            filePath = Path.Combine(filePath, x86);
-        }
-        else
-        {
-            filePath = Path.Combine(filePath, x64);
-        }
-
         Assembly a = Assembly.LoadFile(Main.HookInterface.DllPath);
 
         foreach (var t in a.GetTypes())
@@ -143,7 +125,6 @@ public class InterfaceManager
         {
             try
             {
-                // Main.Write ("Testing " + new_delegates[i].Method);
                 Marshal.WriteIntPtr(vtable, i * ptr_size, Marshal.GetFunctionPointerForDelegate(new_delegates[i]));
             }
             catch (Exception)
@@ -152,7 +133,6 @@ public class InterfaceManager
             }
             // Create all function pointers as neccessary
         }
-        //impl.stored_function_pointers.Add(vtable);
 
         // create the context
         var new_context = Marshal.AllocHGlobal(ptr_size);

@@ -19,19 +19,14 @@ namespace SKYNET
 
         public static HookManager HookManager;
 
-        //public static HookCallback HookCallback;
-
         public static HookInterface HookInterface;
 
         private string callbackChannel;
 
         public static Game Game;
 
-        //private List<IPlugin> Plugins;
-
         public Main(RemoteHooking.IContext inContext, string inChannelName)
         {
-            Write("xd");
             callbackChannel = null;
             Instance = this;
             HookInterface = (HookInterface)Activator.GetObject(typeof(HookInterface), "ipc://" + inChannelName + "/" + inChannelName);
@@ -62,9 +57,10 @@ namespace SKYNET
             }
             else
             {
-                Write("Error forcing steam_api load");
+                Write("Error forcing steam_api injection");
                 return;
             }
+
             SteamEmulator.SteamApiPath = dllPath;
 
             Memory.CreateInMemoryInterface(dllPath);

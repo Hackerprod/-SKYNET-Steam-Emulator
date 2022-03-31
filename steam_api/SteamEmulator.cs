@@ -39,7 +39,7 @@ public class SteamEmulator
     public static bool Initialized { get; set; }
     public static string SteamApiPath { get; set; }
 
-    public static Dictionary<HSteamPipe, Steam_Pipe> steam_pipes;
+    public static Dictionary<HSteamPipe, Pipe> steam_pipes;
 
     public static CSteamApiContext Context;
 
@@ -97,15 +97,13 @@ public class SteamEmulator
 
     public SteamEmulator(bool asClient)
     {
-        steam_pipes = new Dictionary<HSteamPipe, Steam_Pipe>();
+        steam_pipes = new Dictionary<HSteamPipe, Pipe>();
         Instance = this;
         AsClient = asClient;
     }
 
     public void Initialize()
     {
-        string _file = Path.Combine(modCommon.GetPath(), "[SKYNET] steam_api.ini");
-
         modCommon.LoadSettings();
 
         InterfaceManager.Initialize();
@@ -113,7 +111,7 @@ public class SteamEmulator
         if (Client_Callback == null) Client_Callback = new CallbackManager();
         if (Server_Callback == null) Server_Callback = new CallbackManager();
 
-        steam_pipes = new Dictionary<HSteamPipe, Steam_Pipe>();
+        steam_pipes = new Dictionary<HSteamPipe, Pipe>();
 
         #region Interface Initialization
 
@@ -223,14 +221,17 @@ public class SteamEmulator
         Context = new CSteamApiContext();
         var success = Context.Init();
 
-        //if (success)
-        //{
-        //    Write("SteamApi Context created successfully");
-        //}
-        //else
-        //{
-        //    Write("Error creating SteamApi Context");
-        //}
+        #if Debug
+        if (success)
+        {
+            Write("SteamApi Context created successfully");
+        }
+        else
+        {
+            Write("Error creating SteamApi Context");
+        }
+        #endif
+
 
         Initialized = true;
 
@@ -260,7 +261,7 @@ public class SteamEmulator
         {
             HSteamPipe = (HSteamPipe)1;
             Write($"Creating pipe {HSteamPipe}");
-            steam_pipes[HSteamPipe] = Steam_Pipe.NO_USER;
+            steam_pipes[HSteamPipe] = Pipe.NO_USER;
         }
         return HSteamPipe;
     }
@@ -274,7 +275,8 @@ public class SteamEmulator
         }
     }
 }
-public enum Steam_Pipe : int
+
+public enum Pipe : int
 {
     NO_USER,
     CLIENT,

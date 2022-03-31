@@ -32,9 +32,9 @@ public class SteamClient : SteamInterface
             return 0;
         }
 
-        SteamEmulator.steam_pipes.Add((HSteamPipe)hSteamPipe, Steam_Pipe.CLIENT);
+        SteamEmulator.steam_pipes.Add((HSteamPipe)hSteamPipe, Pipe.CLIENT);
 
-        return (int)Steam_Pipe.CLIENT;
+        return (int)Pipe.CLIENT;
     }
 
     public int CreateLocalUser(out int phSteamPipe, EAccountType eAccountType)
