@@ -42,7 +42,7 @@ public class SteamAPI_ISteamRemoteStorage : BaseCalls
     public static bool SteamAPI_ISteamRemoteStorage_FileReadAsyncComplete(SteamAPICall_t hReadCall, IntPtr pvBuffer, uint cubToRead)
     {
         Write("SteamAPI_ISteamRemoteStorage_FileReadAsyncComplete");
-        return SteamEmulator.SteamRemoteStorage.FileReadAsyncComplete(hReadCall, pvBuffer, cubToRead);
+        return SteamEmulator.SteamRemoteStorage.FileReadAsyncComplete(SteamEmulator.SteamRemoteStorage.MemoryAddress, hReadCall, pvBuffer, cubToRead);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -84,21 +84,21 @@ public class SteamAPI_ISteamRemoteStorage : BaseCalls
     public static bool SteamAPI_ISteamRemoteStorage_FileWriteStreamWriteChunk(UGCFileWriteStreamHandle_t writeHandle, IntPtr pvData, int cubData)
     {
         Write("SteamAPI_ISteamRemoteStorage_FileWriteStreamWriteChunk");
-        return SteamEmulator.SteamRemoteStorage.FileWriteStreamWriteChunk(writeHandle, pvData, cubData);
+        return SteamEmulator.SteamRemoteStorage.FileWriteStreamWriteChunk(SteamEmulator.SteamRemoteStorage.MemoryAddress, writeHandle, pvData, cubData);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamRemoteStorage_FileWriteStreamClose(UGCFileWriteStreamHandle_t writeHandle)
     {
         Write("SteamAPI_ISteamRemoteStorage_FileWriteStreamClose");
-        return SteamEmulator.SteamRemoteStorage.FileWriteStreamClose(writeHandle);
+        return SteamEmulator.SteamRemoteStorage.FileWriteStreamClose(SteamEmulator.SteamRemoteStorage.MemoryAddress, writeHandle);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamRemoteStorage_FileWriteStreamCancel(UGCFileWriteStreamHandle_t writeHandle)
     {
         Write("SteamAPI_ISteamRemoteStorage_FileWriteStreamCancel");
-        return SteamEmulator.SteamRemoteStorage.FileWriteStreamCancel(writeHandle);
+        return SteamEmulator.SteamRemoteStorage.FileWriteStreamCancel(SteamEmulator.SteamRemoteStorage.MemoryAddress, writeHandle);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -140,7 +140,7 @@ public class SteamAPI_ISteamRemoteStorage : BaseCalls
     public static int SteamAPI_ISteamRemoteStorage_GetFileCount()
     {
         Write("SteamAPI_ISteamRemoteStorage_GetFileCount");
-        return SteamEmulator.SteamRemoteStorage.GetFileCount(SteamEmulator.SteamRemoteStorage.BaseAddress);
+        return SteamEmulator.SteamRemoteStorage.GetFileCount(SteamEmulator.SteamRemoteStorage.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -161,14 +161,14 @@ public class SteamAPI_ISteamRemoteStorage : BaseCalls
     public static bool SteamAPI_ISteamRemoteStorage_IsCloudEnabledForAccount()
     {
         Write("SteamAPI_ISteamRemoteStorage_IsCloudEnabledForAccount");
-        return SteamEmulator.SteamRemoteStorage.IsCloudEnabledForAccount(SteamEmulator.SteamRemoteStorage.BaseAddress);
+        return SteamEmulator.SteamRemoteStorage.IsCloudEnabledForAccount(SteamEmulator.SteamRemoteStorage.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamRemoteStorage_IsCloudEnabledForApp()
     {
         Write("SteamAPI_ISteamRemoteStorage_IsCloudEnabledForApp");
-        return SteamEmulator.SteamRemoteStorage.IsCloudEnabledForApp(SteamEmulator.SteamRemoteStorage.BaseAddress);
+        return SteamEmulator.SteamRemoteStorage.IsCloudEnabledForApp(SteamEmulator.SteamRemoteStorage.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -182,21 +182,21 @@ public class SteamAPI_ISteamRemoteStorage : BaseCalls
     public static SteamAPICall_t SteamAPI_ISteamRemoteStorage_UGCDownload(UGCHandle_t hContent, uint unPriority)
     {
         Write("SteamAPI_ISteamRemoteStorage_UGCDownload");
-        return SteamEmulator.SteamRemoteStorage.UGCDownload(hContent, unPriority);
+        return SteamEmulator.SteamRemoteStorage.UGCDownload(SteamEmulator.SteamRemoteStorage.MemoryAddress, hContent, unPriority);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamRemoteStorage_GetUGCDownloadProgress(UGCHandle_t hContent, int pnBytesDownloaded, int pnBytesExpected)
     {
         Write("SteamAPI_ISteamRemoteStorage_GetUGCDownloadProgress");
-        return SteamEmulator.SteamRemoteStorage.GetUGCDownloadProgress(hContent, pnBytesDownloaded, pnBytesExpected);
+        return SteamEmulator.SteamRemoteStorage.GetUGCDownloadProgress(SteamEmulator.SteamRemoteStorage.MemoryAddress, hContent, pnBytesDownloaded, pnBytesExpected);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamRemoteStorage_GetUGCDetails(UGCHandle_t hContent, AppId_t pnAppID, string ppchName, int pnFileSizeInBytes, IntPtr pSteamIDOwner)
     {
         Write("SteamAPI_ISteamRemoteStorage_GetUGCDetails");
-        return SteamEmulator.SteamRemoteStorage.GetUGCDetails(hContent, pnAppID, ppchName, pnFileSizeInBytes, pSteamIDOwner);
+        return SteamEmulator.SteamRemoteStorage.GetUGCDetails(SteamEmulator.SteamRemoteStorage.MemoryAddress, hContent, pnAppID, ppchName, pnFileSizeInBytes, pSteamIDOwner);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -210,7 +210,7 @@ public class SteamAPI_ISteamRemoteStorage : BaseCalls
     public static int SteamAPI_ISteamRemoteStorage_GetCachedUGCCount()
     {
         Write("SteamAPI_ISteamRemoteStorage_GetCachedUGCCount");
-        return SteamEmulator.SteamRemoteStorage.GetCachedUGCCount(SteamEmulator.SteamRemoteStorage.BaseAddress);
+        return SteamEmulator.SteamRemoteStorage.GetCachedUGCCount(SteamEmulator.SteamRemoteStorage.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -231,70 +231,70 @@ public class SteamAPI_ISteamRemoteStorage : BaseCalls
     public static PublishedFileUpdateHandle_t SteamAPI_ISteamRemoteStorage_CreatePublishedFileUpdateRequest(PublishedFileId_t unPublishedFileId)
     {
         Write("SteamAPI_ISteamRemoteStorage_CreatePublishedFileUpdateRequest");
-        return SteamEmulator.SteamRemoteStorage.CreatePublishedFileUpdateRequest(unPublishedFileId);
+        return SteamEmulator.SteamRemoteStorage.CreatePublishedFileUpdateRequest(SteamEmulator.SteamRemoteStorage.MemoryAddress, unPublishedFileId);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamRemoteStorage_UpdatePublishedFileFile(PublishedFileUpdateHandle_t updateHandle, string pchFile)
     {
         Write("SteamAPI_ISteamRemoteStorage_UpdatePublishedFileFile");
-        return SteamEmulator.SteamRemoteStorage.UpdatePublishedFileFile(updateHandle, pchFile);
+        return SteamEmulator.SteamRemoteStorage.UpdatePublishedFileFile(SteamEmulator.SteamRemoteStorage.MemoryAddress, updateHandle, pchFile);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamRemoteStorage_UpdatePublishedFilePreviewFile(PublishedFileUpdateHandle_t updateHandle, string pchPreviewFile)
     {
         Write("SteamAPI_ISteamRemoteStorage_UpdatePublishedFilePreviewFile");
-        return SteamEmulator.SteamRemoteStorage.UpdatePublishedFilePreviewFile(updateHandle, pchPreviewFile);
+        return SteamEmulator.SteamRemoteStorage.UpdatePublishedFilePreviewFile(SteamEmulator.SteamRemoteStorage.MemoryAddress, updateHandle, pchPreviewFile);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamRemoteStorage_UpdatePublishedFileTitle(PublishedFileUpdateHandle_t updateHandle, string pchTitle)
     {
         Write("SteamAPI_ISteamRemoteStorage_UpdatePublishedFileTitle");
-        return SteamEmulator.SteamRemoteStorage.UpdatePublishedFileTitle(updateHandle, pchTitle);
+        return SteamEmulator.SteamRemoteStorage.UpdatePublishedFileTitle(SteamEmulator.SteamRemoteStorage.MemoryAddress, updateHandle, pchTitle);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamRemoteStorage_UpdatePublishedFileDescription(PublishedFileUpdateHandle_t updateHandle, string pchDescription)
     {
         Write("SteamAPI_ISteamRemoteStorage_UpdatePublishedFileDescription");
-        return SteamEmulator.SteamRemoteStorage.UpdatePublishedFileDescription(updateHandle, pchDescription);
+        return SteamEmulator.SteamRemoteStorage.UpdatePublishedFileDescription(SteamEmulator.SteamRemoteStorage.MemoryAddress, updateHandle, pchDescription);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamRemoteStorage_UpdatePublishedFileVisibility(PublishedFileUpdateHandle_t updateHandle, ERemoteStoragePublishedFileVisibility eVisibility)
     {
         Write("SteamAPI_ISteamRemoteStorage_UpdatePublishedFileVisibility");
-        return SteamEmulator.SteamRemoteStorage.UpdatePublishedFileVisibility(updateHandle, eVisibility);
+        return SteamEmulator.SteamRemoteStorage.UpdatePublishedFileVisibility(SteamEmulator.SteamRemoteStorage.MemoryAddress, updateHandle, eVisibility);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamRemoteStorage_UpdatePublishedFileTags(PublishedFileUpdateHandle_t updateHandle, IntPtr pTags)
     {
         Write("SteamAPI_ISteamRemoteStorage_UpdatePublishedFileTags");
-        return SteamEmulator.SteamRemoteStorage.UpdatePublishedFileTags(updateHandle, pTags);
+        return SteamEmulator.SteamRemoteStorage.UpdatePublishedFileTags(SteamEmulator.SteamRemoteStorage.MemoryAddress, updateHandle, pTags);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static SteamAPICall_t SteamAPI_ISteamRemoteStorage_CommitPublishedFileUpdate(PublishedFileUpdateHandle_t updateHandle)
     {
         Write("SteamAPI_ISteamRemoteStorage_CommitPublishedFileUpdate");
-        return SteamEmulator.SteamRemoteStorage.CommitPublishedFileUpdate(updateHandle);
+        return SteamEmulator.SteamRemoteStorage.CommitPublishedFileUpdate(SteamEmulator.SteamRemoteStorage.MemoryAddress, updateHandle);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static SteamAPICall_t SteamAPI_ISteamRemoteStorage_GetPublishedFileDetails(PublishedFileId_t unPublishedFileId, uint unMaxSecondsOld)
     {
         Write("SteamAPI_ISteamRemoteStorage_GetPublishedFileDetails");
-        return SteamEmulator.SteamRemoteStorage.GetPublishedFileDetails(unPublishedFileId, unMaxSecondsOld);
+        return SteamEmulator.SteamRemoteStorage.GetPublishedFileDetails(SteamEmulator.SteamRemoteStorage.MemoryAddress, unPublishedFileId, unMaxSecondsOld);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static SteamAPICall_t SteamAPI_ISteamRemoteStorage_DeletePublishedFile(PublishedFileId_t unPublishedFileId)
     {
         Write("SteamAPI_ISteamRemoteStorage_DeletePublishedFile");
-        return SteamEmulator.SteamRemoteStorage.DeletePublishedFile(unPublishedFileId);
+        return SteamEmulator.SteamRemoteStorage.DeletePublishedFile(SteamEmulator.SteamRemoteStorage.MemoryAddress, unPublishedFileId);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -308,7 +308,7 @@ public class SteamAPI_ISteamRemoteStorage : BaseCalls
     public static SteamAPICall_t SteamAPI_ISteamRemoteStorage_SubscribePublishedFile(PublishedFileId_t unPublishedFileId)
     {
         Write("SteamAPI_ISteamRemoteStorage_SubscribePublishedFile");
-        return SteamEmulator.SteamRemoteStorage.SubscribePublishedFile(unPublishedFileId);
+        return SteamEmulator.SteamRemoteStorage.SubscribePublishedFile(SteamEmulator.SteamRemoteStorage.MemoryAddress, unPublishedFileId);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -322,35 +322,35 @@ public class SteamAPI_ISteamRemoteStorage : BaseCalls
     public static SteamAPICall_t SteamAPI_ISteamRemoteStorage_UnsubscribePublishedFile(PublishedFileId_t unPublishedFileId)
     {
         Write("SteamAPI_ISteamRemoteStorage_UnsubscribePublishedFile");
-        return SteamEmulator.SteamRemoteStorage.UnsubscribePublishedFile(unPublishedFileId);
+        return SteamEmulator.SteamRemoteStorage.UnsubscribePublishedFile(SteamEmulator.SteamRemoteStorage.MemoryAddress, unPublishedFileId);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamRemoteStorage_UpdatePublishedFileSetChangeDescription(PublishedFileUpdateHandle_t updateHandle, string pchChangeDescription)
     {
         Write("SteamAPI_ISteamRemoteStorage_UpdatePublishedFileSetChangeDescription");
-        return SteamEmulator.SteamRemoteStorage.UpdatePublishedFileSetChangeDescription(updateHandle, pchChangeDescription);
+        return SteamEmulator.SteamRemoteStorage.UpdatePublishedFileSetChangeDescription(SteamEmulator.SteamRemoteStorage.MemoryAddress, updateHandle, pchChangeDescription);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static SteamAPICall_t SteamAPI_ISteamRemoteStorage_GetPublishedItemVoteDetails(PublishedFileId_t unPublishedFileId)
     {
         Write("SteamAPI_ISteamRemoteStorage_GetPublishedItemVoteDetails");
-        return SteamEmulator.SteamRemoteStorage.GetPublishedItemVoteDetails(unPublishedFileId);
+        return SteamEmulator.SteamRemoteStorage.GetPublishedItemVoteDetails(SteamEmulator.SteamRemoteStorage.MemoryAddress, unPublishedFileId);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static SteamAPICall_t SteamAPI_ISteamRemoteStorage_UpdateUserPublishedItemVote(PublishedFileId_t unPublishedFileId, bool bVoteUp)
     {
         Write("SteamAPI_ISteamRemoteStorage_UpdateUserPublishedItemVote");
-        return SteamEmulator.SteamRemoteStorage.UpdateUserPublishedItemVote(unPublishedFileId, bVoteUp);
+        return SteamEmulator.SteamRemoteStorage.UpdateUserPublishedItemVote(SteamEmulator.SteamRemoteStorage.MemoryAddress, unPublishedFileId, bVoteUp);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static SteamAPICall_t SteamAPI_ISteamRemoteStorage_GetUserPublishedItemVoteDetails(PublishedFileId_t unPublishedFileId)
     {
         Write("SteamAPI_ISteamRemoteStorage_GetUserPublishedItemVoteDetails");
-        return SteamEmulator.SteamRemoteStorage.GetUserPublishedItemVoteDetails(unPublishedFileId);
+        return SteamEmulator.SteamRemoteStorage.GetUserPublishedItemVoteDetails(SteamEmulator.SteamRemoteStorage.MemoryAddress, unPublishedFileId);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -371,7 +371,7 @@ public class SteamAPI_ISteamRemoteStorage : BaseCalls
     public static SteamAPICall_t SteamAPI_ISteamRemoteStorage_SetUserPublishedFileAction(PublishedFileId_t unPublishedFileId, EWorkshopFileAction eAction)
     {
         Write("SteamAPI_ISteamRemoteStorage_SetUserPublishedFileAction");
-        return SteamEmulator.SteamRemoteStorage.SetUserPublishedFileAction(unPublishedFileId, eAction);
+        return SteamEmulator.SteamRemoteStorage.SetUserPublishedFileAction(SteamEmulator.SteamRemoteStorage.MemoryAddress, unPublishedFileId, eAction);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -392,7 +392,7 @@ public class SteamAPI_ISteamRemoteStorage : BaseCalls
     public static SteamAPICall_t SteamAPI_ISteamRemoteStorage_UGCDownloadToLocation(UGCHandle_t hContent, string pchLocation, uint unPriority)
     {
         Write("SteamAPI_ISteamRemoteStorage_UGCDownloadToLocation");
-        return SteamEmulator.SteamRemoteStorage.UGCDownloadToLocation(hContent, pchLocation, unPriority);
+        return SteamEmulator.SteamRemoteStorage.UGCDownloadToLocation(SteamEmulator.SteamRemoteStorage.MemoryAddress, hContent, pchLocation, unPriority);
     }
 
 }

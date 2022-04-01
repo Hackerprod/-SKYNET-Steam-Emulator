@@ -17,7 +17,6 @@ namespace SKYNET.GUI
     {
         uint AppId;
         WebClient WebClient;
-        string CurrentFile;
 
         public frmGameDownload(GameBox Box)
         {
@@ -45,7 +44,6 @@ namespace SKYNET.GUI
             string errorTask = "";
             string BannerPath = Path.Combine(modCommon.GetPath(), "Data", "Images", "Banner");
 
-            WebClient.DownloadDataCompleted += WebClient_DownloadDataCompleted;
             WebClient.DownloadProgressChanged += WebClient_DownloadProgressChanged;
 
             try
@@ -75,10 +73,9 @@ namespace SKYNET.GUI
                 errorTask = "Error downloading file. " + ex.Message;
             }
 
-            if (string.IsNullOrEmpty(errorTask))
+            if (!string.IsNullOrEmpty(errorTask))
             {
                 modCommon.Show(errorTask);
-
             }
         }
 
@@ -89,11 +86,6 @@ namespace SKYNET.GUI
             {
                 PB_Progress.Value = 0;
             }
-        }
-
-        private void WebClient_DownloadDataCompleted(object sender, DownloadDataCompletedEventArgs e)
-        {
-            //e.Result
         }
 
         private void Cancel_Click(object sender, EventArgs e)

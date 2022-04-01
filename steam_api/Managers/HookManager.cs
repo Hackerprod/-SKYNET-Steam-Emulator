@@ -8,7 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
-namespace SKYNET
+namespace SKYNET.Manager
 {
     public class HookManager
     {

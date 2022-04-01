@@ -14,259 +14,259 @@ public class SteamAPI_ISteamUGC : BaseCalls
     public static UGCQueryHandle_t SteamAPI_ISteamUGC_CreateQueryUserUGCRequest(IntPtr unAccountID, IntPtr eListType, int eMatchingUGCType, int eSortOrder, AppId_t nCreatorAppID, AppId_t nConsumerAppID, uint unPage)
     {
         Write("SteamAPI_ISteamUGC_CreateQueryUserUGCRequest");
-        return SteamEmulator.SteamUGC.CreateQueryUserUGCRequest(unAccountID, eListType, eMatchingUGCType, eSortOrder, nCreatorAppID, nConsumerAppID, unPage);
+        return SteamEmulator.SteamUGC.CreateQueryUserUGCRequest(SteamEmulator.SteamUGC.MemoryAddress, unAccountID, eListType, eMatchingUGCType, eSortOrder, nCreatorAppID, nConsumerAppID, unPage);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static UGCQueryHandle_t SteamAPI_ISteamUGC_CreateQueryAllUGCRequest(int eQueryType, int eMatchingeMatchingUGCTypeFileType, AppId_t nCreatorAppID, AppId_t nConsumerAppID, uint unPage)
     {
         Write("SteamAPI_ISteamUGC_CreateQueryAllUGCRequest");
-        return SteamEmulator.SteamUGC.CreateQueryAllUGCRequest(eQueryType, eMatchingeMatchingUGCTypeFileType, nCreatorAppID, nConsumerAppID, unPage);
+        return SteamEmulator.SteamUGC.CreateQueryAllUGCRequest(SteamEmulator.SteamUGC.MemoryAddress, eQueryType, eMatchingeMatchingUGCTypeFileType, nCreatorAppID, nConsumerAppID, unPage);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static UGCQueryHandle_t SteamAPI_ISteamUGC_CreateQueryUGCDetailsRequest(PublishedFileId_t pvecPublishedFileID, uint unNumPublishedFileIDs)
     {
         Write("SteamAPI_ISteamUGC_CreateQueryUGCDetailsRequest");
-        return SteamEmulator.SteamUGC.CreateQueryUGCDetailsRequest(pvecPublishedFileID, unNumPublishedFileIDs);
+        return SteamEmulator.SteamUGC.CreateQueryUGCDetailsRequest(SteamEmulator.SteamUGC.MemoryAddress, pvecPublishedFileID, unNumPublishedFileIDs);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static SteamAPICall_t SteamAPI_ISteamUGC_SendQueryUGCRequest(UGCQueryHandle_t handle)
     {
         Write("SteamAPI_ISteamUGC_SendQueryUGCRequest");
-        return SteamEmulator.SteamUGC.SendQueryUGCRequest(handle);
+        return SteamEmulator.SteamUGC.SendQueryUGCRequest(SteamEmulator.SteamUGC.MemoryAddress, handle);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_GetQueryUGCResult(UGCQueryHandle_t handle, uint index, IntPtr pDetails)
     {
         Write("SteamAPI_ISteamUGC_GetQueryUGCResult");
-        return SteamEmulator.SteamUGC.GetQueryUGCResult(handle, index, pDetails);
+        return SteamEmulator.SteamUGC.GetQueryUGCResult(SteamEmulator.SteamUGC.MemoryAddress, handle, index, pDetails);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_GetQueryUGCPreviewURL(UGCQueryHandle_t handle, uint index, string pchURL, uint cchURLSize)
     {
         Write("SteamAPI_ISteamUGC_GetQueryUGCPreviewURL");
-        return SteamEmulator.SteamUGC.GetQueryUGCPreviewURL(handle, index, pchURL, cchURLSize);
+        return SteamEmulator.SteamUGC.GetQueryUGCPreviewURL(SteamEmulator.SteamUGC.MemoryAddress, handle, index, pchURL, cchURLSize);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_GetQueryUGCMetadata(UGCQueryHandle_t handle, uint index, string pchMetadata, uint cchMetadatasize)
     {
         Write("SteamAPI_ISteamUGC_GetQueryUGCMetadata");
-        return SteamEmulator.SteamUGC.GetQueryUGCMetadata(handle, index, pchMetadata, cchMetadatasize);
+        return SteamEmulator.SteamUGC.GetQueryUGCMetadata(SteamEmulator.SteamUGC.MemoryAddress, handle, index, pchMetadata, cchMetadatasize);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_GetQueryUGCChildren(UGCQueryHandle_t handle, uint index, PublishedFileId_t pvecPublishedFileID, uint cMaxEntries)
     {
         Write("SteamAPI_ISteamUGC_GetQueryUGCChildren");
-        return SteamEmulator.SteamUGC.GetQueryUGCChildren(handle, index, pvecPublishedFileID, cMaxEntries);
+        return SteamEmulator.SteamUGC.GetQueryUGCChildren(SteamEmulator.SteamUGC.MemoryAddress, handle, index, pvecPublishedFileID, cMaxEntries);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_GetQueryUGCStatistic(UGCQueryHandle_t handle, uint index, EItemStatistic eStatType, uint pStatValue)
     {
         Write("SteamAPI_ISteamUGC_GetQueryUGCStatistic");
-        return SteamEmulator.SteamUGC.GetQueryUGCStatistic(handle, index, eStatType, pStatValue);
+        return SteamEmulator.SteamUGC.GetQueryUGCStatistic(SteamEmulator.SteamUGC.MemoryAddress, handle, index, eStatType, pStatValue);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static uint SteamAPI_ISteamUGC_GetQueryUGCNumAdditionalPreviews(UGCQueryHandle_t handle, uint index)
     {
         Write("SteamAPI_ISteamUGC_GetQueryUGCNumAdditionalPreviews");
-        return SteamEmulator.SteamUGC.GetQueryUGCNumAdditionalPreviews(handle, index);
+        return SteamEmulator.SteamUGC.GetQueryUGCNumAdditionalPreviews(SteamEmulator.SteamUGC.MemoryAddress, handle, index);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_GetQueryUGCAdditionalPreview(UGCQueryHandle_t handle, uint index, uint previewIndex, string pchURLOrVideoID, uint cchURLSize, string pchOriginalFileName, uint cchOriginalFileNameSize, EItemPreviewType pPreviewType)
     {
         Write("SteamAPI_ISteamUGC_GetQueryUGCAdditionalPreview");
-        return SteamEmulator.SteamUGC.GetQueryUGCAdditionalPreview(handle, index, previewIndex, pchURLOrVideoID, cchURLSize, pchOriginalFileName, cchOriginalFileNameSize, pPreviewType);
+        return SteamEmulator.SteamUGC.GetQueryUGCAdditionalPreview(SteamEmulator.SteamUGC.MemoryAddress, handle, index, previewIndex, pchURLOrVideoID, cchURLSize, pchOriginalFileName, cchOriginalFileNameSize, pPreviewType);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static uint SteamAPI_ISteamUGC_GetQueryUGCNumKeyValueTags(UGCQueryHandle_t handle, uint index)
     {
         Write("SteamAPI_ISteamUGC_GetQueryUGCNumKeyValueTags");
-        return SteamEmulator.SteamUGC.GetQueryUGCNumKeyValueTags(handle, index);
+        return SteamEmulator.SteamUGC.GetQueryUGCNumKeyValueTags(SteamEmulator.SteamUGC.MemoryAddress, handle, index);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_GetQueryUGCKeyValueTag(UGCQueryHandle_t handle, uint index, uint keyValueTagIndex, string pchKey, uint cchKeySize, string pchValue, uint cchValueSize)
     {
         Write("SteamAPI_ISteamUGC_GetQueryUGCKeyValueTag");
-        return SteamEmulator.SteamUGC.GetQueryUGCKeyValueTag(handle, index, keyValueTagIndex, pchKey, cchKeySize, pchValue, cchValueSize);
+        return SteamEmulator.SteamUGC.GetQueryUGCKeyValueTag(SteamEmulator.SteamUGC.MemoryAddress, handle, index, keyValueTagIndex, pchKey, cchKeySize, pchValue, cchValueSize);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_ReleaseQueryUGCRequest(UGCQueryHandle_t handle)
     {
         Write("SteamAPI_ISteamUGC_ReleaseQueryUGCRequest");
-        return SteamEmulator.SteamUGC.ReleaseQueryUGCRequest(handle);
+        return SteamEmulator.SteamUGC.ReleaseQueryUGCRequest(SteamEmulator.SteamUGC.MemoryAddress, handle);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_AddRequiredTag(UGCQueryHandle_t handle, string pTagName)
     {
         Write("SteamAPI_ISteamUGC_AddRequiredTag");
-        return SteamEmulator.SteamUGC.AddRequiredTag(handle, pTagName);
+        return SteamEmulator.SteamUGC.AddRequiredTag(SteamEmulator.SteamUGC.MemoryAddress, handle, pTagName);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_AddRequiredTagGroup(UGCQueryHandle_t handle, IntPtr pTagGroups) // match any of the tags in this group 
     {
         Write("SteamAPI_ISteamUGC_AddRequiredTagGroup");
-        return SteamEmulator.SteamUGC.AddRequiredTagGroup(handle, pTagGroups);
+        return SteamEmulator.SteamUGC.AddRequiredTagGroup(SteamEmulator.SteamUGC.MemoryAddress, handle, pTagGroups);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_AddExcludedTag(UGCQueryHandle_t handle, string pTagName)
     {
         Write("SteamAPI_ISteamUGC_AddExcludedTag");
-        return SteamEmulator.SteamUGC.AddExcludedTag(handle, pTagName);
+        return SteamEmulator.SteamUGC.AddExcludedTag(SteamEmulator.SteamUGC.MemoryAddress, handle, pTagName);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_SetReturnOnlyIDs(UGCQueryHandle_t handle, bool bReturnOnlyIDs)
     {
         Write("SteamAPI_ISteamUGC_SetReturnOnlyIDs");
-        return SteamEmulator.SteamUGC.SetReturnOnlyIDs(handle, bReturnOnlyIDs);
+        return SteamEmulator.SteamUGC.SetReturnOnlyIDs(SteamEmulator.SteamUGC.MemoryAddress, handle, bReturnOnlyIDs);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_SetReturnKeyValueTags(UGCQueryHandle_t handle, bool bReturnKeyValueTags)
     {
         Write("SteamAPI_ISteamUGC_SetReturnKeyValueTags");
-        return SteamEmulator.SteamUGC.SetReturnKeyValueTags(handle, bReturnKeyValueTags);
+        return SteamEmulator.SteamUGC.SetReturnKeyValueTags(SteamEmulator.SteamUGC.MemoryAddress, handle, bReturnKeyValueTags);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_SetReturnLongDescription(UGCQueryHandle_t handle, bool bReturnLongDescription)
     {
         Write("SteamAPI_ISteamUGC_SetReturnLongDescription");
-        return SteamEmulator.SteamUGC.SetReturnLongDescription(handle, bReturnLongDescription);
+        return SteamEmulator.SteamUGC.SetReturnLongDescription(SteamEmulator.SteamUGC.MemoryAddress, handle, bReturnLongDescription);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_SetReturnMetadata(UGCQueryHandle_t handle, bool bReturnMetadata)
     {
         Write("SteamAPI_ISteamUGC_SetReturnMetadata");
-        return SteamEmulator.SteamUGC.SetReturnMetadata(handle, bReturnMetadata);
+        return SteamEmulator.SteamUGC.SetReturnMetadata(SteamEmulator.SteamUGC.MemoryAddress, handle, bReturnMetadata);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_SetReturnChildren(UGCQueryHandle_t handle, bool bReturnChildren)
     {
         Write("SteamAPI_ISteamUGC_SetReturnChildren");
-        return SteamEmulator.SteamUGC.SetReturnChildren(handle, bReturnChildren);
+        return SteamEmulator.SteamUGC.SetReturnChildren(SteamEmulator.SteamUGC.MemoryAddress, handle, bReturnChildren);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_SetReturnAdditionalPreviews(UGCQueryHandle_t handle, bool bReturnAdditionalPreviews)
     {
         Write("SteamAPI_ISteamUGC_SetReturnAdditionalPreviews");
-        return SteamEmulator.SteamUGC.SetReturnAdditionalPreviews(handle, bReturnAdditionalPreviews);
+        return SteamEmulator.SteamUGC.SetReturnAdditionalPreviews(SteamEmulator.SteamUGC.MemoryAddress, handle, bReturnAdditionalPreviews);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_SetReturnTotalOnly(UGCQueryHandle_t handle, bool bReturnTotalOnly)
     {
         Write("SteamAPI_ISteamUGC_SetReturnTotalOnly");
-        return SteamEmulator.SteamUGC.SetReturnTotalOnly(handle, bReturnTotalOnly);
+        return SteamEmulator.SteamUGC.SetReturnTotalOnly(SteamEmulator.SteamUGC.MemoryAddress, handle, bReturnTotalOnly);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_SetReturnPlaytimeStats(UGCQueryHandle_t handle, uint unDays)
     {
         Write("SteamAPI_ISteamUGC_SetReturnPlaytimeStats");
-        return SteamEmulator.SteamUGC.SetReturnPlaytimeStats(handle, unDays);
+        return SteamEmulator.SteamUGC.SetReturnPlaytimeStats(SteamEmulator.SteamUGC.MemoryAddress, handle, unDays);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_SetLanguage(UGCQueryHandle_t handle, string pchLanguage)
     {
         Write("SteamAPI_ISteamUGC_SetLanguage");
-        return SteamEmulator.SteamUGC.SetLanguage(handle, pchLanguage);
+        return SteamEmulator.SteamUGC.SetLanguage(SteamEmulator.SteamUGC.MemoryAddress, handle, pchLanguage);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_SetAllowCachedResponse(UGCQueryHandle_t handle, uint unMaxAgeSeconds)
     {
         Write("SteamAPI_ISteamUGC_SetAllowCachedResponse");
-        return SteamEmulator.SteamUGC.SetAllowCachedResponse(handle, unMaxAgeSeconds);
+        return SteamEmulator.SteamUGC.SetAllowCachedResponse(SteamEmulator.SteamUGC.MemoryAddress, handle, unMaxAgeSeconds);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_SetCloudFileNameFilter(UGCQueryHandle_t handle, string pMatchCloudFileName)
     {
         Write("SteamAPI_ISteamUGC_SetCloudFileNameFilter");
-        return SteamEmulator.SteamUGC.SetCloudFileNameFilter(handle, pMatchCloudFileName);
+        return SteamEmulator.SteamUGC.SetCloudFileNameFilter(SteamEmulator.SteamUGC.MemoryAddress, handle, pMatchCloudFileName);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_SetMatchAnyTag(UGCQueryHandle_t handle, bool bMatchAnyTag)
     {
         Write("SteamAPI_ISteamUGC_SetMatchAnyTag");
-        return SteamEmulator.SteamUGC.SetMatchAnyTag(handle, bMatchAnyTag);
+        return SteamEmulator.SteamUGC.SetMatchAnyTag(SteamEmulator.SteamUGC.MemoryAddress, handle, bMatchAnyTag);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_SetSearchText(UGCQueryHandle_t handle, string pSearchText)
     {
         Write("SteamAPI_ISteamUGC_SetSearchText");
-        return SteamEmulator.SteamUGC.SetSearchText(handle, pSearchText);
+        return SteamEmulator.SteamUGC.SetSearchText(SteamEmulator.SteamUGC.MemoryAddress, handle, pSearchText);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_SetRankedByTrendDays(UGCQueryHandle_t handle, uint unDays)
     {
         Write("SteamAPI_ISteamUGC_SetRankedByTrendDays");
-        return SteamEmulator.SteamUGC.SetRankedByTrendDays(handle, unDays);
+        return SteamEmulator.SteamUGC.SetRankedByTrendDays(SteamEmulator.SteamUGC.MemoryAddress, handle, unDays);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_AddRequiredKeyValueTag(UGCQueryHandle_t handle, string pKey, string pValue)
     {
         Write("SteamAPI_ISteamUGC_AddRequiredKeyValueTag");
-        return SteamEmulator.SteamUGC.AddRequiredKeyValueTag(handle, pKey, pValue);
+        return SteamEmulator.SteamUGC.AddRequiredKeyValueTag(SteamEmulator.SteamUGC.MemoryAddress, handle, pKey, pValue);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static SteamAPICall_t SteamAPI_ISteamUGC_RequestUGCDetails(PublishedFileId_t nPublishedFileID, uint unMaxAgeSeconds)
     {
         Write("SteamAPI_ISteamUGC_RequestUGCDetails");
-        return SteamEmulator.SteamUGC.RequestUGCDetails(nPublishedFileID, unMaxAgeSeconds);
+        return SteamEmulator.SteamUGC.RequestUGCDetails(SteamEmulator.SteamUGC.MemoryAddress, nPublishedFileID, unMaxAgeSeconds);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static SteamAPICall_t SteamAPI_ISteamUGC_CreateItem(AppId_t nConsumerAppId, EWorkshopFileType eFileType) // create new item for this app with no content attached yet 
     {
         Write("SteamAPI_ISteamUGC_CreateItem");
-        return SteamEmulator.SteamUGC.CreateItem(nConsumerAppId, eFileType);
+        return SteamEmulator.SteamUGC.CreateItem(SteamEmulator.SteamUGC.MemoryAddress, nConsumerAppId, eFileType);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static UGCUpdateHandle_t SteamAPI_ISteamUGC_StartItemUpdate(AppId_t nConsumerAppId, PublishedFileId_t nPublishedFileID) // start an UGC item update. Set changed properties before commiting update with CommitItemUpdate() 
     {
         Write("SteamAPI_ISteamUGC_StartItemUpdate");
-        return SteamEmulator.SteamUGC.StartItemUpdate(nConsumerAppId, nPublishedFileID);
+        return SteamEmulator.SteamUGC.StartItemUpdate(SteamEmulator.SteamUGC.MemoryAddress, nConsumerAppId, nPublishedFileID);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_SetItemTitle(UGCUpdateHandle_t handle, string pchTitle) // change the title of an UGC item 
     {
         Write("SteamAPI_ISteamUGC_SetItemTitle");
-        return SteamEmulator.SteamUGC.SetItemTitle(handle, pchTitle);
+        return SteamEmulator.SteamUGC.SetItemTitle(SteamEmulator.SteamUGC.MemoryAddress, handle, pchTitle);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUGC_SetItemDescription(UGCUpdateHandle_t handle, string pchDescription) // change the description of an UGC item 
     {
         Write("SteamAPI_ISteamUGC_SetItemDescription");
-        return SteamEmulator.SteamUGC.SetItemDescription(handle, pchDescription);
+        return SteamEmulator.SteamUGC.SetItemDescription(SteamEmulator.SteamUGC.MemoryAddress, handle, pchDescription);
     }
 
     //[DllExport(CallingConvention = CallingConvention.Cdecl)]

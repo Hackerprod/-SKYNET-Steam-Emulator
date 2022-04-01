@@ -22,7 +22,7 @@ public class SteamUser : SteamInterface
         return true;
     }
 
-    public ulong GetSteamID(IntPtr _)
+    public SteamId GetSteamID(IntPtr _)
     {
         var SId = new SteamId();
         SId.Value = SteamEmulator.SteamId;
@@ -198,11 +198,11 @@ public class SteamUser : SteamInterface
     }
 
     //////////////////////////////////////
-    
+
 
     #region New
 
-    public bool LogOn(ulong SteamId)
+    public bool LogOn(IntPtr _, ulong SteamId)
     {
         Write("LogOn");
         return true;

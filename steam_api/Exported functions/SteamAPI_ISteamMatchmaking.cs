@@ -13,7 +13,7 @@ public class SteamAPI_ISteamMatchmaking : BaseCalls
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static int SteamAPI_ISteamMatchmaking_GetFavoriteGameCount(IntPtr self)
     {
-        return SteamEmulator.SteamMatchmaking.GetFavoriteGameCount(SteamEmulator.SteamMatchmaking.BaseAddress);
+        return SteamEmulator.SteamMatchmaking.GetFavoriteGameCount(SteamEmulator.SteamMatchmaking.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -37,7 +37,7 @@ public class SteamAPI_ISteamMatchmaking : BaseCalls
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static SteamAPICall_t SteamAPI_ISteamMatchmaking_RequestLobbyList(IntPtr self)
     {
-        return SteamEmulator.SteamMatchmaking.RequestLobbyList(SteamEmulator.SteamMatchmaking.BaseAddress);
+        return SteamEmulator.SteamMatchmaking.RequestLobbyList(SteamEmulator.SteamMatchmaking.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

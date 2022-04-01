@@ -9,28 +9,28 @@ public class SteamAPI_ISteamMusic : BaseCalls
     public static bool SteamAPI_ISteamMusic_BIsEnabled()
     {
         Write("SteamAPI_ISteamMusic_BIsEnabled");
-        return SteamEmulator.SteamMusic.BIsEnabled(SteamEmulator.SteamMusic.BaseAddress);
+        return SteamEmulator.SteamMusic.BIsEnabled(SteamEmulator.SteamMusic.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamMusic_BIsPlaying()
     {
         Write("SteamAPI_ISteamMusic_BIsPlaying");
-        return SteamEmulator.SteamMusic.BIsPlaying(SteamEmulator.SteamMusic.BaseAddress);
+        return SteamEmulator.SteamMusic.BIsPlaying(SteamEmulator.SteamMusic.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static AudioPlayback_Status SteamAPI_ISteamMusic_GetPlaybackStatus()
     {
         Write("SteamAPI_ISteamMusic_GetPlaybackStatus");
-        return SteamEmulator.SteamMusic.GetPlaybackStatus(SteamEmulator.SteamMusic.BaseAddress);
+        return SteamEmulator.SteamMusic.GetPlaybackStatus(SteamEmulator.SteamMusic.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static float SteamAPI_ISteamMusic_GetVolume()
     {
         Write("SteamAPI_ISteamMusic_GetVolume");
-        return SteamEmulator.SteamMusic.GetVolume(SteamEmulator.SteamMusic.BaseAddress);
+        return SteamEmulator.SteamMusic.GetVolume(SteamEmulator.SteamMusic.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

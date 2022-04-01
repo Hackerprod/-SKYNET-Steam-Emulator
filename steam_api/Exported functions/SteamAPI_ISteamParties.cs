@@ -43,7 +43,7 @@ public class SteamAPI_ISteamParties : BaseCalls
     public static bool SteamAPI_ISteamParties_GetAvailableBeaconLocations(SteamPartyBeaconLocation_t pLocationList, uint uMaxNumLocations)
     {
         Write("SteamAPI_ISteamParties_GetAvailableBeaconLocations");
-        return SteamEmulator.SteamParties.GetAvailableBeaconLocations(pLocationList, uMaxNumLocations);
+        return SteamEmulator.SteamParties.GetAvailableBeaconLocations(SteamEmulator.SteamParties.MemoryAddress, pLocationList, uMaxNumLocations);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -64,7 +64,7 @@ public class SteamAPI_ISteamParties : BaseCalls
     public static bool SteamAPI_ISteamParties_GetBeaconLocationData(SteamPartyBeaconLocation_t BeaconLocation, ESteamPartyBeaconLocationData eData, string pchDataStringOut, int cchDataStringOut)
     {
         Write("SteamAPI_ISteamParties_GetBeaconLocationData");
-        return SteamEmulator.SteamParties.GetBeaconLocationData(BeaconLocation, eData, pchDataStringOut, cchDataStringOut);
+        return SteamEmulator.SteamParties.GetBeaconLocationData(SteamEmulator.SteamParties.MemoryAddress, BeaconLocation, eData, pchDataStringOut, cchDataStringOut);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

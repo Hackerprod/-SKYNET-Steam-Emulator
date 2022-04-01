@@ -1,4 +1,4 @@
-﻿
+﻿using SKYNET.Delegate.Helper;
 using SKYNET.Steamworks;
 using Steamworks;
 using System;
@@ -26,7 +26,7 @@ namespace SKYNET.Delegate
         public delegate bool DestroyBeacon(uint ulBeacon);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool GetAvailableBeaconLocations(SteamPartyBeaconLocation_t pLocationList, uint uMaxNumLocations);
+        public delegate bool GetAvailableBeaconLocations(IntPtr _, SteamPartyBeaconLocation_t pLocationList, uint uMaxNumLocations);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate uint GetBeaconByIndex(uint unIndex);
@@ -35,7 +35,7 @@ namespace SKYNET.Delegate
         public delegate bool GetBeaconDetails(uint ulBeaconID, IntPtr pSteamIDBeaconOwner, SteamPartyBeaconLocation_t pLocation, string pchMetadata, int cchMetadata);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool GetBeaconLocationData(SteamPartyBeaconLocation_t BeaconLocation, ESteamPartyBeaconLocationData eData, string pchDataStringOut, int cchDataStringOut);
+        public delegate bool GetBeaconLocationData(IntPtr _, SteamPartyBeaconLocation_t BeaconLocation, ESteamPartyBeaconLocationData eData, string pchDataStringOut, int cchDataStringOut);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate uint GetNumActiveBeacons(IntPtr _);

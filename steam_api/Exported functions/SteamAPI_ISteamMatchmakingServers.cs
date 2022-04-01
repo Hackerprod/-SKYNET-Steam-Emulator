@@ -61,7 +61,7 @@ public class SteamAPI_ISteamMatchmakingServers : BaseCalls
     public static IntPtr SteamAPI_ISteamMatchmakingServers_GetServerDetails(IntPtr hRequest, int iServer)
     {
         Write("SteamAPI_ISteamMatchmakingServers_GetServerDetails");
-        return SteamEmulator.SteamMatchMakingServers.GetServerDetails(SteamEmulator.SteamMatchMakingServers.BaseAddress, hRequest, iServer);
+        return SteamEmulator.SteamMatchMakingServers.GetServerDetails(SteamEmulator.SteamMatchMakingServers.MemoryAddress, hRequest, iServer);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

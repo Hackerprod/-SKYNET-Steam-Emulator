@@ -14,21 +14,21 @@ public class SteamAPI_ISteamUserStats : BaseCalls
     public static bool SteamAPI_ISteamUserStats_RequestCurrentStats()
     {
         Write("SteamAPI_ISteamUserStats_RequestCurrentStats");
-        return SteamEmulator.SteamUserStats.RequestCurrentStats(SteamEmulator.SteamUserStats.BaseAddress);
+        return SteamEmulator.SteamUserStats.RequestCurrentStats(SteamEmulator.SteamUserStats.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUserStats_GetStat(string pchName, uint pData)
     {
         Write("SteamAPI_ISteamUserStats_GetStat");
-        return SteamEmulator.SteamUserStats.GetStat(SteamEmulator.SteamUserStats.BaseAddress, pchName, pData);
+        return SteamEmulator.SteamUserStats.GetStat(SteamEmulator.SteamUserStats.MemoryAddress, pchName, pData);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamUserStats_SetStat(string pchName, uint nData)
     {
         Write("SteamAPI_ISteamUserStats_SetStat");
-        return SteamEmulator.SteamUserStats.SetStat(SteamEmulator.SteamUserStats.BaseAddress, pchName, nData);
+        return SteamEmulator.SteamUserStats.SetStat(SteamEmulator.SteamUserStats.MemoryAddress, pchName, nData);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -70,7 +70,7 @@ public class SteamAPI_ISteamUserStats : BaseCalls
     public static bool SteamAPI_ISteamUserStats_StoreStats()
     {
         Write("SteamAPI_ISteamUserStats_StoreStats");
-        return SteamEmulator.SteamUserStats.StoreStats(SteamEmulator.SteamUserStats.BaseAddress);
+        return SteamEmulator.SteamUserStats.StoreStats(SteamEmulator.SteamUserStats.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -98,7 +98,7 @@ public class SteamAPI_ISteamUserStats : BaseCalls
     public static uint SteamAPI_ISteamUserStats_GetNumAchievements()
     {
         Write("SteamAPI_ISteamUserStats_GetNumAchievements");
-        return SteamEmulator.SteamUserStats.GetNumAchievements(SteamEmulator.SteamUserStats.BaseAddress);
+        return SteamEmulator.SteamUserStats.GetNumAchievements(SteamEmulator.SteamUserStats.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -119,7 +119,7 @@ public class SteamAPI_ISteamUserStats : BaseCalls
     public static bool SteamAPI_ISteamUserStats_GetUserStat(IntPtr steamIDUser, string pchName, uint pData)
     {
         Write("SteamAPI_ISteamUserStats_GetUserStat");
-        return SteamEmulator.SteamUserStats.GetUserStat(SteamEmulator.SteamUserStats.BaseAddress, steamIDUser, pchName, pData);
+        return SteamEmulator.SteamUserStats.GetUserStat(SteamEmulator.SteamUserStats.MemoryAddress, steamIDUser, pchName, pData);
     }
 
 
@@ -225,14 +225,14 @@ public class SteamAPI_ISteamUserStats : BaseCalls
     public static SteamAPICall_t SteamAPI_ISteamUserStats_GetNumberOfCurrentPlayers()
     {
         Write("SteamAPI_ISteamUserStats_GetNumberOfCurrentPlayers");
-        return SteamEmulator.SteamUserStats.GetNumberOfCurrentPlayers(SteamEmulator.SteamUserStats.BaseAddress);
+        return SteamEmulator.SteamUserStats.GetNumberOfCurrentPlayers(SteamEmulator.SteamUserStats.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static SteamAPICall_t SteamAPI_ISteamUserStats_RequestGlobalAchievementPercentages()
     {
         Write("SteamAPI_ISteamUserStats_RequestGlobalAchievementPercentages");
-        return SteamEmulator.SteamUserStats.RequestGlobalAchievementPercentages(SteamEmulator.SteamUserStats.BaseAddress);
+        return SteamEmulator.SteamUserStats.RequestGlobalAchievementPercentages(SteamEmulator.SteamUserStats.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

@@ -1,4 +1,4 @@
-﻿
+﻿using SKYNET.Delegate.Helper;
 using SKYNET.Steamworks;
 using Steamworks;
 using System;
@@ -26,7 +26,7 @@ namespace SKYNET.Delegate
         public delegate SteamAPICall_t FileReadAsync(string pchFile, uint nOffset, uint cubToRead);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool FileReadAsyncComplete(SteamAPICall_t hReadCall, IntPtr pvBuffer, uint cubToRead);
+        public delegate bool FileReadAsyncComplete(IntPtr _, SteamAPICall_t hReadCall, IntPtr pvBuffer, uint cubToRead);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool FileForget(string pchFile);
@@ -44,13 +44,13 @@ namespace SKYNET.Delegate
         public delegate UGCFileWriteStreamHandle_t FileWriteStreamOpen(string pchFile);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool FileWriteStreamWriteChunk(UGCFileWriteStreamHandle_t writeHandle, IntPtr pvData, int cubData);
+        public delegate bool FileWriteStreamWriteChunk(IntPtr _, UGCFileWriteStreamHandle_t writeHandle, IntPtr pvData, int cubData);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool FileWriteStreamClose(UGCFileWriteStreamHandle_t writeHandle);
+        public delegate bool FileWriteStreamClose(IntPtr _, UGCFileWriteStreamHandle_t writeHandle);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool FileWriteStreamCancel(UGCFileWriteStreamHandle_t writeHandle);
+        public delegate bool FileWriteStreamCancel(IntPtr _, UGCFileWriteStreamHandle_t writeHandle);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate bool FileExists(string pchFile);
@@ -86,13 +86,13 @@ namespace SKYNET.Delegate
         public delegate void SetCloudEnabledForApp(bool bEnabled);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate SteamAPICall_t UGCDownload(UGCHandle_t hContent, uint unPriority);
+        public delegate SteamAPICall_t UGCDownload(IntPtr _, UGCHandle_t hContent, uint unPriority);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool GetUGCDownloadProgress(UGCHandle_t hContent, int pnBytesDownloaded, int pnBytesExpected);
+        public delegate bool GetUGCDownloadProgress(IntPtr _, UGCHandle_t hContent, int pnBytesDownloaded, int pnBytesExpected);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool GetUGCDetails(UGCHandle_t hContent, AppId_t pnAppID, string ppchName, int pnFileSizeInBytes, IntPtr pSteamIDOwner);
+        public delegate bool GetUGCDetails(IntPtr _, UGCHandle_t hContent, AppId_t pnAppID, string ppchName, int pnFileSizeInBytes, IntPtr pSteamIDOwner);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate int UGCRead(UGCHandle_t hContent, IntPtr pvData, int cubDataToRead, uint cOffset, IntPtr eAction);
@@ -107,58 +107,58 @@ namespace SKYNET.Delegate
         public delegate SteamAPICall_t PublishWorkshopFile(string pchFile, string pchPreviewFile, AppId_t nConsumerAppId, string pchTitle, string pchDescription, ERemoteStoragePublishedFileVisibility eVisibility, IntPtr pTags, int int2);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate PublishedFileUpdateHandle_t CreatePublishedFileUpdateRequest(PublishedFileId_t unPublishedFileId);
+        public delegate PublishedFileUpdateHandle_t CreatePublishedFileUpdateRequest(IntPtr _, PublishedFileId_t unPublishedFileId);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool UpdatePublishedFileFile(PublishedFileUpdateHandle_t updateHandle, string pchFile);
+        public delegate bool UpdatePublishedFileFile(IntPtr _, PublishedFileUpdateHandle_t updateHandle, string pchFile);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool UpdatePublishedFilePreviewFile(PublishedFileUpdateHandle_t updateHandle, string pchPreviewFile);
+        public delegate bool UpdatePublishedFilePreviewFile(IntPtr _, PublishedFileUpdateHandle_t updateHandle, string pchPreviewFile);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool UpdatePublishedFileTitle(PublishedFileUpdateHandle_t updateHandle, string pchTitle);
+        public delegate bool UpdatePublishedFileTitle(IntPtr _, PublishedFileUpdateHandle_t updateHandle, string pchTitle);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool UpdatePublishedFileDescription(PublishedFileUpdateHandle_t updateHandle, string pchDescription);
+        public delegate bool UpdatePublishedFileDescription(IntPtr _, PublishedFileUpdateHandle_t updateHandle, string pchDescription);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool UpdatePublishedFileVisibility(PublishedFileUpdateHandle_t updateHandle, ERemoteStoragePublishedFileVisibility eVisibility);
+        public delegate bool UpdatePublishedFileVisibility(IntPtr _, PublishedFileUpdateHandle_t updateHandle, ERemoteStoragePublishedFileVisibility eVisibility);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool UpdatePublishedFileTags(PublishedFileUpdateHandle_t updateHandle, IntPtr pTags);
+        public delegate bool UpdatePublishedFileTags(IntPtr _, PublishedFileUpdateHandle_t updateHandle, IntPtr pTags);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate SteamAPICall_t CommitPublishedFileUpdate(PublishedFileUpdateHandle_t updateHandle);
+        public delegate SteamAPICall_t CommitPublishedFileUpdate(IntPtr _, PublishedFileUpdateHandle_t updateHandle);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate SteamAPICall_t GetPublishedFileDetails(PublishedFileId_t unPublishedFileId, uint unMaxSecondsOld);
+        public delegate SteamAPICall_t GetPublishedFileDetails(IntPtr _, PublishedFileId_t unPublishedFileId, uint unMaxSecondsOld);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate SteamAPICall_t DeletePublishedFile(PublishedFileId_t unPublishedFileId);
+        public delegate SteamAPICall_t DeletePublishedFile(IntPtr _, PublishedFileId_t unPublishedFileId);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate SteamAPICall_t EnumerateUserPublishedFiles(uint unStartIndex);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate SteamAPICall_t SubscribePublishedFile(PublishedFileId_t unPublishedFileId);
+        public delegate SteamAPICall_t SubscribePublishedFile(IntPtr _, PublishedFileId_t unPublishedFileId);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate SteamAPICall_t EnumerateUserSubscribedFiles(uint unStartIndex);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate SteamAPICall_t UnsubscribePublishedFile(PublishedFileId_t unPublishedFileId);
+        public delegate SteamAPICall_t UnsubscribePublishedFile(IntPtr _, PublishedFileId_t unPublishedFileId);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool UpdatePublishedFileSetChangeDescription(PublishedFileUpdateHandle_t updateHandle, string pchChangeDescription);
+        public delegate bool UpdatePublishedFileSetChangeDescription(IntPtr _, PublishedFileUpdateHandle_t updateHandle, string pchChangeDescription);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate SteamAPICall_t GetPublishedItemVoteDetails(PublishedFileId_t unPublishedFileId);
+        public delegate SteamAPICall_t GetPublishedItemVoteDetails(IntPtr _, PublishedFileId_t unPublishedFileId);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate SteamAPICall_t UpdateUserPublishedItemVote(PublishedFileId_t unPublishedFileId, bool bVoteUp);
+        public delegate SteamAPICall_t UpdateUserPublishedItemVote(IntPtr _, PublishedFileId_t unPublishedFileId, bool bVoteUp);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate SteamAPICall_t GetUserPublishedItemVoteDetails(PublishedFileId_t unPublishedFileId);
+        public delegate SteamAPICall_t GetUserPublishedItemVoteDetails(IntPtr _, PublishedFileId_t unPublishedFileId);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate SteamAPICall_t EnumerateUserSharedWorkshopFiles(IntPtr steamId, uint unStartIndex, IntPtr pRequiredTags, IntPtr pExcludedTags);
@@ -167,7 +167,7 @@ namespace SKYNET.Delegate
         public delegate SteamAPICall_t PublishVideo(EWorkshopVideoProvider eVideoProvider, string pchVideoAccount, string pchVideoIdentifier, string pchPreviewFile, AppId_t nConsumerAppId, string pchTitle, string pchDescription, ERemoteStoragePublishedFileVisibility eVisibility, IntPtr pTags);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate SteamAPICall_t SetUserPublishedFileAction(PublishedFileId_t unPublishedFileId, EWorkshopFileAction eAction);
+        public delegate SteamAPICall_t SetUserPublishedFileAction(IntPtr _, PublishedFileId_t unPublishedFileId, EWorkshopFileAction eAction);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate SteamAPICall_t EnumeratePublishedFilesByUserAction(EWorkshopFileAction eAction, uint unStartIndex);
@@ -176,7 +176,7 @@ namespace SKYNET.Delegate
         public delegate SteamAPICall_t EnumeratePublishedWorkshopFiles(EWorkshopEnumerationType eEnumerationType, uint unStartIndex, uint unCount, uint unDays, IntPtr pTags, IntPtr pUserTags);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate SteamAPICall_t UGCDownloadToLocation(UGCHandle_t hContent, string pchLocation, uint unPriority);
+        public delegate SteamAPICall_t UGCDownloadToLocation(IntPtr _, UGCHandle_t hContent, string pchLocation, uint unPriority);
 
     }
 }

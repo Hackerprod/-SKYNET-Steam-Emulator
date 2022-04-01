@@ -1,5 +1,6 @@
 ﻿using EasyHook;
 using SKYNET.Helper;
+using SKYNET.Manager;
 using SKYNET.Types;
 using Steamworks;
 using System;
@@ -19,7 +20,7 @@ namespace SKYNET.Hook.Handles
         public override bool Installed { get; set; }
         public override void Install()
         {
-            //return;
+            return;
             // SteamApi Handles
             base.Install<SteamAPI_InitDelegate>("SteamAPI_Init", _SteamAPI_InitDelegate, new SteamAPI_InitDelegate(SteamAPI_Init));
             base.Install<SteamAPI_RunCallbacksDelegate>("SteamAPI_RunCallbacks", _SteamAPI_RunCallbacksDelegate, new SteamAPI_RunCallbacksDelegate(SteamAPI_RunCallbacks));
@@ -364,7 +365,7 @@ namespace SKYNET.Hook.Handles
         public IntPtr g_pSteamClientGameServer()
         {
             Write($"g_pSteamClientGameServer");
-            return SteamEmulator.SteamGameServer.BaseAddress;
+            return SteamEmulator.SteamGameServer.MemoryAddress;
         }
 
         public void Steam_RegisterInterfaceFuncs(IntPtr hModule)
@@ -500,7 +501,7 @@ namespace SKYNET.Hook.Handles
         public IntPtr SteamAPI_SteamScreenshots_v003()
         {
             Write($"SteamAPI_SteamScreenshots_v003");
-            return SteamEmulator.SteamScreenshots.BaseAddress;
+            return SteamEmulator.SteamScreenshots.MemoryAddress;
         }
 
         
@@ -521,14 +522,14 @@ namespace SKYNET.Hook.Handles
         public IntPtr SteamAPI_SteamHTTP_v003()
         {
             Write($"SteamAPI_SteamHTTP_v003");
-            return SteamEmulator.SteamHTTP.BaseAddress;
+            return SteamEmulator.SteamHTTP.MemoryAddress;
         }
 
         
         public IntPtr SteamAPI_SteamGameServerHTTP_v003()
         {
             Write($"SteamAPI_SteamGameServerHTTP_v003");
-            return SteamEmulator.SteamHTTP.BaseAddress;
+            return SteamEmulator.SteamHTTP.MemoryAddress;
         }
 
         
@@ -577,7 +578,7 @@ namespace SKYNET.Hook.Handles
         public IntPtr SteamAPI_SteamTV_v001()
         {
             Write($"SteamAPI_SteamTV_v001");
-            return SteamEmulator.SteamTV.BaseAddress;
+            return SteamEmulator.SteamTV.MemoryAddress;
         }
 
         
@@ -682,191 +683,191 @@ namespace SKYNET.Hook.Handles
         public IntPtr SteamAppList()
         {
             Write($"SteamAppList");
-            return SteamEmulator.SteamAppList.BaseAddress;
+            return SteamEmulator.SteamAppList.MemoryAddress;
         }
 
         public IntPtr SteamApps()
         {
             Write($"ISteamApps");
-            return SteamEmulator.SteamApps.BaseAddress;
+            return SteamEmulator.SteamApps.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public IntPtr SteamClient()
         {
             Write($"SteamClient");
-            return SteamEmulator.SteamClient.BaseAddress;
+            return SteamEmulator.SteamClient.MemoryAddress;
         }
 
         public IntPtr SteamController()
         {
             Write($"SteamController");
-            return SteamEmulator.SteamController.BaseAddress;
+            return SteamEmulator.SteamController.MemoryAddress;
         }
 
         
         public IntPtr SteamFriends()
         {
             Write($"SteamFriends");
-            return SteamEmulator.SteamFriends.BaseAddress;
+            return SteamEmulator.SteamFriends.MemoryAddress;
         }
 
         public IntPtr SteamGameServer()
         {
             Write($"SteamGameServer");
-            return SteamEmulator.SteamGameServer.BaseAddress;
+            return SteamEmulator.SteamGameServer.MemoryAddress;
         }
         
         public IntPtr SteamGameServerApps()
         {
             Write($"SteamGameServerApps");
-            return SteamEmulator.SteamGameServerApps.BaseAddress;
+            return SteamEmulator.SteamGameServerApps.MemoryAddress;
         }
         
         public IntPtr SteamGameServerHTTP()
         {
             Write($"SteamGameServerHTTP");
-            return SteamEmulator.SteamHTTP.BaseAddress;
+            return SteamEmulator.SteamHTTP.MemoryAddress;
         }
 
         public IntPtr SteamGameServerInventory()
         {
             Write($"SteamGameServerInventory");
-            return SteamEmulator.SteamGameServerInventory.BaseAddress;
+            return SteamEmulator.SteamGameServerInventory.MemoryAddress;
         }
         
         public IntPtr SteamGameServerNetworking()
         {
             Write($"SteamGameServerNetworking");
-            return SteamEmulator.SteamGameServerNetworking.BaseAddress;
+            return SteamEmulator.SteamGameServerNetworking.MemoryAddress;
         }
 
         public IntPtr SteamGameServerStats()
         {
             Write($"SteamGameServerStats");
-            return SteamEmulator.SteamGameServerStats.BaseAddress;
+            return SteamEmulator.SteamGameServerStats.MemoryAddress;
         }
 
         public IntPtr SteamGameServerUGC()
         {
             Write($"SteamGameServerUGC");
-            return SteamEmulator.SteamUGC.BaseAddress;
+            return SteamEmulator.SteamUGC.MemoryAddress;
         }
         
         public IntPtr SteamGameServerUtils()
         {
             Write($"SteamGameServerUtils");
-            return SteamEmulator.SteamGameServerUtils.BaseAddress;
+            return SteamEmulator.SteamGameServerUtils.MemoryAddress;
         }
 
         public IntPtr SteamHTTP()
         {
             Write($"SteamHTTP");
-            return SteamEmulator.SteamHTTP.BaseAddress;
+            return SteamEmulator.SteamHTTP.MemoryAddress;
         }
         
         public IntPtr SteamHTMLSurface()
         {
             Write($"SteamHTMLSurface");
-            return SteamEmulator.SteamHTMLSurface.BaseAddress;
+            return SteamEmulator.SteamHTMLSurface.MemoryAddress;
         }
 
         public IntPtr SteamInventory()
         {
             Write($"SteamInventory");
-            return SteamEmulator.SteamInventory.BaseAddress;
+            return SteamEmulator.SteamInventory.MemoryAddress;
         }
 
         public IntPtr SteamMasterServerUpdater()
         {
             Write($"SteamMasterServerUpdater");
-            return SteamEmulator.SteamMasterServerUpdater.BaseAddress;
+            return SteamEmulator.SteamMasterServerUpdater.MemoryAddress;
         }
 
         public IntPtr SteamMatchmaking()
         {
             Write($"SteamMatchmaking");
-            return SteamEmulator.SteamMatchmaking.BaseAddress;
+            return SteamEmulator.SteamMatchmaking.MemoryAddress;
         }
         
         public IntPtr SteamMatchmakingServers()
         {
             Write($"SteamMatchmakingServers");
-            return SteamEmulator.SteamMatchMakingServers.BaseAddress;
+            return SteamEmulator.SteamMatchMakingServers.MemoryAddress;
         }
 
         public IntPtr SteamMusic()
         {
             Write($"SteamMusic");
-            return SteamEmulator.SteamMusic.BaseAddress;
+            return SteamEmulator.SteamMusic.MemoryAddress;
         }
         
         public IntPtr SteamMusicRemote()
         {
             Write($"SteamMusicRemote");
-            return SteamEmulator.SteamMusicRemote.BaseAddress;
+            return SteamEmulator.SteamMusicRemote.MemoryAddress;
         }
 
         
         public IntPtr SteamNetworking()
         {
             Write($"SteamNetworking");
-            return SteamEmulator.SteamNetworking.BaseAddress;
+            return SteamEmulator.SteamNetworking.MemoryAddress;
         }
 
         
         public IntPtr SteamParentalSettings()
         {
             Write($"SteamParentalSettings");
-            return SteamEmulator.SteamParentalSettings.BaseAddress;
+            return SteamEmulator.SteamParentalSettings.MemoryAddress;
         }
 
         
         public IntPtr SteamRemoteStorage()
         {
             Write($"SteamRemoteStorage");
-            return SteamEmulator.SteamRemoteStorage.BaseAddress;
+            return SteamEmulator.SteamRemoteStorage.MemoryAddress;
         }
 
         
         public IntPtr SteamScreenshots()
         {
             Write($"SteamScreenshots");
-            return SteamEmulator.SteamScreenshots.BaseAddress;
+            return SteamEmulator.SteamScreenshots.MemoryAddress;
         }
 
         
         public IntPtr SteamUGC()
         {
             Write($"SteamUGC");
-            return SteamEmulator.SteamUGC.BaseAddress;
+            return SteamEmulator.SteamUGC.MemoryAddress;
         }
         
         public IntPtr SteamUser()
         {
             Write($"SteamUser");
-            return SteamEmulator.SteamUser.BaseAddress;
+            return SteamEmulator.SteamUser.MemoryAddress;
         }
 
         
         public IntPtr SteamUserStats()
         {
             Write($"SteamUserStats");
-            return SteamEmulator.SteamUserStats.BaseAddress;
+            return SteamEmulator.SteamUserStats.MemoryAddress;
         }
 
         
         public IntPtr SteamUtils()
         {
             Write($"SteamUtils");
-            return SteamEmulator.SteamUtils.BaseAddress;
+            return SteamEmulator.SteamUtils.MemoryAddress;
         }
 
         
         public IntPtr SteamVideo()
         {
             Write($"SteamVideo");
-            return SteamEmulator.SteamVideo.BaseAddress;
+            return SteamEmulator.SteamVideo.MemoryAddress;
         }
 
         #endregion

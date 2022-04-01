@@ -7,7 +7,7 @@ namespace SKYNET
 {
     public class SteamInterface
     {
-        public IntPtr BaseAddress { get; set; }
+        public IntPtr MemoryAddress { get; set; }
         public string InterfaceVersion { get; set; }
     }
 }

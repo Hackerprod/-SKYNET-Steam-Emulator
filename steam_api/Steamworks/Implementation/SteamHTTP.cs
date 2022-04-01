@@ -156,7 +156,7 @@ public class SteamHTTP : SteamInterface
     public IntPtr SteamAPI_SteamGameServerHTTP_v003(IntPtr _)
     {
         Write($"SteamAPI_SteamGameServerHTTP_v003");
-        return SteamEmulator.SteamGameServerHttp.BaseAddress;
+        return SteamEmulator.SteamGameServerHttp.MemoryAddress;
     }
 
     private void Write(string v)

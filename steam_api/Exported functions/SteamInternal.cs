@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using SKYNET;
 using SKYNET.Helper;
+using SKYNET.Manager;
 using SKYNET.Types;
 
 public class SteamInternal : BaseCalls
@@ -45,7 +46,7 @@ public class SteamInternal : BaseCalls
     {
         ContextInitData* CreatedContext = (ContextInitData*)c_contextPointer;
 
-        if (CreatedContext->Context.SteamClient() != SteamEmulator.SteamClient.BaseAddress)
+        if (CreatedContext->Context.SteamClient() != SteamEmulator.SteamClient.MemoryAddress)
         {
             Main.Write("SteamInternal_ContextInit initializing");
             CreatedContext->Context.Init();

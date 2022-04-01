@@ -275,7 +275,7 @@ public class SteamInput : SteamInterface
     public IntPtr SteamAPI_SteamInput_v005(IntPtr _)
     {
         Write("SteamAPI_SteamInput_v005");
-        return SteamEmulator.SteamInput.BaseAddress;
+        return SteamEmulator.SteamInput.MemoryAddress;
     }
 
     private void Write(string v)

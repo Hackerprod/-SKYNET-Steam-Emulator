@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 
-namespace SKYNET
+namespace SKYNET.Delegate.Helper
 {
     public class InterfaceDelegates
     {

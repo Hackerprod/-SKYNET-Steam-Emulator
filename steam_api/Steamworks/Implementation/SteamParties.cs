@@ -28,7 +28,7 @@ public class SteamParties : SteamInterface
         return false;
     }
 
-    public bool GetAvailableBeaconLocations(SteamPartyBeaconLocation_t pLocationList, uint uMaxNumLocations)
+    public bool GetAvailableBeaconLocations(IntPtr _, SteamPartyBeaconLocation_t pLocationList, uint uMaxNumLocations)
     {
         Write("GetAvailableBeaconLocations");
         return false;
@@ -46,7 +46,7 @@ public class SteamParties : SteamInterface
         return false;
     }
 
-    public bool GetBeaconLocationData(SteamPartyBeaconLocation_t BeaconLocation, ESteamPartyBeaconLocationData eData, string pchDataStringOut, int cchDataStringOut)
+    public bool GetBeaconLocationData(IntPtr _, SteamPartyBeaconLocation_t BeaconLocation, ESteamPartyBeaconLocationData eData, string pchDataStringOut, int cchDataStringOut)
     {
         Write("GetBeaconLocationData");
         return false;

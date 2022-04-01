@@ -1,6 +1,7 @@
 ﻿using SKYNET;
 using SKYNET.Callback;
 using SKYNET.Helper;
+using SKYNET.Manager;
 using SKYNET.Types;
 using Steamworks;
 using System;
@@ -219,8 +220,8 @@ public class SteamEmulator
 
         SteamClient.ConnectToGlobalUser((int)HSteamPipe);
 
-        Context = InterfaceManager.CreateInstance<CSteamApiContext>(out ContextAddress);
-        var success = Context.Init();
+        //Context = InterfaceManager.CreateInstance<CSteamApiContext>(out ContextAddress);
+        //var success = Context.Init();
 
         #if Debug
         if (success)
@@ -241,8 +242,7 @@ public class SteamEmulator
 
     private T CreateInterface<T>()  where T : SteamInterface
     {
-        T baseClass = InterfaceManager.CreateInterface<T>(out IntPtr BaseAddress);
-        baseClass.BaseAddress = BaseAddress;
+        T baseClass = InterfaceManager.CreateSteamInterface<T>();
         return (T)baseClass;
     }
 

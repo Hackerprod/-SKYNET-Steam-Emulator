@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using SKYNET;
+using SKYNET.Manager;
 using SKYNET.Steamworks;
 using Steamworks;
 
@@ -77,37 +78,37 @@ public class SteamClient : SteamInterface
     public IntPtr GetISteamGameServer(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write($"GetISteamGameServer {pchVersion}");
-        return SteamEmulator.SteamGameServer.BaseAddress;
+        return SteamEmulator.SteamGameServer.MemoryAddress;
     }
 
     public IntPtr GetISteamFriends(int user, int pipe, string pchVersion)
     {
         Write($"GetISteamFriends {pchVersion}");
-        return SteamEmulator.SteamFriends.BaseAddress;
+        return SteamEmulator.SteamFriends.MemoryAddress;
     }
 
     public IntPtr GetISteamGameSearch(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write($"GetISteamFriends {pchVersion}");
-        return SteamEmulator.SteamGameSearch.BaseAddress;
+        return SteamEmulator.SteamGameSearch.MemoryAddress;
     }
 
     public IntPtr GetISteamUtils(int hSteamPipe, string pchVersion)
     {
         Write($"GetISteamUtils {pchVersion}");
-        return SteamEmulator.SteamUtils.BaseAddress;
+        return SteamEmulator.SteamUtils.MemoryAddress;
     }
 
     public IntPtr GetISteamMatchmaking(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write($"GetISteamMatchmaking {pchVersion}");
-        return SteamEmulator.SteamMatchmaking.BaseAddress;
+        return SteamEmulator.SteamMatchmaking.MemoryAddress;
     }
 
     public IntPtr GetISteamMatchmakingServers(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write($"GetISteamMatchmakingServers {pchVersion}");
-        return SteamEmulator.SteamMatchMakingServers.BaseAddress;
+        return SteamEmulator.SteamMatchMakingServers.MemoryAddress;
     }
 
     public IntPtr GetISteamGenericInterface(int hSteamUser, int hSteamPipe, string pchVersion)
@@ -119,37 +120,37 @@ public class SteamClient : SteamInterface
     public IntPtr GetISteamUserStats(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write($"GetISteamUserStats {pchVersion}");
-        return SteamEmulator.SteamUserStats.BaseAddress;
+        return SteamEmulator.SteamUserStats.MemoryAddress;
     }
 
     public IntPtr GetISteamGameServerStats(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write($"GetISteamGameServerStats {pchVersion}");
-        return SteamEmulator.SteamGameServerStats.BaseAddress;
+        return SteamEmulator.SteamGameServerStats.MemoryAddress;
     }
 
     public IntPtr GetISteamApps(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write($"GetISteamApps {pchVersion}");
-        return SteamEmulator.SteamApps.BaseAddress;
+        return SteamEmulator.SteamApps.MemoryAddress;
     }
 
     public IntPtr GetISteamNetworking(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write($"GetISteamNetworking {pchVersion}");
-        return SteamEmulator.SteamNetworking.BaseAddress;
+        return SteamEmulator.SteamNetworking.MemoryAddress;
     }
 
     public IntPtr GetISteamRemoteStorage(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write($"GetISteamRemoteStorage {pchVersion}");
-        return SteamEmulator.SteamRemoteStorage.BaseAddress;
+        return SteamEmulator.SteamRemoteStorage.MemoryAddress;
     }
 
     public IntPtr GetISteamScreenshots(int hSteamUser, int hSteamPipe, [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
     {
         Write($"GetISteamScreenshots {pchVersion}");
-        return SteamEmulator.SteamScreenshots.BaseAddress;
+        return SteamEmulator.SteamScreenshots.MemoryAddress;
     }
 
     public IntPtr GetISteamHTTP(int hSteamUser, int hSteamPipe, IntPtr pchVersion)
@@ -157,79 +158,79 @@ public class SteamClient : SteamInterface
         string version = Marshal.PtrToStringAnsi(pchVersion);
         Write($"GetISteamHTTP {version}");
 
-        return SteamEmulator.SteamHTTP.BaseAddress;
+        return SteamEmulator.SteamHTTP.MemoryAddress;
     }
 
     public IntPtr GetISteamController(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write($"GetISteamController {pchVersion}");
-        return SteamEmulator.SteamController.BaseAddress;
+        return SteamEmulator.SteamController.MemoryAddress;
     }
 
     public IntPtr GetISteamUGC(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write($"GetISteamUGC {pchVersion}");
-        return SteamEmulator.SteamUGC.BaseAddress;
+        return SteamEmulator.SteamUGC.MemoryAddress;
     }
 
     public IntPtr GetISteamAppList(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write($"GetISteamAppList {pchVersion}");
-        return SteamEmulator.SteamAppList.BaseAddress;
+        return SteamEmulator.SteamAppList.MemoryAddress;
     }
 
     public IntPtr GetISteamMusic(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write($"GetISteamMusic {pchVersion}");
-        return SteamEmulator.SteamMusic.BaseAddress;
+        return SteamEmulator.SteamMusic.MemoryAddress;
     }
 
     public IntPtr GetISteamMusicRemote(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write($"GetISteamMusicRemote {pchVersion}");
-        return SteamEmulator.SteamMusicRemote.BaseAddress;
+        return SteamEmulator.SteamMusicRemote.MemoryAddress;
     }
 
     public IntPtr GetISteamInput(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write($"GetISteamInput {pchVersion}");
-        return SteamEmulator.SteamInput.BaseAddress;
+        return SteamEmulator.SteamInput.MemoryAddress;
     }
 
     public IntPtr GetISteamHTMLSurface(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write($"GetISteamHTMLSurface {pchVersion}");
-        return SteamEmulator.SteamHTMLSurface.BaseAddress;
+        return SteamEmulator.SteamHTMLSurface.MemoryAddress;
     }
 
     public IntPtr GetISteamParties(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write($"GetISteamParties {pchVersion}");
-        return SteamEmulator.SteamParties.BaseAddress;
+        return SteamEmulator.SteamParties.MemoryAddress;
     }
 
     public IntPtr GetISteamInventory(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write($"GetISteamInventory {pchVersion}");
-        return SteamEmulator.SteamInventory.BaseAddress;
+        return SteamEmulator.SteamInventory.MemoryAddress;
     }
 
     public IntPtr GetISteamRemotePlay(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write($"GetISteamRemotePlay {pchVersion}");
-        return SteamEmulator.SteamRemotePlay.BaseAddress;
+        return SteamEmulator.SteamRemotePlay.MemoryAddress;
     }
 
     public IntPtr GetISteamVideo(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write($"GetISteamVideo {pchVersion}");
-        return SteamEmulator.SteamVideo.BaseAddress;
+        return SteamEmulator.SteamVideo.MemoryAddress;
     }
 
     public IntPtr GetISteamParentalSettings(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write($"GetISteamParentalSettings {pchVersion}");
-        return SteamEmulator.SteamParentalSettings.BaseAddress;
+        return SteamEmulator.SteamParentalSettings.MemoryAddress;
     }
 
     #endregion

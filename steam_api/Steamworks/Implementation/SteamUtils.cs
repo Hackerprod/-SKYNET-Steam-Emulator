@@ -22,7 +22,7 @@ public class SteamUtils : SteamInterface
     public EUniverse GetConnectedUniverse(IntPtr _)
     {
         Write("GetConnectedUniverse");
-        return EUniverse.Public;
+        return EUniverse.k_EUniversePublic;
     }
 
     public uint GetServerRealTime(IntPtr _)

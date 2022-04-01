@@ -1,4 +1,4 @@
-﻿
+﻿using SKYNET.Delegate.Helper;
 using SKYNET.Steamworks;
 using SKYNET.Types;
 using Steamworks;
@@ -21,7 +21,7 @@ namespace SKYNET.Delegate
         public delegate bool BLoggedOn(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate ulong GetSteamID(IntPtr _);
+        public delegate SteamId GetSteamID(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate int InitiateGameConnection(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, IntPtr steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure);
@@ -114,7 +114,7 @@ namespace SKYNET.Delegate
         #region New
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool LogOn(ulong SteamId);
+        public delegate bool LogOn(IntPtr _, ulong SteamId);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate void LogOff(IntPtr _);
