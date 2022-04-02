@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Runtime.InteropServices;
 using SKYNET;
 using SKYNET.Steamworks;
 
-//[Interface.MapAttribute("SteamController")]
 public class SteamController : SteamInterface
 {
     private Dictionary<string, int> action_handles;

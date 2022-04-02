@@ -213,6 +213,8 @@ public struct CSteamApiContext
             return false;
         }
 
+        SteamEmulator.Write($"CSteamApiContext finished");
+
         return true;
     }
 }

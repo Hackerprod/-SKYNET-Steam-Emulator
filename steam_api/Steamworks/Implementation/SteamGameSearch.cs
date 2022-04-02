@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using SKYNET;
 using SKYNET.Steamworks;
 
 public class SteamGameSearch : SteamInterface
-{
+{ 
     public GameSearchErrorCode_t AcceptGame(IntPtr self)
     {
         Write("AcceptGame");

@@ -57,14 +57,6 @@ namespace SKYNET.Manager
             }
         }
 
-        public static T CreateInstance<T>(out IntPtr MemoryAddress)
-        {
-            var instance = Activator.CreateInstance(typeof(T));
-            IntPtr pointer = IntPtr.Zero;
-            ReferenceHelpers.GetPinnedPtr(instance, ptr => pointer = ptr);
-            MemoryAddress = pointer;
-            return (T)instance;
-        }
         public static T CreateSteamInterface<T>() where T : SteamInterface
         {
             T baseClass = CreateInterface<T>(out IntPtr MemoryAddress);
@@ -94,7 +86,6 @@ namespace SKYNET.Manager
 
             foreach (var MethodInfo in Methods)
             {
-                // Find the delegate type that matches the method
                 var delegateType = iface.DelegateTypes.Find(x => x.Name.Equals(MethodInfo.Name));
 
                 //Write($"Finding delegate for type {mi.Name}");
@@ -105,7 +96,6 @@ namespace SKYNET.Manager
                     return default;
                 }
 
-                // Create new delegates that are bounded to this instance
                 System.Delegate new_delegate;
                 try
                 {
@@ -122,7 +112,6 @@ namespace SKYNET.Manager
 
             var ptr_size = Marshal.SizeOf(typeof(IntPtr));
 
-            // Allocate enough space for the new pointers in local memory
             var vtable = Marshal.AllocHGlobal(Methods.Count * ptr_size);
 
             for (var i = 0; i < new_delegates.Count; i++)
@@ -135,18 +124,33 @@ namespace SKYNET.Manager
                 {
                     Main.Write($"Error Injecting Delegate {new_delegates[i]} - {ex.Message}");
                 }
-                // Create all function pointers as neccessary
             }
 
-            // create the context
             var new_context = Marshal.AllocHGlobal(ptr_size);
 
-            // Write the pointer to the vtable at the address pointed to by new_context;
             Marshal.WriteIntPtr(new_context, vtable);
 
             MemoryAddress = new_context;
             return (T)instance;
         }
+
+        public static IntPtr WriteMemory(object obj)
+        {
+            Type type = obj.GetType();
+
+            var ptr_size = Marshal.SizeOf(typeof(IntPtr));
+
+            var obj_size = Marshal.SizeOf(type);
+            var ptr = Marshal.AllocHGlobal(obj_size);
+            Marshal.StructureToPtr(obj, ptr, true);
+
+            var address = Marshal.AllocHGlobal(ptr_size);
+
+            Marshal.WriteIntPtr(address, ptr);
+
+            return address;
+        }
+
 
         public static List<MethodInfo> InterfaceMethodsForType(Type t)
         {
@@ -275,25 +279,6 @@ namespace SKYNET.Manager
 
             Main.Write($"Not found Interface for {pszVersion}");
             return default;
-        }
-    }
-    public static class ReferenceHelpers
-    {
-        public static readonly Action<object, Action<IntPtr>> GetPinnedPtr;
-
-        static ReferenceHelpers()
-        {
-            var dyn = new DynamicMethod("GetPinnedPtr", typeof(void), new[] { typeof(object), typeof(Action<IntPtr>) }, typeof(ReferenceHelpers).Module);
-            var il = dyn.GetILGenerator();
-            il.DeclareLocal(typeof(object), true);
-            il.Emit(OpCodes.Ldarg_0);
-            il.Emit(OpCodes.Stloc_0);
-            il.Emit(OpCodes.Ldarg_1);
-            il.Emit(OpCodes.Ldloc_0);
-            il.Emit(OpCodes.Conv_I);
-            il.Emit(OpCodes.Call, typeof(Action<IntPtr>).GetMethod("Invoke"));
-            il.Emit(OpCodes.Ret);
-            GetPinnedPtr = (Action<object, Action<IntPtr>>)dyn.CreateDelegate(typeof(Action<object, Action<IntPtr>>));
         }
     }
 }

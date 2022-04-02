@@ -1,6 +1,7 @@
 ﻿using SKYNET;
 using Steamworks;
 using System;
+using System.Runtime.InteropServices;
 
 public class SteamGameServerStats : SteamInterface
 {

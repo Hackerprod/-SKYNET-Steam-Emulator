@@ -7,9 +7,6 @@ using Steamworks;
 
 public class SteamUser : SteamInterface
 {
-
-    public const string STEAMUSER_INTERFACE_VERSION = "SteamUser021";
-
     public HSteamUser GetHSteamUser(IntPtr _)
     {
         Write("GetHSteamUser");

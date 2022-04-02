@@ -1,6 +1,7 @@
 ﻿using SKYNET;
 using SKYNET.Steamworks;
 using System;
+using System.Runtime.InteropServices;
 
 public class SteamMusic : SteamInterface
 {

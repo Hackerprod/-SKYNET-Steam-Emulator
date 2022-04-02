@@ -2,6 +2,7 @@
 using SKYNET.Steamworks;
 using SKYNET.Types;
 using System;
+using System.Runtime.InteropServices;
 
 public class SteamNetworkingSockets : SteamInterface
 {

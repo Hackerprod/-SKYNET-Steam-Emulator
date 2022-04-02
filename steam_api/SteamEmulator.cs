@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -127,19 +128,19 @@ public class SteamEmulator
 
         SteamUtils = CreateInterface<SteamUtils>();
 
-        SteamMatchmaking = CreateInterface<SteamMatchmaking>();   
+        SteamMatchmaking = CreateInterface<SteamMatchmaking>();
 
-        SteamMatchMakingServers = CreateInterface<SteamMatchMakingServers>();    
+        SteamMatchMakingServers = CreateInterface<SteamMatchMakingServers>();
 
-        SteamUserStats = CreateInterface<SteamUserStats>();  
+        SteamUserStats = CreateInterface<SteamUserStats>();
 
-        SteamApps = CreateInterface<SteamApps>();   
+        SteamApps = CreateInterface<SteamApps>();
 
-        SteamNetworking = CreateInterface<SteamNetworking>();   
+        SteamNetworking = CreateInterface<SteamNetworking>();
 
-        SteamRemoteStorage = CreateInterface<SteamRemoteStorage>();  
+        SteamRemoteStorage = CreateInterface<SteamRemoteStorage>();
 
-        SteamScreenshots = CreateInterface<SteamScreenshots>();   
+        SteamScreenshots = CreateInterface<SteamScreenshots>();
 
         SteamHTTP = CreateInterface<SteamHTTP>();
 
@@ -192,7 +193,7 @@ public class SteamEmulator
 
         SteamGameServerNetworking = CreateInterface<SteamNetworking>();
 
-        SteamHTTP = CreateInterface<SteamHTTP>();
+        SteamGameServerHttp = CreateInterface<SteamHTTP>();
 
         SteamGameServerInventory = CreateInterface<SteamInventory>();
 
@@ -220,10 +221,11 @@ public class SteamEmulator
 
         SteamClient.ConnectToGlobalUser((int)HSteamPipe);
 
-        //Context = InterfaceManager.CreateInstance<CSteamApiContext>(out ContextAddress);
-        //var success = Context.Init();
+        CSteamApiContext context = new CSteamApiContext();
+        context.Init();
+        ContextAddress = InterfaceManager.WriteMemory(context);
 
-        #if Debug
+#if Debug
         if (success)
         {
             Write("SteamApi Context created successfully");
@@ -232,7 +234,7 @@ public class SteamEmulator
         {
             Write("Error creating SteamApi Context");
         }
-        #endif
+#endif
 
 
         Initialized = true;

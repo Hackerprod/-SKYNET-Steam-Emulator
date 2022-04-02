@@ -12,6 +12,11 @@ public class SteamFriends : SteamInterface
     public List<Friend> Friends;
     public List<IntPtr> Users;
 
+    public SteamFriends()
+    {
+        Friends = new List<Friend>();
+        Users = new List<IntPtr>();
+    }
 
     public void ActivateGameOverlay(IntPtr _, [MarshalAs(UnmanagedType.LPStr)] string friendsGroupID)
     {

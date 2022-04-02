@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using SKYNET;
 
 public class SteamHTTP : SteamInterface

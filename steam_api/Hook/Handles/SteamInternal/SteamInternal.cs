@@ -55,6 +55,8 @@ namespace SKYNET.Hook.Handles
 
         public unsafe IntPtr SteamInternal_ContextInit(void* c_contextPointer)
         {
+            Main.Write("SteamInternal_ContextInit");
+
             return SteamEmulator.ContextAddress;
 
             ContextInitData* CreatedContext = (ContextInitData*)c_contextPointer;
@@ -65,15 +67,6 @@ namespace SKYNET.Hook.Handles
                 CreatedContext->Context.Init();
                 CreatedContext->counter = 1;
             }
-
-            unsafe
-            {
-                TypedReference tr = __makeref(CreatedContext->Context);
-                return **(IntPtr**)(&tr);
-            }
-
-            GCHandle objHandle = GCHandle.Alloc(CreatedContext->Context, GCHandleType.Pinned);
-            return objHandle.AddrOfPinnedObject();
 
         }
 

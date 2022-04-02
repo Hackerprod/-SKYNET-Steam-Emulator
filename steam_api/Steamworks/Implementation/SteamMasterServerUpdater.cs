@@ -1,5 +1,6 @@
 ﻿using SKYNET;
 using System;
+using System.Runtime.InteropServices;
 
 public class SteamMasterServerUpdater : SteamInterface
 {
