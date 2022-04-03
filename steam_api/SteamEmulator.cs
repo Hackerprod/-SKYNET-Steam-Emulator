@@ -223,7 +223,7 @@ public class SteamEmulator
 
         CSteamApiContext context = new CSteamApiContext();
         context.Init();
-        ContextAddress = InterfaceManager.WriteMemory(context);
+        ContextAddress = InterfaceManager.WriteInMemory(context);
 
 #if Debug
         if (success)

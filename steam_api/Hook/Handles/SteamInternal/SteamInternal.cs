@@ -57,7 +57,7 @@ namespace SKYNET.Hook.Handles
         {
             Main.Write("SteamInternal_ContextInit");
 
-            return SteamEmulator.ContextAddress;
+            //return SteamEmulator.ContextAddress;
 
             ContextInitData* CreatedContext = (ContextInitData*)c_contextPointer;
 
@@ -68,6 +68,8 @@ namespace SKYNET.Hook.Handles
                 CreatedContext->counter = 1;
             }
 
+            return InterfaceManager.WriteInMemory(CreatedContext->Context);
+            //return &CreatedContext->Context;
         }
 
         public struct ContextInitData

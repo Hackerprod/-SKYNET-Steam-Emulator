@@ -1,17 +1,8 @@
-﻿using SKYNET;
-using SKYNET.Delegate;
-using SKYNET.Delegate.Helper;
-using SKYNET.Helper;
-using Steamworks;
+﻿using SKYNET.Delegate.Helper;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
 
 namespace SKYNET.Manager
 {
@@ -41,17 +32,13 @@ namespace SKYNET.Manager
 
                     var new_interface = new InterfaceDelegates { Name = name };
 
-                    //Main.Write(string.Format("Found interface delegates \"{0}\"", name));
-
                     var types = t.GetNestedTypes(BindingFlags.Public);
 
                     foreach (var type in types)
                     {
-                        // Filter out types that are not delegates
                         if (type.IsSubclassOf(typeof(System.Delegate))) new_interface.DelegateTypes.Add(type);
                     }
 
-                    // Just assume all members are delegate types
                     LoadedDelegates.Add(new_interface);
                 }
             }
@@ -67,44 +54,42 @@ namespace SKYNET.Manager
         public static T CreateInterface<T>(out IntPtr MemoryAddress)
         {
             MemoryAddress = IntPtr.Zero;
-            Type type = typeof(T);
-            string Name = type.ToString();
 
-            var iface = LoadedDelegates.Find(d => d.Name == Name);
+            var type = typeof(T);
+            var Name = typeof(T).ToString();
 
-            if (iface == null)
+            var delegatesForType = LoadedDelegates.Find(d => d.Name == Name);
+
+            if (delegatesForType == null)
             {
-                Main.Write(string.Format("Unable to find delegates for interface that implements {0}", Name));
+                Main.Write($"Unable to find delegates for interface that implements {Name}");
                 return default;
             }
 
             var instance = Activator.CreateInstance(type);
 
-            var Methods = InterfaceMethodsForType(type);
+            var Methods = MethodsInType(type);
 
             var new_delegates = new List<System.Delegate>();
 
             foreach (var MethodInfo in Methods)
             {
-                var delegateType = iface.DelegateTypes.Find(x => x.Name.Equals(MethodInfo.Name));
-
-                //Write($"Finding delegate for type {mi.Name}");
+                var delegateType = delegatesForType.DelegateTypes.Find(x => x.Name.Equals(MethodInfo.Name));
 
                 if (delegateType == null)
                 {
-                    Main.Write(string.Format("Unable to find delegate for {0} in {1}!", MethodInfo.Name, iface.Name));
+                    Main.Write($"Unable to find delegate for {MethodInfo.Name} in {delegatesForType.Name}!");
                     return default;
                 }
 
-                System.Delegate new_delegate;
                 try
                 {
-                    new_delegate = System.Delegate.CreateDelegate(delegateType, instance, MethodInfo, true);
+                    System.Delegate new_delegate = System.Delegate.CreateDelegate(delegateType, instance, MethodInfo, true);
                     new_delegates.Add(new_delegate);
                 }
                 catch (Exception e)
                 {
-                    Main.Write(string.Format("EXCEPTION whilst binding function {0}, class {1}", MethodInfo.Name, Name));
+                    Main.Write($"Exception binding function {MethodInfo.Name} in {Name}");
                 }
             }
 
@@ -122,7 +107,7 @@ namespace SKYNET.Manager
                 }
                 catch (Exception ex)
                 {
-                    Main.Write($"Error Injecting Delegate {new_delegates[i]} - {ex.Message}");
+                    Main.Write($"Error Injecting Delegate {new_delegates[i]}, {ex.Message}");
                 }
             }
 
@@ -134,7 +119,7 @@ namespace SKYNET.Manager
             return (T)instance;
         }
 
-        public static IntPtr WriteMemory(object obj)
+        public static IntPtr WriteInMemory(object obj)
         {
             Type type = obj.GetType();
 
@@ -152,11 +137,11 @@ namespace SKYNET.Manager
         }
 
 
-        public static List<MethodInfo> InterfaceMethodsForType(Type t)
+        public static List<MethodInfo> MethodsInType(Type t)
         {
-            var all_methods = new List<MethodInfo>(t.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly));
-            all_methods.RemoveAll(x => x.Name.StartsWith("get_") || x.Name.StartsWith("set_"));
-            return all_methods;
+            var methods = new List<MethodInfo>(t.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly));
+            methods.RemoveAll(x => x.Name.StartsWith("get_") || x.Name.StartsWith("set_"));
+            return methods;
         }
 
         public static IntPtr FindOrCreateInterface(string pchVersion)
