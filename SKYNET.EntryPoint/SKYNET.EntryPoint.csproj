@@ -58,9 +58,11 @@
     <Compile Include="Handles\SteamInternal\SteamInternal.cs" />
     <Compile Include="Handles\SteamInternal\SteamInternal_Delegates.cs" />
     <Compile Include="Handles\steamnetworkingsockets.cs" />
+    <Compile Include="Helper\NativeMethods.cs" />
     <Compile Include="HookManager.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Helper\Memory.cs" />
     <Compile Include="Types\BaseHook.cs" />
     <Compile Include="Types\ConsoleMessage.cs" />
     <Compile Include="Types\HookInterface.cs" />

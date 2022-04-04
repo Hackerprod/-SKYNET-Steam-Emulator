@@ -42,7 +42,7 @@ namespace SKYNET
                  
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images"));
-            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "Banner"));
+            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "Avatars"));
 
             List<Game> Games = new List<Game>();
@@ -117,7 +117,7 @@ namespace SKYNET
             PB_Logo.Image = e.Image;
             LB_GameTittle.Text = e.GameName;
 
-            string imagePath = Path.Combine(modCommon.GetPath(), "Data", "Images", "Banner", e.AppId + "_library_hero.jpg");
+            string imagePath = Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache", e.AppId + "_library_hero.jpg");
             if (File.Exists(imagePath))
             {
                 PB_Banner.Image = Image.FromFile(imagePath);
@@ -199,7 +199,7 @@ namespace SKYNET
                     var InObject = WellKnownObjectMode.Singleton;
                     RemoteHooking.IpcCreateServer(ref channel, InObject, HookInterface);
                     HookInterface.ChannelName = channel;
-                    HookInterface.DllPath = Path.Combine(modCommon.GetPath(), "steam_api.dll");
+                    HookInterface.DllPath = Path.Combine(modCommon.GetPath(), "SKYNET.EntryPoint.dll");
                     RemoteHooking.CreateAndInject(game.ExecutablePath, game.Parameters, 0, HookInterface.InjectionOptions, HookInterface.DllPath, HookInterface.DllPath, out ProcessId, channel);
                     InjectedProcess = Process.GetProcessById(ProcessId);
                     WaitForExit();

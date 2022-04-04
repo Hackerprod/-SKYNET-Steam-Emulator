@@ -69,26 +69,26 @@ namespace SKYNET.Hook.Handles
 
             Main.Write($"SteamInternal_ContextInit initializing ");
 
-            context->m_pSteamClient = SteamEmulator.SteamClient.BaseAddress;
-            context->m_pSteamUser = SteamEmulator.SteamUser.BaseAddress;
-            context->m_pSteamFriends = SteamEmulator.SteamFriends.BaseAddress;
-            context->m_pSteamUtils = SteamEmulator.SteamUtils.BaseAddress;
-            context->m_pSteamMatchmaking = SteamEmulator.SteamMatchmaking.BaseAddress;
-            context->m_pSteamMatchmakingServers = SteamEmulator.SteamMatchMakingServers.BaseAddress;
-            context->m_pSteamUserStats = SteamEmulator.SteamUserStats.BaseAddress;
-            context->m_pSteamApps = SteamEmulator.SteamApps.BaseAddress;
-            context->m_pSteamNetworking = SteamEmulator.SteamNetworking.BaseAddress;
-            context->m_pSteamRemoteStorage = SteamEmulator.SteamMusicRemote.BaseAddress;
-            context->m_pSteamScreenshots = SteamEmulator.SteamScreenshots.BaseAddress;
-            context->m_pSteamHTTP = SteamEmulator.SteamHTTP.BaseAddress;
-            context->m_pSteamController = SteamEmulator.SteamController.BaseAddress;
-            context->m_pSteamUGC = SteamEmulator.SteamUGC.BaseAddress;
-            context->m_pSteamAppList = SteamEmulator.SteamAppList.BaseAddress;
-            context->m_pSteamMusic = SteamEmulator.SteamMusic.BaseAddress;
-            context->m_pSteamMusicRemote = SteamEmulator.SteamMusicRemote.BaseAddress;
-            context->m_pSteamHTMLSurface = SteamEmulator.SteamHTMLSurface.BaseAddress;
-            context->m_pSteamInventory = SteamEmulator.SteamInventory.BaseAddress;
-            context->m_pSteamVideo = SteamEmulator.SteamVideo.BaseAddress;
+            context->m_pSteamClient = SteamEmulator.SteamClient.MemoryAddress;
+            context->m_pSteamUser = SteamEmulator.SteamUser.MemoryAddress;
+            context->m_pSteamFriends = SteamEmulator.SteamFriends.MemoryAddress;
+            context->m_pSteamUtils = SteamEmulator.SteamUtils.MemoryAddress;
+            context->m_pSteamMatchmaking = SteamEmulator.SteamMatchmaking.MemoryAddress;
+            context->m_pSteamMatchmakingServers = SteamEmulator.SteamMatchMakingServers.MemoryAddress;
+            context->m_pSteamUserStats = SteamEmulator.SteamUserStats.MemoryAddress;
+            context->m_pSteamApps = SteamEmulator.SteamApps.MemoryAddress;
+            context->m_pSteamNetworking = SteamEmulator.SteamNetworking.MemoryAddress;
+            context->m_pSteamRemoteStorage = SteamEmulator.SteamMusicRemote.MemoryAddress;
+            context->m_pSteamScreenshots = SteamEmulator.SteamScreenshots.MemoryAddress;
+            context->m_pSteamHTTP = SteamEmulator.SteamHTTP.MemoryAddress;
+            context->m_pSteamController = SteamEmulator.SteamController.MemoryAddress;
+            context->m_pSteamUGC = SteamEmulator.SteamUGC.MemoryAddress;
+            context->m_pSteamAppList = SteamEmulator.SteamAppList.MemoryAddress;
+            context->m_pSteamMusic = SteamEmulator.SteamMusic.MemoryAddress;
+            context->m_pSteamMusicRemote = SteamEmulator.SteamMusicRemote.MemoryAddress;
+            context->m_pSteamHTMLSurface = SteamEmulator.SteamHTMLSurface.MemoryAddress;
+            context->m_pSteamInventory = SteamEmulator.SteamInventory.MemoryAddress;
+            context->m_pSteamVideo = SteamEmulator.SteamVideo.MemoryAddress;
 
             return context;
         }

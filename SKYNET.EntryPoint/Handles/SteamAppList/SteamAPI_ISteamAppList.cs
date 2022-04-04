@@ -27,14 +27,12 @@ namespace SKYNET.Hook.Handles
 
         public int SteamAPI_ISteamAppList_GetAppInstallDir(AppId_t nAppID, IntPtr pchDirectory, int cchNameMax)
         {
-            var mempchDirectory = Helpers.TakeMemory();
             Write("SteamAPI_ISteamAppList_GetAppInstallDir");
             return SteamEmulator.SteamAppList.GetAppInstallDir(nAppID, pchDirectory, cchNameMax);
         }
 
         public int SteamAPI_ISteamAppList_GetAppName(AppId_t nAppID, IntPtr pchName, int cchNameMax)
         {
-            var mempchName = Helpers.TakeMemory();
             Write("SteamAPI_ISteamAppList_GetAppName");
             return SteamEmulator.SteamAppList.GetAppName(nAppID, pchName, cchNameMax);
         }
