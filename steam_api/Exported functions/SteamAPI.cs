@@ -853,7 +853,7 @@ public class SteamAPI : BaseCalls
 
     private static void Write(string v)
     {
-        Log.Write("SteamAPI", v);
+        SteamEmulator.Write("SteamAPI", v);
     }
 
 }

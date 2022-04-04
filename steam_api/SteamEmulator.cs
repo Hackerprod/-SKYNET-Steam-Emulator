@@ -18,6 +18,8 @@ public class SteamEmulator
     public static CallbackManager Client_Callback = new CallbackManager();
     public static CallbackManager Server_Callback = new CallbackManager();
 
+    public event EventHandler<object> OnMessage;
+
     #region Client Info
 
     public static string Language { get; set; }
@@ -259,8 +261,17 @@ public class SteamEmulator
         return HSteamPipe;
     }
 
+    public static void Write(object sender, object msg)
+    {
+        Write(sender + ": " + msg);
+    }
+
     public static void Write(object v)
     {
+        if (AsClient)
+        {
+            Instance.OnMessage?.Invoke(Instance, v);
+        }
         Log.Write(v);
     }
 }

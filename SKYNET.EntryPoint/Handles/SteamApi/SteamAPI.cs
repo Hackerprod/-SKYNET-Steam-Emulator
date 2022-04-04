@@ -333,7 +333,7 @@ namespace SKYNET.Hook.Handles
             Msg += $"{pchMsg}" + Environment.NewLine;
             Msg += "//////////////////////////////   End Mini Dump   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + Environment.NewLine;
             Write(Msg);
-            //Log.Write(Msg, true);
+            //SteamEmulator.Write(Msg, true);
         }
         
         public void SteamAPI_WriteMiniDump(UInt32 uStructuredExceptionCode, IntPtr pvExceptionInfo, UInt32 uBuildID)

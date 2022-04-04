@@ -130,14 +130,14 @@ public class modCommon
             }
 
             string data = $"Loaded user data from file \nNickName: {SteamEmulator.PersonaName} \nSteamId:  {SteamEmulator.SteamId} \nLanguaje: {SteamEmulator.Language} \n";
-            Log.Write(data);
+            SteamEmulator.Write(data);
 
             SettingsLoaded = true;
         }
         catch (Exception e)
         {
             string errorMessage = e.Message + " " + e.StackTrace;
-            Log.Write(errorMessage);
+            SteamEmulator.Write(errorMessage);
         }
 
     }

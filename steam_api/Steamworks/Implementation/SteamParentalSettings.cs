@@ -49,6 +49,6 @@ public class SteamParentalSettings : ISteamInterface
 
     private void Write(string v)
     {
-        Log.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }

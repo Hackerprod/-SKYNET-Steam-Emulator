@@ -22,6 +22,8 @@ namespace SKYNET
 
         public static Game Game;
 
+        public static SteamEmulator SteamEmulator;
+
         public Main(RemoteHooking.IContext inContext, string inChannelName)
         {
             callbackChannel = null;
@@ -69,7 +71,9 @@ namespace SKYNET
             {
                 if (!SteamEmulator.Initialized)
                 {
-                    new SteamEmulator(true).Initialize();
+                    SteamEmulator = new SteamEmulator(true);
+                    SteamEmulator.OnMessage += SteamEmulator_OnMessage;
+                    SteamEmulator.Initialize();
                     SteamEmulator.AppId = HookInterface.Game.AppId;
                 }
 
@@ -96,6 +100,11 @@ namespace SKYNET
 
             HookManager.UninstallHooks();
             LocalHook.Release();
+        }
+
+        private void SteamEmulator_OnMessage(object sender, object msg)
+        {
+            Write(msg);
         }
 
         public static void Write(object msg)

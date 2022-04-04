@@ -46,7 +46,7 @@ public class SteamInternal : BaseCalls
     public static IntPtr SteamInternal_ContextInit(IntPtr c_contextPointer)
     {
         ContextInitData CreatedContext = Marshal.PtrToStructure<ContextInitData>(c_contextPointer);
-        Log.Write($"SteamInternal_ContextInit Counter: {CreatedContext.ctx}");
+        Write($"SteamInternal_ContextInit Counter: {CreatedContext.ctx}");
 
         //CSteamApiContext* context = &CreatedContext.ctx;
 

@@ -14,7 +14,7 @@ public class SteamAppList : ISteamInterface
 
     public int GetAppBuildId(AppId_t nAppID)
     {
-        Log.Write("GetAppBuildId");
+        Write("GetAppBuildId");
         return 10;
     }
 
@@ -44,6 +44,6 @@ public class SteamAppList : ISteamInterface
 
     private void Write(string v)
     {
-        Log.Write(InterfaceVersion, v);
+       SteamEmulator.Write(InterfaceVersion, v);
     }
 }

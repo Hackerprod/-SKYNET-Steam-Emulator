@@ -4,6 +4,6 @@ public class BaseCalls
 {
     public static void Write(object msg)
     {
-        Log.Write(msg);
+        SteamEmulator.Write(msg);
     }
 }

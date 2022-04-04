@@ -10,7 +10,7 @@ public class SteamAPI_ISteamAppList : BaseCalls
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static int SteamAPI_ISteamAppList_GetAppBuildId(AppId_t nAppID)
     {
-        Log.Write("Steam_AppList::GetAppBuildId");
+        Write("Steam_AppList::GetAppBuildId");
         return SteamEmulator.SteamAppList.GetAppBuildId(nAppID);
     }
 

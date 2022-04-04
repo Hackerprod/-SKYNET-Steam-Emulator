@@ -67,7 +67,7 @@ public class InterfaceManager
 
         if (iface == null)
         {
-            Log.Write(string.Format("Unable to find delegates for interface that implements {0}", Name));
+            SteamEmulator.Write(string.Format("Unable to find delegates for interface that implements {0}", Name));
             return (IntPtr.Zero, null);
         }
 
@@ -100,7 +100,7 @@ public class InterfaceManager
 
             if (type == null)
             {
-                Log.Write(string.Format("Unable to find delegate for {0} in {1}!", mi.Name, iface.Name));
+                SteamEmulator.Write(string.Format("Unable to find delegate for {0} in {1}!", mi.Name, iface.Name));
                 return (IntPtr.Zero, null);
             }
 
@@ -113,7 +113,7 @@ public class InterfaceManager
             }
             catch (Exception e)
             {
-                Log.Write(string.Format("EXCEPTION whilst binding function {0}, class {1}", mi.Name, impl.Name));
+                SteamEmulator.Write(string.Format("EXCEPTION whilst binding function {0}, class {1}", mi.Name, impl.Name));
             }
         }
 
@@ -128,12 +128,12 @@ public class InterfaceManager
         {
             try
             {
-                // Log.Write ("Testing " + new_delegates[i].Method);
+                // SteamEmulator.Write ("Testing " + new_delegates[i].Method);
                 Marshal.WriteIntPtr(vtable, i * ptr_size, Marshal.GetFunctionPointerForDelegate(new_delegates[i]));
             }
             catch (Exception)
             {
-                Log.Write($"Error Injecting Delegate {new_delegates[i]}");
+                SteamEmulator.Write($"Error Injecting Delegate {new_delegates[i]}");
             }
             // Create all function pointers as neccessary
         }
@@ -272,7 +272,7 @@ public class InterfaceManager
             return SteamEmulator.SteamParentalSettings.MemoryAddress;
         }
 
-        Log.Write($"Not found Interface for {pszVersion}");
+        SteamEmulator.Write($"Not found Interface for {pszVersion}");
         return default;
     }
 }
