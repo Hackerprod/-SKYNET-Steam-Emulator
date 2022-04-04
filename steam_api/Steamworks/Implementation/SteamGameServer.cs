@@ -5,8 +5,11 @@ using SKYNET;
 using SKYNET.Helper;
 using Steamworks;
 
-public class SteamGameServer : SteamInterface
+public class SteamGameServer : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
     public int GetHSteamUser(IntPtr _)
     {
         Write($"GetHSteamUser");

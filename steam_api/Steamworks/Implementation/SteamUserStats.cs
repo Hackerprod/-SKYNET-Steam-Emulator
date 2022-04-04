@@ -4,8 +4,12 @@ using SKYNET.Steamworks;
 using Steamworks;
 using System;
 
-public class SteamUserStats : SteamInterface
+public class SteamUserStats : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public bool RequestCurrentStats(IntPtr _)
     {
         Write($"RequestCurrentStats");

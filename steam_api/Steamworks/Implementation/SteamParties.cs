@@ -4,8 +4,12 @@ using SKYNET.Steamworks;
 using Steamworks;
 using System;
 
-public class SteamParties : SteamInterface
+public class SteamParties : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public void CancelReservation(uint ulBeacon, IntPtr steamIDUser)
     {
         Write("CancelReservation");

@@ -55,7 +55,7 @@ public class SteamAPI_ISteamController : BaseCalls
     public static IntPtr SteamAPI_ISteamController_GetAnalogActionData(uint controllerHandle, uint analogActionHandle)
     {
         Write("SteamAPI_ISteamController_GetAnalogActionData");
-        return SteamEmulator.SteamController.GetAnalogActionData(SteamEmulator.SteamController.BaseAddress, controllerHandle, analogActionHandle);
+        return SteamEmulator.SteamController.GetAnalogActionData(SteamEmulator.SteamController.MemoryAddress, controllerHandle, analogActionHandle);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -104,7 +104,7 @@ public class SteamAPI_ISteamController : BaseCalls
     public static IntPtr SteamAPI_ISteamController_GetDigitalActionData(IntPtr controllerHandle, int digitalActionHandle)
     {
         Write("SteamAPI_ISteamController_GetDigitalActionData");
-        return SteamEmulator.SteamController.GetDigitalActionData(SteamEmulator.SteamController.BaseAddress, controllerHandle, digitalActionHandle);
+        return SteamEmulator.SteamController.GetDigitalActionData(SteamEmulator.SteamController.MemoryAddress, controllerHandle, digitalActionHandle);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -174,7 +174,7 @@ public class SteamAPI_ISteamController : BaseCalls
     public static bool SteamAPI_ISteamController_Init()
     {
         Write("SteamAPI_ISteamController_Init");
-        return SteamEmulator.SteamController.Init(SteamEmulator.SteamController.BaseAddress);
+        return SteamEmulator.SteamController.Init(SteamEmulator.SteamController.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -200,7 +200,7 @@ public class SteamAPI_ISteamController : BaseCalls
     public static bool SteamAPI_ISteamController_Shutdown()
     {
         Write("SteamAPI_ISteamController_Shutdown");
-        return SteamEmulator.SteamController.Shutdown(SteamEmulator.SteamController.BaseAddress);
+        return SteamEmulator.SteamController.Shutdown(SteamEmulator.SteamController.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

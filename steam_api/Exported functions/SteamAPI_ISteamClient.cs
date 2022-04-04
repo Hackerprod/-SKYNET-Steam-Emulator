@@ -138,28 +138,28 @@ public class SteamAPI_ISteamClient : BaseCalls
     public static IntPtr SteamAPI_ISteamClient_GetISteamScreenshots(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write("SteamAPI_ISteamClient_GetISteamScreenshots");
-        return SteamEmulator.SteamScreenshots.BaseAddress;
+        return SteamEmulator.SteamScreenshots.MemoryAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static uint SteamAPI_ISteamClient_GetIPCCallCount()
     {
         Write("SteamAPI_ISteamClient_GetIPCCallCount");
-        return SteamEmulator.SteamClient.GetIPCCallCount(SteamEmulator.SteamClient.BaseAddress);
+        return SteamEmulator.SteamClient.GetIPCCallCount(SteamEmulator.SteamClient.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamClient_BShutdownIfAllPipesClosed()
     {
         Write("SteamAPI_ISteamClient_BShutdownIfAllPipesClosed");
-        return SteamEmulator.SteamClient.BShutdownIfAllPipesClosed(SteamEmulator.SteamClient.BaseAddress);
+        return SteamEmulator.SteamClient.BShutdownIfAllPipesClosed(SteamEmulator.SteamClient.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static IntPtr SteamAPI_ISteamClient_GetISteamHTTP(int hSteamUser, int hSteamPipe, string pchVersion)
     {
         Write("SteamAPI_ISteamClient_GetISteamHTTP");
-        return SteamEmulator.SteamHTTP.BaseAddress;
+        return SteamEmulator.SteamHTTP.MemoryAddress;
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

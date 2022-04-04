@@ -4,8 +4,12 @@ using SKYNET.Helper;
 using SKYNET.Steamworks;
 using System;
 
-public class SteamParentalSettings : SteamInterface
+public class SteamParentalSettings : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public bool BIsParentalLockEnabled(IntPtr _)
     {
         Write("boolBIsParentalLockEnabled");

@@ -230,10 +230,10 @@ public class SteamEmulator
         InterfaceManager.Initialize();
     }
 
-    private T CreateInterface<T>()  where T : SteamInterface
+    private T CreateInterface<T>()  where T : ISteamInterface
     {
         T baseClass = InterfaceManager.CreateInterface<T>(out IntPtr BaseAddress);
-        baseClass.BaseAddress = BaseAddress;
+        baseClass.MemoryAddress = BaseAddress;
         return (T)baseClass;
     }
 

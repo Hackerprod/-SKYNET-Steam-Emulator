@@ -7,35 +7,33 @@ using SKYNET.Steamworks;
 using SKYNET.Types;
 using Steamworks;
 
-public class SteamFriends : SteamInterface
+public class SteamFriends : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
     public List<Friend> Friends;
     public List<IntPtr> Users;
-
 
     public void ActivateGameOverlay(IntPtr _, [MarshalAs(UnmanagedType.LPStr)] string friendsGroupID)
     {
         Write($"ActivateGameOverlay {friendsGroupID}");
     }
 
-
     public void ActivateGameOverlayInviteDialog(IntPtr _, IntPtr steamIDLobby)
     {
         Write($"ActivateGameOverlayInviteDialog {steamIDLobby}");
     }
-
 
     public void ActivateGameOverlayInviteDialogConnectString(IntPtr _, [MarshalAs(UnmanagedType.LPStr)] string pchConnectString)
     {
         Write($"ActivateGameOverlayInviteDialogConnectString {pchConnectString}");
     }
 
-
     public void ActivateGameOverlayRemotePlayTogetherInviteDialog(IntPtr _, IntPtr steamIDLobby)
     {
         Write($"ActivateGameOverlayRemotePlayTogetherInviteDialog {steamIDLobby}");
     }
-
 
     public void ActivateGameOverlayToStore(IntPtr _, AppId_t nAppID, EOverlayToStoreFlag eFlag)
     {

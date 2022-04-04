@@ -6,8 +6,12 @@ using SKYNET.Steamworks;
 using SKYNET.Types;
 using Steamworks;
 
-public class SteamGameCoordinator : SteamInterface
+public class SteamGameCoordinator : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public bool IsMessageAvailable(uint pcubMsgSize)
     {
         Write("IsMessageAvailable");

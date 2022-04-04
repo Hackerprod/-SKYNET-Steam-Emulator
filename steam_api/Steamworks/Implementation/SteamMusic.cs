@@ -3,8 +3,12 @@ using SKYNET.Helper;
 using SKYNET.Steamworks;
 using System;
 
-public class SteamMusic : SteamInterface
+public class SteamMusic : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public bool BIsEnabled(IntPtr _)
     {
         Write($"BIsEnabled");

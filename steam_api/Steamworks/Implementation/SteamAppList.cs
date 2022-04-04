@@ -6,8 +6,12 @@ using SKYNET;
 using SKYNET.Helper;
 using Steamworks;
 
-public class SteamAppList : SteamInterface
+public class SteamAppList : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public int GetAppBuildId(AppId_t nAppID)
     {
         Log.Write("GetAppBuildId");

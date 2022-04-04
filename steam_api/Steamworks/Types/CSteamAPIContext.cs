@@ -96,121 +96,121 @@ namespace SKYNET.Types
                 return false;
             }
 
-            m_pSteamClient = SteamEmulator.SteamClient.BaseAddress;
+            m_pSteamClient = SteamEmulator.SteamClient.MemoryAddress;
             if (m_pSteamClient == IntPtr.Zero)
             {
                 return false;
             }
 
-            m_pSteamUser = SteamEmulator.SteamUser.BaseAddress;
+            m_pSteamUser = SteamEmulator.SteamUser.MemoryAddress;
             if (m_pSteamUser == IntPtr.Zero)
             {
                 return false;
             }
 
-            m_pSteamFriends = SteamEmulator.SteamFriends.BaseAddress;
+            m_pSteamFriends = SteamEmulator.SteamFriends.MemoryAddress;
             if (m_pSteamFriends == IntPtr.Zero)
             {
                 return false;
             }
 
-            m_pSteamUtils = SteamEmulator.SteamUtils.BaseAddress;
+            m_pSteamUtils = SteamEmulator.SteamUtils.MemoryAddress;
             if (m_pSteamUtils == IntPtr.Zero)
             {
                 return false;
             }
 
-            m_pSteamMatchmaking = SteamEmulator.SteamMatchmaking.BaseAddress;
+            m_pSteamMatchmaking = SteamEmulator.SteamMatchmaking.MemoryAddress;
             if (m_pSteamMatchmaking == IntPtr.Zero)
             {
                 return false;
             }
 
-            m_pSteamMatchmakingServers = SteamEmulator.SteamMatchMakingServers.BaseAddress;
+            m_pSteamMatchmakingServers = SteamEmulator.SteamMatchMakingServers.MemoryAddress;
             if (m_pSteamMatchmakingServers == IntPtr.Zero)
             {
                 return false;
             }
 
-            m_pSteamUserStats = SteamEmulator.SteamUserStats.BaseAddress;
+            m_pSteamUserStats = SteamEmulator.SteamUserStats.MemoryAddress;
             if (m_pSteamUserStats == IntPtr.Zero)
             {
                 return false;
             }
 
-            m_pSteamApps = SteamEmulator.SteamApps.BaseAddress;
+            m_pSteamApps = SteamEmulator.SteamApps.MemoryAddress;
             if (m_pSteamApps == IntPtr.Zero)
             {
                 return false;
             }
 
-            m_pSteamNetworking = SteamEmulator.SteamNetworking.BaseAddress;
+            m_pSteamNetworking = SteamEmulator.SteamNetworking.MemoryAddress;
             if (m_pSteamNetworking == IntPtr.Zero)
             {
                 return false;
             }
 
-            m_pSteamRemoteStorage = SteamEmulator.SteamMusicRemote.BaseAddress;
+            m_pSteamRemoteStorage = SteamEmulator.SteamMusicRemote.MemoryAddress;
             if (m_pSteamRemoteStorage == IntPtr.Zero)
             {
                 return false;
             }
 
-            m_pSteamScreenshots = SteamEmulator.SteamScreenshots.BaseAddress;
+            m_pSteamScreenshots = SteamEmulator.SteamScreenshots.MemoryAddress;
             if (m_pSteamScreenshots == IntPtr.Zero)
             {
                 return false;
             }
 
-            m_pSteamHTTP = SteamEmulator.SteamHTTP.BaseAddress;
+            m_pSteamHTTP = SteamEmulator.SteamHTTP.MemoryAddress;
             if (m_pSteamHTTP == IntPtr.Zero)
             {
                 return false;
             }
 
-            m_pSteamController = SteamEmulator.SteamController.BaseAddress;
+            m_pSteamController = SteamEmulator.SteamController.MemoryAddress;
             if (m_pSteamController == IntPtr.Zero)
             {
                 return false;
             }
 
-            m_pSteamUGC = SteamEmulator.SteamUGC.BaseAddress;
+            m_pSteamUGC = SteamEmulator.SteamUGC.MemoryAddress;
             if (m_pSteamUGC == IntPtr.Zero)
             {
                 return false;
             }
 
-            m_pSteamAppList = SteamEmulator.SteamAppList.BaseAddress;
+            m_pSteamAppList = SteamEmulator.SteamAppList.MemoryAddress;
             if (m_pSteamAppList == IntPtr.Zero)
             {
                 return false;
             }
 
-            m_pSteamMusic = SteamEmulator.SteamMusic.BaseAddress;
+            m_pSteamMusic = SteamEmulator.SteamMusic.MemoryAddress;
             if (m_pSteamMusic == IntPtr.Zero)
             {
                 return false;
             }
 
-            m_pSteamMusicRemote = SteamEmulator.SteamMusicRemote.BaseAddress;
+            m_pSteamMusicRemote = SteamEmulator.SteamMusicRemote.MemoryAddress;
             if (m_pSteamMusicRemote == IntPtr.Zero)
             {
                 return false;
             }
 
-            m_pSteamHTMLSurface = SteamEmulator.SteamHTMLSurface.BaseAddress;
+            m_pSteamHTMLSurface = SteamEmulator.SteamHTMLSurface.MemoryAddress;
             if (m_pSteamHTMLSurface == IntPtr.Zero)
             {
                 return false;
             }
 
-            m_pSteamInventory = SteamEmulator.SteamInventory.BaseAddress;
+            m_pSteamInventory = SteamEmulator.SteamInventory.MemoryAddress;
             if (m_pSteamInventory == IntPtr.Zero)
             {
                 return false;
             }
 
-            m_pSteamVideo = SteamEmulator.SteamVideo.BaseAddress;
+            m_pSteamVideo = SteamEmulator.SteamVideo.MemoryAddress;
             if (m_pSteamVideo == IntPtr.Zero)
             {
                 return false;

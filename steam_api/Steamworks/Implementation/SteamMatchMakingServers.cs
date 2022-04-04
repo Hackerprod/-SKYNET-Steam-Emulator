@@ -2,8 +2,12 @@
 using SKYNET.Helper;
 using System;
 
-public class SteamMatchMakingServers : SteamInterface
+public class SteamMatchMakingServers : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public IntPtr RequestInternetServerList(IntPtr iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
     {
         Write($"RequestInternetServerList");

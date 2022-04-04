@@ -4,8 +4,11 @@ using SKYNET.Helper;
 using SKYNET.Steamworks;
 using Steamworks;
 
-public class SteamMatchmaking : SteamInterface
+public class SteamMatchmaking : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
     public int AddFavoriteGame(AppId_t nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags, uint rTime32LastPlayedOnServer)
     {
         Write("AddFavoriteGame");

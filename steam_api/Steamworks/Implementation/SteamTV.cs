@@ -3,8 +3,11 @@ using SKYNET;
 using SKYNET.Helper;
 using System;
 
-public class SteamTV : SteamInterface
+public class SteamTV : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
     public bool IsBroadcasting(int pnNumViewers)
     {
         Write($"IsBroadcasting");

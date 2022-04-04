@@ -189,7 +189,7 @@ public class SteamAPI_ISteamApps : BaseCalls
     public static IntPtr SteamAPI_ISteamApps_GetAppOwner()
     {
         Write("SteamAPI_ISteamApps_GetAppOwner");
-        return SteamEmulator.SteamApps.BaseAddress;
+        return SteamEmulator.SteamApps.MemoryAddress;
     }
 
     // Returns the associated launch param if the game is run via steam://run/<appid>//?param1=value1;param2=value2;param3=value3 etc.

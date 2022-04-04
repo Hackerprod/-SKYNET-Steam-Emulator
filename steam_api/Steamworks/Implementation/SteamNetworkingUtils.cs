@@ -3,8 +3,12 @@ using SKYNET.Helper;
 using SKYNET.Steamworks;
 using System;
 
-public class SteamNetworkingUtils : SteamInterface
+public class SteamNetworkingUtils : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public IntPtr AllocateMessage(int cbAllocateBuffer)
     {
         Write("AllocateMessage");

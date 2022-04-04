@@ -2,8 +2,12 @@
 using SKYNET;
 using SKYNET.Helper;
 
-public class SteamHTTP : SteamInterface
+public class SteamHTTP : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public uint CreateCookieContainer(bool bAllowResponsesToModify)
     {
         Write($"CreateCookieContainer");
@@ -157,7 +161,7 @@ public class SteamHTTP : SteamInterface
     public IntPtr SteamAPI_SteamGameServerHTTP_v003(IntPtr _)
     {
         Write($"SteamAPI_SteamGameServerHTTP_v003");
-        return SteamEmulator.SteamGameServerHttp.BaseAddress;
+        return SteamEmulator.SteamGameServerHttp.MemoryAddress;
     }
 
     private void Write(string v)

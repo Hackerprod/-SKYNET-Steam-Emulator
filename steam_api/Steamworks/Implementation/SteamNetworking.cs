@@ -3,8 +3,12 @@ using SKYNET.Helper;
 using SKYNET.Steamworks;
 using System;
 
-public class SteamNetworking : SteamInterface
+public class SteamNetworking : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public bool SendP2PPacket(IntPtr steamIDRemote, IntPtr pubData, uint cubData, EP2PSend eP2PSendType, int nChannel)
     {
         Write("SendP2PPacket");

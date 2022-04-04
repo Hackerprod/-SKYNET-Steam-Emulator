@@ -4,8 +4,12 @@ using SKYNET.Helper;
 using SKYNET.Steamworks;
 using System;
 
-public class SteamScreenshots : SteamInterface
+public class SteamScreenshots : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public uint WriteScreenshot(IntPtr pubRGB, uint cubRGB, int nWidth, int nHeight)
     {
         Write("WriteScreenshot");

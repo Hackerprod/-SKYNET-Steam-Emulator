@@ -3,8 +3,12 @@ using SKYNET.Helper;
 using Steamworks;
 using System;
 
-public class SteamNetworkingSocketsSerialized : SteamInterface
+public class SteamNetworkingSocketsSerialized : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public void SendP2PRendezvous(IntPtr steamIDRemote, uint unConnectionIDSrc, IntPtr pMsgRendezvous, uint cbRendezvous)
     {
         Write("SendP2PRendezvous");

@@ -3,8 +3,12 @@ using SKYNET.Helper;
 using SKYNET.Steamworks;
 using System;
 
-public class SteamRemotePlay : SteamInterface
+public class SteamRemotePlay : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public uint GetSessionCount(IntPtr _)
     {
         Write("GetSessionCount");

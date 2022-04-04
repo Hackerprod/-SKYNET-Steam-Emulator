@@ -140,7 +140,7 @@ public class SteamAPI_ISteamRemoteStorage : BaseCalls
     public static int SteamAPI_ISteamRemoteStorage_GetFileCount()
     {
         Write("SteamAPI_ISteamRemoteStorage_GetFileCount");
-        return SteamEmulator.SteamRemoteStorage.GetFileCount(SteamEmulator.SteamRemoteStorage.BaseAddress);
+        return SteamEmulator.SteamRemoteStorage.GetFileCount(SteamEmulator.SteamRemoteStorage.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -161,14 +161,14 @@ public class SteamAPI_ISteamRemoteStorage : BaseCalls
     public static bool SteamAPI_ISteamRemoteStorage_IsCloudEnabledForAccount()
     {
         Write("SteamAPI_ISteamRemoteStorage_IsCloudEnabledForAccount");
-        return SteamEmulator.SteamRemoteStorage.IsCloudEnabledForAccount(SteamEmulator.SteamRemoteStorage.BaseAddress);
+        return SteamEmulator.SteamRemoteStorage.IsCloudEnabledForAccount(SteamEmulator.SteamRemoteStorage.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_ISteamRemoteStorage_IsCloudEnabledForApp()
     {
         Write("SteamAPI_ISteamRemoteStorage_IsCloudEnabledForApp");
-        return SteamEmulator.SteamRemoteStorage.IsCloudEnabledForApp(SteamEmulator.SteamRemoteStorage.BaseAddress);
+        return SteamEmulator.SteamRemoteStorage.IsCloudEnabledForApp(SteamEmulator.SteamRemoteStorage.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -210,7 +210,7 @@ public class SteamAPI_ISteamRemoteStorage : BaseCalls
     public static int SteamAPI_ISteamRemoteStorage_GetCachedUGCCount()
     {
         Write("SteamAPI_ISteamRemoteStorage_GetCachedUGCCount");
-        return SteamEmulator.SteamRemoteStorage.GetCachedUGCCount(SteamEmulator.SteamRemoteStorage.BaseAddress);
+        return SteamEmulator.SteamRemoteStorage.GetCachedUGCCount(SteamEmulator.SteamRemoteStorage.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

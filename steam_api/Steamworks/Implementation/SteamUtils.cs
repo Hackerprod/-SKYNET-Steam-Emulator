@@ -6,8 +6,11 @@ using SKYNET.Helper;
 using SKYNET.Steamworks;
 using Steamworks;
 
-public class SteamUtils : SteamInterface
+public class SteamUtils : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
     public uint GetSecondsSinceAppActive(IntPtr _)
     {
         Write("GetSecondsSinceAppActive");

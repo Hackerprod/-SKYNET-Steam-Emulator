@@ -4,8 +4,12 @@ using SKYNET;
 using SKYNET.Helper;
 using Steamworks;
 
-public class SteamApps : SteamInterface
+public class SteamApps : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public bool BIsSubscribed(IntPtr _)
     {
         Write("BIsSubscribed");

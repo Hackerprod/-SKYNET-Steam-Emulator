@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using SKYNET;
 using SKYNET.Helper;
 using SKYNET.Steamworks;
 
-//[Interface.MapAttribute("SteamController")]
-public class SteamController : SteamInterface
+public class SteamController : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     private Dictionary<string, int> action_handles;
     private Dictionary<string, int> digital_action_handles;
     private Dictionary<string, int> analog_action_handles;

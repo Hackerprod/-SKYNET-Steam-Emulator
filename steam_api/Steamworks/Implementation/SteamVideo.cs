@@ -2,8 +2,12 @@
 using SKYNET.Helper;
 using System;
 
-public class SteamVideo : SteamInterface
+public class SteamVideo : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public void GetVideoURL(IntPtr unVideoAppID)
     {
         Write($"GetVideoURL");

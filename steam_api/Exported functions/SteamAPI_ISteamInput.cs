@@ -25,7 +25,7 @@ public class SteamAPI_ISteamInput : BaseCalls
     public static bool SteamAPI_ISteamInput_BNewDataAvailable()
     {
         Write($"SteamAPI_ISteamInput_BNewDataAvailable");
-        return SteamEmulator.SteamInput.BNewDataAvailable(SteamEmulator.SteamInput.BaseAddress);
+        return SteamEmulator.SteamInput.BNewDataAvailable(SteamEmulator.SteamInput.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -204,7 +204,7 @@ public class SteamAPI_ISteamInput : BaseCalls
     public static ushort SteamAPI_ISteamInput_GetSessionInputConfigurationSettings()
     {
         Write($"SteamAPI_ISteamInput_GetSessionInputConfigurationSettings");
-        return SteamEmulator.SteamInput.GetSessionInputConfigurationSettings(SteamEmulator.SteamInput.BaseAddress);
+        return SteamEmulator.SteamInput.GetSessionInputConfigurationSettings(SteamEmulator.SteamInput.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -284,7 +284,7 @@ public class SteamAPI_ISteamInput : BaseCalls
     public static bool SteamAPI_ISteamInput_Shutdown()
     {
         Write($"SteamAPI_ISteamInput_Shutdown");
-        return SteamEmulator.SteamInput.Shutdown(SteamEmulator.SteamInput.BaseAddress);
+        return SteamEmulator.SteamInput.Shutdown(SteamEmulator.SteamInput.MemoryAddress);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -322,7 +322,7 @@ public class SteamAPI_ISteamInput : BaseCalls
     public static IntPtr SteamAPI_SteamInput_v005()
     {
         Write($"SteamAPI_SteamInput_v005");
-        return SteamEmulator.SteamInput.BaseAddress;
+        return SteamEmulator.SteamInput.MemoryAddress;
     }
 }
 

@@ -6,10 +6,11 @@ using SKYNET.Steamworks;
 using SKYNET.Types;
 using Steamworks;
 
-public class SteamUser : SteamInterface
+public class SteamUser : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
 
-    public const string STEAMUSER_INTERFACE_VERSION = "SteamUser021";
 
     public HSteamUser GetHSteamUser(IntPtr _)
     {

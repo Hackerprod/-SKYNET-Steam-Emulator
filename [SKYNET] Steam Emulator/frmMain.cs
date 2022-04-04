@@ -263,6 +263,10 @@ namespace SKYNET
 
             }
         }
+        private void Write(object sender, object msg)
+        {
+            Write(sender + ": " + msg);
+        }
 
         private void Close_Clicked(object sender, EventArgs e)
         {

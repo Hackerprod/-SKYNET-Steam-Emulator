@@ -4,8 +4,12 @@ using SKYNET.Steamworks;
 using SKYNET.Types;
 using System;
 
-public class SteamNetworkingSockets : SteamInterface
+public class SteamNetworkingSockets : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public uint CreateListenSocketIP(IntPtr localAddress, int nOptions, IntPtr pOptions)
     {
         Write("CreateListenSocketIP");

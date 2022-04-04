@@ -4,8 +4,12 @@ using SKYNET.Steamworks;
 using Steamworks;
 using System;
 
-public class SteamRemoteStorage : SteamInterface
+public class SteamRemoteStorage : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public bool FileWrite(string pchFile, IntPtr pvData, int cubData)
     {
         Write("FileWrite");

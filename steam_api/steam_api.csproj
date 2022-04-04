@@ -143,7 +143,7 @@
     <Compile Include="Steamworks\Delegates\DSteamUtils.cs" />
     <Compile Include="Steamworks\Delegates\DSteamVideo.cs" />
     <Compile Include="Steamworks\Helpers\DelegateAttribute.cs" />
-    <Compile Include="Steamworks\Helpers\IBaseInterface.cs" />
+    <Compile Include="Steamworks\Helpers\ISteamInterface.cs" />
     <Compile Include="Steamworks\Helpers\InterfaceDelegates.cs" />
     <Compile Include="Steamworks\Helpers\InterfaceImplementation.cs" />
     <Compile Include="Steamworks\Implementation\SteamAppList.cs" />

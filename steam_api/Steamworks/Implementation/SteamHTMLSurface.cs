@@ -4,8 +4,12 @@ using SKYNET.Helper;
 using SKYNET.Steamworks;
 using Steamworks;
 
-public class SteamHTMLSurface : SteamInterface
+public class SteamHTMLSurface : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public void AddHeader(IntPtr unBrowserHandle, string pchKey, string pchValue)
     {
         Write("AddHeader");

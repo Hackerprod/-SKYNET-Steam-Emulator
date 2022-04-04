@@ -2,8 +2,12 @@
 using SKYNET.Helper;
 using System;
 
-public class SteamNetworkingMessages : SteamInterface
+public class SteamNetworkingMessages : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public int SendMessageToUser(IntPtr identityRemote, IntPtr pubData, uint cubData, int nSendFlags, int nRemoteChannel)
     {
         Write("SendMessageToUser");

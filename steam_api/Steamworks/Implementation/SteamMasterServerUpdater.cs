@@ -2,8 +2,12 @@
 using SKYNET.Helper;
 using System;
 
-public class SteamMasterServerUpdater : SteamInterface
+public class SteamMasterServerUpdater : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public void SetActive(bool bActive)
     {
         Write($"SetActive");

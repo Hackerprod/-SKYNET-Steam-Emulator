@@ -3,8 +3,12 @@ using SKYNET.Helper;
 using Steamworks;
 using System;
 
-public class SteamGameServerStats : SteamInterface
+public class SteamGameServerStats : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public bool ClearUserAchievement(IntPtr steamIDUser, string pchName)
     {
         Write("ClearUserAchievement");
