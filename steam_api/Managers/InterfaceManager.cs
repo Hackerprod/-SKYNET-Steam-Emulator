@@ -32,20 +32,24 @@ public class InterfaceManager
                 var attribute = t.GetCustomAttribute<DelegateAttribute>();
                 var name = attribute.Name;
 
-                var new_interface = new InterfaceDelegates { Name = name };
-
-                SteamEmulator.Write(string.Format("Found interface delegates \"{0}\"", name));
-
-                var types = t.GetNestedTypes(BindingFlags.Public);
-
-                foreach (var type in types)
+                var @delegate = interface_delegates.Find(d => d.Name == name);
+                if (@delegate == null)
                 {
-                    // Filter out types that are not delegates
-                    if (type.IsSubclassOf(typeof(System.Delegate))) new_interface.DelegateTypes.Add(type);
-                }
+                    var new_interface = new InterfaceDelegates { Name = name };
 
-                // Just assume all members are delegate types
-                interface_delegates.Add(new_interface);
+                    //Write(string.Format("Found interface delegates \"{0}\"", name));
+
+                    var types = t.GetNestedTypes(BindingFlags.Public);
+
+                    foreach (var type in types)
+                    {
+                        // Filter out types that are not delegates
+                        if (type.IsSubclassOf(typeof(System.Delegate))) new_interface.DelegateTypes.Add(type);
+                    }
+
+                    // Just assume all members are delegate types
+                    interface_delegates.Add(new_interface);
+                }
             }
         }
     }
@@ -67,7 +71,7 @@ public class InterfaceManager
 
         if (iface == null)
         {
-            SteamEmulator.Write(string.Format("Unable to find delegates for interface that implements {0}", Name));
+            Write(string.Format("Unable to find delegates for interface that implements {0}", Name));
             return (IntPtr.Zero, null);
         }
 
@@ -100,7 +104,7 @@ public class InterfaceManager
 
             if (type == null)
             {
-                SteamEmulator.Write(string.Format("Unable to find delegate for {0} in {1}!", mi.Name, iface.Name));
+                Write(string.Format("Unable to find delegate for {0} in {1}!", mi.Name, iface.Name));
                 return (IntPtr.Zero, null);
             }
 
@@ -113,7 +117,7 @@ public class InterfaceManager
             }
             catch (Exception e)
             {
-                SteamEmulator.Write(string.Format("EXCEPTION whilst binding function {0}, class {1}", mi.Name, impl.Name));
+                Write(string.Format("EXCEPTION whilst binding function {0}, class {1}", mi.Name, impl.Name));
             }
         }
 
@@ -128,12 +132,12 @@ public class InterfaceManager
         {
             try
             {
-                // SteamEmulator.Write ("Testing " + new_delegates[i].Method);
+                // Write ("Testing " + new_delegates[i].Method);
                 Marshal.WriteIntPtr(vtable, i * ptr_size, Marshal.GetFunctionPointerForDelegate(new_delegates[i]));
             }
             catch (Exception)
             {
-                SteamEmulator.Write($"Error Injecting Delegate {new_delegates[i]}");
+                Write($"Error Injecting Delegate {new_delegates[i]}");
             }
             // Create all function pointers as neccessary
         }
@@ -272,7 +276,12 @@ public class InterfaceManager
             return SteamEmulator.SteamParentalSettings.MemoryAddress;
         }
 
-        SteamEmulator.Write($"Not found Interface for {pszVersion}");
+        Write($"Not found Interface for {pszVersion}");
         return default;
+    }
+
+    private static void Write(string v)
+    {
+        SteamEmulator.Write(v);
     }
 }
