@@ -12,17 +12,17 @@ using Steamworks;
 public class SteamAPI_ISteamUser : BaseCalls
 {
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static HSteamUser SteamAPI_ISteamUser_GetHSteamUser(IntPtr instancePtr)
+    public static HSteamUser SteamAPI_ISteamUser_GetHSteamUser(IntPtr _)
     {
         Write("SteamAPI_ISteamUser_Get");
-        return SteamEmulator.SteamUser.GetHSteamUser(instancePtr);
+        return SteamEmulator.SteamUser.GetHSteamUser(_);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static bool SteamAPI_ISteamUser_BLoggedOn(IntPtr instancePtr)
+    public static bool SteamAPI_ISteamUser_BLoggedOn(IntPtr _)
     {
         Write("SteamAPI_ISteamUser_BLoggedOn");
-        return SteamEmulator.SteamUser.BLoggedOn(instancePtr);
+        return SteamEmulator.SteamUser.BLoggedOn(_);
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]

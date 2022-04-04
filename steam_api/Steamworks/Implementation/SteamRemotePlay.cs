@@ -1,10 +1,14 @@
 ﻿using SKYNET;
+using SKYNET.Helper;
 using SKYNET.Steamworks;
 using System;
-using System.Runtime.InteropServices;
 
-public class SteamRemotePlay : SteamInterface
+public class SteamRemotePlay : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public uint GetSessionCount(IntPtr _)
     {
         Write("GetSessionCount");
@@ -50,6 +54,6 @@ public class SteamRemotePlay : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }

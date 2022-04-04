@@ -1,11 +1,15 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using SKYNET;
+using SKYNET.Helper;
 using SKYNET.Steamworks;
 using Steamworks;
 
-public class SteamHTMLSurface : SteamInterface
+public class SteamHTMLSurface : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public void AddHeader(IntPtr unBrowserHandle, string pchKey, string pchValue)
     {
         Write("AddHeader");
@@ -196,6 +200,6 @@ public class SteamHTMLSurface : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }

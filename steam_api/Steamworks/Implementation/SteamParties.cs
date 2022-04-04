@@ -1,11 +1,15 @@
 ﻿using SKYNET;
+using SKYNET.Helper;
 using SKYNET.Steamworks;
 using Steamworks;
 using System;
-using System.Runtime.InteropServices;
 
-public class SteamParties : SteamInterface
+public class SteamParties : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public void CancelReservation(uint ulBeacon, IntPtr steamIDUser)
     {
         Write("CancelReservation");
@@ -29,7 +33,7 @@ public class SteamParties : SteamInterface
         return false;
     }
 
-    public bool GetAvailableBeaconLocations(IntPtr _, SteamPartyBeaconLocation_t pLocationList, uint uMaxNumLocations)
+    public bool GetAvailableBeaconLocations(SteamPartyBeaconLocation_t pLocationList, uint uMaxNumLocations)
     {
         Write("GetAvailableBeaconLocations");
         return false;
@@ -47,7 +51,7 @@ public class SteamParties : SteamInterface
         return false;
     }
 
-    public bool GetBeaconLocationData(IntPtr _, SteamPartyBeaconLocation_t BeaconLocation, ESteamPartyBeaconLocationData eData, string pchDataStringOut, int cchDataStringOut)
+    public bool GetBeaconLocationData(SteamPartyBeaconLocation_t BeaconLocation, ESteamPartyBeaconLocationData eData, string pchDataStringOut, int cchDataStringOut)
     {
         Write("GetBeaconLocationData");
         return false;
@@ -78,6 +82,6 @@ public class SteamParties : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }

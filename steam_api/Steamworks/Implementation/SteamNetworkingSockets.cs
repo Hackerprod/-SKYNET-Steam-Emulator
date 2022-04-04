@@ -1,11 +1,15 @@
 ﻿using SKYNET;
+using SKYNET.Helper;
 using SKYNET.Steamworks;
 using SKYNET.Types;
 using System;
-using System.Runtime.InteropServices;
 
-public class SteamNetworkingSockets : SteamInterface
+public class SteamNetworkingSockets : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public uint CreateListenSocketIP(IntPtr localAddress, int nOptions, IntPtr pOptions)
     {
         Write("CreateListenSocketIP");
@@ -257,6 +261,6 @@ public class SteamNetworkingSockets : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }

@@ -1,10 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using SKYNET;
+using SKYNET.Helper;
 using SKYNET.Steamworks;
 
-public class SteamGameSearch : SteamInterface
-{ 
+public class SteamGameSearch : ISteamInterface
+{
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
     public GameSearchErrorCode_t AcceptGame(IntPtr self)
     {
         Write("AcceptGame");
@@ -91,6 +94,6 @@ public class SteamGameSearch : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }

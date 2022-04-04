@@ -1,11 +1,15 @@
 ﻿
 using SKYNET;
+using SKYNET.Helper;
 using SKYNET.Steamworks;
 using System;
-using System.Runtime.InteropServices;
 
-public class SteamParentalSettings : SteamInterface
+public class SteamParentalSettings : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public bool BIsParentalLockEnabled(IntPtr _)
     {
         Write("boolBIsParentalLockEnabled");
@@ -45,6 +49,6 @@ public class SteamParentalSettings : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }

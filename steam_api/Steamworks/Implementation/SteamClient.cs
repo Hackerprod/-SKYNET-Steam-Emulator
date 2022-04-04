@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using SKYNET;
-using SKYNET.Manager;
+using SKYNET.Helper;
 using SKYNET.Steamworks;
 using Steamworks;
 
-public class SteamClient : SteamInterface
+public class SteamClient : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public void SetAppId(uint appId)
     {
         Write("SetAppId");
@@ -33,9 +37,9 @@ public class SteamClient : SteamInterface
             return 0;
         }
 
-        SteamEmulator.steam_pipes.Add((HSteamPipe)hSteamPipe, Pipe.CLIENT);
+        SteamEmulator.steam_pipes.Add((HSteamPipe)hSteamPipe, Steam_Pipe.CLIENT);
 
-        return (int)Pipe.CLIENT;
+        return (int)Steam_Pipe.CLIENT;
     }
 
     public int CreateLocalUser(out int phSteamPipe, EAccountType eAccountType)
@@ -247,7 +251,7 @@ public class SteamClient : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }
 

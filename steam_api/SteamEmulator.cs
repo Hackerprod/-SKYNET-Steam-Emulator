@@ -1,14 +1,12 @@
 ﻿using SKYNET;
 using SKYNET.Callback;
 using SKYNET.Helper;
-using SKYNET.Manager;
 using SKYNET.Types;
 using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,11 +14,11 @@ public class SteamEmulator
 {
     public static SteamEmulator Instance;
 
-    public static IntPtr ContextAddress;
-
     // Callbacks
     public static CallbackManager Client_Callback = new CallbackManager();
     public static CallbackManager Server_Callback = new CallbackManager();
+
+    public event EventHandler<object> OnMessage;
 
     #region Client Info
 
@@ -42,9 +40,7 @@ public class SteamEmulator
     public static bool Initialized { get; set; }
     public static string SteamApiPath { get; set; }
 
-    public static Dictionary<HSteamPipe, Pipe> steam_pipes;
-
-    public static CSteamApiContext Context;
+    public static Dictionary<HSteamPipe, Steam_Pipe> steam_pipes;
 
     #region Interfaces 
 
@@ -100,13 +96,15 @@ public class SteamEmulator
 
     public SteamEmulator(bool asClient)
     {
-        steam_pipes = new Dictionary<HSteamPipe, Pipe>();
+        steam_pipes = new Dictionary<HSteamPipe, Steam_Pipe>();
         Instance = this;
         AsClient = asClient;
     }
 
     public void Initialize()
     {
+        string _file = Path.Combine(modCommon.GetPath(), "[SKYNET] steam_api.ini");
+
         modCommon.LoadSettings();
 
         InterfaceManager.Initialize();
@@ -114,7 +112,7 @@ public class SteamEmulator
         if (Client_Callback == null) Client_Callback = new CallbackManager();
         if (Server_Callback == null) Server_Callback = new CallbackManager();
 
-        steam_pipes = new Dictionary<HSteamPipe, Pipe>();
+        steam_pipes = new Dictionary<HSteamPipe, Steam_Pipe>();
 
         #region Interface Initialization
 
@@ -128,19 +126,19 @@ public class SteamEmulator
 
         SteamUtils = CreateInterface<SteamUtils>();
 
-        SteamMatchmaking = CreateInterface<SteamMatchmaking>();
+        SteamMatchmaking = CreateInterface<SteamMatchmaking>();   
 
-        SteamMatchMakingServers = CreateInterface<SteamMatchMakingServers>();
+        SteamMatchMakingServers = CreateInterface<SteamMatchMakingServers>();    
 
-        SteamUserStats = CreateInterface<SteamUserStats>();
+        SteamUserStats = CreateInterface<SteamUserStats>();  
 
-        SteamApps = CreateInterface<SteamApps>();
+        SteamApps = CreateInterface<SteamApps>();   
 
-        SteamNetworking = CreateInterface<SteamNetworking>();
+        SteamNetworking = CreateInterface<SteamNetworking>();   
 
-        SteamRemoteStorage = CreateInterface<SteamRemoteStorage>();
+        SteamRemoteStorage = CreateInterface<SteamRemoteStorage>();  
 
-        SteamScreenshots = CreateInterface<SteamScreenshots>();
+        SteamScreenshots = CreateInterface<SteamScreenshots>();   
 
         SteamHTTP = CreateInterface<SteamHTTP>();
 
@@ -193,7 +191,7 @@ public class SteamEmulator
 
         SteamGameServerNetworking = CreateInterface<SteamNetworking>();
 
-        SteamGameServerHttp = CreateInterface<SteamHTTP>();
+        SteamHTTP = CreateInterface<SteamHTTP>();
 
         SteamGameServerInventory = CreateInterface<SteamInventory>();
 
@@ -221,30 +219,24 @@ public class SteamEmulator
 
         SteamClient.ConnectToGlobalUser((int)HSteamPipe);
 
-        CSteamApiContext context = new CSteamApiContext();
-        context.Init();
-        ContextAddress = InterfaceManager.WriteInMemory(context);
-
-#if Debug
-        if (success)
-        {
-            Write("SteamApi Context created successfully");
-        }
-        else
-        {
-            Write("Error creating SteamApi Context");
-        }
-#endif
-
+        //if (success)
+        //{
+        //    Write("SteamApi Context created successfully");
+        //}
+        //else
+        //{
+        //    Write("Error creating SteamApi Context");
+        //}
 
         Initialized = true;
 
         InterfaceManager.Initialize();
     }
 
-    private T CreateInterface<T>()  where T : SteamInterface
+    private T CreateInterface<T>()  where T : ISteamInterface
     {
-        T baseClass = InterfaceManager.CreateSteamInterface<T>();
+        T baseClass = InterfaceManager.CreateInterface<T>(out IntPtr BaseAddress);
+        baseClass.MemoryAddress = BaseAddress;
         return (T)baseClass;
     }
 
@@ -264,22 +256,26 @@ public class SteamEmulator
         {
             HSteamPipe = (HSteamPipe)1;
             Write($"Creating pipe {HSteamPipe}");
-            steam_pipes[HSteamPipe] = Pipe.NO_USER;
+            steam_pipes[HSteamPipe] = Steam_Pipe.NO_USER;
         }
         return HSteamPipe;
     }
 
+    public static void Write(object sender, object msg)
+    {
+        Write(sender + ": " + msg);
+    }
+
     public static void Write(object v)
     {
-        Log.Write(v);
         if (AsClient)
         {
-            Main.Write(v);
+            Instance.OnMessage?.Invoke(Instance, v);
         }
+        Log.Write(v);
     }
 }
-
-public enum Pipe : int
+public enum Steam_Pipe : int
 {
     NO_USER,
     CLIENT,

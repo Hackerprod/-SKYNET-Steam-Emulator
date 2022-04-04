@@ -1,9 +1,13 @@
 ﻿using SKYNET;
+using SKYNET.Helper;
 using System;
-using System.Runtime.InteropServices;
 
-public class SteamMatchMakingServers : SteamInterface
+public class SteamMatchMakingServers : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public IntPtr RequestInternetServerList(IntPtr iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
     {
         Write($"RequestInternetServerList");
@@ -103,6 +107,6 @@ public class SteamMatchMakingServers : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }

@@ -1,10 +1,14 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using SKYNET;
+using SKYNET.Helper;
 using SKYNET.Steamworks;
 
-public class SteamMusicRemote : SteamInterface
+public class SteamMusicRemote : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public bool RegisterSteamMusicRemote(string pchName)
     {
         Write($"RegisterSteamMusicRemote");
@@ -199,6 +203,6 @@ public class SteamMusicRemote : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }

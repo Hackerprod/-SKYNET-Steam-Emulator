@@ -20,6 +20,11 @@ namespace SKYNET.Helper
             }
         }
 
+        public static void Write(object sender, object msg)
+        {
+            Write(sender + ": " + msg);
+        }
+
         public static void Write(object msg, bool force = false)
         {
             Console.WriteLine(msg);

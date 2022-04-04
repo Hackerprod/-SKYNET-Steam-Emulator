@@ -1,9 +1,13 @@
 ﻿using SKYNET;
+using SKYNET.Helper;
 using System;
-using System.Runtime.InteropServices;
 
-public class SteamVideo : SteamInterface
+public class SteamVideo : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public void GetVideoURL(IntPtr unVideoAppID)
     {
         Write($"GetVideoURL");
@@ -28,6 +32,6 @@ public class SteamVideo : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }

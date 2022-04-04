@@ -1,9 +1,13 @@
 ﻿using SKYNET;
+using SKYNET.Helper;
 using System;
-using System.Runtime.InteropServices;
 
-public class SteamNetworkingMessages : SteamInterface
+public class SteamNetworkingMessages : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public int SendMessageToUser(IntPtr identityRemote, IntPtr pubData, uint cubData, int nSendFlags, int nRemoteChannel)
     {
         Write("SendMessageToUser");
@@ -42,6 +46,6 @@ public class SteamNetworkingMessages : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }

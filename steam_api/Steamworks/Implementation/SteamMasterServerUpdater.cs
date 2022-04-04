@@ -1,9 +1,13 @@
 ﻿using SKYNET;
+using SKYNET.Helper;
 using System;
-using System.Runtime.InteropServices;
 
-public class SteamMasterServerUpdater : SteamInterface
+public class SteamMasterServerUpdater : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public void SetActive(bool bActive)
     {
         Write($"SetActive");
@@ -83,7 +87,7 @@ public class SteamMasterServerUpdater : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }
 

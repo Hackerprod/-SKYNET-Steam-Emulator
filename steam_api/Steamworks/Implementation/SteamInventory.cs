@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using SKYNET;
+using SKYNET.Helper;
 using SKYNET.Steamworks;
 using Steamworks;
 
-public class SteamInventory : SteamInterface
+public class SteamInventory : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public bool AddPromoItem(ref SteamInventoryResult_t pResultHandle, uint itemDef)
     {
         Write($"AddPromoItem");
@@ -234,6 +239,6 @@ public class SteamInventory : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }

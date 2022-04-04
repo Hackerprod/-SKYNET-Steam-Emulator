@@ -1,10 +1,14 @@
 ﻿using SKYNET;
+using SKYNET.Helper;
 using SKYNET.Steamworks;
 using System;
-using System.Runtime.InteropServices;
 
-public class SteamMusic : SteamInterface
+public class SteamMusic : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public bool BIsEnabled(IntPtr _)
     {
         Write($"BIsEnabled");
@@ -56,6 +60,6 @@ public class SteamMusic : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }

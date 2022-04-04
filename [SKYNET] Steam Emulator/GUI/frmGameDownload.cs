@@ -32,7 +32,7 @@ namespace SKYNET.GUI
             AppId = Box.AppId;
             LB_Name.Text = Box.GetGame().Name;
 
-            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "Banner"));
+            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache"));
 
             Thread DownloadThread = new Thread(StartDownloading);
             DownloadThread.IsBackground = true;
@@ -42,7 +42,7 @@ namespace SKYNET.GUI
         private async void StartDownloading()
         {
             string errorTask = "";
-            string BannerPath = Path.Combine(modCommon.GetPath(), "Data", "Images", "Banner");
+            string BannerPath = Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache");
 
             WebClient.DownloadProgressChanged += WebClient_DownloadProgressChanged;
 

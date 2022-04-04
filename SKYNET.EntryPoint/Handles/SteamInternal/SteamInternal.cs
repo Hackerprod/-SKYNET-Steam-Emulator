@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,7 +9,6 @@ using System.Windows.Forms;
 using EasyHook;
 using SKYNET;
 using SKYNET.Helper;
-using SKYNET.Manager;
 using SKYNET.Types;
 
 namespace SKYNET.Hook.Handles
@@ -27,7 +25,7 @@ namespace SKYNET.Hook.Handles
             base.Install<SteamInternal_FindOrCreateGameServerInterfaceDelegate>("SteamInternal_FindOrCreateGameServerInterface", _SteamInternal_FindOrCreateGameServerInterfaceDelegate, new SteamInternal_FindOrCreateGameServerInterfaceDelegate(SteamInternal_FindOrCreateGameServerInterface));
             base.Install<SteamInternal_CreateInterfaceDelegate>("SteamInternal_CreateInterface", _SteamInternal_CreateInterfaceDelegate, new SteamInternal_CreateInterfaceDelegate(SteamInternal_CreateInterface));
             base.Install<SteamInternal_GameServer_InitDelegate>("SteamInternal_GameServer_Init", _SteamInternal_GameServer_InitDelegate, new SteamInternal_GameServer_InitDelegate(SteamInternal_GameServer_Init));
-            //base.Install<SteamInternal_ContextInitDelegate>("SteamInternal_ContextInit", _SteamInternal_ContextInitDelegate, new SteamInternal_ContextInitDelegate(SteamInternal_ContextInit));
+            base.Install<OnContextInitFunc>("SteamInternal_ContextInit", OnContextInitPtr, new OnContextInitFunc(SteamInternal_ContextInit));
         }
 
         public IntPtr SteamInternal_FindOrCreateUserInterface(int hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion)
@@ -54,34 +52,61 @@ namespace SKYNET.Hook.Handles
             return true;
         }
 
-        public unsafe IntPtr SteamInternal_ContextInit(void* c_contextPointer)
+
+        [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
+        public unsafe delegate void* OnContextInitFunc(void* c_contextPtr);
+
+        public static unsafe OnContextInitFunc OnContextInitPtr = SteamInternal_ContextInit;
+
+        public static unsafe void* SteamInternal_ContextInit(void* c_contextPointer)
         {
-            Main.Write("SteamInternal_ContextInit");
-
-            //return SteamEmulator.ContextAddress;
-
             ContextInitData* CreatedContext = (ContextInitData*)c_contextPointer;
+            CSteamApiContext* context = &CreatedContext->Context;
 
-            if (CreatedContext->Context.SteamClient() != SteamEmulator.SteamClient.MemoryAddress)
-            {
-                Main.Write("SteamInternal_ContextInit initializing");
-                CreatedContext->Context.Init();
-                CreatedContext->counter = 1;
-            }
+            //if (CreatedContext->counter == 0)
+            //{
+            //    CreatedContext->counter = 1;
+            //}
 
-            return InterfaceManager.WriteInMemory(CreatedContext->Context);
-            //return &CreatedContext->Context;
+            Main.Write($"SteamInternal_ContextInit initializing ");
+
+            context->m_pSteamClient = SteamEmulator.SteamClient.MemoryAddress;
+            context->m_pSteamUser = SteamEmulator.SteamUser.MemoryAddress;
+            context->m_pSteamFriends = SteamEmulator.SteamFriends.MemoryAddress;
+            context->m_pSteamUtils = SteamEmulator.SteamUtils.MemoryAddress;
+            context->m_pSteamMatchmaking = SteamEmulator.SteamMatchmaking.MemoryAddress;
+            context->m_pSteamMatchmakingServers = SteamEmulator.SteamMatchMakingServers.MemoryAddress;
+            context->m_pSteamUserStats = SteamEmulator.SteamUserStats.MemoryAddress;
+            context->m_pSteamApps = SteamEmulator.SteamApps.MemoryAddress;
+            context->m_pSteamNetworking = SteamEmulator.SteamNetworking.MemoryAddress;
+            context->m_pSteamRemoteStorage = SteamEmulator.SteamMusicRemote.MemoryAddress;
+            context->m_pSteamScreenshots = SteamEmulator.SteamScreenshots.MemoryAddress;
+            context->m_pSteamHTTP = SteamEmulator.SteamHTTP.MemoryAddress;
+            context->m_pSteamController = SteamEmulator.SteamController.MemoryAddress;
+            context->m_pSteamUGC = SteamEmulator.SteamUGC.MemoryAddress;
+            context->m_pSteamAppList = SteamEmulator.SteamAppList.MemoryAddress;
+            context->m_pSteamMusic = SteamEmulator.SteamMusic.MemoryAddress;
+            context->m_pSteamMusicRemote = SteamEmulator.SteamMusicRemote.MemoryAddress;
+            context->m_pSteamHTMLSurface = SteamEmulator.SteamHTMLSurface.MemoryAddress;
+            context->m_pSteamInventory = SteamEmulator.SteamInventory.MemoryAddress;
+            context->m_pSteamVideo = SteamEmulator.SteamVideo.MemoryAddress;
+
+            return context;
         }
 
-        public struct ContextInitData
+        public unsafe struct ContextInitData
         {
-            public uint counter;
             public CSteamApiContext Context;
+            public uint counter;
         }
+
+
 
         public override void Write(object v)
         {
             Main.Write("SteamInternal", v);
         }
     }
+
 }
+

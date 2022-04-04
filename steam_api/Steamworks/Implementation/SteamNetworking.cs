@@ -1,10 +1,14 @@
 ﻿using SKYNET;
+using SKYNET.Helper;
 using SKYNET.Steamworks;
 using System;
-using System.Runtime.InteropServices;
 
-public class SteamNetworking : SteamInterface
+public class SteamNetworking : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public bool SendP2PPacket(IntPtr steamIDRemote, IntPtr pubData, uint cubData, EP2PSend eP2PSendType, int nChannel)
     {
         Write("SendP2PPacket");
@@ -139,6 +143,6 @@ public class SteamNetworking : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }

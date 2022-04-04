@@ -1,9 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using SKYNET;
+using SKYNET.Helper;
 
-public class SteamHTTP : SteamInterface
+public class SteamHTTP : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public uint CreateCookieContainer(bool bAllowResponsesToModify)
     {
         Write($"CreateCookieContainer");
@@ -162,6 +166,6 @@ public class SteamHTTP : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }

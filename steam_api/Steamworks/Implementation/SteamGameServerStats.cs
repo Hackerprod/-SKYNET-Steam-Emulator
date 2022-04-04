@@ -1,10 +1,14 @@
 ﻿using SKYNET;
+using SKYNET.Helper;
 using Steamworks;
 using System;
-using System.Runtime.InteropServices;
 
-public class SteamGameServerStats : SteamInterface
+public class SteamGameServerStats : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public bool ClearUserAchievement(IntPtr steamIDUser, string pchName)
     {
         Write("ClearUserAchievement");
@@ -58,6 +62,6 @@ public class SteamGameServerStats : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }

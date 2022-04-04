@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+
 using SKYNET;
+using SKYNET.Helper;
 using SKYNET.Steamworks;
 using Steamworks;
 
-public class SteamUtils : SteamInterface
+public class SteamUtils : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
     public uint GetSecondsSinceAppActive(IntPtr _)
     {
         Write("GetSecondsSinceAppActive");
@@ -21,7 +26,7 @@ public class SteamUtils : SteamInterface
     public EUniverse GetConnectedUniverse(IntPtr _)
     {
         Write("GetConnectedUniverse");
-        return EUniverse.k_EUniversePublic;
+        return EUniverse.Public;
     }
 
     public uint GetServerRealTime(IntPtr _)
@@ -240,6 +245,6 @@ public class SteamUtils : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }

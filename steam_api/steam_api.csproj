@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A14D2163-7A4E-489C-9AA0-B512D807BCE3}</ProjectGuid>
+    <ProjectGuid>{F296C00A-53B4-4A0D-977B-F1946B1ACCE2}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SKYNET</RootNamespace>
+    <RootNamespace>steam_api</RootNamespace>
     <AssemblyName>steam_api</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -17,12 +17,11 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\[SKYNET] Steam Emulator\bin\Debug\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>default</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,32 +31,13 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>bin\x86\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
   <PropertyGroup>
-    <DllExportIdent>620077B2-A822-4E7F-90CE-3D9193881EAD</DllExportIdent>
+    <DllExportIdent>C7D8FA75-D5BB-4C9F-B596-90D31A05FF6F</DllExportIdent>
     <DllExportMetaLibName>DllExport.dll</DllExportMetaLibName>
     <DllExportNamespace>System.Runtime.InteropServices</DllExportNamespace>
     <DllExportDDNSCecil>true</DllExportDDNSCecil>
     <DllExportSkipOnAnyCpu>false</DllExportSkipOnAnyCpu>
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DllExportPlatform>Auto</DllExportPlatform>
     <DllExportOrdinalsBase>1</DllExportOrdinalsBase>
     <DllExportGenExpLib>false</DllExportGenExpLib>
     <DllExportOurILAsm>false</DllExportOurILAsm>
@@ -70,16 +50,8 @@
     <DllExportPostProcType>0</DllExportPostProcType>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="EasyHook, Version=2.7.7097.0, Culture=neutral, PublicKeyToken=4b580fca19d0b0c5, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\SKYNET.Net.Redirector\EasyHook.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Runtime" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -89,35 +61,52 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Hook\Handles\SteamAppList\SteamAPI_ISteamAppList_Delegates.cs" />
-    <Compile Include="Hook\Handles\SteamAppList\SteamAPI_ISteamAppList.cs" />
-    <Compile Include="Hook\Handles\SteamApps\SteamAPI_ISteamApps.cs" />
-    <Compile Include="Hook\Handles\SteamApps\SteamAPI_ISteamApps_Delegates.cs" />
-    <Compile Include="Steamworks\Helpers\DelegateAttribute.cs" />
-    <Compile Include="Steamworks\Helpers\IBaseInterface.cs" />
-    <Compile Include="Steamworks\Helpers\InterfaceImplementation.cs" />
-    <Compile Include="Steamworks\Helpers\InterfaceDelegates.cs" />
-    <Compile Include="Callback\CallbackManager.cs" />
+    <Compile Include="Callback\CallbackIdentityAttribute.cs" />
     <Compile Include="Callback\CallbackType.cs" />
+    <Compile Include="Callback\CCallbackBase.cs" />
     <Compile Include="Callback\SteamAPICall_t.cs" />
-    <Compile Include="Helper\Memory.cs" />
-    <Compile Include="Helper\NativeMethods.cs" />
-    <Compile Include="Managers\HookManager.cs" />
-    <Compile Include="Hook\Types\ConsoleMessage.cs" />
-    <Compile Include="Hook\Types\BaseHook.cs" />
-    <Compile Include="Hook\Handles\steamnetworkingsockets.cs" />
-    <Compile Include="Hook\Handles\SteamApi\SteamAPI_Delegates.cs" />
-    <Compile Include="Hook\Handles\SteamApi\SteamAPI.cs" />
-    <Compile Include="Hook\Handles\SteamInternal\SteamInternal_Delegates.cs" />
-    <Compile Include="Hook\Handles\SteamInternal\SteamInternal.cs" />
-    <Compile Include="Hook\Handles\LdrLoadDll.cs" />
-    <Compile Include="Steamworks\Types\SteamEnums.cs" />
-    <Compile Include="Steamworks\Types\SteamTypes.cs" />
-    <Compile Include="Steamworks\Types\CSteamAPIContext.cs" />
-    <Compile Include="Hook\Main.cs" />
-    <Compile Include="Managers\InterfaceManager.cs" />
+    <Compile Include="Exported functions\SteamAPI.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamAppList.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamApps.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamClient.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamController.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamFriends.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamGameSearch.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamGameServer.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamGameServerStats.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamHTMLSurface.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamHTTP.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamInput.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamInventory.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamMasterServerUpdater.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamMatchmaking.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamMatchmakingServers.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamMusic.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamMusicRemote.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamNetworking.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamNetworkingMessages.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamNetworkingSockets.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamNetworkingSocketsSerialized.cs" />
     <Compile Include="Exported functions\SteamAPI_ISteamNetworkingUtils.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamParentalSettings.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamParties.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamRemotePlay.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamRemoteStorage.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamScreenshots.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamTV.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamUGC.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamUser.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamUserStats.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamUtils.cs" />
+    <Compile Include="Exported functions\SteamAPI_ISteamVideo.cs" />
     <Compile Include="Exported functions\SteamAPI_SteamNetworkingIdentity.cs" />
+    <Compile Include="Exported functions\SteamInternal.cs" />
+    <Compile Include="Helpers\INIParser.cs" />
+    <Compile Include="Helpers\Log.cs" />
+    <Compile Include="Helpers\modCommon.cs" />
+    <Compile Include="Managers\CallbackManager.cs" />
+    <Compile Include="Managers\InterfaceManager.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SteamEmulator.cs" />
     <Compile Include="Steamworks\Delegates\DSteamAppList.cs" />
     <Compile Include="Steamworks\Delegates\DSteamApps.cs" />
@@ -153,58 +142,30 @@
     <Compile Include="Steamworks\Delegates\DSteamUserStats.cs" />
     <Compile Include="Steamworks\Delegates\DSteamUtils.cs" />
     <Compile Include="Steamworks\Delegates\DSteamVideo.cs" />
-    <Compile Include="Types\BaseCalls.cs" />
-    <Compile Include="Callback\CallbackIdentityAttribute.cs" />
-    <Compile Include="Callback\CCallbackBase.cs" />
-    <Compile Include="Helper\Helpers.cs" />
-    <Compile Include="Helper\INIParser.cs" />
-    <Compile Include="Helper\Log.cs" />
-    <Compile Include="Helper\modCommon.cs" />
-    <Compile Include="Steamworks\Implementation\SteamGameServer.cs" />
-    <Compile Include="Steamworks\Implementation\SteamMasterServerUpdater.cs" />
-    <Compile Include="Steamworks\Implementation\SteamNetworkingMessages.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Exported functions\SteamAPI_ISteamApps.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamMasterServerUpdater.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamMatchmaking.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamMatchmakingServers.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamMusicRemote.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamNetworking.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamNetworkingMessages.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamNetworkingSockets.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamNetworkingSocketsSerialized.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamParentalSettings.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamParties.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamRemotePlay.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamRemoteStorage.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamScreenshots.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamTV.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamUGC.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamUserStats.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamUtils.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamVideo.cs" />
-    <Compile Include="Steamworks\Implementation\SteamClient.cs" />
+    <Compile Include="Steamworks\Helpers\DelegateAttribute.cs" />
+    <Compile Include="Steamworks\Helpers\ISteamInterface.cs" />
+    <Compile Include="Steamworks\Helpers\InterfaceDelegates.cs" />
+    <Compile Include="Steamworks\Helpers\InterfaceImplementation.cs" />
     <Compile Include="Steamworks\Implementation\SteamAppList.cs" />
     <Compile Include="Steamworks\Implementation\SteamApps.cs" />
+    <Compile Include="Steamworks\Implementation\SteamClient.cs" />
     <Compile Include="Steamworks\Implementation\SteamController.cs" />
     <Compile Include="Steamworks\Implementation\SteamFriends.cs" />
-    <Compile Include="Steamworks\Implementation\SteamInput.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamGameServer.cs" />
-    <Compile Include="Steamworks\Implementation\SteamGameServerStats.cs" />
     <Compile Include="Steamworks\Implementation\SteamGameCoordinator.cs" />
     <Compile Include="Steamworks\Implementation\SteamGameSearch.cs" />
+    <Compile Include="Steamworks\Implementation\SteamGameServer.cs" />
+    <Compile Include="Steamworks\Implementation\SteamGameServerStats.cs" />
     <Compile Include="Steamworks\Implementation\SteamHTMLSurface.cs" />
     <Compile Include="Steamworks\Implementation\SteamHTTP.cs" />
+    <Compile Include="Steamworks\Implementation\SteamInput.cs" />
     <Compile Include="Steamworks\Implementation\SteamInventory.cs" />
+    <Compile Include="Steamworks\Implementation\SteamMasterServerUpdater.cs" />
     <Compile Include="Steamworks\Implementation\SteamMatchmaking.cs" />
     <Compile Include="Steamworks\Implementation\SteamMatchMakingServers.cs" />
     <Compile Include="Steamworks\Implementation\SteamMusic.cs" />
     <Compile Include="Steamworks\Implementation\SteamMusicRemote.cs" />
     <Compile Include="Steamworks\Implementation\SteamNetworking.cs" />
+    <Compile Include="Steamworks\Implementation\SteamNetworkingMessages.cs" />
     <Compile Include="Steamworks\Implementation\SteamNetworkingSockets.cs" />
     <Compile Include="Steamworks\Implementation\SteamNetworkingSocketsSerialized.cs" />
     <Compile Include="Steamworks\Implementation\SteamNetworkingUtils.cs" />
@@ -219,31 +180,17 @@
     <Compile Include="Steamworks\Implementation\SteamUserStats.cs" />
     <Compile Include="Steamworks\Implementation\SteamUtils.cs" />
     <Compile Include="Steamworks\Implementation\SteamVideo.cs" />
-    <Compile Include="Exported functions\SteamInternal.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Exported functions\SteamAPI.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamClient.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamHTTP.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamUser.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamAppList.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamFriends.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamController.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamGameSearch.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamGameServerStats.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamHTMLSurface.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamInput.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamInventory.cs" />
-    <Compile Include="Exported functions\SteamAPI_ISteamMusic.cs" />
+    <Compile Include="Steamworks\SteamAPI_PostAPIResultInProcess_t.cs" />
+    <Compile Include="Steamworks\Types\AppId_t.cs" />
+    <Compile Include="Steamworks\Types\CSteamAPIContext.cs" />
     <Compile Include="Steamworks\Types\EAccountType.cs" />
     <Compile Include="Steamworks\Types\EResult.cs" />
-    <Compile Include="Types\Friend.cs" />
-    <Compile Include="Hook\Types\HookInterface.cs" />
-    <Compile Include="Hook\Types\IHook.cs" />
+    <Compile Include="Steamworks\Types\FriendGameInfo_t.cs" />
+    <Compile Include="Steamworks\Types\FriendsGroupID_t.cs" />
     <Compile Include="Steamworks\Types\HAuthTicket.cs" />
     <Compile Include="Steamworks\Types\HSteamPipe.cs" />
     <Compile Include="Steamworks\Types\HSteamUser.cs" />
-    <Compile Include="Steamworks\Types\FriendGameInfo_t.cs" />
-    <Compile Include="Steamworks\Types\FriendsGroupID_t.cs" />
+    <Compile Include="Steamworks\Types\SteamEnums.cs" />
     <Compile Include="Steamworks\Types\SteamInventory\SteamInventoryResult_t.cs" />
     <Compile Include="Steamworks\Types\SteamInventory\SteamItemDef_t.cs" />
     <Compile Include="Steamworks\Types\SteamInventory\SteamItemInstanceID_t.cs" />
@@ -251,28 +198,12 @@
     <Compile Include="Steamworks\Types\SteamRemoteStorage\PublishedFileUpdateHandle_t.cs" />
     <Compile Include="Steamworks\Types\SteamRemoteStorage\UGCFileWriteStreamHandle_t.cs" />
     <Compile Include="Steamworks\Types\SteamRemoteStorage\UGCHandle_t.cs" />
-    <Compile Include="Steamworks\Types\AppId_t.cs" />
+    <Compile Include="Steamworks\Types\SteamTypes.cs" />
     <Compile Include="Steamworks\Types\UGCQueryHandle_t.cs" />
     <Compile Include="Steamworks\Types\UGCUpdateHandle_t.cs" />
-    <Compile Include="Types\Game.cs" />
+    <Compile Include="Types\BaseCalls.cs" />
+    <Compile Include="Types\Friend.cs" />
     <Compile Include="Types\SteamId.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-    <None Include="Resources\close.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\male_user_100px.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Helper\Memory\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ImportGroup Label=".NET DllExport">

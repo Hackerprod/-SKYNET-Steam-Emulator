@@ -1,4 +1,4 @@
-﻿using SKYNET.Delegate.Helper;
+﻿
 using SKYNET.Steamworks;
 using SKYNET.Types;
 using Steamworks;
@@ -114,7 +114,7 @@ namespace SKYNET.Delegate
         #region New
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate bool LogOn(IntPtr _, ulong SteamId);
+        public delegate bool LogOn(ulong SteamId);
 
         [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
         public delegate void LogOff(IntPtr _);

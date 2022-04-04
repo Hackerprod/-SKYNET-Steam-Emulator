@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using SKYNET.Delegate;
 using Steamworks;
-using SKYNET.Delegate.Helper;
 
 namespace SKYNET.Delegate
 {

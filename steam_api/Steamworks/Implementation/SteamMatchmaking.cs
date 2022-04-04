@@ -1,11 +1,14 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using SKYNET;
+using SKYNET.Helper;
 using SKYNET.Steamworks;
 using Steamworks;
 
-public class SteamMatchmaking : SteamInterface
+public class SteamMatchmaking : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
     public int AddFavoriteGame(AppId_t nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags, uint rTime32LastPlayedOnServer)
     {
         Write("AddFavoriteGame");
@@ -226,6 +229,6 @@ public class SteamMatchmaking : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }

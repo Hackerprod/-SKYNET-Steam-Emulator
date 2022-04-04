@@ -1,10 +1,14 @@
 ﻿using SKYNET;
+using SKYNET.Helper;
 using Steamworks;
 using System;
-using System.Runtime.InteropServices;
 
-public class SteamNetworkingSocketsSerialized : SteamInterface
+public class SteamNetworkingSocketsSerialized : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public void SendP2PRendezvous(IntPtr steamIDRemote, uint unConnectionIDSrc, IntPtr pMsgRendezvous, uint cbRendezvous)
     {
         Write("SendP2PRendezvous");
@@ -51,6 +55,6 @@ public class SteamNetworkingSocketsSerialized : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }

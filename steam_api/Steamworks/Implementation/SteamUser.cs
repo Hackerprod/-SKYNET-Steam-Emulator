@@ -1,12 +1,17 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using SKYNET;
+using SKYNET.Helper;
 using SKYNET.Steamworks;
 using SKYNET.Types;
 using Steamworks;
 
-public class SteamUser : SteamInterface
+public class SteamUser : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public HSteamUser GetHSteamUser(IntPtr _)
     {
         Write("GetHSteamUser");
@@ -195,11 +200,11 @@ public class SteamUser : SteamInterface
     }
 
     //////////////////////////////////////
-
+    
 
     #region New
 
-    public bool LogOn(IntPtr _, ulong SteamId)
+    public bool LogOn(ulong SteamId)
     {
         Write("LogOn");
         return true;
@@ -256,7 +261,7 @@ public class SteamUser : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 
 }

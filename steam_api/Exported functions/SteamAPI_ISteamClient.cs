@@ -4,7 +4,6 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using SKYNET;
-using SKYNET.Manager;
 using Steamworks;
 
 public class SteamAPI_ISteamClient : BaseCalls

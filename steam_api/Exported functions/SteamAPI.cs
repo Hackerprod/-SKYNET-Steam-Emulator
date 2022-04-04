@@ -7,9 +7,10 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using SKYNET;
+using SKYNET.Helper;
 using Steamworks;
 
-public class SteamAPI : SteamInterface
+public class SteamAPI : BaseCalls
 {
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static bool SteamAPI_Init()
@@ -852,7 +853,7 @@ public class SteamAPI : SteamInterface
 
     private static void Write(string v)
     {
-        Main.Write("SteamAPI", v);
+        SteamEmulator.Write("SteamAPI", v);
     }
 
 }

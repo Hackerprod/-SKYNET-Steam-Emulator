@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using SKYNET;
+using SKYNET.Helper;
 using SKYNET.Steamworks;
 
-public class SteamController : SteamInterface
+public class SteamController : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     private Dictionary<string, int> action_handles;
     private Dictionary<string, int> digital_action_handles;
     private Dictionary<string, int> analog_action_handles;
@@ -244,6 +248,6 @@ public class SteamController : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }

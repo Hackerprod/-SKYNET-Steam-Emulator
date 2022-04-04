@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SKYNET.Helper
+namespace SKYNET
 {
     public class InterfaceImplementation
     {

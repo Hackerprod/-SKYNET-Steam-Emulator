@@ -5,10 +5,15 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using SKYNET;
+using SKYNET.Helper;
 using SKYNET.Steamworks;
 
-public class SteamInput : SteamInterface
+public class SteamInput : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public void ActivateActionSet(IntPtr inputHandle, IntPtr actionSetHandle)
     {
         Write("ActivateActionSet");
@@ -280,6 +285,6 @@ public class SteamInput : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }

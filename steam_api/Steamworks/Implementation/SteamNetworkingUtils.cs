@@ -1,10 +1,14 @@
 ﻿using SKYNET;
+using SKYNET.Helper;
 using SKYNET.Steamworks;
 using System;
-using System.Runtime.InteropServices;
 
-public class SteamNetworkingUtils : SteamInterface
+public class SteamNetworkingUtils : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public IntPtr AllocateMessage(int cbAllocateBuffer)
     {
         Write("AllocateMessage");
@@ -182,6 +186,6 @@ public class SteamNetworkingUtils : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }

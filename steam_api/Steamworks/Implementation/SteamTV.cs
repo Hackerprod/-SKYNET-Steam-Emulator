@@ -1,9 +1,13 @@
-﻿using SKYNET;
+﻿
+using SKYNET;
+using SKYNET.Helper;
 using System;
-using System.Runtime.InteropServices;
 
-public class SteamTV : SteamInterface
+public class SteamTV : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
     public bool IsBroadcasting(int pnNumViewers)
     {
         Write($"IsBroadcasting");
@@ -43,6 +47,6 @@ public class SteamTV : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }

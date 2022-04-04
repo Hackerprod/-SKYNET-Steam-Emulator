@@ -1,11 +1,15 @@
 ﻿using SKYNET;
+using SKYNET.Helper;
 using SKYNET.Steamworks;
 using Steamworks;
 using System;
-using System.Runtime.InteropServices;
 
-public class SteamUserStats : SteamInterface
+public class SteamUserStats : ISteamInterface
 {
+    public IntPtr MemoryAddress { get; set; }
+    public string InterfaceVersion { get; set; }
+
+
     public bool RequestCurrentStats(IntPtr _)
     {
         Write($"RequestCurrentStats");
@@ -242,6 +246,6 @@ public class SteamUserStats : SteamInterface
 
     private void Write(string v)
     {
-        Main.Write(InterfaceVersion, v);
+        SteamEmulator.Write(InterfaceVersion, v);
     }
 }
