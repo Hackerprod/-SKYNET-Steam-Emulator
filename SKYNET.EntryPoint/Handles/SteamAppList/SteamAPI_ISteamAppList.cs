@@ -21,7 +21,7 @@ namespace SKYNET.Hook.Handles
 
         public int SteamAPI_ISteamAppList_GetAppBuildId(AppId_t nAppID)
         {
-            Log.Write("Steam_AppList::GetAppBuildId");
+            Write("Steam_AppList::GetAppBuildId");
             return SteamEmulator.SteamAppList.GetAppBuildId(nAppID);
         }
 

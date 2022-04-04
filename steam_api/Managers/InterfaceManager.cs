@@ -14,9 +14,6 @@ public class InterfaceManager
 
     private static string filePath;
 
-    private const string x86 = "steam_api.dll";
-    private const string x64 = "steam_api64.dll";
-
     static InterfaceManager()
     {
         Interfaces = new Dictionary<string, IntPtr>();
@@ -25,17 +22,8 @@ public class InterfaceManager
 
     public static void Initialize()
     {
-        filePath = modCommon.GetPath();
-        if (File.Exists(Path.Combine(filePath, x86)))
-        {
-            filePath = Path.Combine(filePath, x86);
-        }
-        else
-        {
-            filePath = Path.Combine(filePath, x64);
-        }
-
-        Assembly a = Assembly.LoadFile(Path.Combine(modCommon.GetPath(), "steam_api64.dll"));
+        filePath = Assembly.GetAssembly(typeof(DelegateAttribute)).Location;
+        Assembly a = Assembly.LoadFile(filePath);
 
         foreach (var t in a.GetTypes())
         {
@@ -46,7 +34,7 @@ public class InterfaceManager
 
                 var new_interface = new InterfaceDelegates { Name = name };
 
-                //Log.Write(string.Format("Found interface delegates \"{0}\"", name));
+                SteamEmulator.Write(string.Format("Found interface delegates \"{0}\"", name));
 
                 var types = t.GetNestedTypes(BindingFlags.Public);
 
