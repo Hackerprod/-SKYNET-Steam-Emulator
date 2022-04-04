@@ -1,10 +1,17 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Runtime.Remoting;
+using System.Runtime.Remoting.Channels;
+using System.Runtime.Remoting.Channels.Ipc;
+using System.Runtime.Serialization.Formatters;
+using System.Security;
+using System.Security.AccessControl;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
@@ -197,7 +204,9 @@ namespace SKYNET
                 try
                 {
                     var InObject = WellKnownObjectMode.Singleton;
-                    RemoteHooking.IpcCreateServer(ref channel, InObject, HookInterface);
+                    //RemoteHooking.IpcCreateServer(ref channel, InObject, HookInterface);
+                    channel = "SteamEmulator";
+                    IpcCreateServer(ref channel, InObject, HookInterface);
                     HookInterface.ChannelName = channel;
                     HookInterface.DllPath = Path.Combine(modCommon.GetPath(), "steam_api.dll");
                     RemoteHooking.CreateAndInject(game.ExecutablePath, game.Parameters, 0, HookInterface.InjectionOptions, HookInterface.DllPath, HookInterface.DllPath, out ProcessId, channel);
@@ -214,6 +223,41 @@ namespace SKYNET
                     Write(ex.Message);
                 }
             });
+        }
+
+        public static IpcServerChannel IpcCreateServer<TRemoteObject>(ref string RefChannelName, WellKnownObjectMode InObjectMode, TRemoteObject ipcInterface, params WellKnownSidType[] InAllowedClientSIDs) where TRemoteObject : MarshalByRefObject
+        {
+            string text = RefChannelName;
+            IDictionary dictionary = new Hashtable();
+            dictionary["name"] = text;
+            dictionary["portName"] = text;
+            DiscretionaryAcl discretionaryAcl = new DiscretionaryAcl(isContainer: false, isDS: false, 1);
+            if (InAllowedClientSIDs.Length == 0)
+            {
+                discretionaryAcl.AddAccess(AccessControlType.Allow, new SecurityIdentifier(WellKnownSidType.WorldSid, null), -1, InheritanceFlags.None, PropagationFlags.None);
+            }
+            else
+            {
+                for (int i = 0; i < InAllowedClientSIDs.Length; i++)
+                {
+                    discretionaryAcl.AddAccess(AccessControlType.Allow, new SecurityIdentifier(InAllowedClientSIDs[i], null), -1, InheritanceFlags.None, PropagationFlags.None);
+                }
+            }
+            CommonSecurityDescriptor securityDescriptor = new CommonSecurityDescriptor(isContainer: false, isDS: false, ControlFlags.OwnerDefaulted | ControlFlags.GroupDefaulted | ControlFlags.DiscretionaryAclPresent, null, null, null, discretionaryAcl);
+            BinaryServerFormatterSinkProvider binaryServerFormatterSinkProvider = new BinaryServerFormatterSinkProvider();
+            binaryServerFormatterSinkProvider.TypeFilterLevel = TypeFilterLevel.Full;
+            IpcServerChannel ipcServerChannel = new IpcServerChannel(dictionary, binaryServerFormatterSinkProvider, securityDescriptor);
+            ChannelServices.RegisterChannel(ipcServerChannel, ensureSecurity: false);
+            if (ipcInterface == null)
+            {
+                RemotingConfiguration.RegisterWellKnownServiceType(typeof(TRemoteObject), text, InObjectMode);
+            }
+            else
+            {
+                RemotingServices.Marshal(ipcInterface, text);
+            }
+            RefChannelName = text;
+            return ipcServerChannel;
         }
 
         private void HookInterface_OnShowMessage(object sender, string e)
