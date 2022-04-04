@@ -292,11 +292,5 @@
     <None Include="Resources\add_Selected.png" />
     <None Include="Resources\add.png" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\steam_api\steam_api.csproj">
-      <Project>{a14d2163-7a4e-489c-9aa0-b512d807bce3}</Project>
-      <Name>steam_api</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
