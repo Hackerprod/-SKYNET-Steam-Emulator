@@ -266,15 +266,27 @@ public class SteamEmulator
         Write(sender + ": " + msg);
     }
 
-    public static void Write(object v)
+//#if Debug
+
+    public static void Write(object msg)
     {
         if (AsClient)
         {
-            Instance.OnMessage?.Invoke(Instance, v);
+            Instance.OnMessage?.Invoke(Instance, msg);
         }
-        Log.Write(v);
+        Log.Write(msg);
     }
+//#else
+
+//    public static void Write(object msg)
+//    {
+//        // TODO
+//    }
+
+//#endif
+
 }
+
 public enum Steam_Pipe : int
 {
     NO_USER,

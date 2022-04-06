@@ -58,6 +58,23 @@ public class SteamInternal : BaseCalls
         return steamApiContext_ptr;
     }
 
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public unsafe static void* SteamInternal_ContextInit_NotWork(void* contextInitData_ptr)
+    {
+        ContextInitData_x64* contextInitData = (ContextInitData_x64*)contextInitData_ptr;
+        Write($"SteamInternal_ContextInit Counter: {contextInitData->counter}");
+
+        if (contextInitData->counter != 1)
+        {
+            CSteamApiContext steamApiContext = contextInitData->Context;
+            contextInitData->counter = 1;
+            steamApiContext.Init();
+            return &contextInitData->Context;
+        }
+
+        return &contextInitData->Context;
+    }
+
     public struct ContextInitData_x64
     {
         private long pFn;                   //64 bit space 
