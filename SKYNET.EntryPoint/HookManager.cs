@@ -1,5 +1,5 @@
 ﻿using EasyHook;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using SKYNET.Hook;
 using SKYNET.Types;
 using System;

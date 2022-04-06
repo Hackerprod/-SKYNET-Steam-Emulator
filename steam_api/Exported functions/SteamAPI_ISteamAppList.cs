@@ -2,45 +2,46 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using SKYNET;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using Steamworks;
 
-public class SteamAPI_ISteamAppList : BaseCalls
+namespace SKYNET.Steamworks.Exported
 {
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static int SteamAPI_ISteamAppList_GetAppBuildId(AppId_t nAppID)
+    public class SteamAPI_ISteamAppList : BaseCalls
     {
-        Write("Steam_AppList::GetAppBuildId");
-        return SteamEmulator.SteamAppList.GetAppBuildId(nAppID);
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_ISteamAppList_GetAppBuildId(AppId_t nAppID)
+        {
+            Write("Steam_AppList::GetAppBuildId");
+            return SteamEmulator.SteamAppList.GetAppBuildId(nAppID);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_ISteamAppList_GetAppInstallDir(AppId_t nAppID, IntPtr pchDirectory, int cchNameMax)
+        {
+            Write("SteamAPI_ISteamAppList_GetAppInstallDir");
+            return SteamEmulator.SteamAppList.GetAppInstallDir(nAppID, pchDirectory, cchNameMax);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_ISteamAppList_GetAppName(AppId_t nAppID, IntPtr pchName, int cchNameMax)
+        {
+            Write("SteamAPI_ISteamAppList_GetAppName");
+            return SteamEmulator.SteamAppList.GetAppName(nAppID, pchName, cchNameMax);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static uint SteamAPI_ISteamAppList_GetInstalledApps(AppId_t pvecAppID, uint unMaxAppIDs)
+        {
+            Write("SteamAPI_ISteamAppList_GetInstalledAppsn");
+            return SteamEmulator.SteamAppList.GetInstalledApps(pvecAppID, unMaxAppIDs);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static uint SteamAPI_ISteamAppList_GetNumInstalledApps(IntPtr _)
+        {
+            Write("SteamAPI_ISteamAppList_GetNumInstalledApps");
+            return SteamEmulator.SteamAppList.GetNumInstalledApps(_);
+        }
     }
-
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static int SteamAPI_ISteamAppList_GetAppInstallDir(AppId_t nAppID, IntPtr pchDirectory, int cchNameMax)
-    {
-        Write("SteamAPI_ISteamAppList_GetAppInstallDir");
-        return SteamEmulator.SteamAppList.GetAppInstallDir(nAppID, pchDirectory, cchNameMax);
-    }
-
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static int SteamAPI_ISteamAppList_GetAppName(AppId_t nAppID, IntPtr pchName, int cchNameMax)
-    {
-        Write("SteamAPI_ISteamAppList_GetAppName");
-        return SteamEmulator.SteamAppList.GetAppName(nAppID, pchName, cchNameMax);
-    }
-
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static uint SteamAPI_ISteamAppList_GetInstalledApps(AppId_t pvecAppID, uint unMaxAppIDs)
-    {
-        Write("SteamAPI_ISteamAppList_GetInstalledAppsn");
-        return SteamEmulator.SteamAppList.GetInstalledApps(pvecAppID, unMaxAppIDs);
-    }
-
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static uint SteamAPI_ISteamAppList_GetNumInstalledApps(IntPtr _)
-    {
-        Write("SteamAPI_ISteamAppList_GetNumInstalledApps");
-        return SteamEmulator.SteamAppList.GetNumInstalledApps(_);
-    }
-
-
 }

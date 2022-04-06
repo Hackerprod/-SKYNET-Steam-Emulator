@@ -1,69 +1,72 @@
 ﻿using SKYNET;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using System;
 
-public class SteamMusic : ISteamInterface
+namespace SKYNET.Steamworks.Implementation
 {
-    public IntPtr MemoryAddress { get; set; }
-    public string InterfaceVersion { get; set; }
-
-    public SteamMusic()
+    public class SteamMusic : ISteamInterface
     {
-        InterfaceVersion = "SteamMusic";
-    }
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
 
-    public bool BIsEnabled(IntPtr _)
-    {
-        Write($"BIsEnabled");
-        return true;
-    }
+        public SteamMusic()
+        {
+            InterfaceVersion = "SteamMusic";
+        }
 
-    public bool BIsPlaying(IntPtr _)
-    {
-        Write($"BIsPlaying");
-        return true;
-    }
+        public bool BIsEnabled(IntPtr _)
+        {
+            Write($"BIsEnabled");
+            return true;
+        }
 
-    public AudioPlayback_Status GetPlaybackStatus(IntPtr _)
-    {
-        Write($"GetPlaybackStatus");
-        return AudioPlayback_Status.AudioPlayback_Undefined;
-    }
+        public bool BIsPlaying(IntPtr _)
+        {
+            Write($"BIsPlaying");
+            return true;
+        }
 
-    public float GetVolume(IntPtr _)
-    {
-        Write($"GetVolume");
-        return 0;
-    }
+        public AudioPlayback_Status GetPlaybackStatus(IntPtr _)
+        {
+            Write($"GetPlaybackStatus");
+            return AudioPlayback_Status.AudioPlayback_Undefined;
+        }
 
-    public void Pause(IntPtr _)
-    {
-        Write($"Pause");
-    }
+        public float GetVolume(IntPtr _)
+        {
+            Write($"GetVolume");
+            return 0;
+        }
 
-    public void Play(IntPtr _)
-    {
-        Write($"Play");
-    }
+        public void Pause(IntPtr _)
+        {
+            Write($"Pause");
+        }
 
-    public void PlayNext(IntPtr _)
-    {
-        Write($"PlayNext");
-    }
+        public void Play(IntPtr _)
+        {
+            Write($"Play");
+        }
 
-    public void PlayPrevious(IntPtr _)
-    {
-        Write($"PlayPrevious");
-    }
+        public void PlayNext(IntPtr _)
+        {
+            Write($"PlayNext");
+        }
 
-    public void SetVolume(float flVolume)
-    {
-        Write($"SetVolume");
-    }
+        public void PlayPrevious(IntPtr _)
+        {
+            Write($"PlayPrevious");
+        }
 
-    private void Write(string v)
-    {
-        SteamEmulator.Write(InterfaceVersion, v);
+        public void SetVolume(float flVolume)
+        {
+            Write($"SetVolume");
+        }
+
+        private void Write(string v)
+        {
+            SteamEmulator.Write(InterfaceVersion, v);
+        }
     }
 }

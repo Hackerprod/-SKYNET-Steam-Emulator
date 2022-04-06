@@ -1,97 +1,100 @@
 ﻿using SKYNET;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using System;
 
-public class SteamMasterServerUpdater : ISteamInterface
+namespace SKYNET.Steamworks.Implementation
 {
-    public IntPtr MemoryAddress { get; set; }
-    public string InterfaceVersion { get; set; }
-
-    public SteamMasterServerUpdater()
+    public class SteamMasterServerUpdater : ISteamInterface
     {
-        InterfaceVersion = "SteamMasterServerUpdater";
-    }
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
 
-    public void SetActive(bool bActive)
-    {
-        Write($"SetActive");
-    }
+        public SteamMasterServerUpdater()
+        {
+            InterfaceVersion = "SteamMasterServerUpdater";
+        }
 
-    public void SetHeartbeatInterval(int iHeartbeatInterval)
-    {
-        Write($"SetHeartbeatInterval");
-    }
+        public void SetActive(bool bActive)
+        {
+            Write($"SetActive");
+        }
 
-    public bool HandleIncomingPacket(IntPtr pData, int cbData, uint srcIP, uint srcPort)
-    {
-        Write($"HandleIncomingPacket");
-        return false;
-    }
+        public void SetHeartbeatInterval(int iHeartbeatInterval)
+        {
+            Write($"SetHeartbeatInterval");
+        }
 
-    public int GetNextOutgoingPacket(IntPtr pOut, int cbMaxOut, uint pNetAdr, uint pPort)
-    {
-        Write($"GetNextOutgoingPacket");
-        return 0;
-    }
+        public bool HandleIncomingPacket(IntPtr pData, int cbData, uint srcIP, uint srcPort)
+        {
+            Write($"HandleIncomingPacket");
+            return false;
+        }
 
-    public void ClearAllKeyValues(IntPtr _)
-    {
-        Write($"ClearAllKeyValues");
-    }
+        public int GetNextOutgoingPacket(IntPtr pOut, int cbMaxOut, uint pNetAdr, uint pPort)
+        {
+            Write($"GetNextOutgoingPacket");
+            return 0;
+        }
 
-    public void SetKeyValue(string pKey, string pValue)
-    {
-        Write($"SetKeyValue");
-    }
+        public void ClearAllKeyValues(IntPtr _)
+        {
+            Write($"ClearAllKeyValues");
+        }
 
-    public void NotifyShutdown(IntPtr _)
-    {
-        Write($"NotifyShutdown");
-    }
+        public void SetKeyValue(string pKey, string pValue)
+        {
+            Write($"SetKeyValue");
+        }
 
-    public bool WasRestartRequested(IntPtr _)
-    {
-        Write($"WasRestartRequested");
-        return false;
-    }
+        public void NotifyShutdown(IntPtr _)
+        {
+            Write($"NotifyShutdown");
+        }
 
-    public void ForceHeartbeat(IntPtr _)
-    {
-        Write($"ForceHeartbeat");
-    }
+        public bool WasRestartRequested(IntPtr _)
+        {
+            Write($"WasRestartRequested");
+            return false;
+        }
 
-    public bool AddMasterServer(string pServerAddress)
-    {
-        Write($"AddMasterServer");
-        return false;
-    }
+        public void ForceHeartbeat(IntPtr _)
+        {
+            Write($"ForceHeartbeat");
+        }
 
-    public bool RemoveMasterServer(string pServerAddress)
-    {
-        Write($"RemoveMasterServer");
-        return false;
-    }
+        public bool AddMasterServer(string pServerAddress)
+        {
+            Write($"AddMasterServer");
+            return false;
+        }
 
-    public int GetNumMasterServers(IntPtr _)
-    {
-        Write($"GetNumMasterServers");
-        return 0;
-    }
+        public bool RemoveMasterServer(string pServerAddress)
+        {
+            Write($"RemoveMasterServer");
+            return false;
+        }
 
-    public int GetMasterServerAddress(int iServer, string pOut, int outBufferSize)
-    {
-        Write($"GetMasterServerAddress");
-        return 0;
-    }
+        public int GetNumMasterServers(IntPtr _)
+        {
+            Write($"GetNumMasterServers");
+            return 0;
+        }
 
-    public void SetBasicServerData(uint nProtocolVersion, bool bDedicatedServer, string pRegionName, string pProductName, uint nMaxReportedClients, bool bPasswordProtected, string pGameDescription)
-    {
-        Write($"SetBasicServerData");
-    }
+        public int GetMasterServerAddress(int iServer, string pOut, int outBufferSize)
+        {
+            Write($"GetMasterServerAddress");
+            return 0;
+        }
 
-    private void Write(string v)
-    {
-        SteamEmulator.Write(InterfaceVersion, v);
+        public void SetBasicServerData(uint nProtocolVersion, bool bDedicatedServer, string pRegionName, string pProductName, uint nMaxReportedClients, bool bPasswordProtected, string pGameDescription)
+        {
+            Write($"SetBasicServerData");
+        }
+
+        private void Write(string v)
+        {
+            SteamEmulator.Write(InterfaceVersion, v);
+        }
     }
 }
 

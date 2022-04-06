@@ -1,64 +1,67 @@
 ﻿using SKYNET;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using Steamworks;
 using System;
 
-public class SteamNetworkingSocketsSerialized : ISteamInterface
+namespace SKYNET.Steamworks.Implementation
 {
-    public IntPtr MemoryAddress { get; set; }
-    public string InterfaceVersion { get; set; }
-
-    public SteamNetworkingSocketsSerialized()
+    public class SteamNetworkingSocketsSerialized : ISteamInterface
     {
-        InterfaceVersion = "SteamNetworkingSocketsSerialized";
-    }
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
 
-    public void SendP2PRendezvous(IntPtr steamIDRemote, uint unConnectionIDSrc, IntPtr pMsgRendezvous, uint cbRendezvous)
-    {
-        Write("SendP2PRendezvous");
-    }
+        public SteamNetworkingSocketsSerialized()
+        {
+            InterfaceVersion = "SteamNetworkingSocketsSerialized";
+        }
 
-    public void SendP2PConnectionFailure(IntPtr steamIDRemote, uint unConnectionIDDest, uint nReason, char pszReason)
-    {
-        Write("SendP2PConnectionFailure");
-    }
+        public void SendP2PRendezvous(IntPtr steamIDRemote, uint unConnectionIDSrc, IntPtr pMsgRendezvous, uint cbRendezvous)
+        {
+            Write("SendP2PRendezvous");
+        }
 
-    public SteamAPICall_t GetCertAsync(IntPtr _)
-    {
-        Write("GetCertAsync");
-        return default;
-    }
+        public void SendP2PConnectionFailure(IntPtr steamIDRemote, uint unConnectionIDDest, uint nReason, char pszReason)
+        {
+            Write("SendP2PConnectionFailure");
+        }
 
-    public int GetNetworkConfigJSON(IntPtr buf, uint cbBuf)
-    {
-        Write("GetNetworkConfigJSON");
-        return 0;
-    }
+        public SteamAPICall_t GetCertAsync(IntPtr _)
+        {
+            Write("GetCertAsync");
+            return default;
+        }
 
-    public void CacheRelayTicket(IntPtr pTicket, uint cbTicket)
-    {
-        Write("CacheRelayTicket");
-    }
+        public int GetNetworkConfigJSON(IntPtr buf, uint cbBuf)
+        {
+            Write("GetNetworkConfigJSON");
+            return 0;
+        }
 
-    public uint GetCachedRelayTicketCount(IntPtr _)
-    {
-        Write("GetCachedRelayTicketCount");
-        return 0;
-    }
+        public void CacheRelayTicket(IntPtr pTicket, uint cbTicket)
+        {
+            Write("CacheRelayTicket");
+        }
 
-    public int GetCachedRelayTicket(uint idxTicket, IntPtr buf, uint cbBuf)
-    {
-        Write("GetCachedRelayTicket");
-        return 0;
-    }
+        public uint GetCachedRelayTicketCount(IntPtr _)
+        {
+            Write("GetCachedRelayTicketCount");
+            return 0;
+        }
 
-    public void PostConnectionStateMsg(IntPtr pMsg, uint cbMsg)
-    {
-        Write("PostConnectionStateMsg");
-    }
+        public int GetCachedRelayTicket(uint idxTicket, IntPtr buf, uint cbBuf)
+        {
+            Write("GetCachedRelayTicket");
+            return 0;
+        }
 
-    private void Write(string v)
-    {
-        SteamEmulator.Write(InterfaceVersion, v);
+        public void PostConnectionStateMsg(IntPtr pMsg, uint cbMsg)
+        {
+            Write("PostConnectionStateMsg");
+        }
+
+        private void Write(string v)
+        {
+            SteamEmulator.Write(InterfaceVersion, v);
+        }
     }
 }

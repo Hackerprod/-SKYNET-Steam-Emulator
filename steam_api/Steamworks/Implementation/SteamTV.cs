@@ -1,57 +1,59 @@
-﻿
-using SKYNET;
-using SKYNET.Helper;
+﻿using SKYNET;
+using SKYNET.Helpers;
 using System;
 
-public class SteamTV : ISteamInterface
+namespace SKYNET.Steamworks.Implementation
 {
-    public IntPtr MemoryAddress { get; set; }
-    public string InterfaceVersion { get; set; }
-
-    public SteamTV()
+    public class SteamTV : ISteamInterface
     {
-        InterfaceVersion = "SteamTV";
-    }
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
 
-    public bool IsBroadcasting(int pnNumViewers)
-    {
-        Write($"IsBroadcasting");
-        return false;
-    }
+        public SteamTV()
+        {
+            InterfaceVersion = "SteamTV";
+        }
 
-    public void AddBroadcastGameData(string pchKey, string pchValue)
-    {
-        Write($"AddBroadcastGameData");
-    }
+        public bool IsBroadcasting(int pnNumViewers)
+        {
+            Write($"IsBroadcasting");
+            return false;
+        }
 
-    public void RemoveBroadcastGameData(string pchKey)
-    {
-        Write($"RemoveBroadcastGameData");
-    }
+        public void AddBroadcastGameData(string pchKey, string pchValue)
+        {
+            Write($"AddBroadcastGameData");
+        }
 
-    public void AddTimelineMarker(string pchTemplateName, bool bPersistent, uint nColorR, uint nColorG, uint nColorB)
-    {
-        Write($"AddTimelineMarker");
-    }
+        public void RemoveBroadcastGameData(string pchKey)
+        {
+            Write($"RemoveBroadcastGameData");
+        }
 
-    public void RemoveTimelineMarker(IntPtr _)
-    {
-        Write($"RemoveTimelineMarker");
-    }
+        public void AddTimelineMarker(string pchTemplateName, bool bPersistent, uint nColorR, uint nColorG, uint nColorB)
+        {
+            Write($"AddTimelineMarker");
+        }
 
-    public uint AddRegion(string pchElementName, string pchTimelineDataSection, IntPtr pSteamTVRegion, int eSteamTVRegionBehavior)
-    {
-        Write($"AddRegion");
-        return 0;
-    }
+        public void RemoveTimelineMarker(IntPtr _)
+        {
+            Write($"RemoveTimelineMarker");
+        }
 
-    public void RemoveRegion(uint unRegionHandle)
-    {
-        Write($"RemoveRegion");
-    }
+        public uint AddRegion(string pchElementName, string pchTimelineDataSection, IntPtr pSteamTVRegion, int eSteamTVRegionBehavior)
+        {
+            Write($"AddRegion");
+            return 0;
+        }
 
-    private void Write(string v)
-    {
-        SteamEmulator.Write(InterfaceVersion, v);
+        public void RemoveRegion(uint unRegionHandle)
+        {
+            Write($"RemoveRegion");
+        }
+
+        private void Write(string v)
+        {
+            SteamEmulator.Write(InterfaceVersion, v);
+        }
     }
 }

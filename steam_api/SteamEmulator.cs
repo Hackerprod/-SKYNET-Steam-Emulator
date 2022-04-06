@@ -1,6 +1,7 @@
 ﻿using SKYNET;
-using SKYNET.Callback;
-using SKYNET.Helper;
+using SKYNET.Helpers;
+using SKYNET.Managers;
+using SKYNET.Steamworks.Implementation;
 using SKYNET.Types;
 using Steamworks;
 using System;
@@ -115,6 +116,8 @@ public class SteamEmulator
         if (Server_Callback == null) Server_Callback = new CallbackManager();
 
         steam_pipes = new Dictionary<HSteamPipe, Steam_Pipe>();
+
+        InterfaceManager.Initialize();
 
         #region Interface Initialization
 
@@ -232,9 +235,11 @@ public class SteamEmulator
         //    Write("Error creating SteamApi Context");
         //}
 
-        Initialized = true;
+        //SteamClient context = (SteamClient)Interface.Bind<ISteamClient>(SteamClient.MemoryAddress);
+        //context.SetPersonaName("Fede");
 
-        InterfaceManager.Initialize();
+
+        Initialized = true;
     }
 
     private T CreateInterface<T>()  where T : ISteamInterface
@@ -297,3 +302,11 @@ public enum Steam_Pipe : int
     CLIENT,
     SERVER
 };
+
+public interface IUserClient
+{
+    string GetUserName();
+    void SetSteamId(long steamId);
+}
+
+

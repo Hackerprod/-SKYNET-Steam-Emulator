@@ -1,5 +1,5 @@
 ﻿using EasyHook;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;

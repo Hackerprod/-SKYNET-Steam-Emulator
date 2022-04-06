@@ -1,55 +1,58 @@
 ﻿using SKYNET;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using System;
 
-public class SteamNetworkingMessages : ISteamInterface
+namespace SKYNET.Steamworks.Implementation
 {
-    public IntPtr MemoryAddress { get; set; }
-    public string InterfaceVersion { get; set; }
-
-    public SteamNetworkingMessages()
+    public class SteamNetworkingMessages : ISteamInterface
     {
-        InterfaceVersion = "SteamNetworkingMessages";
-    }
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
 
-    public int SendMessageToUser(IntPtr identityRemote, IntPtr pubData, uint cubData, int nSendFlags, int nRemoteChannel)
-    {
-        Write("SendMessageToUser");
-        return 0;
-    }
+        public SteamNetworkingMessages()
+        {
+            InterfaceVersion = "SteamNetworkingMessages";
+        }
 
-    public int ReceiveMessagesOnChannel(int nLocalChannel, IntPtr ppOutMessages, int nMaxMessages)
-    {
-        Write("ReceiveMessagesOnChannel");
-        return 0;
-    }
+        public int SendMessageToUser(IntPtr identityRemote, IntPtr pubData, uint cubData, int nSendFlags, int nRemoteChannel)
+        {
+            Write("SendMessageToUser");
+            return 0;
+        }
 
-    public bool AcceptSessionWithUser(IntPtr identityRemote)
-    {
-        Write("AcceptSessionWithUser");
-        return true;
-    }
+        public int ReceiveMessagesOnChannel(int nLocalChannel, IntPtr ppOutMessages, int nMaxMessages)
+        {
+            Write("ReceiveMessagesOnChannel");
+            return 0;
+        }
 
-    public bool CloseSessionWithUser(IntPtr identityRemote)
-    {
-        Write("CloseSessionWithUser");
-        return false;
-    }
+        public bool AcceptSessionWithUser(IntPtr identityRemote)
+        {
+            Write("AcceptSessionWithUser");
+            return true;
+        }
 
-    public bool CloseChannelWithUser(IntPtr identityRemote, int nLocalChannel)
-    {
-        Write("CloseChannelWithUser");
-        return false;
-    }
+        public bool CloseSessionWithUser(IntPtr identityRemote)
+        {
+            Write("CloseSessionWithUser");
+            return false;
+        }
 
-    public IntPtr GetSessionConnectionInfo(IntPtr identityRemote, IntPtr pConnectionInfo, IntPtr pQuickStatus)
-    {
-        Write("GetSessionConnectionInfo");
-        return IntPtr.Zero;
-    }
+        public bool CloseChannelWithUser(IntPtr identityRemote, int nLocalChannel)
+        {
+            Write("CloseChannelWithUser");
+            return false;
+        }
 
-    private void Write(string v)
-    {
-        SteamEmulator.Write(InterfaceVersion, v);
+        public IntPtr GetSessionConnectionInfo(IntPtr identityRemote, IntPtr pConnectionInfo, IntPtr pQuickStatus)
+        {
+            Write("GetSessionConnectionInfo");
+            return IntPtr.Zero;
+        }
+
+        private void Write(string v)
+        {
+            SteamEmulator.Write(InterfaceVersion, v);
+        }
     }
 }

@@ -5,290 +5,294 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using SKYNET;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using SKYNET.Steamworks;
 
-public class SteamInput : ISteamInterface
+
+namespace SKYNET.Steamworks.Implementation
 {
-    public IntPtr MemoryAddress { get; set; }
-    public string InterfaceVersion { get; set; }
-
-    public SteamInput()
+    public class SteamInput : ISteamInterface
     {
-        InterfaceVersion = "SteamInput";
-    }
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
 
-    public void ActivateActionSet(IntPtr inputHandle, IntPtr actionSetHandle)
-    {
-        Write("ActivateActionSet");
-    }
+        public SteamInput()
+        {
+            InterfaceVersion = "SteamInput";
+        }
 
-    public void ActivateActionSetLayer(IntPtr inputHandle, IntPtr actionSetLayerHandle)
-    {
-        Write("ActivateActionSetLayer");
-    }
+        public void ActivateActionSet(IntPtr inputHandle, IntPtr actionSetHandle)
+        {
+            Write("ActivateActionSet");
+        }
 
-    public bool BNewDataAvailable(IntPtr _)
-    {
-        Write("BNewDataAvailable");
-        return false;
-    }
+        public void ActivateActionSetLayer(IntPtr inputHandle, IntPtr actionSetLayerHandle)
+        {
+            Write("ActivateActionSetLayer");
+        }
 
-    public bool BWaitForData([MarshalAs(UnmanagedType.U1)] bool bWaitForever, uint unTimeout)
-    {
-        Write("BWaitForData");
-        return false;
-    }
+        public bool BNewDataAvailable(IntPtr _)
+        {
+            Write("BNewDataAvailable");
+            return false;
+        }
 
-    public void DeactivateActionSetLayer(IntPtr inputHandle, IntPtr actionSetLayerHandle)
-    {
-        Write("DeactivateActionSetLayer");
-    }
+        public bool BWaitForData([MarshalAs(UnmanagedType.U1)] bool bWaitForever, uint unTimeout)
+        {
+            Write("BWaitForData");
+            return false;
+        }
 
-    public void DeactivateAllActionSetLayers(IntPtr inputHandle)
-    {
-        Write("DeactivateAllActionSetLayers");
-    }
+        public void DeactivateActionSetLayer(IntPtr inputHandle, IntPtr actionSetLayerHandle)
+        {
+            Write("DeactivateActionSetLayer");
+        }
 
-    public void EnableDeviceCallbacks(IntPtr _)
-    {
-        Write("EnableDeviceCallbacks");
-    }
+        public void DeactivateAllActionSetLayers(IntPtr inputHandle)
+        {
+            Write("DeactivateAllActionSetLayers");
+        }
 
-    public int GetActionOriginFromint(IntPtr inputHandle, int eOrigin)
-    {
-        Write("GetActionOriginFromint");
-        return 0;
-    }
+        public void EnableDeviceCallbacks(IntPtr _)
+        {
+            Write("EnableDeviceCallbacks");
+        }
 
-    public IntPtr GetActionSetHandle(string pszActionSetName)
-    {
-        Write("GetActionSetHandle");
-        return IntPtr.Zero;
-    }
+        public int GetActionOriginFromint(IntPtr inputHandle, int eOrigin)
+        {
+            Write("GetActionOriginFromint");
+            return 0;
+        }
 
-    public int GetActiveActionSetLayers(IntPtr inputHandle, [In, Out] IntPtr[] handlesOut)
-    {
-        Write("GetActiveActionSetLayers");
-        return 0;
-    }
+        public IntPtr GetActionSetHandle(string pszActionSetName)
+        {
+            Write("GetActionSetHandle");
+            return IntPtr.Zero;
+        }
 
-    public IntPtr GetAnalogActionData(IntPtr inputHandle, IntPtr analogActionHandle)
-    {
-        Write("GetAnalogActionData");
-        return IntPtr.Zero;
-    }
+        public int GetActiveActionSetLayers(IntPtr inputHandle, [In, Out] IntPtr[] handlesOut)
+        {
+            Write("GetActiveActionSetLayers");
+            return 0;
+        }
 
-    public IntPtr GetAnalogActionHandle(string pszActionName)
-    {
-        Write("GetAnalogActionHandle");
-        return IntPtr.Zero;
-    }
+        public IntPtr GetAnalogActionData(IntPtr inputHandle, IntPtr analogActionHandle)
+        {
+            Write("GetAnalogActionData");
+            return IntPtr.Zero;
+        }
 
-    public int GetAnalogActionOrigins(IntPtr inputHandle, IntPtr actionSetHandle, IntPtr analogActionHandle, ref int originsOut)
-    {
-        Write("GetAnalogActionOrigins");
-        return 0;
-    }
+        public IntPtr GetAnalogActionHandle(string pszActionName)
+        {
+            Write("GetAnalogActionHandle");
+            return IntPtr.Zero;
+        }
 
-    public int GetConnectedControllers([In, Out] IntPtr[] handlesOut)
-    {
-        Write("GetConnectedControllers");
-        return 0;
-    }
+        public int GetAnalogActionOrigins(IntPtr inputHandle, IntPtr actionSetHandle, IntPtr analogActionHandle, ref int originsOut)
+        {
+            Write("GetAnalogActionOrigins");
+            return 0;
+        }
 
-    public IntPtr GetControllerForGamepadIndex(int nIndex)
-    {
-        Write("GetControllerForGamepadIndex");
-        return IntPtr.Zero;
-    }
+        public int GetConnectedControllers([In, Out] IntPtr[] handlesOut)
+        {
+            Write("GetConnectedControllers");
+            return 0;
+        }
 
-    public IntPtr GetCurrentActionSet(IntPtr inputHandle)
-    {
-        Write("GetCurrentActionSet");
-        return IntPtr.Zero;
-    }
+        public IntPtr GetControllerForGamepadIndex(int nIndex)
+        {
+            Write("GetControllerForGamepadIndex");
+            return IntPtr.Zero;
+        }
 
-    public bool GetDeviceBindingRevision(IntPtr inputHandle, ref int pMajor, ref int pMinor)
-    {
-        Write("GetDeviceBindingRevision");
-        return false;
-    }
+        public IntPtr GetCurrentActionSet(IntPtr inputHandle)
+        {
+            Write("GetCurrentActionSet");
+            return IntPtr.Zero;
+        }
 
-    public IntPtr GetDigitalActionData(IntPtr inputHandle, IntPtr digitalActionHandle)
-    {
-        Write("GetDigitalActionData");
-        return IntPtr.Zero;
-    }
+        public bool GetDeviceBindingRevision(IntPtr inputHandle, ref int pMajor, ref int pMinor)
+        {
+            Write("GetDeviceBindingRevision");
+            return false;
+        }
 
-    public IntPtr GetDigitalActionHandle(string pszActionName)
-    {
-        Write("GetDigitalActionHandle");
-        return IntPtr.Zero;
-    }
+        public IntPtr GetDigitalActionData(IntPtr inputHandle, IntPtr digitalActionHandle)
+        {
+            Write("GetDigitalActionData");
+            return IntPtr.Zero;
+        }
 
-    public int GetDigitalActionOrigins(IntPtr inputHandle, IntPtr actionSetHandle, IntPtr digitalActionHandle, ref int originsOut)
-    {
-        Write("GetDigitalActionOrigins");
-        return 0;
-    }
+        public IntPtr GetDigitalActionHandle(string pszActionName)
+        {
+            Write("GetDigitalActionHandle");
+            return IntPtr.Zero;
+        }
 
-    public int GetGamepadIndexForController(IntPtr ulinputHandle)
-    {
-        Write("GetGamepadIndexForController");
-        return 0;
-    }
+        public int GetDigitalActionOrigins(IntPtr inputHandle, IntPtr actionSetHandle, IntPtr digitalActionHandle, ref int originsOut)
+        {
+            Write("GetDigitalActionOrigins");
+            return 0;
+        }
 
-    public IntPtr GetGlyphForActionOrigin_Legacy(int eOrigin)
-    {
-        Write("GetGlyphForActionOrigin_Legacy");
-        return IntPtr.Zero;
-    }
+        public int GetGamepadIndexForController(IntPtr ulinputHandle)
+        {
+            Write("GetGamepadIndexForController");
+            return 0;
+        }
 
-    public IntPtr GetGlyphForint(int eOrigin)
-    {
-        Write("GetGlyphForint");
-        return IntPtr.Zero;
-    }
+        public IntPtr GetGlyphForActionOrigin_Legacy(int eOrigin)
+        {
+            Write("GetGlyphForActionOrigin_Legacy");
+            return IntPtr.Zero;
+        }
 
-    public IntPtr GetGlyphPNGForActionOrigin(int eOrigin, IntPtr eSize, uint unFlags)
-    {
-        Write("GetGlyphPNGForActionOrigin");
-        return IntPtr.Zero;
-    }
+        public IntPtr GetGlyphForint(int eOrigin)
+        {
+            Write("GetGlyphForint");
+            return IntPtr.Zero;
+        }
 
-    public IntPtr GetGlyphSVGForActionOrigin(int eOrigin, uint unFlags)
-    {
-        Write("GetGlyphSVGForActionOrigin");
-        return IntPtr.Zero;
-    }
+        public IntPtr GetGlyphPNGForActionOrigin(int eOrigin, IntPtr eSize, uint unFlags)
+        {
+            Write("GetGlyphPNGForActionOrigin");
+            return IntPtr.Zero;
+        }
 
-    public ESteamInputType GetInputTypeForHandle(IntPtr inputHandle)
-    {
-        Write("GetInputTypeForHandle");
-        return ESteamInputType.k_ESteamInputType_Unknown;
-    }
+        public IntPtr GetGlyphSVGForActionOrigin(int eOrigin, uint unFlags)
+        {
+            Write("GetGlyphSVGForActionOrigin");
+            return IntPtr.Zero;
+        }
 
-    public InputMotionData_t GetMotionData(IntPtr inputHandle)
-    {
-        Write("xxx");
-        return new InputMotionData_t();
-    }
+        public ESteamInputType GetInputTypeForHandle(IntPtr inputHandle)
+        {
+            Write("GetInputTypeForHandle");
+            return ESteamInputType.k_ESteamInputType_Unknown;
+        }
 
-    public uint GetRemotePlaySessionID(IntPtr inputHandle)
-    {
-        Write("GetRemotePlaySessionID");
-        return 0;
-    }
+        public InputMotionData_t GetMotionData(IntPtr inputHandle)
+        {
+            Write("xxx");
+            return new InputMotionData_t();
+        }
 
-    public ushort GetSessionInputConfigurationSettings(IntPtr _)
-    {
-        Write("GetSessionInputConfigurationSettings");
-        return 0;
-    }
+        public uint GetRemotePlaySessionID(IntPtr inputHandle)
+        {
+            Write("GetRemotePlaySessionID");
+            return 0;
+        }
 
-    public IntPtr GetStringForActionOrigin(int eOrigin)
-    {
-        Write("GetStringForActionOrigin");
-        return IntPtr.Zero;
-    }
+        public ushort GetSessionInputConfigurationSettings(IntPtr _)
+        {
+            Write("GetSessionInputConfigurationSettings");
+            return 0;
+        }
 
-    public IntPtr GetStringForAnalogActionName(IntPtr eActionHandle)
-    {
-        Write("GetStringForAnalogActionName");
-        return IntPtr.Zero;
-    }
+        public IntPtr GetStringForActionOrigin(int eOrigin)
+        {
+            Write("GetStringForActionOrigin");
+            return IntPtr.Zero;
+        }
 
-    public IntPtr GetStringForDigitalActionName(IntPtr eActionHandle)
-    {
-        Write("GetStringForDigitalActionName");
-        return IntPtr.Zero;
-    }
+        public IntPtr GetStringForAnalogActionName(IntPtr eActionHandle)
+        {
+            Write("GetStringForAnalogActionName");
+            return IntPtr.Zero;
+        }
 
-    public IntPtr GetStringForint(int eOrigin)
-    {
-        Write("GetStringForint");
-        return IntPtr.Zero;
-    }
+        public IntPtr GetStringForDigitalActionName(IntPtr eActionHandle)
+        {
+            Write("GetStringForDigitalActionName");
+            return IntPtr.Zero;
+        }
 
-    public bool Init([MarshalAs(UnmanagedType.U1)] bool bExplicitlyCallRunFrame)
-    {
-        Write("Init");
-        return true;
-    }
+        public IntPtr GetStringForint(int eOrigin)
+        {
+            Write("GetStringForint");
+            return IntPtr.Zero;
+        }
 
-    public void Legacy_TriggerHapticPulse(IntPtr inputHandle, IntPtr eTargetPad, ushort usDurationMicroSec)
-    {
-        Write("Legacy_TriggerHapticPulse");
-    }
+        public bool Init([MarshalAs(UnmanagedType.U1)] bool bExplicitlyCallRunFrame)
+        {
+            Write("Init");
+            return true;
+        }
 
-    public void Legacy_TriggerRepeatedHapticPulse(IntPtr inputHandle, IntPtr eTargetPad, ushort usDurationMicroSec, ushort usOffMicroSec, ushort unRepeat, uint nFlags)
-    {
-        Write("Legacy_TriggerRepeatedHapticPulse");
-    }
+        public void Legacy_TriggerHapticPulse(IntPtr inputHandle, IntPtr eTargetPad, ushort usDurationMicroSec)
+        {
+            Write("Legacy_TriggerHapticPulse");
+        }
 
-    public void RunFrame([MarshalAs(UnmanagedType.U1)] bool bReservedValue)
-    {
-        Write("RunFrame");
-    }
+        public void Legacy_TriggerRepeatedHapticPulse(IntPtr inputHandle, IntPtr eTargetPad, ushort usDurationMicroSec, ushort usOffMicroSec, ushort unRepeat, uint nFlags)
+        {
+            Write("Legacy_TriggerRepeatedHapticPulse");
+        }
 
-    public bool SetInputActionManifestFilePath(string pchInputActionManifestAbsolutePath)
-    {
-        Write("SetInputActionManifestFilePath");
-        return true;
-    }
+        public void RunFrame([MarshalAs(UnmanagedType.U1)] bool bReservedValue)
+        {
+            Write("RunFrame");
+        }
 
-    public void SetLEDColor(IntPtr inputHandle, byte nColorR, byte nColorG, byte nColorB, uint nFlags)
-    {
-        Write("SetLEDColor");
-    }
+        public bool SetInputActionManifestFilePath(string pchInputActionManifestAbsolutePath)
+        {
+            Write("SetInputActionManifestFilePath");
+            return true;
+        }
 
-    public bool ShowBindingPanel(IntPtr inputHandle)
-    {
-        Write("ShowBindingPanel");
-        return false;
-    }
+        public void SetLEDColor(IntPtr inputHandle, byte nColorR, byte nColorG, byte nColorB, uint nFlags)
+        {
+            Write("SetLEDColor");
+        }
 
-    public bool Shutdown(IntPtr _)
-    {
-        Write("Shutdown");
-        return true;
-    }
+        public bool ShowBindingPanel(IntPtr inputHandle)
+        {
+            Write("ShowBindingPanel");
+            return false;
+        }
 
-    public void StopAnalogActionMomentum(IntPtr inputHandle, IntPtr eAction)
-    {
-        Write("StopAnalogActionMomentum");
-    }
+        public bool Shutdown(IntPtr _)
+        {
+            Write("Shutdown");
+            return true;
+        }
 
-    public int TranslateActionOrigin(ESteamInputType eDestinationInputType, int eSourceOrigin)
-    {
-        Write("TranslateActionOrigin");
-        return 0;
-    }
+        public void StopAnalogActionMomentum(IntPtr inputHandle, IntPtr eAction)
+        {
+            Write("StopAnalogActionMomentum");
+        }
 
-    public void TriggerSimpleHapticEvent(IntPtr inputHandle, IntPtr eHapticLocation, byte nIntensity, char nGainDB, byte nOtherIntensity, char nOtherGainDB)
-    {
-        Write("TriggerSimpleHapticEvent");
-    }
+        public int TranslateActionOrigin(ESteamInputType eDestinationInputType, int eSourceOrigin)
+        {
+            Write("TranslateActionOrigin");
+            return 0;
+        }
 
-    public void TriggerVibration(IntPtr inputHandle, ushort usLeftSpeed, ushort usRightSpeed)
-    {
-        Write("TriggerVibration");
-    }
+        public void TriggerSimpleHapticEvent(IntPtr inputHandle, IntPtr eHapticLocation, byte nIntensity, char nGainDB, byte nOtherIntensity, char nOtherGainDB)
+        {
+            Write("TriggerSimpleHapticEvent");
+        }
 
-    public void TriggerVibrationExtended(IntPtr inputHandle, ushort usLeftSpeed, ushort usRightSpeed, ushort usLeftTriggerSpeed, ushort usRightTriggerSpeed)
-    {
-        Write("TriggerVibrationExtended");
-    }
+        public void TriggerVibration(IntPtr inputHandle, ushort usLeftSpeed, ushort usRightSpeed)
+        {
+            Write("TriggerVibration");
+        }
 
-    public IntPtr SteamAPI_SteamInput_v005(IntPtr _)
-    {
-        Write("SteamAPI_SteamInput_v005");
-        return SteamEmulator.SteamInput.MemoryAddress;
-    }
+        public void TriggerVibrationExtended(IntPtr inputHandle, ushort usLeftSpeed, ushort usRightSpeed, ushort usLeftTriggerSpeed, ushort usRightTriggerSpeed)
+        {
+            Write("TriggerVibrationExtended");
+        }
 
-    private void Write(string v)
-    {
-        SteamEmulator.Write(InterfaceVersion, v);
+        public IntPtr SteamAPI_SteamInput_v005(IntPtr _)
+        {
+            Write("SteamAPI_SteamInput_v005");
+            return SteamEmulator.SteamInput.MemoryAddress;
+        }
+
+        private void Write(string v)
+        {
+            SteamEmulator.Write(InterfaceVersion, v);
+        }
     }
 }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using EasyHook;
 using SKYNET;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using SKYNET.Types;
 
 namespace SKYNET.Hook.Handles
@@ -70,26 +70,6 @@ namespace SKYNET.Hook.Handles
 
             Main.Write($"SteamInternal_ContextInit initializing ");
 
-            context->m_pSteamClient = SteamEmulator.SteamClient.MemoryAddress;
-            context->m_pSteamUser = SteamEmulator.SteamUser.MemoryAddress;
-            context->m_pSteamFriends = SteamEmulator.SteamFriends.MemoryAddress;
-            context->m_pSteamUtils = SteamEmulator.SteamUtils.MemoryAddress;
-            context->m_pSteamMatchmaking = SteamEmulator.SteamMatchmaking.MemoryAddress;
-            context->m_pSteamMatchmakingServers = SteamEmulator.SteamMatchMakingServers.MemoryAddress;
-            context->m_pSteamUserStats = SteamEmulator.SteamUserStats.MemoryAddress;
-            context->m_pSteamApps = SteamEmulator.SteamApps.MemoryAddress;
-            context->m_pSteamNetworking = SteamEmulator.SteamNetworking.MemoryAddress;
-            context->m_pSteamRemoteStorage = SteamEmulator.SteamMusicRemote.MemoryAddress;
-            context->m_pSteamScreenshots = SteamEmulator.SteamScreenshots.MemoryAddress;
-            context->m_pSteamHTTP = SteamEmulator.SteamHTTP.MemoryAddress;
-            context->m_pSteamController = SteamEmulator.SteamController.MemoryAddress;
-            context->m_pSteamUGC = SteamEmulator.SteamUGC.MemoryAddress;
-            context->m_pSteamAppList = SteamEmulator.SteamAppList.MemoryAddress;
-            context->m_pSteamMusic = SteamEmulator.SteamMusic.MemoryAddress;
-            context->m_pSteamMusicRemote = SteamEmulator.SteamMusicRemote.MemoryAddress;
-            context->m_pSteamHTMLSurface = SteamEmulator.SteamHTMLSurface.MemoryAddress;
-            context->m_pSteamInventory = SteamEmulator.SteamInventory.MemoryAddress;
-            context->m_pSteamVideo = SteamEmulator.SteamVideo.MemoryAddress;
 
             return context;
         }

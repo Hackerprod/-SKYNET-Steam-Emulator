@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Steamworks;
 
-namespace SKYNET.Callback
+namespace SKYNET.Managers
 {
     public class CallbackManager
     {

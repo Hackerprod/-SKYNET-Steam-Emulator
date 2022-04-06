@@ -7,63 +7,61 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-public class SteamAPI_ISteamNetworkingSocketsSerialized : BaseCalls
+namespace SKYNET.Steamworks.Exported
 {
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static void SteamAPI_ISteamNetworkingSocketsSerialized_SendP2PRendezvous(IntPtr steamIDRemote, uint unConnectionIDSrc, IntPtr pMsgRendezvous, uint cbRendezvous)
+    public class SteamAPI_ISteamNetworkingSocketsSerialized : BaseCalls
     {
-        Write("SteamAPI_ISteamNetworkingSocketsSerialized_SendP2PRendezvous");
-        //
-    }
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamNetworkingSocketsSerialized_SendP2PRendezvous(IntPtr steamIDRemote, uint unConnectionIDSrc, IntPtr pMsgRendezvous, uint cbRendezvous)
+        {
+            Write("SteamAPI_ISteamNetworkingSocketsSerialized_SendP2PRendezvous");
+        }
 
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static void SteamAPI_ISteamNetworkingSocketsSerialized_SendP2PConnectionFailure(IntPtr steamIDRemote, uint unConnectionIDDest, uint nReason, char pszReason)
-    {
-        Write("SteamAPI_ISteamNetworkingSocketsSerialized_SendP2PConnectionFailure");
-        //
-    }
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamNetworkingSocketsSerialized_SendP2PConnectionFailure(IntPtr steamIDRemote, uint unConnectionIDDest, uint nReason, char pszReason)
+        {
+            Write("SteamAPI_ISteamNetworkingSocketsSerialized_SendP2PConnectionFailure");
+        }
 
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static SteamAPICall_t SteamAPI_ISteamNetworkingSocketsSerialized_GetCertAsync(IntPtr _)
-    {
-        Write("SteamAPI_ISteamNetworkingSocketsSerialized_GetCertAsync");
-        return SteamEmulator.SteamNetworkingSocketsSerialized.GetCertAsync(_);
-    }
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static SteamAPICall_t SteamAPI_ISteamNetworkingSocketsSerialized_GetCertAsync(IntPtr _)
+        {
+            Write("SteamAPI_ISteamNetworkingSocketsSerialized_GetCertAsync");
+            return SteamEmulator.SteamNetworkingSocketsSerialized.GetCertAsync(_);
+        }
 
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static int SteamAPI_ISteamNetworkingSocketsSerialized_GetNetworkConfigJSON(IntPtr buf, uint cbBuf)
-    {
-        Write("SteamAPI_ISteamNetworkingSocketsSerialized_GetNetworkConfigJSON");
-        return SteamEmulator.SteamNetworkingSocketsSerialized.GetNetworkConfigJSON(buf, cbBuf);
-    }
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_ISteamNetworkingSocketsSerialized_GetNetworkConfigJSON(IntPtr buf, uint cbBuf)
+        {
+            Write("SteamAPI_ISteamNetworkingSocketsSerialized_GetNetworkConfigJSON");
+            return SteamEmulator.SteamNetworkingSocketsSerialized.GetNetworkConfigJSON(buf, cbBuf);
+        }
 
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static void SteamAPI_ISteamNetworkingSocketsSerialized_CacheRelayTicket(IntPtr pTicket, uint cbTicket)
-    {
-        Write("SteamAPI_ISteamNetworkingSocketsSerialized_CacheRelayTicket");
-        //
-    }
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamNetworkingSocketsSerialized_CacheRelayTicket(IntPtr pTicket, uint cbTicket)
+        {
+            Write("SteamAPI_ISteamNetworkingSocketsSerialized_CacheRelayTicket");
+        }
 
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static uint SteamAPI_ISteamNetworkingSocketsSerialized_GetCachedRelayTicketCount(IntPtr _)
-    {
-        Write("SteamAPI_ISteamNetworkingSocketsSerialized_GetCachedRelayTicketCount");
-        return SteamEmulator.SteamNetworkingSocketsSerialized.GetCachedRelayTicketCount(_);
-    }
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static uint SteamAPI_ISteamNetworkingSocketsSerialized_GetCachedRelayTicketCount(IntPtr _)
+        {
+            Write("SteamAPI_ISteamNetworkingSocketsSerialized_GetCachedRelayTicketCount");
+            return SteamEmulator.SteamNetworkingSocketsSerialized.GetCachedRelayTicketCount(_);
+        }
 
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static int SteamAPI_ISteamNetworkingSocketsSerialized_GetCachedRelayTicket(uint idxTicket, IntPtr buf, uint cbBuf)
-    {
-        Write("SteamAPI_ISteamNetworkingSocketsSerialized_GetCachedRelayTicket");
-        return SteamEmulator.SteamNetworkingSocketsSerialized.GetCachedRelayTicket(idxTicket, buf, cbBuf);
-    }
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_ISteamNetworkingSocketsSerialized_GetCachedRelayTicket(uint idxTicket, IntPtr buf, uint cbBuf)
+        {
+            Write("SteamAPI_ISteamNetworkingSocketsSerialized_GetCachedRelayTicket");
+            return SteamEmulator.SteamNetworkingSocketsSerialized.GetCachedRelayTicket(idxTicket, buf, cbBuf);
+        }
 
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static void SteamAPI_ISteamNetworkingSocketsSerialized_PostConnectionStateMsg(IntPtr pMsg, uint cbMsg)
-    {
-        Write("SteamAPI_ISteamNetworkingSocketsSerialized_PostConnectionStateMsg");
-        //
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamNetworkingSocketsSerialized_PostConnectionStateMsg(IntPtr pMsg, uint cbMsg)
+        {
+            Write("SteamAPI_ISteamNetworkingSocketsSerialized_PostConnectionStateMsg");
+        }
     }
-
 }
 

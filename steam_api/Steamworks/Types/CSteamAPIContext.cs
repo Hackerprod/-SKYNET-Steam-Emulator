@@ -1,5 +1,5 @@
 ﻿using SKYNET;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using System;
 using System.Runtime.InteropServices;
 
@@ -207,4 +207,41 @@ namespace SKYNET.Types
     }
 
 
+    [InterfaceName("CSteamInterfaceContext")]
+    public interface CSteamInterfaceContext
+    {
+        IntPtr SteamClient();
+        IntPtr SteamUser();
+        IntPtr SteamFriends();
+        IntPtr SteamUtils();
+        IntPtr SteamMatchmaking();
+        IntPtr SteamGameSearch();
+        IntPtr SteamUserStats();
+        IntPtr SteamApps();
+        IntPtr SteamMatchmakingServers();
+        IntPtr SteamNetworking();
+        IntPtr SteamRemoteStorage();
+        IntPtr SteamScreenshots();
+        IntPtr SteamHTTP();
+        IntPtr SteamController();
+        IntPtr SteamUGC();
+        IntPtr SteamAppList();
+        IntPtr SteamMusic();
+        IntPtr SteamMusicRemote();
+        IntPtr SteamHTMLSurface();
+        IntPtr SteamInventory();
+        IntPtr SteamVideo();
+        IntPtr SteamParentalSettings();
+        IntPtr SteamInput();
+
+    }
+    public class InterfaceNameAttribute : Attribute
+    {
+        public InterfaceNameAttribute(string name)
+        {
+            this.Name = name;
+        }
+
+        public string Name { get; }
+    }
 }

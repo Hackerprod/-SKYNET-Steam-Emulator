@@ -1,73 +1,75 @@
-﻿
-using SKYNET;
-using SKYNET.Helper;
+﻿using SKYNET;
+using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using System;
 
-public class SteamScreenshots : ISteamInterface
+namespace SKYNET.Steamworks.Implementation
 {
-    public IntPtr MemoryAddress { get; set; }
-    public string InterfaceVersion { get; set; }
-
-    public SteamScreenshots()
+    public class SteamScreenshots : ISteamInterface
     {
-        InterfaceVersion = "SteamScreenshots";
-    }
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
 
-    public uint WriteScreenshot(IntPtr pubRGB, uint cubRGB, int nWidth, int nHeight)
-    {
-        Write("WriteScreenshot");
-        return 0;
-    }
+        public SteamScreenshots()
+        {
+            InterfaceVersion = "SteamScreenshots";
+        }
 
-    public uint AddScreenshotToLibrary(char pchFilename, char pchThumbnailFilename, int nWidth, int nHeight)
-    {
-        Write("AddScreenshotToLibrary");
-        return 0;
-    }
+        public uint WriteScreenshot(IntPtr pubRGB, uint cubRGB, int nWidth, int nHeight)
+        {
+            Write("WriteScreenshot");
+            return 0;
+        }
 
-    public void TriggerScreenshot(IntPtr _)
-    {
-        Write("TriggerScreenshot");
-    }
+        public uint AddScreenshotToLibrary(char pchFilename, char pchThumbnailFilename, int nWidth, int nHeight)
+        {
+            Write("AddScreenshotToLibrary");
+            return 0;
+        }
 
-    public void HookScreenshots(bool bHook)
-    {
-        Write("HookScreenshots");
-    }
+        public void TriggerScreenshot(IntPtr _)
+        {
+            Write("TriggerScreenshot");
+        }
 
-    public bool SetLocation(uint hScreenshot, char pchLocation)
-    {
-        Write("SetLocation");
-        return false;
-    }
+        public void HookScreenshots(bool bHook)
+        {
+            Write("HookScreenshots");
+        }
 
-    public bool TagUser(uint hScreenshot, IntPtr steamID)
-    {
-        Write("TagUser");
-        return false;
-    }
+        public bool SetLocation(uint hScreenshot, char pchLocation)
+        {
+            Write("SetLocation");
+            return false;
+        }
 
-    public bool TagPublishedFile(uint hScreenshot, uint unPublishedFileID)
-    {
-        Write("TagPublishedFile");
-        return false;
-    }
+        public bool TagUser(uint hScreenshot, IntPtr steamID)
+        {
+            Write("TagUser");
+            return false;
+        }
 
-    public bool IsScreenshotsHooked(IntPtr _)
-    {
-        Write("IsScreenshotsHooked");
-        return false;
-    }
+        public bool TagPublishedFile(uint hScreenshot, uint unPublishedFileID)
+        {
+            Write("TagPublishedFile");
+            return false;
+        }
 
-    public uint AddVRScreenshotToLibrary(EVRScreenshotType eType, char pchFilename, char pchVRFilename)
-    {
-        Write("AddVRScreenshotToLibrary");
-        return 0;
-    }
+        public bool IsScreenshotsHooked(IntPtr _)
+        {
+            Write("IsScreenshotsHooked");
+            return false;
+        }
 
-    private void Write(string v)
-    {
-        SteamEmulator.Write(InterfaceVersion, v);
+        public uint AddVRScreenshotToLibrary(EVRScreenshotType eType, char pchFilename, char pchVRFilename)
+        {
+            Write("AddVRScreenshotToLibrary");
+            return 0;
+        }
+
+        private void Write(string v)
+        {
+            SteamEmulator.Write(InterfaceVersion, v);
+        }
     }
 }

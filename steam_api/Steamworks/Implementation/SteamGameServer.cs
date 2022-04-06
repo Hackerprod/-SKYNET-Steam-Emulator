@@ -2,37 +2,40 @@
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using SKYNET;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using Steamworks;
 
-public class SteamGameServer : ISteamInterface
+namespace SKYNET.Steamworks.Implementation
 {
-    public IntPtr MemoryAddress { get; set; }
-    public string InterfaceVersion { get; set; }
+    public class SteamGameServer : ISteamInterface
+    {
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
 
-    public SteamGameServer()
-    {
-        InterfaceVersion = "SteamGameServer";
-    }
-    public int GetHSteamUser(IntPtr _)
-    {
-        Write($"GetHSteamUser");
-        return 1;
-    }
+        public SteamGameServer()
+        {
+            InterfaceVersion = "SteamGameServer";
+        }
+        public int GetHSteamUser(IntPtr _)
+        {
+            Write($"GetHSteamUser");
+            return 1;
+        }
 
-    public int GetHSteamPipe(IntPtr _)
-    {
-        Write($"GetHSteamPipe");
-        return 1;
-    }
+        public int GetHSteamPipe(IntPtr _)
+        {
+            Write($"GetHSteamPipe");
+            return 1;
+        }
 
-    public void RunCallbacks(IntPtr _)
-    {
-        Write($"RunCallbacks");
-    }
+        public void RunCallbacks(IntPtr _)
+        {
+            Write($"RunCallbacks");
+        }
 
-    private void Write(string v)
-    {
-        SteamEmulator.Write(InterfaceVersion, v);
+        private void Write(string v)
+        {
+            SteamEmulator.Write(InterfaceVersion, v);
+        }
     }
 }

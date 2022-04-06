@@ -1,63 +1,65 @@
 ﻿using SKYNET;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using System;
 
-public class SteamRemotePlay : ISteamInterface
+namespace SKYNET.Steamworks.Implementation
 {
-    public IntPtr MemoryAddress { get; set; }
-    public string InterfaceVersion { get; set; }
-
-    public SteamRemotePlay()
+    public class SteamRemotePlay : ISteamInterface
     {
-        InterfaceVersion = "SteamRemotePlay";
-    }
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
 
-    public uint GetSessionCount(IntPtr _)
-    {
-        Write("GetSessionCount");
-        return 0;
-    }
+        public SteamRemotePlay()
+        {
+            InterfaceVersion = "SteamRemotePlay";
+        }
 
-    public uint GetSessionID(int iSessionIndex)
-    {
-        Write("GetSessionID");
-        return default;
-    }
+        public uint GetSessionCount(IntPtr _)
+        {
+            Write("GetSessionCount");
+            return 0;
+        }
 
-    public IntPtr GetSessionSteamID(uint unSessionID)
-    {
-        Write("GetSessionSteamID");
-        return default;
-    }
+        public uint GetSessionID(int iSessionIndex)
+        {
+            Write("GetSessionID");
+            return default;
+        }
 
-    public string GetSessionClientName(uint unSessionID)
-    {
-        Write("GetSessionClientName");
-        return default;
-    }
+        public IntPtr GetSessionSteamID(uint unSessionID)
+        {
+            Write("GetSessionSteamID");
+            return default;
+        }
 
-    public ESteamDeviceFormFactor GetSessionClientFormFactor(uint unSessionID)
-    {
-        Write("GetSessionClientFormFactor");
-        return default;
-    }
+        public string GetSessionClientName(uint unSessionID)
+        {
+            Write("GetSessionClientName");
+            return default;
+        }
 
-    public bool BGetSessionClientResolution(uint unSessionID, int pnResolutionX, int pnResolutionY)
-    {
-        Write("BGetSessionClientResolution");
-        return default;
-    }
+        public ESteamDeviceFormFactor GetSessionClientFormFactor(uint unSessionID)
+        {
+            Write("GetSessionClientFormFactor");
+            return default;
+        }
 
-    public bool BSendRemotePlayTogetherInvite(IntPtr steamIDFriend)
-    {
-        Write("BSendRemotePlayTogetherInvite");
-        return default;
-    }
+        public bool BGetSessionClientResolution(uint unSessionID, int pnResolutionX, int pnResolutionY)
+        {
+            Write("BGetSessionClientResolution");
+            return default;
+        }
 
+        public bool BSendRemotePlayTogetherInvite(IntPtr steamIDFriend)
+        {
+            Write("BSendRemotePlayTogetherInvite");
+            return default;
+        }
 
-    private void Write(string v)
-    {
-        SteamEmulator.Write(InterfaceVersion, v);
+        private void Write(string v)
+        {
+            SteamEmulator.Write(InterfaceVersion, v);
+        }
     }
 }

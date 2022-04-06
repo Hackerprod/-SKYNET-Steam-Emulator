@@ -2,7 +2,7 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using SKYNET;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using Steamworks;
 
 namespace SKYNET.Hook.Handles

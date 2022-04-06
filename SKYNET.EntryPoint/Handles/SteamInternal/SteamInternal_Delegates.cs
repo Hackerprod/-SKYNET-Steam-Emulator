@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using SKYNET;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using SKYNET.Types;
 
 namespace SKYNET.Hook.Handles

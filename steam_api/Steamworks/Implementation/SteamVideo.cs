@@ -1,41 +1,44 @@
 ﻿using SKYNET;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using System;
 
-public class SteamVideo : ISteamInterface
+namespace SKYNET.Steamworks.Implementation
 {
-    public IntPtr MemoryAddress { get; set; }
-    public string InterfaceVersion { get; set; }
-
-    public SteamVideo()
+    public class SteamVideo : ISteamInterface
     {
-        InterfaceVersion = "SteamVideo";
-    }
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
 
-    public void GetVideoURL(IntPtr unVideoAppID)
-    {
-        Write($"GetVideoURL");
-    }
+        public SteamVideo()
+        {
+            InterfaceVersion = "SteamVideo";
+        }
 
-    public bool IsBroadcasting(int pnNumViewers)
-    {
-        Write($"IsBroadcasting");
-        return false;
-    }
+        public void GetVideoURL(IntPtr unVideoAppID)
+        {
+            Write($"GetVideoURL");
+        }
 
-    public void GetOPFSettings(IntPtr unVideoAppID)
-    {
-        Write($"GetOPFSettings");
-    }
+        public bool IsBroadcasting(int pnNumViewers)
+        {
+            Write($"IsBroadcasting");
+            return false;
+        }
 
-    public bool GetOPFStringForApp(IntPtr unVideoAppID, string pchBuffer, uint pnBufferSize)
-    {
-        Write($"GetOPFStringForApp");
-        return false;
-    }
+        public void GetOPFSettings(IntPtr unVideoAppID)
+        {
+            Write($"GetOPFSettings");
+        }
 
-    private void Write(string v)
-    {
-        SteamEmulator.Write(InterfaceVersion, v);
+        public bool GetOPFStringForApp(IntPtr unVideoAppID, string pchBuffer, uint pnBufferSize)
+        {
+            Write($"GetOPFStringForApp");
+            return false;
+        }
+
+        private void Write(string v)
+        {
+            SteamEmulator.Write(InterfaceVersion, v);
+        }
     }
 }

@@ -5,7 +5,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace SKYNET.Helper
+namespace SKYNET.Helpers
 {
 	public static class NativeMethods
 	{
