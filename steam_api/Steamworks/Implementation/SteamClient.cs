@@ -29,8 +29,8 @@ public class SteamClient : ISteamInterface
 
     public bool BReleaseSteamPipe(int hSteamPipe)
     {
-        Write("BReleaseSteamPipe");
-        return false;
+        Write($"BReleaseSteamPipe {hSteamPipe}");
+        return true;
     }
 
     public int ConnectToGlobalUser(int hSteamPipe)

@@ -1,4 +1,5 @@
 ﻿using EasyHook;
+using Microsoft.Win32;
 using SKYNET.Helper;
 using SKYNET.Manager;
 using SKYNET.Types;
@@ -245,9 +246,30 @@ namespace SKYNET.Hook.Handles
         public string SteamAPI_GetSteamInstallPath()
         {
             Write($"{"SteamAPI_GetSteamInstallPath"}");
+            string installPath = "";
 
-            string path = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
-            return path;
+            try
+            {
+                if (modCommon.Is64Bit())
+                {
+                    installPath = (string)Registry.GetValue(
+                         @"HKEY_CURRENT_USER\Software\Valve\Steam",
+                         "SteamPath",
+                         null);
+                }
+                else
+                {
+                    installPath = (string)Registry.GetValue(
+                         @"HKEY_LOCAL_MACHINE\Software\Valve\Steam",
+                         "InstallPath",
+                         null);
+                }
+            }
+            catch
+            {
+            }
+
+            return installPath;
         }
         
         public int SteamAPI_GetHSteamUser()

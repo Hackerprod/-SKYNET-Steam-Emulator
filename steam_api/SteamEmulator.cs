@@ -32,8 +32,10 @@ public class SteamEmulator
     public static HSteamUser HSteamUser;
     public static HSteamPipe HSteamPipe;
 
-    public static HSteamUser HSteamUser_GS{ get; set; }
+    public static HSteamUser HSteamUser_GS;
     public static HSteamPipe HSteamPipe_GS;
+
+    public static CSteamApiContext Context;
 
     #endregion
 
@@ -219,6 +221,8 @@ public class SteamEmulator
 
         SteamClient.ConnectToGlobalUser((int)HSteamPipe);
 
+        Context = new CSteamApiContext();
+        var success = Context.Init();
         //if (success)
         //{
         //    Write("SteamApi Context created successfully");

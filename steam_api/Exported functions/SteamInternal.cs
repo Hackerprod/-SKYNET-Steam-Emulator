@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using SKYNET;
 using SKYNET.Helper;
 using SKYNET.Types;
+using Reloaded.Memory;
 
 public class SteamInternal : BaseCalls
 {
@@ -41,18 +42,20 @@ public class SteamInternal : BaseCalls
     }
 
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static IntPtr SteamInternal_ContextInit(IntPtr contextInitData_ptr)
+    public unsafe static IntPtr SteamInternal_ContextInit(IntPtr contextInitData_ptr)
     {
+        Reloaded.Memory.Sources.Memory Memory = new Reloaded.Memory.Sources.Memory();
+
         ContextInitData_x64 contextInitData = Marshal.PtrToStructure<ContextInitData_x64>(contextInitData_ptr);
         Write($"SteamInternal_ContextInit Counter: {contextInitData.counter}");
 
-        IntPtr steamApiContext_ptr = contextInitData_ptr.Increment(16);
+        IntPtr steamApiContext_ptr = (IntPtr)contextInitData_ptr + 16 ;
 
         if (contextInitData.counter != 1)
         {
-            CSteamApiContext steamApiContext = Marshal.PtrToStructure<CSteamApiContext>(steamApiContext_ptr);
-            steamApiContext.Init();
-            return steamApiContext_ptr;
+            Memory.ChangePermission(steamApiContext_ptr, (int)sizeof(CSteamApiContext), Reloaded.Memory.Kernel32.Kernel32.MEM_PROTECTION.PAGE_READWRITE);
+            Memory.Write(steamApiContext_ptr, ref SteamEmulator.Context, false);
+            //Marshal.StructureToPtr(SteamEmulator.Context, steamApiContext_ptr, false);
         }
 
         return steamApiContext_ptr;
