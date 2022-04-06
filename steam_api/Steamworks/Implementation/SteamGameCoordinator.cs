@@ -11,6 +11,10 @@ public class SteamGameCoordinator : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamGameCoordinator()
+    {
+        InterfaceVersion = "SteamGameCoordinator";
+    }
 
     public bool IsMessageAvailable(uint pcubMsgSize)
     {

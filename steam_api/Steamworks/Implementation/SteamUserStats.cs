@@ -9,6 +9,10 @@ public class SteamUserStats : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamUserStats()
+    {
+        InterfaceVersion = "SteamUserStats";
+    }
 
     public bool RequestCurrentStats(IntPtr _)
     {

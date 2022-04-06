@@ -180,7 +180,6 @@
     <Compile Include="Steamworks\Implementation\SteamUserStats.cs" />
     <Compile Include="Steamworks\Implementation\SteamUtils.cs" />
     <Compile Include="Steamworks\Implementation\SteamVideo.cs" />
-    <Compile Include="Steamworks\SteamAPI_PostAPIResultInProcess_t.cs" />
     <Compile Include="Steamworks\Types\AppId_t.cs" />
     <Compile Include="Steamworks\Types\CSteamAPIContext.cs" />
     <Compile Include="Steamworks\Types\EAccountType.cs" />

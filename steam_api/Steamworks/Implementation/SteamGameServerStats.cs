@@ -8,6 +8,10 @@ public class SteamGameServerStats : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamGameServerStats()
+    {
+        InterfaceVersion = "SteamGameServerStats";
+    }
 
     public bool ClearUserAchievement(IntPtr steamIDUser, string pchName)
     {

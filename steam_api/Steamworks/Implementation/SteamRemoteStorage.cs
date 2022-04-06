@@ -9,6 +9,10 @@ public class SteamRemoteStorage : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamRemoteStorage()
+    {
+        InterfaceVersion = "SteamRemoteStorage";
+    }
 
     public bool FileWrite(string pchFile, IntPtr pvData, int cubData)
     {

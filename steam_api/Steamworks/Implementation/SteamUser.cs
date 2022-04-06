@@ -11,6 +11,10 @@ public class SteamUser : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamUser()
+    {
+        InterfaceVersion = "SteamUser";
+    }
 
     public HSteamUser GetHSteamUser(IntPtr _)
     {

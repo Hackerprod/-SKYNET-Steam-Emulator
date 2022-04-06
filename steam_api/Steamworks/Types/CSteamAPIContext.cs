@@ -8,30 +8,29 @@ namespace SKYNET.Types
     [StructLayout(LayoutKind.Sequential)]
     public struct CSteamApiContext
     {
-        public IntPtr m_pSteamClient;              //ISteamClient* 
-        public IntPtr m_pSteamUser;                //ISteamUser* 
-        public IntPtr m_pSteamFriends;             //ISteamFriends* 
-        public IntPtr m_pSteamUtils;               //ISteamUtils* 
-        public IntPtr m_pSteamMatchmaking;         //ISteamMatchmaking* 
-        public IntPtr m_pSteamGameSearch;          //ISteamGameSearch* 
-        public IntPtr m_pSteamUserStats;           //ISteamUserStats* 
-        public IntPtr m_pSteamApps;                //ISteamApps* 
-        public IntPtr m_pSteamMatchmakingServers;  //ISteamMatchmakingServers* 
-        public IntPtr m_pSteamNetworking;          //ISteamNetworking* 
-        public IntPtr m_pSteamRemoteStorage;       //ISteamRemoteStorage* 
-        public IntPtr m_pSteamScreenshots;         //ISteamScreenshots* 
-        public IntPtr m_pSteamHTTP;                //ISteamHTTP* 
-        public IntPtr m_pSteamController;          //ISteamController* 
-        public IntPtr m_pSteamUGC;                 //ISteamUGC* 
-        public IntPtr m_pSteamAppList;             //ISteamAppList* 
-        public IntPtr m_pSteamMusic;               //ISteamMusic* 
-        public IntPtr m_pSteamMusicRemote;         //ISteamMusicRemote* 
-        public IntPtr m_pSteamHTMLSurface;         //ISteamHTMLSurface* 
-        public IntPtr m_pSteamInventory;           //ISteamInventory* 
-        public IntPtr m_pSteamVideo;               //ISteamVideo* 
-        public IntPtr m_pSteamTV;                  //ISteamTV* 
-        public IntPtr m_pSteamParentalSettings;    //ISteamParentalSettings* 
-        public IntPtr m_pSteamInput;               //ISteamInput* 
+        private IntPtr m_pSteamClient;              //ISteamClient* 
+        private IntPtr m_pSteamUser;                //ISteamUser* 
+        private IntPtr m_pSteamFriends;             //ISteamFriends* 
+        private IntPtr m_pSteamUtils;               //ISteamUtils* 
+        private IntPtr m_pSteamMatchmaking;         //ISteamMatchmaking* 
+        private IntPtr m_pSteamGameSearch;          //ISteamGameSearch* 
+        private IntPtr m_pSteamUserStats;           //ISteamUserStats* 
+        private IntPtr m_pSteamApps;                //ISteamApps* 
+        private IntPtr m_pSteamMatchmakingServers;  //ISteamMatchmakingServers* 
+        private IntPtr m_pSteamNetworking;          //ISteamNetworking* 
+        private IntPtr m_pSteamRemoteStorage;       //ISteamRemoteStorage* 
+        private IntPtr m_pSteamScreenshots;         //ISteamScreenshots* 
+        private IntPtr m_pSteamHTTP;                //ISteamHTTP* 
+        private IntPtr m_pSteamController;          //ISteamController* 
+        private IntPtr m_pSteamUGC;                 //ISteamUGC* 
+        private IntPtr m_pSteamAppList;             //ISteamAppList* 
+        private IntPtr m_pSteamMusic;               //ISteamMusic* 
+        private IntPtr m_pSteamMusicRemote;         //ISteamMusicRemote* 
+        private IntPtr m_pSteamHTMLSurface;         //ISteamHTMLSurface* 
+        private IntPtr m_pSteamInventory;           //ISteamInventory* 
+        private IntPtr m_pSteamVideo;               //ISteamVideo* 
+        private IntPtr m_pSteamParentalSettings;    //ISteamParentalSettings* 
+        private IntPtr m_pSteamInput;               //ISteamInput* 
 
         public IntPtr SteamClient() => m_pSteamClient;
         public IntPtr SteamUser() => m_pSteamUser;
@@ -54,14 +53,11 @@ namespace SKYNET.Types
         public IntPtr SteamHTMLSurface() => m_pSteamHTMLSurface;
         public IntPtr SteamInventory() => m_pSteamInventory;
         public IntPtr SteamVideo() => m_pSteamVideo;
-        public IntPtr SteamTV() => m_pSteamTV;
         public IntPtr SteamParentalSettings() => m_pSteamParentalSettings;
         public IntPtr SteamInput() => m_pSteamInput;
 
         public void Clear()
         {
-            SteamEmulator.Write($"Cleaning CSteamApiContext");
-
             m_pSteamClient = IntPtr.Zero;
             m_pSteamUser = IntPtr.Zero;
             m_pSteamFriends = IntPtr.Zero;
@@ -82,20 +78,10 @@ namespace SKYNET.Types
             m_pSteamHTMLSurface = IntPtr.Zero;
             m_pSteamInventory = IntPtr.Zero;
             m_pSteamVideo = IntPtr.Zero;
-
-            SteamEmulator.Write($"CSteamApiContext cleaned");
         }
 
         public bool Init()
         {
-            var a_steamUser = SteamEmulator.HSteamUser;
-            var a_steamPipe = SteamEmulator.HSteamPipe;
-
-            if ((int)a_steamPipe == 0)
-            {
-                return false;
-            }
-
             m_pSteamClient = SteamEmulator.SteamClient.MemoryAddress;
             if (m_pSteamClient == IntPtr.Zero)
             {
@@ -219,4 +205,6 @@ namespace SKYNET.Types
             return true;
         }
     }
+
+
 }

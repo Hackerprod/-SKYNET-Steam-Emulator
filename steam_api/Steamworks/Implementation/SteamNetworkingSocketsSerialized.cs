@@ -8,6 +8,10 @@ public class SteamNetworkingSocketsSerialized : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamNetworkingSocketsSerialized()
+    {
+        InterfaceVersion = "SteamNetworkingSocketsSerialized";
+    }
 
     public void SendP2PRendezvous(IntPtr steamIDRemote, uint unConnectionIDSrc, IntPtr pMsgRendezvous, uint cbRendezvous)
     {

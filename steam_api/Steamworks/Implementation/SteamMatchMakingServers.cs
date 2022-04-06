@@ -7,6 +7,10 @@ public class SteamMatchMakingServers : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamMatchMakingServers()
+    {
+        InterfaceVersion = "SteamMatchMakingServers";
+    }
 
     public IntPtr RequestInternetServerList(IntPtr iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
     {

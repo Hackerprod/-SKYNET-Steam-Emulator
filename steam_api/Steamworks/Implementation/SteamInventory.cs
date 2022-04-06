@@ -10,6 +10,10 @@ public class SteamInventory : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamInventory()
+    {
+        InterfaceVersion = "SteamInventory";
+    }
 
     public bool AddPromoItem(ref SteamInventoryResult_t pResultHandle, uint itemDef)
     {

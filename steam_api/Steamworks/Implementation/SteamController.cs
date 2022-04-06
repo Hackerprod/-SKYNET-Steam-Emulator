@@ -7,7 +7,7 @@ using SKYNET.Steamworks;
 public class SteamController : ISteamInterface
 {
     public IntPtr MemoryAddress { get; set; }
-    public string InterfaceVersion { get; set; }
+    public string InterfaceVersion { get; set; } 
 
 
     private Dictionary<string, int> action_handles;
@@ -19,6 +19,7 @@ public class SteamController : ISteamInterface
         action_handles = new Dictionary<string, int>();
         digital_action_handles = new Dictionary<string, int>();
         analog_action_handles = new Dictionary<string, int>();
+        InterfaceVersion = "SteamController";
     }
 
     public void ActivateActionSet(IntPtr controllerHandle, int actionSetHandle)

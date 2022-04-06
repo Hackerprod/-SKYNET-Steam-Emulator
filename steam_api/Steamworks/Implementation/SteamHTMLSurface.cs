@@ -9,6 +9,10 @@ public class SteamHTMLSurface : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamHTMLSurface()
+    {
+        InterfaceVersion = "SteamHTMLSurface";
+    }
 
     public void AddHeader(IntPtr unBrowserHandle, string pchKey, string pchValue)
     {

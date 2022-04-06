@@ -7,6 +7,10 @@ public class SteamMasterServerUpdater : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamMasterServerUpdater()
+    {
+        InterfaceVersion = "SteamMasterServerUpdater";
+    }
 
     public void SetActive(bool bActive)
     {

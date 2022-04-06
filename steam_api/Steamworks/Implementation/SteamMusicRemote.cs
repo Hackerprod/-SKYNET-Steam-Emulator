@@ -8,6 +8,10 @@ public class SteamMusicRemote : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamMusicRemote()
+    {
+        InterfaceVersion = "SteamMusicRemote";
+    }
 
     public bool RegisterSteamMusicRemote(string pchName)
     {

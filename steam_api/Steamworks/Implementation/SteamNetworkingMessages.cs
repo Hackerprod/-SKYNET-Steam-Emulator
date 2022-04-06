@@ -7,6 +7,10 @@ public class SteamNetworkingMessages : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamNetworkingMessages()
+    {
+        InterfaceVersion = "SteamNetworkingMessages";
+    }
 
     public int SendMessageToUser(IntPtr identityRemote, IntPtr pubData, uint cubData, int nSendFlags, int nRemoteChannel)
     {

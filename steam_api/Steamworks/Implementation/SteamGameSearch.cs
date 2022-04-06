@@ -8,6 +8,10 @@ public class SteamGameSearch : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamGameSearch()
+    {
+        InterfaceVersion = "SteamGameSearch";
+    }
     public GameSearchErrorCode_t AcceptGame(IntPtr self)
     {
         Write("AcceptGame");

@@ -7,6 +7,10 @@ public class SteamHTTP : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamHTTP()
+    {
+        InterfaceVersion = "SteamHTTP";
+    }
 
     public uint CreateCookieContainer(bool bAllowResponsesToModify)
     {

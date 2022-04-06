@@ -16,7 +16,6 @@ public class SteamInternal : BaseCalls
     public static IntPtr SteamInternal_FindOrCreateUserInterface(IntPtr hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion)
     {
         Write($"SteamInternal_FindOrCreateUserInterface {pszVersion}");
-
         return SteamEmulator.SteamClient.GetISteamGenericInterface((int)SteamEmulator.HSteamUser, (int)SteamEmulator.HSteamPipe, pszVersion);
     }
 
@@ -41,51 +40,262 @@ public class SteamInternal : BaseCalls
         return true;
     }
 
-    public static uint global_counter = 1;
-
     [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static unsafe void* SteamInternal_ContextInit(void* c_contextPointer)
+    public static IntPtr SteamInternal_ContextInit(IntPtr contextInitData_ptr)
     {
-        ContextInitData* CreatedContext = (ContextInitData*)c_contextPointer;
-        Log.Write($"SteamInternal_ContextInit Counter: {CreatedContext->counter}");
+        ContextInitData_x64 contextInitData = Marshal.PtrToStructure<ContextInitData_x64>(contextInitData_ptr);
+        Write($"SteamInternal_ContextInit Counter: {contextInitData.counter}");
 
-        CSteamApiContext* context = &CreatedContext->Context;
+        IntPtr steamApiContext_ptr = contextInitData_ptr.Increment(16);
 
-
-        if (CreatedContext->counter != 1)
+        if (contextInitData.counter != 1)
         {
-            CreatedContext->counter = 1;
-
-            //context->m_pSteamClient = SteamEmulator.SteamClient.MemoryAddress;
-            //context->m_pSteamUser = SteamEmulator.SteamUser.MemoryAddress;
-            //context->m_pSteamFriends = SteamEmulator.SteamFriends.MemoryAddress;
-            //context->m_pSteamUtils = SteamEmulator.SteamUtils.MemoryAddress;
-            //context->m_pSteamMatchmaking = SteamEmulator.SteamMatchmaking.MemoryAddress;
-            //context->m_pSteamMatchmakingServers = SteamEmulator.SteamMatchMakingServers.MemoryAddress;
-            //context->m_pSteamUserStats = SteamEmulator.SteamUserStats.MemoryAddress;
-            //context->m_pSteamApps = SteamEmulator.SteamApps.MemoryAddress;
-            //context->m_pSteamNetworking = SteamEmulator.SteamNetworking.MemoryAddress;
-            //context->m_pSteamRemoteStorage = SteamEmulator.SteamMusicRemote.MemoryAddress;
-            //context->m_pSteamScreenshots = SteamEmulator.SteamScreenshots.MemoryAddress;
-            //context->m_pSteamHTTP = SteamEmulator.SteamHTTP.MemoryAddress;
-            //context->m_pSteamController = SteamEmulator.SteamController.MemoryAddress;
-            //context->m_pSteamUGC = SteamEmulator.SteamUGC.MemoryAddress;
-            //context->m_pSteamAppList = SteamEmulator.SteamAppList.MemoryAddress;
-            //context->m_pSteamMusic = SteamEmulator.SteamMusic.MemoryAddress;
-            //context->m_pSteamMusicRemote = SteamEmulator.SteamMusicRemote.MemoryAddress;
-            //context->m_pSteamHTMLSurface = SteamEmulator.SteamHTMLSurface.MemoryAddress;
-            //context->m_pSteamInventory = SteamEmulator.SteamInventory.MemoryAddress;
-            //context->m_pSteamVideo = SteamEmulator.SteamVideo.MemoryAddress;
-
-            //context->Init();
+            CSteamApiContext steamApiContext = Marshal.PtrToStructure<CSteamApiContext>(steamApiContext_ptr);
+            steamApiContext.Init();
+            return steamApiContext_ptr;
         }
 
-        return context;
+        return steamApiContext_ptr;
     }
 
-    public struct ContextInitData
+    public struct ContextInitData_x64
     {
-        public uint counter;
+        private long pFn;                   //64 bit space 
+        public  long counter;
         public CSteamApiContext Context;
     }
+
+    public struct ContextInitData_x86
+    {
+        private uint pFn;                   //32 bit space
+        public  long counter;
+        public CSteamApiContext Context;
+    }
+}
+
+
+/*
+    This method implementation register SteamMasterServerUpdater and Crash
+
+    SteamInternal_ContextInit Counter: 0, Context: -1823544080
+    SteamInternal_ContextInit Counter: 0, Context: -1823544080
+    SteamInternal_ContextInit Counter: 0, Context: -1823544080
+    SteamMasterServerUpdater: ClearAllKeyValues                         <---
+    SteamAPI: SteamAPI_SetMiniDumpComment
+     
+    [DllExport(CallingConvention = CallingConvention.Cdecl)]
+    public static unsafe void* SteamInternal_ContextInit(IntPtr contextInitData_ptr)
+    {
+        ContextInitData_x64 contextInitData = Marshal.PtrToStructure<ContextInitData_x64>(contextInitData_ptr);
+        Write($"SteamInternal_ContextInit Counter: {contextInitData.counter}, Context: {(int)&contextInitData.Context}");
+
+        if (contextInitData.counter != 1)
+        {
+            contextInitData.Context.Init();
+            return &contextInitData.Context;
+        }
+
+        return &contextInitData.Context;
+
+    }
+   
+     */
+
+public static class IntPtrExtensions
+{
+    #region Methods: Arithmetics
+    public static IntPtr Decrement(this IntPtr pointer, Int32 value)
+    {
+        return Increment(pointer, -value);
+    }
+
+    public static IntPtr Decrement(this IntPtr pointer, Int64 value)
+    {
+        return Increment(pointer, -value);
+    }
+
+    public static IntPtr Decrement(this IntPtr pointer, IntPtr value)
+    {
+        switch (IntPtr.Size)
+        {
+            case sizeof(Int32):
+                return (new IntPtr(pointer.ToInt32() - value.ToInt32()));
+
+            default:
+                return (new IntPtr(pointer.ToInt64() - value.ToInt64()));
+        }
+    }
+
+    public static IntPtr Increment(this IntPtr pointer, Int32 value)
+    {
+        unchecked
+        {
+            switch (IntPtr.Size)
+            {
+                case sizeof(Int32):
+                    return (new IntPtr(pointer.ToInt32() + value));
+
+                default:
+                    return (new IntPtr(pointer.ToInt64() + value));
+            }
+        }
+    }
+
+    public static IntPtr Increment(this IntPtr pointer, Int64 value)
+    {
+        unchecked
+        {
+            switch (IntPtr.Size)
+            {
+                case sizeof(Int32):
+                    return (new IntPtr((Int32)(pointer.ToInt32() + value)));
+
+                default:
+                    return (new IntPtr(pointer.ToInt64() + value));
+            }
+        }
+    }
+
+    public static IntPtr Increment(this IntPtr pointer, IntPtr value)
+    {
+        unchecked
+        {
+            switch (IntPtr.Size)
+            {
+                case sizeof(int):
+                    return new IntPtr(pointer.ToInt32() + value.ToInt32());
+                default:
+                    return new IntPtr(pointer.ToInt64() + value.ToInt64());
+            }
+        }
+    }
+    #endregion
+
+    #region Methods: Comparison
+    public static Int32 CompareTo(this IntPtr left, Int32 right)
+    {
+        return left.CompareTo((UInt32)right);
+    }
+
+    public static Int32 CompareTo(this IntPtr left, IntPtr right)
+    {
+        if (left.ToUInt64() > right.ToUInt64())
+            return 1;
+
+        if (left.ToUInt64() < right.ToUInt64())
+            return -1;
+
+        return 0;
+    }
+
+    public static Int32 CompareTo(this IntPtr left, UInt32 right)
+    {
+        if (left.ToUInt64() > right)
+            return 1;
+
+        if (left.ToUInt64() < right)
+            return -1;
+
+        return 0;
+    }
+    #endregion
+
+    #region Methods: Conversion
+    public unsafe static UInt32 ToUInt32(this IntPtr pointer)
+    {
+        return (UInt32)((void*)pointer);
+    }
+
+    public unsafe static UInt64 ToUInt64(this IntPtr pointer)
+    {
+        return (UInt64)((void*)pointer);
+    }
+    #endregion
+
+    #region Methods: Equality
+    public static Boolean Equals(this IntPtr pointer, Int32 value)
+    {
+        return (pointer.ToInt32() == value);
+    }
+
+    public static Boolean Equals(this IntPtr pointer, Int64 value)
+    {
+        return (pointer.ToInt64() == value);
+    }
+
+    public static Boolean Equals(this IntPtr left, IntPtr ptr2)
+    {
+        return (left == ptr2);
+    }
+
+    public static Boolean Equals(this IntPtr pointer, UInt32 value)
+    {
+        return (pointer.ToUInt32() == value);
+    }
+
+    public static Boolean Equals(this IntPtr pointer, UInt64 value)
+    {
+        return (pointer.ToUInt64() == value);
+    }
+
+    public static Boolean GreaterThanOrEqualTo(this IntPtr left, IntPtr right)
+    {
+        return (left.CompareTo(right) >= 0);
+    }
+
+    public static Boolean LessThanOrEqualTo(this IntPtr left, IntPtr right)
+    {
+        return (left.CompareTo(right) <= 0);
+    }
+    #endregion
+
+    #region Methods: Logic
+    public static IntPtr And(this IntPtr pointer, IntPtr value)
+    {
+        switch (IntPtr.Size)
+        {
+            case sizeof(Int32):
+                return (new IntPtr(pointer.ToInt32() & value.ToInt32()));
+
+            default:
+                return (new IntPtr(pointer.ToInt64() & value.ToInt64()));
+        }
+    }
+
+    public static IntPtr Not(this IntPtr pointer)
+    {
+        switch (IntPtr.Size)
+        {
+            case sizeof(Int32):
+                return (new IntPtr(~pointer.ToInt32()));
+
+            default:
+                return (new IntPtr(~pointer.ToInt64()));
+        }
+    }
+
+    public static IntPtr Or(this IntPtr pointer, IntPtr value)
+    {
+        switch (IntPtr.Size)
+        {
+            case sizeof(Int32):
+                return (new IntPtr(pointer.ToInt32() | value.ToInt32()));
+
+            default:
+                return (new IntPtr(pointer.ToInt64() | value.ToInt64()));
+        }
+    }
+
+    public static IntPtr Xor(this IntPtr pointer, IntPtr value)
+    {
+        switch (IntPtr.Size)
+        {
+            case sizeof(Int32):
+                return (new IntPtr(pointer.ToInt32() ^ value.ToInt32()));
+
+            default:
+                return (new IntPtr(pointer.ToInt64() ^ value.ToInt64()));
+        }
+    }
+    #endregion
 }

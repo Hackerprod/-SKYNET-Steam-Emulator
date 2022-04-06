@@ -11,6 +11,11 @@ public class SteamUtils : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamUtils()
+    {
+        InterfaceVersion = "SteamUtils";
+    }
+
     public uint GetSecondsSinceAppActive(IntPtr _)
     {
         Write("GetSecondsSinceAppActive");

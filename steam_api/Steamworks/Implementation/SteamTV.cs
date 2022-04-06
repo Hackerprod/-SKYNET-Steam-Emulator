@@ -8,6 +8,11 @@ public class SteamTV : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamTV()
+    {
+        InterfaceVersion = "SteamTV";
+    }
+
     public bool IsBroadcasting(int pnNumViewers)
     {
         Write($"IsBroadcasting");

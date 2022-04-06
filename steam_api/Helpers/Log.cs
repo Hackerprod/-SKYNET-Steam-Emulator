@@ -27,12 +27,23 @@ namespace SKYNET.Helper
 
         public static void Write(object msg, bool force = false)
         {
-            Console.WriteLine(msg);
-
             if (!modCommon.LogToFile && !force)
             {
                 return;
             }
+
+            if (outputStream == null)
+            {
+                string _file = Path.Combine(modCommon.GetPath(), "[SKYNET] steam_api.log");
+                outputStream = new FileStream(_file, FileMode.OpenOrCreate);
+            }
+            if (msg == null)
+            {
+                msg = "Message log is Null";
+            }
+
+            Console.WriteLine(msg);
+
 
             if (File.Exists("[SKYNET] steam_api.log"))
             {

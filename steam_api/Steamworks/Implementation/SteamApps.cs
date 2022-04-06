@@ -9,6 +9,10 @@ public class SteamApps : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamApps()
+    {
+        InterfaceVersion = "SteamApps";
+    }
 
     public bool BIsSubscribed(IntPtr _)
     {

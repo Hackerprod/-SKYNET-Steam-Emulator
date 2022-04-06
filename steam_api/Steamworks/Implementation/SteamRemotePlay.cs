@@ -8,6 +8,10 @@ public class SteamRemotePlay : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamRemotePlay()
+    {
+        InterfaceVersion = "SteamRemotePlay";
+    }
 
     public uint GetSessionCount(IntPtr _)
     {

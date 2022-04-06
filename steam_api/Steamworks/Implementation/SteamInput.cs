@@ -13,6 +13,10 @@ public class SteamInput : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamInput()
+    {
+        InterfaceVersion = "SteamInput";
+    }
 
     public void ActivateActionSet(IntPtr inputHandle, IntPtr actionSetHandle)
     {

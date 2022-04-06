@@ -7,6 +7,10 @@ public class SteamVideo : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamVideo()
+    {
+        InterfaceVersion = "SteamVideo";
+    }
 
     public void GetVideoURL(IntPtr unVideoAppID)
     {

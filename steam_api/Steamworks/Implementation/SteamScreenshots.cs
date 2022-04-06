@@ -9,6 +9,10 @@ public class SteamScreenshots : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamScreenshots()
+    {
+        InterfaceVersion = "SteamScreenshots";
+    }
 
     public uint WriteScreenshot(IntPtr pubRGB, uint cubRGB, int nWidth, int nHeight)
     {

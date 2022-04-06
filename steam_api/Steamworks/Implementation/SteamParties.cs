@@ -9,6 +9,10 @@ public class SteamParties : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamParties()
+    {
+        InterfaceVersion = "SteamParties";
+    }
 
     public void CancelReservation(uint ulBeacon, IntPtr steamIDUser)
     {

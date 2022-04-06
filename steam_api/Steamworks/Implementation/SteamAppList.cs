@@ -9,8 +9,12 @@ using Steamworks;
 public class SteamAppList : ISteamInterface
 {
     public IntPtr MemoryAddress { get; set; }
-    public string InterfaceVersion { get; set; }
+    public string InterfaceVersion { get; set; } 
 
+    public SteamAppList()
+    {
+        InterfaceVersion = "SteamAppList";
+    }
 
     public int GetAppBuildId(AppId_t nAppID)
     {

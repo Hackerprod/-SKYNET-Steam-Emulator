@@ -8,6 +8,10 @@ public class SteamNetworkingUtils : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamNetworkingUtils()
+    {
+        InterfaceVersion = "SteamNetworkingUtils";
+    }
 
     public IntPtr AllocateMessage(int cbAllocateBuffer)
     {

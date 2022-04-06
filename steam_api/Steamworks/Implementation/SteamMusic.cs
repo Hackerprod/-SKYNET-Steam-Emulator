@@ -8,6 +8,10 @@ public class SteamMusic : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamMusic()
+    {
+        InterfaceVersion = "SteamMusic";
+    }
 
     public bool BIsEnabled(IntPtr _)
     {

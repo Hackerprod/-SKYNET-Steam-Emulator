@@ -10,6 +10,10 @@ public class SteamGameServer : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamGameServer()
+    {
+        InterfaceVersion = "SteamGameServer";
+    }
     public int GetHSteamUser(IntPtr _)
     {
         Write($"GetHSteamUser");

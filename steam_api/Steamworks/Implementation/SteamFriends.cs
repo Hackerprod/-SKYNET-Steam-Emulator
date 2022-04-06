@@ -15,6 +15,13 @@ public class SteamFriends : ISteamInterface
     public List<Friend> Friends;
     public List<IntPtr> Users;
 
+    public SteamFriends()
+    {
+        InterfaceVersion = "SteamFriends";
+        Friends = new List<Friend>();
+        Users = new List<IntPtr>();
+    }
+
     public void ActivateGameOverlay(IntPtr _, [MarshalAs(UnmanagedType.LPStr)] string friendsGroupID)
     {
         Write($"ActivateGameOverlay {friendsGroupID}");

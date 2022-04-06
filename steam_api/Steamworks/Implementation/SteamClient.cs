@@ -8,8 +8,12 @@ using Steamworks;
 public class SteamClient : ISteamInterface
 {
     public IntPtr MemoryAddress { get; set; }
-    public string InterfaceVersion { get; set; }
+    public string InterfaceVersion { get; set; } = "SteamClient";
 
+    public SteamClient()
+    {
+        InterfaceVersion = "SteamClient";
+    }
 
     public void SetAppId(uint appId)
     {

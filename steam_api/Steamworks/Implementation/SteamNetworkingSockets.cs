@@ -9,6 +9,10 @@ public class SteamNetworkingSockets : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamNetworkingSockets()
+    {
+        InterfaceVersion = "SteamNetworkingSockets";
+    }
 
     public uint CreateListenSocketIP(IntPtr localAddress, int nOptions, IntPtr pOptions)
     {

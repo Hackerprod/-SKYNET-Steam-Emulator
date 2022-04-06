@@ -9,6 +9,10 @@ public class SteamParentalSettings : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamParentalSettings()
+    {
+        InterfaceVersion = "SteamParentalSettings";
+    }
 
     public bool BIsParentalLockEnabled(IntPtr _)
     {

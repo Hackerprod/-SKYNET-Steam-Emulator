@@ -8,6 +8,10 @@ public class SteamNetworking : ISteamInterface
     public IntPtr MemoryAddress { get; set; }
     public string InterfaceVersion { get; set; }
 
+    public SteamNetworking()
+    {
+        InterfaceVersion = "SteamNetworking";
+    }
 
     public bool SendP2PPacket(IntPtr steamIDRemote, IntPtr pubData, uint cubData, EP2PSend eP2PSendType, int nChannel)
     {
