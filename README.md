@@ -8,7 +8,7 @@ The project is in an initial stage, so it is not functional yet.
 ## Settings
 This emulator reads settings from `[SKYNET] steam_api.ini` file, data like Nickname, SteamId, Language etc.
 
-## Actually working on
+## Currently working on
 SteamInternal_ContextInit implementation.
 
 ## Log
