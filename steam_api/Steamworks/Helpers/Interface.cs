@@ -177,7 +177,7 @@ namespace SKYNET.Helpers
             return classType;
         }
 
-        private static Type CreateDelegateTypeFromMethod(MethodInfo methodInfo)
+        public static Type CreateDelegateTypeFromMethod(MethodInfo methodInfo)
         {
             Interface.Initialize();
 

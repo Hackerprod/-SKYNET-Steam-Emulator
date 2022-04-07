@@ -103,7 +103,6 @@
     <Compile Include="Exported functions\SteamAPI_SteamNetworkingIdentity.cs" />
     <Compile Include="Exported functions\SteamInternal.cs" />
     <Compile Include="Helpers\INIParser.cs" />
-    <Compile Include="Helpers\IntPtrExtentions.cs" />
     <Compile Include="Helpers\Log.cs" />
     <Compile Include="Helpers\modCommon.cs" />
     <Compile Include="Steamworks\Helpers\Interface.cs" />

@@ -6,9 +6,15 @@ using SKYNET.Types;
 using Steamworks;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.SymbolStore;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 public class SteamEmulator
@@ -106,6 +112,8 @@ public class SteamEmulator
 
     public void Initialize()
     {
+        Test(typeof(SteamClient));
+
         string _file = Path.Combine(modCommon.GetPath(), "[SKYNET] steam_api.ini");
 
         modCommon.LoadSettings();
@@ -240,6 +248,7 @@ public class SteamEmulator
 
 
         Initialized = true;
+
     }
 
     private T CreateInterface<T>()  where T : ISteamInterface
@@ -285,14 +294,102 @@ public class SteamEmulator
         }
         Log.Write(msg);
     }
-//#else
+    //#else
 
-//    public static void Write(object msg)
-//    {
-//        // TODO
-//    }
+    //    public static void Write(object msg)
+    //    {
+    //        // TODO
+    //    }
 
-//#endif
+    //#endif
+
+    private void Test(Type type)
+    {
+        string Name = type.Name;
+        Write("Creating dll");
+        try
+        {
+
+            AssemblyBuilder asmBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName("Scenarios"), AssemblyBuilderAccess.RunAndSave);
+            ModuleBuilder moduleBuilder = asmBuilder.DefineDynamicModule("Scenarios", "Scenarios.dll");
+
+            foreach (var methodInfo in InterfaceMethodsForType(type))
+            {
+                TypeAttributes typeAttr = TypeAttributes.Class | TypeAttributes.Sealed | TypeAttributes.AnsiClass | TypeAttributes.AutoClass;
+                TypeBuilder del = moduleBuilder.DefineType(methodInfo.Name, typeAttr, typeof(MulticastDelegate));
+
+                CustomAttributeBuilder unmanagedPointer = new CustomAttributeBuilder(typeof(UnmanagedFunctionPointerAttribute).GetConstructor(new[] { typeof(CallingConvention) }), new object[] { CallingConvention.ThisCall });
+                del.SetCustomAttribute(unmanagedPointer);
+
+                MethodAttributes ctorAttr = MethodAttributes.RTSpecialName | MethodAttributes.Public;
+                ConstructorBuilder ctor = del.DefineConstructor(ctorAttr, CallingConventions.Standard, new Type[] { typeof(object), typeof(System.IntPtr) });
+                ctor.SetImplementationFlags(MethodImplAttributes.Runtime | MethodImplAttributes.Managed);
+
+                Type[] parameterTypes = methodInfo.GetParameters().Select(x => x.ParameterType).ToArray();
+
+                MethodBuilder invokeMethod = del.DefineMethod("Invoke", methodInfo.Attributes & ~MethodAttributes.Abstract, methodInfo.ReturnType, parameterTypes);
+                invokeMethod.SetImplementationFlags(MethodImplAttributes.Runtime | MethodImplAttributes.Managed);
+
+                //ParameterInfo[] parameters = methodInfo.GetParameters();
+                //for (int i = 0; i < parameters.Length; i++)
+                //{
+                //    ilGenerator.Emit(OpCodes.Ldarg_S, i + 1);
+                //}
+                //ilGenerator.Emit(OpCodes.Callvirt, delegateType.GetMethod("Invoke"));
+
+                //if (methodInfo.ReturnType == typeof(string))
+                //{
+                //    ilGenerator.Emit(OpCodes.Call, typeof(Interface).GetMethod("PtrToStringUtf8"));
+                //}
+
+                //ilGenerator.Emit(OpCodes.Ret);
+                del.CreateType();
+            }
+
+            asmBuilder.Save("Scenarios.dll");
+
+            //////////////////////////////////////////////////////////////////////////////////
+            ///
+
+            //string delTypeName = "UniqueName";
+
+            //AssemblyBuilder asmBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName("Scenarios"), AssemblyBuilderAccess.RunAndSave);
+            //ModuleBuilder moduleBuilder = asmBuilder.DefineDynamicModule("Scenarios", "Scenarios.dll");
+
+            //TypeAttributes typeAttr = TypeAttributes.Class | TypeAttributes.Sealed | TypeAttributes.AnsiClass | TypeAttributes.AutoClass;
+            //TypeBuilder del = moduleBuilder.DefineType(delTypeName, typeAttr, typeof(MulticastDelegate));
+
+            //ConstructorInfo ufpa = typeof(UnmanagedFunctionPointerAttribute).GetConstructor(new Type[] { typeof(CallingConvention) });
+            //CustomAttributeBuilder unmanagedPointer = new CustomAttributeBuilder(typeof(UnmanagedFunctionPointerAttribute).GetConstructor(new[] { typeof(CallingConvention) }), new object[] { CallingConvention.ThisCall });
+            //del.SetCustomAttribute(unmanagedPointer);
+
+            //MethodAttributes ctorAttr = MethodAttributes.RTSpecialName | MethodAttributes.HideBySig | MethodAttributes.Public;
+            //ConstructorBuilder ctor = del.DefineConstructor(ctorAttr, CallingConventions.Standard, new Type[] { typeof(object), typeof(System.IntPtr) });
+            //ctor.SetImplementationFlags(MethodImplAttributes.Runtime | MethodImplAttributes.Managed);
+
+            //Type[] parameterTypes = new Type[0] { };
+            //MethodAttributes methodAttr = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual;
+
+            //MethodBuilder invokeMethod = del.DefineMethod("Invoke", methodAttr, typeof(string), parameterTypes);
+            //invokeMethod.SetImplementationFlags(MethodImplAttributes.Runtime | MethodImplAttributes.Managed);
+
+            //del.CreateType();
+            //asmBuilder.Save("Scenarios.dll");
+        }
+        catch (Exception ex)
+        {
+            Write(ex.Message + " " + ex.StackTrace);
+        }
+
+
+        Write("Dll created");
+    }
+    public static List<MethodInfo> InterfaceMethodsForType(Type t)
+    {
+        var all_methods = new List<MethodInfo>(t.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly));
+        all_methods.RemoveAll(x => x.Name.StartsWith("get_") || x.Name.StartsWith("set_"));
+        return all_methods;
+    }
 
 }
 
