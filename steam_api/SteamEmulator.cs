@@ -1,4 +1,6 @@
-﻿using NativeSharp;
+﻿#define LOG
+
+using NativeSharp;
 using SKYNET;
 using SKYNET.Helpers;
 using SKYNET.Managers;
@@ -37,7 +39,7 @@ public class SteamEmulator
     public static string PersonaName { get; set; }
     public static ulong SteamId { get; set; }
     public static ulong SteamId_GS { get; set; }
-    public static bool AsClient { get; set; }
+    public static bool AsClient { get; set; } = true;
     public static uint AppId { get; set; }
 
     public static HSteamUser HSteamUser;
@@ -46,7 +48,7 @@ public class SteamEmulator
     public static HSteamUser HSteamUser_GS;
     public static HSteamPipe HSteamPipe_GS;
 
-    public static CSteamApiContext Context;
+    public static CSteamApiContext_Class Context;
 
     #endregion
 
@@ -96,7 +98,7 @@ public class SteamEmulator
     public static SteamUtils SteamGameServerUtils;
     public static SteamGameServerStats SteamGameServerStats;
     public static SteamNetworking SteamGameServerNetworking;
-    public static SteamHTTP SteamGameServerHttp;
+    public static SteamHTTP SteamGameServerHTTP;
     public static SteamInventory SteamGameServerInventory;
     public static SteamUGC SteamGameServerUgc;
     public static SteamApps SteamGameServerApps;
@@ -117,8 +119,6 @@ public class SteamEmulator
 
     public void Initialize()
     {
-        string _file = Path.Combine(modCommon.GetPath(), "[SKYNET] steam_api.ini");
-
         modCommon.LoadSettings();
 
         NativeProcess = NativeProcess.Open((uint)Process.GetCurrentProcess().Id, ProcessAccess.AllAccess);
@@ -230,9 +230,9 @@ public class SteamEmulator
 
         #endregion
 
-        //Context = MemoryManager.CreateInterface<CSteamApiContext>(out IntPtr Ptr);
-        //var success = Context.Init();
-        //Context_Ptr = Ptr;
+        Context = MemoryManager.CreateInterface<CSteamApiContext_Class>(out IntPtr Ptr);
+        var success = Context.Init(Ptr);
+        Context_Ptr = Ptr;
 
         HSteamUser = (HSteamUser)1;
         HSteamPipe = (HSteamPipe)1;
@@ -292,7 +292,9 @@ public class SteamEmulator
         Write(sender + ": " + msg);
     }
 
-//#if Debug
+
+
+#if LOG
 
     public static void Write(object msg)
     {
@@ -303,14 +305,15 @@ public class SteamEmulator
             Instance.OnMessage?.Invoke(Instance, msg);
         }
     }
-    //#else
 
-    //    public static void Write(object msg)
-    //    {
-    //        // TODO
-    //    }
+#else
 
-    //#endif
+    public static void Write(object msg)
+    {
+        // TODO
+    }
+
+#endif
 
 }
 

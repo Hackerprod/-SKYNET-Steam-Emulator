@@ -167,7 +167,7 @@ namespace SKYNET.Steamworks.Implementation
         public IntPtr SteamAPI_SteamGameServerHTTP_v003(IntPtr _)
         {
             Write($"SteamAPI_SteamGameServerHTTP_v003");
-            return SteamEmulator.SteamGameServerHttp.MemoryAddress;
+            return SteamEmulator.SteamGameServerHTTP.MemoryAddress;
         }
 
         private void Write(string v)

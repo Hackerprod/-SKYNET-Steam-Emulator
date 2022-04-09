@@ -11,15 +11,6 @@ namespace SKYNET.Helpers
     {
         private static Stream outputStream;
 
-        static Log()
-        {
-            if (modCommon.LogToFile)
-            {
-                string _file = Path.Combine(modCommon.GetPath(), "[SKYNET] steam_api.log");
-                outputStream = new FileStream(_file, FileMode.OpenOrCreate);
-            }
-        }
-
         public static void Write(object sender, object msg)
         {
             Write(sender + ": " + msg);
@@ -29,14 +20,17 @@ namespace SKYNET.Helpers
         {
             if (!modCommon.LogToFile && !force)
             {
+                //modCommon.Show(msg);
                 return;
             }
+
 
             if (outputStream == null)
             {
                 string _file = Path.Combine(modCommon.GetPath(), "[SKYNET] steam_api.log");
                 outputStream = new FileStream(_file, FileMode.OpenOrCreate);
             }
+
             if (msg == null)
             {
                 msg = "Message log is Null";
@@ -44,8 +38,7 @@ namespace SKYNET.Helpers
 
             Console.WriteLine(msg);
 
-
-            if (File.Exists("[SKYNET] steam_api.log"))
+            if (File.Exists(Path.Combine(modCommon.GetPath(), "[SKYNET] steam_api.log")))
             {
                 string _msg = "";
                 if (msg != null)

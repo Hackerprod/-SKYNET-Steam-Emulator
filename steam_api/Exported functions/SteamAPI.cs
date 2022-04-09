@@ -14,6 +14,8 @@ namespace SKYNET.Steamworks.Exported
 {
     public class SteamAPI : BaseCalls
     {
+        internal static bool firstMiniDump = true;
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_Init()
         {
@@ -67,12 +69,10 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public unsafe static void SteamAPI_RegisterCallback(IntPtr pCallback, int iCallback)
         {
-            string _file = Path.Combine(modCommon.GetPath(), "[SKYNET] steam_api.ini");
-
-            if (File.Exists(_file))
-            {
-                modCommon.LoadSettings();
-            }
+            //if (!SteamEmulator.Initialized)
+            //{
+            //    new SteamEmulator(false).Initialize();
+            //}
 
             CCallbackBase Base = Marshal.PtrToStructure<CCallbackBase>(pCallback);
             string callMessage = $"SteamAPI_RegisterCallback: ";
@@ -86,14 +86,14 @@ namespace SKYNET.Steamworks.Exported
 
             callMessage += $"{(CallbackType)base_callback} {callback_id} ";
 
-            if (GameServer)
-            {
-                SteamEmulator.Server_Callback.RegisterCallback(pCallback, iCallback);
-            }
-            else
-            {
-                SteamEmulator.Client_Callback.RegisterCallback(pCallback, iCallback);
-            }
+            //if (GameServer)
+            //{
+            //    SteamEmulator.Server_Callback.RegisterCallback(pCallback, iCallback);
+            //}
+            //else
+            //{
+            //    SteamEmulator.Client_Callback.RegisterCallback(pCallback, iCallback);
+            //}
 
             Write(callMessage);
         }
@@ -143,7 +143,6 @@ namespace SKYNET.Steamworks.Exported
         public static int SteamAPI_GetHSteamUser()
         {
             Write($"SteamAPI_GetHSteamUser");
-
             if (SteamEmulator.HSteamUser == null || (int)SteamEmulator.HSteamUser == 0)
             {
                 SteamEmulator.CreateSteamUser();
@@ -154,7 +153,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int SteamAPI_GetHSteamPipe()
         {
-            //Write("SteamAPI_GetHSteamPipe");
+            Write("SteamAPI_GetHSteamPipe");
             if (SteamEmulator.HSteamPipe == null || (int)SteamEmulator.HSteamPipe == 0)
             {
                 SteamEmulator.CreateSteamPipe();
@@ -191,7 +190,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_UseBreakpadCrashHandler([MarshalAs(UnmanagedType.LPStr)] string pchVersion, [MarshalAs(UnmanagedType.LPStr)] string pchDate, [MarshalAs(UnmanagedType.LPStr)] string pchTime, bool bFullMemoryDumps, IntPtr pvContext, IntPtr m_pfnPreMinidumpCallback)
         {
-            Write($"SteamAPI_UseBreakpadCrashHandler | Date: {pchDate} | Time: {pchTime} | Version : {pchVersion}");
+            Write($"SteamAPI_UseBreakpadCrashHandler");
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -213,14 +212,12 @@ namespace SKYNET.Steamworks.Exported
             Write($"SteamAPI_ManualDispatch_FreeLastCallback");
         }
 
-
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ManualDispatch_GetAPICallResult(HSteamPipe hSteamPipe, IntPtr hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, bool pbFailed)
         {
             Write($"SteamAPI_ManualDispatch_GetAPICallResult");
             return true;
         }
-
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_RestartApp(UInt32 appid)
@@ -236,7 +233,13 @@ namespace SKYNET.Steamworks.Exported
             Msg += "////////////////////////////// Mini Dump Content \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + Environment.NewLine;
             Msg += $"{pchMsg}" + Environment.NewLine;
             Msg += "//////////////////////////////   End Mini Dump   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + Environment.NewLine;
-            Write(Msg);
+            //if (firstMiniDump)
+            {
+                Write(Msg);
+                firstMiniDump = false;
+                return;
+            }
+           // Write("SteamAPI_SetMiniDumpComment");
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -300,35 +303,35 @@ namespace SKYNET.Steamworks.Exported
         public static IntPtr SteamAPI_SteamAppList_v001()
         {
             Write($"SteamAPI_SteamAppList_v001");
-            return SteamEmulator.SteamClient.GetISteamAppList(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "STEAMAPPLIST_INTERFACE_VERSION001");
+            return SteamEmulator.SteamAppList.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamApps_v008()
         {
             Write($"SteamAPI_SteamApps_v008");
-            return SteamEmulator.SteamClient.GetISteamApps(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "STEAMAPPS_INTERFACE_VERSION008");
+            return SteamEmulator.SteamApps.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamGameServerApps_v008()
         {
             Write($"SteamAPI_SteamGameServerApps_v008");
-            return SteamEmulator.SteamClient.GetISteamApps((int)(int)SteamEmulator.HSteamUser_GS, (int)SteamEmulator.HSteamPipe_GS, "STEAMAPPS_INTERFACE_VERSION008");
+            return SteamEmulator.SteamGameServerApps.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamController_v007()
         {
             Write($"SteamAPI_SteamController_v007");
-            return SteamEmulator.SteamClient.GetISteamController(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamController007");
+            return SteamEmulator.SteamController.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamController_v008()
         {
             Write($"SteamAPI_SteamController_v008");
-            return SteamEmulator.SteamClient.GetISteamController(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamController008");
+            return SteamEmulator.SteamController.MemoryAddress;
         }
 
 
@@ -336,49 +339,49 @@ namespace SKYNET.Steamworks.Exported
         public static IntPtr SteamAPI_SteamFriends_v017()
         {
             Write($"SteamAPI_SteamFriends_v017");
-            return SteamEmulator.SteamClient.GetISteamFriends(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamFriends017");
+            return SteamEmulator.SteamFriends.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamUtils_v010()
         {
             Write($"SteamAPI_SteamUtils_v010");
-            return SteamEmulator.SteamClient.GetISteamUtils(SteamAPI_GetHSteamPipe(), "SteamUtils010");
+            return SteamEmulator.SteamUtils.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamGameServerUtils_v010()
         {
             Write($"SteamAPI_SteamGameServerUtils_v010");
-            return SteamEmulator.SteamClient.GetISteamUtils((int)SteamEmulator.HSteamPipe_GS, "SteamUtils010");
+            return SteamEmulator.SteamGameServerUtils.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamUtils_v009()
         {
             Write($"SteamAPI_SteamUtils_v009");
-            return SteamEmulator.SteamClient.GetISteamUtils(SteamAPI_GetHSteamPipe(), "SteamUtils009");
+            return SteamEmulator.SteamUtils.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamGameServerUtils_v009()
         {
             Write($"SteamAPI_SteamGameServerUtils_v009");
-            return SteamEmulator.SteamClient.GetISteamUtils((int)SteamEmulator.HSteamPipe_GS, "SteamUtils009");
+            return SteamEmulator.SteamGameServerUtils.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamMatchmaking_v009()
         {
             Write($"SteamAPI_SteamMatchmaking_v009");
-            return SteamEmulator.SteamClient.GetISteamMatchmaking(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamMatchMaking009");
+            return SteamEmulator.SteamMatchmaking.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamMatchmakingServers_v002()
         {
             Write($"SteamAPI_SteamMatchmakingServers_v002");
-            return SteamEmulator.SteamClient.GetISteamMatchmakingServers(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamMatchMakingServers002");
+            return SteamEmulator.SteamMatchMakingServers.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -393,21 +396,21 @@ namespace SKYNET.Steamworks.Exported
         public static IntPtr SteamAPI_SteamParties_v002()
         {
             Write($"SteamAPI_SteamParties_v002");
-            return SteamEmulator.SteamClient.GetISteamParties(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamParties002");
+            return SteamEmulator.SteamParties.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamNetworking_v006()
         {
             Write($"SteamAPI_SteamNetworking_v006");
-            return SteamEmulator.SteamClient.GetISteamNetworking(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamNetworking006");
+            return SteamEmulator.SteamNetworking.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamGameServerNetworking_v006()
         {
             Write($"SteamAPI_SteamGameServerNetworking_v006");
-            return SteamEmulator.SteamClient.GetISteamNetworking((int)SteamEmulator.HSteamUser_GS, (int)SteamEmulator.HSteamPipe_GS, "SteamNetworking006");
+            return SteamEmulator.SteamGameServerNetworking.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -428,7 +431,7 @@ namespace SKYNET.Steamworks.Exported
         public static IntPtr SteamAPI_SteamMusicRemote_v001()
         {
             Write($"SteamAPI_SteamMusicRemote_v001");
-            return SteamEmulator.SteamClient.GetISteamMusicRemote(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "STEAMMUSICREMOTE_INTERFACE_VERSION001");
+            return SteamEmulator.SteamMusicRemote.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -442,49 +445,49 @@ namespace SKYNET.Steamworks.Exported
         public static IntPtr SteamAPI_SteamGameServerHTTP_v003()
         {
             Write($"SteamAPI_SteamGameServerHTTP_v003");
-            return SteamEmulator.SteamHTTP.MemoryAddress;
+            return SteamEmulator.SteamGameServerHTTP.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamInput_v001()
         {
             Write($"SteamAPI_SteamInput_v001");
-            return SteamEmulator.SteamClient.GetISteamInput(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamInput001");
+            return SteamEmulator.SteamInput.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamInput_v002()
         {
             Write($"SteamAPI_SteamInput_v002");
-            return SteamEmulator.SteamClient.GetISteamInput(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamInput002");
+            return SteamEmulator.SteamInput.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamHTMLSurface_v005()
         {
             Write($"SteamAPI_SteamHTMLSurface_v005");
-            return SteamEmulator.SteamClient.GetISteamHTMLSurface(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "STEAMHTMLSURFACE_INTERFACE_VERSION_005");
+            return SteamEmulator.SteamHTMLSurface.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamInventory_v003()
         {
             Write($"SteamAPI_SteamInventory_v003");
-            return SteamEmulator.SteamClient.GetISteamInventory(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "STEAMINVENTORY_INTERFACE_V003");
+            return SteamEmulator.SteamInventory.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamGameServerInventory_v003()
         {
             Write($"SteamAPI_SteamGameServerInventory_v003");
-            return SteamEmulator.SteamClient.GetISteamInventory((int)SteamEmulator.HSteamUser_GS, (int)SteamEmulator.HSteamPipe_GS, "STEAMINVENTORY_INTERFACE_V003");
+            return SteamEmulator.SteamGameServerInventory.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamVideo_v002()
         {
             Write($"SteamAPI_SteamVideo_v002");
-            return SteamEmulator.SteamClient.GetISteamVideo(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "STEAMVIDEO_INTERFACE_V002");
+            return SteamEmulator.SteamVideo.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -498,98 +501,98 @@ namespace SKYNET.Steamworks.Exported
         public static IntPtr SteamAPI_SteamParentalSettings_v001()
         {
             Write($"SteamAPI_SteamParentalSettings_v001");
-            return SteamEmulator.SteamClient.GetISteamParentalSettings(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "STEAMPARENTALSETTINGS_INTERFACE_VERSION001");
+            return SteamEmulator.SteamParentalSettings.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamRemotePlay_v001()
         {
             Write($"SteamAPI_SteamRemotePlay_v001");
-            return SteamEmulator.SteamClient.GetISteamRemotePlay(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "STEAMREMOTEPLAY_INTERFACE_VERSION001");
+            return SteamEmulator.SteamRemotePlay.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamNetworkingMessages_v002()
         {
             Write($"SteamAPI_SteamNetworkingMessages_v002");
-            return SteamEmulator.SteamClient.GetISteamGenericInterface(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamNetworkingMessages002");
+            return SteamEmulator.SteamNetworkingMessages.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamNetworkingMessages_SteamAPI_v002()
         {
             Write($"SteamAPI_SteamNetworkingMessages_SteamAPI_v002");
-            return SteamEmulator.SteamClient.GetISteamGenericInterface(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamNetworkingMessages002");
+            return SteamEmulator.SteamNetworkingMessages.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamGameServerNetworkingMessages_v002()
         {
             Write($"SteamAPI_SteamGameServerNetworkingMessages_v002");
-            return SteamEmulator.SteamClient.GetISteamGenericInterface((int)SteamEmulator.HSteamUser_GS, (int)SteamEmulator.HSteamPipe_GS, "SteamNetworkingMessages002");
+            return SteamEmulator.SteamGameServerNetworkingMessages.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamGameServerNetworkingMessages_SteamAPI_v002()
         {
             Write($"SteamAPI_SteamGameServerNetworkingMessages_SteamAPI_v002");
-            return SteamEmulator.SteamClient.GetISteamGenericInterface((int)SteamEmulator.HSteamUser_GS, (int)SteamEmulator.HSteamPipe_GS, "SteamNetworkingMessages002");
+            return SteamEmulator.SteamGameServerNetworkingMessages.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamNetworkingSockets_SteamAPI_v009()
         {
             Write($"SteamAPI_SteamNetworkingSockets_SteamAPI_v009");
-            return SteamEmulator.SteamClient.GetISteamGenericInterface(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamNetworkingSockets009");
+            return SteamEmulator.SteamNetworkingSockets.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamGameServerNetworkingSockets_SteamAPI_v009()
         {
             Write($"SteamAPI_SteamGameServerNetworkingSockets_SteamAPI_v009");
-            return SteamEmulator.SteamClient.GetISteamGenericInterface((int)SteamEmulator.HSteamUser_GS, (int)SteamEmulator.HSteamPipe_GS, "SteamNetworkingSockets009");
+            return SteamEmulator.SteamGameServerNetworkingSockets.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamNetworkingSockets_v009()
         {
             Write($"SteamAPI_SteamNetworkingSockets_v009");
-            return SteamEmulator.SteamClient.GetISteamGenericInterface(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamNetworkingSockets009");
+            return SteamEmulator.SteamNetworkingSockets.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamGameServerNetworkingSockets_v009()
         {
             Write($"SteamAPI_SteamGameServerNetworkingSockets_v009");
-            return SteamEmulator.SteamClient.GetISteamGenericInterface((int)SteamEmulator.HSteamUser_GS, (int)SteamEmulator.HSteamPipe_GS, "SteamNetworkingSockets009");
+            return SteamEmulator.SteamGameServerNetworkingSockets.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamNetworkingSockets_v008()
         {
             Write($"SteamAPI_SteamNetworkingSockets_v008");
-            return SteamEmulator.SteamClient.GetISteamGenericInterface(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamNetworkingSockets008");
+            return SteamEmulator.SteamNetworkingSockets.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamGameServerNetworkingSockets_v008()
         {
             Write($"SteamAPI_SteamGameServerNetworkingSockets_v008");
-            return SteamEmulator.SteamClient.GetISteamGenericInterface((int)SteamEmulator.HSteamUser_GS, (int)SteamEmulator.HSteamPipe_GS, "SteamNetworkingSockets008");
+            return SteamEmulator.SteamGameServerNetworkingSockets.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamNetworkingUtils_SteamAPI_v003()
         {
             Write($"SteamAPI_SteamNetworkingUtils_SteamAPI_v003");
-            return SteamEmulator.SteamClient.GetISteamGenericInterface(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamNetworkingUtils003");
+            return SteamEmulator.SteamNetworkingUtils.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamNetworkingUtils_v003()
         {
             Write($"SteamAPI_SteamNetworkingUtils_v003");
-            return SteamEmulator.SteamClient.GetISteamGenericInterface(SteamAPI_GetHSteamUser(), SteamAPI_GetHSteamPipe(), "SteamNetworkingUtils003");
+            return SteamEmulator.SteamNetworkingUtils.MemoryAddress;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

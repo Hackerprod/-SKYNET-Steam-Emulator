@@ -50,42 +50,18 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public unsafe static IntPtr SteamInternal_ContextInit(IntPtr contextInitData_ptr)
         {
-            long counter = Marshal.ReadInt64(contextInitData_ptr, 8);
-            Write($"{Marshal.SizeOf(contextInitData_ptr)}");
             Write($"SteamInternal_ContextInit");
 
-            IntPtr steamApiContext_ptr = (IntPtr)contextInitData_ptr + 16;
+            var counter = Marshal.ReadInt64(contextInitData_ptr, 8);
+            var apiContext_ptr = contextInitData_ptr + 16;
 
             if (counter != 1)
             {
                 Marshal.WriteInt64(contextInitData_ptr, 8, 1);
-
-                CSteamApiContext context = new CSteamApiContext();
-                context.Init();
-
-                //var ptr_size = Marshal.SizeOf(context);
-                //var vtable = Marshal.AllocHGlobal(ptr_size);
-                //Marshal.WriteIntPtr(steamApiContext_ptr, vtable);
-
-                //CSteamApiContext v = Marshal.PtrToStructure<CSteamApiContext>(steamApiContext_ptr);    // Replace pointer Context for new
-                //v.Init();
-                //Marshal.StructureToPtr(v, steamApiContext_ptr, true);    // Replace pointer Context for new
-
-
-                //Marshal.StructureToPtr(context, steamApiContext_ptr, false);    // Replace pointer Context for new
-
-                //var bytes = MemoryManager.StructToBytes(SteamEmulator.Context);
-                //Marshal.Copy(bytes, 0, steamApiContext_ptr, bytes.Length);
-                //Memcpy(bytes, contextInitData_ptr + 16);
-
-                var addr = Original_ContextInit(contextInitData_ptr);
-
-                Marshal.StructureToPtr(context, steamApiContext_ptr, true);    // Replace pointer Context for new
-
-                return addr;
-                //Write($"Context Address: Custom implementation : {steamApiContext_ptr}  |  Original call : {addr}");
+                Original_ContextInit(contextInitData_ptr);
             }
-            return steamApiContext_ptr;
+
+            return apiContext_ptr;
         }
 
         [DllImport("steam_api64_Original.dll", EntryPoint = "SteamInternal_ContextInit")]
