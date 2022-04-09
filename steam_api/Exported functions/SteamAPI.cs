@@ -14,12 +14,20 @@ namespace SKYNET.Steamworks.Exported
 {
     public class SteamAPI : BaseCalls
     {
+        private static bool InitStep = false;
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_Init()
         {
             if (SteamEmulator.Initialized)
             {
+                if (InitStep)
+                {
+                    Write($"{"SteamAPI_Init [TRUE]"}");
+                    return true;
+                }
                 Write($"{"SteamAPI_Init [TRUE]"}");
+                InitStep = true;
                 return false;
             }
 
@@ -853,7 +861,7 @@ namespace SKYNET.Steamworks.Exported
 
         private static void Write(string v)
         {
-            SteamEmulator.Write("SteamAPI", v);
+            SteamEmulator.Write(v);
         }
     }
 }
