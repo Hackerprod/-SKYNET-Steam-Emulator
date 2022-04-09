@@ -1,4 +1,4 @@
-﻿#define LOG
+﻿//#define LOG
 
 using NativeSharp;
 using SKYNET;
@@ -294,7 +294,7 @@ public class SteamEmulator
 
 
 
-#if LOG
+//#if LOG
 
     public static void Write(object msg)
     {
@@ -306,14 +306,14 @@ public class SteamEmulator
         }
     }
 
-#else
+//#else
 
-    public static void Write(object msg)
-    {
-        // TODO
-    }
+//    public static void Write(object msg)
+//    {
+//        // TODO
+//    }
 
-#endif
+//#endif
 
 }
 

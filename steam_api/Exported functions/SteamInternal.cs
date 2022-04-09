@@ -51,141 +51,50 @@ namespace SKYNET.Steamworks.Exported
         public unsafe static IntPtr SteamInternal_ContextInit(IntPtr contextInitData_ptr)
         {
             Write($"SteamInternal_ContextInit");
-
-            var counter = Marshal.ReadInt64(contextInitData_ptr, 8);
-            var apiContext_ptr = contextInitData_ptr + 16;
-
-            if (counter != 1)
+            IntPtr apiContext_ptr = IntPtr.Zero;
+            if (modCommon.Is64Bit())
             {
-                Marshal.WriteInt64(contextInitData_ptr, 8, 1);
-                Original_ContextInit(contextInitData_ptr);
+                ContextInitData_64 Context = Marshal.PtrToStructure<ContextInitData_64>(contextInitData_ptr);
+                apiContext_ptr = contextInitData_ptr + 16;
+                if (Context.counter != 1)
+                {
+                    Marshal.WriteInt64(contextInitData_ptr, 8, 1);
+                    _pFn = Marshal.GetDelegateForFunctionPointer<pFn>(Context.pFn);
+                    _pFn.Invoke(apiContext_ptr);
+                }
+            }
+            else
+            {
+                var Context = Marshal.PtrToStructure<ContextInitData_x86>(contextInitData_ptr);
+                apiContext_ptr = contextInitData_ptr + 8;
+                if (Context.counter != 1)
+                {
+                    Marshal.WriteInt64(contextInitData_ptr, 4, 1);
+                    _pFn = Marshal.GetDelegateForFunctionPointer<pFn>(Context.pFn);
+                    _pFn.Invoke(apiContext_ptr);
+                }
             }
 
             return apiContext_ptr;
         }
 
-        [DllImport("steam_api64_Original.dll", EntryPoint = "SteamInternal_ContextInit")]
-        private unsafe static extern IntPtr Original_ContextInit(IntPtr dst);
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate void pFn(IntPtr ctx);
+        public static pFn _pFn;
 
-
-        unsafe public static void Memcpy(byte[] bytes, IntPtr dest) // faster than Marshal.Copy
+        public struct ContextInitData_64
         {
-            for (int i = 0; i < bytes.Length; ++i)
-                *(byte*)(dest + i) = bytes[i];
-        }
-
-        public struct ContextInitData_x64
-        {
-            private long pFn;                   //64 bites space 
+            public IntPtr pFn;
             public long counter;
             public CSteamApiContext Context;
         }
 
         public struct ContextInitData_x86
         {
-            private uint pFn;                   //32 bites space
-            public long counter;
+            public IntPtr pFn;
+            public uint counter;
             public CSteamApiContext Context;
         }
     }
 }
 
-/*
-    This method implementation register some interface calls and Crash
-
-    SteamInternal_ContextInit Counter: 0
-    SteamInternal_ContextInit Counter: 0
-    SteamClient: GetISteamScreenshots 
-    SteamClient: BReleaseSteamPipe -703862320                      <---
-    SteamAPI: SteamAPI_SetMiniDumpComment
-     
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
-    public static unsafe void* SteamInternal_ContextInit(IntPtr contextInitData_ptr)
-    {
-        long counter = Marshal.ReadInt64(contextInitData_ptr, 8);
-
-        Write($"SteamInternal_ContextInit Counter: {counter}");
-
-        IntPtr steamApiContext_ptr = (IntPtr)contextInitData_ptr + 16;
-
-        if (counter != 1)
-        {
-            Marshal.WriteInt64(contextInitData_ptr, 8, 1);
-            Marshal.StructureToPtr(SteamEmulator.Context, steamApiContext_ptr, true);    // Replace pointer Context for new
-        }
-
-        return steamApiContext_ptr;
-    }
-*/
-
-public enum Win32Error
-{
-    SUCCESS,
-    INVALID_FUNCTION,
-    FILE_NOT_FOUND,
-    PATH_NOT_FOUND,
-    TOO_MANY_OPEN_FILES,
-    ACCESS_DENIED,
-    INVALID_HANDLE,
-    ARENA_TRASHED,
-    NOT_ENOUGH_MEMORY,
-    INVALID_BLOCK,
-    BAD_ENVIRONMENT
-}
-
-public interface ICSteamApiContext
-{
-    [VTableSlot(0)]
-    IntPtr SteamClient();
-    [VTableSlot(1)]
-    IntPtr SteamUser();
-    [VTableSlot(2)]
-    IntPtr SteamFriends();
-    [VTableSlot(3)]
-    IntPtr SteamUtils();
-    [VTableSlot(4)]
-    IntPtr SteamMatchmaking();
-    [VTableSlot(5)]
-    IntPtr SteamGameSearch();
-    [VTableSlot(6)]
-    IntPtr SteamUserStats();
-    [VTableSlot(7)]
-    IntPtr SteamApps();
-    [VTableSlot(8)]
-    IntPtr SteamMatchmakingServers();
-    [VTableSlot(9)]
-    IntPtr SteamNetworking();
-    [VTableSlot(10)]
-    IntPtr SteamRemoteStorage();
-    [VTableSlot(11)]
-    IntPtr SteamScreenshots();
-    [VTableSlot(12)]
-    IntPtr SteamHTTP();
-    [VTableSlot(13)]
-    IntPtr SteamController();
-    [VTableSlot(14)]
-    IntPtr SteamUGC();
-    [VTableSlot(15)]
-    IntPtr SteamAppList();
-    [VTableSlot(16)]
-    IntPtr SteamMusic();
-    [VTableSlot(17)]
-    IntPtr SteamMusicRemote();
-    [VTableSlot(18)]
-    IntPtr SteamHTMLSurface();
-    [VTableSlot(19)]
-    IntPtr SteamInventory();
-    [VTableSlot(20)]
-    IntPtr SteamVideo();
-    [VTableSlot(21)]
-    IntPtr SteamParentalSettings();
-    [VTableSlot(22)]
-    IntPtr SteamInput();
-
-    [VTableSlot(23)]
-    bool Init();
-
-    [VTableSlot(24)]
-    void Clear();
-
-}
