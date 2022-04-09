@@ -20,7 +20,7 @@ namespace SKYNET.Steamworks.Exported
             if (SteamEmulator.Initialized)
             {
                 Write($"{"SteamAPI_Init [TRUE]"}");
-                return true;
+                return false;
             }
 
             Write($"{"SteamAPI_Init [FALSE]"}");
@@ -66,11 +66,9 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public unsafe static void SteamAPI_RegisterCallback(IntPtr pCallback, int iCallback)
         {
-            string _file = Path.Combine(modCommon.GetPath(), "[SKYNET] steam_api.ini");
-
-            if (File.Exists(_file))
+            if (!SteamEmulator.Initialized)
             {
-                modCommon.LoadSettings();
+                new SteamEmulator(false).Initialize();
             }
 
             CCallbackBase Base = Marshal.PtrToStructure<CCallbackBase>(pCallback);
@@ -87,11 +85,11 @@ namespace SKYNET.Steamworks.Exported
 
             if (GameServer)
             {
-                SteamEmulator.Server_Callback.RegisterCallback(pCallback, iCallback);
+                //SteamEmulator.Server_Callback.RegisterCallback(pCallback, iCallback);
             }
             else
             {
-                SteamEmulator.Client_Callback.RegisterCallback(pCallback, iCallback);
+                //SteamEmulator.Client_Callback.RegisterCallback(pCallback, iCallback);
             }
 
             Write(callMessage);
@@ -855,7 +853,6 @@ namespace SKYNET.Steamworks.Exported
 
         private static void Write(string v)
         {
-            modCommon.Show(v);
             SteamEmulator.Write("SteamAPI", v);
         }
     }

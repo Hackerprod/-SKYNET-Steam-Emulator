@@ -69,7 +69,7 @@ namespace SKYNET.Steamworks.Exported
                 apiContext_ptr = contextInitData_ptr + 8;
                 if (Context.counter != 1)
                 {
-                    Marshal.WriteInt64(contextInitData_ptr, 4, 1);
+                    Marshal.WriteInt32(contextInitData_ptr, 4, 1);
                     _pFn = Marshal.GetDelegateForFunctionPointer<pFn>(Context.pFn);
                     _pFn.Invoke(apiContext_ptr);
                 }
