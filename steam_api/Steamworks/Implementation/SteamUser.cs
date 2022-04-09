@@ -205,65 +205,6 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        //////////////////////////////////////
-
-        #region New
-
-        public bool LogOn(ulong SteamId)
-        {
-            Write("LogOn");
-            return true;
-        }
-
-        public void LogOff(IntPtr _)
-        {
-            Write("LogOff");
-        }
-
-        public bool GetLogonState(IntPtr _)
-        {
-            Write("GetLogonState");
-            return true;
-        }
-
-        public ulong GetClientInstanceID(IntPtr _)
-        {
-            Write("GetClientInstanceID");
-            return 0;
-        }
-
-        public bool IsVACBanned(int @int)
-        {
-            Write("IsVACBanned");
-            return false;
-        }
-
-        public uint GetCountUserNotifications(IntPtr _)
-        {
-            Write("GetCountUserNotifications");
-            return 0;
-        }
-
-        public uint GetCountUserNotification(int @int)
-        {
-            Write("GetCountUserNotification");
-            return 0;
-        }
-
-        public bool SetLanguage(string @string)
-        {
-            Write("SetLanguage");
-            return true;
-        }
-
-        public string GetLanguage(string @string, int @int)
-        {
-            Write("GetLanguage");
-            return "";
-        }
-
-        #endregion
-
         private void Write(string v)
         {
             SteamEmulator.Write(InterfaceVersion, v);

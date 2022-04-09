@@ -94,25 +94,6 @@ namespace SKYNET.Helpers
             }
         }
 
-        public static string GetName<T>()
-            where T : class
-        {
-            return Interface.GetName(typeof(T));
-        }
-
-        public static string GetName(Type interfaceType)
-        {
-            foreach (CustomAttributeData customAttributeData in interfaceType.GetCustomAttributesData())
-            {
-                if (customAttributeData.AttributeType == typeof(InterfaceImplementation))
-                {
-                    return customAttributeData.ConstructorArguments.FirstOrDefault().Value as string;
-                }
-            }
-
-            return null;
-        }
-
         private static AssemblyBuilder AssemblyBuilder = null;
         private static ModuleBuilder ModuleBuilder = null;
         private static uint DelegateTypeId = 0;

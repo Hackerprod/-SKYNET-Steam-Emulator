@@ -25,6 +25,7 @@ namespace SKYNET.Steamworks.Exported
 
             Write($"{"SteamAPI_Init [FALSE]"}");
             new SteamEmulator(false).Initialize();
+            //SteamAPI_GetHSteamPipe();
 
             return false;
         }
@@ -141,7 +142,8 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int SteamAPI_GetHSteamUser()
         {
-            Write("SteamAPI_GetHSteamUser");
+            Write($"SteamAPI_GetHSteamUser");
+
             if (SteamEmulator.HSteamUser == null || (int)SteamEmulator.HSteamUser == 0)
             {
                 SteamEmulator.CreateSteamUser();
@@ -152,12 +154,12 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int SteamAPI_GetHSteamPipe()
         {
-            Write("SteamAPI_GetHSteamPipe");
+            //Write("SteamAPI_GetHSteamPipe");
             if (SteamEmulator.HSteamPipe == null || (int)SteamEmulator.HSteamPipe == 0)
             {
                 SteamEmulator.CreateSteamPipe();
             }
-            return (int)SteamEmulator.HSteamPipe;
+            return (int)1;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -291,9 +293,6 @@ namespace SKYNET.Steamworks.Exported
             if (bGameServerCallbacks)
                 SteamEmulator.SteamGameServer.RunCallbacks(IntPtr.Zero);
         }
-
-
-
 
         #region Interfaces
 
@@ -855,7 +854,7 @@ namespace SKYNET.Steamworks.Exported
 
         private static void Write(string v)
         {
-            SteamEmulator.Write("SteamAPI", v);
+            SteamEmulator.Write(v);
         }
     }
 }

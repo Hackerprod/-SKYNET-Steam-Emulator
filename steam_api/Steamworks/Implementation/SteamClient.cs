@@ -8,23 +8,10 @@ using Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    public class SteamClient : ISteamClient, ISteamInterface 
+    public class SteamClient : ISteamInterface
     {
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; } = "SteamClient";
 
-        public SteamClient()
-        {
-            InterfaceVersion = "SteamClient";
-        }
-
-        public void SetAppId(uint appId)
-        {
-            Write("SetAppId");
-            SteamEmulator.AppId = appId;
-        }
-
-        public int CreateSteamPipe(IntPtr _)
+        public Int32 CreateSteamPipe(IntPtr _)
         {
             Write("CreateSteamPipe");
             return (int)SteamEmulator.CreateSteamPipe();
@@ -39,14 +26,7 @@ namespace SKYNET.Steamworks.Implementation
         public int ConnectToGlobalUser(int hSteamPipe)
         {
             //Write("ConnectToGlobalUser");
-            if (SteamEmulator.steam_pipes.ContainsKey((HSteamPipe)hSteamPipe))
-            {
-                return 0;
-            }
-
-            SteamEmulator.steam_pipes.Add((HSteamPipe)hSteamPipe, Steam_Pipe.CLIENT);
-
-            return (int)Steam_Pipe.CLIENT;
+            return 1;
         }
 
         public int CreateLocalUser(out int phSteamPipe, EAccountType eAccountType)
@@ -61,29 +41,10 @@ namespace SKYNET.Steamworks.Implementation
             Write("ReleaseUser");
         }
 
-        public void SetLocalIPBinding(uint unIP, ushort usPort)
-        {
-            Write("SetLocalIPBinding");
-        }
-
-        public uint GetIPCCallCount(IntPtr _)
-        {
-            Write("GetIPCCallCount");
-            return 0;
-        }
-
-        public bool BShutdownIfAllPipesClosed(IntPtr _)
-        {
-            Write("BShutdownIfAllPipesClosed");
-            return false;
-        }
-
-        #region Interfaces
-
         public IntPtr GetISteamUser(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamUser {pchVersion}");
-            return InterfaceManager.FindOrCreateInterface(pchVersion);
+            return SteamEmulator.SteamUser.MemoryAddress;
         }
 
         public IntPtr GetISteamGameServer(int hSteamUser, int hSteamPipe, string pchVersion)
@@ -92,16 +53,15 @@ namespace SKYNET.Steamworks.Implementation
             return SteamEmulator.SteamGameServer.MemoryAddress;
         }
 
+        public void SetLocalIPBinding(uint unIP, ushort usPort)
+        {
+            Write("SetLocalIPBinding");
+        }
+
         public IntPtr GetISteamFriends(int user, int pipe, string pchVersion)
         {
             Write($"GetISteamFriends {pchVersion}");
             return SteamEmulator.SteamFriends.MemoryAddress;
-        }
-
-        public IntPtr GetISteamGameSearch(int hSteamUser, int hSteamPipe, string pchVersion)
-        {
-            Write($"GetISteamFriends {pchVersion}");
-            return SteamEmulator.SteamGameSearch.MemoryAddress;
         }
 
         public IntPtr GetISteamUtils(int hSteamPipe, string pchVersion)
@@ -125,7 +85,7 @@ namespace SKYNET.Steamworks.Implementation
         public IntPtr GetISteamGenericInterface(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamGenericInterface {pchVersion}");
-            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
+            return InterfaceManager.FindOrCreateInterface(pchVersion);
         }
 
         public IntPtr GetISteamUserStats(int hSteamUser, int hSteamPipe, string pchVersion)
@@ -162,6 +122,34 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"GetISteamScreenshots {pchVersion}");
             return SteamEmulator.SteamScreenshots.MemoryAddress;
+        }
+
+        public IntPtr GetISteamGameSearch(int hSteamUser, int hSteamPipe, string pchVersion)
+        {
+            Write($"GetISteamFriends {pchVersion}");
+            return SteamEmulator.SteamGameSearch.MemoryAddress;
+        }
+
+        public void RunFrame(IntPtr _)
+        {
+            Write($"RunFrame");
+        }
+
+        public uint GetIPCCallCount(IntPtr _)
+        {
+            Write("GetIPCCallCount");
+            return 0;
+        }
+
+        public void SetWarningMessageHook(SteamAPIWarningMessageHook_t pFunction)
+        {
+            Write($"SetWarningMessageHook Name: {pFunction.Method.Name}, ReturnType: {pFunction.Method.ReturnType}, Name: {pFunction.Target}");
+        }
+
+        public bool BShutdownIfAllPipesClosed(IntPtr _)
+        {
+            Write("BShutdownIfAllPipesClosed");
+            return false;
         }
 
         public IntPtr GetISteamHTTP(int hSteamUser, int hSteamPipe, IntPtr pchVersion)
@@ -202,34 +190,31 @@ namespace SKYNET.Steamworks.Implementation
             return SteamEmulator.SteamMusicRemote.MemoryAddress;
         }
 
-        public IntPtr GetISteamInput(int hSteamUser, int hSteamPipe, string pchVersion)
-        {
-            Write($"GetISteamInput {pchVersion}");
-            return SteamEmulator.SteamInput.MemoryAddress;
-        }
-
         public IntPtr GetISteamHTMLSurface(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamHTMLSurface {pchVersion}");
             return SteamEmulator.SteamHTMLSurface.MemoryAddress;
         }
 
-        public IntPtr GetISteamParties(int hSteamUser, int hSteamPipe, string pchVersion)
+        public void Set_SteamAPI_CPostAPIResultInProcess(ref IntPtr arg0)
         {
-            Write($"GetISteamParties {pchVersion}");
-            return SteamEmulator.SteamParties.MemoryAddress;
+            Write($"Set_SteamAPI_CPostAPIResultInProcess");
+        }
+
+        public void Remove_SteamAPI_CPostAPIResultInProcess(ref IntPtr arg0)
+        {
+            Write($"Remove_SteamAPI_CPostAPIResultInProcess");
+        }
+
+        public void Set_SteamAPI_CCheckCallbackRegisteredInProcess(ref IntPtr arg0)
+        {
+            Write($"Set_SteamAPI_CCheckCallbackRegisteredInProcess");
         }
 
         public IntPtr GetISteamInventory(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamInventory {pchVersion}");
             return SteamEmulator.SteamInventory.MemoryAddress;
-        }
-
-        public IntPtr GetISteamRemotePlay(int hSteamUser, int hSteamPipe, string pchVersion)
-        {
-            Write($"GetISteamRemotePlay {pchVersion}");
-            return SteamEmulator.SteamRemotePlay.MemoryAddress;
         }
 
         public IntPtr GetISteamVideo(int hSteamUser, int hSteamPipe, string pchVersion)
@@ -244,22 +229,42 @@ namespace SKYNET.Steamworks.Implementation
             return SteamEmulator.SteamParentalSettings.MemoryAddress;
         }
 
-        #endregion
-
-        public void SetPersonaName(string pchPersonaName)
+        public IntPtr GetISteamInput(int hSteamUser, int hSteamPipe, string pchVersion)
         {
-            Write($"pchPersonaName {pchPersonaName}");
+            Write($"GetISteamInput {pchVersion}");
+            return SteamEmulator.SteamInput.MemoryAddress;
         }
 
-        public void SetWarningMessageHook(SteamAPIWarningMessageHook_t pFunction)
+        public IntPtr GetISteamParties(int hSteamUser, int hSteamPipe, string pchVersion)
         {
-            Write("SetWarningMessageHook");
+            Write($"GetISteamParties {pchVersion}");
+            return SteamEmulator.SteamParties.MemoryAddress;
+        }
+
+        public IntPtr GetISteamRemotePlay(int hSteamUser, int hSteamPipe, string pchVersion)
+        {
+            Write($"GetISteamRemotePlay {pchVersion}");
+            return SteamEmulator.SteamRemotePlay.MemoryAddress;
+        }
+
+        public void DestroyAllInterfaces(IntPtr _)
+        {
+            Write($"DestroyAllInterfaces");
+        }
+
+
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
+
+        public SteamClient()
+        {
+            InterfaceVersion = "SteamClient";
         }
 
         private void Write(string v)
         {
             SteamEmulator.Write(InterfaceVersion, v);
         }
+
     }
 }
-

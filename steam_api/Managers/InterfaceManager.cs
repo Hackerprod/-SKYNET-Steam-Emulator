@@ -12,157 +12,23 @@ namespace SKYNET.Managers
 {
     public class InterfaceManager
     {
-        public static List<InterfaceDelegates> interface_delegates;
-
-        private static Dictionary<string, IntPtr> Interfaces;
-
-        private static string filePath;
-
         static InterfaceManager()
         {
-            Interfaces = new Dictionary<string, IntPtr>();
-            interface_delegates = new List<InterfaceDelegates>();
+
         }
 
         public static void Initialize()
         {
-            filePath = Assembly.GetAssembly(typeof(DelegateAttribute)).Location;
-            Assembly a = Assembly.LoadFile(filePath);
 
-            foreach (var t in a.GetTypes())
-            {
-                if (t.IsDefined(typeof(DelegateAttribute)))
-                {
-                    var attribute = t.GetCustomAttribute<DelegateAttribute>();
-                    var name = attribute.Name;
-
-                    var @delegate = interface_delegates.Find(d => "SKYNET.Steamworks.Implementation." + d.Name == name);
-                    if (@delegate == null)
-                    {
-                        var new_interface = new InterfaceDelegates { Name = name };
-
-                        //Write(string.Format("Found interface delegates \"{0}\"", name));
-
-                        var types = t.GetNestedTypes(BindingFlags.Public);
-
-                        foreach (var type in types)
-                        {
-                            // Filter out types that are not delegates
-                            if (type.IsSubclassOf(typeof(System.Delegate))) new_interface.DelegateTypes.Add(type);
-                        }
-
-                        // Just assume all members are delegate types
-                        interface_delegates.Add(new_interface);
-                    }
-                }
-            }
         }
 
         public static T CreateInterface<T>(out IntPtr BaseAddress) where T : ISteamInterface
         {
-            var (context, iface) = CreateInterface(typeof(T));
+            var (iface, context) = MemoryManager.CreateInterface<T>();
             BaseAddress = context;
             T baseClass = (T)iface;
             baseClass.MemoryAddress = context;
             return (T)baseClass;
-        }
-
-        public static (IntPtr, ISteamInterface) CreateInterface(Type type)
-        {
-            string Name = type.ToString();
-
-            var iface = interface_delegates.Find(d => "SKYNET.Steamworks.Implementation." + d.Name == Name);
-
-            if (iface == null)
-            {
-                Write(string.Format("Unable to find delegates for interface that implements {0}", Name));
-                return (IntPtr.Zero, null);
-            }
-
-            var impl = new InterfaceImplementation
-            {
-                Name = Name,
-                Type = type,
-                Methods = InterfaceMethodsForType(type)
-            };
-
-            // Try to create a new context based on this interface + impl pair
-            var (context, instance) = Create(iface, impl);
-
-            return (context, instance);
-        }
-        private static (IntPtr, ISteamInterface) Create(InterfaceDelegates iface, InterfaceImplementation impl)
-        {
-            var instance = Activator.CreateInstance(impl.Type);
-
-            var new_delegates = new List<System.Delegate>();
-
-
-            for (var i = 0; i < impl.Methods.Count; i++)
-            {
-                // Find the delegate type that matches the method
-                var methodInfo = impl.Methods[i];
-
-                //Type DelegateType = Interface.CreateDelegateTypeFromMethod(methodInfo);
-
-                var DelegateType = iface.DelegateTypes.Find(x => x.Name.Equals(methodInfo.Name));
-                //Write($"Finding delegate for type {mi.Name}");
-
-                if (DelegateType == null)
-                {
-                    Write(string.Format("Unable to find delegate for {0} in {1}!", methodInfo.Name, iface.Name));
-                    return (IntPtr.Zero, null);
-                }
-
-                // Create new delegates that are bounded to this instance
-                System.Delegate new_delegate;
-                try
-                {
-                    new_delegate = System.Delegate.CreateDelegate(DelegateType, instance, methodInfo, true);
-                    new_delegates.Add(new_delegate);
-                }
-                catch (Exception e)
-                {
-                    Write($"EXCEPTION whilst binding function {methodInfo.Name}, class {impl.Name} - {e.Message} {e.StackTrace}");
-                }
-            }
-
-            impl.Delegates.Add(new_delegates);
-
-            var ptr_size = Marshal.SizeOf(typeof(IntPtr));
-
-            // Allocate enough space for the new pointers in local memory
-            var vtable = Marshal.AllocHGlobal(impl.Methods.Count * ptr_size);
-
-            for (var i = 0; i < new_delegates.Count; i++)
-            {
-                try
-                {
-                    // Write ("Testing " + new_delegates[i].Method);
-                    Marshal.WriteIntPtr(vtable, i * ptr_size, Marshal.GetFunctionPointerForDelegate(new_delegates[i]));
-                }
-                catch (Exception)
-                {
-                    Write($"Error Injecting Delegate {new_delegates[i]}");
-                }
-                // Create all function pointers as neccessary
-            }
-            //impl.stored_function_pointers.Add(vtable);
-
-            // create the context
-            var new_context = Marshal.AllocHGlobal(ptr_size);
-
-            // Write the pointer to the vtable at the address pointed to by new_context;
-            Marshal.WriteIntPtr(new_context, vtable);
-
-            return (new_context, (ISteamInterface)instance);
-        }
-
-        public static List<MethodInfo> InterfaceMethodsForType(Type t)
-        {
-            var all_methods = new List<MethodInfo>(t.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly));
-            all_methods.RemoveAll(x => x.Name.StartsWith("get_") || x.Name.StartsWith("set_"));
-            return all_methods;
         }
 
         public static IntPtr FindOrCreateInterface(string pchVersion)

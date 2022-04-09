@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using EasyHook;
 using SKYNET;
 using SKYNET.Helpers;
+using SKYNET.Managers;
 using SKYNET.Types;
 
 namespace SKYNET.Hook.Handles

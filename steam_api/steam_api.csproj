@@ -22,6 +22,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>preview</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -30,6 +31,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>preview</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <DllExportIdent>C7D8FA75-D5BB-4C9F-B596-90D31A05FF6F</DllExportIdent>
@@ -102,55 +104,36 @@
     <Compile Include="Exported functions\SteamAPI_ISteamVideo.cs" />
     <Compile Include="Exported functions\SteamAPI_SteamNetworkingIdentity.cs" />
     <Compile Include="Exported functions\SteamInternal.cs" />
+    <Compile Include="Helpers\Core\Attributes\CallbackIdentityAttribute.cs" />
+    <Compile Include="Helpers\Core\Attributes\InterfaceVersionAttribute.cs" />
+    <Compile Include="Helpers\Core\Attributes\NativeTypeAttribute.cs" />
+    <Compile Include="Helpers\Core\Attributes\VTableSlotAttribute.cs" />
+    <Compile Include="Helpers\Core\ClassInfo.cs" />
+    <Compile Include="Helpers\Core\InterfaceVersions.cs" />
+    <Compile Include="Helpers\Core\InteropHelp.cs" />
+    <Compile Include="Helpers\Core\JITEngine.cs" />
+    <Compile Include="Helpers\Core\MemoryHelper\Additions\ExportTableInfo.cs" />
+    <Compile Include="Helpers\Core\MemoryHelper\Additions\MemoryIO.cs" />
+    <Compile Include="Helpers\Core\MemoryHelper\Additions\MemoryManagement.cs" />
+    <Compile Include="Helpers\Core\MemoryHelper\Additions\ModuleInfo.cs" />
+    <Compile Include="Helpers\Core\MemoryHelper\Additions\ProcessInfo.cs" />
+    <Compile Include="Helpers\Core\MemoryHelper\Additions\ProcessUtils.cs" />
+    <Compile Include="Helpers\Core\MemoryHelper\NativeEnvironment.cs" />
+    <Compile Include="Helpers\Core\MemoryHelper\NativeMethods.cs" />
+    <Compile Include="Helpers\Core\MemoryHelper\NativeModule.cs" />
+    <Compile Include="Helpers\Core\MemoryHelper\NativeProcess.cs" />
     <Compile Include="Helpers\INIParser.cs" />
     <Compile Include="Helpers\Log.cs" />
     <Compile Include="Helpers\modCommon.cs" />
+    <Compile Include="Managers\MemoryManager.cs" />
     <Compile Include="Steamworks\Helpers\Interface.cs" />
     <Compile Include="Managers\CallbackManager.cs" />
     <Compile Include="Managers\InterfaceManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SteamEmulator.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamAppList.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamApps.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamClient.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamController.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamFriends.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamGameCoordinator.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamGameSearch.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamGameServer.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamGameServerStats.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamHTMLSurface.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamHTTP.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamInput.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamInventory.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamMasterServerUpdater.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamMatchmaking.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamMatchmakingServers.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamMusic.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamMusicRemote.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamNetworking.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamNetworkingMessages.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamNetworkingSockets.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamNetworkingSocketsSerialized.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamNetworkingUtils.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamParentalSettings.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamParties.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamRemotePlay.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamRemoteStorage.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamScreenshots.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamTV.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamUGC.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamUser.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamUserStats.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamUtils.cs" />
-    <Compile Include="Steamworks\Delegates\DSteamVideo.cs" />
-    <Compile Include="Steamworks\Helpers\DelegateAttribute.cs" />
     <Compile Include="Steamworks\Helpers\ISteamInterface.cs" />
-    <Compile Include="Steamworks\Helpers\InterfaceDelegates.cs" />
-    <Compile Include="Steamworks\Helpers\InterfaceImplementation.cs" />
     <Compile Include="Steamworks\Implementation\SteamAppList.cs" />
     <Compile Include="Steamworks\Implementation\SteamApps.cs" />
-    <Compile Include="ISteamClient.cs" />
     <Compile Include="Steamworks\Implementation\SteamClient.cs" />
     <Compile Include="Steamworks\Implementation\SteamController.cs" />
     <Compile Include="Steamworks\Implementation\SteamFriends.cs" />

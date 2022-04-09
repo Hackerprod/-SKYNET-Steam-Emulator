@@ -9,14 +9,6 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamUtils : ISteamInterface
     {
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamUtils()
-        {
-            InterfaceVersion = "SteamUtils";
-        }
-
         public uint GetSecondsSinceAppActive(IntPtr _)
         {
             Write("GetSecondsSinceAppActive");
@@ -73,8 +65,9 @@ namespace SKYNET.Steamworks.Implementation
 
         public uint GetAppID(IntPtr _)
         {
-            Write($"GetAppID {SteamEmulator.AppId}");
-            return SteamEmulator.AppId;
+            uint appId = SteamEmulator.AppId == 0 ? 570 : SteamEmulator.AppId;
+            Write($"GetAppID {appId}");
+            return appId;
         }
 
         public void SetOverlayNotificationPosition(IntPtr _, ENotificationPosition eNotificationPosition)
@@ -105,6 +98,11 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("GetAPICallResult");
             return false;
+        }
+
+        public void RunFrame(IntPtr _)
+        {
+            Write("RunFrame");
         }
 
         public uint GetIPCCallCount(IntPtr _)
@@ -157,7 +155,7 @@ namespace SKYNET.Steamworks.Implementation
         public string GetSteamUILanguage(IntPtr _)
         {
             Write("GetSteamUILanguage");
-            return "";
+            return "English";
         }
 
         public bool IsSteamRunningInVR(IntPtr _)
@@ -217,41 +215,13 @@ namespace SKYNET.Steamworks.Implementation
             return default;
         }
 
-        #region New
-
-        public void RunFrame(IntPtr _)
-        {
-            Write("RunFrame");
-        }
-
-        public int GetSteamRealm(IntPtr _)
-        {
-            Write("GetSteamRealm");
-            return 1;
-        }
-
-        public uint SetAppIDForCurrentPipe(uint AppId, bool @bool)
-        {
-            Write("GetSteamRealm");
-            return AppId;
-        }
-
-        public void RecordSteamInterfaceCreation(string version, string @string)
-        {
-            Write("RecordSteamInterfaceCreation");
-        }
-
-        public uint GetLauncherType(IntPtr _)
-        {
-            Write("GetLauncherType");
-            return 0;
-        }
-
-        #endregion
-
         private void Write(string v)
         {
             SteamEmulator.Write(InterfaceVersion, v);
         }
+
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
+
     }
 }

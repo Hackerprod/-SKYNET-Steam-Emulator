@@ -233,7 +233,8 @@ namespace SKYNET.Types
         IntPtr SteamInput();
 
     }
-    public class CSteamClassContext 
+
+    public class CSteamApiContext_Class
     {
         private IntPtr m_pSteamClient;              //ISteamClient* 
         private IntPtr m_pSteamUser;                //ISteamUser* 
@@ -259,31 +260,31 @@ namespace SKYNET.Types
         private IntPtr m_pSteamParentalSettings;    //ISteamParentalSettings* 
         private IntPtr m_pSteamInput;               //ISteamInput* 
 
-        public IntPtr SteamClient() => m_pSteamClient;
-        public IntPtr SteamUser() => m_pSteamUser;
-        public IntPtr SteamFriends() => m_pSteamFriends;
-        public IntPtr SteamUtils() => m_pSteamUtils;
-        public IntPtr SteamMatchmaking() => m_pSteamMatchmaking;
-        public IntPtr SteamGameSearch() => m_pSteamGameSearch;
-        public IntPtr SteamUserStats() => m_pSteamUserStats;
-        public IntPtr SteamApps() => m_pSteamApps;
-        public IntPtr SteamMatchmakingServers() => m_pSteamMatchmakingServers;
-        public IntPtr SteamNetworking() => m_pSteamNetworking;
-        public IntPtr SteamRemoteStorage() => m_pSteamRemoteStorage;
-        public IntPtr SteamScreenshots() => m_pSteamScreenshots;
-        public IntPtr SteamHTTP() => m_pSteamHTTP;
-        public IntPtr SteamController() => m_pSteamController;
-        public IntPtr SteamUGC() => m_pSteamUGC;
-        public IntPtr SteamAppList() => m_pSteamAppList;
-        public IntPtr SteamMusic() => m_pSteamMusic;
-        public IntPtr SteamMusicRemote() => m_pSteamMusicRemote;
-        public IntPtr SteamHTMLSurface() => m_pSteamHTMLSurface;
-        public IntPtr SteamInventory() => m_pSteamInventory;
-        public IntPtr SteamVideo() => m_pSteamVideo;
-        public IntPtr SteamParentalSettings() => m_pSteamParentalSettings;
-        public IntPtr SteamInput() => m_pSteamInput;
+        public IntPtr SteamClient(IntPtr self) { SteamEmulator.Write("CSteamApiContext: SteamClient"); return m_pSteamClient; }
+        public IntPtr SteamUser(IntPtr self) { SteamEmulator.Write("CSteamApiContext: SteamUser"); return m_pSteamUser; }
+        public IntPtr SteamFriends(IntPtr self) { SteamEmulator.Write("CSteamApiContext: SteamFriends"); return m_pSteamFriends; }
+        public IntPtr SteamUtils(IntPtr self) { SteamEmulator.Write("CSteamApiContext: SteamUtils"); return m_pSteamUtils; }
+        public IntPtr SteamMatchmaking(IntPtr self) { SteamEmulator.Write("CSteamApiContext: SteamMatchmaking"); return m_pSteamMatchmaking; }
+        public IntPtr SteamGameSearch(IntPtr self) { SteamEmulator.Write("CSteamApiContext: SteamGameSearch"); return m_pSteamGameSearch; }
+        public IntPtr SteamUserStats(IntPtr self) { SteamEmulator.Write("CSteamApiContext: SteamUserStats"); return m_pSteamUserStats; }
+        public IntPtr SteamApps(IntPtr self) { SteamEmulator.Write("CSteamApiContext: SteamApps"); return m_pSteamApps; }
+        public IntPtr SteamMatchmakingServers(IntPtr self) { SteamEmulator.Write("CSteamApiContext: SteamMatchmakingServers"); return m_pSteamMatchmakingServers; }
+        public IntPtr SteamNetworking(IntPtr self) { SteamEmulator.Write("CSteamApiContext: SteamNetworking"); return m_pSteamNetworking; }
+        public IntPtr SteamRemoteStorage(IntPtr self) { SteamEmulator.Write("CSteamApiContext: SteamRemoteStorage"); return m_pSteamRemoteStorage; }
+        public IntPtr SteamScreenshots(IntPtr self) { SteamEmulator.Write("CSteamApiContext: SteamScreenshots"); return m_pSteamScreenshots; }
+        public IntPtr SteamHTTP(IntPtr self) { SteamEmulator.Write("CSteamApiContext: SteamHTTP"); return m_pSteamHTTP; }
+        public IntPtr SteamController(IntPtr self) { SteamEmulator.Write("CSteamApiContext: SteamController"); return m_pSteamController; }
+        public IntPtr SteamUGC(IntPtr self) { SteamEmulator.Write("CSteamApiContext: SteamUGC"); return m_pSteamUGC; }
+        public IntPtr SteamAppList(IntPtr self) { SteamEmulator.Write("CSteamApiContext: SteamAppList"); return m_pSteamAppList; }
+        public IntPtr SteamMusic(IntPtr self) { SteamEmulator.Write("CSteamApiContext: SteamMusic"); return m_pSteamMusic; }
+        public IntPtr SteamMusicRemote(IntPtr self) { SteamEmulator.Write("CSteamApiContext: SteamMusicRemote"); return m_pSteamMusicRemote; }
+        public IntPtr SteamHTMLSurface(IntPtr self) { SteamEmulator.Write("CSteamApiContext: SteamHTMLSurface"); return m_pSteamHTMLSurface; }
+        public IntPtr SteamInventory(IntPtr self) { SteamEmulator.Write("CSteamApiContext: SteamInventory"); return m_pSteamInventory; }
+        public IntPtr SteamVideo(IntPtr self) { SteamEmulator.Write("CSteamApiContext: SteamVideo"); return m_pSteamVideo; }
+        public IntPtr SteamParentalSettings(IntPtr self) { SteamEmulator.Write("CSteamApiContext: SteamParentalSettings"); return m_pSteamParentalSettings; }
+        public IntPtr SteamInput(IntPtr self) { SteamEmulator.Write("CSteamApiContext: SteamInput"); return m_pSteamInput; }
 
-        public void Clear()
+        public void Clear(IntPtr self)
         {
             m_pSteamClient = IntPtr.Zero;
             m_pSteamUser = IntPtr.Zero;
@@ -307,7 +308,7 @@ namespace SKYNET.Types
             m_pSteamVideo = IntPtr.Zero;
         }
 
-        public bool Init()
+        public bool Init(IntPtr self)
         {
             m_pSteamClient = SteamEmulator.SteamClient.MemoryAddress;
             if (m_pSteamClient == IntPtr.Zero)
