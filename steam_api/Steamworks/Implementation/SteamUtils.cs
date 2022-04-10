@@ -76,10 +76,10 @@ namespace SKYNET.Steamworks.Implementation
             Write("SetOverlayNotificationPosition");
         }
 
-        public bool IsAPICallCompleted(IntPtr _, SteamAPICall_t hSteamAPICall, bool pbFailed)
+        public bool IsAPICallCompleted(IntPtr _, int hSteamAPICall, bool pbFailed)
         {
             Write("IsAPICallCompleted");
-            if (hSteamAPICall.m_SteamAPICall == 1)
+            if (hSteamAPICall == 1)
             {
                 if (pbFailed)
                     pbFailed = true;
@@ -89,13 +89,13 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public ESteamAPICallFailure GetAPICallFailureReason(IntPtr _, SteamAPICall_t hSteamAPICall)
+        public ESteamAPICallFailure GetAPICallFailureReason(IntPtr _, int hSteamAPICall)
         {
             Write("GetAPICallFailureReason");
             return default;
         }
 
-        public bool GetAPICallResult(IntPtr _, SteamAPICall_t hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, bool pbFailed)
+        public bool GetAPICallResult(IntPtr _, int hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, bool pbFailed)
         {
             Write("GetAPICallResult");
             return false;
@@ -129,7 +129,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public SteamAPICall_t CheckFileSignature(IntPtr _, string szFileName)
+        public int CheckFileSignature(IntPtr _, string szFileName)
         {
             Write("CheckFileSignature");
             return default;

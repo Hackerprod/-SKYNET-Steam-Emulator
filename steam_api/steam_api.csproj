@@ -108,7 +108,7 @@
     <Compile Include="Helpers\Log.cs" />
     <Compile Include="Helpers\modCommon.cs" />
     <Compile Include="Managers\MemoryManager.cs" />
-    <Compile Include="Steamworks\Helpers\Interface.cs" />
+    <Compile Include="Steamworks\Helpers\InterfaceAttribute.cs" />
     <Compile Include="Managers\CallbackManager.cs" />
     <Compile Include="Managers\InterfaceManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -149,6 +149,33 @@
     <Compile Include="Steamworks\Implementation\SteamUserStats.cs" />
     <Compile Include="Steamworks\Implementation\SteamUtils.cs" />
     <Compile Include="Steamworks\Implementation\SteamVideo.cs" />
+    <Compile Include="Steamworks\Interfaces\IBaseInterface.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamClient020.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamAppList001.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamApps008.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamController008.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamFriends017.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamFriends015.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamGameServer012.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamGameServerStats001.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamHTMLSurface005.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamHTTP003.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamInventory003.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamMatchmaking009.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamMatchmakingServers002.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamMusic001.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamMusicRemote001.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamNetworking006.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamRemoteStorage016.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamScreenshots003.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamUGC016.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamUnifiedMessages001.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamUser021.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamUser019.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamUserStats012.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamUtils010.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamUtils009.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamVideo002.cs" />
     <Compile Include="Steamworks\Types\AccountID_t.cs" />
     <Compile Include="Steamworks\Types\AppId_t.cs" />
     <Compile Include="Steamworks\Types\CSteamAPIContext.cs" />
@@ -179,6 +206,7 @@
   <ItemGroup>
     <None Include="app.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ImportGroup Label=".NET DllExport">
     <Import Project="$(SolutionDir)packages\DllExport\tools\net.r_eg.DllExport.targets" Condition="Exists($([MSBuild]::Escape('$(SolutionDir)packages\DllExport\tools\net.r_eg.DllExport.targets')))" Label="8337224c9ad9e356" />

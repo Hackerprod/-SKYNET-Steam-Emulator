@@ -106,7 +106,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static HAuthTicket SteamAPI_ISteamUser_GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
+        public static int SteamAPI_ISteamUser_GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
         {
             Write("SteamAPI_ISteamUser_GetAuthSessionTicket");
             return SteamEmulator.SteamUser.GetAuthSessionTicket(IntPtr.Zero, pTicket, cbMaxTicket, pcbTicket);

@@ -90,21 +90,21 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUtils_IsAPICallCompleted(SteamAPICall_t hSteamAPICall, bool pbFailed)
+        public static bool SteamAPI_ISteamUtils_IsAPICallCompleted(int hSteamAPICall, bool pbFailed)
         {
             Write("SteamAPI_ISteamUtils_IsAPICallCompleted");
             return SteamEmulator.SteamUtils.IsAPICallCompleted(SteamEmulator.SteamUtils.MemoryAddress, hSteamAPICall, pbFailed);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static ESteamAPICallFailure SteamAPI_ISteamUtils_GetAPICallFailureReason(SteamAPICall_t hSteamAPICall)
+        public static ESteamAPICallFailure SteamAPI_ISteamUtils_GetAPICallFailureReason(int hSteamAPICall)
         {
             Write("SteamAPI_ISteamUtils_GetAPICallFailureReason");
             return SteamEmulator.SteamUtils.GetAPICallFailureReason(SteamEmulator.SteamUtils.MemoryAddress, hSteamAPICall);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUtils_GetAPICallResult(SteamAPICall_t hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, bool pbFailed)
+        public static bool SteamAPI_ISteamUtils_GetAPICallResult(int hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, bool pbFailed)
         {
             Write("SteamAPI_ISteamUtils_GetAPICallResult");
             return SteamEmulator.SteamUtils.GetAPICallResult(SteamEmulator.SteamUtils.MemoryAddress, hSteamAPICall, pCallback, cubCallback, iCallbackExpected, pbFailed);
@@ -139,7 +139,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static SteamAPICall_t SteamAPI_ISteamUtils_CheckFileSignature(string szFileName)
+        public static int SteamAPI_ISteamUtils_CheckFileSignature(string szFileName)
         {
             Write("SteamAPI_ISteamUtils_CheckFileSignature");
             return SteamEmulator.SteamUtils.CheckFileSignature(SteamEmulator.SteamUtils.MemoryAddress, szFileName);

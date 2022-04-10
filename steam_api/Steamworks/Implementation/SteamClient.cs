@@ -31,14 +31,13 @@ namespace SKYNET.Steamworks.Implementation
             return 1;
         }
 
-        public int CreateLocalUser(out int phSteamPipe, EAccountType eAccountType)
+        public int CreateLocalUser(int phSteamPipe, int eAccountType)
         {
             Write("CreateLocalUser");
-            phSteamPipe = 1;
             return (int)SteamEmulator.CreateSteamUser();
         }
 
-        public void ReleaseUser(int hSteamPipe, int hUser)
+        public void ReleaseUser(int hSteamPipe, int hSteamUser)
         {
             Write("ReleaseUser");
         }
@@ -46,7 +45,7 @@ namespace SKYNET.Steamworks.Implementation
         public IntPtr GetISteamUser(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamUser {pchVersion}");
-            return SteamEmulator.SteamUser.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion); 
         }
 
         public IntPtr GetISteamGameServer(int hSteamUser, int hSteamPipe, string pchVersion)
@@ -55,7 +54,7 @@ namespace SKYNET.Steamworks.Implementation
             return SteamEmulator.SteamGameServer.MemoryAddress;
         }
 
-        public void SetLocalIPBinding(uint unIP, ushort usPort)
+        public void SetLocalIPBinding(uint unIP, uint usPort)
         {
             Write("SetLocalIPBinding");
         }
@@ -126,11 +125,11 @@ namespace SKYNET.Steamworks.Implementation
             return SteamEmulator.SteamScreenshots.MemoryAddress;
         }
 
-        public IntPtr GetISteamGameSearch(int hSteamUser, int hSteamPipe, string pchVersion)
-        {
-            Write($"GetISteamFriends {pchVersion}");
-            return SteamEmulator.SteamGameSearch.MemoryAddress;
-        }
+        //public IntPtr GetISteamGameSearch(int hSteamUser, int hSteamPipe, string pchVersion)
+        //{
+        //    Write($"GetISteamFriends {pchVersion}");
+        //    return SteamEmulator.SteamGameSearch.MemoryAddress;
+        //}
 
         public void RunFrame(IntPtr _)
         {
@@ -143,8 +142,9 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public void SetWarningMessageHook(SteamAPIWarningMessageHook_t pFunction)
+        public void SetWarningMessageHook(IntPtr pFunctionPtr)
         {
+            SteamAPIWarningMessageHook_t pFunction = Marshal.PtrToStructure<SteamAPIWarningMessageHook_t>(pFunctionPtr);
             Write($"SetWarningMessageHook Name: {pFunction.Method.Name}, ReturnType: {pFunction.Method.ReturnType}");
         }
 
@@ -159,6 +159,18 @@ namespace SKYNET.Steamworks.Implementation
             Write($"GetISteamHTTP {pchVersion}");
 
             return SteamEmulator.SteamHTTP.MemoryAddress;
+        }
+
+        public IntPtr DEPRECATED_GetISteamUnifiedMessages(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
+        {
+            Write($"DEPRECATED_GetISteamUnifiedMessages {pchVersion}");
+            return IntPtr.Zero;
+        }
+
+        public IntPtr GetISteamUnifiedMessages(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion )
+        {
+            Write($"GetISteamUnifiedMessages {pchVersion}");
+            return IntPtr.Zero;
         }
 
         public IntPtr GetISteamController(int hSteamUser, int hSteamPipe, string pchVersion)
@@ -197,20 +209,31 @@ namespace SKYNET.Steamworks.Implementation
             return SteamEmulator.SteamHTMLSurface.MemoryAddress;
         }
 
-        public void Set_SteamAPI_CPostAPIResultInProcess(ref IntPtr arg0)
+        public void DEPRECATED_Set_SteamAPI_CPostAPIResultInProcess( IntPtr arg0)
+        {
+            Write($"DEPRECATED_Set_SteamAPI_CPostAPIResultInProcess");
+        }
+
+        public void DEPRECATED_Remove_SteamAPI_CPostAPIResultInProcess(IntPtr arg0)
+        {
+            Write($"DEPRECATED_Remove_SteamAPI_CPostAPIResultInProcess");
+        }
+
+        public void Set_SteamAPI_CCheckCallbackRegisteredInProcess(IntPtr arg0)
+        {
+            Write($"Set_SteamAPI_CCheckCallbackRegisteredInProcess");
+        }
+
+        public void Set_SteamAPI_CPostAPIResultInProcess(IntPtr arg0)
         {
             Write($"Set_SteamAPI_CPostAPIResultInProcess");
         }
 
-        public void Remove_SteamAPI_CPostAPIResultInProcess(ref IntPtr arg0)
+        public void Remove_SteamAPI_CPostAPIResultInProcess(IntPtr arg0)
         {
             Write($"Remove_SteamAPI_CPostAPIResultInProcess");
         }
 
-        public void Set_SteamAPI_CCheckCallbackRegisteredInProcess(ref IntPtr arg0)
-        {
-            Write($"Set_SteamAPI_CCheckCallbackRegisteredInProcess");
-        }
 
         public IntPtr GetISteamInventory(int hSteamUser, int hSteamPipe, string pchVersion)
         {
@@ -228,6 +251,24 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"GetISteamParentalSettings {pchVersion}");
             return SteamEmulator.SteamParentalSettings.MemoryAddress;
+        }
+
+        public IntPtr GetISteamMasterServerUpdater(int hSteamUser, int hSteamPipe, string pchVersion)
+        {
+            Write($"GetISteamMasterServerUpdater {pchVersion}");
+            return InterfaceManager.FindOrCreateInterface(pchVersion);
+        }
+
+        public IntPtr GetISteamContentServer(int hSteamUser, int hSteamPipe, string pchVersion)
+        {
+            Write($"GetISteamContentServer {pchVersion}");
+            return InterfaceManager.FindOrCreateInterface(pchVersion);
+        }
+
+        public IntPtr GetISteamGameSearch(int hSteamUser, int hSteamPipe, string pchVersion)
+        {
+            Write($"GetISteamFriends {pchVersion}");
+            return SteamEmulator.SteamGameSearch.MemoryAddress;
         }
 
         public IntPtr GetISteamInput(int hSteamUser, int hSteamPipe, string pchVersion)

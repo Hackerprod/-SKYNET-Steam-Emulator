@@ -87,10 +87,10 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public HAuthTicket GetAuthSessionTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
+        public int GetAuthSessionTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
         {
             Write("GetAuthSessionTicket");
-            return HAuthTicket.Invalid;
+            return 0;
         }
 
         public EBeginAuthSessionResult BeginAuthSession(IntPtr _, IntPtr pAuthTicket, int cbAuthTicket, IntPtr steamID)
@@ -104,7 +104,7 @@ namespace SKYNET.Steamworks.Implementation
             Write("EndAuthSession");
         }
 
-        public void CancelAuthTicket(IntPtr _, HAuthTicket hAuthTicket)
+        public void CancelAuthTicket(IntPtr _, int hAuthTicket)
         {
             Write("CancelAuthTicket");
         }

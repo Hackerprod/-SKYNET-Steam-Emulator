@@ -34,10 +34,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamClient_CreateLocalUser(out int phSteamPipe, EAccountType eAccountType)
+        public static int SteamAPI_ISteamClient_CreateLocalUser(int phSteamPipe, int eAccountType)
         {
             Write("SteamAPI_ISteamClient_CreateLocalUser");
-            return SteamEmulator.SteamClient.CreateLocalUser(out phSteamPipe, eAccountType);
+            return SteamEmulator.SteamClient.CreateLocalUser(phSteamPipe, eAccountType);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
