@@ -1,20 +1,14 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using SKYNET;
 using SKYNET.Helpers;
 using SKYNET.Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    [StructLayout(LayoutKind.Sequential)]
     public class SteamMusicRemote : ISteamInterface
     {
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamMusicRemote()
-        {
-            InterfaceVersion = "SteamMusicRemote";
-        }
-
         public bool RegisterSteamMusicRemote(string pchName)
         {
             Write($"RegisterSteamMusicRemote");
@@ -205,6 +199,14 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"PlaylistDidChange");
             return false;
+        }
+
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
+
+        public SteamMusicRemote()
+        {
+            InterfaceVersion = "SteamMusicRemote";
         }
 
         private void Write(string v)

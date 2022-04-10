@@ -11,16 +11,9 @@ using SKYNET.Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    [StructLayout(LayoutKind.Sequential)]
     public class SteamInput : ISteamInterface
     {
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamInput()
-        {
-            InterfaceVersion = "SteamInput";
-        }
-
         public void ActivateActionSet(IntPtr inputHandle, IntPtr actionSetHandle)
         {
             Write("ActivateActionSet");
@@ -288,6 +281,14 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("SteamAPI_SteamInput_v005");
             return SteamEmulator.SteamInput.MemoryAddress;
+        }
+
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
+
+        public SteamInput()
+        {
+            InterfaceVersion = "SteamInput";
         }
 
         private void Write(string v)

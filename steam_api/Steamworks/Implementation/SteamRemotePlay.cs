@@ -2,19 +2,13 @@
 using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using System;
+using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    [StructLayout(LayoutKind.Sequential)]
     public class SteamRemotePlay : ISteamInterface
     {
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamRemotePlay()
-        {
-            InterfaceVersion = "SteamRemotePlay";
-        }
-
         public uint GetSessionCount(IntPtr _)
         {
             Write("GetSessionCount");
@@ -55,6 +49,14 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("BSendRemotePlayTogetherInvite");
             return default;
+        }
+
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
+
+        public SteamRemotePlay()
+        {
+            InterfaceVersion = "SteamRemotePlay";
         }
 
         private void Write(string v)

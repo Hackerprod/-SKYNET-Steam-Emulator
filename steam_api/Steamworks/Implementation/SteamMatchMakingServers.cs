@@ -1,19 +1,13 @@
 ﻿using SKYNET;
 using SKYNET.Helpers;
 using System;
+using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    [StructLayout(LayoutKind.Sequential)]
     public class SteamMatchMakingServers : ISteamInterface
     {
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamMatchMakingServers()
-        {
-            InterfaceVersion = "SteamMatchMakingServers";
-        }
-
         public IntPtr RequestInternetServerList(IntPtr iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
         {
             Write($"RequestInternetServerList");
@@ -109,6 +103,14 @@ namespace SKYNET.Steamworks.Implementation
         public void CancelServerQuery(uint hServerQuery)
         {
             Write($"CancelServerQuery");
+        }
+
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
+
+        public SteamMatchMakingServers()
+        {
+            InterfaceVersion = "SteamMatchMakingServers";
         }
 
         private void Write(string v)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using SKYNET;
 using SKYNET.Helpers;
 using SKYNET.Steamworks;
@@ -6,16 +7,9 @@ using Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    [StructLayout(LayoutKind.Sequential)]
     public class SteamHTMLSurface : ISteamInterface
     {
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamHTMLSurface()
-        {
-            InterfaceVersion = "SteamHTMLSurface";
-        }
-
         public void AddHeader(IntPtr unBrowserHandle, string pchKey, string pchValue)
         {
             Write("AddHeader");
@@ -202,6 +196,14 @@ namespace SKYNET.Steamworks.Implementation
         public void ViewSource(IntPtr unBrowserHandle)
         {
             Write("ViewSource");
+        }
+
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
+
+        public SteamHTMLSurface()
+        {
+            InterfaceVersion = "SteamHTMLSurface";
         }
 
         private void Write(string v)

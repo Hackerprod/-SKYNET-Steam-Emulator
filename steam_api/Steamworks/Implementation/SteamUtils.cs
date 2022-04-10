@@ -7,6 +7,7 @@ using Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    [StructLayout(LayoutKind.Sequential)]
     public class SteamUtils : ISteamInterface
     {
         public uint GetSecondsSinceAppActive(IntPtr _)

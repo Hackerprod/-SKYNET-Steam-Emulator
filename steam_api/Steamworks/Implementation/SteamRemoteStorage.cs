@@ -3,19 +3,13 @@ using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using Steamworks;
 using System;
+using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    [StructLayout(LayoutKind.Sequential)]
     public class SteamRemoteStorage : ISteamInterface
     {
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamRemoteStorage()
-        {
-            InterfaceVersion = "SteamRemoteStorage";
-        }
-
         public bool FileWrite(string pchFile, IntPtr pvData, int cubData)
         {
             Write("FileWrite");
@@ -344,6 +338,14 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("UGCDownloadToLocation");
             return default;
+        }
+
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
+
+        public SteamRemoteStorage()
+        {
+            InterfaceVersion = "SteamRemoteStorage";
         }
 
         private void Write(string v)

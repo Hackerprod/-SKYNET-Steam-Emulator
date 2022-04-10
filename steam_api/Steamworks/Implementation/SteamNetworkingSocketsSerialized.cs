@@ -2,19 +2,13 @@
 using SKYNET.Helpers;
 using Steamworks;
 using System;
+using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    [StructLayout(LayoutKind.Sequential)]
     public class SteamNetworkingSocketsSerialized : ISteamInterface
     {
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamNetworkingSocketsSerialized()
-        {
-            InterfaceVersion = "SteamNetworkingSocketsSerialized";
-        }
-
         public void SendP2PRendezvous(IntPtr steamIDRemote, uint unConnectionIDSrc, IntPtr pMsgRendezvous, uint cbRendezvous)
         {
             Write("SendP2PRendezvous");
@@ -57,6 +51,14 @@ namespace SKYNET.Steamworks.Implementation
         public void PostConnectionStateMsg(IntPtr pMsg, uint cbMsg)
         {
             Write("PostConnectionStateMsg");
+        }
+
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
+
+        public SteamNetworkingSocketsSerialized()
+        {
+            InterfaceVersion = "SteamNetworkingSocketsSerialized";
         }
 
         private void Write(string v)

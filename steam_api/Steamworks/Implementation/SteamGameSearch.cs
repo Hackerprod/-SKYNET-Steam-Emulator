@@ -1,19 +1,14 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using SKYNET;
 using SKYNET.Helpers;
 using SKYNET.Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    [StructLayout(LayoutKind.Sequential)]
     public class SteamGameSearch : ISteamInterface
     {
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamGameSearch()
-        {
-            InterfaceVersion = "SteamGameSearch";
-        }
         public GameSearchErrorCode_t AcceptGame(IntPtr self)
         {
             Write("AcceptGame");
@@ -96,6 +91,14 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("SubmitPlayerResult");
             return GameSearchErrorCode_t.OK;
+        }
+
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
+
+        public SteamGameSearch()
+        {
+            InterfaceVersion = "SteamGameSearch";
         }
 
         private void Write(string v)

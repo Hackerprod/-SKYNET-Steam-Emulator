@@ -3,19 +3,13 @@ using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using Steamworks;
 using System;
+using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    [StructLayout(LayoutKind.Sequential)]
     public class SteamUserStats : ISteamInterface
     {
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamUserStats()
-        {
-            InterfaceVersion = "SteamUserStats";
-        }
-
         public bool RequestCurrentStats(IntPtr _)
         {
             Write($"RequestCurrentStats");
@@ -248,6 +242,14 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"GetAchievementProgressLimits");
             return false;
+        }
+
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
+
+        public SteamUserStats()
+        {
+            InterfaceVersion = "SteamUserStats";
         }
 
         private void Write(string v)

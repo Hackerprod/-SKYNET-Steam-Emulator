@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using SKYNET;
 using SKYNET.Helpers;
 using SKYNET.Steamworks;
@@ -6,16 +7,9 @@ using Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    [StructLayout(LayoutKind.Sequential)]
     public class SteamMatchmaking : ISteamInterface
     {
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamMatchmaking()
-        {
-            InterfaceVersion = "SteamMatchmaking";
-        }
-
         public int AddFavoriteGame(AppId_t nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags, uint rTime32LastPlayedOnServer)
         {
             Write("AddFavoriteGame");
@@ -232,6 +226,14 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("SetLobbyType");
             return true;
+        }
+
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
+
+        public SteamMatchmaking()
+        {
+            InterfaceVersion = "SteamMatchmaking";
         }
 
         private void Write(string v)

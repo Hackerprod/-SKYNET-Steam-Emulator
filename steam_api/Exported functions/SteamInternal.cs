@@ -14,7 +14,7 @@ namespace SKYNET.Steamworks.Exported
     public class SteamInternal : BaseCalls
     {
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr SteamInternal_FindOrCreateUserInterface(IntPtr hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion)
+        public static IntPtr SteamInternal_FindOrCreateUserInterface(int hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion)
         {
             Write($"SteamInternal_FindOrCreateUserInterface {pszVersion}");
             return InterfaceManager.FindOrCreateInterface(pszVersion);

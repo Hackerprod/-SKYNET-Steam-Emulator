@@ -1,19 +1,13 @@
 ﻿using SKYNET;
 using SKYNET.Helpers;
 using System;
+using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    [StructLayout(LayoutKind.Sequential)]
     public class SteamVideo : ISteamInterface
     {
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamVideo()
-        {
-            InterfaceVersion = "SteamVideo";
-        }
-
         public void GetVideoURL(IntPtr unVideoAppID)
         {
             Write($"GetVideoURL");
@@ -34,6 +28,14 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"GetOPFStringForApp");
             return false;
+        }
+
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
+
+        public SteamVideo()
+        {
+            InterfaceVersion = "SteamVideo";
         }
 
         private void Write(string v)

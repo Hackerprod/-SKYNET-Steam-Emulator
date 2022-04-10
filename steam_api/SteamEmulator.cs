@@ -36,8 +36,6 @@ public class SteamEmulator
     public static HSteamUser HSteamUser_GS;
     public static HSteamPipe HSteamPipe_GS;
 
-    public static CSteamApiContext_Class Context;
-
     #endregion
 
     public static bool Initialized { get; set; }
@@ -215,30 +213,11 @@ public class SteamEmulator
 
         #endregion
 
-        Context = MemoryManager.CreateInterface<CSteamApiContext_Class>(out IntPtr Ptr);
-        var success = Context.Init(Ptr);
-        Context_Ptr = Ptr;
-
         HSteamUser = (HSteamUser)1;
         HSteamPipe = (HSteamPipe)1;
 
         HSteamUser_GS = (HSteamUser)1;
         HSteamPipe_GS = (HSteamPipe)1;
-
-        SteamClient.ConnectToGlobalUser((int)HSteamPipe);
-
-        //if (success)
-        //{
-        //    Write("SteamApi Context created successfully");
-        //}
-        //else
-        //{
-        //    Write("Error creating SteamApi Context");
-        //}
-
-        //SteamClient context = (SteamClient)Interface.Bind<ISteamClient>(SteamClient.MemoryAddress);
-        //context.SetPersonaName("Fede");
-
 
         Initialized = true;
 

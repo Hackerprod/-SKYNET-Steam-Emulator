@@ -3,19 +3,13 @@ using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using Steamworks;
 using System;
+using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    [StructLayout(LayoutKind.Sequential)]
     public class SteamUGC : ISteamInterface
     {
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamUGC()
-        {
-            InterfaceVersion = "SteamUGC";
-        }
-
         public UGCQueryHandle_t CreateQueryUserUGCRequest(IntPtr unAccountID, IntPtr eListType, int eMatchingUGCType, int eSortOrder, AppId_t nCreatorAppID, AppId_t nConsumerAppID, uint unPage)
         {
             Write("CreateQueryUserUGCRequest");
@@ -477,6 +471,14 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("DeleteItem");
             return default;
+        }
+
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
+
+        public SteamUGC()
+        {
+            InterfaceVersion = "SteamUGC";
         }
 
         private void Write(string v)

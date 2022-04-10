@@ -2,19 +2,13 @@
 using SKYNET.Helpers;
 using Steamworks;
 using System;
+using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    [StructLayout(LayoutKind.Sequential)]
     public class SteamGameServerStats : ISteamInterface
     {
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamGameServerStats()
-        {
-            InterfaceVersion = "SteamGameServerStats";
-        }
-
         public bool ClearUserAchievement(IntPtr steamIDUser, string pchName)
         {
             Write("ClearUserAchievement");
@@ -64,6 +58,14 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("UpdateUserAvgRateStat");
             return false;
+        }
+
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
+
+        public SteamGameServerStats()
+        {
+            InterfaceVersion = "SteamGameServerStats";
         }
 
         private void Write(string v)

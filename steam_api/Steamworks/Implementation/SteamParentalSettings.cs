@@ -3,19 +3,13 @@ using SKYNET;
 using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using System;
+using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    [StructLayout(LayoutKind.Sequential)]
     public class SteamParentalSettings : ISteamInterface
     {
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamParentalSettings()
-        {
-            InterfaceVersion = "SteamParentalSettings";
-        }
-
         public bool BIsParentalLockEnabled(IntPtr _)
         {
             Write("boolBIsParentalLockEnabled");
@@ -50,6 +44,14 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("boolBIsFeatureInBlockList");
             return false;
+        }
+
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
+
+        public SteamParentalSettings()
+        {
+            InterfaceVersion = "SteamParentalSettings";
         }
 
         private void Write(string v)

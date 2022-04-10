@@ -7,16 +7,9 @@ using Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    [StructLayout(LayoutKind.Sequential)]
     public class SteamAppList : ISteamInterface
     {
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamAppList()
-        {
-            InterfaceVersion = "SteamAppList";
-        }
-
         public int GetAppBuildId(AppId_t nAppID)
         {
             Write("GetAppBuildId");
@@ -46,6 +39,15 @@ namespace SKYNET.Steamworks.Implementation
             Write("GetNumInstalledApps\n");
             return 0;
         }
+
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
+
+        public SteamAppList()
+        {
+            InterfaceVersion = "SteamAppList";
+        }
+
 
         private void Write(string v)
         {

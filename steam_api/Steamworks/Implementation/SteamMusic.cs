@@ -2,19 +2,13 @@
 using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using System;
+using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    [StructLayout(LayoutKind.Sequential)]
     public class SteamMusic : ISteamInterface
     {
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamMusic()
-        {
-            InterfaceVersion = "SteamMusic";
-        }
-
         public bool BIsEnabled(IntPtr _)
         {
             Write($"BIsEnabled");
@@ -62,6 +56,14 @@ namespace SKYNET.Steamworks.Implementation
         public void SetVolume(float flVolume)
         {
             Write($"SetVolume");
+        }
+
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
+
+        public SteamMusic()
+        {
+            InterfaceVersion = "SteamMusic";
         }
 
         private void Write(string v)

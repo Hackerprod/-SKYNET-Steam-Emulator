@@ -7,16 +7,9 @@ using Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    [StructLayout(LayoutKind.Sequential)]
     public class SteamInventory : ISteamInterface
     {
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamInventory()
-        {
-            InterfaceVersion = "SteamInventory";
-        }
-
         public bool AddPromoItem(ref SteamInventoryResult_t pResultHandle, uint itemDef)
         {
             Write($"AddPromoItem");
@@ -241,6 +234,14 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"TriggerItemDrop");
             return false;
+        }
+
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
+
+        public SteamInventory()
+        {
+            InterfaceVersion = "SteamInventory";
         }
 
         private void Write(string v)

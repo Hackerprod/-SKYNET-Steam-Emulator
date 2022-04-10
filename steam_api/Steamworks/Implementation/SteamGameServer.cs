@@ -7,15 +7,9 @@ using Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    [StructLayout(LayoutKind.Sequential)]
     public class SteamGameServer : ISteamInterface
     {
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamGameServer()
-        {
-            InterfaceVersion = "SteamGameServer";
-        }
         public int GetHSteamUser(IntPtr _)
         {
             Write($"GetHSteamUser");
@@ -31,6 +25,14 @@ namespace SKYNET.Steamworks.Implementation
         public void RunCallbacks(IntPtr _)
         {
             Write($"RunCallbacks");
+        }
+
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
+
+        public SteamGameServer()
+        {
+            InterfaceVersion = "SteamGameServer";
         }
 
         private void Write(string v)

@@ -3,19 +3,13 @@ using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using SKYNET.Types;
 using System;
+using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    [StructLayout(LayoutKind.Sequential)]
     public class SteamNetworkingSockets : ISteamInterface
     {
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamNetworkingSockets()
-        {
-            InterfaceVersion = "SteamNetworkingSockets";
-        }
-
         public uint CreateListenSocketIP(IntPtr localAddress, int nOptions, IntPtr pOptions)
         {
             Write("CreateListenSocketIP");
@@ -263,6 +257,14 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("SteamDatagramServer_Init");
             return true;
+        }
+
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
+
+        public SteamNetworkingSockets()
+        {
+            InterfaceVersion = "SteamNetworkingSockets";
         }
 
         private void Write(string v)

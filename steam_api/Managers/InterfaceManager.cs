@@ -99,8 +99,8 @@ namespace SKYNET.Managers
             }
             if (pszVersion.StartsWith("STEAMHTTP_INTERFACE_VERSION"))
             {
-                SteamEmulator.SteamFriends.InterfaceVersion = pszVersion;
-                return SteamEmulator.SteamFriends.MemoryAddress;
+                SteamEmulator.SteamHTTP.InterfaceVersion = pszVersion;
+                return SteamEmulator.SteamHTTP.MemoryAddress;
             }
             if (pszVersion.StartsWith("SteamController"))
             {

@@ -1,29 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using SKYNET;
 using SKYNET.Helpers;
 using SKYNET.Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    [StructLayout(LayoutKind.Sequential)]
     public class SteamController : ISteamInterface
     {
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-
-        private Dictionary<string, int> action_handles;
-        private Dictionary<string, int> digital_action_handles;
-        private Dictionary<string, int> analog_action_handles;
-
-        public SteamController()
-        {
-            action_handles = new Dictionary<string, int>();
-            digital_action_handles = new Dictionary<string, int>();
-            analog_action_handles = new Dictionary<string, int>();
-            InterfaceVersion = "SteamController";
-        }
-
         public void ActivateActionSet(IntPtr controllerHandle, int actionSetHandle)
         {
             Write("ActivateActionSet");
@@ -249,6 +235,21 @@ namespace SKYNET.Steamworks.Implementation
             Write("TriggerVibration");
         }
 
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
+
+
+        private Dictionary<string, int> action_handles;
+        private Dictionary<string, int> digital_action_handles;
+        private Dictionary<string, int> analog_action_handles;
+
+        public SteamController()
+        {
+            action_handles = new Dictionary<string, int>();
+            digital_action_handles = new Dictionary<string, int>();
+            analog_action_handles = new Dictionary<string, int>();
+            InterfaceVersion = "SteamController";
+        }
         private void Write(string v)
         {
             SteamEmulator.Write(InterfaceVersion, v);

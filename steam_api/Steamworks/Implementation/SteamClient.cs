@@ -4,15 +4,15 @@ using SKYNET;
 using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Steamworks;
+using SKYNET.Steamworks.Helpers;
+using SKYNET.Steamworks.Types;
 using Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
-
     [StructLayout(LayoutKind.Sequential)]
     public class SteamClient : ISteamInterface
     {
-
         public Int32 CreateSteamPipe(IntPtr _)
         {
             Write("CreateSteamPipe");
@@ -27,7 +27,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public int ConnectToGlobalUser(int hSteamPipe)
         {
-            //Write("ConnectToGlobalUser");
+            Write("ConnectToGlobalUser");
             return 1;
         }
 
@@ -84,7 +84,7 @@ namespace SKYNET.Steamworks.Implementation
             return SteamEmulator.SteamMatchMakingServers.MemoryAddress;
         }
 
-        public IntPtr GetISteamGenericInterface(int hSteamUser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamGenericInterface(int hSteamUser, int hSteamPipe, [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
         {
             Write($"GetISteamGenericInterface {pchVersion}");
             return InterfaceManager.FindOrCreateInterface(pchVersion);
@@ -120,7 +120,7 @@ namespace SKYNET.Steamworks.Implementation
             return SteamEmulator.SteamRemoteStorage.MemoryAddress;
         }
 
-        public IntPtr GetISteamScreenshots(int hSteamUser, int hSteamPipe, [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
+        public IntPtr GetISteamScreenshots(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamScreenshots {pchVersion}");
             return SteamEmulator.SteamScreenshots.MemoryAddress;
@@ -154,10 +154,9 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public IntPtr GetISteamHTTP(int hSteamUser, int hSteamPipe, IntPtr pchVersion)
+        public IntPtr GetISteamHTTP(int hSteamUser, int hSteamPipe, string pchVersion)
         {
-            string version = Marshal.PtrToStringAnsi(pchVersion);
-            Write($"GetISteamHTTP {version}");
+            Write($"GetISteamHTTP {pchVersion}");
 
             return SteamEmulator.SteamHTTP.MemoryAddress;
         }

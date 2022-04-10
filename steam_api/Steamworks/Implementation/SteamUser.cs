@@ -9,16 +9,9 @@ using Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    [StructLayout(LayoutKind.Sequential)]
     public class SteamUser : ISteamInterface
     {
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamUser()
-        {
-            InterfaceVersion = "SteamUser";
-        }
-
         public HSteamUser GetHSteamUser(IntPtr _)
         {
             Write("GetHSteamUser");
@@ -203,6 +196,14 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("BSetDurationControlOnlineState");
             return false;
+        }
+
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
+
+        public SteamUser()
+        {
+            InterfaceVersion = "SteamUser";
         }
 
         private void Write(string v)

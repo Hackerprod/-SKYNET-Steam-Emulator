@@ -114,6 +114,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SteamEmulator.cs" />
     <Compile Include="Steamworks\Helpers\ISteamInterface.cs" />
+    <Compile Include="Steamworks\Helpers\SteamworksExtenctions.cs" />
     <Compile Include="Steamworks\Implementation\SteamAppList.cs" />
     <Compile Include="Steamworks\Implementation\SteamApps.cs" />
     <Compile Include="Steamworks\Implementation\SteamClient.cs" />
@@ -170,6 +171,7 @@
     <Compile Include="Steamworks\Types\SteamTypes.cs" />
     <Compile Include="Steamworks\Types\UGCQueryHandle_t.cs" />
     <Compile Include="Steamworks\Types\UGCUpdateHandle_t.cs" />
+    <Compile Include="Steamworks\Types\UTF8StringHandle.cs" />
     <Compile Include="Types\BaseCalls.cs" />
     <Compile Include="Types\Friend.cs" />
     <Compile Include="Types\SteamId.cs" />

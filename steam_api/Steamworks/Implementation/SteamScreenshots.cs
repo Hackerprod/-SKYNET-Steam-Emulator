@@ -2,19 +2,13 @@
 using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using System;
+using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    [StructLayout(LayoutKind.Sequential)]
     public class SteamScreenshots : ISteamInterface
     {
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamScreenshots()
-        {
-            InterfaceVersion = "SteamScreenshots";
-        }
-
         public uint WriteScreenshot(IntPtr pubRGB, uint cubRGB, int nWidth, int nHeight)
         {
             Write("WriteScreenshot");
@@ -65,6 +59,14 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("AddVRScreenshotToLibrary");
             return 0;
+        }
+
+        public IntPtr MemoryAddress { get; set; }
+        public string InterfaceVersion { get; set; }
+
+        public SteamScreenshots()
+        {
+            InterfaceVersion = "SteamScreenshots";
         }
 
         private void Write(string v)
