@@ -24,7 +24,7 @@ namespace SKYNET.Steamworks.Implementation
         public EUniverse GetConnectedUniverse(IntPtr _)
         {
             Write("GetConnectedUniverse");
-            return EUniverse.Public;
+            return EUniverse.k_EUniversePublic;
         }
 
         public uint GetServerRealTime(IntPtr _)

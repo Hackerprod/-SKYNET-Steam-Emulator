@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using SKYNET.Helpers;
+using SKYNET.Steamworks.Types;
 using Steamworks;
 
 namespace SKYNET.Steamworks.Exported

@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using SKYNET;
 using SKYNET.Helpers;
 using SKYNET.Steamworks;
+using SKYNET.Steamworks.Types;
 using Steamworks;
 
 namespace SKYNET.Steamworks.Exported
@@ -28,7 +29,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static ulong SteamAPI_ISteamUser_GetSteamID(IntPtr _)
+        public static CSteamID SteamAPI_ISteamUser_GetSteamID(IntPtr _)
         {
             Write("SteamAPI_ISteamUser_GetSteamID");
             return SteamEmulator.SteamUser.GetSteamID(_);

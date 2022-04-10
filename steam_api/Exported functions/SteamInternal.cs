@@ -1,23 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using NativeSharp;
 using SKYNET;
 using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Steamworks.Implementation;
 using SKYNET.Types;
-using Steam4NET.Attributes;
-using Steam4NET.Core;
 
 namespace SKYNET.Steamworks.Exported
 {
-    public unsafe class SteamInternal : BaseCalls
+    public class SteamInternal : BaseCalls
     {
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamInternal_FindOrCreateUserInterface(IntPtr hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion)

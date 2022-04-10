@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using SKYNET;
 using SKYNET.Helpers;
 using SKYNET.Steamworks;
+using SKYNET.Steamworks.Types;
 using SKYNET.Types;
 using Steamworks;
 
@@ -30,11 +31,10 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public SteamId GetSteamID(IntPtr _)
+        public CSteamID GetSteamID(IntPtr _)
         {
-            var SId = new SteamId();
-            SId.Value = SteamEmulator.SteamId;
-            Write($"GetSteamID {SId.Value}");
+            var SId = new CSteamID(SteamEmulator.SteamId);
+            Write($"GetSteamID {(ulong)SId}");
             return SId;
         }
 

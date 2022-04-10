@@ -298,9 +298,6 @@ namespace SKYNET.Steamworks.Exported
                 SteamEmulator.SteamGameServer.RunCallbacks(IntPtr.Zero);
         }
 
-
-
-
         #region Interfaces
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

@@ -1,32 +1,19 @@
 ﻿//#define LOG
-
-using NativeSharp;
 using SKYNET;
 using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Steamworks.Implementation;
+using SKYNET.Steamworks.Types;
 using SKYNET.Types;
 using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.SymbolStore;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+
 
 public class SteamEmulator
 {
     public static SteamEmulator Instance;
-
-    public static NativeProcess NativeProcess;
-    public static NativeModule NativeModule;
 
     // Callbacks
     public static CallbackManager Client_Callback = new CallbackManager();
@@ -121,9 +108,6 @@ public class SteamEmulator
     public void Initialize()
     {
         modCommon.LoadSettings();
-
-        NativeProcess = NativeProcess.Open((uint)Process.GetCurrentProcess().Id, ProcessAccess.AllAccess);
-        NativeModule = NativeProcess.GetMainModule();
 
         InterfaceManager.Initialize();
 

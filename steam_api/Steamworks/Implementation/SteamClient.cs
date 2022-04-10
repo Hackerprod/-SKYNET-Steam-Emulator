@@ -8,6 +8,8 @@ using Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
+
+    [StructLayout(LayoutKind.Sequential)]
     public class SteamClient : ISteamInterface
     {
 
@@ -143,7 +145,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public void SetWarningMessageHook(SteamAPIWarningMessageHook_t pFunction)
         {
-            Write($"SetWarningMessageHook Name: {pFunction.Method.Name}, ReturnType: {pFunction.Method.ReturnType}, Name: {pFunction.Target}");
+            Write($"SetWarningMessageHook Name: {pFunction.Method.Name}, ReturnType: {pFunction.Method.ReturnType}");
         }
 
         public bool BShutdownIfAllPipesClosed(IntPtr _)
