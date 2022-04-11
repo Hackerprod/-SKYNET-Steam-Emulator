@@ -99,7 +99,7 @@ namespace SKYNET.Hook.Handles
         public delegate SteamAPICall_t SteamAPI_ISteamApps_GetFileDetailsDelegate(string pszFileName);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate int SteamAPI_ISteamApps_GetLaunchCommandLineDelegate(IntPtr pszCommandLine, int cubCommandLine);
+        public delegate int SteamAPI_ISteamApps_GetLaunchCommandLineDelegate(string pszCommandLine, int cubCommandLine);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
         public delegate bool SteamAPI_ISteamApps_BIsSubscribedFromFamilySharingDelegate();

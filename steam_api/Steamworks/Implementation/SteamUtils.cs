@@ -46,7 +46,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool GetImageRGBA(IntPtr _, int iImage, uint pubDest, int nDestBufferSize)
+        public bool GetImageRGBA(IntPtr _, int iImage, int pubDest, int nDestBufferSize)
         {
             Write("GetImageRGBA");
             return false;
@@ -58,7 +58,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public uint GetCurrentBatteryPower(IntPtr _)
+        public int GetCurrentBatteryPower(IntPtr _)
         {
             Write("GetCurrentBatteryPower");
             return 0;
@@ -71,12 +71,12 @@ namespace SKYNET.Steamworks.Implementation
             return appId;
         }
 
-        public void SetOverlayNotificationPosition(IntPtr _, ENotificationPosition eNotificationPosition)
+        public void SetOverlayNotificationPosition(IntPtr _, int eNotificationPosition)
         {
             Write("SetOverlayNotificationPosition");
         }
 
-        public bool IsAPICallCompleted(IntPtr _, int hSteamAPICall, bool pbFailed)
+        public bool IsAPICallCompleted(IntPtr _, ulong hSteamAPICall, bool pbFailed)
         {
             Write("IsAPICallCompleted");
             if (hSteamAPICall == 1)
@@ -89,13 +89,13 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public ESteamAPICallFailure GetAPICallFailureReason(IntPtr _, int hSteamAPICall)
+        public ESteamAPICallFailure GetAPICallFailureReason(IntPtr _, ulong hSteamAPICall)
         {
             Write("GetAPICallFailureReason");
             return default;
         }
 
-        public bool GetAPICallResult(IntPtr _, int hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, bool pbFailed)
+        public bool GetAPICallResult(IntPtr _, ulong hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, bool pbFailed)
         {
             Write("GetAPICallResult");
             return false;
@@ -112,7 +112,7 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public void SetWarningMessageHook(IntPtr _, SteamAPIWarningMessageHook_t pFunction)
+        public void SetWarningMessageHook(IntPtr _, IntPtr pFunction)
         {
             Write("SetWarningMessageHook");
         }
@@ -129,13 +129,13 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public int CheckFileSignature(IntPtr _, string szFileName)
+        public ulong CheckFileSignature(IntPtr _, string szFileName)
         {
             Write("CheckFileSignature");
             return default;
         }
 
-        public bool ShowGamepadTextInput(IntPtr _, EGamepadTextInputMode eInputMode, EGamepadTextInputLineMode eLineInputMode, string pchDescription, uint unCharMax, string pchExistingText)
+        public bool ShowGamepadTextInput(IntPtr _, int eInputMode, int eLineInputMode, string pchDescription, uint unCharMax, string pchExistingText)
         {
             Write("ShowGamepadTextInput");
             return false;
@@ -210,7 +210,13 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public ESteamIPv6ConnectivityState GetIPv6ConnectivityState(IntPtr _, ESteamIPv6ConnectivityProtocol eProtocol)
+        public int FilterText(int eContext, ulong sourceSteamID, string pchInputMessage, string pchOutFilteredText, uint nByteSizeOutFilteredText)
+        {
+            Write($"FilterText {pchInputMessage}");
+            return 0;
+        }
+
+        public ESteamIPv6ConnectivityState GetIPv6ConnectivityState(IntPtr _, int eProtocol)
         {
             Write("GetIPv6ConnectivityState");
             return default;

@@ -30,7 +30,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamVideo_GetOPFStringForApp(IntPtr unVideoAppID, string pchBuffer, uint pnBufferSize)
+        public static bool SteamAPI_ISteamVideo_GetOPFStringForApp(uint unVideoAppID, string pchBuffer, int pnBufferSize)
         {
             Write("SteamAPI_ISteamVideo_GetOPFStringForApp");
             return SteamEmulator.SteamVideo.GetOPFStringForApp(unVideoAppID, pchBuffer, pnBufferSize);

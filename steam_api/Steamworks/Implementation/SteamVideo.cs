@@ -8,7 +8,7 @@ namespace SKYNET.Steamworks.Implementation
     [StructLayout(LayoutKind.Sequential)]
     public class SteamVideo : ISteamInterface
     {
-        public void GetVideoURL(IntPtr unVideoAppID)
+        public void GetVideoURL(uint unVideoAppID)
         {
             Write($"GetVideoURL");
         }
@@ -19,12 +19,12 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public void GetOPFSettings(IntPtr unVideoAppID)
+        public void GetOPFSettings(uint unVideoAppID)
         {
             Write($"GetOPFSettings");
         }
 
-        public bool GetOPFStringForApp(IntPtr unVideoAppID, string pchBuffer, uint pnBufferSize)
+        public bool GetOPFStringForApp(uint unVideoAppID, string pchBuffer, int pnBufferSize)
         {
             Write($"GetOPFStringForApp");
             return false;

@@ -22,19 +22,19 @@ namespace SKYNET.Steamworks.Implementation
             return default;
         }
 
-        public SteamAPICall_t FileWriteAsync(string pchFile, IntPtr pvData, uint cubData)
+        public ulong FileWriteAsync(string pchFile, IntPtr pvData, uint cubData)
         {
             Write("FileWriteAsync");
             return default;
         }
 
-        public SteamAPICall_t FileReadAsync(string pchFile, uint nOffset, uint cubToRead)
+        public ulong FileReadAsync(string pchFile, uint nOffset, uint cubToRead)
         {
             Write("FileReadAsync");
             return default;
         }
 
-        public bool FileReadAsyncComplete(SteamAPICall_t hReadCall, IntPtr pvBuffer, uint cubToRead)
+        public bool FileReadAsyncComplete(ulong hReadCall, IntPtr pvBuffer, uint cubToRead)
         {
             Write("FileReadAsyncComplete");
             return false;
@@ -52,37 +52,37 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public SteamAPICall_t FileShare(string pchFile)
+        public ulong FileShare(string pchFile)
         {
             Write("FileShare");
             return default;
         }
 
-        public bool SetSyncPlatforms(string pchFile, ERemoteStoragePlatform eRemoteStoragePlatform)
+        public bool SetSyncPlatforms(string pchFile, int eRemoteStoragePlatform)
         {
             Write("SetSyncPlatforms");
             return false;
         }
 
-        public UGCFileWriteStreamHandle_t FileWriteStreamOpen(string pchFile)
+        public ulong FileWriteStreamOpen(string pchFile)
         {
             Write("FileWriteStreamOpen");
             return default;
         }
 
-        public bool FileWriteStreamWriteChunk(UGCFileWriteStreamHandle_t writeHandle, IntPtr pvData, int cubData)
+        public bool FileWriteStreamWriteChunk(ulong writeHandle, IntPtr pvData, int cubData)
         {
             Write("FileWriteStreamWriteChunk");
             return false;
         }
 
-        public bool FileWriteStreamClose(UGCFileWriteStreamHandle_t writeHandle)
+        public bool FileWriteStreamClose(ulong writeHandle)
         {
             Write("FileWriteStreamClose");
             return default;
         }
 
-        public bool FileWriteStreamCancel(UGCFileWriteStreamHandle_t writeHandle)
+        public bool FileWriteStreamCancel(ulong writeHandle)
         {
             Write("FileWriteStreamCancel");
             return default;
@@ -112,7 +112,7 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public ERemoteStoragePlatform GetSyncPlatforms(string pchFile)
+        public int GetSyncPlatforms(string pchFile)
         {
             Write("GetSyncPlatforms");
             return default;
@@ -130,7 +130,7 @@ namespace SKYNET.Steamworks.Implementation
             return default;
         }
 
-        public bool GetQuota(uint pnTotalBytes, uint puAvailableBytes)
+        public bool GetQuota(int pnTotalBytes, int puAvailableBytes)
         {
             Write("GetQuota");
             return false;
@@ -154,25 +154,25 @@ namespace SKYNET.Steamworks.Implementation
             //
         }
 
-        public SteamAPICall_t UGCDownload(UGCHandle_t hContent, uint unPriority)
+        public ulong UGCDownload(ulong hContent, uint unPriority)
         {
             Write("UGCDownload");
             return default;
         }
 
-        public bool GetUGCDownloadProgress(UGCHandle_t hContent, int pnBytesDownloaded, int pnBytesExpected)
+        public bool GetUGCDownloadProgress(ulong hContent, int pnBytesDownloaded, int pnBytesExpected)
         {
             Write("GetUGCDownloadProgress");
             return default;
         }
 
-        public bool GetUGCDetails(UGCHandle_t hContent, AppId_t pnAppID, string ppchName, int pnFileSizeInBytes, IntPtr pSteamIDOwner)
+        public bool GetUGCDetails(ulong hContent, uint pnAppID, string ppchName, int pnFileSizeInBytes, ulong pSteamIDOwner)
         {
             Write("GetUGCDetails");
             return default;
         }
 
-        public int UGCRead(UGCHandle_t hContent, IntPtr pvData, int cubDataToRead, uint cOffset, IntPtr eAction)
+        public int UGCRead(ulong hContent, IntPtr pvData, int cubDataToRead, uint cOffset, IntPtr eAction)
         {
             Write("UGCRead");
             return default;
@@ -184,157 +184,187 @@ namespace SKYNET.Steamworks.Implementation
             return default;
         }
 
-        public UGCHandle_t GetCachedUGCHandle(int iCachedContent)
+        public ulong GetCachedUGCHandle(int iCachedContent)
         {
             Write("GetCachedUGCHandle");
             return default;
         }
 
-        public SteamAPICall_t PublishWorkshopFile(string pchFile, string pchPreviewFile, AppId_t nConsumerAppId, string pchTitle, string pchDescription, ERemoteStoragePublishedFileVisibility eVisibility, IntPtr pTags, int int2)
+        public ulong PublishWorkshopFile(string pchFile, string pchPreviewFile, uint nConsumerAppId, string pchTitle, string pchDescription, int eVisibility, IntPtr pTags, int int2)
         {
             Write("PublishWorkshopFile");
             return default;
         }
 
-        public PublishedFileUpdateHandle_t CreatePublishedFileUpdateRequest(PublishedFileId_t unPublishedFileId)
+        public ulong CreatePublishedFileUpdateRequest(ulong unPublishedFileId)
         {
             Write("CreatePublishedFileUpdateRequest");
             return default;
         }
 
-        public bool UpdatePublishedFileFile(PublishedFileUpdateHandle_t updateHandle, string pchFile)
+        public bool UpdatePublishedFileFile(ulong updateHandle, string pchFile)
         {
             Write("UpdatePublishedFileFile");
             return default;
         }
 
-        public bool UpdatePublishedFilePreviewFile(PublishedFileUpdateHandle_t updateHandle, string pchPreviewFile)
+        public bool UpdatePublishedFilePreviewFile(ulong updateHandle, string pchPreviewFile)
         {
             Write("UpdatePublishedFilePreviewFile");
             return false;
         }
 
-        public bool UpdatePublishedFileTitle(PublishedFileUpdateHandle_t updateHandle, string pchTitle)
+        public void GetFileListFromServer(IntPtr _)
+        {
+            Write("GetFileListFromServer");
+        }
+
+        internal bool FileFetch(string pchFile)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal bool FilePersist(string pchFile)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal bool SynchronizeToClient(IntPtr _)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool UpdatePublishedFileTitle(ulong updateHandle, string pchTitle)
         {
             Write("UpdatePublishedFileTitle");
             return false;
         }
 
-        public bool UpdatePublishedFileDescription(PublishedFileUpdateHandle_t updateHandle, string pchDescription)
+        internal bool ResetFileRequestState(IntPtr _)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal bool SynchronizeToServer(IntPtr _)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool UpdatePublishedFileDescription(ulong updateHandle, string pchDescription)
         {
             Write("UpdatePublishedFileDescription");
             return false;
         }
 
-        public bool UpdatePublishedFileVisibility(PublishedFileUpdateHandle_t updateHandle, ERemoteStoragePublishedFileVisibility eVisibility)
+        public bool UpdatePublishedFileVisibility(ulong updateHandle, int eVisibility)
         {
             Write("UpdatePublishedFileVisibility");
             return false;
         }
 
-        public bool UpdatePublishedFileTags(PublishedFileUpdateHandle_t updateHandle, IntPtr pTags)
+        public bool UpdatePublishedFileTags(ulong updateHandle, IntPtr pTags)
         {
             Write("UpdatePublishedFileTags");
             return default;
         }
 
-        public SteamAPICall_t CommitPublishedFileUpdate(PublishedFileUpdateHandle_t updateHandle)
+        public ulong CommitPublishedFileUpdate(ulong updateHandle)
         {
             Write("CommitPublishedFileUpdate");
             return default;
         }
 
-        public SteamAPICall_t GetPublishedFileDetails(PublishedFileId_t unPublishedFileId, uint unMaxSecondsOld)
+        public ulong GetPublishedFileDetails(ulong unPublishedFileId, uint unMaxSecondsOld)
         {
             Write("GetPublishedFileDetails");
             return default;
         }
 
-        public SteamAPICall_t DeletePublishedFile(PublishedFileId_t unPublishedFileId)
+        public ulong DeletePublishedFile(ulong unPublishedFileId)
         {
             Write("DeletePublishedFile");
             return default;
         }
 
-        public SteamAPICall_t EnumerateUserPublishedFiles(uint unStartIndex)
+        public ulong EnumerateUserPublishedFiles(uint unStartIndex)
         {
             Write("EnumerateUserPublishedFiles");
             return default;
         }
 
-        public SteamAPICall_t SubscribePublishedFile(PublishedFileId_t unPublishedFileId)
+        public ulong SubscribePublishedFile(ulong unPublishedFileId)
         {
             Write("SubscribePublishedFile");
             return default;
         }
 
-        public SteamAPICall_t EnumerateUserSubscribedFiles(uint unStartIndex)
+        public ulong EnumerateUserSubscribedFiles(uint unStartIndex)
         {
             Write("EnumerateUserSubscribedFiles");
             return default;
         }
 
-        public SteamAPICall_t UnsubscribePublishedFile(PublishedFileId_t unPublishedFileId)
+        public ulong UnsubscribePublishedFile(ulong unPublishedFileId)
         {
             Write("UnsubscribePublishedFile");
             return default;
         }
 
-        public bool UpdatePublishedFileSetChangeDescription(PublishedFileUpdateHandle_t updateHandle, string pchChangeDescription)
+        public bool UpdatePublishedFileSetChangeDescription(ulong updateHandle, string pchChangeDescription)
         {
             Write("UpdatePublishedFileSetChangeDescription");
             return default;
         }
 
-        public SteamAPICall_t GetPublishedItemVoteDetails(PublishedFileId_t unPublishedFileId)
+        public ulong GetPublishedItemVoteDetails(ulong unPublishedFileId)
         {
             Write("GetPublishedItemVoteDetails");
             return default;
         }
 
-        public SteamAPICall_t UpdateUserPublishedItemVote(PublishedFileId_t unPublishedFileId, bool bVoteUp)
+        public ulong UpdateUserPublishedItemVote(ulong unPublishedFileId, bool bVoteUp)
         {
             Write("UpdateUserPublishedItemVote");
             return default;
         }
 
-        public SteamAPICall_t GetUserPublishedItemVoteDetails(PublishedFileId_t unPublishedFileId)
+        public ulong GetUserPublishedItemVoteDetails(ulong unPublishedFileId)
         {
             Write("GetUserPublishedItemVoteDetails");
             return default;
         }
 
-        public SteamAPICall_t EnumerateUserSharedWorkshopFiles(IntPtr steamId, uint unStartIndex, IntPtr pRequiredTags, IntPtr pExcludedTags)
+        public ulong EnumerateUserSharedWorkshopFiles(ulong steamId, uint unStartIndex, IntPtr pRequiredTags, IntPtr pExcludedTags)
         {
             Write("EnumerateUserSharedWorkshopFiles");
             return default;
         }
 
-        public SteamAPICall_t PublishVideo(EWorkshopVideoProvider eVideoProvider, string pchVideoAccount, string pchVideoIdentifier, string pchPreviewFile, AppId_t nConsumerAppId, string pchTitle, string pchDescription, ERemoteStoragePublishedFileVisibility eVisibility, IntPtr pTags)
+        public ulong PublishVideo(int eVideoProvider, string pchVideoAccount, string pchVideoIdentifier, string pchPreviewFile, uint nConsumerAppId, string pchTitle, string pchDescription, int eVisibility, IntPtr pTags)
         {
             Write("PublishVideo");
             return default;
         }
 
-        public SteamAPICall_t SetUserPublishedFileAction(PublishedFileId_t unPublishedFileId, EWorkshopFileAction eAction)
+        public ulong SetUserPublishedFileAction(ulong unPublishedFileId, int eAction)
         {
             Write("SetUserPublishedFileAction");
             return default;
         }
 
-        public SteamAPICall_t EnumeratePublishedFilesByUserAction(EWorkshopFileAction eAction, uint unStartIndex)
+        public ulong EnumeratePublishedFilesByUserAction(int eAction, uint unStartIndex)
         {
             Write("EnumeratePublishedFilesByUserAction");
             return default;
         }
 
-        public SteamAPICall_t EnumeratePublishedWorkshopFiles(EWorkshopEnumerationType eEnumerationType, uint unStartIndex, uint unCount, uint unDays, IntPtr pTags, IntPtr pUserTags)
+        public ulong EnumeratePublishedWorkshopFiles(int eEnumerationType, uint unStartIndex, uint unCount, uint unDays, IntPtr pTags, IntPtr pUserTags)
         {
             Write("EnumeratePublishedWorkshopFiles");
             return default;
         }
 
-        public SteamAPICall_t UGCDownloadToLocation(UGCHandle_t hContent, string pchLocation, uint unPriority)
+        public ulong UGCDownloadToLocation(ulong hContent, string pchLocation, uint unPriority)
         {
             Write("UGCDownloadToLocation");
             return default;

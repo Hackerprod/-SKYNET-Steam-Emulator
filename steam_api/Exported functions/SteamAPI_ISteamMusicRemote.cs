@@ -96,7 +96,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamMusicRemote_UpdatePlaybackStatus(AudioPlayback_Status nStatus)
+        public static bool SteamAPI_ISteamMusicRemote_UpdatePlaybackStatus(int nStatus)
         {
             Write("SteamAPI_ISteamMusicRemote_UpdatePlaybackStatus");
             return SteamEmulator.SteamMusicRemote.UpdatePlaybackStatus(nStatus);

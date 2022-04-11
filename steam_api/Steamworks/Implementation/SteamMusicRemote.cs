@@ -81,7 +81,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool UpdatePlaybackStatus(AudioPlayback_Status nStatus)
+        public bool UpdatePlaybackStatus(int nStatus)
         {
             Write($"UpdatePlaybackStatus");
             return false;

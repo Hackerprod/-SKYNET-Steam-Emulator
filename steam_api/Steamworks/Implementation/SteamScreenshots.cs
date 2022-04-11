@@ -15,7 +15,7 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public uint AddScreenshotToLibrary(char pchFilename, char pchThumbnailFilename, int nWidth, int nHeight)
+        public uint AddScreenshotToLibrary(string pchFilename, string pchThumbnailFilename, int nWidth, int nHeight)
         {
             Write("AddScreenshotToLibrary");
             return 0;
@@ -31,19 +31,19 @@ namespace SKYNET.Steamworks.Implementation
             Write("HookScreenshots");
         }
 
-        public bool SetLocation(uint hScreenshot, char pchLocation)
+        public bool SetLocation(uint hScreenshot, string pchLocation)
         {
             Write("SetLocation");
             return false;
         }
 
-        public bool TagUser(uint hScreenshot, IntPtr steamID)
+        public bool TagUser(uint hScreenshot, ulong steamID)
         {
             Write("TagUser");
             return false;
         }
 
-        public bool TagPublishedFile(uint hScreenshot, uint unPublishedFileID)
+        public bool TagPublishedFile(uint hScreenshot, ulong unPublishedFileID)
         {
             Write("TagPublishedFile");
             return false;
@@ -55,7 +55,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public uint AddVRScreenshotToLibrary(EVRScreenshotType eType, char pchFilename, char pchVRFilename)
+        public uint AddVRScreenshotToLibrary(int eType, string pchFilename, string pchVRFilename)
         {
             Write("AddVRScreenshotToLibrary");
             return 0;

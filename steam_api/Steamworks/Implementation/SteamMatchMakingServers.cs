@@ -8,37 +8,37 @@ namespace SKYNET.Steamworks.Implementation
     [StructLayout(LayoutKind.Sequential)]
     public class SteamMatchMakingServers : ISteamInterface
     {
-        public IntPtr RequestInternetServerList(IntPtr iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
+        public IntPtr RequestInternetServerList(uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
         {
             Write($"RequestInternetServerList");
             return IntPtr.Zero;
         }
 
-        public IntPtr RequestLANServerList(IntPtr iApp, IntPtr pRequestServersResponse)
+        public IntPtr RequestLANServerList(uint iApp, IntPtr pRequestServersResponse)
         {
             Write($"RequestLANServerList");
             return IntPtr.Zero;
         }
 
-        public IntPtr RequestFriendsServerList(IntPtr iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
+        public IntPtr RequestFriendsServerList(uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
         {
             Write($"RequestFriendsServerList");
             return IntPtr.Zero;
         }
 
-        public IntPtr RequestFavoritesServerList(IntPtr iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
+        public IntPtr RequestFavoritesServerList(uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
         {
             Write($"RequestFavoritesServerList");
             return IntPtr.Zero;
         }
 
-        public IntPtr RequestHistoryServerList(IntPtr iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
+        public IntPtr RequestHistoryServerList(uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
         {
             Write($"RequestHistoryServerList");
             return IntPtr.Zero;
         }
 
-        public IntPtr RequestSpectatorServerList(IntPtr iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
+        public IntPtr RequestSpectatorServerList(uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
         {
             Write($"RequestSpectatorServerList");
             return IntPtr.Zero;
@@ -49,7 +49,7 @@ namespace SKYNET.Steamworks.Implementation
             Write($"ReleaseRequest");
         }
 
-        public IntPtr GetServerDetails(IntPtr _, IntPtr hRequest, int iServer)
+        public IntPtr GetServerDetails(IntPtr hRequest, int iServer)
         {
             Write($"GetServerDetails");
             return IntPtr.Zero;
@@ -100,7 +100,7 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public void CancelServerQuery(uint hServerQuery)
+        public void CancelServerQuery(int hServerQuery)
         {
             Write($"CancelServerQuery");
         }

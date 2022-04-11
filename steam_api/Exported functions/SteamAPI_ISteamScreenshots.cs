@@ -19,7 +19,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static uint SteamAPI_ISteamScreenshots_AddScreenshotToLibrary(char pchFilename, char pchThumbnailFilename, int nWidth, int nHeight)
+        public static uint SteamAPI_ISteamScreenshots_AddScreenshotToLibrary(string pchFilename, string pchThumbnailFilename, int nWidth, int nHeight)
         {
             Write("SteamAPI_ISteamScreenshots_AddScreenshotToLibrary");
             return SteamEmulator.SteamScreenshots.AddScreenshotToLibrary(pchFilename, pchThumbnailFilename, nWidth, nHeight);
@@ -40,14 +40,14 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamScreenshots_SetLocation(uint hScreenshot, char pchLocation)
+        public static bool SteamAPI_ISteamScreenshots_SetLocation(uint hScreenshot, string pchLocation)
         {
             Write("SteamAPI_ISteamScreenshots_SetLocation");
             return SteamEmulator.SteamScreenshots.SetLocation(hScreenshot, pchLocation);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamScreenshots_TagUser(uint hScreenshot, IntPtr steamID)
+        public static bool SteamAPI_ISteamScreenshots_TagUser(uint hScreenshot, ulong steamID)
         {
             Write("SteamAPI_ISteamScreenshots_TagUser");
             return SteamEmulator.SteamScreenshots.TagUser(hScreenshot, steamID);
@@ -68,7 +68,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static uint SteamAPI_ISteamScreenshots_AddVRScreenshotToLibrary(EVRScreenshotType eType, char pchFilename, char pchVRFilename)
+        public static uint SteamAPI_ISteamScreenshots_AddVRScreenshotToLibrary(int eType, string pchFilename, string pchVRFilename)
         {
             Write("SteamAPI_ISteamScreenshots_AddVRScreenshotToLibrary");
             return SteamEmulator.SteamScreenshots.AddVRScreenshotToLibrary(eType, pchFilename, pchVRFilename);

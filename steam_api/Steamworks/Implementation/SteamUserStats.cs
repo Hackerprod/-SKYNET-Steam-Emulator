@@ -16,13 +16,13 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool GetStat(IntPtr _, string pchName, uint pData)
+        public bool GetStat(string pchName, uint pData)
         {
             Write($"GetStat");
             return false;
         }
 
-        public bool SetStat(IntPtr _, string pchName, uint nData)
+        public bool SetStat(string pchName, uint nData)
         {
             Write($"SetStat");
             return false;
@@ -94,25 +94,25 @@ namespace SKYNET.Steamworks.Implementation
             return "";
         }
 
-        public SteamAPICall_t RequestUserStats(IntPtr steamIDUser)
+        public ulong RequestUserStats(ulong steamIDUser)
         {
             Write($"RequestUserStats");
             return default;
         }
 
-        public bool GetUserStat(IntPtr _, IntPtr steamIDUser, string pchName, uint pData)
+        public bool GetUserStat(ulong steamIDUser, string pchName, uint pData)
         {
             Write($"GetUserStat");
             return false;
         }
 
-        public bool GetUserAchievement(IntPtr steamIDUser, string pchName, bool pbAchieved)
+        public bool GetUserAchievement(ulong steamIDUser, string pchName, bool pbAchieved)
         {
             Write($"GetUserAchievement");
             return false;
         }
 
-        public bool GetUserAchievementAndUnlockTime(IntPtr steamIDUser, string pchName, bool pbAchieved, uint punUnlockTime)
+        public bool GetUserAchievementAndUnlockTime(ulong steamIDUser, string pchName, bool pbAchieved, uint punUnlockTime)
         {
             Write($"GetUserAchievementAndUnlockTime");
             return false;
@@ -124,79 +124,79 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public SteamAPICall_t FindOrCreateLeaderboard(string pchLeaderboardName, ELeaderboardSortMethod eLeaderboardSortMethod, int eLeaderboardDisplayType)
+        public ulong FindOrCreateLeaderboard(string pchLeaderboardName, int eLeaderboardSortMethod, int eLeaderboardDisplayType)
         {
             Write($"FindOrCreateLeaderboard");
             return default;
         }
 
-        public SteamAPICall_t FindLeaderboard(string pchLeaderboardName)
+        public ulong FindLeaderboard(string pchLeaderboardName)
         {
             Write($"FindLeaderboard");
             return default;
         }
 
-        public string GetLeaderboardName(IntPtr hSteamLeaderboard)
+        public string GetLeaderboardName(ulong hSteamLeaderboard)
         {
             Write($"GetLeaderboardName");
             return "";
         }
 
-        public int GetLeaderboardEntryCount(IntPtr hSteamLeaderboard)
+        public int GetLeaderboardEntryCount(ulong hSteamLeaderboard)
         {
             Write($"GetLeaderboardEntryCount");
             return 0;
         }
 
-        public ELeaderboardSortMethod GetLeaderboardSortMethod(IntPtr hSteamLeaderboard)
+        public int GetLeaderboardSortMethod(ulong hSteamLeaderboard)
         {
             Write($"GetLeaderboardSortMethod");
             return default;
         }
 
-        public int GetLeaderboardDisplayType(IntPtr hSteamLeaderboard)
+        public int GetLeaderboardDisplayType(ulong hSteamLeaderboard)
         {
             Write($"GetLeaderboardDisplayType");
             return 0;
         }
 
-        public SteamAPICall_t DownloadLeaderboardEntries(IntPtr hSteamLeaderboard, IntPtr eLeaderboardDataRequest, int nRangeStart, int nRangeEnd)
+        public ulong DownloadLeaderboardEntries(ulong hSteamLeaderboard, IntPtr eLeaderboardDataRequest, int nRangeStart, int nRangeEnd)
         {
             Write($"DownloadLeaderboardEntries");
             return default;
         }
 
-        public SteamAPICall_t DownloadLeaderboardEntriesForUsers(IntPtr hSteamLeaderboard, IntPtr prgUsers, int cUsers)
+        public ulong DownloadLeaderboardEntriesForUsers(ulong hSteamLeaderboard, ulong prgUsers, int cUsers)
         {
             Write($"DownloadLeaderboardEntriesForUsers");
             return default;
         }
 
-        public bool GetDownloadedLeaderboardEntry(IntPtr hSteamLeaderboardEntries, int index, IntPtr pLeaderboardEntry, uint pDetails, int cDetailsMax)
+        public bool GetDownloadedLeaderboardEntry(ulong hSteamLeaderboardEntries, int index, IntPtr pLeaderboardEntry, uint pDetails, int cDetailsMax)
         {
             Write($"GetDownloadedLeaderboardEntry");
             return false;
         }
 
-        public SteamAPICall_t UploadLeaderboardScore(IntPtr hSteamLeaderboard, ELeaderboardUploadScoreMethod eLeaderboardUploadScoreMethod, uint nScore, uint pScoreDetails, int cScoreDetailsCount)
+        public ulong UploadLeaderboardScore(ulong hSteamLeaderboard, int eLeaderboardUploadScoreMethod, uint nScore, uint pScoreDetails, int cScoreDetailsCount)
         {
             Write($"UploadLeaderboardScore");
             return default;
         }
 
-        public SteamAPICall_t AttachLeaderboardUGC(IntPtr hSteamLeaderboard, UGCHandle_t hUGC)
+        public ulong AttachLeaderboardUGC(ulong hSteamLeaderboard, ulong hUGC)
         {
             Write($"AttachLeaderboardUGC");
             return default;
         }
 
-        public SteamAPICall_t GetNumberOfCurrentPlayers(IntPtr _)
+        public ulong GetNumberOfCurrentPlayers(IntPtr _)
         {
             Write($"GetNumberOfCurrentPlayers");
             return default;
         }
 
-        public SteamAPICall_t RequestGlobalAchievementPercentages(IntPtr _)
+        public ulong RequestGlobalAchievementPercentages(IntPtr _)
         {
             Write($"RequestGlobalAchievementPercentages");
             return default;
@@ -220,7 +220,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public SteamAPICall_t RequestGlobalStats(int nHistoryDays)
+        public ulong RequestGlobalStats(int nHistoryDays)
         {
             Write($"RequestGlobalStats");
             return default;

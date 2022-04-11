@@ -30,6 +30,7 @@ namespace SKYNET.Managers
                 if (type.IsDefined(typeof(InterfaceAttribute)))
                 {
                     interfaceTypes.Add(type);
+                    Write(type.Name);
                 }
             }
         }

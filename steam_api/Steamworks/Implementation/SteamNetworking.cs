@@ -9,7 +9,7 @@ namespace SKYNET.Steamworks.Implementation
     [StructLayout(LayoutKind.Sequential)]
     public class SteamNetworking : ISteamInterface
     {
-        public bool SendP2PPacket(IntPtr steamIDRemote, IntPtr pubData, uint cubData, EP2PSend eP2PSendType, int nChannel)
+        public bool SendP2PPacket(ulong steamIDRemote, IntPtr pubData, uint cubData, int eP2PSendType, int nChannel)
         {
             Write("SendP2PPacket");
             return false;
@@ -21,31 +21,31 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool ReadP2PPacket(IntPtr pubDest, uint cubDest, uint pcubMsgSize, IntPtr psteamIDRemote, int nChannel)
+        public bool ReadP2PPacket(IntPtr pubDest, uint cubDest, uint pcubMsgSize, ulong psteamIDRemote, int nChannel)
         {
             Write("ReadP2PPacket");
             return false;
         }
 
-        public bool AcceptP2PSessionWithUser(IntPtr steamIDRemote)
+        public bool AcceptP2PSessionWithUser(ulong steamIDRemote)
         {
             Write("AcceptP2PSessionWithUser");
             return false;
         }
 
-        public bool CloseP2PSessionWithUser(IntPtr steamIDRemote)
+        public bool CloseP2PSessionWithUser(ulong steamIDRemote)
         {
             Write("CloseP2PSessionWithUser");
             return false;
         }
 
-        public bool CloseP2PChannelWithUser(IntPtr steamIDRemote, int nChannel)
+        public bool CloseP2PChannelWithUser(ulong steamIDRemote, int nChannel)
         {
             Write("CloseP2PChannelWithUser");
             return false;
         }
 
-        public bool GetP2PSessionState(IntPtr steamIDRemote, P2PSessionState_t pConnectionState)
+        public bool GetP2PSessionState(ulong steamIDRemote, IntPtr pConnectionState)
         {
             Write("GetP2PSessionState");
             return false;
@@ -57,19 +57,19 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public uint CreateListenSocket(int nVirtualP2PPort, IntPtr nIP, uint nPort, bool bAllowUseOfPacketRelay)
+        public uint CreateListenSocket(int nVirtualP2PPort, uint nIP, uint nPort, bool bAllowUseOfPacketRelay)
         {
             Write("CreateListenSocket");
             return 0;
         }
 
-        public uint CreateP2PConnectionSocket(IntPtr steamIDTarget, int nVirtualPort, int nTimeoutSec, bool bAllowUseOfPacketRelay)
+        public uint CreateP2PConnectionSocket(ulong steamIDTarget, int nVirtualPort, int nTimeoutSec, bool bAllowUseOfPacketRelay)
         {
             Write("CreateP2PConnectionSocket");
             return 0;
         }
 
-        public uint CreateConnectionSocket(IntPtr nIP, uint nPort, int nTimeoutSec)
+        public uint CreateConnectionSocket(uint nIP, uint nPort, int nTimeoutSec)
         {
             Write("CreateConnectionSocket");
             return 0;
@@ -117,19 +117,19 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool GetSocketInfo(uint hSocket, IntPtr pSteamIDRemote, int peSocketStatus, IntPtr punIPRemote, uint punPortRemote)
+        public bool GetSocketInfo(uint hSocket, ulong pSteamIDRemote, int peSocketStatus, uint punIPRemote, uint punPortRemote)
         {
             Write("GetSocketInfo");
             return false;
         }
 
-        public bool GetListenSocketInfo(uint hListenSocket, IntPtr pnIP, uint pnPort)
+        public bool GetListenSocketInfo(uint hListenSocket, uint pnIP, uint pnPort)
         {
             Write("GetListenSocketInfo");
             return false;
         }
 
-        public ESNetSocketConnectionType GetSocketConnectionType(uint hSocket)
+        public int GetSocketConnectionType(uint hSocket)
         {
             Write("GetSocketConnectionType");
             return default;

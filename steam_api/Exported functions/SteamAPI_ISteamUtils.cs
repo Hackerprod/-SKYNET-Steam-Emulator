@@ -55,7 +55,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUtils_GetImageRGBA(int iImage, uint pubDest, int nDestBufferSize)
+        public static bool SteamAPI_ISteamUtils_GetImageRGBA(int iImage, int pubDest, int nDestBufferSize)
         {
             Write("SteamAPI_ISteamUtils_GetImageRGBA");
             return SteamEmulator.SteamUtils.GetImageRGBA(SteamEmulator.SteamUtils.MemoryAddress, iImage, pubDest, nDestBufferSize);
@@ -69,7 +69,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static uint SteamAPI_ISteamUtils_GetCurrentBatteryPower()
+        public static int SteamAPI_ISteamUtils_GetCurrentBatteryPower()
         {
             Write("SteamAPI_ISteamUtils_GetCurrentBatteryPower");
             return SteamEmulator.SteamUtils.GetCurrentBatteryPower(SteamEmulator.SteamUtils.MemoryAddress);
@@ -90,21 +90,21 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUtils_IsAPICallCompleted(int hSteamAPICall, bool pbFailed)
+        public static bool SteamAPI_ISteamUtils_IsAPICallCompleted(ulong hSteamAPICall, bool pbFailed)
         {
             Write("SteamAPI_ISteamUtils_IsAPICallCompleted");
             return SteamEmulator.SteamUtils.IsAPICallCompleted(SteamEmulator.SteamUtils.MemoryAddress, hSteamAPICall, pbFailed);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static ESteamAPICallFailure SteamAPI_ISteamUtils_GetAPICallFailureReason(int hSteamAPICall)
+        public static ESteamAPICallFailure SteamAPI_ISteamUtils_GetAPICallFailureReason(ulong hSteamAPICall)
         {
             Write("SteamAPI_ISteamUtils_GetAPICallFailureReason");
             return SteamEmulator.SteamUtils.GetAPICallFailureReason(SteamEmulator.SteamUtils.MemoryAddress, hSteamAPICall);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUtils_GetAPICallResult(int hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, bool pbFailed)
+        public static bool SteamAPI_ISteamUtils_GetAPICallResult(ulong hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, bool pbFailed)
         {
             Write("SteamAPI_ISteamUtils_GetAPICallResult");
             return SteamEmulator.SteamUtils.GetAPICallResult(SteamEmulator.SteamUtils.MemoryAddress, hSteamAPICall, pCallback, cubCallback, iCallbackExpected, pbFailed);
@@ -139,14 +139,14 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamUtils_CheckFileSignature(string szFileName)
+        public static ulong SteamAPI_ISteamUtils_CheckFileSignature(string szFileName)
         {
             Write("SteamAPI_ISteamUtils_CheckFileSignature");
             return SteamEmulator.SteamUtils.CheckFileSignature(SteamEmulator.SteamUtils.MemoryAddress, szFileName);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUtils_ShowGamepadTextInput(EGamepadTextInputMode eInputMode, EGamepadTextInputLineMode eLineInputMode, string pchDescription, uint unCharMax, string pchExistingText)
+        public static bool SteamAPI_ISteamUtils_ShowGamepadTextInput(int eInputMode, int eLineInputMode, string pchDescription, uint unCharMax, string pchExistingText)
         {
             Write("SteamAPI_ISteamUtils_ShowGamepadTextInput");
             return SteamEmulator.SteamUtils.ShowGamepadTextInput(SteamEmulator.SteamUtils.MemoryAddress, eInputMode, eLineInputMode, pchDescription, unCharMax, pchExistingText);
@@ -237,7 +237,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static ESteamIPv6ConnectivityState SteamAPI_ISteamUtils_GetIPv6ConnectivityState(ESteamIPv6ConnectivityProtocol eProtocol)
+        public static ESteamIPv6ConnectivityState SteamAPI_ISteamUtils_GetIPv6ConnectivityState(int eProtocol)
         {
             Write("SteamAPI_ISteamUtils_GetIPv6ConnectivityState");
             return SteamEmulator.SteamUtils.GetIPv6ConnectivityState(SteamEmulator.SteamUtils.MemoryAddress, eProtocol);

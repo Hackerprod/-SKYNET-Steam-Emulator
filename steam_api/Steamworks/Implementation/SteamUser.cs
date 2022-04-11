@@ -12,10 +12,10 @@ namespace SKYNET.Steamworks.Implementation
     [StructLayout(LayoutKind.Sequential)]
     public class SteamUser : ISteamInterface
     {
-        public HSteamUser GetHSteamUser(IntPtr _)
+        public int GetHSteamUser(IntPtr _)
         {
             Write("GetHSteamUser");
-            return SteamEmulator.HSteamUser;
+            return (int)SteamEmulator.HSteamUser;
         }
 
         public bool BLoggedOn(IntPtr _)
@@ -24,14 +24,14 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public CSteamID GetSteamID(IntPtr _)
+        public ulong GetSteamID(IntPtr _)
         {
-            var SId = new CSteamID(SteamEmulator.SteamId);
+            var SId = SteamEmulator.SteamId;
             Write($"GetSteamID {(ulong)SId}");
             return SId;
         }
 
-        public int InitiateGameConnection(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, IntPtr steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)
+        public int InitiateGameConnection(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)
         {
             Write("InitiateGameConnection");
             return 0;
@@ -63,22 +63,22 @@ namespace SKYNET.Steamworks.Implementation
             Write("StopVoiceRecording");
         }
 
-        public EVoiceResult GetAvailableVoice(IntPtr _, uint pcbCompressed, uint pcbUncompressed_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
+        public int GetAvailableVoice(IntPtr _, uint pcbCompressed, uint pcbUncompressed_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
         {
             Write("GetAvailableVoice");
-            return EVoiceResult.k_EVoiceResultNoData;
+            return (int)EVoiceResult.k_EVoiceResultNoData;
         }
 
-        public EVoiceResult GetVoice(IntPtr _, bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, uint nBytesWritten, bool bWantUncompressed_Deprecated, IntPtr pUncompressedDestBuffer_Deprecated, uint cbUncompressedDestBufferSize_Deprecated, uint nUncompressBytesWritten_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
+        public int GetVoice(IntPtr _, bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, uint nBytesWritten, bool bWantUncompressed_Deprecated, IntPtr pUncompressedDestBuffer_Deprecated, uint cbUncompressedDestBufferSize_Deprecated, uint nUncompressBytesWritten_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
         {
             Write("GetVoice");
-            return EVoiceResult.k_EVoiceResultNoData;
+            return (int)EVoiceResult.k_EVoiceResultNoData;
         }
 
-        public EVoiceResult DecompressVoice(IntPtr _, IntPtr pCompressed, uint cbCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, uint nBytesWritten, uint nDesiredSampleRate)
+        public int DecompressVoice(IntPtr _, IntPtr pCompressed, uint cbCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, uint nBytesWritten, uint nDesiredSampleRate)
         {
             Write("DecompressVoice");
-            return EVoiceResult.k_EVoiceResultNoData;
+            return (int)EVoiceResult.k_EVoiceResultNoData;
         }
 
         public uint GetVoiceOptimalSampleRate(IntPtr _)
@@ -87,32 +87,32 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public int GetAuthSessionTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
+        public uint GetAuthSessionTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
         {
             Write("GetAuthSessionTicket");
             return 0;
         }
 
-        public EBeginAuthSessionResult BeginAuthSession(IntPtr _, IntPtr pAuthTicket, int cbAuthTicket, IntPtr steamID)
+        public int BeginAuthSession(IntPtr _, IntPtr pAuthTicket, int cbAuthTicket, ulong steamID)
         {
             Write("BeginAuthSession");
-            return EBeginAuthSessionResult.k_EBeginAuthSessionResultOK;
+            return (int)EBeginAuthSessionResult.k_EBeginAuthSessionResultOK;
         }
 
-        public void EndAuthSession(IntPtr _, IntPtr steamID)
+        public void EndAuthSession(IntPtr _, ulong steamID)
         {
             Write("EndAuthSession");
         }
 
-        public void CancelAuthTicket(IntPtr _, int hAuthTicket)
+        public void CancelAuthTicket(IntPtr _, uint hAuthTicket)
         {
             Write("CancelAuthTicket");
         }
 
-        public EUserHasLicenseForAppResult UserHasLicenseForApp(IntPtr _, IntPtr steamID, AppId_t appID)
+        public int UserHasLicenseForApp(IntPtr _, ulong steamID, uint appID)
         {
             Write("EUserHasLicenseForAppResult");
-            return EUserHasLicenseForAppResult.k_EUserHasLicenseResultHasLicense;
+            return (int)EUserHasLicenseForAppResult.k_EUserHasLicenseResultHasLicense;
         }
 
         public bool BIsBehindNAT(IntPtr _)
@@ -121,15 +121,15 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public void AdvertiseGame(IntPtr _, IntPtr steamIDGameServer, uint unIPServer, uint usPortServer)
+        public void AdvertiseGame(IntPtr _, ulong steamIDGameServer, uint unIPServer, uint usPortServer)
         {
             Write("AdvertiseGame");
         }
 
-        public SteamAPICall_t RequestEncryptedAppTicket(IntPtr _, IntPtr pDataToInclude, int cbDataToInclude)
+        public ulong RequestEncryptedAppTicket(IntPtr _, IntPtr pDataToInclude, int cbDataToInclude)
         {
             Write("RequestEncryptedAppTicket");
-            return SteamAPICall_t.Invalid;
+            return 0;
         }
 
         public bool GetEncryptedAppTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
@@ -150,10 +150,10 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public SteamAPICall_t RequestStoreAuthURL(IntPtr _, string pchRedirectURL)
+        public ulong RequestStoreAuthURL(IntPtr _, string pchRedirectURL)
         {
             Write("RequestStoreAuthURL");
-            return SteamAPICall_t.Invalid;
+            return 0;
         }
 
         public bool BIsPhoneVerified(IntPtr _)
@@ -180,19 +180,19 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public SteamAPICall_t GetMarketEligibility(IntPtr _)
+        public ulong GetMarketEligibility(IntPtr _)
         {
             Write("GetMarketEligibility");
             return default;
         }
 
-        public SteamAPICall_t GetDurationControl(IntPtr _)
+        public ulong GetDurationControl(IntPtr _)
         {
             Write("GetDurationControl");
             return default;
         }
 
-        public bool BSetDurationControlOnlineState(IntPtr _, EDurationControlOnlineState eNewState)
+        public bool BSetDurationControlOnlineState(IntPtr _, int eNewState)
         {
             Write("BSetDurationControlOnlineState");
             return false;

@@ -10,33 +10,33 @@ namespace SKYNET.Steamworks.Implementation
     [StructLayout(LayoutKind.Sequential)]
     public class SteamController : ISteamInterface
     {
-        public void ActivateActionSet(IntPtr controllerHandle, int actionSetHandle)
+        public void ActivateActionSet(ulong controllerHandle, ulong actionSetHandle)
         {
             Write("ActivateActionSet");
         }
 
-        public void ActivateActionSetLayer(IntPtr controllerHandle, IntPtr actionSetLayerHandle)
+        public void ActivateActionSetLayer(ulong controllerHandle, ulong actionSetLayerHandle)
         {
             Write("ActivateActionSetLayer");
         }
 
-        public void DeactivateActionSetLayer(IntPtr controllerHandle, IntPtr actionSetLayerHandle)
+        public void DeactivateActionSetLayer(ulong controllerHandle, ulong actionSetLayerHandle)
         {
             Write("DeactivateActionSetLayer");
         }
 
-        public void DeactivateAllActionSetLayers(IntPtr controllerHandle)
+        public void DeactivateAllActionSetLayers(ulong controllerHandle)
         {
             Write("DeactivateAllActionSetLayers");
         }
 
-        public EControllerActionOrigin GetActionOriginFromXboxOrigin_(IntPtr controllerHandle, EXboxOrigin eOrigin)
+        public int GetActionOriginFromXboxOrigin_(ulong controllerHandle, int eOrigin)
         {
             Write("GetActionOriginFromXboxOrigin_");
-            return EControllerActionOrigin.k_EControllerActionOrigin_None;
+            return 0;
         }
 
-        public int GetActionSetHandle(string pszActionSetName)
+        public ulong GetActionSetHandle(string pszActionSetName)
         {
             Write("GetActionSetHandle");
             if (string.IsNullOrEmpty(pszActionSetName))
@@ -50,13 +50,13 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public int GetActiveActionSetLayers(IntPtr controllerHandle, int handlesOut)
+        public int GetActiveActionSetLayers(ulong controllerHandle, ulong handlesOut)
         {
             Write("GetActiveActionSetLayers");
             return 0;
         }
 
-        public IntPtr GetAnalogActionData(IntPtr _, uint controllerHandle, uint analogActionHandle)
+        public IntPtr GetAnalogActionData(ulong controllerHandle, ulong analogActionHandle)
         {
             Write("GetAnalogActionData");
             //ControllerAnalogActionData_t data = new ControllerAnalogActionData_t();
@@ -66,7 +66,7 @@ namespace SKYNET.Steamworks.Implementation
             return IntPtr.Zero;
         }
 
-        public int GetAnalogActionHandle(string pszActionName)
+        public ulong GetAnalogActionHandle(string pszActionName)
         {
             Write("GetAnalogActionHandle");
             if (string.IsNullOrEmpty(pszActionName))
@@ -80,37 +80,37 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public int GetAnalogActionOrigins(IntPtr controllerHandle, int actionSetHandle, uint analogActionHandle, EControllerActionOrigin originsOut)
+        public int GetAnalogActionOrigins(ulong controllerHandle, ulong actionSetHandle, ulong analogActionHandle, int originsOut)
         {
             Write("GetAnalogActionOrigins");
             return 0;
         }
 
-        public int GetConnectedControllers(IntPtr handles, IntPtr handlesOut)
+        public int GetConnectedControllers(ulong handlesOut)
         {
             Write("GetConnectedControllers");
             return 0;
         }
 
-        public bool GetControllerBindingRevision(IntPtr controllerHandle, int pMajor, int pMinor)
+        public bool GetControllerBindingRevision(ulong controllerHandle, int pMajor, int pMinor)
         {
             Write("GetControllerBindingRevision");
             return false;
         }
 
-        public int GetControllerForGamepadIndex(int nIndex)
+        public ulong GetControllerForGamepadIndex(int nIndex)
         {
             Write("GetControllerForGamepadIndex");
             return 0;
         }
 
-        public int GetCurrentActionSet(IntPtr controllerHandle)
+        public ulong GetCurrentActionSet(ulong controllerHandle)
         {
             Write("GetCurrentActionSet");
             return 0;
         }
 
-        public IntPtr GetDigitalActionData(IntPtr _, IntPtr controllerHandle, int digitalActionHandle)
+        public IntPtr GetDigitalActionData(ulong controllerHandle, ulong digitalActionHandle)
         {
             Write("GetDigitalActionData");
             ControllerDigitalActionData_t digitalData = new ControllerDigitalActionData_t();
@@ -119,7 +119,7 @@ namespace SKYNET.Steamworks.Implementation
             return IntPtr.Zero;
         }
 
-        public int GetDigitalActionHandle(string pszActionName)
+        public ulong GetDigitalActionHandle(string pszActionName)
         {
             Write("GetDigitalActionHandle");
             if (string.IsNullOrEmpty(pszActionName))
@@ -133,49 +133,49 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public int GetDigitalActionOrigins(IntPtr controllerHandle, int actionSetHandle, int digitalActionHandle, EControllerActionOrigin originsOut)
+        public int GetDigitalActionOrigins(ulong controllerHandle, ulong actionSetHandle, ulong digitalActionHandle, int originsOut)
         {
             Write("GetDigitalActionOrigins");
             return 0;
         }
 
-        public int GetGamepadIndexForController(IntPtr ulControllerHandle)
+        public int GetGamepadIndexForController(ulong ulControllerHandle)
         {
             Write("GetGamepadIndexForController");
             return 0;
         }
 
-        public string GetGlyphForActionOrigin(EControllerActionOrigin eOrigin)
+        public string GetGlyphForActionOrigin(int eOrigin)
         {
             Write("GetGlyphForActionOrigin");
             return "";
         }
 
-        public string GetGlyphForXboxOrigin(EXboxOrigin eOrigin)
+        public string GetGlyphForXboxOrigin(int eOrigin)
         {
             Write("GetGlyphForXboxOrigin");
             return "";
         }
 
-        public ESteamInputType GetInputTypeForHandle(IntPtr controllerHandle)
+        public int GetInputTypeForHandle(ulong controllerHandle)
         {
             Write("GetInputTypeForHandle");
             return 0;
         }
 
-        public ControllerMotionData_t GetMotionData(IntPtr controllerHandle)
+        public IntPtr GetMotionData(ulong controllerHandle)
         {
             Write("GetMotionData");
             return default;
         }
 
-        public string GetStringForActionOrigin(EControllerActionOrigin eOrigin)
+        public string GetStringForActionOrigin(int eOrigin)
         {
             Write("GetStringForActionOrigin");
             return "";
         }
 
-        public string GetStringForXboxOrigin(EXboxOrigin eOrigin)
+        public string GetStringForXboxOrigin(int eOrigin)
         {
             Write("GetStringForXboxOrigin");
             return "";
@@ -192,12 +192,12 @@ namespace SKYNET.Steamworks.Implementation
             Write("RunFrame");
         }
 
-        public void SetLEDColor(IntPtr controllerHandle, uint nColorR, uint nColorG, uint nColorB, int nFlags)
+        public void SetLEDColor(ulong controllerHandle, int nColorR, int nColorG, int nColorB, int nFlags)
         {
             Write("SetLEDColor");
         }
 
-        public bool ShowBindingPanel(IntPtr controllerHandle)
+        public bool ShowBindingPanel(ulong controllerHandle)
         {
             Write("ShowBindingPanel");
             return true;
@@ -209,28 +209,28 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public void StopAnalogActionMomentum(IntPtr controllerHandle, uint eAction)
+        public void StopAnalogActionMomentum(ulong controllerHandle, ulong eAction)
         {
             Write("StopAnalogActionMomentum");
         }
 
-        public EControllerActionOrigin TranslateActionOrigin(ESteamInputType eDestinationInputType, EControllerActionOrigin eSourceOrigin)
+        public int TranslateActionOrigin(int eDestinationInputType, int eSourceOrigin)
         {
             Write("TranslateActionOrigin");
             return default;
         }
 
-        public void TriggerHapticPulse(IntPtr controllerHandle, ESteamControllerPad eTargetPad, uint usDurationMicroSec)
+        public void TriggerHapticPulse(ulong controllerHandle, int eTargetPad, short usDurationMicroSec)
         {
             Write("TriggerHapticPulse");
         }
 
-        public void TriggerRepeatedHapticPulse(IntPtr controllerHandle, ESteamControllerPad eTargetPad, uint usDurationMicroSec, uint usOffMicroSec, uint unRepeat, int nFlags)
+        public void TriggerRepeatedHapticPulse(ulong controllerHandle, int eTargetPad, short usDurationMicroSec, short usOffMicroSec, short unRepeat, int nFlags)
         {
             Write("TriggerRepeatedHapticPulse");
         }
 
-        public void TriggerVibration(IntPtr controllerHandle, uint usLeftSpeed, uint usRightSpeed)
+        public void TriggerVibration(ulong controllerHandle, short usLeftSpeed, short usRightSpeed)
         {
             Write("TriggerVibration");
         }
@@ -239,15 +239,15 @@ namespace SKYNET.Steamworks.Implementation
         public string InterfaceVersion { get; set; }
 
 
-        private Dictionary<string, int> action_handles;
-        private Dictionary<string, int> digital_action_handles;
-        private Dictionary<string, int> analog_action_handles;
+        private Dictionary<string, ulong> action_handles;
+        private Dictionary<string, ulong> digital_action_handles;
+        private Dictionary<string, ulong> analog_action_handles;
 
         public SteamController()
         {
-            action_handles = new Dictionary<string, int>();
-            digital_action_handles = new Dictionary<string, int>();
-            analog_action_handles = new Dictionary<string, int>();
+            action_handles = new Dictionary<string, ulong>();
+            digital_action_handles = new Dictionary<string, ulong>();
+            analog_action_handles = new Dictionary<string, ulong>();
             InterfaceVersion = "SteamController";
         }
         private void Write(string v)

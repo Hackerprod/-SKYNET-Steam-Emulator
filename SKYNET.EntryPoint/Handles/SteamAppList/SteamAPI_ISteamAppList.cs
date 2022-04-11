@@ -19,25 +19,25 @@ namespace SKYNET.Hook.Handles
             base.Install<SteamAPI_ISteamAppList_GetNumInstalledAppsDelegate>("SteamAPI_ISteamAppList_GetNumInstalledApps", _SteamAPI_ISteamAppList_GetNumInstalledApps, new SteamAPI_ISteamAppList_GetNumInstalledAppsDelegate(SteamAPI_ISteamAppList_GetNumInstalledApps));
         }
 
-        public int SteamAPI_ISteamAppList_GetAppBuildId(AppId_t nAppID)
+        public int SteamAPI_ISteamAppList_GetAppBuildId(uint nAppID)
         {
             Write("Steam_AppList::GetAppBuildId");
             return SteamEmulator.SteamAppList.GetAppBuildId(nAppID);
         }
 
-        public int SteamAPI_ISteamAppList_GetAppInstallDir(AppId_t nAppID, IntPtr pchDirectory, int cchNameMax)
+        public int SteamAPI_ISteamAppList_GetAppInstallDir(uint nAppID, string pchDirectory, int cchNameMax)
         {
             Write("SteamAPI_ISteamAppList_GetAppInstallDir");
             return SteamEmulator.SteamAppList.GetAppInstallDir(nAppID, pchDirectory, cchNameMax);
         }
 
-        public int SteamAPI_ISteamAppList_GetAppName(AppId_t nAppID, IntPtr pchName, int cchNameMax)
+        public int SteamAPI_ISteamAppList_GetAppName(uint nAppID, string pchName, int cchNameMax)
         {
             Write("SteamAPI_ISteamAppList_GetAppName");
             return SteamEmulator.SteamAppList.GetAppName(nAppID, pchName, cchNameMax);
         }
 
-        public uint SteamAPI_ISteamAppList_GetInstalledApps(AppId_t pvecAppID, uint unMaxAppIDs)
+        public uint SteamAPI_ISteamAppList_GetInstalledApps(uint pvecAppID, uint unMaxAppIDs)
         {
             Write("SteamAPI_ISteamAppList_GetInstalledAppsn");
             return SteamEmulator.SteamAppList.GetInstalledApps(pvecAppID, unMaxAppIDs);

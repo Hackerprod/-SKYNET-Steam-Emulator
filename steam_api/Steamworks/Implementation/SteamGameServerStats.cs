@@ -9,52 +9,52 @@ namespace SKYNET.Steamworks.Implementation
     [StructLayout(LayoutKind.Sequential)]
     public class SteamGameServerStats : ISteamInterface
     {
-        public bool ClearUserAchievement(IntPtr steamIDUser, string pchName)
+        public bool ClearUserAchievement(ulong steamIDUser, string pchName)
         {
             Write("ClearUserAchievement");
             return false;
         }
 
-        public bool GetUserAchievement(IntPtr steamIDUser, string pchName, bool pbAchieved)
+        public bool GetUserAchievement(ulong steamIDUser, string pchName, bool pbAchieved)
         {
             Write("GetUserAchievement");
             return false;
         }
 
-        public bool GetUserStat(IntPtr steamIDUser, string pchName, int pData)
+        public bool GetUserStat(ulong steamIDUser, string pchName, float pData)
         {
             Write("GetUserStat");
             return false;
         }
 
-        public SteamAPICall_t RequestUserStats(IntPtr steamIDUser)
+        public ulong RequestUserStats(ulong steamIDUser)
         {
             Write("RequestUserStats");
             //GSStatsReceived_t data;
             //data.m_eResult = 0;//k_EResultOK;
             //data.m_steamIDUser = steamIDUser;
-            return SteamAPICall_t.Invalid;
+            return 0;
         }
 
-        public bool SetUserAchievement(IntPtr steamIDUser, string pchName)
+        public bool SetUserAchievement(ulong steamIDUser, string pchName)
         {
             Write("SetUserAchievement");
             return false;
         }
 
-        public bool SetUserStat(IntPtr steamIDUser, string pchName, int nData)
+        public bool SetUserStat(ulong steamIDUser, string pchName, float nData)
         {
             Write("SetUserStat");
             return false;
         }
 
-        public SteamAPICall_t StoreUserStats(IntPtr steamIDUser)
+        public ulong StoreUserStats(ulong steamIDUser)
         {
             Write("StoreUserStats");
-            return SteamAPICall_t.Invalid;
+            return 0;
         }
 
-        public bool UpdateUserAvgRateStat(IntPtr steamIDUser, string pchName, float flCountThisSession, double dSessionLength)
+        public bool UpdateUserAvgRateStat(ulong steamIDUser, string pchName, float flCountThisSession, double dSessionLength)
         {
             Write("UpdateUserAvgRateStat");
             return false;

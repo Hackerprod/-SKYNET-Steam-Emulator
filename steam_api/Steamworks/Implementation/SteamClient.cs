@@ -51,7 +51,7 @@ namespace SKYNET.Steamworks.Implementation
         public IntPtr GetISteamGameServer(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamGameServer {pchVersion}");
-            return SteamEmulator.SteamGameServer.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public void SetLocalIPBinding(uint unIP, uint usPort)
@@ -59,70 +59,70 @@ namespace SKYNET.Steamworks.Implementation
             Write("SetLocalIPBinding");
         }
 
-        public IntPtr GetISteamFriends(int user, int pipe, string pchVersion)
+        public IntPtr GetISteamFriends(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamFriends {pchVersion}");
-            return SteamEmulator.SteamFriends.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamUtils(int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamUtils {pchVersion}");
-            return SteamEmulator.SteamUtils.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(pchVersion);
         }
 
         public IntPtr GetISteamMatchmaking(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamMatchmaking {pchVersion}");
-            return SteamEmulator.SteamMatchmaking.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamMatchmakingServers(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamMatchmakingServers {pchVersion}");
-            return SteamEmulator.SteamMatchMakingServers.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamGenericInterface(int hSteamUser, int hSteamPipe, [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
         {
             Write($"GetISteamGenericInterface {pchVersion}");
-            return InterfaceManager.FindOrCreateInterface(pchVersion);
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamUserStats(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamUserStats {pchVersion}");
-            return SteamEmulator.SteamUserStats.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamGameServerStats(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamGameServerStats {pchVersion}");
-            return SteamEmulator.SteamGameServerStats.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamApps(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamApps {pchVersion}");
-            return SteamEmulator.SteamApps.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamNetworking(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamNetworking {pchVersion}");
-            return SteamEmulator.SteamNetworking.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamRemoteStorage(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamRemoteStorage {pchVersion}");
-            return SteamEmulator.SteamRemoteStorage.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamScreenshots(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamScreenshots {pchVersion}");
-            return SteamEmulator.SteamScreenshots.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         //public IntPtr GetISteamGameSearch(int hSteamUser, int hSteamPipe, string pchVersion)
@@ -157,8 +157,7 @@ namespace SKYNET.Steamworks.Implementation
         public IntPtr GetISteamHTTP(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamHTTP {pchVersion}");
-
-            return SteamEmulator.SteamHTTP.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr DEPRECATED_GetISteamUnifiedMessages(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
@@ -176,37 +175,37 @@ namespace SKYNET.Steamworks.Implementation
         public IntPtr GetISteamController(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamController {pchVersion}");
-            return SteamEmulator.SteamController.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamUGC(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamUGC {pchVersion}");
-            return SteamEmulator.SteamUGC.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamAppList(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamAppList {pchVersion}");
-            return SteamEmulator.SteamAppList.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamMusic(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamMusic {pchVersion}");
-            return SteamEmulator.SteamMusic.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamMusicRemote(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamMusicRemote {pchVersion}");
-            return SteamEmulator.SteamMusicRemote.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamHTMLSurface(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamHTMLSurface {pchVersion}");
-            return SteamEmulator.SteamHTMLSurface.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public void DEPRECATED_Set_SteamAPI_CPostAPIResultInProcess( IntPtr arg0)
@@ -238,19 +237,19 @@ namespace SKYNET.Steamworks.Implementation
         public IntPtr GetISteamInventory(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamInventory {pchVersion}");
-            return SteamEmulator.SteamInventory.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamVideo(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamVideo {pchVersion}");
-            return SteamEmulator.SteamVideo.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamParentalSettings(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamParentalSettings {pchVersion}");
-            return SteamEmulator.SteamParentalSettings.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamMasterServerUpdater(int hSteamUser, int hSteamPipe, string pchVersion)
@@ -268,25 +267,25 @@ namespace SKYNET.Steamworks.Implementation
         public IntPtr GetISteamGameSearch(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamFriends {pchVersion}");
-            return SteamEmulator.SteamGameSearch.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamInput(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamInput {pchVersion}");
-            return SteamEmulator.SteamInput.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamParties(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamParties {pchVersion}");
-            return SteamEmulator.SteamParties.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamRemotePlay(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamRemotePlay {pchVersion}");
-            return SteamEmulator.SteamRemotePlay.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public void DestroyAllInterfaces(IntPtr _)

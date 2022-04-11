@@ -46,20 +46,20 @@ namespace SKYNET.Steamworks.Implementation
             return "";
         }
 
-        public bool BIsSubscribedApp(AppId_t appID)
+        public bool BIsSubscribedApp(uint appID)
         {
             Write("BIsSubscribedApp " + appID);
             return false;
         }
 
-        public bool BIsDlcInstalled(AppId_t appID)
+        public bool BIsDlcInstalled(uint appID)
         {
             Write("BIsDlcInstalled " + appID);
             return false;
 
         }
 
-        public UInt32 GetEarliestPurchaseUnixTime(AppId_t nAppID)
+        public UInt32 GetEarliestPurchaseUnixTime(uint nAppID)
         {
             Write("GetEarliestPurchaseUnixTime");
             //TODO ?
@@ -78,30 +78,30 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public bool BGetDLCDataByIndex(int iDLC, IntPtr pAppID, bool pbAvailable, IntPtr pchName, int cchNameBufferSize)
+        public bool BGetDLCDataByIndex(int iDLC, uint pAppID, bool pbAvailable, string pchName, int cchNameBufferSize)
         {
             Write("BGetDLCDataByIndex");
             return true;
         }
 
-        public void InstallDLC(AppId_t nAppID)
+        public void InstallDLC(uint nAppID)
         {
             Write("InstallDLC");
         }
 
-        public void UninstallDLC(AppId_t nAppID)
+        public void UninstallDLC(uint nAppID)
         {
             Write("UninstallDLC");
         }
 
-        public void RequestAppProofOfPurchaseKey(AppId_t nAppID)
+        public void RequestAppProofOfPurchaseKey(uint nAppID)
         {
             Write("RequestAppProofOfPurchaseKey");
         }
 
-        public bool GetCurrentBetaName(IntPtr pchName, int cchNameBufferSize)
+        public bool GetCurrentBetaName(string pchName, int cchNameBufferSize)
         {
-            Write("GetCurrentBetaName " + cchNameBufferSize);
+            Write("GetCurrentBetaName " + pchName);
             return true;
         }
 
@@ -111,29 +111,29 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public UInt32 GetInstalledDepots(AppId_t appID, IntPtr pvecDepots, uint cMaxDepots)
+        public UInt32 GetInstalledDepots(uint appID, uint pvecDepots, uint cMaxDepots)
         {
             Write($"GetInstalledDepots {appID}, {cMaxDepots}");
             return 0;
         }
 
-        public UInt32 GetAppInstallDir(AppId_t appID, IntPtr pchFolder, uint cchFolderBufferSize)
+        public UInt32 GetAppInstallDir(uint appID, string pchFolder, uint cchFolderBufferSize)
         {
             Write($"GetAppInstallDir {appID} {pchFolder} {cchFolderBufferSize}");
             string installed_path = "xd";
             return (UInt32)installed_path.Length;
         }
 
-        public bool BIsAppInstalled(AppId_t appID)
+        public bool BIsAppInstalled(uint appID)
         {
             Write($"BIsAppInstalled {appID}");
             return true;
         }
 
-        public IntPtr GetAppOwner(IntPtr _)
+        public ulong GetAppOwner(IntPtr _)
         {
             Write("GetAppOwner");
-            return IntPtr.Zero;
+            return 0;
         }
 
         public string GetLaunchQueryParam(string pchKey)
@@ -142,7 +142,7 @@ namespace SKYNET.Steamworks.Implementation
             return "";
         }
 
-        public bool GetDlcDownloadProgress(AppId_t nAppID, UInt64 punBytesDownloaded, UInt64 punBytesTotal)
+        public bool GetDlcDownloadProgress(uint nAppID, UInt64 punBytesDownloaded, UInt64 punBytesTotal)
         {
             Write("GetDlcDownloadProgress");
             return false;
@@ -160,10 +160,10 @@ namespace SKYNET.Steamworks.Implementation
             Write("RequestAllProofOfPurchaseKeys");
         }
 
-        public SteamAPICall_t GetFileDetails(string pszFileName)
+        public ulong GetFileDetails(string pszFileName)
         {
             Write("GetFileDetails");
-            return (SteamAPICall_t)0;
+            return 0;
         }
 
         public bool BIsSubscribedFromFamilySharing(IntPtr _)
@@ -178,7 +178,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public int GetLaunchCommandLine(IntPtr pszCommandLine, int cubCommandLine)
+        public int GetLaunchCommandLine(string pszCommandLine, int cubCommandLine)
         {
             Write("GetLaunchCommandLine");
             return 0;

@@ -10,18 +10,18 @@ namespace SKYNET.Steamworks.Implementation
     [StructLayout(LayoutKind.Sequential)]
     public class SteamMatchmaking : ISteamInterface
     {
-        public int AddFavoriteGame(AppId_t nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags, uint rTime32LastPlayedOnServer)
+        public int AddFavoriteGame(uint nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags, uint rTime32LastPlayedOnServer)
         {
             Write("AddFavoriteGame");
             return 1;
         }
 
-        public void AddRequestLobbyListCompatibleMembersFilter(IntPtr steamIDLobby)
+        public void AddRequestLobbyListCompatibleMembersFilter(ulong steamIDLobby)
         {
             Write("AddRequestLobbyListCompatibleMembersFilter");
         }
 
-        public void AddRequestLobbyListDistanceFilter(ELobbyDistanceFilter eLobbyDistanceFilter)
+        public void AddRequestLobbyListDistanceFilter(int eLobbyDistanceFilter)
         {
             Write("AddRequestLobbyListDistanceFilter");
         }
@@ -36,7 +36,7 @@ namespace SKYNET.Steamworks.Implementation
             Write("AddRequestLobbyListNearValueFilter");
         }
 
-        public void AddRequestLobbyListNumericalFilter(string pchKeyToMatch, int nValueToMatch, ELobbyComparison eComparisonType)
+        public void AddRequestLobbyListNumericalFilter(string pchKeyToMatch, int nValueToMatch, int eComparisonType)
         {
             Write("AddRequestLobbyListNumericalFilter");
         }
@@ -46,24 +46,24 @@ namespace SKYNET.Steamworks.Implementation
             Write("AddRequestLobbyListResultCountFilter");
         }
 
-        public void AddRequestLobbyListStringFilter(string pchKeyToMatch, string pchValueToMatch, ELobbyComparison eComparisonType)
+        public void AddRequestLobbyListStringFilter(string pchKeyToMatch, string pchValueToMatch, int eComparisonType)
         {
             Write("AddRequestLobbyListStringFilter");
         }
 
-        public SteamAPICall_t CreateLobby(ELobbyType eLobbyType, int cMaxMembers)
+        public ulong CreateLobby(int eLobbyType, int cMaxMembers)
         {
             Write("CreateLobby");
-            return new SteamAPICall_t();
+            return new ulong();
         }
 
-        public bool DeleteLobbyData(IntPtr steamIDLobby, string pchKey)
+        public bool DeleteLobbyData(ulong steamIDLobby, string pchKey)
         {
             Write("DeleteLobbyData");
             return true;
         }
 
-        public bool GetFavoriteGame(int iGame, AppId_t pnAppID, uint pnIP, uint pnConnPort, uint pnQueryPort, uint punFlags, uint pRTime32LastPlayedOnServer)
+        public bool GetFavoriteGame(int iGame, uint pnAppID, uint pnIP, uint pnConnPort, uint pnQueryPort, uint punFlags, uint pRTime32LastPlayedOnServer)
         {
             Write("GetFavoriteGame");
             return true;
@@ -75,157 +75,162 @@ namespace SKYNET.Steamworks.Implementation
             return 1;
         }
 
-        public IntPtr GetLobbyByIndex(int iLobby)
+        public ulong GetLobbyByIndex(int iLobby)
         {
             Write("GetLobbyByIndex");
-            return IntPtr.Zero;
+            return 0;
         }
 
-        public int GetLobbyChatEntry(IntPtr steamIDLobby, int iChatID, IntPtr pSteamIDUser, IntPtr pvData, int cubData, EChatEntryType peChatEntryType)
+        public int GetLobbyChatEntry(ulong steamIDLobby, int iChatID, ulong pSteamIDUser, IntPtr pvData, int cubData, int peChatEntryType)
         {
             Write("GetLobbyChatEntry");
             return 1;
         }
 
-        public string GetLobbyData(IntPtr steamIDLobby, string pchKey)
+        public string GetLobbyData(ulong steamIDLobby, string pchKey)
         {
             Write("GetLobbyData");
             return "";
         }
 
-        public bool GetLobbyDataByIndex(IntPtr steamIDLobby, int iLobbyData, string pchKey, int cchKeyBufferSize, string pchValue, int cchValueBufferSize)
+        public bool GetLobbyDataByIndex(ulong steamIDLobby, int iLobbyData, string pchKey, int cchKeyBufferSize, string pchValue, int cchValueBufferSize)
         {
             Write("GetLobbyDataByIndex");
             return true;
         }
 
-        public int GetLobbyDataCount(IntPtr steamIDLobby)
+        public int GetLobbyDataCount(ulong steamIDLobby)
         {
             Write("GetLobbyDataCount");
             return 1;
         }
 
-        public bool GetLobbyGameServer(IntPtr steamIDLobby, uint punGameServerIP, uint punGameServerPort, IntPtr psteamIDGameServer)
+        public bool GetLobbyGameServer(ulong steamIDLobby, uint punGameServerIP, uint punGameServerPort, ulong psteamIDGameServer)
         {
             Write("GetLobbyGameServer");
             return true;
         }
 
-        public IntPtr GetLobbyMemberByIndex(IntPtr steamIDLobby, int iMember)
+        public ulong GetLobbyMemberByIndex(ulong steamIDLobby, int iMember)
         {
             Write("GetLobbyMemberByIndex");
-            return IntPtr.Zero;
+            return 0;
         }
 
-        public string GetLobbyMemberData(IntPtr steamIDLobby, IntPtr steamIDUser, string pchKey)
+        public string GetLobbyMemberData(ulong steamIDLobby, ulong steamIDUser, string pchKey)
         {
             Write("GetLobbyMemberData");
             return "";
         }
 
-        public int GetLobbyMemberLimit(IntPtr steamIDLobby)
+        public int GetLobbyMemberLimit(ulong steamIDLobby)
         {
             Write("GetLobbyMemberLimit");
             return 1;
         }
 
-        public IntPtr GetLobbyOwner(IntPtr steamIDLobby)
+        public ulong GetLobbyOwner(ulong steamIDLobby)
         {
             Write("GetLobbyOwner");
-            return IntPtr.Zero;
+            return 0;
         }
 
-        public int GetNumLobbyMembers(IntPtr steamIDLobby)
+        public int GetNumLobbyMembers(ulong steamIDLobby)
         {
             Write("GetNumLobbyMembers");
             return 1;
         }
 
-        public bool InviteUserToLobby(IntPtr steamIDLobby, IntPtr steamIDInvitee)
+        public bool InviteUserToLobby(ulong steamIDLobby, ulong steamIDInvitee)
         {
             Write("InviteUserToLobby");
             return true;
         }
 
-        public SteamAPICall_t JoinLobby(IntPtr steamIDLobby)
+        public ulong JoinLobby(ulong steamIDLobby)
         {
             Write("JoinLobby");
-            return new SteamAPICall_t();
+            return new ulong();
         }
 
-        public void LeaveLobby(IntPtr steamIDLobby)
+        public void LeaveLobby(ulong steamIDLobby)
         {
             Write("LeaveLobby");
         }
 
-        public bool RemoveFavoriteGame(AppId_t nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags)
+        public bool RemoveFavoriteGame(uint nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags)
         {
             Write("RemoveFavoriteGame");
             return true;
         }
 
-        public bool RequestLobbyData(IntPtr steamIDLobby)
+        public bool RequestLobbyData(ulong steamIDLobby)
         {
             Write("RequestLobbyData");
             return true;
         }
 
-        public SteamAPICall_t RequestLobbyList(IntPtr _)
+        public ulong RequestLobbyList(IntPtr _)
         {
             Write("RequestLobbyList");
-            return new SteamAPICall_t();
+            return new ulong();
         }
 
-        public bool SendLobbyChatMsg(IntPtr steamIDLobby, IntPtr pvMsgBody, int cubMsgBody)
+        public bool SendLobbyChatMsg(ulong steamIDLobby, IntPtr pvMsgBody, int cubMsgBody)
         {
             Write("SendLobbyChatMsg");
             return true;
         }
 
-        public bool SetLinkedLobby(IntPtr steamIDLobby, IntPtr steamIDLobbyDependent)
+        public bool SetLinkedLobby(ulong steamIDLobby, ulong steamIDLobbyDependent)
         {
             Write("SetLinkedLobby");
             return true;
         }
 
-        public bool SetLobbyData(IntPtr steamIDLobby, string pchKey, string pchValue)
+        public bool SetLobbyData(ulong steamIDLobby, string pchKey, string pchValue)
         {
             Write("SetLobbyData");
             return true;
         }
 
-        public void SetLobbyGameServer(IntPtr steamIDLobby, uint unGameServerIP, uint unGameServerPort, IntPtr steamIDGameServer)
+        public void SetLobbyGameServer(ulong steamIDLobby, uint unGameServerIP, uint unGameServerPort, ulong steamIDGameServer)
         {
             Write("SetLobbyGameServer");
         }
 
-        public bool SetLobbyJoinable(IntPtr steamIDLobby, bool bLobbyJoinable)
+        public bool SetLobbyJoinable(ulong steamIDLobby, bool bLobbyJoinable)
         {
             Write("SetLobbyJoinable");
             return true;
         }
 
-        public void SetLobbyMemberData(IntPtr steamIDLobby, string pchKey, string pchValue)
+        public void SetLobbyMemberData(ulong steamIDLobby, string pchKey, string pchValue)
         {
             Write("SetLobbyMemberData");
         }
 
-        public bool SetLobbyMemberLimit(IntPtr steamIDLobby, int cMaxMembers)
+        public bool SetLobbyMemberLimit(ulong steamIDLobby, int cMaxMembers)
         {
             Write("SetLobbyMemberLimit");
             return true;
         }
 
-        public bool SetLobbyOwner(IntPtr steamIDLobby, IntPtr steamIDNewOwner)
+        public bool SetLobbyOwner(ulong steamIDLobby, ulong steamIDNewOwner)
         {
             Write("SetLobbyOwner");
             return true;
         }
 
-        public bool SetLobbyType(IntPtr steamIDLobby, ELobbyType eLobbyType)
+        public bool SetLobbyType(ulong steamIDLobby, int eLobbyType)
         {
             Write("SetLobbyType");
             return true;
+        }
+
+        public void CheckForPSNGameBootInvite(int iGameBootAttributes)
+        {
+            Write("CheckForPSNGameBootInvite");
         }
 
         public IntPtr MemoryAddress { get; set; }

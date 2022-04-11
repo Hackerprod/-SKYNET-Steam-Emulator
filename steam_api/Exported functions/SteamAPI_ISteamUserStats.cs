@@ -23,14 +23,14 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamAPI_ISteamUserStats_GetStat(string pchName, uint pData)
         {
             Write("SteamAPI_ISteamUserStats_GetStat");
-            return SteamEmulator.SteamUserStats.GetStat(SteamEmulator.SteamUserStats.MemoryAddress, pchName, pData);
+            return SteamEmulator.SteamUserStats.GetStat(pchName, pData);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ISteamUserStats_SetStat(string pchName, uint nData)
         {
             Write("SteamAPI_ISteamUserStats_SetStat");
-            return SteamEmulator.SteamUserStats.SetStat(SteamEmulator.SteamUserStats.MemoryAddress, pchName, nData);
+            return SteamEmulator.SteamUserStats.SetStat(pchName, nData);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -111,29 +111,29 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static SteamAPICall_t SteamAPI_ISteamUserStats_RequestUserStats(IntPtr steamIDUser)
+        public static ulong SteamAPI_ISteamUserStats_RequestUserStats(ulong steamIDUser)
         {
             Write("SteamAPI_ISteamUserStats_RequestUserStats");
             return SteamEmulator.SteamUserStats.RequestUserStats(steamIDUser);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUserStats_GetUserStat(IntPtr steamIDUser, string pchName, uint pData)
+        public static bool SteamAPI_ISteamUserStats_GetUserStat(ulong steamIDUser, string pchName, uint pData)
         {
             Write("SteamAPI_ISteamUserStats_GetUserStat");
-            return SteamEmulator.SteamUserStats.GetUserStat(SteamEmulator.SteamUserStats.MemoryAddress, steamIDUser, pchName, pData);
+            return SteamEmulator.SteamUserStats.GetUserStat(steamIDUser, pchName, pData);
         }
 
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUserStats_GetUserAchievement(IntPtr steamIDUser, string pchName, bool pbAchieved)
+        public static bool SteamAPI_ISteamUserStats_GetUserAchievement(ulong steamIDUser, string pchName, bool pbAchieved)
         {
             Write("SteamAPI_ISteamUserStats_GetUserAchievement");
             return SteamEmulator.SteamUserStats.GetUserAchievement(steamIDUser, pchName, pbAchieved);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUserStats_GetUserAchievementAndUnlockTime(IntPtr steamIDUser, string pchName, bool pbAchieved, uint punUnlockTime)
+        public static bool SteamAPI_ISteamUserStats_GetUserAchievementAndUnlockTime(ulong steamIDUser, string pchName, bool pbAchieved, uint punUnlockTime)
         {
             Write("SteamAPI_ISteamUserStats_GetUserAchievementAndUnlockTime");
             return SteamEmulator.SteamUserStats.GetUserAchievementAndUnlockTime(steamIDUser, pchName, pbAchieved, punUnlockTime);
@@ -147,91 +147,91 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static SteamAPICall_t SteamAPI_ISteamUserStats_FindOrCreateLeaderboard(string pchLeaderboardName, ELeaderboardSortMethod eLeaderboardSortMethod, int eLeaderboardDisplayType)
+        public static ulong SteamAPI_ISteamUserStats_FindOrCreateLeaderboard(string pchLeaderboardName, int eLeaderboardSortMethod, int eLeaderboardDisplayType)
         {
             Write("SteamAPI_ISteamUserStats_FindOrCreateLeaderboard");
             return SteamEmulator.SteamUserStats.FindOrCreateLeaderboard(pchLeaderboardName, eLeaderboardSortMethod, eLeaderboardDisplayType);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static SteamAPICall_t SteamAPI_ISteamUserStats_FindLeaderboard(string pchLeaderboardName)
+        public static ulong SteamAPI_ISteamUserStats_FindLeaderboard(string pchLeaderboardName)
         {
             Write("SteamAPI_ISteamUserStats_FindLeaderboard");
             return SteamEmulator.SteamUserStats.FindLeaderboard(pchLeaderboardName);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_ISteamUserStats_GetLeaderboardName(IntPtr hSteamLeaderboard)
+        public static string SteamAPI_ISteamUserStats_GetLeaderboardName(ulong hSteamLeaderboard)
         {
             Write("SteamAPI_ISteamUserStats_GetLeaderboardName");
             return SteamEmulator.SteamUserStats.GetLeaderboardName(hSteamLeaderboard);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamUserStats_GetLeaderboardEntryCount(IntPtr hSteamLeaderboard)
+        public static int SteamAPI_ISteamUserStats_GetLeaderboardEntryCount(ulong hSteamLeaderboard)
         {
             Write("SteamAPI_ISteamUserStats_GetLeaderboardEntryCount");
             return SteamEmulator.SteamUserStats.GetLeaderboardEntryCount(hSteamLeaderboard);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static ELeaderboardSortMethod SteamAPI_ISteamUserStats_GetLeaderboardSortMethod(IntPtr hSteamLeaderboard)
+        public static int SteamAPI_ISteamUserStats_GetLeaderboardSortMethod(ulong hSteamLeaderboard)
         {
             Write("SteamAPI_ISteamUserStats_GetLeaderboardSortMethod");
             return SteamEmulator.SteamUserStats.GetLeaderboardSortMethod(hSteamLeaderboard);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamUserStats_GetLeaderboardDisplayType(IntPtr hSteamLeaderboard)
+        public static int SteamAPI_ISteamUserStats_GetLeaderboardDisplayType(ulong hSteamLeaderboard)
         {
             Write("SteamAPI_ISteamUserStats_GetLeaderboardDisplayType");
             return SteamEmulator.SteamUserStats.GetLeaderboardDisplayType(hSteamLeaderboard);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static SteamAPICall_t SteamAPI_ISteamUserStats_DownloadLeaderboardEntries(IntPtr hSteamLeaderboard, IntPtr eLeaderboardDataRequest, int nRangeStart, int nRangeEnd)
+        public static ulong SteamAPI_ISteamUserStats_DownloadLeaderboardEntries(ulong hSteamLeaderboard, IntPtr eLeaderboardDataRequest, int nRangeStart, int nRangeEnd)
         {
             Write("SteamAPI_ISteamUserStats_DownloadLeaderboardEntries");
             return SteamEmulator.SteamUserStats.DownloadLeaderboardEntries(hSteamLeaderboard, eLeaderboardDataRequest, nRangeStart, nRangeEnd);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static SteamAPICall_t SteamAPI_ISteamUserStats_DownloadLeaderboardEntriesForUsers(IntPtr hSteamLeaderboard, IntPtr prgUsers, int cUsers)
+        public static ulong SteamAPI_ISteamUserStats_DownloadLeaderboardEntriesForUsers(ulong hSteamLeaderboard, ulong prgUsers, int cUsers)
         {
             Write("SteamAPI_ISteamUserStats_DownloadLeaderboardEntriesForUsers");
             return SteamEmulator.SteamUserStats.DownloadLeaderboardEntriesForUsers(hSteamLeaderboard, prgUsers, cUsers);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUserStats_GetDownloadedLeaderboardEntry(IntPtr hSteamLeaderboardEntries, int index, IntPtr pLeaderboardEntry, uint pDetails, int cDetailsMax)
+        public static bool SteamAPI_ISteamUserStats_GetDownloadedLeaderboardEntry(ulong hSteamLeaderboardEntries, int index, IntPtr pLeaderboardEntry, uint pDetails, int cDetailsMax)
         {
             Write("SteamAPI_ISteamUserStats_GetDownloadedLeaderboardEntry");
             return SteamEmulator.SteamUserStats.GetDownloadedLeaderboardEntry(hSteamLeaderboardEntries, index, pLeaderboardEntry, pDetails, cDetailsMax);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static SteamAPICall_t SteamAPI_ISteamUserStats_UploadLeaderboardScore(IntPtr hSteamLeaderboard, ELeaderboardUploadScoreMethod eLeaderboardUploadScoreMethod, uint nScore, uint pScoreDetails, int cScoreDetailsCount)
+        public static ulong SteamAPI_ISteamUserStats_UploadLeaderboardScore(ulong hSteamLeaderboard, int eLeaderboardUploadScoreMethod, uint nScore, uint pScoreDetails, int cScoreDetailsCount)
         {
             Write("SteamAPI_ISteamUserStats_UploadLeaderboardScore");
             return SteamEmulator.SteamUserStats.UploadLeaderboardScore(hSteamLeaderboard, eLeaderboardUploadScoreMethod, nScore, pScoreDetails, cScoreDetailsCount);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static SteamAPICall_t SteamAPI_ISteamUserStats_AttachLeaderboardUGC(IntPtr hSteamLeaderboard, UGCHandle_t hUGC)
+        public static ulong SteamAPI_ISteamUserStats_AttachLeaderboardUGC(ulong hSteamLeaderboard, ulong hUGC)
         {
             Write("SteamAPI_ISteamUserStats_AttachLeaderboardUGC");
             return SteamEmulator.SteamUserStats.AttachLeaderboardUGC(hSteamLeaderboard, hUGC);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static SteamAPICall_t SteamAPI_ISteamUserStats_GetNumberOfCurrentPlayers()
+        public static ulong SteamAPI_ISteamUserStats_GetNumberOfCurrentPlayers()
         {
             Write("SteamAPI_ISteamUserStats_GetNumberOfCurrentPlayers");
             return SteamEmulator.SteamUserStats.GetNumberOfCurrentPlayers(SteamEmulator.SteamUserStats.MemoryAddress);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static SteamAPICall_t SteamAPI_ISteamUserStats_RequestGlobalAchievementPercentages()
+        public static ulong SteamAPI_ISteamUserStats_RequestGlobalAchievementPercentages()
         {
             Write("SteamAPI_ISteamUserStats_RequestGlobalAchievementPercentages");
             return SteamEmulator.SteamUserStats.RequestGlobalAchievementPercentages(SteamEmulator.SteamUserStats.MemoryAddress);
@@ -259,7 +259,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static SteamAPICall_t SteamAPI_ISteamUserStats_RequestGlobalStats(int nHistoryDays)
+        public static ulong SteamAPI_ISteamUserStats_RequestGlobalStats(int nHistoryDays)
         {
             Write("SteamAPI_ISteamUserStats_RequestGlobalStats");
             return SteamEmulator.SteamUserStats.RequestGlobalStats(nHistoryDays);

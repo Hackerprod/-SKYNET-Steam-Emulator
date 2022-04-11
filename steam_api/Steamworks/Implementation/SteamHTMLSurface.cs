@@ -10,53 +10,53 @@ namespace SKYNET.Steamworks.Implementation
     [StructLayout(LayoutKind.Sequential)]
     public class SteamHTMLSurface : ISteamInterface
     {
-        public void AddHeader(IntPtr unBrowserHandle, string pchKey, string pchValue)
+        public void AddHeader(uint unBrowserHandle, string pchKey, string pchValue)
         {
             Write("AddHeader");
         }
 
-        public void AllowStartRequest(IntPtr unBrowserHandle, bool bAllowed)
+        public void AllowStartRequest(uint unBrowserHandle, bool bAllowed)
         {
             Write("AllowStartRequest");
         }
 
-        public void CopyToClipboard(IntPtr unBrowserHandle)
+        public void CopyToClipboard(uint unBrowserHandle)
         {
             Write("CopyToClipboard");
         }
 
-        public SteamAPICall_t CreateBrowser(string pchUserAgent, string pchUserCSS)
+        public ulong CreateBrowser(string pchUserAgent, string pchUserCSS)
         {
             Write("CreateBrowser");
-            return SteamAPICall_t.Invalid;
+            return 0;
         }
 
-        public void ExecuteJavascript(IntPtr unBrowserHandle, string pchScript)
+        public void ExecuteJavascript(uint unBrowserHandle, string pchScript)
         {
             Write("ExecuteJavascript");
         }
 
-        public void FileLoadDialogResponse(IntPtr unBrowserHandle, string pchSelectedFiles)
+        public void FileLoadDialogResponse(uint unBrowserHandle, string pchSelectedFiles)
         {
             Write("FileLoadDialogResponse");
         }
 
-        public void Find(IntPtr unBrowserHandle, string pchSearchStr, bool bCurrentlyInFind, bool bReverse)
+        public void Find(uint unBrowserHandle, string pchSearchStr, bool bCurrentlyInFind, bool bReverse)
         {
             Write("Find");
         }
 
-        public void GetLinkAtPosition(IntPtr unBrowserHandle, int x, int y)
+        public void GetLinkAtPosition(uint unBrowserHandle, int x, int y)
         {
             Write("GetLinkAtPosition");
         }
 
-        public void GoBack(IntPtr unBrowserHandle)
+        public void GoBack(uint unBrowserHandle)
         {
             Write("GoBack");
         }
 
-        public void GoForward(IntPtr unBrowserHandle)
+        public void GoForward(uint unBrowserHandle)
         {
             Write("GoForward");
         }
@@ -67,112 +67,117 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public void JSDialogResponse(IntPtr unBrowserHandle, bool bResult)
+        public void JSDialogResponse(uint unBrowserHandle, bool bResult)
         {
             Write("JSDialogResponse");
         }
 
-        public void KeyDown(IntPtr unBrowserHandle, int nNativeKeyCode, IntPtr IntPtr, bool bIsSystemKey = false)
+        public void KeyDown(uint unBrowserHandle, uint nNativeKeyCode, int IntPtr, bool bIsSystemKey = false)
         {
             Write("KeyDown");
         }
 
-        public void Keystring(IntPtr unBrowserHandle, int cUnicodestring, IntPtr IntPtr)
+        public void Keystring(uint unBrowserHandle, int cUnicodestring, IntPtr IntPtr)
         {
             Write("Keystring");
         }
 
-        public void KeyUp(IntPtr unBrowserHandle, int nNativeKeyCode, IntPtr IntPtr)
+        public void KeyUp(uint unBrowserHandle, uint nNativeKeyCode, int eHTMLKeyModifiers)
         {
             Write("KeyUp");
         }
 
-        public void LoadURL(IntPtr unBrowserHandle, string pchURL, string pchPostData)
+        public void KeyChar(uint unBrowserHandle, uint cUnicodeChar, int eHTMLKeyModifiers)
+        {
+            Write("KeyChar");
+        }
+
+        public void LoadURL(uint unBrowserHandle, string pchURL, string pchPostData)
         {
             Write("LoadURL");
         }
 
-        public void MouseDoubleClick(IntPtr unBrowserHandle, EHTMLMouseButton eMouseButton)
+        public void MouseDoubleClick(uint unBrowserHandle, int eMouseButton)
         {
             Write("MouseDoubleClick");
         }
 
-        public void MouseDown(IntPtr unBrowserHandle, EHTMLMouseButton eMouseButton)
+        public void MouseDown(uint unBrowserHandle, int eMouseButton)
         {
             Write("MouseDown");
         }
 
-        public void MouseMove(IntPtr unBrowserHandle, int x, int y)
+        public void MouseMove(uint unBrowserHandle, int x, int y)
         {
             Write("MouseMove");
         }
 
-        public void MouseUp(IntPtr unBrowserHandle, EHTMLMouseButton eMouseButton)
+        public void MouseUp(uint unBrowserHandle, int eMouseButton)
         {
             Write("MouseUp");
         }
 
-        public void MouseWheel(IntPtr unBrowserHandle, int nDelta)
+        public void MouseWheel(uint unBrowserHandle, int nDelta)
         {
             Write("MouseWheel");
         }
 
-        public void OpenDeveloperTools(IntPtr unBrowserHandle)
+        public void OpenDeveloperTools(uint unBrowserHandle)
         {
             Write("OpenDeveloperTools");
         }
 
-        public void PasteFromClipboard(IntPtr unBrowserHandle)
+        public void PasteFromClipboard(uint unBrowserHandle)
         {
             Write("PasteFromClipboard");
         }
 
-        public void Reload(IntPtr unBrowserHandle)
+        public void Reload(uint unBrowserHandle)
         {
             Write("Reload");
         }
 
-        public void RemoveBrowser(IntPtr unBrowserHandle)
+        public void RemoveBrowser(uint unBrowserHandle)
         {
             Write("RemoveBrowser");
         }
 
-        public void SetBackgroundMode(IntPtr unBrowserHandle, bool bBackgroundMode)
+        public void SetBackgroundMode(uint unBrowserHandle, bool bBackgroundMode)
         {
             Write("SetBackgroundMode");
         }
 
-        public void SetCookie(string pchHostname, string pchKey, string pchValue, string pchPath, IntPtr nExpires, bool bSecure = false, bool bHTTPOnly = false)
+        public void SetCookie(string pchHostname, string pchKey, string pchValue, string pchPath, uint nExpires, bool bSecure = false, bool bHTTPOnly = false)
         {
             Write("SetCookie");
         }
 
-        public void SetDPIScalingFactor(IntPtr unBrowserHandle, float flDPIScaling)
+        public void SetDPIScalingFactor(uint unBrowserHandle, float flDPIScaling)
         {
             Write("SetDPIScalingFactor");
         }
 
-        public void SetHorizontalScroll(IntPtr unBrowserHandle, int nAbsolutePixelScroll)
+        public void SetHorizontalScroll(uint unBrowserHandle, uint nAbsolutePixelScroll)
         {
             Write("SetHorizontalScroll");
         }
 
-        public void SetKeyFocus(IntPtr unBrowserHandle, bool bHasKeyFocus)
+        public void SetKeyFocus(uint unBrowserHandle, bool bHasKeyFocus)
         {
             Write("SetKeyFocus");
         }
 
-        public void SetPageScaleFactor(IntPtr unBrowserHandle, float flZoom, int nPointX, int nPointY)
+        public void SetPageScaleFactor(uint unBrowserHandle, float flZoom, int nPointX, int nPointY)
         {
             Write("SetPageScaleFactor");
         }
 
-        public void SetSize(IntPtr unBrowserHandle, int unWidth, int unHeight)
+        public void SetSize(uint unBrowserHandle, uint unWidth, uint unHeight)
         {
             Write("SetSize");
         }
 
-        public void SetVerticalScroll(IntPtr unBrowserHandle, int nAbsolutePixelScroll)
+        public void SetVerticalScroll(uint unBrowserHandle, uint nAbsolutePixelScroll)
         {
             Write("SetVerticalScroll");
         }
@@ -183,17 +188,17 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public void StopFind(IntPtr unBrowserHandle)
+        public void StopFind(uint unBrowserHandle)
         {
             Write("StopFind");
         }
 
-        public void StopLoad(IntPtr unBrowserHandle)
+        public void StopLoad(uint unBrowserHandle)
         {
             Write("StopLoad");
         }
 
-        public void ViewSource(IntPtr unBrowserHandle)
+        public void ViewSource(uint unBrowserHandle)
         {
             Write("ViewSource");
         }

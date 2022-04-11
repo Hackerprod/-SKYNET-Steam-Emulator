@@ -21,10 +21,10 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public AudioPlayback_Status GetPlaybackStatus(IntPtr _)
+        public int GetPlaybackStatus(IntPtr _)
         {
             Write($"GetPlaybackStatus");
-            return AudioPlayback_Status.AudioPlayback_Undefined;
+            return (int)AudioPlayback_Status.AudioPlayback_Undefined;
         }
 
         public float GetVolume(IntPtr _)

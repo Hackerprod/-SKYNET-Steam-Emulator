@@ -14,10 +14,10 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public IntPtr CreateHTTPRequest(uint eHTTPRequestMethod, string pchAbsoluteURL)
+        public uint CreateHTTPRequest(uint eHTTPRequestMethod, string pchAbsoluteURL)
         {
             Write($"CreateHTTPRequest");
-            return IntPtr.Zero;
+            return 0;
         }
 
         public bool DeferHTTPRequest(uint hRequest)
@@ -26,13 +26,13 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public bool GetHTTPDownloadProgressPct(uint hRequest, ref float pflPercentOut)
+        public bool GetHTTPDownloadProgressPct(uint hRequest, float pflPercentOut)
         {
             Write($"GetHTTPDownloadProgressPct");
             return true;
         }
 
-        public bool GetHTTPRequestWasTimedOut(uint hRequest, ref bool pbWasTimedOut)
+        public bool GetHTTPRequestWasTimedOut(uint hRequest, bool pbWasTimedOut)
         {
             Write($"GetHTTPRequestWasTimedOut");
             return true;
@@ -44,19 +44,19 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public bool GetHTTPResponseBodySize(uint hRequest, ref uint unBodySize)
+        public bool GetHTTPResponseBodySize(uint hRequest, uint unBodySize)
         {
             Write($"GetHTTPResponseBodySize");
             return true;
         }
 
-        public bool GetHTTPResponseHeaderSize(uint hRequest, string pchHeaderName, ref uint unResponseHeaderSize)
+        public bool GetHTTPResponseHeaderSize(uint hRequest, string pchHeaderName, uint unResponseHeaderSize)
         {
             Write($"GetHTTPResponseHeaderSize");
             return true;
         }
 
-        public bool GetHTTPResponseHeaderValue(uint hRequest, string pchHeaderName, IntPtr pHeaderValueBuffer, uint unBufferSize)
+        public bool GetHTTPResponseHeaderValue(uint hRequest, string pchHeaderName, int pHeaderValueBuffer, uint unBufferSize)
         {
             Write($"GetHTTPResponseHeaderValue");
             return true;
@@ -86,13 +86,13 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public bool SendHTTPRequest(uint hRequest, ref ulong pCallHandle)
+        public bool SendHTTPRequest(uint hRequest, ulong pCallHandle)
         {
             Write($"SendHTTPRequest");
             return true;
         }
 
-        public bool SendHTTPRequestAndStreamResponse(uint hRequest, ref ulong pCallHandle)
+        public bool SendHTTPRequestAndStreamResponse(uint hRequest, ulong pCallHandle)
         {
             Write($"SendHTTPRequestAndStreamResponse");
             return true;

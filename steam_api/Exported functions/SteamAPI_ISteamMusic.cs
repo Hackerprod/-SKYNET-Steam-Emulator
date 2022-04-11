@@ -22,7 +22,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static AudioPlayback_Status SteamAPI_ISteamMusic_GetPlaybackStatus()
+        public static int SteamAPI_ISteamMusic_GetPlaybackStatus()
         {
             Write("SteamAPI_ISteamMusic_GetPlaybackStatus");
             return SteamEmulator.SteamMusic.GetPlaybackStatus(SteamEmulator.SteamMusic.MemoryAddress);

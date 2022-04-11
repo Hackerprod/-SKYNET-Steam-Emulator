@@ -220,10 +220,9 @@ namespace SKYNET.Hook.Handles
             return (SteamAPICall_t)0;
         }
 
-        public int SteamAPI_ISteamApps_GetLaunchCommandLine(IntPtr pszCommandLine, int cubCommandLine)
+        public int SteamAPI_ISteamApps_GetLaunchCommandLine(string pszCommandLine, int cubCommandLine)
         {
-            string commandLine = Marshal.PtrToStringUni(pszCommandLine);
-            Write($"SteamAPI_ISteamApps_GetLaunchCommandLine {commandLine}");
+            Write($"SteamAPI_ISteamApps_GetLaunchCommandLine {pszCommandLine}");
             return SteamEmulator.SteamApps.GetLaunchCommandLine(pszCommandLine, cubCommandLine);
         }
 

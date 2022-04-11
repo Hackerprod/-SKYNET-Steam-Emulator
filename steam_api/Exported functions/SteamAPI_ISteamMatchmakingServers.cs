@@ -11,42 +11,42 @@ namespace SKYNET.Steamworks.Exported
     public class SteamAPI_ISteamMatchmakingServers : BaseCalls
     {
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr SteamAPI_ISteamMatchmakingServers_RequestInternetServerList(IntPtr iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
+        public static IntPtr SteamAPI_ISteamMatchmakingServers_RequestInternetServerList(uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
         {
             Write("SteamAPI_ISteamMatchmakingServers_RequestInternetServerList");
             return SteamEmulator.SteamMatchMakingServers.RequestInternetServerList(iApp, ppchFilters, nFilters, pRequestServersResponse);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr SteamAPI_ISteamMatchmakingServers_RequestLANServerList(IntPtr iApp, IntPtr pRequestServersResponse)
+        public static IntPtr SteamAPI_ISteamMatchmakingServers_RequestLANServerList(uint iApp, IntPtr pRequestServersResponse)
         {
             Write("SteamAPI_ISteamMatchmakingServers_RequestLANServerList");
             return SteamEmulator.SteamMatchMakingServers.RequestLANServerList(iApp, pRequestServersResponse);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr SteamAPI_ISteamMatchmakingServers_RequestFriendsServerList(IntPtr iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
+        public static IntPtr SteamAPI_ISteamMatchmakingServers_RequestFriendsServerList(uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
         {
             Write("SteamAPI_ISteamMatchmakingServers_RequestFriendsServerList");
             return SteamEmulator.SteamMatchMakingServers.RequestFriendsServerList(iApp, ppchFilters, nFilters, pRequestServersResponse);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr SteamAPI_ISteamMatchmakingServers_RequestFavoritesServerList(IntPtr iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
+        public static IntPtr SteamAPI_ISteamMatchmakingServers_RequestFavoritesServerList(uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
         {
             Write("SteamAPI_ISteamMatchmakingServers_RequestFavoritesServerList");
             return SteamEmulator.SteamMatchMakingServers.RequestFavoritesServerList(iApp, ppchFilters, nFilters, pRequestServersResponse);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr SteamAPI_ISteamMatchmakingServers_RequestHistoryServerList(IntPtr iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
+        public static IntPtr SteamAPI_ISteamMatchmakingServers_RequestHistoryServerList(uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
         {
             Write("SteamAPI_ISteamMatchmakingServers_RequestHistoryServerList");
             return SteamEmulator.SteamMatchMakingServers.RequestHistoryServerList(iApp, ppchFilters, nFilters, pRequestServersResponse);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr SteamAPI_ISteamMatchmakingServers_RequestSpectatorServerList(IntPtr iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
+        public static IntPtr SteamAPI_ISteamMatchmakingServers_RequestSpectatorServerList(uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
         {
             Write("SteamAPI_ISteamMatchmakingServers_RequestSpectatorServerList");
             return SteamEmulator.SteamMatchMakingServers.RequestSpectatorServerList(iApp, ppchFilters, nFilters, pRequestServersResponse);
@@ -63,7 +63,7 @@ namespace SKYNET.Steamworks.Exported
         public static IntPtr SteamAPI_ISteamMatchmakingServers_GetServerDetails(IntPtr hRequest, int iServer)
         {
             Write("SteamAPI_ISteamMatchmakingServers_GetServerDetails");
-            return SteamEmulator.SteamMatchMakingServers.GetServerDetails(SteamEmulator.SteamMatchMakingServers.MemoryAddress, hRequest, iServer);
+            return SteamEmulator.SteamMatchMakingServers.GetServerDetails(hRequest, iServer);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
