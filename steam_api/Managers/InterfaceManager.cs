@@ -72,8 +72,101 @@ namespace SKYNET.Managers
             }
 
             StoredInterfaces.Add(pszVersion, address);
-           
+            SetInterfaceName(pszVersion);
+
             return address;
+        }
+
+        private static void SetInterfaceName(string pszVersion)
+        {
+            if (pszVersion.StartsWith("SteamUtils"))
+            {
+                SteamEmulator.SteamUtils.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("SteamUser"))
+            {
+                SteamEmulator.SteamUser.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("SteamClient"))
+            {
+                SteamEmulator.SteamClient.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("SteamFriends"))
+            {
+                SteamEmulator.SteamFriends.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("SteamMatchMaking"))
+            {
+                SteamEmulator.SteamMatchmaking.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("SteamMatchGameSearch"))
+            {
+                SteamEmulator.SteamGameSearch.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("SteamMatchMakingServers"))
+            {
+                SteamEmulator.SteamMatchMakingServers.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("STEAMUSERSTATS_INTERFACE_VERSION"))
+            {
+                SteamEmulator.SteamUserStats.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("STEAMAPPS_INTERFACE_VERSION"))
+            {
+                SteamEmulator.SteamApps.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("SteamNetworking"))
+            {
+                SteamEmulator.SteamNetworking.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("STEAMREMOTESTORAGE_INTERFACE_VERSION"))
+            {
+                SteamEmulator.SteamRemoteStorage.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("STEAMSCREENSHOTS_INTERFACE_VERSION"))
+            {
+                SteamEmulator.SteamScreenshots.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("STEAMHTTP_INTERFACE_VERSION"))
+            {
+                SteamEmulator.SteamHTTP.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("SteamController"))
+            {
+                SteamEmulator.SteamController.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("STEAMUGC_INTERFACE_VERSION"))
+            {
+                SteamEmulator.SteamUGC.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("STEAMAPPLIST_INTERFACE_VERSION"))
+            {
+                SteamEmulator.SteamAppList.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("STEAMMUSIC_INTERFACE_VERSION"))
+            {
+                SteamEmulator.SteamMusic.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("STEAMMUSICREMOTE_INTERFACE_VERSION"))
+            {
+                SteamEmulator.SteamMusicRemote.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("STEAMHTMLSURFACE_INTERFACE_VERSION_"))
+            {
+                SteamEmulator.SteamHTMLSurface.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("STEAMINVENTORY_INTERFACE_V"))
+            {
+                SteamEmulator.SteamInventory.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("STEAMVIDEO_INTERFACE_V"))
+            {
+                SteamEmulator.SteamVideo.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("STEAMPARENTALSETTINGS_INTERFACE_VERSION"))
+            {
+                SteamEmulator.SteamParentalSettings.InterfaceVersion = pszVersion;
+            }
         }
 
         //public static IntPtr FindOrCreateInterface(int hSteamUser, int hSteamPipe, string pszVersion)

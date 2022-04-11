@@ -294,8 +294,8 @@ namespace SKYNET.Steamworks.Exported
 
             SteamAPI_RunCallbacks();
 
-            if (bGameServerCallbacks)
-                SteamEmulator.SteamGameServer.RunCallbacks(IntPtr.Zero);
+            //if (bGameServerCallbacks)
+            //    SteamEmulator.SteamGameServer.RunCallbacks(IntPtr.Zero);
         }
 
         #region Interfaces

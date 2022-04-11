@@ -2,33 +2,32 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using SKYNET;
-using SKYNET.Helpers;
-using Steamworks;
+using SKYNET.Steamworks.Helpers;
 
 namespace SKYNET.Steamworks.Implementation
 {
     [StructLayout(LayoutKind.Sequential)]
     public class SteamAppList : ISteamInterface
     {
-        public int GetAppBuildId(AppId_t nAppID)
+        public int GetAppBuildId(IntPtr nAppID)
         {
             Write("GetAppBuildId");
             return 10;
         }
 
-        public int GetAppInstallDir(AppId_t nAppID, IntPtr pchDirectory, int cchNameMax)
+        public int GetAppInstallDir(IntPtr nAppID, string pchDirectory, int cchNameMax)
         {
             Write("GetAppInstallDir");
             return -1;
         }
 
-        public int GetAppName(AppId_t nAppID, IntPtr pchName, int cchNameMax)
+        public int GetAppName(IntPtr nAppID, string pchName, int cchNameMax)
         {
             Write("GetAppName\n");
             return -1;
         }
 
-        public uint GetInstalledApps(AppId_t pvecAppID, uint unMaxAppIDs)
+        public uint GetInstalledApps(IntPtr pvecAppID, uint unMaxAppIDs)
         {
             Write("GetInstalledApps\n");
             return 0;
