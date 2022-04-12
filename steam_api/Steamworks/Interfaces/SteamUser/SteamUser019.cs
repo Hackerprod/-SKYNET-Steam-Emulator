@@ -13,7 +13,7 @@ namespace SKYNET.Interface
 
         public bool BLoggedOn(IntPtr _)
         {
-            return SteamEmulator.SteamUser.BLoggedOn(_);
+            return SteamEmulator.SteamUser.BLoggedOn();
         }
 
         public ulong GetSteamID(IntPtr _)

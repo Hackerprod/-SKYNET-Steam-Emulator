@@ -164,10 +164,10 @@ namespace SKYNET.Steamworks.Implementation
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public IntPtr DEPRECATED_GetISteamUnifiedMessages(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
+        public IntPtr DEPRECATED_GetISteamUnifiedMessages(int hSteamuser, int hSteamPipe, string pchVersion)
         {
             Write($"DEPRECATED_GetISteamUnifiedMessages {pchVersion}");
-            return IntPtr.Zero;
+            return InterfaceManager.FindOrCreateInterface(hSteamuser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamUnifiedMessages(HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion )

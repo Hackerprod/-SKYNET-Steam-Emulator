@@ -265,7 +265,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static string SteamAPI_ISteamFriends_GetFriendRichPresence(ulong steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchKey)
         {
-            Write($"SteamAPI_ISteamFriends_GetFriendRichPresence {steamIDFriend} {pchKey}");
+            Write($"SteamAPI_ISteamFriends_GetFriendRichPresence [{steamIDFriend}]: {pchKey}");
             return SteamEmulator.SteamFriends.GetFriendRichPresence(steamIDFriend, pchKey);
         }
 

@@ -22,7 +22,7 @@ namespace SKYNET.Steamworks.Implementation
             return (int)SteamEmulator.HSteamUser;
         }
 
-        public bool BLoggedOn(IntPtr _)
+        public bool BLoggedOn()
         {
             Write("BLoggedOn");
             return true;

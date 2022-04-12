@@ -295,7 +295,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public string GetFriendRichPresence(ulong steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchKey)
         {
-            Write($"GetFriendRichPresence {steamIDFriend} {pchKey}");
+            Write($"GetFriendRichPresence [{steamIDFriend}]: {pchKey}");
             return "";
         }
 

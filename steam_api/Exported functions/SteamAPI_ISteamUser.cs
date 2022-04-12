@@ -25,7 +25,7 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamAPI_ISteamUser_BLoggedOn(IntPtr _)
         {
             Write("SteamAPI_ISteamUser_BLoggedOn");
-            return SteamEmulator.SteamUser.BLoggedOn(_);
+            return SteamEmulator.SteamUser.BLoggedOn();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
