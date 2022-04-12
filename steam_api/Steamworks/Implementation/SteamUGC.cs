@@ -7,9 +7,13 @@ using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class SteamUGC : ISteamInterface
     {
+        public SteamUGC()
+        {
+            InterfaceVersion = "SteamUGC";
+        }
+
         public ulong CreateQueryUserUGCRequest(uint unAccountID, int eListType, int eMatchingUGCType, int eSortOrder, uint nCreatorAppID, uint nConsumerAppID, uint unPage)
         {
             Write("CreateQueryUserUGCRequest");
@@ -274,6 +278,18 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
+        public bool SetTimeCreatedDateRange(ulong handle, IntPtr rtStart, IntPtr rtEnd)
+        {
+            Write("SetTimeCreatedDateRange");
+            return false;
+        }
+
+        public bool SetTimeUpdatedDateRange(ulong handle, IntPtr rtStart, IntPtr rtEnd)
+        {
+            Write("SetTimeUpdatedDateRange");
+            return false;
+        }
+
         public bool SetItemVisibility(ulong handle, int eVisibility) 
         {
             Write("SetItemVisibility");
@@ -298,7 +314,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool SetAllowLegacyUpload(ulong handle, bool bAllowLegacyUpload) //  use legacy upload for a single small file. The parameter to SetItemContent(IntPtr _) should either be a directory with one file or the full path to the file.  The file must also be less than 10MB in size. 
+        public bool SetAllowLegacyUpload(ulong handle, bool bAllowLegacyUpload) //  use legacy upload for a single small file. The parameter to SetItemContent() should either be a directory with one file or the full path to the file.  The file must also be less than 10MB in size. 
         {
             Write("SetAllowLegacyUpload");
             return false;
@@ -352,7 +368,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public ulong SubmitItemUpdate(ulong handle, string pchChangeNote) // commit update process started with StartItemUpdate(IntPtr _) 
+        public ulong SubmitItemUpdate(ulong handle, string pchChangeNote) 
         {
             Write("SubmitItemUpdate");
             return default;
@@ -400,7 +416,7 @@ namespace SKYNET.Steamworks.Implementation
             return default;
         }
 
-        public uint GetNumSubscribedItems(IntPtr _) // number of subscribed items  
+        public uint GetNumSubscribedItems() // number of subscribed items  
         {
             Write("GetNumSubscribedItems");
             return 0;
@@ -460,7 +476,7 @@ namespace SKYNET.Steamworks.Implementation
             return default;
         }
 
-        public ulong StopPlaytimeTrackingForAllItems(IntPtr _)
+        public ulong StopPlaytimeTrackingForAllItems()
         {
             Write("StopPlaytimeTrackingForAllItems");
             return default;
@@ -502,17 +518,16 @@ namespace SKYNET.Steamworks.Implementation
             return default;
         }
 
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamUGC()
+        public bool ShowWorkshopEULA()
         {
-            InterfaceVersion = "SteamUGC";
+            Write("ShowWorkshopEULA");
+            return false;
         }
 
-        private void Write(string v)
+        public ulong GetWorkshopEULAStatus()
         {
-            SteamEmulator.Write(InterfaceVersion, v);
+            Write("GetWorkshopEULAStatus");
+            return 0;
         }
     }
 }

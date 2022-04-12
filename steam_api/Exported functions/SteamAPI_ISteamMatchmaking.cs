@@ -15,7 +15,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int SteamAPI_ISteamMatchmaking_GetFavoriteGameCount(IntPtr self)
         {
-            return SteamEmulator.SteamMatchmaking.GetFavoriteGameCount(SteamEmulator.SteamMatchmaking.MemoryAddress);
+            return SteamEmulator.SteamMatchmaking.GetFavoriteGameCount();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -39,7 +39,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static ulong SteamAPI_ISteamMatchmaking_RequestLobbyList(IntPtr self)
         {
-            return SteamEmulator.SteamMatchmaking.RequestLobbyList(SteamEmulator.SteamMatchmaking.MemoryAddress);
+            return SteamEmulator.SteamMatchmaking.RequestLobbyList();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

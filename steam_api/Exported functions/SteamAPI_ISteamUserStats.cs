@@ -16,7 +16,7 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamAPI_ISteamUserStats_RequestCurrentStats()
         {
             Write("SteamAPI_ISteamUserStats_RequestCurrentStats");
-            return SteamEmulator.SteamUserStats.RequestCurrentStats(SteamEmulator.SteamUserStats.MemoryAddress);
+            return SteamEmulator.SteamUserStats.RequestCurrentStats();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -72,7 +72,7 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamAPI_ISteamUserStats_StoreStats()
         {
             Write("SteamAPI_ISteamUserStats_StoreStats");
-            return SteamEmulator.SteamUserStats.StoreStats(SteamEmulator.SteamUserStats.MemoryAddress);
+            return SteamEmulator.SteamUserStats.StoreStats();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -100,7 +100,7 @@ namespace SKYNET.Steamworks.Exported
         public static uint SteamAPI_ISteamUserStats_GetNumAchievements()
         {
             Write("SteamAPI_ISteamUserStats_GetNumAchievements");
-            return SteamEmulator.SteamUserStats.GetNumAchievements(SteamEmulator.SteamUserStats.MemoryAddress);
+            return SteamEmulator.SteamUserStats.GetNumAchievements();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -227,14 +227,14 @@ namespace SKYNET.Steamworks.Exported
         public static ulong SteamAPI_ISteamUserStats_GetNumberOfCurrentPlayers()
         {
             Write("SteamAPI_ISteamUserStats_GetNumberOfCurrentPlayers");
-            return SteamEmulator.SteamUserStats.GetNumberOfCurrentPlayers(SteamEmulator.SteamUserStats.MemoryAddress);
+            return SteamEmulator.SteamUserStats.GetNumberOfCurrentPlayers();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static ulong SteamAPI_ISteamUserStats_RequestGlobalAchievementPercentages()
         {
             Write("SteamAPI_ISteamUserStats_RequestGlobalAchievementPercentages");
-            return SteamEmulator.SteamUserStats.RequestGlobalAchievementPercentages(SteamEmulator.SteamUserStats.MemoryAddress);
+            return SteamEmulator.SteamUserStats.RequestGlobalAchievementPercentages();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

@@ -107,7 +107,7 @@ namespace SKYNET.Interface
 
         public ulong GetAppOwner(IntPtr _)
         {
-            return SteamEmulator.SteamApps.GetAppOwner(_);
+            return SteamEmulator.SteamApps.GetAppOwner();
         }
 
         public string GetLaunchQueryParam(IntPtr _, string pchKey)

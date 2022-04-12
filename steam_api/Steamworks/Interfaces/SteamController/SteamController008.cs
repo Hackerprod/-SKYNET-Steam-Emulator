@@ -7,17 +7,17 @@ namespace SKYNET.Interface
     {
         public bool Init(IntPtr _)
         {
-            return SteamEmulator.SteamController.Init(_);
+            return SteamEmulator.SteamController.Init();
         }
 
         public bool Shutdown(IntPtr _)
         {
-            return SteamEmulator.SteamController.Shutdown(_);
+            return SteamEmulator.SteamController.Shutdown();
         }
 
         public void RunFrame(IntPtr _)
         {
-            SteamEmulator.SteamController.RunFrame(_);
+            SteamEmulator.SteamController.RunFrame();
         }
 
         public int GetConnectedControllers(IntPtr _, ulong handlesOut)

@@ -24,10 +24,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static SteamAPICall_t SteamAPI_ISteamNetworkingSocketsSerialized_GetCertAsync(IntPtr _)
+        public static ulong SteamAPI_ISteamNetworkingSocketsSerialized_GetCertAsync(IntPtr _)
         {
             Write("SteamAPI_ISteamNetworkingSocketsSerialized_GetCertAsync");
-            return SteamEmulator.SteamNetworkingSocketsSerialized.GetCertAsync(_);
+            return SteamEmulator.SteamNetworkingSocketsSerialized.GetCertAsync();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

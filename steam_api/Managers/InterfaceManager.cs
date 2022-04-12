@@ -2,6 +2,7 @@
 using SKYNET.Helpers;
 using SKYNET.Interface;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,12 +14,12 @@ namespace SKYNET.Managers
 {
     public class InterfaceManager
     {
-        private static List<Type> interfaceTypes;
+        private static ConcurrentDictionary<string, Type> interfaceTypes;
         private static Dictionary<string, IntPtr> StoredInterfaces;
 
         static InterfaceManager()
         {
-            interfaceTypes = new List<Type>();
+            interfaceTypes = new ConcurrentDictionary<string, Type>();
             StoredInterfaces = new Dictionary<string, IntPtr>();
         }
 
@@ -29,8 +30,8 @@ namespace SKYNET.Managers
             {
                 if (type.IsDefined(typeof(InterfaceAttribute)))
                 {
-                    interfaceTypes.Add(type);
-                    Write(type.Name);
+                    var interfaceAttribute = type.GetCustomAttributes<InterfaceAttribute>().ToList()[0];
+                    interfaceTypes.TryAdd(interfaceAttribute.Name, type);
                 }
             }
         }
@@ -40,7 +41,7 @@ namespace SKYNET.Managers
             var (iface, context) = MemoryManager.CreateInterface<T>();
             BaseAddress = context;
             T baseClass = (T)iface;
-            baseClass.MemoryAddress = context;
+            //baseClass.MemoryAddress = context;
             return (T)baseClass;
         }
 
@@ -56,13 +57,13 @@ namespace SKYNET.Managers
                 return StoredInterfaces[pszVersion];
             }
 
-            Type interfaceType = interfaceTypes.Find(t => t.Name == pszVersion);
-
-            if (interfaceType == null)
+            if (!interfaceTypes.ContainsKey(pszVersion))
             {
                 Write($"Not found Interface for {pszVersion}");
                 return default;
             }
+
+            Type interfaceType = interfaceTypes[pszVersion];
 
             IntPtr address = MemoryManager.CreateInterface(interfaceType);
 

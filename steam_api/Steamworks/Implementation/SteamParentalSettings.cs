@@ -7,9 +7,13 @@ using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class SteamParentalSettings : ISteamInterface
     {
+        public SteamParentalSettings()
+        {
+            InterfaceVersion = "SteamParentalSettings";
+        }
+
         public bool BIsParentalLockEnabled(IntPtr _)
         {
             Write("boolBIsParentalLockEnabled");
@@ -22,41 +26,28 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool BIsAppBlocked(IntPtr nAppID)
+        public bool BIsAppBlocked(uint nAppID)
         {
             Write("boolBIsAppBlocked");
             return false;
         }
 
-        public bool BIsAppInBlockList(IntPtr nAppID)
+        public bool BIsAppInBlockList(uint nAppID)
         {
             Write("boolBIsAppInBlockList");
             return false;
         }
 
-        public bool BIsFeatureBlocked(EParentalFeature eFeature)
+        public bool BIsFeatureBlocked(int eFeature)
         {
             Write("boolBIsFeatureBlocked");
             return false;
         }
 
-        public bool BIsFeatureInBlockList(EParentalFeature eFeature)
+        public bool BIsFeatureInBlockList(int eFeature)
         {
             Write("boolBIsFeatureInBlockList");
             return false;
-        }
-
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamParentalSettings()
-        {
-            InterfaceVersion = "SteamParentalSettings";
-        }
-
-        private void Write(string v)
-        {
-            SteamEmulator.Write(InterfaceVersion, v);
         }
     }
 }

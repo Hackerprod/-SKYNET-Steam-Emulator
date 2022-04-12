@@ -7,10 +7,14 @@ using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class SteamUserStats : ISteamInterface
     {
-        public bool RequestCurrentStats(IntPtr _)
+        public SteamUserStats()
+        {
+            InterfaceVersion = "SteamUserStats";
+        }
+
+        public bool RequestCurrentStats()
         {
             Write($"RequestCurrentStats");
             return false;
@@ -58,7 +62,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool StoreStats(IntPtr _)
+        public bool StoreStats()
         {
             Write($"StoreStats");
             return false;
@@ -82,7 +86,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public uint GetNumAchievements(IntPtr _)
+        public uint GetNumAchievements()
         {
             Write($"GetNumAchievements");
             return 0;
@@ -190,13 +194,13 @@ namespace SKYNET.Steamworks.Implementation
             return default;
         }
 
-        public ulong GetNumberOfCurrentPlayers(IntPtr _)
+        public ulong GetNumberOfCurrentPlayers()
         {
             Write($"GetNumberOfCurrentPlayers");
             return default;
         }
 
-        public ulong RequestGlobalAchievementPercentages(IntPtr _)
+        public ulong RequestGlobalAchievementPercentages()
         {
             Write($"RequestGlobalAchievementPercentages");
             return default;
@@ -242,19 +246,6 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"GetAchievementProgressLimits");
             return false;
-        }
-
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamUserStats()
-        {
-            InterfaceVersion = "SteamUserStats";
-        }
-
-        private void Write(string v)
-        {
-            SteamEmulator.Write(InterfaceVersion, v);
         }
     }
 }

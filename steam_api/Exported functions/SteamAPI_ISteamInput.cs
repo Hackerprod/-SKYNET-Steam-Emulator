@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using SKYNET;
+using SKYNET.Managers;
 using SKYNET.Steamworks;
 
 namespace SKYNET.Steamworks.Exported
@@ -27,7 +28,7 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamAPI_ISteamInput_BNewDataAvailable()
         {
             Write($"SteamAPI_ISteamInput_BNewDataAvailable");
-            return SteamEmulator.SteamInput.BNewDataAvailable(SteamEmulator.SteamInput.MemoryAddress);
+            return SteamEmulator.SteamInput.BNewDataAvailable();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -206,7 +207,7 @@ namespace SKYNET.Steamworks.Exported
         public static ushort SteamAPI_ISteamInput_GetSessionInputConfigurationSettings()
         {
             Write($"SteamAPI_ISteamInput_GetSessionInputConfigurationSettings");
-            return SteamEmulator.SteamInput.GetSessionInputConfigurationSettings(SteamEmulator.SteamInput.MemoryAddress);
+            return SteamEmulator.SteamInput.GetSessionInputConfigurationSettings();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -286,7 +287,7 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamAPI_ISteamInput_Shutdown()
         {
             Write($"SteamAPI_ISteamInput_Shutdown");
-            return SteamEmulator.SteamInput.Shutdown(SteamEmulator.SteamInput.MemoryAddress);
+            return SteamEmulator.SteamInput.Shutdown();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -324,7 +325,7 @@ namespace SKYNET.Steamworks.Exported
         public static IntPtr SteamAPI_SteamInput_v005()
         {
             Write($"SteamAPI_SteamInput_v005");
-            return SteamEmulator.SteamInput.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface("SteamInput005");
         }
     }
 }

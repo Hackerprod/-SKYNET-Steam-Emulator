@@ -120,96 +120,96 @@ public class SteamEmulator
 
         // Client Interfaces
 
-        SteamClient = CreateInterface<SteamClient>();
+        SteamClient = new SteamClient();
 
-        SteamUser = CreateInterface<SteamUser>();
+        SteamUser = new SteamUser();
 
-        SteamFriends = CreateInterface<SteamFriends>();
+        SteamFriends = new SteamFriends();
 
-        SteamUtils = CreateInterface<SteamUtils>();
+        SteamUtils = new SteamUtils();
 
-        SteamMatchmaking = CreateInterface<SteamMatchmaking>();   
+        SteamMatchmaking = new SteamMatchmaking();   
 
-        SteamMatchMakingServers = CreateInterface<SteamMatchMakingServers>();    
+        SteamMatchMakingServers = new SteamMatchMakingServers();    
 
-        SteamUserStats = CreateInterface<SteamUserStats>();  
+        SteamUserStats = new SteamUserStats();  
 
-        SteamApps = CreateInterface<SteamApps>();   
+        SteamApps = new SteamApps();   
 
-        SteamNetworking = CreateInterface<SteamNetworking>();   
+        SteamNetworking = new SteamNetworking();   
 
-        SteamRemoteStorage = CreateInterface<SteamRemoteStorage>();  
+        SteamRemoteStorage = new SteamRemoteStorage();  
 
-        SteamScreenshots = CreateInterface<SteamScreenshots>();   
+        SteamScreenshots = new SteamScreenshots();   
 
-        SteamHTTP = CreateInterface<SteamHTTP>();
+        SteamHTTP = new SteamHTTP();
 
-        SteamController = CreateInterface<SteamController>();
+        SteamController = new SteamController();
 
-        SteamUGC = CreateInterface<SteamUGC>();
+        SteamUGC = new SteamUGC();
 
-        SteamAppList = CreateInterface<SteamAppList>();
+        SteamAppList = new SteamAppList();
 
-        SteamMusic = CreateInterface<SteamMusic>();
+        SteamMusic = new SteamMusic();
 
-        SteamMusicRemote = CreateInterface<SteamMusicRemote>();
+        SteamMusicRemote = new SteamMusicRemote();
 
-        SteamHTMLSurface = CreateInterface<SteamHTMLSurface>();
+        SteamHTMLSurface = new SteamHTMLSurface();
 
-        SteamInventory = CreateInterface<SteamInventory>();
+        SteamInventory = new SteamInventory();
 
-        SteamVideo = CreateInterface<SteamVideo>();
+        SteamVideo = new SteamVideo();
 
-        SteamParentalSettings = CreateInterface<SteamParentalSettings>();
+        SteamParentalSettings = new SteamParentalSettings();
 
-        SteamNetworkingSockets = CreateInterface<SteamNetworkingSockets>();
+        SteamNetworkingSockets = new SteamNetworkingSockets();
 
-        SteamNetworkingSocketsSerialized = CreateInterface<SteamNetworkingSocketsSerialized>();
+        SteamNetworkingSocketsSerialized = new SteamNetworkingSocketsSerialized();
 
-        SteamNetworkingMessages = CreateInterface<SteamNetworkingMessages>();
+        SteamNetworkingMessages = new SteamNetworkingMessages();
 
-        SteamGameCoordinator = CreateInterface<SteamGameCoordinator>();
+        SteamGameCoordinator = new SteamGameCoordinator();
 
-        SteamNetworkingUtils = CreateInterface<SteamNetworkingUtils>();
+        SteamNetworkingUtils = new SteamNetworkingUtils();
 
-        SteamGameSearch = CreateInterface<SteamGameSearch>();
+        SteamGameSearch = new SteamGameSearch();
 
-        SteamParties = CreateInterface<SteamParties>();
+        SteamParties = new SteamParties();
 
-        SteamRemotePlay = CreateInterface<SteamRemotePlay>();
+        SteamRemotePlay = new SteamRemotePlay();
 
-        SteamTV = CreateInterface<SteamTV>();
+        SteamTV = new SteamTV();
 
-        SteamInput = CreateInterface<SteamInput>();
+        SteamInput = new SteamInput();
 
 
         // Server Interfaces
 
-        SteamGameServer = CreateInterface<SteamGameServer>();
+        SteamGameServer = new SteamGameServer();
 
-        SteamGameServerUtils = CreateInterface<SteamUtils>();
+        SteamGameServerUtils = new SteamUtils();
 
-        SteamGameServerStats = CreateInterface<SteamGameServerStats>();
+        SteamGameServerStats = new SteamGameServerStats();
 
-        SteamGameServerNetworking = CreateInterface<SteamNetworking>();
+        SteamGameServerNetworking = new SteamNetworking();
 
-        SteamHTTP = CreateInterface<SteamHTTP>();
+        SteamHTTP = new SteamHTTP();
 
-        SteamGameServerInventory = CreateInterface<SteamInventory>();
+        SteamGameServerInventory = new SteamInventory();
 
-        SteamGameServerUgc = CreateInterface<SteamUGC>();
+        SteamGameServerUgc = new SteamUGC();
 
-        SteamGameServerApps = CreateInterface<SteamApps>();
+        SteamGameServerApps = new SteamApps();
 
-        SteamGameServerNetworkingSockets = CreateInterface<SteamNetworkingSockets>();
+        SteamGameServerNetworkingSockets = new SteamNetworkingSockets();
 
-        SteamGameServerNetworkingSocketsSerialized = CreateInterface<SteamNetworkingSocketsSerialized>();
+        SteamGameServerNetworkingSocketsSerialized = new SteamNetworkingSocketsSerialized();
 
-        SteamGameServerNetworkingMessages = CreateInterface<SteamNetworkingMessages>();
+        SteamGameServerNetworkingMessages = new SteamNetworkingMessages();
 
-        SteamGameServerGamecoordinator = CreateInterface<SteamGameCoordinator>();
+        SteamGameServerGamecoordinator = new SteamGameCoordinator();
 
-        SteamMasterServerUpdater = CreateInterface<SteamMasterServerUpdater>();
+        SteamMasterServerUpdater = new SteamMasterServerUpdater();
 
         #endregion
 
@@ -221,13 +221,6 @@ public class SteamEmulator
 
         Initialized = true;
 
-    }
-
-    private T CreateInterface<T>()  where T : ISteamInterface
-    {
-        T baseClass = InterfaceManager.CreateInterface<T>(out IntPtr BaseAddress);
-        baseClass.MemoryAddress = BaseAddress;
-        return (T)baseClass;
     }
 
     public static HSteamUser CreateSteamUser()

@@ -7,9 +7,20 @@ using SKYNET.Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class SteamController : ISteamInterface
     {
+        private Dictionary<string, ulong> ActionHandles;
+        private Dictionary<string, ulong> DigitalHandles;
+        private Dictionary<string, ulong> AnalogHandles;
+
+        public SteamController()
+        {
+            ActionHandles = new Dictionary<string, ulong>();
+            DigitalHandles = new Dictionary<string, ulong>();
+            AnalogHandles = new Dictionary<string, ulong>();
+            InterfaceVersion = "SteamController";
+        }
+
         public void ActivateActionSet(ulong controllerHandle, ulong actionSetHandle)
         {
             Write("ActivateActionSet");
@@ -43,9 +54,9 @@ namespace SKYNET.Steamworks.Implementation
             {
                 return 0;
             }
-            if (action_handles.ContainsKey(pszActionSetName.ToUpper()))
+            if (ActionHandles.ContainsKey(pszActionSetName.ToUpper()))
             {
-                return action_handles[pszActionSetName.ToUpper()];
+                return ActionHandles[pszActionSetName.ToUpper()];
             }
             return 0;
         }
@@ -73,9 +84,9 @@ namespace SKYNET.Steamworks.Implementation
             {
                 return 0;
             }
-            if (analog_action_handles.ContainsKey(pszActionName.ToUpper()))
+            if (AnalogHandles.ContainsKey(pszActionName.ToUpper()))
             {
-                return analog_action_handles[pszActionName.ToUpper()];
+                return AnalogHandles[pszActionName.ToUpper()];
             }
             return 0;
         }
@@ -126,9 +137,9 @@ namespace SKYNET.Steamworks.Implementation
             {
                 return 0;
             }
-            if (digital_action_handles.ContainsKey(pszActionName.ToUpper()))
+            if (DigitalHandles.ContainsKey(pszActionName.ToUpper()))
             {
-                return digital_action_handles[pszActionName.ToUpper()];
+                return DigitalHandles[pszActionName.ToUpper()];
             }
             return 0;
         }
@@ -181,13 +192,13 @@ namespace SKYNET.Steamworks.Implementation
             return "";
         }
 
-        public bool Init(IntPtr _)
+        public bool Init()
         {
             Write("Init");
             return true;
         }
 
-        public void RunFrame(IntPtr _)
+        public void RunFrame()
         {
             Write("RunFrame");
         }
@@ -203,7 +214,7 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public bool Shutdown(IntPtr _)
+        public bool Shutdown()
         {
             Write("Shutdown");
             return true;
@@ -233,26 +244,6 @@ namespace SKYNET.Steamworks.Implementation
         public void TriggerVibration(ulong controllerHandle, short usLeftSpeed, short usRightSpeed)
         {
             Write("TriggerVibration");
-        }
-
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-
-        private Dictionary<string, ulong> action_handles;
-        private Dictionary<string, ulong> digital_action_handles;
-        private Dictionary<string, ulong> analog_action_handles;
-
-        public SteamController()
-        {
-            action_handles = new Dictionary<string, ulong>();
-            digital_action_handles = new Dictionary<string, ulong>();
-            analog_action_handles = new Dictionary<string, ulong>();
-            InterfaceVersion = "SteamController";
-        }
-        private void Write(string v)
-        {
-            SteamEmulator.Write(InterfaceVersion, v);
         }
     }
 }

@@ -7,9 +7,13 @@ using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class SteamParties : ISteamInterface
     {
+        public SteamParties()
+        {
+            InterfaceVersion = "SteamParties";
+        }
+
         public void CancelReservation(uint ulBeacon, IntPtr steamIDUser)
         {
             Write("CancelReservation");
@@ -78,19 +82,6 @@ namespace SKYNET.Steamworks.Implementation
         public void OnReservationCompleted(uint ulBeacon, IntPtr steamIDUser)
         {
             Write("OnReservationCompleted");
-        }
-
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamParties()
-        {
-            InterfaceVersion = "SteamParties";
-        }
-
-        private void Write(string v)
-        {
-            SteamEmulator.Write(InterfaceVersion, v);
         }
     }
 }

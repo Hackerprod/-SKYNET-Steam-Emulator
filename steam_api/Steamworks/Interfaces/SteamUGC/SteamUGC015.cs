@@ -332,7 +332,7 @@ namespace SKYNET.Interface
 
     public uint GetNumSubscribedItems(IntPtr _)  // number of subscribed items 
     {
-        return SteamEmulator.SteamUGC.GetNumSubscribedItems(_);
+        return SteamEmulator.SteamUGC.GetNumSubscribedItems();
     }
 
     public uint GetSubscribedItems(IntPtr _, ulong pvecPublishedFileID, uint cMaxEntries)  // all subscribed item PublishFileIDs
@@ -382,7 +382,7 @@ namespace SKYNET.Interface
 
     public ulong StopPlaytimeTrackingForAllItems(IntPtr _)
     {
-        return SteamEmulator.SteamUGC.StopPlaytimeTrackingForAllItems(_);
+        return SteamEmulator.SteamUGC.StopPlaytimeTrackingForAllItems();
     }
 
     public ulong AddDependency(IntPtr _, ulong nParentPublishedFileID, ulong nChildPublishedFileID)

@@ -6,14 +6,19 @@ using System.Text;
 using System.Threading.Tasks;
 using SKYNET;
 using SKYNET.Helpers;
+using SKYNET.Managers;
 using SKYNET.Steamworks;
 
 
 namespace SKYNET.Steamworks.Implementation
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class SteamInput : ISteamInterface
     {
+        public SteamInput()
+        {
+            InterfaceVersion = "SteamInput";
+        }
+
         public void ActivateActionSet(IntPtr inputHandle, IntPtr actionSetHandle)
         {
             Write("ActivateActionSet");
@@ -24,7 +29,7 @@ namespace SKYNET.Steamworks.Implementation
             Write("ActivateActionSetLayer");
         }
 
-        public bool BNewDataAvailable(IntPtr _)
+        public bool BNewDataAvailable()
         {
             Write("BNewDataAvailable");
             return false;
@@ -46,7 +51,7 @@ namespace SKYNET.Steamworks.Implementation
             Write("DeactivateAllActionSetLayers");
         }
 
-        public void EnableDeviceCallbacks(IntPtr _)
+        public void EnableDeviceCallbacks()
         {
             Write("EnableDeviceCallbacks");
         }
@@ -177,7 +182,7 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public ushort GetSessionInputConfigurationSettings(IntPtr _)
+        public ushort GetSessionInputConfigurationSettings()
         {
             Write("GetSessionInputConfigurationSettings");
             return 0;
@@ -245,7 +250,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool Shutdown(IntPtr _)
+        public bool Shutdown()
         {
             Write("Shutdown");
             return true;
@@ -277,23 +282,10 @@ namespace SKYNET.Steamworks.Implementation
             Write("TriggerVibrationExtended");
         }
 
-        public IntPtr SteamAPI_SteamInput_v005(IntPtr _)
+        public IntPtr SteamAPI_SteamInput_v005()
         {
             Write("SteamAPI_SteamInput_v005");
-            return SteamEmulator.SteamInput.MemoryAddress;
-        }
-
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamInput()
-        {
-            InterfaceVersion = "SteamInput";
-        }
-
-        private void Write(string v)
-        {
-            SteamEmulator.Write(InterfaceVersion, v);
+            return InterfaceManager.FindOrCreateInterface("SteamInput005");
         }
     }
 }

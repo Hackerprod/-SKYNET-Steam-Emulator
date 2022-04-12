@@ -8,9 +8,13 @@ using Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class SteamGameCoordinator : ISteamInterface
     {
+        public SteamGameCoordinator()
+        {
+            InterfaceVersion = "SteamGameCoordinator";
+        }
+
         public bool IsMessageAvailable(uint pcubMsgSize)
         {
             Write("IsMessageAvailable");
@@ -27,19 +31,6 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("SendMessage_");
             return EGCResults.k_EGCResultOK;
-        }
-
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamGameCoordinator()
-        {
-            InterfaceVersion = "SteamGameCoordinator";
-        }
-
-        private void Write(string v)
-        {
-            SteamEmulator.Write(InterfaceVersion, v);
         }
     }
 }

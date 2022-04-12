@@ -7,9 +7,14 @@ using Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class SteamGameServer : ISteamInterface
     {
+        public SteamGameServer()
+        {
+            InterfaceVersion = "SteamGameServer";
+        }
+
+
         internal bool InitGameServer(IntPtr _, uint unIP, uint usGamePort, uint usQueryPort, uint unFlags, IntPtr nGameAppId, string pchVersionString)
         {
             Write("InitGameServer");
@@ -247,19 +252,6 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("ComputeNewPlayerCompatibility");
             return 0;
-        }
-
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamGameServer()
-        {
-            InterfaceVersion = "SteamGameServer";
-        }
-
-        private void Write(string v)
-        {
-            SteamEmulator.Write(InterfaceVersion, v);
         }
     }
 }

@@ -22,14 +22,14 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamAPI_ISteamMusicRemote_DeregisterSteamMusicRemote()
         {
             Write("SteamAPI_ISteamMusicRemote_DeregisterSteamMusicRemote");
-            return SteamEmulator.SteamMusicRemote.DeregisterSteamMusicRemote(SteamEmulator.SteamFriends.MemoryAddress);
+            return SteamEmulator.SteamMusicRemote.DeregisterSteamMusicRemote();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ISteamMusicRemote_BIsCurrentMusicRemote()
         {
             Write("SteamAPI_ISteamMusicRemote_BIsCurrentMusicRemote");
-            return SteamEmulator.SteamMusicRemote.BIsCurrentMusicRemote(SteamEmulator.SteamFriends.MemoryAddress);
+            return SteamEmulator.SteamMusicRemote.BIsCurrentMusicRemote();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -127,7 +127,7 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamAPI_ISteamMusicRemote_CurrentEntryWillChange()
         {
             Write("SteamAPI_ISteamMusicRemote_CurrentEntryWillChange");
-            return SteamEmulator.SteamMusicRemote.CurrentEntryWillChange(SteamEmulator.SteamFriends.MemoryAddress);
+            return SteamEmulator.SteamMusicRemote.CurrentEntryWillChange();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -162,21 +162,21 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamAPI_ISteamMusicRemote_CurrentEntryDidChange()
         {
             Write("SteamAPI_ISteamMusicRemote_CurrentEntryDidChange");
-            return SteamEmulator.SteamMusicRemote.CurrentEntryDidChange(SteamEmulator.SteamFriends.MemoryAddress);
+            return SteamEmulator.SteamMusicRemote.CurrentEntryDidChange();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ISteamMusicRemote_QueueWillChange()
         {
             Write("SteamAPI_ISteamMusicRemote_QueueWillChange");
-            return SteamEmulator.SteamMusicRemote.QueueWillChange(SteamEmulator.SteamFriends.MemoryAddress);
+            return SteamEmulator.SteamMusicRemote.QueueWillChange();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ISteamMusicRemote_ResetQueueEntries()
         {
             Write("SteamAPI_ISteamMusicRemote_ResetQueueEntries");
-            return SteamEmulator.SteamMusicRemote.ResetQueueEntries(SteamEmulator.SteamFriends.MemoryAddress);
+            return SteamEmulator.SteamMusicRemote.ResetQueueEntries();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -197,21 +197,21 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamAPI_ISteamMusicRemote_QueueDidChange()
         {
             Write("SteamAPI_ISteamMusicRemote_QueueDidChange");
-            return SteamEmulator.SteamMusicRemote.QueueDidChange(SteamEmulator.SteamFriends.MemoryAddress);
+            return SteamEmulator.SteamMusicRemote.QueueDidChange();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ISteamMusicRemote_PlaylistWillChange()
         {
             Write("SteamAPI_ISteamMusicRemote_PlaylistWillChange");
-            return SteamEmulator.SteamMusicRemote.PlaylistWillChange(SteamEmulator.SteamFriends.MemoryAddress);
+            return SteamEmulator.SteamMusicRemote.PlaylistWillChange();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ISteamMusicRemote_ResetPlaylistEntries()
         {
             Write("SteamAPI_ISteamMusicRemote_ResetPlaylistEntries");
-            return SteamEmulator.SteamMusicRemote.ResetPlaylistEntries(SteamEmulator.SteamFriends.MemoryAddress);
+            return SteamEmulator.SteamMusicRemote.ResetPlaylistEntries();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -232,7 +232,7 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamAPI_ISteamMusicRemote_PlaylistDidChange()
         {
             Write("SteamAPI_ISteamMusicRemote_PlaylistDidChange");
-            return SteamEmulator.SteamMusicRemote.PlaylistDidChange(SteamEmulator.SteamFriends.MemoryAddress);
+            return SteamEmulator.SteamMusicRemote.PlaylistDidChange();
         }
     }
 }

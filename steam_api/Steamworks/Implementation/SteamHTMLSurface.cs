@@ -7,9 +7,13 @@ using Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class SteamHTMLSurface : ISteamInterface
     {
+        public SteamHTMLSurface()
+        {
+            InterfaceVersion = "SteamHTMLSurface";
+        }
+
         public void AddHeader(uint unBrowserHandle, string pchKey, string pchValue)
         {
             Write("AddHeader");
@@ -201,19 +205,6 @@ namespace SKYNET.Steamworks.Implementation
         public void ViewSource(uint unBrowserHandle)
         {
             Write("ViewSource");
-        }
-
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamHTMLSurface()
-        {
-            InterfaceVersion = "SteamHTMLSurface";
-        }
-
-        private void Write(string v)
-        {
-            SteamEmulator.Write(InterfaceVersion, v);
         }
     }
 }

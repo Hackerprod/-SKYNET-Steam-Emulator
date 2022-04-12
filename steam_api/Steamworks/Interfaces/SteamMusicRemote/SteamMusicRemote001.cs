@@ -12,12 +12,12 @@ namespace SKYNET.Interface
 
         public bool DeregisterSteamMusicRemote(IntPtr _)
         {
-            return SteamEmulator.SteamMusicRemote.DeregisterSteamMusicRemote(_);
+            return SteamEmulator.SteamMusicRemote.DeregisterSteamMusicRemote();
         }
 
         public bool BIsCurrentMusicRemote(IntPtr _)
         {
-            return SteamEmulator.SteamMusicRemote.BIsCurrentMusicRemote(_);
+            return SteamEmulator.SteamMusicRemote.BIsCurrentMusicRemote();
         }
 
         public bool BActivationSuccess(IntPtr _, bool bValue)
@@ -87,7 +87,7 @@ namespace SKYNET.Interface
 
         public bool CurrentEntryWillChange(IntPtr _)
         {
-            return SteamEmulator.SteamMusicRemote.CurrentEntryWillChange(_);
+            return SteamEmulator.SteamMusicRemote.CurrentEntryWillChange();
         }
 
         public bool CurrentEntryIsAvailable(IntPtr _, bool bAvailable)
@@ -112,17 +112,17 @@ namespace SKYNET.Interface
 
         public bool CurrentEntryDidChange(IntPtr _)
         {
-            return SteamEmulator.SteamMusicRemote.CurrentEntryDidChange(_);
+            return SteamEmulator.SteamMusicRemote.CurrentEntryDidChange();
         }
 
         public bool QueueWillChange(IntPtr _)
         {
-            return SteamEmulator.SteamMusicRemote.QueueWillChange(_);
+            return SteamEmulator.SteamMusicRemote.QueueWillChange();
         }
 
         public bool ResetQueueEntries(IntPtr _)
         {
-            return SteamEmulator.SteamMusicRemote.ResetQueueEntries(_);
+            return SteamEmulator.SteamMusicRemote.ResetQueueEntries();
         }
 
         public bool SetQueueEntry(IntPtr _, int nID, int nPosition, string pchEntryText)
@@ -137,17 +137,17 @@ namespace SKYNET.Interface
 
         public bool QueueDidChange(IntPtr _)
         {
-            return SteamEmulator.SteamMusicRemote.QueueDidChange(_);
+            return SteamEmulator.SteamMusicRemote.QueueDidChange();
         }
 
         public bool PlaylistWillChange(IntPtr _)
         {
-            return SteamEmulator.SteamMusicRemote.PlaylistWillChange(_);
+            return SteamEmulator.SteamMusicRemote.PlaylistWillChange();
         }
 
         public bool ResetPlaylistEntries(IntPtr _)
         {
-            return SteamEmulator.SteamMusicRemote.ResetPlaylistEntries(_);
+            return SteamEmulator.SteamMusicRemote.ResetPlaylistEntries();
         }
 
         public bool SetPlaylistEntry(IntPtr _, int nID, int nPosition, string pchEntryText)
@@ -162,7 +162,7 @@ namespace SKYNET.Interface
 
         public bool PlaylistDidChange(IntPtr _)
         {
-            return SteamEmulator.SteamMusicRemote.PlaylistDidChange(_);
+            return SteamEmulator.SteamMusicRemote.PlaylistDidChange();
         }
 
 

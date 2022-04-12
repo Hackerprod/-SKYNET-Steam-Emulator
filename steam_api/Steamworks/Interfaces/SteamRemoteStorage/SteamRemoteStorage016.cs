@@ -1,10 +1,13 @@
-using System;
-
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace SKYNET.Interface
 {
-    [Interface("STEAMREMOTESTORAGE_INTERFACE_VERSION013")]
-    public class SteamRemoteStorage013 : ISteamInterface
+    [Interface("STEAMREMOTESTORAGE_INTERFACE_VERSION016")]
+    public class SteamRemoteStorage016 : ISteamInterface
     {
         public bool FileWrite(IntPtr _, string pchFile, IntPtr pvData, int cubData)
         {
@@ -106,9 +109,9 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamRemoteStorage.GetFileNameAndSize(iFile, pnFileSizeInBytes);
         }
 
-        public bool GetQuota(IntPtr _, int pnTotalBytes, int puAvailableBytes)
+        public bool GetQuota(IntPtr _, ulong pnTotalBytes, ulong puAvailableBytes)
         {
-            return SteamEmulator.SteamRemoteStorage.GetQuota(pnTotalBytes, puAvailableBytes);
+            return SteamEmulator.SteamRemoteStorage.GetQuota((int)pnTotalBytes, (int)puAvailableBytes);
         }
 
         public bool IsCloudEnabledForAccount(IntPtr _)
@@ -136,7 +139,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamRemoteStorage.GetUGCDownloadProgress(hContent, pnBytesDownloaded, pnBytesExpected);
         }
 
-        public bool GetUGCDetails(ulong hContent, uint pnAppID, string ppchName, int pnFileSizeInBytes, ulong  pSteamIDOwner )
+        public bool GetUGCDetails(ulong hContent, uint pnAppID, string ppchName, int pnFileSizeInBytes, ulong pSteamIDOwner)
         {
             return SteamEmulator.SteamRemoteStorage.GetUGCDetails(hContent, pnAppID, ppchName, pnFileSizeInBytes, pSteamIDOwner);
         }
@@ -276,6 +279,24 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamRemoteStorage.UGCDownloadToLocation(hContent, pchLocation, unPriority);
         }
 
+        public int GetLocalFileChangeCount(IntPtr _)
+        {
+            return SteamEmulator.SteamRemoteStorage.GetLocalFileChangeCount();
+        }
 
+        public string GetLocalFileChange(IntPtr _, int iFile, int pEChangeType, int pEFilePathType)
+        {
+            return SteamEmulator.SteamRemoteStorage.GetLocalFileChange(iFile, pEChangeType, pEFilePathType);
+        }
+
+        public bool BeginFileWriteBatch(IntPtr _)
+        {
+            return SteamEmulator.SteamRemoteStorage.BeginFileWriteBatch();
+        }
+
+        public bool EndFileWriteBatch(IntPtr _)
+        {
+            return SteamEmulator.SteamRemoteStorage.EndFileWriteBatch();
+        }
     }
 }

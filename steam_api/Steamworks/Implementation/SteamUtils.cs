@@ -7,76 +7,80 @@ using Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class SteamUtils : ISteamInterface
     {
-        public uint GetSecondsSinceAppActive(IntPtr _)
+        public SteamUtils()
+        {
+            InterfaceVersion = "SteamUtils";
+        }
+
+        public uint GetSecondsSinceAppActive()
         {
             Write("GetSecondsSinceAppActive");
             return 0;
         }
 
-        public uint GetSecondsSinceComputerActive(IntPtr _)
+        public uint GetSecondsSinceComputerActive()
         {
             Write("GetSecondsSinceComputerActive");
             return 0;
         }
 
-        public EUniverse GetConnectedUniverse(IntPtr _)
+        public EUniverse GetConnectedUniverse()
         {
             Write("GetConnectedUniverse");
             return EUniverse.k_EUniversePublic;
         }
 
-        public uint GetServerRealTime(IntPtr _)
+        public uint GetServerRealTime()
         {
             Write("GetServerRealTime");
             return 0;
         }
 
-        public string GetIPCountry(IntPtr _)
+        public string GetIPCountry()
         {
             Write("GetIPCountry");
             return "";
         }
 
-        public bool GetImageSize(IntPtr _, int iImage, uint pnWidth, uint pnHeight)
+        public bool GetImageSize(int iImage, uint pnWidth, uint pnHeight)
         {
             Write("GetImageSize");
             return false;
         }
 
-        public bool GetImageRGBA(IntPtr _, int iImage, int pubDest, int nDestBufferSize)
+        public bool GetImageRGBA(int iImage, int pubDest, int nDestBufferSize)
         {
             Write("GetImageRGBA");
             return false;
         }
 
-        public bool GetCSERIPPort(IntPtr _, uint unIP, uint usPort)
+        public bool GetCSERIPPort(uint unIP, uint usPort)
         {
             Write("GetCSERIPPort");
             return false;
         }
 
-        public int GetCurrentBatteryPower(IntPtr _)
+        public int GetCurrentBatteryPower()
         {
             Write("GetCurrentBatteryPower");
             return 0;
         }
 
-        public uint GetAppID(IntPtr _)
+        public uint GetAppID()
         {
             uint appId = SteamEmulator.AppId == 0 ? 570 : SteamEmulator.AppId;
             Write($"GetAppID {appId}");
             return appId;
         }
 
-        public void SetOverlayNotificationPosition(IntPtr _, int eNotificationPosition)
+        public void SetOverlayNotificationPosition(int eNotificationPosition)
         {
             Write("SetOverlayNotificationPosition");
         }
 
-        public bool IsAPICallCompleted(IntPtr _, ulong hSteamAPICall, bool pbFailed)
+        public bool IsAPICallCompleted(ulong hSteamAPICall, bool pbFailed)
         {
             Write("IsAPICallCompleted");
             if (hSteamAPICall == 1)
@@ -89,122 +93,122 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public ESteamAPICallFailure GetAPICallFailureReason(IntPtr _, ulong hSteamAPICall)
+        public ESteamAPICallFailure GetAPICallFailureReason(ulong hSteamAPICall)
         {
             Write("GetAPICallFailureReason");
             return default;
         }
 
-        public bool GetAPICallResult(IntPtr _, ulong hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, bool pbFailed)
+        public bool GetAPICallResult(ulong hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, bool pbFailed)
         {
             Write("GetAPICallResult");
             return false;
         }
 
-        public void RunFrame(IntPtr _)
+        public void RunFrame()
         {
             Write("RunFrame");
         }
 
-        public uint GetIPCCallCount(IntPtr _)
+        public uint GetIPCCallCount()
         {
             Write("GetIPCCallCount");
             return 0;
         }
 
-        public void SetWarningMessageHook(IntPtr _, IntPtr pFunction)
+        public void SetWarningMessageHook(IntPtr pFunction)
         {
             Write("SetWarningMessageHook");
         }
 
-        public bool IsOverlayEnabled(IntPtr _)
+        public bool IsOverlayEnabled()
         {
             Write("IsOverlayEnabled");
             return false;
         }
 
-        public bool BOverlayNeedsPresent(IntPtr _)
+        public bool BOverlayNeedsPresent()
         {
             Write("BOverlayNeedsPresent");
             return false;
         }
 
-        public ulong CheckFileSignature(IntPtr _, string szFileName)
+        public ulong CheckFileSignature(string szFileName)
         {
             Write("CheckFileSignature");
             return default;
         }
 
-        public bool ShowGamepadTextInput(IntPtr _, int eInputMode, int eLineInputMode, string pchDescription, uint unCharMax, string pchExistingText)
+        public bool ShowGamepadTextInput(int eInputMode, int eLineInputMode, string pchDescription, uint unCharMax, string pchExistingText)
         {
             Write("ShowGamepadTextInput");
             return false;
         }
 
-        public uint GetEnteredGamepadTextLength(IntPtr _)
+        public uint GetEnteredGamepadTextLength()
         {
             Write("GetEnteredGamepadTextLength");
             return 0;
         }
 
-        public bool GetEnteredGamepadTextInput(IntPtr _, string pchText, uint cchText)
+        public bool GetEnteredGamepadTextInput(string pchText, uint cchText)
         {
             Write("GetEnteredGamepadTextInput");
             return false;
         }
 
-        public string GetSteamUILanguage(IntPtr _)
+        public string GetSteamUILanguage()
         {
             Write("GetSteamUILanguage");
             return "English";
         }
 
-        public bool IsSteamRunningInVR(IntPtr _)
+        public bool IsSteamRunningInVR()
         {
             Write("IsSteamRunningInVR");
             return false;
         }
 
-        public void SetOverlayNotificationInset(IntPtr _, int nHorizontalInset, int nVerticalInset)
+        public void SetOverlayNotificationInset(int nHorizontalInset, int nVerticalInset)
         {
             Write("SetOverlayNotificationInset");
         }
 
-        public bool IsSteamInBigPictureMode(IntPtr _)
+        public bool IsSteamInBigPictureMode()
         {
             Write("IsSteamInBigPictureMode");
             return false;
         }
 
-        public void StartVRDashboard(IntPtr _)
+        public void StartVRDashboard()
         {
             Write("StartVRDashboard");
         }
 
-        public bool IsVRHeadsetStreamingEnabled(IntPtr _)
+        public bool IsVRHeadsetStreamingEnabled()
         {
             Write("IsVRHeadsetStreamingEnabled");
             return false;
         }
 
-        public void SetVRHeadsetStreamingEnabled(IntPtr _, bool bEnabled)
+        public void SetVRHeadsetStreamingEnabled(bool bEnabled)
         {
             Write("SetVRHeadsetStreamingEnabled");
         }
 
-        public bool IsSteamChinaLauncher(IntPtr _)
+        public bool IsSteamChinaLauncher()
         {
             Write("IsSteamChinaLauncher");
             return false;
         }
 
-        public bool InitFilterText(IntPtr _)
+        public bool InitFilterText()
         {
             Write("InitFilterText");
             return true;
         }
 
-        public int FilterText(IntPtr _, string pchOutFilteredText, uint nByteSizeOutFilteredText, string pchInputMessage, bool bLegalOnly)
+        public int FilterText(string pchOutFilteredText, uint nByteSizeOutFilteredText, string pchInputMessage, bool bLegalOnly)
         {
             Write($"FilterText {pchInputMessage}");
             return 0;
@@ -216,19 +220,10 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public ESteamIPv6ConnectivityState GetIPv6ConnectivityState(IntPtr _, int eProtocol)
+        public ESteamIPv6ConnectivityState GetIPv6ConnectivityState(int eProtocol)
         {
             Write("GetIPv6ConnectivityState");
             return default;
         }
-
-        private void Write(string v)
-        {
-            SteamEmulator.Write(InterfaceVersion, v);
-        }
-
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
     }
 }

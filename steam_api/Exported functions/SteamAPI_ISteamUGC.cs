@@ -436,7 +436,7 @@ namespace SKYNET.Steamworks.Exported
         public static uint SteamAPI_ISteamUGC_GetNumSubscribedItems() // number of subscribed items  
         {
             Write("SteamAPI_ISteamUGC_GetNumSubscribedItems");
-            return SteamEmulator.SteamUGC.GetNumSubscribedItems(SteamEmulator.SteamUGC.MemoryAddress);
+            return SteamEmulator.SteamUGC.GetNumSubscribedItems();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -506,7 +506,7 @@ namespace SKYNET.Steamworks.Exported
         public static ulong SteamAPI_ISteamUGC_StopPlaytimeTrackingForAllItems()
         {
             Write("SteamAPI_ISteamUGC_StopPlaytimeTrackingForAllItems");
-            return SteamEmulator.SteamUGC.StopPlaytimeTrackingForAllItems(SteamEmulator.SteamUGC.MemoryAddress);
+            return SteamEmulator.SteamUGC.StopPlaytimeTrackingForAllItems();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

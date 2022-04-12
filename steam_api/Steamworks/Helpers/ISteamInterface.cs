@@ -5,9 +5,13 @@ using System.Text;
 
 namespace SKYNET
 {
-    public interface ISteamInterface
+    public class ISteamInterface
     {
-        IntPtr MemoryAddress { get; set; }
-        string InterfaceVersion { get; set; }
+        public string InterfaceVersion { get; set; }
+
+        public void Write(string v)
+        {
+            SteamEmulator.Write(InterfaceVersion, v);
+        }
     }
 }

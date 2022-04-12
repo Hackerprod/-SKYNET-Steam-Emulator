@@ -5,9 +5,13 @@ using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class SteamTV : ISteamInterface
     {
+        public SteamTV()
+        {
+            InterfaceVersion = "SteamTV";
+        }
+
         public bool IsBroadcasting(int pnNumViewers)
         {
             Write($"IsBroadcasting");
@@ -43,19 +47,6 @@ namespace SKYNET.Steamworks.Implementation
         public void RemoveRegion(uint unRegionHandle)
         {
             Write($"RemoveRegion");
-        }
-
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamTV()
-        {
-            InterfaceVersion = "SteamTV";
-        }
-
-        private void Write(string v)
-        {
-            SteamEmulator.Write(InterfaceVersion, v);
         }
     }
 }

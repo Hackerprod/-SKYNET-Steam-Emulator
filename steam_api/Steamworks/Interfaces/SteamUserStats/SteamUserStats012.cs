@@ -7,7 +7,7 @@ namespace SKYNET.Interface
     {
         public bool RequestCurrentStats(IntPtr _)
         {
-            return SteamEmulator.SteamUserStats.RequestCurrentStats(_);
+            return SteamEmulator.SteamUserStats.RequestCurrentStats();
         }
 
         public bool GetStat(IntPtr _, string pchName, int pData)
@@ -57,7 +57,7 @@ namespace SKYNET.Interface
 
         public bool StoreStats(IntPtr _)
         {
-            return SteamEmulator.SteamUserStats.StoreStats(_);
+            return SteamEmulator.SteamUserStats.StoreStats();
         }
 
         public int GetAchievementIcon(IntPtr _, string pchName)
@@ -77,7 +77,7 @@ namespace SKYNET.Interface
 
         public uint GetNumAchievements(IntPtr _)
         {
-            return SteamEmulator.SteamUserStats.GetNumAchievements(_);
+            return SteamEmulator.SteamUserStats.GetNumAchievements();
         }
 
         public string GetAchievementName(IntPtr _, uint iAchievement)
@@ -172,12 +172,12 @@ namespace SKYNET.Interface
 
     public ulong GetNumberOfCurrentPlayers(IntPtr _)
     {
-        return SteamEmulator.SteamUserStats.GetNumberOfCurrentPlayers(_);
+        return SteamEmulator.SteamUserStats.GetNumberOfCurrentPlayers();
     }
 
     public ulong RequestGlobalAchievementPercentages(IntPtr _)
     {
-        return SteamEmulator.SteamUserStats.RequestGlobalAchievementPercentages(_);
+        return SteamEmulator.SteamUserStats.RequestGlobalAchievementPercentages();
     }
 
     public int GetMostAchievedAchievementInfo(IntPtr _, string pchName, uint unNameBufLen, float pflPercent, bool pbAchieved)

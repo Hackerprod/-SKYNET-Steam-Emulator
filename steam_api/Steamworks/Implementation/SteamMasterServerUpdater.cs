@@ -5,9 +5,13 @@ using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class SteamMasterServerUpdater : ISteamInterface
     {
+        public SteamMasterServerUpdater()
+        {
+            InterfaceVersion = "SteamMasterServerUpdater";
+        }
+
         public void SetActive(bool bActive)
         {
             Write($"SetActive");
@@ -83,19 +87,6 @@ namespace SKYNET.Steamworks.Implementation
         public void SetBasicServerData(uint nProtocolVersion, bool bDedicatedServer, string pRegionName, string pProductName, uint nMaxReportedClients, bool bPasswordProtected, string pGameDescription)
         {
             Write($"SetBasicServerData");
-        }
-
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamMasterServerUpdater()
-        {
-            InterfaceVersion = "SteamMasterServerUpdater";
-        }
-
-        private void Write(string v)
-        {
-            SteamEmulator.Write(InterfaceVersion, v);
         }
     }
 }

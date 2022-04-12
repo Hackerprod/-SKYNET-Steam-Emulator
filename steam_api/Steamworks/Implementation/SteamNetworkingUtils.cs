@@ -6,9 +6,13 @@ using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class SteamNetworkingUtils : ISteamInterface
     {
+        public SteamNetworkingUtils()
+        {
+            InterfaceVersion = "SteamNetworkingUtils";
+        }
+
         public IntPtr AllocateMessage(int cbAllocateBuffer)
         {
             Write("AllocateMessage");
@@ -182,19 +186,6 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("SteamNetworkingIdentity_ParseString");
             return false;
-        }
-
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamNetworkingUtils()
-        {
-            InterfaceVersion = "SteamNetworkingUtils";
-        }
-
-        private void Write(string v)
-        {
-            SteamEmulator.Write(InterfaceVersion, v);
         }
     }
 }

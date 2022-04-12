@@ -5,9 +5,13 @@ using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class SteamNetworkingMessages : ISteamInterface
     {
+        public SteamNetworkingMessages()
+        {
+            InterfaceVersion = "SteamNetworkingMessages";
+        }
+
         public int SendMessageToUser(IntPtr identityRemote, IntPtr pubData, uint cubData, int nSendFlags, int nRemoteChannel)
         {
             Write("SendMessageToUser");
@@ -42,19 +46,6 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("GetSessionConnectionInfo");
             return IntPtr.Zero;
-        }
-
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamNetworkingMessages()
-        {
-            InterfaceVersion = "SteamNetworkingMessages";
-        }
-
-        private void Write(string v)
-        {
-            SteamEmulator.Write(InterfaceVersion, v);
         }
     }
 }

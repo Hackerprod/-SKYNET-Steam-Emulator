@@ -6,22 +6,26 @@ using SKYNET.Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class SteamMusicRemote : ISteamInterface
     {
+        public SteamMusicRemote()
+        {
+            InterfaceVersion = "SteamMusicRemote";
+        }
+
         public bool RegisterSteamMusicRemote(string pchName)
         {
             Write($"RegisterSteamMusicRemote");
             return false;
         }
 
-        public bool DeregisterSteamMusicRemote(IntPtr _)
+        public bool DeregisterSteamMusicRemote()
         {
             Write($"DeregisterSteamMusicRemote");
             return false;
         }
 
-        public bool BIsCurrentMusicRemote(IntPtr _)
+        public bool BIsCurrentMusicRemote()
         {
             Write($"BIsCurrentMusicRemote");
             return false;
@@ -105,7 +109,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool CurrentEntryWillChange(IntPtr _)
+        public bool CurrentEntryWillChange()
         {
             Write($"CurrentEntryWillChange");
             return false;
@@ -135,19 +139,19 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool CurrentEntryDidChange(IntPtr _)
+        public bool CurrentEntryDidChange()
         {
             Write($"CurrentEntryDidChange");
             return false;
         }
 
-        public bool QueueWillChange(IntPtr _)
+        public bool QueueWillChange()
         {
             Write($"QueueWillChange");
             return false;
         }
 
-        public bool ResetQueueEntries(IntPtr _)
+        public bool ResetQueueEntries()
         {
             Write($"ResetQueueEntries");
             return false;
@@ -165,19 +169,19 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool QueueDidChange(IntPtr _)
+        public bool QueueDidChange()
         {
             Write($"QueueDidChange");
             return false;
         }
 
-        public bool PlaylistWillChange(IntPtr _)
+        public bool PlaylistWillChange()
         {
             Write($"PlaylistWillChange");
             return false;
         }
 
-        public bool ResetPlaylistEntries(IntPtr _)
+        public bool ResetPlaylistEntries()
         {
             Write($"ResetPlaylistEntries");
             return false;
@@ -195,23 +199,10 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool PlaylistDidChange(IntPtr _)
+        public bool PlaylistDidChange()
         {
             Write($"PlaylistDidChange");
             return false;
-        }
-
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamMusicRemote()
-        {
-            InterfaceVersion = "SteamMusicRemote";
-        }
-
-        private void Write(string v)
-        {
-            SteamEmulator.Write(InterfaceVersion, v);
         }
     }
 }

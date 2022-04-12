@@ -6,104 +6,95 @@ using SKYNET.Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class SteamGameSearch : ISteamInterface
     {
-        public GameSearchErrorCode_t AcceptGame(IntPtr self)
-        {
-            Write("AcceptGame");
-            return GameSearchErrorCode_t.OK;
-        }
-
-        public GameSearchErrorCode_t AddGameSearchParams(string pchKeyToFind, string pchValuesToFind)
-        {
-            Write("AddGameSearchParams");
-            return GameSearchErrorCode_t.OK;
-        }
-
-        public GameSearchErrorCode_t CancelRequestPlayersForGame(IntPtr self)
-        {
-            Write("CancelRequestPlayersForGame");
-            return GameSearchErrorCode_t.OK;
-        }
-
-        public GameSearchErrorCode_t DeclineGame(IntPtr self)
-        {
-            Write("DeclineGame");
-            return GameSearchErrorCode_t.OK;
-        }
-
-        public GameSearchErrorCode_t EndGame(ulong ullUniqueGameID)
-        {
-            Write("EndGame");
-            return GameSearchErrorCode_t.OK;
-        }
-
-        public GameSearchErrorCode_t EndGameSearch(IntPtr self)
-        {
-            Write("EndGameSearch");
-            return GameSearchErrorCode_t.OK;
-        }
-
-        public GameSearchErrorCode_t HostConfirmGameStart(ulong ullUniqueGameID)
-        {
-            Write("HostConfirmGameStart");
-            return GameSearchErrorCode_t.OK;
-        }
-
-        public GameSearchErrorCode_t RequestPlayersForGame(int nPlayerMin, int nPlayerMax, int nMaxTeamSize)
-        {
-            Write("RequestPlayersForGame");
-            return GameSearchErrorCode_t.OK;
-        }
-
-        public GameSearchErrorCode_t RetrieveConnectionDetails(IntPtr steamIDHost, IntPtr pchConnectionDetails, int cubConnectionDetails)
-        {
-            Write("RetrieveConnectionDetails");
-            return GameSearchErrorCode_t.OK;
-        }
-
-        public GameSearchErrorCode_t SearchForGameSolo(int nPlayerMin, int nPlayerMax)
-        {
-            Write("SearchForGameSolo");
-            return GameSearchErrorCode_t.OK;
-        }
-
-        public GameSearchErrorCode_t SearchForGameWithLobby(IntPtr steamIDLobby, int nPlayerMin, int nPlayerMax)
-        {
-            Write("SearchForGameWithLobby");
-            return GameSearchErrorCode_t.OK;
-        }
-
-        public GameSearchErrorCode_t SetConnectionDetails(string pchConnectionDetails, int cubConnectionDetails)
-        {
-            Write("SetConnectionDetails");
-            return GameSearchErrorCode_t.OK;
-        }
-
-        public GameSearchErrorCode_t SetGameHostParams(string pchKey, string pchValue)
-        {
-            Write("SetGameHostParams");
-            return GameSearchErrorCode_t.OK;
-        }
-
-        public GameSearchErrorCode_t SubmitPlayerResult(ulong ullUniqueGameID, IntPtr steamIDPlayer, PlayerResult_t EPlayerResult)
-        {
-            Write("SubmitPlayerResult");
-            return GameSearchErrorCode_t.OK;
-        }
-
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
         public SteamGameSearch()
         {
             InterfaceVersion = "SteamGameSearch";
         }
 
-        private void Write(string v)
+        public int AcceptGame(IntPtr self)
         {
-            SteamEmulator.Write(InterfaceVersion, v);
+            Write("AcceptGame");
+            return (int)GameSearchErrorCode_t.OK;
+        }
+
+        public int AddGameSearchParams(string pchKeyToFind, string pchValuesToFind)
+        {
+            Write("AddGameSearchParams");
+            return (int)GameSearchErrorCode_t.OK;
+        }
+
+        public int CancelRequestPlayersForGame(IntPtr self)
+        {
+            Write("CancelRequestPlayersForGame");
+            return (int)GameSearchErrorCode_t.OK;
+        }
+
+        public int DeclineGame(IntPtr self)
+        {
+            Write("DeclineGame");
+            return (int)GameSearchErrorCode_t.OK;
+        }
+
+        public int EndGame(ulong ullUniqueGameID)
+        {
+            Write("EndGame");
+            return (int)GameSearchErrorCode_t.OK;
+        }
+
+        public int EndGameSearch(IntPtr self)
+        {
+            Write("EndGameSearch");
+            return (int)GameSearchErrorCode_t.OK;
+        }
+
+        public int HostConfirmGameStart(ulong ullUniqueGameID)
+        {
+            Write("HostConfirmGameStart");
+            return (int)GameSearchErrorCode_t.OK;
+        }
+
+        public int RequestPlayersForGame(int nPlayerMin, int nPlayerMax, int nMaxTeamSize)
+        {
+            Write("RequestPlayersForGame");
+            return (int)GameSearchErrorCode_t.OK;
+        }
+
+        public int RetrieveConnectionDetails(ulong steamIDHost, IntPtr pchConnectionDetails, int cubConnectionDetails)
+        {
+            Write("RetrieveConnectionDetails");
+            return (int)GameSearchErrorCode_t.OK;
+        }
+
+        public int SearchForGameSolo(int nPlayerMin, int nPlayerMax)
+        {
+            Write("SearchForGameSolo");
+            return (int)GameSearchErrorCode_t.OK;
+        }
+
+        public int SearchForGameWithLobby(ulong steamIDLobby, int nPlayerMin, int nPlayerMax)
+        {
+            Write("SearchForGameWithLobby");
+            return (int)GameSearchErrorCode_t.OK;
+        }
+
+        public int SetConnectionDetails(string pchConnectionDetails, int cubConnectionDetails)
+        {
+            Write("SetConnectionDetails");
+            return (int)GameSearchErrorCode_t.OK;
+        }
+
+        public int SetGameHostParams(string pchKey, string pchValue)
+        {
+            Write("SetGameHostParams");
+            return (int)GameSearchErrorCode_t.OK;
+        }
+
+        public int SubmitPlayerResult(ulong ullUniqueGameID, ulong steamIDPlayer, int EPlayerResult)
+        {
+            Write("SubmitPlayerResult");
+            return (int)GameSearchErrorCode_t.OK;
         }
     }
 }

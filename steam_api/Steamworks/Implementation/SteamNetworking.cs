@@ -6,9 +6,13 @@ using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class SteamNetworking : ISteamInterface
     {
+        public SteamNetworking()
+        {
+            InterfaceVersion = "SteamNetworking";
+        }
+
         public bool SendP2PPacket(ulong steamIDRemote, IntPtr pubData, uint cubData, int eP2PSendType, int nChannel)
         {
             Write("SendP2PPacket");
@@ -139,19 +143,6 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("GetMaxPacketSize");
             return 1500;
-        }
-
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamNetworking()
-        {
-            InterfaceVersion = "SteamNetworking";
-        }
-
-        private void Write(string v)
-        {
-            SteamEmulator.Write(InterfaceVersion, v);
         }
     }
 }

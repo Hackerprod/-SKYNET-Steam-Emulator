@@ -7,9 +7,13 @@ using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class SteamRemoteStorage : ISteamInterface
     {
+        public SteamRemoteStorage()
+        {
+            InterfaceVersion = "SteamRemoteStorage";
+        }
+
         public bool FileWrite(string pchFile, IntPtr pvData, int cubData)
         {
             Write("FileWrite");
@@ -118,7 +122,7 @@ namespace SKYNET.Steamworks.Implementation
             return default;
         }
 
-        public int GetFileCount(IntPtr _)
+        public int GetFileCount()
         {
             Write("GetFileCount");
             return 0;
@@ -136,13 +140,13 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool IsCloudEnabledForAccount(IntPtr _)
+        public bool IsCloudEnabledForAccount()
         {
             Write("IsCloudEnabledForAccount");
             return default;
         }
 
-        public bool IsCloudEnabledForApp(IntPtr _)
+        public bool IsCloudEnabledForApp()
         {
             Write("IsCloudEnabledForApp");
             return default;
@@ -178,7 +182,7 @@ namespace SKYNET.Steamworks.Implementation
             return default;
         }
 
-        public int GetCachedUGCCount(IntPtr _)
+        public int GetCachedUGCCount()
         {
             Write("GetCachedUGCCount");
             return default;
@@ -214,7 +218,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public void GetFileListFromServer(IntPtr _)
+        public void GetFileListFromServer()
         {
             Write("GetFileListFromServer");
         }
@@ -229,7 +233,7 @@ namespace SKYNET.Steamworks.Implementation
             throw new NotImplementedException();
         }
 
-        internal bool SynchronizeToClient(IntPtr _)
+        internal bool SynchronizeToClient()
         {
             throw new NotImplementedException();
         }
@@ -240,12 +244,12 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        internal bool ResetFileRequestState(IntPtr _)
+        internal bool ResetFileRequestState()
         {
             throw new NotImplementedException();
         }
 
-        internal bool SynchronizeToServer(IntPtr _)
+        internal bool SynchronizeToServer()
         {
             throw new NotImplementedException();
         }
@@ -370,17 +374,28 @@ namespace SKYNET.Steamworks.Implementation
             return default;
         }
 
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamRemoteStorage()
+        public int GetLocalFileChangeCount()
         {
-            InterfaceVersion = "SteamRemoteStorage";
+            Write("GetLocalFileChangeCount");
+            return 0;
         }
 
-        private void Write(string v)
+        public string GetLocalFileChange(int iFile, int pEChangeType, int pEFilePathType)
         {
-            SteamEmulator.Write(InterfaceVersion, v);
+            Write("GetLocalFileChange");
+            return "";
+        }
+
+        public bool BeginFileWriteBatch()
+        {
+            Write("BeginFileWriteBatch");
+            return true;
+        }
+
+        public bool EndFileWriteBatch()
+        {
+            Write("EndFileWriteBatch");
+            return true;
         }
     }
 }

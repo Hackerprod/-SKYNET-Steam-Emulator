@@ -26,28 +26,28 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamParentalSettings_BIsAppBlocked(IntPtr nAppID)
+        public static bool SteamAPI_ISteamParentalSettings_BIsAppBlocked(uint nAppID)
         {
             Write("SteamAPI_ISteamParentalSettings_BIsAppBlocked");
             return SteamEmulator.SteamParentalSettings.BIsAppBlocked(nAppID);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamParentalSettings_BIsAppInBlockList(IntPtr nAppID)
+        public static bool SteamAPI_ISteamParentalSettings_BIsAppInBlockList(uint nAppID)
         {
             Write("SteamAPI_ISteamParentalSettings_BIsAppInBlockList");
             return SteamEmulator.SteamParentalSettings.BIsAppInBlockList(nAppID);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamParentalSettings_BIsFeatureBlocked(EParentalFeature eFeature)
+        public static bool SteamAPI_ISteamParentalSettings_BIsFeatureBlocked(int eFeature)
         {
             Write("SteamAPI_ISteamParentalSettings_BIsFeatureBlocked");
             return SteamEmulator.SteamParentalSettings.BIsFeatureBlocked(eFeature);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamParentalSettings_BIsFeatureInBlockList(EParentalFeature eFeature)
+        public static bool SteamAPI_ISteamParentalSettings_BIsFeatureInBlockList(int eFeature)
         {
             Write("SteamAPI_ISteamParentalSettings_BIsFeatureInBlockList");
             return SteamEmulator.SteamParentalSettings.BIsFeatureInBlockList(eFeature);

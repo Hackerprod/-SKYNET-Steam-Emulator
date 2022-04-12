@@ -8,37 +8,37 @@ namespace SKYNET.Interface
     {
         public bool BIsEnabled(IntPtr _)
         {
-            return SteamEmulator.SteamMusic.BIsEnabled(_);
+            return SteamEmulator.SteamMusic.BIsEnabled();
         }
 
         public bool BIsPlaying(IntPtr _)
         {
-            return SteamEmulator.SteamMusic.BIsPlaying(_);
+            return SteamEmulator.SteamMusic.BIsPlaying();
         }
 
         public int GetPlaybackStatus(IntPtr _)
         {
-            return SteamEmulator.SteamMusic.GetPlaybackStatus(_);
+            return SteamEmulator.SteamMusic.GetPlaybackStatus();
         }
 
         public void Play(IntPtr _)
         {
-            SteamEmulator.SteamMusic.Play(_);
+            SteamEmulator.SteamMusic.Play();
         }
 
         public void Pause(IntPtr _)
         {
-            SteamEmulator.SteamMusic.Pause(_);
+            SteamEmulator.SteamMusic.Pause();
         }
 
         public void PlayPrevious(IntPtr _)
         {
-            SteamEmulator.SteamMusic.PlayPrevious(_);
+            SteamEmulator.SteamMusic.PlayPrevious();
         }
 
         public void PlayNext(IntPtr _)
         {
-            SteamEmulator.SteamMusic.PlayNext(_);
+            SteamEmulator.SteamMusic.PlayNext();
         }
 
         public void SetVolume(IntPtr _, float flVolume)
@@ -48,7 +48,7 @@ namespace SKYNET.Interface
 
         public float GetVolume(IntPtr _)
         {
-            return SteamEmulator.SteamMusic.GetVolume(_);
+            return SteamEmulator.SteamMusic.GetVolume();
         }
 
     }

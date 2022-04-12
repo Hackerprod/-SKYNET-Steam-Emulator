@@ -7,9 +7,13 @@ using Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class SteamMatchmaking : ISteamInterface
     {
+        public SteamMatchmaking()
+        {
+            InterfaceVersion = "SteamMatchmaking";
+        }
+
         public int AddFavoriteGame(uint nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags, uint rTime32LastPlayedOnServer)
         {
             Write("AddFavoriteGame");
@@ -69,7 +73,7 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public int GetFavoriteGameCount(IntPtr _)
+        public int GetFavoriteGameCount()
         {
             Write("GetFavoriteGameCount");
             return 1;
@@ -170,7 +174,7 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public ulong RequestLobbyList(IntPtr _)
+        public ulong RequestLobbyList()
         {
             Write("RequestLobbyList");
             return new ulong();
@@ -231,19 +235,6 @@ namespace SKYNET.Steamworks.Implementation
         public void CheckForPSNGameBootInvite(int iGameBootAttributes)
         {
             Write("CheckForPSNGameBootInvite");
-        }
-
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamMatchmaking()
-        {
-            InterfaceVersion = "SteamMatchmaking";
-        }
-
-        private void Write(string v)
-        {
-            SteamEmulator.Write(InterfaceVersion, v);
         }
     }
 }

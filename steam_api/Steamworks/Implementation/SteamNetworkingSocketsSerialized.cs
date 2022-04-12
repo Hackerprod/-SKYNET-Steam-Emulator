@@ -6,20 +6,24 @@ using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class SteamNetworkingSocketsSerialized : ISteamInterface
     {
-        public void SendP2PRendezvous(IntPtr steamIDRemote, uint unConnectionIDSrc, IntPtr pMsgRendezvous, uint cbRendezvous)
+        public SteamNetworkingSocketsSerialized()
+        {
+            InterfaceVersion = "SteamNetworkingSocketsSerialized";
+        }
+
+        public void SendP2PRendezvous(ulong steamIDRemote, uint unConnectionIDSrc, IntPtr pMsgRendezvous, uint cbRendezvous)
         {
             Write("SendP2PRendezvous");
         }
 
-        public void SendP2PConnectionFailure(IntPtr steamIDRemote, uint unConnectionIDDest, uint nReason, char pszReason)
+        public void SendP2PConnectionFailure(ulong steamIDRemote, uint unConnectionIDDest, uint nReason, string pszReason)
         {
             Write("SendP2PConnectionFailure");
         }
 
-        public SteamAPICall_t GetCertAsync(IntPtr _)
+        public ulong GetCertAsync()
         {
             Write("GetCertAsync");
             return default;
@@ -42,6 +46,12 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
+        public int GetNetworkConfigJSON(IntPtr buf, uint cbBuf, string pszLauncherPartner)
+        {
+            Write("GetNetworkConfigJSON");
+            return 0;
+        }
+
         public int GetCachedRelayTicket(uint idxTicket, IntPtr buf, uint cbBuf)
         {
             Write("GetCachedRelayTicket");
@@ -53,17 +63,23 @@ namespace SKYNET.Steamworks.Implementation
             Write("PostConnectionStateMsg");
         }
 
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamNetworkingSocketsSerialized()
+        public bool GetSTUNServer(int dont_know, string buf, int len)
         {
-            InterfaceVersion = "SteamNetworkingSocketsSerialized";
+            Write("GetSTUNServer");
+            return false;
         }
 
-        private void Write(string v)
+        public bool BAllowDirectConnectToPeer(IntPtr identity)
         {
-            SteamEmulator.Write(InterfaceVersion, v);
+            Write("BAllowDirectConnectToPeer");
+            return false;
+        }
+
+        public bool BeginAsyncRequestFakeIP(int nNumPorts)
+        {
+
+            Write("BAllowDirectConnectToPeer");
+            return false;
         }
     }
 }

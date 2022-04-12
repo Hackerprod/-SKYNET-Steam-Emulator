@@ -10,10 +10,14 @@ using Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class SteamClient : ISteamInterface
     {
-        public Int32 CreateSteamPipe(IntPtr _)
+        public SteamClient()
+        {
+            InterfaceVersion = "SteamClient";
+        }
+
+        public Int32 CreateSteamPipe()
         {
             Write("CreateSteamPipe");
             return (int)SteamEmulator.CreateSteamPipe();
@@ -131,12 +135,12 @@ namespace SKYNET.Steamworks.Implementation
         //    return SteamEmulator.SteamGameSearch.MemoryAddress;
         //}
 
-        public void RunFrame(IntPtr _)
+        public void RunFrame()
         {
             Write($"RunFrame");
         }
 
-        public uint GetIPCCallCount(IntPtr _)
+        public uint GetIPCCallCount()
         {
             Write("GetIPCCallCount");
             return 0;
@@ -148,7 +152,7 @@ namespace SKYNET.Steamworks.Implementation
             Write($"SetWarningMessageHook Name: {pFunction.Method.Name}, ReturnType: {pFunction.Method.ReturnType}");
         }
 
-        public bool BShutdownIfAllPipesClosed(IntPtr _)
+        public bool BShutdownIfAllPipesClosed()
         {
             Write("BShutdownIfAllPipesClosed");
             return false;
@@ -288,24 +292,9 @@ namespace SKYNET.Steamworks.Implementation
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public void DestroyAllInterfaces(IntPtr _)
+        public void DestroyAllInterfaces()
         {
             Write($"DestroyAllInterfaces");
         }
-
-
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamClient()
-        {
-            InterfaceVersion = "SteamClient";
-        }
-
-        private void Write(string v)
-        {
-            SteamEmulator.Write(InterfaceVersion, v);
-        }
-
     }
 }

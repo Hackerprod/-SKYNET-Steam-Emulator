@@ -7,9 +7,13 @@ using Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class SteamInventory : ISteamInterface
     {
+        public SteamInventory()
+        {
+            InterfaceVersion = "SteamInventory";
+        }
+
         public bool AddPromoItem(uint pResultHandle, uint itemDef)
         {
             Write($"AddPromoItem");
@@ -234,19 +238,6 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"TriggerItemDrop");
             return false;
-        }
-
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamInventory()
-        {
-            InterfaceVersion = "SteamInventory";
-        }
-
-        private void Write(string v)
-        {
-            SteamEmulator.Write(InterfaceVersion, v);
         }
 
         public bool SetProperty(ulong handle, ulong nItemID, string pchPropertyName, string pchPropertyValue)

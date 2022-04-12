@@ -188,10 +188,10 @@ namespace SKYNET.Steamworks.Exported
 
         // returns the SteamID of the original owner. If different from current user, it's borrowed
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr SteamAPI_ISteamApps_GetAppOwner()
+        public static ulong SteamAPI_ISteamApps_GetAppOwner()
         {
             Write("SteamAPI_ISteamApps_GetAppOwner");
-            return SteamEmulator.SteamApps.MemoryAddress;
+            return SteamEmulator.SteamApps.GetAppOwner();
         }
 
         // Returns the associated launch param if the game is run via steam://run/<appid>//?param1=value1;param2=value2;param3=value3 etc.

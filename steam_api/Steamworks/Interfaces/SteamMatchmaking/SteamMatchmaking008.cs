@@ -7,7 +7,7 @@ namespace SKYNET.Interface
     {
         public int GetFavoriteGameCount(IntPtr _)
         {
-            return SteamEmulator.SteamMatchmaking.GetFavoriteGameCount(_);
+            return SteamEmulator.SteamMatchmaking.GetFavoriteGameCount();
         }
 
         public bool GetFavoriteGame(IntPtr _, int iGame, uint pnAppID, uint pnIP, uint pnConnPort, uint pnQueryPort, uint punFlags, uint pRTime32LastPlayedOnServer)
@@ -27,7 +27,7 @@ namespace SKYNET.Interface
 
         public ulong RequestLobbyList(IntPtr _)
         {
-            return SteamEmulator.SteamMatchmaking.RequestLobbyList(_);
+            return SteamEmulator.SteamMatchmaking.RequestLobbyList();
         }
 
         public void AddRequestLobbyListStringFilter(IntPtr _, string pchKeyToMatch, string pchValueToMatch, int eComparisonType)

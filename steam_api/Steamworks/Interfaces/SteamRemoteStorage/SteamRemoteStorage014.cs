@@ -98,7 +98,7 @@ namespace SKYNET.Interface
 
         public int GetFileCount(IntPtr _)
         {
-            return SteamEmulator.SteamRemoteStorage.GetFileCount(_);
+            return SteamEmulator.SteamRemoteStorage.GetFileCount();
         }
 
         public string GetFileNameAndSize(IntPtr _, int iFile, int pnFileSizeInBytes)
@@ -113,12 +113,12 @@ namespace SKYNET.Interface
 
         public bool IsCloudEnabledForAccount(IntPtr _)
         {
-            return SteamEmulator.SteamRemoteStorage.IsCloudEnabledForAccount(_);
+            return SteamEmulator.SteamRemoteStorage.IsCloudEnabledForAccount();
         }
 
         public bool IsCloudEnabledForApp(IntPtr _)
         {
-            return SteamEmulator.SteamRemoteStorage.IsCloudEnabledForApp(_);
+            return SteamEmulator.SteamRemoteStorage.IsCloudEnabledForApp();
         }
 
         public void SetCloudEnabledForApp(IntPtr _, bool bEnabled)
@@ -148,14 +148,14 @@ namespace SKYNET.Interface
 
         public int GetCachedUGCCount(IntPtr _)
         {
-            return SteamEmulator.SteamRemoteStorage.GetCachedUGCCount(_);
+            return SteamEmulator.SteamRemoteStorage.GetCachedUGCCount();
         }
 
 #if SERVER
 
         public void GetFileListFromServer(IntPtr _)
         {
-            SteamEmulator.SteamRemoteStorage.GetFileListFromServer(_);
+            SteamEmulator.SteamRemoteStorage.GetFileListFromServer();
         }
 
         public bool FileFetch(IntPtr _, string pchFile)
@@ -170,17 +170,17 @@ namespace SKYNET.Interface
 
         public bool SynchronizeToClient(IntPtr _)
         {
-            return SteamEmulator.SteamRemoteStorage.SynchronizeToClient(_);
+            return SteamEmulator.SteamRemoteStorage.SynchronizeToClient();
         }
 
         public bool SynchronizeToServer(IntPtr _)
         {
-            return SteamEmulator.SteamRemoteStorage.SynchronizeToServer(_);
+            return SteamEmulator.SteamRemoteStorage.SynchronizeToServer();
         }
 
         public bool ResetFileRequestState(IntPtr _)
         {
-            return SteamEmulator.SteamRemoteStorage.ResetFileRequestState(_);
+            return SteamEmulator.SteamRemoteStorage.ResetFileRequestState();
         }
 
 #endif

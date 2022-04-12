@@ -9,9 +9,18 @@ using Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class SteamFriends : ISteamInterface
     {
+        public List<Friend> Friends;
+        public List<ulong> Users;
+
+        public SteamFriends()
+        {
+            InterfaceVersion = "SteamFriends";
+            Friends = new List<Friend>();
+            Users = new List<ulong>();
+        }
+
         public void ActivateGameOverlay([MarshalAs(UnmanagedType.LPStr)] string friendsGroupID)
         {
             Write($"ActivateGameOverlay {friendsGroupID}");
@@ -557,24 +566,6 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"SetRichPresence {pchKey} {pchValue}");
             return true;
-        }
-
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public List<Friend> Friends;
-        public List<ulong> Users;
-
-        public SteamFriends()
-        {
-            InterfaceVersion = "SteamFriends";
-            Friends = new List<Friend>();
-            Users = new List<ulong>();
-        }
-
-        private void Write(string v)
-        {
-            SteamEmulator.Write(InterfaceVersion, v);
         }
     }
 }

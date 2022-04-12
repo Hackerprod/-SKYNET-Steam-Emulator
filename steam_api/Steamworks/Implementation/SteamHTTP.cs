@@ -2,12 +2,17 @@
 using System.Runtime.InteropServices;
 using SKYNET;
 using SKYNET.Helpers;
+using SKYNET.Managers;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class SteamHTTP : ISteamInterface
     {
+        public SteamHTTP()
+        {
+            InterfaceVersion = "SteamHTTP";
+        }
+
         public uint CreateCookieContainer(bool bAllowResponsesToModify)
         {
             Write($"CreateCookieContainer");
@@ -161,20 +166,7 @@ namespace SKYNET.Steamworks.Implementation
         public IntPtr SteamAPI_SteamGameServerHTTP_v003(IntPtr _)
         {
             Write($"SteamAPI_SteamGameServerHTTP_v003");
-            return SteamEmulator.SteamGameServerHTTP.MemoryAddress;
-        }
-
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamHTTP()
-        {
-            InterfaceVersion = "SteamHTTP";
-        }
-
-        private void Write(string v)
-        {
-            SteamEmulator.Write(InterfaceVersion, v);
+            return InterfaceManager.FindOrCreateInterface("STEAMHTTP_INTERFACE_VERSION003");
         }
     }
 }

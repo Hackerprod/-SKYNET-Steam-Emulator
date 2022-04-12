@@ -142,28 +142,28 @@ namespace SKYNET.Steamworks.Exported
         public static IntPtr SteamAPI_ISteamClient_GetISteamScreenshots(IntPtr instancePtr, int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write("SteamAPI_ISteamClient_GetISteamScreenshots");
-            return SteamEmulator.SteamScreenshots.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static uint SteamAPI_ISteamClient_GetIPCCallCount()
         {
             Write("SteamAPI_ISteamClient_GetIPCCallCount");
-            return SteamEmulator.SteamClient.GetIPCCallCount(SteamEmulator.SteamClient.MemoryAddress);
+            return SteamEmulator.SteamClient.GetIPCCallCount();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ISteamClient_BShutdownIfAllPipesClosed()
         {
             Write("SteamAPI_ISteamClient_BShutdownIfAllPipesClosed");
-            return SteamEmulator.SteamClient.BShutdownIfAllPipesClosed(SteamEmulator.SteamClient.MemoryAddress);
+            return SteamEmulator.SteamClient.BShutdownIfAllPipesClosed();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_ISteamClient_GetISteamHTTP(IntPtr instancePtr, int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write("SteamAPI_ISteamClient_GetISteamHTTP");
-            return SteamEmulator.SteamHTTP.MemoryAddress;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

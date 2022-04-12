@@ -176,7 +176,7 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamAPI_ISteamController_Init()
         {
             Write("SteamAPI_ISteamController_Init");
-            return SteamEmulator.SteamController.Init(SteamEmulator.SteamController.MemoryAddress);
+            return SteamEmulator.SteamController.Init();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -202,7 +202,7 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamAPI_ISteamController_Shutdown()
         {
             Write("SteamAPI_ISteamController_Shutdown");
-            return SteamEmulator.SteamController.Shutdown(SteamEmulator.SteamController.MemoryAddress);
+            return SteamEmulator.SteamController.Shutdown();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

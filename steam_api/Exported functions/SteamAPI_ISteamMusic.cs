@@ -11,28 +11,28 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamAPI_ISteamMusic_BIsEnabled()
         {
             Write("SteamAPI_ISteamMusic_BIsEnabled");
-            return SteamEmulator.SteamMusic.BIsEnabled(SteamEmulator.SteamMusic.MemoryAddress);
+            return SteamEmulator.SteamMusic.BIsEnabled();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ISteamMusic_BIsPlaying()
         {
             Write("SteamAPI_ISteamMusic_BIsPlaying");
-            return SteamEmulator.SteamMusic.BIsPlaying(SteamEmulator.SteamMusic.MemoryAddress);
+            return SteamEmulator.SteamMusic.BIsPlaying();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int SteamAPI_ISteamMusic_GetPlaybackStatus()
         {
             Write("SteamAPI_ISteamMusic_GetPlaybackStatus");
-            return SteamEmulator.SteamMusic.GetPlaybackStatus(SteamEmulator.SteamMusic.MemoryAddress);
+            return SteamEmulator.SteamMusic.GetPlaybackStatus();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static float SteamAPI_ISteamMusic_GetVolume()
         {
             Write("SteamAPI_ISteamMusic_GetVolume");
-            return SteamEmulator.SteamMusic.GetVolume(SteamEmulator.SteamMusic.MemoryAddress);
+            return SteamEmulator.SteamMusic.GetVolume();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

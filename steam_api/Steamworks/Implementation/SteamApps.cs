@@ -6,9 +6,13 @@ using Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class SteamApps : ISteamInterface
     {
+        public SteamApps()
+        {
+            InterfaceVersion = "SteamApps";
+        }
+
         public bool BIsSubscribed(IntPtr _)
         {
             Write("BIsSubscribed");
@@ -130,7 +134,7 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public ulong GetAppOwner(IntPtr _)
+        public ulong GetAppOwner()
         {
             Write("GetAppOwner");
             return 0;
@@ -182,19 +186,6 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("GetLaunchCommandLine");
             return 0;
-        }
-
-        public IntPtr MemoryAddress { get; set; }
-        public string InterfaceVersion { get; set; }
-
-        public SteamApps()
-        {
-            InterfaceVersion = "SteamApps";
-        }
-
-        private void Write(string v)
-        {
-            SteamEmulator.Write(InterfaceVersion, v);
         }
     }
 }

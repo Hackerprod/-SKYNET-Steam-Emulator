@@ -13,7 +13,7 @@ namespace SKYNET.Interface
     {
         public int CreateSteamPipe(IntPtr _)
         {
-            return SteamEmulator.SteamClient.CreateSteamPipe(_);
+            return SteamEmulator.SteamClient.CreateSteamPipe();
         }
 
         public bool BReleaseSteamPipe(IntPtr _, int hSteamPipe)
@@ -115,7 +115,7 @@ namespace SKYNET.Interface
 
     public uint GetIPCCallCount(IntPtr _)
     {
-        return SteamEmulator.SteamClient.GetIPCCallCount(_);
+        return SteamEmulator.SteamClient.GetIPCCallCount();
     }
 
     public void SetWarningMessageHook(IntPtr _, IntPtr pFunction)
@@ -125,7 +125,7 @@ namespace SKYNET.Interface
 
     public bool BShutdownIfAllPipesClosed(IntPtr _)
     {
-        return SteamEmulator.SteamClient.BShutdownIfAllPipesClosed(_);
+        return SteamEmulator.SteamClient.BShutdownIfAllPipesClosed();
     }
 
     public IntPtr GetISteamHTTP(IntPtr _, int hSteamuser, int hSteamPipe, string pchVersion)
