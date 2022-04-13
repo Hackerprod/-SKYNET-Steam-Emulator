@@ -12,6 +12,8 @@ namespace SKYNET
 
         public string ChannelName { get; set; }
 
+        public string EmulatorPath { get; set; }
+
         public string DllPath { get; set; }
 
         public Game Game { get; set; }

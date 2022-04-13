@@ -119,7 +119,7 @@ namespace SKYNET.Steamworks.Exported
         public static int SteamAPI_ISteamFriends_GetClanCount(IntPtr _)
         {
             Write($"SteamAPI_ISteamFriends_GetClanCount");
-            return SteamEmulator.SteamFriends.GetClanCount(_);
+            return SteamEmulator.SteamFriends.GetClanCount();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -168,7 +168,7 @@ namespace SKYNET.Steamworks.Exported
         public static int SteamAPI_ISteamFriends_GetCoplayFriendCount(IntPtr _)
         {
             Write($"SteamAPI_ISteamFriends_GetCoplayFriendCount");
-            return SteamEmulator.SteamFriends.GetCoplayFriendCount(_);
+            return SteamEmulator.SteamFriends.GetCoplayFriendCount();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -287,7 +287,7 @@ namespace SKYNET.Steamworks.Exported
         public static int SteamAPI_ISteamFriends_GetFriendsGroupCount(IntPtr _)
         {
             Write($"SteamAPI_ISteamFriends_GetFriendsGroupCount");
-            return SteamEmulator.SteamFriends.GetFriendsGroupCount(_);
+            return SteamEmulator.SteamFriends.GetFriendsGroupCount();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -349,21 +349,21 @@ namespace SKYNET.Steamworks.Exported
         public static int SteamAPI_ISteamFriends_GetNumChatsWithUnreadPriorityMessages(IntPtr _)
         {
             Write($"SteamAPI_ISteamFriends_GetNumChatsWithUnreadPriorityMessages");
-            return SteamEmulator.SteamFriends.GetNumChatsWithUnreadPriorityMessages(_);
+            return SteamEmulator.SteamFriends.GetNumChatsWithUnreadPriorityMessages();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static string SteamAPI_ISteamFriends_GetPersonaName(IntPtr _)
         {
             Write($"SteamAPI_ISteamFriends_GetPersonaName");
-            return SteamEmulator.SteamFriends.GetPersonaName(_);
+            return SteamEmulator.SteamFriends.GetPersonaName();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static EPersonaState SteamAPI_ISteamFriends_GetPersonaState(IntPtr _)
         {
             Write($"SteamAPI_ISteamFriends_GetPersonaState");
-            return SteamEmulator.SteamFriends.GetPersonaState(_);
+            return SteamEmulator.SteamFriends.GetPersonaState();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -377,7 +377,7 @@ namespace SKYNET.Steamworks.Exported
         public static uint SteamAPI_ISteamFriends_GetUserRestrictions(IntPtr _)
         {
             Write($"SteamAPI_ISteamFriends_GetUserRestrictions");
-            return SteamEmulator.SteamFriends.GetUserRestrictions(_);
+            return SteamEmulator.SteamFriends.GetUserRestrictions();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

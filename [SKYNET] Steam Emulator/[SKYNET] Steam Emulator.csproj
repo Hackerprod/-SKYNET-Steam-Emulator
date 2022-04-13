@@ -87,6 +87,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GUI\Controls\SKYNET_WebLogger.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\Controls\SKYNET_WebLogger.designer.cs">
+      <DependentUpon>SKYNET_WebLogger.cs</DependentUpon>
+    </Compile>
     <Compile Include="Helpers\FileIcon.cs" />
     <Compile Include="GUI\Controls\CircularPictureBox.cs">
       <SubType>UserControl</SubType>
@@ -197,6 +203,9 @@
     <Compile Include="Types\RunningGame.cs" />
     <EmbeddedResource Include="GUI\Controls\CircularPictureBox.resx">
       <DependentUpon>CircularPictureBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\Controls\SKYNET_WebLogger.resx">
+      <DependentUpon>SKYNET_WebLogger.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\frmGameManager.resx">
       <DependentUpon>frmGameManager.cs</DependentUpon>

@@ -47,7 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Game.cs" />
+    <Compile Include="Types\Game.cs" />
     <Compile Include="Handles\LdrLoadDll.cs" />
     <Compile Include="Handles\SteamApi\SteamAPI.cs" />
     <Compile Include="Handles\SteamApi\SteamAPI_Delegates.cs" />

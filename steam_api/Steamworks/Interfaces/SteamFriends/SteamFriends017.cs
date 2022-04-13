@@ -9,7 +9,7 @@ namespace SKYNET.Interface
     {
         public string GetPersonaName(IntPtr _)
         {
-            return SteamEmulator.SteamFriends.GetPersonaName(_);
+            return SteamEmulator.SteamFriends.GetPersonaName();
         }
 
         public ulong SetPersonaName(IntPtr _, string pchPersonaName)
@@ -19,7 +19,7 @@ namespace SKYNET.Interface
 
         public EPersonaState GetPersonaState(IntPtr _)
         {
-            return SteamEmulator.SteamFriends.GetPersonaState(_);
+            return SteamEmulator.SteamFriends.GetPersonaState();
         }
 
         public int GetFriendCount(IntPtr _, int iFriendFlags)
@@ -69,7 +69,7 @@ namespace SKYNET.Interface
 
         public int GetFriendsGroupCount(IntPtr _)
         {
-            return SteamEmulator.SteamFriends.GetFriendsGroupCount(_);
+            return SteamEmulator.SteamFriends.GetFriendsGroupCount();
         }
 
         public int GetFriendsGroupIDByIndex(IntPtr _, int iFG)
@@ -99,7 +99,7 @@ namespace SKYNET.Interface
 
         public int GetClanCount(IntPtr _)
         {
-            return SteamEmulator.SteamFriends.GetClanCount(_);
+            return SteamEmulator.SteamFriends.GetClanCount();
         }
 
         public ulong GetClanByIndex(IntPtr _, int iClan)
@@ -219,7 +219,7 @@ namespace SKYNET.Interface
 
         public uint GetUserRestrictions(IntPtr _)
         {
-            return SteamEmulator.SteamFriends.GetUserRestrictions(_);
+            return SteamEmulator.SteamFriends.GetUserRestrictions();
         }
 
         public bool SetRichPresence(IntPtr _, string pchKey, string pchValue)
@@ -229,7 +229,7 @@ namespace SKYNET.Interface
 
         public void ClearRichPresence(IntPtr _)
         {
-            SteamEmulator.SteamFriends.ClearRichPresence(_);
+            SteamEmulator.SteamFriends.ClearRichPresence();
         }
 
         public string GetFriendRichPresence(IntPtr _, ulong steamIDFriend, string pchKey)
@@ -259,7 +259,7 @@ namespace SKYNET.Interface
 
         public int GetCoplayFriendCount(IntPtr _)
         {
-            return SteamEmulator.SteamFriends.GetCoplayFriendCount(_);
+            return SteamEmulator.SteamFriends.GetCoplayFriendCount();
         }
 
         public ulong GetCoplayFriend(IntPtr _, int iCoplayFriend)
@@ -369,7 +369,7 @@ namespace SKYNET.Interface
 
         public int GetNumChatsWithUnreadPriorityMessages(IntPtr _)
         {
-            return SteamEmulator.SteamFriends.GetNumChatsWithUnreadPriorityMessages(_);
+            return SteamEmulator.SteamFriends.GetNumChatsWithUnreadPriorityMessages();
         }
 
         public void ActivateGameOverlayRemotePlayTogetherInviteDialog(IntPtr _, ulong steamIDLobby)

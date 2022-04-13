@@ -59,7 +59,7 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public void ClearRichPresence(IntPtr _)
+        public void ClearRichPresence()
         {
             Write($"ClearRichPresence");
         }
@@ -121,7 +121,7 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public int GetClanCount(IntPtr _)
+        public int GetClanCount()
         {
             Write($"GetClanCount");
             return 0;
@@ -170,7 +170,7 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public int GetCoplayFriendCount(IntPtr _)
+        public int GetCoplayFriendCount()
         {
             Write($"GetCoplayFriendCount");
             return 0;
@@ -262,8 +262,8 @@ namespace SKYNET.Steamworks.Implementation
 
         public string GetFriendPersonaName(ulong steamIDFriend)
         {
-            Write($"GetFriendPersonaName {(uint)steamIDFriend}");
-            Friend friend = Friends.Find(f => f.AccountId == (uint)steamIDFriend);
+            Write($"GetFriendPersonaName {steamIDFriend}");
+            Friend friend = Friends.Find(f => f.SteamId == steamIDFriend);
             if (friend == null)
             {
                 return "";
@@ -314,7 +314,7 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public int GetFriendsGroupCount(IntPtr _)
+        public int GetFriendsGroupCount()
         {
             Write($"GetFriendsGroupCount");
             return 0;
@@ -376,21 +376,22 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public int GetNumChatsWithUnreadPriorityMessages(IntPtr _)
+        public int GetNumChatsWithUnreadPriorityMessages()
         {
             Write($"GetNumChatsWithUnreadPriorityMessages");
             return 0;
         }
 
 
-        public string GetPersonaName(IntPtr _)
+        public string GetPersonaName()
         {
-            Write($"GetPersonaName");
-            return SteamEmulator.PersonaName;
+            string PersonaName = SteamEmulator.PersonaName;
+            Write($"GetPersonaName {PersonaName}");
+            return PersonaName;
         }
 
 
-        public EPersonaState GetPersonaState(IntPtr _)
+        public EPersonaState GetPersonaState()
         {
             Write($"GetPersonaState");
             return EPersonaState.k_EPersonaStateOnline;
@@ -409,7 +410,7 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public uint GetUserRestrictions(IntPtr _)
+        public uint GetUserRestrictions()
         {
             Write($"GetUserRestrictions");
             return 0;

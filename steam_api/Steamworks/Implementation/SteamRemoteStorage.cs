@@ -3,39 +3,64 @@ using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using Steamworks;
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
     public class SteamRemoteStorage : ISteamInterface
     {
+        private string StoragePath;
+
         public SteamRemoteStorage()
         {
             InterfaceVersion = "SteamRemoteStorage";
+            StoragePath = Path.Combine(SteamEmulator.EmulatorPath, "Data", "Storage", SteamEmulator.AppId.ToString());
+            modCommon.EnsureDirectoryExists(StoragePath);
         }
 
         public bool FileWrite(string pchFile, IntPtr pvData, int cubData)
         {
-            Write("FileWrite");
-            return false;
+            try
+            {
+                Write($"FileWrite {pchFile}");
+                string fullPath = Path.Combine(StoragePath, pchFile);
+                byte[] buffer = ReadBytes(pvData, cubData);
+                File.WriteAllBytes(fullPath, buffer);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public int FileRead(string pchFile, IntPtr pvData, int cubDataToRead)
         {
-            Write("FileRead");
-            return default;
+            Write($"FileRead {pchFile}");
+            try
+            {
+                Write($"FileWrite {pchFile}");
+                string fullPath = Path.Combine(StoragePath, pchFile);
+                byte[] bytes = File.ReadAllBytes(fullPath);
+                pvData = GetPtr(bytes);
+                return bytes.Length;
+            }
+            catch
+            {
+                return 0;
+            }
         }
 
         public ulong FileWriteAsync(string pchFile, IntPtr pvData, uint cubData)
         {
-            Write("FileWriteAsync");
-            return default;
+            return 0;
         }
 
         public ulong FileReadAsync(string pchFile, uint nOffset, uint cubToRead)
         {
             Write("FileReadAsync");
-            return default;
+            return 0;
         }
 
         public bool FileReadAsyncComplete(ulong hReadCall, IntPtr pvBuffer, uint cubToRead)
@@ -47,12 +72,25 @@ namespace SKYNET.Steamworks.Implementation
         public bool FileForget(string pchFile)
         {
             Write("FileForget");
-            return default;
+            return false;
         }
 
         public bool FileDelete(string pchFile)
         {
-            Write("FileDelete");
+            Write($"FileDelete {pchFile}");
+            string fullPath = Path.Combine(StoragePath, pchFile);
+            if (File.Exists(fullPath))
+            {
+                try
+                {
+                    File.Delete(fullPath);
+                    return true;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            }
             return false;
         }
 
@@ -94,8 +132,9 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool FileExists(string pchFile)
         {
-            Write("FileExists");
-            return default;
+            Write($"FileExists {pchFile}");
+            string fullPath = Path.Combine(StoragePath, pchFile);
+            return File.Exists(fullPath);
         }
 
         public bool FilePersisted(string pchFile)
@@ -106,8 +145,17 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetFileSize(string pchFile)
         {
-            Write("GetFileSize");
-            return 0;
+            int Length = 0;
+
+            if (File.Exists(pchFile))
+            {
+                FileInfo info = new FileInfo(pchFile);
+                Length = (int)info.Length;
+            }
+
+            Write($"GetFileSize {pchFile} [{Length}]");
+
+            return Length;
         }
 
         public uint GetFileTimestamp(string pchFile)
@@ -155,7 +203,6 @@ namespace SKYNET.Steamworks.Implementation
         public void SetCloudEnabledForApp(bool bEnabled)
         {
             Write("SetCloudEnabledForApp");
-            //
         }
 
         public ulong UGCDownload(ulong hContent, uint unPriority)
@@ -396,6 +443,23 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("EndFileWriteBatch");
             return true;
+        }
+
+        private unsafe byte[] ReadBytes(IntPtr buffer, int count)
+        {
+            byte[] array = new byte[count];
+            byte* ptr = (byte*)(void*)buffer;
+            for (int i = 0; i < count; i++)
+            {
+                array[i] = ptr[i];
+            }
+            return array;
+        }
+
+        public static IntPtr GetPtr(byte[] buffer)
+        {
+            GCHandle gCHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+            return gCHandle.AddrOfPinnedObject();
         }
     }
 }

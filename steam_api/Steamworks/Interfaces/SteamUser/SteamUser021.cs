@@ -1,3 +1,4 @@
+using SKYNET.Steamworks.Types;
 using Steamworks;
 using System;
 
@@ -6,9 +7,9 @@ namespace SKYNET.Interface
     [Interface("SteamUser021")]
     public class SteamUser021 : ISteamInterface
     {
-        public int Getint(IntPtr _)
+        public int GetHSteamUser(IntPtr _)
         {
-            return SteamEmulator.SteamUser.GetHSteamUser(_);
+            return SteamEmulator.SteamUser.GetHSteamUser();
         }
 
         public bool BLoggedOn(IntPtr _)
@@ -16,154 +17,154 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUser.BLoggedOn();
         }
 
-        public ulong GetSteamID(IntPtr _)
+        public CSteamID GetSteamID(IntPtr _)
         {
-            return SteamEmulator.SteamUser.GetSteamID(_);
+            return new CSteamID(SteamEmulator.SteamUser.GetSteamID());
         }
 
         public int InitiateGameConnection(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)
         {
-            return SteamEmulator.SteamUser.InitiateGameConnection(_, pAuthBlob, cbMaxAuthBlob, steamIDGameServer, unIPServer, usPortServer, bSecure);
+            return SteamEmulator.SteamUser.InitiateGameConnection(pAuthBlob, cbMaxAuthBlob, steamIDGameServer, unIPServer, usPortServer, bSecure);
         }
 
         public void TerminateGameConnection(IntPtr _, uint unIPServer, uint usPortServer)
         {
-            SteamEmulator.SteamUser.TerminateGameConnection(_, unIPServer, usPortServer);
+            SteamEmulator.SteamUser.TerminateGameConnection(unIPServer, usPortServer);
         }
 
         public void TrackAppUsageEvent(IntPtr _, IntPtr gameID, int eAppUsageEvent, string pchExtraInfo = "")
         {
-            SteamEmulator.SteamUser.TrackAppUsageEvent(_, gameID, eAppUsageEvent);
+            SteamEmulator.SteamUser.TrackAppUsageEvent(gameID, eAppUsageEvent);
         }
 
         public bool GetUserDataFolder(IntPtr _, string pchBuffer, int cubBuffer)
         {
-            return SteamEmulator.SteamUser.GetUserDataFolder(_, pchBuffer, cubBuffer);
+            return SteamEmulator.SteamUser.GetUserDataFolder(pchBuffer, cubBuffer);
         }
 
         public void StartVoiceRecording(IntPtr _)
         {
-            SteamEmulator.SteamUser.StartVoiceRecording(_);
+            SteamEmulator.SteamUser.StartVoiceRecording();
         }
 
         public void StopVoiceRecording(IntPtr _)
         {
-            SteamEmulator.SteamUser.StopVoiceRecording(_);
+            SteamEmulator.SteamUser.StopVoiceRecording();
         }
 
         public int GetAvailableVoice(IntPtr _, uint pcbCompressed, uint pcbUncompressed_Deprecated = 0, uint nUncompressedVoiceDesiredSampleRate_Deprecated = 0)
         {
-            return SteamEmulator.SteamUser.GetAvailableVoice(_, pcbCompressed, 0, 0);
+            return SteamEmulator.SteamUser.GetAvailableVoice(pcbCompressed, 0, 0);
         }
 
         public int GetVoice(IntPtr _, bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, uint nBytesWritten, bool bWantUncompressed_Deprecated, IntPtr pUncompressedDestBuffer_Deprecated, uint cbUncompressedDestBufferSize_Deprecated, uint nUncompressBytesWritten_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
         {
-            return SteamEmulator.SteamUser.GetVoice(_, bWantCompressed, pDestBuffer, cbDestBufferSize, nBytesWritten, bWantUncompressed_Deprecated, pUncompressedDestBuffer_Deprecated, cbUncompressedDestBufferSize_Deprecated, nUncompressBytesWritten_Deprecated, nUncompressedVoiceDesiredSampleRate_Deprecated);
+            return SteamEmulator.SteamUser.GetVoice(bWantCompressed, pDestBuffer, cbDestBufferSize, nBytesWritten, bWantUncompressed_Deprecated, pUncompressedDestBuffer_Deprecated, cbUncompressedDestBufferSize_Deprecated, nUncompressBytesWritten_Deprecated, nUncompressedVoiceDesiredSampleRate_Deprecated);
         }
 
         public int DecompressVoice(IntPtr _, IntPtr pCompressed, uint cbCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, uint nBytesWritten, uint nDesiredSampleRate)
         {
-            return SteamEmulator.SteamUser.DecompressVoice(_, pCompressed, cbCompressed, pDestBuffer, cbDestBufferSize, nBytesWritten, nDesiredSampleRate);
+            return SteamEmulator.SteamUser.DecompressVoice(pCompressed, cbCompressed, pDestBuffer, cbDestBufferSize, nBytesWritten, nDesiredSampleRate);
         }
 
         public uint GetVoiceOptimalSampleRate(IntPtr _)
         {
-            return SteamEmulator.SteamUser.GetVoiceOptimalSampleRate(_);
+            return SteamEmulator.SteamUser.GetVoiceOptimalSampleRate();
         }
 
         public uint GetAuthSessionTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
         {
-            return SteamEmulator.SteamUser.GetAuthSessionTicket(_, pTicket, cbMaxTicket, pcbTicket);
+            return SteamEmulator.SteamUser.GetAuthSessionTicket(pTicket, cbMaxTicket, pcbTicket);
         }
 
         public int BeginAuthSession(IntPtr _, IntPtr pAuthTicket, int cbAuthTicket, ulong steamID)
         {
-            return SteamEmulator.SteamUser.BeginAuthSession(_, pAuthTicket, cbAuthTicket, steamID);
+            return SteamEmulator.SteamUser.BeginAuthSession(pAuthTicket, cbAuthTicket, steamID);
         }
 
         public void EndAuthSession(IntPtr _, ulong steamID)
         {
-            SteamEmulator.SteamUser.EndAuthSession(_, steamID);
+            SteamEmulator.SteamUser.EndAuthSession(steamID);
         }
 
         public void CancelAuthTicket(IntPtr _, uint hAuthTicket)
         {
-            SteamEmulator.SteamUser.CancelAuthTicket(_, hAuthTicket);
+            SteamEmulator.SteamUser.CancelAuthTicket(hAuthTicket);
         }
 
         public int UserHasLicenseForApp(IntPtr _, ulong steamID, uint appID)
         {
-            return SteamEmulator.SteamUser.UserHasLicenseForApp(_, steamID, appID);
+            return SteamEmulator.SteamUser.UserHasLicenseForApp(steamID, appID);
         }
 
         public bool BIsBehindNAT(IntPtr _)
         {
-            return SteamEmulator.SteamUser.BIsBehindNAT(_);
+            return SteamEmulator.SteamUser.BIsBehindNAT();
         }
 
         public void AdvertiseGame(IntPtr _, ulong steamIDGameServer, uint unIPServer, uint usPortServer)
         {
-            SteamEmulator.SteamUser.AdvertiseGame(_, steamIDGameServer, unIPServer, usPortServer);
+            SteamEmulator.SteamUser.AdvertiseGame(steamIDGameServer, unIPServer, usPortServer);
         }
 
         public ulong RequestEncryptedAppTicket(IntPtr _, IntPtr pDataToInclude, int cbDataToInclude)
         {
-            return SteamEmulator.SteamUser.RequestEncryptedAppTicket(_, pDataToInclude, cbDataToInclude);
+            return SteamEmulator.SteamUser.RequestEncryptedAppTicket(pDataToInclude, cbDataToInclude);
         }
 
         public bool GetEncryptedAppTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
         {
-            return SteamEmulator.SteamUser.GetEncryptedAppTicket(_, pTicket, cbMaxTicket, pcbTicket);
+            return SteamEmulator.SteamUser.GetEncryptedAppTicket(pTicket, cbMaxTicket, pcbTicket);
         }
 
         public int GetGameBadgeLevel(IntPtr _, int nSeries, bool bFoil)
         {
-            return SteamEmulator.SteamUser.GetGameBadgeLevel(_, nSeries, bFoil);
+            return SteamEmulator.SteamUser.GetGameBadgeLevel(nSeries, bFoil);
         }
 
         public int GetPlayerSteamLevel(IntPtr _)
         {
-            return SteamEmulator.SteamUser.GetPlayerSteamLevel(_);
+            return SteamEmulator.SteamUser.GetPlayerSteamLevel();
         }
 
         public ulong RequestStoreAuthURL(IntPtr _, string pchRedirectURL)
         {
-            return SteamEmulator.SteamUser.RequestStoreAuthURL(_, pchRedirectURL);
+            return SteamEmulator.SteamUser.RequestStoreAuthURL(pchRedirectURL);
         }
 
         public bool BIsPhoneVerified(IntPtr _)
         {
-            return SteamEmulator.SteamUser.BIsPhoneVerified(_);
+            return SteamEmulator.SteamUser.BIsPhoneVerified();
         }
 
         public bool BIsTwoFactorEnabled(IntPtr _)
         {
-            return SteamEmulator.SteamUser.BIsTwoFactorEnabled(_);
+            return SteamEmulator.SteamUser.BIsTwoFactorEnabled();
         }
 
         public bool BIsPhoneIdentifying(IntPtr _)
         {
-            return SteamEmulator.SteamUser.BIsPhoneIdentifying(_);
+            return SteamEmulator.SteamUser.BIsPhoneIdentifying();
         }
 
         public bool BIsPhoneRequiringVerification(IntPtr _)
         {
-            return SteamEmulator.SteamUser.BIsPhoneRequiringVerification(_);
+            return SteamEmulator.SteamUser.BIsPhoneRequiringVerification();
         }
 
         public ulong GetMarketEligibility(IntPtr _)
         {
-            return SteamEmulator.SteamUser.GetMarketEligibility(_);
+            return SteamEmulator.SteamUser.GetMarketEligibility();
         }
 
         public ulong GetDurationControl(IntPtr _)
         {
-            return SteamEmulator.SteamUser.GetDurationControl(_);
+            return SteamEmulator.SteamUser.GetDurationControl();
         }
 
         public bool BSetDurationControlOnlineState(IntPtr _, int eNewState)
         {
-            return SteamEmulator.SteamUser.BSetDurationControlOnlineState(_, eNewState);
+            return SteamEmulator.SteamUser.BSetDurationControlOnlineState(eNewState);
         }
 
 

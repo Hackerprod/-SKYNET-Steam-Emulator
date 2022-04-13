@@ -92,6 +92,68 @@ namespace SKYNET.Managers
             return IntPtr.Zero;
         }
 
+        public static MethodInfo GetMethodInfo(string MethodName)
+        {
+            Assembly currentAssembly = Assembly.GetAssembly(typeof(InterfaceManager));
+            foreach (var type in currentAssembly.GetTypes())
+            {
+                foreach (var method in InterfaceMethodsForType(type))
+                {
+                    if (method.Name == MethodName)
+                    {
+                        return method;
+                    }
+                }
+            }
+            return null;
+        }
+
+        public static IntPtr CreateMethod(Object Instance, MethodInfo methodInfo)
+        {
+            Type type = Instance.GetType();
+            string Name = type.Name;
+            var new_delegates = new List<System.Delegate>();
+            Type DelegateType = CreateDelegate(methodInfo);
+
+            System.Delegate new_delegate = null;
+            try
+            {
+                new_delegate = System.Delegate.CreateDelegate(DelegateType, Instance, methodInfo, true);
+                new_delegates.Add(new_delegate);
+            }
+            catch (Exception e)
+            {
+                ErrorMessage = ($"EXCEPTION whilst binding function {methodInfo.Name}, class {Name} - {e.Message} {e.StackTrace}");
+                SteamEmulator.Write(ErrorMessage);
+                return IntPtr.Zero;
+            }
+
+            var ptr_size = Marshal.SizeOf(typeof(IntPtr));
+
+            var vtable = Marshal.AllocHGlobal(1 * ptr_size);
+
+            for (var i = 0; i < new_delegates.Count; i++)
+            {
+                try
+                {
+                    Marshal.WriteIntPtr(vtable, i * ptr_size, Marshal.GetFunctionPointerForDelegate(new_delegates[i]));
+                }
+                catch (Exception ex)
+                {
+                    ErrorMessage = $"Error Injecting Delegate {new_delegates[i]} in {Name}: {ex.Message}";
+                    SteamEmulator.Write(ErrorMessage);
+                }
+            }
+
+            var new_context = Marshal.AllocHGlobal(ptr_size);
+
+            Marshal.WriteIntPtr(new_context, vtable);
+
+            StoredDelegates.AddRange(new_delegates);
+
+            return new_context;
+        }
+
         public static (T, IntPtr) CreateInterface<T>()
         {
             CleanErrorMessage();

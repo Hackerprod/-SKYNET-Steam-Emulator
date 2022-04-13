@@ -6,7 +6,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-public class modCommon
+public partial class modCommon
 {
     public static DialogResult Show(object msg, MessageBoxButtons buttons = MessageBoxButtons.OK)
     {

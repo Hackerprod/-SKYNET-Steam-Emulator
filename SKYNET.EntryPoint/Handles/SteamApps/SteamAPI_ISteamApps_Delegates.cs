@@ -81,7 +81,7 @@ namespace SKYNET.Hook.Handles
         public delegate bool SteamAPI_ISteamApps_BIsAppInstalledDelegate(AppId_t appID);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate IntPtr SteamAPI_ISteamApps_GetAppOwnerDelegate();
+        public delegate ulong SteamAPI_ISteamApps_GetAppOwnerDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
         public delegate string SteamAPI_ISteamApps_GetLaunchQueryParamDelegate(string pchKey);

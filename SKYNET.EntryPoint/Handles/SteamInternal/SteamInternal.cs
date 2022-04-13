@@ -26,7 +26,7 @@ namespace SKYNET.Hook.Handles
             base.Install<SteamInternal_FindOrCreateGameServerInterfaceDelegate>("SteamInternal_FindOrCreateGameServerInterface", _SteamInternal_FindOrCreateGameServerInterfaceDelegate, new SteamInternal_FindOrCreateGameServerInterfaceDelegate(SteamInternal_FindOrCreateGameServerInterface));
             base.Install<SteamInternal_CreateInterfaceDelegate>("SteamInternal_CreateInterface", _SteamInternal_CreateInterfaceDelegate, new SteamInternal_CreateInterfaceDelegate(SteamInternal_CreateInterface));
             base.Install<SteamInternal_GameServer_InitDelegate>("SteamInternal_GameServer_Init", _SteamInternal_GameServer_InitDelegate, new SteamInternal_GameServer_InitDelegate(SteamInternal_GameServer_Init));
-            base.Install<OnContextInitFunc>("SteamInternal_ContextInit", OnContextInitPtr, new OnContextInitFunc(SteamInternal_ContextInit));
+            base.Install<SteamInternal_ContextInitDelegate>("SteamInternal_ContextInit", _SteamInternal_ContextInitDelegate, new SteamInternal_ContextInitDelegate(SteamInternal_ContextInit));
         }
 
         public IntPtr SteamInternal_FindOrCreateUserInterface(int hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion)
@@ -54,34 +54,53 @@ namespace SKYNET.Hook.Handles
         }
 
 
-        [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public unsafe delegate void* OnContextInitFunc(void* c_contextPtr);
-
-        public static unsafe OnContextInitFunc OnContextInitPtr = SteamInternal_ContextInit;
-
-        public static unsafe void* SteamInternal_ContextInit(void* c_contextPointer)
+        public IntPtr SteamInternal_ContextInit(IntPtr contextInitData_ptr)
         {
-            ContextInitData* CreatedContext = (ContextInitData*)c_contextPointer;
-            CSteamApiContext* context = &CreatedContext->Context;
+            Write($"SteamInternal_ContextInit");
+            IntPtr apiContext_ptr = IntPtr.Zero;
+            if (modCommon.Is64Bit())
+            {
+                ContextInitData_64 Context = Marshal.PtrToStructure<ContextInitData_64>(contextInitData_ptr);
+                apiContext_ptr = contextInitData_ptr + 16;
+                if (Context.counter != 1)
+                {
+                    Marshal.WriteInt64(contextInitData_ptr, 8, 1);
+                    _pFn = Marshal.GetDelegateForFunctionPointer<pFn>(Context.pFn);
+                    _pFn.Invoke(apiContext_ptr);
+                }
+            }
+            else
+            {
+                var Context = Marshal.PtrToStructure<ContextInitData_x86>(contextInitData_ptr);
+                apiContext_ptr = contextInitData_ptr + 8;
+                if (Context.counter != 1)
+                {
+                    Marshal.WriteInt32(contextInitData_ptr, 4, 1);
+                    _pFn = Marshal.GetDelegateForFunctionPointer<pFn>(Context.pFn);
+                    _pFn.Invoke(apiContext_ptr);
+                }
+            }
 
-            //if (CreatedContext->counter == 0)
-            //{
-            //    CreatedContext->counter = 1;
-            //}
-
-            Main.Write($"SteamInternal_ContextInit initializing ");
-
-
-            return context;
+            return apiContext_ptr;
         }
 
-        public unsafe struct ContextInitData
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate void pFn(IntPtr ctx);
+        public static pFn _pFn;
+
+        public struct ContextInitData_64
         {
+            public IntPtr pFn;
+            public long counter;
             public CSteamApiContext Context;
-            public uint counter;
         }
 
-
+        public struct ContextInitData_x86
+        {
+            public IntPtr pFn;
+            public uint counter;
+            public CSteamApiContext Context;
+        }
 
         public override void Write(object v)
         {

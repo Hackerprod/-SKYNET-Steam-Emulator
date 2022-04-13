@@ -9,7 +9,7 @@ namespace SKYNET.Interface
     {
         public string GetPersonaName(IntPtr _)
         {
-            return SteamEmulator.SteamFriends.GetPersonaName(_);
+            return SteamEmulator.SteamFriends.GetPersonaName();
         }
         public int SetPersonaName(IntPtr _, string name)
         {
@@ -17,7 +17,7 @@ namespace SKYNET.Interface
         }
         public uint GetPersonaState(IntPtr _)
         {
-            return (uint)SteamEmulator.SteamFriends.GetPersonaState(_);
+            return (uint)SteamEmulator.SteamFriends.GetPersonaState();
         }
         public int GetFriendCount(IntPtr _)
         {
@@ -57,7 +57,7 @@ namespace SKYNET.Interface
         }
         public int GetFriendsGroupCount(IntPtr _)
         {
-            return SteamEmulator.SteamFriends.GetFriendsGroupCount(_);
+            return SteamEmulator.SteamFriends.GetFriendsGroupCount();
         }
         public short GetGroupIdByIndex(IntPtr _, int index)
         {
@@ -82,7 +82,7 @@ namespace SKYNET.Interface
         }
         public int GetClanCount(IntPtr _)
         {
-            return SteamEmulator.SteamFriends.GetClanCount(_);
+            return SteamEmulator.SteamFriends.GetClanCount();
         }
         public ulong GetClanByIndex(IntPtr _, int index)
         {
@@ -130,11 +130,11 @@ namespace SKYNET.Interface
         }
         public void ActiveGameOverlayToWebPage(IntPtr _, string url)
         {
-            //SteamEmulator.SteamFriends.ActiveGameOverlayToWebPage(_);
+            //SteamEmulator.SteamFriends.ActiveGameOverlayToWebPage();
         }
         public void ActivateGameOverlayToStore(IntPtr _, uint app_id, uint flag)
         {
-            //SteamEmulator.SteamFriends.ActivateGameOverlayToStore(_);
+            //SteamEmulator.SteamFriends.ActivateGameOverlayToStore();
         }
         public void SetPlayedWith(IntPtr _, ulong steam_id)
         {
@@ -178,7 +178,7 @@ namespace SKYNET.Interface
         }
         public uint GetUserRestrictions(IntPtr _)
         {
-            return SteamEmulator.SteamFriends.GetUserRestrictions(_);
+            return SteamEmulator.SteamFriends.GetUserRestrictions();
         }
         public bool SetRichPresence(IntPtr _, string key, string value)
         {
@@ -186,7 +186,7 @@ namespace SKYNET.Interface
         }
         public bool ClearRichPresence(IntPtr _)
         {
-            // SteamEmulator.SteamFriends.ClearRichPresence(_);
+            // SteamEmulator.SteamFriends.ClearRichPresence();
             return true;
         }
         public string GetFriendRichPresence(IntPtr _, ulong steam_id, string key)
@@ -211,7 +211,7 @@ namespace SKYNET.Interface
         }
         public int GetCoplayFriendCount(IntPtr _)
         {
-            return SteamEmulator.SteamFriends.GetCoplayFriendCount(_);
+            return SteamEmulator.SteamFriends.GetCoplayFriendCount();
         }
         public ulong GetCoplayFriend(IntPtr _, int index)
         {

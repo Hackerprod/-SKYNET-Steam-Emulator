@@ -62,7 +62,7 @@ namespace SKYNET
 
             SteamEmulator.SteamApiPath = dllPath;
 
-            Memory.CreateInMemoryInterface(dllPath);
+            Memory.CreateInMemoryModule(dllPath);
         }
 
         public void Run(RemoteHooking.IContext inContext, string inChannelName)
@@ -75,6 +75,7 @@ namespace SKYNET
                     SteamEmulator.OnMessage += SteamEmulator_OnMessage;
                     SteamEmulator.Initialize();
                     SteamEmulator.AppId = HookInterface.Game.AppId;
+                    SteamEmulator.EmulatorPath = HookInterface.EmulatorPath;
                 }
 
                 HookManager.Install();

@@ -28,7 +28,7 @@ namespace SKYNET.Helpers
         [DllImport("kernel32.dll")]
         public static extern IntPtr CreateRemoteThread(IntPtr hProcess, IntPtr lpThreadAttributes, uint dwStackSize, IntPtr lpStartAddress, IntPtr lpParameter, uint dwCreationgFlags, IntPtr lpThreadId);
 
-        public static IntPtr CreateInMemoryInterface(string library)
+        public static IntPtr CreateInMemoryModule(string library)
         {
             int num = 2;
             int num2 = 1024;

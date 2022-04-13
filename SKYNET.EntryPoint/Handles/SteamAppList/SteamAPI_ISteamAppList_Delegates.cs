@@ -13,16 +13,16 @@ namespace SKYNET.Hook.Handles
         // Functions Delegates
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate int SteamAPI_ISteamAppList_GetAppBuildIdDelegate(AppId_t nAppID);
+        public delegate int SteamAPI_ISteamAppList_GetAppBuildIdDelegate(uint nAppID);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate int SteamAPI_ISteamAppList_GetAppInstallDirDelegate(AppId_t nAppID, IntPtr pchDirectory, int cchNameMax);
+        public delegate int SteamAPI_ISteamAppList_GetAppInstallDirDelegate(uint nAppID, string pchDirectory, int cchNameMax);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate int SteamAPI_ISteamAppList_GetAppNameDelegate(AppId_t nAppID, IntPtr pchName, int cchNameMax);
+        public delegate int SteamAPI_ISteamAppList_GetAppNameDelegate(uint nAppID, string pchName, int cchNameMax);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate uint SteamAPI_ISteamAppList_GetInstalledAppsDelegate(AppId_t pvecAppID, uint unMaxAppIDs);
+        public delegate uint SteamAPI_ISteamAppList_GetInstalledAppsDelegate(uint pvecAppID, uint unMaxAppIDs);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
         public delegate uint SteamAPI_ISteamAppList_GetNumInstalledAppsDelegate(IntPtr _);

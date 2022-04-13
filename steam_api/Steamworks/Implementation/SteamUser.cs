@@ -16,7 +16,7 @@ namespace SKYNET.Steamworks.Implementation
             InterfaceVersion = "SteamUser";
         }
 
-        public int GetHSteamUser(IntPtr _)
+        public int GetHSteamUser()
         {
             Write("GetHSteamUser");
             return (int)SteamEmulator.HSteamUser;
@@ -28,175 +28,175 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public ulong GetSteamID(IntPtr _)
+        public ulong GetSteamID()
         {
             var SId = SteamEmulator.SteamId;
             Write($"GetSteamID {(ulong)SId}");
             return SId;
         }
 
-        public int InitiateGameConnection(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)
+        public int InitiateGameConnection(IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)
         {
             Write("InitiateGameConnection");
             return 0;
         }
 
-        public void TerminateGameConnection(IntPtr _, uint unIPServer, uint usPortServer)
+        public void TerminateGameConnection(uint unIPServer, uint usPortServer)
         {
             Write("TerminateGameConnection");
         }
 
-        public void TrackAppUsageEvent(IntPtr _, IntPtr gameID, int eAppUsageEvent, string pchExtraInfo = "")
+        public void TrackAppUsageEvent(IntPtr gameID, int eAppUsageEvent, string pchExtraInfo = "")
         {
             Write("TrackAppUsageEvent");
         }
 
-        public bool GetUserDataFolder(IntPtr _, string pchBuffer, int cubBuffer)
+        public bool GetUserDataFolder(string pchBuffer, int cubBuffer)
         {
             Write("GetUserDataFolder");
             return false;
         }
 
-        public void StartVoiceRecording(IntPtr _)
+        public void StartVoiceRecording()
         {
             Write("StartVoiceRecording");
         }
 
-        public void StopVoiceRecording(IntPtr _)
+        public void StopVoiceRecording()
         {
             Write("StopVoiceRecording");
         }
 
-        public int GetAvailableVoice(IntPtr _, uint pcbCompressed, uint pcbUncompressed_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
+        public int GetAvailableVoice(uint pcbCompressed, uint pcbUncompressed_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
         {
             Write("GetAvailableVoice");
             return (int)EVoiceResult.k_EVoiceResultNoData;
         }
 
-        public int GetVoice(IntPtr _, bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, uint nBytesWritten, bool bWantUncompressed_Deprecated, IntPtr pUncompressedDestBuffer_Deprecated, uint cbUncompressedDestBufferSize_Deprecated, uint nUncompressBytesWritten_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
+        public int GetVoice(bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, uint nBytesWritten, bool bWantUncompressed_Deprecated, IntPtr pUncompressedDestBuffer_Deprecated, uint cbUncompressedDestBufferSize_Deprecated, uint nUncompressBytesWritten_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
         {
             Write("GetVoice");
             return (int)EVoiceResult.k_EVoiceResultNoData;
         }
 
-        public int DecompressVoice(IntPtr _, IntPtr pCompressed, uint cbCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, uint nBytesWritten, uint nDesiredSampleRate)
+        public int DecompressVoice(IntPtr pCompressed, uint cbCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, uint nBytesWritten, uint nDesiredSampleRate)
         {
             Write("DecompressVoice");
             return (int)EVoiceResult.k_EVoiceResultNoData;
         }
 
-        public uint GetVoiceOptimalSampleRate(IntPtr _)
+        public uint GetVoiceOptimalSampleRate()
         {
             Write("GetVoiceOptimalSampleRate");
-            return 0;
+            return 2400;
         }
 
-        public uint GetAuthSessionTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
+        public uint GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
         {
             Write("GetAuthSessionTicket");
             return 0;
         }
 
-        public int BeginAuthSession(IntPtr _, IntPtr pAuthTicket, int cbAuthTicket, ulong steamID)
+        public int BeginAuthSession(IntPtr pAuthTicket, int cbAuthTicket, ulong steamID)
         {
             Write("BeginAuthSession");
             return (int)EBeginAuthSessionResult.k_EBeginAuthSessionResultOK;
         }
 
-        public void EndAuthSession(IntPtr _, ulong steamID)
+        public void EndAuthSession(ulong steamID)
         {
             Write("EndAuthSession");
         }
 
-        public void CancelAuthTicket(IntPtr _, uint hAuthTicket)
+        public void CancelAuthTicket(uint hAuthTicket)
         {
             Write("CancelAuthTicket");
         }
 
-        public int UserHasLicenseForApp(IntPtr _, ulong steamID, uint appID)
+        public int UserHasLicenseForApp(ulong steamID, uint appID)
         {
             Write("EUserHasLicenseForAppResult");
             return (int)EUserHasLicenseForAppResult.k_EUserHasLicenseResultHasLicense;
         }
 
-        public bool BIsBehindNAT(IntPtr _)
+        public bool BIsBehindNAT()
         {
             Write("BIsBehindNAT");
             return false;
         }
 
-        public void AdvertiseGame(IntPtr _, ulong steamIDGameServer, uint unIPServer, uint usPortServer)
+        public void AdvertiseGame(ulong steamIDGameServer, uint unIPServer, uint usPortServer)
         {
             Write("AdvertiseGame");
         }
 
-        public ulong RequestEncryptedAppTicket(IntPtr _, IntPtr pDataToInclude, int cbDataToInclude)
+        public ulong RequestEncryptedAppTicket(IntPtr pDataToInclude, int cbDataToInclude)
         {
             Write("RequestEncryptedAppTicket");
             return 0;
         }
 
-        public bool GetEncryptedAppTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
+        public bool GetEncryptedAppTicket(IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
         {
             Write("GetEncryptedAppTicket");
             return false;
         }
 
-        public int GetGameBadgeLevel(IntPtr _, int nSeries, bool bFoil)
+        public int GetGameBadgeLevel(int nSeries, bool bFoil)
         {
             Write("GetGameBadgeLevel");
             return 0;
         }
 
-        public int GetPlayerSteamLevel(IntPtr _)
+        public int GetPlayerSteamLevel()
         {
             Write("GetPlayerSteamLevel");
             return 0;
         }
 
-        public ulong RequestStoreAuthURL(IntPtr _, string pchRedirectURL)
+        public ulong RequestStoreAuthURL(string pchRedirectURL)
         {
             Write("RequestStoreAuthURL");
             return 0;
         }
 
-        public bool BIsPhoneVerified(IntPtr _)
+        public bool BIsPhoneVerified()
         {
             Write("BIsPhoneVerified");
             return true;
         }
 
-        public bool BIsTwoFactorEnabled(IntPtr _)
+        public bool BIsTwoFactorEnabled()
         {
             Write("BIsTwoFactorEnabled");
             return false;
         }
 
-        public bool BIsPhoneIdentifying(IntPtr _)
+        public bool BIsPhoneIdentifying()
         {
             Write("BIsPhoneIdentifying");
             return false;
         }
 
-        public bool BIsPhoneRequiringVerification(IntPtr _)
+        public bool BIsPhoneRequiringVerification()
         {
             Write("BIsPhoneRequiringVerification");
             return false;
         }
 
-        public ulong GetMarketEligibility(IntPtr _)
+        public ulong GetMarketEligibility()
         {
             Write("GetMarketEligibility");
             return default;
         }
 
-        public ulong GetDurationControl(IntPtr _)
+        public ulong GetDurationControl()
         {
             Write("GetDurationControl");
             return default;
         }
 
-        public bool BSetDurationControlOnlineState(IntPtr _, int eNewState)
+        public bool BSetDurationControlOnlineState(int eNewState)
         {
             Write("BSetDurationControlOnlineState");
             return false;

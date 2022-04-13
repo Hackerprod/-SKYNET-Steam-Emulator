@@ -48,6 +48,7 @@ namespace SKYNET
             RunningGames = new List<RunningGame>();
                  
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data"));
+            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Storage"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "Avatars"));
@@ -190,7 +191,7 @@ namespace SKYNET
 
             Task.Run(() =>
             {
-                richTextBox1.Clear();
+                ///richTextBox1.Clear();
                 Write("Opening " + game.Name);
 
                 HookInterface = new HookInterface();
@@ -204,11 +205,12 @@ namespace SKYNET
                 try
                 {
                     var InObject = WellKnownObjectMode.Singleton;
-                    //RemoteHooking.IpcCreateServer(ref channel, InObject, HookInterface);
-                    channel = "SteamEmulator";
-                    IpcCreateServer(ref channel, InObject, HookInterface);
+                    RemoteHooking.IpcCreateServer(ref channel, InObject, HookInterface);
+                    //channel = "SteamEmulator";
+                    //IpcCreateServer(ref channel, InObject, HookInterface);
                     HookInterface.ChannelName = channel;
                     HookInterface.DllPath = Path.Combine(modCommon.GetPath(), "SKYNET.EntryPoint.dll");
+                    HookInterface.EmulatorPath = modCommon.GetPath();
                     RemoteHooking.CreateAndInject(game.ExecutablePath, game.Parameters, 0, HookInterface.InjectionOptions, HookInterface.DllPath, HookInterface.DllPath, out ProcessId, channel);
                     InjectedProcess = Process.GetProcessById(ProcessId);
                     WaitForExit();
@@ -300,16 +302,12 @@ namespace SKYNET
         {
             try
             {
-                richTextBox1.Text += "   " + msg.ToString() + Environment.NewLine;
+                richTextBox1.Text += msg + Environment.NewLine;
             }
             catch (Exception)
             {
 
             }
-        }
-        private void Write(object sender, object msg)
-        {
-            Write(sender + ": " + msg);
         }
 
         private void Close_Clicked(object sender, EventArgs e)
@@ -491,12 +489,17 @@ namespace SKYNET
 
         #endregion
 
-        private void PictureBox2_Click(object sender, EventArgs e)
+        private void BT_Clear_Click(object sender, EventArgs e)
         {
-            var dialog = new frmMessage("This is a example").ShowDialog();
-            MessageBox.Show(dialog.ToString());
+            richTextBox1.Clear();
         }
 
-        
+        private void RichTextBox1_TextChanged(object sender, EventArgs e)
+        {
+            richTextBox1.SelectionStart = richTextBox1.Text.Length;
+            
+            richTextBox1.ScrollToCaret();
+
+        }
     }
 }

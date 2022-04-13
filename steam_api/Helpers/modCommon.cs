@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-public class modCommon
+public partial class modCommon
 {
     public static bool LogToFile { get; set; }
 

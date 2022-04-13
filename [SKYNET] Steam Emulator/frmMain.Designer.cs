@@ -70,6 +70,7 @@ namespace SKYNET
             this.shadowBox1 = new System.Windows.Forms.Panel();
             this.BT_GameAction = new SKYNET_Button();
             this.PN_BodyContainer = new System.Windows.Forms.Panel();
+            this.BT_Clear = new SKYNET_Button();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.CM_MenuGame = new SKYNET_ContextMenuStrip();
             this.OpenMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -563,6 +564,7 @@ namespace SKYNET
             // PN_BodyContainer
             // 
             this.PN_BodyContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(50)))), ((int)(((byte)(57)))));
+            this.PN_BodyContainer.Controls.Add(this.BT_Clear);
             this.PN_BodyContainer.Controls.Add(this.richTextBox1);
             this.PN_BodyContainer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.PN_BodyContainer.Location = new System.Drawing.Point(249, 335);
@@ -570,16 +572,39 @@ namespace SKYNET
             this.PN_BodyContainer.Size = new System.Drawing.Size(893, 230);
             this.PN_BodyContainer.TabIndex = 10;
             // 
+            // BT_Clear
+            // 
+            this.BT_Clear.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(56)))), ((int)(((byte)(60)))), ((int)(((byte)(67)))));
+            this.BT_Clear.BackColorMouseOver = System.Drawing.Color.Empty;
+            this.BT_Clear.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.BT_Clear.Font = new System.Drawing.Font("Segoe UI Semibold", 6.15F);
+            this.BT_Clear.ForeColor = System.Drawing.Color.White;
+            this.BT_Clear.ForeColorMouseOver = System.Drawing.Color.Empty;
+            this.BT_Clear.ImageAlignment = SKYNET_Button._ImgAlign.Left;
+            this.BT_Clear.ImageIcon = null;
+            this.BT_Clear.Location = new System.Drawing.Point(726, 169);
+            this.BT_Clear.MenuMode = false;
+            this.BT_Clear.Name = "BT_Clear";
+            this.BT_Clear.Rounded = false;
+            this.BT_Clear.Size = new System.Drawing.Size(56, 17);
+            this.BT_Clear.Style = SKYNET_Button._Style.TextOnly;
+            this.BT_Clear.TabIndex = 1;
+            this.BT_Clear.Text = "CLEAR";
+            this.BT_Clear.Visible = false;
+            this.BT_Clear.Click += new System.EventHandler(this.BT_Clear_Click);
+            // 
             // richTextBox1
             // 
             this.richTextBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(50)))), ((int)(((byte)(57)))));
             this.richTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.richTextBox1.ForeColor = System.Drawing.SystemColors.Menu;
-            this.richTextBox1.Location = new System.Drawing.Point(8, 7);
+            this.richTextBox1.Font = new System.Drawing.Font("Segoe UI Emoji", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.richTextBox1.ForeColor = System.Drawing.SystemColors.Window;
+            this.richTextBox1.Location = new System.Drawing.Point(12, 10);
             this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(875, 215);
+            this.richTextBox1.Size = new System.Drawing.Size(871, 214);
             this.richTextBox1.TabIndex = 0;
             this.richTextBox1.Text = "";
+            this.richTextBox1.TextChanged += new System.EventHandler(this.RichTextBox1_TextChanged);
             // 
             // CM_MenuGame
             // 
@@ -725,7 +750,6 @@ namespace SKYNET
         private SKYNET_Button BT_GameAction;
         private Label label6;
         private Panel PN_BodyContainer;
-        private RichTextBox richTextBox1;
         private SKYNET_Label LB_GameTittle;
         private Panel panel7;
         private Controls.GradiantBox gradiantBox1;
@@ -753,6 +777,8 @@ namespace SKYNET
         private CircularPictureBox PB_Avatar;
         private PictureBox pictureBox3;
         private ToolStripMenuItem GameCacheMenuItem;
+        private RichTextBox richTextBox1;
+        private SKYNET_Button BT_Clear;
     }
 }
 

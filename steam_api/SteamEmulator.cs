@@ -40,6 +40,7 @@ public class SteamEmulator
 
     public static bool Initialized { get; set; }
     public static string SteamApiPath { get; set; }
+    public static string EmulatorPath { get; set; }
     public static IntPtr Context_Ptr { get; set; }
 
     public static Dictionary<HSteamPipe, Steam_Pipe> steam_pipes;
@@ -109,6 +110,11 @@ public class SteamEmulator
 
         InterfaceManager.Initialize();
 
+        if (AsClient)
+        {
+            EmulatorPath = modCommon.GetPath();
+        }
+
         if (Client_Callback == null) Client_Callback = new CallbackManager();
         if (Server_Callback == null) Server_Callback = new CallbackManager();
 
@@ -128,19 +134,19 @@ public class SteamEmulator
 
         SteamUtils = new SteamUtils();
 
-        SteamMatchmaking = new SteamMatchmaking();   
+        SteamMatchmaking = new SteamMatchmaking();
 
-        SteamMatchMakingServers = new SteamMatchMakingServers();    
+        SteamMatchMakingServers = new SteamMatchMakingServers();
 
-        SteamUserStats = new SteamUserStats();  
+        SteamUserStats = new SteamUserStats();
 
-        SteamApps = new SteamApps();   
+        SteamApps = new SteamApps();
 
-        SteamNetworking = new SteamNetworking();   
+        SteamNetworking = new SteamNetworking();
 
-        SteamRemoteStorage = new SteamRemoteStorage();  
+        SteamRemoteStorage = new SteamRemoteStorage();
 
-        SteamScreenshots = new SteamScreenshots();   
+        SteamScreenshots = new SteamScreenshots();
 
         SteamHTTP = new SteamHTTP();
 
@@ -251,7 +257,7 @@ public class SteamEmulator
 
 
 
-//#if LOG
+    //#if LOG
 
     public static void Write(object msg)
     {
@@ -263,14 +269,14 @@ public class SteamEmulator
         }
     }
 
-//#else
+    //#else
 
-//    public static void Write(object msg)
-//    {
-//        // TODO
-//    }
+    //    public static void Write(object msg)
+    //    {
+    //        // TODO
+    //    }
 
-//#endif
+    //#endif
 
 }
 

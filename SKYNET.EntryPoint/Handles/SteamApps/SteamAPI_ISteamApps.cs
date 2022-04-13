@@ -182,10 +182,10 @@ namespace SKYNET.Hook.Handles
             return true;
         }
 
-        public IntPtr SteamAPI_ISteamApps_GetAppOwner()
+        public ulong SteamAPI_ISteamApps_GetAppOwner()
         {
             Write("SteamAPI_ISteamApps_GetAppOwner");
-            return SteamEmulator.SteamApps.MemoryAddress;
+            return SteamEmulator.SteamApps.GetAppOwner();
         }
 
         public string SteamAPI_ISteamApps_GetLaunchQueryParam(string pchKey)
