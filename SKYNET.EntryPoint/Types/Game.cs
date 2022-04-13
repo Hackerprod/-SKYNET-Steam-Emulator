@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Web.Script.Serialization;
 
-namespace SKYNET.Types
+namespace SKYNET
 {
     [Serializable]
     public class Game : MarshalByRefObject
@@ -14,7 +13,6 @@ namespace SKYNET.Types
         public string Parameters { get; set; }
         public List<DLC> GameDLC { get; set; }
         public bool LaunchWithoutEmu { get; set; }
-        public bool SaveLog { get; set; }
 
         public Game()
         {
@@ -26,14 +24,6 @@ namespace SKYNET.Types
             public uint AppId { get; set; }
         }
 
-        public static string Serialize(Game serializedGame)
-        {
-            return new JavaScriptSerializer().Serialize(serializedGame);
-        }
 
-        public static Game Deserialize(string serializedGame)
-        {
-            return new JavaScriptSerializer().Deserialize<Game>(serializedGame);
-        }
     }
 }

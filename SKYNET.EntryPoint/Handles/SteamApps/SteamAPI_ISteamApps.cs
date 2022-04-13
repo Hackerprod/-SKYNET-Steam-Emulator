@@ -51,131 +51,135 @@ namespace SKYNET.Hook.Handles
         public bool SteamAPI_ISteamApps_BIsSubscribed()
         {
             Write("SteamAPI_ISteamApps_BIsSubscribed");
-            return SteamEmulator.SteamApps.BIsSubscribed();
+            return true;
         }
 
         public bool SteamAPI_ISteamApps_BIsLowViolence()
         {
             Write("SteamAPI_ISteamApps_BIsLowViolence");
-            return SteamEmulator.SteamApps.BIsLowViolence();
+            return false;
         }
 
         public bool SteamAPI_ISteamApps_BIsCybercafe()
         {
             Write("SteamAPI_ISteamApps_BIsCybercafe");
-            return SteamEmulator.SteamApps.BIsCybercafe();
+            return false;
         }
 
         public bool SteamAPI_ISteamApps_BIsVACBanned()
         {
             Write("SteamAPI_ISteamApps_BIsVACBanned");
-            return SteamEmulator.SteamApps.BIsVACBanned();
+            return false;
         }
 
         public string SteamAPI_ISteamApps_GetCurrentGameLanguage()
         {
             Write("SteamAPI_ISteamApps_GetCurrentGameLanguage");
-            return SteamEmulator.SteamApps.GetCurrentGameLanguage();
+            return SteamEmulator.Language;
         }
 
         public string SteamAPI_ISteamApps_GetAvailableGameLanguages()
         {
             Write("SteamAPI_ISteamApps_GetAvailableGameLanguages");
-            return SteamEmulator.SteamApps.GetAvailableGameLanguages();
+            //TODO?
+            return "";
         }
 
-        public bool SteamAPI_ISteamApps_BIsSubscribedApp(uint appID)
+        public bool SteamAPI_ISteamApps_BIsSubscribedApp(AppId_t appID)
         {
             Write("SteamAPI_ISteamApps_BIsSubscribedApp " + appID);
-            return SteamEmulator.SteamApps.BIsSubscribedApp(appID);
+            return false;
         }
 
 
-        public bool SteamAPI_ISteamApps_BIsDlcInstalled(uint appID)
+        public bool SteamAPI_ISteamApps_BIsDlcInstalled(AppId_t appID)
         {
             Write("SteamAPI_ISteamApps_BIsDlcInstalled " + appID);
-            return SteamEmulator.SteamApps.BIsDlcInstalled(appID);
+            return false;
+
         }
 
-        public UInt32 SteamAPI_ISteamApps_GetEarliestPurchaseUnixTime(uint nAppID)
+        public UInt32 SteamAPI_ISteamApps_GetEarliestPurchaseUnixTime(AppId_t nAppID)
         {
             Write("SteamAPI_ISteamApps_GetEarliestPurchaseUnixTime");
-            return SteamEmulator.SteamApps.GetEarliestPurchaseUnixTime(nAppID);
+            //TODO ?
+            return 1;
         }
 
 
         public bool SteamAPI_ISteamApps_BIsSubscribedFromFreeWeekend()
         {
             Write("SteamAPI_ISteamApps_BIsSubscribedFromFreeWeekend");
-            return SteamEmulator.SteamApps.BIsSubscribedFromFreeWeekend();
+            return false;
         }
 
 
         public int SteamAPI_ISteamApps_GetDLCCount()
         {
             Write("SteamAPI_ISteamApps_GetDLCCount");
-            return SteamEmulator.SteamApps.GetDLCCount();
+            return 0;
         }
 
 
-        public bool SteamAPI_ISteamApps_BGetDLCDataByIndex(int iDLC, uint pAppID, bool pbAvailable, string pchName, int cchNameBufferSize)
+        public bool SteamAPI_ISteamApps_BGetDLCDataByIndex(int iDLC, IntPtr pAppID, bool pbAvailable, IntPtr pchName, int cchNameBufferSize)
         {
             Write("SteamAPI_ISteamApps_BGetDLCDataByIndex");
-            return SteamEmulator.SteamApps.BGetDLCDataByIndex(iDLC, pAppID, pbAvailable, pchName, cchNameBufferSize);
+            return true;
         }
 
 
-        public void SteamAPI_ISteamApps_InstallDLC(uint nAppID)
+        public void SteamAPI_ISteamApps_InstallDLC(AppId_t nAppID)
         {
             Write("SteamAPI_ISteamApps_InstallDLC");
-            SteamEmulator.SteamApps.InstallDLC(nAppID);
         }
 
-        public void SteamAPI_ISteamApps_UninstallDLC(uint nAppID)
+        public void SteamAPI_ISteamApps_UninstallDLC(AppId_t nAppID)
         {
             Write("SteamAPI_ISteamApps_UninstallDLC");
-            SteamEmulator.SteamApps.UninstallDLC(nAppID);
         }
 
 
-        public void SteamAPI_ISteamApps_RequestAppProofOfPurchaseKey(uint nAppID)
+        public void SteamAPI_ISteamApps_RequestAppProofOfPurchaseKey(AppId_t nAppID)
         {
             Write("SteamAPI_ISteamApps_RequestAppProofOfPurchaseKey");
-            SteamEmulator.SteamApps.RequestAppProofOfPurchaseKey(nAppID);
         }
 
-        public bool SteamAPI_ISteamApps_GetCurrentBetaName(string pchName, int cchNameBufferSize)
+        public bool SteamAPI_ISteamApps_GetCurrentBetaName(IntPtr pchName, int cchNameBufferSize)
         {
             Write("SteamAPI_ISteamApps_GetCurrentBetaName " + cchNameBufferSize);
-            return SteamEmulator.SteamApps.GetCurrentBetaName(pchName, cchNameBufferSize);
+            return true;
         }
 
         public bool SteamAPI_ISteamApps_MarkContentCorrupt(bool bMissingFilesOnly)
         {
             Write("SteamAPI_ISteamApps_MarkContentCorrupt");
-            return SteamEmulator.SteamApps.MarkContentCorrupt(bMissingFilesOnly);
+            //TODO: warn user
+            return true;
         }
 
-        public UInt32 SteamAPI_ISteamApps_GetInstalledDepots(uint appID, uint pvecDepots, uint cMaxDepots)
+        public UInt32 SteamAPI_ISteamApps_GetInstalledDepots(AppId_t appID, IntPtr pvecDepots, uint cMaxDepots)
         {
             Write($"SteamAPI_ISteamApps_GetInstalledDepots {appID}, {cMaxDepots}");
-            return SteamEmulator.SteamApps.GetInstalledDepots(appID, pvecDepots, cMaxDepots);
+            //TODO not sure about the behavior of this function, I didn't actually test this.
+            return 0;
         }
 
         //public UInt32 GetInstalledDepots(DepotId_t pvecDepots, UInt32 cMaxDepots)
         //{
         //}
 
-        public UInt32 SteamAPI_ISteamApps_GetAppInstallDir(uint appID, string pchFolder, uint cchFolderBufferSize)
+        public UInt32 SteamAPI_ISteamApps_GetAppInstallDir(AppId_t appID, IntPtr pchFolder, uint cchFolderBufferSize)
         {
-            Write($"SteamAPI_ISteamApps_GetAppInstallDir {appID} ");
-            return SteamEmulator.SteamApps.GetAppInstallDir(appID, pchFolder, cchFolderBufferSize);
+            Write($"SteamAPI_ISteamApps_GetAppInstallDir {appID.m_AppId} ");
+            //TODO return real path instead of dll path
+            string installed_path = "xd";
+            return (UInt32)installed_path.Length; //Real steam always returns the actual path length, not the copied one.
         }
 
-        public bool SteamAPI_ISteamApps_BIsAppInstalled(uint appID)
+        public bool SteamAPI_ISteamApps_BIsAppInstalled(AppId_t appID)
         {
             Write($"SteamAPI_ISteamApps_BIsAppInstalled {appID}");
-            return SteamEmulator.SteamApps.BIsAppInstalled(appID);
+            return true;
         }
 
         public ulong SteamAPI_ISteamApps_GetAppOwner()
@@ -187,34 +191,33 @@ namespace SKYNET.Hook.Handles
         public string SteamAPI_ISteamApps_GetLaunchQueryParam(string pchKey)
         {
             Write("SteamAPI_ISteamApps_GetLaunchQueryParam");
-            return SteamEmulator.SteamApps.GetLaunchQueryParam(pchKey);
+            return "";
         }
 
 
-        public bool SteamAPI_ISteamApps_GetDlcDownloadProgress(uint nAppID, UInt64 punBytesDownloaded, UInt64 punBytesTotal)
+        public bool SteamAPI_ISteamApps_GetDlcDownloadProgress(AppId_t nAppID, UInt64 punBytesDownloaded, UInt64 punBytesTotal)
         {
             Write("SteamAPI_ISteamApps_GetDlcDownloadProgress");
-            return SteamEmulator.SteamApps.GetDlcDownloadProgress(nAppID, punBytesDownloaded, punBytesTotal);
+            return false;
         }
 
 
         public int SteamAPI_ISteamApps_GetAppBuildId()
         {
             Write("SteamAPI_ISteamApps_GetAppBuildId");
-            return SteamEmulator.SteamApps.GetAppBuildId();
+            return 10;
         }
 
 
         public void SteamAPI_ISteamApps_RequestAllProofOfPurchaseKeys()
         {
             Write("SteamAPI_ISteamApps_RequestAllProofOfPurchaseKeys");
-            SteamEmulator.SteamApps.RequestAllProofOfPurchaseKeys();
         }
 
-        public ulong SteamAPI_ISteamApps_GetFileDetails(string pszFileName)
+        public SteamAPICall_t SteamAPI_ISteamApps_GetFileDetails(string pszFileName)
         {
             Write("SteamAPI_ISteamApps_GetFileDetails");
-            return SteamEmulator.SteamApps.GetFileDetails(pszFileName);
+            return (SteamAPICall_t)0;
         }
 
         public int SteamAPI_ISteamApps_GetLaunchCommandLine(string pszCommandLine, int cubCommandLine)
@@ -226,17 +229,17 @@ namespace SKYNET.Hook.Handles
         public bool SteamAPI_ISteamApps_BIsSubscribedFromFamilySharing()
         {
             Write("SteamAPI_ISteamApps_BIsSubscribedFromFamilySharing");
-            return SteamEmulator.SteamApps.BIsSubscribedFromFamilySharing();
+            return false;
         }
 
         public bool SteamAPI_ISteamApps_BIsTimedTrial(UInt32 punSecondsAllowed, UInt32 punSecondsPlayed)
         {
             Write("SteamAPI_ISteamApps_BIsTimedTrial");
-            return SteamEmulator.SteamApps.BIsTimedTrial(punSecondsAllowed, punSecondsPlayed);
+            return false;
         }
         public override void Write(object v)
         {
-            Main.Write("SteamAPI_ISteamApps : SteamAPI_ISteamApps", v);
+            Main.Write("Hook : SteamAPI_ISteamApps", v);
         }
     }
 }

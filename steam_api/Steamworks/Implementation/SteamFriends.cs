@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using SKYNET;
+using SKYNET.Helpers;
 using SKYNET.Steamworks;
-using SKYNET.Steamworks.Types;
 using SKYNET.Types;
 using Steamworks;
 
@@ -26,7 +26,7 @@ namespace SKYNET.Steamworks.Implementation
             Write($"ActivateGameOverlay {friendsGroupID}");
         }
 
-        public void ActivateGameOverlayInviteDialog(SteamID steamIDLobby)
+        public void ActivateGameOverlayInviteDialog(ulong steamIDLobby)
         {
             Write($"ActivateGameOverlayInviteDialog {steamIDLobby}");
         }
@@ -36,7 +36,7 @@ namespace SKYNET.Steamworks.Implementation
             Write($"ActivateGameOverlayInviteDialogConnectString {pchConnectString}");
         }
 
-        public void ActivateGameOverlayRemotePlayTogetherInviteDialog(SteamID steamIDLobby)
+        public void ActivateGameOverlayRemotePlayTogetherInviteDialog(ulong steamIDLobby)
         {
             Write($"ActivateGameOverlayRemotePlayTogetherInviteDialog {steamIDLobby}");
         }
@@ -47,7 +47,7 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public void ActivateGameOverlayToUser([MarshalAs(UnmanagedType.LPStr)] string friendsGroupID, SteamID steamID)
+        public void ActivateGameOverlayToUser([MarshalAs(UnmanagedType.LPStr)] string friendsGroupID, ulong steamID)
         {
             Write($"ActivateGameOverlayToUser {friendsGroupID} {steamID}");
         }
@@ -65,7 +65,7 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public bool CloseClanChatWindowInSteam(SteamID steamIDClanChat)
+        public bool CloseClanChatWindowInSteam(ulong steamIDClanChat)
         {
             Write($"CloseClanChatWindowInSteam {steamIDClanChat}");
             return true;
@@ -86,14 +86,14 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public ulong GetChatMemberByIndex(SteamID steamIDClan, int iUser)
+        public ulong GetChatMemberByIndex(ulong steamIDClan, int iUser)
         {
             Write($"GetChatMemberByIndex {steamIDClan}");
             return 0;
         }
 
 
-        public bool GetClanActivityCounts(SteamID steamIDClan, int pnOnline, int pnInGame, int pnChatting)
+        public bool GetClanActivityCounts(ulong steamIDClan, int pnOnline, int pnInGame, int pnChatting)
         {
             Write($"ActivateGameOverlay {steamIDClan}");
             return false;
@@ -107,14 +107,14 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public int GetClanChatMemberCount(SteamID steamIDClan)
+        public int GetClanChatMemberCount(ulong steamIDClan)
         {
             Write($"GetClanChatMemberCount {steamIDClan}");
             return 0;
         }
 
 
-        public int GetClanChatMessage(SteamID steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, int peChatEntryType, ulong psteamidChatter)
+        public int GetClanChatMessage(ulong steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, int peChatEntryType, ulong psteamidChatter)
         {
             Write($"GetClanChatMessage {steamIDClanChat}");
             return 0;
@@ -128,35 +128,35 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public string GetClanName(SteamID steamIDClan)
+        public string GetClanName(ulong steamIDClan)
         {
             Write($"GetClanName {steamIDClan}");
             return "";
         }
 
 
-        public ulong GetClanOfficerByIndex(SteamID steamIDClan, int iOfficer)
+        public ulong GetClanOfficerByIndex(ulong steamIDClan, int iOfficer)
         {
             Write($"GetClanOfficerByIndex {steamIDClan}");
             return 0;
         }
 
 
-        public int GetClanOfficerCount(SteamID steamIDClan)
+        public int GetClanOfficerCount(ulong steamIDClan)
         {
             Write($"GetClanOfficerCount {steamIDClan}");
             return 0;
         }
 
 
-        public ulong GetClanOwner(SteamID steamIDClan)
+        public ulong GetClanOwner(ulong steamIDClan)
         {
             Write($"GetClanOwner {steamIDClan}");
             return 0;
         }
 
 
-        public string GetClanTag(SteamID steamIDClan)
+        public string GetClanTag(ulong steamIDClan)
         {
             Write($"GetClanTag {steamIDClan}");
             return "";
@@ -177,7 +177,7 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public ulong GetFollowerCount(SteamID steamID)
+        public ulong GetFollowerCount(ulong steamID)
         {
             Write($"GetFollowerCount {steamID}");
             return (ulong)0;
@@ -196,14 +196,14 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public uint GetFriendCoplayGame(SteamID steamIDFriend)
+        public uint GetFriendCoplayGame(ulong steamIDFriend)
         {
             Write($"GetFriendCoplayGame {steamIDFriend}");
             return (uint)0;
         }
 
 
-        public int GetFriendCoplayTime(SteamID steamIDFriend)
+        public int GetFriendCoplayTime(ulong steamIDFriend)
         {
             Write($"GetFriendCoplayTime {steamIDFriend}");
             return 0;
@@ -217,21 +217,21 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public int GetFriendCountFromSource(SteamID steamIDSource)
+        public int GetFriendCountFromSource(ulong steamIDSource)
         {
             Write($"GetFriendCountFromSource {steamIDSource}");
             return 0;
         }
 
 
-        public ulong GetFriendFromSourceByIndex(SteamID steamIDSource, int iFriend)
+        public ulong GetFriendFromSourceByIndex(ulong steamIDSource, int iFriend)
         {
             Write($"GetFriendFromSourceByIndex {steamIDSource} {iFriend}");
             return 0;
         }
 
 
-        public bool GetFriendGamePlayed(SteamID steamIDFriend, IntPtr ptrFriendGameInfo)
+        public bool GetFriendGamePlayed(ulong steamIDFriend, IntPtr ptrFriendGameInfo)
         {
             Write($"GetFriendGamePlayed");
 
@@ -253,14 +253,14 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public int GetFriendMessage(SteamID steamIDFriend, int iMessageID, IntPtr pvData, int cubData, EChatEntryType peChatEntryType)
+        public int GetFriendMessage(ulong steamIDFriend, int iMessageID, IntPtr pvData, int cubData, EChatEntryType peChatEntryType)
         {
             Write($"GetFriendMessage {steamIDFriend}");
             return 0;
         }
 
 
-        public string GetFriendPersonaName(SteamID steamIDFriend)
+        public string GetFriendPersonaName(ulong steamIDFriend)
         {
             Write($"GetFriendPersonaName {steamIDFriend}");
             Friend friend = Friends.Find(f => f.SteamId == steamIDFriend);
@@ -272,42 +272,42 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public string GetFriendPersonaNameHistory(SteamID steamIDFriend, int iPersonaName)
+        public string GetFriendPersonaNameHistory(ulong steamIDFriend, int iPersonaName)
         {
             Write($"GetFriendPersonaNameHistory {steamIDFriend}");
             return "SKYNET";
         }
 
 
-        public EPersonaState GetFriendPersonaState(SteamID steamIDFriend)
+        public EPersonaState GetFriendPersonaState(ulong steamIDFriend)
         {
             Write($"GetFriendPersonaState {steamIDFriend}");
             return Users.Find(f => f == steamIDFriend) == null ? EPersonaState.k_EPersonaStateOffline : EPersonaState.k_EPersonaStateOnline;
         }
 
 
-        public EFriendRelationship GetFriendRelationship(SteamID steamIDFriend)
+        public EFriendRelationship GetFriendRelationship(ulong steamIDFriend)
         {
             Write($"GetFriendRelationship {steamIDFriend}");
             return EFriendRelationship.k_EFriendRelationshipNone;
         }
 
 
-        public string GetFriendRichPresence(SteamID steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchKey)
+        public string GetFriendRichPresence(ulong steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchKey)
         {
             Write($"GetFriendRichPresence [{steamIDFriend}]: {pchKey}");
             return "";
         }
 
 
-        public string GetFriendRichPresenceKeyByIndex(SteamID steamIDFriend, int iKey)
+        public string GetFriendRichPresenceKeyByIndex(ulong steamIDFriend, int iKey)
         {
             Write($"GetFriendRichPresenceKeyByIndex {steamIDFriend} {iKey}");
             return "";
         }
 
 
-        public int GetFriendRichPresenceKeyCount(SteamID steamIDFriend)
+        public int GetFriendRichPresenceKeyCount(ulong steamIDFriend)
         {
             Write($"GetFriendRichPresenceKeyCount {steamIDFriend}");
             return 0;
@@ -348,28 +348,28 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public int GetFriendSteamLevel(SteamID steamIDFriend)
+        public int GetFriendSteamLevel(ulong steamIDFriend)
         {
             Write($"GetFriendSteamLevel {steamIDFriend}");
             return 100;
         }
 
 
-        public int GetSmallFriendAvatar(SteamID steamIDFriend)
+        public int GetSmallFriendAvatar(ulong steamIDFriend)
         {
             Write($"GetSmallFriendAvatar {steamIDFriend}");
             return 0;
         }
 
 
-        public int GetMediumFriendAvatar(SteamID steamIDFriend)
+        public int GetMediumFriendAvatar(ulong steamIDFriend)
         {
             Write($"GetMediumFriendAvatar {steamIDFriend}");
             return 0;
         }
 
 
-        public int GetLargeFriendAvatar(SteamID steamIDFriend)
+        public int GetLargeFriendAvatar(ulong steamIDFriend)
         {
             Write($"GetLargeFriendAvatar {steamIDFriend}");
             return 0;
@@ -398,7 +398,7 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public string GetPlayerNickname(SteamID steamIDPlayer)
+        public string GetPlayerNickname(ulong steamIDPlayer)
         {
             Write($"GetPlayerNickname {steamIDPlayer}");
             Friend friend = Friends.Find(f => f.AccountId == (uint)steamIDPlayer);
@@ -417,7 +417,7 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public bool HasFriend(SteamID steamIDFriend, int iFriendFlags)
+        public bool HasFriend(ulong steamIDFriend, int iFriendFlags)
         {
             Write($"HasFriend {steamIDFriend}");
             Friend friend = Friends.Find(f => f.AccountId == (uint)steamIDFriend);
@@ -425,70 +425,70 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public bool InviteUserToGame(SteamID steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchConnectString)
+        public bool InviteUserToGame(ulong steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchConnectString)
         {
             Write($"InviteUserToGame {steamIDFriend} {pchConnectString}");
             return false;
         }
 
 
-        public bool IsClanChatAdmin(SteamID steamIDClanChat, SteamID steamIDUser)
+        public bool IsClanChatAdmin(ulong steamIDClanChat, ulong steamIDUser)
         {
             Write($"IsClanChatAdmin {steamIDClanChat}");
             return false;
         }
 
 
-        public bool IsClanChatWindowOpenInSteam(SteamID steamIDClanChat)
+        public bool IsClanChatWindowOpenInSteam(ulong steamIDClanChat)
         {
             Write($"IsClanChatWindowOpenInSteam {steamIDClanChat}");
             return false;
         }
 
 
-        public bool IsClanOfficialGameGroup(SteamID steamIDClan)
+        public bool IsClanOfficialGameGroup(ulong steamIDClan)
         {
             Write($"IsClanOfficialGameGroup {steamIDClan}");
             return false;
         }
 
 
-        public bool IsClanPublic(SteamID steamIDClan)
+        public bool IsClanPublic(ulong steamIDClan)
         {
             Write($"IsClanpublic {steamIDClan}");
             return false;
         }
 
 
-        public ulong IsFollowing(SteamID steamID)
+        public ulong IsFollowing(ulong steamID)
         {
             Write($"IsFollowing {steamID}");
             return (ulong)0;
         }
 
 
-        public bool IsUserInSource(SteamID steamIDUser, SteamID steamIDSource)
+        public bool IsUserInSource(ulong steamIDUser, ulong steamIDSource)
         {
             Write($"IsUserInSource {steamIDUser}");
             return false;
         }
 
 
-        public ulong JoinClanChatRoom(SteamID steamIDClan)
+        public ulong JoinClanChatRoom(ulong steamIDClan)
         {
             Write($"JoinClanChatRoom {steamIDClan}");
             return (ulong)0;
         }
 
 
-        public bool LeaveClanChatRoom(SteamID steamIDClan)
+        public bool LeaveClanChatRoom(ulong steamIDClan)
         {
             Write($"LeaveClanChatRoom {steamIDClan}");
             return true;
         }
 
 
-        public bool OpenClanChatWindowInSteam(SteamID steamIDClanChat)
+        public bool OpenClanChatWindowInSteam(ulong steamIDClanChat)
         {
             Write($"OpenClanChatWindowInSteam {steamIDClanChat}");
             return false;
@@ -502,41 +502,41 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public bool ReplyToFriendMessage(SteamID steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchMsgToSend)
+        public bool ReplyToFriendMessage(ulong steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchMsgToSend)
         {
             Write($"ReplyToFriendMessage {steamIDFriend} {pchMsgToSend}");
             return false;
         }
 
 
-        public ulong RequestClanOfficerList(SteamID steamIDClan)
+        public ulong RequestClanOfficerList(ulong steamIDClan)
         {
             Write($"RequestClanOfficerList {steamIDClan}");
             return 0;
         }
 
 
-        public void RequestFriendRichPresence(SteamID steamIDFriend)
+        public void RequestFriendRichPresence(ulong steamIDFriend)
         {
             Write($"RequestFriendRichPresence {steamIDFriend}");
         }
 
 
-        public bool RequestUserInformation(SteamID steamIDUser, bool bRequireNameOnly)
+        public bool RequestUserInformation(ulong steamIDUser, bool bRequireNameOnly)
         {
             Write($"RequestUserInformation {steamIDUser}");
             return false;
         }
 
 
-        public bool SendClanChatMessage(SteamID steamIDClanChat, [MarshalAs(UnmanagedType.LPStr)] string pchText)
+        public bool SendClanChatMessage(ulong steamIDClanChat, [MarshalAs(UnmanagedType.LPStr)] string pchText)
         {
             Write($"SendClanChatMessage {steamIDClanChat} {pchText}");
             return false;
         }
 
 
-        public void SetInGameVoiceSpeaking(SteamID steamIDUser, bool bSpeaking)
+        public void SetInGameVoiceSpeaking(ulong steamIDUser, bool bSpeaking)
         {
             Write($"SetInGameVoiceSpeaking {steamIDUser}");
         }
@@ -557,7 +557,7 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public void SetPlayedWith(SteamID steamIDUserPlayedWith)
+        public void SetPlayedWith(ulong steamIDUserPlayedWith)
         {
             Write($"SetPlayedWith {steamIDUserPlayedWith}");
         }

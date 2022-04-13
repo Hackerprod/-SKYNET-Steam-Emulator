@@ -7,32 +7,32 @@ namespace SKYNET.Interface
     {
         public bool BIsSubscribed(IntPtr _)
         {
-            return SteamEmulator.SteamApps.BIsSubscribed();
+            return SteamEmulator.SteamApps.BIsSubscribed(_);
         }
 
         public bool BIsLowViolence(IntPtr _)
         {
-            return SteamEmulator.SteamApps.BIsLowViolence();
+            return SteamEmulator.SteamApps.BIsLowViolence(_);
         }
 
         public bool BIsCybercafe(IntPtr _)
         {
-            return SteamEmulator.SteamApps.BIsCybercafe();
+            return SteamEmulator.SteamApps.BIsCybercafe(_);
         }
 
         public bool BIsVACBanned(IntPtr _)
         {
-            return SteamEmulator.SteamApps.BIsVACBanned();
+            return SteamEmulator.SteamApps.BIsVACBanned(_);
         }
 
         public string GetCurrentGameLanguage(IntPtr _)
         {
-            return SteamEmulator.SteamApps.GetCurrentGameLanguage();
+            return SteamEmulator.SteamApps.GetCurrentGameLanguage(_);
         }
 
         public string GetAvailableGameLanguages(IntPtr _)
         {
-            return SteamEmulator.SteamApps.GetAvailableGameLanguages();
+            return SteamEmulator.SteamApps.GetAvailableGameLanguages(_);
         }
 
         public bool BIsSubscribedApp(IntPtr _, uint appID)
@@ -52,12 +52,12 @@ namespace SKYNET.Interface
 
         public bool BIsSubscribedFromFreeWeekend(IntPtr _)
         {
-            return SteamEmulator.SteamApps.BIsSubscribedFromFreeWeekend();
+            return SteamEmulator.SteamApps.BIsSubscribedFromFreeWeekend(_);
         }
 
         public int GetDLCCount(IntPtr _)
         {
-            return SteamEmulator.SteamApps.GetDLCCount();
+            return SteamEmulator.SteamApps.GetDLCCount(_);
         }
 
         public bool BGetDLCDataByIndex(IntPtr _, int iDLC, uint pAppID, bool pbAvailable, string pchName, int cchNameBufferSize)
@@ -122,12 +122,12 @@ namespace SKYNET.Interface
 
         public int GetAppBuildId(IntPtr _)
         {
-            return SteamEmulator.SteamApps.GetAppBuildId();
+            return SteamEmulator.SteamApps.GetAppBuildId(_);
         }
 
         public void RequestAllProofOfPurchaseKeys(IntPtr _)
         {
-            SteamEmulator.SteamApps.RequestAllProofOfPurchaseKeys();
+            SteamEmulator.SteamApps.RequestAllProofOfPurchaseKeys(_);
         }
 
         public ulong GetFileDetails(IntPtr _, string pszFileName)
@@ -142,7 +142,7 @@ namespace SKYNET.Interface
 
         public bool BIsSubscribedFromFamilySharing(IntPtr _)
         {
-            return SteamEmulator.SteamApps.BIsSubscribedFromFamilySharing();
+            return SteamEmulator.SteamApps.BIsSubscribedFromFamilySharing(_);
         }
 
         public bool BIsTimedTrial(IntPtr _, uint punSecondsAllowed, uint punSecondsPlayed)
