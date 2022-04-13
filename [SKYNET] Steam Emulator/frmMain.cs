@@ -27,16 +27,15 @@ namespace SKYNET
     public partial class frmMain : frmBase
     {
         public static frmMain frm;
+        public Process InjectedProcess;
+
         private List<RunningGame> RunningGames;
-
-        public Process InjectedProcess { get; set; }
-        internal HookInterface HookInterface { get; set; }
-
         private GameBox SelectedBox;
         private GameBox MenuBox;
-
+        private Dictionary<uint, List<string>> GameMessages;
         private string channel;
         private int ProcessId;
+        private EmuSettings settings;
 
         public frmMain()
         {
@@ -45,6 +44,12 @@ namespace SKYNET
             SetMouseMove(PN_Top);
             frm = this;
 
+            settings = EmuSettings.Load();
+            LB_NickName.Text = settings.PersonaName;
+            LB_Menu_NickName.Text = settings.PersonaName.ToUpper();
+            LB_SteamID.Text = settings.SteamId.ToString();
+
+            GameMessages = new Dictionary<uint, List<string>>();
             RunningGames = new List<RunningGame>();
                  
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data"));
@@ -194,9 +199,15 @@ namespace SKYNET
                 ///richTextBox1.Clear();
                 Write("Opening " + game.Name);
 
-                HookInterface = new HookInterface();
+                HookInterface  HookInterface = new HookInterface();
                 HookInterface.InjectionOptions = InjectionOptions.Default;
                 HookInterface.Game = game;
+
+                HookInterface.PersonaName = settings.PersonaName;
+                HookInterface.Language = settings.Language;
+                HookInterface.ConsoleOutput = settings.ConsoleOutput;
+                HookInterface.SteamId = settings.SteamId;
+
                 HookInterface.OnMessage += this.HookInterface_OnMessage;
                 HookInterface.OnShowMessage += this.HookInterface_OnShowMessage;
 
@@ -213,8 +224,8 @@ namespace SKYNET
                     HookInterface.EmulatorPath = modCommon.GetPath();
                     RemoteHooking.CreateAndInject(game.ExecutablePath, game.Parameters, 0, HookInterface.InjectionOptions, HookInterface.DllPath, HookInterface.DllPath, out ProcessId, channel);
                     InjectedProcess = Process.GetProcessById(ProcessId);
-                    WaitForExit();
                     RunningGames.Add(new RunningGame() { Game = e.GetGame(), Process = InjectedProcess });
+                    WaitForExit();
 
                     BT_GameAction.Text = "CLOSE";
                     BT_GameAction.BackColor = Color.Red;
@@ -269,6 +280,10 @@ namespace SKYNET
 
         private void HookInterface_OnMessage(object sender, ConsoleMessage e)
         {
+            if (!GameMessages.ContainsKey(e.AppId)) GameMessages.Add(e.AppId, new List<string>());
+
+            GameMessages[e.AppId].Add(e.Sender + ": " + e.Msg);
+
             Write(e.Sender + ":  " + e.Msg);
         }
 
@@ -293,6 +308,15 @@ namespace SKYNET
                 }
                 Write($"The injected process {processName} are closed");
 
+                foreach (var game in RunningGames)
+                {
+                    if (GameMessages.ContainsKey(game.Game.AppId) && game.Game.SendLog)
+                    {
+                        string logPath = Path.Combine(modCommon.GetPath(), "Data", "Storage", game.Game.AppId.ToString(), "GameMessages.log");
+                        File.WriteAllLines(logPath, GameMessages[game.Game.AppId]);
+                    }
+                }
+
                 BT_GameAction.Text = "PLAY";
                 BT_GameAction.BackColor = Color.FromArgb(46, 186, 65);
             });
@@ -314,6 +338,8 @@ namespace SKYNET
         {
             string path = Path.Combine(modCommon.GetPath(), "Data");
             modCommon.EnsureDirectoryExists(path);
+
+            EmuSettings.Save(settings);
 
             string game = Path.Combine(path, "Games.json");
 
@@ -408,6 +434,16 @@ namespace SKYNET
                     try
                     {
                         Game.Process.Kill();
+
+                        foreach (var game in RunningGames)
+                        {
+                            if (GameMessages.ContainsKey(game.Game.AppId) && game.Game.SendLog)
+                            {
+                                string logPath = Path.Combine(modCommon.GetPath(), "Data", "Storage", game.Game.AppId.ToString(), "GameMessages.log");
+                                File.WriteAllLines(logPath, GameMessages[game.Game.AppId]);
+                            }
+                        }
+
                         RunningGames.Remove(Game);
                     }
                     catch { }

@@ -16,7 +16,6 @@ public partial class modCommon
 
     private static bool ConsoleEnabled;
     private static bool SettingsLoaded;
-    private static INIParser IniParser;
 
 
     public static IntPtr GetObjectPtr(object Obj)
@@ -72,76 +71,6 @@ public partial class modCommon
     [return: MarshalAs(UnmanagedType.Bool)]
     static extern bool AllocConsole();
 
-    public static void LoadSettings()
-    {
-        if (SettingsLoaded)
-        {
-            return;
-        }
-
-        try
-        {
-            string _file = Path.Combine(GetPath(), "[SKYNET] steam_api.ini");
-
-            if (!File.Exists(_file))
-            {
-                StringBuilder config = new StringBuilder();
-
-                // User Configuration
-
-                config.AppendLine("[STEAM USER]");
-                config.AppendLine($"Nickname = {Environment.UserName}");
-                config.AppendLine($"SteamID = {modCommon.GenerateSteamID()}");
-                config.AppendLine($"Languaje = English");
-                config.AppendLine();
-
-                // Network Configuration
-
-                config.AppendLine("[NETWORK]");
-                config.AppendLine("# When the emulator is in LAN mode (without dedicated server) it sends and receives data through broadcast ");
-                config.AppendLine("ServerIP = 127.0.0.1");
-                config.AppendLine("BroadCastPort = 28025");
-                config.AppendLine();
-
-                // Log Configuration
-
-                config.AppendLine("[LOG]");
-                config.AppendLine("Console = false");
-                config.AppendLine("File = false");
-                config.AppendLine();
-
-                File.WriteAllText(_file, config.ToString());
-            }
-
-            IniParser = new INIParser();
-            IniParser.Load(_file);
-
-            SteamEmulator.SteamId = (ulong)IniParser["STEAM USER"]["SteamID"];
-            SteamEmulator.PersonaName = (string)IniParser["STEAM USER"]["Nickname"];
-            SteamEmulator.Language = (string)IniParser["STEAM USER"]["Languaje"];
-
-            LogToFile = (bool)IniParser["LOG"]["File"];
-
-            bool ConsoleOutput = (bool)IniParser["LOG"]["Console"];
-
-            if (ConsoleOutput)
-            {
-                ActiveConsoleOutput();
-            }
-
-            string data = $"Loaded user data from file \nNickName: {SteamEmulator.PersonaName} \nSteamId:  {SteamEmulator.SteamId} \nLanguaje: {SteamEmulator.Language} \n";
-            SteamEmulator.Write(data);
-
-            SettingsLoaded = true;
-        }
-        catch (Exception e)
-        {
-            string errorMessage = e.Message + " " + e.StackTrace;
-            SteamEmulator.Write(errorMessage);
-        }
-
-    }
-
     public static string GenerateSteamID()
     {
         return "76561" + new Random().Next(100000, 999999) + new Random().Next(100000, 999999);
@@ -167,3 +96,6 @@ public partial class modCommon
     }
 }
 
+namespace SKYNET.Helpers
+{
+}

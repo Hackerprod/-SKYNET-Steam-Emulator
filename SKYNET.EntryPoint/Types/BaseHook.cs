@@ -20,20 +20,8 @@ namespace SKYNET.Hook
                 var ProcAddress = NativeMethods.GetProcAddress(Library, Method);
                 if (ProcAddress == IntPtr.Zero)
                 {
-                    //Main.Write("HookManager", "Method " + Method + " not found, Trying to create in memory");
-                    //MethodInfo info = MemoryManager.GetMethodInfo(Method);
-                    //if (info == null)
-                    //{
-                    //    Main.Write("HookManager", "Not found Method " + Method + " in Assembly");
-                    //    retuGetFileSize
-                    // return;
-                    //}
-                    //ProcAddress = MemoryManager.CreateMethod(Instance, info);
-                    //if (ProcAddress == IntPtr.Zero)
-                    //{
-                    //    Main.Write("HookManager", "Error creating method " + Method + " in memory");
+                    Main.Write("HookManager", "Method " + Method + " not found");
                     return;
-                    //}
                 }
                 try
                 {

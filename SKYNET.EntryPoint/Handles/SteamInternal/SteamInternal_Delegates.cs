@@ -29,11 +29,15 @@ namespace SKYNET.Hook.Handles
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
         public delegate IntPtr SteamInternal_ContextInitDelegate(IntPtr pContextInitData);
 
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate void pFn(IntPtr ctx);
 
         public SteamInternal_FindOrCreateUserInterfaceDelegate _SteamInternal_FindOrCreateUserInterface;
         public SteamInternal_FindOrCreateGameServerInterfaceDelegate _SteamInternal_FindOrCreateGameServerInterfaceDelegate;
         public SteamInternal_CreateInterfaceDelegate _SteamInternal_CreateInterfaceDelegate;
         public SteamInternal_GameServer_InitDelegate _SteamInternal_GameServer_InitDelegate;
         public unsafe SteamInternal_ContextInitDelegate _SteamInternal_ContextInitDelegate;
+        public static pFn _pFn;
+
     }
 }

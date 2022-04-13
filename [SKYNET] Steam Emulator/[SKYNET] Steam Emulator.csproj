@@ -200,6 +200,7 @@
     <Compile Include="GUI\Controls\SKYNET_Check.designer.cs">
       <DependentUpon>SKYNET_Check.cs</DependentUpon>
     </Compile>
+    <Compile Include="Types\EmuSettings.cs" />
     <Compile Include="Types\RunningGame.cs" />
     <EmbeddedResource Include="GUI\Controls\CircularPictureBox.resx">
       <DependentUpon>CircularPictureBox.cs</DependentUpon>

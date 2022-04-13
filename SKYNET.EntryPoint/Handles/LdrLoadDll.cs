@@ -39,7 +39,6 @@ namespace SKYNET.Hook.Handles
             {
                 string unicodeString = GetUnicodeString(moduleFileName);
                 unicodeString = Path.GetFileNameWithoutExtension(unicodeString).ToLower();
-                Main.Write(unicodeString);
                 Main.HookManager.Install(unicodeString.ToUpper());
                 return result;
             }

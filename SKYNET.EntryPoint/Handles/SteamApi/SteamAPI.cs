@@ -46,7 +46,6 @@ namespace SKYNET.Hook.Handles
             base.Install<SteamAPI_ManualDispatch_GetNextCallbackDelegate>("SteamAPI_ManualDispatch_GetNextCallback", _SteamAPI_ManualDispatch_GetNextCallbackDelegate, new SteamAPI_ManualDispatch_GetNextCallbackDelegate(SteamAPI_ManualDispatch_GetNextCallback));
             base.Install<SteamAPI_ManualDispatch_FreeLastCallbackDelegate>("SteamAPI_ManualDispatch_FreeLastCallback", _SteamAPI_ManualDispatch_FreeLastCallbackDelegate, new SteamAPI_ManualDispatch_FreeLastCallbackDelegate(SteamAPI_ManualDispatch_FreeLastCallback));
             base.Install<SteamAPI_ManualDispatch_GetAPICallResultDelegate>("SteamAPI_ManualDispatch_GetAPICallResult", _SteamAPI_ManualDispatch_GetAPICallResultDelegate, new SteamAPI_ManualDispatch_GetAPICallResultDelegate(SteamAPI_ManualDispatch_GetAPICallResult));
-            base.Install<SteamAPI_RestartAppDelegate>("SteamAPI_RestartApp", _SteamAPI_RestartAppDelegate, new SteamAPI_RestartAppDelegate(SteamAPI_RestartApp));
             base.Install<SteamAPI_SetMiniDumpCommentDelegate>("SteamAPI_SetMiniDumpComment", _SteamAPI_SetMiniDumpCommentDelegate, new SteamAPI_SetMiniDumpCommentDelegate(SteamAPI_SetMiniDumpComment));
             base.Install<SteamAPI_WriteMiniDumpDelegate>("SteamAPI_WriteMiniDump", _SteamAPI_WriteMiniDumpDelegate, new SteamAPI_WriteMiniDumpDelegate(SteamAPI_WriteMiniDump));
             base.Install<SteamAPI_ReleaseCurrentThreadMemoryDelegate>("SteamAPI_ReleaseCurrentThreadMemory", _SteamAPI_ReleaseCurrentThreadMemoryDelegate, new SteamAPI_ReleaseCurrentThreadMemoryDelegate(SteamAPI_ReleaseCurrentThreadMemory));
@@ -54,18 +53,12 @@ namespace SKYNET.Hook.Handles
             base.Install<SteamAPI_gameserveritem_t_GetNameDelegate>("SteamAPI_gameserveritem_t_GetName", _SteamAPI_gameserveritem_t_GetNameDelegate, new SteamAPI_gameserveritem_t_GetNameDelegate(SteamAPI_gameserveritem_t_GetName));
             base.Install<SteamAPI_gameserveritem_t_SetNameDelegate>("SteamAPI_gameserveritem_t_SetName", _SteamAPI_gameserveritem_t_SetNameDelegate, new SteamAPI_gameserveritem_t_SetNameDelegate(SteamAPI_gameserveritem_t_SetName));
             base.Install<g_pSteamClientGameServerDelegate>("g_pSteamClientGameServer", _g_pSteamClientGameServerDelegate, new g_pSteamClientGameServerDelegate(g_pSteamClientGameServer));
-            base.Install<Steam_RegisterInterfaceFuncsDelegate>("Steam_RegisterInterfaceFuncs", _Steam_RegisterInterfaceFuncsDelegate, new Steam_RegisterInterfaceFuncsDelegate(Steam_RegisterInterfaceFuncs));
-            base.Install<Steam_RunCallbacksDelegate>("Steam_RunCallbacks", _Steam_RunCallbacksDelegate, new Steam_RunCallbacksDelegate(Steam_RunCallbacks));
             base.Install<SteamAPI_SteamAppList_v001Delegate>("SteamAPI_SteamAppList_v001", _SteamAPI_SteamAppList_v001Delegate, new SteamAPI_SteamAppList_v001Delegate(SteamAPI_SteamAppList_v001));
             base.Install<SteamAPI_SteamApps_v008Delegate>("SteamAPI_SteamApps_v008", _SteamAPI_SteamApps_v008Delegate, new SteamAPI_SteamApps_v008Delegate(SteamAPI_SteamApps_v008));
-            base.Install<SteamAPI_SteamGameServerApps_v008Delegate>("SteamAPI_SteamGameServerApps_v008", _SteamAPI_SteamGameServerApps_v008Delegate, new SteamAPI_SteamGameServerApps_v008Delegate(SteamAPI_SteamGameServerApps_v008));
-            base.Install<SteamAPI_SteamController_v007Delegate>("SteamAPI_SteamController_v007", _SteamAPI_SteamController_v007Delegate, new SteamAPI_SteamController_v007Delegate(SteamAPI_SteamController_v007));
             base.Install<SteamAPI_SteamController_v008Delegate>("SteamAPI_SteamController_v008", _SteamAPI_SteamController_v008Delegate, new SteamAPI_SteamController_v008Delegate(SteamAPI_SteamController_v008));
             base.Install<SteamAPI_SteamFriends_v017Delegate>("SteamAPI_SteamFriends_v017", _SteamAPI_SteamFriends_v017Delegate, new SteamAPI_SteamFriends_v017Delegate(SteamAPI_SteamFriends_v017));
             base.Install<SteamAPI_SteamUtils_v010Delegate>("SteamAPI_SteamUtils_v010", _SteamAPI_SteamUtils_v010Delegate, new SteamAPI_SteamUtils_v010Delegate(SteamAPI_SteamUtils_v010));
             base.Install<SteamAPI_SteamGameServerUtils_v010Delegate>("SteamAPI_SteamGameServerUtils_v010", _SteamAPI_SteamGameServerUtils_v010Delegate, new SteamAPI_SteamGameServerUtils_v010Delegate(SteamAPI_SteamGameServerUtils_v010));
-            base.Install<SteamAPI_SteamUtils_v009Delegate>("SteamAPI_SteamUtils_v009", _SteamAPI_SteamUtils_v009Delegate, new SteamAPI_SteamUtils_v009Delegate(SteamAPI_SteamUtils_v009));
-            base.Install<SteamAPI_SteamGameServerUtils_v009Delegate>("SteamAPI_SteamGameServerUtils_v009", _SteamAPI_SteamGameServerUtils_v009Delegate, new SteamAPI_SteamGameServerUtils_v009Delegate(SteamAPI_SteamGameServerUtils_v009));
             base.Install<SteamAPI_SteamMatchmaking_v009Delegate>("SteamAPI_SteamMatchmaking_v009", _SteamAPI_SteamMatchmaking_v009Delegate, new SteamAPI_SteamMatchmaking_v009Delegate(SteamAPI_SteamMatchmaking_v009));
             base.Install<SteamAPI_SteamMatchmakingServers_v002Delegate>("SteamAPI_SteamMatchmakingServers_v002", _SteamAPI_SteamMatchmakingServers_v002Delegate, new SteamAPI_SteamMatchmakingServers_v002Delegate(SteamAPI_SteamMatchmakingServers_v002));
             base.Install<SteamAPI_SteamGameSearch_v001Delegate>("SteamAPI_SteamGameSearch_v001", _SteamAPI_SteamGameSearch_v001Delegate, new SteamAPI_SteamGameSearch_v001Delegate(SteamAPI_SteamGameSearch_v001));
@@ -77,68 +70,22 @@ namespace SKYNET.Hook.Handles
             base.Install<SteamAPI_SteamMusicRemote_v001Delegate>("SteamAPI_SteamMusicRemote_v001", _SteamAPI_SteamMusicRemote_v001Delegate, new SteamAPI_SteamMusicRemote_v001Delegate(SteamAPI_SteamMusicRemote_v001));
             base.Install<SteamAPI_SteamHTTP_v003Delegate>("SteamAPI_SteamHTTP_v003", _SteamAPI_SteamHTTP_v003Delegate, new SteamAPI_SteamHTTP_v003Delegate(SteamAPI_SteamHTTP_v003));
             base.Install<SteamAPI_SteamGameServerHTTP_v003Delegate>("SteamAPI_SteamGameServerHTTP_v003", _SteamAPI_SteamGameServerHTTP_v003Delegate, new SteamAPI_SteamGameServerHTTP_v003Delegate(SteamAPI_SteamGameServerHTTP_v003));
-            base.Install<SteamAPI_SteamInput_v001Delegate>("SteamAPI_SteamInput_v001", _SteamAPI_SteamInput_v001Delegate, new SteamAPI_SteamInput_v001Delegate(SteamAPI_SteamInput_v001));
-            base.Install<SteamAPI_SteamInput_v002Delegate>("SteamAPI_SteamInput_v002", _SteamAPI_SteamInput_v002Delegate, new SteamAPI_SteamInput_v002Delegate(SteamAPI_SteamInput_v002));
             base.Install<SteamAPI_SteamHTMLSurface_v005Delegate>("SteamAPI_SteamHTMLSurface_v005", _SteamAPI_SteamHTMLSurface_v005Delegate, new SteamAPI_SteamHTMLSurface_v005Delegate(SteamAPI_SteamHTMLSurface_v005));
             base.Install<SteamAPI_SteamInventory_v003Delegate>("SteamAPI_SteamInventory_v003", _SteamAPI_SteamInventory_v003Delegate, new SteamAPI_SteamInventory_v003Delegate(SteamAPI_SteamInventory_v003));
             base.Install<SteamAPI_SteamGameServerInventory_v003Delegate>("SteamAPI_SteamGameServerInventory_v003", _SteamAPI_SteamGameServerInventory_v003Delegate, new SteamAPI_SteamGameServerInventory_v003Delegate(SteamAPI_SteamGameServerInventory_v003));
             base.Install<SteamAPI_SteamVideo_v002Delegate>("SteamAPI_SteamVideo_v002", _SteamAPI_SteamVideo_v002Delegate, new SteamAPI_SteamVideo_v002Delegate(SteamAPI_SteamVideo_v002));
-            base.Install<SteamAPI_SteamTV_v001Delegate>("SteamAPI_SteamTV_v001", _SteamAPI_SteamTV_v001Delegate, new SteamAPI_SteamTV_v001Delegate(SteamAPI_SteamTV_v001));
             base.Install<SteamAPI_SteamParentalSettings_v001Delegate>("SteamAPI_SteamParentalSettings_v001", _SteamAPI_SteamParentalSettings_v001Delegate, new SteamAPI_SteamParentalSettings_v001Delegate(SteamAPI_SteamParentalSettings_v001));
             base.Install<SteamAPI_SteamRemotePlay_v001Delegate>("SteamAPI_SteamRemotePlay_v001", _SteamAPI_SteamRemotePlay_v001Delegate, new SteamAPI_SteamRemotePlay_v001Delegate(SteamAPI_SteamRemotePlay_v001));
-            base.Install<SteamAPI_SteamNetworkingMessages_v002Delegate>("SteamAPI_SteamNetworkingMessages_v002", _SteamAPI_SteamNetworkingMessages_v002Delegate, new SteamAPI_SteamNetworkingMessages_v002Delegate(SteamAPI_SteamNetworkingMessages_v002));
             base.Install<SteamAPI_SteamNetworkingMessages_SteamAPI_v002Delegate>("SteamAPI_SteamNetworkingMessages_SteamAPI_v002", _SteamAPI_SteamNetworkingMessages_SteamAPI_v002Delegate, new SteamAPI_SteamNetworkingMessages_SteamAPI_v002Delegate(SteamAPI_SteamNetworkingMessages_SteamAPI_v002));
-            base.Install<SteamAPI_SteamGameServerNetworkingMessages_v002Delegate>("SteamAPI_SteamGameServerNetworkingMessages_v002", _SteamAPI_SteamGameServerNetworkingMessages_v002Delegate, new SteamAPI_SteamGameServerNetworkingMessages_v002Delegate(SteamAPI_SteamGameServerNetworkingMessages_v002));
             base.Install<SteamAPI_SteamGameServerNetworkingMessages_SteamAPI_v002Delegate>("SteamAPI_SteamGameServerNetworkingMessages_SteamAPI_v002", _SteamAPI_SteamGameServerNetworkingMessages_SteamAPI_v002Delegate, new SteamAPI_SteamGameServerNetworkingMessages_SteamAPI_v002Delegate(SteamAPI_SteamGameServerNetworkingMessages_SteamAPI_v002));
-            base.Install<SteamAPI_SteamNetworkingSockets_SteamAPI_v009Delegate>("SteamAPI_SteamNetworkingSockets_SteamAPI_v009", _SteamAPI_SteamNetworkingSockets_SteamAPI_v009Delegate, new SteamAPI_SteamNetworkingSockets_SteamAPI_v009Delegate(SteamAPI_SteamNetworkingSockets_SteamAPI_v009));
-            base.Install<SteamAPI_SteamGameServerNetworkingSockets_SteamAPI_v009Delegate>("SteamAPI_SteamGameServerNetworkingSockets_SteamAPI_v009", _SteamAPI_SteamGameServerNetworkingSockets_SteamAPI_v009Delegate, new SteamAPI_SteamGameServerNetworkingSockets_SteamAPI_v009Delegate(SteamAPI_SteamGameServerNetworkingSockets_SteamAPI_v009));
-            base.Install<SteamAPI_SteamNetworkingSockets_v009Delegate>("SteamAPI_SteamNetworkingSockets_v009", _SteamAPI_SteamNetworkingSockets_v009Delegate, new SteamAPI_SteamNetworkingSockets_v009Delegate(SteamAPI_SteamNetworkingSockets_v009));
-            base.Install<SteamAPI_SteamGameServerNetworkingSockets_v009Delegate>("SteamAPI_SteamGameServerNetworkingSockets_v009", _SteamAPI_SteamGameServerNetworkingSockets_v009Delegate, new SteamAPI_SteamGameServerNetworkingSockets_v009Delegate(SteamAPI_SteamGameServerNetworkingSockets_v009));
-            base.Install<SteamAPI_SteamNetworkingSockets_v008Delegate>("SteamAPI_SteamNetworkingSockets_v008", _SteamAPI_SteamNetworkingSockets_v008Delegate, new SteamAPI_SteamNetworkingSockets_v008Delegate(SteamAPI_SteamNetworkingSockets_v008));
-            base.Install<SteamAPI_SteamGameServerNetworkingSockets_v008Delegate>("SteamAPI_SteamGameServerNetworkingSockets_v008", _SteamAPI_SteamGameServerNetworkingSockets_v008Delegate, new SteamAPI_SteamGameServerNetworkingSockets_v008Delegate(SteamAPI_SteamGameServerNetworkingSockets_v008));
-            base.Install<SteamAPI_SteamNetworkingUtils_SteamAPI_v003Delegate>("SteamAPI_SteamNetworkingUtils_SteamAPI_v003", _SteamAPI_SteamNetworkingUtils_SteamAPI_v003Delegate, new SteamAPI_SteamNetworkingUtils_SteamAPI_v003Delegate(SteamAPI_SteamNetworkingUtils_SteamAPI_v003));
-            base.Install<SteamAPI_SteamNetworkingUtils_v003Delegate>("SteamAPI_SteamNetworkingUtils_v003", _SteamAPI_SteamNetworkingUtils_v003Delegate, new SteamAPI_SteamNetworkingUtils_v003Delegate(SteamAPI_SteamNetworkingUtils_v003));
             base.Install<SteamAPI_SteamGameServerStats_v001Delegate>("SteamAPI_SteamGameServerStats_v001", _SteamAPI_SteamGameServerStats_v001Delegate, new SteamAPI_SteamGameServerStats_v001Delegate(SteamAPI_SteamGameServerStats_v001));
-            base.Install<SteamAppListDelegate>("SteamAppList", _SteamAppListDelegate, new SteamAppListDelegate(SteamAppList));
-            base.Install<SteamAppsDelegate>("SteamApps", _SteamAppsDelegate, new SteamAppsDelegate(SteamApps));
             base.Install<SteamClientDelegate>("SteamClient", _SteamClientDelegate, new SteamClientDelegate(SteamClient));
-            base.Install<SteamControllerDelegate>("SteamController", _SteamControllerDelegate, new SteamControllerDelegate(SteamController));
-            base.Install<SteamFriendsDelegate>("SteamFriends", _SteamFriendsDelegate, new SteamFriendsDelegate(SteamFriends));
-            base.Install<SteamGameServerDelegate>("SteamGameServer", _SteamGameServerDelegate, new SteamGameServerDelegate(SteamGameServer));
-            base.Install<SteamGameServerAppsDelegate>("SteamGameServerApps", _SteamGameServerAppsDelegate, new SteamGameServerAppsDelegate(SteamGameServerApps));
-            base.Install<SteamGameServerHTTPDelegate>("SteamGameServerHTTP", _SteamGameServerHTTPDelegate, new SteamGameServerHTTPDelegate(SteamGameServerHTTP));
-            base.Install<SteamGameServerInventoryDelegate>("SteamGameServerInventory", _SteamGameServerInventoryDelegate, new SteamGameServerInventoryDelegate(SteamGameServerInventory));
-            base.Install<SteamGameServerNetworkingDelegate>("SteamGameServerNetworking", _SteamGameServerNetworkingDelegate, new SteamGameServerNetworkingDelegate(SteamGameServerNetworking));
-            base.Install<SteamGameServerStatsDelegate>("SteamGameServerStats", _SteamGameServerStatsDelegate, new SteamGameServerStatsDelegate(SteamGameServerStats));
-            base.Install<SteamGameServerUGCDelegate>("SteamGameServerUGC", _SteamGameServerUGCDelegate, new SteamGameServerUGCDelegate(SteamGameServerUGC));
-            base.Install<SteamGameServerUtilsDelegate>("SteamGameServerUtils", _SteamGameServerUtilsDelegate, new SteamGameServerUtilsDelegate(SteamGameServerUtils));
-            base.Install<SteamHTTPDelegate>("SteamHTTP", _SteamHTTPDelegate, new SteamHTTPDelegate(SteamHTTP));
-            base.Install<SteamHTMLSurfaceDelegate>("SteamHTMLSurface", _SteamHTMLSurfaceDelegate, new SteamHTMLSurfaceDelegate(SteamHTMLSurface));
-            base.Install<SteamInventoryDelegate>("SteamInventory", _SteamInventoryDelegate, new SteamInventoryDelegate(SteamInventory));
-            base.Install<SteamMasterServerUpdaterDelegate>("SteamMasterServerUpdater", _SteamMasterServerUpdaterDelegate, new SteamMasterServerUpdaterDelegate(SteamMasterServerUpdater));
-            base.Install<SteamMatchmakingDelegate>("SteamMatchmaking", _SteamMatchmakingDelegate, new SteamMatchmakingDelegate(SteamMatchmaking));
-            base.Install<SteamMatchmakingServersDelegate>("SteamMatchmakingServers", _SteamMatchmakingServersDelegate, new SteamMatchmakingServersDelegate(SteamMatchmakingServers));
-            base.Install<SteamMusicDelegate>("SteamMusic", _SteamMusicDelegate, new SteamMusicDelegate(SteamMusic));
-            base.Install<SteamMusicRemoteDelegate>("SteamMusicRemote", _SteamMusicRemoteDelegate, new SteamMusicRemoteDelegate(SteamMusicRemote));
-            base.Install<SteamNetworkingDelegate>("SteamNetworking", _SteamNetworkingDelegate, new SteamNetworkingDelegate(SteamNetworking));
-            base.Install<SteamParentalSettingsDelegate>("SteamParentalSettings", _SteamParentalSettingsDelegate, new SteamParentalSettingsDelegate(SteamParentalSettings));
-            base.Install<SteamRemoteStorageDelegate>("SteamRemoteStorage", _SteamRemoteStorageDelegate, new SteamRemoteStorageDelegate(SteamRemoteStorage));
-            base.Install<SteamScreenshotsDelegate>("SteamScreenshots", _SteamScreenshotsDelegate, new SteamScreenshotsDelegate(SteamScreenshots));
-            base.Install<SteamUGCDelegate>("SteamUGC", _SteamUGCDelegate, new SteamUGCDelegate(SteamUGC));
-            base.Install<SteamUserDelegate>("SteamUser", _SteamUserDelegate, new SteamUserDelegate(SteamUser), this);
-            base.Install<SteamUserStatsDelegate>("SteamUserStats", _SteamUserStatsDelegate, new SteamUserStatsDelegate(SteamUserStats));
-            base.Install<SteamUtilsDelegate>("SteamUtils", _SteamUtilsDelegate, new SteamUtilsDelegate(SteamUtils));
-            base.Install<SteamVideoDelegate>("SteamVideo", _SteamVideoDelegate, new SteamVideoDelegate(SteamVideo));
-            base.Install<VR_GetGenericInterfaceDelegate>("VR_GetGenericInterface", _VR_GetGenericInterfaceDelegate, new VR_GetGenericInterfaceDelegate(VR_GetGenericInterface));
-            base.Install<VR_GetStringForHmdErrorDelegate>("VR_GetStringForHmdError", _VR_GetStringForHmdErrorDelegate, new VR_GetStringForHmdErrorDelegate(VR_GetStringForHmdError));
-            base.Install<VR_InitDelegate>("VR_Init", _VR_InitDelegate, new VR_InitDelegate(VR_Init));
-            base.Install<VR_IsHmdPresentDelegate>("VR_IsHmdPresent", _VR_IsHmdPresentDelegate, new VR_IsHmdPresentDelegate(VR_IsHmdPresent));
-            base.Install<VR_ShutdownDelegate>("VR_Shutdown", _VR_ShutdownDelegate, new VR_ShutdownDelegate(VR_Shutdown));
         }
+
         int steps = 0;
         public bool SteamAPI_Init()
         {
-            if (SteamEmulator.Initialized && steps == 2)
+            if (SteamEmulator.Initialized && steps == 3)
             {
                 Write($"{"SteamAPI_Init [TRUE]"}");
                 return true;
@@ -156,14 +103,14 @@ namespace SKYNET.Hook.Handles
         public void SteamAPI_RunCallbacks()
         {
             Write("SteamAPI_RunCallbacks");
-            SteamEmulator.Client_Callback.RunCallbacks();
+            //SteamEmulator.Client_Callback.RunCallbacks();
         }
 
         
         public void SteamAPI_RegisterCallResult(CCallbackBase pCallback, SteamAPICall_t hAPICall)
         {
             Write("SteamAPI_RegisterCallResult");
-            SteamEmulator.Client_Callback.RegisterCallResult(pCallback, hAPICall);
+            //SteamEmulator.Client_Callback.RegisterCallResult(pCallback, hAPICall);
         }
 
         public void SteamAPI_Shutdown(IntPtr pContextInitData)
@@ -185,13 +132,6 @@ namespace SKYNET.Hook.Handles
         
         public unsafe void SteamAPI_RegisterCallback(IntPtr pCallback, int iCallback)
         {
-            string _file = Path.Combine(modCommon.GetPath(), "[SKYNET] steam_api.ini");
-
-            if (File.Exists(_file))
-            {
-                modCommon.LoadSettings();
-            }
-
             CCallbackBase Base = Marshal.PtrToStructure<CCallbackBase>(pCallback);
             string callMessage = $"SteamAPI_RegisterCallback: ";
 
@@ -275,17 +215,17 @@ namespace SKYNET.Hook.Handles
         public int SteamAPI_GetHSteamUser()
         {
             Write("SteamAPI_GetHSteamUser");
-            if (SteamEmulator.HSteamUser == null || (int)SteamEmulator.HSteamUser == 0)
+            if (SteamEmulator.HSteamUser == 0)
             {
                 SteamEmulator.CreateSteamUser();
             }
-            return (int)SteamEmulator.HSteamUser;
+            return SteamEmulator.HSteamUser;
         }
 
         public int SteamAPI_GetHSteamPipe()
         {
             Write("SteamAPI_GetHSteamPipe");
-            if (SteamEmulator.HSteamPipe == null || (int)SteamEmulator.HSteamPipe == 0)
+            if ((int)SteamEmulator.HSteamPipe == 0)
             {
                 SteamEmulator.CreateSteamPipe();
             }
@@ -301,7 +241,11 @@ namespace SKYNET.Hook.Handles
         public int GetHSteamUser()
         {
             Write("GetHSteamUser");
-            return SteamAPI_GetHSteamUser();
+            if (SteamEmulator.HSteamUser == 0)
+            {
+                SteamEmulator.CreateSteamUser();
+            }
+            return (int)SteamEmulator.HSteamUser;
         }
 
         public void SteamAPI_SetTryCatchCallbacks(bool bTryCatchCallbacks)
@@ -340,12 +284,6 @@ namespace SKYNET.Hook.Handles
         {
             Write($"SteamAPI_ManualDispatch_GetAPICallResult");
             return true;
-        }
-
-        public bool SteamAPI_RestartApp(UInt32 appid)
-        {
-            Write($"SteamAPI_RestartApp");
-            return SteamAPI_RestartAppIfNecessary(appid);
         }
 
         public void SteamAPI_SetMiniDumpComment([MarshalAs(UnmanagedType.LPStr)] string pchMsg)
@@ -390,22 +328,6 @@ namespace SKYNET.Hook.Handles
             return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamGameServer.InterfaceVersion);
         }
 
-        public void Steam_RegisterInterfaceFuncs(IntPtr hModule)
-        {
-            Write($"Steam_RegisterInterfaceFuncs");
-        }
-
-        public void Steam_RunCallbacks(IntPtr hSteamPipe, bool bGameServerCallbacks)
-        {
-            Write("Steam_RunCallbacks\n");
-
-            SteamAPI_RunCallbacks();
-
-            //if (bGameServerCallbacks)
-            //    SteamEmulator.SteamGameServer.RunCallbacks(IntPtr.Zero);
-        }
-
-
         #region Interfaces
 
         
@@ -414,28 +336,18 @@ namespace SKYNET.Hook.Handles
             Write($"SteamAPI_SteamAppList_v001");
             return InterfaceManager.FindOrCreateInterface("STEAMAPPLIST_INTERFACE_VERSION001");
         }
-
         
         public IntPtr SteamAPI_SteamApps_v008()
         {
             Write($"SteamAPI_SteamApps_v008");
             return InterfaceManager.FindOrCreateInterface("STEAMAPPS_INTERFACE_VERSION008");
         }
-
         
         public IntPtr SteamAPI_SteamGameServerApps_v008()
         {
             Write($"SteamAPI_SteamGameServerApps_v008");
             return InterfaceManager.FindOrCreateInterface("STEAMAPPS_INTERFACE_VERSION008");
         }
-
-        
-        public IntPtr SteamAPI_SteamController_v007()
-        {
-            Write($"SteamAPI_SteamController_v007");
-            return InterfaceManager.FindOrCreateInterface("SteamController007");
-        }
-
         
         public IntPtr SteamAPI_SteamController_v008()
         {
@@ -461,21 +373,6 @@ namespace SKYNET.Hook.Handles
             Write($"SteamAPI_SteamGameServerUtils_v010");
             return InterfaceManager.FindOrCreateInterface("SteamUtils010");
         }
-
-        
-        public IntPtr SteamAPI_SteamUtils_v009()
-        {
-            Write($"SteamAPI_SteamUtils_v009");
-            return InterfaceManager.FindOrCreateInterface("SteamUtils009");
-        }
-
-        
-        public IntPtr SteamAPI_SteamGameServerUtils_v009()
-        {
-            Write($"SteamAPI_SteamGameServerUtils_v009");
-            return InterfaceManager.FindOrCreateInterface("SteamUtils009");
-        }
-
         
         public IntPtr SteamAPI_SteamMatchmaking_v009()
         {
@@ -489,50 +386,42 @@ namespace SKYNET.Hook.Handles
             Write($"SteamAPI_SteamMatchmakingServers_v002");
             return InterfaceManager.FindOrCreateInterface("SteamMatchMakingServers002");
         }
-
         
         public IntPtr SteamAPI_SteamGameSearch_v001()
         {
             Write($"SteamAPI_SteamGameSearch_v001");
             return InterfaceManager.FindOrCreateInterface("SteamAPI_SteamGameSearch_v001");
         }
-
-
         
         public IntPtr SteamAPI_SteamParties_v002()
         {
             Write($"SteamAPI_SteamParties_v002");
             return InterfaceManager.FindOrCreateInterface("SteamParties002");
         }
-
         
         public IntPtr SteamAPI_SteamNetworking_v006()
         {
             Write($"SteamAPI_SteamNetworking_v006");
             return InterfaceManager.FindOrCreateInterface("SteamNetworking006");
         }
-
         
         public IntPtr SteamAPI_SteamGameServerNetworking_v006()
         {
             Write($"SteamAPI_SteamGameServerNetworking_v006");
             return InterfaceManager.FindOrCreateInterface("SteamNetworking006");
         }
-
         
         public IntPtr SteamAPI_SteamScreenshots_v003()
         {
             Write($"SteamAPI_SteamScreenshots_v003");
             return InterfaceManager.FindOrCreateInterface("STEAMSCREENSHOTS_INTERFACE_VERSION003");
         }
-
         
         public IntPtr SteamAPI_SteamMusic_v001()
         {
             Write($"SteamAPI_SteamMusic_v001");
             return InterfaceManager.FindOrCreateInterface("STEAMMUSIC_INTERFACE_VERSION001");
         }
-
         
         public IntPtr SteamAPI_SteamMusicRemote_v001()
         {
@@ -540,69 +429,41 @@ namespace SKYNET.Hook.Handles
             return InterfaceManager.FindOrCreateInterface("STEAMMUSICREMOTE_INTERFACE_VERSION001");
         }
 
-        
         public IntPtr SteamAPI_SteamHTTP_v003()
         {
             Write($"SteamAPI_SteamHTTP_v003");
             return InterfaceManager.FindOrCreateInterface("STEAMHTTP_INTERFACE_VERSION003");
         }
-
         
         public IntPtr SteamAPI_SteamGameServerHTTP_v003()
         {
             Write($"SteamAPI_SteamGameServerHTTP_v003");
             return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamHTTP.InterfaceVersion);
         }
-
-        
-        public IntPtr SteamAPI_SteamInput_v001()
-        {
-            Write($"SteamAPI_SteamInput_v001");
-            return InterfaceManager.FindOrCreateInterface("SteamInput001");
-        }
-
-        
-        public IntPtr SteamAPI_SteamInput_v002()
-        {
-            Write($"SteamAPI_SteamInput_v002");
-            return InterfaceManager.FindOrCreateInterface("SteamInput002");
-        }
-
         
         public IntPtr SteamAPI_SteamHTMLSurface_v005()
         {
             Write($"SteamAPI_SteamHTMLSurface_v005");
             return InterfaceManager.FindOrCreateInterface("STEAMHTMLSURFACE_INTERFACE_VERSION_005");
         }
-
         
         public IntPtr SteamAPI_SteamInventory_v003()
         {
             Write($"SteamAPI_SteamInventory_v003");
             return InterfaceManager.FindOrCreateInterface("STEAMINVENTORY_INTERFACE_V003");
         }
-
         
         public IntPtr SteamAPI_SteamGameServerInventory_v003()
         {
             Write($"SteamAPI_SteamGameServerInventory_v003");
             return InterfaceManager.FindOrCreateInterface("STEAMINVENTORY_INTERFACE_V003");
         }
-
         
         public IntPtr SteamAPI_SteamVideo_v002()
         {
             Write($"SteamAPI_SteamVideo_v002");
             return InterfaceManager.FindOrCreateInterface("STEAMVIDEO_INTERFACE_V002");
         }
-
-        
-        public IntPtr SteamAPI_SteamTV_v001()
-        {
-            Write($"SteamAPI_SteamTV_v001");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamTV.InterfaceVersion);
-        }
-
         
         public IntPtr SteamAPI_SteamParentalSettings_v001()
         {
@@ -610,108 +471,28 @@ namespace SKYNET.Hook.Handles
             return InterfaceManager.FindOrCreateInterface("STEAMPARENTALSETTINGS_INTERFACE_VERSION001");
         }
 
-        
         public IntPtr SteamAPI_SteamRemotePlay_v001()
         {
             Write($"SteamAPI_SteamRemotePlay_v001");
             return InterfaceManager.FindOrCreateInterface("STEAMREMOTEPLAY_INTERFACE_VERSION001");
         }
 
-        
-        public IntPtr SteamAPI_SteamNetworkingMessages_v002()
-        {
-            Write($"SteamAPI_SteamNetworkingMessages_v002");
-            return InterfaceManager.FindOrCreateInterface("SteamNetworkingMessages002");
-        }
-
-        
         public IntPtr SteamAPI_SteamNetworkingMessages_SteamAPI_v002()
         {
             Write($"SteamAPI_SteamNetworkingMessages_SteamAPI_v002");
             return InterfaceManager.FindOrCreateInterface("SteamNetworkingMessages002");
         }
 
-        
-        public IntPtr SteamAPI_SteamGameServerNetworkingMessages_v002()
-        {
-            Write($"SteamAPI_SteamGameServerNetworkingMessages_v002");
-            return InterfaceManager.FindOrCreateInterface("SteamNetworkingMessages002");
-        }
-
-        
         public IntPtr SteamAPI_SteamGameServerNetworkingMessages_SteamAPI_v002()
         {
             Write($"SteamAPI_SteamGameServerNetworkingMessages_SteamAPI_v002");
             return InterfaceManager.FindOrCreateInterface("SteamNetworkingMessages002");
         }
 
-        
-        public IntPtr SteamAPI_SteamNetworkingSockets_SteamAPI_v009()
-        {
-            Write($"SteamAPI_SteamNetworkingSockets_SteamAPI_v009");
-            return InterfaceManager.FindOrCreateInterface("SteamNetworkingSockets009");
-        }
-
-        
-        public IntPtr SteamAPI_SteamGameServerNetworkingSockets_SteamAPI_v009()
-        {
-            Write($"SteamAPI_SteamGameServerNetworkingSockets_SteamAPI_v009");
-            return InterfaceManager.FindOrCreateInterface("SteamNetworkingSockets009");
-        }
-
-        
-        public IntPtr SteamAPI_SteamNetworkingSockets_v009()
-        {
-            Write($"SteamAPI_SteamNetworkingSockets_v009");
-            return InterfaceManager.FindOrCreateInterface("SteamNetworkingSockets009");
-        }
-
-        public IntPtr SteamAPI_SteamGameServerNetworkingSockets_v009()
-        {
-            Write($"SteamAPI_SteamGameServerNetworkingSockets_v009");
-            return InterfaceManager.FindOrCreateInterface("SteamNetworkingSockets009");
-        }
-        
-        public IntPtr SteamAPI_SteamNetworkingSockets_v008()
-        {
-            Write($"SteamAPI_SteamNetworkingSockets_v008");
-            return InterfaceManager.FindOrCreateInterface("SteamNetworkingSockets008");
-        }
-
-        public IntPtr SteamAPI_SteamGameServerNetworkingSockets_v008()
-        {
-            Write($"SteamAPI_SteamGameServerNetworkingSockets_v008");
-            return InterfaceManager.FindOrCreateInterface("SteamNetworkingSockets008");
-        }
-
-        public IntPtr SteamAPI_SteamNetworkingUtils_SteamAPI_v003()
-        {
-            Write($"SteamAPI_SteamNetworkingUtils_SteamAPI_v003");
-            return InterfaceManager.FindOrCreateInterface("SteamNetworkingUtils003");
-        }
-
-        public IntPtr SteamAPI_SteamNetworkingUtils_v003()
-        {
-            Write($"SteamAPI_SteamNetworkingUtils_v003");
-            return InterfaceManager.FindOrCreateInterface("SteamNetworkingUtils003");
-        }
-
         public IntPtr SteamAPI_SteamGameServerStats_v001()
         {
             Write($"SteamAPI_SteamGameServerStats_v001");
             return default;
-        }
-        
-        public IntPtr SteamAppList()
-        {
-            Write($"SteamAppList");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamAppList.InterfaceVersion);
-        }
-
-        public IntPtr SteamApps()
-        {
-            Write($"ISteamApps");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamApps.InterfaceVersion);
         }
 
         public IntPtr SteamClient()
@@ -720,205 +501,8 @@ namespace SKYNET.Hook.Handles
             return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamClient.InterfaceVersion);
         }
 
-        public IntPtr SteamController()
-        {
-            Write($"SteamController");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamController.InterfaceVersion);
-        }
-
-        
-        public IntPtr SteamFriends()
-        {
-            Write($"SteamFriends");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamFriends.InterfaceVersion);
-        }
-
-        public IntPtr SteamGameServer()
-        {
-            Write($"SteamGameServer");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamGameServer.InterfaceVersion);
-        }
-        
-        public IntPtr SteamGameServerApps()
-        {
-            Write($"SteamGameServerApps");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamGameServerApps.InterfaceVersion);
-        }
-        
-        public IntPtr SteamGameServerHTTP()
-        {
-            Write($"SteamGameServerHTTP");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamHTTP.InterfaceVersion);
-        }
-
-        public IntPtr SteamGameServerInventory()
-        {
-            Write($"SteamGameServerInventory");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamGameServerInventory.InterfaceVersion);
-        }
-        
-        public IntPtr SteamGameServerNetworking()
-        {
-            Write($"SteamGameServerNetworking");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamGameServerNetworking.InterfaceVersion);
-        }
-
-        public IntPtr SteamGameServerStats()
-        {
-            Write($"SteamGameServerStats");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamGameServerStats.InterfaceVersion);
-        }
-
-        public IntPtr SteamGameServerUGC()
-        {
-            Write($"SteamGameServerUGC");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamUGC.InterfaceVersion);
-        }
-        
-        public IntPtr SteamGameServerUtils()
-        {
-            Write($"SteamGameServerUtils");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamGameServerUtils.InterfaceVersion);
-        }
-
-        public IntPtr SteamHTTP()
-        {
-            Write($"SteamHTTP");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamHTTP.InterfaceVersion);
-        }
-        
-        public IntPtr SteamHTMLSurface()
-        {
-            Write($"SteamHTMLSurface");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamHTMLSurface.InterfaceVersion);
-        }
-
-        public IntPtr SteamInventory()
-        {
-            Write($"SteamInventory");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamInventory.InterfaceVersion);
-        }
-
-        public IntPtr SteamMasterServerUpdater()
-        {
-            Write($"SteamMasterServerUpdater");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamMasterServerUpdater.InterfaceVersion);
-        }
-
-        public IntPtr SteamMatchmaking()
-        {
-            Write($"SteamMatchmaking");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamMatchmaking.InterfaceVersion);
-        }
-        
-        public IntPtr SteamMatchmakingServers()
-        {
-            Write($"SteamMatchmakingServers");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamMatchMakingServers.InterfaceVersion);
-        }
-
-        public IntPtr SteamMusic()
-        {
-            Write($"SteamMusic");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamMusic.InterfaceVersion);
-        }
-        
-        public IntPtr SteamMusicRemote()
-        {
-            Write($"SteamMusicRemote");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamMusicRemote.InterfaceVersion);
-        }
-
-        
-        public IntPtr SteamNetworking()
-        {
-            Write($"SteamNetworking");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamNetworking.InterfaceVersion);
-        }
-
-        
-        public IntPtr SteamParentalSettings()
-        {
-            Write($"SteamParentalSettings");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamParentalSettings.InterfaceVersion);
-        }
-
-        
-        public IntPtr SteamRemoteStorage()
-        {
-            Write($"SteamRemoteStorage");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamRemoteStorage.InterfaceVersion);
-        }
-
-        
-        public IntPtr SteamScreenshots()
-        {
-            Write($"SteamScreenshots");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamScreenshots.InterfaceVersion);
-        }
-
-        
-        public IntPtr SteamUGC()
-        {
-            Write($"SteamUGC");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamUGC.InterfaceVersion);
-        }
-        
-        public IntPtr SteamUser()
-        {
-            Write($"SteamUser");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamUser.InterfaceVersion);
-        }
-
-        
-        public IntPtr SteamUserStats()
-        {
-            Write($"SteamUserStats");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamUserStats.InterfaceVersion);
-        }
-
-        
-        public IntPtr SteamUtils()
-        {
-            Write($"SteamUtils");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamUtils.InterfaceVersion);
-        }
-
-        
-        public IntPtr SteamVideo()
-        {
-            Write($"SteamVideo");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamVideo.InterfaceVersion);
-        }
-
         #endregion
 
-        public void VR_GetGenericInterface(string pchInterfaceVersion, int peError)
-        {
-            Write($"VR_GetGenericInterface version {pchInterfaceVersion}");
-        }
-        
-        public string VR_GetStringForHmdError(int error)
-        {
-            Write($"VR_GetStringForHmdError");
-            return "";
-        }
-        
-        public void VR_Init(int error, int type)
-        {
-            Write($"VR_Init");
-        }
-        
-        public bool VR_IsHmdPresent()
-        {
-            Write($"VR_IsHmdPresent");
-            return false;
-        }
-        
-        public void VR_Shutdown()
-        {
-            Write($"VR_Shutdown");
-        }
 
         public override void Write(object v)
         {

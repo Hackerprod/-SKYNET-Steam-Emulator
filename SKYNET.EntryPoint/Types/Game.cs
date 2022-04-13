@@ -13,6 +13,7 @@ namespace SKYNET
         public string Parameters { get; set; }
         public List<DLC> GameDLC { get; set; }
         public bool LaunchWithoutEmu { get; set; }
+        public bool SendLog { get; set; }
 
         public Game()
         {

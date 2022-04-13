@@ -27,8 +27,8 @@ namespace SKYNET.Manager
 
             Hooks.Add(new SKYNET.Hook.Handles.SteamInternal());
             Hooks.Add(new SKYNET.Hook.Handles.SteamAPI());
-            //Hooks.Add(new SKYNET.Hook.Handles.SteamAPI_ISteamAppList()); 
-            //Hooks.Add(new SKYNET.Hook.Handles.SteamAPI_ISteamApps());
+            Hooks.Add(new SKYNET.Hook.Handles.SteamAPI_ISteamAppList());
+            Hooks.Add(new SKYNET.Hook.Handles.SteamAPI_ISteamApps());
 
             string moduleName = Modules.Find(m => m.ToLower().StartsWith("steam_api"));
             if (string.IsNullOrEmpty(moduleName))
@@ -56,6 +56,7 @@ namespace SKYNET.Manager
 
         internal void Install()
         {
+            Main.Write("Injectiong Steam_Api calls");
             foreach (var hook in Hooks)
             {
                 if (!hook.Installed && !string.IsNullOrEmpty(hook.Library) && Modules.Contains(hook.Library.ToUpper()))
@@ -166,12 +167,7 @@ namespace SKYNET.Manager
             SteamEmulator.SteamApiPath = dllPath;
 
             CLoadLibrary.LoadLibraryA(dllPath, out string Msg);
-
-            Main.Write("Hook Manager", Msg);
-
-            //Memory.CreateInMemoryModule(dllPath);
         }
-
     }
 }
 public class CLoadLibrary

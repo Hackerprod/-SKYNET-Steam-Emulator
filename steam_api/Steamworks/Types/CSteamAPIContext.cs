@@ -205,4 +205,18 @@ namespace SKYNET.Types
             return true;
         }
     }
+
+    public struct ContextInitData_64
+    {
+        public IntPtr pFn;
+        public long counter;
+        public CSteamApiContext Context;
+    }
+
+    public struct ContextInitData_x86
+    {
+        public IntPtr pFn;
+        public uint counter;
+        public CSteamApiContext Context;
+    }
 }

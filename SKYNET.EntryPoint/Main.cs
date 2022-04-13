@@ -38,6 +38,56 @@ namespace SKYNET
             HookInterface.Ping(callbackChannel);
         }
 
+        public void Run(RemoteHooking.IContext inContext, string inChannelName)
+        {
+            try
+            {
+                if (!SteamEmulator.Initialized)
+                {
+                    SteamEmulator = new SteamEmulator(true);
+                    SteamEmulator.OnMessage += SteamEmulator_OnMessage;
+                    SteamEmulator.SendLog = Game.SendLog;
+                    SteamEmulator.EmulatorPath = HookInterface.EmulatorPath;
+                    SteamEmulator.AppId = HookInterface.Game.AppId;
+                    SteamEmulator.EmulatorPath = HookInterface.EmulatorPath;
+                    SteamEmulator.PersonaName = HookInterface.PersonaName;
+                    SteamEmulator.SteamId = HookInterface.SteamId;
+                    SteamEmulator.EmulatorPath = HookInterface.Language;
+                    bool ConsoleOutput = HookInterface.ConsoleOutput;
+
+                    if (ConsoleOutput)
+                    {
+                        //ActiveConsoleOutput();
+                    }
+
+                    SteamEmulator.Initialize();
+                }
+
+                HookManager.Install();
+            }
+            catch (Exception msg)
+            {
+                Write(msg);
+            }
+
+            RemoteHooking.WakeUpProcess();
+
+            try
+            {
+                while (true)
+                {
+                    Thread.Sleep(7000);
+                    HookInterface.Ping("");
+                }
+            }
+            catch
+            {
+            }
+
+            HookManager.UninstallHooks();
+            LocalHook.Release();
+        }
+
         internal static void ForceSteamAPILoad()
         {
             string dllPath = modCommon.GetPath();
@@ -65,43 +115,6 @@ namespace SKYNET
             Memory.CreateInMemoryModule(dllPath);
         }
 
-        public void Run(RemoteHooking.IContext inContext, string inChannelName)
-        {
-            try
-            {
-                if (!SteamEmulator.Initialized)
-                {
-                    SteamEmulator = new SteamEmulator(true);
-                    SteamEmulator.OnMessage += SteamEmulator_OnMessage;
-                    SteamEmulator.Initialize();
-                    SteamEmulator.AppId = HookInterface.Game.AppId;
-                    SteamEmulator.EmulatorPath = HookInterface.EmulatorPath;
-                }
-
-                HookManager.Install();
-            }
-            catch (Exception msg)
-            {
-                Write(msg);
-            }
-
-            RemoteHooking.WakeUpProcess();
-
-            try
-            {
-                while (true)
-                {
-                    Thread.Sleep(7000);
-                    HookInterface.Ping("");
-                }
-            }
-            catch
-            {
-            }
-
-            HookManager.UninstallHooks();
-            LocalHook.Release();
-        }
 
         private void SteamEmulator_OnMessage(object sender, object msg)
         {

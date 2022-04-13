@@ -40,6 +40,7 @@ public class SteamEmulator
     public static string SteamApiPath { get; set; }
     public static string EmulatorPath { get; set; }
     public static IntPtr Context_Ptr { get; set; }
+    public static bool SendLog { get; set; }
 
     #region Interfaces 
 
@@ -104,8 +105,6 @@ public class SteamEmulator
 
         if (Client_Callback == null) Client_Callback = new CallbackManager();
         if (Server_Callback == null) Server_Callback = new CallbackManager();
-
-        InterfaceManager.Initialize();
 
         #region Interface Initialization
 

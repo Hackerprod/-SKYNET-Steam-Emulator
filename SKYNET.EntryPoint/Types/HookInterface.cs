@@ -18,6 +18,16 @@ namespace SKYNET
 
         public Game Game { get; set; }
 
+
+        #region Settings
+
+        public ulong SteamId { get; set; }
+        public string PersonaName { get; set; }
+        public string Language { get; set; }
+        public bool ConsoleOutput { get; set; }
+
+        #endregion
+
         public InjectionOptions InjectionOptions { get; set; }
 
         public event EventHandler<string> PingNotify;
@@ -25,8 +35,6 @@ namespace SKYNET
         public event EventHandler<ConsoleMessage> OnMessage;
 
         public event EventHandler<string> OnShowMessage;
-        
-        public event EventHandler<string> OnUninstall;
 
         public void Ping(string callbackChannel)
         {
@@ -35,7 +43,7 @@ namespace SKYNET
 
         public void InvokeMessage(string sender, object msg)
         {
-            this.OnMessage?.Invoke(this, new ConsoleMessage(sender, msg));
+            this.OnMessage?.Invoke(this, new ConsoleMessage(570, sender, msg));
         }
 
         public void InvokeShowMessage(object msg)

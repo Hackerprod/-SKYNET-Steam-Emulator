@@ -290,7 +290,7 @@ namespace SKYNET.Managers
 
         private static void Write(string v)
         {
-            SteamEmulator.Write(v);
+            SteamEmulator.Write("Interface Manager", v);
         }
     }
 }

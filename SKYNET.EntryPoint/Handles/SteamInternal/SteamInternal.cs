@@ -1,14 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using EasyHook;
-using SKYNET;
-using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Types;
 
@@ -58,9 +49,10 @@ namespace SKYNET.Hook.Handles
         {
             Write($"SteamInternal_ContextInit");
             IntPtr apiContext_ptr = IntPtr.Zero;
+
             if (modCommon.Is64Bit())
             {
-                ContextInitData_64 Context = Marshal.PtrToStructure<ContextInitData_64>(contextInitData_ptr);
+                var Context = Marshal.PtrToStructure<ContextInitData_64>(contextInitData_ptr);
                 apiContext_ptr = contextInitData_ptr + 16;
                 if (Context.counter != 1)
                 {
@@ -82,24 +74,6 @@ namespace SKYNET.Hook.Handles
             }
 
             return apiContext_ptr;
-        }
-
-        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate void pFn(IntPtr ctx);
-        public static pFn _pFn;
-
-        public struct ContextInitData_64
-        {
-            public IntPtr pFn;
-            public long counter;
-            public CSteamApiContext Context;
-        }
-
-        public struct ContextInitData_x86
-        {
-            public IntPtr pFn;
-            public uint counter;
-            public CSteamApiContext Context;
         }
 
         public override void Write(object v)
