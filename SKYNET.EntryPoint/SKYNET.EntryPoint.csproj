@@ -38,6 +38,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Remoting" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -47,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helper\INIParser.cs" />
     <Compile Include="Types\Game.cs" />
     <Compile Include="Handles\LdrLoadDll.cs" />
     <Compile Include="Handles\SteamApi\SteamAPI.cs" />
@@ -57,40 +59,39 @@
     <Compile Include="Handles\SteamApps\SteamAPI_ISteamApps_Delegates.cs" />
     <Compile Include="Handles\SteamInternal\SteamInternal.cs" />
     <Compile Include="Handles\SteamInternal\SteamInternal_Delegates.cs" />
-    <Compile Include="Handles\steamnetworkingsockets.cs" />
     <Compile Include="Helper\NativeMethods.cs" />
     <Compile Include="HookManager.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Helper\Memory.cs" />
     <Compile Include="Types\BaseHook.cs" />
-    <Compile Include="Types\ConsoleMessage.cs" />
     <Compile Include="Types\HookInterface.cs" />
     <Compile Include="Types\IHook.cs" />
+    <Compile Include="Types\SettingsEmu.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\steam_api\steam_api.csproj">
+    <ProjectReference Include="..\steam_api\SKYNET.SteamApi.csproj">
       <Project>{f296c00a-53b4-4a0d-977b-f1946b1acce2}</Project>
-      <Name>steam_api</Name>
+      <Name>SKYNET.SteamApi</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="EasyHook\EasyHook32.dll">
+    <Content Include="EasyHook32.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="EasyHook\EasyHook32Svc.exe">
+    <Content Include="EasyHook32Svc.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="EasyHook\EasyHook64.dll">
+    <Content Include="EasyHook64.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="EasyHook\EasyHook64Svc.exe">
+    <Content Include="EasyHook64Svc.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="EasyHook\EasyLoad32.dll">
+    <Content Include="EasyLoad32.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="EasyHook\EasyLoad64.dll">
+    <Content Include="EasyLoad64.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

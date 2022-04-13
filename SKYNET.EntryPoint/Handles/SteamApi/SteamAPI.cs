@@ -185,13 +185,6 @@ namespace SKYNET.Hook.Handles
         
         public unsafe void SteamAPI_RegisterCallback(IntPtr pCallback, int iCallback)
         {
-            string _file = Path.Combine(modCommon.GetPath(), "[SKYNET] steam_api.ini");
-
-            if (File.Exists(_file))
-            {
-                modCommon.LoadSettings();
-            }
-
             CCallbackBase Base = Marshal.PtrToStructure<CCallbackBase>(pCallback);
             string callMessage = $"SteamAPI_RegisterCallback: ";
 

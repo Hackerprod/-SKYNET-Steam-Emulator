@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.28803.202
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "[SKYNET] Steam Emulator", "[SKYNET] Steam Emulator\[SKYNET] Steam Emulator.csproj", "{F6137E0F-7158-40AB-802D-550F7F1A4C62}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "steam_api", "steam_api\steam_api.csproj", "{F296C00A-53B4-4A0D-977B-F1946B1ACCE2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SKYNET.SteamApi", "steam_api\SKYNET.SteamApi.csproj", "{F296C00A-53B4-4A0D-977B-F1946B1ACCE2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SKYNET.EntryPoint", "SKYNET.EntryPoint\SKYNET.EntryPoint.csproj", "{F6F62E21-7C2B-4032-8F1A-50110A13C87B}"
 EndProject

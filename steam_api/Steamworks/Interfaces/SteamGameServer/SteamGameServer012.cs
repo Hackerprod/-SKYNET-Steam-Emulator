@@ -43,7 +43,7 @@ namespace SKYNET.Interface
 
         public void LogOff(IntPtr _)
         {
-            SteamEmulator.SteamGameServer.LogOff(_);
+            SteamEmulator.SteamGameServer.LogOff();
         }
 
         public bool BLoggedOn(IntPtr _)

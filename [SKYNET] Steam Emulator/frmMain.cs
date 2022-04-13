@@ -20,6 +20,7 @@ using EasyHook;
 using SKYNET;
 using SKYNET.GUI;
 using SKYNET.Properties;
+using SKYNET.Steamworks.Types;
 using SKYNET.Types;
 
 namespace SKYNET
@@ -27,14 +28,13 @@ namespace SKYNET
     public partial class frmMain : frmBase
     {
         public static frmMain frm;
+
+        private Process InjectedProcess;
+        private HookInterface HookInterface;
         private List<RunningGame> RunningGames;
-
-        public Process InjectedProcess { get; set; }
-        internal HookInterface HookInterface { get; set; }
-
+        private SettingsEmu Settings;
         private GameBox SelectedBox;
         private GameBox MenuBox;
-
         private string channel;
         private int ProcessId;
 
@@ -52,6 +52,9 @@ namespace SKYNET
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "Avatars"));
+
+            Settings = new SettingsEmu();
+            Settings.Load();
 
             List<Game> Games = new List<Game>();
             string game = Path.Combine(modCommon.GetPath(), "Data", "Games.json");
@@ -196,7 +199,10 @@ namespace SKYNET
 
                 HookInterface = new HookInterface();
                 HookInterface.InjectionOptions = InjectionOptions.Default;
-                HookInterface.Game = game;
+                HookInterface.SerializedGame = Game.Serialize(game);
+                HookInterface.SerializedSettings = SettingsEmu.Serialize(Settings);
+                HookInterface.SendLog = true;
+                HookInterface.EmulatorPath = modCommon.GetPath();
                 HookInterface.OnMessage += this.HookInterface_OnMessage;
                 HookInterface.OnShowMessage += this.HookInterface_OnShowMessage;
 
@@ -210,7 +216,6 @@ namespace SKYNET
                     //IpcCreateServer(ref channel, InObject, HookInterface);
                     HookInterface.ChannelName = channel;
                     HookInterface.DllPath = Path.Combine(modCommon.GetPath(), "SKYNET.EntryPoint.dll");
-                    HookInterface.EmulatorPath = modCommon.GetPath();
                     RemoteHooking.CreateAndInject(game.ExecutablePath, game.Parameters, 0, HookInterface.InjectionOptions, HookInterface.DllPath, HookInterface.DllPath, out ProcessId, channel);
                     InjectedProcess = Process.GetProcessById(ProcessId);
                     WaitForExit();
@@ -267,7 +272,7 @@ namespace SKYNET
             new frmMessage(e).ShowDialog();
         }
 
-        private void HookInterface_OnMessage(object sender, ConsoleMessage e)
+        private void HookInterface_OnMessage(object sender, GameMessage e)
         {
             Write(e.Sender + ":  " + e.Msg);
         }
@@ -298,11 +303,11 @@ namespace SKYNET
             });
         }
 
-        private void Write(object msg)
+        public static void Write(object msg)
         {
             try
             {
-                richTextBox1.Text += msg + Environment.NewLine;
+                frm.richTextBox1.Text += msg + Environment.NewLine;
             }
             catch (Exception)
             {
@@ -499,7 +504,6 @@ namespace SKYNET
             richTextBox1.SelectionStart = richTextBox1.Text.Length;
             
             richTextBox1.ScrollToCaret();
-
         }
     }
 }

@@ -1,12 +1,14 @@
 ﻿namespace SKYNET
 {
-    public class ConsoleMessage
+    public class GameMessage
     {
+        public uint AppID;
         public string Sender;
         public object Msg;
 
-        public ConsoleMessage(string sender, object msg)
+        public GameMessage(uint appId, string sender, object msg)
         {
+            this.AppID = appId;
             this.Sender = sender;
             this.Msg = msg;
         }

@@ -53,7 +53,7 @@ namespace SKYNET.Managers
                     catch (Exception e)
                     {
                         ErrorMessage = ($"EXCEPTION whilst binding function {methodInfo.Name}, class {Name} - {e.Message} {e.StackTrace}");
-                        SteamEmulator.Write(ErrorMessage);
+                        SteamEmulator.Write("Memory Manager", ErrorMessage);
                         return IntPtr.Zero;
                     }
                 }
@@ -71,7 +71,7 @@ namespace SKYNET.Managers
                     catch (Exception ex)
                     {
                         ErrorMessage = $"Error Injecting Delegate {new_delegates[i]} in {Name}: {ex.Message}";
-                        SteamEmulator.Write(ErrorMessage);
+                        SteamEmulator.Write("Memory Manager", ErrorMessage);
                     }
                 }
 
@@ -124,7 +124,7 @@ namespace SKYNET.Managers
             catch (Exception e)
             {
                 ErrorMessage = ($"EXCEPTION whilst binding function {methodInfo.Name}, class {Name} - {e.Message} {e.StackTrace}");
-                SteamEmulator.Write(ErrorMessage);
+                SteamEmulator.Write("Memory Manager", ErrorMessage);
                 return IntPtr.Zero;
             }
 
@@ -141,7 +141,7 @@ namespace SKYNET.Managers
                 catch (Exception ex)
                 {
                     ErrorMessage = $"Error Injecting Delegate {new_delegates[i]} in {Name}: {ex.Message}";
-                    SteamEmulator.Write(ErrorMessage);
+                    SteamEmulator.Write("Memory Manager", ErrorMessage);
                 }
             }
 
@@ -180,7 +180,7 @@ namespace SKYNET.Managers
                     catch (Exception e)
                     {
                         ErrorMessage = ($"EXCEPTION whilst binding function {methodInfo.Name}, class {Name} - {e.Message} {e.StackTrace}");
-                        SteamEmulator.Write(ErrorMessage);
+                        SteamEmulator.Write("Memory Manager", ErrorMessage);
                         return (default, IntPtr.Zero);
                     }
                 }
@@ -198,7 +198,7 @@ namespace SKYNET.Managers
                     catch (Exception ex)
                     {
                         ErrorMessage = $"Error Injecting Delegate {new_delegates[i]} in {Name}: {ex.Message}";
-                        SteamEmulator.Write(ErrorMessage);
+                        SteamEmulator.Write("Memory Manager", ErrorMessage);
                     }
                 }
 

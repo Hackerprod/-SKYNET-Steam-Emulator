@@ -2,7 +2,6 @@
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using SKYNET;
-using SKYNET.Helpers;
 using Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
@@ -52,13 +51,13 @@ namespace SKYNET.Steamworks.Implementation
             
         }
 
-        internal void LogOff(IntPtr _)
+        public void LogOff()
         {
             Write("LogOff");
             
         }
 
-        internal bool BLoggedOn(IntPtr _)
+        public bool BLoggedOn(IntPtr _)
         {
             Write("BLoggedOn");
             return true;

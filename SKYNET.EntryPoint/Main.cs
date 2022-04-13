@@ -1,12 +1,14 @@
 ﻿using EasyHook;
 using SKYNET.Helpers;
 using SKYNET.Manager;
+using SKYNET.Types;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace SKYNET
 {
@@ -28,41 +30,13 @@ namespace SKYNET
         {
             callbackChannel = null;
             Instance = this;
+
             HookInterface = (HookInterface)Activator.GetObject(typeof(HookInterface), "ipc://" + inChannelName + "/" + inChannelName);
-            Game = HookInterface.Game;
 
             Config.HelperLibraryLocation = Path.GetDirectoryName(HookInterface.DllPath);
             Config.DependencyPath = Path.GetDirectoryName(HookInterface.DllPath);
 
-            HookManager = new HookManager();
             HookInterface.Ping(callbackChannel);
-        }
-
-        internal static void ForceSteamAPILoad()
-        {
-            string dllPath = modCommon.GetPath();
-
-            if (File.Exists(Game.SteamApiPath))
-            {
-                dllPath = Game.SteamApiPath;
-            }
-            else if (File.Exists(Path.Combine(dllPath, "steam_api.dll")))
-            {
-                dllPath = Path.Combine(dllPath, "steam_api.dll");
-            }
-            else if (File.Exists(Path.Combine(dllPath, "steam_api64.dll")))
-            {
-                dllPath = Path.Combine(dllPath, "steam_api64.dll");
-            }
-            else
-            {
-                Write("Error forcing steam_api injection");
-                return;
-            }
-
-            SteamEmulator.SteamApiPath = dllPath;
-
-            Memory.CreateInMemoryModule(dllPath);
         }
 
         public void Run(RemoteHooking.IContext inContext, string inChannelName)
@@ -73,15 +47,34 @@ namespace SKYNET
                 {
                     SteamEmulator = new SteamEmulator(true);
                     SteamEmulator.OnMessage += SteamEmulator_OnMessage;
-                    SteamEmulator.Initialize();
-                    SteamEmulator.AppId = HookInterface.Game.AppId;
                     SteamEmulator.EmulatorPath = HookInterface.EmulatorPath;
+                    SteamEmulator.Initialize();
+
+                    Game = SKYNET.Types.Game.Deserialize(HookInterface.SerializedGame);
+                    SettingsEmu settings = SettingsEmu.Deserialize(HookInterface.SerializedGame);
+
+                    CLoadLibrary.LoadLibraryA(Game.SteamApiPath, out string Msg);
+
+                    SteamEmulator.AppId = Game.AppId;
+                    SteamEmulator.SteamId = settings.SteamId;
+                    SteamEmulator.PersonaName = settings.PersonaName;
+                    SteamEmulator.Language = settings.Language;
+                    SteamEmulator.SendLog = HookInterface.SendLog;
+                    SteamEmulator.SteamApiPath = Game.SteamApiPath;
+
+                    if (settings.ConsoleOutput)
+                    {
+                        modCommon.ActiveConsoleOutput();
+                    }
+
+                    HookManager = new HookManager();
                 }
 
                 HookManager.Install();
             }
             catch (Exception msg)
             {
+                MessageBox.Show(msg.ToString());
                 Write(msg);
             }
 
@@ -108,14 +101,20 @@ namespace SKYNET
             Write(msg);
         }
 
-        public static void Write(object msg)
+        public static void Write(object sender, object msg)
         {
             Write(Process.GetCurrentProcess().ProcessName.ToUpper(), msg);
         }
 
-        public static void Write(object sender, object msg)
+        public static void Write(object msg)
         {
-            HookInterface.InvokeMessage(sender.ToString(), msg);
+            uint appId = Game == null ? 0 : Game.AppId;
+            Write(appId, "Main", msg);
+        }
+
+        public static void Write(uint appId, object sender, object msg)
+        {
+            HookInterface.InvokeMessage(appId, sender.ToString(), msg);
         }
 
         public static void OnShowMessage(object msg)

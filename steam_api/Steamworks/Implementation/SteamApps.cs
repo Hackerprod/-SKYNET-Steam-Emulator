@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using SKYNET;
-using SKYNET.Helpers;
 using Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
@@ -13,37 +12,37 @@ namespace SKYNET.Steamworks.Implementation
             InterfaceVersion = "SteamApps";
         }
 
-        public bool BIsSubscribed(IntPtr _)
+        public bool BIsSubscribed()
         {
             Write("BIsSubscribed");
             return true;
         }
 
-        public bool BIsLowViolence(IntPtr _)
+        public bool BIsLowViolence()
         {
             Write("BIsLowViolence");
             return false;
         }
 
-        public bool BIsCybercafe(IntPtr _)
+        public bool BIsCybercafe()
         {
             Write("BIsCybercafe");
             return false;
         }
 
-        public bool BIsVACBanned(IntPtr _)
+        public bool BIsVACBanned()
         {
             Write("BIsVACBanned");
             return false;
         }
 
-        public string GetCurrentGameLanguage(IntPtr _)
+        public string GetCurrentGameLanguage()
         {
             Write("GetCurrentGameLanguage");
             return SteamEmulator.Language;
         }
 
-        public string GetAvailableGameLanguages(IntPtr _)
+        public string GetAvailableGameLanguages()
         {
             Write("GetAvailableGameLanguages");
             //TODO?
@@ -70,13 +69,13 @@ namespace SKYNET.Steamworks.Implementation
             return 1;
         }
 
-        public bool BIsSubscribedFromFreeWeekend(IntPtr _)
+        public bool BIsSubscribedFromFreeWeekend()
         {
             Write("BIsSubscribedFromFreeWeekend");
             return false;
         }
 
-        public int GetDLCCount(IntPtr _)
+        public int GetDLCCount()
         {
             Write("GetDLCCount");
             return 0;
@@ -153,13 +152,13 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public int GetAppBuildId(IntPtr _)
+        public int GetAppBuildId()
         {
             Write("GetAppBuildId");
             return 10;
         }
 
-        public void RequestAllProofOfPurchaseKeys(IntPtr _)
+        public void RequestAllProofOfPurchaseKeys()
         {
             Write("RequestAllProofOfPurchaseKeys");
         }
@@ -170,7 +169,7 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public bool BIsSubscribedFromFamilySharing(IntPtr _)
+        public bool BIsSubscribedFromFamilySharing()
         {
             Write("BIsSubscribedFromFamilySharing");
             return false;
