@@ -39,6 +39,7 @@ public class SteamEmulator
     public static bool Initialized { get; set; }
     public static string SteamApiPath { get; set; }
     public static string EmulatorPath { get; set; }
+    public static IntPtr Context_Ptr { get; set; }
     public static bool SendLog { get; set; }
 
     #region Interfaces 

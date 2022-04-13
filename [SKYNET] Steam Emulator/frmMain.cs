@@ -206,6 +206,10 @@ namespace SKYNET
                 HookInterface.OnMessage += this.HookInterface_OnMessage;
                 HookInterface.OnShowMessage += this.HookInterface_OnShowMessage;
 
+                modCommon.Show(HookInterface.SerializedGame);
+                modCommon.Show(HookInterface.SerializedSettings);
+                modCommon.Show(HookInterface.EmulatorPath);
+
                 channel = null;
 
                 try
