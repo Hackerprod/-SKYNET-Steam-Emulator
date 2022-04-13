@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using SKYNET;
-using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using SKYNET.Steamworks.Types;
 using SKYNET.Types;
@@ -28,14 +27,14 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public ulong GetSteamID()
+        public SteamID GetSteamID()
         {
             var SId = SteamEmulator.SteamId;
             Write($"GetSteamID {(ulong)SId}");
             return SId;
         }
 
-        public int InitiateGameConnection(IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)
+        public int InitiateGameConnection(IntPtr pAuthBlob, int cbMaxAuthBlob, SteamID steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)
         {
             Write("InitiateGameConnection");
             return 0;
@@ -97,13 +96,13 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public int BeginAuthSession(IntPtr pAuthTicket, int cbAuthTicket, ulong steamID)
+        public int BeginAuthSession(IntPtr pAuthTicket, int cbAuthTicket, SteamID steamID)
         {
             Write("BeginAuthSession");
             return (int)EBeginAuthSessionResult.k_EBeginAuthSessionResultOK;
         }
 
-        public void EndAuthSession(ulong steamID)
+        public void EndAuthSession(SteamID steamID)
         {
             Write("EndAuthSession");
         }
@@ -113,7 +112,7 @@ namespace SKYNET.Steamworks.Implementation
             Write("CancelAuthTicket");
         }
 
-        public int UserHasLicenseForApp(ulong steamID, uint appID)
+        public int UserHasLicenseForApp(SteamID steamID, uint appID)
         {
             Write("EUserHasLicenseForAppResult");
             return (int)EUserHasLicenseForAppResult.k_EUserHasLicenseResultHasLicense;
@@ -125,7 +124,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public void AdvertiseGame(ulong steamIDGameServer, uint unIPServer, uint usPortServer)
+        public void AdvertiseGame(SteamID steamIDGameServer, uint unIPServer, uint usPortServer)
         {
             Write("AdvertiseGame");
         }

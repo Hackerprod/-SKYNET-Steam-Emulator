@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using SKYNET;
-using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Steamworks;
 using SKYNET.Steamworks.Helpers;
@@ -17,10 +16,10 @@ namespace SKYNET.Steamworks.Implementation
             InterfaceVersion = "SteamClient";
         }
 
-        public Int32 CreateSteamPipe()
+        public int CreateSteamPipe()
         {
             Write("CreateSteamPipe");
-            return (int)SteamEmulator.CreateSteamPipe();
+            return SteamEmulator.CreateSteamPipe();
         }
 
         public bool BReleaseSteamPipe(int hSteamPipe)
@@ -32,7 +31,7 @@ namespace SKYNET.Steamworks.Implementation
         public int ConnectToGlobalUser(int hSteamPipe)
         {
             Write("ConnectToGlobalUser");
-            return 1;
+            return SteamEmulator.HSteamUser;
         }
 
         public int CreateLocalUser(int phSteamPipe, int eAccountType)
@@ -143,7 +142,7 @@ namespace SKYNET.Steamworks.Implementation
         public uint GetIPCCallCount()
         {
             Write("GetIPCCallCount");
-            return 0;
+            return SteamEmulator.SteamUtils.GetIPCCallCount();
         }
 
         public void SetWarningMessageHook(IntPtr pFunctionPtr)

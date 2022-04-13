@@ -1,4 +1,5 @@
 ﻿using EasyHook;
+using SKYNET.Types;
 using System;
 using System.Collections.Concurrent;
 
@@ -16,13 +17,16 @@ namespace SKYNET
 
         public string DllPath { get; set; }
 
-        public Game Game { get; set; }
+        public string SerializedGame { get; set; }
+
+        public string SerializedSettings { get; set; }
 
         public InjectionOptions InjectionOptions { get; set; }
+        public bool SendLog { get; set; }
 
         public event EventHandler<string> PingNotify;
 
-        public event EventHandler<ConsoleMessage> OnMessage;
+        public event EventHandler<GameMessage> OnMessage;
 
         public event EventHandler<string> OnShowMessage;
         
@@ -33,9 +37,9 @@ namespace SKYNET
             this.PingNotify?.Invoke(this, callbackChannel);
         }
 
-        public void InvokeMessage(string sender, object msg)
+        public void InvokeMessage(uint appId, string sender, object msg)
         {
-            this.OnMessage?.Invoke(this, new ConsoleMessage(sender, msg));
+            this.OnMessage?.Invoke(this, new GameMessage(appId, sender, msg));
         }
 
         public void InvokeShowMessage(object msg)

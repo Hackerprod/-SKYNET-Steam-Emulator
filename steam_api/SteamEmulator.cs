@@ -1,6 +1,5 @@
 ﻿//#define LOG
 using SKYNET;
-using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Steamworks.Implementation;
 using SKYNET.Steamworks.Types;
@@ -19,22 +18,21 @@ public class SteamEmulator
     public static CallbackManager Client_Callback = new CallbackManager();
     public static CallbackManager Server_Callback = new CallbackManager();
 
-    public event EventHandler<object> OnMessage;
+    public event EventHandler<GameMessage> OnMessage;
 
     #region Client Info
 
     public static string Language { get; set; }
     public static string PersonaName { get; set; }
-    public static ulong SteamId { get; set; }
+    public static SteamID SteamId { get; set; }
     public static ulong SteamId_GS { get; set; }
-    public static bool AsClient { get; set; } = true;
     public static uint AppId { get; set; }
 
-    public static HSteamUser HSteamUser;
-    public static HSteamPipe HSteamPipe;
+    public static int HSteamUser;
+    public static int HSteamPipe;
 
-    public static HSteamUser HSteamUser_GS;
-    public static HSteamPipe HSteamPipe_GS;
+    public static int HSteamUser_GS;
+    public static int HSteamPipe_GS;
 
     #endregion
 
@@ -42,8 +40,7 @@ public class SteamEmulator
     public static string SteamApiPath { get; set; }
     public static string EmulatorPath { get; set; }
     public static IntPtr Context_Ptr { get; set; }
-
-    public static Dictionary<HSteamPipe, Steam_Pipe> steam_pipes;
+    public static bool SendLog { get; set; }
 
     #region Interfaces 
 
@@ -99,26 +96,15 @@ public class SteamEmulator
 
     public SteamEmulator(bool asClient)
     {
-        steam_pipes = new Dictionary<HSteamPipe, Steam_Pipe>();
         Instance = this;
-        AsClient = asClient;
     }
 
     public void Initialize()
     {
-        modCommon.LoadSettings();
-
         InterfaceManager.Initialize();
-
-        if (AsClient)
-        {
-            EmulatorPath = modCommon.GetPath();
-        }
 
         if (Client_Callback == null) Client_Callback = new CallbackManager();
         if (Server_Callback == null) Server_Callback = new CallbackManager();
-
-        steam_pipes = new Dictionary<HSteamPipe, Steam_Pipe>();
 
         InterfaceManager.Initialize();
 
@@ -219,53 +205,53 @@ public class SteamEmulator
 
         #endregion
 
-        HSteamUser = (HSteamUser)1;
-        HSteamPipe = (HSteamPipe)1;
+        HSteamUser = 1;
+        HSteamPipe = 1;
 
-        HSteamUser_GS = (HSteamUser)1;
-        HSteamPipe_GS = (HSteamPipe)1;
+        HSteamUser_GS = 1;
+        HSteamPipe_GS = 1;
 
         Initialized = true;
 
     }
 
-    public static HSteamUser CreateSteamUser()
+    public static int CreateSteamUser()
     {
-        if (HSteamUser == null)
+        if (HSteamUser == 0)
         {
-            HSteamUser = (HSteamUser)1;
+            HSteamUser = 1;
             Write($"Creating user {HSteamUser}");
         }
         return HSteamUser;
     }
 
-    public static HSteamPipe CreateSteamPipe()
+    public static int CreateSteamPipe()
     {
-        if (HSteamPipe == null)
+        if (HSteamPipe == 0)
         {
-            HSteamPipe = (HSteamPipe)1;
+            HSteamPipe = 1;
             Write($"Creating pipe {HSteamPipe}");
-            steam_pipes[HSteamPipe] = Steam_Pipe.NO_USER;
         }
         return HSteamPipe;
     }
 
-    public static void Write(object sender, object msg)
+    private static void Write(string msg)
     {
-        Write(sender + ": " + msg);
+        Write("Steam Emulator", msg);
     }
-
-
 
     //#if LOG
 
-    public static void Write(object msg)
+    static string lastMsg = "";
+    public static void Write(string sender, object msg)
     {
-        Log.Write(msg);
-
-        if (AsClient)
+        if (SendLog)
         {
-            Instance.OnMessage?.Invoke(Instance, msg);
+            if (lastMsg != msg.ToString())
+            {
+                Instance.OnMessage?.Invoke(Instance, new GameMessage(AppId, sender, msg));
+                lastMsg = msg.ToString(); 
+            }
         }
     }
 
@@ -280,11 +266,5 @@ public class SteamEmulator
 
 }
 
-public enum Steam_Pipe : int
-{
-    NO_USER,
-    CLIENT,
-    SERVER
-};
 
 

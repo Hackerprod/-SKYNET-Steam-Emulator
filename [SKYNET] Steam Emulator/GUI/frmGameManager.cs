@@ -165,7 +165,7 @@ namespace SKYNET
                 return;
             }
 
-            var Game = new Game()
+            var game = new Types.Game()
             {
                 Name = TB_Name.Text,
                 ExecutablePath = TB_ExecutablePath.Text,
@@ -177,12 +177,12 @@ namespace SKYNET
 
             if (boxHandle != 0)
             {
-                frmMain.frm.UpdateGame(boxHandle, Game);
+                frmMain.frm.UpdateGame(boxHandle, game);
                 Close();
             }
             else
             {
-                frmMain.frm.AddGame(Game);
+                frmMain.frm.AddGame(game);
                 Close();
             }
         }

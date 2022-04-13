@@ -1,3 +1,4 @@
+using SKYNET.Steamworks.Types;
 using Steamworks;
 using System;
 
@@ -16,9 +17,9 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUser.BLoggedOn();
         }
 
-        public ulong GetSteamID(IntPtr _)
+        public SteamID GetSteamID(IntPtr _)
         {
-            return (ulong)SteamEmulator.SteamUser.GetSteamID();
+            return SteamEmulator.SteamUser.GetSteamID();
         }
 
         public int InitiateGameConnection(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)

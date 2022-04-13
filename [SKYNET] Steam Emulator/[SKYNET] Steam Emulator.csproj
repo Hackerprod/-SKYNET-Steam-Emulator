@@ -87,12 +87,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GUI\Controls\SKYNET_WebLogger.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="GUI\Controls\SKYNET_WebLogger.designer.cs">
-      <DependentUpon>SKYNET_WebLogger.cs</DependentUpon>
-    </Compile>
     <Compile Include="Helpers\FileIcon.cs" />
     <Compile Include="GUI\Controls\CircularPictureBox.cs">
       <SubType>UserControl</SubType>
@@ -168,6 +162,7 @@
     <Compile Include="GUI\frmMessage.Designer.cs">
       <DependentUpon>frmMessage.cs</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\INIParser.cs" />
     <Compile Include="Helpers\Memory.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>
@@ -203,9 +198,6 @@
     <Compile Include="Types\RunningGame.cs" />
     <EmbeddedResource Include="GUI\Controls\CircularPictureBox.resx">
       <DependentUpon>CircularPictureBox.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GUI\Controls\SKYNET_WebLogger.resx">
-      <DependentUpon>SKYNET_WebLogger.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\frmGameManager.resx">
       <DependentUpon>frmGameManager.cs</DependentUpon>
@@ -325,9 +317,9 @@
       <Project>{f6f62e21-7c2b-4032-8f1a-50110a13c87b}</Project>
       <Name>SKYNET.EntryPoint</Name>
     </ProjectReference>
-    <ProjectReference Include="..\steam_api\steam_api.csproj">
+    <ProjectReference Include="..\steam_api\SKYNET.SteamApi.csproj">
       <Project>{f296c00a-53b4-4a0d-977b-f1946b1acce2}</Project>
-      <Name>steam_api</Name>
+      <Name>SKYNET.SteamApi</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
