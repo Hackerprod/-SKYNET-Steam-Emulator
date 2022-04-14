@@ -28,7 +28,7 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public ulong GetSteamID()
+        public SteamID GetSteamID()
         {
             var SId = SteamEmulator.SteamId;
             Write($"GetSteamID {(ulong)SId}");

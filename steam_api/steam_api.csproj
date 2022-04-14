@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SKYNET</RootNamespace>
-    <AssemblyName>SKYNET.SteamApi</AssemblyName>
+    <AssemblyName>steam_api</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\[SKYNET] Steam Emulator\bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -34,7 +34,7 @@
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <DllExportIdent>C7D8FA75-D5BB-4C9F-B596-90D31A05FF6F</DllExportIdent>
+    <DllExportIdent>B9611032-BDB8-42DF-9E85-20620E39914A</DllExportIdent>
     <DllExportMetaLibName>DllExport.dll</DllExportMetaLibName>
     <DllExportNamespace>System.Runtime.InteropServices</DllExportNamespace>
     <DllExportDDNSCecil>true</DllExportDDNSCecil>
@@ -68,6 +68,9 @@
     <Compile Include="Callback\CallbackType.cs" />
     <Compile Include="Callback\CCallbackBase.cs" />
     <Compile Include="Callback\SteamAPICall_t.cs" />
+    <Compile Include="Exported\SteamAPI.cs" />
+    <Compile Include="Exported\SteamAPI_ISteamGameServer.cs" />
+    <Compile Include="Exported\SteamInternal.cs" />
     <Compile Include="Helpers\modCommon.cs" />
     <Compile Include="Managers\MemoryManager.cs" />
     <Compile Include="Steamworks\Helpers\InterfaceAttribute.cs" />
@@ -113,12 +116,15 @@
     <Compile Include="Steamworks\Implementation\SteamUtils.cs" />
     <Compile Include="Steamworks\Implementation\SteamVideo.cs" />
     <Compile Include="Steamworks\Interfaces\IBaseInterface.cs" />
+    <Compile Include="Steamworks\Interfaces\ISteamAppDisableUpdate001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamClient\SteamClient020.cs" />
     <Compile Include="Steamworks\Interfaces\SteamAppList\SteamAppList001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamApps\SteamApps008.cs" />
     <Compile Include="Steamworks\Interfaces\SteamController\SteamController008.cs" />
     <Compile Include="Steamworks\Interfaces\SteamFriends\SteamFriends017.cs" />
     <Compile Include="Steamworks\Interfaces\SteamFriends\SteamFriends015.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamGameCoordinator\SteamGameCoordinator001.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamGameServer\SteamGameServer014.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameServer\SteamGameServer012.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameServerStats\SteamGameServerStats001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamHTMLSurface\SteamHTMLSurface004.cs" />
@@ -155,7 +161,6 @@
     <Compile Include="Steamworks\Types\AccountID_t.cs" />
     <Compile Include="Steamworks\Types\AppId_t.cs" />
     <Compile Include="Steamworks\Types\CSteamAPIContext.cs" />
-    <Compile Include="Steamworks\Types\CSteamID.cs" />
     <Compile Include="Steamworks\Types\EAccountType.cs" />
     <Compile Include="Steamworks\Types\EResult.cs" />
     <Compile Include="Steamworks\Types\FriendGameInfo_t.cs" />

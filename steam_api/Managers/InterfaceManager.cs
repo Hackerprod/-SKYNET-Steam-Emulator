@@ -169,6 +169,14 @@ namespace SKYNET.Managers
             {
                 SteamEmulator.SteamParentalSettings.InterfaceVersion = type.Name;
             }
+            if (pszVersion.StartsWith("SteamGameServer"))
+            {
+                SteamEmulator.SteamGameServer.InterfaceVersion = type.Name;
+            }
+            if (pszVersion.StartsWith("SteamGameCoordinator"))
+            {
+                SteamEmulator.SteamGameCoordinator.InterfaceVersion = type.Name;
+            }
         }
 
         //public static IntPtr FindOrCreateInterface(int hSteamUser, int hSteamPipe, string pszVersion)

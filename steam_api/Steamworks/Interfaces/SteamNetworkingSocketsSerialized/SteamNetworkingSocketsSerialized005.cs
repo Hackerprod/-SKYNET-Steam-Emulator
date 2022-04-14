@@ -49,7 +49,7 @@ namespace SKYNET.Interface
             SteamEmulator.SteamNetworkingSocketsSerialized.PostConnectionStateMsg(pMsg, cbMsg);
         }
 
-        public bool GetSTUNServer(IntPtr _, int dont_know, string buf, int len)
+        public bool GetSTUNServer(IntPtr _, int dont_know, IntPtr buf, int len)
         {
             return SteamEmulator.SteamNetworkingSocketsSerialized.GetSTUNServer(dont_know, buf, len);
         }

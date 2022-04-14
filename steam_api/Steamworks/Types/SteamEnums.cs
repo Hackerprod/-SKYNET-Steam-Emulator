@@ -3174,7 +3174,7 @@ namespace SKYNET.Steamworks
         k_EFeatureMax
     };
 
-    public enum EGCResults
+    public enum EGCResults : int
     {
         k_EGCResultOK = 0,
         k_EGCResultNoMessage = 1,           // There is no message in the queue

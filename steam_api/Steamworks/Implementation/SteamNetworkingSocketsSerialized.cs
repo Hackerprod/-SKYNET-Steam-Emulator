@@ -63,7 +63,7 @@ namespace SKYNET.Steamworks.Implementation
             Write("PostConnectionStateMsg");
         }
 
-        public bool GetSTUNServer(int dont_know, string buf, int len)
+        public bool GetSTUNServer(int dont_know, IntPtr buf, int len)
         {
             Write("GetSTUNServer");
             return false;

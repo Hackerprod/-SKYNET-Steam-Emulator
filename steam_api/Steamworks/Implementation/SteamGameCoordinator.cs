@@ -30,7 +30,7 @@ namespace SKYNET.Steamworks.Implementation
         public EGCResults SendMessage_(uint unMsgType, IntPtr pubData, uint cubData)
         {
             Write("SendMessage_");
-            return EGCResults.k_EGCResultOK;
+            return EGCResults.k_EGCResultNotLoggedOn;
         }
     }
 }

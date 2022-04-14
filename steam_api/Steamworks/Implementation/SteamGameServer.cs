@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using SKYNET;
 using SKYNET.Helpers;
+using SKYNET.Types;
 using Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
@@ -15,243 +16,275 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        internal bool InitGameServer(IntPtr _, uint unIP, uint usGamePort, uint usQueryPort, uint unFlags, IntPtr nGameAppId, string pchVersionString)
+        public bool InitGameServer(uint unIP, int usGamePort, int usQueryPort, uint unFlags, uint nGameAppId, string pchVersionString)
         {
             Write("InitGameServer");
             return true;
         }
 
-        internal void SetProduct(IntPtr _, string pszProduct)
+        public void SetProduct(string pszProduct)
         {
             Write($"SetProduct {pszProduct}");
         }
 
-        internal void SetGameDescription(IntPtr _, string pszGameDescription)
+        public void SetGameDescription(string pszGameDescription)
         {
             Write($"SetGameDescription {pszGameDescription}");
         }
 
-        internal void SetModDir(IntPtr _, string pszModDir)
+        public void SetModDir(string pszModDir)
         {
-            Write("SetModDir");
+            Write($"SetModDir {pszModDir}");
         }
 
-        internal void SetDedicatedServer(IntPtr _, bool bDedicated)
+        public void SetDedicatedServer(bool bDedicated)
         {
             Write("SetDedicatedServer");
         }
 
-        internal void LogOn(IntPtr _, string pszToken)
+        public void LogOn(string pszToken)
         {
             Write("LogOn");
         }
 
-        internal void LogOnAnonymous(IntPtr _)
+        public void LogOnAnonymous()
         {
             Write("LogOnAnonymous");
             
         }
 
-        internal void LogOff(IntPtr _)
+        public void LogOff()
         {
             Write("LogOff");
             
         }
 
-        internal bool BLoggedOn(IntPtr _)
+        public bool BLoggedOn()
         {
             Write("BLoggedOn");
             return true;
         }
 
-        internal bool BSecure(IntPtr _)
+        public bool BSecure()
         {
             Write("BSecure");
             return true;
         }
 
-        internal ulong GetSteamID(IntPtr _)
+        public ulong GetSteamID()
         {
             Write("GetSteamID");
             return SteamEmulator.SteamId_GS;
         }
 
-        internal bool WasRestartRequested(IntPtr _)
+        public bool WasRestartRequested()
         {
             Write("WasRestartRequested");
             return false;
         }
 
-        internal void SetMaxPlayerCount(IntPtr _, int cPlayersMax)
+        public void SetMaxPlayerCount(int cPlayersMax)
         {
             Write("SetMaxPlayerCount");
         }
 
-        internal void SetBotPlayerCount(IntPtr _, int cBotplayers)
+        public void SetBotPlayerCount(int cBotplayers)
         {
             Write("SetBotPlayerCount");
         }
 
-        internal void SetServerName(IntPtr _, string pszServerName)
+        public void SetServerName(string pszServerName)
         {
             Write("SetServerName");
         }
 
-        internal void SetMapName(IntPtr _, string pszMapName)
+        public void SetMapName(string pszMapName)
         {
             Write("SetMapName");
         }
 
-        internal void SetPasswordProtected(IntPtr _, bool bPasswordProtected)
+        public void SetPasswordProtected(bool bPasswordProtected)
         {
             Write("SetPasswordProtected");
         }
 
-        internal void SetSpectatorPort(IntPtr _, uint unSpectatorPort)
+        public void SetSpectatorPort(uint unSpectatorPort)
         {
             Write("SetSpectatorPort");
         }
 
-        internal void SetSpectatorServerName(IntPtr _, string pszSpectatorServerName)
+        public void SetSpectatorServerName(string pszSpectatorServerName)
         {
             Write("SetSpectatorServerName");
         }
 
-        internal void ClearAllKeyValues(IntPtr _)
+        public void ClearAllKeyValues()
         {
             Write("ClearAllKeyValues");
         }
 
-        internal void SetKeyValue(IntPtr _, string pKey, string pValue)
+        public void SetKeyValue(string pKey, string pValue)
         {
             Write("SetKeyValue");
         }
 
-        internal void SetGameTags(IntPtr _, string pchGameTags)
+        public void SetGameTags(string pchGameTags)
         {
             Write("SetGameTags");
         }
 
-        internal void SetGameData(IntPtr _, string pchGameData)
+        public void SetGameData(string pchGameData)
         {
             Write("SetGameData");
         }
 
-        internal void SetRegion(IntPtr _, string pszRegion)
+        public void SetRegion(string pszRegion)
         {
             Write("SetRegion");
         }
 
-        internal bool SendUserConnectAndAuthenticate(IntPtr _, uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, ulong pSteamIDUser)
+        public bool SendUserConnectAndAuthenticate(uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, ulong pSteamIDUser)
         {
             Write("SendUserConnectAndAuthenticate");
             return true;
         }
 
-        internal ulong CreateUnauthenticatedUserConnection(IntPtr _)
+        public ulong CreateUnauthenticatedUserConnection()
         {
             Write("CreateUnauthenticatedUserConnection");
             return 0;
         }
 
-        internal void SendUserDisconnect(IntPtr _, ulong steamIDUser)
+        public void SendUserDisconnect(SteamID steamIDUser)
         {
             Write("SendUserDisconnect");
         }
 
-        internal bool BUpdateUserData(IntPtr _, ulong steamIDUser, string pchPlayerName, uint uScore)
+        public bool BUpdateUserData(SteamID steamIDUser, string pchPlayerName, uint uScore)
         {
             Write("BUpdateUserData");
             return true;
         }
 
-        internal IntPtr GetAuthSessionTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
+        public IntPtr GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
         {
             Write("GetAuthSessionTicket");
             return IntPtr.Zero;
         }
 
-        internal int BeginAuthSession(IntPtr _, IntPtr pAuthTicket, int cbAuthTicket, ulong steamID)
+        public void SetAdvertiseServerActive(bool bActive)
+        {
+            Write("SetAdvertiseServerActive");
+        }
+
+        public int BeginAuthSession(IntPtr pAuthTicket, int cbAuthTicket, SteamID steamID)
         {
             Write("BeginAuthSession");
             return (int)EBeginAuthSessionResult.k_EBeginAuthSessionResultOK;
         }
 
-        internal void EndAuthSession(IntPtr _, ulong steamID)
+        public void EndAuthSession(SteamID steamID)
         {
             Write("EndAuthSession");
         }
 
-        internal void CancelAuthTicket(IntPtr _, IntPtr hAuthTicket)
+        public void CancelAuthTicket(IntPtr hAuthTicket)
         {
             Write("CancelAuthTicket");
         }
 
-        internal int UserHasLicenseForApp(IntPtr _, ulong steamID, IntPtr appID)
+        public int UserHasLicenseForApp(SteamID steamID, uint appID)
         {
             Write("UserHasLicenseForApp");
             return (int)EUserHasLicenseForAppResult.k_EUserHasLicenseResultHasLicense; 
         }
 
-        internal bool RequestUserGroupStatus(IntPtr _, ulong steamIDUser, ulong steamIDGroup)
+        public bool RequestUserGroupStatus(SteamID steamIDUser, SteamID steamIDGroup)
         {
             Write("RequestUserGroupStatus");
             return false;
         }
 
-        internal void GetGameplayStats(IntPtr _)
+        public void GetGameplayStats()
         {
             Write("GetGameplayStats");
         }
 
-        internal ulong GetServerReputation(IntPtr _)
+        public ulong GetServerReputation()
         {
             Write("GetServerReputation");
             return 100;
         }
 
-        internal uint GetPublicIP_old(IntPtr _)
+        public uint GetPublicIP_old()
         {
             Write("GetPublicIP_old");
             return 0;
         }
 
-        internal bool HandleIncomingPacket(IntPtr _, IntPtr pData, int cbData, uint srcIP, uint srcPort)
+        public bool HandleIncomingPacket(IntPtr pData, int cbData, uint srcIP, uint srcPort)
         {
             Write("HandleIncomingPacket");
             return true;
         }
 
-        internal int GetNextOutgoingPacket(IntPtr _, IntPtr pOut, int cbMaxOut, uint pNetAdr, uint pPort)
+        public int GetNextOutgoingPacket(IntPtr pOut, int cbMaxOut, uint pNetAdr, uint pPort)
         {
             Write("GetNextOutgoingPacket");
             return 0;
         }
 
-        internal void EnableHeartbeats(IntPtr _, bool bActive)
+        internal IntPtr GetPublicIP()
+        {
+            Write("GetNextOutgoingPacket");
+            return IntPtr.Zero;
+        }
+
+        public void EnableHeartbeats(bool bActive)
         {
             Write("EnableHeartbeats");
         }
 
-        internal void SetHeartbeatInterval(IntPtr _, int iHeartbeatInterval)
+        public void SetHeartbeatInterval(int iHeartbeatInterval)
         {
             Write("SetHeartbeatInterval");
         }
 
-        internal void ForceHeartbeat(IntPtr _)
+        public void ForceHeartbeat()
         {
             Write("ForceHeartbeat");
         }
-        internal ulong AssociateWithClan(IntPtr _, ulong steamIDClan)
+        public ulong AssociateWithClan(SteamID steamIDClan)
         {
             Write("AssociateWithClan");
             return 0;
         }
 
-        internal ulong ComputeNewPlayerCompatibility(IntPtr _, ulong steamIDNewPlayer)
+        public ulong ComputeNewPlayerCompatibility(SteamID steamIDNewPlayer)
         {
             Write("ComputeNewPlayerCompatibility");
             return 0;
+        }
+
+        public bool SendUserConnectAndAuthenticate_DEPRECATED(uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, ulong pSteamIDUser)
+        {
+            Write("SendUserConnectAndAuthenticate_DEPRECATED");
+            return true;
+        }
+
+        public void SendUserDisconnect_DEPRECATED(SteamID steamIDUser)
+        {
+            Write("SendUserDisconnect_DEPRECATED");
+        }
+
+        public void SetMasterServerHeartbeatInterval_DEPRECATED(int iHeartbeatInterval)
+        {
+            Write("SetMasterServerHeartbeatInterval_DEPRECATED");
+        }
+
+        public void ForceMasterServerHeartbeat_DEPRECATED()
+        {
+            Write("ForceMasterServerHeartbeat_DEPRECATED");
         }
     }
 }

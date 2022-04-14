@@ -8,7 +8,8 @@ using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-
+using System.IO;
+using System.Linq;
 
 public class SteamEmulator
 {
@@ -18,7 +19,7 @@ public class SteamEmulator
     public static CallbackManager Client_Callback = new CallbackManager();
     public static CallbackManager Server_Callback = new CallbackManager();
 
-    public event EventHandler<GameMessage> OnMessage;
+    public event EventHandler<GameMessage> OnMessage; 
 
     #region Client Info
 
@@ -94,13 +95,17 @@ public class SteamEmulator
 
     #endregion
 
-    public SteamEmulator(bool asClient)
+    public SteamEmulator()
     {
         Instance = this;
     }
 
     public void Initialize()
     {
+        if (Initialized) return;
+
+        LoadCustomVars();
+
         InterfaceManager.Initialize();
 
         if (Client_Callback == null) Client_Callback = new CallbackManager();
@@ -251,7 +256,47 @@ public class SteamEmulator
                 lastMsg = msg.ToString(); 
             }
         }
+
+        Console.WriteLine(sender + ": " + msg);
+
+        string fileName = modCommon.GetPath() + "/[SKYNET] steam_api.log";
+        var lines = new List<string>(); 
+        if (File.Exists(fileName))
+        {
+            lines = File.ReadAllLines(fileName).ToList();
+        }
+        lines.Add(sender + ": " + msg);
+
+        File.WriteAllLines(fileName, lines);
+
     }
+
+    private void LoadCustomVars()
+    {
+        modCommon.ActiveConsoleOutput();
+
+        string fileName = modCommon.GetPath() + "/[SKYNET] steam_api.log";
+        File.WriteAllLines(fileName, new List<string>());
+
+        Language = "English";
+        PersonaName = "Hacker";
+        SteamId = new SteamID();
+        SteamId.Set(1000, SKYNET.Steamworks.EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeIndividual);
+        SteamId_GS = 1;
+        AppId = 570;
+
+        HSteamUser = 1;
+        HSteamPipe = 1;
+
+        HSteamUser_GS = 1;
+        HSteamPipe_GS = 1;
+
+
+        SteamApiPath = Path.Combine(modCommon.GetPath(), "steam_api64.dll");
+        EmulatorPath = @"D:\Instaladores\Programación\Projects\[SKYNET] Steam Emulator\[SKYNET] Steam Emulator\bin\Debug";
+        SendLog = true;
+    }
+
 
     //#else
 

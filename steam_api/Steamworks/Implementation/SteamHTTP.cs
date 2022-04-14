@@ -21,7 +21,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public uint CreateHTTPRequest(uint eHTTPRequestMethod, string pchAbsoluteURL)
         {
-            Write($"CreateHTTPRequest");
+            Write($"CreateHTTPRequest {eHTTPRequestMethod} {pchAbsoluteURL}");
             return 0;
         }
 
