@@ -65,13 +65,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Callback\CallbackBuffer.cs" />
+    <Compile Include="Callback\CallbackHandler.cs" />
     <Compile Include="Callback\CallbackIdentityAttribute.cs" />
-    <Compile Include="Callback\CallbackType.cs" />
+    <Compile Include="Callback\CallBackMsg.cs" />
+    <Compile Include="Callback\CallbackEnums.cs" />
+    <Compile Include="Callback\CallbackTypes.cs" />
     <Compile Include="Callback\CCallbackBase.cs" />
     <Compile Include="Callback\SteamAPICall_t.cs" />
     <Compile Include="Exported\SteamAPI.cs" />
     <Compile Include="Exported\SteamAPI_ISteamGameServer.cs" />
     <Compile Include="Exported\SteamInternal.cs" />
+    <Compile Include="Helpers\Extentions.cs" />
     <Compile Include="Helpers\IntPtrExtentions.cs" />
     <Compile Include="Helpers\modCommon.cs" />
     <Compile Include="Managers\MemoryManager.cs" />

@@ -13,6 +13,5 @@ namespace Steamworks
 		public IntPtr m_vfptr; 
 		public byte m_nCallbackFlags; 
 		public int m_iCallback; 
-	
 	}
 }

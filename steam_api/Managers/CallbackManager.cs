@@ -8,14 +8,39 @@ using Steamworks;
 
 namespace SKYNET.Managers
 {
-    public class CallbackManager
+    public unsafe class CallbackManager
     {
-        //private Dictionary<int, CCallbackBase> Callbacks { get; set; } = new Dictionary<int, CCallbackBase>();
+        public const byte k_ECallbackFlagsRegistered = 1;
+        public const byte k_ECallbackFlagsGameServer = 2;
 
-        public void RegisterCallback(IntPtr pCallback, int iCallback)
+        private static Dictionary<int, CCallbackBase> Client_Callbacks;
+        private static Dictionary<int, CCallbackBase> Server_Callbacks;
+
+        static CallbackManager()
         {
-           // SteamAPICall_t t = new SteamAPICall_t((ulong)iCallback);
-            //Callbacks.Add(iCallback, pCallback);
+            if (Client_Callbacks == null)
+            {
+                Client_Callbacks = new Dictionary<int, CCallbackBase>();
+            }
+            if (Server_Callbacks == null)
+            {
+                Server_Callbacks = new Dictionary<int, CCallbackBase>();
+            }
+        }
+
+        public unsafe static void RegisterCallback(int iCallback, CCallbackBase pCallback, bool Server = false)
+        {
+            pCallback.m_nCallbackFlags |= k_ECallbackFlagsRegistered;
+            pCallback.m_iCallback = iCallback;
+
+            if (Server)
+            {
+                Server_Callbacks.Add(iCallback, pCallback);
+            }
+            else
+            {
+                Server_Callbacks.Add(iCallback, pCallback);
+            }
         }
 
         public void UnregisterCallResult(IntPtr pCallback, SteamAPICall_t hAPICall)

@@ -88,5 +88,23 @@ namespace SKYNET.Helper
                 return false;
             }
         }
+
+        public static object ToType(this IntPtr ptr, Type t)
+        {
+            if (ptr == IntPtr.Zero)
+            {
+                return null;
+            }
+            return Marshal.PtrToStructure(ptr, t);
+        }
+
+        internal static T ToType<T>(this IntPtr ptr)
+        {
+            if (ptr == IntPtr.Zero)
+            {
+                return default(T);
+            }
+            return (T)Marshal.PtrToStructure(ptr, typeof(T));
+        }
     }
 }

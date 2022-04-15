@@ -3182,4 +3182,23 @@ namespace SKYNET.Steamworks
         k_EGCResultNotLoggedOn = 3,         // The client is not logged onto Steam
         k_EGCResultInvalidMessage = 4,      // Something was wrong with the message being sent with SendMessage
     };
+
+    public enum EFriendFlags
+    {
+        k_EFriendFlagNone = 0x00,
+        k_EFriendFlagBlocked = 0x01,
+        k_EFriendFlagFriendshipRequested = 0x02,
+        k_EFriendFlagImmediate = 0x04,          // "regular" friend
+        k_EFriendFlagClanMember = 0x08,
+        k_EFriendFlagOnGameServer = 0x10,
+        // k_EFriendFlagHasPlayedWith	= 0x20,	// not currently used
+        // k_EFriendFlagFriendOfFriend	= 0x40, // not currently used
+        k_EFriendFlagRequestingFriendship = 0x80,
+        k_EFriendFlagRequestingInfo = 0x100,
+        k_EFriendFlagIgnored = 0x200,
+        k_EFriendFlagIgnoredFriend = 0x400,
+        // k_EFriendFlagSuggested		= 0x800,	// not used
+        k_EFriendFlagChatMember = 0x1000,
+        k_EFriendFlagAll = 0xFFFF,
+    };
 }

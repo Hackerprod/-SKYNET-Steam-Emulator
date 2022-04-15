@@ -1,4 +1,5 @@
 ﻿using SKYNET;
+using SKYNET.Callback;
 using SKYNET.Helper;
 using SKYNET.Helpers;
 using SKYNET.Steamworks;
@@ -58,7 +59,7 @@ namespace SKYNET.Steamworks.Implementation
                 Write($"FileRead {pchFile}");
                 string fullPath = Path.Combine(StoragePath, pchFile);
                 byte[] bytes = File.ReadAllBytes(fullPath);
-                pvData = GetPtr(bytes);
+                pvData = bytes.GetPtr();
                 return bytes.Length;
             }
             catch
@@ -67,24 +68,25 @@ namespace SKYNET.Steamworks.Implementation
             }
         }
 
-        public ulong FileWriteAsync(string pchFile, IntPtr pvData, uint cubData)
+        public SteamAPICall_t FileWriteAsync(string pchFile, IntPtr pvData, uint cubData)
         {
             Write($"FileWriteAsync {pchFile}");
             try
             {
                 string fullPath = Path.Combine(StoragePath, pchFile);
                 modCommon.EnsureDirectoryExists(fullPath, true);
-                Byte[] bytes = pvData.GetBytes(cubData);
-                File.WriteAllBytes(pchFile, bytes);
-                return 1;
+                byte[] bytes = pvData.GetBytes(cubData);
+                File.WriteAllBytes(fullPath, bytes);
+                return new SteamAPICall_t(CallbackType.k_iRemoteStorageFileWriteAsyncComplete);
             }
-            catch 
+            catch
             {
-                return 0;
+                Write($"Error writing file {pchFile}");
+                return new SteamAPICall_t(0);
             }
         }
 
-        public ulong FileReadAsync(string pchFile, uint nOffset, uint cubToRead)
+        public SteamAPICall_t FileReadAsync(string pchFile, uint nOffset, uint cubToRead)
         {
             Write("FileReadAsync");
             return 0;
@@ -161,11 +163,6 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"FileExists {pchFile}");
             string fullPath = Path.Combine(StoragePath, pchFile);
-            if (!File.Exists(fullPath))
-            {
-                modCommon.EnsureDirectoryExists(fullPath, true);
-                File.WriteAllText(fullPath, "");
-            }
             return File.Exists(fullPath);
         }
 
@@ -188,7 +185,7 @@ namespace SKYNET.Steamworks.Implementation
 
             Write($"GetFileSize {pchFile} [{Length}]");
 
-            return Length == 0 ? 10 : Length;
+            return Length;
         }
 
         public uint GetFileTimestamp(string pchFile)
@@ -495,10 +492,85 @@ namespace SKYNET.Steamworks.Implementation
             return array;
         }
 
-        public static IntPtr GetPtr(byte[] buffer)
+
+        public void PostCallback(int callback_id, SKYNET.Callback.Buffer b)
         {
-            GCHandle gCHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-            return gCHandle.AddrOfPinnedObject();
+            CallbackHandler.PostCallback(1, 1, callback_id, b);
         }
     }
 }
+
+public struct SteamAPICall_t : IEquatable<SteamAPICall_t>, IComparable<SteamAPICall_t>
+{
+    public ulong Value;
+
+    public SteamAPICall_t(CallbackType value)
+    {
+        Value = (ulong)value;
+    }
+
+    public static implicit operator SteamAPICall_t(ulong value)
+    {
+        SteamAPICall_t result = default(SteamAPICall_t);
+        result.Value = value;
+        return result;
+    }
+
+    public static implicit operator ulong(SteamAPICall_t value)
+    {
+        return value.Value;
+    }
+
+    public override string ToString()
+    {
+        return Value.ToString();
+    }
+
+    public override int GetHashCode()
+    {
+        return Value.GetHashCode();
+    }
+
+    public override bool Equals(object p)
+    {
+        return Equals((SteamAPICall_t)p);
+    }
+
+    public bool Equals(SteamAPICall_t p)
+    {
+        return p.Value == Value;
+    }
+
+    public static bool operator ==(SteamAPICall_t a, SteamAPICall_t b)
+    {
+        return a.Equals(b);
+    }
+
+    public static bool operator !=(SteamAPICall_t a, SteamAPICall_t b)
+    {
+        return !a.Equals(b);
+    }
+
+    public int CompareTo(SteamAPICall_t other)
+    {
+        return Value.CompareTo(other.Value);
+    }
+}
+
+
+[StructLayout(LayoutKind.Sequential, Pack = 8)]
+internal struct SteamAPICallCompleted_t : ICallbackData
+{
+    internal ulong AsyncCall;
+
+    internal int Callback;
+
+    internal uint ParamCount;
+
+    public static int _datasize = Marshal.SizeOf(typeof(SteamAPICallCompleted_t));
+
+    public int DataSize => _datasize;
+
+    public CallbackType CallbackType => CallbackType.k_iSteamAPICallCompleted;
+}
+

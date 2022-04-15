@@ -24,7 +24,9 @@ namespace SKYNET.Steamworks.Implementation
 
         public EGCResults RetrieveMessage(uint punMsgType, IntPtr pubDest, uint cubDest, uint pcubMsgSize)
         {
-            Write("RetrieveMessage");
+            uint msgType = GetGCMsg(punMsgType);
+
+            Write($"RetrieveMessage [{msgType}]");
             return EGCResults.k_EGCResultOK;
         }
 

@@ -16,8 +16,8 @@ namespace SKYNET.Steamworks.Implementation
 
         public ulong CreateQueryUserUGCRequest(uint unAccountID, int eListType, int eMatchingUGCType, int eSortOrder, uint nCreatorAppID, uint nConsumerAppID, uint unPage)
         {
-            Write("CreateQueryUserUGCRequest");
-            return default;
+            Write($"CreateQueryUserUGCRequest for {unAccountID}");
+            return 0;
         }
 
         public ulong CreateQueryAllUGCRequest(int eQueryType, int eMatchingeMatchingUGCTypeFileType, uint nCreatorAppID, uint nConsumerAppID, uint unPage)
@@ -41,7 +41,7 @@ namespace SKYNET.Steamworks.Implementation
         public ulong SendQueryUGCRequest(ulong handle)
         {
             Write("SendQueryUGCRequest");
-            return default;
+            return 0;
         }
 
         public bool GetQueryUGCResult(ulong handle, uint index, IntPtr pDetails)
@@ -155,13 +155,13 @@ namespace SKYNET.Steamworks.Implementation
         public bool SetReturnKeyValueTags(ulong handle, bool bReturnKeyValueTags)
         {
             Write("SetReturnKeyValueTags");
-            return false;
+            return true;
         }
 
         public bool SetReturnLongDescription(ulong handle, bool bReturnLongDescription)
         {
             Write("SetReturnLongDescription");
-            return false;
+            return true;
         }
 
         public bool SetReturnMetadata(ulong handle, bool bReturnMetadata)

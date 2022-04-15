@@ -19,12 +19,12 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamRemoteStorage.FileRead(pchFile, pvData, cubDataToRead);
         }
 
-        public ulong FileWriteAsync(IntPtr _, string pchFile, IntPtr pvData, uint cubData)
+        public SteamAPICall_t FileWriteAsync(IntPtr _, string pchFile, IntPtr pvData, uint cubData)
         {
             return SteamEmulator.SteamRemoteStorage.FileWriteAsync(pchFile, pvData, cubData);
         }
 
-        public ulong FileReadAsync(IntPtr _, string pchFile, uint nOffset, uint cubToRead)
+        public SteamAPICall_t FileReadAsync(IntPtr _, string pchFile, uint nOffset, uint cubToRead)
         {
             return SteamEmulator.SteamRemoteStorage.FileReadAsync(pchFile, nOffset, cubToRead);
         }

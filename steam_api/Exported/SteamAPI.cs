@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using SKYNET.Helper;
 
 namespace SKYNET.Exported
 {
@@ -74,28 +75,29 @@ namespace SKYNET.Exported
                 SteamEmulator.Initialize();
             }
 
-            CCallbackBase Base = Marshal.PtrToStructure<CCallbackBase>(pCallback);
-            string callMessage = $"SteamAPI_RegisterCallback: ";
-
-            int base_callback = (iCallback / 100) * 100;
-            int callback_id = iCallback % 100;
-
-            bool GameServer = (Base.m_nCallbackFlags & CCallbackBase.k_ECallbackFlagsGameServer) != 0;
-            string isGameServer = GameServer ? "[ GAMESERVER ]" : "[   CLIENT   ]";
-            callMessage += $"{isGameServer} ";
-
-            callMessage += $"{(CallbackType)base_callback} {callback_id} ";
-
-            if (GameServer)
+            try
             {
-                SteamEmulator.Server_Callback.RegisterCallback(pCallback, iCallback);
-            }
-            else
-            {
-                SteamEmulator.Client_Callback.RegisterCallback(pCallback, iCallback);
-            }
+                CCallbackBase Base = pCallback.ToType<CCallbackBase>();
 
-            Write(callMessage);
+                string callMessage = $"SteamAPI_RegisterCallback: ";
+
+                CallbackType Type = iCallback.GetCallbackType();
+                int callback_id = iCallback % 100;
+
+                bool GameServer = Base.IsGameServer();
+                string isGameServer = GameServer ? "[ GAMESERVER ]" : "[   CLIENT   ]";
+                callMessage += $"{isGameServer} ";
+
+                callMessage += $"  {callback_id}    {Type} ";
+
+                CallbackManager.RegisterCallback(iCallback, Base, GameServer);
+
+                Write(callMessage);
+            }
+            catch 
+            {
+
+            }
         }
 
 

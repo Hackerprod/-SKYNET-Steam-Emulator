@@ -73,9 +73,10 @@ namespace SKYNET.Steamworks.Implementation
             return (int)EVoiceResult.k_EVoiceResultNoData;
         }
 
-        public int GetVoice(bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, uint nBytesWritten, bool bWantUncompressed_Deprecated, IntPtr pUncompressedDestBuffer_Deprecated, uint cbUncompressedDestBufferSize_Deprecated, uint nUncompressBytesWritten_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
+        public int GetVoice(bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, bool bWantUncompressed_Deprecated, IntPtr pUncompressedDestBuffer_Deprecated, uint cbUncompressedDestBufferSize_Deprecated, uint nUncompressBytesWritten_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
         {
             Write("GetVoice");
+            nBytesWritten = 0;
             return (int)EVoiceResult.k_EVoiceResultNoData;
         }
 
@@ -91,9 +92,10 @@ namespace SKYNET.Steamworks.Implementation
             return 2400;
         }
 
-        public uint GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
+        public uint GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
         {
             Write("GetAuthSessionTicket");
+            pcbTicket = 0;
             return 0;
         }
 
