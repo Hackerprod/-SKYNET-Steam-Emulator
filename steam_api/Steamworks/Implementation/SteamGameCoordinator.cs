@@ -5,6 +5,7 @@ using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using SKYNET.Types;
 using Steamworks;
+using SKYNET.Helper;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -24,13 +25,22 @@ namespace SKYNET.Steamworks.Implementation
         public EGCResults RetrieveMessage(uint punMsgType, IntPtr pubDest, uint cubDest, uint pcubMsgSize)
         {
             Write("RetrieveMessage");
-            return EGCResults.k_EGCResultNoMessage;
+            return EGCResults.k_EGCResultOK;
         }
 
         public EGCResults SendMessage_(uint unMsgType, IntPtr pubData, uint cubData)
         {
-            Write("SendMessage_");
-            return EGCResults.k_EGCResultNotLoggedOn;
+            uint msgType = GetGCMsg(unMsgType);
+            byte[] bytes = pubData.GetBytes(cubData);
+
+            Write($"SendMessage [{msgType}], {bytes.Length} bytes");
+
+            return EGCResults.k_EGCResultOK;
+        }
+
+        private uint GetGCMsg(uint msg)
+        {
+            return msg & 0x7FFFFFFFu;
         }
     }
 }

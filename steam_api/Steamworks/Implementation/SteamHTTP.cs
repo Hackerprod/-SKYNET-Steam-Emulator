@@ -3,6 +3,8 @@ using System.Runtime.InteropServices;
 using SKYNET;
 using SKYNET.Helpers;
 using SKYNET.Managers;
+using System.Net;
+using System.Net.Http;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -21,8 +23,18 @@ namespace SKYNET.Steamworks.Implementation
 
         public uint CreateHTTPRequest(uint eHTTPRequestMethod, string pchAbsoluteURL)
         {
-            Write($"CreateHTTPRequest {eHTTPRequestMethod} {pchAbsoluteURL}");
-            return 0;
+            Write($"CreateHTTPRequest {(HTTPMethod)eHTTPRequestMethod} {pchAbsoluteURL}");
+            try
+            {
+                WebRequest request = HttpWebRequest.Create(pchAbsoluteURL);
+                var response = request.GetResponse();
+                return 1;
+            }
+            catch (Exception)
+            {
+                return 0;
+            }
+            
         }
 
         public bool DeferHTTPRequest(uint hRequest)

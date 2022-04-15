@@ -35,7 +35,7 @@ namespace SKYNET.Steamworks.Implementation
         public uint GetServerRealTime()
         {
             Write("GetServerRealTime");
-            return 0;
+            return (uint)DateTime.Now.Millisecond;
         }
 
         public string GetIPCountry()

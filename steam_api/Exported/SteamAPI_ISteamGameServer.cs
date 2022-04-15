@@ -11,61 +11,61 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int SteamGameServer_GetHSteamUser()
         {
-            Write("SteamGameServer_GetHSteamUser\n");
+            Write("SteamGameServer_GetHSteamUser");
             return 1;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static HSteamPipe SteamGameServer_GetHSteamPipe()
         {
-            Write("SteamGameServer_GetHSteamPipe\n");
+            Write("SteamGameServer_GetHSteamPipe");
             return (HSteamPipe)1;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamGameServer_Init(IntPtr unIP, IntPtr usSteamPort, IntPtr usGamePort, IntPtr unknown, IntPtr eServerMode, IntPtr unknown1, IntPtr unknown2, IntPtr unknown3)
         {
-            Write("SteamGameServer_Init\n");
+            Write("SteamGameServer_Init");
             return true;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamGameServer_InitSafe(IntPtr unIP, IntPtr usSteamPort, IntPtr usGamePort, IntPtr unknown, IntPtr eServerMode, IntPtr unknown1, IntPtr unknown2, IntPtr unknown3)
         {
-            Write("SteamGameServer_InitSafe\n");
+            Write("SteamGameServer_InitSafe");
             return true;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamGameServer_Shutdown()
         {
-            Write("SteamGameServer_Shutdown\n");
+            Write("SteamGameServer_Shutdown");
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamGameServer_RunCallbacks()
         {
-            Write("SteamGameServer_RunCallbacks\n");
+            Write("SteamGameServer_RunCallbacks");
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamGameServer_BSecure()
         {
-            Write("SteamGameServer_BSecure\n");
+            Write("SteamGameServer_BSecure");
             return false;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static ulong SteamGameServer_GetSteamID()
         {
-            Write("SteamGameServer_GetSteamID\n");
+            Write("SteamGameServer_GetSteamID");
             return modCommon.CreateSteamID();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static ulong SteamGameServer_GetIPCCallCount()
         {
-            Write("SteamGameServer_GetIPCCallCount\n");
+            Write("SteamGameServer_GetIPCCallCount");
             return 0;
         }
 

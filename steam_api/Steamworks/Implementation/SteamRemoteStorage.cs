@@ -1,9 +1,12 @@
 ﻿using SKYNET;
+using SKYNET.Helper;
 using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using Steamworks;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
@@ -11,36 +14,48 @@ namespace SKYNET.Steamworks.Implementation
     public class SteamRemoteStorage : ISteamInterface
     {
         private string StoragePath;
+        private List<string> StorageFiles;
+        private int LastFile;
 
         public SteamRemoteStorage()
         {
             InterfaceVersion = "SteamRemoteStorage";
-            StoragePath = Path.Combine(SteamEmulator.EmulatorPath, "Data", "Storage", SteamEmulator.AppId.ToString());
-            modCommon.EnsureDirectoryExists(StoragePath);
+            StorageFiles = new List<string>();
+            LastFile = 0;
+
+            try
+            {
+                StoragePath = Path.Combine(SteamEmulator.EmulatorPath, "Data", "Storage", SteamEmulator.AppId.ToString());
+                modCommon.EnsureDirectoryExists(StoragePath);
+            }
+            catch (Exception)
+            {
+                StoragePath = Path.Combine(modCommon.GetPath(), SteamEmulator.AppId.ToString());
+            }
         }
 
         public bool FileWrite(string pchFile, IntPtr pvData, int cubData)
         {
             try
             {
-                Write($"FileWrite {pchFile}");
                 string fullPath = Path.Combine(StoragePath, pchFile);
-                byte[] buffer = ReadBytes(pvData, cubData);
+                byte[] buffer = pvData.GetBytes(cubData);
                 File.WriteAllBytes(fullPath, buffer);
+                Write($"FileWrite {pchFile}, {buffer.Length} bytes");
                 return true;
             }
             catch
             {
+                Write($"FileWrite {pchFile}");
                 return false;
             }
         }
 
         public int FileRead(string pchFile, IntPtr pvData, int cubDataToRead)
         {
-            Write($"FileRead {pchFile}");
             try
             {
-                Write($"FileWrite {pchFile}");
+                Write($"FileRead {pchFile}");
                 string fullPath = Path.Combine(StoragePath, pchFile);
                 byte[] bytes = File.ReadAllBytes(fullPath);
                 pvData = GetPtr(bytes);
@@ -54,7 +69,19 @@ namespace SKYNET.Steamworks.Implementation
 
         public ulong FileWriteAsync(string pchFile, IntPtr pvData, uint cubData)
         {
-            return 0;
+            Write($"FileWriteAsync {pchFile}");
+            try
+            {
+                string fullPath = Path.Combine(StoragePath, pchFile);
+                modCommon.EnsureDirectoryExists(fullPath, true);
+                Byte[] bytes = pvData.GetBytes(cubData);
+                File.WriteAllBytes(pchFile, bytes);
+                return 1;
+            }
+            catch 
+            {
+                return 0;
+            }
         }
 
         public ulong FileReadAsync(string pchFile, uint nOffset, uint cubToRead)
@@ -134,6 +161,11 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"FileExists {pchFile}");
             string fullPath = Path.Combine(StoragePath, pchFile);
+            if (!File.Exists(fullPath))
+            {
+                modCommon.EnsureDirectoryExists(fullPath, true);
+                File.WriteAllText(fullPath, "");
+            }
             return File.Exists(fullPath);
         }
 
@@ -147,15 +179,16 @@ namespace SKYNET.Steamworks.Implementation
         {
             int Length = 0;
 
-            if (File.Exists(pchFile))
+            string fullPath = Path.Combine(StoragePath, pchFile);
+            if (File.Exists(fullPath))
             {
-                FileInfo info = new FileInfo(pchFile);
+                FileInfo info = new FileInfo(fullPath);
                 Length = (int)info.Length;
             }
 
             Write($"GetFileSize {pchFile} [{Length}]");
 
-            return Length;
+            return Length == 0 ? 10 : Length;
         }
 
         public uint GetFileTimestamp(string pchFile)
@@ -172,14 +205,45 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetFileCount()
         {
-            Write("GetFileCount");
-            return 0;
+            if (Directory.Exists(StoragePath))
+            {
+                StorageFiles = Directory.GetFiles(StoragePath, "*.*", SearchOption.AllDirectories).ToList();
+                LastFile = 0;
+            }
+            Write($"GetFileCount {StorageFiles.Count}");
+            return StorageFiles.Count;
         }
 
         public string GetFileNameAndSize(int iFile, int pnFileSizeInBytes)
         {
-            Write("GetFileNameAndSize");
-            return default;
+            if (StorageFiles.Count == 0)
+            {
+                Write("GetFileNameAndSize");
+                return "";
+            }
+
+            if (LastFile < StorageFiles.Count)
+            {
+                string filename = StorageFiles[LastFile];
+                pnFileSizeInBytes = (int)new FileInfo(filename).Length;
+
+                if (LastFile == (StorageFiles.Count - 1))
+                {
+                    LastFile = 0;
+                }
+                else
+                {
+                    LastFile++;
+                }
+
+                filename = filename.Replace(StoragePath + @"\", "");
+
+                Write($"GetFileNameAndSize {filename}, {pnFileSizeInBytes} bytes");
+
+                return filename;
+            }
+
+            return "";
         }
 
         public bool GetQuota(int pnTotalBytes, int puAvailableBytes)
@@ -270,35 +334,10 @@ namespace SKYNET.Steamworks.Implementation
             Write("GetFileListFromServer");
         }
 
-        internal bool FileFetch(string pchFile)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal bool FilePersist(string pchFile)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal bool SynchronizeToClient()
-        {
-            throw new NotImplementedException();
-        }
-
         public bool UpdatePublishedFileTitle(ulong updateHandle, string pchTitle)
         {
             Write("UpdatePublishedFileTitle");
             return false;
-        }
-
-        internal bool ResetFileRequestState()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal bool SynchronizeToServer()
-        {
-            throw new NotImplementedException();
         }
 
         public bool UpdatePublishedFileDescription(ulong updateHandle, string pchDescription)

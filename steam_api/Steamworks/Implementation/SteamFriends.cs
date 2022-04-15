@@ -41,7 +41,7 @@ namespace SKYNET.Steamworks.Implementation
             Write($"ActivateGameOverlayRemotePlayTogetherInviteDialog {steamIDLobby}");
         }
 
-        public void ActivateGameOverlayToStore(uint nAppID, EOverlayToStoreFlag eFlag)
+        public void ActivateGameOverlayToStore(uint nAppID, int eFlag)
         {
             Write($"ActivateGameOverlayToStore {nAppID} {eFlag}");
         }
@@ -231,24 +231,24 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public bool GetFriendGamePlayed(SteamID steamIDFriend, out FriendGameInfo_t pFriendGameInfo)
+        public bool GetFriendGamePlayed(SteamID steamIDFriend, /*FriendGameInfo_t*/IntPtr pFriendGameInfo)
         {
             Write($"GetFriendGamePlayed");
 
-            pFriendGameInfo = new FriendGameInfo_t();
+            //pFriendGameInfo = new FriendGameInfo_t();
 
-            Friend friend = Friends.Find(f => f.AccountId == (uint)steamIDFriend);
-            if (friend == null)
-            {
-                pFriendGameInfo.GameID = 0;
-                pFriendGameInfo.GameIP = 0;
-                pFriendGameInfo.GamePort = 0;
-                return false;
-            }
-            pFriendGameInfo.GameID = friend.GameId;
-            pFriendGameInfo.GameIP = 0;
-            pFriendGameInfo.GamePort = 0;
-            return true;
+            //Friend friend = Friends.Find(f => f.AccountId == (uint)steamIDFriend);
+            //if (friend == null)
+            //{
+            //    pFriendGameInfo.GameID = 0;
+            //    pFriendGameInfo.GameIP = 0;
+            //    pFriendGameInfo.GamePort = 0;
+            //    return false;
+            //}
+            //pFriendGameInfo.GameID = friend.GameId;
+            //pFriendGameInfo.GameIP = 0;
+            //pFriendGameInfo.GamePort = 0;
+            return false;
         }
 
 
@@ -278,23 +278,23 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public EPersonaState GetFriendPersonaState(SteamID steamIDFriend)
+        public int GetFriendPersonaState(SteamID steamIDFriend)
         {
             Write($"GetFriendPersonaState {steamIDFriend}");
-            return Users.Find(f => f.ConvertToUInt64() == steamIDFriend.ConvertToUInt64()) == null ? EPersonaState.k_EPersonaStateOffline : EPersonaState.k_EPersonaStateOnline;
+            return (int)(Users.Find(f => f.ConvertToUInt64() == steamIDFriend.ConvertToUInt64()) == null ? EPersonaState.k_EPersonaStateOffline : EPersonaState.k_EPersonaStateOnline);
         }
 
 
-        public EFriendRelationship GetFriendRelationship(SteamID steamIDFriend)
+        public int GetFriendRelationship(SteamID steamIDFriend)
         {
             Write($"GetFriendRelationship {steamIDFriend}");
-            return EFriendRelationship.k_EFriendRelationshipNone;
+            return (int)EFriendRelationship.k_EFriendRelationshipNone;
         }
 
 
         public string GetFriendRichPresence(SteamID steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchKey)
         {
-            Write($"GetFriendRichPresence [{steamIDFriend}]: {pchKey}");
+            Write($"GetFriendRichPresence [{steamIDFriend.ConvertToUInt64()}]: {pchKey}");
             return "";
         }
 
@@ -334,7 +334,7 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public void GetFriendsGroupMembersList(int friendsGroupID, ulong pOutSteamIDMembers, int nMembersCount)
+        public void GetFriendsGroupMembersList(int friendsGroupID, IntPtr pOutSteamIDMembers, int nMembersCount)
         {
             Write($"GetFriendsGroupMembersList {friendsGroupID}");
         }

@@ -41,9 +41,9 @@ namespace SKYNET.Interface
         {
             return SteamEmulator.SteamFriends.GetFriendPersonaName(steam_id);
         }
-        public bool GetFriendGamePlayed(IntPtr _, SteamID steam_id, out FriendGameInfo_t friend_game_info_out)
+        public bool GetFriendGamePlayed(IntPtr _, SteamID steam_id, IntPtr friend_game_info_out)
         {
-            bool result = SteamEmulator.SteamFriends.GetFriendGamePlayed(steam_id, out friend_game_info_out);
+            bool result = SteamEmulator.SteamFriends.GetFriendGamePlayed(steam_id, friend_game_info_out);
             return result;
         }
         public string GetFriendPersonaNameHistory(IntPtr _, ulong steam_id, int index)
@@ -75,7 +75,7 @@ namespace SKYNET.Interface
         {
             return SteamEmulator.SteamFriends.GetFriendsGroupMembersCount(default);
         }
-        public void GetFriendsGroupMembersList(IntPtr _, short id, ulong steam_id_out, int max_steam_id_out)
+        public void GetFriendsGroupMembersList(IntPtr _, short id, IntPtr steam_id_out, int max_steam_id_out)
         {
             SteamEmulator.SteamFriends.GetFriendsGroupMembersList(id, steam_id_out, max_steam_id_out);
         }

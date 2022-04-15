@@ -18,6 +18,8 @@ When File log option si enabled in settings, a log file will be created in the r
 ###
 - [x] ISteamAppList		
 - - [x] ISteamAppList001
+- [x] ISteamAppDisableUpdate
+- - [x] ISteamAppDisableUpdate001
 - [x] ISteamApps
 - - [x] ISteamApps008
 - [x] ISteamClient		
@@ -32,6 +34,7 @@ When File log option si enabled in settings, a log file will be created in the r
 - [ ] ISteamGameSearch		
 - [x] ISteamGameServer
 - - [x] ISteamGameServer012 
+- - [x] ISteamGameServer014
 - [x] ISteamGameServerStats	
 - - [x] ISteamGameServerStats001 
 - [x] ISteamHTMLSurface
