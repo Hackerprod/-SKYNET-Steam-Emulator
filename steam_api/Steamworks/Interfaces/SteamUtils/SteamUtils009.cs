@@ -62,9 +62,9 @@ namespace SKYNET.Interface
             SteamEmulator.SteamUtils.SetOverlayNotificationPosition(eNotificationPosition);
         }
 
-        public bool IsAPICallCompleted(IntPtr _, ulong hSteamAPICall, bool pbFailed)
+        public bool IsAPICallCompleted(IntPtr _, SteamAPICall_t hSteamAPICall, bool pbFailed)
         {
-            return SteamEmulator.SteamUtils.IsAPICallCompleted(hSteamAPICall, pbFailed);
+            return SteamEmulator.SteamUtils.IsAPICallCompleted(hSteamAPICall, ref pbFailed);
         }
 
         public ESteamAPICallFailure GetAPICallFailureReason(IntPtr _, ulong hSteamAPICall)

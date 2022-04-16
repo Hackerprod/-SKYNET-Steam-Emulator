@@ -124,9 +124,9 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamFriends.GetClanActivityCounts(steam_id, ref online, ref in_game, ref chatting);
         }
 
-        public int DownloadClanActivityCounts(IntPtr _, System.UInt64[] clans, int count)
+        public SteamAPICall_t DownloadClanActivityCounts(IntPtr _, System.UInt64[] clans, int count)
         {
-            return (int)SteamEmulator.SteamFriends.DownloadClanActivityCounts(clans, count);
+            return SteamEmulator.SteamFriends.DownloadClanActivityCounts(clans, count);
         }
 
         public int GetFriendCountFromSource(IntPtr _, ulong source_id)
@@ -200,9 +200,9 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamFriends.RequestUserInformation(steam_id, require_name_only);
         }
 
-        public int RequestClanOfficerList(IntPtr _, ulong steam_id)
+        public SteamAPICall_t RequestClanOfficerList(IntPtr _, ulong steam_id)
         {
-            return (int)SteamEmulator.SteamFriends.RequestClanOfficerList(steam_id);
+            return SteamEmulator.SteamFriends.RequestClanOfficerList(steam_id);
         }
 
         public SteamID GetClanOwner(IntPtr _, ulong steam_id)
@@ -279,9 +279,9 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamFriends.GetFriendCoplayGame(steam_id);
         }
 
-        public int JoinClanChatRoom(IntPtr _, ulong steam_id)
+        public SteamAPICall_t JoinClanChatRoom(IntPtr _, ulong steam_id)
         {
-            return (int)SteamEmulator.SteamFriends.JoinClanChatRoom(steam_id);
+            return SteamEmulator.SteamFriends.JoinClanChatRoom(steam_id);
         }
         public bool LeaveClanChatRoom(IntPtr _, ulong steam_id)
         {
@@ -343,19 +343,19 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamFriends.GetFriendMessage(steam_id, msg_index, b_pointer, b_length, msg_type);
         }
 
-        public int GetFollowerCount(IntPtr _, ulong steam_id)
+        public SteamAPICall_t GetFollowerCount(IntPtr _, ulong steam_id)
         {
-            return (int)SteamEmulator.SteamFriends.GetFollowerCount(steam_id);
+            return SteamEmulator.SteamFriends.GetFollowerCount(steam_id);
         }
 
-        public int IsFollowing(IntPtr _, ulong steam_id)
+        public SteamAPICall_t IsFollowing(IntPtr _, ulong steam_id)
         {
-            return (int)SteamEmulator.SteamFriends.IsFollowing(steam_id);
+            return SteamEmulator.SteamFriends.IsFollowing(steam_id);
         }
 
-        public int EnumerateFollowingList(IntPtr _, uint starting_index)
+        public SteamAPICall_t EnumerateFollowingList(IntPtr _, uint starting_index)
         {
-            return (int)SteamEmulator.SteamFriends.EnumerateFollowingList(starting_index);
+            return SteamEmulator.SteamFriends.EnumerateFollowingList(starting_index);
         }
 
         public bool IsClanPublic(IntPtr _, ulong steam_id)

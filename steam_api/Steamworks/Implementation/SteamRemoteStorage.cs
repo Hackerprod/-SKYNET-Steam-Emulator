@@ -14,7 +14,7 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamRemoteStorage : ISteamInterface
     {
-        private string StoragePath;
+        public string StoragePath;
         private List<string> StorageFiles;
         private int LastFile;
 

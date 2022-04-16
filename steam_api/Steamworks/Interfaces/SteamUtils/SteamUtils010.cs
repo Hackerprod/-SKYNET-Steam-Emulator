@@ -62,17 +62,17 @@ namespace SKYNET.Interface
             SteamEmulator.SteamUtils.SetOverlayNotificationPosition(eNotificationPosition);
         }
 
-        public bool IsAPICallCompleted(IntPtr _, ulong hSteamAPICall, bool pbFailed)
+        public bool IsAPICallCompleted(IntPtr _, SteamAPICall_t hSteamAPICall, bool pbFailed)
         {
-            return SteamEmulator.SteamUtils.IsAPICallCompleted(hSteamAPICall, pbFailed);
+            return SteamEmulator.SteamUtils.IsAPICallCompleted(hSteamAPICall, ref pbFailed);
         }
 
-        public ESteamAPICallFailure GetAPICallFailureReason(IntPtr _, ulong hSteamAPICall)
+        public ESteamAPICallFailure GetAPICallFailureReason(IntPtr _, SteamAPICall_t hSteamAPICall)
         {
             return SteamEmulator.SteamUtils.GetAPICallFailureReason(hSteamAPICall);
         }
 
-        public bool GetAPICallResult(IntPtr _, ulong hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, bool pbFailed)
+        public bool GetAPICallResult(IntPtr _, SteamAPICall_t hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, bool pbFailed)
         {
             return SteamEmulator.SteamUtils.GetAPICallResult(hSteamAPICall, pCallback, cubCallback, iCallbackExpected, pbFailed);
         }

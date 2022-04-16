@@ -36,9 +36,9 @@ namespace SKYNET.Interface
             SteamEmulator.SteamUser.TrackAppUsageEvent(gameID, eAppUsageEvent);
         }
 
-        public bool GetUserDataFolder(IntPtr _, string pchBuffer, int cubBuffer)
+        public bool GetUserDataFolder(IntPtr _, ref string pchBuffer, int cubBuffer)
         {
-            return SteamEmulator.SteamUser.GetUserDataFolder(pchBuffer, cubBuffer);
+            return SteamEmulator.SteamUser.GetUserDataFolder(ref pchBuffer, cubBuffer);
         }
 
         public void StartVoiceRecording(IntPtr _)
@@ -66,7 +66,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUser.DecompressVoice(pCompressed, cbCompressed, pDestBuffer, cbDestBufferSize, nBytesWritten, nDesiredSampleRate);
         }
 
-        public uint GetVoiceOptimalSampleRate(IntPtr _)
+        public int GetVoiceOptimalSampleRate(IntPtr _)
         {
             return SteamEmulator.SteamUser.GetVoiceOptimalSampleRate();
         }

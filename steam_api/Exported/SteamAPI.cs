@@ -42,8 +42,26 @@ namespace SKYNET.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_RegisterCallResult(CCallbackBase pCallback, SteamAPICall_t hAPICall)
         {
-            Write("SteamAPI_RegisterCallResult");
-            SteamEmulator.Client_Callback.RegisterCallResult(pCallback, hAPICall);
+            try
+            {
+                string callMessage = $"SteamAPI_RegisterCallResult: ";
+
+                bool GameServer = pCallback.IsGameServer();
+                string isGameServer = GameServer ? "[ GAMESERVER ]" : "[   CLIENT   ]";
+                callMessage += $"{isGameServer} ";
+
+                CallbackType Type = pCallback.m_iCallback.GetCallbackType();
+                int callback_id = pCallback.m_iCallback % 100;
+
+                callMessage += $"  {callback_id}    {Type} ";
+                Write(callMessage);
+
+                CallbackManager.RegisterCallResult(pCallback, hAPICall);
+            }
+            catch
+            {
+                Write("SteamAPI_RegisterCallResult");
+            }
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -96,7 +114,7 @@ namespace SKYNET.Exported
             }
             catch 
             {
-
+                Write("SteamAPI_RegisterCallback");
             }
         }
 

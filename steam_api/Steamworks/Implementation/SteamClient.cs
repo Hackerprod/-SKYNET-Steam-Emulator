@@ -49,12 +49,14 @@ namespace SKYNET.Steamworks.Implementation
         public IntPtr GetISteamUser(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamUser {pchVersion}");
+            if (!pchVersion.StartsWith("SteamUser")) return IntPtr.Zero;
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion); 
         }
 
         public IntPtr GetISteamGameServer(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamGameServer {pchVersion}");
+            if (!pchVersion.StartsWith("SteamGameServer")) return IntPtr.Zero;
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
@@ -66,24 +68,28 @@ namespace SKYNET.Steamworks.Implementation
         public IntPtr GetISteamFriends(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamFriends {pchVersion}");
+            if (!pchVersion.StartsWith("SteamFriends")) return IntPtr.Zero;
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamUtils(int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamUtils {pchVersion}");
+            if (!pchVersion.StartsWith("SteamUtils")) return IntPtr.Zero;
             return InterfaceManager.FindOrCreateInterface(pchVersion);
         }
 
         public IntPtr GetISteamMatchmaking(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamMatchmaking {pchVersion}");
+            if (!pchVersion.StartsWith("SteamMatchmaking")) return IntPtr.Zero;
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamMatchmakingServers(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamMatchmakingServers {pchVersion}");
+            if (!pchVersion.StartsWith("SteamMatchmakingServers")) return IntPtr.Zero;
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
@@ -96,44 +102,44 @@ namespace SKYNET.Steamworks.Implementation
         public IntPtr GetISteamUserStats(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamUserStats {pchVersion}");
+            if (!pchVersion.StartsWith("STEAMUSERSTATS_INTERFACE_VERSION")) return IntPtr.Zero;
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamGameServerStats(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamGameServerStats {pchVersion}");
+            if (!pchVersion.StartsWith("SteamGameServer")) return IntPtr.Zero;
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamApps(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamApps {pchVersion}");
+            if (!pchVersion.StartsWith("STEAMAPPS_INTERFACE_VERSION")) return IntPtr.Zero;
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamNetworking(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamNetworking {pchVersion}");
+            if (!pchVersion.StartsWith("SteamNetworking")) return IntPtr.Zero;
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamRemoteStorage(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamRemoteStorage {pchVersion}");
+            if (!pchVersion.StartsWith("STEAMREMOTESTORAGE_INTERFACE_VERSION")) return IntPtr.Zero;
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamScreenshots(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamScreenshots {pchVersion}");
+            if (!pchVersion.StartsWith("STEAMSCREENSHOTS_INTERFACE_VERSION")) return IntPtr.Zero;
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
-
-        //public IntPtr GetISteamGameSearch(int hSteamUser, int hSteamPipe, string pchVersion)
-        //{
-        //    Write($"GetISteamFriends {pchVersion}");
-        //    return SteamEmulator.SteamGameSearch.MemoryAddress;
-        //}
 
         public void RunFrame()
         {
@@ -148,8 +154,15 @@ namespace SKYNET.Steamworks.Implementation
 
         public void SetWarningMessageHook(IntPtr pFunctionPtr)
         {
-            SteamAPIWarningMessageHook_t pFunction = Marshal.PtrToStructure<SteamAPIWarningMessageHook_t>(pFunctionPtr);
-            Write($"SetWarningMessageHook Name: {pFunction.Method.Name}, ReturnType: {pFunction.Method.ReturnType}");
+            try
+            {
+                SteamAPIWarningMessageHook_t pFunction = Marshal.PtrToStructure<SteamAPIWarningMessageHook_t>(pFunctionPtr);
+                Write($"SetWarningMessageHook Name: {pFunction.Method.Name}, ReturnType: {pFunction.Method.ReturnType}");
+            }
+            catch (Exception)
+            {
+                Write($"SetWarningMessageHook");
+            }
         }
 
         public bool BShutdownIfAllPipesClosed()
@@ -161,6 +174,7 @@ namespace SKYNET.Steamworks.Implementation
         public IntPtr GetISteamHTTP(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamHTTP {pchVersion}");
+            if (!pchVersion.StartsWith("STEAMHTTP_INTERFACE_VERSION")) return IntPtr.Zero;
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
@@ -179,36 +193,42 @@ namespace SKYNET.Steamworks.Implementation
         public IntPtr GetISteamController(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamController {pchVersion}");
+            if (!pchVersion.StartsWith("SteamController")) return IntPtr.Zero;
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamUGC(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamUGC {pchVersion}");
+            if (!pchVersion.StartsWith("STEAMUGC_INTERFACE_VERSION")) return IntPtr.Zero;
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamAppList(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamAppList {pchVersion}");
+            if (!pchVersion.StartsWith("STEAMAPPLIST_INTERFACE_VERSION")) return IntPtr.Zero;
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamMusic(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamMusic {pchVersion}");
+            if (!pchVersion.StartsWith("STEAMMUSIC_INTERFACE_VERSION")) return IntPtr.Zero;
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamMusicRemote(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamMusicRemote {pchVersion}");
+            if (!pchVersion.StartsWith("STEAMMUSICREMOTE_INTERFACE_VERSION")) return IntPtr.Zero;
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamHTMLSurface(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamHTMLSurface {pchVersion}");
+            if (!pchVersion.StartsWith("STEAMHTMLSURFACE_INTERFACE_VERSION")) return IntPtr.Zero;
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
@@ -241,18 +261,21 @@ namespace SKYNET.Steamworks.Implementation
         public IntPtr GetISteamInventory(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamInventory {pchVersion}");
+            if (!pchVersion.StartsWith("STEAMINVENTORY_INTERFACE_V")) return IntPtr.Zero;
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamVideo(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamVideo {pchVersion}");
+            if (!pchVersion.StartsWith("STEAMVIDEO_INTERFACE_V")) return IntPtr.Zero;
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamParentalSettings(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamParentalSettings {pchVersion}");
+            if (!pchVersion.StartsWith("STEAMPARENTALSETTINGS_INTERFACE_VERSION")) return IntPtr.Zero;
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
@@ -271,6 +294,7 @@ namespace SKYNET.Steamworks.Implementation
         public IntPtr GetISteamGameSearch(int hSteamUser, int hSteamPipe, string pchVersion)
         {
             Write($"GetISteamFriends {pchVersion}");
+            if (!pchVersion.StartsWith("SteamFriends")) return IntPtr.Zero;
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 

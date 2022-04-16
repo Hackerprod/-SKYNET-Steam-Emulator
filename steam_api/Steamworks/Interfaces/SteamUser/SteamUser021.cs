@@ -23,7 +23,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUser.GetSteamID();
         }
 
-        public int InitiateGameConnection(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)
+        public int InitiateGameConnection(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, SteamID steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)
         {
             return SteamEmulator.SteamUser.InitiateGameConnection(pAuthBlob, cbMaxAuthBlob, steamIDGameServer, unIPServer, usPortServer, bSecure);
         }
@@ -40,7 +40,7 @@ namespace SKYNET.Interface
 
         public bool GetUserDataFolder(IntPtr _, string pchBuffer, int cubBuffer)
         {
-            return SteamEmulator.SteamUser.GetUserDataFolder(pchBuffer, cubBuffer);
+            return SteamEmulator.SteamUser.GetUserDataFolder(ref pchBuffer, cubBuffer);
         }
 
         public void StartVoiceRecording(IntPtr _)
@@ -68,7 +68,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUser.DecompressVoice(pCompressed, cbCompressed, pDestBuffer, cbDestBufferSize, nBytesWritten, nDesiredSampleRate);
         }
 
-        public uint GetVoiceOptimalSampleRate(IntPtr _)
+        public int GetVoiceOptimalSampleRate(IntPtr _)
         {
             return SteamEmulator.SteamUser.GetVoiceOptimalSampleRate();
         }
@@ -78,12 +78,12 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUser.GetAuthSessionTicket(pTicket, cbMaxTicket, ref pcbTicket);
         }
 
-        public int BeginAuthSession(IntPtr _, IntPtr pAuthTicket, int cbAuthTicket, ulong steamID)
+        public int BeginAuthSession(IntPtr _, IntPtr pAuthTicket, int cbAuthTicket, SteamID steamID)
         {
             return SteamEmulator.SteamUser.BeginAuthSession(pAuthTicket, cbAuthTicket, steamID);
         }
 
-        public void EndAuthSession(IntPtr _, ulong steamID)
+        public void EndAuthSession(IntPtr _, SteamID steamID)
         {
             SteamEmulator.SteamUser.EndAuthSession(steamID);
         }
@@ -93,7 +93,7 @@ namespace SKYNET.Interface
             SteamEmulator.SteamUser.CancelAuthTicket(hAuthTicket);
         }
 
-        public int UserHasLicenseForApp(IntPtr _, ulong steamID, uint appID)
+        public int UserHasLicenseForApp(IntPtr _, SteamID steamID, uint appID)
         {
             return SteamEmulator.SteamUser.UserHasLicenseForApp(steamID, appID);
         }
@@ -103,12 +103,12 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUser.BIsBehindNAT();
         }
 
-        public void AdvertiseGame(IntPtr _, ulong steamIDGameServer, uint unIPServer, uint usPortServer)
+        public void AdvertiseGame(IntPtr _, SteamID steamIDGameServer, uint unIPServer, uint usPortServer)
         {
             SteamEmulator.SteamUser.AdvertiseGame(steamIDGameServer, unIPServer, usPortServer);
         }
 
-        public ulong RequestEncryptedAppTicket(IntPtr _, IntPtr pDataToInclude, int cbDataToInclude)
+        public SteamAPICall_t RequestEncryptedAppTicket(IntPtr _, IntPtr pDataToInclude, int cbDataToInclude)
         {
             return SteamEmulator.SteamUser.RequestEncryptedAppTicket(pDataToInclude, cbDataToInclude);
         }
@@ -128,7 +128,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUser.GetPlayerSteamLevel();
         }
 
-        public ulong RequestStoreAuthURL(IntPtr _, string pchRedirectURL)
+        public SteamAPICall_t RequestStoreAuthURL(IntPtr _, string pchRedirectURL)
         {
             return SteamEmulator.SteamUser.RequestStoreAuthURL(pchRedirectURL);
         }
@@ -153,12 +153,12 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUser.BIsPhoneRequiringVerification();
         }
 
-        public ulong GetMarketEligibility(IntPtr _)
+        public SteamAPICall_t GetMarketEligibility(IntPtr _)
         {
             return SteamEmulator.SteamUser.GetMarketEligibility();
         }
 
-        public ulong GetDurationControl(IntPtr _)
+        public SteamAPICall_t GetDurationControl(IntPtr _)
         {
             return SteamEmulator.SteamUser.GetDurationControl();
         }

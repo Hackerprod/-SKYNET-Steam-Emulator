@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using SKYNET;
 using SKYNET.Helpers;
+using SKYNET.Managers;
 using SKYNET.Steamworks;
 using Steamworks;
 
@@ -9,21 +10,23 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamUtils : ISteamInterface
     {
+        private DateTime ActiveTime;
         public SteamUtils()
         {
             InterfaceVersion = "SteamUtils";
+            ActiveTime = DateTime.Now;
         }
 
         public uint GetSecondsSinceAppActive()
         {
             Write("GetSecondsSinceAppActive");
-            return 0;
+            return (uint)(DateTime.Now - ActiveTime).Seconds;
         }
 
         public uint GetSecondsSinceComputerActive()
         {
             Write("GetSecondsSinceComputerActive");
-            return 0;
+            return (uint)(DateTime.Now - ActiveTime).Seconds + 3000;
         }
 
         public EUniverse GetConnectedUniverse()
@@ -41,7 +44,7 @@ namespace SKYNET.Steamworks.Implementation
         public string GetIPCountry()
         {
             Write("GetIPCountry");
-            return "";
+            return "US";
         }
 
         public bool GetImageSize(int iImage, uint pnWidth, uint pnHeight)
@@ -65,7 +68,7 @@ namespace SKYNET.Steamworks.Implementation
         public int GetCurrentBatteryPower()
         {
             Write("GetCurrentBatteryPower");
-            return 0;
+            return 100;
         }
 
         public uint GetAppID()
@@ -80,7 +83,7 @@ namespace SKYNET.Steamworks.Implementation
             Write("SetOverlayNotificationPosition");
         }
 
-        public bool IsAPICallCompleted(ulong hSteamAPICall, bool pbFailed)
+        public bool IsAPICallCompleted(SteamAPICall_t hSteamAPICall, ref bool pbFailed)
         {
             Write("IsAPICallCompleted");
             if (hSteamAPICall == 1)
@@ -90,19 +93,25 @@ namespace SKYNET.Steamworks.Implementation
                 return true;
             }
 
+            if (CallbackManager.Contains(hSteamAPICall))
+                return false;
+
+            if (pbFailed) pbFailed = false;
             return true;
         }
 
-        public ESteamAPICallFailure GetAPICallFailureReason(ulong hSteamAPICall)
+        public ESteamAPICallFailure GetAPICallFailureReason(SteamAPICall_t hSteamAPICall)
         {
             Write("GetAPICallFailureReason");
-            return default;
+            return ESteamAPICallFailure.k_ESteamAPICallFailureNone;
         }
 
-        public bool GetAPICallResult(ulong hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, bool pbFailed)
+        public bool GetAPICallResult(SteamAPICall_t hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, bool pbFailed)
         {
             Write("GetAPICallResult");
-            return false;
+            var CallCompleted = CallbackManager.SteamAPICallsCompleted.Find(c => c == hSteamAPICall);
+            if (CallCompleted == null) return false;
+            return true;
         }
 
         public void RunFrame()
@@ -113,7 +122,7 @@ namespace SKYNET.Steamworks.Implementation
         public uint GetIPCCallCount()
         {
             Write("GetIPCCallCount");
-            return 0;
+            return (uint)new Random().Next(100, 200);
         }
 
         public void SetWarningMessageHook(IntPtr pFunction)
@@ -133,10 +142,11 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public ulong CheckFileSignature(string szFileName)
+        public SteamAPICall_t CheckFileSignature(string szFileName)
         {
             Write("CheckFileSignature");
-            return default;
+            // CheckFileSignature_t
+            return 0;
         }
 
         public bool ShowGamepadTextInput(int eInputMode, int eLineInputMode, string pchDescription, uint unCharMax, string pchExistingText)
@@ -160,7 +170,7 @@ namespace SKYNET.Steamworks.Implementation
         public string GetSteamUILanguage()
         {
             Write("GetSteamUILanguage");
-            return "English";
+            return SteamEmulator.Language;
         }
 
         public bool IsSteamRunningInVR()
@@ -205,7 +215,7 @@ namespace SKYNET.Steamworks.Implementation
         public bool InitFilterText()
         {
             Write("InitFilterText");
-            return true;
+            return false;
         }
 
         public int FilterText(string pchOutFilteredText, uint nByteSizeOutFilteredText, string pchInputMessage, bool bLegalOnly)
@@ -223,7 +233,7 @@ namespace SKYNET.Steamworks.Implementation
         public ESteamIPv6ConnectivityState GetIPv6ConnectivityState(int eProtocol)
         {
             Write("GetIPv6ConnectivityState");
-            return default;
+            return ESteamIPv6ConnectivityState.k_ESteamIPv6ConnectivityState_Unknown;
         }
     }
 }

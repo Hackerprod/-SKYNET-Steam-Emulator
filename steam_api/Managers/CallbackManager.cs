@@ -12,9 +12,11 @@ namespace SKYNET.Managers
     {
         public const byte k_ECallbackFlagsRegistered = 1;
         public const byte k_ECallbackFlagsGameServer = 2;
+        public static List<SteamAPICall_t> SteamAPICallsCompleted;
 
         private static Dictionary<int, CCallbackBase> Client_Callbacks;
         private static Dictionary<int, CCallbackBase> Server_Callbacks;
+        private static List<SteamAPICall_t> SteamAPICalls;
 
         static CallbackManager()
         {
@@ -25,6 +27,14 @@ namespace SKYNET.Managers
             if (Server_Callbacks == null)
             {
                 Server_Callbacks = new Dictionary<int, CCallbackBase>();
+            }
+            if (SteamAPICalls == null)
+            {
+                SteamAPICalls = new List<SteamAPICall_t>();
+            }
+            if (SteamAPICallsCompleted == null)
+            {
+                SteamAPICallsCompleted = new List<SteamAPICall_t>();
             }
         }
 
@@ -53,9 +63,9 @@ namespace SKYNET.Managers
 
         }
 
-        public void RegisterCallResult(CCallbackBase pCallback, SteamAPICall_t hAPICall)
+        public static void RegisterCallResult(CCallbackBase pCallback, SteamAPICall_t hAPICall)
         {
-
+            SteamAPICalls.Add(hAPICall);
         }
 
         public void RunCallbacks()
@@ -77,6 +87,11 @@ namespace SKYNET.Managers
             //    Marshal.FreeHGlobal(ptr);
             //    Callbacks.Remove(pipe_id);
             //}
+        }
+
+        public static bool Contains(SteamAPICall_t hSteamAPICall)
+        {
+            return SteamAPICalls.Contains(hSteamAPICall);
         }
     }
 }
