@@ -50,13 +50,10 @@ namespace SKYNET.Exported
                 //string isGameServer = GameServer ? "[ GAMESERVER ]" : "[   CLIENT   ]";
                 //callMessage += $"{isGameServer} ";
 
-                //CallbackType Type = pCallback.m_iCallback.GetCallbackType();
-                //int callback_id = pCallback.m_iCallback % 100;
+                callMessage += $"  {callback_id}    {Type} ";
+                Write(callMessage);
 
-                //callMessage += $"  {callback_id}    {Type} ";
-                //Write(callMessage);
-
-                //CallbackManager.RegisterCallResult(hAPICall, pCallback);
+                CallbackManager.RegisterCallResult(pCallback, hAPICall);
             }
             catch
             {
@@ -230,7 +227,7 @@ namespace SKYNET.Exported
 
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ManualDispatch_GetAPICallResult(int hSteamPipe, ulong hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, ref bool pbFailed)
+        public static bool SteamAPI_ManualDispatch_GetAPICallResult(HSteamPipe hSteamPipe, IntPtr hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, bool pbFailed)
         {
             Write($"SteamAPI_ManualDispatch_GetAPICallResult");
             return SteamEmulator.SteamUtils.GetAPICallResult(hSteamAPICall, pCallback, cubCallback, iCallbackExpected, ref pbFailed);

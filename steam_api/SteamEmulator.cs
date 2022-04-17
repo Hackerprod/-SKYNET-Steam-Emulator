@@ -104,10 +104,10 @@ public class SteamEmulator
         LoadCustomVars();
 
         SteamId_GS = new SteamID();
-        SteamId_GS.Set((uint)new Random().Next(1000, 9999), EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeGameServer);
-        
+        SteamId_GS.Set((uint)new Random().Next(1000, 9999), SKYNET.Steamworks.EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeGameServer);
+
         InterfaceManager.Initialize();
-        
+
         #region Interface Initialization
 
         // Client Interfaces
@@ -212,7 +212,7 @@ public class SteamEmulator
         HSteamPipe_GS = 2;
 
         Initialized = true;
-        modCommon.Show("Unju");
+
     }
 
     public static int CreateSteamUser()
