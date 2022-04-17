@@ -16,23 +16,40 @@ namespace SKYNET.Managers
     {
         private static ConcurrentDictionary<string, Type> interfaceTypes;
         private static Dictionary<string, IntPtr> StoredInterfaces;
+        private static Dictionary<string, IntPtr> StoredInterfaces_Gameserver;
 
         static InterfaceManager()
         {
             interfaceTypes = new ConcurrentDictionary<string, Type>();
             StoredInterfaces = new Dictionary<string, IntPtr>();
+            StoredInterfaces_Gameserver = new Dictionary<string, IntPtr>();
         }
 
         public static void Initialize()
         {
-            Assembly currentAssembly = Assembly.GetAssembly(typeof(InterfaceManager));
-            foreach (var type in currentAssembly.GetTypes())
+            try
             {
-                if (type.IsDefined(typeof(InterfaceAttribute)))
+                Console.WriteLine("Loading Assembly");
+                Assembly currentAssembly = Assembly.GetAssembly(typeof(InterfaceAttribute));
+                Console.WriteLine(currentAssembly.GetTypes() == null);
+                if (currentAssembly == null)
                 {
-                    var interfaceAttribute = type.GetCustomAttributes<InterfaceAttribute>().ToList()[0];
-                    interfaceTypes.TryAdd(interfaceAttribute.Name, type);
+                    Console.WriteLine("Error loading Interface list.");
+                    return;
                 }
+                foreach (var type in currentAssembly.GetTypes())
+                {
+                    Console.WriteLine($"{type.Name}");
+                    if (type.IsDefined(typeof(InterfaceAttribute)))
+                    {
+                        var interfaceAttribute = type.GetCustomAttributes<InterfaceAttribute>().ToList()[0];
+                        interfaceTypes.TryAdd(interfaceAttribute.Name, type);
+                    }
+                }
+            }
+            catch 
+            {
+                
             }
         }
 
@@ -50,15 +67,26 @@ namespace SKYNET.Managers
             return FindOrCreateInterface(1, 1, pchVersion);
         }
 
-        public static IntPtr FindOrCreateInterface(int hSteamUser, int hSteamPipe, string pszVersion)
+        public static IntPtr FindOrCreateInterface(int hSteamUser, int hSteamPipe, string pszVersion, bool GameServer = false)
         {
             if (pszVersion.StartsWith("SteamGameServer0"))
             {
                 Write($"Skipping {pszVersion}");
                 return default;
             }
+            if (pszVersion.StartsWith("SteamClient"))
+            {
+                //Write($"Skipping {pszVersion}");
+                //return default;
+            }
 
-            if (StoredInterfaces.ContainsKey(pszVersion))
+            ///////////////////////////////////////////////////////////////////////
+
+            if (GameServer && StoredInterfaces_Gameserver.ContainsKey(pszVersion))
+            {
+                return StoredInterfaces_Gameserver[pszVersion];
+            }
+            else if (StoredInterfaces.ContainsKey(pszVersion))
             {
                 return StoredInterfaces[pszVersion];
             }
@@ -79,7 +107,15 @@ namespace SKYNET.Managers
                 return address;
             }
 
-            StoredInterfaces.Add(pszVersion, address);
+            if (GameServer)
+            {
+                StoredInterfaces_Gameserver.Add(pszVersion, address);
+            }
+            else
+            {
+                StoredInterfaces.Add(pszVersion, address);
+            }
+            
             SetInterfaceName(pszVersion, interfaceType);
 
             return address;

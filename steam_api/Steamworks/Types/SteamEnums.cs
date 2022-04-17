@@ -646,31 +646,31 @@ namespace SKYNET.Steamworks
         k_EItemPreviewType_EnvironmentMap_LatLong = 4, // standard image file expected
         k_EItemPreviewType_ReservedMax = 255,  // you can specify your own types above this value
     };
-    public enum EWorkshopFileType : int
-    {
-        k_EWorkshopFileTypeFirst = 0,
+    //public enum EWorkshopFileType : int
+    //{
+    //    k_EWorkshopFileTypeFirst = 0,
 
-        k_EWorkshopFileTypeCommunity = 0,      // normal Workshop item that can be subscribed to
-        k_EWorkshopFileTypeMicrotransaction = 1,       // Workshop item that is meant to be voted on for the purpose of selling in-game
-        k_EWorkshopFileTypeCollection = 2,     // a collection of Workshop or Greenlight items
-        k_EWorkshopFileTypeArt = 3,    // artwork
-        k_EWorkshopFileTypeVideo = 4,      // external video
-        k_EWorkshopFileTypeScreenshot = 5,     // screenshot
-        k_EWorkshopFileTypeGame = 6,       // Greenlight game entry
-        k_EWorkshopFileTypeSoftware = 7,       // Greenlight software entry
-        k_EWorkshopFileTypeConcept = 8,    // Greenlight concept
-        k_EWorkshopFileTypeWebGuide = 9,       // Steam web guide
-        k_EWorkshopFileTypeIntegratedGuide = 10,       // application integrated guide
-        k_EWorkshopFileTypeMerch = 11,     // Workshop merchandise meant to be voted on for the purpose of being sold
-        k_EWorkshopFileTypeControllerBinding = 12,     // Steam Controller bindings
-        k_EWorkshopFileTypeSteamworksAccessInvite = 13,    // internal
-        k_EWorkshopFileTypeSteamVideo = 14,    // Steam video
-        k_EWorkshopFileTypeGameManagedItem = 15,       // managed completely by the game, not the user, and not shown on the web
+    //    k_EWorkshopFileTypeCommunity = 0,      // normal Workshop item that can be subscribed to
+    //    k_EWorkshopFileTypeMicrotransaction = 1,       // Workshop item that is meant to be voted on for the purpose of selling in-game
+    //    k_EWorkshopFileTypeCollection = 2,     // a collection of Workshop or Greenlight items
+    //    k_EWorkshopFileTypeArt = 3,    // artwork
+    //    k_EWorkshopFileTypeVideo = 4,      // external video
+    //    k_EWorkshopFileTypeScreenshot = 5,     // screenshot
+    //    k_EWorkshopFileTypeGame = 6,       // Greenlight game entry
+    //    k_EWorkshopFileTypeSoftware = 7,       // Greenlight software entry
+    //    k_EWorkshopFileTypeConcept = 8,    // Greenlight concept
+    //    k_EWorkshopFileTypeWebGuide = 9,       // Steam web guide
+    //    k_EWorkshopFileTypeIntegratedGuide = 10,       // application integrated guide
+    //    k_EWorkshopFileTypeMerch = 11,     // Workshop merchandise meant to be voted on for the purpose of being sold
+    //    k_EWorkshopFileTypeControllerBinding = 12,     // Steam Controller bindings
+    //    k_EWorkshopFileTypeSteamworksAccessInvite = 13,    // internal
+    //    k_EWorkshopFileTypeSteamVideo = 14,    // Steam video
+    //    k_EWorkshopFileTypeGameManagedItem = 15,       // managed completely by the game, not the user, and not shown on the web
 
-        // Update k_EWorkshopFileTypeMax if you add values.
-        k_EWorkshopFileTypeMax = 16
+    //    // Update k_EWorkshopFileTypeMax if you add values.
+    //    k_EWorkshopFileTypeMax = 16
 
-    };
+    //};
     public enum EItemStatistic : int
     {
         k_EItemStatistic_NumSubscriptions = 0,
@@ -774,36 +774,12 @@ namespace SKYNET.Steamworks
         k_EPositionBottomLeft = 2,
         k_EPositionBottomRight = 3,
     };
-    // Steam API call failure results
-    public enum ESteamAPICallFailure : int
-    {
-        k_ESteamAPICallFailureNone = -1,            // no failure
-        k_ESteamAPICallFailureSteamGone = 0,        // the local Steam process has gone away
-        k_ESteamAPICallFailureNetworkFailure = 1,   // the network connection to Steam has been broken, or was already broken
-                                                    // SteamServersDisconnected_t callback will be sent around the same time
-                                                    // SteamServersConnected_t will be sent when the client is able to talk to the Steam servers again
-        k_ESteamAPICallFailureInvalidHandle = 2,    // the SteamAPICall_t handle passed in no longer exists
-        k_ESteamAPICallFailureMismatchedCallback = 3,// GetAPICallResult() was called with the wrong callback type for this API call
-    };
     public enum ESteamIPv6ConnectivityProtocol : int
     {
         k_ESteamIPv6ConnectivityProtocol_Invalid = 0,
         k_ESteamIPv6ConnectivityProtocol_HTTP = 1,      // because a proxy may make this different than other protocols
         k_ESteamIPv6ConnectivityProtocol_UDP = 2,       // test UDP connectivity. Uses a port that is commonly needed for other Steam stuff. If UDP works, TCP probably works. 
     };
-
-    //
-    // EUniverse
-    //
-    public enum EUniverse : int
-    {
-        k_EUniverseInvalid,
-        k_EUniversePublic,
-        k_EUniverseBeta,
-        k_EUniverseInternal,
-        k_EUniverseDev,
-        k_EUniverseMax
-    }
 
     //
     // ESteamIPType

@@ -9,24 +9,22 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using SKYNET.Helper;
+using SKYNET.Callback;
 
 namespace SKYNET.Exported
 {
     public class SteamAPI
     {
-        private static SteamEmulator SteamEmulator;
-
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_Init()
         {
             if (SteamEmulator.Initialized)
             {
-                Write($"{"SteamAPI_Init [TRUE]"}");
+                Write($"{"SteamAPI_Init : Initialized"}");
                 return true;
             }
 
-            Write($"{"SteamAPI_Init [FALSE]"}");
-            SteamEmulator = new SteamEmulator();
+            Write($"{"SteamAPI_Init : Initializing"}");
             SteamEmulator.Initialize();
 
             return false;
@@ -36,27 +34,29 @@ namespace SKYNET.Exported
         public static void SteamAPI_RunCallbacks()
         {
             ///Write("SteamAPI_RunCallbacks");
-            SteamEmulator.Client_Callback.RunCallbacks();
+            CallbackManager.RunCallbacks();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_RegisterCallResult(CCallbackBase pCallback, SteamAPICall_t hAPICall)
+        public static void SteamAPI_RegisterCallResult(CallbackMsg pCallback, SteamAPICall_t hAPICall)
         {
             try
             {
-                string callMessage = $"SteamAPI_RegisterCallResult: ";
+                Write("SteamAPI_RegisterCallResult");
 
-                bool GameServer = pCallback.IsGameServer();
-                string isGameServer = GameServer ? "[ GAMESERVER ]" : "[   CLIENT   ]";
-                callMessage += $"{isGameServer} ";
+                //string callMessage = $"SteamAPI_RegisterCallResult: ";
 
-                CallbackType Type = pCallback.m_iCallback.GetCallbackType();
-                int callback_id = pCallback.m_iCallback % 100;
+                //bool GameServer = pCallback.IsGameServer();
+                //string isGameServer = GameServer ? "[ GAMESERVER ]" : "[   CLIENT   ]";
+                //callMessage += $"{isGameServer} ";
 
-                callMessage += $"  {callback_id}    {Type} ";
-                Write(callMessage);
+                //CallbackType Type = pCallback.m_iCallback.GetCallbackType();
+                //int callback_id = pCallback.m_iCallback % 100;
 
-                CallbackManager.RegisterCallResult(pCallback, hAPICall);
+                //callMessage += $"  {callback_id}    {Type} ";
+                //Write(callMessage);
+
+                //CallbackManager.RegisterCallResult(hAPICall, pCallback);
             }
             catch
             {
@@ -74,14 +74,14 @@ namespace SKYNET.Exported
         public static void SteamAPI_UnregisterCallback(IntPtr pCallback)
         {
             Write($"SteamAPI_UnregisterCallback {pCallback}");
-            SteamEmulator.Client_Callback.UnregisterCallback(pCallback);
+            CallbackManager.UnregisterCallback(pCallback);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_UnregisterCallResult(IntPtr pCallback, SteamAPICall_t hAPICall)
         {
             Write("SteamAPI_UnregisterCallResult\n");
-            SteamEmulator.Client_Callback.UnregisterCallResult(pCallback, hAPICall);
+            CallbackManager.UnregisterCallResult(pCallback, hAPICall);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -89,7 +89,6 @@ namespace SKYNET.Exported
         {
             if (!SteamEmulator.Initialized)
             {
-                SteamEmulator = new SteamEmulator();
                 SteamEmulator.Initialize();
             }
 
@@ -97,18 +96,15 @@ namespace SKYNET.Exported
             {
                 CCallbackBase Base = pCallback.ToType<CCallbackBase>();
 
-                string callMessage = $"SteamAPI_RegisterCallback: ";
+                var callMessage = $"SteamAPI_RegisterCallback: ";
+                var Type = iCallback.GetCallbackType();
+                var callback_id = iCallback % 100;
+                var isGameServer = Base.IsGameServer() ? "[ GAMESERVER ]" : "[   CLIENT   ]";
+                var space = callback_id < 10 ? " " : "";
 
-                CallbackType Type = iCallback.GetCallbackType();
-                int callback_id = iCallback % 100;
+                callMessage += $"{isGameServer}  {callback_id} {space} {Type} ";
 
-                bool GameServer = Base.IsGameServer();
-                string isGameServer = GameServer ? "[ GAMESERVER ]" : "[   CLIENT   ]";
-                callMessage += $"{isGameServer} ";
-
-                callMessage += $"  {callback_id}    {Type} ";
-
-                CallbackManager.RegisterCallback(iCallback, Base, GameServer);
+                CallbackManager.RegisterCallback(iCallback, Base, Base.IsGameServer());
 
                 Write(callMessage);
             }
@@ -220,24 +216,24 @@ namespace SKYNET.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ManualDispatch_GetNextCallback(HSteamPipe hSteamPipe, IntPtr pCallbackMsg)
+        public static bool SteamAPI_ManualDispatch_GetNextCallback(int hSteamPipe, IntPtr pCallbackMsg)
         {
             Write($"SteamAPI_ManualDispatch_GetNextCallback");
             return true;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_ManualDispatch_FreeLastCallback(HSteamPipe hSteamPipe)
+        public static void SteamAPI_ManualDispatch_FreeLastCallback(int hSteamPipe)
         {
             Write($"SteamAPI_ManualDispatch_FreeLastCallback");
         }
 
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ManualDispatch_GetAPICallResult(HSteamPipe hSteamPipe, IntPtr hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, bool pbFailed)
+        public static bool SteamAPI_ManualDispatch_GetAPICallResult(int hSteamPipe, ulong hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, ref bool pbFailed)
         {
             Write($"SteamAPI_ManualDispatch_GetAPICallResult");
-            return true;
+            return SteamEmulator.SteamUtils.GetAPICallResult(hSteamAPICall, pCallback, cubCallback, iCallbackExpected, ref pbFailed);
         }
 
 
