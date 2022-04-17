@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using SKYNET.Callback;
 using Steamworks;
 
 namespace SKYNET.Managers
@@ -45,11 +46,17 @@ namespace SKYNET.Managers
 
             if (Server)
             {
-                Server_Callbacks.Add(iCallback, pCallback);
+                if (Server_Callbacks.ContainsKey(iCallback))
+                    Server_Callbacks[iCallback] = pCallback;
+                else
+                    Server_Callbacks.Add(iCallback, pCallback);
             }
             else
             {
-                Server_Callbacks.Add(iCallback, pCallback);
+                if (Client_Callbacks.ContainsKey(iCallback))
+                    Client_Callbacks[iCallback] = pCallback;
+                else
+                    Client_Callbacks.Add(iCallback, pCallback);
             }
         }
 
@@ -87,6 +94,14 @@ namespace SKYNET.Managers
             //    Marshal.FreeHGlobal(ptr);
             //    Callbacks.Remove(pipe_id);
             //}
+        }
+
+        public static SteamAPICall_t AddCallbackResult(IBaseCallback callbackData)
+        {
+            //TODO
+            int iCallback = callbackData.k_iCallback;
+
+            return 0;
         }
 
         public static bool Contains(SteamAPICall_t hSteamAPICall)

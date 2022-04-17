@@ -35,7 +35,7 @@ namespace SKYNET.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_RunCallbacks()
         {
-            Write("SteamAPI_RunCallbacks");
+            ///Write("SteamAPI_RunCallbacks");
             SteamEmulator.Client_Callback.RunCallbacks();
         }
 
@@ -112,9 +112,9 @@ namespace SKYNET.Exported
 
                 Write(callMessage);
             }
-            catch 
+            catch (Exception ex)
             {
-                Write("SteamAPI_RegisterCallback");
+                Write("SteamAPI_RegisterCallback " + ex.ToString());
             }
         }
 

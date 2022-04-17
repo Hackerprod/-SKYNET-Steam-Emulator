@@ -1,4 +1,4 @@
-﻿//#define LOG
+﻿#define LOG
 using SKYNET;
 using SKYNET.Managers;
 using SKYNET.Steamworks.Implementation;
@@ -42,6 +42,7 @@ public class SteamEmulator
     public static string EmulatorPath { get; set; }
     public static IntPtr Context_Ptr { get; set; }
     public static bool SendLog { get; set; }
+    public static ulong GameID { get; set; }
 
     #region Interfaces 
 
@@ -243,33 +244,46 @@ public class SteamEmulator
         Write("Steam Emulator", msg);
     }
 
-    //#if LOG
+    #if LOG
 
     static string lastMsg = "";
     public static void Write(string sender, object msg)
     {
-        if (SendLog)
-        {
-            if (lastMsg != msg.ToString())
-            {
-                Instance.OnMessage?.Invoke(Instance, new GameMessage(AppId, sender, msg));
-                lastMsg = msg.ToString(); 
-            }
-        }
+        //if (SendLog)
+        //{
+        //    if (lastMsg != msg.ToString())
+        //    {
+        //        Instance.OnMessage?.Invoke(Instance, new GameMessage(AppId, sender, msg));
+        //        lastMsg = msg.ToString(); 
+        //    }
+        //}
 
-        Console.WriteLine(sender + ": " + msg);
+        //if (lastMsg != msg.ToString())
+        //{
+            Console.WriteLine(sender + ": " + msg);
 
-        string fileName = modCommon.GetPath() + "/[SKYNET] steam_api.log";
-        var lines = new List<string>(); 
-        if (File.Exists(fileName))
-        {
-            lines = File.ReadAllLines(fileName).ToList();
-        }
-        lines.Add(sender + ": " + msg);
+        //    string fileName = modCommon.GetPath() + "/[SKYNET] steam_api.log";
+        //    var lines = new List<string>();
+        //    if (File.Exists(fileName))
+        //    {
+        //        lines = File.ReadAllLines(fileName).ToList();
+        //    }
+        //    lines.Add(sender + ": " + msg);
 
-        File.WriteAllLines(fileName, lines);
-
+        //    File.WriteAllLines(fileName, lines);
+        //    lastMsg = msg.ToString();
+        //}
     }
+
+    #else
+
+        public static void Write(string sender, object msg)
+        {
+            Console.WriteLine(sender + ": " + msg);
+            // TODO
+        }
+
+    #endif
 
     private void LoadCustomVars()
     {
@@ -296,17 +310,6 @@ public class SteamEmulator
         EmulatorPath = @"D:\Instaladores\Programación\Projects\[SKYNET] Steam Emulator\[SKYNET] Steam Emulator\bin\Debug";
         SendLog = true;
     }
-
-
-    //#else
-
-    //    public static void Write(object msg)
-    //    {
-    //        // TODO
-    //    }
-
-    //#endif
-
 }
 
 

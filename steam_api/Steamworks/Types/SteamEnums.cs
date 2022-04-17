@@ -6,11 +6,44 @@ using System.Threading.Tasks;
 
 namespace SKYNET.Steamworks
 {
+    public enum EItemState
+    {
+        k_EItemStateNone = 0,   // item not tracked on client
+        k_EItemStateSubscribed = 1, // current user is subscribed to this item. Not just cached.
+        k_EItemStateLegacyItem = 2, // item was created with ISteamRemoteStorage
+        k_EItemStateInstalled = 4,  // item is installed and usable (but maybe out of date)
+        k_EItemStateNeedsUpdate = 8,    // items needs an update. Either because it's not installed yet or creator updated content
+        k_EItemStateDownloading = 16,   // item update is currently downloading
+        k_EItemStateDownloadPending = 32,   // DownloadItem() was called for this item, content isn't available until DownloadItemResult_t is fired
+    };
+
+    public enum EUserUGCList
+    {
+        k_EUserUGCList_Published,
+        k_EUserUGCList_VotedOn,
+        k_EUserUGCList_VotedUp,
+        k_EUserUGCList_VotedDown,
+        k_EUserUGCList_WillVoteLater,
+        k_EUserUGCList_Favorited,
+        k_EUserUGCList_Subscribed,
+        k_EUserUGCList_UsedOrPlayed,
+        k_EUserUGCList_Followed,
+    };
+
+    public enum ELeaderboardDisplayType
+    {
+        k_ELeaderboardDisplayTypeNone = 0,
+        k_ELeaderboardDisplayTypeNumeric = 1,           // simple numerical score
+        k_ELeaderboardDisplayTypeTimeSeconds = 2,       // the score represents a time, in seconds
+        k_ELeaderboardDisplayTypeTimeMilliSeconds = 3,  // the score represents a time, in milliseconds
+    };
+
     public enum ESteamControllerPad
     {
         k_ESteamControllerPad_Left,
         k_ESteamControllerPad_Right
     };
+
     public enum EControllerActionOrigin
     {
         // Steam Controller

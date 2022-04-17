@@ -175,6 +175,7 @@
     <Compile Include="Steamworks\Types\HAuthTicket.cs" />
     <Compile Include="Steamworks\Types\HSteamPipe.cs" />
     <Compile Include="Steamworks\Types\HSteamUser.cs" />
+    <Compile Include="Steamworks\Types\UTF8String.cs" />
     <Compile Include="Steamworks\Types\SteamEnums.cs" />
     <Compile Include="Steamworks\Types\SteamInventory\SteamInventoryResult_t.cs" />
     <Compile Include="Steamworks\Types\SteamInventory\SteamItemDef_t.cs" />

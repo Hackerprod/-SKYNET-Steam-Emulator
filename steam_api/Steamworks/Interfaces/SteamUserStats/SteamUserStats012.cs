@@ -10,14 +10,14 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUserStats.RequestCurrentStats();
         }
 
-        public bool GetStat(IntPtr _, string pchName, int pData)
+        public bool GetStat(IntPtr _, string pchName, ref int pData)
         {
-            return SteamEmulator.SteamUserStats.GetStat(pchName, (uint)pData);
+            return SteamEmulator.SteamUserStats.GetStat(pchName, ref pData);
         }
 
-        public bool GetStat(IntPtr _, string pchName, float pData)
+        public bool GetStat(IntPtr _, string pchName, ref float pData)
         {
-            return SteamEmulator.SteamUserStats.GetStat(pchName, (uint)pData);
+            return SteamEmulator.SteamUserStats.GetStat(pchName, ref pData);
         }
 
         public bool SetStat(IntPtr _, string pchName, int nData)
@@ -85,7 +85,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUserStats.GetAchievementName(iAchievement);
         }
 
-        public ulong RequestUserStats(IntPtr _, ulong steamIDUser)
+        public SteamAPICall_t RequestUserStats(IntPtr _, ulong steamIDUser)
         {
             return SteamEmulator.SteamUserStats.RequestUserStats(steamIDUser);
         }
@@ -115,12 +115,12 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUserStats.ResetAllStats(bAchievementsToo);
         }
 
-        public ulong FindOrCreateLeaderboard(IntPtr _, string pchLeaderboardName, int eLeaderboardSortMethod, int eLeaderboardDisplayType)
+        public SteamAPICall_t FindOrCreateLeaderboard(IntPtr _, string pchLeaderboardName, int eLeaderboardSortMethod, int eLeaderboardDisplayType)
         {
             return SteamEmulator.SteamUserStats.FindOrCreateLeaderboard(pchLeaderboardName, eLeaderboardSortMethod, eLeaderboardDisplayType);
         }
 
-        public ulong FindLeaderboard(IntPtr _, string pchLeaderboardName)
+        public SteamAPICall_t FindLeaderboard(IntPtr _, string pchLeaderboardName)
         {
             return SteamEmulator.SteamUserStats.FindLeaderboard(pchLeaderboardName);
         }
@@ -145,12 +145,12 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUserStats.GetLeaderboardDisplayType(hSteamLeaderboard);
         }
 
-        public ulong DownloadLeaderboardEntries(IntPtr _, ulong hSteamLeaderboard, IntPtr eLeaderboardDataRequest, int nRangeStart, int nRangeEnd)
+        public SteamAPICall_t DownloadLeaderboardEntries(IntPtr _, ulong hSteamLeaderboard, IntPtr eLeaderboardDataRequest, int nRangeStart, int nRangeEnd)
         {
             return SteamEmulator.SteamUserStats.DownloadLeaderboardEntries(hSteamLeaderboard, eLeaderboardDataRequest, nRangeStart, nRangeEnd);
         }
 
-        public ulong DownloadLeaderboardEntriesForUsers(IntPtr _, ulong hSteamLeaderboard, ulong prgUsers, int cUsers )
+        public SteamAPICall_t DownloadLeaderboardEntriesForUsers(IntPtr _, ulong hSteamLeaderboard, ulong prgUsers, int cUsers )
     {
             return SteamEmulator.SteamUserStats.DownloadLeaderboardEntriesForUsers(hSteamLeaderboard, prgUsers, cUsers);
         }
@@ -165,17 +165,17 @@ namespace SKYNET.Interface
     return  SteamEmulator.SteamUserStats.UploadLeaderboardScore(hSteamLeaderboard, eLeaderboardUploadScoreMethod, (uint)nScore, (uint)pScoreDetails, cScoreDetailsCount);
 }
 
-    public ulong AttachLeaderboardUGC(IntPtr _, ulong hSteamLeaderboard, ulong hUGC)
+    public SteamAPICall_t AttachLeaderboardUGC(IntPtr _, ulong hSteamLeaderboard, ulong hUGC)
     {
         return SteamEmulator.SteamUserStats.AttachLeaderboardUGC(hSteamLeaderboard, hUGC);
     }
 
-    public ulong GetNumberOfCurrentPlayers(IntPtr _)
+    public SteamAPICall_t GetNumberOfCurrentPlayers(IntPtr _)
     {
         return SteamEmulator.SteamUserStats.GetNumberOfCurrentPlayers();
     }
 
-    public ulong RequestGlobalAchievementPercentages(IntPtr _)
+    public SteamAPICall_t RequestGlobalAchievementPercentages(IntPtr _)
     {
         return SteamEmulator.SteamUserStats.RequestGlobalAchievementPercentages();
     }
@@ -195,7 +195,7 @@ namespace SKYNET.Interface
         return SteamEmulator.SteamUserStats.GetAchievementAchievedPercent(pchName, pflPercent);
     }
 
-    public ulong RequestGlobalStats(IntPtr _, int nHistoryDays)
+    public SteamAPICall_t RequestGlobalStats(IntPtr _, int nHistoryDays)
     {
         return SteamEmulator.SteamUserStats.RequestGlobalStats(nHistoryDays);
     }

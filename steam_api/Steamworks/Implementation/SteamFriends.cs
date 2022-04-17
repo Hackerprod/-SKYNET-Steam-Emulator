@@ -5,6 +5,7 @@ using SKYNET;
 using SKYNET.Callback;
 using SKYNET.Helpers;
 using SKYNET.Steamworks;
+using SKYNET.Steamworks.Types;
 using SKYNET.Types;
 using Steamworks;
 
@@ -271,13 +272,21 @@ namespace SKYNET.Steamworks.Implementation
 
         public string GetFriendPersonaName(SteamID steamIDFriend)
         {
-            Write($"GetFriendPersonaName {steamIDFriend.ConvertToUInt64()}");
-            Friend friend = Friends.Find(f => f.SteamId == steamIDFriend);
-            if (friend == null)
+            Write($"------------------------- GetFriendPersonaName {steamIDFriend}");
+
+            string personaName = "Unknown";
+
+            if (SteamID.Equals(steamIDFriend, SteamEmulator.SteamId))
             {
-                return "";
+                personaName = SteamEmulator.PersonaName;
             }
-            return friend.PersonaName;
+            else
+            {
+                Friend friend = Friends.Find(f => f.SteamId == steamIDFriend);
+                if (friend != null) personaName = friend.PersonaName;
+            }
+
+            return personaName;
         }
 
 
@@ -411,6 +420,10 @@ namespace SKYNET.Steamworks.Implementation
         public string GetPlayerNickname(SteamID steamIDPlayer)
         {
             Write($"GetPlayerNickname {steamIDPlayer.ConvertToUInt64()}");
+            if (steamIDPlayer == SteamEmulator.SteamId)
+            {
+                return SteamEmulator.PersonaName;
+            }
             Friend friend = Friends.Find(f => f.AccountId == (uint)steamIDPlayer);
             if (friend == null)
             {

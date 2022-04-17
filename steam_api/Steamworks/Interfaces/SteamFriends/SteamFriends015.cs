@@ -1,4 +1,5 @@
 using SKYNET.Steamworks;
+using SKYNET.Steamworks.Types;
 using SKYNET.Types;
 using Steamworks;
 using System;
@@ -37,7 +38,7 @@ namespace SKYNET.Interface
         {
             return (uint)SteamEmulator.SteamFriends.GetFriendPersonaState(steam_id);
         }
-        public string GetFriendPersonaName(IntPtr _, ulong steam_id)
+        public string GetFriendPersonaName(IntPtr _, SteamID steam_id)
         {
             return SteamEmulator.SteamFriends.GetFriendPersonaName(steam_id);
         }

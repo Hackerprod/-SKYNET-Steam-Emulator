@@ -1,296 +1,368 @@
 ﻿using SKYNET;
+using SKYNET.Callback;
 using SKYNET.Helpers;
+using SKYNET.Managers;
 using SKYNET.Steamworks;
 using Steamworks;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    //return new SteamAPICall_t(CallbackType.k_iRemoteStorageFileReadAsyncComplete);
     public class SteamUGC : ISteamInterface
     {
+        private List<UGC> UGCQueries;
+        UGCQueryHandle_t Handle;
+        List<PublishedFileId_t> subscribed;
+
+        internal class UGC
+        {
+            public UGCQueryHandle_t Handle;
+            public List<PublishedFileId_t> return_only;
+            public bool ReturnAll;
+            public bool ReturnOnly;
+            public List<PublishedFileId_t> results;
+
+            public UGC()
+            {
+                return_only = new List<PublishedFileId_t>();
+                results = new List<PublishedFileId_t>();
+            }
+        }
+
         public SteamUGC()
         {
             InterfaceVersion = "SteamUGC";
+            UGCQueries = new List<UGC>();
+            subscribed = new List<PublishedFileId_t>();
         }
 
-        public ulong CreateQueryUserUGCRequest(uint unAccountID, int eListType, int eMatchingUGCType, int eSortOrder, uint nCreatorAppID, uint nConsumerAppID, uint unPage)
+        public UGCQueryHandle_t CreateQueryUserUGCRequest(uint unAccountID, int eListType, int eMatchingUGCType, int eSortOrder, uint nCreatorAppID, uint nConsumerAppID, uint unPage)
         {
             Write($"CreateQueryUserUGCRequest for {unAccountID}");
-            return 0;
+            return CreateOne((eListType == (int)EUserUGCList.k_EUserUGCList_Subscribed || eListType == (int)EUserUGCList.k_EUserUGCList_Published));
         }
 
-        public ulong CreateQueryAllUGCRequest(int eQueryType, int eMatchingeMatchingUGCTypeFileType, uint nCreatorAppID, uint nConsumerAppID, uint unPage)
+        public UGCQueryHandle_t CreateQueryAllUGCRequest(int eQueryType, int eMatchingeMatchingUGCTypeFileType, uint nCreatorAppID, uint nConsumerAppID, uint unPage)
         {
             Write("CreateQueryAllUGCRequest");
-            return default;
+            return CreateOne();
         }
 
-        public ulong CreateQueryAllUGCRequest(int eQueryType, int eMatchingeMatchingUGCTypeFileType, uint nCreatorAppID, uint nConsumerAppID, string pchCursor)
+        public UGCQueryHandle_t CreateQueryAllUGCRequest(int eQueryType, int eMatchingeMatchingUGCTypeFileType, uint nCreatorAppID, uint nConsumerAppID, string pchCursor)
         {
             Write("CreateQueryAllUGCRequest");
-            return default;
+            return CreateOne();
         }
 
-        public ulong CreateQueryUGCDetailsRequest(ulong pvecPublishedFileID, uint unNumPublishedFileIDs)
+        public UGCQueryHandle_t CreateQueryUGCDetailsRequest(ulong pvecPublishedFileID, uint unNumPublishedFileIDs)
         {
             Write("CreateQueryUGCDetailsRequest");
-            return default;
+            return CreateOne();
         }
 
-        public ulong SendQueryUGCRequest(ulong handle)
+        public SteamAPICall_t SendQueryUGCRequest(UGCQueryHandle_t handle)
         {
-            Write("SendQueryUGCRequest");
+            try
+            {
+                Write("SendQueryUGCRequest");
+
+                var request = UGCQueries.Find(u => u.Handle == handle);
+                if (request == null) return 0;
+
+                if (request.ReturnAll)
+                {
+                    request.results = subscribed;
+                }
+
+                if (request.return_only.Any())
+                {
+                    foreach (var item in request.return_only)
+                    {
+                        request.results.Add(item);
+                    }
+                }
+
+                SteamUGCQueryCompleted_t data = new SteamUGCQueryCompleted_t()
+                {
+                    m_handle = handle,
+                    m_eResult = SKYNET.Types.EResult.k_EResultOK,
+                    m_unNumResultsReturned = (uint)request.results.Count(),
+                    m_unTotalMatchingResults = (uint)request.results.Count(),
+                    m_bCachedData = false,
+                };
+                //return new SteamAPICall_t(CallbackType.k_iSteamUGCQueryCompleted);
+                return CallbackManager.AddCallbackResult(data);
+            }
+            catch (Exception ex)
+            {
+                Write($"SendQueryUGCRequest {ex}");
+            }
             return 0;
         }
 
-        public bool GetQueryUGCResult(ulong handle, uint index, IntPtr pDetails)
+        public bool GetQueryUGCResult(UGCQueryHandle_t handle, uint index, IntPtr pDetails)
         {
             Write("GetQueryUGCResult");
-            return false;
+            var UGC = UGCQueries.Find(u => u.Handle == handle);
+            if (UGC == null) return false;
+            if (index >= UGC.results.Count) return false;
+            foreach (var item in UGC.results)
+            {
+                set_details(item, pDetails);
+            }
+            return true;
         }
 
-        public bool GetQueryUGCPreviewURL(ulong handle, uint index, string pchURL, uint cchURLSize)
+        public bool GetQueryUGCPreviewURL(UGCQueryHandle_t handle, uint index, string pchURL, uint cchURLSize)
         {
             Write("GetQueryUGCPreviewURL");
             return false;
         }
 
-        public bool GetQueryUGCMetadata(ulong handle, uint index, string pchMetadata, uint cchMetadatasize)
+        public bool GetQueryUGCMetadata(UGCQueryHandle_t handle, uint index, string pchMetadata, uint cchMetadatasize)
         {
             Write("GetQueryUGCMetadata");
             return false;
         }
 
-        internal uint GetQueryUGCNumTags(ulong handle, uint index)
+        internal uint GetQueryUGCNumTags(UGCQueryHandle_t handle, uint index)
         {
             Write("GetQueryUGCNumTags");
             return 0;
         }
 
-        public bool GetQueryUGCChildren(ulong handle, uint index, ulong pvecPublishedFileID, uint cMaxEntries)
+        public bool GetQueryUGCChildren(UGCQueryHandle_t handle, uint index, ulong pvecPublishedFileID, uint cMaxEntries)
         {
             Write("GetQueryUGCChildren");
             return false;
         }
 
-        internal bool GetQueryUGCTag(ulong handle, uint index, uint indexTag, string pchValue, uint cchValueSize)
+        internal bool GetQueryUGCTag(UGCQueryHandle_t handle, uint index, uint indexTag, string pchValue, uint cchValueSize)
         {
             Write("GetQueryUGCTag");
             return false;
         }
 
-        internal bool GetQueryUGCTagDisplayName(ulong handle, uint index, uint indexTag, string pchValue, uint cchValueSize)
+        internal bool GetQueryUGCTagDisplayName(UGCQueryHandle_t handle, uint index, uint indexTag, string pchValue, uint cchValueSize)
         {
             Write("GetQueryUGCTagDisplayName");
             return false;
         }
 
-        public bool GetQueryUGCStatistic(ulong handle, uint index, int eStatType, ulong pStatValue)
+        public bool GetQueryUGCStatistic(UGCQueryHandle_t handle, uint index, int eStatType, ulong pStatValue)
         {
             Write("GetQueryUGCStatistic");
             return false;
         }
 
-        public uint GetQueryUGCNumAdditionalPreviews(ulong handle, uint index)
+        public uint GetQueryUGCNumAdditionalPreviews(UGCQueryHandle_t handle, uint index)
         {
             Write("GetQueryUGCNumAdditionalPreviews");
             return 0;
         }
 
-        public bool GetQueryUGCAdditionalPreview(ulong handle, uint index, uint previewIndex, string pchURLOrVideoID, uint cchURLSize, string pchOriginalFileName, uint cchOriginalFileNameSize, int pPreviewType)
+        public bool GetQueryUGCAdditionalPreview(UGCQueryHandle_t handle, uint index, uint previewIndex, string pchURLOrVideoID, uint cchURLSize, string pchOriginalFileName, uint cchOriginalFileNameSize, int pPreviewType)
         {
             Write("GetQueryUGCAdditionalPreview");
             return false;
         }
 
-        public uint GetQueryUGCNumKeyValueTags(ulong handle, uint index)
+        public uint GetQueryUGCNumKeyValueTags(UGCQueryHandle_t handle, uint index)
         {
             Write("GetQueryUGCNumKeyValueTags");
             return 0;
         }
 
-        public bool GetQueryUGCKeyValueTag(ulong handle, uint index, uint keyValueTagIndex, string pchKey, uint cchKeySize, string pchValue, uint cchValueSize)
+        public bool GetQueryUGCKeyValueTag(UGCQueryHandle_t handle, uint index, uint keyValueTagIndex, string pchKey, uint cchKeySize, string pchValue, uint cchValueSize)
         {
             Write("GetQueryUGCKeyValueTag");
             return false;
         }
 
-        public bool GetQueryUGCKeyValueTag(ulong handle, uint index, string pchKey, string pchValue, uint cchValueSize)
+        public bool GetQueryUGCKeyValueTag(UGCQueryHandle_t handle, uint index, string pchKey, string pchValue, uint cchValueSize)
         {
             Write("GetQueryUGCKeyValueTag");
             return false;
         }
 
-        public bool ReleaseQueryUGCRequest(ulong handle)
+        public bool ReleaseQueryUGCRequest(UGCQueryHandle_t handle)
         {
             Write("ReleaseQueryUGCRequest");
-            return false;
+            var UGC = UGCQueries.Find(u => u.Handle == handle);
+            if (UGC == null) return false;
+            UGCQueries.Remove(UGC);
+            return true;
         }
 
-        public bool AddRequiredTag(ulong handle, string pTagName)
+        public bool AddRequiredTag(UGCQueryHandle_t handle, string pTagName)
         {
             Write("AddRequiredTag");
             return false;
         }
 
-        public bool AddRequiredTagGroup(ulong handle, IntPtr pTagGroups) // match any of the tags in this group 
+        public bool AddRequiredTagGroup(UGCQueryHandle_t handle, IntPtr pTagGroups) // match any of the tags in this group 
         {
             Write("AddRequiredTagGroup");
             return false;
         }
 
-        public bool AddExcludedTag(ulong handle, string pTagName)
+        public bool AddExcludedTag(UGCQueryHandle_t handle, string pTagName)
         {
             Write("AddExcludedTag");
             return false;
         }
 
-        public bool SetReturnOnlyIDs(ulong handle, bool bReturnOnlyIDs)
+        public bool SetReturnOnlyIDs(UGCQueryHandle_t handle, bool bReturnOnlyIDs)
         {
             Write("SetReturnOnlyIDs");
-            return false;
+            return true;
         }
 
-        public bool SetReturnKeyValueTags(ulong handle, bool bReturnKeyValueTags)
+        public bool SetReturnKeyValueTags(UGCQueryHandle_t handle, bool bReturnKeyValueTags)
         {
             Write("SetReturnKeyValueTags");
             return true;
         }
 
-        public bool SetReturnLongDescription(ulong handle, bool bReturnLongDescription)
+        public bool SetReturnLongDescription(UGCQueryHandle_t handle, bool bReturnLongDescription)
         {
             Write("SetReturnLongDescription");
             return true;
         }
 
-        public bool SetReturnMetadata(ulong handle, bool bReturnMetadata)
+        public bool SetReturnMetadata(UGCQueryHandle_t handle, bool bReturnMetadata)
         {
             Write("SetReturnMetadata");
-            return false;
+            return true;
         }
 
-        public bool SetReturnChildren(ulong handle, bool bReturnChildren)
+        public bool SetReturnChildren(UGCQueryHandle_t handle, bool bReturnChildren)
         {
             Write("SetReturnChildren");
-            return false;
+            return true;
         }
 
-        public bool SetReturnAdditionalPreviews(ulong handle, bool bReturnAdditionalPreviews)
+        public bool SetReturnAdditionalPreviews(UGCQueryHandle_t handle, bool bReturnAdditionalPreviews)
         {
             Write("SetReturnAdditionalPreviews");
-            return false;
+            return true;
         }
 
-        public bool SetReturnTotalOnly(ulong handle, bool bReturnTotalOnly)
+        public bool SetReturnTotalOnly(UGCQueryHandle_t handle, bool bReturnTotalOnly)
         {
             Write("SetReturnTotalOnly");
-            return false;
+            return true;
         }
 
-        public bool SetReturnPlaytimeStats(ulong handle, uint unDays)
+        public bool SetReturnPlaytimeStats(UGCQueryHandle_t handle, uint unDays)
         {
             Write("SetReturnPlaytimeStats");
-            return false;
+            return true;
         }
 
-        public bool SetLanguage(ulong handle, string pchLanguage)
+        public bool SetLanguage(UGCQueryHandle_t handle, string pchLanguage)
         {
             Write("SetLanguage");
-            return false;
+            return true;
         }
 
-        public bool SetAllowCachedResponse(ulong handle, uint unMaxAgeSeconds)
+        public bool SetAllowCachedResponse(UGCQueryHandle_t handle, uint unMaxAgeSeconds)
         {
             Write("SetAllowCachedResponse");
-            return false;
+            return true;
         }
 
-        public bool SetCloudFileNameFilter(ulong handle, string pMatchCloudFileName)
+        public bool SetCloudFileNameFilter(UGCQueryHandle_t handle, string pMatchCloudFileName)
         {
             Write("SetCloudFileNameFilter");
-            return false;
+            return true;
         }
 
-        public bool SetMatchAnyTag(ulong handle, bool bMatchAnyTag)
+        public bool SetMatchAnyTag(UGCQueryHandle_t handle, bool bMatchAnyTag)
         {
             Write("SetMatchAnyTag");
-            return false;
+            return true;
         }
 
-        public bool SetSearchText(ulong handle, string pSearchText)
+        public bool SetSearchText(UGCQueryHandle_t handle, string pSearchText)
         {
             Write("SetSearchText");
-            return false;
+            return true;
         }
 
-        public bool SetRankedByTrendDays(ulong handle, uint unDays)
+        public bool SetRankedByTrendDays(UGCQueryHandle_t handle, uint unDays)
         {
             Write("SetRankedByTrendDays");
-            return false;
+            return true;
         }
 
-        public bool AddRequiredKeyValueTag(ulong handle, string pKey, string pValue)
+        public bool AddRequiredKeyValueTag(UGCQueryHandle_t handle, string pKey, string pValue)
         {
             Write("AddRequiredKeyValueTag");
-            return false;
+            return true;
         }
 
-        public ulong RequestUGCDetails(ulong nPublishedFileID, uint unMaxAgeSeconds)
+        public SteamAPICall_t RequestUGCDetails(ulong nPublishedFileID, uint unMaxAgeSeconds)
         {
             Write("RequestUGCDetails");
-            return default;
+            // SteamUGCRequestUGCDetailsResult_t
+            return 0;
         }
 
-        public ulong CreateItem(uint nConsumerAppId, int eFileType)
+        public SteamAPICall_t CreateItem(uint nConsumerAppId, int eFileType)
         {
             Write("CreateItem");
-            return default;
+            // CreateItemResult_t
+            return 0;
         }
 
-        public ulong StartItemUpdate(uint nConsumerAppId, ulong nPublishedFileID) 
+        public UGCUpdateHandle_t StartItemUpdate(uint nConsumerAppId, ulong nPublishedFileID) 
         {
             Write("StartItemUpdate");
-            return default;
+            return (UGCUpdateHandle_t)0;
         }
 
-        public bool SetItemTitle(ulong handle, string pchTitle) // change the title of an UGC item 
+        public bool SetItemTitle(UGCQueryHandle_t handle, string pchTitle) // change the title of an UGC item 
         {
             Write("SetItemTitle");
             return false;
         }
 
-        public bool SetItemDescription(ulong handle, string pchDescription) // change the description of an UGC item 
+        public bool SetItemDescription(UGCQueryHandle_t handle, string pchDescription) // change the description of an UGC item 
         {
             Write("SetItemDescription");
             return false;
         }
 
-        public bool SetItemUpdateLanguage(ulong handle, string pchLanguage) // specify the language of the title or description that will be set 
+        public bool SetItemUpdateLanguage(UGCQueryHandle_t handle, string pchLanguage) // specify the language of the title or description that will be set 
         {
             Write("SetItemUpdateLanguage");
             return false;
         }
 
-        public bool SetItemMetadata(ulong handle, string pchMetaData)
+        public bool SetItemMetadata(UGCQueryHandle_t handle, string pchMetaData)
         {
             Write("SetItemMetadata");
             return false;
         }
 
-        public bool SetTimeCreatedDateRange(ulong handle, IntPtr rtStart, IntPtr rtEnd)
+        public bool SetTimeCreatedDateRange(UGCQueryHandle_t handle, IntPtr rtStart, IntPtr rtEnd)
         {
             Write("SetTimeCreatedDateRange");
             return false;
         }
 
-        public bool SetTimeUpdatedDateRange(ulong handle, IntPtr rtStart, IntPtr rtEnd)
+        public bool SetTimeUpdatedDateRange(UGCQueryHandle_t handle, IntPtr rtStart, IntPtr rtEnd)
         {
             Write("SetTimeUpdatedDateRange");
             return false;
         }
 
-        public bool SetItemVisibility(ulong handle, int eVisibility) 
+        public bool SetItemVisibility(UGCQueryHandle_t handle, int eVisibility) 
         {
             Write("SetItemVisibility");
             return false;
@@ -302,136 +374,178 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool SetItemContent(ulong handle, string pszContentFolder) // update item content from this local folder 
+        public bool SetItemContent(UGCQueryHandle_t handle, string pszContentFolder) // update item content from this local folder 
         {
             Write("SetItemContent");
             return false;
         }
 
-        public bool SetItemPreview(ulong handle, string pszPreviewFile) //  change preview image file for this item. pszPreviewFile points to local image file, which must be under 1MB in size 
+        public bool SetItemPreview(UGCQueryHandle_t handle, string pszPreviewFile) //  change preview image file for this item. pszPreviewFile points to local image file, which must be under 1MB in size 
         {
             Write("SetItemPreview");
             return false;
         }
 
-        public bool SetAllowLegacyUpload(ulong handle, bool bAllowLegacyUpload) //  use legacy upload for a single small file. The parameter to SetItemContent() should either be a directory with one file or the full path to the file.  The file must also be less than 10MB in size. 
+        public bool SetAllowLegacyUpload(UGCQueryHandle_t handle, bool bAllowLegacyUpload) //  use legacy upload for a single small file. The parameter to SetItemContent() should either be a directory with one file or the full path to the file.  The file must also be less than 10MB in size. 
         {
             Write("SetAllowLegacyUpload");
             return false;
         }
 
-        public bool RemoveAllItemKeyValueTags(ulong handle) // remove all existing key-value tags (you can add new ones via the AddItemKeyValueTag function) 
+        public bool RemoveAllItemKeyValueTags(UGCQueryHandle_t handle) // remove all existing key-value tags (you can add new ones via the AddItemKeyValueTag function) 
         {
             Write("RemoveAllItemKeyValueTags");
             return false;
         }
 
-        public bool RemoveItemKeyValueTags(ulong handle, string pchKey) // remove any existing key-value tags with the specified key 
+        public bool RemoveItemKeyValueTags(UGCQueryHandle_t handle, string pchKey) // remove any existing key-value tags with the specified key 
         {
             Write("RemoveItemKeyValueTags");
             return false;
         }
 
-        public bool AddItemKeyValueTag(ulong handle, string pchKey, string pchValue) // add new key-value tags for the item. Note that there can be multiple values for a tag. 
+        public bool AddItemKeyValueTag(UGCQueryHandle_t handle, string pchKey, string pchValue) // add new key-value tags for the item. Note that there can be multiple values for a tag. 
         {
             Write("AddItemKeyValueTag");
             return false;
         }
 
-        public bool AddItemPreviewFile(ulong handle, string pszPreviewFile, int type) //  add preview file for this item. pszPreviewFile points to local file, which must be under 1MB in size 
+        public bool AddItemPreviewFile(UGCQueryHandle_t handle, string pszPreviewFile, int type) //  add preview file for this item. pszPreviewFile points to local file, which must be under 1MB in size 
         {
             Write("AddItemPreviewFile");
             return false;
         }
 
-        public bool AddItemPreviewVideo(ulong handle, string pszVideoID) //  add preview video for this item 
+        public bool AddItemPreviewVideo(UGCQueryHandle_t handle, string pszVideoID) //  add preview video for this item 
         {
             Write("AddItemPreviewVideo");
             return false;
         }
 
-        public bool UpdateItemPreviewFile(ulong handle, uint index, string pszPreviewFile) //  updates an existing preview file for this item. pszPreviewFile points to local file, which must be under 1MB in size 
+        public bool UpdateItemPreviewFile(UGCQueryHandle_t handle, uint index, string pszPreviewFile) //  updates an existing preview file for this item. pszPreviewFile points to local file, which must be under 1MB in size 
         {
             Write("UpdateItemPreviewFile");
             return false;
         }
 
-        public bool UpdateItemPreviewVideo(ulong handle, uint index, string pszVideoID) //  updates an existing preview video for this item 
+        public bool UpdateItemPreviewVideo(UGCQueryHandle_t handle, uint index, string pszVideoID) //  updates an existing preview video for this item 
         {
             Write("UpdateItemPreviewVideo");
             return false;
         }
 
-        public bool RemoveItemPreview(ulong handle, uint index) // remove a preview by index starting at 0 (previews are sorted) 
+        public bool RemoveItemPreview(UGCQueryHandle_t handle, uint index) // remove a preview by index starting at 0 (previews are sorted) 
         {
             Write("RemoveItemPreview");
             return false;
         }
 
-        public ulong SubmitItemUpdate(ulong handle, string pchChangeNote) 
+        public SteamAPICall_t SubmitItemUpdate(UGCQueryHandle_t handle, string pchChangeNote) 
         {
             Write("SubmitItemUpdate");
-            return default;
+            // SubmitItemUpdateResult_t
+            return 0;
         }
 
-        public int GetItemUpdateProgress(ulong handle, ulong punBytesProcessed, ulong punBytesTotal)
+        public int GetItemUpdateProgress(UGCQueryHandle_t handle, ulong punBytesProcessed, ulong punBytesTotal)
         {
             Write("GetItemUpdateProgress");
             return 0;
         }
 
-        public ulong SetUserItemVote(ulong nPublishedFileID, bool bVoteUp)
+        public SteamAPICall_t SetUserItemVote(ulong nPublishedFileID, bool bVoteUp)
         {
             Write("SetUserItemVote");
-            return default;
+            // SetUserItemVoteResult_t
+            return 0;
         }
 
-        public ulong GetUserItemVote(ulong nPublishedFileID)
+        public SteamAPICall_t GetUserItemVote(ulong nPublishedFileID)
         {
             Write("GetUserItemVote");
-            return default;
+            // GetUserItemVoteResult_t
+            return 0;
         }
 
-        public ulong AddItemToFavorites(uint nAppId, ulong nPublishedFileID)
+        public SteamAPICall_t AddItemToFavorites(uint nAppId, ulong nPublishedFileID)
         {
             Write("AddItemToFavorites");
-            return default;
+            // UserFavoriteItemsListChanged_t
+            return 0;
         }
 
-        public ulong RemoveItemFromFavorites(uint nAppId, ulong nPublishedFileID)
+        public SteamAPICall_t RemoveItemFromFavorites(uint nAppId, ulong nPublishedFileID)
         {
             Write("RemoveItemFromFavorites");
-            return default;
+            // UserFavoriteItemsListChanged_t
+            return 0;
         }
 
-        public ulong SubscribeItem(ulong nPublishedFileID) // subscribe to this item, will be installed ASAP 
+        public SteamAPICall_t SubscribeItem(PublishedFileId_t nPublishedFileID) 
         {
-            Write("SubscribeItem");
-            return default;
+            try
+            {
+                Write("SubscribeItem");
+                subscribed.Add(nPublishedFileID);
+                RemoteStorageSubscribePublishedFileResult_t data = new RemoteStorageSubscribePublishedFileResult_t()
+                {
+                    m_eResult = SKYNET.Types.EResult.k_EResultOK,
+                    m_nPublishedFileId = nPublishedFileID
+                };
+                return CallbackManager.AddCallbackResult(data);
+            }
+            catch (Exception ex)
+            {
+                Write($"SubscribeItem {ex}");
+            }
+            return 0;
         }
 
-        public ulong UnsubscribeItem(ulong nPublishedFileID) // unsubscribe from this item, will be uninstalled after game quits 
+        public SteamAPICall_t UnsubscribeItem(PublishedFileId_t nPublishedFileID) // unsubscribe from this item, will be uninstalled after game quits 
         {
             Write("UnsubscribeItem");
-            return default;
+            try
+            {
+                Write("SubscribeItem");
+                subscribed.Add(nPublishedFileID);
+                RemoteStorageUnsubscribePublishedFileResult_t data = new RemoteStorageUnsubscribePublishedFileResult_t()
+                {
+                    m_eResult = SKYNET.Types.EResult.k_EResultOK,
+                    m_nPublishedFileId = nPublishedFileID
+                };
+                if (subscribed.Contains(nPublishedFileID))
+                {
+                    subscribed.Remove(nPublishedFileID);
+                }
+                return CallbackManager.AddCallbackResult(data);
+            }
+            catch (Exception ex)
+            {
+                Write($"SubscribeItem {ex}");
+            }
+            return 0;
         }
 
         public uint GetNumSubscribedItems() // number of subscribed items  
         {
             Write("GetNumSubscribedItems");
-            return 0;
+            return (uint)subscribed.Count();
         }
 
         public uint GetSubscribedItems(ulong pvecPublishedFileID, uint cMaxEntries) // all subscribed item PublishFileIDs 
         {
             Write("GetSubscribedItems");
-            return 0;
+            if (cMaxEntries > subscribed.Count())
+            {
+                cMaxEntries = (uint)subscribed.Count();
+            }
+            return cMaxEntries;
         }
 
         public uint GetItemState(ulong nPublishedFileID)
         {
             Write("GetItemState");
-            return 0;
+            return (uint)EItemState.k_EItemStateSubscribed;
         }
 
         public bool GetItemInstallInfo(ulong nPublishedFileID, ulong punSizeOnDisk, string pchFolder, uint cchFolderSize, uint punTimeStamp)
@@ -464,58 +578,100 @@ namespace SKYNET.Steamworks.Implementation
             //
         }
 
-        public ulong StartPlaytimeTracking(ulong pvecPublishedFileID, uint unNumPublishedFileIDs)
+        public SteamAPICall_t StartPlaytimeTracking(PublishedFileId_t pvecPublishedFileID, uint unNumPublishedFileIDs)
         {
-            Write("StartPlaytimeTracking");
-            return default;
+            try
+            {
+                Write("StartPlaytimeTracking");
+                StopPlaytimeTrackingResult_t data = new StopPlaytimeTrackingResult_t()
+                {
+                     m_eResult = SKYNET.Types.EResult.k_EResultOK
+                };
+                return CallbackManager.AddCallbackResult(data);
+            }
+            catch (Exception ex)
+            {
+                Write($"StartPlaytimeTracking {ex}");
+            }
+            return 0;
         }
 
-        public ulong StopPlaytimeTracking(ulong pvecPublishedFileID, uint unNumPublishedFileIDs)
+        public SteamAPICall_t StopPlaytimeTracking(ulong pvecPublishedFileID, uint unNumPublishedFileIDs)
         {
-            Write("StopPlaytimeTracking");
-            return default;
+            try
+            {
+                Write("StopPlaytimeTracking");
+                StopPlaytimeTrackingResult_t data = new StopPlaytimeTrackingResult_t()
+                {
+                    m_eResult = SKYNET.Types.EResult.k_EResultOK
+                };
+                return CallbackManager.AddCallbackResult(data);
+            }
+            catch (Exception ex)
+            {
+                Write($"StopPlaytimeTracking {ex}");
+            }
+            return 0;
         }
 
-        public ulong StopPlaytimeTrackingForAllItems()
+        public SteamAPICall_t StopPlaytimeTrackingForAllItems()
         {
-            Write("StopPlaytimeTrackingForAllItems");
-            return default;
+            try
+            {
+                Write("StopPlaytimeTracking");
+                StopPlaytimeTrackingResult_t data = new StopPlaytimeTrackingResult_t()
+                {
+                    m_eResult = SKYNET.Types.EResult.k_EResultOK
+                };
+                return CallbackManager.AddCallbackResult(data);
+            }
+            catch (Exception ex)
+            {
+                Write($"StopPlaytimeTracking {ex}");
+            }
+            return 0;
         }
 
-        public ulong AddDependency(ulong nParentPublishedFileID, ulong nChildPublishedFileID)
+        public SteamAPICall_t AddDependency(ulong nParentPublishedFileID, ulong nChildPublishedFileID)
         {
             Write("AddDependency");
-            return default;
+            // AddAppDependencyResult_t
+            return 0;
         }
 
-        public ulong RemoveDependency(ulong nParentPublishedFileID, ulong nChildPublishedFileID)
+        public SteamAPICall_t RemoveDependency(ulong nParentPublishedFileID, ulong nChildPublishedFileID)
         {
             Write("RemoveDependency");
-            return default;
+            // RemoveAppDependencyResult_t
+            return 0;
         }
 
-        public ulong AddAppDependency(ulong nPublishedFileID, uint nAppID)
+        public SteamAPICall_t AddAppDependency(ulong nPublishedFileID, uint nAppID)
         {
             Write("AddAppDependency");
-            return default;
+            // AddAppDependencyResult_t
+            return 0;
         }
 
-        public ulong RemoveAppDependency(ulong nPublishedFileID, uint nAppID)
+        public SteamAPICall_t RemoveAppDependency(ulong nPublishedFileID, uint nAppID)
         {
             Write("RemoveAppDependency");
+            // RemoveAppDependencyResult_t
             return default;
         }
 
-        public ulong GetAppDependencies(ulong nPublishedFileID)
+        public SteamAPICall_t GetAppDependencies(ulong nPublishedFileID)
         {
             Write("GetAppDependencies");
-            return default;
+            // GetAppDependenciesResult_t
+            return 0;
         }
 
-        public ulong DeleteItem(ulong nPublishedFileID)
+        public SteamAPICall_t DeleteItem(ulong nPublishedFileID)
         {
             Write("DeleteItem");
-            return default;
+            // DeleteItemResult_t
+            return 0;
         }
 
         public bool ShowWorkshopEULA()
@@ -524,10 +680,51 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public ulong GetWorkshopEULAStatus()
+        public SteamAPICall_t GetWorkshopEULAStatus()
         {
             Write("GetWorkshopEULAStatus");
             return 0;
+        }
+
+        ////////////////////////////////////////////////////////////////////////////
+        
+        internal UGCQueryHandle_t CreateOne(bool returnAll = false)
+        {
+            UGC instance = new UGC();
+            instance.ReturnAll = returnAll;
+            instance.Handle = Handle;
+
+            Handle.m_UGCQueryHandle++;
+
+            UGCQueries.Add(instance);
+            return instance.Handle;
+        }
+
+        void set_details(PublishedFileId_t id, IntPtr ptrDetails)
+        {
+            try
+            {
+                SteamUGCDetails_t pDetails = Marshal.PtrToStructure<SteamUGCDetails_t>(ptrDetails);
+                if (true)
+                {
+                    pDetails.m_eResult = SKYNET.Result.OK;
+                    pDetails.m_nPublishedFileId = id;
+                    pDetails.m_eFileType = WorkshopFileType.Community;
+                    pDetails.m_nCreatorAppID = SteamEmulator.AppId;
+                    pDetails.m_nConsumerAppID = SteamEmulator.AppId;
+                    //TODO
+                }
+                else
+                {
+                    pDetails.m_nPublishedFileId = id;
+                    pDetails.m_eResult = SKYNET.Result.Fail;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Write(ex.ToString());
+            }
         }
     }
 }

@@ -75,7 +75,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetAvailableVoice(uint pcbCompressed, uint pcbUncompressed_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
         {
-            Write("GetAvailableVoice");
+            //Write("GetAvailableVoice");
             return (int)EVoiceResult.k_EVoiceResultNoData;
         }
 
@@ -173,7 +173,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool BIsPhoneVerified()
         {
-            Write("BIsPhoneVerified");
+            //Write("BIsPhoneVerified");
             return true;
         }
 

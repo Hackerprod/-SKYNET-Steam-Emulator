@@ -235,8 +235,7 @@ namespace SKYNET.Types
             }
         }
 
-        public SteamID()
-            : this(0uL)
+        public SteamID() : this(0uL)
         {
         }
 
