@@ -36,10 +36,10 @@ namespace SKYNET.Steamworks.Implementation
                 UserStatsReceived_t data = new UserStatsReceived_t()
                 {
                     m_nGameID = SteamEmulator.GameID,
-                    m_eResult = EResult.k_EResultOK,
-                    m_steamIDUser = (ulong)SteamEmulator.SteamId
+                    m_eResult = SKYNET.Types.EResult.k_EResultOK,
+                    m_steamIDUser = SteamEmulator.SteamId
                 };
-     //           CallbackManager.AddCallbackResult(data);
+                CallbackManager.AddCallbackResult(data);
                 return true;
             }
             catch (Exception ex)
@@ -107,9 +107,9 @@ namespace SKYNET.Steamworks.Implementation
                 UserStatsStored_t data = new UserStatsStored_t()
                 {
                     m_nGameID = SteamEmulator.GameID,
-                    m_eResult = EResult.k_EResultOK
+                    m_eResult = SKYNET.Types.EResult.k_EResultOK
                 };
-  //              CallbackManager.AddCallbackResult(data);
+                CallbackManager.AddCallbackResult(data);
                 return true;
             }
             catch (Exception ex)
@@ -160,9 +160,9 @@ namespace SKYNET.Steamworks.Implementation
                 {
                     m_nGameID = SteamEmulator.GameID,
                     m_eResult = EResult.k_EResultOK,
-   //                 m_steamIDUser = steamIDUser
+                    m_steamIDUser = steamIDUser
                 };
-   //             return CallbackManager.AddCallbackResult(data);
+                return CallbackManager.AddCallbackResult(data);
             }
             catch (Exception ex)
             {
@@ -217,10 +217,10 @@ namespace SKYNET.Steamworks.Implementation
                 LeaderboardFindResult_t data = new LeaderboardFindResult_t()
                 {
                     m_bLeaderboardFound = 1,
-      //              m_hSteamLeaderboard = 1
+                    m_hSteamLeaderboard = 1
                 };
 
-      //          return CallbackManager.AddCallbackResult(data);
+                return CallbackManager.AddCallbackResult(data);
             }
             catch (Exception ex)
             {
@@ -251,10 +251,10 @@ namespace SKYNET.Steamworks.Implementation
                 LeaderboardFindResult_t data = new LeaderboardFindResult_t()
                 {
                     m_bLeaderboardFound = 1,
-      //              m_hSteamLeaderboard = null
+                    m_hSteamLeaderboard = 1
                 };
 
-     //           return CallbackManager.AddCallbackResult(data);
+                return CallbackManager.AddCallbackResult(data);
             }
             catch (Exception ex)
             {
@@ -330,7 +330,7 @@ namespace SKYNET.Steamworks.Implementation
                     m_bSuccess = 1,
                     m_cPlayers = 0
                 };
-                //return CallbackManager.AddCallbackResult(data);
+                return CallbackManager.AddCallbackResult(data);
             }
             catch (Exception ex)
             {
@@ -374,7 +374,7 @@ namespace SKYNET.Steamworks.Implementation
                     m_eResult = EResult.k_EResultOK,
                     m_nGameID = SteamEmulator.GameID
                 };
-  //              return CallbackManager.AddCallbackResult(data);
+                return CallbackManager.AddCallbackResult(data);
             }
             catch (Exception ex)
             {

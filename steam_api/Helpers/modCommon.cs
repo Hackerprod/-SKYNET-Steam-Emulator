@@ -90,21 +90,9 @@ public partial class modCommon
         }
         finally { currentProcess = null; }
     }
-
     public static bool Is64Bit()
     {
         return IntPtr.Size == 8;
-    }
-
-    public static DateTime LoadTime { get; set; }
-    public static int MilisecondTime()
-    {
-        return (DateTime.Now - LoadTime).Milliseconds;
-    }
-
-    public static uint ToUnixTime(DateTime t)
-    {
-        return (uint)(new DateTimeOffset(t)).ToUnixTimeSeconds();
     }
 }
 

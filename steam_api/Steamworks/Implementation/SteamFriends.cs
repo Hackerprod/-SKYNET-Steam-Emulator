@@ -250,14 +250,14 @@ namespace SKYNET.Steamworks.Implementation
             Friend friend = Friends.Find(f => f.AccountId == (uint)steamIDFriend);
             if (friend == null)
             {
-                pFriendGameInfo.m_gameID = (CGameID)0;
-                pFriendGameInfo.m_unGameIP = 0;
-                pFriendGameInfo.m_usGamePort = 0;
+                pFriendGameInfo.GameID = 0;
+                pFriendGameInfo.GameIP = 0;
+                pFriendGameInfo.GamePort = 0;
                 return false; 
             }
-            pFriendGameInfo.m_gameID = (CGameID)friend.GameId;
-            pFriendGameInfo.m_unGameIP = 0;
-            pFriendGameInfo.m_usGamePort = 0;
+            pFriendGameInfo.GameID = friend.GameId;
+            pFriendGameInfo.GameIP = 0;
+            pFriendGameInfo.GamePort = 0;
             return true;
         }
 
@@ -270,13 +270,13 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public string GetFriendPersonaName(ulong steamIDFriend)
+        public string GetFriendPersonaName(SteamID steamIDFriend)
         {
-            Write($"------------------------- GetFriendPersonaName {steamIDFriend} | Mi ID {(ulong)SteamEmulator.SteamId}");
+            Write($"------------------------- GetFriendPersonaName {steamIDFriend}");
 
             string personaName = "Unknown";
 
-            if ((ulong)steamIDFriend == (ulong)SteamEmulator.SteamId)
+            if (SteamID.Equals(steamIDFriend, SteamEmulator.SteamId))
             {
                 personaName = SteamEmulator.PersonaName;
             }
@@ -581,11 +581,20 @@ namespace SKYNET.Steamworks.Implementation
             // SetPersonaNameResponse_t
 
             SetPersonaNameResponse_t data = new SetPersonaNameResponse_t();
-            data.m_bSuccess = true;
-            data.m_bLocalSuccess = true;
-            data.m_result = EResult.k_EResultOK;
+            data.Success = true;
+            data.LocalSuccess = true;
+            data.Result = SKYNET.Result.OK;
 
             SteamEmulator.PersonaName = pchPersonaName;
+
+            var b = new Callback.Buffer();
+            b.SetAlignment(4);
+
+            b.WriteString(pchPersonaName);
+            b.WriteBool(data.Success);
+            b.WriteInt((int)data.Result);
+
+            PostCallback(data, CallbackType.k_iSetPersonaNameResponse, b);
 
             return 0;
             return new SteamAPICall_t(CallbackType.k_iSetPersonaNameResponse);

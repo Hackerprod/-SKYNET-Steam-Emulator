@@ -12,21 +12,21 @@ namespace SKYNET.Steamworks.Exported
         public static int SteamGameServer_GetHSteamUser()
         {
             Write("SteamGameServer_GetHSteamUser");
-            return SteamEmulator.HSteamUser_GS;
+            return 1;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamGameServer_GetHSteamPipe()
+        public static HSteamPipe SteamGameServer_GetHSteamPipe()
         {
             Write("SteamGameServer_GetHSteamPipe");
-            return SteamEmulator.HSteamPipe_GS;
+            return (HSteamPipe)1;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamGameServer_Init(uint unIP, int usGamePort, int usQueryPort, uint unFlags, uint nGameAppId, string pchVersionString)
+        public static bool SteamGameServer_Init(IntPtr unIP, IntPtr usSteamPort, IntPtr usGamePort, IntPtr unknown, IntPtr eServerMode, IntPtr unknown1, IntPtr unknown2, IntPtr unknown3)
         {
             Write("SteamGameServer_Init");
-            return SteamEmulator.SteamGameServer.InitGameServer(unIP, usGamePort, usQueryPort, unFlags, nGameAppId, pchVersionString);
+            return true;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -59,7 +59,7 @@ namespace SKYNET.Steamworks.Exported
         public static ulong SteamGameServer_GetSteamID()
         {
             Write("SteamGameServer_GetSteamID");
-            return SteamEmulator.SteamId_GS;
+            return modCommon.CreateSteamID();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

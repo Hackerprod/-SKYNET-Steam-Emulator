@@ -2,7 +2,6 @@
 using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using SKYNET.Types;
-using Steamworks;
 using System;
 using System.Runtime.InteropServices;
 
@@ -208,7 +207,7 @@ namespace SKYNET.Steamworks.Implementation
         public EResult GetHostedDedicatedServerAddress(SteamDatagramHostedAddress pRouting)
         {
             Write("GetHostedDedicatedServerAddress");
-            return EResult.k_EResultFail;
+            return EResult.k_EResultNone;
         }
 
         public uint CreateHostedDedicatedServerListenSocket(int nVirtualPort, int nOptions, IntPtr pOptions)

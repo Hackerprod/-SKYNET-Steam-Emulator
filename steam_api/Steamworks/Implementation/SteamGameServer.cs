@@ -210,11 +210,10 @@ namespace SKYNET.Steamworks.Implementation
             Write("GetGameplayStats");
         }
 
-        public SteamAPICall_t GetServerReputation()
+        public ulong GetServerReputation()
         {
             Write("GetServerReputation");
-            // GSReputation_t
-            return 0;
+            return 100;
         }
 
         public uint GetPublicIP_old()
@@ -255,13 +254,13 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("ForceHeartbeat");
         }
-        public SteamAPICall_t AssociateWithClan(SteamID steamIDClan)
+        public ulong AssociateWithClan(SteamID steamIDClan)
         {
             Write("AssociateWithClan");
             return 0;
         }
 
-        public SteamAPICall_t ComputeNewPlayerCompatibility(SteamID steamIDNewPlayer)
+        public ulong ComputeNewPlayerCompatibility(SteamID steamIDNewPlayer)
         {
             Write("ComputeNewPlayerCompatibility");
             return 0;

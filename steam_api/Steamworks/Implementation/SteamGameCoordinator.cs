@@ -16,16 +16,6 @@ namespace SKYNET.Steamworks.Implementation
             InterfaceVersion = "SteamGameCoordinator";
         }
 
-        public EGCResults SendMessage_(uint unMsgType, IntPtr pubData, uint cubData)
-        {
-            uint msgType = GetGCMsg(unMsgType);
-            byte[] bytes = pubData.GetBytes(cubData);
-
-            Write($"SendMessage [{msgType}], {bytes.Length} bytes");
-
-            return EGCResults.k_EGCResultOK;
-        }
-
         public bool IsMessageAvailable(uint pcubMsgSize)
         {
             Write("IsMessageAvailable");
@@ -37,6 +27,16 @@ namespace SKYNET.Steamworks.Implementation
             uint msgType = GetGCMsg(punMsgType);
 
             Write($"RetrieveMessage [{msgType}]");
+            return EGCResults.k_EGCResultOK;
+        }
+
+        public EGCResults SendMessage_(uint unMsgType, IntPtr pubData, uint cubData)
+        {
+            uint msgType = GetGCMsg(unMsgType);
+            byte[] bytes = pubData.GetBytes(cubData);
+
+            Write($"SendMessage [{msgType}], {bytes.Length} bytes");
+
             return EGCResults.k_EGCResultOK;
         }
 

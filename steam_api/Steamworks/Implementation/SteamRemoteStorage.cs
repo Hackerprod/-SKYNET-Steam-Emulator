@@ -81,7 +81,7 @@ namespace SKYNET.Steamworks.Implementation
 
                 RemoteStorageFileWriteAsyncComplete_t data = new RemoteStorageFileWriteAsyncComplete_t()
                 {
-                    m_eResult = EResult.k_EResultOK  
+                    m_eResult = SKYNET.Types.EResult.k_EResultOK  
                 };
                 //return CallbackManager.AddCallbackResult(data);
                 return new SteamAPICall_t(CallbackType.k_iRemoteStorageFileWriteAsyncComplete);

@@ -64,74 +64,182 @@ namespace SKYNET.Callback
         int DataSize { get; }
     }
 
-    //[StructLayout(LayoutKind.Sequential)]
-    //public struct UserStatsReceived_t : IBaseCallback
-    //{
-    //    public int k_iCallback { get { return (int)UserStatsCallbacks.k_iSteamUserStatsCallbacks + 1; } }
-    //    public ulong m_nGameID;         // Game these stats are for
-    //    public EResult m_eResult;       // Success / error fetching the stats
-    //    public SteamID m_steamIDUser;	// The user for whom the stats are retrieved for
-    //}
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
+    public struct SetPersonaNameResponse_t : ICallbackData
+    {
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool Success;
 
-    //[StructLayout(LayoutKind.Sequential)]
-    //public struct UserStatsStored_t : IBaseCallback
-    //{
-    //    public int k_iCallback { get { return (int)UserStatsCallbacks.k_iSteamUserStatsCallbacks + 2; } }
-    //    public ulong m_nGameID;       // Game these stats are for
-    //    public EResult m_eResult;      // success / error
-    //};
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool LocalSuccess;
 
-    //[StructLayout(LayoutKind.Sequential)]
-    //public struct LeaderboardFindResult_t : IBaseCallback
-    //{
-    //    public int k_iCallback { get { return (int)UserStatsCallbacks.k_iSteamUserStatsCallbacks + 4; } }
-    //    public ulong m_hSteamLeaderboard; // handle to the leaderboard serarched for, 0 if no leaderboard found
-    //    public int m_bLeaderboardFound;              // 0 if no leaderboard found
-    //};
+        internal Result Result;
 
-    //[StructLayout(LayoutKind.Sequential)]
-    //public struct NumberOfCurrentPlayers_t : IBaseCallback
-    //{
-    //    public int k_iCallback { get { return (int)UserStatsCallbacks.k_iSteamUserStatsCallbacks + 7; } }
-    //    public int m_bSuccess;           // 1 if the call was successful
-    //    public uint m_cPlayers;          // Number of players currently playing    };
-    //}
+        public static int _datasize = Marshal.SizeOf(typeof(SetPersonaNameResponse_t));
 
-    //[StructLayout(LayoutKind.Sequential)]
-    //public struct GlobalStatsReceived_t : IBaseCallback
-    //{
-    //    public int k_iCallback { get { return (int)UserStatsCallbacks.k_iSteamUserStatsCallbacks + 12; } }
-    //    public ulong m_nGameID;               // Game global stats were requested for
-    //    public EResult m_eResult;             // The result of the request    
-    //}
+        public int DataSize => _datasize;
 
-    //[StructLayout(LayoutKind.Sequential)]
-    //public struct SteamUGCQueryCompleted_t : IBaseCallback
-    //{
-    //    public int k_iCallback { get { return (int)UserStatsCallbacks.k_iSteamUGCCallbacks + 1; } }
-    //    public UGCQueryHandle_t m_handle;
-    //    public EResult m_eResult;
-    //    public uint m_unNumResultsReturned;
-    //    public uint m_unTotalMatchingResults;
-    //    public bool m_bCachedData; // indicates whether this data was retrieved from the local on-disk cache
-    //    public string m_rgchNextCursor; // If a paging cursor was used, then this will be the next cursor to get the next result set.    }
-    //}
+        public CallbackType CallbackType => CallbackType.k_iSetPersonaNameResponse;
+        public int k_iCallback { get { return (int)0; } }
+    }
 
-    //[StructLayout(LayoutKind.Sequential)]
-    //struct RemoteStorageSubscribePublishedFileResult_t : IBaseCallback
-    //{
-    //    public int k_iCallback { get { return (int)UserStatsCallbacks.k_iSteamRemoteStorageCallbacks + 13; } }
-    //    public EResult m_eResult;              // The result of the operation.
-    //    public PublishedFileId_t m_nPublishedFileId;
-    //};
+    [StructLayout(LayoutKind.Sequential)]
+    public struct UserStatsReceived_t : IBaseCallback
+    {
+        public int k_iCallback { get { return (int)UserStatsCallbacks.k_iSteamUserStatsCallbacks + 1; } }
+        public ulong m_nGameID;         // Game these stats are for
+        public EResult m_eResult;       // Success / error fetching the stats
+        public SteamID m_steamIDUser;	// The user for whom the stats are retrieved for
+    }
 
-    //[StructLayout(LayoutKind.Sequential)]
-    //struct RemoteStorageUnsubscribePublishedFileResult_t : IBaseCallback
-    //{
-    //    public int k_iCallback { get { return (int)UserStatsCallbacks.k_iSteamRemoteStorageCallbacks + 15; } }
-    //    public EResult m_eResult;              // The result of the operation.
-    //    public PublishedFileId_t m_nPublishedFileId;
-    //};
+    [StructLayout(LayoutKind.Sequential)]
+    public struct UserStatsStored_t : IBaseCallback
+    {
+        public int k_iCallback { get { return (int)UserStatsCallbacks.k_iSteamUserStatsCallbacks + 2; } }
+        public ulong m_nGameID;       // Game these stats are for
+        public EResult m_eResult;      // success / error
+    };
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct LeaderboardFindResult_t : IBaseCallback
+    {
+        public int k_iCallback { get { return (int)UserStatsCallbacks.k_iSteamUserStatsCallbacks + 4; } }
+        public ulong m_hSteamLeaderboard; // handle to the leaderboard serarched for, 0 if no leaderboard found
+        public int m_bLeaderboardFound;              // 0 if no leaderboard found
+    };
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct NumberOfCurrentPlayers_t : IBaseCallback
+    {
+        public int k_iCallback { get { return (int)UserStatsCallbacks.k_iSteamUserStatsCallbacks + 7; } }
+        public int m_bSuccess;           // 1 if the call was successful
+        public uint m_cPlayers;          // Number of players currently playing    };
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct GlobalStatsReceived_t : IBaseCallback
+    {
+        public int k_iCallback { get { return (int)UserStatsCallbacks.k_iSteamUserStatsCallbacks + 12; } }
+        public ulong m_nGameID;               // Game global stats were requested for
+        public EResult m_eResult;             // The result of the request    
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct SteamUGCQueryCompleted_t : IBaseCallback
+    {
+        public int k_iCallback { get { return (int)UserStatsCallbacks.k_iSteamUGCCallbacks + 1; } }
+        public UGCQueryHandle_t m_handle;
+        public EResult m_eResult;
+        public uint m_unNumResultsReturned;
+        public uint m_unTotalMatchingResults;
+        public bool m_bCachedData; // indicates whether this data was retrieved from the local on-disk cache
+        public string m_rgchNextCursor; // If a paging cursor was used, then this will be the next cursor to get the next result set.    }
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
+    public struct SteamUGCDetails_t
+    {
+        internal PublishedFileId_t m_nPublishedFileId;
+
+        internal Result m_eResult;
+
+        internal WorkshopFileType m_eFileType;
+
+        internal uint m_nCreatorAppID;
+
+        internal uint m_nConsumerAppID;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 129)]
+        internal byte[] Title;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8000)]
+        internal byte[] Description;
+
+        internal ulong SteamIDOwner;
+
+        internal uint TimeCreated;
+
+        internal uint TimeUpdated;
+
+        internal uint TimeAddedToUserList;
+
+        internal RemoteStoragePublishedFileVisibility Visibility;
+
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool Banned;
+
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool AcceptedForUse;
+
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool TagsTruncated;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1025)]
+        internal byte[] Tags;
+
+        internal ulong File;
+
+        internal ulong PreviewFile;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 260)]
+        internal byte[] PchFileName;
+
+        internal int FileSize;
+
+        internal int PreviewFileSize;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
+        internal byte[] URL;
+
+        internal uint VotesUp;
+
+        internal uint VotesDown;
+
+        internal float Score;
+
+        internal uint NumChildren;
+
+        internal string TitleUTF8()
+        {
+            return Encoding.UTF8.GetString(Title, 0, Array.IndexOf(Title, (byte)0));
+        }
+
+        internal string DescriptionUTF8()
+        {
+            return Encoding.UTF8.GetString(Description, 0, Array.IndexOf(Description, (byte)0));
+        }
+
+        internal string TagsUTF8()
+        {
+            return Encoding.UTF8.GetString(Tags, 0, Array.IndexOf(Tags, (byte)0));
+        }
+
+        internal string PchFileNameUTF8()
+        {
+            return Encoding.UTF8.GetString(PchFileName, 0, Array.IndexOf(PchFileName, (byte)0));
+        }
+
+        internal string URLUTF8()
+        {
+            return Encoding.UTF8.GetString(URL, 0, Array.IndexOf(URL, (byte)0));
+        }
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct RemoteStorageSubscribePublishedFileResult_t : IBaseCallback
+    {
+        public int k_iCallback { get { return (int)UserStatsCallbacks.k_iSteamRemoteStorageCallbacks + 13; } }
+        public EResult m_eResult;              // The result of the operation.
+        public PublishedFileId_t m_nPublishedFileId;
+    };
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct RemoteStorageUnsubscribePublishedFileResult_t : IBaseCallback
+    {
+        public int k_iCallback { get { return (int)UserStatsCallbacks.k_iSteamRemoteStorageCallbacks + 15; } }
+        public EResult m_eResult;              // The result of the operation.
+        public PublishedFileId_t m_nPublishedFileId;
+    };
 
     [StructLayout(LayoutKind.Sequential)]
     struct StopPlaytimeTrackingResult_t : IBaseCallback
