@@ -270,13 +270,13 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public string GetFriendPersonaName(SteamID steamIDFriend)
+        public string GetFriendPersonaName(ulong steamIDFriend)
         {
-            Write($"------------------------- GetFriendPersonaName {steamIDFriend}");
+            Write($"------------------------- GetFriendPersonaName {steamIDFriend} | Mi ID {(ulong)SteamEmulator.SteamId}");
 
             string personaName = "Unknown";
 
-            if (SteamID.Equals(steamIDFriend, SteamEmulator.SteamId))
+            if ((ulong)steamIDFriend == (ulong)SteamEmulator.SteamId)
             {
                 personaName = SteamEmulator.PersonaName;
             }

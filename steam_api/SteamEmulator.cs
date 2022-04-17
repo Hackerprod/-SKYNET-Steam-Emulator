@@ -1,5 +1,6 @@
-﻿#define LOG
+﻿//#define LOG
 using SKYNET;
+using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Steamworks.Implementation;
 using SKYNET.Steamworks.Types;
@@ -15,19 +16,21 @@ public class SteamEmulator
 {
     public static SteamEmulator Instance;
 
-    // Callbacks
-    public static CallbackManager Client_Callback = new CallbackManager();
-    public static CallbackManager Server_Callback = new CallbackManager();
-
-    public event EventHandler<GameMessage> OnMessage; 
+    public static event EventHandler<GameMessage> OnMessage;
 
     #region Client Info
 
-    public static string Language { get; set; }
-    public static string PersonaName { get; set; }
-    public static SteamID SteamId { get; set; }
-    public static ulong SteamId_GS { get; set; }
-    public static uint AppId { get; set; }
+    public static string Language;
+    public static string PersonaName;
+    public static string SteamApiPath;
+    public static string EmulatorPath;
+
+    public static SteamID SteamId;
+    public static SteamID SteamId_GS;
+    public static ulong GameID;
+    public static uint AppId;
+    public static bool Initialized;
+    public static bool SendLog;
 
     public static int HSteamUser;
     public static int HSteamPipe;
@@ -36,13 +39,6 @@ public class SteamEmulator
     public static int HSteamPipe_GS;
 
     #endregion
-
-    public static bool Initialized { get; set; }
-    public static string SteamApiPath { get; set; }
-    public static string EmulatorPath { get; set; }
-    public static IntPtr Context_Ptr { get; set; }
-    public static bool SendLog { get; set; }
-    public static ulong GameID { get; set; }
 
     #region Interfaces 
 
@@ -101,16 +97,16 @@ public class SteamEmulator
         Instance = this;
     }
 
-    public void Initialize()
+    public static void Initialize()
     {
         if (Initialized) return;
 
         LoadCustomVars();
 
-        InterfaceManager.Initialize();
+        SteamId_GS = new SteamID();
+        SteamId_GS.Set((uint)new Random().Next(1000, 9999), SKYNET.Steamworks.EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeGameServer);
 
-        if (Client_Callback == null) Client_Callback = new CallbackManager();
-        if (Server_Callback == null) Server_Callback = new CallbackManager();
+        InterfaceManager.Initialize();
 
         #region Interface Initialization
 
@@ -212,8 +208,8 @@ public class SteamEmulator
         HSteamUser = 1;
         HSteamPipe = 1;
 
-        HSteamUser_GS = 1;
-        HSteamPipe_GS = 1;
+        HSteamUser_GS = 2;
+        HSteamPipe_GS = 2;
 
         Initialized = true;
 
@@ -244,48 +240,49 @@ public class SteamEmulator
         Write("Steam Emulator", msg);
     }
 
-    #if LOG
+#if LOG
 
     static string lastMsg = "";
     public static void Write(string sender, object msg)
     {
-        //if (SendLog)
-        //{
-        //    if (lastMsg != msg.ToString())
-        //    {
-        //        Instance.OnMessage?.Invoke(Instance, new GameMessage(AppId, sender, msg));
-        //        lastMsg = msg.ToString(); 
-        //    }
-        //}
-
-        //if (lastMsg != msg.ToString())
-        //{
-            Console.WriteLine(sender + ": " + msg);
-
-        //    string fileName = modCommon.GetPath() + "/[SKYNET] steam_api.log";
-        //    var lines = new List<string>();
-        //    if (File.Exists(fileName))
-        //    {
-        //        lines = File.ReadAllLines(fileName).ToList();
-        //    }
-        //    lines.Add(sender + ": " + msg);
-
-        //    File.WriteAllLines(fileName, lines);
-        //    lastMsg = msg.ToString();
-        //}
-    }
-
-    #else
-
-        public static void Write(string sender, object msg)
+        if (SendLog)
         {
-            Console.WriteLine(sender + ": " + msg);
-            // TODO
+            if (lastMsg != msg.ToString())
+            {
+                Instance.OnMessage?.Invoke(Instance, new GameMessage(AppId, sender, msg));
+                lastMsg = msg.ToString();
+            }
         }
 
-    #endif
+        if (lastMsg != msg.ToString())
+        {
+            Console.WriteLine(sender + ": " + msg);
 
-    private void LoadCustomVars()
+            string fileName = modCommon.GetPath() + "/[SKYNET] steam_api.log";
+            var lines = new List<string>();
+            if (File.Exists(fileName))
+            {
+                lines = File.ReadAllLines(fileName).ToList();
+            }
+            lines.Add(sender + ": " + msg);
+
+            File.WriteAllLines(fileName, lines);
+            lastMsg = msg.ToString();
+        }
+    }
+
+#else
+    public static void Write(string sender, object msg)
+    {
+        Console.WriteLine(sender + ": " + msg);
+        Log.AppEnd(sender + ": " + msg);
+
+        // TODO
+    }
+
+#endif
+
+    private static void LoadCustomVars()
     {
         modCommon.ActiveConsoleOutput();
 
@@ -293,9 +290,8 @@ public class SteamEmulator
         File.WriteAllLines(fileName, new List<string>());
 
         Language = "English";
-        PersonaName = "Hacker";
-        SteamId = new SteamID();
-        SteamId.Set(1000, SKYNET.Steamworks.EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeIndividual);
+        PersonaName = "Hackerprod";
+        SteamId = new SteamID(76561198429375037);
         SteamId_GS = 1;
         AppId = 570;
 

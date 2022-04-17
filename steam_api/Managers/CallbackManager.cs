@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using SKYNET.Callback;
+using SKYNET.Helper;
 using Steamworks;
 
 namespace SKYNET.Managers
@@ -17,7 +18,10 @@ namespace SKYNET.Managers
 
         private static Dictionary<int, CCallbackBase> Client_Callbacks;
         private static Dictionary<int, CCallbackBase> Server_Callbacks;
+        private static Dictionary<ulong, CCallbackBase> CallbackResult;
         private static List<SteamAPICall_t> SteamAPICalls;
+
+        static object call_id_lock = new object();
 
         static CallbackManager()
         {
@@ -36,6 +40,10 @@ namespace SKYNET.Managers
             if (SteamAPICallsCompleted == null)
             {
                 SteamAPICallsCompleted = new List<SteamAPICall_t>();
+            }
+            if (CallbackResult == null)
+            {
+                CallbackResult = new Dictionary<ulong, CCallbackBase>();
             }
         }
 
@@ -60,22 +68,29 @@ namespace SKYNET.Managers
             }
         }
 
-        public void UnregisterCallResult(IntPtr pCallback, SteamAPICall_t hAPICall)
+        public static void UnregisterCallResult(IntPtr pCallback, SteamAPICall_t hAPICall)
         {
 
         }
 
-        public void UnregisterCallback(IntPtr pCallback)
+        public static void UnregisterCallback(IntPtr pCallback)
         {
 
         }
 
-        public static void RegisterCallResult(CCallbackBase pCallback, SteamAPICall_t hAPICall)
+        public static void RegisterCallResult(SteamAPICall_t hAPICall, CCallbackBase pCallback)
         {
-            SteamAPICalls.Add(hAPICall);
+            if (CallbackResult.ContainsKey(hAPICall))
+            {
+                CallbackResult[hAPICall] = pCallback;
+            }
+            else
+            {
+                CallbackResult.Add(hAPICall, pCallback);
+            }
         }
 
-        public void RunCallbacks()
+        public static void RunCallbacks()
         {
             //for (auto & c : callbacks)
             //{
@@ -83,7 +98,7 @@ namespace SKYNET.Managers
             //}
         }
 
-        public void FreeCallback(int pipe_id)
+        public static void FreeCallback(int pipe_id)
         {
             //bool found = Callbacks.TryGetValue(pipe_id, out CCallbackBase value);
 
@@ -101,7 +116,30 @@ namespace SKYNET.Managers
             //TODO
             int iCallback = callbackData.k_iCallback;
 
+            //lock (call_id_lock)
+            //{
+            //    last_call_id += 1;
+            //    registered_calls[last_call_id] = new AsyncJobResult()
+            //    {
+            //        job_id = last_call_id,
+            //        internal_job_id = job.JobID,
+            //        finished = false,
+            //        result = null,
+            //    };
+            //}
+
+            //return last_call_id;
+
             return 0;
+        }
+
+        internal static byte[] GetCallResult(ulong handle, IntPtr callback, int callback_size, int callback_expected)
+        {
+            if (CallbackResult.ContainsKey(handle))
+            {
+                return CallbackResult[handle].m_vfptr.GetBytes(callback_size);
+            }
+            return default;
         }
 
         public static bool Contains(SteamAPICall_t hSteamAPICall)

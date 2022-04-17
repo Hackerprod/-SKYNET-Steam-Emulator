@@ -37,8 +37,9 @@ namespace SKYNET.Steamworks.Implementation
 
         public uint GetServerRealTime()
         {
-            Write("GetServerRealTime");
-            return (uint)DateTime.Now.Millisecond;
+            uint ServerTime = (uint)(new DateTimeOffset(DateTime.Now)).ToUnixTimeSeconds(); 
+            Write($"GetServerRealTime {ServerTime}");
+            return ServerTime;
         }
 
         public string GetIPCountry()
@@ -106,12 +107,27 @@ namespace SKYNET.Steamworks.Implementation
             return ESteamAPICallFailure.k_ESteamAPICallFailureNone;
         }
 
-        public bool GetAPICallResult(SteamAPICall_t hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, bool pbFailed)
+        public bool GetAPICallResult(ulong handle, IntPtr callback, int callback_size, int callback_expected, ref bool failed)
         {
-            Write("GetAPICallResult");
-            var CallCompleted = CallbackManager.SteamAPICallsCompleted.Find(c => c == hSteamAPICall);
-            if (CallCompleted == null) return false;
-            return true;
+            try
+            {
+                Write("GetAPICallResult");
+                var result = CallbackManager.GetCallResult(handle, callback, callback_size, callback_expected);
+
+                if (result == null)
+                {
+                    failed = true;
+                    return false;
+                }
+
+                Marshal.Copy(result, 0, callback, callback_size);
+                return !failed;
+            }
+            catch (Exception ex)
+            {
+                Write($"GetAPICallResult {ex}");
+            }
+            return false;
         }
 
         public void RunFrame()

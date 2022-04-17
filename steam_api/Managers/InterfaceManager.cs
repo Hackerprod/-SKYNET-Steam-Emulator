@@ -16,11 +16,13 @@ namespace SKYNET.Managers
     {
         private static ConcurrentDictionary<string, Type> interfaceTypes;
         private static Dictionary<string, IntPtr> StoredInterfaces;
+        private static Dictionary<string, IntPtr> StoredInterfaces_Gameserver;
 
         static InterfaceManager()
         {
             interfaceTypes = new ConcurrentDictionary<string, Type>();
             StoredInterfaces = new Dictionary<string, IntPtr>();
+            StoredInterfaces_Gameserver = new Dictionary<string, IntPtr>();
         }
 
         public static void Initialize()
@@ -50,15 +52,26 @@ namespace SKYNET.Managers
             return FindOrCreateInterface(1, 1, pchVersion);
         }
 
-        public static IntPtr FindOrCreateInterface(int hSteamUser, int hSteamPipe, string pszVersion)
+        public static IntPtr FindOrCreateInterface(int hSteamUser, int hSteamPipe, string pszVersion, bool GameServer = false)
         {
             if (pszVersion.StartsWith("SteamGameServer0"))
             {
                 Write($"Skipping {pszVersion}");
                 return default;
             }
+            if (pszVersion.StartsWith("SteamClient"))
+            {
+                //Write($"Skipping {pszVersion}");
+                //return default;
+            }
 
-            if (StoredInterfaces.ContainsKey(pszVersion))
+            ///////////////////////////////////////////////////////////////////////
+
+            if (GameServer && StoredInterfaces_Gameserver.ContainsKey(pszVersion))
+            {
+                return StoredInterfaces_Gameserver[pszVersion];
+            }
+            else if (StoredInterfaces.ContainsKey(pszVersion))
             {
                 return StoredInterfaces[pszVersion];
             }
@@ -79,7 +92,15 @@ namespace SKYNET.Managers
                 return address;
             }
 
-            StoredInterfaces.Add(pszVersion, address);
+            if (GameServer)
+            {
+                StoredInterfaces_Gameserver.Add(pszVersion, address);
+            }
+            else
+            {
+                StoredInterfaces.Add(pszVersion, address);
+            }
+            
             SetInterfaceName(pszVersion, interfaceType);
 
             return address;

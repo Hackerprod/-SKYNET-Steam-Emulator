@@ -6,10 +6,10 @@ namespace SKYNET.Interface
     [Interface("SteamGameServer014")]
     public class SteamGameServer014 : ISteamInterface
     {
-        private bool InitGameServer(IntPtr _, uint unIP, int usGamePort, int usQueryPort, uint unFlags, uint nGameAppId, string pchVersionString )
-        {
-            return SteamEmulator.SteamGameServer.InitGameServer(unIP, usGamePort, usQueryPort, unFlags, nGameAppId, pchVersionString);
-        }
+        //private bool InitGameServer(IntPtr _, uint unIP, int usGamePort, int usQueryPort, uint unFlags, uint nGameAppId, string pchVersionString )
+        //{
+        //    return SteamEmulator.SteamGameServer.InitGameServer(unIP, usGamePort, usQueryPort, unFlags, nGameAppId, pchVersionString);
+        //}
 
         public void SetProduct(IntPtr _, string pszProduct)
         {
@@ -166,7 +166,7 @@ namespace SKYNET.Interface
             SteamEmulator.SteamGameServer.GetGameplayStats();
         }
 
-        public ulong GetServerReputation(IntPtr _)
+        public SteamAPICall_t GetServerReputation(IntPtr _)
         {
             return SteamEmulator.SteamGameServer.GetServerReputation();
         }
@@ -186,12 +186,12 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamGameServer.GetNextOutgoingPacket(pOut, cbMaxOut, pNetAdr, pPort);
         }
 
-        public ulong AssociateWithClan(IntPtr _, ulong steamIDClan)
+        public SteamAPICall_t AssociateWithClan(IntPtr _, ulong steamIDClan)
         {
             return SteamEmulator.SteamGameServer.AssociateWithClan(steamIDClan);
         }
 
-        public ulong ComputeNewPlayerCompatibility(IntPtr _, ulong steamIDNewPlayer)
+        public SteamAPICall_t ComputeNewPlayerCompatibility(IntPtr _, ulong steamIDNewPlayer)
         {
             return SteamEmulator.SteamGameServer.ComputeNewPlayerCompatibility(steamIDNewPlayer);
         }
