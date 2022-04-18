@@ -5,14 +5,20 @@ using SKYNET.Helpers;
 using SKYNET.Managers;
 using System.Net;
 using System.Net.Http;
+using Steamworks;
+using System.Collections.Generic;
 
 namespace SKYNET.Steamworks.Implementation
 {
     public class SteamHTTP : ISteamInterface
     {
+        private List<HTTPRequest> HTTPRequests;
+        private HTTPRequestHandle Handle;
         public SteamHTTP()
         {
             InterfaceVersion = "SteamHTTP";
+            HTTPRequests = new List<HTTPRequest>();
+            Handle = (HTTPRequestHandle)0;
         }
 
         public uint CreateCookieContainer(bool bAllowResponsesToModify)
@@ -21,18 +27,26 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public uint CreateHTTPRequest(uint eHTTPRequestMethod, string pchAbsoluteURL)
+        public HTTPRequestHandle CreateHTTPRequest(uint eHTTPRequestMethod, string pchAbsoluteURL)
         {
             Write($"CreateHTTPRequest {(HTTPMethod)eHTTPRequestMethod} {pchAbsoluteURL}");
+
+            HTTPRequest HttpRequest = new HTTPRequest();
+            HttpRequest.handle = Handle;
+            HttpRequest.context_value = 0;
+            Handle.m_HTTPRequestHandle++;;
+
+            HTTPRequests.Add(HttpRequest);
+
             try
             {
-                WebRequest request = HttpWebRequest.Create(pchAbsoluteURL);
-                var response = request.GetResponse();
-                return 1;
+                //WebRequest request = HttpWebRequest.Create(pchAbsoluteURL);
+                //var response = request.GetResponse();
+                return Handle;
             }
             catch (Exception)
             {
-                return 0;
+                return Handle;
             }
             
         }
@@ -103,9 +117,33 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public bool SendHTTPRequest(uint hRequest, ulong pCallHandle)
+        public bool SendHTTPRequest(HTTPRequestHandle hRequest, ref SteamAPICall_t pCallHandle)
         {
-            Write($"SendHTTPRequest");
+            try
+            {
+                Write($"SendHTTPRequest");
+
+                HTTPRequest request = HTTPRequests.Find(r => r.handle == hRequest);
+                if (request == null)
+                {
+                    return false;
+                }
+
+                HTTPRequestCompleted_t data = new HTTPRequestCompleted_t();
+                data.m_hRequest = request.handle;
+                data.m_ulContextValue = request.context_value;
+                data.m_bRequestSuccessful = false;
+                data.m_eStatusCode = EHTTPStatusCode.k_EHTTPStatusCode404NotFound;
+                data.m_unBodySize = (uint)request.response.Length;
+
+                pCallHandle = CallbackManager.AddCallbackResult(data);
+                pCallHandle = new SteamAPICall_t( CallbackType.k_iHTTPRequestCompleted);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Write($"SendHTTPRequest {ex}");
+            }
             return true;
         }
 
@@ -145,9 +183,15 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public bool SetHTTPRequestHeaderValue(uint hRequest, string pchHeaderName, string pchHeaderValue)
+        public bool SetHTTPRequestHeaderValue(HTTPRequestHandle hRequest, string pchHeaderName, string pchHeaderValue)
         {
             Write($"SetHTTPRequestHeaderValue");
+            HTTPRequest request = HTTPRequests.Find(r => r.handle == hRequest);
+            if (request == null)
+            {
+                return false;
+            }
+
             return true;
         }
 
@@ -180,5 +224,13 @@ namespace SKYNET.Steamworks.Implementation
             Write($"SteamAPI_SteamGameServerHTTP_v003");
             return InterfaceManager.FindOrCreateInterface("STEAMHTTP_INTERFACE_VERSION003");
         }
+
+        
+    }
+    public class HTTPRequest
+    {
+        public HTTPRequestHandle handle;
+        public ulong context_value;
+        internal string response;
     }
 }

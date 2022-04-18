@@ -1,3 +1,4 @@
+using Steamworks;
 using System;
 
 
@@ -6,7 +7,7 @@ namespace SKYNET.Interface
     [Interface("STEAMHTTP_INTERFACE_VERSION003")]
     public class SteamHTTP003 : ISteamInterface
     {
-        public uint CreateHTTPRequest(IntPtr _, uint eHTTPRequestMethod, string pchAbsoluteURL)
+        public HTTPRequestHandle CreateHTTPRequest(IntPtr _, uint eHTTPRequestMethod, string pchAbsoluteURL)
         {
             return SteamEmulator.SteamHTTP.CreateHTTPRequest(eHTTPRequestMethod, pchAbsoluteURL);
         }
@@ -21,7 +22,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamHTTP.SetHTTPRequestNetworkActivityTimeout(hRequest, unTimeoutSeconds);
         }
 
-        public bool SetHTTPRequestHeaderValue(IntPtr _, uint hRequest, string pchHeaderName, string pchHeaderValue)
+        public bool SetHTTPRequestHeaderValue(IntPtr _, HTTPRequestHandle hRequest, string pchHeaderName, string pchHeaderValue)
         {
             return SteamEmulator.SteamHTTP.SetHTTPRequestHeaderValue(hRequest, pchHeaderName, pchHeaderValue);
         }
@@ -31,9 +32,9 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamHTTP.SetHTTPRequestGetOrPostParameter(hRequest, pchParamName, pchParamValue);
         }
 
-        public bool SendHTTPRequest(IntPtr _, uint hRequest, ulong pCallHandle)
+        public bool SendHTTPRequest(IntPtr _, HTTPRequestHandle hRequest, ref SteamAPICall_t pCallHandle)
         {
-            return SteamEmulator.SteamHTTP.SendHTTPRequest(hRequest, pCallHandle);
+            return SteamEmulator.SteamHTTP.SendHTTPRequest(hRequest, ref pCallHandle);
         }
 
         public bool SendHTTPRequestAndStreamResponse(IntPtr _, uint hRequest, ulong pCallHandle)
@@ -132,5 +133,64 @@ namespace SKYNET.Interface
         }
 
 
+    }
+}
+
+namespace Steamworks
+{
+    public struct HTTPRequestHandle : System.IEquatable<HTTPRequestHandle>, System.IComparable<HTTPRequestHandle>
+    {
+        public static readonly HTTPRequestHandle Invalid = new HTTPRequestHandle(0);
+        public uint m_HTTPRequestHandle;
+
+        public HTTPRequestHandle(uint value)
+        {
+            m_HTTPRequestHandle = value;
+        }
+
+        public override string ToString()
+        {
+            return m_HTTPRequestHandle.ToString();
+        }
+
+        public override bool Equals(object other)
+        {
+            return other is HTTPRequestHandle && this == (HTTPRequestHandle)other;
+        }
+
+        public override int GetHashCode()
+        {
+            return m_HTTPRequestHandle.GetHashCode();
+        }
+
+        public static bool operator ==(HTTPRequestHandle x, HTTPRequestHandle y)
+        {
+            return x.m_HTTPRequestHandle == y.m_HTTPRequestHandle;
+        }
+
+        public static bool operator !=(HTTPRequestHandle x, HTTPRequestHandle y)
+        {
+            return !(x == y);
+        }
+
+        public static explicit operator HTTPRequestHandle(uint value)
+        {
+            return new HTTPRequestHandle(value);
+        }
+
+        public static explicit operator uint(HTTPRequestHandle that)
+        {
+            return that.m_HTTPRequestHandle;
+        }
+
+        public bool Equals(HTTPRequestHandle other)
+        {
+            return m_HTTPRequestHandle == other.m_HTTPRequestHandle;
+        }
+
+        public int CompareTo(HTTPRequestHandle other)
+        {
+            return m_HTTPRequestHandle.CompareTo(other.m_HTTPRequestHandle);
+        }
     }
 }

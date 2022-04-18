@@ -38,25 +38,24 @@ namespace SKYNET.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_RegisterCallResult(CallbackMsg pCallback, SteamAPICall_t hAPICall)
+        public static void SteamAPI_RegisterCallResult(IntPtr ptrCallback, SteamAPICall_t hAPICall)
         {
             try
             {
-                Write("SteamAPI_RegisterCallResult");
+                var pCallback = ptrCallback.ToType<CCallbackBase>();
+                string callMessage = $"SteamAPI_RegisterCallResult: ";
 
-                //string callMessage = $"SteamAPI_RegisterCallResult: ";
+                bool GameServer = pCallback.IsGameServer();
+                string isGameServer = GameServer ? "[ GAMESERVER ]" : "[   CLIENT   ]";
+                callMessage += $"{isGameServer} ";
 
-                //bool GameServer = pCallback.IsGameServer();
-                //string isGameServer = GameServer ? "[ GAMESERVER ]" : "[   CLIENT   ]";
-                //callMessage += $"{isGameServer} ";
+                CallbackType Type = pCallback.m_iCallback.GetCallbackType();
+                int callback_id = pCallback.m_iCallback % 100;
 
-                //CallbackType Type = pCallback.m_iCallback.GetCallbackType();
-                //int callback_id = pCallback.m_iCallback % 100;
+                callMessage += $"  {callback_id}    {Type} ";
+                Write(callMessage);
 
-                //callMessage += $"  {callback_id}    {Type} ";
-                //Write(callMessage);
-
-                //CallbackManager.RegisterCallResult(hAPICall, pCallback);
+                CallbackManager.RegisterCallResult(hAPICall, pCallback);
             }
             catch
             {
@@ -104,7 +103,7 @@ namespace SKYNET.Exported
 
                 callMessage += $"{isGameServer}  {callback_id} {space} {Type} ";
 
-                CallbackManager.RegisterCallback(iCallback, Base, Base.IsGameServer());
+                //CallbackManager.RegisterCallback(iCallback, Base, Base.IsGameServer());
 
                 Write(callMessage);
             }

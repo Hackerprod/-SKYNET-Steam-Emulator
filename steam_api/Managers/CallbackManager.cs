@@ -111,10 +111,10 @@ namespace SKYNET.Managers
             //}
         }
 
-        public static SteamAPICall_t AddCallbackResult(IBaseCallback callbackData)
+        public static SteamAPICall_t AddCallbackResult(object callbackData)
         {
             //TODO
-            int iCallback = callbackData.k_iCallback;
+            //int iCallback = callbackData.k_iCallback;
 
             //lock (call_id_lock)
             //{

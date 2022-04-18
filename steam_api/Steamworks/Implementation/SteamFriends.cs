@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using SKYNET;
 using SKYNET.Callback;
 using SKYNET.Helpers;
-using SKYNET.Steamworks;
 using SKYNET.Steamworks.Types;
 using SKYNET.Types;
 using Steamworks;
@@ -13,14 +11,14 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamFriends : ISteamInterface
     {
-        public List<Friend> Friends;
+        public List<SKYNET.Types.Friend> Friends;
         public List<SteamID> Users;
         public Dictionary<string, string> RichPresence;
 
         public SteamFriends()
         {
             InterfaceVersion = "SteamFriends";
-            Friends = new List<Friend>();
+            Friends = new List<SKYNET.Types.Friend>();
             Users = new List<SteamID>();
             RichPresence = new Dictionary<string, string>();
         }
@@ -197,7 +195,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamID GetFriendByIndex(int iFriend, int iFriendFlags)
         {
             Write($"GetFriendByIndex {iFriend}");
-            Friend friend = Friends.Find(f => f.AccountId == (uint)iFriend);
+            var friend = Friends.Find(f => f.AccountId == (uint)iFriend);
             if (friend == null)
             {
                 return 0;
@@ -247,7 +245,7 @@ namespace SKYNET.Steamworks.Implementation
 
             pFriendGameInfo = new FriendGameInfo_t();
 
-            Friend friend = Friends.Find(f => f.AccountId == (uint)steamIDFriend);
+            var friend = Friends.Find(f => f.AccountId == (uint)steamIDFriend);
             if (friend == null)
             {
                 pFriendGameInfo.GameID = 0;
@@ -282,7 +280,7 @@ namespace SKYNET.Steamworks.Implementation
             }
             else
             {
-                Friend friend = Friends.Find(f => f.SteamId == steamIDFriend);
+                var friend = Friends.Find(f => f.SteamId == steamIDFriend);
                 if (friend != null) personaName = friend.PersonaName;
             }
 
@@ -424,7 +422,7 @@ namespace SKYNET.Steamworks.Implementation
             {
                 return SteamEmulator.PersonaName;
             }
-            Friend friend = Friends.Find(f => f.AccountId == (uint)steamIDPlayer);
+            var friend = Friends.Find(f => f.AccountId == (uint)steamIDPlayer);
             if (friend == null)
             {
                 return "";
@@ -443,7 +441,7 @@ namespace SKYNET.Steamworks.Implementation
         public bool HasFriend(SteamID steamIDFriend, int iFriendFlags)
         {
             Write($"HasFriend {steamIDFriend.ConvertToUInt64()}");
-            Friend friend = Friends.Find(f => f.AccountId == (uint)steamIDFriend);
+            var friend = Friends.Find(f => f.AccountId == (uint)steamIDFriend);
             return friend != null;
         }
 
@@ -581,9 +579,9 @@ namespace SKYNET.Steamworks.Implementation
             // SetPersonaNameResponse_t
 
             SetPersonaNameResponse_t data = new SetPersonaNameResponse_t();
-            data.Success = true;
-            data.LocalSuccess = true;
-            data.Result = SKYNET.Result.OK;
+            data.m_bSuccess = true;
+            data.m_bLocalSuccess = true;
+            data.m_result = EResult.k_EResultOK;
 
             SteamEmulator.PersonaName = pchPersonaName;
 
@@ -591,13 +589,13 @@ namespace SKYNET.Steamworks.Implementation
             b.SetAlignment(4);
 
             b.WriteString(pchPersonaName);
-            b.WriteBool(data.Success);
-            b.WriteInt((int)data.Result);
+            b.WriteBool(data.m_bSuccess);
+            b.WriteInt((int)data.m_result);
 
             PostCallback(data, CallbackType.k_iSetPersonaNameResponse, b);
 
             return 0;
-            return new SteamAPICall_t(CallbackType.k_iSetPersonaNameResponse);
+            //return new SteamAPICall_t(SKYNET.CallbackType.k_iSetPersonaNameResponse);
         }
 
         public void SetPlayedWith(SteamID steamIDUserPlayedWith)

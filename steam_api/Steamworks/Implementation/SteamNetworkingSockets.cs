@@ -207,7 +207,7 @@ namespace SKYNET.Steamworks.Implementation
         public EResult GetHostedDedicatedServerAddress(SteamDatagramHostedAddress pRouting)
         {
             Write("GetHostedDedicatedServerAddress");
-            return EResult.k_EResultNone;
+            return EResult.k_EResultFail;
         }
 
         public uint CreateHostedDedicatedServerListenSocket(int nVirtualPort, int nOptions, IntPtr pOptions)

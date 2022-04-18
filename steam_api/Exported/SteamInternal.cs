@@ -22,7 +22,7 @@ namespace SKYNET.Exported
         public static IntPtr SteamInternal_FindOrCreateGameServerInterface(int hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion)
         {
             Write($"SteamInternal_FindOrCreateGameServerInterface {pszVersion}");
-            return InterfaceManager.FindOrCreateInterface(hSteamUser, 1, pszVersion, true);
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, 1, pszVersion);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

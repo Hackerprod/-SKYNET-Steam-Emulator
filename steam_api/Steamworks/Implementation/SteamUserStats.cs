@@ -36,7 +36,7 @@ namespace SKYNET.Steamworks.Implementation
                 UserStatsReceived_t data = new UserStatsReceived_t()
                 {
                     m_nGameID = SteamEmulator.GameID,
-                    m_eResult = SKYNET.Types.EResult.k_EResultOK,
+                    m_eResult = EResult.k_EResultOK,
                     m_steamIDUser = SteamEmulator.SteamId
                 };
                 CallbackManager.AddCallbackResult(data);
@@ -107,7 +107,7 @@ namespace SKYNET.Steamworks.Implementation
                 UserStatsStored_t data = new UserStatsStored_t()
                 {
                     m_nGameID = SteamEmulator.GameID,
-                    m_eResult = SKYNET.Types.EResult.k_EResultOK
+                    m_eResult = EResult.k_EResultOK
                 };
                 CallbackManager.AddCallbackResult(data);
                 return true;
@@ -217,7 +217,7 @@ namespace SKYNET.Steamworks.Implementation
                 LeaderboardFindResult_t data = new LeaderboardFindResult_t()
                 {
                     m_bLeaderboardFound = 1,
-                    m_hSteamLeaderboard = 1
+                    m_hSteamLeaderboard = default
                 };
 
                 return CallbackManager.AddCallbackResult(data);
@@ -251,7 +251,7 @@ namespace SKYNET.Steamworks.Implementation
                 LeaderboardFindResult_t data = new LeaderboardFindResult_t()
                 {
                     m_bLeaderboardFound = 1,
-                    m_hSteamLeaderboard = 1
+                    m_hSteamLeaderboard = default
                 };
 
                 return CallbackManager.AddCallbackResult(data);

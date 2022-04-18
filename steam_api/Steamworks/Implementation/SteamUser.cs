@@ -32,9 +32,9 @@ namespace SKYNET.Steamworks.Implementation
 
         public SteamID GetSteamID()
         {
-            var SId = SteamEmulator.SteamId;
-            Write($"GetSteamID {(ulong)SId}");
-            return SId;
+            ulong ID = SteamEmulator.SteamId;
+            Write($"GetSteamID {ID}");
+            return SteamEmulator.SteamId;
         }
 
         public int InitiateGameConnection(IntPtr pAuthBlob, int cbMaxAuthBlob, SteamID steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)
@@ -199,7 +199,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("GetMarketEligibility");
             // MarketEligibilityResponse_t
-            return default;
+            return 0;
         }
 
         public SteamAPICall_t GetDurationControl()

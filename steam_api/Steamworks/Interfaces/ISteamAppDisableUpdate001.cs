@@ -11,7 +11,7 @@ namespace SKYNET.Interface
     {
         public void SetAppUpdateDisabledSecondsRemaining(int seconds)
         {
-            SteamEmulator.Write("ISteamAppDisableUpdate001", "SetAppUpdateDisabledSecondsRemaining");
+            SteamEmulator.Write("ISteamAppDisableUpdate001", $"SetAppUpdateDisabledSecondsRemaining {seconds}");
         }
     }
 }

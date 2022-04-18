@@ -89,7 +89,7 @@ namespace SKYNET.Steamworks.Implementation
                 SteamUGCQueryCompleted_t data = new SteamUGCQueryCompleted_t()
                 {
                     m_handle = handle,
-                    m_eResult = SKYNET.Types.EResult.k_EResultOK,
+                    m_eResult = EResult.k_EResultOK,
                     m_unNumResultsReturned = (uint)request.results.Count(),
                     m_unTotalMatchingResults = (uint)request.results.Count(),
                     m_bCachedData = false,
@@ -489,7 +489,7 @@ namespace SKYNET.Steamworks.Implementation
                 subscribed.Add(nPublishedFileID);
                 RemoteStorageSubscribePublishedFileResult_t data = new RemoteStorageSubscribePublishedFileResult_t()
                 {
-                    m_eResult = SKYNET.Types.EResult.k_EResultOK,
+                    m_eResult = EResult.k_EResultOK,
                     m_nPublishedFileId = nPublishedFileID
                 };
                 return CallbackManager.AddCallbackResult(data);
@@ -510,7 +510,7 @@ namespace SKYNET.Steamworks.Implementation
                 subscribed.Add(nPublishedFileID);
                 RemoteStorageUnsubscribePublishedFileResult_t data = new RemoteStorageUnsubscribePublishedFileResult_t()
                 {
-                    m_eResult = SKYNET.Types.EResult.k_EResultOK,
+                    m_eResult = EResult.k_EResultOK,
                     m_nPublishedFileId = nPublishedFileID
                 };
                 if (subscribed.Contains(nPublishedFileID))
@@ -585,7 +585,7 @@ namespace SKYNET.Steamworks.Implementation
                 Write("StartPlaytimeTracking");
                 StopPlaytimeTrackingResult_t data = new StopPlaytimeTrackingResult_t()
                 {
-                     m_eResult = SKYNET.Types.EResult.k_EResultOK
+                     m_eResult = EResult.k_EResultOK
                 };
                 return CallbackManager.AddCallbackResult(data);
             }
@@ -603,7 +603,7 @@ namespace SKYNET.Steamworks.Implementation
                 Write("StopPlaytimeTracking");
                 StopPlaytimeTrackingResult_t data = new StopPlaytimeTrackingResult_t()
                 {
-                    m_eResult = SKYNET.Types.EResult.k_EResultOK
+                    m_eResult = EResult.k_EResultOK
                 };
                 return CallbackManager.AddCallbackResult(data);
             }
@@ -621,7 +621,7 @@ namespace SKYNET.Steamworks.Implementation
                 Write("StopPlaytimeTracking");
                 StopPlaytimeTrackingResult_t data = new StopPlaytimeTrackingResult_t()
                 {
-                    m_eResult = SKYNET.Types.EResult.k_EResultOK
+                    m_eResult = EResult.k_EResultOK
                 };
                 return CallbackManager.AddCallbackResult(data);
             }
@@ -709,7 +709,7 @@ namespace SKYNET.Steamworks.Implementation
                 {
                     pDetails.m_eResult = SKYNET.Result.OK;
                     pDetails.m_nPublishedFileId = id;
-                    pDetails.m_eFileType = WorkshopFileType.Community;
+                    pDetails.m_eFileType = EWorkshopFileType.k_EWorkshopFileTypeCommunity;
                     pDetails.m_nCreatorAppID = SteamEmulator.AppId;
                     pDetails.m_nConsumerAppID = SteamEmulator.AppId;
                     //TODO

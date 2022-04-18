@@ -1,11 +1,11 @@
-﻿//#define LOG
+﻿#define LOG
 using SKYNET;
 using SKYNET.Helpers;
 using SKYNET.Managers;
+using SKYNET.Steamworks;
 using SKYNET.Steamworks.Implementation;
 using SKYNET.Steamworks.Types;
 using SKYNET.Types;
-using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -242,41 +242,21 @@ public class SteamEmulator
 
 #if LOG
 
-    static string lastMsg = "";
+    
     public static void Write(string sender, object msg)
     {
         if (SendLog)
         {
-            if (lastMsg != msg.ToString())
-            {
-                Instance.OnMessage?.Invoke(Instance, new GameMessage(AppId, sender, msg));
-                lastMsg = msg.ToString();
-            }
+            OnMessage?.Invoke(Instance, new GameMessage(AppId, sender, msg));
         }
 
-        if (lastMsg != msg.ToString())
-        {
-            Console.WriteLine(sender + ": " + msg);
-
-            string fileName = modCommon.GetPath() + "/[SKYNET] steam_api.log";
-            var lines = new List<string>();
-            if (File.Exists(fileName))
-            {
-                lines = File.ReadAllLines(fileName).ToList();
-            }
-            lines.Add(sender + ": " + msg);
-
-            File.WriteAllLines(fileName, lines);
-            lastMsg = msg.ToString();
-        }
+        Console.WriteLine(sender + ": " + msg);
+        Log.AppEnd(sender + ": " + msg);
     }
 
 #else
     public static void Write(string sender, object msg)
     {
-        Console.WriteLine(sender + ": " + msg);
-        Log.AppEnd(sender + ": " + msg);
-
         // TODO
     }
 
@@ -291,15 +271,17 @@ public class SteamEmulator
 
         Language = "English";
         PersonaName = "Hackerprod";
-        SteamId = new SteamID(76561198429375037);
+        //SteamId = new SteamID(76561198429375037); My online SteamID
+        SteamId = new SteamID(76561197960266730);
+        
         SteamId_GS = 1;
         AppId = 570;
 
         HSteamUser = 1;
         HSteamPipe = 1;
 
-        HSteamUser_GS = 1;
-        HSteamPipe_GS = 1;
+        HSteamUser_GS = 2;
+        HSteamPipe_GS = 2;
 
 
         SteamApiPath = Path.Combine(modCommon.GetPath(), "steam_api64.dll");

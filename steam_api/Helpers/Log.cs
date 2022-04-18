@@ -10,9 +10,11 @@ namespace SKYNET.Helpers
 {
     public class Log
     {
-        internal static List<string> buffered = new List<string>();
-        static object file_lock = new object();
-        static string fileName;
+        private static List<string> buffered = new List<string>();
+        private static object file_lock = new object();
+        private static string lastMsg = "";
+        private static string fileName;
+        
         static Log()
         {
             fileName = modCommon.GetPath() + "/[SKYNET] steam_api.log";
@@ -22,16 +24,20 @@ namespace SKYNET.Helpers
         {
             try
             {
-                var taken = false;
-                Monitor.TryEnter(file_lock, ref taken);
-
-                if (taken)
+                if (formatted != lastMsg)
                 {
-                    buffered.Add(formatted);
-                    File.AppendAllLines(fileName, buffered);
-                    buffered.Clear();
+                    var taken = false;
+                    Monitor.TryEnter(file_lock, ref taken);
 
-                    Monitor.Exit(file_lock);
+                    if (taken)
+                    {
+                        buffered.Add(formatted);
+                        File.AppendAllLines(fileName, buffered);
+                        buffered.Clear();
+
+                        Monitor.Exit(file_lock);
+                    }
+                    lastMsg = formatted;
                 }
             }
             catch 

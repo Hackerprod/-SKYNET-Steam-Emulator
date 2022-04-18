@@ -65,85 +65,13 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    public struct SetPersonaNameResponse_t : ICallbackData
-    {
-        [MarshalAs(UnmanagedType.I1)]
-        internal bool Success;
-
-        [MarshalAs(UnmanagedType.I1)]
-        internal bool LocalSuccess;
-
-        internal Result Result;
-
-        public static int _datasize = Marshal.SizeOf(typeof(SetPersonaNameResponse_t));
-
-        public int DataSize => _datasize;
-
-        public CallbackType CallbackType => CallbackType.k_iSetPersonaNameResponse;
-        public int k_iCallback { get { return (int)0; } }
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct UserStatsReceived_t : IBaseCallback
-    {
-        public int k_iCallback { get { return (int)UserStatsCallbacks.k_iSteamUserStatsCallbacks + 1; } }
-        public ulong m_nGameID;         // Game these stats are for
-        public EResult m_eResult;       // Success / error fetching the stats
-        public SteamID m_steamIDUser;	// The user for whom the stats are retrieved for
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct UserStatsStored_t : IBaseCallback
-    {
-        public int k_iCallback { get { return (int)UserStatsCallbacks.k_iSteamUserStatsCallbacks + 2; } }
-        public ulong m_nGameID;       // Game these stats are for
-        public EResult m_eResult;      // success / error
-    };
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct LeaderboardFindResult_t : IBaseCallback
-    {
-        public int k_iCallback { get { return (int)UserStatsCallbacks.k_iSteamUserStatsCallbacks + 4; } }
-        public ulong m_hSteamLeaderboard; // handle to the leaderboard serarched for, 0 if no leaderboard found
-        public int m_bLeaderboardFound;              // 0 if no leaderboard found
-    };
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct NumberOfCurrentPlayers_t : IBaseCallback
-    {
-        public int k_iCallback { get { return (int)UserStatsCallbacks.k_iSteamUserStatsCallbacks + 7; } }
-        public int m_bSuccess;           // 1 if the call was successful
-        public uint m_cPlayers;          // Number of players currently playing    };
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct GlobalStatsReceived_t : IBaseCallback
-    {
-        public int k_iCallback { get { return (int)UserStatsCallbacks.k_iSteamUserStatsCallbacks + 12; } }
-        public ulong m_nGameID;               // Game global stats were requested for
-        public EResult m_eResult;             // The result of the request    
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct SteamUGCQueryCompleted_t : IBaseCallback
-    {
-        public int k_iCallback { get { return (int)UserStatsCallbacks.k_iSteamUGCCallbacks + 1; } }
-        public UGCQueryHandle_t m_handle;
-        public EResult m_eResult;
-        public uint m_unNumResultsReturned;
-        public uint m_unTotalMatchingResults;
-        public bool m_bCachedData; // indicates whether this data was retrieved from the local on-disk cache
-        public string m_rgchNextCursor; // If a paging cursor was used, then this will be the next cursor to get the next result set.    }
-    }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
     public struct SteamUGCDetails_t
     {
         internal PublishedFileId_t m_nPublishedFileId;
 
         internal Result m_eResult;
 
-        internal WorkshopFileType m_eFileType;
+        internal EWorkshopFileType m_eFileType;
 
         internal uint m_nCreatorAppID;
 
@@ -163,7 +91,7 @@ namespace SKYNET.Callback
 
         internal uint TimeAddedToUserList;
 
-        internal RemoteStoragePublishedFileVisibility Visibility;
+        internal ERemoteStoragePublishedFileVisibility Visibility;
 
         [MarshalAs(UnmanagedType.I1)]
         internal bool Banned;
@@ -224,22 +152,6 @@ namespace SKYNET.Callback
             return Encoding.UTF8.GetString(URL, 0, Array.IndexOf(URL, (byte)0));
         }
     }
-
-    [StructLayout(LayoutKind.Sequential)]
-    struct RemoteStorageSubscribePublishedFileResult_t : IBaseCallback
-    {
-        public int k_iCallback { get { return (int)UserStatsCallbacks.k_iSteamRemoteStorageCallbacks + 13; } }
-        public EResult m_eResult;              // The result of the operation.
-        public PublishedFileId_t m_nPublishedFileId;
-    };
-
-    [StructLayout(LayoutKind.Sequential)]
-    struct RemoteStorageUnsubscribePublishedFileResult_t : IBaseCallback
-    {
-        public int k_iCallback { get { return (int)UserStatsCallbacks.k_iSteamRemoteStorageCallbacks + 15; } }
-        public EResult m_eResult;              // The result of the operation.
-        public PublishedFileId_t m_nPublishedFileId;
-    };
 
     [StructLayout(LayoutKind.Sequential)]
     struct StopPlaytimeTrackingResult_t : IBaseCallback
