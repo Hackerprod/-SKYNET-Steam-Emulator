@@ -13,26 +13,32 @@ namespace SKYNET.Steamworks.Types
 
         public AccountID_t(uint value)
         {
-            m_AccountID = value;
+            this.m_AccountID = value;
         }
 
         public override string ToString()
         {
-            return m_AccountID.ToString();
+            return this.m_AccountID.ToString();
         }
 
         public override bool Equals(object other)
         {
-            if (other is AccountID_t)
-            {
-                return this == (AccountID_t)other;
-            }
-            return false;
+            return other is AccountID_t && this == (AccountID_t)other;
         }
 
         public override int GetHashCode()
         {
-            return m_AccountID.GetHashCode();
+            return this.m_AccountID.GetHashCode();
+        }
+
+        public bool Equals(AccountID_t other)
+        {
+            return this.m_AccountID == other.m_AccountID;
+        }
+
+        public int CompareTo(AccountID_t other)
+        {
+            return this.m_AccountID.CompareTo(other.m_AccountID);
         }
 
         public static bool operator ==(AccountID_t x, AccountID_t y)
@@ -53,16 +59,6 @@ namespace SKYNET.Steamworks.Types
         public static explicit operator uint(AccountID_t that)
         {
             return that.m_AccountID;
-        }
-
-        public bool Equals(AccountID_t other)
-        {
-            return m_AccountID == other.m_AccountID;
-        }
-
-        public int CompareTo(AccountID_t other)
-        {
-            return m_AccountID.CompareTo(other.m_AccountID);
         }
     }
 }

@@ -3,11 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using SKYNET;
-using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Steamworks.Implementation;
 using SKYNET.Types;
@@ -17,7 +12,7 @@ namespace SKYNET.Exported
     public unsafe class SteamInternal 
     {
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr SteamInternal_FindOrCreateUserInterface(IntPtr hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion)
+        public static IntPtr SteamInternal_FindOrCreateUserInterface(int hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion)
         {
             Write($"SteamInternal_FindOrCreateUserInterface {pszVersion}");
             return InterfaceManager.FindOrCreateInterface(pszVersion);
@@ -27,7 +22,7 @@ namespace SKYNET.Exported
         public static IntPtr SteamInternal_FindOrCreateGameServerInterface(int hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion)
         {
             Write($"SteamInternal_FindOrCreateGameServerInterface {pszVersion}");
-            return InterfaceManager.FindOrCreateInterface(pszVersion);
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, 1, pszVersion, true);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

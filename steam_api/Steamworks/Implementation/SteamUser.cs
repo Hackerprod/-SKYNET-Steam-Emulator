@@ -76,7 +76,7 @@ namespace SKYNET.Steamworks.Implementation
         public int GetAvailableVoice(uint pcbCompressed, uint pcbUncompressed_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
         {
             //Write("GetAvailableVoice");
-            return (int)EVoiceResult.k_EVoiceResultNoData;
+            return (int)EVoiceResult.k_EVoiceResultOK;
         }
 
         public int GetVoice(bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, bool bWantUncompressed_Deprecated, IntPtr pUncompressedDestBuffer_Deprecated, uint cbUncompressedDestBufferSize_Deprecated, uint nUncompressBytesWritten_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)

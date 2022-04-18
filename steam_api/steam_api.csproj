@@ -78,6 +78,7 @@
     <Compile Include="Exported\SteamInternal.cs" />
     <Compile Include="Helpers\Extentions.cs" />
     <Compile Include="Helpers\IntPtrExtentions.cs" />
+    <Compile Include="Helpers\Log.cs" />
     <Compile Include="Helpers\modCommon.cs" />
     <Compile Include="Managers\MemoryManager.cs" />
     <Compile Include="Steamworks\Helpers\InterfaceAttribute.cs" />
@@ -130,10 +131,12 @@
     <Compile Include="Steamworks\Interfaces\SteamController\SteamController008.cs" />
     <Compile Include="Steamworks\Interfaces\SteamFriends\SteamFriends017.cs" />
     <Compile Include="Steamworks\Interfaces\SteamFriends\SteamFriends015.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamFriends\SteamFriends017_.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameCoordinator\SteamGameCoordinator001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameServer\SteamGameServer014.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameServer\SteamGameServer012.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameServerStats\SteamGameServerStats001.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamGameStats\SteamGameStats001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamHTMLSurface\SteamHTMLSurface004.cs" />
     <Compile Include="Steamworks\Interfaces\SteamHTMLSurface\SteamHTMLSurface005.cs" />
     <Compile Include="Steamworks\Interfaces\SteamHTTP\SteamHTTP003.cs" />
