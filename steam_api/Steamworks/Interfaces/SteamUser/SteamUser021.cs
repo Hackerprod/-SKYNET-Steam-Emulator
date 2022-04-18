@@ -23,7 +23,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUser.GetSteamID();
         }
 
-        public int InitiateGameConnection(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, SteamID steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)
+        public int InitiateGameConnection(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)
         {
             return SteamEmulator.SteamUser.InitiateGameConnection(pAuthBlob, cbMaxAuthBlob, steamIDGameServer, unIPServer, usPortServer, bSecure);
         }
@@ -78,12 +78,12 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUser.GetAuthSessionTicket(pTicket, cbMaxTicket, ref pcbTicket);
         }
 
-        public int BeginAuthSession(IntPtr _, IntPtr pAuthTicket, int cbAuthTicket, SteamID steamID)
+        public int BeginAuthSession(IntPtr _, IntPtr pAuthTicket, int cbAuthTicket, ulong steamID)
         {
             return SteamEmulator.SteamUser.BeginAuthSession(pAuthTicket, cbAuthTicket, steamID);
         }
 
-        public void EndAuthSession(IntPtr _, SteamID steamID)
+        public void EndAuthSession(IntPtr _, ulong steamID)
         {
             SteamEmulator.SteamUser.EndAuthSession(steamID);
         }
@@ -93,7 +93,7 @@ namespace SKYNET.Interface
             SteamEmulator.SteamUser.CancelAuthTicket(hAuthTicket);
         }
 
-        public int UserHasLicenseForApp(IntPtr _, SteamID steamID, uint appID)
+        public int UserHasLicenseForApp(IntPtr _, ulong steamID, uint appID)
         {
             return SteamEmulator.SteamUser.UserHasLicenseForApp(steamID, appID);
         }
@@ -103,7 +103,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUser.BIsBehindNAT();
         }
 
-        public void AdvertiseGame(IntPtr _, SteamID steamIDGameServer, uint unIPServer, uint usPortServer)
+        public void AdvertiseGame(IntPtr _, ulong steamIDGameServer, uint unIPServer, uint usPortServer)
         {
             SteamEmulator.SteamUser.AdvertiseGame(steamIDGameServer, unIPServer, usPortServer);
         }

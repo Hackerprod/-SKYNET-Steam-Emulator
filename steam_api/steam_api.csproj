@@ -53,9 +53,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Collections.Immutable, Version=1.2.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Collections.Immutable.1.7.1\lib\net461\System.Collections.Immutable.dll</HintPath>
+    </Reference>
     <Reference Include="System.Core" />
+    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
+    </Reference>
     <Reference Include="System.Net" />
-    <Reference Include="System.Numerics" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -125,14 +130,13 @@
     <Compile Include="Steamworks\Implementation\SteamUtils.cs" />
     <Compile Include="Steamworks\Implementation\SteamVideo.cs" />
     <Compile Include="Steamworks\Interfaces\IBaseInterface.cs" />
-    <Compile Include="Steamworks\Interfaces\ISteamAppDisableUpdate001.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamAppDisableUpdate001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamClient\SteamClient020.cs" />
     <Compile Include="Steamworks\Interfaces\SteamAppList\SteamAppList001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamApps\SteamApps008.cs" />
     <Compile Include="Steamworks\Interfaces\SteamController\SteamController008.cs" />
     <Compile Include="Steamworks\Interfaces\SteamFriends\SteamFriends017.cs" />
     <Compile Include="Steamworks\Interfaces\SteamFriends\SteamFriends015.cs" />
-    <Compile Include="Steamworks\Interfaces\SteamFriends\SteamFriends017_.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameCoordinator\SteamGameCoordinator001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameServer\SteamGameServer014.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameServer\SteamGameServer012.cs" />
@@ -183,7 +187,7 @@
     <Compile Include="Steamworks\Types\ScreenshotHandle.cs" />
     <Compile Include="Steamworks\Types\SNetListenSocket_t.cs" />
     <Compile Include="Steamworks\Types\SNetSocket_t.cs" />
-    <Compile Include="Steamworks\Types\SteamCallbacks.cs" />
+    <Compile Include="Callback\SteamCallbacks.cs" />
     <Compile Include="Steamworks\Types\SteamLeaderboardEntries_t.cs" />
     <Compile Include="Steamworks\Types\SteamLeaderboard_t.cs" />
     <Compile Include="Steamworks\Types\UTF8String.cs" />
@@ -205,6 +209,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ImportGroup Label=".NET DllExport">

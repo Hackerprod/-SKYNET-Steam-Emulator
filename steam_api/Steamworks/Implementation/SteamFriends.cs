@@ -423,10 +423,7 @@ namespace SKYNET.Steamworks.Implementation
                 return SteamEmulator.PersonaName;
             }
             var friend = Friends.Find(f => f.AccountId == (uint)steamIDPlayer);
-            if (friend == null)
-            {
-                return "";
-            }
+            if (friend == null) return "Unknown";
             return friend.PersonaName;
         }
 

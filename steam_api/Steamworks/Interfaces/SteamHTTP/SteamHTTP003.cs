@@ -77,7 +77,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamHTTP.GetHTTPStreamingResponseBodyData(hRequest, cOffset, pBodyDataBuffer, unBufferSize);
         }
 
-        public bool ReleaseHTTPRequest(IntPtr _, uint hRequest)
+        public bool ReleaseHTTPRequest(IntPtr _, HTTPRequestHandle hRequest)
         {
             return SteamEmulator.SteamHTTP.ReleaseHTTPRequest(hRequest);
         }

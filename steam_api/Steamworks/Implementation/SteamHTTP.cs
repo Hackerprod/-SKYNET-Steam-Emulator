@@ -7,18 +7,20 @@ using System.Net;
 using System.Net.Http;
 using Steamworks;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.IO;
 
 namespace SKYNET.Steamworks.Implementation
 {
     public class SteamHTTP : ISteamInterface
     {
         private List<HTTPRequest> HTTPRequests;
-        private HTTPRequestHandle Handle;
+        private uint Handle;
         public SteamHTTP()
         {
             InterfaceVersion = "SteamHTTP";
             HTTPRequests = new List<HTTPRequest>();
-            Handle = (HTTPRequestHandle)0;
+            Handle = 0;
         }
 
         public uint CreateCookieContainer(bool bAllowResponsesToModify)
@@ -31,24 +33,17 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"CreateHTTPRequest {(HTTPMethod)eHTTPRequestMethod} {pchAbsoluteURL}");
 
+            var CreatedHandle = (HTTPRequestHandle)Handle;
+            Handle++;
+
             HTTPRequest HttpRequest = new HTTPRequest();
-            HttpRequest.handle = Handle;
-            HttpRequest.context_value = 0;
-            Handle.m_HTTPRequestHandle++;;
+            HttpRequest.URL = pchAbsoluteURL;
+            HttpRequest.RequestMethod = (HTTPMethod)eHTTPRequestMethod;
+            HttpRequest.Handle = CreatedHandle;
+            HttpRequest.ContextValue = 0;
 
             HTTPRequests.Add(HttpRequest);
-
-            try
-            {
-                //WebRequest request = HttpWebRequest.Create(pchAbsoluteURL);
-                //var response = request.GetResponse();
-                return Handle;
-            }
-            catch (Exception)
-            {
-                return Handle;
-            }
-            
+            return CreatedHandle;
         }
 
         public bool DeferHTTPRequest(uint hRequest)
@@ -111,42 +106,66 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public bool ReleaseHTTPRequest(uint hRequest)
+        public bool ReleaseHTTPRequest(HTTPRequestHandle hRequest)
         {
-            Write($"ReleaseHTTPRequest");
-            return true;
+            Write($"ReleaseHTTPRequest, Header: {hRequest}");
+            for (int i = 0; i < HTTPRequests.Count; i++)
+            {
+                if (HTTPRequests[i].Handle == hRequest)
+                {
+                    HTTPRequests.RemoveAt(i);
+                    Write("---------------------------------------- removed");
+                    return true;
+                }
+            }
+            return false;
         }
 
         public bool SendHTTPRequest(HTTPRequestHandle hRequest, ref SteamAPICall_t pCallHandle)
         {
+            Write($"SendHTTPRequest, Handle: {hRequest}");
+
+            HTTPRequest request = HTTPRequests.Find(r => r.Handle == hRequest);
+            if (request == null)
+            {
+                return false;
+            }
+
+            HTTPRequestCompleted_t data = new HTTPRequestCompleted_t()
+            {
+                m_hRequest = request.Handle
+            };
+
             try
             {
-                Write($"SendHTTPRequest");
+                WebRequest webrequest = HttpWebRequest.Create(request.URL);
+                webrequest.Method = request.RequestMethod.ToString();
+                HttpWebResponse response = (HttpWebResponse)webrequest.GetResponse();
+                StreamReader reader = new StreamReader(response.GetResponseStream());
+                string content = reader.ReadToEnd();
+                request.Response = content;
 
-                HTTPRequest request = HTTPRequests.Find(r => r.handle == hRequest);
-                if (request == null)
-                {
-                    return false;
-                }
-
-                HTTPRequestCompleted_t data = new HTTPRequestCompleted_t();
-                data.m_hRequest = request.handle;
-                data.m_ulContextValue = request.context_value;
-                data.m_bRequestSuccessful = false;
-                data.m_eStatusCode = EHTTPStatusCode.k_EHTTPStatusCode404NotFound;
-                data.m_unBodySize = (uint)request.response.Length;
-
-                pCallHandle = CallbackManager.AddCallbackResult(data);
-                pCallHandle = new SteamAPICall_t( CallbackType.k_iHTTPRequestCompleted);
-                return true;
+                data.m_ulContextValue = request.ContextValue;
+                data.m_bRequestSuccessful = true;
+                data.m_eStatusCode = (EHTTPStatusCode)response.StatusCode;
+                data.m_unBodySize = (uint)content.Length;
             }
             catch (Exception ex)
             {
-                Write($"SendHTTPRequest {ex}");
+                data.m_ulContextValue = request.ContextValue;
+                data.m_bRequestSuccessful = false;
+                data.m_eStatusCode = EHTTPStatusCode.k_EHTTPStatusCode404NotFound;
+                data.m_unBodySize = 0;
             }
+
+            //pCallHandle = CallbackManager.AddCallbackResult(data);
+            pCallHandle = new SteamAPICall_t(CallbackType.k_iHTTPRequestCompleted);
             return true;
         }
 
+        // Sends the HTTP request, will return false on a bad handle, otherwise use SteamCallHandle to wait on
+        // asynchronous response via callback for completion, and listen for HTTPRequestHeadersReceived_t and 
+        // HTTPRequestDataReceived_t callbacks while streaming.
         public bool SendHTTPRequestAndStreamResponse(uint hRequest, ulong pCallHandle)
         {
             Write($"SendHTTPRequestAndStreamResponse");
@@ -185,8 +204,8 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool SetHTTPRequestHeaderValue(HTTPRequestHandle hRequest, string pchHeaderName, string pchHeaderValue)
         {
-            Write($"SetHTTPRequestHeaderValue");
-            HTTPRequest request = HTTPRequests.Find(r => r.handle == hRequest);
+            Write($"SetHTTPRequestHeaderValue, Handle {hRequest}");
+            HTTPRequest request = HTTPRequests.Find(r => r.Handle == hRequest);
             if (request == null)
             {
                 return false;
@@ -229,8 +248,10 @@ namespace SKYNET.Steamworks.Implementation
     }
     public class HTTPRequest
     {
-        public HTTPRequestHandle handle;
-        public ulong context_value;
-        internal string response;
+        public HTTPRequestHandle Handle;
+        public ulong ContextValue;
+        public string Response;
+        public HTTPMethod RequestMethod;
+        public string URL;
     }
 }

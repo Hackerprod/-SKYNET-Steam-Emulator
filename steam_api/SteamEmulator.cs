@@ -212,7 +212,6 @@ public class SteamEmulator
         HSteamPipe_GS = 2;
 
         Initialized = true;
-
     }
 
     public static int CreateSteamUser()
@@ -287,6 +286,8 @@ public class SteamEmulator
         SteamApiPath = Path.Combine(modCommon.GetPath(), "steam_api64.dll");
         EmulatorPath = @"D:\Instaladores\Programación\Projects\[SKYNET] Steam Emulator\[SKYNET] Steam Emulator\bin\Debug";
         SendLog = true;
+
+
     }
 }
 

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace SKYNET.Interface
 {
     [Interface("SteamAppDisableUpdate001")]
-    public class ISteamAppDisableUpdate001 : ISteamInterface
+    public class SteamAppDisableUpdate001 : ISteamInterface
     {
         public void SetAppUpdateDisabledSecondsRemaining(int seconds)
         {
