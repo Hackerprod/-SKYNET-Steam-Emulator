@@ -77,10 +77,11 @@
     <Compile Include="Callback\CallbackEnums.cs" />
     <Compile Include="Callback\CallbackTypes.cs" />
     <Compile Include="Callback\CCallbackBase.cs" />
+    <Compile Include="Callback\InteropHelp.cs" />
     <Compile Include="Callback\SteamAPICall_t.cs" />
-    <Compile Include="Exported\SteamAPI.cs" />
-    <Compile Include="Exported\SteamAPI_ISteamGameServer.cs" />
-    <Compile Include="Exported\SteamInternal.cs" />
+    <Compile Include="Steamworks\Exported\SteamAPI.cs" />
+    <Compile Include="Steamworks\Exported\SteamAPI_ISteamGameServer.cs" />
+    <Compile Include="Steamworks\Exported\SteamInternal.cs" />
     <Compile Include="Helpers\Extentions.cs" />
     <Compile Include="Helpers\IntPtrExtentions.cs" />
     <Compile Include="Helpers\Log.cs" />
@@ -177,6 +178,7 @@
     <Compile Include="Steamworks\Interfaces\SteamVideo\SteamVideo002.cs" />
     <Compile Include="Steamworks\Types\AccountID_t.cs" />
     <Compile Include="Steamworks\Types\AppId_t.cs" />
+    <Compile Include="Steamworks\Types\CallbackStructs.cs" />
     <Compile Include="Steamworks\Types\CGameID.cs" />
     <Compile Include="Steamworks\Types\Constants.cs" />
     <Compile Include="Steamworks\Types\CSteamAPIContext.cs" />
@@ -190,7 +192,6 @@
     <Compile Include="Steamworks\Types\ScreenshotHandle.cs" />
     <Compile Include="Steamworks\Types\SNetListenSocket_t.cs" />
     <Compile Include="Steamworks\Types\SNetSocket_t.cs" />
-    <Compile Include="Steamworks\Types\SteamCallbacks.cs" />
     <Compile Include="Steamworks\Types\SteamLeaderboardEntries_t.cs" />
     <Compile Include="Steamworks\Types\SteamLeaderboard_t.cs" />
     <Compile Include="Steamworks\Types\UTF8String.cs" />

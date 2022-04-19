@@ -1,19 +1,15 @@
-﻿
-using System;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
+﻿using System;
 
-
-namespace Steamworks
+namespace SKYNET.Callback
 {
-    [AttributeUsage(AttributeTargets.Class)]
-    public class CallbackIdentityAttribute : Attribute 
-	{
-		private int _Identity_k__BackingField; 
-	
-		public int Identity { get; set; }
+    [AttributeUsage(AttributeTargets.Struct, AllowMultiple = false)]
+    internal class CallbackIdentityAttribute : Attribute
+    {
+        public int Identity { get; set; }
 
-        public CallbackIdentityAttribute(int callbackNum) { _Identity_k__BackingField = callbackNum; }
-        public CallbackIdentityAttribute() { }
+        public CallbackIdentityAttribute(int callbackNum)
+        {
+            Identity = callbackNum;
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using SKYNET;
+using SKYNET.Callback;
 using SKYNET.Helpers;
 using SKYNET.Interface;
 using System;
@@ -36,6 +37,11 @@ namespace SKYNET.Managers
                     var interfaceAttribute = type.GetCustomAttributes<InterfaceAttribute>().ToList()[0];
                     interfaceTypes.TryAdd(interfaceAttribute.Name, type);
                 }
+                //if (type.IsDefined(typeof(CallbackIdentityAttribute)))
+                //{
+                //    var CallbackIdentity = type.GetCustomAttributes<CallbackIdentityAttribute>().ToList()[0];
+                //    CallbackManager.CallbackTypes.TryAdd(CallbackIdentity.Identity, type);
+                //}
             }
 
             //interfaceTypes.TryAdd("STEAMAPPLIST_INTERFACE_VERSION001", typeof(SteamAppList001));

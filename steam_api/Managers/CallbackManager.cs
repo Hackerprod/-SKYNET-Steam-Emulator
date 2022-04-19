@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -15,13 +16,14 @@ namespace SKYNET.Managers
         public const byte k_ECallbackFlagsRegistered = 1;
         public const byte k_ECallbackFlagsGameServer = 2;
         public static List<SteamAPICall_t> SteamAPICallsCompleted;
+        public static ConcurrentDictionary<int, Type> CallbackTypes;
 
         private static Dictionary<int, CCallbackBase> Client_Callbacks;
         private static Dictionary<int, CCallbackBase> Server_Callbacks;
         private static Dictionary<ulong, CCallbackBase> CallbackResult;
         private static List<SteamAPICall_t> SteamAPICalls;
 
-        static object call_id_lock = new object();
+        private static object call_id_lock = new object();
 
         static CallbackManager()
         {
@@ -44,6 +46,10 @@ namespace SKYNET.Managers
             if (CallbackResult == null)
             {
                 CallbackResult = new Dictionary<ulong, CCallbackBase>();
+            }
+            if (CallbackTypes == null)
+            {
+                CallbackTypes = new ConcurrentDictionary<int, Type>();
             }
         }
 
@@ -111,8 +117,9 @@ namespace SKYNET.Managers
             //}
         }
 
-        public static SteamAPICall_t AddCallbackResult(object callbackData)
+        public static SteamAPICall_t AddCallbackResult(object callbackData, int iCallback)
         {
+
             //TODO
             //int iCallback = callbackData.k_iCallback;
 

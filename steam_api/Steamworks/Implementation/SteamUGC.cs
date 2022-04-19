@@ -86,16 +86,16 @@ namespace SKYNET.Steamworks.Implementation
                     }
                 }
 
-                SteamUGCQueryCompleted_t data = new SteamUGCQueryCompleted_t()
-                {
-                    m_handle = handle,
-                    m_eResult = SKYNET.Types.EResult.k_EResultOK,
-                    m_unNumResultsReturned = (uint)request.results.Count(),
-                    m_unTotalMatchingResults = (uint)request.results.Count(),
-                    m_bCachedData = false,
-                };
-                //return new SteamAPICall_t(CallbackType.k_iSteamUGCQueryCompleted);
-                return CallbackManager.AddCallbackResult(data);
+                //SteamUGCQueryCompleted_t data = new SteamUGCQueryCompleted_t()
+                //{
+                //    m_handle = handle,
+                //    m_eResult = SKYNET.Types.EResult.k_EResultOK,
+                //    m_unNumResultsReturned = (uint)request.results.Count(),
+                //    m_unTotalMatchingResults = (uint)request.results.Count(),
+                //    m_bCachedData = false,
+                //};
+                ////return new SteamAPICall_t(CallbackType.k_iSteamUGCQueryCompleted);
+                //return CallbackManager.AddCallbackResult(data, SteamUGCQueryCompleted_t.k_iCallback);
             }
             catch (Exception ex)
             {
@@ -487,12 +487,12 @@ namespace SKYNET.Steamworks.Implementation
             {
                 Write("SubscribeItem");
                 subscribed.Add(nPublishedFileID);
-                RemoteStorageSubscribePublishedFileResult_t data = new RemoteStorageSubscribePublishedFileResult_t()
-                {
-                    m_eResult = SKYNET.Types.EResult.k_EResultOK,
-                    m_nPublishedFileId = nPublishedFileID
-                };
-                return CallbackManager.AddCallbackResult(data);
+                //RemoteStorageSubscribePublishedFileResult_t data = new RemoteStorageSubscribePublishedFileResult_t()
+                //{
+                //    m_eResult = SKYNET.Types.EResult.k_EResultOK,
+                //    m_nPublishedFileId = nPublishedFileID
+                //};
+                //return CallbackManager.AddCallbackResult(data, RemoteStorageSubscribePublishedFileResult_t.k_iCallback);
             }
             catch (Exception ex)
             {
@@ -508,16 +508,16 @@ namespace SKYNET.Steamworks.Implementation
             {
                 Write("SubscribeItem");
                 subscribed.Add(nPublishedFileID);
-                RemoteStorageUnsubscribePublishedFileResult_t data = new RemoteStorageUnsubscribePublishedFileResult_t()
-                {
-                    m_eResult = SKYNET.Types.EResult.k_EResultOK,
-                    m_nPublishedFileId = nPublishedFileID
-                };
-                if (subscribed.Contains(nPublishedFileID))
-                {
-                    subscribed.Remove(nPublishedFileID);
-                }
-                return CallbackManager.AddCallbackResult(data);
+                //RemoteStorageUnsubscribePublishedFileResult_t data = new RemoteStorageUnsubscribePublishedFileResult_t()
+                //{
+                //    m_eResult = SKYNET.Types.EResult.k_EResultOK,
+                //    m_nPublishedFileId = nPublishedFileID
+                //};
+                //if (subscribed.Contains(nPublishedFileID))
+                //{
+                //    subscribed.Remove(nPublishedFileID);
+                //}
+                //return CallbackManager.AddCallbackResult(data, RemoteStorageUnsubscribePublishedFileResult_t.k_iCallback);
             }
             catch (Exception ex)
             {
@@ -583,11 +583,11 @@ namespace SKYNET.Steamworks.Implementation
             try
             {
                 Write("StartPlaytimeTracking");
-                StopPlaytimeTrackingResult_t data = new StopPlaytimeTrackingResult_t()
-                {
-                     m_eResult = SKYNET.Types.EResult.k_EResultOK
-                };
-                return CallbackManager.AddCallbackResult(data);
+                //StopPlaytimeTrackingResult_t data = new StopPlaytimeTrackingResult_t()
+                //{
+                //     m_eResult = SKYNET.Types.EResult.k_EResultOK
+                //};
+                //return CallbackManager.AddCallbackResult(data, StopPlaytimeTrackingResult_t.k_iCallback);
             }
             catch (Exception ex)
             {
@@ -601,11 +601,11 @@ namespace SKYNET.Steamworks.Implementation
             try
             {
                 Write("StopPlaytimeTracking");
-                StopPlaytimeTrackingResult_t data = new StopPlaytimeTrackingResult_t()
-                {
-                    m_eResult = SKYNET.Types.EResult.k_EResultOK
-                };
-                return CallbackManager.AddCallbackResult(data);
+                //StopPlaytimeTrackingResult_t data = new StopPlaytimeTrackingResult_t()
+                //{
+                //    m_eResult = SKYNET.Types.EResult.k_EResultOK
+                //};
+                //return CallbackManager.AddCallbackResult(data, StopPlaytimeTrackingResult_t.k_iCallback);
             }
             catch (Exception ex)
             {
@@ -619,11 +619,11 @@ namespace SKYNET.Steamworks.Implementation
             try
             {
                 Write("StopPlaytimeTracking");
-                StopPlaytimeTrackingResult_t data = new StopPlaytimeTrackingResult_t()
-                {
-                    m_eResult = SKYNET.Types.EResult.k_EResultOK
-                };
-                return CallbackManager.AddCallbackResult(data);
+                //StopPlaytimeTrackingResult_t data = new StopPlaytimeTrackingResult_t()
+                //{
+                //    m_eResult = SKYNET.Types.EResult.k_EResultOK
+                //};
+                //return CallbackManager.AddCallbackResult(data, StopPlaytimeTrackingResult_t.k_iCallback);
             }
             catch (Exception ex)
             {
@@ -704,21 +704,21 @@ namespace SKYNET.Steamworks.Implementation
         {
             try
             {
-                SteamUGCDetails_t pDetails = Marshal.PtrToStructure<SteamUGCDetails_t>(ptrDetails);
-                if (true)
-                {
-                    pDetails.m_eResult = SKYNET.Result.OK;
-                    pDetails.m_nPublishedFileId = id;
-                    pDetails.m_eFileType = WorkshopFileType.Community;
-                    pDetails.m_nCreatorAppID = SteamEmulator.AppId;
-                    pDetails.m_nConsumerAppID = SteamEmulator.AppId;
-                    //TODO
-                }
-                else
-                {
-                    pDetails.m_nPublishedFileId = id;
-                    pDetails.m_eResult = SKYNET.Result.Fail;
-                }
+                //SteamUGCDetails_t pDetails = Marshal.PtrToStructure<SteamUGCDetails_t>(ptrDetails);
+                //if (true)
+                //{
+                //    pDetails.m_eResult = SKYNET.Result.OK;
+                //    pDetails.m_nPublishedFileId = id;
+                //    //pDetails.m_eFileType = WorkshopFileType.Community;
+                //    pDetails.m_nCreatorAppID = SteamEmulator.AppId;
+                //    pDetails.m_nConsumerAppID = SteamEmulator.AppId;
+                //    //TODO
+                //}
+                //else
+                //{
+                //    pDetails.m_nPublishedFileId = id;
+                //    pDetails.m_eResult = SKYNET.Result.Fail;
+                //}
 
             }
             catch (Exception ex)

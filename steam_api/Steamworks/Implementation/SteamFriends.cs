@@ -580,23 +580,23 @@ namespace SKYNET.Steamworks.Implementation
             Write($"SetPersonaName {pchPersonaName}");
             // SetPersonaNameResponse_t
 
-            SetPersonaNameResponse_t data = new SetPersonaNameResponse_t();
-            data.Success = true;
-            data.LocalSuccess = true;
-            data.Result = SKYNET.Result.OK;
+            //SetPersonaNameResponse_t data = new SetPersonaNameResponse_t();
+            //data.Success = true;
+            //data.LocalSuccess = true;
+            //data.Result = SKYNET.Result.OK;
 
-            SteamEmulator.PersonaName = pchPersonaName;
+            //SteamEmulator.PersonaName = pchPersonaName;
 
-            var b = new Callback.Buffer();
-            b.SetAlignment(4);
+            //var b = new Callback.Buffer();
+            //b.SetAlignment(4);
 
-            b.WriteString(pchPersonaName);
-            b.WriteBool(data.Success);
-            b.WriteInt((int)data.Result);
+            //b.WriteString(pchPersonaName);
+            //b.WriteBool(data.Success);
+            //b.WriteInt((int)data.Result);
 
-            PostCallback(data, CallbackType.k_iSetPersonaNameResponse, b);
+            //PostCallback(data, CallbackType.k_iSetPersonaNameResponse, b);
 
-            return 0;
+            //return 0;
             return new SteamAPICall_t(CallbackType.k_iSetPersonaNameResponse);
         }
 

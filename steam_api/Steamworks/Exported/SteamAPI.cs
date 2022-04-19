@@ -94,17 +94,20 @@ namespace SKYNET.Exported
 
             try
             {
-                CCallbackBase Base = pCallback.ToType<CCallbackBase>();
+                CCallbackBase Callback = pCallback.ToType<CCallbackBase>();
+
+                Write("iCallback " + iCallback);
 
                 var callMessage = $"SteamAPI_RegisterCallback: ";
-                var Type = iCallback.GetCallbackType();
+                var CallInterface = iCallback.GetCallbackType();
+                var CallType = (CallbackType)iCallback;
                 var callback_id = iCallback % 100;
-                var isGameServer = Base.IsGameServer() ? "[ GAMESERVER ]" : "[   CLIENT   ]";
+                var isGameServer = Callback.IsGameServer() ? "[ GAMESERVER ]" : "[   CLIENT   ]";
                 var space = callback_id < 10 ? " " : "";
 
-                callMessage += $"{isGameServer}  {callback_id} {space} {Type} ";
+                callMessage += $"{isGameServer}  {callback_id} {space} {CallInterface} {CallType}";
 
-                CallbackManager.RegisterCallback(iCallback, Base, Base.IsGameServer());
+                CallbackManager.RegisterCallback(iCallback, Callback, Callback.IsGameServer());
 
                 Write(callMessage);
             }

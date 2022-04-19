@@ -19,7 +19,7 @@ namespace SKYNET.Interface
 
         public SteamID GetSteamID(IntPtr _)
         {
-            return SteamEmulator.SteamUser.GetSteamID();
+            return (SteamID)SteamEmulator.SteamUser.GetSteamID();
         }
 
         public int InitiateGameConnection(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)

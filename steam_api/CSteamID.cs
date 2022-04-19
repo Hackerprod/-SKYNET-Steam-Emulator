@@ -1,316 +1,276 @@
 ﻿using SKYNET.Steamworks;
 using SKYNET.Steamworks.Types;
+using SKYNET.Types;
 using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Steamworks
 {
-    public struct CSteamID : System.IEquatable<CSteamID>, System.IComparable<CSteamID>
+    [StructLayout(LayoutKind.Sequential)]
+    public class CSteamID
     {
-        public static readonly CSteamID Nil = new CSteamID();
-        public static readonly CSteamID OutofDateGS = new CSteamID(new AccountID_t(0), 0, EUniverse.k_EUniverseInvalid, EAccountType.k_EAccountTypeInvalid);
-        public static readonly CSteamID LanModeGS = new CSteamID(new AccountID_t(0), 0, EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeInvalid);
-        public static readonly CSteamID NotInitYetGS = new CSteamID(new AccountID_t(1), 0, EUniverse.k_EUniverseInvalid, EAccountType.k_EAccountTypeInvalid);
-        public static readonly CSteamID NonSteamGS = new CSteamID(new AccountID_t(2), 0, EUniverse.k_EUniverseInvalid, EAccountType.k_EAccountTypeInvalid);
-        public ulong m_SteamID;
+        private BitVector64 steamid;
 
-        public CSteamID(AccountID_t unAccountID, EUniverse eUniverse, EAccountType eAccountType)
+        public CSteamID()
+            : this(0)
         {
-            m_SteamID = 0;
+        }
+
+        public CSteamID(UInt32 unAccountID, EUniverse eUniverse, EAccountType eAccountType)
+            : this()
+        {
             Set(unAccountID, eUniverse, eAccountType);
         }
 
-        public CSteamID(AccountID_t unAccountID, uint unAccountInstance, EUniverse eUniverse, EAccountType eAccountType)
+        public CSteamID(UInt32 unAccountID, UInt32 unInstance, EUniverse eUniverse, EAccountType eAccountType)
+            : this()
         {
-            m_SteamID = 0;
-#if _SERVER && Assert
-		Assert( ! ( ( EAccountType.k_EAccountTypeIndividual == eAccountType ) && ( unAccountInstance > k_unSteamUserWebInstance ) ) );	// enforce that for individual accounts, instance is always 1
-#endif // _SERVER
-            InstancedSet(unAccountID, unAccountInstance, eUniverse, eAccountType);
+            InstancedSet(unAccountID, unInstance, eUniverse, eAccountType);
         }
 
-        public CSteamID(ulong ulSteamID)
+        public CSteamID(UInt64 id)
         {
-            m_SteamID = ulSteamID;
+            this.steamid = new BitVector64(id);
         }
 
-        public void Set(AccountID_t unAccountID, EUniverse eUniverse, EAccountType eAccountType)
+        public CSteamID(SteamID_t sid)
+            : this(sid.low32Bits, sid.high32Bits & 0xFFFFF, (EUniverse)(sid.high32Bits >> 24), (EAccountType)((sid.high32Bits >> 20) & 0xF))
         {
-            SetAccountID(unAccountID);
-            SetEUniverse(eUniverse);
-            SetEAccountType(eAccountType);
+        }
 
-            if (eAccountType == EAccountType.k_EAccountTypeClan || eAccountType == EAccountType.k_EAccountTypeGameServer)
+        public static implicit operator UInt64(CSteamID sid)
+        {
+            return sid.steamid.Data;
+        }
+
+        public static implicit operator CSteamID(UInt64 id)
+        {
+            return new CSteamID(id);
+        }
+
+        public static implicit operator CSteamID(SteamID_t sid)
+        {
+            return new CSteamID(sid);
+        }
+
+        public void Set(UInt32 unAccountID, EUniverse eUniverse, EAccountType eAccountType)
+        {
+            this.AccountID = unAccountID;
+            this.AccountUniverse = eUniverse;
+            this.AccountType = eAccountType;
+
+            if (eAccountType == EAccountType.k_EAccountTypeClan)
             {
-                SetAccountInstance(0);
+                this.AccountInstance = 0;
             }
             else
             {
-                // by default we pick the desktop instance
-                SetAccountInstance(Constants.k_unSteamUserDesktopInstance);
+                this.AccountInstance = 1;
             }
         }
 
-        public void InstancedSet(AccountID_t unAccountID, uint unInstance, EUniverse eUniverse, EAccountType eAccountType)
+        public void InstancedSet(UInt32 unAccountID, UInt32 unInstance, EUniverse eUniverse, EAccountType eAccountType)
         {
-            SetAccountID(unAccountID);
-            SetEUniverse(eUniverse);
-            SetEAccountType(eAccountType);
-            SetAccountInstance(unInstance);
+            this.AccountID = unAccountID;
+            this.AccountUniverse = eUniverse;
+            this.AccountType = eAccountType;
+            this.AccountInstance = unInstance;
         }
 
-        public void Clear()
+        public void SetFromUint64(UInt64 ulSteamID)
         {
-            m_SteamID = 0;
+            this.steamid.Data = ulSteamID;
         }
 
-        public void CreateBlankAnonLogon(EUniverse eUniverse)
+        public UInt64 ConvertToUint64()
         {
-            SetAccountID(new AccountID_t(0));
-            SetEUniverse(eUniverse);
-            SetEAccountType(EAccountType.k_EAccountTypeAnonGameServer);
-            SetAccountInstance(0);
+            return this.steamid.Data;
         }
 
-        public void CreateBlankAnonUserLogon(EUniverse eUniverse)
+        public UInt64 GetValue()
         {
-            SetAccountID(new AccountID_t(0));
-            SetEUniverse(eUniverse);
-            SetEAccountType(EAccountType.k_EAccountTypeAnonUser);
-            SetAccountInstance(0);
+            return this.steamid.Data;
         }
 
-        //-----------------------------------------------------------------------------
-        // Purpose: Is this an anonymous game server login that will be filled in?
-        //-----------------------------------------------------------------------------
         public bool BBlankAnonAccount()
         {
-            return GetAccountID() == new AccountID_t(0) && BAnonAccount() && GetUnAccountInstance() == 0;
+            return this.AccountID == 0 && BAnonAccount() && this.AccountInstance == 0;
         }
-
-        //-----------------------------------------------------------------------------
-        // Purpose: Is this a game server account id?  (Either persistent or anonymous)
-        //-----------------------------------------------------------------------------
         public bool BGameServerAccount()
         {
-            return GetEAccountType() == EAccountType.k_EAccountTypeGameServer || GetEAccountType() == EAccountType.k_EAccountTypeAnonGameServer;
+            return this.AccountType == EAccountType.k_EAccountTypeGameServer || this.AccountType == EAccountType.k_EAccountTypeAnonGameServer;
         }
-
-        //-----------------------------------------------------------------------------
-        // Purpose: Is this a persistent (not anonymous) game server account id?
-        //-----------------------------------------------------------------------------
-        public bool BPersistentGameServerAccount()
-        {
-            return GetEAccountType() == EAccountType.k_EAccountTypeGameServer;
-        }
-
-        //-----------------------------------------------------------------------------
-        // Purpose: Is this an anonymous game server account id?
-        //-----------------------------------------------------------------------------
-        public bool BAnonGameServerAccount()
-        {
-            return GetEAccountType() == EAccountType.k_EAccountTypeAnonGameServer;
-        }
-
-        //-----------------------------------------------------------------------------
-        // Purpose: Is this a content server account id?
-        //-----------------------------------------------------------------------------
         public bool BContentServerAccount()
         {
-            return GetEAccountType() == EAccountType.k_EAccountTypeContentServer;
+            return this.AccountType == EAccountType.k_EAccountTypeContentServer;
         }
-
-
-        //-----------------------------------------------------------------------------
-        // Purpose: Is this a clan account id?
-        //-----------------------------------------------------------------------------
         public bool BClanAccount()
         {
-            return GetEAccountType() == EAccountType.k_EAccountTypeClan;
+            return this.AccountType == EAccountType.k_EAccountTypeClan;
         }
-
-
-        //-----------------------------------------------------------------------------
-        // Purpose: Is this a chat account id?
-        //-----------------------------------------------------------------------------
         public bool BChatAccount()
         {
-            return GetEAccountType() == EAccountType.k_EAccountTypeChat;
+            return this.AccountType == EAccountType.k_EAccountTypeChat;
         }
-
-        //-----------------------------------------------------------------------------
-        // Purpose: Is this a chat account id?
-        //-----------------------------------------------------------------------------
         public bool IsLobby()
         {
-            return (GetEAccountType() == EAccountType.k_EAccountTypeChat)
-                && (GetUnAccountInstance() & (int)EChatSteamIDInstanceFlags.k_EChatInstanceFlagLobby) != 0;
+            return (this.AccountType == EAccountType.k_EAccountTypeChat) && ((this.AccountInstance & (0x000FFFFF + 1) >> 2) != 0);
         }
-
-
-        //-----------------------------------------------------------------------------
-        // Purpose: Is this an individual user account id?
-        //-----------------------------------------------------------------------------
-        public bool BIndividualAccount()
-        {
-            return GetEAccountType() == EAccountType.k_EAccountTypeIndividual || GetEAccountType() == EAccountType.k_EAccountTypeConsoleUser;
-        }
-
-
-        //-----------------------------------------------------------------------------
-        // Purpose: Is this an anonymous account?
-        //-----------------------------------------------------------------------------
         public bool BAnonAccount()
         {
-            return GetEAccountType() == EAccountType.k_EAccountTypeAnonUser || GetEAccountType() == EAccountType.k_EAccountTypeAnonGameServer;
+            return this.AccountType == EAccountType.k_EAccountTypeAnonUser || this.AccountType == EAccountType.k_EAccountTypeAnonGameServer;
         }
-
-        //-----------------------------------------------------------------------------
-        // Purpose: Is this an anonymous user account? ( used to create an account or reset a password )
-        //-----------------------------------------------------------------------------
         public bool BAnonUserAccount()
         {
-            return GetEAccountType() == EAccountType.k_EAccountTypeAnonUser;
-        }
-
-        //-----------------------------------------------------------------------------
-        // Purpose: Is this a faked up Steam ID for a PSN friend account?
-        //-----------------------------------------------------------------------------
-        public bool BConsoleUserAccount()
-        {
-            return GetEAccountType() == EAccountType.k_EAccountTypeConsoleUser;
-        }
-
-        public void SetAccountID(AccountID_t other)
-        {
-            m_SteamID = (m_SteamID & ~(0xFFFFFFFFul << (ushort)0)) | (((ulong)(other) & 0xFFFFFFFFul) << (ushort)0);
-        }
-
-        public void SetAccountInstance(uint other)
-        {
-            m_SteamID = (m_SteamID & ~(0xFFFFFul << (ushort)32)) | (((ulong)(other) & 0xFFFFFul) << (ushort)32);
-        }
-
-        // This is a non standard/custom function not found in C++ Steamworks
-        public void SetEAccountType(EAccountType other)
-        {
-            m_SteamID = (m_SteamID & ~(0xFul << (ushort)52)) | (((ulong)(other) & 0xFul) << (ushort)52);
-        }
-
-        public void SetEUniverse(EUniverse other)
-        {
-            m_SteamID = (m_SteamID & ~(0xFFul << (ushort)56)) | (((ulong)(other) & 0xFFul) << (ushort)56);
-        }
-
-        public void ClearIndividualInstance()
-        {
-            if (BIndividualAccount())
-                SetAccountInstance(0);
-        }
-
-        public bool HasNoIndividualInstance()
-        {
-            return BIndividualAccount() && (GetUnAccountInstance() == 0);
-        }
-
-        public AccountID_t GetAccountID()
-        {
-            return new AccountID_t((uint)(m_SteamID & 0xFFFFFFFFul));
-        }
-
-        public uint GetUnAccountInstance()
-        {
-            return (uint)((m_SteamID >> 32) & 0xFFFFFul);
-        }
-
-        public EAccountType GetEAccountType()
-        {
-            return (EAccountType)((m_SteamID >> 52) & 0xFul);
-        }
-
-        public EUniverse GetEUniverse()
-        {
-            return (EUniverse)((m_SteamID >> 56) & 0xFFul);
+            return this.AccountType == EAccountType.k_EAccountTypeAnonUser;
         }
 
         public bool IsValid()
         {
-            if (GetEAccountType() <= EAccountType.k_EAccountTypeInvalid || GetEAccountType() >= EAccountType.k_EAccountTypeMax)
+            if (this.AccountType <= EAccountType.k_EAccountTypeInvalid || this.AccountType >= EAccountType.k_EAccountTypeMax)
                 return false;
 
-            if (GetEUniverse() <= EUniverse.k_EUniverseInvalid || GetEUniverse() >= EUniverse.k_EUniverseMax)
+            if (this.AccountUniverse <= EUniverse.k_EUniverseInvalid || this.AccountUniverse >= EUniverse.k_EUniverseMax)
                 return false;
 
-            if (GetEAccountType() == EAccountType.k_EAccountTypeIndividual)
+            if (this.AccountType == EAccountType.k_EAccountTypeIndividual)
             {
-                if (GetAccountID() == new AccountID_t(0) || GetUnAccountInstance() > Constants.k_unSteamUserWebInstance)
+                if (this.AccountID == 0 || this.AccountInstance != 1)
                     return false;
             }
 
-            if (GetEAccountType() == EAccountType.k_EAccountTypeClan)
+            if (this.AccountType == EAccountType.k_EAccountTypeClan)
             {
-                if (GetAccountID() == new AccountID_t(0) || GetUnAccountInstance() != 0)
+                if (this.AccountID == 0 || this.AccountInstance != 0)
                     return false;
             }
 
-            if (GetEAccountType() == EAccountType.k_EAccountTypeGameServer)
-            {
-                if (GetAccountID() == new AccountID_t(0))
-                    return false;
-                // Any limit on instances?  We use them for local users and bots
-            }
             return true;
         }
 
-        #region Overrides
-        public override string ToString()
+        public UInt32 AccountID
         {
-            return m_SteamID.ToString();
+            get
+            {
+                return (UInt32)steamid[0, 0xFFFFFFFF];
+            }
+            set
+            {
+                steamid[0, 0xFFFFFFFF] = value;
+            }
         }
 
-        public override bool Equals(object other)
+        public UInt32 AccountInstance
         {
-            return other is CSteamID && this == (CSteamID)other;
+            get
+            {
+                return (UInt32)steamid[32, 0xFFFFF];
+            }
+            set
+            {
+                steamid[32, 0xFFFFF] = (UInt64)value;
+            }
+        }
+
+        public EAccountType AccountType
+        {
+            get
+            {
+                return (EAccountType)steamid[52, 0xF];
+            }
+            set
+            {
+                steamid[52, 0xF] = (UInt64)value;
+            }
+        }
+
+        public EUniverse AccountUniverse
+        {
+            get
+            {
+                return (EUniverse)steamid[56, 0xFF];
+            }
+            set
+            {
+                steamid[56, 0xFF] = (UInt64)value;
+            }
+        }
+
+        public string Render()
+        {
+            switch (AccountType)
+            {
+                case EAccountType.k_EAccountTypeInvalid:
+                case EAccountType.k_EAccountTypeIndividual:
+                    if (AccountUniverse <= EUniverse.k_EUniversePublic)
+                        return String.Format("STEAM_0:{0}:{1}", AccountID & 1, AccountID >> 1);
+                    else
+                        return String.Format("STEAM_{2}:{0}:{1}", AccountID & 1, AccountID >> 1, (int)AccountUniverse);
+                default:
+                    return Convert.ToString(this);
+            }
+        }
+
+        public override string ToString()
+        {
+            return Render();
+        }
+
+        public override bool Equals(System.Object obj)
+        {
+            if (obj == null)
+                return false;
+
+            CSteamID sid = obj as CSteamID;
+            if ((System.Object)sid == null)
+                return false;
+
+            return steamid.Data == sid.steamid.Data;
+        }
+
+        public bool Equals(CSteamID sid)
+        {
+            if ((object)sid == null)
+                return false;
+
+            return steamid.Data == sid.steamid.Data;
+        }
+
+        public static bool operator ==(CSteamID a, CSteamID b)
+        {
+            if (System.Object.ReferenceEquals(a, b))
+                return true;
+
+            if (((object)a == null) || ((object)b == null))
+                return false;
+
+            return a.steamid.Data == b.steamid.Data;
+        }
+
+        public static bool operator !=(CSteamID a, CSteamID b)
+        {
+            return !(a == b);
         }
 
         public override int GetHashCode()
         {
-            return m_SteamID.GetHashCode();
+            return steamid.Data.GetHashCode();
         }
+    }
 
-        public static bool operator ==(CSteamID x, CSteamID y)
-        {
-            return x.m_SteamID == y.m_SteamID;
-        }
-
-        public static bool operator !=(CSteamID x, CSteamID y)
-        {
-            return !(x == y);
-        }
-
-        public static explicit operator CSteamID(ulong value)
-        {
-            return new CSteamID(value);
-        }
-        public static explicit operator ulong(CSteamID that)
-        {
-            return that.m_SteamID;
-        }
-
-        public bool Equals(CSteamID other)
-        {
-            return m_SteamID == other.m_SteamID;
-        }
-
-        public int CompareTo(CSteamID other)
-        {
-            return m_SteamID.CompareTo(other.m_SteamID);
-        }
-        #endregion
+    // Summary:
+    //     Used to store a SteamID in callbacks (With proper alignment / padding).
+    //     You probably don't want to use this type directly, convert it to CSteamID.
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
+    public struct SteamID_t
+    {
+        public UInt32 low32Bits;    // m_unAccountID (32)
+        public UInt32 high32Bits;   // m_unAccountInstance (20), m_EAccountType (4), m_EUniverse (8)
     }
 }
 

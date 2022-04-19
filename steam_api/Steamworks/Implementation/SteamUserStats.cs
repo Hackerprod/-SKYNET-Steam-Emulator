@@ -20,6 +20,7 @@ namespace SKYNET.Steamworks.Implementation
             public string Name { get; set; }
             public ELeaderboardSortMethod ShortMethod { get; set; }
             public ELeaderboardDisplayType DisplayType { get; set; }
+            public SteamLeaderboard_t SteamLeaderboard { get; set; }
         }
 
         public SteamUserStats()
@@ -33,13 +34,13 @@ namespace SKYNET.Steamworks.Implementation
             try
             {
                 Write($"RequestCurrentStats");
-                UserStatsReceived_t data = new UserStatsReceived_t()
-                {
-                    m_nGameID = SteamEmulator.GameID,
-                    m_eResult = SKYNET.Types.EResult.k_EResultOK,
-                    m_steamIDUser = SteamEmulator.SteamId
-                };
-                CallbackManager.AddCallbackResult(data);
+                //UserStatsReceived_t data = new UserStatsReceived_t()
+                //{
+                //    m_nGameID = SteamEmulator.GameID,
+                //    m_eResult = SKYNET.Types.EResult.k_EResultOK,
+                //    m_steamIDUser = SteamEmulator.SteamId
+                //};
+                //CallbackManager.AddCallbackResult(data, UserStatsReceived_t.k_iCallback);
                 return true;
             }
             catch (Exception ex)
@@ -104,12 +105,12 @@ namespace SKYNET.Steamworks.Implementation
             try
             {
                 Write($"StoreStats");
-                UserStatsStored_t data = new UserStatsStored_t()
-                {
-                    m_nGameID = SteamEmulator.GameID,
-                    m_eResult = SKYNET.Types.EResult.k_EResultOK
-                };
-                CallbackManager.AddCallbackResult(data);
+                //UserStatsStored_t data = new UserStatsStored_t()
+                //{
+                //    m_nGameID = SteamEmulator.GameID,
+                //    m_eResult = SKYNET.Types.EResult.k_EResultOK
+                //};
+                //CallbackManager.AddCallbackResult(data, UserStatsStored_t.k_iCallback);
                 return true;
             }
             catch (Exception ex)
@@ -156,13 +157,13 @@ namespace SKYNET.Steamworks.Implementation
             try
             {
                 Write($"RequestUserStats");
-                UserStatsReceived_t data = new UserStatsReceived_t()
-                {
-                    m_nGameID = SteamEmulator.GameID,
-                    m_eResult = EResult.k_EResultOK,
-                    m_steamIDUser = steamIDUser
-                };
-                return CallbackManager.AddCallbackResult(data);
+                //UserStatsReceived_t data = new UserStatsReceived_t()
+                //{
+                //    m_nGameID = SteamEmulator.GameID,
+                //    m_eResult = EResult.k_EResultOK,
+                //    m_steamIDUser = steamIDUser
+                //};
+                //return CallbackManager.AddCallbackResult(data, UserStatsReceived_t.k_iCallback);
             }
             catch (Exception ex)
             {
@@ -214,13 +215,13 @@ namespace SKYNET.Steamworks.Implementation
                     Leaderboards.Add(leaderboard);
                 }
 
-                LeaderboardFindResult_t data = new LeaderboardFindResult_t()
-                {
-                    m_bLeaderboardFound = 1,
-                    m_hSteamLeaderboard = 1
-                };
+                //LeaderboardFindResult_t data = new LeaderboardFindResult_t()
+                //{
+                //    m_bLeaderboardFound = 1,
+                //    m_hSteamLeaderboard = default
+                //};
 
-                return CallbackManager.AddCallbackResult(data);
+                //return CallbackManager.AddCallbackResult(data, LeaderboardFindResult_t.k_iCallback);
             }
             catch (Exception ex)
             {
@@ -248,13 +249,13 @@ namespace SKYNET.Steamworks.Implementation
                     Leaderboards.Add(leaderboard);
                 }
 
-                LeaderboardFindResult_t data = new LeaderboardFindResult_t()
-                {
-                    m_bLeaderboardFound = 1,
-                    m_hSteamLeaderboard = 1
-                };
+                //LeaderboardFindResult_t data = new LeaderboardFindResult_t()
+                //{
+                //    m_bLeaderboardFound = 1,
+                //    m_hSteamLeaderboard = default
+                //};
 
-                return CallbackManager.AddCallbackResult(data);
+                //return CallbackManager.AddCallbackResult(data, LeaderboardFindResult_t.k_iCallback);
             }
             catch (Exception ex)
             {
@@ -325,12 +326,12 @@ namespace SKYNET.Steamworks.Implementation
             try
             {
                 Write($"GetNumberOfCurrentPlayers");
-                NumberOfCurrentPlayers_t data = new NumberOfCurrentPlayers_t()
-                {
-                    m_bSuccess = 1,
-                    m_cPlayers = 0
-                };
-                return CallbackManager.AddCallbackResult(data);
+                //NumberOfCurrentPlayers_t data = new NumberOfCurrentPlayers_t()
+                //{
+                //    m_bSuccess = 1,
+                //    m_cPlayers = 0
+                //};
+                //return CallbackManager.AddCallbackResult(data, NumberOfCurrentPlayers_t.k_iCallback);
             }
             catch (Exception ex)
             {
@@ -369,12 +370,12 @@ namespace SKYNET.Steamworks.Implementation
             try
             {
                 Write($"RequestGlobalStats");
-                GlobalStatsReceived_t data = new GlobalStatsReceived_t()
-                {
-                    m_eResult = EResult.k_EResultOK,
-                    m_nGameID = SteamEmulator.GameID
-                };
-                return CallbackManager.AddCallbackResult(data);
+                //GlobalStatsReceived_t data = new GlobalStatsReceived_t()
+                //{
+                //    m_eResult = EResult.k_EResultOK,
+                //    m_nGameID = SteamEmulator.GameID
+                //};
+                //return CallbackManager.AddCallbackResult(data, GlobalStatsReceived_t.k_iCallback);
             }
             catch (Exception ex)
             {

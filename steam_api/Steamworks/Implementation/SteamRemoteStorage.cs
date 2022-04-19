@@ -79,18 +79,18 @@ namespace SKYNET.Steamworks.Implementation
                 byte[] bytes = pvData.GetBytes(cubData);
                 File.WriteAllBytes(fullPath, bytes);
 
-                RemoteStorageFileWriteAsyncComplete_t data = new RemoteStorageFileWriteAsyncComplete_t()
-                {
-                    m_eResult = SKYNET.Types.EResult.k_EResultOK  
-                };
-                //return CallbackManager.AddCallbackResult(data);
-                return new SteamAPICall_t(CallbackType.k_iRemoteStorageFileWriteAsyncComplete);
+                //RemoteStorageFileWriteAsyncComplete_t data = new RemoteStorageFileWriteAsyncComplete_t()
+                //{
+                //    m_eResult = SKYNET.Types.EResult.k_EResultOK  
+                //};
+                ////return CallbackManager.AddCallbackResult(data);
+                //return new SteamAPICall_t(CallbackType.k_iRemoteStorageFileWriteAsyncComplete);
             }
             catch
             {
                 Write($"Error writing file {pchFile}");
-                return 0;
             }
+            return 0;
         }
 
         public SteamAPICall_t FileReadAsync(string pchFile, uint nOffset, uint cubToRead)
@@ -573,21 +573,4 @@ public struct SteamAPICall_t : IEquatable<SteamAPICall_t>, IComparable<SteamAPIC
 }
 
 
-[StructLayout(LayoutKind.Sequential, Pack = 8)]
-internal struct SteamAPICallCompleted_t : ICallbackData
-{
-    internal ulong AsyncCall;
-
-    internal int Callback;
-
-    internal uint ParamCount;
-
-    public static int _datasize = Marshal.SizeOf(typeof(SteamAPICallCompleted_t));
-
-    public int DataSize => _datasize;
-
-    public CallbackType CallbackType => CallbackType.k_iSteamAPICallCompleted;
-
-    public int k_iCallback => 0;
-}
 

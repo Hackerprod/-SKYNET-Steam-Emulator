@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.IO;
 using SKYNET.Steamworks.Types;
+using SKYNET.Callback;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -129,38 +130,39 @@ namespace SKYNET.Steamworks.Implementation
             HTTPRequest request = HTTPRequests.Find(r => r.Handle == hRequest);
             if (request == null)
             {
+                Write($"SendHTTPRequest, Not found request for Handle: {hRequest}");
                 return false;
             }
 
-            HTTPRequestCompleted_t data = new HTTPRequestCompleted_t()
-            {
-                m_hRequest = request.Handle
-            };
+            //HTTPRequestCompleted_t data = new HTTPRequestCompleted_t()
+            //{
+            //    m_hRequest = request.Handle
+            //};
 
-            try
-            {
-                WebRequest webrequest = HttpWebRequest.Create(request.URL);
-                webrequest.Method = request.RequestMethod.ToString();
-                HttpWebResponse response = (HttpWebResponse)webrequest.GetResponse();
-                StreamReader reader = new StreamReader(response.GetResponseStream());
-                string content = reader.ReadToEnd();
-                request.Response = content;
+            //try
+            //{
+            //    WebRequest webrequest = HttpWebRequest.Create(request.URL);
+            //    webrequest.Method = request.RequestMethod.ToString();
+            //    HttpWebResponse response = (HttpWebResponse)webrequest.GetResponse();
+            //    StreamReader reader = new StreamReader(response.GetResponseStream());
+            //    string content = reader.ReadToEnd();
+            //    request.Response = content;
 
-                data.m_ulContextValue = request.ContextValue;
-                data.m_bRequestSuccessful = true;
-                data.m_eStatusCode = (EHTTPStatusCode)response.StatusCode;
-                data.m_unBodySize = (uint)content.Length;
-            }
-            catch (Exception ex)
-            {
-                data.m_ulContextValue = request.ContextValue;
-                data.m_bRequestSuccessful = false;
-                data.m_eStatusCode = EHTTPStatusCode.k_EHTTPStatusCode404NotFound;
-                data.m_unBodySize = 0;
-            }
+            //    data.m_ulContextValue = request.ContextValue;
+            //    data.m_bRequestSuccessful = true;
+            //    data.m_eStatusCode = (EHTTPStatusCode)response.StatusCode;
+            //    data.m_unBodySize = (uint)content.Length;
+            //}
+            //catch (Exception ex)
+            //{
+            //    data.m_ulContextValue = request.ContextValue;
+            //    data.m_bRequestSuccessful = false;
+            //    data.m_eStatusCode = EHTTPStatusCode.k_EHTTPStatusCode404NotFound;
+            //    data.m_unBodySize = 0;
+            //}
 
-            //pCallHandle = CallbackManager.AddCallbackResult(data);
-            pCallHandle = new SteamAPICall_t(CallbackType.k_iHTTPRequestCompleted);
+            //pCallHandle = CallbackManager.AddCallbackResult(data, HTTPRequestCompleted_t.k_iCallback);
+            //pCallHandle = new SteamAPICall_t(CallbackType.k_iHTTPRequestCompleted);
             return true;
         }
 
