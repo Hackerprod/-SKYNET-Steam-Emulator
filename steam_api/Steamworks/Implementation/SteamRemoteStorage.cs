@@ -81,7 +81,7 @@ namespace SKYNET.Steamworks.Implementation
 
                 RemoteStorageFileWriteAsyncComplete_t data = new RemoteStorageFileWriteAsyncComplete_t()
                 {
-                    m_eResult = EResult.k_EResultOK  
+                    m_eResult = SKYNET.Types.EResult.k_EResultOK  
                 };
                 //return CallbackManager.AddCallbackResult(data);
                 return new SteamAPICall_t(CallbackType.k_iRemoteStorageFileWriteAsyncComplete);
@@ -519,7 +519,7 @@ public struct SteamAPICall_t : IEquatable<SteamAPICall_t>, IComparable<SteamAPIC
 {
     public ulong Value;
 
-    public SteamAPICall_t(SKYNET.CallbackType value)
+    public SteamAPICall_t(CallbackType value)
     {
         Value = (ulong)value;
     }
@@ -586,7 +586,7 @@ internal struct SteamAPICallCompleted_t : ICallbackData
 
     public int DataSize => _datasize;
 
-    public SKYNET.CallbackType CallbackType => SKYNET.CallbackType.k_iSteamAPICallCompleted;
+    public CallbackType CallbackType => CallbackType.k_iSteamAPICallCompleted;
 
     public int k_iCallback => 0;
 }

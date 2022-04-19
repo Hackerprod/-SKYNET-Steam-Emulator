@@ -130,6 +130,7 @@
     <Compile Include="Steamworks\Implementation\SteamUtils.cs" />
     <Compile Include="Steamworks\Implementation\SteamVideo.cs" />
     <Compile Include="Steamworks\Interfaces\IBaseInterface.cs" />
+    <Compile Include="Steamworks\Interfaces\ISteamAppDisableUpdate001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamAppDisableUpdate001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamClient\SteamClient020.cs" />
     <Compile Include="Steamworks\Interfaces\SteamAppList\SteamAppList001.cs" />
@@ -137,6 +138,7 @@
     <Compile Include="Steamworks\Interfaces\SteamController\SteamController008.cs" />
     <Compile Include="Steamworks\Interfaces\SteamFriends\SteamFriends017.cs" />
     <Compile Include="Steamworks\Interfaces\SteamFriends\SteamFriends015.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamFriends\SteamFriends017_.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameCoordinator\SteamGameCoordinator001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameServer\SteamGameServer014.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameServer\SteamGameServer012.cs" />
@@ -178,16 +180,17 @@
     <Compile Include="Steamworks\Types\CGameID.cs" />
     <Compile Include="Steamworks\Types\Constants.cs" />
     <Compile Include="Steamworks\Types\CSteamAPIContext.cs" />
+    <Compile Include="Steamworks\Types\EAccountType.cs" />
+    <Compile Include="Steamworks\Types\EResult.cs" />
     <Compile Include="Steamworks\Types\FriendGameInfo_t.cs" />
     <Compile Include="Steamworks\Types\FriendsGroupID_t.cs" />
     <Compile Include="Steamworks\Types\HAuthTicket.cs" />
     <Compile Include="Steamworks\Types\HSteamPipe.cs" />
     <Compile Include="Steamworks\Types\HSteamUser.cs" />
-    <Compile Include="Steamworks\Types\Packsize.cs" />
     <Compile Include="Steamworks\Types\ScreenshotHandle.cs" />
     <Compile Include="Steamworks\Types\SNetListenSocket_t.cs" />
     <Compile Include="Steamworks\Types\SNetSocket_t.cs" />
-    <Compile Include="Callback\SteamCallbacks.cs" />
+    <Compile Include="Steamworks\Types\SteamCallbacks.cs" />
     <Compile Include="Steamworks\Types\SteamLeaderboardEntries_t.cs" />
     <Compile Include="Steamworks\Types\SteamLeaderboard_t.cs" />
     <Compile Include="Steamworks\Types\UTF8String.cs" />

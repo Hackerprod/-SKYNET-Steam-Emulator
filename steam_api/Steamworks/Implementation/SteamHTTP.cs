@@ -9,6 +9,7 @@ using Steamworks;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.IO;
+using SKYNET.Steamworks.Types;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -244,7 +245,7 @@ namespace SKYNET.Steamworks.Implementation
             return InterfaceManager.FindOrCreateInterface("STEAMHTTP_INTERFACE_VERSION003");
         }
 
-        
+
     }
     public class HTTPRequest
     {

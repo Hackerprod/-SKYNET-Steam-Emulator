@@ -28,59 +28,59 @@ namespace SKYNET.Managers
 
         public static void Initialize()
         {
-            //Assembly currentAssembly = Assembly.GetAssembly(typeof(InterfaceManager));
-            //    foreach (var type in currentAssembly.GetTypes())
-            //    {
-            //        if (type.IsDefined(typeof(InterfaceAttribute)))
-            //        {
-            //            var interfaceAttribute = type.GetCustomAttributes<InterfaceAttribute>().ToList()[0];
-            //            interfaceTypes.TryAdd(interfaceAttribute.Name, type);
-            //        }
-            //    }
+            Assembly currentAssembly = Assembly.GetAssembly(typeof(InterfaceManager));
+            foreach (var type in currentAssembly.GetTypes())
+            {
+                if (type.IsDefined(typeof(InterfaceAttribute)))
+                {
+                    var interfaceAttribute = type.GetCustomAttributes<InterfaceAttribute>().ToList()[0];
+                    interfaceTypes.TryAdd(interfaceAttribute.Name, type);
+                }
+            }
 
-            interfaceTypes.TryAdd("STEAMAPPLIST_INTERFACE_VERSION001", typeof(SteamAppList001));
-            interfaceTypes.TryAdd("STEAMAPPS_INTERFACE_VERSION008", typeof(SteamApps008));
-            interfaceTypes.TryAdd("SteamClient020", typeof(SteamClient020));
-            interfaceTypes.TryAdd("SteamController008", typeof(SteamController008));
-            interfaceTypes.TryAdd("SteamFriends015", typeof(SteamFriends015));
-            interfaceTypes.TryAdd("SteamFriends017", typeof(SteamFriends017));
-            interfaceTypes.TryAdd("SteamGameCoordinator001", typeof(SteamGameCoordinator001));
-            interfaceTypes.TryAdd("SteamGameServer012", typeof(SteamGameServer012));
-            interfaceTypes.TryAdd("SteamGameServer014", typeof(SteamGameServer014));
-            interfaceTypes.TryAdd("SteamGameServerStats001", typeof(SteamGameServerStats001));
-            interfaceTypes.TryAdd("SteamGameStats001", typeof(SteamGameStats001));
-            interfaceTypes.TryAdd("STEAMHTMLSURFACE_INTERFACE_VERSION_004", typeof(SteamHTMLSurface004));
-            interfaceTypes.TryAdd("STEAMHTMLSURFACE_INTERFACE_VERSION_005", typeof(SteamHTMLSurface005));
-            interfaceTypes.TryAdd("STEAMHTTP_INTERFACE_VERSION003", typeof(SteamHTTP003));
-            interfaceTypes.TryAdd("STEAMINVENTORY_INTERFACE_V002", typeof(SteamInventory002));
-            interfaceTypes.TryAdd("STEAMINVENTORY_INTERFACE_V003", typeof(SteamInventory003));
-            interfaceTypes.TryAdd("SteamMatchGameSearch001", typeof(SteamMatchGameSearch001));
-            interfaceTypes.TryAdd("SteamMatchMaking008", typeof(SteamMatchMaking008));
-            interfaceTypes.TryAdd("SteamMatchMaking009", typeof(SteamMatchMaking009));
-            interfaceTypes.TryAdd("SteamMatchMakingServers002", typeof(SteamMatchMakingServers002));
-            interfaceTypes.TryAdd("STEAMMUSIC_INTERFACE_VERSION001", typeof(SteamMusic001));
-            interfaceTypes.TryAdd("STEAMMUSICREMOTE_INTERFACE_VERSION001", typeof(SteamMusicRemote001));
-            interfaceTypes.TryAdd("SteamNetworking005", typeof(SteamNetworking005));
-            interfaceTypes.TryAdd("SteamNetworking006", typeof(SteamNetworking006));
-            interfaceTypes.TryAdd("SteamNetworkingSocketsSerialized002", typeof(SteamNetworkingSocketsSerialized002));
-            interfaceTypes.TryAdd("SteamNetworkingSocketsSerialized003", typeof(SteamNetworkingSocketsSerialized003));
-            interfaceTypes.TryAdd("SteamNetworkingSocketsSerialized004", typeof(SteamNetworkingSocketsSerialized004));
-            interfaceTypes.TryAdd("SteamNetworkingSocketsSerialized005", typeof(SteamNetworkingSocketsSerialized005));
-            interfaceTypes.TryAdd("STEAMPARENTALSETTINGS_INTERFACE_VERSION001", typeof(SteamParentalSettings001));
-            interfaceTypes.TryAdd("STEAMREMOTESTORAGE_INTERFACE_VERSION013", typeof(SteamRemoteStorage013));
-            interfaceTypes.TryAdd("STEAMREMOTESTORAGE_INTERFACE_VERSION014", typeof(SteamRemoteStorage014));
-            interfaceTypes.TryAdd("STEAMREMOTESTORAGE_INTERFACE_VERSION016", typeof(SteamRemoteStorage016));
-            interfaceTypes.TryAdd("STEAMSCREENSHOTS_INTERFACE_VERSION003", typeof(SteamScreenshots003));
-            interfaceTypes.TryAdd("STEAMUGC_INTERFACE_VERSION014", typeof(SteamUGC014));
-            interfaceTypes.TryAdd("STEAMUGC_INTERFACE_VERSION015", typeof(SteamUGC015));
-            interfaceTypes.TryAdd("STEAMUGC_INTERFACE_VERSION016", typeof(SteamUGC016));
-            interfaceTypes.TryAdd("SteamUser019", typeof(SteamUser019));
-            interfaceTypes.TryAdd("SteamUser021", typeof(SteamUser021));
-            interfaceTypes.TryAdd("STEAMUSERSTATS_INTERFACE_VERSION012", typeof(SteamUserStats012));
-            interfaceTypes.TryAdd("SteamUtils009", typeof(SteamUtils009));
-            interfaceTypes.TryAdd("SteamUtils010", typeof(SteamUtils010));
-            interfaceTypes.TryAdd("STEAMVIDEO_INTERFACE_V002", typeof(SteamVideo002));
-            interfaceTypes.TryAdd("SteamAppDisableUpdate001", typeof(SteamAppDisableUpdate001));
+            //interfaceTypes.TryAdd("STEAMAPPLIST_INTERFACE_VERSION001", typeof(SteamAppList001));
+            //interfaceTypes.TryAdd("STEAMAPPS_INTERFACE_VERSION008", typeof(SteamApps008));
+            //interfaceTypes.TryAdd("SteamClient020", typeof(SteamClient020));
+            //interfaceTypes.TryAdd("SteamController008", typeof(SteamController008));
+            //interfaceTypes.TryAdd("SteamFriends015", typeof(SteamFriends015));
+            //interfaceTypes.TryAdd("SteamFriends017", typeof(SteamFriends017));
+            //interfaceTypes.TryAdd("SteamGameCoordinator001", typeof(SteamGameCoordinator001));
+            //interfaceTypes.TryAdd("SteamGameServer012", typeof(SteamGameServer012));
+            //interfaceTypes.TryAdd("SteamGameServer014", typeof(SteamGameServer014));
+            //interfaceTypes.TryAdd("SteamGameServerStats001", typeof(SteamGameServerStats001));
+            //interfaceTypes.TryAdd("SteamGameStats001", typeof(SteamGameStats001));
+            //interfaceTypes.TryAdd("STEAMHTMLSURFACE_INTERFACE_VERSION_004", typeof(SteamHTMLSurface004));
+            //interfaceTypes.TryAdd("STEAMHTMLSURFACE_INTERFACE_VERSION_005", typeof(SteamHTMLSurface005));
+            //interfaceTypes.TryAdd("STEAMHTTP_INTERFACE_VERSION003", typeof(SteamHTTP003));
+            //interfaceTypes.TryAdd("STEAMINVENTORY_INTERFACE_V002", typeof(SteamInventory002));
+            //interfaceTypes.TryAdd("STEAMINVENTORY_INTERFACE_V003", typeof(SteamInventory003));
+            //interfaceTypes.TryAdd("SteamMatchGameSearch001", typeof(SteamMatchGameSearch001));
+            //interfaceTypes.TryAdd("SteamMatchMaking008", typeof(SteamMatchMaking008));
+            //interfaceTypes.TryAdd("SteamMatchMaking009", typeof(SteamMatchMaking009));
+            //interfaceTypes.TryAdd("SteamMatchMakingServers002", typeof(SteamMatchMakingServers002));
+            //interfaceTypes.TryAdd("STEAMMUSIC_INTERFACE_VERSION001", typeof(SteamMusic001));
+            //interfaceTypes.TryAdd("STEAMMUSICREMOTE_INTERFACE_VERSION001", typeof(SteamMusicRemote001));
+            //interfaceTypes.TryAdd("SteamNetworking005", typeof(SteamNetworking005));
+            //interfaceTypes.TryAdd("SteamNetworking006", typeof(SteamNetworking006));
+            //interfaceTypes.TryAdd("SteamNetworkingSocketsSerialized002", typeof(SteamNetworkingSocketsSerialized002));
+            //interfaceTypes.TryAdd("SteamNetworkingSocketsSerialized003", typeof(SteamNetworkingSocketsSerialized003));
+            //interfaceTypes.TryAdd("SteamNetworkingSocketsSerialized004", typeof(SteamNetworkingSocketsSerialized004));
+            //interfaceTypes.TryAdd("SteamNetworkingSocketsSerialized005", typeof(SteamNetworkingSocketsSerialized005));
+            //interfaceTypes.TryAdd("STEAMPARENTALSETTINGS_INTERFACE_VERSION001", typeof(SteamParentalSettings001));
+            //interfaceTypes.TryAdd("STEAMREMOTESTORAGE_INTERFACE_VERSION013", typeof(SteamRemoteStorage013));
+            //interfaceTypes.TryAdd("STEAMREMOTESTORAGE_INTERFACE_VERSION014", typeof(SteamRemoteStorage014));
+            //interfaceTypes.TryAdd("STEAMREMOTESTORAGE_INTERFACE_VERSION016", typeof(SteamRemoteStorage016));
+            //interfaceTypes.TryAdd("STEAMSCREENSHOTS_INTERFACE_VERSION003", typeof(SteamScreenshots003));
+            //interfaceTypes.TryAdd("STEAMUGC_INTERFACE_VERSION014", typeof(SteamUGC014));
+            //interfaceTypes.TryAdd("STEAMUGC_INTERFACE_VERSION015", typeof(SteamUGC015));
+            //interfaceTypes.TryAdd("STEAMUGC_INTERFACE_VERSION016", typeof(SteamUGC016));
+            //interfaceTypes.TryAdd("SteamUser019", typeof(SteamUser019));
+            //interfaceTypes.TryAdd("SteamUser021", typeof(SteamUser021));
+            //interfaceTypes.TryAdd("STEAMUSERSTATS_INTERFACE_VERSION012", typeof(SteamUserStats012));
+            //interfaceTypes.TryAdd("SteamUtils009", typeof(SteamUtils009));
+            //interfaceTypes.TryAdd("SteamUtils010", typeof(SteamUtils010));
+            //interfaceTypes.TryAdd("STEAMVIDEO_INTERFACE_V002", typeof(SteamVideo002));
+            //interfaceTypes.TryAdd("SteamAppDisableUpdate001", typeof(SteamAppDisableUpdate001));
         }
 
         public static T CreateInterface<T>(out IntPtr BaseAddress) where T : ISteamInterface
