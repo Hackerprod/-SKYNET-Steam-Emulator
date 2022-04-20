@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SKYNET.Helpers
+namespace SKYNET.Helper
 {
     public class Log
     {

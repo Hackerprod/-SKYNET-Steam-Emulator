@@ -98,7 +98,7 @@ namespace SKYNET.Steamworks.Implementation
             Write($"FileReadAsync {pchFile}");
             try
             {
-                return new SteamAPICall_t(CallbackType.k_iRemoteStorageFileReadAsyncComplete);
+                return new SteamAPICall_t(CallbackType.RemoteStorageFileReadAsyncComplete);
             }
             catch
             {

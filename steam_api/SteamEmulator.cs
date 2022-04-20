@@ -1,6 +1,6 @@
 ﻿#define LOG
 using SKYNET;
-using SKYNET.Helpers;
+using SKYNET.Helper;
 using SKYNET.Managers;
 using SKYNET.Steamworks.Implementation;
 using SKYNET.Steamworks.Types;
@@ -240,33 +240,36 @@ public class SteamEmulator
         Write("Steam Emulator", msg);
     }
 
+    private static string lastMsg = "";
+
 #if LOG
 
-    static string lastMsg = "";
     public static void Write(string sender, object msg)
     {
         if (string.IsNullOrEmpty(sender)) { sender = "NULL"; }
         if (msg == null) { msg = "NULL"; }
 
-        if (SendLog)
-        {
-            if (lastMsg != msg.ToString())
-            {
-                OnMessage?.Invoke(Instance, new GameMessage(AppId, sender, msg));
-                lastMsg = msg.ToString();
-            }
-        }
+        //if (SendLog)
+        //{
+        //    if (lastMsg != msg.ToString())
+        //    {
+        //        OnMessage?.Invoke(Instance, new GameMessage(AppId, sender, msg));
+        //        lastMsg = msg.ToString();
+        //    }
+        //}
 
-        Log.AppEnd(sender + ": " + msg);
-        Console.WriteLine(sender + ": " + msg);
 
         if (lastMsg != msg.ToString())
         {
-            
+            Log.AppEnd(sender + ": " + msg);
+            Console.WriteLine(sender + ": " + msg);
+
+            lastMsg = msg.ToString();
         }
     }
 
 #else
+
     public static void Write(string sender, object msg)
     {
         Console.WriteLine(sender + ": " + msg);

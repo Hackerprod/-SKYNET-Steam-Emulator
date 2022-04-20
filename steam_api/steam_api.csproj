@@ -78,7 +78,9 @@
     <Compile Include="Callback\CallbackTypes.cs" />
     <Compile Include="Callback\CCallbackBase.cs" />
     <Compile Include="Callback\InteropHelp.cs" />
+    <Compile Include="Helpers\Platform.cs" />
     <Compile Include="Callback\SteamAPICall_t.cs" />
+    <Compile Include="Helpers\Utf8StringToNative.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamGameServer.cs" />
     <Compile Include="Steamworks\Exported\SteamInternal.cs" />
@@ -213,7 +215,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ImportGroup Label=".NET DllExport">

@@ -1,22 +1,33 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using SKYNET;
-using SKYNET.Helpers;
-using SKYNET.Steamworks;
-using SKYNET.Types;
-using Steamworks;
 using SKYNET.Helper;
+using System.Collections.Generic;
+using SKYNET.Callback;
+using System.Linq;
+using SKYNET.Managers;
 
 namespace SKYNET.Steamworks.Implementation
 {
     public class SteamGameCoordinator : ISteamInterface
     {
+        private List<object> InMessages;
+        public void PushMessage(object message)
+        {
+            InMessages.Add(message);
+            uint MsgSize = (uint)Marshal.SizeOf(message);
+
+            GCMessageAvailable_t data;
+            data.m_nMessageSize = MsgSize;
+            CallbackManager.addCBResult(GCMessageAvailable_t.k_iCallback, data, MsgSize);
+        }
+
         public SteamGameCoordinator()
         {
             InterfaceVersion = "SteamGameCoordinator";
+            InMessages = new List<object>();
         }
 
-        public EGCResults SendMessage_(uint unMsgType, IntPtr pubData, uint cubData)
+        public EGCResults SendMessage(uint unMsgType, IntPtr pubData, uint cubData)
         {
             uint msgType = GetGCMsg(unMsgType);
             byte[] bytes = pubData.GetBytes(cubData);
@@ -29,6 +40,10 @@ namespace SKYNET.Steamworks.Implementation
         public bool IsMessageAvailable(uint pcubMsgSize)
         {
             Write("IsMessageAvailable");
+            if (InMessages.Any())
+            {
+                return true;
+            }
             return false;
         }
 
@@ -37,7 +52,7 @@ namespace SKYNET.Steamworks.Implementation
             uint msgType = GetGCMsg(punMsgType);
 
             Write($"RetrieveMessage [{msgType}]");
-            return EGCResults.k_EGCResultOK;
+            return EGCResults.k_EGCResultNoMessage;
         }
 
         private uint GetGCMsg(uint msg)

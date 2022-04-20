@@ -597,7 +597,7 @@ namespace SKYNET.Steamworks.Implementation
             //PostCallback(data, CallbackType.k_iSetPersonaNameResponse, b);
 
             //return 0;
-            return new SteamAPICall_t(CallbackType.k_iSetPersonaNameResponse);
+            return new SteamAPICall_t(CallbackType.SetPersonaNameResponse);
         }
 
         public void SetPlayedWith(SteamID steamIDUserPlayedWith)

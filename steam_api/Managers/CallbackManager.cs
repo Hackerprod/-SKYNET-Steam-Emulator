@@ -18,8 +18,10 @@ namespace SKYNET.Managers
         public static List<SteamAPICall_t> SteamAPICallsCompleted;
         public static ConcurrentDictionary<int, Type> CallbackTypes;
 
-        private static Dictionary<int, CCallbackBase> Client_Callbacks;
-        private static Dictionary<int, CCallbackBase> Server_Callbacks;
+        private static ConcurrentDictionary<int, SteamCallback> Client_Callbacks;
+        private static ConcurrentDictionary<int, SteamCallback> Server_Callbacks;
+
+
         private static Dictionary<ulong, CCallbackBase> CallbackResult;
         private static List<SteamAPICall_t> SteamAPICalls;
 
@@ -29,11 +31,11 @@ namespace SKYNET.Managers
         {
             if (Client_Callbacks == null)
             {
-                Client_Callbacks = new Dictionary<int, CCallbackBase>();
+                Client_Callbacks = new ConcurrentDictionary<int, SteamCallback>();
             }
             if (Server_Callbacks == null)
             {
-                Server_Callbacks = new Dictionary<int, CCallbackBase>();
+                Server_Callbacks = new ConcurrentDictionary<int, SteamCallback>();
             }
             if (SteamAPICalls == null)
             {
@@ -55,35 +57,56 @@ namespace SKYNET.Managers
 
         public unsafe static void RegisterCallback(int iCallback, IntPtr ptrCallback, bool Server = false)
         {
-            CCallbackBase pCallback = ptrCallback.ToType<CCallbackBase>();
-            pCallback.m_nCallbackFlags |= k_ECallbackFlagsRegistered;
-            pCallback.m_iCallback = iCallback;
-            Marshal.StructureToPtr(pCallback, ptrCallback, false);
+            if (iCallback == new SteamAPICallCompleted_t().Callback)
+            {
+                var CBase = ptrCallback.ToType<CCallbackBase>().m_iCallback;
+            }
+
+            SteamCallback sCallback = new SteamCallback(ptrCallback);
+            sCallback.CallbackBase.m_nCallbackFlags |= k_ECallbackFlagsRegistered;
+            sCallback.CallbackBase.m_iCallback = iCallback;
+            sCallback.Update();
+
 
             if (Server)
             {
                 if (Server_Callbacks.ContainsKey(iCallback))
-                    Server_Callbacks[iCallback] = pCallback;
+                    Server_Callbacks[iCallback] = sCallback;
                 else
-                    Server_Callbacks.Add(iCallback, pCallback);
+                    Server_Callbacks.TryAdd(iCallback, sCallback);
             }
             else
             {
                 if (Client_Callbacks.ContainsKey(iCallback))
-                    Client_Callbacks[iCallback] = pCallback;
+                    Client_Callbacks[iCallback] = sCallback;
                 else
-                    Client_Callbacks.Add(iCallback, pCallback);
+                    Client_Callbacks.TryAdd(iCallback, sCallback);
             }
         }
 
         public static void UnregisterCallResult(IntPtr pCallback, SteamAPICall_t hAPICall)
         {
-
         }
 
-        public static void UnregisterCallback(IntPtr pCallback)
+        public static void UnregisterCallback(IntPtr ptrCallback)
         {
+            CCallbackBase pCallback = ptrCallback.ToType<CCallbackBase>();
+            if (pCallback.m_iCallback == new SteamAPICallCompleted_t().Callback)
+            {
+                pCallback.m_nCallbackFlags &= k_ECallbackFlagsRegistered;
+                Marshal.StructureToPtr(pCallback, ptrCallback, false);
+            }
 
+            if (pCallback.IsGameServer())
+            {
+                if (Server_Callbacks.ContainsKey(pCallback.m_iCallback))
+                    Server_Callbacks.TryRemove(pCallback.m_iCallback, out _);
+            }
+            else
+            {
+                if (Client_Callbacks.ContainsKey(pCallback.m_iCallback))
+                    Client_Callbacks.TryRemove(pCallback.m_iCallback, out _);
+            }
         }
 
         public static void RegisterCallResult(SteamAPICall_t hAPICall, CCallbackBase pCallback)
@@ -117,6 +140,11 @@ namespace SKYNET.Managers
             //    Marshal.FreeHGlobal(ptr);
             //    Callbacks.Remove(pipe_id);
             //}
+        }
+
+        internal static void addCBResult(int k_iCallback, GCMessageAvailable_t data, uint msgSize)
+        {
+            
         }
 
         public static SteamAPICall_t AddCallbackResult(object callbackData, int iCallback)
@@ -156,4 +184,46 @@ namespace SKYNET.Managers
             return SteamAPICalls.Contains(hSteamAPICall);
         }
     }
+
+    public class SteamCallback
+    {
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate void RunDelegate(IntPtr pvParam);
+        public static RunDelegate _Run;
+
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        public delegate void RunFullDelegate(IntPtr pvParam, bool bIOFailure, SteamAPICall_t hSteamAPICall);
+        public static RunFullDelegate _RunFull;
+
+        public bool Completed { get; set; }
+        public IntPtr Pointer { get; }
+        public CCallbackBase CallbackBase { get; }
+        public bool IsGameserver => (CallbackBase.m_nCallbackFlags & CCallbackBase.k_ECallbackFlagsGameServer) != 0;
+
+        public SteamCallback(IntPtr _pointer)
+        {
+            Pointer = _pointer;
+            CallbackBase = _pointer.ToType<CCallbackBase>();
+
+            //_Run = Marshal.GetDelegateForFunctionPointer<RunDelegate>(CallbackBase.Run);
+            //_RunFull = Marshal.GetDelegateForFunctionPointer<RunFullDelegate>(CallbackBase.RunFull);
+        }
+
+        public void Run(IntPtr pvParam)
+        {
+            _Run(pvParam);
+        }
+
+        public void Run(IntPtr pvParam, bool bIOFailure, SteamAPICall_t hSteamAPICall)
+        {
+            _RunFull(pvParam, bIOFailure, hSteamAPICall);
+        }
+
+        public void Update()
+        {
+            Marshal.StructureToPtr(CallbackBase, Pointer, false);
+        }
+    }
+
 }
+

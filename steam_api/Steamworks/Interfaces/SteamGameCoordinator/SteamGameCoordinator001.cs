@@ -11,9 +11,9 @@ namespace SKYNET.Interface
     [Interface("SteamGameCoordinator001")]
     public class SteamGameCoordinator001 : ISteamInterface
     {
-        public EGCResults SendMessage_(IntPtr _, uint unMsgType, IntPtr pubData, uint cubData)
+        public EGCResults SendMessage(IntPtr _, uint unMsgType, IntPtr pubData, uint cubData)
         {
-            return SteamEmulator.SteamGameCoordinator.SendMessage_(unMsgType, pubData, cubData);
+            return SteamEmulator.SteamGameCoordinator.SendMessage(unMsgType, pubData, cubData);
         }
 
         public bool IsMessageAvailable(IntPtr _, uint pcubMsgSize)

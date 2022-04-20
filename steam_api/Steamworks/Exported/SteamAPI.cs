@@ -73,7 +73,7 @@ namespace SKYNET.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_UnregisterCallback(IntPtr pCallback)
         {
-            Write($"SteamAPI_UnregisterCallback {pCallback}");
+            Write($"SteamAPI_UnregisterCallback");
             CallbackManager.UnregisterCallback(pCallback);
         }
 

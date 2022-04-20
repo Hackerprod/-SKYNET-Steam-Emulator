@@ -1,3068 +1,3028 @@
-﻿//using SKYNET.Steamworks;
-//using SKYNET.Steamworks.Types;
-//using SKYNET.Types;
-//using Steamworks;
-//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Runtime.InteropServices;
-//using System.Text;
-//using System.Threading.Tasks;
-
-//namespace SKYNET.Callback
-//{
-//    // callbacks
-//    //---------------------------------------------------------------------------------
-//    // Purpose: Sent when a new app is installed
-//    //---------------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamAppListCallbacks + 1)]
-//    public struct SteamAppInstalled_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamAppListCallbacks + 1;
-//        public AppId_t m_nAppID;            // ID of the app that installs
-//        public int m_iInstallFolderIndex; // library folder the app is installed
-//    }
-
-//    //---------------------------------------------------------------------------------
-//    // Purpose: Sent when an app is uninstalled
-//    //---------------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamAppListCallbacks + 2)]
-//    public struct SteamAppUninstalled_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamAppListCallbacks + 2;
-//        public AppId_t m_nAppID;            // ID of the app that installs
-//        public int m_iInstallFolderIndex; // library folder the app was installed
-//    }
-
-//    // callbacks
-//    //-----------------------------------------------------------------------------
-//    // Purpose: posted after the user gains ownership of DLC & that DLC is installed
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamAppsCallbacks + 5)]
-//    public struct DlcInstalled_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamAppsCallbacks + 5;
-//        public AppId_t m_nAppID;        // AppID of the DLC
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: response to RegisterActivationCode()
-//    //-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamAppsCallbacks + 8)]
-//    //public struct RegisterActivationCodeResponse_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamAppsCallbacks + 8;
-//    //    public ERegisterActivationCodeResult m_eResult;
-//    //    public uint m_unPackageRegistered;                      // package that was registered. Only set on success
-//    //}
-
-//    //---------------------------------------------------------------------------------
-//    // Purpose: posted after the user gains executes a Steam URL with command line or query parameters
-//    // such as steam://run/<appid>//-commandline/?param1=value1&param2=value2&param3=value3 etc
-//    // while the game is already running.  The new params can be queried
-//    // with GetLaunchQueryParam and GetLaunchCommandLine
-//    //---------------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 1)]
-//    [CallbackIdentity(Constants.k_iSteamAppsCallbacks + 14)]
-//    public struct NewUrlLaunchParameters_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamAppsCallbacks + 14;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: response to RequestAppProofOfPurchaseKey/RequestAllProofOfPurchaseKeys
-//    // for supporting third-party CD keys, or other proof-of-purchase systems.
-//    //-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamAppsCallbacks + 21)]
-//    //public struct AppProofOfPurchaseKeyResponse_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamAppsCallbacks + 21;
-//    //    public EResult m_eResult;
-//    //    public uint m_nAppID;
-//    //    public uint m_cchKeyLength;
-//    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.k_cubAppProofOfPurchaseKeyMax)]
-//    //    private byte[] m_rgchKey_;
-//    //    public string m_rgchKey
-//    //    {
-//    //        get { return InteropHelp.ByteArrayToStringUTF8(m_rgchKey_); }
-//    //        set { InteropHelp.StringToByteArrayUTF8(value, m_rgchKey_, Constants.k_cubAppProofOfPurchaseKeyMax); }
-//    //    }
-//    //}
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: response to GetFileDetails
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamAppsCallbacks + 23)]
-//    public struct FileDetailsResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamAppsCallbacks + 23;
-//        public EResult m_eResult;
-//        public ulong m_ulFileSize;  // original file size in bytes
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
-//        public byte[] m_FileSHA;    // original file SHA1 hash
-//        public uint m_unFlags;      //
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: called for games in Timed Trial mode
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamAppsCallbacks + 30)]
-//    public struct TimedTrialStatus_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamAppsCallbacks + 30;
-//        public AppId_t m_unAppID;           // appID
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bIsOffline;       // if true, time allowed / played refers to offline time, not total time
-//        public uint m_unSecondsAllowed; // how many seconds the app can be played in total
-//        public uint m_unSecondsPlayed;  // how many seconds the app was already played
-//    }
-
-//    // callbacks
-//    //-----------------------------------------------------------------------------
-//    // Purpose: called when a friends' status changes
-//    //-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamFriendsCallbacks + 4)]
-//    //public struct PersonaStateChange_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamFriendsCallbacks + 4;
-
-//    //    public ulong m_ulSteamID;       // steamID of the friend who changed
-//    //    public EPersonaChange m_nChangeFlags;       // what's changed
-//    //}
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: posted when game overlay activates or deactivates
-//    //			the game can use this to be pause or resume single player games
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamFriendsCallbacks + 31)]
-//    public struct GameOverlayActivated_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamFriendsCallbacks + 31;
-//        public byte m_bActive;  // true if it's just been activated, false otherwise
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: called when the user tries to join a different game server from their friends list
-//    //			game client should attempt to connect to specified server when this is received
-//    //-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamFriendsCallbacks + 32)]
-//    //public struct GameServerChangeRequested_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamFriendsCallbacks + 32;
-//    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
-//    //    private byte[] m_rgchServer_;
-//    //    public string m_rgchServer      // server address ("127.0.0.1:27015", "tf2.valvesoftware.com")
-//    //    {
-//    //        get { return InteropHelp.ByteArrayToStringUTF8(m_rgchServer_); }
-//    //        set { InteropHelp.StringToByteArrayUTF8(value, m_rgchServer_, 64); }
-//    //    }
-//    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
-//    //    private byte[] m_rgchPassword_;
-//    //    public string m_rgchPassword    // server password, if any
-//    //    {
-//    //        get { return InteropHelp.ByteArrayToStringUTF8(m_rgchPassword_); }
-//    //        set { InteropHelp.StringToByteArrayUTF8(value, m_rgchPassword_, 64); }
-//    //    }
-//    //}
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: called when the user tries to join a lobby from their friends list
-//    //			game client should attempt to connect to specified lobby when this is received
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamFriendsCallbacks + 33)]
-//    public struct GameLobbyJoinRequested_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamFriendsCallbacks + 33;
-//        public CSteamID m_steamIDLobby;
-
-//        // The friend they did the join via (will be invalid if not directly via a friend)
-//        //
-//        // On PS3, the friend will be invalid if this was triggered by a PSN invite via the XMB, but
-//        // the account type will be console user so you can tell at least that this was from a PSN friend
-//        // rather than a Steam friend.
-//        public CSteamID m_steamIDFriend;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: called when an avatar is loaded in from a previous GetLargeFriendAvatar() call
-//    //			if the image wasn't already available
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 4)]
-//    [CallbackIdentity(Constants.k_iSteamFriendsCallbacks + 34)]
-//    public struct AvatarImageLoaded_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamFriendsCallbacks + 34;
-//        public CSteamID m_steamID; // steamid the avatar has been loaded for
-//        public int m_iImage; // the image index of the now loaded image
-//        public int m_iWide; // width of the loaded image
-//        public int m_iTall; // height of the loaded image
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: marks the return of a request officer list call
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamFriendsCallbacks + 35)]
-//    public struct ClanOfficerListResponse_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamFriendsCallbacks + 35;
-//        public CSteamID m_steamIDClan;
-//        public int m_cOfficers;
-//        public byte m_bSuccess;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: callback indicating updated data about friends rich presence information
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 4)]
-//    [CallbackIdentity(Constants.k_iSteamFriendsCallbacks + 36)]
-//    public struct FriendRichPresenceUpdate_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamFriendsCallbacks + 36;
-//        public CSteamID m_steamIDFriend;    // friend who's rich presence has changed
-//        public AppId_t m_nAppID;            // the appID of the game (should always be the current game)
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: called when the user tries to join a game from their friends list
-//    //			rich presence will have been set with the "connect" key which is set here
-//    //-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamFriendsCallbacks + 37)]
-//    //public struct GameRichPresenceJoinRequested_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamFriendsCallbacks + 37;
-//    //    public CSteamID m_steamIDFriend;        // the friend they did the join via (will be invalid if not directly via a friend)
-//    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.k_cchMaxRichPresenceValueLength)]
-//    //    private byte[] m_rgchConnect_;
-//    //    public string m_rgchConnect
-//    //    {
-//    //        get { return InteropHelp.ByteArrayToStringUTF8(m_rgchConnect_); }
-//    //        set { InteropHelp.StringToByteArrayUTF8(value, m_rgchConnect_, Constants.k_cchMaxRichPresenceValueLength); }
-//    //    }
-//    //}
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: a chat message has been received for a clan chat the game has joined
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 4)]
-//    [CallbackIdentity(Constants.k_iSteamFriendsCallbacks + 38)]
-//    public struct GameConnectedClanChatMsg_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamFriendsCallbacks + 38;
-//        public CSteamID m_steamIDClanChat;
-//        public CSteamID m_steamIDUser;
-//        public int m_iMessageID;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: a user has joined a clan chat
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamFriendsCallbacks + 39)]
-//    public struct GameConnectedChatJoin_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamFriendsCallbacks + 39;
-//        public CSteamID m_steamIDClanChat;
-//        public CSteamID m_steamIDUser;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: a user has left the chat we're in
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-//    [CallbackIdentity(Constants.k_iSteamFriendsCallbacks + 40)]
-//    public struct GameConnectedChatLeave_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamFriendsCallbacks + 40;
-//        public CSteamID m_steamIDClanChat;
-//        public CSteamID m_steamIDUser;
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bKicked;      // true if admin kicked
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bDropped; // true if Steam connection dropped
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: a DownloadClanActivityCounts() call has finished
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamFriendsCallbacks + 41)]
-//    public struct DownloadClanActivityCountsResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamFriendsCallbacks + 41;
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bSuccess;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: a JoinClanChatRoom() call has finished
-//    //-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 4)]
-//    //[CallbackIdentity(Constants.k_iSteamFriendsCallbacks + 42)]
-//    //public struct JoinClanChatRoomCompletionResult_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamFriendsCallbacks + 42;
-//    //    public CSteamID m_steamIDClanChat;
-//    //    public EChatRoomEnterResponse m_eChatRoomEnterResponse;
-//    //}
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: a chat message has been received from a user
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 4)]
-//    [CallbackIdentity(Constants.k_iSteamFriendsCallbacks + 43)]
-//    public struct GameConnectedFriendChatMsg_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamFriendsCallbacks + 43;
-//        public CSteamID m_steamIDUser;
-//        public int m_iMessageID;
-//    }
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 4)]
-//    [CallbackIdentity(Constants.k_iSteamFriendsCallbacks + 44)]
-//    public struct FriendsGetFollowerCount_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamFriendsCallbacks + 44;
-//        public EResult m_eResult;
-//        public CSteamID m_steamID;
-//        public int m_nCount;
-//    }
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 4)]
-//    [CallbackIdentity(Constants.k_iSteamFriendsCallbacks + 45)]
-//    public struct FriendsIsFollowing_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamFriendsCallbacks + 45;
-//        public EResult m_eResult;
-//        public CSteamID m_steamID;
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bIsFollowing;
-//    }
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 4)]
-//    [CallbackIdentity(Constants.k_iSteamFriendsCallbacks + 46)]
-//    public struct FriendsEnumerateFollowingList_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamFriendsCallbacks + 46;
-//        public EResult m_eResult;
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.k_cEnumerateFollowersMax)]
-//        public CSteamID[] m_rgSteamID;
-//        public int m_nResultsReturned;
-//        public int m_nTotalResultCount;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: reports the result of an attempt to change the user's persona name
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamFriendsCallbacks + 47)]
-//    public struct SetPersonaNameResponse_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamFriendsCallbacks + 47;
-
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bSuccess; // true if name change succeeded completely.
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bLocalSuccess; // true if name change was retained locally.  (We might not have been able to communicate with Steam)
-//        public EResult m_result; // detailed result code
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Invoked when the status of unread messages changes
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 1)]
-//    [CallbackIdentity(Constants.k_iSteamFriendsCallbacks + 48)]
-//    public struct UnreadChatMessagesChanged_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamFriendsCallbacks + 48;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Dispatched when an overlay browser instance is navigated to a protocol/scheme registered by RegisterProtocolInOverlayBrowser()
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamFriendsCallbacks + 49)]
-//    public struct OverlayBrowserProtocolNavigation_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamFriendsCallbacks + 49;
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024)]
-//        private byte[] rgchURI_;
-//        public string rgchURI
-//        {
-//            get { return InteropHelp.ByteArrayToStringUTF8(rgchURI_); }
-//            set { InteropHelp.StringToByteArrayUTF8(value, rgchURI_, 1024); }
-//        }
-//    }
-
-//    // callbacks
-//    // callback notification - A new message is available for reading from the message queue
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamGameCoordinatorCallbacks + 1)]
-//    public struct GCMessageAvailable_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamGameCoordinatorCallbacks + 1;
-//        public uint m_nMessageSize;
-//    }
-
-//    // callback notification - A message failed to make it to the GC. It may be down temporarily
-//    [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 1)]
-//    [CallbackIdentity(Constants.k_iSteamGameCoordinatorCallbacks + 2)]
-//    public struct GCMessageFailed_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamGameCoordinatorCallbacks + 2;
-//    }
-
-//    // callbacks
-//    // client has been approved to connect to this game server
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamGameServerCallbacks + 1)]
-//    public struct GSClientApprove_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamGameServerCallbacks + 1;
-//        public CSteamID m_SteamID;          // SteamID of approved player
-//        public CSteamID m_OwnerSteamID; // SteamID of original owner for game license
-//    }
-
-//    // client has been denied to connection to this game server
-//    //[StructLayout(LayoutKind.Sequential, Pack = 4)]
-//    //[CallbackIdentity(Constants.k_iSteamGameServerCallbacks + 2)]
-//    //public struct GSClientDeny_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamGameServerCallbacks + 2;
-//    //    public CSteamID m_SteamID;
-//    //    public EDenyReason m_eDenyReason;
-//    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
-//    //    private byte[] m_rgchOptionalText_;
-//    //    public string m_rgchOptionalText
-//    //    {
-//    //        get { return InteropHelp.ByteArrayToStringUTF8(m_rgchOptionalText_); }
-//    //        set { InteropHelp.StringToByteArrayUTF8(value, m_rgchOptionalText_, 128); }
-//    //    }
-//    //}
-
-//    // request the game server should kick the user
-//    //[StructLayout(LayoutKind.Sequential, Pack = 4)]
-//    //[CallbackIdentity(Constants.k_iSteamGameServerCallbacks + 3)]
-//    //public struct GSClientKick_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamGameServerCallbacks + 3;
-//    //    public CSteamID m_SteamID;
-//    //    public EDenyReason m_eDenyReason;
-//    //}
-
-//    // NOTE: callback values 4 and 5 are skipped because they are used for old deprecated callbacks,
-//    // do not reuse them here.
-//    // client achievement info
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamGameServerCallbacks + 6)]
-//    public struct GSClientAchievementStatus_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamGameServerCallbacks + 6;
-//        public ulong m_SteamID;
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
-//        private byte[] m_pchAchievement_;
-//        public string m_pchAchievement
-//        {
-//            get { return InteropHelp.ByteArrayToStringUTF8(m_pchAchievement_); }
-//            set { InteropHelp.StringToByteArrayUTF8(value, m_pchAchievement_, 128); }
-//        }
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bUnlocked;
-//    }
-
-//    // received when the game server requests to be displayed as secure (VAC protected)
-//    // m_bSecure is true if the game server should display itself as secure to users, false otherwise
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUserCallbacks + 15)]
-//    public struct GSPolicyResponse_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUserCallbacks + 15;
-//        public byte m_bSecure;
-//    }
-
-//    // GS gameplay stats info
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamGameServerCallbacks + 7)]
-//    public struct GSGameplayStats_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamGameServerCallbacks + 7;
-//        public EResult m_eResult;                   // Result of the call
-//        public int m_nRank;                 // Overall rank of the server (0-based)
-//        public uint m_unTotalConnects;          // Total number of clients who have ever connected to the server
-//        public uint m_unTotalMinutesPlayed;     // Total number of minutes ever played on the server
-//    }
-
-//    // send as a reply to RequestUserGroupStatus()
-//    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-//    [CallbackIdentity(Constants.k_iSteamGameServerCallbacks + 8)]
-//    public struct GSClientGroupStatus_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamGameServerCallbacks + 8;
-//        public CSteamID m_SteamIDUser;
-//        public CSteamID m_SteamIDGroup;
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bMember;
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bOfficer;
-//    }
-
-//    // Sent as a reply to GetServerReputation()
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamGameServerCallbacks + 9)]
-//    public struct GSReputation_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamGameServerCallbacks + 9;
-//        public EResult m_eResult;               // Result of the call;
-//        public uint m_unReputationScore;    // The reputation score for the game server
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bBanned;              // True if the server is banned from the Steam
-//                                            // master servers
-
-//        // The following members are only filled out if m_bBanned is true. They will all
-//        // be set to zero otherwise. Master server bans are by IP so it is possible to be
-//        // banned even when the score is good high if there is a bad server on another port.
-//        // This information can be used to determine which server is bad.
-
-//        public uint m_unBannedIP;       // The IP of the banned server
-//        public ushort m_usBannedPort;       // The port of the banned server
-//        public ulong m_ulBannedGameID;  // The game ID the banned server is serving
-//        public uint m_unBanExpires;     // Time the ban expires, expressed in the Unix epoch (seconds since 1/1/1970)
-//    }
-
-//    // Sent as a reply to AssociateWithClan()
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamGameServerCallbacks + 10)]
-//    public struct AssociateWithClanResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamGameServerCallbacks + 10;
-//        public EResult m_eResult;               // Result of the call;
-//    }
-
-//    // Sent as a reply to ComputeNewPlayerCompatibility()
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamGameServerCallbacks + 11)]
-//    public struct ComputeNewPlayerCompatibilityResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamGameServerCallbacks + 11;
-//        public EResult m_eResult;               // Result of the call;
-//        public int m_cPlayersThatDontLikeCandidate;
-//        public int m_cPlayersThatCandidateDoesntLike;
-//        public int m_cClanPlayersThatDontLikeCandidate;
-//        public CSteamID m_SteamIDCandidate;
-//    }
-
-//    // callbacks
-//    //-----------------------------------------------------------------------------
-//    // Purpose: called when the latests stats and achievements have been received
-//    //			from the server
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 4)]
-//    [CallbackIdentity(Constants.k_iSteamGameServerStatsCallbacks)]
-//    public struct GSStatsReceived_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamGameServerStatsCallbacks;
-//        public EResult m_eResult;       // Success / error fetching the stats
-//        public CSteamID m_steamIDUser;  // The user for whom the stats are retrieved for
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: result of a request to store the user stats for a game
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 4)]
-//    [CallbackIdentity(Constants.k_iSteamGameServerStatsCallbacks + 1)]
-//    public struct GSStatsStored_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamGameServerStatsCallbacks + 1;
-//        public EResult m_eResult;       // success / error
-//        public CSteamID m_steamIDUser;  // The user for whom the stats were stored
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Callback indicating that a user's stats have been unloaded.
-//    //  Call RequestUserStats again to access stats for this user
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUserStatsCallbacks + 8)]
-//    public struct GSStatsUnloaded_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUserStatsCallbacks + 8;
-//        public CSteamID m_steamIDUser;  // User whose stats have been unloaded
-//    }
-
-//    // callbacks
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The browser is ready for use
-//    //-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 1)]
-//    //public struct HTML_BrowserReady_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 1;
-//    //    public HHTMLBrowser unBrowserHandle; // this browser is now fully created and ready to navigate to pages
-//    //}
-
-//    ////-----------------------------------------------------------------------------
-//    //// Purpose: the browser has a pending paint
-//    ////-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 2)]
-//    //public struct HTML_NeedsPaint_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 2;
-//    //    public HHTMLBrowser unBrowserHandle; // the browser that needs the paint
-//    //    public IntPtr pBGRA; // a pointer to the B8G8R8A8 data for this surface, valid until SteamAPI_RunCallbacks is next called
-//    //    public uint unWide; // the total width of the pBGRA texture
-//    //    public uint unTall; // the total height of the pBGRA texture
-//    //    public uint unUpdateX; // the offset in X for the damage rect for this update
-//    //    public uint unUpdateY; // the offset in Y for the damage rect for this update
-//    //    public uint unUpdateWide; // the width of the damage rect for this update
-//    //    public uint unUpdateTall; // the height of the damage rect for this update
-//    //    public uint unScrollX; // the page scroll the browser was at when this texture was rendered
-//    //    public uint unScrollY; // the page scroll the browser was at when this texture was rendered
-//    //    public float flPageScale; // the page scale factor on this page when rendered
-//    //    public uint unPageSerial; // incremented on each new page load, you can use this to reject draws while navigating to new pages
-//    //}
-
-//    ////-----------------------------------------------------------------------------
-//    //// Purpose: The browser wanted to navigate to a new page
-//    ////   NOTE - you MUST call AllowStartRequest in response to this callback
-//    ////-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 3)]
-//    //public struct HTML_StartRequest_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 3;
-//    //    public HHTMLBrowser unBrowserHandle; // the handle of the surface navigating
-//    //    public string pchURL; // the url they wish to navigate to
-//    //    public string pchTarget; // the html link target type  (i.e _blank, _self, _parent, _top )
-//    //    public string pchPostData; // any posted data for the request
-//    //    [MarshalAs(UnmanagedType.I1)]
-//    //    public bool bIsRedirect; // true if this was a http/html redirect from the last load request
-//    //}
-
-//    ////-----------------------------------------------------------------------------
-//    //// Purpose: The browser has been requested to close due to user interaction (usually from a javascript window.close() call)
-//    ////-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 4)]
-//    //public struct HTML_CloseBrowser_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 4;
-//    //    public HHTMLBrowser unBrowserHandle; // the handle of the surface
-//    //}
-
-//    ////-----------------------------------------------------------------------------
-//    //// Purpose: the browser is navigating to a new url
-//    ////-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 5)]
-//    //public struct HTML_URLChanged_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 5;
-//    //    public HHTMLBrowser unBrowserHandle; // the handle of the surface navigating
-//    //    public string pchURL; // the url they wish to navigate to
-//    //    public string pchPostData; // any posted data for the request
-//    //    [MarshalAs(UnmanagedType.I1)]
-//    //    public bool bIsRedirect; // true if this was a http/html redirect from the last load request
-//    //    public string pchPageTitle; // the title of the page
-//    //    [MarshalAs(UnmanagedType.I1)]
-//    //    public bool bNewNavigation; // true if this was from a fresh tab and not a click on an existing page
-//    //}
-
-//    ////-----------------------------------------------------------------------------
-//    //// Purpose: A page is finished loading
-//    ////-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 6)]
-//    //public struct HTML_FinishedRequest_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 6;
-//    //    public HHTMLBrowser unBrowserHandle; // the handle of the surface
-//    //    public string pchURL; //
-//    //    public string pchPageTitle; //
-//    //}
-
-//    ////-----------------------------------------------------------------------------
-//    //// Purpose: a request to load this url in a new tab
-//    ////-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 7)]
-//    //public struct HTML_OpenLinkInNewTab_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 7;
-//    //    public HHTMLBrowser unBrowserHandle; // the handle of the surface
-//    //    public string pchURL; //
-//    //}
-
-//    ////-----------------------------------------------------------------------------
-//    //// Purpose: the page has a new title now
-//    ////-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 8)]
-//    //public struct HTML_ChangedTitle_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 8;
-//    //    public HHTMLBrowser unBrowserHandle; // the handle of the surface
-//    //    public string pchTitle; //
-//    //}
-
-//    ////-----------------------------------------------------------------------------
-//    //// Purpose: results from a search
-//    ////-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 9)]
-//    //public struct HTML_SearchResults_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 9;
-//    //    public HHTMLBrowser unBrowserHandle; // the handle of the surface
-//    //    public uint unResults; //
-//    //    public uint unCurrentMatch; //
-//    //}
-
-//    ////-----------------------------------------------------------------------------
-//    //// Purpose: page history status changed on the ability to go backwards and forward
-//    ////-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 10)]
-//    //public struct HTML_CanGoBackAndForward_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 10;
-//    //    public HHTMLBrowser unBrowserHandle; // the handle of the surface
-//    //    [MarshalAs(UnmanagedType.I1)]
-//    //    public bool bCanGoBack; //
-//    //    [MarshalAs(UnmanagedType.I1)]
-//    //    public bool bCanGoForward; //
-//    //}
-
-//    ////-----------------------------------------------------------------------------
-//    //// Purpose: details on the visibility and size of the horizontal scrollbar
-//    ////-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 11)]
-//    //public struct HTML_HorizontalScroll_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 11;
-//    //    public HHTMLBrowser unBrowserHandle; // the handle of the surface
-//    //    public uint unScrollMax; //
-//    //    public uint unScrollCurrent; //
-//    //    public float flPageScale; //
-//    //    [MarshalAs(UnmanagedType.I1)]
-//    //    public bool bVisible; //
-//    //    public uint unPageSize; //
-//    //}
-
-//    ////-----------------------------------------------------------------------------
-//    //// Purpose: details on the visibility and size of the vertical scrollbar
-//    ////-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 12)]
-//    //public struct HTML_VerticalScroll_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 12;
-//    //    public HHTMLBrowser unBrowserHandle; // the handle of the surface
-//    //    public uint unScrollMax; //
-//    //    public uint unScrollCurrent; //
-//    //    public float flPageScale; //
-//    //    [MarshalAs(UnmanagedType.I1)]
-//    //    public bool bVisible; //
-//    //    public uint unPageSize; //
-//    //}
-
-//    ////-----------------------------------------------------------------------------
-//    //// Purpose: response to GetLinkAtPosition call
-//    ////-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 13)]
-//    //public struct HTML_LinkAtPosition_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 13;
-//    //    public HHTMLBrowser unBrowserHandle; // the handle of the surface
-//    //    public uint x; // NOTE - Not currently set
-//    //    public uint y; // NOTE - Not currently set
-//    //    public string pchURL; //
-//    //    [MarshalAs(UnmanagedType.I1)]
-//    //    public bool bInput; //
-//    //    [MarshalAs(UnmanagedType.I1)]
-//    //    public bool bLiveLink; //
-//    //}
-
-//    ////-----------------------------------------------------------------------------
-//    //// Purpose: show a Javascript alert dialog, call JSDialogResponse
-//    ////   when the user dismisses this dialog (or right away to ignore it)
-//    ////-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 14)]
-//    //public struct HTML_JSAlert_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 14;
-//    //    public HHTMLBrowser unBrowserHandle; // the handle of the surface
-//    //    public string pchMessage; //
-//    //}
-
-//    ////-----------------------------------------------------------------------------
-//    //// Purpose: show a Javascript confirmation dialog, call JSDialogResponse
-//    ////   when the user dismisses this dialog (or right away to ignore it)
-//    ////-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 15)]
-//    //public struct HTML_JSConfirm_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 15;
-//    //    public HHTMLBrowser unBrowserHandle; // the handle of the surface
-//    //    public string pchMessage; //
-//    //}
-
-//    ////-----------------------------------------------------------------------------
-//    //// Purpose: when received show a file open dialog
-//    ////   then call FileLoadDialogResponse with the file(s) the user selected.
-//    ////-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 16)]
-//    //public struct HTML_FileOpenDialog_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 16;
-//    //    public HHTMLBrowser unBrowserHandle; // the handle of the surface
-//    //    public string pchTitle; //
-//    //    public string pchInitialFile; //
-//    //}
-
-//    ////-----------------------------------------------------------------------------
-//    //// Purpose: a new html window is being created.
-//    ////
-//    //// IMPORTANT NOTE: at this time, the API does not allow you to acknowledge or
-//    //// render the contents of this new window, so the new window is always destroyed
-//    //// immediately. The URL and other parameters of the new window are passed here
-//    //// to give your application the opportunity to call CreateBrowser and set up
-//    //// a new browser in response to the attempted popup, if you wish to do so.
-//    ////-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 21)]
-//    //public struct HTML_NewWindow_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 21;
-//    //    public HHTMLBrowser unBrowserHandle; // the handle of the current surface
-//    //    public string pchURL; // the page to load
-//    //    public uint unX; // the x pos into the page to display the popup
-//    //    public uint unY; // the y pos into the page to display the popup
-//    //    public uint unWide; // the total width of the pBGRA texture
-//    //    public uint unTall; // the total height of the pBGRA texture
-//    //    public HHTMLBrowser unNewWindow_BrowserHandle_IGNORE;
-//    //}
-
-//    ////-----------------------------------------------------------------------------
-//    //// Purpose: change the cursor to display
-//    ////-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 22)]
-//    //public struct HTML_SetCursor_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 22;
-//    //    public HHTMLBrowser unBrowserHandle; // the handle of the surface
-//    //    public uint eMouseCursor; // the EMouseCursor to display
-//    //}
-
-//    ////-----------------------------------------------------------------------------
-//    //// Purpose: informational message from the browser
-//    ////-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 23)]
-//    //public struct HTML_StatusText_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 23;
-//    //    public HHTMLBrowser unBrowserHandle; // the handle of the surface
-//    //    public string pchMsg; // the EMouseCursor to display
-//    //}
-
-//    ////-----------------------------------------------------------------------------
-//    //// Purpose: show a tooltip
-//    ////-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 24)]
-//    //public struct HTML_ShowToolTip_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 24;
-//    //    public HHTMLBrowser unBrowserHandle; // the handle of the surface
-//    //    public string pchMsg; // the EMouseCursor to display
-//    //}
-
-//    ////-----------------------------------------------------------------------------
-//    //// Purpose: update the text of an existing tooltip
-//    ////-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 25)]
-//    //public struct HTML_UpdateToolTip_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 25;
-//    //    public HHTMLBrowser unBrowserHandle; // the handle of the surface
-//    //    public string pchMsg; // the EMouseCursor to display
-//    //}
-
-//    ////-----------------------------------------------------------------------------
-//    //// Purpose: hide the tooltip you are showing
-//    ////-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 26)]
-//    //public struct HTML_HideToolTip_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 26;
-//    //    public HHTMLBrowser unBrowserHandle; // the handle of the surface
-//    //}
-
-//    ////-----------------------------------------------------------------------------
-//    //// Purpose: The browser has restarted due to an internal failure, use this new handle value
-//    ////-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamHTMLSurfaceCallbacks + 27)]
-//    //public struct HTML_BrowserRestarted_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamHTMLSurfaceCallbacks + 27;
-//    //    public HHTMLBrowser unBrowserHandle; // this is the new browser handle after the restart
-//    //    public HHTMLBrowser unOldBrowserHandle; // the handle for the browser before the restart, if your handle was this then switch to using unBrowserHandle for API calls
-//    //}
-
-//    // callbacks
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamHTTPCallbacks + 1)]
-//    public struct HTTPRequestCompleted_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamHTTPCallbacks + 1;
-
-//        // Handle value for the request that has completed.
-//        public HTTPRequestHandle m_hRequest;
-
-//        // Context value that the user defined on the request that this callback is associated with, 0 if
-//        // no context value was set.
-//        public ulong m_ulContextValue;
-
-//        // This will be true if we actually got any sort of response from the server (even an error).
-//        // It will be false if we failed due to an internal error or client side network failure.
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bRequestSuccessful;
-
-//        // Will be the HTTP status code value returned by the server, k_EHTTPStatusCode200OK is the normal
-//        // OK response, if you get something else you probably need to treat it as a failure.
-//        public EHTTPStatusCode m_eStatusCode;
-
-//        public uint m_unBodySize; // Same as GetHTTPResponseBodySize()
-//    }
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamHTTPCallbacks + 2)]
-//    public struct HTTPRequestHeadersReceived_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamHTTPCallbacks + 2;
-
-//        // Handle value for the request that has received headers.
-//        public HTTPRequestHandle m_hRequest;
-
-//        // Context value that the user defined on the request that this callback is associated with, 0 if
-//        // no context value was set.
-//        public ulong m_ulContextValue;
-//    }
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamHTTPCallbacks + 3)]
-//    public struct HTTPRequestDataReceived_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamHTTPCallbacks + 3;
-
-//        // Handle value for the request that has received data.
-//        public HTTPRequestHandle m_hRequest;
-
-//        // Context value that the user defined on the request that this callback is associated with, 0 if
-//        // no context value was set.
-//        public ulong m_ulContextValue;
-
-
-//        // Offset to provide to GetHTTPStreamingResponseBodyData to get this chunk of data
-//        public uint m_cOffset;
-
-//        // Size to provide to GetHTTPStreamingResponseBodyData to get this chunk of data
-//        public uint m_cBytesReceived;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: called when a new controller has been connected, will fire once
-//    // per controller if multiple new controllers connect in the same frame
-//    //-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamControllerCallbacks + 1)]
-//    //public struct SteamInputDeviceConnected_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamControllerCallbacks + 1;
-//    //    public InputHandle_t m_ulConnectedDeviceHandle; // Handle for device
-//    //}
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: called when a new controller has been connected, will fire once
-//    // per controller if multiple new controllers connect in the same frame
-//    //-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamControllerCallbacks + 2)]
-//    //public struct SteamInputDeviceDisconnected_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamControllerCallbacks + 2;
-//    //    public InputHandle_t m_ulDisconnectedDeviceHandle;  // Handle for device
-//    //}
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: called when a controller configuration has been loaded, will fire once
-//    // per controller per focus change for Steam Input enabled controllers
-//    //-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamControllerCallbacks + 3)]
-//    //public struct SteamInputConfigurationLoaded_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamControllerCallbacks + 3;
-//    //    public AppId_t m_unAppID;
-//    //    public InputHandle_t m_ulDeviceHandle;      // Handle for device
-//    //    public CSteamID m_ulMappingCreator;     // May differ from local user when using
-//    //                                            // an unmodified community or official config
-//    //    public uint m_unMajorRevision;      // Binding revision from In-game Action File.
-//    //                                        // Same value as queried by GetDeviceBindingRevision
-//    //    public uint m_unMinorRevision;
-//    //    [MarshalAs(UnmanagedType.I1)]
-//    //    public bool m_bUsesSteamInputAPI;   // Does the configuration contain any Analog/Digital actions?
-//    //    [MarshalAs(UnmanagedType.I1)]
-//    //    public bool m_bUsesGamepadAPI;      // Does the configuration contain any Xinput bindings?
-//    //}
-
-//    // SteamInventoryResultReady_t callbacks are fired whenever asynchronous
-//    // results transition from "Pending" to "OK" or an error state. There will
-//    // always be exactly one callback per handle.
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamInventoryCallbacks + 0)]
-//    public struct SteamInventoryResultReady_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamInventoryCallbacks + 0;
-//        public SteamInventoryResult_t m_handle;
-//        public EResult m_result;
-//    }
-
-//    // SteamInventoryFullUpdate_t callbacks are triggered when GetAllItems
-//    // successfully returns a result which is newer / fresher than the last
-//    // known result. (It will not trigger if the inventory hasn't changed,
-//    // or if results from two overlapping calls are reversed in flight and
-//    // the earlier result is already known to be stale/out-of-date.)
-//    // The normal ResultReady callback will still be triggered immediately
-//    // afterwards; this is an additional notification for your convenience.
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamInventoryCallbacks + 1)]
-//    public struct SteamInventoryFullUpdate_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamInventoryCallbacks + 1;
-//        public SteamInventoryResult_t m_handle;
-//    }
-
-//    // A SteamInventoryDefinitionUpdate_t callback is triggered whenever
-//    // item definitions have been updated, which could be in response to
-//    // LoadItemDefinitions() or any other async request which required
-//    // a definition update in order to process results from the server.
-//    [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 1)]
-//    [CallbackIdentity(Constants.k_iSteamInventoryCallbacks + 2)]
-//    public struct SteamInventoryDefinitionUpdate_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamInventoryCallbacks + 2;
-//    }
-
-//    // Returned
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamInventoryCallbacks + 3)]
-//    public struct SteamInventoryEligiblePromoItemDefIDs_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamInventoryCallbacks + 3;
-//        public EResult m_result;
-//        public CSteamID m_steamID;
-//        public int m_numEligiblePromoItemDefs;
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bCachedData;  // indicates that the data was retrieved from the cache and not the server
-//    }
-
-//    // Triggered from StartPurchase call
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamInventoryCallbacks + 4)]
-//    public struct SteamInventoryStartPurchaseResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamInventoryCallbacks + 4;
-//        public EResult m_result;
-//        public ulong m_ulOrderID;
-//        public ulong m_ulTransID;
-//    }
-
-//    // Triggered from RequestPrices
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamInventoryCallbacks + 5)]
-//    public struct SteamInventoryRequestPricesResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamInventoryCallbacks + 5;
-//        public EResult m_result;
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-//        private byte[] m_rgchCurrency_;
-//        public string m_rgchCurrency
-//        {
-//            get { return InteropHelp.ByteArrayToStringUTF8(m_rgchCurrency_); }
-//            set { InteropHelp.StringToByteArrayUTF8(value, m_rgchCurrency_, 4); }
-//        }
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Callbacks for ISteamMatchmaking (which go through the regular Steam callback registration system)
-//    //-----------------------------------------------------------------------------
-//    // Purpose: a server was added/removed from the favorites list, you should refresh now
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamMatchmakingCallbacks + 2)]
-//    public struct FavoritesListChanged_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMatchmakingCallbacks + 2;
-//        public uint m_nIP; // an IP of 0 means reload the whole list, any other value means just one server
-//        public uint m_nQueryPort;
-//        public uint m_nConnPort;
-//        public uint m_nAppID;
-//        public uint m_nFlags;
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bAdd; // true if this is adding the entry, otherwise it is a remove
-//        public AccountID_t m_unAccountId;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Someone has invited you to join a Lobby
-//    //			normally you don't need to do anything with this, since
-//    //			the Steam UI will also display a '<user> has invited you to the lobby, join?' dialog
-//    //
-//    //			if the user outside a game chooses to join, your game will be launched with the parameter "+connect_lobby <64-bit lobby id>",
-//    //			or with the callback GameLobbyJoinRequested_t if they're already in-game
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamMatchmakingCallbacks + 3)]
-//    public struct LobbyInvite_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMatchmakingCallbacks + 3;
-
-//        public ulong m_ulSteamIDUser;       // Steam ID of the person making the invite
-//        public ulong m_ulSteamIDLobby;  // Steam ID of the Lobby
-//        public ulong m_ulGameID;            // GameID of the Lobby
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Sent on entering a lobby, or on failing to enter
-//    //			m_EChatRoomEnterResponse will be set to k_EChatRoomEnterResponseSuccess on success,
-//    //			or a higher value on failure (see enum EChatRoomEnterResponse)
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamMatchmakingCallbacks + 4)]
-//    public struct LobbyEnter_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMatchmakingCallbacks + 4;
-
-//        public ulong m_ulSteamIDLobby;                          // SteamID of the Lobby you have entered
-//        public uint m_rgfChatPermissions;                       // Permissions of the current user
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bLocked;                                      // If true, then only invited users may join
-//        public uint m_EChatRoomEnterResponse;   // EChatRoomEnterResponse
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The lobby metadata has changed
-//    //			if m_ulSteamIDMember is the steamID of a lobby member, use GetLobbyMemberData() to access per-user details
-//    //			if m_ulSteamIDMember == m_ulSteamIDLobby, use GetLobbyData() to access lobby metadata
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamMatchmakingCallbacks + 5)]
-//    public struct LobbyDataUpdate_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMatchmakingCallbacks + 5;
-
-//        public ulong m_ulSteamIDLobby;      // steamID of the Lobby
-//        public ulong m_ulSteamIDMember;     // steamID of the member whose data changed, or the room itself
-//        public byte m_bSuccess;             // true if we lobby data was successfully changed;
-//                                            // will only be false if RequestLobbyData() was called on a lobby that no longer exists
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The lobby chat room state has changed
-//    //			this is usually sent when a user has joined or left the lobby
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamMatchmakingCallbacks + 6)]
-//    public struct LobbyChatUpdate_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMatchmakingCallbacks + 6;
-
-//        public ulong m_ulSteamIDLobby;          // Lobby ID
-//        public ulong m_ulSteamIDUserChanged;        // user who's status in the lobby just changed - can be recipient
-//        public ulong m_ulSteamIDMakingChange;       // Chat member who made the change (different from SteamIDUserChange if kicking, muting, etc.)
-//                                                    // for example, if one user kicks another from the lobby, this will be set to the id of the user who initiated the kick
-//        public uint m_rgfChatMemberStateChange; // bitfield of EChatMemberStateChange values
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: A chat message for this lobby has been sent
-//    //			use GetLobbyChatEntry( m_iChatID ) to retrieve the contents of this message
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamMatchmakingCallbacks + 7)]
-//    public struct LobbyChatMsg_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMatchmakingCallbacks + 7;
-
-//        public ulong m_ulSteamIDLobby;          // the lobby id this is in
-//        public ulong m_ulSteamIDUser;           // steamID of the user who has sent this message
-//        public byte m_eChatEntryType;           // type of message
-//        public uint m_iChatID;              // index of the chat entry to lookup
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: A game created a game for all the members of the lobby to join,
-//    //			as triggered by a SetLobbyGameServer()
-//    //			it's up to the individual clients to take action on this; the usual
-//    //			game behavior is to leave the lobby and connect to the specified game server
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamMatchmakingCallbacks + 9)]
-//    public struct LobbyGameCreated_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMatchmakingCallbacks + 9;
-
-//        public ulong m_ulSteamIDLobby;      // the lobby we were in
-//        public ulong m_ulSteamIDGameServer; // the new game server that has been created or found for the lobby members
-//        public uint m_unIP;                 // IP & Port of the game server (if any)
-//        public ushort m_usPort;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Number of matching lobbies found
-//    //			iterate the returned lobbies with GetLobbyByIndex(), from values 0 to m_nLobbiesMatching-1
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamMatchmakingCallbacks + 10)]
-//    public struct LobbyMatchList_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMatchmakingCallbacks + 10;
-//        public uint m_nLobbiesMatching;     // Number of lobbies that matched search criteria and we have SteamIDs for
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: posted if a user is forcefully removed from a lobby
-//    //			can occur if a user loses connection to Steam
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamMatchmakingCallbacks + 12)]
-//    public struct LobbyKicked_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMatchmakingCallbacks + 12;
-//        public ulong m_ulSteamIDLobby;          // Lobby
-//        public ulong m_ulSteamIDAdmin;          // User who kicked you - possibly the ID of the lobby itself
-//        public byte m_bKickedDueToDisconnect;       // true if you were kicked from the lobby due to the user losing connection to Steam (currently always true)
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Result of our request to create a Lobby
-//    //			m_eResult == k_EResultOK on success
-//    //			at this point, the lobby has been joined and is ready for use
-//    //			a LobbyEnter_t callback will also be received (since the local user is joining their own lobby)
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamMatchmakingCallbacks + 13)]
-//    public struct LobbyCreated_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMatchmakingCallbacks + 13;
-
-//        public EResult m_eResult;       // k_EResultOK - the lobby was successfully created
-//                                        // k_EResultNoConnection - your Steam client doesn't have a connection to the back-end
-//                                        // k_EResultTimeout - you the message to the Steam servers, but it didn't respond
-//                                        // k_EResultFail - the server responded, but with an unknown internal error
-//                                        // k_EResultAccessDenied - your game isn't set to allow lobbies, or your client does haven't rights to play the game
-//                                        // k_EResultLimitExceeded - your game client has created too many lobbies
-
-//        public ulong m_ulSteamIDLobby;      // chat room, zero if failed
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Result of our request to create a Lobby
-//    //			m_eResult == k_EResultOK on success
-//    //			at this point, the lobby has been joined and is ready for use
-//    //			a LobbyEnter_t callback will also be received (since the local user is joining their own lobby)
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamMatchmakingCallbacks + 16)]
-//    public struct FavoritesListAccountsUpdated_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMatchmakingCallbacks + 16;
-
-//        public EResult m_eResult;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Callbacks for ISteamGameSearch (which go through the regular Steam callback registration system)
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamGameSearchCallbacks + 1)]
-//    public struct SearchForGameProgressCallback_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamGameSearchCallbacks + 1;
-
-//        public ulong m_ullSearchID; // all future callbacks referencing this search will include this Search ID
-
-//        public EResult m_eResult; // if search has started this result will be k_EResultOK, any other value indicates search has failed to start or has terminated
-//        public CSteamID m_lobbyID; // lobby ID if lobby search, invalid steamID otherwise
-//        public CSteamID m_steamIDEndedSearch; // if search was terminated, steamID that terminated search
-
-//        public int m_nSecondsRemainingEstimate;
-//        public int m_cPlayersSearching;
-//    }
-
-//    // notification to all players searching that a game has been found
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamGameSearchCallbacks + 2)]
-//    public struct SearchForGameResultCallback_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamGameSearchCallbacks + 2;
-
-//        public ulong m_ullSearchID;
-
-//        public EResult m_eResult; // if game/host was lost this will be an error value
-
-//        // if m_bGameFound is true the following are non-zero
-//        public int m_nCountPlayersInGame;
-//        public int m_nCountAcceptedGame;
-//        // if m_steamIDHost is valid the host has started the game
-//        public CSteamID m_steamIDHost;
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bFinalCallback;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // ISteamGameSearch : Game Host API callbacks
-//    // callback from RequestPlayersForGame when the matchmaking service has started or ended search
-//    // callback will also follow a call from CancelRequestPlayersForGame - m_bSearchInProgress will be false
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamGameSearchCallbacks + 11)]
-//    public struct RequestPlayersForGameProgressCallback_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamGameSearchCallbacks + 11;
-
-//        public EResult m_eResult;       // m_ullSearchID will be non-zero if this is k_EResultOK
-//        public ulong m_ullSearchID;     // all future callbacks referencing this search will include this Search ID
-//    }
-
-//    // callback from RequestPlayersForGame
-//    // one of these will be sent per player
-//    // followed by additional callbacks when players accept or decline the game
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamGameSearchCallbacks + 12)]
-//    //public struct RequestPlayersForGameResultCallback_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamGameSearchCallbacks + 12;
-
-//    //    public EResult m_eResult;       // m_ullSearchID will be non-zero if this is k_EResultOK
-//    //    public ulong m_ullSearchID;
-
-//    //    public CSteamID m_SteamIDPlayerFound; // player steamID
-//    //    public CSteamID m_SteamIDLobby; // if the player is in a lobby, the lobby ID
-//    //    public PlayerAcceptState_t m_ePlayerAcceptState;
-//    //    public int m_nPlayerIndex;
-//    //    public int m_nTotalPlayersFound;        // expect this many callbacks at minimum
-//    //    public int m_nTotalPlayersAcceptedGame;
-//    //    public int m_nSuggestedTeamIndex;
-//    //    public ulong m_ullUniqueGameID;
-//    //}
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamGameSearchCallbacks + 13)]
-//    public struct RequestPlayersForGameFinalResultCallback_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamGameSearchCallbacks + 13;
-
-//        public EResult m_eResult;
-//        public ulong m_ullSearchID;
-//        public ulong m_ullUniqueGameID;
-//    }
-
-//    // this callback confirms that results were received by the matchmaking service for this player
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamGameSearchCallbacks + 14)]
-//    public struct SubmitPlayerResultResultCallback_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamGameSearchCallbacks + 14;
-
-//        public EResult m_eResult;
-//        public ulong ullUniqueGameID;
-//        public CSteamID steamIDPlayer;
-//    }
-
-//    // this callback confirms that the game is recorded as complete on the matchmaking service
-//    // the next call to RequestPlayersForGame will generate a new unique game ID
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamGameSearchCallbacks + 15)]
-//    public struct EndGameResultCallback_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamGameSearchCallbacks + 15;
-
-//        public EResult m_eResult;
-//        public ulong ullUniqueGameID;
-//    }
-
-//    // Steam has responded to the user request to join a party via the given Beacon ID.
-//    // If successful, the connect string contains game-specific instructions to connect
-//    // to the game with that party.
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamPartiesCallbacks + 1)]
-//    //public struct JoinPartyCallback_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamPartiesCallbacks + 1;
-
-//    //    public EResult m_eResult;
-//    //    public PartyBeaconID_t m_ulBeaconID;
-//    //    public CSteamID m_SteamIDBeaconOwner;
-//    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
-//    //    private byte[] m_rgchConnectString_;
-//    //    public string m_rgchConnectString
-//    //    {
-//    //        get { return InteropHelp.ByteArrayToStringUTF8(m_rgchConnectString_); }
-//    //        set { InteropHelp.StringToByteArrayUTF8(value, m_rgchConnectString_, 256); }
-//    //    }
-//    //}
-
-//    // Response to CreateBeacon request. If successful, the beacon ID is provided.
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamPartiesCallbacks + 2)]
-//    //public struct CreateBeaconCallback_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamPartiesCallbacks + 2;
-
-//    //    public EResult m_eResult;
-//    //    public PartyBeaconID_t m_ulBeaconID;
-//    //}
-
-//    // Someone has used the beacon to join your party - they are in-flight now
-//    // and we've reserved one of the open slots for them.
-//    // You should confirm when they join your party by calling OnReservationCompleted().
-//    // Otherwise, Steam may timeout their reservation eventually.
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamPartiesCallbacks + 3)]
-//    //public struct ReservationNotificationCallback_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamPartiesCallbacks + 3;
-
-//    //    public PartyBeaconID_t m_ulBeaconID;
-//    //    public CSteamID m_steamIDJoiner;
-//    //}
-
-//    // Response to ChangeNumOpenSlots call
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamPartiesCallbacks + 4)]
-//    public struct ChangeNumOpenSlotsCallback_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamPartiesCallbacks + 4;
-
-//        public EResult m_eResult;
-//    }
-
-//    // The list of possible Party beacon locations has changed
-//    [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 1)]
-//    [CallbackIdentity(Constants.k_iSteamPartiesCallbacks + 5)]
-//    public struct AvailableBeaconLocationsUpdated_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamPartiesCallbacks + 5;
-//    }
-
-//    // The list of active beacons may have changed
-//    [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 1)]
-//    [CallbackIdentity(Constants.k_iSteamPartiesCallbacks + 6)]
-//    public struct ActiveBeaconsUpdated_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamPartiesCallbacks + 6;
-//    }
-
-//    // callbacks
-//    [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 1)]
-//    [CallbackIdentity(Constants.k_iSteamMusicCallbacks + 1)]
-//    public struct PlaybackStatusHasChanged_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMusicCallbacks + 1;
-//    }
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamMusicCallbacks + 2)]
-//    public struct VolumeHasChanged_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMusicCallbacks + 2;
-//        public float m_flNewVolume;
-//    }
-
-//    // callbacks
-//    [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 1)]
-//    [CallbackIdentity(Constants.k_iSteamMusicRemoteCallbacks + 1)]
-//    public struct MusicPlayerRemoteWillActivate_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMusicRemoteCallbacks + 1;
-//    }
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 1)]
-//    [CallbackIdentity(Constants.k_iSteamMusicRemoteCallbacks + 2)]
-//    public struct MusicPlayerRemoteWillDeactivate_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMusicRemoteCallbacks + 2;
-//    }
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 1)]
-//    [CallbackIdentity(Constants.k_iSteamMusicRemoteCallbacks + 3)]
-//    public struct MusicPlayerRemoteToFront_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMusicRemoteCallbacks + 3;
-//    }
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 1)]
-//    [CallbackIdentity(Constants.k_iSteamMusicRemoteCallbacks + 4)]
-//    public struct MusicPlayerWillQuit_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMusicRemoteCallbacks + 4;
-//    }
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 1)]
-//    [CallbackIdentity(Constants.k_iSteamMusicRemoteCallbacks + 5)]
-//    public struct MusicPlayerWantsPlay_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMusicRemoteCallbacks + 5;
-//    }
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 1)]
-//    [CallbackIdentity(Constants.k_iSteamMusicRemoteCallbacks + 6)]
-//    public struct MusicPlayerWantsPause_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMusicRemoteCallbacks + 6;
-//    }
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 1)]
-//    [CallbackIdentity(Constants.k_iSteamMusicRemoteCallbacks + 7)]
-//    public struct MusicPlayerWantsPlayPrevious_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMusicRemoteCallbacks + 7;
-//    }
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 1)]
-//    [CallbackIdentity(Constants.k_iSteamMusicRemoteCallbacks + 8)]
-//    public struct MusicPlayerWantsPlayNext_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMusicRemoteCallbacks + 8;
-//    }
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamMusicRemoteCallbacks + 9)]
-//    public struct MusicPlayerWantsShuffled_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMusicRemoteCallbacks + 9;
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bShuffled;
-//    }
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamMusicRemoteCallbacks + 10)]
-//    public struct MusicPlayerWantsLooped_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMusicRemoteCallbacks + 10;
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bLooped;
-//    }
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamMusicCallbacks + 11)]
-//    public struct MusicPlayerWantsVolume_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMusicCallbacks + 11;
-//        public float m_flNewVolume;
-//    }
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamMusicCallbacks + 12)]
-//    public struct MusicPlayerSelectsQueueEntry_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMusicCallbacks + 12;
-//        public int nID;
-//    }
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamMusicCallbacks + 13)]
-//    public struct MusicPlayerSelectsPlaylistEntry_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMusicCallbacks + 13;
-//        public int nID;
-//    }
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamMusicRemoteCallbacks + 14)]
-//    public struct MusicPlayerWantsPlayingRepeatStatus_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamMusicRemoteCallbacks + 14;
-//        public int m_nPlayingRepeatStatus;
-//    }
-
-//    // callbacks
-//    // callback notification - a user wants to talk to us over the P2P channel via the SendP2PPacket() API
-//    // in response, a call to AcceptP2PPacketsFromUser() needs to be made, if you want to talk with them
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamNetworkingCallbacks + 2)]
-//    public struct P2PSessionRequest_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamNetworkingCallbacks + 2;
-//        public CSteamID m_steamIDRemote;            // user who wants to talk to us
-//    }
-
-//    // callback notification - packets can't get through to the specified user via the SendP2PPacket() API
-//    // all packets queued packets unsent at this point will be dropped
-//    // further attempts to send will retry making the connection (but will be dropped if we fail again)
-//    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-//    [CallbackIdentity(Constants.k_iSteamNetworkingCallbacks + 3)]
-//    public struct P2PSessionConnectFail_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamNetworkingCallbacks + 3;
-//        public CSteamID m_steamIDRemote;            // user we were sending packets to
-//        public byte m_eP2PSessionError;         // EP2PSessionError indicating why we're having trouble
-//    }
-
-//    // callback notification - status of a socket has changed
-//    // used as part of the CreateListenSocket() / CreateP2PConnectionSocket()
-//    [StructLayout(LayoutKind.Sequential, Pack = 4)]
-//    [CallbackIdentity(Constants.k_iSteamNetworkingCallbacks + 1)]
-//    public struct SocketStatusCallback_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamNetworkingCallbacks + 1;
-//        public SNetSocket_t m_hSocket;              // the socket used to send/receive data to the remote host
-//        public SNetListenSocket_t m_hListenSocket;  // this is the server socket that we were listening on; NULL if this was an outgoing connection
-//        public CSteamID m_steamIDRemote;            // remote steamID we have connected to, if it has one
-//        public int m_eSNetSocketState;              // socket state, ESNetSocketState
-//    }
-
-//    //
-//    // Callbacks
-//    //
-//    /// Posted when a remote host is sending us a message, and we do not already have a session with them
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamNetworkingMessagesCallbacks + 1)]
-//    //public struct SteamNetworkingMessagesSessionRequest_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamNetworkingMessagesCallbacks + 1;
-//    //    public SteamNetworkingIdentity m_identityRemote;            // user who wants to talk to us
-//    //}
-
-//    /// Posted when we fail to establish a connection, or we detect that communications
-//    /// have been disrupted it an unusual way.  There is no notification when a peer proactively
-//    /// closes the session.  ("Closed by peer" is not a concept of UDP-style communications, and
-//    /// SteamNetworkingMessages is primarily intended to make porting UDP code easy.)
-//    ///
-//    /// Remember: callbacks are asynchronous.   See notes on SendMessageToUser,
-//    /// and k_nSteamNetworkingSend_AutoRestartBrokenSession in particular.
-//    ///
-//    /// Also, if a session times out due to inactivity, no callbacks will be posted.  The only
-//    /// way to detect that this is happening is that querying the session state may return
-//    /// none, connecting, and findingroute again.
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamNetworkingMessagesCallbacks + 2)]
-//    //public struct SteamNetworkingMessagesSessionFailed_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamNetworkingMessagesCallbacks + 2;
-
-//    //    /// Detailed info about the session that failed.
-//    //    /// SteamNetConnectionInfo_t::m_identityRemote indicates who this session
-//    //    /// was with.
-//    //    public SteamNetConnectionInfo_t m_info;
-//    //}
-
-//    /// Callback struct used to notify when a connection has changed state
-//    /// This callback is posted whenever a connection is created, destroyed, or changes state.
-//    /// The m_info field will contain a complete description of the connection at the time the
-//    /// change occurred and the callback was posted.  In particular, m_eState will have the
-//    /// new connection state.
-//    ///
-//    /// You will usually need to listen for this callback to know when:
-//    /// - A new connection arrives on a listen socket.
-//    ///   m_info.m_hListenSocket will be set, m_eOldState = k_ESteamNetworkingConnectionState_None,
-//    ///   and m_info.m_eState = k_ESteamNetworkingConnectionState_Connecting.
-//    ///   See ISteamNetworkigSockets::AcceptConnection.
-//    /// - A connection you initiated has been accepted by the remote host.
-//    ///   m_eOldState = k_ESteamNetworkingConnectionState_Connecting, and
-//    ///   m_info.m_eState = k_ESteamNetworkingConnectionState_Connected.
-//    ///   Some connections might transition to k_ESteamNetworkingConnectionState_FindingRoute first.
-//    /// - A connection has been actively rejected or closed by the remote host.
-//    ///   m_eOldState = k_ESteamNetworkingConnectionState_Connecting or k_ESteamNetworkingConnectionState_Connected,
-//    ///   and m_info.m_eState = k_ESteamNetworkingConnectionState_ClosedByPeer.  m_info.m_eEndReason
-//    ///   and m_info.m_szEndDebug will have for more details.
-//    ///   NOTE: upon receiving this callback, you must still destroy the connection using
-//    ///   ISteamNetworkingSockets::CloseConnection to free up local resources.  (The details
-//    ///   passed to the function are not used in this case, since the connection is already closed.)
-//    /// - A problem was detected with the connection, and it has been closed by the local host.
-//    ///   The most common failure is timeout, but other configuration or authentication failures
-//    ///   can cause this.  m_eOldState = k_ESteamNetworkingConnectionState_Connecting or
-//    ///   k_ESteamNetworkingConnectionState_Connected, and m_info.m_eState = k_ESteamNetworkingConnectionState_ProblemDetectedLocally.
-//    ///   m_info.m_eEndReason and m_info.m_szEndDebug will have for more details.
-//    ///   NOTE: upon receiving this callback, you must still destroy the connection using
-//    ///   ISteamNetworkingSockets::CloseConnection to free up local resources.  (The details
-//    ///   passed to the function are not used in this case, since the connection is already closed.)
-//    ///
-//    /// Remember that callbacks are posted to a queue, and networking connections can
-//    /// change at any time.  It is possible that the connection has already changed
-//    /// state by the time you process this callback.
-//    ///
-//    /// Also note that callbacks will be posted when connections are created and destroyed by your own API calls.
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamNetworkingSocketsCallbacks + 1)]
-//    //public struct SteamNetConnectionStatusChangedCallback_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamNetworkingSocketsCallbacks + 1;
-
-//    //    /// Connection handle
-//    //    public HSteamNetConnection m_hConn;
-
-//    //    /// Full connection info
-//    //    public SteamNetConnectionInfo_t m_info;
-
-//    //    /// Previous state.  (Current state is in m_info.m_eState)
-//    //    public ESteamNetworkingConnectionState m_eOldState;
-//    //}
-
-//    /// A struct used to describe our readiness to participate in authenticated,
-//    /// encrypted communication.  In order to do this we need:
-//    ///
-//    /// - The list of trusted CA certificates that might be relevant for this
-//    ///   app.
-//    /// - A valid certificate issued by a CA.
-//    ///
-//    /// This callback is posted whenever the state of our readiness changes.
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamNetworkingSocketsCallbacks + 2)]
-//    public struct SteamNetAuthenticationStatus_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamNetworkingSocketsCallbacks + 2;
-
-//        /// Status
-//        public ESteamNetworkingAvailability m_eAvail;
-
-//        /// Non-localized English language status.  For diagnostic/debugging
-//        /// purposes only.
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
-//        private byte[] m_debugMsg_;
-//        public string m_debugMsg
-//        {
-//            get { return InteropHelp.ByteArrayToStringUTF8(m_debugMsg_); }
-//            set { InteropHelp.StringToByteArrayUTF8(value, m_debugMsg_, 256); }
-//        }
-//    }
-
-//    /// A struct used to describe our readiness to use the relay network.
-//    /// To do this we first need to fetch the network configuration,
-//    /// which describes what POPs are available.
-//    [CallbackIdentity(Constants.k_iSteamNetworkingUtilsCallbacks + 1)]
-//    public struct SteamRelayNetworkStatus_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamNetworkingUtilsCallbacks + 1;
-
-//        /// Summary status.  When this is "current", initialization has
-//        /// completed.  Anything else means you are not ready yet, or
-//        /// there is a significant problem.
-//        public ESteamNetworkingAvailability m_eAvail;
-
-//        /// Nonzero if latency measurement is in progress (or pending,
-//        /// awaiting a prerequisite).
-//        public int m_bPingMeasurementInProgress;
-
-//        /// Status obtaining the network config.  This is a prerequisite
-//        /// for relay network access.
-//        ///
-//        /// Failure to obtain the network config almost always indicates
-//        /// a problem with the local internet connection.
-//        public ESteamNetworkingAvailability m_eAvailNetworkConfig;
-
-//        /// Current ability to communicate with ANY relay.  Note that
-//        /// the complete failure to communicate with any relays almost
-//        /// always indicates a problem with the local Internet connection.
-//        /// (However, just because you can reach a single relay doesn't
-//        /// mean that the local connection is in perfect health.)
-//        public ESteamNetworkingAvailability m_eAvailAnyRelay;
-
-//        /// Non-localized English language status.  For diagnostic/debugging
-//        /// purposes only.
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
-//        private byte[] m_debugMsg_;
-//        public string m_debugMsg
-//        {
-//            get { return InteropHelp.ByteArrayToStringUTF8(m_debugMsg_); }
-//            set { InteropHelp.StringToByteArrayUTF8(value, m_debugMsg_, 256); }
-//        }
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Callback for querying UGC
-//    //-----------------------------------------------------------------------------
-//    [CallbackIdentity(Constants.k_ISteamParentalSettingsCallbacks + 1)]
-//    public struct SteamParentalSettingsChanged_t
-//    {
-//        public const int k_iCallback = Constants.k_ISteamParentalSettingsCallbacks + 1;
-//    }
-
-//    // callbacks
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamRemotePlayCallbacks + 1)]
-//    //public struct SteamRemotePlaySessionConnected_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamRemotePlayCallbacks + 1;
-//    //    public RemotePlaySessionID_t m_unSessionID;
-//    //}
-
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamRemotePlayCallbacks + 2)]
-//    //public struct SteamRemotePlaySessionDisconnected_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamRemotePlayCallbacks + 2;
-//    //    public RemotePlaySessionID_t m_unSessionID;
-//    //}
-
-//    // callbacks
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The result of a call to FileShare()
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamRemoteStorageCallbacks + 7)]
-//    public struct RemoteStorageFileShareResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamRemoteStorageCallbacks + 7;
-//        public EResult m_eResult;           // The result of the operation
-//        public UGCHandle_t m_hFile;     // The handle that can be shared with users and features
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.k_cchFilenameMax)]
-//        private byte[] m_rgchFilename_;
-//        public string m_rgchFilename // The name of the file that was shared
-//        {
-//            get { return InteropHelp.ByteArrayToStringUTF8(m_rgchFilename_); }
-//            set { InteropHelp.StringToByteArrayUTF8(value, m_rgchFilename_, Constants.k_cchFilenameMax); }
-//        }
-//    }
-
-//    // k_iSteamRemoteStorageCallbacks + 8 is deprecated! Do not reuse
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The result of a call to PublishFile()
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamRemoteStorageCallbacks + 9)]
-//    public struct RemoteStoragePublishFileResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamRemoteStorageCallbacks + 9;
-//        public EResult m_eResult;               // The result of the operation.
-//        public PublishedFileId_t m_nPublishedFileId;
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bUserNeedsToAcceptWorkshopLegalAgreement;
-//    }
-
-//    // k_iSteamRemoteStorageCallbacks + 10 is deprecated! Do not reuse
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The result of a call to DeletePublishedFile()
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamRemoteStorageCallbacks + 11)]
-//    public struct RemoteStorageDeletePublishedFileResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamRemoteStorageCallbacks + 11;
-//        public EResult m_eResult;               // The result of the operation.
-//        public PublishedFileId_t m_nPublishedFileId;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The result of a call to EnumerateUserPublishedFiles()
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamRemoteStorageCallbacks + 12)]
-//    public struct RemoteStorageEnumerateUserPublishedFilesResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamRemoteStorageCallbacks + 12;
-//        public EResult m_eResult;               // The result of the operation.
-//        public int m_nResultsReturned;
-//        public int m_nTotalResultCount;
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.k_unEnumeratePublishedFilesMaxResults)]
-//        public PublishedFileId_t[] m_rgPublishedFileId;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The result of a call to SubscribePublishedFile()
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamRemoteStorageCallbacks + 13)]
-//    public struct RemoteStorageSubscribePublishedFileResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamRemoteStorageCallbacks + 13;
-//        public EResult m_eResult;               // The result of the operation.
-//        public PublishedFileId_t m_nPublishedFileId;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The result of a call to EnumerateSubscribePublishedFiles()
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamRemoteStorageCallbacks + 14)]
-//    public struct RemoteStorageEnumerateUserSubscribedFilesResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamRemoteStorageCallbacks + 14;
-//        public EResult m_eResult;               // The result of the operation.
-//        public int m_nResultsReturned;
-//        public int m_nTotalResultCount;
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.k_unEnumeratePublishedFilesMaxResults)]
-//        public PublishedFileId_t[] m_rgPublishedFileId;
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.k_unEnumeratePublishedFilesMaxResults)]
-//        public uint[] m_rgRTimeSubscribed;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The result of a call to UnsubscribePublishedFile()
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamRemoteStorageCallbacks + 15)]
-//    public struct RemoteStorageUnsubscribePublishedFileResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamRemoteStorageCallbacks + 15;
-//        public EResult m_eResult;               // The result of the operation.
-//        public PublishedFileId_t m_nPublishedFileId;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The result of a call to CommitPublishedFileUpdate()
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamRemoteStorageCallbacks + 16)]
-//    public struct RemoteStorageUpdatePublishedFileResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamRemoteStorageCallbacks + 16;
-//        public EResult m_eResult;               // The result of the operation.
-//        public PublishedFileId_t m_nPublishedFileId;
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bUserNeedsToAcceptWorkshopLegalAgreement;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The result of a call to UGCDownload()
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamRemoteStorageCallbacks + 17)]
-//    public struct RemoteStorageDownloadUGCResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamRemoteStorageCallbacks + 17;
-//        public EResult m_eResult;               // The result of the operation.
-//        public UGCHandle_t m_hFile;         // The handle to the file that was attempted to be downloaded.
-//        public AppId_t m_nAppID;                // ID of the app that created this file.
-//        public int m_nSizeInBytes;          // The size of the file that was downloaded, in bytes.
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.k_cchFilenameMax)]
-//        private byte[] m_pchFileName_;
-//        public string m_pchFileName     // The name of the file that was downloaded.
-//        {
-//            get { return InteropHelp.ByteArrayToStringUTF8(m_pchFileName_); }
-//            set { InteropHelp.StringToByteArrayUTF8(value, m_pchFileName_, Constants.k_cchFilenameMax); }
-//        }
-//        public ulong m_ulSteamIDOwner;      // Steam ID of the user who created this content.
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The result of a call to GetPublishedFileDetails()
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamRemoteStorageCallbacks + 18)]
-//    public struct RemoteStorageGetPublishedFileDetailsResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamRemoteStorageCallbacks + 18;
-//        public EResult m_eResult;               // The result of the operation.
-//        public PublishedFileId_t m_nPublishedFileId;
-//        public AppId_t m_nCreatorAppID;     // ID of the app that created this file.
-//        public AppId_t m_nConsumerAppID;        // ID of the app that will consume this file.
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.k_cchPublishedDocumentTitleMax)]
-//        private byte[] m_rgchTitle_;
-//        public string m_rgchTitle       // title of document
-//        {
-//            get { return InteropHelp.ByteArrayToStringUTF8(m_rgchTitle_); }
-//            set { InteropHelp.StringToByteArrayUTF8(value, m_rgchTitle_, Constants.k_cchPublishedDocumentTitleMax); }
-//        }
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.k_cchPublishedDocumentDescriptionMax)]
-//        private byte[] m_rgchDescription_;
-//        public string m_rgchDescription // description of document
-//        {
-//            get { return InteropHelp.ByteArrayToStringUTF8(m_rgchDescription_); }
-//            set { InteropHelp.StringToByteArrayUTF8(value, m_rgchDescription_, Constants.k_cchPublishedDocumentDescriptionMax); }
-//        }
-//        public UGCHandle_t m_hFile;         // The handle of the primary file
-//        public UGCHandle_t m_hPreviewFile;      // The handle of the preview file
-//        public ulong m_ulSteamIDOwner;      // Steam ID of the user who created this content.
-//        public uint m_rtimeCreated;         // time when the published file was created
-//        public uint m_rtimeUpdated;         // time when the published file was last updated
-//        public ERemoteStoragePublishedFileVisibility m_eVisibility;
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bBanned;
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.k_cchTagListMax)]
-//        private byte[] m_rgchTags_;
-//        public string m_rgchTags    // comma separated list of all tags associated with this file
-//        {
-//            get { return InteropHelp.ByteArrayToStringUTF8(m_rgchTags_); }
-//            set { InteropHelp.StringToByteArrayUTF8(value, m_rgchTags_, Constants.k_cchTagListMax); }
-//        }
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bTagsTruncated;           // whether the list of tags was too long to be returned in the provided buffer
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.k_cchFilenameMax)]
-//        private byte[] m_pchFileName_;
-//        public string m_pchFileName     // The name of the primary file
-//        {
-//            get { return InteropHelp.ByteArrayToStringUTF8(m_pchFileName_); }
-//            set { InteropHelp.StringToByteArrayUTF8(value, m_pchFileName_, Constants.k_cchFilenameMax); }
-//        }
-//        public int m_nFileSize;             // Size of the primary file
-//        public int m_nPreviewFileSize;      // Size of the preview file
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.k_cchPublishedFileURLMax)]
-//        private byte[] m_rgchURL_;
-//        public string m_rgchURL // URL (for a video or a website)
-//        {
-//            get { return InteropHelp.ByteArrayToStringUTF8(m_rgchURL_); }
-//            set { InteropHelp.StringToByteArrayUTF8(value, m_rgchURL_, Constants.k_cchPublishedFileURLMax); }
-//        }
-//        public EWorkshopFileType m_eFileType;   // Type of the file
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bAcceptedForUse;          // developer has specifically flagged this item as accepted in the Workshop
-//    }
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamRemoteStorageCallbacks + 19)]
-//    public struct RemoteStorageEnumerateWorkshopFilesResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamRemoteStorageCallbacks + 19;
-//        public EResult m_eResult;
-//        public int m_nResultsReturned;
-//        public int m_nTotalResultCount;
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.k_unEnumeratePublishedFilesMaxResults)]
-//        public PublishedFileId_t[] m_rgPublishedFileId;
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.k_unEnumeratePublishedFilesMaxResults)]
-//        public float[] m_rgScore;
-//        public AppId_t m_nAppId;
-//        public uint m_unStartIndex;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The result of GetPublishedItemVoteDetails
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamRemoteStorageCallbacks + 20)]
-//    public struct RemoteStorageGetPublishedItemVoteDetailsResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamRemoteStorageCallbacks + 20;
-//        public EResult m_eResult;
-//        public PublishedFileId_t m_unPublishedFileId;
-//        public int m_nVotesFor;
-//        public int m_nVotesAgainst;
-//        public int m_nReports;
-//        public float m_fScore;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: User subscribed to a file for the app (from within the app or on the web)
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamRemoteStorageCallbacks + 21)]
-//    public struct RemoteStoragePublishedFileSubscribed_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamRemoteStorageCallbacks + 21;
-//        public PublishedFileId_t m_nPublishedFileId;    // The published file id
-//        public AppId_t m_nAppID;                        // ID of the app that will consume this file.
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: User unsubscribed from a file for the app (from within the app or on the web)
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamRemoteStorageCallbacks + 22)]
-//    public struct RemoteStoragePublishedFileUnsubscribed_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamRemoteStorageCallbacks + 22;
-//        public PublishedFileId_t m_nPublishedFileId;    // The published file id
-//        public AppId_t m_nAppID;                        // ID of the app that will consume this file.
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Published file that a user owns was deleted (from within the app or the web)
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamRemoteStorageCallbacks + 23)]
-//    public struct RemoteStoragePublishedFileDeleted_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamRemoteStorageCallbacks + 23;
-//        public PublishedFileId_t m_nPublishedFileId;    // The published file id
-//        public AppId_t m_nAppID;                        // ID of the app that will consume this file.
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The result of a call to UpdateUserPublishedItemVote()
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamRemoteStorageCallbacks + 24)]
-//    public struct RemoteStorageUpdateUserPublishedItemVoteResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamRemoteStorageCallbacks + 24;
-//        public EResult m_eResult;               // The result of the operation.
-//        public PublishedFileId_t m_nPublishedFileId;    // The published file id
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The result of a call to GetUserPublishedItemVoteDetails()
-//    //-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamRemoteStorageCallbacks + 25)]
-//    //public struct RemoteStorageUserVoteDetails_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamRemoteStorageCallbacks + 25;
-//    //    public EResult m_eResult;               // The result of the operation.
-//    //    public PublishedFileId_t m_nPublishedFileId;    // The published file id
-//    //    public EWorkshopVote m_eVote;           // what the user voted
-//    //}
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamRemoteStorageCallbacks + 26)]
-//    public struct RemoteStorageEnumerateUserSharedWorkshopFilesResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamRemoteStorageCallbacks + 26;
-//        public EResult m_eResult;               // The result of the operation.
-//        public int m_nResultsReturned;
-//        public int m_nTotalResultCount;
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.k_unEnumeratePublishedFilesMaxResults)]
-//        public PublishedFileId_t[] m_rgPublishedFileId;
-//    }
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamRemoteStorageCallbacks + 27)]
-//    public struct RemoteStorageSetUserPublishedFileActionResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamRemoteStorageCallbacks + 27;
-//        public EResult m_eResult;               // The result of the operation.
-//        public PublishedFileId_t m_nPublishedFileId;    // The published file id
-//        public EWorkshopFileAction m_eAction;   // the action that was attempted
-//    }
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamRemoteStorageCallbacks + 28)]
-//    public struct RemoteStorageEnumeratePublishedFilesByUserActionResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamRemoteStorageCallbacks + 28;
-//        public EResult m_eResult;               // The result of the operation.
-//        public EWorkshopFileAction m_eAction;   // the action that was filtered on
-//        public int m_nResultsReturned;
-//        public int m_nTotalResultCount;
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.k_unEnumeratePublishedFilesMaxResults)]
-//        public PublishedFileId_t[] m_rgPublishedFileId;
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.k_unEnumeratePublishedFilesMaxResults)]
-//        public uint[] m_rgRTimeUpdated;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Called periodically while a PublishWorkshopFile is in progress
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamRemoteStorageCallbacks + 29)]
-//    public struct RemoteStoragePublishFileProgress_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamRemoteStorageCallbacks + 29;
-//        public double m_dPercentFile;
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bPreview;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Called when the content for a published file is updated
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamRemoteStorageCallbacks + 30)]
-//    public struct RemoteStoragePublishedFileUpdated_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamRemoteStorageCallbacks + 30;
-//        public PublishedFileId_t m_nPublishedFileId;    // The published file id
-//        public AppId_t m_nAppID;                        // ID of the app that will consume this file.
-//        public ulong m_ulUnused;                        // not used anymore
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Called when a FileWriteAsync completes
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamRemoteStorageCallbacks + 31)]
-//    public struct RemoteStorageFileWriteAsyncComplete_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamRemoteStorageCallbacks + 31;
-//        public EResult m_eResult;                       // result
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Called when a FileReadAsync completes
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamRemoteStorageCallbacks + 32)]
-//    public struct RemoteStorageFileReadAsyncComplete_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamRemoteStorageCallbacks + 32;
-//        public SteamAPICall_t m_hFileReadAsync;     // call handle of the async read which was made
-//        public EResult m_eResult;                       // result
-//        public uint m_nOffset;                      // offset in the file this read was at
-//        public uint m_cubRead;                      // amount read - will the <= the amount requested
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: one or more files for this app have changed locally after syncing
-//    //			to remote session changes
-//    //			Note: only posted if this happens DURING the local app session
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 1)]
-//    [CallbackIdentity(Constants.k_iSteamRemoteStorageCallbacks + 33)]
-//    public struct RemoteStorageLocalFileChange_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamRemoteStorageCallbacks + 33;
-//    }
-
-//    // callbacks
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Screenshot successfully written or otherwise added to the library
-//    // and can now be tagged
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamScreenshotsCallbacks + 1)]
-//    public struct ScreenshotReady_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamScreenshotsCallbacks + 1;
-//        public ScreenshotHandle m_hLocal;
-//        public EResult m_eResult;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Screenshot has been requested by the user.  Only sent if
-//    // HookScreenshots() has been called, in which case Steam will not take
-//    // the screenshot itself.
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 1)]
-//    [CallbackIdentity(Constants.k_iSteamScreenshotsCallbacks + 2)]
-//    public struct ScreenshotRequested_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamScreenshotsCallbacks + 2;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Callback for querying UGC
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUGCCallbacks + 1)]
-//    public struct SteamUGCQueryCompleted_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUGCCallbacks + 1;
-//        public UGCQueryHandle_t m_handle;
-//        public EResult m_eResult;
-//        public uint m_unNumResultsReturned;
-//        public uint m_unTotalMatchingResults;
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bCachedData;  // indicates whether this data was retrieved from the local on-disk cache
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.k_cchPublishedFileURLMax)]
-//        private byte[] m_rgchNextCursor_;
-//        public string m_rgchNextCursor // If a paging cursor was used, then this will be the next cursor to get the next result set.
-//        {
-//            get { return InteropHelp.ByteArrayToStringUTF8(m_rgchNextCursor_); }
-//            set { InteropHelp.StringToByteArrayUTF8(value, m_rgchNextCursor_, Constants.k_cchPublishedFileURLMax); }
-//        }
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Callback for requesting details on one piece of UGC
-//    //-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamUGCCallbacks + 2)]
-//    //public struct SteamUGCRequestUGCDetailsResult_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamUGCCallbacks + 2;
-//    //    public SteamUGCDetails_t m_details;
-//    //    [MarshalAs(UnmanagedType.I1)]
-//    //    public bool m_bCachedData; // indicates whether this data was retrieved from the local on-disk cache
-//    //}
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: result for ISteamUGC::CreateItem()
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUGCCallbacks + 3)]
-//    public struct CreateItemResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUGCCallbacks + 3;
-//        public EResult m_eResult;
-//        public PublishedFileId_t m_nPublishedFileId; // new item got this UGC PublishFileID
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bUserNeedsToAcceptWorkshopLegalAgreement;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: result for ISteamUGC::SubmitItemUpdate()
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUGCCallbacks + 4)]
-//    public struct SubmitItemUpdateResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUGCCallbacks + 4;
-//        public EResult m_eResult;
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bUserNeedsToAcceptWorkshopLegalAgreement;
-//        public PublishedFileId_t m_nPublishedFileId;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: a Workshop item has been installed or updated
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUGCCallbacks + 5)]
-//    public struct ItemInstalled_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUGCCallbacks + 5;
-//        public AppId_t m_unAppID;
-//        public PublishedFileId_t m_nPublishedFileId;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: result of DownloadItem(), existing item files can be accessed again
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUGCCallbacks + 6)]
-//    public struct DownloadItemResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUGCCallbacks + 6;
-//        public AppId_t m_unAppID;
-//        public PublishedFileId_t m_nPublishedFileId;
-//        public EResult m_eResult;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: result of AddItemToFavorites() or RemoveItemFromFavorites()
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUGCCallbacks + 7)]
-//    public struct UserFavoriteItemsListChanged_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUGCCallbacks + 7;
-//        public PublishedFileId_t m_nPublishedFileId;
-//        public EResult m_eResult;
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bWasAddRequest;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The result of a call to SetUserItemVote()
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUGCCallbacks + 8)]
-//    public struct SetUserItemVoteResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUGCCallbacks + 8;
-//        public PublishedFileId_t m_nPublishedFileId;
-//        public EResult m_eResult;
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bVoteUp;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The result of a call to GetUserItemVote()
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUGCCallbacks + 9)]
-//    public struct GetUserItemVoteResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUGCCallbacks + 9;
-//        public PublishedFileId_t m_nPublishedFileId;
-//        public EResult m_eResult;
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bVotedUp;
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bVotedDown;
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bVoteSkipped;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The result of a call to StartPlaytimeTracking()
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUGCCallbacks + 10)]
-//    public struct StartPlaytimeTrackingResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUGCCallbacks + 10;
-//        public EResult m_eResult;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The result of a call to StopPlaytimeTracking()
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUGCCallbacks + 11)]
-//    public struct StopPlaytimeTrackingResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUGCCallbacks + 11;
-//        public EResult m_eResult;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The result of a call to AddDependency
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUGCCallbacks + 12)]
-//    public struct AddUGCDependencyResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUGCCallbacks + 12;
-//        public EResult m_eResult;
-//        public PublishedFileId_t m_nPublishedFileId;
-//        public PublishedFileId_t m_nChildPublishedFileId;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The result of a call to RemoveDependency
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUGCCallbacks + 13)]
-//    public struct RemoveUGCDependencyResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUGCCallbacks + 13;
-//        public EResult m_eResult;
-//        public PublishedFileId_t m_nPublishedFileId;
-//        public PublishedFileId_t m_nChildPublishedFileId;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The result of a call to AddAppDependency
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUGCCallbacks + 14)]
-//    public struct AddAppDependencyResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUGCCallbacks + 14;
-//        public EResult m_eResult;
-//        public PublishedFileId_t m_nPublishedFileId;
-//        public AppId_t m_nAppID;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The result of a call to RemoveAppDependency
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUGCCallbacks + 15)]
-//    public struct RemoveAppDependencyResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUGCCallbacks + 15;
-//        public EResult m_eResult;
-//        public PublishedFileId_t m_nPublishedFileId;
-//        public AppId_t m_nAppID;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The result of a call to GetAppDependencies.  Callback may be called
-//    //			multiple times until all app dependencies have been returned.
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUGCCallbacks + 16)]
-//    public struct GetAppDependenciesResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUGCCallbacks + 16;
-//        public EResult m_eResult;
-//        public PublishedFileId_t m_nPublishedFileId;
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-//        public AppId_t[] m_rgAppIDs;
-//        public uint m_nNumAppDependencies;      // number returned in this struct
-//        public uint m_nTotalNumAppDependencies; // total found
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The result of a call to DeleteItem
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUGCCallbacks + 17)]
-//    public struct DeleteItemResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUGCCallbacks + 17;
-//        public EResult m_eResult;
-//        public PublishedFileId_t m_nPublishedFileId;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: signal that the list of subscribed items changed
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUGCCallbacks + 18)]
-//    public struct UserSubscribedItemsListChanged_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUGCCallbacks + 18;
-//        public AppId_t m_nAppID;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Status of the user's acceptable/rejection of the app's specific Workshop EULA
-//    //-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamUGCCallbacks + 20)]
-//    //public struct WorkshopEULAStatus_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamUGCCallbacks + 20;
-//    //    public EResult m_eResult;
-//    //    public AppId_t m_nAppID;
-//    //    public uint m_unVersion;
-//    //    public RTime32 m_rtAction;
-//    //    [MarshalAs(UnmanagedType.I1)]
-//    //    public bool m_bAccepted;
-//    //    [MarshalAs(UnmanagedType.I1)]
-//    //    public bool m_bNeedsAction;
-//    //}
-
-//    // callbacks
-//    //-----------------------------------------------------------------------------
-//    // Purpose: called when a connections to the Steam back-end has been established
-//    //			this means the Steam client now has a working connection to the Steam servers
-//    //			usually this will have occurred before the game has launched, and should
-//    //			only be seen if the user has dropped connection due to a networking issue
-//    //			or a Steam server update
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 1)]
-//    [CallbackIdentity(Constants.k_iSteamUserCallbacks + 1)]
-//    public struct SteamServersConnected_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUserCallbacks + 1;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: called when a connection attempt has failed
-//    //			this will occur periodically if the Steam client is not connected,
-//    //			and has failed in it's retry to establish a connection
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUserCallbacks + 2)]
-//    public struct SteamServerConnectFailure_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUserCallbacks + 2;
-//        public EResult m_eResult;
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bStillRetrying;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: called if the client has lost connection to the Steam servers
-//    //			real-time services will be disabled until a matching SteamServersConnected_t has been posted
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUserCallbacks + 3)]
-//    public struct SteamServersDisconnected_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUserCallbacks + 3;
-//        public EResult m_eResult;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Sent by the Steam server to the client telling it to disconnect from the specified game server,
-//    //			which it may be in the process of or already connected to.
-//    //			The game client should immediately disconnect upon receiving this message.
-//    //			This can usually occur if the user doesn't have rights to play on the game server.
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUserCallbacks + 13)]
-//    public struct ClientGameServerDeny_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUserCallbacks + 13;
-
-//        public uint m_uAppID;
-//        public uint m_unGameServerIP;
-//        public ushort m_usGameServerPort;
-//        public ushort m_bSecure;
-//        public uint m_uReason;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: called when the callback system for this client is in an error state (and has flushed pending callbacks)
-//    //			When getting this message the client should disconnect from Steam, reset any stored Steam state and reconnect.
-//    //			This usually occurs in the rare event the Steam client has some kind of fatal error.
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUserCallbacks + 17)]
-//    public struct IPCFailure_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUserCallbacks + 17;
-//        public byte m_eFailureType;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Signaled whenever licenses change
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 1)]
-//    [CallbackIdentity(Constants.k_iSteamUserCallbacks + 25)]
-//    public struct LicensesUpdated_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUserCallbacks + 25;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // callback for BeginAuthSession
-//    //-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 4)]
-//    //[CallbackIdentity(Constants.k_iSteamUserCallbacks + 43)]
-//    //public struct ValidateAuthTicketResponse_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamUserCallbacks + 43;
-//    //    public CSteamID m_SteamID;
-//    //    public EAuthSessionResponse m_eAuthSessionResponse;
-//    //    public CSteamID m_OwnerSteamID; // different from m_SteamID if borrowed
-//    //}
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: called when a user has responded to a microtransaction authorization request
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUserCallbacks + 52)]
-//    public struct MicroTxnAuthorizationResponse_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUserCallbacks + 52;
-
-//        public uint m_unAppID;          // AppID for this microtransaction
-//        public ulong m_ulOrderID;           // OrderID provided for the microtransaction
-//        public byte m_bAuthorized;      // if user authorized transaction
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Result from RequestEncryptedAppTicket
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUserCallbacks + 54)]
-//    public struct EncryptedAppTicketResponse_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUserCallbacks + 54;
-
-//        public EResult m_eResult;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // callback for GetAuthSessionTicket
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUserCallbacks + 63)]
-//    public struct GetAuthSessionTicketResponse_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUserCallbacks + 63;
-//        public HAuthTicket m_hAuthTicket;
-//        public EResult m_eResult;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: sent to your game in response to a steam://gamewebcallback/ command
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUserCallbacks + 64)]
-//    public struct GameWebCallback_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUserCallbacks + 64;
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
-//        private byte[] m_szURL_;
-//        public string m_szURL
-//        {
-//            get { return InteropHelp.ByteArrayToStringUTF8(m_szURL_); }
-//            set { InteropHelp.StringToByteArrayUTF8(value, m_szURL_, 256); }
-//        }
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: sent to your game in response to ISteamUser::RequestStoreAuthURL
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUserCallbacks + 65)]
-//    public struct StoreAuthURLResponse_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUserCallbacks + 65;
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 512)]
-//        private byte[] m_szURL_;
-//        public string m_szURL
-//        {
-//            get { return InteropHelp.ByteArrayToStringUTF8(m_szURL_); }
-//            set { InteropHelp.StringToByteArrayUTF8(value, m_szURL_, 512); }
-//        }
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: sent in response to ISteamUser::GetMarketEligibility
-//    //-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamUserCallbacks + 66)]
-//    //public struct MarketEligibilityResponse_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamUserCallbacks + 66;
-//    //    [MarshalAs(UnmanagedType.I1)]
-//    //    public bool m_bAllowed;
-//    //    public EMarketNotAllowedReasonFlags m_eNotAllowedReason;
-//    //    public RTime32 m_rtAllowedAtTime;
-
-//    //    public int m_cdaySteamGuardRequiredDays; // The number of days any user is required to have had Steam Guard before they can use the market
-//    //    public int m_cdayNewDeviceCooldown; // The number of days after initial device authorization a user must wait before using the market on that device
-//    //}
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: sent for games with enabled anti indulgence / duration control, for
-//    // enabled users. Lets the game know whether the user can keep playing or
-//    // whether the game should exit, and returns info about remaining gameplay time.
-//    //
-//    // This callback is fired asynchronously in response to timers triggering.
-//    // It is also fired in response to calls to GetDurationControl().
-//    //-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamUserCallbacks + 67)]
-//    //public struct DurationControl_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamUserCallbacks + 67;
-
-//    //    public EResult m_eResult;                               // result of call (always k_EResultOK for asynchronous timer-based notifications)
-//    //    public AppId_t m_appid;                             // appid generating playtime
-
-//    //    [MarshalAs(UnmanagedType.I1)]
-//    //    public bool m_bApplicable;                          // is duration control applicable to user + game combination
-//    //    public int m_csecsLast5h;                           // playtime since most recent 5 hour gap in playtime, only counting up to regulatory limit of playtime, in seconds
-
-//    //    public EDurationControlProgress m_progress;         // recommended progress (either everything is fine, or please exit game)
-//    //    public EDurationControlNotification m_notification; // notification to show, if any (always k_EDurationControlNotification_None for API calls)
-
-//    //    public int m_csecsToday;                            // playtime on current calendar day
-//    //    public int m_csecsRemaining;                        // playtime remaining until the user hits a regulatory limit
-//    //}
-
-//    // callbacks
-//    //-----------------------------------------------------------------------------
-//    // Purpose: called when the latests stats and achievements have been received
-//    //			from the server
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Explicit, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUserStatsCallbacks + 1)]
-//    public struct UserStatsReceived_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUserStatsCallbacks + 1;
-//        [FieldOffset(0)]
-//        public ulong m_nGameID;     // Game these stats are for
-//        [FieldOffset(8)]
-//        public EResult m_eResult;       // Success / error fetching the stats
-//        [FieldOffset(12)]
-//        public CSteamID m_steamIDUser;  // The user for whom the stats are retrieved for
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: result of a request to store the user stats for a game
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUserStatsCallbacks + 2)]
-//    public struct UserStatsStored_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUserStatsCallbacks + 2;
-//        public ulong m_nGameID;     // Game these stats are for
-//        public EResult m_eResult;       // success / error
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: result of a request to store the achievements for a game, or an
-//    //			"indicate progress" call. If both m_nCurProgress and m_nMaxProgress
-//    //			are zero, that means the achievement has been fully unlocked.
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUserStatsCallbacks + 3)]
-//    public struct UserAchievementStored_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUserStatsCallbacks + 3;
-
-//        public ulong m_nGameID;             // Game this is for
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bGroupAchievement;    // if this is a "group" achievement
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.k_cchStatNameMax)]
-//        private byte[] m_rgchAchievementName_;
-//        public string m_rgchAchievementName     // name of the achievement
-//        {
-//            get { return InteropHelp.ByteArrayToStringUTF8(m_rgchAchievementName_); }
-//            set { InteropHelp.StringToByteArrayUTF8(value, m_rgchAchievementName_, Constants.k_cchStatNameMax); }
-//        }
-//        public uint m_nCurProgress;         // current progress towards the achievement
-//        public uint m_nMaxProgress;         // "out of" this many
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: call result for finding a leaderboard, returned as a result of FindOrCreateLeaderboard() or FindLeaderboard()
-//    //			use CCallResult<> to map this async result to a member function
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUserStatsCallbacks + 4)]
-//    public struct LeaderboardFindResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUserStatsCallbacks + 4;
-//        public SteamLeaderboard_t m_hSteamLeaderboard;  // handle to the leaderboard serarched for, 0 if no leaderboard found
-//        public byte m_bLeaderboardFound;                // 0 if no leaderboard found
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: call result indicating scores for a leaderboard have been downloaded and are ready to be retrieved, returned as a result of DownloadLeaderboardEntries()
-//    //			use CCallResult<> to map this async result to a member function
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUserStatsCallbacks + 5)]
-//    public struct LeaderboardScoresDownloaded_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUserStatsCallbacks + 5;
-//        public SteamLeaderboard_t m_hSteamLeaderboard;
-//        public SteamLeaderboardEntries_t m_hSteamLeaderboardEntries;    // the handle to pass into GetDownloadedLeaderboardEntries()
-//        public int m_cEntryCount; // the number of entries downloaded
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: call result indicating scores has been uploaded, returned as a result of UploadLeaderboardScore()
-//    //			use CCallResult<> to map this async result to a member function
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUserStatsCallbacks + 6)]
-//    public struct LeaderboardScoreUploaded_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUserStatsCallbacks + 6;
-//        public byte m_bSuccess;         // 1 if the call was successful
-//        public SteamLeaderboard_t m_hSteamLeaderboard;  // the leaderboard handle that was
-//        public int m_nScore;                // the score that was attempted to set
-//        public byte m_bScoreChanged;        // true if the score in the leaderboard change, false if the existing score was better
-//        public int m_nGlobalRankNew;        // the new global rank of the user in this leaderboard
-//        public int m_nGlobalRankPrevious;   // the previous global rank of the user in this leaderboard; 0 if the user had no existing entry in the leaderboard
-//    }
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUserStatsCallbacks + 7)]
-//    public struct NumberOfCurrentPlayers_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUserStatsCallbacks + 7;
-//        public byte m_bSuccess;         // 1 if the call was successful
-//        public int m_cPlayers;          // Number of players currently playing
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Callback indicating that a user's stats have been unloaded.
-//    //  Call RequestUserStats again to access stats for this user
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUserStatsCallbacks + 8)]
-//    public struct UserStatsUnloaded_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUserStatsCallbacks + 8;
-//        public CSteamID m_steamIDUser;  // User whose stats have been unloaded
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Callback indicating that an achievement icon has been fetched
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUserStatsCallbacks + 9)]
-//    public struct UserAchievementIconFetched_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUserStatsCallbacks + 9;
-
-//        public CGameID m_nGameID;               // Game this is for
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.k_cchStatNameMax)]
-//        private byte[] m_rgchAchievementName_;
-//        public string m_rgchAchievementName     // name of the achievement
-//        {
-//            get { return InteropHelp.ByteArrayToStringUTF8(m_rgchAchievementName_); }
-//            set { InteropHelp.StringToByteArrayUTF8(value, m_rgchAchievementName_, Constants.k_cchStatNameMax); }
-//        }
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bAchieved;        // Is the icon for the achieved or not achieved version?
-//        public int m_nIconHandle;       // Handle to the image, which can be used in SteamUtils()->GetImageRGBA(), 0 means no image is set for the achievement
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Callback indicating that global achievement percentages are fetched
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUserStatsCallbacks + 10)]
-//    public struct GlobalAchievementPercentagesReady_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUserStatsCallbacks + 10;
-
-//        public ulong m_nGameID;             // Game this is for
-//        public EResult m_eResult;               // Result of the operation
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: call result indicating UGC has been uploaded, returned as a result of SetLeaderboardUGC()
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUserStatsCallbacks + 11)]
-//    public struct LeaderboardUGCSet_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUserStatsCallbacks + 11;
-//        public EResult m_eResult;               // The result of the operation
-//        public SteamLeaderboard_t m_hSteamLeaderboard;  // the leaderboard handle that was
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: callback indicating global stats have been received.
-//    //	Returned as a result of RequestGlobalStats()
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUserStatsCallbacks + 12)]
-//    public struct GlobalStatsReceived_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUserStatsCallbacks + 12;
-//        public ulong m_nGameID;             // Game global stats were requested for
-//        public EResult m_eResult;               // The result of the request
-//    }
-
-//    // callbacks
-//    //-----------------------------------------------------------------------------
-//    // Purpose: The country of the user changed
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 1)]
-//    [CallbackIdentity(Constants.k_iSteamUtilsCallbacks + 1)]
-//    public struct IPCountry_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUtilsCallbacks + 1;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: Fired when running on a laptop and less than 10 minutes of battery is left, fires then every minute
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUtilsCallbacks + 2)]
-//    public struct LowBatteryPower_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUtilsCallbacks + 2;
-//        public byte m_nMinutesBatteryLeft;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // Purpose: called when a SteamAsyncCall_t has completed (or failed)
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUtilsCallbacks + 3)]
-//    public struct SteamAPICallCompleted_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUtilsCallbacks + 3;
-//        public SteamAPICall_t m_hAsyncCall;
-//        public int m_iCallback;
-//        public uint m_cubParam;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // called when Steam wants to shutdown
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 1)]
-//    [CallbackIdentity(Constants.k_iSteamUtilsCallbacks + 4)]
-//    public struct SteamShutdown_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUtilsCallbacks + 4;
-//    }
-
-//    //-----------------------------------------------------------------------------
-//    // callback for CheckFileSignature
-//    //-----------------------------------------------------------------------------
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamUtilsCallbacks + 5)]
-//    //public struct CheckFileSignature_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamUtilsCallbacks + 5;
-//    //    public ECheckFileSignature m_eCheckFileSignature;
-//    //}
-
-//    // k_iSteamUtilsCallbacks + 13 is taken
-//    //-----------------------------------------------------------------------------
-//    // Full Screen gamepad text input has been closed
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamUtilsCallbacks + 14)]
-//    public struct GamepadTextInputDismissed_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUtilsCallbacks + 14;
-//        [MarshalAs(UnmanagedType.I1)]
-//        public bool m_bSubmitted;                                       // true if user entered & accepted text (Call ISteamUtils::GetEnteredGamepadTextInput() for text), false if canceled input
-//        public uint m_unSubmittedText;
-//    }
-
-//    // k_iSteamUtilsCallbacks + 15 through 35 are taken
-//    [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 1)]
-//    [CallbackIdentity(Constants.k_iSteamUtilsCallbacks + 36)]
-//    public struct AppResumingFromSuspend_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUtilsCallbacks + 36;
-//    }
-
-//    // k_iSteamUtilsCallbacks + 37 is taken
-//    //-----------------------------------------------------------------------------
-//    // The floating on-screen keyboard has been closed
-//    //-----------------------------------------------------------------------------
-//    [StructLayout(LayoutKind.Sequential, Pack = 8, Size = 1)]
-//    [CallbackIdentity(Constants.k_iSteamUtilsCallbacks + 38)]
-//    public struct FloatingGamepadTextInputDismissed_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamUtilsCallbacks + 38;
-//    }
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamVideoCallbacks + 11)]
-//    public struct GetVideoURLResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamVideoCallbacks + 11;
-//        public EResult m_eResult;
-//        public AppId_t m_unVideoAppID;
-//        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
-//        private byte[] m_rgchURL_;
-//        public string m_rgchURL
-//        {
-//            get { return InteropHelp.ByteArrayToStringUTF8(m_rgchURL_); }
-//            set { InteropHelp.StringToByteArrayUTF8(value, m_rgchURL_, 256); }
-//        }
-//    }
-
-//    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    [CallbackIdentity(Constants.k_iSteamVideoCallbacks + 24)]
-//    public struct GetOPFSettingsResult_t
-//    {
-//        public const int k_iCallback = Constants.k_iSteamVideoCallbacks + 24;
-//        public EResult m_eResult;
-//        public AppId_t m_unVideoAppID;
-//    }
-
-//    /// Callback struct used to notify when a connection has changed state
-//    /// A struct used to describe a "fake IP" we have been assigned to
-//    /// use as an identifier.  This callback is posted when
-//    /// ISteamNetworkingSoockets::BeginAsyncRequestFakeIP completes.
-//    /// See also ISteamNetworkingSockets::GetFakeIP
-//    //[StructLayout(LayoutKind.Sequential, Pack = 8)]
-//    //[CallbackIdentity(Constants.k_iSteamNetworkingSocketsCallbacks + 3)]
-//    //public struct SteamNetworkingFakeIPResult_t
-//    //{
-//    //    public const int k_iCallback = Constants.k_iSteamNetworkingSocketsCallbacks + 3;
-
-//    //    /// Status/result of the allocation request.  Possible failure values are:
-//    //    /// - k_EResultBusy - you called GetFakeIP but the request has not completed.
-//    //    /// - k_EResultInvalidParam - you called GetFakeIP with an invalid port index
-//    //    /// - k_EResultLimitExceeded - You asked for too many ports, or made an
-//    //    ///   additional request after one had already succeeded
-//    //    /// - k_EResultNoMatch - GetFakeIP was called, but no request has been made
-//    //    ///
-//    //    /// Note that, with the exception of k_EResultBusy (if you are polling),
-//    //    /// it is highly recommended to treat all failures as fatal.
-//    //    public EResult m_eResult;
-
-//    //    /// Local identity of the ISteamNetworkingSockets object that made
-//    //    /// this request and is assigned the IP.  This is needed in the callback
-//    //    /// in the case where there are multiple ISteamNetworkingSockets objects.
-//    //    /// (E.g. one for the user, and another for the local gameserver).
-//    //    public SteamNetworkingIdentity m_identity;
-
-//    //    /// Fake IPv4 IP address that we have been assigned.  NOTE: this
-//    //    /// IP address is not exclusively ours!  Steam tries to avoid sharing
-//    //    /// IP addresses, but this may not always be possible.  The IP address
-//    //    /// may be currently in use by another host, but with different port(s).
-//    //    /// The exact same IP:port address may have been used previously.
-//    //    /// Steam tries to avoid reusing ports until they have not been in use for
-//    //    /// some time, but this may not always be possible.
-//    //    public uint m_unIP;
-//    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = Constants.k_nMaxReturnPorts)]
-//    //    public ushort[] m_unPorts;
-//    //}
-//}
+﻿using SKYNET.Helper;
+using SKYNET.Steamworks;
+using SKYNET.Steamworks.Types;
+using SKYNET.Types;
+using Steamworks;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SKYNET.Callback
+{
+    /// <summary>
+    /// Gives us a generic way to get the CallbackId of structs
+    /// </summary>
+    internal interface ICallbackData
+    {
+        CallbackType CallbackType { get; }
+        int DataSize { get; }
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct SteamServersConnected_t : ICallbackData
+    {
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamServersConnected_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamServersConnected;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct SteamServerConnectFailure_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool StillRetrying; // m_bStillRetrying bool
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamServerConnectFailure_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamServerConnectFailure;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct SteamServersDisconnected_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamServersDisconnected_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamServersDisconnected;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct ClientGameServerDeny_t : ICallbackData
+    {
+        internal uint AppID; // m_uAppID uint32
+        internal uint GameServerIP; // m_unGameServerIP uint32
+        internal ushort GameServerPort; // m_usGameServerPort uint16
+        internal ushort Secure; // m_bSecure uint16
+        internal uint Reason; // m_uReason uint32
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(ClientGameServerDeny_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.ClientGameServerDeny;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct IPCFailure_t : ICallbackData
+    {
+        internal byte FailureType; // m_eFailureType uint8
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(IPCFailure_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.IPCFailure;
+        #endregion
+        internal enum EFailureType : int
+        {
+            FlushedCallbackQueue = 0,
+            PipeFail = 1,
+        }
+
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct LicensesUpdated_t : ICallbackData
+    {
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LicensesUpdated_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.LicensesUpdated;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    internal struct ValidateAuthTicketResponse_t : ICallbackData
+    {
+        internal ulong SteamID; // m_SteamID CSteamID
+        internal AuthResponse AuthSessionResponse; // m_eAuthSessionResponse EAuthSessionResponse
+        internal ulong OwnerSteamID; // m_OwnerSteamID CSteamID
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(ValidateAuthTicketResponse_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.ValidateAuthTicketResponse;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct MicroTxnAuthorizationResponse_t : ICallbackData
+    {
+        internal uint AppID; // m_unAppID uint32
+        internal ulong OrderID; // m_ulOrderID uint64
+        internal byte Authorized; // m_bAuthorized uint8
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MicroTxnAuthorizationResponse_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.MicroTxnAuthorizationResponse;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct EncryptedAppTicketResponse_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(EncryptedAppTicketResponse_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.EncryptedAppTicketResponse;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct GetAuthSessionTicketResponse_t : ICallbackData
+    {
+        internal uint AuthTicket; // m_hAuthTicket HAuthTicket
+        internal Result Result; // m_eResult EResult
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GetAuthSessionTicketResponse_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.GetAuthSessionTicketResponse;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct GameWebCallback_t : ICallbackData
+    {
+        internal string URLUTF8() => System.Text.Encoding.UTF8.GetString(URL, 0, System.Array.IndexOf<byte>(URL, 0));
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)] // byte[] m_szURL
+        internal byte[] URL; // m_szURL char [256]
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GameWebCallback_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.GameWebCallback;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct StoreAuthURLResponse_t : ICallbackData
+    {
+        internal string URLUTF8() => System.Text.Encoding.UTF8.GetString(URL, 0, System.Array.IndexOf<byte>(URL, 0));
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 512)] // byte[] m_szURL
+        internal byte[] URL; // m_szURL char [512]
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(StoreAuthURLResponse_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.StoreAuthURLResponse;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct MarketEligibilityResponse_t : ICallbackData
+    {
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool Allowed; // m_bAllowed bool
+        internal MarketNotAllowedReasonFlags NotAllowedReason; // m_eNotAllowedReason EMarketNotAllowedReasonFlags
+        internal uint TAllowedAtTime; // m_rtAllowedAtTime RTime32
+        internal int CdaySteamGuardRequiredDays; // m_cdaySteamGuardRequiredDays int
+        internal int CdayNewDeviceCooldown; // m_cdayNewDeviceCooldown int
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MarketEligibilityResponse_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.MarketEligibilityResponse;
+        #endregion
+    }
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct DurationControl_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal AppId Appid; // m_appid AppId_t
+    //    [MarshalAs(UnmanagedType.I1)]
+    //    internal bool Applicable; // m_bApplicable bool
+    //    internal int CsecsLast5h; // m_csecsLast5h int32
+    //    internal DurationControlProgress Progress; // m_progress EDurationControlProgress
+    //    internal DurationControlNotification Otification; // m_notification EDurationControlNotification
+    //    internal int CsecsToday; // m_csecsToday int32
+    //    internal int CsecsRemaining; // m_csecsRemaining int32
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(DurationControl_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.DurationControl;
+    //    #endregion
+    //}
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct PersonaStateChange_t : ICallbackData
+    {
+        internal ulong SteamID; // m_ulSteamID uint64
+        internal int ChangeFlags; // m_nChangeFlags int
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(PersonaStateChange_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.PersonaStateChange;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct GameOverlayActivated_t : ICallbackData
+    {
+        internal byte Active; // m_bActive uint8
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GameOverlayActivated_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.GameOverlayActivated;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct GameServerChangeRequested_t : ICallbackData
+    {
+        internal string ServerUTF8() => System.Text.Encoding.UTF8.GetString(Server, 0, System.Array.IndexOf<byte>(Server, 0));
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)] // byte[] m_rgchServer
+        internal byte[] Server; // m_rgchServer char [64]
+        internal string PasswordUTF8() => System.Text.Encoding.UTF8.GetString(Password, 0, System.Array.IndexOf<byte>(Password, 0));
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)] // byte[] m_rgchPassword
+        internal byte[] Password; // m_rgchPassword char [64]
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GameServerChangeRequested_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.GameServerChangeRequested;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    internal struct GameLobbyJoinRequested_t : ICallbackData
+    {
+        internal ulong SteamIDLobby; // m_steamIDLobby CSteamID
+        internal ulong SteamIDFriend; // m_steamIDFriend CSteamID
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GameLobbyJoinRequested_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.GameLobbyJoinRequested;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct AvatarImageLoaded_t : ICallbackData
+    {
+        internal ulong SteamID; // m_steamID CSteamID
+        internal int Image; // m_iImage int
+        internal int Wide; // m_iWide int
+        internal int Tall; // m_iTall int
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(AvatarImageLoaded_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.AvatarImageLoaded;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct ClanOfficerListResponse_t : ICallbackData
+    {
+        internal ulong SteamIDClan; // m_steamIDClan CSteamID
+        internal int COfficers; // m_cOfficers int
+        internal byte Success; // m_bSuccess uint8
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(ClanOfficerListResponse_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.ClanOfficerListResponse;
+        #endregion
+    }
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct FriendRichPresenceUpdate_t : ICallbackData
+    //{
+    //    internal ulong SteamIDFriend; // m_steamIDFriend CSteamID
+    //    internal AppId AppID; // m_nAppID AppId_t
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(FriendRichPresenceUpdate_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.FriendRichPresenceUpdate;
+    //    #endregion
+    //}
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct GameRichPresenceJoinRequested_t : ICallbackData
+    {
+        internal ulong SteamIDFriend; // m_steamIDFriend CSteamID
+        internal string ConnectUTF8() => System.Text.Encoding.UTF8.GetString(Connect, 0, System.Array.IndexOf<byte>(Connect, 0));
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)] // byte[] m_rgchConnect
+        internal byte[] Connect; // m_rgchConnect char [256]
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GameRichPresenceJoinRequested_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.GameRichPresenceJoinRequested;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    internal struct GameConnectedClanChatMsg_t : ICallbackData
+    {
+        internal ulong SteamIDClanChat; // m_steamIDClanChat CSteamID
+        internal ulong SteamIDUser; // m_steamIDUser CSteamID
+        internal int MessageID; // m_iMessageID int
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GameConnectedClanChatMsg_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.GameConnectedClanChatMsg;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    internal struct GameConnectedChatJoin_t : ICallbackData
+    {
+        internal ulong SteamIDClanChat; // m_steamIDClanChat CSteamID
+        internal ulong SteamIDUser; // m_steamIDUser CSteamID
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GameConnectedChatJoin_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.GameConnectedChatJoin;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    internal struct GameConnectedChatLeave_t : ICallbackData
+    {
+        internal ulong SteamIDClanChat; // m_steamIDClanChat CSteamID
+        internal ulong SteamIDUser; // m_steamIDUser CSteamID
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool Kicked; // m_bKicked bool
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool Dropped; // m_bDropped bool
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GameConnectedChatLeave_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.GameConnectedChatLeave;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct DownloadClanActivityCountsResult_t : ICallbackData
+    {
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool Success; // m_bSuccess bool
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(DownloadClanActivityCountsResult_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.DownloadClanActivityCountsResult;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct JoinClanChatRoomCompletionResult_t : ICallbackData
+    {
+        internal ulong SteamIDClanChat; // m_steamIDClanChat CSteamID
+        internal RoomEnter ChatRoomEnterResponse; // m_eChatRoomEnterResponse EChatRoomEnterResponse
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(JoinClanChatRoomCompletionResult_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.JoinClanChatRoomCompletionResult;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct GameConnectedFriendChatMsg_t : ICallbackData
+    {
+        internal ulong SteamIDUser; // m_steamIDUser CSteamID
+        internal int MessageID; // m_iMessageID int
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GameConnectedFriendChatMsg_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.GameConnectedFriendChatMsg;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    internal struct FriendsGetFollowerCount_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+        internal ulong SteamID; // m_steamID CSteamID
+        internal int Count; // m_nCount int
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(FriendsGetFollowerCount_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.FriendsGetFollowerCount;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    internal struct FriendsIsFollowing_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+        internal ulong SteamID; // m_steamID CSteamID
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool IsFollowing; // m_bIsFollowing bool
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(FriendsIsFollowing_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.FriendsIsFollowing;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    internal struct FriendsEnumerateFollowingList_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50, ArraySubType = UnmanagedType.U8)]
+        internal ulong[] GSteamID; // m_rgSteamID CSteamID [50]
+        internal int ResultsReturned; // m_nResultsReturned int32
+        internal int TotalResultCount; // m_nTotalResultCount int32
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(FriendsEnumerateFollowingList_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.FriendsEnumerateFollowingList;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct SetPersonaNameResponse_t : ICallbackData
+    {
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool Success; // m_bSuccess bool
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool LocalSuccess; // m_bLocalSuccess bool
+        internal Result Result; // m_result EResult
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SetPersonaNameResponse_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SetPersonaNameResponse;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct UnreadChatMessagesChanged_t : ICallbackData
+    {
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(UnreadChatMessagesChanged_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.UnreadChatMessagesChanged;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct OverlayBrowserProtocolNavigation_t : ICallbackData
+    {
+        internal string RgchURIUTF8() => System.Text.Encoding.UTF8.GetString(RgchURI, 0, System.Array.IndexOf<byte>(RgchURI, 0));
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024)] // byte[] rgchURI
+        internal byte[] RgchURI; // rgchURI char [1024]
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(OverlayBrowserProtocolNavigation_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.OverlayBrowserProtocolNavigation;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct IPCountry_t : ICallbackData
+    {
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(IPCountry_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.IPCountry;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct LowBatteryPower_t : ICallbackData
+    {
+        internal byte MinutesBatteryLeft; // m_nMinutesBatteryLeft uint8
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LowBatteryPower_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.LowBatteryPower;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct SteamAPICallCompleted_t : ICallbackData
+    {
+        internal ulong AsyncCall; // m_hAsyncCall SteamAPICall_t
+        internal int Callback; // m_iCallback int
+        internal uint ParamCount; // m_cubParam uint32
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamAPICallCompleted_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamAPICallCompleted;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct SteamShutdown_t : ICallbackData
+    {
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamShutdown_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamShutdown;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct CheckFileSignature_t : ICallbackData
+    {
+        internal CheckFileSignature CheckFileSignature; // m_eCheckFileSignature ECheckFileSignature
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(CheckFileSignature_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.CheckFileSignature;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct GamepadTextInputDismissed_t : ICallbackData
+    {
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool Submitted; // m_bSubmitted bool
+        internal uint SubmittedText; // m_unSubmittedText uint32
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GamepadTextInputDismissed_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.GamepadTextInputDismissed;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct AppResumingFromSuspend_t : ICallbackData
+    {
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(AppResumingFromSuspend_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.AppResumingFromSuspend;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct FloatingGamepadTextInputDismissed_t : ICallbackData
+    {
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(FloatingGamepadTextInputDismissed_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.FloatingGamepadTextInputDismissed;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct FavoritesListChanged_t : ICallbackData
+    {
+        internal uint IP; // m_nIP uint32
+        internal uint QueryPort; // m_nQueryPort uint32
+        internal uint ConnPort; // m_nConnPort uint32
+        internal uint AppID; // m_nAppID uint32
+        internal uint Flags; // m_nFlags uint32
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool Add; // m_bAdd bool
+        internal uint AccountId; // m_unAccountId AccountID_t
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(FavoritesListChanged_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.FavoritesListChanged;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct LobbyInvite_t : ICallbackData
+    {
+        internal ulong SteamIDUser; // m_ulSteamIDUser uint64
+        internal ulong SteamIDLobby; // m_ulSteamIDLobby uint64
+        internal ulong GameID; // m_ulGameID uint64
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LobbyInvite_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.LobbyInvite;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct LobbyEnter_t : ICallbackData
+    {
+        internal ulong SteamIDLobby; // m_ulSteamIDLobby uint64
+        internal uint GfChatPermissions; // m_rgfChatPermissions uint32
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool Locked; // m_bLocked bool
+        internal uint EChatRoomEnterResponse; // m_EChatRoomEnterResponse uint32
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LobbyEnter_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.LobbyEnter;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct LobbyDataUpdate_t : ICallbackData
+    {
+        internal ulong SteamIDLobby; // m_ulSteamIDLobby uint64
+        internal ulong SteamIDMember; // m_ulSteamIDMember uint64
+        internal byte Success; // m_bSuccess uint8
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LobbyDataUpdate_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.LobbyDataUpdate;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct LobbyChatUpdate_t : ICallbackData
+    {
+        internal ulong SteamIDLobby; // m_ulSteamIDLobby uint64
+        internal ulong SteamIDUserChanged; // m_ulSteamIDUserChanged uint64
+        internal ulong SteamIDMakingChange; // m_ulSteamIDMakingChange uint64
+        internal uint GfChatMemberStateChange; // m_rgfChatMemberStateChange uint32
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LobbyChatUpdate_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.LobbyChatUpdate;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct LobbyChatMsg_t : ICallbackData
+    {
+        internal ulong SteamIDLobby; // m_ulSteamIDLobby uint64
+        internal ulong SteamIDUser; // m_ulSteamIDUser uint64
+        internal byte ChatEntryType; // m_eChatEntryType uint8
+        internal uint ChatID; // m_iChatID uint32
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LobbyChatMsg_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.LobbyChatMsg;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct LobbyGameCreated_t : ICallbackData
+    {
+        internal ulong SteamIDLobby; // m_ulSteamIDLobby uint64
+        internal ulong SteamIDGameServer; // m_ulSteamIDGameServer uint64
+        internal uint IP; // m_unIP uint32
+        internal ushort Port; // m_usPort uint16
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LobbyGameCreated_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.LobbyGameCreated;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct LobbyMatchList_t : ICallbackData
+    {
+        internal uint LobbiesMatching; // m_nLobbiesMatching uint32
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LobbyMatchList_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.LobbyMatchList;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct LobbyKicked_t : ICallbackData
+    {
+        internal ulong SteamIDLobby; // m_ulSteamIDLobby uint64
+        internal ulong SteamIDAdmin; // m_ulSteamIDAdmin uint64
+        internal byte KickedDueToDisconnect; // m_bKickedDueToDisconnect uint8
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LobbyKicked_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.LobbyKicked;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct LobbyCreated_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+        internal ulong SteamIDLobby; // m_ulSteamIDLobby uint64
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LobbyCreated_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.LobbyCreated;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    internal struct PSNGameBootInviteResult_t : ICallbackData
+    {
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool GameBootInviteExists; // m_bGameBootInviteExists bool
+        internal ulong SteamIDLobby; // m_steamIDLobby CSteamID
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(PSNGameBootInviteResult_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.PSNGameBootInviteResult;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct FavoritesListAccountsUpdated_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(FavoritesListAccountsUpdated_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.FavoritesListAccountsUpdated;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    internal struct SearchForGameProgressCallback_t : ICallbackData
+    {
+        internal ulong LSearchID; // m_ullSearchID uint64
+        internal Result Result; // m_eResult EResult
+        internal ulong LobbyID; // m_lobbyID CSteamID
+        internal ulong SteamIDEndedSearch; // m_steamIDEndedSearch CSteamID
+        internal int SecondsRemainingEstimate; // m_nSecondsRemainingEstimate int32
+        internal int CPlayersSearching; // m_cPlayersSearching int32
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SearchForGameProgressCallback_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SearchForGameProgressCallback;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    internal struct SearchForGameResultCallback_t : ICallbackData
+    {
+        internal ulong LSearchID; // m_ullSearchID uint64
+        internal Result Result; // m_eResult EResult
+        internal int CountPlayersInGame; // m_nCountPlayersInGame int32
+        internal int CountAcceptedGame; // m_nCountAcceptedGame int32
+        internal ulong SteamIDHost; // m_steamIDHost CSteamID
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool FinalCallback; // m_bFinalCallback bool
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SearchForGameResultCallback_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SearchForGameResultCallback;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct RequestPlayersForGameProgressCallback_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+        internal ulong LSearchID; // m_ullSearchID uint64
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RequestPlayersForGameProgressCallback_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.RequestPlayersForGameProgressCallback;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    internal struct RequestPlayersForGameResultCallback_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+        internal ulong LSearchID; // m_ullSearchID uint64
+        internal ulong SteamIDPlayerFound; // m_SteamIDPlayerFound CSteamID
+        internal ulong SteamIDLobby; // m_SteamIDLobby CSteamID
+        internal RequestPlayersForGameResultCallback_t.PlayerAcceptState_t PlayerAcceptState; // m_ePlayerAcceptState RequestPlayersForGameResultCallback_t::PlayerAcceptState_t
+        internal int PlayerIndex; // m_nPlayerIndex int32
+        internal int TotalPlayersFound; // m_nTotalPlayersFound int32
+        internal int TotalPlayersAcceptedGame; // m_nTotalPlayersAcceptedGame int32
+        internal int SuggestedTeamIndex; // m_nSuggestedTeamIndex int32
+        internal ulong LUniqueGameID; // m_ullUniqueGameID uint64
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RequestPlayersForGameResultCallback_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.RequestPlayersForGameResultCallback;
+        #endregion
+        internal enum PlayerAcceptState_t : int
+        {
+            Unknown = 0,
+            PlayerAccepted = 1,
+            PlayerDeclined = 2,
+        }
+
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct RequestPlayersForGameFinalResultCallback_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+        internal ulong LSearchID; // m_ullSearchID uint64
+        internal ulong LUniqueGameID; // m_ullUniqueGameID uint64
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RequestPlayersForGameFinalResultCallback_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.RequestPlayersForGameFinalResultCallback;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    internal struct SubmitPlayerResultResultCallback_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+        internal ulong UllUniqueGameID; // ullUniqueGameID uint64
+        internal ulong SteamIDPlayer; // steamIDPlayer CSteamID
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SubmitPlayerResultResultCallback_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SubmitPlayerResultResultCallback;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct EndGameResultCallback_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+        internal ulong UllUniqueGameID; // ullUniqueGameID uint64
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(EndGameResultCallback_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.EndGameResultCallback;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    internal struct JoinPartyCallback_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+        internal ulong BeaconID; // m_ulBeaconID PartyBeaconID_t
+        internal ulong SteamIDBeaconOwner; // m_SteamIDBeaconOwner CSteamID
+        internal string ConnectStringUTF8() => System.Text.Encoding.UTF8.GetString(ConnectString, 0, System.Array.IndexOf<byte>(ConnectString, 0));
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)] // byte[] m_rgchConnectString
+        internal byte[] ConnectString; // m_rgchConnectString char [256]
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(JoinPartyCallback_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.JoinPartyCallback;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct CreateBeaconCallback_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+        internal ulong BeaconID; // m_ulBeaconID PartyBeaconID_t
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(CreateBeaconCallback_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.CreateBeaconCallback;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    internal struct ReservationNotificationCallback_t : ICallbackData
+    {
+        internal ulong BeaconID; // m_ulBeaconID PartyBeaconID_t
+        internal ulong SteamIDJoiner; // m_steamIDJoiner CSteamID
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(ReservationNotificationCallback_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.ReservationNotificationCallback;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct ChangeNumOpenSlotsCallback_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(ChangeNumOpenSlotsCallback_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.ChangeNumOpenSlotsCallback;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct AvailableBeaconLocationsUpdated_t : ICallbackData
+    {
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(AvailableBeaconLocationsUpdated_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.AvailableBeaconLocationsUpdated;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct ActiveBeaconsUpdated_t : ICallbackData
+    {
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(ActiveBeaconsUpdated_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.ActiveBeaconsUpdated;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct RemoteStorageFileShareResult_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+        internal ulong File; // m_hFile UGCHandle_t
+        internal string FilenameUTF8() => System.Text.Encoding.UTF8.GetString(Filename, 0, System.Array.IndexOf<byte>(Filename, 0));
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 260)] // byte[] m_rgchFilename
+        internal byte[] Filename; // m_rgchFilename char [260]
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageFileShareResult_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.RemoteStorageFileShareResult;
+        #endregion
+    }
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct RemoteStoragePublishFileResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    [MarshalAs(UnmanagedType.I1)]
+    //    internal bool UserNeedsToAcceptWorkshopLegalAgreement; // m_bUserNeedsToAcceptWorkshopLegalAgreement bool
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStoragePublishFileResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.RemoteStoragePublishFileResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct RemoteStorageDeletePublishedFileResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageDeletePublishedFileResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.RemoteStorageDeletePublishedFileResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct RemoteStorageEnumerateUserPublishedFilesResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal int ResultsReturned; // m_nResultsReturned int32
+    //    internal int TotalResultCount; // m_nTotalResultCount int32
+    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50, ArraySubType = UnmanagedType.U8)]
+    //    internal PublishedFileId[] GPublishedFileId; // m_rgPublishedFileId PublishedFileId_t [50]
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageEnumerateUserPublishedFilesResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.RemoteStorageEnumerateUserPublishedFilesResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct RemoteStorageSubscribePublishedFileResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageSubscribePublishedFileResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.RemoteStorageSubscribePublishedFileResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct RemoteStorageEnumerateUserSubscribedFilesResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal int ResultsReturned; // m_nResultsReturned int32
+    //    internal int TotalResultCount; // m_nTotalResultCount int32
+    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50, ArraySubType = UnmanagedType.U8)]
+    //    internal PublishedFileId[] GPublishedFileId; // m_rgPublishedFileId PublishedFileId_t [50]
+    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50, ArraySubType = UnmanagedType.U4)]
+    //    internal uint[] GRTimeSubscribed; // m_rgRTimeSubscribed uint32 [50]
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageEnumerateUserSubscribedFilesResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.RemoteStorageEnumerateUserSubscribedFilesResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct RemoteStorageUnsubscribePublishedFileResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageUnsubscribePublishedFileResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.RemoteStorageUnsubscribePublishedFileResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct RemoteStorageUpdatePublishedFileResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    [MarshalAs(UnmanagedType.I1)]
+    //    internal bool UserNeedsToAcceptWorkshopLegalAgreement; // m_bUserNeedsToAcceptWorkshopLegalAgreement bool
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageUpdatePublishedFileResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.RemoteStorageUpdatePublishedFileResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct RemoteStorageDownloadUGCResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal ulong File; // m_hFile UGCHandle_t
+    //    internal AppId AppID; // m_nAppID AppId_t
+    //    internal int SizeInBytes; // m_nSizeInBytes int32
+    //    internal string PchFileNameUTF8() => System.Text.Encoding.UTF8.GetString(PchFileName, 0, System.Array.IndexOf<byte>(PchFileName, 0));
+    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 260)] // byte[] m_pchFileName
+    //    internal byte[] PchFileName; // m_pchFileName char [260]
+    //    internal ulong SteamIDOwner; // m_ulSteamIDOwner uint64
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageDownloadUGCResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.RemoteStorageDownloadUGCResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct RemoteStorageGetPublishedFileDetailsResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    internal AppId CreatorAppID; // m_nCreatorAppID AppId_t
+    //    internal AppId ConsumerAppID; // m_nConsumerAppID AppId_t
+    //    internal string TitleUTF8() => System.Text.Encoding.UTF8.GetString(Title, 0, System.Array.IndexOf<byte>(Title, 0));
+    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 129)] // byte[] m_rgchTitle
+    //    internal byte[] Title; // m_rgchTitle char [129]
+    //    internal string DescriptionUTF8() => System.Text.Encoding.UTF8.GetString(Description, 0, System.Array.IndexOf<byte>(Description, 0));
+    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8000)] // byte[] m_rgchDescription
+    //    internal byte[] Description; // m_rgchDescription char [8000]
+    //    internal ulong File; // m_hFile UGCHandle_t
+    //    internal ulong PreviewFile; // m_hPreviewFile UGCHandle_t
+    //    internal ulong SteamIDOwner; // m_ulSteamIDOwner uint64
+    //    internal uint TimeCreated; // m_rtimeCreated uint32
+    //    internal uint TimeUpdated; // m_rtimeUpdated uint32
+    //    internal RemoteStoragePublishedFileVisibility Visibility; // m_eVisibility ERemoteStoragePublishedFileVisibility
+    //    [MarshalAs(UnmanagedType.I1)]
+    //    internal bool Banned; // m_bBanned bool
+    //    internal string TagsUTF8() => System.Text.Encoding.UTF8.GetString(Tags, 0, System.Array.IndexOf<byte>(Tags, 0));
+    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1025)] // byte[] m_rgchTags
+    //    internal byte[] Tags; // m_rgchTags char [1025]
+    //    [MarshalAs(UnmanagedType.I1)]
+    //    internal bool TagsTruncated; // m_bTagsTruncated bool
+    //    internal string PchFileNameUTF8() => System.Text.Encoding.UTF8.GetString(PchFileName, 0, System.Array.IndexOf<byte>(PchFileName, 0));
+    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 260)] // byte[] m_pchFileName
+    //    internal byte[] PchFileName; // m_pchFileName char [260]
+    //    internal int FileSize; // m_nFileSize int32
+    //    internal int PreviewFileSize; // m_nPreviewFileSize int32
+    //    internal string URLUTF8() => System.Text.Encoding.UTF8.GetString(URL, 0, System.Array.IndexOf<byte>(URL, 0));
+    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)] // byte[] m_rgchURL
+    //    internal byte[] URL; // m_rgchURL char [256]
+    //    internal WorkshopFileType FileType; // m_eFileType EWorkshopFileType
+    //    [MarshalAs(UnmanagedType.I1)]
+    //    internal bool AcceptedForUse; // m_bAcceptedForUse bool
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageGetPublishedFileDetailsResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.RemoteStorageGetPublishedFileDetailsResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct RemoteStorageEnumerateWorkshopFilesResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal int ResultsReturned; // m_nResultsReturned int32
+    //    internal int TotalResultCount; // m_nTotalResultCount int32
+    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50, ArraySubType = UnmanagedType.U8)]
+    //    internal PublishedFileId[] GPublishedFileId; // m_rgPublishedFileId PublishedFileId_t [50]
+    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50, ArraySubType = UnmanagedType.R4)]
+    //    internal float[] GScore; // m_rgScore float [50]
+    //    internal AppId AppId; // m_nAppId AppId_t
+    //    internal uint StartIndex; // m_unStartIndex uint32
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageEnumerateWorkshopFilesResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.RemoteStorageEnumerateWorkshopFilesResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct RemoteStorageGetPublishedItemVoteDetailsResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal PublishedFileId PublishedFileId; // m_unPublishedFileId PublishedFileId_t
+    //    internal int VotesFor; // m_nVotesFor int32
+    //    internal int VotesAgainst; // m_nVotesAgainst int32
+    //    internal int Reports; // m_nReports int32
+    //    internal float FScore; // m_fScore float
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageGetPublishedItemVoteDetailsResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.RemoteStorageGetPublishedItemVoteDetailsResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct RemoteStoragePublishedFileSubscribed_t : ICallbackData
+    //{
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    internal AppId AppID; // m_nAppID AppId_t
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStoragePublishedFileSubscribed_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.RemoteStoragePublishedFileSubscribed;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct RemoteStoragePublishedFileUnsubscribed_t : ICallbackData
+    //{
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    internal AppId AppID; // m_nAppID AppId_t
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStoragePublishedFileUnsubscribed_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.RemoteStoragePublishedFileUnsubscribed;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct RemoteStoragePublishedFileDeleted_t : ICallbackData
+    //{
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    internal AppId AppID; // m_nAppID AppId_t
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStoragePublishedFileDeleted_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.RemoteStoragePublishedFileDeleted;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct RemoteStorageUpdateUserPublishedItemVoteResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageUpdateUserPublishedItemVoteResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.RemoteStorageUpdateUserPublishedItemVoteResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct RemoteStorageUserVoteDetails_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    internal WorkshopVote Vote; // m_eVote EWorkshopVote
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageUserVoteDetails_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.RemoteStorageUserVoteDetails;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct RemoteStorageEnumerateUserSharedWorkshopFilesResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal int ResultsReturned; // m_nResultsReturned int32
+    //    internal int TotalResultCount; // m_nTotalResultCount int32
+    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50, ArraySubType = UnmanagedType.U8)]
+    //    internal PublishedFileId[] GPublishedFileId; // m_rgPublishedFileId PublishedFileId_t [50]
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageEnumerateUserSharedWorkshopFilesResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.RemoteStorageEnumerateUserSharedWorkshopFilesResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct RemoteStorageSetUserPublishedFileActionResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    internal WorkshopFileAction Action; // m_eAction EWorkshopFileAction
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageSetUserPublishedFileActionResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.RemoteStorageSetUserPublishedFileActionResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct RemoteStorageEnumeratePublishedFilesByUserActionResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal WorkshopFileAction Action; // m_eAction EWorkshopFileAction
+    //    internal int ResultsReturned; // m_nResultsReturned int32
+    //    internal int TotalResultCount; // m_nTotalResultCount int32
+    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50, ArraySubType = UnmanagedType.U8)]
+    //    internal PublishedFileId[] GPublishedFileId; // m_rgPublishedFileId PublishedFileId_t [50]
+    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50, ArraySubType = UnmanagedType.U4)]
+    //    internal uint[] GRTimeUpdated; // m_rgRTimeUpdated uint32 [50]
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageEnumeratePublishedFilesByUserActionResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.RemoteStorageEnumeratePublishedFilesByUserActionResult;
+    //    #endregion
+    //}
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct RemoteStoragePublishFileProgress_t : ICallbackData
+    {
+        internal double DPercentFile; // m_dPercentFile double
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool Preview; // m_bPreview bool
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStoragePublishFileProgress_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.RemoteStoragePublishFileProgress;
+        #endregion
+    }
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct RemoteStoragePublishedFileUpdated_t : ICallbackData
+    //{
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    internal AppId AppID; // m_nAppID AppId_t
+    //    internal ulong Unused; // m_ulUnused uint64
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStoragePublishedFileUpdated_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.RemoteStoragePublishedFileUpdated;
+    //    #endregion
+    //}
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct RemoteStorageFileWriteAsyncComplete_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageFileWriteAsyncComplete_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.RemoteStorageFileWriteAsyncComplete;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct RemoteStorageFileReadAsyncComplete_t : ICallbackData
+    {
+        internal ulong FileReadAsync; // m_hFileReadAsync SteamAPICall_t
+        internal Result Result; // m_eResult EResult
+        internal uint Offset; // m_nOffset uint32
+        internal uint Read; // m_cubRead uint32
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageFileReadAsyncComplete_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.RemoteStorageFileReadAsyncComplete;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct RemoteStorageLocalFileChange_t : ICallbackData
+    {
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageLocalFileChange_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.RemoteStorageLocalFileChange;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    internal struct UserStatsReceived_t : ICallbackData
+    {
+        internal ulong GameID; // m_nGameID uint64
+        internal Result Result; // m_eResult EResult
+        internal ulong SteamIDUser; // m_steamIDUser CSteamID
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(UserStatsReceived_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.UserStatsReceived;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct UserStatsStored_t : ICallbackData
+    {
+        internal ulong GameID; // m_nGameID uint64
+        internal Result Result; // m_eResult EResult
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(UserStatsStored_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.UserStatsStored;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct UserAchievementStored_t : ICallbackData
+    {
+        internal ulong GameID; // m_nGameID uint64
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool GroupAchievement; // m_bGroupAchievement bool
+        internal string AchievementNameUTF8() => System.Text.Encoding.UTF8.GetString(AchievementName, 0, System.Array.IndexOf<byte>(AchievementName, 0));
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)] // byte[] m_rgchAchievementName
+        internal byte[] AchievementName; // m_rgchAchievementName char [128]
+        internal uint CurProgress; // m_nCurProgress uint32
+        internal uint MaxProgress; // m_nMaxProgress uint32
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(UserAchievementStored_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.UserAchievementStored;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct LeaderboardFindResult_t : ICallbackData
+    {
+        internal ulong SteamLeaderboard; // m_hSteamLeaderboard SteamLeaderboard_t
+        internal byte LeaderboardFound; // m_bLeaderboardFound uint8
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LeaderboardFindResult_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.LeaderboardFindResult;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct LeaderboardScoresDownloaded_t : ICallbackData
+    {
+        internal ulong SteamLeaderboard; // m_hSteamLeaderboard SteamLeaderboard_t
+        internal ulong SteamLeaderboardEntries; // m_hSteamLeaderboardEntries SteamLeaderboardEntries_t
+        internal int CEntryCount; // m_cEntryCount int
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LeaderboardScoresDownloaded_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.LeaderboardScoresDownloaded;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct LeaderboardScoreUploaded_t : ICallbackData
+    {
+        internal byte Success; // m_bSuccess uint8
+        internal ulong SteamLeaderboard; // m_hSteamLeaderboard SteamLeaderboard_t
+        internal int Score; // m_nScore int32
+        internal byte ScoreChanged; // m_bScoreChanged uint8
+        internal int GlobalRankNew; // m_nGlobalRankNew int
+        internal int GlobalRankPrevious; // m_nGlobalRankPrevious int
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LeaderboardScoreUploaded_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.LeaderboardScoreUploaded;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct NumberOfCurrentPlayers_t : ICallbackData
+    {
+        internal byte Success; // m_bSuccess uint8
+        internal int CPlayers; // m_cPlayers int32
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(NumberOfCurrentPlayers_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.NumberOfCurrentPlayers;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct UserStatsUnloaded_t : ICallbackData
+    {
+        internal ulong SteamIDUser; // m_steamIDUser CSteamID
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(UserStatsUnloaded_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.UserStatsUnloaded;
+        #endregion
+    }
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct UserAchievementIconFetched_t : ICallbackData
+    //{
+    //    internal GameId GameID; // m_nGameID CGameID
+    //    internal string AchievementNameUTF8() => System.Text.Encoding.UTF8.GetString(AchievementName, 0, System.Array.IndexOf<byte>(AchievementName, 0));
+    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)] // byte[] m_rgchAchievementName
+    //    internal byte[] AchievementName; // m_rgchAchievementName char [128]
+    //    [MarshalAs(UnmanagedType.I1)]
+    //    internal bool Achieved; // m_bAchieved bool
+    //    internal int IconHandle; // m_nIconHandle int
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(UserAchievementIconFetched_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.UserAchievementIconFetched;
+    //    #endregion
+    //}
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct GlobalAchievementPercentagesReady_t : ICallbackData
+    {
+        internal ulong GameID; // m_nGameID uint64
+        internal Result Result; // m_eResult EResult
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GlobalAchievementPercentagesReady_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.GlobalAchievementPercentagesReady;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct LeaderboardUGCSet_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+        internal ulong SteamLeaderboard; // m_hSteamLeaderboard SteamLeaderboard_t
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LeaderboardUGCSet_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.LeaderboardUGCSet;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct GlobalStatsReceived_t : ICallbackData
+    {
+        internal ulong GameID; // m_nGameID uint64
+        internal Result Result; // m_eResult EResult
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GlobalStatsReceived_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.GlobalStatsReceived;
+        #endregion
+    }
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct DlcInstalled_t : ICallbackData
+    //{
+    //    internal AppId AppID; // m_nAppID AppId_t
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(DlcInstalled_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.DlcInstalled;
+    //    #endregion
+    //}
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct RegisterActivationCodeResponse_t : ICallbackData
+    {
+        internal RegisterActivationCodeResult Result; // m_eResult ERegisterActivationCodeResult
+        internal uint PackageRegistered; // m_unPackageRegistered uint32
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RegisterActivationCodeResponse_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.RegisterActivationCodeResponse;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct NewUrlLaunchParameters_t : ICallbackData
+    {
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(NewUrlLaunchParameters_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.NewUrlLaunchParameters;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct AppProofOfPurchaseKeyResponse_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+        internal uint AppID; // m_nAppID uint32
+        internal uint CchKeyLength; // m_cchKeyLength uint32
+        internal string KeyUTF8() => System.Text.Encoding.UTF8.GetString(Key, 0, System.Array.IndexOf<byte>(Key, 0));
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 240)] // byte[] m_rgchKey
+        internal byte[] Key; // m_rgchKey char [240]
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(AppProofOfPurchaseKeyResponse_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.AppProofOfPurchaseKeyResponse;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct FileDetailsResult_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+        internal ulong FileSize; // m_ulFileSize uint64
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)] //  m_FileSHA
+        internal byte[] FileSHA; // m_FileSHA uint8 [20]
+        internal uint Flags; // m_unFlags uint32
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(FileDetailsResult_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.FileDetailsResult;
+        #endregion
+    }
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct TimedTrialStatus_t : ICallbackData
+    //{
+    //    internal AppId AppID; // m_unAppID AppId_t
+    //    [MarshalAs(UnmanagedType.I1)]
+    //    internal bool IsOffline; // m_bIsOffline bool
+    //    internal uint SecondsAllowed; // m_unSecondsAllowed uint32
+    //    internal uint SecondsPlayed; // m_unSecondsPlayed uint32
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(TimedTrialStatus_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.TimedTrialStatus;
+    //    #endregion
+    //}
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct P2PSessionRequest_t : ICallbackData
+    {
+        internal ulong SteamIDRemote; // m_steamIDRemote CSteamID
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(P2PSessionRequest_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.P2PSessionRequest;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct P2PSessionConnectFail_t : ICallbackData
+    {
+        internal ulong SteamIDRemote; // m_steamIDRemote CSteamID
+        internal byte P2PSessionError; // m_eP2PSessionError uint8
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(P2PSessionConnectFail_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.P2PSessionConnectFail;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct ScreenshotReady_t : ICallbackData
+    {
+        internal uint Local; // m_hLocal ScreenshotHandle
+        internal Result Result; // m_eResult EResult
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(ScreenshotReady_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.ScreenshotReady;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct ScreenshotRequested_t : ICallbackData
+    {
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(ScreenshotRequested_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.ScreenshotRequested;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct PlaybackStatusHasChanged_t : ICallbackData
+    {
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(PlaybackStatusHasChanged_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.PlaybackStatusHasChanged;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct VolumeHasChanged_t : ICallbackData
+    {
+        internal float NewVolume; // m_flNewVolume float
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(VolumeHasChanged_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.VolumeHasChanged;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct MusicPlayerRemoteWillActivate_t : ICallbackData
+    {
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerRemoteWillActivate_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.MusicPlayerRemoteWillActivate;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct MusicPlayerRemoteWillDeactivate_t : ICallbackData
+    {
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerRemoteWillDeactivate_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.MusicPlayerRemoteWillDeactivate;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct MusicPlayerRemoteToFront_t : ICallbackData
+    {
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerRemoteToFront_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.MusicPlayerRemoteToFront;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct MusicPlayerWillQuit_t : ICallbackData
+    {
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerWillQuit_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.MusicPlayerWillQuit;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct MusicPlayerWantsPlay_t : ICallbackData
+    {
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerWantsPlay_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.MusicPlayerWantsPlay;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct MusicPlayerWantsPause_t : ICallbackData
+    {
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerWantsPause_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.MusicPlayerWantsPause;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct MusicPlayerWantsPlayPrevious_t : ICallbackData
+    {
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerWantsPlayPrevious_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.MusicPlayerWantsPlayPrevious;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct MusicPlayerWantsPlayNext_t : ICallbackData
+    {
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerWantsPlayNext_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.MusicPlayerWantsPlayNext;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct MusicPlayerWantsShuffled_t : ICallbackData
+    {
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool Shuffled; // m_bShuffled bool
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerWantsShuffled_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.MusicPlayerWantsShuffled;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct MusicPlayerWantsLooped_t : ICallbackData
+    {
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool Looped; // m_bLooped bool
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerWantsLooped_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.MusicPlayerWantsLooped;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct MusicPlayerWantsVolume_t : ICallbackData
+    {
+        internal float NewVolume; // m_flNewVolume float
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerWantsVolume_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.MusicPlayerWantsVolume;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct MusicPlayerSelectsQueueEntry_t : ICallbackData
+    {
+        internal int NID; // nID int
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerSelectsQueueEntry_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.MusicPlayerSelectsQueueEntry;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct MusicPlayerSelectsPlaylistEntry_t : ICallbackData
+    {
+        internal int NID; // nID int
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerSelectsPlaylistEntry_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.MusicPlayerSelectsPlaylistEntry;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct MusicPlayerWantsPlayingRepeatStatus_t : ICallbackData
+    {
+        internal int PlayingRepeatStatus; // m_nPlayingRepeatStatus int
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerWantsPlayingRepeatStatus_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.MusicPlayerWantsPlayingRepeatStatus;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTTPRequestCompleted_t : ICallbackData
+    {
+        internal uint Request; // m_hRequest HTTPRequestHandle
+        internal ulong ContextValue; // m_ulContextValue uint64
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool RequestSuccessful; // m_bRequestSuccessful bool
+        internal HTTPStatusCode StatusCode; // m_eStatusCode EHTTPStatusCode
+        internal uint BodySize; // m_unBodySize uint32
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTTPRequestCompleted_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTTPRequestCompleted;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTTPRequestHeadersReceived_t : ICallbackData
+    {
+        internal uint Request; // m_hRequest HTTPRequestHandle
+        internal ulong ContextValue; // m_ulContextValue uint64
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTTPRequestHeadersReceived_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTTPRequestHeadersReceived;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTTPRequestDataReceived_t : ICallbackData
+    {
+        internal uint Request; // m_hRequest HTTPRequestHandle
+        internal ulong ContextValue; // m_ulContextValue uint64
+        internal uint COffset; // m_cOffset uint32
+        internal uint CBytesReceived; // m_cBytesReceived uint32
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTTPRequestDataReceived_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTTPRequestDataReceived;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct SteamInputDeviceConnected_t : ICallbackData
+    {
+        internal ulong ConnectedDeviceHandle; // m_ulConnectedDeviceHandle InputHandle_t
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamInputDeviceConnected_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamInputDeviceConnected;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct SteamInputDeviceDisconnected_t : ICallbackData
+    {
+        internal ulong DisconnectedDeviceHandle; // m_ulDisconnectedDeviceHandle InputHandle_t
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamInputDeviceDisconnected_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamInputDeviceDisconnected;
+        #endregion
+    }
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    //internal struct SteamInputConfigurationLoaded_t : ICallbackData
+    //{
+    //    internal AppId AppID; // m_unAppID AppId_t
+    //    internal ulong DeviceHandle; // m_ulDeviceHandle InputHandle_t
+    //    internal ulong MappingCreator; // m_ulMappingCreator CSteamID
+    //    internal uint MajorRevision; // m_unMajorRevision uint32
+    //    internal uint MinorRevision; // m_unMinorRevision uint32
+    //    [MarshalAs(UnmanagedType.I1)]
+    //    internal bool UsesSteamInputAPI; // m_bUsesSteamInputAPI bool
+    //    [MarshalAs(UnmanagedType.I1)]
+    //    internal bool UsesGamepadAPI; // m_bUsesGamepadAPI bool
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamInputConfigurationLoaded_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.SteamInputConfigurationLoaded;
+    //    #endregion
+    //}
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct SteamUGCQueryCompleted_t : ICallbackData
+    {
+        internal ulong Handle; // m_handle UGCQueryHandle_t
+        internal Result Result; // m_eResult EResult
+        internal uint NumResultsReturned; // m_unNumResultsReturned uint32
+        internal uint TotalMatchingResults; // m_unTotalMatchingResults uint32
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool CachedData; // m_bCachedData bool
+        internal string NextCursorUTF8() => System.Text.Encoding.UTF8.GetString(NextCursor, 0, System.Array.IndexOf<byte>(NextCursor, 0));
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)] // byte[] m_rgchNextCursor
+        internal byte[] NextCursor; // m_rgchNextCursor char [256]
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamUGCQueryCompleted_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamUGCQueryCompleted;
+        #endregion
+    }
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct SteamUGCRequestUGCDetailsResult_t : ICallbackData
+    //{
+    //    internal SteamUGCDetails_t Details; // m_details SteamUGCDetails_t
+    //    [MarshalAs(UnmanagedType.I1)]
+    //    internal bool CachedData; // m_bCachedData bool
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamUGCRequestUGCDetailsResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.SteamUGCRequestUGCDetailsResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct CreateItemResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    [MarshalAs(UnmanagedType.I1)]
+    //    internal bool UserNeedsToAcceptWorkshopLegalAgreement; // m_bUserNeedsToAcceptWorkshopLegalAgreement bool
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(CreateItemResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.CreateItemResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct SubmitItemUpdateResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    [MarshalAs(UnmanagedType.I1)]
+    //    internal bool UserNeedsToAcceptWorkshopLegalAgreement; // m_bUserNeedsToAcceptWorkshopLegalAgreement bool
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SubmitItemUpdateResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.SubmitItemUpdateResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct ItemInstalled_t : ICallbackData
+    //{
+    //    internal AppId AppID; // m_unAppID AppId_t
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(ItemInstalled_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.ItemInstalled;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct DownloadItemResult_t : ICallbackData
+    //{
+    //    internal AppId AppID; // m_unAppID AppId_t
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    internal Result Result; // m_eResult EResult
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(DownloadItemResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.DownloadItemResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct UserFavoriteItemsListChanged_t : ICallbackData
+    //{
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    internal Result Result; // m_eResult EResult
+    //    [MarshalAs(UnmanagedType.I1)]
+    //    internal bool WasAddRequest; // m_bWasAddRequest bool
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(UserFavoriteItemsListChanged_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.UserFavoriteItemsListChanged;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct SetUserItemVoteResult_t : ICallbackData
+    //{
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    internal Result Result; // m_eResult EResult
+    //    [MarshalAs(UnmanagedType.I1)]
+    //    internal bool VoteUp; // m_bVoteUp bool
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SetUserItemVoteResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.SetUserItemVoteResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct GetUserItemVoteResult_t : ICallbackData
+    //{
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    internal Result Result; // m_eResult EResult
+    //    [MarshalAs(UnmanagedType.I1)]
+    //    internal bool VotedUp; // m_bVotedUp bool
+    //    [MarshalAs(UnmanagedType.I1)]
+    //    internal bool VotedDown; // m_bVotedDown bool
+    //    [MarshalAs(UnmanagedType.I1)]
+    //    internal bool VoteSkipped; // m_bVoteSkipped bool
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GetUserItemVoteResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.GetUserItemVoteResult;
+    //    #endregion
+    //}
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct StartPlaytimeTrackingResult_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(StartPlaytimeTrackingResult_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.StartPlaytimeTrackingResult;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct StopPlaytimeTrackingResult_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(StopPlaytimeTrackingResult_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.StopPlaytimeTrackingResult;
+        #endregion
+    }
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct AddUGCDependencyResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    internal PublishedFileId ChildPublishedFileId; // m_nChildPublishedFileId PublishedFileId_t
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(AddUGCDependencyResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.AddUGCDependencyResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct RemoveUGCDependencyResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    internal PublishedFileId ChildPublishedFileId; // m_nChildPublishedFileId PublishedFileId_t
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoveUGCDependencyResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.RemoveUGCDependencyResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct AddAppDependencyResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    internal AppId AppID; // m_nAppID AppId_t
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(AddAppDependencyResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.AddAppDependencyResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct RemoveAppDependencyResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    internal AppId AppID; // m_nAppID AppId_t
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoveAppDependencyResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.RemoveAppDependencyResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct GetAppDependenciesResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32, ArraySubType = UnmanagedType.U4)]
+    //    internal AppId[] GAppIDs; // m_rgAppIDs AppId_t [32]
+    //    internal uint NumAppDependencies; // m_nNumAppDependencies uint32
+    //    internal uint TotalNumAppDependencies; // m_nTotalNumAppDependencies uint32
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GetAppDependenciesResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.GetAppDependenciesResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct DeleteItemResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(DeleteItemResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.DeleteItemResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct UserSubscribedItemsListChanged_t : ICallbackData
+    //{
+    //    internal AppId AppID; // m_nAppID AppId_t
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(UserSubscribedItemsListChanged_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.UserSubscribedItemsListChanged;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct WorkshopEULAStatus_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal AppId AppID; // m_nAppID AppId_t
+    //    internal uint Version; // m_unVersion uint32
+    //    internal uint TAction; // m_rtAction RTime32
+    //    [MarshalAs(UnmanagedType.I1)]
+    //    internal bool Accepted; // m_bAccepted bool
+    //    [MarshalAs(UnmanagedType.I1)]
+    //    internal bool NeedsAction; // m_bNeedsAction bool
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(WorkshopEULAStatus_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.WorkshopEULAStatus;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct SteamAppInstalled_t : ICallbackData
+    //{
+    //    internal AppId AppID; // m_nAppID AppId_t
+    //    internal int InstallFolderIndex; // m_iInstallFolderIndex int
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamAppInstalled_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.SteamAppInstalled;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct SteamAppUninstalled_t : ICallbackData
+    //{
+    //    internal AppId AppID; // m_nAppID AppId_t
+    //    internal int InstallFolderIndex; // m_iInstallFolderIndex int
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamAppUninstalled_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.SteamAppUninstalled;
+    //    #endregion
+    //}
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTML_BrowserReady_t : ICallbackData
+    {
+        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_BrowserReady_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTML_BrowserReady;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTML_NeedsPaint_t : ICallbackData
+    {
+        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        internal string PBGRA; // pBGRA const char *
+        internal uint UnWide; // unWide uint32
+        internal uint UnTall; // unTall uint32
+        internal uint UnUpdateX; // unUpdateX uint32
+        internal uint UnUpdateY; // unUpdateY uint32
+        internal uint UnUpdateWide; // unUpdateWide uint32
+        internal uint UnUpdateTall; // unUpdateTall uint32
+        internal uint UnScrollX; // unScrollX uint32
+        internal uint UnScrollY; // unScrollY uint32
+        internal float FlPageScale; // flPageScale float
+        internal uint UnPageSerial; // unPageSerial uint32
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_NeedsPaint_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTML_NeedsPaint;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTML_StartRequest_t : ICallbackData
+    {
+        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        internal string PchURL; // pchURL const char *
+        internal string PchTarget; // pchTarget const char *
+        internal string PchPostData; // pchPostData const char *
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool BIsRedirect; // bIsRedirect bool
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_StartRequest_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTML_StartRequest;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTML_CloseBrowser_t : ICallbackData
+    {
+        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_CloseBrowser_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTML_CloseBrowser;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTML_URLChanged_t : ICallbackData
+    {
+        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        internal string PchURL; // pchURL const char *
+        internal string PchPostData; // pchPostData const char *
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool BIsRedirect; // bIsRedirect bool
+        internal string PchPageTitle; // pchPageTitle const char *
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool BNewNavigation; // bNewNavigation bool
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_URLChanged_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTML_URLChanged;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTML_FinishedRequest_t : ICallbackData
+    {
+        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        internal string PchURL; // pchURL const char *
+        internal string PchPageTitle; // pchPageTitle const char *
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_FinishedRequest_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTML_FinishedRequest;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTML_OpenLinkInNewTab_t : ICallbackData
+    {
+        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        internal string PchURL; // pchURL const char *
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_OpenLinkInNewTab_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTML_OpenLinkInNewTab;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTML_ChangedTitle_t : ICallbackData
+    {
+        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        internal string PchTitle; // pchTitle const char *
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_ChangedTitle_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTML_ChangedTitle;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTML_SearchResults_t : ICallbackData
+    {
+        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        internal uint UnResults; // unResults uint32
+        internal uint UnCurrentMatch; // unCurrentMatch uint32
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_SearchResults_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTML_SearchResults;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTML_CanGoBackAndForward_t : ICallbackData
+    {
+        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool BCanGoBack; // bCanGoBack bool
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool BCanGoForward; // bCanGoForward bool
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_CanGoBackAndForward_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTML_CanGoBackAndForward;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTML_HorizontalScroll_t : ICallbackData
+    {
+        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        internal uint UnScrollMax; // unScrollMax uint32
+        internal uint UnScrollCurrent; // unScrollCurrent uint32
+        internal float FlPageScale; // flPageScale float
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool BVisible; // bVisible bool
+        internal uint UnPageSize; // unPageSize uint32
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_HorizontalScroll_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTML_HorizontalScroll;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTML_VerticalScroll_t : ICallbackData
+    {
+        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        internal uint UnScrollMax; // unScrollMax uint32
+        internal uint UnScrollCurrent; // unScrollCurrent uint32
+        internal float FlPageScale; // flPageScale float
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool BVisible; // bVisible bool
+        internal uint UnPageSize; // unPageSize uint32
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_VerticalScroll_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTML_VerticalScroll;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTML_LinkAtPosition_t : ICallbackData
+    {
+        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        internal uint X; // x uint32
+        internal uint Y; // y uint32
+        internal string PchURL; // pchURL const char *
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool BInput; // bInput bool
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool BLiveLink; // bLiveLink bool
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_LinkAtPosition_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTML_LinkAtPosition;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTML_JSAlert_t : ICallbackData
+    {
+        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        internal string PchMessage; // pchMessage const char *
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_JSAlert_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTML_JSAlert;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTML_JSConfirm_t : ICallbackData
+    {
+        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        internal string PchMessage; // pchMessage const char *
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_JSConfirm_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTML_JSConfirm;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTML_FileOpenDialog_t : ICallbackData
+    {
+        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        internal string PchTitle; // pchTitle const char *
+        internal string PchInitialFile; // pchInitialFile const char *
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_FileOpenDialog_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTML_FileOpenDialog;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTML_NewWindow_t : ICallbackData
+    {
+        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        internal string PchURL; // pchURL const char *
+        internal uint UnX; // unX uint32
+        internal uint UnY; // unY uint32
+        internal uint UnWide; // unWide uint32
+        internal uint UnTall; // unTall uint32
+        internal uint UnNewWindow_BrowserHandle_IGNORE; // unNewWindow_BrowserHandle_IGNORE HHTMLBrowser
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_NewWindow_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTML_NewWindow;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTML_SetCursor_t : ICallbackData
+    {
+        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        internal uint EMouseCursor; // eMouseCursor uint32
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_SetCursor_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTML_SetCursor;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTML_StatusText_t : ICallbackData
+    {
+        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        internal string PchMsg; // pchMsg const char *
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_StatusText_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTML_StatusText;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTML_ShowToolTip_t : ICallbackData
+    {
+        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        internal string PchMsg; // pchMsg const char *
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_ShowToolTip_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTML_ShowToolTip;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTML_UpdateToolTip_t : ICallbackData
+    {
+        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        internal string PchMsg; // pchMsg const char *
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_UpdateToolTip_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTML_UpdateToolTip;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTML_HideToolTip_t : ICallbackData
+    {
+        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_HideToolTip_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTML_HideToolTip;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct HTML_BrowserRestarted_t : ICallbackData
+    {
+        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        internal uint UnOldBrowserHandle; // unOldBrowserHandle HHTMLBrowser
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_BrowserRestarted_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.HTML_BrowserRestarted;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct SteamInventoryResultReady_t : ICallbackData
+    {
+        internal int Handle; // m_handle SteamInventoryResult_t
+        internal Result Result; // m_result EResult
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamInventoryResultReady_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamInventoryResultReady;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct SteamInventoryFullUpdate_t : ICallbackData
+    {
+        internal int Handle; // m_handle SteamInventoryResult_t
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamInventoryFullUpdate_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamInventoryFullUpdate;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct SteamInventoryDefinitionUpdate_t : ICallbackData
+    {
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamInventoryDefinitionUpdate_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamInventoryDefinitionUpdate;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    internal struct SteamInventoryEligiblePromoItemDefIDs_t : ICallbackData
+    {
+        internal Result Result; // m_result EResult
+        internal ulong SteamID; // m_steamID CSteamID
+        internal int UmEligiblePromoItemDefs; // m_numEligiblePromoItemDefs int
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool CachedData; // m_bCachedData bool
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamInventoryEligiblePromoItemDefIDs_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamInventoryEligiblePromoItemDefIDs;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct SteamInventoryStartPurchaseResult_t : ICallbackData
+    {
+        internal Result Result; // m_result EResult
+        internal ulong OrderID; // m_ulOrderID uint64
+        internal ulong TransID; // m_ulTransID uint64
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamInventoryStartPurchaseResult_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamInventoryStartPurchaseResult;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct SteamInventoryRequestPricesResult_t : ICallbackData
+    {
+        internal Result Result; // m_result EResult
+        internal string CurrencyUTF8() => System.Text.Encoding.UTF8.GetString(Currency, 0, System.Array.IndexOf<byte>(Currency, 0));
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)] // byte[] m_rgchCurrency
+        internal byte[] Currency; // m_rgchCurrency char [4]
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamInventoryRequestPricesResult_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamInventoryRequestPricesResult;
+        #endregion
+    }
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct GetVideoURLResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal AppId VideoAppID; // m_unVideoAppID AppId_t
+    //    internal string URLUTF8() => System.Text.Encoding.UTF8.GetString(URL, 0, System.Array.IndexOf<byte>(URL, 0));
+    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)] // byte[] m_rgchURL
+    //    internal byte[] URL; // m_rgchURL char [256]
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GetVideoURLResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.GetVideoURLResult;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct GetOPFSettingsResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal AppId VideoAppID; // m_unVideoAppID AppId_t
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GetOPFSettingsResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.GetOPFSettingsResult;
+    //    #endregion
+    //}
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct SteamParentalSettingsChanged_t : ICallbackData
+    {
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamParentalSettingsChanged_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamParentalSettingsChanged;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct SteamRemotePlaySessionConnected_t : ICallbackData
+    {
+        internal uint SessionID; // m_unSessionID RemotePlaySessionID_t
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamRemotePlaySessionConnected_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamRemotePlaySessionConnected;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct SteamRemotePlaySessionDisconnected_t : ICallbackData
+    {
+        internal uint SessionID; // m_unSessionID RemotePlaySessionID_t
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamRemotePlaySessionDisconnected_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamRemotePlaySessionDisconnected;
+        #endregion
+    }
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct SteamNetworkingMessagesSessionRequest_t : ICallbackData
+    //{
+    //    internal NetIdentity DentityRemote; // m_identityRemote SteamNetworkingIdentity
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamNetworkingMessagesSessionRequest_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.SteamNetworkingMessagesSessionRequest;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct SteamNetworkingMessagesSessionFailed_t : ICallbackData
+    //{
+    //    internal ConnectionInfo Nfo; // m_info SteamNetConnectionInfo_t
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamNetworkingMessagesSessionFailed_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.SteamNetworkingMessagesSessionFailed;
+    //    #endregion
+    //}
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct SteamNetConnectionStatusChangedCallback_t : ICallbackData
+    //{
+    //    internal Connection Conn; // m_hConn HSteamNetConnection
+    //    internal ConnectionInfo Nfo; // m_info SteamNetConnectionInfo_t
+    //    internal ConnectionState OldState; // m_eOldState ESteamNetworkingConnectionState
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamNetConnectionStatusChangedCallback_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.SteamNetConnectionStatusChangedCallback;
+    //    #endregion
+    //}
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct SteamNetAuthenticationStatus_t : ICallbackData
+    {
+        internal SteamNetworkingAvailability Avail; // m_eAvail ESteamNetworkingAvailability
+        internal string DebugMsgUTF8() => System.Text.Encoding.UTF8.GetString(DebugMsg, 0, System.Array.IndexOf<byte>(DebugMsg, 0));
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)] // byte[] m_debugMsg
+        internal byte[] DebugMsg; // m_debugMsg char [256]
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamNetAuthenticationStatus_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamNetAuthenticationStatus;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct SteamRelayNetworkStatus_t : ICallbackData
+    {
+        internal SteamNetworkingAvailability Avail; // m_eAvail ESteamNetworkingAvailability
+        internal int PingMeasurementInProgress; // m_bPingMeasurementInProgress int
+        internal SteamNetworkingAvailability AvailNetworkConfig; // m_eAvailNetworkConfig ESteamNetworkingAvailability
+        internal SteamNetworkingAvailability AvailAnyRelay; // m_eAvailAnyRelay ESteamNetworkingAvailability
+        internal string DebugMsgUTF8() => System.Text.Encoding.UTF8.GetString(DebugMsg, 0, System.Array.IndexOf<byte>(DebugMsg, 0));
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)] // byte[] m_debugMsg
+        internal byte[] DebugMsg; // m_debugMsg char [256]
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamRelayNetworkStatus_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamRelayNetworkStatus;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    internal struct GSClientApprove_t : ICallbackData
+    {
+        internal ulong SteamID; // m_SteamID CSteamID
+        internal ulong OwnerSteamID; // m_OwnerSteamID CSteamID
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GSClientApprove_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.GSClientApprove;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct GSClientDeny_t : ICallbackData
+    {
+        internal ulong SteamID; // m_SteamID CSteamID
+        internal DenyReason DenyReason; // m_eDenyReason EDenyReason
+        internal string OptionalTextUTF8() => System.Text.Encoding.UTF8.GetString(OptionalText, 0, System.Array.IndexOf<byte>(OptionalText, 0));
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)] // byte[] m_rgchOptionalText
+        internal byte[] OptionalText; // m_rgchOptionalText char [128]
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GSClientDeny_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.GSClientDeny;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct GSClientKick_t : ICallbackData
+    {
+        internal ulong SteamID; // m_SteamID CSteamID
+        internal DenyReason DenyReason; // m_eDenyReason EDenyReason
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GSClientKick_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.GSClientKick;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct GSClientAchievementStatus_t : ICallbackData
+    {
+        internal ulong SteamID; // m_SteamID uint64
+        internal string PchAchievementUTF8() => System.Text.Encoding.UTF8.GetString(PchAchievement, 0, System.Array.IndexOf<byte>(PchAchievement, 0));
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)] // byte[] m_pchAchievement
+        internal byte[] PchAchievement; // m_pchAchievement char [128]
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool Unlocked; // m_bUnlocked bool
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GSClientAchievementStatus_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.GSClientAchievementStatus;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct GSPolicyResponse_t : ICallbackData
+    {
+        internal byte Secure; // m_bSecure uint8
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GSPolicyResponse_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.GSPolicyResponse;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct GSGameplayStats_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+        internal int Rank; // m_nRank int32
+        internal uint TotalConnects; // m_unTotalConnects uint32
+        internal uint TotalMinutesPlayed; // m_unTotalMinutesPlayed uint32
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GSGameplayStats_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.GSGameplayStats;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    internal struct GSClientGroupStatus_t : ICallbackData
+    {
+        internal ulong SteamIDUser; // m_SteamIDUser CSteamID
+        internal ulong SteamIDGroup; // m_SteamIDGroup CSteamID
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool Member; // m_bMember bool
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool Officer; // m_bOfficer bool
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GSClientGroupStatus_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.GSClientGroupStatus;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct GSReputation_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+        internal uint ReputationScore; // m_unReputationScore uint32
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool Banned; // m_bBanned bool
+        internal uint BannedIP; // m_unBannedIP uint32
+        internal ushort BannedPort; // m_usBannedPort uint16
+        internal ulong BannedGameID; // m_ulBannedGameID uint64
+        internal uint BanExpires; // m_unBanExpires uint32
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GSReputation_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.GSReputation;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct AssociateWithClanResult_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(AssociateWithClanResult_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.AssociateWithClanResult;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    internal struct ComputeNewPlayerCompatibilityResult_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+        internal int CPlayersThatDontLikeCandidate; // m_cPlayersThatDontLikeCandidate int
+        internal int CPlayersThatCandidateDoesntLike; // m_cPlayersThatCandidateDoesntLike int
+        internal int CClanPlayersThatDontLikeCandidate; // m_cClanPlayersThatDontLikeCandidate int
+        internal ulong SteamIDCandidate; // m_SteamIDCandidate CSteamID
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(ComputeNewPlayerCompatibilityResult_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.ComputeNewPlayerCompatibilityResult;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    internal struct GSStatsReceived_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+        internal ulong SteamIDUser; // m_steamIDUser CSteamID
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GSStatsReceived_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.GSStatsReceived;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    internal struct GSStatsStored_t : ICallbackData
+    {
+        internal Result Result; // m_eResult EResult
+        internal ulong SteamIDUser; // m_steamIDUser CSteamID
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GSStatsStored_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.GSStatsStored;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct GSStatsUnloaded_t : ICallbackData
+    {
+        internal ulong SteamIDUser; // m_steamIDUser CSteamID
+
+        #region SteamCallback
+        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GSStatsUnloaded_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.GSStatsUnloaded;
+        #endregion
+    }
+
+    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    //internal struct SteamNetworkingFakeIPResult_t : ICallbackData
+    //{
+    //    internal Result Result; // m_eResult EResult
+    //    internal NetIdentity Dentity; // m_identity SteamNetworkingIdentity
+    //    internal uint IP; // m_unIP uint32
+    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8, ArraySubType = UnmanagedType.U2)]
+    //    internal ushort[] Ports; // m_unPorts uint16 [8]
+
+    //    #region SteamCallback
+    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamNetworkingFakeIPResult_t));
+    //    public int DataSize => _datasize;
+    //    public CallbackType CallbackType => CallbackType.SteamNetworkingFakeIPResult;
+    //    #endregion
+    //}
+
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
+    public struct GCMessageAvailable_t
+    {
+        public const int k_iCallback = 1701;
+
+        public uint m_nMessageSize;
+    }
+
+
+}
