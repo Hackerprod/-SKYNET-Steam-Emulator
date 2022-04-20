@@ -1,4 +1,4 @@
-﻿//#define LOG
+﻿#define LOG
 using SKYNET;
 using SKYNET.Helpers;
 using SKYNET.Managers;
@@ -245,29 +245,24 @@ public class SteamEmulator
     static string lastMsg = "";
     public static void Write(string sender, object msg)
     {
+        if (string.IsNullOrEmpty(sender)) { sender = "NULL"; }
+        if (msg == null) { msg = "NULL"; }
+
         if (SendLog)
         {
             if (lastMsg != msg.ToString())
             {
-                Instance.OnMessage?.Invoke(Instance, new GameMessage(AppId, sender, msg));
+                OnMessage?.Invoke(Instance, new GameMessage(AppId, sender, msg));
                 lastMsg = msg.ToString();
             }
         }
 
+        Log.AppEnd(sender + ": " + msg);
+        Console.WriteLine(sender + ": " + msg);
+
         if (lastMsg != msg.ToString())
         {
-            Console.WriteLine(sender + ": " + msg);
-
-            string fileName = modCommon.GetPath() + "/[SKYNET] steam_api.log";
-            var lines = new List<string>();
-            if (File.Exists(fileName))
-            {
-                lines = File.ReadAllLines(fileName).ToList();
-            }
-            lines.Add(sender + ": " + msg);
-
-            File.WriteAllLines(fileName, lines);
-            lastMsg = msg.ToString();
+            
         }
     }
 

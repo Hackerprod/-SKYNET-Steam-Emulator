@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 
 namespace Steamworks
 {
-    [StructLayout(LayoutKind.Sequential)]
     public class CSteamID
     {
         private BitVector64 steamid;

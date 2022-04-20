@@ -53,10 +53,12 @@ namespace SKYNET.Managers
             }
         }
 
-        public unsafe static void RegisterCallback(int iCallback, CCallbackBase pCallback, bool Server = false)
+        public unsafe static void RegisterCallback(int iCallback, IntPtr ptrCallback, bool Server = false)
         {
+            CCallbackBase pCallback = ptrCallback.ToType<CCallbackBase>();
             pCallback.m_nCallbackFlags |= k_ECallbackFlagsRegistered;
             pCallback.m_iCallback = iCallback;
+            Marshal.StructureToPtr(pCallback, ptrCallback, false);
 
             if (Server)
             {

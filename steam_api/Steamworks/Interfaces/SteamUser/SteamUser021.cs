@@ -19,10 +19,10 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUser.BLoggedOn();
         }
 
-        [return: MarshalAs(UnmanagedType.Struct)]
-        public SteamID GetSteamID(IntPtr _)
+        ///[return: MarshalAs(UnmanagedType.I8)]
+        public CSteamID GetSteamID(IntPtr _)
         {
-            return new SteamID(SteamEmulator.SteamUser.GetSteamID());
+            return new CSteamID(SteamEmulator.SteamUser.GetSteamID());
         }
 
         public int InitiateGameConnection(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, SteamID steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)

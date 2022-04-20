@@ -107,7 +107,7 @@ namespace SKYNET.Exported
 
                 callMessage += $"{isGameServer}  {callback_id} {space} {CallInterface} {CallType}";
 
-                CallbackManager.RegisterCallback(iCallback, Callback, Callback.IsGameServer());
+                CallbackManager.RegisterCallback(iCallback, pCallback, Callback.IsGameServer());
 
                 Write(callMessage);
             }
