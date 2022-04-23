@@ -1,5 +1,11 @@
+using SKYNET.Steamworks;
 using Steamworks;
 using System;
+
+using SteamAPICall_t = System.UInt64;
+using PublishedFileId_t = System.UInt64;
+using UGCQueryHandle_t = System.UInt64;
+using UGCUpdateHandle_t = System.UInt64;
 
 namespace SKYNET.Interface
 {
@@ -26,7 +32,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUGC.CreateQueryUGCDetailsRequest(pvecPublishedFileID, unNumPublishedFileIDs);
         }
 
-        public ulong SendQueryUGCRequest(IntPtr _, UGCQueryHandle_t handle)
+        public SteamAPICall_t SendQueryUGCRequest(IntPtr _, UGCQueryHandle_t handle)
         {
             return SteamEmulator.SteamUGC.SendQueryUGCRequest(handle);
         }
@@ -176,12 +182,12 @@ namespace SKYNET.Interface
         return SteamEmulator.SteamUGC.AddRequiredKeyValueTag(handle, pKey, pValue);
     }
 
-    public ulong RequestUGCDetails(IntPtr _, ulong nPublishedFileID, uint unMaxAgeSeconds)
+    public SteamAPICall_t RequestUGCDetails(IntPtr _, ulong nPublishedFileID, uint unMaxAgeSeconds)
     {
         return SteamEmulator.SteamUGC.RequestUGCDetails(nPublishedFileID, unMaxAgeSeconds);
     }
 
-    public ulong CreateItem(IntPtr _, uint nConsumerAppId, int eFileType)
+    public SteamAPICall_t CreateItem(IntPtr _, uint nConsumerAppId, int eFileType)
     {
         return SteamEmulator.SteamUGC.CreateItem(nConsumerAppId, eFileType);
     }
@@ -276,7 +282,7 @@ namespace SKYNET.Interface
         return SteamEmulator.SteamUGC.RemoveItemPreview(handle, index);
     }
 
-    public ulong SubmitItemUpdate(UGCQueryHandle_t handle, string pchChangeNote) 
+    public SteamAPICall_t SubmitItemUpdate(UGCQueryHandle_t handle, string pchChangeNote) 
     {
         return SteamEmulator.SteamUGC.SubmitItemUpdate(handle, pchChangeNote);
     }
@@ -286,32 +292,32 @@ namespace SKYNET.Interface
         return SteamEmulator.SteamUGC.GetItemUpdateProgress(handle, punBytesProcessed, punBytesTotal);
     }
 
-    public ulong SetUserItemVote(IntPtr _, ulong nPublishedFileID, bool bVoteUp)
+    public SteamAPICall_t SetUserItemVote(IntPtr _, ulong nPublishedFileID, bool bVoteUp)
     {
         return SteamEmulator.SteamUGC.SetUserItemVote(nPublishedFileID, bVoteUp);
     }
 
-    public ulong GetUserItemVote(IntPtr _, ulong nPublishedFileID)
+    public SteamAPICall_t GetUserItemVote(IntPtr _, ulong nPublishedFileID)
     {
         return SteamEmulator.SteamUGC.GetUserItemVote(nPublishedFileID);
     }
 
-    public ulong AddItemToFavorites(IntPtr _, uint nAppId, ulong nPublishedFileID)
+    public SteamAPICall_t AddItemToFavorites(IntPtr _, uint nAppId, ulong nPublishedFileID)
     {
         return SteamEmulator.SteamUGC.AddItemToFavorites(nAppId, nPublishedFileID);
     }
 
-    public ulong RemoveItemFromFavorites(IntPtr _, uint nAppId, ulong nPublishedFileID)
+    public SteamAPICall_t RemoveItemFromFavorites(IntPtr _, uint nAppId, ulong nPublishedFileID)
     {
         return SteamEmulator.SteamUGC.RemoveItemFromFavorites(nAppId, nPublishedFileID);
     }
 
-    public ulong SubscribeItem(IntPtr _, PublishedFileId_t nPublishedFileID) 
+    public SteamAPICall_t SubscribeItem(IntPtr _, PublishedFileId_t nPublishedFileID) 
     {
         return SteamEmulator.SteamUGC.SubscribeItem(nPublishedFileID);
     }
 
-    public ulong UnsubscribeItem(IntPtr _, PublishedFileId_t nPublishedFileID) 
+    public SteamAPICall_t UnsubscribeItem(IntPtr _, PublishedFileId_t nPublishedFileID) 
     {
         return SteamEmulator.SteamUGC.UnsubscribeItem(nPublishedFileID);
     }
@@ -356,47 +362,47 @@ namespace SKYNET.Interface
         SteamEmulator.SteamUGC.SuspendDownloads(bSuspend);
     }
 
-    public ulong StartPlaytimeTracking(IntPtr _, PublishedFileId_t pvecPublishedFileID, uint unNumPublishedFileIDs)
+    public SteamAPICall_t StartPlaytimeTracking(IntPtr _, PublishedFileId_t pvecPublishedFileID, uint unNumPublishedFileIDs)
     {
         return SteamEmulator.SteamUGC.StartPlaytimeTracking(pvecPublishedFileID, unNumPublishedFileIDs);
     }
 
-    public ulong StopPlaytimeTracking(IntPtr _, ulong pvecPublishedFileID, uint unNumPublishedFileIDs)
+    public SteamAPICall_t StopPlaytimeTracking(IntPtr _, ulong pvecPublishedFileID, uint unNumPublishedFileIDs)
     {
         return SteamEmulator.SteamUGC.StopPlaytimeTracking(pvecPublishedFileID, unNumPublishedFileIDs);
     }
 
-    public ulong StopPlaytimeTrackingForAllItems(IntPtr _)
+    public SteamAPICall_t StopPlaytimeTrackingForAllItems(IntPtr _)
     {
         return SteamEmulator.SteamUGC.StopPlaytimeTrackingForAllItems();
     }
 
-    public ulong AddDependency(IntPtr _, ulong nParentPublishedFileID, ulong nChildPublishedFileID)
+    public SteamAPICall_t AddDependency(IntPtr _, ulong nParentPublishedFileID, ulong nChildPublishedFileID)
     {
         return SteamEmulator.SteamUGC.AddDependency(nParentPublishedFileID, nChildPublishedFileID);
     }
 
-    public ulong RemoveDependency(IntPtr _, ulong nParentPublishedFileID, ulong nChildPublishedFileID)
+    public SteamAPICall_t RemoveDependency(IntPtr _, ulong nParentPublishedFileID, ulong nChildPublishedFileID)
     {
         return SteamEmulator.SteamUGC.RemoveDependency(nParentPublishedFileID, nChildPublishedFileID);
     }
 
-    public ulong AddAppDependency(IntPtr _, ulong nPublishedFileID, uint nAppID)
+    public SteamAPICall_t AddAppDependency(IntPtr _, ulong nPublishedFileID, uint nAppID)
     {
         return SteamEmulator.SteamUGC.AddAppDependency(nPublishedFileID, nAppID);
     }
 
-    public ulong RemoveAppDependency(IntPtr _, ulong nPublishedFileID, uint nAppID)
+    public SteamAPICall_t RemoveAppDependency(IntPtr _, ulong nPublishedFileID, uint nAppID)
     {
         return SteamEmulator.SteamUGC.RemoveAppDependency(nPublishedFileID, nAppID);
     }
 
-    public ulong GetAppDependencies(IntPtr _, ulong nPublishedFileID)
+    public SteamAPICall_t GetAppDependencies(IntPtr _, ulong nPublishedFileID)
     {
         return SteamEmulator.SteamUGC.GetAppDependencies(nPublishedFileID);
     }
 
-    public ulong DeleteItem(IntPtr _, ulong nPublishedFileID)
+    public SteamAPICall_t DeleteItem(IntPtr _, ulong nPublishedFileID)
     {
         return SteamEmulator.SteamUGC.DeleteItem(nPublishedFileID);
     }

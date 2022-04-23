@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using SKYNET;
-using SKYNET.Helpers;
 using SKYNET.Managers;
 using System.Net;
 using System.Net.Http;
@@ -9,8 +6,11 @@ using Steamworks;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.IO;
-using SKYNET.Steamworks.Types;
 using SKYNET.Callback;
+
+using SteamAPICall_t = System.UInt64;
+using HTTPRequestHandle = System.UInt32;
+using HTTPCookieContainerHandle = System.UInt32;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -18,6 +18,8 @@ namespace SKYNET.Steamworks.Implementation
     {
         private List<HTTPRequest> HTTPRequests;
         private uint Handle;
+        private SteamAPICall_t k_uAPICallInvalid = 0x0;
+
         public SteamHTTP()
         {
             InterfaceVersion = "SteamHTTP";
@@ -48,61 +50,61 @@ namespace SKYNET.Steamworks.Implementation
             return CreatedHandle;
         }
 
-        public bool DeferHTTPRequest(uint hRequest)
+        public bool DeferHTTPRequest(HTTPRequestHandle hRequest)
         {
             Write($"DeferHTTPRequest");
             return true;
         }
 
-        public bool GetHTTPDownloadProgressPct(uint hRequest, float pflPercentOut)
+        public bool GetHTTPDownloadProgressPct(HTTPRequestHandle hRequest, float pflPercentOut)
         {
             Write($"GetHTTPDownloadProgressPct");
             return true;
         }
 
-        public bool GetHTTPRequestWasTimedOut(uint hRequest, bool pbWasTimedOut)
+        public bool GetHTTPRequestWasTimedOut(HTTPRequestHandle hRequest, bool pbWasTimedOut)
         {
             Write($"GetHTTPRequestWasTimedOut");
             return true;
         }
 
-        public bool GetHTTPResponseBodyData(uint hRequest, IntPtr pBodyDataBuffer, uint unBufferSize)
+        public bool GetHTTPResponseBodyData(HTTPRequestHandle hRequest, IntPtr pBodyDataBuffer, uint unBufferSize)
         {
             Write($"GetHTTPResponseBodyData");
             return true;
         }
 
-        public bool GetHTTPResponseBodySize(uint hRequest, uint unBodySize)
+        public bool GetHTTPResponseBodySize(HTTPRequestHandle hRequest, uint unBodySize)
         {
             Write($"GetHTTPResponseBodySize");
             return true;
         }
 
-        public bool GetHTTPResponseHeaderSize(uint hRequest, string pchHeaderName, uint unResponseHeaderSize)
+        public bool GetHTTPResponseHeaderSize(HTTPRequestHandle hRequest, string pchHeaderName, uint unResponseHeaderSize)
         {
             Write($"GetHTTPResponseHeaderSize");
             return true;
         }
 
-        public bool GetHTTPResponseHeaderValue(uint hRequest, string pchHeaderName, int pHeaderValueBuffer, uint unBufferSize)
+        public bool GetHTTPResponseHeaderValue(HTTPRequestHandle hRequest, string pchHeaderName, int pHeaderValueBuffer, uint unBufferSize)
         {
             Write($"GetHTTPResponseHeaderValue");
             return true;
         }
 
-        public bool GetHTTPStreamingResponseBodyData(uint hRequest, uint cOffset, IntPtr pBodyDataBuffer, uint unBufferSize)
+        public bool GetHTTPStreamingResponseBodyData(HTTPRequestHandle hRequest, uint cOffset, IntPtr pBodyDataBuffer, uint unBufferSize)
         {
             Write($"GetHTTPStreamingResponseBodyData");
             return true;
         }
 
-        public bool PrioritizeHTTPRequest(uint hRequest)
+        public bool PrioritizeHTTPRequest(HTTPRequestHandle hRequest)
         {
             Write($"PrioritizeHTTPRequest");
             return true;
         }
 
-        public bool ReleaseCookieContainer(uint hCookieContainer)
+        public bool ReleaseCookieContainer(HTTPCookieContainerHandle hCookieContainer)
         {
             Write($"ReleaseCookieContainer");
             return true;
@@ -134,72 +136,72 @@ namespace SKYNET.Steamworks.Implementation
                 return false;
             }
 
-            //HTTPRequestCompleted_t data = new HTTPRequestCompleted_t()
-            //{
-            //    m_hRequest = request.Handle
-            //};
+            HTTPRequestCompleted_t data = new HTTPRequestCompleted_t()
+            {
+                Request = (uint)request.Handle
+            };
 
-            //try
-            //{
-            //    WebRequest webrequest = HttpWebRequest.Create(request.URL);
-            //    webrequest.Method = request.RequestMethod.ToString();
-            //    HttpWebResponse response = (HttpWebResponse)webrequest.GetResponse();
-            //    StreamReader reader = new StreamReader(response.GetResponseStream());
-            //    string content = reader.ReadToEnd();
-            //    request.Response = content;
+            try
+            {
+                WebRequest webrequest = HttpWebRequest.Create(request.URL);
+                webrequest.Method = request.RequestMethod.ToString();
+                HttpWebResponse response = (HttpWebResponse)webrequest.GetResponse();
+                StreamReader reader = new StreamReader(response.GetResponseStream());
+                string content = reader.ReadToEnd();
+                request.Response = content;
 
-            //    data.m_ulContextValue = request.ContextValue;
-            //    data.m_bRequestSuccessful = true;
-            //    data.m_eStatusCode = (EHTTPStatusCode)response.StatusCode;
-            //    data.m_unBodySize = (uint)content.Length;
-            //}
-            //catch (Exception ex)
-            //{
-            //    data.m_ulContextValue = request.ContextValue;
-            //    data.m_bRequestSuccessful = false;
-            //    data.m_eStatusCode = EHTTPStatusCode.k_EHTTPStatusCode404NotFound;
-            //    data.m_unBodySize = 0;
-            //}
+                data.ContextValue = request.ContextValue;
+                data.RequestSuccessful = true;
+                data.StatusCode = (HTTPStatusCode)response.StatusCode;
+                data.BodySize = (uint)content.Length;
+            }
+            catch (Exception ex)
+            {
+                data.ContextValue = request.ContextValue;
+                data.RequestSuccessful = false;
+                data.StatusCode = HTTPStatusCode.Code404NotFound;
+                data.BodySize = 0;
+            }
 
-            //pCallHandle = CallbackManager.AddCallbackResult(data, HTTPRequestCompleted_t.k_iCallback);
-            //pCallHandle = new SteamAPICall_t(CallbackType.k_iHTTPRequestCompleted);
+            CallbackManager.AddCallbackResult(data);
+            pCallHandle = (ulong)CallbackType.HTTPRequestCompleted;
             return true;
         }
 
         // Sends the HTTP request, will return false on a bad handle, otherwise use SteamCallHandle to wait on
         // asynchronous response via callback for completion, and listen for HTTPRequestHeadersReceived_t and 
         // HTTPRequestDataReceived_t callbacks while streaming.
-        public bool SendHTTPRequestAndStreamResponse(uint hRequest, ulong pCallHandle)
+        public bool SendHTTPRequestAndStreamResponse(HTTPRequestHandle hRequest, SteamAPICall_t pCallHandle)
         {
             Write($"SendHTTPRequestAndStreamResponse");
             return true;
         }
 
-        public bool SetCookie(uint hCookieContainer, string pchHost, string pchUrl, string pchCookie)
+        public bool SetCookie(HTTPCookieContainerHandle hCookieContainer, string pchHost, string pchUrl, string pchCookie)
         {
             Write($"SetCookie");
             return true;
         }
 
-        public bool SetHTTPRequestAbsoluteTimeoutMS(uint hRequest, uint unMilliseconds)
+        public bool SetHTTPRequestAbsoluteTimeoutMS(HTTPRequestHandle hRequest, uint unMilliseconds)
         {
             Write($"SetHTTPRequestAbsoluteTimeoutMS");
             return true;
         }
 
-        public bool SetHTTPRequestContextValue(uint hRequest, ulong ulContextValue)
+        public bool SetHTTPRequestContextValue(HTTPRequestHandle hRequest, ulong ulContextValue)
         {
             Write($"SetHTTPRequestContextValue");
             return true;
         }
 
-        public bool SetHTTPRequestCookieContainer(uint hRequest, uint hCookieContainer)
+        public bool SetHTTPRequestCookieContainer(HTTPRequestHandle hRequest, HTTPCookieContainerHandle hCookieContainer)
         {
             Write($"SetHTTPRequestCookieContainer");
             return true;
         }
 
-        public bool SetHTTPRequestGetOrPostParameter(uint hRequest, string pchParamName, string pchParamValue)
+        public bool SetHTTPRequestGetOrPostParameter(HTTPRequestHandle hRequest, string pchParamName, string pchParamValue)
         {
             Write($"SetHTTPRequestGetOrPostParameter");
             return true;
@@ -217,25 +219,25 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public bool SetHTTPRequestNetworkActivityTimeout(uint hRequest, uint unTimeoutSeconds)
+        public bool SetHTTPRequestNetworkActivityTimeout(HTTPRequestHandle hRequest, uint unTimeoutSeconds)
         {
             Write($"SetHTTPRequestNetworkActivityTimeout");
             return true;
         }
 
-        public bool SetHTTPRequestRawPostBody(uint hRequest, string pchContentType, IntPtr pubBody, uint unBodyLen)
+        public bool SetHTTPRequestRawPostBody(HTTPRequestHandle hRequest, string pchContentType, IntPtr pubBody, uint unBodyLen)
         {
             Write($"SetHTTPRequestRawPostBody");
             return true;
         }
 
-        public bool SetHTTPRequestRequiresVerifiedCertificate(uint hRequest, bool bRequireVerifiedCertificate)
+        public bool SetHTTPRequestRequiresVerifiedCertificate(HTTPRequestHandle hRequest, bool bRequireVerifiedCertificate)
         {
             Write($"SetHTTPRequestRequiresVerifiedCertificate");
             return true;
         }
 
-        public bool SetHTTPRequestUserAgentInfo(uint hRequest, string pchUserAgentInfo)
+        public bool SetHTTPRequestUserAgentInfo(HTTPRequestHandle hRequest, string pchUserAgentInfo)
         {
             Write($"SetHTTPRequestUserAgentInfo");
             return true;

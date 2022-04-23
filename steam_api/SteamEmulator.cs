@@ -2,21 +2,29 @@
 using SKYNET;
 using SKYNET.Helper;
 using SKYNET.Managers;
+using SKYNET.Plugin;
+using SKYNET.Steamworks;
 using SKYNET.Steamworks.Implementation;
-using SKYNET.Steamworks.Types;
-using SKYNET.Types;
 using Steamworks;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
+using System.Reflection;
+
+using AppID = System.UInt32;
+using HSteamPipe = System.UInt32;
+using HSteamUser = System.UInt32;
+
 
 public class SteamEmulator
 {
     public static SteamEmulator Instance;
 
     public static event EventHandler<GameMessage> OnMessage;
+
+    public static bool Hooked;
+
+    public static IGameCoordinatorPlugin GameCoordinatorPlugin;
 
     #region Client Info
 
@@ -25,18 +33,19 @@ public class SteamEmulator
     public static string SteamApiPath;
     public static string EmulatorPath;
 
-    public static SteamID SteamId;
-    public static SteamID SteamId_GS;
+    public static CSteamID SteamId;
+    public static CSteamID SteamId_GS;
     public static ulong GameID;
     public static uint AppId;
     public static bool Initialized;
+    public static bool Initializing;
     public static bool SendLog;
 
-    public static int HSteamUser;
-    public static int HSteamPipe;
+    public static HSteamUser HSteamUser;
+    public static HSteamPipe HSteamPipe;
 
-    public static int HSteamUser_GS;
-    public static int HSteamPipe_GS;
+    public static HSteamUser HSteamUser_GS;
+    public static HSteamPipe HSteamPipe_GS;
 
     #endregion
 
@@ -77,17 +86,7 @@ public class SteamEmulator
 
     //GameServer
     public static SteamGameServer SteamGameServer;
-    public static SteamUtils SteamGameServerUtils;
     public static SteamGameServerStats SteamGameServerStats;
-    public static SteamNetworking SteamGameServerNetworking;
-    public static SteamHTTP SteamGameServerHTTP;
-    public static SteamInventory SteamGameServerInventory;
-    public static SteamUGC SteamGameServerUgc;
-    public static SteamApps SteamGameServerApps;
-    public static SteamNetworkingSockets SteamGameServerNetworkingSockets;
-    public static SteamNetworkingSocketsSerialized SteamGameServerNetworkingSocketsSerialized;
-    public static SteamNetworkingMessages SteamGameServerNetworkingMessages;
-    public static SteamGameCoordinator SteamGameServerGamecoordinator;
     public static SteamMasterServerUpdater SteamMasterServerUpdater;
 
     #endregion
@@ -97,14 +96,30 @@ public class SteamEmulator
         Instance = this;
     }
 
-    public static void Initialize()
+    public static void Initialize(bool hooked = false)
     {
         if (Initialized) return;
+        Initializing = true;
+        Hooked = hooked;
+        try
+        {
+            if (!Hooked)
+            {
+                Settings.Load();
 
-        LoadCustomVars();
+                string fileName = Path.Combine(modCommon.GetPath(), "SKYNET", "[SKYNET] steam_api.log");
+                if (File.Exists(fileName))
+                {
+                    File.WriteAllLines(fileName, new List<string>());
+                }
+            }
+        }
+        catch
+        {
+            Write("Settings", "Error loading settings");
+        }
 
-        SteamId_GS = new SteamID();
-        SteamId_GS.Set((uint)new Random().Next(1000, 9999), SKYNET.Steamworks.EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeGameServer);
+        SteamId_GS = new CSteamID((uint)new Random().Next(1000, 9999), EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeGameServer);
 
         InterfaceManager.Initialize();
 
@@ -179,27 +194,7 @@ public class SteamEmulator
 
         SteamGameServer = new SteamGameServer();
 
-        SteamGameServerUtils = new SteamUtils();
-
         SteamGameServerStats = new SteamGameServerStats();
-
-        SteamGameServerNetworking = new SteamNetworking();
-
-        SteamHTTP = new SteamHTTP();
-
-        SteamGameServerInventory = new SteamInventory();
-
-        SteamGameServerUgc = new SteamUGC();
-
-        SteamGameServerApps = new SteamApps();
-
-        SteamGameServerNetworkingSockets = new SteamNetworkingSockets();
-
-        SteamGameServerNetworkingSocketsSerialized = new SteamNetworkingSocketsSerialized();
-
-        SteamGameServerNetworkingMessages = new SteamNetworkingMessages();
-
-        SteamGameServerGamecoordinator = new SteamGameCoordinator();
 
         SteamMasterServerUpdater = new SteamMasterServerUpdater();
 
@@ -211,11 +206,60 @@ public class SteamEmulator
         HSteamUser_GS = 2;
         HSteamPipe_GS = 2;
 
-        Initialized = true;
+        InitializePlugins();
 
+        Initialized = true;
+        Initializing = false;
     }
 
-    public static int CreateSteamUser()
+    private static void InitializePlugins()
+    {
+        string PluginsDirectory = modCommon.GetPath();
+        if (Directory.Exists(PluginsDirectory))
+        {
+            foreach (var file in Directory.GetFiles(PluginsDirectory, "*.dll"))
+            {
+                if (Path.GetFileNameWithoutExtension(file).StartsWith("SKYNET."))
+                {
+                    try
+                    {
+                        var plugin = Assembly.LoadFile(file);
+                        Type type = plugin.GetType("SKYNET.GameCoordinator");
+                        if (type != null)
+                        {
+                            IGameCoordinatorPlugin iPlugin = (IGameCoordinatorPlugin)Activator.CreateInstance(type);
+                            if (iPlugin == null)
+                            {
+                                Write("PLUGINS", $"Failed to load plugin {Path.GetFileNameWithoutExtension(file)}");
+                            }
+                            else
+                            {
+                                AppID appID = iPlugin.Initialize();
+                                if (appID == AppId)
+                                {
+                                    GameCoordinatorPlugin = iPlugin;
+                                    GameCoordinatorPlugin.IsMessageAvailable = IsMessageAvailable;
+                                    Write("PLUGINS", $"Loaded GameCoordinator plugin {Path.GetFileNameWithoutExtension(file)} for AppID {appID}");
+                                }
+                            }
+
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Write("PLUGINS", $"Failed to load plugin {Path.GetFileNameWithoutExtension(file)} {"\n"}");
+                    }
+                }
+            }
+        }
+    }
+
+    private static void IsMessageAvailable(object sender, byte[] gcMessage)
+    {
+        SteamGameCoordinator.PushMessage(gcMessage);
+    }
+
+    public static HSteamUser CreateSteamUser()
     {
         if (HSteamUser == 0)
         {
@@ -225,7 +269,7 @@ public class SteamEmulator
         return HSteamUser;
     }
 
-    public static int CreateSteamPipe()
+    public static uint CreateSteamPipe()
     {
         if (HSteamPipe == 0)
         {
@@ -249,22 +293,23 @@ public class SteamEmulator
         if (string.IsNullOrEmpty(sender)) { sender = "NULL"; }
         if (msg == null) { msg = "NULL"; }
 
-        //if (SendLog)
-        //{
-        //    if (lastMsg != msg.ToString())
-        //    {
-        //        OnMessage?.Invoke(Instance, new GameMessage(AppId, sender, msg));
-        //        lastMsg = msg.ToString();
-        //    }
-        //}
-
-
-        if (lastMsg != msg.ToString())
+        if (SendLog)
         {
-            Log.AppEnd(sender + ": " + msg);
-            Console.WriteLine(sender + ": " + msg);
+            if (Hooked)
+            {
+                OnMessage?.Invoke(Instance, new GameMessage(AppId, sender, msg));
+                lastMsg = msg.ToString();
+            }
 
-            lastMsg = msg.ToString();
+            if (lastMsg != msg.ToString())
+            {
+                if (sender.ToUpper() == "DEBUG") Console.ForegroundColor = ConsoleColor.Red;
+                else Console.ResetColor();
+
+                Console.WriteLine($" {sender}: {msg}");
+                Log.AppEnd(sender + ": " + msg);
+                lastMsg = msg.ToString();
+            }
         }
     }
 
@@ -272,38 +317,17 @@ public class SteamEmulator
 
     public static void Write(string sender, object msg)
     {
-        Console.WriteLine(sender + ": " + msg);
-        //Log.AppEnd(sender + ": " + msg);
-
         // TODO
     }
 
 #endif
 
-    private static void LoadCustomVars()
+    public static void Debug(string v)
     {
-        modCommon.ActiveConsoleOutput();
-
-        string fileName = modCommon.GetPath() + "/[SKYNET] steam_api.log";
-        File.WriteAllLines(fileName, new List<string>());
-
-        Language = "English";
-        PersonaName = "Hackerprod";
-        SteamId = new SteamID(76561198429375037);
-        SteamId_GS = 1;
-        AppId = 570;
-
-        HSteamUser = 1;
-        HSteamPipe = 1;
-
-        HSteamUser_GS = 1;
-        HSteamPipe_GS = 1;
-
-
-        SteamApiPath = Path.Combine(modCommon.GetPath(), "steam_api64.dll");
-        EmulatorPath = @"D:\Instaladores\Programación\Projects\[SKYNET] Steam Emulator\[SKYNET] Steam Emulator\bin\Debug";
-        SendLog = true;
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($" DEBUG: {v}");
     }
+
 }
 
 

@@ -1,8 +1,12 @@
-﻿using System;
+﻿using Steamworks;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
+using SteamAPICall_t = System.UInt64;
+using UGCFileWriteStreamHandle_t = System.UInt64;
 
 namespace SKYNET.Interface
 {
@@ -44,7 +48,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamRemoteStorage.FileDelete(pchFile);
         }
 
-        public ulong FileShare(IntPtr _, string pchFile)
+        public SteamAPICall_t FileShare(IntPtr _, string pchFile)
         {
             return SteamEmulator.SteamRemoteStorage.FileShare(pchFile);
         }
@@ -54,7 +58,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamRemoteStorage.SetSyncPlatforms(pchFile, eRemoteStoragePlatform);
         }
 
-        public ulong FileWriteStreamOpen(IntPtr _, string pchFile)
+        public UGCFileWriteStreamHandle_t FileWriteStreamOpen(IntPtr _, string pchFile)
         {
             return SteamEmulator.SteamRemoteStorage.FileWriteStreamOpen(pchFile);
         }
@@ -209,7 +213,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamRemoteStorage.DeletePublishedFile(unPublishedFileId);
         }
 
-        public ulong EnumerateUserPublishedFiles(IntPtr _, uint unStartIndex)
+        public SteamAPICall_t EnumerateUserPublishedFiles(IntPtr _, uint unStartIndex)
         {
             return SteamEmulator.SteamRemoteStorage.EnumerateUserPublishedFiles(unStartIndex);
         }
@@ -249,7 +253,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamRemoteStorage.GetUserPublishedItemVoteDetails(unPublishedFileId);
         }
 
-        public ulong EnumerateUserSharedWorkshopFiles(IntPtr _, ulong steamId, uint unStartIndex, IntPtr pRequiredTags, IntPtr pExcludedTags)
+        public SteamAPICall_t EnumerateUserSharedWorkshopFiles(IntPtr _, ulong steamId, uint unStartIndex, IntPtr pRequiredTags, IntPtr pExcludedTags)
         {
             return SteamEmulator.SteamRemoteStorage.EnumerateUserSharedWorkshopFiles(steamId, unStartIndex, pRequiredTags, pExcludedTags);
         }

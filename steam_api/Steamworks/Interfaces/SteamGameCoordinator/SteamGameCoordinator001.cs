@@ -11,19 +11,19 @@ namespace SKYNET.Interface
     [Interface("SteamGameCoordinator001")]
     public class SteamGameCoordinator001 : ISteamInterface
     {
-        public EGCResults SendMessage(IntPtr _, uint unMsgType, IntPtr pubData, uint cubData)
+        public int SendMessage(IntPtr _, uint unMsgType, IntPtr pubData, uint cubData)
         {
-            return SteamEmulator.SteamGameCoordinator.SendMessage(unMsgType, pubData, cubData);
+            return (int)SteamEmulator.SteamGameCoordinator.SendMessage(unMsgType, pubData, cubData);
         }
 
-        public bool IsMessageAvailable(IntPtr _, uint pcubMsgSize)
+        public bool IsMessageAvailable(IntPtr _, ref uint pcubMsgSize)
         {
-            return SteamEmulator.SteamGameCoordinator.IsMessageAvailable(pcubMsgSize);
+            return SteamEmulator.SteamGameCoordinator.IsMessageAvailable(ref pcubMsgSize);
         }
 
-        public EGCResults RetrieveMessage(IntPtr _, uint punMsgType, IntPtr pubDest, uint cubDest, uint pcubMsgSize)
+        public int RetrieveMessage(IntPtr _, ref uint punMsgType, IntPtr pubDest, uint cubDest, ref uint pcubMsgSize)
         {
-            return SteamEmulator.SteamGameCoordinator.RetrieveMessage(punMsgType, pubDest, cubDest, pcubMsgSize);
+            return (int)SteamEmulator.SteamGameCoordinator.RetrieveMessage(ref punMsgType, pubDest, cubDest, ref pcubMsgSize);
         }
 
 

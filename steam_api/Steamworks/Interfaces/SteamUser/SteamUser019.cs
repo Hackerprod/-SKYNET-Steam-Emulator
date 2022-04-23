@@ -1,6 +1,7 @@
 using SKYNET.Types;
 using Steamworks;
 using System;
+using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Interface
 {
@@ -17,9 +18,9 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUser.BLoggedOn();
         }
 
-        public SteamID GetSteamID(IntPtr _)
+        public CSteamID GetSteamID(IntPtr _)
         {
-            return (SteamID)SteamEmulator.SteamUser.GetSteamID();
+            return SteamEmulator.SteamUser.GetSteamID();
         }
 
         public int InitiateGameConnection(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)
@@ -107,7 +108,7 @@ namespace SKYNET.Interface
             SteamEmulator.SteamUser.AdvertiseGame(steamIDGameServer, unIPServer, usPortServer);
         }
 
-        public ulong RequestEncryptedAppTicket(IntPtr _, IntPtr pDataToInclude, int cbDataToInclude)
+        public SteamAPICall_t RequestEncryptedAppTicket(IntPtr _, IntPtr pDataToInclude, int cbDataToInclude)
         {
             return SteamEmulator.SteamUser.RequestEncryptedAppTicket(pDataToInclude, cbDataToInclude);
         }
@@ -127,7 +128,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUser.GetPlayerSteamLevel();
         }
 
-        public ulong RequestStoreAuthURL(IntPtr _, string pchRedirectURL)
+        public SteamAPICall_t RequestStoreAuthURL(IntPtr _, string pchRedirectURL)
         {
             return SteamEmulator.SteamUser.RequestStoreAuthURL(pchRedirectURL);
         }

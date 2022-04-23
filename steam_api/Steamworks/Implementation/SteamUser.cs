@@ -1,17 +1,19 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using SKYNET;
+using SKYNET.Helper;
 using SKYNET.Helpers;
 using SKYNET.Steamworks;
-using SKYNET.Steamworks.Types;
 using SKYNET.Types;
 using Steamworks;
+using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Implementation
 {
     public class SteamUser : ISteamInterface
     {
         private bool Recording;
+        private SteamAPICall_t k_uAPICallInvalid = 0x0;
 
         public SteamUser()
         {
@@ -30,16 +32,20 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public ulong GetSteamID()
+        public CSteamID GetSteamID()
         {
-            var SId = (ulong)SteamEmulator.SteamId;
-            Write($"GetSteamID {SId}");
-            return SId;
+            var SteamId = SteamEmulator.SteamId;
+            Write($"GetSteamID {SteamId}");
+            return SteamId;
         }
 
-        public int InitiateGameConnection(IntPtr pAuthBlob, int cbMaxAuthBlob, SteamID steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)
+        public int InitiateGameConnection(IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)
         {
             Write("InitiateGameConnection");
+            MutexHelper.Wait("InitiateGameConnection", delegate
+            {
+                // TODO
+            });
             return 0;
         }
 
@@ -102,27 +108,43 @@ namespace SKYNET.Steamworks.Implementation
         public uint GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
         {
             Write("GetAuthSessionTicket");
+            MutexHelper.Wait("GetAuthSessionTicket", delegate
+            {
+                // TODO
+            });
             pcbTicket = 0;
             return 0;
         }
 
-        public int BeginAuthSession(IntPtr pAuthTicket, int cbAuthTicket, SteamID steamID)
+        public int BeginAuthSession(IntPtr pAuthTicket, int cbAuthTicket, ulong steamID)
         {
             Write("BeginAuthSession");
+            MutexHelper.Wait("BeginAuthSession", delegate
+            {
+                // TODO
+            });
             return (int)EBeginAuthSessionResult.k_EBeginAuthSessionResultOK;
         }
 
-        public void EndAuthSession(SteamID steamID)
+        public void EndAuthSession(ulong steamID)
         {
             Write("EndAuthSession");
+            MutexHelper.Wait("EndAuthSession", delegate
+            {
+                // TODO
+            });
         }
 
         public void CancelAuthTicket(uint hAuthTicket)
         {
             Write("CancelAuthTicket");
+            MutexHelper.Wait("CancelAuthTicket", delegate
+            {
+                // TODO
+            });
         }
 
-        public int UserHasLicenseForApp(SteamID steamID, uint appID)
+        public int UserHasLicenseForApp(ulong steamID, uint appID)
         {
             Write("EUserHasLicenseForAppResult");
             return (int)EUserHasLicenseForAppResult.k_EUserHasLicenseResultHasLicense;
@@ -134,7 +156,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public void AdvertiseGame(SteamID steamIDGameServer, uint unIPServer, uint usPortServer)
+        public void AdvertiseGame(ulong steamIDGameServer, uint unIPServer, uint usPortServer)
         {
             Write("AdvertiseGame");
         }
@@ -143,7 +165,11 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("RequestEncryptedAppTicket");
             // EncryptedAppTicketResponse_t
-            return 0;
+            MutexHelper.Wait("RequestEncryptedAppTicket", delegate
+            {
+
+            });
+            return k_uAPICallInvalid;
         }
 
         public bool GetEncryptedAppTicket(IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
@@ -168,7 +194,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"RequestStoreAuthURL {pchRedirectURL}");
             // StoreAuthURLResponse_t
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public bool BIsPhoneVerified()
@@ -206,7 +232,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("GetDurationControl");
             // DurationControl_t
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public bool BSetDurationControlOnlineState(int eNewState)

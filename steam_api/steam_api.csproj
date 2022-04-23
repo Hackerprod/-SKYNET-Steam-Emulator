@@ -57,10 +57,12 @@
       <HintPath>..\packages\System.Collections.Immutable.1.7.1\lib\net461\System.Collections.Immutable.dll</HintPath>
     </Reference>
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
     </Reference>
     <Reference Include="System.Net" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -78,9 +80,18 @@
     <Compile Include="Callback\CallbackTypes.cs" />
     <Compile Include="Callback\CCallbackBase.cs" />
     <Compile Include="Callback\InteropHelp.cs" />
+    <Compile Include="Helpers\ImageHelper.cs" />
+    <Compile Include="Helpers\IniParser.cs" />
+    <Compile Include="Helpers\MutexHelper.cs" />
     <Compile Include="Helpers\Platform.cs" />
-    <Compile Include="Callback\SteamAPICall_t.cs" />
-    <Compile Include="Helpers\Utf8StringToNative.cs" />
+    <Compile Include="Helpers\Settings.cs" />
+    <Compile Include="Managers\TicketManager.cs" />
+    <Compile Include="Plugin\IGameCoordinatorPlugin.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Steamworks\Exported\SteamAPI.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamGameServer.cs" />
     <Compile Include="Steamworks\Exported\SteamInternal.cs" />
@@ -89,15 +100,15 @@
     <Compile Include="Helpers\Log.cs" />
     <Compile Include="Helpers\modCommon.cs" />
     <Compile Include="Managers\MemoryManager.cs" />
-    <Compile Include="CSteamID.cs" />
+    <Compile Include="Steamworks\Types\SteamIPAddress_t.cs" />
+    <Compile Include="Steamworks\Types\SteamNetworkingIPAddr.cs" />
+    <Compile Include="Types\CSteamID.cs" />
     <Compile Include="Steamworks\Helpers\InterfaceAttribute.cs" />
     <Compile Include="Managers\CallbackManager.cs" />
     <Compile Include="Managers\InterfaceManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SteamEmulator.cs" />
-    <Compile Include="Steamworks\Helpers\IntPtrExtenctions.cs" />
     <Compile Include="Steamworks\Helpers\ISteamInterface.cs" />
-    <Compile Include="Steamworks\Helpers\SteamworksExtenctions.cs" />
     <Compile Include="Steamworks\Implementation\SteamAppList.cs" />
     <Compile Include="Steamworks\Implementation\SteamApps.cs" />
     <Compile Include="Steamworks\Implementation\SteamClient.cs" />
@@ -141,7 +152,6 @@
     <Compile Include="Steamworks\Interfaces\SteamController\SteamController008.cs" />
     <Compile Include="Steamworks\Interfaces\SteamFriends\SteamFriends017.cs" />
     <Compile Include="Steamworks\Interfaces\SteamFriends\SteamFriends015.cs" />
-    <Compile Include="Steamworks\Interfaces\SteamFriends\SteamFriends017_.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameCoordinator\SteamGameCoordinator001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameServer\SteamGameServer014.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameServer\SteamGameServer012.cs" />
@@ -178,43 +188,28 @@
     <Compile Include="Steamworks\Interfaces\SteamUtils\SteamUtils010.cs" />
     <Compile Include="Steamworks\Interfaces\SteamUtils\SteamUtils009.cs" />
     <Compile Include="Steamworks\Interfaces\SteamVideo\SteamVideo002.cs" />
-    <Compile Include="Steamworks\Types\AccountID_t.cs" />
-    <Compile Include="Steamworks\Types\AppId_t.cs" />
-    <Compile Include="Steamworks\Types\CallbackStructs.cs" />
-    <Compile Include="Steamworks\Types\CGameID.cs" />
     <Compile Include="Steamworks\Types\Constants.cs" />
     <Compile Include="Steamworks\Types\CSteamAPIContext.cs" />
     <Compile Include="Steamworks\Types\EAccountType.cs" />
     <Compile Include="Steamworks\Types\EResult.cs" />
     <Compile Include="Steamworks\Types\FriendGameInfo_t.cs" />
-    <Compile Include="Steamworks\Types\FriendsGroupID_t.cs" />
-    <Compile Include="Steamworks\Types\HAuthTicket.cs" />
-    <Compile Include="Steamworks\Types\HSteamPipe.cs" />
-    <Compile Include="Steamworks\Types\HSteamUser.cs" />
-    <Compile Include="Steamworks\Types\ScreenshotHandle.cs" />
-    <Compile Include="Steamworks\Types\SNetListenSocket_t.cs" />
-    <Compile Include="Steamworks\Types\SNetSocket_t.cs" />
-    <Compile Include="Steamworks\Types\SteamLeaderboardEntries_t.cs" />
-    <Compile Include="Steamworks\Types\SteamLeaderboard_t.cs" />
-    <Compile Include="Steamworks\Types\UTF8String.cs" />
     <Compile Include="Steamworks\Types\SteamEnums.cs" />
-    <Compile Include="Steamworks\Types\SteamInventory\SteamInventoryResult_t.cs" />
-    <Compile Include="Steamworks\Types\SteamInventory\SteamItemDef_t.cs" />
-    <Compile Include="Steamworks\Types\SteamInventory\SteamItemInstanceID_t.cs" />
-    <Compile Include="Steamworks\Types\SteamRemoteStorage\PublishedFileId_t.cs" />
-    <Compile Include="Steamworks\Types\SteamRemoteStorage\PublishedFileUpdateHandle_t.cs" />
-    <Compile Include="Steamworks\Types\SteamRemoteStorage\UGCFileWriteStreamHandle_t.cs" />
-    <Compile Include="Steamworks\Types\SteamRemoteStorage\UGCHandle_t.cs" />
     <Compile Include="Steamworks\Types\SteamTypes.cs" />
-    <Compile Include="Steamworks\Types\UGCQueryHandle_t.cs" />
-    <Compile Include="Steamworks\Types\UGCUpdateHandle_t.cs" />
-    <Compile Include="Steamworks\Types\UTF8StringHandle.cs" />
     <Compile Include="Types\GameMessage.cs" />
-    <Compile Include="Types\Friend.cs" />
-    <Compile Include="Types\SteamID.cs" />
+    <Compile Include="Types\SteamFriend.cs" />
+    <Compile Include="Types\GameServerData.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Image.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ImportGroup Label=".NET DllExport">

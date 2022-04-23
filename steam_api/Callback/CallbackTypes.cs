@@ -1,6 +1,5 @@
 ﻿using SKYNET.Helper;
 using SKYNET.Steamworks;
-using SKYNET.Steamworks.Types;
 using SKYNET.Types;
 using Steamworks;
 using System;
@@ -9,13 +8,14 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using PublishedFileId_t = System.UInt64;
 
 namespace SKYNET.Callback
 {
     /// <summary>
     /// Gives us a generic way to get the CallbackId of structs
     /// </summary>
-    internal interface ICallbackData
+    public interface ICallbackData
     {
         CallbackType CallbackType { get; }
         int DataSize { get; }
@@ -26,7 +26,7 @@ namespace SKYNET.Callback
     {
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamServersConnected_t));
+        public static int _datasize = Marshal.SizeOf(typeof(SteamServersConnected_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.SteamServersConnected;
         #endregion
@@ -35,12 +35,12 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct SteamServerConnectFailure_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
         [MarshalAs(UnmanagedType.I1)]
         internal bool StillRetrying; // m_bStillRetrying bool
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamServerConnectFailure_t));
+        public static int _datasize = Marshal.SizeOf(typeof(SteamServerConnectFailure_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.SteamServerConnectFailure;
         #endregion
@@ -49,10 +49,10 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct SteamServersDisconnected_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamServersDisconnected_t));
+        public static int _datasize = Marshal.SizeOf(typeof(SteamServersDisconnected_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.SteamServersDisconnected;
         #endregion
@@ -68,7 +68,7 @@ namespace SKYNET.Callback
         internal uint Reason; // m_uReason uint32
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(ClientGameServerDeny_t));
+        public static int _datasize = Marshal.SizeOf(typeof(ClientGameServerDeny_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.ClientGameServerDeny;
         #endregion
@@ -80,7 +80,7 @@ namespace SKYNET.Callback
         internal byte FailureType; // m_eFailureType uint8
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(IPCFailure_t));
+        public static int _datasize = Marshal.SizeOf(typeof(IPCFailure_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.IPCFailure;
         #endregion
@@ -97,7 +97,7 @@ namespace SKYNET.Callback
     {
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LicensesUpdated_t));
+        public static int _datasize = Marshal.SizeOf(typeof(LicensesUpdated_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.LicensesUpdated;
         #endregion
@@ -111,7 +111,7 @@ namespace SKYNET.Callback
         internal ulong OwnerSteamID; // m_OwnerSteamID CSteamID
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(ValidateAuthTicketResponse_t));
+        public static int _datasize = Marshal.SizeOf(typeof(ValidateAuthTicketResponse_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.ValidateAuthTicketResponse;
         #endregion
@@ -125,7 +125,7 @@ namespace SKYNET.Callback
         internal byte Authorized; // m_bAuthorized uint8
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MicroTxnAuthorizationResponse_t));
+        public static int _datasize = Marshal.SizeOf(typeof(MicroTxnAuthorizationResponse_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.MicroTxnAuthorizationResponse;
         #endregion
@@ -134,10 +134,10 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct EncryptedAppTicketResponse_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(EncryptedAppTicketResponse_t));
+        public static int _datasize = Marshal.SizeOf(typeof(EncryptedAppTicketResponse_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.EncryptedAppTicketResponse;
         #endregion
@@ -147,10 +147,10 @@ namespace SKYNET.Callback
     internal struct GetAuthSessionTicketResponse_t : ICallbackData
     {
         internal uint AuthTicket; // m_hAuthTicket HAuthTicket
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GetAuthSessionTicketResponse_t));
+        public static int _datasize = Marshal.SizeOf(typeof(GetAuthSessionTicketResponse_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.GetAuthSessionTicketResponse;
         #endregion
@@ -164,7 +164,7 @@ namespace SKYNET.Callback
         internal byte[] URL; // m_szURL char [256]
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GameWebCallback_t));
+        public static int _datasize = Marshal.SizeOf(typeof(GameWebCallback_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.GameWebCallback;
         #endregion
@@ -178,7 +178,7 @@ namespace SKYNET.Callback
         internal byte[] URL; // m_szURL char [512]
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(StoreAuthURLResponse_t));
+        public static int _datasize = Marshal.SizeOf(typeof(StoreAuthURLResponse_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.StoreAuthURLResponse;
         #endregion
@@ -195,7 +195,7 @@ namespace SKYNET.Callback
         internal int CdayNewDeviceCooldown; // m_cdayNewDeviceCooldown int
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MarketEligibilityResponse_t));
+        public static int _datasize = Marshal.SizeOf(typeof(MarketEligibilityResponse_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.MarketEligibilityResponse;
         #endregion
@@ -204,7 +204,7 @@ namespace SKYNET.Callback
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct DurationControl_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal AppId Appid; // m_appid AppId_t
     //    [MarshalAs(UnmanagedType.I1)]
     //    internal bool Applicable; // m_bApplicable bool
@@ -215,7 +215,7 @@ namespace SKYNET.Callback
     //    internal int CsecsRemaining; // m_csecsRemaining int32
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(DurationControl_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(DurationControl_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.DurationControl;
     //    #endregion
@@ -228,7 +228,7 @@ namespace SKYNET.Callback
         internal int ChangeFlags; // m_nChangeFlags int
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(PersonaStateChange_t));
+        public static int _datasize = Marshal.SizeOf(typeof(PersonaStateChange_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.PersonaStateChange;
         #endregion
@@ -240,7 +240,7 @@ namespace SKYNET.Callback
         internal byte Active; // m_bActive uint8
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GameOverlayActivated_t));
+        public static int _datasize = Marshal.SizeOf(typeof(GameOverlayActivated_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.GameOverlayActivated;
         #endregion
@@ -257,7 +257,7 @@ namespace SKYNET.Callback
         internal byte[] Password; // m_rgchPassword char [64]
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GameServerChangeRequested_t));
+        public static int _datasize = Marshal.SizeOf(typeof(GameServerChangeRequested_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.GameServerChangeRequested;
         #endregion
@@ -270,7 +270,7 @@ namespace SKYNET.Callback
         internal ulong SteamIDFriend; // m_steamIDFriend CSteamID
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GameLobbyJoinRequested_t));
+        public static int _datasize = Marshal.SizeOf(typeof(GameLobbyJoinRequested_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.GameLobbyJoinRequested;
         #endregion
@@ -285,7 +285,7 @@ namespace SKYNET.Callback
         internal int Tall; // m_iTall int
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(AvatarImageLoaded_t));
+        public static int _datasize = Marshal.SizeOf(typeof(AvatarImageLoaded_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.AvatarImageLoaded;
         #endregion
@@ -299,7 +299,7 @@ namespace SKYNET.Callback
         internal byte Success; // m_bSuccess uint8
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(ClanOfficerListResponse_t));
+        public static int _datasize = Marshal.SizeOf(typeof(ClanOfficerListResponse_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.ClanOfficerListResponse;
         #endregion
@@ -312,7 +312,7 @@ namespace SKYNET.Callback
     //    internal AppId AppID; // m_nAppID AppId_t
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(FriendRichPresenceUpdate_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(FriendRichPresenceUpdate_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.FriendRichPresenceUpdate;
     //    #endregion
@@ -327,7 +327,7 @@ namespace SKYNET.Callback
         internal byte[] Connect; // m_rgchConnect char [256]
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GameRichPresenceJoinRequested_t));
+        public static int _datasize = Marshal.SizeOf(typeof(GameRichPresenceJoinRequested_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.GameRichPresenceJoinRequested;
         #endregion
@@ -341,7 +341,7 @@ namespace SKYNET.Callback
         internal int MessageID; // m_iMessageID int
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GameConnectedClanChatMsg_t));
+        public static int _datasize = Marshal.SizeOf(typeof(GameConnectedClanChatMsg_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.GameConnectedClanChatMsg;
         #endregion
@@ -354,7 +354,7 @@ namespace SKYNET.Callback
         internal ulong SteamIDUser; // m_steamIDUser CSteamID
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GameConnectedChatJoin_t));
+        public static int _datasize = Marshal.SizeOf(typeof(GameConnectedChatJoin_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.GameConnectedChatJoin;
         #endregion
@@ -371,7 +371,7 @@ namespace SKYNET.Callback
         internal bool Dropped; // m_bDropped bool
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GameConnectedChatLeave_t));
+        public static int _datasize = Marshal.SizeOf(typeof(GameConnectedChatLeave_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.GameConnectedChatLeave;
         #endregion
@@ -384,7 +384,7 @@ namespace SKYNET.Callback
         internal bool Success; // m_bSuccess bool
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(DownloadClanActivityCountsResult_t));
+        public static int _datasize = Marshal.SizeOf(typeof(DownloadClanActivityCountsResult_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.DownloadClanActivityCountsResult;
         #endregion
@@ -397,7 +397,7 @@ namespace SKYNET.Callback
         internal RoomEnter ChatRoomEnterResponse; // m_eChatRoomEnterResponse EChatRoomEnterResponse
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(JoinClanChatRoomCompletionResult_t));
+        public static int _datasize = Marshal.SizeOf(typeof(JoinClanChatRoomCompletionResult_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.JoinClanChatRoomCompletionResult;
         #endregion
@@ -410,7 +410,7 @@ namespace SKYNET.Callback
         internal int MessageID; // m_iMessageID int
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GameConnectedFriendChatMsg_t));
+        public static int _datasize = Marshal.SizeOf(typeof(GameConnectedFriendChatMsg_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.GameConnectedFriendChatMsg;
         #endregion
@@ -419,12 +419,12 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
     internal struct FriendsGetFollowerCount_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
         internal ulong SteamID; // m_steamID CSteamID
         internal int Count; // m_nCount int
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(FriendsGetFollowerCount_t));
+        public static int _datasize = Marshal.SizeOf(typeof(FriendsGetFollowerCount_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.FriendsGetFollowerCount;
         #endregion
@@ -433,13 +433,13 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
     internal struct FriendsIsFollowing_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
         internal ulong SteamID; // m_steamID CSteamID
         [MarshalAs(UnmanagedType.I1)]
         internal bool IsFollowing; // m_bIsFollowing bool
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(FriendsIsFollowing_t));
+        public static int _datasize = Marshal.SizeOf(typeof(FriendsIsFollowing_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.FriendsIsFollowing;
         #endregion
@@ -448,14 +448,14 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
     internal struct FriendsEnumerateFollowingList_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50, ArraySubType = UnmanagedType.U8)]
         internal ulong[] GSteamID; // m_rgSteamID CSteamID [50]
         internal int ResultsReturned; // m_nResultsReturned int32
         internal int TotalResultCount; // m_nTotalResultCount int32
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(FriendsEnumerateFollowingList_t));
+        public static int _datasize = Marshal.SizeOf(typeof(FriendsEnumerateFollowingList_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.FriendsEnumerateFollowingList;
         #endregion
@@ -468,10 +468,10 @@ namespace SKYNET.Callback
         internal bool Success; // m_bSuccess bool
         [MarshalAs(UnmanagedType.I1)]
         internal bool LocalSuccess; // m_bLocalSuccess bool
-        internal Result Result; // m_result EResult
+        internal EResult Result; // m_result EResult
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SetPersonaNameResponse_t));
+        public static int _datasize = Marshal.SizeOf(typeof(SetPersonaNameResponse_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.SetPersonaNameResponse;
         #endregion
@@ -482,7 +482,7 @@ namespace SKYNET.Callback
     {
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(UnreadChatMessagesChanged_t));
+        public static int _datasize = Marshal.SizeOf(typeof(UnreadChatMessagesChanged_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.UnreadChatMessagesChanged;
         #endregion
@@ -496,7 +496,7 @@ namespace SKYNET.Callback
         internal byte[] RgchURI; // rgchURI char [1024]
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(OverlayBrowserProtocolNavigation_t));
+        public static int _datasize = Marshal.SizeOf(typeof(OverlayBrowserProtocolNavigation_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.OverlayBrowserProtocolNavigation;
         #endregion
@@ -507,7 +507,7 @@ namespace SKYNET.Callback
     {
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(IPCountry_t));
+        public static int _datasize = Marshal.SizeOf(typeof(IPCountry_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.IPCountry;
         #endregion
@@ -519,7 +519,7 @@ namespace SKYNET.Callback
         internal byte MinutesBatteryLeft; // m_nMinutesBatteryLeft uint8
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LowBatteryPower_t));
+        public static int _datasize = Marshal.SizeOf(typeof(LowBatteryPower_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.LowBatteryPower;
         #endregion
@@ -533,7 +533,7 @@ namespace SKYNET.Callback
         internal uint ParamCount; // m_cubParam uint32
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamAPICallCompleted_t));
+        public static int _datasize = Marshal.SizeOf(typeof(SteamAPICallCompleted_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.SteamAPICallCompleted;
         #endregion
@@ -544,7 +544,7 @@ namespace SKYNET.Callback
     {
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamShutdown_t));
+        public static int _datasize = Marshal.SizeOf(typeof(SteamShutdown_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.SteamShutdown;
         #endregion
@@ -556,7 +556,7 @@ namespace SKYNET.Callback
         internal CheckFileSignature CheckFileSignature; // m_eCheckFileSignature ECheckFileSignature
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(CheckFileSignature_t));
+        public static int _datasize = Marshal.SizeOf(typeof(CheckFileSignature_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.CheckFileSignature;
         #endregion
@@ -570,7 +570,7 @@ namespace SKYNET.Callback
         internal uint SubmittedText; // m_unSubmittedText uint32
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GamepadTextInputDismissed_t));
+        public static int _datasize = Marshal.SizeOf(typeof(GamepadTextInputDismissed_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.GamepadTextInputDismissed;
         #endregion
@@ -581,7 +581,7 @@ namespace SKYNET.Callback
     {
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(AppResumingFromSuspend_t));
+        public static int _datasize = Marshal.SizeOf(typeof(AppResumingFromSuspend_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.AppResumingFromSuspend;
         #endregion
@@ -592,7 +592,7 @@ namespace SKYNET.Callback
     {
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(FloatingGamepadTextInputDismissed_t));
+        public static int _datasize = Marshal.SizeOf(typeof(FloatingGamepadTextInputDismissed_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.FloatingGamepadTextInputDismissed;
         #endregion
@@ -611,7 +611,7 @@ namespace SKYNET.Callback
         internal uint AccountId; // m_unAccountId AccountID_t
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(FavoritesListChanged_t));
+        public static int _datasize = Marshal.SizeOf(typeof(FavoritesListChanged_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.FavoritesListChanged;
         #endregion
@@ -625,7 +625,7 @@ namespace SKYNET.Callback
         internal ulong GameID; // m_ulGameID uint64
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LobbyInvite_t));
+        public static int _datasize = Marshal.SizeOf(typeof(LobbyInvite_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.LobbyInvite;
         #endregion
@@ -641,7 +641,7 @@ namespace SKYNET.Callback
         internal uint EChatRoomEnterResponse; // m_EChatRoomEnterResponse uint32
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LobbyEnter_t));
+        public static int _datasize = Marshal.SizeOf(typeof(LobbyEnter_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.LobbyEnter;
         #endregion
@@ -655,7 +655,7 @@ namespace SKYNET.Callback
         internal byte Success; // m_bSuccess uint8
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LobbyDataUpdate_t));
+        public static int _datasize = Marshal.SizeOf(typeof(LobbyDataUpdate_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.LobbyDataUpdate;
         #endregion
@@ -670,7 +670,7 @@ namespace SKYNET.Callback
         internal uint GfChatMemberStateChange; // m_rgfChatMemberStateChange uint32
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LobbyChatUpdate_t));
+        public static int _datasize = Marshal.SizeOf(typeof(LobbyChatUpdate_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.LobbyChatUpdate;
         #endregion
@@ -685,7 +685,7 @@ namespace SKYNET.Callback
         internal uint ChatID; // m_iChatID uint32
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LobbyChatMsg_t));
+        public static int _datasize = Marshal.SizeOf(typeof(LobbyChatMsg_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.LobbyChatMsg;
         #endregion
@@ -700,7 +700,7 @@ namespace SKYNET.Callback
         internal ushort Port; // m_usPort uint16
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LobbyGameCreated_t));
+        public static int _datasize = Marshal.SizeOf(typeof(LobbyGameCreated_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.LobbyGameCreated;
         #endregion
@@ -712,7 +712,7 @@ namespace SKYNET.Callback
         internal uint LobbiesMatching; // m_nLobbiesMatching uint32
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LobbyMatchList_t));
+        public static int _datasize = Marshal.SizeOf(typeof(LobbyMatchList_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.LobbyMatchList;
         #endregion
@@ -726,7 +726,7 @@ namespace SKYNET.Callback
         internal byte KickedDueToDisconnect; // m_bKickedDueToDisconnect uint8
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LobbyKicked_t));
+        public static int _datasize = Marshal.SizeOf(typeof(LobbyKicked_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.LobbyKicked;
         #endregion
@@ -735,11 +735,11 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct LobbyCreated_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
         internal ulong SteamIDLobby; // m_ulSteamIDLobby uint64
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LobbyCreated_t));
+        public static int _datasize = Marshal.SizeOf(typeof(LobbyCreated_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.LobbyCreated;
         #endregion
@@ -753,7 +753,7 @@ namespace SKYNET.Callback
         internal ulong SteamIDLobby; // m_steamIDLobby CSteamID
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(PSNGameBootInviteResult_t));
+        public static int _datasize = Marshal.SizeOf(typeof(PSNGameBootInviteResult_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.PSNGameBootInviteResult;
         #endregion
@@ -762,10 +762,10 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct FavoritesListAccountsUpdated_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(FavoritesListAccountsUpdated_t));
+        public static int _datasize = Marshal.SizeOf(typeof(FavoritesListAccountsUpdated_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.FavoritesListAccountsUpdated;
         #endregion
@@ -775,14 +775,14 @@ namespace SKYNET.Callback
     internal struct SearchForGameProgressCallback_t : ICallbackData
     {
         internal ulong LSearchID; // m_ullSearchID uint64
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
         internal ulong LobbyID; // m_lobbyID CSteamID
         internal ulong SteamIDEndedSearch; // m_steamIDEndedSearch CSteamID
         internal int SecondsRemainingEstimate; // m_nSecondsRemainingEstimate int32
         internal int CPlayersSearching; // m_cPlayersSearching int32
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SearchForGameProgressCallback_t));
+        public static int _datasize = Marshal.SizeOf(typeof(SearchForGameProgressCallback_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.SearchForGameProgressCallback;
         #endregion
@@ -792,7 +792,7 @@ namespace SKYNET.Callback
     internal struct SearchForGameResultCallback_t : ICallbackData
     {
         internal ulong LSearchID; // m_ullSearchID uint64
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
         internal int CountPlayersInGame; // m_nCountPlayersInGame int32
         internal int CountAcceptedGame; // m_nCountAcceptedGame int32
         internal ulong SteamIDHost; // m_steamIDHost CSteamID
@@ -800,7 +800,7 @@ namespace SKYNET.Callback
         internal bool FinalCallback; // m_bFinalCallback bool
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SearchForGameResultCallback_t));
+        public static int _datasize = Marshal.SizeOf(typeof(SearchForGameResultCallback_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.SearchForGameResultCallback;
         #endregion
@@ -809,11 +809,11 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct RequestPlayersForGameProgressCallback_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
         internal ulong LSearchID; // m_ullSearchID uint64
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RequestPlayersForGameProgressCallback_t));
+        public static int _datasize = Marshal.SizeOf(typeof(RequestPlayersForGameProgressCallback_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.RequestPlayersForGameProgressCallback;
         #endregion
@@ -822,7 +822,7 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
     internal struct RequestPlayersForGameResultCallback_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
         internal ulong LSearchID; // m_ullSearchID uint64
         internal ulong SteamIDPlayerFound; // m_SteamIDPlayerFound CSteamID
         internal ulong SteamIDLobby; // m_SteamIDLobby CSteamID
@@ -834,7 +834,7 @@ namespace SKYNET.Callback
         internal ulong LUniqueGameID; // m_ullUniqueGameID uint64
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RequestPlayersForGameResultCallback_t));
+        public static int _datasize = Marshal.SizeOf(typeof(RequestPlayersForGameResultCallback_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.RequestPlayersForGameResultCallback;
         #endregion
@@ -850,12 +850,12 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct RequestPlayersForGameFinalResultCallback_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
         internal ulong LSearchID; // m_ullSearchID uint64
         internal ulong LUniqueGameID; // m_ullUniqueGameID uint64
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RequestPlayersForGameFinalResultCallback_t));
+        public static int _datasize = Marshal.SizeOf(typeof(RequestPlayersForGameFinalResultCallback_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.RequestPlayersForGameFinalResultCallback;
         #endregion
@@ -864,12 +864,12 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
     internal struct SubmitPlayerResultResultCallback_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
         internal ulong UllUniqueGameID; // ullUniqueGameID uint64
         internal ulong SteamIDPlayer; // steamIDPlayer CSteamID
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SubmitPlayerResultResultCallback_t));
+        public static int _datasize = Marshal.SizeOf(typeof(SubmitPlayerResultResultCallback_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.SubmitPlayerResultResultCallback;
         #endregion
@@ -878,11 +878,11 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct EndGameResultCallback_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
         internal ulong UllUniqueGameID; // ullUniqueGameID uint64
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(EndGameResultCallback_t));
+        public static int _datasize = Marshal.SizeOf(typeof(EndGameResultCallback_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.EndGameResultCallback;
         #endregion
@@ -891,7 +891,7 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
     internal struct JoinPartyCallback_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
         internal ulong BeaconID; // m_ulBeaconID PartyBeaconID_t
         internal ulong SteamIDBeaconOwner; // m_SteamIDBeaconOwner CSteamID
         internal string ConnectStringUTF8() => System.Text.Encoding.UTF8.GetString(ConnectString, 0, System.Array.IndexOf<byte>(ConnectString, 0));
@@ -899,7 +899,7 @@ namespace SKYNET.Callback
         internal byte[] ConnectString; // m_rgchConnectString char [256]
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(JoinPartyCallback_t));
+        public static int _datasize = Marshal.SizeOf(typeof(JoinPartyCallback_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.JoinPartyCallback;
         #endregion
@@ -908,11 +908,11 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct CreateBeaconCallback_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
         internal ulong BeaconID; // m_ulBeaconID PartyBeaconID_t
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(CreateBeaconCallback_t));
+        public static int _datasize = Marshal.SizeOf(typeof(CreateBeaconCallback_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.CreateBeaconCallback;
         #endregion
@@ -925,7 +925,7 @@ namespace SKYNET.Callback
         internal ulong SteamIDJoiner; // m_steamIDJoiner CSteamID
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(ReservationNotificationCallback_t));
+        public static int _datasize = Marshal.SizeOf(typeof(ReservationNotificationCallback_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.ReservationNotificationCallback;
         #endregion
@@ -934,10 +934,10 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct ChangeNumOpenSlotsCallback_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(ChangeNumOpenSlotsCallback_t));
+        public static int _datasize = Marshal.SizeOf(typeof(ChangeNumOpenSlotsCallback_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.ChangeNumOpenSlotsCallback;
         #endregion
@@ -948,7 +948,7 @@ namespace SKYNET.Callback
     {
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(AvailableBeaconLocationsUpdated_t));
+        public static int _datasize = Marshal.SizeOf(typeof(AvailableBeaconLocationsUpdated_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.AvailableBeaconLocationsUpdated;
         #endregion
@@ -959,7 +959,7 @@ namespace SKYNET.Callback
     {
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(ActiveBeaconsUpdated_t));
+        public static int _datasize = Marshal.SizeOf(typeof(ActiveBeaconsUpdated_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.ActiveBeaconsUpdated;
         #endregion
@@ -968,14 +968,14 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct RemoteStorageFileShareResult_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
-        internal ulong File; // m_hFile UGCHandle_t
-        internal string FilenameUTF8() => System.Text.Encoding.UTF8.GetString(Filename, 0, System.Array.IndexOf<byte>(Filename, 0));
+        internal EResult m_eResult; // m_eResult EResult
+        internal ulong m_hFile; // m_hFile UGCHandle_t
+        internal string FilenameUTF8() => System.Text.Encoding.UTF8.GetString(m_rgchFilename, 0, System.Array.IndexOf<byte>(m_rgchFilename, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 260)] // byte[] m_rgchFilename
-        internal byte[] Filename; // m_rgchFilename char [260]
+        internal byte[] m_rgchFilename; // m_rgchFilename char [260]
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageFileShareResult_t));
+        public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageFileShareResult_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.RemoteStorageFileShareResult;
         #endregion
@@ -984,13 +984,13 @@ namespace SKYNET.Callback
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct RemoteStoragePublishFileResult_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
     //    [MarshalAs(UnmanagedType.I1)]
     //    internal bool UserNeedsToAcceptWorkshopLegalAgreement; // m_bUserNeedsToAcceptWorkshopLegalAgreement bool
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStoragePublishFileResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStoragePublishFileResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.RemoteStoragePublishFileResult;
     //    #endregion
@@ -999,40 +999,40 @@ namespace SKYNET.Callback
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct RemoteStorageDeletePublishedFileResult_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageDeletePublishedFileResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageDeletePublishedFileResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.RemoteStorageDeletePublishedFileResult;
     //    #endregion
     //}
 
-    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct RemoteStorageEnumerateUserPublishedFilesResult_t : ICallbackData
-    //{
-    //    internal Result Result; // m_eResult EResult
-    //    internal int ResultsReturned; // m_nResultsReturned int32
-    //    internal int TotalResultCount; // m_nTotalResultCount int32
-    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50, ArraySubType = UnmanagedType.U8)]
-    //    internal PublishedFileId[] GPublishedFileId; // m_rgPublishedFileId PublishedFileId_t [50]
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct RemoteStorageEnumerateUserPublishedFilesResult_t : ICallbackData
+    {
+        internal EResult m_eResult; // m_eResult EResult
+        internal int m_nResultsReturned; // m_nResultsReturned int32
+        internal int m_nTotalResultCount; // m_nTotalResultCount int32
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50, ArraySubType = UnmanagedType.U8)]
+        internal PublishedFileId_t[] m_rgPublishedFileId; // m_rgPublishedFileId PublishedFileId_t [50]
 
-    //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageEnumerateUserPublishedFilesResult_t));
-    //    public int DataSize => _datasize;
-    //    public CallbackType CallbackType => CallbackType.RemoteStorageEnumerateUserPublishedFilesResult;
-    //    #endregion
-    //}
+        #region SteamCallback
+        public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageEnumerateUserPublishedFilesResult_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.RemoteStorageEnumerateUserPublishedFilesResult;
+        #endregion
+    }
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct RemoteStorageSubscribePublishedFileResult_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageSubscribePublishedFileResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageSubscribePublishedFileResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.RemoteStorageSubscribePublishedFileResult;
     //    #endregion
@@ -1041,7 +1041,7 @@ namespace SKYNET.Callback
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct RemoteStorageEnumerateUserSubscribedFilesResult_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal int ResultsReturned; // m_nResultsReturned int32
     //    internal int TotalResultCount; // m_nTotalResultCount int32
     //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50, ArraySubType = UnmanagedType.U8)]
@@ -1050,35 +1050,35 @@ namespace SKYNET.Callback
     //    internal uint[] GRTimeSubscribed; // m_rgRTimeSubscribed uint32 [50]
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageEnumerateUserSubscribedFilesResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageEnumerateUserSubscribedFilesResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.RemoteStorageEnumerateUserSubscribedFilesResult;
     //    #endregion
     //}
 
-    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct RemoteStorageUnsubscribePublishedFileResult_t : ICallbackData
-    //{
-    //    internal Result Result; // m_eResult EResult
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct RemoteStorageUnsubscribePublishedFileResult_t : ICallbackData
+    {
+        internal EResult m_eResult; // m_eResult EResult
+        internal PublishedFileId_t m_nPublishedFileId; // m_nPublishedFileId PublishedFileId_t
 
-    //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageUnsubscribePublishedFileResult_t));
-    //    public int DataSize => _datasize;
-    //    public CallbackType CallbackType => CallbackType.RemoteStorageUnsubscribePublishedFileResult;
-    //    #endregion
-    //}
+        #region SteamCallback
+        public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageUnsubscribePublishedFileResult_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.RemoteStorageUnsubscribePublishedFileResult;
+        #endregion
+    }
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct RemoteStorageUpdatePublishedFileResult_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
     //    [MarshalAs(UnmanagedType.I1)]
     //    internal bool UserNeedsToAcceptWorkshopLegalAgreement; // m_bUserNeedsToAcceptWorkshopLegalAgreement bool
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageUpdatePublishedFileResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageUpdatePublishedFileResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.RemoteStorageUpdatePublishedFileResult;
     //    #endregion
@@ -1087,7 +1087,7 @@ namespace SKYNET.Callback
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct RemoteStorageDownloadUGCResult_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal ulong File; // m_hFile UGCHandle_t
     //    internal AppId AppID; // m_nAppID AppId_t
     //    internal int SizeInBytes; // m_nSizeInBytes int32
@@ -1097,7 +1097,7 @@ namespace SKYNET.Callback
     //    internal ulong SteamIDOwner; // m_ulSteamIDOwner uint64
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageDownloadUGCResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageDownloadUGCResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.RemoteStorageDownloadUGCResult;
     //    #endregion
@@ -1106,7 +1106,7 @@ namespace SKYNET.Callback
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct RemoteStorageGetPublishedFileDetailsResult_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
     //    internal AppId CreatorAppID; // m_nCreatorAppID AppId_t
     //    internal AppId ConsumerAppID; // m_nConsumerAppID AppId_t
@@ -1142,7 +1142,7 @@ namespace SKYNET.Callback
     //    internal bool AcceptedForUse; // m_bAcceptedForUse bool
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageGetPublishedFileDetailsResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageGetPublishedFileDetailsResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.RemoteStorageGetPublishedFileDetailsResult;
     //    #endregion
@@ -1151,7 +1151,7 @@ namespace SKYNET.Callback
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct RemoteStorageEnumerateWorkshopFilesResult_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal int ResultsReturned; // m_nResultsReturned int32
     //    internal int TotalResultCount; // m_nTotalResultCount int32
     //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50, ArraySubType = UnmanagedType.U8)]
@@ -1162,7 +1162,7 @@ namespace SKYNET.Callback
     //    internal uint StartIndex; // m_unStartIndex uint32
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageEnumerateWorkshopFilesResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageEnumerateWorkshopFilesResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.RemoteStorageEnumerateWorkshopFilesResult;
     //    #endregion
@@ -1171,7 +1171,7 @@ namespace SKYNET.Callback
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct RemoteStorageGetPublishedItemVoteDetailsResult_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal PublishedFileId PublishedFileId; // m_unPublishedFileId PublishedFileId_t
     //    internal int VotesFor; // m_nVotesFor int32
     //    internal int VotesAgainst; // m_nVotesAgainst int32
@@ -1179,7 +1179,7 @@ namespace SKYNET.Callback
     //    internal float FScore; // m_fScore float
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageGetPublishedItemVoteDetailsResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageGetPublishedItemVoteDetailsResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.RemoteStorageGetPublishedItemVoteDetailsResult;
     //    #endregion
@@ -1192,7 +1192,7 @@ namespace SKYNET.Callback
     //    internal AppId AppID; // m_nAppID AppId_t
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStoragePublishedFileSubscribed_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStoragePublishedFileSubscribed_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.RemoteStoragePublishedFileSubscribed;
     //    #endregion
@@ -1205,7 +1205,7 @@ namespace SKYNET.Callback
     //    internal AppId AppID; // m_nAppID AppId_t
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStoragePublishedFileUnsubscribed_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStoragePublishedFileUnsubscribed_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.RemoteStoragePublishedFileUnsubscribed;
     //    #endregion
@@ -1218,7 +1218,7 @@ namespace SKYNET.Callback
     //    internal AppId AppID; // m_nAppID AppId_t
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStoragePublishedFileDeleted_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStoragePublishedFileDeleted_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.RemoteStoragePublishedFileDeleted;
     //    #endregion
@@ -1227,11 +1227,11 @@ namespace SKYNET.Callback
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct RemoteStorageUpdateUserPublishedItemVoteResult_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageUpdateUserPublishedItemVoteResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageUpdateUserPublishedItemVoteResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.RemoteStorageUpdateUserPublishedItemVoteResult;
     //    #endregion
@@ -1240,12 +1240,12 @@ namespace SKYNET.Callback
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct RemoteStorageUserVoteDetails_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
     //    internal WorkshopVote Vote; // m_eVote EWorkshopVote
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageUserVoteDetails_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageUserVoteDetails_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.RemoteStorageUserVoteDetails;
     //    #endregion
@@ -1254,14 +1254,14 @@ namespace SKYNET.Callback
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct RemoteStorageEnumerateUserSharedWorkshopFilesResult_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal int ResultsReturned; // m_nResultsReturned int32
     //    internal int TotalResultCount; // m_nTotalResultCount int32
     //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50, ArraySubType = UnmanagedType.U8)]
     //    internal PublishedFileId[] GPublishedFileId; // m_rgPublishedFileId PublishedFileId_t [50]
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageEnumerateUserSharedWorkshopFilesResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageEnumerateUserSharedWorkshopFilesResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.RemoteStorageEnumerateUserSharedWorkshopFilesResult;
     //    #endregion
@@ -1270,12 +1270,12 @@ namespace SKYNET.Callback
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct RemoteStorageSetUserPublishedFileActionResult_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
     //    internal WorkshopFileAction Action; // m_eAction EWorkshopFileAction
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageSetUserPublishedFileActionResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageSetUserPublishedFileActionResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.RemoteStorageSetUserPublishedFileActionResult;
     //    #endregion
@@ -1284,7 +1284,7 @@ namespace SKYNET.Callback
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct RemoteStorageEnumeratePublishedFilesByUserActionResult_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal WorkshopFileAction Action; // m_eAction EWorkshopFileAction
     //    internal int ResultsReturned; // m_nResultsReturned int32
     //    internal int TotalResultCount; // m_nTotalResultCount int32
@@ -1294,7 +1294,7 @@ namespace SKYNET.Callback
     //    internal uint[] GRTimeUpdated; // m_rgRTimeUpdated uint32 [50]
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageEnumeratePublishedFilesByUserActionResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageEnumeratePublishedFilesByUserActionResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.RemoteStorageEnumeratePublishedFilesByUserActionResult;
     //    #endregion
@@ -1308,7 +1308,7 @@ namespace SKYNET.Callback
         internal bool Preview; // m_bPreview bool
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStoragePublishFileProgress_t));
+        public static int _datasize = Marshal.SizeOf(typeof(RemoteStoragePublishFileProgress_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.RemoteStoragePublishFileProgress;
         #endregion
@@ -1322,7 +1322,7 @@ namespace SKYNET.Callback
     //    internal ulong Unused; // m_ulUnused uint64
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStoragePublishedFileUpdated_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStoragePublishedFileUpdated_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.RemoteStoragePublishedFileUpdated;
     //    #endregion
@@ -1331,10 +1331,10 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct RemoteStorageFileWriteAsyncComplete_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult m_eResult; // m_eResult EResult
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageFileWriteAsyncComplete_t));
+        public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageFileWriteAsyncComplete_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.RemoteStorageFileWriteAsyncComplete;
         #endregion
@@ -1344,12 +1344,12 @@ namespace SKYNET.Callback
     internal struct RemoteStorageFileReadAsyncComplete_t : ICallbackData
     {
         internal ulong FileReadAsync; // m_hFileReadAsync SteamAPICall_t
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
         internal uint Offset; // m_nOffset uint32
         internal uint Read; // m_cubRead uint32
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageFileReadAsyncComplete_t));
+        public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageFileReadAsyncComplete_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.RemoteStorageFileReadAsyncComplete;
         #endregion
@@ -1360,7 +1360,7 @@ namespace SKYNET.Callback
     {
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoteStorageLocalFileChange_t));
+        public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageLocalFileChange_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.RemoteStorageLocalFileChange;
         #endregion
@@ -1370,11 +1370,11 @@ namespace SKYNET.Callback
     internal struct UserStatsReceived_t : ICallbackData
     {
         internal ulong GameID; // m_nGameID uint64
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
         internal ulong SteamIDUser; // m_steamIDUser CSteamID
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(UserStatsReceived_t));
+        public static int _datasize = Marshal.SizeOf(typeof(UserStatsReceived_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.UserStatsReceived;
         #endregion
@@ -1384,10 +1384,10 @@ namespace SKYNET.Callback
     internal struct UserStatsStored_t : ICallbackData
     {
         internal ulong GameID; // m_nGameID uint64
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(UserStatsStored_t));
+        public static int _datasize = Marshal.SizeOf(typeof(UserStatsStored_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.UserStatsStored;
         #endregion
@@ -1406,7 +1406,7 @@ namespace SKYNET.Callback
         internal uint MaxProgress; // m_nMaxProgress uint32
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(UserAchievementStored_t));
+        public static int _datasize = Marshal.SizeOf(typeof(UserAchievementStored_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.UserAchievementStored;
         #endregion
@@ -1419,7 +1419,7 @@ namespace SKYNET.Callback
         internal byte LeaderboardFound; // m_bLeaderboardFound uint8
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LeaderboardFindResult_t));
+        public static int _datasize = Marshal.SizeOf(typeof(LeaderboardFindResult_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.LeaderboardFindResult;
         #endregion
@@ -1433,7 +1433,7 @@ namespace SKYNET.Callback
         internal int CEntryCount; // m_cEntryCount int
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LeaderboardScoresDownloaded_t));
+        public static int _datasize = Marshal.SizeOf(typeof(LeaderboardScoresDownloaded_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.LeaderboardScoresDownloaded;
         #endregion
@@ -1450,7 +1450,7 @@ namespace SKYNET.Callback
         internal int GlobalRankPrevious; // m_nGlobalRankPrevious int
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LeaderboardScoreUploaded_t));
+        public static int _datasize = Marshal.SizeOf(typeof(LeaderboardScoreUploaded_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.LeaderboardScoreUploaded;
         #endregion
@@ -1463,7 +1463,7 @@ namespace SKYNET.Callback
         internal int CPlayers; // m_cPlayers int32
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(NumberOfCurrentPlayers_t));
+        public static int _datasize = Marshal.SizeOf(typeof(NumberOfCurrentPlayers_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.NumberOfCurrentPlayers;
         #endregion
@@ -1475,7 +1475,7 @@ namespace SKYNET.Callback
         internal ulong SteamIDUser; // m_steamIDUser CSteamID
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(UserStatsUnloaded_t));
+        public static int _datasize = Marshal.SizeOf(typeof(UserStatsUnloaded_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.UserStatsUnloaded;
         #endregion
@@ -1493,7 +1493,7 @@ namespace SKYNET.Callback
     //    internal int IconHandle; // m_nIconHandle int
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(UserAchievementIconFetched_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(UserAchievementIconFetched_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.UserAchievementIconFetched;
     //    #endregion
@@ -1503,10 +1503,10 @@ namespace SKYNET.Callback
     internal struct GlobalAchievementPercentagesReady_t : ICallbackData
     {
         internal ulong GameID; // m_nGameID uint64
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GlobalAchievementPercentagesReady_t));
+        public static int _datasize = Marshal.SizeOf(typeof(GlobalAchievementPercentagesReady_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.GlobalAchievementPercentagesReady;
         #endregion
@@ -1515,11 +1515,11 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct LeaderboardUGCSet_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
         internal ulong SteamLeaderboard; // m_hSteamLeaderboard SteamLeaderboard_t
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(LeaderboardUGCSet_t));
+        public static int _datasize = Marshal.SizeOf(typeof(LeaderboardUGCSet_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.LeaderboardUGCSet;
         #endregion
@@ -1529,10 +1529,10 @@ namespace SKYNET.Callback
     internal struct GlobalStatsReceived_t : ICallbackData
     {
         internal ulong GameID; // m_nGameID uint64
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GlobalStatsReceived_t));
+        public static int _datasize = Marshal.SizeOf(typeof(GlobalStatsReceived_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.GlobalStatsReceived;
         #endregion
@@ -1544,7 +1544,7 @@ namespace SKYNET.Callback
     //    internal AppId AppID; // m_nAppID AppId_t
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(DlcInstalled_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(DlcInstalled_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.DlcInstalled;
     //    #endregion
@@ -1557,7 +1557,7 @@ namespace SKYNET.Callback
         internal uint PackageRegistered; // m_unPackageRegistered uint32
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RegisterActivationCodeResponse_t));
+        public static int _datasize = Marshal.SizeOf(typeof(RegisterActivationCodeResponse_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.RegisterActivationCodeResponse;
         #endregion
@@ -1568,7 +1568,7 @@ namespace SKYNET.Callback
     {
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(NewUrlLaunchParameters_t));
+        public static int _datasize = Marshal.SizeOf(typeof(NewUrlLaunchParameters_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.NewUrlLaunchParameters;
         #endregion
@@ -1577,7 +1577,7 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct AppProofOfPurchaseKeyResponse_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
         internal uint AppID; // m_nAppID uint32
         internal uint CchKeyLength; // m_cchKeyLength uint32
         internal string KeyUTF8() => System.Text.Encoding.UTF8.GetString(Key, 0, System.Array.IndexOf<byte>(Key, 0));
@@ -1585,7 +1585,7 @@ namespace SKYNET.Callback
         internal byte[] Key; // m_rgchKey char [240]
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(AppProofOfPurchaseKeyResponse_t));
+        public static int _datasize = Marshal.SizeOf(typeof(AppProofOfPurchaseKeyResponse_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.AppProofOfPurchaseKeyResponse;
         #endregion
@@ -1594,14 +1594,14 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct FileDetailsResult_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
         internal ulong FileSize; // m_ulFileSize uint64
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)] //  m_FileSHA
         internal byte[] FileSHA; // m_FileSHA uint8 [20]
         internal uint Flags; // m_unFlags uint32
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(FileDetailsResult_t));
+        public static int _datasize = Marshal.SizeOf(typeof(FileDetailsResult_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.FileDetailsResult;
         #endregion
@@ -1617,7 +1617,7 @@ namespace SKYNET.Callback
     //    internal uint SecondsPlayed; // m_unSecondsPlayed uint32
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(TimedTrialStatus_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(TimedTrialStatus_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.TimedTrialStatus;
     //    #endregion
@@ -1629,7 +1629,7 @@ namespace SKYNET.Callback
         internal ulong SteamIDRemote; // m_steamIDRemote CSteamID
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(P2PSessionRequest_t));
+        public static int _datasize = Marshal.SizeOf(typeof(P2PSessionRequest_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.P2PSessionRequest;
         #endregion
@@ -1642,7 +1642,7 @@ namespace SKYNET.Callback
         internal byte P2PSessionError; // m_eP2PSessionError uint8
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(P2PSessionConnectFail_t));
+        public static int _datasize = Marshal.SizeOf(typeof(P2PSessionConnectFail_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.P2PSessionConnectFail;
         #endregion
@@ -1652,10 +1652,10 @@ namespace SKYNET.Callback
     internal struct ScreenshotReady_t : ICallbackData
     {
         internal uint Local; // m_hLocal ScreenshotHandle
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(ScreenshotReady_t));
+        public static int _datasize = Marshal.SizeOf(typeof(ScreenshotReady_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.ScreenshotReady;
         #endregion
@@ -1666,7 +1666,7 @@ namespace SKYNET.Callback
     {
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(ScreenshotRequested_t));
+        public static int _datasize = Marshal.SizeOf(typeof(ScreenshotRequested_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.ScreenshotRequested;
         #endregion
@@ -1677,7 +1677,7 @@ namespace SKYNET.Callback
     {
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(PlaybackStatusHasChanged_t));
+        public static int _datasize = Marshal.SizeOf(typeof(PlaybackStatusHasChanged_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.PlaybackStatusHasChanged;
         #endregion
@@ -1689,7 +1689,7 @@ namespace SKYNET.Callback
         internal float NewVolume; // m_flNewVolume float
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(VolumeHasChanged_t));
+        public static int _datasize = Marshal.SizeOf(typeof(VolumeHasChanged_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.VolumeHasChanged;
         #endregion
@@ -1700,7 +1700,7 @@ namespace SKYNET.Callback
     {
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerRemoteWillActivate_t));
+        public static int _datasize = Marshal.SizeOf(typeof(MusicPlayerRemoteWillActivate_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.MusicPlayerRemoteWillActivate;
         #endregion
@@ -1711,7 +1711,7 @@ namespace SKYNET.Callback
     {
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerRemoteWillDeactivate_t));
+        public static int _datasize = Marshal.SizeOf(typeof(MusicPlayerRemoteWillDeactivate_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.MusicPlayerRemoteWillDeactivate;
         #endregion
@@ -1722,7 +1722,7 @@ namespace SKYNET.Callback
     {
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerRemoteToFront_t));
+        public static int _datasize = Marshal.SizeOf(typeof(MusicPlayerRemoteToFront_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.MusicPlayerRemoteToFront;
         #endregion
@@ -1733,7 +1733,7 @@ namespace SKYNET.Callback
     {
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerWillQuit_t));
+        public static int _datasize = Marshal.SizeOf(typeof(MusicPlayerWillQuit_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.MusicPlayerWillQuit;
         #endregion
@@ -1744,7 +1744,7 @@ namespace SKYNET.Callback
     {
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerWantsPlay_t));
+        public static int _datasize = Marshal.SizeOf(typeof(MusicPlayerWantsPlay_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.MusicPlayerWantsPlay;
         #endregion
@@ -1755,7 +1755,7 @@ namespace SKYNET.Callback
     {
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerWantsPause_t));
+        public static int _datasize = Marshal.SizeOf(typeof(MusicPlayerWantsPause_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.MusicPlayerWantsPause;
         #endregion
@@ -1766,7 +1766,7 @@ namespace SKYNET.Callback
     {
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerWantsPlayPrevious_t));
+        public static int _datasize = Marshal.SizeOf(typeof(MusicPlayerWantsPlayPrevious_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.MusicPlayerWantsPlayPrevious;
         #endregion
@@ -1777,7 +1777,7 @@ namespace SKYNET.Callback
     {
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerWantsPlayNext_t));
+        public static int _datasize = Marshal.SizeOf(typeof(MusicPlayerWantsPlayNext_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.MusicPlayerWantsPlayNext;
         #endregion
@@ -1790,7 +1790,7 @@ namespace SKYNET.Callback
         internal bool Shuffled; // m_bShuffled bool
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerWantsShuffled_t));
+        public static int _datasize = Marshal.SizeOf(typeof(MusicPlayerWantsShuffled_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.MusicPlayerWantsShuffled;
         #endregion
@@ -1803,7 +1803,7 @@ namespace SKYNET.Callback
         internal bool Looped; // m_bLooped bool
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerWantsLooped_t));
+        public static int _datasize = Marshal.SizeOf(typeof(MusicPlayerWantsLooped_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.MusicPlayerWantsLooped;
         #endregion
@@ -1815,7 +1815,7 @@ namespace SKYNET.Callback
         internal float NewVolume; // m_flNewVolume float
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerWantsVolume_t));
+        public static int _datasize = Marshal.SizeOf(typeof(MusicPlayerWantsVolume_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.MusicPlayerWantsVolume;
         #endregion
@@ -1827,7 +1827,7 @@ namespace SKYNET.Callback
         internal int NID; // nID int
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerSelectsQueueEntry_t));
+        public static int _datasize = Marshal.SizeOf(typeof(MusicPlayerSelectsQueueEntry_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.MusicPlayerSelectsQueueEntry;
         #endregion
@@ -1839,7 +1839,7 @@ namespace SKYNET.Callback
         internal int NID; // nID int
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerSelectsPlaylistEntry_t));
+        public static int _datasize = Marshal.SizeOf(typeof(MusicPlayerSelectsPlaylistEntry_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.MusicPlayerSelectsPlaylistEntry;
         #endregion
@@ -1851,7 +1851,7 @@ namespace SKYNET.Callback
         internal int PlayingRepeatStatus; // m_nPlayingRepeatStatus int
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(MusicPlayerWantsPlayingRepeatStatus_t));
+        public static int _datasize = Marshal.SizeOf(typeof(MusicPlayerWantsPlayingRepeatStatus_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.MusicPlayerWantsPlayingRepeatStatus;
         #endregion
@@ -1868,7 +1868,7 @@ namespace SKYNET.Callback
         internal uint BodySize; // m_unBodySize uint32
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTTPRequestCompleted_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTTPRequestCompleted_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTTPRequestCompleted;
         #endregion
@@ -1881,7 +1881,7 @@ namespace SKYNET.Callback
         internal ulong ContextValue; // m_ulContextValue uint64
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTTPRequestHeadersReceived_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTTPRequestHeadersReceived_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTTPRequestHeadersReceived;
         #endregion
@@ -1896,7 +1896,7 @@ namespace SKYNET.Callback
         internal uint CBytesReceived; // m_cBytesReceived uint32
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTTPRequestDataReceived_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTTPRequestDataReceived_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTTPRequestDataReceived;
         #endregion
@@ -1908,7 +1908,7 @@ namespace SKYNET.Callback
         internal ulong ConnectedDeviceHandle; // m_ulConnectedDeviceHandle InputHandle_t
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamInputDeviceConnected_t));
+        public static int _datasize = Marshal.SizeOf(typeof(SteamInputDeviceConnected_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.SteamInputDeviceConnected;
         #endregion
@@ -1920,7 +1920,7 @@ namespace SKYNET.Callback
         internal ulong DisconnectedDeviceHandle; // m_ulDisconnectedDeviceHandle InputHandle_t
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamInputDeviceDisconnected_t));
+        public static int _datasize = Marshal.SizeOf(typeof(SteamInputDeviceDisconnected_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.SteamInputDeviceDisconnected;
         #endregion
@@ -1940,7 +1940,7 @@ namespace SKYNET.Callback
     //    internal bool UsesGamepadAPI; // m_bUsesGamepadAPI bool
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamInputConfigurationLoaded_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(SteamInputConfigurationLoaded_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.SteamInputConfigurationLoaded;
     //    #endregion
@@ -1950,7 +1950,7 @@ namespace SKYNET.Callback
     internal struct SteamUGCQueryCompleted_t : ICallbackData
     {
         internal ulong Handle; // m_handle UGCQueryHandle_t
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
         internal uint NumResultsReturned; // m_unNumResultsReturned uint32
         internal uint TotalMatchingResults; // m_unTotalMatchingResults uint32
         [MarshalAs(UnmanagedType.I1)]
@@ -1960,36 +1960,36 @@ namespace SKYNET.Callback
         internal byte[] NextCursor; // m_rgchNextCursor char [256]
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamUGCQueryCompleted_t));
+        public static int _datasize = Marshal.SizeOf(typeof(SteamUGCQueryCompleted_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.SteamUGCQueryCompleted;
         #endregion
     }
 
-    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct SteamUGCRequestUGCDetailsResult_t : ICallbackData
-    //{
-    //    internal SteamUGCDetails_t Details; // m_details SteamUGCDetails_t
-    //    [MarshalAs(UnmanagedType.I1)]
-    //    internal bool CachedData; // m_bCachedData bool
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    internal struct SteamUGCRequestUGCDetailsResult_t : ICallbackData
+    {
+        internal SteamUGCDetails_t Details; // m_details SteamUGCDetails_t
+        [MarshalAs(UnmanagedType.I1)]
+        internal bool CachedData; // m_bCachedData bool
 
-    //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamUGCRequestUGCDetailsResult_t));
-    //    public int DataSize => _datasize;
-    //    public CallbackType CallbackType => CallbackType.SteamUGCRequestUGCDetailsResult;
-    //    #endregion
-    //}
+        #region SteamCallback
+        public static int _datasize = Marshal.SizeOf(typeof(SteamUGCRequestUGCDetailsResult_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamUGCRequestUGCDetailsResult;
+        #endregion
+    }
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct CreateItemResult_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
     //    [MarshalAs(UnmanagedType.I1)]
     //    internal bool UserNeedsToAcceptWorkshopLegalAgreement; // m_bUserNeedsToAcceptWorkshopLegalAgreement bool
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(CreateItemResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(CreateItemResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.CreateItemResult;
     //    #endregion
@@ -1998,13 +1998,13 @@ namespace SKYNET.Callback
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct SubmitItemUpdateResult_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    [MarshalAs(UnmanagedType.I1)]
     //    internal bool UserNeedsToAcceptWorkshopLegalAgreement; // m_bUserNeedsToAcceptWorkshopLegalAgreement bool
     //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SubmitItemUpdateResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(SubmitItemUpdateResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.SubmitItemUpdateResult;
     //    #endregion
@@ -2017,7 +2017,7 @@ namespace SKYNET.Callback
     //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(ItemInstalled_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(ItemInstalled_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.ItemInstalled;
     //    #endregion
@@ -2028,10 +2028,10 @@ namespace SKYNET.Callback
     //{
     //    internal AppId AppID; // m_unAppID AppId_t
     //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(DownloadItemResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(DownloadItemResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.DownloadItemResult;
     //    #endregion
@@ -2041,12 +2041,12 @@ namespace SKYNET.Callback
     //internal struct UserFavoriteItemsListChanged_t : ICallbackData
     //{
     //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    [MarshalAs(UnmanagedType.I1)]
     //    internal bool WasAddRequest; // m_bWasAddRequest bool
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(UserFavoriteItemsListChanged_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(UserFavoriteItemsListChanged_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.UserFavoriteItemsListChanged;
     //    #endregion
@@ -2056,12 +2056,12 @@ namespace SKYNET.Callback
     //internal struct SetUserItemVoteResult_t : ICallbackData
     //{
     //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    [MarshalAs(UnmanagedType.I1)]
     //    internal bool VoteUp; // m_bVoteUp bool
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SetUserItemVoteResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(SetUserItemVoteResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.SetUserItemVoteResult;
     //    #endregion
@@ -2071,7 +2071,7 @@ namespace SKYNET.Callback
     //internal struct GetUserItemVoteResult_t : ICallbackData
     //{
     //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    [MarshalAs(UnmanagedType.I1)]
     //    internal bool VotedUp; // m_bVotedUp bool
     //    [MarshalAs(UnmanagedType.I1)]
@@ -2080,7 +2080,7 @@ namespace SKYNET.Callback
     //    internal bool VoteSkipped; // m_bVoteSkipped bool
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GetUserItemVoteResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(GetUserItemVoteResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.GetUserItemVoteResult;
     //    #endregion
@@ -2089,10 +2089,10 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct StartPlaytimeTrackingResult_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(StartPlaytimeTrackingResult_t));
+        public static int _datasize = Marshal.SizeOf(typeof(StartPlaytimeTrackingResult_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.StartPlaytimeTrackingResult;
         #endregion
@@ -2101,10 +2101,10 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct StopPlaytimeTrackingResult_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult m_eResult; // m_eResult EResult
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(StopPlaytimeTrackingResult_t));
+        public static int _datasize = Marshal.SizeOf(typeof(StopPlaytimeTrackingResult_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.StopPlaytimeTrackingResult;
         #endregion
@@ -2113,12 +2113,12 @@ namespace SKYNET.Callback
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct AddUGCDependencyResult_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
     //    internal PublishedFileId ChildPublishedFileId; // m_nChildPublishedFileId PublishedFileId_t
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(AddUGCDependencyResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(AddUGCDependencyResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.AddUGCDependencyResult;
     //    #endregion
@@ -2127,12 +2127,12 @@ namespace SKYNET.Callback
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct RemoveUGCDependencyResult_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
     //    internal PublishedFileId ChildPublishedFileId; // m_nChildPublishedFileId PublishedFileId_t
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoveUGCDependencyResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(RemoveUGCDependencyResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.RemoveUGCDependencyResult;
     //    #endregion
@@ -2141,12 +2141,12 @@ namespace SKYNET.Callback
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct AddAppDependencyResult_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
     //    internal AppId AppID; // m_nAppID AppId_t
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(AddAppDependencyResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(AddAppDependencyResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.AddAppDependencyResult;
     //    #endregion
@@ -2155,12 +2155,12 @@ namespace SKYNET.Callback
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct RemoveAppDependencyResult_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
     //    internal AppId AppID; // m_nAppID AppId_t
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(RemoveAppDependencyResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(RemoveAppDependencyResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.RemoveAppDependencyResult;
     //    #endregion
@@ -2169,7 +2169,7 @@ namespace SKYNET.Callback
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct GetAppDependenciesResult_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
     //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32, ArraySubType = UnmanagedType.U4)]
     //    internal AppId[] GAppIDs; // m_rgAppIDs AppId_t [32]
@@ -2177,7 +2177,7 @@ namespace SKYNET.Callback
     //    internal uint TotalNumAppDependencies; // m_nTotalNumAppDependencies uint32
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GetAppDependenciesResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(GetAppDependenciesResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.GetAppDependenciesResult;
     //    #endregion
@@ -2186,11 +2186,11 @@ namespace SKYNET.Callback
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct DeleteItemResult_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(DeleteItemResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(DeleteItemResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.DeleteItemResult;
     //    #endregion
@@ -2202,7 +2202,7 @@ namespace SKYNET.Callback
     //    internal AppId AppID; // m_nAppID AppId_t
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(UserSubscribedItemsListChanged_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(UserSubscribedItemsListChanged_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.UserSubscribedItemsListChanged;
     //    #endregion
@@ -2211,7 +2211,7 @@ namespace SKYNET.Callback
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct WorkshopEULAStatus_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal AppId AppID; // m_nAppID AppId_t
     //    internal uint Version; // m_unVersion uint32
     //    internal uint TAction; // m_rtAction RTime32
@@ -2221,7 +2221,7 @@ namespace SKYNET.Callback
     //    internal bool NeedsAction; // m_bNeedsAction bool
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(WorkshopEULAStatus_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(WorkshopEULAStatus_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.WorkshopEULAStatus;
     //    #endregion
@@ -2234,7 +2234,7 @@ namespace SKYNET.Callback
     //    internal int InstallFolderIndex; // m_iInstallFolderIndex int
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamAppInstalled_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(SteamAppInstalled_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.SteamAppInstalled;
     //    #endregion
@@ -2247,7 +2247,7 @@ namespace SKYNET.Callback
     //    internal int InstallFolderIndex; // m_iInstallFolderIndex int
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamAppUninstalled_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(SteamAppUninstalled_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.SteamAppUninstalled;
     //    #endregion
@@ -2259,7 +2259,7 @@ namespace SKYNET.Callback
         internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_BrowserReady_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTML_BrowserReady_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTML_BrowserReady;
         #endregion
@@ -2282,7 +2282,7 @@ namespace SKYNET.Callback
         internal uint UnPageSerial; // unPageSerial uint32
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_NeedsPaint_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTML_NeedsPaint_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTML_NeedsPaint;
         #endregion
@@ -2299,7 +2299,7 @@ namespace SKYNET.Callback
         internal bool BIsRedirect; // bIsRedirect bool
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_StartRequest_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTML_StartRequest_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTML_StartRequest;
         #endregion
@@ -2311,7 +2311,7 @@ namespace SKYNET.Callback
         internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_CloseBrowser_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTML_CloseBrowser_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTML_CloseBrowser;
         #endregion
@@ -2330,7 +2330,7 @@ namespace SKYNET.Callback
         internal bool BNewNavigation; // bNewNavigation bool
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_URLChanged_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTML_URLChanged_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTML_URLChanged;
         #endregion
@@ -2344,7 +2344,7 @@ namespace SKYNET.Callback
         internal string PchPageTitle; // pchPageTitle const char *
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_FinishedRequest_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTML_FinishedRequest_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTML_FinishedRequest;
         #endregion
@@ -2357,7 +2357,7 @@ namespace SKYNET.Callback
         internal string PchURL; // pchURL const char *
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_OpenLinkInNewTab_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTML_OpenLinkInNewTab_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTML_OpenLinkInNewTab;
         #endregion
@@ -2370,7 +2370,7 @@ namespace SKYNET.Callback
         internal string PchTitle; // pchTitle const char *
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_ChangedTitle_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTML_ChangedTitle_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTML_ChangedTitle;
         #endregion
@@ -2384,7 +2384,7 @@ namespace SKYNET.Callback
         internal uint UnCurrentMatch; // unCurrentMatch uint32
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_SearchResults_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTML_SearchResults_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTML_SearchResults;
         #endregion
@@ -2400,7 +2400,7 @@ namespace SKYNET.Callback
         internal bool BCanGoForward; // bCanGoForward bool
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_CanGoBackAndForward_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTML_CanGoBackAndForward_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTML_CanGoBackAndForward;
         #endregion
@@ -2418,7 +2418,7 @@ namespace SKYNET.Callback
         internal uint UnPageSize; // unPageSize uint32
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_HorizontalScroll_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTML_HorizontalScroll_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTML_HorizontalScroll;
         #endregion
@@ -2436,7 +2436,7 @@ namespace SKYNET.Callback
         internal uint UnPageSize; // unPageSize uint32
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_VerticalScroll_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTML_VerticalScroll_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTML_VerticalScroll;
         #endregion
@@ -2455,7 +2455,7 @@ namespace SKYNET.Callback
         internal bool BLiveLink; // bLiveLink bool
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_LinkAtPosition_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTML_LinkAtPosition_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTML_LinkAtPosition;
         #endregion
@@ -2468,7 +2468,7 @@ namespace SKYNET.Callback
         internal string PchMessage; // pchMessage const char *
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_JSAlert_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTML_JSAlert_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTML_JSAlert;
         #endregion
@@ -2481,7 +2481,7 @@ namespace SKYNET.Callback
         internal string PchMessage; // pchMessage const char *
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_JSConfirm_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTML_JSConfirm_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTML_JSConfirm;
         #endregion
@@ -2495,7 +2495,7 @@ namespace SKYNET.Callback
         internal string PchInitialFile; // pchInitialFile const char *
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_FileOpenDialog_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTML_FileOpenDialog_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTML_FileOpenDialog;
         #endregion
@@ -2513,7 +2513,7 @@ namespace SKYNET.Callback
         internal uint UnNewWindow_BrowserHandle_IGNORE; // unNewWindow_BrowserHandle_IGNORE HHTMLBrowser
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_NewWindow_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTML_NewWindow_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTML_NewWindow;
         #endregion
@@ -2526,7 +2526,7 @@ namespace SKYNET.Callback
         internal uint EMouseCursor; // eMouseCursor uint32
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_SetCursor_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTML_SetCursor_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTML_SetCursor;
         #endregion
@@ -2539,7 +2539,7 @@ namespace SKYNET.Callback
         internal string PchMsg; // pchMsg const char *
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_StatusText_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTML_StatusText_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTML_StatusText;
         #endregion
@@ -2552,7 +2552,7 @@ namespace SKYNET.Callback
         internal string PchMsg; // pchMsg const char *
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_ShowToolTip_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTML_ShowToolTip_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTML_ShowToolTip;
         #endregion
@@ -2565,7 +2565,7 @@ namespace SKYNET.Callback
         internal string PchMsg; // pchMsg const char *
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_UpdateToolTip_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTML_UpdateToolTip_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTML_UpdateToolTip;
         #endregion
@@ -2577,7 +2577,7 @@ namespace SKYNET.Callback
         internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_HideToolTip_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTML_HideToolTip_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTML_HideToolTip;
         #endregion
@@ -2590,7 +2590,7 @@ namespace SKYNET.Callback
         internal uint UnOldBrowserHandle; // unOldBrowserHandle HHTMLBrowser
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(HTML_BrowserRestarted_t));
+        public static int _datasize = Marshal.SizeOf(typeof(HTML_BrowserRestarted_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.HTML_BrowserRestarted;
         #endregion
@@ -2600,10 +2600,10 @@ namespace SKYNET.Callback
     internal struct SteamInventoryResultReady_t : ICallbackData
     {
         internal int Handle; // m_handle SteamInventoryResult_t
-        internal Result Result; // m_result EResult
+        internal EResult Result; // m_result EResult
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamInventoryResultReady_t));
+        public static int _datasize = Marshal.SizeOf(typeof(SteamInventoryResultReady_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.SteamInventoryResultReady;
         #endregion
@@ -2615,7 +2615,7 @@ namespace SKYNET.Callback
         internal int Handle; // m_handle SteamInventoryResult_t
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamInventoryFullUpdate_t));
+        public static int _datasize = Marshal.SizeOf(typeof(SteamInventoryFullUpdate_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.SteamInventoryFullUpdate;
         #endregion
@@ -2626,7 +2626,7 @@ namespace SKYNET.Callback
     {
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamInventoryDefinitionUpdate_t));
+        public static int _datasize = Marshal.SizeOf(typeof(SteamInventoryDefinitionUpdate_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.SteamInventoryDefinitionUpdate;
         #endregion
@@ -2635,14 +2635,14 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
     internal struct SteamInventoryEligiblePromoItemDefIDs_t : ICallbackData
     {
-        internal Result Result; // m_result EResult
+        internal EResult Result; // m_result EResult
         internal ulong SteamID; // m_steamID CSteamID
         internal int UmEligiblePromoItemDefs; // m_numEligiblePromoItemDefs int
         [MarshalAs(UnmanagedType.I1)]
         internal bool CachedData; // m_bCachedData bool
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamInventoryEligiblePromoItemDefIDs_t));
+        public static int _datasize = Marshal.SizeOf(typeof(SteamInventoryEligiblePromoItemDefIDs_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.SteamInventoryEligiblePromoItemDefIDs;
         #endregion
@@ -2651,12 +2651,12 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct SteamInventoryStartPurchaseResult_t : ICallbackData
     {
-        internal Result Result; // m_result EResult
+        internal EResult Result; // m_result EResult
         internal ulong OrderID; // m_ulOrderID uint64
         internal ulong TransID; // m_ulTransID uint64
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamInventoryStartPurchaseResult_t));
+        public static int _datasize = Marshal.SizeOf(typeof(SteamInventoryStartPurchaseResult_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.SteamInventoryStartPurchaseResult;
         #endregion
@@ -2665,13 +2665,13 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct SteamInventoryRequestPricesResult_t : ICallbackData
     {
-        internal Result Result; // m_result EResult
+        internal EResult Result; // m_result EResult
         internal string CurrencyUTF8() => System.Text.Encoding.UTF8.GetString(Currency, 0, System.Array.IndexOf<byte>(Currency, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)] // byte[] m_rgchCurrency
         internal byte[] Currency; // m_rgchCurrency char [4]
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamInventoryRequestPricesResult_t));
+        public static int _datasize = Marshal.SizeOf(typeof(SteamInventoryRequestPricesResult_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.SteamInventoryRequestPricesResult;
         #endregion
@@ -2680,14 +2680,14 @@ namespace SKYNET.Callback
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct GetVideoURLResult_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal AppId VideoAppID; // m_unVideoAppID AppId_t
     //    internal string URLUTF8() => System.Text.Encoding.UTF8.GetString(URL, 0, System.Array.IndexOf<byte>(URL, 0));
     //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)] // byte[] m_rgchURL
     //    internal byte[] URL; // m_rgchURL char [256]
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GetVideoURLResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(GetVideoURLResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.GetVideoURLResult;
     //    #endregion
@@ -2696,11 +2696,11 @@ namespace SKYNET.Callback
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct GetOPFSettingsResult_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal AppId VideoAppID; // m_unVideoAppID AppId_t
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GetOPFSettingsResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(GetOPFSettingsResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.GetOPFSettingsResult;
     //    #endregion
@@ -2711,7 +2711,7 @@ namespace SKYNET.Callback
     {
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamParentalSettingsChanged_t));
+        public static int _datasize = Marshal.SizeOf(typeof(SteamParentalSettingsChanged_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.SteamParentalSettingsChanged;
         #endregion
@@ -2723,7 +2723,7 @@ namespace SKYNET.Callback
         internal uint SessionID; // m_unSessionID RemotePlaySessionID_t
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamRemotePlaySessionConnected_t));
+        public static int _datasize = Marshal.SizeOf(typeof(SteamRemotePlaySessionConnected_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.SteamRemotePlaySessionConnected;
         #endregion
@@ -2735,7 +2735,7 @@ namespace SKYNET.Callback
         internal uint SessionID; // m_unSessionID RemotePlaySessionID_t
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamRemotePlaySessionDisconnected_t));
+        public static int _datasize = Marshal.SizeOf(typeof(SteamRemotePlaySessionDisconnected_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.SteamRemotePlaySessionDisconnected;
         #endregion
@@ -2747,7 +2747,7 @@ namespace SKYNET.Callback
     //    internal NetIdentity DentityRemote; // m_identityRemote SteamNetworkingIdentity
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamNetworkingMessagesSessionRequest_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(SteamNetworkingMessagesSessionRequest_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.SteamNetworkingMessagesSessionRequest;
     //    #endregion
@@ -2759,7 +2759,7 @@ namespace SKYNET.Callback
     //    internal ConnectionInfo Nfo; // m_info SteamNetConnectionInfo_t
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamNetworkingMessagesSessionFailed_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(SteamNetworkingMessagesSessionFailed_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.SteamNetworkingMessagesSessionFailed;
     //    #endregion
@@ -2773,7 +2773,7 @@ namespace SKYNET.Callback
     //    internal ConnectionState OldState; // m_eOldState ESteamNetworkingConnectionState
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamNetConnectionStatusChangedCallback_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(SteamNetConnectionStatusChangedCallback_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.SteamNetConnectionStatusChangedCallback;
     //    #endregion
@@ -2788,7 +2788,7 @@ namespace SKYNET.Callback
         internal byte[] DebugMsg; // m_debugMsg char [256]
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamNetAuthenticationStatus_t));
+        public static int _datasize = Marshal.SizeOf(typeof(SteamNetAuthenticationStatus_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.SteamNetAuthenticationStatus;
         #endregion
@@ -2806,7 +2806,7 @@ namespace SKYNET.Callback
         internal byte[] DebugMsg; // m_debugMsg char [256]
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamRelayNetworkStatus_t));
+        public static int _datasize = Marshal.SizeOf(typeof(SteamRelayNetworkStatus_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.SteamRelayNetworkStatus;
         #endregion
@@ -2819,7 +2819,7 @@ namespace SKYNET.Callback
         internal ulong OwnerSteamID; // m_OwnerSteamID CSteamID
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GSClientApprove_t));
+        public static int _datasize = Marshal.SizeOf(typeof(GSClientApprove_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.GSClientApprove;
         #endregion
@@ -2835,7 +2835,7 @@ namespace SKYNET.Callback
         internal byte[] OptionalText; // m_rgchOptionalText char [128]
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GSClientDeny_t));
+        public static int _datasize = Marshal.SizeOf(typeof(GSClientDeny_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.GSClientDeny;
         #endregion
@@ -2848,7 +2848,7 @@ namespace SKYNET.Callback
         internal DenyReason DenyReason; // m_eDenyReason EDenyReason
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GSClientKick_t));
+        public static int _datasize = Marshal.SizeOf(typeof(GSClientKick_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.GSClientKick;
         #endregion
@@ -2865,7 +2865,7 @@ namespace SKYNET.Callback
         internal bool Unlocked; // m_bUnlocked bool
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GSClientAchievementStatus_t));
+        public static int _datasize = Marshal.SizeOf(typeof(GSClientAchievementStatus_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.GSClientAchievementStatus;
         #endregion
@@ -2877,7 +2877,7 @@ namespace SKYNET.Callback
         internal byte Secure; // m_bSecure uint8
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GSPolicyResponse_t));
+        public static int _datasize = Marshal.SizeOf(typeof(GSPolicyResponse_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.GSPolicyResponse;
         #endregion
@@ -2886,13 +2886,13 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct GSGameplayStats_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
         internal int Rank; // m_nRank int32
         internal uint TotalConnects; // m_unTotalConnects uint32
         internal uint TotalMinutesPlayed; // m_unTotalMinutesPlayed uint32
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GSGameplayStats_t));
+        public static int _datasize = Marshal.SizeOf(typeof(GSGameplayStats_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.GSGameplayStats;
         #endregion
@@ -2909,7 +2909,7 @@ namespace SKYNET.Callback
         internal bool Officer; // m_bOfficer bool
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GSClientGroupStatus_t));
+        public static int _datasize = Marshal.SizeOf(typeof(GSClientGroupStatus_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.GSClientGroupStatus;
         #endregion
@@ -2918,7 +2918,7 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct GSReputation_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
         internal uint ReputationScore; // m_unReputationScore uint32
         [MarshalAs(UnmanagedType.I1)]
         internal bool Banned; // m_bBanned bool
@@ -2928,7 +2928,7 @@ namespace SKYNET.Callback
         internal uint BanExpires; // m_unBanExpires uint32
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GSReputation_t));
+        public static int _datasize = Marshal.SizeOf(typeof(GSReputation_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.GSReputation;
         #endregion
@@ -2937,10 +2937,10 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct AssociateWithClanResult_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(AssociateWithClanResult_t));
+        public static int _datasize = Marshal.SizeOf(typeof(AssociateWithClanResult_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.AssociateWithClanResult;
         #endregion
@@ -2949,14 +2949,14 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
     internal struct ComputeNewPlayerCompatibilityResult_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
         internal int CPlayersThatDontLikeCandidate; // m_cPlayersThatDontLikeCandidate int
         internal int CPlayersThatCandidateDoesntLike; // m_cPlayersThatCandidateDoesntLike int
         internal int CClanPlayersThatDontLikeCandidate; // m_cClanPlayersThatDontLikeCandidate int
         internal ulong SteamIDCandidate; // m_SteamIDCandidate CSteamID
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(ComputeNewPlayerCompatibilityResult_t));
+        public static int _datasize = Marshal.SizeOf(typeof(ComputeNewPlayerCompatibilityResult_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.ComputeNewPlayerCompatibilityResult;
         #endregion
@@ -2965,11 +2965,11 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
     internal struct GSStatsReceived_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
         internal ulong SteamIDUser; // m_steamIDUser CSteamID
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GSStatsReceived_t));
+        public static int _datasize = Marshal.SizeOf(typeof(GSStatsReceived_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.GSStatsReceived;
         #endregion
@@ -2978,11 +2978,11 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
     internal struct GSStatsStored_t : ICallbackData
     {
-        internal Result Result; // m_eResult EResult
+        internal EResult Result; // m_eResult EResult
         internal ulong SteamIDUser; // m_steamIDUser CSteamID
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GSStatsStored_t));
+        public static int _datasize = Marshal.SizeOf(typeof(GSStatsStored_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.GSStatsStored;
         #endregion
@@ -2994,7 +2994,7 @@ namespace SKYNET.Callback
         internal ulong SteamIDUser; // m_steamIDUser CSteamID
 
         #region SteamCallback
-        public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(GSStatsUnloaded_t));
+        public static int _datasize = Marshal.SizeOf(typeof(GSStatsUnloaded_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.GSStatsUnloaded;
         #endregion
@@ -3003,26 +3003,39 @@ namespace SKYNET.Callback
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //internal struct SteamNetworkingFakeIPResult_t : ICallbackData
     //{
-    //    internal Result Result; // m_eResult EResult
+    //    internal EResult Result; // m_eResult EResult
     //    internal NetIdentity Dentity; // m_identity SteamNetworkingIdentity
     //    internal uint IP; // m_unIP uint32
     //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8, ArraySubType = UnmanagedType.U2)]
     //    internal ushort[] Ports; // m_unPorts uint16 [8]
 
     //    #region SteamCallback
-    //    public static int _datasize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(SteamNetworkingFakeIPResult_t));
+    //    public static int _datasize = Marshal.SizeOf(typeof(SteamNetworkingFakeIPResult_t));
     //    public int DataSize => _datasize;
     //    public CallbackType CallbackType => CallbackType.SteamNetworkingFakeIPResult;
     //    #endregion
     //}
 
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    public struct GCMessageAvailable_t
+    public struct GCMessageAvailable_t : ICallbackData
     {
-        public const int k_iCallback = 1701;
-
         public uint m_nMessageSize;
+
+        #region SteamCallback
+        public static int _datasize = Marshal.SizeOf(typeof(GCMessageAvailable_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamGameCoordinator;
+        #endregion
     }
 
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
+    public struct GCMessageFailed_t : ICallbackData
+    {
+        #region SteamCallback
+        public static int _datasize = Marshal.SizeOf(typeof(GCMessageAvailable_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamGameCoordinatorFailed;
+        #endregion
+    };
 
 }

@@ -1,6 +1,7 @@
 using SKYNET.Steamworks;
 using Steamworks;
 using System;
+using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Interface
 {
@@ -32,12 +33,12 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUtils.GetIPCountry();
         }
 
-        public bool GetImageSize(IntPtr _, int iImage, uint pnWidth, uint pnHeight)
+        public bool GetImageSize(IntPtr _, int iImage, ref uint pnWidth, ref uint pnHeight)
         {
-            return SteamEmulator.SteamUtils.GetImageSize(iImage, pnWidth, pnHeight);
+            return SteamEmulator.SteamUtils.GetImageSize(iImage, ref pnWidth, ref pnHeight);
         }
 
-        public bool GetImageRGBA(IntPtr _, int iImage, int pubDest, int nDestBufferSize)
+        public bool GetImageRGBA(IntPtr _, int iImage, IntPtr pubDest, int nDestBufferSize)
         {
             return SteamEmulator.SteamUtils.GetImageRGBA(iImage, pubDest, nDestBufferSize);
         }
@@ -67,12 +68,12 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUtils.IsAPICallCompleted(hSteamAPICall, ref pbFailed);
         }
 
-        public ESteamAPICallFailure GetAPICallFailureReason(IntPtr _, ulong hSteamAPICall)
+        public ESteamAPICallFailure GetAPICallFailureReason(IntPtr _, SteamAPICall_t hSteamAPICall)
         {
             return SteamEmulator.SteamUtils.GetAPICallFailureReason(hSteamAPICall);
         }
 
-        public bool GetAPICallResult(IntPtr _, ulong hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, ref bool pbFailed)
+        public bool GetAPICallResult(IntPtr _, SteamAPICall_t hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, ref bool pbFailed)
         {
             return SteamEmulator.SteamUtils.GetAPICallResult(hSteamAPICall, pCallback, cubCallback, iCallbackExpected, ref pbFailed);
         }
@@ -99,7 +100,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUtils.BOverlayNeedsPresent();
         }
 
-        public ulong CheckFileSignature(IntPtr _, string szFileName)
+        public SteamAPICall_t CheckFileSignature(IntPtr _, string szFileName)
         {
             return SteamEmulator.SteamUtils.CheckFileSignature(szFileName);
         }

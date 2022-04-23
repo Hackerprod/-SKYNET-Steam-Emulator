@@ -1,15 +1,19 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 using SKYNET;
+using SKYNET.Helper;
 using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Steamworks;
 using Steamworks;
+using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Implementation
 {
     public class SteamUtils : ISteamInterface
     {
+        SteamAPICall_t k_uAPICallInvalid = 0x0;
         private DateTime ActiveTime;
         public SteamUtils()
         {
@@ -38,7 +42,7 @@ namespace SKYNET.Steamworks.Implementation
         public uint GetServerRealTime()
         {
             uint ServerTime = (uint)(new DateTimeOffset(DateTime.Now)).ToUnixTimeSeconds(); 
-            Write($"GetServerRealTime {ServerTime}");
+            Write($"GetServerRealTime");
             return ServerTime;
         }
 
@@ -48,16 +52,64 @@ namespace SKYNET.Steamworks.Implementation
             return "US";
         }
 
-        public bool GetImageSize(int iImage, uint pnWidth, uint pnHeight)
+        public bool GetImageSize(int iImage, ref uint pnWidth, ref uint pnHeight)
         {
-            Write("GetImageSize");
-            return false;
+            Write($"GetImageSize");
+            var Result = false;
+            int Width = 0;
+            int Height = 0;
+            MutexHelper.Wait("GetImageSize", delegate
+            {
+                try
+                {
+                    var (width, height) = SteamEmulator.SteamFriends.GetImageSize(iImage);
+
+                    if (width != 0 | height != 0)
+                    {
+                        Width  = width;
+                        Height = height;
+                        Result = true;
+                    }
+                }
+                catch
+                {
+
+                }
+            });
+
+            pnWidth = (uint)Width;
+            pnHeight = (uint)Height;
+            return Result;
         }
 
-        public bool GetImageRGBA(int iImage, int pubDest, int nDestBufferSize)
+        public bool GetImageRGBA(int iImage, IntPtr pubDest, int nDestBufferSize)
         {
-            Write("GetImageRGBA");
-            return false;
+            Write($"GetImageRGBA, {nDestBufferSize} bytes");
+            var Result = false;
+
+            MutexHelper.Wait("GetImageRGBA", delegate
+            {
+                try
+                {
+                    var avatar = SteamEmulator.SteamFriends.GetImageAvatar(iImage);
+                    if (avatar != null)
+                    {
+                        byte[] bytes = avatar.GetImage(iImage);
+                        if (nDestBufferSize > bytes.Length)
+                        {
+                            nDestBufferSize = bytes.Length;
+                        }
+                        Marshal.Copy(bytes, 0, pubDest, nDestBufferSize);
+                        Result = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Write("" + ex);
+                }
+            });
+
+            return Result;
         }
 
         public bool GetCSERIPPort(uint unIP, uint usPort)
@@ -87,7 +139,7 @@ namespace SKYNET.Steamworks.Implementation
         public bool IsAPICallCompleted(SteamAPICall_t hSteamAPICall, ref bool pbFailed)
         {
             Write("IsAPICallCompleted");
-            if (hSteamAPICall == 1)
+            if (hSteamAPICall == (SteamAPICall_t)1)
             {
                 if (pbFailed)
                     pbFailed = true;
@@ -107,21 +159,21 @@ namespace SKYNET.Steamworks.Implementation
             return ESteamAPICallFailure.k_ESteamAPICallFailureNone;
         }
 
-        public bool GetAPICallResult(ulong handle, IntPtr callback, int callback_size, int callback_expected, ref bool failed)
+        public bool GetAPICallResult(SteamAPICall_t handle, IntPtr callback, int callback_size, int callback_expected, ref bool failed)
         {
             try
             {
                 Write("GetAPICallResult");
-                var result = CallbackManager.GetCallResult(handle, callback, callback_size, callback_expected);
+                //var result = CallbackManager.GetCallResult(handle, callback, callback_size, callback_expected);
 
-                if (result == null)
-                {
-                    failed = true;
-                    return false;
-                }
+                //if (result == null)
+                //{
+                //    failed = true;
+                //    return false;
+                //}
 
-                Marshal.Copy(result, 0, callback, callback_size);
-                return !failed;
+                //Marshal.Copy(result, 0, callback, callback_size);
+                //return !failed;
             }
             catch (Exception ex)
             {
@@ -162,7 +214,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("CheckFileSignature");
             // CheckFileSignature_t
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public bool ShowGamepadTextInput(int eInputMode, int eLineInputMode, string pchDescription, uint unCharMax, string pchExistingText)
@@ -236,7 +288,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public int FilterText(string pchOutFilteredText, uint nByteSizeOutFilteredText, string pchInputMessage, bool bLegalOnly)
         {
-            Write($"FilterText {pchInputMessage}");
+            Write($"FilterText {pchOutFilteredText}");
             return 0;
         }
 

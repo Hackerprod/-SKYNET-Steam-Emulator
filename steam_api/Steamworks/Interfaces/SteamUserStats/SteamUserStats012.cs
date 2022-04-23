@@ -1,4 +1,6 @@
+using Steamworks;
 using System;
+using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Interface
 {
@@ -150,8 +152,8 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUserStats.DownloadLeaderboardEntries(hSteamLeaderboard, eLeaderboardDataRequest, nRangeStart, nRangeEnd);
         }
 
-        public SteamAPICall_t DownloadLeaderboardEntriesForUsers(IntPtr _, ulong hSteamLeaderboard, ulong prgUsers, int cUsers )
-    {
+        public SteamAPICall_t DownloadLeaderboardEntriesForUsers(IntPtr _, ulong hSteamLeaderboard, ulong prgUsers, int cUsers)
+        {
             return SteamEmulator.SteamUserStats.DownloadLeaderboardEntriesForUsers(hSteamLeaderboard, prgUsers, cUsers);
         }
 
@@ -160,76 +162,76 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUserStats.GetDownloadedLeaderboardEntry(hSteamLeaderboardEntries, index, pLeaderboardEntry, (uint)pDetails, cDetailsMax);
         }
 
-        public ulong UploadLeaderboardScore(IntPtr _, ulong hSteamLeaderboard, int eLeaderboardUploadScoreMethod, int nScore, int pScoreDetails, int cScoreDetailsCount ) 
-{
-    return  SteamEmulator.SteamUserStats.UploadLeaderboardScore(hSteamLeaderboard, eLeaderboardUploadScoreMethod, (uint)nScore, (uint)pScoreDetails, cScoreDetailsCount);
-}
+        public SteamAPICall_t UploadLeaderboardScore(IntPtr _, ulong hSteamLeaderboard, int eLeaderboardUploadScoreMethod, int nScore, int pScoreDetails, int cScoreDetailsCount)
+        {
+            return SteamEmulator.SteamUserStats.UploadLeaderboardScore(hSteamLeaderboard, eLeaderboardUploadScoreMethod, (uint)nScore, (uint)pScoreDetails, cScoreDetailsCount);
+        }
 
-    public SteamAPICall_t AttachLeaderboardUGC(IntPtr _, ulong hSteamLeaderboard, ulong hUGC)
-    {
-        return SteamEmulator.SteamUserStats.AttachLeaderboardUGC(hSteamLeaderboard, hUGC);
+        public SteamAPICall_t AttachLeaderboardUGC(IntPtr _, ulong hSteamLeaderboard, ulong hUGC)
+        {
+            return SteamEmulator.SteamUserStats.AttachLeaderboardUGC(hSteamLeaderboard, hUGC);
+        }
+
+        public SteamAPICall_t GetNumberOfCurrentPlayers(IntPtr _)
+        {
+            return SteamEmulator.SteamUserStats.GetNumberOfCurrentPlayers();
+        }
+
+        public SteamAPICall_t RequestGlobalAchievementPercentages(IntPtr _)
+        {
+            return SteamEmulator.SteamUserStats.RequestGlobalAchievementPercentages();
+        }
+
+        public int GetMostAchievedAchievementInfo(IntPtr _, string pchName, uint unNameBufLen, float pflPercent, bool pbAchieved)
+        {
+            return SteamEmulator.SteamUserStats.GetMostAchievedAchievementInfo(pchName, unNameBufLen, pflPercent, pbAchieved);
+        }
+
+        public int GetNextMostAchievedAchievementInfo(IntPtr _, int iIteratorPrevious, string pchName, uint unNameBufLen, float pflPercent, bool pbAchieved)
+        {
+            return SteamEmulator.SteamUserStats.GetNextMostAchievedAchievementInfo(iIteratorPrevious, pchName, unNameBufLen, pflPercent, pbAchieved);
+        }
+
+        public bool GetAchievementAchievedPercent(IntPtr _, string pchName, float pflPercent)
+        {
+            return SteamEmulator.SteamUserStats.GetAchievementAchievedPercent(pchName, pflPercent);
+        }
+
+        public SteamAPICall_t RequestGlobalStats(IntPtr _, int nHistoryDays)
+        {
+            return SteamEmulator.SteamUserStats.RequestGlobalStats(nHistoryDays);
+        }
+
+        public bool GetGlobalStat(IntPtr _, string pchStatName, long pData)
+        {
+            return SteamEmulator.SteamUserStats.GetGlobalStat(pchStatName, (uint)pData);
+        }
+
+        public bool GetGlobalStat(IntPtr _, string pchStatName, double pData)
+        {
+            return SteamEmulator.SteamUserStats.GetGlobalStat(pchStatName, (uint)pData);
+        }
+
+        public int GetGlobalStatHistory(IntPtr _, string pchStatName, long pData, uint cubData)
+        {
+            return (int)SteamEmulator.SteamUserStats.GetGlobalStatHistory(pchStatName, (uint)pData, cubData);
+        }
+
+        public int GetGlobalStatHistory(IntPtr _, string pchStatName, double pData, uint cubData)
+        {
+            return (int)SteamEmulator.SteamUserStats.GetGlobalStatHistory(pchStatName, (uint)pData, cubData);
+        }
+
+        public bool GetAchievementProgressLimits(IntPtr _, string pchName, int pnMinProgress, int pnMaxProgress)
+        {
+            return SteamEmulator.SteamUserStats.GetAchievementProgressLimits(pchName, (uint)pnMinProgress, (uint)pnMaxProgress);
+        }
+
+        public bool GetAchievementProgressLimits(IntPtr _, string pchName, float pfMinProgress, float pfMaxProgress)
+        {
+            return SteamEmulator.SteamUserStats.GetAchievementProgressLimits(pchName, (uint)pfMinProgress, (uint)pfMaxProgress);
+        }
+
+
     }
-
-    public SteamAPICall_t GetNumberOfCurrentPlayers(IntPtr _)
-    {
-        return SteamEmulator.SteamUserStats.GetNumberOfCurrentPlayers();
-    }
-
-    public SteamAPICall_t RequestGlobalAchievementPercentages(IntPtr _)
-    {
-        return SteamEmulator.SteamUserStats.RequestGlobalAchievementPercentages();
-    }
-
-    public int GetMostAchievedAchievementInfo(IntPtr _, string pchName, uint unNameBufLen, float pflPercent, bool pbAchieved)
-    {
-        return SteamEmulator.SteamUserStats.GetMostAchievedAchievementInfo(pchName, unNameBufLen, pflPercent, pbAchieved);
-    }
-
-    public int GetNextMostAchievedAchievementInfo(IntPtr _, int iIteratorPrevious, string pchName, uint unNameBufLen, float pflPercent, bool pbAchieved)
-    {
-        return SteamEmulator.SteamUserStats.GetNextMostAchievedAchievementInfo(iIteratorPrevious, pchName, unNameBufLen, pflPercent, pbAchieved);
-    }
-
-    public bool GetAchievementAchievedPercent(IntPtr _, string pchName, float pflPercent)
-    {
-        return SteamEmulator.SteamUserStats.GetAchievementAchievedPercent(pchName, pflPercent);
-    }
-
-    public SteamAPICall_t RequestGlobalStats(IntPtr _, int nHistoryDays)
-    {
-        return SteamEmulator.SteamUserStats.RequestGlobalStats(nHistoryDays);
-    }
-
-    public bool GetGlobalStat(IntPtr _, string pchStatName, long pData)
-    {
-        return SteamEmulator.SteamUserStats.GetGlobalStat(pchStatName, (uint)pData);
-    }
-
-    public bool GetGlobalStat(IntPtr _, string pchStatName, double pData)
-    {
-        return SteamEmulator.SteamUserStats.GetGlobalStat(pchStatName, (uint)pData);
-    }
-
-    public int GetGlobalStatHistory(IntPtr _, string pchStatName, long pData, uint cubData)
-    {
-        return (int)SteamEmulator.SteamUserStats.GetGlobalStatHistory(pchStatName, (uint)pData, cubData);
-    }
-
-    public int GetGlobalStatHistory(IntPtr _, string pchStatName, double pData, uint cubData)
-    {
-        return (int)SteamEmulator.SteamUserStats.GetGlobalStatHistory(pchStatName, (uint)pData, cubData);
-    }
-
-    public bool GetAchievementProgressLimits(IntPtr _, string pchName, int pnMinProgress, int pnMaxProgress)
-    {
-        return SteamEmulator.SteamUserStats.GetAchievementProgressLimits(pchName, (uint)pnMinProgress, (uint)pnMaxProgress);
-    }
-
-    public bool GetAchievementProgressLimits(IntPtr _, string pchName, float pfMinProgress, float pfMaxProgress)
-    {
-        return SteamEmulator.SteamUserStats.GetAchievementProgressLimits(pchName, (uint)pfMinProgress, (uint)pfMaxProgress);
-    }
-
-
-}
 }

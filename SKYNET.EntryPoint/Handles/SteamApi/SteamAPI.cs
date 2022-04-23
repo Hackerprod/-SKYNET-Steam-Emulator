@@ -6,14 +6,10 @@ using SKYNET.Managers;
 using SKYNET.Types;
 using Steamworks;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+
+using HSteamPipe = System.UInt32;
+using HSteamUser = System.UInt32;
 
 namespace SKYNET.Hook.Handles
 {

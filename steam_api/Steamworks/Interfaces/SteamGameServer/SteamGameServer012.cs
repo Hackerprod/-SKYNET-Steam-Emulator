@@ -1,5 +1,6 @@
+using Steamworks;
 using System;
-
+using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Interface
 {
@@ -56,7 +57,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamGameServer.BSecure();
         }
 
-        public ulong GetSteamID(IntPtr _)
+        public CSteamID GetSteamID(IntPtr _)
         {
             return SteamEmulator.SteamGameServer.GetSteamID();
         }
@@ -131,7 +132,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamGameServer.SendUserConnectAndAuthenticate(unIPClient, pvAuthBlob, cubAuthBlobSize, pSteamIDUser);
         }
 
-        public ulong CreateUnauthenticatedUserConnection(IntPtr _)
+        public CSteamID CreateUnauthenticatedUserConnection(IntPtr _)
         {
             return SteamEmulator.SteamGameServer.CreateUnauthenticatedUserConnection();
         }
@@ -146,7 +147,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamGameServer.BUpdateUserData(steamIDUser, pchPlayerName, uScore);
         }
 
-        public IntPtr GetAuthSessionTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
+        public uint GetAuthSessionTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, IntPtr pcbTicket)
         {
             return SteamEmulator.SteamGameServer.GetAuthSessionTicket(pTicket, cbMaxTicket, pcbTicket);
         }
@@ -181,7 +182,7 @@ namespace SKYNET.Interface
             SteamEmulator.SteamGameServer.GetGameplayStats();
         }
 
-        public ulong GetServerReputation(IntPtr _)
+        public SteamAPICall_t GetServerReputation(IntPtr _)
         {
             return SteamEmulator.SteamGameServer.GetServerReputation();
         }
@@ -216,12 +217,12 @@ namespace SKYNET.Interface
             SteamEmulator.SteamGameServer.ForceHeartbeat();
         }
 
-        public ulong AssociateWithClan(IntPtr _, ulong steamIDClan)
+        public SteamAPICall_t AssociateWithClan(IntPtr _, ulong steamIDClan)
         {
             return SteamEmulator.SteamGameServer.AssociateWithClan(steamIDClan);
         }
 
-        public ulong ComputeNewPlayerCompatibility(IntPtr _, ulong steamIDNewPlayer)
+        public SteamAPICall_t ComputeNewPlayerCompatibility(IntPtr _, ulong steamIDNewPlayer)
         {
             return SteamEmulator.SteamGameServer.ComputeNewPlayerCompatibility(steamIDNewPlayer);
         }

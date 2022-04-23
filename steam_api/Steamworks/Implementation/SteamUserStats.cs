@@ -9,11 +9,15 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
+using SteamAPICall_t = System.UInt64;
+using SteamLeaderboard_t = System.UInt64;
+
 namespace SKYNET.Steamworks.Implementation
 {
     public class SteamUserStats : ISteamInterface
     {
         private List<Leaderboard> Leaderboards;
+        private SteamAPICall_t k_uAPICallInvalid = 0x0;
 
         internal class Leaderboard
         {
@@ -152,7 +156,7 @@ namespace SKYNET.Steamworks.Implementation
             return "";
         }
 
-        public SteamAPICall_t RequestUserStats(SteamID steamIDUser)
+        public SteamAPICall_t RequestUserStats(ulong steamIDUser)
         {
             try
             {
@@ -169,22 +173,22 @@ namespace SKYNET.Steamworks.Implementation
             {
                 Write($"RequestUserStats {ex}");
             }
-            return 0;
+            return k_uAPICallInvalid;
         }
 
-        public bool GetUserStat(SteamID steamIDUser, string pchName, uint pData)
+        public bool GetUserStat(ulong steamIDUser, string pchName, uint pData)
         {
             Write($"GetUserStat");
             return false;
         }
 
-        public bool GetUserAchievement(SteamID steamIDUser, string pchName, bool pbAchieved)
+        public bool GetUserAchievement(ulong steamIDUser, string pchName, bool pbAchieved)
         {
             Write($"GetUserAchievement");
             return false;
         }
 
-        public bool GetUserAchievementAndUnlockTime(SteamID steamIDUser, string pchName, bool pbAchieved, uint punUnlockTime)
+        public bool GetUserAchievementAndUnlockTime(ulong steamIDUser, string pchName, bool pbAchieved, uint punUnlockTime)
         {
             Write($"GetUserAchievementAndUnlockTime");
             return false;
@@ -227,7 +231,7 @@ namespace SKYNET.Steamworks.Implementation
             {
                 Write($"FindOrCreateLeaderboard {ex}");
             }
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public SteamAPICall_t FindLeaderboard(string pchLeaderboardName)
@@ -261,7 +265,7 @@ namespace SKYNET.Steamworks.Implementation
             {
                 Write($"FindOrCreateLeaderboard {ex}");
             }
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public string GetLeaderboardName(ulong hSteamLeaderboard)
@@ -292,14 +296,14 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"DownloadLeaderboardEntries");
             // LeaderboardScoresDownloaded_t
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public SteamAPICall_t DownloadLeaderboardEntriesForUsers(ulong hSteamLeaderboard, ulong prgUsers, int cUsers)
         {
             Write($"DownloadLeaderboardEntriesForUsers");
             // LeaderboardScoresDownloaded_t
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public bool GetDownloadedLeaderboardEntry(ulong hSteamLeaderboardEntries, int index, IntPtr pLeaderboardEntry, uint pDetails, int cDetailsMax)
@@ -312,13 +316,13 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"UploadLeaderboardScore");
             // LeaderboardScoreUploaded_t
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public SteamAPICall_t AttachLeaderboardUGC(ulong hSteamLeaderboard, ulong hUGC)
         {
             Write($"AttachLeaderboardUGC");
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public SteamAPICall_t GetNumberOfCurrentPlayers()
@@ -337,14 +341,14 @@ namespace SKYNET.Steamworks.Implementation
             {
                 Write($"GetNumberOfCurrentPlayers {ex}");
             }
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public SteamAPICall_t RequestGlobalAchievementPercentages()
         {
             Write($"RequestGlobalAchievementPercentages");
             // GlobalAchievementPercentagesReady_t
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public int GetMostAchievedAchievementInfo(string pchName, uint unNameBufLen, float pflPercent, bool pbAchieved)
@@ -381,7 +385,7 @@ namespace SKYNET.Steamworks.Implementation
             {
                 Write($"RequestGlobalStats {ex}");
             }
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public bool GetGlobalStat(string pchStatName, uint pData)

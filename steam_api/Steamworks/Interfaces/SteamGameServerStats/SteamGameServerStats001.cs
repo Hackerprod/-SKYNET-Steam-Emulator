@@ -1,12 +1,13 @@
+using Steamworks;
 using System;
-
+using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Interface
 {
     [Interface("SteamGameServerStats001")]
     public class SteamGameServerStats001 : ISteamInterface
     {
-        public ulong RequestUserStats(IntPtr _, ulong steamIDUser)
+        public SteamAPICall_t RequestUserStats(IntPtr _, ulong steamIDUser)
         {
             return SteamEmulator.SteamGameServerStats.RequestUserStats(steamIDUser);
         }
@@ -51,7 +52,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamGameServerStats.ClearUserAchievement(steamIDUser, pchName);
         }
 
-        public ulong StoreUserStats(IntPtr _, ulong steamIDUser)
+        public SteamAPICall_t StoreUserStats(IntPtr _, ulong steamIDUser)
         {
             return SteamEmulator.SteamGameServerStats.StoreUserStats(steamIDUser);
         }

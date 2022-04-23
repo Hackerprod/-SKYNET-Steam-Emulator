@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Text;
 using SKYNET;
 using SKYNET.Helpers;
 using Steamworks;
@@ -13,37 +14,37 @@ namespace SKYNET.Steamworks.Implementation
             InterfaceVersion = "SteamApps";
         }
 
-        public bool BIsSubscribed(IntPtr _)
+        public bool BIsSubscribed()
         {
             Write("BIsSubscribed");
             return true;
         }
 
-        public bool BIsLowViolence(IntPtr _)
+        public bool BIsLowViolence()
         {
             Write("BIsLowViolence");
             return false;
         }
 
-        public bool BIsCybercafe(IntPtr _)
+        public bool BIsCybercafe()
         {
             Write("BIsCybercafe");
             return false;
         }
 
-        public bool BIsVACBanned(IntPtr _)
+        public bool BIsVACBanned()
         {
             Write("BIsVACBanned");
             return false;
         }
 
-        public string GetCurrentGameLanguage(IntPtr _)
+        public string GetCurrentGameLanguage()
         {
             Write("GetCurrentGameLanguage");
             return SteamEmulator.Language;
         }
 
-        public string GetAvailableGameLanguages(IntPtr _)
+        public string GetAvailableGameLanguages()
         {
             Write("GetAvailableGameLanguages");
             //TODO?
@@ -70,13 +71,13 @@ namespace SKYNET.Steamworks.Implementation
             return 1;
         }
 
-        public bool BIsSubscribedFromFreeWeekend(IntPtr _)
+        public bool BIsSubscribedFromFreeWeekend()
         {
             Write("BIsSubscribedFromFreeWeekend");
             return false;
         }
 
-        public int GetDLCCount(IntPtr _)
+        public int GetDLCCount()
         {
             Write("GetDLCCount");
             return 0;
@@ -103,10 +104,21 @@ namespace SKYNET.Steamworks.Implementation
             Write("RequestAppProofOfPurchaseKey");
         }
 
-        public bool GetCurrentBetaName(string pchName, int cchNameBufferSize)
+        public bool GetCurrentBetaName(IntPtr pchName, int cchNameBufferSize)
         {
-            Write("GetCurrentBetaName " + pchName);
-            return true;
+            try
+            {
+                Write("GetCurrentBetaName");
+                byte[] PublicBeta = Encoding.Default.GetBytes("Public");
+                if (PublicBeta.Length > cchNameBufferSize) return false;
+                Marshal.Copy(PublicBeta, 0, pchName, PublicBeta.Length);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Write("GetCurrentBetaName " + ex);
+                return false;
+            }
         }
 
         public bool MarkContentCorrupt(bool bMissingFilesOnly)
@@ -124,7 +136,7 @@ namespace SKYNET.Steamworks.Implementation
         public UInt32 GetAppInstallDir(uint appID, string pchFolder, uint cchFolderBufferSize)
         {
             Write($"GetAppInstallDir {appID} {pchFolder} {cchFolderBufferSize}");
-            string installed_path = "xd";
+            string installed_path = modCommon.GetPath();
             return (UInt32)installed_path.Length;
         }
 
@@ -134,10 +146,10 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public ulong GetAppOwner()
+        public CSteamID GetAppOwner()
         {
             Write("GetAppOwner");
-            return 0;
+            return SteamEmulator.SteamId;
         }
 
         public string GetLaunchQueryParam(string pchKey)
@@ -153,13 +165,13 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public int GetAppBuildId(IntPtr _)
+        public int GetAppBuildId()
         {
             Write("GetAppBuildId");
             return 10;
         }
 
-        public void RequestAllProofOfPurchaseKeys(IntPtr _)
+        public void RequestAllProofOfPurchaseKeys()
         {
             Write("RequestAllProofOfPurchaseKeys");
         }
@@ -170,7 +182,7 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public bool BIsSubscribedFromFamilySharing(IntPtr _)
+        public bool BIsSubscribedFromFamilySharing()
         {
             Write("BIsSubscribedFromFamilySharing");
             return false;

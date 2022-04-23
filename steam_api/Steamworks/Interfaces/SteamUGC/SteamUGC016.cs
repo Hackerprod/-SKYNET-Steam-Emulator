@@ -1,5 +1,11 @@
+using SKYNET.Steamworks;
 using Steamworks;
 using System;
+
+using SteamAPICall_t = System.UInt64;
+using PublishedFileId_t = System.UInt64;
+using UGCQueryHandle_t = System.UInt64;
+using UGCUpdateHandle_t = System.UInt64;
 
 namespace SKYNET.Interface
 {
@@ -26,7 +32,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUGC.CreateQueryUGCDetailsRequest(pvecPublishedFileID, unNumPublishedFileIDs);
         }
 
-        public ulong SendQueryUGCRequest(IntPtr _, UGCQueryHandle_t handle)
+        public SteamAPICall_t SendQueryUGCRequest(IntPtr _, UGCQueryHandle_t handle)
         {
             return SteamEmulator.SteamUGC.SendQueryUGCRequest(handle);
         }

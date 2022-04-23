@@ -1,5 +1,6 @@
 ﻿using SKYNET;
 using SKYNET.Callback;
+using SKYNET.Helper;
 using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Steamworks;
@@ -9,22 +10,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 
+using SteamAPICall_t = System.UInt64;
+using PublishedFileId_t = System.UInt64;
+using UGCQueryHandle_t = System.UInt64;
+using UGCUpdateHandle_t = System.UInt64;
+
 namespace SKYNET.Steamworks.Implementation
 {
-    //return new SteamAPICall_t(CallbackType.k_iRemoteStorageFileReadAsyncComplete);
     public class SteamUGC : ISteamInterface
     {
         private List<UGC> UGCQueries;
-        UGCQueryHandle_t Handle;
-        List<PublishedFileId_t> subscribed;
+        private UGCQueryHandle_t Handle;
+        private List<PublishedFileId_t> subscribed;
+        private SteamAPICall_t k_uAPICallInvalid = 0x0;
 
         internal class UGC
         {
             public UGCQueryHandle_t Handle;
             public List<PublishedFileId_t> return_only;
+            public List<PublishedFileId_t> results;
             public bool ReturnAll;
             public bool ReturnOnly;
-            public List<PublishedFileId_t> results;
 
             public UGC()
             {
@@ -66,55 +72,65 @@ namespace SKYNET.Steamworks.Implementation
 
         public SteamAPICall_t SendQueryUGCRequest(UGCQueryHandle_t handle)
         {
-            try
+            Write("SendQueryUGCRequest");
+            SteamAPICall_t APICall = k_uAPICallInvalid;
+            MutexHelper.Wait("SendQueryUGCRequest", delegate
             {
-                Write("SendQueryUGCRequest");
-
-                var request = UGCQueries.Find(u => u.Handle == handle);
-                if (request == null) return 0;
-
-                if (request.ReturnAll)
+                try
                 {
-                    request.results = subscribed;
-                }
-
-                if (request.return_only.Any())
-                {
-                    foreach (var item in request.return_only)
+                    var request = UGCQueries.Find(u => u.Handle == handle);
+                    if (request != null)
                     {
-                        request.results.Add(item);
+                        if (request.ReturnAll)
+                        {
+                            request.results = subscribed;
+                        }
+
+                        if (request.return_only.Any())
+                        {
+                            foreach (var item in request.return_only)
+                            {
+                                request.results.Add(item);
+                            }
+                        }
+
+                        //SteamUGCQueryCompleted_t data = new SteamUGCQueryCompleted_t()
+                        //{
+                        //    m_handle = handle,
+                        //    m_eResult = SKYNET.Types.EResult.k_EResultOK,
+                        //    m_unNumResultsReturned = (uint)request.results.Count(),
+                        //    m_unTotalMatchingResults = (uint)request.results.Count(),
+                        //    m_bCachedData = false,
+                        //};
+                        ////APICall = new SteamAPICall_t(CallbackType.k_iSteamUGCQueryCompleted);
+                        //APICall = CallbackManager.AddCallbackResult(data, SteamUGCQueryCompleted_t.k_iCallback);
                     }
                 }
-
-                //SteamUGCQueryCompleted_t data = new SteamUGCQueryCompleted_t()
-                //{
-                //    m_handle = handle,
-                //    m_eResult = SKYNET.Types.EResult.k_EResultOK,
-                //    m_unNumResultsReturned = (uint)request.results.Count(),
-                //    m_unTotalMatchingResults = (uint)request.results.Count(),
-                //    m_bCachedData = false,
-                //};
-                ////return new SteamAPICall_t(CallbackType.k_iSteamUGCQueryCompleted);
-                //return CallbackManager.AddCallbackResult(data, SteamUGCQueryCompleted_t.k_iCallback);
-            }
-            catch (Exception ex)
-            {
-                Write($"SendQueryUGCRequest {ex}");
-            }
-            return 0;
+                catch (Exception ex)
+                {
+                    Write($"SendQueryUGCRequest {ex}");
+                }
+            });
+            return APICall;
         }
 
         public bool GetQueryUGCResult(UGCQueryHandle_t handle, uint index, IntPtr pDetails)
         {
             Write("GetQueryUGCResult");
-            var UGC = UGCQueries.Find(u => u.Handle == handle);
-            if (UGC == null) return false;
-            if (index >= UGC.results.Count) return false;
-            foreach (var item in UGC.results)
+            bool Result = false;
+            MutexHelper.Wait("GetQueryUGCResult", delegate
             {
-                set_details(item, pDetails);
-            }
-            return true;
+                var UGC = UGCQueries.Find(u => u.Handle == handle);
+                if (UGC != null && (index < UGC.results.Count))
+                {
+                    foreach (var item in UGC.results)
+                    {
+                        //set_details(item, pDetails);
+                    }
+                }
+                Result = true;
+            });
+            return Result;
         }
 
         public bool GetQueryUGCPreviewURL(UGCQueryHandle_t handle, uint index, string pchURL, uint cchURLSize)
@@ -192,10 +208,17 @@ namespace SKYNET.Steamworks.Implementation
         public bool ReleaseQueryUGCRequest(UGCQueryHandle_t handle)
         {
             Write("ReleaseQueryUGCRequest");
-            var UGC = UGCQueries.Find(u => u.Handle == handle);
-            if (UGC == null) return false;
-            UGCQueries.Remove(UGC);
-            return true;
+            bool Return = false;
+            MutexHelper.Wait("ReleaseQueryUGCRequest", delegate
+            {
+                var UGC = UGCQueries.Find(u => u.Handle == handle);
+                if (UGC != null)
+                {
+                    UGCQueries.Remove(UGC);
+                    Return = true;
+                }
+            });
+            return Return;
         }
 
         public bool AddRequiredTag(UGCQueryHandle_t handle, string pTagName)
@@ -310,14 +333,14 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("RequestUGCDetails");
             // SteamUGCRequestUGCDetailsResult_t
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public SteamAPICall_t CreateItem(uint nConsumerAppId, int eFileType)
         {
             Write("CreateItem");
             // CreateItemResult_t
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public UGCUpdateHandle_t StartItemUpdate(uint nConsumerAppId, ulong nPublishedFileID) 
@@ -326,19 +349,19 @@ namespace SKYNET.Steamworks.Implementation
             return (UGCUpdateHandle_t)0;
         }
 
-        public bool SetItemTitle(UGCQueryHandle_t handle, string pchTitle) // change the title of an UGC item 
+        public bool SetItemTitle(UGCQueryHandle_t handle, string pchTitle) 
         {
             Write("SetItemTitle");
             return false;
         }
 
-        public bool SetItemDescription(UGCQueryHandle_t handle, string pchDescription) // change the description of an UGC item 
+        public bool SetItemDescription(UGCQueryHandle_t handle, string pchDescription) 
         {
             Write("SetItemDescription");
             return false;
         }
 
-        public bool SetItemUpdateLanguage(UGCQueryHandle_t handle, string pchLanguage) // specify the language of the title or description that will be set 
+        public bool SetItemUpdateLanguage(UGCQueryHandle_t handle, string pchLanguage) 
         {
             Write("SetItemUpdateLanguage");
             return false;
@@ -374,67 +397,67 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool SetItemContent(UGCQueryHandle_t handle, string pszContentFolder) // update item content from this local folder 
+        public bool SetItemContent(UGCQueryHandle_t handle, string pszContentFolder) 
         {
             Write("SetItemContent");
             return false;
         }
 
-        public bool SetItemPreview(UGCQueryHandle_t handle, string pszPreviewFile) //  change preview image file for this item. pszPreviewFile points to local image file, which must be under 1MB in size 
+        public bool SetItemPreview(UGCQueryHandle_t handle, string pszPreviewFile) 
         {
             Write("SetItemPreview");
             return false;
         }
 
-        public bool SetAllowLegacyUpload(UGCQueryHandle_t handle, bool bAllowLegacyUpload) //  use legacy upload for a single small file. The parameter to SetItemContent() should either be a directory with one file or the full path to the file.  The file must also be less than 10MB in size. 
+        public bool SetAllowLegacyUpload(UGCQueryHandle_t handle, bool bAllowLegacyUpload) 
         {
             Write("SetAllowLegacyUpload");
             return false;
         }
 
-        public bool RemoveAllItemKeyValueTags(UGCQueryHandle_t handle) // remove all existing key-value tags (you can add new ones via the AddItemKeyValueTag function) 
+        public bool RemoveAllItemKeyValueTags(UGCQueryHandle_t handle) 
         {
             Write("RemoveAllItemKeyValueTags");
             return false;
         }
 
-        public bool RemoveItemKeyValueTags(UGCQueryHandle_t handle, string pchKey) // remove any existing key-value tags with the specified key 
+        public bool RemoveItemKeyValueTags(UGCQueryHandle_t handle, string pchKey) 
         {
             Write("RemoveItemKeyValueTags");
             return false;
         }
 
-        public bool AddItemKeyValueTag(UGCQueryHandle_t handle, string pchKey, string pchValue) // add new key-value tags for the item. Note that there can be multiple values for a tag. 
+        public bool AddItemKeyValueTag(UGCQueryHandle_t handle, string pchKey, string pchValue) 
         {
             Write("AddItemKeyValueTag");
             return false;
         }
 
-        public bool AddItemPreviewFile(UGCQueryHandle_t handle, string pszPreviewFile, int type) //  add preview file for this item. pszPreviewFile points to local file, which must be under 1MB in size 
+        public bool AddItemPreviewFile(UGCQueryHandle_t handle, string pszPreviewFile, int type) 
         {
             Write("AddItemPreviewFile");
             return false;
         }
 
-        public bool AddItemPreviewVideo(UGCQueryHandle_t handle, string pszVideoID) //  add preview video for this item 
+        public bool AddItemPreviewVideo(UGCQueryHandle_t handle, string pszVideoID) 
         {
             Write("AddItemPreviewVideo");
             return false;
         }
 
-        public bool UpdateItemPreviewFile(UGCQueryHandle_t handle, uint index, string pszPreviewFile) //  updates an existing preview file for this item. pszPreviewFile points to local file, which must be under 1MB in size 
+        public bool UpdateItemPreviewFile(UGCQueryHandle_t handle, uint index, string pszPreviewFile) 
         {
             Write("UpdateItemPreviewFile");
             return false;
         }
 
-        public bool UpdateItemPreviewVideo(UGCQueryHandle_t handle, uint index, string pszVideoID) //  updates an existing preview video for this item 
+        public bool UpdateItemPreviewVideo(UGCQueryHandle_t handle, uint index, string pszVideoID) 
         {
             Write("UpdateItemPreviewVideo");
             return false;
         }
 
-        public bool RemoveItemPreview(UGCQueryHandle_t handle, uint index) // remove a preview by index starting at 0 (previews are sorted) 
+        public bool RemoveItemPreview(UGCQueryHandle_t handle, uint index) 
         {
             Write("RemoveItemPreview");
             return false;
@@ -444,7 +467,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("SubmitItemUpdate");
             // SubmitItemUpdateResult_t
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public int GetItemUpdateProgress(UGCQueryHandle_t handle, ulong punBytesProcessed, ulong punBytesTotal)
@@ -457,100 +480,122 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("SetUserItemVote");
             // SetUserItemVoteResult_t
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public SteamAPICall_t GetUserItemVote(ulong nPublishedFileID)
         {
             Write("GetUserItemVote");
             // GetUserItemVoteResult_t
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public SteamAPICall_t AddItemToFavorites(uint nAppId, ulong nPublishedFileID)
         {
             Write("AddItemToFavorites");
             // UserFavoriteItemsListChanged_t
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public SteamAPICall_t RemoveItemFromFavorites(uint nAppId, ulong nPublishedFileID)
         {
             Write("RemoveItemFromFavorites");
             // UserFavoriteItemsListChanged_t
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public SteamAPICall_t SubscribeItem(PublishedFileId_t nPublishedFileID) 
         {
-            try
+            Write("SubscribeItem");
+            SteamAPICall_t APICall = k_uAPICallInvalid;
+            MutexHelper.Wait("SubscribeItem", delegate
             {
-                Write("SubscribeItem");
-                subscribed.Add(nPublishedFileID);
-                //RemoteStorageSubscribePublishedFileResult_t data = new RemoteStorageSubscribePublishedFileResult_t()
-                //{
-                //    m_eResult = SKYNET.Types.EResult.k_EResultOK,
-                //    m_nPublishedFileId = nPublishedFileID
-                //};
-                //return CallbackManager.AddCallbackResult(data, RemoteStorageSubscribePublishedFileResult_t.k_iCallback);
-            }
-            catch (Exception ex)
-            {
-                Write($"SubscribeItem {ex}");
-            }
-            return 0;
+                try
+                {
+                    subscribed.Add(nPublishedFileID);
+                    //RemoteStorageSubscribePublishedFileResult_t data = new RemoteStorageSubscribePublishedFileResult_t()
+                    //{
+                    //    m_eResult = SKYNET.Types.EResult.k_EResultOK,
+                    //    m_nPublishedFileId = nPublishedFileID
+                    //};
+                    //APICall = CallbackManager.AddCallbackResult(data, RemoteStorageSubscribePublishedFileResult_t.k_iCallback);
+                }
+                catch (Exception ex)
+                {
+                    Write($"SubscribeItem {ex}");
+                }
+            });
+
+            return APICall;
         }
 
-        public SteamAPICall_t UnsubscribeItem(PublishedFileId_t nPublishedFileID) // unsubscribe from this item, will be uninstalled after game quits 
+        public SteamAPICall_t UnsubscribeItem(PublishedFileId_t nPublishedFileID) 
         {
             Write("UnsubscribeItem");
-            try
+            SteamAPICall_t APICall = k_uAPICallInvalid;
+            MutexHelper.Wait("UnsubscribeItem", delegate
             {
-                Write("SubscribeItem");
-                subscribed.Add(nPublishedFileID);
-                //RemoteStorageUnsubscribePublishedFileResult_t data = new RemoteStorageUnsubscribePublishedFileResult_t()
-                //{
-                //    m_eResult = SKYNET.Types.EResult.k_EResultOK,
-                //    m_nPublishedFileId = nPublishedFileID
-                //};
-                //if (subscribed.Contains(nPublishedFileID))
-                //{
-                //    subscribed.Remove(nPublishedFileID);
-                //}
-                //return CallbackManager.AddCallbackResult(data, RemoteStorageUnsubscribePublishedFileResult_t.k_iCallback);
-            }
-            catch (Exception ex)
-            {
-                Write($"SubscribeItem {ex}");
-            }
-            return 0;
+                try
+                {
+                    if (subscribed.Contains(nPublishedFileID))
+                    {
+                        subscribed.Remove(nPublishedFileID);
+                    }
+
+                    RemoteStorageUnsubscribePublishedFileResult_t data = new RemoteStorageUnsubscribePublishedFileResult_t()
+                    {
+                        m_eResult = SKYNET.Types.EResult.k_EResultOK,
+                        m_nPublishedFileId = nPublishedFileID
+                    };
+                    APICall = CallbackManager.AddCallbackResult(data);
+                }
+                catch (Exception ex)
+                {
+                    Write($"SubscribeItem {ex}");
+                }
+            });
+
+            return k_uAPICallInvalid;
         }
 
-        public uint GetNumSubscribedItems() // number of subscribed items  
+        public uint GetNumSubscribedItems() 
         {
             Write("GetNumSubscribedItems");
             return (uint)subscribed.Count();
         }
 
-        public uint GetSubscribedItems(ulong pvecPublishedFileID, uint cMaxEntries) // all subscribed item PublishFileIDs 
+        public uint GetSubscribedItems(ulong pvecPublishedFileID, uint cMaxEntries) 
         {
             Write("GetSubscribedItems");
-            if (cMaxEntries > subscribed.Count())
+            uint MaxEntries = cMaxEntries;
+            MutexHelper.Wait("GetSubscribedItems", delegate
             {
-                cMaxEntries = (uint)subscribed.Count();
-            }
-            return cMaxEntries;
+                if (MaxEntries > subscribed.Count())
+                {
+                    MaxEntries = (uint)subscribed.Count();
+                }
+            });
+            cMaxEntries = MaxEntries;
+            return MaxEntries;
         }
 
         public uint GetItemState(ulong nPublishedFileID)
         {
             Write("GetItemState");
+            MutexHelper.Wait("GetItemState", delegate
+            {
+                // TODO
+            });
             return (uint)EItemState.k_EItemStateSubscribed;
         }
 
         public bool GetItemInstallInfo(ulong nPublishedFileID, ulong punSizeOnDisk, string pchFolder, uint cchFolderSize, uint punTimeStamp)
         {
             Write("GetItemInstallInfo");
+            MutexHelper.Wait("GetItemInstallInfo", delegate
+            {
+                // TODO
+            });
             return false;
         }
 
@@ -580,38 +625,47 @@ namespace SKYNET.Steamworks.Implementation
 
         public SteamAPICall_t StartPlaytimeTracking(PublishedFileId_t pvecPublishedFileID, uint unNumPublishedFileIDs)
         {
-            try
+            Write("StartPlaytimeTracking");
+            SteamAPICall_t ApiCall = k_uAPICallInvalid;
+            MutexHelper.Wait("StartPlaytimeTracking", delegate
             {
-                Write("StartPlaytimeTracking");
-                //StopPlaytimeTrackingResult_t data = new StopPlaytimeTrackingResult_t()
-                //{
-                //     m_eResult = SKYNET.Types.EResult.k_EResultOK
-                //};
-                //return CallbackManager.AddCallbackResult(data, StopPlaytimeTrackingResult_t.k_iCallback);
-            }
-            catch (Exception ex)
-            {
-                Write($"StartPlaytimeTracking {ex}");
-            }
-            return 0;
+                try
+                {
+                    StopPlaytimeTrackingResult_t data = new StopPlaytimeTrackingResult_t()
+                    {
+                        m_eResult = SKYNET.Types.EResult.k_EResultOK
+                    };
+                    ApiCall = CallbackManager.AddCallbackResult(data);
+                }
+                catch (Exception ex)
+                {
+                    Write($"StartPlaytimeTracking {ex}");
+                }
+            });
+            return ApiCall;
         }
 
         public SteamAPICall_t StopPlaytimeTracking(ulong pvecPublishedFileID, uint unNumPublishedFileIDs)
         {
-            try
+            Write("StopPlaytimeTracking");
+            SteamAPICall_t ApiCall = k_uAPICallInvalid;
+            MutexHelper.Wait("StopPlaytimeTracking", delegate
             {
-                Write("StopPlaytimeTracking");
-                //StopPlaytimeTrackingResult_t data = new StopPlaytimeTrackingResult_t()
-                //{
-                //    m_eResult = SKYNET.Types.EResult.k_EResultOK
-                //};
-                //return CallbackManager.AddCallbackResult(data, StopPlaytimeTrackingResult_t.k_iCallback);
-            }
-            catch (Exception ex)
-            {
-                Write($"StopPlaytimeTracking {ex}");
-            }
-            return 0;
+                try
+                {
+                    StopPlaytimeTrackingResult_t data = new StopPlaytimeTrackingResult_t()
+                    {
+                        m_eResult = SKYNET.Types.EResult.k_EResultOK
+                    };
+                    ApiCall = CallbackManager.AddCallbackResult(data);
+                }
+                catch (Exception ex)
+                {
+                    Write($"StopPlaytimeTracking {ex}");
+                }
+            });
+            return ApiCall;
+
         }
 
         public SteamAPICall_t StopPlaytimeTrackingForAllItems()
@@ -629,49 +683,49 @@ namespace SKYNET.Steamworks.Implementation
             {
                 Write($"StopPlaytimeTracking {ex}");
             }
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public SteamAPICall_t AddDependency(ulong nParentPublishedFileID, ulong nChildPublishedFileID)
         {
             Write("AddDependency");
             // AddAppDependencyResult_t
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public SteamAPICall_t RemoveDependency(ulong nParentPublishedFileID, ulong nChildPublishedFileID)
         {
             Write("RemoveDependency");
             // RemoveAppDependencyResult_t
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public SteamAPICall_t AddAppDependency(ulong nPublishedFileID, uint nAppID)
         {
             Write("AddAppDependency");
             // AddAppDependencyResult_t
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public SteamAPICall_t RemoveAppDependency(ulong nPublishedFileID, uint nAppID)
         {
             Write("RemoveAppDependency");
             // RemoveAppDependencyResult_t
-            return default;
+            return 0;
         }
 
         public SteamAPICall_t GetAppDependencies(ulong nPublishedFileID)
         {
             Write("GetAppDependencies");
             // GetAppDependenciesResult_t
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public SteamAPICall_t DeleteItem(ulong nPublishedFileID)
         {
             Write("DeleteItem");
             // DeleteItemResult_t
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public bool ShowWorkshopEULA()
@@ -683,7 +737,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamAPICall_t GetWorkshopEULAStatus()
         {
             Write("GetWorkshopEULAStatus");
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         ////////////////////////////////////////////////////////////////////////////
@@ -691,10 +745,14 @@ namespace SKYNET.Steamworks.Implementation
         internal UGCQueryHandle_t CreateOne(bool returnAll = false)
         {
             UGC instance = new UGC();
-            instance.ReturnAll = returnAll;
-            instance.Handle = Handle;
 
-            Handle.m_UGCQueryHandle++;
+            MutexHelper.Wait("CreateOne", delegate
+            {
+                instance.ReturnAll = returnAll;
+                instance.Handle = Handle;
+
+                Handle++;
+            });
 
             UGCQueries.Add(instance);
             return instance.Handle;
@@ -704,22 +762,13 @@ namespace SKYNET.Steamworks.Implementation
         {
             try
             {
-                //SteamUGCDetails_t pDetails = Marshal.PtrToStructure<SteamUGCDetails_t>(ptrDetails);
-                //if (true)
-                //{
-                //    pDetails.m_eResult = SKYNET.Result.OK;
-                //    pDetails.m_nPublishedFileId = id;
-                //    //pDetails.m_eFileType = WorkshopFileType.Community;
-                //    pDetails.m_nCreatorAppID = SteamEmulator.AppId;
-                //    pDetails.m_nConsumerAppID = SteamEmulator.AppId;
-                //    //TODO
-                //}
-                //else
-                //{
-                //    pDetails.m_nPublishedFileId = id;
-                //    pDetails.m_eResult = SKYNET.Result.Fail;
-                //}
-
+                SteamUGCDetails_t pDetails = Marshal.PtrToStructure<SteamUGCDetails_t>(ptrDetails);
+                pDetails.m_eResult = SKYNET.Types.EResult.k_EResultOK;
+                pDetails.m_nPublishedFileId = id;
+                pDetails.m_eFileType = EWorkshopFileType.k_EWorkshopFileTypeCommunity;
+                pDetails.m_nCreatorAppID = SteamEmulator.AppId;
+                pDetails.m_nConsumerAppID = SteamEmulator.AppId;
+                Marshal.StructureToPtr(pDetails, ptrDetails, false);
             }
             catch (Exception ex)
             {

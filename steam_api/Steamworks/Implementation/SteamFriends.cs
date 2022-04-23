@@ -1,28 +1,69 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Runtime.InteropServices;
-using SKYNET;
 using SKYNET.Callback;
-using SKYNET.Helpers;
-using SKYNET.Steamworks;
-using SKYNET.Steamworks.Types;
+using SKYNET.Helper;
+using SKYNET.Managers;
+using SKYNET.Properties;
 using SKYNET.Types;
 using Steamworks;
+using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Implementation
 {
     public class SteamFriends : ISteamInterface
     {
-        public List<Friend> Friends;
-        public List<SteamID> Users;
-        public Dictionary<string, string> RichPresence;
+        private List<SteamFriend> Friends;
+        private List<ulong> Users;
+        private Dictionary<string, string> RichPresence;
+        private ConcurrentDictionary<ulong, ImageAvatar> Avatars;
+        private int ImageIndex;
+        private ImageAvatar DefaultAvatar;
+        private SteamAPICall_t k_uAPICallInvalid = 0x0;
 
         public SteamFriends()
         {
             InterfaceVersion = "SteamFriends";
-            Friends = new List<Friend>();
-            Users = new List<SteamID>();
+            Friends = new List<SteamFriend>();
+            Users = new List<ulong>();
             RichPresence = new Dictionary<string, string>();
+            Avatars = new ConcurrentDictionary<ulong, ImageAvatar>();
+            ImageIndex = 10;
+
+            #region Default Avatar
+
+            DefaultAvatar = new ImageAvatar(Resources.Image, 1);
+
+            #endregion
+
+            #region Own Avatar
+
+            string fileName = Path.Combine(modCommon.GetPath(), "SKYNET", "Avatar.jpg");
+            Bitmap Avatar = default;
+            if (File.Exists(fileName))
+            {
+                Avatar = (Bitmap)Bitmap.FromFile(fileName);
+            }
+            else
+            {
+                Avatar = ImageHelper.GetDesktopWallpaper();
+            }
+
+            ImageAvatar avatar = new ImageAvatar(Avatar, ImageIndex);
+            Avatars.TryAdd((ulong)SteamEmulator.SteamId, avatar);
+            ImageIndex = avatar.Large + 1;
+
+            #endregion
+        }
+
+        public string GetPersonaName()
+        {
+            string PersonaName = SteamEmulator.PersonaName;
+            Write($"GetPersonaName {PersonaName}");
+            return PersonaName;
         }
 
         public void ActivateGameOverlay([MarshalAs(UnmanagedType.LPStr)] string friendsGroupID)
@@ -30,9 +71,9 @@ namespace SKYNET.Steamworks.Implementation
             Write($"ActivateGameOverlay {friendsGroupID}");
         }
 
-        public void ActivateGameOverlayInviteDialog(SteamID steamIDLobby)
+        public void ActivateGameOverlayInviteDialog(ulong steamIDLobby)
         {
-            Write($"ActivateGameOverlayInviteDialog {steamIDLobby.ConvertToUInt64()}");
+            Write($"ActivateGameOverlayInviteDialog {steamIDLobby}");
         }
 
         public void ActivateGameOverlayInviteDialogConnectString([MarshalAs(UnmanagedType.LPStr)] string pchConnectString)
@@ -40,9 +81,9 @@ namespace SKYNET.Steamworks.Implementation
             Write($"ActivateGameOverlayInviteDialogConnectString {pchConnectString}");
         }
 
-        public void ActivateGameOverlayRemotePlayTogetherInviteDialog(SteamID steamIDLobby)
+        public void ActivateGameOverlayRemotePlayTogetherInviteDialog(ulong steamIDLobby)
         {
-            Write($"ActivateGameOverlayRemotePlayTogetherInviteDialog {steamIDLobby.ConvertToUInt64()}");
+            Write($"ActivateGameOverlayRemotePlayTogetherInviteDialog {steamIDLobby}");
         }
 
         public void ActivateGameOverlayToStore(uint nAppID, uint eFlag)
@@ -51,9 +92,18 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public void ActivateGameOverlayToUser([MarshalAs(UnmanagedType.LPStr)] string friendsGroupID, SteamID steamID)
+        public void ActivateGameOverlayToUser([MarshalAs(UnmanagedType.LPStr)] string friendsGroupID, ulong steamID)
         {
-            Write($"ActivateGameOverlayToUser {friendsGroupID} {steamID.ConvertToUInt64()}");
+            Write($"ActivateGameOverlayToUser {friendsGroupID} {(CSteamID)steamID}");
+
+            switch (friendsGroupID)
+            {
+                case "friendadd":
+                    // TODO
+                    break;
+                default:
+                    break;
+            }
         }
 
 
@@ -69,9 +119,9 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public bool CloseClanChatWindowInSteam(SteamID steamIDClanChat)
+        public bool CloseClanChatWindowInSteam(ulong steamIDClanChat)
         {
-            Write($"CloseClanChatWindowInSteam {steamIDClanChat.ConvertToUInt64()}");
+            Write($"CloseClanChatWindowInSteam {steamIDClanChat}");
             return true;
         }
 
@@ -79,7 +129,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamAPICall_t DownloadClanActivityCounts(UInt64[] clans, int cClansToRequest)
         {
             Write($"DownloadClanActivityCounts {cClansToRequest}");
-            return 0;
+            return k_uAPICallInvalid;
         }
 
 
@@ -87,20 +137,20 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"EnumerateFollowingList {unStartIndex}");
             // FriendsEnumerateFollowingList_t
-            return 0;
+            return k_uAPICallInvalid;
         }
 
 
-        public SteamID GetChatMemberByIndex(SteamID steamIDClan, int iUser)
+        public CSteamID GetChatMemberByIndex(ulong steamIDClan, int iUser)
         {
-            Write($"GetChatMemberByIndex {steamIDClan.ConvertToUInt64()}");
-            return 0;
+            Write($"GetChatMemberByIndex {steamIDClan}");
+            return (CSteamID)0;
         }
 
 
-        public bool GetClanActivityCounts(SteamID steamIDClan, ref int online, ref int in_game, ref int chatting)
+        public bool GetClanActivityCounts(ulong steamIDClan, ref int online, ref int in_game, ref int chatting)
         {
-            Write($"ActivateGameOverlay {steamIDClan.ConvertToUInt64()}");
+            Write($"ActivateGameOverlay {steamIDClan}");
             online = 0;
             in_game = 0;
             chatting = 0;
@@ -108,24 +158,24 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public SteamID GetClanByIndex(int iClan)
+        public CSteamID GetClanByIndex(int iClan)
         {
             Write($"GetClanByIndex {iClan}");
-            return 0;
+            return (CSteamID)0;
         }
 
 
-        public int GetClanChatMemberCount(SteamID steamIDClan)
+        public int GetClanChatMemberCount(ulong steamIDClan)
         {
-            Write($"GetClanChatMemberCount {steamIDClan.ConvertToUInt64()}");
+            Write($"GetClanChatMemberCount {steamIDClan}");
             return 0;
         }
 
 
-        public int GetClanChatMessage(SteamID steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, int peChatEntryType, ref ulong psteamidChatter)
+        public int GetClanChatMessage(ulong steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, int peChatEntryType, ref ulong psteamidChatter)
         {
             psteamidChatter = 0;
-            Write($"GetClanChatMessage {steamIDClanChat.ConvertToUInt64()}");
+            Write($"GetClanChatMessage {steamIDClanChat}");
             return 0;
         }
 
@@ -137,45 +187,45 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public string GetClanName(SteamID steamIDClan)
+        public string GetClanName(ulong steamIDClan)
         {
-            Write($"GetClanName {steamIDClan.ConvertToUInt64()}");
+            Write($"GetClanName {steamIDClan}");
             return "";
         }
 
 
-        public SteamID GetClanOfficerByIndex(SteamID steamIDClan, int iOfficer)
+        public CSteamID GetClanOfficerByIndex(ulong steamIDClan, int iOfficer)
         {
-            Write($"GetClanOfficerByIndex {steamIDClan.ConvertToUInt64()}");
+            Write($"GetClanOfficerByIndex {steamIDClan}");
+            return (CSteamID)0;
+        }
+
+
+        public int GetClanOfficerCount(ulong steamIDClan)
+        {
+            Write($"GetClanOfficerCount {steamIDClan}");
             return 0;
         }
 
 
-        public int GetClanOfficerCount(SteamID steamIDClan)
+        public CSteamID GetClanOwner(ulong steamIDClan)
         {
-            Write($"GetClanOfficerCount {steamIDClan.ConvertToUInt64()}");
-            return 0;
+            Write($"GetClanOwner {steamIDClan}");
+            return (CSteamID)0;
         }
 
 
-        public SteamID GetClanOwner(SteamID steamIDClan)
+        public string GetClanTag(ulong steamIDClan)
         {
-            Write($"GetClanOwner {steamIDClan.ConvertToUInt64()}");
-            return 0;
-        }
-
-
-        public string GetClanTag(SteamID steamIDClan)
-        {
-            Write($"GetClanTag {steamIDClan.ConvertToUInt64()}");
+            Write($"GetClanTag {steamIDClan}");
             return "";
         }
 
 
-        public SteamID GetCoplayFriend(int iCoplayFriend)
+        public CSteamID GetCoplayFriend(int iCoplayFriend)
         {
             Write($"GetCoplayFriend {iCoplayFriend}");
-            return 0;
+            return (CSteamID)0;
         }
 
 
@@ -186,36 +236,45 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public SteamAPICall_t GetFollowerCount(SteamID steamID)
+        public SteamAPICall_t GetFollowerCount(ulong steamID)
         {
-            Write($"GetFollowerCount {steamID.ConvertToUInt64()}");
+            Write($"GetFollowerCount {steamID}");
             // FriendsGetFollowerCount_t
-            return 0;
+            return k_uAPICallInvalid;
         }
 
 
-        public SteamID GetFriendByIndex(int iFriend, int iFriendFlags)
+        public CSteamID GetFriendByIndex(int iFriend, int iFriendFlags)
         {
             Write($"GetFriendByIndex {iFriend}");
-            Friend friend = Friends.Find(f => f.AccountId == (uint)iFriend);
-            if (friend == null)
+            CSteamID Result = (CSteamID)0;
+
+            MutexHelper.Wait("GetFriendByIndex", delegate
             {
-                return 0;
-            }
-            return friend.SteamId;
+                if (Friends.Count > iFriend)
+                {
+                    SteamFriend friend = Friends[iFriend];
+                    if (friend != null)
+                    {
+                        Result = (CSteamID)friend.SteamId;
+                    }
+                }
+            });
+
+            return Result;
         }
 
 
-        public uint GetFriendCoplayGame(SteamID steamIDFriend)
+        public uint GetFriendCoplayGame(ulong steamIDFriend)
         {
-            Write($"GetFriendCoplayGame {steamIDFriend.ConvertToUInt64()}");
+            Write($"GetFriendCoplayGame {steamIDFriend}");
             return (uint)0;
         }
 
 
-        public int GetFriendCoplayTime(SteamID steamIDFriend)
+        public int GetFriendCoplayTime(ulong steamIDFriend)
         {
-            Write($"GetFriendCoplayTime {steamIDFriend.ConvertToUInt64()}");
+            Write($"GetFriendCoplayTime {steamIDFriend}");
             return 0;
         }
 
@@ -223,31 +282,36 @@ namespace SKYNET.Steamworks.Implementation
         public int GetFriendCount(int iFriendFlags)
         {
             Write($"GetFriendCount {(EFriendFlags)iFriendFlags}");
+            int Result = 0;
+            MutexHelper.Wait("GetFriendCount", delegate
+            {
+                Result = Friends.Count;
+            });
+            return Result;
+        }
+
+
+        public int GetFriendCountFromSource(ulong steamIDSource)
+        {
+            Write($"GetFriendCountFromSource {steamIDSource}");
             return 0;
         }
 
 
-        public int GetFriendCountFromSource(SteamID steamIDSource)
+        public CSteamID GetFriendFromSourceByIndex(ulong steamIDSource, int iFriend)
         {
-            Write($"GetFriendCountFromSource {steamIDSource.ConvertToUInt64()}");
-            return 0;
+            Write($"GetFriendFromSourceByIndex {steamIDSource} {iFriend}");
+            return (CSteamID)0;
         }
 
 
-        public SteamID GetFriendFromSourceByIndex(SteamID steamIDSource, int iFriend)
+        public bool GetFriendGamePlayed(ulong steamIDFriend, ref FriendGameInfo_t pFriendGameInfo)
         {
-            Write($"GetFriendFromSourceByIndex {steamIDSource.ConvertToUInt64()} {iFriend}");
-            return 0;
-        }
-
-
-        public bool GetFriendGamePlayed(SteamID steamIDFriend, ref FriendGameInfo_t pFriendGameInfo)
-        {
-            Write($"GetFriendGamePlayed {steamIDFriend.ConvertToUInt64()}" );
+            Write($"GetFriendGamePlayed {steamIDFriend}");
 
             pFriendGameInfo = new FriendGameInfo_t();
 
-            Friend friend = Friends.Find(f => f.AccountId == (uint)steamIDFriend);
+            SteamFriend friend = Friends.Find(f => f.AccountId == (uint)steamIDFriend);
             if (friend == null)
             {
                 pFriendGameInfo.GameID = 0;
@@ -262,58 +326,80 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public int GetFriendMessage(SteamID steamIDFriend, int iMessageID, IntPtr pvData, int cubData, uint peChatEntryType)
+        public int GetFriendMessage(ulong steamIDFriend, int iMessageID, IntPtr pvData, int cubData, uint peChatEntryType)
         {
-            Write($"GetFriendMessage {steamIDFriend.ConvertToUInt64()} {(EChatEntryType)peChatEntryType}");
+            Write($"GetFriendMessage {steamIDFriend} {(EChatEntryType)peChatEntryType}");
             peChatEntryType = 1;
             return 0;
         }
 
-
         public string GetFriendPersonaName(ulong steamIDFriend)
         {
-            Write($"------------------------- GetFriendPersonaName {steamIDFriend} | Mi ID {(ulong)SteamEmulator.SteamId}");
-
-            string personaName = "Unknown";
-
-            if ((ulong)steamIDFriend == (ulong)SteamEmulator.SteamId)
+            string Result = "Unknown";
+            MutexHelper.Wait("FileReadAsyncComplete", delegate
             {
-                personaName = SteamEmulator.PersonaName;
-            }
-            else
-            {
-                Friend friend = Friends.Find(f => f.SteamId == steamIDFriend);
-                if (friend != null) personaName = friend.PersonaName;
-            }
+                if ((ulong)steamIDFriend == (ulong)SteamEmulator.SteamId)
+                {
+                    Result = SteamEmulator.PersonaName;
+                }
+                else
+                {
+                    SteamFriend friend = Friends.Find(f => f.SteamId == steamIDFriend);
+                    if (friend != null) Result = friend.PersonaName;
+                }
 
-            return personaName;
+                Write($"GetFriendPersonaName {new CSteamID(steamIDFriend)} | {Result}");
+            });
+            return Result;
         }
 
 
-        public string GetFriendPersonaNameHistory(SteamID steamIDFriend, int iPersonaName)
+        public string GetFriendPersonaNameHistory(ulong steamIDFriend, int iPersonaName)
         {
-            Write($"GetFriendPersonaNameHistory {steamIDFriend.ConvertToUInt64()}");
+            Write($"GetFriendPersonaNameHistory {steamIDFriend}");
             return "SKYNET";
         }
 
 
-        public int GetFriendPersonaState(SteamID steamIDFriend)
+        public EPersonaState GetFriendPersonaState(ulong steamIDFriend)
         {
-            Write($"GetFriendPersonaState {steamIDFriend.ConvertToUInt64()}");
-            return (int)(Users.Find(f => f.ConvertToUInt64() == steamIDFriend.ConvertToUInt64()) == null ? EPersonaState.k_EPersonaStateOffline : EPersonaState.k_EPersonaStateOnline);
+            Write($"GetFriendPersonaState {steamIDFriend}");
+            EPersonaState Result = EPersonaState.k_EPersonaStateOnline;
+            MutexHelper.Wait("GetFriendPersonaState", delegate
+            {
+                if (steamIDFriend == (ulong)SteamEmulator.SteamId)
+                {
+                    Result = EPersonaState.k_EPersonaStateOnline;
+                }
+                else if (Users.Find(f => f == steamIDFriend) != 0)
+                {
+                    Result = EPersonaState.k_EPersonaStateOnline;
+                }
+            });
+
+            return Result;
         }
 
 
-        public int GetFriendRelationship(SteamID steamIDFriend)
+        public EFriendRelationship GetFriendRelationship(ulong steamIDFriend)
         {
-            Write($"GetFriendRelationship {steamIDFriend.ConvertToUInt64()}");
-            return (int)EFriendRelationship.k_EFriendRelationshipNone;
+            Write($"GetFriendRelationship {steamIDFriend}");
+            EFriendRelationship Result = EFriendRelationship.k_EFriendRelationshipNone;
+
+            MutexHelper.Wait("GetFriendRelationship", delegate
+            {
+                SteamFriend friend = Friends.Find(f => f.SteamId == steamIDFriend);
+                if (friend != null)
+                    Result = EFriendRelationship.k_EFriendRelationshipFriend;
+            });
+
+            return Result;
         }
 
 
-        public string GetFriendRichPresence(SteamID steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchKey)
+        public string GetFriendRichPresence(ulong steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchKey)
         {
-            Write($"GetFriendRichPresence [{steamIDFriend.ConvertToUInt64()}]: {pchKey}");
+            Write($"GetFriendRichPresence [{steamIDFriend}]: {pchKey}");
             if (RichPresence.ContainsKey(pchKey))
             {
                 return RichPresence[pchKey];
@@ -321,15 +407,15 @@ namespace SKYNET.Steamworks.Implementation
             return "";
         }
 
-        public string GetFriendRichPresenceKeyByIndex(SteamID steamIDFriend, int iKey)
+        public string GetFriendRichPresenceKeyByIndex(ulong steamIDFriend, int iKey)
         {
-            Write($"GetFriendRichPresenceKeyByIndex {steamIDFriend.ConvertToUInt64()} {iKey}");
+            Write($"GetFriendRichPresenceKeyByIndex {steamIDFriend} {iKey}");
             return "";
         }
 
-        public int GetFriendRichPresenceKeyCount(SteamID steamIDFriend)
+        public int GetFriendRichPresenceKeyCount(ulong steamIDFriend)
         {
-            Write($"GetFriendRichPresenceKeyCount {steamIDFriend.ConvertToUInt64()}");
+            Write($"GetFriendRichPresenceKeyCount {steamIDFriend}");
             return 0;
         }
 
@@ -345,13 +431,11 @@ namespace SKYNET.Steamworks.Implementation
             return (int)0;
         }
 
-
         public int GetFriendsGroupMembersCount(int friendsGroupID)
         {
             Write($"GetFriendsGroupMembersCount {friendsGroupID}");
             return 0;
         }
-
 
         public void GetFriendsGroupMembersList(short friendsGroupID, ref IntPtr pOutSteamIDMembers, int nMembersCount)
         {
@@ -359,41 +443,47 @@ namespace SKYNET.Steamworks.Implementation
             Marshal.StructureToPtr(SteamEmulator.SteamId, pOutSteamIDMembers, false);
         }
 
-
         public string GetFriendsGroupName(int friendsGroupID)
         {
             Write($"GetFriendsGroupName {friendsGroupID}");
             return "";
         }
 
-
-        public int GetFriendSteamLevel(SteamID steamIDFriend)
+        public int GetFriendSteamLevel(ulong steamIDFriend)
         {
-            Write($"GetFriendSteamLevel {steamIDFriend.ConvertToUInt64()}");
+            Write($"GetFriendSteamLevel {steamIDFriend}");
             return 100;
         }
 
-
-        public int GetSmallFriendAvatar(SteamID steamIDFriend)
+        public int GetSmallFriendAvatar(ulong steamIDFriend)
         {
-            Write($"GetSmallFriendAvatar {steamIDFriend.ConvertToUInt64()}");
-            return 0;
+            Write($"GetSmallFriendAvatar {steamIDFriend}");
+            if (Avatars.TryGetValue(steamIDFriend, out ImageAvatar avatar))
+            {
+                return avatar.Small;
+            }
+            return DefaultAvatar.Small;
         }
 
-
-        public int GetMediumFriendAvatar(SteamID steamIDFriend)
+        public int GetMediumFriendAvatar(ulong steamIDFriend)
         {
-            Write($"GetMediumFriendAvatar {steamIDFriend.ConvertToUInt64()}");
-            return 0;
+            Write($"GetMediumFriendAvatar {steamIDFriend}");
+            if (Avatars.TryGetValue(steamIDFriend, out ImageAvatar avatar))
+            {
+                return avatar.Medium;
+            }
+            return DefaultAvatar.Medium;
         }
 
-
-        public int GetLargeFriendAvatar(SteamID steamIDFriend)
+        public int GetLargeFriendAvatar(ulong steamIDFriend)
         {
-            Write($"GetLargeFriendAvatar {steamIDFriend.ConvertToUInt64()}");
-            return 0;
+            Write($"GetLargeFriendAvatar {steamIDFriend}");
+            if (Avatars.TryGetValue(steamIDFriend, out ImageAvatar avatar))
+            {
+                return avatar.Large;
+            }
+            return DefaultAvatar.Large;
         }
-
 
         public int GetNumChatsWithUnreadPriorityMessages()
         {
@@ -401,30 +491,20 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-
-        public string GetPersonaName()
-        {
-            string PersonaName = SteamEmulator.PersonaName;
-            Write($"GetPersonaName {PersonaName}");
-            return PersonaName;
-        }
-
-
         public uint GetPersonaState()
         {
             Write($"GetPersonaState");
             return (uint)EPersonaState.k_EPersonaStateOnline;
         }
 
-
-        public string GetPlayerNickname(SteamID steamIDPlayer)
+        public string GetPlayerNickname(ulong steamIDPlayer)
         {
-            Write($"GetPlayerNickname {steamIDPlayer.ConvertToUInt64()}");
-            if (steamIDPlayer == SteamEmulator.SteamId)
+            Write($"GetPlayerNickname {steamIDPlayer}");
+            if (steamIDPlayer == (ulong)SteamEmulator.SteamId)
             {
                 return SteamEmulator.PersonaName;
             }
-            Friend friend = Friends.Find(f => f.AccountId == (uint)steamIDPlayer);
+            SteamFriend friend = Friends.Find(f => f.AccountId == (uint)steamIDPlayer);
             if (friend == null)
             {
                 return "";
@@ -432,93 +512,80 @@ namespace SKYNET.Steamworks.Implementation
             return friend.PersonaName;
         }
 
-
         public uint GetUserRestrictions()
         {
             Write($"GetUserRestrictions");
             return 0;
         }
 
-
-        public bool HasFriend(SteamID steamIDFriend, int iFriendFlags)
+        public bool HasFriend(ulong steamIDFriend, int iFriendFlags)
         {
-            Write($"HasFriend {steamIDFriend.ConvertToUInt64()}");
-            Friend friend = Friends.Find(f => f.AccountId == (uint)steamIDFriend);
+            Write($"HasFriend {steamIDFriend}");
+            SteamFriend friend = Friends.Find(f => f.AccountId == (uint)steamIDFriend);
             return friend != null;
         }
 
-
-        public bool InviteUserToGame(SteamID steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchConnectString)
+        public bool InviteUserToGame(ulong steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchConnectString)
         {
-            Write($"InviteUserToGame {steamIDFriend.ConvertToUInt64()} {pchConnectString}");
+            Write($"InviteUserToGame {steamIDFriend} {pchConnectString}");
             return false;
         }
 
-
-        public bool IsClanChatAdmin(SteamID steamIDClanChat, SteamID steamIDUser)
+        public bool IsClanChatAdmin(ulong steamIDClanChat, ulong steamIDUser)
         {
-            Write($"IsClanChatAdmin {steamIDClanChat.ConvertToUInt64()}");
+            Write($"IsClanChatAdmin {steamIDClanChat}");
             return false;
         }
 
-
-        public bool IsClanChatWindowOpenInSteam(SteamID steamIDClanChat)
+        public bool IsClanChatWindowOpenInSteam(ulong steamIDClanChat)
         {
-            Write($"IsClanChatWindowOpenInSteam {steamIDClanChat.ConvertToUInt64()}");
+            Write($"IsClanChatWindowOpenInSteam {steamIDClanChat}");
             return false;
         }
 
-
-        public bool IsClanOfficialGameGroup(SteamID steamIDClan)
+        public bool IsClanOfficialGameGroup(ulong steamIDClan)
         {
-            Write($"IsClanOfficialGameGroup {steamIDClan.ConvertToUInt64()}");
+            Write($"IsClanOfficialGameGroup {steamIDClan}");
             return false;
         }
 
-
-        public bool IsClanPublic(SteamID steamIDClan)
+        public bool IsClanPublic(ulong steamIDClan)
         {
-            Write($"IsClanpublic {steamIDClan.ConvertToUInt64()}");
+            Write($"IsClanpublic {steamIDClan}");
             return false;
         }
 
-
-        public SteamAPICall_t IsFollowing(SteamID steamID)
+        public SteamAPICall_t IsFollowing(ulong steamID)
         {
-            Write($"IsFollowing {steamID.ConvertToUInt64()}");
+            Write($"IsFollowing {steamID}");
             // FriendsIsFollowing_t
-            return 0;
+            return k_uAPICallInvalid;
         }
 
-
-        public bool IsUserInSource(SteamID steamIDUser, SteamID steamIDSource)
+        public bool IsUserInSource(ulong steamIDUser, ulong steamIDSource)
         {
-            Write($"IsUserInSource {steamIDUser.ConvertToUInt64()}");
+            Write($"IsUserInSource {steamIDUser}");
             return false;
         }
 
-
-        public SteamAPICall_t JoinClanChatRoom(SteamID steamIDClan)
+        public SteamAPICall_t JoinClanChatRoom(ulong steamIDClan)
         {
-            Write($"JoinClanChatRoom {steamIDClan.ConvertToUInt64()}");
+            Write($"JoinClanChatRoom {steamIDClan}");
             // JoinClanChatRoomCompletionResult_t
-            return 0;
+            return k_uAPICallInvalid;
         }
 
-
-        public bool LeaveClanChatRoom(SteamID steamIDClan)
+        public bool LeaveClanChatRoom(ulong steamIDClan)
         {
-            Write($"LeaveClanChatRoom {steamIDClan.ConvertToUInt64()}");
+            Write($"LeaveClanChatRoom {steamIDClan}");
             return true;
         }
 
-
-        public bool OpenClanChatWindowInSteam(SteamID steamIDClanChat)
+        public bool OpenClanChatWindowInSteam(ulong steamIDClanChat)
         {
-            Write($"OpenClanChatWindowInSteam {steamIDClanChat.ConvertToUInt64()}");
+            Write($"OpenClanChatWindowInSteam {steamIDClanChat}");
             return false;
         }
-
 
         public bool RegisterProtocolInOverlayBrowser([MarshalAs(UnmanagedType.LPStr)] string pchProtocol)
         {
@@ -526,47 +593,40 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-
-        public bool ReplyToFriendMessage(SteamID steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchMsgToSend)
+        public bool ReplyToFriendMessage(ulong steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchMsgToSend)
         {
-            Write($"ReplyToFriendMessage {steamIDFriend.ConvertToUInt64()} {pchMsgToSend}");
+            Write($"ReplyToFriendMessage {steamIDFriend} {pchMsgToSend}");
             return false;
         }
 
-
-        public SteamAPICall_t RequestClanOfficerList(SteamID steamIDClan)
+        public SteamAPICall_t RequestClanOfficerList(ulong steamIDClan)
         {
-            Write($"RequestClanOfficerList {steamIDClan.ConvertToUInt64()}");
+            Write($"RequestClanOfficerList {steamIDClan}");
             // ClanOfficerListResponse_t
-            return 0;
+            return k_uAPICallInvalid;
         }
 
-
-        public void RequestFriendRichPresence(SteamID steamIDFriend)
+        public void RequestFriendRichPresence(ulong steamIDFriend)
         {
-            Write($"RequestFriendRichPresence {steamIDFriend.ConvertToUInt64()}");
+            Write($"RequestFriendRichPresence {steamIDFriend}");
         }
 
-
-        public bool RequestUserInformation(SteamID steamIDUser, bool bRequireNameOnly)
+        public bool RequestUserInformation(ulong steamIDUser, bool bRequireNameOnly)
         {
-            Write($"RequestUserInformation {steamIDUser.ConvertToUInt64()}");
+            Write($"RequestUserInformation {steamIDUser}");
             return false;
         }
 
-
-        public bool SendClanChatMessage(SteamID steamIDClanChat, [MarshalAs(UnmanagedType.LPStr)] string pchText)
+        public bool SendClanChatMessage(ulong steamIDClanChat, [MarshalAs(UnmanagedType.LPStr)] string pchText)
         {
-            Write($"SendClanChatMessage {steamIDClanChat.ConvertToUInt64()} {pchText}");
+            Write($"SendClanChatMessage {steamIDClanChat} {pchText}");
             return false;
         }
 
-
-        public void SetInGameVoiceSpeaking(SteamID steamIDUser, bool bSpeaking)
+        public void SetInGameVoiceSpeaking(ulong steamIDUser, bool bSpeaking)
         {
-            Write($"SetInGameVoiceSpeaking {steamIDUser.ConvertToUInt64()}");
+            Write($"SetInGameVoiceSpeaking {steamIDUser}");
         }
-
 
         public bool SetListenForFriendsMessages(bool bInterceptEnabled)
         {
@@ -574,37 +634,28 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-
         public SteamAPICall_t SetPersonaName([MarshalAs(UnmanagedType.LPStr)] string pchPersonaName)
         {
             Write($"SetPersonaName {pchPersonaName}");
-            // SetPersonaNameResponse_t
+            SteamAPICall_t APICall = k_uAPICallInvalid;
+            MutexHelper.Wait("SetPersonaName", delegate
+            {
+                SetPersonaNameResponse_t data = new SetPersonaNameResponse_t();
+                data.Success = true;
+                data.LocalSuccess = true;
+                data.Result = EResult.k_EResultOK;
 
-            //SetPersonaNameResponse_t data = new SetPersonaNameResponse_t();
-            //data.Success = true;
-            //data.LocalSuccess = true;
-            //data.Result = SKYNET.Result.OK;
+                SteamEmulator.PersonaName = pchPersonaName;
 
-            //SteamEmulator.PersonaName = pchPersonaName;
-
-            //var b = new Callback.Buffer();
-            //b.SetAlignment(4);
-
-            //b.WriteString(pchPersonaName);
-            //b.WriteBool(data.Success);
-            //b.WriteInt((int)data.Result);
-
-            //PostCallback(data, CallbackType.k_iSetPersonaNameResponse, b);
-
-            //return 0;
-            return new SteamAPICall_t(CallbackType.SetPersonaNameResponse);
+                APICall = CallbackManager.AddCallbackResult(data);
+            });
+            return APICall;
         }
 
-        public void SetPlayedWith(SteamID steamIDUserPlayedWith)
+        public void SetPlayedWith(ulong steamIDUserPlayedWith)
         {
-            Write($"SetPlayedWith {steamIDUserPlayedWith.ConvertToUInt64()}");
+            Write($"SetPlayedWith {steamIDUserPlayedWith}");
         }
-
 
         public bool SetRichPresence([MarshalAs(UnmanagedType.LPStr)] string pchKey, [MarshalAs(UnmanagedType.LPStr)] string pchValue)
         {
@@ -630,6 +681,115 @@ namespace SKYNET.Steamworks.Implementation
             }
 
             return true;
+        }
+
+        public (int, int) GetImageSize(int index)
+        {
+            if (DefaultAvatar.Small == index)   return (32, 32);
+            if (DefaultAvatar.Medium == index)  return (64, 64);
+            if (DefaultAvatar.Large == index)   return (184, 184);
+
+            foreach (var KV in SteamEmulator.SteamFriends.Avatars)
+            {
+                var avatar = KV.Value;
+                if (avatar.Small == index)  return (32, 32);
+                if (avatar.Medium == index) return (64, 64);
+                if (avatar.Large == index)  return (184, 184);
+            }
+
+            return (0, 0);
+        }
+
+        public ImageAvatar GetImageAvatar(int index)
+        {
+            if (DefaultAvatar.Small == index)   return DefaultAvatar;
+            if (DefaultAvatar.Medium == index)  return DefaultAvatar;
+            if (DefaultAvatar.Large == index)   return DefaultAvatar;
+
+            foreach (var KV in Avatars)
+            {
+                var avatar = KV.Value;
+                if (avatar.Small == index || avatar.Medium == index || avatar.Large == index)
+                {
+                    return avatar;
+                }
+            }
+            return null;
+        }
+        
+
+        public class ImageAvatar
+        {
+            public int Small;
+            public int Medium;
+            public int Large;
+
+            public byte[] SmallBytes;
+            public byte[] MediumBytes;
+            public byte[] LargeBytes;
+
+            public uint Width;
+            public uint Height;
+            public Bitmap Image;
+
+            public ImageAvatar(Bitmap data, int imageIndex)
+            {
+                Small = imageIndex;
+                imageIndex++;
+
+                Medium = imageIndex;
+                imageIndex++;
+
+                Large = imageIndex;
+                imageIndex++;
+
+                Image = data;
+
+                var resized32 = ImageHelper.Resize(Image, 32, 32);
+                SmallBytes = ImageHelper.ConvertToRGBA(resized32);
+
+                var resized64 = ImageHelper.Resize(Image, 64, 64);
+                MediumBytes = ImageHelper.ConvertToRGBA(resized64);
+
+                var resized184 = ImageHelper.Resize(Image, 184, 184);
+                LargeBytes = ImageHelper.ConvertToRGBA(resized184);
+            }
+
+            public byte[] GetImage(int iImage)
+            {
+                int size = 0;
+                if (iImage == Small)
+                {
+                    if (SmallBytes.Length == 0)
+                    {
+                        var resized = ImageHelper.Resize(Image, 32, 32);
+                        SmallBytes = ImageHelper.ConvertToRGBA(resized);
+                    }
+                    return SmallBytes;
+                } 
+                if (iImage == Medium)
+                {
+                    if (MediumBytes.Length == 0)
+                    {
+                        var resized = ImageHelper.Resize(Image, 64, 64);
+                        MediumBytes = ImageHelper.ConvertToRGBA(resized);
+                    }
+                    return MediumBytes;
+                }
+                if (iImage == Large)
+                {
+                    if (LargeBytes.Length == 0)
+                    {
+                        var resized = ImageHelper.Resize(Image, 184, 184);
+                        LargeBytes = ImageHelper.ConvertToRGBA(resized);
+                    }
+                    return LargeBytes;
+                }
+
+                var resizedIMG = ImageHelper.Resize(Image, 32, 32);
+                var Bytes = ImageHelper.ConvertToRGBA(resizedIMG);
+                return Bytes;
+            }
         }
     }
 }

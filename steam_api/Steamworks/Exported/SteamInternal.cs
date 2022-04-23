@@ -7,6 +7,9 @@ using SKYNET.Managers;
 using SKYNET.Steamworks.Implementation;
 using SKYNET.Types;
 
+using HSteamPipe = System.UInt32;
+using HSteamUser = System.UInt32;
+
 namespace SKYNET.Exported
 {
     public unsafe class SteamInternal 
@@ -19,10 +22,10 @@ namespace SKYNET.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr SteamInternal_FindOrCreateGameServerInterface(int hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion)
+        public static IntPtr SteamInternal_FindOrCreateGameServerInterface(HSteamUser hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion)
         {
             Write($"SteamInternal_FindOrCreateGameServerInterface {pszVersion}");
-            return InterfaceManager.FindOrCreateInterface(hSteamUser, 1, pszVersion);
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, 1, pszVersion, true);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

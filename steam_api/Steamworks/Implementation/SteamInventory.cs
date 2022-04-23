@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using SKYNET;
 using SKYNET.Helpers;
 using SKYNET.Steamworks;
+using SKYNET.Types;
 using Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
@@ -124,7 +125,7 @@ namespace SKYNET.Steamworks.Implementation
         public int GetResultStatus(uint resultHandle)
         {
             Write($"GetResultStatus");
-            return (int)Result.OK;
+            return (int)EResult.k_EResultOK;
         }
 
         public uint GetResultTimestamp(uint resultHandle)

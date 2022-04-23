@@ -6,6 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using HSteamPipe = System.UInt32;
+using HSteamUser = System.UInt32;
+
 namespace SKYNET.Interface
 {
     [Interface("SteamClient020")]
@@ -16,32 +19,32 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamClient.CreateSteamPipe();
         }
 
-        public bool BReleaseSteamPipe(IntPtr _, int hSteamPipe)
+        public bool BReleaseSteamPipe(IntPtr _, HSteamPipe hSteamPipe)
         {
             return SteamEmulator.SteamClient.BReleaseSteamPipe(hSteamPipe);
         }
 
-        public int ConnectToGlobalUser(IntPtr _, int hSteamPipe)
+        public int ConnectToGlobalUser(IntPtr _, HSteamPipe hSteamPipe)
         {
             return SteamEmulator.SteamClient.ConnectToGlobalUser(hSteamPipe);
         }
 
-        public int CreateLocalUser(IntPtr _, int phSteamPipe, int eAccountType)
+        public HSteamUser CreateLocalUser(IntPtr _, HSteamPipe phSteamPipe, int eAccountType)
         {
             return SteamEmulator.SteamClient.CreateLocalUser(phSteamPipe, eAccountType);
         }
 
-        public void ReleaseUser(IntPtr _, int hSteamPipe, int hUser)
+        public void ReleaseUser(IntPtr _, HSteamPipe hSteamPipe, HSteamUser hUser)
         {
             SteamEmulator.SteamClient.ReleaseUser(hSteamPipe, hUser);
         }
 
-        public IntPtr GetISteamUser(IntPtr _, int hSteamUser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamUser(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
             return SteamEmulator.SteamClient.GetISteamUser(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public IntPtr GetISteamGameServer(IntPtr _, int hSteamUser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamGameServer(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
             return SteamEmulator.SteamClient.GetISteamGameServer(hSteamUser, hSteamPipe, pchVersion);
         }
@@ -51,64 +54,64 @@ namespace SKYNET.Interface
             SteamEmulator.SteamClient.SetLocalIPBinding(unIP, usPort);
         }
 
-        public IntPtr GetISteamFriends(IntPtr _, int hSteamUser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamFriends(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
             return SteamEmulator.SteamClient.GetISteamFriends(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public IntPtr GetISteamUtils(IntPtr _, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamUtils(IntPtr _, HSteamPipe hSteamPipe, string pchVersion)
         {
             return SteamEmulator.SteamClient.GetISteamUtils(hSteamPipe, pchVersion);
         }
 
-        public IntPtr GetISteamMatchmaking(IntPtr _, int hSteamUser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamMatchmaking(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
             return SteamEmulator.SteamClient.GetISteamMatchmaking(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public IntPtr GetISteamMatchmakingServers(IntPtr _, int hSteamUser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamMatchmakingServers(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
             return SteamEmulator.SteamClient.GetISteamMatchmakingServers(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public void GetISteamGenericInterface(IntPtr _, int hSteamUser, int hSteamPipe, string pchVersion)
+        public void GetISteamGenericInterface(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
             SteamEmulator.SteamClient.GetISteamGenericInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public IntPtr GetISteamUserStats(IntPtr _, int hSteamUser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamUserStats(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
             return SteamEmulator.SteamClient.GetISteamUserStats(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public IntPtr GetISteamGameServerStats(IntPtr _, int hSteamuser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamGameServerStats(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
-            return SteamEmulator.SteamClient.GetISteamGameServerStats(hSteamuser, hSteamPipe, pchVersion);
+            return SteamEmulator.SteamClient.GetISteamGameServerStats(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public IntPtr GetISteamApps(IntPtr _, int hSteamUser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamApps(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
             return SteamEmulator.SteamClient.GetISteamApps(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public IntPtr GetISteamNetworking(IntPtr _, int hSteamUser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamNetworking(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
             return SteamEmulator.SteamClient.GetISteamNetworking(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public IntPtr GetISteamRemoteStorage(IntPtr _, int hSteamuser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamRemoteStorage(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
-            return SteamEmulator.SteamClient.GetISteamRemoteStorage(hSteamuser, hSteamPipe, pchVersion);
+            return SteamEmulator.SteamClient.GetISteamRemoteStorage(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public IntPtr GetISteamScreenshots(IntPtr _, int hSteamuser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamScreenshots(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
-            return SteamEmulator.SteamClient.GetISteamScreenshots(hSteamuser, hSteamPipe, pchVersion);
+            return SteamEmulator.SteamClient.GetISteamScreenshots(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public IntPtr GetISteamGameSearch(IntPtr _, int hSteamuser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamGameSearch(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
-            return SteamEmulator.SteamClient.GetISteamGameSearch(hSteamuser, hSteamPipe, pchVersion);
+            return SteamEmulator.SteamClient.GetISteamGameSearch(hSteamUser, hSteamPipe, pchVersion);
         }
 
         //#region STEAM_PRIVATE_API( virtual void RunFrame() = 0; )
@@ -135,48 +138,48 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamClient.BShutdownIfAllPipesClosed();
         }
 
-        public IntPtr GetISteamHTTP(IntPtr _, int hSteamuser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamHTTP(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
-            return SteamEmulator.SteamClient.GetISteamHTTP(hSteamuser, hSteamPipe, pchVersion);
+            return SteamEmulator.SteamClient.GetISteamHTTP(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        //#region STEAM_PRIVATE_API( virtual void *DEPRECATED_GetISteamUnifiedMessages( HSteamUser hSteamuser, HSteamPipe hSteamPipe, const char *pchVersion ) = 0 ; )
+        //#region STEAM_PRIVATE_API( virtual void *DEPRECATED_GetISteamUnifiedMessages( HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion ) = 0 ; )
 
-        //private void DEPRECATED_GetISteamUnifiedMessages(IntPtr _, int hSteamuser, int hSteamPipe, string pchVersion)
+        //private void DEPRECATED_GetISteamUnifiedMessages(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         //{
-        //    SteamEmulator.SteamClient.DEPRECATED_GetISteamUnifiedMessages(hSteamuser, hSteamPipe, pchVersion);
+        //    SteamEmulator.SteamClient.DEPRECATED_GetISteamUnifiedMessages(hSteamUser, hSteamPipe, pchVersion);
         //}
 
         //#endregion
 
-        public IntPtr GetISteamController(IntPtr _, int hSteamUser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamController(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
             return SteamEmulator.SteamClient.GetISteamController(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public IntPtr GetISteamUGC(IntPtr _, int hSteamUser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamUGC(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
             return SteamEmulator.SteamClient.GetISteamUGC(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public IntPtr GetISteamAppList(IntPtr _, int hSteamUser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamAppList(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
             return SteamEmulator.SteamClient.GetISteamAppList(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public IntPtr GetISteamMusic(IntPtr _, int hSteamuser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamMusic(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
-            return SteamEmulator.SteamClient.GetISteamMusic(hSteamuser, hSteamPipe, pchVersion);
+            return SteamEmulator.SteamClient.GetISteamMusic(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public IntPtr GetISteamMusicRemote(IntPtr _, int hSteamuser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamMusicRemote(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
-            return SteamEmulator.SteamClient.GetISteamMusicRemote(hSteamuser, hSteamPipe, pchVersion);
+            return SteamEmulator.SteamClient.GetISteamMusicRemote(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public IntPtr GetISteamHTMLSurface(IntPtr _, int hSteamuser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamHTMLSurface(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
-            return SteamEmulator.SteamClient.GetISteamHTMLSurface(hSteamuser, hSteamPipe, pchVersion);
+            return SteamEmulator.SteamClient.GetISteamHTMLSurface(hSteamUser, hSteamPipe, pchVersion);
         }
 
         //#region STEAM_PRIVATE_API( virtual void DEPRECATED_Set_SteamAPI_CPostAPIResultInProcess( void (*)() ) = 0; )
@@ -206,32 +209,32 @@ namespace SKYNET.Interface
 
         //#endregion
 
-        public IntPtr GetISteamInventory(IntPtr _, int hSteamuser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamInventory(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
-            return SteamEmulator.SteamClient.GetISteamInventory(hSteamuser, hSteamPipe, pchVersion);
+            return SteamEmulator.SteamClient.GetISteamInventory(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public IntPtr GetISteamVideo(IntPtr _, int hSteamuser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamVideo(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
-            return SteamEmulator.SteamClient.GetISteamVideo(hSteamuser, hSteamPipe, pchVersion);
+            return SteamEmulator.SteamClient.GetISteamVideo(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public IntPtr GetISteamParentalSettings(IntPtr _, int hSteamuser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamParentalSettings(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
-            return SteamEmulator.SteamClient.GetISteamParentalSettings(hSteamuser, hSteamPipe, pchVersion);
+            return SteamEmulator.SteamClient.GetISteamParentalSettings(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public IntPtr GetISteamInput(IntPtr _, int hSteamUser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamInput(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
             return SteamEmulator.SteamClient.GetISteamInput(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public IntPtr GetISteamParties(IntPtr _, int hSteamUser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamParties(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
             return SteamEmulator.SteamClient.GetISteamParties(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public IntPtr GetISteamRemotePlay(IntPtr _, int hSteamUser, int hSteamPipe, string pchVersion)
+        public IntPtr GetISteamRemotePlay(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
             return SteamEmulator.SteamClient.GetISteamRemotePlay(hSteamUser, hSteamPipe, pchVersion);
         }

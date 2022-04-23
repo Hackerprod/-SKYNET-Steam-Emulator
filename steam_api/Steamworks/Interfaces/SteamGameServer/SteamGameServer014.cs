@@ -1,15 +1,16 @@
+using Steamworks;
 using System;
-
+using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Interface
 {
     [Interface("SteamGameServer014")]
     public class SteamGameServer014 : ISteamInterface
     {
-        //private bool InitGameServer(IntPtr _, uint unIP, int usGamePort, int usQueryPort, uint unFlags, uint nGameAppId, string pchVersionString )
-        //{
-        //    return SteamEmulator.SteamGameServer.InitGameServer(unIP, usGamePort, usQueryPort, unFlags, nGameAppId, pchVersionString);
-        //}
+        public bool InitGameServer(IntPtr _, uint unIP, int usGamePort, int usQueryPort, uint unFlags, uint nGameAppId, string pchVersionString)
+        {
+            return SteamEmulator.SteamGameServer.InitGameServer(unIP, usGamePort, usQueryPort, unFlags, nGameAppId, pchVersionString);
+        }
 
         public void SetProduct(IntPtr _, string pszProduct)
         {
@@ -56,7 +57,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamGameServer.BSecure();
         }
 
-        public ulong GetSteamID(IntPtr _)
+        public CSteamID GetSteamID(IntPtr _)
         {
             return SteamEmulator.SteamGameServer.GetSteamID();
         }
@@ -131,7 +132,7 @@ namespace SKYNET.Interface
             SteamEmulator.SteamGameServer.SetAdvertiseServerActive(bActive);
         }
 
-        public IntPtr GetAuthSessionTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
+        public uint GetAuthSessionTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, IntPtr pcbTicket)
         {
             return SteamEmulator.SteamGameServer.GetAuthSessionTicket(pTicket, cbMaxTicket, pcbTicket);
         }
@@ -171,7 +172,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamGameServer.GetServerReputation();
         }
 
-        public IntPtr GetPublicIP(IntPtr _)
+        public SteamIPAddress_t GetPublicIP(IntPtr _)
         {
             return SteamEmulator.SteamGameServer.GetPublicIP();
         }
@@ -201,7 +202,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamGameServer.SendUserConnectAndAuthenticate_DEPRECATED(unIPClient, pvAuthBlob, cubAuthBlobSize, pSteamIDUser);
         }
 
-        public ulong CreateUnauthenticatedUserConnection(IntPtr _)
+        public CSteamID CreateUnauthenticatedUserConnection(IntPtr _)
         {
             return SteamEmulator.SteamGameServer.CreateUnauthenticatedUserConnection();
         }

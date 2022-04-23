@@ -1,12 +1,84 @@
-﻿using Steamworks;
+﻿using SKYNET.Types;
+using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
+using PublishedFileId_t = System.UInt64;
+using UGCHandle_t = System.UInt64;
+using SteamItemInstanceID_t = System.UInt64;
+using AppId_t = System.UInt32;
+using SteamItemDef_t = System.UInt32;
+
 namespace SKYNET.Steamworks
 {
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
+    public struct SteamUGCDetails_t
+    {
+        public PublishedFileId_t m_nPublishedFileId;
+
+        public EResult m_eResult;
+
+        public EWorkshopFileType m_eFileType;
+
+        public AppId_t m_nCreatorAppID;
+
+        public AppId_t m_nConsumerAppID;
+
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 129)]
+        public string m_rgchTitle;
+
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 8000)]
+        public string m_rgchDescription;
+
+        public ulong m_ulSteamIDOwner;
+
+        public uint m_rtimeCreated;
+
+        public uint m_rtimeUpdated;
+
+        public uint m_rtimeAddedToUserList;
+
+        public ERemoteStoragePublishedFileVisibility m_eVisibility;
+
+        [MarshalAs(UnmanagedType.I1)]
+        public bool m_bBanned;
+
+        [MarshalAs(UnmanagedType.I1)]
+        public bool m_bAcceptedForUse;
+
+        [MarshalAs(UnmanagedType.I1)]
+        public bool m_bTagsTruncated;
+
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 1025)]
+        public string m_rgchTags;
+
+        public UGCHandle_t m_hFile;
+
+        public UGCHandle_t m_hPreviewFile;
+
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+        public string m_pchFileName;
+
+        public int m_nFileSize;
+
+        public int m_nPreviewFileSize;
+
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
+        public string m_rgchURL;
+
+        public uint m_unVotesUp;
+
+        public uint m_unVotesDown;
+
+        public float m_flScore;
+
+        public uint m_unNumChildren;
+    }
+
     public struct ControllerDigitalActionData_t
     {
         // The current state of this action; will be true if currently pressed

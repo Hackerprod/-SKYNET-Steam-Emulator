@@ -26,12 +26,12 @@ namespace SKYNET.Interface
 
         public int AcceptGame(IntPtr _)
         {
-            return SteamEmulator.SteamGameSearch.AcceptGame(_);
+            return SteamEmulator.SteamGameSearch.AcceptGame();
         }
 
         public int DeclineGame(IntPtr _)
         {
-            return SteamEmulator.SteamGameSearch.DeclineGame(_);
+            return SteamEmulator.SteamGameSearch.DeclineGame();
         }
 
         public int RetrieveConnectionDetails(IntPtr _, ulong steamIDHost, IntPtr pchConnectionDetails, int cubConnectionDetails)
@@ -41,7 +41,7 @@ namespace SKYNET.Interface
 
         public int EndGameSearch(IntPtr _)
         {
-            return SteamEmulator.SteamGameSearch.EndGameSearch(_);
+            return SteamEmulator.SteamGameSearch.EndGameSearch();
         }
 
         public int SetGameHostParams(IntPtr _, string pchKey, string pchValue)
@@ -66,7 +66,7 @@ namespace SKYNET.Interface
 
         public int CancelRequestPlayersForGame(IntPtr _)
         {
-            return SteamEmulator.SteamGameSearch.CancelRequestPlayersForGame(_);
+            return SteamEmulator.SteamGameSearch.CancelRequestPlayersForGame();
         }
 
         public int SubmitPlayerResult(IntPtr _, ulong ullUniqueGameID, ulong steamIDPlayer, int EPlayerResult)

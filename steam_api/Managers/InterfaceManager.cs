@@ -12,19 +12,22 @@ using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
+using HSteamPipe = System.UInt32;
+using HSteamUser = System.UInt32;
+
 namespace SKYNET.Managers
 {
     public class InterfaceManager
     {
         private static ConcurrentDictionary<string, Type> interfaceTypes;
-        private static Dictionary<string, IntPtr> StoredInterfaces;
-        private static Dictionary<string, IntPtr> StoredInterfaces_Gameserver;
+        private static ConcurrentDictionary<string, IntPtr> StoredInterfaces;
+        private static ConcurrentDictionary<string, IntPtr> StoredInterfaces_Gameserver;
 
         static InterfaceManager()
         {
             interfaceTypes = new ConcurrentDictionary<string, Type>();
-            StoredInterfaces = new Dictionary<string, IntPtr>();
-            StoredInterfaces_Gameserver = new Dictionary<string, IntPtr>();
+            StoredInterfaces = new ConcurrentDictionary<string, IntPtr>();
+            StoredInterfaces_Gameserver = new ConcurrentDictionary<string, IntPtr>();
         }
 
         public static void Initialize()
@@ -37,56 +40,7 @@ namespace SKYNET.Managers
                     var interfaceAttribute = type.GetCustomAttributes<InterfaceAttribute>().ToList()[0];
                     interfaceTypes.TryAdd(interfaceAttribute.Name, type);
                 }
-                //if (type.IsDefined(typeof(CallbackIdentityAttribute)))
-                //{
-                //    var CallbackIdentity = type.GetCustomAttributes<CallbackIdentityAttribute>().ToList()[0];
-                //    CallbackManager.CallbackTypes.TryAdd(CallbackIdentity.Identity, type);
-                //}
             }
-
-            //interfaceTypes.TryAdd("STEAMAPPLIST_INTERFACE_VERSION001", typeof(SteamAppList001));
-            //interfaceTypes.TryAdd("STEAMAPPS_INTERFACE_VERSION008", typeof(SteamApps008));
-            //interfaceTypes.TryAdd("SteamClient020", typeof(SteamClient020));
-            //interfaceTypes.TryAdd("SteamController008", typeof(SteamController008));
-            //interfaceTypes.TryAdd("SteamFriends015", typeof(SteamFriends015));
-            //interfaceTypes.TryAdd("SteamFriends017", typeof(SteamFriends017));
-            //interfaceTypes.TryAdd("SteamGameCoordinator001", typeof(SteamGameCoordinator001));
-            //interfaceTypes.TryAdd("SteamGameServer012", typeof(SteamGameServer012));
-            //interfaceTypes.TryAdd("SteamGameServer014", typeof(SteamGameServer014));
-            //interfaceTypes.TryAdd("SteamGameServerStats001", typeof(SteamGameServerStats001));
-            //interfaceTypes.TryAdd("SteamGameStats001", typeof(SteamGameStats001));
-            //interfaceTypes.TryAdd("STEAMHTMLSURFACE_INTERFACE_VERSION_004", typeof(SteamHTMLSurface004));
-            //interfaceTypes.TryAdd("STEAMHTMLSURFACE_INTERFACE_VERSION_005", typeof(SteamHTMLSurface005));
-            //interfaceTypes.TryAdd("STEAMHTTP_INTERFACE_VERSION003", typeof(SteamHTTP003));
-            //interfaceTypes.TryAdd("STEAMINVENTORY_INTERFACE_V002", typeof(SteamInventory002));
-            //interfaceTypes.TryAdd("STEAMINVENTORY_INTERFACE_V003", typeof(SteamInventory003));
-            //interfaceTypes.TryAdd("SteamMatchGameSearch001", typeof(SteamMatchGameSearch001));
-            //interfaceTypes.TryAdd("SteamMatchMaking008", typeof(SteamMatchMaking008));
-            //interfaceTypes.TryAdd("SteamMatchMaking009", typeof(SteamMatchMaking009));
-            //interfaceTypes.TryAdd("SteamMatchMakingServers002", typeof(SteamMatchMakingServers002));
-            //interfaceTypes.TryAdd("STEAMMUSIC_INTERFACE_VERSION001", typeof(SteamMusic001));
-            //interfaceTypes.TryAdd("STEAMMUSICREMOTE_INTERFACE_VERSION001", typeof(SteamMusicRemote001));
-            //interfaceTypes.TryAdd("SteamNetworking005", typeof(SteamNetworking005));
-            //interfaceTypes.TryAdd("SteamNetworking006", typeof(SteamNetworking006));
-            //interfaceTypes.TryAdd("SteamNetworkingSocketsSerialized002", typeof(SteamNetworkingSocketsSerialized002));
-            //interfaceTypes.TryAdd("SteamNetworkingSocketsSerialized003", typeof(SteamNetworkingSocketsSerialized003));
-            //interfaceTypes.TryAdd("SteamNetworkingSocketsSerialized004", typeof(SteamNetworkingSocketsSerialized004));
-            //interfaceTypes.TryAdd("SteamNetworkingSocketsSerialized005", typeof(SteamNetworkingSocketsSerialized005));
-            //interfaceTypes.TryAdd("STEAMPARENTALSETTINGS_INTERFACE_VERSION001", typeof(SteamParentalSettings001));
-            //interfaceTypes.TryAdd("STEAMREMOTESTORAGE_INTERFACE_VERSION013", typeof(SteamRemoteStorage013));
-            //interfaceTypes.TryAdd("STEAMREMOTESTORAGE_INTERFACE_VERSION014", typeof(SteamRemoteStorage014));
-            //interfaceTypes.TryAdd("STEAMREMOTESTORAGE_INTERFACE_VERSION016", typeof(SteamRemoteStorage016));
-            //interfaceTypes.TryAdd("STEAMSCREENSHOTS_INTERFACE_VERSION003", typeof(SteamScreenshots003));
-            //interfaceTypes.TryAdd("STEAMUGC_INTERFACE_VERSION014", typeof(SteamUGC014));
-            //interfaceTypes.TryAdd("STEAMUGC_INTERFACE_VERSION015", typeof(SteamUGC015));
-            //interfaceTypes.TryAdd("STEAMUGC_INTERFACE_VERSION016", typeof(SteamUGC016));
-            //interfaceTypes.TryAdd("SteamUser019", typeof(SteamUser019));
-            //interfaceTypes.TryAdd("SteamUser021", typeof(SteamUser021));
-            //interfaceTypes.TryAdd("STEAMUSERSTATS_INTERFACE_VERSION012", typeof(SteamUserStats012));
-            //interfaceTypes.TryAdd("SteamUtils009", typeof(SteamUtils009));
-            //interfaceTypes.TryAdd("SteamUtils010", typeof(SteamUtils010));
-            //interfaceTypes.TryAdd("STEAMVIDEO_INTERFACE_V002", typeof(SteamVideo002));
-            //interfaceTypes.TryAdd("SteamAppDisableUpdate001", typeof(SteamAppDisableUpdate001));
         }
 
         public static T CreateInterface<T>(out IntPtr BaseAddress) where T : ISteamInterface
@@ -103,9 +57,9 @@ namespace SKYNET.Managers
             return FindOrCreateInterface(1, 1, pchVersion);
         }
 
-        public static IntPtr FindOrCreateInterface(int hSteamUser, int hSteamPipe, string pszVersion)
+        public static IntPtr FindOrCreateInterface(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pszVersion, bool GameServer = false)
         {
-            bool GameServer = hSteamUser == SteamEmulator.HSteamUser_GS;
+            #region Tests purposes
 
             //if (pszVersion.StartsWith("SteamUtils"))
             //{
@@ -195,10 +149,10 @@ namespace SKYNET.Managers
             //{
             //    Write($"Skipping {pszVersion}"); return default;
             //}
-            if (pszVersion.StartsWith("SteamGameServer0"))
-            {
-                Write($"Skipping {pszVersion}"); return default;
-            }
+            //if (pszVersion.StartsWith("SteamGameServer0"))
+            //{
+            //    Write($"Skipping {pszVersion}"); return default;
+            //}
             //if (pszVersion.StartsWith("SteamGameCoordinator"))
             //{
             //    Write($"Skipping {pszVersion}"); return default;
@@ -208,15 +162,18 @@ namespace SKYNET.Managers
             //    Write($"Skipping {pszVersion}"); return default;
             //}
 
-            ///////////////////////////////////////////////////////////////////////
+            #endregion
 
-            if (GameServer && StoredInterfaces_Gameserver.ContainsKey(pszVersion))
+            if (GameServer)
             {
-                return StoredInterfaces_Gameserver[pszVersion];
+                if (StoredInterfaces_Gameserver.TryGetValue(pszVersion, out IntPtr BaseAddress))
+                {
+                    return BaseAddress;
+                }
             }
-            else if (StoredInterfaces.ContainsKey(pszVersion))
+            else if (StoredInterfaces.TryGetValue(pszVersion, out IntPtr BaseAddress))
             {
-                return StoredInterfaces[pszVersion];
+                return BaseAddress;
             }
 
             if (!interfaceTypes.ContainsKey(pszVersion))
@@ -237,11 +194,11 @@ namespace SKYNET.Managers
 
             if (GameServer)
             {
-                StoredInterfaces_Gameserver.Add(pszVersion, address);
+                StoredInterfaces_Gameserver.TryAdd(pszVersion, address);
             }
             else
             {
-                StoredInterfaces.Add(pszVersion, address);
+                StoredInterfaces.TryAdd(pszVersion, address);
             }
             
             SetInterfaceName(pszVersion, interfaceType);

@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -105,6 +107,26 @@ public partial class modCommon
     public static uint ToUnixTime(DateTime t)
     {
         return (uint)(new DateTimeOffset(t)).ToUnixTimeSeconds();
+    }
+
+    public static IPAddress GetIPAddress()
+    {
+        string hostName = Dns.GetHostName();
+        IPHostEntry hostEntry = Dns.GetHostEntry(hostName);
+        IPAddress iPAddress = null;
+        IPAddress[] addressList = hostEntry.AddressList;
+        foreach (IPAddress iPAddress2 in addressList)
+        {
+            if (iPAddress2.AddressFamily == AddressFamily.InterNetwork)
+            {
+                iPAddress = iPAddress2;
+            }
+        }
+        return iPAddress;
+    }
+    public static IPAddress GetIPAddress(uint IP)
+    {
+        return new IPAddress(new byte[] { (byte)(IP >> 24), (byte)(IP >> 16), (byte)(IP >> 8), (byte)IP });
     }
 }
 

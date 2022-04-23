@@ -1,68 +1,97 @@
 ﻿using System;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using SKYNET;
 using SKYNET.Helpers;
+using SKYNET.Managers;
 using SKYNET.Types;
 using Steamworks;
+using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    using HAuthTicket = UInt32;
     public class SteamGameServer : ISteamInterface
     {
+        private GameServerData ServerData;
+        private bool LoggedIn;
+        private SteamAPICall_t k_uAPICallInvalid = 0x0;
+
         public SteamGameServer()
         {
             InterfaceVersion = "SteamGameServer";
+            ServerData = new GameServerData();
         }
 
 
         public bool InitGameServer(uint unIP, int usGamePort, int usQueryPort, uint unFlags, uint nGameAppId, string pchVersionString)
         {
             Write("InitGameServer");
+
+            if (LoggedIn)
+            {
+                return false;
+            }
+
+            ServerData.IP = unIP;
+            ServerData.Port = usGamePort;
+            ServerData.QueryPort = usQueryPort;
+            ServerData.Flags = unFlags;
+            ServerData.AppId = nGameAppId;
+            ServerData.VersionString = pchVersionString;
+
+            if (SteamEmulator.AppId == 0) SteamEmulator.AppId = nGameAppId;
+
             return true;
         }
 
         public void SetProduct(string pszProduct)
         {
             Write($"SetProduct {pszProduct}");
+            ServerData.Product = pszProduct;
         }
 
         public void SetGameDescription(string pszGameDescription)
         {
             Write($"SetGameDescription {pszGameDescription}");
+            ServerData.Description = pszGameDescription;
         }
 
         public void SetModDir(string pszModDir)
         {
             Write($"SetModDir {pszModDir}");
+            ServerData.ModDir = pszModDir;
         }
 
         public void SetDedicatedServer(bool bDedicated)
         {
             Write("SetDedicatedServer");
+            ServerData.Dedicated = bDedicated;
         }
 
         public void LogOn(string pszToken)
         {
             Write("LogOn");
+            LoggedIn = true;
         }
 
         public void LogOnAnonymous()
         {
             Write("LogOnAnonymous");
-            
+            LoggedIn = true;
         }
 
         public void LogOff()
         {
             Write("LogOff");
-            
+            LoggedIn = false;
         }
 
         public bool BLoggedOn()
         {
             Write("BLoggedOn");
-            return true;
+            return LoggedIn;
         }
 
         public bool BSecure()
@@ -71,10 +100,11 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public ulong GetSteamID()
+        public CSteamID GetSteamID()
         {
-            Write("GetSteamID");
-            return SteamEmulator.SteamId_GS;
+            var SteamId = SteamEmulator.SteamId_GS;
+            Write($"GetSteamID {(string)SteamId}");
+            return SteamId; 
         }
 
         public bool WasRestartRequested()
@@ -86,90 +116,106 @@ namespace SKYNET.Steamworks.Implementation
         public void SetMaxPlayerCount(int cPlayersMax)
         {
             Write("SetMaxPlayerCount");
+            ServerData.MaxPlayers = cPlayersMax;
         }
 
         public void SetBotPlayerCount(int cBotplayers)
         {
             Write("SetBotPlayerCount");
+            ServerData.BotPlayers = cBotplayers;
         }
 
         public void SetServerName(string pszServerName)
         {
             Write("SetServerName");
+            ServerData.ServerName = pszServerName;
         }
 
         public void SetMapName(string pszMapName)
         {
             Write("SetMapName");
+            ServerData.MapName = pszMapName;
         }
 
         public void SetPasswordProtected(bool bPasswordProtected)
         {
             Write("SetPasswordProtected");
+            ServerData.PasswordProtected = bPasswordProtected;
         }
 
         public void SetSpectatorPort(uint unSpectatorPort)
         {
             Write("SetSpectatorPort");
+            ServerData.SpectatorPort = unSpectatorPort;
         }
 
         public void SetSpectatorServerName(string pszSpectatorServerName)
         {
             Write("SetSpectatorServerName");
+            ServerData.SpectatorServerName = pszSpectatorServerName;
         }
 
         public void ClearAllKeyValues()
         {
             Write("ClearAllKeyValues");
+            ServerData.KeyValues.Clear();
         }
 
         public void SetKeyValue(string pKey, string pValue)
         {
             Write("SetKeyValue");
+            ServerData.KeyValues.TryAdd(pKey, pValue);
         }
 
         public void SetGameTags(string pchGameTags)
         {
             Write("SetGameTags");
+            ServerData.GameTags = pchGameTags;
         }
 
         public void SetGameData(string pchGameData)
         {
             Write("SetGameData");
+            ServerData.GameData = pchGameData;
         }
 
         public void SetRegion(string pszRegion)
         {
             Write("SetRegion");
+            ServerData.Region = pszRegion;
         }
 
         public bool SendUserConnectAndAuthenticate(uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, ulong pSteamIDUser)
         {
-            Write("SendUserConnectAndAuthenticate");
-            return true;
+            var IPAddress = modCommon.GetIPAddress(unIPClient);
+            Write($"SendUserConnectAndAuthenticate {new CSteamID(pSteamIDUser)} | {IPAddress}");
+            return TicketManager.ConnectAndAuthenticate(unIPClient, pvAuthBlob, cubAuthBlobSize, pSteamIDUser);
         }
 
-        public ulong CreateUnauthenticatedUserConnection()
+        public CSteamID CreateUnauthenticatedUserConnection()
         {
             Write("CreateUnauthenticatedUserConnection");
-            return 0;
+            return new CSteamID((uint)new Random().Next(1000, 9999), EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeAnonUser);
         }
 
-        public void SendUserDisconnect(SteamID steamIDUser)
+        public void SendUserDisconnect(ulong steamIDUser)
         {
             Write("SendUserDisconnect");
+            TicketManager.RemoveTicket(steamIDUser);
         }
 
-        public bool BUpdateUserData(SteamID steamIDUser, string pchPlayerName, uint uScore)
+        public bool BUpdateUserData(ulong steamIDUser, string pchPlayerName, uint uScore)
         {
             Write("BUpdateUserData");
             return true;
         }
 
-        public IntPtr GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
+        // Retrieve ticket to be sent to the entity who wishes to authenticate you ( using BeginAuthSession API ). 
+        // uint32 *pcbTicket  retrieves the length of the actual ticket.
+        public HAuthTicket GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, IntPtr pcbTicket)
         {
-            Write("GetAuthSessionTicket");
-            return IntPtr.Zero;
+            SteamEmulator.Write("DEBUG", "GetAuthSessionTicket");
+            return TicketManager.GetAuthSessionTicket(pTicket, cbMaxTicket, pcbTicket);
         }
 
         public void SetAdvertiseServerActive(bool bActive)
@@ -177,13 +223,13 @@ namespace SKYNET.Steamworks.Implementation
             Write("SetAdvertiseServerActive");
         }
 
-        public int BeginAuthSession(IntPtr pAuthTicket, int cbAuthTicket, SteamID steamID)
+        public int BeginAuthSession(IntPtr pAuthTicket, int cbAuthTicket, ulong steamID)
         {
             Write("BeginAuthSession");
             return (int)EBeginAuthSessionResult.k_EBeginAuthSessionResultOK;
         }
 
-        public void EndAuthSession(SteamID steamID)
+        public void EndAuthSession(ulong steamID)
         {
             Write("EndAuthSession");
         }
@@ -193,16 +239,16 @@ namespace SKYNET.Steamworks.Implementation
             Write("CancelAuthTicket");
         }
 
-        public int UserHasLicenseForApp(SteamID steamID, uint appID)
+        public int UserHasLicenseForApp(ulong steamID, uint appID)
         {
             Write("UserHasLicenseForApp");
             return (int)EUserHasLicenseForAppResult.k_EUserHasLicenseResultHasLicense; 
         }
 
-        public bool RequestUserGroupStatus(SteamID steamIDUser, SteamID steamIDGroup)
+        public bool RequestUserGroupStatus(ulong steamIDUser, ulong steamIDGroup)
         {
             Write("RequestUserGroupStatus");
-            return false;
+            return true;
         }
 
         public void GetGameplayStats()
@@ -214,7 +260,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("GetServerReputation");
             // GSReputation_t
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public uint GetPublicIP_old()
@@ -231,14 +277,15 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetNextOutgoingPacket(IntPtr pOut, int cbMaxOut, uint pNetAdr, uint pPort)
         {
-            Write("GetNextOutgoingPacket");
+            SteamEmulator.Write("DEBUG", "GetNextOutgoingPacket");
             return 0;
         }
 
-        internal IntPtr GetPublicIP()
+        internal SteamIPAddress_t GetPublicIP()
         {
-            Write("GetNextOutgoingPacket");
-            return IntPtr.Zero;
+            Write("GetPublicIP");
+            SteamIPAddress_t iPAddress = new SteamIPAddress_t(modCommon.GetIPAddress());
+            return iPAddress;
         }
 
         public void EnableHeartbeats(bool bActive)
@@ -255,16 +302,16 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("ForceHeartbeat");
         }
-        public SteamAPICall_t AssociateWithClan(SteamID steamIDClan)
+        public SteamAPICall_t AssociateWithClan(ulong steamIDClan)
         {
             Write("AssociateWithClan");
-            return 0;
+            return k_uAPICallInvalid;
         }
 
-        public SteamAPICall_t ComputeNewPlayerCompatibility(SteamID steamIDNewPlayer)
+        public SteamAPICall_t ComputeNewPlayerCompatibility(ulong steamIDNewPlayer)
         {
             Write("ComputeNewPlayerCompatibility");
-            return 0;
+            return k_uAPICallInvalid;
         }
 
         public bool SendUserConnectAndAuthenticate_DEPRECATED(uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, ulong pSteamIDUser)
@@ -273,7 +320,7 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public void SendUserDisconnect_DEPRECATED(SteamID steamIDUser)
+        public void SendUserDisconnect_DEPRECATED(ulong steamIDUser)
         {
             Write("SendUserDisconnect_DEPRECATED");
         }

@@ -4,19 +4,22 @@ using System.Windows.Forms;
 using SKYNET.Helpers;
 using Steamworks;
 
+using HSteamPipe = System.UInt32;
+using HSteamUser = System.UInt32;
+
 namespace SKYNET.Steamworks.Exported
 {
     public partial class SteamAPI_SteamGameServer 
     {
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamGameServer_GetHSteamUser()
+        public static HSteamUser SteamGameServer_GetHSteamUser()
         {
             Write("SteamGameServer_GetHSteamUser");
             return SteamEmulator.HSteamUser_GS;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamGameServer_GetHSteamPipe()
+        public static HSteamPipe SteamGameServer_GetHSteamPipe()
         {
             Write("SteamGameServer_GetHSteamPipe");
             return SteamEmulator.HSteamPipe_GS;
@@ -56,7 +59,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static ulong SteamGameServer_GetSteamID()
+        public static CSteamID SteamGameServer_GetSteamID()
         {
             Write("SteamGameServer_GetSteamID");
             return SteamEmulator.SteamId_GS;
@@ -66,7 +69,7 @@ namespace SKYNET.Steamworks.Exported
         public static ulong SteamGameServer_GetIPCCallCount()
         {
             Write("SteamGameServer_GetIPCCallCount");
-            return 0;
+            return SteamEmulator.SteamUtils.GetIPCCallCount();
         }
 
         private static void Write(string msg)
