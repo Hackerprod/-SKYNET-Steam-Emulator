@@ -143,8 +143,8 @@ namespace SKYNET.Steamworks.Implementation
         {
             try
             {
-                SteamAPIWarningMessageHook_t pFunction = Marshal.PtrToStructure<SteamAPIWarningMessageHook_t>(pFunctionPtr);
-                Write($"SetWarningMessageHook Name: {pFunction.Method.Name}, ReturnType: {pFunction.Method.ReturnType}");
+                //SteamAPIWarningMessageHook_t pFunction = Marshal.PtrToStructure<SteamAPIWarningMessageHook_t>(pFunctionPtr);
+                Write($"SetWarningMessageHook");
             }
             catch (Exception)
             {

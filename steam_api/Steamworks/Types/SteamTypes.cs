@@ -99,25 +99,6 @@ namespace SKYNET.Steamworks
         public bool bActive;
     };
 
-    public struct ControllerMotionData_t
-    {
-        // Sensor-fused absolute rotation; will drift in heading
-        float rotQuatX;
-        float rotQuatY;
-        float rotQuatZ;
-        float rotQuatW;
-
-        // Positional acceleration
-        float posAccelX;
-        float posAccelY;
-        float posAccelZ;
-
-        // Angular velocity
-        float rotVelX;
-        float rotVelY;
-        float rotVelZ;
-    };
-
     public struct InputDigitalActionData_t
     {
         // The current state of this action; will be true if currently pressed
@@ -176,11 +157,6 @@ namespace SKYNET.Steamworks
         uint m_nRemotePort;           // Only exists for compatibility with older authentication api's
     };
 
-    public struct SteamDatagramRelayAuthTicket { };
-    public struct SteamDatagramHostedAddress { };
-    public struct SteamDatagramGameCoordinatorServerLogin { };
-    public struct SteamRelayNetworkStatus_t { };
-
     //
     // Ping location / measurement
     //
@@ -208,7 +184,4 @@ namespace SKYNET.Steamworks
         uint m_eType;
         uint m_ulLocationID;
     };
-
-    [System.Runtime.InteropServices.UnmanagedFunctionPointer(System.Runtime.InteropServices.CallingConvention.Cdecl)]
-    public delegate void SteamAPIWarningMessageHook_t(int nSeverity, System.Text.StringBuilder pchDebugText);
 }

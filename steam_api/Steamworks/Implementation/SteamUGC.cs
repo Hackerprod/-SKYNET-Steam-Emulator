@@ -227,7 +227,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool AddRequiredTagGroup(UGCQueryHandle_t handle, IntPtr pTagGroups) // match any of the tags in this group 
+        public bool AddRequiredTagGroup(UGCQueryHandle_t handle, IntPtr pTagGroups) 
         {
             Write("AddRequiredTagGroup");
             return false;
@@ -768,6 +768,7 @@ namespace SKYNET.Steamworks.Implementation
                 pDetails.m_eFileType = EWorkshopFileType.k_EWorkshopFileTypeCommunity;
                 pDetails.m_nCreatorAppID = SteamEmulator.AppId;
                 pDetails.m_nConsumerAppID = SteamEmulator.AppId;
+
                 Marshal.StructureToPtr(pDetails, ptrDetails, false);
             }
             catch (Exception ex)

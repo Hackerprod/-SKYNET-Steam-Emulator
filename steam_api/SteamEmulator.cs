@@ -301,15 +301,25 @@ public class SteamEmulator
                 lastMsg = msg.ToString();
             }
 
-            if (lastMsg != msg.ToString())
-            {
-                if (sender.ToUpper() == "DEBUG") Console.ForegroundColor = ConsoleColor.Red;
-                else Console.ResetColor();
+            //if (lastMsg != msg.ToString())
+            //{
+            //    if (sender.ToUpper() == "DEBUG") Console.ForegroundColor = ConsoleColor.Red;
+            //    else Console.ResetColor();
 
-                Console.WriteLine($" {sender}: {msg}");
-                Log.AppEnd(sender + ": " + msg);
-                lastMsg = msg.ToString();
-            }
+            //    Console.WriteLine($" {sender}: {msg}");
+            //    Log.AppEnd(sender + ": " + msg);
+            //    lastMsg = msg.ToString();
+            //}
+        }
+
+        if (lastMsg != msg.ToString())
+        {
+            if (sender.ToUpper() == "DEBUG") Console.ForegroundColor = ConsoleColor.Red;
+            else Console.ResetColor();
+
+            Console.WriteLine($" {sender}: {msg}");
+            Log.AppEnd(sender + ": " + msg);
+            lastMsg = msg.ToString();
         }
     }
 

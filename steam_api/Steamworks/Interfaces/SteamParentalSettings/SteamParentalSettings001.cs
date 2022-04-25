@@ -11,12 +11,12 @@ namespace SKYNET.Interface
     {
         public bool BIsParentalLockEnabled(IntPtr _)
         {
-            return SteamEmulator.SteamParentalSettings.BIsParentalLockEnabled(_);
+            return SteamEmulator.SteamParentalSettings.BIsParentalLockEnabled();
         }
 
         public bool BIsParentalLockLocked(IntPtr _)
         {
-            return SteamEmulator.SteamParentalSettings.BIsParentalLockLocked(_);
+            return SteamEmulator.SteamParentalSettings.BIsParentalLockLocked();
         }
 
         public bool BIsAppBlocked(IntPtr _, uint nAppID)

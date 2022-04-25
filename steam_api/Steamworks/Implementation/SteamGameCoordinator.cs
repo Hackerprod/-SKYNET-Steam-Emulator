@@ -17,7 +17,7 @@ namespace SKYNET.Steamworks.Implementation
             InterfaceVersion = "SteamGameCoordinator";
             InMessages = new List<byte[]>();
 
-            // Connection Status test
+            // Connection Status "TEST"
             byte[] ConnectionStatus = new byte[] { 0xA4, 0x0F, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00 };
             InMessages.Add(ConnectionStatus);
         }

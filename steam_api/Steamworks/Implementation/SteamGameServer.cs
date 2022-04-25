@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Net;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
-using SKYNET;
-using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Types;
 using Steamworks;
+
 using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Implementation

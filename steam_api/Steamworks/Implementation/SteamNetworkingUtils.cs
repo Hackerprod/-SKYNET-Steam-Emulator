@@ -24,16 +24,16 @@ namespace SKYNET.Steamworks.Implementation
             Write("InitRelayNetworkAccess");
         }
 
-        public ESteamNetworkingAvailability GetRelayNetworkStatus(SteamRelayNetworkStatus_t pDetails)
+        public ESteamNetworkingAvailability GetRelayNetworkStatus(IntPtr pDetails)
         {
             Write("GetRelayNetworkStatus");
-            return default;
+            return 0;
         }
 
         public float GetLocalPingLocation(SteamNetworkPingLocation_t result)
         {
             Write("GetLocalPingLocation");
-            return default;
+            return 0;
         }
 
         public int EstimatePingTimeBetweenTwoLocations(SteamNetworkPingLocation_t location1, SteamNetworkPingLocation_t location2)

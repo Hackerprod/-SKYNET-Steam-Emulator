@@ -41,9 +41,9 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamInventory.GetAllItems((uint)pResultHandle);
         }
 
-        public bool GetItemsByID(IntPtr _, int pResultHandle, ulong pInstanceIDs, uint unCountInstanceIDs)
+        public bool GetItemsByID(IntPtr _, int pResultHandle, ref ulong pInstanceIDs, uint unCountInstanceIDs)
         {
-            return SteamEmulator.SteamInventory.GetItemsByID((uint)pResultHandle, pInstanceIDs, unCountInstanceIDs);
+            return SteamEmulator.SteamInventory.GetItemsByID((uint)pResultHandle, ref pInstanceIDs, unCountInstanceIDs);
         }
 
         public bool SerializeResult(IntPtr _, int resultHandle, IntPtr pOutBuffer, uint punOutBufferSize)
@@ -81,9 +81,9 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamInventory.ConsumeItem((uint)pResultHandle, itemConsume, unQuantity);
         }
 
-        public bool ExchangeItems(IntPtr _, int pResultHandle, IntPtr pArrayGenerate, IntPtr punArrayGenerateQuantity, uint unArrayGenerateLength, ulong pArrayDestroy, uint punArrayDestroyQuantity, uint unArrayDestroyLength)
+        public bool ExchangeItems(IntPtr _, int pResultHandle, IntPtr pArrayGenerate, IntPtr punArrayGenerateQuantity, uint unArrayGenerateLength, ref ulong[] pArrayDestroy, uint punArrayDestroyQuantity, uint unArrayDestroyLength)
         {
-            return SteamEmulator.SteamInventory.ExchangeItems((uint)pResultHandle, pArrayGenerate, punArrayGenerateQuantity, unArrayGenerateLength, pArrayDestroy, punArrayDestroyQuantity, unArrayDestroyLength);
+            return SteamEmulator.SteamInventory.ExchangeItems((uint)pResultHandle, pArrayGenerate, punArrayGenerateQuantity, unArrayGenerateLength, ref pArrayDestroy, punArrayDestroyQuantity, unArrayDestroyLength);
         }
 
         public bool TransferItemQuantity(IntPtr _, int pResultHandle, ulong itemIdSource, uint unQuantity, ulong itemIdDest)

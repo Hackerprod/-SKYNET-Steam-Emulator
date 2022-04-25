@@ -34,7 +34,7 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public void ClearAllKeyValues(IntPtr _)
+        public void ClearAllKeyValues()
         {
             Write($"ClearAllKeyValues");
         }
@@ -44,18 +44,18 @@ namespace SKYNET.Steamworks.Implementation
             Write($"SetKeyValue");
         }
 
-        public void NotifyShutdown(IntPtr _)
+        public void NotifyShutdown()
         {
             Write($"NotifyShutdown");
         }
 
-        public bool WasRestartRequested(IntPtr _)
+        public bool WasRestartRequested()
         {
             Write($"WasRestartRequested");
             return false;
         }
 
-        public void ForceHeartbeat(IntPtr _)
+        public void ForceHeartbeat()
         {
             Write($"ForceHeartbeat");
         }
@@ -72,7 +72,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public int GetNumMasterServers(IntPtr _)
+        public int GetNumMasterServers()
         {
             Write($"GetNumMasterServers");
             return 0;

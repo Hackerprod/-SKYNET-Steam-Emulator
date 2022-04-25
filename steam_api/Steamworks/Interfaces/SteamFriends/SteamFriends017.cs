@@ -51,9 +51,9 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamFriends.GetFriendPersonaName(steamID);
         }
 
-        public bool GetFriendGamePlayed(IntPtr _, ulong steamID, ref FriendGameInfo_t friend_game_info_out)
+        public bool GetFriendGamePlayed(IntPtr _, ulong steamID, IntPtr friend_game_info_out)
         {
-            return SteamEmulator.SteamFriends.GetFriendGamePlayed(steamID, ref friend_game_info_out);
+            return SteamEmulator.SteamFriends.GetFriendGamePlayed(steamID, friend_game_info_out);
         }
 
         public string GetFriendPersonaNameHistory(IntPtr _, ulong steamID, int index)
@@ -91,9 +91,9 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamFriends.GetFriendsGroupMembersCount(id);
         }
 
-        public void GetFriendsGroupMembersList(IntPtr _, short friendsGroupID, ref IntPtr steam_id_out, int max_steam_id_out)
+        public void GetFriendsGroupMembersList(IntPtr _, short friendsGroupID, IntPtr steam_id_out, int max_steam_id_out)
         {
-            SteamEmulator.SteamFriends.GetFriendsGroupMembersList(friendsGroupID, ref steam_id_out, max_steam_id_out);
+            SteamEmulator.SteamFriends.GetFriendsGroupMembersList(friendsGroupID, steam_id_out, max_steam_id_out);
         }
 
         public bool HasFriend(IntPtr _, ulong steamID, int iFriendFlags)
@@ -126,7 +126,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamFriends.GetClanActivityCounts(steamID, ref online, ref in_game, ref chatting);
         }
 
-        public SteamAPICall_t DownloadClanActivityCounts(IntPtr _, System.UInt64[] clans, int count)
+        public SteamAPICall_t DownloadClanActivityCounts(IntPtr _, UInt64[] clans, int count)
         {
             return SteamEmulator.SteamFriends.DownloadClanActivityCounts(clans, count);
         }

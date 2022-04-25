@@ -4,7 +4,8 @@ using SKYNET;
 using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using SKYNET.Types;
-using Steamworks;
+
+using SteamItemInstanceID_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -33,7 +34,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool ConsumeItem(uint pResultHandle, ulong itemConsume, uint unQuantity)
+        public bool ConsumeItem(uint pResultHandle, SteamItemInstanceID_t itemConsume, uint unQuantity)
         {
             Write($"ConsumeItem");
             return false;
@@ -50,7 +51,7 @@ namespace SKYNET.Steamworks.Implementation
             Write($"DestroyResult");
         }
 
-        public bool ExchangeItems(uint pResultHandle, IntPtr pArrayGenerate, IntPtr punArrayGenerateQuantity, uint unArrayGenerateLength, ulong pArrayDestroy, uint punArrayDestroyQuantity, uint unArrayDestroyLength)
+        public bool ExchangeItems(uint pResultHandle, IntPtr pArrayGenerate, IntPtr punArrayGenerateQuantity, uint unArrayGenerateLength, ref SteamItemInstanceID_t[] pArrayDestroy, uint punArrayDestroyQuantity, uint unArrayDestroyLength)
         {
             Write($"ExchangeItems");
             return false;
@@ -92,7 +93,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool GetItemsByID(uint pResultHandle, ulong pInstanceIDs, uint unCountInstanceIDs)
+        public bool GetItemsByID(uint pResultHandle, ref SteamItemInstanceID_t pInstanceIDs, uint unCountInstanceIDs)
         {
             Write($"GetItemsByID");
             return false;

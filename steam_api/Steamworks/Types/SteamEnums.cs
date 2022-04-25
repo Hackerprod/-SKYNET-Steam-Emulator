@@ -341,24 +341,6 @@ namespace SKYNET.Steamworks
         k_EXboxOrigin_DPad_West,
         k_EXboxOrigin_DPad_East,
     };
-    public enum ESteamInputType
-    {
-        k_ESteamInputType_Unknown,
-        k_ESteamInputType_SteamController,
-        k_ESteamInputType_XBox360Controller,
-        k_ESteamInputType_XBoxOneController,
-        k_ESteamInputType_GenericGamepad,       // DirectInput controllers
-        k_ESteamInputType_PS4Controller,
-        k_ESteamInputType_AppleMFiController,   // Unused
-        k_ESteamInputType_AndroidController,    // Unused
-        k_ESteamInputType_SwitchJoyConPair,     // Unused
-        k_ESteamInputType_SwitchJoyConSingle,   // Unused
-        k_ESteamInputType_SwitchProController,
-        k_ESteamInputType_MobileTouch,          // Steam Link App On-screen Virtual Controller
-        k_ESteamInputType_PS3Controller,        // Currently uses PS4 Origins
-        k_ESteamInputType_Count,
-        k_ESteamInputType_MaximumPossibleValue = 255,
-    };
     public enum GameSearchErrorCode_t : int
     {
         OK = 1,

@@ -15,7 +15,7 @@ namespace SKYNET.Steamworks.Implementation
             InterfaceVersion = "SteamParties";
         }
 
-        public void CancelReservation(uint ulBeacon, IntPtr steamIDUser)
+        public void CancelReservation(uint ulBeacon, ulong steamIDUser)
         {
             Write("CancelReservation");
         }
@@ -26,7 +26,7 @@ namespace SKYNET.Steamworks.Implementation
             return default;
         }
 
-        public SteamAPICall_t CreateBeacon(uint unOpenSlots, SteamPartyBeaconLocation_t pBeaconLocation, string pchConnectString, string pchMetadata)
+        public SteamAPICall_t CreateBeacon(uint unOpenSlots, IntPtr pBeaconLocation, string pchConnectString, string pchMetadata)
         {
             Write("CreateBeacon");
             return default;
@@ -38,7 +38,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool GetAvailableBeaconLocations(SteamPartyBeaconLocation_t pLocationList, uint uMaxNumLocations)
+        public bool GetAvailableBeaconLocations(IntPtr pLocationList, uint uMaxNumLocations)
         {
             Write("GetAvailableBeaconLocations");
             return false;
@@ -50,19 +50,19 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public bool GetBeaconDetails(uint ulBeaconID, IntPtr pSteamIDBeaconOwner, SteamPartyBeaconLocation_t pLocation, string pchMetadata, int cchMetadata)
+        public bool GetBeaconDetails(uint ulBeaconID, IntPtr pSteamIDBeaconOwner, IntPtr pLocation, string pchMetadata, int cchMetadata)
         {
             Write("GetBeaconDetails");
             return false;
         }
 
-        public bool GetBeaconLocationData(SteamPartyBeaconLocation_t BeaconLocation, ESteamPartyBeaconLocationData eData, string pchDataStringOut, int cchDataStringOut)
+        public bool GetBeaconLocationData(IntPtr BeaconLocation, int eData, string pchDataStringOut, int cchDataStringOut)
         {
             Write("GetBeaconLocationData");
             return false;
         }
 
-        public uint GetNumActiveBeacons(IntPtr _)
+        public uint GetNumActiveBeacons()
         {
             Write("GetNumActiveBeacons");
             return 0;
@@ -80,7 +80,7 @@ namespace SKYNET.Steamworks.Implementation
             return default;
         }
 
-        public void OnReservationCompleted(uint ulBeacon, IntPtr steamIDUser)
+        public void OnReservationCompleted(uint ulBeacon, ulong steamIDUser)
         {
             Write("OnReservationCompleted");
         }

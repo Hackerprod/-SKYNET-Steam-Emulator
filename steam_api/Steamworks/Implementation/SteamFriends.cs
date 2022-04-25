@@ -10,6 +10,7 @@ using SKYNET.Managers;
 using SKYNET.Properties;
 using SKYNET.Types;
 using Steamworks;
+
 using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Implementation
@@ -66,7 +67,7 @@ namespace SKYNET.Steamworks.Implementation
             return PersonaName;
         }
 
-        public void ActivateGameOverlay([MarshalAs(UnmanagedType.LPStr)] string friendsGroupID)
+        public void ActivateGameOverlay(string friendsGroupID)
         {
             Write($"ActivateGameOverlay {friendsGroupID}");
         }
@@ -76,7 +77,7 @@ namespace SKYNET.Steamworks.Implementation
             Write($"ActivateGameOverlayInviteDialog {steamIDLobby}");
         }
 
-        public void ActivateGameOverlayInviteDialogConnectString([MarshalAs(UnmanagedType.LPStr)] string pchConnectString)
+        public void ActivateGameOverlayInviteDialogConnectString(string pchConnectString)
         {
             Write($"ActivateGameOverlayInviteDialogConnectString {pchConnectString}");
         }
@@ -92,7 +93,7 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public void ActivateGameOverlayToUser([MarshalAs(UnmanagedType.LPStr)] string friendsGroupID, ulong steamID)
+        public void ActivateGameOverlayToUser(string friendsGroupID, ulong steamID)
         {
             Write($"ActivateGameOverlayToUser {friendsGroupID} {(CSteamID)steamID}");
 
@@ -107,7 +108,7 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public void ActivateGameOverlayToWebPage([MarshalAs(UnmanagedType.LPStr)] string pchURL, int eMode)
+        public void ActivateGameOverlayToWebPage(string pchURL, int eMode)
         {
             Write($"ActivateGameOverlayToWebPage {pchURL}");
         }
@@ -305,23 +306,34 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public bool GetFriendGamePlayed(ulong steamIDFriend, ref FriendGameInfo_t pFriendGameInfo)
+        public bool GetFriendGamePlayed(ulong steamIDFriend, IntPtr ptrFriendGameInfo)
         {
             Write($"GetFriendGamePlayed {steamIDFriend}");
 
-            pFriendGameInfo = new FriendGameInfo_t();
+            FriendGameInfo_t pFriendGameInfo = Marshal.PtrToStructure<FriendGameInfo_t>(ptrFriendGameInfo);
 
-            SteamFriend friend = Friends.Find(f => f.AccountId == (uint)steamIDFriend);
-            if (friend == null)
+            if (steamIDFriend == (ulong)SteamEmulator.SteamId)
             {
-                pFriendGameInfo.GameID = 0;
+                pFriendGameInfo.GameID = (uint)SteamEmulator.GameID;
                 pFriendGameInfo.GameIP = 0;
                 pFriendGameInfo.GamePort = 0;
-                return false; 
             }
-            pFriendGameInfo.GameID = friend.GameId;
-            pFriendGameInfo.GameIP = 0;
-            pFriendGameInfo.GamePort = 0;
+            else
+            {
+                SteamFriend friend = Friends.Find(f => f.AccountId == (uint)steamIDFriend);
+                if (friend == null)
+                {
+                    pFriendGameInfo.GameID = 0;
+                    pFriendGameInfo.GameIP = 0;
+                    pFriendGameInfo.GamePort = 0;
+                    return false;
+                }
+                pFriendGameInfo.GameID = friend.GameId;
+                pFriendGameInfo.GameIP = 0;
+                pFriendGameInfo.GamePort = 0;
+            }
+
+            Marshal.StructureToPtr(pFriendGameInfo, ptrFriendGameInfo, false);
             return true;
         }
 
@@ -397,7 +409,7 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public string GetFriendRichPresence(ulong steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchKey)
+        public string GetFriendRichPresence(ulong steamIDFriend, string pchKey)
         {
             Write($"GetFriendRichPresence [{steamIDFriend}]: {pchKey}");
             if (RichPresence.ContainsKey(pchKey))
@@ -437,7 +449,7 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public void GetFriendsGroupMembersList(short friendsGroupID, ref IntPtr pOutSteamIDMembers, int nMembersCount)
+        public void GetFriendsGroupMembersList(short friendsGroupID, IntPtr pOutSteamIDMembers, int nMembersCount)
         {
             Write($"GetFriendsGroupMembersList {friendsGroupID}");
             Marshal.StructureToPtr(SteamEmulator.SteamId, pOutSteamIDMembers, false);
@@ -457,7 +469,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetSmallFriendAvatar(ulong steamIDFriend)
         {
-            Write($"GetSmallFriendAvatar {steamIDFriend}");
+            Write($"GetSmallFriendAvatar {(CSteamID)steamIDFriend}");
             if (Avatars.TryGetValue(steamIDFriend, out ImageAvatar avatar))
             {
                 return avatar.Small;
@@ -467,7 +479,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetMediumFriendAvatar(ulong steamIDFriend)
         {
-            Write($"GetMediumFriendAvatar {steamIDFriend}");
+            Write($"GetMediumFriendAvatar {(CSteamID)steamIDFriend}");
             if (Avatars.TryGetValue(steamIDFriend, out ImageAvatar avatar))
             {
                 return avatar.Medium;
@@ -477,7 +489,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetLargeFriendAvatar(ulong steamIDFriend)
         {
-            Write($"GetLargeFriendAvatar {steamIDFriend}");
+            Write($"GetLargeFriendAvatar {(CSteamID)steamIDFriend}");
             if (Avatars.TryGetValue(steamIDFriend, out ImageAvatar avatar))
             {
                 return avatar.Large;
@@ -509,7 +521,7 @@ namespace SKYNET.Steamworks.Implementation
             {
                 return "";
             }
-            return friend.PersonaName;
+            return null;
         }
 
         public uint GetUserRestrictions()
@@ -525,7 +537,7 @@ namespace SKYNET.Steamworks.Implementation
             return friend != null;
         }
 
-        public bool InviteUserToGame(ulong steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchConnectString)
+        public bool InviteUserToGame(ulong steamIDFriend, string pchConnectString)
         {
             Write($"InviteUserToGame {steamIDFriend} {pchConnectString}");
             return false;
@@ -587,13 +599,13 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool RegisterProtocolInOverlayBrowser([MarshalAs(UnmanagedType.LPStr)] string pchProtocol)
+        public bool RegisterProtocolInOverlayBrowser(string pchProtocol)
         {
             Write($"RegisterProtocolInOverlayBrowser {pchProtocol}");
             return false;
         }
 
-        public bool ReplyToFriendMessage(ulong steamIDFriend, [MarshalAs(UnmanagedType.LPStr)] string pchMsgToSend)
+        public bool ReplyToFriendMessage(ulong steamIDFriend, string pchMsgToSend)
         {
             Write($"ReplyToFriendMessage {steamIDFriend} {pchMsgToSend}");
             return false;
@@ -613,11 +625,11 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool RequestUserInformation(ulong steamIDUser, bool bRequireNameOnly)
         {
-            Write($"RequestUserInformation {steamIDUser}");
+            Write($"RequestUserInformation {(CSteamID)steamIDUser}");
             return false;
         }
 
-        public bool SendClanChatMessage(ulong steamIDClanChat, [MarshalAs(UnmanagedType.LPStr)] string pchText)
+        public bool SendClanChatMessage(ulong steamIDClanChat, string pchText)
         {
             Write($"SendClanChatMessage {steamIDClanChat} {pchText}");
             return false;
@@ -634,7 +646,7 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public SteamAPICall_t SetPersonaName([MarshalAs(UnmanagedType.LPStr)] string pchPersonaName)
+        public SteamAPICall_t SetPersonaName(string pchPersonaName)
         {
             Write($"SetPersonaName {pchPersonaName}");
             SteamAPICall_t APICall = k_uAPICallInvalid;
@@ -657,7 +669,7 @@ namespace SKYNET.Steamworks.Implementation
             Write($"SetPlayedWith {steamIDUserPlayedWith}");
         }
 
-        public bool SetRichPresence([MarshalAs(UnmanagedType.LPStr)] string pchKey, [MarshalAs(UnmanagedType.LPStr)] string pchValue)
+        public bool SetRichPresence(string pchKey, string pchValue)
         {
             Write($"SetRichPresence {pchKey} {pchValue}");
 
@@ -685,9 +697,9 @@ namespace SKYNET.Steamworks.Implementation
 
         public (int, int) GetImageSize(int index)
         {
-            if (DefaultAvatar.Small == index)   return (32, 32);
-            if (DefaultAvatar.Medium == index)  return (64, 64);
-            if (DefaultAvatar.Large == index)   return (184, 184);
+            if (DefaultAvatar.Small == index) return (32, 32);
+            if (DefaultAvatar.Medium == index) return (64, 64);
+            if (DefaultAvatar.Large == index) return (184, 184);
 
             foreach (var KV in SteamEmulator.SteamFriends.Avatars)
             {
@@ -702,9 +714,9 @@ namespace SKYNET.Steamworks.Implementation
 
         public ImageAvatar GetImageAvatar(int index)
         {
-            if (DefaultAvatar.Small == index)   return DefaultAvatar;
-            if (DefaultAvatar.Medium == index)  return DefaultAvatar;
-            if (DefaultAvatar.Large == index)   return DefaultAvatar;
+            if (DefaultAvatar.Small == index) return DefaultAvatar;
+            if (DefaultAvatar.Medium == index) return DefaultAvatar;
+            if (DefaultAvatar.Large == index) return DefaultAvatar;
 
             foreach (var KV in Avatars)
             {

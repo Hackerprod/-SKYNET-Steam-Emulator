@@ -159,7 +159,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public ESteamNetworkingAvailability InitAuthentication(IntPtr _)
+        public ESteamNetworkingAvailability InitAuthentication()
         {
             Write("InitAuthentication");
             return ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Current;
@@ -171,7 +171,7 @@ namespace SKYNET.Steamworks.Implementation
             return ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Current;
         }
 
-        public uint CreatePollGroup(IntPtr _)
+        public uint CreatePollGroup()
         {
             Write("CreatePollGroup");
             return 0;
@@ -195,13 +195,13 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public bool ReceivedRelayAuthTicket(IntPtr pvTicket, int cbTicket, SteamDatagramRelayAuthTicket pOutParsedTicket)
+        public bool ReceivedRelayAuthTicket(IntPtr pvTicket, int cbTicket, IntPtr pOutParsedTicket)
         {
             Write("ReceivedRelayAuthTicket");
             return false;
         }
 
-        public int FindRelayAuthTicketForServer(IntPtr identityGameServer, int nVirtualPort, SteamDatagramRelayAuthTicket pOutParsedTicket)
+        public int FindRelayAuthTicketForServer(IntPtr identityGameServer, int nVirtualPort, IntPtr pOutParsedTicket)
         {
             Write("FindRelayAuthTicketForServer");
             return 0;
@@ -213,19 +213,19 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public uint GetHostedDedicatedServerPort(IntPtr _)
+        public uint GetHostedDedicatedServerPort()
         {
             Write("GetHostedDedicatedServerPort");
             return 0;
         }
 
-        public uint GetHostedDedicatedServerPOPID(IntPtr _)
+        public uint GetHostedDedicatedServerPOPID()
         {
             Write("GetHostedDedicatedServerPOPID");
             return 0;
         }
 
-        public EResult GetHostedDedicatedServerAddress(SteamDatagramHostedAddress pRouting)
+        public EResult GetHostedDedicatedServerAddress(IntPtr pRouting)
         {
             Write("GetHostedDedicatedServerAddress");
             return EResult.k_EResultNone;
@@ -237,9 +237,10 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public EResult GetGameCoordinatorServerLogin(SteamDatagramGameCoordinatorServerLogin pLoginInfo, int pcbSignedBlob, IntPtr pBlob)
+        public EResult GetGameCoordinatorServerLogin(IntPtr pLoginInfo, int pcbSignedBlob, IntPtr pBlob)
         {
             Write("GetGameCoordinatorServerLogin");
+            // SteamDatagramGameCoordinatorServerLogin pLoginInfo
             return default;
         }
 

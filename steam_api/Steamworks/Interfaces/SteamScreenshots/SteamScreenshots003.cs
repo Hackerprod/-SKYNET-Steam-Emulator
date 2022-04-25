@@ -17,7 +17,7 @@ namespace SKYNET.Interface
 
         public void TriggerScreenshot(IntPtr _)
         {
-            SteamEmulator.SteamScreenshots.TriggerScreenshot(_);
+            SteamEmulator.SteamScreenshots.TriggerScreenshot();
         }
 
         public void HookScreenshots(IntPtr _, bool bHook)
@@ -42,7 +42,7 @@ namespace SKYNET.Interface
 
         public bool IsScreenshotsHooked(IntPtr _)
         {
-            return SteamEmulator.SteamScreenshots.IsScreenshotsHooked(_);
+            return SteamEmulator.SteamScreenshots.IsScreenshotsHooked();
         }
 
         public uint AddVRScreenshotToLibrary(IntPtr _, int eType, string pchFilename, string pchVRFilename)

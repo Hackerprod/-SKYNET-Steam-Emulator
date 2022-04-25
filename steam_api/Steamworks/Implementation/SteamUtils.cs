@@ -7,6 +7,7 @@ using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Steamworks;
 using Steamworks;
+
 using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Implementation
@@ -288,13 +289,13 @@ namespace SKYNET.Steamworks.Implementation
 
         public int FilterText(string pchOutFilteredText, uint nByteSizeOutFilteredText, string pchInputMessage, bool bLegalOnly)
         {
-            Write($"FilterText {pchOutFilteredText}");
+            Write($"FilterText");
             return 0;
         }
 
         public int FilterText(int eContext, ulong sourceSteamID, string pchInputMessage, string pchOutFilteredText, uint nByteSizeOutFilteredText)
         {
-            Write($"FilterText {pchInputMessage}");
+            Write($"FilterText");
             return 0;
         }
 

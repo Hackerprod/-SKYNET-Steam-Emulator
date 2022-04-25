@@ -25,7 +25,7 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public void TriggerScreenshot(IntPtr _)
+        public void TriggerScreenshot()
         {
             Write("TriggerScreenshot");
         }
@@ -53,7 +53,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool IsScreenshotsHooked(IntPtr _)
+        public bool IsScreenshotsHooked()
         {
             Write("IsScreenshotsHooked");
             return false;

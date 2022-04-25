@@ -589,23 +589,6 @@ namespace SKYNET.Steamworks.Implementation
             Write("EndFileWriteBatch");
             return true;
         }
-
-        private unsafe byte[] ReadBytes(IntPtr buffer, int count)
-        {
-            byte[] array = new byte[count];
-            byte* ptr = (byte*)(void*)buffer;
-            for (int i = 0; i < count; i++)
-            {
-                array[i] = ptr[i];
-            }
-            return array;
-        }
-
-
-        public void PostCallback(int callback_id, SKYNET.Callback.Buffer b)
-        {
-            CallbackHandler.PostCallback(1, 1, callback_id, b);
-        }
     }
 }
 

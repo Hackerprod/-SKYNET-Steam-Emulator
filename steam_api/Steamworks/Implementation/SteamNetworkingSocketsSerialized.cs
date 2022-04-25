@@ -26,7 +26,7 @@ namespace SKYNET.Steamworks.Implementation
         public ulong GetCertAsync()
         {
             Write("GetCertAsync");
-            return default;
+            return 0;
         }
 
         public int GetNetworkConfigJSON(IntPtr buf, uint cbBuf)

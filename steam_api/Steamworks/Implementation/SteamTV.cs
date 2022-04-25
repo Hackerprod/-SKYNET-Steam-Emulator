@@ -33,7 +33,7 @@ namespace SKYNET.Steamworks.Implementation
             Write($"AddTimelineMarker");
         }
 
-        public void RemoveTimelineMarker(IntPtr _)
+        public void RemoveTimelineMarker()
         {
             Write($"RemoveTimelineMarker");
         }
