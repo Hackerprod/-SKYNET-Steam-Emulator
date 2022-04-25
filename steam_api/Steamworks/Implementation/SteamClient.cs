@@ -16,10 +16,10 @@ namespace SKYNET.Steamworks.Implementation
             InterfaceVersion = "SteamClient";
         }
 
-        public Int32 CreateSteamPipe()
+        public HSteamPipe CreateSteamPipe()
         {
             Write("CreateSteamPipe");
-            return (int)SteamEmulator.CreateSteamPipe();
+            return SteamEmulator.CreateSteamPipe();
         }
 
         public bool BReleaseSteamPipe(HSteamPipe hSteamPipe)
@@ -57,7 +57,7 @@ namespace SKYNET.Steamworks.Implementation
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public void SetLocalIPBinding(uint unIP, uint usPort)
+        public void SetLocalIPBinding(IntPtr unIP, uint usPort)
         {
             Write("SetLocalIPBinding");
         }

@@ -10,6 +10,6 @@ namespace SKYNET.Plugin
     {
         uint Initialize();
         void MessageFromGame(byte[] bytes);
-        EventHandler<byte[]> IsMessageAvailable { get; set; }
+        EventHandler<Dictionary <uint, byte[]>> IsMessageAvailable { get; set; }
     }
 }

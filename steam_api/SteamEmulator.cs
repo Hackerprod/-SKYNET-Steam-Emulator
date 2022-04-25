@@ -254,9 +254,12 @@ public class SteamEmulator
         }
     }
 
-    private static void IsMessageAvailable(object sender, byte[] gcMessage)
+    private static void IsMessageAvailable(object sender, Dictionary<uint, byte[]> gcMessages)
     {
-        SteamGameCoordinator.PushMessage(gcMessage);
+        foreach (var msg in gcMessages)
+        {
+            SteamGameCoordinator.PushMessage(msg.Key, msg.Value);
+        }
     }
 
     public static HSteamUser CreateSteamUser()

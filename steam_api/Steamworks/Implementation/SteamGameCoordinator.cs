@@ -5,27 +5,27 @@ using System.Collections.Generic;
 using SKYNET.Callback;
 using System.Linq;
 using SKYNET.Managers;
+using System.Collections.Concurrent;
 
 namespace SKYNET.Steamworks.Implementation
 {
     public class SteamGameCoordinator : ISteamInterface
     {
-        private List<byte[]> InMessages;
+        private ConcurrentDictionary<uint, byte[]> InMessages;
 
         public SteamGameCoordinator()
         {
             InterfaceVersion = "SteamGameCoordinator";
-            InMessages = new List<byte[]>();
+            InMessages = new ConcurrentDictionary<uint, byte[]>();
 
-            // Connection Status "TEST"
+            // CMsgConnectionStatus serialized
             byte[] ConnectionStatus = new byte[] { 0xA4, 0x0F, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00 };
-            InMessages.Add(ConnectionStatus);
+            InMessages.TryAdd(4009U, ConnectionStatus);
         }
 
-        public void PushMessage(byte[] message)
+        public void PushMessage(uint MsgType, byte[] message)
         {
-            InMessages.Add(message);
-            uint MsgSize = (uint)Marshal.SizeOf(message);
+            InMessages.TryAdd(MsgType, message);
 
             GCMessageAvailable_t data = new GCMessageAvailable_t();
             data.m_nMessageSize = (uint)message.Length;
@@ -62,7 +62,8 @@ namespace SKYNET.Steamworks.Implementation
             uint msgType = GetGCMsg(punMsgType);
             Write($"RetrieveMessage [{msgType}]");
             EGCResults Result = EGCResults.k_EGCResultNoMessage;
-            uint size = 0;
+            uint Size = 0;
+            uint MsgType = 0;
 
             MutexHelper.Wait("RetrieveMessage", delegate
             {
@@ -70,13 +71,15 @@ namespace SKYNET.Steamworks.Implementation
                 {
                     try
                     {
-                        byte[] msg = InMessages[0];
+                        
+                        var msg = InMessages.First();
 
-                        Marshal.Copy(msg, 0, pubDest, msg.Length);
-                        size = (uint)msg.Length;
-
-                        InMessages.RemoveAt(0);
+                        Marshal.Copy(msg.Value, 0, pubDest, msg.Value.Length);
+                        Size = (uint)msg.Value.Length;
+                        MsgType = msg.Key;
                         Result = EGCResults.k_EGCResultOK;
+
+                        InMessages.TryRemove(msg.Key, out _); 
                     }
                     catch
                     {
@@ -85,7 +88,9 @@ namespace SKYNET.Steamworks.Implementation
                 }
             });
 
-            pcubMsgSize = size;
+            punMsgType = MsgType;
+
+            pcubMsgSize = Size;
             return Result;
         }
 

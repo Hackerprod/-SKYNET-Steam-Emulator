@@ -14,7 +14,7 @@ namespace SKYNET.Interface
     [Interface("SteamClient020")]
     public class SteamClient020 : ISteamInterface
     {
-        public int CreateSteamPipe(IntPtr _)
+        public HSteamPipe CreateSteamPipe(IntPtr _)
         {
             return SteamEmulator.SteamClient.CreateSteamPipe();
         }
@@ -49,7 +49,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamClient.GetISteamGameServer(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public void SetLocalIPBinding(IntPtr _, uint unIP, uint usPort)
+        public void SetLocalIPBinding(IntPtr _, IntPtr unIP, uint usPort)
         {
             SteamEmulator.SteamClient.SetLocalIPBinding(unIP, usPort);
         }
@@ -114,16 +114,13 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamClient.GetISteamGameSearch(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        //#region STEAM_PRIVATE_API( virtual void RunFrame() = 0; )
+        // Deprecated. Applications should use SteamAPI_RunCallbacks() or SteamGameServer_RunCallbacks() instead.
+        public void RunFrame(IntPtr _)  
+        {
+            SteamEmulator.SteamClient.RunFrame();
+        }
 
-        //private void RunFrame(IntPtr _)
-        //{
-        //    SteamEmulator.SteamClient.RunFrame();
-        //}
-
-        //#endregion
-
-        public uint GetIPCCallCount(IntPtr _)
+        public UInt32 GetIPCCallCount(IntPtr _)
         {
             return SteamEmulator.SteamClient.GetIPCCallCount();
         }
@@ -143,14 +140,11 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamClient.GetISteamHTTP(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        //#region STEAM_PRIVATE_API( virtual void *DEPRECATED_GetISteamUnifiedMessages( HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion ) = 0 ; )
-
-        //private void DEPRECATED_GetISteamUnifiedMessages(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
-        //{
-        //    SteamEmulator.SteamClient.DEPRECATED_GetISteamUnifiedMessages(hSteamUser, hSteamPipe, pchVersion);
-        //}
-
-        //#endregion
+        // Deprecated - the ISteamUnifiedMessages interface is no longer intended for public consumption.        
+        public void DEPRECATED_GetISteamUnifiedMessages(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)  
+        {
+            SteamEmulator.SteamClient.DEPRECATED_GetISteamUnifiedMessages(hSteamUser, hSteamPipe, pchVersion);
+        }
 
         public IntPtr GetISteamController(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
@@ -182,32 +176,23 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamClient.GetISteamHTMLSurface(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        //#region STEAM_PRIVATE_API( virtual void DEPRECATED_Set_SteamAPI_CPostAPIResultInProcess( void (*)() ) = 0; )
+        // Deprecated - Helper functions for internal Steam usage
+        public void DEPRECATED_Set_SteamAPI_CPostAPIResultInProcess(IntPtr _, IntPtr Arg)
+        {
+            SteamEmulator.SteamClient.DEPRECATED_Set_SteamAPI_CPostAPIResultInProcess(Arg);
+        }
 
-        //private void DEPRECATED_Set_SteamAPI_CPostAPIResultInProcess(IntPtr _, IntPtr Arg)
-        //{
-        //    SteamEmulator.SteamClient.DEPRECATED_Set_SteamAPI_CPostAPIResultInProcess(Arg);
-        //}
+        // Deprecated - Helper functions for internal Steam usage
+        public void DEPRECATED_Remove_SteamAPI_CPostAPIResultInProcess(IntPtr _, IntPtr Arg)
+        {
+            SteamEmulator.SteamClient.DEPRECATED_Remove_SteamAPI_CPostAPIResultInProcess(Arg);
+        }
 
-        //#endregion
-
-        //#region STEAM_PRIVATE_API( virtual void DEPRECATED_Remove_SteamAPI_CPostAPIResultInProcess( void (*)() ) = 0; )
-
-        //private void DEPRECATED_Remove_SteamAPI_CPostAPIResultInProcess(IntPtr _, IntPtr Arg)
-        //{
-        //    SteamEmulator.SteamClient.DEPRECATED_Remove_SteamAPI_CPostAPIResultInProcess(Arg);
-        //}
-
-        //#endregion
-
-        //#region STEAM_PRIVATE_API( virtual void Set_SteamAPI_CCheckCallbackRegisteredInProcess( SteamAPI_CheckCallbackRegistered_t func ) = 0; )
-
-        //private void Set_SteamAPI_CCheckCallbackRegisteredInProcess(IntPtr _, IntPtr Arg)
-        //{
-        //    SteamEmulator.SteamClient.Set_SteamAPI_CCheckCallbackRegisteredInProcess(Arg);
-        //}
-
-        //#endregion
+        // Deprecated - Helper functions for internal Steam usage
+        public void Set_SteamAPI_CCheckCallbackRegisteredInProcess(IntPtr _, IntPtr Arg)
+        {
+            SteamEmulator.SteamClient.Set_SteamAPI_CCheckCallbackRegisteredInProcess(Arg);
+        }
 
         public IntPtr GetISteamInventory(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
@@ -239,14 +224,23 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamClient.GetISteamRemotePlay(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        //#region STEAM_PRIVATE_API( virtual void DestroyAllInterfaces() = 0; )
+        public void DestroyAllInterfaces(IntPtr _)
+        {
+            SteamEmulator.SteamClient.DestroyAllInterfaces();
+        }
 
-        //private void DestroyAllInterfaces(IntPtr _)
-        //{
-        //    SteamEmulator.SteamClient.DestroyAllInterfaces();
-        //}
+        // Inline Methods
 
-        //#endregion
+        public IntPtr SteamClient(IntPtr _)
+        {
+            SteamEmulator.Write("DEBUG", "SteamClient in SteamClient XD");
+            return InterfaceManager.FindOrCreateInterface("SteamClient020");
+        }
 
+        public IntPtr SteamGameServerClient(IntPtr _)
+        {
+            SteamEmulator.Write("DEBUG", "SteamGameServerClient in SteamClient XD");
+            return InterfaceManager.FindOrCreateInterface("SteamClient020");
+        }
     }
 }
