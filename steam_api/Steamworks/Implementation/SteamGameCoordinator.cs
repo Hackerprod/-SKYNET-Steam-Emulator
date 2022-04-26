@@ -48,24 +48,28 @@ namespace SKYNET.Steamworks.Implementation
         public bool IsMessageAvailable(ref uint pcubMsgSize)
         {
             Write("IsMessageAvailable");
-            if (InMessages.Any())
+            var Result = false;
+            uint MsgSize = 0;
+            MutexHelper.Wait("GameCoordinator", delegate
             {
-                pcubMsgSize = (uint)InMessages[0].Length;
-                Write($"Found Message Available, {pcubMsgSize} bytes");
-                return true;
-            }
-            return false;
+                if (InMessages.Any())
+                {
+                    MsgSize = (uint)InMessages.First().Value.Length;
+                    Result = true;
+                }
+            });
+            pcubMsgSize = MsgSize;
+            return Result;
         }
 
         public EGCResults RetrieveMessage(ref uint punMsgType, IntPtr pubDest, uint cubDest, ref uint pcubMsgSize)
         {
-            uint msgType = GetGCMsg(punMsgType);
-            Write($"RetrieveMessage [{msgType}]");
+            Write($"RetrieveMessage");
             EGCResults Result = EGCResults.k_EGCResultNoMessage;
             uint Size = 0;
             uint MsgType = 0;
 
-            MutexHelper.Wait("RetrieveMessage", delegate
+            MutexHelper.Wait("GameCoordinator", delegate
             {
                 if (InMessages.Any())
                 {
@@ -89,8 +93,8 @@ namespace SKYNET.Steamworks.Implementation
             });
 
             punMsgType = MsgType;
-
             pcubMsgSize = Size;
+
             return Result;
         }
 

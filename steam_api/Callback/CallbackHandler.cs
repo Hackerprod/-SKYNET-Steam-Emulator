@@ -10,13 +10,13 @@ namespace SKYNET.Callback
     {
         public static Dictionary<int, Queue<InternalCallbackMsg>> PendingCallbacks { get; set; } = new Dictionary<int, Queue<InternalCallbackMsg>>();
 
-        public static void PostCallback(int pipe_id, int user_id, int callback_id, Buffer b)
+        public static void PostCallback(int pipe_id, int user_id, int callback_id, object b)
         {
             var new_callback = new InternalCallbackMsg
             {
                 user_id = user_id,
                 callback_id = (uint)callback_id,
-                data = b.GetBuffer(),
+                //data = b.GetBuffer(),
             };
 
             if (PendingCallbacks.TryGetValue(pipe_id, out var cb_queue))
@@ -36,4 +36,11 @@ namespace SKYNET.Callback
         }
     }
 
+    [Serializable]
+    public class InternalCallbackMsg
+    {
+        public int user_id;
+        public uint callback_id;
+        public byte[] data;
+    }
 }

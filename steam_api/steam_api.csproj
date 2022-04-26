@@ -72,14 +72,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Callback\CallbackBuffer.cs" />
     <Compile Include="Callback\CallbackHandler.cs" />
-    <Compile Include="Callback\CallbackIdentityAttribute.cs" />
-    <Compile Include="Callback\CallBackMsg.cs" />
     <Compile Include="Callback\CallbackEnums.cs" />
     <Compile Include="Callback\CallbackTypes.cs" />
     <Compile Include="Callback\CCallbackBase.cs" />
-    <Compile Include="Callback\InteropHelp.cs" />
     <Compile Include="Helpers\ImageHelper.cs" />
     <Compile Include="Helpers\IniParser.cs" />
     <Compile Include="Helpers\MutexHelper.cs" />

@@ -192,7 +192,13 @@ namespace SKYNET.Steamworks.Implementation
         public bool SetHTTPRequestContextValue(HTTPRequestHandle hRequest, ulong ulContextValue)
         {
             Write($"SetHTTPRequestContextValue");
-            return true;
+            HTTPRequest request = HTTPRequests.Find(r => r.Handle == hRequest);
+            if (request == null)
+            {
+                return false;
+            }
+            request.ContextValue = ulContextValue;
+            return true; 
         }
 
         public bool SetHTTPRequestCookieContainer(HTTPRequestHandle hRequest, HTTPCookieContainerHandle hCookieContainer)
@@ -215,7 +221,6 @@ namespace SKYNET.Steamworks.Implementation
             {
                 return false;
             }
-
             return true;
         }
 

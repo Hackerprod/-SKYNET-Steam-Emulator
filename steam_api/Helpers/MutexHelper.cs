@@ -33,20 +33,20 @@ namespace SKYNET.Helper
 
         public static void Wait(string MutexName, Action code)
         {
-            //Mutex mutex = GetOrCreate(MutexName);
+            Mutex mutex = GetOrCreate(MutexName);
 
             try
             {
-                //mutex.WaitOne();
+                mutex.WaitOne();
                 code();
             }
             catch
             {
-                //
+
             }
             finally
             {
-                //mutex.ReleaseMutex();
+                mutex.ReleaseMutex();
             }
         }
     }

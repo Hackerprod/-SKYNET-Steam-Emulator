@@ -1,3 +1,4 @@
+using SKYNET.Managers;
 using Steamworks;
 using System;
 using SteamAPICall_t = System.UInt64;
@@ -217,19 +218,24 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamGameServer.BUpdateUserData(steamIDUser, pchPlayerName, uScore);
         }
 
-
-
-        private void SetMasterServerHeartbeatInterval_DEPRECATED(IntPtr _, int iHeartbeatInterval)
+        // Deprecated functions.  These will be removed in a future version of the SDK.
+        public void SetMasterServerHeartbeatInterval_DEPRECATED(IntPtr _, int iHeartbeatInterval)
         {
             SteamEmulator.SteamGameServer.SetMasterServerHeartbeatInterval_DEPRECATED(iHeartbeatInterval);
         }
 
-        private void ForceMasterServerHeartbeat_DEPRECATED(IntPtr _)
+        public void ForceMasterServerHeartbeat_DEPRECATED(IntPtr _)
         {
             SteamEmulator.SteamGameServer.ForceMasterServerHeartbeat_DEPRECATED();
         }
 
+        // Inline functions 
 
+        public IntPtr SteamGameServer(IntPtr _)
+        {
+            SteamEmulator.Write("DEBUG", "SteamClient in SteamClient XD");
+            return InterfaceManager.FindOrCreateInterface("SteamGameServer014");
+        }
 
 
     }

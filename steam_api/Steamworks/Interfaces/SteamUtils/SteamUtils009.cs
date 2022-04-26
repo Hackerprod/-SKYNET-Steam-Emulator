@@ -78,7 +78,11 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUtils.GetAPICallResult(hSteamAPICall, pCallback, cubCallback, iCallbackExpected, ref pbFailed);
         }
 
-        // 	STEAM_PRIVATE_API( virtual void RunFrame() = 0; )
+        // Deprecated. Applications should use SteamAPI_RunCallbacks() instead. Game servers do not need to call this function.
+        public void RunFrame(IntPtr _)
+        {
+            SteamEmulator.SteamUtils.RunFrame();
+        }
 
         public uint GetIPCCallCount(IntPtr _)
         {

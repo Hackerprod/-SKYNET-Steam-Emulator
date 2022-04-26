@@ -4,10 +4,10 @@ using SKYNET.Types;
 using Steamworks;
 
 using SteamAPICall_t = System.UInt64;
+using HAuthTicket = System.UInt32;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    using HAuthTicket = UInt32;
     public class SteamGameServer : ISteamInterface
     {
         private GameServerData ServerData;
