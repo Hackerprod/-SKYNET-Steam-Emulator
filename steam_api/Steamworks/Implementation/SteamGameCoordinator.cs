@@ -12,15 +12,18 @@ namespace SKYNET.Steamworks.Implementation
     public class SteamGameCoordinator : ISteamInterface
     {
         private ConcurrentDictionary<uint, byte[]> InMessages;
+        private List<byte[]> Messages;
 
         public SteamGameCoordinator()
         {
             InterfaceVersion = "SteamGameCoordinator";
             InMessages = new ConcurrentDictionary<uint, byte[]>();
+            Messages = new List<byte[]>();
 
             // CMsgConnectionStatus serialized
             byte[] ConnectionStatus = new byte[] { 0xA4, 0x0F, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00 };
             InMessages.TryAdd(4009U, ConnectionStatus);
+            Messages.Add(ConnectionStatus);
         }
 
         public void PushMessage(uint MsgType, byte[] message)
@@ -49,52 +52,54 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("IsMessageAvailable");
             var Result = false;
-            uint MsgSize = 0;
-            MutexHelper.Wait("GameCoordinator", delegate
+            //if (InMessages.Any())
+            //{
+            //    pcubMsgSize = (uint)InMessages.First().Value.Length;
+            //    Result = true;
+            //}
+            if (Messages.Any())
             {
-                if (InMessages.Any())
-                {
-                    MsgSize = (uint)InMessages.First().Value.Length;
-                    Result = true;
-                }
-            });
-            pcubMsgSize = MsgSize;
+                pcubMsgSize = (uint)Messages[0].Length;
+                Result = true;
+            }
             return Result;
         }
 
         public EGCResults RetrieveMessage(ref uint punMsgType, IntPtr pubDest, uint cubDest, ref uint pcubMsgSize)
         {
-            Write($"RetrieveMessage");
+            Write($"RetrieveMessage cubDest{cubDest}");
             EGCResults Result = EGCResults.k_EGCResultNoMessage;
-            uint Size = 0;
-            uint MsgType = 0;
 
-            MutexHelper.Wait("GameCoordinator", delegate
+            if (Messages.Any())
             {
-                if (InMessages.Any())
-                {
-                    try
-                    {
-                        
-                        var msg = InMessages.First();
+                var msg = Messages[0];
 
-                        Marshal.Copy(msg.Value, 0, pubDest, msg.Value.Length);
-                        Size = (uint)msg.Value.Length;
-                        MsgType = msg.Key;
-                        Result = EGCResults.k_EGCResultOK;
+                Marshal.Copy(msg, 0, pubDest, msg.Length);
+                pcubMsgSize = (uint)msg.Length;
+                punMsgType = 4009;
+                Result = EGCResults.k_EGCResultOK;
 
-                        InMessages.TryRemove(msg.Key, out _); 
-                    }
-                    catch
-                    {
+                Messages.RemoveAt(0);
+            }
 
-                    }
-                }
-            });
+            //if (InMessages.Any())
+            //{
+            //    try
+            //    {
+            //        var msg = InMessages.First();
 
-            punMsgType = MsgType;
-            pcubMsgSize = Size;
+            //        Marshal.Copy(msg.Value, 0, pubDest, msg.Value.Length);
+            //        pcubMsgSize = (uint)msg.Value.Length;
+            //        punMsgType = msg.Key;
+            //        Result = EGCResults.k_EGCResultOK;
 
+            //        InMessages.TryRemove(msg.Key, out _);
+            //    }
+            //    catch
+            //    {
+
+            //    }
+            //}
             return Result;
         }
 

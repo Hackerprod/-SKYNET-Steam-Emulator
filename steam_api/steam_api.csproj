@@ -102,6 +102,8 @@
     <Compile Include="Helpers\Log.cs" />
     <Compile Include="Helpers\modCommon.cs" />
     <Compile Include="Managers\MemoryManager.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamInput\SteamInput006.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamInput\SteamInput002.cs" />
     <Compile Include="Steamworks\Types\SteamIPAddress_t.cs" />
     <Compile Include="Steamworks\Types\SteamNetworkingIPAddr.cs" />
     <Compile Include="Types\CSteamID.cs" />

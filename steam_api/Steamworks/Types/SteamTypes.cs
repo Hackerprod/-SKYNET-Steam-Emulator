@@ -99,14 +99,14 @@ namespace SKYNET.Steamworks
         public bool bActive;
     };
 
-    public struct InputDigitalActionData_t
-    {
-        // The current state of this action; will be true if currently pressed
-        bool bState;
+    //public struct InputDigitalActionData_t
+    //{
+    //    // The current state of this action; will be true if currently pressed
+    //    bool bState;
 
-        // Whether or not this action is currently available to be bound in the active action set
-        bool bActive;
-    };
+    //    // Whether or not this action is currently available to be bound in the active action set
+    //    bool bActive;
+    //};
     public struct InputAnalogActionData_t
     {
         // Type of data coming from this action, this will match what got specified in the action set

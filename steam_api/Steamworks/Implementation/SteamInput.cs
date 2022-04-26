@@ -62,13 +62,13 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public IntPtr GetActionSetHandle(string pszActionSetName)
+        public InputActionSetHandle_t GetActionSetHandle(string pszActionSetName)
         {
             Write("GetActionSetHandle");
-            return IntPtr.Zero;
+            return 0;
         }
 
-        public int GetActiveActionSetLayers(InputHandle_t inputHandle, [In, Out] IntPtr[] handlesOut)
+        public int GetActiveActionSetLayers(InputHandle_t inputHandle, ref InputActionSetHandle_t[] handlesOut)
         {
             Write("GetActiveActionSetLayers");
             return 0;
@@ -86,52 +86,59 @@ namespace SKYNET.Steamworks.Implementation
             return IntPtr.Zero;
         }
 
-        public int GetAnalogActionOrigins(InputHandle_t inputHandle, InputActionSetHandle_t actionSetHandle, InputAnalogActionHandle_t analogActionHandle, ref int originsOut)
+        public int GetAnalogActionOrigins(InputHandle_t inputHandle, InputActionSetHandle_t actionSetHandle, InputAnalogActionHandle_t analogActionHandle, ref int[] originsOut)
         {
             Write("GetAnalogActionOrigins");
             return 0;
         }
 
-        public int GetConnectedControllers([In, Out] InputHandle_t[] handlesOut)
+        public int GetConnectedControllers(ref InputHandle_t[] handlesOut)
         {
             Write("GetConnectedControllers");
             return 0;
         }
 
-        public IntPtr GetControllerForGamepadIndex(int nIndex)
+        public InputHandle_t GetControllerForGamepadIndex(int nIndex)
         {
             Write("GetControllerForGamepadIndex");
-            return IntPtr.Zero;
+            return 0;
         }
 
-        public IntPtr GetCurrentActionSet(InputHandle_t inputHandle)
+        public InputActionSetHandle_t GetCurrentActionSet(InputHandle_t inputHandle)
         {
             Write("GetCurrentActionSet");
-            return IntPtr.Zero;
+            return 0;
         }
 
-        public bool GetDeviceBindingRevision(InputHandle_t inputHandle, ref int pMajor, ref int pMinor)
+        public bool GetDeviceBindingRevision(InputHandle_t inputHandle, int pMajor, int pMinor)
         {
             Write("GetDeviceBindingRevision");
             return false;
         }
 
-        public IntPtr GetDigitalActionData(InputHandle_t inputHandle, IntPtr digitalActionHandle)
+        public IntPtr GetDigitalActionData(InputHandle_t inputHandle, InputDigitalActionHandle_t digitalActionHandle)
         {
             Write("GetDigitalActionData");
+            // InputDigitalActionData_t type
             return IntPtr.Zero;
         }
 
-        public IntPtr GetDigitalActionHandle(string pszActionName)
+        public InputDigitalActionHandle_t GetDigitalActionHandle(string pszActionName)
         {
             Write("GetDigitalActionHandle");
-            return IntPtr.Zero;
+            return 0;
         }
 
-        public int GetDigitalActionOrigins(InputHandle_t inputHandle, InputActionSetHandle_t actionSetHandle, IntPtr digitalActionHandle, ref int originsOut)
+        public int GetDigitalActionOrigins(InputHandle_t inputHandle, InputActionSetHandle_t actionSetHandle, InputDigitalActionHandle_t digitalActionHandle, ref int[] originsOut)
         {
             Write("GetDigitalActionOrigins");
             return 0;
+        }
+
+        public string GetGlyphForActionOrigin(int eOrigin)
+        {
+            Write("GetGlyphForActionOrigin");
+            return "";
         }
 
         public int GetGamepadIndexForController(InputHandle_t ulinputHandle)
@@ -152,16 +159,16 @@ namespace SKYNET.Steamworks.Implementation
             return IntPtr.Zero;
         }
 
-        public IntPtr GetGlyphPNGForActionOrigin(int eOrigin, int eSize, uint unFlags)
+        public string GetGlyphPNGForActionOrigin(int eOrigin, int eSize, uint unFlags)
         {
             Write("GetGlyphPNGForActionOrigin");
-            return IntPtr.Zero;
+            return "";
         }
 
-        public IntPtr GetGlyphSVGForActionOrigin(int eOrigin, uint unFlags)
+        public string GetGlyphSVGForActionOrigin(int eOrigin, uint unFlags)
         {
             Write("GetGlyphSVGForActionOrigin");
-            return IntPtr.Zero;
+            return "";
         }
 
         public int GetInputTypeForHandle(InputHandle_t inputHandle)
@@ -170,16 +177,20 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
+        public void TriggerHapticPulse(ulong inputHandle, ESteamControllerPad eTargetPad, short usDurationMicroSec)
+        {
+            Write("TriggerHapticPulse");
+        }
+
+        public void TriggerRepeatedHapticPulse(ulong inputHandle, ESteamControllerPad eTargetPad, short usDurationMicroSec, short usOffMicroSec, short unRepeat, int nFlags)
+        {
+            Write("TriggerRepeatedHapticPulse");
+        }
+
         public InputMotionData_t GetMotionData(InputHandle_t inputHandle)
         {
             Write("xxx");
             return new InputMotionData_t();
-        }
-
-        public uint GetRemotePlaySessionID(InputHandle_t inputHandle)
-        {
-            Write("GetRemotePlaySessionID");
-            return 0;
         }
 
         public ushort GetSessionInputConfigurationSettings()
@@ -188,22 +199,40 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public IntPtr GetStringForActionOrigin(int eOrigin)
+        public string GetStringForActionOrigin(int eOrigin)
         {
             Write("GetStringForActionOrigin");
-            return IntPtr.Zero;
+            return "";
         }
 
-        public IntPtr GetStringForAnalogActionName(InputAnalogActionHandle_t eActionHandle)
+        public string GetStringForAnalogActionName(InputAnalogActionHandle_t eActionHandle)
         {
             Write("GetStringForAnalogActionName");
-            return IntPtr.Zero;
+            return "";
         }
 
-        public IntPtr GetStringForDigitalActionName(InputAnalogActionHandle_t eActionHandle)
+        public string GetStringForXboxOrigin(int eOrigin)
+        {
+            Write("GetStringForXboxOrigin");
+            return "";
+        }
+
+        public string GetGlyphForXboxOrigin(int eOrigin)
+        {
+            Write("GetGlyphForXboxOrigin");
+            return "";
+        }
+
+        public int GetActionOriginFromXboxOrigin(InputHandle_t inputHandle, int eOrigin)
+        {
+            Write("GetActionOriginFromXboxOrigin");
+            return 0;
+        }
+
+        public string GetStringForDigitalActionName(InputAnalogActionHandle_t eActionHandle)
         {
             Write("GetStringForDigitalActionName");
-            return IntPtr.Zero;
+            return "";
         }
 
         public IntPtr GetStringForint(int eOrigin)
@@ -213,6 +242,12 @@ namespace SKYNET.Steamworks.Implementation
         }
 
         public bool Init(bool bExplicitlyCallRunFrame)
+        {
+            Write("Init");
+            return true;
+        }
+
+        public bool Init()
         {
             Write("Init");
             return true;
@@ -233,13 +268,18 @@ namespace SKYNET.Steamworks.Implementation
             Write("RunFrame");
         }
 
+        public void RunFrame()
+        {
+            Write("RunFrame");
+        }
+
         public bool SetInputActionManifestFilePath(string pchInputActionManifestAbsolutePath)
         {
             Write("SetInputActionManifestFilePath");
             return true;
         }
 
-        public void SetLEDColor(InputHandle_t inputHandle, byte nColorR, byte nColorG, byte nColorB, uint nFlags)
+        public void SetLEDColor(InputHandle_t inputHandle, int nColorR, int nColorG, int nColorB, int nFlags)
         {
             Write("SetLEDColor");
         }
@@ -267,17 +307,17 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public void TriggerSimpleHapticEvent(InputHandle_t inputHandle, IntPtr eHapticLocation, byte nIntensity, char nGainDB, byte nOtherIntensity, char nOtherGainDB)
+        public void TriggerSimpleHapticEvent(InputHandle_t inputHandle, int eHapticLocation, int nIntensity, string nGainDB, int nOtherIntensity, string nOtherGainDB)
         {
             Write("TriggerSimpleHapticEvent");
         }
 
-        public void TriggerVibration(InputHandle_t inputHandle, ushort usLeftSpeed, ushort usRightSpeed)
+        public void TriggerVibration(InputHandle_t inputHandle, short usLeftSpeed, short usRightSpeed)
         {
             Write("TriggerVibration");
         }
 
-        public void TriggerVibrationExtended(InputHandle_t inputHandle, ushort usLeftSpeed, ushort usRightSpeed, ushort usLeftTriggerSpeed, ushort usRightTriggerSpeed)
+        public void TriggerVibrationExtended(InputHandle_t inputHandle, short usLeftSpeed, short usRightSpeed, short usLeftTriggerSpeed, short usRightTriggerSpeed)
         {
             Write("TriggerVibrationExtended");
         }
@@ -286,6 +326,12 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("SteamAPI_SteamInput_v005");
             return InterfaceManager.FindOrCreateInterface("SteamInput005");
+        }
+
+        public uint GetRemotePlaySessionID(InputHandle_t inputHandle)
+        {
+            Write("GetRemotePlaySessionID");
+            return 0;
         }
     }
 }

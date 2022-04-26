@@ -112,8 +112,8 @@ namespace SKYNET.Steamworks.Implementation
             {
                 // TODO
             });
-            pcbTicket = 0;
-            return 0;
+            pcbTicket = 10;
+            return 100;
         }
 
         public int BeginAuthSession(IntPtr pAuthTicket, int cbAuthTicket, ulong steamID)
