@@ -35,15 +35,6 @@ namespace SKYNET.Managers
             }
         }
 
-        public static T CreateInterface<T>(out IntPtr BaseAddress) where T : ISteamInterface
-        {
-            var (iface, context) = MemoryManager.CreateInterface<T>();
-            BaseAddress = context;
-            T baseClass = (T)iface;
-            //baseClass.MemoryAddress = context;
-            return (T)baseClass;
-        }
-
         public static IntPtr FindOrCreateInterface(string pchVersion)
         {
             return FindOrCreateInterface(1, 1, pchVersion);
@@ -51,110 +42,11 @@ namespace SKYNET.Managers
 
         public static IntPtr FindOrCreateInterface(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pszVersion, bool GameServer = false)
         {
-            #region Tests purposes
-
-            //if (pszVersion.StartsWith("SteamUtils"))
-            //{
-            //    Write($"Skipping {pszVersion}"); return default;
-            //}
-            //if (pszVersion.StartsWith("SteamUser"))
-            //{
-            //    Write($"Skipping {pszVersion}"); return default;
-            //}
-            //if (pszVersion.StartsWith("SteamClient"))
-            //{
-            //    Write($"Skipping {pszVersion}"); return default;
-            //}
-            //if (pszVersion.StartsWith("SteamFriends"))
-            //{
-            //    Write($"Skipping {pszVersion}"); return default;
-            //}
-            //if (pszVersion.StartsWith("SteamMatchMaking"))
-            //{
-            //    Write($"Skipping {pszVersion}"); return default;
-            //}
-            //if (pszVersion.StartsWith("SteamMatchGameSearch"))
-            //{
-            //    Write($"Skipping {pszVersion}"); return default;
-            //}
-            //if (pszVersion.StartsWith("SteamMatchMakingServers"))
-            //{
-            //    Write($"Skipping {pszVersion}"); return default;
-            //}
-            //if (pszVersion.StartsWith("STEAMUSERSTATS_INTERFACE_VERSION"))
-            //{
-            //    Write($"Skipping {pszVersion}"); return default;
-            //}
-            //if (pszVersion.StartsWith("STEAMAPPS_INTERFACE_VERSION"))
-            //{
-            //    Write($"Skipping {pszVersion}"); return default;
-            //}
-            //if (pszVersion.StartsWith("SteamNetworking"))
-            //{
-            //    Write($"Skipping {pszVersion}"); return default;
-            //}
-            //if (pszVersion.StartsWith("STEAMREMOTESTORAGE_INTERFACE_VERSION"))
-            //{
-            //    Write($"Skipping {pszVersion}"); return default;
-            //}
-            //if (pszVersion.StartsWith("STEAMSCREENSHOTS_INTERFACE_VERSION"))
-            //{
-            //    Write($"Skipping {pszVersion}"); return default;
-            //}
-            //if (pszVersion.StartsWith("STEAMHTTP_INTERFACE_VERSION"))
-            //{
-            //    Write($"Skipping {pszVersion}"); return default;
-            //}
-            //if (pszVersion.StartsWith("SteamController"))
-            //{
-            //    Write($"Skipping {pszVersion}"); return default;
-            //}
-            //if (pszVersion.StartsWith("STEAMUGC_INTERFACE_VERSION"))
-            //{
-            //    Write($"Skipping {pszVersion}"); return default;
-            //}
-            //if (pszVersion.StartsWith("STEAMAPPLIST_INTERFACE_VERSION"))
-            //{
-            //    Write($"Skipping {pszVersion}"); return default;
-            //}
-            //if (pszVersion.StartsWith("STEAMMUSIC_INTERFACE_VERSION"))
-            //{
-            //    Write($"Skipping {pszVersion}"); return default;
-            //}
-            //if (pszVersion.StartsWith("STEAMMUSICREMOTE_INTERFACE_VERSION"))
-            //{
-            //    Write($"Skipping {pszVersion}"); return default;
-            //}
-            //if (pszVersion.StartsWith("STEAMHTMLSURFACE_INTERFACE_VERSION_"))
-            //{
-            //    Write($"Skipping {pszVersion}"); return default;
-            //}
-            //if (pszVersion.StartsWith("STEAMINVENTORY_INTERFACE_V"))
-            //{
-            //    Write($"Skipping {pszVersion}"); return default;
-            //}
-            //if (pszVersion.StartsWith("STEAMVIDEO_INTERFACE_V"))
-            //{
-            //    Write($"Skipping {pszVersion}"); return default;
-            //}
-            //if (pszVersion.StartsWith("STEAMPARENTALSETTINGS_INTERFACE_VERSION"))
-            //{
-            //    Write($"Skipping {pszVersion}"); return default;
-            //}
-            //if (pszVersion.StartsWith("SteamGameServer0"))
-            //{
-            //    Write($"Skipping {pszVersion}"); return default;
-            //}
-            //if (pszVersion.StartsWith("SteamGameCoordinator"))
-            //{
-            //    Write($"Skipping {pszVersion}"); return default;
-            //}
-            //if (pszVersion.StartsWith("SteamNetworkingSocketsSerialized"))
-            //{
-            //    Write($"Skipping {pszVersion}"); return default;
-            //}
-
-            #endregion
+            if (InvalidateInterface(pszVersion))
+            {
+                Write($"Skipping {pszVersion}");
+                return default;
+            }
 
             if (GameServer)
             {
@@ -196,6 +88,116 @@ namespace SKYNET.Managers
             SetInterfaceName(pszVersion, interfaceType);
 
             return address;
+        }
+
+        private static bool InvalidateInterface(string pszVersion)
+        {
+            #region For test purposes
+
+            //if (pszVersion.StartsWith("SteamUtils"))
+            //{
+            //    return true;
+            //}
+            //if (pszVersion.StartsWith("SteamUser"))
+            //{
+            //    return true;
+            //}
+            //if (pszVersion.StartsWith("SteamClient"))
+            //{
+            //    return true;
+            //}
+            //if (pszVersion.StartsWith("SteamFriends"))
+            //{
+            //    return true;
+            //}
+            //if (pszVersion.StartsWith("SteamMatchMaking"))
+            //{
+            //    return true;
+            //}
+            //if (pszVersion.StartsWith("SteamMatchGameSearch"))
+            //{
+            //    return true;
+            //}
+            //if (pszVersion.StartsWith("SteamMatchMakingServers"))
+            //{
+            //    return true;
+            //}
+            //if (pszVersion.StartsWith("STEAMUSERSTATS_INTERFACE_VERSION"))
+            //{
+            //    return true;
+            //}
+            //if (pszVersion.StartsWith("STEAMAPPS_INTERFACE_VERSION"))
+            //{
+            //    return true;
+            //}
+            //if (pszVersion.StartsWith("SteamNetworking"))
+            //{
+            //    return true;
+            //}
+            //if (pszVersion.StartsWith("STEAMREMOTESTORAGE_INTERFACE_VERSION"))
+            //{
+            //    return true;
+            //}
+            //if (pszVersion.StartsWith("STEAMSCREENSHOTS_INTERFACE_VERSION"))
+            //{
+            //    return true;
+            //}
+            //if (pszVersion.StartsWith("STEAMHTTP_INTERFACE_VERSION"))
+            //{
+            //    return true;
+            //}
+            //if (pszVersion.StartsWith("SteamController"))
+            //{
+            //    return true;
+            //}
+            //if (pszVersion.StartsWith("STEAMUGC_INTERFACE_VERSION"))
+            //{
+            //    return true;
+            //}
+            //if (pszVersion.StartsWith("STEAMAPPLIST_INTERFACE_VERSION"))
+            //{
+            //    return true;
+            //}
+            //if (pszVersion.StartsWith("STEAMMUSIC_INTERFACE_VERSION"))
+            //{
+            //    return true;
+            //}
+            //if (pszVersion.StartsWith("STEAMMUSICREMOTE_INTERFACE_VERSION"))
+            //{
+            //    return true;
+            //}
+            //if (pszVersion.StartsWith("STEAMHTMLSURFACE_INTERFACE_VERSION_"))
+            //{
+            //    return true;
+            //}
+            //if (pszVersion.StartsWith("STEAMINVENTORY_INTERFACE_V"))
+            //{
+            //    return true;
+            //}
+            //if (pszVersion.StartsWith("STEAMVIDEO_INTERFACE_V"))
+            //{
+            //    return true;
+            //}
+            //if (pszVersion.StartsWith("STEAMPARENTALSETTINGS_INTERFACE_VERSION"))
+            //{
+            //    return true;
+            //}
+            //if (pszVersion.StartsWith("SteamGameServer0"))
+            //{
+            //    return true;
+            //}
+            //if (pszVersion.StartsWith("SteamGameCoordinator"))
+            //{
+            //    return true;
+            //}
+            //if (pszVersion.StartsWith("SteamNetworkingSocketsSerialized"))
+            //{
+            //    return true;
+            //}
+
+            return false;
+
+            #endregion
         }
 
         private static void SetInterfaceName(string pszVersion, Type type)
