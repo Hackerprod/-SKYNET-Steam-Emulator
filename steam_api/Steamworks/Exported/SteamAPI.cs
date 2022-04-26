@@ -22,16 +22,17 @@ namespace SKYNET.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_Init()
         {
-            if (SteamEmulator.Initialized)
+            if (!SteamEmulator.Initialized)
             {
-                Write($"{"SteamAPI_Init : Initialized"}");
-                return true;
+                Write($"SteamAPI_Init : Initializing");
+                SteamEmulator.Initialize();
+            }
+            else
+            {
+                Write($"SteamAPI_Init : Initialized");
             }
 
-            Write($"{"SteamAPI_Init : Initializing"}");
-            SteamEmulator.Initialize();
-
-            return false;
+            return true;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

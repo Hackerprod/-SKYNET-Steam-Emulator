@@ -29,8 +29,10 @@ namespace SKYNET.Managers
             {
                 if (type.IsDefined(typeof(InterfaceAttribute)))
                 {
-                    var interfaceAttribute = type.GetCustomAttributes<InterfaceAttribute>().ToList()[0];
-                    interfaceTypes.TryAdd(interfaceAttribute.Name, type);
+                    foreach (var attribute in type.GetCustomAttributes<InterfaceAttribute>())
+                    {
+                        interfaceTypes.TryAdd(attribute.Name, type);
+                    }
                 }
             }
         }

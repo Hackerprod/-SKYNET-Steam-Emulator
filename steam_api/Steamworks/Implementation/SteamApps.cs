@@ -137,7 +137,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"GetAppInstallDir {appID} {pchFolder} {cchFolderBufferSize}");
             string installed_path = modCommon.GetPath();
-            return (UInt32)installed_path.Length;
+            return (uint)installed_path.Length;
         }
 
         public bool BIsAppInstalled(uint appID)

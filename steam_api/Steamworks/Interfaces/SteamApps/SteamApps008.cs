@@ -150,7 +150,5 @@ namespace SKYNET.Interface
         {
             return SteamEmulator.SteamApps.BIsTimedTrial(punSecondsAllowed, punSecondsPlayed);
         }
-
-
     }
 }

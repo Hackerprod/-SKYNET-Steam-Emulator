@@ -89,7 +89,13 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Steamworks\Exported\SteamAPI.cs" />
-    <Compile Include="Steamworks\Exported\SteamAPI_ISteamGameServer.cs" />
+    <Compile Include="Steamworks\Exported\SteamAPI_SteamGameSearch.cs" />
+    <Compile Include="Steamworks\Exported\SteamAPI_SteamFriends.cs" />
+    <Compile Include="Steamworks\Exported\SteamAPI_SteamController.cs" />
+    <Compile Include="Steamworks\Exported\SteamAPI_SteamClient.cs" />
+    <Compile Include="Steamworks\Exported\SteamAPI_SteamApps.cs" />
+    <Compile Include="Steamworks\Exported\SteamAPI_SteamAppList.cs" />
+    <Compile Include="Steamworks\Exported\SteamAPI_SteamGameServer.cs" />
     <Compile Include="Steamworks\Exported\SteamInternal.cs" />
     <Compile Include="Helpers\Extentions.cs" />
     <Compile Include="Helpers\IntPtrExtentions.cs" />

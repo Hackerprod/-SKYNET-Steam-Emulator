@@ -107,12 +107,10 @@ namespace SKYNET.Steamworks.Implementation
             }
         }
 
-
         public void ActivateGameOverlayToWebPage(string pchURL, int eMode)
         {
             Write($"ActivateGameOverlayToWebPage {pchURL}");
         }
-
 
         public void ClearRichPresence()
         {

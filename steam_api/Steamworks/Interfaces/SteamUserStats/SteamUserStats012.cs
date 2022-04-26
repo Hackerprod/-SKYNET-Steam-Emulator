@@ -4,6 +4,7 @@ using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Interface
 {
+    [Interface("STEAMUSERSTATS_INTERFACE_VERSION011")]
     [Interface("STEAMUSERSTATS_INTERFACE_VERSION012")]
     public class SteamUserStats012 : ISteamInterface
     {

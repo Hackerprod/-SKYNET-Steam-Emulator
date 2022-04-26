@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace SKYNET.Interface
 {
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class InterfaceAttribute : Attribute
     {
         public string Name { get; set; }

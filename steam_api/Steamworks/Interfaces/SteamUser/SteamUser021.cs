@@ -7,6 +7,7 @@ using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Interface
 {
+    [Interface("SteamUser020")]
     [Interface("SteamUser021")]
     public class SteamUser021 : ISteamInterface
     {
