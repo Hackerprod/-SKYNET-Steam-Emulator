@@ -10,17 +10,17 @@ namespace SKYNET.Interface
     [Interface("STEAMREMOTESTORAGE_INTERFACE_VERSION014")]
     public class SteamRemoteStorage014 : ISteamInterface
     {
-        public bool FileWrite(IntPtr _, string pchFile, IntPtr pvData, int cubData)
+        public bool FileWrite(IntPtr _, string pchFile, string pvData, int cubData)
         {
             return SteamEmulator.SteamRemoteStorage.FileWrite(pchFile, pvData, cubData);
         }
 
-        public int FileRead(IntPtr _, string pchFile, IntPtr pvData, int cubDataToRead)
+        public int FileRead(IntPtr _, string pchFile, string pvData, int cubDataToRead)
         {
             return SteamEmulator.SteamRemoteStorage.FileRead(pchFile, pvData, cubDataToRead);
         }
 
-        public SteamAPICall_t FileWriteAsync(IntPtr _, string pchFile, IntPtr pvData, uint cubData)
+        public SteamAPICall_t FileWriteAsync(IntPtr _, string pchFile, string pvData, uint cubData)
         {
             return SteamEmulator.SteamRemoteStorage.FileWriteAsync(pchFile, pvData, cubData);
         }

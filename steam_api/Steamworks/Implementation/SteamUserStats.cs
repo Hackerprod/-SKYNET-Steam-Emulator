@@ -330,12 +330,12 @@ namespace SKYNET.Steamworks.Implementation
             try
             {
                 Write($"GetNumberOfCurrentPlayers");
-                //NumberOfCurrentPlayers_t data = new NumberOfCurrentPlayers_t()
-                //{
-                //    m_bSuccess = 1,
-                //    m_cPlayers = 0
-                //};
-                //return CallbackManager.AddCallbackResult(data, NumberOfCurrentPlayers_t.k_iCallback);
+                NumberOfCurrentPlayers_t data = new NumberOfCurrentPlayers_t()
+                {
+                    m_bSuccess = 1,
+                    m_cPlayers = SteamEmulator.SteamFriends.Users.Count
+                };
+                return CallbackManager.AddCallbackResult(data);
             }
             catch (Exception ex)
             {

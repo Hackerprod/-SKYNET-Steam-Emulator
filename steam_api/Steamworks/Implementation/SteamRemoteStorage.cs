@@ -26,6 +26,7 @@ namespace SKYNET.Steamworks.Implementation
         private ConcurrentDictionary<ulong, string> SharedFiles;
         private int LastFile;
         private SteamAPICall_t k_uAPICallInvalid = 0x0;
+        string key = "dotakeys_personal.lst";
 
         public SteamRemoteStorage()
         {
@@ -53,7 +54,7 @@ namespace SKYNET.Steamworks.Implementation
             }
         }
 
-        public bool FileWrite(string pchFile, IntPtr pvData, int cubData)
+        public bool FileWrite(string pchFile, string pvData, int cubData)
         {
             bool Result = false;
             MutexHelper.Wait("FileWrite", delegate
@@ -61,7 +62,7 @@ namespace SKYNET.Steamworks.Implementation
                 try
                 {
                     string fullPath = Path.Combine(StoragePath, pchFile);
-                    byte[] buffer = pvData.GetBytes(cubData);
+                    byte[] buffer = Encoding.Default.GetBytes(pvData);
                     File.WriteAllBytes(fullPath, buffer);
                     Write($"FileWrite {pchFile}, {buffer.Length} bytes");
                     Result = true;
@@ -74,36 +75,43 @@ namespace SKYNET.Steamworks.Implementation
             return Result;
         }
 
-        public int FileRead(string pchFile, IntPtr pvData, int cubDataToRead)
+        public int FileRead(string pchFile, string pvData, int cubDataToRead)
         {
             Write($"FileRead {pchFile}");
             int Result = 0;
+            string Data = "";
+
             MutexHelper.Wait("FileRead", delegate
             {
                 try
                 {
                     string fullPath = Path.Combine(StoragePath, pchFile);
-                    byte[] bytes = File.ReadAllBytes(fullPath);
-                    pvData = bytes.GetPtr();
-                    Result = bytes.Length;
+                    Data = File.ReadAllText(fullPath);
+                    Result = Data.Length;
                 }
                 catch (Exception ex)
                 {
                     Write($"FileRead {pchFile} {ex}");
+                    Result = 0;
                 }
             });
+
+            pvData = Data;
+            cubDataToRead = Data.Length;
+
             return Result;
         }
 
-        public SteamAPICall_t FileWriteAsync(string pchFile, IntPtr pvData, uint cubData)
+        public SteamAPICall_t FileWriteAsync(string pchFile, string pvData, uint cubData)
         {
             Write($"FileWriteAsync {pchFile}");
+
             SteamAPICall_t APICall = k_uAPICallInvalid;
             try
             {
                 string fullPath = Path.Combine(StoragePath, pchFile);
                 modCommon.EnsureDirectoryExists(fullPath, true);
-                byte[] bytes = pvData.GetBytes(cubData);
+                byte[] bytes = Encoding.Default.GetBytes(pvData);
                 File.WriteAllBytes(fullPath, bytes);
 
                 RemoteStorageFileWriteAsyncComplete_t data = new RemoteStorageFileWriteAsyncComplete_t()

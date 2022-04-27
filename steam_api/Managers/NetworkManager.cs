@@ -7,9 +7,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
+using static SKYNET.Network.ClassNetworkServerBroadcast;
 
 namespace SKYNET.Managers
 {
@@ -19,22 +21,64 @@ namespace SKYNET.Managers
 
         public static void Initialize()
         {
-            BroadcastNetwork = new BroadcastNetwork();
-            BroadcastNetwork.DataReceived += Discovery_DataReceived;
-            BroadcastNetwork.Start();
+            //BroadcastNetwork = new BroadcastNetwork();
+            //BroadcastNetwork.DataReceived += Discovery_DataReceived;
+            //BroadcastNetwork.Start();
 
-            var localEndpoint = new IPEndPoint(IPAddress.Parse("10.31.0.1"), 0);
-            var udpClient = new UdpClient(localEndpoint);
+            //var localEndpoint = new IPEndPoint(IPAddress.Parse("10.31.0.1"), 0);
+            //var udpClient = new UdpClient(localEndpoint);
+
+            UdpClient udpClient = new UdpClient(8123);
+
+            int n = 0;
+
+        // Loops test
+        goBack:;
+
+            IPEndPoint remoteIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
+            UdpState s = new UdpState
+            {
+                E = remoteIpEndPoint,
+                U = udpClient
+            };
+            udpClient.BeginReceive(ServerReceiveCallback, s);
+
+            Write("d");
+            goto goBack;
+
+        
 
             //BroadcastNetwork receiver = new BroadcastNetwork(28000);
             //receiver.DataReceived += Discovery_DataReceived;
             //Task.Run(async () => await receiver.ReceiveAsync().ConfigureAwait(false));
 
-            SendAsync(udpClient, 28000, Encoding.Default.GetBytes("Unju"));
+            //SendAsync(udpClient, 28000, Encoding.Default.GetBytes("Unju"));
 
             //SendAsync(udpClient, 28000, Encoding.Default.GetBytes("Al berro"));
 
             //AnnounceClient();
+
+        }
+
+        private static void ServerReceiveCallback(IAsyncResult ar)
+        {
+
+            string returnData = "";
+            try
+            {
+                UdpClient udpClient = ((UdpState)(ar.AsyncState)).U;
+                IPEndPoint remoteIpEndPoint = ((UdpState)(ar.AsyncState)).E;
+                Byte[] receiveBytes = udpClient.EndReceive(ar, ref remoteIpEndPoint);
+                //remoteIpEndPoint.Address  <- adresse du serveur distant
+                returnData = Encoding.ASCII.GetString(receiveBytes);
+
+                Write(returnData);
+            }
+            catch (Exception e)
+            {
+                Write("" + e);
+
+            }
         }
 
         private static void SendAsync(UdpClient udpClient, int destinationPort, byte[] deviceHelloPackage)

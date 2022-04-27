@@ -1459,8 +1459,8 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct NumberOfCurrentPlayers_t : ICallbackData
     {
-        internal byte Success; // m_bSuccess uint8
-        internal int CPlayers; // m_cPlayers int32
+        internal byte m_bSuccess; // m_bSuccess uint8
+        internal int m_cPlayers; // m_cPlayers int32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(NumberOfCurrentPlayers_t));

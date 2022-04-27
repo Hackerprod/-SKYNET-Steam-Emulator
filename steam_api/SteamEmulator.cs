@@ -10,7 +10,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
+
 using AppID = System.UInt32;
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
@@ -210,9 +212,50 @@ public class SteamEmulator
         Initialized = true;
         Initializing = false;
 
-        NetworkManager.Initialize();
-        Write("SKYNET", "Steam emulator initialized");
+
+
+
+
+
+
+
+
+
+
+
+
+        Write("SKYNET", "Initializing network");
+
+        //MutexHelper.Wait("Thread", () =>
+        //{
+        //    Thread thread = new Thread(() =>
+        //    {
+
+        //    });
+        //    thread.Start();
+        //});
+
+        //Task.Factory.StartNew(() =>
+        //{
+        //    // Whatever code you want in your thread
+        //});
+        Console.WriteLine(
+            "Independent task has completed; main thread ends.");
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
 
     private static void InitializePlugins()
     {

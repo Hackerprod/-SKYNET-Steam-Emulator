@@ -13,5 +13,6 @@ namespace SKYNET.Types
         public ulong SteamId { get; set; }
         public string PersonaName { get; set; }
         public uint GameId { get; set; }
+        public bool HasFriend { get; set; }
     }
 }
