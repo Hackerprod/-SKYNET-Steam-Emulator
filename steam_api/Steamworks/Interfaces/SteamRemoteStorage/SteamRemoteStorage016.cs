@@ -18,7 +18,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamRemoteStorage.FileWrite(pchFile, pvData, cubData);
         }
 
-        public int FileRead(IntPtr _, string pchFile, string pvData, int cubDataToRead)
+        public int FileRead(IntPtr _, string pchFile, IntPtr pvData, int cubDataToRead)
         {
             return SteamEmulator.SteamRemoteStorage.FileRead(pchFile, pvData, cubDataToRead);
         }

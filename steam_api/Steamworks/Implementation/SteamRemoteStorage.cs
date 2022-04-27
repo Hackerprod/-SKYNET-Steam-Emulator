@@ -75,7 +75,7 @@ namespace SKYNET.Steamworks.Implementation
             return Result;
         }
 
-        public int FileRead(string pchFile, string pvData, int cubDataToRead)
+        public int FileRead(string pchFile, IntPtr pvData, int cubDataToRead)
         {
             Write($"FileRead {pchFile}");
             int Result = 0;
@@ -96,8 +96,9 @@ namespace SKYNET.Steamworks.Implementation
                 }
             });
 
-            pvData = Data;
-            cubDataToRead = Data.Length;
+            byte[] bytes = Encoding.Default.GetBytes(Data);
+            Marshal.Copy(bytes, 0, pvData, bytes.Length);
+            Result = bytes.Length;
 
             return Result;
         }
@@ -281,7 +282,7 @@ namespace SKYNET.Steamworks.Implementation
                 Length = (int)info.Length;
             }
 
-            Write($"GetFileSize {pchFile} [{Length}]");
+            Write($"GetFileSize {pchFile}, {Length} bytes");
 
             return Length;
         }
