@@ -211,6 +211,7 @@ public class SteamEmulator
         Initializing = false;
 
         NetworkManager.Initialize();
+        Write("SKYNET", "Steam emulator initialized");
     }
 
     private static void InitializePlugins()
