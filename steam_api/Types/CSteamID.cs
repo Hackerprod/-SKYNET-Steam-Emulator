@@ -32,6 +32,20 @@ namespace Steamworks
             this.SteamID = (SteamID & ~(0xFFFFFul << (ushort)32)) | (((ulong)(instance) & 0xFFFFFul) << (ushort)32);
         }
 
+        public CSteamID(uint accountId)
+        {
+            this.AccountId = accountId;
+            this.Universe = (byte)EUniverse.k_EUniversePublic;
+            this.AccountType = (byte)EAccountType.k_EAccountTypeIndividual;
+
+            int instance = (AccountType == (byte)EAccountType.k_EAccountTypeClan || AccountType == (byte)EAccountType.k_EAccountTypeGameServer) ? 0 : 1;
+
+            this.SteamID = (SteamID & ~(0xFFFFFFFFul << (ushort)0)) | (((ulong)(AccountId) & 0xFFFFFFFFul) << (ushort)0);
+            this.SteamID = (SteamID & ~(0xFFul << (ushort)56)) | (((ulong)(Universe) & 0xFFul) << (ushort)56);
+            this.SteamID = (SteamID & ~(0xFul << (ushort)52)) | (((ulong)(AccountType) & 0xFul) << (ushort)52);
+            this.SteamID = (SteamID & ~(0xFFFFFul << (ushort)32)) | (((ulong)(instance) & 0xFFFFFul) << (ushort)32);
+        }
+
         public CSteamID(ulong _steamID)
         {
             this.SteamID = _steamID;

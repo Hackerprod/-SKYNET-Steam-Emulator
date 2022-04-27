@@ -38,6 +38,7 @@ namespace SKYNET.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public unsafe static void SteamAPI_RegisterCallback(IntPtr pCallback, int iCallback)
         {
+
             // Check if Steam emulator is not initialized 
             if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
             {

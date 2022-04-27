@@ -7,12 +7,11 @@ using System.Threading.Tasks;
 
 namespace SKYNET.Types
 {
-    public class SteamFriend
+    public class SteamUser
     {
-        public uint AccountId;
-        public ulong SteamId;
-        public string PersonaName;
-
+        public uint AccountId { get; set; }
+        public ulong SteamId { get; set; }
+        public string PersonaName { get; set; }
         public uint GameId { get; set; }
     }
 }

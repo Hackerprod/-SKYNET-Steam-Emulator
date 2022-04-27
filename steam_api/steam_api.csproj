@@ -78,10 +78,17 @@
     <Compile Include="Callback\CCallbackBase.cs" />
     <Compile Include="Helpers\ImageHelper.cs" />
     <Compile Include="Helpers\IniParser.cs" />
+    <Compile Include="Helpers\JSON\SimpleJSONDotNetTypes.cs" />
     <Compile Include="Helpers\MutexHelper.cs" />
     <Compile Include="Helpers\Platform.cs" />
     <Compile Include="Helpers\Settings.cs" />
+    <Compile Include="Helpers\JSON\JSONParser.cs" />
+    <Compile Include="Managers\NetworkManager.cs" />
     <Compile Include="Managers\TicketManager.cs" />
+    <Compile Include="Network\Packets\BroadcastPacket.cs" />
+    <Compile Include="Network\BroadcastServer.cs" />
+    <Compile Include="Network\Packets\NetworkMessage.cs" />
+    <Compile Include="Network\Packets\NET_Messages.cs" />
     <Compile Include="Plugin\IGameCoordinatorPlugin.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -148,7 +155,6 @@
     <Compile Include="Steamworks\Implementation\SteamUtils.cs" />
     <Compile Include="Steamworks\Implementation\SteamVideo.cs" />
     <Compile Include="Steamworks\Interfaces\IBaseInterface.cs" />
-    <Compile Include="Steamworks\Interfaces\ISteamAppDisableUpdate001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamAppDisableUpdate001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamClient\SteamClient020.cs" />
     <Compile Include="Steamworks\Interfaces\SteamAppList\SteamAppList001.cs" />
@@ -200,7 +206,7 @@
     <Compile Include="Steamworks\Types\SteamEnums.cs" />
     <Compile Include="Steamworks\Types\SteamTypes.cs" />
     <Compile Include="Types\GameMessage.cs" />
-    <Compile Include="Types\SteamFriend.cs" />
+    <Compile Include="Types\SteamUser.cs" />
     <Compile Include="Types\GameServerData.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -215,6 +221,7 @@
   <ItemGroup>
     <None Include="Resources\Image.jpg" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ImportGroup Label=".NET DllExport">
     <Import Project="$(SolutionDir)packages\DllExport\tools\net.r_eg.DllExport.targets" Condition="Exists($([MSBuild]::Escape('$(SolutionDir)packages\DllExport\tools\net.r_eg.DllExport.targets')))" Label="8337224c9ad9e356" />

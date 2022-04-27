@@ -10,11 +10,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-
+using System.Threading.Tasks;
 using AppID = System.UInt32;
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
-
 
 public class SteamEmulator
 {
@@ -210,6 +209,8 @@ public class SteamEmulator
 
         Initialized = true;
         Initializing = false;
+
+        NetworkManager.Initialize();
     }
 
     private static void InitializePlugins()

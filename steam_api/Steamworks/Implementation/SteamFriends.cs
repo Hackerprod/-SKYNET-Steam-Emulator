@@ -17,8 +17,8 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamFriends : ISteamInterface
     {
-        private List<SteamFriend> Friends;
-        private List<ulong> Users;
+        private List<SKYNET.Types.SteamUser> Friends;
+        private List<SKYNET.Types.SteamUser> Users;
         private Dictionary<string, string> RichPresence;
         private ConcurrentDictionary<ulong, ImageAvatar> Avatars;
         private int ImageIndex;
@@ -28,8 +28,8 @@ namespace SKYNET.Steamworks.Implementation
         public SteamFriends()
         {
             InterfaceVersion = "SteamFriends";
-            Friends = new List<SteamFriend>();
-            Users = new List<ulong>();
+            Friends = new List<SKYNET.Types.SteamUser>();
+            Users   = new List<SKYNET.Types.SteamUser>();
             RichPresence = new Dictionary<string, string>();
             Avatars = new ConcurrentDictionary<ulong, ImageAvatar>();
             ImageIndex = 10;
@@ -252,7 +252,7 @@ namespace SKYNET.Steamworks.Implementation
             {
                 if (Friends.Count > iFriend)
                 {
-                    SteamFriend friend = Friends[iFriend];
+                    var friend = Friends[iFriend];
                     if (friend != null)
                     {
                         Result = (CSteamID)friend.SteamId;
@@ -318,7 +318,7 @@ namespace SKYNET.Steamworks.Implementation
             }
             else
             {
-                SteamFriend friend = Friends.Find(f => f.AccountId == (uint)steamIDFriend);
+                var friend = Friends.Find(f => f.AccountId == (uint)steamIDFriend);
                 if (friend == null)
                 {
                     pFriendGameInfo.GameID = 0;
@@ -354,7 +354,7 @@ namespace SKYNET.Steamworks.Implementation
                 }
                 else
                 {
-                    SteamFriend friend = Friends.Find(f => f.SteamId == steamIDFriend);
+                    var friend = Friends.Find(f => f.SteamId == steamIDFriend);
                     if (friend != null) Result = friend.PersonaName;
                 }
 
@@ -381,7 +381,7 @@ namespace SKYNET.Steamworks.Implementation
                 {
                     Result = EPersonaState.k_EPersonaStateOnline;
                 }
-                else if (Users.Find(f => f == steamIDFriend) != 0)
+                else if (Users.Find(f => f.SteamId == steamIDFriend) != null)
                 {
                     Result = EPersonaState.k_EPersonaStateOnline;
                 }
@@ -398,7 +398,7 @@ namespace SKYNET.Steamworks.Implementation
 
             MutexHelper.Wait("GetFriendRelationship", delegate
             {
-                SteamFriend friend = Friends.Find(f => f.SteamId == steamIDFriend);
+                var friend = Friends.Find(f => f.SteamId == steamIDFriend);
                 if (friend != null)
                     Result = EFriendRelationship.k_EFriendRelationshipFriend;
             });
@@ -514,7 +514,7 @@ namespace SKYNET.Steamworks.Implementation
             {
                 return SteamEmulator.PersonaName;
             }
-            SteamFriend friend = Friends.Find(f => f.AccountId == (uint)steamIDPlayer);
+            var friend = Friends.Find(f => f.AccountId == (uint)steamIDPlayer);
             if (friend == null)
             {
                 return "";
@@ -531,7 +531,7 @@ namespace SKYNET.Steamworks.Implementation
         public bool HasFriend(ulong steamIDFriend, int iFriendFlags)
         {
             Write($"HasFriend {steamIDFriend}");
-            SteamFriend friend = Friends.Find(f => f.AccountId == (uint)steamIDFriend);
+            var friend = Friends.Find(f => f.AccountId == (uint)steamIDFriend);
             return friend != null;
         }
 
@@ -708,6 +708,47 @@ namespace SKYNET.Steamworks.Implementation
             }
 
             return (0, 0);
+        }
+
+        public void AddOrUpdateUser(uint accountID, string personaName, uint appID)
+        {
+            var user = Users.Find(f => f.AccountId == accountID);
+            if (Friends == null)
+            {
+                CSteamID steamID = new CSteamID(accountID);
+                user = new SKYNET.Types.SteamUser()
+                {
+                    PersonaName = personaName,
+                    AccountId = accountID,
+                    SteamId = (ulong)steamID,
+                    GameId = appID
+                };
+                Users.Add(user);
+            }
+            else
+            {
+                user.PersonaName = personaName;
+            }
+        }
+        public void AddOrUpdateFriend(uint accountID, string personaName, uint appID)
+        {
+            var friend = Friends.Find(f => f.AccountId == accountID);
+            if (Friends == null)
+            {
+                CSteamID steamID = new CSteamID(accountID);
+                friend = new SKYNET.Types.SteamUser()
+                {
+                    PersonaName = personaName,
+                    AccountId = accountID,
+                    SteamId = (ulong)steamID,
+                    GameId = appID
+                };
+                Friends.Add(friend);
+            }
+            else
+            {
+                friend.PersonaName = personaName;
+            }
         }
 
         public ImageAvatar GetImageAvatar(int index)
