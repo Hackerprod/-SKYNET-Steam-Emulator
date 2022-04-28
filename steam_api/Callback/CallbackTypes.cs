@@ -8,7 +8,9 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+
 using PublishedFileId_t = System.UInt64;
+using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Callback
 {
@@ -1343,10 +1345,10 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct RemoteStorageFileReadAsyncComplete_t : ICallbackData
     {
-        internal ulong FileReadAsync; // m_hFileReadAsync SteamAPICall_t
-        internal EResult Result; // m_eResult EResult
-        internal uint Offset; // m_nOffset uint32
-        internal uint Read; // m_cubRead uint32
+        internal SteamAPICall_t m_hFileReadAsync; // m_hFileReadAsync SteamAPICall_t
+        internal EResult m_eResult; // m_eResult EResult
+        internal uint m_nOffset; // m_nOffset uint32
+        internal uint m_cubRead; // m_cubRead uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageFileReadAsyncComplete_t));

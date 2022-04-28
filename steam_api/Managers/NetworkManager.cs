@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Reflection.Emit;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 using static SKYNET.Network.ClassNetworkServerBroadcast;
@@ -21,92 +22,29 @@ namespace SKYNET.Managers
 
         public static void Initialize()
         {
-            //BroadcastNetwork = new BroadcastNetwork();
-            //BroadcastNetwork.DataReceived += Discovery_DataReceived;
-            //BroadcastNetwork.Start();
+            BroadcastNetwork = new BroadcastNetwork();
+            BroadcastNetwork.DataReceived += Discovery_DataReceived;
+            BroadcastNetwork.Start();
 
-            //var localEndpoint = new IPEndPoint(IPAddress.Parse("10.31.0.1"), 0);
-            //var udpClient = new UdpClient(localEndpoint);
-
-            UdpClient udpClient = new UdpClient(8123);
-
-            int n = 0;
-
-        // Loops test
-        goBack:;
-
-            IPEndPoint remoteIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
-            UdpState s = new UdpState
-            {
-                E = remoteIpEndPoint,
-                U = udpClient
-            };
-            udpClient.BeginReceive(ServerReceiveCallback, s);
-
-            Write("d");
-            goto goBack;
-
-        
-
-            //BroadcastNetwork receiver = new BroadcastNetwork(28000);
-            //receiver.DataReceived += Discovery_DataReceived;
-            //Task.Run(async () => await receiver.ReceiveAsync().ConfigureAwait(false));
-
-            //SendAsync(udpClient, 28000, Encoding.Default.GetBytes("Unju"));
-
-            //SendAsync(udpClient, 28000, Encoding.Default.GetBytes("Al berro"));
-
-            //AnnounceClient();
-
+            AnnounceClient();
         }
 
-        private static void ServerReceiveCallback(IAsyncResult ar)
+        private static void Discovery_DataReceived(byte[] msg, IPAddress EndPoint)
         {
-
-            string returnData = "";
             try
             {
-                UdpClient udpClient = ((UdpState)(ar.AsyncState)).U;
-                IPEndPoint remoteIpEndPoint = ((UdpState)(ar.AsyncState)).E;
-                Byte[] receiveBytes = udpClient.EndReceive(ar, ref remoteIpEndPoint);
-                //remoteIpEndPoint.Address  <- adresse du serveur distant
-                returnData = Encoding.ASCII.GetString(receiveBytes);
-
-                Write(returnData);
+                string Content = Encoding.Default.GetString(msg);
+                NetworkMessage message = Content.FromJson<NetworkMessage>();
+                ProcessMessage(message);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Write("" + e);
-
+                Write($"Error parsing incoming message");
             }
         }
 
-        private static void SendAsync(UdpClient udpClient, int destinationPort, byte[] deviceHelloPackage)
+        private static void ProcessMessage(NetworkMessage message)
         {
-            Console.WriteLine($"{nameof(SendAsync)} - Send hello package");
-
-            var ipEndpoint = new IPEndPoint(IPAddress.Broadcast, destinationPort);
-            udpClient.Send(deviceHelloPackage, deviceHelloPackage.Length, ipEndpoint);
-        }
-
-        private static void Discovery_DataReceived(byte[] arg1, System.Net.IPAddress arg2)
-        {
-            Console.WriteLine($"Discovery_DataReceived: {Encoding.Default.GetString(arg1)}");
-        }
-
-        private static void BroadcastNetwork_PacketReceived(object sender, BroadcastPacket e)
-        {
-            Write("...");
-            string json = Encoding.Default.GetString(e.Data);
-            NetworkMessage message = json.FromJson<NetworkMessage>();
-            if (message == null)
-            {
-                Write("Malformed Packet received");
-                return;
-            }
-
-            Write($"Received Broadcast packet type: {message.MessageType}");
-
             switch ((MessageType)message.MessageType)
             {
                 case MessageType.NET_Announce:
@@ -121,10 +59,8 @@ namespace SKYNET.Managers
 
         private static void ProcessAnnounce(NetworkMessage message)
         {
-            Write("Receiveeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeed");
-            //NET_Announce announce = message.Body.Deserialize<NET_Announce>();
-            //SteamEmulator.SteamFriends.AddOrUpdateFriend(announce.AccountID, announce.PersonaName, announce.AppID);
-            //SteamEmulator.SteamFriends.AddOrUpdateUser(announce.AccountID, announce.PersonaName, announce.AppID);
+            NET_Announce announce = message.ParsedBody.FromJson<NET_Announce>();
+            SteamEmulator.SteamFriends.AddOrUpdateUser(announce.AccountID, announce.PersonaName, announce.AppID);
         }
 
         public static void AnnounceClient()
@@ -152,13 +88,19 @@ namespace SKYNET.Managers
             NetworkMessage message = new NetworkMessage()
             {
                 MessageType = (int)type,
-                Body = obj
+                ParsedBody = obj.ToJson()
             };
 
             string json = message.ToJson();
             byte[] Body = Encoding.Default.GetBytes(json);
-
+            SendBroadcastMessage(Body);
         }
+
+        public static void SendBroadcastMessage(byte[] Body)
+        {
+            BroadcastNetwork.Send(Body);
+        }
+
 
         private static void Write(string msg)
         {

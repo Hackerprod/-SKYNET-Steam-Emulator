@@ -108,9 +108,9 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamRemoteStorage.GetFileCount();
         }
 
-        public string GetFileNameAndSize(IntPtr _, int iFile, int pnFileSizeInBytes)
+        public string GetFileNameAndSize(IntPtr _, int iFile, ref int pnFileSizeInBytes)
         {
-            return SteamEmulator.SteamRemoteStorage.GetFileNameAndSize(iFile, pnFileSizeInBytes);
+            return SteamEmulator.SteamRemoteStorage.GetFileNameAndSize(iFile, ref pnFileSizeInBytes);
         }
 
         public bool GetQuota(IntPtr _, ulong pnTotalBytes, ulong puAvailableBytes)

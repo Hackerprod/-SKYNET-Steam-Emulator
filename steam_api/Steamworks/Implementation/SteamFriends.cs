@@ -12,6 +12,7 @@ using SKYNET.Types;
 using Steamworks;
 
 using SteamAPICall_t = System.UInt64;
+using FriendsGroupID_t = System.UInt16;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -118,7 +119,7 @@ namespace SKYNET.Steamworks.Implementation
             Write($"ActivateGameOverlayRemotePlayTogetherInviteDialog {steamIDLobby}");
         }
 
-        public void ActivateGameOverlayToStore(uint nAppID, uint eFlag)
+        public void ActivateGameOverlayToStore(uint nAppID, int eFlag)
         {
             Write($"ActivateGameOverlayToStore {nAppID} {eFlag}");
         }
@@ -158,7 +159,7 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public SteamAPICall_t DownloadClanActivityCounts(UInt64[] clans, int cClansToRequest)
+        public SteamAPICall_t DownloadClanActivityCounts(IntPtr clans, int cClansToRequest)
         {
             Write($"DownloadClanActivityCounts {cClansToRequest}");
             return k_uAPICallInvalid;
@@ -361,10 +362,10 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public int GetFriendMessage(ulong steamIDFriend, int iMessageID, IntPtr pvData, int cubData, uint peChatEntryType)
+        public int GetFriendMessage(ulong steamIDFriend, int iMessageID, IntPtr pvData, int cubData, ref int peChatEntryType)
         {
             Write($"GetFriendMessage {steamIDFriend} {(EChatEntryType)peChatEntryType}");
-            peChatEntryType = 1;
+            peChatEntryType = (int)EChatEntryType.ChatMsg;
             return 0;
         }
 
@@ -394,7 +395,7 @@ namespace SKYNET.Steamworks.Implementation
             return "SKYNET";
         }
 
-        public EPersonaState GetFriendPersonaState(ulong steamIDFriend)
+        public int GetFriendPersonaState(ulong steamIDFriend)
         {
             Write($"GetFriendPersonaState {steamIDFriend}");
             EPersonaState Result = EPersonaState.k_EPersonaStateOnline;
@@ -410,10 +411,10 @@ namespace SKYNET.Steamworks.Implementation
                 }
             });
 
-            return Result;
+            return (int)Result;
         }
 
-        public EFriendRelationship GetFriendRelationship(ulong steamIDFriend)
+        public int GetFriendRelationship(ulong steamIDFriend)
         {
             Write($"GetFriendRelationship {steamIDFriend}");
             EFriendRelationship Result = EFriendRelationship.k_EFriendRelationshipNone;
@@ -425,7 +426,7 @@ namespace SKYNET.Steamworks.Implementation
                     Result = EFriendRelationship.k_EFriendRelationshipFriend;
             });
 
-            return Result;
+            return (int)Result;
         }
 
         public string GetFriendRichPresence(ulong steamIDFriend, string pchKey)
@@ -456,25 +457,25 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public int GetFriendsGroupIDByIndex(int iFG)
+        public FriendsGroupID_t GetFriendsGroupIDByIndex(int iFG)
         {
             Write($"GetFriendsGroupIDByIndex {iFG}");
             return (int)0;
         }
 
-        public int GetFriendsGroupMembersCount(int friendsGroupID)
+        public int GetFriendsGroupMembersCount(FriendsGroupID_t friendsGroupID)
         {
             Write($"GetFriendsGroupMembersCount {friendsGroupID}");
             return 0;
         }
 
-        public void GetFriendsGroupMembersList(short friendsGroupID, IntPtr pOutSteamIDMembers, int nMembersCount)
+        public void GetFriendsGroupMembersList(FriendsGroupID_t friendsGroupID, IntPtr pOutSteamIDMembers, int nMembersCount)
         {
             Write($"GetFriendsGroupMembersList {friendsGroupID}");
             Marshal.StructureToPtr(SteamEmulator.SteamId, pOutSteamIDMembers, false);
         }
 
-        public string GetFriendsGroupName(int friendsGroupID)
+        public string GetFriendsGroupName(FriendsGroupID_t friendsGroupID)
         {
             Write($"GetFriendsGroupName {friendsGroupID}");
             return "";
@@ -522,10 +523,10 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public uint GetPersonaState()
+        public int GetPersonaState()
         {
             Write($"GetPersonaState");
-            return (uint)EPersonaState.k_EPersonaStateOnline;
+            return (int)EPersonaState.k_EPersonaStateOnline;
         }
 
         public string GetPlayerNickname(ulong steamIDPlayer)

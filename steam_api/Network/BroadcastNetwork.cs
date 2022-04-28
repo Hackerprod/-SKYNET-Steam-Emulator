@@ -18,43 +18,27 @@ namespace SKYNET.Network
         // udpclient object
         UdpClient client;
 
-        // public string IP = "127.0.0.1"; default local
-        public int port; // define > init
-
         //constants
-        const int INIT_PORT = 28000;
+        const int INIT_PORT = 8123;
         const string MULTICAST_ADDR = "239.0.0.222";
 
         // start from unity3d
         public void Start()
         {
-            Console.WriteLine("UDPSend.init()");
-
-            // define port
-            port = INIT_PORT;
-
-            // status
-            Console.WriteLine("Listening on 127.0.0.1 : " + port);
-
-
-            receiveThread = new Thread(new ThreadStart(ReceiveData));
-            receiveThread.IsBackground = false;
-            receiveThread.SetApartmentState(ApartmentState.Unknown);
-            receiveThread.Start();
+            ThreadPool.QueueUserWorkItem(ReceiveData);
         }
 
         // receive thread
-        private void ReceiveData()
+        private void ReceiveData(object ThreadObj)
         {
             client = new UdpClient();
 
-            IPEndPoint localEp = new IPEndPoint(IPAddress.Any, port);
+            IPEndPoint localEp = new IPEndPoint(IPAddress.Any, INIT_PORT);
             client.Client.Bind(localEp);
 
             client.JoinMulticastGroup(IPAddress.Parse(MULTICAST_ADDR));
             while (true)
             {
-                Console.WriteLine("123");
                 try
                 {
                     byte[] data = client.Receive(ref localEp);
@@ -65,6 +49,20 @@ namespace SKYNET.Network
                     Console.WriteLine(err.ToString());
                 }
             }
+        }
+
+        public void Send(string data)
+        {
+            Byte[] senddata = Encoding.ASCII.GetBytes(data.ToString());
+            Send(senddata);
+        }
+
+        public void Send(byte[] data)
+        {
+            UdpClient udpClient = new UdpClient();
+            udpClient.Connect(IPAddress.Broadcast, 8123);
+            udpClient.Send(data, data.Length);
+            udpClient.Close();
         }
     }
 }

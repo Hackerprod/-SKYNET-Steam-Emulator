@@ -123,6 +123,7 @@ public class SteamEmulator
         SteamId_GS = new CSteamID((uint)new Random().Next(1000, 9999), EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeGameServer);
 
         InterfaceManager.Initialize();
+        NetworkManager.Initialize();
 
         #region Interface Initialization
 
@@ -212,50 +213,7 @@ public class SteamEmulator
         Initialized = true;
         Initializing = false;
 
-
-
-
-
-
-
-
-
-
-
-
-
-        Write("SKYNET", "Initializing network");
-
-        //MutexHelper.Wait("Thread", () =>
-        //{
-        //    Thread thread = new Thread(() =>
-        //    {
-
-        //    });
-        //    thread.Start();
-        //});
-
-        //Task.Factory.StartNew(() =>
-        //{
-        //    // Whatever code you want in your thread
-        //});
-        Console.WriteLine(
-            "Independent task has completed; main thread ends.");
-
-
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
     private static void InitializePlugins()
     {

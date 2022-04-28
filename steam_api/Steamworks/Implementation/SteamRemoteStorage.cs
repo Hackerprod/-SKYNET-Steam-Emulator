@@ -26,20 +26,22 @@ namespace SKYNET.Steamworks.Implementation
         private ConcurrentDictionary<ulong, string> SharedFiles;
         private int LastFile;
         private SteamAPICall_t k_uAPICallInvalid = 0x0;
-        string key = "dotakeys_personal.lst";
+        private Dictionary<ulong, string> AsyncFilesRead;
 
         public SteamRemoteStorage()
         {
             InterfaceVersion = "SteamRemoteStorage";
             StorageFiles = new List<string>();
             SharedFiles = new ConcurrentDictionary<ulong, string>();
+            AsyncFilesRead = new Dictionary<ulong, string>();
             LastFile = 0;
 
             try
             {
+                string MainPath = "";
                 if (SteamEmulator.Hooked)
                 {
-                    StoragePath = Path.Combine(SteamEmulator.EmulatorPath, "SKYNET", "Storage", SteamEmulator.AppId.ToString());
+                    StoragePath = Path.Combine(SteamEmulator.EmulatorPath, "SKYNET", "Storage", SteamEmulator.AppId.ToString(), "remote");
                     modCommon.EnsureDirectoryExists(StoragePath);
                 }
                 else
@@ -117,7 +119,7 @@ namespace SKYNET.Steamworks.Implementation
 
                 RemoteStorageFileWriteAsyncComplete_t data = new RemoteStorageFileWriteAsyncComplete_t()
                 {
-                    m_eResult = SKYNET.Types.EResult.k_EResultOK
+                    m_eResult = EResult.k_EResultOK
                 };
                 APICall = CallbackManager.AddCallbackResult(data);
             }
@@ -136,7 +138,24 @@ namespace SKYNET.Steamworks.Implementation
             {
                 try
                 {
-                    APICall = (ulong)CallbackType.RemoteStorageFileReadAsyncComplete;
+                    RemoteStorageFileReadAsyncComplete_t data = new RemoteStorageFileReadAsyncComplete_t();
+                    data.m_eResult = EResult.k_EResultFail;
+
+                    string fullPath = Path.Combine(StoragePath, pchFile);
+                    if (File.Exists(fullPath))
+                    {
+                        data.m_nOffset = nOffset;
+                        data.m_cubRead = cubToRead;
+                        data.m_eResult = EResult.k_EResultOK;
+                        data.m_hFileReadAsync = (ulong)new CSteamID();
+
+                        if (!AsyncFilesRead.ContainsKey(data.m_hFileReadAsync))
+                        {
+                            AsyncFilesRead.Add(data.m_hFileReadAsync, fullPath);
+                        }
+                    }
+
+                    APICall = CallbackManager.AddCallbackResult(data);
                 }
                 catch
                 {
@@ -149,11 +168,31 @@ namespace SKYNET.Steamworks.Implementation
         public bool FileReadAsyncComplete(ulong hReadCall, IntPtr pvBuffer, uint cubToRead)
         {
             Write("FileReadAsyncComplete");
-            MutexHelper.Wait("FileReadAsyncComplete", delegate
+
+            if (AsyncFilesRead.ContainsKey(hReadCall))
             {
-                // TODO
-            });
-            return false;
+                MutexHelper.Wait("FileReadAsyncComplete", delegate
+                {
+                    string fullPath = AsyncFilesRead[hReadCall];
+                    string Data = "";
+                    try
+                    {
+                        Data = File.ReadAllText(fullPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        Write($"FileRead {fullPath} {ex}");
+                    }
+
+                    byte[] bytes = Encoding.Default.GetBytes(Data);
+                    Marshal.Copy(bytes, 0, pvBuffer, bytes.Length);
+                });
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public bool FileForget(string pchFile)
@@ -310,7 +349,7 @@ namespace SKYNET.Steamworks.Implementation
             return StorageFiles.Count;
         }
 
-        public string GetFileNameAndSize(int iFile, int pnFileSizeInBytes)
+        public string GetFileNameAndSize(int iFile, ref int pnFileSizeInBytes)
         {
             if (StorageFiles.Count == 0)
             {

@@ -9,7 +9,7 @@ namespace SKYNET.Network.Packets
     public class NetworkMessage
     {
         public int MessageType { get; set; }
-        public object Body { get; set; }
+        public string ParsedBody { get; set; }
 
     }
 }

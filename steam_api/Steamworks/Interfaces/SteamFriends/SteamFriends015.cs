@@ -2,7 +2,9 @@ using SKYNET.Steamworks;
 using SKYNET.Types;
 using Steamworks;
 using System;
+
 using SteamAPICall_t = System.UInt64;
+using FriendsGroupID_t = System.UInt16;
 
 namespace SKYNET.Interface
 {
@@ -29,7 +31,7 @@ namespace SKYNET.Interface
         {
             return (ulong)SteamEmulator.SteamFriends.GetFriendByIndex(index, 0);
         }
-        public EFriendRelationship GetFriendRelationship(IntPtr _, ulong steamID)
+        public int GetFriendRelationship(IntPtr _, ulong steamID)
         {
             return SteamEmulator.SteamFriends.GetFriendRelationship(steamID);
         }
@@ -75,7 +77,7 @@ namespace SKYNET.Interface
         {
             return SteamEmulator.SteamFriends.GetFriendsGroupMembersCount(default);
         }
-        public void GetFriendsGroupMembersList(IntPtr _, short id, IntPtr steamID_out, int max_steamID_out)
+        public void GetFriendsGroupMembersList(IntPtr _, FriendsGroupID_t id, IntPtr steamID_out, int max_steamID_out)
         {
             SteamEmulator.SteamFriends.GetFriendsGroupMembersList(id, steamID_out, max_steamID_out);
         }
@@ -103,7 +105,7 @@ namespace SKYNET.Interface
         {
             return SteamEmulator.SteamFriends.GetClanActivityCounts(steamID, ref online, ref in_game, ref chatting);
         }
-        public SteamAPICall_t DownloadClanActivityCounts(IntPtr _, ulong[] clans, int count)
+        public SteamAPICall_t DownloadClanActivityCounts(IntPtr _, IntPtr clans, int count)
         {
             return SteamEmulator.SteamFriends.DownloadClanActivityCounts(clans, count);
         }
@@ -276,9 +278,9 @@ namespace SKYNET.Interface
         {
             return SteamEmulator.SteamFriends.ReplyToFriendMessage(steamID, msg);
         }
-        public int GetFriendMessage(IntPtr _, ulong steamID, int msg_index, IntPtr b_pointer, int b_length, ref uint msg_type)
+        public int GetFriendMessage(IntPtr _, ulong steamID, int msg_index, IntPtr b_pointer, int b_length, ref int msg_type)
         {
-            return SteamEmulator.SteamFriends.GetFriendMessage(steamID, msg_index, b_pointer, b_length, msg_type);
+            return SteamEmulator.SteamFriends.GetFriendMessage(steamID, msg_index, b_pointer, b_length, ref msg_type);
         }
         public SteamAPICall_t GetFollowerCount(IntPtr _, ulong steamID)
         {

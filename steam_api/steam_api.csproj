@@ -87,7 +87,7 @@
     <Compile Include="Managers\TicketManager.cs" />
     <Compile Include="Network\ClassNetworkServerBroadcast.cs" />
     <Compile Include="Network\Packets\BroadcastPacket.cs" />
-    <Compile Include="Network\BroadcastServer.cs" />
+    <Compile Include="Network\BroadcastNetwork.cs" />
     <Compile Include="Network\Packets\NetworkMessage.cs" />
     <Compile Include="Network\Packets\NET_Messages.cs" />
     <Compile Include="Plugin\IGameCoordinatorPlugin.cs" />

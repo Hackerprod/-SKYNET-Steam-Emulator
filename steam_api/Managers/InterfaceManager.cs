@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
 
 using HSteamPipe = System.UInt32;
@@ -44,6 +46,8 @@ namespace SKYNET.Managers
 
         public static IntPtr FindOrCreateInterface(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pszVersion, bool GameServer = false)
         {
+            NetworkManager.AnnounceClient();
+
             if (InvalidateInterface(pszVersion))
             {
                 Write($"Skipping {pszVersion}");
