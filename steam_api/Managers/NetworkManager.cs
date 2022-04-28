@@ -12,7 +12,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
-using static SKYNET.Network.ClassNetworkServerBroadcast;
 
 namespace SKYNET.Managers
 {
@@ -22,20 +21,24 @@ namespace SKYNET.Managers
 
         public static void Initialize()
         {
+            HttpServer httpServer = new HttpServer();
+            httpServer.Start();
+
             BroadcastNetwork = new BroadcastNetwork();
-            BroadcastNetwork.DataReceived += Discovery_DataReceived;
+            BroadcastNetwork.PacketReceived += BroadcastNetwork_PacketReceived; ;
             BroadcastNetwork.Start();
 
             AnnounceClient();
         }
 
-        private static void Discovery_DataReceived(byte[] msg, IPAddress EndPoint)
+        private static void BroadcastNetwork_PacketReceived(object sender, KeyValuePair<IPAddress, byte[]> KeyValue)
         {
             try
             {
-                string Content = Encoding.Default.GetString(msg);
+                Write($"BroadcastNetwork_PacketReceived");
+                string Content = Encoding.Default.GetString(KeyValue.Value);
                 NetworkMessage message = Content.FromJson<NetworkMessage>();
-                ProcessMessage(message);
+                ProcessMessage(message, KeyValue.Key);
             }
             catch (Exception ex)
             {
@@ -43,12 +46,13 @@ namespace SKYNET.Managers
             }
         }
 
-        private static void ProcessMessage(NetworkMessage message)
+        private static void ProcessMessage(NetworkMessage message, IPAddress sender)
         {
             switch ((MessageType)message.MessageType)
             {
                 case MessageType.NET_Announce:
-                    ProcessAnnounce(message);
+                    string Ip = sender.ToString();
+                    ProcessAnnounce(message, Ip);
                     break;
                 case MessageType.NET_Avatar:
                     break;
@@ -57,10 +61,10 @@ namespace SKYNET.Managers
             }
         }
 
-        private static void ProcessAnnounce(NetworkMessage message)
+        private static void ProcessAnnounce(NetworkMessage message, string senderAddress)
         {
             NET_Announce announce = message.ParsedBody.FromJson<NET_Announce>();
-            SteamEmulator.SteamFriends.AddOrUpdateUser(announce.AccountID, announce.PersonaName, announce.AppID);
+            SteamEmulator.SteamFriends.AddOrUpdateUser(announce.AccountID, announce.PersonaName, announce.AppID, senderAddress);
         }
 
         public static void AnnounceClient()
@@ -101,10 +105,42 @@ namespace SKYNET.Managers
             BroadcastNetwork.Send(Body);
         }
 
-
         private static void Write(string msg)
         {
             SteamEmulator.Write("NetworkManager", msg);
+        }
+
+        public static List<IPAddress> GetIPAddresses()
+        {
+            var Addresses = new List<IPAddress>();
+            string hostName = Dns.GetHostName();
+            IPHostEntry hostEntry = Dns.GetHostEntry(hostName);
+            IPAddress iPAddress = null;
+            IPAddress[] addressList = hostEntry.AddressList;
+            foreach (IPAddress iPAddress2 in addressList)
+            {
+                if (iPAddress2.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    Addresses.Add(iPAddress2);
+                }
+            }
+            return Addresses;
+        }
+
+        public static IPAddress GetIPAddress()
+        {
+            string hostName = Dns.GetHostName();
+            IPHostEntry hostEntry = Dns.GetHostEntry(hostName);
+            IPAddress iPAddress = null;
+            IPAddress[] addressList = hostEntry.AddressList;
+            foreach (IPAddress iPAddress2 in addressList)
+            {
+                if (iPAddress2.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    iPAddress = iPAddress2;
+                }
+            }
+            return iPAddress;
         }
     }
 }

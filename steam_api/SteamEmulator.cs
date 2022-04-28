@@ -131,9 +131,9 @@ public class SteamEmulator
 
         SteamClient = new SteamClient();
 
-        SteamUser = new SteamUser();
+        SteamUser = new SteamUser(); 
 
-        SteamFriends = new SteamFriends();
+        SteamFriends = new SteamFriends(); 
 
         SteamUtils = new SteamUtils();
 

@@ -280,7 +280,7 @@ namespace SKYNET.Steamworks.Implementation
         internal SteamIPAddress_t GetPublicIP()
         {
             Write("GetPublicIP");
-            SteamIPAddress_t iPAddress = new SteamIPAddress_t(modCommon.GetIPAddress());
+            SteamIPAddress_t iPAddress = new SteamIPAddress_t(NetworkManager.GetIPAddress());
             return iPAddress;
         }
 

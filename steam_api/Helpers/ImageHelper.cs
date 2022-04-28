@@ -103,5 +103,10 @@ namespace SKYNET.Helper
             MemoryStream stream = new MemoryStream(bytes);
             return Image.FromStream(stream);
         }
+
+        public static Image ImageFromStream(Stream stream)
+        {
+            return Image.FromStream(stream);
+        }
     }
 }

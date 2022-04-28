@@ -14,5 +14,7 @@ namespace SKYNET.Types
         public string PersonaName { get; set; }
         public uint GameId { get; set; }
         public bool HasFriend { get; set; }
+        public string IPAddress { get; set; }
+
     }
 }

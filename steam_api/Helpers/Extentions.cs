@@ -1,5 +1,4 @@
 ﻿using SKYNET.Callback;
-using SKYNET.Network.Packets;
 using Steamworks;
 using System;
 using System.Collections.Generic;
@@ -37,32 +36,32 @@ namespace SKYNET.Helper
             return (CallbackType)type;
         }
 
-        public static string Serialize(this NET_Base Base)
-        {
-            try
-            {
-                return new JavaScriptSerializer().Serialize(Base);
-            }
-            catch (Exception ex)
-            {
-                modCommon.Show(ex);
-                return default;
-            }
-        }
+        //public static string Serialize(this NET_Base Base)
+        //{
+        //    try
+        //    {
+        //        return new JavaScriptSerializer().Serialize(Base);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        modCommon.Show(ex);
+        //        return default;
+        //    }
+        //}
 
-        public static byte[] Serialize(this NetworkMessage Base)
-        {
-            try
-            {
-                string json = new JavaScriptSerializer().Serialize(Base);
-                return Encoding.Default.GetBytes(json);
-            }
-            catch (Exception ex)
-            {
-                modCommon.Show(ex);
-                return default;
-            }
-        }
+        //public static byte[] Serialize(this NetworkMessage Base)
+        //{
+        //    try
+        //    {
+        //        string json = new JavaScriptSerializer().Serialize(Base);
+        //        return Encoding.Default.GetBytes(json);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        modCommon.Show(ex);
+        //        return default;
+        //    }
+        //}
 
         public static T Deserialize<T>(this byte[] bytes)
         {

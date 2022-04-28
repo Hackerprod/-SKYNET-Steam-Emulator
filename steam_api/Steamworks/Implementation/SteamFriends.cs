@@ -13,6 +13,7 @@ using Steamworks;
 
 using SteamAPICall_t = System.UInt64;
 using FriendsGroupID_t = System.UInt16;
+using System.Net;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -41,22 +42,38 @@ namespace SKYNET.Steamworks.Implementation
 
             #region Own Avatar
 
-            string fileName = Path.Combine(modCommon.GetPath(), "SKYNET", "Avatar.jpg");
-            Bitmap Avatar = default;
-            if (File.Exists(fileName))
+            try
             {
-                Avatar = (Bitmap)Bitmap.FromFile(fileName);
+                string fileName = Path.Combine(modCommon.GetPath(), "SKYNET", "Avatar.jpg");
+                Bitmap Avatar = default;
+                if (File.Exists(fileName))
+                {
+                    Avatar = (Bitmap)Bitmap.FromFile(fileName);
+                }
+                else
+                {
+                    Avatar = ImageHelper.GetDesktopWallpaper();
+                }
+                ImageAvatar avatar = new ImageAvatar(Avatar, ImageIndex);
+                Avatars.TryAdd((ulong)SteamEmulator.SteamId, avatar);
+                ImageIndex = avatar.Large + 1;
             }
-            else
+            catch (Exception ex)
             {
-                Avatar = ImageHelper.GetDesktopWallpaper();
+                Write($"Error loading default avatar {ex}");
             }
-
-            ImageAvatar avatar = new ImageAvatar(Avatar, ImageIndex);
-            Avatars.TryAdd((ulong)SteamEmulator.SteamId, avatar);
-            ImageIndex = avatar.Large + 1;
 
             #endregion
+
+            Users.Add(new Types.SteamUser()
+            {
+                AccountId = 1000,
+                GameId = 570,
+                HasFriend = true,
+                PersonaName = "Hackerprod",
+                SteamId = (ulong)new CSteamID(1000),
+                IPAddress = "10.31.0.1"
+            });
 
             Users.Add(new Types.SteamUser()
             {
@@ -86,7 +103,7 @@ namespace SKYNET.Steamworks.Implementation
             {
                 AccountId = 1004,
                 GameId = 570,
-                HasFriend = true,
+                HasFriend = false,
                 PersonaName = "Georgio",
                 SteamId = (ulong)new CSteamID(1004)
             });
@@ -490,9 +507,29 @@ namespace SKYNET.Steamworks.Implementation
         public int GetSmallFriendAvatar(ulong steamIDFriend)
         {
             Write($"GetSmallFriendAvatar {(CSteamID)steamIDFriend}");
-            if (Avatars.TryGetValue(steamIDFriend, out ImageAvatar avatar))
+            //if (Avatars.TryGetValue(steamIDFriend, out ImageAvatar avatar))
+            //{
+            //    return avatar.Small;
+            //}
+            //else
             {
-                return avatar.Small;
+                try
+                {
+                    var User = Users.Find(u => u.SteamId == steamIDFriend);
+                    if (User != null)
+                    {
+                        ImageAvatar avatar = RequestAvatar(steamIDFriend, User.IPAddress);
+                        if (avatar != null)
+                        {
+                            return avatar.Small;
+                        }
+                        Console.WriteLine("Returned Avatar null");
+                    }
+                }
+                catch 
+                {
+
+                }
             }
             return DefaultAvatar.Small;
         }
@@ -500,9 +537,29 @@ namespace SKYNET.Steamworks.Implementation
         public int GetMediumFriendAvatar(ulong steamIDFriend)
         {
             Write($"GetMediumFriendAvatar {(CSteamID)steamIDFriend}");
-            if (Avatars.TryGetValue(steamIDFriend, out ImageAvatar avatar))
+            //if (Avatars.TryGetValue(steamIDFriend, out ImageAvatar avatar))
+            //{
+            //    return avatar.Medium;
+            //}
+            //else
             {
-                return avatar.Medium;
+                try
+                {
+                    var User = Users.Find(u => u.SteamId == steamIDFriend);
+                    if (User != null)
+                    {
+                        ImageAvatar avatar = RequestAvatar(steamIDFriend, User.IPAddress);
+                        if (avatar != null)
+                        {
+                            return avatar.Medium;
+                        }
+                        Console.WriteLine("Returned Avatar null");
+                    }
+                }
+                catch
+                {
+
+                }
             }
             return DefaultAvatar.Medium;
         }
@@ -510,9 +567,29 @@ namespace SKYNET.Steamworks.Implementation
         public int GetLargeFriendAvatar(ulong steamIDFriend)
         {
             Write($"GetLargeFriendAvatar {(CSteamID)steamIDFriend}");
-            if (Avatars.TryGetValue(steamIDFriend, out ImageAvatar avatar))
+            //if (Avatars.TryGetValue(steamIDFriend, out ImageAvatar avatar))
+            //{
+            //    return avatar.Large;
+            //}
+            //else
             {
-                return avatar.Large;
+                try
+                {
+                    var User = Users.Find(u => u.SteamId == steamIDFriend);
+                    if (User != null)
+                    {
+                        ImageAvatar avatar = RequestAvatar(steamIDFriend, User.IPAddress);
+                        if (avatar != null)
+                        {
+                            return avatar.Large;
+                        }
+                        Console.WriteLine("Returned Avatar null");
+                    }
+                }
+                catch
+                {
+
+                }
             }
             return DefaultAvatar.Large;
         }
@@ -715,6 +792,15 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
+        public byte[] GetAvatar(ulong steamID)
+        {
+            if (Avatars.TryGetValue(steamID, out var avatar))
+            {
+                return avatar.GetImage();
+            }
+            return new byte[0];
+        }
+
         public (int, int) GetImageSize(int index)
         {
             if (DefaultAvatar.Small == index) return (32, 32);
@@ -732,7 +818,7 @@ namespace SKYNET.Steamworks.Implementation
             return (0, 0);
         }
 
-        public void AddOrUpdateUser(uint accountID, string personaName, uint appID)
+        public void AddOrUpdateUser(uint accountID, string personaName, uint appID, string senderAddress = "")
         {
             var user = Users.Find(f => f.AccountId == accountID);
             if (user == null)
@@ -743,9 +829,11 @@ namespace SKYNET.Steamworks.Implementation
                     PersonaName = personaName,
                     AccountId = accountID,
                     SteamId = (ulong)steamID,
-                    GameId = appID
+                    GameId = appID,
+                    IPAddress = senderAddress
                 };
                 Users.Add(user);
+                Write($"Added user {personaName}, {steamID}, from {senderAddress}");
             }
             else
             {
@@ -768,7 +856,30 @@ namespace SKYNET.Steamworks.Implementation
             }
             return null;
         }
-        
+
+        private ImageAvatar RequestAvatar(ulong steamIDFriend, string IPAddress)
+        {
+            try
+            {
+                Write($"http://{IPAddress}:8880/Avatar");
+                WebClient client = new WebClient();
+                byte[] bytes = client.DownloadData($"http://{IPAddress}:8880/Avatar");
+                if (bytes.Length != 0)
+                {
+                    var bitmap = (Bitmap)ImageHelper.ImageFromBytes(bytes);
+                    ImageAvatar avatar = new ImageAvatar(bitmap, ImageIndex);
+                    ImageIndex = avatar.Large + 1;
+                    Avatars.TryAdd(steamIDFriend, avatar);
+                    return avatar;
+                }
+            }
+            catch (Exception ex)
+            {
+                Write($"{ex}");
+            }
+            Write($"HTTP request returned empty");
+            return null;
+        }
 
         public class ImageAvatar
         {
@@ -806,6 +917,13 @@ namespace SKYNET.Steamworks.Implementation
                 var resized184 = ImageHelper.Resize(Image, 184, 184);
                 LargeBytes = ImageHelper.ConvertToRGBA(resized184);
             }
+
+            public byte[] GetImage()
+            {
+                var resized = ImageHelper.Resize(Image, 200, 200);
+                return ImageHelper.ImageToBytes(resized);
+            }
+
 
             public byte[] GetImage(int iImage)
             {
