@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using SKYNET;
 using SKYNET.Helper;
 using SKYNET.Helpers;
+using SKYNET.Managers;
 using SKYNET.Steamworks;
 using SKYNET.Types;
 using Steamworks;
@@ -108,10 +109,7 @@ namespace SKYNET.Steamworks.Implementation
         public uint GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
         {
             Write("GetAuthSessionTicket");
-            MutexHelper.Wait("GetAuthSessionTicket", delegate
-            {
-                // TODO
-            });
+            NetworkManager.AnnounceClient();
             pcbTicket = 10;
             return 100;
         }

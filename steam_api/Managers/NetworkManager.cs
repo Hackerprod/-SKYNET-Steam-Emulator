@@ -18,6 +18,7 @@ namespace SKYNET.Managers
     public class NetworkManager
     {
         private static BroadcastNetwork BroadcastNetwork;
+        private static System.Timers.Timer Timer;
 
         public static void Initialize()
         {
@@ -29,13 +30,23 @@ namespace SKYNET.Managers
             BroadcastNetwork.Start();
 
             AnnounceClient();
+
+            ThreadPool.QueueUserWorkItem(StartTimer);
+        }
+
+        private static void StartTimer(object threadObj)
+        {
+            Timer = new System.Timers.Timer();
+            Timer.AutoReset = false;
+            Timer.Interval = 60000;
+            Timer.Elapsed += Timer_Elapsed;
+            Timer.Start();
         }
 
         private static void BroadcastNetwork_PacketReceived(object sender, KeyValuePair<IPAddress, byte[]> KeyValue)
         {
             try
             {
-                Write($"BroadcastNetwork_PacketReceived");
                 string Content = Encoding.Default.GetString(KeyValue.Value);
                 NetworkMessage message = Content.FromJson<NetworkMessage>();
                 ProcessMessage(message, KeyValue.Key);
@@ -141,6 +152,13 @@ namespace SKYNET.Managers
                 }
             }
             return iPAddress;
+        }
+
+        private static void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            AnnounceClient();
+            Timer.Interval = 60000;
+            Timer.Start();
         }
     }
 }

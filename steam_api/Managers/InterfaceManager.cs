@@ -46,8 +46,6 @@ namespace SKYNET.Managers
 
         public static IntPtr FindOrCreateInterface(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pszVersion, bool GameServer = false)
         {
-            NetworkManager.AnnounceClient();
-
             if (InvalidateInterface(pszVersion))
             {
                 Write($"Skipping {pszVersion}");

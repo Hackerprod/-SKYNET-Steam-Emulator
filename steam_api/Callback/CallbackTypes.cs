@@ -226,8 +226,8 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct PersonaStateChange_t : ICallbackData
     {
-        internal ulong SteamID; // m_ulSteamID uint64
-        internal int ChangeFlags; // m_nChangeFlags int
+        internal ulong m_ulSteamID; // m_ulSteamID uint64
+        internal int m_nChangeFlags; // m_nChangeFlags int
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(PersonaStateChange_t));

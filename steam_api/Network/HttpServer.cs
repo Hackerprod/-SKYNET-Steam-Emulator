@@ -19,7 +19,6 @@ namespace SKYNET.Network
             _listener = new HttpListener();
             foreach (var ipaddress in NetworkManager.GetIPAddresses())
             {
-                Console.WriteLine($"Using address: http://{ipaddress}:{SERVER_PORT}/");
                 _listener.Prefixes.Add($"http://{ipaddress}:{SERVER_PORT}/");
             }
         }
@@ -32,7 +31,6 @@ namespace SKYNET.Network
 
         private void ListenConnections(object state)
         {
-            Console.WriteLine($"Started HTTP listen on port 8880");
             while (true)
             {
                 try

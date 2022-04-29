@@ -29,6 +29,7 @@ namespace SKYNET.Exported
             }
             else
             {
+                NetworkManager.AnnounceClient();
                 Write($"SteamAPI_Init : Initialized");
             }
 
@@ -256,7 +257,7 @@ namespace SKYNET.Exported
             Msg += "////////////////////////////// Mini Dump Content \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + Environment.NewLine;
             Msg += $"{pchMsg}" + Environment.NewLine;
             Msg += "//////////////////////////////   End Mini Dump   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + Environment.NewLine;
-            Write(Msg);
+            Write("SteamAPI_SetMiniDumpComment");
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

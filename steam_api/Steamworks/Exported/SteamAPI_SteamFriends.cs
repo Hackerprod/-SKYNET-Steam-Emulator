@@ -9,6 +9,7 @@ using Steamworks;
 
 using SteamAPICall_t = System.UInt64;
 using FriendsGroupID_t = System.UInt16;
+using System.Threading.Tasks;
 
 public class SteamAPI_SteamFriends
 {
