@@ -208,11 +208,11 @@ namespace SKYNET.Steamworks.Implementation
 
         // Retrieve ticket to be sent to the entity who wishes to authenticate you ( using BeginAuthSession API ). 
         // uint32 *pcbTicket  retrieves the length of the actual ticket.
-        public HAuthTicket GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, IntPtr pcbTicket)
+        public HAuthTicket GetAuthSessionTicket(IntPtr pTicket, ref int cbMaxTicket, ref uint pcbTicket)
         {
             SteamEmulator.Write("DEBUG", "GetAuthSessionTicket");
             NetworkManager.AnnounceClient();
-            return TicketManager.GetAuthSessionTicket(pTicket, cbMaxTicket, pcbTicket);
+            return TicketManager.GetAuthSessionTicket(pTicket, ref cbMaxTicket, ref pcbTicket, true);
         }
 
         public void SetAdvertiseServerActive(bool bActive)

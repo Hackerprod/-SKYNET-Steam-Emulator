@@ -17,6 +17,7 @@ namespace SKYNET.Helper
             // Verify Paths
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "SKYNET"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "SKYNET", "Storage"));
+            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "SKYNET", "AvatarCache"));
 
             try
             {

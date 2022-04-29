@@ -98,7 +98,7 @@ public partial class modCommon
         return IntPtr.Size == 8;
     }
 
-    public static DateTime LoadTime { get; set; }
+    public static DateTime LoadTime { get; set; } = DateTime.Now;
     public static int MilisecondTime()
     {
         return (DateTime.Now - LoadTime).Milliseconds;

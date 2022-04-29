@@ -22,6 +22,7 @@ namespace SKYNET.Steamworks.Implementation
     public class SteamFriends : ISteamInterface
     {
         public List<SKYNET.Types.SteamUser> Users;
+        public List<ulong> DownloadedAvatar;
         public List<ulong> QueringAvatar;
         private Dictionary<string, string> RichPresence;
         private ConcurrentDictionary<ulong, ImageAvatar> Avatars;
@@ -33,7 +34,8 @@ namespace SKYNET.Steamworks.Implementation
         {
             InterfaceVersion = "SteamFriends";
             Users   = new List<SKYNET.Types.SteamUser>();
-            QueringAvatar = new List<SteamAPICall_t>();
+            QueringAvatar = new List<ulong>();
+            DownloadedAvatar = new List<ulong>();
             RichPresence = new Dictionary<string, string>();
             Avatars = new ConcurrentDictionary<ulong, ImageAvatar>();
             ImageIndex = 10;
@@ -144,16 +146,38 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public void ActivateGameOverlayToUser(string friendsGroupID, ulong steamID)
+        public void ActivateGameOverlayToUser(string pchDialog, ulong steamID)
         {
-            Write($"ActivateGameOverlayToUser {friendsGroupID} {(CSteamID)steamID}");
+            Write($"ActivateGameOverlayToUser {pchDialog} {(CSteamID)steamID}");
 
-            switch (friendsGroupID)
+            switch (pchDialog)
             {
+                case "steamid":
+                    // TODO
+                    break;
+                case "chat":
+                    // TODO
+                    break;
+                case "jointrade":
+                    // TODO
+                    break;
+                case "stats":
+                    // TODO
+                    break;
+                case "achievements":
+                    // TODO
+                    break;
                 case "friendadd":
                     // TODO
                     break;
                 case "friendremove":
+                    // TODO
+                    break;
+                case "friendrequestaccept":
+                    // TODO
+                    break;
+                case "friendrequestignore":
+                    // TODO
                     break;
                 default:
                     break;
@@ -200,12 +224,12 @@ namespace SKYNET.Steamworks.Implementation
         }
 
 
-        public bool GetClanActivityCounts(ulong steamIDClan, ref int online, ref int in_game, ref int chatting)
+        public bool GetClanActivityCounts(ulong steamIDClan, ref int pnOnline, ref int pnInGame, ref int pnChatting)
         {
             Write($"ActivateGameOverlay {steamIDClan}");
-            online = 0;
-            in_game = 0;
-            chatting = 0;
+            pnOnline = 0;
+            pnInGame = 0;
+            pnChatting = 0;
             return true;
         }
 
@@ -847,6 +871,7 @@ namespace SKYNET.Steamworks.Implementation
                         Avatars.TryAdd(steamIDFriend, avatar);
                         ReportUserChanged(steamIDFriend, EPersonaChange.k_EPersonaChangeAvatar);
                     }
+                    DownloadedAvatar.Add(steamIDFriend);
                     QueringAvatar.Remove(steamIDFriend);
                 }
             }

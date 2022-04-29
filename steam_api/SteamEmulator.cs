@@ -124,6 +124,7 @@ public class SteamEmulator
 
         InterfaceManager.Initialize();
         NetworkManager.Initialize();
+        IpcManager.Initialize();
 
         #region Interface Initialization
 

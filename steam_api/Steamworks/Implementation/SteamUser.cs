@@ -7,7 +7,9 @@ using SKYNET.Managers;
 using SKYNET.Steamworks;
 using SKYNET.Types;
 using Steamworks;
+
 using SteamAPICall_t = System.UInt64;
+using HAuthTicket = System.UInt32;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -106,12 +108,11 @@ namespace SKYNET.Steamworks.Implementation
             return 4800;
         }
 
-        public uint GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
+        public HAuthTicket GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
         {
             Write("GetAuthSessionTicket");
             NetworkManager.AnnounceClient();
-            pcbTicket = 10;
-            return 100;
+            return TicketManager.GetAuthSessionTicket(pTicket, ref cbMaxTicket, ref pcbTicket);
         }
 
         public int BeginAuthSession(IntPtr pAuthTicket, int cbAuthTicket, ulong steamID)
