@@ -9,7 +9,7 @@ The project is in an initial stage, so it is not functional yet.
 This emulator reads settings from `[SKYNET] steam_api.ini` file, data like Nickname, SteamId, Language etc.
 
 ## Currently working on
-Interface implementation.
+Network implementation.
 
 ## Log
 When File log option si enabled in settings, a log file will be created in the root of the game executable with the following name `[SKYNET] steam_api.log`
