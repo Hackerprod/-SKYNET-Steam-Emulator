@@ -7,14 +7,14 @@ using System.Windows.Forms;
 
 namespace SKYNET.Network
 {
-    public class ClientSockets
+    public class ClientSocket
     {
-        public Socket ClientSocket;
+        public Socket socket;
         public event EventHandler<NetPacket> OnDataReceived;
 
-        public ClientSockets(Socket socket)
+        public ClientSocket(Socket _socket)
         {
-            this.ClientSocket = socket;
+            this.socket = _socket;
         }
 
         public void BeginReceiving()
@@ -26,24 +26,24 @@ namespace SKYNET.Network
                 {
                     if (StopReceiving) break;
 
-                    if (!IsSocketConnected(ClientSocket))
+                    if (!IsSocketConnected(socket))
                     {
                         break;
                     }
-                    if (ClientSocket.Available != 0)
+                    if (socket.Available != 0)
                     {
                         List<byte> list = new List<byte>();
-                        while (ClientSocket.Available > 0 && ClientSocket.Connected)
+                        while (socket.Available > 0 && socket.Connected)
                         {
                             byte[] array3 = new byte[1];
-                            ClientSocket.Receive(array3, 0, 1, SocketFlags.None);
+                            socket.Receive(array3, 0, 1, SocketFlags.None);
                             list.AddRange(array3);
 
                         }
 
                         if (list.Count > 0)
                         {
-                            OnDataReceived?.Invoke(this, new NetPacket() { Sender = ClientSocket, Data = list.ToArray() });
+                            OnDataReceived?.Invoke(this, new NetPacket() { Sender = socket, Data = list.ToArray() });
                         }
                     }
                 }

@@ -11,6 +11,19 @@ namespace SKYNET.Helper
 {
     public static class Extentions
     {
+        
+        public static uint GetAccountID(this ulong SteamID)
+        {
+            try
+            {
+                return new CSteamID(SteamID).AccountId;
+            }
+            catch (Exception)
+            {
+                return (uint)SteamID;
+            }
+        }
+
         public static bool IsGameServer(this CCallbackBase Base)
         {
             bool GS = false;

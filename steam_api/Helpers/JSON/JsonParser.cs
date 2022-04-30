@@ -18,30 +18,37 @@ namespace SKYNET.Helper.JSON
 
         public static T FromJson<T>(this string json)
         {
-            // Initialize, if needed, the ThreadStatic variables
-            if (propertyInfoCache == null) propertyInfoCache = new Dictionary<Type, Dictionary<string, PropertyInfo>>();
-            if (fieldInfoCache == null) fieldInfoCache = new Dictionary<Type, Dictionary<string, FieldInfo>>();
-            if (stringBuilder == null) stringBuilder = new StringBuilder();
-            if (splitArrayPool == null) splitArrayPool = new Stack<List<string>>();
-
-            //Remove all whitespace not within strings to make parsing simpler
-            stringBuilder.Length = 0;
-            for (int i = 0; i < json.Length; i++)
+            try
             {
-                char c = json[i];
-                if (c == '"')
+                // Initialize, if needed, the ThreadStatic variables
+                if (propertyInfoCache == null) propertyInfoCache = new Dictionary<Type, Dictionary<string, PropertyInfo>>();
+                if (fieldInfoCache == null) fieldInfoCache = new Dictionary<Type, Dictionary<string, FieldInfo>>();
+                if (stringBuilder == null) stringBuilder = new StringBuilder();
+                if (splitArrayPool == null) splitArrayPool = new Stack<List<string>>();
+
+                //Remove all whitespace not within strings to make parsing simpler
+                stringBuilder.Length = 0;
+                for (int i = 0; i < json.Length; i++)
                 {
-                    i = AppendUntilStringEnd(true, i, json);
-                    continue;
+                    char c = json[i];
+                    if (c == '"')
+                    {
+                        i = AppendUntilStringEnd(true, i, json);
+                        continue;
+                    }
+                    if (char.IsWhiteSpace(c))
+                        continue;
+
+                    stringBuilder.Append(c);
                 }
-                if (char.IsWhiteSpace(c))
-                    continue;
 
-                stringBuilder.Append(c);
+                //Parse the thing!
+                return (T)ParseValue(typeof(T), stringBuilder.ToString());
             }
-
-            //Parse the thing!
-            return (T)ParseValue(typeof(T), stringBuilder.ToString());
+            catch (Exception)
+            {
+                return default;
+            }
         }
 
         static int AppendUntilStringEnd(bool appendEscapeCharacter, int startIdx, string json)

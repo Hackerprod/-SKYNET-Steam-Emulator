@@ -18,6 +18,17 @@ namespace SKYNET.Network.Packets
         public uint AppID { get; set; }
     }
 
+    public class NET_AvatarRequest : NET_Base
+    {
+
+    }
+
+    public class NET_AvatarResponse : NET_Base
+    {
+        public uint AccountID { get; set; }
+        public string HexAvatar { get; set; }
+    }
+
     public enum MessageType : int
     {
         NET_Announce,

@@ -2,6 +2,7 @@
 using SKYNET.Helper;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -57,16 +58,16 @@ namespace SKYNET.Managers
             try
             {
                 CurrentTicket++;
-                ulong steam_id = (ulong)SteamEmulator.SteamId;
-                byte[] first4 = pTicket.GetBytes(4);
-                first4[0] = 0x14;
-                first4[1] = 0;
-                first4[2] = 0;
-                first4[3] = 0;
-                Marshal.Copy(first4, 0, pTicket, 4);
-                Marshal.WriteInt64(pTicket, 12, (long)steam_id);
-                Marshal.WriteInt32(pcbTicket, 0, cbMaxTicket);
-                Marshal.WriteInt32(pTicket, sizeof(UInt64), (int)CurrentTicket);
+
+                byte[] Token = new byte[4] { 0x14, 0x00, 0x00, 0x00 };
+                byte[] IPAddr = NetworkManager.GetIPAddress().GetAddressBytes();
+
+                MemoryStream ticketStream = new MemoryStream();
+                ticketStream.WriteBytes(Token);
+                ticketStream.WriteInt32L(0x18); // Header size
+                ticketStream.WriteBytes(IPAddr);
+
+                Marshal.Copy(ticketStream.ToArray(), 0, pTicket, ticketStream.ToArray().Length);
 
                 GetAuthSessionTicketResponse_t data = new GetAuthSessionTicketResponse_t()
                 {
@@ -88,8 +89,6 @@ namespace SKYNET.Managers
         {
             SteamEmulator.Write("Ticket Manager", msg);
         }
-
-
     }
 }
 

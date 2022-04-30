@@ -13,7 +13,7 @@ namespace SKYNET.Network
     {
         private Socket _serverSocket;
         private IPEndPoint _localEndPoint;
-        private List<ClientSockets> ConnectedClients;
+        private List<ClientSocket> ConnectedClients;
         public const int Port = 28880;
         public bool Started { get; private set; }
 
@@ -23,12 +23,12 @@ namespace SKYNET.Network
 
         public TCPServer()
         {
-            ConnectedClients = new List<ClientSockets>();
+            ConnectedClients = new List<ClientSocket>();
         }
 
-        internal void NotifyUserDisconnected(ClientSockets clientSockets)
+        internal void NotifyUserDisconnected(ClientSocket clientSockets)
         {
-            OnDisconnected?.Invoke(this, clientSockets.ClientSocket);
+            OnDisconnected?.Invoke(this, clientSockets.socket);
             ConnectedClients.Remove(clientSockets);
         }
 
@@ -54,7 +54,7 @@ namespace SKYNET.Network
             {
                 Socket socket = ((Socket)ar.AsyncState).EndAccept(ar);
                 OnConnected?.Invoke(this, socket);
-                ClientSockets client = new ClientSockets(socket);
+                ClientSocket client = new ClientSocket(socket);
                 client.OnDataReceived += Client_OnDataReceived;
                 client.BeginReceiving();
 
@@ -98,10 +98,10 @@ namespace SKYNET.Network
 
         internal void DisconnectAll()
         {
-            foreach (ClientSockets conn in ConnectedClients)
+            foreach (ClientSocket conn in ConnectedClients)
             {
                 conn.Stop();
-                conn.ClientSocket.Close();
+                conn.socket.Close();
             }
             ConnectedClients.Clear();
         }

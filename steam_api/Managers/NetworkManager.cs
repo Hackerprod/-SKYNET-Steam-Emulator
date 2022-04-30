@@ -2,8 +2,11 @@
 using SKYNET.Helper.JSON;
 using SKYNET.Network;
 using SKYNET.Network.Packets;
+using SKYNET.Steamworks.Implementation;
+using Steamworks;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -21,7 +24,7 @@ namespace SKYNET.Managers
         public static void Initialize()
         {
             TCPServer tcpServer = new TCPServer();
-            tcpServer.OnDataReceived += TcpServer_OnDataReceived;
+            tcpServer.OnDataReceived += Network_OnDataReceived;
             tcpServer.OnConnected += TcpServer_OnConnected;
             ThreadPool.QueueUserWorkItem(tcpServer.Start);
 
@@ -33,7 +36,7 @@ namespace SKYNET.Managers
             Write("Client connected from " + e.RemoteEndPoint);
         }
 
-        private static void TcpServer_OnDataReceived(object sender, Network.NetPacket packet)
+        private static void Network_OnDataReceived(object sender, Network.NetPacket packet)
         {
             NetworkMessage message = packet.Data.GetString().FromJson<NetworkMessage>();
             ProcessMessage(message, packet.Sender);
@@ -43,17 +46,16 @@ namespace SKYNET.Managers
 
         private static void ProcessMessage(NetworkMessage message, Socket socket)
         {
+            Write($"Received message {(MessageType)message.MessageType} from {((IPEndPoint)socket.RemoteEndPoint).Address.ToString()}");
             switch ((MessageType)message.MessageType)
             {
                 case MessageType.NET_Announce:
-                    ProcessAnnounce(message, socket);
-                    break;
                 case MessageType.NET_AnnounceResponse:
                     ProcessAnnounce(message, socket);
                     break;
                 case MessageType.NET_AvatarRequest:
-                    break;
                 case MessageType.NET_AvatarResponse:
+                    ProcessAvatar(message, socket);
                     break;
                 default:
                     break;
@@ -65,6 +67,7 @@ namespace SKYNET.Managers
         {
             NET_Announce announce = message.ParsedBody.FromJson<NET_Announce>();
 
+            // Add User to List on both cases (NET_Announce and NET_AnnounceResponse)
             if (announce != null)
                 SteamEmulator.SteamFriends.AddOrUpdateUser(announce.AccountID, announce.PersonaName, announce.AppID, ((IPEndPoint)socket.RemoteEndPoint).Address.ToString());
 
@@ -82,12 +85,68 @@ namespace SKYNET.Managers
                 };
                 string json = messageResponse.ToJson();
                 socket.Send(json.GetBytes());
+
+                // Connection pair close the socket
             }
             else
             {
-                Write("Closing connection after received NET_AnnounceResponse message");
+                Write($"Closing connection after received {(MessageType)message.MessageType} message");
                 socket.Close();
                 socket.Dispose();
+            }
+        }
+
+        private static void ProcessAvatar(NetworkMessage message, Socket socket)
+        {
+            if (message.MessageType == (int)MessageType.NET_AvatarRequest)
+            {
+                try
+                {
+                    var imageBytes = SteamEmulator.SteamFriends.GetAvatar((ulong)SteamEmulator.SteamId);
+                    string hexAvatar = Convert.ToBase64String(imageBytes);
+                    NET_AvatarResponse avatarResponse = new NET_AvatarResponse()
+                    {
+                        AccountID = SteamEmulator.SteamId.AccountId,
+                        HexAvatar = hexAvatar
+                    };
+                    string parsedResponse = avatarResponse.ToJson();
+                    NetworkMessage messageResponse = new NetworkMessage()
+                    {
+                        MessageType = (int)MessageType.NET_AvatarResponse,
+                        ParsedBody = parsedResponse
+                    };
+                    string json = messageResponse.ToJson();
+                    socket.Send(json.GetBytes());
+                }
+                catch (Exception ex)
+                {
+                    Write($"{ex}");
+                }
+            }
+            else
+            {
+                try
+                {
+                    NET_AvatarResponse announceResponse = message.ParsedBody.FromJson<NET_AvatarResponse>();
+                    if (announceResponse != null)
+                    {
+                        var imageBytes = Convert.FromBase64String(announceResponse.HexAvatar);
+                        if (imageBytes.Length != 0)
+                        {
+                            Bitmap Avatar = (Bitmap)ImageHelper.ImageFromBytes(imageBytes);
+                            ulong SteamID = (ulong)new CSteamID(announceResponse.AccountID);
+                            SteamEmulator.SteamFriends.AddOrUpdateAvatar(Avatar, SteamID);
+                            SteamEmulator.SteamRemoteStorage.StoreAvatar(Avatar, announceResponse.AccountID);
+                        }
+                    }
+                    Write($"Closing connection after received {(MessageType)message.MessageType} message");
+                    socket.Close();
+                    socket.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    Write($"{ex}");
+                }
             }
         }
 
@@ -103,12 +162,51 @@ namespace SKYNET.Managers
                     try
                     {
                         Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                        socket.BeginConnect(new IPEndPoint(IPAddress.Parse(Address), 28880), AnnounceCallback, socket);
+                        socket.BeginConnect(Address, 28880, AnnounceCallback, socket);
                     }
                     catch
                     {
                     }
                 }
+            }
+        }
+
+        public static void RequestAvatar(string IP)
+        {
+            try
+            {
+                Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                socket.BeginConnect(IP, 28880, AvatarCallback, socket);
+            }
+            catch
+            {
+            }
+        }
+
+        #region Conection callback
+
+        private static void AvatarCallback(IAsyncResult ar)
+        {
+            try
+            {
+                Socket socket = ((Socket)ar.AsyncState);
+                socket.EndConnect(ar);
+
+                NetworkMessage message = new NetworkMessage()
+                {
+                    MessageType = (int)MessageType.NET_AvatarRequest,
+                    ParsedBody = ""
+                };
+                string json = message.ToJson();
+                byte[] bytes = Encoding.Default.GetBytes(json);
+                socket.Send(bytes);
+
+                ClientSocket client = new ClientSocket(socket);
+                client.OnDataReceived += Network_OnDataReceived;
+                client.BeginReceiving();
+            }
+            catch
+            {
             }
         }
 
@@ -122,20 +220,21 @@ namespace SKYNET.Managers
                 NET_Announce announce = new NET_Announce()
                 {
                     PersonaName = SteamEmulator.PersonaName,
-                    AccountID = (uint)SteamEmulator.SteamId
+                    AccountID = SteamEmulator.SteamId.AccountId
                 };
 
                 NetworkMessage message = new NetworkMessage()
                 {
-                    MessageType = (int)MessageType.NET_AnnounceResponse,
+                    MessageType = (int)MessageType.NET_Announce,
                     ParsedBody = announce.ToJson()
                 };
+
                 string json = message.ToJson();
                 byte[] bytes = Encoding.Default.GetBytes(json);
                 socket.Send(bytes);
 
-                ClientSockets client = new ClientSockets(socket);
-                client.OnDataReceived += Client_OnDataReceived;
+                ClientSocket client = new ClientSocket(socket);
+                client.OnDataReceived += Network_OnDataReceived;
                 client.BeginReceiving();
             }
             catch 
@@ -143,18 +242,7 @@ namespace SKYNET.Managers
             }
         }
 
-        private static void Client_OnDataReceived(object sender, Network.NetPacket e)
-        {
-            try
-            {
-                Socket socket = e.Sender;
-                NetworkMessage message = e.Data.GetString().FromJson<NetworkMessage>();
-                ProcessMessage(message, socket);
-            }
-            catch
-            {
-            }
-        }
+        #endregion
 
         private static void Write(string msg)
         {

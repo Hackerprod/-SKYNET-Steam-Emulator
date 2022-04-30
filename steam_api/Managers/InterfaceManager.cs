@@ -148,7 +148,7 @@ namespace SKYNET.Managers
             //}
             if (pszVersion.StartsWith("STEAMHTTP_INTERFACE_VERSION"))
             {
-                //return true;
+                return true;
             }
             //if (pszVersion.StartsWith("SteamController"))
             //{

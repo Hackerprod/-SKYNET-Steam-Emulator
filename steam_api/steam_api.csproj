@@ -84,9 +84,9 @@
     <Compile Include="Helpers\Settings.cs" />
     <Compile Include="Helpers\JSON\JSONParser.cs" />
     <Compile Include="Managers\NetworkManager.cs" />
+    <Compile Include="Helpers\StreamHelpers.cs" />
     <Compile Include="Managers\TicketManager.cs" />
-    <Compile Include="Network\ClientSockets.cs" />
-    <Compile Include="Network\HttpServer.cs" />
+    <Compile Include="Network\ClientSocket.cs" />
     <Compile Include="Network\Packets\BroadcastPacket.cs" />
     <Compile Include="Network\BroadcastNetwork.cs" />
     <Compile Include="Network\Packets\NetworkMessage.cs" />

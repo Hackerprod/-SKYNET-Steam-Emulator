@@ -60,13 +60,23 @@ namespace SKYNET.Helper
             }
         }
 
+        public static Image CreateCopy(Image image)
+        {
+            byte[] sourceImage = ImageToBytes(image);
+            return ImageFromBytes(sourceImage);
+        }
+
         public static byte[] ImageToBytes(Image image)
         {
+            byte[] imageArray = new byte[0];
+
             using (MemoryStream stream = new MemoryStream())
             {
                 image.Save(stream, ImageFormat.Jpeg);
-                return stream.ToArray();
+                stream.Close();
+                imageArray = stream.ToArray();
             }
+            return imageArray;
         }
 
         public static byte[] ConvertToRGBA(Bitmap image)
@@ -89,12 +99,19 @@ namespace SKYNET.Helper
 
         public static Bitmap GetDesktopWallpaper()
         {
-            RegistryKey Key = Registry.CurrentUser.OpenSubKey(@"Control Panel\Desktop", true);
-            if (Key == null) return null;
-            string filePath = (string)Key.GetValue("WallPaper");
-            if (string.IsNullOrEmpty(filePath)) return null;
-            if (!File.Exists(filePath)) return null;
-            return (Bitmap)Bitmap.FromFile(filePath);
+            try
+            {
+                RegistryKey Key = Registry.CurrentUser.OpenSubKey(@"Control Panel\Desktop", true);
+                if (Key == null) return null;
+                string filePath = (string)Key.GetValue("WallPaper");
+                if (string.IsNullOrEmpty(filePath)) return null;
+                if (!File.Exists(filePath)) return null;
+                return (Bitmap)Bitmap.FromFile(filePath);
+            }
+            catch 
+            {
+                return null;
+            }
         }
 
 
