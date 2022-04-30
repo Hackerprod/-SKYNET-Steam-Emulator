@@ -211,7 +211,6 @@ namespace SKYNET.Steamworks.Implementation
         public HAuthTicket GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, IntPtr pcbTicket)
         {
             SteamEmulator.Write("DEBUG", "GetAuthSessionTicket");
-            NetworkManager.AnnounceClient();
             return TicketManager.GetAuthSessionTicket(pTicket, cbMaxTicket, pcbTicket);
         }
 

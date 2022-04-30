@@ -338,9 +338,9 @@ public class SteamEmulator
 
 #endif
 
-    public static void Debug(string v)
+    public static void Debug(string v, ConsoleColor color = ConsoleColor.Red)
     {
-        Console.ForegroundColor = ConsoleColor.Red;
+        Console.ForegroundColor = color;
         Console.WriteLine($" DEBUG: {v}");
     }
 

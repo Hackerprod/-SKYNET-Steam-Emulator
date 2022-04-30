@@ -10,12 +10,12 @@ using SKYNET.Managers;
 using SKYNET.Properties;
 using SKYNET.Types;
 using Steamworks;
-
-using SteamAPICall_t = System.UInt64;
-using FriendsGroupID_t = System.UInt16;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+
+using SteamAPICall_t = System.UInt64;
+using FriendsGroupID_t = System.UInt16;
 
 namespace SKYNET.Steamworks.Implementation
 {

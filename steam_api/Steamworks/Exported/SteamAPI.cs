@@ -29,7 +29,6 @@ namespace SKYNET.Exported
             }
             else
             {
-                NetworkManager.AnnounceClient();
                 Write($"SteamAPI_Init : Initialized");
             }
 
@@ -82,24 +81,26 @@ namespace SKYNET.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_RegisterCallResult(IntPtr pCallback, SteamAPICall_t hAPICall)
         {
-            //try
-            //{
-            //    CCallbackBase Callback = pCallback.ToType<CCallbackBase>();
+            SteamEmulator.Debug("SteamAPI_RegisterCallResult SteamAPICall_t: " + hAPICall, ConsoleColor.Yellow);
 
-            //    var callMessage = $"SteamAPI_RegisterCallResult: ";
-            //    var CallType = Callback.m_iCallback.GetCallbackType();
-            //    var isGameServer = Callback.IsGameServer() ? "[ GAMESERVER ]" : "[   CLIENT   ]";
+            try
+            {
+                CCallbackBase Callback = pCallback.ToType<CCallbackBase>();
 
-            //    callMessage += $"{isGameServer} {CallType}";
+                var callMessage = $"SteamAPI_RegisterCallResult: ";
+                var CallType = Callback.m_iCallback.GetCallbackType();
+                var isGameServer = Callback.IsGameServer() ? "[ GAMESERVER ]" : "[   CLIENT   ]";
 
-            //    Write(callMessage);
+                callMessage += $"{isGameServer} {CallType}";
 
-            //    CallbackManager.RegisterCallResult(pCallback, hAPICall);
-            //}
-            //catch (Exception ex)
-            //{
-            //    Write($"SteamAPI_RegisterCallResult: {ex}");
-            //}
+                Write(callMessage);
+
+                CallbackManager.RegisterCallResult(pCallback, hAPICall);
+            }
+            catch (Exception ex)
+            {
+                Write($"SteamAPI_RegisterCallResult: {ex}");
+            }
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

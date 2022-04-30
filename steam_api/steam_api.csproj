@@ -85,11 +85,13 @@
     <Compile Include="Helpers\JSON\JSONParser.cs" />
     <Compile Include="Managers\NetworkManager.cs" />
     <Compile Include="Managers\TicketManager.cs" />
+    <Compile Include="Network\ClientSockets.cs" />
     <Compile Include="Network\HttpServer.cs" />
     <Compile Include="Network\Packets\BroadcastPacket.cs" />
     <Compile Include="Network\BroadcastNetwork.cs" />
     <Compile Include="Network\Packets\NetworkMessage.cs" />
     <Compile Include="Network\Packets\NET_Messages.cs" />
+    <Compile Include="Network\TCPServer.cs" />
     <Compile Include="Plugin\IGameCoordinatorPlugin.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

@@ -21,6 +21,8 @@ namespace SKYNET.Network.Packets
     public enum MessageType : int
     {
         NET_Announce,
-        NET_Avatar
+        NET_AnnounceResponse,
+        NET_AvatarRequest,
+        NET_AvatarResponse,
     }
 }

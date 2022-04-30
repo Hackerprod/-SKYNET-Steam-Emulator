@@ -4,6 +4,7 @@ using SKYNET.Network;
 using SKYNET.Network.Packets;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -17,103 +18,142 @@ namespace SKYNET.Managers
 {
     public class NetworkManager
     {
-        private static BroadcastNetwork BroadcastNetwork;
-        private static System.Timers.Timer Timer;
-
         public static void Initialize()
         {
-            HttpServer httpServer = new HttpServer();
-            httpServer.Start();
+            TCPServer tcpServer = new TCPServer();
+            tcpServer.OnDataReceived += TcpServer_OnDataReceived;
+            tcpServer.OnConnected += TcpServer_OnConnected;
+            ThreadPool.QueueUserWorkItem(tcpServer.Start);
 
-            BroadcastNetwork = new BroadcastNetwork();
-            BroadcastNetwork.PacketReceived += BroadcastNetwork_PacketReceived; ;
-            BroadcastNetwork.Start();
-
-            AnnounceClient();
-
-            ThreadPool.QueueUserWorkItem(StartTimer);
+            ThreadPool.QueueUserWorkItem(BroadcastAnnounce);
         }
 
-        private static void StartTimer(object threadObj)
+        private static void TcpServer_OnConnected(object sender, Socket e)
         {
-            Timer = new System.Timers.Timer();
-            Timer.AutoReset = false;
-            Timer.Interval = 60000;
-            Timer.Elapsed += Timer_Elapsed;
-            Timer.Start();
+            Write("Client connected from " + e.RemoteEndPoint);
         }
 
-        private static void BroadcastNetwork_PacketReceived(object sender, KeyValuePair<IPAddress, byte[]> KeyValue)
+        private static void TcpServer_OnDataReceived(object sender, Network.NetPacket packet)
         {
-            try
-            {
-                string Content = Encoding.Default.GetString(KeyValue.Value);
-                NetworkMessage message = Content.FromJson<NetworkMessage>();
-                ProcessMessage(message, KeyValue.Key);
-            }
-            catch (Exception ex)
-            {
-                Write($"Error parsing incoming message");
-            }
+            NetworkMessage message = packet.Data.GetString().FromJson<NetworkMessage>();
+            ProcessMessage(message, packet.Sender);
         }
 
-        private static void ProcessMessage(NetworkMessage message, IPAddress sender)
+        #region Message processors
+
+        private static void ProcessMessage(NetworkMessage message, Socket socket)
         {
             switch ((MessageType)message.MessageType)
             {
                 case MessageType.NET_Announce:
-                    string Ip = sender.ToString();
-                    ProcessAnnounce(message, Ip);
+                    ProcessAnnounce(message, socket);
                     break;
-                case MessageType.NET_Avatar:
+                case MessageType.NET_AnnounceResponse:
+                    ProcessAnnounce(message, socket);
+                    break;
+                case MessageType.NET_AvatarRequest:
+                    break;
+                case MessageType.NET_AvatarResponse:
                     break;
                 default:
                     break;
             }
+
         }
 
-        private static void ProcessAnnounce(NetworkMessage message, string senderAddress)
+        private static void ProcessAnnounce(NetworkMessage message, Socket socket)
         {
             NET_Announce announce = message.ParsedBody.FromJson<NET_Announce>();
-            SteamEmulator.SteamFriends.AddOrUpdateUser(announce.AccountID, announce.PersonaName, announce.AppID, senderAddress);
+
+            if (announce != null)
+                SteamEmulator.SteamFriends.AddOrUpdateUser(announce.AccountID, announce.PersonaName, announce.AppID, ((IPEndPoint)socket.RemoteEndPoint).Address.ToString());
+
+            if (message.MessageType == (int)MessageType.NET_Announce)
+            {
+                NET_Announce announceResponse = new NET_Announce()
+                {
+                    PersonaName = SteamEmulator.PersonaName,
+                    AccountID = (uint)SteamEmulator.SteamId
+                };
+                NetworkMessage messageResponse = new NetworkMessage()
+                {
+                    MessageType = (int)MessageType.NET_AnnounceResponse,
+                    ParsedBody = announceResponse.ToJson()
+                };
+                string json = messageResponse.ToJson();
+                socket.Send(json.GetBytes());
+            }
+            else
+            {
+                Write("Closing connection after received NET_AnnounceResponse message");
+                socket.Close();
+                socket.Dispose();
+            }
         }
 
-        public static void AnnounceClient()
+        #endregion
+
+        private static void BroadcastAnnounce(object state)
+        {
+            foreach (var item in GetIPAddresses())
+            {
+                var Addressess = GetIPAddressRange(item);
+                foreach (var Address in Addressess)
+                {
+                    try
+                    {
+                        Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                        socket.BeginConnect(new IPEndPoint(IPAddress.Parse(Address), 28880), AnnounceCallback, socket);
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+        }
+
+        private static void AnnounceCallback(IAsyncResult ar)
         {
             try
             {
+                Socket socket = ((Socket)ar.AsyncState);
+                socket.EndConnect(ar);
+
                 NET_Announce announce = new NET_Announce()
                 {
                     PersonaName = SteamEmulator.PersonaName,
                     AccountID = (uint)SteamEmulator.SteamId
                 };
 
-                SendBroadcastMessage(announce, MessageType.NET_Announce);
+                NetworkMessage message = new NetworkMessage()
+                {
+                    MessageType = (int)MessageType.NET_AnnounceResponse,
+                    ParsedBody = announce.ToJson()
+                };
+                string json = message.ToJson();
+                byte[] bytes = Encoding.Default.GetBytes(json);
+                socket.Send(bytes);
+
+                ClientSockets client = new ClientSockets(socket);
+                client.OnDataReceived += Client_OnDataReceived;
+                client.BeginReceiving();
             }
-            catch (Exception ex)
+            catch 
             {
-                Write($"{ex}");
             }
         }
 
-        private static void SendBroadcastMessage(object obj, MessageType type)
+        private static void Client_OnDataReceived(object sender, Network.NetPacket e)
         {
-            if (obj == null) return;
-
-            NetworkMessage message = new NetworkMessage()
+            try
             {
-                MessageType = (int)type,
-                ParsedBody = obj.ToJson()
-            };
-
-            string json = message.ToJson();
-            byte[] Body = Encoding.Default.GetBytes(json);
-            SendBroadcastMessage(Body);
-        }
-
-        public static void SendBroadcastMessage(byte[] Body)
-        {
-            BroadcastNetwork.Send(Body);
+                Socket socket = e.Sender;
+                NetworkMessage message = e.Data.GetString().FromJson<NetworkMessage>();
+                ProcessMessage(message, socket);
+            }
+            catch
+            {
+            }
         }
 
         private static void Write(string msg)
@@ -154,11 +194,15 @@ namespace SKYNET.Managers
             return iPAddress;
         }
 
-        private static void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        private static List<string> GetIPAddressRange(IPAddress address)
         {
-            AnnounceClient();
-            Timer.Interval = 60000;
-            Timer.Start();
+            List<string> rangeAddr = new List<string>();
+            string[] ipParts = address.ToString().Split('.');
+            for (int i = 1; i < 255; i++)
+            {
+                rangeAddr.Add($"{ipParts[0]}.{ipParts[1]}.{ipParts[2]}.{i}");
+            }
+            return rangeAddr;
         }
     }
 }

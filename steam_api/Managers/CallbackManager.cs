@@ -18,15 +18,17 @@ namespace SKYNET.Managers
     {
         private static ConcurrentDictionary<int, SteamCallback> Client_Callbacks;
         private static ConcurrentDictionary<int, SteamCallback> Server_Callbacks;
-
+        public static SteamAPICall_t CurrentCall;
 
         private static Dictionary<ulong, CCallbackBase> CallbackResult;
-        private static List<SteamAPICall_t> SteamAPICalls;
+        private static Dictionary<SteamAPICall_t, ICallbackData> SteamAPICalls;
 
         private static object call_id_lock = new object();
 
         static CallbackManager()
         {
+            CurrentCall = 0;
+
             if (Client_Callbacks == null)
             {
                 Client_Callbacks = new ConcurrentDictionary<int, SteamCallback>();
@@ -37,7 +39,7 @@ namespace SKYNET.Managers
             }
             if (SteamAPICalls == null)
             {
-                SteamAPICalls = new List<SteamAPICall_t>();
+                SteamAPICalls = new Dictionary<SteamAPICall_t, ICallbackData>();
             }
             if (CallbackResult == null)
             {
@@ -136,25 +138,18 @@ namespace SKYNET.Managers
 
         public static SteamAPICall_t AddCallbackResult(ICallbackData data)
         {
-            int iCallback = (int)data.CallbackType;
+            CurrentCall++;
 
-            foreach (var item in Client_Callbacks)
-            {
-                SteamCallback Callback = item.Value;
-                if (Callback.MainType == CallbackType.ClientHTTPCallbacks)
-                {
-                    Write("testiiiiiiing");
-                    HTTPRequestCompleted_t vas = (HTTPRequestCompleted_t)data;
+            SteamAPICalls.Add(CurrentCall, data);
 
-                }
-            }
+            SteamEmulator.Debug($"Registered CallbackResult {CurrentCall}");
 
-            return (SteamAPICall_t)0;
+            return CurrentCall;
         }
 
         public static bool Contains(SteamAPICall_t hSteamAPICall)
         {
-            return SteamAPICalls.Contains(hSteamAPICall);
+            return SteamAPICalls.ContainsKey(hSteamAPICall);
         }
 
         private static void Write(string v)

@@ -25,6 +25,16 @@ namespace SKYNET.Helper
             }
         }
 
+        public static string GetString(this byte[] bytes)
+        {
+            return Encoding.Default.GetString(bytes);
+        }
+
+        public static byte[] GetBytes(this string @string)
+        {
+            return Encoding.Default.GetBytes(@string);
+        }
+
         public static CallbackType GetCallbackType(this int iCallback)
         {
             int type = 0;

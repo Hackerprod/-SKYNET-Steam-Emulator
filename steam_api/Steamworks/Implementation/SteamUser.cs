@@ -109,7 +109,6 @@ namespace SKYNET.Steamworks.Implementation
         public uint GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
         {
             Write("GetAuthSessionTicket");
-            NetworkManager.AnnounceClient();
             pcbTicket = 10;
             return 100;
         }
