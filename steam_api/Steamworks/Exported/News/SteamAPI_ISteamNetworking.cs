@@ -1,0 +1,173 @@
+﻿using SKYNET;
+using SKYNET.Steamworks;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SKYNET.Steamworks.Exported
+{
+    public class SteamAPI_ISteamNetworking
+    {
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworking_SendP2PPacket(IntPtr _, ulong steamIDRemote, IntPtr pubData, uint cubData, int eP2PSendType, int nChannel)
+        {
+            Write("SteamAPI_ISteamNetworking_SendP2PPacket");
+            return SteamEmulator.SteamNetworking.SendP2PPacket(steamIDRemote, pubData, cubData, eP2PSendType, nChannel);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworking_IsP2PPacketAvailable(IntPtr _, uint pcubMsgSize, int nChannel)
+        {
+            Write("SteamAPI_ISteamNetworking_IsP2PPacketAvailable");
+            return SteamEmulator.SteamNetworking.IsP2PPacketAvailable(pcubMsgSize, nChannel);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworking_ReadP2PPacket(IntPtr _, IntPtr pubDest, uint cubDest, uint pcubMsgSize, ulong psteamIDRemote, int nChannel)
+        {
+            Write("SteamAPI_ISteamNetworking_ReadP2PPacket");
+            return SteamEmulator.SteamNetworking.ReadP2PPacket(pubDest, cubDest, pcubMsgSize, psteamIDRemote, nChannel);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworking_AcceptP2PSessionWithUser(IntPtr _, ulong steamIDRemote)
+        {
+            Write("SteamAPI_ISteamNetworking_AcceptP2PSessionWithUser");
+            return SteamEmulator.SteamNetworking.AcceptP2PSessionWithUser(steamIDRemote);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworking_CloseP2PSessionWithUser(IntPtr _, ulong steamIDRemote)
+        {
+            Write("SteamAPI_ISteamNetworking_CloseP2PSessionWithUser");
+            return SteamEmulator.SteamNetworking.CloseP2PSessionWithUser(steamIDRemote);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworking_CloseP2PChannelWithUser(IntPtr _, ulong steamIDRemote, int nChannel)
+        {
+            Write("SteamAPI_ISteamNetworking_CloseP2PChannelWithUser");
+            return SteamEmulator.SteamNetworking.CloseP2PChannelWithUser(steamIDRemote, nChannel);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworking_GetP2PSessionState(IntPtr _, ulong steamIDRemote, IntPtr pConnectionState)
+        {
+            Write("SteamAPI_ISteamNetworking_GetP2PSessionState");
+            return SteamEmulator.SteamNetworking.GetP2PSessionState(steamIDRemote, pConnectionState);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworking_AllowP2PPacketRelay(IntPtr _, bool bAllow)
+        {
+            Write("SteamAPI_ISteamNetworking_AllowP2PPacketRelay");
+            return SteamEmulator.SteamNetworking.AllowP2PPacketRelay(bAllow);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static uint SteamAPI_ISteamNetworking_CreateListenSocket(IntPtr _, int nVirtualP2PPort, uint nIP, uint nPort, bool bAllowUseOfPacketRelay)
+        {
+            Write("SteamAPI_ISteamNetworking_CreateListenSocket");
+            return SteamEmulator.SteamNetworking.CreateListenSocket(nVirtualP2PPort, nIP, nPort, bAllowUseOfPacketRelay);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static uint SteamAPI_ISteamNetworking_CreateP2PConnectionSocket(IntPtr _, ulong steamIDTarget, int nVirtualPort, int nTimeoutSec, bool bAllowUseOfPacketRelay)
+        {
+            Write("SteamAPI_ISteamNetworking_CreateP2PConnectionSocket");
+            return SteamEmulator.SteamNetworking.CreateP2PConnectionSocket(steamIDTarget, nVirtualPort, nTimeoutSec, bAllowUseOfPacketRelay);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static uint SteamAPI_ISteamNetworking_CreateConnectionSocket(IntPtr _, uint nIP, uint nPort, int nTimeoutSec)
+        {
+            Write("SteamAPI_ISteamNetworking_CreateConnectionSocket");
+            return SteamEmulator.SteamNetworking.CreateConnectionSocket(nIP, nPort, nTimeoutSec);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworking_DestroySocket(IntPtr _, uint hSocket, bool bNotifyRemoteEnd)
+        {
+            Write("SteamAPI_ISteamNetworking_DestroySocket");
+            return SteamEmulator.SteamNetworking.DestroySocket(hSocket, bNotifyRemoteEnd);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworking_DestroyListenSocket(IntPtr _, uint hSocket, bool bNotifyRemoteEnd)
+        {
+            Write("SteamAPI_ISteamNetworking_DestroyListenSocket");
+            return SteamEmulator.SteamNetworking.DestroyListenSocket(hSocket, bNotifyRemoteEnd);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworking_SendDataOnSocket(IntPtr _, uint hSocket, IntPtr pubData, uint cubData, bool bReliable)
+        {
+            Write("SteamAPI_ISteamNetworking_SendDataOnSocket");
+            return SteamEmulator.SteamNetworking.SendDataOnSocket(hSocket, pubData, cubData, bReliable);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworking_IsDataAvailableOnSocket(IntPtr _, uint hSocket, uint pcubMsgSize)
+        {
+            Write("SteamAPI_ISteamNetworking_IsDataAvailableOnSocket");
+            return SteamEmulator.SteamNetworking.IsDataAvailableOnSocket(hSocket, pcubMsgSize);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworking_RetrieveDataFromSocket(IntPtr _, uint hSocket, IntPtr pubDest, uint cubDest, uint pcubMsgSize)
+        {
+            Write("SteamAPI_ISteamNetworking_RetrieveDataFromSocket");
+            return SteamEmulator.SteamNetworking.RetrieveDataFromSocket(hSocket, pubDest, cubDest, pcubMsgSize);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworking_IsDataAvailable(IntPtr _, uint hListenSocket, uint pcubMsgSize, uint phSocket)
+        {
+            Write("SteamAPI_ISteamNetworking_IsDataAvailable");
+            return SteamEmulator.SteamNetworking.IsDataAvailable(hListenSocket, pcubMsgSize, phSocket);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworking_RetrieveData(IntPtr _, uint hListenSocket, IntPtr pubDest, uint cubDest, uint pcubMsgSize, uint phSocket)
+        {
+            Write("SteamAPI_ISteamNetworking_RetrieveData");
+            return SteamEmulator.SteamNetworking.RetrieveData(hListenSocket, pubDest, cubDest, pcubMsgSize, phSocket);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworking_GetSocketInfo(IntPtr _, uint hSocket, ulong pSteamIDRemote, int peSocketStatus, uint punIPRemote, uint punPortRemote)
+        {
+            Write("SteamAPI_ISteamNetworking_GetSocketInfo");
+            return SteamEmulator.SteamNetworking.GetSocketInfo(hSocket, pSteamIDRemote, peSocketStatus, punIPRemote, punPortRemote);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworking_GetListenSocketInfo(IntPtr _, uint hListenSocket, uint pnIP, uint pnPort)
+        {
+            Write("SteamAPI_ISteamNetworking_GetListenSocketInfo");
+            return SteamEmulator.SteamNetworking.GetListenSocketInfo(hListenSocket, pnIP, pnPort);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_ISteamNetworking_GetSocketConnectionType(IntPtr _, uint hSocket)
+        {
+            Write("SteamAPI_ISteamNetworking_GetSocketConnectionType");
+            return SteamEmulator.SteamNetworking.GetSocketConnectionType(hSocket);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_ISteamNetworking_GetMaxPacketSize(IntPtr _, uint hSocket)
+        {
+            Write("SteamAPI_ISteamNetworking_GetMaxPacketSize");
+            return SteamEmulator.SteamNetworking.GetMaxPacketSize(hSocket);
+        }
+
+        private static void Write(string msg)
+        {
+            SteamEmulator.Write("SteamAPI_ISteamNetworking", msg);
+        }
+    }
+}

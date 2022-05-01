@@ -221,7 +221,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public int BeginAuthSession(IntPtr pAuthTicket, int cbAuthTicket, ulong steamID)
         {
-            Write("BeginAuthSession");
+            Write($"BeginAuthSession for {(CSteamID)steamID}");
             return (int)EBeginAuthSessionResult.k_EBeginAuthSessionResultOK;
         }
 

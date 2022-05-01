@@ -53,15 +53,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Collections.Immutable, Version=1.2.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Collections.Immutable.1.7.1\lib\net461\System.Collections.Immutable.dll</HintPath>
-    </Reference>
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
-    </Reference>
     <Reference Include="System.Net" />
+    <Reference Include="System.Runtime.Remoting" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
@@ -78,11 +74,13 @@
     <Compile Include="Callback\CCallbackBase.cs" />
     <Compile Include="Helpers\ImageHelper.cs" />
     <Compile Include="Helpers\IniParser.cs" />
+    <Compile Include="Helpers\IpcCommunicator.cs" />
     <Compile Include="Helpers\JSON\SimpleJSONDotNetTypes.cs" />
     <Compile Include="Helpers\MutexHelper.cs" />
     <Compile Include="Helpers\Platform.cs" />
     <Compile Include="Helpers\Settings.cs" />
     <Compile Include="Helpers\JSON\JSONParser.cs" />
+    <Compile Include="Managers\IpcManager.cs" />
     <Compile Include="Managers\NetworkManager.cs" />
     <Compile Include="Helpers\StreamHelpers.cs" />
     <Compile Include="Managers\TicketManager.cs" />
@@ -98,6 +96,18 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Steamworks\Exported\News\SteamAPI_ISteamGameServerStats.cs" />
+    <Compile Include="Steamworks\Exported\News\SteamAPI_ISteamHTMLSurface.cs" />
+    <Compile Include="Steamworks\Exported\News\SteamAPI_ISteamHTTP.cs" />
+    <Compile Include="Steamworks\Exported\News\SteamAPI_ISteamInput.cs" />
+    <Compile Include="Steamworks\Exported\News\SteamAPI_ISteamInventory.cs" />
+    <Compile Include="Steamworks\Exported\News\SteamAPI_ISteamMasterServerUpdater.cs" />
+    <Compile Include="Steamworks\Exported\News\SteamAPI_ISteamNetworking.cs" />
+    <Compile Include="Steamworks\Exported\News\SteamAPI_ISteamNetworkingSockets.cs" />
+    <Compile Include="Steamworks\Exported\News\SteamAPI_ISteamRemoteStorage.cs" />
+    <Compile Include="Steamworks\Exported\News\SteamAPI_ISteamUser.cs" />
+    <Compile Include="Steamworks\Exported\News\SteamAPI_ISteamUserStats.cs" />
+    <Compile Include="Steamworks\Exported\News\SteamAPI_ISteamUtils.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_SteamGameSearch.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_SteamFriends.cs" />
@@ -112,6 +122,7 @@
     <Compile Include="Helpers\Log.cs" />
     <Compile Include="Helpers\modCommon.cs" />
     <Compile Include="Managers\MemoryManager.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamClient\SteamClient017.cs" />
     <Compile Include="Steamworks\Interfaces\SteamInput\SteamInput006.cs" />
     <Compile Include="Steamworks\Interfaces\SteamInput\SteamInput002.cs" />
     <Compile Include="Steamworks\Types\SteamIPAddress_t.cs" />

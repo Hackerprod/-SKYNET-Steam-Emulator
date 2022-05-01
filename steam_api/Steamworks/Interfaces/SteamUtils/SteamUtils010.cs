@@ -18,7 +18,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUtils.GetSecondsSinceComputerActive();
         }
 
-        public EUniverse GetConnectedUniverse(IntPtr _)
+        public int GetConnectedUniverse(IntPtr _)
         {
             return SteamEmulator.SteamUtils.GetConnectedUniverse();
         }
@@ -175,7 +175,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUtils.FilterText(eContext, sourceSteamID, pchInputMessage, pchOutFilteredText, nByteSizeOutFilteredText);
         }
 
-        public ESteamIPv6ConnectivityState GetIPv6ConnectivityState(IntPtr _, int eProtocol)
+        public int GetIPv6ConnectivityState(IntPtr _, int eProtocol)
         {
             return SteamEmulator.SteamUtils.GetIPv6ConnectivityState(eProtocol);
         }

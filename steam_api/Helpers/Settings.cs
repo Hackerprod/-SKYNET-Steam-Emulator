@@ -74,9 +74,9 @@ namespace SKYNET.Helper
 
                 SteamEmulator.SendLog = (bool)IniParser["Log Settings"]["File"];
 
-                bool ConsoleOutput = (bool)IniParser["Log Settings"]["Console"];
+                SteamEmulator.ConsoleLog = (bool)IniParser["Log Settings"]["Console"];
 
-                if (ConsoleOutput)
+                if (SteamEmulator.ConsoleLog)
                 {
                     modCommon.ActiveConsoleOutput();
                 }

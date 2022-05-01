@@ -306,7 +306,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public CSteamID GetFriendByIndex(int iFriend, int iFriendFlags)
         {
-            Write($"GetFriendByIndex, Index: {iFriend}, Flags: {iFriendFlags}");
+            string msg = $"GetFriendByIndex, Index: {iFriend} | ";
             CSteamID Result = new CSteamID(0);
             int index = iFriendFlags; // BUG Take flags as index
 
@@ -322,6 +322,7 @@ namespace SKYNET.Steamworks.Implementation
                     }
                 }
             });
+            Write(msg + Result);
             return Result;
         }
 

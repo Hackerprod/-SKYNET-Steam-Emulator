@@ -168,7 +168,7 @@ namespace SKYNET.Steamworks.Implementation
         public ulong RequestPrices(IntPtr self)
         {
             Write($"RequestPrices");
-            return new ulong();
+            return 0;
         }
 
         public void SendItemDropHeartbeat(IntPtr self)
@@ -209,10 +209,10 @@ namespace SKYNET.Steamworks.Implementation
         public ulong StartPurchase(IntPtr pArrayItemDefs, IntPtr punArrayQuantity, uint unArrayLength)
         {
             Write($"StartPurchase");
-            return new ulong();
+            return 0;
         }
 
-        public ulong StartUpdateProperties(IntPtr _)
+        public ulong StartUpdateProperties()
         {
             Write($"StartUpdateProperties");
             return 0;

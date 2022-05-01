@@ -38,7 +38,9 @@ public class SteamEmulator
     public static uint AppId;
     public static bool Initialized;
     public static bool Initializing;
+
     public static bool SendLog;
+    public static bool ConsoleLog;
 
     public static HSteamUser HSteamUser;
     public static HSteamPipe HSteamPipe;
@@ -200,6 +202,7 @@ public class SteamEmulator
         #endregion
 
         NetworkManager.Initialize();
+        IpcManager.Initialize();
 
         HSteamUser = 1;
         HSteamPipe = 1;
@@ -306,25 +309,20 @@ public class SteamEmulator
                 lastMsg = msg.ToString();
             }
 
-            //if (lastMsg != msg.ToString())
-            //{
-            //    if (sender.ToUpper() == "DEBUG") Console.ForegroundColor = ConsoleColor.Red;
-            //    else Console.ResetColor();
-
-            //    Console.WriteLine($" {sender}: {msg}");
-            //    Log.AppEnd(sender + ": " + msg);
-            //    lastMsg = msg.ToString();
-            //}
+            if (lastMsg != msg.ToString())
+            {
+                Log.AppEnd(sender + ": " + msg);
+                lastMsg = msg.ToString();
+            }
         }
 
-        if (lastMsg != msg.ToString())
+        if (ConsoleLog && lastMsg != msg.ToString())
         {
-            if (sender.ToUpper() == "DEBUG") Console.ForegroundColor = ConsoleColor.Red;
-            else Console.ResetColor();
-
+            if (sender.ToUpper() == "DEBUG")
+                Console.ForegroundColor = ConsoleColor.Red;
+            else
+                Console.ResetColor();
             Console.WriteLine($" {sender}: {msg}");
-            Log.AppEnd(sender + ": " + msg);
-            lastMsg = msg.ToString();
         }
     }
 

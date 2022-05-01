@@ -219,4 +219,8 @@ namespace SKYNET.Types
         public uint counter;
         public CSteamApiContext Context;
     }
+
+    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+    public delegate void pFn(IntPtr ctx);
+
 }

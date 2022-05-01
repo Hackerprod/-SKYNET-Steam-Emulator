@@ -15,7 +15,7 @@ using SteamAPICall_t = System.UInt64;
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
 
-namespace SKYNET.Exported
+namespace SKYNET.Steamworks.Exported
 {
     public class SteamAPI
     {
