@@ -59,7 +59,7 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public EResult AcceptConnection(HSteamNetConnection hConn)
+        public int AcceptConnection(HSteamNetConnection hConn)
         {
             Write("AcceptConnection");
             return default;
@@ -100,18 +100,18 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public EResult SendMessageToConnection(HSteamNetConnection hConn, IntPtr pData, uint cbData, int nSendFlags, uint pOutMessageNumber)
+        public int SendMessageToConnection(HSteamNetConnection hConn, IntPtr pData, UInt32 cbData, int nSendFlags, Int64 pOutMessageNumber)
         {
             Write("SendMessageToConnection");
             return default;
         }
 
-        public void SendMessages(int nMessages, IntPtr pMessages, uint pOutMessageNumberOrResult)
+        public void SendMessages(int nMessages, IntPtr pMessages, Int64 pOutMessageNumberOrResult)
         {
             Write("SendMessages");
         }
 
-        public EResult FlushMessagesOnConnection(HSteamNetConnection hConn)
+        public int FlushMessagesOnConnection(HSteamNetConnection hConn)
         {
             Write("FlushMessagesOnConnection");
             return default;
@@ -159,16 +159,16 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public ESteamNetworkingAvailability InitAuthentication()
+        public int InitAuthentication()
         {
             Write("InitAuthentication");
-            return ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Current;
+            return (int)ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Current;
         }
 
-        public ESteamNetworkingAvailability GetAuthenticationStatus(IntPtr pDetails)
+        public int GetAuthenticationStatus(IntPtr pDetails)
         {
             Write("GetAuthenticationStatus");
-            return ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Current;
+            return (int)ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Current;
         }
 
         public uint CreatePollGroup()
@@ -213,7 +213,7 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public uint GetHostedDedicatedServerPort()
+        public int GetHostedDedicatedServerPort()
         {
             Write("GetHostedDedicatedServerPort");
             return 0;
@@ -225,10 +225,10 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public EResult GetHostedDedicatedServerAddress(IntPtr pRouting)
+        public int GetHostedDedicatedServerAddress(IntPtr pRouting)
         {
             Write("GetHostedDedicatedServerAddress");
-            return EResult.k_EResultNone;
+            return 0;
         }
 
         public HSteamListenSocket CreateHostedDedicatedServerListenSocket(int nVirtualPort, int nOptions, IntPtr pOptions)
@@ -237,7 +237,7 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public EResult GetGameCoordinatorServerLogin(IntPtr pLoginInfo, int pcbSignedBlob, IntPtr pBlob)
+        public int GetGameCoordinatorServerLogin(IntPtr pLoginInfo, int pcbSignedBlob, IntPtr pBlob)
         {
             Write("GetGameCoordinatorServerLogin");
             // SteamDatagramGameCoordinatorServerLogin pLoginInfo
@@ -264,7 +264,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool SetCertificate(IntPtr pCertificate, int cbCertificate, string errMsg)
         {
-            Write("SetCertificate");
+            Write($"SetCertificate {errMsg}");
             return false;
         }
 

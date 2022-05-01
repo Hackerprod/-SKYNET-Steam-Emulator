@@ -41,7 +41,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static EResult SteamAPI_ISteamNetworkingSockets_AcceptConnection(IntPtr _, uint hConn)
+        public static int SteamAPI_ISteamNetworkingSockets_AcceptConnection(IntPtr _, uint hConn)
         {
             Write("SteamAPI_ISteamNetworkingSockets_AcceptConnection");
             return SteamEmulator.SteamNetworkingSockets.AcceptConnection(hConn);
@@ -90,7 +90,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static EResult SteamAPI_ISteamNetworkingSockets_SendMessageToConnection(IntPtr _, uint hConn, IntPtr pData, uint cbData, int nSendFlags, uint pOutMessageNumber)
+        public static int SteamAPI_ISteamNetworkingSockets_SendMessageToConnection(IntPtr _, uint hConn, IntPtr pData, uint cbData, int nSendFlags, uint pOutMessageNumber)
         {
             Write("SteamAPI_ISteamNetworkingSockets_SendMessageToConnection");
             return SteamEmulator.SteamNetworkingSockets.SendMessageToConnection(hConn, pData, cbData, nSendFlags, pOutMessageNumber);
@@ -104,7 +104,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static EResult SteamAPI_ISteamNetworkingSockets_FlushMessagesOnConnection(IntPtr _, uint hConn)
+        public static int SteamAPI_ISteamNetworkingSockets_FlushMessagesOnConnection(IntPtr _, uint hConn)
         {
             Write("SteamAPI_ISteamNetworkingSockets_FlushMessagesOnConnection");
             return SteamEmulator.SteamNetworkingSockets.FlushMessagesOnConnection(hConn);
@@ -160,14 +160,14 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static ESteamNetworkingAvailability SteamAPI_ISteamNetworkingSockets_InitAuthentication(IntPtr _)
+        public static int SteamAPI_ISteamNetworkingSockets_InitAuthentication(IntPtr _)
         {
             Write("SteamAPI_ISteamNetworkingSockets_InitAuthentication");
             return SteamEmulator.SteamNetworkingSockets.InitAuthentication();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static ESteamNetworkingAvailability SteamAPI_ISteamNetworkingSockets_GetAuthenticationStatus(IntPtr _, IntPtr pDetails)
+        public static int SteamAPI_ISteamNetworkingSockets_GetAuthenticationStatus(IntPtr _, IntPtr pDetails)
         {
             Write("SteamAPI_ISteamNetworkingSockets_GetAuthenticationStatus");
             return SteamEmulator.SteamNetworkingSockets.GetAuthenticationStatus(pDetails);
@@ -223,7 +223,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static uint SteamAPI_ISteamNetworkingSockets_GetHostedDedicatedServerPort(IntPtr _)
+        public static int SteamAPI_ISteamNetworkingSockets_GetHostedDedicatedServerPort(IntPtr _)
         {
             Write("SteamAPI_ISteamNetworkingSockets_GetHostedDedicatedServerPort");
             return SteamEmulator.SteamNetworkingSockets.GetHostedDedicatedServerPort();
@@ -237,7 +237,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static EResult SteamAPI_ISteamNetworkingSockets_GetHostedDedicatedServerAddress(IntPtr _, IntPtr pRouting)
+        public static int SteamAPI_ISteamNetworkingSockets_GetHostedDedicatedServerAddress(IntPtr _, IntPtr pRouting)
         {
             Write("SteamAPI_ISteamNetworkingSockets_GetHostedDedicatedServerAddress");
             return SteamEmulator.SteamNetworkingSockets.GetHostedDedicatedServerAddress(pRouting);
@@ -251,7 +251,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static EResult SteamAPI_ISteamNetworkingSockets_GetGameCoordinatorServerLogin(IntPtr _, IntPtr pLoginInfo, int pcbSignedBlob, IntPtr pBlob)
+        public static int SteamAPI_ISteamNetworkingSockets_GetGameCoordinatorServerLogin(IntPtr _, IntPtr pLoginInfo, int pcbSignedBlob, IntPtr pBlob)
         {
             Write("SteamAPI_ISteamNetworkingSockets_GetGameCoordinatorServerLogin");
             return SteamEmulator.SteamNetworkingSockets.GetGameCoordinatorServerLogin(pLoginInfo, pcbSignedBlob, pBlob);
