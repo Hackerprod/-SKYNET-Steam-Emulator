@@ -9,7 +9,6 @@ using InputActionSetHandle_t = System.UInt64;
 using InputDigitalActionHandle_t = System.UInt64;
 using InputAnalogActionHandle_t = System.UInt64;
 
-
 namespace SKYNET.Steamworks.Implementation
 {
     public class SteamInput : ISteamInterface

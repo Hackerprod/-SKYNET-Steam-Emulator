@@ -16,6 +16,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         SteamAPICall_t k_uAPICallInvalid = 0x0;
         private DateTime ActiveTime;
+
         public SteamUtils()
         {
             InterfaceVersion = "SteamUtils";
@@ -34,10 +35,10 @@ namespace SKYNET.Steamworks.Implementation
             return (uint)(DateTime.Now - ActiveTime).Seconds + 3000;
         }
 
-        public EUniverse GetConnectedUniverse()
+        public int GetConnectedUniverse()
         {
             Write("GetConnectedUniverse");
-            return EUniverse.k_EUniversePublic;
+            return (int)EUniverse.k_EUniversePublic;
         }
 
         public uint GetServerRealTime()
@@ -299,10 +300,10 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public ESteamIPv6ConnectivityState GetIPv6ConnectivityState(int eProtocol)
+        public int GetIPv6ConnectivityState(int eProtocol)
         {
             Write("GetIPv6ConnectivityState");
-            return ESteamIPv6ConnectivityState.k_ESteamIPv6ConnectivityState_Unknown;
+            return (int)ESteamIPv6ConnectivityState.k_ESteamIPv6ConnectivityState_Unknown;
         }
     }
 }

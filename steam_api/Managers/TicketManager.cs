@@ -50,22 +50,17 @@ namespace SKYNET.Managers
 
         internal static uint GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, IntPtr pcbTicket)
         {
-            int STEAM_AUTH_TICKET_SIZE = 234;
-            int STEAM_TICKET_MIN_SIZE = (4 + 8 + 8);
-            if (cbMaxTicket < STEAM_TICKET_MIN_SIZE) return 0;
-            if (cbMaxTicket > STEAM_AUTH_TICKET_SIZE) cbMaxTicket = STEAM_AUTH_TICKET_SIZE;
-
             try
             {
                 CurrentTicket++;
 
-                byte[] Token = new byte[4] { 0x14, 0x00, 0x00, 0x00 };
+                byte[] Token = new byte[] { 0x14, 0x00, 0x00, 0x00 };
                 byte[] IPAddr = NetworkManager.GetIPAddress().GetAddressBytes();
 
                 MemoryStream ticketStream = new MemoryStream();
-                ticketStream.WriteBytes(Token);
-                ticketStream.WriteInt32L(0x18); // Header size
-                ticketStream.WriteBytes(IPAddr);
+                ticketStream.WriteBytes(Token);     // Ticket token
+                ticketStream.WriteInt32L(0x18);     // Header size
+                ticketStream.WriteBytes(IPAddr);    // IP address
 
                 Marshal.Copy(ticketStream.ToArray(), 0, pTicket, ticketStream.ToArray().Length);
 

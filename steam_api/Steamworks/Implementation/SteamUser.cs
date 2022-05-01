@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using SKYNET;
 using SKYNET.Helper;
-using SKYNET.Helpers;
-using SKYNET.Managers;
-using SKYNET.Steamworks;
-using SKYNET.Types;
 using Steamworks;
+
 using SteamAPICall_t = System.UInt64;
+using HSteamPipe = System.UInt32;
+using HSteamUser = System.UInt32;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -21,10 +18,10 @@ namespace SKYNET.Steamworks.Implementation
             InterfaceVersion = "SteamUser";
         }
 
-        public int GetHSteamUser()
+        public HSteamUser GetHSteamUser()
         {
             Write("GetHSteamUser");
-            return (int)SteamEmulator.HSteamUser;
+            return SteamEmulator.HSteamUser;
         }
 
         public bool BLoggedOn()
@@ -55,7 +52,7 @@ namespace SKYNET.Steamworks.Implementation
             Write("TerminateGameConnection");
         }
 
-        public void TrackAppUsageEvent(IntPtr gameID, int eAppUsageEvent, string pchExtraInfo = "")
+        public void TrackAppUsageEvent(IntPtr gameID, int eAppUsageEvent, string pchExtraInfo)
         {
             Write("TrackAppUsageEvent");
         }

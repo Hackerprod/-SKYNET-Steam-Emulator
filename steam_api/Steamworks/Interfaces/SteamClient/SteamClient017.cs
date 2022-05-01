@@ -1,18 +1,18 @@
-﻿using SKYNET.Interface;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Runtime.InteropServices;
+using SKYNET.Interface;
 using SKYNET.Managers;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
 
 namespace SKYNET.Interface
 {
-    [Interface("SteamClient020")]
-    public class SteamClient020 : ISteamInterface
+    [Interface("SteamClient017")]
+    public class SteamClient017 : ISteamInterface
     {
         public HSteamPipe CreateSteamPipe(IntPtr _)
         {
@@ -109,13 +109,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamClient.GetISteamScreenshots(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public IntPtr GetISteamGameSearch(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            return SteamEmulator.SteamClient.GetISteamGameSearch(hSteamUser, hSteamPipe, pchVersion);
-        }
-
-        // Deprecated. Applications should use SteamAPI_RunCallbacks() or SteamGameServer_RunCallbacks() instead.
-        public void RunFrame(IntPtr _)  
+        public void RunFrame(IntPtr _)
         {
             SteamEmulator.SteamClient.RunFrame();
         }
@@ -141,7 +135,7 @@ namespace SKYNET.Interface
         }
 
         // Deprecated - the ISteamUnifiedMessages interface is no longer intended for public consumption.        
-        public void DEPRECATED_GetISteamUnifiedMessages(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)  
+        public void DEPRECATED_GetISteamUnifiedMessages(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
             SteamEmulator.SteamClient.DEPRECATED_GetISteamUnifiedMessages(hSteamUser, hSteamPipe, pchVersion);
         }
@@ -207,40 +201,6 @@ namespace SKYNET.Interface
         public IntPtr GetISteamParentalSettings(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
             return SteamEmulator.SteamClient.GetISteamParentalSettings(hSteamUser, hSteamPipe, pchVersion);
-        }
-
-        public IntPtr GetISteamInput(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            return SteamEmulator.SteamClient.GetISteamInput(hSteamUser, hSteamPipe, pchVersion);
-        }
-
-        public IntPtr GetISteamParties(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            return SteamEmulator.SteamClient.GetISteamParties(hSteamUser, hSteamPipe, pchVersion);
-        }
-
-        public IntPtr GetISteamRemotePlay(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            return SteamEmulator.SteamClient.GetISteamRemotePlay(hSteamUser, hSteamPipe, pchVersion);
-        }
-
-        public void DestroyAllInterfaces(IntPtr _)
-        {
-            SteamEmulator.SteamClient.DestroyAllInterfaces();
-        }
-
-        // Inline Methods
-
-        public IntPtr SteamClient(IntPtr _)
-        {
-            SteamEmulator.Write("DEBUG", "SteamClient in SteamClient XD");
-            return InterfaceManager.FindOrCreateInterface("SteamClient020");
-        }
-
-        public IntPtr SteamGameServerClient(IntPtr _)
-        {
-            SteamEmulator.Write("DEBUG", "SteamGameServerClient in SteamClient XD");
-            return InterfaceManager.FindOrCreateInterface("SteamClient020");
         }
     }
 }

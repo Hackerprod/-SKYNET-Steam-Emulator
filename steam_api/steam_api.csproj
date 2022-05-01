@@ -98,6 +98,18 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Steamworks\Exported\News\SteamAPI_ISteamGameServerStats.cs" />
+    <Compile Include="Steamworks\Exported\News\SteamAPI_ISteamHTMLSurface.cs" />
+    <Compile Include="Steamworks\Exported\News\SteamAPI_ISteamHTTP.cs" />
+    <Compile Include="Steamworks\Exported\News\SteamAPI_ISteamInput.cs" />
+    <Compile Include="Steamworks\Exported\News\SteamAPI_ISteamInventory.cs" />
+    <Compile Include="Steamworks\Exported\News\SteamAPI_ISteamMasterServerUpdater.cs" />
+    <Compile Include="Steamworks\Exported\News\SteamAPI_ISteamNetworking.cs" />
+    <Compile Include="Steamworks\Exported\News\SteamAPI_ISteamNetworkingSockets.cs" />
+    <Compile Include="Steamworks\Exported\News\SteamAPI_ISteamRemoteStorage.cs" />
+    <Compile Include="Steamworks\Exported\News\SteamAPI_ISteamUser.cs" />
+    <Compile Include="Steamworks\Exported\News\SteamAPI_ISteamUserStats.cs" />
+    <Compile Include="Steamworks\Exported\News\SteamAPI_ISteamUtils.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_SteamGameSearch.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_SteamFriends.cs" />
@@ -112,6 +124,7 @@
     <Compile Include="Helpers\Log.cs" />
     <Compile Include="Helpers\modCommon.cs" />
     <Compile Include="Managers\MemoryManager.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamClient\SteamClient017.cs" />
     <Compile Include="Steamworks\Interfaces\SteamInput\SteamInput006.cs" />
     <Compile Include="Steamworks\Interfaces\SteamInput\SteamInput002.cs" />
     <Compile Include="Steamworks\Types\SteamIPAddress_t.cs" />

@@ -158,7 +158,7 @@ namespace SKYNET.Interface
 
         public ulong StartUpdateProperties(IntPtr _)
         {
-            return SteamEmulator.SteamInventory.StartUpdateProperties(_);
+            return SteamEmulator.SteamInventory.StartUpdateProperties();
         }
 
         public bool RemoveProperty(IntPtr _, ulong handle, ulong nItemID, string pchPropertyName)

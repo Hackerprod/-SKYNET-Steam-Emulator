@@ -57,7 +57,7 @@ namespace SKYNET.Steamworks.Implementation
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public void SetLocalIPBinding(IntPtr unIP, uint usPort)
+        public void SetLocalIPBinding(UInt32 unIP, uint usPort)
         {
             Write("SetLocalIPBinding");
         }

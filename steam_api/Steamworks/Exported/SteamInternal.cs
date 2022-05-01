@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using SKYNET.Managers;
@@ -10,10 +11,12 @@ using SKYNET.Types;
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
 
-namespace SKYNET.Exported
+namespace SKYNET.Steamworks.Exported
 {
-    public unsafe class SteamInternal 
+    public unsafe class SteamInternal
     {
+        public static pFn _pFn;
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamInternal_FindOrCreateUserInterface(int hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion)
         {
@@ -43,7 +46,7 @@ namespace SKYNET.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public unsafe static IntPtr SteamInternal_ContextInit(IntPtr contextInitData_ptr)
+        public static IntPtr SteamInternal_ContextInit(IntPtr contextInitData_ptr)
         {
             IntPtr apiContext_ptr = IntPtr.Zero;
             if (modCommon.Is64Bit())
@@ -70,7 +73,6 @@ namespace SKYNET.Exported
                     _pFn.Invoke(apiContext_ptr);
                 }
             }
-
             return apiContext_ptr;
         }
 
@@ -78,11 +80,6 @@ namespace SKYNET.Exported
         {
             SteamEmulator.Write("SteamInternal", v);
         }
-
-        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate void pFn(IntPtr ctx);
-        public static pFn _pFn;
-
     }
 }
 
