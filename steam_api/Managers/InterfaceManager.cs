@@ -148,7 +148,7 @@ namespace SKYNET.Managers
             //}
             if (pszVersion.StartsWith("STEAMHTTP_INTERFACE_VERSION"))
             {
-                return true;
+                //return true;
             }
             //if (pszVersion.StartsWith("SteamController"))
             //{
@@ -310,7 +310,7 @@ namespace SKYNET.Managers
 
         private static void Write(string v)
         {
-            SteamEmulator.Write("Interface Manager", v);
+            SteamEmulator.Write("InterfaceManager", v);
         }
     }
 }

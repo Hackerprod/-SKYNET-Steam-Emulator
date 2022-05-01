@@ -123,8 +123,12 @@
     <Compile Include="Helpers\modCommon.cs" />
     <Compile Include="Managers\MemoryManager.cs" />
     <Compile Include="Steamworks\Interfaces\SteamClient\SteamClient017.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamInput\SteamInput001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamInput\SteamInput006.cs" />
     <Compile Include="Steamworks\Interfaces\SteamInput\SteamInput002.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamNetworkingUtils\SteamNetworkingUtils003.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamParties\SteamParties002.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamRemotePlay\SteamRemotePlay001.cs" />
     <Compile Include="Steamworks\Types\SteamIPAddress_t.cs" />
     <Compile Include="Steamworks\Types\SteamNetworkingIPAddr.cs" />
     <Compile Include="Types\CSteamID.cs" />

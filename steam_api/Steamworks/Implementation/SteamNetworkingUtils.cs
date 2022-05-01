@@ -4,6 +4,10 @@ using SKYNET.Steamworks;
 using System;
 using System.Runtime.InteropServices;
 
+using SteamNetworkingPOPID = System.UInt32;
+using SteamNetworkingMicroseconds = System.Int64;
+using HSteamNetConnection = System.UInt32;
+
 namespace SKYNET.Steamworks.Implementation
 {
     public class SteamNetworkingUtils : ISteamInterface
@@ -19,41 +23,41 @@ namespace SKYNET.Steamworks.Implementation
             return IntPtr.Zero;
         }
 
-        public void InitRelayNetworkAccess(IntPtr _)
+        public void InitRelayNetworkAccess()
         {
             Write("InitRelayNetworkAccess");
         }
 
-        public ESteamNetworkingAvailability GetRelayNetworkStatus(IntPtr pDetails)
+        public int GetRelayNetworkStatus(IntPtr pDetails)
         {
             Write("GetRelayNetworkStatus");
             return 0;
         }
 
-        public float GetLocalPingLocation(SteamNetworkPingLocation_t result)
+        public float GetLocalPingLocation(IntPtr result)
         {
             Write("GetLocalPingLocation");
             return 0;
         }
 
-        public int EstimatePingTimeBetweenTwoLocations(SteamNetworkPingLocation_t location1, SteamNetworkPingLocation_t location2)
+        public int EstimatePingTimeBetweenTwoLocations(IntPtr location1, IntPtr location2)
         {
             Write("EstimatePingTimeBetweenTwoLocations");
             return 0;
         }
 
-        public int EstimatePingTimeFromLocalHost(SteamNetworkPingLocation_t remoteLocation)
+        public int EstimatePingTimeFromLocalHost(IntPtr remoteLocation)
         {
             Write("EstimatePingTimeFromLocalHost");
             return 0;
         }
 
-        public void ConvertPingLocationToString(SteamNetworkPingLocation_t location, char pszBuf, int cchBufSize)
+        public void ConvertPingLocationToString(IntPtr location, string pszBuf, int cchBufSize)
         {
             Write("ConvertPingLocationToString");
         }
 
-        public bool ParsePingLocationString(char pszString, SteamNetworkPingLocation_t result)
+        public bool ParsePingLocationString(string pszString, IntPtr result)
         {
             Write("ParsePingLocationString");
             return false;
@@ -65,7 +69,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public int GetPingToDataCenter(IntPtr popID, IntPtr pViaRelayPoP)
+        public int GetPingToDataCenter(SteamNetworkingPOPID popID, SteamNetworkingPOPID pViaRelayPoP)
         {
             Write("GetPingToDataCenter");
             return 0;
@@ -77,30 +81,36 @@ namespace SKYNET.Steamworks.Implementation
         //    return 0;
         //}
 
-        public int GetPOPCount(IntPtr _)
+        public int GetPOPCount()
         {
             Write("GetPOPCount");
             return 0;
         }
 
-        public int GetPOPList(IntPtr list, int nListSz)
+        public int GetDirectPingToPOP(SteamNetworkingPOPID popID)
+        {
+            Write("GetDirectPingToPOP");
+            return 0;
+        }
+
+        public int GetPOPList(SteamNetworkingPOPID list, int nListSz)
         {
             Write("GetPOPList");
             return 0;
         }
 
-        public uint GetLocalTimestamp(IntPtr _)
+        public SteamNetworkingMicroseconds GetLocalTimestamp()
         {
             Write("GetLocalTimestamp");
             return 0;
         }
 
-        public void SetDebugOutputFunction(ESteamNetworkingSocketsDebugOutputType eDetailLevel, IntPtr pfnFunc)
+        public void SetDebugOutputFunction(int eDetailLevel, IntPtr pfnFunc)
         {
             Write("SetDebugOutputFunction");
         }
 
-        public bool SetGlobalConfigValueInt32(int eValue, uint val)
+        public bool SetGlobalConfigValueInt32(int eValue, Int32 val)
         {
             Write("SetGlobalConfigValueInt32");
             return false;
@@ -112,77 +122,113 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool SetGlobalConfigValueString(int eValue, char val)
+        public bool SetGlobalConfigValueString(int eValue, string val)
         {
             Write("SetGlobalConfigValueString");
             return false;
         }
 
-        public bool SetConnectionConfigValueInt32(uint hConn, int eValue, uint val)
+        public bool SetConnectionConfigValueInt32(HSteamNetConnection hConn, int eValue, Int32 val)
         {
             Write("SetConnectionConfigValueInt32");
             return false;
         }
 
-        public bool SetConnectionConfigValueFloat(uint hConn, int eValue, float val)
+        public bool SetConnectionConfigValueFloat(HSteamNetConnection hConn, int eValue, float val)
         {
             Write("SetConnectionConfigValueFloat");
             return false;
         }
 
-        public bool SetConnectionConfigValueString(uint hConn, int eValue, char val)
+        public bool SetGlobalConfigValuePtr(int eValue, IntPtr val)
+        {
+            Write("SetGlobalConfigValuePtr");
+            return false;
+        }
+
+        public bool SetConnectionConfigValueString(HSteamNetConnection hConn, int eValue, string val)
         {
             Write("SetConnectionConfigValueString");
             return false;
         }
 
-        public bool SetConfigValue(int eValue, IntPtr eScopeType, IntPtr scopeObj, IntPtr eDataType, IntPtr pArg)
+        public bool SetConfigValue(int eValue, int eScopeType, IntPtr scopeObj, int eDataType, IntPtr pArg)
         {
             Write("SetConfigValue");
             return false;
         }
 
-        public bool SetConfigValueStruct(IntPtr opt, IntPtr eScopeType, IntPtr scopeObj)
+        public bool SetConfigValueStruct(IntPtr opt, int eScopeType, IntPtr scopeObj)
         {
             Write("SetConfigValueStruct");
             return false;
         }
 
-        public ESteamNetworkingGetConfigValueResult GetConfigValue(int eValue, IntPtr eScopeType, IntPtr scopeObj, IntPtr pOutDataType, IntPtr pResult, IntPtr cbResult)
+        internal bool SetGlobalCallback_SteamNetConnectionStatusChanged(IntPtr fnCallback)
+        {
+            Write("SetGlobalCallback_SteamNetConnectionStatusChanged");
+            return true;
+        }
+
+        internal bool SetGlobalCallback_SteamNetAuthenticationStatusChanged(IntPtr fnCallback)
+        {
+            Write("SetGlobalCallback_SteamNetAuthenticationStatusChanged");
+            return true;
+        }
+
+        public int GetConfigValue(int eValue, int eScopeType, IntPtr scopeObj, int pOutDataType, IntPtr pResult, IntPtr cbResult)
         {
             Write("GetConfigValue");
             return default;
         }
 
-        public bool GetConfigValueInfo(int eValue, char pOutName, IntPtr pOutDataType, IntPtr pOutScope, int pOutNextValue)
+        internal bool SetGlobalCallback_MessagesSessionRequest(IntPtr fnCallback)
+        {
+            Write("SetGlobalCallback_MessagesSessionRequest");
+            return true;
+        }
+
+        internal bool SetGlobalCallback_MessagesSessionFailed(IntPtr fnCallback)
+        {
+            Write("SetGlobalCallback_MessagesSessionFailed");
+            return true;
+        }
+
+        internal bool SetGlobalCallback_SteamRelayNetworkStatusChanged(IntPtr fnCallback)
+        {
+            Write("SetGlobalCallback_SteamRelayNetworkStatusChanged");
+            return true;
+        }
+
+        public bool GetConfigValueInfo(int eValue, string pOutName, int pOutDataType, int pOutScope, int pOutNextValue)
         {
             Write("GetConfigValueInfo");
             return false;
         }
 
-        public int GetFirstConfigValue(IntPtr _)
+        public int GetFirstConfigValue()
         {
             Write("GetFirstConfigValue");
             return 0;
         }
 
-        public void SteamNetworkingIPAddr_ToString(IntPtr addr, char buf, IntPtr cbBuf, bool bWithPort)
+        public void SteamNetworkingIPAddr_ToString(IntPtr addr, string buf, IntPtr cbBuf, bool bWithPort)
         {
             Write("SteamNetworkingIPAddr_ToString");
         }
 
-        public bool SteamNetworkingIPAddr_ParseString(IntPtr pAddr, char pszStr)
+        public bool SteamNetworkingIPAddr_ParseString(IntPtr pAddr, string pszStr)
         {
             Write("SteamNetworkingIPAddr_ParseString");
             return false;
         }
 
-        public void SteamNetworkingIdentity_ToString(IntPtr identity, char buf, IntPtr cbBuf)
+        public void SteamNetworkingIdentity_ToString(IntPtr identity, string buf, IntPtr cbBuf)
         {
             Write("SteamNetworkingIdentity_ToString");
         }
 
-        public bool SteamNetworkingIdentity_ParseString(IntPtr pIdentity, char pszStr)
+        public bool SteamNetworkingIdentity_ParseString(IntPtr pIdentity, string pszStr)
         {
             Write("SteamNetworkingIdentity_ParseString");
             return false;

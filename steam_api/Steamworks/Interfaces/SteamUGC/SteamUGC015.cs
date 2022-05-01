@@ -252,7 +252,7 @@ namespace SKYNET.Interface
         return SteamEmulator.SteamUGC.SetItemPreview(handle, pszPreviewFile);
     }
 
-    public bool SetAllowLegacyUpload(UGCQueryHandle_t handle, bool bAllowLegacyUpload)
+    public bool SetAllowLegacyUpload(IntPtr _, UGCQueryHandle_t handle, bool bAllowLegacyUpload)
     {
         return SteamEmulator.SteamUGC.SetAllowLegacyUpload(handle, bAllowLegacyUpload);
     }
@@ -297,7 +297,7 @@ namespace SKYNET.Interface
         return SteamEmulator.SteamUGC.RemoveItemPreview(handle, index);
     }
 
-    public SteamAPICall_t SubmitItemUpdate(UGCQueryHandle_t handle, string pchChangeNote)
+    public SteamAPICall_t SubmitItemUpdate(IntPtr _, UGCQueryHandle_t handle, string pchChangeNote)
     {
         return SteamEmulator.SteamUGC.SubmitItemUpdate(handle, pchChangeNote);
     }

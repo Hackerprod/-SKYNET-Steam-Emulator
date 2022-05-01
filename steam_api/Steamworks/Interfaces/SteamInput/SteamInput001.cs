@@ -12,9 +12,8 @@ using InputAnalogActionHandle_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("SteamInput001")] // Cheched (some SteamInput002)
-    [Interface("SteamInput002")]
-    public class SteamInput002 : ISteamInterface
+    [Interface("SteamInput001")]
+    public class SteamInput001 : ISteamInterface
     {
         public bool Init(IntPtr _)
         {

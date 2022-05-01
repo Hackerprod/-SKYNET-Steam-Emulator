@@ -324,6 +324,8 @@ public class SteamEmulator
                 Console.ResetColor();
             Console.WriteLine($" {sender}: {msg}");
         }
+
+        IpcManager.SendMsg($" {sender}: {msg}");
     }
 
 #else

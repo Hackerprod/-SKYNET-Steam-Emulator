@@ -7,6 +7,7 @@ using ControllerAnalogActionHandle_t = System.UInt64;
 
 namespace SKYNET.Interface
 {
+    [Interface("SteamController007")] // Cheched (some SteamController008)
     [Interface("SteamController008")]
     public class SteamController008 : ISteamInterface
     {

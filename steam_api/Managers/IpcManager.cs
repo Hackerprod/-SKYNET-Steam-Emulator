@@ -3,6 +3,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
@@ -18,65 +20,64 @@ namespace SKYNET.Managers
 {
     public class IpcManager
     {
-        public static IpcCommunicator IpcClient;
-        private static string channel;
-        private static System.Timers.Timer _timer;
+        private static IpcCommunicator CommunicatorServer;
+        private static IpcCommunicator CommunicatorClient;
 
         static IpcManager()
         {
-            _timer = new System.Timers.Timer();
-            _timer.Elapsed += _timer_Elapsed;
-            _timer.AutoReset = false;
-            _timer.Interval = 5000;
+            CommunicatorServer = new IpcCommunicator();
+            CommunicatorServer.ProcessID = Process.GetCurrentProcess().Id;
+            CommunicatorServer.OnMessage += CommunicatorServer_OnMessage;
         }
 
         public static void Initialize()
         {
+            ThreadPool.QueueUserWorkItem(StartServer);
             ThreadPool.QueueUserWorkItem(StartConnection);
+        }
+
+        public static void StartServer(object state)
+        {
+            string channel = Process.GetCurrentProcess().Id.ToString();
+            var InObject = WellKnownObjectMode.Singleton;
+            IpcCreateServer(ref channel, InObject, CommunicatorServer);
         }
 
         public static void StartConnection(object state)
         {
-            channel = null;
-            _timer.Start();
-        }
-
-
-
-        private static void _timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            SteamEmulator.Write("IPCManager", "Connecting to Ipc server");
-            bool restart = true;
-            try
+            while (true)
             {
-                string channel = "SteamEmulator";
-                IpcClient = (IpcCommunicator)Activator.GetObject(typeof(IpcCommunicator), "ipc://" + channel + "/" + channel);
-                if (IpcClient != null)
+                try
                 {
-                    SteamEmulator.Write("IPCManager", "Ipc client connected successfully");
-                    restart = false;
-                    IpcClient.OnMessage += IpcClient_OnMessage;
-                    IpcClient.InvokeMessage("Ipc client connected successfully from " + Process.GetCurrentProcess().ProcessName);
+                    if (CommunicatorClient == null)
+                    {
+                        CommunicatorClient = (IpcCommunicator)Activator.GetObject(typeof(IpcCommunicator), "ipc://SKYNET/SKYNET");
+                        if (CommunicatorClient != null)
+                        {
+                            Write("Ipc client connected successfully");
+                            CommunicatorClient.InvokeMessage(Process.GetCurrentProcess().Id);
+                        }
+                    }
+                    else
+                    {
+                        CommunicatorClient.Ping("");
+                    }
+
                 }
-            }
-            catch 
-            {
-
-            }
-            if (restart)
-            {
-                _timer.Interval = 5000;
-                _timer.Start();
+                catch 
+                {
+                    CommunicatorClient = null;
+                }
+                Thread.Sleep(7000);
             }
         }
 
-        private static void IpcClient_OnMessage(object sender, object e)
+        private static void CommunicatorServer_OnMessage(object sender, object e)
         {
-            SteamEmulator.Write("IPCManager", e.ToString());
+            // Message received from client
+            Write(e);
         }
-
-
-        public static IpcServerChannel IpcCreateServer<TRemoteObject>(ref string RefChannelName, WellKnownObjectMode InObjectMode, TRemoteObject ipcInterface, params WellKnownSidType[] InAllowedClientSIDs) where TRemoteObject : MarshalByRefObject
+        private static IpcServerChannel IpcCreateServer<TRemoteObject>(ref string RefChannelName, WellKnownObjectMode InObjectMode, TRemoteObject ipcInterface, params WellKnownSidType[] InAllowedClientSIDs) where TRemoteObject : MarshalByRefObject
         {
             string text = RefChannelName;
             IDictionary dictionary = new Hashtable();
@@ -111,5 +112,23 @@ namespace SKYNET.Managers
             return ipcServerChannel;
         }
 
+        internal static void SendMsg(string v)
+        {
+            try
+            {
+                if (CommunicatorClient != null)
+                {
+                    CommunicatorClient.InvokeMessage(v);
+                }   
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        private static void Write(object v)
+        {
+            SteamEmulator.Write("IpcManager", v);
+        }
     }
 }

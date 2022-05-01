@@ -9,10 +9,16 @@ namespace SKYNET.Helper
     public class IpcCommunicator : MarshalByRefObject
     {
         public event EventHandler<object> OnMessage;
+        public int ProcessID;
 
         public void InvokeMessage(object msg)
         {
             OnMessage?.Invoke(this, msg);
+        }
+
+        public void Ping(string v)
+        {
+
         }
     }
 }
