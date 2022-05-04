@@ -11,7 +11,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         public SteamParentalSettings()
         {
-            InterfaceVersion = "SteamParentalSettings";
+            InterfaceName = "SteamParentalSettings";
         }
 
         public bool BIsParentalLockEnabled()

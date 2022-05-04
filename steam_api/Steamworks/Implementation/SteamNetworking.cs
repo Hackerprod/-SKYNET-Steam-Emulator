@@ -10,7 +10,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         public SteamNetworking()
         {
-            InterfaceVersion = "SteamNetworking";
+            InterfaceName = "SteamNetworking";
         }
 
         public bool SendP2PPacket(ulong steamIDRemote, IntPtr pubData, uint cubData, int eP2PSendType, int nChannel)

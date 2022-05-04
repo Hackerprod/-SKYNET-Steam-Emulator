@@ -9,7 +9,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         public SteamMatchMakingServers()
         {
-            InterfaceVersion = "SteamMatchMakingServers";
+            InterfaceName = "SteamMatchMakingServers";
         }
 
         public IntPtr RequestInternetServerList(uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)

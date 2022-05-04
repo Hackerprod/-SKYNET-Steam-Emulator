@@ -41,7 +41,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public SteamUGC()
         {
-            InterfaceVersion = "SteamUGC";
+            InterfaceName = "SteamUGC";
             UGCQueries = new List<UGC>();
             subscribed = new List<PublishedFileId_t>();
         }

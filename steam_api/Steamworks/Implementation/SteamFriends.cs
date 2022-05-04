@@ -32,7 +32,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public SteamFriends()
         {
-            InterfaceVersion = "SteamFriends";
+            InterfaceName = "SteamFriends";
             Users   = new List<SKYNET.Types.SteamUser>();
             QueryingAvatar = new List<SteamAPICall_t>();
             RichPresence = new Dictionary<string, string>();

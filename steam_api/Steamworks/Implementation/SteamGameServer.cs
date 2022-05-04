@@ -16,7 +16,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public SteamGameServer()
         {
-            InterfaceVersion = "SteamGameServer";
+            InterfaceName = "SteamGameServer";
             ServerData = new GameServerData();
         }
 

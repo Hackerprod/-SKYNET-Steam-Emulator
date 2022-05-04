@@ -69,7 +69,7 @@ namespace SKYNET.Managers
 
             // Add User to List on both cases (NET_Announce and NET_AnnounceResponse)
             if (announce != null)
-                SteamEmulator.SteamFriends.AddOrUpdateUser(announce.AccountID, announce.PersonaName, announce.AppID, ((IPEndPoint)socket.RemoteEndPoint).Address.ToString());
+                SteamEmulator.SteamFriends?.AddOrUpdateUser(announce.AccountID, announce.PersonaName, announce.AppID, ((IPEndPoint)socket.RemoteEndPoint).Address.ToString());
 
             if (message.MessageType == (int)MessageType.NET_Announce)
             {
@@ -244,9 +244,9 @@ namespace SKYNET.Managers
 
         #endregion
 
-        private static void Write(string msg)
+        private static void Write(object msg)
         {
-            //SteamEmulator.Write("NetworkManager", msg);
+            SteamEmulator.Write("NetworkManager", msg);
         }
 
         public static List<IPAddress> GetIPAddresses()

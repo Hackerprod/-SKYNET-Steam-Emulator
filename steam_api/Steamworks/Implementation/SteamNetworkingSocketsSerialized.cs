@@ -12,7 +12,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         public SteamNetworkingSocketsSerialized()
         {
-            InterfaceVersion = "SteamNetworkingSocketsSerialized";
+            InterfaceName = "SteamNetworkingSocketsSerialized";
         }
 
         public void SendP2PRendezvous(ulong steamIDRemote, uint unConnectionIDSrc, IntPtr pMsgRendezvous, uint cbRendezvous)

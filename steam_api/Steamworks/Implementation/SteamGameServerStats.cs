@@ -9,7 +9,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public SteamGameServerStats()
         {
-            InterfaceVersion = "SteamGameServerStats";
+            InterfaceName = "SteamGameServerStats";
         }
 
         public bool ClearUserAchievement(ulong steamIDUser, string pchName)

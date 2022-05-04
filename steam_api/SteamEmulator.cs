@@ -124,8 +124,6 @@ public class SteamEmulator
 
             SteamId_GS = new CSteamID((uint)new Random().Next(1000, 9999), EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeGameServer);
 
-            InterfaceManager.Initialize();
-
             #region Interface Initialization
 
             // Client Interfaces
@@ -203,6 +201,7 @@ public class SteamEmulator
 
             #endregion
 
+            InterfaceManager.Initialize();
             NetworkManager.Initialize();
             //IpcManager.Initialize();
 

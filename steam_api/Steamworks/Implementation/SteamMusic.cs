@@ -10,7 +10,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         public SteamMusic()
         {
-            InterfaceVersion = "SteamMusic";
+            InterfaceName = "SteamMusic";
         }
 
         public bool BIsEnabled()

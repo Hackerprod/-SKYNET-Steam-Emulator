@@ -34,7 +34,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public SteamRemoteStorage()
         {
-            InterfaceVersion = "SteamRemoteStorage";
+            InterfaceName = "SteamRemoteStorage";
             StorageFiles = new List<string>();
             SharedFiles = new ConcurrentDictionary<ulong, string>();
             AsyncFilesRead = new Dictionary<ulong, string>();
@@ -42,7 +42,6 @@ namespace SKYNET.Steamworks.Implementation
 
             try
             {
-                string MainPath = "";
                 if (SteamEmulator.Hooked)
                 {
                     StoragePath = Path.Combine(SteamEmulator.EmulatorPath, "SKYNET", "Storage", SteamEmulator.AppId.ToString(), "remote");

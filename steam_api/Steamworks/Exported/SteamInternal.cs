@@ -49,29 +49,35 @@ namespace SKYNET.Steamworks.Exported
         public static IntPtr SteamInternal_ContextInit(IntPtr contextInitData_ptr)
         {
             IntPtr apiContext_ptr = IntPtr.Zero;
-            if (modCommon.Is64Bit())
+            try
             {
-                ContextInitData_64 Context = Marshal.PtrToStructure<ContextInitData_64>(contextInitData_ptr);
-                apiContext_ptr = contextInitData_ptr + 16;
-                if (Context.counter != 1)
+                if (modCommon.Is64Bit())
                 {
-                    Write($"SteamInternal_ContextInit");
-                    Marshal.WriteInt64(contextInitData_ptr, 8, 1);
-                    _pFn = Marshal.GetDelegateForFunctionPointer<pFn>(Context.pFn);
-                    _pFn.Invoke(apiContext_ptr);
+                    ContextInitData_64 Context = Marshal.PtrToStructure<ContextInitData_64>(contextInitData_ptr);
+                    apiContext_ptr = contextInitData_ptr + 16;
+                    if (Context.counter != 1)
+                    {
+                        Write($"SteamInternal_ContextInit");
+                        Marshal.WriteInt64(contextInitData_ptr, 8, 1);
+                        _pFn = Marshal.GetDelegateForFunctionPointer<pFn>(Context.pFn);
+                        _pFn.Invoke(apiContext_ptr);
+                    }
+                }
+                else
+                {
+                    var Context = Marshal.PtrToStructure<ContextInitData_x86>(contextInitData_ptr);
+                    apiContext_ptr = contextInitData_ptr + 8;
+                    if (Context.counter != 1)
+                    {
+                        Write($"SteamInternal_ContextInit");
+                        Marshal.WriteInt32(contextInitData_ptr, 4, 1);
+                        _pFn = Marshal.GetDelegateForFunctionPointer<pFn>(Context.pFn);
+                        _pFn.Invoke(apiContext_ptr);
+                    }
                 }
             }
-            else
+            catch
             {
-                var Context = Marshal.PtrToStructure<ContextInitData_x86>(contextInitData_ptr);
-                apiContext_ptr = contextInitData_ptr + 8;
-                if (Context.counter != 1)
-                {
-                    Write($"SteamInternal_ContextInit");
-                    Marshal.WriteInt32(contextInitData_ptr, 4, 1);
-                    _pFn = Marshal.GetDelegateForFunctionPointer<pFn>(Context.pFn);
-                    _pFn.Invoke(apiContext_ptr);
-                }
             }
             return apiContext_ptr;
         }

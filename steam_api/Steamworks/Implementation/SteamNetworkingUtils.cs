@@ -16,7 +16,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         public SteamNetworkingUtils()
         {
-            InterfaceVersion = "SteamNetworkingUtils";
+            InterfaceName = "SteamNetworkingUtils";
         }
 
         public IntPtr AllocateMessage(int cbAllocateBuffer)

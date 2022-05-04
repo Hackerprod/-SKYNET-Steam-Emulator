@@ -10,7 +10,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         public SteamScreenshots()
         {
-            InterfaceVersion = "SteamScreenshots";
+            InterfaceName = "SteamScreenshots";
         }
 
         public uint WriteScreenshot(IntPtr pubRGB, uint cubRGB, int nWidth, int nHeight)

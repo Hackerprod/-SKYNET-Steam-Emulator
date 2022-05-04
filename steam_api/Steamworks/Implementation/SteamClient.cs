@@ -13,7 +13,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         public SteamClient()
         {
-            InterfaceVersion = "SteamClient";
+            InterfaceName = "SteamClient";
         }
 
         public HSteamPipe CreateSteamPipe()

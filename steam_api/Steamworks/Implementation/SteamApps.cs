@@ -11,7 +11,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         public SteamApps()
         {
-            InterfaceVersion = "SteamApps";
+            InterfaceName = "SteamApps";
         }
 
         public bool BIsSubscribed()

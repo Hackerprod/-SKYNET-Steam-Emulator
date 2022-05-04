@@ -29,7 +29,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public SteamUserStats()
         {
-            InterfaceVersion = "SteamUserStats";
+            InterfaceName = "SteamUserStats";
             Leaderboards = new List<Leaderboard>();
         }
 

@@ -10,7 +10,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         public SteamMusicRemote()
         {
-            InterfaceVersion = "SteamMusicRemote";
+            InterfaceName = "SteamMusicRemote";
         }
 
         public bool RegisterSteamMusicRemote(string pchName)

@@ -13,7 +13,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         public SteamMatchmaking()
         {
-            InterfaceVersion = "SteamMatchmaking";
+            InterfaceName = "SteamMatchmaking";
         }
 
         public int AddFavoriteGame(uint nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags, uint rTime32LastPlayedOnServer)
