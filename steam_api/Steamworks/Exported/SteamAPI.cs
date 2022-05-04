@@ -36,6 +36,12 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_Shutdown(IntPtr pContextInitData)
+        {
+            Write("SteamAPI_Shutdown");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public unsafe static void SteamAPI_RegisterCallback(IntPtr pCallback, int iCallback)
         {
 
@@ -61,6 +67,7 @@ namespace SKYNET.Steamworks.Exported
                 Write(callMessage);
 
                 CallbackManager.RegisterCallback(sCallback);
+                //CallbackWrapper.RegisterCallback(pCallback, iCallback);
             }
             catch (Exception ex)
             {
@@ -74,6 +81,7 @@ namespace SKYNET.Steamworks.Exported
         {
             Write("SteamAPI_RunCallbacks");
             CallbackManager.RunCallbacks();
+            //CallbackWrapper.RunCallbacks();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -96,6 +104,7 @@ namespace SKYNET.Steamworks.Exported
                 Write($"SteamAPI_RegisterCallResult SteamAPICall_t: {hAPICall} | Callback.m_iCallback {sCallback.CallbackBase.m_iCallback}");
 
                 CallbackManager.RegisterCallResult(sCallback);
+                //CallbackWrapper.RegisterCallResult(pCallback, hAPICall);
             }
             catch (Exception ex)
             {
@@ -104,17 +113,12 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_Shutdown(IntPtr pContextInitData)
-        {
-            Write("SteamAPI_Shutdown");
-        }
-
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_UnregisterCallback(IntPtr pCallback)
         {
             SteamCallback sCallback = new SteamCallback(pCallback);
             Write($"SteamAPI_UnregisterCallback {sCallback.CallbackType}");
             CallbackManager.UnregisterCallback(pCallback);
+            //CallbackWrapper.UnregisterCallback(pCallback);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -122,6 +126,7 @@ namespace SKYNET.Steamworks.Exported
         {
             Write("SteamAPI_UnregisterCallResult\n");
             //CallbackManager.UnregisterCallResult(pCallback, hAPICall);
+            //CallbackWrapper.UnregisterCallResult(pCallback, hAPICall);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

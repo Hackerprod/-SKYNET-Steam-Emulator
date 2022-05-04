@@ -71,6 +71,7 @@
     <Compile Include="Callback\CallbackHandler.cs" />
     <Compile Include="Callback\CallbackEnums.cs" />
     <Compile Include="Callback\CallbackTypes.cs" />
+    <Compile Include="Callback\CallbackWrapper.cs" />
     <Compile Include="Callback\CCallbackBase.cs" />
     <Compile Include="Callback\CCallbackBaseVTable.cs" />
     <Compile Include="Callback\SteamCallBacks.cs" />
@@ -259,7 +260,9 @@
   <ItemGroup>
     <None Include="Resources\Image.jpg" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Resources\Callbacks.dll" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ImportGroup Label=".NET DllExport">
     <Import Project="$(SolutionDir)packages\DllExport\tools\net.r_eg.DllExport.targets" Condition="Exists($([MSBuild]::Escape('$(SolutionDir)packages\DllExport\tools\net.r_eg.DllExport.targets')))" Label="8337224c9ad9e356" />

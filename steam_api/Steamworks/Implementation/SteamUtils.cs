@@ -3,10 +3,6 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using SKYNET;
 using SKYNET.Helper;
-using SKYNET.Helpers;
-using SKYNET.Managers;
-using SKYNET.Steamworks;
-using Steamworks;
 
 using SteamAPICall_t = System.UInt64;
 
@@ -32,7 +28,7 @@ namespace SKYNET.Steamworks.Implementation
         public uint GetSecondsSinceComputerActive()
         {
             Write("GetSecondsSinceComputerActive");
-            return (uint)(DateTime.Now - ActiveTime).Seconds + 3000;
+            return (uint)modCommon.GetInactiveTimeSpan().Value.Seconds;
         }
 
         public int GetConnectedUniverse()

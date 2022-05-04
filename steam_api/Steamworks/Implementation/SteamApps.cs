@@ -2,7 +2,6 @@
 using System.Runtime.InteropServices;
 using System.Text;
 using SKYNET;
-using SKYNET.Helpers;
 using Steamworks;
 
 namespace SKYNET.Steamworks.Implementation

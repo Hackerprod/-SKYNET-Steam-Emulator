@@ -68,7 +68,7 @@ namespace SKYNET.Managers
             NET_Announce announce = message.ParsedBody.FromJson<NET_Announce>();
 
             // Add User to List on both cases (NET_Announce and NET_AnnounceResponse)
-            if (announce != null)
+            if (announce != null && announce.AccountID != SteamEmulator.SteamId.AccountId)
                 SteamEmulator.SteamFriends?.AddOrUpdateUser(announce.AccountID, announce.PersonaName, announce.AppID, ((IPEndPoint)socket.RemoteEndPoint).Address.ToString());
 
             if (message.MessageType == (int)MessageType.NET_Announce)

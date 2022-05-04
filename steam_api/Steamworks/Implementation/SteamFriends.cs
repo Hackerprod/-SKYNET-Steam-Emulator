@@ -57,7 +57,7 @@ namespace SKYNET.Steamworks.Implementation
                 }
                 else
                 {
-                    Avatar = ImageHelper.GetDesktopWallpaper();
+                    Avatar = ImageHelper.GetDesktopWallpaper(true);
                 }
                 if (Avatar != null)
                 {

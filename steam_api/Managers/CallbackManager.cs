@@ -120,6 +120,10 @@ namespace SKYNET.Managers
 
         public static SteamAPICall_t AddCallbackResult(ICallbackData data)
         {
+            //IntPtr result = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(ICallbackData)));
+            //Marshal.StructureToPtr(data, result, false);
+            //return CallbackWrapper.AddCallbackResult((int)data.CallbackType, result, data.DataSize);
+
             CurrentCall++;
 
             MutexHelper.Wait("SteamAPICalls", delegate
@@ -225,7 +229,7 @@ namespace SKYNET.Managers
         {
             IntPtr pvParam = Marshal.AllocHGlobal(data.DataSize);
             Marshal.StructureToPtr(data, pvParam, false);
-            Run(pvParam, bIOFailure, hSteamAPICall);
+            //Run(pvParam, bIOFailure, hSteamAPICall);
 
             SteamAPICallCompleted_t completedData = new SteamAPICallCompleted_t()
             {
