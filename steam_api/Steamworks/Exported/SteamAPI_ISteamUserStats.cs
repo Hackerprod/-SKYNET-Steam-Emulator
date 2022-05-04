@@ -45,10 +45,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUserStats_GetAchievement(IntPtr _, string pchName, bool pbAchieved)
+        public static bool SteamAPI_ISteamUserStats_GetAchievement(IntPtr _, string pchName, ref bool pbAchieved)
         {
             Write("SteamAPI_ISteamUserStats_GetAchievement");
-            return SteamEmulator.SteamUserStats.GetAchievement(pchName, pbAchieved);
+            return SteamEmulator.SteamUserStats.GetAchievement(pchName, ref pbAchieved);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -66,10 +66,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUserStats_GetAchievementAndUnlockTime(IntPtr _, string pchName, bool pbAchieved, uint punUnlockTime)
+        public static bool SteamAPI_ISteamUserStats_GetAchievementAndUnlockTime(IntPtr _, ref string pchName, ref bool pbAchieved, uint punUnlockTime)
         {
             Write("SteamAPI_ISteamUserStats_GetAchievementAndUnlockTime");
-            return SteamEmulator.SteamUserStats.GetAchievementAndUnlockTime(pchName, pbAchieved, punUnlockTime);
+            return SteamEmulator.SteamUserStats.GetAchievementAndUnlockTime(pchName, ref pbAchieved, ref punUnlockTime);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

@@ -215,13 +215,6 @@ public class SteamEmulator
 
             Initialized = true;
             Initializing = false;
-
-            var handle = Marshal.AllocHGlobal(Marshal.SizeOf(SteamId));
-            Marshal.StructureToPtr(SteamId, handle, false);
-
-            TEST.CSteamID st2 = Marshal.PtrToStructure<TEST.CSteamID>(handle);
-            Write($"Steam id {SteamId}");
-            Write($"Steam id {st2}");
         }
         catch (Exception ex)
         {

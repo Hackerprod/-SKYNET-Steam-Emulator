@@ -38,9 +38,9 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUserStats.UpdateAvgRateStat(pchName, flCountThisSession, dSessionLength);
         }
 
-        public bool GetAchievement(IntPtr _, string pchName, bool pbAchieved)
+        public bool GetAchievement(IntPtr _, string pchName, ref bool pbAchieved)
         {
-            return SteamEmulator.SteamUserStats.GetAchievement(pchName, pbAchieved);
+            return SteamEmulator.SteamUserStats.GetAchievement(pchName, ref pbAchieved);
         }
 
         public bool SetAchievement(IntPtr _, string pchName)
@@ -53,9 +53,9 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUserStats.ClearAchievement(pchName);
         }
 
-        public bool GetAchievementAndUnlockTime(IntPtr _, string pchName, bool pbAchieved, uint punUnlockTime)
+        public bool GetAchievementAndUnlockTime(IntPtr _, string pchName, ref bool pbAchieved, ref uint punUnlockTime)
         {
-            return SteamEmulator.SteamUserStats.GetAchievementAndUnlockTime(pchName, pbAchieved, punUnlockTime);
+            return SteamEmulator.SteamUserStats.GetAchievementAndUnlockTime(pchName, ref pbAchieved, ref punUnlockTime);
         }
 
         public bool StoreStats(IntPtr _)

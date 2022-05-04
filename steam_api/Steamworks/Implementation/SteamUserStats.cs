@@ -1,13 +1,16 @@
 ﻿using SKYNET;
 using SKYNET.Callback;
+using SKYNET.Helper;
+using SKYNET.Helper.JSON;
 using SKYNET.Managers;
 using SKYNET.Steamworks;
 using SKYNET.Types;
 using Steamworks;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
-
+using System.Text;
 using SteamAPICall_t = System.UInt64;
 using SteamLeaderboard_t = System.UInt64;
 
@@ -16,20 +19,21 @@ namespace SKYNET.Steamworks.Implementation
     public class SteamUserStats : ISteamInterface
     {
         private List<Leaderboard> Leaderboards;
+        private List<Achievement> Achievements;
         private SteamAPICall_t k_uAPICallInvalid = 0x0;
-
-        internal class Leaderboard
-        {
-            public string Name { get; set; }
-            public ELeaderboardSortMethod ShortMethod { get; set; }
-            public ELeaderboardDisplayType DisplayType { get; set; }
-            public SteamLeaderboard_t SteamLeaderboard { get; set; }
-        }
 
         public SteamUserStats()
         {
             InterfaceName = "SteamUserStats";
             Leaderboards = new List<Leaderboard>();
+            Achievements = new List<Achievement>();
+
+            string achievementsPath = Path.Combine(modCommon.GetPath(), "SKYNET", "Storage", "Achievements.json");
+            if (File.Exists(achievementsPath))
+            {
+                string fileContent = File.ReadAllText(achievementsPath);
+                Achievements = fileContent.FromJson<List<Achievement>>();
+            }
         }
 
         public bool RequestCurrentStats()
@@ -79,28 +83,89 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool GetAchievement(string pchName, bool pbAchieved)
+        public bool GetAchievement(string pchName, ref bool pbAchieved)
         {
             Write($"GetAchievement {pchName}");
-            return false;
+            var Result = false;
+            var achieved = false;
+            MutexHelper.Wait("GetAchievement", delegate
+            {
+                var achievement = Achievements.Find(a => a.Name == pchName);
+                if (achievement == null)
+                {
+                    achieved = true;
+                    Result = false;
+                }
+                else
+                {
+                    achieved = achievement.Earned;
+                    Result = true;
+                }
+            });
+            pbAchieved = achieved;
+            return Result;
         }
 
         public bool SetAchievement(string pchName)
         {
             Write($"SetAchievement {pchName}");
-            return false;
+            var Result = false;
+            MutexHelper.Wait("GetAchievement", delegate
+            {
+                var achievement = Achievements.Find(a => a.Name == pchName);
+                if (achievement == null)
+                {
+                    achievement = new Achievement()
+                    {
+                        Name = pchName,
+                        Date = DateTime.Now,
+                        Earned = true
+                    };
+                    Achievements.Add(achievement);
+                    SaveAchievements();
+                    // TODO: Show Overlay with Achievement
+                    Result = true;
+                }
+            });
+
+            return Result;
         }
 
         public bool ClearAchievement(string pchName)
         {
             Write($"ClearAchievement {pchName}");
-            return false;
+            MutexHelper.Wait("ClearAchievement", delegate
+            {
+                for (int i = 0; i < Achievements.Count; i++)
+                {
+                    var achievement = Achievements[i];
+                    achievement.Earned = false;
+                    achievement.Progress = 0;
+                }
+                SaveAchievements();
+            });
+            return true;
         }
 
-        public bool GetAchievementAndUnlockTime(string pchName, bool pbAchieved, uint punUnlockTime)
+        public bool GetAchievementAndUnlockTime(string pchName, ref bool pbAchieved, ref uint punUnlockTime)
         {
             Write($"GetAchievementAndUnlockTime {pchName}");
-            return false;
+            var Result = false;
+            var Archived = false;
+            uint UnlockTime = 0;
+            MutexHelper.Wait("GetAchievementAndUnlockTime", delegate
+            {
+                var achievement = Achievements.Find(a => a.Name == pchName);
+                if (achievement != null)
+                {
+                    Archived = achievement.Earned;
+                    UnlockTime = (uint)(new DateTimeOffset(achievement.Date)).ToUnixTimeSeconds();
+                    Result = true;
+                }
+            });
+            pbAchieved = Archived;
+            punUnlockTime = UnlockTime;
+            return Result;
         }
 
         public bool StoreStats()
@@ -108,12 +173,12 @@ namespace SKYNET.Steamworks.Implementation
             try
             {
                 Write($"StoreStats");
-                //UserStatsStored_t data = new UserStatsStored_t()
-                //{
-                //    m_nGameID = SteamEmulator.GameID,
-                //    m_eResult = SKYNET.Types.EResult.k_EResultOK
-                //};
-                //CallbackManager.AddCallbackResult(data, UserStatsStored_t.k_iCallback);
+                UserStatsStored_t data = new UserStatsStored_t()
+                {
+                    m_nGameID = SteamEmulator.GameID,
+                    m_eResult = SKYNET.Types.EResult.k_EResultOK
+                };
+                CallbackManager.AddCallbackResult(data);
                 return true;
             }
             catch (Exception ex)
@@ -138,21 +203,55 @@ namespace SKYNET.Steamworks.Implementation
         public bool IndicateAchievementProgress(string pchName, uint nCurProgress, uint nMaxProgress)
         {
             Write($"IndicateAchievementProgress");
-            // UserAchievementStored_t
-            // CallbackManager.AddCallbackResult(data);
-            return false;
+            var Result = false;
+            var Archived = false;
+
+            MutexHelper.Wait("IndicateAchievementProgress", delegate
+            {
+                var achievement = Achievements.Find(a => a.Name == pchName);
+                if (achievement != null)
+                {
+                    achievement.Progress = nCurProgress;
+                    achievement.MaxProgress = nMaxProgress;
+                    Archived = achievement.Earned;
+                    Result = true;
+                }
+                SaveAchievements();
+            });
+
+            UserAchievementStored_t data = new UserAchievementStored_t()
+            {
+                m_nGameID = SteamEmulator.AppId,
+                m_bGroupAchievement = false,
+                m_rgchAchievementName = Encoding.UTF8.GetBytes(pchName),
+                m_nCurProgress = Archived ? nCurProgress : 0,
+                m_nMaxProgress = Archived ? nMaxProgress : 0
+            };
+
+            CallbackManager.AddCallbackResult(data);
+
+            return Result;
         }
 
         public uint GetNumAchievements()
         {
-            Write($"GetNumAchievements");
-            return 0;
+            var achievements = (uint)Achievements.Count;
+            Write($"GetNumAchievements {achievements}");
+            return achievements;
         }
 
         public string GetAchievementName(uint iAchievement)
         {
-            Write($"GetAchievementName");
-            return "";
+            string achievementName = "";
+            try
+            {
+                if (Achievements.Count <= iAchievement)
+                    return "";
+                achievementName = Achievements[(int)iAchievement].Name;
+            }
+            catch { }
+            Write($"GetAchievementName {iAchievement} {achievementName}");
+            return achievementName;
         }
 
         public SteamAPICall_t RequestUserStats(ulong steamIDUser)
@@ -160,13 +259,13 @@ namespace SKYNET.Steamworks.Implementation
             try
             {
                 Write($"RequestUserStats");
-                //UserStatsReceived_t data = new UserStatsReceived_t()
-                //{
-                //    m_nGameID = SteamEmulator.GameID,
-                //    m_eResult = EResult.k_EResultOK,
-                //    m_steamIDUser = steamIDUser
-                //};
-                //return CallbackManager.AddCallbackResult(data, UserStatsReceived_t.k_iCallback);
+                UserStatsReceived_t data = new UserStatsReceived_t()
+                {
+                    m_nGameID = SteamEmulator.GameID,
+                    m_eResult = EResult.k_EResultOK,
+                    m_steamIDUser = steamIDUser
+                };
+                return CallbackManager.AddCallbackResult(data);
             }
             catch (Exception ex)
             {
@@ -407,6 +506,35 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
+        private void SaveAchievements()
+        {
+            try
+            {
+                string achievementsPath = Path.Combine(modCommon.GetPath(), "SKYNET", "Storage", "Achievements.json");
+                modCommon.EnsureDirectoryExists(achievementsPath, true);
+                string json = Achievements.ToJson();
+                File.WriteAllText(achievementsPath, json);
+            }
+            catch
+            {
+            }
+        }
 
+        private class Achievement
+        {
+            public string Name { get; set; }
+            public bool Earned { get; set; }
+            public DateTime Date { get; set; }
+            public uint Progress { get; set; }
+            public uint MaxProgress { get; set; }
+        }
+
+        private class Leaderboard
+        {
+            public string Name { get; set; }
+            public ELeaderboardSortMethod ShortMethod { get; set; }
+            public ELeaderboardDisplayType DisplayType { get; set; }
+            public SteamLeaderboard_t SteamLeaderboard { get; set; }
+        }
     }
 }

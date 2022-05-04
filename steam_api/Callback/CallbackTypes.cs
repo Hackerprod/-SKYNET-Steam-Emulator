@@ -1385,8 +1385,8 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct UserStatsStored_t : ICallbackData
     {
-        internal ulong GameID; // m_nGameID uint64
-        internal EResult Result; // m_eResult EResult
+        internal ulong m_nGameID; // m_nGameID uint64
+        internal EResult m_eResult; // m_eResult EResult
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(UserStatsStored_t));
@@ -1398,14 +1398,14 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct UserAchievementStored_t : ICallbackData
     {
-        internal ulong GameID; // m_nGameID uint64
+        internal ulong m_nGameID; // m_nGameID uint64
         [MarshalAs(UnmanagedType.I1)]
-        internal bool GroupAchievement; // m_bGroupAchievement bool
-        internal string AchievementNameUTF8() => System.Text.Encoding.UTF8.GetString(AchievementName, 0, System.Array.IndexOf<byte>(AchievementName, 0));
+        internal bool m_bGroupAchievement; // m_bGroupAchievement bool
+        internal string AchievementNameUTF8() => System.Text.Encoding.UTF8.GetString(m_rgchAchievementName, 0, System.Array.IndexOf<byte>(m_rgchAchievementName, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)] // byte[] m_rgchAchievementName
-        internal byte[] AchievementName; // m_rgchAchievementName char [128]
-        internal uint CurProgress; // m_nCurProgress uint32
-        internal uint MaxProgress; // m_nMaxProgress uint32
+        internal byte[] m_rgchAchievementName; // m_rgchAchievementName char [128]
+        internal uint m_nCurProgress; // m_nCurProgress uint32
+        internal uint m_nMaxProgress; // m_nMaxProgress uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(UserAchievementStored_t));
