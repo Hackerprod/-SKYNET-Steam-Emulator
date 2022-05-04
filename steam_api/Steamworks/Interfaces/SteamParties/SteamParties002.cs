@@ -22,7 +22,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamParties.GetBeaconByIndex(unIndex);
         }
 
-        public bool GetBeaconDetails(IntPtr _, PartyBeaconID_t ulBeaconID, ulong pSteamIDBeaconOwner, IntPtr pLocation, string pchMetadata, int cchMetadata) 
+        public bool GetBeaconDetails(IntPtr _, PartyBeaconID_t ulBeaconID, ulong pSteamIDBeaconOwner, IntPtr pLocation, string pchMetadata, int cchMetadata)
         {
             return SteamEmulator.SteamParties.GetBeaconDetails(ulBeaconID, pSteamIDBeaconOwner, pLocation, pchMetadata, cchMetadata);
         }

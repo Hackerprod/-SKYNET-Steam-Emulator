@@ -68,7 +68,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUtils.IsAPICallCompleted(hSteamAPICall, ref pbFailed);
         }
 
-        public ESteamAPICallFailure GetAPICallFailureReason(IntPtr _, SteamAPICall_t hSteamAPICall)
+        public int GetAPICallFailureReason(IntPtr _, SteamAPICall_t hSteamAPICall)
         {
             return SteamEmulator.SteamUtils.GetAPICallFailureReason(hSteamAPICall);
         }

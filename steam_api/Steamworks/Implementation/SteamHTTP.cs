@@ -141,21 +141,21 @@ namespace SKYNET.Steamworks.Implementation
                 Request = (uint)request.Handle
             };
 
-            try
-            {
-                WebRequest webrequest = HttpWebRequest.Create(request.URL);
-                webrequest.Method = request.RequestMethod.ToString();
-                HttpWebResponse response = (HttpWebResponse)webrequest.GetResponse();
-                StreamReader reader = new StreamReader(response.GetResponseStream());
-                string content = reader.ReadToEnd();
-                request.Response = content;
+            //try
+            //{
+            //    WebRequest webrequest = HttpWebRequest.Create(request.URL);
+            //    webrequest.Method = request.RequestMethod.ToString();
+            //    HttpWebResponse response = (HttpWebResponse)webrequest.GetResponse();
+            //    StreamReader reader = new StreamReader(response.GetResponseStream());
+            //    string content = reader.ReadToEnd();
+            //    request.Response = content;
 
-                data.ContextValue = request.ContextValue;
-                data.RequestSuccessful = true;
-                data.StatusCode = (HTTPStatusCode)response.StatusCode;
-                data.BodySize = (uint)content.Length;
-            }
-            catch (Exception ex)
+            //    data.ContextValue = request.ContextValue;
+            //    data.RequestSuccessful = true;
+            //    data.StatusCode = (HTTPStatusCode)response.StatusCode;
+            //    data.BodySize = (uint)content.Length;
+            //}
+            //catch (Exception ex)
             {
                 data.ContextValue = request.ContextValue;
                 data.RequestSuccessful = false;
@@ -163,8 +163,7 @@ namespace SKYNET.Steamworks.Implementation
                 data.BodySize = 0;
             }
 
-            CallbackManager.AddCallbackResult(data);
-            pCallHandle = (ulong)CallbackType.HTTPRequestCompleted;
+            pCallHandle = CallbackManager.AddCallbackResult(data);
             return true;
         }
 

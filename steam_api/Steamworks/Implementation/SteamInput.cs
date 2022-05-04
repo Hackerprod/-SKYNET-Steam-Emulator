@@ -186,10 +186,10 @@ namespace SKYNET.Steamworks.Implementation
             Write("TriggerRepeatedHapticPulse");
         }
 
-        public InputMotionData_t GetMotionData(InputHandle_t inputHandle)
+        public IntPtr GetMotionData(InputHandle_t inputHandle)
         {
             Write("xxx");
-            return new InputMotionData_t();
+            return IntPtr.Zero;
         }
 
         public ushort GetSessionInputConfigurationSettings()

@@ -47,55 +47,55 @@ namespace SKYNET.Steamworks.Exported
 
             if (!SteamEmulator.Initialized) return;
 
-            //try
-            //{
-            //    CCallbackBase Callback = pCallback.ToType<CCallbackBase>();
+            try
+            {
+                var callMessage = $"SteamAPI_RegisterCallback: ";
 
-            //    var callMessage = $"SteamAPI_RegisterCallback: ";
-            //    var CallInterface = iCallback.GetCallbackType();
-            //    var CallType = (CallbackType)iCallback;
-            //    var callback_id = iCallback % 100;
-            //    var isGameServer = Callback.IsGameServer() ? "[ GAMESERVER ]" : "[   CLIENT   ]";
-            //    var space = callback_id < 10 ? " " : "";
+                SteamCallback sCallback = new SteamCallback(pCallback, iCallback);
 
-            //    callMessage += $"{isGameServer}  {callback_id} {space} {CallInterface} {CallType}";
+                var isGameServer = sCallback.HasGameserver ? "[ GAMESERVER ]" : "[   CLIENT   ]";
+                var space = (int)sCallback.CallbackType < 1000 ? " " : "";
 
-            //    Write(callMessage);
+                callMessage += $"{isGameServer}  {(int)sCallback.CallbackType} {space} {sCallback.BaseType} {sCallback.CallbackType}";
 
-            //    CallbackManager.RegisterCallback(iCallback, pCallback, Callback.IsGameServer());
-            //}
-            //catch (Exception ex)
-            //{
-            //    Write("SteamAPI_RegisterCallback " + ex.ToString());
-            //}
+                Write(callMessage);
+
+                CallbackManager.RegisterCallback(sCallback);
+            }
+            catch (Exception ex)
+            {
+                Write("SteamAPI_RegisterCallback " + ex.ToString());
+            }
         }
 
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_RunCallbacks()
         {
-            ///Write("SteamAPI_RunCallbacks");
+            Write("SteamAPI_RunCallbacks");
             CallbackManager.RunCallbacks();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_RegisterCallResult(IntPtr pCallback, SteamAPICall_t hAPICall)
         {
-            SteamEmulator.Debug("SteamAPI_RegisterCallResult SteamAPICall_t: " + hAPICall, ConsoleColor.Yellow);
-
             try
             {
-                CCallbackBase Callback = pCallback.ToType<CCallbackBase>();
+                var callMessage = $"SteamAPI_RegisterCallback: ";
 
-                var callMessage = $"SteamAPI_RegisterCallResult: ";
-                var CallType = Callback.m_iCallback.GetCallbackType();
-                var isGameServer = Callback.IsGameServer() ? "[ GAMESERVER ]" : "[   CLIENT   ]";
+                SteamCallback sCallback = new SteamCallback(pCallback, true);
+                sCallback.SteamAPICall = hAPICall;
 
-                callMessage += $"{isGameServer} {CallType}";
+                var isGameServer = sCallback.HasGameserver ? "[ GAMESERVER ]" : "[   CLIENT   ]";
+                var space = (int)sCallback.CallbackType < 1000 ? " " : "";
+
+                callMessage += $"{isGameServer}  {(int)sCallback.CallbackType} {space} {sCallback.BaseType} {sCallback.CallbackType}";
 
                 Write(callMessage);
 
-                CallbackManager.RegisterCallResult(pCallback, hAPICall);
+                Write($"SteamAPI_RegisterCallResult SteamAPICall_t: {hAPICall} | Callback.m_iCallback {sCallback.CallbackBase.m_iCallback}");
+
+                CallbackManager.RegisterCallResult(sCallback);
             }
             catch (Exception ex)
             {
@@ -112,7 +112,8 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_UnregisterCallback(IntPtr pCallback)
         {
-            Write($"SteamAPI_UnregisterCallback");
+            SteamCallback sCallback = new SteamCallback(pCallback);
+            Write($"SteamAPI_UnregisterCallback {sCallback.CallbackType}");
             CallbackManager.UnregisterCallback(pCallback);
         }
 
@@ -120,7 +121,7 @@ namespace SKYNET.Steamworks.Exported
         public static void SteamAPI_UnregisterCallResult(IntPtr pCallback, SteamAPICall_t hAPICall)
         {
             Write("SteamAPI_UnregisterCallResult\n");
-            CallbackManager.UnregisterCallResult(pCallback, hAPICall);
+            //CallbackManager.UnregisterCallResult(pCallback, hAPICall);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -216,6 +217,14 @@ namespace SKYNET.Steamworks.Exported
             Write($"SteamAPI_UseBreakpadCrashHandler | Date: {pchDate} | Time: {pchTime} | Version : {pchVersion}");
         }
 
+        
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ManualDispatch_Init()
+        {
+            Write($"SteamAPI_ManualDispatch_Init");
+        }
+
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_ManualDispatch_RunFrame(HSteamPipe hSteamPipe)
         {
@@ -258,6 +267,7 @@ namespace SKYNET.Steamworks.Exported
             Msg += "////////////////////////////// Mini Dump Content \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + Environment.NewLine;
             Msg += $"{pchMsg}" + Environment.NewLine;
             Msg += "//////////////////////////////   End Mini Dump   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + Environment.NewLine;
+            //Write(Msg);
             Write("SteamAPI_SetMiniDumpComment");
         }
 

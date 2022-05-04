@@ -98,7 +98,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static ESteamAPICallFailure SteamAPI_ISteamUtils_GetAPICallFailureReason(IntPtr _, SteamAPICall_t hSteamAPICall)
+        public static int SteamAPI_ISteamUtils_GetAPICallFailureReason(IntPtr _, SteamAPICall_t hSteamAPICall)
         {
             Write("SteamAPI_ISteamUtils_GetAPICallFailureReason");
             return SteamEmulator.SteamUtils.GetAPICallFailureReason(hSteamAPICall);
@@ -246,7 +246,7 @@ namespace SKYNET.Steamworks.Exported
 
         private static void Write(string msg)
         {
-            SteamEmulator.Write("SteamAPI_ISteamUser", msg);
+            SteamEmulator.Write("", msg);
         }
     }
 }

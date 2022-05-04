@@ -20,9 +20,9 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUser.BLoggedOn();
         }
 
-        public CSteamID GetSteamID(IntPtr _)
+        public ulong GetSteamID(IntPtr _)
         {
-            return SteamEmulator.SteamUser.GetSteamID();
+            return (ulong)SteamEmulator.SteamUser.GetSteamID();
         }
 
         public int InitiateGameConnection(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)

@@ -48,7 +48,7 @@ namespace SKYNET.Managers
             }
         }
 
-        internal static uint GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, IntPtr pcbTicket)
+        internal static uint GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
         {
             try
             {
@@ -61,6 +61,8 @@ namespace SKYNET.Managers
                 ticketStream.WriteBytes(Token);     // Ticket token
                 ticketStream.WriteInt32L(0x18);     // Header size
                 ticketStream.WriteBytes(IPAddr);    // IP address
+
+                pcbTicket = (uint)ticketStream.Length;
 
                 Marshal.Copy(ticketStream.ToArray(), 0, pTicket, ticketStream.ToArray().Length);
 

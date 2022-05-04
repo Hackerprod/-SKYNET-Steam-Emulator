@@ -7,6 +7,8 @@ using System.Runtime.InteropServices;
 using SteamNetworkingPOPID = System.UInt32;
 using SteamNetworkingMicroseconds = System.Int64;
 using HSteamNetConnection = System.UInt32;
+using SKYNET.Callback;
+using SKYNET.Managers;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -31,42 +33,57 @@ namespace SKYNET.Steamworks.Implementation
         public int GetRelayNetworkStatus(IntPtr pDetails)
         {
             Write("GetRelayNetworkStatus");
-            return 0;
+            SteamRelayNetworkStatus_t data = new SteamRelayNetworkStatus_t()
+            {
+                m_eAvail = ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Current,
+                m_bPingMeasurementInProgress = 0,
+                m_eAvailAnyRelay = ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Current,
+                m_eAvailNetworkConfig = ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Current
+            };
+            CallbackManager.AddCallbackResult(data);
+            if (pDetails != IntPtr.Zero)
+            {
+                Marshal.StructureToPtr(data, pDetails, false);
+            }
+            return (int)ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Current;
         }
 
         public float GetLocalPingLocation(IntPtr result)
         {
             Write("GetLocalPingLocation");
-            return 0;
+            SteamNetworkPingLocation_t pingLocation = Marshal.PtrToStructure<SteamNetworkPingLocation_t>(result);
+            pingLocation.m_data = 20;
+            return 2;
         }
 
         public int EstimatePingTimeBetweenTwoLocations(IntPtr location1, IntPtr location2)
         {
             Write("EstimatePingTimeBetweenTwoLocations");
-            return 0;
+            return 15;
         }
 
         public int EstimatePingTimeFromLocalHost(IntPtr remoteLocation)
         {
             Write("EstimatePingTimeFromLocalHost");
-            return 0;
+            return 15;
         }
 
-        public void ConvertPingLocationToString(IntPtr location, string pszBuf, int cchBufSize)
+        public void ConvertPingLocationToString(IntPtr location, ref string pszBuf, int cchBufSize)
         {
             Write("ConvertPingLocationToString");
+            pszBuf = "us=8+5";
         }
 
         public bool ParsePingLocationString(string pszString, IntPtr result)
         {
             Write("ParsePingLocationString");
-            return false;
+            return true;
         }
 
         public bool CheckPingDataUpToDate(float flMaxAgeSeconds)
         {
             Write("CheckPingDataUpToDate");
-            return false;
+            return true;
         }
 
         public int GetPingToDataCenter(SteamNetworkingPOPID popID, SteamNetworkingPOPID pViaRelayPoP)
@@ -102,7 +119,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamNetworkingMicroseconds GetLocalTimestamp()
         {
             Write("GetLocalTimestamp");
-            return 0;
+            return (long)(DateTime.Now - SteamEmulator.SteamUtils.ActiveTime).Seconds + (SteamNetworkingMicroseconds)24 * 3600 * 30 /* * 1e6 */; 
         }
 
         public void SetDebugOutputFunction(int eDetailLevel, IntPtr pfnFunc)
@@ -209,12 +226,13 @@ namespace SKYNET.Steamworks.Implementation
         public int GetFirstConfigValue()
         {
             Write("GetFirstConfigValue");
-            return 0;
+            return 0; //ESteamNetworkingConfigValue.k_ESteamNetworkingConfig_Invalid;
         }
 
         public void SteamNetworkingIPAddr_ToString(IntPtr addr, string buf, IntPtr cbBuf, bool bWithPort)
         {
             Write("SteamNetworkingIPAddr_ToString");
+            // TODO
         }
 
         public bool SteamNetworkingIPAddr_ParseString(IntPtr pAddr, string pszStr)

@@ -109,9 +109,9 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamRemoteStorage.GetFileNameAndSize(iFile, ref pnFileSizeInBytes);
         }
 
-        public bool GetQuota(IntPtr _, int pnTotalBytes, int puAvailableBytes)
+        public bool GetQuota(IntPtr _, ref ulong pnTotalBytes, ref ulong puAvailableBytes)
         {
-            return SteamEmulator.SteamRemoteStorage.GetQuota(pnTotalBytes, puAvailableBytes);
+            return SteamEmulator.SteamRemoteStorage.GetQuota(ref pnTotalBytes, ref puAvailableBytes);
         }
 
         public bool IsCloudEnabledForAccount(IntPtr _)

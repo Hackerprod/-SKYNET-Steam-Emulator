@@ -147,9 +147,9 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamGameServer.BUpdateUserData(steamIDUser, pchPlayerName, uScore);
         }
 
-        public uint GetAuthSessionTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, IntPtr pcbTicket)
+        public uint GetAuthSessionTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
         {
-            return SteamEmulator.SteamGameServer.GetAuthSessionTicket(pTicket, cbMaxTicket, pcbTicket);
+            return SteamEmulator.SteamGameServer.GetAuthSessionTicket(pTicket, cbMaxTicket, ref pcbTicket);
         }
 
         public int BeginAuthSession(IntPtr _, IntPtr pAuthTicket, int cbAuthTicket, ulong steamID)

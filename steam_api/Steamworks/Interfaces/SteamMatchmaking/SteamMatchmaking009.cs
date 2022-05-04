@@ -1,3 +1,4 @@
+using Steamworks;
 using System;
 
 namespace SKYNET.Interface
@@ -180,7 +181,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamMatchmaking.SetLobbyJoinable(steamIDLobby, bLobbyJoinable);
         }
 
-        public ulong GetLobbyOwner(IntPtr _, ulong steamIDLobby)
+        public CSteamID GetLobbyOwner(IntPtr _, ulong steamIDLobby)
         {
             return SteamEmulator.SteamMatchmaking.GetLobbyOwner(steamIDLobby);
         }

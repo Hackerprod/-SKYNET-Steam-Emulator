@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace Steamworks
 {
+    [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     public class CSteamID : IEquatable<CSteamID>, IComparable<CSteamID>
     {
@@ -73,11 +74,6 @@ namespace Steamworks
             return this.SteamID.GetHashCode();
         }
 
-        public bool Equals(uint other)
-        {
-            return this.AccountId == other;
-        }
-
         public int CompareTo(CSteamID other)
         {
             return this.SteamID.CompareTo(other.SteamID);
@@ -93,10 +89,31 @@ namespace Steamworks
             return x.SteamID == y.SteamID;
         }
 
+
         public static bool operator !=(CSteamID x, CSteamID y)
         {
             return !(x == y);
         }
+
+        #region IEquatable ulong
+
+
+        public static bool operator ==(CSteamID x, ulong y)
+        {
+            return x.SteamID == y;
+        }
+
+        public static bool operator !=(CSteamID x, ulong y)
+        {
+            return !(x.SteamID == y);
+        }
+
+        public bool Equals(ulong other)
+        {
+            return this.SteamID == other;
+        }
+
+        #endregion
 
         public static explicit operator CSteamID(ulong value)
         {

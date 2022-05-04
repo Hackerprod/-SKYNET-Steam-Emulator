@@ -99,7 +99,7 @@ namespace SKYNET.Steamworks.Implementation
         public CSteamID GetSteamID()
         {
             var SteamId = SteamEmulator.SteamId_GS;
-            Write($"GetSteamID {(string)SteamId}");
+            Write($"GetSteamID {SteamId.ToString()}");
             return SteamId; 
         }
 
@@ -208,10 +208,10 @@ namespace SKYNET.Steamworks.Implementation
 
         // Retrieve ticket to be sent to the entity who wishes to authenticate you ( using BeginAuthSession API ). 
         // uint32 *pcbTicket  retrieves the length of the actual ticket.
-        public HAuthTicket GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, IntPtr pcbTicket)
+        public HAuthTicket GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
         {
             SteamEmulator.Write("DEBUG", "GetAuthSessionTicket");
-            return TicketManager.GetAuthSessionTicket(pTicket, cbMaxTicket, pcbTicket);
+            return TicketManager.GetAuthSessionTicket(pTicket, cbMaxTicket, ref pcbTicket);
         }
 
         public void SetAdvertiseServerActive(bool bActive)

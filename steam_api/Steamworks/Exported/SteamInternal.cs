@@ -78,7 +78,7 @@ namespace SKYNET.Steamworks.Exported
 
         private static void Write(string v)
         {
-            SteamEmulator.Write("SteamInternal", v);
+            SteamEmulator.Write("", v);
         }
     }
 }

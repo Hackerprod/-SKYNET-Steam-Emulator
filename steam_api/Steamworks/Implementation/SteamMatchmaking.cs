@@ -5,6 +5,8 @@ using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using Steamworks;
 
+using SteamAPICall_t = System.UInt64;
+
 namespace SKYNET.Steamworks.Implementation
 {
     public class SteamMatchmaking : ISteamInterface
@@ -55,7 +57,7 @@ namespace SKYNET.Steamworks.Implementation
             Write("AddRequestLobbyListStringFilter");
         }
 
-        public ulong CreateLobby(int eLobbyType, int cMaxMembers)
+        public SteamAPICall_t CreateLobby(int eLobbyType, int cMaxMembers)
         {
             Write("CreateLobby");
             return new ulong();
@@ -133,10 +135,10 @@ namespace SKYNET.Steamworks.Implementation
             return 1;
         }
 
-        public ulong GetLobbyOwner(ulong steamIDLobby)
+        public CSteamID GetLobbyOwner(ulong steamIDLobby)
         {
             Write("GetLobbyOwner");
-            return 0;
+            return (CSteamID)0;
         }
 
         public int GetNumLobbyMembers(ulong steamIDLobby)
@@ -151,7 +153,7 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public ulong JoinLobby(ulong steamIDLobby)
+        public SteamAPICall_t JoinLobby(ulong steamIDLobby)
         {
             Write("JoinLobby");
             return new ulong();
@@ -174,7 +176,7 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public ulong RequestLobbyList()
+        public SteamAPICall_t RequestLobbyList()
         {
             Write("RequestLobbyList");
             return new ulong();

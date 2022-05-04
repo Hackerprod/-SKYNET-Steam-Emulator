@@ -12,6 +12,7 @@ using Steamworks;
 using SteamAPICall_t = System.UInt64;
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
+using SKYNET.Managers;
 
 namespace SKYNET.Steamworks.Exported
 {
@@ -241,9 +242,16 @@ namespace SKYNET.Steamworks.Exported
             return SteamEmulator.SteamUser.BSetDurationControlOnlineState(eNewState);
         }
 
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamUser_v020()
+        {
+            Write("SteamAPI_SteamUser_v020");
+            return InterfaceManager.FindOrCreateInterface("SteamUser020");
+        }
+
         private static void Write(string msg)
         {
-            SteamEmulator.Write("SteamAPI_ISteamUser", msg);
+            SteamEmulator.Write("", msg);
         }
     }
 }

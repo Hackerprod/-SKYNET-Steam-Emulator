@@ -15,7 +15,7 @@ namespace SKYNET.Steamworks.Implementation
     public class SteamUtils : ISteamInterface
     {
         SteamAPICall_t k_uAPICallInvalid = 0x0;
-        private DateTime ActiveTime;
+        public DateTime ActiveTime;
 
         public SteamUtils()
         {
@@ -148,17 +148,17 @@ namespace SKYNET.Steamworks.Implementation
                 return true;
             }
 
-            if (CallbackManager.Contains(hSteamAPICall))
-                return false;
+            //if (CallbackManager.Contains(hSteamAPICall))
+            //    return false;
 
             if (pbFailed) pbFailed = false;
             return true;
         }
 
-        public ESteamAPICallFailure GetAPICallFailureReason(SteamAPICall_t hSteamAPICall)
+        public int GetAPICallFailureReason(SteamAPICall_t hSteamAPICall)
         {
             Write("GetAPICallFailureReason");
-            return ESteamAPICallFailure.k_ESteamAPICallFailureNone;
+            return (int)ESteamAPICallFailure.k_ESteamAPICallFailureNone;
         }
 
         public bool GetAPICallResult(SteamAPICall_t handle, IntPtr callback, int callback_size, int callback_expected, ref bool failed)
@@ -203,7 +203,7 @@ namespace SKYNET.Steamworks.Implementation
         public bool IsOverlayEnabled()
         {
             Write("IsOverlayEnabled");
-            return false;
+            return true;
         }
 
         public bool BOverlayNeedsPresent()

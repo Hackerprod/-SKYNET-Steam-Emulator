@@ -530,9 +530,9 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct SteamAPICallCompleted_t : ICallbackData
     {
-        internal ulong AsyncCall; // m_hAsyncCall SteamAPICall_t
-        internal int Callback; // m_iCallback int
-        internal uint ParamCount; // m_cubParam uint32
+        internal SteamAPICall_t m_hAsyncCall; // m_hAsyncCall SteamAPICall_t
+        internal int m_iCallback; // m_iCallback int
+        internal UInt32 m_cubParam; // m_cubParam uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SteamAPICallCompleted_t));
@@ -1371,9 +1371,9 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
     internal struct UserStatsReceived_t : ICallbackData
     {
-        internal ulong GameID; // m_nGameID uint64
-        internal EResult Result; // m_eResult EResult
-        internal ulong SteamIDUser; // m_steamIDUser CSteamID
+        internal ulong m_nGameID; // m_nGameID uint64
+        internal EResult m_eResult; // m_eResult EResult
+        internal ulong m_steamIDUser; // m_steamIDUser CSteamID
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(UserStatsReceived_t));
@@ -2784,7 +2784,7 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct SteamNetAuthenticationStatus_t : ICallbackData
     {
-        internal SteamNetworkingAvailability Avail; // m_eAvail ESteamNetworkingAvailability
+        internal ESteamNetworkingAvailability Avail; // m_eAvail ESteamNetworkingAvailability
         internal string DebugMsgUTF8() => System.Text.Encoding.UTF8.GetString(DebugMsg, 0, System.Array.IndexOf<byte>(DebugMsg, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)] // byte[] m_debugMsg
         internal byte[] DebugMsg; // m_debugMsg char [256]
@@ -2799,10 +2799,10 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct SteamRelayNetworkStatus_t : ICallbackData
     {
-        internal SteamNetworkingAvailability Avail; // m_eAvail ESteamNetworkingAvailability
-        internal int PingMeasurementInProgress; // m_bPingMeasurementInProgress int
-        internal SteamNetworkingAvailability AvailNetworkConfig; // m_eAvailNetworkConfig ESteamNetworkingAvailability
-        internal SteamNetworkingAvailability AvailAnyRelay; // m_eAvailAnyRelay ESteamNetworkingAvailability
+        internal ESteamNetworkingAvailability m_eAvail; // m_eAvail ESteamNetworkingAvailability
+        internal int m_bPingMeasurementInProgress; // m_bPingMeasurementInProgress int
+        internal ESteamNetworkingAvailability m_eAvailNetworkConfig; // m_eAvailNetworkConfig ESteamNetworkingAvailability
+        internal ESteamNetworkingAvailability m_eAvailAnyRelay; // m_eAvailAnyRelay ESteamNetworkingAvailability
         internal string DebugMsgUTF8() => System.Text.Encoding.UTF8.GetString(DebugMsg, 0, System.Array.IndexOf<byte>(DebugMsg, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)] // byte[] m_debugMsg
         internal byte[] DebugMsg; // m_debugMsg char [256]

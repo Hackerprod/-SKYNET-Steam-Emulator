@@ -38,13 +38,13 @@ namespace SKYNET.Steamworks.Implementation
             try
             {
                 Write($"RequestCurrentStats");
-                //UserStatsReceived_t data = new UserStatsReceived_t()
-                //{
-                //    m_nGameID = SteamEmulator.GameID,
-                //    m_eResult = SKYNET.Types.EResult.k_EResultOK,
-                //    m_steamIDUser = SteamEmulator.SteamId
-                //};
-                //CallbackManager.AddCallbackResult(data, UserStatsReceived_t.k_iCallback);
+                UserStatsReceived_t data = new UserStatsReceived_t()
+                {
+                    m_nGameID = SteamEmulator.GameID,
+                    m_eResult = EResult.k_EResultOK,
+                    m_steamIDUser = (ulong)SteamEmulator.SteamId
+                };
+                CallbackManager.AddCallbackResult(data);
                 return true;
             }
             catch (Exception ex)
@@ -329,12 +329,14 @@ namespace SKYNET.Steamworks.Implementation
         {
             try
             {
-                Write($"GetNumberOfCurrentPlayers");
                 NumberOfCurrentPlayers_t data = new NumberOfCurrentPlayers_t()
                 {
                     m_bSuccess = 1,
                     m_cPlayers = SteamEmulator.SteamFriends.Users.Count
                 };
+
+                Write($"GetNumberOfCurrentPlayers {SteamEmulator.SteamFriends.Users.Count}");
+
                 return CallbackManager.AddCallbackResult(data);
             }
             catch (Exception ex)

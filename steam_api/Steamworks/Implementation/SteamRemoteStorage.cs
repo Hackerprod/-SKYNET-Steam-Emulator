@@ -389,22 +389,24 @@ namespace SKYNET.Steamworks.Implementation
             return "";
         }
 
-        public bool GetQuota(int pnTotalBytes, int puAvailableBytes)
+        public bool GetQuota(ref ulong pnTotalBytes, ref ulong puAvailableBytes)
         {
             Write("GetQuota");
-            return false;
+            pnTotalBytes = 1024 * 1024 * 1024;
+            puAvailableBytes = 1024 * 1024 * 1024;
+            return true;
         }
 
         public bool IsCloudEnabledForAccount()
         {
             Write("IsCloudEnabledForAccount");
-            return false;
+            return true;
         }
 
         public bool IsCloudEnabledForApp()
         {
             Write("IsCloudEnabledForApp");
-            return false;
+            return true;
         }
 
         public void SetCloudEnabledForApp(bool bEnabled)

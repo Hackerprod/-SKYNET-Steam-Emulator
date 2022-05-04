@@ -176,7 +176,7 @@ namespace SKYNET.Steamworks
     /// ISteamNetworkingUtils().
     public struct SteamNetworkPingLocation_t
     {
-        uint m_data;
+        public uint m_data;
     };
 
     public struct SteamPartyBeaconLocation_t

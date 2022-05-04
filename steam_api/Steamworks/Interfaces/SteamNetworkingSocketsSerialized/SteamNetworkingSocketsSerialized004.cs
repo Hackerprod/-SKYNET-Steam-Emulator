@@ -36,7 +36,7 @@ namespace SKYNET.Interface
 
         public uint GetCachedRelayTicketCount(IntPtr _)
         {
-            return SteamEmulator.SteamNetworkingSocketsSerialized.GetCachedRelayTicketCount(_);
+            return SteamEmulator.SteamNetworkingSocketsSerialized.GetCachedRelayTicketCount();
         }
 
         public int GetCachedRelayTicket(IntPtr _, uint idxTicket, IntPtr buf, uint cbBuf)

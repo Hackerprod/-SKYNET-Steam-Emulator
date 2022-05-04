@@ -108,7 +108,7 @@ namespace SKYNET.Interface
 
         public bool LoadItemDefinitions(IntPtr _)
         {
-            return SteamEmulator.SteamInventory.LoadItemDefinitions(_);
+            return SteamEmulator.SteamInventory.LoadItemDefinitions();
         }
 
         public bool GetItemDefinitionIDs(IntPtr _, IntPtr pItemDefIDs, uint punItemDefIDsArraySize )
@@ -138,12 +138,12 @@ namespace SKYNET.Interface
 
         public ulong RequestPrices(IntPtr _)
         {
-            return SteamEmulator.SteamInventory.RequestPrices(_);
+            return SteamEmulator.SteamInventory.RequestPrices();
         }
 
         public uint GetNumItemsWithPrices(IntPtr _)
         {
-            return SteamEmulator.SteamInventory.GetNumItemsWithPrices(_);
+            return SteamEmulator.SteamInventory.GetNumItemsWithPrices();
         }
 
         public bool GetItemsWithPrices(IntPtr _, IntPtr pArrayItemDefs, IntPtr pCurrentPrices, ulong pBasePrices, uint unArrayLength)

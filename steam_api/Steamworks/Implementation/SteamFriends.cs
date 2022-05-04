@@ -76,7 +76,7 @@ namespace SKYNET.Steamworks.Implementation
 
             Users.Add(new Types.SteamUser()
             {
-                AccountId = SteamEmulator.SteamId.AccountId,
+                //AccountId = SteamEmulator.SteamId.AccountId,
                 GameId = SteamEmulator.AppId,
                 HasFriend = false,
                 PersonaName = SteamEmulator.PersonaName,
@@ -187,13 +187,11 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-
         public SteamAPICall_t DownloadClanActivityCounts(IntPtr clans, int cClansToRequest)
         {
             Write($"DownloadClanActivityCounts {cClansToRequest}");
             return k_uAPICallInvalid;
         }
-
 
         public SteamAPICall_t EnumerateFollowingList(uint unStartIndex)
         {
@@ -202,13 +200,11 @@ namespace SKYNET.Steamworks.Implementation
             return k_uAPICallInvalid;
         }
 
-
         public CSteamID GetChatMemberByIndex(ulong steamIDClan, int iUser)
         {
             Write($"GetChatMemberByIndex {steamIDClan}");
             return (CSteamID)0;
         }
-
 
         public bool GetClanActivityCounts(ulong steamIDClan, ref int online, ref int in_game, ref int chatting)
         {
@@ -219,20 +215,17 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-
         public CSteamID GetClanByIndex(int iClan)
         {
             Write($"GetClanByIndex {iClan}");
             return (CSteamID)0;
         }
 
-
         public int GetClanChatMemberCount(ulong steamIDClan)
         {
             Write($"GetClanChatMemberCount {steamIDClan}");
             return 0;
         }
-
 
         public int GetClanChatMessage(ulong steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, int peChatEntryType, ref ulong psteamidChatter)
         {
@@ -241,13 +234,11 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-
         public int GetClanCount()
         {
             Write($"GetClanCount");
             return 0;
         }
-
 
         public string GetClanName(ulong steamIDClan)
         {
@@ -255,13 +246,11 @@ namespace SKYNET.Steamworks.Implementation
             return "";
         }
 
-
         public CSteamID GetClanOfficerByIndex(ulong steamIDClan, int iOfficer)
         {
             Write($"GetClanOfficerByIndex {steamIDClan}");
             return (CSteamID)0;
         }
-
 
         public int GetClanOfficerCount(ulong steamIDClan)
         {
@@ -269,13 +258,11 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-
         public CSteamID GetClanOwner(ulong steamIDClan)
         {
             Write($"GetClanOwner {steamIDClan}");
             return (CSteamID)0;
         }
-
 
         public string GetClanTag(ulong steamIDClan)
         {
@@ -283,13 +270,11 @@ namespace SKYNET.Steamworks.Implementation
             return "";
         }
 
-
         public CSteamID GetCoplayFriend(int iCoplayFriend)
         {
             Write($"GetCoplayFriend {iCoplayFriend}");
             return (CSteamID)0;
         }
-
 
         public int GetCoplayFriendCount()
         {
@@ -354,14 +339,6 @@ namespace SKYNET.Steamworks.Implementation
             return Result;
         }
 
-        //static bool ok_friend_flags(int iFriendFlags)
-        //{
-        //    if (iFriendFlags & (int)EFriendFlags.k_EFriendFlagImmediate)
-        //        return true;
-
-        //    return false;
-        //}
-
         public int GetFriendCountFromSource(ulong steamIDSource)
         {
             Write($"GetFriendCountFromSource {steamIDSource}");
@@ -378,6 +355,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"GetFriendGamePlayed {(CSteamID)steamIDFriend}");
 
+            bool Result = false;
             FriendGameInfo_t pFriendGameInfo = Marshal.PtrToStructure<FriendGameInfo_t>(ptrFriendGameInfo);
 
             if (steamIDFriend == (ulong)SteamEmulator.SteamId)
@@ -388,21 +366,24 @@ namespace SKYNET.Steamworks.Implementation
             }
             else
             {
-                var friend = Users.Find(f => f.AccountId == (uint)steamIDFriend);
+                var friend = Users.Find(f => f.AccountId == steamIDFriend.GetAccountID());
                 if (friend == null)
                 {
                     pFriendGameInfo.GameID = 0;
                     pFriendGameInfo.GameIP = 0;
                     pFriendGameInfo.GamePort = 0;
-                    return false;
+                    Result = true;
                 }
-                pFriendGameInfo.GameID = friend.GameId;
-                pFriendGameInfo.GameIP = 0;
-                pFriendGameInfo.GamePort = 0;
+                else
+                {
+                    pFriendGameInfo.GameID = friend.GameId;
+                    pFriendGameInfo.GameIP = 0;
+                    pFriendGameInfo.GamePort = 0;
+                }
             }
 
             Marshal.StructureToPtr(pFriendGameInfo, ptrFriendGameInfo, false);
-            return true;
+            return Result;
         }
 
         public int GetFriendMessage(ulong steamIDFriend, int iMessageID, IntPtr pvData, int cubData, ref int peChatEntryType)
@@ -740,18 +721,17 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"SetPersonaName {pchPersonaName}");
             SteamAPICall_t APICall = k_uAPICallInvalid;
-            MutexHelper.Wait("SetPersonaName", delegate
-            {
-                SetPersonaNameResponse_t data = new SetPersonaNameResponse_t();
-                data.Success = true;
-                data.LocalSuccess = true;
-                data.Result = EResult.k_EResultOK;
 
-                SteamEmulator.PersonaName = pchPersonaName;
+            SetPersonaNameResponse_t data = new SetPersonaNameResponse_t();
+            data.Success = true;
+            data.LocalSuccess = true;
+            data.Result = EResult.k_EResultOK;
 
-                APICall = CallbackManager.AddCallbackResult(data);
-                ReportUserChanged((ulong)SteamEmulator.SteamId, EPersonaChange.k_EPersonaChangeName);
-            });
+            SteamEmulator.PersonaName = pchPersonaName;
+
+            APICall = CallbackManager.AddCallbackResult(data);
+            ReportUserChanged((ulong)SteamEmulator.SteamId, EPersonaChange.k_EPersonaChangeName);
+
             return APICall;
         }
 
@@ -828,7 +808,7 @@ namespace SKYNET.Steamworks.Implementation
                     HasFriend = true
                 };
                 Users.Add(user);
-                Write($"Added user {personaName}, {steamID}, from {senderAddress}");
+                Write($"Added user {personaName} {steamID}, from {senderAddress}");
             }
             else
             {

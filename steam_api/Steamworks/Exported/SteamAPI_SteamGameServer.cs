@@ -74,7 +74,7 @@ namespace SKYNET.Steamworks.Exported
 
         private static void Write(string msg)
         {
-            SteamEmulator.Write("SteamAPI_SteamGameServer", msg);
+            SteamEmulator.Write("", msg);
         }
     }
 }

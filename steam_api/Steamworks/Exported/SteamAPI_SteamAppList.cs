@@ -12,7 +12,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int SteamAPI_ISteamAppList_GetAppBuildId(uint nAppID)
         {
-            Write("Steam_AppList::GetAppBuildId");
+            Write("SteamAPI_ISteamAppList_GetAppBuildId");
             return SteamEmulator.SteamAppList.GetAppBuildId(nAppID);
         }
 
@@ -46,7 +46,7 @@ namespace SKYNET.Steamworks.Exported
 
         private static void Write(string msg)
         {
-            SteamEmulator.Write("SteamAPI_SteamAppList", msg);
+            SteamEmulator.Write("", msg);
         }
     }
 }

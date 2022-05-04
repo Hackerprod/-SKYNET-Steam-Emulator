@@ -114,7 +114,7 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamInput.StopAnalogActionMomentum(inputHandle, eAction);
         }
 
-        public InputMotionData_t GetMotionData(IntPtr _, InputHandle_t inputHandle)
+        public IntPtr GetMotionData(IntPtr _, InputHandle_t inputHandle)
         {
             return SteamEmulator.SteamInput.GetMotionData(inputHandle);
         }

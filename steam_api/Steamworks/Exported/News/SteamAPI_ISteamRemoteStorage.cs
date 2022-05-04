@@ -12,7 +12,7 @@ using SteamAPICall_t = System.UInt64;
 using UGCFileWriteStreamHandle_t = System.UInt64;
 using UGCHandle_t = System.UInt64;
 using PublishedFileUpdateHandle_t = System.UInt64;
-
+using SKYNET.Managers;
 
 namespace SKYNET.Steamworks.Exported
 {
@@ -159,10 +159,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamRemoteStorage_GetQuota(IntPtr _, int pnTotalBytes, int puAvailableBytes)
+        public static bool SteamAPI_ISteamRemoteStorage_GetQuota(IntPtr _, ref ulong pnTotalBytes, ref ulong puAvailableBytes)
         {
             Write("SteamAPI_ISteamRemoteStorage_GetQuota");
-            return SteamEmulator.SteamRemoteStorage.GetQuota(pnTotalBytes, puAvailableBytes);
+            return SteamEmulator.SteamRemoteStorage.GetQuota(ref pnTotalBytes, ref puAvailableBytes);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -403,9 +403,16 @@ namespace SKYNET.Steamworks.Exported
             return SteamEmulator.SteamRemoteStorage.UGCDownloadToLocation(hContent, pchLocation, unPriority);
         }
 
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamRemoteStorage_v014()
+        {
+            Write("SteamAPI_SteamRemoteStorage_v014");
+            return InterfaceManager.FindOrCreateInterface("STEAMREMOTESTORAGE_INTERFACE_VERSION014");
+        }
+
         private static void Write(string msg)
         {
-            SteamEmulator.Write("SteamAPI_ISteamRemoteStorage", msg);
+            SteamEmulator.Write("", msg);
         }
     }
 }

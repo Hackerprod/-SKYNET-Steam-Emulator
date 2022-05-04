@@ -105,7 +105,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public uint GetNumItemsWithPrices(IntPtr self)
+        public uint GetNumItemsWithPrices()
         {
             Write($"GetNumItemsWithPrices");
             return 0;
@@ -147,7 +147,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool LoadItemDefinitions(IntPtr self)
+        public bool LoadItemDefinitions()
         {
             Write($"LoadItemDefinitions");
             return false;
@@ -165,7 +165,7 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public ulong RequestPrices(IntPtr self)
+        public ulong RequestPrices()
         {
             Write($"RequestPrices");
             return 0;

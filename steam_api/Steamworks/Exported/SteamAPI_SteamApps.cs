@@ -223,7 +223,7 @@ namespace SKYNET.Steamworks.Exported
 
         private static void Write(string msg)
         {
-            SteamEmulator.Write("SteamAPI_SteamAppList", msg);
+            SteamEmulator.Write("", msg);
         }
     }
 }
