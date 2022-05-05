@@ -66,8 +66,8 @@ namespace SKYNET.Steamworks.Exported
 
                 Write(callMessage);
 
-                CallbackManager.RegisterCallback(sCallback);
-                //CallbackWrapper.RegisterCallback(pCallback, iCallback);
+                //CallbackManager.RegisterCallback(sCallback);
+                CallbackWrapper.RegisterCallback(pCallback, iCallback);
             }
             catch (Exception ex)
             {

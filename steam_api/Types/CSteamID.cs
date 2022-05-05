@@ -15,9 +15,9 @@ namespace Steamworks
     public class CSteamID : IEquatable<CSteamID>, IComparable<CSteamID>
     {
         public ulong SteamID;
-        public uint AccountId;
-        public byte Universe;
-        public byte AccountType;
+        public uint  AccountId;
+        public byte  Universe;
+        public byte  AccountType;
 
         public CSteamID()
         {
@@ -41,6 +41,7 @@ namespace Steamworks
 
             int instance = (AccountType == (byte)EAccountType.k_EAccountTypeClan || AccountType == (byte)EAccountType.k_EAccountTypeGameServer) ? 0 : 1;
 
+            this.SteamID = 0;
             this.SteamID = (SteamID & ~(0xFFFFFFFFul << (ushort)0)) | (((ulong)(AccountId) & 0xFFFFFFFFul) << (ushort)0);
             this.SteamID = (SteamID & ~(0xFFul << (ushort)56)) | (((ulong)(Universe) & 0xFFul) << (ushort)56);
             this.SteamID = (SteamID & ~(0xFul << (ushort)52)) | (((ulong)(AccountType) & 0xFul) << (ushort)52);
@@ -63,6 +64,7 @@ namespace Steamworks
 
             int instance = (_AccountType == EAccountType.k_EAccountTypeClan || _AccountType == EAccountType.k_EAccountTypeGameServer) ? 0 : 1;
 
+            this.SteamID = 0;
             this.SteamID = (SteamID & ~(0xFFFFFFFFul << (ushort)0)) | (((ulong)(_accountId) & 0xFFFFFFFFul) << (ushort)0);
             this.SteamID = (SteamID & ~(0xFFul << (ushort)56)) | (((ulong)(_Universe) & 0xFFul) << (ushort)56);
             this.SteamID = (SteamID & ~(0xFul << (ushort)52)) | (((ulong)(_AccountType) & 0xFul) << (ushort)52);
@@ -94,26 +96,6 @@ namespace Steamworks
         {
             return !(x == y);
         }
-
-        #region IEquatable ulong
-
-
-        public static bool operator ==(CSteamID x, ulong y)
-        {
-            return x.SteamID == y;
-        }
-
-        public static bool operator !=(CSteamID x, ulong y)
-        {
-            return !(x.SteamID == y);
-        }
-
-        public bool Equals(ulong other)
-        {
-            return this.SteamID == other;
-        }
-
-        #endregion
 
         public static explicit operator CSteamID(ulong value)
         {

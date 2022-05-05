@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 
 using SteamAPICall_t = System.UInt64;
 using FriendsGroupID_t = System.UInt16;
+using SKYNET.Overlay;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -50,6 +51,9 @@ namespace SKYNET.Steamworks.Implementation
             try
             {
                 string fileName = Path.Combine(modCommon.GetPath(), "SKYNET", "Avatar.jpg");
+                if (!File.Exists(fileName))
+                    fileName = Path.Combine(modCommon.GetPath(), "SKYNET", "Avatar.png");
+
                 Bitmap Avatar = default;
                 if (File.Exists(fileName))
                 {
@@ -161,14 +165,40 @@ namespace SKYNET.Steamworks.Implementation
 
             switch (friendsGroupID)
             {
+                case "steamid":
+                    // Opens the overlay web browser to the specified user or groups profile.
+                    break;
+                case "chat":
+                    // Opens a chat window to the specified user, or joins the group chat.
+                    break;
+                case "jointrade":
+                    // Opens a window to a Steam Trading session that was started with the ISteamEconomy / StartTrade Web API.
+                    break;
+                case "stats":
+                    // Opens the overlay web browser to the specified user's stats.
+                    break;
+                case "achievements":
+                    // Opens the overlay web browser to the specified user's achievements.
+                    break;
                 case "friendadd":
-                    // TODO
+                    // Opens the overlay in minimal mode prompting the user to add the target user as a friend.
                     break;
                 case "friendremove":
+                    // Opens the overlay in minimal mode prompting the user to remove the target friend.
+                    break;
+                case "friendrequestaccept":
+                    // Opens the overlay in minimal mode prompting the user to accept an incoming friend invite.
+                    break;
+                case "friendrequestignore":
+                    // Opens the overlay in minimal mode prompting the user to ignore an incoming friend invite.
                     break;
                 default:
                     break;
             }
+
+            var overlay = new frmOverlay();
+            overlay.ShowDialog();
+
         }
 
         public void ActivateGameOverlayToWebPage(string pchURL, int eMode)

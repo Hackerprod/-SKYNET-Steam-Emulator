@@ -31,6 +31,7 @@ namespace SKYNET.Managers
 
         public static void RegisterCallback(SteamCallback sCallback)
         {
+            return;
             if (sCallback.SteamAPICall == (ulong)new SteamAPICallCompleted_t().CallbackType)
             {
                 Write("Completeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeed");
@@ -54,6 +55,7 @@ namespace SKYNET.Managers
 
         public static void RegisterCallResult(SteamCallback steamCallback)
         {
+            return;
             Write($"RegisterCallResult: Processing callback {steamCallback.SteamAPICall}");
 
             MutexHelper.Wait("RegisterCallResult", delegate
@@ -74,8 +76,6 @@ namespace SKYNET.Managers
                             Write($"RegisterCallResult: Creating new SteamCallbacks with key {callType}");
                             SteamCallbacks.TryAdd(callType, steamCallback);
                         }
-
-                        RunCallbacks();
                     });
 
                 }
@@ -88,6 +88,7 @@ namespace SKYNET.Managers
 
         public static void RunCallbacks()
         {
+            return;
             MutexHelper.Wait("SteamAPICalls", delegate
             {
                 foreach (var KV in SteamAPICalls)
@@ -120,6 +121,7 @@ namespace SKYNET.Managers
 
         public static SteamAPICall_t AddCallbackResult(ICallbackData data)
         {
+            return 0;
             //IntPtr result = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(ICallbackData)));
             //Marshal.StructureToPtr(data, result, false);
             //return CallbackWrapper.AddCallbackResult((int)data.CallbackType, result, data.DataSize);
@@ -151,8 +153,6 @@ namespace SKYNET.Managers
     {
         public const byte k_ECallbackFlagsRegistered = 1;
         public const byte k_ECallbackFlagsGameServer = 2;
-
-        private static Dictionary<SteamAPICall_t, ICallbackData> results;
 
         public CallbackType CallbackType { get; set; }
         public CallbackType BaseType { get { return ((int)CallbackType).GetCallbackType(); } }
@@ -193,15 +193,20 @@ namespace SKYNET.Managers
 
         public SteamCallback(IntPtr _pointer, bool hasResult = false)
         {
-            Pointer = _pointer;
-            CallbackBase = _pointer.ToType<CCallbackBase>();
-            Created = DateTime.Now;
-            results = new Dictionary<SteamAPICall_t, ICallbackData>();
-            HasResult = hasResult;
+            try
+            {
+                Pointer = _pointer;
+                CallbackBase = _pointer.ToType<CCallbackBase>();
+                Created = DateTime.Now;
+                HasResult = hasResult;
 
-            CCallResult cResult = CallbackBase.m_vfptr.ToType<CCallResult>();
-            m_RunCallback = Marshal.GetDelegateForFunctionPointer<RunCBDel>(cResult.m_RunCallback);
-            m_RunCallResult = Marshal.GetDelegateForFunctionPointer<RunCRDel>(cResult.m_RunCallResult);
+                CCallResult cResult = CallbackBase.m_vfptr.ToType<CCallResult>();
+                m_RunCallback = Marshal.GetDelegateForFunctionPointer<RunCBDel>(cResult.m_RunCallback);
+                m_RunCallResult = Marshal.GetDelegateForFunctionPointer<RunCRDel>(cResult.m_RunCallResult);
+            }
+            catch 
+            {
+            }
         }
 
         public SteamCallback(IntPtr _pointer, int iCallback, bool hasResult = false)
@@ -211,7 +216,6 @@ namespace SKYNET.Managers
             CallbackBase.m_iCallback = iCallback;
             CallbackType = (CallbackType)iCallback;
             Created = DateTime.Now;
-            results = new Dictionary<SteamAPICall_t, ICallbackData>();
             HasResult = hasResult;
 
             CCallResult cResult = CallbackBase.m_vfptr.ToType<CCallResult>();
