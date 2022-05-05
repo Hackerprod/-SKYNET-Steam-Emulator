@@ -23,7 +23,14 @@ namespace SKYNET.Callback
         {
             SteamEmulator.Write("Unju", "RegisterCallback");
             ThreadPool.QueueUserWorkItem(VerifyExists);
-            SKYNET_RegisterCallback(pCallback, iCallback);
+            object obj = (object)new object[] { pCallback, iCallback };
+            ThreadPool.QueueUserWorkItem(Register, obj);
+        }
+
+        private static void Register(object state)
+        {
+            object[] obj = (object[])state;
+            SKYNET_RegisterCallback((IntPtr)obj[0], (int)obj[1]);
         }
 
         public static void RegisterCallResult(IntPtr pCallback, SteamAPICall_t hAPICall)
