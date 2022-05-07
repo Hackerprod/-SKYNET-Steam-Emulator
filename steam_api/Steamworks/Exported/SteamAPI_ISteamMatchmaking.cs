@@ -6,7 +6,7 @@ using System.Text;
 using System.Windows.Forms;
 using SKYNET;
 using SKYNET.Steamworks;
-using Steamworks;
+
 
 using SteamAPICall_t = System.UInt64;
 
@@ -169,7 +169,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamMatchmaking_GetLobbyDataByIndex(IntPtr _, ulong steamIDLobby, int iLobbyData, string pchKey, int cchKeyBufferSize, string pchValue, int cchValueBufferSize)
+        public static bool SteamAPI_ISteamMatchmaking_GetLobbyDataByIndex(IntPtr _, ulong steamIDLobby, int iLobbyData, IntPtr pchKey, int cchKeyBufferSize, IntPtr pchValue, int cchValueBufferSize)
         {
             Write("SteamAPI_ISteamMatchmaking_GetLobbyDataByIndex");
             return SteamEmulator.SteamMatchmaking.GetLobbyDataByIndex(steamIDLobby, iLobbyData, pchKey, cchKeyBufferSize, pchValue, cchValueBufferSize);
@@ -260,7 +260,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static CSteamID SteamAPI_ISteamMatchmaking_GetLobbyOwner(IntPtr _, ulong steamIDLobby)
+        public static ulong SteamAPI_ISteamMatchmaking_GetLobbyOwner(IntPtr _, ulong steamIDLobby)
         {
             Write("SteamAPI_ISteamMatchmaking_GetLobbyOwner");
             return SteamEmulator.SteamMatchmaking.GetLobbyOwner(steamIDLobby);

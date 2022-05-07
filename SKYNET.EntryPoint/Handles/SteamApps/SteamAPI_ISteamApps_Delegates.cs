@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using SKYNET;
-using Steamworks;
+
 
 namespace SKYNET.Hook.Handles
 {

@@ -1,16 +1,13 @@
-﻿using SKYNET;
-using SKYNET.Callback;
+﻿using SKYNET.Callback;
 using SKYNET.Helper;
 using SKYNET.Helper.JSON;
 using SKYNET.Managers;
-using SKYNET.Steamworks;
 using SKYNET.Types;
-using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text;
+
 using SteamAPICall_t = System.UInt64;
 using SteamLeaderboard_t = System.UInt64;
 
@@ -283,7 +280,19 @@ namespace SKYNET.Steamworks.Implementation
         public bool GetUserAchievement(ulong steamIDUser, string pchName, bool pbAchieved)
         {
             Write($"GetUserAchievement");
-            return false;
+            bool Result = false;
+            bool Archived = false;
+            MutexHelper.Wait("GetUserAchievement", delegate
+            {
+                var achievement = Achievements.Find(a => a.Name == pchName);
+                if (achievement != null)
+                {
+                    Archived = achievement.Earned;
+                    pbAchieved = false;
+                    Result = true;
+                }
+            });
+            return Result;
         }
 
         public bool GetUserAchievementAndUnlockTime(ulong steamIDUser, string pchName, bool pbAchieved, uint punUnlockTime)

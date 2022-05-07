@@ -1,5 +1,5 @@
 ﻿using SKYNET.Managers;
-using Steamworks;
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,6 +14,7 @@ using SKYNET.Callback;
 using SteamAPICall_t = System.UInt64;
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
+using Steamworks;
 
 namespace SKYNET.Steamworks.Exported
 {
@@ -44,6 +45,8 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public unsafe static void SteamAPI_RegisterCallback(IntPtr pCallback, int iCallback)
         {
+            //CallbackWrapper.RegisterCallback(pCallback, iCallback);
+            //return;
 
             // Check if Steam emulator is not initialized 
             if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
@@ -66,8 +69,7 @@ namespace SKYNET.Steamworks.Exported
 
                 Write(callMessage);
 
-                //CallbackManager.RegisterCallback(sCallback);
-                CallbackWrapper.RegisterCallback(pCallback, iCallback);
+                CallbackManager.RegisterCallback(sCallback);
             }
             catch (Exception ex)
             {
@@ -87,9 +89,12 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_RegisterCallResult(IntPtr pCallback, SteamAPICall_t hAPICall)
         {
+            //CallbackWrapper.RegisterCallResult(pCallback, hAPICall);
+            //return;
+
             try
             {
-                var callMessage = $"SteamAPI_RegisterCallback: ";
+                var callMessage = $"SteamAPI_RegisterCallResult: ";
 
                 SteamCallback sCallback = new SteamCallback(pCallback, true);
                 sCallback.SteamAPICall = hAPICall;
@@ -97,14 +102,11 @@ namespace SKYNET.Steamworks.Exported
                 var isGameServer = sCallback.HasGameserver ? "[ GAMESERVER ]" : "[   CLIENT   ]";
                 var space = (int)sCallback.CallbackType < 1000 ? " " : "";
 
-                callMessage += $"{isGameServer}  {(int)sCallback.CallbackType} {space} {sCallback.BaseType} {sCallback.CallbackType}";
+                callMessage += $"{isGameServer}  {hAPICall}  {(int)sCallback.CallbackType} {space} {sCallback.BaseType} {sCallback.CallbackType}";
 
                 Write(callMessage);
 
-                Write($"SteamAPI_RegisterCallResult SteamAPICall_t: {hAPICall} | Callback.m_iCallback {sCallback.CallbackBase.m_iCallback}");
-
                 CallbackManager.RegisterCallResult(sCallback);
-                //CallbackWrapper.RegisterCallResult(pCallback, hAPICall);
             }
             catch (Exception ex)
             {
@@ -115,10 +117,11 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_UnregisterCallback(IntPtr pCallback)
         {
+            //CallbackWrapper.UnregisterCallback(pCallback);
+            //return;
             SteamCallback sCallback = new SteamCallback(pCallback);
             Write($"SteamAPI_UnregisterCallback {sCallback.CallbackType}");
             CallbackManager.UnregisterCallback(pCallback);
-            //CallbackWrapper.UnregisterCallback(pCallback);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

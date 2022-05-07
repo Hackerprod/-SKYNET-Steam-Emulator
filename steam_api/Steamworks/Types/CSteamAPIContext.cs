@@ -220,6 +220,6 @@ namespace SKYNET.Types
     }
 
     [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-    public delegate void pFn(IntPtr ctx);
+    public delegate void pFnDelegate(IntPtr ctx);
 
 }

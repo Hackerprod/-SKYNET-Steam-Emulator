@@ -5,14 +5,13 @@ using System.Runtime.InteropServices;
 using System.Text;
 using SKYNET;
 using SKYNET.Managers;
-using Steamworks;
 
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
 
 namespace SKYNET.Steamworks.Exported
 {
-    public class SteamAPI_SteamClient
+    public class SteamAPI_ISteamClient
     {
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int SteamAPI_ISteamClient_CreateSteamPipe(IntPtr _)
@@ -175,6 +174,13 @@ namespace SKYNET.Steamworks.Exported
         {
             Write($"SteamAPI_ISteamClient_GetIPCCallCount");
             return SteamEmulator.SteamClient.GetIPCCallCount();
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamClient_SetWarningMessageHook(IntPtr _, IntPtr pFunctionPtr)
+        {
+            Write($"SteamAPI_ISteamClient_SetWarningMessageHook");
+            SteamEmulator.SteamClient.SetWarningMessageHook(pFunctionPtr);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

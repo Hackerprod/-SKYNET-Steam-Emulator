@@ -1,5 +1,6 @@
 ﻿using SKYNET.Callback;
-using Steamworks;
+using SKYNET.Steamworks;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,6 +47,11 @@ namespace SKYNET.Helper
         public static byte[] GetBytes(this string @string)
         {
             return Encoding.Default.GetBytes(@string);
+        }
+
+        public static byte[] GetBytesFromBase64String(this string @string)
+        {
+            return Convert.FromBase64String(@string);
         }
 
         public static CallbackType GetCallbackType(this int iCallback)

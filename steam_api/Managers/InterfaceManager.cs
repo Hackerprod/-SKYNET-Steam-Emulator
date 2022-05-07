@@ -134,6 +134,10 @@ namespace SKYNET.Managers
             //{
             //    return true;
             //}
+            if (pszVersion.StartsWith("SteamNetworkingUtils"))
+            {
+                return true;
+            }
             //if (pszVersion.StartsWith("SteamNetworking"))
             //{
             //    return true;

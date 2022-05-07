@@ -4,19 +4,19 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 using SKYNET.Callback;
 using SKYNET.Helper;
 using SKYNET.Managers;
 using SKYNET.Properties;
 using SKYNET.Types;
-using Steamworks;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
+using SKYNET.Overlay;
 
 using SteamAPICall_t = System.UInt64;
 using FriendsGroupID_t = System.UInt16;
-using SKYNET.Overlay;
+using SKYNET.Network.Packets;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -113,7 +113,7 @@ namespace SKYNET.Steamworks.Implementation
                 AccountId = 1003,
                 GameId = 570,
                 HasFriend = true,
-                PersonaName = "Yusniel",
+                PersonaName = "BrolySSL",
                 SteamId = (ulong)new CSteamID(1003),
                 IPAddress = "10.31.0.3"
             });
@@ -355,7 +355,6 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetFriendCount(int iFriendFlags)
         {
-            SteamEmulator.Debug($"GetFriendCount Flags {iFriendFlags} - {(int)EFriendFlags.k_EFriendFlagImmediate} | {iFriendFlags & (int)EFriendFlags.k_EFriendFlagImmediate}");
             int Result = 0;
             if ((iFriendFlags & (int)EFriendFlags.k_EFriendFlagImmediate) == (int)EFriendFlags.k_EFriendFlagImmediate)
             {
@@ -753,14 +752,20 @@ namespace SKYNET.Steamworks.Implementation
             SteamAPICall_t APICall = k_uAPICallInvalid;
 
             SetPersonaNameResponse_t data = new SetPersonaNameResponse_t();
-            data.Success = true;
-            data.LocalSuccess = true;
-            data.Result = EResult.k_EResultOK;
-
-            SteamEmulator.PersonaName = pchPersonaName;
+            data.m_bSuccess = true;
+            data.m_bLocalSuccess = true;
+            data.m_result = EResult.k_EResultOK;
 
             APICall = CallbackManager.AddCallbackResult(data);
             ReportUserChanged((ulong)SteamEmulator.SteamId, EPersonaChange.k_EPersonaChangeName);
+
+            SteamEmulator.PersonaName = pchPersonaName;
+            var user = Users.Find(f => f.SteamId == (ulong)SteamEmulator.SteamId);
+            if (user != null)
+            {
+                user.PersonaName = pchPersonaName;
+                NetworkManager.BroadcastStatusUpdated(user);
+            }
 
             return APICall;
         }
@@ -794,6 +799,55 @@ namespace SKYNET.Steamworks.Implementation
             }
 
             return true;
+        }
+
+        public void UpdateUserLobby(ulong userSteamId, ulong lobbySteamId)
+        {
+            var user = Users.Find(f => f.SteamId == userSteamId);
+            if (user != null)
+            {
+                user.LobbyId = lobbySteamId;
+                if (userSteamId == (ulong)SteamEmulator.SteamId)
+                {
+                    NetworkManager.BroadcastStatusUpdated(user);
+                }
+            }
+        }
+
+        public void UpdateUserStatus(NET_UserDataUpdated statusChanged, string ipaddress)
+        {
+            var user = Users.Find(f => f.AccountId == statusChanged.AccountID);
+            if (user != null)
+            {
+                user.LobbyId = statusChanged.LobbyID;
+                if (user.PersonaName != statusChanged.PersonaName)
+                {
+                    user.PersonaName = statusChanged.PersonaName;
+                    ReportUserChanged(user.SteamId, EPersonaChange.k_EPersonaChangeName);
+                }
+                if (user.LobbyId != statusChanged.LobbyID)
+                {
+                    user.LobbyId = statusChanged.LobbyID;
+                    // TODO: Update in SteamMatchmaking
+                }
+            }
+            else
+            {
+                user = new Types.SteamUser()
+                {
+                    AccountId = statusChanged.AccountID,
+                    SteamId = (ulong)new CSteamID(statusChanged.AccountID),
+                    HasFriend = true,
+                    PersonaName = statusChanged.PersonaName,
+                    IPAddress = ipaddress
+                };
+                Users.Add(user);
+            }
+        }
+
+        public Types.SteamUser GetUser(ulong steamID)
+        {
+            return Users.Find(u => u.SteamId == steamID);
         }
 
         public byte[] GetAvatar(ulong steamID)

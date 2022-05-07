@@ -1,7 +1,6 @@
 ﻿using SKYNET.Helper;
 using SKYNET.Steamworks;
 using SKYNET.Types;
-using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -467,10 +466,10 @@ namespace SKYNET.Callback
     internal struct SetPersonaNameResponse_t : ICallbackData
     {
         [MarshalAs(UnmanagedType.I1)]
-        internal bool Success; // m_bSuccess bool
+        internal bool m_bSuccess; // m_bSuccess bool
         [MarshalAs(UnmanagedType.I1)]
-        internal bool LocalSuccess; // m_bLocalSuccess bool
-        internal EResult Result; // m_result EResult
+        internal bool m_bLocalSuccess; // m_bLocalSuccess bool
+        internal EResult m_result; // m_result EResult
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SetPersonaNameResponse_t));
@@ -636,11 +635,11 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct LobbyEnter_t : ICallbackData
     {
-        internal ulong SteamIDLobby; // m_ulSteamIDLobby uint64
-        internal uint GfChatPermissions; // m_rgfChatPermissions uint32
+        internal ulong m_ulSteamIDLobby; // m_ulSteamIDLobby uint64
+        internal uint m_rgfChatPermissions; // m_rgfChatPermissions uint32
         [MarshalAs(UnmanagedType.I1)]
-        internal bool Locked; // m_bLocked bool
-        internal uint EChatRoomEnterResponse; // m_EChatRoomEnterResponse uint32
+        internal bool m_bLocked; // m_bLocked bool
+        internal uint m_EChatRoomEnterResponse; // m_EChatRoomEnterResponse uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(LobbyEnter_t));
@@ -652,9 +651,9 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct LobbyDataUpdate_t : ICallbackData
     {
-        internal ulong SteamIDLobby; // m_ulSteamIDLobby uint64
-        internal ulong SteamIDMember; // m_ulSteamIDMember uint64
-        internal byte Success; // m_bSuccess uint8
+        internal ulong m_ulSteamIDLobby; // m_ulSteamIDLobby uint64
+        internal ulong m_ulSteamIDMember; // m_ulSteamIDMember uint64
+        internal byte m_bSuccess; // m_bSuccess uint8
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(LobbyDataUpdate_t));
@@ -711,7 +710,7 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct LobbyMatchList_t : ICallbackData
     {
-        internal uint LobbiesMatching; // m_nLobbiesMatching uint32
+        internal uint m_nLobbiesMatching; // m_nLobbiesMatching uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(LobbyMatchList_t));
@@ -737,8 +736,8 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct LobbyCreated_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
-        internal ulong SteamIDLobby; // m_ulSteamIDLobby uint64
+        internal EResult m_eResult; // m_eResult EResult
+        internal ulong m_ulSteamIDLobby; // m_ulSteamIDLobby uint64
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(LobbyCreated_t));

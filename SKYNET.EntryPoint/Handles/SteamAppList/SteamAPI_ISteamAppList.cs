@@ -3,7 +3,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using SKYNET;
 using SKYNET.Helpers;
-using Steamworks;
+
 
 namespace SKYNET.Hook.Handles
 {

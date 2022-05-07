@@ -1,5 +1,5 @@
 using SKYNET.Steamworks;
-using Steamworks;
+
 using System;
 
 using SteamAPICall_t = System.UInt64;
@@ -10,6 +10,7 @@ using UGCUpdateHandle_t = System.UInt64;
 namespace SKYNET.Interface
 {
     [Interface("STEAMUGC_INTERFACE_VERSION010")]
+    [Interface("STEAMUGC_INTERFACE_VERSION012")]
     [Interface("STEAMUGC_INTERFACE_VERSION014")]
     public class SteamUGC014 : ISteamInterface
     {

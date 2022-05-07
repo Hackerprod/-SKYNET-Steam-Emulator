@@ -2,20 +2,15 @@
 using SKYNET.Helper.JSON;
 using SKYNET.Network;
 using SKYNET.Network.Packets;
-using SKYNET.Steamworks.Implementation;
-using Steamworks;
+using SKYNET.Steamworks;
+using SKYNET.Types;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection.Emit;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Web.Script.Serialization;
 
 namespace SKYNET.Managers
 {
@@ -26,8 +21,8 @@ namespace SKYNET.Managers
             TCPServer tcpServer = new TCPServer();
             tcpServer.OnDataReceived += Network_OnDataReceived;
             tcpServer.OnConnected += TcpServer_OnConnected;
-            ThreadPool.QueueUserWorkItem(tcpServer.Start);
 
+            ThreadPool.QueueUserWorkItem(tcpServer.Start);
             ThreadPool.QueueUserWorkItem(BroadcastAnnounce);
         }
 
@@ -56,6 +51,12 @@ namespace SKYNET.Managers
                 case MessageType.NET_AvatarRequest:
                 case MessageType.NET_AvatarResponse:
                     ProcessAvatar(message, socket);
+                    break;
+                case MessageType.NET_UserDataUpdated:
+                    ProcessUserStatusChanged(message, socket);
+                    break;
+                case MessageType.NET_P2PMessage:
+                    ProcessP2PMessage(message, socket);
                     break;
                 default:
                     break;
@@ -150,10 +151,104 @@ namespace SKYNET.Managers
             }
         }
 
+        private static void ProcessUserStatusChanged(NetworkMessage message, Socket socket)
+        {
+            NET_UserDataUpdated StatusChanged = message.ParsedBody.FromJson<NET_UserDataUpdated>();
+
+            if (StatusChanged != null)
+            {
+                if (StatusChanged.AccountID == SteamEmulator.SteamId.AccountId) return;
+                string ipaddress = "";
+                try { ipaddress = ((IPEndPoint)socket.RemoteEndPoint).Address.ToString(); } catch { }
+                SteamEmulator.SteamFriends.UpdateUserStatus(StatusChanged, ipaddress);
+            }
+
+            Write($"Closing connection after received {(MessageType)message.MessageType} message");
+            socket.Close();
+            socket.Dispose();
+        }
+
+        private static void ProcessP2PMessage(NetworkMessage message, Socket socket)
+        {
+            NET_P2PMessage p2p = message.ParsedBody.FromJson<NET_P2PMessage>();
+
+            if (p2p != null && p2p.AccountID == SteamEmulator.SteamId.AccountId)
+            {
+                byte[] bytes = Convert.FromBase64String(p2p.Buffer);
+                SteamEmulator.SteamNetworking.P2PIncoming.Add(p2p);
+            }
+
+            Write($"Closing connection after received {(MessageType)message.MessageType} message");
+            socket.Close();
+            socket.Dispose();
+        }
+
         #endregion
 
-        private static void BroadcastAnnounce(object state)
+        public static void BroadcastStatusUpdated(SteamUser user)
         {
+            NET_UserDataUpdated status = new NET_UserDataUpdated()
+            {
+                PersonaName = user.PersonaName,
+                AccountID = SteamEmulator.SteamId.AccountId,
+                LobbyID = user.LobbyId.GetAccountID()
+            };
+
+            NetworkMessage message = new NetworkMessage()
+            {
+                MessageType = (int)MessageType.NET_UserDataUpdated,
+                ParsedBody = status.ToJson()
+            };
+
+            ThreadPool.QueueUserWorkItem(SendBroadcast, message);
+        }
+
+        public static void SendP2PTo(ulong steamIDRemote, byte[] bytes, int eP2PSendType, int nChannel)
+        {
+            try
+            {
+                NET_P2PMessage p2p = new NET_P2PMessage()
+                {
+                    AccountID = steamIDRemote.GetAccountID(),
+                    Buffer = Convert.ToBase64String(bytes),
+                    IDRemote = SteamEmulator.SteamId.AccountId,
+                    P2PSendType = eP2PSendType,
+                    Channel = nChannel
+                };
+
+                NetworkMessage message = new NetworkMessage()
+                {
+                    MessageType = (int)MessageType.NET_P2PMessage,
+                    ParsedBody = p2p.ToJson()
+                };
+
+                var user = SteamEmulator.SteamFriends.GetUser(steamIDRemote);
+                if (user == null)
+                    ThreadPool.QueueUserWorkItem(SendBroadcast, message);
+
+                if (IPAddress.TryParse(user.IPAddress, out _))
+                {
+                    try
+                    {
+                        Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                        SocketData SocketData = new SocketData() { socket = socket, Message = message };
+                        socket.BeginConnect(user.IPAddress, 28880, ConnectionCallback, SocketData);
+                    }
+                    catch 
+                    {
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Write(ex.Message + " " + ex.StackTrace);
+            }
+        }
+
+        private static void SendBroadcast(object state)
+        {
+            NetworkMessage message = (NetworkMessage)state;
+
             foreach (var item in GetIPAddresses())
             {
                 var Addressess = GetIPAddressRange(item);
@@ -162,7 +257,37 @@ namespace SKYNET.Managers
                     try
                     {
                         Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                        socket.BeginConnect(Address, 28880, AnnounceCallback, socket);
+                        SocketData SocketData = new SocketData() { socket = socket, Message = message };
+                        socket.BeginConnect(Address, 28880, ConnectionCallback, SocketData);
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+        }
+
+
+        private static void BroadcastAnnounce(object state)
+        {
+            NET_Announce announce = new NET_Announce()
+            {
+                PersonaName = SteamEmulator.PersonaName,
+                AccountID = SteamEmulator.SteamId.AccountId
+            };
+
+            NetworkMessage message = CreateNetworkMessage(announce, MessageType.NET_Announce);
+
+            foreach (var item in GetIPAddresses())
+            {
+                var Addressess = GetIPAddressRange(item);
+                foreach (var Address in Addressess)
+                {
+                    try
+                    {
+                        Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                        SocketData SocketData = new SocketData() { socket = socket, Message = message };
+                        socket.BeginConnect(Address, 28880, ConnectionCallback, SocketData);
                     }
                     catch
                     {
@@ -173,10 +298,17 @@ namespace SKYNET.Managers
 
         public static void RequestAvatar(string IP)
         {
+            NetworkMessage message = new NetworkMessage()
+            {
+                MessageType = (int)MessageType.NET_AvatarRequest,
+                ParsedBody = ""
+            };
+
             try
             {
                 Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                socket.BeginConnect(IP, 28880, AvatarCallback, socket);
+                SocketData SocketData = new SocketData() { socket = socket, Message = message };
+                socket.BeginConnect(IP, 28880, ConnectionCallback, SocketData);
             }
             catch
             {
@@ -185,55 +317,18 @@ namespace SKYNET.Managers
 
         #region Conection callback
 
-        private static void AvatarCallback(IAsyncResult ar)
+        private static void ConnectionCallback(IAsyncResult ar)
         {
             try
             {
-                Socket socket = ((Socket)ar.AsyncState);
-                socket.EndConnect(ar);
+                SocketData SocketData = ((SocketData)ar.AsyncState);
+                SocketData.socket.EndConnect(ar);
 
-                NetworkMessage message = new NetworkMessage()
-                {
-                    MessageType = (int)MessageType.NET_AvatarRequest,
-                    ParsedBody = ""
-                };
-                string json = message.ToJson();
+                string json = SocketData.Message.ToJson();
                 byte[] bytes = Encoding.Default.GetBytes(json);
-                socket.Send(bytes);
+                SocketData.socket.Send(bytes);
 
-                ClientSocket client = new ClientSocket(socket);
-                client.OnDataReceived += Network_OnDataReceived;
-                client.BeginReceiving();
-            }
-            catch
-            {
-            }
-        }
-
-        private static void AnnounceCallback(IAsyncResult ar)
-        {
-            try
-            {
-                Socket socket = ((Socket)ar.AsyncState);
-                socket.EndConnect(ar);
-
-                NET_Announce announce = new NET_Announce()
-                {
-                    PersonaName = SteamEmulator.PersonaName,
-                    AccountID = SteamEmulator.SteamId.AccountId
-                };
-
-                NetworkMessage message = new NetworkMessage()
-                {
-                    MessageType = (int)MessageType.NET_Announce,
-                    ParsedBody = announce.ToJson()
-                };
-
-                string json = message.ToJson();
-                byte[] bytes = Encoding.Default.GetBytes(json);
-                socket.Send(bytes);
-
-                ClientSocket client = new ClientSocket(socket);
+                ClientSocket client = new ClientSocket(SocketData.socket);
                 client.OnDataReceived += Network_OnDataReceived;
                 client.BeginReceiving();
             }
@@ -243,6 +338,16 @@ namespace SKYNET.Managers
         }
 
         #endregion
+
+        private static NetworkMessage CreateNetworkMessage(NET_Base Base, MessageType type)
+        {
+            NetworkMessage message = new NetworkMessage()
+            {
+                MessageType = (int)type,
+                ParsedBody = Base.ToJson()
+            };
+            return message;
+        }
 
         private static void Write(object msg)
         {
@@ -282,6 +387,13 @@ namespace SKYNET.Managers
             return iPAddress;
         }
 
+        public static uint GetIPAddress(IPAddress ipAddr)
+        {
+            byte[] addressBytes = ipAddr.GetAddressBytes();
+            Array.Reverse(addressBytes);
+            return BitConverter.ToUInt32(addressBytes, 0);
+        }
+
         private static List<string> GetIPAddressRange(IPAddress address)
         {
             List<string> rangeAddr = new List<string>();
@@ -291,6 +403,12 @@ namespace SKYNET.Managers
                 rangeAddr.Add($"{ipParts[0]}.{ipParts[1]}.{ipParts[2]}.{i}");
             }
             return rangeAddr;
+        }
+
+        private class SocketData
+        {
+            public Socket socket { get; set; }
+            public NetworkMessage Message { get; set; }
         }
     }
 }

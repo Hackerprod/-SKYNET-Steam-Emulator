@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Steamworks;
+
 
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;

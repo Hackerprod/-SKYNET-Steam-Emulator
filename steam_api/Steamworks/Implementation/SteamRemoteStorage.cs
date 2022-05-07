@@ -2,7 +2,6 @@
 using SKYNET.Helper;
 using SKYNET.Managers;
 using SKYNET.Types;
-using Steamworks;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -92,8 +91,11 @@ namespace SKYNET.Steamworks.Implementation
                 try
                 {
                     string fullPath = Path.Combine(StoragePath, pchFile);
-                    Data = File.ReadAllText(fullPath);
-                    Result = Data.Length;
+                    if (File.Exists(fullPath))
+                    {
+                        Data = File.ReadAllText(fullPath);
+                        Result = Data.Length;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -102,9 +104,12 @@ namespace SKYNET.Steamworks.Implementation
                 }
             });
 
-            byte[] bytes = Encoding.Default.GetBytes(Data);
-            Marshal.Copy(bytes, 0, pvData, bytes.Length);
-            Result = bytes.Length;
+            if (Data.Length > 0)
+            {
+                byte[] bytes = Encoding.Default.GetBytes(Data);
+                Marshal.Copy(bytes, 0, pvData, bytes.Length);
+                Result = bytes.Length;
+            }
 
             return Result;
         }
@@ -201,8 +206,9 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool FileForget(string pchFile)
         {
-            Write("FileForget");
-            return false;
+            Write($"FileForget {pchFile}");
+            string fullPath = Path.Combine(StoragePath, pchFile);
+            return File.Exists(fullPath);
         }
 
         public bool FileDelete(string pchFile)

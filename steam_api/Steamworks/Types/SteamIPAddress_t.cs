@@ -1,7 +1,7 @@
 ﻿using SKYNET.Steamworks;
 using System.Runtime.InteropServices;
 
-namespace Steamworks
+namespace SKYNET.Steamworks
 {
     [System.Serializable]
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

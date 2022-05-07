@@ -15,7 +15,7 @@ namespace SKYNET.Steamworks.Exported
 {
     public unsafe class SteamInternal
     {
-        public static pFn _pFn;
+        public static pFnDelegate pFn;
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamInternal_FindOrCreateUserInterface(int hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion)
@@ -59,8 +59,8 @@ namespace SKYNET.Steamworks.Exported
                     {
                         Write($"SteamInternal_ContextInit");
                         Marshal.WriteInt64(contextInitData_ptr, 8, 1);
-                        _pFn = Marshal.GetDelegateForFunctionPointer<pFn>(Context.pFn);
-                        _pFn.Invoke(apiContext_ptr);
+                        pFn = Marshal.GetDelegateForFunctionPointer<pFnDelegate>(Context.pFn);
+                        pFn(apiContext_ptr);
                     }
                 }
                 else
@@ -71,8 +71,8 @@ namespace SKYNET.Steamworks.Exported
                     {
                         Write($"SteamInternal_ContextInit");
                         Marshal.WriteInt32(contextInitData_ptr, 4, 1);
-                        _pFn = Marshal.GetDelegateForFunctionPointer<pFn>(Context.pFn);
-                        _pFn.Invoke(apiContext_ptr);
+                        pFn = Marshal.GetDelegateForFunctionPointer<pFnDelegate>(Context.pFn);
+                        pFn(apiContext_ptr);
                     }
                 }
             }

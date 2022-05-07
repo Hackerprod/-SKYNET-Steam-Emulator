@@ -1,10 +1,12 @@
 ﻿using SKYNET.Callback;
+using SKYNET.Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+
 using SteamAPICall_t = System.UInt64;
 
 namespace Steamworks.Net
@@ -21,7 +23,7 @@ namespace Steamworks.Net
 
         private GCHandle m_pCCallbackBase;
 
-        private SteamAPICall_t m_hAPICall = 0;
+        private SteamAPICall_t m_hAPICall = SteamAPICall_t.Invalid;
 
         private readonly int m_size = Marshal.SizeOf(typeof(T));
 
@@ -75,12 +77,12 @@ namespace Steamworks.Net
             {
                 throw new Exception("CallResult function was null, you must either set it in the CallResult Constructor or in Set()");
             }
-            if (m_hAPICall != 0)
+            if (m_hAPICall != SteamAPICall_t.Invalid)
             {
                 NativeMethods.SteamAPI_UnregisterCallResult(m_pCCallbackBase.AddrOfPinnedObject(), (ulong)m_hAPICall);
             }
             m_hAPICall = hAPICall;
-            if (hAPICall != 0)
+            if (hAPICall != SteamAPICall_t.Invalid)
             {
                 NativeMethods.SteamAPI_RegisterCallResult(m_pCCallbackBase.AddrOfPinnedObject(), (ulong)hAPICall);
             }
@@ -88,15 +90,15 @@ namespace Steamworks.Net
 
         public bool IsActive()
         {
-            return m_hAPICall != 0;
+            return m_hAPICall != SteamAPICall_t.Invalid;
         }
 
         public void Cancel()
         {
-            if (m_hAPICall != 0)
+            if (m_hAPICall != SteamAPICall_t.Invalid)
             {
                 NativeMethods.SteamAPI_UnregisterCallResult(m_pCCallbackBase.AddrOfPinnedObject(), (ulong)m_hAPICall);
-                m_hAPICall = 0;
+                m_hAPICall = SteamAPICall_t.Invalid;
             }
         }
 
@@ -105,9 +107,9 @@ namespace Steamworks.Net
             m_CCallbackBase.m_nCallbackFlags |= 2;
         }
 
-        private void OnRunCallback(IntPtr thisptr, IntPtr pvParam)
+        private void OnRunCallback(IntPtr pvParam)
         {
-            m_hAPICall = 0;
+            m_hAPICall = SteamAPICall_t.Invalid;
             try
             {
                 this.m_Func((T)Marshal.PtrToStructure(pvParam, typeof(T)), bIOFailure: false);
@@ -118,11 +120,11 @@ namespace Steamworks.Net
             }
         }
 
-        private void OnRunCallResult(IntPtr thisptr, IntPtr pvParam, bool bFailed, ulong hSteamAPICall_)
+        private void OnRunCallResult(IntPtr pvParam, bool bFailed, ulong hSteamAPICall_)
         {
             if ((SteamAPICall_t)hSteamAPICall_ == m_hAPICall)
             {
-                m_hAPICall = 0;
+                m_hAPICall = SteamAPICall_t.Invalid;
                 try
                 {
                     this.m_Func((T)Marshal.PtrToStructure(pvParam, typeof(T)), bFailed);

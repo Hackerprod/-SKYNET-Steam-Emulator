@@ -1,16 +1,13 @@
-﻿using SKYNET.Interface;
-using SKYNET.Managers;
+﻿using SKYNET.Managers;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
 
 namespace SKYNET.Interface
 {
+    [Interface("SteamClient018")]
+    [Interface("SteamClient019")]
     [Interface("SteamClient020")]
     public class SteamClient020 : ISteamInterface
     {

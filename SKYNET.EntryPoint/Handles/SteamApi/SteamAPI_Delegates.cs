@@ -1,6 +1,6 @@
 ﻿using EasyHook;
 using SKYNET.Types;
-using Steamworks;
+
 using System;
 using System.Collections.Generic;
 using System.IO;

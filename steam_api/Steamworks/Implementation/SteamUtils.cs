@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using SKYNET;
 using SKYNET.Helper;
-
+using SKYNET.Managers;
 using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Implementation
@@ -136,19 +136,13 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool IsAPICallCompleted(SteamAPICall_t hSteamAPICall, ref bool pbFailed)
         {
-            Write("IsAPICallCompleted");
-            if (hSteamAPICall == (SteamAPICall_t)1)
+            Write($"IsAPICallCompleted {hSteamAPICall}");
+
+            if (CallbackManager.IsCompleted(hSteamAPICall))
             {
-                if (pbFailed)
-                    pbFailed = true;
                 return true;
             }
-
-            //if (CallbackManager.Contains(hSteamAPICall))
-            //    return false;
-
-            if (pbFailed) pbFailed = false;
-            return true;
+            return false;
         }
 
         public int GetAPICallFailureReason(SteamAPICall_t hSteamAPICall)
@@ -161,17 +155,16 @@ namespace SKYNET.Steamworks.Implementation
         {
             try
             {
-                Write("GetAPICallResult");
-                //var result = CallbackManager.GetCallResult(handle, callback, callback_size, callback_expected);
+                Write($"GetAPICallResult {handle}");
 
-                //if (result == null)
-                //{
-                //    failed = true;
-                //    return false;
-                //}
-
-                //Marshal.Copy(result, 0, callback, callback_size);
-                //return !failed;
+                if (CallbackManager.CallbackResults.TryGetValue(handle, out var data))
+                {
+                    callback_size = data.DataSize;
+                    Marshal.StructureToPtr(data, callback, false);
+                    failed = false;
+                }
+                failed = true;
+                return false;
             }
             catch (Exception ex)
             {

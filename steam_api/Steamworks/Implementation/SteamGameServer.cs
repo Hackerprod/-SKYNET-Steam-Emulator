@@ -1,7 +1,7 @@
 ﻿using System;
 using SKYNET.Managers;
 using SKYNET.Types;
-using Steamworks;
+
 
 using SteamAPICall_t = System.UInt64;
 using HAuthTicket = System.UInt32;

@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using SKYNET;
 using SKYNET.Steamworks;
-using Steamworks;
+
 
 using SteamInventoryResult_t = System.UInt32;
 using SteamItemInstanceID_t = System.UInt64;

@@ -4,7 +4,6 @@ using System.Text;
 using System.Runtime.InteropServices;
 using SKYNET.Interface;
 using SKYNET.Managers;
-using System;
 
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;

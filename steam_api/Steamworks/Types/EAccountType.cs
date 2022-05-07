@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 
 // Image 51: Assembly-CSharp-firstpass.dll - Assembly: Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null - Types 4298-5255
 
-namespace Steamworks
+namespace SKYNET.Steamworks
 {
 	public enum EAccountType // TypeDefIndex: 4792
 	{

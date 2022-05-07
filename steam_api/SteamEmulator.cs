@@ -5,7 +5,6 @@ using SKYNET.Managers;
 using SKYNET.Plugin;
 using SKYNET.Steamworks;
 using SKYNET.Steamworks.Implementation;
-using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -34,7 +33,7 @@ public class SteamEmulator
 
     public static CSteamID SteamId;
     public static CSteamID SteamId_GS;
-    public static ulong GameID;
+    public static uint GameID;
     public static uint AppId;
     public static bool Initialized;
     public static bool Initializing;

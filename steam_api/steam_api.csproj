@@ -52,6 +52,10 @@
     <DllExportPostProcType>0</DllExportPostProcType>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Steamworks.NET, Version=11.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\JUEGOS\Farm Together\Steamworks.NET.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -71,9 +75,8 @@
     <Compile Include="Callback\CallbackHandler.cs" />
     <Compile Include="Callback\CallbackEnums.cs" />
     <Compile Include="Callback\CallbackTypes.cs" />
-    <Compile Include="Callback\CallbackWrapper.cs" />
     <Compile Include="Callback\CCallbackBase.cs" />
-    <Compile Include="Callback\CCallbackBaseVTable.cs" />
+    <Compile Include="Callback\SteamCallback.cs" />
     <Compile Include="Callback\SteamCallBacks.cs" />
     <Compile Include="Overlay\frmOverlay.cs">
       <SubType>Form</SubType>
@@ -83,6 +86,7 @@
     </Compile>
     <Compile Include="Steamworks.Net\Callback.cs" />
     <Compile Include="Steamworks.Net\CallbackDispatcher.cs" />
+    <Compile Include="Steamworks.Net\Callback_test.cs" />
     <Compile Include="Steamworks.Net\CallResult.cs" />
     <Compile Include="Steamworks.Net\CSteamID.cs" />
     <Compile Include="Helpers\ImageHelper.cs" />
@@ -138,7 +142,7 @@
     <Compile Include="Steamworks\Exported\SteamAPI_SteamGameSearch.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_SteamFriends.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_SteamController.cs" />
-    <Compile Include="Steamworks\Exported\SteamAPI_SteamClient.cs" />
+    <Compile Include="Steamworks\Exported\SteamAPI_ISteamClient.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_SteamApps.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_SteamAppList.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_SteamGameServer.cs" />
@@ -270,7 +274,10 @@
     <None Include="Resources\Image.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Callbacks.dll" />
+    <None Include="Resources\SKYNET.Callbacks.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\SKYNET.Callbacks64.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ImportGroup Label=".NET DllExport">

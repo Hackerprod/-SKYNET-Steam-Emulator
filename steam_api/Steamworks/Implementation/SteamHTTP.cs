@@ -2,7 +2,6 @@
 using SKYNET.Managers;
 using System.Net;
 using System.Net.Http;
-using Steamworks;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.IO;

@@ -1,4 +1,5 @@
 ﻿using SKYNET;
+using SKYNET.Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -72,13 +73,10 @@ public partial class modCommon
     [return: MarshalAs(UnmanagedType.Bool)]
     static extern bool AllocConsole();
 
-    public static string GenerateSteamID()
+    public static ulong GenerateSteamID()
     {
-        return "76561" + new Random().Next(100000, 999999) + new Random().Next(100000, 999999);
-    }
-    public static ulong CreateSteamID()
-    {
-        return ulong.Parse(GenerateSteamID());
+        CSteamID randomID = new CSteamID();
+        return (ulong)randomID;
     }
 
     public static string GetPath()

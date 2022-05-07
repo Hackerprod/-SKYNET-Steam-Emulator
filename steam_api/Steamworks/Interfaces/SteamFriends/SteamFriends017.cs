@@ -1,6 +1,5 @@
 using SKYNET.Steamworks;
 using SKYNET.Types;
-using Steamworks;
 using System;
 using System.Runtime.InteropServices;
 

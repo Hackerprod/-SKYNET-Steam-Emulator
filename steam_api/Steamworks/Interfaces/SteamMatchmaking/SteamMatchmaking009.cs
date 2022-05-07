@@ -1,4 +1,4 @@
-using Steamworks;
+using SKYNET.Steamworks;
 using System;
 
 namespace SKYNET.Interface
@@ -116,7 +116,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamMatchmaking.GetLobbyDataCount(steamIDLobby);
         }
 
-        public bool GetLobbyDataByIndex(IntPtr _, ulong steamIDLobby, int iLobbyData, string pchKey, int cchKeyBufferSize, string pchValue, int cchValueBufferSize)
+        public bool GetLobbyDataByIndex(IntPtr _, ulong steamIDLobby, int iLobbyData, IntPtr pchKey, int cchKeyBufferSize, IntPtr pchValue, int cchValueBufferSize)
         {
             return SteamEmulator.SteamMatchmaking.GetLobbyDataByIndex(steamIDLobby, iLobbyData, pchKey, cchKeyBufferSize, pchValue, cchValueBufferSize);
         }
@@ -181,7 +181,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamMatchmaking.SetLobbyJoinable(steamIDLobby, bLobbyJoinable);
         }
 
-        public CSteamID GetLobbyOwner(IntPtr _, ulong steamIDLobby)
+        public ulong GetLobbyOwner(IntPtr _, ulong steamIDLobby)
         {
             return SteamEmulator.SteamMatchmaking.GetLobbyOwner(steamIDLobby);
         }

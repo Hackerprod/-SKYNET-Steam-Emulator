@@ -6,7 +6,6 @@
 // Changes to this file will be reverted when you update Steamworks.NET
 
 using SKYNET.Steamworks;
-using Steamworks;
 using System;
 using System.Runtime.InteropServices;
 using IntPtr = System.IntPtr;

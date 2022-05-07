@@ -4,7 +4,7 @@ using SKYNET.Types;
 using System;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
-using Steamworks;
+
 
 using HSteamNetConnection = System.UInt32;
 using HSteamListenSocket = System.UInt32;

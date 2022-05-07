@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Text;
 using SKYNET;
-using Steamworks;
+
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -59,8 +59,7 @@ namespace SKYNET.Steamworks.Implementation
         public bool BIsDlcInstalled(uint appID)
         {
             Write("BIsDlcInstalled " + appID);
-            return false;
-
+            return true;
         }
 
         public UInt32 GetEarliestPurchaseUnixTime(uint nAppID)
