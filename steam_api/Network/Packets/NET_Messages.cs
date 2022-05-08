@@ -29,7 +29,7 @@ namespace SKYNET.Network.Packets
         public string HexAvatar { get; set; }
     }
 
-    public class NET_P2PMessage : NET_Base
+    public class NET_P2PPacket : NET_Base
     {
         public uint AccountID { get; set; }
         public string Buffer { get; set; }
@@ -45,13 +45,25 @@ namespace SKYNET.Network.Packets
         public uint LobbyID { get; set; }
     }
 
+    public class NET_LobbyListRequest : NET_Base
+    {
+        public uint RequestID { get; set; }
+    }
+
+    public class NET_LobbyListResponse : NET_Base
+    {
+        public string SerializedLobby { get; set; }
+    }
+
     public enum MessageType : int
     {
         NET_Announce,
         NET_AnnounceResponse,
         NET_AvatarRequest,
         NET_AvatarResponse,
-        NET_UserDataUpdated, 
-        NET_P2PMessage
+        NET_UserDataUpdated,
+        NET_P2PPacket,
+        NET_LobbyListRequest,
+        NET_LobbyListResponse
     }
 }

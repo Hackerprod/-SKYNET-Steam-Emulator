@@ -22,6 +22,21 @@ namespace SKYNET.Callback
         int DataSize { get; }
     }
 
+    public class CallbackMessage
+    {
+        public ICallbackData Data { get; set; }
+        public bool Called { get; set; }
+        public bool ReadyToCall { get; set; }
+
+        public CallbackMessage(ICallbackData data, bool readyToCall = true)
+        {
+            Data = data;
+            ReadyToCall = readyToCall;
+        }
+
+
+    }
+
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct SteamServersConnected_t : ICallbackData
     {
@@ -395,7 +410,7 @@ namespace SKYNET.Callback
     internal struct JoinClanChatRoomCompletionResult_t : ICallbackData
     {
         internal ulong SteamIDClanChat; // m_steamIDClanChat CSteamID
-        internal RoomEnter ChatRoomEnterResponse; // m_eChatRoomEnterResponse EChatRoomEnterResponse
+        internal EChatRoomEnterResponse ChatRoomEnterResponse; // m_eChatRoomEnterResponse EChatRoomEnterResponse
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(JoinClanChatRoomCompletionResult_t));
@@ -1529,8 +1544,8 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct GlobalStatsReceived_t : ICallbackData
     {
-        internal ulong GameID; // m_nGameID uint64
-        internal EResult Result; // m_eResult EResult
+        internal ulong m_nGameID; // m_nGameID uint64
+        internal EResult m_eResult; // m_eResult EResult
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GlobalStatsReceived_t));
@@ -1627,7 +1642,7 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct P2PSessionRequest_t : ICallbackData
     {
-        internal ulong SteamIDRemote; // m_steamIDRemote CSteamID
+        internal ulong m_steamIDRemote; // m_steamIDRemote CSteamID
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(P2PSessionRequest_t));

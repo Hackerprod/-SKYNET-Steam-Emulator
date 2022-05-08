@@ -10,112 +10,104 @@ using System.Threading.Tasks;
 
 namespace SKYNET.Steamworks
 {
-    [Serializable]
-    [StructLayout(LayoutKind.Sequential)]
-    public class CSteamID : IEquatable<CSteamID>, IComparable<CSteamID>
-    {
-        public ulong SteamID;
-        public uint  AccountId;
-        public byte  Universe;
-        public byte  AccountType;
+    //[Serializable]
+    //[StructLayout(LayoutKind.Sequential)]
+    //public class CSteamID : IEquatable<CSteamID>, IComparable<CSteamID>
+    //{
+    //    public ulong SteamID;
+    //    public uint  AccountId;
+    //    public byte  Universe;
+    //    public byte  AccountType;
 
-        public CSteamID()
-        {
-            this.AccountId = (uint)new Random().Next(1000, 9999);
-            this.Universe = (byte)EUniverse.k_EUniversePublic;
-            this.AccountType = (byte)EAccountType.k_EAccountTypeIndividual;
+    //    public CSteamID(uint accountId)
+    //    {
+    //        this.AccountId = accountId;
+    //        this.Universe = (byte)EUniverse.k_EUniversePublic;
+    //        this.AccountType = (byte)EAccountType.k_EAccountTypeIndividual;
 
-            int instance = (AccountType == (byte)EAccountType.k_EAccountTypeClan || AccountType == (byte)EAccountType.k_EAccountTypeGameServer) ? 0 : 1;
+    //        int instance = (AccountType == (byte)EAccountType.k_EAccountTypeClan || AccountType == (byte)EAccountType.k_EAccountTypeGameServer) ? 0 : 1;
 
-            this.SteamID = (SteamID & ~(0xFFFFFFFFul << (ushort)0)) | (((ulong)(AccountId) & 0xFFFFFFFFul) << (ushort)0);
-            this.SteamID = (SteamID & ~(0xFFul << (ushort)56)) | (((ulong)(Universe) & 0xFFul) << (ushort)56);
-            this.SteamID = (SteamID & ~(0xFul << (ushort)52)) | (((ulong)(AccountType) & 0xFul) << (ushort)52);
-            this.SteamID = (SteamID & ~(0xFFFFFul << (ushort)32)) | (((ulong)(instance) & 0xFFFFFul) << (ushort)32);
-        }
+    //        this.SteamID = 0;
+    //        this.SteamID = (SteamID & ~(0xFFFFFFFFul << (ushort)0)) | (((ulong)(AccountId) & 0xFFFFFFFFul) << (ushort)0);
+    //        this.SteamID = (SteamID & ~(0xFFul << (ushort)56)) | (((ulong)(Universe) & 0xFFul) << (ushort)56);
+    //        this.SteamID = (SteamID & ~(0xFul << (ushort)52)) | (((ulong)(AccountType) & 0xFul) << (ushort)52);
+    //        this.SteamID = (SteamID & ~(0xFFFFFul << (ushort)32)) | (((ulong)(instance) & 0xFFFFFul) << (ushort)32);
+    //    }
 
-        public CSteamID(uint accountId)
-        {
-            this.AccountId = accountId;
-            this.Universe = (byte)EUniverse.k_EUniversePublic;
-            this.AccountType = (byte)EAccountType.k_EAccountTypeIndividual;
+    //    public CSteamID(ulong _steamID)
+    //    {
+    //        this.SteamID = _steamID;
+    //        this.AccountId = (uint)(_steamID & 0xFFFFFFFFul);
+    //        this.Universe = (byte)(EUniverse)((_steamID >> 56) & 0xFFul);
+    //        this.AccountType = (byte)(EAccountType)((_steamID >> 52) & 0xFul);
+    //    }
 
-            int instance = (AccountType == (byte)EAccountType.k_EAccountTypeClan || AccountType == (byte)EAccountType.k_EAccountTypeGameServer) ? 0 : 1;
+    //    public CSteamID(uint _accountId, EUniverse _Universe, EAccountType _AccountType)
+    //    {
+    //        this.AccountId = _accountId;
+    //        this.Universe = (byte)_Universe;
+    //        this.AccountType = (byte)_AccountType;
 
-            this.SteamID = 0;
-            this.SteamID = (SteamID & ~(0xFFFFFFFFul << (ushort)0)) | (((ulong)(AccountId) & 0xFFFFFFFFul) << (ushort)0);
-            this.SteamID = (SteamID & ~(0xFFul << (ushort)56)) | (((ulong)(Universe) & 0xFFul) << (ushort)56);
-            this.SteamID = (SteamID & ~(0xFul << (ushort)52)) | (((ulong)(AccountType) & 0xFul) << (ushort)52);
-            this.SteamID = (SteamID & ~(0xFFFFFul << (ushort)32)) | (((ulong)(instance) & 0xFFFFFul) << (ushort)32);
-        }
+    //        int instance = (_AccountType == EAccountType.k_EAccountTypeClan || _AccountType == EAccountType.k_EAccountTypeGameServer) ? 0 : 1;
 
-        public CSteamID(ulong _steamID)
-        {
-            this.SteamID = _steamID;
-            this.AccountId = (uint)(_steamID & 0xFFFFFFFFul);
-            this.Universe = (byte)(EUniverse)((_steamID >> 56) & 0xFFul);
-            this.AccountType = (byte)(EAccountType)((_steamID >> 52) & 0xFul);
-        }
+    //        this.SteamID = 0;
+    //        this.SteamID = (SteamID & ~(0xFFFFFFFFul << (ushort)0)) | (((ulong)(_accountId) & 0xFFFFFFFFul) << (ushort)0);
+    //        this.SteamID = (SteamID & ~(0xFFul << (ushort)56)) | (((ulong)(_Universe) & 0xFFul) << (ushort)56);
+    //        this.SteamID = (SteamID & ~(0xFul << (ushort)52)) | (((ulong)(_AccountType) & 0xFul) << (ushort)52);
+    //        this.SteamID = (SteamID & ~(0xFFFFFul << (ushort)32)) | (((ulong)(instance) & 0xFFFFFul) << (ushort)32);
+    //    }
 
-        public CSteamID(uint _accountId, EUniverse _Universe, EAccountType _AccountType)
-        {
-            this.AccountId = _accountId;
-            this.Universe = (byte)_Universe;
-            this.AccountType = (byte)_AccountType;
+    //    public static CSteamID CreateOne()
+    //    {
+    //        CSteamID randomID = new CSteamID((uint)new Random().Next(1000, 9999));
+    //        return randomID;
+    //    }
 
-            int instance = (_AccountType == EAccountType.k_EAccountTypeClan || _AccountType == EAccountType.k_EAccountTypeGameServer) ? 0 : 1;
+    //    public override int GetHashCode()
+    //    {
+    //        return this.SteamID.GetHashCode();
+    //    }
 
-            this.SteamID = 0;
-            this.SteamID = (SteamID & ~(0xFFFFFFFFul << (ushort)0)) | (((ulong)(_accountId) & 0xFFFFFFFFul) << (ushort)0);
-            this.SteamID = (SteamID & ~(0xFFul << (ushort)56)) | (((ulong)(_Universe) & 0xFFul) << (ushort)56);
-            this.SteamID = (SteamID & ~(0xFul << (ushort)52)) | (((ulong)(_AccountType) & 0xFul) << (ushort)52);
-            this.SteamID = (SteamID & ~(0xFFFFFul << (ushort)32)) | (((ulong)(instance) & 0xFFFFFul) << (ushort)32);
-        }
+    //    public int CompareTo(CSteamID other)
+    //    {
+    //        return this.SteamID.CompareTo(other.SteamID);
+    //    }
 
-        public override int GetHashCode()
-        {
-            return this.SteamID.GetHashCode();
-        }
+    //    public bool Equals(CSteamID other)
+    //    {
+    //        return this.SteamID == other.SteamID;
+    //    }
 
-        public int CompareTo(CSteamID other)
-        {
-            return this.SteamID.CompareTo(other.SteamID);
-        }
-
-        public bool Equals(CSteamID other)
-        {
-            return this.SteamID == other.SteamID;
-        }
-
-        public static bool operator ==(CSteamID x, CSteamID y)
-        {
-            return x.SteamID == y.SteamID;
-        }
+    //    public static bool operator ==(CSteamID x, CSteamID y)
+    //    {
+    //        return x.SteamID == y.SteamID;
+    //    }
 
 
-        public static bool operator !=(CSteamID x, CSteamID y)
-        {
-            return !(x == y);
-        }
+    //    public static bool operator !=(CSteamID x, CSteamID y)
+    //    {
+    //        return !(x == y);
+    //    }
 
-        public static explicit operator CSteamID(ulong value)
-        {
-            return new CSteamID(value);
-        }
+    //    public static explicit operator CSteamID(ulong value)
+    //    {
+    //        return new CSteamID(value);
+    //    }
 
-        public static explicit operator ulong(CSteamID that)
-        {
-            return that.SteamID;
-        }
+    //    public static explicit operator ulong(CSteamID that)
+    //    {
+    //        return that.SteamID;
+    //    }
 
-        public override string ToString()
-        {
-            return $"[U:{Universe}:{AccountId}] ({SteamID})";
-        }
+    //    public override string ToString()
+    //    {
+    //        return $"[U:{Universe}:{AccountId}] ({SteamID})";
+    //    }
 
-        public static explicit operator string(CSteamID that)
-        {
-            return that.ToString();
-        }
-    }
+    //    public static explicit operator string(CSteamID that)
+    //    {
+    //        return that.ToString();
+    //    }
+    //}
 }
 

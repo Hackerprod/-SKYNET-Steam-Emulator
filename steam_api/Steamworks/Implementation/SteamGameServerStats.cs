@@ -20,7 +20,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool GetUserAchievement(ulong steamIDUser, string pchName, bool pbAchieved)
         {
-            Write("GetUserAchievement");
+            Write($"GetUserAchievement (SteamID: {steamIDUser}, Name: {pchName})");
             return false;
         }
 

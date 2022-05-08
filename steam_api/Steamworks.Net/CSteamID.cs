@@ -10,7 +10,7 @@ using System;
 using System.Runtime.InteropServices;
 using IntPtr = System.IntPtr;
 
-namespace TEST
+namespace SKYNET.Steamworks
 {
     [Serializable]
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -32,6 +32,18 @@ namespace TEST
         {
             m_SteamID = 0uL;
             Set(unAccountID, eUniverse, eAccountType);
+        }
+
+        public CSteamID(uint unAccountID, EUniverse eUniverse, EAccountType eAccountType)
+        {
+            m_SteamID = 0uL;
+            Set((AccountID_t)unAccountID, eUniverse, eAccountType);
+        }
+
+        public static CSteamID CreateOne()
+        {
+            CSteamID randomID = new CSteamID((uint)new Random().Next(1000, 9999), EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeIndividual);
+            return randomID;
         }
 
         public CSteamID(AccountID_t unAccountID, uint unAccountInstance, EUniverse eUniverse, EAccountType eAccountType)

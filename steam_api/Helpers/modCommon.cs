@@ -75,8 +75,7 @@ public partial class modCommon
 
     public static ulong GenerateSteamID()
     {
-        CSteamID randomID = new CSteamID();
-        return (ulong)randomID;
+        return (ulong)CSteamID.CreateOne();
     }
 
     public static string GetPath()

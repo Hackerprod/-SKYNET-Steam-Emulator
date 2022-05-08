@@ -19,7 +19,7 @@ namespace SKYNET.Steamworks.Exported
     public class SteamAPI_ISteamRemoteStorage
     {
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamRemoteStorage_FileWrite(IntPtr _, string pchFile, string pvData, int cubData)
+        public static bool SteamAPI_ISteamRemoteStorage_FileWrite(IntPtr _, string pchFile, IntPtr pvData, int cubData)
         {
             Write("SteamAPI_ISteamRemoteStorage_FileWrite");
             return SteamEmulator.SteamRemoteStorage.FileWrite(pchFile, pvData, cubData);
@@ -33,7 +33,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static SteamAPICall_t SteamAPI_ISteamRemoteStorage_FileWriteAsync(IntPtr _, string pchFile, string pvData, uint cubData)
+        public static SteamAPICall_t SteamAPI_ISteamRemoteStorage_FileWriteAsync(IntPtr _, string pchFile, IntPtr pvData, uint cubData)
         {
             Write("SteamAPI_ISteamRemoteStorage_FileWriteAsync");
             return SteamEmulator.SteamRemoteStorage.FileWriteAsync(pchFile, pvData, cubData);

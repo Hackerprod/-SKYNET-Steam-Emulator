@@ -17,7 +17,7 @@ namespace SKYNET.Helper
         {
             try
             {
-                return new CSteamID(SteamID).AccountId;
+                return (uint)new CSteamID(SteamID).GetAccountID();
             }
             catch (Exception)
             {

@@ -117,19 +117,17 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_UnregisterCallback(IntPtr pCallback)
         {
-            //CallbackWrapper.UnregisterCallback(pCallback);
-            //return;
             SteamCallback sCallback = new SteamCallback(pCallback);
-            Write($"SteamAPI_UnregisterCallback {sCallback.CallbackType}");
-            CallbackManager.UnregisterCallback(pCallback);
+            string success = CallbackManager.UnregisterCallback(sCallback) ? "OK" : "Error";
+            Write($"SteamAPI_UnregisterCallback {sCallback.CallbackType} {success}");
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_UnregisterCallResult(IntPtr pCallback, SteamAPICall_t hAPICall)
         {
-            Write("SteamAPI_UnregisterCallResult\n");
-            //CallbackManager.UnregisterCallResult(pCallback, hAPICall);
-            //CallbackWrapper.UnregisterCallResult(pCallback, hAPICall);
+            SteamCallback sCallback = new SteamCallback(pCallback);
+            string success = CallbackManager.UnregisterCallResult(sCallback, hAPICall) ? "OK" : "Error";
+            Write($"SteamAPI_UnregisterCallResult {sCallback.CallbackType} {success}");
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

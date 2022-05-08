@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using SKYNET;
 using SKYNET.Callback;
 using SKYNET.Managers;
@@ -14,8 +16,8 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamMatchmaking : ISteamInterface
     {
-        private const int CallbackTimeOut = 20;
-        private ConcurrentDictionary<ulong, SteamLobby> Lobbies;
+        public uint CurrentRequest;
+        public ConcurrentDictionary<ulong, SteamLobby> Lobbies;
         private FilterLobby filters;
 
         public SteamMatchmaking()
@@ -23,16 +25,8 @@ namespace SKYNET.Steamworks.Implementation
             InterfaceName = "SteamMatchmaking";
             Lobbies = new ConcurrentDictionary<SteamAPICall_t, SteamLobby>();
             filters = new FilterLobby();
-
-            var tempID = modCommon.GenerateSteamID();
-            Lobbies.TryAdd(tempID, new SteamLobby()
-            {
-                Joinable = true,
-                MaxMembers = 10,
-                Owner = (ulong)SteamEmulator.SteamId,
-                SteamID = tempID,
-                Type = ELobbyType.k_ELobbyTypePublic
-            });
+            CurrentRequest = 0;
+            CreateTestLobby();
         }
 
         public int AddFavoriteGame(uint nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags, uint rTime32LastPlayedOnServer)
@@ -88,47 +82,47 @@ namespace SKYNET.Steamworks.Implementation
         public SteamAPICall_t CreateLobby(int eLobbyType, int cMaxMembers)
         {
             Write($"CreateLobby {(ELobbyType)eLobbyType} limit {cMaxMembers} members");
-            var LocalLobby = new SteamLobby()
+            ulong callResult = 0;
+            try
             {
-                Owner = (ulong)SteamEmulator.SteamId, 
-                SteamID = modCommon.GenerateSteamID(),
-                Type = (ELobbyType)eLobbyType,
-                MaxMembers =  cMaxMembers
-            };
+                var LocalLobby = new SteamLobby()
+                {
+                    Owner = (ulong)SteamEmulator.SteamId,
+                    SteamID = modCommon.GenerateSteamID(),
+                    Type = (ELobbyType)eLobbyType,
+                    MaxMembers = cMaxMembers
+                };
+                LocalLobby.Members.Add(new SteamLobby.LobbyMember()
+                {
+                    m_SteamID = (ulong)SteamEmulator.SteamId
+                });
 
-            LobbyCreated_t data = new LobbyCreated_t()
-            {
-                m_eResult = Types.EResult.k_EResultOK, 
-                m_ulSteamIDLobby = LocalLobby.SteamID
-            };
+                LobbyCreated_t data = new LobbyCreated_t()
+                {
+                    m_eResult = Types.EResult.k_EResultOK,
+                    m_ulSteamIDLobby = LocalLobby.SteamID
+                };
 
-            LobbyEnter_t enterData = new LobbyEnter_t()
-            {
-                m_ulSteamIDLobby = LocalLobby.SteamID,
-                m_rgfChatPermissions = 0,
-                m_bLocked = false,
-                m_EChatRoomEnterResponse = 1
-            };
+                if (!Lobbies.TryAdd(LocalLobby.SteamID, LocalLobby))
+                {
+                    data.m_eResult = Types.EResult.k_EResultFail;
+                }
 
-            if (!Lobbies.TryAdd(LocalLobby.SteamID, LocalLobby))
-            {
-                data.m_eResult = Types.EResult.k_EResultFail;
+                SteamEmulator.SteamFriends.UpdateUserLobby((ulong)SteamEmulator.SteamId, LocalLobby.SteamID);
+
+                callResult = CallbackManager.AddCallbackResult(data);
             }
+            catch (Exception)
+            {
 
-            SteamEmulator.SteamFriends.UpdateUserLobby((ulong)SteamEmulator.SteamId, LocalLobby.SteamID);
-
-            ulong callResult = CallbackManager.AddCallbackResult(data);
-            CallbackManager.AddCallback(data);
-
-            CallbackManager.AddCallbackResult(enterData);
-            CallbackManager.AddCallback(enterData);
+            }
 
             return callResult;
         }
 
         public bool DeleteLobbyData(ulong steamIDLobby, string pchKey)
         {
-            Write("DeleteLobbyData");
+            Write($"DeleteLobbyData (Lobby SteamID: {steamIDLobby}, Key: {pchKey})");
             if (Lobbies.TryGetValue(steamIDLobby, out var lobby))
             {
                 lobby.LobbyData.Clear();
@@ -149,19 +143,20 @@ namespace SKYNET.Steamworks.Implementation
             return 1;
         }
 
-        public ulong GetLobbyByIndex(int iLobby)
+        public CSteamID GetLobbyByIndex(int iLobby)
         {
-            Write("GetLobbyByIndex");
             int index = 0;
+            CSteamID Response = new CSteamID(0);
             foreach (var lobby in Lobbies)
             {
                 if (index == iLobby)
                 {
-                    return lobby.Key;
+                    Response = new CSteamID(lobby.Value.SteamID);
                 }
                 index++;
             }
-            return 0;
+            Write($"GetLobbyByIndex (Lobby Index: {iLobby}) = {(ulong)Response}");
+            return Response;
         }
 
         public int GetLobbyChatEntry(ulong steamIDLobby, int iChatID, ulong pSteamIDUser, IntPtr pvData, int cubData, int peChatEntryType)
@@ -172,37 +167,41 @@ namespace SKYNET.Steamworks.Implementation
 
         public string GetLobbyData(ulong steamIDLobby, string pchKey)
         {
-            Write("GetLobbyData");
+            string Result = "";
             if (Lobbies.TryGetValue(steamIDLobby, out var lobby))
             {
                 if (lobby.LobbyData.ContainsKey(pchKey))
                 {
-                    return lobby.LobbyData[pchKey];
+                    Result = lobby.LobbyData[pchKey];
                 }
             }
-            return "";
+            Write($"GetLobbyData (Lobby SteamID: {steamIDLobby}, Key: {pchKey}) = {Result}");
+            return Result;
         }
 
         public bool GetLobbyDataByIndex(ulong steamIDLobby, int iLobbyData, IntPtr pchKey, int cchKeyBufferSize, IntPtr pchValue, int cchValueBufferSize)
         {
-            Write($"GetLobbyDataByIndex {steamIDLobby} {iLobbyData}");
             if (Lobbies.TryGetValue(steamIDLobby, out var lobby))
             {
                 (var Key, var Value) = lobby.GetDataByIndex(iLobbyData);
                 Marshal.Copy(Encoding.Default.GetBytes(Key), 0, pchKey, Encoding.Default.GetBytes(Key).Length);
                 Marshal.Copy(Encoding.Default.GetBytes(Value), 0, pchValue, Encoding.Default.GetBytes(Value).Length);
+                Write($"GetLobbyDataByIndex (Lobby SteamID: {steamIDLobby},  LobbyData index: {iLobbyData}) = ({Key} {Value})");
+                return true;
             }
+            Write($"GetLobbyDataByIndex (Lobby SteamID: {steamIDLobby},  LobbyData index: {iLobbyData})");
             return false;
         }
 
         public int GetLobbyDataCount(ulong steamIDLobby)
         {
-            Write("GetLobbyDataCount");
+            int Count = 0;
             if (Lobbies.TryGetValue(steamIDLobby, out var lobby))
             {
-                return lobby.LobbyData.Count;
+                Count = lobby.LobbyData.Count;
             }
-            return 0;
+            Write($"GetLobbyDataCount (Lobby SteamID: {steamIDLobby}) = {Count}");
+            return Count;
         }
 
         public bool GetLobbyGameServer(ulong steamIDLobby, uint punGameServerIP, uint punGameServerPort, ulong psteamIDGameServer)
@@ -211,22 +210,23 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public ulong GetLobbyMemberByIndex(ulong steamIDLobby, int iMember)
+        public CSteamID GetLobbyMemberByIndex(ulong steamIDLobby, int iMember)
         {
-            Write("GetLobbyMemberByIndex");
+            ulong MemberByIndex = 0;
             if (Lobbies.TryGetValue(steamIDLobby, out var lobby))
             {
                 if (lobby.Members.Count > iMember)
                 {
-                    return lobby.Members[iMember].m_SteamID;
+                    MemberByIndex = lobby.Members[iMember].m_SteamID;
                 }
             }
-            return 0;
+            Write($"GetLobbyMemberByIndex (Lobby SteamID: {steamIDLobby}, Index: {iMember}) = {MemberByIndex}");
+            return new CSteamID(MemberByIndex);
         }
 
         public string GetLobbyMemberData(ulong steamIDLobby, ulong steamIDUser, string pchKey)
         {
-            Write($"GetLobbyMemberData {steamIDLobby} {steamIDUser} {pchKey}");
+            Write($"GetLobbyMemberData (Lobby SteamID: {steamIDLobby}, User SteamID: {steamIDUser} Key: {pchKey})");
             if (Lobbies.TryGetValue(steamIDLobby, out var lobby))
             {
                 var member = lobby.Members.Find(m => m.m_SteamID == steamIDUser);
@@ -241,28 +241,34 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetLobbyMemberLimit(ulong steamIDLobby)
         {
-            Write($"GetLobbyMemberLimit {steamIDLobby}");
-            return 1;
-        }
-
-        public ulong GetLobbyOwner(ulong steamIDLobby)
-        {
-            Write($"GetLobbyOwner {steamIDLobby}");
+            Write($"GetLobbyMemberLimit (Lobby SteamID: {steamIDLobby})");
             if (Lobbies.TryGetValue(steamIDLobby, out var lobby))
             {
-                return lobby.Owner;
+                return lobby.MaxMembers;
             }
             return 0;
+        }
+
+        public CSteamID GetLobbyOwner(ulong steamIDLobby)
+        {
+            ulong Owner = 0;
+            if (Lobbies.TryGetValue(steamIDLobby, out var lobby))
+            {
+                Owner = lobby.Owner;
+            }
+            Write($"GetLobbyOwner (Lobby SteamID: {steamIDLobby}) = {Owner}");
+            return new CSteamID(Owner); 
         }
 
         public int GetNumLobbyMembers(ulong steamIDLobby)
         {
-            Write("GetNumLobbyMembers");
+            int members = 0;
             if (Lobbies.TryGetValue(steamIDLobby, out var lobby))
             {
-                return lobby.Members.Count;
+                members = lobby.Members.Count;
             }
-            return 0;
+            Write($"GetNumLobbyMembers (Lobby SteamID: {steamIDLobby}) = {members}");
+            return members;
         }
 
         public bool InviteUserToLobby(ulong steamIDLobby, ulong steamIDInvitee)
@@ -270,20 +276,21 @@ namespace SKYNET.Steamworks.Implementation
             Write("InviteUserToLobby");
             if (Lobbies.TryGetValue(steamIDLobby, out var lobby))
             {
-                // TODO: Send trougth socket
+                // TODO: Send through socket
             }
             return true;
         }
 
         public SteamAPICall_t JoinLobby(ulong steamIDLobby)
         {
-            Write("JoinLobby");
+            Write($"JoinLobby (Lobby SteamID: {steamIDLobby})");
 
             LobbyEnter_t data = new LobbyEnter_t()
             {
                  m_ulSteamIDLobby = steamIDLobby,
-                 m_bLocked = false,
-                 m_EChatRoomEnterResponse = 1
+                 m_bLocked = false, 
+                 m_EChatRoomEnterResponse = (uint)EChatRoomEnterResponse.Success,
+                 m_rgfChatPermissions = 1
             };
 
             if (Lobbies.TryGetValue(steamIDLobby, out var lobby))
@@ -302,7 +309,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public void LeaveLobby(ulong steamIDLobby)
         {
-            Write("LeaveLobby");
+            Write($"LeaveLobby (Lobby SteamID: {steamIDLobby})");
             if (Lobbies.TryGetValue(steamIDLobby, out var lobby))
             {
 
@@ -318,32 +325,49 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool RequestLobbyData(ulong steamIDLobby)
         {
-            Write("RequestLobbyData");
-
+            bool Result = false;
             LobbyDataUpdate_t data = new LobbyDataUpdate_t()
             {
-                m_bSuccess = 0
+                m_bSuccess = 0,
             };
 
             if (Lobbies.TryGetValue(steamIDLobby, out var lobby))
             {
-
+                Result = true;
+                data.m_bSuccess = 1;
+                data.m_ulSteamIDLobby = lobby.SteamID;
+                data.m_ulSteamIDMember = lobby.Owner;
             }
 
             CallbackManager.AddCallbackResult(data);
-
+            Write($"RequestLobbyData (Lobby SteamID: {steamIDLobby}) = {Result}");
             return true;
         }
 
         public SteamAPICall_t RequestLobbyList()
         {
-            Write("RequestLobbyList");
-            // TODO: Request lobby list to network
-            LobbyMatchList_t data = new LobbyMatchList_t()
+            Write($"RequestLobbyList");
+            CurrentRequest++;
+            NetworkManager.RequestLobbyList(CurrentRequest);
+
+            SteamAPICall_t APICall = CallbackManager.AddCallbackResult(new LobbyMatchList_t(), false);
+            ThreadPool.QueueUserWorkItem(WaitLobbyMatchList, APICall);
+            return APICall;
+        }
+
+        private void WaitLobbyMatchList(object state)
+        {
+            SteamAPICall_t APICall = (SteamAPICall_t)state;
+            Thread.Sleep(3000);
+            if (CallbackManager.CallbackResults.TryGetValue(APICall, out var callback))
             {
-                m_nLobbiesMatching = 1
-            };
-            return CallbackManager.AddCallbackResult(data);
+                LobbyMatchList_t data = new LobbyMatchList_t()
+                {
+                    m_nLobbiesMatching = (uint)Lobbies.Count
+                };
+                callback.Data = data;
+                callback.ReadyToCall = true;
+            }
         }
 
         public bool SendLobbyChatMsg(ulong steamIDLobby, IntPtr pvMsgBody, int cubMsgBody)
@@ -360,7 +384,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool SetLobbyData(ulong steamIDLobby, string pchKey, string pchValue)
         {
-            Write($"SetLobbyData {steamIDLobby} {pchKey} {pchValue}");
+            Write($"SetLobbyData (Lobby SteamID: {steamIDLobby}, Key: {pchKey}, Value: {pchValue})");
             if (Lobbies.TryGetValue(steamIDLobby, out var lobby))
             {
                 lobby.LobbyData[pchKey] = pchValue;
@@ -382,7 +406,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool SetLobbyJoinable(ulong steamIDLobby, bool bLobbyJoinable)
         {
-            Write("SetLobbyJoinable");
+            Write($"SetLobbyJoinable (Lobby SteamID: {steamIDLobby}, Joinable: {bLobbyJoinable})");
             if (Lobbies.TryGetValue(steamIDLobby, out var lobby))
             {
                 lobby.Joinable = bLobbyJoinable;
@@ -393,7 +417,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public void SetLobbyMemberData(ulong steamIDLobby, string pchKey, string pchValue)
         {
-            Write($"SetLobbyMemberData {steamIDLobby} {pchKey} {pchValue}");
+            Write($"SetLobbyMemberData (Lobby SteamID: {steamIDLobby}, Key: {pchKey}, Value: {pchValue})");
             if (Lobbies.TryGetValue(steamIDLobby, out var lobby))
             {
                 lobby.LobbyData[pchKey] = pchValue;
@@ -402,7 +426,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool SetLobbyMemberLimit(ulong steamIDLobby, int cMaxMembers)
         {
-            Write("SetLobbyMemberLimit");
+            Write($"SetLobbyMemberLimit (Lobby SteamID: {steamIDLobby}, MaxMembers: {cMaxMembers})");
             if (Lobbies.TryGetValue(steamIDLobby, out var lobby))
             {
                 lobby.MaxMembers = cMaxMembers;
@@ -413,7 +437,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool SetLobbyOwner(ulong steamIDLobby, ulong steamIDNewOwner)
         {
-            Write("SetLobbyOwner");
+            Write($"SetLobbyOwner (Lobby SteamID: {steamIDLobby},  SteamIDNewOwner: {steamIDNewOwner})");
             if (Lobbies.TryGetValue(steamIDLobby, out var lobby))
             {
                 lobby.Owner = steamIDNewOwner;
@@ -424,7 +448,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool SetLobbyType(ulong steamIDLobby, int eLobbyType)
         {
-            Write("SetLobbyType");
+            Write($"SetLobbyType (Lobby SteamID: {steamIDLobby}, LobbyType: {(ELobbyType)eLobbyType})");
             if (Lobbies.TryGetValue(steamIDLobby, out var lobby))
             {
                 lobby.Type = (ELobbyType)eLobbyType;
@@ -438,7 +462,38 @@ namespace SKYNET.Steamworks.Implementation
             Write("CheckForPSNGameBootInvite");
         }
 
-        private class SteamLobby
+        private void CreateTestLobby()
+        {
+            var id = modCommon.GenerateSteamID();
+            Lobbies.TryAdd(id, new SteamLobby()
+            {
+                SteamID = id,
+                Joinable = true,
+                MaxMembers = 20,
+                Owner = (ulong)SteamEmulator.SteamId,
+                Type = ELobbyType.k_ELobbyTypePublic,
+                Members = { new SteamLobby.LobbyMember() { m_SteamID = (ulong)SteamEmulator.SteamId } },
+                LobbyData =
+                {
+                    { "lobby_type", "2" },
+                    { "0", "172" },
+                    { "1", "1" },
+                    { "2", "1" },
+                    { "3", "2000" },
+                    { "4", "10" },
+                    { "5", "0" },
+                    { "6", "1" },
+                    { "join_in_progress", "1" },
+                    { "session_state", "0" },
+                    { "name", "Hackerprod" },
+                    { "owner", ((ulong)SteamEmulator.SteamId).ToString() },
+                    { "internalIP", "10.31.0.1" },
+                    { "publicIP", "10.31.0.1" },
+                }
+            });
+        }
+
+        public class SteamLobby
         {
             public ulong SteamID { get; set; }
             public ulong Owner { get; set; }
@@ -475,14 +530,14 @@ namespace SKYNET.Steamworks.Implementation
                 return (key, value);
             }
 
-            internal class LobbyGameserver
+            public class LobbyGameserver
             {
                 public ulong SteamID { get; set; }
                 public uint IP { get; set; }
                 public uint Port { get; set; }
             }
 
-            internal class LobbyMember
+            public class LobbyMember
             {
                 public ulong m_SteamID;
                 public List<LobbyMetaData> m_Data;
@@ -492,7 +547,7 @@ namespace SKYNET.Steamworks.Implementation
                 }
             }
 
-            internal class LobbyMetaData
+            public class LobbyMetaData
             {
                 public string m_Key;
                 public string m_Value;

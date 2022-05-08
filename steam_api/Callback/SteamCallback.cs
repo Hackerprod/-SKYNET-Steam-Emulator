@@ -86,12 +86,10 @@ namespace Steamworks
             if (HasResult)
             {
                 Run(pvParam, bIOFailure, hSteamAPICall);
-                SteamEmulator.Debug($"Called Run(IntPtr, bool, SteamAPICall_t) function in callback {data.CallbackType} {hSteamAPICall}");
             }
             else
             {
                 Run(pvParam);
-                SteamEmulator.Debug($"Called Run(IntPtr) function in callback {data.CallbackType} {hSteamAPICall}");
             }
 
 

@@ -14,18 +14,20 @@ namespace SKYNET.Managers
     public unsafe class CallbackManager
     {
         public static ConcurrentDictionary<CallbackType, SteamCallback> SteamCallbacks;
-        public static Dictionary<SteamAPICall_t, ICallbackData> CallbackResults { get; set; }
-        public static List<ICallbackData> Callbacks { get; set; }
+        public static ConcurrentDictionary<SteamAPICall_t, CallbackMessage> CallbackResults { get; set; }
+        public static List<CallbackMessage> Callbacks { get; set; }
 
         public static SteamAPICall_t CurrentCall;
+
+        private const int CallbackTimeOut = 20;
 
         static CallbackManager()
         {
             CurrentCall = 1000000000;
 
             SteamCallbacks = new ConcurrentDictionary<CallbackType, SteamCallback>();
-            CallbackResults = new Dictionary<SteamAPICall_t, ICallbackData>();
-            Callbacks = new List<ICallbackData>();
+            CallbackResults = new ConcurrentDictionary<SteamAPICall_t, CallbackMessage>();
+            Callbacks = new List<CallbackMessage>();
         }
 
         public static void RegisterCallback(SteamCallback sCallback)
@@ -55,8 +57,6 @@ namespace SKYNET.Managers
 
         public static void RegisterCallResult(SteamCallback steamCallback)
         {
-            Write($"RegisterCallResult: Processing callback {steamCallback.SteamAPICall}");
-
             MutexHelper.Wait("RegisterCallResult", delegate
             {
                 try
@@ -85,15 +85,13 @@ namespace SKYNET.Managers
             });
         }
 
-        public static SteamAPICall_t AddCallbackResult(ICallbackData data)
+        public static SteamAPICall_t AddCallbackResult(ICallbackData data, bool readyToCall = true)
         {
-            //return CallbackWrapper.AddCallbackResult(data);
-
             CurrentCall++;
 
             MutexHelper.Wait("CallbackResults", delegate
             {
-                CallbackResults.Add(CurrentCall, data);
+                CallbackResults.TryAdd(CurrentCall, new CallbackMessage(data, readyToCall));
             });
 
             Write($"Added CallbackResult {CurrentCall} {((int)data.CallbackType).GetCallbackType()} {data.CallbackType} ");
@@ -101,13 +99,11 @@ namespace SKYNET.Managers
             return CurrentCall;
         }
 
-        public static void AddCallback(ICallbackData data)
+        public static void AddCallback(ICallbackData data, bool readyToCall = true)
         {
-            //return CallbackWrapper.AddCallbackResult(data);
-
             MutexHelper.Wait("Callbacks", delegate
             {
-                Callbacks.Add(data);
+                Callbacks.Add(new CallbackMessage(data, readyToCall));
             });
 
             Write($"Added Callback {CurrentCall} {((int)data.CallbackType).GetCallbackType()} {data.CallbackType} ");
@@ -122,34 +118,53 @@ namespace SKYNET.Managers
                     try
                     {
                         SteamAPICall_t APICall = KV.Key;
-                        ICallbackData callbackData = KV.Value;
+                        ICallbackData callbackData = KV.Value.Data;
 
-                        MutexHelper.Wait("SteamCallbacks", delegate
+                        if (!KV.Value.ReadyToCall)
                         {
-                            if (SteamCallbacks.ContainsKey(callbackData.CallbackType))
-                            {
-                                SteamEmulator.Debug($"Foooooooooooooooooooooooooooound in RunCallbacks, {callbackData.CallbackType}");
-                                SteamEmulator.Debug($"Found callback {callbackData.CallbackType}");
+                            goto Skip;
+                        }
 
-                                SteamCallback Callback = SteamCallbacks[callbackData.CallbackType];
-                                Callback.Run(callbackData, false, APICall);
-                                CallbackResults.Remove(APICall);
-                            }
-                            else
+                        if (KV.Value.Called)
+                        {
+                            CallbackResults.TryRemove(APICall, out _);
+                        }
+                        else
+                        {
+                            MutexHelper.Wait("SteamCallbacks", delegate
                             {
-                                var Callback = SteamCallbacks.Where(c => c.Value.CallbackType == callbackData.CallbackType).Select(c => c.Value).FirstOrDefault();
-                                if (Callback != null)
+                                if (SteamCallbacks.ContainsKey(callbackData.CallbackType))
                                 {
-                                    SteamEmulator.Debug($"Yeeeeeeeeeeeeeeeeeeeeeeeeeeees in RunCallbacks, {callbackData.CallbackType}");
+                                    SteamEmulator.Debug($"Found callback {callbackData.CallbackType}");
+
+                                    SteamCallback Callback = SteamCallbacks[callbackData.CallbackType];
+                                    if (true)
+                                    {
+
+                                    }
                                     Callback.Run(callbackData, false, APICall);
-                                    CallbackResults.Remove(APICall);
+                                    KV.Value.Called = true;
+                                    Write($"Called function (IntPtr, bool, SteamAPICall_t) in {callbackData.CallbackType} callback");
                                 }
                                 else
                                 {
-                                    SteamEmulator.Debug($"not found callback for {callbackData.CallbackType}", ConsoleColor.Green);
+                                    var Callback = SteamCallbacks.Where(c => c.Value.CallbackType == callbackData.CallbackType).Select(c => c.Value).FirstOrDefault();
+                                    if (Callback != null)
+                                    {
+                                        Callback.Run(callbackData, false, APICall);
+                                        KV.Value.Called = true;
+                                        Write($"Called function (IntPtr, bool, SteamAPICall_t) in {callbackData.CallbackType} callback");
+
+                                    }
+                                    else
+                                    {
+                                        //SteamEmulator.Debug($"not found callback for {callbackData.CallbackType}", ConsoleColor.Green);
+                                    }
                                 }
-                            }
-                        });
+                            });
+                        }
+
+                        Skip:;
                     }
                     catch (Exception ex)
                     {
@@ -160,32 +175,52 @@ namespace SKYNET.Managers
 
             MutexHelper.Wait("Callbacks", delegate
             {
-                foreach (var callbackData in Callbacks)
+                for (int i = 0; i < Callbacks.Count; i++)
                 {
-                    SteamEmulator.Debug($"In Callbacks list {callbackData.CallbackType}", ConsoleColor.Yellow);
-
-                    try
+                    var callbackMessage = Callbacks[i];
+                    if (callbackMessage.Called)
                     {
-                        var Callback = SteamCallbacks.Where(c => c.Value.CallbackType == callbackData.CallbackType).Select(c => c.Value).FirstOrDefault();
-                        if (Callback != null)
-                        {
-                            SteamEmulator.Debug($"Yeeeeeeeeeeeeeeeeeeeeeeeeeeees in RunCallbacks, {callbackData.CallbackType}");
-                            Callback.Run(callbackData);
-                        }
-                        else
-                        {
-                            SteamEmulator.Debug($"not found callback for {callbackData.CallbackType}", ConsoleColor.Green);
-                        }
+                        Callbacks.RemoveAt(i);
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        Write("" + ex);
+                        if (!callbackMessage.ReadyToCall)
+                        {
+                            goto Skip;
+                        }
+
+                        var data = callbackMessage.Data;
+                        try
+                        {
+                            var Callback = SteamCallbacks.Where(c => c.Value.CallbackType == data.CallbackType).Select(c => c.Value).FirstOrDefault();
+                            if (Callback != null)
+                            {
+                                Callback.Run(data);
+                                callbackMessage.Called = true;
+                                Write($"Called function Run(IntPtr) in {data.CallbackType} callback");
+                            }
+                            else
+                            {
+                                //SteamEmulator.Debug($"not found callback for {data.CallbackType}", ConsoleColor.Green);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Write("" + ex);
+                        }
+
+                        Skip:;
                     }
                 }
             });
         }
 
-        internal static bool IsCompleted(ulong hSteamAPICall)
+        public static bool UnregisterCallResult(SteamCallback pCallback, ulong hAPICall)
+        {
+            return CallbackResults.TryRemove(hAPICall, out _);
+        }
+
+        public static bool IsCompleted(ulong hSteamAPICall)
         {
             bool Result = false;
             MutexHelper.Wait("SteamCallbacks", delegate
@@ -201,9 +236,10 @@ namespace SKYNET.Managers
             return Result;
         }
 
-        internal static void UnregisterCallback(IntPtr pCallback)
+        public static bool UnregisterCallback(SteamCallback pCallback)
         {
-            CCallbackBase Callback = pCallback.ToType<CCallbackBase>();
+            var Type = pCallback.CallbackType;
+            return SteamCallbacks.TryRemove(Type, out _);
         }
 
         private static void Write(string v)

@@ -66,7 +66,7 @@ namespace SKYNET.Interface
             SteamEmulator.SteamMatchmaking.AddRequestLobbyListCompatibleMembersFilter(steamIDLobby);
         }
 
-        public ulong GetLobbyByIndex(IntPtr _, int iLobby)
+        public CSteamID GetLobbyByIndex(IntPtr _, int iLobby)
         {
             return SteamEmulator.SteamMatchmaking.GetLobbyByIndex(iLobby);
         }
@@ -96,7 +96,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamMatchmaking.GetNumLobbyMembers(steamIDLobby);
         }
 
-        public ulong GetLobbyMemberByIndex(IntPtr _, ulong steamIDLobby, int iMember)
+        public CSteamID GetLobbyMemberByIndex(IntPtr _, ulong steamIDLobby, int iMember)
         {
             return SteamEmulator.SteamMatchmaking.GetLobbyMemberByIndex(steamIDLobby, iMember);
         }
@@ -181,7 +181,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamMatchmaking.SetLobbyJoinable(steamIDLobby, bLobbyJoinable);
         }
 
-        public ulong GetLobbyOwner(IntPtr _, ulong steamIDLobby)
+        public CSteamID GetLobbyOwner(IntPtr _, ulong steamIDLobby)
         {
             return SteamEmulator.SteamMatchmaking.GetLobbyOwner(steamIDLobby);
         }

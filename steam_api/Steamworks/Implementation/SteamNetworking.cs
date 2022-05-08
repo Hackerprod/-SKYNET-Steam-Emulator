@@ -1,4 +1,5 @@
 ﻿using SKYNET;
+using SKYNET.Callback;
 using SKYNET.Helper;
 using SKYNET.Managers;
 using SKYNET.Network.Packets;
@@ -12,12 +13,12 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamNetworking : ISteamInterface
     {
-        public List<NET_P2PMessage> P2PIncoming { get; set; }
+        public List<NET_P2PPacket> P2PIncoming { get; set; }
 
         public SteamNetworking()
         {
             InterfaceName = "SteamNetworking";
-            P2PIncoming = new List<NET_P2PMessage>();
+            P2PIncoming = new List<NET_P2PPacket>();
         }
 
         public bool SendP2PPacket(ulong steamIDRemote, IntPtr pubData, uint cubData, int eP2PSendType, int nChannel)
@@ -29,6 +30,7 @@ namespace SKYNET.Steamworks.Implementation
             }
             byte[] bytes = pubData.GetBytes(cubData);
             NetworkManager.SendP2PTo(steamIDRemote, bytes, eP2PSendType, nChannel);
+
             return true;
         }
 
@@ -53,7 +55,7 @@ namespace SKYNET.Steamworks.Implementation
         public bool AcceptP2PSessionWithUser(ulong steamIDRemote)
         {
             Write("AcceptP2PSessionWithUser");
-            return false;
+            return true;
         }
 
         public bool CloseP2PSessionWithUser(ulong steamIDRemote)

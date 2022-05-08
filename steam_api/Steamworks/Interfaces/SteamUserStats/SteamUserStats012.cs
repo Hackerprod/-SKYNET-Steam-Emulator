@@ -13,7 +13,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUserStats.RequestCurrentStats();
         }
 
-        public bool GetStat(IntPtr _, string pchName, ref int pData)
+        public bool GetStat(IntPtr _, string pchName, ref uint pData)
         {
             return SteamEmulator.SteamUserStats.GetStat(pchName, ref pData);
         }

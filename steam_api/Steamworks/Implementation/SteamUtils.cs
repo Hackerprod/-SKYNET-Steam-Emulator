@@ -157,10 +157,10 @@ namespace SKYNET.Steamworks.Implementation
             {
                 Write($"GetAPICallResult {handle}");
 
-                if (CallbackManager.CallbackResults.TryGetValue(handle, out var data))
+                if (CallbackManager.CallbackResults.TryGetValue(handle, out var cMessage))
                 {
-                    callback_size = data.DataSize;
-                    Marshal.StructureToPtr(data, callback, false);
+                    callback_size = cMessage.Data.DataSize;
+                    Marshal.StructureToPtr(cMessage.Data, callback, false);
                     failed = false;
                 }
                 failed = true;

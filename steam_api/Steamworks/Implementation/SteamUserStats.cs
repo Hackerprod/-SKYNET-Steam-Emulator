@@ -4,6 +4,7 @@ using SKYNET.Helper.JSON;
 using SKYNET.Managers;
 using SKYNET.Types;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -17,6 +18,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         private List<Leaderboard> Leaderboards;
         private List<Achievement> Achievements;
+        private ConcurrentDictionary<ulong, List<PlayerStat>> UserStats;
         private SteamAPICall_t k_uAPICallInvalid = 0x0;
 
         public SteamUserStats()
@@ -24,12 +26,24 @@ namespace SKYNET.Steamworks.Implementation
             InterfaceName = "SteamUserStats";
             Leaderboards = new List<Leaderboard>();
             Achievements = new List<Achievement>();
+            UserStats = new ConcurrentDictionary<ulong, List<PlayerStat>>();
+            UserStats.TryAdd((ulong)SteamEmulator.SteamId, new List<PlayerStat>());
 
             string achievementsPath = Path.Combine(modCommon.GetPath(), "SKYNET", "Storage", "Achievements.json");
             if (File.Exists(achievementsPath))
             {
                 string fileContent = File.ReadAllText(achievementsPath);
                 Achievements = fileContent.FromJson<List<Achievement>>();
+            }
+
+            if (UserStats.TryGetValue((ulong)SteamEmulator.SteamId, out var StatsList))
+            {
+                string UserStatsPath = Path.Combine(modCommon.GetPath(), "SKYNET", "Storage", "UserStats.json");
+                if (File.Exists(UserStatsPath))
+                {
+                    string fileContent = File.ReadAllText(UserStatsPath);
+                    StatsList = fileContent.FromJson<List<PlayerStat>>();
+                }
             }
         }
 
@@ -54,24 +68,53 @@ namespace SKYNET.Steamworks.Implementation
             }
         }
 
-        public bool GetStat(string pchName, ref int pData)
+        public bool GetStat(string pchName, ref uint pData)
         {
-            Write($"GetStat {pchName}");
-            if (string.IsNullOrEmpty(pchName) || pData == 0) return false;
-            return false;
+            bool Result = false;
+            if (UserStats.TryGetValue((ulong)SteamEmulator.SteamId, out var userStats))
+            {
+                var statsList = userStats.Find(n => n.Name == pchName);
+                pData = (statsList == null) ? 0 : statsList.Data;
+                Result = true;
+            }
+            Write($"GetStat (Name = {pchName}, out Data = {pData}) = {Result}");
+            return Result;
         }
 
         public bool GetStat(string pchName, ref float pData)
         {
-            Write($"GetStat {pchName}");
-            if (string.IsNullOrEmpty(pchName) || pData == 0) return false;
-            return false;
+            bool Result = false;
+            if (UserStats.TryGetValue((ulong)SteamEmulator.SteamId, out var userStats))
+            {
+                var statsList = userStats.Find(n => n.Name == pchName);
+                pData = (statsList == null) ? 0 : statsList.Data;
+                Result = true;
+            }
+            Write($"GetStat (Name = {pchName}, out Data = {pData}) = {Result}");
+            return Result;
         }
 
         public bool SetStat(string pchName, uint nData)
         {
-            Write($"SetStat {pchName}");
-            return false;
+            Write($"SetStat (Name = {pchName}, Data = {nData})");
+
+            bool Result = false;
+            if (UserStats.TryGetValue((ulong)SteamEmulator.SteamId, out var userStats))
+            {
+                var statsList = userStats.Find(n => n.Name == pchName);
+                if (statsList == null)
+                {
+                    userStats.Add(new PlayerStat() { Name = pchName, Data = nData });
+                }
+                else
+                {
+                    statsList.Data = nData;
+                }
+                Result = true;
+            }
+            Write($"SetStat (Name = {pchName}, Data = {nData}) = {Result}");
+            SaveUserStats();
+            return Result;
         }
 
         public bool UpdateAvgRateStat(string pchName, float flCountThisSession, double dSessionLength)
@@ -176,6 +219,7 @@ namespace SKYNET.Steamworks.Implementation
                     m_eResult = SKYNET.Types.EResult.k_EResultOK
                 };
                 CallbackManager.AddCallbackResult(data);
+                SaveUserStats();
                 return true;
             }
             catch (Exception ex)
@@ -255,7 +299,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             try
             {
-                Write($"RequestUserStats");
+                Write($"RequestUserStats {steamIDUser}");
                 UserStatsReceived_t data = new UserStatsReceived_t()
                 {
                     m_nGameID = SteamEmulator.GameID,
@@ -273,25 +317,44 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool GetUserStat(ulong steamIDUser, string pchName, uint pData)
         {
-            Write($"GetUserStat");
-            return false;
+
+            bool Result = false;
+            if (UserStats.TryGetValue(steamIDUser, out var userStats))
+            {
+                var statsList = userStats.Find(n => n.Name == pchName);
+                pData = (statsList == null) ? 0 : statsList.Data;
+                Result = true;
+            }
+            else
+            {
+                // TODO: Request through socket
+            }
+            Write($"GetUserStat (SteamID = {steamIDUser}, Name = {pchName}, Data = {pData}) = {Result}");
+            return Result;
         }
 
         public bool GetUserAchievement(ulong steamIDUser, string pchName, bool pbAchieved)
         {
-            Write($"GetUserAchievement");
+            Write($"GetUserAchievement (SteamID: {steamIDUser}, Name: {pchName})");
             bool Result = false;
             bool Archived = false;
-            MutexHelper.Wait("GetUserAchievement", delegate
+            if (steamIDUser == (ulong)SteamEmulator.SteamId)
             {
-                var achievement = Achievements.Find(a => a.Name == pchName);
-                if (achievement != null)
+                MutexHelper.Wait("GetUserAchievement", delegate
                 {
-                    Archived = achievement.Earned;
-                    pbAchieved = false;
-                    Result = true;
-                }
-            });
+                    var achievement = Achievements.Find(a => a.Name == pchName);
+                    if (achievement != null)
+                    {
+                        Archived = achievement.Earned;
+                        pbAchieved = false;
+                        Result = true;
+                    }
+                });
+            }
+            else
+            {
+                // TODO: Request through socket
+            }
             return Result;
         }
 
@@ -304,6 +367,9 @@ namespace SKYNET.Steamworks.Implementation
         public bool ResetAllStats(bool bAchievementsToo)
         {
             Write($"ResetAllStats");
+            UserStats.Clear();
+            if (bAchievementsToo)
+                Achievements.Clear();
             return false;
         }
 
@@ -482,13 +548,13 @@ namespace SKYNET.Steamworks.Implementation
         {
             try
             {
-                Write($"RequestGlobalStats");
-                //GlobalStatsReceived_t data = new GlobalStatsReceived_t()
-                //{
-                //    m_eResult = EResult.k_EResultOK,
-                //    m_nGameID = SteamEmulator.GameID
-                //};
-                //return CallbackManager.AddCallbackResult(data, GlobalStatsReceived_t.k_iCallback);
+                Write($"RequestGlobalStats {nHistoryDays} days");
+                GlobalStatsReceived_t data = new GlobalStatsReceived_t()
+                {
+                    m_eResult = EResult.k_EResultOK,
+                    m_nGameID = SteamEmulator.GameID
+                };
+                return CallbackManager.AddCallbackResult(data);
             }
             catch (Exception ex)
             {
@@ -500,6 +566,7 @@ namespace SKYNET.Steamworks.Implementation
         public bool GetGlobalStat(string pchStatName, uint pData)
         {
             Write($"GetGlobalStat {pchStatName}");
+            // TODO
             return false;
         }
 
@@ -529,6 +596,28 @@ namespace SKYNET.Steamworks.Implementation
             }
         }
 
+        private void SaveUserStats()
+        {
+            if (UserStats.TryGetValue((ulong)SteamEmulator.SteamId, out var StatsList))
+            {
+                MutexHelper.Wait("SaveUserStats", delegate
+                {
+                    try
+                    {
+                        string UserStatsPath = Path.Combine(modCommon.GetPath(), "SKYNET", "Storage", "UserStats.json");
+                        modCommon.EnsureDirectoryExists(UserStatsPath, true);
+                        string json = StatsList.ToJson();
+                        File.WriteAllText(UserStatsPath, json);
+                    }
+                    catch (Exception ex)
+                    {
+                        Write(ex);
+                    }
+                });
+            }
+        }
+
+
         private class Achievement
         {
             public string Name { get; set; }
@@ -544,6 +633,12 @@ namespace SKYNET.Steamworks.Implementation
             public ELeaderboardSortMethod ShortMethod { get; set; }
             public ELeaderboardDisplayType DisplayType { get; set; }
             public SteamLeaderboard_t SteamLeaderboard { get; set; }
+        }
+
+        private class PlayerStat
+        {
+            public string Name { get; set; }
+            public uint Data { get; set; }
         }
     }
 }

@@ -30,7 +30,7 @@ namespace SKYNET.Steamworks.Implementation
         public CSteamID GetSessionSteamID(RemotePlaySessionID_t unSessionID)
         {
             Write("GetSessionSteamID");
-            return new CSteamID();
+            return CSteamID.CreateOne();
         }
 
         public string GetSessionClientName(RemotePlaySessionID_t unSessionID)

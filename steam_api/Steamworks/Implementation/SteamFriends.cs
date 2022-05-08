@@ -93,7 +93,7 @@ namespace SKYNET.Steamworks.Implementation
             Users.Add(new Types.SteamUser()
             {
                 AccountId = 1001,
-                GameId = 570,
+                GameId = SteamEmulator.GameID,
                 HasFriend = true,
                 PersonaName = "Yohel.com",
                 SteamId = (ulong)new CSteamID(1001),
@@ -102,7 +102,7 @@ namespace SKYNET.Steamworks.Implementation
             Users.Add(new Types.SteamUser()
             {
                 AccountId = 1002,
-                GameId = 570,
+                GameId = SteamEmulator.GameID,
                 HasFriend = true,
                 PersonaName = "Elier",
                 SteamId = (ulong)new CSteamID(1002),
@@ -111,7 +111,7 @@ namespace SKYNET.Steamworks.Implementation
             Users.Add(new Types.SteamUser()
             {
                 AccountId = 1003,
-                GameId = 570,
+                GameId = SteamEmulator.GameID,
                 HasFriend = true,
                 PersonaName = "BrolySSL",
                 SteamId = (ulong)new CSteamID(1003),
@@ -323,7 +323,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             string msg = $"GetFriendByIndex, Index: {iFriend} | ";
             CSteamID Result = new CSteamID(0);
-            int index = iFriendFlags; // BUG Take flags as index
+            int index = iFriend; // iFriendFlags; // BUG Take flags as index
 
             MutexHelper.Wait("GetFriendByIndex", delegate
             {
@@ -382,7 +382,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool GetFriendGamePlayed(ulong steamIDFriend, IntPtr ptrFriendGameInfo)
         {
-            Write($"GetFriendGamePlayed {(CSteamID)steamIDFriend}");
+            Write($"GetFriendGamePlayed {steamIDFriend}");
 
             bool Result = false;
             FriendGameInfo_t pFriendGameInfo = Marshal.PtrToStructure<FriendGameInfo_t>(ptrFriendGameInfo);

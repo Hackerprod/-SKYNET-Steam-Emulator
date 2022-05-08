@@ -24,7 +24,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUserStats_GetStat(IntPtr _, string pchName, ref int pData)
+        public static bool SteamAPI_ISteamUserStats_GetStat(IntPtr _, string pchName, ref uint pData)
         {
             Write("SteamAPI_ISteamUserStats_GetStat");
             return SteamEmulator.SteamUserStats.GetStat(pchName, ref pData);

@@ -930,7 +930,7 @@ namespace SKYNET.Steamworks
     //
     // EChatRoomEnterResponse
     //
-    public enum RoomEnter : int
+    public enum EChatRoomEnterResponse : int
     {
         Success = 1,
         DoesntExist = 2,

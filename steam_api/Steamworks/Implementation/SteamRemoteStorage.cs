@@ -40,12 +40,12 @@ namespace SKYNET.Steamworks.Implementation
             {
                 if (SteamEmulator.Hooked)
                 {
-                    StoragePath = Path.Combine(SteamEmulator.EmulatorPath, "SKYNET", "Storage", SteamEmulator.AppId.ToString(), "remote");
+                    StoragePath = Path.Combine(SteamEmulator.EmulatorPath, "SKYNET", "Storage", "Remote", SteamEmulator.AppId.ToString(), "remote");
                     modCommon.EnsureDirectoryExists(StoragePath);
                 }
                 else
                 {
-                    StoragePath = Path.Combine(modCommon.GetPath(), "SKYNET", "Storage");
+                    StoragePath = Path.Combine(modCommon.GetPath(), "SKYNET", "Storage", "Remote");
                     modCommon.EnsureDirectoryExists(StoragePath);
                 }
             }
@@ -59,7 +59,7 @@ namespace SKYNET.Steamworks.Implementation
 
         }
 
-        public bool FileWrite(string pchFile, string pvData, int cubData)
+        public bool FileWrite(string pchFile, IntPtr pvData, int cubData)
         {
             bool Result = false;
             MutexHelper.Wait("FileWrite", delegate
@@ -67,7 +67,7 @@ namespace SKYNET.Steamworks.Implementation
                 try
                 {
                     string fullPath = Path.Combine(StoragePath, pchFile);
-                    byte[] buffer = Encoding.Default.GetBytes(pvData);
+                    byte[] buffer = pvData.GetBytes(cubData);
                     File.WriteAllBytes(fullPath, buffer);
                     Write($"FileWrite {pchFile}, {buffer.Length} bytes");
                     Result = true;
@@ -84,7 +84,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"FileRead {pchFile}");
             int Result = 0;
-            string Data = "";
+            byte[] bytes = default;
 
             MutexHelper.Wait("FileRead", delegate
             {
@@ -93,8 +93,8 @@ namespace SKYNET.Steamworks.Implementation
                     string fullPath = Path.Combine(StoragePath, pchFile);
                     if (File.Exists(fullPath))
                     {
-                        Data = File.ReadAllText(fullPath);
-                        Result = Data.Length;
+                        bytes = File.ReadAllBytes(fullPath);
+                        Result = bytes.Length;
                     }
                 }
                 catch (Exception ex)
@@ -104,9 +104,8 @@ namespace SKYNET.Steamworks.Implementation
                 }
             });
 
-            if (Data.Length > 0)
+            if (bytes != null && bytes.Length > 0)
             {
-                byte[] bytes = Encoding.Default.GetBytes(Data);
                 Marshal.Copy(bytes, 0, pvData, bytes.Length);
                 Result = bytes.Length;
             }
@@ -114,22 +113,23 @@ namespace SKYNET.Steamworks.Implementation
             return Result;
         }
 
-        public SteamAPICall_t FileWriteAsync(string pchFile, string pvData, uint cubData)
+        public SteamAPICall_t FileWriteAsync(string pchFile, IntPtr pvData, uint cubData)
         {
-            Write($"FileWriteAsync {pchFile}");
+            Write($"FileWriteAsync {pchFile}, {cubData} bytes");
 
             SteamAPICall_t APICall = k_uAPICallInvalid;
             try
             {
                 string fullPath = Path.Combine(StoragePath, pchFile);
                 modCommon.EnsureDirectoryExists(fullPath, true);
-                byte[] bytes = Encoding.Default.GetBytes(pvData);
+                byte[] bytes = pvData.GetBytes(cubData);
                 File.WriteAllBytes(fullPath, bytes);
 
                 RemoteStorageFileWriteAsyncComplete_t data = new RemoteStorageFileWriteAsyncComplete_t()
                 {
-                    m_eResult = EResult.k_EResultOK
+                    m_eResult = EResult.k_EResultOK,
                 };
+
                 APICall = CallbackManager.AddCallbackResult(data);
             }
             catch
@@ -156,7 +156,7 @@ namespace SKYNET.Steamworks.Implementation
                         data.m_nOffset = nOffset;
                         data.m_cubRead = cubToRead;
                         data.m_eResult = EResult.k_EResultOK;
-                        data.m_hFileReadAsync = (ulong)new CSteamID();
+                        data.m_hFileReadAsync = (ulong)CSteamID.CreateOne();
 
                         if (!AsyncFilesRead.ContainsKey(data.m_hFileReadAsync))
                         {
@@ -183,18 +183,19 @@ namespace SKYNET.Steamworks.Implementation
                 MutexHelper.Wait("FileReadAsyncComplete", delegate
                 {
                     string fullPath = AsyncFilesRead[hReadCall];
-                    string Data = "";
-                    try
+                    byte[] bytes = default;
+                    if (File.Exists(fullPath))
                     {
-                        Data = File.ReadAllText(fullPath);
+                        try
+                        {
+                            bytes = File.ReadAllBytes(fullPath);
+                            Marshal.Copy(bytes, 0, pvBuffer, bytes.Length);
+                        }
+                        catch (Exception ex)
+                        {
+                            Write($"FileRead {fullPath} {ex}");
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        Write($"FileRead {fullPath} {ex}");
-                    }
-
-                    byte[] bytes = Encoding.Default.GetBytes(Data);
-                    Marshal.Copy(bytes, 0, pvBuffer, bytes.Length);
                 });
                 return true;
             }
@@ -247,7 +248,7 @@ namespace SKYNET.Steamworks.Implementation
                     else
                     {
                         data.m_eResult = EResult.k_EResultOK;
-                        data.m_hFile = (ulong)new CSteamID();
+                        data.m_hFile = (ulong)CSteamID.CreateOne();
                         data.m_rgchFilename = Encoding.Default.GetBytes(pchFile);
                         SharedFiles.TryAdd(data.m_hFile, pchFile);
                         APICall = CallbackManager.AddCallbackResult(data);
@@ -309,9 +310,10 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool FileExists(string pchFile)
         {
-            Write($"FileExists {pchFile}");
             string fullPath = Path.Combine(StoragePath, pchFile);
-            return File.Exists(fullPath);
+            bool Exists = File.Exists(fullPath);
+            Write($"FileExists {pchFile} = {Exists}");
+            return Exists;
         }
 
         public bool FilePersisted(string pchFile)
