@@ -1,5 +1,5 @@
 ﻿using SKYNET.Managers;
-using Steamworks;
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,8 +14,9 @@ using SKYNET.Callback;
 using SteamAPICall_t = System.UInt64;
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
+using Steamworks;
 
-namespace SKYNET.Exported
+namespace SKYNET.Steamworks.Exported
 {
     public class SteamAPI
     {
@@ -29,77 +30,10 @@ namespace SKYNET.Exported
             }
             else
             {
-                NetworkManager.AnnounceClient();
                 Write($"SteamAPI_Init : Initialized");
             }
 
             return true;
-        }
-
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public unsafe static void SteamAPI_RegisterCallback(IntPtr pCallback, int iCallback)
-        {
-
-            // Check if Steam emulator is not initialized 
-            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
-            {
-                SteamEmulator.Initialize();
-            }
-
-            if (!SteamEmulator.Initialized) return;
-
-            //try
-            //{
-            //    CCallbackBase Callback = pCallback.ToType<CCallbackBase>();
-
-            //    var callMessage = $"SteamAPI_RegisterCallback: ";
-            //    var CallInterface = iCallback.GetCallbackType();
-            //    var CallType = (CallbackType)iCallback;
-            //    var callback_id = iCallback % 100;
-            //    var isGameServer = Callback.IsGameServer() ? "[ GAMESERVER ]" : "[   CLIENT   ]";
-            //    var space = callback_id < 10 ? " " : "";
-
-            //    callMessage += $"{isGameServer}  {callback_id} {space} {CallInterface} {CallType}";
-
-            //    Write(callMessage);
-
-            //    CallbackManager.RegisterCallback(iCallback, pCallback, Callback.IsGameServer());
-            //}
-            //catch (Exception ex)
-            //{
-            //    Write("SteamAPI_RegisterCallback " + ex.ToString());
-            //}
-        }
-
-
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_RunCallbacks()
-        {
-            ///Write("SteamAPI_RunCallbacks");
-            CallbackManager.RunCallbacks();
-        }
-
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_RegisterCallResult(IntPtr pCallback, SteamAPICall_t hAPICall)
-        {
-            //try
-            //{
-            //    CCallbackBase Callback = pCallback.ToType<CCallbackBase>();
-
-            //    var callMessage = $"SteamAPI_RegisterCallResult: ";
-            //    var CallType = Callback.m_iCallback.GetCallbackType();
-            //    var isGameServer = Callback.IsGameServer() ? "[ GAMESERVER ]" : "[   CLIENT   ]";
-
-            //    callMessage += $"{isGameServer} {CallType}";
-
-            //    Write(callMessage);
-
-            //    CallbackManager.RegisterCallResult(pCallback, hAPICall);
-            //}
-            //catch (Exception ex)
-            //{
-            //    Write($"SteamAPI_RegisterCallResult: {ex}");
-            //}
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -109,17 +43,84 @@ namespace SKYNET.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public unsafe static void SteamAPI_RegisterCallback(IntPtr pCallback, int iCallback)
+        {
+            // Check if Steam emulator is not initialized 
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+
+            if (!SteamEmulator.Initialized) return;
+
+            try
+            {
+                var callMessage = $"SteamAPI_RegisterCallback: ";
+
+                SteamCallback sCallback = new SteamCallback(pCallback, iCallback);
+
+                var isGameServer = sCallback.HasGameserver ? "[ GAMESERVER ]" : "[   CLIENT   ]";
+                var space = (int)sCallback.CallbackType < 1000 ? " " : "";
+
+                callMessage += $"{isGameServer}  {(int)sCallback.CallbackType} {space} {sCallback.BaseType} {sCallback.CallbackType}";
+
+                Write(callMessage);
+
+                CallbackManager.RegisterCallback(sCallback);
+            }
+            catch (Exception ex)
+            {
+                Write("SteamAPI_RegisterCallback " + ex.ToString());
+            }
+        }
+
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_RunCallbacks()
+        {
+            Write("SteamAPI_RunCallbacks");
+            CallbackManager.RunCallbacks();
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_RegisterCallResult(IntPtr pCallback, SteamAPICall_t hAPICall)
+        {
+            try
+            {
+                var callMessage = $"SteamAPI_RegisterCallResult: ";
+
+                SteamCallback sCallback = new SteamCallback(pCallback, true);
+                sCallback.SteamAPICall = hAPICall;
+
+                var isGameServer = sCallback.HasGameserver ? "[ GAMESERVER ]" : "[   CLIENT   ]";
+                var space = (int)sCallback.CallbackType < 1000 ? " " : "";
+
+                callMessage += $"{isGameServer}  {hAPICall}  {(int)sCallback.CallbackType} {space} {sCallback.BaseType} {sCallback.CallbackType}";
+
+                Write(callMessage);
+
+                CallbackManager.RegisterCallResult(sCallback);
+            }
+            catch (Exception ex)
+            {
+                Write($"SteamAPI_RegisterCallResult: {ex}");
+            }
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_UnregisterCallback(IntPtr pCallback)
         {
-            Write($"SteamAPI_UnregisterCallback");
-            CallbackManager.UnregisterCallback(pCallback);
+            SteamCallback sCallback = new SteamCallback(pCallback);
+            string success = CallbackManager.UnregisterCallback(sCallback) ? "OK" : "Error";
+            Write($"SteamAPI_UnregisterCallback {sCallback.CallbackType} {success}");
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_UnregisterCallResult(IntPtr pCallback, SteamAPICall_t hAPICall)
         {
-            Write("SteamAPI_UnregisterCallResult\n");
-            CallbackManager.UnregisterCallResult(pCallback, hAPICall);
+            SteamCallback sCallback = new SteamCallback(pCallback);
+            string success = CallbackManager.UnregisterCallResult(sCallback, hAPICall) ? "OK" : "Error";
+            Write($"SteamAPI_UnregisterCallResult {sCallback.CallbackType} {success}");
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -215,23 +216,33 @@ namespace SKYNET.Exported
             Write($"SteamAPI_UseBreakpadCrashHandler | Date: {pchDate} | Time: {pchTime} | Version : {pchVersion}");
         }
 
+        
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ManualDispatch_Init()
+        {
+            Write($"SteamAPI_ManualDispatch_Init");
+        }
+
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_ManualDispatch_RunFrame(HSteamPipe hSteamPipe)
         {
             Write($"SteamAPI_ManualDispatch_RunFrame");
+            CallbackManager.RunCallbacks();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ManualDispatch_GetNextCallback(HSteamPipe hSteamPipe, IntPtr pCallbackMsg)
         {
             Write($"SteamAPI_ManualDispatch_GetNextCallback");
-            return true;
+            return false;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_ManualDispatch_FreeLastCallback(HSteamPipe hSteamPipe)
         {
             Write($"SteamAPI_ManualDispatch_FreeLastCallback");
+            //Marshal.FreeHGlobal();
         }
 
 
@@ -244,10 +255,11 @@ namespace SKYNET.Exported
 
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_RestartApp(UInt32 appid)
+        public static bool SteamAPI_RestartApp(uint appid)
         {
             Write($"SteamAPI_RestartApp");
-            return SteamAPI_RestartAppIfNecessary(appid);
+            SteamEmulator.AppId = appid;
+            return false;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -257,7 +269,8 @@ namespace SKYNET.Exported
             Msg += "////////////////////////////// Mini Dump Content \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + Environment.NewLine;
             Msg += $"{pchMsg}" + Environment.NewLine;
             Msg += "//////////////////////////////   End Mini Dump   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + Environment.NewLine;
-            Write("SteamAPI_SetMiniDumpComment");
+            Write(Msg);
+            //Write("SteamAPI_SetMiniDumpComment");
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -296,6 +309,13 @@ namespace SKYNET.Exported
         {
             Write($"g_pSteamClientGameServer");
             return InterfaceManager.FindOrCreateInterface("g_pSteamClientGameServer");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static HSteamUser Steam_GetHSteamUserCurrent()
+        {
+            Write($"Steam_GetHSteamUserCurrent");
+            return SteamEmulator.HSteamUser;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -575,233 +595,233 @@ namespace SKYNET.Exported
         public static IntPtr SteamAPI_SteamNetworkingUtils_v003()
         {
             Write($"SteamAPI_SteamNetworkingUtils_v003");
-                        return InterfaceManager.FindOrCreateInterface("SteamNetworkingUtils003");
+            return InterfaceManager.FindOrCreateInterface("SteamNetworkingUtils003");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamGameServerStats_v001()
+        {
+            Write($"SteamAPI_SteamGameServerStats_v001");
+            return InterfaceManager.FindOrCreateInterface("STEAMUSERSTATS_INTERFACE_VERSION001");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAppList()
+        {
+            Write($"SteamAppList");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamAppList.InterfaceVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamApps()
+        {
+            Write($"ISteamApps");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamApps.InterfaceVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamClient()
+        {
+            Write($"SteamClient");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamClient.InterfaceVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamController()
+        {
+            Write($"SteamController");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamController.InterfaceVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamFriends()
+        {
+            Write($"SteamFriends");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamFriends.InterfaceVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamGameServer()
+        {
+            Write($"SteamGameServer");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamGameServer.InterfaceVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamGameServerApps()
+        {
+            Write($"SteamGameServerApps");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamApps.InterfaceVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamGameServerHTTP()
+        {
+            Write($"SteamGameServerHTTP");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamHTTP.InterfaceVersion);
+        }
+
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamGameServerInventory()
+        {
+            Write($"SteamGameServerInventory");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamInventory.InterfaceVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamGameServerNetworking()
+        {
+            Write($"SteamGameServerNetworking");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamNetworking.InterfaceVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamGameServerStats()
+        {
+            Write($"SteamGameServerStats");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamGameServerStats.InterfaceVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamGameServerUGC()
+        {
+            Write($"SteamGameServerUGC");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamUGC.InterfaceVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamGameServerUtils()
+        {
+            Write($"SteamGameServerUtils");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamUtils.InterfaceVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamHTTP()
+        {
+            Write($"SteamHTTP");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamHTTP.InterfaceVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamHTMLSurface()
+        {
+            Write($"SteamHTMLSurface");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamHTMLSurface.InterfaceVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamInventory()
+        {
+            Write($"SteamInventory");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamInventory.InterfaceVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamMasterServerUpdater()
+        {
+            Write($"SteamMasterServerUpdater");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamMasterServerUpdater.InterfaceVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamMatchmaking()
+        {
+            Write($"SteamMatchmaking");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamMatchmaking.InterfaceVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamMatchmakingServers()
+        {
+            Write($"SteamMatchmakingServers");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamMatchMakingServers.InterfaceVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamMusic()
+        {
+            Write($"SteamMusic");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamMusic.InterfaceVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamMusicRemote()
+        {
+            Write($"SteamMusicRemote");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamMusicRemote.InterfaceVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamNetworking()
+        {
+            Write($"SteamNetworking");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamNetworking.InterfaceVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamParentalSettings()
+        {
+            Write($"SteamParentalSettings");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamParentalSettings.InterfaceVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamRemoteStorage()
+        {
+            Write($"SteamRemoteStorage");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamRemoteStorage.InterfaceVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamScreenshots()
+        {
+            Write($"SteamScreenshots");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamScreenshots.InterfaceVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamUGC()
+        {
+            Write($"SteamUGC");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamUGC.InterfaceVersion);
         }
 
         //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamAPI_SteamGameServerStats_v001()
+        //public static ISteamUnifiedMessages SteamUnifiedMessages()
         //{
-        //    Write($"SteamAPI_SteamGameServerStats_v001");
-        //    return SteamEmulator.SteamGameServerStats.MemoryAddress;
+        //    Write($"SteamUnifiedMessages");
+        //    return SteamEmulator.SteamUnifiedMessages;
         //}
 
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamAppList()
-        //{
-        //    Write($"SteamAppList");
-        //    return SteamEmulator.SteamAppList.MemoryAddress;
-        //}
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamUser()
+        {
+            Write($"SteamUser");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamUser.InterfaceVersion);
+        }
 
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamApps()
-        //{
-        //    Write($"ISteamApps");
-        //    return SteamEmulator.SteamApps.MemoryAddress;
-        //}
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamUserStats()
+        {
+            Write($"SteamUserStats");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamUserStats.InterfaceVersion);
+        }
 
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamClient()
-        //{
-        //    Write($"SteamClient");
-        //    return SteamEmulator.SteamClient.MemoryAddress;
-        //}
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamUtils()
+        {
+            Write($"SteamUtils");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamUtils.InterfaceVersion);
+        }
 
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamController()
-        //{
-        //    Write($"SteamController");
-        //    return SteamEmulator.SteamController.MemoryAddress;
-        //}
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamFriends()
-        //{
-        //    Write($"SteamFriends");
-        //    return SteamEmulator.SteamFriends.MemoryAddress;
-        //}
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamGameServer()
-        //{
-        //    Write($"SteamGameServer");
-        //    return SteamEmulator.SteamGameServer.MemoryAddress;
-        //}
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamGameServerApps()
-        //{
-        //    Write($"SteamGameServerApps");
-        //    return SteamEmulator.SteamGameServerApps.MemoryAddress;
-        //}
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamGameServerHTTP()
-        //{
-        //    Write($"SteamGameServerHTTP");
-        //    return SteamEmulator.SteamHTTP.MemoryAddress;
-        //}
-
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamGameServerInventory()
-        //{
-        //    Write($"SteamGameServerInventory");
-        //    return SteamEmulator.SteamGameServerInventory.MemoryAddress;
-        //}
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamGameServerNetworking()
-        //{
-        //    Write($"SteamGameServerNetworking");
-        //    return SteamEmulator.SteamGameServerNetworking.MemoryAddress;
-        //}
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamGameServerStats()
-        //{
-        //    Write($"SteamGameServerStats");
-        //    return SteamEmulator.SteamGameServerStats.MemoryAddress;
-        //}
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamGameServerUGC()
-        //{
-        //    Write($"SteamGameServerUGC");
-        //    return SteamEmulator.SteamUGC.MemoryAddress;
-        //}
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamGameServerUtils()
-        //{
-        //    Write($"SteamGameServerUtils");
-        //    return SteamEmulator.SteamGameServerUtils.MemoryAddress;
-        //}
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamHTTP()
-        //{
-        //    Write($"SteamHTTP");
-        //    return SteamEmulator.SteamHTTP.MemoryAddress;
-        //}
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamHTMLSurface()
-        //{
-        //    Write($"SteamHTMLSurface");
-        //    return SteamEmulator.SteamHTMLSurface.MemoryAddress;
-        //}
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamInventory()
-        //{
-        //    Write($"SteamInventory");
-        //    return SteamEmulator.SteamInventory.MemoryAddress;
-        //}
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamMasterServerUpdater()
-        //{
-        //    Write($"SteamMasterServerUpdater");
-        //    return SteamEmulator.SteamMasterServerUpdater.MemoryAddress;
-        //}
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamMatchmaking()
-        //{
-        //    Write($"SteamMatchmaking");
-        //    return SteamEmulator.SteamMatchmaking.MemoryAddress;
-        //}
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamMatchmakingServers()
-        //{
-        //    Write($"SteamMatchmakingServers");
-        //    return SteamEmulator.SteamMatchMakingServers.MemoryAddress;
-        //}
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamMusic()
-        //{
-        //    Write($"SteamMusic");
-        //    return SteamEmulator.SteamMusic.MemoryAddress;
-        //}
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamMusicRemote()
-        //{
-        //    Write($"SteamMusicRemote");
-        //    return SteamEmulator.SteamMusicRemote.MemoryAddress;
-        //}
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamNetworking()
-        //{
-        //    Write($"SteamNetworking");
-        //    return SteamEmulator.SteamNetworking.MemoryAddress;
-        //}
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamParentalSettings()
-        //{
-        //    Write($"SteamParentalSettings");
-        //    return SteamEmulator.SteamParentalSettings.MemoryAddress;
-        //}
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamRemoteStorage()
-        //{
-        //    Write($"SteamRemoteStorage");
-        //    return SteamEmulator.SteamRemoteStorage.MemoryAddress;
-        //}
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamScreenshots()
-        //{
-        //    Write($"SteamScreenshots");
-        //    return SteamEmulator.SteamScreenshots.MemoryAddress;
-        //}
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamUGC()
-        //{
-        //    Write($"SteamUGC");
-        //    return SteamEmulator.SteamUGC.MemoryAddress;
-        //}
-
-        ////[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        ////public static ISteamUnifiedMessages SteamUnifiedMessages()
-        ////{
-        ////    Write($"SteamUnifiedMessages");
-        ////    return SteamEmulator.SteamUnifiedMessages;
-        ////}
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamUser()
-        //{
-        //    Write($"SteamUser");
-        //    return SteamEmulator.SteamUser.MemoryAddress;
-        //}
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamUserStats()
-        //{
-        //    Write($"SteamUserStats");
-        //    return SteamEmulator.SteamUserStats.MemoryAddress;
-        //}
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamUtils()
-        //{
-        //    Write($"SteamUtils");
-        //    return SteamEmulator.SteamUtils.MemoryAddress;
-        //}
-
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static IntPtr SteamVideo()
-        //{
-        //    Write($"SteamVideo");
-        //    return SteamEmulator.SteamVideo.MemoryAddress;
-        //}
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamVideo()
+        {
+            Write($"SteamVideo");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamVideo.InterfaceVersion);
+        }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void VR_GetGenericInterface(string pchInterfaceVersion, int peError)

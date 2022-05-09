@@ -1,4 +1,4 @@
-﻿namespace Steamworks
+﻿namespace SKYNET.Steamworks
 {
     public static class Constants
     {

@@ -1,8 +1,8 @@
-using Steamworks;
+
 using System;
 using SteamAPICall_t = System.UInt64;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("STEAMUSERSTATS_INTERFACE_VERSION011")]
     [Interface("STEAMUSERSTATS_INTERFACE_VERSION012")]
@@ -13,7 +13,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUserStats.RequestCurrentStats();
         }
 
-        public bool GetStat(IntPtr _, string pchName, ref int pData)
+        public bool GetStat(IntPtr _, string pchName, ref uint pData)
         {
             return SteamEmulator.SteamUserStats.GetStat(pchName, ref pData);
         }
@@ -38,9 +38,9 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUserStats.UpdateAvgRateStat(pchName, flCountThisSession, dSessionLength);
         }
 
-        public bool GetAchievement(IntPtr _, string pchName, bool pbAchieved)
+        public bool GetAchievement(IntPtr _, string pchName, ref bool pbAchieved)
         {
-            return SteamEmulator.SteamUserStats.GetAchievement(pchName, pbAchieved);
+            return SteamEmulator.SteamUserStats.GetAchievement(pchName, ref pbAchieved);
         }
 
         public bool SetAchievement(IntPtr _, string pchName)
@@ -53,9 +53,9 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUserStats.ClearAchievement(pchName);
         }
 
-        public bool GetAchievementAndUnlockTime(IntPtr _, string pchName, bool pbAchieved, uint punUnlockTime)
+        public bool GetAchievementAndUnlockTime(IntPtr _, string pchName, ref bool pbAchieved, ref uint punUnlockTime)
         {
-            return SteamEmulator.SteamUserStats.GetAchievementAndUnlockTime(pchName, pbAchieved, punUnlockTime);
+            return SteamEmulator.SteamUserStats.GetAchievementAndUnlockTime(pchName, ref pbAchieved, ref punUnlockTime);
         }
 
         public bool StoreStats(IntPtr _)

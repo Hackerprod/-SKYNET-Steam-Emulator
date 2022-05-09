@@ -3,11 +3,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using SKYNET;
 using SKYNET.Helper;
-using SKYNET.Helpers;
 using SKYNET.Managers;
-using SKYNET.Steamworks;
-using Steamworks;
-
 using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Implementation
@@ -15,10 +11,11 @@ namespace SKYNET.Steamworks.Implementation
     public class SteamUtils : ISteamInterface
     {
         SteamAPICall_t k_uAPICallInvalid = 0x0;
-        private DateTime ActiveTime;
+        public DateTime ActiveTime;
+
         public SteamUtils()
         {
-            InterfaceVersion = "SteamUtils";
+            InterfaceName = "SteamUtils";
             ActiveTime = DateTime.Now;
         }
 
@@ -31,13 +28,13 @@ namespace SKYNET.Steamworks.Implementation
         public uint GetSecondsSinceComputerActive()
         {
             Write("GetSecondsSinceComputerActive");
-            return (uint)(DateTime.Now - ActiveTime).Seconds + 3000;
+            return (uint)modCommon.GetInactiveTimeSpan().Value.Seconds;
         }
 
-        public EUniverse GetConnectedUniverse()
+        public int GetConnectedUniverse()
         {
             Write("GetConnectedUniverse");
-            return EUniverse.k_EUniversePublic;
+            return (int)EUniverse.k_EUniversePublic;
         }
 
         public uint GetServerRealTime()
@@ -139,42 +136,35 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool IsAPICallCompleted(SteamAPICall_t hSteamAPICall, ref bool pbFailed)
         {
-            Write("IsAPICallCompleted");
-            if (hSteamAPICall == (SteamAPICall_t)1)
+            Write($"IsAPICallCompleted {hSteamAPICall}");
+
+            if (CallbackManager.IsCompleted(hSteamAPICall))
             {
-                if (pbFailed)
-                    pbFailed = true;
                 return true;
             }
-
-            if (CallbackManager.Contains(hSteamAPICall))
-                return false;
-
-            if (pbFailed) pbFailed = false;
-            return true;
+            return false;
         }
 
-        public ESteamAPICallFailure GetAPICallFailureReason(SteamAPICall_t hSteamAPICall)
+        public int GetAPICallFailureReason(SteamAPICall_t hSteamAPICall)
         {
             Write("GetAPICallFailureReason");
-            return ESteamAPICallFailure.k_ESteamAPICallFailureNone;
+            return (int)ESteamAPICallFailure.k_ESteamAPICallFailureNone;
         }
 
         public bool GetAPICallResult(SteamAPICall_t handle, IntPtr callback, int callback_size, int callback_expected, ref bool failed)
         {
             try
             {
-                Write("GetAPICallResult");
-                //var result = CallbackManager.GetCallResult(handle, callback, callback_size, callback_expected);
+                Write($"GetAPICallResult {handle}");
 
-                //if (result == null)
-                //{
-                //    failed = true;
-                //    return false;
-                //}
-
-                //Marshal.Copy(result, 0, callback, callback_size);
-                //return !failed;
+                if (CallbackManager.CallbackResults.TryGetValue(handle, out var cMessage))
+                {
+                    callback_size = cMessage.Data.DataSize;
+                    Marshal.StructureToPtr(cMessage.Data, callback, false);
+                    failed = false;
+                }
+                failed = true;
+                return false;
             }
             catch (Exception ex)
             {
@@ -202,7 +192,7 @@ namespace SKYNET.Steamworks.Implementation
         public bool IsOverlayEnabled()
         {
             Write("IsOverlayEnabled");
-            return false;
+            return true;
         }
 
         public bool BOverlayNeedsPresent()
@@ -299,10 +289,10 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public ESteamIPv6ConnectivityState GetIPv6ConnectivityState(int eProtocol)
+        public int GetIPv6ConnectivityState(int eProtocol)
         {
             Write("GetIPv6ConnectivityState");
-            return ESteamIPv6ConnectivityState.k_ESteamIPv6ConnectivityState_Unknown;
+            return (int)ESteamIPv6ConnectivityState.k_ESteamIPv6ConnectivityState_Unknown;
         }
     }
 }

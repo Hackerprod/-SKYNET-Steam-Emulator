@@ -1,6 +1,7 @@
+using SKYNET.Steamworks;
 using System;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("SteamMatchMaking009")]
     public class SteamMatchMaking009 : ISteamInterface
@@ -65,7 +66,7 @@ namespace SKYNET.Interface
             SteamEmulator.SteamMatchmaking.AddRequestLobbyListCompatibleMembersFilter(steamIDLobby);
         }
 
-        public ulong GetLobbyByIndex(IntPtr _, int iLobby)
+        public CSteamID GetLobbyByIndex(IntPtr _, int iLobby)
         {
             return SteamEmulator.SteamMatchmaking.GetLobbyByIndex(iLobby);
         }
@@ -95,7 +96,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamMatchmaking.GetNumLobbyMembers(steamIDLobby);
         }
 
-        public ulong GetLobbyMemberByIndex(IntPtr _, ulong steamIDLobby, int iMember)
+        public CSteamID GetLobbyMemberByIndex(IntPtr _, ulong steamIDLobby, int iMember)
         {
             return SteamEmulator.SteamMatchmaking.GetLobbyMemberByIndex(steamIDLobby, iMember);
         }
@@ -115,7 +116,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamMatchmaking.GetLobbyDataCount(steamIDLobby);
         }
 
-        public bool GetLobbyDataByIndex(IntPtr _, ulong steamIDLobby, int iLobbyData, string pchKey, int cchKeyBufferSize, string pchValue, int cchValueBufferSize)
+        public bool GetLobbyDataByIndex(IntPtr _, ulong steamIDLobby, int iLobbyData, IntPtr pchKey, int cchKeyBufferSize, IntPtr pchValue, int cchValueBufferSize)
         {
             return SteamEmulator.SteamMatchmaking.GetLobbyDataByIndex(steamIDLobby, iLobbyData, pchKey, cchKeyBufferSize, pchValue, cchValueBufferSize);
         }
@@ -180,7 +181,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamMatchmaking.SetLobbyJoinable(steamIDLobby, bLobbyJoinable);
         }
 
-        public ulong GetLobbyOwner(IntPtr _, ulong steamIDLobby)
+        public CSteamID GetLobbyOwner(IntPtr _, ulong steamIDLobby)
         {
             return SteamEmulator.SteamMatchmaking.GetLobbyOwner(steamIDLobby);
         }

@@ -1,10 +1,11 @@
 ﻿using EasyHook;
 using Microsoft.Win32;
+using SKYNET.Callback;
 using SKYNET.Helpers;
 using SKYNET.Manager;
 using SKYNET.Managers;
 using SKYNET.Types;
-using Steamworks;
+
 using System;
 using System.Runtime.InteropServices;
 

@@ -1,12 +1,6 @@
-﻿using SKYNET.Interface;
-using SKYNET.Steamworks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("SteamGameCoordinator001")]
     public class SteamGameCoordinator001 : ISteamInterface
@@ -16,7 +10,7 @@ namespace SKYNET.Interface
             return (int)SteamEmulator.SteamGameCoordinator.SendMessage(unMsgType, pubData, cubData);
         }
 
-        public bool IsMessageAvailable(IntPtr _, ref uint pcubMsgSize)
+        public bool IsMessageAvailable(IntPtr _, ref int pcubMsgSize)
         {
             return SteamEmulator.SteamGameCoordinator.IsMessageAvailable(ref pcubMsgSize);
         }
@@ -25,7 +19,5 @@ namespace SKYNET.Interface
         {
             return (int)SteamEmulator.SteamGameCoordinator.RetrieveMessage(ref punMsgType, pubDest, cubDest, ref pcubMsgSize);
         }
-
-
     }
 }

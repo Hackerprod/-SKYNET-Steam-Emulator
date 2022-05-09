@@ -1,14 +1,11 @@
-﻿using SKYNET;
-using SKYNET.Callback;
+﻿using SKYNET.Callback;
 using SKYNET.Helper;
-using SKYNET.Helpers;
 using SKYNET.Managers;
-using SKYNET.Steamworks;
 using SKYNET.Types;
-using Steamworks;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -16,12 +13,15 @@ using System.Text;
 
 using SteamAPICall_t = System.UInt64;
 using UGCFileWriteStreamHandle_t = System.UInt64;
+using UGCHandle_t = System.UInt64;
+using PublishedFileUpdateHandle_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Implementation
 {
     public class SteamRemoteStorage : ISteamInterface
     {
         public string StoragePath;
+        public string AvatarCachePath;
         private List<string> StorageFiles;
         private ConcurrentDictionary<ulong, string> SharedFiles;
         private int LastFile;
@@ -30,7 +30,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public SteamRemoteStorage()
         {
-            InterfaceVersion = "SteamRemoteStorage";
+            InterfaceName = "SteamRemoteStorage";
             StorageFiles = new List<string>();
             SharedFiles = new ConcurrentDictionary<ulong, string>();
             AsyncFilesRead = new Dictionary<ulong, string>();
@@ -38,15 +38,14 @@ namespace SKYNET.Steamworks.Implementation
 
             try
             {
-                string MainPath = "";
                 if (SteamEmulator.Hooked)
                 {
-                    StoragePath = Path.Combine(SteamEmulator.EmulatorPath, "SKYNET", "Storage", SteamEmulator.AppId.ToString(), "remote");
+                    StoragePath = Path.Combine(SteamEmulator.EmulatorPath, "SKYNET", "Storage", "Remote", SteamEmulator.AppId.ToString(), "remote");
                     modCommon.EnsureDirectoryExists(StoragePath);
                 }
                 else
                 {
-                    StoragePath = Path.Combine(modCommon.GetPath(), "SKYNET", "Storage");
+                    StoragePath = Path.Combine(modCommon.GetPath(), "SKYNET", "Storage", "Remote");
                     modCommon.EnsureDirectoryExists(StoragePath);
                 }
             }
@@ -54,9 +53,13 @@ namespace SKYNET.Steamworks.Implementation
             {
                 Write($"Error in StoragePath: {ex}");
             }
+
+            AvatarCachePath = Path.Combine(modCommon.GetPath(), "SKYNET", "AvatarCache");
+            modCommon.EnsureDirectoryExists(AvatarCachePath);
+
         }
 
-        public bool FileWrite(string pchFile, string pvData, int cubData)
+        public bool FileWrite(string pchFile, IntPtr pvData, int cubData)
         {
             bool Result = false;
             MutexHelper.Wait("FileWrite", delegate
@@ -64,7 +67,7 @@ namespace SKYNET.Steamworks.Implementation
                 try
                 {
                     string fullPath = Path.Combine(StoragePath, pchFile);
-                    byte[] buffer = Encoding.Default.GetBytes(pvData);
+                    byte[] buffer = pvData.GetBytes(cubData);
                     File.WriteAllBytes(fullPath, buffer);
                     Write($"FileWrite {pchFile}, {buffer.Length} bytes");
                     Result = true;
@@ -81,15 +84,18 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"FileRead {pchFile}");
             int Result = 0;
-            string Data = "";
+            byte[] bytes = default;
 
             MutexHelper.Wait("FileRead", delegate
             {
                 try
                 {
                     string fullPath = Path.Combine(StoragePath, pchFile);
-                    Data = File.ReadAllText(fullPath);
-                    Result = Data.Length;
+                    if (File.Exists(fullPath))
+                    {
+                        bytes = File.ReadAllBytes(fullPath);
+                        Result = bytes.Length;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -98,29 +104,32 @@ namespace SKYNET.Steamworks.Implementation
                 }
             });
 
-            byte[] bytes = Encoding.Default.GetBytes(Data);
-            Marshal.Copy(bytes, 0, pvData, bytes.Length);
-            Result = bytes.Length;
+            if (bytes != null && bytes.Length > 0)
+            {
+                Marshal.Copy(bytes, 0, pvData, bytes.Length);
+                Result = bytes.Length;
+            }
 
             return Result;
         }
 
-        public SteamAPICall_t FileWriteAsync(string pchFile, string pvData, uint cubData)
+        public SteamAPICall_t FileWriteAsync(string pchFile, IntPtr pvData, uint cubData)
         {
-            Write($"FileWriteAsync {pchFile}");
+            Write($"FileWriteAsync {pchFile}, {cubData} bytes");
 
             SteamAPICall_t APICall = k_uAPICallInvalid;
             try
             {
                 string fullPath = Path.Combine(StoragePath, pchFile);
                 modCommon.EnsureDirectoryExists(fullPath, true);
-                byte[] bytes = Encoding.Default.GetBytes(pvData);
+                byte[] bytes = pvData.GetBytes(cubData);
                 File.WriteAllBytes(fullPath, bytes);
 
                 RemoteStorageFileWriteAsyncComplete_t data = new RemoteStorageFileWriteAsyncComplete_t()
                 {
-                    m_eResult = EResult.k_EResultOK
+                    m_eResult = EResult.k_EResultOK,
                 };
+
                 APICall = CallbackManager.AddCallbackResult(data);
             }
             catch
@@ -147,7 +156,7 @@ namespace SKYNET.Steamworks.Implementation
                         data.m_nOffset = nOffset;
                         data.m_cubRead = cubToRead;
                         data.m_eResult = EResult.k_EResultOK;
-                        data.m_hFileReadAsync = (ulong)new CSteamID();
+                        data.m_hFileReadAsync = (ulong)CSteamID.CreateOne();
 
                         if (!AsyncFilesRead.ContainsKey(data.m_hFileReadAsync))
                         {
@@ -174,18 +183,19 @@ namespace SKYNET.Steamworks.Implementation
                 MutexHelper.Wait("FileReadAsyncComplete", delegate
                 {
                     string fullPath = AsyncFilesRead[hReadCall];
-                    string Data = "";
-                    try
+                    byte[] bytes = default;
+                    if (File.Exists(fullPath))
                     {
-                        Data = File.ReadAllText(fullPath);
+                        try
+                        {
+                            bytes = File.ReadAllBytes(fullPath);
+                            Marshal.Copy(bytes, 0, pvBuffer, bytes.Length);
+                        }
+                        catch (Exception ex)
+                        {
+                            Write($"FileRead {fullPath} {ex}");
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        Write($"FileRead {fullPath} {ex}");
-                    }
-
-                    byte[] bytes = Encoding.Default.GetBytes(Data);
-                    Marshal.Copy(bytes, 0, pvBuffer, bytes.Length);
                 });
                 return true;
             }
@@ -197,8 +207,9 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool FileForget(string pchFile)
         {
-            Write("FileForget");
-            return false;
+            Write($"FileForget {pchFile}");
+            string fullPath = Path.Combine(StoragePath, pchFile);
+            return File.Exists(fullPath);
         }
 
         public bool FileDelete(string pchFile)
@@ -237,7 +248,7 @@ namespace SKYNET.Steamworks.Implementation
                     else
                     {
                         data.m_eResult = EResult.k_EResultOK;
-                        data.m_hFile = (ulong)new CSteamID();
+                        data.m_hFile = (ulong)CSteamID.CreateOne();
                         data.m_rgchFilename = Encoding.Default.GetBytes(pchFile);
                         SharedFiles.TryAdd(data.m_hFile, pchFile);
                         APICall = CallbackManager.AddCallbackResult(data);
@@ -299,9 +310,10 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool FileExists(string pchFile)
         {
-            Write($"FileExists {pchFile}");
             string fullPath = Path.Combine(StoragePath, pchFile);
-            return File.Exists(fullPath);
+            bool Exists = File.Exists(fullPath);
+            Write($"FileExists {pchFile} = {Exists}");
+            return Exists;
         }
 
         public bool FilePersisted(string pchFile)
@@ -381,22 +393,24 @@ namespace SKYNET.Steamworks.Implementation
             return "";
         }
 
-        public bool GetQuota(int pnTotalBytes, int puAvailableBytes)
+        public bool GetQuota(ref ulong pnTotalBytes, ref ulong puAvailableBytes)
         {
             Write("GetQuota");
-            return false;
+            pnTotalBytes = 1024 * 1024 * 1024;
+            puAvailableBytes = 1024 * 1024 * 1024;
+            return true;
         }
 
         public bool IsCloudEnabledForAccount()
         {
             Write("IsCloudEnabledForAccount");
-            return false;
+            return true;
         }
 
         public bool IsCloudEnabledForApp()
         {
             Write("IsCloudEnabledForApp");
-            return false;
+            return true;
         }
 
         public void SetCloudEnabledForApp(bool bEnabled)
@@ -404,25 +418,25 @@ namespace SKYNET.Steamworks.Implementation
             Write("SetCloudEnabledForApp");
         }
 
-        public ulong UGCDownload(ulong hContent, uint unPriority)
+        public SteamAPICall_t UGCDownload(UGCHandle_t hContent, uint unPriority)
         {
             Write("UGCDownload");
             return 0;
         }
 
-        public bool GetUGCDownloadProgress(ulong hContent, int pnBytesDownloaded, int pnBytesExpected)
+        public bool GetUGCDownloadProgress(UGCHandle_t hContent, int pnBytesDownloaded, int pnBytesExpected)
         {
             Write("GetUGCDownloadProgress");
             return false;
         }
 
-        public bool GetUGCDetails(ulong hContent, uint pnAppID, string ppchName, int pnFileSizeInBytes, ulong pSteamIDOwner)
+        public bool GetUGCDetails(UGCHandle_t hContent, uint pnAppID, string ppchName, int pnFileSizeInBytes, ulong pSteamIDOwner)
         {
             Write("GetUGCDetails");
             return false;
         }
 
-        public int UGCRead(ulong hContent, IntPtr pvData, int cubDataToRead, uint cOffset, IntPtr eAction)
+        public int UGCRead(UGCHandle_t hContent, IntPtr pvData, int cubDataToRead, uint cOffset, IntPtr eAction)
         {
             Write("UGCRead");
             return 0;
@@ -434,13 +448,13 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public ulong GetCachedUGCHandle(int iCachedContent)
+        public UGCHandle_t GetCachedUGCHandle(int iCachedContent)
         {
             Write("GetCachedUGCHandle");
             return 0;
         }
 
-        public ulong PublishWorkshopFile(string pchFile, string pchPreviewFile, uint nConsumerAppId, string pchTitle, string pchDescription, int eVisibility, IntPtr pTags, int int2)
+        public SteamAPICall_t PublishWorkshopFile(string pchFile, string pchPreviewFile, uint nConsumerAppId, string pchTitle, string pchDescription, int eVisibility, IntPtr pTags, int int2)
         {
             Write("PublishWorkshopFile");
             return 0;
@@ -452,13 +466,13 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public bool UpdatePublishedFileFile(ulong updateHandle, string pchFile)
+        public bool UpdatePublishedFileFile(PublishedFileUpdateHandle_t updateHandle, string pchFile)
         {
             Write("UpdatePublishedFileFile");
             return false;
         }
 
-        public bool UpdatePublishedFilePreviewFile(ulong updateHandle, string pchPreviewFile)
+        public bool UpdatePublishedFilePreviewFile(PublishedFileUpdateHandle_t updateHandle, string pchPreviewFile)
         {
             Write("UpdatePublishedFilePreviewFile");
             return false;
@@ -469,43 +483,43 @@ namespace SKYNET.Steamworks.Implementation
             Write("GetFileListFromServer");
         }
 
-        public bool UpdatePublishedFileTitle(ulong updateHandle, string pchTitle)
+        public bool UpdatePublishedFileTitle(PublishedFileUpdateHandle_t updateHandle, string pchTitle)
         {
             Write("UpdatePublishedFileTitle");
             return false;
         }
 
-        public bool UpdatePublishedFileDescription(ulong updateHandle, string pchDescription)
+        public bool UpdatePublishedFileDescription(PublishedFileUpdateHandle_t updateHandle, string pchDescription)
         {
             Write("UpdatePublishedFileDescription");
             return false;
         }
 
-        public bool UpdatePublishedFileVisibility(ulong updateHandle, int eVisibility)
+        public bool UpdatePublishedFileVisibility(PublishedFileUpdateHandle_t updateHandle, int eVisibility)
         {
             Write("UpdatePublishedFileVisibility");
             return false;
         }
 
-        public bool UpdatePublishedFileTags(ulong updateHandle, IntPtr pTags)
+        public bool UpdatePublishedFileTags(PublishedFileUpdateHandle_t updateHandle, IntPtr pTags)
         {
             Write("UpdatePublishedFileTags");
             return false;
         }
 
-        public ulong CommitPublishedFileUpdate(ulong updateHandle)
+        public SteamAPICall_t CommitPublishedFileUpdate(PublishedFileUpdateHandle_t updateHandle)
         {
             Write("CommitPublishedFileUpdate");
             return 0;
         }
 
-        public ulong GetPublishedFileDetails(ulong unPublishedFileId, uint unMaxSecondsOld)
+        public SteamAPICall_t GetPublishedFileDetails(ulong unPublishedFileId, uint unMaxSecondsOld)
         {
             Write("GetPublishedFileDetails");
             return 0;
         }
 
-        public ulong DeletePublishedFile(ulong unPublishedFileId)
+        public SteamAPICall_t DeletePublishedFile(ulong unPublishedFileId)
         {
             Write("DeletePublishedFile");
             return 0;
@@ -527,43 +541,43 @@ namespace SKYNET.Steamworks.Implementation
             return APICall;
         }
 
-        public ulong SubscribePublishedFile(ulong unPublishedFileId)
+        public SteamAPICall_t SubscribePublishedFile(ulong unPublishedFileId)
         {
             Write("SubscribePublishedFile");
             return 0;
         }
 
-        public ulong EnumerateUserSubscribedFiles(uint unStartIndex)
+        public SteamAPICall_t EnumerateUserSubscribedFiles(uint unStartIndex)
         {
             Write("EnumerateUserSubscribedFiles");
             return 0;
         }
 
-        public ulong UnsubscribePublishedFile(ulong unPublishedFileId)
+        public SteamAPICall_t UnsubscribePublishedFile(ulong unPublishedFileId)
         {
             Write("UnsubscribePublishedFile");
             return 0;
         }
 
-        public bool UpdatePublishedFileSetChangeDescription(ulong updateHandle, string pchChangeDescription)
+        public bool UpdatePublishedFileSetChangeDescription(PublishedFileUpdateHandle_t updateHandle, string pchChangeDescription)
         {
             Write("UpdatePublishedFileSetChangeDescription");
             return false;
         }
 
-        public ulong GetPublishedItemVoteDetails(ulong unPublishedFileId)
+        public SteamAPICall_t GetPublishedItemVoteDetails(ulong unPublishedFileId)
         {
             Write("GetPublishedItemVoteDetails");
             return 0;
         }
 
-        public ulong UpdateUserPublishedItemVote(ulong unPublishedFileId, bool bVoteUp)
+        public SteamAPICall_t UpdateUserPublishedItemVote(ulong unPublishedFileId, bool bVoteUp)
         {
             Write("UpdateUserPublishedItemVote");
             return 0;
         }
 
-        public ulong GetUserPublishedItemVoteDetails(ulong unPublishedFileId)
+        public SteamAPICall_t GetUserPublishedItemVoteDetails(ulong unPublishedFileId)
         {
             Write("GetUserPublishedItemVoteDetails");
             return 0;
@@ -584,31 +598,31 @@ namespace SKYNET.Steamworks.Implementation
             return APICall;
         }
 
-        public ulong PublishVideo(int eVideoProvider, string pchVideoAccount, string pchVideoIdentifier, string pchPreviewFile, uint nConsumerAppId, string pchTitle, string pchDescription, int eVisibility, IntPtr pTags)
+        public SteamAPICall_t PublishVideo(int eVideoProvider, string pchVideoAccount, string pchVideoIdentifier, string pchPreviewFile, uint nConsumerAppId, string pchTitle, string pchDescription, int eVisibility, IntPtr pTags)
         {
             Write("PublishVideo");
             return 0;
         }
 
-        public ulong SetUserPublishedFileAction(ulong unPublishedFileId, int eAction)
+        public SteamAPICall_t SetUserPublishedFileAction(ulong unPublishedFileId, int eAction)
         {
             Write("SetUserPublishedFileAction");
             return 0;
         }
 
-        public ulong EnumeratePublishedFilesByUserAction(int eAction, uint unStartIndex)
+        public SteamAPICall_t EnumeratePublishedFilesByUserAction(int eAction, uint unStartIndex)
         {
             Write("EnumeratePublishedFilesByUserAction");
             return 0;
         }
 
-        public ulong EnumeratePublishedWorkshopFiles(int eEnumerationType, uint unStartIndex, uint unCount, uint unDays, IntPtr pTags, IntPtr pUserTags)
+        public SteamAPICall_t EnumeratePublishedWorkshopFiles(int eEnumerationType, uint unStartIndex, uint unCount, uint unDays, IntPtr pTags, IntPtr pUserTags)
         {
             Write("EnumeratePublishedWorkshopFiles");
             return 0;
         }
 
-        public ulong UGCDownloadToLocation(ulong hContent, string pchLocation, uint unPriority)
+        public SteamAPICall_t UGCDownloadToLocation(ulong hContent, string pchLocation, uint unPriority)
         {
             Write("UGCDownloadToLocation");
             return 0;
@@ -636,6 +650,19 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("EndFileWriteBatch");
             return true;
+        }
+
+        public void StoreAvatar(Bitmap avatar, uint accountID)
+        {
+            try
+            {
+                modCommon.EnsureDirectoryExists(AvatarCachePath);
+                avatar.Save(Path.Combine(AvatarCachePath, accountID + ".jpg"));
+            }
+            catch 
+            {
+
+            }
         }
     }
 }

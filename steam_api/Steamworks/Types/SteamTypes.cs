@@ -1,5 +1,4 @@
 ﻿using SKYNET.Types;
-using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -147,14 +146,14 @@ namespace SKYNET.Steamworks
 
     public struct P2PSessionState_t
     {
-        uint m_bConnectionActive;      // true if we've got an active open connection
-        uint m_bConnecting;            // true if we're currently trying to establish a connection
-        uint m_eP2PSessionError;       // last error recorded (see enum above)
-        uint m_bUsingRelay;            // true if it's going through a relay server (TURN)
-        uint m_nBytesQueuedForSend;
-        uint m_nPacketsQueuedForSend;
-        uint m_nRemoteIP;             // potential IP:Port of remote host. Could be TURN server. 
-        uint m_nRemotePort;           // Only exists for compatibility with older authentication api's
+        public bool m_bConnectionActive;      // true if we've got an active open connection
+        public bool m_bConnecting;            // true if we're currently trying to establish a connection
+        public uint m_eP2PSessionError;       // last error recorded (see enum above)
+        public bool m_bUsingRelay;            // true if it's going through a relay server (TURN)
+        public uint m_nBytesQueuedForSend;
+        public uint m_nPacketsQueuedForSend;
+        public uint m_nRemoteIP;             // potential IP:Port of remote host. Could be TURN server. 
+        public uint m_nRemotePort;           // Only exists for compatibility with older authentication api's
     };
 
     //
@@ -176,12 +175,20 @@ namespace SKYNET.Steamworks
     /// ISteamNetworkingUtils().
     public struct SteamNetworkPingLocation_t
     {
-        uint m_data;
+        public uint m_data;
     };
 
     public struct SteamPartyBeaconLocation_t
     {
         uint m_eType;
         uint m_ulLocationID;
+    };
+
+    public struct TicketData
+    {
+        public ulong SteamID;
+        public uint IPClient;
+        public IntPtr AuthBlob;
+        public uint BlobSize;
     };
 }

@@ -1,7 +1,7 @@
 using System;
 using HHTMLBrowser = System.UInt32;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("STEAMHTMLSURFACE_INTERFACE_VERSION_004")]
     public class SteamHTMLSurface004 : ISteamInterface

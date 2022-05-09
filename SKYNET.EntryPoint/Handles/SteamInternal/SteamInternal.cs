@@ -52,7 +52,7 @@ namespace SKYNET.Hook.Handles
 
             if (modCommon.Is64Bit())
             {
-                var Context = Marshal.PtrToStructure<ContextInitData_64>(contextInitData_ptr);
+                var Context = Marshal.PtrToStructure<ContextInitData_x64>(contextInitData_ptr);
                 apiContext_ptr = contextInitData_ptr + 16;
                 if (Context.counter != 1)
                 {

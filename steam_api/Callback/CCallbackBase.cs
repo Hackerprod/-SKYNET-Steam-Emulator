@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace Steamworks
+namespace SKYNET.Callback
 {
     [StructLayout(LayoutKind.Sequential)]
     public class CCallbackBase

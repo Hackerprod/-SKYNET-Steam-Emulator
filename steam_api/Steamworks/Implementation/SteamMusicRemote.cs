@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using SKYNET;
-using SKYNET.Helpers;
 using SKYNET.Steamworks;
 
 namespace SKYNET.Steamworks.Implementation
@@ -10,7 +9,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         public SteamMusicRemote()
         {
-            InterfaceVersion = "SteamMusicRemote";
+            InterfaceName = "SteamMusicRemote";
         }
 
         public bool RegisterSteamMusicRemote(string pchName)

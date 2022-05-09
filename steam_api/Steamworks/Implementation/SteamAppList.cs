@@ -9,7 +9,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         public SteamAppList()
         {
-            InterfaceVersion = "SteamAppList";
+            InterfaceName = "SteamAppList";
         }
 
         public int GetAppBuildId(uint nAppID)

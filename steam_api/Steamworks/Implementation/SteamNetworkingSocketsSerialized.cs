@@ -1,8 +1,9 @@
 ﻿using SKYNET;
-using SKYNET.Helpers;
-using Steamworks;
+
 using System;
 using System.Runtime.InteropServices;
+
+using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -10,7 +11,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         public SteamNetworkingSocketsSerialized()
         {
-            InterfaceVersion = "SteamNetworkingSocketsSerialized";
+            InterfaceName = "SteamNetworkingSocketsSerialized";
         }
 
         public void SendP2PRendezvous(ulong steamIDRemote, uint unConnectionIDSrc, IntPtr pMsgRendezvous, uint cbRendezvous)
@@ -23,7 +24,7 @@ namespace SKYNET.Steamworks.Implementation
             Write("SendP2PConnectionFailure");
         }
 
-        public ulong GetCertAsync()
+        public SteamAPICall_t GetCertAsync()
         {
             Write("GetCertAsync");
             return 0;
@@ -40,7 +41,7 @@ namespace SKYNET.Steamworks.Implementation
             Write("CacheRelayTicket");
         }
 
-        public uint GetCachedRelayTicketCount(IntPtr _)
+        public uint GetCachedRelayTicketCount()
         {
             Write("GetCachedRelayTicketCount");
             return 0;

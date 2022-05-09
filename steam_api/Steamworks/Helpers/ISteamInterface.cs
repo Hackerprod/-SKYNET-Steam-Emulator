@@ -9,10 +9,11 @@ namespace SKYNET
     public class ISteamInterface
     {
         public string InterfaceVersion { get; set; }
+        public string InterfaceName { get; set; }
 
-        public void Write(string v)
+        public void Write(object msg)
         {
-            SteamEmulator.Write(InterfaceVersion, v);
+            SteamEmulator.Write(InterfaceName, msg);
         }
     }
 }

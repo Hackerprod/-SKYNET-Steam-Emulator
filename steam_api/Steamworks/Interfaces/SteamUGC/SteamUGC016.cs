@@ -1,5 +1,5 @@
 using SKYNET.Steamworks;
-using Steamworks;
+
 using System;
 
 using SteamAPICall_t = System.UInt64;
@@ -7,7 +7,7 @@ using PublishedFileId_t = System.UInt64;
 using UGCQueryHandle_t = System.UInt64;
 using UGCUpdateHandle_t = System.UInt64;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("STEAMUGC_INTERFACE_VERSION016")]
     public class SteamUGC016 : ISteamInterface
@@ -262,7 +262,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUGC.SetItemPreview(handle, pszPreviewFile);
         }
 
-        public bool SetAllowLegacyUpload(UGCQueryHandle_t handle, bool bAllowLegacyUpload)  //  use legacy upload for a single small file. The parameter to SetItemContent(IntPtr _) should either be a directory with one file or the full path to the file.  The file must also be less than 10MB in size.
+        public bool SetAllowLegacyUpload(IntPtr _, UGCQueryHandle_t handle, bool bAllowLegacyUpload)  //  use legacy upload for a single small file. The parameter to SetItemContent(IntPtr _) should either be a directory with one file or the full path to the file.  The file must also be less than 10MB in size.
         {
             return SteamEmulator.SteamUGC.SetAllowLegacyUpload(handle, bAllowLegacyUpload);
         }
@@ -307,7 +307,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUGC.RemoveItemPreview(handle, index);
         }
 
-        public SteamAPICall_t SubmitItemUpdate(UGCQueryHandle_t handle, string pchChangeNote)  // commit update process started with StartItemUpdate(IntPtr _)
+        public SteamAPICall_t SubmitItemUpdate(IntPtr _, UGCQueryHandle_t handle, string pchChangeNote)  // commit update process started with StartItemUpdate(IntPtr _)
         {
             return SteamEmulator.SteamUGC.SubmitItemUpdate(handle, pchChangeNote);
         }

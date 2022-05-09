@@ -1,5 +1,5 @@
 ﻿using SKYNET;
-using SKYNET.Helpers;
+using SKYNET.Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -73,13 +73,9 @@ public partial class modCommon
     [return: MarshalAs(UnmanagedType.Bool)]
     static extern bool AllocConsole();
 
-    public static string GenerateSteamID()
+    public static ulong GenerateSteamID()
     {
-        return "76561" + new Random().Next(100000, 999999) + new Random().Next(100000, 999999);
-    }
-    public static ulong CreateSteamID()
-    {
-        return ulong.Parse(GenerateSteamID());
+        return (ulong)CSteamID.CreateOne();
     }
 
     public static string GetPath()
@@ -113,8 +109,30 @@ public partial class modCommon
     {
         return new IPAddress(new byte[] { (byte)(IP >> 24), (byte)(IP >> 16), (byte)(IP >> 8), (byte)IP });
     }
-}
 
-namespace SKYNET.Helpers
-{
+    public static int GetInactiveTime()                         
+    {
+        LASTINPUTINFO plii = new LASTINPUTINFO();
+        plii.cbSize = checked((uint)Marshal.SizeOf((object)plii));
+        plii.dwTime = 0U;
+        return !GetLastInputInfo(ref plii) ? 0 : checked((int)Math.Round(unchecked((double)(checked((long)(Environment.TickCount & int.MaxValue) - (long)plii.dwTime & (long)int.MaxValue) & (long)int.MaxValue) / 1000.0)));
+    }
+
+    public static TimeSpan? GetInactiveTimeSpan()
+    {
+        LASTINPUTINFO plii = new LASTINPUTINFO();
+        plii.cbSize = checked((uint)Marshal.SizeOf((object)plii));
+        plii.dwTime = 0U;
+        return !GetLastInputInfo(ref plii) ? new TimeSpan?() : new TimeSpan?(TimeSpan.FromMilliseconds((double)checked((long)Environment.TickCount - (long)plii.dwTime)));
+    }
+
+    [DllImport("user32.dll")]
+    private static extern bool GetLastInputInfo(ref LASTINPUTINFO plii);
+
+
+    private struct LASTINPUTINFO
+    {
+        public uint cbSize;
+        public uint dwTime;
+    }
 }

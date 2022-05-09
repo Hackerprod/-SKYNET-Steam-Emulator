@@ -1,5 +1,4 @@
 ﻿using SKYNET;
-using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using System;
 using System.Runtime.InteropServices;
@@ -10,7 +9,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         public SteamScreenshots()
         {
-            InterfaceVersion = "SteamScreenshots";
+            InterfaceName = "SteamScreenshots";
         }
 
         public uint WriteScreenshot(IntPtr pubRGB, uint cubRGB, int nWidth, int nHeight)

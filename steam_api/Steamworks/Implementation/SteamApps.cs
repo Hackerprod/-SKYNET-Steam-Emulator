@@ -2,8 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Text;
 using SKYNET;
-using SKYNET.Helpers;
-using Steamworks;
+
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -11,7 +10,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         public SteamApps()
         {
-            InterfaceVersion = "SteamApps";
+            InterfaceName = "SteamApps";
         }
 
         public bool BIsSubscribed()
@@ -60,8 +59,7 @@ namespace SKYNET.Steamworks.Implementation
         public bool BIsDlcInstalled(uint appID)
         {
             Write("BIsDlcInstalled " + appID);
-            return false;
-
+            return true;
         }
 
         public UInt32 GetEarliestPurchaseUnixTime(uint nAppID)
@@ -149,7 +147,7 @@ namespace SKYNET.Steamworks.Implementation
         public CSteamID GetAppOwner()
         {
             Write("GetAppOwner");
-            return SteamEmulator.SteamId;
+            return (CSteamID)SteamEmulator.SteamId;
         }
 
         public string GetLaunchQueryParam(string pchKey)

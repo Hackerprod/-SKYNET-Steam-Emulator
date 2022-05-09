@@ -1,15 +1,15 @@
-using Steamworks;
+
 using System;
 
 using SteamAPICall_t = System.UInt64;
 using UGCFileWriteStreamHandle_t = System.UInt64;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("STEAMREMOTESTORAGE_INTERFACE_VERSION013")]
     public class SteamRemoteStorage013 : ISteamInterface
     {
-        public bool FileWrite(IntPtr _, string pchFile, string pvData, int cubData)
+        public bool FileWrite(IntPtr _, string pchFile, IntPtr pvData, int cubData)
         {
             return SteamEmulator.SteamRemoteStorage.FileWrite(pchFile, pvData, cubData);
         }
@@ -19,7 +19,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamRemoteStorage.FileRead(pchFile, pvData, cubDataToRead);
         }
 
-        public SteamAPICall_t FileWriteAsync(IntPtr _, string pchFile, string pvData, uint cubData)
+        public SteamAPICall_t FileWriteAsync(IntPtr _, string pchFile, IntPtr pvData, uint cubData)
         {
             return SteamEmulator.SteamRemoteStorage.FileWriteAsync(pchFile, pvData, cubData);
         }
@@ -109,9 +109,9 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamRemoteStorage.GetFileNameAndSize(iFile, ref pnFileSizeInBytes);
         }
 
-        public bool GetQuota(IntPtr _, int pnTotalBytes, int puAvailableBytes)
+        public bool GetQuota(IntPtr _, ref ulong pnTotalBytes, ref ulong puAvailableBytes)
         {
-            return SteamEmulator.SteamRemoteStorage.GetQuota(pnTotalBytes, puAvailableBytes);
+            return SteamEmulator.SteamRemoteStorage.GetQuota(ref pnTotalBytes, ref puAvailableBytes);
         }
 
         public bool IsCloudEnabledForAccount(IntPtr _)

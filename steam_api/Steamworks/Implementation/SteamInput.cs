@@ -9,14 +9,13 @@ using InputActionSetHandle_t = System.UInt64;
 using InputDigitalActionHandle_t = System.UInt64;
 using InputAnalogActionHandle_t = System.UInt64;
 
-
 namespace SKYNET.Steamworks.Implementation
 {
     public class SteamInput : ISteamInterface
     {
         public SteamInput()
         {
-            InterfaceVersion = "SteamInput";
+            InterfaceName = "SteamInput";
         }
 
         public void ActivateActionSet(InputHandle_t inputHandle, InputActionSetHandle_t actionSetHandle)
@@ -187,10 +186,10 @@ namespace SKYNET.Steamworks.Implementation
             Write("TriggerRepeatedHapticPulse");
         }
 
-        public InputMotionData_t GetMotionData(InputHandle_t inputHandle)
+        public IntPtr GetMotionData(InputHandle_t inputHandle)
         {
             Write("xxx");
-            return new InputMotionData_t();
+            return IntPtr.Zero;
         }
 
         public ushort GetSessionInputConfigurationSettings()

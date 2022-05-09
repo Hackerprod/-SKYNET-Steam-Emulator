@@ -1,8 +1,8 @@
-using Steamworks;
+using SKYNET.Steamworks;
 using System;
 using SteamAPICall_t = System.UInt64;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("SteamGameServer012")]
     public class SteamGameServer012 : ISteamInterface
@@ -147,9 +147,9 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamGameServer.BUpdateUserData(steamIDUser, pchPlayerName, uScore);
         }
 
-        public uint GetAuthSessionTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
+        public uint GetAuthSessionTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
         {
-            return SteamEmulator.SteamGameServer.GetAuthSessionTicket(pTicket, ref cbMaxTicket, ref pcbTicket);
+            return SteamEmulator.SteamGameServer.GetAuthSessionTicket(pTicket, cbMaxTicket, ref pcbTicket);
         }
 
         public int BeginAuthSession(IntPtr _, IntPtr pAuthTicket, int cbAuthTicket, ulong steamID)

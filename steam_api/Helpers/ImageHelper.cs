@@ -36,7 +36,6 @@ namespace SKYNET.Helper
                 Exception ex2 = ex;
                 return result;
             }
-
         }
 
         public static Bitmap Resize(Bitmap image, int width, int height)
@@ -60,13 +59,23 @@ namespace SKYNET.Helper
             }
         }
 
+        public static Image CreateCopy(Image image)
+        {
+            byte[] sourceImage = ImageToBytes(image);
+            return ImageFromBytes(sourceImage);
+        }
+
         public static byte[] ImageToBytes(Image image)
         {
+            byte[] imageArray = new byte[0];
+
             using (MemoryStream stream = new MemoryStream())
             {
                 image.Save(stream, ImageFormat.Jpeg);
-                return stream.ToArray();
+                stream.Close();
+                imageArray = stream.ToArray();
             }
+            return imageArray;
         }
 
         public static byte[] ConvertToRGBA(Bitmap image)
@@ -87,14 +96,47 @@ namespace SKYNET.Helper
             return rgbaB;
         }
 
-        public static Bitmap GetDesktopWallpaper()
+        public static Bitmap GetDesktopWallpaper(bool Aspect4x4 = false)
         {
-            RegistryKey Key = Registry.CurrentUser.OpenSubKey(@"Control Panel\Desktop", true);
-            if (Key == null) return null;
-            string filePath = (string)Key.GetValue("WallPaper");
-            if (string.IsNullOrEmpty(filePath)) return null;
-            if (!File.Exists(filePath)) return null;
-            return (Bitmap)Bitmap.FromFile(filePath);
+            try
+            {
+                RegistryKey Key = Registry.CurrentUser.OpenSubKey(@"Control Panel\Desktop", true);
+                if (Key == null) return null;
+                string filePath = (string)Key.GetValue("WallPaper");
+                if (string.IsNullOrEmpty(filePath)) return null;
+                if (!File.Exists(filePath)) return null;
+                if (Aspect4x4)
+                {
+                    return (Bitmap)AspectRatio4x4((Bitmap)Bitmap.FromFile(filePath));
+                }
+                return (Bitmap)Bitmap.FromFile(filePath);
+            }
+            catch 
+            {
+                return null;
+            }
+        }
+
+        public static Image AspectRatio4x4(Image img)
+        {
+            // 4:3 Aspect Ratio. You can also add it as parameters
+            double aspectRatio_X = 4;
+            double aspectRatio_Y = 4;
+
+            double imgWidth = Convert.ToDouble(img.Width);
+            double imgHeight = Convert.ToDouble(img.Height);
+
+            if (imgWidth / imgHeight > (aspectRatio_X / aspectRatio_Y))
+            {
+                double extraWidth = imgWidth - (imgHeight * (aspectRatio_X / aspectRatio_Y));
+                double cropStartFrom = extraWidth / 2;
+                Bitmap bmp = new Bitmap((int)(img.Width - extraWidth), img.Height);
+                Graphics grp = Graphics.FromImage(bmp);
+                grp.DrawImage(img, new Rectangle(0, 0, (int)(img.Width - extraWidth), img.Height), new Rectangle((int)cropStartFrom, 0, (int)(imgWidth - extraWidth), img.Height), GraphicsUnit.Pixel);
+                return bmp;
+            }
+            else
+                return null;
         }
 
 

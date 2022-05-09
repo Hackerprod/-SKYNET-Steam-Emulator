@@ -1,7 +1,7 @@
 using System;
 
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("STEAMINVENTORY_INTERFACE_V003")]
     public class SteamInventory003 : ISteamInterface
@@ -108,7 +108,7 @@ namespace SKYNET.Interface
 
         public bool LoadItemDefinitions(IntPtr _)
         {
-            return SteamEmulator.SteamInventory.LoadItemDefinitions(_);
+            return SteamEmulator.SteamInventory.LoadItemDefinitions();
         }
 
         public bool GetItemDefinitionIDs(IntPtr _, IntPtr pItemDefIDs, uint punItemDefIDsArraySize )
@@ -138,12 +138,12 @@ namespace SKYNET.Interface
 
         public ulong RequestPrices(IntPtr _)
         {
-            return SteamEmulator.SteamInventory.RequestPrices(_);
+            return SteamEmulator.SteamInventory.RequestPrices();
         }
 
         public uint GetNumItemsWithPrices(IntPtr _)
         {
-            return SteamEmulator.SteamInventory.GetNumItemsWithPrices(_);
+            return SteamEmulator.SteamInventory.GetNumItemsWithPrices();
         }
 
         public bool GetItemsWithPrices(IntPtr _, IntPtr pArrayItemDefs, IntPtr pCurrentPrices, ulong pBasePrices, uint unArrayLength)
@@ -158,7 +158,7 @@ namespace SKYNET.Interface
 
         public ulong StartUpdateProperties(IntPtr _)
         {
-            return SteamEmulator.SteamInventory.StartUpdateProperties(_);
+            return SteamEmulator.SteamInventory.StartUpdateProperties();
         }
 
         public bool RemoveProperty(IntPtr _, ulong handle, ulong nItemID, string pchPropertyName)

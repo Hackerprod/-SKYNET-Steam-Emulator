@@ -6,7 +6,7 @@ using System.Text;
 using System.Windows.Forms;
 using SKYNET;
 using SKYNET.Hook;
-using Steamworks;
+using SKYNET.Steamworks;
 
 namespace SKYNET.Hook.Handles
 {
@@ -182,7 +182,7 @@ namespace SKYNET.Hook.Handles
             return true;
         }
 
-        public ulong SteamAPI_ISteamApps_GetAppOwner()
+        public CSteamID SteamAPI_ISteamApps_GetAppOwner()
         {
             Write("SteamAPI_ISteamApps_GetAppOwner");
             return SteamEmulator.SteamApps.GetAppOwner();

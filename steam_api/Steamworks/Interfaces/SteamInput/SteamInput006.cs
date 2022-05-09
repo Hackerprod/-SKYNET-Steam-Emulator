@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SKYNET.Interface;
 
 using InputHandle_t = System.UInt64;
 using InputActionSetHandle_t = System.UInt64;
@@ -159,7 +154,7 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamInput.StopAnalogActionMomentum(inputHandle, eAction);
         }
 
-        public InputMotionData_t GetMotionData(IntPtr _, InputHandle_t inputHandle)
+        public IntPtr GetMotionData(IntPtr _, InputHandle_t inputHandle)
         {
             return SteamEmulator.SteamInput.GetMotionData(inputHandle);
         }

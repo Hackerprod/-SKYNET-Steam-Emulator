@@ -1,10 +1,6 @@
-﻿using SKYNET;
-using SKYNET.Callback;
+﻿using SKYNET.Callback;
 using SKYNET.Helper;
-using SKYNET.Helpers;
 using SKYNET.Managers;
-using SKYNET.Steamworks;
-using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,7 +37,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public SteamUGC()
         {
-            InterfaceVersion = "SteamUGC";
+            InterfaceName = "SteamUGC";
             UGCQueries = new List<UGC>();
             subscribed = new List<PublishedFileId_t>();
         }
@@ -97,7 +93,7 @@ namespace SKYNET.Steamworks.Implementation
                         //SteamUGCQueryCompleted_t data = new SteamUGCQueryCompleted_t()
                         //{
                         //    m_handle = handle,
-                        //    m_eResult = SKYNET.Types.EResult.k_EResultOK,
+                        //    m_eResult = EResult.k_EResultOK,
                         //    m_unNumResultsReturned = (uint)request.results.Count(),
                         //    m_unTotalMatchingResults = (uint)request.results.Count(),
                         //    m_bCachedData = false,
@@ -515,7 +511,7 @@ namespace SKYNET.Steamworks.Implementation
                     subscribed.Add(nPublishedFileID);
                     //RemoteStorageSubscribePublishedFileResult_t data = new RemoteStorageSubscribePublishedFileResult_t()
                     //{
-                    //    m_eResult = SKYNET.Types.EResult.k_EResultOK,
+                    //    m_eResult = EResult.k_EResultOK,
                     //    m_nPublishedFileId = nPublishedFileID
                     //};
                     //APICall = CallbackManager.AddCallbackResult(data, RemoteStorageSubscribePublishedFileResult_t.k_iCallback);
@@ -544,7 +540,7 @@ namespace SKYNET.Steamworks.Implementation
 
                     RemoteStorageUnsubscribePublishedFileResult_t data = new RemoteStorageUnsubscribePublishedFileResult_t()
                     {
-                        m_eResult = SKYNET.Types.EResult.k_EResultOK,
+                        m_eResult = EResult.k_EResultOK,
                         m_nPublishedFileId = nPublishedFileID
                     };
                     APICall = CallbackManager.AddCallbackResult(data);
@@ -633,7 +629,7 @@ namespace SKYNET.Steamworks.Implementation
                 {
                     StopPlaytimeTrackingResult_t data = new StopPlaytimeTrackingResult_t()
                     {
-                        m_eResult = SKYNET.Types.EResult.k_EResultOK
+                        m_eResult = EResult.k_EResultOK
                     };
                     ApiCall = CallbackManager.AddCallbackResult(data);
                 }
@@ -655,7 +651,7 @@ namespace SKYNET.Steamworks.Implementation
                 {
                     StopPlaytimeTrackingResult_t data = new StopPlaytimeTrackingResult_t()
                     {
-                        m_eResult = SKYNET.Types.EResult.k_EResultOK
+                        m_eResult = EResult.k_EResultOK
                     };
                     ApiCall = CallbackManager.AddCallbackResult(data);
                 }
@@ -675,7 +671,7 @@ namespace SKYNET.Steamworks.Implementation
                 Write("StopPlaytimeTracking");
                 //StopPlaytimeTrackingResult_t data = new StopPlaytimeTrackingResult_t()
                 //{
-                //    m_eResult = SKYNET.Types.EResult.k_EResultOK
+                //    m_eResult = EResult.k_EResultOK
                 //};
                 //return CallbackManager.AddCallbackResult(data, StopPlaytimeTrackingResult_t.k_iCallback);
             }
@@ -763,7 +759,7 @@ namespace SKYNET.Steamworks.Implementation
             try
             {
                 SteamUGCDetails_t pDetails = Marshal.PtrToStructure<SteamUGCDetails_t>(ptrDetails);
-                pDetails.m_eResult = SKYNET.Types.EResult.k_EResultOK;
+                pDetails.m_eResult = EResult.k_EResultOK;
                 pDetails.m_nPublishedFileId = id;
                 pDetails.m_eFileType = EWorkshopFileType.k_EWorkshopFileTypeCommunity;
                 pDetails.m_nCreatorAppID = SteamEmulator.AppId;

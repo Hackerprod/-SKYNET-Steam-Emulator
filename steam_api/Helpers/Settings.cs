@@ -1,5 +1,5 @@
 ﻿using SKYNET;
-using Steamworks;
+using SKYNET.Steamworks;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,7 +17,7 @@ namespace SKYNET.Helper
             // Verify Paths
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "SKYNET"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "SKYNET", "Storage"));
-            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "SKYNET", "AvatarCache"));
+            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "SKYNET", "Storage", "Remote"));
 
             try
             {
@@ -25,6 +25,8 @@ namespace SKYNET.Helper
 
                 if (!File.Exists(fileName))
                 {
+                    string steam_appid = Path.Combine(modCommon.GetPath(), "steam_appid.txt");
+                    string appid = File.Exists(steam_appid) ? File.ReadAllText(steam_appid) : "0";
                     StringBuilder config = new StringBuilder();
 
                     // User Configuration
@@ -36,7 +38,8 @@ namespace SKYNET.Helper
 
                     config.AppendLine("[Game Settings]");
                     config.AppendLine($"Languaje = english");
-                    config.AppendLine($"AppId = 570");
+                    config.AppendLine($"AppId = {appid}");
+                    config.AppendLine($"UnityGame = false");
                     config.AppendLine();
 
                     // Network Configuration
@@ -74,10 +77,9 @@ namespace SKYNET.Helper
                             SteamEmulator.AppId = appId;
 
                 SteamEmulator.SendLog = (bool)IniParser["Log Settings"]["File"];
+                SteamEmulator.ConsoleLog = (bool)IniParser["Log Settings"]["Console"];
 
-                bool ConsoleOutput = (bool)IniParser["Log Settings"]["Console"];
-
-                if (ConsoleOutput)
+                if (SteamEmulator.ConsoleLog)
                 {
                     modCommon.ActiveConsoleOutput();
                 }

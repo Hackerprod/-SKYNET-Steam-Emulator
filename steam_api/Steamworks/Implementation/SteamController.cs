@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using SKYNET;
-using SKYNET.Helpers;
 using SKYNET.Steamworks;
 
 using ControllerHandle_t = System.UInt64;
@@ -23,7 +22,7 @@ namespace SKYNET.Steamworks.Implementation
             ActionHandles = new Dictionary<string, ControllerActionSetHandle_t>();
             DigitalHandles = new Dictionary<string, ControllerDigitalActionHandle_t>();
             AnalogHandles = new Dictionary<string, ControllerAnalogActionHandle_t>();
-            InterfaceVersion = "SteamController";
+            InterfaceName = "SteamController";
         }
 
         public void ActivateActionSet(ControllerHandle_t controllerHandle, ControllerActionSetHandle_t actionSetHandle)

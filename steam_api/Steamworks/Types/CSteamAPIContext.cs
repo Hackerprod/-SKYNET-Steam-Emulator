@@ -1,5 +1,4 @@
 ﻿using SKYNET;
-using SKYNET.Helpers;
 using System;
 using System.Runtime.InteropServices;
 
@@ -206,7 +205,7 @@ namespace SKYNET.Types
         }
     }
 
-    public struct ContextInitData_64
+    public struct ContextInitData_x64
     {
         public IntPtr pFn;
         public long counter;
@@ -219,4 +218,8 @@ namespace SKYNET.Types
         public uint counter;
         public CSteamApiContext Context;
     }
+
+    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+    public delegate void pFnDelegate(IntPtr ctx);
+
 }

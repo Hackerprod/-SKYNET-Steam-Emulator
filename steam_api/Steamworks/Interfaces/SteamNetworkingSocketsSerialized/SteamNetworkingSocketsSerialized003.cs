@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("SteamNetworkingSocketsSerialized003")]
     public class SteamNetworkingSocketsSerialized003 : ISteamInterface
@@ -36,7 +36,7 @@ namespace SKYNET.Interface
 
         public uint GetCachedRelayTicketCount(IntPtr _)
         {
-            return SteamEmulator.SteamNetworkingSocketsSerialized.GetCachedRelayTicketCount(_);
+            return SteamEmulator.SteamNetworkingSocketsSerialized.GetCachedRelayTicketCount();
         }
 
         public int GetCachedRelayTicket(IntPtr _, uint idxTicket, IntPtr buf, uint cbBuf)

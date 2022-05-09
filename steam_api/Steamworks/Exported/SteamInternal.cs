@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using SKYNET.Managers;
@@ -10,10 +11,12 @@ using SKYNET.Types;
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
 
-namespace SKYNET.Exported
+namespace SKYNET.Steamworks.Exported
 {
-    public unsafe class SteamInternal 
+    public unsafe class SteamInternal
     {
+        public static pFnDelegate pFn;
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamInternal_FindOrCreateUserInterface(int hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion)
         {
@@ -43,46 +46,46 @@ namespace SKYNET.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public unsafe static IntPtr SteamInternal_ContextInit(IntPtr contextInitData_ptr)
+        public static IntPtr SteamInternal_ContextInit(IntPtr contextInitData_ptr)
         {
             IntPtr apiContext_ptr = IntPtr.Zero;
-            if (modCommon.Is64Bit())
+            try
             {
-                ContextInitData_64 Context = Marshal.PtrToStructure<ContextInitData_64>(contextInitData_ptr);
-                apiContext_ptr = contextInitData_ptr + 16;
-                if (Context.counter != 1)
+                if (modCommon.Is64Bit())
                 {
-                    Write($"SteamInternal_ContextInit");
-                    Marshal.WriteInt64(contextInitData_ptr, 8, 1);
-                    _pFn = Marshal.GetDelegateForFunctionPointer<pFn>(Context.pFn);
-                    _pFn.Invoke(apiContext_ptr);
+                    ContextInitData_x64 Context = Marshal.PtrToStructure<ContextInitData_x64>(contextInitData_ptr);
+                    apiContext_ptr = contextInitData_ptr + 16;
+                    if (Context.counter != 1)
+                    {
+                        Write($"SteamInternal_ContextInit");
+                        Marshal.WriteInt64(contextInitData_ptr, 8, 1);
+                        pFn = Marshal.GetDelegateForFunctionPointer<pFnDelegate>(Context.pFn);
+                        pFn(apiContext_ptr);
+                    }
+                }
+                else
+                {
+                    var Context = Marshal.PtrToStructure<ContextInitData_x86>(contextInitData_ptr);
+                    apiContext_ptr = contextInitData_ptr + 8;
+                    if (Context.counter != 1)
+                    {
+                        Write($"SteamInternal_ContextInit");
+                        Marshal.WriteInt32(contextInitData_ptr, 4, 1);
+                        pFn = Marshal.GetDelegateForFunctionPointer<pFnDelegate>(Context.pFn);
+                        pFn(apiContext_ptr);
+                    }
                 }
             }
-            else
+            catch
             {
-                var Context = Marshal.PtrToStructure<ContextInitData_x86>(contextInitData_ptr);
-                apiContext_ptr = contextInitData_ptr + 8;
-                if (Context.counter != 1)
-                {
-                    Write($"SteamInternal_ContextInit");
-                    Marshal.WriteInt32(contextInitData_ptr, 4, 1);
-                    _pFn = Marshal.GetDelegateForFunctionPointer<pFn>(Context.pFn);
-                    _pFn.Invoke(apiContext_ptr);
-                }
             }
-
             return apiContext_ptr;
         }
 
         private static void Write(string v)
         {
-            SteamEmulator.Write("SteamInternal", v);
+            SteamEmulator.Write("", v);
         }
-
-        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-        public delegate void pFn(IntPtr ctx);
-        public static pFn _pFn;
-
     }
 }
 

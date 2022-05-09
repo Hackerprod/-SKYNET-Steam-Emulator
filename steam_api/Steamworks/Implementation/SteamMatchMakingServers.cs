@@ -1,5 +1,4 @@
 ﻿using SKYNET;
-using SKYNET.Helpers;
 using System;
 using System.Runtime.InteropServices;
 
@@ -9,7 +8,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         public SteamMatchMakingServers()
         {
-            InterfaceVersion = "SteamMatchMakingServers";
+            InterfaceName = "SteamMatchMakingServers";
         }
 
         public IntPtr RequestInternetServerList(uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)

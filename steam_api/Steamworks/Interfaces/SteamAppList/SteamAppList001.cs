@@ -1,6 +1,6 @@
 using System;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("STEAMAPPLIST_INTERFACE_VERSION001")]
     public class SteamAppList001 : ISteamInterface

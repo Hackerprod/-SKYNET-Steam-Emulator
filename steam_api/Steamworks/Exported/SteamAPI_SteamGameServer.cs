@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
-using SKYNET.Helpers;
-using Steamworks;
+
 
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
@@ -62,7 +60,7 @@ namespace SKYNET.Steamworks.Exported
         public static CSteamID SteamGameServer_GetSteamID()
         {
             Write("SteamGameServer_GetSteamID");
-            return SteamEmulator.SteamId_GS;
+            return (CSteamID)SteamEmulator.SteamId_GS;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -74,7 +72,7 @@ namespace SKYNET.Steamworks.Exported
 
         private static void Write(string msg)
         {
-            SteamEmulator.Write("SteamAPI_SteamGameServer", msg);
+            SteamEmulator.Write("", msg);
         }
     }
 }

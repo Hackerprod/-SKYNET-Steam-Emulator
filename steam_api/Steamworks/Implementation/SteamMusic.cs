@@ -1,5 +1,4 @@
 ﻿using SKYNET;
-using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using System;
 using System.Runtime.InteropServices;
@@ -10,7 +9,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         public SteamMusic()
         {
-            InterfaceVersion = "SteamMusic";
+            InterfaceName = "SteamMusic";
         }
 
         public bool BIsEnabled()

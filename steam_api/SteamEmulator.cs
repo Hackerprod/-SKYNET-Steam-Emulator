@@ -5,14 +5,11 @@ using SKYNET.Managers;
 using SKYNET.Plugin;
 using SKYNET.Steamworks;
 using SKYNET.Steamworks.Implementation;
-using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
-
+using System.Runtime.InteropServices;
 using AppID = System.UInt32;
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
@@ -36,11 +33,13 @@ public class SteamEmulator
 
     public static CSteamID SteamId;
     public static CSteamID SteamId_GS;
-    public static ulong GameID;
+    public static uint GameID;
     public static uint AppId;
     public static bool Initialized;
     public static bool Initializing;
+
     public static bool SendLog;
+    public static bool ConsoleLog;
 
     public static HSteamUser HSteamUser;
     public static HSteamPipe HSteamPipe;
@@ -99,121 +98,127 @@ public class SteamEmulator
 
     public static void Initialize(bool hooked = false)
     {
-        if (Initialized) return;
-        Initializing = true;
-        Hooked = hooked;
         try
         {
-            if (!Hooked)
+            if (Initialized) return;
+            Initializing = true;
+            Hooked = hooked;
+            try
             {
-                Settings.Load();
-
-                string fileName = Path.Combine(modCommon.GetPath(), "SKYNET", "[SKYNET] steam_api.log");
-                if (File.Exists(fileName))
+                if (!Hooked)
                 {
-                    File.WriteAllLines(fileName, new List<string>());
+                    Settings.Load();
+
+                    string fileName = Path.Combine(modCommon.GetPath(), "SKYNET", "[SKYNET] steam_api.log");
+                    if (File.Exists(fileName))
+                    {
+                        File.WriteAllLines(fileName, new List<string>());
+                    }
                 }
             }
+            catch
+            {
+                Write("Settings", "Error loading settings");
+            }
+
+            SteamId_GS = new CSteamID((uint)new Random().Next(1000, 9999), EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeGameServer);
+
+            #region Interface Initialization
+
+            // Client Interfaces
+
+            SteamClient = new SteamClient();
+
+            SteamUser = new SteamUser();
+
+            SteamFriends = new SteamFriends();
+
+            SteamUtils = new SteamUtils();
+
+            SteamMatchmaking = new SteamMatchmaking();
+
+            SteamMatchMakingServers = new SteamMatchMakingServers();
+
+            SteamUserStats = new SteamUserStats();
+
+            SteamApps = new SteamApps();
+
+            SteamNetworking = new SteamNetworking();
+
+            SteamRemoteStorage = new SteamRemoteStorage();
+
+            SteamScreenshots = new SteamScreenshots();
+
+            SteamHTTP = new SteamHTTP();
+
+            SteamController = new SteamController();
+
+            SteamUGC = new SteamUGC();
+
+            SteamAppList = new SteamAppList();
+
+            SteamMusic = new SteamMusic();
+
+            SteamMusicRemote = new SteamMusicRemote();
+
+            SteamHTMLSurface = new SteamHTMLSurface();
+
+            SteamInventory = new SteamInventory();
+
+            SteamVideo = new SteamVideo();
+
+            SteamParentalSettings = new SteamParentalSettings();
+
+            SteamNetworkingSockets = new SteamNetworkingSockets();
+
+            SteamNetworkingSocketsSerialized = new SteamNetworkingSocketsSerialized();
+
+            SteamNetworkingMessages = new SteamNetworkingMessages();
+
+            SteamGameCoordinator = new SteamGameCoordinator();
+
+            SteamNetworkingUtils = new SteamNetworkingUtils();
+
+            SteamGameSearch = new SteamGameSearch();
+
+            SteamParties = new SteamParties();
+
+            SteamRemotePlay = new SteamRemotePlay();
+
+            SteamTV = new SteamTV();
+
+            SteamInput = new SteamInput();
+
+
+            // Server Interfaces
+
+            SteamGameServer = new SteamGameServer();
+
+            SteamGameServerStats = new SteamGameServerStats();
+
+            SteamMasterServerUpdater = new SteamMasterServerUpdater();
+
+            #endregion
+
+            InterfaceManager.Initialize();
+            NetworkManager.Initialize();
+            //IpcManager.Initialize();
+
+            HSteamUser = 1;
+            HSteamPipe = 1;
+
+            HSteamUser_GS = 2;
+            HSteamPipe_GS = 2;
+
+            InitializePlugins();
+
+            Initialized = true;
+            Initializing = false;
         }
-        catch
+        catch (Exception ex)
         {
-            Write("Settings", "Error loading settings");
+            Write(ex);
         }
-
-        SteamId_GS = new CSteamID((uint)new Random().Next(1000, 9999), EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeGameServer);
-
-        InterfaceManager.Initialize();
-        NetworkManager.Initialize();
-        IpcManager.Initialize();
-
-        #region Interface Initialization
-
-        // Client Interfaces
-
-        SteamClient = new SteamClient();
-
-        SteamUser = new SteamUser(); 
-
-        SteamFriends = new SteamFriends(); 
-
-        SteamUtils = new SteamUtils();
-
-        SteamMatchmaking = new SteamMatchmaking();
-
-        SteamMatchMakingServers = new SteamMatchMakingServers();
-
-        SteamUserStats = new SteamUserStats();
-
-        SteamApps = new SteamApps();
-
-        SteamNetworking = new SteamNetworking();
-
-        SteamRemoteStorage = new SteamRemoteStorage();
-
-        SteamScreenshots = new SteamScreenshots();
-
-        SteamHTTP = new SteamHTTP();
-
-        SteamController = new SteamController();
-
-        SteamUGC = new SteamUGC();
-
-        SteamAppList = new SteamAppList();
-
-        SteamMusic = new SteamMusic();
-
-        SteamMusicRemote = new SteamMusicRemote();
-
-        SteamHTMLSurface = new SteamHTMLSurface();
-
-        SteamInventory = new SteamInventory();
-
-        SteamVideo = new SteamVideo();
-
-        SteamParentalSettings = new SteamParentalSettings();
-
-        SteamNetworkingSockets = new SteamNetworkingSockets();
-
-        SteamNetworkingSocketsSerialized = new SteamNetworkingSocketsSerialized();
-
-        SteamNetworkingMessages = new SteamNetworkingMessages();
-
-        SteamGameCoordinator = new SteamGameCoordinator();
-
-        SteamNetworkingUtils = new SteamNetworkingUtils();
-
-        SteamGameSearch = new SteamGameSearch();
-
-        SteamParties = new SteamParties();
-
-        SteamRemotePlay = new SteamRemotePlay();
-
-        SteamTV = new SteamTV();
-
-        SteamInput = new SteamInput();
-
-
-        // Server Interfaces
-
-        SteamGameServer = new SteamGameServer();
-
-        SteamGameServerStats = new SteamGameServerStats();
-
-        SteamMasterServerUpdater = new SteamMasterServerUpdater();
-
-        #endregion
-
-        HSteamUser = 1;
-        HSteamPipe = 1;
-
-        HSteamUser_GS = 2;
-        HSteamPipe_GS = 2;
-
-        InitializePlugins();
-
-        Initialized = true;
-        Initializing = false;
-
     }
 
     private static void InitializePlugins()
@@ -286,7 +291,7 @@ public class SteamEmulator
         return HSteamPipe;
     }
 
-    private static void Write(string msg)
+    private static void Write(object msg)
     {
         Write("Steam Emulator", msg);
     }
@@ -297,37 +302,36 @@ public class SteamEmulator
 
     public static void Write(string sender, object msg)
     {
-        if (string.IsNullOrEmpty(sender)) { sender = "NULL"; }
-        if (msg == null) { msg = "NULL"; }
-
-        if (SendLog)
-        {
-            if (Hooked)
-            {
-                OnMessage?.Invoke(Instance, new GameMessage(AppId, sender, msg));
-                lastMsg = msg.ToString();
-            }
-
-            //if (lastMsg != msg.ToString())
-            //{
-            //    if (sender.ToUpper() == "DEBUG") Console.ForegroundColor = ConsoleColor.Red;
-            //    else Console.ResetColor();
-
-            //    Console.WriteLine($" {sender}: {msg}");
-            //    Log.AppEnd(sender + ": " + msg);
-            //    lastMsg = msg.ToString();
-            //}
-        }
+        string message = " ";
+        message += string.IsNullOrEmpty(sender) ? "" : $"{sender}: "; 
+        message += msg == null ? "NULL" : msg;
 
         if (lastMsg != msg.ToString())
         {
-            if (sender.ToUpper() == "DEBUG") Console.ForegroundColor = ConsoleColor.Red;
-            else Console.ResetColor();
+            if (SendLog)
+            {
+                if (Hooked)
+                {
+                    OnMessage?.Invoke(Instance, new GameMessage(AppId, sender, msg));
+                    lastMsg = msg.ToString();
+                }
 
-            Console.WriteLine($" {sender}: {msg}");
-            Log.AppEnd(sender + ": " + msg);
+                Log.AppEnd(message);
+                lastMsg = msg.ToString();
+            }
+
+            if (ConsoleLog)
+            {
+                if (sender.ToUpper() == "DEBUG")
+                    Console.ForegroundColor = ConsoleColor.Red;
+                else
+                    Console.ResetColor();
+                Console.WriteLine(message);
+            }
             lastMsg = msg.ToString();
         }
+
+        //IpcManager.SendMsg($" {sender}: {msg}");
     }
 
 #else
@@ -339,12 +343,11 @@ public class SteamEmulator
 
 #endif
 
-    public static void Debug(string v)
+    public static void Debug(string v, ConsoleColor color = ConsoleColor.Red)
     {
-        Console.ForegroundColor = ConsoleColor.Red;
+        Console.ForegroundColor = color;
         Console.WriteLine($" DEBUG: {v}");
     }
-
 }
 
 

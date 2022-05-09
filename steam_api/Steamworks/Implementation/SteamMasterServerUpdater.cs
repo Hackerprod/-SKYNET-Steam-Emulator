@@ -1,5 +1,4 @@
 ﻿using SKYNET;
-using SKYNET.Helpers;
 using System;
 using System.Runtime.InteropServices;
 
@@ -9,7 +8,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         public SteamMasterServerUpdater()
         {
-            InterfaceVersion = "SteamMasterServerUpdater";
+            InterfaceName = "SteamMasterServerUpdater";
         }
 
         public void SetActive(bool bActive)

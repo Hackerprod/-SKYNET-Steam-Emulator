@@ -930,7 +930,7 @@ namespace SKYNET.Steamworks
     //
     // EChatRoomEnterResponse
     //
-    public enum RoomEnter : int
+    public enum EChatRoomEnterResponse : int
     {
         Success = 1,
         DoesntExist = 2,
@@ -2766,23 +2766,6 @@ namespace SKYNET.Steamworks
         Tablet = 2,
         Computer = 3,
         TV = 4,
-    }
-
-    //
-    // ESteamNetworkingAvailability
-    //
-    public enum SteamNetworkingAvailability : int
-    {
-        CannotTry = -102,
-        Failed = -101,
-        Previously = -100,
-        Retrying = -10,
-        NeverTried = 1,
-        Waiting = 2,
-        Attempting = 3,
-        Current = 100,
-        Unknown = 0,
-        Force32bit = 2147483647,
     }
 
     //

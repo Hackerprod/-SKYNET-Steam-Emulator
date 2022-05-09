@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using SKYNET;
 using SKYNET.Helper;
-using SKYNET.Helpers;
-using SKYNET.Managers;
-using SKYNET.Steamworks;
-using SKYNET.Types;
-using Steamworks;
+
 
 using SteamAPICall_t = System.UInt64;
+using HSteamPipe = System.UInt32;
+using HSteamUser = System.UInt32;
 using HAuthTicket = System.UInt32;
+using SKYNET.Managers;
+using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -20,13 +18,13 @@ namespace SKYNET.Steamworks.Implementation
 
         public SteamUser()
         {
-            InterfaceVersion = "SteamUser";
+            InterfaceName = "SteamUser";
         }
 
-        public int GetHSteamUser()
+        public HSteamUser GetHSteamUser()
         {
             Write("GetHSteamUser");
-            return (int)SteamEmulator.HSteamUser;
+            return SteamEmulator.HSteamUser;
         }
 
         public bool BLoggedOn()
@@ -57,7 +55,7 @@ namespace SKYNET.Steamworks.Implementation
             Write("TerminateGameConnection");
         }
 
-        public void TrackAppUsageEvent(IntPtr gameID, int eAppUsageEvent, string pchExtraInfo = "")
+        public void TrackAppUsageEvent(IntPtr gameID, int eAppUsageEvent, string pchExtraInfo)
         {
             Write("TrackAppUsageEvent");
         }
@@ -111,8 +109,8 @@ namespace SKYNET.Steamworks.Implementation
         public HAuthTicket GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
         {
             Write("GetAuthSessionTicket");
-            NetworkManager.AnnounceClient();
-            return TicketManager.GetAuthSessionTicket(pTicket, ref cbMaxTicket, ref pcbTicket);
+            HAuthTicket Ticket = TicketManager.GetAuthSessionTicket(pTicket, cbMaxTicket, ref pcbTicket);
+            return Ticket;
         }
 
         public int BeginAuthSession(IntPtr pAuthTicket, int cbAuthTicket, ulong steamID)

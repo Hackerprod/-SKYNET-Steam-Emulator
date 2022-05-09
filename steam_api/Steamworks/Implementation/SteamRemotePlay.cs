@@ -1,8 +1,10 @@
 ﻿using SKYNET;
-using SKYNET.Helpers;
 using SKYNET.Steamworks;
+
 using System;
 using System.Runtime.InteropServices;
+
+using RemotePlaySessionID_t = System.UInt32;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -10,7 +12,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         public SteamRemotePlay()
         {
-            InterfaceVersion = "SteamRemotePlay";
+            InterfaceName = "SteamRemotePlay";
         }
 
         public uint GetSessionCount()
@@ -19,40 +21,40 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public uint GetSessionID(int iSessionIndex)
+        public RemotePlaySessionID_t GetSessionID(int iSessionIndex)
         {
             Write("GetSessionID");
-            return default;
+            return 0;
         }
 
-        public IntPtr GetSessionSteamID(uint unSessionID)
+        public CSteamID GetSessionSteamID(RemotePlaySessionID_t unSessionID)
         {
             Write("GetSessionSteamID");
-            return default;
+            return CSteamID.CreateOne();
         }
 
-        public string GetSessionClientName(uint unSessionID)
+        public string GetSessionClientName(RemotePlaySessionID_t unSessionID)
         {
             Write("GetSessionClientName");
-            return default;
+            return "";
         }
 
-        public ESteamDeviceFormFactor GetSessionClientFormFactor(uint unSessionID)
+        public int GetSessionClientFormFactor(RemotePlaySessionID_t unSessionID)
         {
             Write("GetSessionClientFormFactor");
-            return default;
+            return 0;
         }
 
-        public bool BGetSessionClientResolution(uint unSessionID, int pnResolutionX, int pnResolutionY)
+        public bool BGetSessionClientResolution(RemotePlaySessionID_t unSessionID, int pnResolutionX, int pnResolutionY)
         {
             Write("BGetSessionClientResolution");
             return default;
         }
 
-        public bool BSendRemotePlayTogetherInvite(IntPtr steamIDFriend)
+        public bool BSendRemotePlayTogetherInvite(ulong steamIDFriend)
         {
             Write("BSendRemotePlayTogetherInvite");
-            return default;
+            return false;
         }
     }
 }

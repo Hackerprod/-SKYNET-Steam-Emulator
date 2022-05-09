@@ -1,9 +1,9 @@
 using SKYNET.Steamworks;
-using Steamworks;
+
 using System;
 using SteamAPICall_t = System.UInt64;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("SteamUtils009")]
     public class SteamUtils009 : ISteamInterface
@@ -18,7 +18,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUtils.GetSecondsSinceComputerActive();
         }
 
-        public EUniverse GetConnectedUniverse(IntPtr _)
+        public int GetConnectedUniverse(IntPtr _)
         {
             return SteamEmulator.SteamUtils.GetConnectedUniverse();
         }
@@ -68,7 +68,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUtils.IsAPICallCompleted(hSteamAPICall, ref pbFailed);
         }
 
-        public ESteamAPICallFailure GetAPICallFailureReason(IntPtr _, SteamAPICall_t hSteamAPICall)
+        public int GetAPICallFailureReason(IntPtr _, SteamAPICall_t hSteamAPICall)
         {
             return SteamEmulator.SteamUtils.GetAPICallFailureReason(hSteamAPICall);
         }
@@ -174,7 +174,7 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUtils.FilterText(pchOutFilteredText, nByteSizeOutFilteredText, pchInputMessage, bLegalOnly);
         }
 
-        public ESteamIPv6ConnectivityState GetIPv6ConnectivityState(IntPtr _, int eProtocol)
+        public int GetIPv6ConnectivityState(IntPtr _, int eProtocol)
         {
             return SteamEmulator.SteamUtils.GetIPv6ConnectivityState(eProtocol);
         }

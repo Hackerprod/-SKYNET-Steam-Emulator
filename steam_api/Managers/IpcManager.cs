@@ -1,62 +1,76 @@
-﻿using SKYNET.Helpers;
+﻿using SKYNET.Helper;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Ipc;
 using System.Runtime.Serialization.Formatters;
 using System.Security.AccessControl;
 using System.Security.Principal;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace SKYNET.Managers
 {
     public class IpcManager
     {
-        private static System.Timers.Timer Timer;
-        private static string channel;
         private static IpcCommunicator CommunicatorServer;
         private static IpcCommunicator CommunicatorClient;
-        private static bool ClientConnected;
 
-        public IpcManager()
+        static IpcManager()
         {
             CommunicatorServer = new IpcCommunicator();
+            CommunicatorServer.ProcessID = Process.GetCurrentProcess().Id;
             CommunicatorServer.OnMessage += CommunicatorServer_OnMessage;
-            Timer = new System.Timers.Timer();
-        }
-
-        private void CommunicatorServer_OnMessage(object sender, object e)
-        {
-            Write("Received IPC message from server");
-        }
-
-        private static void CommunicatorClient_OnMessage(object sender, object e)
-        {
-            Write("Received IPC message from client");
         }
 
         public static void Initialize()
         {
-            ThreadPool.QueueUserWorkItem(CreateIpcThread);
-            ThreadPool.QueueUserWorkItem(StartTimer);
+            ThreadPool.QueueUserWorkItem(StartServer);
+            ThreadPool.QueueUserWorkItem(StartConnection);
         }
 
-        private static void ConnectIpcThread(object state)
+        public static void StartServer(object state)
         {
+            string channel = Process.GetCurrentProcess().Id.ToString();
+            var InObject = WellKnownObjectMode.Singleton;
+            IpcCreateServer(ref channel, InObject, CommunicatorServer);
         }
 
-        private static void CreateIpcThread(object state)
+        public static void StartConnection(object state)
         {
-            channel = Process.GetCurrentProcess().Id.ToString();
-            IpcCreateServer(ref channel, WellKnownObjectMode.Singleton, CommunicatorServer);
+            while (true)
+            {
+                try
+                {
+                    if (CommunicatorClient == null)
+                    {
+                        CommunicatorClient = (IpcCommunicator)Activator.GetObject(typeof(IpcCommunicator), "ipc://SKYNET/SKYNET");
+                        if (CommunicatorClient != null)
+                        {
+                            Write("Ipc client connected successfully");
+                            CommunicatorClient.InvokeMessage(Process.GetCurrentProcess().Id);
+                        }
+                    }
+                    else
+                    {
+                        CommunicatorClient.Ping("");
+                    }
+
+                }
+                catch 
+                {
+                    CommunicatorClient = null;
+                }
+                Thread.Sleep(7000);
+            }
         }
 
+        private static void CommunicatorServer_OnMessage(object sender, object e)
+        {
+            // Message received from client
+            Write(e);
+        }
         private static IpcServerChannel IpcCreateServer<TRemoteObject>(ref string RefChannelName, WellKnownObjectMode InObjectMode, TRemoteObject ipcInterface, params WellKnownSidType[] InAllowedClientSIDs) where TRemoteObject : MarshalByRefObject
         {
             string text = RefChannelName;
@@ -92,41 +106,23 @@ namespace SKYNET.Managers
             return ipcServerChannel;
         }
 
-        private static void StartTimer(object threadObj)
-        {
-            Timer = new System.Timers.Timer();
-            Timer.AutoReset = false;
-            Timer.Interval = 5000;
-            Timer.Elapsed += Timer_Elapsed;
-            Timer.Start();
-        }
-
-        private static void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        internal static void SendMsg(string v)
         {
             try
             {
-                if (ClientConnected) return;
-
-                string EmulatorChannel = "SKYNET";
-                CommunicatorClient = (IpcCommunicator)Activator.GetObject(typeof(IpcCommunicator), "ipc://" + EmulatorChannel + "/" + EmulatorChannel);
                 if (CommunicatorClient != null)
                 {
-                    CommunicatorClient.OnMessage += CommunicatorClient_OnMessage;
-                    Write("Connected to IPC client");
-                    ClientConnected = true;
-                }
+                    CommunicatorClient.InvokeMessage(v);
+                }   
             }
-            catch
+            catch (Exception)
             {
             }
-
-            Timer.Interval = 5000;
-            Timer.Start();
         }
 
-        private static void Write(string v)
+        private static void Write(object v)
         {
-            SteamEmulator.Write("Ipc Manager", v);
+            SteamEmulator.Write("IpcManager", v);
         }
     }
 }

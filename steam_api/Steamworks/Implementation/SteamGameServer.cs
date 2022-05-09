@@ -1,7 +1,7 @@
 ﻿using System;
 using SKYNET.Managers;
 using SKYNET.Types;
-using Steamworks;
+
 
 using SteamAPICall_t = System.UInt64;
 using HAuthTicket = System.UInt32;
@@ -16,7 +16,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public SteamGameServer()
         {
-            InterfaceVersion = "SteamGameServer";
+            InterfaceName = "SteamGameServer";
             ServerData = new GameServerData();
         }
 
@@ -99,7 +99,7 @@ namespace SKYNET.Steamworks.Implementation
         public CSteamID GetSteamID()
         {
             var SteamId = SteamEmulator.SteamId_GS;
-            Write($"GetSteamID {(string)SteamId}");
+            Write($"GetSteamID {SteamId.ToString()}");
             return SteamId; 
         }
 
@@ -208,11 +208,10 @@ namespace SKYNET.Steamworks.Implementation
 
         // Retrieve ticket to be sent to the entity who wishes to authenticate you ( using BeginAuthSession API ). 
         // uint32 *pcbTicket  retrieves the length of the actual ticket.
-        public HAuthTicket GetAuthSessionTicket(IntPtr pTicket, ref int cbMaxTicket, ref uint pcbTicket)
+        public HAuthTicket GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
         {
             SteamEmulator.Write("DEBUG", "GetAuthSessionTicket");
-            NetworkManager.AnnounceClient();
-            return TicketManager.GetAuthSessionTicket(pTicket, ref cbMaxTicket, ref pcbTicket, true);
+            return TicketManager.GetAuthSessionTicket(pTicket, cbMaxTicket, ref pcbTicket);
         }
 
         public void SetAdvertiseServerActive(bool bActive)
@@ -222,7 +221,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public int BeginAuthSession(IntPtr pAuthTicket, int cbAuthTicket, ulong steamID)
         {
-            Write("BeginAuthSession");
+            Write($"BeginAuthSession for {(CSteamID)steamID}");
             return (int)EBeginAuthSessionResult.k_EBeginAuthSessionResultOK;
         }
 

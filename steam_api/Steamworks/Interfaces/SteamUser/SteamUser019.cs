@@ -1,14 +1,18 @@
 using SKYNET.Types;
-using Steamworks;
-using System;
-using SteamAPICall_t = System.UInt64;
 
-namespace SKYNET.Interface
+using System;
+
+using SteamAPICall_t = System.UInt64;
+using HSteamUser = System.UInt32;
+using SKYNET.Steamworks;
+using System.Runtime.InteropServices;
+
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("SteamUser019")]
     public class SteamUser019 : ISteamInterface
     {
-        public int GetHSteamUser(IntPtr _)
+        public HSteamUser GetHSteamUser(IntPtr _)
         {
             return SteamEmulator.SteamUser.GetHSteamUser();
         }
@@ -33,9 +37,9 @@ namespace SKYNET.Interface
             SteamEmulator.SteamUser.TerminateGameConnection(unIPServer, usPortServer);
         }
 
-        public void TrackAppUsageEvent(IntPtr _, IntPtr gameID, int eAppUsageEvent, string pchExtraInfo = "")
+        public void TrackAppUsageEvent(IntPtr _, IntPtr gameID, int eAppUsageEvent, string pchExtraInfo)
         {
-            SteamEmulator.SteamUser.TrackAppUsageEvent(gameID, eAppUsageEvent);
+            SteamEmulator.SteamUser.TrackAppUsageEvent(gameID, eAppUsageEvent, pchExtraInfo);
         }
 
         public bool GetUserDataFolder(IntPtr _, ref string pchBuffer, int cubBuffer)

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using SKYNET;
-using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using SKYNET.Types;
 
@@ -13,7 +12,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         public SteamInventory()
         {
-            InterfaceVersion = "SteamInventory";
+            InterfaceName = "SteamInventory";
         }
 
         public bool AddPromoItem(uint pResultHandle, uint itemDef)
@@ -105,7 +104,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public uint GetNumItemsWithPrices(IntPtr self)
+        public uint GetNumItemsWithPrices()
         {
             Write($"GetNumItemsWithPrices");
             return 0;
@@ -147,7 +146,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool LoadItemDefinitions(IntPtr self)
+        public bool LoadItemDefinitions()
         {
             Write($"LoadItemDefinitions");
             return false;
@@ -165,10 +164,10 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public ulong RequestPrices(IntPtr self)
+        public ulong RequestPrices()
         {
             Write($"RequestPrices");
-            return new ulong();
+            return 0;
         }
 
         public void SendItemDropHeartbeat(IntPtr self)
@@ -209,10 +208,10 @@ namespace SKYNET.Steamworks.Implementation
         public ulong StartPurchase(IntPtr pArrayItemDefs, IntPtr punArrayQuantity, uint unArrayLength)
         {
             Write($"StartPurchase");
-            return new ulong();
+            return 0;
         }
 
-        public ulong StartUpdateProperties(IntPtr _)
+        public ulong StartUpdateProperties()
         {
             Write($"StartUpdateProperties");
             return 0;

@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 
-namespace Steamworks
+namespace SKYNET.Steamworks
 {
 	public struct FriendGameInfo_t
 	{

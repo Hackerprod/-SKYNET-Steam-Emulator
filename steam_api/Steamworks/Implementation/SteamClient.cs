@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using SKYNET;
-using SKYNET.Helpers;
 using SKYNET.Managers;
 
 using HSteamPipe = System.UInt32;
@@ -13,7 +12,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         public SteamClient()
         {
-            InterfaceVersion = "SteamClient";
+            InterfaceName = "SteamClient";
         }
 
         public HSteamPipe CreateSteamPipe()
@@ -57,7 +56,7 @@ namespace SKYNET.Steamworks.Implementation
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public void SetLocalIPBinding(IntPtr unIP, uint usPort)
+        public void SetLocalIPBinding(UInt32 unIP, uint usPort)
         {
             Write("SetLocalIPBinding");
         }

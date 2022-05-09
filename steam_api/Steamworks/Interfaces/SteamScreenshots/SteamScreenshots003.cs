@@ -1,6 +1,6 @@
 using System;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("STEAMSCREENSHOTS_INTERFACE_VERSION003")]
     public class SteamScreenshots003 : ISteamInterface
