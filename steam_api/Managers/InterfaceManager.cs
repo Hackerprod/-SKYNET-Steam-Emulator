@@ -45,8 +45,8 @@ namespace SKYNET.Managers
         {
             if (InvalidateInterface(pszVersion))
             {
-                //Write($"Skipping {pszVersion}");
-                //return default;
+                Write($"Skipping {pszVersion}");
+                return default;
             }
 
             if (GameServer)
@@ -131,10 +131,10 @@ namespace SKYNET.Managers
             //{
             //    return true;
             //}
-            if (pszVersion.StartsWith("SteamNetworkingUtils"))
-            {
-                return true;
-            }
+            //if (pszVersion.StartsWith("SteamNetworkingUtils"))
+            //{
+            //    return true;
+            //}
             //if (pszVersion.StartsWith("SteamNetworking"))
             //{
             //    return true;
@@ -147,10 +147,10 @@ namespace SKYNET.Managers
             //{
             //    return true;
             //}
-            //if (pszVersion.StartsWith("STEAMHTTP_INTERFACE_VERSION"))
-            //{
-            //    return true;
-            //}
+            if (pszVersion.StartsWith("STEAMHTTP_INTERFACE_VERSION"))
+            {
+                return true;
+            }
             //if (pszVersion.StartsWith("SteamController"))
             //{
             //    return true;
