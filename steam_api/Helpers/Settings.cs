@@ -17,6 +17,7 @@ namespace SKYNET.Helper
             // Verify Paths
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "SKYNET"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "SKYNET", "Storage"));
+            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "SKYNET", "Storage", "Remote"));
 
             try
             {
@@ -24,6 +25,8 @@ namespace SKYNET.Helper
 
                 if (!File.Exists(fileName))
                 {
+                    string steam_appid = Path.Combine(modCommon.GetPath(), "steam_appid.txt");
+                    string appid = File.Exists(steam_appid) ? File.ReadAllText(steam_appid) : "0";
                     StringBuilder config = new StringBuilder();
 
                     // User Configuration
@@ -35,7 +38,7 @@ namespace SKYNET.Helper
 
                     config.AppendLine("[Game Settings]");
                     config.AppendLine($"Languaje = english");
-                    config.AppendLine($"AppId = 570");
+                    config.AppendLine($"AppId = {appid}");
                     config.AppendLine();
 
                     // Network Configuration

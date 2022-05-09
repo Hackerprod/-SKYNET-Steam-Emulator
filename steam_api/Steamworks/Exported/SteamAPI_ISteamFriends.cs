@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 namespace SKYNET.Steamworks.Exported
 {
 
-    public class SteamAPI_SteamFriends
+    public class SteamAPI_ISteamFriends
     {
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_ISteamFriends_ActivateGameOverlay(IntPtr _, string friendsGroupID)

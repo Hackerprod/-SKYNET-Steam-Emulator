@@ -9,7 +9,7 @@ using SKYNET;
 
 namespace SKYNET.Steamworks.Exported
 {
-    public class SteamAPI_SteamApps
+    public class SteamAPI_ISteamApps
     {
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ISteamApps_BIsSubscribed(IntPtr _)

@@ -11,7 +11,7 @@ using ControllerAnalogActionHandle_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Exported
 {
-    public class SteamAPI_SteamController
+    public class SteamAPI_ISteamController
     {
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_ISteamController_ActivateActionSet(IntPtr _, ControllerHandle_t controllerHandle, ControllerActionSetHandle_t actionSetHandle)

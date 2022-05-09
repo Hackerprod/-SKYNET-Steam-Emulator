@@ -310,9 +310,9 @@ namespace SKYNET.Steamworks.Implementation
         public void LeaveLobby(ulong steamIDLobby)
         {
             Write($"LeaveLobby (Lobby SteamID: {steamIDLobby})");
-            if (Lobbies.TryGetValue(steamIDLobby, out var lobby))
+            if (Lobbies.TryGetValue(steamIDLobby, out _))
             {
-
+                Lobbies.TryRemove(steamIDLobby, out _);
             }
             // TODO: Send broadcast info 
         }

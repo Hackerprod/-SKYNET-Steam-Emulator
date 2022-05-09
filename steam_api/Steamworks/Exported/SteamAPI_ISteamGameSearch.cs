@@ -6,7 +6,7 @@ using SKYNET.Steamworks;
 
 namespace SKYNET.Steamworks.Exported
 {
-    public class SteamAPI_SteamGameSearch
+    public class SteamAPI_ISteamGameSearch
     {
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int SteamAPI_ISteamGameSearch_AcceptGame(IntPtr _)

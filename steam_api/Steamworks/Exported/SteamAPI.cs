@@ -45,9 +45,6 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public unsafe static void SteamAPI_RegisterCallback(IntPtr pCallback, int iCallback)
         {
-            //CallbackWrapper.RegisterCallback(pCallback, iCallback);
-            //return;
-
             // Check if Steam emulator is not initialized 
             if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
             {
@@ -83,15 +80,11 @@ namespace SKYNET.Steamworks.Exported
         {
             Write("SteamAPI_RunCallbacks");
             CallbackManager.RunCallbacks();
-            //CallbackWrapper.RunCallbacks();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_RegisterCallResult(IntPtr pCallback, SteamAPICall_t hAPICall)
         {
-            //CallbackWrapper.RegisterCallResult(pCallback, hAPICall);
-            //return;
-
             try
             {
                 var callMessage = $"SteamAPI_RegisterCallResult: ";
@@ -262,10 +255,11 @@ namespace SKYNET.Steamworks.Exported
 
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_RestartApp(UInt32 appid)
+        public static bool SteamAPI_RestartApp(uint appid)
         {
             Write($"SteamAPI_RestartApp");
-            return SteamAPI_RestartAppIfNecessary(appid);
+            SteamEmulator.AppId = appid;
+            return false;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -315,6 +309,13 @@ namespace SKYNET.Steamworks.Exported
         {
             Write($"g_pSteamClientGameServer");
             return InterfaceManager.FindOrCreateInterface("g_pSteamClientGameServer");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static HSteamUser Steam_GetHSteamUserCurrent()
+        {
+            Write($"Steam_GetHSteamUserCurrent");
+            return SteamEmulator.HSteamUser;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

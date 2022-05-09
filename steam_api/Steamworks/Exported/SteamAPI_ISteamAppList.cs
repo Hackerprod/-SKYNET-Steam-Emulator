@@ -7,7 +7,7 @@ using SKYNET.Helper;
 
 namespace SKYNET.Steamworks.Exported
 {
-    public class SteamAPI_SteamAppList
+    public class SteamAPI_ISteamAppList
     {
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int SteamAPI_ISteamAppList_GetAppBuildId(uint nAppID)
