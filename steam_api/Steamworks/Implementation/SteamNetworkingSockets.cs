@@ -284,6 +284,45 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
+        internal void ResetIdentity(IntPtr pIdentity)
+        {
+            Write("ResetIdentity");
+        }
+
+        internal void RunCallbacks()
+        {
+            Write("RunCallbacks");
+        }
+
+        internal bool BeginAsyncRequestFakeIP(int nNumPorts)
+        {
+            Write("BeginAsyncRequestFakeIP");
+            return true;
+        }
+
+        internal void GetFakeIP(int idxFirstPort, IntPtr pInfo)
+        {
+            Write("GetFakeIP");
+        }
+
+        internal uint CreateListenSocketP2PFakeIP(int idxFakePort, int nOptions, IntPtr pOptions)
+        {
+            Write("CreateListenSocketP2PFakeIP");
+            return 0;
+        }
+
+        internal int GetRemoteFakeIPForConnection(uint hConn, SteamNetworkingIPAddr pOutAddr)
+        {
+            Write("GetRemoteFakeIPForConnection");
+            return (int)EResult.k_EResultOK;
+        }
+
+        internal IntPtr CreateFakeUDPPort(int idxFakeServerPort)
+        {
+            Write("CreateFakeUDPPort");
+            return IntPtr.Zero;
+        }
+
         internal class SocketConnection
         {
             public int SocketID { get; set; }

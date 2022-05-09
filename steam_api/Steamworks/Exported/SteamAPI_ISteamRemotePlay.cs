@@ -27,10 +27,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static CSteamID SteamAPI_ISteamRemotePlay_GetSessionSteamID(IntPtr _, uint unSessionID)
+        public static ulong SteamAPI_ISteamRemotePlay_GetSessionSteamID(IntPtr _, uint unSessionID)
         {
             Write("SteamAPI_ISteamRemotePlay_IntPtrGetSessionSteamID");
-            return SteamEmulator.SteamRemotePlay.GetSessionSteamID(unSessionID);
+            return SteamEmulator.SteamRemotePlay.GetSessionSteamID(unSessionID).SteamID;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

@@ -7,8 +7,10 @@ using HSteamNetPollGroup = System.UInt32;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("SteamNetworkingSockets008")]
-    public class SteamNetworkingSockets008 : ISteamInterface
+    [Interface("SteamNetworkingSockets008")] // Verified
+    [Interface("SteamNetworkingSockets009")]
+    [Interface("SteamNetworkingSockets012")]
+    public class SteamNetworkingSockets012 : ISteamInterface
     {
         public HSteamListenSocket CreateListenSocketIP(IntPtr _, IntPtr localAddress, int nOptions, IntPtr pOptions)
         {
@@ -202,6 +204,41 @@ namespace SKYNET.Steamworks.Interfaces
         public bool SetCertificate(IntPtr _, IntPtr pCertificate, int cbCertificate, string errMsg)
         {
             return SteamEmulator.SteamNetworkingSockets.SetCertificate(pCertificate, cbCertificate, errMsg);
+        }
+
+        public void ResetIdentity(IntPtr _, IntPtr pIdentity )
+        {
+            SteamEmulator.SteamNetworkingSockets.ResetIdentity(pIdentity);
+        }
+
+        public void RunCallbacks(IntPtr _)
+        {
+            SteamEmulator.SteamNetworkingSockets.RunCallbacks();
+        }
+
+        public bool BeginAsyncRequestFakeIP(IntPtr _, int nNumPorts)
+        {
+            return SteamEmulator.SteamNetworkingSockets.BeginAsyncRequestFakeIP(nNumPorts);
+        }
+
+        public void GetFakeIP(IntPtr _, int idxFirstPort, IntPtr pInfo)
+        {
+            SteamEmulator.SteamNetworkingSockets.GetFakeIP(idxFirstPort, pInfo);
+        }
+
+        public HSteamListenSocket CreateListenSocketP2PFakeIP(IntPtr _, int idxFakePort, int nOptions,  IntPtr pOptions)
+        {
+            return SteamEmulator.SteamNetworkingSockets.CreateListenSocketP2PFakeIP(idxFakePort, nOptions, pOptions);
+        }
+
+        public int GetRemoteFakeIPForConnection(IntPtr _, HSteamNetConnection hConn, SteamNetworkingIPAddr pOutAddr)
+        {
+            return SteamEmulator.SteamNetworkingSockets.GetRemoteFakeIPForConnection(hConn, pOutAddr);
+        }
+
+        public IntPtr CreateFakeUDPPort(IntPtr _, int idxFakeServerPort)
+        {
+            return SteamEmulator.SteamNetworkingSockets.CreateFakeUDPPort(idxFakeServerPort);
         }
     }
 }

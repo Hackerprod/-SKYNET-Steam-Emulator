@@ -1,5 +1,4 @@
 ﻿using SKYNET.Managers;
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,7 +13,6 @@ using SKYNET.Callback;
 using SteamAPICall_t = System.UInt64;
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
-using Steamworks;
 
 namespace SKYNET.Steamworks.Exported
 {

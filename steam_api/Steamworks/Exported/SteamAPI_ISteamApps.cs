@@ -159,10 +159,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static CSteamID SteamAPI_ISteamApps_GetAppOwner(IntPtr _)
+        public static ulong SteamAPI_ISteamApps_GetAppOwner(IntPtr _)
         {
             Write("SteamAPI_ISteamApps_GetAppOwner");
-            return SteamEmulator.SteamApps.GetAppOwner();
+            return SteamEmulator.SteamApps.GetAppOwner().SteamID;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

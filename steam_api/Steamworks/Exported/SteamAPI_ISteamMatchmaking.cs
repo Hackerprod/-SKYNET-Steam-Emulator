@@ -7,7 +7,6 @@ using System.Windows.Forms;
 using SKYNET;
 using SKYNET.Steamworks;
 
-
 using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Exported
@@ -99,10 +98,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static CSteamID SteamAPI_ISteamMatchmaking_GetLobbyByIndex(IntPtr _, int iLobby)
+        public static ulong SteamAPI_ISteamMatchmaking_GetLobbyByIndex(IntPtr _, int iLobby)
         {
             Write("SteamAPI_ISteamMatchmaking_GetLobbyByIndex");
-            return SteamEmulator.SteamMatchmaking.GetLobbyByIndex(iLobby);
+            return SteamEmulator.SteamMatchmaking.GetLobbyByIndex(iLobby).SteamID;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -141,10 +140,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static CSteamID SteamAPI_ISteamMatchmaking_GetLobbyMemberByIndex(IntPtr _, ulong steamIDLobby, int iMember)
+        public static ulong SteamAPI_ISteamMatchmaking_GetLobbyMemberByIndex(IntPtr _, ulong steamIDLobby, int iMember)
         {
             Write("SteamAPI_ISteamMatchmaking_GetLobbyMemberByIndex");
-            return SteamEmulator.SteamMatchmaking.GetLobbyMemberByIndex(steamIDLobby, iMember);
+            return SteamEmulator.SteamMatchmaking.GetLobbyMemberByIndex(steamIDLobby, iMember).SteamID;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -260,10 +259,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static CSteamID SteamAPI_ISteamMatchmaking_GetLobbyOwner(IntPtr _, ulong steamIDLobby)
+        public static ulong SteamAPI_ISteamMatchmaking_GetLobbyOwner(IntPtr _, ulong steamIDLobby)
         {
             Write("SteamAPI_ISteamMatchmaking_GetLobbyOwner");
-            return SteamEmulator.SteamMatchmaking.GetLobbyOwner(steamIDLobby);
+            return SteamEmulator.SteamMatchmaking.GetLobbyOwner(steamIDLobby).SteamID;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

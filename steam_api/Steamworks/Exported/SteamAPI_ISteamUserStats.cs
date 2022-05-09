@@ -1,13 +1,6 @@
-﻿using SKYNET;
-using SKYNET.Managers;
-using SKYNET.Steamworks;
-
+﻿using SKYNET.Managers;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 using SteamAPICall_t = System.UInt64;
 using SteamLeaderboard_t = System.UInt64;

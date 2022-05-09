@@ -14,7 +14,7 @@ namespace SKYNET.Steamworks.Implementation
         public int SendMessageToUser(IntPtr identityRemote, IntPtr pubData, uint cubData, int nSendFlags, int nRemoteChannel)
         {
             Write("SendMessageToUser");
-            return 0;
+            return (int)EResult.k_EResultOK;
         }
 
         public int ReceiveMessagesOnChannel(int nLocalChannel, IntPtr ppOutMessages, int nMaxMessages)

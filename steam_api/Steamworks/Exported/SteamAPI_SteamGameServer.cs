@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
 
@@ -57,10 +56,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static CSteamID SteamGameServer_GetSteamID()
+        public static ulong SteamGameServer_GetSteamID()
         {
             Write("SteamGameServer_GetSteamID");
-            return (CSteamID)SteamEmulator.SteamId_GS;
+            return SteamEmulator.SteamId_GS.SteamID;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

@@ -94,10 +94,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static CSteamID SteamAPI_ISteamFriends_GetChatMemberByIndex(IntPtr _, ulong steamIDClan, int iUser)
+        public static ulong SteamAPI_ISteamFriends_GetChatMemberByIndex(IntPtr _, ulong steamIDClan, int iUser)
         {
             Write($"SteamAPI_ISteamFriends_GetChatMemberByIndex");
-            return SteamEmulator.SteamFriends.GetChatMemberByIndex(steamIDClan, iUser);
+            return SteamEmulator.SteamFriends.GetChatMemberByIndex(steamIDClan, iUser).SteamID;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -108,10 +108,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static CSteamID SteamAPI_ISteamFriends_GetClanByIndex(IntPtr _, int iClan)
+        public static ulong SteamAPI_ISteamFriends_GetClanByIndex(IntPtr _, int iClan)
         {
             Write($"SteamAPI_ISteamFriends_GetClanByIndex");
-            return SteamEmulator.SteamFriends.GetClanByIndex(iClan);
+            return SteamEmulator.SteamFriends.GetClanByIndex(iClan).SteamID;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -143,10 +143,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static CSteamID SteamAPI_ISteamFriends_GetClanOfficerByIndex(IntPtr _, ulong steamIDClan, int iOfficer)
+        public static ulong SteamAPI_ISteamFriends_GetClanOfficerByIndex(IntPtr _, ulong steamIDClan, int iOfficer)
         {
             Write($"SteamAPI_ISteamFriends_GetClanOfficerByIndex");
-            return SteamEmulator.SteamFriends.GetClanOfficerByIndex(steamIDClan, iOfficer);
+            return SteamEmulator.SteamFriends.GetClanOfficerByIndex(steamIDClan, iOfficer).SteamID;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -157,10 +157,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static CSteamID SteamAPI_ISteamFriends_GetClanOwner(IntPtr _, ulong steamIDClan)
+        public static ulong SteamAPI_ISteamFriends_GetClanOwner(IntPtr _, ulong steamIDClan)
         {
             Write($"SteamAPI_ISteamFriends_GetClanOwner");
-            return SteamEmulator.SteamFriends.GetClanOwner(steamIDClan);
+            return SteamEmulator.SteamFriends.GetClanOwner(steamIDClan).SteamID;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -171,10 +171,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static CSteamID SteamAPI_ISteamFriends_GetCoplayFriend(IntPtr _, int iCoplayFriend)
+        public static ulong SteamAPI_ISteamFriends_GetCoplayFriend(IntPtr _, int iCoplayFriend)
         {
             Write($"SteamAPI_ISteamFriends_GetCoplayFriend");
-            return SteamEmulator.SteamFriends.GetCoplayFriend(iCoplayFriend);
+            return SteamEmulator.SteamFriends.GetCoplayFriend(iCoplayFriend).SteamID;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -192,10 +192,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static CSteamID SteamAPI_ISteamFriends_GetFriendByIndex(IntPtr _, int iFriend, int iFriendFlags)
+        public static ulong SteamAPI_ISteamFriends_GetFriendByIndex(IntPtr _, int iFriend, int iFriendFlags)
         {
             Write($"SteamAPI_ISteamFriends_GetFriendByIndex");
-            return SteamEmulator.SteamFriends.GetFriendByIndex(iFriend, iFriendFlags);
+            return SteamEmulator.SteamFriends.GetFriendByIndex(iFriend, iFriendFlags).SteamID;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -227,10 +227,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static CSteamID SteamAPI_ISteamFriends_GetFriendFromSourceByIndex(IntPtr _, ulong steamIDSource, int iFriend)
+        public static ulong SteamAPI_ISteamFriends_GetFriendFromSourceByIndex(IntPtr _, ulong steamIDSource, int iFriend)
         {
             Write($"SteamAPI_ISteamFriends_GetFriendFromSourceByIndex");
-            return SteamEmulator.SteamFriends.GetFriendFromSourceByIndex(steamIDSource, iFriend);
+            return SteamEmulator.SteamFriends.GetFriendFromSourceByIndex(steamIDSource, iFriend).SteamID;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
