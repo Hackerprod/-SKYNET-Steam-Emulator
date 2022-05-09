@@ -16,6 +16,10 @@ namespace SKYNET.Steamworks
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct CSteamID : IEquatable<CSteamID>, IComparable<CSteamID>
     {
+        public ulong m_SteamID;
+
+        public static readonly CSteamID Invalid = new CSteamID(new AccountID_t(0u), 0u, EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeIndividual);
+
         public static readonly CSteamID Nil = default(CSteamID);
 
         public static readonly CSteamID OutofDateGS = new CSteamID(new AccountID_t(0u), 0u, EUniverse.k_EUniverseInvalid, EAccountType.k_EAccountTypeInvalid);
@@ -25,8 +29,6 @@ namespace SKYNET.Steamworks
         public static readonly CSteamID NotInitYetGS = new CSteamID(new AccountID_t(1u), 0u, EUniverse.k_EUniverseInvalid, EAccountType.k_EAccountTypeInvalid);
 
         public static readonly CSteamID NonSteamGS = new CSteamID(new AccountID_t(2u), 0u, EUniverse.k_EUniverseInvalid, EAccountType.k_EAccountTypeInvalid);
-
-        public ulong m_SteamID;
 
         public CSteamID(AccountID_t unAccountID, EUniverse eUniverse, EAccountType eAccountType)
         {

@@ -26,7 +26,6 @@ namespace SKYNET.Steamworks.Implementation
             Lobbies = new ConcurrentDictionary<SteamAPICall_t, SteamLobby>();
             filters = new FilterLobby();
             CurrentRequest = 0;
-            CreateTestLobby();
         }
 
         public int AddFavoriteGame(uint nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags, uint rTime32LastPlayedOnServer)

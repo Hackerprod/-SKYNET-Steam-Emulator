@@ -19,7 +19,7 @@ namespace SKYNET.Steamworks
     //    public byte  Universe;
     //    public byte  AccountType;
 
-    //    public CSteamID(uint accountId)
+    //    public IntPtr(uint accountId)
     //    {
     //        this.AccountId = accountId;
     //        this.Universe = (byte)EUniverse.k_EUniversePublic;
@@ -34,7 +34,7 @@ namespace SKYNET.Steamworks
     //        this.SteamID = (SteamID & ~(0xFFFFFul << (ushort)32)) | (((ulong)(instance) & 0xFFFFFul) << (ushort)32);
     //    }
 
-    //    public CSteamID(ulong _steamID)
+    //    public IntPtr(ulong _steamID)
     //    {
     //        this.SteamID = _steamID;
     //        this.AccountId = (uint)(_steamID & 0xFFFFFFFFul);
@@ -42,7 +42,7 @@ namespace SKYNET.Steamworks
     //        this.AccountType = (byte)(EAccountType)((_steamID >> 52) & 0xFul);
     //    }
 
-    //    public CSteamID(uint _accountId, EUniverse _Universe, EAccountType _AccountType)
+    //    public IntPtr(uint _accountId, EUniverse _Universe, EAccountType _AccountType)
     //    {
     //        this.AccountId = _accountId;
     //        this.Universe = (byte)_Universe;

@@ -269,8 +269,8 @@ namespace SKYNET.Steamworks.Exported
             Msg += "////////////////////////////// Mini Dump Content \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + Environment.NewLine;
             Msg += $"{pchMsg}" + Environment.NewLine;
             Msg += "//////////////////////////////   End Mini Dump   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + Environment.NewLine;
-            //Write(Msg);
-            Write("SteamAPI_SetMiniDumpComment");
+            Write(Msg);
+            //Write("SteamAPI_SetMiniDumpComment");
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

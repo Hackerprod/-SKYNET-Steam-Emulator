@@ -7,6 +7,7 @@ using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
 using HAuthTicket = System.UInt32;
 using SKYNET.Managers;
+using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -36,7 +37,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             var SteamId = SteamEmulator.SteamId;
             Write($"GetSteamID {SteamId}");
-            return SteamId;
+            return new CSteamID(SteamId);
         }
 
         public int InitiateGameConnection(IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)

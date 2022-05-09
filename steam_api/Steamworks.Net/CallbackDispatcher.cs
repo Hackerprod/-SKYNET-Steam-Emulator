@@ -350,7 +350,7 @@ namespace Steamworks.Net {
 		public delegate void APIDispatchDelegate(T param, bool bIOFailure);
 		private event APIDispatchDelegate m_Func;
 
-		private SteamAPICall_t m_hAPICall = SteamAPICall_t.Invalid;
+		private SteamAPICall_t m_hAPICall = 0;
 		public SteamAPICall_t Handle { get { return m_hAPICall; } }
 
 		private bool m_bDisposed = false;
@@ -403,14 +403,14 @@ namespace Steamworks.Net {
 				throw new Exception("CallResult function was null, you must either set it in the CallResult Constructor or via Set()");
 			}
 
-			if (m_hAPICall != SteamAPICall_t.Invalid)
+			if (m_hAPICall != 0)
             {
 				CallbackDispatcher.Unregister(m_hAPICall, this);
 			}
 
 			m_hAPICall = hAPICall;
 
-			if (hAPICall != SteamAPICall_t.Invalid)
+			if (hAPICall != 0)
             {
 				CallbackDispatcher.Register(hAPICall, this);
 			}
@@ -418,7 +418,7 @@ namespace Steamworks.Net {
 
 		public bool IsActive()
         {
-			return (m_hAPICall != SteamAPICall_t.Invalid);
+			return (m_hAPICall != 0);
 		}
 
 		public void Cancel()
@@ -450,7 +450,7 @@ namespace Steamworks.Net {
 
 		internal override void SetUnregistered()
         {
-			m_hAPICall = SteamAPICall_t.Invalid;
+			m_hAPICall = 0;
 		}
 	}
     // structure that contains client callback data

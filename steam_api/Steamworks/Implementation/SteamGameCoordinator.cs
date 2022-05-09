@@ -20,7 +20,7 @@ namespace SKYNET.Steamworks.Implementation
 
             // CMsgConnectionStatus serialized
             byte[] ConnectionStatus = new byte[] { 0xA4, 0x0F, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00 };
-            InMessages.TryAdd(4009U, ConnectionStatus);
+            //InMessages.TryAdd(4009U, ConnectionStatus);
         }
 
         public void PushMessage(uint MsgType, byte[] message)
@@ -57,7 +57,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public EGCResults RetrieveMessage(ref uint punMsgType, IntPtr pubDest, uint cubDest, ref uint pcubMsgSize)
         {
-            Write($"RetrieveMessage cubDest{cubDest}");
+            Write($"RetrieveMessage");
             EGCResults Result = EGCResults.k_EGCResultNoMessage;
 
             if (InMessages.Any())

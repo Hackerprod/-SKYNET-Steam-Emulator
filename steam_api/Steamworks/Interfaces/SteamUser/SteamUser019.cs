@@ -4,6 +4,7 @@ using System;
 
 using SteamAPICall_t = System.UInt64;
 using HSteamUser = System.UInt32;
+using SKYNET.Steamworks;
 
 namespace SKYNET.Interface
 {
@@ -20,9 +21,9 @@ namespace SKYNET.Interface
             return SteamEmulator.SteamUser.BLoggedOn();
         }
 
-        public ulong GetSteamID(IntPtr _)
+        public CSteamID GetSteamID(IntPtr _)
         {
-            return (ulong)SteamEmulator.SteamUser.GetSteamID();
+            return SteamEmulator.SteamUser.GetSteamID();
         }
 
         public int InitiateGameConnection(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)

@@ -68,7 +68,7 @@ namespace SKYNET.Helper
                 foreach (var item in IniParser["User Settings"].Settings)
                     if (item.Key == "AccountId")
                         if (uint.TryParse((string)item.Value, out uint accountId))
-                            SteamEmulator.SteamId = new CSteamID(accountId, Steamworks.EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeIndividual);
+                            SteamEmulator.SteamId = (ulong)new CSteamID(accountId, Steamworks.EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeIndividual);
 
                 foreach (var item in IniParser["Game Settings"].Settings)
                     if (item.Key == "AppId")

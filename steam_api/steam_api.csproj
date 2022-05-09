@@ -52,10 +52,6 @@
     <DllExportPostProcType>0</DllExportPostProcType>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Steamworks.NET, Version=11.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\JUEGOS\Farm Together\Steamworks.NET.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -76,6 +72,7 @@
     <Compile Include="Callback\CallbackEnums.cs" />
     <Compile Include="Callback\CallbackTypes.cs" />
     <Compile Include="Callback\CCallbackBase.cs" />
+    <Compile Include="Callback\CCallbackBaseVTable.cs" />
     <Compile Include="Callback\SteamCallback.cs" />
     <Compile Include="Callback\SteamCallBacks.cs" />
     <Compile Include="Overlay\frmOverlay.cs">
@@ -137,6 +134,7 @@
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamUser.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamUserStats.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamUtils.cs" />
+    <Compile Include="Steamworks\Exported\SteamAPI_SteamNetworkingConfigValue.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_SteamNetworkingIdentity.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamGameSearch.cs" />

@@ -147,7 +147,7 @@ namespace SKYNET.Steamworks.Implementation
         public CSteamID GetAppOwner()
         {
             Write("GetAppOwner");
-            return SteamEmulator.SteamId;
+            return (CSteamID)SteamEmulator.SteamId;
         }
 
         public string GetLaunchQueryParam(string pchKey)

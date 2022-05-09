@@ -60,7 +60,7 @@ namespace SKYNET.Steamworks.Exported
         public static CSteamID SteamGameServer_GetSteamID()
         {
             Write("SteamGameServer_GetSteamID");
-            return SteamEmulator.SteamId_GS;
+            return (CSteamID)SteamEmulator.SteamId_GS;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

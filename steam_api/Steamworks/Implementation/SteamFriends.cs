@@ -233,7 +233,7 @@ namespace SKYNET.Steamworks.Implementation
         public CSteamID GetChatMemberByIndex(ulong steamIDClan, int iUser)
         {
             Write($"GetChatMemberByIndex {steamIDClan}");
-            return (CSteamID)0;
+            return CSteamID.Invalid;
         }
 
         public bool GetClanActivityCounts(ulong steamIDClan, ref int online, ref int in_game, ref int chatting)
@@ -248,7 +248,7 @@ namespace SKYNET.Steamworks.Implementation
         public CSteamID GetClanByIndex(int iClan)
         {
             Write($"GetClanByIndex {iClan}");
-            return (CSteamID)0;
+            return CSteamID.Invalid;
         }
 
         public int GetClanChatMemberCount(ulong steamIDClan)
@@ -279,7 +279,7 @@ namespace SKYNET.Steamworks.Implementation
         public CSteamID GetClanOfficerByIndex(ulong steamIDClan, int iOfficer)
         {
             Write($"GetClanOfficerByIndex {steamIDClan}");
-            return (CSteamID)0;
+            return CSteamID.Invalid;
         }
 
         public int GetClanOfficerCount(ulong steamIDClan)
@@ -291,7 +291,7 @@ namespace SKYNET.Steamworks.Implementation
         public CSteamID GetClanOwner(ulong steamIDClan)
         {
             Write($"GetClanOwner {steamIDClan}");
-            return (CSteamID)0;
+            return CSteamID.Invalid;
         }
 
         public string GetClanTag(ulong steamIDClan)
@@ -303,7 +303,7 @@ namespace SKYNET.Steamworks.Implementation
         public CSteamID GetCoplayFriend(int iCoplayFriend)
         {
             Write($"GetCoplayFriend {iCoplayFriend}");
-            return (CSteamID)0;
+            return CSteamID.Invalid;
         }
 
         public int GetCoplayFriendCount()
@@ -333,7 +333,7 @@ namespace SKYNET.Steamworks.Implementation
                     var friend = Friends[index];
                     if (friend != null)
                     {
-                        Result = (CSteamID)friend.SteamId;
+                        Result = new CSteamID(friend.SteamId);
                     }
                 }
             });
@@ -377,7 +377,7 @@ namespace SKYNET.Steamworks.Implementation
         public CSteamID GetFriendFromSourceByIndex(ulong steamIDSource, int iFriend)
         {
             Write($"GetFriendFromSourceByIndex {steamIDSource} {iFriend}");
-            return (CSteamID)0;
+            return CSteamID.Invalid;
         }
 
         public bool GetFriendGamePlayed(ulong steamIDFriend, IntPtr ptrFriendGameInfo)
