@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SteamAPICall_t = System.UInt64;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("SteamGameStats001")]
     public class SteamGameStats001 : ISteamInterface

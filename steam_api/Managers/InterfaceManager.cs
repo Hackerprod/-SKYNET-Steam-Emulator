@@ -1,9 +1,6 @@
-﻿using SKYNET.Interface;
+﻿using SKYNET.Steamworks.Interfaces;
 using System;
 using System.Collections.Concurrent;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
 using System.Reflection;
 
 using HSteamPipe = System.UInt32;

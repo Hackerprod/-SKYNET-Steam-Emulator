@@ -1,7 +1,7 @@
 using System;
 
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("SteamMatchMakingServers002")]
     public class SteamMatchMakingServers002 : ISteamInterface

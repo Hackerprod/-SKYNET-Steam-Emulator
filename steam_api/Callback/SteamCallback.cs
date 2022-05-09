@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 using SteamAPICall_t = System.UInt64;
 
-namespace Steamworks
+namespace SKYNET.Callback
 {
     public class SteamCallback
     {

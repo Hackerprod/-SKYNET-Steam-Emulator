@@ -6,7 +6,7 @@ using HTTPRequestHandle = System.UInt32;
 using HTTPCookieContainerHandle = System.UInt32;
 
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("STEAMHTTP_INTERFACE_VERSION002")]
     [Interface("STEAMHTTP_INTERFACE_VERSION003")]

@@ -1,6 +1,6 @@
 using System;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("STEAMVIDEO_INTERFACE_V002")]
     public class SteamVideo002 : ISteamInterface

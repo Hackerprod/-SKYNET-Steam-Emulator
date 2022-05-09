@@ -98,13 +98,13 @@ namespace SKYNET.Steamworks.Implementation
 
                 LobbyCreated_t data = new LobbyCreated_t()
                 {
-                    m_eResult = Types.EResult.k_EResultOK,
+                    m_eResult = EResult.k_EResultOK,
                     m_ulSteamIDLobby = LocalLobby.SteamID
                 };
 
                 if (!Lobbies.TryAdd(LocalLobby.SteamID, LocalLobby))
                 {
-                    data.m_eResult = Types.EResult.k_EResultFail;
+                    data.m_eResult = EResult.k_EResultFail;
                 }
 
                 SteamEmulator.SteamFriends.UpdateUserLobby((ulong)SteamEmulator.SteamId, LocalLobby.SteamID);

@@ -31,8 +31,8 @@ public class SteamEmulator
     public static string SteamApiPath;
     public static string EmulatorPath;
 
-    public static ulong SteamId;
-    public static ulong SteamId_GS;
+    public static CSteamID SteamId;
+    public static CSteamID SteamId_GS;
     public static uint GameID;
     public static uint AppId;
     public static bool Initialized;
@@ -121,7 +121,7 @@ public class SteamEmulator
                 Write("Settings", "Error loading settings");
             }
 
-            SteamId_GS = (ulong)new CSteamID((uint)new Random().Next(1000, 9999), EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeGameServer);
+            SteamId_GS = new CSteamID((uint)new Random().Next(1000, 9999), EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeGameServer);
 
             #region Interface Initialization
 
@@ -348,7 +348,6 @@ public class SteamEmulator
         Console.ForegroundColor = color;
         Console.WriteLine($" DEBUG: {v}");
     }
-
 }
 
 

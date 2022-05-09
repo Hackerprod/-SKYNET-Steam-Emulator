@@ -140,7 +140,7 @@ namespace SKYNET.Managers
                 NET_Announce announce = message.ParsedBody.FromJson<NET_Announce>();
 
                 // Add User to List on both cases (NET_Announce and NET_AnnounceResponse)
-                if (announce != null && announce.AccountID != (uint)SteamEmulator.SteamId.GetAccountID())
+                if (announce != null && announce.AccountID != SteamEmulator.SteamId.AccountId)
                     SteamEmulator.SteamFriends?.AddOrUpdateUser(announce.AccountID, announce.PersonaName, announce.AppID, ((IPEndPoint)socket.RemoteEndPoint).Address.ToString());
 
                 if (message.MessageType == (int)MessageType.NET_Announce)
@@ -183,7 +183,7 @@ namespace SKYNET.Managers
                     string hexAvatar = Convert.ToBase64String(imageBytes);
                     NET_AvatarResponse avatarResponse = new NET_AvatarResponse()
                     {
-                        AccountID = (uint)SteamEmulator.SteamId.GetAccountID(),
+                        AccountID = (uint)SteamEmulator.SteamId.AccountId,
                         HexAvatar = hexAvatar
                     };
                     string parsedResponse = avatarResponse.ToJson();
@@ -235,7 +235,7 @@ namespace SKYNET.Managers
 
                 if (StatusChanged != null)
                 {
-                    if (StatusChanged.AccountID == (uint)SteamEmulator.SteamId.GetAccountID()) return;
+                    if (StatusChanged.AccountID == (uint)SteamEmulator.SteamId.AccountId) return;
                     string ipaddress = "";
                     try { ipaddress = ((IPEndPoint)socket.RemoteEndPoint).Address.ToString(); } catch { }
                     SteamEmulator.SteamFriends.UpdateUserStatus(StatusChanged, ipaddress);
@@ -257,7 +257,7 @@ namespace SKYNET.Managers
             {
                 NET_P2PPacket p2p = message.ParsedBody.FromJson<NET_P2PPacket>();
 
-                if (p2p != null && p2p.AccountID == (uint)SteamEmulator.SteamId.GetAccountID())
+                if (p2p != null && p2p.AccountID == (uint)SteamEmulator.SteamId.AccountId)
                 {
                     byte[] bytes = Convert.FromBase64String(p2p.Buffer);
                     SteamEmulator.SteamNetworking.P2PIncoming.Add(p2p);
@@ -280,7 +280,7 @@ namespace SKYNET.Managers
             NET_UserDataUpdated status = new NET_UserDataUpdated()
             {
                 PersonaName = user.PersonaName,
-                AccountID = (uint)SteamEmulator.SteamId.GetAccountID(),
+                AccountID = (uint)SteamEmulator.SteamId.AccountId,
                 LobbyID = user.LobbyId.GetAccountID()
             };
 
@@ -301,7 +301,7 @@ namespace SKYNET.Managers
                 {
                     AccountID = steamIDRemote.GetAccountID(),
                     Buffer = Convert.ToBase64String(bytes),
-                    IDRemote = (uint)SteamEmulator.SteamId.GetAccountID(),
+                    IDRemote = (uint)SteamEmulator.SteamId.AccountId,
                     P2PSendType = eP2PSendType,
                     Channel = nChannel
                 };
@@ -379,7 +379,7 @@ namespace SKYNET.Managers
             NET_Announce announce = new NET_Announce()
             {
                 PersonaName = SteamEmulator.PersonaName,
-                AccountID = (uint)SteamEmulator.SteamId.GetAccountID()
+                AccountID = (uint)SteamEmulator.SteamId.AccountId
             };
 
             NetworkMessage message = CreateNetworkMessage(announce, MessageType.NET_Announce);

@@ -3,7 +3,7 @@ using System;
 
 using RemotePlaySessionID_t = System.UInt32;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("STEAMREMOTEPLAY_INTERFACE_VERSION001")]
     public class SteamRemotePlay001 : ISteamInterface

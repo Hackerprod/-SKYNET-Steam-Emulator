@@ -5,7 +5,7 @@ using HSteamNetConnection = System.UInt32;
 using HSteamListenSocket = System.UInt32;
 using HSteamNetPollGroup = System.UInt32;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("SteamNetworkingSockets008")]
     public class SteamNetworkingSockets008 : ISteamInterface

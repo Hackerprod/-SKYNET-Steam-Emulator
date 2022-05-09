@@ -1,4 +1,4 @@
-﻿namespace SKYNET.Interface
+﻿namespace SKYNET.Steamworks.Interfaces
 {
     public interface ISteamInterface
     {

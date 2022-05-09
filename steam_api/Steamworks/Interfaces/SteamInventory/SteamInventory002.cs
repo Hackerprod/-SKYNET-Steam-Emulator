@@ -1,7 +1,7 @@
 using System;
 
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("STEAMINVENTORY_INTERFACE_V002")]
     public class SteamInventory002 : ISteamInterface

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using SteamAPICall_t = System.UInt64;
 using PartyBeaconID_t = System.UInt64;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("SteamParties002")]
     public class SteamParties002 : ISteamInterface

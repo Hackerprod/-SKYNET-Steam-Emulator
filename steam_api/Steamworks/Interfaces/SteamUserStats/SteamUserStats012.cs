@@ -2,7 +2,7 @@
 using System;
 using SteamAPICall_t = System.UInt64;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("STEAMUSERSTATS_INTERFACE_VERSION011")]
     [Interface("STEAMUSERSTATS_INTERFACE_VERSION012")]

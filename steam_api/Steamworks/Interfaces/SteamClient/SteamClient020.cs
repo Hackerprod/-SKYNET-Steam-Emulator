@@ -4,7 +4,7 @@ using System;
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("SteamClient018")]
     [Interface("SteamClient019")]

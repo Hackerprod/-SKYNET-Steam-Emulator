@@ -1,5 +1,6 @@
 ﻿using SKYNET.Callback;
 using SKYNET.Helper;
+using SKYNET.Steamworks;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -69,7 +70,7 @@ namespace SKYNET.Managers
                 GetAuthSessionTicketResponse_t data = new GetAuthSessionTicketResponse_t()
                 {
                     AuthTicket = CurrentTicket,
-                    Result = Types.EResult.k_EResultOK
+                    Result = EResult.k_EResultOK
                 };
 
                 CallbackManager.AddCallbackResult(data);
@@ -89,10 +90,3 @@ namespace SKYNET.Managers
     }
 }
 
-struct TicketData
-{
-    public ulong SteamID;
-    public uint IPClient;
-    public IntPtr AuthBlob;
-    public uint BlobSize;
-};

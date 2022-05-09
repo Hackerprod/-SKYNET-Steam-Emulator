@@ -4,7 +4,7 @@ using SteamNetworkingPOPID = System.UInt32;
 using HSteamNetConnection = System.UInt32;
 using SteamNetworkingMicroseconds = System.Int64;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("SteamNetworkingUtils003")]
     public class SteamNetworkingUtils003 : ISteamInterface

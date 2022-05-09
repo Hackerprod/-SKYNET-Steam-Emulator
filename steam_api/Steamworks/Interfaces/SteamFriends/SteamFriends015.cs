@@ -6,7 +6,7 @@ using System;
 using SteamAPICall_t = System.UInt64;
 using FriendsGroupID_t = System.UInt16;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("SteamFriends015")]
     public class SteamFriends015 : ISteamInterface

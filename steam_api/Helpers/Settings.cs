@@ -39,6 +39,7 @@ namespace SKYNET.Helper
                     config.AppendLine("[Game Settings]");
                     config.AppendLine($"Languaje = english");
                     config.AppendLine($"AppId = {appid}");
+                    config.AppendLine($"UnityGame = false");
                     config.AppendLine();
 
                     // Network Configuration
@@ -68,7 +69,7 @@ namespace SKYNET.Helper
                 foreach (var item in IniParser["User Settings"].Settings)
                     if (item.Key == "AccountId")
                         if (uint.TryParse((string)item.Value, out uint accountId))
-                            SteamEmulator.SteamId = (ulong)new CSteamID(accountId, Steamworks.EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeIndividual);
+                            SteamEmulator.SteamId = new CSteamID(accountId, Steamworks.EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeIndividual);
 
                 foreach (var item in IniParser["Game Settings"].Settings)
                     if (item.Key == "AppId")
@@ -76,7 +77,6 @@ namespace SKYNET.Helper
                             SteamEmulator.AppId = appId;
 
                 SteamEmulator.SendLog = (bool)IniParser["Log Settings"]["File"];
-
                 SteamEmulator.ConsoleLog = (bool)IniParser["Log Settings"]["Console"];
 
                 if (SteamEmulator.ConsoleLog)

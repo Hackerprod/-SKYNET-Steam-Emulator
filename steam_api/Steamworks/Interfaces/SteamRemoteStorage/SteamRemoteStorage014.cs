@@ -5,7 +5,7 @@ using System;
 using SteamAPICall_t = System.UInt64;
 using UGCFileWriteStreamHandle_t = System.UInt64;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("STEAMREMOTESTORAGE_INTERFACE_VERSION014")]
     public class SteamRemoteStorage014 : ISteamInterface

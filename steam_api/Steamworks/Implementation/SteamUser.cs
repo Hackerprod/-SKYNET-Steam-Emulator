@@ -37,7 +37,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             var SteamId = SteamEmulator.SteamId;
             Write($"GetSteamID {SteamId}");
-            return new CSteamID(SteamId);
+            return SteamId;
         }
 
         public int InitiateGameConnection(IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)

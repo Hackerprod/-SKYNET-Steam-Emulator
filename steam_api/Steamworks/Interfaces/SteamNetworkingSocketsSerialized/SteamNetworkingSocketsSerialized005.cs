@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("SteamNetworkingSocketsSerialized005")]
     public class SteamNetworkingSocketsSerialized005 : ISteamInterface

@@ -7,7 +7,7 @@ using PublishedFileId_t = System.UInt64;
 using UGCQueryHandle_t = System.UInt64;
 using UGCUpdateHandle_t = System.UInt64;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("STEAMUGC_INTERFACE_VERSION010")]
     [Interface("STEAMUGC_INTERFACE_VERSION012")]

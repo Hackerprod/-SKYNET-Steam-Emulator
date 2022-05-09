@@ -1,12 +1,6 @@
-﻿using SKYNET.Interface;
-using SKYNET.Steamworks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("SteamGameCoordinator001")]
     public class SteamGameCoordinator001 : ISteamInterface

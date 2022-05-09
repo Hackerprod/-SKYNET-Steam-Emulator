@@ -3,7 +3,7 @@ using SKYNET.Steamworks;
 using System;
 using SteamAPICall_t = System.UInt64;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("SteamUtils010")]
     public class SteamUtils010 : ISteamInterface

@@ -1,5 +1,6 @@
 ﻿using EasyHook;
 using Microsoft.Win32;
+using SKYNET.Callback;
 using SKYNET.Helpers;
 using SKYNET.Manager;
 using SKYNET.Managers;

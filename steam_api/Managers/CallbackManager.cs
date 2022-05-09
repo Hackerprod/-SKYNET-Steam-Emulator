@@ -111,6 +111,7 @@ namespace SKYNET.Managers
 
         public static void RunCallbacks()
         {
+            return;
             MutexHelper.Wait("CallbackResults", delegate
             {
                 foreach (var KV in CallbackResults)

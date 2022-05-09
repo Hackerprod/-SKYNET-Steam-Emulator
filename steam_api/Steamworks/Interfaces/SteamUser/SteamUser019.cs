@@ -5,8 +5,9 @@ using System;
 using SteamAPICall_t = System.UInt64;
 using HSteamUser = System.UInt32;
 using SKYNET.Steamworks;
+using System.Runtime.InteropServices;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("SteamUser019")]
     public class SteamUser019 : ISteamInterface

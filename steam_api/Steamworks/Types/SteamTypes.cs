@@ -183,4 +183,12 @@ namespace SKYNET.Steamworks
         uint m_eType;
         uint m_ulLocationID;
     };
+
+    public struct TicketData
+    {
+        public ulong SteamID;
+        public uint IPClient;
+        public IntPtr AuthBlob;
+        public uint BlobSize;
+    };
 }

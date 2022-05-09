@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SKYNET.Types
+namespace SKYNET.Steamworks
 {
     // General result codes
     public enum EResult

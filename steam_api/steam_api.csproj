@@ -81,11 +81,10 @@
     <Compile Include="Overlay\frmOverlay.Designer.cs">
       <DependentUpon>frmOverlay.cs</DependentUpon>
     </Compile>
-    <Compile Include="Steamworks.Net\Callback.cs" />
-    <Compile Include="Steamworks.Net\CallbackDispatcher.cs" />
-    <Compile Include="Steamworks.Net\Callback_test.cs" />
-    <Compile Include="Steamworks.Net\CallResult.cs" />
-    <Compile Include="Steamworks.Net\CSteamID.cs" />
+    <Compile Include="Callback\Steamworks.Net\Callback.cs" />
+    <Compile Include="Callback\Steamworks.Net\CallbackDispatcher.cs" />
+    <Compile Include="Callback\Steamworks.Net\Callback_test.cs" />
+    <Compile Include="Callback\Steamworks.Net\CallResult.cs" />
     <Compile Include="Helpers\ImageHelper.cs" />
     <Compile Include="Helpers\IniParser.cs" />
     <Compile Include="Helpers\IpcCommunicator.cs" />

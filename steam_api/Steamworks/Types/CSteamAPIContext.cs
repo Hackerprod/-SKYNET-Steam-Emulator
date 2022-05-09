@@ -205,7 +205,7 @@ namespace SKYNET.Types
         }
     }
 
-    public struct ContextInitData_64
+    public struct ContextInitData_x64
     {
         public IntPtr pFn;
         public long counter;

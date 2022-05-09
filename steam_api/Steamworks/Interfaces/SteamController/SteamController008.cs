@@ -5,7 +5,7 @@ using ControllerActionSetHandle_t = System.UInt64;
 using ControllerDigitalActionHandle_t = System.UInt64;
 using ControllerAnalogActionHandle_t = System.UInt64;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("SteamController006")]
     [Interface("SteamController007")] // Checked (some SteamController008)

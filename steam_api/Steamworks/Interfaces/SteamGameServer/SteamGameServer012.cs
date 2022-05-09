@@ -2,7 +2,7 @@ using SKYNET.Steamworks;
 using System;
 using SteamAPICall_t = System.UInt64;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("SteamGameServer012")]
     public class SteamGameServer012 : ISteamInterface

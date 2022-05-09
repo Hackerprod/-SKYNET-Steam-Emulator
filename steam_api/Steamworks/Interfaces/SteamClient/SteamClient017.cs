@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Runtime.InteropServices;
-using SKYNET.Interface;
-using SKYNET.Managers;
 
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("SteamClient017")]
     public class SteamClient017 : ISteamInterface

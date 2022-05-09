@@ -216,7 +216,7 @@ namespace SKYNET.Steamworks.Implementation
                 UserStatsStored_t data = new UserStatsStored_t()
                 {
                     m_nGameID = SteamEmulator.GameID,
-                    m_eResult = SKYNET.Types.EResult.k_EResultOK
+                    m_eResult = EResult.k_EResultOK
                 };
                 CallbackManager.AddCallbackResult(data);
                 SaveUserStats();

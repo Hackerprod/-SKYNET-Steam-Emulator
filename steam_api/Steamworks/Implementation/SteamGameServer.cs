@@ -100,7 +100,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             var SteamId = SteamEmulator.SteamId_GS;
             Write($"GetSteamID {SteamId.ToString()}");
-            return new CSteamID(SteamId); 
+            return SteamId; 
         }
 
         public bool WasRestartRequested()

@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SKYNET.Interface
+namespace SKYNET.Steamworks.Interfaces
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class InterfaceAttribute : Attribute

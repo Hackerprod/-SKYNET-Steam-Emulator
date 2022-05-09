@@ -53,7 +53,7 @@ namespace SKYNET.Steamworks.Exported
             {
                 if (modCommon.Is64Bit())
                 {
-                    ContextInitData_64 Context = Marshal.PtrToStructure<ContextInitData_64>(contextInitData_ptr);
+                    ContextInitData_x64 Context = Marshal.PtrToStructure<ContextInitData_x64>(contextInitData_ptr);
                     apiContext_ptr = contextInitData_ptr + 16;
                     if (Context.counter != 1)
                     {
