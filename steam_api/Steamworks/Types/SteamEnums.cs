@@ -865,7 +865,7 @@ namespace SKYNET.Steamworks
     //
     // EAuthSessionResponse
     //
-    public enum AuthResponse : int
+    public enum EAuthSessionResponse : int
     {
         OK = 0,
         UserNotConnectedToSteam = 1,

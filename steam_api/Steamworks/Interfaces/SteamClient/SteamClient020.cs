@@ -23,7 +23,7 @@ namespace SKYNET.Steamworks.Interfaces
 
         public int ConnectToGlobalUser(IntPtr _, HSteamPipe hSteamPipe)
         {
-            return SteamEmulator.SteamClient.ConnectToGlobalUser(hSteamPipe);
+            return (int)SteamEmulator.SteamClient.ConnectToGlobalUser(hSteamPipe);
         }
 
         public HSteamUser CreateLocalUser(IntPtr _, HSteamPipe phSteamPipe, int eAccountType)

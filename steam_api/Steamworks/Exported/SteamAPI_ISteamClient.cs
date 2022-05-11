@@ -31,7 +31,7 @@ namespace SKYNET.Steamworks.Exported
         public static int SteamAPI_ISteamClient_ConnectToGlobalUser(IntPtr _, HSteamPipe hSteamPipe)
         {
             Write($"SteamAPI_ISteamClient_ConnectToGlobalUser");
-            return SteamEmulator.SteamClient.ConnectToGlobalUser(hSteamPipe);
+            return (int)SteamEmulator.SteamClient.ConnectToGlobalUser(hSteamPipe);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

@@ -305,7 +305,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamFriends.SendClanChatMessage(steamIDClanChat, pchText);
         }
 
-        public int GetClanChatMessage(IntPtr _, ulong steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, int peChatEntryType, ref ulong psteamidChatter)
+        public int GetClanChatMessage(IntPtr _, ulong steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, int peChatEntryType, ref ulong[] psteamidChatter)
         {
             return SteamEmulator.SteamFriends.GetClanChatMessage(steamIDClanChat, iMessage, prgchText, cchTextMax, peChatEntryType, ref psteamidChatter);
         }
@@ -342,7 +342,7 @@ namespace SKYNET.Steamworks.Interfaces
 
         public int GetFriendMessage(IntPtr _, ulong steamIDFriend, int iMessageID, IntPtr pvData, int cubData, ref int peChatEntryType)
         {
-            return SteamEmulator.SteamFriends.GetFriendMessage(steamIDFriend, iMessageID, pvData, cubData, ref peChatEntryType);
+            return SteamEmulator.SteamFriends.GetFriendMessage(steamIDFriend, iMessageID, pvData, cubData, peChatEntryType);
         }
 
         public SteamAPICall_t GetFollowerCount(IntPtr _, ulong steamID)

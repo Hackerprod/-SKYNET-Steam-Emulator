@@ -1,11 +1,11 @@
-using SKYNET.Types;
-
 using System;
 
 using SteamAPICall_t = System.UInt64;
 using HSteamUser = System.UInt32;
-using SKYNET.Steamworks;
-using System.Runtime.InteropServices;
+using uint16 = System.UInt16;
+using uint32 = System.UInt32;
+using AppId_t = System.UInt32;
+using HAuthTicket = System.UInt32;
 
 namespace SKYNET.Steamworks.Interfaces
 {
@@ -27,17 +27,17 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUser.GetSteamID();
         }
 
-        public int InitiateGameConnection(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)
+        public int InitiateGameConnection(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, CSteamID steamIDGameServer, uint32 unIPServer, uint16 usPortServer, bool bSecure)
         {
-            return SteamEmulator.SteamUser.InitiateGameConnection(pAuthBlob, cbMaxAuthBlob, steamIDGameServer, unIPServer, usPortServer, bSecure);
+            return SteamEmulator.SteamUser.InitiateGameConnection(pAuthBlob, cbMaxAuthBlob, (ulong)steamIDGameServer, unIPServer, usPortServer, bSecure);
         }
 
-        public void TerminateGameConnection(IntPtr _, uint unIPServer, uint usPortServer)
+        public void TerminateGameConnection(IntPtr _, uint32 unIPServer, uint16 usPortServer)
         {
             SteamEmulator.SteamUser.TerminateGameConnection(unIPServer, usPortServer);
         }
 
-        public void TrackAppUsageEvent(IntPtr _, IntPtr gameID, int eAppUsageEvent, string pchExtraInfo)
+        public void TrackAppUsageEvent(IntPtr _, IntPtr gameID, int eAppUsageEvent, string pchExtraInfo = "")
         {
             SteamEmulator.SteamUser.TrackAppUsageEvent(gameID, eAppUsageEvent, pchExtraInfo);
         }
@@ -57,49 +57,49 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamUser.StopVoiceRecording();
         }
 
-        public int GetAvailableVoice(IntPtr _, uint pcbCompressed, uint pcbUncompressed_Deprecated = 0, uint nUncompressedVoiceDesiredSampleRate_Deprecated = 0)
+        public EVoiceResult GetAvailableVoice(IntPtr _, ref uint pcbCompressed, ref uint pcbUncompressed_Deprecated, uint32 nUncompressedVoiceDesiredSampleRate_Deprecated = 0)
         {
-            return SteamEmulator.SteamUser.GetAvailableVoice(pcbCompressed, pcbUncompressed_Deprecated, nUncompressedVoiceDesiredSampleRate_Deprecated);
+            return (EVoiceResult)SteamEmulator.SteamUser.GetAvailableVoice(ref pcbCompressed, ref pcbUncompressed_Deprecated, nUncompressedVoiceDesiredSampleRate_Deprecated);
         }
 
-        public int GetVoice(IntPtr _, bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, bool bWantUncompressed_Deprecated, IntPtr pUncompressedDestBuffer_Deprecated, uint cbUncompressedDestBufferSize_Deprecated, uint nUncompressBytesWritten_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
+        public EVoiceResult GetVoice(IntPtr _, bool bWantCompressed, IntPtr pDestBuffer, uint32 cbDestBufferSize, ref uint nBytesWritten, bool bWantUncompressed_Deprecated, IntPtr pUncompressedDestBuffer_Deprecated, uint32 cbUncompressedDestBufferSize_Deprecated, ref uint nUncompressBytesWritten_Deprecated, uint32 nUncompressedVoiceDesiredSampleRate_Deprecated = 0)
         {
-            return SteamEmulator.SteamUser.GetVoice(bWantCompressed, pDestBuffer, cbDestBufferSize, ref nBytesWritten, bWantUncompressed_Deprecated, pUncompressedDestBuffer_Deprecated, cbUncompressedDestBufferSize_Deprecated, nUncompressBytesWritten_Deprecated, nUncompressedVoiceDesiredSampleRate_Deprecated);
+            return (EVoiceResult)SteamEmulator.SteamUser.GetVoice(bWantCompressed, pDestBuffer, cbDestBufferSize, ref nBytesWritten, bWantUncompressed_Deprecated, pUncompressedDestBuffer_Deprecated, cbUncompressedDestBufferSize_Deprecated, nUncompressBytesWritten_Deprecated, nUncompressedVoiceDesiredSampleRate_Deprecated);
         }
 
-        public int DecompressVoice(IntPtr _, IntPtr pCompressed, uint cbCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, uint nBytesWritten, uint nDesiredSampleRate)
+        public EVoiceResult DecompressVoice(IntPtr _, IntPtr pCompressed, uint32 cbCompressed, IntPtr pDestBuffer, uint32 cbDestBufferSize, ref uint nBytesWritten, uint32 nDesiredSampleRate)
         {
-            return SteamEmulator.SteamUser.DecompressVoice(pCompressed, cbCompressed, pDestBuffer, cbDestBufferSize, nBytesWritten, nDesiredSampleRate);
+            return (EVoiceResult)SteamEmulator.SteamUser.DecompressVoice(pCompressed, cbCompressed, pDestBuffer, cbDestBufferSize, nBytesWritten, nDesiredSampleRate);
         }
 
-        public int GetVoiceOptimalSampleRate(IntPtr _)
+        public uint32 GetVoiceOptimalSampleRate(IntPtr _)
         {
             return SteamEmulator.SteamUser.GetVoiceOptimalSampleRate();
         }
 
-        public uint GetAuthSessionTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
+        public HAuthTicket GetAuthSessionTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
         {
             return SteamEmulator.SteamUser.GetAuthSessionTicket(pTicket, cbMaxTicket, ref pcbTicket);
         }
 
-        public int BeginAuthSession(IntPtr _, IntPtr pAuthTicket, int cbAuthTicket, ulong steamID)
+        public EBeginAuthSessionResult BeginAuthSession(IntPtr _, IntPtr pAuthTicket, int cbAuthTicket, CSteamID steamID)
         {
-            return SteamEmulator.SteamUser.BeginAuthSession(pAuthTicket, cbAuthTicket, steamID);
+            return (EBeginAuthSessionResult)SteamEmulator.SteamUser.BeginAuthSession(pAuthTicket, cbAuthTicket, (ulong)steamID);
         }
 
-        public void EndAuthSession(IntPtr _, ulong steamID)
+        public void EndAuthSession(IntPtr _, CSteamID steamID)
         {
-            SteamEmulator.SteamUser.EndAuthSession(steamID);
+            SteamEmulator.SteamUser.EndAuthSession((ulong)steamID);
         }
 
-        public void CancelAuthTicket(IntPtr _, uint hAuthTicket)
+        public void CancelAuthTicket(IntPtr _, HAuthTicket hAuthTicket)
         {
             SteamEmulator.SteamUser.CancelAuthTicket(hAuthTicket);
         }
 
-        public int UserHasLicenseForApp(IntPtr _, ulong steamID, uint appID)
+        public EUserHasLicenseForAppResult UserHasLicenseForApp(IntPtr _, CSteamID steamID, AppId_t appID)
         {
-            return SteamEmulator.SteamUser.UserHasLicenseForApp(steamID, appID);
+            return (EUserHasLicenseForAppResult)SteamEmulator.SteamUser.UserHasLicenseForApp((ulong)steamID, appID);
         }
 
         public bool BIsBehindNAT(IntPtr _)
@@ -107,9 +107,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUser.BIsBehindNAT();
         }
 
-        public void AdvertiseGame(IntPtr _, ulong steamIDGameServer, uint unIPServer, uint usPortServer)
+        public void AdvertiseGame(IntPtr _, CSteamID steamIDGameServer, uint32 unIPServer, uint16 usPortServer)
         {
-            SteamEmulator.SteamUser.AdvertiseGame(steamIDGameServer, unIPServer, usPortServer);
+            SteamEmulator.SteamUser.AdvertiseGame((ulong)steamIDGameServer, unIPServer, usPortServer);
         }
 
         public SteamAPICall_t RequestEncryptedAppTicket(IntPtr _, IntPtr pDataToInclude, int cbDataToInclude)
@@ -156,7 +156,5 @@ namespace SKYNET.Steamworks.Interfaces
         {
             return SteamEmulator.SteamUser.BIsPhoneRequiringVerification();
         }
-
-
     }
 }

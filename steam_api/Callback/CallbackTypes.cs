@@ -33,8 +33,6 @@ namespace SKYNET.Callback
             Data = data;
             ReadyToCall = readyToCall;
         }
-
-
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
@@ -77,11 +75,11 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct ClientGameServerDeny_t : ICallbackData
     {
-        internal uint AppID; // m_uAppID uint32
-        internal uint GameServerIP; // m_unGameServerIP uint32
-        internal ushort GameServerPort; // m_usGameServerPort uint16
-        internal ushort Secure; // m_bSecure uint16
-        internal uint Reason; // m_uReason uint32
+        internal uint m_uAppID; // m_uAppID uint32
+        internal uint m_unGameServerIP; // m_unGameServerIP uint32
+        internal ushort m_usGameServerPort; // m_usGameServerPort uint16
+        internal ushort m_bSecure; // m_bSecure uint16
+        internal uint m_uReason; // m_uReason uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(ClientGameServerDeny_t));
@@ -93,7 +91,7 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct IPCFailure_t : ICallbackData
     {
-        internal byte FailureType; // m_eFailureType uint8
+        internal byte m_eFailureType; // m_eFailureType uint8
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(IPCFailure_t));
@@ -122,9 +120,9 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
     internal struct ValidateAuthTicketResponse_t : ICallbackData
     {
-        internal ulong SteamID; // m_SteamID CSteamID
-        internal AuthResponse AuthSessionResponse; // m_eAuthSessionResponse EAuthSessionResponse
-        internal ulong OwnerSteamID; // m_OwnerSteamID CSteamID
+        internal ulong m_SteamID; // m_SteamID CSteamID
+        internal EAuthSessionResponse m_eAuthSessionResponse; // m_eAuthSessionResponse EAuthSessionResponse
+        internal ulong m_OwnerSteamID; // m_OwnerSteamID CSteamID
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(ValidateAuthTicketResponse_t));
@@ -136,9 +134,9 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct MicroTxnAuthorizationResponse_t : ICallbackData
     {
-        internal uint AppID; // m_unAppID uint32
-        internal ulong OrderID; // m_ulOrderID uint64
-        internal byte Authorized; // m_bAuthorized uint8
+        internal uint m_unAppID; // m_unAppID uint32
+        internal ulong m_ulOrderID; // m_ulOrderID uint64
+        internal byte m_bAuthorized; // m_bAuthorized uint8
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(MicroTxnAuthorizationResponse_t));
@@ -150,7 +148,7 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct EncryptedAppTicketResponse_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
+        internal EResult m_eResult; // m_eResult EResult
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(EncryptedAppTicketResponse_t));
@@ -265,12 +263,12 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct GameServerChangeRequested_t : ICallbackData
     {
-        internal string ServerUTF8() => System.Text.Encoding.UTF8.GetString(Server, 0, System.Array.IndexOf<byte>(Server, 0));
+        internal string ServerUTF8() => System.Text.Encoding.UTF8.GetString(m_rgchServer, 0, System.Array.IndexOf<byte>(m_rgchServer, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)] // byte[] m_rgchServer
-        internal byte[] Server; // m_rgchServer char [64]
-        internal string PasswordUTF8() => System.Text.Encoding.UTF8.GetString(Password, 0, System.Array.IndexOf<byte>(Password, 0));
+        internal byte[] m_rgchServer; // m_rgchServer char [64]
+        internal string PasswordUTF8() => System.Text.Encoding.UTF8.GetString(m_rgchPassword, 0, System.Array.IndexOf<byte>(m_rgchPassword, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)] // byte[] m_rgchPassword
-        internal byte[] Password; // m_rgchPassword char [64]
+        internal byte[] m_rgchPassword; // m_rgchPassword char [64]
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GameServerChangeRequested_t));
@@ -282,8 +280,8 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
     internal struct GameLobbyJoinRequested_t : ICallbackData
     {
-        internal ulong SteamIDLobby; // m_steamIDLobby CSteamID
-        internal ulong SteamIDFriend; // m_steamIDFriend CSteamID
+        internal CSteamID m_steamIDLobby; // m_steamIDLobby CSteamID
+        internal CSteamID m_steamIDFriend; // m_steamIDFriend CSteamID
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GameLobbyJoinRequested_t));
@@ -668,7 +666,7 @@ namespace SKYNET.Callback
     {
         internal ulong m_ulSteamIDLobby; // m_ulSteamIDLobby uint64
         internal ulong m_ulSteamIDMember; // m_ulSteamIDMember uint64
-        internal byte m_bSuccess; // m_bSuccess uint8
+        internal bool m_bSuccess; // m_bSuccess uint8
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(LobbyDataUpdate_t));

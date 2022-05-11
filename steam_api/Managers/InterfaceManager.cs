@@ -46,7 +46,7 @@ namespace SKYNET.Managers
             if (InvalidateInterface(pszVersion))
             {
                 Write($"Skipping {pszVersion}");
-                return default;
+                //return default;
             }
 
             if (GameServer)

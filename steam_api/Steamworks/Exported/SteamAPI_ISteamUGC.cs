@@ -9,7 +9,7 @@ using UGCUpdateHandle_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Exported
 {
-    public class SteamAPI_ISteamUGC 
+    public class SteamAPI_ISteamUGC
     {
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static UGCQueryHandle_t SteamAPI_ISteamUGC_CreateQueryUserUGCRequest(IntPtr _, uint unAccountID, int eListType, int eMatchingUGCType, int eSortOrder, uint nCreatorAppID, uint nConsumerAppID, uint unPage)
@@ -243,14 +243,14 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static SteamAPICall_t SteamAPI_ISteamUGC_CreateItem(IntPtr _, uint nConsumerAppId, int eFileType) 
+        public static SteamAPICall_t SteamAPI_ISteamUGC_CreateItem(IntPtr _, uint nConsumerAppId, int eFileType)
         {
             Write("SteamAPI_ISteamUGC_CreateItem");
             return SteamEmulator.SteamUGC.CreateItem(nConsumerAppId, eFileType);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static UGCUpdateHandle_t SteamAPI_ISteamUGC_StartItemUpdate(IntPtr _, uint nConsumerAppId, PublishedFileId_t nPublishedFileID) 
+        public static UGCUpdateHandle_t SteamAPI_ISteamUGC_StartItemUpdate(IntPtr _, uint nConsumerAppId, PublishedFileId_t nPublishedFileID)
         {
             Write("SteamAPI_ISteamUGC_StartItemUpdate");
             return SteamEmulator.SteamUGC.StartItemUpdate(nConsumerAppId, nPublishedFileID);

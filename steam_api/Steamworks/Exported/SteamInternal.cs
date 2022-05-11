@@ -48,7 +48,13 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamInternal_ContextInit(IntPtr contextInitData_ptr)
         {
-            IntPtr apiContext_ptr = IntPtr.Zero;
+            IntPtr apiContext_ptr = ByPassFunction(contextInitData_ptr);
+
+            if (apiContext_ptr != IntPtr.Zero)
+            {
+                return apiContext_ptr;
+            }
+            
             try
             {
                 if (modCommon.Is64Bit())
@@ -81,6 +87,29 @@ namespace SKYNET.Steamworks.Exported
             }
             return apiContext_ptr;
         }
+
+        #region bypass functions
+
+        private static IntPtr ByPassFunction(IntPtr contextInitData_ptr)
+        {
+            if (File.Exists(Path.Combine(modCommon.GetPath(), "steam_api_.dll")))
+            {
+                return SteamInternal_ContextInit86(contextInitData_ptr);
+            }
+            if (File.Exists(Path.Combine(modCommon.GetPath(), "steam_api64_.dll")))
+            {
+                return SteamInternal_ContextInit64(contextInitData_ptr);
+            }
+            return IntPtr.Zero;
+        }
+
+        [DllImport("steam_api_.dll",   EntryPoint = "SteamInternal_ContextInit", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr SteamInternal_ContextInit86(IntPtr context);
+
+        [DllImport("steam_api64_.dll", EntryPoint = "SteamInternal_ContextInit", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr SteamInternal_ContextInit64(IntPtr context);
+
+        #endregion
 
         private static void Write(string v)
         {

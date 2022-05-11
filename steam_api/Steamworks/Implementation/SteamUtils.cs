@@ -136,13 +136,14 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool IsAPICallCompleted(SteamAPICall_t hSteamAPICall, ref bool pbFailed)
         {
-            Write($"IsAPICallCompleted {hSteamAPICall}");
-
+            bool Result = false;
             if (CallbackManager.IsCompleted(hSteamAPICall))
             {
-                return true;
+                Result = true;
+                pbFailed = false;
             }
-            return false;
+            Write($"IsAPICallCompleted (SteamAPICall = {hSteamAPICall}) = {Result}");
+            return Result;
         }
 
         public int GetAPICallFailureReason(SteamAPICall_t hSteamAPICall)

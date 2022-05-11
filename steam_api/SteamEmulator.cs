@@ -40,6 +40,7 @@ public class SteamEmulator
 
     public static bool SendLog;
     public static bool ConsoleLog;
+    public static int BroadCastPort;
 
     public static HSteamUser HSteamUser;
     public static HSteamPipe HSteamPipe;
@@ -297,7 +298,7 @@ public class SteamEmulator
     }
 
     private static string lastMsg = "";
-
+    
 #if LOG
 
     public static void Write(string sender, object msg)

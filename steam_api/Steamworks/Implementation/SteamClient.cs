@@ -27,7 +27,7 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public int ConnectToGlobalUser(HSteamPipe hSteamPipe)
+        public HSteamUser ConnectToGlobalUser(HSteamPipe hSteamPipe)
         {
             Write("ConnectToGlobalUser");
             return 1;

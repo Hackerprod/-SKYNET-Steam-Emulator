@@ -21,10 +21,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamMatchmaking_GetFavoriteGame(IntPtr _, int iGame, uint pnAppID, uint pnIP, uint pnConnPort, uint pnQueryPort, uint punFlags, uint pRTime32LastPlayedOnServer)
+        public static bool SteamAPI_ISteamMatchmaking_GetFavoriteGame(IntPtr _, int iGame, ref uint pnAppID, ref uint pnIP, ref uint pnConnPort, ref uint pnQueryPort, ref uint punFlags, uint pRTime32LastPlayedOnServer)
         {
             Write("SteamAPI_ISteamMatchmaking_GetFavoriteGame");
-            return SteamEmulator.SteamMatchmaking.GetFavoriteGame(iGame, pnAppID, pnIP, pnConnPort, pnQueryPort, punFlags, pRTime32LastPlayedOnServer);
+            return SteamEmulator.SteamMatchmaking.GetFavoriteGame(iGame, ref pnAppID, ref pnIP, ref pnConnPort, ref pnQueryPort, ref punFlags, pRTime32LastPlayedOnServer);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

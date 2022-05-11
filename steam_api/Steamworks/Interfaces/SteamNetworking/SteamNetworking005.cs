@@ -115,7 +115,5 @@ namespace SKYNET.Steamworks.Interfaces
         {
             return SteamEmulator.SteamNetworking.GetMaxPacketSize(hSocket);
         }
-
-
     }
 }

@@ -50,7 +50,7 @@ namespace SKYNET.Steamworks.Exported
             }
 
             if (!SteamEmulator.Initialized) return;
-
+            return;
             try
             {
                 var callMessage = $"SteamAPI_RegisterCallback: ";
@@ -264,9 +264,9 @@ namespace SKYNET.Steamworks.Exported
         public static void SteamAPI_SetMiniDumpComment([MarshalAs(UnmanagedType.LPStr)] string pchMsg)
         {
             string Msg = "SteamAPI_SetMiniDumpComment" + Environment.NewLine;
-            Msg += "////////////////////////////// Mini Dump Content \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + Environment.NewLine;
-            Msg += $"{pchMsg}" + Environment.NewLine;
-            Msg += "//////////////////////////////   End Mini Dump   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + Environment.NewLine;
+            Msg += " ////////////////////////////// Mini Dump Content \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + Environment.NewLine;
+            Msg += $" {pchMsg}" + Environment.NewLine;
+            Msg += " //////////////////////////////   End Mini Dump   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + Environment.NewLine;
             Write(Msg);
             //Write("SteamAPI_SetMiniDumpComment");
         }

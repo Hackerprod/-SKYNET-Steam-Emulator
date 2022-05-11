@@ -39,7 +39,6 @@ namespace SKYNET.Helper
                     config.AppendLine("[Game Settings]");
                     config.AppendLine($"Languaje = english");
                     config.AppendLine($"AppId = {appid}");
-                    config.AppendLine($"UnityGame = false");
                     config.AppendLine();
 
                     // Network Configuration
@@ -83,6 +82,8 @@ namespace SKYNET.Helper
                 {
                     modCommon.ActiveConsoleOutput();
                 }
+
+                SteamEmulator.BroadCastPort = (int)IniParser["Network Settings"]["BroadCastPort"];
 
                 string data = $"Loaded user data from file \n PersonaName: {SteamEmulator.PersonaName} \n SteamId:  {SteamEmulator.SteamId} \n Languaje: {SteamEmulator.Language} \n";
                 SteamEmulator.Write("Settings", data);

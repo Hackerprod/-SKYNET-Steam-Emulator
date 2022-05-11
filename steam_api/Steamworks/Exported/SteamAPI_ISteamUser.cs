@@ -80,10 +80,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamUser_GetAvailableVoice(IntPtr _, uint pcbCompressed, uint pcbUncompressed_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
+        public static int SteamAPI_ISteamUser_GetAvailableVoice(IntPtr _, ref uint pcbCompressed, ref uint pcbUncompressed_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
         {
             Write("SteamAPI_ISteamUser_GetAvailableVoice");
-            return SteamEmulator.SteamUser.GetAvailableVoice(pcbCompressed, pcbUncompressed_Deprecated, nUncompressedVoiceDesiredSampleRate_Deprecated);
+            return SteamEmulator.SteamUser.GetAvailableVoice(ref pcbCompressed, ref pcbUncompressed_Deprecated, nUncompressedVoiceDesiredSampleRate_Deprecated);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -101,7 +101,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamUser_GetVoiceOptimalSampleRate(IntPtr _)
+        public static uint SteamAPI_ISteamUser_GetVoiceOptimalSampleRate(IntPtr _)
         {
             Write("SteamAPI_ISteamUser_GetVoiceOptimalSampleRate");
             return SteamEmulator.SteamUser.GetVoiceOptimalSampleRate();

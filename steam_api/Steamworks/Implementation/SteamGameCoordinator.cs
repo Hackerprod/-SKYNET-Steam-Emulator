@@ -37,7 +37,7 @@ namespace SKYNET.Steamworks.Implementation
             uint msgType = GetGCMsg(unMsgType);
             byte[] bytes = pubData.GetBytes(cubData);
 
-            Write($"SendMessage [{msgType}], {bytes.Length} bytes");
+            Write($"SendMessage (MsgType = {msgType}], {bytes.Length} bytes)");
             if (SteamEmulator.GameCoordinatorPlugin != null)
             {
                 SteamEmulator.GameCoordinatorPlugin.MessageFromGame(bytes);
@@ -45,19 +45,19 @@ namespace SKYNET.Steamworks.Implementation
             return EGCResults.k_EGCResultOK;
         }
 
-        public bool IsMessageAvailable(ref int pcubMsgSize)
+        public bool IsMessageAvailable(ref uint pcubMsgSize)
         {
-            Write("IsMessageAvailable");
+            bool Result = false;
             if (InMessages.Any())
             {
-                return true;
+                Result = true;
             }
-            return false;
+            Write($"IsMessageAvailable (MsgSize = {pcubMsgSize}) = {Result}");
+            return Result;
         }
 
         public EGCResults RetrieveMessage(ref uint punMsgType, IntPtr pubDest, uint cubDest, ref uint pcubMsgSize)
         {
-            Write($"RetrieveMessage");
             EGCResults Result = EGCResults.k_EGCResultNoMessage;
 
             if (InMessages.Any())
@@ -65,19 +65,19 @@ namespace SKYNET.Steamworks.Implementation
                 try
                 {
                     var msg = InMessages.First();
-
                     Marshal.Copy(msg.Value, 0, pubDest, msg.Value.Length);
-                    pcubMsgSize = (uint)msg.Value.Length;
-                    punMsgType = msg.Key;
+                    //pcubMsgSize = (uint)msg.Value.Length;
+                    //punMsgType = msg.Key;
                     Result = EGCResults.k_EGCResultOK;
 
                     InMessages.TryRemove(msg.Key, out _);
                 }
-                catch
+                catch (Exception ex)
                 {
-
+                    Write($"{ex.Message} {ex.StackTrace}");
                 }
             }
+            Write($"RetrieveMessage (MsgType = {punMsgType}, {pcubMsgSize} bytes) = {Result}");
             return Result;
         }
 

@@ -4,7 +4,7 @@ using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("STEAMUSERSTATS_INTERFACE_VERSION011")]
+    [Interface("STEAMUSERSTATS_INTERFACE_VERSION011")] // Verified
     [Interface("STEAMUSERSTATS_INTERFACE_VERSION012")]
     public class SteamUserStats012 : ISteamInterface
     {
@@ -118,7 +118,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUserStats.ResetAllStats(bAchievementsToo);
         }
 
-        public SteamAPICall_t FindOrCreateLeaderboard(IntPtr _, string pchLeaderboardName, int eLeaderboardSortMethod, int eLeaderboardDisplayType)
+        public SteamAPICall_t FindOrCreateLeaderboard(IntPtr _, string pchLeaderboardName, ELeaderboardSortMethod eLeaderboardSortMethod, ELeaderboardDisplayType eLeaderboardDisplayType)
         {
             return SteamEmulator.SteamUserStats.FindOrCreateLeaderboard(pchLeaderboardName, eLeaderboardSortMethod, eLeaderboardDisplayType);
         }

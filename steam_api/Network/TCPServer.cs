@@ -14,16 +14,17 @@ namespace SKYNET.Network
         private Socket _serverSocket;
         private IPEndPoint _localEndPoint;
         private List<ClientSocket> ConnectedClients;
-        public const int Port = 28880;
+        public int Port = 28880;
         public bool Started { get; private set; }
 
         public event EventHandler<Socket> OnConnected;
         public event EventHandler<Socket> OnDisconnected;
         public event EventHandler<NetPacket> OnDataReceived;
 
-        public TCPServer()
+        public TCPServer(int port)
         {
             ConnectedClients = new List<ClientSocket>();
+            Port = port;
         }
 
         internal void NotifyUserDisconnected(ClientSocket clientSockets)
@@ -43,8 +44,9 @@ namespace SKYNET.Network
                 this._serverSocket.BeginAccept(new AsyncCallback(this.EndAccept), this._serverSocket);
                 this.Started = true;
             }
-            catch 
+            catch (Exception ex)
             {
+                SteamEmulator.Write("NetworkManager", $"Error starting TCP server: {ex}");
             }
         }
 

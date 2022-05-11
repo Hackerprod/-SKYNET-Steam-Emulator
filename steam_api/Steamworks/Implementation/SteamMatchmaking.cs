@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using SKYNET;
 using SKYNET.Callback;
+using SKYNET.Helper.JSON;
 using SKYNET.Managers;
 using SKYNET.Steamworks;
 
@@ -19,6 +21,7 @@ namespace SKYNET.Steamworks.Implementation
         public uint CurrentRequest;
         public ConcurrentDictionary<ulong, SteamLobby> Lobbies;
         private FilterLobby filters;
+        private List<FavoriteGame> FavoriteGames;
 
         public SteamMatchmaking()
         {
@@ -26,11 +29,31 @@ namespace SKYNET.Steamworks.Implementation
             Lobbies = new ConcurrentDictionary<SteamAPICall_t, SteamLobby>();
             filters = new FilterLobby();
             CurrentRequest = 0;
+            FavoriteGames = new List<FavoriteGame>();
+
+            string FavoriteGamesPath = Path.Combine(modCommon.GetPath(), "SKYNET", "Storage", "FavoriteGames.json");
+            if (File.Exists(FavoriteGamesPath))
+            {
+                string fileContent = File.ReadAllText(FavoriteGamesPath);
+                FavoriteGames = fileContent.FromJson<List<FavoriteGame>>();
+            }
+            CreateTestLobby();
         }
 
         public int AddFavoriteGame(uint nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags, uint rTime32LastPlayedOnServer)
         {
             Write("AddFavoriteGame");
+            var Game = new FavoriteGame()
+            {
+                AppID = nAppID,
+                IP = nIP,
+                ConnPort = nConnPort,
+                QueryPort = nQueryPort,
+                Flags = unFlags,
+                Time32LastPlayedOnServer = rTime32LastPlayedOnServer
+            };
+            FavoriteGames.Add(Game);
+            SaveFavoriteGames();
             return 1;
         }
 
@@ -130,22 +153,41 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool GetFavoriteGame(int iGame, uint pnAppID, uint pnIP, uint pnConnPort, uint pnQueryPort, uint punFlags, uint pRTime32LastPlayedOnServer)
+        public bool GetFavoriteGame(int iGame, ref uint pnAppID, ref uint pnIP, ref uint pnConnPort, ref uint pnQueryPort, ref uint punFlags, uint pRTime32LastPlayedOnServer)
         {
             Write("GetFavoriteGame");
-            return true;
+            try
+            {
+                for (int i = 0; i < FavoriteGames.Count; i++)
+                {
+                    if (i == iGame)
+                    {
+                        var game = FavoriteGames[i];
+                        pnAppID = game.AppID;
+                        pnIP = game.IP;
+                        pnConnPort = game.ConnPort;
+                        pnQueryPort = game.QueryPort;
+                        punFlags = game.Flags;
+                        return true;
+                    }
+                }
+            }
+            catch 
+            {
+            }
+            return false;
         }
 
         public int GetFavoriteGameCount()
         {
             Write("GetFavoriteGameCount");
-            return 1;
+            return FavoriteGames.Count;
         }
 
         public CSteamID GetLobbyByIndex(int iLobby)
         {
             int index = 0;
-            CSteamID Response = new CSteamID(0);
+            CSteamID Response = CSteamID.Invalid;
             foreach (var lobby in Lobbies)
             {
                 if (index == iLobby)
@@ -319,6 +361,8 @@ namespace SKYNET.Steamworks.Implementation
         public bool RemoveFavoriteGame(uint nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags)
         {
             Write("RemoveFavoriteGame");
+            var game = FavoriteGames.Find(g => g.AppID == nAppID && g.IP == nIP && g.ConnPort == nConnPort);
+            FavoriteGames.Remove(game);
             return true;
         }
 
@@ -327,20 +371,19 @@ namespace SKYNET.Steamworks.Implementation
             bool Result = false;
             LobbyDataUpdate_t data = new LobbyDataUpdate_t()
             {
-                m_bSuccess = 0,
+                m_bSuccess = false,
             };
-
             if (Lobbies.TryGetValue(steamIDLobby, out var lobby))
             {
                 Result = true;
-                data.m_bSuccess = 1;
+                data.m_bSuccess = true;
                 data.m_ulSteamIDLobby = lobby.SteamID;
-                data.m_ulSteamIDMember = lobby.Owner;
+                //data.m_ulSteamIDMember = lobby.Owner; 
             }
 
             CallbackManager.AddCallbackResult(data);
             Write($"RequestLobbyData (Lobby SteamID: {steamIDLobby}) = {Result}");
-            return true;
+            return Result;
         }
 
         public SteamAPICall_t RequestLobbyList()
@@ -461,6 +504,20 @@ namespace SKYNET.Steamworks.Implementation
             Write("CheckForPSNGameBootInvite");
         }
 
+        private void SaveFavoriteGames()
+        {
+            try
+            {
+                string FavoriteGamesPath = Path.Combine(modCommon.GetPath(), "SKYNET", "Storage", "FavoriteGames.json");
+                modCommon.EnsureDirectoryExists(FavoriteGamesPath, true);
+                string json = FavoriteGames.ToJson();
+                File.WriteAllText(FavoriteGamesPath, json);
+            }
+            catch
+            {
+            }
+        }
+
         private void CreateTestLobby()
         {
             var id = modCommon.GenerateSteamID();
@@ -482,7 +539,7 @@ namespace SKYNET.Steamworks.Implementation
                     { "4", "10" },
                     { "5", "0" },
                     { "6", "1" },
-                    { "join_in_progress", "1" },
+                    { "join_in_progress", "0" },
                     { "session_state", "0" },
                     { "name", "Hackerprod" },
                     { "owner", ((ulong)SteamEmulator.SteamId).ToString() },
@@ -561,6 +618,16 @@ namespace SKYNET.Steamworks.Implementation
             public int ValueToMatch { get; set; }
             public ELobbyComparison ComparisonType { get; set; }
             public string StringValueToMatch { get; set; }
+        }
+
+        internal class FavoriteGame
+        {
+            public uint AppID { get; set; }
+            public uint IP { get; set; }
+            public uint ConnPort { get; set; }
+            public uint QueryPort { get; set; }
+            public uint Flags { get; set; }
+            public uint Time32LastPlayedOnServer { get; set; }
         }
     }
 }

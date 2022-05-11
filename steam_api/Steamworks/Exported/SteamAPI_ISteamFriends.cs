@@ -122,7 +122,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamFriends_GetClanChatMessage(IntPtr _, ulong steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, int peChatEntryType, ref ulong psteamidChatter)
+        public static int SteamAPI_ISteamFriends_GetClanChatMessage(IntPtr _, ulong steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, int peChatEntryType, ref ulong[] psteamidChatter)
         {
             Write($"SteamAPI_ISteamFriends_GetClanChatMessage");
             return SteamEmulator.SteamFriends.GetClanChatMessage(steamIDClanChat, iMessage, prgchText, cchTextMax, peChatEntryType, ref psteamidChatter);
@@ -244,7 +244,7 @@ namespace SKYNET.Steamworks.Exported
         public static int SteamAPI_ISteamFriends_GetFriendMessage(IntPtr _, ulong steamIDFriend, int iMessageID, IntPtr pvData, int cubData, ref int peChatEntryType)
         {
             Write($"SteamAPI_ISteamFriends_GetFriendMessage");
-            return SteamEmulator.SteamFriends.GetFriendMessage(steamIDFriend, iMessageID, pvData, cubData, ref peChatEntryType);
+            return SteamEmulator.SteamFriends.GetFriendMessage(steamIDFriend, iMessageID, pvData, cubData, peChatEntryType);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

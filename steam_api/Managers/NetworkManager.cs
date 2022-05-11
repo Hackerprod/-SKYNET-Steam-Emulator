@@ -17,9 +17,14 @@ namespace SKYNET.Managers
 {
     public class NetworkManager
     {
+        public static int Port = 28880;
+
         public static void Initialize()
         {
-            TCPServer tcpServer = new TCPServer();
+            Port = SteamEmulator.BroadCastPort;
+            Write($"Initializing TCP server on port {Port}");
+
+            TCPServer tcpServer = new TCPServer(Port);
             tcpServer.OnDataReceived += Network_OnDataReceived;
             tcpServer.OnConnected += TcpServer_OnConnected;
 
@@ -314,20 +319,9 @@ namespace SKYNET.Managers
 
                 var user = SteamEmulator.SteamFriends.GetUser(steamIDRemote);
                 if (user == null)
-                    ThreadPool.QueueUserWorkItem(SendBroadcast, message);
+                    return;
 
-                if (IPAddress.TryParse(user.IPAddress, out _))
-                {
-                    try
-                    {
-                        Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                        SocketData SocketData = new SocketData() { socket = socket, Message = message };
-                        socket.BeginConnect(user.IPAddress, 28880, ConnectionCallback, SocketData);
-                    }
-                    catch 
-                    {
-                    }
-                }
+                SendTo(user.IPAddress, message);
             }
             catch (Exception ex)
             {
@@ -351,31 +345,9 @@ namespace SKYNET.Managers
             SendBroadcast(message);
         }
 
-        private static void SendBroadcast(object state)
-        {
-            NetworkMessage message = (NetworkMessage)state;
-
-            foreach (var item in GetIPAddresses())
-            {
-                var Addressess = GetIPAddressRange(item);
-                foreach (var Address in Addressess)
-                {
-                    try
-                    {
-                        Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                        SocketData SocketData = new SocketData() { socket = socket, Message = message };
-                        socket.BeginConnect(Address, 28880, ConnectionCallback, SocketData);
-                    }
-                    catch
-                    {
-                    }
-                }
-            }
-        }
-
-
         private static void BroadcastAnnounce(object state)
         {
+            Write($"Sending broadcast msg");
             NET_Announce announce = new NET_Announce()
             {
                 PersonaName = SteamEmulator.PersonaName,
@@ -384,22 +356,7 @@ namespace SKYNET.Managers
 
             NetworkMessage message = CreateNetworkMessage(announce, MessageType.NET_Announce);
 
-            foreach (var item in GetIPAddresses())
-            {
-                var Addressess = GetIPAddressRange(item);
-                foreach (var Address in Addressess)
-                {
-                    try
-                    {
-                        Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                        SocketData SocketData = new SocketData() { socket = socket, Message = message };
-                        socket.BeginConnect(Address, 28880, ConnectionCallback, SocketData);
-                    }
-                    catch
-                    {
-                    }
-                }
-            }
+            SendBroadcast(message);
         }
 
         public static void RequestAvatar(string IP)
@@ -414,10 +371,48 @@ namespace SKYNET.Managers
             {
                 Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 SocketData SocketData = new SocketData() { socket = socket, Message = message };
-                socket.BeginConnect(IP, 28880, ConnectionCallback, SocketData);
+                socket.BeginConnect(IP, Port, ConnectionCallback, SocketData);
             }
             catch
             {
+            }
+        }
+
+        private static void SendBroadcast(object state)
+        {
+            NetworkMessage message = (NetworkMessage)state;
+
+            foreach (var item in GetIPAddresses())
+            {
+                var Addressess = GetIPAddressRange(item);
+                foreach (var Address in Addressess)
+                {
+                    try
+                    {
+                        Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                        SocketData SocketData = new SocketData() { socket = socket, Message = message };
+                        socket.BeginConnect(Address, Port, ConnectionCallback, SocketData);
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+        }
+
+        private static void SendTo(string iPAddress, NetworkMessage message)
+        {
+            if (IPAddress.TryParse(iPAddress, out _))
+            {
+                try
+                {
+                    Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                    SocketData SocketData = new SocketData() { socket = socket, Message = message };
+                    socket.BeginConnect(iPAddress, Port, ConnectionCallback, SocketData);
+                }
+                catch
+                {
+                }
             }
         }
 

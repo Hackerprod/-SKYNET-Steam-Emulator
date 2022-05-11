@@ -57,9 +57,9 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamUser.StopVoiceRecording();
         }
 
-        public int GetAvailableVoice(IntPtr _, uint pcbCompressed, uint pcbUncompressed_Deprecated = 0, uint nUncompressedVoiceDesiredSampleRate_Deprecated = 0)
+        public int GetAvailableVoice(IntPtr _, ref uint pcbCompressed, uint pcbUncompressed_Deprecated = 0, uint nUncompressedVoiceDesiredSampleRate_Deprecated = 0)
         {
-            return SteamEmulator.SteamUser.GetAvailableVoice(pcbCompressed, 0, 0);
+            return SteamEmulator.SteamUser.GetAvailableVoice(ref pcbCompressed, ref pcbUncompressed_Deprecated, 0);
         }
 
         public int GetVoice(IntPtr _, bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, bool bWantUncompressed_Deprecated, IntPtr pUncompressedDestBuffer_Deprecated, uint cbUncompressedDestBufferSize_Deprecated, uint nUncompressBytesWritten_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
@@ -72,7 +72,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUser.DecompressVoice(pCompressed, cbCompressed, pDestBuffer, cbDestBufferSize, nBytesWritten, nDesiredSampleRate);
         }
 
-        public int GetVoiceOptimalSampleRate(IntPtr _)
+        public uint GetVoiceOptimalSampleRate(IntPtr _)
         {
             return SteamEmulator.SteamUser.GetVoiceOptimalSampleRate();
         }

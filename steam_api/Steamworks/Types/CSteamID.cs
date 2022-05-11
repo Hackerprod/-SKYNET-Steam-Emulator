@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks
 {
-    [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     public class CSteamID : IEquatable<CSteamID>, IComparable<CSteamID>, IEquatable<ulong>, IComparable<ulong>
     {

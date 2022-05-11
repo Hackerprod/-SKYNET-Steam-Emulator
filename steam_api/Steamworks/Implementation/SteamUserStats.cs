@@ -373,11 +373,11 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public SteamAPICall_t FindOrCreateLeaderboard(string pchLeaderboardName, int eLeaderboardSortMethod, int eLeaderboardDisplayType)
+        public SteamAPICall_t FindOrCreateLeaderboard(string pchLeaderboardName, ELeaderboardSortMethod eLeaderboardSortMethod, ELeaderboardDisplayType eLeaderboardDisplayType)
         {
             try
             {
-                Write($"FindOrCreateLeaderboard");
+                Write($"FindOrCreateLeaderboard (Name = {pchLeaderboardName}, SortMethod = {(ELeaderboardSortMethod)eLeaderboardSortMethod}, DisplayType = {(ELeaderboardDisplayType)eLeaderboardDisplayType})");
 
                 Leaderboard leaderboard = Leaderboards.Find( l => l.Name == pchLeaderboardName);
 

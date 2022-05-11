@@ -4,14 +4,11 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Net;
 using System.Threading;
-using System.Threading.Tasks;
 using SKYNET.Callback;
 using SKYNET.Helper;
 using SKYNET.Managers;
 using SKYNET.Properties;
-using SKYNET.Types;
 using SKYNET.Overlay;
 
 using SteamAPICall_t = System.UInt64;
@@ -132,6 +129,12 @@ namespace SKYNET.Steamworks.Implementation
             string PersonaName = SteamEmulator.PersonaName;
             Write($"GetPersonaName {PersonaName}");
             return PersonaName;
+        }
+
+        public short GetGroupIdByIndex(int index)
+        {
+            Write($"GetGroupIdByIndex {index}");
+            return 0;
         }
 
         public void ActivateGameOverlay(string friendsGroupID)
@@ -257,9 +260,9 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public int GetClanChatMessage(ulong steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, int peChatEntryType, ref ulong psteamidChatter)
+        public int GetClanChatMessage(ulong steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, int peChatEntryType, ref ulong[] psteamidChatter)
         {
-            psteamidChatter = 0;
+            //psteamidChatter = 0;
             Write($"GetClanChatMessage {steamIDClanChat}");
             return 0;
         }
@@ -321,23 +324,27 @@ namespace SKYNET.Steamworks.Implementation
 
         public CSteamID GetFriendByIndex(int iFriend, int iFriendFlags)
         {
-            string msg = $"GetFriendByIndex, Index: {iFriend} | ";
-            CSteamID Result = new CSteamID(0);
-            int index = iFriend; // iFriendFlags; // BUG Take flags as index
+            var Friends = Users.FindAll(f => f.HasFriend);
 
+            if (iFriend < 0 | iFriend > Friends.Count)
+            {
+                iFriend = iFriendFlags;
+            }
+
+            CSteamID Result = CSteamID.Invalid;
             MutexHelper.Wait("GetFriendByIndex", delegate
             {
                 var Friends = Users.FindAll(f => f.HasFriend);
-                if (Friends.Count > index)
+                if (Friends.Count > iFriend)
                 {
-                    var friend = Friends[index];
+                    var friend = Friends[iFriend];
                     if (friend != null)
                     {
                         Result = new CSteamID(friend.SteamId);
                     }
                 }
             });
-            Write(msg + Result);
+            Write($"GetFriendByIndex (Index = {iFriend}, FriendFlags = {iFriendFlags}) = {Result.ToString()}");
             return Result;
         }
 
@@ -415,7 +422,7 @@ namespace SKYNET.Steamworks.Implementation
             return Result;
         }
 
-        public int GetFriendMessage(ulong steamIDFriend, int iMessageID, IntPtr pvData, int cubData, ref int peChatEntryType)
+        public int GetFriendMessage(ulong steamIDFriend, int iMessageID, IntPtr pvData, int cubData, int peChatEntryType)
         {
             Write($"GetFriendMessage {steamIDFriend} {(EChatEntryType)peChatEntryType}");
             peChatEntryType = (int)EChatEntryType.ChatMsg;
@@ -437,7 +444,7 @@ namespace SKYNET.Steamworks.Implementation
                     if (friend != null) Result = friend.PersonaName;
                 }
 
-                Write($"GetFriendPersonaName {new CSteamID(steamIDFriend)} | {Result}");
+                Write($"GetFriendPersonaName (SteamID = {new CSteamID(steamIDFriend)}) = {Result}");
             });
             return Result;
         }

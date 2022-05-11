@@ -1,23 +1,24 @@
 ﻿using System;
+using uint32 = System.UInt32;
 
 namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("SteamGameCoordinator001")]
     public class SteamGameCoordinator001 : ISteamInterface
     {
-        public int SendMessage(IntPtr _, uint unMsgType, IntPtr pubData, uint cubData)
+        public EGCResults SendMessage(uint32 unMsgType, IntPtr pubData, uint32 cubData)
         {
-            return (int)SteamEmulator.SteamGameCoordinator.SendMessage(unMsgType, pubData, cubData);
+            return SteamEmulator.SteamGameCoordinator.SendMessage(unMsgType, pubData, cubData);
         }
 
-        public bool IsMessageAvailable(IntPtr _, ref int pcubMsgSize)
+        public bool IsMessageAvailable(ref uint32 pcubMsgSize)
         {
             return SteamEmulator.SteamGameCoordinator.IsMessageAvailable(ref pcubMsgSize);
         }
 
-        public int RetrieveMessage(IntPtr _, ref uint punMsgType, IntPtr pubDest, uint cubDest, ref uint pcubMsgSize)
+        public EGCResults RetrieveMessage(uint32 punMsgType, IntPtr pubDest, uint32 cubDest, ref uint32 pcubMsgSize)
         {
-            return (int)SteamEmulator.SteamGameCoordinator.RetrieveMessage(ref punMsgType, pubDest, cubDest, ref pcubMsgSize);
+            return SteamEmulator.SteamGameCoordinator.RetrieveMessage(ref punMsgType, pubDest, cubDest, ref pcubMsgSize);
         }
     }
 }

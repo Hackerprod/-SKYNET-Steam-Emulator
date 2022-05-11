@@ -1,11 +1,9 @@
-﻿using EasyHook;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 using SKYNET.Callback;
 using SKYNET.Helpers;
 using SKYNET.Manager;
 using SKYNET.Managers;
 using SKYNET.Types;
-
 using System;
 using System.Runtime.InteropServices;
 
@@ -286,9 +284,9 @@ namespace SKYNET.Hook.Handles
         public void SteamAPI_SetMiniDumpComment([MarshalAs(UnmanagedType.LPStr)] string pchMsg)
         {
             string Msg = "SteamAPI_SetMiniDumpComment" + Environment.NewLine;
-            Msg += "////////////////////////////// Mini Dump Content \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + Environment.NewLine;
-            Msg += $"{pchMsg}" + Environment.NewLine;
-            Msg += "//////////////////////////////   End Mini Dump   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + Environment.NewLine;
+            Msg += " ////////////////////////////// Mini Dump Content \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + Environment.NewLine;
+            Msg += $" {pchMsg}" + Environment.NewLine;
+            Msg += " //////////////////////////////   End Mini Dump   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + Environment.NewLine;
             Write(Msg);
             //SteamEmulator.Write(Msg, true);
         }

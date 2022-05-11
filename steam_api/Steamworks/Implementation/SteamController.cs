@@ -53,16 +53,17 @@ namespace SKYNET.Steamworks.Implementation
 
         public ControllerActionSetHandle_t GetActionSetHandle(string pszActionSetName)
         {
-            Write("GetActionSetHandle");
+            ulong Result = 0;
             if (string.IsNullOrEmpty(pszActionSetName))
             {
-                return 0;
+                Result = 0;
             }
             if (ActionHandles.ContainsKey(pszActionSetName.ToUpper()))
             {
-                return ActionHandles[pszActionSetName.ToUpper()];
+                Result = ActionHandles[pszActionSetName.ToUpper()];
             }
-            return 0;
+            Write($"GetAnalogActionHandle (ActionSetName = {pszActionSetName}) = {Result}");
+            return Result;
         }
 
         public int GetActiveActionSetLayers(ControllerHandle_t controllerHandle, ControllerActionSetHandle_t handlesOut)
@@ -83,16 +84,17 @@ namespace SKYNET.Steamworks.Implementation
 
         public ControllerAnalogActionHandle_t GetAnalogActionHandle(string pszActionName)
         {
-            Write("GetAnalogActionHandle");
+            ulong Result = 0;
             if (string.IsNullOrEmpty(pszActionName))
             {
-                return 0;
+                Result = 0;
             }
             if (AnalogHandles.ContainsKey(pszActionName.ToUpper()))
             {
-                return AnalogHandles[pszActionName.ToUpper()];
+                Result = AnalogHandles[pszActionName.ToUpper()];
             }
-            return 0;
+            Write($"GetAnalogActionHandle (ActionName = {pszActionName}) = {Result}");
+            return Result;
         }
 
         public int GetAnalogActionOrigins(ControllerHandle_t controllerHandle, ControllerActionSetHandle_t actionSetHandle, ControllerAnalogActionHandle_t analogActionHandle, int originsOut)
@@ -136,16 +138,17 @@ namespace SKYNET.Steamworks.Implementation
 
         public ControllerDigitalActionHandle_t GetDigitalActionHandle(string pszActionName)
         {
-            Write("GetDigitalActionHandle");
+            ulong Result = 0;
             if (string.IsNullOrEmpty(pszActionName))
             {
-                return 0;
+                Result = 0;
             }
             if (DigitalHandles.ContainsKey(pszActionName.ToUpper()))
             {
-                return DigitalHandles[pszActionName.ToUpper()];
+                Result = DigitalHandles[pszActionName.ToUpper()];
             }
-            return 0;
+            Write($"GetDigitalActionHandle (ActionName = {pszActionName}) = {Result}");
+            return Result;
         }
 
         public int GetDigitalActionOrigins(ControllerHandle_t controllerHandle, ControllerActionSetHandle_t actionSetHandle, ControllerDigitalActionHandle_t digitalActionHandle, int originsOut)
@@ -162,7 +165,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public string GetGlyphForActionOrigin(int eOrigin)
         {
-            Write("GetGlyphForActionOrigin");
+            Write($"GetGlyphForActionOrigin {(EControllerActionOrigin)eOrigin}");
             return "";
         }
 
@@ -178,15 +181,27 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
+        internal bool ShowDigitalActionOrigins(ulong controllerHandle, ulong digitalActionHandle, float flScale, float flXPosition, float flYPosition)
+        {
+            Write("ShowDigitalActionOrigins");
+            return false;
+        }
+
         public IntPtr GetMotionData(ControllerHandle_t controllerHandle)
         {
             Write("GetMotionData");
             return default;
         }
 
+        public bool ShowAnalogActionOrigins(ulong controllerHandle, ulong analogActionHandle, float flScale, float flXPosition, float flYPosition)
+        {
+            Write("GetMotionData");
+            return false;
+        }
+
         public string GetStringForActionOrigin(int eOrigin)
         {
-            Write("GetStringForActionOrigin");
+            Write($"GetStringForActionOrigin {(EControllerActionOrigin)eOrigin}");
             return "";
         }
 

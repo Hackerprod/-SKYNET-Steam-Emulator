@@ -39,7 +39,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool BIsFeatureBlocked(int eFeature)
         {
-            Write("boolBIsFeatureBlocked");
+            Write("BIsFeatureBlocked");
             return false;
         }
 

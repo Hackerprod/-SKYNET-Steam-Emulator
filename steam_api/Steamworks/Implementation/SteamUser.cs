@@ -80,7 +80,7 @@ namespace SKYNET.Steamworks.Implementation
             Recording = false;
         }
 
-        public int GetAvailableVoice(uint pcbCompressed, uint pcbUncompressed_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
+        public int GetAvailableVoice(ref uint pcbCompressed, ref uint pcbUncompressed_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
         {
             //Write("GetAvailableVoice");
             return (int)EVoiceResult.k_EVoiceResultOK;
@@ -100,7 +100,7 @@ namespace SKYNET.Steamworks.Implementation
             return (int)EVoiceResult.k_EVoiceResultNoData;
         }
 
-        public int GetVoiceOptimalSampleRate()
+        public uint GetVoiceOptimalSampleRate()
         {
             Write("GetVoiceOptimalSampleRate");
             return 4800;
