@@ -8,12 +8,12 @@ The project is in an initial stage, so it is not functional yet.
 ## Directury structure
 ```
 📁 Game folder                     
-└───📁 SKYNET
-    ├───📁 AvatarCache                  // Contains avatars cache
-    ├───📁 Storage                      // Contains stats and achievements files
-    |   └───📁 Remote                   // Contains game files
-    ├───📄 [SKYNET] steam_api.ini       
-    └───📄 [SKYNET] steam_api.log       // If option is enabled
+└──📁 SKYNET
+   ├──📁 AvatarCache                  // Contains avatars cache
+   ├──📁 Storage                      // Contains stats and achievements files
+   |  └──📁 Remote                    // Contains game files
+   ├──📄 [SKYNET] steam_api.ini       
+   └──📄 [SKYNET] steam_api.log       // If option is enabled
 ```
 
 ## Settings
@@ -28,6 +28,8 @@ When File log option si enabled in settings, a log file will be created in the r
 
 ## Implemented Interfaces
 ###
+- [x] ISteamAppDisableUpdate
+- - [x] SteamAppDisableUpdate001
 - [x] ISteamAppList		
 - - [x] ISteamAppList001
 - [x] ISteamAppDisableUpdate
@@ -35,8 +37,14 @@ When File log option si enabled in settings, a log file will be created in the r
 - [x] ISteamApps
 - - [x] ISteamApps008
 - [x] ISteamClient		
+- - [x] ISteamClient017
+- - [x] ISteamClient018
+- - [x] ISteamClient019
 - - [x] ISteamClient020
 - [x] ISteamController
+- - [x] ISteamController005
+- - [x] ISteamController006
+- - [x] ISteamController007
 - - [x] ISteamController008
 - [x] ISteamFriends		
 - - [x] ISteamFriends015
@@ -49,11 +57,19 @@ When File log option si enabled in settings, a log file will be created in the r
 - - [x] ISteamGameServer014
 - [x] ISteamGameServerStats	
 - - [x] ISteamGameServerStats001 
+- [x] ISteamGameStats	
+- - [x] ISteamGameStats001 
 - [x] ISteamHTMLSurface
+- - [x] ISteamHTMLSurface003
 - - [x] ISteamHTMLSurface004
 - - [x] ISteamHTMLSurface005
 - [x] ISteamHTTP
+- - [x] ISteamHTTP002 
 - - [x] ISteamHTTP003 
+- [x] ISteamInput
+- - [x] ISteamInput001
+- - [x] ISteamInput002
+- - [x] ISteamInput006
 - [x] ISteamInventory
 - - [x] ISteamInventory002
 - - [x] ISteamInventory003
@@ -72,17 +88,23 @@ When File log option si enabled in settings, a log file will be created in the r
 - [x] ISteamNetworking		
 - - [x] ISteamNetworking005
 - - [x] ISteamNetworking006 
-- [ ] ISteamNetworkingMessages
-- [ ] ISteamNetworkingSockets	
+- [x] ISteamNetworkingMessages
+- - [x] SteamNetworkingMessages002
+- [x] ISteamNetworkingSockets	
+- - [x] ISteamNetworkingSockets008
+- - [x] ISteamNetworkingSockets009
+- - [x] ISteamNetworkingSockets012
 - [x] ISteamNetworkingSocketsSerialized
 - - [x] ISteamNetworkingSocketsSerialized002 
 - - [x] ISteamNetworkingSocketsSerialized003 
 - - [x] ISteamNetworkingSocketsSerialized004 
 - - [x] ISteamNetworkingSocketsSerialized005 
-- [ ] ISteamNetworkingUtils	
+- [x] ISteamNetworkingUtils	
+- - [x] ISteamNetworkingUtils003
 - [x] ISteamParentalSettings
 - - [x] ISteamParentalSettings001 
-- [ ] ISteamRemotePlay		
+- [x] ISteamRemotePlay		
+- - [x] ISteamRemotePlay001		
 - [x] ISteamRemoteStorage
 - - [x] ISteamRemoteStorage013 
 - - [x] ISteamRemoteStorage014 
@@ -91,11 +113,16 @@ When File log option si enabled in settings, a log file will be created in the r
 - - [x] ISteamScreenshots003 
 - [ ] ISteamTV
 - [x] ISteamUGC			
+- - [x] ISteamUGC010
+- - [x] ISteamUGC012
 - - [x] ISteamUGC014
 - - [x] ISteamUGC015
 - - [x] ISteamUGC016
+- [x] ISteamUnifiedMessages
+- - [x] SteamUnifiedMessages001 
 - [x] ISteamUser
 - - [x] ISteamUser019 
+- - [x] ISteamUser020 
 - - [x] ISteamUser021 
 - [x] ISteamUserStats		
 - - [x] ISteamUserStats012 
