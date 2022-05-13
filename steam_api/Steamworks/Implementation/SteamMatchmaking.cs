@@ -26,6 +26,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamMatchmaking()
         {
             InterfaceName = "SteamMatchmaking";
+            InterfaceVersion = "SteamMatchMaking009";
             Lobbies = new ConcurrentDictionary<SteamAPICall_t, SteamLobby>();
             filters = new FilterLobby();
             CurrentRequest = 0;

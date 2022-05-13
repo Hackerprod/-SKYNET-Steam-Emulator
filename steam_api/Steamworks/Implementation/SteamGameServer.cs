@@ -2,7 +2,6 @@
 using SKYNET.Managers;
 using SKYNET.Types;
 
-
 using SteamAPICall_t = System.UInt64;
 using HAuthTicket = System.UInt32;
 
@@ -17,6 +16,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamGameServer()
         {
             InterfaceName = "SteamGameServer";
+            InterfaceVersion = "SteamGameServer014";
             ServerData = new GameServerData();
         }
 

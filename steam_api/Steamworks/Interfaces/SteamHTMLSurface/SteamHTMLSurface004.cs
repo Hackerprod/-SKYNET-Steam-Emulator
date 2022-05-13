@@ -3,14 +3,11 @@ using HHTMLBrowser = System.UInt32;
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    
+    [Interface("STEAMHTMLSURFACE_INTERFACE_VERSION_003")]
     [Interface("STEAMHTMLSURFACE_INTERFACE_VERSION_004")]
     public class SteamHTMLSurface004 : ISteamInterface
     {
-        //        public ~ISteamHTMLSurface004(IntPtr _) {}
-        //{
-        //    return  SteamEmulator.SteamHTMLSurface.ISteamHTMLSurface004(_);
-        //}
-
         public bool Init(IntPtr _)
         {
             return SteamEmulator.SteamHTMLSurface.Init();

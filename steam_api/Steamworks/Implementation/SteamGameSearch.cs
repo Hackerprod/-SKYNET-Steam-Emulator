@@ -10,6 +10,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamGameSearch()
         {
             InterfaceName = "SteamGameSearch";
+            InterfaceVersion = "SteamMatchGameSearch001";
         }
 
         public int AcceptGame()

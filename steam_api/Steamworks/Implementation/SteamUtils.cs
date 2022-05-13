@@ -16,6 +16,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamUtils()
         {
             InterfaceName = "SteamUtils";
+            InterfaceVersion = "SteamUtils009";
             ActiveTime = DateTime.Now;
         }
 

@@ -10,15 +10,17 @@ using SKYNET.Helper;
 using SKYNET.Managers;
 using SKYNET.Properties;
 using SKYNET.Overlay;
+using SKYNET.Network.Packets;
+using SKYNET.Types;
 
 using SteamAPICall_t = System.UInt64;
 using FriendsGroupID_t = System.UInt16;
-using SKYNET.Network.Packets;
 
 namespace SKYNET.Steamworks.Implementation
 {
     public class SteamFriends : ISteamInterface
     {
+
         public List<SKYNET.Types.SteamUser> Users;
         public List<ulong> QueryingAvatar;
         private Dictionary<string, string> RichPresence;
@@ -31,6 +33,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamFriends()
         {
             InterfaceName = "SteamFriends";
+            InterfaceVersion = "SteamFriends017";
             Users   = new List<SKYNET.Types.SteamUser>();
             QueryingAvatar = new List<SteamAPICall_t>();
             RichPresence = new Dictionary<string, string>();
@@ -77,7 +80,7 @@ namespace SKYNET.Steamworks.Implementation
 
             Users.Add(new Types.SteamUser()
             {
-                //AccountId = SteamEmulator.SteamId.AccountId,
+                AccountId = SteamEmulator.SteamId.AccountId,
                 GameId = SteamEmulator.AppId,
                 HasFriend = false,
                 PersonaName = SteamEmulator.PersonaName,
@@ -165,43 +168,47 @@ namespace SKYNET.Steamworks.Implementation
         public void ActivateGameOverlayToUser(string friendsGroupID, ulong steamID)
         {
             Write($"ActivateGameOverlayToUser {friendsGroupID} {(CSteamID)steamID}");
-
+            OverlayType type = default;
             switch (friendsGroupID)
             {
                 case "steamid":
-                    // Opens the overlay web browser to the specified user or groups profile.
+                    type = OverlayType.SteamProfile;
                     break;
                 case "chat":
-                    // Opens a chat window to the specified user, or joins the group chat.
+                    type = OverlayType.Chat;
                     break;
                 case "jointrade":
-                    // Opens a window to a Steam Trading session that was started with the ISteamEconomy / StartTrade Web API.
+                    type = OverlayType.JoinTrade;
                     break;
                 case "stats":
-                    // Opens the overlay web browser to the specified user's stats.
+                    type = OverlayType.Stats;
                     break;
                 case "achievements":
-                    // Opens the overlay web browser to the specified user's achievements.
+                    type = OverlayType.Achievements;
                     break;
                 case "friendadd":
-                    // Opens the overlay in minimal mode prompting the user to add the target user as a friend.
+                    type = OverlayType.FriendAdd;
                     break;
                 case "friendremove":
-                    // Opens the overlay in minimal mode prompting the user to remove the target friend.
+                    type = OverlayType.FriendRemove;
                     break;
                 case "friendrequestaccept":
-                    // Opens the overlay in minimal mode prompting the user to accept an incoming friend invite.
+                    type = OverlayType.FriendRequestAccept;
                     break;
                 case "friendrequestignore":
-                    // Opens the overlay in minimal mode prompting the user to ignore an incoming friend invite.
+                    type = OverlayType.FriendRequestIgnore;
                     break;
                 default:
                     break;
             }
 
-            var overlay = new frmOverlay();
-            overlay.ShowDialog();
-
+            if (modCommon.Overlay == null)
+            {
+                modCommon.Overlay = new frmOverlay();
+                modCommon.Overlay.ProcessOverlay(Users, type, steamID);
+                modCommon.Overlay.Show();
+            }
+            modCommon.Overlay.ProcessOverlay(Users, type, steamID);
         }
 
         public void ActivateGameOverlayToWebPage(string pchURL, int eMode)

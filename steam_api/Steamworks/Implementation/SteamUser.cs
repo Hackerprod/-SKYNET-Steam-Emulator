@@ -19,6 +19,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamUser()
         {
             InterfaceName = "SteamUser";
+            InterfaceVersion = "SteamUser020";
         }
 
         public HSteamUser GetHSteamUser()

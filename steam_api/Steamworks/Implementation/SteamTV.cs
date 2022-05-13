@@ -9,6 +9,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamTV()
         {
             InterfaceName = "SteamTV";
+            InterfaceVersion = "STEAMTV_INTERFACE_V002";
         }
 
         public bool IsBroadcasting(int pnNumViewers)

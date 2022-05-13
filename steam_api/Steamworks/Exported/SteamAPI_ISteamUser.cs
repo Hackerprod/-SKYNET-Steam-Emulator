@@ -247,6 +247,13 @@ namespace SKYNET.Steamworks.Exported
             return InterfaceManager.FindOrCreateInterface("SteamUser020");
         }
 
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamUser_v021()
+        {
+            Write("SteamAPI_SteamUser_v020");
+            return InterfaceManager.FindOrCreateInterface("SteamUser021");
+        }
+
         private static void Write(string msg)
         {
             SteamEmulator.Write("", msg);

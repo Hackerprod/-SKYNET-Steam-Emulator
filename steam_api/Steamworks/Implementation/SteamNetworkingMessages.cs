@@ -9,6 +9,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamNetworkingMessages()
         {
             InterfaceName = "SteamNetworkingMessages";
+            InterfaceVersion = "SteamNetworkingMessages002";
         }
 
         public int SendMessageToUser(IntPtr identityRemote, IntPtr pubData, uint cubData, int nSendFlags, int nRemoteChannel)

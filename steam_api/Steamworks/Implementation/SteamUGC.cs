@@ -20,24 +20,10 @@ namespace SKYNET.Steamworks.Implementation
         private List<PublishedFileId_t> subscribed;
         private SteamAPICall_t k_uAPICallInvalid = 0x0;
 
-        internal class UGC
-        {
-            public UGCQueryHandle_t Handle;
-            public List<PublishedFileId_t> return_only;
-            public List<PublishedFileId_t> results;
-            public bool ReturnAll;
-            public bool ReturnOnly;
-
-            public UGC()
-            {
-                return_only = new List<PublishedFileId_t>();
-                results = new List<PublishedFileId_t>();
-            }
-        }
-
         public SteamUGC()
         {
             InterfaceName = "SteamUGC";
+            InterfaceVersion = "STEAMUGC_INTERFACE_VERSION012";
             UGCQueries = new List<UGC>();
             subscribed = new List<PublishedFileId_t>();
         }
@@ -772,5 +758,22 @@ namespace SKYNET.Steamworks.Implementation
                 Write(ex.ToString());
             }
         }
+
+        internal class UGC
+        {
+            public UGCQueryHandle_t Handle;
+            public List<PublishedFileId_t> return_only;
+            public List<PublishedFileId_t> results;
+            public bool ReturnAll;
+            public bool ReturnOnly;
+
+            public UGC()
+            {
+                return_only = new List<PublishedFileId_t>();
+                results = new List<PublishedFileId_t>();
+            }
+        }
     }
+
+
 }

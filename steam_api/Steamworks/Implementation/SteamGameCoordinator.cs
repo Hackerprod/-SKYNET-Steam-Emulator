@@ -16,6 +16,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamGameCoordinator()
         {
             InterfaceName = "SteamGameCoordinator";
+            InterfaceVersion = "SteamGameCoordinator001";
             InMessages = new ConcurrentDictionary<uint, byte[]>();
 
             // CMsgConnectionStatus serialized

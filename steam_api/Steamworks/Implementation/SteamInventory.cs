@@ -13,6 +13,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamInventory()
         {
             InterfaceName = "SteamInventory";
+            InterfaceVersion = "STEAMINVENTORY_INTERFACE_V003";
         }
 
         public bool AddPromoItem(uint pResultHandle, uint itemDef)

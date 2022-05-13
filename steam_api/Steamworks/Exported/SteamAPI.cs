@@ -85,17 +85,13 @@ namespace SKYNET.Steamworks.Exported
         {
             try
             {
-                var callMessage = $"SteamAPI_RegisterCallResult: ";
-
                 SteamCallback sCallback = new SteamCallback(pCallback, true);
                 sCallback.SteamAPICall = hAPICall;
 
                 var isGameServer = sCallback.HasGameserver ? "[ GAMESERVER ]" : "[   CLIENT   ]";
                 var space = (int)sCallback.CallbackType < 1000 ? " " : "";
 
-                callMessage += $"{isGameServer}  {hAPICall}  {(int)sCallback.CallbackType} {space} {sCallback.BaseType} {sCallback.CallbackType}";
-
-                Write(callMessage);
+                Write($"SteamAPI_RegisterCallResult: {isGameServer}  {hAPICall}  {(int)sCallback.CallbackType} {space} {sCallback.BaseType} {sCallback.CallbackType}");
 
                 CallbackManager.RegisterCallResult(sCallback);
             }
@@ -284,25 +280,6 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_gameserveritem_t_Construct(IntPtr self)
-        {
-            Write($"SteamAPI_gameserveritem_t_Construct");
-        }
-
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_gameserveritem_t_GetName(IntPtr self)
-        {
-            Write($"SteamAPI_gameserveritem_t_GetName");
-            return "";
-        }
-
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_gameserveritem_t_SetName(IntPtr self, IntPtr pName)
-        {
-            Write($"SteamAPI_gameserveritem_t_SetName");
-        }
-
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr g_pSteamClientGameServer()
         {
             Write($"g_pSteamClientGameServer");
@@ -328,9 +305,6 @@ namespace SKYNET.Steamworks.Exported
             Write("Steam_RunCallbacks\n");
 
             SteamAPI_RunCallbacks();
-
-            //if (bGameServerCallbacks)
-            //    SteamEmulator.SteamGameServer.RunCallbacks(IntPtr.Zero);
         }
 
         #region Interfaces
@@ -617,7 +591,7 @@ namespace SKYNET.Steamworks.Exported
             return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamApps.InterfaceVersion);
         }
 
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        [DllExport("SteamClient", CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamClient()
         {
             Write($"SteamClient");
@@ -853,6 +827,43 @@ namespace SKYNET.Steamworks.Exported
             Write($"VR_Shutdown");
         }
 
+
+        #endregion
+
+        #region SteamContentServer
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamContentServer()
+        {
+            Write($"SteamContentServer");
+            return IntPtr.Zero;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamContentServer_Init()
+        {
+            Write($"SteamContentServer_Init");
+            return true;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamContentServer_RunCallbacks()
+        {
+            Write($"SteamContentServer_RunCallbacks");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamContentServer_Shutdown()
+        {
+            Write($"SteamContentServer_RunCallbacks");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamContentServerUtils()
+        {
+            Write($"SteamContentServer");
+            return IntPtr.Zero;
+        }
 
         #endregion
 

@@ -1,8 +1,4 @@
-﻿using SKYNET;
-using SKYNET.Steamworks;
-
-using System;
-using System.Runtime.InteropServices;
+﻿using System;
 
 using SteamAPICall_t = System.UInt64;
 using PartyBeaconID_t = System.UInt64;
@@ -14,6 +10,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamParties()
         {
             InterfaceName = "SteamParties";
+            InterfaceVersion = "xxx";
         }
 
         public void CancelReservation(PartyBeaconID_t ulBeacon, ulong steamIDUser)

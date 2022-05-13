@@ -9,6 +9,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamHTMLSurface()
         {
             InterfaceName = "SteamHTMLSurface";
+            InterfaceVersion = "STEAMHTMLSURFACE_INTERFACE_VERSION_005";
         }
 
         public void AddHeader(HHTMLBrowser unBrowserHandle, string pchKey, string pchValue)

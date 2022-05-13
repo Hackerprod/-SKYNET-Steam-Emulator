@@ -2,7 +2,6 @@
 using SKYNET.Helper;
 using SKYNET.Helper.JSON;
 using SKYNET.Managers;
-using SKYNET.Types;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -24,6 +23,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamUserStats()
         {
             InterfaceName = "SteamUserStats";
+            InterfaceVersion = "STEAMUSERSTATS_INTERFACE_VERSION011";
             Leaderboards = new List<Leaderboard>();
             Achievements = new List<Achievement>();
             UserStats = new ConcurrentDictionary<ulong, List<PlayerStat>>();

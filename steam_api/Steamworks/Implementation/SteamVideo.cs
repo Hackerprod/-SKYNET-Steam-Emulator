@@ -9,6 +9,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamVideo()
         {
             InterfaceName = "SteamVideo";
+            InterfaceVersion = "STEAMVIDEO_INTERFACE_V002";
         }
 
         public void GetVideoURL(uint unVideoAppID)
