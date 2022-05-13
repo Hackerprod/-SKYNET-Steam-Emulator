@@ -5,11 +5,23 @@ The project is in an initial stage, so it is not functional yet.
 
 ![Screenshot](Capture.png)
 
+## Directury structure
+```
+📁 Game folder                     
+└───📁 SKYNET
+    ├───📁 AvatarCache                  // Contains avatars cache
+    ├───📁 Storage                      // Contains stats and achievements files
+    |   └───📁 Remote                   // Contains game files
+    ├───📄 [SKYNET] steam_api.ini       
+    └───📄 [SKYNET] steam_api.log       // If option is enabled
+```
+
 ## Settings
 This emulator reads settings from `[SKYNET] steam_api.ini` file, data like Nickname, SteamId, Language etc.
 
 ## Currently working on
-Network implementation.
+Callback system implementation.
+Fucking SteamInternal_ContextInit in x86 Games
 
 ## Log
 When File log option si enabled in settings, a log file will be created in the root of the game executable with the following name `[SKYNET] steam_api.log`
