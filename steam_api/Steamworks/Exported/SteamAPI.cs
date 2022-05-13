@@ -280,25 +280,6 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_gameserveritem_t_Construct(IntPtr self)
-        {
-            Write($"SteamAPI_gameserveritem_t_Construct");
-        }
-
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_gameserveritem_t_GetName(IntPtr self)
-        {
-            Write($"SteamAPI_gameserveritem_t_GetName");
-            return "";
-        }
-
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_gameserveritem_t_SetName(IntPtr self, IntPtr pName)
-        {
-            Write($"SteamAPI_gameserveritem_t_SetName");
-        }
-
-        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr g_pSteamClientGameServer()
         {
             Write($"g_pSteamClientGameServer");

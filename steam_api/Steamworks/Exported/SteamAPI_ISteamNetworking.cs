@@ -165,6 +165,196 @@ namespace SKYNET.Steamworks.Exported
             return SteamEmulator.SteamNetworking.GetMaxPacketSize(hSocket);
         }
 
+        #region ISteamNetworkingFakeUDPPort
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamNetworkingFakeUDPPort_DestroyFakeUDPPort(IntPtr _)
+        {
+            Write("SteamAPI_ISteamNetworkingFakeUDPPort_DestroyFakeUDPPort");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static EResult SteamAPI_ISteamNetworkingFakeUDPPort_SendMessageToFakeIP(IntPtr _, IntPtr remoteAddress, IntPtr pData, uint cbData, int nSendFlags)
+        {
+            Write("SteamAPI_ISteamNetworkingFakeUDPPort_SendMessageToFakeIP");
+            return EResult.k_EResultFail;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_ISteamNetworkingFakeUDPPort_ReceiveMessages(IntPtr _, IntPtr ppOutMessages, int nMaxMessages)
+        {
+            Write("SteamAPI_ISteamNetworkingFakeUDPPort_ReceiveMessages");
+            return 0;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamNetworkingFakeUDPPort_ScheduleCleanup(IntPtr _, IntPtr remoteAddress )
+        {
+            Write("SteamAPI_ISteamNetworkingFakeUDPPort_ScheduleCleanup");
+        }
+
+        #endregion
+
+        #region SteamIPAddress_t
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_SteamIPAddress_t_IsSet(IntPtr _)
+        {
+            Write("SteamAPI_SteamIPAddress_t_IsSet");
+            return false;
+        }
+
+        #endregion
+
+        #region MatchMakingKeyValuePair_t
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_MatchMakingKeyValuePair_t_Construct(IntPtr _)
+        {
+            Write("SteamAPI_MatchMakingKeyValuePair_t_Construct");
+        }
+
+        #endregion
+
+        #region servernetadr_t
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_servernetadr_t_Construct(IntPtr _)
+        {
+            Write("SteamAPI_MatchMakingKeyValuePair_t_Construct");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_servernetadr_t_Init(IntPtr _, int ip, int usQueryPort, int usConnectionPort)
+        {
+            Write("SteamAPI_servernetadr_t_Init");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_servernetadr_t_GetQueryPort(IntPtr _)
+        {
+            Write("SteamAPI_servernetadr_t_GetQueryPort");
+            return 0;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_servernetadr_t_SetQueryPort(IntPtr _, int usPort)
+        {
+            Write("SteamAPI_servernetadr_t_SetQueryPort");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_servernetadr_t_GetConnectionPort(IntPtr _)
+        {
+            Write("SteamAPI_servernetadr_t_GetConnectionPort");
+            return 0;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_servernetadr_t_SetConnectionPort(IntPtr _, int usPort)
+        {
+            Write("SteamAPI_MatchMakingKeyValuePair_t_Construct");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static uint SteamAPI_servernetadr_t_GetIP(IntPtr _)
+        {
+            Write("SteamAPI_servernetadr_t_GetIP");
+            return 0;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_servernetadr_t_SetIP(IntPtr _, uint unIP)
+        {
+            Write("SteamAPI_servernetadr_t_SetIP");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static string SteamAPI_servernetadr_t_GetConnectionAddressString(IntPtr _)
+        {
+            Write("SteamAPI_servernetadr_t_GetConnectionAddressString");
+            return "";
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static string SteamAPI_servernetadr_t_GetQueryAddressString(IntPtr _)
+        {
+            Write("SteamAPI_servernetadr_t_GetQueryAddressString");
+            return "";
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_servernetadr_t_IsLessThan(IntPtr _, IntPtr netadr)
+        {
+            Write("SteamAPI_servernetadr_t_IsLessThan");
+            return false;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static string SteamAPI_servernetadr_t_Assign(IntPtr _, IntPtr netadr)
+        {
+            Write("SteamAPI_servernetadr_t_Assign");
+            return "";
+        }
+
+        #endregion
+
+        #region gameserveritem_t
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_gameserveritem_t_Construct(IntPtr self)
+        {
+            Write($"SteamAPI_gameserveritem_t_Construct");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static string SteamAPI_gameserveritem_t_GetName(IntPtr self)
+        {
+            Write($"SteamAPI_gameserveritem_t_GetName");
+            return "";
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_gameserveritem_t_SetName(IntPtr self, IntPtr pName)
+        {
+            Write($"SteamAPI_gameserveritem_t_SetName");
+        }
+
+        #endregion
+
+        #region SteamNetworkingMessage_t
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_SteamNetworkingMessage_t_Release(IntPtr _)
+        {
+            Write("SteamAPI_SteamNetworkingMessage_t_Release");
+        }
+
+        #endregion
+
+        #region SteamDatagramHostedAddress
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_SteamDatagramHostedAddress_Clear(IntPtr _)
+        {
+            Write("SteamAPI_SteamDatagramHostedAddress_Clear");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamDatagramHostedAddress_GetPopID(IntPtr _)
+        {
+            Write("SteamAPI_SteamDatagramHostedAddress_GetPopID");
+            return IntPtr.Zero;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_SteamDatagramHostedAddress_SetDevAddress(IntPtr _, uint nIP, int nPort, IntPtr popid)
+        {
+            Write("SteamAPI_SteamDatagramHostedAddress_SetDevAddress");
+        }
+
+        #endregion
+
         private static void Write(string msg)
         {
             SteamEmulator.Write("", msg);

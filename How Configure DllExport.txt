@@ -1,4 +1,0 @@
-- Select project and Apply
-- In Namespace for DllExport 
-System.Runtime.InteropServices
-- Done.

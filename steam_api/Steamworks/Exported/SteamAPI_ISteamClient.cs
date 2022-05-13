@@ -14,10 +14,10 @@ namespace SKYNET.Steamworks.Exported
     public class SteamAPI_ISteamClient
     {
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamClient_CreateSteamPipe(IntPtr _)
+        public static HSteamPipe SteamAPI_ISteamClient_CreateSteamPipe(IntPtr _)
         {
             Write($"SteamAPI_ISteamClient_CreateSteamPipe");
-            return (int)SteamEmulator.CreateSteamPipe();
+            return SteamEmulator.CreateSteamPipe();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -28,10 +28,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamClient_ConnectToGlobalUser(IntPtr _, HSteamPipe hSteamPipe)
+        public static HSteamUser SteamAPI_ISteamClient_ConnectToGlobalUser(IntPtr _, HSteamPipe hSteamPipe)
         {
             Write($"SteamAPI_ISteamClient_ConnectToGlobalUser");
-            return (int)SteamEmulator.SteamClient.ConnectToGlobalUser(hSteamPipe);
+            return SteamEmulator.SteamClient.ConnectToGlobalUser(hSteamPipe);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
