@@ -209,14 +209,14 @@ namespace SKYNET.Types
     {
         public IntPtr pFn;
         public long counter;
-        public CSteamApiContext Context;
+        public IntPtr Context;
     }
 
     public struct ContextInitData_x86
     {
         public IntPtr pFn;
         public uint counter;
-        public CSteamApiContext Context;
+        public IntPtr Context;
     }
 
     [UnmanagedFunctionPointer(CallingConvention.ThisCall)]

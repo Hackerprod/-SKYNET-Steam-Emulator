@@ -31,6 +31,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamRemoteStorage()
         {
             InterfaceName = "SteamRemoteStorage";
+            InterfaceVersion = "STEAMREMOTESTORAGE_INTERFACE_VERSION014";
             StorageFiles = new List<string>();
             SharedFiles = new ConcurrentDictionary<ulong, string>();
             AsyncFilesRead = new Dictionary<ulong, string>();

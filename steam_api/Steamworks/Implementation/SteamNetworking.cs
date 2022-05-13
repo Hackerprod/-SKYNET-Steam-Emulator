@@ -18,6 +18,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamNetworking()
         {
             InterfaceName = "SteamNetworking";
+            InterfaceVersion = "SteamNetworking005";
             P2PIncoming = new List<NET_P2PPacket>();
         }
 

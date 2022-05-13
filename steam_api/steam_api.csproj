@@ -103,6 +103,12 @@
     <Compile Include="Network\Packets\NetworkMessage.cs" />
     <Compile Include="Network\Packets\NET_Messages.cs" />
     <Compile Include="Network\TCPServer.cs" />
+    <Compile Include="Overlay\ProfileControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Overlay\ProfileControl.Designer.cs">
+      <DependentUpon>ProfileControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Plugin\IGameCoordinatorPlugin.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -257,6 +263,7 @@
     <Compile Include="Steamworks\Types\SteamEnums.cs" />
     <Compile Include="Steamworks\Types\SteamTypes.cs" />
     <Compile Include="Types\GameMessage.cs" />
+    <Compile Include="Types\OverlayType.cs" />
     <Compile Include="Types\SteamUser.cs" />
     <Compile Include="Types\GameServerData.cs" />
   </ItemGroup>
@@ -267,6 +274,9 @@
     <EmbeddedResource Include="Overlay\frmOverlay.resx">
       <DependentUpon>frmOverlay.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Overlay\ProfileControl.resx">
+      <DependentUpon>ProfileControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -276,10 +286,7 @@
     <None Include="Resources\Image.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\SKYNET.Callbacks.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\SKYNET.Callbacks64.dll" />
+    <None Include="Resources\close.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ImportGroup Label=".NET DllExport">

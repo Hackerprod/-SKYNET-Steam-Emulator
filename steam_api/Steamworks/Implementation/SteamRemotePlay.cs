@@ -13,6 +13,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamRemotePlay()
         {
             InterfaceName = "SteamRemotePlay";
+            InterfaceVersion = "STEAMREMOTEPLAY_INTERFACE_VERSION001";
         }
 
         public uint GetSessionCount()

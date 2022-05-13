@@ -1,4 +1,5 @@
 ﻿using SKYNET;
+using SKYNET.Overlay;
 using SKYNET.Steamworks;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,10 @@ public partial class modCommon
 
     private static bool ConsoleEnabled;
     private static bool SettingsLoaded;
+
+    public static DateTime LoadTime { get; set; } = DateTime.Now;
+    public static frmOverlay Overlay;
+
 
 
     public static IntPtr GetObjectPtr(object Obj)
@@ -94,7 +99,6 @@ public partial class modCommon
         return IntPtr.Size == 8;
     }
 
-    public static DateTime LoadTime { get; set; } = DateTime.Now;
     public static int MilisecondTime()
     {
         return (DateTime.Now - LoadTime).Milliseconds;

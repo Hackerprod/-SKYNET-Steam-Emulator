@@ -1,7 +1,4 @@
-﻿using SKYNET;
-
-using System;
-using System.Runtime.InteropServices;
+﻿using System;
 
 using SteamAPICall_t = System.UInt64;
 
@@ -12,6 +9,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamNetworkingSocketsSerialized()
         {
             InterfaceName = "SteamNetworkingSocketsSerialized";
+            InterfaceVersion = "SteamNetworkingSocketsSerialized005";
         }
 
         public void SendP2PRendezvous(ulong steamIDRemote, uint unConnectionIDSrc, IntPtr pMsgRendezvous, uint cbRendezvous)

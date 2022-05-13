@@ -16,6 +16,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamInput()
         {
             InterfaceName = "SteamInput";
+            InterfaceVersion = "SteamInput001";
         }
 
         public void ActivateActionSet(InputHandle_t inputHandle, InputActionSetHandle_t actionSetHandle)
@@ -188,7 +189,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public IntPtr GetMotionData(InputHandle_t inputHandle)
         {
-            Write("xxx");
+            Write("GetMotionData");
             return IntPtr.Zero;
         }
 

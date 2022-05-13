@@ -9,6 +9,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamMasterServerUpdater()
         {
             InterfaceName = "SteamMasterServerUpdater";
+            InterfaceVersion = "SteamMasterServerUpdater002";
         }
 
         public void SetActive(bool bActive)

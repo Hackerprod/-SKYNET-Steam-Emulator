@@ -24,6 +24,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamUserStats()
         {
             InterfaceName = "SteamUserStats";
+            InterfaceVersion = "STEAMUSERSTATS_INTERFACE_VERSION011";
             Leaderboards = new List<Leaderboard>();
             Achievements = new List<Achievement>();
             UserStats = new ConcurrentDictionary<ulong, List<PlayerStat>>();

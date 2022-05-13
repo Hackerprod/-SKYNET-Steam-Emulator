@@ -22,6 +22,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamHTTP()
         {
             InterfaceName = "SteamHTTP";
+            InterfaceVersion = "STEAMHTTP_INTERFACE_VERSION003";
             HTTPRequests = new List<HTTPRequest>();
             Handle = 0;
         }

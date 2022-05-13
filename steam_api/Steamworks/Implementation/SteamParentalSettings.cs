@@ -1,9 +1,4 @@
 ﻿
-using SKYNET;
-using SKYNET.Steamworks;
-using System;
-using System.Runtime.InteropServices;
-
 namespace SKYNET.Steamworks.Implementation
 {
     public class SteamParentalSettings : ISteamInterface
@@ -11,6 +6,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamParentalSettings()
         {
             InterfaceName = "SteamParentalSettings";
+            InterfaceVersion = "STEAMPARENTALSETTINGS_INTERFACE_VERSION001";
         }
 
         public bool BIsParentalLockEnabled()

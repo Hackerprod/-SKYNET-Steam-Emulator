@@ -1,13 +1,11 @@
-﻿using SKYNET;
-using SKYNET.Steamworks;
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
+using SKYNET.Callback;
+using SKYNET.Managers;
 
 using SteamNetworkingPOPID = System.UInt32;
 using SteamNetworkingMicroseconds = System.Int64;
 using HSteamNetConnection = System.UInt32;
-using SKYNET.Callback;
-using SKYNET.Managers;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -16,6 +14,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamNetworkingUtils()
         {
             InterfaceName = "SteamNetworkingUtils";
+            InterfaceVersion = "SteamNetworkingUtils003";
         }
 
         public IntPtr AllocateMessage(int cbAllocateBuffer)

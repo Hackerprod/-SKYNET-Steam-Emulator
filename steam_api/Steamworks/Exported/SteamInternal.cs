@@ -66,7 +66,7 @@ namespace SKYNET.Steamworks.Exported
                         Write($"SteamInternal_ContextInit");
                         Marshal.WriteInt64(contextInitData_ptr, 8, 1);
                         pFn = Marshal.GetDelegateForFunctionPointer<pFnDelegate>(Context.pFn);
-                        pFn(apiContext_ptr);
+                        pFn?.Invoke(apiContext_ptr);
                     }
                 }
                 else
@@ -78,7 +78,7 @@ namespace SKYNET.Steamworks.Exported
                         Write($"SteamInternal_ContextInit");
                         Marshal.WriteInt32(contextInitData_ptr, 4, 1);
                         pFn = Marshal.GetDelegateForFunctionPointer<pFnDelegate>(Context.pFn);
-                        pFn(apiContext_ptr);
+                        pFn?.Invoke(apiContext_ptr);
                     }
                 }
             }
@@ -94,10 +94,12 @@ namespace SKYNET.Steamworks.Exported
         {
             if (File.Exists(Path.Combine(modCommon.GetPath(), "steam_api_.dll")))
             {
+                Write($"SteamInternal_ContextInit ByPass");
                 return SteamInternal_ContextInit86(contextInitData_ptr);
             }
             if (File.Exists(Path.Combine(modCommon.GetPath(), "steam_api64_.dll")))
             {
+                Write($"SteamInternal_ContextInit ByPass");
                 return SteamInternal_ContextInit64(contextInitData_ptr);
             }
             return IntPtr.Zero;
@@ -111,9 +113,9 @@ namespace SKYNET.Steamworks.Exported
 
         #endregion
 
-        private static void Write(string v)
+        private static void Write(object msg)
         {
-            SteamEmulator.Write("", v);
+            SteamEmulator.Write("", msg);
         }
     }
 }
