@@ -26,7 +26,7 @@ Multiplataform             Works with multiple game engines like Source 2, Unity
 Network communication      Network communication between clients through a configurable port.
 Overlay                    External Overlay for steam and game messages.
 DLC                        Unlock all downloaded DLCs
-Avatar support             Load avatar from file (Avatar.jpg) inside SKYNET folder and share it with the other players through the network
+Avatar support             Load avatar from file (Avatar.jpg) inside SKYNET folder and share it through the network
 Plugin system              Load external plugin to communicate with the emu.
 ```
 ## ⚙️ Settings
