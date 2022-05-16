@@ -15,10 +15,12 @@ The project is in an initial stage, so it is not functional yet for some Games.
    ├──📄 [SKYNET] steam_api.ini       
    └──📑 [SKYNET] steam_api.log       // If option is enabled
 ```
-## 📎 Features
-`User Stats manager` Save and Load user stats from local folder.
-`Achievements manager` Save and Load user achievements from local folder.
-`CSteamworks emulation` Rename the emu to CSteamworks.dll to emulate them.
+## 🔗 Features
+`User Stats manager`       Save and Load user stats from local folder.
+
+`Achievements manager`     Save and Load user achievements from local folder.
+
+`CSteamworks emulation`    Rename the emu to CSteamworks.dll to emulate them.
 
 ## ⚙️ Settings
 This emulator reads settings from `[SKYNET] steam_api.ini` file, data like Nickname, SteamId, Language etc.
