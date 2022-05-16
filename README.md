@@ -88,7 +88,9 @@ namespace SKYNET.Plugin
 ```
 
 ## ⭐ Implemented Interfaces
-###
+
+<details><summary>Click to expand</summary><br />
+
 - [x] ISteamAppDisableUpdate
 - - [x] SteamAppDisableUpdate001
 - [x] ISteamAppList		
@@ -192,3 +194,5 @@ namespace SKYNET.Plugin
 - - [x] ISteamUtils010
 - [x] ISteamVideo			
 - - [x] ISteamVideo002 
+</details>
+
