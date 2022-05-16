@@ -15,12 +15,15 @@ The project is in an initial stage, so it is not functional yet for some Games.
    ├──📄 [SKYNET] steam_api.ini       
    └──📑 [SKYNET] steam_api.log       // If option is enabled
 ```
+
 ## 🔗 Features
 **`User Stats manager`** &emsp;&emsp;&emsp;  Save and Load user stats from local folder. <br />
 **`Achievements manager`** &emsp;&emsp;  Save and Load user achievements from local folder. <br />
 **`CSteamworks emulation`**&emsp;&emsp;Rename the emu to **CSteamworks.dll** to emulate them. <br />
 **`Multiplataform`** &emsp;&emsp;&emsp;&emsp;&emsp; Works with multiple game engines like Source 2, Unity 3D etc.<br />
-**`Network communication`** &emsp;&ensp; Network communication between clients through a configurable port.
+**`Network communication`** &emsp;&ensp; Network communication between clients through a configurable port.<br />
+**`Overlay`** &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp; External Overlay for steam and game messages.<br />
+**`Plugin system`** &emsp;&emsp;&emsp;&emsp;&emsp;&ensp; Load external plugin to communicate with the emu.
 
 ## ⚙️ Settings
 This emulator reads settings from `[SKYNET] steam_api.ini` file, data like Nickname, SteamId, Language etc.
@@ -31,6 +34,58 @@ Fucking SteamInternal_ContextInit in x86 Games
 
 ## 📝 Log
 When File log option si enabled in settings, a log file will be created in the root of the game executable with the following name `[SKYNET] steam_api.log`
+
+## 🔌 Plugin system
+The plugin system is developed in order to establish a communication between the game and the game coordinator, the following example shows a basic plugin. <br /><br />
+**Interface for Game coordinator plugin:**
+```csharp
+namespace SKYNET.Plugin
+{
+    public interface IGameCoordinatorPlugin
+    {
+        uint Initialize();
+        void MessageFromGame(byte[] bytes);
+        EventHandler<Dictionary <uint, byte[]>> IsMessageAvailable { get; set; }
+    }
+}
+```
+**Game coordinator plugin example:**
+```csharp
+namespace SKYNET.Plugin
+{
+    public class Dota2GameCoordinator : IGameCoordinatorPlugin
+    {
+        private uint AppID = 570;
+        public EventHandler<Dictionary<uint, byte[]>> IsMessageAvailable { get; set; }
+
+        public uint Initialize()
+        {
+            // TODO: Initialize all Game coordinator class
+            return AppID;
+        }
+
+        public void MessageFromGame(byte[] bytes)
+        {
+            // Process message from game
+            uint MsgType = MsgUtil.GetGCMsg(new MemoryStream(bytes).ReadUInt32L());
+            IPacketGCMsg packetGCMsg = MsgUtil.GetPacketGcMsg(MsgType, bytes);
+            // TODO: Process GC message
+        }
+
+        public void SendPacketToGame(uint msgType, byte[] packet)
+        {
+            Dictionary<uint, byte[]> message = new Dictionary<uint, byte[]>();
+            message.Add(msgType, packet);
+            IsMessageAvailable?.Invoke(this, message);
+        }
+
+        public void SendPacketToGame(Dictionary<uint, byte[]> messages)
+        {
+            IsMessageAvailable?.Invoke(this, messages);
+        }
+    }
+}
+```
 
 ## ⭐ Implemented Interfaces
 ###
