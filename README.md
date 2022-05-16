@@ -26,7 +26,26 @@ The project is in an initial stage, so it is not functional yet for some Games.
 **`Plugin system`** &emsp;&emsp;&emsp;&emsp;&emsp;&ensp; Load external plugin to communicate with the emu.
 
 ## ⚙️ Settings
-This emulator reads settings from `[SKYNET] steam_api.ini` file, data like Nickname, SteamId, Language etc.
+When the emulator runs for the first time, it create the directories that it is going to use and generates them inside the SKYNET folder the `[SKYNET] steam_api.ini`<br />
+<details><summary>Settings structure</summary><br />
+
+ [User Settings]<br />
+PersonaName = Hackerprod<br />
+AccountId = 1000<br />
+
+[Game Settings]<br />
+Languaje = spanish<br />
+AppId = 570<br />
+
+[Network Settings]<br />
+ServerIP = 127.0.0.1<br />
+BroadCastPort = 28025<br />
+
+[Log Settings]<br />
+File = false<br />
+Console = true<br />
+
+</details>
 
 ## 🔨 Currently working on
 Callback system implementation.<br />
