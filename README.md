@@ -16,25 +16,23 @@ The project is in an initial stage, so it is not functional yet for some Games.
    └──📑 [SKYNET] steam_api.log       // If option is enabled
 ```
 ## 🔗 Features
-`User Stats manager`       Save and Load user stats from local folder.
-
-`Achievements manager`     Save and Load user achievements from local folder.
-
-`CSteamworks emulation`    Rename the emu to CSteamworks.dll to emulate them.
-
-`Multiplataform`   Works with multiple game engines like Source 2, Unity 3D etc.
+**`User Stats manager`** &emsp;&emsp;&emsp;  Save and Load user stats from local folder. <br />
+**`Achievements manager`** &emsp;&emsp;  Save and Load user achievements from local folder. <br />
+**`CSteamworks emulation`**&emsp;&emsp;Rename the emu to **CSteamworks.dll** to emulate them. <br />
+**`Multiplataform`** &emsp;&emsp;&emsp;&emsp;&emsp; Works with multiple game engines like Source 2, Unity 3D etc.<br />
+**`Network communication`** &emsp;&ensp; Network communication between clients through a configurable port.
 
 ## ⚙️ Settings
 This emulator reads settings from `[SKYNET] steam_api.ini` file, data like Nickname, SteamId, Language etc.
 
 ## 🔨 Currently working on
-Callback system implementation.
+Callback system implementation.<br />
 Fucking SteamInternal_ContextInit in x86 Games
 
 ## 📝 Log
 When File log option si enabled in settings, a log file will be created in the root of the game executable with the following name `[SKYNET] steam_api.log`
 
-## Implemented Interfaces
+## ⭐ Implemented Interfaces
 ###
 - [x] ISteamAppDisableUpdate
 - - [x] SteamAppDisableUpdate001
