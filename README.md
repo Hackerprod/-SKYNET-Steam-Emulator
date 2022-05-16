@@ -5,7 +5,7 @@ The project is in an initial stage, so it is not functional yet for some Games.
 
 ![Screenshot](Capture.png)
 
-## 📁 Directury structure
+## 📁 Directory structure
 ```
 📁 Game folder                     
 └──📁 SKYNET
