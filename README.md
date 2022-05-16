@@ -22,6 +22,8 @@ The project is in an initial stage, so it is not functional yet for some Games.
 
 `CSteamworks emulation`    Rename the emu to CSteamworks.dll to emulate them.
 
+`Multiplataform`   Works with multiple game engines like Source 2, Unity 3D etc.
+
 ## ⚙️ Settings
 This emulator reads settings from `[SKYNET] steam_api.ini` file, data like Nickname, SteamId, Language etc.
 
