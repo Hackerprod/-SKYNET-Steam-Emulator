@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using SKYNET;
-using SKYNET.Helper;
-using SKYNET.Steamworks;
 
 namespace SKYNET.Steamworks.Exported
 {

@@ -1,11 +1,5 @@
 using System;
-using System.Drawing;
-using System.Net;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Windows.Forms;
-using SKYNET;
-using SKYNET.Steamworks;
 
 using SteamAPICall_t = System.UInt64;
 
@@ -278,6 +272,16 @@ namespace SKYNET.Steamworks.Exported
             Write("SteamAPI_ISteamMatchmaking_SetLinkedLobby");
             return SteamEmulator.SteamMatchmaking.SetLinkedLobby(steamIDLobby, steamIDLobbyDependent);
         }
+
+        #region MatchMakingKeyValuePair_t
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_MatchMakingKeyValuePair_t_Construct(IntPtr _)
+        {
+            Write("SteamAPI_MatchMakingKeyValuePair_t_Construct");
+        }
+
+        #endregion
 
         private static void Write(string msg)
         {

@@ -56,7 +56,7 @@ namespace SKYNET.Steamworks.Implementation
                 {
                     m_nGameID = SteamEmulator.GameID,
                     m_eResult = EResult.k_EResultOK,
-                    m_steamIDUser = (ulong)SteamEmulator.SteamId
+                    m_steamIDUser = SteamEmulator.SteamId
                 };
                 CallbackManager.AddCallbackResult(data);
                 return true;
@@ -304,7 +304,7 @@ namespace SKYNET.Steamworks.Implementation
                 {
                     m_nGameID = SteamEmulator.GameID,
                     m_eResult = EResult.k_EResultOK,
-                    m_steamIDUser = steamIDUser
+                    m_steamIDUser = (CSteamID)steamIDUser
                 };
                 return CallbackManager.AddCallbackResult(data);
             }
@@ -465,27 +465,27 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public SteamAPICall_t DownloadLeaderboardEntries(ulong hSteamLeaderboard, IntPtr eLeaderboardDataRequest, int nRangeStart, int nRangeEnd)
+        public SteamAPICall_t DownloadLeaderboardEntries(ulong hSteamLeaderboard, int eLeaderboardDataRequest, int nRangeStart, int nRangeEnd)
         {
             Write($"DownloadLeaderboardEntries");
             // LeaderboardScoresDownloaded_t
             return k_uAPICallInvalid;
         }
 
-        public SteamAPICall_t DownloadLeaderboardEntriesForUsers(ulong hSteamLeaderboard, ulong prgUsers, int cUsers)
+        public SteamAPICall_t DownloadLeaderboardEntriesForUsers(ulong hSteamLeaderboard, IntPtr prgUsers, int cUsers)
         {
             Write($"DownloadLeaderboardEntriesForUsers");
             // LeaderboardScoresDownloaded_t
             return k_uAPICallInvalid;
         }
 
-        public bool GetDownloadedLeaderboardEntry(ulong hSteamLeaderboardEntries, int index, IntPtr pLeaderboardEntry, uint pDetails, int cDetailsMax)
+        public bool GetDownloadedLeaderboardEntry(ulong hSteamLeaderboardEntries, int index, IntPtr pLeaderboardEntry, IntPtr pDetails, int cDetailsMax)
         {
             Write($"GetDownloadedLeaderboardEntry");
             return false;
         }
 
-        public SteamAPICall_t UploadLeaderboardScore(ulong hSteamLeaderboard, int eLeaderboardUploadScoreMethod, uint nScore, uint pScoreDetails, int cScoreDetailsCount)
+        public SteamAPICall_t UploadLeaderboardScore(ulong hSteamLeaderboard, int eLeaderboardUploadScoreMethod, uint nScore, IntPtr pScoreDetails, int cScoreDetailsCount)
         {
             Write($"UploadLeaderboardScore");
             // LeaderboardScoreUploaded_t

@@ -1422,7 +1422,7 @@ namespace SKYNET.Steamworks
     //
     // EUGCReadAction
     //
-    public enum UGCReadAction : int
+    public enum EUGCReadAction : int
     {
         ontinueReadingUntilFinished = 0,
         ontinueReading = 1,
@@ -1449,16 +1449,13 @@ namespace SKYNET.Steamworks
         APIFilename = 2,
     }
 
-    //
-    // ELeaderboardDataRequest
-    //
-    public enum LeaderboardDataRequest : int
+    public enum ELeaderboardDataRequest
     {
-        Global = 0,
-        GlobalAroundUser = 1,
-        Friends = 2,
-        Users = 3,
-    }
+        k_ELeaderboardDataRequestGlobal = 0,
+        k_ELeaderboardDataRequestGlobalAroundUser = 1,
+        k_ELeaderboardDataRequestFriends = 2,
+        k_ELeaderboardDataRequestUsers = 3
+    };
 
     //
     // ELeaderboardSortMethod
@@ -2589,7 +2586,7 @@ namespace SKYNET.Steamworks
     //
     // EUGCMatchingUGCType
     //
-    public enum UgcType : int
+    public enum EUGCMatchingUGCType : int
     {
         Items = 0,
         Items_Mtx = 1,
@@ -2626,7 +2623,7 @@ namespace SKYNET.Steamworks
     //
     // EUserUGCListSortOrder
     //
-    public enum UserUGCListSortOrder : int
+    public enum EUserUGCListSortOrder : int
     {
         CreationOrderDesc = 0,
         CreationOrderAsc = 1,
@@ -2640,7 +2637,7 @@ namespace SKYNET.Steamworks
     //
     // EUGCQuery
     //
-    public enum UGCQuery : int
+    public enum EUGCQuery : int
     {
         RankedByVote = 0,
         RankedByPublicationDate = 1,
@@ -2667,7 +2664,7 @@ namespace SKYNET.Steamworks
     //
     // EItemUpdateStatus
     //
-    public enum ItemUpdateStatus : int
+    public enum EItemUpdateStatus : int
     {
         Invalid = 0,
         PreparingConfig = 1,
@@ -2884,7 +2881,7 @@ namespace SKYNET.Steamworks
     //
     // ESteamNetworkingConfigDataType
     //
-    public enum NetConfigType : int
+    public enum ESteamNetworkingConfigDataType : int
     {
         Int32 = 1,
         Int64 = 2,
@@ -2896,7 +2893,7 @@ namespace SKYNET.Steamworks
     //
     // ESteamNetworkingConfigValue
     //
-    public enum NetConfig : int
+    public enum ESteamNetworkingConfigValue : int
     {
         Invalid = 0,
         TimeoutInitial = 24,
@@ -2958,37 +2955,9 @@ namespace SKYNET.Steamworks
     }
 
     //
-    // ESteamNetworkingGetConfigValueResult
-    //
-    public enum NetConfigResult : int
-    {
-        BadValue = -1,
-        BadScopeObj = -2,
-        BufferTooSmall = -3,
-        OK = 1,
-        OKInherited = 2,
-    }
-
-    //
-    // ESteamNetworkingSocketsDebugOutputType
-    //
-    public enum NetDebugOutput : int
-    {
-        None = 0,
-        Bug = 1,
-        Error = 2,
-        Important = 3,
-        Warning = 4,
-        Msg = 5,
-        Verbose = 6,
-        Debug = 7,
-        Everything = 8,
-    }
-
-    //
     // EServerMode
     //
-    public enum ServerMode : int
+    public enum EServerMode : int
     {
         Invalid = 0,
         NoAuthentication = 1,

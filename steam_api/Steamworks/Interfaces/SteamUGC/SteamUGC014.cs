@@ -37,9 +37,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUGC.SendQueryUGCRequest(handle);
         }
 
-        public bool GetQueryUGCResult(IntPtr _, UGCQueryHandle_t handle, uint index, IntPtr pDetails)
+        public bool GetQueryUGCResult(IntPtr _, UGCQueryHandle_t handle, uint index, ref SteamUGCDetails_t pDetails)
         {
-            return SteamEmulator.SteamUGC.GetQueryUGCResult(handle, index, pDetails);
+            return SteamEmulator.SteamUGC.GetQueryUGCResult(handle, index, ref pDetails);
         }
 
         public bool GetQueryUGCPreviewURL(IntPtr _, UGCQueryHandle_t handle, uint index, string pchURL, uint cchURLSize)
@@ -52,9 +52,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUGC.GetQueryUGCMetadata(handle, index, pchMetadata, cchMetadatasize);
         }
 
-        public bool GetQueryUGCChildren(IntPtr _, UGCQueryHandle_t handle, uint index, ulong pvecPublishedFileID, uint cMaxEntries)
+        public bool GetQueryUGCChildren(IntPtr _, UGCQueryHandle_t handle, uint index, ref ulong[] pvecPublishedFileID, uint cMaxEntries)
         {
-            return SteamEmulator.SteamUGC.GetQueryUGCChildren(handle, index, pvecPublishedFileID, cMaxEntries);
+            return SteamEmulator.SteamUGC.GetQueryUGCChildren(handle, index, ref pvecPublishedFileID, cMaxEntries);
         }
 
         public bool GetQueryUGCStatistic(IntPtr _, UGCQueryHandle_t handle, uint index, int eStatType, ulong pStatValue)

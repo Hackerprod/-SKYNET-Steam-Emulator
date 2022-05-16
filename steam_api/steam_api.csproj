@@ -75,6 +75,8 @@
     <Compile Include="Callback\CCallbackBaseVTable.cs" />
     <Compile Include="Callback\SteamCallback.cs" />
     <Compile Include="Callback\SteamCallBacks.cs" />
+    <Compile Include="Steamworks\Exported\CSteamworks.cs" />
+    <Compile Include="Helpers\DllExportAttribute.cs" />
     <Compile Include="Overlay\frmOverlay.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -149,7 +151,7 @@
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamClient.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamApps.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamAppList.cs" />
-    <Compile Include="Steamworks\Exported\SteamAPI_SteamGameServer.cs" />
+    <Compile Include="Steamworks\Exported\SteamAPI_ISteamGameServer.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_SteamNetworkingIPAddr.cs" />
     <Compile Include="Steamworks\Exported\SteamInternal.cs" />
     <Compile Include="Helpers\Extentions.cs" />

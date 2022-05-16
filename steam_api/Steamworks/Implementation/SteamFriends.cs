@@ -90,6 +90,7 @@ namespace SKYNET.Steamworks.Implementation
 
             #endregion
 
+            return;
             Users.Add(new Types.SteamUser()
             {
                 AccountId = 1001,
@@ -329,7 +330,8 @@ namespace SKYNET.Steamworks.Implementation
             return k_uAPICallInvalid;
         }
 
-        public CSteamID GetFriendByIndex(int iFriend, int iFriendFlags)
+        [return: MarshalAs(UnmanagedType.Struct)]
+        public CSteamID GetFriendByIndex([MarshalAs(UnmanagedType.I4)] int iFriend, int iFriendFlags)
         {
             var Friends = Users.FindAll(f => f.HasFriend);
 

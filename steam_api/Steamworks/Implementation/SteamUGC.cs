@@ -96,7 +96,7 @@ namespace SKYNET.Steamworks.Implementation
             return APICall;
         }
 
-        public bool GetQueryUGCResult(UGCQueryHandle_t handle, uint index, IntPtr pDetails)
+        public bool GetQueryUGCResult(UGCQueryHandle_t handle, uint index, ref SteamUGCDetails_t pDetails)
         {
             Write("GetQueryUGCResult");
             bool Result = false;
@@ -133,7 +133,7 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public bool GetQueryUGCChildren(UGCQueryHandle_t handle, uint index, ulong pvecPublishedFileID, uint cMaxEntries)
+        public bool GetQueryUGCChildren(UGCQueryHandle_t handle, uint index, ref PublishedFileId_t[] pvecPublishedFileID, uint cMaxEntries)
         {
             Write("GetQueryUGCChildren");
             return false;

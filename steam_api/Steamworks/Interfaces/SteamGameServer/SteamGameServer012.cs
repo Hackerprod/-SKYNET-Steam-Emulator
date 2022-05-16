@@ -1,6 +1,7 @@
-using SKYNET.Steamworks;
 using System;
+
 using SteamAPICall_t = System.UInt64;
+using HAuthTicket = System.UInt32;
 
 namespace SKYNET.Steamworks.Interfaces
 {
@@ -94,7 +95,7 @@ namespace SKYNET.Steamworks.Interfaces
 
         public void SetSpectatorPort(IntPtr _, uint unSpectatorPort)
         {
-            SteamEmulator.SteamGameServer.SetSpectatorPort(unSpectatorPort);
+            SteamEmulator.SteamGameServer.SetSpectatorPort((int)unSpectatorPort);
         }
 
         public void SetSpectatorServerName(IntPtr _, string pszSpectatorServerName)
@@ -162,7 +163,7 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamGameServer.EndAuthSession(steamID);
         }
 
-        public void CancelAuthTicket(IntPtr _, IntPtr hAuthTicket)
+        public void CancelAuthTicket(IntPtr _, HAuthTicket hAuthTicket)
         {
             SteamEmulator.SteamGameServer.CancelAuthTicket(hAuthTicket);
         }

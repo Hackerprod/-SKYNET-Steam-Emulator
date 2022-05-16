@@ -24,19 +24,7 @@ namespace SKYNET.Callback
         public bool HasResult { get; set; }
         public DateTime Created { get; set; }
 
-        #region Delegates 
-
-        private const CallingConvention cc = CallingConvention.Cdecl;
-
-        [NonSerialized]
-        [MarshalAs(UnmanagedType.FunctionPtr)]
-        public CCallbackBaseVTable.RunCRDel m_RunCallResult;
-
-        [NonSerialized]
-        [MarshalAs(UnmanagedType.FunctionPtr)]
-        private CCallbackBaseVTable.RunCBDel m_RunCallback;
-
-        #endregion
+        private CCallResult CallResult { get; set; }
 
         public SteamCallback(IntPtr _pointer, bool hasResult = false)
         {
@@ -46,9 +34,7 @@ namespace SKYNET.Callback
             HasResult = hasResult;
             CallbackType = (CallbackType)CallbackBase.m_iCallback;
 
-            CCallResult cResult = CallbackBase.m_vfptr.ToType<CCallResult>();
-            m_RunCallback = Marshal.GetDelegateForFunctionPointer<CCallbackBaseVTable.RunCBDel>(cResult.m_RunCallback);
-            m_RunCallResult = Marshal.GetDelegateForFunctionPointer<CCallbackBaseVTable.RunCRDel>(cResult.m_RunCallResult);
+            CallResult = CallbackBase.m_vfptr.ToType<CCallResult>();
         }
 
         public SteamCallback(IntPtr _pointer, int iCallback, bool hasResult = false)
@@ -60,9 +46,7 @@ namespace SKYNET.Callback
             Created = DateTime.Now;
             HasResult = hasResult;
 
-            CCallResult cResult = CallbackBase.m_vfptr.ToType<CCallResult>();
-            m_RunCallback = Marshal.GetDelegateForFunctionPointer<CCallbackBaseVTable.RunCBDel>(cResult.m_RunCallback);
-            m_RunCallResult = Marshal.GetDelegateForFunctionPointer<CCallbackBaseVTable.RunCRDel>(cResult.m_RunCallResult);
+            CallResult = CallbackBase.m_vfptr.ToType<CCallResult>();
         }
 
         public void Run(ICallbackData data)
@@ -71,11 +55,6 @@ namespace SKYNET.Callback
             Marshal.StructureToPtr(data, pvParam, false);
 
             Run(pvParam);
-        }
-
-        public void Run(IntPtr pvParam)
-        {
-            m_RunCallback(IntPtr.Zero, pvParam);
         }
 
         public void Run(ICallbackData data, bool bIOFailure, ulong hSteamAPICall)
@@ -106,9 +85,14 @@ namespace SKYNET.Callback
             //Run(pvParam2);
         }
 
+        public void Run(IntPtr pvParam)
+        {
+            CallResult.m_RunCallback(IntPtr.Zero, pvParam);
+        }
+
         public void Run(IntPtr pvParam, bool bIOFailure, ulong hSteamAPICall)
         {
-            m_RunCallResult(IntPtr.Zero, pvParam, bIOFailure, (ulong)hSteamAPICall);
+            CallResult.m_RunCallResult(IntPtr.Zero, pvParam, bIOFailure, (ulong)hSteamAPICall);
         }
 
         public void Update()
@@ -129,10 +113,10 @@ namespace SKYNET.Callback
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        private struct CCallResult
+        public struct CCallResult
         {
-            public IntPtr m_RunCallResult;
-            public IntPtr m_RunCallback;
+            public CCallbackBaseVTable.RunCRDel m_RunCallResult;
+            public CCallbackBaseVTable.RunCBDel m_RunCallback;
             public IntPtr m_GetCallbackSizeBytes;
         }
     }

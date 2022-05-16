@@ -1385,7 +1385,7 @@ namespace SKYNET.Callback
     {
         internal ulong m_nGameID; // m_nGameID uint64
         internal EResult m_eResult; // m_eResult EResult
-        internal ulong m_steamIDUser; // m_steamIDUser CSteamID
+        internal CSteamID m_steamIDUser; // m_steamIDUser CSteamID
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(UserStatsReceived_t));

@@ -139,10 +139,10 @@ namespace SKYNET.Steamworks.Implementation
             ServerData.PasswordProtected = bPasswordProtected;
         }
 
-        public void SetSpectatorPort(uint unSpectatorPort)
+        public void SetSpectatorPort(int unSpectatorPort)
         {
             Write("SetSpectatorPort");
-            ServerData.SpectatorPort = unSpectatorPort;
+            ServerData.SpectatorPort = (uint)unSpectatorPort;
         }
 
         public void SetSpectatorServerName(string pszSpectatorServerName)
@@ -230,7 +230,7 @@ namespace SKYNET.Steamworks.Implementation
             Write("EndAuthSession");
         }
 
-        public void CancelAuthTicket(IntPtr hAuthTicket)
+        public void CancelAuthTicket(HAuthTicket hAuthTicket)
         {
             Write("CancelAuthTicket");
         }
@@ -277,11 +277,11 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        internal SteamIPAddress_t GetPublicIP()
+        internal uint GetPublicIP()
         {
-            Write("GetPublicIP");
-            SteamIPAddress_t iPAddress = new SteamIPAddress_t(NetworkManager.GetIPAddress());
-            return iPAddress;
+            Write("GetPublicIP ******************************");
+            //SteamIPAddress_t iPAddress = new SteamIPAddress_t(NetworkManager.GetIPAddress());
+            return 0;
         }
 
         public void EnableHeartbeats(bool bActive)

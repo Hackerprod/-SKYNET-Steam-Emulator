@@ -14,8 +14,8 @@ namespace SKYNET.Steamworks.Implementation
 
         public IntPtr RequestInternetServerList(uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
         {
-            Write($"RequestInternetServerList");
-            return IntPtr.Zero;
+            Write($"RequestInternetServerList querying LAN list");
+            return RequestLANServerList(iApp, pRequestServersResponse);
         }
 
         public IntPtr RequestLANServerList(uint iApp, IntPtr pRequestServersResponse)

@@ -1,11 +1,7 @@
 using System;
-using System.Drawing;
-using System.Net;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Windows.Forms;
-using SKYNET;
 
+using DepotId_t = System.UInt32;
 
 namespace SKYNET.Steamworks.Exported
 {
@@ -131,10 +127,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static UInt32 SteamAPI_ISteamApps_GetInstalledDepots(IntPtr _, uint appID, uint pvecDepots, uint cMaxDepots)
+        public static UInt32 SteamAPI_ISteamApps_GetInstalledDepots(IntPtr _, uint appID, ref DepotId_t[] pvecDepots, uint cMaxDepots)
         {
             Write($"SteamAPI_ISteamApps_GetInstalledDepots");
-            return SteamEmulator.SteamApps.GetInstalledDepots(appID, pvecDepots, cMaxDepots);
+            return SteamEmulator.SteamApps.GetInstalledDepots(appID, ref pvecDepots, cMaxDepots);
         }
 
         //[DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -166,7 +162,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_ISteamApps_GetLaunchQueryParam(IntPtr _, string pchKey)
+        public static IntPtr SteamAPI_ISteamApps_GetLaunchQueryParam(IntPtr _, string pchKey)
         {
             Write("SteamAPI_ISteamApps_GetLaunchQueryParam");
             return SteamEmulator.SteamApps.GetLaunchQueryParam(pchKey);

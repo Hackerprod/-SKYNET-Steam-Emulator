@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using SKYNET;
-using SKYNET.Steamworks;
-using SKYNET.Types;
 
 using SteamItemInstanceID_t = System.UInt64;
+using SteamInventoryResult_t = System.UInt32;
+using SteamItemDef_t = System.UInt32;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -51,7 +50,7 @@ namespace SKYNET.Steamworks.Implementation
             Write($"DestroyResult");
         }
 
-        public bool ExchangeItems(uint pResultHandle, IntPtr pArrayGenerate, IntPtr punArrayGenerateQuantity, uint unArrayGenerateLength, ref SteamItemInstanceID_t[] pArrayDestroy, uint punArrayDestroyQuantity, uint unArrayDestroyLength)
+        public bool ExchangeItems(ref SteamInventoryResult_t pResultHandle, ref SteamItemDef_t[] pArrayGenerate, ref uint[] punArrayGenerateQuantity, uint unArrayGenerateLength, ref SteamItemInstanceID_t[] pArrayDestroy, ref uint[] punArrayDestroyQuantity, uint unArrayDestroyLength)
         {
             Write($"ExchangeItems");
             return false;
@@ -171,7 +170,7 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public void SendItemDropHeartbeat(IntPtr self)
+        public void SendItemDropHeartbeat()
         {
             Write($"SendItemDropHeartbeat");
         }

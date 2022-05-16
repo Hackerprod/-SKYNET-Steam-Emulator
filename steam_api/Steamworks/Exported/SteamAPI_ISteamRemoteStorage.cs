@@ -201,7 +201,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamRemoteStorage_UGCRead(IntPtr _, UGCHandle_t hContent, IntPtr pvData, int cubDataToRead, uint cOffset, IntPtr eAction)
+        public static int SteamAPI_ISteamRemoteStorage_UGCRead(IntPtr _, UGCHandle_t hContent, IntPtr pvData, int cubDataToRead, uint cOffset, int eAction)
         {
             Write("SteamAPI_ISteamRemoteStorage_UGCRead");
             return SteamEmulator.SteamRemoteStorage.UGCRead(hContent, pvData, cubDataToRead, cOffset, eAction);

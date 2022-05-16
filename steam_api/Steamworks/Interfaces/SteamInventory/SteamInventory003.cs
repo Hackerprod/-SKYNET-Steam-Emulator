@@ -1,5 +1,9 @@
 using System;
 
+using SteamInventoryResult_t = System.UInt32;
+using SteamItemInstanceID_t = System.UInt64;
+using SteamAPICall_t = System.UInt64;
+using SteamItemDef_t = System.UInt32;
 
 namespace SKYNET.Steamworks.Interfaces
 {
@@ -81,9 +85,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamInventory.ConsumeItem(pResultHandle, itemConsume, unQuantity);
         }
 
-        public bool ExchangeItems(IntPtr _, uint pResultHandle, IntPtr pArrayGenerate, IntPtr punArrayGenerateQuantity, uint unArrayGenerateLength, ref ulong[] pArrayDestroy, uint punArrayDestroyQuantity, uint unArrayDestroyLength )
-    {
-            return SteamEmulator.SteamInventory.ExchangeItems(pResultHandle, pArrayGenerate, punArrayGenerateQuantity, unArrayGenerateLength, ref pArrayDestroy, punArrayDestroyQuantity, unArrayDestroyLength);
+        public bool ExchangeItems(IntPtr _, ref SteamInventoryResult_t pResultHandle, ref SteamItemDef_t[] pArrayGenerate, ref uint[] punArrayGenerateQuantity, uint unArrayGenerateLength, ref SteamItemInstanceID_t[] pArrayDestroy, ref uint[] punArrayDestroyQuantity, uint unArrayDestroyLength)
+        {
+            return SteamEmulator.SteamInventory.ExchangeItems(ref pResultHandle, ref pArrayGenerate, ref punArrayGenerateQuantity, unArrayGenerateLength, ref pArrayDestroy, ref punArrayDestroyQuantity, unArrayDestroyLength);
         }
 
         public bool TransferItemQuantity(IntPtr _, uint pResultHandle, ulong itemIdSource, uint unQuantity, ulong itemIdDest)
@@ -93,7 +97,7 @@ namespace SKYNET.Steamworks.Interfaces
 
         public void SendItemDropHeartbeat(IntPtr _)
         {
-            SteamEmulator.SteamInventory.SendItemDropHeartbeat(_);
+            SteamEmulator.SteamInventory.SendItemDropHeartbeat();
         }
 
         public bool TriggerItemDrop(IntPtr _, uint pResultHandle, uint dropListDefinition)

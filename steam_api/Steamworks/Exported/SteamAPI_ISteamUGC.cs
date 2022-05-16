@@ -40,10 +40,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUGC_GetQueryUGCResult(IntPtr _, UGCQueryHandle_t handle, uint index, IntPtr pDetails)
+        public static bool SteamAPI_ISteamUGC_GetQueryUGCResult(IntPtr _, UGCQueryHandle_t handle, uint index, ref SteamUGCDetails_t pDetails)
         {
             Write("SteamAPI_ISteamUGC_GetQueryUGCResult");
-            return SteamEmulator.SteamUGC.GetQueryUGCResult(handle, index, pDetails);
+            return SteamEmulator.SteamUGC.GetQueryUGCResult(handle, index, ref pDetails);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -61,10 +61,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUGC_GetQueryUGCChildren(IntPtr _, UGCQueryHandle_t handle, uint index, PublishedFileId_t pvecPublishedFileID, uint cMaxEntries)
+        public static bool SteamAPI_ISteamUGC_GetQueryUGCChildren(IntPtr _, UGCQueryHandle_t handle, uint index, ref PublishedFileId_t[] pvecPublishedFileID, uint cMaxEntries)
         {
             Write("SteamAPI_ISteamUGC_GetQueryUGCChildren");
-            return SteamEmulator.SteamUGC.GetQueryUGCChildren(handle, index, pvecPublishedFileID, cMaxEntries);
+            return SteamEmulator.SteamUGC.GetQueryUGCChildren(handle, index, ref pvecPublishedFileID, cMaxEntries);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

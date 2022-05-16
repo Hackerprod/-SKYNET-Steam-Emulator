@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 using SKYNET;
 using SKYNET.Helper;
 
-
 namespace SKYNET.Steamworks.Exported
 {
     public class SteamAPI_ISteamAppList
@@ -31,17 +30,17 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static uint SteamAPI_ISteamAppList_GetInstalledApps(uint pvecAppID, uint unMaxAppIDs)
+        public static uint SteamAPI_ISteamAppList_GetInstalledApps(IntPtr _, uint pvecAppID, uint unMaxAppIDs)
         {
             Write("SteamAPI_ISteamAppList_GetInstalledAppsn");
             return SteamEmulator.SteamAppList.GetInstalledApps(pvecAppID, unMaxAppIDs);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static uint SteamAPI_ISteamAppList_GetNumInstalledApps(IntPtr _)
+        public static uint SteamAPI_ISteamAppList_GetNumInstalledApps()
         {
             Write("SteamAPI_ISteamAppList_GetNumInstalledApps");
-            return SteamEmulator.SteamAppList.GetNumInstalledApps(_);
+            return SteamEmulator.SteamAppList.GetNumInstalledApps();
         }
 
         private static void Write(string msg)

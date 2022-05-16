@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using SKYNET.Helper;
@@ -13,24 +12,25 @@ using SKYNET.Callback;
 using SteamAPICall_t = System.UInt64;
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
+using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Exported
 {
     public class SteamAPI
     {
+        static SteamAPI()
+        {
+            // Check if Steam emulator is not initialized 
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_Init()
         {
-            if (!SteamEmulator.Initialized)
-            {
-                Write($"SteamAPI_Init : Initializing");
-                SteamEmulator.Initialize();
-            }
-            else
-            {
-                Write($"SteamAPI_Init : Initialized");
-            }
-
+            Write($"SteamAPI_Init");
             return true;
         }
 
@@ -43,14 +43,6 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public unsafe static void SteamAPI_RegisterCallback(IntPtr pCallback, int iCallback)
         {
-            // Check if Steam emulator is not initialized 
-            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
-            {
-                SteamEmulator.Initialize();
-            }
-
-            if (!SteamEmulator.Initialized) return;
-            return;
             try
             {
                 var callMessage = $"SteamAPI_RegisterCallback: ";
@@ -263,8 +255,8 @@ namespace SKYNET.Steamworks.Exported
             Msg += " ////////////////////////////// Mini Dump Content \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + Environment.NewLine;
             Msg += $" {pchMsg}" + Environment.NewLine;
             Msg += " //////////////////////////////   End Mini Dump   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + Environment.NewLine;
-            Write(Msg);
-            //Write("SteamAPI_SetMiniDumpComment");
+            //Write(Msg);
+            Write("SteamAPI_SetMiniDumpComment");
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -300,7 +292,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void Steam_RunCallbacks(IntPtr hSteamPipe, bool bGameServerCallbacks)
+        public static void Steam_RunCallbacks(HSteamPipe hSteamPipe, bool bGameServerCallbacks)
         {
             Write("Steam_RunCallbacks\n");
 

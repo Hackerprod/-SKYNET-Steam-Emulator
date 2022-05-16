@@ -37,7 +37,7 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public uint GetNumInstalledApps(IntPtr _)
+        public uint GetNumInstalledApps()
         {
             Write("GetNumInstalledApps\n");
             return 0;

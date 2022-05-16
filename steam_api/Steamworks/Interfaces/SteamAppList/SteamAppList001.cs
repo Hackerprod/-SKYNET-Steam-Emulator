@@ -7,7 +7,7 @@ namespace SKYNET.Steamworks.Interfaces
     {
         public uint GetNumInstalledApps(IntPtr _)
         {
-            return SteamEmulator.SteamAppList.GetNumInstalledApps(_);
+            return SteamEmulator.SteamAppList.GetNumInstalledApps();
         }
 
         public uint GetInstalledApps(IntPtr _, uint pvecAppID, uint unMaxAppIDs)

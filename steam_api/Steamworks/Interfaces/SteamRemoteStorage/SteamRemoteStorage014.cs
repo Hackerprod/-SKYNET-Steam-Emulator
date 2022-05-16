@@ -145,7 +145,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamRemoteStorage.GetUGCDetails(hContent, pnAppID, ppchName, pnFileSizeInBytes, pSteamIDOwner);
         }
 
-        public int UGCRead(IntPtr _, ulong hContent, IntPtr pvData, int cubDataToRead, uint cOffset, IntPtr eAction)
+        public int UGCRead(IntPtr _, ulong hContent, IntPtr pvData, int cubDataToRead, uint cOffset, int eAction)
         {
             return SteamEmulator.SteamRemoteStorage.UGCRead(hContent, pvData, cubDataToRead, cOffset, eAction);
         }

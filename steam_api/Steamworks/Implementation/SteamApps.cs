@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Text;
-using SKYNET;
 
+using DepotId_t = System.UInt32;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -126,7 +126,7 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public UInt32 GetInstalledDepots(uint appID, uint pvecDepots, uint cMaxDepots)
+        public UInt32 GetInstalledDepots(uint appID, ref DepotId_t[] pvecDepots, uint cMaxDepots)
         {
             Write($"GetInstalledDepots {appID}, {cMaxDepots}");
             return 0;
@@ -151,10 +151,10 @@ namespace SKYNET.Steamworks.Implementation
             return (CSteamID)SteamEmulator.SteamId;
         }
 
-        public string GetLaunchQueryParam(string pchKey)
+        public IntPtr GetLaunchQueryParam(string pchKey)
         {
             Write("GetLaunchQueryParam");
-            return "";
+            return default;
         }
 
         public bool GetDlcDownloadProgress(uint nAppID, UInt64 punBytesDownloaded, UInt64 punBytesTotal)

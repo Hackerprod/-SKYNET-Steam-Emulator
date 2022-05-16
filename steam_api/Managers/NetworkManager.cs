@@ -451,7 +451,7 @@ namespace SKYNET.Managers
 
         private static void Write(object msg)
         {
-            //SteamEmulator.Write("NetworkManager", msg);
+            SteamEmulator.Write("NetworkManager", msg);
         }
 
         public static List<IPAddress> GetIPAddresses()

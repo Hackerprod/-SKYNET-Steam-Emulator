@@ -1,6 +1,8 @@
 using SKYNET.Steamworks;
 using System;
 
+using DepotId_t = System.UInt32;
+
 namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("STEAMAPPS_INTERFACE_VERSION008")]
@@ -91,9 +93,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamApps.MarkContentCorrupt(bMissingFilesOnly);
         }
 
-        public uint GetInstalledDepots(IntPtr _, uint appID, uint pvecDepots, uint cMaxDepots)  
+        public uint GetInstalledDepots(IntPtr _, uint appID, ref DepotId_t[] pvecDepots, uint cMaxDepots)  
         {
-            return SteamEmulator.SteamApps.GetInstalledDepots(appID, pvecDepots, cMaxDepots);
+            return SteamEmulator.SteamApps.GetInstalledDepots(appID, ref pvecDepots, cMaxDepots);
         }
 
         public uint GetAppInstallDir(IntPtr _, uint appID, string pchFolder, uint cchFolderBufferSize)
@@ -111,7 +113,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamApps.GetAppOwner();
         }
 
-        public string GetLaunchQueryParam(IntPtr _, string pchKey)
+        public IntPtr GetLaunchQueryParam(IntPtr _, string pchKey)
         {
             return SteamEmulator.SteamApps.GetLaunchQueryParam(pchKey);
         }

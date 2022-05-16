@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using SKYNET;
-using SKYNET.Steamworks;
-
 
 using SteamInventoryResult_t = System.UInt32;
 using SteamItemInstanceID_t = System.UInt64;
 using SteamAPICall_t = System.UInt64;
+using SteamItemDef_t = System.UInt32;
 
 namespace SKYNET.Steamworks.Exported
 {
@@ -34,7 +32,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamInventory_ConsumeItem(IntPtr _, SteamInventoryResult_t pResultHandle, uint itemConsume, uint unQuantity)
+        public static bool SteamAPI_ISteamInventory_ConsumeItem(IntPtr _, SteamInventoryResult_t pResultHandle, SteamItemInstanceID_t itemConsume, uint unQuantity)
         {
             Write("SteamAPI_ISteamInventory_ConsumeItem");
             return SteamEmulator.SteamInventory.ConsumeItem(pResultHandle, itemConsume, unQuantity);
@@ -54,10 +52,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamInventory_ExchangeItems(IntPtr _, SteamInventoryResult_t pResultHandle, IntPtr pArrayGenerate, IntPtr punArrayGenerateQuantity, uint unArrayGenerateLength, ref SteamItemInstanceID_t[] pArrayDestroy, uint punArrayDestroyQuantity, uint unArrayDestroyLength)
+        public static bool SteamAPI_ISteamInventory_ExchangeItems(IntPtr _, ref SteamInventoryResult_t pResultHandle, ref SteamItemDef_t[] pArrayGenerate, ref uint[] punArrayGenerateQuantity, uint unArrayGenerateLength, ref SteamItemInstanceID_t[] pArrayDestroy, ref uint[] punArrayDestroyQuantity, uint unArrayDestroyLength)
         {
             Write("SteamAPI_ISteamInventory_ExchangeItems");
-            return SteamEmulator.SteamInventory.ExchangeItems(pResultHandle, pArrayGenerate, punArrayGenerateQuantity, unArrayGenerateLength, ref pArrayDestroy, punArrayDestroyQuantity, unArrayDestroyLength);
+            return SteamEmulator.SteamInventory.ExchangeItems(ref pResultHandle, ref pArrayGenerate, ref punArrayGenerateQuantity, unArrayGenerateLength, ref pArrayDestroy, ref punArrayDestroyQuantity, unArrayDestroyLength);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

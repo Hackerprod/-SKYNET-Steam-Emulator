@@ -1,11 +1,5 @@
 using System;
-using System.Drawing;
-using System.Net;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Windows.Forms;
-using SKYNET;
-
 
 using SteamAPICall_t = System.UInt64;
 using HTTPRequestHandle = System.UInt32;

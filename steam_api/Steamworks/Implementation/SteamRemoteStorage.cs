@@ -437,7 +437,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public int UGCRead(UGCHandle_t hContent, IntPtr pvData, int cubDataToRead, uint cOffset, IntPtr eAction)
+        public int UGCRead(UGCHandle_t hContent, IntPtr pvData, int cubDataToRead, uint cOffset, int eAction)
         {
             Write("UGCRead");
             return 0;

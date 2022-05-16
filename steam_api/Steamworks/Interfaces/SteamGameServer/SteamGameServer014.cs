@@ -93,7 +93,7 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamGameServer.SetPasswordProtected(bPasswordProtected);
         }
 
-        public void SetSpectatorPort(IntPtr _, uint unSpectatorPort)
+        public void SetSpectatorPort(IntPtr _, int unSpectatorPort)
         {
             SteamEmulator.SteamGameServer.SetSpectatorPort(unSpectatorPort);
         }
@@ -148,7 +148,7 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamGameServer.EndAuthSession(steamID);
         }
 
-        public void CancelAuthTicket(IntPtr _, IntPtr hAuthTicket)
+        public void CancelAuthTicket(IntPtr _, uint hAuthTicket)
         {
             SteamEmulator.SteamGameServer.CancelAuthTicket(hAuthTicket);
         }
@@ -173,7 +173,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamGameServer.GetServerReputation();
         }
 
-        public SteamIPAddress_t GetPublicIP(IntPtr _)
+        public uint GetPublicIP(IntPtr _)
         {
             return SteamEmulator.SteamGameServer.GetPublicIP();
         }

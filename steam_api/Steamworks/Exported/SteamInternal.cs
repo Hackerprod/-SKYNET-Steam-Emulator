@@ -15,7 +15,14 @@ namespace SKYNET.Steamworks.Exported
 {
     public unsafe class SteamInternal
     {
-        public static pFnDelegate pFn;
+        static SteamInternal()
+        {
+            // Check if Steam emulator is not initialized yet
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamInternal_FindOrCreateUserInterface(int hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion)
@@ -48,70 +55,19 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamInternal_ContextInit(IntPtr contextInitData_ptr)
         {
-            IntPtr apiContext_ptr = ByPassFunction(contextInitData_ptr);
+            var contextData = Marshal.PtrToStructure<ContextInitData>(contextInitData_ptr);
+            var apiContext_ptr = contextInitData_ptr + (IntPtr.Size * 2);                       // 16 for x64 process, 8 for x86 process
+            var counter = Marshal.ReadInt32(contextInitData_ptr, IntPtr.Size);
 
-            if (apiContext_ptr != IntPtr.Zero)
+            if (counter != 1)
             {
-                return apiContext_ptr;
+                Write($"SteamInternal_ContextInit");
+                Marshal.WriteInt32(contextInitData_ptr, IntPtr.Size, 1);
+                contextData.pFn(apiContext_ptr);
             }
-            
-            try
-            {
-                if (modCommon.Is64Bit())
-                {
-                    ContextInitData_x64 Context = Marshal.PtrToStructure<ContextInitData_x64>(contextInitData_ptr);
-                    apiContext_ptr = contextInitData_ptr + 16;
-                    if (Context.counter != 1)
-                    {
-                        Write($"SteamInternal_ContextInit");
-                        Marshal.WriteInt64(contextInitData_ptr, 8, 1);
-                        pFn = Marshal.GetDelegateForFunctionPointer<pFnDelegate>(Context.pFn);
-                        pFn?.Invoke(apiContext_ptr);
-                    }
-                }
-                else
-                {
-                    var Context = Marshal.PtrToStructure<ContextInitData_x86>(contextInitData_ptr);
-                    apiContext_ptr = contextInitData_ptr + 8;
-                    if (Context.counter != 1)
-                    {
-                        Write($"SteamInternal_ContextInit");
-                        Marshal.WriteInt32(contextInitData_ptr, 4, 1);
-                        pFn = Marshal.GetDelegateForFunctionPointer<pFnDelegate>(Context.pFn);
-                        pFn?.Invoke(apiContext_ptr);
-                    }
-                }
-            }
-            catch
-            {
-            }
+
             return apiContext_ptr;
         }
-
-        #region bypass functions
-
-        private static IntPtr ByPassFunction(IntPtr contextInitData_ptr)
-        {
-            if (File.Exists(Path.Combine(modCommon.GetPath(), "steam_api_.dll")))
-            {
-                Write($"SteamInternal_ContextInit ByPass");
-                return SteamInternal_ContextInit86(contextInitData_ptr);
-            }
-            if (File.Exists(Path.Combine(modCommon.GetPath(), "steam_api64_.dll")))
-            {
-                Write($"SteamInternal_ContextInit ByPass");
-                return SteamInternal_ContextInit64(contextInitData_ptr);
-            }
-            return IntPtr.Zero;
-        }
-
-        [DllImport("steam_api_.dll",   EntryPoint = "SteamInternal_ContextInit", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr SteamInternal_ContextInit86(IntPtr context);
-
-        [DllImport("steam_api64_.dll", EntryPoint = "SteamInternal_ContextInit", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr SteamInternal_ContextInit64(IntPtr context);
-
-        #endregion
 
         private static void Write(object msg)
         {
