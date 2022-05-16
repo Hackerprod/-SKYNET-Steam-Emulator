@@ -41,7 +41,6 @@ namespace SKYNET.Steamworks.Exported
     {
         static CSteamworks()
         {
-            // Check if Steam emulator is not initialized 
             if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
             {
                 SteamEmulator.Initialize();

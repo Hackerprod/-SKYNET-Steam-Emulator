@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using SKYNET.Managers;
-using SKYNET.Steamworks.Implementation;
 using SKYNET.Types;
 
 using HSteamPipe = System.UInt32;
@@ -17,7 +12,6 @@ namespace SKYNET.Steamworks.Exported
     {
         static SteamInternal()
         {
-            // Check if Steam emulator is not initialized yet
             if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
             {
                 SteamEmulator.Initialize();
