@@ -68,7 +68,7 @@ namespace SKYNET.Helper
                 foreach (var item in IniParser["User Settings"].Settings)
                     if (item.Key == "AccountId")
                         if (uint.TryParse((string)item.Value, out uint accountId))
-                            SteamEmulator.SteamId = new CSteamID(accountId, Steamworks.EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeIndividual);
+                            SteamEmulator.SteamID = new CSteamID(accountId, Steamworks.EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeIndividual);
 
                 foreach (var item in IniParser["Game Settings"].Settings)
                     if (item.Key == "AppId")
@@ -85,7 +85,7 @@ namespace SKYNET.Helper
 
                 SteamEmulator.BroadCastPort = (int)IniParser["Network Settings"]["BroadCastPort"];
 
-                string data = $"Loaded user data from file \n PersonaName: {SteamEmulator.PersonaName} \n SteamId:  {SteamEmulator.SteamId} \n Languaje: {SteamEmulator.Language} \n";
+                string data = $"Loaded user data from file \n PersonaName: {SteamEmulator.PersonaName} \n SteamId:  {SteamEmulator.SteamID} \n Languaje: {SteamEmulator.Language} \n";
                 SteamEmulator.Write("Settings", data);
             }
             catch (Exception)

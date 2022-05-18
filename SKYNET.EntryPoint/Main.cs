@@ -51,7 +51,7 @@ namespace SKYNET
                     SteamEmulator.AppId = HookInterface.Game.AppId;
                     SteamEmulator.EmulatorPath = HookInterface.EmulatorPath;
                     SteamEmulator.PersonaName = HookInterface.PersonaName;
-                    SteamEmulator.SteamId = HookInterface.SteamId;
+                    SteamEmulator.SteamID = HookInterface.SteamId;
                     SteamEmulator.EmulatorPath = HookInterface.Language;
                     bool ConsoleOutput = HookInterface.ConsoleOutput;
 

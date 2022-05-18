@@ -18,8 +18,7 @@ namespace SKYNET.Callback
         public bool Completed { get; set; }
         public IntPtr Pointer { get; }
         public CCallbackBase CallbackBase { get; }
-        //public SteamAPICall_t SteamAPICall { get; set; }
-        public ulong SteamAPICall { get; set; }
+        public SteamAPICall_t SteamAPICall { get; set; }
         public bool HasGameserver => (CallbackBase.m_nCallbackFlags & CCallbackBase.k_ECallbackFlagsGameServer) != 0;
         public bool HasResult { get; set; }
         public DateTime Created { get; set; }

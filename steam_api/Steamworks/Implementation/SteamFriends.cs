@@ -66,7 +66,7 @@ namespace SKYNET.Steamworks.Implementation
                 if (Avatar != null)
                 {
                     ImageAvatar avatar = new ImageAvatar(Avatar, ref ImageIndex); 
-                    Avatars.TryAdd((ulong)SteamEmulator.SteamId, avatar);
+                    Avatars.TryAdd((ulong)SteamEmulator.SteamID, avatar);
                 }
             }
             catch (Exception ex)
@@ -80,11 +80,11 @@ namespace SKYNET.Steamworks.Implementation
 
             Users.Add(new Types.SteamUser()
             {
-                AccountId = SteamEmulator.SteamId.AccountId,
+                AccountId = SteamEmulator.SteamID.AccountId,
                 GameId = SteamEmulator.AppId,
                 HasFriend = false,
                 PersonaName = SteamEmulator.PersonaName,
-                SteamId = (ulong)SteamEmulator.SteamId,
+                SteamId = (ulong)SteamEmulator.SteamID,
                 IPAddress = NetworkManager.GetIPAddress().ToString()
             });
 
@@ -403,7 +403,7 @@ namespace SKYNET.Steamworks.Implementation
             bool Result = false;
             FriendGameInfo_t pFriendGameInfo = Marshal.PtrToStructure<FriendGameInfo_t>(ptrFriendGameInfo);
 
-            if (steamIDFriend == (ulong)SteamEmulator.SteamId)
+            if (steamIDFriend == (ulong)SteamEmulator.SteamID)
             {
                 pFriendGameInfo.GameID = (uint)SteamEmulator.GameID;
                 pFriendGameInfo.GameIP = 0;
@@ -443,7 +443,7 @@ namespace SKYNET.Steamworks.Implementation
             string Result = "Unknown";
             MutexHelper.Wait("FileReadAsyncComplete", delegate
             {
-                if ((ulong)steamIDFriend == (ulong)SteamEmulator.SteamId)
+                if ((ulong)steamIDFriend == (ulong)SteamEmulator.SteamID)
                 {
                     Result = SteamEmulator.PersonaName;
                 }
@@ -470,7 +470,7 @@ namespace SKYNET.Steamworks.Implementation
             EPersonaState Result = EPersonaState.k_EPersonaStateOnline;
             MutexHelper.Wait("GetFriendPersonaState", delegate
             {
-                if (steamIDFriend == (ulong)SteamEmulator.SteamId)
+                if (steamIDFriend == (ulong)SteamEmulator.SteamID)
                 {
                     Result = EPersonaState.k_EPersonaStateOnline;
                 }
@@ -541,7 +541,7 @@ namespace SKYNET.Steamworks.Implementation
         public void GetFriendsGroupMembersList(FriendsGroupID_t friendsGroupID, IntPtr pOutSteamIDMembers, int nMembersCount)
         {
             Write($"GetFriendsGroupMembersList {friendsGroupID}");
-            Marshal.StructureToPtr(SteamEmulator.SteamId, pOutSteamIDMembers, false);
+            Marshal.StructureToPtr(SteamEmulator.SteamID, pOutSteamIDMembers, false);
         }
 
         public string GetFriendsGroupName(FriendsGroupID_t friendsGroupID)
@@ -628,7 +628,7 @@ namespace SKYNET.Steamworks.Implementation
         public string GetPlayerNickname(ulong steamIDPlayer)
         {
             Write($"GetPlayerNickname {steamIDPlayer}");
-            if (steamIDPlayer == (ulong)SteamEmulator.SteamId)
+            if (steamIDPlayer == (ulong)SteamEmulator.SteamID)
             {
                 return SteamEmulator.PersonaName;
             }
@@ -773,10 +773,10 @@ namespace SKYNET.Steamworks.Implementation
             data.m_result = EResult.k_EResultOK;
 
             APICall = CallbackManager.AddCallbackResult(data);
-            ReportUserChanged((ulong)SteamEmulator.SteamId, EPersonaChange.k_EPersonaChangeName);
+            ReportUserChanged((ulong)SteamEmulator.SteamID, EPersonaChange.k_EPersonaChangeName);
 
             SteamEmulator.PersonaName = pchPersonaName;
-            var user = Users.Find(f => f.SteamId == (ulong)SteamEmulator.SteamId);
+            var user = Users.Find(f => f.SteamId == (ulong)SteamEmulator.SteamID);
             if (user != null)
             {
                 user.PersonaName = pchPersonaName;
@@ -823,7 +823,7 @@ namespace SKYNET.Steamworks.Implementation
             if (user != null)
             {
                 user.LobbyId = lobbySteamId;
-                if (userSteamId == (ulong)SteamEmulator.SteamId)
+                if (userSteamId == (ulong)SteamEmulator.SteamID)
                 {
                     NetworkManager.BroadcastStatusUpdated(user);
                 }

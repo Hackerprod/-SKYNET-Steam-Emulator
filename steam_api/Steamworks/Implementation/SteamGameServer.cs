@@ -98,7 +98,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public CSteamID GetSteamID()
         {
-            var SteamId = SteamEmulator.SteamId_GS;
+            var SteamId = SteamEmulator.SteamID_GS;
             Write($"GetSteamID {SteamId.ToString()}");
             return SteamId; 
         }
@@ -286,12 +286,12 @@ namespace SKYNET.Steamworks.Implementation
 
         public void EnableHeartbeats(bool bActive)
         {
-            Write("EnableHeartbeats");
+            Write($"EnableHeartbeats (bActive = {bActive})");
         }
 
         public void SetHeartbeatInterval(int iHeartbeatInterval)
         {
-            Write("SetHeartbeatInterval");
+            Write($"SetHeartbeatInterval (HeartbeatInterval = {iHeartbeatInterval})");
         }
 
         public void ForceHeartbeat()

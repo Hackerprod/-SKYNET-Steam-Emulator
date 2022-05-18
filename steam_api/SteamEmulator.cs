@@ -41,8 +41,8 @@ public class SteamEmulator
     public static string SteamApiPath;
     public static string EmulatorPath;
 
-    public static CSteamID SteamId;
-    public static CSteamID SteamId_GS;
+    public static CSteamID SteamID;
+    public static CSteamID SteamID_GS;
     public static uint GameID;
     public static uint AppId;
     public static bool Initialized;
@@ -132,7 +132,7 @@ public class SteamEmulator
                 Write("Settings", "Error loading settings");
             }
 
-            SteamId_GS = new CSteamID((uint)new Random().Next(1000, 9999), EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeGameServer);
+            SteamID_GS = new CSteamID((uint)new Random().Next(1000, 9999), EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeGameServer);
 
             #region Interface Initialization
 

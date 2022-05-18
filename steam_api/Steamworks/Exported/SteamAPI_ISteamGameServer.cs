@@ -331,7 +331,7 @@ namespace SKYNET.Steamworks.Exported
         public static ulong SteamGameServer_GetSteamID()
         {
             Write("SteamGameServer_GetSteamID");
-            return SteamEmulator.SteamId_GS.SteamID;
+            return SteamEmulator.SteamID_GS.SteamID;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

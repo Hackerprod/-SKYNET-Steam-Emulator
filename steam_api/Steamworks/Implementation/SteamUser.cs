@@ -36,7 +36,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public CSteamID GetSteamID()
         {
-            var SteamId = SteamEmulator.SteamId;
+            var SteamId = SteamEmulator.SteamID;
             Write($"GetSteamID {SteamId}");
             return SteamId;
         }

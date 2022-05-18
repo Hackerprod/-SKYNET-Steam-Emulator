@@ -27,11 +27,18 @@ namespace SKYNET.Callback
         public ICallbackData Data { get; set; }
         public bool Called { get; set; }
         public bool ReadyToCall { get; set; }
+        public DateTime Time { get; set; }
 
         public CallbackMessage(ICallbackData data, bool readyToCall = true)
         {
             Data = data;
             ReadyToCall = readyToCall;
+            Time = DateTime.Now;
+        }
+
+        public bool TimedOut()
+        {
+            return (DateTime.Now - Time).Seconds > 20;
         }
     }
 
@@ -678,10 +685,10 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     internal struct LobbyChatUpdate_t : ICallbackData
     {
-        internal ulong SteamIDLobby; // m_ulSteamIDLobby uint64
-        internal ulong SteamIDUserChanged; // m_ulSteamIDUserChanged uint64
-        internal ulong SteamIDMakingChange; // m_ulSteamIDMakingChange uint64
-        internal uint GfChatMemberStateChange; // m_rgfChatMemberStateChange uint32
+        internal ulong m_ulSteamIDLobby; // m_ulSteamIDLobby uint64
+        internal ulong m_ulSteamIDUserChanged; // m_ulSteamIDUserChanged uint64
+        internal ulong m_ulSteamIDMakingChange; // m_ulSteamIDMakingChange uint64
+        internal uint m_rgfChatMemberStateChange; // m_rgfChatMemberStateChange uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(LobbyChatUpdate_t));

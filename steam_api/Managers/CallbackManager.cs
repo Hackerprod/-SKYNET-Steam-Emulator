@@ -124,7 +124,11 @@ namespace SKYNET.Managers
                         {
                             goto Skip;
                         }
-
+                        if (KV.Value.TimedOut())
+                        {
+                            CallbackResults.TryRemove(APICall, out _);
+                            goto Skip;
+                        }
                         if (KV.Value.Called)
                         {
                             CallbackResults.TryRemove(APICall, out _);
@@ -138,10 +142,6 @@ namespace SKYNET.Managers
                                     SteamEmulator.Debug($"Found callback {callbackData.CallbackType}");
 
                                     SteamCallback Callback = SteamCallbacks[callbackData.CallbackType];
-                                    if (true)
-                                    {
-
-                                    }
                                     Callback.Run(callbackData, false, APICall);
                                     KV.Value.Called = true;
                                     Write($"Called function (IntPtr, bool, SteamAPICall_t) in {callbackData.CallbackType} callback");
@@ -154,7 +154,6 @@ namespace SKYNET.Managers
                                         Callback.Run(callbackData, false, APICall);
                                         KV.Value.Called = true;
                                         Write($"Called function (IntPtr, bool, SteamAPICall_t) in {callbackData.CallbackType} callback");
-
                                     }
                                     else
                                     {
@@ -186,6 +185,11 @@ namespace SKYNET.Managers
                     {
                         if (!callbackMessage.ReadyToCall)
                         {
+                            goto Skip;
+                        }
+                        if (callbackMessage.TimedOut())
+                        {
+                            Callbacks.RemoveAt(i);
                             goto Skip;
                         }
 

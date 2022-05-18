@@ -10,6 +10,7 @@ using SKYNET;
 using SKYNET.Callback;
 using SKYNET.Helper.JSON;
 using SKYNET.Managers;
+using SKYNET.Network.Packets;
 using SKYNET.Steamworks;
 
 using SteamAPICall_t = System.UInt64;
@@ -38,7 +39,7 @@ namespace SKYNET.Steamworks.Implementation
                 string fileContent = File.ReadAllText(FavoriteGamesPath);
                 FavoriteGames = fileContent.FromJson<List<FavoriteGame>>();
             }
-            CreateTestLobby();
+            //CreateTestLobby();
         }
 
         public int AddFavoriteGame(uint nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags, uint rTime32LastPlayedOnServer)
@@ -61,7 +62,6 @@ namespace SKYNET.Steamworks.Implementation
         public void AddRequestLobbyListCompatibleMembersFilter(ulong steamIDLobby)
         {
             Write("AddRequestLobbyListCompatibleMembersFilter");
-            
         }
 
         public void AddRequestLobbyListDistanceFilter(int eLobbyDistanceFilter)
@@ -110,14 +110,14 @@ namespace SKYNET.Steamworks.Implementation
             {
                 var LocalLobby = new SteamLobby()
                 {
-                    Owner = (ulong)SteamEmulator.SteamId,
+                    Owner = (ulong)SteamEmulator.SteamID,
                     SteamID = modCommon.GenerateSteamID(),
                     Type = (ELobbyType)eLobbyType,
                     MaxMembers = cMaxMembers
                 };
                 LocalLobby.Members.Add(new SteamLobby.LobbyMember()
                 {
-                    m_SteamID = (ulong)SteamEmulator.SteamId
+                    m_SteamID = (ulong)SteamEmulator.SteamID
                 });
 
                 LobbyCreated_t data = new LobbyCreated_t()
@@ -131,7 +131,7 @@ namespace SKYNET.Steamworks.Implementation
                     data.m_eResult = EResult.k_EResultFail;
                 }
 
-                SteamEmulator.SteamFriends.UpdateUserLobby((ulong)SteamEmulator.SteamId, LocalLobby.SteamID);
+                SteamEmulator.SteamFriends.UpdateUserLobby((ulong)SteamEmulator.SteamID, LocalLobby.SteamID);
 
                 callResult = CallbackManager.AddCallbackResult(data);
             }
@@ -330,20 +330,24 @@ namespace SKYNET.Steamworks.Implementation
             LobbyEnter_t data = new LobbyEnter_t()
             {
                  m_ulSteamIDLobby = steamIDLobby,
-                 m_bLocked = false, 
-                 m_EChatRoomEnterResponse = (uint)EChatRoomEnterResponse.Success,
+                 m_bLocked = false,
+                 m_EChatRoomEnterResponse = (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess,
                  m_rgfChatPermissions = 1
             };
 
             if (Lobbies.TryGetValue(steamIDLobby, out var lobby))
             {
-                if (lobby.MaxMembers == lobby.Members.Count)
+                if (lobby.MaxMembers >= lobby.Members.Count)
                 {
                     data.m_EChatRoomEnterResponse = 0;
                 }
                 if (!lobby.Joinable)
                 {
-                    data.m_EChatRoomEnterResponse = 0;
+                    //data.m_EChatRoomEnterResponse = 0;
+                }
+                if (data.m_EChatRoomEnterResponse == (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess)
+                {
+                    NetworkManager.SendLobbyJoinRequest(lobby);
                 }
             }
             return CallbackManager.AddCallbackResult(data);
@@ -352,11 +356,11 @@ namespace SKYNET.Steamworks.Implementation
         public void LeaveLobby(ulong steamIDLobby)
         {
             Write($"LeaveLobby (Lobby SteamID: {steamIDLobby})");
-            if (Lobbies.TryGetValue(steamIDLobby, out _))
+            if (Lobbies.TryGetValue(steamIDLobby, out var lobby))
             {
+                NetworkManager.SendLobbyLeave(lobby.Owner, lobby.SteamID);
                 Lobbies.TryRemove(steamIDLobby, out _);
             }
-            // TODO: Send broadcast info 
         }
 
         public bool RemoveFavoriteGame(uint nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags)
@@ -379,7 +383,7 @@ namespace SKYNET.Steamworks.Implementation
                 Result = true;
                 data.m_bSuccess = true;
                 data.m_ulSteamIDLobby = lobby.SteamID;
-                //data.m_ulSteamIDMember = lobby.Owner; 
+                data.m_ulSteamIDMember = lobby.Owner; 
             }
 
             CallbackManager.AddCallbackResult(data);
@@ -431,6 +435,8 @@ namespace SKYNET.Steamworks.Implementation
             if (Lobbies.TryGetValue(steamIDLobby, out var lobby))
             {
                 lobby.LobbyData[pchKey] = pchValue;
+                NetworkManager.BroadcastLobbyData(lobby, pchKey, pchValue);
+                //LobbyDataUpdate_t
                 return true;
             }
             return false;
@@ -505,6 +511,64 @@ namespace SKYNET.Steamworks.Implementation
             Write("CheckForPSNGameBootInvite");
         }
 
+        public void JoinResponse(bool success, SteamLobby lobby)
+        {
+            try
+            {
+                if (success)
+                {
+                    Lobbies[lobby.SteamID] = lobby;
+
+                    LobbyDataUpdate_t data = new LobbyDataUpdate_t()
+                    {
+                        m_bSuccess = true,
+                        m_ulSteamIDLobby = lobby.SteamID,
+                        m_ulSteamIDMember = lobby.Owner
+                    };
+
+                    CallbackManager.AddCallbackResult(data);
+                }
+                else
+                {
+                    
+                }
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
+        public void LobbyDataUpdated(NET_LobbyDataUpdate lobbyDataUpdate)
+        {
+            if (Lobbies.TryGetValue(lobbyDataUpdate.LobbyID, out var lobby))
+            {
+                lobby.LobbyData[lobbyDataUpdate.Key] = lobbyDataUpdate.Value;
+
+                LobbyDataUpdate_t data = new LobbyDataUpdate_t()
+                {
+                    m_bSuccess = true,
+                    m_ulSteamIDLobby = lobby.SteamID,
+                    m_ulSteamIDMember = lobby.Owner
+                };
+
+                CallbackManager.AddCallbackResult(data);
+            }
+        }
+
+        public void LobbyChatUpdated(NET_LobbyChatUpdate lobbyChatUpdate)
+        {
+            LobbyChatUpdate_t data = new LobbyChatUpdate_t()
+            {
+                m_ulSteamIDLobby = lobbyChatUpdate.SteamIDLobby,
+                m_ulSteamIDUserChanged = lobbyChatUpdate.SteamIDUserChanged,
+                m_rgfChatMemberStateChange = lobbyChatUpdate.ChatMemberStateChange,
+                m_ulSteamIDMakingChange = lobbyChatUpdate.SteamIDMakingChange
+            };
+
+            CallbackManager.AddCallbackResult(data);
+        }
+
         private void SaveFavoriteGames()
         {
             try
@@ -527,9 +591,9 @@ namespace SKYNET.Steamworks.Implementation
                 SteamID = id,
                 Joinable = true,
                 MaxMembers = 20,
-                Owner = (ulong)SteamEmulator.SteamId,
+                Owner = (ulong)SteamEmulator.SteamID,
                 Type = ELobbyType.k_ELobbyTypePublic,
-                Members = { new SteamLobby.LobbyMember() { m_SteamID = (ulong)SteamEmulator.SteamId } },
+                Members = { new SteamLobby.LobbyMember() { m_SteamID = (ulong)SteamEmulator.SteamID } },
                 LobbyData =
                 {
                     { "lobby_type", "2" },
@@ -542,12 +606,28 @@ namespace SKYNET.Steamworks.Implementation
                     { "6", "1" },
                     { "join_in_progress", "0" },
                     { "session_state", "0" },
-                    { "name", "Hackerprod" },
-                    { "owner", ((ulong)SteamEmulator.SteamId).ToString() },
+                    { "name", SteamEmulator.PersonaName },
+                    { "owner", ((ulong)SteamEmulator.SteamID).ToString() },
                     { "internalIP", "10.31.0.1" },
                     { "publicIP", "10.31.0.1" },
                 }
             });
+        }
+
+        public SteamLobby GetLobby(ulong SteamID)
+        {
+            Lobbies.TryGetValue(SteamID, out var lobby);
+            return lobby;
+        }
+
+        public bool GetLobby(ulong SteamID, out SteamLobby lobby)
+        {
+            return Lobbies.TryGetValue(SteamID, out lobby);
+        }
+
+        public SteamLobby GetLobbyByOwner(ulong ownerID)
+        {
+            return SteamEmulator.SteamMatchmaking.Lobbies.Where(l => l.Value.Owner == ownerID).Select(l => l.Value).FirstOrDefault();
         }
 
         public class SteamLobby

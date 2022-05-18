@@ -6,6 +6,13 @@ using System.Threading.Tasks;
 
 namespace SKYNET.Network.Packets
 {
+    public class NetworkMessage
+    {
+        public int MessageType { get; set; }
+        public string ParsedBody { get; set; }
+
+    }
+
     public class NET_Base
     {
 
@@ -55,6 +62,40 @@ namespace SKYNET.Network.Packets
         public string SerializedLobby { get; set; }
     }
 
+    public class NET_LobbyJoinRequest : NET_Base
+    {
+        public ulong SteamID { get; set; }
+        public ulong LobbyID { get; set; }
+    }
+
+    public class NET_LobbyJoinResponse : NET_Base
+    {
+        public bool Success { get; set; }
+        public string SerializedLobby { get; set; }
+    }
+
+    public class NET_LobbyDataUpdate : NET_Base
+    {
+        public ulong LobbyID { get; set; }
+        public string Key { get; set; }
+        public string Value { get; set; }
+    }
+
+    public class NET_LobbyChatUpdate : NET_Base
+    {
+        public ulong SteamIDLobby { get; set; }
+        public ulong SteamIDUserChanged { get; set; }
+        public ulong SteamIDMakingChange { get; set; }
+        public uint  ChatMemberStateChange { get; set; }
+    }
+
+    public class NET_LobbyLeave : NET_Base
+    {
+        public ulong LobbyID { get; set; }
+        public ulong SteamID { get; set; }
+    }
+    
+
     public enum MessageType : int
     {
         NET_Announce,
@@ -64,6 +105,11 @@ namespace SKYNET.Network.Packets
         NET_UserDataUpdated,
         NET_P2PPacket,
         NET_LobbyListRequest,
-        NET_LobbyListResponse
+        NET_LobbyListResponse,
+        NET_LobbyJoinRequest,
+        NET_LobbyJoinResponse,
+        NET_LobbyDataUpdate,
+        NET_LobbyChatUpdate,
+        NET_LobbyLeave
     }
 }
