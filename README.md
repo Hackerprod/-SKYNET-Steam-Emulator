@@ -21,7 +21,7 @@ The project is in an initial stage, so it is not functional yet for some Games.
 ```
 User Stats manager         Save and Load user stats from local folder.
 Achievements manager       Save and Load user achievements from local folder.
-CSteamworks emulation      Rename the emu to **CSteamworks.dll** to emulate them.
+CSteamworks emulation      Rename the emu to CSteamworks.dll to emulate them.
 Multiplataform             Works with multiple game engines like Source 2, Unity 3D etc.
 Network communication      Network communication between clients through a configurable port.
 Overlay                    External Overlay for steam and game messages.
@@ -56,7 +56,7 @@ Callback system implementation.<br />
 Fucking SteamInternal_ContextInit in x86 Games
 
 ## 📝 Log
-When File log option si enabled in settings, a log file will be created in the root of the game executable with the following name `[SKYNET] steam_api.log`
+When File log option si enabled in settings, a log file will be created inside SKYNET folder with the following name `[SKYNET] steam_api.log`
 
 ## 🔌 Plugin system
 The plugin system is developed in order to establish a communication between the game and the game coordinator, the following example shows a basic plugin. <br /><br />
