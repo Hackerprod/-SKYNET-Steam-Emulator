@@ -95,6 +95,10 @@ namespace SKYNET.Managers
         {
             #region For test purposes
 
+            if (pszVersion.StartsWith("STEAMHTTP_INTERFACE_VERSION"))
+            {
+                return !SteamEmulator.ISteamHTTP;
+            }
             //if (pszVersion.StartsWith("SteamUtils"))
             //{
             //    return true;
@@ -147,10 +151,6 @@ namespace SKYNET.Managers
             //{
             //    return true;
             //}
-            if (pszVersion.StartsWith("STEAMHTTP_INTERFACE_VERSION"))
-            {
-                //return true;
-            }
             //if (pszVersion.StartsWith("SteamController"))
             //{
             //    return true;

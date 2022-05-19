@@ -150,13 +150,15 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"ActivateGameOverlayInviteDialog (Lobby SteamID = {steamIDLobby})");
             OverlayType type = OverlayType.LobbyInvite;
+            var users = new List<SKYNET.Types.SteamUser>();
+            users.AddRange(Users);
             if (modCommon.Overlay == null)
             {
                 modCommon.Overlay = new frmOverlay();
-                modCommon.Overlay.ProcessOverlay(Users, type, steamIDLobby);
+                modCommon.Overlay.ProcessOverlay(users, type, steamIDLobby);
                 modCommon.Overlay.Show();
             }
-            modCommon.Overlay.ProcessOverlay(Users, type, steamIDLobby);
+            modCommon.Overlay.ProcessOverlay(users, type, steamIDLobby);
         }
 
         public void ActivateGameOverlayInviteDialogConnectString(string pchConnectString)
@@ -210,14 +212,14 @@ namespace SKYNET.Steamworks.Implementation
                 default:
                     break;
             }
-
+            var users = new List<SKYNET.Types.SteamUser>();
             if (modCommon.Overlay == null)
             {
                 modCommon.Overlay = new frmOverlay();
-                modCommon.Overlay.ProcessOverlay(Users, type, steamID);
+                modCommon.Overlay.ProcessOverlay(users, type, steamID);
                 modCommon.Overlay.Show();
             }
-            modCommon.Overlay.ProcessOverlay(Users, type, steamID);
+            modCommon.Overlay.ProcessOverlay(users, type, steamID);
         }
 
         public void ActivateGameOverlayToWebPage(string pchURL, int eMode)
@@ -351,7 +353,6 @@ namespace SKYNET.Steamworks.Implementation
             CSteamID Result = CSteamID.Invalid;
             MutexHelper.Wait("GetFriendByIndex", delegate
             {
-                var Friends = Users.FindAll(f => f.HasFriend);
                 if (Friends.Count > iFriend)
                 {
                     var friend = Friends[iFriend];
@@ -382,7 +383,7 @@ namespace SKYNET.Steamworks.Implementation
             int Result = 0;
             if ((iFriendFlags & (int)EFriendFlags.k_EFriendFlagImmediate) == (int)EFriendFlags.k_EFriendFlagImmediate)
             {
-                MutexHelper.Wait("GetFriendCount", delegate
+                MutexHelper.Wait("Users", delegate
                 {
                     var Friends = Users.FindAll(f => f.HasFriend);
                     Result = Friends.Count;
@@ -410,7 +411,10 @@ namespace SKYNET.Steamworks.Implementation
 
             bool Result = false;
             FriendGameInfo_t pFriendGameInfo = Marshal.PtrToStructure<FriendGameInfo_t>(ptrFriendGameInfo);
+            MutexHelper.Wait("Users", delegate
+            {
 
+            });
             if (steamIDFriend == (ulong)SteamEmulator.SteamID)
             {
                 pFriendGameInfo.GameID = (uint)SteamEmulator.GameID;
@@ -419,7 +423,7 @@ namespace SKYNET.Steamworks.Implementation
             }
             else
             {
-                var friend = Users.Find(f => f.AccountId == steamIDFriend.GetAccountID());
+                var friend = GetUser(steamIDFriend);
                 if (friend == null)
                 {
                     pFriendGameInfo.GameID = 0;
@@ -449,7 +453,7 @@ namespace SKYNET.Steamworks.Implementation
         public string GetFriendPersonaName(ulong steamIDFriend)
         {
             string Result = "Unknown";
-            MutexHelper.Wait("FileReadAsyncComplete", delegate
+            MutexHelper.Wait("Users", delegate
             {
                 if ((ulong)steamIDFriend == (ulong)SteamEmulator.SteamID)
                 {
@@ -457,7 +461,7 @@ namespace SKYNET.Steamworks.Implementation
                 }
                 else
                 {
-                    var friend = Users.Find(f => f.SteamId == steamIDFriend);
+                    var friend = GetUser(steamIDFriend);
                     if (friend != null) Result = friend.PersonaName;
                 }
 
@@ -476,7 +480,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"GetFriendPersonaState {steamIDFriend}");
             EPersonaState Result = EPersonaState.k_EPersonaStateOnline;
-            MutexHelper.Wait("GetFriendPersonaState", delegate
+            MutexHelper.Wait("Users", delegate
             {
                 if (steamIDFriend == (ulong)SteamEmulator.SteamID)
                 {
@@ -496,9 +500,9 @@ namespace SKYNET.Steamworks.Implementation
             Write($"GetFriendRelationship {steamIDFriend}");
             EFriendRelationship Result = EFriendRelationship.k_EFriendRelationshipNone;
 
-            MutexHelper.Wait("GetFriendRelationship", delegate
+            MutexHelper.Wait("Users", delegate
             {
-                var friend = Users.Find(f => f.SteamId == steamIDFriend);
+                var friend = GetUser(steamIDFriend);
                 if (friend != null && friend.HasFriend)
                     Result = EFriendRelationship.k_EFriendRelationshipFriend;
             });
@@ -636,16 +640,21 @@ namespace SKYNET.Steamworks.Implementation
         public string GetPlayerNickname(ulong steamIDPlayer)
         {
             Write($"GetPlayerNickname {steamIDPlayer}");
-            if (steamIDPlayer == (ulong)SteamEmulator.SteamID)
+            var Result = "";
+            MutexHelper.Wait("Users", delegate
             {
-                return SteamEmulator.PersonaName;
-            }
-            var friend = Users.Find(f => f.AccountId == (uint)steamIDPlayer);
-            if (friend == null)
-            {
-                return "";
-            }
-            return null;
+                if (steamIDPlayer == (ulong)SteamEmulator.SteamID)
+                {
+                    Result = SteamEmulator.PersonaName;
+                }
+                var friend = GetUser(steamIDPlayer);
+                if (friend == null)
+                {
+                    Result = "";
+                }
+
+            });
+            return Result;
         }
 
         public uint GetUserRestrictions()
@@ -657,8 +666,8 @@ namespace SKYNET.Steamworks.Implementation
         public bool HasFriend(ulong steamIDFriend, int iFriendFlags)
         {
             Write($"HasFriend {steamIDFriend}");
-            var friend = Users.Find(f => f.AccountId == (uint)steamIDFriend && f.HasFriend);
-            return friend != null;
+            var friend = GetUser(steamIDFriend);
+            return friend != null && friend.HasFriend;
         }
 
         public bool InviteUserToGame(ulong steamIDFriend, string pchConnectString)
@@ -784,7 +793,11 @@ namespace SKYNET.Steamworks.Implementation
             ReportUserChanged((ulong)SteamEmulator.SteamID, EPersonaChange.k_EPersonaChangeName);
 
             SteamEmulator.PersonaName = pchPersonaName;
-            var user = Users.Find(f => f.SteamId == (ulong)SteamEmulator.SteamID);
+            MutexHelper.Wait("Users", delegate
+            {
+
+            });
+            var user = GetUser((ulong)SteamEmulator.SteamID);
             if (user != null)
             {
                 user.PersonaName = pchPersonaName;
@@ -827,7 +840,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public void UpdateUserLobby(ulong userSteamId, ulong lobbySteamId)
         {
-            var user = Users.Find(f => f.SteamId == userSteamId);
+            var user = GetUser(userSteamId);
             if (user != null)
             {
                 user.LobbyId = lobbySteamId;
@@ -840,7 +853,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public void UpdateUserStatus(NET_UserDataUpdated statusChanged, string ipaddress)
         {
-            var user = Users.Find(f => f.AccountId == statusChanged.AccountID);
+            var user = GetUser((ulong)new CSteamID(statusChanged.AccountID));
             if (user != null)
             {
                 user.LobbyId = statusChanged.LobbyID;
@@ -871,7 +884,22 @@ namespace SKYNET.Steamworks.Implementation
 
         public Types.SteamUser GetUser(ulong steamID)
         {
-            return Users.Find(u => u.SteamId == steamID);
+            Types.SteamUser user = default;
+            MutexHelper.Wait("Users", delegate
+            {
+                user = Users.Find(u => u.SteamId == steamID);
+            });
+            return user;
+        }
+
+        public Types.SteamUser GetUserByAddress(string iPAddress)
+        {
+            Types.SteamUser user = default;
+            MutexHelper.Wait("Users", delegate
+            {
+                user = Users.Find(u => u.IPAddress == iPAddress);
+            });
+            return user;
         }
 
         public byte[] GetAvatar(ulong steamID)
@@ -902,26 +930,29 @@ namespace SKYNET.Steamworks.Implementation
 
         public void AddOrUpdateUser(uint accountID, string personaName, uint appID, string senderAddress = "")
         {
-            var user = Users.Find(u => u.AccountId == accountID);
-            if (user == null)
+            MutexHelper.Wait("Users", delegate
             {
-                CSteamID steamID = new CSteamID(accountID);
-                user = new SKYNET.Types.SteamUser()
+                var user = GetUser((ulong)new CSteamID(accountID));
+                if (user == null)
                 {
-                    PersonaName = personaName,
-                    AccountId = accountID,
-                    SteamId = (ulong)steamID,
-                    GameId = appID,
-                    IPAddress = senderAddress,
-                    HasFriend = true
-                };
-                Users.Add(user);
-                Write($"Added user {personaName} {steamID}, from {senderAddress}");
-            }
-            else
-            {
-                user.PersonaName = personaName;
-            }
+                    CSteamID steamID = new CSteamID(accountID);
+                    user = new SKYNET.Types.SteamUser()
+                    {
+                        PersonaName = personaName,
+                        AccountId = accountID,
+                        SteamId = (ulong)steamID,
+                        GameId = appID,
+                        IPAddress = senderAddress,
+                        HasFriend = true
+                    };
+                    Users.Add(user);
+                    Write($"Added user {personaName} {steamID}, from {senderAddress}");
+                }
+                else
+                {
+                    user.PersonaName = personaName;
+                }
+            });
         }
         public ImageAvatar GetImageAvatar(int index)
         {
@@ -949,7 +980,7 @@ namespace SKYNET.Steamworks.Implementation
 
                 if (QueryingAvatar.Contains(steamIDFriend)) return;
 
-                var User = Users.Find(u => u.SteamId == steamIDFriend);
+                var User = GetUser(steamIDFriend);
                 if (User != null)
                 {
                     QueryingAvatar.Add(steamIDFriend);

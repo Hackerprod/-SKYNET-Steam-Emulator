@@ -2,11 +2,9 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using SKYNET.Callback;
 using SKYNET.Helper;
-using SKYNET.Steamworks;
-using Steamworks;
+
 using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Managers
@@ -111,6 +109,8 @@ namespace SKYNET.Managers
 
         public static void RunCallbacks()
         {
+            if (!SteamEmulator.RunCallbacks) return;
+
             MutexHelper.Wait("CallbackResults", delegate
             {
                 foreach (var KV in CallbackResults)
@@ -219,9 +219,25 @@ namespace SKYNET.Managers
             });
         }
 
+        internal static bool GetCallResult(ulong handle, out CallbackMessage cCallback)
+        {
+            CallbackMessage callback = default;
+            MutexHelper.Wait("CallbackResults", delegate
+            {
+                CallbackResults.TryGetValue(handle, out callback);
+            });
+            cCallback = callback;
+            return cCallback != null;
+        }
+
         public static bool UnregisterCallResult(SteamCallback pCallback, ulong hAPICall)
         {
-            return CallbackResults.TryRemove(hAPICall, out _);
+            bool Result = false;
+            MutexHelper.Wait("CallbackResults", delegate
+            {
+                Result = CallbackResults.TryRemove(hAPICall, out _);
+            });
+            return Result;
         }
 
         public static bool IsCompleted(ulong hSteamAPICall)
@@ -229,12 +245,9 @@ namespace SKYNET.Managers
             bool Result = false;
             MutexHelper.Wait("SteamCallbacks", delegate
             {
-                foreach (var callback in SteamCallbacks)
+                if (CallbackResults.TryGetValue(hSteamAPICall, out var callback))
                 {
-                    if (callback.Value.SteamAPICall == hSteamAPICall)
-                    {
-                        Result = true;
-                    }
+                    Result = callback.Called;
                 }
             });
             return Result;

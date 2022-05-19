@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using SKYNET;
+using SKYNET.Callback;
 using SKYNET.Helper;
 using SKYNET.Managers;
 using SteamAPICall_t = System.UInt64;
@@ -157,12 +158,13 @@ namespace SKYNET.Steamworks.Implementation
         {
             try
             {
-                Write($"GetAPICallResult {handle}");
+                Write($"GetAPICallResult (SteamAPICall = {handle}, Expected callback = {(CallbackType)callback_expected}");
 
-                if (CallbackManager.CallbackResults.TryGetValue(handle, out var cMessage))
+                if (CallbackManager.GetCallResult(handle, out var cCallback))
                 {
-                    callback_size = cMessage.Data.DataSize;
-                    Marshal.StructureToPtr(cMessage.Data, callback, false);
+                    Write($"Found callback {cCallback.Data.CallbackType}");
+                    callback_size = cCallback.Data.DataSize;
+                    Marshal.StructureToPtr(cCallback.Data, callback, false);
                     failed = false;
                 }
                 failed = true;

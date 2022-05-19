@@ -52,6 +52,10 @@ public class SteamEmulator
     public static bool ConsoleLog;
     public static int BroadCastPort;
 
+    // Debug options
+    public static bool RunCallbacks;
+    public static bool ISteamHTTP;
+
     public static HSteamUser HSteamUser;
     public static HSteamPipe HSteamPipe;
 

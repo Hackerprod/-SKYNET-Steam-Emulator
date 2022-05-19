@@ -49,6 +49,7 @@ namespace SKYNET.Managers
         private static void ProcessMessage(NetworkMessage message, Socket socket)
         {
             Write($"Received message {(MessageType)message.MessageType} from {((IPEndPoint)socket.RemoteEndPoint).Address.ToString()}");
+            CheckInUserList(socket);
             switch ((MessageType)message.MessageType)
             {
                 case MessageType.NET_Announce:
@@ -96,6 +97,20 @@ namespace SKYNET.Managers
 
         }
 
+        private static void CheckInUserList(Socket socket)
+        {
+            var IPAddress = ((IPEndPoint)socket.RemoteEndPoint).Address.ToString();
+            if (IslocalAddress(IPAddress))
+            {
+                return;
+            }
+            var user = SteamEmulator.SteamFriends.GetUserByAddress(IPAddress);
+            if (user == null)
+            {
+                AnnounceTo(IPAddress);
+            }
+        }
+
         private static void ProcessLobbyGameserver(NetworkMessage message, Socket socket)
         {
             NET_LobbyGameserver lobbyGameserver = message.ParsedBody.FromJson<NET_LobbyGameserver>();
@@ -131,9 +146,9 @@ namespace SKYNET.Managers
                         ParsedBody = lobbyChatUpdate.ToJson()
                     };
 
-                    foreach (var item in lobby.Members)
+                    foreach (var member in lobby.Members)
                     {
-                        var user = SteamEmulator.SteamFriends.GetUser(lobby.Owner);
+                        var user = SteamEmulator.SteamFriends.GetUser(member.m_SteamID);
                         if (user != null)
                         {
                             SendTo(user.IPAddress, lobbymessage);
@@ -142,10 +157,9 @@ namespace SKYNET.Managers
 
                     LobbyChatUpdate_t data = new LobbyChatUpdate_t()
                     {
-                        m_ulSteamIDLobby = lobbyChatUpdate.SteamIDLobby,
-                        m_ulSteamIDUserChanged = lobbyChatUpdate.SteamIDUserChanged,
-                        m_rgfChatMemberStateChange = lobbyChatUpdate.ChatMemberStateChange,
-                        m_ulSteamIDMakingChange = lobbyChatUpdate.SteamIDMakingChange
+                        m_ulSteamIDLobby = lobbyLeave.LobbyID,
+                        m_ulSteamIDUserChanged = lobbyLeave.SteamID,
+                        m_rgfChatMemberStateChange = (int)EChatMemberStateChange.k_EChatMemberStateChangeLeft
                     };
                     CallbackManager.AddCallback(data);
                 }
@@ -363,6 +377,11 @@ namespace SKYNET.Managers
         {
             try
             {
+                if (IslocalAddress(((IPEndPoint)socket.RemoteEndPoint).Address))
+                {
+                    return;
+                }
+
                 NET_Announce announce = message.ParsedBody.FromJson<NET_Announce>();
 
                 // Add User to List on both cases (NET_Announce and NET_AnnounceResponse)
@@ -770,11 +789,11 @@ namespace SKYNET.Managers
             IPHostEntry hostEntry = Dns.GetHostEntry(hostName);
             IPAddress iPAddress = null;
             IPAddress[] addressList = hostEntry.AddressList;
-            foreach (IPAddress iPAddress2 in addressList)
+            foreach (IPAddress address in addressList)
             {
-                if (iPAddress2.AddressFamily == AddressFamily.InterNetwork)
+                if (address.AddressFamily == AddressFamily.InterNetwork)
                 {
-                    iPAddress = iPAddress2;
+                    iPAddress = address;
                 }
             }
             return iPAddress;
@@ -796,6 +815,31 @@ namespace SKYNET.Managers
                 rangeAddr.Add($"{ipParts[0]}.{ipParts[1]}.{ipParts[2]}.{i}");
             }
             return rangeAddr;
+        }
+
+        private static bool IslocalAddress(IPAddress iPAddress)
+        {
+            return IslocalAddress(iPAddress.ToString());
+        }
+
+        private static bool IslocalAddress(string iPAddress)
+        {
+            try
+            {
+                IPAddress[] hostIPs = Dns.GetHostAddresses(iPAddress);
+                IPAddress[] localIPs = Dns.GetHostAddresses(Dns.GetHostName());
+
+                foreach (IPAddress hostIP in hostIPs)
+                {
+                    if (IPAddress.IsLoopback(hostIP)) return true;
+                    foreach (IPAddress localIP in localIPs)
+                    {
+                        if (hostIP.Equals(localIP)) return true;
+                    }
+                }
+            }
+            catch { }
+            return false;
         }
 
         private class SocketData

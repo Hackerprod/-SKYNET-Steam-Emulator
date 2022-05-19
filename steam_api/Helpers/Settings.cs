@@ -49,6 +49,13 @@ namespace SKYNET.Helper
                     config.AppendLine("BroadCastPort = 28025");
                     config.AppendLine();
 
+                    // Network Configuration
+
+                    config.AppendLine("[Debug Settings]");
+                    config.AppendLine("RunCallbacks = true");
+                    config.AppendLine("ISteamHTTP = true");
+                    config.AppendLine();
+
                     // Log Configuration
 
                     config.AppendLine("[Log Settings]");
@@ -77,6 +84,9 @@ namespace SKYNET.Helper
 
                 SteamEmulator.SendLog = (bool)IniParser["Log Settings"]["File"];
                 SteamEmulator.ConsoleLog = (bool)IniParser["Log Settings"]["Console"];
+
+                try { SteamEmulator.RunCallbacks = (bool)IniParser["Debug Settings"]["RunCallbacks"]; } catch { }
+                try { SteamEmulator.ISteamHTTP = (bool)IniParser["Debug Settings"]["ISteamHTTP"]; } catch { }
 
                 if (SteamEmulator.ConsoleLog)
                 {

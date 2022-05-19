@@ -147,7 +147,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public CSteamID GetAppOwner()
         {
-            Write("GetAppOwner");
+            Write($"GetAppOwner");
             return SteamEmulator.SteamID;
         }
 

@@ -149,7 +149,7 @@ namespace SKYNET.Steamworks.Implementation
         public bool LoadItemDefinitions()
         {
             Write($"LoadItemDefinitions");
-            return false;
+            return true;
         }
 
         public bool RemoveProperty(ulong handle, ulong nItemID, string pchPropertyName)
