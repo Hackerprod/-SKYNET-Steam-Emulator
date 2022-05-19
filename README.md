@@ -56,7 +56,7 @@ Callback system implementation.<br />
 Fucking SteamInternal_ContextInit in x86 Games
 
 ## 📝 Log
-When File log option si enabled in settings, a log file will be created in the root of the game executable with the following name `[SKYNET] steam_api.log`
+When File log option si enabled in settings, a log file will be created inside SKYNET folder with the following name `[SKYNET] steam_api.log`
 
 ## 🔌 Plugin system
 The plugin system is developed in order to establish a communication between the game and the game coordinator, the following example shows a basic plugin. <br /><br />
