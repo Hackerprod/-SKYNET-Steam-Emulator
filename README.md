@@ -17,14 +17,18 @@ The project is in an initial stage, so it is not functional yet for some Games.
 ```
 
 ## 🔗 Features
-**`User Stats manager`** &emsp;&emsp;&emsp;  Save and Load user stats from local folder. <br />
-**`Achievements manager`** &emsp;&emsp;  Save and Load user achievements from local folder. <br />
-**`CSteamworks emulation`**&emsp;&emsp;Rename the emu to **CSteamworks.dll** to emulate them. <br />
-**`Multiplataform`** &emsp;&emsp;&emsp;&emsp;&emsp; Works with multiple game engines like Source 2, Unity 3D etc.<br />
-**`Network communication`** &emsp;&ensp; Network communication between clients through a configurable port.<br />
-**`Overlay`** &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp; External Overlay for steam and game messages.<br />
-**`Plugin system`** &emsp;&emsp;&emsp;&emsp;&emsp;&ensp; Load external plugin to communicate with the emu.
 
+```
+User Stats manager         Save and Load user stats from local folder.
+Achievements manager       Save and Load user achievements from local folder.
+CSteamworks emulation      Rename the emu to **CSteamworks.dll** to emulate them.
+Multiplataform             Works with multiple game engines like Source 2, Unity 3D etc.
+Network communication      Network communication between clients through a configurable port.
+Overlay                    External Overlay for steam and game messages.
+DLC                        Unlock all downloaded DLCs
+Avatar support             Load avatar from file (Avatar.jpg) inside SKYNET folder and share it through the network
+Plugin system              Load external plugin to communicate with the emu.
+```
 ## ⚙️ Settings
 When the emulator runs for the first time, it create the directories that it is going to use and generates them inside the SKYNET folder the `[SKYNET] steam_api.ini`<br />
 <details><summary>Settings structure</summary><br />
