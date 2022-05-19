@@ -148,27 +148,35 @@ namespace SKYNET.Steamworks.Implementation
 
         public void ActivateGameOverlayInviteDialog(ulong steamIDLobby)
         {
-            Write($"ActivateGameOverlayInviteDialog {steamIDLobby}");
+            Write($"ActivateGameOverlayInviteDialog (Lobby SteamID = {steamIDLobby})");
+            OverlayType type = OverlayType.LobbyInvite;
+            if (modCommon.Overlay == null)
+            {
+                modCommon.Overlay = new frmOverlay();
+                modCommon.Overlay.ProcessOverlay(Users, type, steamIDLobby);
+                modCommon.Overlay.Show();
+            }
+            modCommon.Overlay.ProcessOverlay(Users, type, steamIDLobby);
         }
 
         public void ActivateGameOverlayInviteDialogConnectString(string pchConnectString)
         {
-            Write($"ActivateGameOverlayInviteDialogConnectString {pchConnectString}");
+            Write($"ActivateGameOverlayInviteDialogConnectString (URI = {pchConnectString})");
         }
 
         public void ActivateGameOverlayRemotePlayTogetherInviteDialog(ulong steamIDLobby)
         {
-            Write($"ActivateGameOverlayRemotePlayTogetherInviteDialog {steamIDLobby}");
+            Write($"ActivateGameOverlayRemotePlayTogetherInviteDialog (Lobby SteamID = {steamIDLobby})");
         }
 
         public void ActivateGameOverlayToStore(uint nAppID, int eFlag)
         {
-            Write($"ActivateGameOverlayToStore {nAppID} {eFlag}");
+            Write($"ActivateGameOverlayToStore (AppID = {nAppID}, Flag = {eFlag})");
         }
 
         public void ActivateGameOverlayToUser(string friendsGroupID, ulong steamID)
         {
-            Write($"ActivateGameOverlayToUser {friendsGroupID} {(CSteamID)steamID}");
+            Write($"ActivateGameOverlayToUser (GroupID = {friendsGroupID}, SteamID = {(CSteamID)steamID})");
             OverlayType type = default;
             switch (friendsGroupID)
             {
@@ -793,7 +801,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool SetRichPresence(string pchKey, string pchValue)
         {
-            Write($"SetRichPresence {pchKey} {pchValue}");
+            Write($"SetRichPresence (Key = {pchKey}, Value = {pchValue})");
 
             if (!string.IsNullOrEmpty(pchValue))
             {

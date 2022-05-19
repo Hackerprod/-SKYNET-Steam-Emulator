@@ -4,6 +4,7 @@ using SKYNET.Types;
 
 using SteamAPICall_t = System.UInt64;
 using HAuthTicket = System.UInt32;
+using SKYNET.Callback;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -23,7 +24,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool InitGameServer(uint unIP, int usGamePort, int usQueryPort, uint unFlags, uint nGameAppId, string pchVersionString)
         {
-            Write("InitGameServer");
+            Write($"InitGameServer (IP = {unIP}, GamePort = {usGamePort}, QueryPort = {usQueryPort}, Flags = {unFlags}, GameAppId = {nGameAppId}, VersionString = {pchVersionString})");
 
             if (LoggedIn)
             {
@@ -37,7 +38,11 @@ namespace SKYNET.Steamworks.Implementation
             ServerData.AppId = nGameAppId;
             ServerData.VersionString = pchVersionString;
 
-            if (SteamEmulator.AppId == 0) SteamEmulator.AppId = nGameAppId;
+            if (SteamEmulator.AppId == 0)
+                SteamEmulator.AppId = nGameAppId;
+
+            SteamServersConnected_t data = new SteamServersConnected_t();
+            CallbackManager.AddCallback(data);
 
             return true;
         }

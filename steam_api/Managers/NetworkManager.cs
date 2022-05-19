@@ -4,12 +4,9 @@ using SKYNET.Helper.JSON;
 using SKYNET.Network;
 using SKYNET.Network.Packets;
 using SKYNET.Steamworks;
-using SKYNET.Steamworks.Implementation;
-using SKYNET.Types;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -21,29 +18,30 @@ namespace SKYNET.Managers
     public class NetworkManager
     {
         public static int Port = 28880;
+        public static TCPServer TCPServer;
 
         public static void Initialize()
         {
             Port = SteamEmulator.BroadCastPort;
             Write($"Initializing TCP server on port {Port}");
 
-            TCPServer tcpServer = new TCPServer(Port);
-            tcpServer.OnDataReceived += Network_OnDataReceived;
-            tcpServer.OnConnected += TcpServer_OnConnected;
+            TCPServer = new TCPServer(Port);
+            TCPServer.OnDataReceived += TCPServer_OnDataReceived;
+            TCPServer.OnConnected += TCPServer_OnConnected;
 
-            ThreadPool.QueueUserWorkItem(tcpServer.Start);
+            ThreadPool.QueueUserWorkItem(TCPServer.Start);
             ThreadPool.QueueUserWorkItem(BroadcastAnnounce);
         }
 
-        private static void TcpServer_OnConnected(object sender, Socket e)
+        private static void TCPServer_OnConnected(object sender, ClientSocket e)
         {
             Write("Client connected from " + e.RemoteEndPoint);
         }
 
-        private static void Network_OnDataReceived(object sender, Network.NetPacket packet)
+        private static void TCPServer_OnDataReceived(object sender, NetPacket packet)
         {
             NetworkMessage message = packet.Data.GetString().FromJson<NetworkMessage>();
-            ProcessMessage(message, packet.Sender);
+            ProcessMessage(message, packet.Sender.socket);
         }
 
         #region Message processors
@@ -64,9 +62,6 @@ namespace SKYNET.Managers
                 case MessageType.NET_UserDataUpdated:
                     ProcessUserStatusChanged(message, socket);
                     break;
-                case MessageType.NET_P2PPacket:
-                    ProcessP2PPacket(message, socket);
-                    break;
                 case MessageType.NET_LobbyListRequest:
                     ProcessLobbyListRequest(message, socket);
                     break;
@@ -82,16 +77,38 @@ namespace SKYNET.Managers
                 case MessageType.NET_LobbyDataUpdate:
                     ProcessLobbyDataUpdate(message, socket);
                     break;
+                case MessageType.NET_LobbyMetaDataUpdate:
+                    ProcessLobbyMetaDataUpdate(message, socket);
+                    break;
                 case MessageType.NET_LobbyChatUpdate:
                     ProcessLobbyChatUpdate(message, socket);
                     break;
                 case MessageType.NET_LobbyLeave:
                     ProcessLobbyLeave(message, socket);
                     break;
+                case MessageType.NET_LobbyGameserver:
+                    ProcessLobbyGameserver(message, socket);
+                    break;
+                    
                 default:
                     break;
             }
 
+        }
+
+        private static void ProcessLobbyGameserver(NetworkMessage message, Socket socket)
+        {
+            NET_LobbyGameserver lobbyGameserver = message.ParsedBody.FromJson<NET_LobbyGameserver>();
+            if (lobbyGameserver != null)
+            {
+                if (SteamEmulator.SteamMatchmaking.GetLobby(lobbyGameserver.LobbyID, out var lobby))
+                {
+                    lobby.Gameserver.SteamID = lobbyGameserver.SteamID;
+                    lobby.Gameserver.IP = lobbyGameserver.IP;
+                    lobby.Gameserver.Port = lobbyGameserver.Port;
+                }
+            }
+            CloseSocket(socket, (MessageType)message.MessageType);
         }
 
         private static void ProcessLobbyLeave(NetworkMessage message, Socket socket)
@@ -105,7 +122,7 @@ namespace SKYNET.Managers
                     {
                         SteamIDLobby = lobby.SteamID,
                         SteamIDUserChanged = lobbyLeave.SteamID,
-                        ChatMemberStateChange = (int)EChatMemberStateChange.k_EChatMemberStateChangeKicked
+                        ChatMemberStateChange = (int)EChatMemberStateChange.k_EChatMemberStateChangeLeft
                     };
 
                     NetworkMessage lobbymessage = new NetworkMessage()
@@ -122,11 +139,19 @@ namespace SKYNET.Managers
                             SendTo(user.IPAddress, lobbymessage);
                         }
                     }
+
+                    LobbyChatUpdate_t data = new LobbyChatUpdate_t()
+                    {
+                        m_ulSteamIDLobby = lobbyChatUpdate.SteamIDLobby,
+                        m_ulSteamIDUserChanged = lobbyChatUpdate.SteamIDUserChanged,
+                        m_rgfChatMemberStateChange = lobbyChatUpdate.ChatMemberStateChange,
+                        m_ulSteamIDMakingChange = lobbyChatUpdate.SteamIDMakingChange
+                    };
+                    CallbackManager.AddCallback(data);
                 }
             }
 
-            Write($"Closing connection after received {(MessageType)message.MessageType} message");
-            CloseSocket(socket);
+            CloseSocket(socket, (MessageType)message.MessageType);
         }
 
         private static void ProcessLobbyChatUpdate(NetworkMessage message, Socket socket)
@@ -144,6 +169,15 @@ namespace SKYNET.Managers
             if (lobbyDataUpdate != null)
             {
                 SteamEmulator.SteamMatchmaking.LobbyDataUpdated(lobbyDataUpdate);
+            }
+        }
+
+        private static void ProcessLobbyMetaDataUpdate(NetworkMessage message, Socket socket)
+        {
+            NET_LobbyMetaDataUpdate lobbyMetaDataUpdate = message.ParsedBody.FromJson<NET_LobbyMetaDataUpdate>();
+            if (lobbyMetaDataUpdate != null)
+            {
+                SteamEmulator.SteamMatchmaking.LobbyMetaDataUpdated(lobbyMetaDataUpdate);
             }
         }
 
@@ -173,18 +207,32 @@ namespace SKYNET.Managers
                             m_SteamID = lobbyJoinRequest.SteamID
                         });
 
+                        // LobbyChatUpdate
                         NET_LobbyChatUpdate lobbyChatUpdate = new NET_LobbyChatUpdate()
                         {
                             SteamIDLobby = lobby.SteamID,
                             SteamIDUserChanged = lobbyJoinRequest.SteamID,
                             ChatMemberStateChange = (int)EChatMemberStateChange.k_EChatMemberStateChangeEntered
-
                         };
 
-                        NetworkMessage lobbymessage = new NetworkMessage()
+                        NetworkMessage ChatUpdateMessage = new NetworkMessage()
                         {
                             MessageType = (int)MessageType.NET_LobbyChatUpdate,
                             ParsedBody = lobbyChatUpdate.ToJson()
+                        };
+
+                        // LobbyDataUpdate
+                        NET_LobbyDataUpdate lobbyDataUpdate = new NET_LobbyDataUpdate()
+                        {
+                            SteamIDLobby = lobby.SteamID,
+                            SteamIDMember = lobbyJoinRequest.SteamID,
+                            Success = true
+                        };
+
+                        NetworkMessage DataUpdateMessage = new NetworkMessage()
+                        {
+                            MessageType = (int)MessageType.NET_LobbyChatUpdate,
+                            ParsedBody = lobbyDataUpdate.ToJson()
                         };
 
                         foreach (var item in lobby.Members)
@@ -192,7 +240,8 @@ namespace SKYNET.Managers
                             var user = SteamEmulator.SteamFriends.GetUser(lobby.Owner);
                             if (user != null)
                             {
-                                SendTo(user.IPAddress, lobbymessage);
+                                SendTo(user.IPAddress, ChatUpdateMessage);
+                                SendTo(user.IPAddress, DataUpdateMessage);
                             }
                         }
                     }
@@ -228,8 +277,7 @@ namespace SKYNET.Managers
                 Write(ex);
             }
 
-            Write($"Closing connection after received {(MessageType)message.MessageType} message");
-            CloseSocket(socket);
+            CloseSocket(socket, (MessageType)message.MessageType);
         }
 
         private static void ProcessLobbyListRequest(NetworkMessage message, Socket socket)
@@ -241,14 +289,14 @@ namespace SKYNET.Managers
                 {
                     if (lobbyListRequest.RequestID == SteamEmulator.SteamMatchmaking.CurrentRequest)
                     {
-                        CloseSocket(socket);
+                        CloseSocket(socket, (MessageType)message.MessageType);
                         return;
                     }
                 }
                 var lobby = SteamEmulator.SteamMatchmaking.GetLobbyByOwner((ulong)SteamEmulator.SteamID);
                 if (lobby == null)
                 {
-                    CloseSocket(socket);
+                    CloseSocket(socket, (MessageType)message.MessageType);
                 }
                 else
                 {
@@ -292,10 +340,6 @@ namespace SKYNET.Managers
                     {
                         lobby.LobbyData["internalIP"] = remoteAddress;
                     }
-                    if (lobby.LobbyData.ContainsKey("session_state"))
-                    {
-                        lobby.LobbyData["session_state"] = "0";
-                    }
 
                     Write($"Adding lobby {lobby.SteamID} from {remoteAddress}");
                     SteamEmulator.SteamMatchmaking.Lobbies.TryAdd(lobby.SteamID, lobby);
@@ -312,8 +356,7 @@ namespace SKYNET.Managers
                 Write(ex);
             }
 
-            Write($"Closing connection after received {(MessageType)message.MessageType} message");
-            CloseSocket(socket);
+            CloseSocket(socket, (MessageType)message.MessageType);
         }
 
         private static void ProcessAnnounce(NetworkMessage message, Socket socket)
@@ -345,8 +388,7 @@ namespace SKYNET.Managers
                 }
                 else
                 {
-                    Write($"Closing connection after received {(MessageType)message.MessageType} message");
-                    CloseSocket(socket);
+                    CloseSocket(socket, (MessageType)message.MessageType);
                 }
             }
             catch 
@@ -403,8 +445,7 @@ namespace SKYNET.Managers
                 {
                     Write($"{ex}");
                 }
-                Write($"Closing connection after received {(MessageType)message.MessageType} message");
-                CloseSocket(socket);
+                CloseSocket(socket, (MessageType)message.MessageType);
             }
         }
 
@@ -427,29 +468,7 @@ namespace SKYNET.Managers
 
             }
 
-            Write($"Closing connection after received {(MessageType)message.MessageType} message");
-            CloseSocket(socket);
-        }
-
-        private static void ProcessP2PPacket(NetworkMessage message, Socket socket)
-        {
-            try
-            {
-                NET_P2PPacket p2p = message.ParsedBody.FromJson<NET_P2PPacket>();
-
-                if (p2p != null && p2p.AccountID == (uint)SteamEmulator.SteamID.AccountId)
-                {
-                    byte[] bytes = Convert.FromBase64String(p2p.Buffer);
-                    SteamEmulator.SteamNetworking.P2PIncoming.Add(p2p);
-                }
-            }
-            catch 
-            {
-
-            }
-
-            Write($"Closing connection after received {(MessageType)message.MessageType} message");
-            CloseSocket(socket);
+            CloseSocket(socket, (MessageType)message.MessageType);
         }
 
         #endregion
@@ -500,9 +519,9 @@ namespace SKYNET.Managers
             }
         }
 
-        public static void BroadcastLobbyData(SteamLobby lobby, string pchKey, string pchValue)
+        public static void BroadcastLobbyMetaData(SteamLobby lobby, string pchKey, string pchValue)
         {
-            NET_LobbyDataUpdate dataUpdate = new NET_LobbyDataUpdate()
+            NET_LobbyMetaDataUpdate dataUpdate = new NET_LobbyMetaDataUpdate()
             {
                 LobbyID = lobby.SteamID,
                 Key = pchKey,
@@ -511,7 +530,7 @@ namespace SKYNET.Managers
 
             NetworkMessage message = new NetworkMessage()
             {
-                MessageType = (int)MessageType.NET_LobbyDataUpdate,
+                MessageType = (int)MessageType.NET_LobbyMetaDataUpdate,
                 ParsedBody = dataUpdate.ToJson()
             };            
 
@@ -528,34 +547,32 @@ namespace SKYNET.Managers
             }
         }
 
-        public static void SendP2PTo(ulong steamIDRemote, byte[] bytes, int eP2PSendType, int nChannel)
+        public static void BroadcastLobbyGameServer(SteamLobby lobby)
         {
-            try
+            NET_LobbyGameserver GSUpdate = new NET_LobbyGameserver()
             {
-                NET_P2PPacket p2p = new NET_P2PPacket()
-                {
-                    AccountID = steamIDRemote.GetAccountID(),
-                    Buffer = Convert.ToBase64String(bytes),
-                    IDRemote = (uint)SteamEmulator.SteamID.AccountId,
-                    P2PSendType = eP2PSendType,
-                    Channel = nChannel
-                };
+                LobbyID = lobby.SteamID,
+                SteamID = lobby.Gameserver.SteamID,
+                IP = lobby.Gameserver.IP,
+                Port = lobby.Gameserver.Port
+            };
 
-                NetworkMessage message = new NetworkMessage()
-                {
-                    MessageType = (int)MessageType.NET_P2PPacket,
-                    ParsedBody = p2p.ToJson()
-                };
-
-                var user = SteamEmulator.SteamFriends.GetUser(steamIDRemote);
-                if (user == null)
-                    return;
-
-                SendTo(user.IPAddress, message);
-            }
-            catch (Exception ex)
+            NetworkMessage message = new NetworkMessage()
             {
-                Write(ex.Message + " " + ex.StackTrace);
+                MessageType = (int)MessageType.NET_LobbyGameserver,
+                ParsedBody = GSUpdate.ToJson()
+            };
+
+            foreach (var member in lobby.Members)
+            {
+                if (member.m_SteamID != (ulong)SteamEmulator.SteamID)
+                {
+                    var user = SteamEmulator.SteamFriends.GetUser(member.m_SteamID);
+                    if (user != null)
+                    {
+                        SendTo(user.IPAddress, message);
+                    }
+                }
             }
         }
 
@@ -693,7 +710,7 @@ namespace SKYNET.Managers
                 SocketData.socket.Send(bytes);
 
                 ClientSocket client = new ClientSocket(SocketData.socket);
-                client.OnDataReceived += Network_OnDataReceived;
+                client.OnDataReceived += TCPServer_OnDataReceived;
                 client.BeginReceiving();
             }
             catch 
@@ -713,8 +730,9 @@ namespace SKYNET.Managers
             return message;
         }
 
-        private static void CloseSocket(Socket socket)
+        private static void CloseSocket(Socket socket, MessageType messageType)
         {
+            Write($"Closing connection after received {messageType} message");
             try
             {
                 socket.Close();

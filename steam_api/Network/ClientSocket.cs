@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -43,7 +44,7 @@ namespace SKYNET.Network
 
                         if (list.Count > 0)
                         {
-                            OnDataReceived?.Invoke(this, new NetPacket() { Sender = socket, Data = list.ToArray() });
+                            OnDataReceived?.Invoke(this, new NetPacket() { Sender = this, Data = list.ToArray() });
                         }
                     }
                 }
@@ -70,10 +71,27 @@ namespace SKYNET.Network
         }
 
         public bool StopReceiving { get; private set; }
+        public IPEndPoint RemoteEndPoint => (IPEndPoint)socket?.RemoteEndPoint;
 
         public void Stop()
         {
             StopReceiving = true;
+        }
+
+        public bool Send(byte[] bytes)
+        {
+            try
+            {
+                if (socket.Connected)
+                {
+                    socket.Send(bytes);
+                    return true;
+                }
+            }
+            catch 
+            {
+            }
+            return false;
         }
     }
 }

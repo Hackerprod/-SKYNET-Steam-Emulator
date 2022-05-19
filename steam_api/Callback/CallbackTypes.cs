@@ -43,9 +43,8 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct SteamServersConnected_t : ICallbackData
+    public struct SteamServersConnected_t : ICallbackData
     {
-
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SteamServersConnected_t));
         public int DataSize => _datasize;
@@ -3059,4 +3058,31 @@ namespace SKYNET.Callback
         #endregion
     };
 
+    public struct SteamNetworkingSocketsCert_t : ICallbackData
+    {
+        public EResult m_eResult;
+        public UInt32 m_cbCert;
+        public byte[] m_certOrMsg; //CMsgSteamDatagramCertificate protobuf
+        public UInt64 m_caKeyID;
+        public UInt32 m_cbSignature;
+        public byte[] m_signature;
+        public UInt32 m_cbPrivKey;
+        public byte[] m_privKey;
+        //total size: 792
+        //0
+        //4
+        //8 []
+        //0x208
+        //0x20C
+        //0x210
+        //0x214 []
+        //0x294
+        //0x298 []
+
+        #region SteamCallback
+        public static int _datasize = Marshal.SizeOf(typeof(SteamNetworkingSocketsCert_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => (CallbackType)Constants.k_iSteamNetworkingCallbacks + 96;
+        #endregion
+    };
 }

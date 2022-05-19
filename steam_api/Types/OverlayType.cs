@@ -18,5 +18,6 @@ namespace SKYNET.Types
         FriendRemove,           // friendremove         Opens the overlay in minimal mode prompting the user to remove the target friend.
         FriendRequestAccept,    // friendrequestaccept  Opens the overlay in minimal mode prompting the user to accept an incoming friend invite.
         FriendRequestIgnore,    // friendrequestignore  Opens the overlay in minimal mode prompting the user to ignore an incoming friend invite.
+        LobbyInvite,
     }
 }

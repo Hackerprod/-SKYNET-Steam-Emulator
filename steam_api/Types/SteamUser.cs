@@ -16,5 +16,10 @@ namespace SKYNET.Types
         public ulong LobbyId { get; set; }
         public bool HasFriend { get; set; }
         public string IPAddress { get; set; }
+
+        public SteamUser()
+        {
+            IPAddress = "";
+        }
     }
 }

@@ -71,7 +71,6 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "v";
             this.TopMost = true;
-            this.Paint += new System.Windows.Forms.PaintEventHandler(this.FrmOverlay_Paint);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Event_MouseDown);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Event_MouseMove);
             this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.Event_MouseUp);

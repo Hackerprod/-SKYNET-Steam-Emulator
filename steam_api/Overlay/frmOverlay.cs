@@ -31,6 +31,50 @@ namespace SKYNET.Overlay
             InitializeComponent();
         }
 
+        public void ProcessOverlay(List<Types.SteamUser> users, OverlayType overlayType, ulong steamID)
+        {
+            OverlayActive = false;
+            Users = users;
+            UserSteamID = steamID;
+            OverlayType = overlayType;
+            OverlayActive = true;
+
+            hWndHandle = FindWindow(null, Process.GetCurrentProcess().ProcessName);
+            ThreadPool.QueueUserWorkItem(LoopPosition);
+
+            switch (OverlayType)
+            {
+                case OverlayType.UsersList:
+                    CreateUsersList();
+                    break;
+                case OverlayType.SteamProfile:
+                    CreateProfile();
+                    break;
+                case OverlayType.Chat:
+                    break;
+                case OverlayType.JoinTrade:
+                    break;
+                case OverlayType.Stats:
+                    break;
+                case OverlayType.Achievements:
+                    break;
+                case OverlayType.FriendAdd:
+                    break;
+                case OverlayType.FriendRemove:
+                    break;
+                case OverlayType.FriendRequestAccept:
+                    break;
+                case OverlayType.FriendRequestIgnore:
+                    break;
+                case OverlayType.LobbyInvite:
+                    CreateLobbyInvite();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+
         private void LoopPosition(object state)
         {
             while (OverlayActive)
@@ -75,6 +119,11 @@ namespace SKYNET.Overlay
             PN_Container.Controls.Add(control);
         }
 
+        private void CreateLobbyInvite()
+        {
+            
+        }
+
         private void ShowErrorMessage(string msg)
         {
             Label LB_Message = new Label()
@@ -88,11 +137,6 @@ namespace SKYNET.Overlay
             };
             Controls.Add(LB_Message);
             LB_Message.BringToFront();
-        }
-
-        private void FrmOverlay_Paint(object sender, PaintEventArgs e)
-        {
-
         }
 
         private void PB_Close_Click(object sender, EventArgs e)
@@ -142,44 +186,5 @@ namespace SKYNET.Overlay
         [DllImport("user32.dll")]
         private static extern IntPtr GetForegroundWindow();
 
-        public void ProcessOverlay(List<Types.SteamUser> users, OverlayType overlayType, ulong steamID)
-        {
-            OverlayActive = false;
-            Users = users;
-            UserSteamID = steamID;
-            OverlayType = overlayType;
-            OverlayActive = true;
-
-            hWndHandle = FindWindow(null, Process.GetCurrentProcess().ProcessName);
-            ThreadPool.QueueUserWorkItem(LoopPosition);
-
-            switch (OverlayType)
-            {
-                case OverlayType.UsersList:
-                    CreateUsersList();
-                    break;
-                case OverlayType.SteamProfile:
-                    CreateProfile();
-                    break;
-                case OverlayType.Chat:
-                    break;
-                case OverlayType.JoinTrade:
-                    break;
-                case OverlayType.Stats:
-                    break;
-                case OverlayType.Achievements:
-                    break;
-                case OverlayType.FriendAdd:
-                    break;
-                case OverlayType.FriendRemove:
-                    break;
-                case OverlayType.FriendRequestAccept:
-                    break;
-                case OverlayType.FriendRequestIgnore:
-                    break;
-                default:
-                    break;
-            }
-        }
     }
 }

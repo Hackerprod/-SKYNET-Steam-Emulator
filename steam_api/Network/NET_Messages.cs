@@ -10,7 +10,6 @@ namespace SKYNET.Network.Packets
     {
         public int MessageType { get; set; }
         public string ParsedBody { get; set; }
-
     }
 
     public class NET_Base
@@ -40,7 +39,7 @@ namespace SKYNET.Network.Packets
     {
         public uint AccountID { get; set; }
         public string Buffer { get; set; }
-        public uint IDRemote { get; set; }
+        public uint Sender { get; set; }
         public int P2PSendType { get; set; }
         public int Channel { get; set; }
     }
@@ -76,6 +75,13 @@ namespace SKYNET.Network.Packets
 
     public class NET_LobbyDataUpdate : NET_Base
     {
+        public ulong SteamIDLobby { get; set; }
+        public ulong SteamIDMember { get; set; }
+        public bool Success { get; set; }
+    }
+
+    public class NET_LobbyMetaDataUpdate : NET_Base
+    {
         public ulong LobbyID { get; set; }
         public string Key { get; set; }
         public string Value { get; set; }
@@ -94,7 +100,14 @@ namespace SKYNET.Network.Packets
         public ulong LobbyID { get; set; }
         public ulong SteamID { get; set; }
     }
-    
+
+    public class NET_LobbyGameserver : NET_Base
+    {
+        public ulong LobbyID { get; set; }
+        public ulong SteamID { get; set; }
+        public uint IP { get; set; }
+        public uint Port { get; set; }
+    }
 
     public enum MessageType : int
     {
@@ -104,12 +117,17 @@ namespace SKYNET.Network.Packets
         NET_AvatarResponse,
         NET_UserDataUpdated,
         NET_P2PPacket,
+
+        // Lobbies
         NET_LobbyListRequest,
         NET_LobbyListResponse,
         NET_LobbyJoinRequest,
         NET_LobbyJoinResponse,
         NET_LobbyDataUpdate,
+        NET_LobbyMetaDataUpdate,
         NET_LobbyChatUpdate,
-        NET_LobbyLeave
+        NET_LobbyLeave,
+        NET_LobbyGameserver,
+
     }
 }

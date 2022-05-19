@@ -17,7 +17,7 @@ namespace SKYNET.Network
         public int Port = 28880;
         public bool Started { get; private set; }
 
-        public event EventHandler<Socket> OnConnected;
+        public event EventHandler<ClientSocket> OnConnected;
         public event EventHandler<Socket> OnDisconnected;
         public event EventHandler<NetPacket> OnDataReceived;
 
@@ -55,8 +55,8 @@ namespace SKYNET.Network
             try
             {
                 Socket socket = ((Socket)ar.AsyncState).EndAccept(ar);
-                OnConnected?.Invoke(this, socket);
                 ClientSocket client = new ClientSocket(socket);
+                OnConnected?.Invoke(this, client);
                 client.OnDataReceived += Client_OnDataReceived;
                 client.BeginReceiving();
 
@@ -110,7 +110,7 @@ namespace SKYNET.Network
     }
     public class NetPacket
     {
-        public Socket Sender;
+        public ClientSocket Sender;
         public byte[] Data;
     }
 }

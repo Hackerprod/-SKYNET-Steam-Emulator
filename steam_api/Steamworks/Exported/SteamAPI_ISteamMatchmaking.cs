@@ -218,10 +218,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamMatchmaking_GetLobbyGameServer(IntPtr _, ulong steamIDLobby, uint punGameServerIP, uint punGameServerPort, ulong psteamIDGameServer)
+        public static bool SteamAPI_ISteamMatchmaking_GetLobbyGameServer(IntPtr _, ulong steamIDLobby, ref uint punGameServerIP, ref uint punGameServerPort, ref ulong psteamIDGameServer)
         {
             Write("SteamAPI_ISteamMatchmaking_GetLobbyGameServer");
-            return SteamEmulator.SteamMatchmaking.GetLobbyGameServer(steamIDLobby, punGameServerIP, punGameServerPort, psteamIDGameServer);
+            return SteamEmulator.SteamMatchmaking.GetLobbyGameServer(steamIDLobby, ref punGameServerIP, ref punGameServerPort, ref psteamIDGameServer);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

@@ -2128,9 +2128,9 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamMatchmaking_GetLobbyGameServer(ulong steamIDLobby, ref uint punGameServerIP, ref ushort punGameServerPort, ref ulong psteamIDGameServer)
+        public static bool ISteamMatchmaking_GetLobbyGameServer(ulong steamIDLobby, ref uint punGameServerIP, ref uint punGameServerPort, ref ulong psteamIDGameServer)
         {
-            return SteamEmulator.SteamMatchmaking.GetLobbyGameServer((ulong)steamIDLobby, punGameServerIP, punGameServerPort, (ulong)psteamIDGameServer);
+            return SteamEmulator.SteamMatchmaking.GetLobbyGameServer((ulong)steamIDLobby, ref punGameServerIP, ref punGameServerPort, ref psteamIDGameServer);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -2535,14 +2535,14 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamNetworking_IsP2PPacketAvailable(ref uint pcubMsgSize, int nChannel)
         {
-            return SteamEmulator.SteamNetworking.IsP2PPacketAvailable(pcubMsgSize, nChannel);
+            return SteamEmulator.SteamNetworking.IsP2PPacketAvailable(ref pcubMsgSize, nChannel);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamNetworking_ReadP2PPacket(IntPtr pubDest, uint cubDest, ref uint pcubMsgSize, ref ulong psteamIDRemote, int nChannel)
         //public static bool ISteamNetworking_ReadP2PPacket(ref byte[] pubDest, uint cubDest, ref uint pcubMsgSize, ref ulong psteamIDRemote, int nChannel)
         {
-            return SteamEmulator.SteamNetworking.ReadP2PPacket(pubDest, cubDest, pcubMsgSize, (ulong)psteamIDRemote, nChannel);
+            return SteamEmulator.SteamNetworking.ReadP2PPacket(pubDest, cubDest, ref pcubMsgSize, ref psteamIDRemote, nChannel);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -4223,14 +4223,14 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamGameServerNetworking_IsP2PPacketAvailable(ref uint pcubMsgSize, int nChannel)
         {
-            return SteamEmulator.SteamNetworking.IsP2PPacketAvailable(pcubMsgSize, nChannel);
+            return SteamEmulator.SteamNetworking.IsP2PPacketAvailable(ref pcubMsgSize, nChannel);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamGameServerNetworking_ReadP2PPacket(IntPtr pubDest, uint cubDest, ref uint pcubMsgSize, ref ulong psteamIDRemote, int nChannel)
         //public static bool ISteamGameServerNetworking_ReadP2PPacket(ref byte[] pubDest, uint cubDest, ref uint pcubMsgSize, ref ulong psteamIDRemote, int nChannel)
         {
-            return SteamEmulator.SteamNetworking.ReadP2PPacket(pubDest, cubDest, pcubMsgSize, (ulong)psteamIDRemote, nChannel);
+            return SteamEmulator.SteamNetworking.ReadP2PPacket(pubDest, cubDest, ref pcubMsgSize, ref psteamIDRemote, nChannel);
         }
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamGameServerNetworking_AcceptP2PSessionWithUser(ulong steamIDRemote)

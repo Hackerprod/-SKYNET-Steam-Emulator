@@ -44,12 +44,12 @@ namespace SKYNET.Managers
             {
                 if (SteamCallbacks.ContainsKey(callType))
                 {
-                    Write($"RegisterCallback: SteamCallbacks contains key {callType}");
+                    //Write($"RegisterCallback: SteamCallbacks contains key {callType}");
                     SteamCallbacks[callType] = sCallback;
                 }
                 else
                 {
-                    Write($"RegisterCallback: Creating new SteamCallbacks with key {callType}");
+                    //Write($"RegisterCallback: Creating new SteamCallbacks with key {callType}");
                     SteamCallbacks.TryAdd(callType, sCallback);
                 }
             });
@@ -67,12 +67,12 @@ namespace SKYNET.Managers
                     {
                         if (SteamCallbacks.ContainsKey(callType))
                         {
-                            Write($"RegisterCallResult: SteamCallbacks contains key {callType}");
+                            //Write($"RegisterCallResult: SteamCallbacks contains key {callType}");
                             SteamCallbacks[callType] = steamCallback;
                         }
                         else
                         {
-                            Write($"RegisterCallResult: Creating new SteamCallbacks with key {callType}");
+                            //Write($"RegisterCallResult: Creating new SteamCallbacks with key {callType}");
                             SteamCallbacks.TryAdd(callType, steamCallback);
                         }
                     });
