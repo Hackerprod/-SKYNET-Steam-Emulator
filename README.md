@@ -21,7 +21,7 @@ The project is in an initial stage, so it is not functional yet for some Games.
 ```
 User Stats manager         Save and Load user stats from local folder.
 Achievements manager       Save and Load user achievements from local folder.
-CSteamworks emulation      Rename the emu to **CSteamworks.dll** to emulate them.
+CSteamworks emulation      Rename the emu to CSteamworks.dll to emulate them.
 Multiplataform             Works with multiple game engines like Source 2, Unity 3D etc.
 Network communication      Network communication between clients through a configurable port.
 Overlay                    External Overlay for steam and game messages.
