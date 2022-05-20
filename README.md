@@ -7,7 +7,7 @@ The project is in an initial stage, so it is not functional yet for some Games.
 
 ## 📁 Directory structure
 ```
-📁 Game folder                     
+📁 Root game folder                     
 └──📁 SKYNET
    ├──📁 AvatarCache                  // Contains avatars cache
    ├──📁 Storage                      // Contains stats and achievements files
