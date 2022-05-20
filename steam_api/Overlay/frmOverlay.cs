@@ -29,6 +29,7 @@ namespace SKYNET.Overlay
         public frmOverlay()
         {
             InitializeComponent();
+            Visible = false;
         }
 
         public void ProcessOverlay(List<Types.SteamUser> users, OverlayType overlayType, ulong steamID)
@@ -102,12 +103,24 @@ namespace SKYNET.Overlay
 
         private void CreateUsersList()
         {
+            int x = 10;
+            int y = 10;
 
+            foreach (var user in Users)
+            {
+                var userControl = new SteamUserControl(user)
+                {
+                    Location = new Point(x , y),
+                };
+                PN_Container.Controls.Add(userControl);
+
+                if (x > 300) { x = 10; y += 90; } else x += 310;
+            }
         }
 
         private void CreateProfile()
         {
-            Types.SteamUser User = Users.Find(u => u.SteamId == UserSteamID);
+            Types.SteamUser User = Users.Find(u => u.SteamID == UserSteamID);
             if (User == null)
             {
                 ShowErrorMessage($"User with Steam id {UserSteamID} not found");
@@ -121,7 +134,7 @@ namespace SKYNET.Overlay
 
         private void CreateLobbyInvite()
         {
-            
+            CreateUsersList();
         }
 
         private void ShowErrorMessage(string msg)
@@ -186,5 +199,9 @@ namespace SKYNET.Overlay
         [DllImport("user32.dll")]
         private static extern IntPtr GetForegroundWindow();
 
+        private void FrmOverlay_Shown(object sender, EventArgs e)
+        {
+            Visible = true;
+        }
     }
 }

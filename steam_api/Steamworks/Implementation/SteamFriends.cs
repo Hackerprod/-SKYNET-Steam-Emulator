@@ -80,42 +80,42 @@ namespace SKYNET.Steamworks.Implementation
 
             Users.Add(new Types.SteamUser()
             {
-                AccountId = SteamEmulator.SteamID.AccountId,
-                GameId = SteamEmulator.AppId,
+                AccountID = SteamEmulator.SteamID.AccountId,
+                GameID = SteamEmulator.AppID,
                 HasFriend = false,
                 PersonaName = SteamEmulator.PersonaName,
-                SteamId = (ulong)SteamEmulator.SteamID,
+                SteamID = (ulong)SteamEmulator.SteamID,
                 IPAddress = NetworkManager.GetIPAddress().ToString()
             });
 
             #endregion
 
-            return;
+            //return;
             Users.Add(new Types.SteamUser()
             {
-                AccountId = 1001,
-                GameId = SteamEmulator.GameID,
+                AccountID = 1001,
+                GameID = SteamEmulator.GameID,
                 HasFriend = true,
                 PersonaName = "Yohel.com",
-                SteamId = (ulong)new CSteamID(1001),
+                SteamID = (ulong)new CSteamID(1001),
                 IPAddress = "10.31.0.1"
             });
             Users.Add(new Types.SteamUser()
             {
-                AccountId = 1002,
-                GameId = SteamEmulator.GameID,
+                AccountID = 1002,
+                GameID = SteamEmulator.GameID,
                 HasFriend = true,
                 PersonaName = "Elier",
-                SteamId = (ulong)new CSteamID(1002),
+                SteamID = (ulong)new CSteamID(1002),
                 IPAddress = "10.31.0.2"
             });
             Users.Add(new Types.SteamUser()
             {
-                AccountId = 1003,
-                GameId = SteamEmulator.GameID,
+                AccountID = 1003,
+                GameID = SteamEmulator.GameID,
                 HasFriend = true,
                 PersonaName = "BrolySSL",
-                SteamId = (ulong)new CSteamID(1003),
+                SteamID = (ulong)new CSteamID(1003),
                 IPAddress = "10.31.0.3"
             });
         }
@@ -148,17 +148,28 @@ namespace SKYNET.Steamworks.Implementation
 
         public void ActivateGameOverlayInviteDialog(ulong steamIDLobby)
         {
-            Write($"ActivateGameOverlayInviteDialog (Lobby SteamID = {steamIDLobby})");
-            OverlayType type = OverlayType.LobbyInvite;
-            var users = new List<SKYNET.Types.SteamUser>();
-            users.AddRange(Users);
-            if (modCommon.Overlay == null)
+            try
             {
-                modCommon.Overlay = new frmOverlay();
-                modCommon.Overlay.ProcessOverlay(users, type, steamIDLobby);
-                modCommon.Overlay.Show();
+                Write($"ActivateGameOverlayInviteDialog (Lobby SteamID = {steamIDLobby})");
+                OverlayType type = OverlayType.LobbyInvite;
+                Write("x1");
+                var users = new List<SKYNET.Types.SteamUser>();
+                users.AddRange(Users);
+                Write("x2");
+                if (modCommon.Overlay == null)
+                {
+                    modCommon.Overlay = new frmOverlay(); Write("x3");
+                    modCommon.Overlay.ProcessOverlay(users, type, steamIDLobby); Write("x4");
+                    modCommon.Overlay.Show();
+                    return;
+                }
+                Write("x5");
+                modCommon.Overlay.ProcessOverlay(users, type, steamIDLobby); Write("x6");
             }
-            modCommon.Overlay.ProcessOverlay(users, type, steamIDLobby);
+            catch (Exception ex)
+            {
+                Write(ex);
+            }
         }
 
         public void ActivateGameOverlayInviteDialogConnectString(string pchConnectString)
@@ -358,7 +369,7 @@ namespace SKYNET.Steamworks.Implementation
                     var friend = Friends[iFriend];
                     if (friend != null)
                     {
-                        Result = new CSteamID(friend.SteamId);
+                        Result = new CSteamID(friend.SteamID);
                     }
                 }
             });
@@ -415,7 +426,7 @@ namespace SKYNET.Steamworks.Implementation
             {
 
             });
-            if (steamIDFriend == (ulong)SteamEmulator.SteamID)
+            if (steamIDFriend == SteamEmulator.SteamID)
             {
                 pFriendGameInfo.GameID = (uint)SteamEmulator.GameID;
                 pFriendGameInfo.GameIP = 0;
@@ -433,7 +444,7 @@ namespace SKYNET.Steamworks.Implementation
                 }
                 else
                 {
-                    pFriendGameInfo.GameID = friend.GameId;
+                    pFriendGameInfo.GameID = friend.GameID;
                     pFriendGameInfo.GameIP = 0;
                     pFriendGameInfo.GamePort = 0;
                 }
@@ -455,7 +466,7 @@ namespace SKYNET.Steamworks.Implementation
             string Result = "Unknown";
             MutexHelper.Wait("Users", delegate
             {
-                if ((ulong)steamIDFriend == (ulong)SteamEmulator.SteamID)
+                if ((ulong)steamIDFriend == SteamEmulator.SteamID)
                 {
                     Result = SteamEmulator.PersonaName;
                 }
@@ -482,11 +493,11 @@ namespace SKYNET.Steamworks.Implementation
             EPersonaState Result = EPersonaState.k_EPersonaStateOnline;
             MutexHelper.Wait("Users", delegate
             {
-                if (steamIDFriend == (ulong)SteamEmulator.SteamID)
+                if (steamIDFriend == SteamEmulator.SteamID)
                 {
                     Result = EPersonaState.k_EPersonaStateOnline;
                 }
-                else if (Users.Find(f => f.SteamId == steamIDFriend) != null)
+                else if (Users.Find(f => f.SteamID == steamIDFriend) != null)
                 {
                     Result = EPersonaState.k_EPersonaStateOnline;
                 }
@@ -643,7 +654,7 @@ namespace SKYNET.Steamworks.Implementation
             var Result = "";
             MutexHelper.Wait("Users", delegate
             {
-                if (steamIDPlayer == (ulong)SteamEmulator.SteamID)
+                if (steamIDPlayer == SteamEmulator.SteamID)
                 {
                     Result = SteamEmulator.PersonaName;
                 }
@@ -843,8 +854,8 @@ namespace SKYNET.Steamworks.Implementation
             var user = GetUser(userSteamId);
             if (user != null)
             {
-                user.LobbyId = lobbySteamId;
-                if (userSteamId == (ulong)SteamEmulator.SteamID)
+                user.LobbyID = lobbySteamId;
+                if (userSteamId == SteamEmulator.SteamID)
                 {
                     NetworkManager.BroadcastStatusUpdated(user);
                 }
@@ -856,15 +867,15 @@ namespace SKYNET.Steamworks.Implementation
             var user = GetUser((ulong)new CSteamID(statusChanged.AccountID));
             if (user != null)
             {
-                user.LobbyId = statusChanged.LobbyID;
+                user.LobbyID = statusChanged.LobbyID;
                 if (user.PersonaName != statusChanged.PersonaName)
                 {
                     user.PersonaName = statusChanged.PersonaName;
-                    ReportUserChanged(user.SteamId, EPersonaChange.k_EPersonaChangeName);
+                    ReportUserChanged(user.SteamID, EPersonaChange.k_EPersonaChangeName);
                 }
-                if (user.LobbyId != statusChanged.LobbyID)
+                if (user.LobbyID != statusChanged.LobbyID)
                 {
-                    user.LobbyId = statusChanged.LobbyID;
+                    user.LobbyID = statusChanged.LobbyID;
                     // TODO: Update in SteamMatchmaking
                 }
             }
@@ -872,8 +883,8 @@ namespace SKYNET.Steamworks.Implementation
             {
                 user = new Types.SteamUser()
                 {
-                    AccountId = statusChanged.AccountID,
-                    SteamId = (ulong)new CSteamID(statusChanged.AccountID),
+                    AccountID = statusChanged.AccountID,
+                    SteamID = (ulong)new CSteamID(statusChanged.AccountID),
                     HasFriend = true,
                     PersonaName = statusChanged.PersonaName,
                     IPAddress = ipaddress
@@ -887,7 +898,7 @@ namespace SKYNET.Steamworks.Implementation
             Types.SteamUser user = default;
             MutexHelper.Wait("Users", delegate
             {
-                user = Users.Find(u => u.SteamId == steamID);
+                user = Users.Find(u => u.SteamID == steamID);
             });
             return user;
         }
@@ -939,9 +950,9 @@ namespace SKYNET.Steamworks.Implementation
                     user = new SKYNET.Types.SteamUser()
                     {
                         PersonaName = personaName,
-                        AccountId = accountID,
-                        SteamId = (ulong)steamID,
-                        GameId = appID,
+                        AccountID = accountID,
+                        SteamID = (ulong)steamID,
+                        GameID = appID,
                         IPAddress = senderAddress,
                         HasFriend = true
                     };

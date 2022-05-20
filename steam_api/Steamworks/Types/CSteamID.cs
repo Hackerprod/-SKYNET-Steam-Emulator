@@ -121,6 +121,16 @@ namespace SKYNET.Steamworks
         {
             return !(x.SteamID == y);
         }
+
+        public static bool operator ==(ulong y, CSteamID x)
+        {
+            return x.SteamID == y;
+        }
+
+        public static bool operator !=(ulong y, CSteamID x)
+        {
+            return !(x.SteamID == y);
+        }
     }
 }
 

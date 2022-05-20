@@ -126,7 +126,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public uint GetAppID()
         {
-            uint appId = SteamEmulator.AppId == 0 ? 570 : SteamEmulator.AppId;
+            uint appId = SteamEmulator.AppID == 0 ? 570 : SteamEmulator.AppID;
             Write($"GetAppID {appId}");
             return appId;
         }
@@ -156,25 +156,23 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool GetAPICallResult(SteamAPICall_t handle, IntPtr callback, int callback_size, int callback_expected, ref bool failed)
         {
+            bool Result = false;
             try
             {
-                Write($"GetAPICallResult (SteamAPICall = {handle}, Expected callback = {(CallbackType)callback_expected}");
-
                 if (CallbackManager.GetCallResult(handle, out var cCallback))
                 {
-                    Write($"Found callback {cCallback.Data.CallbackType}");
-                    callback_size = cCallback.Data.DataSize;
                     Marshal.StructureToPtr(cCallback.Data, callback, false);
                     failed = false;
+                    Result = true;
                 }
-                failed = true;
-                return false;
             }
             catch (Exception ex)
             {
                 Write($"GetAPICallResult {ex}");
             }
-            return false;
+            Write($"GetAPICallResult (SteamAPICall = {handle}, CallbackExpected = {(CallbackType)callback_expected}) = {Result}");
+            failed = true;
+            return Result;
         }
 
         public void RunFrame()

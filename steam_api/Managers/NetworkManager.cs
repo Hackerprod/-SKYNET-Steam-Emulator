@@ -4,6 +4,7 @@ using SKYNET.Helper.JSON;
 using SKYNET.Network;
 using SKYNET.Network.Packets;
 using SKYNET.Steamworks;
+using SKYNET.Steamworks.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -137,6 +138,7 @@ namespace SKYNET.Managers
                     {
                         SteamIDLobby = lobby.SteamID,
                         SteamIDUserChanged = lobbyLeave.SteamID,
+                        SteamIDMakingChange = lobbyLeave.SteamID,
                         ChatMemberStateChange = (int)EChatMemberStateChange.k_EChatMemberStateChangeLeft
                     };
 
@@ -159,6 +161,7 @@ namespace SKYNET.Managers
                     {
                         m_ulSteamIDLobby = lobbyLeave.LobbyID,
                         m_ulSteamIDUserChanged = lobbyLeave.SteamID,
+                        m_ulSteamIDMakingChange = lobbyLeave.SteamID,
                         m_rgfChatMemberStateChange = (int)EChatMemberStateChange.k_EChatMemberStateChangeLeft
                     };
                     CallbackManager.AddCallback(data);
@@ -226,6 +229,7 @@ namespace SKYNET.Managers
                         {
                             SteamIDLobby = lobby.SteamID,
                             SteamIDUserChanged = lobbyJoinRequest.SteamID,
+                            SteamIDMakingChange = lobbyJoinRequest.SteamID,
                             ChatMemberStateChange = (int)EChatMemberStateChange.k_EChatMemberStateChangeEntered
                         };
 
@@ -302,6 +306,11 @@ namespace SKYNET.Managers
                 if (lobbyListRequest != null)
                 {
                     if (lobbyListRequest.RequestID == SteamEmulator.SteamMatchmaking.CurrentRequest)
+                    {
+                        CloseSocket(socket, (MessageType)message.MessageType);
+                        return;
+                    }
+                    if (lobbyListRequest.AppID == SteamEmulator.AppID)
                     {
                         CloseSocket(socket, (MessageType)message.MessageType);
                         return;
@@ -498,7 +507,7 @@ namespace SKYNET.Managers
             {
                 PersonaName = user.PersonaName,
                 AccountID = (uint)SteamEmulator.SteamID.AccountId,
-                LobbyID = user.LobbyId.GetAccountID()
+                LobbyID = user.LobbyID.GetAccountID()
             };
 
             NetworkMessage message = new NetworkMessage()
@@ -599,6 +608,7 @@ namespace SKYNET.Managers
         {
             NET_LobbyListRequest lobbyListRequest = new NET_LobbyListRequest()
             {
+                AppID = SteamEmulator.AppID,
                 RequestID = currentRequest
             };
 
@@ -622,6 +632,29 @@ namespace SKYNET.Managers
             NetworkMessage message = CreateNetworkMessage(announce, MessageType.NET_Announce);
 
             SendBroadcast(message);
+        }
+
+        public static void SendLobbyDataUpdate(ulong SteamID, LobbyDataUpdate_t lobby)
+        {
+            NET_LobbyDataUpdate lobbyDataUpdate = new NET_LobbyDataUpdate()
+            {
+                SteamIDLobby = lobby.m_ulSteamIDLobby,
+                SteamIDMember = lobby.m_ulSteamIDMember,
+                Success = lobby.m_bSuccess
+            };
+
+            NetworkMessage message = new NetworkMessage()
+            {
+                MessageType = (int)MessageType.NET_LobbyChatUpdate,
+                ParsedBody = lobbyDataUpdate.ToJson()
+            };
+
+            var user = SteamEmulator.SteamFriends.GetUser(SteamID);
+            if (user == null)
+            {
+                return;
+            }
+            SendTo(user.IPAddress, message);
         }
 
         private static void AnnounceTo(string remoteAddress)

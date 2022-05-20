@@ -80,7 +80,7 @@ namespace SKYNET.Helper
                 foreach (var item in IniParser["Game Settings"].Settings)
                     if (item.Key == "AppId")
                         if (uint.TryParse((string)item.Value, out uint appId))
-                            SteamEmulator.AppId = appId;
+                            SteamEmulator.AppID = appId;
 
                 SteamEmulator.SendLog = (bool)IniParser["Log Settings"]["File"];
                 SteamEmulator.ConsoleLog = (bool)IniParser["Log Settings"]["Console"];

@@ -71,7 +71,7 @@ namespace SKYNET.Steamworks.Exported
         public static bool RestartAppIfNecessary(AppId_t unOwnAppID)
         {
             Write("RestartAppIfNecessary");
-            SteamEmulator.AppId = unOwnAppID;
+            SteamEmulator.AppID = unOwnAppID;
             return false;
         }
 

@@ -15,6 +15,12 @@ using System.Windows.Forms;
 
 public partial class modCommon
 {
+#if WIN32
+        public const int StructPackSize = 4;
+#else
+    public const int StructPackSize = 8;
+#endif
+
     public static bool LogToFile { get; set; }
 
     private static bool ConsoleEnabled;

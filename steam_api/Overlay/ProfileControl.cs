@@ -19,14 +19,14 @@ namespace SKYNET.Overlay
             InitializeComponent();
 
             LB_PersonaName.Text = User.PersonaName;
-            LB_AccountID.Text = User.AccountId.ToString();
-            LB_SteamID.Text = User.SteamId.ToString();
+            LB_AccountID.Text = User.AccountID.ToString();
+            LB_SteamID.Text = User.SteamID.ToString();
             LB_IPAddress.Text = User.IPAddress.ToString();
-            LB_GameID.Text = User.GameId.ToString();
+            LB_GameID.Text = User.GameID.ToString();
 
             try
             {
-                var avatarBytes = SteamEmulator.SteamFriends.GetAvatar(User.SteamId);
+                var avatarBytes = SteamEmulator.SteamFriends.GetAvatar(User.SteamID);
                 if (avatarBytes != null && avatarBytes.Length > 0)
                 {
                     var bitmap = ImageHelper.ImageFromBytes(avatarBytes);

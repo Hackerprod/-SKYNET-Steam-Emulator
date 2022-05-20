@@ -134,7 +134,7 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamAPI_RestartAppIfNecessary(uint appId)
         {
             Write($"SteamAPI_RestartAppIfNecessary called {appId}");
-            SteamEmulator.AppId = appId;
+            SteamEmulator.AppID = appId;
             return false;
         }
 
@@ -243,7 +243,7 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamAPI_RestartApp(uint appid)
         {
             Write($"SteamAPI_RestartApp");
-            SteamEmulator.AppId = appid;
+            SteamEmulator.AppID = appid;
             return false;
         }
 

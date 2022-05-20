@@ -44,7 +44,7 @@ public class SteamEmulator
     public static CSteamID SteamID;
     public static CSteamID SteamID_GS;
     public static uint GameID;
-    public static uint AppId;
+    public static uint AppID;
     public static bool Initialized;
     public static bool Initializing;
 
@@ -259,7 +259,7 @@ public class SteamEmulator
                             else
                             {
                                 AppID appID = iPlugin.Initialize();
-                                if (appID == AppId)
+                                if (appID == AppID)
                                 {
                                     GameCoordinatorPlugin = iPlugin;
                                     GameCoordinatorPlugin.IsMessageAvailable = IsMessageAvailable;
@@ -327,7 +327,7 @@ public class SteamEmulator
             {
                 if (Hooked)
                 {
-                    OnMessage?.Invoke(Instance, new GameMessage(AppId, sender, msg));
+                    OnMessage?.Invoke(Instance, new GameMessage(AppID, sender, msg));
                     lastMsg = msg.ToString();
                 }
 

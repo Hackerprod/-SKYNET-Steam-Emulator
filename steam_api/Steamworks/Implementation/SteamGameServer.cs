@@ -38,8 +38,8 @@ namespace SKYNET.Steamworks.Implementation
             ServerData.AppId = nGameAppId;
             ServerData.VersionString = pchVersionString;
 
-            if (SteamEmulator.AppId == 0)
-                SteamEmulator.AppId = nGameAppId;
+            if (SteamEmulator.AppID == 0)
+                SteamEmulator.AppID = nGameAppId;
 
             SteamServersConnected_t data = new SteamServersConnected_t();
             CallbackManager.AddCallback(data);

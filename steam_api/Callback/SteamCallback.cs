@@ -52,7 +52,6 @@ namespace SKYNET.Callback
         {
             IntPtr pvParam = Marshal.AllocHGlobal(data.DataSize);
             Marshal.StructureToPtr(data, pvParam, false);
-
             Run(pvParam);
         }
 
@@ -69,19 +68,6 @@ namespace SKYNET.Callback
             {
                 Run(pvParam);
             }
-
-
-            //SKYNET.Callback.SteamAPICallCompleted_t completedData = new SKYNET.Callback.SteamAPICallCompleted_t()
-            //{
-            //    m_hAsyncCall = hSteamAPICall,
-            //    m_iCallback = (int)data.CallbackType,
-            //    m_cubParam = (uint)data.DataSize
-            //};
-
-            //IntPtr pvParam2 = Marshal.AllocHGlobal(completedData.DataSize);
-            //Marshal.StructureToPtr(completedData, pvParam2, false);
-            //Run(pvParam2, bIOFailure, hSteamAPICall);
-            //Run(pvParam2);
         }
 
         public void Run(IntPtr pvParam)
@@ -114,9 +100,18 @@ namespace SKYNET.Callback
         [StructLayout(LayoutKind.Sequential)]
         public struct CCallResult
         {
-            public CCallbackBaseVTable.RunCRDel m_RunCallResult;
-            public CCallbackBaseVTable.RunCBDel m_RunCallback;
-            public IntPtr m_GetCallbackSizeBytes;
+            public RunCallResultDelegate m_RunCallResult;
+            public RunCallbackDelegate m_RunCallback;
+            public GetCallbackSizeBytesDel m_GetCallbackSizeBytes;
+
+            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+            public delegate void RunCallbackDelegate(IntPtr _, IntPtr pvParam);
+
+            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+            public delegate void RunCallResultDelegate(IntPtr _, IntPtr pvParam, [MarshalAs(UnmanagedType.I1)] bool bIOFailure, ulong hSteamAPICall);
+
+            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+            public delegate int GetCallbackSizeBytesDel(IntPtr _);
         }
     }
 

@@ -304,7 +304,7 @@ namespace SKYNET.Steamworks.Implementation
 
             UserAchievementStored_t data = new UserAchievementStored_t()
             {
-                m_nGameID = SteamEmulator.AppId,
+                m_nGameID = SteamEmulator.AppID,
                 m_bGroupAchievement = false,
                 m_rgchAchievementName = Encoding.UTF8.GetBytes(pchName),
                 m_nCurProgress = Archived ? nCurProgress : 0,
@@ -380,7 +380,7 @@ namespace SKYNET.Steamworks.Implementation
             Write($"GetUserAchievement (SteamID: {steamIDUser}, Name: {pchName})");
             bool Result = false;
             bool Archived = false;
-            if (steamIDUser == (ulong)SteamEmulator.SteamID)
+            if (steamIDUser == SteamEmulator.SteamID)
             {
                 MutexHelper.Wait("Achievements", delegate
                 {

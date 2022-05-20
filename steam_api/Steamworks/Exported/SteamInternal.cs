@@ -43,7 +43,7 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamInternal_GameServer_Init(uint unIP, int usPort, int usGamePort, uint usQueryPort, uint eServerMode, string pchVersionString)
         {
             Write($"SteamInternal_GameServer_Init {pchVersionString}");
-            return SteamEmulator.SteamGameServer.InitGameServer(unIP, usPort, (int)usQueryPort, eServerMode, SteamEmulator.AppId, pchVersionString);
+            return SteamEmulator.SteamGameServer.InitGameServer(unIP, usPort, (int)usQueryPort, eServerMode, SteamEmulator.AppID, pchVersionString);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

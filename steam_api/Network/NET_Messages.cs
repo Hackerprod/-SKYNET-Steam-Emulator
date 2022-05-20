@@ -53,6 +53,7 @@ namespace SKYNET.Network.Packets
 
     public class NET_LobbyListRequest : NET_Base
     {
+        public uint AppID { get; set; }
         public uint RequestID { get; set; }
     }
 

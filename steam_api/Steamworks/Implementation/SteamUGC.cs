@@ -748,8 +748,8 @@ namespace SKYNET.Steamworks.Implementation
                 pDetails.m_eResult = EResult.k_EResultOK;
                 pDetails.m_nPublishedFileId = id;
                 pDetails.m_eFileType = EWorkshopFileType.k_EWorkshopFileTypeCommunity;
-                pDetails.m_nCreatorAppID = SteamEmulator.AppId;
-                pDetails.m_nConsumerAppID = SteamEmulator.AppId;
+                pDetails.m_nCreatorAppID = SteamEmulator.AppID;
+                pDetails.m_nConsumerAppID = SteamEmulator.AppID;
 
                 Marshal.StructureToPtr(pDetails, ptrDetails, false);
             }

@@ -28,12 +28,14 @@ namespace SKYNET.Callback
         public bool Called { get; set; }
         public bool ReadyToCall { get; set; }
         public DateTime Time { get; set; }
+        public bool CallComplete { get; set; }
 
-        public CallbackMessage(ICallbackData data, bool readyToCall = true)
+        public CallbackMessage(ICallbackData data, bool readyToCall = true, bool callComplete = false)
         {
             Data = data;
             ReadyToCall = readyToCall;
             Time = DateTime.Now;
+            CallComplete = callComplete;
         }
 
         public bool TimedOut()
@@ -53,11 +55,11 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct SteamServerConnectFailure_t : ICallbackData
+    public struct SteamServerConnectFailure_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
+        public EResult Result; // m_eResult EResult
         [MarshalAs(UnmanagedType.I1)]
-        internal bool StillRetrying; // m_bStillRetrying bool
+        public bool StillRetrying; // m_bStillRetrying bool
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SteamServerConnectFailure_t));
@@ -67,9 +69,9 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct SteamServersDisconnected_t : ICallbackData
+    public struct SteamServersDisconnected_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
+        public EResult Result; // m_eResult EResult
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SteamServersDisconnected_t));
@@ -79,13 +81,13 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct ClientGameServerDeny_t : ICallbackData
+    public struct ClientGameServerDeny_t : ICallbackData
     {
-        internal uint m_uAppID; // m_uAppID uint32
-        internal uint m_unGameServerIP; // m_unGameServerIP uint32
-        internal ushort m_usGameServerPort; // m_usGameServerPort uint16
-        internal ushort m_bSecure; // m_bSecure uint16
-        internal uint m_uReason; // m_uReason uint32
+        public uint m_uAppID; // m_uAppID uint32
+        public uint m_unGameServerIP; // m_unGameServerIP uint32
+        public ushort m_usGameServerPort; // m_usGameServerPort uint16
+        public ushort m_bSecure; // m_bSecure uint16
+        public uint m_uReason; // m_uReason uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(ClientGameServerDeny_t));
@@ -95,16 +97,16 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct IPCFailure_t : ICallbackData
+    public struct IPCFailure_t : ICallbackData
     {
-        internal byte m_eFailureType; // m_eFailureType uint8
+        public byte m_eFailureType; // m_eFailureType uint8
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(IPCFailure_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.IPCFailure;
         #endregion
-        internal enum EFailureType : int
+        public enum EFailureType : int
         {
             FlushedCallbackQueue = 0,
             PipeFail = 1,
@@ -113,7 +115,7 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct LicensesUpdated_t : ICallbackData
+    public struct LicensesUpdated_t : ICallbackData
     {
 
         #region SteamCallback
@@ -124,11 +126,11 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
-    internal struct ValidateAuthTicketResponse_t : ICallbackData
+    public struct ValidateAuthTicketResponse_t : ICallbackData
     {
-        internal ulong m_SteamID; // m_SteamID CSteamID
-        internal EAuthSessionResponse m_eAuthSessionResponse; // m_eAuthSessionResponse EAuthSessionResponse
-        internal ulong m_OwnerSteamID; // m_OwnerSteamID CSteamID
+        public ulong m_SteamID; // m_SteamID CSteamID
+        public EAuthSessionResponse m_eAuthSessionResponse; // m_eAuthSessionResponse EAuthSessionResponse
+        public ulong m_OwnerSteamID; // m_OwnerSteamID CSteamID
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(ValidateAuthTicketResponse_t));
@@ -138,11 +140,11 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct MicroTxnAuthorizationResponse_t : ICallbackData
+    public struct MicroTxnAuthorizationResponse_t : ICallbackData
     {
-        internal uint m_unAppID; // m_unAppID uint32
-        internal ulong m_ulOrderID; // m_ulOrderID uint64
-        internal byte m_bAuthorized; // m_bAuthorized uint8
+        public uint m_unAppID; // m_unAppID uint32
+        public ulong m_ulOrderID; // m_ulOrderID uint64
+        public byte m_bAuthorized; // m_bAuthorized uint8
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(MicroTxnAuthorizationResponse_t));
@@ -152,9 +154,9 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct EncryptedAppTicketResponse_t : ICallbackData
+    public struct EncryptedAppTicketResponse_t : ICallbackData
     {
-        internal EResult m_eResult; // m_eResult EResult
+        public EResult m_eResult; // m_eResult EResult
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(EncryptedAppTicketResponse_t));
@@ -164,10 +166,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct GetAuthSessionTicketResponse_t : ICallbackData
+    public struct GetAuthSessionTicketResponse_t : ICallbackData
     {
-        internal uint AuthTicket; // m_hAuthTicket HAuthTicket
-        internal EResult Result; // m_eResult EResult
+        public uint AuthTicket; // m_hAuthTicket HAuthTicket
+        public EResult Result; // m_eResult EResult
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GetAuthSessionTicketResponse_t));
@@ -177,11 +179,11 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct GameWebCallback_t : ICallbackData
+    public struct GameWebCallback_t : ICallbackData
     {
-        internal string URLUTF8() => System.Text.Encoding.UTF8.GetString(URL, 0, System.Array.IndexOf<byte>(URL, 0));
+        public string URLUTF8() => System.Text.Encoding.UTF8.GetString(URL, 0, System.Array.IndexOf<byte>(URL, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)] // byte[] m_szURL
-        internal byte[] URL; // m_szURL char [256]
+        public byte[] URL; // m_szURL char [256]
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GameWebCallback_t));
@@ -191,11 +193,11 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct StoreAuthURLResponse_t : ICallbackData
+    public struct StoreAuthURLResponse_t : ICallbackData
     {
-        internal string URLUTF8() => System.Text.Encoding.UTF8.GetString(URL, 0, System.Array.IndexOf<byte>(URL, 0));
+        public string URLUTF8() => System.Text.Encoding.UTF8.GetString(URL, 0, System.Array.IndexOf<byte>(URL, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 512)] // byte[] m_szURL
-        internal byte[] URL; // m_szURL char [512]
+        public byte[] URL; // m_szURL char [512]
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(StoreAuthURLResponse_t));
@@ -205,14 +207,14 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct MarketEligibilityResponse_t : ICallbackData
+    public struct MarketEligibilityResponse_t : ICallbackData
     {
         [MarshalAs(UnmanagedType.I1)]
-        internal bool Allowed; // m_bAllowed bool
-        internal MarketNotAllowedReasonFlags NotAllowedReason; // m_eNotAllowedReason EMarketNotAllowedReasonFlags
-        internal uint TAllowedAtTime; // m_rtAllowedAtTime RTime32
-        internal int CdaySteamGuardRequiredDays; // m_cdaySteamGuardRequiredDays int
-        internal int CdayNewDeviceCooldown; // m_cdayNewDeviceCooldown int
+        public bool Allowed; // m_bAllowed bool
+        public MarketNotAllowedReasonFlags NotAllowedReason; // m_eNotAllowedReason EMarketNotAllowedReasonFlags
+        public uint TAllowedAtTime; // m_rtAllowedAtTime RTime32
+        public int CdaySteamGuardRequiredDays; // m_cdaySteamGuardRequiredDays int
+        public int CdayNewDeviceCooldown; // m_cdayNewDeviceCooldown int
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(MarketEligibilityResponse_t));
@@ -222,17 +224,17 @@ namespace SKYNET.Callback
     }
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct DurationControl_t : ICallbackData
+    //public struct DurationControl_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal AppId Appid; // m_appid AppId_t
+    //    public EResult Result; // m_eResult EResult
+    //    public AppId Appid; // m_appid AppId_t
     //    [MarshalAs(UnmanagedType.I1)]
-    //    internal bool Applicable; // m_bApplicable bool
-    //    internal int CsecsLast5h; // m_csecsLast5h int32
-    //    internal DurationControlProgress Progress; // m_progress EDurationControlProgress
-    //    internal DurationControlNotification Otification; // m_notification EDurationControlNotification
-    //    internal int CsecsToday; // m_csecsToday int32
-    //    internal int CsecsRemaining; // m_csecsRemaining int32
+    //    public bool Applicable; // m_bApplicable bool
+    //    public int CsecsLast5h; // m_csecsLast5h int32
+    //    public DurationControlProgress Progress; // m_progress EDurationControlProgress
+    //    public DurationControlNotification Otification; // m_notification EDurationControlNotification
+    //    public int CsecsToday; // m_csecsToday int32
+    //    public int CsecsRemaining; // m_csecsRemaining int32
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(DurationControl_t));
@@ -242,10 +244,10 @@ namespace SKYNET.Callback
     //}
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct PersonaStateChange_t : ICallbackData
+    public struct PersonaStateChange_t : ICallbackData
     {
-        internal ulong m_ulSteamID; // m_ulSteamID uint64
-        internal int m_nChangeFlags; // m_nChangeFlags int
+        public ulong m_ulSteamID; // m_ulSteamID uint64
+        public int m_nChangeFlags; // m_nChangeFlags int
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(PersonaStateChange_t));
@@ -255,9 +257,9 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct GameOverlayActivated_t : ICallbackData
+    public struct GameOverlayActivated_t : ICallbackData
     {
-        internal byte Active; // m_bActive uint8
+        public byte Active; // m_bActive uint8
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GameOverlayActivated_t));
@@ -267,14 +269,14 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct GameServerChangeRequested_t : ICallbackData
+    public struct GameServerChangeRequested_t : ICallbackData
     {
-        internal string ServerUTF8() => System.Text.Encoding.UTF8.GetString(m_rgchServer, 0, System.Array.IndexOf<byte>(m_rgchServer, 0));
+        public string ServerUTF8() => System.Text.Encoding.UTF8.GetString(m_rgchServer, 0, System.Array.IndexOf<byte>(m_rgchServer, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)] // byte[] m_rgchServer
-        internal byte[] m_rgchServer; // m_rgchServer char [64]
-        internal string PasswordUTF8() => System.Text.Encoding.UTF8.GetString(m_rgchPassword, 0, System.Array.IndexOf<byte>(m_rgchPassword, 0));
+        public byte[] m_rgchServer; // m_rgchServer char [64]
+        public string PasswordUTF8() => System.Text.Encoding.UTF8.GetString(m_rgchPassword, 0, System.Array.IndexOf<byte>(m_rgchPassword, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)] // byte[] m_rgchPassword
-        internal byte[] m_rgchPassword; // m_rgchPassword char [64]
+        public byte[] m_rgchPassword; // m_rgchPassword char [64]
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GameServerChangeRequested_t));
@@ -284,10 +286,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
-    internal struct GameLobbyJoinRequested_t : ICallbackData
+    public struct GameLobbyJoinRequested_t : ICallbackData
     {
-        internal CSteamID m_steamIDLobby; // m_steamIDLobby CSteamID
-        internal CSteamID m_steamIDFriend; // m_steamIDFriend CSteamID
+        public CSteamID m_steamIDLobby; // m_steamIDLobby CSteamID
+        public CSteamID m_steamIDFriend; // m_steamIDFriend CSteamID
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GameLobbyJoinRequested_t));
@@ -297,12 +299,12 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct AvatarImageLoaded_t : ICallbackData
+    public struct AvatarImageLoaded_t : ICallbackData
     {
-        internal ulong SteamID; // m_steamID CSteamID
-        internal int Image; // m_iImage int
-        internal int Wide; // m_iWide int
-        internal int Tall; // m_iTall int
+        public ulong SteamID; // m_steamID CSteamID
+        public int Image; // m_iImage int
+        public int Wide; // m_iWide int
+        public int Tall; // m_iTall int
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(AvatarImageLoaded_t));
@@ -312,11 +314,11 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct ClanOfficerListResponse_t : ICallbackData
+    public struct ClanOfficerListResponse_t : ICallbackData
     {
-        internal ulong SteamIDClan; // m_steamIDClan CSteamID
-        internal int COfficers; // m_cOfficers int
-        internal byte Success; // m_bSuccess uint8
+        public ulong SteamIDClan; // m_steamIDClan CSteamID
+        public int COfficers; // m_cOfficers int
+        public byte Success; // m_bSuccess uint8
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(ClanOfficerListResponse_t));
@@ -326,10 +328,10 @@ namespace SKYNET.Callback
     }
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct FriendRichPresenceUpdate_t : ICallbackData
+    //public struct FriendRichPresenceUpdate_t : ICallbackData
     //{
-    //    internal ulong SteamIDFriend; // m_steamIDFriend CSteamID
-    //    internal AppId AppID; // m_nAppID AppId_t
+    //    public ulong SteamIDFriend; // m_steamIDFriend CSteamID
+    //    public AppId AppID; // m_nAppID AppId_t
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(FriendRichPresenceUpdate_t));
@@ -339,12 +341,12 @@ namespace SKYNET.Callback
     //}
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct GameRichPresenceJoinRequested_t : ICallbackData
+    public struct GameRichPresenceJoinRequested_t : ICallbackData
     {
-        internal ulong SteamIDFriend; // m_steamIDFriend CSteamID
-        internal string ConnectUTF8() => System.Text.Encoding.UTF8.GetString(Connect, 0, System.Array.IndexOf<byte>(Connect, 0));
+        public ulong SteamIDFriend; // m_steamIDFriend CSteamID
+        public string ConnectUTF8() => System.Text.Encoding.UTF8.GetString(Connect, 0, System.Array.IndexOf<byte>(Connect, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)] // byte[] m_rgchConnect
-        internal byte[] Connect; // m_rgchConnect char [256]
+        public byte[] Connect; // m_rgchConnect char [256]
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GameRichPresenceJoinRequested_t));
@@ -354,11 +356,11 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
-    internal struct GameConnectedClanChatMsg_t : ICallbackData
+    public struct GameConnectedClanChatMsg_t : ICallbackData
     {
-        internal ulong SteamIDClanChat; // m_steamIDClanChat CSteamID
-        internal ulong SteamIDUser; // m_steamIDUser CSteamID
-        internal int MessageID; // m_iMessageID int
+        public ulong SteamIDClanChat; // m_steamIDClanChat CSteamID
+        public ulong SteamIDUser; // m_steamIDUser CSteamID
+        public int MessageID; // m_iMessageID int
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GameConnectedClanChatMsg_t));
@@ -368,10 +370,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
-    internal struct GameConnectedChatJoin_t : ICallbackData
+    public struct GameConnectedChatJoin_t : ICallbackData
     {
-        internal ulong SteamIDClanChat; // m_steamIDClanChat CSteamID
-        internal ulong SteamIDUser; // m_steamIDUser CSteamID
+        public ulong SteamIDClanChat; // m_steamIDClanChat CSteamID
+        public ulong SteamIDUser; // m_steamIDUser CSteamID
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GameConnectedChatJoin_t));
@@ -381,14 +383,14 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
-    internal struct GameConnectedChatLeave_t : ICallbackData
+    public struct GameConnectedChatLeave_t : ICallbackData
     {
-        internal ulong SteamIDClanChat; // m_steamIDClanChat CSteamID
-        internal ulong SteamIDUser; // m_steamIDUser CSteamID
+        public ulong SteamIDClanChat; // m_steamIDClanChat CSteamID
+        public ulong SteamIDUser; // m_steamIDUser CSteamID
         [MarshalAs(UnmanagedType.I1)]
-        internal bool Kicked; // m_bKicked bool
+        public bool Kicked; // m_bKicked bool
         [MarshalAs(UnmanagedType.I1)]
-        internal bool Dropped; // m_bDropped bool
+        public bool Dropped; // m_bDropped bool
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GameConnectedChatLeave_t));
@@ -398,10 +400,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct DownloadClanActivityCountsResult_t : ICallbackData
+    public struct DownloadClanActivityCountsResult_t : ICallbackData
     {
         [MarshalAs(UnmanagedType.I1)]
-        internal bool Success; // m_bSuccess bool
+        public bool Success; // m_bSuccess bool
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(DownloadClanActivityCountsResult_t));
@@ -411,10 +413,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct JoinClanChatRoomCompletionResult_t : ICallbackData
+    public struct JoinClanChatRoomCompletionResult_t : ICallbackData
     {
-        internal ulong SteamIDClanChat; // m_steamIDClanChat CSteamID
-        internal EChatRoomEnterResponse ChatRoomEnterResponse; // m_eChatRoomEnterResponse EChatRoomEnterResponse
+        public ulong SteamIDClanChat; // m_steamIDClanChat CSteamID
+        public EChatRoomEnterResponse ChatRoomEnterResponse; // m_eChatRoomEnterResponse EChatRoomEnterResponse
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(JoinClanChatRoomCompletionResult_t));
@@ -424,10 +426,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct GameConnectedFriendChatMsg_t : ICallbackData
+    public struct GameConnectedFriendChatMsg_t : ICallbackData
     {
-        internal ulong SteamIDUser; // m_steamIDUser CSteamID
-        internal int MessageID; // m_iMessageID int
+        public ulong SteamIDUser; // m_steamIDUser CSteamID
+        public int MessageID; // m_iMessageID int
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GameConnectedFriendChatMsg_t));
@@ -437,11 +439,11 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
-    internal struct FriendsGetFollowerCount_t : ICallbackData
+    public struct FriendsGetFollowerCount_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
-        internal ulong SteamID; // m_steamID CSteamID
-        internal int Count; // m_nCount int
+        public EResult Result; // m_eResult EResult
+        public ulong SteamID; // m_steamID CSteamID
+        public int Count; // m_nCount int
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(FriendsGetFollowerCount_t));
@@ -451,12 +453,12 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
-    internal struct FriendsIsFollowing_t : ICallbackData
+    public struct FriendsIsFollowing_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
-        internal ulong SteamID; // m_steamID CSteamID
+        public EResult Result; // m_eResult EResult
+        public ulong SteamID; // m_steamID CSteamID
         [MarshalAs(UnmanagedType.I1)]
-        internal bool IsFollowing; // m_bIsFollowing bool
+        public bool IsFollowing; // m_bIsFollowing bool
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(FriendsIsFollowing_t));
@@ -466,13 +468,13 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
-    internal struct FriendsEnumerateFollowingList_t : ICallbackData
+    public struct FriendsEnumerateFollowingList_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
+        public EResult Result; // m_eResult EResult
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50, ArraySubType = UnmanagedType.U8)]
-        internal ulong[] GSteamID; // m_rgSteamID CSteamID [50]
-        internal int ResultsReturned; // m_nResultsReturned int32
-        internal int TotalResultCount; // m_nTotalResultCount int32
+        public ulong[] GSteamID; // m_rgSteamID CSteamID [50]
+        public int ResultsReturned; // m_nResultsReturned int32
+        public int TotalResultCount; // m_nTotalResultCount int32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(FriendsEnumerateFollowingList_t));
@@ -482,13 +484,13 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct SetPersonaNameResponse_t : ICallbackData
+    public struct SetPersonaNameResponse_t : ICallbackData
     {
         [MarshalAs(UnmanagedType.I1)]
-        internal bool m_bSuccess; // m_bSuccess bool
+        public bool m_bSuccess; // m_bSuccess bool
         [MarshalAs(UnmanagedType.I1)]
-        internal bool m_bLocalSuccess; // m_bLocalSuccess bool
-        internal EResult m_result; // m_result EResult
+        public bool m_bLocalSuccess; // m_bLocalSuccess bool
+        public EResult m_result; // m_result EResult
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SetPersonaNameResponse_t));
@@ -498,7 +500,7 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct UnreadChatMessagesChanged_t : ICallbackData
+    public struct UnreadChatMessagesChanged_t : ICallbackData
     {
 
         #region SteamCallback
@@ -509,11 +511,11 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct OverlayBrowserProtocolNavigation_t : ICallbackData
+    public struct OverlayBrowserProtocolNavigation_t : ICallbackData
     {
-        internal string RgchURIUTF8() => System.Text.Encoding.UTF8.GetString(RgchURI, 0, System.Array.IndexOf<byte>(RgchURI, 0));
+        public string RgchURIUTF8() => System.Text.Encoding.UTF8.GetString(RgchURI, 0, System.Array.IndexOf<byte>(RgchURI, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024)] // byte[] rgchURI
-        internal byte[] RgchURI; // rgchURI char [1024]
+        public byte[] RgchURI; // rgchURI char [1024]
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(OverlayBrowserProtocolNavigation_t));
@@ -523,7 +525,7 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct IPCountry_t : ICallbackData
+    public struct IPCountry_t : ICallbackData
     {
 
         #region SteamCallback
@@ -534,9 +536,9 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct LowBatteryPower_t : ICallbackData
+    public struct LowBatteryPower_t : ICallbackData
     {
-        internal byte MinutesBatteryLeft; // m_nMinutesBatteryLeft uint8
+        public byte MinutesBatteryLeft; // m_nMinutesBatteryLeft uint8
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(LowBatteryPower_t));
@@ -546,11 +548,11 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct SteamAPICallCompleted_t : ICallbackData
+    public struct SteamAPICallCompleted_t : ICallbackData
     {
-        internal SteamAPICall_t m_hAsyncCall; // m_hAsyncCall SteamAPICall_t
-        internal int m_iCallback; // m_iCallback int
-        internal UInt32 m_cubParam; // m_cubParam uint32
+        public SteamAPICall_t m_hAsyncCall; // m_hAsyncCall SteamAPICall_t
+        public int m_iCallback; // m_iCallback int
+        public UInt32 m_cubParam; // m_cubParam uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SteamAPICallCompleted_t));
@@ -560,7 +562,7 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct SteamShutdown_t : ICallbackData
+    public struct SteamShutdown_t : ICallbackData
     {
 
         #region SteamCallback
@@ -571,9 +573,9 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct CheckFileSignature_t : ICallbackData
+    public struct CheckFileSignature_t : ICallbackData
     {
-        internal CheckFileSignature CheckFileSignature; // m_eCheckFileSignature ECheckFileSignature
+        public CheckFileSignature CheckFileSignature; // m_eCheckFileSignature ECheckFileSignature
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(CheckFileSignature_t));
@@ -583,11 +585,11 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct GamepadTextInputDismissed_t : ICallbackData
+    public struct GamepadTextInputDismissed_t : ICallbackData
     {
         [MarshalAs(UnmanagedType.I1)]
-        internal bool Submitted; // m_bSubmitted bool
-        internal uint SubmittedText; // m_unSubmittedText uint32
+        public bool Submitted; // m_bSubmitted bool
+        public uint SubmittedText; // m_unSubmittedText uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GamepadTextInputDismissed_t));
@@ -597,7 +599,7 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct AppResumingFromSuspend_t : ICallbackData
+    public struct AppResumingFromSuspend_t : ICallbackData
     {
 
         #region SteamCallback
@@ -608,7 +610,7 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct FloatingGamepadTextInputDismissed_t : ICallbackData
+    public struct FloatingGamepadTextInputDismissed_t : ICallbackData
     {
 
         #region SteamCallback
@@ -619,16 +621,16 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct FavoritesListChanged_t : ICallbackData
+    public struct FavoritesListChanged_t : ICallbackData
     {
-        internal uint IP; // m_nIP uint32
-        internal uint QueryPort; // m_nQueryPort uint32
-        internal uint ConnPort; // m_nConnPort uint32
-        internal uint AppID; // m_nAppID uint32
-        internal uint Flags; // m_nFlags uint32
+        public uint IP; // m_nIP uint32
+        public uint QueryPort; // m_nQueryPort uint32
+        public uint ConnPort; // m_nConnPort uint32
+        public uint AppID; // m_nAppID uint32
+        public uint Flags; // m_nFlags uint32
         [MarshalAs(UnmanagedType.I1)]
-        internal bool Add; // m_bAdd bool
-        internal uint AccountId; // m_unAccountId AccountID_t
+        public bool Add; // m_bAdd bool
+        public uint AccountId; // m_unAccountId AccountID_t
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(FavoritesListChanged_t));
@@ -638,11 +640,11 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct LobbyInvite_t : ICallbackData
+    public struct LobbyInvite_t : ICallbackData
     {
-        internal ulong SteamIDUser; // m_ulSteamIDUser uint64
-        internal ulong SteamIDLobby; // m_ulSteamIDLobby uint64
-        internal ulong GameID; // m_ulGameID uint64
+        public ulong SteamIDUser; // m_ulSteamIDUser uint64
+        public ulong SteamIDLobby; // m_ulSteamIDLobby uint64
+        public ulong GameID; // m_ulGameID uint64
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(LobbyInvite_t));
@@ -652,13 +654,13 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct LobbyEnter_t : ICallbackData
+    public struct LobbyEnter_t : ICallbackData
     {
-        internal ulong m_ulSteamIDLobby; // m_ulSteamIDLobby uint64
-        internal uint m_rgfChatPermissions; // m_rgfChatPermissions uint32
+        public ulong m_ulSteamIDLobby; // m_ulSteamIDLobby uint64
+        public uint m_rgfChatPermissions; // m_rgfChatPermissions uint32
         [MarshalAs(UnmanagedType.I1)]
-        internal bool m_bLocked; // m_bLocked bool
-        internal uint m_EChatRoomEnterResponse; // m_EChatRoomEnterResponse uint32
+        public bool m_bLocked; // m_bLocked bool
+        public uint m_EChatRoomEnterResponse; // m_EChatRoomEnterResponse uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(LobbyEnter_t));
@@ -668,11 +670,11 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct LobbyDataUpdate_t : ICallbackData
+    public struct LobbyDataUpdate_t : ICallbackData
     {
-        internal ulong m_ulSteamIDLobby; // m_ulSteamIDLobby uint64
-        internal ulong m_ulSteamIDMember; // m_ulSteamIDMember uint64
-        internal bool m_bSuccess; // m_bSuccess uint8
+        public ulong m_ulSteamIDLobby; // m_ulSteamIDLobby uint64
+        public ulong m_ulSteamIDMember; // m_ulSteamIDMember uint64
+        public bool m_bSuccess; // m_bSuccess uint8
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(LobbyDataUpdate_t));
@@ -682,12 +684,12 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct LobbyChatUpdate_t : ICallbackData
+    public struct LobbyChatUpdate_t : ICallbackData
     {
-        internal ulong m_ulSteamIDLobby; // m_ulSteamIDLobby uint64
-        internal ulong m_ulSteamIDUserChanged; // m_ulSteamIDUserChanged uint64
-        internal ulong m_ulSteamIDMakingChange; // m_ulSteamIDMakingChange uint64
-        internal uint m_rgfChatMemberStateChange; // m_rgfChatMemberStateChange uint32
+        public ulong m_ulSteamIDLobby; // m_ulSteamIDLobby uint64
+        public ulong m_ulSteamIDUserChanged; // m_ulSteamIDUserChanged uint64
+        public ulong m_ulSteamIDMakingChange; // m_ulSteamIDMakingChange uint64
+        public uint m_rgfChatMemberStateChange; // m_rgfChatMemberStateChange uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(LobbyChatUpdate_t));
@@ -697,12 +699,12 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct LobbyChatMsg_t : ICallbackData
+    public struct LobbyChatMsg_t : ICallbackData
     {
-        internal ulong SteamIDLobby; // m_ulSteamIDLobby uint64
-        internal ulong SteamIDUser; // m_ulSteamIDUser uint64
-        internal byte ChatEntryType; // m_eChatEntryType uint8
-        internal uint ChatID; // m_iChatID uint32
+        public ulong SteamIDLobby; // m_ulSteamIDLobby uint64
+        public ulong SteamIDUser; // m_ulSteamIDUser uint64
+        public byte ChatEntryType; // m_eChatEntryType uint8
+        public uint ChatID; // m_iChatID uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(LobbyChatMsg_t));
@@ -712,12 +714,12 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct LobbyGameCreated_t : ICallbackData
+    public struct LobbyGameCreated_t : ICallbackData
     {
-        internal ulong SteamIDLobby; // m_ulSteamIDLobby uint64
-        internal ulong SteamIDGameServer; // m_ulSteamIDGameServer uint64
-        internal uint IP; // m_unIP uint32
-        internal ushort Port; // m_usPort uint16
+        public ulong SteamIDLobby; // m_ulSteamIDLobby uint64
+        public ulong SteamIDGameServer; // m_ulSteamIDGameServer uint64
+        public uint IP; // m_unIP uint32
+        public ushort Port; // m_usPort uint16
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(LobbyGameCreated_t));
@@ -727,9 +729,9 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct LobbyMatchList_t : ICallbackData
+    public struct LobbyMatchList_t : ICallbackData
     {
-        internal uint m_nLobbiesMatching; // m_nLobbiesMatching uint32
+        public uint m_nLobbiesMatching; // m_nLobbiesMatching uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(LobbyMatchList_t));
@@ -739,11 +741,11 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct LobbyKicked_t : ICallbackData
+    public struct LobbyKicked_t : ICallbackData
     {
-        internal ulong SteamIDLobby; // m_ulSteamIDLobby uint64
-        internal ulong SteamIDAdmin; // m_ulSteamIDAdmin uint64
-        internal byte KickedDueToDisconnect; // m_bKickedDueToDisconnect uint8
+        public ulong SteamIDLobby; // m_ulSteamIDLobby uint64
+        public ulong SteamIDAdmin; // m_ulSteamIDAdmin uint64
+        public byte KickedDueToDisconnect; // m_bKickedDueToDisconnect uint8
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(LobbyKicked_t));
@@ -753,10 +755,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct LobbyCreated_t : ICallbackData
+    public struct LobbyCreated_t : ICallbackData
     {
-        internal EResult m_eResult; // m_eResult EResult
-        internal ulong m_ulSteamIDLobby; // m_ulSteamIDLobby uint64
+        public EResult m_eResult; // m_eResult EResult
+        public ulong m_ulSteamIDLobby; // m_ulSteamIDLobby uint64
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(LobbyCreated_t));
@@ -766,11 +768,11 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
-    internal struct PSNGameBootInviteResult_t : ICallbackData
+    public struct PSNGameBootInviteResult_t : ICallbackData
     {
         [MarshalAs(UnmanagedType.I1)]
-        internal bool GameBootInviteExists; // m_bGameBootInviteExists bool
-        internal ulong SteamIDLobby; // m_steamIDLobby CSteamID
+        public bool GameBootInviteExists; // m_bGameBootInviteExists bool
+        public ulong SteamIDLobby; // m_steamIDLobby CSteamID
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(PSNGameBootInviteResult_t));
@@ -780,9 +782,9 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct FavoritesListAccountsUpdated_t : ICallbackData
+    public struct FavoritesListAccountsUpdated_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
+        public EResult Result; // m_eResult EResult
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(FavoritesListAccountsUpdated_t));
@@ -792,14 +794,14 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
-    internal struct SearchForGameProgressCallback_t : ICallbackData
+    public struct SearchForGameProgressCallback_t : ICallbackData
     {
-        internal ulong LSearchID; // m_ullSearchID uint64
-        internal EResult Result; // m_eResult EResult
-        internal ulong LobbyID; // m_lobbyID CSteamID
-        internal ulong SteamIDEndedSearch; // m_steamIDEndedSearch CSteamID
-        internal int SecondsRemainingEstimate; // m_nSecondsRemainingEstimate int32
-        internal int CPlayersSearching; // m_cPlayersSearching int32
+        public ulong LSearchID; // m_ullSearchID uint64
+        public EResult Result; // m_eResult EResult
+        public ulong LobbyID; // m_lobbyID CSteamID
+        public ulong SteamIDEndedSearch; // m_steamIDEndedSearch CSteamID
+        public int SecondsRemainingEstimate; // m_nSecondsRemainingEstimate int32
+        public int CPlayersSearching; // m_cPlayersSearching int32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SearchForGameProgressCallback_t));
@@ -809,15 +811,15 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
-    internal struct SearchForGameResultCallback_t : ICallbackData
+    public struct SearchForGameResultCallback_t : ICallbackData
     {
-        internal ulong LSearchID; // m_ullSearchID uint64
-        internal EResult Result; // m_eResult EResult
-        internal int CountPlayersInGame; // m_nCountPlayersInGame int32
-        internal int CountAcceptedGame; // m_nCountAcceptedGame int32
-        internal ulong SteamIDHost; // m_steamIDHost CSteamID
+        public ulong LSearchID; // m_ullSearchID uint64
+        public EResult Result; // m_eResult EResult
+        public int CountPlayersInGame; // m_nCountPlayersInGame int32
+        public int CountAcceptedGame; // m_nCountAcceptedGame int32
+        public ulong SteamIDHost; // m_steamIDHost CSteamID
         [MarshalAs(UnmanagedType.I1)]
-        internal bool FinalCallback; // m_bFinalCallback bool
+        public bool FinalCallback; // m_bFinalCallback bool
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SearchForGameResultCallback_t));
@@ -827,10 +829,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct RequestPlayersForGameProgressCallback_t : ICallbackData
+    public struct RequestPlayersForGameProgressCallback_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
-        internal ulong LSearchID; // m_ullSearchID uint64
+        public EResult Result; // m_eResult EResult
+        public ulong LSearchID; // m_ullSearchID uint64
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(RequestPlayersForGameProgressCallback_t));
@@ -840,25 +842,25 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
-    internal struct RequestPlayersForGameResultCallback_t : ICallbackData
+    public struct RequestPlayersForGameResultCallback_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
-        internal ulong LSearchID; // m_ullSearchID uint64
-        internal ulong SteamIDPlayerFound; // m_SteamIDPlayerFound CSteamID
-        internal ulong SteamIDLobby; // m_SteamIDLobby CSteamID
-        internal RequestPlayersForGameResultCallback_t.PlayerAcceptState_t PlayerAcceptState; // m_ePlayerAcceptState RequestPlayersForGameResultCallback_t::PlayerAcceptState_t
-        internal int PlayerIndex; // m_nPlayerIndex int32
-        internal int TotalPlayersFound; // m_nTotalPlayersFound int32
-        internal int TotalPlayersAcceptedGame; // m_nTotalPlayersAcceptedGame int32
-        internal int SuggestedTeamIndex; // m_nSuggestedTeamIndex int32
-        internal ulong LUniqueGameID; // m_ullUniqueGameID uint64
+        public EResult Result; // m_eResult EResult
+        public ulong LSearchID; // m_ullSearchID uint64
+        public ulong SteamIDPlayerFound; // m_SteamIDPlayerFound CSteamID
+        public ulong SteamIDLobby; // m_SteamIDLobby CSteamID
+        public RequestPlayersForGameResultCallback_t.PlayerAcceptState_t PlayerAcceptState; // m_ePlayerAcceptState RequestPlayersForGameResultCallback_t::PlayerAcceptState_t
+        public int PlayerIndex; // m_nPlayerIndex int32
+        public int TotalPlayersFound; // m_nTotalPlayersFound int32
+        public int TotalPlayersAcceptedGame; // m_nTotalPlayersAcceptedGame int32
+        public int SuggestedTeamIndex; // m_nSuggestedTeamIndex int32
+        public ulong LUniqueGameID; // m_ullUniqueGameID uint64
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(RequestPlayersForGameResultCallback_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.RequestPlayersForGameResultCallback;
         #endregion
-        internal enum PlayerAcceptState_t : int
+        public enum PlayerAcceptState_t : int
         {
             Unknown = 0,
             PlayerAccepted = 1,
@@ -868,11 +870,11 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct RequestPlayersForGameFinalResultCallback_t : ICallbackData
+    public struct RequestPlayersForGameFinalResultCallback_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
-        internal ulong LSearchID; // m_ullSearchID uint64
-        internal ulong LUniqueGameID; // m_ullUniqueGameID uint64
+        public EResult Result; // m_eResult EResult
+        public ulong LSearchID; // m_ullSearchID uint64
+        public ulong LUniqueGameID; // m_ullUniqueGameID uint64
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(RequestPlayersForGameFinalResultCallback_t));
@@ -882,11 +884,11 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
-    internal struct SubmitPlayerResultResultCallback_t : ICallbackData
+    public struct SubmitPlayerResultResultCallback_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
-        internal ulong UllUniqueGameID; // ullUniqueGameID uint64
-        internal ulong SteamIDPlayer; // steamIDPlayer CSteamID
+        public EResult Result; // m_eResult EResult
+        public ulong UllUniqueGameID; // ullUniqueGameID uint64
+        public ulong SteamIDPlayer; // steamIDPlayer CSteamID
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SubmitPlayerResultResultCallback_t));
@@ -896,10 +898,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct EndGameResultCallback_t : ICallbackData
+    public struct EndGameResultCallback_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
-        internal ulong UllUniqueGameID; // ullUniqueGameID uint64
+        public EResult Result; // m_eResult EResult
+        public ulong UllUniqueGameID; // ullUniqueGameID uint64
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(EndGameResultCallback_t));
@@ -909,14 +911,14 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
-    internal struct JoinPartyCallback_t : ICallbackData
+    public struct JoinPartyCallback_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
-        internal ulong BeaconID; // m_ulBeaconID PartyBeaconID_t
-        internal ulong SteamIDBeaconOwner; // m_SteamIDBeaconOwner CSteamID
-        internal string ConnectStringUTF8() => System.Text.Encoding.UTF8.GetString(ConnectString, 0, System.Array.IndexOf<byte>(ConnectString, 0));
+        public EResult Result; // m_eResult EResult
+        public ulong BeaconID; // m_ulBeaconID PartyBeaconID_t
+        public ulong SteamIDBeaconOwner; // m_SteamIDBeaconOwner CSteamID
+        public string ConnectStringUTF8() => System.Text.Encoding.UTF8.GetString(ConnectString, 0, System.Array.IndexOf<byte>(ConnectString, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)] // byte[] m_rgchConnectString
-        internal byte[] ConnectString; // m_rgchConnectString char [256]
+        public byte[] ConnectString; // m_rgchConnectString char [256]
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(JoinPartyCallback_t));
@@ -926,10 +928,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct CreateBeaconCallback_t : ICallbackData
+    public struct CreateBeaconCallback_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
-        internal ulong BeaconID; // m_ulBeaconID PartyBeaconID_t
+        public EResult Result; // m_eResult EResult
+        public ulong BeaconID; // m_ulBeaconID PartyBeaconID_t
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(CreateBeaconCallback_t));
@@ -939,10 +941,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
-    internal struct ReservationNotificationCallback_t : ICallbackData
+    public struct ReservationNotificationCallback_t : ICallbackData
     {
-        internal ulong BeaconID; // m_ulBeaconID PartyBeaconID_t
-        internal ulong SteamIDJoiner; // m_steamIDJoiner CSteamID
+        public ulong BeaconID; // m_ulBeaconID PartyBeaconID_t
+        public ulong SteamIDJoiner; // m_steamIDJoiner CSteamID
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(ReservationNotificationCallback_t));
@@ -952,9 +954,9 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct ChangeNumOpenSlotsCallback_t : ICallbackData
+    public struct ChangeNumOpenSlotsCallback_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
+        public EResult Result; // m_eResult EResult
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(ChangeNumOpenSlotsCallback_t));
@@ -964,7 +966,7 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct AvailableBeaconLocationsUpdated_t : ICallbackData
+    public struct AvailableBeaconLocationsUpdated_t : ICallbackData
     {
 
         #region SteamCallback
@@ -975,7 +977,7 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct ActiveBeaconsUpdated_t : ICallbackData
+    public struct ActiveBeaconsUpdated_t : ICallbackData
     {
 
         #region SteamCallback
@@ -986,13 +988,13 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct RemoteStorageFileShareResult_t : ICallbackData
+    public struct RemoteStorageFileShareResult_t : ICallbackData
     {
-        internal EResult m_eResult; // m_eResult EResult
-        internal ulong m_hFile; // m_hFile UGCHandle_t
-        internal string FilenameUTF8() => System.Text.Encoding.UTF8.GetString(m_rgchFilename, 0, System.Array.IndexOf<byte>(m_rgchFilename, 0));
+        public EResult m_eResult; // m_eResult EResult
+        public ulong m_hFile; // m_hFile UGCHandle_t
+        public string FilenameUTF8() => System.Text.Encoding.UTF8.GetString(m_rgchFilename, 0, System.Array.IndexOf<byte>(m_rgchFilename, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 260)] // byte[] m_rgchFilename
-        internal byte[] m_rgchFilename; // m_rgchFilename char [260]
+        public byte[] m_rgchFilename; // m_rgchFilename char [260]
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageFileShareResult_t));
@@ -1002,12 +1004,12 @@ namespace SKYNET.Callback
     }
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct RemoteStoragePublishFileResult_t : ICallbackData
+    //public struct RemoteStoragePublishFileResult_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    public EResult Result; // m_eResult EResult
+    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
     //    [MarshalAs(UnmanagedType.I1)]
-    //    internal bool UserNeedsToAcceptWorkshopLegalAgreement; // m_bUserNeedsToAcceptWorkshopLegalAgreement bool
+    //    public bool UserNeedsToAcceptWorkshopLegalAgreement; // m_bUserNeedsToAcceptWorkshopLegalAgreement bool
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStoragePublishFileResult_t));
@@ -1017,10 +1019,10 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct RemoteStorageDeletePublishedFileResult_t : ICallbackData
+    //public struct RemoteStorageDeletePublishedFileResult_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    public EResult Result; // m_eResult EResult
+    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageDeletePublishedFileResult_t));
@@ -1030,13 +1032,13 @@ namespace SKYNET.Callback
     //}
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct RemoteStorageEnumerateUserPublishedFilesResult_t : ICallbackData
+    public struct RemoteStorageEnumerateUserPublishedFilesResult_t : ICallbackData
     {
-        internal EResult m_eResult; // m_eResult EResult
-        internal int m_nResultsReturned; // m_nResultsReturned int32
-        internal int m_nTotalResultCount; // m_nTotalResultCount int32
+        public EResult m_eResult; // m_eResult EResult
+        public int m_nResultsReturned; // m_nResultsReturned int32
+        public int m_nTotalResultCount; // m_nTotalResultCount int32
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50, ArraySubType = UnmanagedType.U8)]
-        internal PublishedFileId_t[] m_rgPublishedFileId; // m_rgPublishedFileId PublishedFileId_t [50]
+        public PublishedFileId_t[] m_rgPublishedFileId; // m_rgPublishedFileId PublishedFileId_t [50]
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageEnumerateUserPublishedFilesResult_t));
@@ -1046,10 +1048,10 @@ namespace SKYNET.Callback
     }
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct RemoteStorageSubscribePublishedFileResult_t : ICallbackData
+    //public struct RemoteStorageSubscribePublishedFileResult_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    public EResult Result; // m_eResult EResult
+    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageSubscribePublishedFileResult_t));
@@ -1059,15 +1061,15 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct RemoteStorageEnumerateUserSubscribedFilesResult_t : ICallbackData
+    //public struct RemoteStorageEnumerateUserSubscribedFilesResult_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal int ResultsReturned; // m_nResultsReturned int32
-    //    internal int TotalResultCount; // m_nTotalResultCount int32
+    //    public EResult Result; // m_eResult EResult
+    //    public int ResultsReturned; // m_nResultsReturned int32
+    //    public int TotalResultCount; // m_nTotalResultCount int32
     //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50, ArraySubType = UnmanagedType.U8)]
-    //    internal PublishedFileId[] GPublishedFileId; // m_rgPublishedFileId PublishedFileId_t [50]
+    //    public PublishedFileId[] GPublishedFileId; // m_rgPublishedFileId PublishedFileId_t [50]
     //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50, ArraySubType = UnmanagedType.U4)]
-    //    internal uint[] GRTimeSubscribed; // m_rgRTimeSubscribed uint32 [50]
+    //    public uint[] GRTimeSubscribed; // m_rgRTimeSubscribed uint32 [50]
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageEnumerateUserSubscribedFilesResult_t));
@@ -1077,10 +1079,10 @@ namespace SKYNET.Callback
     //}
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct RemoteStorageUnsubscribePublishedFileResult_t : ICallbackData
+    public struct RemoteStorageUnsubscribePublishedFileResult_t : ICallbackData
     {
-        internal EResult m_eResult; // m_eResult EResult
-        internal PublishedFileId_t m_nPublishedFileId; // m_nPublishedFileId PublishedFileId_t
+        public EResult m_eResult; // m_eResult EResult
+        public PublishedFileId_t m_nPublishedFileId; // m_nPublishedFileId PublishedFileId_t
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageUnsubscribePublishedFileResult_t));
@@ -1090,12 +1092,12 @@ namespace SKYNET.Callback
     }
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct RemoteStorageUpdatePublishedFileResult_t : ICallbackData
+    //public struct RemoteStorageUpdatePublishedFileResult_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    public EResult Result; // m_eResult EResult
+    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
     //    [MarshalAs(UnmanagedType.I1)]
-    //    internal bool UserNeedsToAcceptWorkshopLegalAgreement; // m_bUserNeedsToAcceptWorkshopLegalAgreement bool
+    //    public bool UserNeedsToAcceptWorkshopLegalAgreement; // m_bUserNeedsToAcceptWorkshopLegalAgreement bool
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageUpdatePublishedFileResult_t));
@@ -1105,16 +1107,16 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct RemoteStorageDownloadUGCResult_t : ICallbackData
+    //public struct RemoteStorageDownloadUGCResult_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal ulong File; // m_hFile UGCHandle_t
-    //    internal AppId AppID; // m_nAppID AppId_t
-    //    internal int SizeInBytes; // m_nSizeInBytes int32
-    //    internal string PchFileNameUTF8() => System.Text.Encoding.UTF8.GetString(PchFileName, 0, System.Array.IndexOf<byte>(PchFileName, 0));
+    //    public EResult Result; // m_eResult EResult
+    //    public ulong File; // m_hFile UGCHandle_t
+    //    public AppId AppID; // m_nAppID AppId_t
+    //    public int SizeInBytes; // m_nSizeInBytes int32
+    //    public string PchFileNameUTF8() => System.Text.Encoding.UTF8.GetString(PchFileName, 0, System.Array.IndexOf<byte>(PchFileName, 0));
     //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 260)] // byte[] m_pchFileName
-    //    internal byte[] PchFileName; // m_pchFileName char [260]
-    //    internal ulong SteamIDOwner; // m_ulSteamIDOwner uint64
+    //    public byte[] PchFileName; // m_pchFileName char [260]
+    //    public ulong SteamIDOwner; // m_ulSteamIDOwner uint64
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageDownloadUGCResult_t));
@@ -1124,42 +1126,42 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct RemoteStorageGetPublishedFileDetailsResult_t : ICallbackData
+    //public struct RemoteStorageGetPublishedFileDetailsResult_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
-    //    internal AppId CreatorAppID; // m_nCreatorAppID AppId_t
-    //    internal AppId ConsumerAppID; // m_nConsumerAppID AppId_t
-    //    internal string TitleUTF8() => System.Text.Encoding.UTF8.GetString(Title, 0, System.Array.IndexOf<byte>(Title, 0));
+    //    public EResult Result; // m_eResult EResult
+    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    public AppId CreatorAppID; // m_nCreatorAppID AppId_t
+    //    public AppId ConsumerAppID; // m_nConsumerAppID AppId_t
+    //    public string TitleUTF8() => System.Text.Encoding.UTF8.GetString(Title, 0, System.Array.IndexOf<byte>(Title, 0));
     //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 129)] // byte[] m_rgchTitle
-    //    internal byte[] Title; // m_rgchTitle char [129]
-    //    internal string DescriptionUTF8() => System.Text.Encoding.UTF8.GetString(Description, 0, System.Array.IndexOf<byte>(Description, 0));
+    //    public byte[] Title; // m_rgchTitle char [129]
+    //    public string DescriptionUTF8() => System.Text.Encoding.UTF8.GetString(Description, 0, System.Array.IndexOf<byte>(Description, 0));
     //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8000)] // byte[] m_rgchDescription
-    //    internal byte[] Description; // m_rgchDescription char [8000]
-    //    internal ulong File; // m_hFile UGCHandle_t
-    //    internal ulong PreviewFile; // m_hPreviewFile UGCHandle_t
-    //    internal ulong SteamIDOwner; // m_ulSteamIDOwner uint64
-    //    internal uint TimeCreated; // m_rtimeCreated uint32
-    //    internal uint TimeUpdated; // m_rtimeUpdated uint32
-    //    internal RemoteStoragePublishedFileVisibility Visibility; // m_eVisibility ERemoteStoragePublishedFileVisibility
+    //    public byte[] Description; // m_rgchDescription char [8000]
+    //    public ulong File; // m_hFile UGCHandle_t
+    //    public ulong PreviewFile; // m_hPreviewFile UGCHandle_t
+    //    public ulong SteamIDOwner; // m_ulSteamIDOwner uint64
+    //    public uint TimeCreated; // m_rtimeCreated uint32
+    //    public uint TimeUpdated; // m_rtimeUpdated uint32
+    //    public RemoteStoragePublishedFileVisibility Visibility; // m_eVisibility ERemoteStoragePublishedFileVisibility
     //    [MarshalAs(UnmanagedType.I1)]
-    //    internal bool Banned; // m_bBanned bool
-    //    internal string TagsUTF8() => System.Text.Encoding.UTF8.GetString(Tags, 0, System.Array.IndexOf<byte>(Tags, 0));
+    //    public bool Banned; // m_bBanned bool
+    //    public string TagsUTF8() => System.Text.Encoding.UTF8.GetString(Tags, 0, System.Array.IndexOf<byte>(Tags, 0));
     //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1025)] // byte[] m_rgchTags
-    //    internal byte[] Tags; // m_rgchTags char [1025]
+    //    public byte[] Tags; // m_rgchTags char [1025]
     //    [MarshalAs(UnmanagedType.I1)]
-    //    internal bool TagsTruncated; // m_bTagsTruncated bool
-    //    internal string PchFileNameUTF8() => System.Text.Encoding.UTF8.GetString(PchFileName, 0, System.Array.IndexOf<byte>(PchFileName, 0));
+    //    public bool TagsTruncated; // m_bTagsTruncated bool
+    //    public string PchFileNameUTF8() => System.Text.Encoding.UTF8.GetString(PchFileName, 0, System.Array.IndexOf<byte>(PchFileName, 0));
     //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 260)] // byte[] m_pchFileName
-    //    internal byte[] PchFileName; // m_pchFileName char [260]
-    //    internal int FileSize; // m_nFileSize int32
-    //    internal int PreviewFileSize; // m_nPreviewFileSize int32
-    //    internal string URLUTF8() => System.Text.Encoding.UTF8.GetString(URL, 0, System.Array.IndexOf<byte>(URL, 0));
+    //    public byte[] PchFileName; // m_pchFileName char [260]
+    //    public int FileSize; // m_nFileSize int32
+    //    public int PreviewFileSize; // m_nPreviewFileSize int32
+    //    public string URLUTF8() => System.Text.Encoding.UTF8.GetString(URL, 0, System.Array.IndexOf<byte>(URL, 0));
     //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)] // byte[] m_rgchURL
-    //    internal byte[] URL; // m_rgchURL char [256]
-    //    internal WorkshopFileType FileType; // m_eFileType EWorkshopFileType
+    //    public byte[] URL; // m_rgchURL char [256]
+    //    public WorkshopFileType FileType; // m_eFileType EWorkshopFileType
     //    [MarshalAs(UnmanagedType.I1)]
-    //    internal bool AcceptedForUse; // m_bAcceptedForUse bool
+    //    public bool AcceptedForUse; // m_bAcceptedForUse bool
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageGetPublishedFileDetailsResult_t));
@@ -1169,17 +1171,17 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct RemoteStorageEnumerateWorkshopFilesResult_t : ICallbackData
+    //public struct RemoteStorageEnumerateWorkshopFilesResult_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal int ResultsReturned; // m_nResultsReturned int32
-    //    internal int TotalResultCount; // m_nTotalResultCount int32
+    //    public EResult Result; // m_eResult EResult
+    //    public int ResultsReturned; // m_nResultsReturned int32
+    //    public int TotalResultCount; // m_nTotalResultCount int32
     //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50, ArraySubType = UnmanagedType.U8)]
-    //    internal PublishedFileId[] GPublishedFileId; // m_rgPublishedFileId PublishedFileId_t [50]
+    //    public PublishedFileId[] GPublishedFileId; // m_rgPublishedFileId PublishedFileId_t [50]
     //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50, ArraySubType = UnmanagedType.R4)]
-    //    internal float[] GScore; // m_rgScore float [50]
-    //    internal AppId AppId; // m_nAppId AppId_t
-    //    internal uint StartIndex; // m_unStartIndex uint32
+    //    public float[] GScore; // m_rgScore float [50]
+    //    public AppId AppId; // m_nAppId AppId_t
+    //    public uint StartIndex; // m_unStartIndex uint32
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageEnumerateWorkshopFilesResult_t));
@@ -1189,14 +1191,14 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct RemoteStorageGetPublishedItemVoteDetailsResult_t : ICallbackData
+    //public struct RemoteStorageGetPublishedItemVoteDetailsResult_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal PublishedFileId PublishedFileId; // m_unPublishedFileId PublishedFileId_t
-    //    internal int VotesFor; // m_nVotesFor int32
-    //    internal int VotesAgainst; // m_nVotesAgainst int32
-    //    internal int Reports; // m_nReports int32
-    //    internal float FScore; // m_fScore float
+    //    public EResult Result; // m_eResult EResult
+    //    public PublishedFileId PublishedFileId; // m_unPublishedFileId PublishedFileId_t
+    //    public int VotesFor; // m_nVotesFor int32
+    //    public int VotesAgainst; // m_nVotesAgainst int32
+    //    public int Reports; // m_nReports int32
+    //    public float FScore; // m_fScore float
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageGetPublishedItemVoteDetailsResult_t));
@@ -1206,10 +1208,10 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct RemoteStoragePublishedFileSubscribed_t : ICallbackData
+    //public struct RemoteStoragePublishedFileSubscribed_t : ICallbackData
     //{
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
-    //    internal AppId AppID; // m_nAppID AppId_t
+    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    public AppId AppID; // m_nAppID AppId_t
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStoragePublishedFileSubscribed_t));
@@ -1219,10 +1221,10 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct RemoteStoragePublishedFileUnsubscribed_t : ICallbackData
+    //public struct RemoteStoragePublishedFileUnsubscribed_t : ICallbackData
     //{
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
-    //    internal AppId AppID; // m_nAppID AppId_t
+    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    public AppId AppID; // m_nAppID AppId_t
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStoragePublishedFileUnsubscribed_t));
@@ -1232,10 +1234,10 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct RemoteStoragePublishedFileDeleted_t : ICallbackData
+    //public struct RemoteStoragePublishedFileDeleted_t : ICallbackData
     //{
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
-    //    internal AppId AppID; // m_nAppID AppId_t
+    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    public AppId AppID; // m_nAppID AppId_t
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStoragePublishedFileDeleted_t));
@@ -1245,10 +1247,10 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct RemoteStorageUpdateUserPublishedItemVoteResult_t : ICallbackData
+    //public struct RemoteStorageUpdateUserPublishedItemVoteResult_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    public EResult Result; // m_eResult EResult
+    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageUpdateUserPublishedItemVoteResult_t));
@@ -1258,11 +1260,11 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct RemoteStorageUserVoteDetails_t : ICallbackData
+    //public struct RemoteStorageUserVoteDetails_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
-    //    internal WorkshopVote Vote; // m_eVote EWorkshopVote
+    //    public EResult Result; // m_eResult EResult
+    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    public WorkshopVote Vote; // m_eVote EWorkshopVote
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageUserVoteDetails_t));
@@ -1272,13 +1274,13 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct RemoteStorageEnumerateUserSharedWorkshopFilesResult_t : ICallbackData
+    //public struct RemoteStorageEnumerateUserSharedWorkshopFilesResult_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal int ResultsReturned; // m_nResultsReturned int32
-    //    internal int TotalResultCount; // m_nTotalResultCount int32
+    //    public EResult Result; // m_eResult EResult
+    //    public int ResultsReturned; // m_nResultsReturned int32
+    //    public int TotalResultCount; // m_nTotalResultCount int32
     //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50, ArraySubType = UnmanagedType.U8)]
-    //    internal PublishedFileId[] GPublishedFileId; // m_rgPublishedFileId PublishedFileId_t [50]
+    //    public PublishedFileId[] GPublishedFileId; // m_rgPublishedFileId PublishedFileId_t [50]
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageEnumerateUserSharedWorkshopFilesResult_t));
@@ -1288,11 +1290,11 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct RemoteStorageSetUserPublishedFileActionResult_t : ICallbackData
+    //public struct RemoteStorageSetUserPublishedFileActionResult_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
-    //    internal WorkshopFileAction Action; // m_eAction EWorkshopFileAction
+    //    public EResult Result; // m_eResult EResult
+    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    public WorkshopFileAction Action; // m_eAction EWorkshopFileAction
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageSetUserPublishedFileActionResult_t));
@@ -1302,16 +1304,16 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct RemoteStorageEnumeratePublishedFilesByUserActionResult_t : ICallbackData
+    //public struct RemoteStorageEnumeratePublishedFilesByUserActionResult_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal WorkshopFileAction Action; // m_eAction EWorkshopFileAction
-    //    internal int ResultsReturned; // m_nResultsReturned int32
-    //    internal int TotalResultCount; // m_nTotalResultCount int32
+    //    public EResult Result; // m_eResult EResult
+    //    public WorkshopFileAction Action; // m_eAction EWorkshopFileAction
+    //    public int ResultsReturned; // m_nResultsReturned int32
+    //    public int TotalResultCount; // m_nTotalResultCount int32
     //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50, ArraySubType = UnmanagedType.U8)]
-    //    internal PublishedFileId[] GPublishedFileId; // m_rgPublishedFileId PublishedFileId_t [50]
+    //    public PublishedFileId[] GPublishedFileId; // m_rgPublishedFileId PublishedFileId_t [50]
     //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50, ArraySubType = UnmanagedType.U4)]
-    //    internal uint[] GRTimeUpdated; // m_rgRTimeUpdated uint32 [50]
+    //    public uint[] GRTimeUpdated; // m_rgRTimeUpdated uint32 [50]
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageEnumeratePublishedFilesByUserActionResult_t));
@@ -1321,11 +1323,11 @@ namespace SKYNET.Callback
     //}
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct RemoteStoragePublishFileProgress_t : ICallbackData
+    public struct RemoteStoragePublishFileProgress_t : ICallbackData
     {
-        internal double DPercentFile; // m_dPercentFile double
+        public double DPercentFile; // m_dPercentFile double
         [MarshalAs(UnmanagedType.I1)]
-        internal bool Preview; // m_bPreview bool
+        public bool Preview; // m_bPreview bool
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(RemoteStoragePublishFileProgress_t));
@@ -1335,11 +1337,11 @@ namespace SKYNET.Callback
     }
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct RemoteStoragePublishedFileUpdated_t : ICallbackData
+    //public struct RemoteStoragePublishedFileUpdated_t : ICallbackData
     //{
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
-    //    internal AppId AppID; // m_nAppID AppId_t
-    //    internal ulong Unused; // m_ulUnused uint64
+    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    public AppId AppID; // m_nAppID AppId_t
+    //    public ulong Unused; // m_ulUnused uint64
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStoragePublishedFileUpdated_t));
@@ -1349,9 +1351,9 @@ namespace SKYNET.Callback
     //}
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct RemoteStorageFileWriteAsyncComplete_t : ICallbackData
+    public struct RemoteStorageFileWriteAsyncComplete_t : ICallbackData
     {
-        internal EResult m_eResult; // m_eResult EResult
+        public EResult m_eResult; // m_eResult EResult
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageFileWriteAsyncComplete_t));
@@ -1361,12 +1363,12 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct RemoteStorageFileReadAsyncComplete_t : ICallbackData
+    public struct RemoteStorageFileReadAsyncComplete_t : ICallbackData
     {
-        internal SteamAPICall_t m_hFileReadAsync; // m_hFileReadAsync SteamAPICall_t
-        internal EResult m_eResult; // m_eResult EResult
-        internal uint m_nOffset; // m_nOffset uint32
-        internal uint m_cubRead; // m_cubRead uint32
+        public SteamAPICall_t m_hFileReadAsync; // m_hFileReadAsync SteamAPICall_t
+        public EResult m_eResult; // m_eResult EResult
+        public uint m_nOffset; // m_nOffset uint32
+        public uint m_cubRead; // m_cubRead uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageFileReadAsyncComplete_t));
@@ -1376,7 +1378,7 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct RemoteStorageLocalFileChange_t : ICallbackData
+    public struct RemoteStorageLocalFileChange_t : ICallbackData
     {
 
         #region SteamCallback
@@ -1387,11 +1389,11 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
-    internal struct UserStatsReceived_t : ICallbackData
+    public struct UserStatsReceived_t : ICallbackData
     {
-        internal ulong m_nGameID; // m_nGameID uint64
-        internal EResult m_eResult; // m_eResult EResult
-        internal CSteamID m_steamIDUser; // m_steamIDUser CSteamID
+        public ulong m_nGameID; // m_nGameID uint64
+        public EResult m_eResult; // m_eResult EResult
+        public CSteamID m_steamIDUser; // m_steamIDUser CSteamID
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(UserStatsReceived_t));
@@ -1401,10 +1403,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct UserStatsStored_t : ICallbackData
+    public struct UserStatsStored_t : ICallbackData
     {
-        internal ulong m_nGameID; // m_nGameID uint64
-        internal EResult m_eResult; // m_eResult EResult
+        public ulong m_nGameID; // m_nGameID uint64
+        public EResult m_eResult; // m_eResult EResult
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(UserStatsStored_t));
@@ -1414,16 +1416,16 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct UserAchievementStored_t : ICallbackData
+    public struct UserAchievementStored_t : ICallbackData
     {
-        internal ulong m_nGameID; // m_nGameID uint64
+        public ulong m_nGameID; // m_nGameID uint64
         [MarshalAs(UnmanagedType.I1)]
-        internal bool m_bGroupAchievement; // m_bGroupAchievement bool
-        internal string AchievementNameUTF8() => System.Text.Encoding.UTF8.GetString(m_rgchAchievementName, 0, System.Array.IndexOf<byte>(m_rgchAchievementName, 0));
+        public bool m_bGroupAchievement; // m_bGroupAchievement bool
+        public string AchievementNameUTF8() => System.Text.Encoding.UTF8.GetString(m_rgchAchievementName, 0, System.Array.IndexOf<byte>(m_rgchAchievementName, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)] // byte[] m_rgchAchievementName
-        internal byte[] m_rgchAchievementName; // m_rgchAchievementName char [128]
-        internal uint m_nCurProgress; // m_nCurProgress uint32
-        internal uint m_nMaxProgress; // m_nMaxProgress uint32
+        public byte[] m_rgchAchievementName; // m_rgchAchievementName char [128]
+        public uint m_nCurProgress; // m_nCurProgress uint32
+        public uint m_nMaxProgress; // m_nMaxProgress uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(UserAchievementStored_t));
@@ -1433,10 +1435,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct LeaderboardFindResult_t : ICallbackData
+    public struct LeaderboardFindResult_t : ICallbackData
     {
-        internal ulong SteamLeaderboard; // m_hSteamLeaderboard SteamLeaderboard_t
-        internal byte LeaderboardFound; // m_bLeaderboardFound uint8
+        public ulong SteamLeaderboard; // m_hSteamLeaderboard SteamLeaderboard_t
+        public byte LeaderboardFound; // m_bLeaderboardFound uint8
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(LeaderboardFindResult_t));
@@ -1446,11 +1448,11 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct LeaderboardScoresDownloaded_t : ICallbackData
+    public struct LeaderboardScoresDownloaded_t : ICallbackData
     {
-        internal ulong SteamLeaderboard; // m_hSteamLeaderboard SteamLeaderboard_t
-        internal ulong SteamLeaderboardEntries; // m_hSteamLeaderboardEntries SteamLeaderboardEntries_t
-        internal int CEntryCount; // m_cEntryCount int
+        public ulong SteamLeaderboard; // m_hSteamLeaderboard SteamLeaderboard_t
+        public ulong SteamLeaderboardEntries; // m_hSteamLeaderboardEntries SteamLeaderboardEntries_t
+        public int CEntryCount; // m_cEntryCount int
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(LeaderboardScoresDownloaded_t));
@@ -1460,14 +1462,14 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct LeaderboardScoreUploaded_t : ICallbackData
+    public struct LeaderboardScoreUploaded_t : ICallbackData
     {
-        internal byte Success; // m_bSuccess uint8
-        internal ulong SteamLeaderboard; // m_hSteamLeaderboard SteamLeaderboard_t
-        internal int Score; // m_nScore int32
-        internal byte ScoreChanged; // m_bScoreChanged uint8
-        internal int GlobalRankNew; // m_nGlobalRankNew int
-        internal int GlobalRankPrevious; // m_nGlobalRankPrevious int
+        public byte Success; // m_bSuccess uint8
+        public ulong SteamLeaderboard; // m_hSteamLeaderboard SteamLeaderboard_t
+        public int Score; // m_nScore int32
+        public byte ScoreChanged; // m_bScoreChanged uint8
+        public int GlobalRankNew; // m_nGlobalRankNew int
+        public int GlobalRankPrevious; // m_nGlobalRankPrevious int
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(LeaderboardScoreUploaded_t));
@@ -1477,10 +1479,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct NumberOfCurrentPlayers_t : ICallbackData
+    public struct NumberOfCurrentPlayers_t : ICallbackData
     {
-        internal byte m_bSuccess; // m_bSuccess uint8
-        internal int m_cPlayers; // m_cPlayers int32
+        public byte m_bSuccess; // m_bSuccess uint8
+        public int m_cPlayers; // m_cPlayers int32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(NumberOfCurrentPlayers_t));
@@ -1490,9 +1492,9 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct UserStatsUnloaded_t : ICallbackData
+    public struct UserStatsUnloaded_t : ICallbackData
     {
-        internal ulong SteamIDUser; // m_steamIDUser CSteamID
+        public ulong SteamIDUser; // m_steamIDUser CSteamID
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(UserStatsUnloaded_t));
@@ -1502,15 +1504,15 @@ namespace SKYNET.Callback
     }
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct UserAchievementIconFetched_t : ICallbackData
+    //public struct UserAchievementIconFetched_t : ICallbackData
     //{
-    //    internal GameId GameID; // m_nGameID CGameID
-    //    internal string AchievementNameUTF8() => System.Text.Encoding.UTF8.GetString(AchievementName, 0, System.Array.IndexOf<byte>(AchievementName, 0));
+    //    public GameId GameID; // m_nGameID CGameID
+    //    public string AchievementNameUTF8() => System.Text.Encoding.UTF8.GetString(AchievementName, 0, System.Array.IndexOf<byte>(AchievementName, 0));
     //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)] // byte[] m_rgchAchievementName
-    //    internal byte[] AchievementName; // m_rgchAchievementName char [128]
+    //    public byte[] AchievementName; // m_rgchAchievementName char [128]
     //    [MarshalAs(UnmanagedType.I1)]
-    //    internal bool Achieved; // m_bAchieved bool
-    //    internal int IconHandle; // m_nIconHandle int
+    //    public bool Achieved; // m_bAchieved bool
+    //    public int IconHandle; // m_nIconHandle int
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(UserAchievementIconFetched_t));
@@ -1520,10 +1522,10 @@ namespace SKYNET.Callback
     //}
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct GlobalAchievementPercentagesReady_t : ICallbackData
+    public struct GlobalAchievementPercentagesReady_t : ICallbackData
     {
-        internal ulong GameID; // m_nGameID uint64
-        internal EResult Result; // m_eResult EResult
+        public ulong GameID; // m_nGameID uint64
+        public EResult Result; // m_eResult EResult
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GlobalAchievementPercentagesReady_t));
@@ -1533,10 +1535,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct LeaderboardUGCSet_t : ICallbackData
+    public struct LeaderboardUGCSet_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
-        internal ulong SteamLeaderboard; // m_hSteamLeaderboard SteamLeaderboard_t
+        public EResult Result; // m_eResult EResult
+        public ulong SteamLeaderboard; // m_hSteamLeaderboard SteamLeaderboard_t
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(LeaderboardUGCSet_t));
@@ -1546,10 +1548,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct GlobalStatsReceived_t : ICallbackData
+    public struct GlobalStatsReceived_t : ICallbackData
     {
-        internal ulong m_nGameID; // m_nGameID uint64
-        internal EResult m_eResult; // m_eResult EResult
+        public ulong m_nGameID; // m_nGameID uint64
+        public EResult m_eResult; // m_eResult EResult
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GlobalStatsReceived_t));
@@ -1559,9 +1561,9 @@ namespace SKYNET.Callback
     }
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct DlcInstalled_t : ICallbackData
+    //public struct DlcInstalled_t : ICallbackData
     //{
-    //    internal AppId AppID; // m_nAppID AppId_t
+    //    public AppId AppID; // m_nAppID AppId_t
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(DlcInstalled_t));
@@ -1571,10 +1573,10 @@ namespace SKYNET.Callback
     //}
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct RegisterActivationCodeResponse_t : ICallbackData
+    public struct RegisterActivationCodeResponse_t : ICallbackData
     {
-        internal RegisterActivationCodeResult Result; // m_eResult ERegisterActivationCodeResult
-        internal uint PackageRegistered; // m_unPackageRegistered uint32
+        public RegisterActivationCodeResult Result; // m_eResult ERegisterActivationCodeResult
+        public uint PackageRegistered; // m_unPackageRegistered uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(RegisterActivationCodeResponse_t));
@@ -1584,7 +1586,7 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct NewUrlLaunchParameters_t : ICallbackData
+    public struct NewUrlLaunchParameters_t : ICallbackData
     {
 
         #region SteamCallback
@@ -1595,14 +1597,14 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct AppProofOfPurchaseKeyResponse_t : ICallbackData
+    public struct AppProofOfPurchaseKeyResponse_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
-        internal uint AppID; // m_nAppID uint32
-        internal uint CchKeyLength; // m_cchKeyLength uint32
-        internal string KeyUTF8() => System.Text.Encoding.UTF8.GetString(Key, 0, System.Array.IndexOf<byte>(Key, 0));
+        public EResult Result; // m_eResult EResult
+        public uint AppID; // m_nAppID uint32
+        public uint CchKeyLength; // m_cchKeyLength uint32
+        public string KeyUTF8() => System.Text.Encoding.UTF8.GetString(Key, 0, System.Array.IndexOf<byte>(Key, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 240)] // byte[] m_rgchKey
-        internal byte[] Key; // m_rgchKey char [240]
+        public byte[] Key; // m_rgchKey char [240]
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(AppProofOfPurchaseKeyResponse_t));
@@ -1612,13 +1614,13 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct FileDetailsResult_t : ICallbackData
+    public struct FileDetailsResult_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
-        internal ulong FileSize; // m_ulFileSize uint64
+        public EResult Result; // m_eResult EResult
+        public ulong FileSize; // m_ulFileSize uint64
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)] //  m_FileSHA
-        internal byte[] FileSHA; // m_FileSHA uint8 [20]
-        internal uint Flags; // m_unFlags uint32
+        public byte[] FileSHA; // m_FileSHA uint8 [20]
+        public uint Flags; // m_unFlags uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(FileDetailsResult_t));
@@ -1628,13 +1630,13 @@ namespace SKYNET.Callback
     }
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct TimedTrialStatus_t : ICallbackData
+    //public struct TimedTrialStatus_t : ICallbackData
     //{
-    //    internal AppId AppID; // m_unAppID AppId_t
+    //    public AppId AppID; // m_unAppID AppId_t
     //    [MarshalAs(UnmanagedType.I1)]
-    //    internal bool IsOffline; // m_bIsOffline bool
-    //    internal uint SecondsAllowed; // m_unSecondsAllowed uint32
-    //    internal uint SecondsPlayed; // m_unSecondsPlayed uint32
+    //    public bool IsOffline; // m_bIsOffline bool
+    //    public uint SecondsAllowed; // m_unSecondsAllowed uint32
+    //    public uint SecondsPlayed; // m_unSecondsPlayed uint32
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(TimedTrialStatus_t));
@@ -1644,9 +1646,9 @@ namespace SKYNET.Callback
     //}
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct P2PSessionRequest_t : ICallbackData
+    public struct P2PSessionRequest_t : ICallbackData
     {
-        internal ulong m_steamIDRemote; // m_steamIDRemote CSteamID
+        public ulong m_steamIDRemote; // m_steamIDRemote CSteamID
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(P2PSessionRequest_t));
@@ -1656,10 +1658,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct P2PSessionConnectFail_t : ICallbackData
+    public struct P2PSessionConnectFail_t : ICallbackData
     {
-        internal ulong SteamIDRemote; // m_steamIDRemote CSteamID
-        internal byte P2PSessionError; // m_eP2PSessionError uint8
+        public ulong SteamIDRemote; // m_steamIDRemote CSteamID
+        public byte P2PSessionError; // m_eP2PSessionError uint8
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(P2PSessionConnectFail_t));
@@ -1669,10 +1671,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct ScreenshotReady_t : ICallbackData
+    public struct ScreenshotReady_t : ICallbackData
     {
-        internal uint Local; // m_hLocal ScreenshotHandle
-        internal EResult Result; // m_eResult EResult
+        public uint Local; // m_hLocal ScreenshotHandle
+        public EResult Result; // m_eResult EResult
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(ScreenshotReady_t));
@@ -1682,7 +1684,7 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct ScreenshotRequested_t : ICallbackData
+    public struct ScreenshotRequested_t : ICallbackData
     {
 
         #region SteamCallback
@@ -1693,7 +1695,7 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct PlaybackStatusHasChanged_t : ICallbackData
+    public struct PlaybackStatusHasChanged_t : ICallbackData
     {
 
         #region SteamCallback
@@ -1704,9 +1706,9 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct VolumeHasChanged_t : ICallbackData
+    public struct VolumeHasChanged_t : ICallbackData
     {
-        internal float NewVolume; // m_flNewVolume float
+        public float NewVolume; // m_flNewVolume float
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(VolumeHasChanged_t));
@@ -1716,7 +1718,7 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct MusicPlayerRemoteWillActivate_t : ICallbackData
+    public struct MusicPlayerRemoteWillActivate_t : ICallbackData
     {
 
         #region SteamCallback
@@ -1727,7 +1729,7 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct MusicPlayerRemoteWillDeactivate_t : ICallbackData
+    public struct MusicPlayerRemoteWillDeactivate_t : ICallbackData
     {
 
         #region SteamCallback
@@ -1738,7 +1740,7 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct MusicPlayerRemoteToFront_t : ICallbackData
+    public struct MusicPlayerRemoteToFront_t : ICallbackData
     {
 
         #region SteamCallback
@@ -1749,7 +1751,7 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct MusicPlayerWillQuit_t : ICallbackData
+    public struct MusicPlayerWillQuit_t : ICallbackData
     {
 
         #region SteamCallback
@@ -1760,7 +1762,7 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct MusicPlayerWantsPlay_t : ICallbackData
+    public struct MusicPlayerWantsPlay_t : ICallbackData
     {
 
         #region SteamCallback
@@ -1771,7 +1773,7 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct MusicPlayerWantsPause_t : ICallbackData
+    public struct MusicPlayerWantsPause_t : ICallbackData
     {
 
         #region SteamCallback
@@ -1782,7 +1784,7 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct MusicPlayerWantsPlayPrevious_t : ICallbackData
+    public struct MusicPlayerWantsPlayPrevious_t : ICallbackData
     {
 
         #region SteamCallback
@@ -1793,7 +1795,7 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct MusicPlayerWantsPlayNext_t : ICallbackData
+    public struct MusicPlayerWantsPlayNext_t : ICallbackData
     {
 
         #region SteamCallback
@@ -1804,10 +1806,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct MusicPlayerWantsShuffled_t : ICallbackData
+    public struct MusicPlayerWantsShuffled_t : ICallbackData
     {
         [MarshalAs(UnmanagedType.I1)]
-        internal bool Shuffled; // m_bShuffled bool
+        public bool Shuffled; // m_bShuffled bool
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(MusicPlayerWantsShuffled_t));
@@ -1817,10 +1819,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct MusicPlayerWantsLooped_t : ICallbackData
+    public struct MusicPlayerWantsLooped_t : ICallbackData
     {
         [MarshalAs(UnmanagedType.I1)]
-        internal bool Looped; // m_bLooped bool
+        public bool Looped; // m_bLooped bool
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(MusicPlayerWantsLooped_t));
@@ -1830,9 +1832,9 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct MusicPlayerWantsVolume_t : ICallbackData
+    public struct MusicPlayerWantsVolume_t : ICallbackData
     {
-        internal float NewVolume; // m_flNewVolume float
+        public float NewVolume; // m_flNewVolume float
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(MusicPlayerWantsVolume_t));
@@ -1842,9 +1844,9 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct MusicPlayerSelectsQueueEntry_t : ICallbackData
+    public struct MusicPlayerSelectsQueueEntry_t : ICallbackData
     {
-        internal int NID; // nID int
+        public int NID; // nID int
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(MusicPlayerSelectsQueueEntry_t));
@@ -1854,9 +1856,9 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct MusicPlayerSelectsPlaylistEntry_t : ICallbackData
+    public struct MusicPlayerSelectsPlaylistEntry_t : ICallbackData
     {
-        internal int NID; // nID int
+        public int NID; // nID int
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(MusicPlayerSelectsPlaylistEntry_t));
@@ -1866,9 +1868,9 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct MusicPlayerWantsPlayingRepeatStatus_t : ICallbackData
+    public struct MusicPlayerWantsPlayingRepeatStatus_t : ICallbackData
     {
-        internal int PlayingRepeatStatus; // m_nPlayingRepeatStatus int
+        public int PlayingRepeatStatus; // m_nPlayingRepeatStatus int
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(MusicPlayerWantsPlayingRepeatStatus_t));
@@ -1878,14 +1880,14 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTTPRequestCompleted_t : ICallbackData
+    public struct HTTPRequestCompleted_t : ICallbackData
     {
-        internal uint Request; // m_hRequest HTTPRequestHandle
-        internal ulong ContextValue; // m_ulContextValue uint64
+        public uint Request; // m_hRequest HTTPRequestHandle
+        public ulong ContextValue; // m_ulContextValue uint64
         [MarshalAs(UnmanagedType.I1)]
-        internal bool RequestSuccessful; // m_bRequestSuccessful bool
-        internal HTTPStatusCode StatusCode; // m_eStatusCode EHTTPStatusCode
-        internal uint BodySize; // m_unBodySize uint32
+        public bool RequestSuccessful; // m_bRequestSuccessful bool
+        public HTTPStatusCode StatusCode; // m_eStatusCode EHTTPStatusCode
+        public uint BodySize; // m_unBodySize uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTTPRequestCompleted_t));
@@ -1895,10 +1897,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTTPRequestHeadersReceived_t : ICallbackData
+    public struct HTTPRequestHeadersReceived_t : ICallbackData
     {
-        internal uint Request; // m_hRequest HTTPRequestHandle
-        internal ulong ContextValue; // m_ulContextValue uint64
+        public uint Request; // m_hRequest HTTPRequestHandle
+        public ulong ContextValue; // m_ulContextValue uint64
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTTPRequestHeadersReceived_t));
@@ -1908,12 +1910,12 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTTPRequestDataReceived_t : ICallbackData
+    public struct HTTPRequestDataReceived_t : ICallbackData
     {
-        internal uint Request; // m_hRequest HTTPRequestHandle
-        internal ulong ContextValue; // m_ulContextValue uint64
-        internal uint COffset; // m_cOffset uint32
-        internal uint CBytesReceived; // m_cBytesReceived uint32
+        public uint Request; // m_hRequest HTTPRequestHandle
+        public ulong ContextValue; // m_ulContextValue uint64
+        public uint COffset; // m_cOffset uint32
+        public uint CBytesReceived; // m_cBytesReceived uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTTPRequestDataReceived_t));
@@ -1923,9 +1925,9 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct SteamInputDeviceConnected_t : ICallbackData
+    public struct SteamInputDeviceConnected_t : ICallbackData
     {
-        internal ulong ConnectedDeviceHandle; // m_ulConnectedDeviceHandle InputHandle_t
+        public ulong ConnectedDeviceHandle; // m_ulConnectedDeviceHandle InputHandle_t
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SteamInputDeviceConnected_t));
@@ -1935,9 +1937,9 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct SteamInputDeviceDisconnected_t : ICallbackData
+    public struct SteamInputDeviceDisconnected_t : ICallbackData
     {
-        internal ulong DisconnectedDeviceHandle; // m_ulDisconnectedDeviceHandle InputHandle_t
+        public ulong DisconnectedDeviceHandle; // m_ulDisconnectedDeviceHandle InputHandle_t
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SteamInputDeviceDisconnected_t));
@@ -1947,17 +1949,17 @@ namespace SKYNET.Callback
     }
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
-    //internal struct SteamInputConfigurationLoaded_t : ICallbackData
+    //public struct SteamInputConfigurationLoaded_t : ICallbackData
     //{
-    //    internal AppId AppID; // m_unAppID AppId_t
-    //    internal ulong DeviceHandle; // m_ulDeviceHandle InputHandle_t
-    //    internal ulong MappingCreator; // m_ulMappingCreator CSteamID
-    //    internal uint MajorRevision; // m_unMajorRevision uint32
-    //    internal uint MinorRevision; // m_unMinorRevision uint32
+    //    public AppId AppID; // m_unAppID AppId_t
+    //    public ulong DeviceHandle; // m_ulDeviceHandle InputHandle_t
+    //    public ulong MappingCreator; // m_ulMappingCreator CSteamID
+    //    public uint MajorRevision; // m_unMajorRevision uint32
+    //    public uint MinorRevision; // m_unMinorRevision uint32
     //    [MarshalAs(UnmanagedType.I1)]
-    //    internal bool UsesSteamInputAPI; // m_bUsesSteamInputAPI bool
+    //    public bool UsesSteamInputAPI; // m_bUsesSteamInputAPI bool
     //    [MarshalAs(UnmanagedType.I1)]
-    //    internal bool UsesGamepadAPI; // m_bUsesGamepadAPI bool
+    //    public bool UsesGamepadAPI; // m_bUsesGamepadAPI bool
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(SteamInputConfigurationLoaded_t));
@@ -1967,17 +1969,17 @@ namespace SKYNET.Callback
     //}
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct SteamUGCQueryCompleted_t : ICallbackData
+    public struct SteamUGCQueryCompleted_t : ICallbackData
     {
-        internal ulong Handle; // m_handle UGCQueryHandle_t
-        internal EResult Result; // m_eResult EResult
-        internal uint NumResultsReturned; // m_unNumResultsReturned uint32
-        internal uint TotalMatchingResults; // m_unTotalMatchingResults uint32
+        public ulong Handle; // m_handle UGCQueryHandle_t
+        public EResult Result; // m_eResult EResult
+        public uint NumResultsReturned; // m_unNumResultsReturned uint32
+        public uint TotalMatchingResults; // m_unTotalMatchingResults uint32
         [MarshalAs(UnmanagedType.I1)]
-        internal bool CachedData; // m_bCachedData bool
-        internal string NextCursorUTF8() => System.Text.Encoding.UTF8.GetString(NextCursor, 0, System.Array.IndexOf<byte>(NextCursor, 0));
+        public bool CachedData; // m_bCachedData bool
+        public string NextCursorUTF8() => System.Text.Encoding.UTF8.GetString(NextCursor, 0, System.Array.IndexOf<byte>(NextCursor, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)] // byte[] m_rgchNextCursor
-        internal byte[] NextCursor; // m_rgchNextCursor char [256]
+        public byte[] NextCursor; // m_rgchNextCursor char [256]
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SteamUGCQueryCompleted_t));
@@ -1987,11 +1989,11 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct SteamUGCRequestUGCDetailsResult_t : ICallbackData
+    public struct SteamUGCRequestUGCDetailsResult_t : ICallbackData
     {
-        internal SteamUGCDetails_t Details; // m_details SteamUGCDetails_t
+        public SteamUGCDetails_t Details; // m_details SteamUGCDetails_t
         [MarshalAs(UnmanagedType.I1)]
-        internal bool CachedData; // m_bCachedData bool
+        public bool CachedData; // m_bCachedData bool
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SteamUGCRequestUGCDetailsResult_t));
@@ -2001,12 +2003,12 @@ namespace SKYNET.Callback
     }
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct CreateItemResult_t : ICallbackData
+    //public struct CreateItemResult_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    public EResult Result; // m_eResult EResult
+    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
     //    [MarshalAs(UnmanagedType.I1)]
-    //    internal bool UserNeedsToAcceptWorkshopLegalAgreement; // m_bUserNeedsToAcceptWorkshopLegalAgreement bool
+    //    public bool UserNeedsToAcceptWorkshopLegalAgreement; // m_bUserNeedsToAcceptWorkshopLegalAgreement bool
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(CreateItemResult_t));
@@ -2016,12 +2018,12 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct SubmitItemUpdateResult_t : ICallbackData
+    //public struct SubmitItemUpdateResult_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
+    //    public EResult Result; // m_eResult EResult
     //    [MarshalAs(UnmanagedType.I1)]
-    //    internal bool UserNeedsToAcceptWorkshopLegalAgreement; // m_bUserNeedsToAcceptWorkshopLegalAgreement bool
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    public bool UserNeedsToAcceptWorkshopLegalAgreement; // m_bUserNeedsToAcceptWorkshopLegalAgreement bool
+    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(SubmitItemUpdateResult_t));
@@ -2031,10 +2033,10 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct ItemInstalled_t : ICallbackData
+    //public struct ItemInstalled_t : ICallbackData
     //{
-    //    internal AppId AppID; // m_unAppID AppId_t
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    public AppId AppID; // m_unAppID AppId_t
+    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(ItemInstalled_t));
@@ -2044,11 +2046,11 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct DownloadItemResult_t : ICallbackData
+    //public struct DownloadItemResult_t : ICallbackData
     //{
-    //    internal AppId AppID; // m_unAppID AppId_t
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
-    //    internal EResult Result; // m_eResult EResult
+    //    public AppId AppID; // m_unAppID AppId_t
+    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    public EResult Result; // m_eResult EResult
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(DownloadItemResult_t));
@@ -2058,12 +2060,12 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct UserFavoriteItemsListChanged_t : ICallbackData
+    //public struct UserFavoriteItemsListChanged_t : ICallbackData
     //{
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
-    //    internal EResult Result; // m_eResult EResult
+    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    public EResult Result; // m_eResult EResult
     //    [MarshalAs(UnmanagedType.I1)]
-    //    internal bool WasAddRequest; // m_bWasAddRequest bool
+    //    public bool WasAddRequest; // m_bWasAddRequest bool
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(UserFavoriteItemsListChanged_t));
@@ -2073,12 +2075,12 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct SetUserItemVoteResult_t : ICallbackData
+    //public struct SetUserItemVoteResult_t : ICallbackData
     //{
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
-    //    internal EResult Result; // m_eResult EResult
+    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    public EResult Result; // m_eResult EResult
     //    [MarshalAs(UnmanagedType.I1)]
-    //    internal bool VoteUp; // m_bVoteUp bool
+    //    public bool VoteUp; // m_bVoteUp bool
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(SetUserItemVoteResult_t));
@@ -2088,16 +2090,16 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct GetUserItemVoteResult_t : ICallbackData
+    //public struct GetUserItemVoteResult_t : ICallbackData
     //{
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
-    //    internal EResult Result; // m_eResult EResult
+    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    public EResult Result; // m_eResult EResult
     //    [MarshalAs(UnmanagedType.I1)]
-    //    internal bool VotedUp; // m_bVotedUp bool
+    //    public bool VotedUp; // m_bVotedUp bool
     //    [MarshalAs(UnmanagedType.I1)]
-    //    internal bool VotedDown; // m_bVotedDown bool
+    //    public bool VotedDown; // m_bVotedDown bool
     //    [MarshalAs(UnmanagedType.I1)]
-    //    internal bool VoteSkipped; // m_bVoteSkipped bool
+    //    public bool VoteSkipped; // m_bVoteSkipped bool
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(GetUserItemVoteResult_t));
@@ -2107,9 +2109,9 @@ namespace SKYNET.Callback
     //}
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct StartPlaytimeTrackingResult_t : ICallbackData
+    public struct StartPlaytimeTrackingResult_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
+        public EResult Result; // m_eResult EResult
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(StartPlaytimeTrackingResult_t));
@@ -2119,9 +2121,9 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct StopPlaytimeTrackingResult_t : ICallbackData
+    public struct StopPlaytimeTrackingResult_t : ICallbackData
     {
-        internal EResult m_eResult; // m_eResult EResult
+        public EResult m_eResult; // m_eResult EResult
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(StopPlaytimeTrackingResult_t));
@@ -2131,11 +2133,11 @@ namespace SKYNET.Callback
     }
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct AddUGCDependencyResult_t : ICallbackData
+    //public struct AddUGCDependencyResult_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
-    //    internal PublishedFileId ChildPublishedFileId; // m_nChildPublishedFileId PublishedFileId_t
+    //    public EResult Result; // m_eResult EResult
+    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    public PublishedFileId ChildPublishedFileId; // m_nChildPublishedFileId PublishedFileId_t
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(AddUGCDependencyResult_t));
@@ -2145,11 +2147,11 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct RemoveUGCDependencyResult_t : ICallbackData
+    //public struct RemoveUGCDependencyResult_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
-    //    internal PublishedFileId ChildPublishedFileId; // m_nChildPublishedFileId PublishedFileId_t
+    //    public EResult Result; // m_eResult EResult
+    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    public PublishedFileId ChildPublishedFileId; // m_nChildPublishedFileId PublishedFileId_t
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(RemoveUGCDependencyResult_t));
@@ -2159,11 +2161,11 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct AddAppDependencyResult_t : ICallbackData
+    //public struct AddAppDependencyResult_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
-    //    internal AppId AppID; // m_nAppID AppId_t
+    //    public EResult Result; // m_eResult EResult
+    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    public AppId AppID; // m_nAppID AppId_t
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(AddAppDependencyResult_t));
@@ -2173,11 +2175,11 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct RemoveAppDependencyResult_t : ICallbackData
+    //public struct RemoveAppDependencyResult_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
-    //    internal AppId AppID; // m_nAppID AppId_t
+    //    public EResult Result; // m_eResult EResult
+    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    public AppId AppID; // m_nAppID AppId_t
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(RemoveAppDependencyResult_t));
@@ -2187,14 +2189,14 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct GetAppDependenciesResult_t : ICallbackData
+    //public struct GetAppDependenciesResult_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    public EResult Result; // m_eResult EResult
+    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
     //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32, ArraySubType = UnmanagedType.U4)]
-    //    internal AppId[] GAppIDs; // m_rgAppIDs AppId_t [32]
-    //    internal uint NumAppDependencies; // m_nNumAppDependencies uint32
-    //    internal uint TotalNumAppDependencies; // m_nTotalNumAppDependencies uint32
+    //    public AppId[] GAppIDs; // m_rgAppIDs AppId_t [32]
+    //    public uint NumAppDependencies; // m_nNumAppDependencies uint32
+    //    public uint TotalNumAppDependencies; // m_nTotalNumAppDependencies uint32
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(GetAppDependenciesResult_t));
@@ -2204,10 +2206,10 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct DeleteItemResult_t : ICallbackData
+    //public struct DeleteItemResult_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    //    public EResult Result; // m_eResult EResult
+    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(DeleteItemResult_t));
@@ -2217,9 +2219,9 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct UserSubscribedItemsListChanged_t : ICallbackData
+    //public struct UserSubscribedItemsListChanged_t : ICallbackData
     //{
-    //    internal AppId AppID; // m_nAppID AppId_t
+    //    public AppId AppID; // m_nAppID AppId_t
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(UserSubscribedItemsListChanged_t));
@@ -2229,16 +2231,16 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct WorkshopEULAStatus_t : ICallbackData
+    //public struct WorkshopEULAStatus_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal AppId AppID; // m_nAppID AppId_t
-    //    internal uint Version; // m_unVersion uint32
-    //    internal uint TAction; // m_rtAction RTime32
+    //    public EResult Result; // m_eResult EResult
+    //    public AppId AppID; // m_nAppID AppId_t
+    //    public uint Version; // m_unVersion uint32
+    //    public uint TAction; // m_rtAction RTime32
     //    [MarshalAs(UnmanagedType.I1)]
-    //    internal bool Accepted; // m_bAccepted bool
+    //    public bool Accepted; // m_bAccepted bool
     //    [MarshalAs(UnmanagedType.I1)]
-    //    internal bool NeedsAction; // m_bNeedsAction bool
+    //    public bool NeedsAction; // m_bNeedsAction bool
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(WorkshopEULAStatus_t));
@@ -2248,10 +2250,10 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct SteamAppInstalled_t : ICallbackData
+    //public struct SteamAppInstalled_t : ICallbackData
     //{
-    //    internal AppId AppID; // m_nAppID AppId_t
-    //    internal int InstallFolderIndex; // m_iInstallFolderIndex int
+    //    public AppId AppID; // m_nAppID AppId_t
+    //    public int InstallFolderIndex; // m_iInstallFolderIndex int
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(SteamAppInstalled_t));
@@ -2261,10 +2263,10 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct SteamAppUninstalled_t : ICallbackData
+    //public struct SteamAppUninstalled_t : ICallbackData
     //{
-    //    internal AppId AppID; // m_nAppID AppId_t
-    //    internal int InstallFolderIndex; // m_iInstallFolderIndex int
+    //    public AppId AppID; // m_nAppID AppId_t
+    //    public int InstallFolderIndex; // m_iInstallFolderIndex int
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(SteamAppUninstalled_t));
@@ -2274,9 +2276,9 @@ namespace SKYNET.Callback
     //}
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTML_BrowserReady_t : ICallbackData
+    public struct HTML_BrowserReady_t : ICallbackData
     {
-        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        public uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTML_BrowserReady_t));
@@ -2286,20 +2288,20 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTML_NeedsPaint_t : ICallbackData
+    public struct HTML_NeedsPaint_t : ICallbackData
     {
-        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
-        internal string PBGRA; // pBGRA const char *
-        internal uint UnWide; // unWide uint32
-        internal uint UnTall; // unTall uint32
-        internal uint UnUpdateX; // unUpdateX uint32
-        internal uint UnUpdateY; // unUpdateY uint32
-        internal uint UnUpdateWide; // unUpdateWide uint32
-        internal uint UnUpdateTall; // unUpdateTall uint32
-        internal uint UnScrollX; // unScrollX uint32
-        internal uint UnScrollY; // unScrollY uint32
-        internal float FlPageScale; // flPageScale float
-        internal uint UnPageSerial; // unPageSerial uint32
+        public uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        public string PBGRA; // pBGRA const char *
+        public uint UnWide; // unWide uint32
+        public uint UnTall; // unTall uint32
+        public uint UnUpdateX; // unUpdateX uint32
+        public uint UnUpdateY; // unUpdateY uint32
+        public uint UnUpdateWide; // unUpdateWide uint32
+        public uint UnUpdateTall; // unUpdateTall uint32
+        public uint UnScrollX; // unScrollX uint32
+        public uint UnScrollY; // unScrollY uint32
+        public float FlPageScale; // flPageScale float
+        public uint UnPageSerial; // unPageSerial uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTML_NeedsPaint_t));
@@ -2309,14 +2311,14 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTML_StartRequest_t : ICallbackData
+    public struct HTML_StartRequest_t : ICallbackData
     {
-        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
-        internal string PchURL; // pchURL const char *
-        internal string PchTarget; // pchTarget const char *
-        internal string PchPostData; // pchPostData const char *
+        public uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        public string PchURL; // pchURL const char *
+        public string PchTarget; // pchTarget const char *
+        public string PchPostData; // pchPostData const char *
         [MarshalAs(UnmanagedType.I1)]
-        internal bool BIsRedirect; // bIsRedirect bool
+        public bool BIsRedirect; // bIsRedirect bool
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTML_StartRequest_t));
@@ -2326,9 +2328,9 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTML_CloseBrowser_t : ICallbackData
+    public struct HTML_CloseBrowser_t : ICallbackData
     {
-        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        public uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTML_CloseBrowser_t));
@@ -2338,16 +2340,16 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTML_URLChanged_t : ICallbackData
+    public struct HTML_URLChanged_t : ICallbackData
     {
-        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
-        internal string PchURL; // pchURL const char *
-        internal string PchPostData; // pchPostData const char *
+        public uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        public string PchURL; // pchURL const char *
+        public string PchPostData; // pchPostData const char *
         [MarshalAs(UnmanagedType.I1)]
-        internal bool BIsRedirect; // bIsRedirect bool
-        internal string PchPageTitle; // pchPageTitle const char *
+        public bool BIsRedirect; // bIsRedirect bool
+        public string PchPageTitle; // pchPageTitle const char *
         [MarshalAs(UnmanagedType.I1)]
-        internal bool BNewNavigation; // bNewNavigation bool
+        public bool BNewNavigation; // bNewNavigation bool
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTML_URLChanged_t));
@@ -2357,11 +2359,11 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTML_FinishedRequest_t : ICallbackData
+    public struct HTML_FinishedRequest_t : ICallbackData
     {
-        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
-        internal string PchURL; // pchURL const char *
-        internal string PchPageTitle; // pchPageTitle const char *
+        public uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        public string PchURL; // pchURL const char *
+        public string PchPageTitle; // pchPageTitle const char *
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTML_FinishedRequest_t));
@@ -2371,10 +2373,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTML_OpenLinkInNewTab_t : ICallbackData
+    public struct HTML_OpenLinkInNewTab_t : ICallbackData
     {
-        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
-        internal string PchURL; // pchURL const char *
+        public uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        public string PchURL; // pchURL const char *
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTML_OpenLinkInNewTab_t));
@@ -2384,10 +2386,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTML_ChangedTitle_t : ICallbackData
+    public struct HTML_ChangedTitle_t : ICallbackData
     {
-        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
-        internal string PchTitle; // pchTitle const char *
+        public uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        public string PchTitle; // pchTitle const char *
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTML_ChangedTitle_t));
@@ -2397,11 +2399,11 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTML_SearchResults_t : ICallbackData
+    public struct HTML_SearchResults_t : ICallbackData
     {
-        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
-        internal uint UnResults; // unResults uint32
-        internal uint UnCurrentMatch; // unCurrentMatch uint32
+        public uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        public uint UnResults; // unResults uint32
+        public uint UnCurrentMatch; // unCurrentMatch uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTML_SearchResults_t));
@@ -2411,13 +2413,13 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTML_CanGoBackAndForward_t : ICallbackData
+    public struct HTML_CanGoBackAndForward_t : ICallbackData
     {
-        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        public uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
         [MarshalAs(UnmanagedType.I1)]
-        internal bool BCanGoBack; // bCanGoBack bool
+        public bool BCanGoBack; // bCanGoBack bool
         [MarshalAs(UnmanagedType.I1)]
-        internal bool BCanGoForward; // bCanGoForward bool
+        public bool BCanGoForward; // bCanGoForward bool
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTML_CanGoBackAndForward_t));
@@ -2427,15 +2429,15 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTML_HorizontalScroll_t : ICallbackData
+    public struct HTML_HorizontalScroll_t : ICallbackData
     {
-        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
-        internal uint UnScrollMax; // unScrollMax uint32
-        internal uint UnScrollCurrent; // unScrollCurrent uint32
-        internal float FlPageScale; // flPageScale float
+        public uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        public uint UnScrollMax; // unScrollMax uint32
+        public uint UnScrollCurrent; // unScrollCurrent uint32
+        public float FlPageScale; // flPageScale float
         [MarshalAs(UnmanagedType.I1)]
-        internal bool BVisible; // bVisible bool
-        internal uint UnPageSize; // unPageSize uint32
+        public bool BVisible; // bVisible bool
+        public uint UnPageSize; // unPageSize uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTML_HorizontalScroll_t));
@@ -2445,15 +2447,15 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTML_VerticalScroll_t : ICallbackData
+    public struct HTML_VerticalScroll_t : ICallbackData
     {
-        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
-        internal uint UnScrollMax; // unScrollMax uint32
-        internal uint UnScrollCurrent; // unScrollCurrent uint32
-        internal float FlPageScale; // flPageScale float
+        public uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        public uint UnScrollMax; // unScrollMax uint32
+        public uint UnScrollCurrent; // unScrollCurrent uint32
+        public float FlPageScale; // flPageScale float
         [MarshalAs(UnmanagedType.I1)]
-        internal bool BVisible; // bVisible bool
-        internal uint UnPageSize; // unPageSize uint32
+        public bool BVisible; // bVisible bool
+        public uint UnPageSize; // unPageSize uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTML_VerticalScroll_t));
@@ -2463,16 +2465,16 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTML_LinkAtPosition_t : ICallbackData
+    public struct HTML_LinkAtPosition_t : ICallbackData
     {
-        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
-        internal uint X; // x uint32
-        internal uint Y; // y uint32
-        internal string PchURL; // pchURL const char *
+        public uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        public uint X; // x uint32
+        public uint Y; // y uint32
+        public string PchURL; // pchURL const char *
         [MarshalAs(UnmanagedType.I1)]
-        internal bool BInput; // bInput bool
+        public bool BInput; // bInput bool
         [MarshalAs(UnmanagedType.I1)]
-        internal bool BLiveLink; // bLiveLink bool
+        public bool BLiveLink; // bLiveLink bool
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTML_LinkAtPosition_t));
@@ -2482,10 +2484,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTML_JSAlert_t : ICallbackData
+    public struct HTML_JSAlert_t : ICallbackData
     {
-        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
-        internal string PchMessage; // pchMessage const char *
+        public uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        public string PchMessage; // pchMessage const char *
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTML_JSAlert_t));
@@ -2495,10 +2497,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTML_JSConfirm_t : ICallbackData
+    public struct HTML_JSConfirm_t : ICallbackData
     {
-        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
-        internal string PchMessage; // pchMessage const char *
+        public uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        public string PchMessage; // pchMessage const char *
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTML_JSConfirm_t));
@@ -2508,11 +2510,11 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTML_FileOpenDialog_t : ICallbackData
+    public struct HTML_FileOpenDialog_t : ICallbackData
     {
-        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
-        internal string PchTitle; // pchTitle const char *
-        internal string PchInitialFile; // pchInitialFile const char *
+        public uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        public string PchTitle; // pchTitle const char *
+        public string PchInitialFile; // pchInitialFile const char *
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTML_FileOpenDialog_t));
@@ -2522,15 +2524,15 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTML_NewWindow_t : ICallbackData
+    public struct HTML_NewWindow_t : ICallbackData
     {
-        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
-        internal string PchURL; // pchURL const char *
-        internal uint UnX; // unX uint32
-        internal uint UnY; // unY uint32
-        internal uint UnWide; // unWide uint32
-        internal uint UnTall; // unTall uint32
-        internal uint UnNewWindow_BrowserHandle_IGNORE; // unNewWindow_BrowserHandle_IGNORE HHTMLBrowser
+        public uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        public string PchURL; // pchURL const char *
+        public uint UnX; // unX uint32
+        public uint UnY; // unY uint32
+        public uint UnWide; // unWide uint32
+        public uint UnTall; // unTall uint32
+        public uint UnNewWindow_BrowserHandle_IGNORE; // unNewWindow_BrowserHandle_IGNORE HHTMLBrowser
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTML_NewWindow_t));
@@ -2540,10 +2542,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTML_SetCursor_t : ICallbackData
+    public struct HTML_SetCursor_t : ICallbackData
     {
-        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
-        internal uint EMouseCursor; // eMouseCursor uint32
+        public uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        public uint EMouseCursor; // eMouseCursor uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTML_SetCursor_t));
@@ -2553,10 +2555,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTML_StatusText_t : ICallbackData
+    public struct HTML_StatusText_t : ICallbackData
     {
-        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
-        internal string PchMsg; // pchMsg const char *
+        public uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        public string PchMsg; // pchMsg const char *
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTML_StatusText_t));
@@ -2566,10 +2568,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTML_ShowToolTip_t : ICallbackData
+    public struct HTML_ShowToolTip_t : ICallbackData
     {
-        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
-        internal string PchMsg; // pchMsg const char *
+        public uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        public string PchMsg; // pchMsg const char *
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTML_ShowToolTip_t));
@@ -2579,10 +2581,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTML_UpdateToolTip_t : ICallbackData
+    public struct HTML_UpdateToolTip_t : ICallbackData
     {
-        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
-        internal string PchMsg; // pchMsg const char *
+        public uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        public string PchMsg; // pchMsg const char *
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTML_UpdateToolTip_t));
@@ -2592,9 +2594,9 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTML_HideToolTip_t : ICallbackData
+    public struct HTML_HideToolTip_t : ICallbackData
     {
-        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        public uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTML_HideToolTip_t));
@@ -2604,10 +2606,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct HTML_BrowserRestarted_t : ICallbackData
+    public struct HTML_BrowserRestarted_t : ICallbackData
     {
-        internal uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
-        internal uint UnOldBrowserHandle; // unOldBrowserHandle HHTMLBrowser
+        public uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
+        public uint UnOldBrowserHandle; // unOldBrowserHandle HHTMLBrowser
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(HTML_BrowserRestarted_t));
@@ -2617,10 +2619,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct SteamInventoryResultReady_t : ICallbackData
+    public struct SteamInventoryResultReady_t : ICallbackData
     {
-        internal int Handle; // m_handle SteamInventoryResult_t
-        internal EResult Result; // m_result EResult
+        public int Handle; // m_handle SteamInventoryResult_t
+        public EResult Result; // m_result EResult
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SteamInventoryResultReady_t));
@@ -2630,9 +2632,9 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct SteamInventoryFullUpdate_t : ICallbackData
+    public struct SteamInventoryFullUpdate_t : ICallbackData
     {
-        internal int Handle; // m_handle SteamInventoryResult_t
+        public int Handle; // m_handle SteamInventoryResult_t
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SteamInventoryFullUpdate_t));
@@ -2642,7 +2644,7 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct SteamInventoryDefinitionUpdate_t : ICallbackData
+    public struct SteamInventoryDefinitionUpdate_t : ICallbackData
     {
 
         #region SteamCallback
@@ -2653,13 +2655,13 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
-    internal struct SteamInventoryEligiblePromoItemDefIDs_t : ICallbackData
+    public struct SteamInventoryEligiblePromoItemDefIDs_t : ICallbackData
     {
-        internal EResult Result; // m_result EResult
-        internal ulong SteamID; // m_steamID CSteamID
-        internal int UmEligiblePromoItemDefs; // m_numEligiblePromoItemDefs int
+        public EResult Result; // m_result EResult
+        public ulong SteamID; // m_steamID CSteamID
+        public int UmEligiblePromoItemDefs; // m_numEligiblePromoItemDefs int
         [MarshalAs(UnmanagedType.I1)]
-        internal bool CachedData; // m_bCachedData bool
+        public bool CachedData; // m_bCachedData bool
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SteamInventoryEligiblePromoItemDefIDs_t));
@@ -2669,11 +2671,11 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct SteamInventoryStartPurchaseResult_t : ICallbackData
+    public struct SteamInventoryStartPurchaseResult_t : ICallbackData
     {
-        internal EResult Result; // m_result EResult
-        internal ulong OrderID; // m_ulOrderID uint64
-        internal ulong TransID; // m_ulTransID uint64
+        public EResult Result; // m_result EResult
+        public ulong OrderID; // m_ulOrderID uint64
+        public ulong TransID; // m_ulTransID uint64
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SteamInventoryStartPurchaseResult_t));
@@ -2683,12 +2685,12 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct SteamInventoryRequestPricesResult_t : ICallbackData
+    public struct SteamInventoryRequestPricesResult_t : ICallbackData
     {
-        internal EResult Result; // m_result EResult
-        internal string CurrencyUTF8() => System.Text.Encoding.UTF8.GetString(Currency, 0, System.Array.IndexOf<byte>(Currency, 0));
+        public EResult Result; // m_result EResult
+        public string CurrencyUTF8() => System.Text.Encoding.UTF8.GetString(Currency, 0, System.Array.IndexOf<byte>(Currency, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)] // byte[] m_rgchCurrency
-        internal byte[] Currency; // m_rgchCurrency char [4]
+        public byte[] Currency; // m_rgchCurrency char [4]
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SteamInventoryRequestPricesResult_t));
@@ -2698,13 +2700,13 @@ namespace SKYNET.Callback
     }
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct GetVideoURLResult_t : ICallbackData
+    //public struct GetVideoURLResult_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal AppId VideoAppID; // m_unVideoAppID AppId_t
-    //    internal string URLUTF8() => System.Text.Encoding.UTF8.GetString(URL, 0, System.Array.IndexOf<byte>(URL, 0));
+    //    public EResult Result; // m_eResult EResult
+    //    public AppId VideoAppID; // m_unVideoAppID AppId_t
+    //    public string URLUTF8() => System.Text.Encoding.UTF8.GetString(URL, 0, System.Array.IndexOf<byte>(URL, 0));
     //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)] // byte[] m_rgchURL
-    //    internal byte[] URL; // m_rgchURL char [256]
+    //    public byte[] URL; // m_rgchURL char [256]
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(GetVideoURLResult_t));
@@ -2714,10 +2716,10 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct GetOPFSettingsResult_t : ICallbackData
+    //public struct GetOPFSettingsResult_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal AppId VideoAppID; // m_unVideoAppID AppId_t
+    //    public EResult Result; // m_eResult EResult
+    //    public AppId VideoAppID; // m_unVideoAppID AppId_t
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(GetOPFSettingsResult_t));
@@ -2727,7 +2729,7 @@ namespace SKYNET.Callback
     //}
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct SteamParentalSettingsChanged_t : ICallbackData
+    public struct SteamParentalSettingsChanged_t : ICallbackData
     {
 
         #region SteamCallback
@@ -2738,9 +2740,9 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct SteamRemotePlaySessionConnected_t : ICallbackData
+    public struct SteamRemotePlaySessionConnected_t : ICallbackData
     {
-        internal uint SessionID; // m_unSessionID RemotePlaySessionID_t
+        public uint SessionID; // m_unSessionID RemotePlaySessionID_t
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SteamRemotePlaySessionConnected_t));
@@ -2750,9 +2752,9 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct SteamRemotePlaySessionDisconnected_t : ICallbackData
+    public struct SteamRemotePlaySessionDisconnected_t : ICallbackData
     {
-        internal uint SessionID; // m_unSessionID RemotePlaySessionID_t
+        public uint SessionID; // m_unSessionID RemotePlaySessionID_t
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SteamRemotePlaySessionDisconnected_t));
@@ -2762,9 +2764,9 @@ namespace SKYNET.Callback
     }
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct SteamNetworkingMessagesSessionRequest_t : ICallbackData
+    //public struct SteamNetworkingMessagesSessionRequest_t : ICallbackData
     //{
-    //    internal NetIdentity DentityRemote; // m_identityRemote SteamNetworkingIdentity
+    //    public NetIdentity DentityRemote; // m_identityRemote SteamNetworkingIdentity
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(SteamNetworkingMessagesSessionRequest_t));
@@ -2774,9 +2776,9 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct SteamNetworkingMessagesSessionFailed_t : ICallbackData
+    //public struct SteamNetworkingMessagesSessionFailed_t : ICallbackData
     //{
-    //    internal ConnectionInfo Nfo; // m_info SteamNetConnectionInfo_t
+    //    public ConnectionInfo Nfo; // m_info SteamNetConnectionInfo_t
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(SteamNetworkingMessagesSessionFailed_t));
@@ -2786,11 +2788,11 @@ namespace SKYNET.Callback
     //}
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct SteamNetConnectionStatusChangedCallback_t : ICallbackData
+    //public struct SteamNetConnectionStatusChangedCallback_t : ICallbackData
     //{
-    //    internal Connection Conn; // m_hConn HSteamNetConnection
-    //    internal ConnectionInfo Nfo; // m_info SteamNetConnectionInfo_t
-    //    internal ConnectionState OldState; // m_eOldState ESteamNetworkingConnectionState
+    //    public Connection Conn; // m_hConn HSteamNetConnection
+    //    public ConnectionInfo Nfo; // m_info SteamNetConnectionInfo_t
+    //    public ConnectionState OldState; // m_eOldState ESteamNetworkingConnectionState
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(SteamNetConnectionStatusChangedCallback_t));
@@ -2800,12 +2802,12 @@ namespace SKYNET.Callback
     //}
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct SteamNetAuthenticationStatus_t : ICallbackData
+    public struct SteamNetAuthenticationStatus_t : ICallbackData
     {
-        internal ESteamNetworkingAvailability Avail; // m_eAvail ESteamNetworkingAvailability
-        internal string DebugMsgUTF8() => System.Text.Encoding.UTF8.GetString(DebugMsg, 0, System.Array.IndexOf<byte>(DebugMsg, 0));
+        public ESteamNetworkingAvailability Avail; // m_eAvail ESteamNetworkingAvailability
+        public string DebugMsgUTF8() => System.Text.Encoding.UTF8.GetString(DebugMsg, 0, System.Array.IndexOf<byte>(DebugMsg, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)] // byte[] m_debugMsg
-        internal byte[] DebugMsg; // m_debugMsg char [256]
+        public byte[] DebugMsg; // m_debugMsg char [256]
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SteamNetAuthenticationStatus_t));
@@ -2815,15 +2817,15 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct SteamRelayNetworkStatus_t : ICallbackData
+    public struct SteamRelayNetworkStatus_t : ICallbackData
     {
-        internal ESteamNetworkingAvailability m_eAvail; // m_eAvail ESteamNetworkingAvailability
-        internal int m_bPingMeasurementInProgress; // m_bPingMeasurementInProgress int
-        internal ESteamNetworkingAvailability m_eAvailNetworkConfig; // m_eAvailNetworkConfig ESteamNetworkingAvailability
-        internal ESteamNetworkingAvailability m_eAvailAnyRelay; // m_eAvailAnyRelay ESteamNetworkingAvailability
-        internal string DebugMsgUTF8() => System.Text.Encoding.UTF8.GetString(DebugMsg, 0, System.Array.IndexOf<byte>(DebugMsg, 0));
+        public ESteamNetworkingAvailability m_eAvail; // m_eAvail ESteamNetworkingAvailability
+        public int m_bPingMeasurementInProgress; // m_bPingMeasurementInProgress int
+        public ESteamNetworkingAvailability m_eAvailNetworkConfig; // m_eAvailNetworkConfig ESteamNetworkingAvailability
+        public ESteamNetworkingAvailability m_eAvailAnyRelay; // m_eAvailAnyRelay ESteamNetworkingAvailability
+        public string DebugMsgUTF8() => System.Text.Encoding.UTF8.GetString(DebugMsg, 0, System.Array.IndexOf<byte>(DebugMsg, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)] // byte[] m_debugMsg
-        internal byte[] DebugMsg; // m_debugMsg char [256]
+        public byte[] DebugMsg; // m_debugMsg char [256]
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SteamRelayNetworkStatus_t));
@@ -2833,10 +2835,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
-    internal struct GSClientApprove_t : ICallbackData
+    public struct GSClientApprove_t : ICallbackData
     {
-        internal ulong SteamID; // m_SteamID CSteamID
-        internal ulong OwnerSteamID; // m_OwnerSteamID CSteamID
+        public ulong SteamID; // m_SteamID CSteamID
+        public ulong OwnerSteamID; // m_OwnerSteamID CSteamID
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GSClientApprove_t));
@@ -2846,13 +2848,13 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct GSClientDeny_t : ICallbackData
+    public struct GSClientDeny_t : ICallbackData
     {
-        internal ulong SteamID; // m_SteamID CSteamID
-        internal DenyReason DenyReason; // m_eDenyReason EDenyReason
-        internal string OptionalTextUTF8() => System.Text.Encoding.UTF8.GetString(OptionalText, 0, System.Array.IndexOf<byte>(OptionalText, 0));
+        public ulong SteamID; // m_SteamID CSteamID
+        public DenyReason DenyReason; // m_eDenyReason EDenyReason
+        public string OptionalTextUTF8() => System.Text.Encoding.UTF8.GetString(OptionalText, 0, System.Array.IndexOf<byte>(OptionalText, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)] // byte[] m_rgchOptionalText
-        internal byte[] OptionalText; // m_rgchOptionalText char [128]
+        public byte[] OptionalText; // m_rgchOptionalText char [128]
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GSClientDeny_t));
@@ -2862,10 +2864,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct GSClientKick_t : ICallbackData
+    public struct GSClientKick_t : ICallbackData
     {
-        internal ulong SteamID; // m_SteamID CSteamID
-        internal DenyReason DenyReason; // m_eDenyReason EDenyReason
+        public ulong SteamID; // m_SteamID CSteamID
+        public DenyReason DenyReason; // m_eDenyReason EDenyReason
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GSClientKick_t));
@@ -2875,14 +2877,14 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct GSClientAchievementStatus_t : ICallbackData
+    public struct GSClientAchievementStatus_t : ICallbackData
     {
-        internal ulong SteamID; // m_SteamID uint64
-        internal string PchAchievementUTF8() => System.Text.Encoding.UTF8.GetString(PchAchievement, 0, System.Array.IndexOf<byte>(PchAchievement, 0));
+        public ulong SteamID; // m_SteamID uint64
+        public string PchAchievementUTF8() => System.Text.Encoding.UTF8.GetString(PchAchievement, 0, System.Array.IndexOf<byte>(PchAchievement, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)] // byte[] m_pchAchievement
-        internal byte[] PchAchievement; // m_pchAchievement char [128]
+        public byte[] PchAchievement; // m_pchAchievement char [128]
         [MarshalAs(UnmanagedType.I1)]
-        internal bool Unlocked; // m_bUnlocked bool
+        public bool Unlocked; // m_bUnlocked bool
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GSClientAchievementStatus_t));
@@ -2892,9 +2894,9 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct GSPolicyResponse_t : ICallbackData
+    public struct GSPolicyResponse_t : ICallbackData
     {
-        internal byte Secure; // m_bSecure uint8
+        public byte Secure; // m_bSecure uint8
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GSPolicyResponse_t));
@@ -2904,12 +2906,12 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct GSGameplayStats_t : ICallbackData
+    public struct GSGameplayStats_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
-        internal int Rank; // m_nRank int32
-        internal uint TotalConnects; // m_unTotalConnects uint32
-        internal uint TotalMinutesPlayed; // m_unTotalMinutesPlayed uint32
+        public EResult Result; // m_eResult EResult
+        public int Rank; // m_nRank int32
+        public uint TotalConnects; // m_unTotalConnects uint32
+        public uint TotalMinutesPlayed; // m_unTotalMinutesPlayed uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GSGameplayStats_t));
@@ -2919,14 +2921,14 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
-    internal struct GSClientGroupStatus_t : ICallbackData
+    public struct GSClientGroupStatus_t : ICallbackData
     {
-        internal ulong SteamIDUser; // m_SteamIDUser CSteamID
-        internal ulong SteamIDGroup; // m_SteamIDGroup CSteamID
+        public ulong SteamIDUser; // m_SteamIDUser CSteamID
+        public ulong SteamIDGroup; // m_SteamIDGroup CSteamID
         [MarshalAs(UnmanagedType.I1)]
-        internal bool Member; // m_bMember bool
+        public bool Member; // m_bMember bool
         [MarshalAs(UnmanagedType.I1)]
-        internal bool Officer; // m_bOfficer bool
+        public bool Officer; // m_bOfficer bool
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GSClientGroupStatus_t));
@@ -2936,16 +2938,16 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct GSReputation_t : ICallbackData
+    public struct GSReputation_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
-        internal uint ReputationScore; // m_unReputationScore uint32
+        public EResult Result; // m_eResult EResult
+        public uint ReputationScore; // m_unReputationScore uint32
         [MarshalAs(UnmanagedType.I1)]
-        internal bool Banned; // m_bBanned bool
-        internal uint BannedIP; // m_unBannedIP uint32
-        internal ushort BannedPort; // m_usBannedPort uint16
-        internal ulong BannedGameID; // m_ulBannedGameID uint64
-        internal uint BanExpires; // m_unBanExpires uint32
+        public bool Banned; // m_bBanned bool
+        public uint BannedIP; // m_unBannedIP uint32
+        public ushort BannedPort; // m_usBannedPort uint16
+        public ulong BannedGameID; // m_ulBannedGameID uint64
+        public uint BanExpires; // m_unBanExpires uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GSReputation_t));
@@ -2955,9 +2957,9 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct AssociateWithClanResult_t : ICallbackData
+    public struct AssociateWithClanResult_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
+        public EResult Result; // m_eResult EResult
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(AssociateWithClanResult_t));
@@ -2967,13 +2969,13 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
-    internal struct ComputeNewPlayerCompatibilityResult_t : ICallbackData
+    public struct ComputeNewPlayerCompatibilityResult_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
-        internal int CPlayersThatDontLikeCandidate; // m_cPlayersThatDontLikeCandidate int
-        internal int CPlayersThatCandidateDoesntLike; // m_cPlayersThatCandidateDoesntLike int
-        internal int CClanPlayersThatDontLikeCandidate; // m_cClanPlayersThatDontLikeCandidate int
-        internal ulong SteamIDCandidate; // m_SteamIDCandidate CSteamID
+        public EResult Result; // m_eResult EResult
+        public int CPlayersThatDontLikeCandidate; // m_cPlayersThatDontLikeCandidate int
+        public int CPlayersThatCandidateDoesntLike; // m_cPlayersThatCandidateDoesntLike int
+        public int CClanPlayersThatDontLikeCandidate; // m_cClanPlayersThatDontLikeCandidate int
+        public ulong SteamIDCandidate; // m_SteamIDCandidate CSteamID
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(ComputeNewPlayerCompatibilityResult_t));
@@ -2983,10 +2985,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
-    internal struct GSStatsReceived_t : ICallbackData
+    public struct GSStatsReceived_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
-        internal ulong SteamIDUser; // m_steamIDUser CSteamID
+        public EResult Result; // m_eResult EResult
+        public ulong SteamIDUser; // m_steamIDUser CSteamID
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GSStatsReceived_t));
@@ -2996,10 +2998,10 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
-    internal struct GSStatsStored_t : ICallbackData
+    public struct GSStatsStored_t : ICallbackData
     {
-        internal EResult Result; // m_eResult EResult
-        internal ulong SteamIDUser; // m_steamIDUser CSteamID
+        public EResult Result; // m_eResult EResult
+        public ulong SteamIDUser; // m_steamIDUser CSteamID
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GSStatsStored_t));
@@ -3009,9 +3011,9 @@ namespace SKYNET.Callback
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    internal struct GSStatsUnloaded_t : ICallbackData
+    public struct GSStatsUnloaded_t : ICallbackData
     {
-        internal ulong SteamIDUser; // m_steamIDUser CSteamID
+        public ulong SteamIDUser; // m_steamIDUser CSteamID
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GSStatsUnloaded_t));
@@ -3021,13 +3023,13 @@ namespace SKYNET.Callback
     }
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //internal struct SteamNetworkingFakeIPResult_t : ICallbackData
+    //public struct SteamNetworkingFakeIPResult_t : ICallbackData
     //{
-    //    internal EResult Result; // m_eResult EResult
-    //    internal NetIdentity Dentity; // m_identity SteamNetworkingIdentity
-    //    internal uint IP; // m_unIP uint32
+    //    public EResult Result; // m_eResult EResult
+    //    public NetIdentity Dentity; // m_identity SteamNetworkingIdentity
+    //    public uint IP; // m_unIP uint32
     //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8, ArraySubType = UnmanagedType.U2)]
-    //    internal ushort[] Ports; // m_unPorts uint16 [8]
+    //    public ushort[] Ports; // m_unPorts uint16 [8]
 
     //    #region SteamCallback
     //    public static int _datasize = Marshal.SizeOf(typeof(SteamNetworkingFakeIPResult_t));
