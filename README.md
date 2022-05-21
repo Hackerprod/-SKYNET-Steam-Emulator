@@ -7,7 +7,7 @@ The project is in an initial stage, so it is not functional yet for some Games.
 
 ## 📁 Directory structure
 ```
-📁 Game folder                     
+📁 Root game folder                     
 └──📁 SKYNET
    ├──📁 AvatarCache                  // Contains avatars cache
    ├──📁 Storage                      // Contains stats and achievements files
@@ -25,8 +25,8 @@ CSteamworks emulation      Rename the emu to CSteamworks.dll to emulate them.
 Multiplataform             Works with multiple game engines like Source 2, Unity 3D etc.
 Network communication      Network communication between clients through a configurable port.
 Overlay                    External Overlay for steam and game messages.
-DLC                        Unlock all downloaded DLCs
-Avatar support             Load avatar from file (Avatar.jpg) inside SKYNET folder and share it through the network
+DLC                        Unlock all downloaded DLCs.
+Avatar support             Load avatar from file (Avatar.jpg) inside SKYNET folder and share it through the network.
 Plugin system              Load external plugin to communicate with the emu.
 ```
 ## ⚙️ Settings
@@ -53,7 +53,7 @@ Console = true<br />
 
 ## 🔨 Currently working on
 Callback system implementation.<br />
-Fucking SteamInternal_ContextInit in x86 Games
+SteamInternal_ContextInit in x86 Games
 
 ## 📝 Log
 When File log option si enabled in settings, a log file will be created inside SKYNET folder with the following name `[SKYNET] steam_api.log`
