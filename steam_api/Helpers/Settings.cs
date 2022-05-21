@@ -1,9 +1,15 @@
 ﻿using SKYNET;
+using SKYNET.Managers;
 using SKYNET.Steamworks;
+using SKYNET.Steamworks.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace SKYNET.Helper
@@ -85,6 +91,8 @@ namespace SKYNET.Helper
                 SteamEmulator.SendLog = (bool)IniParser["Log Settings"]["File"];
                 SteamEmulator.ConsoleLog = (bool)IniParser["Log Settings"]["Console"];
 
+                ThreadPool.QueueUserWorkItem(DetourGameDebug);
+
                 try { SteamEmulator.RunCallbacks = (bool)IniParser["Debug Settings"]["RunCallbacks"]; } catch { }
                 try { SteamEmulator.ISteamHTTP = (bool)IniParser["Debug Settings"]["ISteamHTTP"]; } catch { }
 
@@ -104,5 +112,63 @@ namespace SKYNET.Helper
             }
 
         }
+
+        private static void DetourGameDebug(object sendLog)
+        {
+            if (SteamEmulator.SendLog)
+            {
+                try
+                {
+                    foreach (ProcessModule module in Process.GetCurrentProcess().Modules)
+                    {
+                        //Console.WriteLine(DateTime.Now);
+                    }
+                }
+                catch 
+                {
+                }
+            }
+            //var Assemblies = AppDomain.CurrentDomain;
+            //SteamEmulator.Write("Assemblies", Assemblies == null);
+
+            //var Assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            //foreach (var Assemblie in Assemblies)
+            //{
+            //    SteamEmulator.Write("Assemblies", Assemblie.FullName);
+            //}
+            //foreach (var type in currentAssembly.GetTypes())
+            //{
+            //    if (type.IsDefined(typeof(InterfaceAttribute)))
+            //    {
+            //        foreach (var attribute in type.GetCustomAttributes<InterfaceAttribute>())
+            //        {
+            //            interfaceTypes.TryAdd(attribute.Name, type);
+            //        }
+            //    }
+            //}
+        }
+
+        public static IntPtr GetProcAddress(string InModule, string InSymbolName)
+        {
+            IntPtr moduleHandle = GetModuleHandle(InModule);
+            if (moduleHandle == IntPtr.Zero)
+            {
+                SteamEmulator.Write("HookManager", "Null Module Handle");
+                return IntPtr.Zero;
+            }
+            IntPtr procAddress = GetProcAddress(moduleHandle, InSymbolName);
+            if (procAddress == IntPtr.Zero)
+            {
+                SteamEmulator.Write("HookManager", InSymbolName + " does not exist.");
+                return IntPtr.Zero;
+            }
+            return procAddress;
+        }
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
+        private static extern IntPtr GetProcAddress(IntPtr hModule, string lpProcName);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+        public static extern IntPtr GetModuleHandle(string lpModuleName);
     }
 }

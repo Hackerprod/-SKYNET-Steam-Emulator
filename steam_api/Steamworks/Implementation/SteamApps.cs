@@ -8,8 +8,11 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamApps : ISteamInterface
     {
+        public static SteamApps Instance;
+
         public SteamApps()
         {
+            Instance = this;
             InterfaceName = "SteamApps";
             InterfaceVersion = "STEAMAPPS_INTERFACE_VERSION008";
         }

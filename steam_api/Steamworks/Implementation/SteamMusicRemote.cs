@@ -7,8 +7,11 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamMusicRemote : ISteamInterface
     {
+        public static SteamMusicRemote Instance;
+
         public SteamMusicRemote()
         {
+            Instance = this;
             InterfaceName = "SteamMusicRemote";
             InterfaceVersion = "STEAMMUSICREMOTE_INTERFACE_VERSION001";
         }

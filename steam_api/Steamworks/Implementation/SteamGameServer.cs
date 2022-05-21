@@ -10,12 +10,14 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamGameServer : ISteamInterface
     {
+        public static SteamGameServer Instance;
+
         private GameServerData ServerData;
         private bool LoggedIn;
-        private SteamAPICall_t k_uAPICallInvalid = 0x0;
 
         public SteamGameServer()
         {
+            Instance = this;
             InterfaceName = "SteamGameServer";
             InterfaceVersion = "SteamGameServer014";
             ServerData = new GameServerData();

@@ -18,7 +18,7 @@ namespace SKYNET.Overlay
     public partial class frmOverlay : Form
     {
         private const int WM_HOTKEY = 0x0312;
-        private List<Types.SteamUser> Users;
+        private List<SteamPlayer> Users;
         private ulong UserSteamID;
         private OverlayType OverlayType;
 
@@ -32,7 +32,7 @@ namespace SKYNET.Overlay
             Visible = false;
         }
 
-        public void ProcessOverlay(List<Types.SteamUser> users, OverlayType overlayType, ulong steamID)
+        public void ProcessOverlay(List<SteamPlayer> users, OverlayType overlayType, ulong steamID)
         {
             OverlayActive = false;
             Users = users;
@@ -120,7 +120,7 @@ namespace SKYNET.Overlay
 
         private void CreateProfile()
         {
-            Types.SteamUser User = Users.Find(u => u.SteamID == UserSteamID);
+            SteamPlayer User = Users.Find(u => u.SteamID == UserSteamID);
             if (User == null)
             {
                 ShowErrorMessage($"User with Steam id {UserSteamID} not found");

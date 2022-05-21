@@ -8,13 +8,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using SKYNET.Helper;
+using SKYNET.Steamworks.Implementation;
+using SKYNET.Types;
 
 namespace SKYNET.Overlay
 {
     public partial class ProfileControl : UserControl
     {
 
-        public ProfileControl(Types.SteamUser User)
+        public ProfileControl(SteamPlayer User)
         {
             InitializeComponent();
 
@@ -26,7 +28,7 @@ namespace SKYNET.Overlay
 
             try
             {
-                var avatarBytes = SteamEmulator.SteamFriends.GetAvatar(User.SteamID);
+                var avatarBytes = SteamFriends.Instance.GetAvatar(User.SteamID);
                 if (avatarBytes != null && avatarBytes.Length > 0)
                 {
                     var bitmap = ImageHelper.ImageFromBytes(avatarBytes);

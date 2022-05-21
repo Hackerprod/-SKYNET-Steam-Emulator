@@ -66,11 +66,13 @@ namespace SKYNET.Network.Packets
     {
         public ulong SteamID { get; set; }
         public ulong LobbyID { get; set; }
+        public ulong CallbackHandle { get; set; }
     }
 
     public class NET_LobbyJoinResponse : NET_Base
     {
-        public bool Success { get; set; }
+        public uint ChatRoomEnterResponse { get; set; }
+        public ulong CallbackHandle { get; set; }
         public string SerializedLobby { get; set; }
     }
 

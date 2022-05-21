@@ -10,11 +10,13 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamUser : ISteamInterface
     {
+        public static SteamUser Instance;
+
         private bool Recording;
-        private SteamAPICall_t k_uAPICallInvalid = 0x0;
 
         public SteamUser()
         {
+            Instance = this;
             InterfaceName = "SteamUser";
             InterfaceVersion = "SteamUser020";
         }

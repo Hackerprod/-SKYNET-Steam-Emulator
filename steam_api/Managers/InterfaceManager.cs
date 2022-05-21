@@ -1,4 +1,5 @@
-﻿using SKYNET.Steamworks.Interfaces;
+﻿using SKYNET.Steamworks.Implementation;
+using SKYNET.Steamworks.Interfaces;
 using System;
 using System.Collections.Concurrent;
 using System.Reflection;
@@ -224,8 +225,8 @@ namespace SKYNET.Managers
             }
             if (pszVersion.StartsWith("SteamFriends"))
             {
-                SteamEmulator.SteamFriends.InterfaceName = type.Name;
-                SteamEmulator.SteamFriends.InterfaceVersion = pszVersion;
+                SteamFriends.Instance.InterfaceName = type.Name;
+                SteamFriends.Instance.InterfaceVersion = pszVersion;
             }
             if (pszVersion.StartsWith("SteamMatchMaking"))
             {

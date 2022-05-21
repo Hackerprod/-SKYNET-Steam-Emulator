@@ -15,13 +15,15 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamUGC : ISteamInterface
     {
+        public static SteamUGC Instance;
+
         private List<UGC> UGCQueries;
         private UGCQueryHandle_t Handle;
         private List<PublishedFileId_t> subscribed;
-        private SteamAPICall_t k_uAPICallInvalid = 0x0;
 
         public SteamUGC()
         {
+            Instance = this;
             InterfaceName = "SteamUGC";
             InterfaceVersion = "STEAMUGC_INTERFACE_VERSION012";
             UGCQueries = new List<UGC>();

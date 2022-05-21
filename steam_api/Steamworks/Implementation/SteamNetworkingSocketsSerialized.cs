@@ -6,8 +6,11 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamNetworkingSocketsSerialized : ISteamInterface
     {
+        public static SteamNetworkingSocketsSerialized Instance;
+
         public SteamNetworkingSocketsSerialized()
         {
+            Instance = this;
             InterfaceName = "SteamNetworkingSocketsSerialized";
             InterfaceVersion = "SteamNetworkingSocketsSerialized005";
         }

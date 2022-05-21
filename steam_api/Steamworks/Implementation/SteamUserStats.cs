@@ -15,13 +15,15 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamUserStats : ISteamInterface
     {
+        public static SteamUserStats Instance;
+
         private List<Leaderboard> Leaderboards;
         private List<Achievement> Achievements;
         private ConcurrentDictionary<ulong, List<PlayerStat>> UserStats;
-        private SteamAPICall_t k_uAPICallInvalid = 0x0;
 
         public SteamUserStats()
         {
+            Instance = this;
             InterfaceName = "SteamUserStats";
             InterfaceVersion = "STEAMUSERSTATS_INTERFACE_VERSION011";
             Leaderboards = new List<Leaderboard>();
@@ -547,10 +549,10 @@ namespace SKYNET.Steamworks.Implementation
                 NumberOfCurrentPlayers_t data = new NumberOfCurrentPlayers_t()
                 {
                     m_bSuccess = 1,
-                    m_cPlayers = SteamEmulator.SteamFriends.Users.Count
+                    m_cPlayers = SteamFriends.Instance.Users.Count
                 };
 
-                Write($"GetNumberOfCurrentPlayers {SteamEmulator.SteamFriends.Users.Count}");
+                Write($"GetNumberOfCurrentPlayers {SteamFriends.Instance.Users.Count}");
 
                 return CallbackManager.AddCallbackResult(data);
             }

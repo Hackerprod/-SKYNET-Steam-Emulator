@@ -4,6 +4,7 @@ using SKYNET.Helper.JSON;
 using SKYNET.Managers;
 using SKYNET.Network.Packets;
 using SKYNET.Steamworks;
+using SKYNET.Steamworks.Implementation;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -141,7 +142,7 @@ namespace SKYNET.Network
 
         private static string GetIPAddress(ulong steamIDRemote)
         {
-            var user = SteamEmulator.SteamFriends.GetUser(steamIDRemote);
+            var user = SteamFriends.Instance.GetUser(steamIDRemote);
             if (user != null)
             {
                 return user.IPAddress;
@@ -149,7 +150,7 @@ namespace SKYNET.Network
             var lobby = SteamEmulator.SteamMatchmaking.GetLobbyByGameserver(steamIDRemote);
             if (lobby != null)
             {
-                user = SteamEmulator.SteamFriends.GetUser(lobby.Owner);
+                user = SteamFriends.Instance.GetUser(lobby.Owner);
                 if (user != null)
                 {
                     return user.IPAddress;

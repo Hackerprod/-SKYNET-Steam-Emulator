@@ -7,8 +7,11 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamMusic : ISteamInterface
     {
+        public static SteamMusic Instance;
+
         public SteamMusic()
         {
+            Instance = this;
             InterfaceName = "SteamMusic";
             InterfaceVersion = "STEAMMUSIC_INTERFACE_VERSION001";
         }

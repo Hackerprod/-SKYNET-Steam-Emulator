@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SKYNET.Types
 {
-    public class SteamUser
+    public class SteamPlayer
     {
         public uint AccountID { get; set; }
         public ulong SteamID { get; set; }
@@ -16,10 +16,5 @@ namespace SKYNET.Types
         public ulong LobbyID { get; set; }
         public bool HasFriend { get; set; }
         public string IPAddress { get; set; }
-
-        public SteamUser()
-        {
-            IPAddress = "";
-        }
     }
 }

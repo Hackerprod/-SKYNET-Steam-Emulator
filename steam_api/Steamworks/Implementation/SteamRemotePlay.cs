@@ -10,8 +10,11 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamRemotePlay : ISteamInterface
     {
+        public static SteamRemotePlay Instance;
+
         public SteamRemotePlay()
         {
+            Instance = this;
             InterfaceName = "SteamRemotePlay";
             InterfaceVersion = "STEAMREMOTEPLAY_INTERFACE_VERSION001";
         }

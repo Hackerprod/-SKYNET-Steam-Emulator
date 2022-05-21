@@ -7,8 +7,11 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamParties : ISteamInterface
     {
+        public static SteamParties Instance;
+
         public SteamParties()
         {
+            Instance = this;
             InterfaceName = "SteamParties";
             InterfaceVersion = "xxx";
         }

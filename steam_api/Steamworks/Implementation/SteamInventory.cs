@@ -9,8 +9,11 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamInventory : ISteamInterface
     {
+        public static SteamInventory Instance;
+
         public SteamInventory()
         {
+            Instance = this;
             InterfaceName = "SteamInventory";
             InterfaceVersion = "STEAMINVENTORY_INTERFACE_V003";
         }

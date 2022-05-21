@@ -19,7 +19,7 @@ namespace SKYNET.Helpers
 
         public static IntPtr GetProcAddress(string InSymbolName)
         {
-            return GetProcAddress("steam_api64.dll", InSymbolName);
+            return GetProcAddress("steam_api64.dll", "Log");
         }
         public static IntPtr GetProcAddress(string InModule, string InSymbolName)
         {

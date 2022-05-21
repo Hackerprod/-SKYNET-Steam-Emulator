@@ -28,6 +28,7 @@ namespace SKYNET.Callback
         public bool Called { get; set; }
         public bool ReadyToCall { get; set; }
         public DateTime Time { get; set; }
+        public int TimeSeconds => (DateTime.Now - Time).Seconds;
         public bool CallComplete { get; set; }
 
         public CallbackMessage(ICallbackData data, bool readyToCall = true, bool callComplete = false)

@@ -10,14 +10,15 @@ using System.Windows.Forms;
 using SKYNET.Types;
 using SKYNET.Steamworks;
 using SKYNET.Helper;
+using SKYNET.Steamworks.Implementation;
 
 namespace SKYNET.Overlay
 {
     public partial class SteamUserControl : UserControl
     {
-        public SteamUser User { get; }
+        public SteamPlayer User { get; }
 
-        public SteamUserControl(Types.SteamUser user)
+        public SteamUserControl(SteamPlayer user)
         {
             InitializeComponent();
             
@@ -29,7 +30,7 @@ namespace SKYNET.Overlay
 
             try
             {
-                var avatarBytes = SteamEmulator.SteamFriends.GetAvatar(User.SteamID);
+                var avatarBytes = SteamFriends.Instance.GetAvatar(User.SteamID);
                 if (avatarBytes != null && avatarBytes.Length > 0)
                 {
                     var bitmap = ImageHelper.ImageFromBytes(avatarBytes);

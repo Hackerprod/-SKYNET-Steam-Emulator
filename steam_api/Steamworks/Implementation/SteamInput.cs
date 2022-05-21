@@ -13,8 +13,11 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamInput : ISteamInterface
     {
+        public static SteamInput Instance;
+
         public SteamInput()
         {
+            Instance = this;
             InterfaceName = "SteamInput";
             InterfaceVersion = "SteamInput001";
         }

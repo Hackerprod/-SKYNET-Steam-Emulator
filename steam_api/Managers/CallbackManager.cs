@@ -122,6 +122,10 @@ namespace SKYNET.Managers
                         ICallbackData callbackData = CallbackMessage.Data;
                         if (!CallbackMessage.ReadyToCall)
                         {
+                            if (CallbackMessage.TimeSeconds > 5)
+                            {
+                                CallbackMessage.ReadyToCall = true;
+                            }
                             goto Skip;
                         }
                         if (CallbackMessage.TimedOut())
@@ -186,31 +190,35 @@ namespace SKYNET.Managers
             {
                 for (int i = 0; i < Callbacks.Count; i++)
                 {
-                    var callbackMessage = Callbacks[i];
-                    if (callbackMessage.Called)
+                    var CallbackMessage = Callbacks[i];
+                    if (CallbackMessage.Called)
                     {
                         Callbacks.RemoveAt(i);
                     }
                     else
                     {
-                        if (!callbackMessage.ReadyToCall)
+                        if (!CallbackMessage.ReadyToCall)
                         {
+                            if (CallbackMessage.TimeSeconds > 5)
+                            {
+                                CallbackMessage.ReadyToCall = true;
+                            }
                             goto Skip;
                         }
-                        if (callbackMessage.TimedOut())
+                        if (CallbackMessage.TimedOut())
                         {
                             Callbacks.RemoveAt(i);
                             goto Skip;
                         }
 
-                        var data = callbackMessage.Data;
+                        var data = CallbackMessage.Data;
                         try
                         {
                             var Callback = SteamCallbacks.Where(c => c.Value.CallbackType == data.CallbackType).Select(c => c.Value).FirstOrDefault();
                             if (Callback != null)
                             {
                                 Callback.Run(data);
-                                callbackMessage.Called = true;
+                                CallbackMessage.Called = true;
                                 Write($"Called function Run(IntPtr) in {data.CallbackType} callback");
                             }
                             else

@@ -11,11 +11,13 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamUtils : ISteamInterface
     {
-        SteamAPICall_t k_uAPICallInvalid = 0x0;
+        public static SteamUtils Instance;
+
         public DateTime ActiveTime;
 
         public SteamUtils()
         {
+            Instance = this;
             InterfaceName = "SteamUtils";
             InterfaceVersion = "SteamUtils009";
             ActiveTime = DateTime.Now;
@@ -62,7 +64,7 @@ namespace SKYNET.Steamworks.Implementation
             {
                 try
                 {
-                    var (width, height) = SteamEmulator.SteamFriends.GetImageSize(iImage);
+                    var (width, height) = SteamFriends.Instance.GetImageSize(iImage);
 
                     if (width != 0 | height != 0)
                     {
@@ -91,7 +93,7 @@ namespace SKYNET.Steamworks.Implementation
             {
                 try
                 {
-                    var avatar = SteamEmulator.SteamFriends.GetImageAvatar(iImage);
+                    var avatar = SteamFriends.Instance.GetImageAvatar(iImage);
                     if (avatar != null)
                     {
                         byte[] bytes = avatar.GetImage(iImage);
