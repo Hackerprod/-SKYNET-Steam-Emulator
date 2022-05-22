@@ -38,7 +38,7 @@ namespace SKYNET.Network.Packets
     public class NET_P2PPacket : NET_Base
     {
         public uint AccountID { get; set; }
-        public string Buffer { get; set; }
+        public byte[] Buffer { get; set; }
         public uint Sender { get; set; }
         public int P2PSendType { get; set; }
         public int Channel { get; set; }

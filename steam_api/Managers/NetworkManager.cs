@@ -35,7 +35,7 @@ namespace SKYNET.Managers
             ThreadPool.QueueUserWorkItem(BroadcastAnnounce);
         }
 
-        private static void TCPServer_OnConnected(object sender, ClientSocket e)
+        private static void TCPServer_OnConnected(object sender, TCPClient e)
         {
             Write("Client connected from " + e.RemoteEndPoint);
         }
@@ -43,7 +43,7 @@ namespace SKYNET.Managers
         private static void TCPServer_OnDataReceived(object sender, NetPacket packet)
         {
             NetworkMessage message = packet.Data.GetString().FromJson<NetworkMessage>();
-            ProcessMessage(message, packet.Sender.socket);
+            ProcessMessage(message, packet.Sender.Socket);
         }
 
         #region Message processors
@@ -211,7 +211,7 @@ namespace SKYNET.Managers
             {
                 if (SteamMatchmaking.Instance.GetLobby(lobbyJoinRequest.LobbyID, out var lobby))
                 {
-                    if (lobby.MaxMembers >= lobby.Members.Count)
+                    if (lobby.Members.Count >= lobby.MaxMembers)
                     {
                         lobbyJoinResponse.ChatRoomEnterResponse = (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseFull;
                     }
@@ -393,7 +393,7 @@ namespace SKYNET.Managers
                 string IPAddress = ((IPEndPoint)socket.RemoteEndPoint).Address.ToString();
 
                 // Add User to List on both cases (NET_Announce and NET_AnnounceResponse)
-                if (announce != null && announce.AccountID != SteamEmulator.SteamID.AccountId)
+                if (announce != null && announce.AccountID != SteamEmulator.SteamID.AccountID)
                     SteamFriends.Instance?.AddOrUpdateUser(announce.AccountID, announce.PersonaName, announce.AppID, IPAddress);
 
                 if (message.MessageType == (int)MessageType.NET_Announce)
@@ -430,7 +430,7 @@ namespace SKYNET.Managers
                     string hexAvatar = Convert.ToBase64String(imageBytes);
                     var avatarResponse = new NET_AvatarResponse()
                     {
-                        AccountID = (uint)SteamEmulator.SteamID.AccountId,
+                        AccountID = (uint)SteamEmulator.SteamID.AccountID,
                         HexAvatar = hexAvatar
                     };
                     var messageResponse = CreateNetworkMessage(avatarResponse, MessageType.NET_AvatarResponse);
@@ -474,7 +474,7 @@ namespace SKYNET.Managers
                 var StatusChanged = message.ParsedBody.FromJson<NET_UserDataUpdated>();
                 if (StatusChanged != null)
                 {
-                    if (StatusChanged.AccountID == (uint)SteamEmulator.SteamID.AccountId) return;
+                    if (StatusChanged.AccountID == (uint)SteamEmulator.SteamID.AccountID) return;
                     var IPAddress = ((IPEndPoint)socket.RemoteEndPoint).Address.ToString();
                     SteamFriends.Instance.UpdateUserStatus(StatusChanged, IPAddress);
                 }
@@ -494,7 +494,7 @@ namespace SKYNET.Managers
             var status = new NET_UserDataUpdated()
             {
                 PersonaName = user.PersonaName,
-                AccountID = (uint)SteamEmulator.SteamID.AccountId,
+                AccountID = (uint)SteamEmulator.SteamID.AccountID,
                 LobbyID = user.LobbyID.GetAccountID()
             };
 
@@ -599,7 +599,7 @@ namespace SKYNET.Managers
             var announce = new NET_Announce()
             {
                 PersonaName = SteamEmulator.PersonaName,
-                AccountID = (uint)SteamEmulator.SteamID.AccountId,
+                AccountID = (uint)SteamEmulator.SteamID.AccountID,
                 AppID = SteamEmulator.AppID
             };
 
@@ -632,7 +632,7 @@ namespace SKYNET.Managers
             var announce = new NET_Announce()
             {
                 PersonaName = SteamEmulator.PersonaName,
-                AccountID = (uint)SteamEmulator.SteamID.AccountId
+                AccountID = (uint)SteamEmulator.SteamID.AccountID
             };
 
             var message = CreateNetworkMessage(announce, MessageType.NET_Announce);
@@ -714,7 +714,7 @@ namespace SKYNET.Managers
                 byte[] bytes = Encoding.Default.GetBytes(json);
                 SocketData.socket.Send(bytes);
 
-                ClientSocket client = new ClientSocket(SocketData.socket);
+                TCPClient client = new TCPClient(SocketData.socket);
                 client.OnDataReceived += TCPServer_OnDataReceived;
                 client.BeginReceiving();
             }
@@ -799,11 +799,14 @@ namespace SKYNET.Managers
             return iPAddress;
         }
 
-        public static uint ConvertIPAddress(IPAddress ipAddr)
+        public static uint ConvertFromIPAddress(IPAddress ipAddr)
         {
-            byte[] addressBytes = ipAddr.GetAddressBytes();
-            Array.Reverse(addressBytes);
-            return BitConverter.ToUInt32(addressBytes, 0);
+            return (uint)IPAddress.NetworkToHostOrder(ipAddr.Address);
+        }
+
+        public static IPAddress ConvertToIPAddress(uint ipAddr)
+        {
+            return new IPAddress(IPAddress.HostToNetworkOrder(ipAddr));
         }
 
         private static List<string> GetIPAddressRange(IPAddress address)
@@ -845,6 +848,11 @@ namespace SKYNET.Managers
             }
             catch { }
             return false;
+        }
+
+        public static string IntToAddr(long address)
+        {
+            return IPAddress.Parse(address.ToString()).ToString();
         }
 
         private class SocketData

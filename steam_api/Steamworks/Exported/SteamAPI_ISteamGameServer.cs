@@ -275,11 +275,6 @@ namespace SKYNET.Steamworks.Exported
             return SteamEmulator.SteamGameServer.ComputeNewPlayerCompatibility(steamIDNewPlayer);
         }
 
-
-
-
-
-
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static HSteamUser SteamGameServer_GetHSteamUser()
         {
@@ -312,6 +307,7 @@ namespace SKYNET.Steamworks.Exported
         public static void SteamGameServer_Shutdown()
         {
             Write("SteamGameServer_Shutdown");
+            SteamEmulator.SteamID_GS = CSteamID.GenerateGameServer();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

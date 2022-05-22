@@ -717,10 +717,10 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     public struct LobbyGameCreated_t : ICallbackData
     {
-        public ulong SteamIDLobby; // m_ulSteamIDLobby uint64
-        public ulong SteamIDGameServer; // m_ulSteamIDGameServer uint64
-        public uint IP; // m_unIP uint32
-        public ushort Port; // m_usPort uint16
+        public ulong m_ulSteamIDLobby; // m_ulSteamIDLobby uint64
+        public ulong m_ulSteamIDGameServer; // m_ulSteamIDGameServer uint64
+        public uint m_unIP; // m_unIP uint32
+        public ushort m_usPort; // m_usPort uint16
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(LobbyGameCreated_t));

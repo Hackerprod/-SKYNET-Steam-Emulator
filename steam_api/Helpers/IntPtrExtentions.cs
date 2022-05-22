@@ -43,6 +43,7 @@ namespace SKYNET.Helper
             GCHandle gCHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
             return gCHandle.AddrOfPinnedObject();
         }
+
         public static byte[] GetBytes(this IntPtr buffer, uint length)
         {
             return GetBytes(buffer, (int)length);

@@ -43,63 +43,68 @@ namespace SKYNET.Steamworks.Implementation
             if (SteamEmulator.AppID == 0)
                 SteamEmulator.AppID = nGameAppId;
 
-            SteamServersConnected_t data = new SteamServersConnected_t();
-            CallbackManager.AddCallback(data);
-
             return true;
         }
 
         public void SetProduct(string pszProduct)
         {
-            Write($"SetProduct {pszProduct}");
+            Write($"SetProduct (Product = {pszProduct})");
             ServerData.Product = pszProduct;
         }
 
         public void SetGameDescription(string pszGameDescription)
         {
-            Write($"SetGameDescription {pszGameDescription}");
+            Write($"SetGameDescription (GameDescription = {pszGameDescription})");
             ServerData.Description = pszGameDescription;
         }
 
         public void SetModDir(string pszModDir)
         {
-            Write($"SetModDir {pszModDir}");
+            Write($"SetModDir (ModDir = {pszModDir})");
             ServerData.ModDir = pszModDir;
         }
 
         public void SetDedicatedServer(bool bDedicated)
         {
-            Write("SetDedicatedServer");
+            Write($"SetDedicatedServer (Dedicated = {bDedicated})");
             ServerData.Dedicated = bDedicated;
         }
 
         public void LogOn(string pszToken)
         {
-            Write("LogOn");
+            Write($"LogOn (Token = {pszToken})");
+
+            SteamServersConnected_t data = new SteamServersConnected_t();
+            CallbackManager.AddCallbackResult(data);
+
             LoggedIn = true;
         }
 
         public void LogOnAnonymous()
         {
-            Write("LogOnAnonymous");
+            Write($"LogOnAnonymous");
+
+            SteamServersConnected_t data = new SteamServersConnected_t();
+            CallbackManager.AddCallbackResult(data);
+
             LoggedIn = true;
         }
 
         public void LogOff()
         {
-            Write("LogOff");
+            Write($"LogOff");
             LoggedIn = false;
         }
 
         public bool BLoggedOn()
         {
-            Write("BLoggedOn");
+            Write($"BLoggedOn");
             return LoggedIn;
         }
 
         public bool BSecure()
         {
-            Write("BSecure");
+            Write($"BSecure");
             return true;
         }
 
@@ -112,104 +117,104 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool WasRestartRequested()
         {
-            Write("WasRestartRequested");
+            Write($"WasRestartRequested");
             return false;
         }
 
         public void SetMaxPlayerCount(int cPlayersMax)
         {
-            Write("SetMaxPlayerCount");
+            Write($"SetMaxPlayerCount (PlayersMax = {cPlayersMax})");
             ServerData.MaxPlayers = cPlayersMax;
         }
 
         public void SetBotPlayerCount(int cBotplayers)
         {
-            Write("SetBotPlayerCount");
+            Write($"SetBotPlayerCount (Botplayers = {cBotplayers})");
             ServerData.BotPlayers = cBotplayers;
         }
 
         public void SetServerName(string pszServerName)
         {
-            Write("SetServerName");
+            Write($"SetServerName (ServerName = {pszServerName})");
             ServerData.ServerName = pszServerName;
         }
 
         public void SetMapName(string pszMapName)
         {
-            Write("SetMapName");
+            Write($"SetMapName (MapName = {pszMapName})");
             ServerData.MapName = pszMapName;
         }
 
         public void SetPasswordProtected(bool bPasswordProtected)
         {
-            Write("SetPasswordProtected");
+            Write($"SetPasswordProtected (PasswordProtected = {bPasswordProtected})");
             ServerData.PasswordProtected = bPasswordProtected;
         }
 
         public void SetSpectatorPort(int unSpectatorPort)
         {
-            Write("SetSpectatorPort");
+            Write($"SetSpectatorPort (SpectatorPort = {unSpectatorPort})");
             ServerData.SpectatorPort = (uint)unSpectatorPort;
         }
 
         public void SetSpectatorServerName(string pszSpectatorServerName)
         {
-            Write("SetSpectatorServerName");
+            Write($"SetSpectatorServerName (SpectatorServerName = {pszSpectatorServerName})");
             ServerData.SpectatorServerName = pszSpectatorServerName;
         }
 
         public void ClearAllKeyValues()
         {
-            Write("ClearAllKeyValues");
+            Write($"ClearAllKeyValues");
             ServerData.KeyValues.Clear();
         }
 
         public void SetKeyValue(string pKey, string pValue)
         {
-            Write("SetKeyValue");
+            Write($"SetKeyValue (Key = {pKey}, Value = {pValue})");
             ServerData.KeyValues.TryAdd(pKey, pValue);
         }
 
         public void SetGameTags(string pchGameTags)
         {
-            Write("SetGameTags");
+            Write($"SetGameTags (GameTags = {pchGameTags})");
             ServerData.GameTags = pchGameTags;
         }
 
         public void SetGameData(string pchGameData)
         {
-            Write("SetGameData");
+            Write($"SetGameData (GameData = {pchGameData})");
             ServerData.GameData = pchGameData;
         }
 
         public void SetRegion(string pszRegion)
         {
-            Write("SetRegion");
+            Write($"SetRegion (Region = {pszRegion})");
             ServerData.Region = pszRegion;
         }
 
         public bool SendUserConnectAndAuthenticate(uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, ulong pSteamIDUser)
         {
             var IPAddress = modCommon.GetIPAddress(unIPClient);
-            Write($"SendUserConnectAndAuthenticate {new CSteamID(pSteamIDUser)} | {IPAddress}");
+            Write($"SendUserConnectAndAuthenticate (SteamID = {new CSteamID(pSteamIDUser)} | {IPAddress})");
             return TicketManager.ConnectAndAuthenticate(unIPClient, pvAuthBlob, cubAuthBlobSize, pSteamIDUser);
         }
 
         public CSteamID CreateUnauthenticatedUserConnection()
         {
-            Write("CreateUnauthenticatedUserConnection");
-            return new CSteamID((uint)new Random().Next(1000, 9999), EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeAnonUser);
+            Write($"CreateUnauthenticatedUserConnection");
+            return CSteamID.CreateUnauthenticatedUser();
         }
 
         public void SendUserDisconnect(ulong steamIDUser)
         {
-            Write("SendUserDisconnect");
+            Write($"SendUserDisconnect (SteamID = {steamIDUser})");
             TicketManager.RemoveTicket(steamIDUser);
         }
 
         public bool BUpdateUserData(ulong steamIDUser, string pchPlayerName, uint uScore)
         {
-            Write("BUpdateUserData");
+            Write($"BUpdateUserData (SteamID = {steamIDUser}, PlayerName = {pchPlayerName})");
             return true;
         }
 
@@ -217,83 +222,83 @@ namespace SKYNET.Steamworks.Implementation
         // uint32 *pcbTicket  retrieves the length of the actual ticket.
         public HAuthTicket GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
         {
-            SteamEmulator.Write("DEBUG", "GetAuthSessionTicket");
+            SteamEmulator.Write($"DEBUG", "GetAuthSessionTicket");
             return TicketManager.GetAuthSessionTicket(pTicket, cbMaxTicket, ref pcbTicket);
         }
 
         public void SetAdvertiseServerActive(bool bActive)
         {
-            Write("SetAdvertiseServerActive");
+            Write($"SetAdvertiseServerActive (Active = {bActive})");
         }
 
         public int BeginAuthSession(IntPtr pAuthTicket, int cbAuthTicket, ulong steamID)
         {
-            Write($"BeginAuthSession for {(CSteamID)steamID}");
+            Write($"BeginAuthSession (SteamID = {(CSteamID)steamID}) = {EBeginAuthSessionResult.k_EBeginAuthSessionResultOK}");
             return (int)EBeginAuthSessionResult.k_EBeginAuthSessionResultOK;
         }
 
         public void EndAuthSession(ulong steamID)
         {
-            Write("EndAuthSession");
+            Write($"EndAuthSession (SteamID = {steamID})");
         }
 
         public void CancelAuthTicket(HAuthTicket hAuthTicket)
         {
-            Write("CancelAuthTicket");
+            Write($"CancelAuthTicket");
         }
 
         public int UserHasLicenseForApp(ulong steamID, uint appID)
         {
-            Write("UserHasLicenseForApp");
+            Write($"UserHasLicenseForApp (SteamID = {steamID}, AppID = {appID})");
             return (int)EUserHasLicenseForAppResult.k_EUserHasLicenseResultHasLicense; 
         }
 
         public bool RequestUserGroupStatus(ulong steamIDUser, ulong steamIDGroup)
         {
-            Write("RequestUserGroupStatus");
+            Write($"RequestUserGroupStatus (SteamID = {steamIDUser}, IDGroup = {steamIDGroup})");
             return true;
         }
 
         public void GetGameplayStats()
         {
-            Write("GetGameplayStats");
+            Write($"GetGameplayStats");
         }
 
         public SteamAPICall_t GetServerReputation()
         {
-            Write("GetServerReputation");
+            Write($"GetServerReputation");
             // GSReputation_t
             return k_uAPICallInvalid;
         }
 
         public uint GetPublicIP_old()
         {
-            Write("GetPublicIP_old");
+            Write($"GetPublicIP_old");
             return 0;
         }
 
         public bool HandleIncomingPacket(IntPtr pData, int cbData, uint srcIP, uint srcPort)
         {
-            Write("HandleIncomingPacket");
+            Write($"HandleIncomingPacket");
             return true;
         }
 
         public int GetNextOutgoingPacket(IntPtr pOut, int cbMaxOut, uint pNetAdr, uint pPort)
         {
-            SteamEmulator.Write("DEBUG", "GetNextOutgoingPacket");
+            SteamEmulator.Write($"DEBUG", "GetNextOutgoingPacket");
             return 0;
         }
 
         internal uint GetPublicIP()
         {
-            Write("GetPublicIP ******************************");
+            Write($"GetPublicIP ******************************");
             //SteamIPAddress_t iPAddress = new SteamIPAddress_t(NetworkManager.GetIPAddress());
             return 0;
         }
 
         public void EnableHeartbeats(bool bActive)
         {
-            Write($"EnableHeartbeats (bActive = {bActive})");
+            Write($"EnableHeartbeats (Active = {bActive})");
         }
 
         public void SetHeartbeatInterval(int iHeartbeatInterval)
@@ -303,39 +308,39 @@ namespace SKYNET.Steamworks.Implementation
 
         public void ForceHeartbeat()
         {
-            Write("ForceHeartbeat");
+            Write($"ForceHeartbeat");
         }
         public SteamAPICall_t AssociateWithClan(ulong steamIDClan)
         {
-            Write("AssociateWithClan");
+            Write($"AssociateWithClan (SteamID = {steamIDClan})");
             return k_uAPICallInvalid;
         }
 
         public SteamAPICall_t ComputeNewPlayerCompatibility(ulong steamIDNewPlayer)
         {
-            Write("ComputeNewPlayerCompatibility");
+            Write($"ComputeNewPlayerCompatibility (SteamID = {steamIDNewPlayer})");
             return k_uAPICallInvalid;
         }
 
         public bool SendUserConnectAndAuthenticate_DEPRECATED(uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, ulong pSteamIDUser)
         {
-            Write("SendUserConnectAndAuthenticate_DEPRECATED");
+            Write($"SendUserConnectAndAuthenticate_DEPRECATED");
             return true;
         }
 
         public void SendUserDisconnect_DEPRECATED(ulong steamIDUser)
         {
-            Write("SendUserDisconnect_DEPRECATED");
+            Write($"SendUserDisconnect_DEPRECATED (SteamID = {steamIDUser})");
         }
 
         public void SetMasterServerHeartbeatInterval_DEPRECATED(int iHeartbeatInterval)
         {
-            Write("SetMasterServerHeartbeatInterval_DEPRECATED");
+            Write($"SetMasterServerHeartbeatInterval_DEPRECATED");
         }
 
         public void ForceMasterServerHeartbeat_DEPRECATED()
         {
-            Write("ForceMasterServerHeartbeat_DEPRECATED");
+            Write($"ForceMasterServerHeartbeat_DEPRECATED");
         }
     }
 }

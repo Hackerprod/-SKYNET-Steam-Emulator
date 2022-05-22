@@ -11,6 +11,7 @@
 #define LOG
 using SKYNET;
 using SKYNET.Helper;
+using SKYNET.Helper.JSON;
 using SKYNET.Managers;
 using SKYNET.Plugin;
 using SKYNET.Steamworks;
@@ -136,7 +137,7 @@ public class SteamEmulator
                 Write("Settings", "Error loading settings");
             }
 
-            SteamID_GS = new CSteamID((uint)new Random().Next(1000, 9999), EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeGameServer);
+            SteamID_GS = CSteamID.GenerateGameServer();
 
             #region Interface Initialization
 

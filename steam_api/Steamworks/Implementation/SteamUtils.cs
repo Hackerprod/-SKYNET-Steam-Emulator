@@ -159,11 +159,13 @@ namespace SKYNET.Steamworks.Implementation
         public bool GetAPICallResult(SteamAPICall_t handle, IntPtr callback, int callback_size, int callback_expected, ref bool failed)
         {
             bool Result = false;
+            failed = true;
             try
             {
                 if (CallbackManager.GetCallResult(handle, out var cCallback))
                 {
                     Marshal.StructureToPtr(cCallback.Data, callback, false);
+                    cCallback.Called = true;
                     failed = false;
                     Result = true;
                 }
@@ -173,7 +175,6 @@ namespace SKYNET.Steamworks.Implementation
                 Write($"GetAPICallResult {ex}");
             }
             Write($"GetAPICallResult (SteamAPICall = {handle}, CallbackExpected = {(CallbackType)callback_expected}) = {Result}");
-            failed = true;
             return Result;
         }
 

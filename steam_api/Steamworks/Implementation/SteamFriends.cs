@@ -81,7 +81,7 @@ namespace SKYNET.Steamworks.Implementation
 
             Users.Add(new SteamPlayer()
             {
-                AccountID = SteamEmulator.SteamID.AccountId,
+                AccountID = SteamEmulator.SteamID.AccountID,
                 GameID = SteamEmulator.AppID,
                 HasFriend = false,
                 PersonaName = SteamEmulator.PersonaName,

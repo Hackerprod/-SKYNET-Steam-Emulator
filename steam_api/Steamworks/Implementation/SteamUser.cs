@@ -76,7 +76,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public void StopVoiceRecording()
         {
-            Write("StopVoiceRecording");
+            //Write("StopVoiceRecording");
             Recording = false;
         }
 
@@ -88,7 +88,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetVoice(bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, bool bWantUncompressed_Deprecated, IntPtr pUncompressedDestBuffer_Deprecated, uint cbUncompressedDestBufferSize_Deprecated, uint nUncompressBytesWritten_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
         {
-            Write("GetVoice");
+            //Write("GetVoice");
             if (Recording) return (int)EVoiceResult.k_EVoiceResultNotRecording;
             nBytesWritten = 0;
             return (int)EVoiceResult.k_EVoiceResultNoData;
@@ -102,7 +102,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public uint GetVoiceOptimalSampleRate()
         {
-            Write("GetVoiceOptimalSampleRate");
+            //Write("GetVoiceOptimalSampleRate");
             return 4800;
         }
 

@@ -9,7 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
-
+using System.Text;
 using SNetListenSocket_t = System.UInt32;
 using SNetSocket_t = System.UInt32;
 
@@ -40,34 +40,52 @@ namespace SKYNET.Steamworks.Implementation
             if (pubData != IntPtr.Zero)
             {
                 byte[] bytes = pubData.GetBytes(cubData);
-                Result = P2PNetworking.SendP2PTo(steamIDRemote, bytes, eP2PSendType, nChannel);
+
+                if (steamIDRemote == SteamEmulator.SteamID)
+                {
+                    MutexHelper.Wait("P2PPacket", delegate
+                    {
+                        P2PIncoming.Add(new NET_P2PPacket()
+                        {
+                            Sender = SteamEmulator.SteamID.AccountID,
+                            AccountID = steamIDRemote.GetAccountID(),
+                            Buffer = bytes,
+                            Channel = nChannel,
+                            P2PSendType = eP2PSendType
+                        });
+                        Result = true;
+                    });
+                }
+                else
+                {
+                    Result = P2PNetworking.SendP2PTo(steamIDRemote, bytes, eP2PSendType, nChannel);
+                }
             }
-            Write($"SendP2PPacket (Remote SteamID = {steamIDRemote}, Length = {cubData}, {(EP2PSend)eP2PSendType}) = {Result}");
+            Write($"SendP2PPacket (Remote SteamID = {steamIDRemote}, Length = {cubData}, {(EP2PSend)eP2PSendType}, Channel = {nChannel}) = {Result}");
             return Result;
         }
 
         public bool IsP2PPacketAvailable(ref uint pcubMsgSize, int nChannel)
         {
             bool Result = false;
-            var MsgSize = pcubMsgSize;
+            var MsgSize = 0;
             MutexHelper.Wait("P2PPacket", delegate
             {
                 var Packet = P2PIncoming.Find(p => p.Channel == nChannel);
                 if (Packet != null)
                 {
-                    byte[] bytes = Packet.Buffer.GetBytesFromBase64String();
-                    MsgSize = (uint)bytes.Length;
+                    byte[] bytes = Packet.Buffer;
+                    MsgSize = bytes.Length;
                     Result = true;
                 }
             });
-            pcubMsgSize = MsgSize;
+            pcubMsgSize = (uint)MsgSize;
             Write($"IsP2PPacketAvailable (MsgSize = {pcubMsgSize}, Channel = {nChannel}) = {Result}");
             return Result;
         }
 
         public bool ReadP2PPacket(IntPtr pubDest, uint cubDest, ref uint pcubMsgSize, ref ulong psteamIDRemote, int nChannel)
         {
-            Write("ReadP2PPacket");
             bool Result = false;
             ulong IDRemote = 0;
             int MsgSize = 0;
@@ -76,7 +94,7 @@ namespace SKYNET.Steamworks.Implementation
                 var Packet = P2PIncoming.Find(p => p.Channel == nChannel);
                 if (Packet != null)
                 {
-                    byte[] bytes = Packet.Buffer.GetBytesFromBase64String();
+                    byte[] bytes = Packet.Buffer;
                     IDRemote = (ulong)new CSteamID(Packet.Sender);
                     MsgSize = bytes.Length;
                     Marshal.Copy(bytes, 0, pubDest, bytes.Length);
@@ -111,13 +129,13 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"GetP2PSessionState {steamIDRemote}");
 
-            uint RemoteIP = NetworkManager.ConvertIPAddress(NetworkManager.GetIPAddress()); 
+            uint RemoteIP = NetworkManager.ConvertFromIPAddress(NetworkManager.GetIPAddress()); 
             var user = SteamFriends.Instance.GetUser(steamIDRemote);
             if (user != null)
             {
                 if (IPAddress.TryParse(user.IPAddress, out var Address))
                 {
-                    RemoteIP = NetworkManager.ConvertIPAddress(Address);
+                    RemoteIP = NetworkManager.ConvertFromIPAddress(Address);
                 }
             }
 

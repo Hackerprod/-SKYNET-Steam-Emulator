@@ -18,26 +18,28 @@ namespace SKYNET.Network
     public class P2PNetworking
     {
         public static TCPServer P2PServer;
-        public static ClientSocket P2PSocket;
+        public static TCPClient P2PSocket;
+        public static int Port;
 
         private static List<ulong> P2PSession;
-        private static ConcurrentDictionary<string, ClientSocket> Connections;
+        private static ConcurrentDictionary<string, TCPClient> Connections;
 
         public static void Initialize()
         {
-            Connections = new ConcurrentDictionary<string, ClientSocket>();
+            Connections = new ConcurrentDictionary<string, TCPClient>();
             P2PSession = new List<ulong>();
+            Port = 3333;
 
-            P2PServer = new TCPServer(3333);
+            P2PServer = new TCPServer(Port);
             P2PServer.OnDataReceived += P2PServer_OnDataReceived;
             P2PServer.OnConnected += P2PServer_OnConnected;
 
             ThreadPool.QueueUserWorkItem(P2PServer.Start);
         }
 
-        private static void P2PServer_OnConnected(object sender, ClientSocket e)
+        private static void P2PServer_OnConnected(object sender, TCPClient e)
         {
-            string IPAddress = ((IPEndPoint)e.socket.RemoteEndPoint).Address.ToString();
+            string IPAddress = ((IPEndPoint)e.Socket.RemoteEndPoint).Address.ToString();
             Write($"P2P Client connected from {IPAddress}");
             if (!Connections.ContainsKey(IPAddress))
             {
@@ -49,32 +51,32 @@ namespace SKYNET.Network
         {
             SteamEmulator.Debug($"Received P2P packet from {((IPEndPoint)packet.Sender.RemoteEndPoint).Address}");
 
-            RegisterConnection(packet);
+            //RegisterConnection(packet);
 
-            string json = Encoding.Default.GetString(packet.Data);
-            NET_P2PPacket P2PPacket = json.FromJson<NET_P2PPacket>();
+            //string json = Encoding.Default.GetString(packet.Data);
+            //NET_P2PPacket P2PPacket = json.FromJson<NET_P2PPacket>();
 
-            if (P2PPacket == null) return;
+            //if (P2PPacket == null) return;
 
-            ulong steamIDRemote = (ulong)new CSteamID(P2PPacket.Sender);
-            if (!P2PSession.Contains(steamIDRemote))
-            {
-                P2PSessionRequest_t data = new P2PSessionRequest_t()
-                {
-                    m_steamIDRemote = steamIDRemote
-                };
-                CallbackManager.AddCallbackResult(data);
-                P2PSession.Add(steamIDRemote);
-            }
+            //ulong steamIDRemote = (ulong)new CSteamID(P2PPacket.Sender);
+            //if (!P2PSession.Contains(steamIDRemote))
+            //{
+            //    P2PSessionRequest_t data = new P2PSessionRequest_t()
+            //    {
+            //        m_steamIDRemote = steamIDRemote
+            //    };
+            //    CallbackManager.AddCallbackResult(data);
+            //    P2PSession.Add(steamIDRemote);
+            //}
 
-            try
-            {
-                byte[] bytes = Convert.FromBase64String(P2PPacket.Buffer);
-                SteamEmulator.SteamNetworking.AddP2PPacket(P2PPacket);
-            }
-            catch
-            {
-            }
+            //try
+            //{
+            //    byte[] bytes = Convert.FromBase64String(P2PPacket.Buffer);
+            //    SteamEmulator.SteamNetworking.AddP2PPacket(P2PPacket);
+            //}
+            //catch
+            //{
+            //}
         }
 
         private static void RegisterConnection(NetPacket packet)
@@ -97,7 +99,7 @@ namespace SKYNET.Network
 
             try
             {
-                byte[] bytes = Convert.FromBase64String(P2PPacket.Buffer);
+                byte[] bytes = P2PPacket.Buffer;
                 SteamEmulator.SteamNetworking.AddP2PPacket(P2PPacket);
             }
             catch
@@ -112,8 +114,8 @@ namespace SKYNET.Network
                 NET_P2PPacket p2p = new NET_P2PPacket()
                 {
                     AccountID = steamIDRemote.GetAccountID(),
-                    Buffer = Convert.ToBase64String(bytes),
-                    Sender = SteamEmulator.SteamID.AccountId,
+                    Buffer = bytes,
+                    Sender = SteamEmulator.SteamID.AccountID,
                     P2PSendType = eP2PSendType,
                     Channel = nChannel
                 }; 
@@ -174,7 +176,7 @@ namespace SKYNET.Network
                     {
                         Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                         SocketData SocketData = new SocketData() { socket = socket, Data = bytes };
-                        socket.BeginConnect(iPAddress, 3333, ConnectionCallback, SocketData);
+                        socket.BeginConnect(iPAddress, 4444, ConnectionCallback, SocketData);
                     }
                     catch
                     {
@@ -198,13 +200,14 @@ namespace SKYNET.Network
                 byte[] bytes = SocketData.Data;
                 SocketData.socket.Send(bytes);
 
-                ClientSocket client = new ClientSocket(SocketData.socket);
+                TCPClient client = new TCPClient(SocketData.socket);
                 client.OnDataReceived += P2PSocket_OnDataReceived;
                 client.BeginReceiving();
                 Connections.TryAdd(IPAddress, client);
             }
-            catch
+            catch (Exception ex)
             {
+                Write(ex);
             }
         }
 
@@ -229,7 +232,7 @@ namespace SKYNET.Network
                 {
                     try
                     {
-                        KV.Value.socket.Disconnect(false);
+                        KV.Value.Socket.Disconnect(false);
                     }
                     catch 
                     {

@@ -13,23 +13,23 @@ namespace SKYNET.Network
     {
         private Socket _serverSocket;
         private IPEndPoint _localEndPoint;
-        private List<ClientSocket> ConnectedClients;
+        private List<TCPClient> ConnectedClients;
         public int Port = 28880;
-        public bool Started { get; private set; }
+        public bool Started;
 
-        public event EventHandler<ClientSocket> OnConnected;
+        public event EventHandler<TCPClient> OnConnected;
         public event EventHandler<Socket> OnDisconnected;
         public event EventHandler<NetPacket> OnDataReceived;
 
         public TCPServer(int port)
         {
-            ConnectedClients = new List<ClientSocket>();
+            ConnectedClients = new List<TCPClient>();
             Port = port;
         }
 
-        internal void NotifyUserDisconnected(ClientSocket clientSockets)
+        internal void NotifyUserDisconnected(TCPClient clientSockets)
         {
-            OnDisconnected?.Invoke(this, clientSockets.socket);
+            OnDisconnected?.Invoke(this, clientSockets.Socket);
             ConnectedClients.Remove(clientSockets);
         }
 
@@ -55,7 +55,7 @@ namespace SKYNET.Network
             try
             {
                 Socket socket = ((Socket)ar.AsyncState).EndAccept(ar);
-                ClientSocket client = new ClientSocket(socket);
+                TCPClient client = new TCPClient(socket);
                 OnConnected?.Invoke(this, client);
                 client.OnDataReceived += Client_OnDataReceived;
                 client.BeginReceiving();
@@ -100,17 +100,17 @@ namespace SKYNET.Network
 
         internal void DisconnectAll()
         {
-            foreach (ClientSocket conn in ConnectedClients)
+            foreach (TCPClient conn in ConnectedClients)
             {
                 conn.Stop();
-                conn.socket.Close();
+                conn.Socket.Close();
             }
             ConnectedClients.Clear();
         }
     }
     public class NetPacket
     {
-        public ClientSocket Sender;
+        public TCPClient Sender;
         public byte[] Data;
     }
 }
