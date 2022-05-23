@@ -75,6 +75,7 @@
     <Compile Include="Callback\CCallbackBaseVTable.cs" />
     <Compile Include="Callback\SteamCallback.cs" />
     <Compile Include="Callback\SteamCallBacks.cs" />
+    <Compile Include="Plugin\Dota2GameCoordinator.cs" />
     <Compile Include="Steamworks\Exported\CSteamworks.cs" />
     <Compile Include="Helpers\DllExportAttribute.cs" />
     <Compile Include="Overlay\frmOverlay.cs">
