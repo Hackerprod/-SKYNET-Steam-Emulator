@@ -930,21 +930,22 @@ namespace SKYNET.Steamworks
     //
     // EChatRoomEnterResponse
     //
-    public enum EChatRoomEnterResponse : int
+    public enum EChatRoomEnterResponse
     {
-        Success = 1,
-        DoesntExist = 2,
-        NotAllowed = 3,
-        Full = 4,
-        Error = 5,
-        Banned = 6,
-        Limited = 7,
-        ClanDisabled = 8,
-        CommunityBan = 9,
-        MemberBlockedYou = 10,
-        YouBlockedMember = 11,
-        RatelimitExceeded = 15,
+        k_EChatRoomEnterResponseSuccess = 1,
+        k_EChatRoomEnterResponseDoesntExist = 2,
+        k_EChatRoomEnterResponseNotAllowed = 3,
+        k_EChatRoomEnterResponseFull = 4,
+        k_EChatRoomEnterResponseError = 5,
+        k_EChatRoomEnterResponseBanned = 6,
+        k_EChatRoomEnterResponseLimited = 7,
+        k_EChatRoomEnterResponseClanDisabled = 8,
+        k_EChatRoomEnterResponseCommunityBan = 9,
+        k_EChatRoomEnterResponseMemberBlockedYou = 10,
+        k_EChatRoomEnterResponseYouBlockedMember = 11,
+        k_EChatRoomEnterResponseRatelimitExceeded = 15
     }
+}
 
     //
     // EChatSteamIDInstanceFlags
@@ -3057,4 +3058,13 @@ namespace SKYNET.Steamworks
         k_EFriendFlagChatMember = 0x1000,
         k_EFriendFlagAll = 0xFFFF,
     };
-}
+
+public enum EChatMemberStateChange
+{
+    // Specific to joining / leaving the chatroom
+    k_EChatMemberStateChangeEntered = 0x0001,       // This user has joined or is joining the chat room
+    k_EChatMemberStateChangeLeft = 0x0002,      // This user has left or is leaving the chat room
+    k_EChatMemberStateChangeDisconnected = 0x0004,      // User disconnected without leaving the chat first
+    k_EChatMemberStateChangeKicked = 0x0008,        // User kicked
+    k_EChatMemberStateChangeBanned = 0x0010,		// User kicked and banned
+};

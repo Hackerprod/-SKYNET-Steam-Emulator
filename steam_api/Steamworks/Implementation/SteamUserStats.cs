@@ -15,19 +15,20 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamUserStats : ISteamInterface
     {
+        public static SteamUserStats Instance;
+
         private List<Leaderboard> Leaderboards;
         private List<Achievement> Achievements;
         private ConcurrentDictionary<ulong, List<PlayerStat>> UserStats;
-        private SteamAPICall_t k_uAPICallInvalid = 0x0;
 
         public SteamUserStats()
         {
+            Instance = this;
             InterfaceName = "SteamUserStats";
             InterfaceVersion = "STEAMUSERSTATS_INTERFACE_VERSION011";
             Leaderboards = new List<Leaderboard>();
             Achievements = new List<Achievement>();
             UserStats = new ConcurrentDictionary<ulong, List<PlayerStat>>();
-            UserStats.TryAdd((ulong)SteamEmulator.SteamId, new List<PlayerStat>());
 
             string achievementsPath = Path.Combine(modCommon.GetPath(), "SKYNET", "Storage", "Achievements.json");
             if (File.Exists(achievementsPath))
@@ -36,14 +37,16 @@ namespace SKYNET.Steamworks.Implementation
                 Achievements = fileContent.FromJson<List<Achievement>>();
             }
 
-            if (UserStats.TryGetValue((ulong)SteamEmulator.SteamId, out var StatsList))
+            string UserStatsPath = Path.Combine(modCommon.GetPath(), "SKYNET", "Storage", "UserStats.json");
+            if (File.Exists(UserStatsPath))
             {
-                string UserStatsPath = Path.Combine(modCommon.GetPath(), "SKYNET", "Storage", "UserStats.json");
-                if (File.Exists(UserStatsPath))
-                {
-                    string fileContent = File.ReadAllText(UserStatsPath);
-                    StatsList = fileContent.FromJson<List<PlayerStat>>();
-                }
+                string fileContent = File.ReadAllText(UserStatsPath);
+                var StatsList = fileContent.FromJson<List<PlayerStat>>();
+                UserStats.TryAdd((ulong)SteamEmulator.SteamID, StatsList);
+            }
+            else
+            {
+                UserStats.TryAdd((ulong)SteamEmulator.SteamID, new List<PlayerStat>());
             }
         }
 
@@ -56,7 +59,7 @@ namespace SKYNET.Steamworks.Implementation
                 {
                     m_nGameID = SteamEmulator.GameID,
                     m_eResult = EResult.k_EResultOK,
-                    m_steamIDUser = SteamEmulator.SteamId
+                    m_steamIDUser = SteamEmulator.SteamID
                 };
                 CallbackManager.AddCallbackResult(data);
                 return true;
@@ -71,12 +74,32 @@ namespace SKYNET.Steamworks.Implementation
         public bool GetStat(string pchName, ref uint pData)
         {
             bool Result = false;
-            if (UserStats.TryGetValue((ulong)SteamEmulator.SteamId, out var userStats))
+            var Data = pData;
+            MutexHelper.Wait("UserStats", delegate
             {
-                var statsList = userStats.Find(n => n.Name == pchName);
-                pData = (statsList == null) ? 0 : statsList.Data;
-                Result = true;
-            }
+                if (UserStats.TryGetValue((ulong)SteamEmulator.SteamID, out var userStats))
+                {
+                    var statsList = userStats.Find(n => n.Name == pchName);
+                    if (statsList == null)
+                    {
+                        statsList = new PlayerStat();
+                        statsList.Name = pchName;
+                        statsList.Data = 0;
+                        userStats.Add(statsList);
+                        SaveUserStats();
+                    }
+                    Data = statsList.Data;
+                    Result = true;
+                }
+                else
+                {
+                    userStats = new List<PlayerStat>();
+                    userStats.Add(new PlayerStat() { Name = pchName, Data = 0 });
+                    UserStats.TryAdd((ulong)SteamEmulator.SteamID, userStats);
+                    SaveUserStats();
+                }
+            });
+            pData = Data;
             Write($"GetStat (Name = {pchName}, out Data = {pData}) = {Result}");
             return Result;
         }
@@ -84,14 +107,35 @@ namespace SKYNET.Steamworks.Implementation
         public bool GetStat(string pchName, ref float pData)
         {
             bool Result = false;
-            if (UserStats.TryGetValue((ulong)SteamEmulator.SteamId, out var userStats))
+            var Data = pData;
+            MutexHelper.Wait("UserStats", delegate
             {
-                var statsList = userStats.Find(n => n.Name == pchName);
-                pData = (statsList == null) ? 0 : statsList.Data;
-                Result = true;
-            }
+                if (UserStats.TryGetValue((ulong)SteamEmulator.SteamID, out var userStats))
+                {
+                    var statsList = userStats.Find(n => n.Name == pchName);
+                    if (statsList == null)
+                    {
+                        statsList = new PlayerStat();
+                        statsList.Name = pchName;
+                        statsList.Data = 0;
+                        userStats.Add(statsList);
+                        SaveUserStats();
+                    }
+                    Data = statsList.Data;
+                    Result = true;
+                }
+                else
+                {
+                    userStats = new List<PlayerStat>();
+                    userStats.Add(new PlayerStat() { Name = pchName, Data = 0 });
+                    UserStats.TryAdd((ulong)SteamEmulator.SteamID, userStats);
+                    SaveUserStats();
+                }
+            });
+            pData = Data;
             Write($"GetStat (Name = {pchName}, out Data = {pData}) = {Result}");
             return Result;
+
         }
 
         public bool SetStat(string pchName, uint nData)
@@ -99,7 +143,7 @@ namespace SKYNET.Steamworks.Implementation
             Write($"SetStat (Name = {pchName}, Data = {nData})");
 
             bool Result = false;
-            if (UserStats.TryGetValue((ulong)SteamEmulator.SteamId, out var userStats))
+            if (UserStats.TryGetValue((ulong)SteamEmulator.SteamID, out var userStats))
             {
                 var statsList = userStats.Find(n => n.Name == pchName);
                 if (statsList == null)
@@ -125,10 +169,10 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool GetAchievement(string pchName, ref bool pbAchieved)
         {
-            Write($"GetAchievement {pchName}");
+            Write($"GetAchievement (Name = {pchName})");
             var Result = false;
             var achieved = false;
-            MutexHelper.Wait("GetAchievement", delegate
+            MutexHelper.Wait("Achievements", delegate
             {
                 var achievement = Achievements.Find(a => a.Name == pchName);
                 if (achievement == null)
@@ -150,7 +194,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"SetAchievement {pchName}");
             var Result = false;
-            MutexHelper.Wait("GetAchievement", delegate
+            MutexHelper.Wait("Achievements", delegate
             {
                 var achievement = Achievements.Find(a => a.Name == pchName);
                 if (achievement == null)
@@ -174,7 +218,7 @@ namespace SKYNET.Steamworks.Implementation
         public bool ClearAchievement(string pchName)
         {
             Write($"ClearAchievement {pchName}");
-            MutexHelper.Wait("ClearAchievement", delegate
+            MutexHelper.Wait("Achievements", delegate
             {
                 for (int i = 0; i < Achievements.Count; i++)
                 {
@@ -193,7 +237,7 @@ namespace SKYNET.Steamworks.Implementation
             var Result = false;
             var Archived = false;
             uint UnlockTime = 0;
-            MutexHelper.Wait("GetAchievementAndUnlockTime", delegate
+            MutexHelper.Wait("Achievements", delegate
             {
                 var achievement = Achievements.Find(a => a.Name == pchName);
                 if (achievement != null)
@@ -247,7 +291,7 @@ namespace SKYNET.Steamworks.Implementation
             var Result = false;
             var Archived = false;
 
-            MutexHelper.Wait("IndicateAchievementProgress", delegate
+            MutexHelper.Wait("Achievements", delegate
             {
                 var achievement = Achievements.Find(a => a.Name == pchName);
                 if (achievement != null)
@@ -262,7 +306,7 @@ namespace SKYNET.Steamworks.Implementation
 
             UserAchievementStored_t data = new UserAchievementStored_t()
             {
-                m_nGameID = SteamEmulator.AppId,
+                m_nGameID = SteamEmulator.AppID,
                 m_bGroupAchievement = false,
                 m_rgchAchievementName = Encoding.UTF8.GetBytes(pchName),
                 m_nCurProgress = Archived ? nCurProgress : 0,
@@ -338,9 +382,9 @@ namespace SKYNET.Steamworks.Implementation
             Write($"GetUserAchievement (SteamID: {steamIDUser}, Name: {pchName})");
             bool Result = false;
             bool Archived = false;
-            if (steamIDUser == (ulong)SteamEmulator.SteamId)
+            if (steamIDUser == SteamEmulator.SteamID)
             {
-                MutexHelper.Wait("GetUserAchievement", delegate
+                MutexHelper.Wait("Achievements", delegate
                 {
                     var achievement = Achievements.Find(a => a.Name == pchName);
                     if (achievement != null)
@@ -505,10 +549,10 @@ namespace SKYNET.Steamworks.Implementation
                 NumberOfCurrentPlayers_t data = new NumberOfCurrentPlayers_t()
                 {
                     m_bSuccess = 1,
-                    m_cPlayers = SteamEmulator.SteamFriends.Users.Count
+                    m_cPlayers = SteamFriends.Instance.Users.Count
                 };
 
-                Write($"GetNumberOfCurrentPlayers {SteamEmulator.SteamFriends.Users.Count}");
+                Write($"GetNumberOfCurrentPlayers {SteamFriends.Instance.Users.Count}");
 
                 return CallbackManager.AddCallbackResult(data);
             }
@@ -598,9 +642,9 @@ namespace SKYNET.Steamworks.Implementation
 
         private void SaveUserStats()
         {
-            if (UserStats.TryGetValue((ulong)SteamEmulator.SteamId, out var StatsList))
+            if (UserStats.TryGetValue((ulong)SteamEmulator.SteamID, out var StatsList))
             {
-                MutexHelper.Wait("SaveUserStats", delegate
+                MutexHelper.Wait("UserStats", delegate
                 {
                     try
                     {

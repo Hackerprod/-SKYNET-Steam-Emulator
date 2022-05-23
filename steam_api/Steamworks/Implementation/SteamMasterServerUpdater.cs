@@ -6,8 +6,11 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamMasterServerUpdater : ISteamInterface
     {
+        public static SteamMasterServerUpdater Instance;
+
         public SteamMasterServerUpdater()
         {
+            Instance = this;
             InterfaceName = "SteamMasterServerUpdater";
             InterfaceVersion = "SteamMasterServerUpdater002";
         }

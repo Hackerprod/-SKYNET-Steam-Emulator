@@ -156,9 +156,9 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamMatchmaking.SetLobbyGameServer(steamIDLobby, unGameServerIP, unGameServerPort, steamIDGameServer);
         }
 
-        public bool GetLobbyGameServer(IntPtr _, ulong steamIDLobby, uint punGameServerIP, uint punGameServerPort, ulong psteamIDGameServer)
+        public bool GetLobbyGameServer(IntPtr _, ulong steamIDLobby, ref uint punGameServerIP, ref uint punGameServerPort, ref ulong psteamIDGameServer)
         {
-            return SteamEmulator.SteamMatchmaking.GetLobbyGameServer(steamIDLobby, punGameServerIP, punGameServerPort, psteamIDGameServer);
+            return SteamEmulator.SteamMatchmaking.GetLobbyGameServer(steamIDLobby, ref punGameServerIP, ref punGameServerPort, ref psteamIDGameServer);
         }
 
         public bool SetLobbyMemberLimit(IntPtr _, ulong steamIDLobby, int cMaxMembers)

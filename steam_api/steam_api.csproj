@@ -68,43 +68,39 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Callback\CallbackHandler.cs" />
     <Compile Include="Callback\CallbackEnums.cs" />
     <Compile Include="Callback\CallbackTypes.cs" />
     <Compile Include="Callback\CCallbackBase.cs" />
-    <Compile Include="Callback\CCallbackBaseVTable.cs" />
     <Compile Include="Callback\SteamCallback.cs" />
     <Compile Include="Callback\SteamCallBacks.cs" />
-    <Compile Include="Plugin\Dota2GameCoordinator.cs" />
+    <Compile Include="Helpers\Platform.cs" />
+    <Compile Include="Network\P2PNetworking.cs" />
+    <Compile Include="Overlay\SteamUserControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Overlay\SteamUserControl.Designer.cs">
+      <DependentUpon>SteamUserControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Steamworks\Exported\CSteamworks.cs" />
-    <Compile Include="Helpers\DllExportAttribute.cs" />
     <Compile Include="Overlay\frmOverlay.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Overlay\frmOverlay.Designer.cs">
       <DependentUpon>frmOverlay.cs</DependentUpon>
     </Compile>
-    <Compile Include="Callback\Steamworks.Net\Callback.cs" />
-    <Compile Include="Callback\Steamworks.Net\CallbackDispatcher.cs" />
-    <Compile Include="Callback\Steamworks.Net\Callback_test.cs" />
-    <Compile Include="Callback\Steamworks.Net\CallResult.cs" />
     <Compile Include="Helpers\ImageHelper.cs" />
     <Compile Include="Helpers\IniParser.cs" />
     <Compile Include="Helpers\IpcCommunicator.cs" />
     <Compile Include="Helpers\JSON\SimpleJSONDotNetTypes.cs" />
     <Compile Include="Helpers\MutexHelper.cs" />
-    <Compile Include="Helpers\Platform.cs" />
     <Compile Include="Helpers\Settings.cs" />
     <Compile Include="Helpers\JSON\JSONParser.cs" />
     <Compile Include="Managers\IpcManager.cs" />
     <Compile Include="Managers\NetworkManager.cs" />
     <Compile Include="Helpers\StreamHelpers.cs" />
     <Compile Include="Managers\TicketManager.cs" />
-    <Compile Include="Network\ClientSocket.cs" />
-    <Compile Include="Network\Packets\BroadcastPacket.cs" />
-    <Compile Include="Network\BroadcastNetwork.cs" />
-    <Compile Include="Network\Packets\NetworkMessage.cs" />
-    <Compile Include="Network\Packets\NET_Messages.cs" />
+    <Compile Include="Network\TCPClient.cs" />
+    <Compile Include="Network\NET_Messages.cs" />
     <Compile Include="Network\TCPServer.cs" />
     <Compile Include="Overlay\ProfileControl.cs">
       <SubType>UserControl</SubType>
@@ -278,6 +274,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Overlay\ProfileControl.resx">
       <DependentUpon>ProfileControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Overlay\SteamUserControl.resx">
+      <DependentUpon>SteamUserControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

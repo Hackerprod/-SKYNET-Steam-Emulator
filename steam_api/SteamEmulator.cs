@@ -11,6 +11,7 @@
 #define LOG
 using SKYNET;
 using SKYNET.Helper;
+using SKYNET.Helper.JSON;
 using SKYNET.Managers;
 using SKYNET.Plugin;
 using SKYNET.Steamworks;
@@ -41,16 +42,20 @@ public class SteamEmulator
     public static string SteamApiPath;
     public static string EmulatorPath;
 
-    public static CSteamID SteamId;
-    public static CSteamID SteamId_GS;
+    public static CSteamID SteamID;
+    public static CSteamID SteamID_GS;
     public static uint GameID;
-    public static uint AppId;
+    public static uint AppID;
     public static bool Initialized;
     public static bool Initializing;
 
     public static bool SendLog;
     public static bool ConsoleLog;
     public static int BroadCastPort;
+
+    // Debug options
+    public static bool RunCallbacks;
+    public static bool ISteamHTTP;
 
     public static HSteamUser HSteamUser;
     public static HSteamPipe HSteamPipe;
@@ -132,7 +137,7 @@ public class SteamEmulator
                 Write("Settings", "Error loading settings");
             }
 
-            SteamId_GS = new CSteamID((uint)new Random().Next(1000, 9999), EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeGameServer);
+            SteamID_GS = CSteamID.GenerateGameServer();
 
             #region Interface Initialization
 
@@ -255,7 +260,7 @@ public class SteamEmulator
                             else
                             {
                                 AppID appID = iPlugin.Initialize();
-                                if (appID == AppId)
+                                if (appID == AppID)
                                 {
                                     GameCoordinatorPlugin = iPlugin;
                                     GameCoordinatorPlugin.IsMessageAvailable = IsMessageAvailable;
@@ -323,7 +328,7 @@ public class SteamEmulator
             {
                 if (Hooked)
                 {
-                    OnMessage?.Invoke(Instance, new GameMessage(AppId, sender, msg));
+                    OnMessage?.Invoke(Instance, new GameMessage(AppID, sender, msg));
                     lastMsg = msg.ToString();
                 }
 
@@ -354,10 +359,10 @@ public class SteamEmulator
 
 #endif
 
-    public static void Debug(string v, ConsoleColor color = ConsoleColor.Red)
+    public static void Debug(object msg, ConsoleColor color = ConsoleColor.Red)
     {
         Console.ForegroundColor = color;
-        Console.WriteLine($" DEBUG: {v}");
+        Console.WriteLine($" DEBUG: {msg}");
     }
 }
 

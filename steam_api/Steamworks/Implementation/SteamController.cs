@@ -10,12 +10,15 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamController : ISteamInterface
     {
+        public static SteamController Instance;
+
         private Dictionary<string, ControllerActionSetHandle_t> ActionHandles;
         private Dictionary<string, ControllerDigitalActionHandle_t> DigitalHandles;
         private Dictionary<string, ControllerAnalogActionHandle_t> AnalogHandles;
 
         public SteamController()
         {
+            Instance = this;
             ActionHandles = new Dictionary<string, ControllerActionSetHandle_t>();
             DigitalHandles = new Dictionary<string, ControllerDigitalActionHandle_t>();
             AnalogHandles = new Dictionary<string, ControllerAnalogActionHandle_t>();

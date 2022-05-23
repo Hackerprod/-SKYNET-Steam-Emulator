@@ -174,7 +174,7 @@ namespace SKYNET.Hook.Handles
         public bool SteamAPI_RestartAppIfNecessary(uint appId)
         {
             Write($"SteamAPI_RestartAppIfNecessary called {appId}");
-            SteamEmulator.AppId = appId;
+            SteamEmulator.AppID = appId;
             return false;
         }
         

@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 
 using SteamAPICall_t = System.UInt64;
 using FriendsGroupID_t = System.UInt16;
+using SKYNET.Steamworks.Implementation;
 
 namespace SKYNET.Steamworks.Interfaces
 {
@@ -13,381 +14,381 @@ namespace SKYNET.Steamworks.Interfaces
     {
         public string GetPersonaName(IntPtr _)
         {
-            return SteamEmulator.SteamFriends.GetPersonaName();
+            return SteamFriends.Instance.GetPersonaName();
         }
 
         public SteamAPICall_t SetPersonaName(IntPtr _, string name)
         {
-            return SteamEmulator.SteamFriends.SetPersonaName(name);
+            return SteamFriends.Instance.SetPersonaName(name);
         }
 
         public int GetPersonaState(IntPtr _)
         {
-            return SteamEmulator.SteamFriends.GetPersonaState();
+            return SteamFriends.Instance.GetPersonaState();
         }
 
         public int GetFriendCount(IntPtr _, int iFriendFlags)
         {
-            return SteamEmulator.SteamFriends.GetFriendCount(iFriendFlags);
+            return SteamFriends.Instance.GetFriendCount(iFriendFlags);
         }
 
         public CSteamID GetFriendByIndex(IntPtr _, int iFriend, int iFriendFlags)
         {
-            return SteamEmulator.SteamFriends.GetFriendByIndex(iFriend, iFriendFlags);
+            return SteamFriends.Instance.GetFriendByIndex(iFriend, iFriendFlags);
         }
 
         public int GetFriendRelationship(IntPtr _, ulong steamID)
         {
-            return SteamEmulator.SteamFriends.GetFriendRelationship(steamID);
+            return SteamFriends.Instance.GetFriendRelationship(steamID);
         }
 
         public int GetFriendPersonaState(IntPtr _, ulong steamID)
         {
-            return SteamEmulator.SteamFriends.GetFriendPersonaState(steamID);
+            return SteamFriends.Instance.GetFriendPersonaState(steamID);
         }
 
         public string GetFriendPersonaName(IntPtr _, ulong steamID)
         {
-            return SteamEmulator.SteamFriends.GetFriendPersonaName(steamID);
+            return SteamFriends.Instance.GetFriendPersonaName(steamID);
         }
 
         public bool GetFriendGamePlayed(IntPtr _, ulong steamID, IntPtr pFriendGameInfo)
         {
-            return SteamEmulator.SteamFriends.GetFriendGamePlayed(steamID, pFriendGameInfo);
+            return SteamFriends.Instance.GetFriendGamePlayed(steamID, pFriendGameInfo);
         }
 
         public string GetFriendPersonaNameHistory(IntPtr _, ulong steamID, int index)
         {
-            return SteamEmulator.SteamFriends.GetFriendPersonaNameHistory(steamID, index);
+            return SteamFriends.Instance.GetFriendPersonaNameHistory(steamID, index);
         }
 
         public int GetFriendSteamLevel(IntPtr _, ulong steamID)
         {
-            return SteamEmulator.SteamFriends.GetFriendSteamLevel(steamID);
+            return SteamFriends.Instance.GetFriendSteamLevel(steamID);
         }
 
         public string GetPlayerNickname(IntPtr _, ulong steamID)
         {
-            return SteamEmulator.SteamFriends.GetPlayerNickname(steamID);
+            return SteamFriends.Instance.GetPlayerNickname(steamID);
         }
 
         public int GetFriendsGroupCount(IntPtr _)
         {
-            return SteamEmulator.SteamFriends.GetFriendsGroupCount();
+            return SteamFriends.Instance.GetFriendsGroupCount();
         }
 
         public FriendsGroupID_t GetFriendsGroupIDByIndex(IntPtr _, int iFG)
         {
-            return SteamEmulator.SteamFriends.GetFriendsGroupIDByIndex(iFG);
+            return SteamFriends.Instance.GetFriendsGroupIDByIndex(iFG);
         }
 
         public string GetFriendsGroupName(IntPtr _, FriendsGroupID_t friendsGroupID)
         {
-            return SteamEmulator.SteamFriends.GetFriendsGroupName(friendsGroupID);
+            return SteamFriends.Instance.GetFriendsGroupName(friendsGroupID);
         }
 
         public int GetFriendsGroupMembersCount(IntPtr _, FriendsGroupID_t friendsGroupID)
         {
-            return SteamEmulator.SteamFriends.GetFriendsGroupMembersCount(friendsGroupID);
+            return SteamFriends.Instance.GetFriendsGroupMembersCount(friendsGroupID);
         }
 
         public void GetFriendsGroupMembersList(IntPtr _, FriendsGroupID_t friendsGroupID, IntPtr pOutSteamIDMembers, int nMembersCount)
         {
-            SteamEmulator.SteamFriends.GetFriendsGroupMembersList(friendsGroupID, pOutSteamIDMembers, nMembersCount);
+            SteamFriends.Instance.GetFriendsGroupMembersList(friendsGroupID, pOutSteamIDMembers, nMembersCount);
         }
 
         public bool HasFriend(IntPtr _, ulong steamIDFriend, int iFriendFlags)
         {
-            return SteamEmulator.SteamFriends.HasFriend(steamIDFriend, iFriendFlags);
+            return SteamFriends.Instance.HasFriend(steamIDFriend, iFriendFlags);
         }
 
         public int GetClanCount(IntPtr _)
         {
-            return SteamEmulator.SteamFriends.GetClanCount();
+            return SteamFriends.Instance.GetClanCount();
         }
 
         public CSteamID GetClanByIndex(IntPtr _, int iClan)
         {
-            return SteamEmulator.SteamFriends.GetClanByIndex(iClan);
+            return SteamFriends.Instance.GetClanByIndex(iClan);
         }
 
         public string GetClanName(IntPtr _, ulong steamIDClan)
         {
-            return SteamEmulator.SteamFriends.GetClanName(steamIDClan);
+            return SteamFriends.Instance.GetClanName(steamIDClan);
         }
 
         public string GetClanTag(IntPtr _, ulong steamIDClan)
         {
-            return SteamEmulator.SteamFriends.GetClanTag(steamIDClan);
+            return SteamFriends.Instance.GetClanTag(steamIDClan);
         }
 
         public bool GetClanActivityCounts(IntPtr _, ulong steamIDClan, ref int pnOnline, ref int pnInGame, ref int pnChatting)
         {
-            return SteamEmulator.SteamFriends.GetClanActivityCounts(steamIDClan, ref pnOnline, ref pnInGame, ref pnChatting);
+            return SteamFriends.Instance.GetClanActivityCounts(steamIDClan, ref pnOnline, ref pnInGame, ref pnChatting);
         }
 
         public SteamAPICall_t DownloadClanActivityCounts(IntPtr _, IntPtr psteamIDClans, int cClansToRequest)
         {
-            return SteamEmulator.SteamFriends.DownloadClanActivityCounts(psteamIDClans, cClansToRequest);
+            return SteamFriends.Instance.DownloadClanActivityCounts(psteamIDClans, cClansToRequest);
         }
 
         public int GetFriendCountFromSource(IntPtr _, ulong steamIDSource)
         {
-            return SteamEmulator.SteamFriends.GetFriendCountFromSource(steamIDSource);
+            return SteamFriends.Instance.GetFriendCountFromSource(steamIDSource);
         }
 
         public CSteamID GetFriendFromSourceByIndex(IntPtr _, ulong steamIDSource, int iFriend)
         {
-            return SteamEmulator.SteamFriends.GetFriendFromSourceByIndex(steamIDSource, iFriend);
+            return SteamFriends.Instance.GetFriendFromSourceByIndex(steamIDSource, iFriend);
         }
 
         public bool IsUserInSource(IntPtr _, ulong steamIDUser, ulong steamIDSource)
         {
-            return SteamEmulator.SteamFriends.IsUserInSource(steamIDUser, steamIDSource);
+            return SteamFriends.Instance.IsUserInSource(steamIDUser, steamIDSource);
         }
 
         public void SetInGameVoiceSpeaking(IntPtr _, ulong steamIDUser, bool bSpeaking)
         {
-            SteamEmulator.SteamFriends.SetInGameVoiceSpeaking(steamIDUser, bSpeaking);
+            SteamFriends.Instance.SetInGameVoiceSpeaking(steamIDUser, bSpeaking);
         }
 
         public void ActivateGameOverlay(IntPtr _, string pchDialog)
         {
-            SteamEmulator.SteamFriends.ActivateGameOverlay(pchDialog);
+            SteamFriends.Instance.ActivateGameOverlay(pchDialog);
         }
 
         public void ActivateGameOverlayToUser(IntPtr _, string pchDialog, ulong steamID)
         {
-            SteamEmulator.SteamFriends.ActivateGameOverlayToUser(pchDialog, steamID);
+            SteamFriends.Instance.ActivateGameOverlayToUser(pchDialog, steamID);
         }
 
         public void ActivateGameOverlayToWebPage(IntPtr _, string pchURL, int eMode)
         {
-            SteamEmulator.SteamFriends.ActivateGameOverlayToWebPage(pchURL, eMode);
+            SteamFriends.Instance.ActivateGameOverlayToWebPage(pchURL, eMode);
         }
 
         public void ActivateGameOverlayToStore(IntPtr _, uint nAppID, int eFlag)
         {
-            SteamEmulator.SteamFriends.ActivateGameOverlayToStore(nAppID, eFlag);
+            SteamFriends.Instance.ActivateGameOverlayToStore(nAppID, eFlag);
         }
 
         public void SetPlayedWith(IntPtr _, ulong steamIDUserPlayedWith)
         {
-            SteamEmulator.SteamFriends.SetPlayedWith(steamIDUserPlayedWith);
+            SteamFriends.Instance.SetPlayedWith(steamIDUserPlayedWith);
         }
 
         public void ActivateGameOverlayInviteDialog(IntPtr _, ulong steamIDLobby)
         {
-            SteamEmulator.SteamFriends.ActivateGameOverlayInviteDialog(steamIDLobby);
+            SteamFriends.Instance.ActivateGameOverlayInviteDialog(steamIDLobby);
         }
 
         public int GetSmallFriendAvatar(IntPtr _, ulong steamIDFriend)
         {
-            return SteamEmulator.SteamFriends.GetSmallFriendAvatar(steamIDFriend);
+            return SteamFriends.Instance.GetSmallFriendAvatar(steamIDFriend);
         }
 
         public int GetMediumFriendAvatar(IntPtr _, ulong steamIDFriend)
         {
-            return SteamEmulator.SteamFriends.GetMediumFriendAvatar(steamIDFriend);
+            return SteamFriends.Instance.GetMediumFriendAvatar(steamIDFriend);
         }
 
         public int GetLargeFriendAvatar(IntPtr _, ulong steamIDFriend)
         {
-            return SteamEmulator.SteamFriends.GetLargeFriendAvatar(steamIDFriend);
+            return SteamFriends.Instance.GetLargeFriendAvatar(steamIDFriend);
         }
 
         public bool RequestUserInformation(IntPtr _, ulong steamIDUser, bool bRequireNameOnly)
         {
-            return SteamEmulator.SteamFriends.RequestUserInformation(steamIDUser, bRequireNameOnly);
+            return SteamFriends.Instance.RequestUserInformation(steamIDUser, bRequireNameOnly);
         }
 
         public SteamAPICall_t RequestClanOfficerList(IntPtr _, ulong steamIDClan)
         {
-            return SteamEmulator.SteamFriends.RequestClanOfficerList(steamIDClan);
+            return SteamFriends.Instance.RequestClanOfficerList(steamIDClan);
         }
 
         public CSteamID GetClanOwner(IntPtr _, ulong steamIDClan)
         {
-            return SteamEmulator.SteamFriends.GetClanOwner(steamIDClan);
+            return SteamFriends.Instance.GetClanOwner(steamIDClan);
         }
 
         public int GetClanOfficerCount(IntPtr _, ulong steamIDClan)
         {
-            return SteamEmulator.SteamFriends.GetClanOfficerCount(steamIDClan);
+            return SteamFriends.Instance.GetClanOfficerCount(steamIDClan);
         }
 
         public CSteamID GetClanOfficerByIndex(IntPtr _, ulong steamIDClan, int iOfficer)
         {
-            return SteamEmulator.SteamFriends.GetClanOfficerByIndex(steamIDClan, iOfficer);
+            return SteamFriends.Instance.GetClanOfficerByIndex(steamIDClan, iOfficer);
         }
 
         public UInt32 GetUserRestrictions(IntPtr _)
         {
-            return SteamEmulator.SteamFriends.GetUserRestrictions();
+            return SteamFriends.Instance.GetUserRestrictions();
         }
 
         public bool SetRichPresence(IntPtr _, string pchKey, string pchValue)
         {
-            return SteamEmulator.SteamFriends.SetRichPresence(pchKey, pchValue);
+            return SteamFriends.Instance.SetRichPresence(pchKey, pchValue);
         }
 
         public void ClearRichPresence(IntPtr _)
         {
-            SteamEmulator.SteamFriends.ClearRichPresence();
+            SteamFriends.Instance.ClearRichPresence();
         }
 
         public string GetFriendRichPresence(IntPtr _, ulong steamIDFriend, string pchKey)
         {
-            return SteamEmulator.SteamFriends.GetFriendRichPresence(steamIDFriend, pchKey);
+            return SteamFriends.Instance.GetFriendRichPresence(steamIDFriend, pchKey);
         }
 
         public int GetFriendRichPresenceKeyCount(IntPtr _, ulong steamIDFriend)
         {
-            return SteamEmulator.SteamFriends.GetFriendRichPresenceKeyCount(steamIDFriend);
+            return SteamFriends.Instance.GetFriendRichPresenceKeyCount(steamIDFriend);
         }
 
         public string GetFriendRichPresenceKeyByIndex(IntPtr _, ulong steamIDFriend, int iKey)
         {
-            return SteamEmulator.SteamFriends.GetFriendRichPresenceKeyByIndex(steamIDFriend, iKey);
+            return SteamFriends.Instance.GetFriendRichPresenceKeyByIndex(steamIDFriend, iKey);
         }
         public void RequestFriendRichPresence(IntPtr _, ulong steamIDFriend)
         {
-            SteamEmulator.SteamFriends.RequestFriendRichPresence(steamIDFriend);
+            SteamFriends.Instance.RequestFriendRichPresence(steamIDFriend);
         }
 
         public bool InviteUserToGame(IntPtr _, ulong steamIDFriend, string pchConnectString)
         {
-            return SteamEmulator.SteamFriends.InviteUserToGame(steamIDFriend, pchConnectString);
+            return SteamFriends.Instance.InviteUserToGame(steamIDFriend, pchConnectString);
         }
 
         public int GetCoplayFriendCount(IntPtr _)
         {
-            return SteamEmulator.SteamFriends.GetCoplayFriendCount();
+            return SteamFriends.Instance.GetCoplayFriendCount();
         }
 
         public CSteamID GetCoplayFriend(IntPtr _, int iCoplayFriend)
         {
-            return SteamEmulator.SteamFriends.GetCoplayFriend(iCoplayFriend);
+            return SteamFriends.Instance.GetCoplayFriend(iCoplayFriend);
         }
 
         public int GetFriendCoplayTime(IntPtr _, ulong steamIDFriend)
         {
-            return SteamEmulator.SteamFriends.GetFriendCoplayTime(steamIDFriend);
+            return SteamFriends.Instance.GetFriendCoplayTime(steamIDFriend);
         }
 
         public uint GetFriendCoplayGame(IntPtr _, ulong steamIDFriend)
         {
-            return SteamEmulator.SteamFriends.GetFriendCoplayGame(steamIDFriend);
+            return SteamFriends.Instance.GetFriendCoplayGame(steamIDFriend);
         }
 
         public SteamAPICall_t JoinClanChatRoom(IntPtr _, ulong steamIDClan)
         {
-            return SteamEmulator.SteamFriends.JoinClanChatRoom(steamIDClan);
+            return SteamFriends.Instance.JoinClanChatRoom(steamIDClan);
         }
 
         public bool LeaveClanChatRoom(IntPtr _, ulong steamIDClan)
         {
-            return SteamEmulator.SteamFriends.LeaveClanChatRoom(steamIDClan);
+            return SteamFriends.Instance.LeaveClanChatRoom(steamIDClan);
         }
 
         public int GetClanChatMemberCount(IntPtr _, ulong steamIDClan)
         {
-            return SteamEmulator.SteamFriends.GetClanChatMemberCount(steamIDClan);
+            return SteamFriends.Instance.GetClanChatMemberCount(steamIDClan);
         }
 
         public CSteamID GetChatMemberByIndex(IntPtr _, ulong steamIDClan, int iUser)
         {
-            return SteamEmulator.SteamFriends.GetChatMemberByIndex(steamIDClan, iUser);
+            return SteamFriends.Instance.GetChatMemberByIndex(steamIDClan, iUser);
         }
 
         public bool SendClanChatMessage(IntPtr _, ulong steamIDClanChat, string pchText)
         {
-            return SteamEmulator.SteamFriends.SendClanChatMessage(steamIDClanChat, pchText);
+            return SteamFriends.Instance.SendClanChatMessage(steamIDClanChat, pchText);
         }
 
         public int GetClanChatMessage(IntPtr _, ulong steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, int peChatEntryType, ref ulong[] psteamidChatter)
         {
-            return SteamEmulator.SteamFriends.GetClanChatMessage(steamIDClanChat, iMessage, prgchText, cchTextMax, peChatEntryType, ref psteamidChatter);
+            return SteamFriends.Instance.GetClanChatMessage(steamIDClanChat, iMessage, prgchText, cchTextMax, peChatEntryType, ref psteamidChatter);
         }
 
         public bool IsClanChatAdmin(IntPtr _, ulong steamIDClanChat, ulong steamIDUser)
         {
-            return SteamEmulator.SteamFriends.IsClanChatAdmin(steamIDClanChat, steamIDUser);
+            return SteamFriends.Instance.IsClanChatAdmin(steamIDClanChat, steamIDUser);
         }
 
         public bool IsClanChatWindowOpenInSteam(IntPtr _, ulong steamIDClanChat)
         {
-            return SteamEmulator.SteamFriends.IsClanChatWindowOpenInSteam(steamIDClanChat);
+            return SteamFriends.Instance.IsClanChatWindowOpenInSteam(steamIDClanChat);
         }
 
         public bool OpenClanChatWindowInSteam(IntPtr _, ulong steamIDClanChat)
         {
-            return SteamEmulator.SteamFriends.OpenClanChatWindowInSteam(steamIDClanChat);
+            return SteamFriends.Instance.OpenClanChatWindowInSteam(steamIDClanChat);
         }
 
         public bool CloseClanChatWindowInSteam(IntPtr _, ulong steamIDClanChat)
         {
-            return SteamEmulator.SteamFriends.CloseClanChatWindowInSteam(steamIDClanChat);
+            return SteamFriends.Instance.CloseClanChatWindowInSteam(steamIDClanChat);
         }
 
         public bool SetListenForFriendsMessages(IntPtr _, bool bInterceptEnabled)
         {
-            return SteamEmulator.SteamFriends.SetListenForFriendsMessages(bInterceptEnabled);
+            return SteamFriends.Instance.SetListenForFriendsMessages(bInterceptEnabled);
         }
 
         public bool ReplyToFriendMessage(IntPtr _, ulong steamIDFriend, string pchMsgToSend)
         {
-            return SteamEmulator.SteamFriends.ReplyToFriendMessage(steamIDFriend, pchMsgToSend);
+            return SteamFriends.Instance.ReplyToFriendMessage(steamIDFriend, pchMsgToSend);
         }
 
         public int GetFriendMessage(IntPtr _, ulong steamIDFriend, int iMessageID, IntPtr pvData, int cubData, ref int peChatEntryType)
         {
-            return SteamEmulator.SteamFriends.GetFriendMessage(steamIDFriend, iMessageID, pvData, cubData, peChatEntryType);
+            return SteamFriends.Instance.GetFriendMessage(steamIDFriend, iMessageID, pvData, cubData, peChatEntryType);
         }
 
         public SteamAPICall_t GetFollowerCount(IntPtr _, ulong steamID)
         {
-            return SteamEmulator.SteamFriends.GetFollowerCount(steamID);
+            return SteamFriends.Instance.GetFollowerCount(steamID);
         }
 
         public SteamAPICall_t IsFollowing(IntPtr _, ulong steamID)
         {
-            return SteamEmulator.SteamFriends.IsFollowing(steamID);
+            return SteamFriends.Instance.IsFollowing(steamID);
         }
 
         public SteamAPICall_t EnumerateFollowingList(IntPtr _, UInt32 unStartIndex)
         {
-            return SteamEmulator.SteamFriends.EnumerateFollowingList(unStartIndex);
+            return SteamFriends.Instance.EnumerateFollowingList(unStartIndex);
         }
 
         public bool IsClanPublic(IntPtr _, ulong steamIDClan)
         {
-            return SteamEmulator.SteamFriends.IsClanPublic(steamIDClan);
+            return SteamFriends.Instance.IsClanPublic(steamIDClan);
         }
 
         public bool IsClanOfficialGameGroup(IntPtr _, ulong steamIDClan)
         {
-            return SteamEmulator.SteamFriends.IsClanOfficialGameGroup(steamIDClan);
+            return SteamFriends.Instance.IsClanOfficialGameGroup(steamIDClan);
         }
 
         public int GetNumChatsWithUnreadPriorityMessages(IntPtr _)
         {
-            return SteamEmulator.SteamFriends.GetNumChatsWithUnreadPriorityMessages();
+            return SteamFriends.Instance.GetNumChatsWithUnreadPriorityMessages();
         }
 
         public void ActivateGameOverlayRemotePlayTogetherInviteDialog(IntPtr _, ulong steamIDLobby)
         {
-            SteamEmulator.SteamFriends.ActivateGameOverlayRemotePlayTogetherInviteDialog(steamIDLobby);
+            SteamFriends.Instance.ActivateGameOverlayRemotePlayTogetherInviteDialog(steamIDLobby);
         }
 
         public bool RegisterProtocolInOverlayBrowser(IntPtr _, string pchProtocol)
         {
-            return SteamEmulator.SteamFriends.RegisterProtocolInOverlayBrowser(pchProtocol);
+            return SteamFriends.Instance.RegisterProtocolInOverlayBrowser(pchProtocol);
         }
 
         public void ActivateGameOverlayInviteDialogConnectString(IntPtr _, string pchConnectString)
         {
-            SteamEmulator.SteamFriends.ActivateGameOverlayInviteDialogConnectString(pchConnectString);
+            SteamFriends.Instance.ActivateGameOverlayInviteDialogConnectString(pchConnectString);
         }
     }
 }

@@ -32,6 +32,7 @@ using ScreenshotHandle = System.UInt32;
 using AccountID_t = System.UInt32;
 using SteamLeaderboardEntries_t = System.UInt64;
 using ClientUnifiedMessageHandle = System.UInt64;
+using SKYNET.Steamworks.Implementation;
 
 #endregion
 
@@ -71,7 +72,7 @@ namespace SKYNET.Steamworks.Exported
         public static bool RestartAppIfNecessary(AppId_t unOwnAppID)
         {
             Write("RestartAppIfNecessary");
-            SteamEmulator.AppId = unOwnAppID;
+            SteamEmulator.AppID = unOwnAppID;
             return false;
         }
 
@@ -699,423 +700,423 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static string ISteamFriends_GetPersonaName()
         {
-            return SteamEmulator.SteamFriends.GetPersonaName();
+            return SteamFriends.Instance.GetPersonaName();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static ulong ISteamFriends_SetPersonaName(string pchPersonaName)
         {
-            return SteamEmulator.SteamFriends.SetPersonaName(pchPersonaName);
+            return SteamFriends.Instance.SetPersonaName(pchPersonaName);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static EPersonaState ISteamFriends_GetPersonaState()
         {
-            return (EPersonaState)SteamEmulator.SteamFriends.GetPersonaState();
+            return (EPersonaState)SteamFriends.Instance.GetPersonaState();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int ISteamFriends_GetFriendCount(EFriendFlags iFriendFlags)
         {
-            return SteamEmulator.SteamFriends.GetFriendCount((int)iFriendFlags);
+            return SteamFriends.Instance.GetFriendCount((int)iFriendFlags);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static ulong ISteamFriends_GetFriendByIndex(int iFriend, EFriendFlags iFriendFlags)
         {
-            return (ulong)SteamEmulator.SteamFriends.GetFriendByIndex(iFriend, (int)iFriendFlags);
+            return (ulong)SteamFriends.Instance.GetFriendByIndex(iFriend, (int)iFriendFlags);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static EFriendRelationship ISteamFriends_GetFriendRelationship(ulong steamIDFriend)
         {
-            return (EFriendRelationship)SteamEmulator.SteamFriends.GetFriendRelationship((ulong)steamIDFriend);
+            return (EFriendRelationship)SteamFriends.Instance.GetFriendRelationship((ulong)steamIDFriend);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static EPersonaState ISteamFriends_GetFriendPersonaState(ulong steamIDFriend)
         {
-            return (EPersonaState)SteamEmulator.SteamFriends.GetFriendPersonaState((ulong)steamIDFriend);
+            return (EPersonaState)SteamFriends.Instance.GetFriendPersonaState((ulong)steamIDFriend);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static string ISteamFriends_GetFriendPersonaName(ulong steamIDFriend)
         {
-            return SteamEmulator.SteamFriends.GetFriendPersonaName((ulong)steamIDFriend);
+            return SteamFriends.Instance.GetFriendPersonaName((ulong)steamIDFriend);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamFriends_GetFriendGamePlayed(ulong steamIDFriend, IntPtr pFriendGameInfo)
         {
-            return SteamEmulator.SteamFriends.GetFriendGamePlayed((ulong)steamIDFriend, pFriendGameInfo);
+            return SteamFriends.Instance.GetFriendGamePlayed((ulong)steamIDFriend, pFriendGameInfo);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static string ISteamFriends_GetFriendPersonaNameHistory(ulong steamIDFriend, int iPersonaName)
         {
-            return SteamEmulator.SteamFriends.GetFriendPersonaNameHistory((ulong)steamIDFriend, iPersonaName);
+            return SteamFriends.Instance.GetFriendPersonaNameHistory((ulong)steamIDFriend, iPersonaName);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int ISteamFriends_GetFriendSteamLevel(ulong steamIDFriend)
         {
-            return SteamEmulator.SteamFriends.GetFriendSteamLevel((ulong)steamIDFriend);
+            return SteamFriends.Instance.GetFriendSteamLevel((ulong)steamIDFriend);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static string ISteamFriends_GetPlayerNickname(ulong steamIDPlayer)
         {
-            return SteamEmulator.SteamFriends.GetPlayerNickname((ulong)steamIDPlayer);
+            return SteamFriends.Instance.GetPlayerNickname((ulong)steamIDPlayer);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int ISteamFriends_GetFriendsGroupCount()
         {
-            return SteamEmulator.SteamFriends.GetFriendsGroupCount();
+            return SteamFriends.Instance.GetFriendsGroupCount();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int ISteamFriends_GetFriendsGroupIDByIndex(int iFG)
         {
-            return SteamEmulator.SteamFriends.GetFriendsGroupIDByIndex(iFG);
+            return SteamFriends.Instance.GetFriendsGroupIDByIndex(iFG);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static string ISteamFriends_GetFriendsGroupName(FriendsGroupID_t friendsGroupID)
         {
-            return SteamEmulator.SteamFriends.GetFriendsGroupName(friendsGroupID);
+            return SteamFriends.Instance.GetFriendsGroupName(friendsGroupID);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int ISteamFriends_GetFriendsGroupMembersCount(FriendsGroupID_t friendsGroupID)
         {
-            return SteamEmulator.SteamFriends.GetFriendsGroupMembersCount(friendsGroupID);
+            return SteamFriends.Instance.GetFriendsGroupMembersCount(friendsGroupID);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         //public static void ISteamFriends_GetFriendsGroupMembersList(FriendsGroupID_t friendsGroupID, ref ulong[] pOutSteamIDMembers, int nMembersCount)
         public static void ISteamFriends_GetFriendsGroupMembersList(FriendsGroupID_t friendsGroupID, IntPtr pOutSteamIDMembers, int nMembersCount)
         {
-            SteamEmulator.SteamFriends.GetFriendsGroupMembersList(friendsGroupID, pOutSteamIDMembers, nMembersCount);
+            SteamFriends.Instance.GetFriendsGroupMembersList(friendsGroupID, pOutSteamIDMembers, nMembersCount);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamFriends_HasFriend(ulong steamIDFriend, EFriendFlags iFriendFlags)
         {
-            return SteamEmulator.SteamFriends.HasFriend((ulong)steamIDFriend, (int)iFriendFlags);
+            return SteamFriends.Instance.HasFriend((ulong)steamIDFriend, (int)iFriendFlags);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int ISteamFriends_GetClanCount()
         {
-            return SteamEmulator.SteamFriends.GetClanCount();
+            return SteamFriends.Instance.GetClanCount();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static ulong ISteamFriends_GetClanByIndex(int iClan)
         {
-            return (ulong)SteamEmulator.SteamFriends.GetClanByIndex(iClan);
+            return (ulong)SteamFriends.Instance.GetClanByIndex(iClan);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static string ISteamFriends_GetClanName(ulong steamIDClan)
         {
-            return SteamEmulator.SteamFriends.GetClanName((ulong)steamIDClan);
+            return SteamFriends.Instance.GetClanName((ulong)steamIDClan);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static string ISteamFriends_GetClanTag(ulong steamIDClan)
         {
-            return SteamEmulator.SteamFriends.GetClanTag((ulong)steamIDClan);
+            return SteamFriends.Instance.GetClanTag((ulong)steamIDClan);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamFriends_GetClanActivityCounts(ulong steamIDClan, ref int pnOnline, ref int pnInGame, ref int pnChatting)
         {
-            return SteamEmulator.SteamFriends.GetClanActivityCounts((ulong)steamIDClan, ref pnOnline, ref pnInGame, ref pnChatting);
+            return SteamFriends.Instance.GetClanActivityCounts((ulong)steamIDClan, ref pnOnline, ref pnInGame, ref pnChatting);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static ulong ISteamFriends_DownloadClanActivityCounts(IntPtr psteamIDClans, int cClansToRequest)
         //public static ulong ISteamFriends_DownloadClanActivityCounts(ref ulong[] psteamIDClans, int cClansToRequest)
         {
-            return SteamEmulator.SteamFriends.DownloadClanActivityCounts(psteamIDClans, cClansToRequest);
+            return SteamFriends.Instance.DownloadClanActivityCounts(psteamIDClans, cClansToRequest);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int ISteamFriends_GetFriendCountFromSource(ulong steamIDSource)
         {
-            return SteamEmulator.SteamFriends.GetFriendCountFromSource((ulong)steamIDSource);
+            return SteamFriends.Instance.GetFriendCountFromSource((ulong)steamIDSource);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static ulong ISteamFriends_GetFriendFromSourceByIndex(ulong steamIDSource, int iFriend)
         {
-            return (ulong)SteamEmulator.SteamFriends.GetFriendFromSourceByIndex((ulong)steamIDSource, iFriend);
+            return (ulong)SteamFriends.Instance.GetFriendFromSourceByIndex((ulong)steamIDSource, iFriend);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamFriends_IsUserInSource(ulong steamIDUser, ulong steamIDSource)
         {
-            return SteamEmulator.SteamFriends.IsUserInSource((ulong)steamIDUser, (ulong)steamIDSource);
+            return SteamFriends.Instance.IsUserInSource((ulong)steamIDUser, (ulong)steamIDSource);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void ISteamFriends_SetInGameVoiceSpeaking(ulong steamIDUser, bool bSpeaking)
         {
-            SteamEmulator.SteamFriends.SetInGameVoiceSpeaking((ulong)steamIDUser, bSpeaking);
+            SteamFriends.Instance.SetInGameVoiceSpeaking((ulong)steamIDUser, bSpeaking);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void ISteamFriends_ActivateGameOverlay(string pchDialog)
         {
-            SteamEmulator.SteamFriends.ActivateGameOverlay(pchDialog);
+            SteamFriends.Instance.ActivateGameOverlay(pchDialog);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void ISteamFriends_ActivateGameOverlayToUser(string pchDialog, ulong steamID)
         {
-            SteamEmulator.SteamFriends.ActivateGameOverlayToUser(pchDialog, (ulong)steamID);
+            SteamFriends.Instance.ActivateGameOverlayToUser(pchDialog, (ulong)steamID);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void ISteamFriends_ActivateGameOverlayToWebPage(string pchURL)
         {
-            SteamEmulator.SteamFriends.ActivateGameOverlayToWebPage(pchURL, 0);
+            SteamFriends.Instance.ActivateGameOverlayToWebPage(pchURL, 0);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void ISteamFriends_ActivateGameOverlayToStore(AppId_t nAppID, EOverlayToStoreFlag eFlag)
         {
-            SteamEmulator.SteamFriends.ActivateGameOverlayToStore(nAppID, (int)eFlag);
+            SteamFriends.Instance.ActivateGameOverlayToStore(nAppID, (int)eFlag);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void ISteamFriends_SetPlayedWith(ulong steamIDUserPlayedWith)
         {
-            SteamEmulator.SteamFriends.SetPlayedWith((ulong)steamIDUserPlayedWith);
+            SteamFriends.Instance.SetPlayedWith((ulong)steamIDUserPlayedWith);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void ISteamFriends_ActivateGameOverlayInviteDialog(ulong steamIDLobby)
         {
-            SteamEmulator.SteamFriends.ActivateGameOverlayInviteDialog((ulong)steamIDLobby);
+            SteamFriends.Instance.ActivateGameOverlayInviteDialog((ulong)steamIDLobby);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int ISteamFriends_GetSmallFriendAvatar(ulong steamIDFriend)
         {
-            return SteamEmulator.SteamFriends.GetSmallFriendAvatar((ulong)steamIDFriend);
+            return SteamFriends.Instance.GetSmallFriendAvatar((ulong)steamIDFriend);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int ISteamFriends_GetMediumFriendAvatar(ulong steamIDFriend)
         {
-            return SteamEmulator.SteamFriends.GetMediumFriendAvatar((ulong)steamIDFriend);
+            return SteamFriends.Instance.GetMediumFriendAvatar((ulong)steamIDFriend);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int ISteamFriends_GetLargeFriendAvatar(ulong steamIDFriend)
         {
-            return SteamEmulator.SteamFriends.GetLargeFriendAvatar((ulong)steamIDFriend);
+            return SteamFriends.Instance.GetLargeFriendAvatar((ulong)steamIDFriend);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamFriends_RequestUserInformation(ulong steamIDUser, bool bRequireNameOnly)
         {
-            return SteamEmulator.SteamFriends.RequestUserInformation((ulong)steamIDUser, bRequireNameOnly);
+            return SteamFriends.Instance.RequestUserInformation((ulong)steamIDUser, bRequireNameOnly);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static ulong ISteamFriends_RequestClanOfficerList(ulong steamIDClan)
         {
-            return SteamEmulator.SteamFriends.RequestClanOfficerList((ulong)steamIDClan);
+            return SteamFriends.Instance.RequestClanOfficerList((ulong)steamIDClan);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static ulong ISteamFriends_GetClanOwner(ulong steamIDClan)
         {
-            return (ulong)SteamEmulator.SteamFriends.GetClanOwner((ulong)steamIDClan);
+            return (ulong)SteamFriends.Instance.GetClanOwner((ulong)steamIDClan);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int ISteamFriends_GetClanOfficerCount(ulong steamIDClan)
         {
-            return SteamEmulator.SteamFriends.GetClanOfficerCount((ulong)steamIDClan);
+            return SteamFriends.Instance.GetClanOfficerCount((ulong)steamIDClan);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static ulong ISteamFriends_GetClanOfficerByIndex(ulong steamIDClan, int iOfficer)
         {
-            return (ulong)SteamEmulator.SteamFriends.GetClanOfficerByIndex((ulong)steamIDClan, iOfficer);
+            return (ulong)SteamFriends.Instance.GetClanOfficerByIndex((ulong)steamIDClan, iOfficer);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static uint ISteamFriends_GetUserRestrictions()
         {
-            return SteamEmulator.SteamFriends.GetUserRestrictions();
+            return SteamFriends.Instance.GetUserRestrictions();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamFriends_SetRichPresence(string pchKey, string pchValue)
         {
-            return SteamEmulator.SteamFriends.SetRichPresence(pchKey, pchValue);
+            return SteamFriends.Instance.SetRichPresence(pchKey, pchValue);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void ISteamFriends_ClearRichPresence()
         {
-            SteamEmulator.SteamFriends.ClearRichPresence();
+            SteamFriends.Instance.ClearRichPresence();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static string ISteamFriends_GetFriendRichPresence(ulong steamIDFriend, string pchKey)
         {
-            return SteamEmulator.SteamFriends.GetFriendRichPresence((ulong)steamIDFriend, pchKey);
+            return SteamFriends.Instance.GetFriendRichPresence((ulong)steamIDFriend, pchKey);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int ISteamFriends_GetFriendRichPresenceKeyCount(ulong steamIDFriend)
         {
-            return SteamEmulator.SteamFriends.GetFriendRichPresenceKeyCount((ulong)steamIDFriend);
+            return SteamFriends.Instance.GetFriendRichPresenceKeyCount((ulong)steamIDFriend);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static string ISteamFriends_GetFriendRichPresenceKeyByIndex(ulong steamIDFriend, int iKey)
         {
-            return SteamEmulator.SteamFriends.GetFriendRichPresenceKeyByIndex((ulong)steamIDFriend, iKey);
+            return SteamFriends.Instance.GetFriendRichPresenceKeyByIndex((ulong)steamIDFriend, iKey);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void ISteamFriends_RequestFriendRichPresence(ulong steamIDFriend)
         {
-            SteamEmulator.SteamFriends.RequestFriendRichPresence((ulong)steamIDFriend);
+            SteamFriends.Instance.RequestFriendRichPresence((ulong)steamIDFriend);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamFriends_InviteUserToGame(ulong steamIDFriend, string pchConnectString)
         {
-            return SteamEmulator.SteamFriends.InviteUserToGame((ulong)steamIDFriend, pchConnectString);
+            return SteamFriends.Instance.InviteUserToGame((ulong)steamIDFriend, pchConnectString);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int ISteamFriends_GetCoplayFriendCount()
         {
-            return SteamEmulator.SteamFriends.GetCoplayFriendCount();
+            return SteamFriends.Instance.GetCoplayFriendCount();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static ulong ISteamFriends_GetCoplayFriend(int iCoplayFriend)
         {
-            return (ulong)SteamEmulator.SteamFriends.GetCoplayFriend(iCoplayFriend);
+            return (ulong)SteamFriends.Instance.GetCoplayFriend(iCoplayFriend);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int ISteamFriends_GetFriendCoplayTime(ulong steamIDFriend)
         {
-            return SteamEmulator.SteamFriends.GetFriendCoplayTime((ulong)steamIDFriend);
+            return SteamFriends.Instance.GetFriendCoplayTime((ulong)steamIDFriend);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static uint ISteamFriends_GetFriendCoplayGame(ulong steamIDFriend)
         {
-            return SteamEmulator.SteamFriends.GetFriendCoplayGame((ulong)steamIDFriend);
+            return SteamFriends.Instance.GetFriendCoplayGame((ulong)steamIDFriend);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static ulong ISteamFriends_JoinClanChatRoom(ulong steamIDClan)
         {
-            return SteamEmulator.SteamFriends.JoinClanChatRoom((ulong)steamIDClan);
+            return SteamFriends.Instance.JoinClanChatRoom((ulong)steamIDClan);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamFriends_LeaveClanChatRoom(ulong steamIDClan)
         {
-            return SteamEmulator.SteamFriends.LeaveClanChatRoom((ulong)steamIDClan);
+            return SteamFriends.Instance.LeaveClanChatRoom((ulong)steamIDClan);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int ISteamFriends_GetClanChatMemberCount(ulong steamIDClan)
         {
-            return SteamEmulator.SteamFriends.GetClanChatMemberCount((ulong)steamIDClan);
+            return SteamFriends.Instance.GetClanChatMemberCount((ulong)steamIDClan);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static ulong ISteamFriends_GetChatMemberByIndex(ulong steamIDClan, int iUser)
         {
-            return (ulong)SteamEmulator.SteamFriends.GetChatMemberByIndex((ulong)steamIDClan, iUser);
+            return (ulong)SteamFriends.Instance.GetChatMemberByIndex((ulong)steamIDClan, iUser);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamFriends_SendClanChatMessage(ulong steamIDClanChat, string pchText)
         {
-            return SteamEmulator.SteamFriends.SendClanChatMessage((ulong)steamIDClanChat, pchText);
+            return SteamFriends.Instance.SendClanChatMessage((ulong)steamIDClanChat, pchText);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int ISteamFriends_GetClanChatMessage(ulong steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, int peChatEntryType, ref ulong[] psteamidChatter)
         {
-            return SteamEmulator.SteamFriends.GetClanChatMessage((ulong)steamIDClanChat, iMessage, prgchText, cchTextMax, peChatEntryType, ref psteamidChatter);
+            return SteamFriends.Instance.GetClanChatMessage((ulong)steamIDClanChat, iMessage, prgchText, cchTextMax, peChatEntryType, ref psteamidChatter);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamFriends_IsClanChatAdmin(ulong steamIDClanChat, ulong steamIDUser)
         {
-            return SteamEmulator.SteamFriends.IsClanChatAdmin((ulong)steamIDClanChat, (ulong)steamIDUser);
+            return SteamFriends.Instance.IsClanChatAdmin((ulong)steamIDClanChat, (ulong)steamIDUser);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamFriends_IsClanChatWindowOpenInSteam(ulong steamIDClanChat)
         {
-            return SteamEmulator.SteamFriends.IsClanChatWindowOpenInSteam(steamIDClanChat);
+            return SteamFriends.Instance.IsClanChatWindowOpenInSteam(steamIDClanChat);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamFriends_OpenClanChatWindowInSteam(ulong steamIDClanChat)
         {
-            return SteamEmulator.SteamFriends.OpenClanChatWindowInSteam((ulong)steamIDClanChat);
+            return SteamFriends.Instance.OpenClanChatWindowInSteam((ulong)steamIDClanChat);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamFriends_CloseClanChatWindowInSteam(ulong steamIDClanChat)
         {
-            return SteamEmulator.SteamFriends.CloseClanChatWindowInSteam((ulong)steamIDClanChat);
+            return SteamFriends.Instance.CloseClanChatWindowInSteam((ulong)steamIDClanChat);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamFriends_SetListenForFriendsMessages(bool bInterceptEnabled)
         {
-            return SteamEmulator.SteamFriends.SetListenForFriendsMessages(bInterceptEnabled);
+            return SteamFriends.Instance.SetListenForFriendsMessages(bInterceptEnabled);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamFriends_ReplyToFriendMessage(ulong steamIDFriend, string pchMsgToSend)
         {
-            return SteamEmulator.SteamFriends.ReplyToFriendMessage((ulong)steamIDFriend, pchMsgToSend);
+            return SteamFriends.Instance.ReplyToFriendMessage((ulong)steamIDFriend, pchMsgToSend);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int ISteamFriends_GetFriendMessage(ulong steamIDFriend, int iMessageID, IntPtr pvData, int cubData, ref int peChatEntryType)
         {
-            return SteamEmulator.SteamFriends.GetFriendMessage((ulong)steamIDFriend, iMessageID, pvData, cubData, peChatEntryType);
+            return SteamFriends.Instance.GetFriendMessage((ulong)steamIDFriend, iMessageID, pvData, cubData, peChatEntryType);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static ulong ISteamFriends_GetFollowerCount(ulong steamID)
         {
-            return SteamEmulator.SteamFriends.GetFollowerCount((ulong)steamID);
+            return SteamFriends.Instance.GetFollowerCount((ulong)steamID);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static ulong ISteamFriends_IsFollowing(ulong steamID)
         {
-            return SteamEmulator.SteamFriends.IsFollowing((ulong)steamID);
+            return SteamFriends.Instance.IsFollowing((ulong)steamID);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static ulong ISteamFriends_EnumerateFollowingList(uint unStartIndex)
         {
-            return SteamEmulator.SteamFriends.EnumerateFollowingList(unStartIndex);
+            return SteamFriends.Instance.EnumerateFollowingList(unStartIndex);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -2128,9 +2129,9 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamMatchmaking_GetLobbyGameServer(ulong steamIDLobby, ref uint punGameServerIP, ref ushort punGameServerPort, ref ulong psteamIDGameServer)
+        public static bool ISteamMatchmaking_GetLobbyGameServer(ulong steamIDLobby, ref uint punGameServerIP, ref uint punGameServerPort, ref ulong psteamIDGameServer)
         {
-            return SteamEmulator.SteamMatchmaking.GetLobbyGameServer((ulong)steamIDLobby, punGameServerIP, punGameServerPort, (ulong)psteamIDGameServer);
+            return SteamEmulator.SteamMatchmaking.GetLobbyGameServer((ulong)steamIDLobby, ref punGameServerIP, ref punGameServerPort, ref psteamIDGameServer);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -2535,14 +2536,13 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamNetworking_IsP2PPacketAvailable(ref uint pcubMsgSize, int nChannel)
         {
-            return SteamEmulator.SteamNetworking.IsP2PPacketAvailable(pcubMsgSize, nChannel);
+            return SteamEmulator.SteamNetworking.IsP2PPacketAvailable(ref pcubMsgSize, nChannel);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamNetworking_ReadP2PPacket(IntPtr pubDest, uint cubDest, ref uint pcubMsgSize, ref ulong psteamIDRemote, int nChannel)
-        //public static bool ISteamNetworking_ReadP2PPacket(ref byte[] pubDest, uint cubDest, ref uint pcubMsgSize, ref ulong psteamIDRemote, int nChannel)
         {
-            return SteamEmulator.SteamNetworking.ReadP2PPacket(pubDest, cubDest, pcubMsgSize, (ulong)psteamIDRemote, nChannel);
+            return SteamEmulator.SteamNetworking.ReadP2PPacket(pubDest, cubDest, ref pcubMsgSize, ref psteamIDRemote, nChannel);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -3414,14 +3414,12 @@ namespace SKYNET.Steamworks.Exported
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static uint ISteamUser_GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
-        //public static uint ISteamUser_GetAuthSessionTicket(ref byte[] pTicket, int cbMaxTicket, ref uint pcbTicket)
         {
             return SteamEmulator.SteamUser.GetAuthSessionTicket(pTicket, cbMaxTicket, ref pcbTicket);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static EBeginAuthSessionResult ISteamUser_BeginAuthSession(IntPtr pAuthTicket, int cbAuthTicket, ulong steamID)
-        //public static EBeginAuthSessionResult ISteamUser_BeginAuthSession(ref byte[] pAuthTicket, int cbAuthTicket, ulong steamID)
         {
             return (EBeginAuthSessionResult)SteamEmulator.SteamUser.BeginAuthSession(pAuthTicket, cbAuthTicket, (ulong)steamID);
         }
@@ -4223,15 +4221,15 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamGameServerNetworking_IsP2PPacketAvailable(ref uint pcubMsgSize, int nChannel)
         {
-            return SteamEmulator.SteamNetworking.IsP2PPacketAvailable(pcubMsgSize, nChannel);
+            return SteamEmulator.SteamNetworking.IsP2PPacketAvailable(ref pcubMsgSize, nChannel);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamGameServerNetworking_ReadP2PPacket(IntPtr pubDest, uint cubDest, ref uint pcubMsgSize, ref ulong psteamIDRemote, int nChannel)
-        //public static bool ISteamGameServerNetworking_ReadP2PPacket(ref byte[] pubDest, uint cubDest, ref uint pcubMsgSize, ref ulong psteamIDRemote, int nChannel)
         {
-            return SteamEmulator.SteamNetworking.ReadP2PPacket(pubDest, cubDest, pcubMsgSize, (ulong)psteamIDRemote, nChannel);
+            return SteamEmulator.SteamNetworking.ReadP2PPacket(pubDest, cubDest, ref pcubMsgSize, ref psteamIDRemote, nChannel);
         }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamGameServerNetworking_AcceptP2PSessionWithUser(ulong steamIDRemote)
         {

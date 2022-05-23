@@ -7,8 +7,11 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamGameSearch : ISteamInterface
     {
+        public static SteamGameSearch Instance;
+
         public SteamGameSearch()
         {
+            Instance = this;
             InterfaceName = "SteamGameSearch";
             InterfaceVersion = "SteamMatchGameSearch001";
         }

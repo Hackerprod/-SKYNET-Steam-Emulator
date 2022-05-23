@@ -75,7 +75,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_ISteamUser_StopVoiceRecording(IntPtr _)
         {
-            Write("SteamAPI_ISteamUser_StopVoiceRecording");
+            //Write("SteamAPI_ISteamUser_StopVoiceRecording");
             SteamEmulator.SteamUser.StopVoiceRecording();
         }
 
@@ -89,7 +89,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int SteamAPI_ISteamUser_GetVoice(IntPtr _, bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, bool bWantUncompressed_Deprecated, IntPtr pUncompressedDestBuffer_Deprecated, uint cbUncompressedDestBufferSize_Deprecated, uint nUncompressBytesWritten_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
         {
-            Write("SteamAPI_ISteamUser_GetVoice");
+            //Write("SteamAPI_ISteamUser_GetVoice");
             return SteamEmulator.SteamUser.GetVoice(bWantCompressed, pDestBuffer, cbDestBufferSize, ref nBytesWritten, bWantUncompressed_Deprecated, pUncompressedDestBuffer_Deprecated, cbUncompressedDestBufferSize_Deprecated, nUncompressBytesWritten_Deprecated, nUncompressedVoiceDesiredSampleRate_Deprecated);
         }
 
@@ -103,7 +103,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static uint SteamAPI_ISteamUser_GetVoiceOptimalSampleRate(IntPtr _)
         {
-            Write("SteamAPI_ISteamUser_GetVoiceOptimalSampleRate");
+            //Write("SteamAPI_ISteamUser_GetVoiceOptimalSampleRate");
             return SteamEmulator.SteamUser.GetVoiceOptimalSampleRate();
         }
 

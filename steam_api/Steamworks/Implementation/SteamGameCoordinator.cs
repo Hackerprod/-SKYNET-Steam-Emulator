@@ -11,10 +11,13 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamGameCoordinator : ISteamInterface
     {
+        public static SteamGameCoordinator Instance;
+
         private ConcurrentDictionary<uint, byte[]> InMessages;
 
         public SteamGameCoordinator()
         {
+            Instance = this;
             InterfaceName = "SteamGameCoordinator";
             InterfaceVersion = "SteamGameCoordinator001";
             InMessages = new ConcurrentDictionary<uint, byte[]>();

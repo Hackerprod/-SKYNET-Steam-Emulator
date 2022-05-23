@@ -8,8 +8,11 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamApps : ISteamInterface
     {
+        public static SteamApps Instance;
+
         public SteamApps()
         {
+            Instance = this;
             InterfaceName = "SteamApps";
             InterfaceVersion = "STEAMAPPS_INTERFACE_VERSION008";
         }
@@ -59,13 +62,13 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool BIsDlcInstalled(uint appID)
         {
-            Write("BIsDlcInstalled " + appID);
+            Write($"BIsDlcInstalled (AppID = {appID})");
             return true;
         }
 
         public UInt32 GetEarliestPurchaseUnixTime(uint nAppID)
         {
-            Write("GetEarliestPurchaseUnixTime");
+            Write($"GetEarliestPurchaseUnixTime (AppID = {nAppID})");
             //TODO ?
             return 1;
         }
@@ -90,12 +93,12 @@ namespace SKYNET.Steamworks.Implementation
 
         public void InstallDLC(uint nAppID)
         {
-            Write("InstallDLC");
+            Write($"InstallDLC (AppID = {nAppID})");
         }
 
         public void UninstallDLC(uint nAppID)
         {
-            Write("UninstallDLC");
+            Write($"UninstallDLC (AppID = {nAppID})");
         }
 
         public void RequestAppProofOfPurchaseKey(uint nAppID)
@@ -147,8 +150,8 @@ namespace SKYNET.Steamworks.Implementation
 
         public CSteamID GetAppOwner()
         {
-            Write("GetAppOwner");
-            return (CSteamID)SteamEmulator.SteamId;
+            Write($"GetAppOwner");
+            return SteamEmulator.SteamID;
         }
 
         public IntPtr GetLaunchQueryParam(string pchKey)
@@ -159,7 +162,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool GetDlcDownloadProgress(uint nAppID, UInt64 punBytesDownloaded, UInt64 punBytesTotal)
         {
-            Write("GetDlcDownloadProgress");
+            Write($"GetDlcDownloadProgress (AppID = {nAppID})");
             return false;
         }
 

@@ -11,14 +11,14 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamNetworking.SendP2PPacket(steamIDRemote, pubData, cubData, eP2PSendType, 0);
         }
 
-        public bool IsP2PPacketAvailable(IntPtr _, uint pcubMsgSize, int nChannel = 0)
+        public bool IsP2PPacketAvailable(IntPtr _, ref uint pcubMsgSize, int nChannel)
         {
-            return SteamEmulator.SteamNetworking.IsP2PPacketAvailable(pcubMsgSize, 0);
+            return SteamEmulator.SteamNetworking.IsP2PPacketAvailable(ref pcubMsgSize, nChannel);
         }
 
-        public bool ReadP2PPacket(IntPtr _, IntPtr pubDest, uint cubDest, uint pcubMsgSize, ulong psteamIDRemote, int nChannel = 0)
+        public bool ReadP2PPacket(IntPtr _, IntPtr pubDest, uint cubDest, ref uint pcubMsgSize, ref ulong psteamIDRemote, int nChannel)
         {
-            return SteamEmulator.SteamNetworking.ReadP2PPacket(pubDest, cubDest, pcubMsgSize, psteamIDRemote, 0);
+            return SteamEmulator.SteamNetworking.ReadP2PPacket(pubDest, cubDest, ref pcubMsgSize, ref psteamIDRemote, nChannel);
         }
 
         public bool AcceptP2PSessionWithUser(IntPtr _, ulong steamIDRemote)

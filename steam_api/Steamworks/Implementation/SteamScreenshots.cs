@@ -7,8 +7,11 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamScreenshots : ISteamInterface
     {
+        public static SteamScreenshots Instance;
+
         public SteamScreenshots()
         {
+            Instance = this;
             InterfaceName = "SteamScreenshots";
             InterfaceVersion = "STEAMSCREENSHOTS_INTERFACE_VERSION003";
         }

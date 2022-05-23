@@ -9,8 +9,11 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamInventory : ISteamInterface
     {
+        public static SteamInventory Instance;
+
         public SteamInventory()
         {
+            Instance = this;
             InterfaceName = "SteamInventory";
             InterfaceVersion = "STEAMINVENTORY_INTERFACE_V003";
         }
@@ -149,7 +152,7 @@ namespace SKYNET.Steamworks.Implementation
         public bool LoadItemDefinitions()
         {
             Write($"LoadItemDefinitions");
-            return false;
+            return true;
         }
 
         public bool RemoveProperty(ulong handle, ulong nItemID, string pchPropertyName)

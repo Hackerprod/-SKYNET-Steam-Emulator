@@ -1,23 +1,22 @@
 ﻿using System;
 using SKYNET.Helper;
-
+using SKYNET.Managers;
 
 using SteamAPICall_t = System.UInt64;
-using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
 using HAuthTicket = System.UInt32;
-using SKYNET.Managers;
-using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
     public class SteamUser : ISteamInterface
     {
+        public static SteamUser Instance;
+
         private bool Recording;
-        private SteamAPICall_t k_uAPICallInvalid = 0x0;
 
         public SteamUser()
         {
+            Instance = this;
             InterfaceName = "SteamUser";
             InterfaceVersion = "SteamUser020";
         }
@@ -36,7 +35,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public CSteamID GetSteamID()
         {
-            var SteamId = SteamEmulator.SteamId;
+            var SteamId = SteamEmulator.SteamID;
             Write($"GetSteamID {SteamId}");
             return SteamId;
         }
@@ -77,7 +76,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public void StopVoiceRecording()
         {
-            Write("StopVoiceRecording");
+            //Write("StopVoiceRecording");
             Recording = false;
         }
 
@@ -89,7 +88,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetVoice(bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, bool bWantUncompressed_Deprecated, IntPtr pUncompressedDestBuffer_Deprecated, uint cbUncompressedDestBufferSize_Deprecated, uint nUncompressBytesWritten_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
         {
-            Write("GetVoice");
+            //Write("GetVoice");
             if (Recording) return (int)EVoiceResult.k_EVoiceResultNotRecording;
             nBytesWritten = 0;
             return (int)EVoiceResult.k_EVoiceResultNoData;
@@ -103,7 +102,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public uint GetVoiceOptimalSampleRate()
         {
-            Write("GetVoiceOptimalSampleRate");
+            //Write("GetVoiceOptimalSampleRate");
             return 4800;
         }
 

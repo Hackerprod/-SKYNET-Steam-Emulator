@@ -5,10 +5,11 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamGameServerStats : ISteamInterface
     {
-        private SteamAPICall_t k_uAPICallInvalid = 0x0;
+        public static SteamGameServerStats Instance;
 
         public SteamGameServerStats()
         {
+            Instance = this;
             InterfaceName = "SteamGameServerStats";
             InterfaceVersion = "SteamGameServerStats001";
         }

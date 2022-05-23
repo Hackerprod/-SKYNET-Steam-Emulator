@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using SKYNET;
+using SKYNET.Callback;
 using SKYNET.Helper;
 using SKYNET.Managers;
 using SteamAPICall_t = System.UInt64;
@@ -10,11 +11,13 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamUtils : ISteamInterface
     {
-        SteamAPICall_t k_uAPICallInvalid = 0x0;
+        public static SteamUtils Instance;
+
         public DateTime ActiveTime;
 
         public SteamUtils()
         {
+            Instance = this;
             InterfaceName = "SteamUtils";
             InterfaceVersion = "SteamUtils009";
             ActiveTime = DateTime.Now;
@@ -61,7 +64,7 @@ namespace SKYNET.Steamworks.Implementation
             {
                 try
                 {
-                    var (width, height) = SteamEmulator.SteamFriends.GetImageSize(iImage);
+                    var (width, height) = SteamFriends.Instance.GetImageSize(iImage);
 
                     if (width != 0 | height != 0)
                     {
@@ -90,7 +93,7 @@ namespace SKYNET.Steamworks.Implementation
             {
                 try
                 {
-                    var avatar = SteamEmulator.SteamFriends.GetImageAvatar(iImage);
+                    var avatar = SteamFriends.Instance.GetImageAvatar(iImage);
                     if (avatar != null)
                     {
                         byte[] bytes = avatar.GetImage(iImage);
@@ -125,7 +128,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public uint GetAppID()
         {
-            uint appId = SteamEmulator.AppId == 0 ? 570 : SteamEmulator.AppId;
+            uint appId = SteamEmulator.AppID == 0 ? 570 : SteamEmulator.AppID;
             Write($"GetAppID {appId}");
             return appId;
         }
@@ -155,24 +158,24 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool GetAPICallResult(SteamAPICall_t handle, IntPtr callback, int callback_size, int callback_expected, ref bool failed)
         {
+            bool Result = false;
+            failed = true;
             try
             {
-                Write($"GetAPICallResult {handle}");
-
-                if (CallbackManager.CallbackResults.TryGetValue(handle, out var cMessage))
+                if (CallbackManager.GetCallResult(handle, out var cCallback))
                 {
-                    callback_size = cMessage.Data.DataSize;
-                    Marshal.StructureToPtr(cMessage.Data, callback, false);
+                    Marshal.StructureToPtr(cCallback.Data, callback, false);
+                    cCallback.Called = true;
                     failed = false;
+                    Result = true;
                 }
-                failed = true;
-                return false;
             }
             catch (Exception ex)
             {
                 Write($"GetAPICallResult {ex}");
             }
-            return false;
+            Write($"GetAPICallResult (SteamAPICall = {handle}, CallbackExpected = {(CallbackType)callback_expected}) = {Result}");
+            return Result;
         }
 
         public void RunFrame()

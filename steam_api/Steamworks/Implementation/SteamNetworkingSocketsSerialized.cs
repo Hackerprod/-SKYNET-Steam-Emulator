@@ -6,8 +6,11 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamNetworkingSocketsSerialized : ISteamInterface
     {
+        public static SteamNetworkingSocketsSerialized Instance;
+
         public SteamNetworkingSocketsSerialized()
         {
+            Instance = this;
             InterfaceName = "SteamNetworkingSocketsSerialized";
             InterfaceVersion = "SteamNetworkingSocketsSerialized005";
         }
@@ -25,6 +28,7 @@ namespace SKYNET.Steamworks.Implementation
         public SteamAPICall_t GetCertAsync()
         {
             Write("GetCertAsync");
+            // SteamNetworkingSocketsCert_t
             return 0;
         }
 
@@ -62,7 +66,7 @@ namespace SKYNET.Steamworks.Implementation
             Write("PostConnectionStateMsg");
         }
 
-        public bool GetSTUNServer(int dont, IntPtr buf, int len)
+        public bool GetSTUNServer(int dont_know, IntPtr buf, int len)
         {
             Write("GetSTUNServer");
             return false;
@@ -76,7 +80,6 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool BeginAsyncRequestFakeIP(int nNumPorts)
         {
-
             Write("BAllowDirectConnectToPeer");
             return false;
         }

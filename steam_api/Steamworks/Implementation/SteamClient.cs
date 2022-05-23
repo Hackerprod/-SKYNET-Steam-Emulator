@@ -10,10 +10,13 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamClient : ISteamInterface
     {
+        public static SteamClient Instance;
+
         public SteamClient()
         {
+            Instance = this;
             InterfaceName = "SteamClient";
-            InterfaceVersion = "SteamClient020";
+            InterfaceVersion = "SteamClient017";
         }
 
         public HSteamPipe CreateSteamPipe()

@@ -6,8 +6,11 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamVideo : ISteamInterface
     {
+        public static SteamVideo Instance;
+
         public SteamVideo()
         {
+            Instance = this;
             InterfaceName = "SteamVideo";
             InterfaceVersion = "STEAMVIDEO_INTERFACE_V002";
         }

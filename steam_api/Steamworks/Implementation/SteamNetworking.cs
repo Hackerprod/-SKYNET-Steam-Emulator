@@ -1,88 +1,154 @@
-﻿using SKYNET;
-using SKYNET.Callback;
+﻿using SKYNET.Callback;
 using SKYNET.Helper;
 using SKYNET.Managers;
+using SKYNET.Network;
 using SKYNET.Network.Packets;
-using SKYNET.Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using System.Text;
+using SNetListenSocket_t = System.UInt32;
+using SNetSocket_t = System.UInt32;
 
 namespace SKYNET.Steamworks.Implementation
 {
     public class SteamNetworking : ISteamInterface
     {
-        public List<NET_P2PPacket> P2PIncoming { get; set; }
+        public static SteamNetworking Instance;
+
+        public List<NET_P2PPacket> P2PIncoming;
+        public Dictionary<SNetSocket_t, Socket> P2PSocket;
+        public Dictionary<SNetListenSocket_t, Socket> P2PListenSocket;
 
         public SteamNetworking()
         {
+            Instance = this;
             InterfaceName = "SteamNetworking";
             InterfaceVersion = "SteamNetworking005";
             P2PIncoming = new List<NET_P2PPacket>();
+            P2PSocket = new Dictionary<SNetListenSocket_t, Socket>();
+            P2PListenSocket = new Dictionary<SNetListenSocket_t, Socket>();
+            P2PNetworking.Initialize();
         }
 
         public bool SendP2PPacket(ulong steamIDRemote, IntPtr pubData, uint cubData, int eP2PSendType, int nChannel)
         {
-            Write("SendP2PPacket");
-            if (pubData == IntPtr.Zero)
+            bool Result = false;
+            if (pubData != IntPtr.Zero)
             {
-                return false;
-            }
-            byte[] bytes = pubData.GetBytes(cubData);
-            NetworkManager.SendP2PTo(steamIDRemote, bytes, eP2PSendType, nChannel);
+                byte[] bytes = pubData.GetBytes(cubData);
+                Write(Encoding.Default.GetString(bytes));
 
-            return true;
+                if (steamIDRemote == SteamEmulator.SteamID)
+                {
+                    MutexHelper.Wait("P2PPacket", delegate
+                    {
+                        P2PIncoming.Add(new NET_P2PPacket()
+                        {
+                            Sender = SteamEmulator.SteamID.AccountID,
+                            AccountID = steamIDRemote.GetAccountID(),
+                            Buffer = bytes,
+                            Channel = nChannel,
+                            P2PSendType = eP2PSendType
+                        });
+                        Result = true;
+                    });
+                }
+                else
+                {
+                    Result = P2PNetworking.SendP2PTo(steamIDRemote, bytes, eP2PSendType, nChannel);
+                }
+            }
+            Write($"SendP2PPacket (SteamID = {steamIDRemote}, Length = {cubData}, {(EP2PSend)eP2PSendType}, Channel = {nChannel}) = {Result}");
+            return Result;
         }
 
-        public bool IsP2PPacketAvailable(uint pcubMsgSize, int nChannel)
+        public bool IsP2PPacketAvailable(ref uint pcubMsgSize, int nChannel)
         {
-            Write("IsP2PPacketAvailable");
-            return P2PIncoming.Any();
+            //Write($"IsP2PPacketAvailable (MsgSize = {pcubMsgSize}, Channel = {nChannel})");
+            //pcubMsgSize = 0;
+            //return false;
+
+            bool Result = false;
+            var MsgSize = 0;
+            MutexHelper.Wait("P2PPacket", delegate
+            {
+                var Packet = P2PIncoming.Find(p => p.Channel == nChannel);
+                if (Packet != null)
+                {
+                    byte[] bytes = Packet.Buffer;
+                    MsgSize = bytes.Length;
+                    Result = true;
+                }
+            });
+            pcubMsgSize = (uint)MsgSize;
+            Write($"IsP2PPacketAvailable (MsgSize = {pcubMsgSize}, Channel = {nChannel}) = {Result}");
+            return Result;
         }
 
-        public bool ReadP2PPacket(IntPtr pubDest, uint cubDest, uint pcubMsgSize, ulong psteamIDRemote, int nChannel)
+        public bool ReadP2PPacket(IntPtr pubDest, uint cubDest, ref uint pcubMsgSize, ref ulong psteamIDRemote, int nChannel)
         {
-            Write("ReadP2PPacket");
-            if (P2PIncoming.Any())
+            bool Result = false;
+            ulong IDRemote = 0;
+            int MsgSize = 0;
+            var Packet = P2PIncoming.Find(p => p.Channel == nChannel);
+            if (Packet != null)
             {
-                var packet = P2PIncoming[0];
-                Marshal.Copy(packet.Buffer.GetBytesFromBase64String(), 0, pubDest, packet.Buffer.GetBytesFromBase64String().Length);
-                P2PIncoming.RemoveAt(0);
+                byte[] bytes = Packet.Buffer;
+                IDRemote = (ulong)new CSteamID(Packet.Sender);
+                MsgSize = bytes.Length;
+                Marshal.Copy(bytes, 0, pubDest, bytes.Length); 
+                P2PIncoming.Remove(Packet);
+                Result = true;
             }
-            return false;
+            psteamIDRemote = IDRemote;
+            pcubMsgSize = (uint)MsgSize;
+            return Result;
         }
 
         public bool AcceptP2PSessionWithUser(ulong steamIDRemote)
         {
-            Write("AcceptP2PSessionWithUser");
+            Write($"AcceptP2PSessionWithUser (User SteamID = {steamIDRemote})");
             return true;
         }
 
         public bool CloseP2PSessionWithUser(ulong steamIDRemote)
         {
-            Write("CloseP2PSessionWithUser");
-            return false;
+            Write($"CloseP2PSessionWithUser (User SteamID = {steamIDRemote})");
+            return true;
         }
 
         public bool CloseP2PChannelWithUser(ulong steamIDRemote, int nChannel)
         {
-            Write("CloseP2PChannelWithUser");
-            return false;
+            Write($"CloseP2PChannelWithUser (User SteamID = {steamIDRemote})");
+            return true;
         }
 
         public bool GetP2PSessionState(ulong steamIDRemote, IntPtr ptrConnectionState)
         {
             Write($"GetP2PSessionState {steamIDRemote}");
 
+            uint RemoteIP = NetworkManager.ConvertFromIPAddress(NetworkManager.GetIPAddress()); 
+            var user = SteamFriends.Instance.GetUser(steamIDRemote);
+            if (user != null)
+            {
+                if (IPAddress.TryParse(user.IPAddress, out var Address))
+                {
+                    RemoteIP = NetworkManager.ConvertFromIPAddress(Address);
+                }
+            }
+
             P2PSessionState_t pConnectionState = Marshal.PtrToStructure<P2PSessionState_t>(ptrConnectionState);
-            pConnectionState.m_bConnectionActive = true;
-            pConnectionState.m_bConnecting = false;
+            pConnectionState.m_bConnectionActive = 1;
+            pConnectionState.m_bConnecting = 0;
             pConnectionState.m_eP2PSessionError = 0;
             pConnectionState.m_bUsingRelay = false;
             pConnectionState.m_nBytesQueuedForSend = 0;
             pConnectionState.m_nPacketsQueuedForSend = 0;
-            pConnectionState.m_nRemoteIP = NetworkManager.GetIPAddress(NetworkManager.GetIPAddress());
+            pConnectionState.m_nRemoteIP = RemoteIP;
             pConnectionState.m_nRemotePort = 208802;
 
             Marshal.StructureToPtr(pConnectionState, ptrConnectionState, false);
@@ -93,91 +159,99 @@ namespace SKYNET.Steamworks.Implementation
         public bool AllowP2PPacketRelay(bool bAllow)
         {
             Write("AllowP2PPacketRelay");
-            return false;
+            return true;
         }
 
-        public uint CreateListenSocket(int nVirtualP2PPort, uint nIP, uint nPort, bool bAllowUseOfPacketRelay)
+        public SNetListenSocket_t CreateListenSocket(int nVirtualP2PPort, uint nIP, uint nPort, bool bAllowUseOfPacketRelay)
         {
             Write("CreateListenSocket");
             return 0;
         }
 
-        public uint CreateP2PConnectionSocket(ulong steamIDTarget, int nVirtualPort, int nTimeoutSec, bool bAllowUseOfPacketRelay)
+        public SNetSocket_t CreateP2PConnectionSocket(ulong steamIDTarget, int nVirtualPort, int nTimeoutSec, bool bAllowUseOfPacketRelay)
         {
             Write("CreateP2PConnectionSocket");
             return 0;
         }
 
-        public uint CreateConnectionSocket(uint nIP, uint nPort, int nTimeoutSec)
+        public SNetSocket_t CreateConnectionSocket(uint nIP, uint nPort, int nTimeoutSec)
         {
             Write("CreateConnectionSocket");
             return 0;
         }
 
-        public bool DestroySocket(uint hSocket, bool bNotifyRemoteEnd)
+        public bool DestroySocket(SNetSocket_t hSocket, bool bNotifyRemoteEnd)
         {
             Write("DestroySocket");
             return false;
         }
 
-        public bool DestroyListenSocket(uint hSocket, bool bNotifyRemoteEnd)
+        public bool DestroyListenSocket(SNetListenSocket_t hSocket, bool bNotifyRemoteEnd)
         {
             Write("DestroyListenSocket");
             return false;
         }
 
-        public bool SendDataOnSocket(uint hSocket, IntPtr pubData, uint cubData, bool bReliable)
+        public bool SendDataOnSocket(SNetSocket_t hSocket, IntPtr pubData, uint cubData, bool bReliable)
         {
             Write("SendDataOnSocket");
             return false;
         }
 
-        public bool IsDataAvailableOnSocket(uint hSocket, uint pcubMsgSize)
+        public bool IsDataAvailableOnSocket(SNetSocket_t hSocket, uint pcubMsgSize)
         {
             Write("IsDataAvailableOnSocket");
             return false;
         }
 
-        public bool RetrieveDataFromSocket(uint hSocket, IntPtr pubDest, uint cubDest, uint pcubMsgSize)
+        public bool RetrieveDataFromSocket(SNetSocket_t hSocket, IntPtr pubDest, uint cubDest, uint pcubMsgSize)
         {
             Write("RetrieveDataFromSocket");
             return false;
         }
 
-        public bool IsDataAvailable(uint hListenSocket, uint pcubMsgSize, uint phSocket)
+        public bool IsDataAvailable(SNetListenSocket_t hListenSocket, uint pcubMsgSize, SNetSocket_t phSocket)
         {
             Write("IsDataAvailable");
             return false;
         }
 
-        public bool RetrieveData(uint hListenSocket, IntPtr pubDest, uint cubDest, uint pcubMsgSize, uint phSocket)
+        public bool RetrieveData(SNetListenSocket_t hListenSocket, IntPtr pubDest, uint cubDest, uint pcubMsgSize, SNetSocket_t phSocket)
         {
             Write("RetrieveData");
             return false;
         }
 
-        public bool GetSocketInfo(uint hSocket, ulong pSteamIDRemote, int peSocketStatus, uint punIPRemote, uint punPortRemote)
+        public bool GetSocketInfo(SNetSocket_t hSocket, ulong pSteamIDRemote, int peSocketStatus, uint punIPRemote, uint punPortRemote)
         {
             Write("GetSocketInfo");
             return false;
         }
 
-        public bool GetListenSocketInfo(uint hListenSocket, uint pnIP, uint pnPort)
+        public bool GetListenSocketInfo(SNetListenSocket_t hListenSocket, uint pnIP, uint pnPort)
         {
             Write("GetListenSocketInfo");
             return false;
         }
 
-        public int GetSocketConnectionType(uint hSocket)
+        public int GetSocketConnectionType(SNetSocket_t hSocket)
         {
             Write("GetSocketConnectionType");
             return default;
         }
 
-        public int GetMaxPacketSize(uint hSocket)
+        public int GetMaxPacketSize(SNetSocket_t hSocket)
         {
             Write("GetMaxPacketSize");
             return 1500;
+        }
+
+        public void AddP2PPacket(NET_P2PPacket p2p)
+        {
+            MutexHelper.Wait("P2PPacket", delegate
+            {
+                P2PIncoming.Add(p2p);
+            });
         }
     }
 }

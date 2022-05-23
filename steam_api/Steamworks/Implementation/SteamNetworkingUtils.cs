@@ -11,8 +11,11 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamNetworkingUtils : ISteamInterface
     {
+        public static SteamNetworkingUtils Instance;
+
         public SteamNetworkingUtils()
         {
+            Instance = this;
             InterfaceName = "SteamNetworkingUtils";
             InterfaceVersion = "SteamNetworkingUtils003";
         }

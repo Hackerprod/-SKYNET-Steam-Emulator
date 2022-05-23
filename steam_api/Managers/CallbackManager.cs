@@ -2,11 +2,9 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using SKYNET.Callback;
 using SKYNET.Helper;
-using SKYNET.Steamworks;
-using Steamworks;
+
 using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Managers
@@ -44,12 +42,12 @@ namespace SKYNET.Managers
             {
                 if (SteamCallbacks.ContainsKey(callType))
                 {
-                    Write($"RegisterCallback: SteamCallbacks contains key {callType}");
+                    //Write($"RegisterCallback: SteamCallbacks contains key {callType}");
                     SteamCallbacks[callType] = sCallback;
                 }
                 else
                 {
-                    Write($"RegisterCallback: Creating new SteamCallbacks with key {callType}");
+                    //Write($"RegisterCallback: Creating new SteamCallbacks with key {callType}");
                     SteamCallbacks.TryAdd(callType, sCallback);
                 }
             });
@@ -67,12 +65,12 @@ namespace SKYNET.Managers
                     {
                         if (SteamCallbacks.ContainsKey(callType))
                         {
-                            Write($"RegisterCallResult: SteamCallbacks contains key {callType}");
+                            //Write($"RegisterCallResult: SteamCallbacks contains key {callType}");
                             SteamCallbacks[callType] = steamCallback;
                         }
                         else
                         {
-                            Write($"RegisterCallResult: Creating new SteamCallbacks with key {callType}");
+                            //Write($"RegisterCallResult: Creating new SteamCallbacks with key {callType}");
                             SteamCallbacks.TryAdd(callType, steamCallback);
                         }
                     });
@@ -85,13 +83,13 @@ namespace SKYNET.Managers
             });
         }
 
-        public static SteamAPICall_t AddCallbackResult(ICallbackData data, bool readyToCall = true)
+        public static SteamAPICall_t AddCallbackResult(ICallbackData data, bool ReadyToCall = true, bool CallComplete = false)
         {
             CurrentCall++;
 
             MutexHelper.Wait("CallbackResults", delegate
             {
-                CallbackResults.TryAdd(CurrentCall, new CallbackMessage(data, readyToCall));
+                CallbackResults.TryAdd(CurrentCall, new CallbackMessage(data, ReadyToCall, CallComplete));
             });
 
             Write($"Added CallbackResult {CurrentCall} {((int)data.CallbackType).GetCallbackType()} {data.CallbackType} ");
@@ -111,6 +109,8 @@ namespace SKYNET.Managers
 
         public static void RunCallbacks()
         {
+            if (!SteamEmulator.RunCallbacks) return;
+
             MutexHelper.Wait("CallbackResults", delegate
             {
                 foreach (var KV in CallbackResults)
@@ -118,14 +118,22 @@ namespace SKYNET.Managers
                     try
                     {
                         SteamAPICall_t APICall = KV.Key;
-                        ICallbackData callbackData = KV.Value.Data;
-
-                        if (!KV.Value.ReadyToCall)
+                        var CallbackMessage = KV.Value;
+                        ICallbackData callbackData = CallbackMessage.Data;
+                        if (!CallbackMessage.ReadyToCall)
                         {
+                            if (CallbackMessage.TimeSeconds > 5)
+                            {
+                                CallbackMessage.ReadyToCall = true;
+                            }
                             goto Skip;
                         }
-
-                        if (KV.Value.Called)
+                        if (CallbackMessage.TimedOut())
+                        {
+                            CallbackResults.TryRemove(APICall, out _);
+                            goto Skip;
+                        }
+                        if (CallbackMessage.Called)
                         {
                             CallbackResults.TryRemove(APICall, out _);
                         }
@@ -138,12 +146,18 @@ namespace SKYNET.Managers
                                     SteamEmulator.Debug($"Found callback {callbackData.CallbackType}");
 
                                     SteamCallback Callback = SteamCallbacks[callbackData.CallbackType];
-                                    if (true)
-                                    {
-
-                                    }
                                     Callback.Run(callbackData, false, APICall);
-                                    KV.Value.Called = true;
+                                    if (CallbackMessage.CallComplete)
+                                    {
+                                        //var SteamAPICallCompleted = new SteamAPICallCompleted_t()
+                                        //{
+                                        //    m_hAsyncCall = APICall,
+                                        //    m_iCallback = (int)callbackData.CallbackType,
+                                        //    m_cubParam = (uint)callbackData.DataSize
+                                        //};
+                                        //Callback.Run(SteamAPICallCompleted);
+                                    }
+                                    CallbackMessage.Called = true;
                                     Write($"Called function (IntPtr, bool, SteamAPICall_t) in {callbackData.CallbackType} callback");
                                 }
                                 else
@@ -152,9 +166,8 @@ namespace SKYNET.Managers
                                     if (Callback != null)
                                     {
                                         Callback.Run(callbackData, false, APICall);
-                                        KV.Value.Called = true;
+                                        CallbackMessage.Called = true;
                                         Write($"Called function (IntPtr, bool, SteamAPICall_t) in {callbackData.CallbackType} callback");
-
                                     }
                                     else
                                     {
@@ -177,26 +190,35 @@ namespace SKYNET.Managers
             {
                 for (int i = 0; i < Callbacks.Count; i++)
                 {
-                    var callbackMessage = Callbacks[i];
-                    if (callbackMessage.Called)
+                    var CallbackMessage = Callbacks[i];
+                    if (CallbackMessage.Called)
                     {
                         Callbacks.RemoveAt(i);
                     }
                     else
                     {
-                        if (!callbackMessage.ReadyToCall)
+                        if (!CallbackMessage.ReadyToCall)
                         {
+                            if (CallbackMessage.TimeSeconds > 5)
+                            {
+                                CallbackMessage.ReadyToCall = true;
+                            }
+                            goto Skip;
+                        }
+                        if (CallbackMessage.TimedOut())
+                        {
+                            Callbacks.RemoveAt(i);
                             goto Skip;
                         }
 
-                        var data = callbackMessage.Data;
+                        var data = CallbackMessage.Data;
                         try
                         {
                             var Callback = SteamCallbacks.Where(c => c.Value.CallbackType == data.CallbackType).Select(c => c.Value).FirstOrDefault();
                             if (Callback != null)
                             {
                                 Callback.Run(data);
-                                callbackMessage.Called = true;
+                                CallbackMessage.Called = true;
                                 Write($"Called function Run(IntPtr) in {data.CallbackType} callback");
                             }
                             else
@@ -215,9 +237,25 @@ namespace SKYNET.Managers
             });
         }
 
+        internal static bool GetCallResult(ulong handle, out CallbackMessage cCallback)
+        {
+            CallbackMessage callback = default;
+            MutexHelper.Wait("CallbackResults", delegate
+            {
+                CallbackResults.TryGetValue(handle, out callback);
+            });
+            cCallback = callback;
+            return cCallback != null;
+        }
+
         public static bool UnregisterCallResult(SteamCallback pCallback, ulong hAPICall)
         {
-            return CallbackResults.TryRemove(hAPICall, out _);
+            bool Result = false;
+            MutexHelper.Wait("CallbackResults", delegate
+            {
+                Result = CallbackResults.TryRemove(hAPICall, out _);
+            });
+            return Result;
         }
 
         public static bool IsCompleted(ulong hSteamAPICall)
@@ -225,12 +263,9 @@ namespace SKYNET.Managers
             bool Result = false;
             MutexHelper.Wait("SteamCallbacks", delegate
             {
-                foreach (var callback in SteamCallbacks)
+                if (CallbackResults.TryGetValue(hSteamAPICall, out var callback))
                 {
-                    if (callback.Value.SteamAPICall == hSteamAPICall)
-                    {
-                        Result = true;
-                    }
+                    Result = callback.Called;
                 }
             });
             return Result;

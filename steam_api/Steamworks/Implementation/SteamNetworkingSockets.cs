@@ -5,20 +5,21 @@ using System;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 
-
 using HSteamNetConnection = System.UInt32;
 using HSteamListenSocket = System.UInt32;
 
 namespace SKYNET.Steamworks.Implementation
 {
-    
     public class SteamNetworkingSockets : ISteamInterface
     {
+        public static SteamNetworkingSockets Instance;
+
         private List<SocketConnection> Sockets;
         private int CurrentSocketID;
 
         public SteamNetworkingSockets()
         {
+            Instance = this;
             InterfaceName = "SteamNetworkingSockets";
             InterfaceVersion = "SteamNetworkingSockets008";
             Sockets = new List<SocketConnection>();

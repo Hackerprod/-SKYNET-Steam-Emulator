@@ -6,8 +6,11 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamTV : ISteamInterface
     {
+        public static SteamTV Instance;
+
         public SteamTV()
         {
+            Instance = this;
             InterfaceName = "SteamTV";
             InterfaceVersion = "STEAMTV_INTERFACE_V002";
         }

@@ -1,4 +1,5 @@
-﻿using SKYNET.Steamworks.Interfaces;
+﻿using SKYNET.Steamworks.Implementation;
+using SKYNET.Steamworks.Interfaces;
 using System;
 using System.Collections.Concurrent;
 using System.Reflection;
@@ -95,6 +96,10 @@ namespace SKYNET.Managers
         {
             #region For test purposes
 
+            if (pszVersion.StartsWith("STEAMHTTP_INTERFACE_VERSION"))
+            {
+                return !SteamEmulator.ISteamHTTP;
+            }
             //if (pszVersion.StartsWith("SteamUtils"))
             //{
             //    return true;
@@ -147,10 +152,6 @@ namespace SKYNET.Managers
             //{
             //    return true;
             //}
-            if (pszVersion.StartsWith("STEAMHTTP_INTERFACE_VERSION"))
-            {
-                //return true;
-            }
             //if (pszVersion.StartsWith("SteamController"))
             //{
             //    return true;
@@ -224,8 +225,8 @@ namespace SKYNET.Managers
             }
             if (pszVersion.StartsWith("SteamFriends"))
             {
-                SteamEmulator.SteamFriends.InterfaceName = type.Name;
-                SteamEmulator.SteamFriends.InterfaceVersion = pszVersion;
+                SteamFriends.Instance.InterfaceName = type.Name;
+                SteamFriends.Instance.InterfaceVersion = pszVersion;
             }
             if (pszVersion.StartsWith("SteamMatchMaking"))
             {

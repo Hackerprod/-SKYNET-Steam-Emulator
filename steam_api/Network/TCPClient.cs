@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -7,14 +8,14 @@ using System.Windows.Forms;
 
 namespace SKYNET.Network
 {
-    public class ClientSocket
+    public class TCPClient
     {
-        public Socket socket;
+        public Socket Socket;
         public event EventHandler<NetPacket> OnDataReceived;
 
-        public ClientSocket(Socket _socket)
+        public TCPClient(Socket _socket)
         {
-            this.socket = _socket;
+            Socket = _socket;
         }
 
         public void BeginReceiving()
@@ -26,24 +27,24 @@ namespace SKYNET.Network
                 {
                     if (StopReceiving) break;
 
-                    if (!IsSocketConnected(socket))
+                    if (!IsSocketConnected(Socket))
                     {
                         break;
                     }
-                    if (socket.Available != 0)
+                    if (Socket.Available != 0)
                     {
                         List<byte> list = new List<byte>();
-                        while (socket.Available > 0 && socket.Connected)
+                        while (Socket.Available > 0 && Socket.Connected)
                         {
                             byte[] array3 = new byte[1];
-                            socket.Receive(array3, 0, 1, SocketFlags.None);
+                            Socket.Receive(array3, 0, 1, SocketFlags.None);
                             list.AddRange(array3);
 
                         }
 
                         if (list.Count > 0)
                         {
-                            OnDataReceived?.Invoke(this, new NetPacket() { Sender = socket, Data = list.ToArray() });
+                            OnDataReceived?.Invoke(this, new NetPacket() { Sender = this, Data = list.ToArray() });
                         }
                     }
                 }
@@ -70,10 +71,27 @@ namespace SKYNET.Network
         }
 
         public bool StopReceiving { get; private set; }
+        public IPEndPoint RemoteEndPoint => (IPEndPoint)Socket?.RemoteEndPoint;
 
         public void Stop()
         {
             StopReceiving = true;
+        }
+
+        public bool Send(byte[] bytes)
+        {
+            try
+            {
+                if (Socket.Connected)
+                {
+                    Socket.Send(bytes);
+                    return true;
+                }
+            }
+            catch 
+            {
+            }
+            return false;
         }
     }
 }

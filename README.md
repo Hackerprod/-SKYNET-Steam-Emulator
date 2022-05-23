@@ -7,7 +7,7 @@ The project is in an initial stage, so it is not functional yet for some Games.
 
 ## 📁 Directory structure
 ```
-📁 Game folder                     
+📁 Root game folder                     
 └──📁 SKYNET
    ├──📁 AvatarCache                  // Contains avatars cache
    ├──📁 Storage                      // Contains stats and achievements files
@@ -15,27 +15,105 @@ The project is in an initial stage, so it is not functional yet for some Games.
    ├──📄 [SKYNET] steam_api.ini       
    └──📑 [SKYNET] steam_api.log       // If option is enabled
 ```
+
 ## 🔗 Features
-`User Stats manager`       Save and Load user stats from local folder.
 
-`Achievements manager`     Save and Load user achievements from local folder.
-
-`CSteamworks emulation`    Rename the emu to CSteamworks.dll to emulate them.
-
-`Multiplataform`   Works with multiple game engines like Source 2, Unity 3D etc.
-
+```
+User Stats manager         Save and Load user stats from local folder.
+Achievements manager       Save and Load user achievements from local folder.
+CSteamworks emulation      Rename the emu to CSteamworks.dll to emulate them.
+Multiplataform             Works with multiple game engines like Source 2, Unity 3D etc.
+Network communication      Network communication between clients through a configurable port.
+Overlay                    External Overlay for steam and game messages.
+DLC                        Unlock all downloaded DLCs.
+Avatar support             Load avatar from file (Avatar.jpg) inside SKYNET folder and share it through the network.
+Plugin system              Load external plugin to communicate with the emu.
+```
 ## ⚙️ Settings
-This emulator reads settings from `[SKYNET] steam_api.ini` file, data like Nickname, SteamId, Language etc.
+When the emulator runs for the first time, it create the directories that it is going to use and generates them inside the SKYNET folder the `[SKYNET] steam_api.ini`<br />
+<details><summary>Settings structure</summary><br />
+
+ [User Settings]<br />
+PersonaName = Hackerprod<br />
+AccountId = 1000<br />
+
+[Game Settings]<br />
+Languaje = spanish<br />
+AppId = 570<br />
+
+[Network Settings]<br />
+ServerIP = 127.0.0.1<br />
+BroadCastPort = 28025<br />
+
+[Log Settings]<br />
+File = false<br />
+Console = true<br />
+
+</details>
 
 ## 🔨 Currently working on
-Callback system implementation.
-Fucking SteamInternal_ContextInit in x86 Games
+Callback system implementation.<br />
+SteamInternal_ContextInit in x86 Games
 
 ## 📝 Log
-When File log option si enabled in settings, a log file will be created in the root of the game executable with the following name `[SKYNET] steam_api.log`
+When File log option si enabled in settings, a log file will be created inside SKYNET folder with the following name `[SKYNET] steam_api.log`
 
-## Implemented Interfaces
-###
+## 🔌 Plugin system
+The plugin system is developed in order to establish a communication between the game and the game coordinator, the following example shows a basic plugin. <br /><br />
+**Interface for Game coordinator plugin:**
+```csharp
+namespace SKYNET.Plugin
+{
+    public interface IGameCoordinatorPlugin
+    {
+        uint Initialize();
+        void MessageFromGame(byte[] bytes);
+        EventHandler<Dictionary <uint, byte[]>> IsMessageAvailable { get; set; }
+    }
+}
+```
+**Game coordinator plugin example:**
+```csharp
+namespace SKYNET.Plugin
+{
+    public class Dota2GameCoordinator : IGameCoordinatorPlugin
+    {
+        private uint AppID = 570;
+        public EventHandler<Dictionary<uint, byte[]>> IsMessageAvailable { get; set; }
+
+        public uint Initialize()
+        {
+            // TODO: Initialize all Game coordinator class
+            return AppID;
+        }
+
+        public void MessageFromGame(byte[] bytes)
+        {
+            // Process message from game
+            uint MsgType = MsgUtil.GetGCMsg(new MemoryStream(bytes).ReadUInt32L());
+            IPacketGCMsg packetGCMsg = MsgUtil.GetPacketGcMsg(MsgType, bytes);
+            // TODO: Process GC message
+        }
+
+        public void SendPacketToGame(uint msgType, byte[] packet)
+        {
+            Dictionary<uint, byte[]> message = new Dictionary<uint, byte[]>();
+            message.Add(msgType, packet);
+            IsMessageAvailable?.Invoke(this, message);
+        }
+
+        public void SendPacketToGame(Dictionary<uint, byte[]> messages)
+        {
+            IsMessageAvailable?.Invoke(this, messages);
+        }
+    }
+}
+```
+
+## ⭐ Implemented Interfaces
+
+<details><summary>Click to expand</summary><br />
+
 - [x] ISteamAppDisableUpdate
 - - [x] SteamAppDisableUpdate001
 - [x] ISteamAppList		
@@ -139,3 +217,5 @@ When File log option si enabled in settings, a log file will be created in the r
 - - [x] ISteamUtils010
 - [x] ISteamVideo			
 - - [x] ISteamVideo002 
+</details>
+

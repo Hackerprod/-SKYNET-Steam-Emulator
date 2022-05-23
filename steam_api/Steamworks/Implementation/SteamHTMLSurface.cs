@@ -6,8 +6,11 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamHTMLSurface : ISteamInterface
     {
+        public static SteamHTMLSurface Instance;
+
         public SteamHTMLSurface()
         {
+            Instance = this;
             InterfaceName = "SteamHTMLSurface";
             InterfaceVersion = "STEAMHTMLSURFACE_INTERFACE_VERSION_005";
         }

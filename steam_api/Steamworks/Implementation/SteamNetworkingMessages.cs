@@ -6,8 +6,11 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamNetworkingMessages : ISteamInterface
     {
+        public static SteamNetworkingMessages Instance;
+
         public SteamNetworkingMessages()
         {
+            Instance = this;
             InterfaceName = "SteamNetworkingMessages";
             InterfaceVersion = "SteamNetworkingMessages002";
         }

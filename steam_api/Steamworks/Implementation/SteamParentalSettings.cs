@@ -3,8 +3,11 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamParentalSettings : ISteamInterface
     {
+        public static SteamParentalSettings Instance;
+
         public SteamParentalSettings()
         {
+            Instance = this;
             InterfaceName = "SteamParentalSettings";
             InterfaceVersion = "STEAMPARENTALSETTINGS_INTERFACE_VERSION001";
         }

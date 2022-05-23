@@ -20,16 +20,18 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamRemoteStorage : ISteamInterface
     {
+        public static SteamRemoteStorage Instance;
+
         public string StoragePath;
         public string AvatarCachePath;
         private List<string> StorageFiles;
         private ConcurrentDictionary<ulong, string> SharedFiles;
         private int LastFile;
-        private SteamAPICall_t k_uAPICallInvalid = 0x0;
         private Dictionary<ulong, string> AsyncFilesRead;
 
         public SteamRemoteStorage()
         {
+            Instance = this;
             InterfaceName = "SteamRemoteStorage";
             InterfaceVersion = "STEAMREMOTESTORAGE_INTERFACE_VERSION014";
             StorageFiles = new List<string>();
@@ -41,7 +43,7 @@ namespace SKYNET.Steamworks.Implementation
             {
                 if (SteamEmulator.Hooked)
                 {
-                    StoragePath = Path.Combine(SteamEmulator.EmulatorPath, "SKYNET", "Storage", "Remote", SteamEmulator.AppId.ToString(), "remote");
+                    StoragePath = Path.Combine(SteamEmulator.EmulatorPath, "SKYNET", "Storage", "Remote", SteamEmulator.AppID.ToString(), "remote");
                     modCommon.EnsureDirectoryExists(StoragePath);
                 }
                 else

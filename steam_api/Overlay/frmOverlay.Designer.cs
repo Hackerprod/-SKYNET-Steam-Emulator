@@ -35,6 +35,7 @@
             // 
             // PN_Container
             // 
+            this.PN_Container.AutoScroll = true;
             this.PN_Container.Location = new System.Drawing.Point(23, 49);
             this.PN_Container.Name = "PN_Container";
             this.PN_Container.Size = new System.Drawing.Size(654, 291);
@@ -55,8 +56,7 @@
             // 
             // frmOverlay
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.Color.Black;
             this.ClientSize = new System.Drawing.Size(700, 363);
             this.Controls.Add(this.PN_Container);
@@ -64,14 +64,14 @@
             this.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "frmOverlay";
-            this.Opacity = 0.75D;
+            this.Opacity = 0.9D;
             this.Padding = new System.Windows.Forms.Padding(20);
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "v";
             this.TopMost = true;
-            this.Paint += new System.Windows.Forms.PaintEventHandler(this.FrmOverlay_Paint);
+            this.Shown += new System.EventHandler(this.FrmOverlay_Shown);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Event_MouseDown);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Event_MouseMove);
             this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.Event_MouseUp);

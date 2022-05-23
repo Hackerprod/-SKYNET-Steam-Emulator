@@ -146,8 +146,8 @@ namespace SKYNET.Steamworks
 
     public struct P2PSessionState_t
     {
-        public bool m_bConnectionActive;      // true if we've got an active open connection
-        public bool m_bConnecting;            // true if we're currently trying to establish a connection
+        public byte m_bConnectionActive;      // true if we've got an active open connection
+        public byte m_bConnecting;            // true if we're currently trying to establish a connection
         public uint m_eP2PSessionError;       // last error recorded (see enum above)
         public bool m_bUsingRelay;            // true if it's going through a relay server (TURN)
         public uint m_nBytesQueuedForSend;
@@ -191,4 +191,6 @@ namespace SKYNET.Steamworks
         public IntPtr AuthBlob;
         public uint BlobSize;
     };
+
+
 }

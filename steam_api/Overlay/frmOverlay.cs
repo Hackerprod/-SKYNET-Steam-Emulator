@@ -18,7 +18,7 @@ namespace SKYNET.Overlay
     public partial class frmOverlay : Form
     {
         private const int WM_HOTKEY = 0x0312;
-        private List<Types.SteamUser> Users;
+        private List<SteamPlayer> Users;
         private ulong UserSteamID;
         private OverlayType OverlayType;
 
@@ -29,7 +29,52 @@ namespace SKYNET.Overlay
         public frmOverlay()
         {
             InitializeComponent();
+            Visible = false;
         }
+
+        public void ProcessOverlay(List<SteamPlayer> users, OverlayType overlayType, ulong steamID)
+        {
+            OverlayActive = false;
+            Users = users;
+            UserSteamID = steamID;
+            OverlayType = overlayType;
+            OverlayActive = true;
+
+            hWndHandle = FindWindow(null, Process.GetCurrentProcess().ProcessName);
+            ThreadPool.QueueUserWorkItem(LoopPosition);
+
+            switch (OverlayType)
+            {
+                case OverlayType.UsersList:
+                    CreateUsersList();
+                    break;
+                case OverlayType.SteamProfile:
+                    CreateProfile();
+                    break;
+                case OverlayType.Chat:
+                    break;
+                case OverlayType.JoinTrade:
+                    break;
+                case OverlayType.Stats:
+                    break;
+                case OverlayType.Achievements:
+                    break;
+                case OverlayType.FriendAdd:
+                    break;
+                case OverlayType.FriendRemove:
+                    break;
+                case OverlayType.FriendRequestAccept:
+                    break;
+                case OverlayType.FriendRequestIgnore:
+                    break;
+                case OverlayType.LobbyInvite:
+                    CreateLobbyInvite();
+                    break;
+                default:
+                    break;
+            }
+        }
+
 
         private void LoopPosition(object state)
         {
@@ -58,12 +103,24 @@ namespace SKYNET.Overlay
 
         private void CreateUsersList()
         {
+            int x = 10;
+            int y = 10;
 
+            foreach (var user in Users)
+            {
+                var userControl = new SteamUserControl(user)
+                {
+                    Location = new Point(x , y),
+                };
+                PN_Container.Controls.Add(userControl);
+
+                if (x > 300) { x = 10; y += 90; } else x += 310;
+            }
         }
 
         private void CreateProfile()
         {
-            Types.SteamUser User = Users.Find(u => u.SteamId == UserSteamID);
+            SteamPlayer User = Users.Find(u => u.SteamID == UserSteamID);
             if (User == null)
             {
                 ShowErrorMessage($"User with Steam id {UserSteamID} not found");
@@ -73,6 +130,11 @@ namespace SKYNET.Overlay
             ProfileControl control = new ProfileControl(User);
             control.Dock = DockStyle.Fill;
             PN_Container.Controls.Add(control);
+        }
+
+        private void CreateLobbyInvite()
+        {
+            CreateUsersList();
         }
 
         private void ShowErrorMessage(string msg)
@@ -88,11 +150,6 @@ namespace SKYNET.Overlay
             };
             Controls.Add(LB_Message);
             LB_Message.BringToFront();
-        }
-
-        private void FrmOverlay_Paint(object sender, PaintEventArgs e)
-        {
-
         }
 
         private void PB_Close_Click(object sender, EventArgs e)
@@ -142,44 +199,9 @@ namespace SKYNET.Overlay
         [DllImport("user32.dll")]
         private static extern IntPtr GetForegroundWindow();
 
-        public void ProcessOverlay(List<Types.SteamUser> users, OverlayType overlayType, ulong steamID)
+        private void FrmOverlay_Shown(object sender, EventArgs e)
         {
-            OverlayActive = false;
-            Users = users;
-            UserSteamID = steamID;
-            OverlayType = overlayType;
-            OverlayActive = true;
-
-            hWndHandle = FindWindow(null, Process.GetCurrentProcess().ProcessName);
-            ThreadPool.QueueUserWorkItem(LoopPosition);
-
-            switch (OverlayType)
-            {
-                case OverlayType.UsersList:
-                    CreateUsersList();
-                    break;
-                case OverlayType.SteamProfile:
-                    CreateProfile();
-                    break;
-                case OverlayType.Chat:
-                    break;
-                case OverlayType.JoinTrade:
-                    break;
-                case OverlayType.Stats:
-                    break;
-                case OverlayType.Achievements:
-                    break;
-                case OverlayType.FriendAdd:
-                    break;
-                case OverlayType.FriendRemove:
-                    break;
-                case OverlayType.FriendRequestAccept:
-                    break;
-                case OverlayType.FriendRequestIgnore:
-                    break;
-                default:
-                    break;
-            }
+            Visible = true;
         }
     }
 }

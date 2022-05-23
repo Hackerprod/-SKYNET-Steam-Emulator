@@ -6,8 +6,11 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamMatchMakingServers : ISteamInterface
     {
+        public static SteamMatchMakingServers Instance;
+
         public SteamMatchMakingServers()
         {
+            Instance = this;
             InterfaceName = "SteamMatchMakingServers";
             InterfaceVersion = "SteamMatchMakingServers002";
         }

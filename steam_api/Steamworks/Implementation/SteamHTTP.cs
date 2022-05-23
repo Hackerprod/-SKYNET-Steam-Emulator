@@ -15,12 +15,14 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamHTTP : ISteamInterface
     {
+        public static SteamHTTP Instance;
+
         private List<HTTPRequest> HTTPRequests;
         private uint Handle;
-        private SteamAPICall_t k_uAPICallInvalid = 0x0;
 
         public SteamHTTP()
         {
+            Instance = this;
             InterfaceName = "SteamHTTP";
             InterfaceVersion = "STEAMHTTP_INTERFACE_VERSION003";
             HTTPRequests = new List<HTTPRequest>();
