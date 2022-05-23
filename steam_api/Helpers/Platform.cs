@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace SKYNET.Helper
 {
@@ -8,5 +9,11 @@ namespace SKYNET.Helper
 
         public const CallingConvention CC = CallingConvention.Cdecl;
         public const int StructPackSize = 4;
+
+        public static DateTime LoadTime { get; set; } = DateTime.Now;
+        public static int MilisecondTime()
+        {
+            return (DateTime.Now - LoadTime).Milliseconds;
+        }
     }
 }
