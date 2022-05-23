@@ -51,32 +51,31 @@ namespace SKYNET.Network
         {
             SteamEmulator.Debug($"Received P2P packet from {((IPEndPoint)packet.Sender.RemoteEndPoint).Address}");
 
-            //RegisterConnection(packet);
+            RegisterConnection(packet);
 
-            //string json = Encoding.Default.GetString(packet.Data);
-            //NET_P2PPacket P2PPacket = json.FromJson<NET_P2PPacket>();
+            string json = Encoding.Default.GetString(packet.Data);
+            NET_P2PPacket P2PPacket = json.FromJson<NET_P2PPacket>();
 
-            //if (P2PPacket == null) return;
+            if (P2PPacket == null) return;
 
-            //ulong steamIDRemote = (ulong)new CSteamID(P2PPacket.Sender);
-            //if (!P2PSession.Contains(steamIDRemote))
-            //{
-            //    P2PSessionRequest_t data = new P2PSessionRequest_t()
-            //    {
-            //        m_steamIDRemote = steamIDRemote
-            //    };
-            //    CallbackManager.AddCallbackResult(data);
-            //    P2PSession.Add(steamIDRemote);
-            //}
+            ulong steamIDRemote = (ulong)new CSteamID(P2PPacket.Sender);
+            if (!P2PSession.Contains(steamIDRemote))
+            {
+                P2PSessionRequest_t data = new P2PSessionRequest_t()
+                {
+                    m_steamIDRemote = steamIDRemote
+                };
+                CallbackManager.AddCallbackResult(data);
+                P2PSession.Add(steamIDRemote);
+            }
 
-            //try
-            //{
-            //    byte[] bytes = Convert.FromBase64String(P2PPacket.Buffer);
-            //    SteamEmulator.SteamNetworking.AddP2PPacket(P2PPacket);
-            //}
-            //catch
-            //{
-            //}
+            try
+            {
+                SteamEmulator.SteamNetworking.AddP2PPacket(P2PPacket);
+            }
+            catch
+            {
+            }
         }
 
         private static void RegisterConnection(NetPacket packet)
@@ -111,7 +110,7 @@ namespace SKYNET.Network
         {
             try
             {
-                NET_P2PPacket p2p = new NET_P2PPacket()
+                var p2p = new NET_P2PPacket()
                 {
                     AccountID = steamIDRemote.GetAccountID(),
                     Buffer = bytes,
@@ -175,8 +174,8 @@ namespace SKYNET.Network
                     try
                     {
                         Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                        SocketData SocketData = new SocketData() { socket = socket, Data = bytes };
-                        socket.BeginConnect(iPAddress, 4444, ConnectionCallback, SocketData);
+                        SocketData SocketData = new SocketData() { Address = iPAddress, socket = socket, Data = bytes };
+                        socket.BeginConnect(iPAddress, Port, ConnectionCallback, SocketData);
                     }
                     catch
                     {
@@ -195,7 +194,7 @@ namespace SKYNET.Network
                 SocketData SocketData = ((SocketData)ar.AsyncState);
                 SocketData.socket.EndConnect(ar);
                 string IPAddress = ((IPEndPoint)SocketData.socket.RemoteEndPoint).Address.ToString();
-                Write($"Connected to {IPAddress}");
+                Write($"Connected to {SocketData.Address}");
 
                 byte[] bytes = SocketData.Data;
                 SocketData.socket.Send(bytes);
@@ -203,7 +202,7 @@ namespace SKYNET.Network
                 TCPClient client = new TCPClient(SocketData.socket);
                 client.OnDataReceived += P2PSocket_OnDataReceived;
                 client.BeginReceiving();
-                Connections.TryAdd(IPAddress, client);
+                Connections.TryAdd(SocketData.Address, client);
             }
             catch (Exception ex)
             {
@@ -220,6 +219,7 @@ namespace SKYNET.Network
 
         private class SocketData
         {
+            public string Address { get; set; }
             public Socket socket { get; set; }
             public byte[] Data { get; set; }
         }

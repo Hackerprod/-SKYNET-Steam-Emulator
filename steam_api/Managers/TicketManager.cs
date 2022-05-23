@@ -55,17 +55,21 @@ namespace SKYNET.Managers
             {
                 CurrentTicket++;
 
-                byte[] Token = new byte[] { 0x14, 0x00, 0x00, 0x00 };
-                byte[] IPAddr = NetworkManager.GetIPAddress().GetAddressBytes();
+                //byte[] TicketBytes = GetTicket(); // Old way
+                //pcbTicket = (uint)ticketStream.Length;
+                //Marshal.Copy(ticketStream.ToArray(), 0, pTicket, ticketStream.ToArray().Length);
 
-                MemoryStream ticketStream = new MemoryStream();
-                ticketStream.WriteBytes(Token);     // Ticket token
-                ticketStream.WriteInt32L(0x18);     // Header size
-                ticketStream.WriteBytes(IPAddr);    // IP address
+                Ticket ticket = new Ticket()
+                {
+                    Header = SteamEmulator.AppID, //new byte[] { 0x14, 0x00, 0x00, 0x00 },
+                    Handle = CurrentTicket,
+                    TicketID = CSteamID.CreateOne().AccountID,
+                    UserSteamID = (ulong)SteamEmulator.SteamID,
+                };
 
-                pcbTicket = (uint)ticketStream.Length;
-
-                Marshal.Copy(ticketStream.ToArray(), 0, pTicket, ticketStream.ToArray().Length);
+                int size = Marshal.SizeOf(ticket);
+                pcbTicket = (uint)size;
+                Marshal.StructureToPtr(ticket, pTicket, false);
 
                 GetAuthSessionTicketResponse_t data = new GetAuthSessionTicketResponse_t()
                 {
@@ -83,10 +87,39 @@ namespace SKYNET.Managers
             return CurrentTicket;
         }
 
+        private static byte[] GetTicket()
+        {
+            byte[] Token = new byte[] { 0x14, 0x00, 0x00, 0x00 };
+            byte[] IPAddr = NetworkManager.GetIPAddress().GetAddressBytes();
+
+            MemoryStream ticketStream = new MemoryStream();
+            ticketStream.WriteBytes(Token);                 // Ticket token
+            ticketStream.WriteInt32L(0x18);                 // Header size
+            ticketStream.WriteBytes(IPAddr);                // IP address     
+            
+            return ticketStream.ToArray();
+        }
+
         private static void Write(string msg)
         {
             SteamEmulator.Write("Ticket Manager", msg);
         }
+    }
+
+    [StructLayout(LayoutKind.Explicit)]
+    public class Ticket
+    {
+        [FieldOffset(0)]
+        public uint Header;
+
+        [FieldOffset(4)]
+        public uint Handle;
+
+        [FieldOffset(8)]
+        public uint TicketID;
+
+        [FieldOffset(12)]
+        public ulong UserSteamID;
     }
 }
 

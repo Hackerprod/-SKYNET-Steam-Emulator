@@ -291,7 +291,7 @@ namespace SKYNET.Steamworks.Implementation
 
         internal uint GetPublicIP()
         {
-            Write($"GetPublicIP ******************************");
+            Write($"GetPublicIP");
             //SteamIPAddress_t iPAddress = new SteamIPAddress_t(NetworkManager.GetIPAddress());
             return 0;
         }

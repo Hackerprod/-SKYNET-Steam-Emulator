@@ -20,7 +20,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamNetworking_ReadP2PPacket(IntPtr _, IntPtr pubDest, ref uint cubDest, ref uint pcubMsgSize, ulong psteamIDRemote, int nChannel)
+        public static bool SteamAPI_ISteamNetworking_ReadP2PPacket(IntPtr _, IntPtr pubDest, uint cubDest, ref uint pcubMsgSize, ref ulong psteamIDRemote, int nChannel)
         {
             Write("SteamAPI_ISteamNetworking_ReadP2PPacket");
             return SteamEmulator.SteamNetworking.ReadP2PPacket(pubDest, cubDest, ref pcubMsgSize, ref psteamIDRemote, nChannel);

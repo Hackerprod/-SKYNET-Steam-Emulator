@@ -42,7 +42,7 @@ namespace SKYNET.Steamworks.Implementation
                 FavoriteGames = fileContent.FromJson<List<FavoriteGame>>();
             }
 
-            CreateTestLobby();
+            //CreateTestLobby();
         }
 
         public int AddFavoriteGame(uint nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags, uint rTime32LastPlayedOnServer)
@@ -146,11 +146,10 @@ namespace SKYNET.Steamworks.Implementation
 
                 CallbackManager.AddCallbackResult(lobbyEnter);
 
-                UpdateLobby(LocalLobby, LocalLobby.SteamID, false);
+                UpdateLobby(LocalLobby, LocalLobby.SteamID);
             }
             catch (Exception)
             {
-
             }
             return callResult;
         }
@@ -485,7 +484,7 @@ namespace SKYNET.Steamworks.Implementation
                 CallbackManager.AddCallbackResult(data);
 
                 NetworkManager.BroadcastLobbyGameServer(lobby);
-                //UpdateLobby(lobby, lobby.SteamID);
+                UpdateLobby(lobby, lobby.SteamID);
             }
         }
 
@@ -704,11 +703,11 @@ namespace SKYNET.Steamworks.Implementation
 
             CallbackManager.AddCallbackResult(data);
 
-            //var Members = IncludeOwner ? lobby.Members : lobby.Members.FindAll(m => m.m_SteamID != SteamEmulator.SteamID);
-            //foreach (var member in Members)
-            //{
-            //    NetworkManager.SendLobbyDataUpdate(member.m_SteamID, data);
-            //}
+            var Members = IncludeOwner ? lobby.Members : lobby.Members.FindAll(m => m.m_SteamID != SteamEmulator.SteamID);
+            foreach (var member in Members)
+            {
+                NetworkManager.SendLobbyDataUpdate(member.m_SteamID, data);
+            }
         }
 
 

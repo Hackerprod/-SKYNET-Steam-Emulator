@@ -2541,7 +2541,6 @@ namespace SKYNET.Steamworks.Exported
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamNetworking_ReadP2PPacket(IntPtr pubDest, uint cubDest, ref uint pcubMsgSize, ref ulong psteamIDRemote, int nChannel)
-        //public static bool ISteamNetworking_ReadP2PPacket(ref byte[] pubDest, uint cubDest, ref uint pcubMsgSize, ref ulong psteamIDRemote, int nChannel)
         {
             return SteamEmulator.SteamNetworking.ReadP2PPacket(pubDest, cubDest, ref pcubMsgSize, ref psteamIDRemote, nChannel);
         }
@@ -3415,14 +3414,12 @@ namespace SKYNET.Steamworks.Exported
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static uint ISteamUser_GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
-        //public static uint ISteamUser_GetAuthSessionTicket(ref byte[] pTicket, int cbMaxTicket, ref uint pcbTicket)
         {
             return SteamEmulator.SteamUser.GetAuthSessionTicket(pTicket, cbMaxTicket, ref pcbTicket);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static EBeginAuthSessionResult ISteamUser_BeginAuthSession(IntPtr pAuthTicket, int cbAuthTicket, ulong steamID)
-        //public static EBeginAuthSessionResult ISteamUser_BeginAuthSession(ref byte[] pAuthTicket, int cbAuthTicket, ulong steamID)
         {
             return (EBeginAuthSessionResult)SteamEmulator.SteamUser.BeginAuthSession(pAuthTicket, cbAuthTicket, (ulong)steamID);
         }
@@ -4229,10 +4226,10 @@ namespace SKYNET.Steamworks.Exported
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamGameServerNetworking_ReadP2PPacket(IntPtr pubDest, uint cubDest, ref uint pcubMsgSize, ref ulong psteamIDRemote, int nChannel)
-        //public static bool ISteamGameServerNetworking_ReadP2PPacket(ref byte[] pubDest, uint cubDest, ref uint pcubMsgSize, ref ulong psteamIDRemote, int nChannel)
         {
             return SteamEmulator.SteamNetworking.ReadP2PPacket(pubDest, cubDest, ref pcubMsgSize, ref psteamIDRemote, nChannel);
         }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamGameServerNetworking_AcceptP2PSessionWithUser(ulong steamIDRemote)
         {
