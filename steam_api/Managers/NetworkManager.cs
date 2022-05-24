@@ -80,9 +80,6 @@ namespace SKYNET.Managers
                 case MessageType.NET_LobbyDataUpdate:
                     ProcessLobbyDataUpdate(message, socket);
                     break;
-                case MessageType.NET_LobbyMetaDataUpdate:
-                    ProcessLobbyMetaDataUpdate(message, socket);
-                    break;
                 case MessageType.NET_LobbyChatUpdate:
                     ProcessLobbyChatUpdate(message, socket);
                     break;
@@ -190,15 +187,6 @@ namespace SKYNET.Managers
             }
         }
 
-        private static void ProcessLobbyMetaDataUpdate(NetworkMessage message, Socket socket)
-        {
-            var lobbyMetaDataUpdate = message.ParsedBody.FromJson<NET_LobbyMetaDataUpdate>();
-            if (lobbyMetaDataUpdate != null)
-            {
-                SteamMatchmaking.Instance.LobbyMetaDataUpdated(lobbyMetaDataUpdate);
-            }
-        }
-
         private static void ProcessLobbyJoinRequest(NetworkMessage message, Socket socket)
         {
             var lobbyJoinRequest = message.ParsedBody.FromJson<NET_LobbyJoinRequest>();
@@ -245,7 +233,7 @@ namespace SKYNET.Managers
                     {
                         SteamIDLobby = lobby.SteamID,
                         SteamIDMember = lobbyJoinRequest.SteamID,
-                        Success = true
+                        ParsedLobby = serialized
                     };
 
                     var lobbyChatUpdate = new NET_LobbyChatUpdate()
@@ -532,30 +520,6 @@ namespace SKYNET.Managers
             }
         }
 
-        public static void BroadcastLobbyMetaData(SteamLobby lobby, string pchKey, string pchValue)
-        {
-            var dataUpdate = new NET_LobbyMetaDataUpdate()
-            {
-                LobbyID = lobby.SteamID,
-                Key = pchKey,
-                Value = pchValue
-            };
-
-            var message = CreateNetworkMessage(dataUpdate, MessageType.NET_LobbyMetaDataUpdate);  
-
-            foreach (var member in lobby.Members)
-            {
-                if (member.m_SteamID != (ulong)SteamEmulator.SteamID)
-                {
-                    var user = SteamFriends.Instance.GetUser(member.m_SteamID);
-                    if (user != null)
-                    {
-                        SendTo(user.IPAddress, message);
-                    }
-                }
-            }
-        }
-
         public static void BroadcastLobbyGameServer(SteamLobby lobby)
         {
             var lobbyGameserver = new NET_LobbyGameserver()
@@ -608,18 +572,18 @@ namespace SKYNET.Managers
             SendBroadcast(message);
         }
 
-        public static void SendLobbyDataUpdate(ulong SteamID, LobbyDataUpdate_t lobby)
+        public static void SendLobbyDataUpdate(ulong IDTarget, ulong IDLobby, ulong IDMember, SteamLobby lobby)
         {
             var lobbyDataUpdate = new NET_LobbyDataUpdate()
             {
-                SteamIDLobby = lobby.m_ulSteamIDLobby,
-                SteamIDMember = lobby.m_ulSteamIDMember,
-                Success = lobby.m_bSuccess
+                SteamIDLobby = IDLobby,
+                SteamIDMember = IDMember,
+                ParsedLobby = lobby.ToJson()
             };
 
-            var message = CreateNetworkMessage(lobbyDataUpdate, MessageType.NET_LobbyChatUpdate);
+            var message = CreateNetworkMessage(lobbyDataUpdate, MessageType.NET_LobbyDataUpdate);
 
-            var user = SteamFriends.Instance.GetUser(SteamID);
+            var user = SteamFriends.Instance.GetUser(IDTarget);
             if (user == null)
             {
                 return;

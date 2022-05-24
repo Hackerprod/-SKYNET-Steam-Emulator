@@ -8,21 +8,21 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ISteamNetworking_SendP2PPacket(IntPtr _, ulong steamIDRemote, IntPtr pubData, uint cubData, int eP2PSendType, int nChannel)
         {
-            Write("SteamAPI_ISteamNetworking_SendP2PPacket");
+            //Write("SteamAPI_ISteamNetworking_SendP2PPacket");
             return SteamEmulator.SteamNetworking.SendP2PPacket(steamIDRemote, pubData, cubData, eP2PSendType, nChannel);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ISteamNetworking_IsP2PPacketAvailable(IntPtr _, ref uint pcubMsgSize, int nChannel)
         {
-            Write("SteamAPI_ISteamNetworking_IsP2PPacketAvailable");
+            //Write("SteamAPI_ISteamNetworking_IsP2PPacketAvailable");
             return SteamEmulator.SteamNetworking.IsP2PPacketAvailable(ref pcubMsgSize, nChannel);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ISteamNetworking_ReadP2PPacket(IntPtr _, IntPtr pubDest, uint cubDest, ref uint pcubMsgSize, ref ulong psteamIDRemote, int nChannel)
         {
-            Write("SteamAPI_ISteamNetworking_ReadP2PPacket");
+            //Write("SteamAPI_ISteamNetworking_ReadP2PPacket");
             return SteamEmulator.SteamNetworking.ReadP2PPacket(pubDest, cubDest, ref pcubMsgSize, ref psteamIDRemote, nChannel);
         }
 

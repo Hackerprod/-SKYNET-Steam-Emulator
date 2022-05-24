@@ -1,18 +1,13 @@
 ﻿using SKYNET.Managers;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SKYNET.Helper;
 using SKYNET.Callback;
+using System.Runtime.InteropServices;
 
 using SteamAPICall_t = System.UInt64;
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
-using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Exported
 {
@@ -586,7 +581,7 @@ namespace SKYNET.Steamworks.Exported
         public static IntPtr SteamClient()
         {
             Write($"SteamClient");
-            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamClient.InterfaceVersion);
+            return InterfaceManager.FindOrCreateInterface("SteamClient017");
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -751,12 +746,12 @@ namespace SKYNET.Steamworks.Exported
             return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamUGC.InterfaceVersion);
         }
 
-        //[DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static ISteamUnifiedMessages SteamUnifiedMessages()
-        //{
-        //    Write($"SteamUnifiedMessages");
-        //    return SteamEmulator.SteamUnifiedMessages;
-        //}
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamUnifiedMessages()
+        {
+            Write($"SteamUnifiedMessages not implemented Interface");
+            return default;
+        }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamUser()

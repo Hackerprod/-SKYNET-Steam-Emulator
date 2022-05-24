@@ -62,16 +62,12 @@ namespace SKYNET.Steamworks.Implementation
                     Result = P2PNetworking.SendP2PTo(steamIDRemote, bytes, eP2PSendType, nChannel);
                 }
             }
-            Write($"SendP2PPacket (SteamID = {steamIDRemote}, Length = {cubData}, {(EP2PSend)eP2PSendType}, Channel = {nChannel}) = {Result}");
+            //Write($"SendP2PPacket (SteamID = {steamIDRemote}, Length = {cubData}, {(EP2PSend)eP2PSendType}, Channel = {nChannel}) = {Result}");
             return Result;
         }
 
         public bool IsP2PPacketAvailable(ref uint pcubMsgSize, int nChannel)
         {
-            //Write($"IsP2PPacketAvailable (MsgSize = {pcubMsgSize}, Channel = {nChannel})");
-            //pcubMsgSize = 0;
-            //return false;
-
             bool Result = false;
             var MsgSize = 0;
             MutexHelper.Wait("P2PPacket", delegate
@@ -85,7 +81,7 @@ namespace SKYNET.Steamworks.Implementation
                 }
             });
             pcubMsgSize = (uint)MsgSize;
-            Write($"IsP2PPacketAvailable (MsgSize = {pcubMsgSize}, Channel = {nChannel}) = {Result}");
+            //Write($"IsP2PPacketAvailable (MsgSize = {pcubMsgSize}, Channel = {nChannel}) = {Result}");
             return Result;
         }
 

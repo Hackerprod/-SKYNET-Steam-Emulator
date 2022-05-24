@@ -91,7 +91,7 @@ namespace SKYNET.Steamworks.Implementation
 
             #endregion
 
-            //return;
+            return;
             Users.Add(new SteamPlayer()
             {
                 AccountID = 1001,

@@ -17,43 +17,35 @@ namespace SKYNET.Network
 {
     public class P2PNetworking
     {
-        public static TCPServer P2PServer;
-        public static TCPClient P2PSocket;
-        public static int Port;
-
+        public  static int Port;
         private static List<ulong> P2PSession;
-        private static ConcurrentDictionary<string, TCPClient> Connections;
+        private static ConcurrentDictionary<string, UdpClient> Connections;
 
         public static void Initialize()
         {
-            Connections = new ConcurrentDictionary<string, TCPClient>();
+            Connections = new ConcurrentDictionary<string, UdpClient>();
             P2PSession = new List<ulong>();
             Port = 3333;
 
-            P2PServer = new TCPServer(Port);
-            P2PServer.OnDataReceived += P2PServer_OnDataReceived;
-            P2PServer.OnConnected += P2PServer_OnConnected;
-
-            ThreadPool.QueueUserWorkItem(P2PServer.Start);
+            ThreadPool.QueueUserWorkItem(ReceiveThread);
         }
 
-        private static void P2PServer_OnConnected(object sender, TCPClient e)
+        private static void ReceiveThread(Object ThreadObject)
         {
-            string IPAddress = ((IPEndPoint)e.Socket.RemoteEndPoint).Address.ToString();
-            Write($"P2P Client connected from {IPAddress}");
-            if (!Connections.ContainsKey(IPAddress))
+            UdpClient udpClient = new UdpClient(Port);
+            while (true)
             {
-                Connections.TryAdd(IPAddress, e);
+                IPEndPoint remoteIpEndPoint = new IPEndPoint(IPAddress.Any, Port);
+                byte[] bytes = udpClient.Receive(ref remoteIpEndPoint);
+                OnDataReceived(bytes, remoteIpEndPoint);
             }
         }
 
-        private static void P2PServer_OnDataReceived(object sender, NetPacket packet)
+        private static void OnDataReceived(byte[] Data, IPEndPoint EndPoint)
         {
-            SteamEmulator.Debug($"Received P2P packet from {((IPEndPoint)packet.Sender.RemoteEndPoint).Address}");
+            SteamEmulator.Debug($"Received P2P packet from {EndPoint.Address}");
 
-            RegisterConnection(packet);
-
-            string json = Encoding.Default.GetString(packet.Data);
+            string json = Encoding.Default.GetString(Data);
             NET_P2PPacket P2PPacket = json.FromJson<NET_P2PPacket>();
 
             if (P2PPacket == null) return;
@@ -78,31 +70,11 @@ namespace SKYNET.Network
             }
         }
 
-        private static void RegisterConnection(NetPacket packet)
+        private static void RegisterConnection(string IPAddress, UdpClient client)
         {
-            string IPAddress = ((IPEndPoint)packet.Sender.RemoteEndPoint).Address.ToString();
-
             if (!Connections.ContainsKey(IPAddress))
             {
-                Connections.TryAdd(IPAddress, packet.Sender);
-            }
-        }
-
-        private static void P2PSocket_OnDataReceived(object sender, NetPacket packet)
-        {
-            SteamEmulator.Debug($"Received P2P packet from {((IPEndPoint)packet.Sender.RemoteEndPoint).Address}");
-            string json = Encoding.Default.GetString(packet.Data);
-            NET_P2PPacket P2PPacket = json.FromJson<NET_P2PPacket>();
-
-            if (P2PPacket == null) return;
-
-            try
-            {
-                byte[] bytes = P2PPacket.Buffer;
-                SteamEmulator.SteamNetworking.AddP2PPacket(P2PPacket);
-            }
-            catch
-            {
+                Connections.TryAdd(IPAddress, client);
             }
         }
 
@@ -163,54 +135,36 @@ namespace SKYNET.Network
         private static bool SendTo(string iPAddress, byte[] bytes)
         {
             Write($"Connecting to {iPAddress}");
-            if (Connections.TryGetValue(iPAddress, out var clientSocket))
+            if (Connections.ContainsKey(iPAddress) && Connections[iPAddress].Client.Connected)
             {
-                return clientSocket.Send(bytes);
-            }
-            else
-            {
-                if (IPAddress.TryParse(iPAddress, out _))
+                try
                 {
-                    try
-                    {
-                        Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                        SocketData SocketData = new SocketData() { Address = iPAddress, socket = socket, Data = bytes };
-                        socket.BeginConnect(iPAddress, Port, ConnectionCallback, SocketData);
-                    }
-                    catch
-                    {
-                    }
+                    var client = Connections[iPAddress];
+                    client.Send(bytes, bytes.Length);
+                    return true;
                 }
-                return false;
+                catch
+                {
+                    Connections.TryRemove(iPAddress, out var _);
+                }
             }
-        }
 
-        #region Conection callback
-
-        private static void ConnectionCallback(IAsyncResult ar)
-        {
-            try
+            if (IPAddress.TryParse(iPAddress, out _))
             {
-                SocketData SocketData = ((SocketData)ar.AsyncState);
-                SocketData.socket.EndConnect(ar);
-                string IPAddress = ((IPEndPoint)SocketData.socket.RemoteEndPoint).Address.ToString();
-                Write($"Connected to {SocketData.Address}");
-
-                byte[] bytes = SocketData.Data;
-                SocketData.socket.Send(bytes);
-
-                TCPClient client = new TCPClient(SocketData.socket);
-                client.OnDataReceived += P2PSocket_OnDataReceived;
-                client.BeginReceiving();
-                Connections.TryAdd(SocketData.Address, client);
+                try
+                {
+                    UdpClient udpClient = new UdpClient();
+                    udpClient.Connect(iPAddress, Port);
+                    udpClient.Send(bytes, bytes.Length);
+                    RegisterConnection(iPAddress, udpClient);
+                    return true;
+                }
+                catch
+                {
+                }
             }
-            catch (Exception ex)
-            {
-                Write(ex);
-            }
+            return false;
         }
-
-        #endregion
 
         private static void Write(object msg)
         {
@@ -232,7 +186,7 @@ namespace SKYNET.Network
                 {
                     try
                     {
-                        KV.Value.Socket.Disconnect(false);
+                        //KV.Value.Socket.Disconnect(false);
                     }
                     catch 
                     {

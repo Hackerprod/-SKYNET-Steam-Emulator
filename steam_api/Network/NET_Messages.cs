@@ -80,14 +80,7 @@ namespace SKYNET.Network.Packets
     {
         public ulong SteamIDLobby { get; set; }
         public ulong SteamIDMember { get; set; }
-        public bool Success { get; set; }
-    }
-
-    public class NET_LobbyMetaDataUpdate : NET_Base
-    {
-        public ulong LobbyID { get; set; }
-        public string Key { get; set; }
-        public string Value { get; set; }
+        public string ParsedLobby { get; set; }
     }
 
     public class NET_LobbyChatUpdate : NET_Base
@@ -127,7 +120,6 @@ namespace SKYNET.Network.Packets
         NET_LobbyJoinRequest,
         NET_LobbyJoinResponse,
         NET_LobbyDataUpdate,
-        NET_LobbyMetaDataUpdate,
         NET_LobbyChatUpdate,
         NET_LobbyLeave,
         NET_LobbyGameserver,

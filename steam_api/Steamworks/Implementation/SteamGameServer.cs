@@ -234,6 +234,15 @@ namespace SKYNET.Steamworks.Implementation
         public int BeginAuthSession(IntPtr pAuthTicket, int cbAuthTicket, ulong steamID)
         {
             Write($"BeginAuthSession (SteamID = {(CSteamID)steamID}) = {EBeginAuthSessionResult.k_EBeginAuthSessionResultOK}");
+
+            ValidateAuthTicketResponse_t data = new ValidateAuthTicketResponse_t()
+            {
+                m_eAuthSessionResponse = EAuthSessionResponse.OK,
+                m_OwnerSteamID = steamID,
+                m_SteamID = steamID
+            };
+            CallbackManager.AddCallbackResult(data);
+
             return (int)EBeginAuthSessionResult.k_EBeginAuthSessionResultOK;
         }
 

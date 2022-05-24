@@ -2528,7 +2528,6 @@ namespace SKYNET.Steamworks.Exported
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamNetworking_SendP2PPacket(ulong steamIDRemote, IntPtr pubData, uint cubData, EP2PSend eP2PSendType, int nChannel)
-        //public static bool ISteamNetworking_SendP2PPacket(ulong steamIDRemote, ref byte[] pubData, uint cubData, EP2PSend eP2PSendType, int nChannel)
         {
             return SteamEmulator.SteamNetworking.SendP2PPacket((ulong)steamIDRemote, pubData, cubData, (int)eP2PSendType, nChannel);
         }
@@ -4213,7 +4212,6 @@ namespace SKYNET.Steamworks.Exported
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamGameServerNetworking_SendP2PPacket(ulong steamIDRemote, IntPtr pubData, uint cubData, EP2PSend eP2PSendType, int nChannel)
-        //public static bool ISteamGameServerNetworking_SendP2PPacket(ulong steamIDRemote, ref byte[] pubData, uint cubData, EP2PSend eP2PSendType, int nChannel)
         {
             return SteamEmulator.SteamNetworking.SendP2PPacket((ulong)steamIDRemote, pubData, cubData, (int)eP2PSendType, nChannel);
         }
