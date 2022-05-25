@@ -33,17 +33,17 @@ Plugin system              Load external plugin to communicate with the emu.
 When the emulator runs for the first time, it create the directories that it is going to use and generates them inside the SKYNET folder the `[SKYNET] steam_api.ini`<br />
 <details><summary>Settings structure</summary><br />
 
- [User Settings]<br />
+ [User Info]<br />
 PersonaName = Hackerprod<br />
 AccountId = 1000<br />
 
-[Game Settings]<br />
-Languaje = spanish<br />
+[Game info]<br />
+Language = english<br />
 AppId = 570<br />
 
 [Network Settings]<br />
 ServerIP = 127.0.0.1<br />
-BroadCastPort = 28025<br />
+BroadcastPort = 28025<br />
 
 [Log Settings]<br />
 File = false<br />
