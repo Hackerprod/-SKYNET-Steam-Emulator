@@ -46,7 +46,7 @@ namespace SKYNET
                 {
                     SteamEmulator = new SteamEmulator(true);
                     SteamEmulator.OnMessage += SteamEmulator_OnMessage;
-                    SteamEmulator.SendLog = Game.SendLog;
+                    SteamEmulator.FileLog = Game.SendLog;
                     SteamEmulator.EmulatorPath = HookInterface.EmulatorPath;
                     SteamEmulator.AppID = HookInterface.Game.AppId;
                     SteamEmulator.EmulatorPath = HookInterface.EmulatorPath;

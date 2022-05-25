@@ -73,6 +73,7 @@
     <Compile Include="Callback\CCallbackBase.cs" />
     <Compile Include="Callback\SteamCallback.cs" />
     <Compile Include="Callback\SteamCallBacks.cs" />
+    <Compile Include="Helpers\INISerializer.cs" />
     <Compile Include="Helpers\Platform.cs" />
     <Compile Include="Network\P2PNetworking.cs" />
     <Compile Include="Overlay\SteamUserControl.cs">
@@ -89,7 +90,6 @@
       <DependentUpon>frmOverlay.cs</DependentUpon>
     </Compile>
     <Compile Include="Helpers\ImageHelper.cs" />
-    <Compile Include="Helpers\IniParser.cs" />
     <Compile Include="Helpers\IpcCommunicator.cs" />
     <Compile Include="Helpers\JSON\SimpleJSONDotNetTypes.cs" />
     <Compile Include="Helpers\MutexHelper.cs" />

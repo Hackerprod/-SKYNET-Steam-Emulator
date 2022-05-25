@@ -74,32 +74,26 @@ namespace SKYNET.Steamworks.Implementation
         public bool GetStat(string pchName, ref uint pData)
         {
             bool Result = false;
-            var Data = pData;
-            MutexHelper.Wait("UserStats", delegate
+            uint Data = 0;
+            try
             {
-                if (UserStats.TryGetValue((ulong)SteamEmulator.SteamID, out var userStats))
+                MutexHelper.Wait("UserStats", delegate
                 {
-                    var statsList = userStats.Find(n => n.Name == pchName);
-                    if (statsList == null)
+                    if (UserStats.TryGetValue((ulong)SteamEmulator.SteamID, out var userStats))
                     {
-                        statsList = new PlayerStat();
-                        statsList.Name = pchName;
-                        statsList.Data = 0;
-                        userStats.Add(statsList);
-                        SaveUserStats();
+                        var statsList = userStats.Find(n => n.Name == pchName);
+                        if (statsList != null)
+                        {
+                            Data = statsList.Data;
+                            Result = true;
+                        }
                     }
-                    Data = statsList.Data;
-                    Result = true;
-                }
-                else
-                {
-                    userStats = new List<PlayerStat>();
-                    userStats.Add(new PlayerStat() { Name = pchName, Data = 0 });
-                    UserStats.TryAdd((ulong)SteamEmulator.SteamID, userStats);
-                    SaveUserStats();
-                }
-            });
-            pData = Data;
+                });
+                pData = Data;
+            }
+            catch (Exception)
+            {
+            }
             Write($"GetStat (Name = {pchName}, out Data = {pData}) = {Result}");
             return Result;
         }

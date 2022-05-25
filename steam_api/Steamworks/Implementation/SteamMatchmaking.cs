@@ -22,6 +22,7 @@ namespace SKYNET.Steamworks.Implementation
         public  static SteamMatchmaking Instance;
         public  uint CurrentRequest;
         public  ConcurrentDictionary<ulong, SteamLobby> Lobbies;
+        public ConcurrentDictionary<string, string> DataAwaiting;
         private FilterLobby filters;
         private List<FavoriteGame> FavoriteGames;
 
@@ -31,7 +32,8 @@ namespace SKYNET.Steamworks.Implementation
             InterfaceName = "SteamMatchmaking";
             InterfaceVersion = "SteamMatchMaking009";
 
-            Lobbies = new ConcurrentDictionary<SteamAPICall_t, SteamLobby>();
+            Lobbies = new ConcurrentDictionary<ulong, SteamLobby>();
+            DataAwaiting = new ConcurrentDictionary<string, string>();
             filters = new FilterLobby();
             CurrentRequest = 0;
             FavoriteGames = new List<FavoriteGame>();
@@ -123,6 +125,15 @@ namespace SKYNET.Steamworks.Implementation
                 {
                     m_SteamID = (ulong)SteamEmulator.SteamID
                 });
+
+                if (DataAwaiting.Any())
+                {
+                    foreach (var KV in DataAwaiting)
+                    {
+                        LocalLobby.LobbyData.Add(KV.Key, KV.Value);
+                    }
+                    DataAwaiting.Clear();
+                }
 
                 LobbyCreated_t data = new LobbyCreated_t()
                 {
@@ -389,7 +400,10 @@ namespace SKYNET.Steamworks.Implementation
             Write($"LeaveLobby (Lobby SteamID: {steamIDLobby})");
             if (GetLobby(steamIDLobby, out var lobby))
             {
-                NetworkManager.SendLobbyLeave(lobby.Owner, lobby.SteamID);
+                if (lobby.Owner == SteamEmulator.SteamID)
+                    NetworkManager.SendLobbyRemove(lobby);
+                else
+                    NetworkManager.SendLobbyLeave(lobby.Owner, lobby.SteamID);
                 Lobbies.TryRemove(steamIDLobby, out _);
             }
             P2PNetworking.CloseConnections();
@@ -427,6 +441,10 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"RequestLobbyList");
             CurrentRequest++;
+            MutexHelper.Wait("Lobbies", delegate
+            {
+                Lobbies.Clear();
+            });
             NetworkManager.RequestLobbyList(CurrentRequest);
 
             SteamAPICall_t APICall = CallbackManager.AddCallbackResult(new LobbyMatchList_t(), false);
@@ -463,7 +481,6 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool SetLobbyData(ulong steamIDLobby, string pchKey, string pchValue)
         {
-            Write($"SetLobbyData (Lobby SteamID: {steamIDLobby}, Key: {pchKey}, Value: {pchValue})");
             var Result = false;
             MutexHelper.Wait("Lobbies", delegate
             {
@@ -472,17 +489,27 @@ namespace SKYNET.Steamworks.Implementation
                     if (!lobby.LobbyData.ContainsKey(pchKey))
                     {
                         lobby.LobbyData.Add(pchKey, pchValue);
-                        UpdateLobby(lobby, lobby.SteamID);
+                        //UpdateLobby(lobby, lobby.SteamID);
                         Result = true;
                     }
                     else if (lobby.LobbyData[pchKey] != pchValue)
                     {
                         lobby.LobbyData[pchKey] = pchValue;
-                        UpdateLobby(lobby, lobby.SteamID);
+                        //UpdateLobby(lobby, lobby.SteamID);
+                        Result = true;
+                    }
+                    else if (lobby.LobbyData[pchKey] == pchValue)
+                    {
                         Result = true;
                     }
                 }
+                else if (steamIDLobby == 0)
+                {
+                    DataAwaiting.TryAdd(pchKey, pchValue);
+                }
+
             });
+            Write($"SetLobbyData (Lobby SteamID: {steamIDLobby}, Key: {pchKey}, Value: {pchValue}) = {Result}");
             return Result;
         }
 
@@ -612,6 +639,26 @@ namespace SKYNET.Steamworks.Implementation
             }
         }
 
+        public void RemoveLobby(ulong LobbyID)
+        {
+            if (GetLobby(LobbyID, out var lobby))
+            {
+                LobbyDataUpdate_t data = new LobbyDataUpdate_t()
+                {
+                    m_bSuccess = false,
+                    m_ulSteamIDLobby = LobbyID,
+                    m_ulSteamIDMember = lobby.Owner
+                };
+
+                CallbackManager.AddCallbackResult(data);
+
+                MutexHelper.Wait("Lobbies", delegate
+                {
+                    Lobbies.TryRemove(LobbyID, out var _);
+                });
+            }
+        }
+
         public void LobbyDataUpdated(NET_LobbyDataUpdate lobbyDataUpdate)
         {
             LobbyDataUpdate_t data = new LobbyDataUpdate_t()
@@ -701,7 +748,6 @@ namespace SKYNET.Steamworks.Implementation
                     m_ulSteamIDLobby = lobby.SteamID,
                     m_ulSteamIDMember = Member
                 };
-
                 CallbackManager.AddCallbackResult(data);
             }
 

@@ -49,9 +49,9 @@ public class SteamEmulator
     public static bool Initialized;
     public static bool Initializing;
 
-    public static bool SendLog;
+    public static bool FileLog;
     public static bool ConsoleLog;
-    public static int BroadCastPort;
+    public static int BroadcastPort;
 
     // Debug options
     public static bool RunCallbacks;
@@ -324,7 +324,7 @@ public class SteamEmulator
 
         if (lastMsg != msg.ToString())
         {
-            if (SendLog)
+            if (FileLog)
             {
                 if (Hooked)
                 {

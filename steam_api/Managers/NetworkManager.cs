@@ -24,7 +24,7 @@ namespace SKYNET.Managers
 
         public static void Initialize()
         {
-            Port = SteamEmulator.BroadCastPort;
+            Port = SteamEmulator.BroadcastPort;
             Write($"Initializing TCP server on port {Port}");
 
             TCPServer = new TCPServer(Port);
@@ -86,6 +86,9 @@ namespace SKYNET.Managers
                 case MessageType.NET_LobbyLeave:
                     ProcessLobbyLeave(message, socket);
                     break;
+                case MessageType.NET_LobbyRemove:
+                    ProcessLobbyRemove(message, socket);
+                    break;
                 case MessageType.NET_LobbyGameserver:
                     ProcessLobbyGameserver(message, socket);
                     break;
@@ -123,7 +126,7 @@ namespace SKYNET.Managers
                     lobby.Gameserver.Filled = true;
                 }
             }
-            CloseSocket(socket, (MessageType)message.MessageType);
+            CloseSocket(socket, message.MessageType);
         }
 
         private static void ProcessLobbyLeave(NetworkMessage message, Socket socket)
@@ -166,7 +169,17 @@ namespace SKYNET.Managers
                 }
             }
 
-            CloseSocket(socket, (MessageType)message.MessageType);
+            CloseSocket(socket, message.MessageType);
+        }
+
+        private static void ProcessLobbyRemove(NetworkMessage message, Socket socket)
+        {
+            var lobbyRemove = message.ParsedBody.FromJson<NET_LobbyRemove>();
+            if (lobbyRemove != null)
+            {
+                SteamMatchmaking.Instance.RemoveLobby(lobbyRemove.LobbyID);
+            }
+            CloseSocket(socket, message.MessageType);
         }
 
         private static void ProcessLobbyChatUpdate(NetworkMessage message, Socket socket)
@@ -283,7 +296,7 @@ namespace SKYNET.Managers
                 Write(ex);
             }
 
-            CloseSocket(socket, (MessageType)message.MessageType);
+            CloseSocket(socket, message.MessageType);
         }
 
         private static void ProcessLobbyListRequest(NetworkMessage message, Socket socket)
@@ -295,19 +308,19 @@ namespace SKYNET.Managers
                 {
                     if (lobbyListRequest.RequestID == SteamMatchmaking.Instance.CurrentRequest)
                     {
-                        CloseSocket(socket, (MessageType)message.MessageType);
+                        CloseSocket(socket, message.MessageType);
                         return;
                     }
                     if (lobbyListRequest.AppID != SteamEmulator.AppID)
                     {
-                        CloseSocket(socket, (MessageType)message.MessageType);
+                        CloseSocket(socket, message.MessageType);
                         return;
                     }
                 }
                 var lobby = SteamMatchmaking.Instance.GetLobbyByOwner((ulong)SteamEmulator.SteamID);
                 if (lobby == null)
                 {
-                    CloseSocket(socket, (MessageType)message.MessageType);
+                    CloseSocket(socket, message.MessageType);
                 }
                 else
                 {
@@ -363,7 +376,7 @@ namespace SKYNET.Managers
                 Write(ex);
             }
 
-            CloseSocket(socket, (MessageType)message.MessageType);
+            CloseSocket(socket, message.MessageType);
         }
 
         private static void ProcessAnnounce(NetworkMessage message, Socket socket)
@@ -373,7 +386,7 @@ namespace SKYNET.Managers
                 if (IslocalAddress(((IPEndPoint)socket.RemoteEndPoint).Address))
                 {
                     Write("Returning because is local address");
-                    CloseSocket(socket, (MessageType)message.MessageType);
+                    CloseSocket(socket, message.MessageType);
                     return;
                 }
 
@@ -399,7 +412,7 @@ namespace SKYNET.Managers
                 }
                 else
                 {
-                    CloseSocket(socket, (MessageType)message.MessageType);
+                    CloseSocket(socket, message.MessageType);
                 }
             }
             catch 
@@ -451,7 +464,7 @@ namespace SKYNET.Managers
                 {
                     Write($"{ex}");
                 }
-                CloseSocket(socket, (MessageType)message.MessageType);
+                CloseSocket(socket, message.MessageType);
             }
         }
 
@@ -472,7 +485,7 @@ namespace SKYNET.Managers
 
             }
 
-            CloseSocket(socket, (MessageType)message.MessageType);
+            CloseSocket(socket, message.MessageType);
         }
 
         #endregion
@@ -627,6 +640,28 @@ namespace SKYNET.Managers
             }
         }
 
+        internal static void SendLobbyRemove(SteamLobby lobby)
+        {
+            foreach (var member in lobby.Members)
+            {
+                if (member.m_SteamID != lobby.Owner)
+                {
+                    var user = SteamFriends.Instance.GetUser(member.m_SteamID);
+                    if (user != null)
+                    {
+                        var lobbyRemove = new NET_LobbyRemove()
+                        {
+                            LobbyID = lobby.SteamID
+                        };
+
+                        var message = CreateNetworkMessage(lobbyRemove, MessageType.NET_LobbyRemove);
+
+                        SendTo(user.IPAddress, message);
+                    }
+                }
+            }
+        }
+
         private static void SendBroadcast(object state)
         {
             NetworkMessage message = (NetworkMessage)state;
@@ -699,9 +734,9 @@ namespace SKYNET.Managers
             return message;
         }
 
-        private static void CloseSocket(Socket socket, MessageType messageType)
+        private static void CloseSocket(Socket socket, int messageType)
         {
-            Write($"Closing connection after received {messageType} message");
+            Write($"Closing connection after received {(MessageType)messageType} message");
             try
             {
                 socket.Close();

@@ -1,4 +1,5 @@
 ﻿using SKYNET;
+using SKYNET.INI;
 using SKYNET.Managers;
 using SKYNET.Steamworks;
 using SKYNET.Steamworks.Interfaces;
@@ -6,17 +7,52 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using static SKYNET.INI.INISerializer;
 
 namespace SKYNET.Helper
 {
     public class Settings
     {
-        private static INIParser IniParser;
+        [Section("User Info")]
+        public string PersonaName { get; set; }
+
+        [Section("User Info")]
+        public uint AccountID { get; set; }
+
+
+        [Section("Game Info")]
+        public string Language { get; set; }
+
+        [Section("Game Info")]
+        public uint AppId { get; set; }
+
+
+        [Section("Network Settings")]
+        [Comment("IP address of the dedicated steam server")]
+        public IPAddress ServerIP { get; set; }
+
+        [Section("Network Settings")]
+        public int BroadcastPort { get; set; }
+
+
+        [Section("Log Settings")]
+        public bool File { get; set; }
+
+        [Section("Log Settings")]
+        public bool Console { get; set; }
+
+
+        [Section("Debug Info")]
+        public bool RunCallbacks { get; set; }
+
+        [Section("Debug Info")]
+        public bool ISteamHTTP { get; set; }
 
         public static void Load()
         {
@@ -25,97 +61,66 @@ namespace SKYNET.Helper
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "SKYNET", "Storage"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "SKYNET", "Storage", "Remote"));
 
+            string fileName = Path.Combine(modCommon.GetPath(), "SKYNET", "[SKYNET] steam_api.ini");
+            if (!System.IO.File.Exists(fileName))
+            {
+                CreateNew(fileName);
+            }
+
             try
             {
-                string fileName = Path.Combine(modCommon.GetPath(), "SKYNET", "[SKYNET] steam_api.ini");
+                Settings settings = INISerializer.DeserializeFromFile<Settings>(fileName);
 
-                if (!File.Exists(fileName))
-                {
-                    string steam_appid = Path.Combine(modCommon.GetPath(), "steam_appid.txt");
-                    string appid = File.Exists(steam_appid) ? File.ReadAllText(steam_appid) : "0";
-                    StringBuilder config = new StringBuilder();
-
-                    // User Configuration
-
-                    config.AppendLine("[User Settings]");
-                    config.AppendLine($"PersonaName = {Environment.UserName}");
-                    config.AppendLine($"AccountId = {new Random().Next(1000, 9999)}");
-                    config.AppendLine();
-
-                    config.AppendLine("[Game Settings]");
-                    config.AppendLine($"Languaje = english");
-                    config.AppendLine($"AppId = {appid}");
-                    config.AppendLine();
-
-                    // Network Configuration
-
-                    config.AppendLine("[Network Settings]");
-                    config.AppendLine("# When the emulator is in LAN mode (without dedicated server) it sends and receives data through broadcast ");
-                    config.AppendLine("ServerIP = 127.0.0.1");
-                    config.AppendLine("BroadCastPort = 28025");
-                    config.AppendLine();
-
-                    // Network Configuration
-
-                    config.AppendLine("[Debug Settings]");
-                    config.AppendLine("RunCallbacks = true");
-                    config.AppendLine("ISteamHTTP = true");
-                    config.AppendLine();
-
-                    // Log Configuration
-
-                    config.AppendLine("[Log Settings]");
-                    config.AppendLine("File = false");
-                    config.AppendLine("Console = false");
-                    config.AppendLine();
-
-                    File.WriteAllText(fileName, config.ToString());
-                }
-
-                IniParser = new INIParser();
-                IniParser.Load(fileName);
-
-                SteamEmulator.PersonaName = (string)IniParser["User Settings"]["PersonaName"];
-                SteamEmulator.Language = (string)IniParser["Game Settings"]["Languaje"];
-
-                foreach (var item in IniParser["User Settings"].Settings)
-                    if (item.Key == "AccountId")
-                        if (uint.TryParse((string)item.Value, out uint accountId))
-                            SteamEmulator.SteamID = new CSteamID(accountId, Steamworks.EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeIndividual);
-
-                foreach (var item in IniParser["Game Settings"].Settings)
-                    if (item.Key == "AppId")
-                        if (uint.TryParse((string)item.Value, out uint appId))
-                            SteamEmulator.AppID = appId;
-
-                SteamEmulator.SendLog = (bool)IniParser["Log Settings"]["File"];
-                SteamEmulator.ConsoleLog = (bool)IniParser["Log Settings"]["Console"];
-
-                ThreadPool.QueueUserWorkItem(DetourGameDebug);
-
-                try { SteamEmulator.RunCallbacks = (bool)IniParser["Debug Settings"]["RunCallbacks"]; } catch { }
-                try { SteamEmulator.ISteamHTTP = (bool)IniParser["Debug Settings"]["ISteamHTTP"]; } catch { }
-
-                if (SteamEmulator.ConsoleLog)
+                SteamEmulator.PersonaName   = settings.PersonaName;
+                SteamEmulator.SteamID       = new CSteamID(settings.AccountID, Steamworks.EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeIndividual);
+                SteamEmulator.Language      = settings.Language;
+                SteamEmulator.AppID         = settings.AppId;
+                SteamEmulator.BroadcastPort = settings.BroadcastPort;
+                SteamEmulator.FileLog       = settings.File;
+                SteamEmulator.ConsoleLog    = settings.Console;
+                SteamEmulator.RunCallbacks  = settings.RunCallbacks;
+                SteamEmulator.ISteamHTTP    = settings.ISteamHTTP;
+                if (settings.Console)
                 {
                     modCommon.ActiveConsoleOutput();
                 }
-
-                SteamEmulator.BroadCastPort = (int)IniParser["Network Settings"]["BroadCastPort"];
-
                 string data = $"Loaded user data from file \n PersonaName: {SteamEmulator.PersonaName} \n SteamId:  {SteamEmulator.SteamID} \n Languaje: {SteamEmulator.Language} \n";
                 SteamEmulator.Write("Settings", data);
             }
-            catch (Exception)
+            catch
             {
-                MessageBox.Show("xd");
+                CreateNew(fileName);
+            }
+        }
+
+        private static void CreateNew(string fileName)
+        {
+            string steam_appid = Path.Combine(modCommon.GetPath(), "steam_appid.txt");
+            int appid = 0;
+            if (System.IO.File.Exists(steam_appid))
+            {
+                try { appid = int.Parse(System.IO.File.ReadAllText(steam_appid)); } catch { }
             }
 
+            Settings settings = new Settings()
+            {
+                PersonaName = Environment.UserName,
+                AccountID = (uint)new Random().Next(1000, 9999),
+                Language = "english",
+                AppId = (uint)appid,
+                ServerIP = IPAddress.Loopback,
+                BroadcastPort = 28025,
+                File = false,
+                Console = false,
+                RunCallbacks = true,
+                ISteamHTTP = true
+            };
+            INISerializer.SerializeToFile(settings, fileName);
         }
 
         private static void DetourGameDebug(object sendLog)
         {
-            if (SteamEmulator.SendLog)
+            if (SteamEmulator.FileLog)
             {
                 try
                 {

@@ -265,7 +265,8 @@ namespace SKYNET.Managers
             {
                 if (CallbackResults.TryGetValue(hSteamAPICall, out var callback))
                 {
-                    Result = callback.Called;
+                    //Result = callback.Called;
+                    Result = callback.ReadyToCall;
                 }
             });
             return Result;

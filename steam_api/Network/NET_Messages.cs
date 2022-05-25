@@ -97,6 +97,11 @@ namespace SKYNET.Network.Packets
         public ulong SteamID { get; set; }
     }
 
+    public class NET_LobbyRemove : NET_Base
+    {
+        public ulong LobbyID { get; set; }
+    }
+
     public class NET_LobbyGameserver : NET_Base
     {
         public ulong LobbyID { get; set; }
@@ -122,6 +127,7 @@ namespace SKYNET.Network.Packets
         NET_LobbyDataUpdate,
         NET_LobbyChatUpdate,
         NET_LobbyLeave,
+        NET_LobbyRemove,
         NET_LobbyGameserver,
 
     }
