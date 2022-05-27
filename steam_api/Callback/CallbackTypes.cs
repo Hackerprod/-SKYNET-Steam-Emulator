@@ -289,8 +289,8 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
     public struct GameLobbyJoinRequested_t : ICallbackData
     {
-        public CSteamID m_steamIDLobby; // m_steamIDLobby CSteamID
-        public CSteamID m_steamIDFriend; // m_steamIDFriend CSteamID
+        public ulong m_steamIDLobby; // m_steamIDLobby CSteamID
+        public ulong m_steamIDFriend; // m_steamIDFriend CSteamID
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GameLobbyJoinRequested_t));

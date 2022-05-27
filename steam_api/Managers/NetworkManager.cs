@@ -51,7 +51,6 @@ namespace SKYNET.Managers
         private static void ProcessMessage(NetworkMessage message, Socket socket)
         {
             Write($"Received message {(MessageType)message.MessageType} from {((IPEndPoint)socket.RemoteEndPoint).Address.ToString()}");
-            //CheckInUserList(socket);
             switch ((MessageType)message.MessageType)
             {
                 case MessageType.NET_Announce:
@@ -306,12 +305,12 @@ namespace SKYNET.Managers
                 var lobbyListRequest = message.ParsedBody.FromJson<NET_LobbyListRequest>();
                 if (lobbyListRequest != null)
                 {
-                    if (lobbyListRequest.RequestID == SteamMatchmaking.Instance.CurrentRequest)
-                    {
-                        CloseSocket(socket, message.MessageType);
-                        return;
-                    }
-                    if (lobbyListRequest.AppID != SteamEmulator.AppID)
+                    //if (lobbyListRequest.RequestID == SteamMatchmaking.Instance.CurrentRequest)
+                    //{
+                    //    CloseSocket(socket, message.MessageType);
+                    //    return;
+                    //}
+                    if (lobbyListRequest.AppID != 0 && lobbyListRequest.AppID != SteamEmulator.AppID)
                     {
                         CloseSocket(socket, message.MessageType);
                         return;

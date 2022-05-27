@@ -30,18 +30,31 @@ namespace SKYNET.Steamworks.Implementation
 
             if (LoggedIn)
             {
+                Write($"InitGameServer skiping, gameserver logged in");
                 return false;
             }
 
-            ServerData.IP = unIP;
+            uint IP = unIP != 0 ? unIP : NetworkManager.ConvertFromIPAddress(NetworkManager.GetIPAddress());
+
+            ServerData.IP = IP;
             ServerData.Port = usGamePort;
             ServerData.QueryPort = usQueryPort;
             ServerData.Flags = unFlags;
             ServerData.AppId = nGameAppId;
             ServerData.VersionString = pchVersionString;
 
-            if (SteamEmulator.AppID == 0)
-                SteamEmulator.AppID = nGameAppId;
+            var lobby = SteamMatchmaking.Instance.GetLobbyByOwner((ulong)SteamEmulator.SteamID);
+            if (lobby != null)
+            {
+                if (lobby.Gameserver.IP == 0)
+                {
+                    lobby.Gameserver.IP = IP;
+                }
+                if (lobby.Gameserver.Port == 0)
+                {
+                    lobby.Gameserver.Port = (uint)usQueryPort;
+                }
+            }
 
             return true;
         }

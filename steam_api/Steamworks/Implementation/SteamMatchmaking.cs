@@ -45,7 +45,7 @@ namespace SKYNET.Steamworks.Implementation
                 FavoriteGames = fileContent.FromJson<List<FavoriteGame>>();
             }
 
-            //CreateTestLobby();
+            CreateTestLobby();
         }
 
         public int AddFavoriteGame(uint nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags, uint rTime32LastPlayedOnServer)
@@ -518,10 +518,16 @@ namespace SKYNET.Steamworks.Implementation
             Write($"SetLobbyGameServer (Lobby SteamID = {steamIDLobby}, EndPoint = {unGameServerIP}:{unGameServerPort}, GameServerID = {steamIDGameServer})");
             if (GetLobby(steamIDLobby, out var lobby))
             {
+                uint IP = unGameServerIP != 0 ? unGameServerIP : NetworkManager.ConvertFromIPAddress(NetworkManager.GetIPAddress());
+                
                 lobby.Gameserver.SteamID = steamIDGameServer;
-                lobby.Gameserver.IP = unGameServerIP;
-                lobby.Gameserver.Port = unGameServerPort;
+                lobby.Gameserver.IP = IP;
                 lobby.Gameserver.Filled = true;
+
+                if (unGameServerPort != 0)
+                {
+                    lobby.Gameserver.Port = unGameServerPort;
+                }
 
                 LobbyGameCreated_t data = new LobbyGameCreated_t()
                 {
