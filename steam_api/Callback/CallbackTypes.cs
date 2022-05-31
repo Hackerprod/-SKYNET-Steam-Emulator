@@ -72,7 +72,7 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     public struct SteamServersDisconnected_t : ICallbackData
     {
-        public EResult Result; // m_eResult EResult
+        public EResult m_eResult; // m_eResult EResult
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SteamServersDisconnected_t));
@@ -272,12 +272,12 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     public struct GameServerChangeRequested_t : ICallbackData
     {
-        public string ServerUTF8() => System.Text.Encoding.UTF8.GetString(m_rgchServer, 0, System.Array.IndexOf<byte>(m_rgchServer, 0));
+        //public string ServerUTF8() => System.Text.Encoding.UTF8.GetString(m_rgchServer, 0, System.Array.IndexOf<byte>(m_rgchServer, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)] // byte[] m_rgchServer
-        public byte[] m_rgchServer; // m_rgchServer char [64]
-        public string PasswordUTF8() => System.Text.Encoding.UTF8.GetString(m_rgchPassword, 0, System.Array.IndexOf<byte>(m_rgchPassword, 0));
+        public string m_rgchServer; // m_rgchServer char [64]
+        //public string PasswordUTF8() => System.Text.Encoding.UTF8.GetString(m_rgchPassword, 0, System.Array.IndexOf<byte>(m_rgchPassword, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)] // byte[] m_rgchPassword
-        public byte[] m_rgchPassword; // m_rgchPassword char [64]
+        public string m_rgchPassword; // m_rgchPassword char [64]
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GameServerChangeRequested_t));

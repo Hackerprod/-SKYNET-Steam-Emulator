@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -45,7 +46,7 @@ namespace SKYNET.Steamworks.Implementation
                 FavoriteGames = fileContent.FromJson<List<FavoriteGame>>();
             }
 
-            CreateTestLobby();
+            //CreateTestLobby();
         }
 
         public int AddFavoriteGame(uint nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags, uint rTime32LastPlayedOnServer)
@@ -119,7 +120,12 @@ namespace SKYNET.Steamworks.Implementation
                     Owner = (ulong)SteamEmulator.SteamID,
                     SteamID = modCommon.GenerateSteamID(),
                     Type = (ELobbyType)eLobbyType,
-                    MaxMembers = cMaxMembers
+                    MaxMembers = cMaxMembers,
+                    Gameserver = new SteamLobby.LobbyGameserver()
+                    {
+                        IP = SteamGameServer.Instance.ServerData.IP,
+                        Port = (uint)SteamGameServer.Instance.ServerData.QueryPort,
+                    }
                 };
                 LocalLobby.Members.Add(new SteamLobby.LobbyMember()
                 {
@@ -287,7 +293,7 @@ namespace SKYNET.Steamworks.Implementation
                 var Gameserver = lobby.Gameserver;
                 if (Gameserver.Filled)
                 {
-                    punGameServerIP = lobby.Gameserver.IP;
+                    punGameServerIP = (uint)IPAddress.Parse("10.31.0.4").Address; //lobby.Gameserver.IP;
                     punGameServerPort = lobby.Gameserver.Port;
                     psteamIDGameServer = lobby.Gameserver.SteamID;
                     Result = true;
@@ -518,6 +524,8 @@ namespace SKYNET.Steamworks.Implementation
             Write($"SetLobbyGameServer (Lobby SteamID = {steamIDLobby}, EndPoint = {unGameServerIP}:{unGameServerPort}, GameServerID = {steamIDGameServer})");
             if (GetLobby(steamIDLobby, out var lobby))
             {
+                Write($"SetLobbyGameServer *** IP = {lobby.Gameserver.IP}, Port = {lobby.Gameserver.Port})");
+
                 uint IP = unGameServerIP != 0 ? unGameServerIP : NetworkManager.ConvertFromIPAddress(NetworkManager.GetIPAddress());
                 
                 lobby.Gameserver.SteamID = steamIDGameServer;
@@ -531,10 +539,10 @@ namespace SKYNET.Steamworks.Implementation
 
                 LobbyGameCreated_t data = new LobbyGameCreated_t()
                 {
-                    m_ulSteamIDLobby = steamIDLobby,
+                    m_ulSteamIDLobby = lobby.Gameserver.SteamID,
                     m_ulSteamIDGameServer = steamIDGameServer,
-                    m_unIP = unGameServerIP,
-                    m_usPort = (ushort)unGameServerPort, 
+                    m_unIP = lobby.Gameserver.IP,
+                    m_usPort = (ushort)lobby.Gameserver.Port, 
                 };
                 CallbackManager.AddCallbackResult(data);
 

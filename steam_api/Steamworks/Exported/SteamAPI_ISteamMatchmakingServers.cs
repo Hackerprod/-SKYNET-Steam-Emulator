@@ -1,5 +1,8 @@
-﻿using System;
+﻿using SKYNET.Steamworks.Types;
+using System;
 using System.Runtime.InteropServices;
+
+using HServerListRequest = System.IntPtr;
 
 namespace SKYNET.Steamworks.Exported
 {
@@ -119,6 +122,39 @@ namespace SKYNET.Steamworks.Exported
         {
             Write("SteamAPI_ISteamMatchmakingServers_CancelServerQuery");
         }
+
+        // ISteamMatchmakingServerListResponse
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamMatchmakingServerListResponse_ServerResponded(IntPtr _, HServerListRequest hRequest, int iServer)
+        {
+            Write("SteamAPI_ISteamMatchmakingServerListResponse_ServerResponded");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamMatchmakingServerListResponse_ServerFailedToRespond(IntPtr _, HServerListRequest hRequest, int iServer)
+        {
+            Write("SteamAPI_ISteamMatchmakingServerListResponse_ServerFailedToRespond");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamMatchmakingServerListResponse_RefreshComplete(IntPtr _, HServerListRequest hRequest, EMatchMakingServerResponse response)
+        {
+            Write("SteamAPI_ISteamMatchmakingServerListResponse_RefreshComplete");
+        }
+
+        // ISteamMatchmakingPingResponse
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamMatchmakingPingResponse_ServerResponded(IntPtr _, IntPtr server )
+        {
+            Write("SteamAPI_ISteamMatchmakingPingResponse_ServerResponded");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamMatchmakingPingResponse_ServerFailedToRespond(IntPtr _)
+        {
+            Write("SteamAPI_ISteamMatchmakingPingResponse_ServerFailedToRespond");
+        }
+
 
         private static void Write(string msg)
         {

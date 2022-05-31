@@ -33,13 +33,13 @@ namespace SKYNET.Helper
         public uint AppId { get; set; }
 
 
-        [Section("Network Settings")]
         [Comment("IP address of the dedicated steam server")]
         public IPAddress ServerIP { get; set; }
 
         [Section("Network Settings")]
         public int BroadcastPort { get; set; }
 
+        
 
         [Section("Log Settings")]
         public bool File { get; set; }
@@ -86,6 +86,7 @@ namespace SKYNET.Helper
                 }
                 string data = $"Loaded user data from file \n PersonaName: {SteamEmulator.PersonaName} \n SteamId:  {SteamEmulator.SteamID} \n Languaje: {SteamEmulator.Language} \n";
                 SteamEmulator.Write("Settings", data);
+                //INISerializer.SerializeToFile(settings, fileName);
             }
             catch
             {

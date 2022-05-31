@@ -344,7 +344,7 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamGameServer_InitSafe(uint unIP, ushort usSteamPort, ushort usGamePort, ushort usQueryPort, EServerMode eServerMode, string pchVersionString)
         {
             Write("SteamGameServer_InitSafe");
-            return true;
+            return SteamEmulator.SteamGameServer.InitGameServer(unIP, usGamePort, usQueryPort, 0, (uint)eServerMode, pchVersionString);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

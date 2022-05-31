@@ -2,6 +2,7 @@
 using System;
 using SKYNET.Managers;
 using SKYNET.Callback;
+using SKYNET.Steamworks.Implementation;
 
 #region using types
 
@@ -32,7 +33,7 @@ using ScreenshotHandle = System.UInt32;
 using AccountID_t = System.UInt32;
 using SteamLeaderboardEntries_t = System.UInt64;
 using ClientUnifiedMessageHandle = System.UInt64;
-using SKYNET.Steamworks.Implementation;
+using HServerListRequest = System.IntPtr;
 
 #endregion
 
@@ -2177,25 +2178,25 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr ISteamMatchmakingServers_RequestInternetServerList(AppId_t iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
+        public static HServerListRequest ISteamMatchmakingServers_RequestInternetServerList(AppId_t iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
         {
             return SteamEmulator.SteamMatchMakingServers.RequestInternetServerList(iApp, ppchFilters, nFilters, pRequestServersResponse);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr ISteamMatchmakingServers_RequestLANServerList(AppId_t iApp, IntPtr pRequestServersResponse)
+        public static HServerListRequest ISteamMatchmakingServers_RequestLANServerList(AppId_t iApp, IntPtr pRequestServersResponse)
         {
             return SteamEmulator.SteamMatchMakingServers.RequestLANServerList(iApp, pRequestServersResponse);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr ISteamMatchmakingServers_RequestFriendsServerList(AppId_t iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
+        public static HServerListRequest ISteamMatchmakingServers_RequestFriendsServerList(AppId_t iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
         {
             return SteamEmulator.SteamMatchMakingServers.RequestFriendsServerList(iApp, ppchFilters, nFilters, pRequestServersResponse);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr ISteamMatchmakingServers_RequestFavoritesServerList(AppId_t iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
+        public static HServerListRequest ISteamMatchmakingServers_RequestFavoritesServerList(AppId_t iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
         {
             return SteamEmulator.SteamMatchMakingServers.RequestFavoritesServerList(iApp, ppchFilters, nFilters, pRequestServersResponse);
         }
@@ -2207,7 +2208,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr ISteamMatchmakingServers_RequestSpectatorServerList(AppId_t iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
+        public static HServerListRequest ISteamMatchmakingServers_RequestSpectatorServerList(AppId_t iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
         {
             return SteamEmulator.SteamMatchMakingServers.RequestSpectatorServerList(iApp, ppchFilters, nFilters, pRequestServersResponse);
         }
@@ -2219,37 +2220,37 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr ISteamMatchmakingServers_GetServerDetails(IntPtr hRequest, int iServer)
+        public static IntPtr ISteamMatchmakingServers_GetServerDetails(HServerListRequest hRequest, int iServer)
         {
             return SteamEmulator.SteamMatchMakingServers.GetServerDetails(hRequest, iServer);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void ISteamMatchmakingServers_CancelQuery(IntPtr hRequest)
+        public static void ISteamMatchmakingServers_CancelQuery(HServerListRequest hRequest)
         {
             SteamEmulator.SteamMatchMakingServers.CancelQuery(hRequest);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void ISteamMatchmakingServers_RefreshQuery(IntPtr hRequest)
+        public static void ISteamMatchmakingServers_RefreshQuery(HServerListRequest hRequest)
         {
             SteamEmulator.SteamMatchMakingServers.RefreshQuery(hRequest);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamMatchmakingServers_IsRefreshing(IntPtr hRequest)
+        public static bool ISteamMatchmakingServers_IsRefreshing(HServerListRequest hRequest)
         {
             return SteamEmulator.SteamMatchMakingServers.IsRefreshing(hRequest);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int ISteamMatchmakingServers_GetServerCount(IntPtr hRequest)
+        public static int ISteamMatchmakingServers_GetServerCount(HServerListRequest hRequest)
         {
             return SteamEmulator.SteamMatchMakingServers.GetServerCount(hRequest);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void ISteamMatchmakingServers_RefreshServer(IntPtr hRequest, int iServer)
+        public static void ISteamMatchmakingServers_RefreshServer(HServerListRequest hRequest, int iServer)
         {
             SteamEmulator.SteamMatchMakingServers.RefreshServer(hRequest, iServer);
         }

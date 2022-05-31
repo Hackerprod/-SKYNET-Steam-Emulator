@@ -1,6 +1,10 @@
 ﻿using SKYNET;
+using SKYNET.Helper;
+using SKYNET.Steamworks.Types;
 using System;
 using System.Runtime.InteropServices;
+
+using HServerListRequest = System.IntPtr;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -15,37 +19,41 @@ namespace SKYNET.Steamworks.Implementation
             InterfaceVersion = "SteamMatchMakingServers002";
         }
 
-        public IntPtr RequestInternetServerList(uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
+        public HServerListRequest RequestInternetServerList(uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
         {
             Write($"RequestInternetServerList querying LAN list");
             return RequestLANServerList(iApp, pRequestServersResponse);
         }
 
-        public IntPtr RequestLANServerList(uint iApp, IntPtr pRequestServersResponse)
+        public HServerListRequest RequestLANServerList(uint iApp, IntPtr pRequestServersResponse)
         {
             Write($"RequestLANServerList");
+            var response = pRequestServersResponse.ToType<ISteamMatchmakingServerListResponse>();
+            //response.RefreshComplete(IntPtr.Zero, EMatchMakingServerResponse.eServerResponded);
+            //response.m_RefreshComplete(IntPtr.Zero, EMatchMakingServerResponse.eServerResponded);
+            //response.m_ServerResponded(IntPtr.Zero, 225);
             return IntPtr.Zero;
         }
 
-        public IntPtr RequestFriendsServerList(uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
+        public HServerListRequest RequestFriendsServerList(uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
         {
             Write($"RequestFriendsServerList");
             return IntPtr.Zero;
         }
 
-        public IntPtr RequestFavoritesServerList(uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
+        public HServerListRequest RequestFavoritesServerList(uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
         {
             Write($"RequestFavoritesServerList");
             return IntPtr.Zero;
         }
 
-        public IntPtr RequestHistoryServerList(uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
+        public HServerListRequest RequestHistoryServerList(uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
         {
             Write($"RequestHistoryServerList");
             return IntPtr.Zero;
         }
 
-        public IntPtr RequestSpectatorServerList(uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
+        public HServerListRequest RequestSpectatorServerList(uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
         {
             Write($"RequestSpectatorServerList");
             return IntPtr.Zero;
@@ -56,35 +64,35 @@ namespace SKYNET.Steamworks.Implementation
             Write($"ReleaseRequest");
         }
 
-        public IntPtr GetServerDetails(IntPtr hRequest, int iServer)
+        public IntPtr GetServerDetails(HServerListRequest hRequest, int iServer)
         {
             Write($"GetServerDetails");
             return IntPtr.Zero;
         }
 
-        public void CancelQuery(IntPtr hRequest)
+        public void CancelQuery(HServerListRequest hRequest)
         {
             Write($"CancelQuery");
         }
 
-        public void RefreshQuery(IntPtr hRequest)
+        public void RefreshQuery(HServerListRequest hReques)
         {
             Write($"RefreshQuery");
         }
 
-        public bool IsRefreshing(IntPtr hRequest)
+        public bool IsRefreshing(HServerListRequest hReques)
         {
             Write($"IsRefreshing");
             return false;
         }
 
-        public int GetServerCount(IntPtr hRequest)
+        public int GetServerCount(HServerListRequest hRequest)
         {
             Write($"GetServerCount");
-            return 0;
+            return 10;
         }
 
-        public void RefreshServer(IntPtr hRequest, int iServer)
+        public void RefreshServer(HServerListRequest hReques, int iServer)
         {
             Write($"RefreshServer");
         }

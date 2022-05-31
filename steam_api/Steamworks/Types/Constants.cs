@@ -1,4 +1,6 @@
-﻿namespace SKYNET.Steamworks
+﻿using System;
+
+namespace SKYNET.Steamworks
 {
     public static class Constants
     {
@@ -95,15 +97,19 @@
         public const int k_cchMaxRichPresenceKeys = 20;
         public const int k_cchMaxRichPresenceKeyLength = 64;
         public const int k_cchMaxRichPresenceValueLength = 256;
+
         // game server flags
-        public const int k_unServerFlagNone = 0x00;
-        public const int k_unServerFlagActive = 0x01; // server has users playing
-        public const int k_unServerFlagSecure = 0x02; // server wants to be secure
-        public const int k_unServerFlagDedicated = 0x04; // server is dedicated
-        public const int k_unServerFlagLinux = 0x08; // linux build
-        public const int k_unServerFlagPassworded = 0x10; // password protected
-        public const int k_unServerFlagPrivate = 0x20; // server shouldn't list on master server and
-                                                       // game server flags
+        public const UInt32 k_unServerFlagNone = 0x00;
+        public const UInt32 k_unServerFlagActive = 0x01;        // server has users playing
+        public const UInt32 k_unServerFlagSecure = 0x02;        // server wants to be secure
+        public const UInt32 k_unServerFlagDedicated = 0x04;     // server is dedicated
+        public const UInt32 k_unServerFlagLinux = 0x08;         // linux build
+        public const UInt32 k_unServerFlagPassworded = 0x10;    // password protected
+        public const UInt32 k_unServerFlagPrivate = 0x20;       // server shouldn't list on master server and
+                                                                // won't enforce authentication of users that connect to the server.
+                                                                // Useful when you run a server where the clients may not
+                                                                // be connected to the internet but you want them to play (i.e LANs)
+                                                                // game server flags
         public const int k_unFavoriteFlagNone = 0x00;
         public const int k_unFavoriteFlagFavorite = 0x01; // this game favorite entry is for the favorites list
         public const int k_unFavoriteFlagHistory = 0x02; // this game favorite entry is for the history list

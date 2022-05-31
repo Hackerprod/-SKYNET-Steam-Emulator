@@ -166,6 +166,7 @@
     <Compile Include="Steamworks\Interfaces\SteamParties\SteamParties002.cs" />
     <Compile Include="Steamworks\Interfaces\SteamRemotePlay\SteamRemotePlay001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamUnifiedMessages\SteamUnifiedMessages001.cs" />
+    <Compile Include="Steamworks\Types\ISteamMatchmakingServerListResponse.cs" />
     <Compile Include="Steamworks\Types\SteamIPAddress_t.cs" />
     <Compile Include="Steamworks\Types\SteamNetworkingIPAddr.cs" />
     <Compile Include="Steamworks\Types\CSteamID.cs" />

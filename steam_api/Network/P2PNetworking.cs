@@ -27,7 +27,16 @@ namespace SKYNET.Network
             P2PSession = new List<ulong>();
             Port = 3333;
 
-            ThreadPool.QueueUserWorkItem(ReceiveThread);
+            if (NetworkManager.IsAvailablePort(Port))
+            {
+                Write($"Initializing P2P server on port {Port}");
+                ThreadPool.QueueUserWorkItem(ReceiveThread);
+            }
+            else
+            {
+                Write($"Error initializing P2P server, port {Port} is in use");
+            }
+
         }
 
         private static void ReceiveThread(Object ThreadObject)
@@ -35,9 +44,15 @@ namespace SKYNET.Network
             UdpClient udpClient = new UdpClient(Port);
             while (true)
             {
-                IPEndPoint remoteIpEndPoint = new IPEndPoint(IPAddress.Any, Port);
-                byte[] bytes = udpClient.Receive(ref remoteIpEndPoint);
-                OnDataReceived(bytes, remoteIpEndPoint);
+                try
+                {
+                    IPEndPoint remoteIpEndPoint = new IPEndPoint(IPAddress.Any, Port);
+                    byte[] bytes = udpClient.Receive(ref remoteIpEndPoint);
+                    OnDataReceived(bytes, remoteIpEndPoint);
+                }
+                catch
+                {
+                }
             }
         }
 

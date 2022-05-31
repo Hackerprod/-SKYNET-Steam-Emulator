@@ -9,7 +9,9 @@ using SKYNET.Types;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -25,13 +27,22 @@ namespace SKYNET.Managers
         public static void Initialize()
         {
             Port = SteamEmulator.BroadcastPort;
-            Write($"Initializing TCP server on port {Port}");
 
-            TCPServer = new TCPServer(Port);
-            TCPServer.OnDataReceived += TCPServer_OnDataReceived;
-            TCPServer.OnConnected += TCPServer_OnConnected;
+            if (IsAvailablePort(Port))
+            {
+                Write($"Initializing TCP server on port {Port}");
 
-            ThreadPool.QueueUserWorkItem(TCPServer.Start);
+                TCPServer = new TCPServer(Port);
+                TCPServer.OnDataReceived += TCPServer_OnDataReceived;
+                TCPServer.OnConnected += TCPServer_OnConnected;
+
+                ThreadPool.QueueUserWorkItem(TCPServer.Start);
+            }
+            else
+            {
+                Write($"Error initializing TCP server, port {Port} is in use");
+            }
+
             ThreadPool.QueueUserWorkItem(BroadcastAnnounce);
         }
 
@@ -119,10 +130,18 @@ namespace SKYNET.Managers
             {
                 if (SteamMatchmaking.Instance.GetLobby(lobbyGameserver.LobbyID, out var lobby))
                 {
+                    Write($"Received gameserver data for lobby {lobbyGameserver.LobbyID}, IP = {lobbyGameserver.IP}, Port = {lobbyGameserver.Port}");
                     lobby.Gameserver.SteamID = lobbyGameserver.SteamID;
                     lobby.Gameserver.IP = lobbyGameserver.IP;
                     lobby.Gameserver.Port = lobbyGameserver.Port;
                     lobby.Gameserver.Filled = true;
+
+                    // TODO: Necessary?
+                    GameServerChangeRequested_t data = new GameServerChangeRequested_t()
+                    {
+                        m_rgchServer = $"{lobbyGameserver.IP}:{lobbyGameserver.Port}"
+                    };
+                    CallbackManager.AddCallbackResult(data);
                 }
             }
             CloseSocket(socket, message.MessageType);
@@ -347,7 +366,7 @@ namespace SKYNET.Managers
             try
             {
                 var lobbyListResponse = message.ParsedBody.FromJson<NET_LobbyListResponse>();
-                var lobby = lobbyListResponse.SerializedLobby.FromJson<Steamworks.Implementation.SteamMatchmaking.SteamLobby>();
+                var lobby = lobbyListResponse.SerializedLobby.FromJson<SteamMatchmaking.SteamLobby>();
                 if (lobby != null)
                 {
                     string remoteAddress = ((IPEndPoint)socket.RemoteEndPoint).Address.ToString();
@@ -780,8 +799,35 @@ namespace SKYNET.Managers
             return Addresses;
         }
 
-
         public static IPAddress GetIPAddress()
+        {
+            if (NetworkInterface.GetIsNetworkAvailable())
+            {
+                NetworkInterface[] allNetworkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
+                foreach (NetworkInterface networkInterface in allNetworkInterfaces)
+                {
+                    if (networkInterface.OperationalStatus != OperationalStatus.Up)
+                    {
+                        continue;
+                    }
+                    IPInterfaceProperties iPProperties = networkInterface.GetIPProperties();
+                    if (iPProperties.GatewayAddresses.FirstOrDefault() == null)
+                    {
+                        continue;
+                    }
+                    foreach (UnicastIPAddressInformation unicastAddress in iPProperties.UnicastAddresses)
+                    {
+                        if (unicastAddress.Address.AddressFamily == AddressFamily.InterNetwork)
+                        {
+                            return unicastAddress.Address;
+                        }
+                    }
+                }
+            }
+            return GetIPAddress2();
+        }
+
+        public static IPAddress GetIPAddress2()
         {
             string hostName = Dns.GetHostName();
             IPHostEntry hostEntry = Dns.GetHostEntry(hostName);
@@ -797,14 +843,45 @@ namespace SKYNET.Managers
             return iPAddress;
         }
 
-        public static uint ConvertFromIPAddress(IPAddress ipAddr)
+        public static uint ConvertFromIPAddress(IPAddress iPAddress)
         {
-            return (uint)IPAddress.NetworkToHostOrder(ipAddr.Address);
+            byte[] addressBytes = iPAddress.GetAddressBytes();
+            uint num = (uint)(addressBytes[0] << 24);
+            num += (uint)(addressBytes[1] << 16);
+            num += (uint)(addressBytes[2] << 8);
+            num += addressBytes[3];
+            return num;
         }
 
         public static IPAddress ConvertToIPAddress(uint ipAddr)
         {
-            return new IPAddress(IPAddress.HostToNetworkOrder(ipAddr));
+            return new IPAddress(ipAddr.Swap());
+        }
+
+        public static bool IsAvailablePort(int port)
+        {
+            Write($"Checking Port {port}");
+
+            IPGlobalProperties ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
+            IPEndPoint[] tcpConnInfoArray = ipGlobalProperties.GetActiveTcpListeners();
+            IPEndPoint[] udpConnInfoArray = ipGlobalProperties.GetActiveUdpListeners();
+
+            foreach (IPEndPoint endpoint in tcpConnInfoArray)
+            {
+                if (endpoint.Port == port)
+                {
+                    return false;
+                }
+            }
+            foreach (IPEndPoint endpoint in udpConnInfoArray)
+            {
+                if (endpoint.Port == port)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private static List<string> GetIPAddressRange(IPAddress address)

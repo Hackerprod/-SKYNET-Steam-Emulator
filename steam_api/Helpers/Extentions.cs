@@ -25,6 +25,19 @@ namespace SKYNET.Helper
             }
         }
 
+        public static uint Swap(this uint address)
+        {
+            return ((address & 0x000000ff) << 24) +
+                   ((address & 0x0000ff00) << 8) +
+                   ((address & 0x00ff0000) >> 8) +
+                   ((address & 0xff000000) >> 24);
+        }
+
+        public static uint Swap(this long address)
+        {
+            return ((uint)address).Swap();
+        }
+
         public static bool IsGameServer(this CCallbackBase Base)
         {
             bool GS = false;

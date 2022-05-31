@@ -12,7 +12,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         public static SteamGameServer Instance;
 
-        private GameServerData ServerData;
+        public GameServerData ServerData;
         private bool LoggedIn;
 
         public SteamGameServer()
@@ -22,7 +22,6 @@ namespace SKYNET.Steamworks.Implementation
             InterfaceVersion = "SteamGameServer014";
             ServerData = new GameServerData();
         }
-
 
         public bool InitGameServer(uint unIP, int usGamePort, int usQueryPort, uint unFlags, uint nGameAppId, string pchVersionString)
         {
@@ -34,7 +33,15 @@ namespace SKYNET.Steamworks.Implementation
                 return false;
             }
 
-            uint IP = unIP != 0 ? unIP : NetworkManager.ConvertFromIPAddress(NetworkManager.GetIPAddress());
+            uint IP = 0;
+            if (unIP != 0)
+            {
+                IP = unIP;
+            }
+            else
+            {
+                IP = NetworkManager.ConvertFromIPAddress(NetworkManager.GetIPAddress());
+            }
 
             ServerData.IP = IP;
             ServerData.Port = usGamePort;
@@ -46,15 +53,21 @@ namespace SKYNET.Steamworks.Implementation
             var lobby = SteamMatchmaking.Instance.GetLobbyByOwner((ulong)SteamEmulator.SteamID);
             if (lobby != null)
             {
-                if (lobby.Gameserver.IP == 0)
-                {
-                    lobby.Gameserver.IP = IP;
-                }
-                if (lobby.Gameserver.Port == 0)
-                {
-                    lobby.Gameserver.Port = (uint)usQueryPort;
-                }
+                lobby.Gameserver.IP = IP;
+                lobby.Gameserver.Port = (uint)usQueryPort;
+                Write($"Setting lobby gameserver IP = {IP}, Port = {(uint)usQueryPort}");
             }
+            else
+            {
+
+            }
+
+           // TODO: Necessary
+           GSPolicyResponse_t Policy = new GSPolicyResponse_t()
+           {
+               Secure = (byte)(ServerData.Flags & Constants.k_unServerFlagSecure)
+           };
+            CallbackManager.AddCallbackResult(Policy);
 
             return true;
         }
@@ -107,6 +120,12 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"LogOff");
             LoggedIn = false;
+
+            SteamServersDisconnected_t data = new SteamServersDisconnected_t()
+            {
+                m_eResult = EResult.k_EResultOK
+            };
+            CallbackManager.AddCallbackResult(data);
         }
 
         public bool BLoggedOn()
@@ -124,6 +143,7 @@ namespace SKYNET.Steamworks.Implementation
         public CSteamID GetSteamID()
         {
             var SteamId = SteamEmulator.SteamID_GS;
+            if (!LoggedIn) SteamId = k_steamIDNil;
             Write($"GetSteamID {SteamId.ToString()}");
             return SteamId; 
         }
