@@ -1,7 +1,37 @@
- # [SKYNET] Steam Emulator
+ <img src="[SKYNET] Steam Emulator/game.ico" align="right" height="150" width="150" />
+
+# [SKYNET] Steam Emulator [![Awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/sindresorhus/awesome#readme)
 This project is created with the aim of replacing the original `steam_api.dll` from Steam with this one and thus emulating a connection to be able to play games in LAN mode.
 This is not a steamworks wrapper like `Steamworks.Net` or `Facepunch`.
 The project is in an initial stage, so it is not functional yet for some Games.
+
+<p align="center">
+    <a href="https://github.com/badges/shields/graphs/contributors" alt="Contributors">
+        <img src="https://img.shields.io/github/contributors/badges/shields" /></a>
+    <a href="#backers" alt="Backers on Open Collective">
+        <img src="https://img.shields.io/opencollective/backers/shields" /></a>
+    <a href="#sponsors" alt="Sponsors on Open Collective">
+        <img src="https://img.shields.io/opencollective/sponsors/shields" /></a>
+    <a href="https://github.com/badges/shields/pulse" alt="Activity">
+        <img src="https://img.shields.io/github/commit-activity/m/badges/shields" /></a>
+    <a href="https://circleci.com/gh/badges/shields/tree/master">
+        <img src="https://img.shields.io/circleci/project/github/badges/shields/master" alt="build status"></a>
+    <a href="https://circleci.com/gh/badges/daily-tests">
+        <img src="https://img.shields.io/circleci/project/github/badges/daily-tests?label=service%20tests"
+            alt="service-test status"></a>
+    <a href="https://coveralls.io/github/badges/shields">
+        <img src="https://img.shields.io/coveralls/github/badges/shields"
+            alt="coverage"></a>
+    <a href="https://lgtm.com/projects/g/badges/shields/alerts/">
+        <img src="https://img.shields.io/lgtm/alerts/g/badges/shields"
+            alt="Total alerts"/></a>
+    <a href="https://discord.gg/HjJCwm5">
+        <img src="https://img.shields.io/discord/308323056592486420?logo=discord"
+            alt="chat on Discord"></a>
+    <a href="https://twitter.com/intent/follow?screen_name=shields_io">
+        <img src="https://img.shields.io/twitter/follow/shields_io?style=social&logo=twitter"
+            alt="follow on Twitter"></a>
+</p>
 
 ![Screenshot](Capture.png)
 
