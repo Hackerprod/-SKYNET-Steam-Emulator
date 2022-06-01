@@ -1,6 +1,5 @@
 ﻿using EasyHook;
 using SKYNET.Types;
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,6 +8,10 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
+using HSteamPipe = System.UInt32;
+using HSteamUser = System.UInt32;
+using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Hook.Handles
 {
@@ -21,7 +24,7 @@ namespace SKYNET.Hook.Handles
         public delegate void SteamAPI_RunCallbacksDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate void SteamAPI_RegisterCallResultDelegate(CCallbackBase pCallback, SteamAPICall_t hAPICall);
+        public delegate void SteamAPI_RegisterCallResultDelegate(IntPtr pCallback, SteamAPICall_t hAPICall);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
         public delegate void SteamAPI_ShutdownDelegate(IntPtr pContextInitData);
@@ -48,19 +51,19 @@ namespace SKYNET.Hook.Handles
         public delegate bool SteamAPI_RestartAppIfNecessaryDelegate(uint appId);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate string SteamAPI_GetSteamInstallPathDelegate();
+        public delegate IntPtr SteamAPI_GetSteamInstallPathDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate int SteamAPI_GetHSteamUserDelegate();
+        public delegate HSteamUser SteamAPI_GetHSteamUserDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate int SteamAPI_GetHSteamPipeDelegate();
+        public delegate HSteamPipe SteamAPI_GetHSteamPipeDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate int GetHSteamPipeDelegate();
+        public delegate HSteamPipe GetHSteamPipeDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate int GetHSteamUserDelegate();
+        public delegate HSteamUser GetHSteamUserDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
         public delegate void SteamAPI_SetTryCatchCallbacksDelegate(bool bTryCatchCallbacks);
@@ -72,7 +75,7 @@ namespace SKYNET.Hook.Handles
         public delegate void SteamAPI_UseBreakpadCrashHandlerDelegate([MarshalAs(UnmanagedType.LPStr)] string pchVersion, [MarshalAs(UnmanagedType.LPStr)] string pchDate, [MarshalAs(UnmanagedType.LPStr)] string pchTime, bool bFullMemoryDumps, IntPtr pvContext, IntPtr m_pfnPreMinidumpCallback);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate void SteamAPI_ManualDispatch_RunFrameDelegate(IntPtr hSteamPipe);
+        public delegate void SteamAPI_ManualDispatch_RunFrameDelegate(HSteamPipe hSteamPipe);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
         public delegate bool SteamAPI_ManualDispatch_GetNextCallbackDelegate(HSteamPipe hSteamPipe, IntPtr pCallbackMs);
@@ -81,7 +84,7 @@ namespace SKYNET.Hook.Handles
         public delegate void SteamAPI_ManualDispatch_FreeLastCallbackDelegate(HSteamPipe hSteamPipe);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate bool SteamAPI_ManualDispatch_GetAPICallResultDelegate(HSteamPipe hSteamPipe, IntPtr hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, bool pbFailed);
+        public delegate bool SteamAPI_ManualDispatch_GetAPICallResultDelegate(HSteamPipe hSteamPipe, SteamAPICall_t hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, ref bool pbFailed);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
         public delegate void SteamAPI_SetMiniDumpCommentDelegate([MarshalAs(UnmanagedType.LPStr)] string pchMsg);

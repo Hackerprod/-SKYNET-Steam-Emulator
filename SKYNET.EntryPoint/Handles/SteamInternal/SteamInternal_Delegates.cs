@@ -3,12 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using SKYNET;
-using SKYNET.Helpers;
-using SKYNET.Types;
+
+using HSteamUser = System.UInt32;
 
 namespace SKYNET.Hook.Handles
 {
@@ -18,13 +14,13 @@ namespace SKYNET.Hook.Handles
         public delegate IntPtr SteamInternal_FindOrCreateUserInterfaceDelegate(int hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate IntPtr SteamInternal_FindOrCreateGameServerInterfaceDelegate(int hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion);
+        public delegate IntPtr SteamInternal_FindOrCreateGameServerInterfaceDelegate(HSteamUser hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
         public delegate IntPtr SteamInternal_CreateInterfaceDelegate([MarshalAs(UnmanagedType.LPStr)] string version);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate bool SteamInternal_GameServer_InitDelegate(IntPtr unIP, IntPtr usPort, IntPtr usGamePort, IntPtr usQueryPort, IntPtr eServerMode, [MarshalAs(UnmanagedType.LPStr)] string pchVersionString);
+        public delegate bool SteamInternal_GameServer_InitDelegate(uint unIP, int usPort, int usGamePort, uint usQueryPort, uint eServerMode, string pchVersionString);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
         public delegate IntPtr SteamInternal_ContextInitDelegate(IntPtr pContextInitData);

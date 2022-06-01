@@ -280,11 +280,17 @@ namespace SKYNET
 
         private void HookInterface_OnMessage(object sender, ConsoleMessage e)
         {
-            if (!GameMessages.ContainsKey(e.AppId)) GameMessages.Add(e.AppId, new List<string>());
+            try
+            {
+                if (!GameMessages.ContainsKey(e.AppId)) GameMessages.Add(e.AppId, new List<string>());
 
-            GameMessages[e.AppId].Add(e.Sender + ": " + e.Msg);
+                GameMessages[e.AppId].Add(e.Sender + ": " + e.Msg);
 
-            Write(e.Sender + ":  " + e.Msg);
+                Write(e.Sender + ":  " + e.Msg);
+            }
+            catch 
+            {
+            }
         }
 
         private void WaitForExit()

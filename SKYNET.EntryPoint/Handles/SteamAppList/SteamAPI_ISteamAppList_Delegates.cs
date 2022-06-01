@@ -22,10 +22,10 @@ namespace SKYNET.Hook.Handles
         public delegate int SteamAPI_ISteamAppList_GetAppNameDelegate(uint nAppID, string pchName, int cchNameMax);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate uint SteamAPI_ISteamAppList_GetInstalledAppsDelegate(uint pvecAppID, uint unMaxAppIDs);
+        public delegate uint SteamAPI_ISteamAppList_GetInstalledAppsDelegate(IntPtr _, uint pvecAppID, uint unMaxAppIDs);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate uint SteamAPI_ISteamAppList_GetNumInstalledAppsDelegate(IntPtr _);
+        public delegate uint SteamAPI_ISteamAppList_GetNumInstalledAppsDelegate();
 
 
         // Functions Delegates

@@ -56,7 +56,7 @@ namespace SKYNET.Manager
 
         internal void Install()
         {
-            Main.Write("Injectiong Steam_Api calls");
+            Main.Write("Injecting calls Handles");
             foreach (var hook in Hooks)
             {
                 if (!hook.Installed && !string.IsNullOrEmpty(hook.Library) && Modules.Contains(hook.Library.ToUpper()))
@@ -70,12 +70,13 @@ namespace SKYNET.Manager
         {
             if (!string.IsNullOrEmpty(UpperDllName))
             {
-                var hooks = Hooks.FindAll((BaseHook h) => !h.Installed && Path.GetFileNameWithoutExtension(h.Library).ToUpper() == UpperDllName);
+                var hooks = Hooks.FindAll((BaseHook h) => !h.Installed && UpperDllName.StartsWith("STEAM_API"));
                 if (hooks.Any())
                 {
                     foreach (var hook in hooks)
                     {
                         hook.Install();
+                        hook.Installed = true;
                     }
                 }
 
@@ -166,10 +167,15 @@ namespace SKYNET.Manager
 
             SteamEmulator.SteamApiPath = dllPath;
 
-            CLoadLibrary.LoadLibraryA(dllPath, out string Msg);
+            //CLoadLibrary.LoadLibraryA(dllPath, out string Msg);
+            //Memory.CreateInMemoryModule(dllPath);
         }
+
     }
 }
+
+
+
 public class CLoadLibrary
 {
     internal static class CWinAPI

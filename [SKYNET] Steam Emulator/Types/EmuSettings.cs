@@ -1,4 +1,5 @@
 ﻿
+using SKYNET.Steamworks;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,12 +24,10 @@ namespace SKYNET.Types
             string fileName = Path.Combine(modCommon.GetPath(), "Data", "[SKYNET] Steam Emulator.json");
             if (!File.Exists(fileName))
             {
-                SteamID steamId = new SteamID();
-                steamId.Set((uint)(new Random().Next(1000, 9999)), Steamworks.EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeIndividual);
-
+                CSteamID steamID = CSteamID.CreateOne();
                 settings = new EmuSettings()
                 {
-                    SteamId = steamId.ConvertToUInt64(),
+                    SteamId = steamID.SteamID,
                     Language = "English",
                     PersonaName = Environment.UserName,
                     LogToFile = false,

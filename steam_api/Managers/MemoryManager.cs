@@ -368,12 +368,12 @@ namespace SKYNET.Managers
             MethodAttributes ctorAttr = MethodAttributes.RTSpecialName | MethodAttributes.Public;
             ConstructorBuilder ctor = del.DefineConstructor(ctorAttr, CallingConventions.Standard, new Type[] { typeof(object), typeof(System.IntPtr) });
             ctor.SetImplementationFlags(MethodImplAttributes.Runtime | MethodImplAttributes.Managed);
-
+            
             Type[] parameterTypes = methodInfo.GetParameters().Select(x => x.ParameterType).ToArray();
 
             MethodBuilder invokeMethod = del.DefineMethod("Invoke", methodInfo.Attributes & ~MethodAttributes.Abstract, methodInfo.ReturnType, parameterTypes);
-            invokeMethod.SetImplementationFlags(MethodImplAttributes.Runtime | MethodImplAttributes.Managed);
-            return del.CreateType(); ;
+            invokeMethod.SetImplementationFlags(MethodImplAttributes.Runtime | MethodImplAttributes.Managed); 
+            return del.CreateType();
         }
 
         public static bool SaveDelegates(Type type, string filename)
@@ -414,9 +414,17 @@ namespace SKYNET.Managers
             }
         }
 
-        public static List<MethodInfo> InterfaceMethodsForType(Type t)
+        public static List<MethodInfo> InterfaceMethodsForType(Type t, bool includeStatics = false)
         {
-            var all_methods = new List<MethodInfo>(t.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly));
+            var all_methods = new List<MethodInfo>();
+            if (includeStatics)
+            {
+                all_methods = new List<MethodInfo>(t.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly | BindingFlags.Static));
+            }
+            else
+            {
+                all_methods = new List<MethodInfo>(t.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly));
+            }
             all_methods.RemoveAll(x => x.Name.StartsWith("get_") || x.Name.StartsWith("set_"));
             return all_methods;
         }

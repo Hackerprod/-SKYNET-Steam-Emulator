@@ -1,6 +1,9 @@
 ﻿using EasyHook;
 using SKYNET.Helpers;
+using SKYNET.Hook.Handles;
 using SKYNET.Manager;
+using SKYNET.Managers;
+using SKYNET.Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -44,23 +47,26 @@ namespace SKYNET
             {
                 if (!SteamEmulator.Initialized)
                 {
-                    SteamEmulator = new SteamEmulator(true);
+                    string app = Process.GetCurrentProcess().ProcessName;
+                    Write($"Initializing steam API in {app}");
+                    SteamEmulator = new SteamEmulator();
+                    SteamEmulator.Initialize(true);
                     SteamEmulator.OnMessage += SteamEmulator_OnMessage;
                     SteamEmulator.FileLog = Game.SendLog;
                     SteamEmulator.EmulatorPath = HookInterface.EmulatorPath;
                     SteamEmulator.AppID = HookInterface.Game.AppId;
                     SteamEmulator.EmulatorPath = HookInterface.EmulatorPath;
                     SteamEmulator.PersonaName = HookInterface.PersonaName;
-                    SteamEmulator.SteamID = HookInterface.SteamId;
+                    SteamEmulator.SteamID = (CSteamID)HookInterface.SteamId;
                     SteamEmulator.EmulatorPath = HookInterface.Language;
+                    SteamEmulator.FileLog = true;
+                    SteamEmulator.ConsoleLog = true;
                     bool ConsoleOutput = HookInterface.ConsoleOutput;
 
                     if (ConsoleOutput)
                     {
-                        //ActiveConsoleOutput();
+                        modCommon.ActiveConsoleOutput();
                     }
-
-                    SteamEmulator.Initialize();
                 }
 
                 HookManager.Install();
@@ -87,34 +93,6 @@ namespace SKYNET
             HookManager.UninstallHooks();
             LocalHook.Release();
         }
-
-        internal static void ForceSteamAPILoad()
-        {
-            string dllPath = modCommon.GetPath();
-
-            if (File.Exists(Game.SteamApiPath))
-            {
-                dllPath = Game.SteamApiPath;
-            }
-            else if (File.Exists(Path.Combine(dllPath, "steam_api.dll")))
-            {
-                dllPath = Path.Combine(dllPath, "steam_api.dll");
-            }
-            else if (File.Exists(Path.Combine(dllPath, "steam_api64.dll")))
-            {
-                dllPath = Path.Combine(dllPath, "steam_api64.dll");
-            }
-            else
-            {
-                Write("Error forcing steam_api injection");
-                return;
-            }
-
-            SteamEmulator.SteamApiPath = dllPath;
-
-            Memory.CreateInMemoryModule(dllPath);
-        }
-
 
         private void SteamEmulator_OnMessage(object sender, object msg)
         {

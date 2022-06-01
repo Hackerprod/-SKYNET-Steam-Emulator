@@ -36,7 +36,6 @@ namespace SKYNET.Network
             {
                 Write($"Error initializing P2P server, port {Port} is in use");
             }
-
         }
 
         private static void ReceiveThread(Object ThreadObject)

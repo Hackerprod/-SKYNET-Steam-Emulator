@@ -100,7 +100,7 @@ public partial class modCommon
         finally { currentProcess = null; }
     }
 
-    public static bool Is64Bit()
+    public static bool Isx64()
     {
         return IntPtr.Size == 8;
     }

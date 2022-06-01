@@ -5,7 +5,13 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using SKYNET;
+using SKYNET.Steamworks;
 
+using HSteamPipe = System.UInt32;
+using HSteamUser = System.UInt32;
+using SteamAPICall_t = System.UInt64;
+using AppId_t = System.UInt32;
+using DepotId_t = System.UInt32;
 
 namespace SKYNET.Hook.Handles
 {
@@ -18,94 +24,94 @@ namespace SKYNET.Hook.Handles
         // Functions Delegates
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate bool SteamAPI_ISteamApps_BIsSubscribedDelegate();
+        public delegate bool SteamAPI_ISteamApps_BIsSubscribedDelegate(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate bool SteamAPI_ISteamApps_BIsLowViolenceDelegate();
+        public delegate bool SteamAPI_ISteamApps_BIsLowViolenceDelegate(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate bool SteamAPI_ISteamApps_BIsCybercafeDelegate();
+        public delegate bool SteamAPI_ISteamApps_BIsCybercafeDelegate(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate bool SteamAPI_ISteamApps_BIsVACBannedDelegate();
+        public delegate bool SteamAPI_ISteamApps_BIsVACBannedDelegate(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate string SteamAPI_ISteamApps_GetCurrentGameLanguageDelegate();
+        public delegate string SteamAPI_ISteamApps_GetCurrentGameLanguageDelegate(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate string SteamAPI_ISteamApps_GetAvailableGameLanguagesDelegate();
+        public delegate string SteamAPI_ISteamApps_GetAvailableGameLanguagesDelegate(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate bool SteamAPI_ISteamApps_BIsSubscribedAppDelegate(AppId_t appID);
+        public delegate bool SteamAPI_ISteamApps_BIsSubscribedAppDelegate(IntPtr _, AppId_t appID);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate bool SteamAPI_ISteamApps_BIsDlcInstalledDelegate(AppId_t appID);
+        public delegate bool SteamAPI_ISteamApps_BIsDlcInstalledDelegate(IntPtr _, AppId_t appID);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate UInt32 SteamAPI_ISteamApps_GetEarliestPurchaseUnixTimeDelegate(AppId_t nAppID);
+        public delegate UInt32 SteamAPI_ISteamApps_GetEarliestPurchaseUnixTimeDelegate(IntPtr _, AppId_t nAppID);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate bool SteamAPI_ISteamApps_BIsSubscribedFromFreeWeekendDelegate();
+        public delegate bool SteamAPI_ISteamApps_BIsSubscribedFromFreeWeekendDelegate(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate int SteamAPI_ISteamApps_GetDLCCountDelegate();
+        public delegate int SteamAPI_ISteamApps_GetDLCCountDelegate(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate bool SteamAPI_ISteamApps_BGetDLCDataByIndexDelegate(int iDLC, IntPtr pAppID, bool pbAvailable, IntPtr pchName, int cchNameBufferSize);
+        public delegate bool SteamAPI_ISteamApps_BGetDLCDataByIndexDelegate(IntPtr _, int iDLC, uint pAppID, bool pbAvailable, string pchName, int cchNameBufferSize);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate void SteamAPI_ISteamApps_InstallDLCDelegate(AppId_t nAppID);
+        public delegate void SteamAPI_ISteamApps_InstallDLCDelegate(IntPtr _, AppId_t nAppID);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate void SteamAPI_ISteamApps_UninstallDLCDelegate(AppId_t nAppID);
+        public delegate void SteamAPI_ISteamApps_UninstallDLCDelegate(IntPtr _, AppId_t nAppID);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate void SteamAPI_ISteamApps_RequestAppProofOfPurchaseKeyDelegate(AppId_t nAppID);
+        public delegate void SteamAPI_ISteamApps_RequestAppProofOfPurchaseKeyDelegate(IntPtr _, AppId_t nAppID);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate bool SteamAPI_ISteamApps_GetCurrentBetaNameDelegate(IntPtr pchName, int cchNameBufferSize);
+        public delegate bool SteamAPI_ISteamApps_GetCurrentBetaNameDelegate(IntPtr _, IntPtr pchName, int cchNameBufferSize);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate bool SteamAPI_ISteamApps_MarkContentCorruptDelegate(bool bMissingFilesOnly);
+        public delegate bool SteamAPI_ISteamApps_MarkContentCorruptDelegate(IntPtr _, bool bMissingFilesOnly);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate UInt32 SteamAPI_ISteamApps_GetInstalledDepotsDelegate(AppId_t appID, IntPtr pvecDepots, uint cMaxDepots);
+        public delegate UInt32 SteamAPI_ISteamApps_GetInstalledDepotsDelegate(IntPtr _, uint appID, ref DepotId_t[] pvecDepots, uint cMaxDepots);
 
         //[UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
         //public delegate UInt32  GetInstalledDepotsDelegate (DepotId_t pvecDepots, UInt32 cMaxDepots);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate UInt32 SteamAPI_ISteamApps_GetAppInstallDirDelegate(AppId_t appID, IntPtr pchFolder, uint cchFolderBufferSize);
+        public delegate UInt32 SteamAPI_ISteamApps_GetAppInstallDirDelegate(IntPtr _, uint appID, string pchFolder, uint cchFolderBufferSize);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate bool SteamAPI_ISteamApps_BIsAppInstalledDelegate(AppId_t appID);
+        public delegate bool SteamAPI_ISteamApps_BIsAppInstalledDelegate(IntPtr _, AppId_t appID);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate ulong SteamAPI_ISteamApps_GetAppOwnerDelegate();
+        public delegate ulong SteamAPI_ISteamApps_GetAppOwnerDelegate(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate string SteamAPI_ISteamApps_GetLaunchQueryParamDelegate(string pchKey);
+        public delegate IntPtr SteamAPI_ISteamApps_GetLaunchQueryParamDelegate(IntPtr _, string pchKey);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate bool SteamAPI_ISteamApps_GetDlcDownloadProgressDelegate(AppId_t nAppID, UInt64 punBytesDownloaded, UInt64 punBytesTotal);
+        public delegate bool SteamAPI_ISteamApps_GetDlcDownloadProgressDelegate(IntPtr _, AppId_t nAppID, UInt64 punBytesDownloaded, UInt64 punBytesTotal);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate int SteamAPI_ISteamApps_GetAppBuildIdDelegate();
+        public delegate int SteamAPI_ISteamApps_GetAppBuildIdDelegate(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate void SteamAPI_ISteamApps_RequestAllProofOfPurchaseKeysDelegate();
+        public delegate void SteamAPI_ISteamApps_RequestAllProofOfPurchaseKeysDelegate(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate SteamAPICall_t SteamAPI_ISteamApps_GetFileDetailsDelegate(string pszFileName);
+        public delegate SteamAPICall_t SteamAPI_ISteamApps_GetFileDetailsDelegate(IntPtr _, string pszFileName);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate int SteamAPI_ISteamApps_GetLaunchCommandLineDelegate(string pszCommandLine, int cubCommandLine);
+        public delegate int SteamAPI_ISteamApps_GetLaunchCommandLineDelegate(IntPtr _, string pszCommandLine, int cubCommandLine);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate bool SteamAPI_ISteamApps_BIsSubscribedFromFamilySharingDelegate();
+        public delegate bool SteamAPI_ISteamApps_BIsSubscribedFromFamilySharingDelegate(IntPtr _);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
-        public delegate bool SteamAPI_ISteamApps_BIsTimedTrialDelegate(UInt32 punSecondsAllowed, UInt32 punSecondsPlayed);
+        public delegate bool SteamAPI_ISteamApps_BIsTimedTrialDelegate(IntPtr _, UInt32 punSecondsAllowed, UInt32 punSecondsPlayed);
 
 
         // Functions Delegates
