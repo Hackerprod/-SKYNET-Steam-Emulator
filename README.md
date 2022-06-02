@@ -14,6 +14,13 @@ The project is in an initial stage, so it is not functional yet for some Games.
 
 ![Screenshot](Capture.png)
 
+## 📁 How to use
+### Replacing the dll
+When compiling the project, two folders are generated (x64 and x86) that contain the dll for different target platform, in the case of x64 you must rename the file to steam_api64.dll, to emulate the connection to Steam of a game you must replace the dll with the one that contains the game. In case the game engine is Unity you can rename the dll to CSteamworks.dll and replace it.
+
+### Client Emulator
+To use the client you simply need to add the game and configure the appid and path of the original steam_api. The client is currently under development so it is not functional yet.
+
 ## 📁 Directory structure
 ```
 📁 Root game folder                     
