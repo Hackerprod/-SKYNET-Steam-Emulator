@@ -38,7 +38,7 @@ To use the client you simply need to add the game and configure the appid and pa
 User Stats manager         Save and Load user stats from local folder.
 Achievements manager       Save and Load user achievements from local folder.
 CSteamworks emulation      Rename the emu to CSteamworks.dll to emulate them.
-Multiplataform             Works with multiple game engines like Source 2, Unity 3D etc.
+Supported Game Engines     Works with multiple game engines like Source 2, Unity 3D etc.
 Network communication      Network communication between clients through a configurable port.
 Overlay                    External Overlay for steam and game messages.
 DLC                        Unlock all downloaded DLCs.
