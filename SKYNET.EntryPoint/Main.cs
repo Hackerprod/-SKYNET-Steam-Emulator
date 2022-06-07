@@ -48,7 +48,6 @@ namespace SKYNET
                 if (!SteamEmulator.Initialized)
                 {
                     string app = Process.GetCurrentProcess().ProcessName;
-                    Write($"Initializing steam API in {app}");
                     SteamEmulator = new SteamEmulator();
                     SteamEmulator.Initialize(true);
                     SteamEmulator.OnMessage += SteamEmulator_OnMessage;

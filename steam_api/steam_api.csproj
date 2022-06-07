@@ -270,6 +270,10 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="obj\Debug\SKYNET.Overlay.frmOverlay.resources" />
+    <EmbeddedResource Include="obj\Debug\SKYNET.Overlay.ProfileControl.resources" />
+    <EmbeddedResource Include="obj\Debug\SKYNET.Overlay.SteamUserControl.resources" />
+    <EmbeddedResource Include="obj\Debug\SKYNET.Properties.Resources.resources" />
     <EmbeddedResource Include="Overlay\frmOverlay.resx">
       <DependentUpon>frmOverlay.cs</DependentUpon>
     </EmbeddedResource>
@@ -285,10 +289,23 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="obj\Debug\DesignTimeResolveAssemblyReferences.cache" />
+    <None Include="obj\Debug\DesignTimeResolveAssemblyReferencesInput.cache" />
+    <None Include="obj\Debug\steam_api.csproj.CoreCompileInputs.cache" />
+    <None Include="obj\Debug\steam_api.csproj.GenerateResource.cache" />
+    <None Include="obj\Debug\steam_api.csprojAssemblyReference.cache" />
     <None Include="Resources\Image.jpg" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\close.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="obj\Debug\steam_api.csproj.FileListAbsolute.txt" />
+    <Content Include="obj\Debug\steam_api.dll" />
+    <Content Include="obj\Debug\steam_api.pdb" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="obj\Debug\TempPE\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ImportGroup Label=".NET DllExport">

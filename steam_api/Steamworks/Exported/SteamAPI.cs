@@ -107,13 +107,14 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamAPI_InitSafe()
         {
             Write("SteamAPI_InitSafe");
-            return true;
+            return SteamAPI_Init();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_InitAnonymousUser()
         {
             Write("SteamAPI_InitAnonymousUser");
+            SteamAPI_Init();
             return true;
         }
 

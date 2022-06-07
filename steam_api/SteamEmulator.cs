@@ -112,10 +112,8 @@ public class SteamEmulator
         Instance = this;
     }
 
-    [DllExport(CallingConvention = CallingConvention.Cdecl)]
     public static void Initialize(bool hooked = false)
     {
-        Write("Initializing steam API");
         try
         {
             if (Initialized) return;
