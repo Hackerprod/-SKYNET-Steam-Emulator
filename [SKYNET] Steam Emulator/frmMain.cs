@@ -16,7 +16,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
-using EasyHook;
 using SKYNET;
 using SKYNET.GUI;
 using SKYNET.Properties;
@@ -194,48 +193,48 @@ namespace SKYNET
                 return;
             }
 
-            Task.Run(() =>
-            {
-                ///richTextBox1.Clear();
-                Write("Opening " + game.Name);
+            //Task.Run(() =>
+            //{
+            //    ///richTextBox1.Clear();
+            //    Write("Opening " + game.Name);
 
-                HookInterface  HookInterface = new HookInterface();
-                HookInterface.InjectionOptions = InjectionOptions.Default;
-                HookInterface.Game = game;
+            //    HookInterface  HookInterface = new HookInterface();
+            //    HookInterface.InjectionOptions = InjectionOptions.Default;
+            //    HookInterface.Game = game;
 
-                HookInterface.PersonaName = settings.PersonaName;
-                HookInterface.Language = settings.Language;
-                HookInterface.ConsoleOutput = settings.ConsoleOutput;
-                HookInterface.SteamId = settings.SteamId;
+            //    HookInterface.PersonaName = settings.PersonaName;
+            //    HookInterface.Language = settings.Language;
+            //    HookInterface.ConsoleOutput = settings.ConsoleOutput;
+            //    HookInterface.SteamId = settings.SteamId;
 
-                HookInterface.OnMessage += this.HookInterface_OnMessage;
-                HookInterface.OnShowMessage += this.HookInterface_OnShowMessage;
+            //    HookInterface.OnMessage += this.HookInterface_OnMessage;
+            //    HookInterface.OnShowMessage += this.HookInterface_OnShowMessage;
 
-                channel = null;
+            //    channel = null;
 
-                try
-                {
-                    var InObject = WellKnownObjectMode.Singleton;
-                    RemoteHooking.IpcCreateServer(ref channel, InObject, HookInterface);
-                    //channel = "SteamEmulator";
-                    //IpcCreateServer(ref channel, InObject, HookInterface);
-                    HookInterface.ChannelName = channel;
-                    HookInterface.DllPath = Path.Combine(modCommon.GetPath(), "SKYNET.EntryPoint.dll");
-                    HookInterface.EmulatorPath = modCommon.GetPath();
-                    RemoteHooking.CreateAndInject(game.ExecutablePath, game.Parameters, 0, HookInterface.InjectionOptions, HookInterface.DllPath, HookInterface.DllPath, out ProcessId, channel);
-                    InjectedProcess = Process.GetProcessById(ProcessId);
-                    RunningGames.Add(new RunningGame() { Game = e.GetGame(), Process = InjectedProcess });
-                    WaitForExit();
+            //    try
+            //    {
+            //        var InObject = WellKnownObjectMode.Singleton;
+            //        RemoteHooking.IpcCreateServer(ref channel, InObject, HookInterface);
+            //        //channel = "SteamEmulator";
+            //        //IpcCreateServer(ref channel, InObject, HookInterface);
+            //        HookInterface.ChannelName = channel;
+            //        HookInterface.DllPath = Path.Combine(modCommon.GetPath(), "SKYNET.EntryPoint.dll");
+            //        HookInterface.EmulatorPath = modCommon.GetPath();
+            //        RemoteHooking.CreateAndInject(game.ExecutablePath, game.Parameters, 0, HookInterface.InjectionOptions, HookInterface.DllPath, HookInterface.DllPath, out ProcessId, channel);
+            //        InjectedProcess = Process.GetProcessById(ProcessId);
+            //        RunningGames.Add(new RunningGame() { Game = e.GetGame(), Process = InjectedProcess });
+            //        WaitForExit();
 
-                    BT_GameAction.Text = "CLOSE";
-                    BT_GameAction.BackColor = Color.Red;
-                }
-                catch (Exception ex)
-                {
-                    Write($"Error Injecting {Path.GetFileName(e.GamePath)}");
-                    Write(ex.Message);
-                }
-            });
+            //        BT_GameAction.Text = "CLOSE";
+            //        BT_GameAction.BackColor = Color.Red;
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        Write($"Error Injecting {Path.GetFileName(e.GamePath)}");
+            //        Write(ex.Message);
+            //    }
+            //});
         }
 
         public static IpcServerChannel IpcCreateServer<TRemoteObject>(ref string RefChannelName, WellKnownObjectMode InObjectMode, TRemoteObject ipcInterface, params WellKnownSidType[] InAllowedClientSIDs) where TRemoteObject : MarshalByRefObject

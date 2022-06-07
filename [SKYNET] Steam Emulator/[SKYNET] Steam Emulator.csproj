@@ -63,9 +63,6 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="EasyHook, Version=2.7.7097.0, Culture=neutral, PublicKeyToken=4b580fca19d0b0c5, processorArchitecture=MSIL">
-      <HintPath>..\packages\EasyHook.2.7.7097\lib\net40\EasyHook.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.mshtml, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
@@ -200,6 +197,8 @@
     <Compile Include="GUI\Controls\SKYNET_Check.designer.cs">
       <DependentUpon>SKYNET_Check.cs</DependentUpon>
     </Compile>
+    <Compile Include="Types\ConsoleMessage.cs" />
+    <Compile Include="Types\Game.cs" />
     <Compile Include="Types\Settings.cs" />
     <Compile Include="Types\RunningGame.cs" />
     <EmbeddedResource Include="GUI\Controls\CircularPictureBox.resx">
@@ -257,7 +256,6 @@
     <EmbeddedResource Include="GUI\Controls\SKYNET_Check.resx">
       <DependentUpon>SKYNET_Check.cs</DependentUpon>
     </EmbeddedResource>
-    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -310,10 +308,6 @@
     <None Include="Resources\add.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SKYNET.EntryPoint\SKYNET.EntryPoint.csproj">
-      <Project>{f6f62e21-7c2b-4032-8f1a-50110a13c87b}</Project>
-      <Name>SKYNET.EntryPoint</Name>
-    </ProjectReference>
     <ProjectReference Include="..\steam_api\steam_api.csproj">
       <Project>{f296c00a-53b4-4a0d-977b-f1946b1acce2}</Project>
       <Name>steam_api</Name>
