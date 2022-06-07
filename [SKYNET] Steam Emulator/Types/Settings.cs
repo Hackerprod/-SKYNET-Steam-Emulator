@@ -10,7 +10,7 @@ using System.Web.Script.Serialization;
 
 namespace SKYNET.Types
 {
-    public class EmuSettings
+    public class Settings
     {
         public ulong SteamId { get; set; }
         public string PersonaName { get; set; }
@@ -18,14 +18,14 @@ namespace SKYNET.Types
         public bool LogToFile { get; set; }
         public bool ConsoleOutput { get; set; }
 
-        public static EmuSettings Load()
+        public static Settings Load()
         {
-            EmuSettings settings;
+            Settings settings;
             string fileName = Path.Combine(modCommon.GetPath(), "Data", "[SKYNET] Steam Emulator.json");
             if (!File.Exists(fileName))
             {
                 CSteamID steamID = CSteamID.CreateOne();
-                settings = new EmuSettings()
+                settings = new Settings()
                 {
                     SteamId = steamID.SteamID,
                     Language = "English",
@@ -38,12 +38,12 @@ namespace SKYNET.Types
             else
             {
                 string json = File.ReadAllText(fileName);
-                settings = new JavaScriptSerializer().Deserialize<EmuSettings>(json);
+                settings = new JavaScriptSerializer().Deserialize<Settings>(json);
             }
             return settings;
         }
 
-        public static void Save(EmuSettings settings)
+        public static void Save(Settings settings)
         {
             string fileName = Path.Combine(modCommon.GetPath(), "Data", "[SKYNET] Steam Emulator.json");
 

@@ -458,13 +458,17 @@ namespace SKYNET.Steamworks.Implementation
             peChatEntryType = (int)EChatEntryType.ChatMsg;
             return 0;
         }
-
+        int num = 0;
         public string GetFriendPersonaName(ulong steamIDFriend)
         {
-            string Result = "Unknown";
+            string Result = "Unknown" + "_" + num; num++;
             MutexHelper.Wait("Users", delegate
             {
-                if ((ulong)steamIDFriend == SteamEmulator.SteamID)
+                if (steamIDFriend == SteamEmulator.SteamID)
+                {
+                    Result = SteamEmulator.PersonaName;
+                }
+                else if (steamIDFriend == 65535)
                 {
                     Result = SteamEmulator.PersonaName;
                 }

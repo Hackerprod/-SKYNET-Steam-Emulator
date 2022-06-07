@@ -35,7 +35,7 @@ namespace SKYNET
         private Dictionary<uint, List<string>> GameMessages;
         private string channel;
         private int ProcessId;
-        private EmuSettings settings;
+        private Types.Settings settings;
 
         public frmMain()
         {
@@ -44,7 +44,7 @@ namespace SKYNET
             SetMouseMove(PN_Top);
             frm = this;
 
-            settings = EmuSettings.Load();
+            settings = Types.Settings.Load();
             LB_NickName.Text = settings.PersonaName;
             LB_Menu_NickName.Text = settings.PersonaName.ToUpper();
             LB_SteamID.Text = settings.SteamId.ToString();
@@ -345,7 +345,7 @@ namespace SKYNET
             string path = Path.Combine(modCommon.GetPath(), "Data");
             modCommon.EnsureDirectoryExists(path);
 
-            EmuSettings.Save(settings);
+            Types.Settings.Save(settings);
 
             string game = Path.Combine(path, "Games.json");
 
