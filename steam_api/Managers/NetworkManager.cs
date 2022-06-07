@@ -801,34 +801,6 @@ namespace SKYNET.Managers
 
         public static IPAddress GetIPAddress()
         {
-            if (NetworkInterface.GetIsNetworkAvailable())
-            {
-                NetworkInterface[] allNetworkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
-                foreach (NetworkInterface networkInterface in allNetworkInterfaces)
-                {
-                    if (networkInterface.OperationalStatus != OperationalStatus.Up)
-                    {
-                        continue;
-                    }
-                    IPInterfaceProperties iPProperties = networkInterface.GetIPProperties();
-                    if (iPProperties.GatewayAddresses.FirstOrDefault() == null)
-                    {
-                        continue;
-                    }
-                    foreach (UnicastIPAddressInformation unicastAddress in iPProperties.UnicastAddresses)
-                    {
-                        if (unicastAddress.Address.AddressFamily == AddressFamily.InterNetwork)
-                        {
-                            return unicastAddress.Address;
-                        }
-                    }
-                }
-            }
-            return GetIPAddress2();
-        }
-
-        public static IPAddress GetIPAddress2()
-        {
             string hostName = Dns.GetHostName();
             IPHostEntry hostEntry = Dns.GetHostEntry(hostName);
             IPAddress iPAddress = null;

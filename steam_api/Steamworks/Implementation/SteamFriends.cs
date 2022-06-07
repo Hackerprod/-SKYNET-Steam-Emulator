@@ -39,12 +39,12 @@ namespace SKYNET.Steamworks.Implementation
             QueryingAvatar = new List<SteamAPICall_t>();
             RichPresence = new Dictionary<string, string>();
             Avatars = new ConcurrentDictionary<ulong, ImageAvatar>();
-            ImageIndex = 10;
+            ImageIndex = 10; 
 
             #region Default Avatar
 
             DefaultAvatar = new ImageAvatar(Resources.Image, ref ImageIndex);
-            
+
             #endregion
 
             #region Own Avatar

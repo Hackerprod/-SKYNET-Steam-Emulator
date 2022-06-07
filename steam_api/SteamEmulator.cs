@@ -137,21 +137,21 @@ public class SteamEmulator
                 Write("Settings", "Error loading settings");
             }
 
-            SteamID_GS = CSteamID.GenerateGameServer();
+            SteamID_GS = CSteamID.GenerateGameServer(); 
 
             #region Interface Initialization
 
             // Client Interfaces
 
-            SteamClient = new SteamClient();
+            SteamClient = new SteamClient(); 
 
-            SteamUser = new SteamUser();
+            SteamUser = new SteamUser(); 
 
-            SteamFriends = new SteamFriends();
+            SteamFriends = new SteamFriends(); 
 
-            SteamUtils = new SteamUtils();
+            SteamUtils = new SteamUtils(); 
 
-            SteamMatchmaking = new SteamMatchmaking();
+            SteamMatchmaking = new SteamMatchmaking(); 
 
             SteamMatchMakingServers = new SteamMatchMakingServers();
 
@@ -215,7 +215,7 @@ public class SteamEmulator
             SteamMasterServerUpdater = new SteamMasterServerUpdater();
 
             #endregion
-
+            
             InterfaceManager.Initialize();
             NetworkManager.Initialize();
             //IpcManager.Initialize();
