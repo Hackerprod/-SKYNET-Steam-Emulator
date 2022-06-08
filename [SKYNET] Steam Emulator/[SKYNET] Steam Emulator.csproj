@@ -12,6 +12,8 @@
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -291,12 +293,6 @@
     <None Include="Resources\8967.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="EasyHook\EasyHook32.dll" />
-    <Content Include="EasyHook\EasyHook32Svc.exe" />
-    <Content Include="EasyHook\EasyHook64.dll" />
-    <Content Include="EasyHook\EasyHook64Svc.exe" />
-    <Content Include="EasyHook\EasyLoad32.dll" />
-    <Content Include="EasyHook\EasyLoad64.dll" />
     <Content Include="game.ico" />
     <None Include="Resources\Header_1.jpg" />
     <None Include="Resources\coins.png" />
@@ -308,6 +304,10 @@
     <None Include="Resources\add.png" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SKYNET.Client\SKYNET.Client.csproj">
+      <Project>{0b5f1bfc-2cb9-48bb-908e-d7a7388cdf21}</Project>
+      <Name>SKYNET.Client</Name>
+    </ProjectReference>
     <ProjectReference Include="..\steam_api\steam_api.csproj">
       <Project>{f296c00a-53b4-4a0d-977b-f1946b1acce2}</Project>
       <Name>steam_api</Name>

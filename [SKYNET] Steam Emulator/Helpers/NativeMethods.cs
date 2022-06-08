@@ -7,7 +7,7 @@ using System.Text;
 
 namespace SKYNET.Helpers
 {
-	public static class NativeMethods
+	public partial class NativeMethods
 	{
         public static IntPtr GetProcAddress(string InModule, string InSymbolName)
         {
