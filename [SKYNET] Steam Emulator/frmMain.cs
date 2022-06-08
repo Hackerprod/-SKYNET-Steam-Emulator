@@ -208,7 +208,9 @@ namespace SKYNET
             pInfo.RedirectStandardOutput = true;
             pInfo.UseShellExecute = false;
 
-            InjectedProcess = Process.Start(pInfo);
+            //InjectedProcess = Process.Start(pInfo);
+            Injector.CreateAndInject(game.ExecutablePath, game.Parameters, 0, x86Dll, x64Dll, out int pId, null);
+            Injector.WakeUpProcess();
             //var Injector = new Reloaded.Injector.Injector(InjectedProcess);
             //Injector.Inject(x64Dll);
 

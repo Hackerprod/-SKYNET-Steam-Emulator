@@ -167,6 +167,9 @@
     <Compile Include="GUI\frmMessage.Designer.cs">
       <DependentUpon>frmMessage.cs</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\Injector\HelperServiceInterface.cs" />
+    <Compile Include="Helpers\Injector\Injector.cs" />
+    <Compile Include="Helpers\Injector\NativeAPI.cs" />
     <Compile Include="Helpers\Memory.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>
