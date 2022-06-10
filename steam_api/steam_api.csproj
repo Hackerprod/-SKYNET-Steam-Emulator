@@ -74,8 +74,18 @@
     <Compile Include="Callback\SteamCallback.cs" />
     <Compile Include="Callback\SteamCallBacks.cs" />
     <Compile Include="Helpers\INISerializer.cs" />
+    <Compile Include="Helpers\IPC\EventArgs.cs" />
+    <Compile Include="Helpers\IPC\PipeClient.cs" />
+    <Compile Include="Helpers\IPC\PipeConnection.cs" />
+    <Compile Include="Helpers\IPC\PipeServer.cs" />
+    <Compile Include="Helpers\IPC\PipeStreamReader.cs" />
+    <Compile Include="Helpers\IPC\PipeStreamWrapper.cs" />
+    <Compile Include="Helpers\IPC\PipeStreamWriter.cs" />
+    <Compile Include="Helpers\IPC\TaskWorker.cs" />
+    <Compile Include="Helpers\IPC\Types\IPC_Messages.cs" />
+    <Compile Include="Helpers\JSON\JSONParser.cs" />
+    <Compile Include="Helpers\JSON\SimpleJSONDotNetTypes.cs" />
     <Compile Include="Helpers\Platform.cs" />
-    <Compile Include="Network\P2PNetworking.cs" />
     <Compile Include="Overlay\SteamUserControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -90,25 +100,17 @@
       <DependentUpon>frmOverlay.cs</DependentUpon>
     </Compile>
     <Compile Include="Helpers\ImageHelper.cs" />
-    <Compile Include="Helpers\IpcCommunicator.cs" />
-    <Compile Include="Helpers\JSON\SimpleJSONDotNetTypes.cs" />
     <Compile Include="Helpers\MutexHelper.cs" />
     <Compile Include="Helpers\Settings.cs" />
-    <Compile Include="Helpers\JSON\JSONParser.cs" />
-    <Compile Include="Managers\IpcManager.cs" />
-    <Compile Include="Managers\NetworkManager.cs" />
+    <Compile Include="Managers\IPCManager.cs" />
     <Compile Include="Helpers\StreamHelpers.cs" />
     <Compile Include="Managers\TicketManager.cs" />
-    <Compile Include="Network\TCPClient.cs" />
-    <Compile Include="Network\NET_Messages.cs" />
-    <Compile Include="Network\TCPServer.cs" />
     <Compile Include="Overlay\ProfileControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Overlay\ProfileControl.Designer.cs">
       <DependentUpon>ProfileControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Plugin\IGameCoordinatorPlugin.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -151,11 +153,12 @@
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamGameServer.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_SteamNetworkingIPAddr.cs" />
     <Compile Include="Steamworks\Exported\SteamInternal.cs" />
-    <Compile Include="Helpers\Extentions.cs" />
+    <Compile Include="Helpers\Extensions.cs" />
     <Compile Include="Helpers\IntPtrExtentions.cs" />
     <Compile Include="Helpers\Log.cs" />
     <Compile Include="Helpers\modCommon.cs" />
     <Compile Include="Managers\MemoryManager.cs" />
+    <Compile Include="Helpers\NetworkHelper.cs" />
     <Compile Include="Steamworks\Interfaces\SteamClient\SteamClient017.cs" />
     <Compile Include="Steamworks\Interfaces\SteamController\SteamController005.cs" />
     <Compile Include="Steamworks\Interfaces\SteamInput\SteamInput006.cs" />
@@ -263,7 +266,7 @@
     <Compile Include="Steamworks\Types\SteamTypes.cs" />
     <Compile Include="Types\GameMessage.cs" />
     <Compile Include="Types\OverlayType.cs" />
-    <Compile Include="Types\SteamUser.cs" />
+    <Compile Include="Types\SteamPlayer.cs" />
     <Compile Include="Types\GameServerData.cs" />
   </ItemGroup>
   <ItemGroup>

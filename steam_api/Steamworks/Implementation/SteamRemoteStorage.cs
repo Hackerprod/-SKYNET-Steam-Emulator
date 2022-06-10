@@ -41,16 +41,9 @@ namespace SKYNET.Steamworks.Implementation
 
             try
             {
-                if (SteamEmulator.Hooked)
-                {
-                    StoragePath = Path.Combine(SteamEmulator.EmulatorPath, "SKYNET", "Storage", "Remote", SteamEmulator.AppID.ToString(), "remote");
-                    modCommon.EnsureDirectoryExists(StoragePath);
-                }
-                else
-                {
-                    StoragePath = Path.Combine(modCommon.GetPath(), "SKYNET", "Storage", "Remote");
-                    modCommon.EnsureDirectoryExists(StoragePath);
-                }
+                // TODO: Update to new client implementation
+                StoragePath = Path.Combine(modCommon.GetPath(), "SKYNET", "Storage", "Remote");
+                modCommon.EnsureDirectoryExists(StoragePath);
             }
             catch (Exception ex)
             {

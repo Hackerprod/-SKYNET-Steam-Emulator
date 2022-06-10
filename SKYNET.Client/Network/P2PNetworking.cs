@@ -2,7 +2,6 @@
 //using SKYNET.Helper;
 //using SKYNET.Helper.JSON;
 //using SKYNET.Managers;
-//using SKYNET.Network.Packets;
 //using SKYNET.Steamworks;
 //using SKYNET.Steamworks.Implementation;
 //using System;

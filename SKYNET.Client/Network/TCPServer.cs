@@ -34,7 +34,7 @@ namespace SKYNET.Network
             ConnectedClients.Remove(clientSockets);
         }
 
-        public void Start(object state)
+        public void Start()
         {
             this._localEndPoint = new IPEndPoint(IPAddress.Any, Port);
             this._serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);

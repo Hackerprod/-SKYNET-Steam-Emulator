@@ -69,6 +69,9 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
     <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="NativeSharp, Version=3.0.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NativeSharp-lib.3.0.0.1\lib\net40\NativeSharp.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Design" />
@@ -86,12 +89,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GUI\Controls\SKYNET_UserControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\Controls\SKYNET_UserControl.Designer.cs">
+      <DependentUpon>SKYNET_UserControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\DllInjector.cs" />
     <Compile Include="GUI\Controls\SKYNET_WebLogger.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="GUI\Controls\SKYNET_WebLogger.designer.cs">
       <DependentUpon>SKYNET_WebLogger.cs</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\Extentions.cs" />
     <Compile Include="Helpers\FileIcon.cs" />
     <Compile Include="GUI\Controls\CircularPictureBox.cs">
       <SubType>UserControl</SubType>
@@ -167,9 +178,6 @@
     <Compile Include="GUI\frmMessage.Designer.cs">
       <DependentUpon>frmMessage.cs</DependentUpon>
     </Compile>
-    <Compile Include="Helpers\Injector\HelperServiceInterface.cs" />
-    <Compile Include="Helpers\Injector\Injector.cs" />
-    <Compile Include="Helpers\Injector\NativeAPI.cs" />
     <Compile Include="Helpers\Memory.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>
@@ -183,9 +191,6 @@
     <Compile Include="GUI\Controls\GameBox.Designer.cs">
       <DependentUpon>GameBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="Helpers\IconExtractor\IconExtractor.cs" />
-    <Compile Include="Helpers\IconExtractor\IconUtil.cs" />
-    <Compile Include="Helpers\IconExtractor\NativeMethods.cs" />
     <Compile Include="Helpers\modCommon.cs" />
     <Compile Include="Helpers\NativeMethods.cs" />
     <Compile Include="Program.cs" />
@@ -204,10 +209,12 @@
     </Compile>
     <Compile Include="Types\ConsoleMessage.cs" />
     <Compile Include="Types\Game.cs" />
-    <Compile Include="Types\Settings.cs" />
     <Compile Include="Types\RunningGame.cs" />
     <EmbeddedResource Include="GUI\Controls\CircularPictureBox.resx">
       <DependentUpon>CircularPictureBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\Controls\SKYNET_UserControl.resx">
+      <DependentUpon>SKYNET_UserControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\Controls\SKYNET_WebLogger.resx">
       <DependentUpon>SKYNET_WebLogger.cs</DependentUpon>
@@ -261,6 +268,7 @@
     <EmbeddedResource Include="GUI\Controls\SKYNET_Check.resx">
       <DependentUpon>SKYNET_Check.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -311,10 +319,11 @@
       <Project>{0b5f1bfc-2cb9-48bb-908e-d7a7388cdf21}</Project>
       <Name>SKYNET.Client</Name>
     </ProjectReference>
-    <ProjectReference Include="..\steam_api\steam_api.csproj">
-      <Project>{f296c00a-53b4-4a0d-977b-f1946b1acce2}</Project>
-      <Name>steam_api</Name>
+    <ProjectReference Include="..\SKYNET.Common\SKYNET.Common.csproj">
+      <Project>{bb307a9e-49f3-4ede-abe4-87ec2086be18}</Project>
+      <Name>SKYNET.Common</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

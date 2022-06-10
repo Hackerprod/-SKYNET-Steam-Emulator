@@ -10,11 +10,11 @@ using SKYNET.Helper;
 using SKYNET.Managers;
 using SKYNET.Properties;
 using SKYNET.Overlay;
-using SKYNET.Network.Packets;
 using SKYNET.Types;
 
 using SteamAPICall_t = System.UInt64;
 using FriendsGroupID_t = System.UInt16;
+using SKYNET.IPC.Types;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -86,7 +86,7 @@ namespace SKYNET.Steamworks.Implementation
                 HasFriend = false,
                 PersonaName = SteamEmulator.PersonaName,
                 SteamID = (ulong)SteamEmulator.SteamID,
-                IPAddress = NetworkManager.GetIPAddress().ToString()
+                IPAddress = NetworkHelper.GetIPAddress().ToString()
             });
 
             #endregion
@@ -814,7 +814,7 @@ namespace SKYNET.Steamworks.Implementation
             if (user != null)
             {
                 user.PersonaName = pchPersonaName;
-                NetworkManager.BroadcastStatusUpdated(user);
+                IPCManager.BroadcastStatusUpdated(user);
             }
 
             return APICall;
@@ -859,17 +859,18 @@ namespace SKYNET.Steamworks.Implementation
                 user.LobbyID = lobbySteamId;
                 if (userSteamId == SteamEmulator.SteamID)
                 {
-                    NetworkManager.BroadcastStatusUpdated(user);
+                    IPCManager.BroadcastStatusUpdated(user);
                 }
             }
         }
 
-        public void UpdateUserStatus(NET_UserDataUpdated statusChanged, string IPAddress)
+        public void UpdateUserStatus(IPC_UserDataUpdated statusChanged)
         {
             var user = GetUser(new CSteamID(statusChanged.AccountID));
             if (user != null)
             {
                 user.LobbyID = statusChanged.LobbyID;
+                user.IPAddress = statusChanged.IPAddress;
                 if (user.PersonaName != statusChanged.PersonaName)
                 {
                     user.PersonaName = statusChanged.PersonaName;
@@ -889,7 +890,7 @@ namespace SKYNET.Steamworks.Implementation
                     SteamID = (ulong)new CSteamID(statusChanged.AccountID),
                     HasFriend = true,
                     PersonaName = statusChanged.PersonaName,
-                    IPAddress = IPAddress
+                    IPAddress = statusChanged.IPAddress
                 };
                 Users.Add(user);
             }
@@ -1001,7 +1002,7 @@ namespace SKYNET.Steamworks.Implementation
                 if (User != null)
                 {
                     QueryingAvatar.Add(steamIDFriend);
-                    NetworkManager.RequestAvatar(User.IPAddress);
+                    IPCManager.RequestAvatar(User.SteamID);
                 }
             }
             catch

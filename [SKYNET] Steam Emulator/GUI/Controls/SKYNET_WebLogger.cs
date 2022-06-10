@@ -144,15 +144,21 @@ namespace SKYNET.Controls
         {
             for (int i = 0; i < CallBack.Count; i++)
             {
-                var e = CallBack[i];
+                try
+                {
+                    var e = CallBack[i];
 
-                if (e == null || e.Msg == null)
-                    return;
-                string htmlMessage = GetMessage(e);
+                    if (e == null || e.Msg == null)
+                        return;
+                    string htmlMessage = GetMessage(e);
 
-                Write(htmlMessage);
+                    Write(htmlMessage);
 
-                CallBack.Remove(e);
+                    CallBack.RemoveAt(i);
+                }
+                catch (Exception)
+                {
+                }
             }
         }
 
@@ -165,7 +171,6 @@ namespace SKYNET.Controls
 
                 webChat.Invoke(new Action(() =>
                 {
-                    MessageBox.Show(html);
                     webChat.Document.Write(html);
                     try
                     {
@@ -302,12 +307,12 @@ namespace SKYNET.Controls
 
     public partial class SKYNET_WebLogger
     {
-        private string C_1 = "#1D2834";
-        private string C_2 = "#222E39";
-        private string C_Last = "#1D2834";
+        private string C_1 = "#2E3239";
+        private string C_2 = "#393F48";
+        private string C_Last = "#2E3239";
         public string GetMessage(ConsoleMessage m)
         {
-            string msg = "";
+            string msg = m.Msg.ToString();
             string ObjectId = "";
 
             ObjectId = "ObjectId";
@@ -318,7 +323,7 @@ namespace SKYNET.Controls
             //Sender
             code.AppendLine($"<tr bgcolor=\"{C_Last}\">");
             code.AppendLine("<td style=\"padding-left:5; width:115\">");
-            code.AppendLine($"<h5 style='color:{ColorTranslator.ToHtml(Color.White)}; text-align:top' Class='message-type'>{"Menganooooo"}</h5>");
+            code.AppendLine($"<h5 style='color:{ColorTranslator.ToHtml(Color.White)}; text-align:top' Class='message-type'>{m.Sender}</h5>");
             code.AppendLine("</td>");
 
             //Body
@@ -348,7 +353,6 @@ namespace SKYNET.Controls
             {
                 if (ObjectId != "")
                 {
-                    msg += $"&nbsp; &nbsp; <a onclick=\"window.external.ShowDump('{ObjectId}')\" style=\"cursor:hand; color:#78C3FC; text-size:70px;\"> Show details </a>";
                     code.Append(msg);
                 }
                 else

@@ -1,23 +1,16 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Runtime.Remoting;
-using System.Runtime.Remoting.Channels;
-using System.Runtime.Remoting.Channels.Ipc;
-using System.Runtime.Serialization.Formatters;
-using System.Security.AccessControl;
-using System.Security.Principal;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
 using SKYNET.Client;
+using SKYNET.Common;
 using SKYNET.GUI;
-using SKYNET.Helpers;
+using SKYNET.GUI.Controls;
+using SKYNET.Managers;
 using SKYNET.Properties;
 using SKYNET.Types;
 
@@ -33,7 +26,6 @@ namespace SKYNET
         private GameBox SelectedBox;
         private GameBox MenuBox;
         private Dictionary<uint, List<string>> GameMessages;
-        private string channel;
         private int ProcessId;
         private Types.Settings settings;
 
@@ -44,15 +36,17 @@ namespace SKYNET
             SetMouseMove(PN_Top);
             frm = this;
 
+            Log.OnMessage += Log_OnMessage;
             settings = Types.Settings.Load();
             LB_NickName.Text = settings.PersonaName;
             LB_Menu_NickName.Text = settings.PersonaName.ToUpper();
-            LB_SteamID.Text = settings.SteamId.ToString();
+            LB_SteamID.Text = settings.AccountID.ToString();
 
             GameMessages = new Dictionary<uint, List<string>>();
             RunningGames = new List<RunningGame>();
                  
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data"));
+            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "www"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Storage"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache"));
@@ -90,8 +84,45 @@ namespace SKYNET
 
             shadowBox1.BackColor = Color.FromArgb(100, 0, 0, 0);
 
-            SteamClient = new SteamClient();
+            SteamClient = new SteamClient(settings);
             SteamClient.Initialize();
+
+            UserManager.OnUserAdded += UserManager_OnUserAdded;
+            UserManager.OnUserUpdated += UserManager_OnUserUpdated;
+            UserManager.OnUserRemoved += UserManager_OnUserRemoved;
+
+            PB_Avatar.Image = SteamClient.Avatar;
+        }
+
+        #region Events
+
+        private void UserManager_OnUserAdded(object sender, SteamPlayer user)
+        {
+            var control = new SKYNET_UserControl();
+            control.SteamPlayer = user;
+            control.Dock = DockStyle.Top;
+
+            modCommon.InvokeAction(PN_UserContainer, delegate
+            {
+                PN_UserContainer.Controls.Add(control);
+            });
+        }
+
+        private void UserManager_OnUserUpdated(object sender, SteamPlayer user)
+        {
+
+        }
+
+        private void UserManager_OnUserRemoved(object sender, SteamPlayer user)
+        {
+
+        }
+
+        #endregion
+
+        private void Log_OnMessage(object sender, LogEventArgs Event)
+        {
+            Write(Event.Sender, Event.Message);
         }
 
         private void GameBox_Clicked(object sender, MouseEventArgs e )
@@ -159,6 +190,7 @@ namespace SKYNET
         {
             AddBoxGame(game);
         }
+
         public void UpdateGame(int boxHandle, Game game)
         {
             foreach (var control in PN_GameContainer.Controls)
@@ -196,7 +228,7 @@ namespace SKYNET
                 return;
             }
 
-            Write("Opening " + game.Name);
+            Write("SteamClient", "Opening " + game.Name);
 
             string x86Dll = Path.Combine(modCommon.GetPath(), "x86", "steam_api.dll");
             string x64Dll = Path.Combine(modCommon.GetPath(), "x64", "steam_api64.dll");
@@ -208,12 +240,7 @@ namespace SKYNET
             pInfo.RedirectStandardOutput = true;
             pInfo.UseShellExecute = false;
 
-            //InjectedProcess = Process.Start(pInfo);
-            Injector.CreateAndInject(game.ExecutablePath, game.Parameters, 0, x86Dll, x64Dll, out int pId, null);
-            Injector.WakeUpProcess();
-            //var Injector = new Reloaded.Injector.Injector(InjectedProcess);
-            //Injector.Inject(x64Dll);
-
+            InjectedProcess = DllInjector.Inject(game.ExecutablePath, game.Parameters, x64Dll, x86Dll);
 
             RunningGames.Add(new RunningGame() { Game = e.GetGame(), Process = InjectedProcess });
             BT_GameAction.Text = "CLOSE";
@@ -224,21 +251,6 @@ namespace SKYNET
         private void HookInterface_OnShowMessage(object sender, string e)
         {
             new frmMessage(e).ShowDialog();
-        }
-
-        private void HookInterface_OnMessage(object sender, ConsoleMessage e)
-        {
-            try
-            {
-                if (!GameMessages.ContainsKey(e.AppId)) GameMessages.Add(e.AppId, new List<string>());
-
-                GameMessages[e.AppId].Add(e.Sender + ": " + e.Msg);
-
-                Write(e.Sender + ":  " + e.Msg);
-            }
-            catch 
-            {
-            }
         }
 
         private void WaitForExit()
@@ -260,7 +272,7 @@ namespace SKYNET
                     {
                     }
                 }
-                Write($"The injected process {processName} are closed");
+                Write("SteamClient", $"The injected process {processName} are closed");
 
                 foreach (var game in RunningGames)
                 {
@@ -276,16 +288,9 @@ namespace SKYNET
             });
         }
 
-        private void Write(object msg)
+        private void Write(string sender, object msg)
         {
-            try
-            {
-                richTextBox1.Text += msg + Environment.NewLine;
-            }
-            catch (Exception)
-            {
-
-            }
+            WebLogger1.WriteLine(new ConsoleMessage(0, sender, msg));
         }
 
         private void Close_Clicked(object sender, EventArgs e)
@@ -478,18 +483,5 @@ namespace SKYNET
         }
 
         #endregion
-
-        private void BT_Clear_Click(object sender, EventArgs e)
-        {
-            richTextBox1.Clear();
-        }
-
-        private void RichTextBox1_TextChanged(object sender, EventArgs e)
-        {
-            richTextBox1.SelectionStart = richTextBox1.Text.Length;
-            
-            richTextBox1.ScrollToCaret();
-
-        }
     }
 }

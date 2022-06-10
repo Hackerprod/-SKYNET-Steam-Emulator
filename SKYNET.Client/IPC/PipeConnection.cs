@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SKYNET.Common;
+using System;
 using System.IO.Pipes;
 using System.Text;
 using System.Threading;
@@ -142,7 +143,8 @@ namespace SKYNET.IPC
         {
             if (!IsConnected || !PipeStreamWrapper.CanWrite)
             {
-                throw new InvalidOperationException("Client is not connected");
+                Log.Write("PipeConnection", "Client is not connected to send data");
+                return;
             }
 
             string JSON = new JavaScriptSerializer().Serialize(value);

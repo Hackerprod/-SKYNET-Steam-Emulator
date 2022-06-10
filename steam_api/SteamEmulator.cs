@@ -13,7 +13,6 @@ using SKYNET;
 using SKYNET.Helper;
 using SKYNET.Helper.JSON;
 using SKYNET.Managers;
-using SKYNET.Plugin;
 using SKYNET.Steamworks;
 using SKYNET.Steamworks.Implementation;
 using System;
@@ -21,19 +20,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using AppID = System.UInt32;
+
+using AppID      = System.UInt32;
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
 
 public class SteamEmulator
 {
     public static SteamEmulator Instance;
-
-    public static event EventHandler<GameMessage> OnMessage;
-
-    public static bool Hooked;
-
-    public static IGameCoordinatorPlugin GameCoordinatorPlugin;
 
     #region Client Info
 
@@ -118,26 +112,26 @@ public class SteamEmulator
         {
             if (Initialized) return;
             Initializing = true;
-            Hooked = hooked;
-            try
-            {
-                if (!Hooked)
-                {
-                    Settings.Load();
 
-                    string fileName = Path.Combine(modCommon.GetPath(), "SKYNET", "[SKYNET] steam_api.log");
-                    if (File.Exists(fileName))
-                    {
-                        File.WriteAllLines(fileName, new List<string>());
-                    }
-                }
-            }
-            catch
-            {
-                Write("Settings", "Error loading settings");
-            }
+            #region Load settings
+            //try
+            //{
+            //    if (!Hooked)
+            //    {
+            //        Settings.Load();
 
-            SteamID_GS = CSteamID.GenerateGameServer(); 
+            //        string fileName = Path.Combine(modCommon.GetPath(), "SKYNET", "[SKYNET] steam_api.log");
+            //        if (File.Exists(fileName))
+            //        {
+            //            File.WriteAllLines(fileName, new List<string>());
+            //        }
+            //    }
+            //}
+            //catch
+            //{
+            //    Write("Settings", "Error loading settings");
+            //}
+            #endregion
 
             #region Interface Initialization
 
@@ -217,8 +211,7 @@ public class SteamEmulator
             #endregion
             
             InterfaceManager.Initialize();
-            NetworkManager.Initialize();
-            //IpcManager.Initialize();
+            IPCManager.Initialize();
 
             HSteamUser = 1;
             HSteamPipe = 1;
@@ -226,56 +219,12 @@ public class SteamEmulator
             HSteamUser_GS = 2;
             HSteamPipe_GS = 2;
 
-            InitializePlugins();
-
             Initialized = true;
             Initializing = false;
         }
         catch (Exception ex)
         {
             Write(ex);
-        }
-    }
-
-    private static void InitializePlugins()
-    {
-        string PluginsDirectory = modCommon.GetPath();
-        if (Directory.Exists(PluginsDirectory))
-        {
-            foreach (var file in Directory.GetFiles(PluginsDirectory, "*.dll"))
-            {
-                if (Path.GetFileNameWithoutExtension(file).StartsWith("SKYNET."))
-                {
-                    try
-                    {
-                        var plugin = Assembly.LoadFile(file);
-                        Type type = plugin.GetType("SKYNET.GameCoordinator");
-                        if (type != null)
-                        {
-                            IGameCoordinatorPlugin iPlugin = (IGameCoordinatorPlugin)Activator.CreateInstance(type);
-                            if (iPlugin == null)
-                            {
-                                Write("PLUGINS", $"Failed to load plugin {Path.GetFileNameWithoutExtension(file)}");
-                            }
-                            else
-                            {
-                                AppID appID = iPlugin.Initialize();
-                                if (appID == AppID)
-                                {
-                                    GameCoordinatorPlugin = iPlugin;
-                                    GameCoordinatorPlugin.IsMessageAvailable = IsMessageAvailable;
-                                    Write("PLUGINS", $"Loaded GameCoordinator plugin {Path.GetFileNameWithoutExtension(file)} for AppID {appID}");
-                                }
-                            }
-
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Write("PLUGINS", $"Failed to load plugin {Path.GetFileNameWithoutExtension(file)} {"\n"}");
-                    }
-                }
-            }
         }
     }
 
@@ -326,12 +275,6 @@ public class SteamEmulator
         {
             if (FileLog)
             {
-                if (Hooked)
-                {
-                    OnMessage?.Invoke(Instance, new GameMessage(AppID, sender, msg));
-                    lastMsg = msg.ToString();
-                }
-
                 Log.AppEnd(message);
                 lastMsg = msg.ToString();
             }

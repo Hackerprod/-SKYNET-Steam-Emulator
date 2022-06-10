@@ -42,10 +42,7 @@ namespace SKYNET.Steamworks.Implementation
             byte[] bytes = pubData.GetBytes(cubData);
 
             Write($"SendMessage (MsgType = {msgType}], {bytes.Length} bytes)");
-            if (SteamEmulator.GameCoordinatorPlugin != null)
-            {
-                SteamEmulator.GameCoordinatorPlugin.MessageFromGame(bytes);
-            }
+            IPCManager.GCRequest(msgType, bytes);
             return EGCResults.k_EGCResultOK;
         }
 

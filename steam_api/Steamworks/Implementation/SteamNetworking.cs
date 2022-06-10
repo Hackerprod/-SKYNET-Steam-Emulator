@@ -1,8 +1,6 @@
-﻿using SKYNET.Callback;
-using SKYNET.Helper;
+﻿using SKYNET.Helper;
+using SKYNET.IPC.Types;
 using SKYNET.Managers;
-using SKYNET.Network;
-using SKYNET.Network.Packets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +8,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
+
 using SNetListenSocket_t = System.UInt32;
 using SNetSocket_t = System.UInt32;
 
@@ -19,7 +18,7 @@ namespace SKYNET.Steamworks.Implementation
     {
         public static SteamNetworking Instance;
 
-        public List<NET_P2PPacket> P2PIncoming;
+        public List<IPC_P2PPacket> P2PIncoming;
         public Dictionary<SNetSocket_t, Socket> P2PSocket;
         public Dictionary<SNetListenSocket_t, Socket> P2PListenSocket;
 
@@ -28,10 +27,9 @@ namespace SKYNET.Steamworks.Implementation
             Instance = this;
             InterfaceName = "SteamNetworking";
             InterfaceVersion = "SteamNetworking005";
-            P2PIncoming = new List<NET_P2PPacket>();
+            P2PIncoming = new List<IPC_P2PPacket>();
             P2PSocket = new Dictionary<SNetListenSocket_t, Socket>();
             P2PListenSocket = new Dictionary<SNetListenSocket_t, Socket>();
-            P2PNetworking.Initialize();
         }
 
         public bool SendP2PPacket(ulong steamIDRemote, IntPtr pubData, uint cubData, int eP2PSendType, int nChannel)
@@ -42,28 +40,30 @@ namespace SKYNET.Steamworks.Implementation
                 byte[] bytes = pubData.GetBytes(cubData);
                 Write(Encoding.Default.GetString(bytes));
 
+                var packet = new IPC_P2PPacket()
+                {
+                    Sender = SteamEmulator.SteamID.AccountID,
+                    AccountID = steamIDRemote.GetAccountID(),
+                    Buffer = bytes,
+                    Channel = nChannel,
+                    P2PSendType = eP2PSendType
+                };
+
                 if (steamIDRemote == SteamEmulator.SteamID)
                 {
                     MutexHelper.Wait("P2PPacket", delegate
                     {
-                        P2PIncoming.Add(new NET_P2PPacket()
-                        {
-                            Sender = SteamEmulator.SteamID.AccountID,
-                            AccountID = steamIDRemote.GetAccountID(),
-                            Buffer = bytes,
-                            Channel = nChannel,
-                            P2PSendType = eP2PSendType
-                        });
+                        P2PIncoming.Add(packet);
                         Result = true;
                     });
                 }
                 else
                 {
-                    Result = P2PNetworking.SendP2PTo(steamIDRemote, bytes, eP2PSendType, nChannel);
+                    IPCManager.SendP2PTo(steamIDRemote, packet);
                 }
             }
             //Write($"SendP2PPacket (SteamID = {steamIDRemote}, Length = {cubData}, {(EP2PSend)eP2PSendType}, Channel = {nChannel}) = {Result}");
-            return Result;
+            return true;
         }
 
         public bool IsP2PPacketAvailable(ref uint pcubMsgSize, int nChannel)
@@ -127,13 +127,13 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"GetP2PSessionState {steamIDRemote}");
 
-            uint RemoteIP = NetworkManager.ConvertFromIPAddress(NetworkManager.GetIPAddress()); 
+            uint RemoteIP = NetworkHelper.ConvertFromIPAddress(NetworkHelper.GetIPAddress()); 
             var user = SteamFriends.Instance.GetUser(steamIDRemote);
             if (user != null)
             {
                 if (IPAddress.TryParse(user.IPAddress, out var Address))
                 {
-                    RemoteIP = NetworkManager.ConvertFromIPAddress(Address);
+                    RemoteIP = NetworkHelper.ConvertFromIPAddress(Address);
                 }
             }
 
@@ -242,7 +242,7 @@ namespace SKYNET.Steamworks.Implementation
             return 1500;
         }
 
-        public void AddP2PPacket(NET_P2PPacket p2p)
+        public void AddP2PPacket(IPC_P2PPacket p2p)
         {
             MutexHelper.Wait("P2PPacket", delegate
             {

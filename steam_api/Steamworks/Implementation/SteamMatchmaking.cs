@@ -10,9 +10,8 @@ using System.Threading;
 using SKYNET.Callback;
 using SKYNET.Helper;
 using SKYNET.Helper.JSON;
+using SKYNET.IPC.Types;
 using SKYNET.Managers;
-using SKYNET.Network;
-using SKYNET.Network.Packets;
 
 using SteamAPICall_t = System.UInt64;
 
@@ -167,6 +166,7 @@ namespace SKYNET.Steamworks.Implementation
 
                 CallbackManager.AddCallbackResult(lobbyEnter);
 
+                IPCManager.SendCreateLobby(LocalLobby);
                 UpdateLobby(LocalLobby, LocalLobby.SteamID);
             }
             catch (Exception)
@@ -391,7 +391,7 @@ namespace SKYNET.Steamworks.Implementation
             if (GetLobby(steamIDLobby, out var lobby))
             {
                 APICall = CallbackManager.AddCallbackResult(data, false);
-                NetworkManager.SendLobbyJoinRequest(APICall, lobby);
+                IPCManager.SendLobbyJoinRequest(APICall, lobby);
             }
             else
             {
@@ -407,12 +407,11 @@ namespace SKYNET.Steamworks.Implementation
             if (GetLobby(steamIDLobby, out var lobby))
             {
                 if (lobby.Owner == SteamEmulator.SteamID)
-                    NetworkManager.SendLobbyRemove(lobby);
+                    IPCManager.SendLobbyRemove(lobby);
                 else
-                    NetworkManager.SendLobbyLeave(lobby.Owner, lobby.SteamID);
+                    IPCManager.SendLobbyLeave(lobby.Owner, lobby.SteamID);
                 Lobbies.TryRemove(steamIDLobby, out _);
             }
-            P2PNetworking.CloseConnections();
         }
 
         public bool RemoveFavoriteGame(uint nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags)
@@ -451,7 +450,7 @@ namespace SKYNET.Steamworks.Implementation
             {
                 Lobbies.Clear();
             });
-            NetworkManager.RequestLobbyList(CurrentRequest);
+            IPCManager.RequestLobbyList(CurrentRequest);
 
             SteamAPICall_t APICall = CallbackManager.AddCallbackResult(new LobbyMatchList_t(), false);
             ThreadPool.QueueUserWorkItem(WaitLobbyMatchList, APICall);
@@ -526,7 +525,7 @@ namespace SKYNET.Steamworks.Implementation
             {
                 Write($"SetLobbyGameServer *** IP = {lobby.Gameserver.IP}, Port = {lobby.Gameserver.Port})");
 
-                uint IP = unGameServerIP != 0 ? unGameServerIP : NetworkManager.ConvertFromIPAddress(NetworkManager.GetIPAddress());
+                uint IP = unGameServerIP != 0 ? unGameServerIP : NetworkHelper.ConvertFromIPAddress(NetworkHelper.GetIPAddress());
                 
                 lobby.Gameserver.SteamID = steamIDGameServer;
                 lobby.Gameserver.IP = IP;
@@ -546,7 +545,7 @@ namespace SKYNET.Steamworks.Implementation
                 };
                 CallbackManager.AddCallbackResult(data);
 
-                NetworkManager.BroadcastLobbyGameServer(lobby);
+                IPCManager.BroadcastLobbyGameServer(lobby);
                 UpdateLobby(lobby, lobby.SteamID);
             }
         }
@@ -614,7 +613,7 @@ namespace SKYNET.Steamworks.Implementation
             Write("CheckForPSNGameBootInvite");
         }
 
-        public void JoinResponse(NET_LobbyJoinResponse JoinRespons, SteamLobby lobby)
+        public void JoinResponse(IPC_LobbyJoinResponse JoinRespons, SteamLobby lobby)
         {
             try
             {
@@ -673,7 +672,7 @@ namespace SKYNET.Steamworks.Implementation
             }
         }
 
-        public void LobbyDataUpdated(NET_LobbyDataUpdate lobbyDataUpdate)
+        public void LobbyDataUpdated(IPC_LobbyDataUpdate lobbyDataUpdate)
         {
             LobbyDataUpdate_t data = new LobbyDataUpdate_t()
             {
@@ -685,7 +684,7 @@ namespace SKYNET.Steamworks.Implementation
             CallbackManager.AddCallbackResult(data);
         }
 
-        public void LobbyChatUpdated(NET_LobbyChatUpdate lobbyChatUpdate)
+        public void LobbyChatUpdated(IPC_LobbyChatUpdate lobbyChatUpdate)
         {
             LobbyChatUpdate_t data = new LobbyChatUpdate_t()
             {
@@ -745,7 +744,7 @@ namespace SKYNET.Steamworks.Implementation
                 Gameserver = new SteamLobby.LobbyGameserver()
                 {
                     Filled = true,
-                    IP = NetworkManager.ConvertFromIPAddress(NetworkManager.GetIPAddress()),
+                    IP = NetworkHelper.ConvertFromIPAddress(NetworkHelper.GetIPAddress()),
                     Port = 27015,
                     SteamID = (ulong)SteamEmulator.SteamID_GS 
                 }
@@ -768,7 +767,7 @@ namespace SKYNET.Steamworks.Implementation
             var Members = lobby.Members.FindAll(m => m.m_SteamID != SteamEmulator.SteamID);
             foreach (var member in Members)
             {
-                NetworkManager.SendLobbyDataUpdate(member.m_SteamID, lobby.SteamID, Member, lobby);
+                IPCManager.SendLobbyDataUpdate(member.m_SteamID, lobby.SteamID, Member, lobby);
             }
         }
 

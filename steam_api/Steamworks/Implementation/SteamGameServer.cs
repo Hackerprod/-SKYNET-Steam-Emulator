@@ -5,6 +5,7 @@ using SKYNET.Types;
 using SteamAPICall_t = System.UInt64;
 using HAuthTicket = System.UInt32;
 using SKYNET.Callback;
+using SKYNET.Helper;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -40,7 +41,7 @@ namespace SKYNET.Steamworks.Implementation
             }
             else
             {
-                IP = NetworkManager.ConvertFromIPAddress(NetworkManager.GetIPAddress());
+                IP = NetworkHelper.ConvertFromIPAddress(NetworkHelper.GetIPAddress());
             }
 
             ServerData.IP = IP;
