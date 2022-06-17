@@ -5,6 +5,14 @@ namespace SKYNET.Steamworks.Exported
 {
     public class SteamAPI_ISteamMasterServerUpdater
     {
+        static SteamAPI_ISteamMasterServerUpdater()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_ISteamMasterServerUpdater_SetActive(IntPtr _, bool bActive)
         {

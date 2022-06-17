@@ -89,11 +89,35 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GUI\Controls\ImageCropControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\Controls\ImageCropControl.designer.cs">
+      <DependentUpon>ImageCropControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="GUI\Controls\SKYNET_UserControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="GUI\Controls\SKYNET_UserControl.Designer.cs">
       <DependentUpon>SKYNET_UserControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\frmCropEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\frmCropEditor.designer.cs">
+      <DependentUpon>frmCropEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\frmLogin.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\frmLogin.Designer.cs">
+      <DependentUpon>frmLogin.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\frmUpdateProfile.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\frmUpdateProfile.designer.cs">
+      <DependentUpon>frmUpdateProfile.cs</DependentUpon>
     </Compile>
     <Compile Include="Helpers\DllInjector.cs" />
     <Compile Include="GUI\Controls\SKYNET_WebLogger.cs">
@@ -208,7 +232,6 @@
       <DependentUpon>SKYNET_Check.cs</DependentUpon>
     </Compile>
     <Compile Include="Types\ConsoleMessage.cs" />
-    <Compile Include="Types\Game.cs" />
     <Compile Include="Types\RunningGame.cs" />
     <EmbeddedResource Include="GUI\Controls\CircularPictureBox.resx">
       <DependentUpon>CircularPictureBox.cs</DependentUpon>
@@ -218,6 +241,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\Controls\SKYNET_WebLogger.resx">
       <DependentUpon>SKYNET_WebLogger.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\frmCropEditor.resx">
+      <DependentUpon>frmCropEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\frmGameManager.resx">
       <DependentUpon>frmGameManager.cs</DependentUpon>
@@ -249,8 +275,14 @@
     <EmbeddedResource Include="GUI\frmGameDownload.resx">
       <DependentUpon>frmGameDownload.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="GUI\frmLogin.resx">
+      <DependentUpon>frmLogin.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GUI\frmMessage.resx">
       <DependentUpon>frmMessage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\frmUpdateProfile.resx">
+      <DependentUpon>frmUpdateProfile.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -305,6 +337,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="game.ico" />
+    <None Include="Resources\profile_picture.png" />
+    <None Include="Resources\male_user_100px.png" />
+    <None Include="Resources\key_2_60px.png" />
+    <None Include="Resources\steam_home_os.png" />
+    <None Include="Resources\sc_button_steam_lg.png" />
     <None Include="Resources\Header_1.jpg" />
     <None Include="Resources\coins.png" />
     <None Include="Resources\main.js" />

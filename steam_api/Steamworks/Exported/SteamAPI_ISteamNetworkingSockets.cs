@@ -1,17 +1,18 @@
-﻿using SKYNET;
-using SKYNET.Steamworks;
-using SKYNET.Types;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SKYNET.Steamworks.Exported
 {
     public class SteamAPI_ISteamNetworkingSockets
     {
+        static SteamAPI_ISteamNetworkingSockets()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static uint SteamAPI_ISteamNetworkingSockets_CreateListenSocketIP(IntPtr _, IntPtr localAddress, int nOptions, IntPtr pOptions)
         {

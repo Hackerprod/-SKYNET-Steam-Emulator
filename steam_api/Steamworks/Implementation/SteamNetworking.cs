@@ -1,9 +1,9 @@
-﻿using SKYNET.Helper;
+﻿using SKYNET.Callback;
+using SKYNET.Helper;
 using SKYNET.IPC.Types;
 using SKYNET.Managers;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
@@ -17,6 +17,7 @@ namespace SKYNET.Steamworks.Implementation
     public class SteamNetworking : ISteamInterface
     {
         public static SteamNetworking Instance;
+        private static List<ulong> P2PSession;
 
         public List<IPC_P2PPacket> P2PIncoming;
         public Dictionary<SNetSocket_t, Socket> P2PSocket;
@@ -30,6 +31,25 @@ namespace SKYNET.Steamworks.Implementation
             P2PIncoming = new List<IPC_P2PPacket>();
             P2PSocket = new Dictionary<SNetListenSocket_t, Socket>();
             P2PListenSocket = new Dictionary<SNetListenSocket_t, Socket>();
+            P2PSession = new List<ulong>();
+        }
+
+        internal void ProcessP2PPacket(IPC_P2PPacket P2PPacket)
+        {
+            ulong steamIDRemote = (ulong)new CSteamID(P2PPacket.Sender);
+            MutexHelper.Wait("P2PPacket", delegate
+            {
+                if (!P2PSession.Contains(steamIDRemote))
+                {
+                    P2PSessionRequest_t data = new P2PSessionRequest_t()
+                    {
+                        m_steamIDRemote = steamIDRemote
+                    };
+                    CallbackManager.AddCallbackResult(data);
+                    P2PSession.Add(steamIDRemote);
+                }
+            });
+            AddP2PPacket(P2PPacket);
         }
 
         public bool SendP2PPacket(ulong steamIDRemote, IntPtr pubData, uint cubData, int eP2PSendType, int nChannel)

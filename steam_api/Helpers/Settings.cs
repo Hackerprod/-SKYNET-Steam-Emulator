@@ -1,19 +1,10 @@
-﻿using SKYNET;
-using SKYNET.INI;
-using SKYNET.Managers;
+﻿using SKYNET.INI;
 using SKYNET.Steamworks;
-using SKYNET.Steamworks.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
-using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
-using System.Windows.Forms;
-using static SKYNET.INI.INISerializer;
 
 namespace SKYNET.Helper
 {
@@ -75,9 +66,8 @@ namespace SKYNET.Helper
                 SteamEmulator.SteamID       = new CSteamID(settings.AccountID, Steamworks.EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeIndividual);
                 SteamEmulator.Language      = settings.Language;
                 SteamEmulator.AppID         = settings.AppId;
-                SteamEmulator.BroadcastPort = settings.BroadcastPort;
-                SteamEmulator.FileLog       = settings.File;
-                SteamEmulator.ConsoleLog    = settings.Console;
+                SteamEmulator.LogToFile       = settings.File;
+                SteamEmulator.LogToConsole    = settings.Console;
                 SteamEmulator.RunCallbacks  = settings.RunCallbacks;
                 SteamEmulator.ISteamHTTP    = settings.ISteamHTTP;
                 if (settings.Console)
@@ -121,7 +111,7 @@ namespace SKYNET.Helper
 
         private static void DetourGameDebug(object sendLog)
         {
-            if (SteamEmulator.FileLog)
+            if (SteamEmulator.LogToFile)
             {
                 try
                 {

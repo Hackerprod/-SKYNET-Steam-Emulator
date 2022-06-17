@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SKYNET.Types;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,8 +22,10 @@ namespace SKYNET.IPC.Types
     public enum IPCMessageType : int
     {
         // Users
-        IPC_User,
+        IPC_ClientHello,
+        IPC_ClientWelcome,
         IPC_AddOrUpdateUser,
+        IPC_Settings,
         IPC_AvatarRequest,
         IPC_AvatarResponse,
         IPC_UserDataUpdated,
@@ -40,16 +43,39 @@ namespace SKYNET.IPC.Types
         IPC_LobbyChatUpdate,
         IPC_LobbyGameserver,
 
+        // User stats
+        IPC_Leaderboards,
+        IPC_Achievements,
+        IPC_PlayerStats,
+
         // Gamecoordinator
         IPC_GCMessageRequest,
         IPC_GCMessageResponse,
+    }
+
+    public class IPC_ClientHello : IPC_MessageBase
+    {
+        public uint AppID { get; set; }
+    }
+
+    public class IPC_ClientWelcome : IPC_MessageBase
+    {
+        public string PersonaName { get; set; }
+        public string Language { get; set; }
+        public uint AccountID { get; set; }
+        public uint GameServerID { get; set; }
+        public bool GameOverlay { get; set; }
+        public bool LogToFile { get; set; }
+        public bool LogToConsole { get; set; }
+        public bool RunCallbacks { get; set; }
+        public bool ISteamHTTP { get; set; }
     }
 
     public class IPC_LobbyCreate : IPC_MessageBase
     {
         public string SerializedLobby { get; set; }
     }
-    
+
     public class IPC_GCMessageRequest : IPC_MessageBase
     {
         public uint MsgType { get; set; }
@@ -60,15 +86,6 @@ namespace SKYNET.IPC.Types
     {
         public uint MsgType { get; set; }
         public byte[] Buffer { get; set; }
-    }
-
-    public class IPC_User : IPC_MessageBase
-    {
-        public string PersonaName { get; set; }
-        public string Language { get; set; }
-        public uint AccountID { get; set; }
-        public uint AppID { get; set; }
-        public uint GameServerID { get; set; }
     }
 
     public class IPC_AddOrUpdateUser : IPC_MessageBase
@@ -134,6 +151,7 @@ namespace SKYNET.IPC.Types
 
     public class IPC_LobbyDataUpdate : IPC_MessageBase
     {
+        public ulong TargetSteamID { get; set; }
         public ulong SteamIDLobby { get; set; }
         public ulong SteamIDMember { get; set; }
         public string SerializedLobby { get; set; }
@@ -164,5 +182,20 @@ namespace SKYNET.IPC.Types
         public ulong SteamID { get; set; }
         public uint IP { get; set; }
         public uint Port { get; set; }
+    }
+
+    public class IPC_Leaderboards : IPC_MessageBase
+    {
+        public List<Leaderboard> Leaderboards { get; set; }
+    }
+
+    public class IPC_Achievements : IPC_MessageBase
+    {
+        public List<Achievement> Achievements { get; set; }
+    }
+    public class IPC_PlayerStats : IPC_MessageBase
+    {
+        public ulong SteamID { get; set; }
+        public List<PlayerStat> PlayerStats { get; set; }
     }
 }

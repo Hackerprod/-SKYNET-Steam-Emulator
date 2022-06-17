@@ -7,6 +7,14 @@ namespace SKYNET.Steamworks.Exported
 {
     public class SteamAPI_ISteamUtils
     {
+        static SteamAPI_ISteamUtils()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static uint SteamAPI_ISteamUtils_GetSecondsSinceAppActive(IntPtr _)
         {

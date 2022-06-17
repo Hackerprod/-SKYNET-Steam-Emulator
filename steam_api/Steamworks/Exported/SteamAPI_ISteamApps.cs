@@ -7,6 +7,14 @@ namespace SKYNET.Steamworks.Exported
 {
     public class SteamAPI_ISteamApps
     {
+        static SteamAPI_ISteamApps()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ISteamApps_BIsSubscribed(IntPtr _)
         {

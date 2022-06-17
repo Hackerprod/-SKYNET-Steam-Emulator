@@ -9,6 +9,14 @@ namespace SKYNET.Steamworks.Exported
 {
     public class SteamAPI_ISteamHTTP
     {
+        static SteamAPI_ISteamHTTP()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ISteamHTTP_GetHTTPRequestWasTimedOut(IntPtr _, uint hRequest, bool pbWasTimedOut)
         {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
@@ -10,6 +11,7 @@ using SKYNET.Client;
 using SKYNET.Common;
 using SKYNET.GUI;
 using SKYNET.GUI.Controls;
+using SKYNET.Helper;
 using SKYNET.Managers;
 using SKYNET.Properties;
 using SKYNET.Types;
@@ -19,6 +21,7 @@ namespace SKYNET
     public partial class frmMain : frmBase
     {
         public static frmMain frm;
+        public static Types.Settings settings;
         public Process InjectedProcess;
         public SteamClient SteamClient;
 
@@ -27,7 +30,7 @@ namespace SKYNET
         private GameBox MenuBox;
         private Dictionary<uint, List<string>> GameMessages;
         private int ProcessId;
-        private Types.Settings settings;
+        
 
         public frmMain()
         {
@@ -37,6 +40,7 @@ namespace SKYNET
             frm = this;
 
             Log.OnMessage += Log_OnMessage;
+
             settings = Types.Settings.Load();
             LB_NickName.Text = settings.PersonaName;
             LB_Menu_NickName.Text = settings.PersonaName.ToUpper();
@@ -50,37 +54,27 @@ namespace SKYNET
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Storage"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache"));
+            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "AvatarCache"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "Avatars"));
 
-            List<Game> Games = new List<Game>();
-            string game = Path.Combine(modCommon.GetPath(), "Data", "Games.json");
-            if (File.Exists(game))
+            try
             {
-                try
+                string AvatarPath = Path.Combine(modCommon.GetPath(), "Data", "Images", "AvatarCache", "Avatar.jpg");
+                if (File.Exists(AvatarPath))
                 {
-                    string json = File.ReadAllText(game);
-                    Games = new JavaScriptSerializer().Deserialize<List<Game>>(json);
+                    var AvatarImage = ImageHelper.FromFile(AvatarPath);
+                    PB_Avatar.Image = AvatarImage;
+                    SteamClient.Avatar = (Bitmap)AvatarImage;
                 }
-                catch (Exception)
-                {
-                    Games = new List<Game>();
-                    modCommon.Show("Error loading Game stored data");
-                }
+            }
+            catch (Exception)
+            {
             }
 
-            string AvatarDirectory = Path.Combine(modCommon.GetPath(), "Data", "Images", "Avatars");
-            if (Directory.Exists(AvatarDirectory))
-            {
-                if (File.Exists(Path.Combine(AvatarDirectory, "Avatar.png")))
-                {
-                    PB_Avatar.Image = Image.FromFile(Path.Combine(AvatarDirectory, "Avatar.png"));
-                }
-            }
-
-            foreach (var Game in Games)
-            {
-                AddBoxGame(Game);
-            }
+            GameManager.OnGameAdded += GameManager_OnGameAdded;
+            GameManager.OnGameUpdated += GameManager_OnGameUpdated;
+            GameManager.OnGameRemoved += GameManager_OnGameRemoved;
+            GameManager.Initialize();
 
             shadowBox1.BackColor = Color.FromArgb(100, 0, 0, 0);
 
@@ -90,11 +84,35 @@ namespace SKYNET
             UserManager.OnUserAdded += UserManager_OnUserAdded;
             UserManager.OnUserUpdated += UserManager_OnUserUpdated;
             UserManager.OnUserRemoved += UserManager_OnUserRemoved;
-
-            PB_Avatar.Image = SteamClient.Avatar;
         }
 
-        #region Events
+        #region GameManager Events
+
+        private void GameManager_OnGameAdded(object sender, Game e)
+        {
+            AddBoxGame(e);
+        }
+
+        private void GameManager_OnGameUpdated(object sender, Game e)
+        {
+            foreach (var control in PN_GameContainer.Controls)
+            {
+                if (control is GameBox && ((GameBox)control).Handle.ToInt32() == MenuBox.Handle.ToInt32())
+                {
+                    ((GameBox)control).SetGame(e);
+                    return;
+                }
+            }
+        }
+
+        private void GameManager_OnGameRemoved(object sender, Game e)
+        {
+
+        }
+
+        #endregion
+
+        #region UserManager Events
 
         private void UserManager_OnUserAdded(object sender, SteamPlayer user)
         {
@@ -186,23 +204,6 @@ namespace SKYNET
 
         }
 
-        public void AddGame(Game game)
-        {
-            AddBoxGame(game);
-        }
-
-        public void UpdateGame(int boxHandle, Game game)
-        {
-            foreach (var control in PN_GameContainer.Controls)
-            {
-                if (control is GameBox && ((GameBox)control).Handle.ToInt32() == boxHandle)
-                {
-                    ((GameBox)control).SetGame(game);
-                    return;
-                }
-            }
-        }
-
         private void AddBoxGame(Game game)
         {
             var module = new GameBox();
@@ -239,8 +240,21 @@ namespace SKYNET
             pInfo.CreateNoWindow = true;
             pInfo.RedirectStandardOutput = true;
             pInfo.UseShellExecute = false;
+            InjectedProcess = Process.Start(pInfo);
 
-            InjectedProcess = DllInjector.Inject(game.ExecutablePath, game.Parameters, x64Dll, x86Dll);
+            var content = "";
+            if (modCommon.Is64Bit)
+            {
+                content = $"rundll32 \"x64/steam_api64.dll\",Initialize {InjectedProcess.ProcessName}.exe";
+            }
+            else
+                content = $"rundll32 \"x86/steam_api.dll\",Initialize {InjectedProcess.ProcessName}.exe";
+
+            string injPath = Path.Combine(modCommon.GetPath(), "Inject.cmd");
+            File.WriteAllText(injPath, content);
+            Process.Start(injPath);
+
+            //InjectedProcess = DllInjector.Inject(game.ExecutablePath, game.Parameters, x64Dll, x86Dll);
 
             RunningGames.Add(new RunningGame() { Game = e.GetGame(), Process = InjectedProcess });
             BT_GameAction.Text = "CLOSE";
@@ -248,9 +262,32 @@ namespace SKYNET
             WaitForExit();
         }
 
-        private void HookInterface_OnShowMessage(object sender, string e)
+        internal static void AvatarUpdated(Bitmap Avatar)
         {
-            new frmMessage(e).ShowDialog();
+            SteamClient.Avatar = Avatar;
+            frm.PB_Avatar.Image = Avatar;
+            IPCManager.SendAvatarUpdated(SteamClient.AccountID, Avatar);
+
+            try
+            {
+                string AvatarPath = Path.Combine(modCommon.GetPath(), "Data", "Images", "AvatarCache", "Avatar.jpg");
+                modCommon.EnsureDirectoryExists(AvatarPath, true);
+                ImageHelper.ToFile(AvatarPath, Avatar);
+            }
+            catch 
+            {
+                modCommon.Show("Error saving avatar image");
+            }
+        }
+
+        internal static void PersonaNameUpdated(string PersonaName)
+        {
+            SteamClient.PersonaName = PersonaName;
+            frm.LB_NickName.Text = PersonaName;
+            frm.LB_Menu_NickName.Text = PersonaName.ToUpper();
+            IPCManager.SendUserDataUpdated(SteamClient.AccountID, PersonaName);
+            settings.PersonaName = PersonaName;
+            settings.Save();
         }
 
         private void WaitForExit()
@@ -276,10 +313,10 @@ namespace SKYNET
 
                 foreach (var game in RunningGames)
                 {
-                    if (GameMessages.ContainsKey(game.Game.AppId) && game.Game.SendLog)
+                    if (GameMessages.ContainsKey(game.Game.AppID) && game.Game.LogToFile)
                     {
-                        string logPath = Path.Combine(modCommon.GetPath(), "Data", "Storage", game.Game.AppId.ToString(), "GameMessages.log");
-                        File.WriteAllLines(logPath, GameMessages[game.Game.AppId]);
+                        string logPath = Path.Combine(modCommon.GetPath(), "Data", "Storage", game.Game.AppID.ToString(), "GameMessages.log");
+                        File.WriteAllLines(logPath, GameMessages[game.Game.AppID]);
                     }
                 }
 
@@ -295,12 +332,10 @@ namespace SKYNET
 
         private void Close_Clicked(object sender, EventArgs e)
         {
-            string path = Path.Combine(modCommon.GetPath(), "Data");
+            string path = Path.Combine(modCommon.GetPath(), "Data", "Games.bin");
             modCommon.EnsureDirectoryExists(path);
 
-            Types.Settings.Save(settings);
-
-            string game = Path.Combine(path, "Games.json");
+            settings.Save();
 
             List<Game> Games = new List<Game>();
             foreach (var control in PN_GameContainer.Controls)
@@ -310,8 +345,9 @@ namespace SKYNET
                     Games.Add(((GameBox)control).GetGame());
                 }
             }
+
             string json = new JavaScriptSerializer().Serialize(Games);
-            File.WriteAllText(game, json);
+            File.WriteAllText(path, json);
 
             Process.GetCurrentProcess().Kill();
         }
@@ -396,10 +432,10 @@ namespace SKYNET
 
                         foreach (var game in RunningGames)
                         {
-                            if (GameMessages.ContainsKey(game.Game.AppId) && game.Game.SendLog)
+                            if (GameMessages.ContainsKey(game.Game.AppID) && game.Game.LogToFile)
                             {
-                                string logPath = Path.Combine(modCommon.GetPath(), "Data", "Storage", game.Game.AppId.ToString(), "GameMessages.log");
-                                File.WriteAllLines(logPath, GameMessages[game.Game.AppId]);
+                                string logPath = Path.Combine(modCommon.GetPath(), "Data", "Storage", game.Game.AppID.ToString(), "GameMessages.log");
+                                File.WriteAllLines(logPath, GameMessages[game.Game.AppID]);
                             }
                         }
 
@@ -461,6 +497,8 @@ namespace SKYNET
                     object control = PN_GameContainer.Controls[i];
                     if (control is GameBox && ((GameBox)control).Handle == MenuBox.Handle)
                     {
+                        Game game = ((GameBox)control).GetGame();
+                        GameManager.Remove(game.AppID);
                         PN_GameContainer.Controls.RemoveAt(i);
                     }
                 }
@@ -483,5 +521,21 @@ namespace SKYNET
         }
 
         #endregion
+
+        private void PN_GameContainer_DragDrop(object sender, DragEventArgs e)
+        {
+            string path = ((string[])e.Data.GetData(DataFormats.FileDrop, false))[0];
+            new frmGameManager(path).ShowDialog();
+        }
+
+        private void PN_GameContainer_DragEnter(object sender, DragEventArgs e)
+        {
+            e.Effect = DragDropEffects.Copy;
+        }
+
+        private void BT_Profile_Click(object sender, EventArgs e)
+        {
+            new frmUpdateProfile().ShowDialog();
+        }
     }
 }

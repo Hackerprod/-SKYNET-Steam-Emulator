@@ -1,16 +1,13 @@
-﻿using SKYNET.Helper;
+﻿using SKYNET.Common;
+using SKYNET.Helper;
 using SKYNET.Managers;
 using SKYNET.Plugin;
 using SKYNET.Steamworks;
 using SKYNET.Types;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 using AppID = System.UInt32;
 
@@ -23,21 +20,24 @@ namespace SKYNET.Client
         public static string PersonaName { get; set; }
         public static string Language { get; set; }
         public static Bitmap Avatar { get; set; }
+        public static bool LogToFile { get; set; }
+        public static bool LogToConsole { get; set; }
+        public static bool RunCallbacks { get; set; }
+        public static bool ISteamHTTP { get; set; }
         public static CSteamID SteamID_GS { get; set; }
 
         public SteamClient(Settings settings)
         {
+            Write("SteamClient", "Initializing SteamClient");
             SteamID = new CSteamID(settings.AccountID);
             AccountID = settings.AccountID;
             PersonaName = settings.PersonaName;
             Language = settings.Language;
             SteamID_GS = CSteamID.GenerateGameServer();
-
-            var AvatarPath = Path.Combine(modCommon.GetPath(), "Data", "Images", "Avatar.jpg");
-            if (File.Exists(AvatarPath))
-                Avatar = (Bitmap)Image.FromFile(AvatarPath);
-            else
-                Avatar = ImageHelper.GetDesktopWallpaper(true);
+            LogToFile = settings.LogToFile;
+            LogToConsole = settings.LogToConsole;
+            RunCallbacks = settings.RunCallbacks;
+            ISteamHTTP = settings.ISteamHTTP;
         }
 
         public void Initialize()
@@ -45,6 +45,7 @@ namespace SKYNET.Client
             UserManager.Initialize();
             NetworkManager.Initialize();
             IPCManager.Initialize();
+            StatsManager.Initialize();
         }
 
         private static void InitializePlugins()
@@ -82,7 +83,7 @@ namespace SKYNET.Client
                         }
                         catch (Exception ex)
                         {
-                            Write("PLUGINS", $"Failed to load plugin {Path.GetFileNameWithoutExtension(file)} {"\n"}");
+                            Write("PLUGINGS", $"Failed to load plugin {Path.GetFileNameWithoutExtension(file)} {"\n"}");
                         }
                     }
                 }
@@ -90,10 +91,9 @@ namespace SKYNET.Client
         }
 
 
-        internal static void Write(string v1, string v2)
+        internal static void Write(string sender, object msg)
         {
-
+            Log.Write(sender, msg);
         }
-
     }
 }

@@ -54,7 +54,7 @@ namespace SKYNET
             this.pictureBox3 = new System.Windows.Forms.PictureBox();
             this.PB_Avatar = new CircularPictureBox();
             this.skyneT_Button1 = new SKYNET_Button();
-            this.BT_Connect = new SKYNET_Button();
+            this.BT_Profile = new SKYNET_Button();
             this.LB_SteamID = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.LB_NickName = new System.Windows.Forms.Label();
@@ -70,6 +70,7 @@ namespace SKYNET
             this.shadowBox1 = new System.Windows.Forms.Panel();
             this.BT_GameAction = new SKYNET_Button();
             this.PN_BodyContainer = new System.Windows.Forms.Panel();
+            this.WebLogger1 = new SKYNET.Controls.SKYNET_WebLogger();
             this.PN_UserContainer = new System.Windows.Forms.Panel();
             this.CM_MenuGame = new SKYNET_ContextMenuStrip();
             this.OpenMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -80,7 +81,6 @@ namespace SKYNET
             this.ToButtomMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.GameCacheMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ConfigureMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.WebLogger1 = new SKYNET.Controls.SKYNET_WebLogger();
             this.PN_Top.SuspendLayout();
             this.panel3.SuspendLayout();
             this.panel4.SuspendLayout();
@@ -239,12 +239,15 @@ namespace SKYNET
             // 
             // PN_GameContainer
             // 
+            this.PN_GameContainer.AllowDrop = true;
             this.PN_GameContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(36)))), ((int)(((byte)(40)))), ((int)(((byte)(47)))));
             this.PN_GameContainer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.PN_GameContainer.Location = new System.Drawing.Point(0, 226);
             this.PN_GameContainer.Name = "PN_GameContainer";
             this.PN_GameContainer.Size = new System.Drawing.Size(249, 339);
             this.PN_GameContainer.TabIndex = 19;
+            this.PN_GameContainer.DragDrop += new System.Windows.Forms.DragEventHandler(this.PN_GameContainer_DragDrop);
+            this.PN_GameContainer.DragEnter += new System.Windows.Forms.DragEventHandler(this.PN_GameContainer_DragEnter);
             // 
             // panel8
             // 
@@ -325,7 +328,7 @@ namespace SKYNET
             this.panel7.Controls.Add(this.pictureBox3);
             this.panel7.Controls.Add(this.PB_Avatar);
             this.panel7.Controls.Add(this.skyneT_Button1);
-            this.panel7.Controls.Add(this.BT_Connect);
+            this.panel7.Controls.Add(this.BT_Profile);
             this.panel7.Controls.Add(this.LB_SteamID);
             this.panel7.Controls.Add(this.label9);
             this.panel7.Controls.Add(this.LB_NickName);
@@ -373,24 +376,25 @@ namespace SKYNET
             this.skyneT_Button1.TabIndex = 18;
             this.skyneT_Button1.Text = "CONNECT";
             // 
-            // BT_Connect
+            // BT_Profile
             // 
-            this.BT_Connect.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(34)))), ((int)(((byte)(131)))), ((int)(((byte)(246)))));
-            this.BT_Connect.BackColorMouseOver = System.Drawing.Color.Empty;
-            this.BT_Connect.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.BT_Connect.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.BT_Connect.ForeColor = System.Drawing.Color.White;
-            this.BT_Connect.ForeColorMouseOver = System.Drawing.Color.Empty;
-            this.BT_Connect.ImageAlignment = SKYNET_Button._ImgAlign.Left;
-            this.BT_Connect.ImageIcon = null;
-            this.BT_Connect.Location = new System.Drawing.Point(128, 100);
-            this.BT_Connect.MenuMode = false;
-            this.BT_Connect.Name = "BT_Connect";
-            this.BT_Connect.Rounded = false;
-            this.BT_Connect.Size = new System.Drawing.Size(110, 25);
-            this.BT_Connect.Style = SKYNET_Button._Style.TextOnly;
-            this.BT_Connect.TabIndex = 17;
-            this.BT_Connect.Text = "PROFILE";
+            this.BT_Profile.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(34)))), ((int)(((byte)(131)))), ((int)(((byte)(246)))));
+            this.BT_Profile.BackColorMouseOver = System.Drawing.Color.Empty;
+            this.BT_Profile.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.BT_Profile.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.BT_Profile.ForeColor = System.Drawing.Color.White;
+            this.BT_Profile.ForeColorMouseOver = System.Drawing.Color.Empty;
+            this.BT_Profile.ImageAlignment = SKYNET_Button._ImgAlign.Left;
+            this.BT_Profile.ImageIcon = null;
+            this.BT_Profile.Location = new System.Drawing.Point(128, 100);
+            this.BT_Profile.MenuMode = false;
+            this.BT_Profile.Name = "BT_Profile";
+            this.BT_Profile.Rounded = false;
+            this.BT_Profile.Size = new System.Drawing.Size(110, 25);
+            this.BT_Profile.Style = SKYNET_Button._Style.TextOnly;
+            this.BT_Profile.TabIndex = 17;
+            this.BT_Profile.Text = "PROFILE";
+            this.BT_Profile.Click += new System.EventHandler(this.BT_Profile_Click);
             // 
             // LB_SteamID
             // 
@@ -572,6 +576,17 @@ namespace SKYNET
             this.PN_BodyContainer.Size = new System.Drawing.Size(893, 230);
             this.PN_BodyContainer.TabIndex = 10;
             // 
+            // WebLogger1
+            // 
+            this.WebLogger1.AutoScrollLines = true;
+            this.WebLogger1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.WebLogger1.Location = new System.Drawing.Point(0, 0);
+            this.WebLogger1.LoggerBackColor = System.Drawing.Color.Empty;
+            this.WebLogger1.Name = "WebLogger1";
+            this.WebLogger1.ScrollColors = System.Drawing.Color.Empty;
+            this.WebLogger1.Size = new System.Drawing.Size(726, 230);
+            this.WebLogger1.TabIndex = 2;
+            // 
             // PN_UserContainer
             // 
             this.PN_UserContainer.Dock = System.Windows.Forms.DockStyle.Right;
@@ -662,17 +677,6 @@ namespace SKYNET
             this.ConfigureMenuItem.Text = "Properties";
             this.ConfigureMenuItem.Click += new System.EventHandler(this.ConfigureMenuItem_Click);
             // 
-            // skyneT_WebLogger1
-            // 
-            this.WebLogger1.AutoScrollLines = true;
-            this.WebLogger1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.WebLogger1.Location = new System.Drawing.Point(0, 0);
-            this.WebLogger1.LoggerBackColor = System.Drawing.Color.Empty;
-            this.WebLogger1.Name = "skyneT_WebLogger1";
-            this.WebLogger1.ScrollColors = System.Drawing.Color.Empty;
-            this.WebLogger1.Size = new System.Drawing.Size(726, 230);
-            this.WebLogger1.TabIndex = 2;
-            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -748,7 +752,7 @@ namespace SKYNET
         private Label LB_NickName;
         private Label LB_SteamID;
         private Label label9;
-        private SKYNET_Button BT_Connect;
+        private SKYNET_Button BT_Profile;
         private SKYNET_Button skyneT_Button1;
         private Panel PN_GameContainer;
         private Panel panel8;

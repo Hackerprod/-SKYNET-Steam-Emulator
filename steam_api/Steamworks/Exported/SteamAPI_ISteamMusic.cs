@@ -4,8 +4,16 @@ using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Exported
 {
-    public class SteamAPI_ISteamMusic 
+    public class SteamAPI_ISteamMusic
     {
+        static SteamAPI_ISteamMusic()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ISteamMusic_BIsEnabled(IntPtr _)
         {

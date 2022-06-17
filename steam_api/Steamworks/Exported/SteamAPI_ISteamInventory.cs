@@ -10,6 +10,14 @@ namespace SKYNET.Steamworks.Exported
 {
     public class SteamAPI_ISteamInventory
     {
+        static SteamAPI_ISteamInventory()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ISteamInventory_AddPromoItem(IntPtr _, uint pResultHandle, uint itemDef)
         {

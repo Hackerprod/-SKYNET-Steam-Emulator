@@ -5,6 +5,14 @@ namespace SKYNET.Steamworks.Exported
 {
     public class SteamAPI_ISteamNetworking
     {
+        static SteamAPI_ISteamNetworking()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ISteamNetworking_SendP2PPacket(IntPtr _, ulong steamIDRemote, IntPtr pubData, uint cubData, int eP2PSendType, int nChannel)
         {

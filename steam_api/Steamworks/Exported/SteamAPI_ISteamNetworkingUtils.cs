@@ -1,18 +1,19 @@
-﻿using SKYNET;
-using SKYNET.Steamworks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-
-using SteamNetworkingMicroseconds = System.Int64;
 
 namespace SKYNET.Steamworks.Exported
 {
-    public class SteamAPI_ISteamNetworkingUtils 
+    using SteamNetworkingMicroseconds = System.Int64;
+    public class SteamAPI_ISteamNetworkingUtils
     {
+        static SteamAPI_ISteamNetworkingUtils()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_ISteamNetworkingUtils_AllocateMessage(IntPtr _, int cbAllocateBuffer)
         {

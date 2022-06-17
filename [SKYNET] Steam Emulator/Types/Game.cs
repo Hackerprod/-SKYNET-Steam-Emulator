@@ -12,19 +12,21 @@ namespace SKYNET
         public uint AppId { get; set; }
         public string Parameters { get; set; }
         public List<DLC> GameDLC { get; set; }
+        public bool LogToFile { get; set; }
+        public bool LogToConsole { get; set; }
+        public bool RunCallbacks { get; set; }
+        public bool ISteamHTTP { get; set; }
         public bool LaunchWithoutEmu { get; set; }
-        public bool SendLog { get; set; }
 
         public Game()
         {
             GameDLC = new List<DLC>();
         }
+
         public class DLC
         {
             public string Name { get; set; }
             public uint AppId { get; set; }
         }
-
-
     }
 }

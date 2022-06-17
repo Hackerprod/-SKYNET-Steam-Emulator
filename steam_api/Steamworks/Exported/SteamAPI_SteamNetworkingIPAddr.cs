@@ -5,6 +5,14 @@ namespace SKYNET.Steamworks.Exported
 {
     public class SteamAPI_SteamNetworkingIPAddr
     {
+        static SteamAPI_SteamNetworkingIPAddr()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_SteamNetworkingIPAddr_Clear(IntPtr _)
         {

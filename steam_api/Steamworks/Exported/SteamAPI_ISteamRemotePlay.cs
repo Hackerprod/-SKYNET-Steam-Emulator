@@ -1,17 +1,18 @@
-﻿using SKYNET;
-using SKYNET.Steamworks;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SKYNET.Steamworks.Exported
 {
-    public class SteamAPI_ISteamRemotePlay 
+    public class SteamAPI_ISteamRemotePlay
     {
+        static SteamAPI_ISteamRemotePlay()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static uint SteamAPI_ISteamRemotePlay_GetSessionCount(IntPtr _)
         {

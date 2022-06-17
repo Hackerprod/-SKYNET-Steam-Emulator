@@ -44,6 +44,10 @@ public partial class modCommon
         finally { currentProcess = null; }
     }
 
+    public static bool Is64Bit => IntPtr.Size == 8;
+
+    public static bool ShowShadow { get; set; }
+
     public static void OpenFolderAndSelectFile(string filePath)
     {
         if (filePath == null)

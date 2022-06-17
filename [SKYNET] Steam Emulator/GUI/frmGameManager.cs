@@ -2,8 +2,10 @@
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using SKYNET.GUI;
+using SKYNET.Managers;
 using TsudaKageyu;
 
 namespace SKYNET
@@ -30,30 +32,33 @@ namespace SKYNET
 
             LoadLogo(filePath);
 
-            if (File.Exists(Path.Combine(PathDirectory, "steam_api.dll")))
+            Task.Run(delegate
             {
-                TB_SteamApiPath.Text = Path.Combine(PathDirectory, "steam_api.dll");
-            }
-            else if (File.Exists(Path.Combine(PathDirectory, "steam_api64.dll")))
-            {
-                TB_SteamApiPath.Text = Path.Combine(PathDirectory, "steam_api64.dll");
-            }
-            else
-            {
-                var files = Directory.GetFiles(PathDirectory, "*.dll", SearchOption.AllDirectories).ToList();
-
-                string x86 = files.Find(x => x.Contains("steam_api.dll"));
-                if (!string.IsNullOrEmpty(x86))
+                if (File.Exists(Path.Combine(PathDirectory, "steam_api.dll")))
                 {
-                    TB_SteamApiPath.Text = x86;
+                    TB_SteamApiPath.Text = Path.Combine(PathDirectory, "steam_api.dll");
                 }
-
-                string x64 = files.Find(x => x.Contains("steam_api64.dll"));
-                if (!string.IsNullOrEmpty(x64))
+                else if (File.Exists(Path.Combine(PathDirectory, "steam_api64.dll")))
                 {
-                    TB_SteamApiPath.Text = x64;
+                    TB_SteamApiPath.Text = Path.Combine(PathDirectory, "steam_api64.dll");
                 }
-            }
+                else
+                {
+                    var files = Directory.GetFiles(PathDirectory, "*.dll", SearchOption.AllDirectories).ToList();
+
+                    string x86 = files.Find(x => x.Contains("steam_api.dll"));
+                    if (!string.IsNullOrEmpty(x86))
+                    {
+                        TB_SteamApiPath.Text = x86;
+                    }
+
+                    string x64 = files.Find(x => x.Contains("steam_api64.dll"));
+                    if (!string.IsNullOrEmpty(x64))
+                    {
+                        TB_SteamApiPath.Text = x64;
+                    }
+                }
+            });
 
             TB_AppId.Text = "0";
             if (File.Exists(Path.Combine(PathDirectory, "steam_appid.txt")))
@@ -74,8 +79,13 @@ namespace SKYNET
             TB_ExecutablePath.Text = Game.ExecutablePath;
             TB_SteamApiPath.Text = Game.SteamApiPath;
             TB_Parameters.Text = Game.Parameters;
-            TB_AppId.Text = Game.AppId.ToString();
-            CHB_WithoutEmu.Checked = Game.LaunchWithoutEmu;
+            TB_AppId.Text = Game.AppID.ToString();
+            CH_WithoutEmu.Checked = Game.LaunchWithoutEmu;
+            CH_LogToFile.Checked = Game.LogToFile;
+            CH_LogToConsole.Checked = Game.LogToConsole;
+            CH_RunCallbacks.Checked = Game.RunCallbacks;
+            CH_ISteamHTTP.Checked = Game.ISteamHTTP;
+
             LoadLogo(Game.ExecutablePath);
             BT_AddGame.Text = "Update";
 
@@ -171,18 +181,35 @@ namespace SKYNET
                 ExecutablePath = TB_ExecutablePath.Text,
                 SteamApiPath = TB_SteamApiPath.Text,
                 Parameters = TB_Parameters.Text,
-                AppId = _AppId,
-                LaunchWithoutEmu = CHB_WithoutEmu.Checked
+                AppID = _AppId,
+                LaunchWithoutEmu = CH_WithoutEmu.Checked,
+                GameOverlay = CH_GameOverlay.Checked,
+                LogToFile = CH_LogToFile.Checked,
+                LogToConsole = CH_LogToConsole.Checked,
+                RunCallbacks = CH_RunCallbacks.Checked, 
+                ISteamHTTP = CH_ISteamHTTP.Checked,
             };
 
             if (boxHandle != 0)
             {
-                frmMain.frm.UpdateGame(boxHandle, Game);
+                try
+                {
+                    string appid_Path = Path.Combine(Path.GetDirectoryName(TB_ExecutablePath.Text), "steam_appid.txt");
+                    File.WriteAllText(appid_Path, TB_AppId.Text);
+                }
+                catch { }
+                GameManager.Update(Game);
                 Close();
             }
             else
             {
-                frmMain.frm.AddGame(Game);
+                try
+                {
+                    string appid_Path = Path.Combine(Path.GetDirectoryName(TB_ExecutablePath.Text), "steam_appid.txt");
+                    File.WriteAllText(appid_Path, TB_AppId.Text);
+                }
+                catch { }
+                GameManager.AddGame(Game);
                 Close();
             }
         }

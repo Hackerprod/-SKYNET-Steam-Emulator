@@ -236,7 +236,7 @@ namespace SKYNET
         {
             GameName = game.Name;
             GamePath = game.ExecutablePath;
-            AppId = game.AppId;
+            AppId = game.AppID;
             Parameters = game.Parameters;
             _game = game;
         }

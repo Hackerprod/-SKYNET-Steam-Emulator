@@ -7,6 +7,14 @@ namespace SKYNET.Steamworks.Exported
 {
     public class SteamAPI_ISteamGameServerStats
     {
+        static SteamAPI_ISteamGameServerStats()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ISteamGameServerStats_ClearUserAchievement(IntPtr _, ulong steamIDUser, string pchName)
         {

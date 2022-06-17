@@ -13,6 +13,14 @@ namespace SKYNET.Steamworks.Exported
 {
     public class SteamAPI_ISteamClient
     {
+        static SteamAPI_ISteamClient()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static HSteamPipe SteamAPI_ISteamClient_CreateSteamPipe(IntPtr _)
         {

@@ -1,15 +1,18 @@
-﻿using SKYNET;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SKYNET.Steamworks.Exported
 {
-    public class SteamAPI_ISteamNetworkingMessages 
+    public class SteamAPI_ISteamNetworkingMessages
     {
+        static SteamAPI_ISteamNetworkingMessages()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int SteamAPI_ISteamNetworkingMessages_SendMessageToUser(IntPtr _, IntPtr identityRemote, IntPtr pubData, uint cubData, int nSendFlags, int nRemoteChannel)
         {

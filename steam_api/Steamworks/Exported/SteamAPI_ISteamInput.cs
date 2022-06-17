@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using SKYNET;
 using SKYNET.Managers;
-using SKYNET.Steamworks;
 
 using InputHandle_t = System.UInt64;
 using InputActionSetHandle_t = System.UInt64;
@@ -17,6 +11,14 @@ namespace SKYNET.Steamworks.Exported
 {
     public class SteamAPI_ISteamInput
     {
+        static SteamAPI_ISteamInput()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_ISteamInput_ActivateActionSet(IntPtr _, InputHandle_t inputHandle, IntPtr actionSetHandle)
         {

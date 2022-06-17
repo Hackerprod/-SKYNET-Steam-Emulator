@@ -38,7 +38,16 @@ namespace SKYNET
             this.BT_AddGame = new SKYNET_Button();
             this.PN_LeftContainer = new System.Windows.Forms.Panel();
             this.PN_BodyContainer = new System.Windows.Forms.Panel();
-            this.CHB_WithoutEmu = new SKYNET.Controls.SKYNET_Check();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.CH_ISteamHTTP = new SKYNET.Controls.SKYNET_Check();
+            this.label9 = new System.Windows.Forms.Label();
+            this.CH_RunCallbacks = new SKYNET.Controls.SKYNET_Check();
+            this.label10 = new System.Windows.Forms.Label();
+            this.CH_LogToConsole = new SKYNET.Controls.SKYNET_Check();
+            this.label8 = new System.Windows.Forms.Label();
+            this.CH_LogToFile = new SKYNET.Controls.SKYNET_Check();
+            this.label7 = new System.Windows.Forms.Label();
+            this.CH_WithoutEmu = new SKYNET.Controls.SKYNET_Check();
             this.label6 = new System.Windows.Forms.Label();
             this.LB_Name = new System.Windows.Forms.Label();
             this.PB_Avatar = new System.Windows.Forms.PictureBox();
@@ -52,6 +61,8 @@ namespace SKYNET
             this.label2 = new System.Windows.Forms.Label();
             this.TB_Name = new SKYNET.Controls.SKYNET_TextBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.CH_GameOverlay = new SKYNET.Controls.SKYNET_Check();
+            this.label11 = new System.Windows.Forms.Label();
             this.PN_Top.SuspendLayout();
             this.panel3.SuspendLayout();
             this.PN_BodyContainer.SuspendLayout();
@@ -88,7 +99,7 @@ namespace SKYNET
             this.panel3.Controls.Add(this.BT_Cancel);
             this.panel3.Controls.Add(this.BT_AddGame);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel3.Location = new System.Drawing.Point(0, 509);
+            this.panel3.Location = new System.Drawing.Point(0, 550);
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(741, 69);
             this.panel3.TabIndex = 7;
@@ -139,13 +150,24 @@ namespace SKYNET
             this.PN_LeftContainer.Dock = System.Windows.Forms.DockStyle.Left;
             this.PN_LeftContainer.Location = new System.Drawing.Point(0, 0);
             this.PN_LeftContainer.Name = "PN_LeftContainer";
-            this.PN_LeftContainer.Size = new System.Drawing.Size(0, 578);
+            this.PN_LeftContainer.Size = new System.Drawing.Size(0, 619);
             this.PN_LeftContainer.TabIndex = 6;
             // 
             // PN_BodyContainer
             // 
             this.PN_BodyContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(50)))), ((int)(((byte)(57)))));
-            this.PN_BodyContainer.Controls.Add(this.CHB_WithoutEmu);
+            this.PN_BodyContainer.Controls.Add(this.CH_GameOverlay);
+            this.PN_BodyContainer.Controls.Add(this.label11);
+            this.PN_BodyContainer.Controls.Add(this.panel1);
+            this.PN_BodyContainer.Controls.Add(this.CH_ISteamHTTP);
+            this.PN_BodyContainer.Controls.Add(this.label9);
+            this.PN_BodyContainer.Controls.Add(this.CH_RunCallbacks);
+            this.PN_BodyContainer.Controls.Add(this.label10);
+            this.PN_BodyContainer.Controls.Add(this.CH_LogToConsole);
+            this.PN_BodyContainer.Controls.Add(this.label8);
+            this.PN_BodyContainer.Controls.Add(this.CH_LogToFile);
+            this.PN_BodyContainer.Controls.Add(this.label7);
+            this.PN_BodyContainer.Controls.Add(this.CH_WithoutEmu);
             this.PN_BodyContainer.Controls.Add(this.label6);
             this.PN_BodyContainer.Controls.Add(this.LB_Name);
             this.PN_BodyContainer.Controls.Add(this.PB_Avatar);
@@ -162,28 +184,116 @@ namespace SKYNET
             this.PN_BodyContainer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.PN_BodyContainer.Location = new System.Drawing.Point(0, 26);
             this.PN_BodyContainer.Name = "PN_BodyContainer";
-            this.PN_BodyContainer.Size = new System.Drawing.Size(741, 483);
+            this.PN_BodyContainer.Size = new System.Drawing.Size(741, 524);
             this.PN_BodyContainer.TabIndex = 10;
             // 
-            // CHB_WithoutEmu
+            // panel1
             // 
-            this.CHB_WithoutEmu.BackColor = System.Drawing.Color.Transparent;
-            this.CHB_WithoutEmu.Checked = false;
-            this.CHB_WithoutEmu.Location = new System.Drawing.Point(640, 438);
-            this.CHB_WithoutEmu.Name = "CHB_WithoutEmu";
-            this.CHB_WithoutEmu.Size = new System.Drawing.Size(34, 25);
-            this.CHB_WithoutEmu.TabIndex = 15;
+            this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(66)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
+            this.panel1.Location = new System.Drawing.Point(376, 431);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(2, 85);
+            this.panel1.TabIndex = 24;
+            // 
+            // CH_ISteamHTTP
+            // 
+            this.CH_ISteamHTTP.BackColor = System.Drawing.Color.Transparent;
+            this.CH_ISteamHTTP.Checked = true;
+            this.CH_ISteamHTTP.Location = new System.Drawing.Point(640, 460);
+            this.CH_ISteamHTTP.Name = "CH_ISteamHTTP";
+            this.CH_ISteamHTTP.Size = new System.Drawing.Size(34, 25);
+            this.CH_ISteamHTTP.TabIndex = 23;
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
+            this.label9.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.label9.Location = new System.Drawing.Point(404, 460);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(181, 17);
+            this.label9.TabIndex = 22;
+            this.label9.Text = "Initialize ISteamHTTP interface";
+            // 
+            // CH_RunCallbacks
+            // 
+            this.CH_RunCallbacks.BackColor = System.Drawing.Color.Transparent;
+            this.CH_RunCallbacks.Checked = true;
+            this.CH_RunCallbacks.Location = new System.Drawing.Point(640, 431);
+            this.CH_RunCallbacks.Name = "CH_RunCallbacks";
+            this.CH_RunCallbacks.Size = new System.Drawing.Size(34, 25);
+            this.CH_RunCallbacks.TabIndex = 21;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
+            this.label10.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.label10.Location = new System.Drawing.Point(63, 489);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(196, 17);
+            this.label10.TabIndex = 20;
+            this.label10.Text = "Launch game without emulation ";
+            // 
+            // CH_LogToConsole
+            // 
+            this.CH_LogToConsole.BackColor = System.Drawing.Color.Transparent;
+            this.CH_LogToConsole.Checked = false;
+            this.CH_LogToConsole.Location = new System.Drawing.Point(323, 457);
+            this.CH_LogToConsole.Name = "CH_LogToConsole";
+            this.CH_LogToConsole.Size = new System.Drawing.Size(34, 25);
+            this.CH_LogToConsole.TabIndex = 19;
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
+            this.label8.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.label8.Location = new System.Drawing.Point(63, 460);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(204, 17);
+            this.label8.TabIndex = 18;
+            this.label8.Text = "Debug game and print in console";
+            // 
+            // CH_LogToFile
+            // 
+            this.CH_LogToFile.BackColor = System.Drawing.Color.Transparent;
+            this.CH_LogToFile.Checked = false;
+            this.CH_LogToFile.Location = new System.Drawing.Point(323, 428);
+            this.CH_LogToFile.Name = "CH_LogToFile";
+            this.CH_LogToFile.Size = new System.Drawing.Size(34, 25);
+            this.CH_LogToFile.TabIndex = 17;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
+            this.label7.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.label7.Location = new System.Drawing.Point(63, 431);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(187, 17);
+            this.label7.TabIndex = 16;
+            this.label7.Text = "Debug game and save Log file";
+            // 
+            // CH_WithoutEmu
+            // 
+            this.CH_WithoutEmu.BackColor = System.Drawing.Color.Transparent;
+            this.CH_WithoutEmu.Checked = false;
+            this.CH_WithoutEmu.Location = new System.Drawing.Point(323, 486);
+            this.CH_WithoutEmu.Name = "CH_WithoutEmu";
+            this.CH_WithoutEmu.Size = new System.Drawing.Size(34, 25);
+            this.CH_WithoutEmu.TabIndex = 15;
             // 
             // label6
             // 
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
             this.label6.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.label6.Location = new System.Drawing.Point(63, 441);
+            this.label6.Location = new System.Drawing.Point(404, 431);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(196, 17);
+            this.label6.Size = new System.Drawing.Size(146, 17);
             this.label6.TabIndex = 13;
-            this.label6.Text = "Launch game without emulation ";
+            this.label6.Text = "Run SteamAPI Callbacks";
             // 
             // LB_Name
             // 
@@ -282,9 +392,9 @@ namespace SKYNET
             this.label4.ForeColor = System.Drawing.SystemColors.ButtonFace;
             this.label4.Location = new System.Drawing.Point(63, 232);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(92, 17);
+            this.label4.Size = new System.Drawing.Size(91, 17);
             this.label4.TabIndex = 5;
-            this.label4.Text = "SteamApi Path";
+            this.label4.Text = "SteamAPI Path";
             // 
             // TB_ExecutablePath
             // 
@@ -341,12 +451,32 @@ namespace SKYNET
             this.label1.TabIndex = 1;
             this.label1.Text = "Name";
             // 
+            // CH_GameOverlay
+            // 
+            this.CH_GameOverlay.BackColor = System.Drawing.Color.Transparent;
+            this.CH_GameOverlay.Checked = true;
+            this.CH_GameOverlay.Location = new System.Drawing.Point(640, 489);
+            this.CH_GameOverlay.Name = "CH_GameOverlay";
+            this.CH_GameOverlay.Size = new System.Drawing.Size(34, 25);
+            this.CH_GameOverlay.TabIndex = 26;
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
+            this.label11.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.label11.Location = new System.Drawing.Point(404, 489);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(133, 17);
+            this.label11.TabIndex = 25;
+            this.label11.Text = "Enable Game Overlay";
+            // 
             // frmGameManager
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(65)))), ((int)(((byte)(73)))));
-            this.ClientSize = new System.Drawing.Size(741, 578);
+            this.ClientSize = new System.Drawing.Size(741, 619);
             this.Controls.Add(this.PN_BodyContainer);
             this.Controls.Add(this.panel3);
             this.Controls.Add(this.PN_Top);
@@ -386,7 +516,18 @@ namespace SKYNET
         private PictureBox PB_Avatar;
         private Label LB_Name;
         private Label label6;
-        private Controls.SKYNET_Check CHB_WithoutEmu;
+        private Controls.SKYNET_Check CH_WithoutEmu;
+        private Controls.SKYNET_Check CH_LogToConsole;
+        private Label label8;
+        private Controls.SKYNET_Check CH_LogToFile;
+        private Label label7;
+        private Controls.SKYNET_Check CH_ISteamHTTP;
+        private Label label9;
+        private Controls.SKYNET_Check CH_RunCallbacks;
+        private Label label10;
+        private Panel panel1;
+        private Controls.SKYNET_Check CH_GameOverlay;
+        private Label label11;
     }
 }
 

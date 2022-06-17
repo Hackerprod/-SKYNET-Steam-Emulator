@@ -1,16 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using SKYNET.Steamworks.Implementation;
 
 using SteamAPICall_t = System.UInt64;
 using FriendsGroupID_t = System.UInt16;
-using System.Threading.Tasks;
-using SKYNET.Steamworks.Implementation;
 
 namespace SKYNET.Steamworks.Exported
 {
     public class SteamAPI_ISteamFriends
     {
+        static SteamAPI_ISteamFriends()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_ISteamFriends_ActivateGameOverlay(IntPtr _, string friendsGroupID)
         {

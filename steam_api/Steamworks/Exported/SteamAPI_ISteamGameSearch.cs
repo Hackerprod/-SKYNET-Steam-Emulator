@@ -5,6 +5,14 @@ namespace SKYNET.Steamworks.Exported
 {
     public class SteamAPI_ISteamGameSearch
     {
+        static SteamAPI_ISteamGameSearch()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int SteamAPI_ISteamGameSearch_AcceptGame(IntPtr _)
         {

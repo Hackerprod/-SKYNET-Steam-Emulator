@@ -1,18 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-
-using int32_t = System.Int32;
-using uint32_t = System.UInt32;
-using uint64_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Exported
 {
+    using int32_t = System.Int32;
+    using uint32_t = System.UInt32;
+    using uint64_t = System.UInt64;
     public class SteamAPI_vr_IVR
     {
+        static SteamAPI_vr_IVR()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_vr_IVRSystem_GetWindowBounds(IntPtr _, int32_t pnX, int32_t pnY, uint32_t pnWidth, uint32_t pnHeight)
         {

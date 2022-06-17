@@ -1,20 +1,20 @@
-﻿using SKYNET;
-using SKYNET.Steamworks;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-
-using SteamAPICall_t = System.UInt64;
-using PartyBeaconID_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Exported
 {
-    public class SteamAPI_ISteamParties 
+    using SteamAPICall_t = System.UInt64;
+    using PartyBeaconID_t = System.UInt64;
+    public class SteamAPI_ISteamParties
     {
+        static SteamAPI_ISteamParties()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_ISteamParties_CancelReservation(IntPtr _, uint ulBeacon, IntPtr steamIDUser)
         {

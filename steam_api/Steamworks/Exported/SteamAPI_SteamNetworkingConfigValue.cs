@@ -1,14 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SKYNET.Steamworks.Exported
 {
     public class SteamAPI_SteamNetworkingConfigValue
     {
+        static SteamAPI_SteamNetworkingConfigValue()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_SteamNetworkingConfigValue_t_SetInt32(IntPtr _, IntPtr eVal, IntPtr data)
         {

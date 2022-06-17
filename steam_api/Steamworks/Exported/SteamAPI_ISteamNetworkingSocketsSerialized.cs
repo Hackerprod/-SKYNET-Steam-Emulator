@@ -1,18 +1,19 @@
-﻿using SKYNET;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-
-using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Exported
 {
-    public class SteamAPI_ISteamNetworkingSocketsSerialized 
+    using SteamAPICall_t = System.UInt64;
+    public class SteamAPI_ISteamNetworkingSocketsSerialized
     {
+        static SteamAPI_ISteamNetworkingSocketsSerialized()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_ISteamNetworkingSocketsSerialized_SendP2PRendezvous(IntPtr _, ulong steamIDRemote, uint unConnectionIDSrc, IntPtr pMsgRendezvous, uint cbRendezvous)
         {

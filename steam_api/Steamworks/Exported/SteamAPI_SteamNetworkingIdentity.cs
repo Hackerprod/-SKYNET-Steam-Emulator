@@ -3,8 +3,16 @@ using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Exported
 {
-    public class SteamAPI_SteamNetworkingIdentity 
+    public class SteamAPI_SteamNetworkingIdentity
     {
+        static SteamAPI_SteamNetworkingIdentity()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_SteamNetworkingIdentity_Clear(IntPtr _)
         {

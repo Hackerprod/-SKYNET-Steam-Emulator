@@ -1,17 +1,19 @@
-﻿using SKYNET;
-using SKYNET.Managers;
-using SKYNET.Steamworks;
+﻿using SKYNET.Managers;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SKYNET.Steamworks.Exported
 {
-    public class SteamAPI_ISteamScreenshots 
+    public class SteamAPI_ISteamScreenshots
     {
+        static SteamAPI_ISteamScreenshots()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static uint SteamAPI_ISteamScreenshots_WriteScreenshot(IntPtr _, IntPtr pubRGB, uint cubRGB, int nWidth, int nHeight)
         {

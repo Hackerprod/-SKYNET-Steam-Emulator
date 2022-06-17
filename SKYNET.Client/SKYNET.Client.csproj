@@ -47,9 +47,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IPC\Types\IPC_Messages.cs" />
+    <Compile Include="Managers\GameManager.cs" />
     <Compile Include="Managers\IPCManager.cs" />
     <Compile Include="Managers\LobbyManager.cs" />
     <Compile Include="Managers\NetworkManager.cs" />
+    <Compile Include="Managers\StatsManager.cs" />
     <Compile Include="Managers\UserManager.cs" />
     <Compile Include="Network\FileServer.cs" />
     <Compile Include="Network\NET_Messages.cs" />
@@ -68,6 +70,10 @@
     <Compile Include="IPC\TaskWorker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SteamPlayer.cs" />
+    <Compile Include="Types\Achievement.cs" />
+    <Compile Include="Types\Game.cs" />
+    <Compile Include="Types\Leaderboard.cs" />
+    <Compile Include="Types\PlayerStat.cs" />
     <Compile Include="Types\SteamLobby.cs" />
   </ItemGroup>
   <ItemGroup />

@@ -11,6 +11,14 @@ namespace SKYNET.Steamworks.Exported
 {
     public partial class SteamAPI_ISteamGameServer
     {
+        static SteamAPI_ISteamGameServer()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ISteamGameServer_InitGameServer(IntPtr _, uint unIP, int usGamePort, int usQueryPort, uint unFlags, AppId_t nGameAppId, string pchVersionString)
         {

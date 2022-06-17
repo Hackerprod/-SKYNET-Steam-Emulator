@@ -2,12 +2,19 @@
 using System;
 using System.Runtime.InteropServices;
 
-using SteamAPICall_t = System.UInt64;
-
 namespace SKYNET.Steamworks.Exported
 {
+    using SteamAPICall_t = System.UInt64;
     public class SteamAPI_ISteamUserStats
     {
+        static SteamAPI_ISteamUserStats()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ISteamUserStats_RequestCurrentStats(IntPtr _)
         {

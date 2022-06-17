@@ -8,6 +8,14 @@ namespace SKYNET.Steamworks.Exported
 {
     public class SteamAPI_ISteamHTMLSurface
     {
+        static SteamAPI_ISteamHTMLSurface()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_ISteamHTMLSurface_SteamAPI_ISteamHTMLSurface_AddHeader(IntPtr _, HHTMLBrowser unBrowserHandle, string pchKey, string pchValue)
         {

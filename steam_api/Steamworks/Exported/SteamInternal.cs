@@ -3,11 +3,10 @@ using System.Runtime.InteropServices;
 using SKYNET.Managers;
 using SKYNET.Types;
 
-using HSteamPipe = System.UInt32;
-using HSteamUser = System.UInt32;
-
 namespace SKYNET.Steamworks.Exported
 {
+    using HSteamPipe = System.UInt32;
+    using HSteamUser = System.UInt32;
     public unsafe class SteamInternal
     {
         static SteamInternal()

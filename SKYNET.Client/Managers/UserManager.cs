@@ -36,6 +36,15 @@ namespace SKYNET.Managers
             });
             return user;
         }
+        public static SteamPlayer GetUser(uint accountID)
+        {
+            SteamPlayer user = default;
+            MutexHelper.Wait("Users", delegate
+            {
+                user = Users.Find(u => u.AccountID == accountID);
+            });
+            return user;
+        }
         public static SteamPlayer GetUser(CSteamID steamID)
         {
             return GetUser((ulong)steamID);

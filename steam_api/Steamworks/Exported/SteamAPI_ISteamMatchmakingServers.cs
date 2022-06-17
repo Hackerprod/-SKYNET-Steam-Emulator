@@ -1,13 +1,19 @@
-﻿using SKYNET.Steamworks.Types;
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
-
-using HServerListRequest = System.IntPtr;
 
 namespace SKYNET.Steamworks.Exported
 {
-    public class SteamAPI_ISteamMatchmakingServers 
+    using HServerListRequest = System.IntPtr;
+    public class SteamAPI_ISteamMatchmakingServers
     {
+        static SteamAPI_ISteamMatchmakingServers()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_ISteamMatchmakingServers_RequestInternetServerList(IntPtr _, uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)
         {

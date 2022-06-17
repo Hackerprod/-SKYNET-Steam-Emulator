@@ -1,13 +1,18 @@
 ﻿using System;
-using System.IO;
 using System.Runtime.InteropServices;
-using SKYNET;
-using SKYNET.Helper;
 
 namespace SKYNET.Steamworks.Exported
 {
     public class SteamAPI_ISteamAppList
     {
+        static SteamAPI_ISteamAppList()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int SteamAPI_ISteamAppList_GetAppBuildId(uint nAppID)
         {

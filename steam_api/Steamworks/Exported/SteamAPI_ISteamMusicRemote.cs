@@ -1,16 +1,18 @@
-﻿using SKYNET;
-using SKYNET.Steamworks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SKYNET.Steamworks.Exported
 {
-    public class SteamAPI_ISteamMusicRemote 
+    public class SteamAPI_ISteamMusicRemote
     {
+        static SteamAPI_ISteamMusicRemote()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ISteamMusicRemote_RegisterSteamMusicRemote(IntPtr _, string pchName)
         {

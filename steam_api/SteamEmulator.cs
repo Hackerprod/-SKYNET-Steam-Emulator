@@ -8,19 +8,15 @@
                                 ╚═════╝░╚═╝░░╚═╝░░░╚═╝░░░╚═╝░░╚══╝╚══════╝░░░╚═╝░░░   
 */
 
-#define LOG
-using SKYNET;
+//#define FORCELOG
 using SKYNET.Helper;
-using SKYNET.Helper.JSON;
 using SKYNET.Managers;
 using SKYNET.Steamworks;
 using SKYNET.Steamworks.Implementation;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
-
 using AppID      = System.UInt32;
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
@@ -38,18 +34,7 @@ public class SteamEmulator
 
     public static CSteamID SteamID;
     public static CSteamID SteamID_GS;
-    public static uint GameID;
     public static uint AppID;
-    public static bool Initialized;
-    public static bool Initializing;
-
-    public static bool FileLog;
-    public static bool ConsoleLog;
-    public static int BroadcastPort;
-
-    // Debug options
-    public static bool RunCallbacks;
-    public static bool ISteamHTTP;
 
     public static HSteamUser HSteamUser;
     public static HSteamPipe HSteamPipe;
@@ -57,6 +42,17 @@ public class SteamEmulator
     public static HSteamUser HSteamUser_GS;
     public static HSteamPipe HSteamPipe_GS;
 
+    public static bool GameOverlay;
+    public static bool LogToFile;
+    public static bool LogToConsole;
+
+    public static bool Initialized;
+    public static bool Initializing;
+
+    // Debug options
+    public static bool RunCallbacks;
+    public static bool ISteamHTTP;
+ 
     #endregion
 
     #region Interfaces 
@@ -106,32 +102,22 @@ public class SteamEmulator
         Instance = this;
     }
 
-    public static void Initialize(bool hooked = false)
+    public static void Initialize()
     {
         try
         {
+            Log.Clean();
+            Write("Initializing Steam Emulator");
+
             if (Initialized) return;
+
             Initializing = true;
 
-            #region Load settings
-            //try
-            //{
-            //    if (!Hooked)
-            //    {
-            //        Settings.Load();
+            SteamID = CSteamID.Invalid;
+            LoadAppID();
 
-            //        string fileName = Path.Combine(modCommon.GetPath(), "SKYNET", "[SKYNET] steam_api.log");
-            //        if (File.Exists(fileName))
-            //        {
-            //            File.WriteAllLines(fileName, new List<string>());
-            //        }
-            //    }
-            //}
-            //catch
-            //{
-            //    Write("Settings", "Error loading settings");
-            //}
-            #endregion
+            IPCManager.Initialize();
+            InterfaceManager.Initialize();
 
             #region Interface Initialization
 
@@ -210,9 +196,6 @@ public class SteamEmulator
 
             #endregion
             
-            InterfaceManager.Initialize();
-            IPCManager.Initialize();
-
             HSteamUser = 1;
             HSteamPipe = 1;
 
@@ -225,6 +208,22 @@ public class SteamEmulator
         catch (Exception ex)
         {
             Write(ex);
+        }
+    }
+
+    private static void LoadAppID()
+    {
+        try
+        {
+            string appid_Path = Path.Combine(modCommon.GetPath(), "steam_appid.txt");
+            if (File.Exists(appid_Path))
+            {
+                string content = File.ReadAllText(appid_Path);
+                uint.TryParse(content, out AppID);
+            }
+        }
+        catch 
+        {
         }
     }
 
@@ -262,24 +261,24 @@ public class SteamEmulator
     }
 
     private static string lastMsg = "";
-    
-#if LOG
+
+#if FORCELOG
 
     public static void Write(string sender, object msg)
     {
         string message = " ";
-        message += string.IsNullOrEmpty(sender) ? "" : $"{sender}: "; 
+        message += string.IsNullOrEmpty(sender) ? "" : $"{sender}: ";
         message += msg == null ? "NULL" : msg;
 
         if (lastMsg != msg.ToString())
         {
-            if (FileLog)
+            if (true)
             {
                 Log.AppEnd(message);
                 lastMsg = msg.ToString();
             }
 
-            if (ConsoleLog)
+            if (true)
             {
                 if (sender.ToUpper() == "DEBUG")
                     Console.ForegroundColor = ConsoleColor.Red;
@@ -289,15 +288,34 @@ public class SteamEmulator
             }
             lastMsg = msg.ToString();
         }
-
-        //IpcManager.SendMsg($" {sender}: {msg}");
     }
 
 #else
 
     public static void Write(string sender, object msg)
     {
-        // TODO
+        string message = " ";
+        message += string.IsNullOrEmpty(sender) ? "" : $"{sender}: "; 
+        message += msg == null ? "NULL" : msg;
+
+        if (lastMsg != msg.ToString())
+        {
+            if (LogToFile)
+            {
+                Log.AppEnd(message);
+                lastMsg = msg.ToString();
+            }
+
+            if (LogToConsole)
+            {
+                if (sender.ToUpper() == "DEBUG")
+                    Console.ForegroundColor = ConsoleColor.Red;
+                else
+                    Console.ResetColor();
+                Console.WriteLine(message);
+            }
+            lastMsg = msg.ToString();
+        }
     }
 
 #endif

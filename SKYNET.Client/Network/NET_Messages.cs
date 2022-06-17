@@ -80,7 +80,7 @@ namespace SKYNET.Network.Packets
     {
         public ulong SteamIDLobby { get; set; }
         public ulong SteamIDMember { get; set; }
-        public string ParsedLobby { get; set; }
+        public string SerializedLobby { get; set; }
     }
 
     public class NET_LobbyChatUpdate : NET_Base

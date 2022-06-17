@@ -10,6 +10,7 @@ namespace SKYNET.Types
     public class SteamLobby
     {
         public ulong SteamID { get; set; }
+        public uint AppID { get; set; }
         public ulong Owner { get; set; }
         public ELobbyType Type { get; set; }
         public List<LobbyMember> Members { get; set; }

@@ -2,6 +2,7 @@
 using SKYNET.Helper;
 using SKYNET.Helper.JSON;
 using SKYNET.Managers;
+using SKYNET.Types;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -9,7 +10,6 @@ using System.IO;
 using System.Text;
 
 using SteamAPICall_t = System.UInt64;
-using SteamLeaderboard_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -29,26 +29,29 @@ namespace SKYNET.Steamworks.Implementation
             Leaderboards = new List<Leaderboard>();
             Achievements = new List<Achievement>();
             UserStats = new ConcurrentDictionary<ulong, List<PlayerStat>>();
+        }
 
-            string achievementsPath = Path.Combine(modCommon.GetPath(), "SKYNET", "Storage", "Achievements.json");
-            if (File.Exists(achievementsPath))
+        internal void SetLeaderboards(List<Leaderboard> leaderboards)
+        {
+            if (leaderboards != null)
             {
-                string fileContent = File.ReadAllText(achievementsPath);
-                Achievements = fileContent.FromJson<List<Achievement>>();
-            }
-
-            string UserStatsPath = Path.Combine(modCommon.GetPath(), "SKYNET", "Storage", "UserStats.json");
-            if (File.Exists(UserStatsPath))
-            {
-                string fileContent = File.ReadAllText(UserStatsPath);
-                var StatsList = fileContent.FromJson<List<PlayerStat>>();
-                UserStats.TryAdd((ulong)SteamEmulator.SteamID, StatsList);
-            }
-            else
-            {
-                UserStats.TryAdd((ulong)SteamEmulator.SteamID, new List<PlayerStat>());
+                Leaderboards = leaderboards;
             }
         }
+
+        internal void SetAchievements(List<Achievement> achievements)
+        {
+            if (achievements != null)
+            {
+                Achievements = achievements;
+            }
+        }
+
+        internal void SetPlayerStats(ulong steamID, List<PlayerStat> playerStats)
+        {
+            UserStats.TryAdd(steamID, playerStats);
+        }
+
 
         public bool RequestCurrentStats()
         {
@@ -57,7 +60,7 @@ namespace SKYNET.Steamworks.Implementation
                 Write($"RequestCurrentStats");
                 UserStatsReceived_t data = new UserStatsReceived_t()
                 {
-                    m_nGameID = SteamEmulator.GameID,
+                    m_nGameID = SteamEmulator.AppID,
                     m_eResult = EResult.k_EResultOK,
                     m_steamIDUser = SteamEmulator.SteamID
                 };
@@ -253,7 +256,7 @@ namespace SKYNET.Steamworks.Implementation
                 Write($"StoreStats");
                 UserStatsStored_t data = new UserStatsStored_t()
                 {
-                    m_nGameID = SteamEmulator.GameID,
+                    m_nGameID = SteamEmulator.AppID,
                     m_eResult = EResult.k_EResultOK
                 };
                 CallbackManager.AddCallbackResult(data);
@@ -340,7 +343,7 @@ namespace SKYNET.Steamworks.Implementation
                 Write($"RequestUserStats {steamIDUser}");
                 UserStatsReceived_t data = new UserStatsReceived_t()
                 {
-                    m_nGameID = SteamEmulator.GameID,
+                    m_nGameID = SteamEmulator.AppID,
                     m_eResult = EResult.k_EResultOK,
                     m_steamIDUser = (CSteamID)steamIDUser
                 };
@@ -590,7 +593,7 @@ namespace SKYNET.Steamworks.Implementation
                 GlobalStatsReceived_t data = new GlobalStatsReceived_t()
                 {
                     m_eResult = EResult.k_EResultOK,
-                    m_nGameID = SteamEmulator.GameID
+                    m_nGameID = SteamEmulator.AppID
                 };
                 return CallbackManager.AddCallbackResult(data);
             }
@@ -653,30 +656,6 @@ namespace SKYNET.Steamworks.Implementation
                     }
                 });
             }
-        }
-
-
-        private class Achievement
-        {
-            public string Name { get; set; }
-            public bool Earned { get; set; }
-            public DateTime Date { get; set; }
-            public uint Progress { get; set; }
-            public uint MaxProgress { get; set; }
-        }
-
-        private class Leaderboard
-        {
-            public string Name { get; set; }
-            public ELeaderboardSortMethod ShortMethod { get; set; }
-            public ELeaderboardDisplayType DisplayType { get; set; }
-            public SteamLeaderboard_t SteamLeaderboard { get; set; }
-        }
-
-        private class PlayerStat
-        {
-            public string Name { get; set; }
-            public uint Data { get; set; }
         }
     }
 }

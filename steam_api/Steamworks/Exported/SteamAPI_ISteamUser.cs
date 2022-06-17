@@ -1,21 +1,21 @@
 using System;
-using System.Drawing;
-using System.Net;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Windows.Forms;
-using SKYNET;
-using SKYNET.Steamworks;
-
-using SteamAPICall_t = System.UInt64;
-using HSteamPipe = System.UInt32;
-using HSteamUser = System.UInt32;
 using SKYNET.Managers;
 
 namespace SKYNET.Steamworks.Exported
 {
+    using SteamAPICall_t = System.UInt64;
+    using HSteamUser = System.UInt32;
     public class SteamAPI_ISteamUser
     {
+        static SteamAPI_ISteamUser()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static HSteamUser SteamAPI_ISteamUser_GetHSteamUser(IntPtr _)
         {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SKYNET.GUI;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -20,8 +21,9 @@ namespace SKYNET
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            //Application.Run(new frmLogin());
             Application.Run(new frmMain());
         }
-        
+
     }
 }

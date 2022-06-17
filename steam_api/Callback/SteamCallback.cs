@@ -33,7 +33,7 @@ namespace SKYNET.Callback
             HasResult = hasResult;
             CallbackType = (CallbackType)CallbackBase.m_iCallback;
 
-            CallResult = CallbackBase.m_vfptr.ToType<CCallResult>();
+            CallResult = CallbackBase.CCallbackMgr.ToType<CCallResult>();
         }
 
         public SteamCallback(IntPtr _pointer, int iCallback, bool hasResult = false)
@@ -45,7 +45,7 @@ namespace SKYNET.Callback
             Created = DateTime.Now;
             HasResult = hasResult;
 
-            CallResult = CallbackBase.m_vfptr.ToType<CCallResult>();
+            CallResult = CallbackBase.CCallbackMgr.ToType<CCallResult>();
         }
 
         public void Run(ICallbackData data)
@@ -96,23 +96,5 @@ namespace SKYNET.Callback
             CallbackBase.m_nCallbackFlags &= k_ECallbackFlagsRegistered;
             Update();
         }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct CCallResult
-        {
-            public RunCallResultDelegate m_RunCallResult;
-            public RunCallbackDelegate m_RunCallback;
-            public GetCallbackSizeBytesDel m_GetCallbackSizeBytes;
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate void RunCallbackDelegate(IntPtr _, IntPtr pvParam);
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate void RunCallResultDelegate(IntPtr _, IntPtr pvParam, [MarshalAs(UnmanagedType.I1)] bool bIOFailure, ulong hSteamAPICall);
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate int GetCallbackSizeBytesDel(IntPtr _);
-        }
     }
-
 }

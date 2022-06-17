@@ -11,10 +11,10 @@ using SKYNET.Managers;
 using SKYNET.Properties;
 using SKYNET.Overlay;
 using SKYNET.Types;
+using SKYNET.IPC.Types;
 
 using SteamAPICall_t = System.UInt64;
 using FriendsGroupID_t = System.UInt16;
-using SKYNET.IPC.Types;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -40,7 +40,10 @@ namespace SKYNET.Steamworks.Implementation
             RichPresence = new Dictionary<string, string>();
             Avatars = new ConcurrentDictionary<ulong, ImageAvatar>();
             ImageIndex = 10; 
+        }
 
+        public void Initialize()
+        {
             #region Default Avatar
 
             DefaultAvatar = new ImageAvatar(Resources.Image, ref ImageIndex);
@@ -51,24 +54,9 @@ namespace SKYNET.Steamworks.Implementation
 
             try
             {
-                string fileName = Path.Combine(modCommon.GetPath(), "SKYNET", "Avatar.jpg");
-                if (!File.Exists(fileName))
-                    fileName = Path.Combine(modCommon.GetPath(), "SKYNET", "Avatar.png");
-
-                Bitmap Avatar = default;
-                if (File.Exists(fileName))
-                {
-                    Avatar = (Bitmap)Bitmap.FromFile(fileName);
-                }
-                else
-                {
-                    Avatar = ImageHelper.GetDesktopWallpaper(true);
-                }
-                if (Avatar != null)
-                {
-                    ImageAvatar avatar = new ImageAvatar(Avatar, ref ImageIndex); 
-                    Avatars.TryAdd((ulong)SteamEmulator.SteamID, avatar);
-                }
+                var Avatar = ImageHelper.GetDesktopWallpaper(true);
+                ImageAvatar avatar = new ImageAvatar(Avatar, ref ImageIndex);
+                Avatars.TryAdd((ulong)SteamEmulator.SteamID, avatar);
             }
             catch (Exception ex)
             {
@@ -95,7 +83,7 @@ namespace SKYNET.Steamworks.Implementation
             Users.Add(new SteamPlayer()
             {
                 AccountID = 1001,
-                GameID = SteamEmulator.GameID,
+                GameID = SteamEmulator.AppID,
                 HasFriend = true,
                 PersonaName = "Yohel.com",
                 SteamID = (ulong)new CSteamID(1001),
@@ -104,7 +92,7 @@ namespace SKYNET.Steamworks.Implementation
             Users.Add(new SteamPlayer()
             {
                 AccountID = 1002,
-                GameID = SteamEmulator.GameID,
+                GameID = SteamEmulator.AppID,
                 HasFriend = true,
                 PersonaName = "Elier",
                 SteamID = (ulong)new CSteamID(1002),
@@ -113,7 +101,7 @@ namespace SKYNET.Steamworks.Implementation
             Users.Add(new SteamPlayer()
             {
                 AccountID = 1003,
-                GameID = SteamEmulator.GameID,
+                GameID = SteamEmulator.AppID,
                 HasFriend = true,
                 PersonaName = "BrolySSL",
                 SteamID = (ulong)new CSteamID(1003),
@@ -426,7 +414,7 @@ namespace SKYNET.Steamworks.Implementation
             });
             if (steamIDFriend == SteamEmulator.SteamID)
             {
-                pFriendGameInfo.GameID = (uint)SteamEmulator.GameID;
+                pFriendGameInfo.GameID = (uint)SteamEmulator.AppID;
                 pFriendGameInfo.GameIP = 0;
                 pFriendGameInfo.GamePort = 0;
             }
@@ -814,7 +802,7 @@ namespace SKYNET.Steamworks.Implementation
             if (user != null)
             {
                 user.PersonaName = pchPersonaName;
-                IPCManager.BroadcastStatusUpdated(user);
+                IPCManager.SendUserDataUpdated(user);
             }
 
             return APICall;
@@ -859,7 +847,7 @@ namespace SKYNET.Steamworks.Implementation
                 user.LobbyID = lobbySteamId;
                 if (userSteamId == SteamEmulator.SteamID)
                 {
-                    IPCManager.BroadcastStatusUpdated(user);
+                    IPCManager.SendUserDataUpdated(user);
                 }
             }
         }
@@ -869,12 +857,22 @@ namespace SKYNET.Steamworks.Implementation
             var user = GetUser(new CSteamID(statusChanged.AccountID));
             if (user != null)
             {
-                user.LobbyID = statusChanged.LobbyID;
-                user.IPAddress = statusChanged.IPAddress;
-                if (user.PersonaName != statusChanged.PersonaName)
+                if (!string.IsNullOrEmpty(statusChanged.IPAddress))
                 {
-                    user.PersonaName = statusChanged.PersonaName;
-                    ReportUserChanged(user.SteamID, EPersonaChange.k_EPersonaChangeName);
+                    user.IPAddress = statusChanged.IPAddress;
+                }
+                if (!string.IsNullOrEmpty(statusChanged.PersonaName))
+                {
+                    if (user.PersonaName != statusChanged.PersonaName)
+                    {
+                        user.PersonaName = statusChanged.PersonaName;
+                        ReportUserChanged(user.SteamID, EPersonaChange.k_EPersonaChangeName);
+
+                        if (statusChanged.AccountID == SteamEmulator.SteamID.AccountID)
+                        {
+                            SteamEmulator.PersonaName = statusChanged.PersonaName;
+                        }
+                    }
                 }
                 if (user.LobbyID != statusChanged.LobbyID)
                 {
@@ -1022,10 +1020,11 @@ namespace SKYNET.Steamworks.Implementation
             {
                 avatar = new ImageAvatar(image, ref ImageIndex);
                 Avatars.TryAdd(steamID, avatar);
-                ReportUserChanged(steamID, EPersonaChange.k_EPersonaChangeAvatar);
             }
             if (QueryingAvatar.Contains(steamID))
                 QueryingAvatar.Remove(steamID);
+
+            ReportUserChanged(steamID, EPersonaChange.k_EPersonaChangeAvatar);
         }
 
         private ImageAvatar LoadFromCache(ulong steamIDFriend)

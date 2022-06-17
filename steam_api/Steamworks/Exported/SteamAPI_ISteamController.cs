@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using SKYNET;
-using SKYNET.Steamworks;
 
 using ControllerHandle_t = System.UInt64;
 using ControllerActionSetHandle_t = System.UInt64;
@@ -13,6 +10,14 @@ namespace SKYNET.Steamworks.Exported
 {
     public class SteamAPI_ISteamController
     {
+        static SteamAPI_ISteamController()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_ISteamController_ActivateActionSet(IntPtr _, ControllerHandle_t controllerHandle, ControllerActionSetHandle_t actionSetHandle)
         {

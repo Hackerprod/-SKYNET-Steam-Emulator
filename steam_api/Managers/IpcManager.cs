@@ -9,7 +9,6 @@ using SKYNET.Types;
 using System;
 using System.Drawing;
 using System.Threading;
-using static SKYNET.Steamworks.Implementation.SteamMatchmaking;
 
 namespace SKYNET.Managers
 {
@@ -40,18 +39,8 @@ namespace SKYNET.Managers
 
         private static void IPCClient_Connected(object sender, ConnectionEventArgs<IPCMessage> e)
         {
-            Write("IPCClient Connected");
-        }
-
-        internal static void GCRequest(uint MsgType, byte[] bytes)
-        {
-            var IPC_GCRequest = new IPC_GCMessageRequest()
-            {
-                MsgType = MsgType,
-                Buffer = bytes
-            };
-            //var message = CreateIPCMessage(IPC_GCRequest, IPCMessageType.IPC_GCMessageRequest);
-            //SendTo(IPC_ToServer, message);
+            Write("IPCClient Connected to server");
+            SendClientHello();
         }
 
         private static void IPCClient_Disconnected(object sender, ConnectionEventArgs<IPCMessage> e)
@@ -61,7 +50,6 @@ namespace SKYNET.Managers
 
         private static void IPCClient_MessageReceived(object sender, ConnectionMessageEventArgs<IPCMessage> message)
         {
-            Write("IPCClient MessageReceived");
             ProcessMessage(message.Message);
         }
 
@@ -69,11 +57,11 @@ namespace SKYNET.Managers
 
         private static void ProcessMessage(IPCMessage message)
         {
-            Write($"Received message {(IPCMessageType)message.MessageType}");
+            Write($"Received IPC message {(IPCMessageType)message.MessageType}");
             switch ((IPCMessageType)message.MessageType)
             {
-                case IPCMessageType.IPC_User:
-                    ProcessUser(message);
+                case IPCMessageType.IPC_ClientWelcome:
+                    ProcessClientWelcome(message);
                     break;
                 case IPCMessageType.IPC_AddOrUpdateUser:
                     ProcessAddOrUpdateUser(message);
@@ -82,7 +70,7 @@ namespace SKYNET.Managers
                     ProcessAvatarResponse(message);
                     break;
                 case IPCMessageType.IPC_UserDataUpdated:
-                    ProcessUserStatusChanged(message);
+                    ProcessUserDataUpdated(message);
                     break;
                 case IPCMessageType.IPC_LobbyListRequest:
                     ProcessLobbyListRequest(message);
@@ -111,11 +99,89 @@ namespace SKYNET.Managers
                 case IPCMessageType.IPC_LobbyGameserver:
                     ProcessLobbyGameserver(message);
                     break;
-
+                case IPCMessageType.IPC_Leaderboards:
+                    ProcessLeaderboards(message);
+                    break;
+                case IPCMessageType.IPC_Achievements:
+                    ProcessAchievements(message);
+                    break;
+                case IPCMessageType.IPC_PlayerStats:
+                    ProcessPlayerStats(message);
+                    break;
+                case IPCMessageType.IPC_P2PPacket:
+                    ProcessP2PPacket(message);
+                    break;
                 default:
                     break;
             }
 
+        }
+
+        #region IPC_ClientHello
+
+        private static void SendClientHello()
+        {
+            var ClientHello = new IPC_ClientHello()
+            {
+                AppID = SteamEmulator.AppID
+            };
+            var message = CreateIPCMessage(ClientHello, IPCMessageType.IPC_ClientHello);
+            SendTo(IPC_ToServer, message);
+        }
+
+        private static void ProcessClientWelcome(IPCMessage message)
+        {
+            try
+            {
+                var ClientWelcome = message.ParsedBody.FromJson<IPC_ClientWelcome>();
+                SteamEmulator.PersonaName = ClientWelcome.PersonaName;
+                SteamEmulator.SteamID = new CSteamID(ClientWelcome.AccountID);
+                SteamEmulator.SteamID_GS = new CSteamID(ClientWelcome.GameServerID);
+                SteamEmulator.GameOverlay = ClientWelcome.GameOverlay;
+                SteamEmulator.LogToFile = ClientWelcome.LogToFile;
+                SteamEmulator.LogToConsole = ClientWelcome.LogToConsole;
+                SteamEmulator.RunCallbacks = ClientWelcome.RunCallbacks;
+                SteamEmulator.ISteamHTTP = ClientWelcome.ISteamHTTP;
+
+                if (ClientWelcome.LogToConsole)
+                {
+                    modCommon.ActiveConsoleOutput();
+                }
+
+                SteamFriends.Instance.Initialize();
+            }
+            catch
+            {
+
+            }
+        }
+
+        #endregion
+        private static void ProcessPlayerStats(IPCMessage message)
+        {
+            var PlayerStats = message.ParsedBody.FromJson<IPC_PlayerStats>();
+            if (PlayerStats != null)
+            {
+                SteamUserStats.Instance?.SetPlayerStats(PlayerStats.SteamID, PlayerStats.PlayerStats);
+            }
+        }
+
+        private static void ProcessAchievements(IPCMessage message)
+        {
+            var Achievements = message.ParsedBody.FromJson<IPC_Achievements>();
+            if (Achievements != null)
+            {
+                SteamUserStats.Instance?.SetAchievements(Achievements.Achievements);
+            }
+        }
+
+        private static void ProcessLeaderboards(IPCMessage message)
+        {
+            var Leaderboards = message.ParsedBody.FromJson<IPC_Leaderboards>();
+            if (Leaderboards != null)
+            {
+                SteamUserStats.Instance?.SetLeaderboards(Leaderboards.Leaderboards);
+            }
         }
 
         private static void ProcessAddOrUpdateUser(IPCMessage message)
@@ -130,10 +196,17 @@ namespace SKYNET.Managers
             }
         }
 
-        internal static void SendP2PTo(ulong steamIDRemote, IPC_P2PPacket packet)
+        public static void SendP2PTo(ulong steamIDRemote, IPC_P2PPacket packet)
         {
             var message = CreateIPCMessage(packet, IPCMessageType.IPC_P2PPacket);
             SendTo(steamIDRemote, message);
+        }
+
+        private static void ProcessP2PPacket(IPCMessage message)
+        {
+            var P2PPacket = message.ParsedBody.FromJson<IPC_P2PPacket>();
+            if (P2PPacket == null) return;
+            SteamNetworking.Instance.ProcessP2PPacket(P2PPacket); 
         }
 
         private static void ProcessLobbyGameserver(IPCMessage message)
@@ -202,7 +275,7 @@ namespace SKYNET.Managers
 
         internal static void SendCreateLobby(SteamLobby lobby)
         {
-            IPC_CreateLobby CreateLobby = new IPC_CreateLobby()
+            IPC_LobbyCreate CreateLobby = new IPC_LobbyCreate()
             {
                 SerializedLobby = lobby.ToJson()
             };
@@ -316,7 +389,7 @@ namespace SKYNET.Managers
                 var lobbyJoinResponse = message.ParsedBody.FromJson<IPC_LobbyJoinResponse>();
                 if (lobbyJoinResponse != null)
                 {
-                    var lobby = lobbyJoinResponse.SerializedLobby.FromJson<SteamMatchmaking.SteamLobby>();
+                    var lobby = lobbyJoinResponse.SerializedLobby.FromJson<SteamLobby>();
                     if (lobby != null)
                     {
                         SteamMatchmaking.Instance.JoinResponse(lobbyJoinResponse, lobby);
@@ -380,7 +453,7 @@ namespace SKYNET.Managers
             try
             {
                 var lobbyListResponse = message.ParsedBody.FromJson<IPC_LobbyListResponse>();
-                var lobby = lobbyListResponse.SerializedLobby.FromJson<SteamMatchmaking.SteamLobby>();
+                var lobby = lobbyListResponse.SerializedLobby.FromJson<SteamLobby>();
                 if (lobby != null)
                 {
                     Write($"Adding lobby {lobby.SteamID}");
@@ -392,22 +465,6 @@ namespace SKYNET.Managers
                 Write(ex);
             }
 
-        }
-
-        private static void ProcessUser(IPCMessage message)
-        {
-            try
-            {
-                var user = message.ParsedBody.FromJson<IPC_User>();
-                SteamEmulator.PersonaName = user.PersonaName;
-                SteamEmulator.SteamID = new CSteamID(user.AccountID);
-                SteamEmulator.SteamID_GS = new CSteamID(user.GameServerID);
-                SteamEmulator.AppID = user.AppID;
-            }
-            catch
-            {
-
-            }
         }
 
         private static void ProcessAvatarResponse(IPCMessage message)
@@ -433,7 +490,7 @@ namespace SKYNET.Managers
             }
         }
 
-        private static void ProcessUserStatusChanged(IPCMessage message)
+        private static void ProcessUserDataUpdated(IPCMessage message)
         {
             try
             {
@@ -452,18 +509,17 @@ namespace SKYNET.Managers
 
         #endregion
 
-        public static void BroadcastStatusUpdated(SteamPlayer user)
+        public static void SendUserDataUpdated(SteamPlayer user)
         {
-            //var status = new IPC_UserDataUpdated()
-            //{
-            //    PersonaName = user.PersonaName,
-            //    AccountID = (uint)SteamEmulator.SteamID.AccountID,
-            //    LobbyID = user.LobbyID.GetAccountID()
-            //};
+            var status = new IPC_UserDataUpdated()
+            {
+                PersonaName = user.PersonaName,
+                AccountID = (uint)SteamEmulator.SteamID.AccountID, 
+                LobbyID = user.LobbyID.GetAccountID()
+            };
 
-            //var message = CreateNetworkMessage(status, IPCMessageType.IPC_UserDataUpdated);
-
-            //ThreadPool.QueueUserWorkItem(SendBroadcast, message);
+            var message = CreateIPCMessage(status, IPCMessageType.IPC_UserDataUpdated);
+            SendTo(IPC_Broadcast, message);
         }
 
         public static void SendLobbyJoinRequest(ulong APICall, SteamLobby lobby)
@@ -495,7 +551,7 @@ namespace SKYNET.Managers
             }
         }
 
-        public static void BroadcastLobbyGameServer(SteamLobby lobby)
+        public static void SendLobbyGameServer(SteamLobby lobby)
         {
             var lobbyGameserver = new IPC_LobbyGameserver()
             {
@@ -520,7 +576,7 @@ namespace SKYNET.Managers
             }
         }
 
-        public static void RequestLobbyList(uint currentRequest)
+        public static void SendLobbyListRequest(uint currentRequest)
         {
             var lobbyListRequest = new IPC_LobbyListRequest()
             {
@@ -536,7 +592,8 @@ namespace SKYNET.Managers
         public static void SendLobbyDataUpdate(ulong IDTarget, ulong IDLobby, ulong IDMember, SteamLobby lobby)
         {
             var lobbyDataUpdate = new IPC_LobbyDataUpdate()
-            {
+            { 
+                TargetSteamID = IDTarget,
                 SteamIDLobby = IDLobby,
                 SteamIDMember = IDMember,
                 SerializedLobby = lobby.ToJson()
@@ -545,11 +602,10 @@ namespace SKYNET.Managers
             var message = CreateIPCMessage(lobbyDataUpdate, IPCMessageType.IPC_LobbyDataUpdate);
 
             var user = SteamFriends.Instance.GetUser(IDTarget);
-            if (user == null)
+            if (user != null)
             {
-                return;
+                SendTo(user.SteamID, message);
             }
-            SendTo(user.SteamID, message);
         }
 
         public static void RequestAvatar(ulong SteamID)
@@ -590,12 +646,23 @@ namespace SKYNET.Managers
                         };
 
                         var message = CreateIPCMessage(lobbyRemove, IPCMessageType.IPC_LobbyRemove);
-
                         SendTo(user.SteamID, message);
                     }
                 }
             }
         }
+
+        internal static void GCRequest(uint MsgType, byte[] bytes)
+        {
+            var IPC_GCRequest = new IPC_GCMessageRequest()
+            {
+                MsgType = MsgType,
+                Buffer = bytes
+            };
+            //var message = CreateIPCMessage(IPC_GCRequest, IPCMessageType.IPC_GCMessageRequest);
+            //SendTo(IPC_ToServer, message);
+        }
+
 
         private static void SendTo(ulong SteamID, IPCMessage message)
         {
@@ -622,9 +689,7 @@ namespace SKYNET.Managers
 
         private static void Write(object v)
         {
-            SteamEmulator.Write("IpcManager", v);
+            SteamEmulator.Write("IPCManager", v);
         }
-
-
     }
 }

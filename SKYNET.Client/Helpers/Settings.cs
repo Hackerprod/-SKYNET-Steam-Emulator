@@ -36,7 +36,7 @@ namespace SKYNET.Types
         public static Settings Load()
         {
             Settings settings;
-            string fileName = Path.Combine(modCommon.GetPath(), "Data", "[SKYNET] Steam Emulator.json");
+            string fileName = Path.Combine(modCommon.GetPath(), "Data", "[SKYNET] Steam Emulator.bin");
             if (!File.Exists(fileName))
             {
                 settings = new Settings()
@@ -61,10 +61,10 @@ namespace SKYNET.Types
             return settings;
         }
 
-        public static void Save(Settings settings)
+        public void Save()
         {
-            string fileName = Path.Combine(modCommon.GetPath(), "Data", "[SKYNET] Steam Emulator.json");
-            string json = new JavaScriptSerializer().Serialize(settings);
+            string fileName = Path.Combine(modCommon.GetPath(), "Data", "[SKYNET] Steam Emulator.bin");
+            string json = new JavaScriptSerializer().Serialize(this);
             File.WriteAllText(fileName, json);
         }
 

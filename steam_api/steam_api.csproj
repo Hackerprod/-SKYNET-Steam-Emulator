@@ -68,16 +68,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Callback\CallbackDelegates.cs" />
     <Compile Include="Callback\CallbackEnums.cs" />
     <Compile Include="Callback\CallbackTypes.cs" />
     <Compile Include="Callback\CCallbackBase.cs" />
+    <Compile Include="Callback\CCallResult.cs" />
     <Compile Include="Callback\SteamCallback.cs" />
     <Compile Include="Callback\SteamCallBacks.cs" />
     <Compile Include="Helpers\INISerializer.cs" />
     <Compile Include="Helpers\IPC\EventArgs.cs" />
     <Compile Include="Helpers\IPC\PipeClient.cs" />
     <Compile Include="Helpers\IPC\PipeConnection.cs" />
-    <Compile Include="Helpers\IPC\PipeServer.cs" />
     <Compile Include="Helpers\IPC\PipeStreamReader.cs" />
     <Compile Include="Helpers\IPC\PipeStreamWrapper.cs" />
     <Compile Include="Helpers\IPC\PipeStreamWriter.cs" />
@@ -264,8 +265,12 @@
     <Compile Include="Steamworks\Types\FriendGameInfo_t.cs" />
     <Compile Include="Steamworks\Types\SteamEnums.cs" />
     <Compile Include="Steamworks\Types\SteamTypes.cs" />
+    <Compile Include="Types\Achievement.cs" />
     <Compile Include="Types\GameMessage.cs" />
+    <Compile Include="Types\Leaderboard.cs" />
     <Compile Include="Types\OverlayType.cs" />
+    <Compile Include="Types\PlayerStat.cs" />
+    <Compile Include="Types\SteamLobby.cs" />
     <Compile Include="Types\SteamPlayer.cs" />
     <Compile Include="Types\GameServerData.cs" />
   </ItemGroup>

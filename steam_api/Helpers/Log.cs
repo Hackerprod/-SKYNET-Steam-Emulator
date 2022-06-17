@@ -45,5 +45,16 @@ namespace SKYNET.Helper
 
             }
         }
+
+        public static void Clean()
+        {
+            try
+            {
+                File.WriteAllText(fileName, "");
+            }
+            catch 
+            {
+            }
+        }
     }
 }

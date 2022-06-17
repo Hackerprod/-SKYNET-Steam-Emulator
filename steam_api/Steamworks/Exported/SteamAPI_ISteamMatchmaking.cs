@@ -1,12 +1,19 @@
 using System;
 using System.Runtime.InteropServices;
 
-using SteamAPICall_t = System.UInt64;
-
 namespace SKYNET.Steamworks.Exported
 {
-    public class SteamAPI_ISteamMatchmaking 
+    using SteamAPICall_t = System.UInt64;
+    public class SteamAPI_ISteamMatchmaking
     {
+        static SteamAPI_ISteamMatchmaking()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int SteamAPI_ISteamMatchmaking_GetFavoriteGameCount(IntPtr _)
         {

@@ -15,6 +15,7 @@ using System.Threading;
 using System.Runtime.InteropServices;
 using SKYNET.Types;
 using System.IO.Pipes;
+using SKYNET.Helper;
 
 namespace SKYNET.Controls
 {
@@ -23,17 +24,19 @@ namespace SKYNET.Controls
     {
         [Category("SKYNET")]
         public event EventHandler<WebBrowserDocumentCompletedEventArgs> DocumentCompleted;
+
         [Category("SKYNET")]
         public event EventHandler<WebBrowserNavigatingEventArgs> Navigating;
+
         public override ContextMenuStrip ContextMenuStrip
         {
             get { return webChat.ContextMenuStrip; }
             set { webChat.ContextMenuStrip = value; }
         }
 
-
+        private Mutex mutex;
         private List<ConsoleMessage> CallBack;
-        Font _font;
+        private Font _font;
         public override Font Font
         {
             get
@@ -51,7 +54,7 @@ namespace SKYNET.Controls
             InitializeWebBrowser();
             _font = new Font("Segoe UI", 10);
             CallBack = new List<ConsoleMessage>();
-
+            mutex = new Mutex(false, "CallBack");
         }
         private void InitializeWebBrowser()
         {
@@ -137,28 +140,41 @@ namespace SKYNET.Controls
 
         public void WriteLine(ConsoleMessage msg)
         {
+            try { mutex.WaitOne(); } catch { }
             CallBack.Add(msg);
+            mutex.ReleaseMutex();
             VerifyCallback();
         }
         private void VerifyCallback()
         {
-            for (int i = 0; i < CallBack.Count; i++)
+            try
             {
-                try
+                mutex.WaitOne();
+                for (int i = 0; i < CallBack.Count; i++)
                 {
-                    var e = CallBack[i];
+                    try
+                    {
+                        var callback = CallBack[i];
+                        if (callback == null || callback.Msg == null)
+                            return;
 
-                    if (e == null || e.Msg == null)
-                        return;
-                    string htmlMessage = GetMessage(e);
+                        string htmlMessage = GetMessage(callback);
+                        Write(htmlMessage);
 
-                    Write(htmlMessage);
-
-                    CallBack.RemoveAt(i);
+                        CallBack.RemoveAt(i);
+                    }
+                    catch (Exception)
+                    {
+                    }
                 }
-                catch (Exception)
-                {
-                }
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                mutex.ReleaseMutex();
             }
         }
 
@@ -166,8 +182,11 @@ namespace SKYNET.Controls
         {
             try
             {
-                int bodyHeight = Convert.ToInt32(webChat.Document.InvokeScript("GetPageHeight"));
-                bool scroll = bodyHeight - Height == webChat.Document?.Body?.ScrollTop;
+                int bodyHeight = 0;
+                bool scroll = false;
+
+                try { bodyHeight = Convert.ToInt32(webChat.Document.InvokeScript("GetPageHeight")); } catch { }
+                try { scroll = bodyHeight - Height == webChat.Document?.Body?.ScrollTop; } catch { }
 
                 webChat.Invoke(new Action(() =>
                 {
@@ -183,13 +202,11 @@ namespace SKYNET.Controls
                 }));
 
             }
-            catch { }
+            catch (Exception ex)
+            {
+                modCommon.Show(ex);
+            }
         }
-
-
-
-
-
 
         public void AssignStyleSheet()
         {

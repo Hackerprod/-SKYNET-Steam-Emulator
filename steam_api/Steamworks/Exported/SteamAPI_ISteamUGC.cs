@@ -2,15 +2,22 @@
 using System.Runtime.InteropServices;
 using SKYNET.Managers;
 
-using SteamAPICall_t = System.UInt64;
-using PublishedFileId_t = System.UInt64;
-using UGCQueryHandle_t = System.UInt64;
-using UGCUpdateHandle_t = System.UInt64;
-
 namespace SKYNET.Steamworks.Exported
 {
+    using SteamAPICall_t = System.UInt64;
+    using PublishedFileId_t = System.UInt64;
+    using UGCQueryHandle_t = System.UInt64;
+    using UGCUpdateHandle_t = System.UInt64;
     public class SteamAPI_ISteamUGC
     {
+        static SteamAPI_ISteamUGC()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static UGCQueryHandle_t SteamAPI_ISteamUGC_CreateQueryUserUGCRequest(IntPtr _, uint unAccountID, int eListType, int eMatchingUGCType, int eSortOrder, uint nCreatorAppID, uint nConsumerAppID, uint unPage)
         {

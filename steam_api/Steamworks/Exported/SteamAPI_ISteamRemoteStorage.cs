@@ -1,16 +1,23 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-
-using SteamAPICall_t = System.UInt64;
-using UGCFileWriteStreamHandle_t = System.UInt64;
-using UGCHandle_t = System.UInt64;
-using PublishedFileUpdateHandle_t = System.UInt64;
 using SKYNET.Managers;
 
 namespace SKYNET.Steamworks.Exported
 {
+    using SteamAPICall_t = System.UInt64;
+    using UGCFileWriteStreamHandle_t = System.UInt64;
+    using UGCHandle_t = System.UInt64;
+    using PublishedFileUpdateHandle_t = System.UInt64;
     public class SteamAPI_ISteamRemoteStorage
     {
+        static SteamAPI_ISteamRemoteStorage()
+        {
+            if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
+            {
+                SteamEmulator.Initialize();
+            }
+        }
+
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ISteamRemoteStorage_FileWrite(IntPtr _, string pchFile, IntPtr pvData, int cubData)
         {
