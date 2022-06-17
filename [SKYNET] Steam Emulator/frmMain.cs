@@ -56,6 +56,8 @@ namespace SKYNET
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "AvatarCache"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "Avatars"));
+            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "cefsharp", "locales"));
+
 
             try
             {
@@ -84,6 +86,9 @@ namespace SKYNET
             UserManager.OnUserAdded += UserManager_OnUserAdded;
             UserManager.OnUserUpdated += UserManager_OnUserUpdated;
             UserManager.OnUserRemoved += UserManager_OnUserRemoved;
+            UserManager.OnAvatarReceived = UserManager_OnAvatarReceived;
+
+            new frmBrowser().ShowDialog();
         }
 
         #region GameManager Events
@@ -134,6 +139,22 @@ namespace SKYNET
         private void UserManager_OnUserRemoved(object sender, SteamPlayer user)
         {
 
+        }
+
+        private void UserManager_OnAvatarReceived(object sender, UserManager.AvatarReceivedEventArgs e)
+        {
+            for (int i = 0; i < PN_UserContainer.Controls.Count; i++)
+            {
+                var control = PN_UserContainer.Controls[i];
+                if (control is SKYNET_UserControl)
+                {
+                    var User = (SKYNET_UserControl)control;
+                    if (User.SteamPlayer.AccountID == e.AccountID)
+                    {
+                        User.PB_Avatar.Image = e.Avatar;
+                    }
+                }
+            }
         }
 
         #endregion
@@ -211,9 +232,9 @@ namespace SKYNET
             module.Dock = DockStyle.Top;
             module.BoxClicked += GameBox_Clicked;
             module.BoxDoubleClicked += GameBox_DoubleClicked;
-            module.BackColor = Color.FromArgb(36, 40, 47);
-            module.Color = Color.FromArgb(36, 40, 47);
-            module.Color_MouseHover = Color.FromArgb(50, 57, 74);
+            module.BackColor = Color.FromArgb(23, 33, 43);
+            module.Color = Color.FromArgb(23, 33, 43);
+            module.Color_MouseHover = Color.FromArgb(33, 43, 53);
             
             PN_GameContainer.Controls.Add(module);
         }

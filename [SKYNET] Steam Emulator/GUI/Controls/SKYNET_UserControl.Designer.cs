@@ -39,6 +39,7 @@
             this.PB_Avatar.Location = new System.Drawing.Point(6, 5);
             this.PB_Avatar.Name = "PB_Avatar";
             this.PB_Avatar.Size = new System.Drawing.Size(30, 30);
+            this.PB_Avatar.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.PB_Avatar.TabIndex = 0;
             this.PB_Avatar.TabStop = false;
             this.PB_Avatar.MouseLeave += new System.EventHandler(this.SKYNET_UserControl_MouseLeave);
@@ -74,7 +75,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(50)))), ((int)(((byte)(57)))));
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(43)))), ((int)(((byte)(53)))));
             this.Controls.Add(this.LB_IPAddress);
             this.Controls.Add(this.LB_PersonaName);
             this.Controls.Add(this.PB_Avatar);
@@ -90,7 +91,7 @@
 
         #endregion
 
-        private System.Windows.Forms.PictureBox PB_Avatar;
+        public System.Windows.Forms.PictureBox PB_Avatar;
         private System.Windows.Forms.Label LB_PersonaName;
         private System.Windows.Forms.Label LB_IPAddress;
     }

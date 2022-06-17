@@ -38,6 +38,8 @@ namespace SKYNET
             this.BT_AddGame = new SKYNET_Button();
             this.PN_LeftContainer = new System.Windows.Forms.Panel();
             this.PN_BodyContainer = new System.Windows.Forms.Panel();
+            this.CH_GameOverlay = new SKYNET.Controls.SKYNET_Check();
+            this.label11 = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
             this.CH_ISteamHTTP = new SKYNET.Controls.SKYNET_Check();
             this.label9 = new System.Windows.Forms.Label();
@@ -61,8 +63,6 @@ namespace SKYNET
             this.label2 = new System.Windows.Forms.Label();
             this.TB_Name = new SKYNET.Controls.SKYNET_TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.CH_GameOverlay = new SKYNET.Controls.SKYNET_Check();
-            this.label11 = new System.Windows.Forms.Label();
             this.PN_Top.SuspendLayout();
             this.panel3.SuspendLayout();
             this.PN_BodyContainer.SuspendLayout();
@@ -71,7 +71,7 @@ namespace SKYNET
             // 
             // PN_Top
             // 
-            this.PN_Top.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(33)))), ((int)(((byte)(35)))));
+            this.PN_Top.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
             this.PN_Top.Controls.Add(this.BT_Close);
             this.PN_Top.Dock = System.Windows.Forms.DockStyle.Top;
             this.PN_Top.Location = new System.Drawing.Point(0, 0);
@@ -81,10 +81,10 @@ namespace SKYNET
             // 
             // BT_Close
             // 
-            this.BT_Close.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(33)))), ((int)(((byte)(35)))));
-            this.BT_Close.Color = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(33)))), ((int)(((byte)(35)))));
+            this.BT_Close.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
+            this.BT_Close.Color = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
             this.BT_Close.Dock = System.Windows.Forms.DockStyle.Right;
-            this.BT_Close.FocusedColor = System.Drawing.Color.FromArgb(((int)(((byte)(42)))), ((int)(((byte)(43)))), ((int)(((byte)(45)))));
+            this.BT_Close.FocusedColor = System.Drawing.Color.FromArgb(((int)(((byte)(53)))), ((int)(((byte)(64)))), ((int)(((byte)(78)))));
             this.BT_Close.Location = new System.Drawing.Point(707, 0);
             this.BT_Close.MaximumSize = new System.Drawing.Size(34, 26);
             this.BT_Close.MinimumSize = new System.Drawing.Size(34, 26);
@@ -95,7 +95,7 @@ namespace SKYNET
             // 
             // panel3
             // 
-            this.panel3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(42)))), ((int)(((byte)(46)))), ((int)(((byte)(51)))));
+            this.panel3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
             this.panel3.Controls.Add(this.BT_Cancel);
             this.panel3.Controls.Add(this.BT_AddGame);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -106,7 +106,7 @@ namespace SKYNET
             // 
             // BT_Cancel
             // 
-            this.BT_Cancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(66)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
+            this.BT_Cancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(46)))), ((int)(((byte)(88)))));
             this.BT_Cancel.BackColorMouseOver = System.Drawing.Color.Empty;
             this.BT_Cancel.Cursor = System.Windows.Forms.Cursors.Hand;
             this.BT_Cancel.Font = new System.Drawing.Font("Segoe UI", 9F);
@@ -114,7 +114,7 @@ namespace SKYNET
             this.BT_Cancel.ForeColorMouseOver = System.Drawing.Color.Empty;
             this.BT_Cancel.ImageAlignment = SKYNET_Button._ImgAlign.Left;
             this.BT_Cancel.ImageIcon = null;
-            this.BT_Cancel.Location = new System.Drawing.Point(468, 15);
+            this.BT_Cancel.Location = new System.Drawing.Point(465, 15);
             this.BT_Cancel.MenuMode = false;
             this.BT_Cancel.Name = "BT_Cancel";
             this.BT_Cancel.Rounded = false;
@@ -126,7 +126,7 @@ namespace SKYNET
             // 
             // BT_AddGame
             // 
-            this.BT_AddGame.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(66)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
+            this.BT_AddGame.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(34)))), ((int)(((byte)(131)))), ((int)(((byte)(246)))));
             this.BT_AddGame.BackColorMouseOver = System.Drawing.Color.Empty;
             this.BT_AddGame.Cursor = System.Windows.Forms.Cursors.Hand;
             this.BT_AddGame.Font = new System.Drawing.Font("Segoe UI", 9F);
@@ -155,7 +155,7 @@ namespace SKYNET
             // 
             // PN_BodyContainer
             // 
-            this.PN_BodyContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(50)))), ((int)(((byte)(57)))));
+            this.PN_BodyContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(29)))), ((int)(((byte)(39)))), ((int)(((byte)(51)))));
             this.PN_BodyContainer.Controls.Add(this.CH_GameOverlay);
             this.PN_BodyContainer.Controls.Add(this.label11);
             this.PN_BodyContainer.Controls.Add(this.panel1);
@@ -187,6 +187,26 @@ namespace SKYNET
             this.PN_BodyContainer.Size = new System.Drawing.Size(741, 524);
             this.PN_BodyContainer.TabIndex = 10;
             // 
+            // CH_GameOverlay
+            // 
+            this.CH_GameOverlay.BackColor = System.Drawing.Color.Transparent;
+            this.CH_GameOverlay.Checked = true;
+            this.CH_GameOverlay.Location = new System.Drawing.Point(640, 489);
+            this.CH_GameOverlay.Name = "CH_GameOverlay";
+            this.CH_GameOverlay.Size = new System.Drawing.Size(34, 25);
+            this.CH_GameOverlay.TabIndex = 26;
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
+            this.label11.ForeColor = System.Drawing.Color.White;
+            this.label11.Location = new System.Drawing.Point(404, 489);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(133, 17);
+            this.label11.TabIndex = 25;
+            this.label11.Text = "Enable Game Overlay";
+            // 
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(66)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
@@ -208,7 +228,7 @@ namespace SKYNET
             // 
             this.label9.AutoSize = true;
             this.label9.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
-            this.label9.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.label9.ForeColor = System.Drawing.Color.White;
             this.label9.Location = new System.Drawing.Point(404, 460);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(181, 17);
@@ -228,7 +248,7 @@ namespace SKYNET
             // 
             this.label10.AutoSize = true;
             this.label10.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
-            this.label10.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.label10.ForeColor = System.Drawing.Color.White;
             this.label10.Location = new System.Drawing.Point(63, 489);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(196, 17);
@@ -248,7 +268,7 @@ namespace SKYNET
             // 
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
-            this.label8.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.label8.ForeColor = System.Drawing.Color.White;
             this.label8.Location = new System.Drawing.Point(63, 460);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(204, 17);
@@ -268,7 +288,7 @@ namespace SKYNET
             // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
-            this.label7.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.label7.ForeColor = System.Drawing.Color.White;
             this.label7.Location = new System.Drawing.Point(63, 431);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(187, 17);
@@ -288,7 +308,7 @@ namespace SKYNET
             // 
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
-            this.label6.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.label6.ForeColor = System.Drawing.Color.White;
             this.label6.Location = new System.Drawing.Point(404, 431);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(146, 17);
@@ -317,11 +337,12 @@ namespace SKYNET
             // 
             // TB_AppId
             // 
-            this.TB_AppId.ActivatedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(66)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
-            this.TB_AppId.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(66)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
-            this.TB_AppId.Color = System.Drawing.Color.FromArgb(((int)(((byte)(66)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
+            this.TB_AppId.ActivatedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
+            this.TB_AppId.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
+            this.TB_AppId.Color = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
+            this.TB_AppId.ForeColor = System.Drawing.Color.White;
             this.TB_AppId.IsPassword = false;
-            this.TB_AppId.Location = new System.Drawing.Point(66, 389);
+            this.TB_AppId.Location = new System.Drawing.Point(66, 385);
             this.TB_AppId.Logo = null;
             this.TB_AppId.LogoCursor = System.Windows.Forms.Cursors.Default;
             this.TB_AppId.Name = "TB_AppId";
@@ -335,8 +356,8 @@ namespace SKYNET
             // 
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
-            this.label5.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.label5.Location = new System.Drawing.Point(63, 367);
+            this.label5.ForeColor = System.Drawing.Color.White;
+            this.label5.Location = new System.Drawing.Point(63, 363);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(48, 17);
             this.label5.TabIndex = 9;
@@ -344,11 +365,12 @@ namespace SKYNET
             // 
             // TB_Parameters
             // 
-            this.TB_Parameters.ActivatedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(66)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
-            this.TB_Parameters.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(66)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
-            this.TB_Parameters.Color = System.Drawing.Color.FromArgb(((int)(((byte)(66)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
+            this.TB_Parameters.ActivatedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
+            this.TB_Parameters.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
+            this.TB_Parameters.Color = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
+            this.TB_Parameters.ForeColor = System.Drawing.Color.White;
             this.TB_Parameters.IsPassword = false;
-            this.TB_Parameters.Location = new System.Drawing.Point(66, 321);
+            this.TB_Parameters.Location = new System.Drawing.Point(66, 318);
             this.TB_Parameters.Logo = null;
             this.TB_Parameters.LogoCursor = System.Windows.Forms.Cursors.Default;
             this.TB_Parameters.Name = "TB_Parameters";
@@ -362,8 +384,8 @@ namespace SKYNET
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
-            this.label3.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.label3.Location = new System.Drawing.Point(63, 299);
+            this.label3.ForeColor = System.Drawing.Color.White;
+            this.label3.Location = new System.Drawing.Point(63, 296);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(112, 17);
             this.label3.TabIndex = 7;
@@ -371,11 +393,12 @@ namespace SKYNET
             // 
             // TB_SteamApiPath
             // 
-            this.TB_SteamApiPath.ActivatedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(66)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
-            this.TB_SteamApiPath.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(66)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
-            this.TB_SteamApiPath.Color = System.Drawing.Color.FromArgb(((int)(((byte)(66)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
+            this.TB_SteamApiPath.ActivatedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
+            this.TB_SteamApiPath.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
+            this.TB_SteamApiPath.Color = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
+            this.TB_SteamApiPath.ForeColor = System.Drawing.Color.White;
             this.TB_SteamApiPath.IsPassword = false;
-            this.TB_SteamApiPath.Location = new System.Drawing.Point(66, 254);
+            this.TB_SteamApiPath.Location = new System.Drawing.Point(66, 252);
             this.TB_SteamApiPath.Logo = null;
             this.TB_SteamApiPath.LogoCursor = System.Windows.Forms.Cursors.Default;
             this.TB_SteamApiPath.Name = "TB_SteamApiPath";
@@ -389,8 +412,8 @@ namespace SKYNET
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
-            this.label4.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.label4.Location = new System.Drawing.Point(63, 232);
+            this.label4.ForeColor = System.Drawing.Color.White;
+            this.label4.Location = new System.Drawing.Point(63, 230);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(91, 17);
             this.label4.TabIndex = 5;
@@ -398,11 +421,12 @@ namespace SKYNET
             // 
             // TB_ExecutablePath
             // 
-            this.TB_ExecutablePath.ActivatedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(66)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
-            this.TB_ExecutablePath.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(66)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
-            this.TB_ExecutablePath.Color = System.Drawing.Color.FromArgb(((int)(((byte)(66)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
+            this.TB_ExecutablePath.ActivatedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
+            this.TB_ExecutablePath.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
+            this.TB_ExecutablePath.Color = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
+            this.TB_ExecutablePath.ForeColor = System.Drawing.Color.White;
             this.TB_ExecutablePath.IsPassword = false;
-            this.TB_ExecutablePath.Location = new System.Drawing.Point(66, 186);
+            this.TB_ExecutablePath.Location = new System.Drawing.Point(66, 185);
             this.TB_ExecutablePath.Logo = null;
             this.TB_ExecutablePath.LogoCursor = System.Windows.Forms.Cursors.Default;
             this.TB_ExecutablePath.Name = "TB_ExecutablePath";
@@ -416,8 +440,8 @@ namespace SKYNET
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
-            this.label2.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.label2.Location = new System.Drawing.Point(63, 164);
+            this.label2.ForeColor = System.Drawing.Color.White;
+            this.label2.Location = new System.Drawing.Point(63, 163);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(99, 17);
             this.label2.TabIndex = 3;
@@ -425,9 +449,10 @@ namespace SKYNET
             // 
             // TB_Name
             // 
-            this.TB_Name.ActivatedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(66)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
-            this.TB_Name.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(66)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
-            this.TB_Name.Color = System.Drawing.Color.FromArgb(((int)(((byte)(66)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
+            this.TB_Name.ActivatedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
+            this.TB_Name.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
+            this.TB_Name.Color = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
+            this.TB_Name.ForeColor = System.Drawing.Color.White;
             this.TB_Name.IsPassword = false;
             this.TB_Name.Location = new System.Drawing.Point(66, 119);
             this.TB_Name.Logo = null;
@@ -444,32 +469,12 @@ namespace SKYNET
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
-            this.label1.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.label1.ForeColor = System.Drawing.Color.White;
             this.label1.Location = new System.Drawing.Point(63, 97);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(43, 17);
             this.label1.TabIndex = 1;
             this.label1.Text = "Name";
-            // 
-            // CH_GameOverlay
-            // 
-            this.CH_GameOverlay.BackColor = System.Drawing.Color.Transparent;
-            this.CH_GameOverlay.Checked = true;
-            this.CH_GameOverlay.Location = new System.Drawing.Point(640, 489);
-            this.CH_GameOverlay.Name = "CH_GameOverlay";
-            this.CH_GameOverlay.Size = new System.Drawing.Size(34, 25);
-            this.CH_GameOverlay.TabIndex = 26;
-            // 
-            // label11
-            // 
-            this.label11.AutoSize = true;
-            this.label11.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
-            this.label11.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.label11.Location = new System.Drawing.Point(404, 489);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(133, 17);
-            this.label11.TabIndex = 25;
-            this.label11.Text = "Enable Game Overlay";
             // 
             // frmGameManager
             // 

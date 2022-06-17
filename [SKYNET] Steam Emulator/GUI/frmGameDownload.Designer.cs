@@ -35,13 +35,13 @@ namespace SKYNET.GUI
             this.PN_Right = new System.Windows.Forms.Panel();
             this.PN_Left = new System.Windows.Forms.Panel();
             this.PN_Container = new System.Windows.Forms.Panel();
+            this.PB_Progress = new SKYNET.Controls.SKYNET_ProgressBar();
             this.LB_Info = new System.Windows.Forms.Label();
             this.LB_Name = new System.Windows.Forms.Label();
             this.PB_Avatar = new System.Windows.Forms.PictureBox();
             this.cancel = new System.Windows.Forms.Button();
             this.ok = new System.Windows.Forms.Button();
             this.BT_Cancel = new SKYNET_Button();
-            this.PB_Progress = new SKYNET.Controls.SKYNET_ProgressBar();
             this.PN_Container.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Avatar)).BeginInit();
             this.SuspendLayout();
@@ -86,7 +86,7 @@ namespace SKYNET.GUI
             // 
             // PN_Container
             // 
-            this.PN_Container.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(44)))), ((int)(((byte)(50)))), ((int)(((byte)(57)))));
+            this.PN_Container.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(29)))), ((int)(((byte)(39)))), ((int)(((byte)(51)))));
             this.PN_Container.Controls.Add(this.PB_Progress);
             this.PN_Container.Controls.Add(this.LB_Info);
             this.PN_Container.Controls.Add(this.LB_Name);
@@ -100,11 +100,29 @@ namespace SKYNET.GUI
             this.PN_Container.Size = new System.Drawing.Size(521, 230);
             this.PN_Container.TabIndex = 4;
             // 
+            // PB_Progress
+            // 
+            this.PB_Progress.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
+            this.PB_Progress.DrawHatch = true;
+            this.PB_Progress.ForeColor = System.Drawing.SystemColors.Control;
+            this.PB_Progress.Location = new System.Drawing.Point(28, 135);
+            this.PB_Progress.Maximum = 100;
+            this.PB_Progress.Minimum = 0;
+            this.PB_Progress.Name = "PB_Progress";
+            this.PB_Progress.ProgressColor1 = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(255)))));
+            this.PB_Progress.ProgressColor2 = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(200)))));
+            this.PB_Progress.ShowPercentage = true;
+            this.PB_Progress.Size = new System.Drawing.Size(467, 23);
+            this.PB_Progress.TabIndex = 16;
+            this.PB_Progress.Text = "skyneT_ProgressBar1";
+            this.PB_Progress.Value = 0;
+            this.PB_Progress.ValueAlignment = SKYNET.Controls.SKYNET_ProgressBar.Alignment.Right;
+            // 
             // LB_Info
             // 
             this.LB_Info.AutoSize = true;
             this.LB_Info.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
-            this.LB_Info.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.LB_Info.ForeColor = System.Drawing.Color.White;
             this.LB_Info.Location = new System.Drawing.Point(25, 110);
             this.LB_Info.Name = "LB_Info";
             this.LB_Info.Size = new System.Drawing.Size(62, 17);
@@ -153,11 +171,11 @@ namespace SKYNET.GUI
             // 
             // BT_Cancel
             // 
-            this.BT_Cancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
+            this.BT_Cancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(46)))), ((int)(((byte)(88)))));
             this.BT_Cancel.BackColorMouseOver = System.Drawing.Color.Empty;
             this.BT_Cancel.Cursor = System.Windows.Forms.Cursors.Hand;
             this.BT_Cancel.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.BT_Cancel.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.BT_Cancel.ForeColor = System.Drawing.Color.White;
             this.BT_Cancel.ForeColorMouseOver = System.Drawing.Color.Empty;
             this.BT_Cancel.ImageAlignment = SKYNET_Button._ImgAlign.Left;
             this.BT_Cancel.ImageIcon = null;
@@ -170,24 +188,6 @@ namespace SKYNET.GUI
             this.BT_Cancel.TabIndex = 2;
             this.BT_Cancel.Text = "CANCEL";
             this.BT_Cancel.Click += new System.EventHandler(this.Cancel_Click);
-            // 
-            // PB_Progress
-            // 
-            this.PB_Progress.BackColor = System.Drawing.Color.Transparent;
-            this.PB_Progress.DrawHatch = true;
-            this.PB_Progress.ForeColor = System.Drawing.SystemColors.Control;
-            this.PB_Progress.Location = new System.Drawing.Point(28, 135);
-            this.PB_Progress.Maximum = 100;
-            this.PB_Progress.Minimum = 0;
-            this.PB_Progress.Name = "PB_Progress";
-            this.PB_Progress.ProgressColor1 = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(255)))));
-            this.PB_Progress.ProgressColor2 = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(200)))));
-            this.PB_Progress.ShowPercentage = true;
-            this.PB_Progress.Size = new System.Drawing.Size(467, 23);
-            this.PB_Progress.TabIndex = 16;
-            this.PB_Progress.Text = "skyneT_ProgressBar1";
-            this.PB_Progress.Value = 0;
-            this.PB_Progress.ValueAlignment = SKYNET.Controls.SKYNET_ProgressBar.Alignment.Right;
             // 
             // frmGameDownload
             // 

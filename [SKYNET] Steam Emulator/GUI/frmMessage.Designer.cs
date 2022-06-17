@@ -83,7 +83,7 @@ namespace SKYNET.GUI
             // 
             // PN_Container
             // 
-            this.PN_Container.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(44)))), ((int)(((byte)(50)))), ((int)(((byte)(57)))));
+            this.PN_Container.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
             this.PN_Container.Controls.Add(this.cancel);
             this.PN_Container.Controls.Add(this.ok);
             this.PN_Container.Controls.Add(this.BT_Cancel);
@@ -117,11 +117,11 @@ namespace SKYNET.GUI
             // 
             // BT_Cancel
             // 
-            this.BT_Cancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
+            this.BT_Cancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(46)))), ((int)(((byte)(88)))));
             this.BT_Cancel.BackColorMouseOver = System.Drawing.Color.Empty;
             this.BT_Cancel.Cursor = System.Windows.Forms.Cursors.Hand;
             this.BT_Cancel.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.BT_Cancel.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.BT_Cancel.ForeColor = System.Drawing.Color.White;
             this.BT_Cancel.ForeColorMouseOver = System.Drawing.Color.Empty;
             this.BT_Cancel.ImageAlignment = SKYNET_Button._ImgAlign.Left;
             this.BT_Cancel.ImageIcon = null;
@@ -137,11 +137,11 @@ namespace SKYNET.GUI
             // 
             // BT_Ok
             // 
-            this.BT_Ok.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
+            this.BT_Ok.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(34)))), ((int)(((byte)(131)))), ((int)(((byte)(246)))));
             this.BT_Ok.BackColorMouseOver = System.Drawing.Color.Empty;
             this.BT_Ok.Cursor = System.Windows.Forms.Cursors.Hand;
             this.BT_Ok.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.BT_Ok.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.BT_Ok.ForeColor = System.Drawing.Color.White;
             this.BT_Ok.ForeColorMouseOver = System.Drawing.Color.Empty;
             this.BT_Ok.ImageAlignment = SKYNET_Button._ImgAlign.Left;
             this.BT_Ok.ImageIcon = null;

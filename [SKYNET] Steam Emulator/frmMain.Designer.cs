@@ -102,7 +102,7 @@ namespace SKYNET
             // 
             // PN_Top
             // 
-            this.PN_Top.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(33)))), ((int)(((byte)(35)))));
+            this.PN_Top.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(33)))), ((int)(((byte)(43)))));
             this.PN_Top.Controls.Add(this.BT_Minimize);
             this.PN_Top.Controls.Add(this.BT_Close);
             this.PN_Top.Dock = System.Windows.Forms.DockStyle.Top;
@@ -113,10 +113,10 @@ namespace SKYNET
             // 
             // BT_Minimize
             // 
-            this.BT_Minimize.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(33)))), ((int)(((byte)(35)))));
-            this.BT_Minimize.Color = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(33)))), ((int)(((byte)(35)))));
+            this.BT_Minimize.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(33)))), ((int)(((byte)(43)))));
+            this.BT_Minimize.Color = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(33)))), ((int)(((byte)(43)))));
             this.BT_Minimize.Dock = System.Windows.Forms.DockStyle.Right;
-            this.BT_Minimize.FocusedColor = System.Drawing.Color.FromArgb(((int)(((byte)(42)))), ((int)(((byte)(43)))), ((int)(((byte)(45)))));
+            this.BT_Minimize.FocusedColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(43)))), ((int)(((byte)(53)))));
             this.BT_Minimize.Location = new System.Drawing.Point(825, 0);
             this.BT_Minimize.MaximumSize = new System.Drawing.Size(34, 26);
             this.BT_Minimize.MinimumSize = new System.Drawing.Size(34, 26);
@@ -127,10 +127,10 @@ namespace SKYNET
             // 
             // BT_Close
             // 
-            this.BT_Close.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(33)))), ((int)(((byte)(35)))));
-            this.BT_Close.Color = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(33)))), ((int)(((byte)(35)))));
+            this.BT_Close.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(33)))), ((int)(((byte)(43)))));
+            this.BT_Close.Color = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(33)))), ((int)(((byte)(43)))));
             this.BT_Close.Dock = System.Windows.Forms.DockStyle.Right;
-            this.BT_Close.FocusedColor = System.Drawing.Color.FromArgb(((int)(((byte)(42)))), ((int)(((byte)(43)))), ((int)(((byte)(45)))));
+            this.BT_Close.FocusedColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(43)))), ((int)(((byte)(53)))));
             this.BT_Close.Location = new System.Drawing.Point(859, 0);
             this.BT_Close.MaximumSize = new System.Drawing.Size(34, 26);
             this.BT_Close.MinimumSize = new System.Drawing.Size(34, 26);
@@ -141,7 +141,7 @@ namespace SKYNET
             // 
             // panel3
             // 
-            this.panel3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(42)))), ((int)(((byte)(46)))), ((int)(((byte)(51)))));
+            this.panel3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
             this.panel3.Controls.Add(this.label6);
             this.panel3.Controls.Add(this.LB_Status);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -152,8 +152,9 @@ namespace SKYNET
             // 
             // label6
             // 
+            this.label6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
             this.label6.Font = new System.Drawing.Font("Segoe UI Emoji", 8F);
-            this.label6.ForeColor = System.Drawing.Color.DarkGray;
+            this.label6.ForeColor = System.Drawing.Color.White;
             this.label6.Location = new System.Drawing.Point(3, 20);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(812, 15);
@@ -163,8 +164,9 @@ namespace SKYNET
             // 
             // LB_Status
             // 
+            this.LB_Status.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
             this.LB_Status.Font = new System.Drawing.Font("Segoe UI Emoji", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.LB_Status.ForeColor = System.Drawing.Color.Gainsboro;
+            this.LB_Status.ForeColor = System.Drawing.Color.White;
             this.LB_Status.Location = new System.Drawing.Point(3, 5);
             this.LB_Status.Name = "LB_Status";
             this.LB_Status.Size = new System.Drawing.Size(812, 15);
@@ -174,7 +176,7 @@ namespace SKYNET
             // 
             // panel4
             // 
-            this.panel4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(33)))), ((int)(((byte)(35)))));
+            this.panel4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(33)))), ((int)(((byte)(43)))));
             this.panel4.Controls.Add(this.LB_Menu_NickName);
             this.panel4.Controls.Add(this.label3);
             this.panel4.Controls.Add(this.label2);
@@ -240,7 +242,7 @@ namespace SKYNET
             // PN_GameContainer
             // 
             this.PN_GameContainer.AllowDrop = true;
-            this.PN_GameContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(36)))), ((int)(((byte)(40)))), ((int)(((byte)(47)))));
+            this.PN_GameContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(33)))), ((int)(((byte)(43)))));
             this.PN_GameContainer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.PN_GameContainer.Location = new System.Drawing.Point(0, 226);
             this.PN_GameContainer.Name = "PN_GameContainer";
@@ -251,7 +253,7 @@ namespace SKYNET
             // 
             // panel8
             // 
-            this.panel8.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(36)))), ((int)(((byte)(40)))), ((int)(((byte)(47)))));
+            this.panel8.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(33)))), ((int)(((byte)(43)))));
             this.panel8.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel8.Location = new System.Drawing.Point(0, 221);
             this.panel8.Name = "panel8";
@@ -260,6 +262,7 @@ namespace SKYNET
             // 
             // panel6
             // 
+            this.panel6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
             this.panel6.Controls.Add(this.LB_Add);
             this.panel6.Controls.Add(this.PB_Add);
             this.panel6.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -272,7 +275,7 @@ namespace SKYNET
             // 
             this.LB_Add.AutoSize = true;
             this.LB_Add.Font = new System.Drawing.Font("Segoe UI Emoji", 8.25F);
-            this.LB_Add.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
+            this.LB_Add.ForeColor = System.Drawing.Color.White;
             this.LB_Add.Location = new System.Drawing.Point(50, 12);
             this.LB_Add.Name = "LB_Add";
             this.LB_Add.Size = new System.Drawing.Size(92, 15);
@@ -297,7 +300,7 @@ namespace SKYNET
             // 
             // panel1
             // 
-            this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(42)))), ((int)(((byte)(46)))), ((int)(((byte)(51)))));
+            this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
             this.panel1.Controls.Add(this.TB_Search);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(0, 169);
@@ -307,9 +310,10 @@ namespace SKYNET
             // 
             // TB_Search
             // 
-            this.TB_Search.ActivatedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(35)))), ((int)(((byte)(40)))));
-            this.TB_Search.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(35)))), ((int)(((byte)(40)))));
-            this.TB_Search.Color = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(35)))), ((int)(((byte)(40)))));
+            this.TB_Search.ActivatedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(33)))), ((int)(((byte)(43)))));
+            this.TB_Search.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(33)))), ((int)(((byte)(43)))));
+            this.TB_Search.Color = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(33)))), ((int)(((byte)(43)))));
+            this.TB_Search.ForeColor = System.Drawing.Color.White;
             this.TB_Search.IsPassword = false;
             this.TB_Search.Location = new System.Drawing.Point(13, 6);
             this.TB_Search.Logo = global::SKYNET.Properties.Resources.search;
@@ -324,7 +328,7 @@ namespace SKYNET
             // 
             // panel7
             // 
-            this.panel7.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(42)))), ((int)(((byte)(46)))), ((int)(((byte)(51)))));
+            this.panel7.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
             this.panel7.Controls.Add(this.pictureBox3);
             this.panel7.Controls.Add(this.PB_Avatar);
             this.panel7.Controls.Add(this.skyneT_Button1);
@@ -436,11 +440,11 @@ namespace SKYNET
             this.gradiantBox1.Controls.Add(this.label1);
             this.gradiantBox1.Controls.Add(this.pictureBox1);
             this.gradiantBox1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.gradiantBox1.LeftColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(33)))), ((int)(((byte)(35)))));
+            this.gradiantBox1.LeftColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(33)))), ((int)(((byte)(43)))));
             this.gradiantBox1.Location = new System.Drawing.Point(0, 15);
             this.gradiantBox1.Mode = SKYNET.Controls.Mode.Vertical;
             this.gradiantBox1.Name = "gradiantBox1";
-            this.gradiantBox1.RigthColor = System.Drawing.Color.FromArgb(((int)(((byte)(42)))), ((int)(((byte)(46)))), ((int)(((byte)(51)))));
+            this.gradiantBox1.RigthColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
             this.gradiantBox1.Size = new System.Drawing.Size(249, 25);
             this.gradiantBox1.TabIndex = 11;
             // 
@@ -480,7 +484,7 @@ namespace SKYNET
             // 
             // panel2
             // 
-            this.panel2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(32)))), ((int)(((byte)(33)))), ((int)(((byte)(35)))));
+            this.panel2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(33)))), ((int)(((byte)(43)))));
             this.panel2.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel2.Location = new System.Drawing.Point(0, 5);
             this.panel2.Name = "panel2";
@@ -579,6 +583,7 @@ namespace SKYNET
             // WebLogger1
             // 
             this.WebLogger1.AutoScrollLines = true;
+            this.WebLogger1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(43)))), ((int)(((byte)(53)))));
             this.WebLogger1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.WebLogger1.Location = new System.Drawing.Point(0, 0);
             this.WebLogger1.LoggerBackColor = System.Drawing.Color.Empty;
@@ -589,6 +594,7 @@ namespace SKYNET
             // 
             // PN_UserContainer
             // 
+            this.PN_UserContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(43)))), ((int)(((byte)(53)))));
             this.PN_UserContainer.Dock = System.Windows.Forms.DockStyle.Right;
             this.PN_UserContainer.Location = new System.Drawing.Point(726, 0);
             this.PN_UserContainer.Name = "PN_UserContainer";

@@ -282,6 +282,16 @@ namespace SKYNET.Managers
                     string json = messageResponse.ToJson();
                     socket.Send(json.GetBytes());
 
+                    var imageBytes = ImageHelper.ImageToBytes(SteamClient.Avatar);
+                    string hexAvatar = Convert.ToBase64String(imageBytes);
+                    var avatarResponse = new NET_AvatarResponse()
+                    {
+                        AccountID = (uint)SteamClient.AccountID,
+                        HexAvatar = hexAvatar
+                    };
+                    var messageResponse2 = CreateNetworkMessage(avatarResponse, MessageType.NET_AvatarResponse);
+                    SendTo(IPAddress, messageResponse2);
+
                     // Connection pair close the socket
                 }
                 else
@@ -534,13 +544,13 @@ namespace SKYNET.Managers
                         if (imageBytes.Length != 0)
                         {
                             Bitmap Avatar = (Bitmap)ImageHelper.ImageFromBytes(imageBytes);
-                            ulong SteamID = (ulong)new CSteamID(AvatarResponse.AccountID);
                             IPCManager.AvatarResponse(AvatarResponse.HexAvatar, AvatarResponse.AccountID);
                             try
                             {
                                 string AvatarCachePath = Path.Combine(modCommon.GetPath(), "Data", "Images", "AvatarCache", AvatarResponse.AccountID + ".jpg");
                                 modCommon.EnsureDirectoryExists(AvatarCachePath, true);
                                 ImageHelper.ToFile(AvatarCachePath, Avatar);
+                                UserManager.AvatarReceived(AvatarResponse.AccountID, Avatar);
                             }
                             catch
                             {

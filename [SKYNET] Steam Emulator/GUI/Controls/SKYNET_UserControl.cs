@@ -34,12 +34,12 @@ namespace SKYNET.GUI.Controls
 
         private void SKYNET_UserControl_MouseMove(object sender, MouseEventArgs e)
         {
-            BackColor = Color.FromArgb(56, 60, 67);
+            BackColor = Color.FromArgb(43, 53, 63);
         }
 
         private void SKYNET_UserControl_MouseLeave(object sender, EventArgs e)
         {
-            BackColor = Color.FromArgb(46, 50, 57);
+            BackColor = Color.FromArgb(33, 43, 53);
         }
     }
 }

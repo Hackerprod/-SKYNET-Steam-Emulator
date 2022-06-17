@@ -66,7 +66,7 @@ namespace SKYNET.Controls
             while (webChat.Document == null || webChat.Document.Body == null)
             Application.DoEvents();
 
-            webChat.Document.OpenNew(true).Write($"<html><head>{GetHtmlIEVersion()}{ScrollBar(_scroll) + JavaScript()} <style>{GetStyles()}</style>  <title name = 'head'>SKYNET</title>" + $"</head><body class='body' bgcolor={ColorTranslator.ToHtml(Color.FromArgb(46, 50, 57))}><table style=\"padding: 0px\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" id='table'>");
+            webChat.Document.OpenNew(true).Write($"<html><head>{GetHtmlIEVersion()}{ScrollBar(_scroll) + JavaScript()} <style>{GetStyles()}</style>  <title name = 'head'>SKYNET</title>" + $"</head><body class='body' bgcolor={ColorTranslator.ToHtml(Color.FromArgb(33, 43, 53))}><table style=\"padding: 0px\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" id='table'>");
             AssignStyleSheet();
 
             webChat.Navigating += new WebBrowserNavigatingEventHandler(webChat_Navigating);
@@ -324,9 +324,9 @@ namespace SKYNET.Controls
 
     public partial class SKYNET_WebLogger
     {
-        private string C_1 = "#2E3239";
-        private string C_2 = "#393F48";
-        private string C_Last = "#2E3239";
+        private string C_1 = "#212B35";
+        private string C_2 = "#242F39";
+        private string C_Last = "#212B35";
         public string GetMessage(ConsoleMessage m)
         {
             string msg = m.Msg.ToString();
