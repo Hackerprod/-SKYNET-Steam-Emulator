@@ -198,10 +198,17 @@ namespace SKYNET.Controls
                 // Draw diagonal lines
                 if (_DrawHatch == true)
                 {
-                    for (var i = 0; i <= (Width - 1) * _Maximum / _Value; i += 20)
+                    try
                     {
-                        G.DrawLine(new Pen(new SolidBrush(Color.FromArgb(25, Color.White)), 10.0F), new Point(System.Convert.ToInt32(i), 0), new Point((int)(i - 10), Height));
+                        for (var i = 0; i <= (Width - 1) * _Maximum / _Value; i += 20)
+                        {
+                            G.DrawLine(new Pen(new SolidBrush(Color.FromArgb(25, Color.White)), 10.0F), new Point(System.Convert.ToInt32(i), 0), new Point((int)(i - 10), Height));
+                        }
                     }
+                    catch 
+                    {
+                    }
+
                 }
 
                 G.SetClip(GP3);

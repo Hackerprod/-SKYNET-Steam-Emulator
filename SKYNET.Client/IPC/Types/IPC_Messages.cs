@@ -56,6 +56,7 @@ namespace SKYNET.IPC.Types
     public class IPC_ClientHello : IPC_MessageBase
     {
         public uint AppID { get; set; }
+        public int ProcessID { get; set; }
     }
 
     public class IPC_ClientWelcome : IPC_MessageBase

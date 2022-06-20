@@ -118,6 +118,8 @@ namespace SKYNET.Managers
                 var Game = GameManager.GetGame(AppID);
                 if (Game != null)
                 {
+                    GameManager.InvokeGameLaunched(Game, ClientHello.ProcessID);
+
                     ClientWelcome.LogToFile = Game.LogToFile;
                     ClientWelcome.LogToConsole = Game.LogToConsole;
                     ClientWelcome.RunCallbacks = Game.RunCallbacks;

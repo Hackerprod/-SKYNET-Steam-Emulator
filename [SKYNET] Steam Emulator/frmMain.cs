@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
@@ -22,15 +21,12 @@ namespace SKYNET
     {
         public static frmMain frm;
         public static Types.Settings settings;
-        public Process InjectedProcess;
         public SteamClient SteamClient;
 
         private List<RunningGame> RunningGames;
         private GameBox SelectedBox;
         private GameBox MenuBox;
         private Dictionary<uint, List<string>> GameMessages;
-        private int ProcessId;
-        
 
         public frmMain()
         {
@@ -52,6 +48,7 @@ namespace SKYNET
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "www"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Storage"));
+            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Injector"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "AvatarCache"));
@@ -76,6 +73,7 @@ namespace SKYNET
             GameManager.OnGameAdded += GameManager_OnGameAdded;
             GameManager.OnGameUpdated += GameManager_OnGameUpdated;
             GameManager.OnGameRemoved += GameManager_OnGameRemoved;
+            GameManager.OnGameLaunched = GameManager_OnGameLaunched;
             GameManager.Initialize();
 
             shadowBox1.BackColor = Color.FromArgb(100, 0, 0, 0);
@@ -88,7 +86,7 @@ namespace SKYNET
             UserManager.OnUserRemoved += UserManager_OnUserRemoved;
             UserManager.OnAvatarReceived = UserManager_OnAvatarReceived;
 
-            new frmBrowser().ShowDialog();
+            //new frmBrowser().ShowDialog();
         }
 
         #region GameManager Events
@@ -113,6 +111,32 @@ namespace SKYNET
         private void GameManager_OnGameRemoved(object sender, Game e)
         {
 
+        }
+
+        private void GameManager_OnGameLaunched(object sender, GameManager.GameLaunchedEventArgs e)
+        {
+            var game = new RunningGame(e.ProcessID, e.Game);
+            game.OnGameClosed += Game_OnGameClosed;
+            RunningGames.Add(game);
+        }
+
+        private void Game_OnGameClosed(object sender, Game e)
+        {
+            //foreach (var game in RunningGames)
+            //{
+            //    if (GameMessages.ContainsKey(game.Game.AppID) && game.Game.LogToFile)
+            //    {
+            //        //string logPath = Path.Combine(modCommon.GetPath(), "Data", "Storage", game.Game.AppID.ToString(), "GameMessages.log");
+            //        //File.WriteAllLines(logPath, GameMessages[game.Game.AppID]);
+            //    }
+            //}
+
+            RunningGames.RemoveAll(g => g.Game.AppID == e.AppID);
+
+            Write("SteamClient", $"The injected process are closed");
+
+            BT_GameAction.Text = "PLAY";
+            BT_GameAction.BackColor = Color.FromArgb(46, 186, 65);
         }
 
         #endregion
@@ -255,32 +279,10 @@ namespace SKYNET
             string x86Dll = Path.Combine(modCommon.GetPath(), "x86", "steam_api.dll");
             string x64Dll = Path.Combine(modCommon.GetPath(), "x64", "steam_api64.dll");
 
-            var pInfo = new ProcessStartInfo();
-            pInfo.FileName = game.ExecutablePath;
-            pInfo.Arguments = game.Parameters;
-            pInfo.CreateNoWindow = true;
-            pInfo.RedirectStandardOutput = true;
-            pInfo.UseShellExecute = false;
-            InjectedProcess = Process.Start(pInfo);
+            DllInjector.Inject(game.ExecutablePath, game.Parameters, x64Dll, x86Dll, game.AppID);
 
-            var content = "";
-            if (modCommon.Is64Bit)
-            {
-                content = $"rundll32 \"x64/steam_api64.dll\",Initialize {InjectedProcess.ProcessName}.exe";
-            }
-            else
-                content = $"rundll32 \"x86/steam_api.dll\",Initialize {InjectedProcess.ProcessName}.exe";
-
-            string injPath = Path.Combine(modCommon.GetPath(), "Inject.cmd");
-            File.WriteAllText(injPath, content);
-            Process.Start(injPath);
-
-            //InjectedProcess = DllInjector.Inject(game.ExecutablePath, game.Parameters, x64Dll, x86Dll);
-
-            RunningGames.Add(new RunningGame() { Game = e.GetGame(), Process = InjectedProcess });
             BT_GameAction.Text = "CLOSE";
             BT_GameAction.BackColor = Color.Red;
-            WaitForExit();
         }
 
         internal static void AvatarUpdated(Bitmap Avatar)
@@ -309,41 +311,6 @@ namespace SKYNET
             IPCManager.SendUserDataUpdated(SteamClient.AccountID, PersonaName);
             settings.PersonaName = PersonaName;
             settings.Save();
-        }
-
-        private void WaitForExit()
-        {
-            Task.Run(() =>
-            {
-                int closeId = 0;
-                string processName = "";
-                while (ProcessId != closeId)
-                {
-                    try
-                    {
-                        Process processById = Process.GetProcessById(ProcessId);
-                        processName = processById.ProcessName;
-                        closeId = ProcessId;
-                        processById.WaitForExit();
-                    }
-                    catch (Exception)
-                    {
-                    }
-                }
-                Write("SteamClient", $"The injected process {processName} are closed");
-
-                foreach (var game in RunningGames)
-                {
-                    if (GameMessages.ContainsKey(game.Game.AppID) && game.Game.LogToFile)
-                    {
-                        string logPath = Path.Combine(modCommon.GetPath(), "Data", "Storage", game.Game.AppID.ToString(), "GameMessages.log");
-                        File.WriteAllLines(logPath, GameMessages[game.Game.AppID]);
-                    }
-                }
-
-                BT_GameAction.Text = "PLAY";
-                BT_GameAction.BackColor = Color.FromArgb(46, 186, 65);
-            });
         }
 
         private void Write(string sender, object msg)

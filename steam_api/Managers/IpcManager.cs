@@ -7,6 +7,7 @@ using SKYNET.Steamworks;
 using SKYNET.Steamworks.Implementation;
 using SKYNET.Types;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
 
@@ -123,7 +124,8 @@ namespace SKYNET.Managers
         {
             var ClientHello = new IPC_ClientHello()
             {
-                AppID = SteamEmulator.AppID
+                AppID = SteamEmulator.AppID,
+                ProcessID = Process.GetCurrentProcess().Id
             };
             var message = CreateIPCMessage(ClientHello, IPCMessageType.IPC_ClientHello);
             SendTo(IPC_ToServer, message);

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SKYNET.Managers;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -73,8 +74,51 @@ namespace SKYNET.GUI
                 errorTask = "Error downloading file. " + ex.Message;
             }
 
+            string steamAPI_Key = "";
+
+            try
+            {
+                StatsManager.GenerateAchievements(AppId, steamAPI_Key);
+                LB_Info.Text = $"Downloading Achievements for AppId {AppId}";
+            }
+            catch (Exception ex)
+            {
+                errorTask = "Error downloading file. " + ex.Message;
+            }
+
+            try
+            {
+                StatsManager.GenerateAppDetails(AppId);
+                LB_Info.Text = $"Downloading AppDetails for AppId {AppId}";
+            }
+            catch (Exception ex)
+            {
+                errorTask = "Error downloading file. " + ex.Message;
+            }
+
+            try
+            {
+                StatsManager.GenerateItems(AppId);
+                LB_Info.Text = $"Downloading Items for AppId {AppId}";
+            }
+            catch (Exception ex)
+            {
+                errorTask = "Error downloading file. " + ex.Message;
+            }
+
+            try
+            {
+                StatsManager.GenerateDLCs(AppId);
+                LB_Info.Text = $"Downloading DLCs for AppId {AppId}";
+            }
+            catch (Exception ex)
+            {
+                errorTask = "Error downloading file. " + ex.Message;
+            }
+
             if (!string.IsNullOrEmpty(errorTask))
             {
+                LB_Info.Text = $"Finished with errors.";
                 modCommon.Show(errorTask);
             }
         }

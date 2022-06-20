@@ -13,6 +13,7 @@ namespace SKYNET.Managers
         public static event EventHandler<Game> OnGameAdded;
         public static event EventHandler<Game> OnGameUpdated;
         public static event EventHandler<Game> OnGameRemoved;
+        public static EventHandler<GameLaunchedEventArgs> OnGameLaunched;
         private static List<Game> Games;
 
         static GameManager()
@@ -87,5 +88,22 @@ namespace SKYNET.Managers
                 OnGameUpdated?.Invoke(null, game);
             }
         }
+
+        public static void InvokeGameLaunched(Game game, int processID)
+        {
+            OnGameLaunched?.Invoke(null, new GameLaunchedEventArgs(processID, game));
+        }
+
+        public class GameLaunchedEventArgs : EventArgs
+        {
+            public Game Game;
+            public int ProcessID;
+            public GameLaunchedEventArgs(int processID, Game game)
+            {
+                ProcessID = processID;
+                Game = game;
+            }
+        }
+
     }
 }
