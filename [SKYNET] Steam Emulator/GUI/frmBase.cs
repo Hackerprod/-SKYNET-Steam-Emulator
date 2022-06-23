@@ -76,16 +76,14 @@ namespace SKYNET.GUI
             SetWindowCompositionAttribute(this.Handle, ref Data);
             Marshal.FreeHGlobal(accentPtr);
         }
-        public virtual void LoadLanguage()
-        {
 
-        }
         public void SetMouseMove(Control control)
         {
             control.MouseMove += Event_MouseMove;
             control.MouseDown += Event_MouseDown;
             control.MouseUp += Event_MouseUp;
         }
+
         private void Event_MouseMove(object sender, MouseEventArgs e)
         {
             if (mouseDown)

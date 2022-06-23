@@ -15,6 +15,7 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace SKYNET.Managers
 {
@@ -22,7 +23,7 @@ namespace SKYNET.Managers
     {
         public static int Port = 28880;
         public static TCPServer TCPServer;
-        public static FileServer FileServer;
+        public static WebServer WebServer;
 
         public static void Initialize()
         {
@@ -31,7 +32,7 @@ namespace SKYNET.Managers
 
             if (NetworkHelper.IsAvailablePort(Port))
             {
-                Write($"Initializing TCP server on port {Port}");
+                //Write($"Initializing TCP server on port {Port}");
 
                 TCPServer = new TCPServer(Port);
                 TCPServer.OnDataReceived += TCPServer_OnDataReceived;
@@ -43,15 +44,15 @@ namespace SKYNET.Managers
                 Write($"Error initializing TCP server, port {Port} is in use");
             }
 
-            FileServer = new FileServer(80);
-            FileServer.Start();
+            WebServer = new WebServer(80);
+            WebServer.Start();
 
             BroadcastAnnounce();
         }
 
         private static void TCPServer_OnConnected(object sender, TCPClient e)
         {
-            Write("Client connected from " + e.RemoteEndPoint);
+            //Write("Client connected from " + e.RemoteEndPoint);
         }
 
         private static void TCPServer_OnDataReceived(object sender, NetPacket packet)
@@ -448,26 +449,28 @@ namespace SKYNET.Managers
             }
         }
 
-        private static void SendBroadcast(object state)
+        private static void SendBroadcast(NetworkMessage message)
         {
-            NetworkMessage message = (NetworkMessage)state;
-
-            foreach (var address in NetworkHelper.GetIPAddresses())
+            Task.Run(() =>
             {
-                var Addressess = NetworkHelper.GetIPAddressRange(address);
-                foreach (var Address in Addressess)
+                foreach (var address in NetworkHelper.GetIPAddresses())
                 {
-                    try
+                    var Addressess = NetworkHelper.GetIPAddressRange(address);
+                    foreach (var Address in Addressess)
                     {
-                        Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                        SocketData SocketData = new SocketData() { socket = socket, Message = message };
-                        socket.BeginConnect(Address, Port, ConnectionCallback, SocketData);
-                    }
-                    catch
-                    {
+                        try
+                        {
+                            Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                            SocketData SocketData = new SocketData() { socket = socket, Message = message };
+                            socket.BeginConnect(Address, Port, ConnectionCallback, SocketData);
+                        }
+                        catch
+                        {
+                        }
                     }
                 }
-            }
+
+            });
         }
 
         #endregion
@@ -511,6 +514,12 @@ namespace SKYNET.Managers
                 SendTo(user.IPAddress, message);
             }
         }
+
+        public static void SendAnnounce()
+        {
+            BroadcastAnnounce();
+        }
+
         private static void ProcessAvatar(NetworkMessage message, Socket socket)
         {
             if (message.MessageType == (int)MessageType.NET_AvatarRequest)
@@ -576,22 +585,22 @@ namespace SKYNET.Managers
             };
 
             var message = CreateNetworkMessage(announce, MessageType.NET_Announce);
-            ThreadPool.QueueUserWorkItem(SendBroadcast, message);
+            SendBroadcast(message);
         }
 
-        //private static void CheckInUserList(Socket socket)
-        //{
-        //    var IPAddress = ((IPEndPoint)socket.RemoteEndPoint).Address.ToString();
-        //    if (IslocalAddress(IPAddress))
-        //    {
-        //        return;
-        //    }
-        //    var user = SteamFriends.Instance.GetUserByAddress(IPAddress);
-        //    if (user == null)
-        //    {
-        //        AnnounceTo(IPAddress);
-        //    }
-        //}
+        private static void CheckInUserList(Socket socket)
+        {
+            var IPAddress = ((IPEndPoint)socket.RemoteEndPoint).Address;
+            if (NetworkHelper.IslocalAddress(IPAddress))
+            {
+                return;
+            }
+            var user = UserManager.GetUserByAddress(IPAddress.ToString());
+            if (user == null)
+            {
+                SendAnnounceTo(IPAddress.ToString());
+            }
+        }
 
         public static void SendUserDataUpdated(IPC_UserDataUpdated userDataUpdated)
         {
@@ -605,7 +614,7 @@ namespace SKYNET.Managers
 
             var message = CreateNetworkMessage(UserDataUpdated, MessageType.NET_UserDataUpdated);
 
-            ThreadPool.QueueUserWorkItem(SendBroadcast, message);
+            SendBroadcast(message);
         }
 
         #region NET_LobbyGameserver
@@ -652,33 +661,19 @@ namespace SKYNET.Managers
         }
         #endregion
 
-        //private static void BroadcastAnnounce(object state)
-        //{
-        //    var announce = new NET_Announce()
-        //    {
-        //        PersonaName = SteamEmulator.PersonaName,
-        //        AccountID = (uint)SteamEmulator.SteamID.AccountID,
-        //        AppID = SteamEmulator.AppID
-        //    };
 
-        //    NetworkMessage message = CreateNetworkMessage(announce, MessageType.NET_Announce);
+        public static void SendAnnounceTo(string remoteAddress)
+        {
+            var announce = new NET_Announce()
+            {
+                PersonaName = SteamClient.PersonaName,
+                AccountID = (uint)SteamClient.SteamID.AccountID
+            };
 
-        //    SendBroadcast(message);
-        //}
+            var message = CreateNetworkMessage(announce, MessageType.NET_Announce);
 
-
-        //private static void AnnounceTo(string remoteAddress)
-        //{
-        //    var announce = new NET_Announce()
-        //    {
-        //        PersonaName = SteamEmulator.PersonaName,
-        //        AccountID = (uint)SteamEmulator.SteamID.AccountID
-        //    };
-
-        //    var message = CreateNetworkMessage(announce, MessageType.NET_Announce);
-
-        //    SendTo(remoteAddress, message);
-        //}
+            SendTo(remoteAddress, message);
+        }
 
         private static void SendTo(string iPAddress, NetworkMessage message)
         {

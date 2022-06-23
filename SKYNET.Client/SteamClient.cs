@@ -17,13 +17,10 @@ namespace SKYNET.Client
     {
         public static CSteamID SteamID { get; set; }
         public static uint AccountID { get; set; }
+        public static string AccountName { get; set; }
         public static string PersonaName { get; set; }
         public static string Language { get; set; }
         public static Bitmap Avatar { get; set; }
-        public static bool LogToFile { get; set; }
-        public static bool LogToConsole { get; set; }
-        public static bool RunCallbacks { get; set; }
-        public static bool ISteamHTTP { get; set; }
         public static CSteamID SteamID_GS { get; set; }
 
         public SteamClient(Settings settings)
@@ -31,13 +28,10 @@ namespace SKYNET.Client
             Write("SteamClient", "Initializing SteamClient");
             SteamID = new CSteamID(settings.AccountID);
             AccountID = settings.AccountID;
+            AccountName = settings.AccountName;
             PersonaName = settings.PersonaName;
             Language = settings.Language;
             SteamID_GS = CSteamID.GenerateGameServer();
-            LogToFile = settings.LogToFile;
-            LogToConsole = settings.LogToConsole;
-            RunCallbacks = settings.RunCallbacks;
-            ISteamHTTP = settings.ISteamHTTP;
         }
 
         public void Initialize()

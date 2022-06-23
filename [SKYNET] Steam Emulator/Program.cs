@@ -23,7 +23,7 @@ namespace SKYNET
         {
             //string JSON = File.ReadAllText(@"D:\Instaladores\Programación\Projects\[SKYNET] Steam Emulator\[SKYNET] Steam Emulator\bin\Debug\Data\Storage\570\AppDetails.json");
             //AppDetails details = new JavaScriptSerializer().Deserialize<AppDetails>(JSON);
-            //modCommon.Show(details._570.data.background_raw);
+            //modCommon.Show(details.lolo.data.about_the_game);
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -33,5 +33,7 @@ namespace SKYNET
 
     }
 }
+
+
 
 

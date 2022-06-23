@@ -34,12 +34,12 @@ namespace SKYNET
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmUpdateProfile));
             this.panelTop = new System.Windows.Forms.Panel();
             this.acceptBtn = new System.Windows.Forms.Button();
             this.Browser = new System.Windows.Forms.WebBrowser();
             this.panelBody = new System.Windows.Forms.Panel();
+            this.label1 = new System.Windows.Forms.Label();
             this._password = new System.Windows.Forms.Label();
             this.Password = new SKYNET.Controls.SKYNET_TextBox();
             this.UserName = new SKYNET.Controls.SKYNET_TextBox();
@@ -47,12 +47,11 @@ namespace SKYNET
             this.b_Cancel = new SKYNET_Button();
             this.PB_Avatar = new CircularPictureBox();
             this.b_Apply = new SKYNET_Button();
-            this.ErrorLabel = new System.Windows.Forms.Label();
             this._username = new System.Windows.Forms.Label();
-            this.Logo_Timer = new System.Windows.Forms.Timer(this.components);
             this.label6 = new System.Windows.Forms.Label();
             this.panelLogo = new System.Windows.Forms.Panel();
             this.Logo = new System.Windows.Forms.PictureBox();
+            this.TB_AccountID = new SKYNET.Controls.SKYNET_TextBox();
             this.panelBody.SuspendLayout();
             this.panelLogo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.Logo)).BeginInit();
@@ -88,6 +87,8 @@ namespace SKYNET
             // panelBody
             // 
             this.panelBody.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(29)))), ((int)(((byte)(39)))), ((int)(((byte)(51)))));
+            this.panelBody.Controls.Add(this.TB_AccountID);
+            this.panelBody.Controls.Add(this.label1);
             this.panelBody.Controls.Add(this._password);
             this.panelBody.Controls.Add(this.Password);
             this.panelBody.Controls.Add(this.UserName);
@@ -95,16 +96,26 @@ namespace SKYNET
             this.panelBody.Controls.Add(this.b_Cancel);
             this.panelBody.Controls.Add(this.PB_Avatar);
             this.panelBody.Controls.Add(this.b_Apply);
-            this.panelBody.Controls.Add(this.ErrorLabel);
             this.panelBody.Controls.Add(this._username);
             this.panelBody.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelBody.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(33)))), ((int)(((byte)(43)))));
             this.panelBody.Location = new System.Drawing.Point(0, 26);
             this.panelBody.Name = "panelBody";
             this.panelBody.Padding = new System.Windows.Forms.Padding(8);
-            this.panelBody.Size = new System.Drawing.Size(393, 188);
+            this.panelBody.Size = new System.Drawing.Size(393, 267);
             this.panelBody.TabIndex = 34;
             this.panelBody.Click += new System.EventHandler(this.PanelBody_Click);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
+            this.label1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(34)))), ((int)(((byte)(131)))), ((int)(((byte)(246)))));
+            this.label1.Location = new System.Drawing.Point(160, 148);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(77, 17);
+            this.label1.TabIndex = 70;
+            this.label1.Text = "Account ID";
             // 
             // _password
             // 
@@ -113,9 +124,9 @@ namespace SKYNET
             this._password.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(34)))), ((int)(((byte)(131)))), ((int)(((byte)(246)))));
             this._password.Location = new System.Drawing.Point(160, 82);
             this._password.Name = "_password";
-            this._password.Size = new System.Drawing.Size(77, 17);
+            this._password.Size = new System.Drawing.Size(66, 17);
             this._password.TabIndex = 68;
-            this._password.Text = "Contraseña";
+            this._password.Text = "Password";
             // 
             // Password
             // 
@@ -170,7 +181,7 @@ namespace SKYNET
             this.b_Cancel.ForeColorMouseOver = System.Drawing.Color.Empty;
             this.b_Cancel.ImageAlignment = SKYNET_Button._ImgAlign.Left;
             this.b_Cancel.ImageIcon = null;
-            this.b_Cancel.Location = new System.Drawing.Point(274, 150);
+            this.b_Cancel.Location = new System.Drawing.Point(274, 217);
             this.b_Cancel.MenuMode = false;
             this.b_Cancel.Name = "b_Cancel";
             this.b_Cancel.Rounded = false;
@@ -200,7 +211,7 @@ namespace SKYNET
             this.b_Apply.ForeColorMouseOver = System.Drawing.Color.Empty;
             this.b_Apply.ImageAlignment = SKYNET_Button._ImgAlign.Left;
             this.b_Apply.ImageIcon = null;
-            this.b_Apply.Location = new System.Drawing.Point(163, 150);
+            this.b_Apply.Location = new System.Drawing.Point(163, 217);
             this.b_Apply.MenuMode = false;
             this.b_Apply.Name = "b_Apply";
             this.b_Apply.Rounded = false;
@@ -210,16 +221,6 @@ namespace SKYNET
             this.b_Apply.Text = "Aplicar";
             this.b_Apply.Click += new System.EventHandler(this.Apply_Button_Click);
             // 
-            // ErrorLabel
-            // 
-            this.ErrorLabel.AutoSize = true;
-            this.ErrorLabel.Font = new System.Drawing.Font("Segoe UI Emoji", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ErrorLabel.ForeColor = System.Drawing.Color.Red;
-            this.ErrorLabel.Location = new System.Drawing.Point(63, 199);
-            this.ErrorLabel.Name = "ErrorLabel";
-            this.ErrorLabel.Size = new System.Drawing.Size(0, 15);
-            this.ErrorLabel.TabIndex = 56;
-            // 
             // _username
             // 
             this._username.AutoSize = true;
@@ -227,15 +228,9 @@ namespace SKYNET
             this._username.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(34)))), ((int)(((byte)(131)))), ((int)(((byte)(246)))));
             this._username.Location = new System.Drawing.Point(160, 20);
             this._username.Name = "_username";
-            this._username.Size = new System.Drawing.Size(129, 17);
+            this._username.Size = new System.Drawing.Size(75, 17);
             this._username.TabIndex = 38;
-            this._username.Text = "Nombre de usuario";
-            // 
-            // Logo_Timer
-            // 
-            this.Logo_Timer.Enabled = true;
-            this.Logo_Timer.Interval = 1;
-            this.Logo_Timer.Tick += new System.EventHandler(this.Logo_Timer_Tick);
+            this._username.Text = "User name";
             // 
             // label6
             // 
@@ -269,12 +264,29 @@ namespace SKYNET
             this.Logo.TabIndex = 1;
             this.Logo.TabStop = false;
             // 
+            // TB_AccountID
+            // 
+            this.TB_AccountID.ActivatedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(61)))), ((int)(((byte)(75)))));
+            this.TB_AccountID.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(61)))), ((int)(((byte)(75)))));
+            this.TB_AccountID.Color = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(61)))), ((int)(((byte)(75)))));
+            this.TB_AccountID.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(220)))), ((int)(((byte)(240)))));
+            this.TB_AccountID.IsPassword = false;
+            this.TB_AccountID.Location = new System.Drawing.Point(162, 168);
+            this.TB_AccountID.Logo = global::SKYNET.Properties.Resources.steam_home_os;
+            this.TB_AccountID.LogoCursor = System.Windows.Forms.Cursors.Default;
+            this.TB_AccountID.Name = "TB_AccountID";
+            this.TB_AccountID.OnlyNumbers = false;
+            this.TB_AccountID.ShowLogo = true;
+            this.TB_AccountID.Size = new System.Drawing.Size(213, 35);
+            this.TB_AccountID.TabIndex = 71;
+            this.TB_AccountID.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
+            // 
             // frmUpdateProfile
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(46)))), ((int)(((byte)(60)))));
-            this.ClientSize = new System.Drawing.Size(393, 221);
+            this.ClientSize = new System.Drawing.Size(393, 293);
             this.Controls.Add(this.panelBody);
             this.Controls.Add(this.panelLogo);
             this.Controls.Add(this.Browser);
@@ -303,11 +315,9 @@ namespace SKYNET
         private System.Windows.Forms.WebBrowser Browser;
         private System.Windows.Forms.Panel panelBody;
         private System.Windows.Forms.Label _username;
-        private System.Windows.Forms.Timer Logo_Timer;
         private System.Windows.Forms.PictureBox Logo;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Panel panelLogo;
-        private System.Windows.Forms.Label ErrorLabel;
         private SKYNET_Button b_Apply;
         private CircularPictureBox PB_Avatar;
         private SKYNET_Button b_Cancel;
@@ -315,5 +325,7 @@ namespace SKYNET
         public SKYNET_TextBox UserName;
         public SKYNET_TextBox Password;
         private System.Windows.Forms.Label _password;
+        private System.Windows.Forms.Label label1;
+        private SKYNET_TextBox TB_AccountID;
     }
 }

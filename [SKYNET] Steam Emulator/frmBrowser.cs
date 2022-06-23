@@ -2,10 +2,7 @@
 using System;
 using System.Drawing;
 using System.IO;
-using System.Net;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Web.Script.Serialization;
 using System.Windows.Forms;
 
 namespace SKYNET
@@ -23,7 +20,13 @@ namespace SKYNET
 
         private void FrmBrowser_Load(object sender, EventArgs e)
         {
-            Xpcom.Initialize(Path.Combine(modCommon.GetPath(), "Data", "Firefox"));
+            string FireFoxPath = Path.Combine(modCommon.GetPath(), "Data", "Firefox");
+            string customFP = Path.Combine(modCommon.GetPath(), "Firefox.txt");
+            if (File.Exists(customFP))
+            {
+                FireFoxPath = File.ReadAllText(customFP);
+            }
+            Xpcom.Initialize(FireFoxPath);
 
             InitializePref();
             InitializePreferences();
@@ -39,14 +42,8 @@ namespace SKYNET
             Xpcom.InitChromeContext();
             JavaScriptContext = new AutoJSContext(browser.Window);
 
-            browser.Navigate("127.0.0.1/index2.html");
-            //browser.Navigate("127.0.0.1/UI/index.html");
-            //browser.Navigate("10.31.0.201");
-            //browser.Navigate("http://10.31.0.1:8080/");
-
-
-            //JavaScriptToCSharpCallBack();
-            //CSharpInvokingJavascriptComObjects();
+            TB_Url.Text = "127.0.0.1/index.html";
+            browser.Navigate(TB_Url.Text);
         }
 
         private void CallmeAction(string obj)
@@ -57,6 +54,7 @@ namespace SKYNET
         private void _browser_DocumentCompleted(object sender, Gecko.Events.GeckoDocumentCompletedEventArgs e)
         {
             Text = e.Uri.ToString();
+            TB_Url.Text = e.Uri.ToString();
             UpdateJavaScriptContext();
             browser_OnInitCompleted(null, null);
         }
@@ -255,9 +253,8 @@ namespace SKYNET
 
         private void BT_JSFunction_Click(object sender, EventArgs e)
         {
-            string Result = "";
-            JavaScriptContext.EvaluateScript($"myFunction('{TB_Message.Text}');", out Result);
-            //Console.WriteLine(Result);
+            JavaScriptContext.EvaluateScript($"myFunction('{TB_Message.Text}');", out string Result);
+            modCommon.Show(Result);
 
             JSCall("Eotu.Success('" + TB_Message.Text + "');");
         }
@@ -518,5 +515,10 @@ namespace SKYNET
         #endregion
 
         #endregion
+
+        private void BT_Go_Click(object sender, EventArgs e)
+        {
+            browser.Navigate(TB_Url.Text);
+        }
     }
 }

@@ -12,7 +12,7 @@ namespace SKYNET.Managers
     {
         public static List<SteamLobby> Lobbies;
 
-        public LobbyManager()
+        static LobbyManager()
         {
             Lobbies = new List<SteamLobby>();
         }
@@ -69,7 +69,7 @@ namespace SKYNET.Managers
 
         public static SteamLobby GetLobbyByOwner(ulong steamID)
         {
-            return Lobbies.Where(l => l.Owner == steamID).Select(l => l).FirstOrDefault();
+            return Lobbies.Where(l => l.Owner == steamID).FirstOrDefault();
         }
 
         public static SteamLobby GetLobbyByGameserver(ulong steamID_GS)

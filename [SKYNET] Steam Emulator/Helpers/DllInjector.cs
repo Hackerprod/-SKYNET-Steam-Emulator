@@ -1,22 +1,16 @@
 ﻿using NativeSharp;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SKYNET
 {
     public class DllInjector
     {
-        [DllImport("ManualMapInjector.dll", CallingConvention = CallingConvention.Cdecl)]
-        private extern static int _InjectFileHex(IntPtr szDll, int pId, int flags);
-
-        public static Process Inject(string executablePath, string parameters, string x64Dll, string x86Dll, object AppID)
+        public static Process Inject(string executablePath, string parameters, object AppID)
         {
+            string x86Dll = Path.Combine(modCommon.GetPath(), "x86", "steam_api.dll");
+            string x64Dll = Path.Combine(modCommon.GetPath(), "x64", "steam_api64.dll");
+
             string pName = "";
             var pInfo = new ProcessStartInfo();
             pInfo.FileName = executablePath;

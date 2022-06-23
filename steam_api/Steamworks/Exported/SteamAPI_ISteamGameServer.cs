@@ -6,6 +6,7 @@ using HSteamUser = System.UInt32;
 using SteamAPICall_t = System.UInt64;
 using HAuthTicket = System.UInt32;
 using AppId_t = System.UInt32;
+using SKYNET.Steamworks.Implementation;
 
 namespace SKYNET.Steamworks.Exported
 {
@@ -360,6 +361,7 @@ namespace SKYNET.Steamworks.Exported
         {
             Write("SteamGameServer_Shutdown");
             SteamEmulator.SteamID_GS = CSteamID.GenerateGameServer();
+            SteamGameServer.Instance.LoggedIn = false;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

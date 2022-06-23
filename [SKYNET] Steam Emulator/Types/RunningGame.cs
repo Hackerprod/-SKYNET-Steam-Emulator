@@ -12,31 +12,33 @@ namespace SKYNET.Types
         public event EventHandler<Game> OnGameClosed;
         public Game Game;
         public Process Process;
+        public string GameClientID;
 
         private int ProcessId;
 
-        public RunningGame(int processID, Game game)
+        public RunningGame(int processID, Game game, string gameClientID)
         {
             Game = game;
             ProcessId = processID;
+            GameClientID = gameClientID;
             Process = Process.GetProcessById(processID);
             Initialize();
         }
 
         public void Initialize()
         {
-            Task.Run(() =>
-            {
-                while (true)
-                {
-                    if (Process.GetProcessById(ProcessId) == null)
-                    {
-                        OnGameClosed?.Invoke(null, Game);
-                        break;
-                    }
-                }
-                OnGameClosed?.Invoke(null, Game);
-            });
+            //Task.Run(() =>
+            //{
+            //    while (true)
+            //    {
+            //        if (Process.GetProcessById(ProcessId) == null)
+            //        {
+            //            OnGameClosed?.Invoke(null, Game);
+            //            break;
+            //        }
+            //    }
+            //    OnGameClosed?.Invoke(null, Game);
+            //});
         }
     }
 }

@@ -1,52 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
-using Microsoft.VisualBasic.CompilerServices;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
 using System.IO;
-using System.Net;
-using System.Net.Sockets;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Runtime.InteropServices;
-using System.Drawing.Imaging;
-using System.Threading;
 using System.Timers;
 using SKYNET.GUI;
 using SKYNET.Client;
 
 namespace SKYNET
 {
-    [ComVisibleAttribute(true)]
     public partial class frmUpdateProfile : frmBase
     {
-        private readonly Dictionary<string, string> UsersAndIds = new Dictionary<string, string>();
         public static frmUpdateProfile frm;
-        private readonly System.Timers.Timer ErrorTimer;
         public byte[] ImageBytes { get; set; }
         public Bitmap UpdatedAvatar { get; set; }
 
         public frmUpdateProfile()
         {
-            modCommon.ShowShadow = true;
             InitializeComponent();
             frm = this;
             CheckForIllegalCrossThreadCalls = false;
             base.SetMouseMove(panelTop);
 
-            ErrorTimer = new System.Timers.Timer();
-            ErrorTimer.AutoReset = false;
-            ErrorTimer.Elapsed += this._timer_Elapsed;
-
             //modCommon.frmUpdateProfile = this;
             //modCommon.frmLogin.Visible = false;
-
-            LoadLanguage();
         }
 
         private void frmMain_Load(object sender, EventArgs e)
@@ -54,25 +32,7 @@ namespace SKYNET
             UserName.Text = SteamClient.PersonaName;
             //Password.Text = frmMain.Password;
             PB_Avatar.Image = SteamClient.Avatar;
-        }
-        
-        private void Logo_Timer_Tick(object sender, EventArgs e)
-        {
-            if (Logo.Size.Width < 105)
-            {
-                Logo.Size = new Size(Logo.Size.Width + 5, Logo.Size.Width + 5);
-            }
-            else
-            {
-                Logo.Size = new Size(105, 105);
-                Logo_Timer.Enabled = false;
-            }
-        }
-
-        private void _timer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            ErrorLabel.Text = "";
-            ErrorLabel.Visible = false;
+            TB_AccountID.Text = SteamClient.AccountID.ToString();
         }
 
         private void Cancel_Button_Click(object sender, EventArgs e)
@@ -101,6 +61,17 @@ namespace SKYNET
 
             //if (Password.Text != SteamClient.Password)
             //    frmMain.PasswordUpdated(Password.Text);
+
+            if (uint.TryParse(TB_AccountID.Text, out uint accountID))
+            {
+                if (accountID != SteamClient.AccountID)
+                    frmMain.AccountIDUpdated(accountID);
+            }
+            else
+            {
+                modCommon.Show("Please... set a valid account ID");
+                return;
+            }
 
             Close();
         }
@@ -135,6 +106,7 @@ namespace SKYNET
                     }
                 }
             }
+
             WindowState = FormWindowState.Normal;
 
             try

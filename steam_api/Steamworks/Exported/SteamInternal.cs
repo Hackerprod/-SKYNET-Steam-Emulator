@@ -3,11 +3,12 @@ using System.Runtime.InteropServices;
 using SKYNET.Managers;
 using SKYNET.Types;
 
+using HSteamPipe = System.UInt32;
+using HSteamUser = System.UInt32;
+
 namespace SKYNET.Steamworks.Exported
 {
-    using HSteamPipe = System.UInt32;
-    using HSteamUser = System.UInt32;
-    public unsafe class SteamInternal
+    public class SteamInternal
     {
         static SteamInternal()
         {
@@ -41,9 +42,10 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamInternal_GameServer_Init(uint unIP, int usPort, int usGamePort, uint usQueryPort, uint eServerMode, string pchVersionString)
         {
-            Write($"SteamInternal_GameServer_Init {pchVersionString}");
             var unFlags = eServerMode == (int)EServerMode.AuthenticationAndSecure ? Constants.k_unServerFlagSecure : 0;
-            return SteamEmulator.SteamGameServer.InitGameServer(unIP, usPort, (int)usQueryPort, unFlags, SteamEmulator.AppID, pchVersionString);
+            var result = SteamEmulator.SteamGameServer.InitGameServer(unIP, usPort, (int)usQueryPort, unFlags, SteamEmulator.AppID, pchVersionString);
+            Write($"SteamInternal_GameServer_Init = {result}");
+            return result;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

@@ -12,25 +12,11 @@ namespace SKYNET.Types
 {
     public class Settings
     {
+        public string AccountName { get; set; }
         public string PersonaName { get; set; }
-
         public uint AccountID { get; set; }
-
         public string Language { get; set; }
-        
         public IPAddress ServerIP { get; set; }
-
-        public int BroadcastPort { get; set; }
-
-        public bool LogToFile { get; set; }
-
-        public bool LogToConsole { get; set; }
-
-
-        public bool RunCallbacks { get; set; }
-
-        public bool ISteamHTTP { get; set; }
-
 
 
         public static Settings Load()
@@ -42,14 +28,10 @@ namespace SKYNET.Types
                 settings = new Settings()
                 {
                     PersonaName = Environment.UserName,
+                    AccountName = Environment.UserName,
                     AccountID = (uint)new Random().Next(1000, 9999),
                     Language = "english",
                     ServerIP = IPAddress.Loopback,
-                    BroadcastPort = 28025,
-                    LogToFile = false,
-                    LogToConsole = false,
-                    RunCallbacks = true,
-                    ISteamHTTP = true
                 };
                 return settings;
             }
@@ -61,12 +43,12 @@ namespace SKYNET.Types
             return settings;
         }
 
-        public void Save()
+        public static void Save(Settings settings)
         {
             string fileName = Path.Combine(modCommon.GetPath(), "Data", "[SKYNET] Steam Emulator.bin");
-            string json = new JavaScriptSerializer().Serialize(this);
+            modCommon.EnsureDirectoryExists(fileName, true);
+            string json = new JavaScriptSerializer().Serialize(settings);
             File.WriteAllText(fileName, json);
         }
-
     }
 }

@@ -13,6 +13,7 @@ using SKYNET.GUI.Controls;
 using SKYNET.Helper;
 using SKYNET.Managers;
 using SKYNET.Properties;
+using SKYNET.Steamworks;
 using SKYNET.Types;
 
 namespace SKYNET
@@ -40,7 +41,7 @@ namespace SKYNET
             settings = Types.Settings.Load();
             LB_NickName.Text = settings.PersonaName;
             LB_Menu_NickName.Text = settings.PersonaName.ToUpper();
-            LB_SteamID.Text = settings.AccountID.ToString();
+            LB_SteamID.Text = new CSteamID(settings.AccountID).SteamID.ToString();
 
             GameMessages = new Dictionary<uint, List<string>>();
             RunningGames = new List<RunningGame>();
@@ -53,8 +54,6 @@ namespace SKYNET
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "AvatarCache"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "Avatars"));
-            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "cefsharp", "locales"));
-
 
             try
             {
@@ -74,6 +73,7 @@ namespace SKYNET
             GameManager.OnGameUpdated += GameManager_OnGameUpdated;
             GameManager.OnGameRemoved += GameManager_OnGameRemoved;
             GameManager.OnGameLaunched = GameManager_OnGameLaunched;
+            GameManager.OnGameClosed = GameManager_OnGameClosed;
             GameManager.Initialize();
 
             shadowBox1.BackColor = Color.FromArgb(100, 0, 0, 0);
@@ -86,7 +86,10 @@ namespace SKYNET
             UserManager.OnUserRemoved += UserManager_OnUserRemoved;
             UserManager.OnAvatarReceived = UserManager_OnAvatarReceived;
 
-            //new frmBrowser().ShowDialog();
+            if (File.Exists(Path.Combine(modCommon.GetPath(), "Browser.txt")))
+            {
+                new frmBrowser().ShowDialog();
+            }
         }
 
         #region GameManager Events
@@ -115,9 +118,17 @@ namespace SKYNET
 
         private void GameManager_OnGameLaunched(object sender, GameManager.GameLaunchedEventArgs e)
         {
-            var game = new RunningGame(e.ProcessID, e.Game);
+            var game = new RunningGame(e.ProcessID, e.Game, e.GameClientID);
             game.OnGameClosed += Game_OnGameClosed;
             RunningGames.Add(game);
+        }
+
+        private void GameManager_OnGameClosed(object sender, string gameClientID)
+        {
+            RunningGames.RemoveAll(g => g.GameClientID == gameClientID);
+
+            BT_GameAction.Text = "PLAY";
+            BT_GameAction.BackColor = Color.FromArgb(46, 186, 65);
         }
 
         private void Game_OnGameClosed(object sender, Game e)
@@ -276,16 +287,13 @@ namespace SKYNET
 
             Write("SteamClient", "Opening " + game.Name);
 
-            string x86Dll = Path.Combine(modCommon.GetPath(), "x86", "steam_api.dll");
-            string x64Dll = Path.Combine(modCommon.GetPath(), "x64", "steam_api64.dll");
-
-            DllInjector.Inject(game.ExecutablePath, game.Parameters, x64Dll, x86Dll, game.AppID);
+            DllInjector.Inject(game.ExecutablePath, game.Parameters, game.AppID);
 
             BT_GameAction.Text = "CLOSE";
             BT_GameAction.BackColor = Color.Red;
         }
 
-        internal static void AvatarUpdated(Bitmap Avatar)
+        public static void AvatarUpdated(Bitmap Avatar)
         {
             SteamClient.Avatar = Avatar;
             frm.PB_Avatar.Image = Avatar;
@@ -303,14 +311,23 @@ namespace SKYNET
             }
         }
 
-        internal static void PersonaNameUpdated(string PersonaName)
+        public static void PersonaNameUpdated(string PersonaName)
         {
             SteamClient.PersonaName = PersonaName;
             frm.LB_NickName.Text = PersonaName;
             frm.LB_Menu_NickName.Text = PersonaName.ToUpper();
             IPCManager.SendUserDataUpdated(SteamClient.AccountID, PersonaName);
             settings.PersonaName = PersonaName;
-            settings.Save();
+            Types.Settings.Save(settings);
+        }
+
+        public static void AccountIDUpdated(uint accountID)
+        {
+            SteamClient.AccountID = accountID;
+            SteamClient.SteamID = new Steamworks.CSteamID(accountID);
+            frm.LB_SteamID.Text = SteamClient.SteamID.SteamID.ToString();
+            settings.AccountID = accountID;
+            Types.Settings.Save(settings);
         }
 
         private void Write(string sender, object msg)
@@ -321,9 +338,9 @@ namespace SKYNET
         private void Close_Clicked(object sender, EventArgs e)
         {
             string path = Path.Combine(modCommon.GetPath(), "Data", "Games.bin");
-            modCommon.EnsureDirectoryExists(path);
+            modCommon.EnsureDirectoryExists(path, true);
 
-            settings.Save();
+            Types.Settings.Save(settings);
 
             List<Game> Games = new List<Game>();
             foreach (var control in PN_GameContainer.Controls)
@@ -524,6 +541,11 @@ namespace SKYNET
         private void BT_Profile_Click(object sender, EventArgs e)
         {
             new frmUpdateProfile().ShowDialog();
+        }
+
+        private void BT_Connect_Click(object sender, EventArgs e)
+        {
+            NetworkManager.SendAnnounce();
         }
     }
 }

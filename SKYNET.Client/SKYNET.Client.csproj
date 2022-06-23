@@ -53,7 +53,7 @@
     <Compile Include="Managers\NetworkManager.cs" />
     <Compile Include="Managers\StatsManager.cs" />
     <Compile Include="Managers\UserManager.cs" />
-    <Compile Include="Network\FileServer.cs" />
+    <Compile Include="Network\WebServer.cs" />
     <Compile Include="Network\NET_Messages.cs" />
     <Compile Include="Network\P2PNetworking.cs" />
     <Compile Include="Network\TCPClient.cs" />

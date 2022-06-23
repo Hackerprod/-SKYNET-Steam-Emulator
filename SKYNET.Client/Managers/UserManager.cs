@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -38,6 +39,7 @@ namespace SKYNET.Managers
             });
             return user;
         }
+
         public static SteamPlayer GetUser(uint accountID)
         {
             SteamPlayer user = default;
@@ -96,6 +98,16 @@ namespace SKYNET.Managers
             });
         }
 
+        public static SteamPlayer GetUserByAddress(string iPAddress)
+        {
+            SteamPlayer player = null;
+            MutexHelper.Wait("Users", delegate
+            {
+                player = Users.Find(u => u.IPAddress == iPAddress);
+            });
+            return player;
+        }
+
         private static void Write(object msg)
         {
             Log.Write("UserManager", msg);
@@ -116,6 +128,5 @@ namespace SKYNET.Managers
                 Avatar = avatar;
             }
         }
-
     }
 }

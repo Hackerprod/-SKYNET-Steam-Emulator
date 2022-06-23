@@ -3,30 +3,17 @@ using System.Collections.Generic;
 
 using System.Globalization;
 
-
 namespace SKYNET.Types
 {
     public class AppDetails
     {
-        public AppID _570 { get; set; }
+        public AppID lolo { get; set; }
     }
 
     public class AppID
     {
         public bool success { get; set; }
         public Data data { get; set; }
-    }
-
-    public class Category
-    {
-        public int id { get; set; }
-        public string description { get; set; }
-    }
-
-    public class ContentDescriptors
-    {
-        public List<object> ids { get; set; }
-        public object notes { get; set; }
     }
 
     public class Data
@@ -63,6 +50,19 @@ namespace SKYNET.Types
         public string background { get; set; }
         public string background_raw { get; set; }
         public ContentDescriptors content_descriptors { get; set; }
+    }
+
+
+    public class Category
+    {
+        public int id { get; set; }
+        public string description { get; set; }
+    }
+
+    public class ContentDescriptors
+    {
+        public List<object> ids { get; set; }
+        public object notes { get; set; }
     }
 
     public class Genre

@@ -14,7 +14,7 @@ namespace SKYNET.Steamworks.Implementation
         public static SteamGameServer Instance;
 
         public GameServerData ServerData;
-        private bool LoggedIn;
+        public bool LoggedIn;
 
         public SteamGameServer()
         {
@@ -63,11 +63,12 @@ namespace SKYNET.Steamworks.Implementation
 
             }
 
-           // TODO: Necessary
-           GSPolicyResponse_t Policy = new GSPolicyResponse_t()
-           {
-               Secure = (byte)(ServerData.Flags & Constants.k_unServerFlagSecure)
-           };
+            // TODO: Necessary
+            GSPolicyResponse_t Policy = new GSPolicyResponse_t()
+            {
+                Secure = (byte)(ServerData.Flags & Constants.k_unServerFlagSecure)
+            };
+
             CallbackManager.AddCallbackResult(Policy);
 
             return true;

@@ -27,8 +27,6 @@ namespace SKYNET.GUI
             CheckForIllegalCrossThreadCalls = false;
             base.SetMouseMove(panelTop);
 
-            LoadLanguage();
-
             DialogResult = new Button();
             Controls.Add(DialogResult);
             DialogResult.DialogResult = System.Windows.Forms.DialogResult.OK;
@@ -47,15 +45,6 @@ namespace SKYNET.GUI
 
             this.rScreen = Screen.GetWorkingArea(Screen.PrimaryScreen.Bounds);
             ChangeWindowTop();
-        }
-
-        public override void LoadLanguage()
-        {
-            //modCommon.Language.Translate(l_Preview, "5.001");
-            //modCommon.Language.Translate(_showlines, "5.002");
-            //modCommon.Language.Translate(_circled, "5.003");
-            //modCommon.Language.Translate(Rotate_L, "5.004");
-            //modCommon.Language.Translate(btn_Apply, "5.005");
         }
 
         public void ChangeWindowTop()

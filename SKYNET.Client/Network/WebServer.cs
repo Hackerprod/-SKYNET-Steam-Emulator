@@ -8,7 +8,7 @@ using WebSocketSharp.Server;
 
 namespace SKYNET
 {
-    public class FileServer
+    public class WebServer
     {
         private string _rootDirectory;
         private HttpServer httpsv;
@@ -89,7 +89,7 @@ namespace SKYNET
         #endregion
     };
 
-        public FileServer(int port)
+        public WebServer(int port)
         {
             httpsv = new HttpServer(port);
             httpsv.DocumentRootPath = Path.Combine(modCommon.GetPath(), "Data", "www");
@@ -231,7 +231,7 @@ namespace SKYNET
             try
             {
                 httpsv.Start();
-                Log.Write("WebServer", $"Web server started on port {ServerPort}");
+                //Log.Write("WebServer", $"Web server started on port {ServerPort}");
                 return true;
             }
             catch

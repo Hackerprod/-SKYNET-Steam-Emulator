@@ -118,7 +118,7 @@ namespace SKYNET.Managers
                 var Game = GameManager.GetGame(AppID);
                 if (Game != null)
                 {
-                    GameManager.InvokeGameLaunched(Game, ClientHello.ProcessID);
+                    GameManager.InvokeGameLaunched(Game, ClientHello.ProcessID, connection.PipeName);
 
                     ClientWelcome.LogToFile = Game.LogToFile;
                     ClientWelcome.LogToConsole = Game.LogToConsole;
@@ -313,6 +313,7 @@ namespace SKYNET.Managers
         private static void OnClientDisconnected(object sender, ConnectionEventArgs<IPCMessage> e)
         {
             Log.Write("IPCManager", $"Client {e.Connection.PipeName} disconnected");
+            GameManager.InvokeGameClosed(e.Connection.PipeName);
         }
 
         private static void OnExceptionOccurred(object sender, ExceptionEventArgs e)

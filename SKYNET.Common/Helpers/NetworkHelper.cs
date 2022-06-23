@@ -95,7 +95,7 @@ namespace SKYNET.Helper
             return rangeAddr;
         }
 
-        private static bool IslocalAddress(IPAddress iPAddress)
+        public static bool IslocalAddress(IPAddress iPAddress)
         {
             return IslocalAddress(iPAddress.ToString());
         }

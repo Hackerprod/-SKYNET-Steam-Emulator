@@ -53,7 +53,7 @@ namespace SKYNET
             this.panel7 = new System.Windows.Forms.Panel();
             this.pictureBox3 = new System.Windows.Forms.PictureBox();
             this.PB_Avatar = new CircularPictureBox();
-            this.skyneT_Button1 = new SKYNET_Button();
+            this.BT_Connect = new SKYNET_Button();
             this.BT_Profile = new SKYNET_Button();
             this.LB_SteamID = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
@@ -331,7 +331,7 @@ namespace SKYNET
             this.panel7.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
             this.panel7.Controls.Add(this.pictureBox3);
             this.panel7.Controls.Add(this.PB_Avatar);
-            this.panel7.Controls.Add(this.skyneT_Button1);
+            this.panel7.Controls.Add(this.BT_Connect);
             this.panel7.Controls.Add(this.BT_Profile);
             this.panel7.Controls.Add(this.LB_SteamID);
             this.panel7.Controls.Add(this.label9);
@@ -361,24 +361,25 @@ namespace SKYNET
             this.PB_Avatar.Size = new System.Drawing.Size(73, 73);
             this.PB_Avatar.TabIndex = 19;
             // 
-            // skyneT_Button1
+            // BT_Connect
             // 
-            this.skyneT_Button1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(46)))), ((int)(((byte)(88)))));
-            this.skyneT_Button1.BackColorMouseOver = System.Drawing.Color.Empty;
-            this.skyneT_Button1.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.skyneT_Button1.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.skyneT_Button1.ForeColor = System.Drawing.Color.White;
-            this.skyneT_Button1.ForeColorMouseOver = System.Drawing.Color.Empty;
-            this.skyneT_Button1.ImageAlignment = SKYNET_Button._ImgAlign.Left;
-            this.skyneT_Button1.ImageIcon = null;
-            this.skyneT_Button1.Location = new System.Drawing.Point(13, 100);
-            this.skyneT_Button1.MenuMode = false;
-            this.skyneT_Button1.Name = "skyneT_Button1";
-            this.skyneT_Button1.Rounded = false;
-            this.skyneT_Button1.Size = new System.Drawing.Size(110, 25);
-            this.skyneT_Button1.Style = SKYNET_Button._Style.TextOnly;
-            this.skyneT_Button1.TabIndex = 18;
-            this.skyneT_Button1.Text = "CONNECT";
+            this.BT_Connect.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(46)))), ((int)(((byte)(88)))));
+            this.BT_Connect.BackColorMouseOver = System.Drawing.Color.Empty;
+            this.BT_Connect.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.BT_Connect.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.BT_Connect.ForeColor = System.Drawing.Color.White;
+            this.BT_Connect.ForeColorMouseOver = System.Drawing.Color.Empty;
+            this.BT_Connect.ImageAlignment = SKYNET_Button._ImgAlign.Left;
+            this.BT_Connect.ImageIcon = null;
+            this.BT_Connect.Location = new System.Drawing.Point(13, 100);
+            this.BT_Connect.MenuMode = false;
+            this.BT_Connect.Name = "BT_Connect";
+            this.BT_Connect.Rounded = false;
+            this.BT_Connect.Size = new System.Drawing.Size(110, 25);
+            this.BT_Connect.Style = SKYNET_Button._Style.TextOnly;
+            this.BT_Connect.TabIndex = 18;
+            this.BT_Connect.Text = "ANNOUNCE";
+            this.BT_Connect.Click += new System.EventHandler(this.BT_Connect_Click);
             // 
             // BT_Profile
             // 
@@ -759,7 +760,7 @@ namespace SKYNET
         private Label LB_SteamID;
         private Label label9;
         private SKYNET_Button BT_Profile;
-        private SKYNET_Button skyneT_Button1;
+        private SKYNET_Button BT_Connect;
         private Panel PN_GameContainer;
         private Panel panel8;
         private SKYNET_ContextMenuStrip CM_MenuGame;
