@@ -32,34 +32,6 @@ namespace SKYNET
 
             LoadLogo(filePath);
 
-            Task.Run(delegate
-            {
-                if (File.Exists(Path.Combine(PathDirectory, "steam_api.dll")))
-                {
-                    TB_SteamApiPath.Text = Path.Combine(PathDirectory, "steam_api.dll");
-                }
-                else if (File.Exists(Path.Combine(PathDirectory, "steam_api64.dll")))
-                {
-                    TB_SteamApiPath.Text = Path.Combine(PathDirectory, "steam_api64.dll");
-                }
-                else
-                {
-                    var files = Directory.GetFiles(PathDirectory, "*.dll", SearchOption.AllDirectories).ToList();
-
-                    string x86 = files.Find(x => x.Contains("steam_api.dll"));
-                    if (!string.IsNullOrEmpty(x86))
-                    {
-                        TB_SteamApiPath.Text = x86;
-                    }
-
-                    string x64 = files.Find(x => x.Contains("steam_api64.dll"));
-                    if (!string.IsNullOrEmpty(x64))
-                    {
-                        TB_SteamApiPath.Text = x64;
-                    }
-                }
-            });
-
             TB_AppId.Text = "0";
             if (File.Exists(Path.Combine(PathDirectory, "steam_appid.txt")))
             {
@@ -77,7 +49,6 @@ namespace SKYNET
             TB_Name.Text = Game.Name;
             LB_Name.Text = Game.Name;
             TB_ExecutablePath.Text = Game.ExecutablePath;
-            TB_SteamApiPath.Text = Game.SteamApiPath;
             TB_Parameters.Text = Game.Parameters;
             TB_AppId.Text = Game.AppID.ToString();
             CH_WithoutEmu.Checked = Game.LaunchWithoutEmu;
@@ -179,7 +150,6 @@ namespace SKYNET
             {
                 Name = TB_Name.Text,
                 ExecutablePath = TB_ExecutablePath.Text,
-                SteamApiPath = TB_SteamApiPath.Text,
                 Parameters = TB_Parameters.Text,
                 AppID = _AppId,
                 LaunchWithoutEmu = CH_WithoutEmu.Checked,

@@ -84,8 +84,6 @@ namespace SKYNET.Managers
                 Game.Name = game.Name;
                 Game.Parameters = game.Parameters;
                 Game.RunCallbacks = game.RunCallbacks;
-                Game.SteamApiPath = game.SteamApiPath;
-
                 OnGameUpdated?.Invoke(null, game);
             }
         }

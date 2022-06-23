@@ -8,7 +8,6 @@ namespace SKYNET
     {
         public string Name { get; set; }
         public string ExecutablePath { get; set; }
-        public string SteamApiPath { get; set; }
         public uint AppID { get; set; }
         public string Parameters { get; set; }
         public List<DLC> GameDLC { get; set; }
