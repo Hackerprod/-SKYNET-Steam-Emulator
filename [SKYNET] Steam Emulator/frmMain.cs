@@ -119,32 +119,12 @@ namespace SKYNET
         private void GameManager_OnGameLaunched(object sender, GameManager.GameLaunchedEventArgs e)
         {
             var game = new RunningGame(e.ProcessID, e.Game, e.GameClientID);
-            game.OnGameClosed += Game_OnGameClosed;
             RunningGames.Add(game);
         }
 
         private void GameManager_OnGameClosed(object sender, string gameClientID)
         {
             RunningGames.RemoveAll(g => g.GameClientID == gameClientID);
-
-            BT_GameAction.Text = "PLAY";
-            BT_GameAction.BackColor = Color.FromArgb(46, 186, 65);
-        }
-
-        private void Game_OnGameClosed(object sender, Game e)
-        {
-            //foreach (var game in RunningGames)
-            //{
-            //    if (GameMessages.ContainsKey(game.Game.AppID) && game.Game.LogToFile)
-            //    {
-            //        //string logPath = Path.Combine(modCommon.GetPath(), "Data", "Storage", game.Game.AppID.ToString(), "GameMessages.log");
-            //        //File.WriteAllLines(logPath, GameMessages[game.Game.AppID]);
-            //    }
-            //}
-
-            RunningGames.RemoveAll(g => g.Game.AppID == e.AppID);
-
-            Write("SteamClient", $"The injected process are closed");
 
             BT_GameAction.Text = "PLAY";
             BT_GameAction.BackColor = Color.FromArgb(46, 186, 65);
