@@ -56,6 +56,7 @@ namespace SKYNET
             CH_LogToConsole.Checked = Game.LogToConsole;
             CH_RunCallbacks.Checked = Game.RunCallbacks;
             CH_ISteamHTTP.Checked = Game.ISteamHTTP;
+            CH_CSteamworks.Checked = Game.CSteamworks;
 
             LoadLogo(Game.ExecutablePath);
             BT_AddGame.Text = "Update";
@@ -158,6 +159,7 @@ namespace SKYNET
                 LogToConsole = CH_LogToConsole.Checked,
                 RunCallbacks = CH_RunCallbacks.Checked, 
                 ISteamHTTP = CH_ISteamHTTP.Checked,
+                CSteamworks = CH_CSteamworks.Checked
             };
 
             if (boxHandle != 0)

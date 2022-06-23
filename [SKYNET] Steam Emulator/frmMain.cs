@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
 using SKYNET.Client;
@@ -267,7 +266,7 @@ namespace SKYNET
 
             Write("SteamClient", "Opening " + game.Name);
 
-            DllInjector.Inject(game.ExecutablePath, game.Parameters, game.AppID);
+            DllInjector.Inject(game.ExecutablePath, game.Parameters, game.AppID, game.CSteamworks);
 
             BT_GameAction.Text = "CLOSE";
             BT_GameAction.BackColor = Color.Red;

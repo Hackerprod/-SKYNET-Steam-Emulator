@@ -1,4 +1,5 @@
 ﻿using NativeSharp;
+using System;
 using System.Diagnostics;
 using System.IO;
 
@@ -6,10 +7,15 @@ namespace SKYNET
 {
     public class DllInjector
     {
-        public static Process Inject(string executablePath, string parameters, object AppID)
+        public static Process Inject(string executablePath, string parameters, uint appID, bool cSteamworks)
         {
             string x86Dll = Path.Combine(modCommon.GetPath(), "x86", "steam_api.dll");
             string x64Dll = Path.Combine(modCommon.GetPath(), "x64", "steam_api64.dll");
+            string x86CSteamworksDll = Path.Combine(modCommon.GetPath(), "x86", "CSteamworks.dll");
+            string x64CSteamworksDll = Path.Combine(modCommon.GetPath(), "x64", "CSteamworks.dll");
+
+            Preparex64Dll();
+            PrepareCsteamworks();
 
             string pName = "";
             var pInfo = new ProcessStartInfo();
@@ -21,8 +27,14 @@ namespace SKYNET
             pName = tProcess.ProcessName;
 
             var nProcess = NativeProcess.Open((uint)tProcess.Id);
-            string DllPath = nProcess.Is64Bit ? x64Dll : x86Dll;
+            var Is64Bit = nProcess.Is64Bit;
             tProcess.Kill();
+
+            string DllPath = "";
+            if (cSteamworks)
+                DllPath = Is64Bit ? x64CSteamworksDll : x86CSteamworksDll;
+            else
+                DllPath = Is64Bit ? x64Dll : x86Dll;
 
             string modifiedConfig = InjectConfig;
 
@@ -30,7 +42,7 @@ namespace SKYNET
             modifiedConfig = modifiedConfig.Replace("$Parameters$", parameters);
             modifiedConfig = modifiedConfig.Replace("$Dll$", DllPath);
 
-            string tempConfig = Path.Combine(modCommon.GetPath(), "Data", "Injector", $"{AppID}.xpr");
+            string tempConfig = Path.Combine(modCommon.GetPath(), "Data", "Injector", $"{appID}.xpr");
             modCommon.EnsureDirectoryExists(tempConfig, true);
             File.WriteAllText(tempConfig, modifiedConfig);
 
@@ -51,6 +63,25 @@ namespace SKYNET
             }
 
             return process;
+        }
+
+        private static void PrepareCsteamworks()
+        {
+            string x86Dll = Path.Combine(modCommon.GetPath(), "x86", "steam_api.dll");
+            string x64Dll = Path.Combine(modCommon.GetPath(), "x64", "steam_api64.dll");
+
+            string x86CSteamworksDll = Path.Combine(modCommon.GetPath(), "x86", "CSteamworks.dll");
+            string x64CSteamworksDll = Path.Combine(modCommon.GetPath(), "x64", "CSteamworks.dll");
+
+            try { File.Copy(x86Dll, x86CSteamworksDll, true); } catch { }
+            try { File.Copy(x64Dll, x64CSteamworksDll, true); } catch { }
+        }
+
+        private static void Preparex64Dll()
+        {
+            string x64DllCompiled = Path.Combine(modCommon.GetPath(), "x64", "steam_api.dll");
+            string x64Dll = Path.Combine(modCommon.GetPath(), "x64", "steam_api64.dll");
+            try { File.Copy(x64DllCompiled, x64Dll, true); } catch { }
         }
 
         private static string InjectConfig = @"

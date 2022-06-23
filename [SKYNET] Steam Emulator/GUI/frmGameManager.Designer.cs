@@ -38,6 +38,8 @@ namespace SKYNET
             this.BT_AddGame = new SKYNET_Button();
             this.PN_LeftContainer = new System.Windows.Forms.Panel();
             this.PN_BodyContainer = new System.Windows.Forms.Panel();
+            this.label4 = new System.Windows.Forms.Label();
+            this.CH_CSteamworks = new SKYNET.Controls.SKYNET_Check();
             this.CH_GameOverlay = new SKYNET.Controls.SKYNET_Check();
             this.label11 = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
@@ -97,7 +99,7 @@ namespace SKYNET
             this.panel3.Controls.Add(this.BT_Cancel);
             this.panel3.Controls.Add(this.BT_AddGame);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel3.Location = new System.Drawing.Point(0, 494);
+            this.panel3.Location = new System.Drawing.Point(0, 519);
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(741, 76);
             this.panel3.TabIndex = 7;
@@ -112,7 +114,7 @@ namespace SKYNET
             this.BT_Cancel.ForeColorMouseOver = System.Drawing.Color.Empty;
             this.BT_Cancel.ImageAlignment = SKYNET_Button._ImgAlign.Left;
             this.BT_Cancel.ImageIcon = null;
-            this.BT_Cancel.Location = new System.Drawing.Point(465, 15);
+            this.BT_Cancel.Location = new System.Drawing.Point(465, 17);
             this.BT_Cancel.MenuMode = false;
             this.BT_Cancel.Name = "BT_Cancel";
             this.BT_Cancel.Rounded = false;
@@ -132,7 +134,7 @@ namespace SKYNET
             this.BT_AddGame.ForeColorMouseOver = System.Drawing.Color.Empty;
             this.BT_AddGame.ImageAlignment = SKYNET_Button._ImgAlign.Left;
             this.BT_AddGame.ImageIcon = null;
-            this.BT_AddGame.Location = new System.Drawing.Point(574, 15);
+            this.BT_AddGame.Location = new System.Drawing.Point(574, 17);
             this.BT_AddGame.MenuMode = false;
             this.BT_AddGame.Name = "BT_AddGame";
             this.BT_AddGame.Rounded = false;
@@ -148,12 +150,14 @@ namespace SKYNET
             this.PN_LeftContainer.Dock = System.Windows.Forms.DockStyle.Left;
             this.PN_LeftContainer.Location = new System.Drawing.Point(0, 0);
             this.PN_LeftContainer.Name = "PN_LeftContainer";
-            this.PN_LeftContainer.Size = new System.Drawing.Size(0, 570);
+            this.PN_LeftContainer.Size = new System.Drawing.Size(0, 595);
             this.PN_LeftContainer.TabIndex = 6;
             // 
             // PN_BodyContainer
             // 
             this.PN_BodyContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(29)))), ((int)(((byte)(39)))), ((int)(((byte)(51)))));
+            this.PN_BodyContainer.Controls.Add(this.label4);
+            this.PN_BodyContainer.Controls.Add(this.CH_CSteamworks);
             this.PN_BodyContainer.Controls.Add(this.CH_GameOverlay);
             this.PN_BodyContainer.Controls.Add(this.label11);
             this.PN_BodyContainer.Controls.Add(this.panel1);
@@ -180,14 +184,34 @@ namespace SKYNET
             this.PN_BodyContainer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.PN_BodyContainer.Location = new System.Drawing.Point(0, 26);
             this.PN_BodyContainer.Name = "PN_BodyContainer";
-            this.PN_BodyContainer.Size = new System.Drawing.Size(741, 468);
+            this.PN_BodyContainer.Size = new System.Drawing.Size(741, 493);
             this.PN_BodyContainer.TabIndex = 10;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
+            this.label4.ForeColor = System.Drawing.Color.White;
+            this.label4.Location = new System.Drawing.Point(63, 455);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(155, 17);
+            this.label4.TabIndex = 28;
+            this.label4.Text = "Emulate CSteamworks Dll";
+            // 
+            // CH_CSteamworks
+            // 
+            this.CH_CSteamworks.BackColor = System.Drawing.Color.Transparent;
+            this.CH_CSteamworks.Checked = false;
+            this.CH_CSteamworks.Location = new System.Drawing.Point(323, 452);
+            this.CH_CSteamworks.Name = "CH_CSteamworks";
+            this.CH_CSteamworks.Size = new System.Drawing.Size(34, 25);
+            this.CH_CSteamworks.TabIndex = 27;
             // 
             // CH_GameOverlay
             // 
             this.CH_GameOverlay.BackColor = System.Drawing.Color.Transparent;
             this.CH_GameOverlay.Checked = true;
-            this.CH_GameOverlay.Location = new System.Drawing.Point(640, 423);
+            this.CH_GameOverlay.Location = new System.Drawing.Point(640, 425);
             this.CH_GameOverlay.Name = "CH_GameOverlay";
             this.CH_GameOverlay.Size = new System.Drawing.Size(34, 25);
             this.CH_GameOverlay.TabIndex = 26;
@@ -197,7 +221,7 @@ namespace SKYNET
             this.label11.AutoSize = true;
             this.label11.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
             this.label11.ForeColor = System.Drawing.Color.White;
-            this.label11.Location = new System.Drawing.Point(404, 423);
+            this.label11.Location = new System.Drawing.Point(404, 425);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(133, 17);
             this.label11.TabIndex = 25;
@@ -206,16 +230,16 @@ namespace SKYNET
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(66)))), ((int)(((byte)(70)))), ((int)(((byte)(77)))));
-            this.panel1.Location = new System.Drawing.Point(376, 365);
+            this.panel1.Location = new System.Drawing.Point(376, 367);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(2, 85);
+            this.panel1.Size = new System.Drawing.Size(2, 110);
             this.panel1.TabIndex = 24;
             // 
             // CH_ISteamHTTP
             // 
             this.CH_ISteamHTTP.BackColor = System.Drawing.Color.Transparent;
             this.CH_ISteamHTTP.Checked = true;
-            this.CH_ISteamHTTP.Location = new System.Drawing.Point(640, 394);
+            this.CH_ISteamHTTP.Location = new System.Drawing.Point(640, 396);
             this.CH_ISteamHTTP.Name = "CH_ISteamHTTP";
             this.CH_ISteamHTTP.Size = new System.Drawing.Size(34, 25);
             this.CH_ISteamHTTP.TabIndex = 23;
@@ -225,7 +249,7 @@ namespace SKYNET
             this.label9.AutoSize = true;
             this.label9.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
             this.label9.ForeColor = System.Drawing.Color.White;
-            this.label9.Location = new System.Drawing.Point(404, 394);
+            this.label9.Location = new System.Drawing.Point(404, 396);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(181, 17);
             this.label9.TabIndex = 22;
@@ -235,7 +259,7 @@ namespace SKYNET
             // 
             this.CH_RunCallbacks.BackColor = System.Drawing.Color.Transparent;
             this.CH_RunCallbacks.Checked = true;
-            this.CH_RunCallbacks.Location = new System.Drawing.Point(640, 365);
+            this.CH_RunCallbacks.Location = new System.Drawing.Point(640, 367);
             this.CH_RunCallbacks.Name = "CH_RunCallbacks";
             this.CH_RunCallbacks.Size = new System.Drawing.Size(34, 25);
             this.CH_RunCallbacks.TabIndex = 21;
@@ -245,7 +269,7 @@ namespace SKYNET
             this.label10.AutoSize = true;
             this.label10.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
             this.label10.ForeColor = System.Drawing.Color.White;
-            this.label10.Location = new System.Drawing.Point(63, 423);
+            this.label10.Location = new System.Drawing.Point(63, 425);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(196, 17);
             this.label10.TabIndex = 20;
@@ -255,7 +279,7 @@ namespace SKYNET
             // 
             this.CH_LogToConsole.BackColor = System.Drawing.Color.Transparent;
             this.CH_LogToConsole.Checked = false;
-            this.CH_LogToConsole.Location = new System.Drawing.Point(323, 391);
+            this.CH_LogToConsole.Location = new System.Drawing.Point(323, 393);
             this.CH_LogToConsole.Name = "CH_LogToConsole";
             this.CH_LogToConsole.Size = new System.Drawing.Size(34, 25);
             this.CH_LogToConsole.TabIndex = 19;
@@ -265,7 +289,7 @@ namespace SKYNET
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
             this.label8.ForeColor = System.Drawing.Color.White;
-            this.label8.Location = new System.Drawing.Point(63, 394);
+            this.label8.Location = new System.Drawing.Point(63, 396);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(204, 17);
             this.label8.TabIndex = 18;
@@ -275,7 +299,7 @@ namespace SKYNET
             // 
             this.CH_LogToFile.BackColor = System.Drawing.Color.Transparent;
             this.CH_LogToFile.Checked = false;
-            this.CH_LogToFile.Location = new System.Drawing.Point(323, 362);
+            this.CH_LogToFile.Location = new System.Drawing.Point(323, 364);
             this.CH_LogToFile.Name = "CH_LogToFile";
             this.CH_LogToFile.Size = new System.Drawing.Size(34, 25);
             this.CH_LogToFile.TabIndex = 17;
@@ -285,7 +309,7 @@ namespace SKYNET
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
             this.label7.ForeColor = System.Drawing.Color.White;
-            this.label7.Location = new System.Drawing.Point(63, 365);
+            this.label7.Location = new System.Drawing.Point(63, 367);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(187, 17);
             this.label7.TabIndex = 16;
@@ -295,7 +319,7 @@ namespace SKYNET
             // 
             this.CH_WithoutEmu.BackColor = System.Drawing.Color.Transparent;
             this.CH_WithoutEmu.Checked = false;
-            this.CH_WithoutEmu.Location = new System.Drawing.Point(323, 420);
+            this.CH_WithoutEmu.Location = new System.Drawing.Point(323, 422);
             this.CH_WithoutEmu.Name = "CH_WithoutEmu";
             this.CH_WithoutEmu.Size = new System.Drawing.Size(34, 25);
             this.CH_WithoutEmu.TabIndex = 15;
@@ -305,7 +329,7 @@ namespace SKYNET
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F);
             this.label6.ForeColor = System.Drawing.Color.White;
-            this.label6.Location = new System.Drawing.Point(404, 365);
+            this.label6.Location = new System.Drawing.Point(404, 367);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(146, 17);
             this.label6.TabIndex = 13;
@@ -449,7 +473,7 @@ namespace SKYNET
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(65)))), ((int)(((byte)(73)))));
-            this.ClientSize = new System.Drawing.Size(741, 570);
+            this.ClientSize = new System.Drawing.Size(741, 595);
             this.Controls.Add(this.PN_BodyContainer);
             this.Controls.Add(this.panel3);
             this.Controls.Add(this.PN_Top);
@@ -499,6 +523,8 @@ namespace SKYNET
         private Panel panel1;
         private Controls.SKYNET_Check CH_GameOverlay;
         private Label label11;
+        private Label label4;
+        private Controls.SKYNET_Check CH_CSteamworks;
     }
 }
 

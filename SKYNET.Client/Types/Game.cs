@@ -17,6 +17,7 @@ namespace SKYNET
         public bool ISteamHTTP { get; set; }
         public bool LaunchWithoutEmu { get; set; }
         public bool GameOverlay { get; set; }
+        public bool CSteamworks { get; set; }
 
         public Game()
         {
