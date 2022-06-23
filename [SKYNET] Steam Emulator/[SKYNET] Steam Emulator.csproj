@@ -68,11 +68,11 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Geckofx-Core">
-      <HintPath>..\..\Examples\GeckoFX\GeckoFX\bin\Debug\Geckofx-Core.dll</HintPath>
+    <Reference Include="Geckofx-Core, Version=45.0.34.0, Culture=neutral, PublicKeyToken=3209ac31600d1857, processorArchitecture=x86">
+      <HintPath>..\packages\Geckofx45.45.0.34\lib\net45\Geckofx-Core.dll</HintPath>
     </Reference>
-    <Reference Include="Geckofx-Winforms">
-      <HintPath>..\..\Examples\GeckoFX\GeckoFX\bin\Debug\Geckofx-Winforms.dll</HintPath>
+    <Reference Include="Geckofx-Winforms, Version=45.0.34.0, Culture=neutral, PublicKeyToken=3209ac31600d1857, processorArchitecture=x86">
+      <HintPath>..\packages\Geckofx45.45.0.34\lib\net45\Geckofx-Winforms.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.mshtml, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>True</EmbedInteropTypes>
@@ -95,10 +95,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="570.cs" />
-    <Compile Include="Category.cs" />
-    <Compile Include="ContentDescriptors.cs" />
-    <Compile Include="Data.cs" />
     <Compile Include="frmBrowser.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -108,7 +104,6 @@
     <Compile Include="frmBrowser.Eotu.Client.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Genre.cs" />
     <Compile Include="GUI\Controls\ImageCropControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -237,14 +232,6 @@
     </Compile>
     <Compile Include="Helpers\modCommon.cs" />
     <Compile Include="Helpers\NativeMethods.cs" />
-    <Compile Include="LinuxRequirements.cs" />
-    <Compile Include="MacRequirements.cs" />
-    <Compile Include="Metacritic.cs" />
-    <Compile Include="Movie.cs" />
-    <Compile Include="Mp4.cs" />
-    <Compile Include="PackageGroups.cs" />
-    <Compile Include="PcRequirements.cs" />
-    <Compile Include="Platforms.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GUI\Controls\SKYNET_TextBox.cs">
@@ -259,15 +246,8 @@
     <Compile Include="GUI\Controls\SKYNET_Check.designer.cs">
       <DependentUpon>SKYNET_Check.cs</DependentUpon>
     </Compile>
-    <Compile Include="Recommendations.cs" />
-    <Compile Include="ReleaseDate.cs" />
-    <Compile Include="RootObject.cs" />
-    <Compile Include="Screenshot.cs" />
-    <Compile Include="Sub.cs" />
-    <Compile Include="SupportInfo.cs" />
     <Compile Include="Types\ClientSDK.cs" />
     <Compile Include="Types\RunningGame.cs" />
-    <Compile Include="Webm.cs" />
     <Compile Include="WebManager.cs" />
     <EmbeddedResource Include="frmBrowser.resx">
       <DependentUpon>frmBrowser.cs</DependentUpon>
@@ -339,6 +319,7 @@
     <EmbeddedResource Include="GUI\Controls\SKYNET_Check.resx">
       <DependentUpon>SKYNET_Check.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="Firefox\omni.ja" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -375,6 +356,25 @@
     <None Include="Resources\8967.jpg" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Firefox\AccessibleMarshal.dll" />
+    <Content Include="Firefox\breakpadinjector.dll" />
+    <Content Include="Firefox\d3dcompiler_47.dll" />
+    <Content Include="Firefox\freebl3.dll" />
+    <Content Include="Firefox\icudt58.dll" />
+    <Content Include="Firefox\icuin58.dll" />
+    <Content Include="Firefox\icuuc58.dll" />
+    <Content Include="Firefox\lgpllibs.dll" />
+    <Content Include="Firefox\libEGL.dll" />
+    <Content Include="Firefox\libGLESv2.dll" />
+    <Content Include="Firefox\mozglue.dll" />
+    <Content Include="Firefox\nss3.dll" />
+    <Content Include="Firefox\nssckbi.dll" />
+    <Content Include="Firefox\nssdbm3.dll" />
+    <Content Include="Firefox\plugin-container.exe" />
+    <Content Include="Firefox\plugin-hang-ui.exe" />
+    <Content Include="Firefox\sandboxbroker.dll" />
+    <Content Include="Firefox\softokn3.dll" />
+    <Content Include="Firefox\xul.dll" />
     <Content Include="game.ico" />
     <None Include="Resources\profile_picture.png" />
     <None Include="Resources\male_user_100px.png" />
@@ -406,6 +406,8 @@
     <PropertyGroup>
       <ErrorText>Este proyecto hace referencia a los paquetes NuGet que faltan en este equipo. Use la restauración de paquetes NuGet para descargarlos. Para obtener más información, consulte http://go.microsoft.com/fwlink/?LinkID=322105. El archivo que falta es {0}.</ErrorText>
     </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Geckofx45.45.0.34\build\Geckofx45.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Geckofx45.45.0.34\build\Geckofx45.targets'))" />
   </Target>
   <Import Project="..\packages\CefSharp.Common.102.0.90\build\CefSharp.Common.targets" Condition="Exists('..\packages\CefSharp.Common.102.0.90\build\CefSharp.Common.targets')" />
+  <Import Project="..\packages\Geckofx45.45.0.34\build\Geckofx45.targets" Condition="Exists('..\packages\Geckofx45.45.0.34\build\Geckofx45.targets')" />
 </Project>

@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\ConsoleMessage.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Helpers\MathHelper.cs" />
     <Compile Include="Helpers\RectangleHelper.cs" />

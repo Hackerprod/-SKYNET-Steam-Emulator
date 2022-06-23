@@ -1,4 +1,6 @@
 ﻿
+using SKYNET.INI;
+using SKYNET.INI.Attributes;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,10 +14,19 @@ namespace SKYNET.Types
 {
     public class Settings
     {
+        [INISection("User Info")]
         public string AccountName { get; set; }
+
+        [INISection("User Info")]
         public string PersonaName { get; set; }
+
+        [INISection("User Info")]
         public uint AccountID { get; set; }
+
+        [INISection("User Info")]
         public string Language { get; set; }
+
+        [INISection("Network")]
         public IPAddress ServerIP { get; set; }
 
 
@@ -37,8 +48,7 @@ namespace SKYNET.Types
             }
             else
             {
-                string json = File.ReadAllText(fileName);
-                settings = new JavaScriptSerializer().Deserialize<Settings>(json);
+                settings = INISerializer.DeserializeFromFile<Settings>(fileName);
             }
             return settings;
         }
@@ -47,8 +57,7 @@ namespace SKYNET.Types
         {
             string fileName = Path.Combine(modCommon.GetPath(), "Data", "[SKYNET] Steam Emulator.bin");
             modCommon.EnsureDirectoryExists(fileName, true);
-            string json = new JavaScriptSerializer().Serialize(settings);
-            File.WriteAllText(fileName, json);
+            INISerializer.SerializeToFile(settings, fileName);
         }
     }
 }
