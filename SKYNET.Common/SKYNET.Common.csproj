@@ -34,6 +34,7 @@
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -150,6 +151,7 @@
     <Compile Include="websocket-sharp\WebSocketException.cs" />
     <Compile Include="websocket-sharp\WebSocketFrame.cs" />
     <Compile Include="websocket-sharp\WebSocketState.cs" />
+    <Compile Include="WinMod.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="websocket-sharp\doc\" />

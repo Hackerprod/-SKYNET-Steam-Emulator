@@ -14,6 +14,7 @@ namespace SKYNET.GUI.Controls
     public partial class SKYNET_UserControl : UserControl
     {
         private SteamPlayer steamPlayer;
+        private Bitmap avatar;
 
         [Category("SKYNET")]
         public SteamPlayer SteamPlayer
@@ -23,7 +24,17 @@ namespace SKYNET.GUI.Controls
             {
                 steamPlayer = value;
                 LB_PersonaName.Text = steamPlayer.PersonaName;
-                LB_IPAddress.Text = steamPlayer.IPAddress;
+                LB_IPAddress.Text   = steamPlayer.IPAddress;
+            }
+        }
+
+        public Bitmap Avatar
+        {
+            get { return avatar; }
+            set
+            {
+                avatar = value;
+                PB_Avatar.Image = avatar;
             }
         }
 

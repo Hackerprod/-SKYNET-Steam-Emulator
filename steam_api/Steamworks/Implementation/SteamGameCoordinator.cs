@@ -29,7 +29,10 @@ namespace SKYNET.Steamworks.Implementation
 
         public void PushMessage(uint MsgType, byte[] message)
         {
-            InMessages.TryAdd(MsgType, message);
+            if (InMessages.Any())
+            {
+                InMessages.TryAdd(MsgType, message);
+            }
 
             GCMessageAvailable_t data = new GCMessageAvailable_t();
             data.m_nMessageSize = (uint)message.Length;
@@ -46,40 +49,77 @@ namespace SKYNET.Steamworks.Implementation
             return EGCResults.k_EGCResultOK;
         }
 
-        public bool IsMessageAvailable(ref uint pcubMsgSize)
+        public unsafe bool IsMessageAvailable(uint* pcubMsgSize)
         {
             bool Result = false;
-            if (InMessages.Any())
+            uint SizeResult = 0;
+            MutexHelper.Wait("InMessages", delegate
             {
-                Result = true;
+                if (InMessages.Any())
+                {
+                    var size = InMessages.FirstOrDefault().Value.Length;
+                    SizeResult = (uint)size;
+                    Result = true;
+                }
+            });
+
+            var sizes = new uint[1] { SizeResult };
+            fixed (uint* p = &sizes[0])
+            {
+                pcubMsgSize = p;
             }
-            Write($"IsMessageAvailable (MsgSize = {pcubMsgSize}) = {Result}");
+
+            Write($"IsMessageAvailable (MsgSize = {*pcubMsgSize}) = {Result}");
             return Result;
         }
 
-        public EGCResults RetrieveMessage(ref uint punMsgType, IntPtr pubDest, uint cubDest, ref uint pcubMsgSize)
+        public unsafe int RetrieveMessage(uint* punMsgType, IntPtr pubDest, uint cubDest, uint* pcubMsgSize)
         {
             EGCResults Result = EGCResults.k_EGCResultNoMessage;
+            byte[] Body = null;
+            uint MsgType = 0;
+            uint MsgSize = 0;
+            return (int)Result;
 
-            if (InMessages.Any())
+            MutexHelper.Wait("InMessages", delegate
             {
-                try
+                if (InMessages.Any())
                 {
                     var msg = InMessages.First();
-                    Marshal.Copy(msg.Value, 0, pubDest, msg.Value.Length);
-                    //pcubMsgSize = (uint)msg.Value.Length;
-                    //punMsgType = msg.Key;
-                    Result = EGCResults.k_EGCResultOK;
+                    Body = msg.Value;
+                    MsgType = msg.Key;
+                    MsgSize = (uint)msg.Value.Length;
 
+                    Result = EGCResults.k_EGCResultOK;
                     InMessages.TryRemove(msg.Key, out _);
                 }
-                catch (Exception ex)
+            });
+
+            if (Body == null)
+            {
+                return (int)EGCResults.k_EGCResultNoMessage;
+            }
+
+            try
+            {
+                Marshal.Copy(Body, 0, pubDest, (int)MsgSize);
+                var values = new uint[2] { MsgType, MsgSize };
+                fixed (uint* Type = &values[0])
                 {
-                    Write($"{ex.Message} {ex.StackTrace}");
+                    punMsgType = Type;
+                }
+                fixed (uint* Size = &values[1])
+                {
+                    pcubMsgSize = Size;
                 }
             }
-            Write($"RetrieveMessage (MsgType = {punMsgType}, {pcubMsgSize} bytes) = {Result}");
-            return Result;
+            catch (Exception ex)
+            {
+                Write($"{ex.Message} {ex.StackTrace}");
+            }
+
+            Write($"RetrieveMessage (MsgType = {*punMsgType}, {*pcubMsgSize} bytes) = {Result}");
+            return (int)Result;
         }
 
         private uint GetGCMsg(uint msg)

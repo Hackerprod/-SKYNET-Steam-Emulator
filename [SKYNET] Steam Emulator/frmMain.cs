@@ -11,6 +11,7 @@ using SKYNET.GUI;
 using SKYNET.GUI.Controls;
 using SKYNET.Helper;
 using SKYNET.Managers;
+using SKYNET.Network.Packets;
 using SKYNET.Properties;
 using SKYNET.Steamworks;
 using SKYNET.Types;
@@ -36,6 +37,7 @@ namespace SKYNET
             frm = this;
 
             Log.OnMessage += Log_OnMessage;
+            ShadowBox.BackColor = Color.FromArgb(100, 0, 0, 0);
 
             settings = Types.Settings.Load();
             LB_NickName.Text = settings.PersonaName;
@@ -68,22 +70,24 @@ namespace SKYNET
             {
             }
 
+            SteamClient = new SteamClient(settings);
+            SteamClient.Initialize();
+
             GameManager.OnGameAdded += GameManager_OnGameAdded;
             GameManager.OnGameUpdated += GameManager_OnGameUpdated;
             GameManager.OnGameRemoved += GameManager_OnGameRemoved;
-            GameManager.OnGameLaunched = GameManager_OnGameLaunched;
+            GameManager.OnGameLaunched = GameManager_OnGameOpened;
+            GameManager.OnUserGameOpened += GameManager_OnUserGameOpened;
             GameManager.OnGameClosed = GameManager_OnGameClosed;
             GameManager.Initialize();
-
-            shadowBox1.BackColor = Color.FromArgb(100, 0, 0, 0);
-
-            SteamClient = new SteamClient(settings);
-            SteamClient.Initialize();
 
             UserManager.OnUserAdded += UserManager_OnUserAdded;
             UserManager.OnUserUpdated += UserManager_OnUserUpdated;
             UserManager.OnUserRemoved += UserManager_OnUserRemoved;
             UserManager.OnAvatarReceived = UserManager_OnAvatarReceived;
+
+            WebManager.OnGameLaunch += UserManager_OnGameLaunch;
+            WebManager.Initialize();
 
             if (File.Exists(Path.Combine(modCommon.GetPath(), "Browser.txt")))
             {
@@ -104,7 +108,7 @@ namespace SKYNET
             {
                 if (control is GameBox && ((GameBox)control).Handle.ToInt32() == MenuBox.Handle.ToInt32())
                 {
-                    ((GameBox)control).SetGame(e);
+                    ((GameBox)control).Game = e;
                     return;
                 }
             }
@@ -115,10 +119,27 @@ namespace SKYNET
 
         }
 
-        private void GameManager_OnGameLaunched(object sender, GameManager.GameLaunchedEventArgs e)
+        private void GameManager_OnGameOpened(object sender, GameManager.GameLaunchedEventArgs e)
         {
             var game = new RunningGame(e.ProcessID, e.Game, e.GameClientID);
             RunningGames.Add(game);
+            NetworkManager.SendGameOpened(e.Game);
+        }
+
+        private void GameManager_OnUserGameOpened(object sender, NET_GameOpened e)
+        {
+            for (int i = 0; i < PN_UserContainer.Controls.Count; i++)
+            {
+                var control = PN_UserContainer.Controls[i];
+                if (control is SKYNET_UserControl)
+                {
+                    var User = (SKYNET_UserControl)control;
+                    if (User.SteamPlayer.AccountID == e.AccountID)
+                    {
+                        new frmPlayerNotify(e, User).ShowDialog();
+                    }
+                }
+            }
         }
 
         private void GameManager_OnGameClosed(object sender, string gameClientID)
@@ -135,14 +156,34 @@ namespace SKYNET
 
         private void UserManager_OnUserAdded(object sender, SteamPlayer user)
         {
-            var control = new SKYNET_UserControl();
-            control.SteamPlayer = user;
-            control.Dock = DockStyle.Top;
-
-            modCommon.InvokeAction(PN_UserContainer, delegate
+            try
             {
-                PN_UserContainer.Controls.Add(control);
-            });
+                for (int i = 0; i < PN_UserContainer.Controls.Count; i++)
+                {
+                    var control = PN_UserContainer.Controls[i];
+                    if (control is SKYNET_UserControl)
+                    {
+                        var User = (SKYNET_UserControl)control;
+                        if (User.SteamPlayer.AccountID == user.AccountID)
+                        {
+                            return;
+                        }
+                    }
+                }
+
+                var userControl = new SKYNET_UserControl();
+                userControl.SteamPlayer = user;
+                userControl.Dock = DockStyle.Top;
+
+                modCommon.InvokeAction(PN_UserContainer, delegate
+                {
+                    PN_UserContainer.Controls.Add(userControl);
+                });
+            }
+            catch 
+            {
+
+            }
         }
 
         private void UserManager_OnUserUpdated(object sender, SteamPlayer user)
@@ -165,13 +206,20 @@ namespace SKYNET
                     var User = (SKYNET_UserControl)control;
                     if (User.SteamPlayer.AccountID == e.AccountID)
                     {
-                        User.PB_Avatar.Image = e.Avatar;
+                        User.Avatar = e.Avatar;
                     }
                 }
             }
         }
 
         #endregion
+
+        private void UserManager_OnGameLaunch(object sender, string Guid)
+        {
+            var Game = GameManager.GetGame(Guid);
+            if (Game == null) return;
+            OpenGame(Game);
+        }
 
         private void Log_OnMessage(object sender, LogEventArgs Event)
         {
@@ -195,14 +243,14 @@ namespace SKYNET
         private void GameBox_DoubleClicked(object sender, GameBox e)
         {
             SelectBox(e);
-            OpenGame(e);
+            OpenGame(e.Game);
         }
 
         private void SelectBox(GameBox e)
         {
             SelectedBox = e;
 
-            if (RunningGames.Find(x => x.Game == e.GetGame()) != null)
+            if (RunningGames.Find(x => x.Game == e.Game) != null)
             {
                 BT_GameAction.Text = "CLOSE";
                 BT_GameAction.BackColor = Color.Red;
@@ -213,10 +261,19 @@ namespace SKYNET
                 BT_GameAction.BackColor = Color.FromArgb(46, 186, 65);
             }
 
-            PB_Logo.Image = e.Image;
-            LB_GameTittle.Text = e.GameName;
+            LB_GameTittle.Text = e.Game.Name;
 
-            string imagePath = Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache", e.AppId + "_library_hero.jpg");
+            try
+            {
+                var imageBytes = Convert.FromBase64String(e.Game.AvatarHex);
+                Bitmap Avatar = (Bitmap)ImageHelper.ImageFromBytes(imageBytes);
+                PB_Logo.Image = Avatar;
+            }
+            catch 
+            {
+            }
+
+            string imagePath = Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache", e.Game.AppID + "_library_hero.jpg");
             if (File.Exists(imagePath))
             {
                 PB_Banner.Image = Image.FromFile(imagePath);
@@ -242,7 +299,7 @@ namespace SKYNET
         private void AddBoxGame(Game game)
         {
             var module = new GameBox();
-            module.SetGame(game);
+            module.Game = game;
             module.Dock = DockStyle.Top;
             module.BoxClicked += GameBox_Clicked;
             module.BoxDoubleClicked += GameBox_DoubleClicked;
@@ -254,10 +311,8 @@ namespace SKYNET
         }
 
 
-        private void OpenGame(GameBox e)
+        private void OpenGame(Game game)
         {
-            Game game = e.GetGame();
-
             if (game.LaunchWithoutEmu)
             {
                 Process.Start(game.ExecutablePath, game.Parameters);
@@ -266,7 +321,7 @@ namespace SKYNET
 
             Write("SteamClient", "Opening " + game.Name);
 
-            DllInjector.Inject(game.ExecutablePath, game.Parameters, game.AppID, game.CSteamworks);
+            DllInjector.Inject(game);
 
             BT_GameAction.Text = "CLOSE";
             BT_GameAction.BackColor = Color.Red;
@@ -326,7 +381,7 @@ namespace SKYNET
             {
                 if (control is GameBox)
                 {
-                    Games.Add(((GameBox)control).GetGame());
+                    Games.Add(((GameBox)control).Game);
                 }
             }
 
@@ -403,11 +458,11 @@ namespace SKYNET
         {
             if (BT_GameAction.Text == "PLAY")
             {
-                OpenGame(SelectedBox);
+                OpenGame(SelectedBox.Game);
             }
             else
             {
-                var Game = RunningGames.Find(x => x.Game == SelectedBox.GetGame());
+                var Game = RunningGames.Find(x => x.Game == SelectedBox.Game);
                 if (Game != null)
                 {
                     try
@@ -451,24 +506,23 @@ namespace SKYNET
 
         private void OpenMenuItem_Click(object sender, EventArgs e)
         {
-            OpenGame(MenuBox);
+            OpenGame(MenuBox.Game);
         }
 
         private void OpenWithoutEmuMenuItem_Click(object sender, EventArgs e)
         {
-            var game = MenuBox.GetGame();
+            var game = MenuBox.Game;
             Process.Start(game.ExecutablePath, game.Parameters);
-            return;
         }
 
         private void OpenFileLocationMenuItem_Click(object sender, EventArgs e)
         {
-            modCommon.OpenFolderAndSelectFile(MenuBox.GetGame().ExecutablePath);
+            modCommon.OpenFolderAndSelectFile(MenuBox.Game.ExecutablePath);
         }
 
         private void ConfigureMenuItem_Click(object sender, EventArgs e)
         {
-            new frmGameManager(MenuBox).ShowDialog();
+            new frmGameManager(MenuBox.Game).ShowDialog();
         }
 
         private void RemoveMenuItem_Click(object sender, EventArgs e)
@@ -481,7 +535,7 @@ namespace SKYNET
                     object control = PN_GameContainer.Controls[i];
                     if (control is GameBox && ((GameBox)control).Handle == MenuBox.Handle)
                     {
-                        Game game = ((GameBox)control).GetGame();
+                        Game game = ((GameBox)control).Game;
                         GameManager.Remove(game.AppID);
                         PN_GameContainer.Controls.RemoveAt(i);
                     }
@@ -496,7 +550,7 @@ namespace SKYNET
 
         private void GameCacheMenuItem_Click(object sender, EventArgs e)
         {
-            if (MenuBox.AppId == 0)
+            if (MenuBox.Game.AppID == 0)
             {
                 modCommon.Show("Please configure a valid AppId for this game.");
                 return;

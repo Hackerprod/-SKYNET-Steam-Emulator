@@ -6,6 +6,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Windows.Forms;
+using TsudaKageyu;
 
 namespace SKYNET.Helper
 {
@@ -33,6 +34,56 @@ namespace SKYNET.Helper
                 Exception ex2 = ex;
                 return result;
             }
+        }
+
+        public static Image IconFromFile(string filePath)
+        {
+            Image image = null;
+
+            try
+            {
+                var extractor = new IconExtractor(filePath);
+                var icon = extractor.GetIcon(0);
+
+                Icon[] splitIcons = IconUtil.Split(icon);
+
+                Icon selectedIcon = null;
+
+                foreach (var item in splitIcons)
+                {
+                    if (selectedIcon == null)
+                    {
+                        selectedIcon = item;
+                    }
+                    else
+                    {
+                        if (IconUtil.GetBitCount(item) > IconUtil.GetBitCount(selectedIcon))
+                        {
+                            selectedIcon = item;
+                        }
+                        else if (IconUtil.GetBitCount(item) == IconUtil.GetBitCount(selectedIcon) && item.Width > selectedIcon.Width)
+                        {
+                            selectedIcon = item;
+                        }
+                    }
+                }
+                return selectedIcon.ToBitmap();
+            }
+            catch
+            {
+
+            }
+
+            try
+            {
+                image = Icon.ExtractAssociatedIcon(filePath)?.ToBitmap();
+            }
+            catch
+            {
+                image = new Icon(SystemIcons.Application, 256, 256).ToBitmap();
+            }
+
+            return image;
         }
 
         public static Bitmap Resize(Bitmap image, int width, int height)

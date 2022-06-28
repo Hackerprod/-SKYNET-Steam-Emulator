@@ -67,7 +67,7 @@ namespace SKYNET
             this.PB_Banner = new System.Windows.Forms.PictureBox();
             this.PB_Logo = new System.Windows.Forms.PictureBox();
             this.LB_GameTittle = new SKYNET.GUI.Controls.SKYNET_Label();
-            this.shadowBox1 = new System.Windows.Forms.Panel();
+            this.ShadowBox = new System.Windows.Forms.Panel();
             this.BT_GameAction = new SKYNET_Button();
             this.PN_BodyContainer = new System.Windows.Forms.Panel();
             this.WebLogger1 = new SKYNET.Controls.SKYNET_WebLogger();
@@ -95,7 +95,7 @@ namespace SKYNET
             ((System.ComponentModel.ISupportInitialize)(this.PB_Banner)).BeginInit();
             this.PB_Banner.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Logo)).BeginInit();
-            this.shadowBox1.SuspendLayout();
+            this.ShadowBox.SuspendLayout();
             this.PN_BodyContainer.SuspendLayout();
             this.CM_MenuGame.SuspendLayout();
             this.SuspendLayout();
@@ -355,7 +355,7 @@ namespace SKYNET
             // 
             // PB_Avatar
             // 
-            this.PB_Avatar.Image = null;
+            this.PB_Avatar.Image = global::SKYNET.Properties.Resources.profile_picture;
             this.PB_Avatar.Location = new System.Drawing.Point(11, 2);
             this.PB_Avatar.Name = "PB_Avatar";
             this.PB_Avatar.Size = new System.Drawing.Size(73, 73);
@@ -505,7 +505,7 @@ namespace SKYNET
             // 
             this.PB_Banner.Controls.Add(this.PB_Logo);
             this.PB_Banner.Controls.Add(this.LB_GameTittle);
-            this.PB_Banner.Controls.Add(this.shadowBox1);
+            this.PB_Banner.Controls.Add(this.ShadowBox);
             this.PB_Banner.Dock = System.Windows.Forms.DockStyle.Top;
             this.PB_Banner.Image = global::SKYNET.Properties.Resources.Header_1;
             this.PB_Banner.Location = new System.Drawing.Point(249, 66);
@@ -541,13 +541,13 @@ namespace SKYNET
             // 
             // shadowBox1
             // 
-            this.shadowBox1.BackColor = System.Drawing.Color.Transparent;
-            this.shadowBox1.Controls.Add(this.BT_GameAction);
-            this.shadowBox1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.shadowBox1.Location = new System.Drawing.Point(0, 219);
-            this.shadowBox1.Name = "shadowBox1";
-            this.shadowBox1.Size = new System.Drawing.Size(893, 50);
-            this.shadowBox1.TabIndex = 10;
+            this.ShadowBox.BackColor = System.Drawing.Color.Transparent;
+            this.ShadowBox.Controls.Add(this.BT_GameAction);
+            this.ShadowBox.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.ShadowBox.Location = new System.Drawing.Point(0, 219);
+            this.ShadowBox.Name = "shadowBox1";
+            this.ShadowBox.Size = new System.Drawing.Size(893, 50);
+            this.ShadowBox.TabIndex = 10;
             // 
             // BT_GameAction
             // 
@@ -718,7 +718,7 @@ namespace SKYNET
             ((System.ComponentModel.ISupportInitialize)(this.PB_Banner)).EndInit();
             this.PB_Banner.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.PB_Logo)).EndInit();
-            this.shadowBox1.ResumeLayout(false);
+            this.ShadowBox.ResumeLayout(false);
             this.PN_BodyContainer.ResumeLayout(false);
             this.CM_MenuGame.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -743,7 +743,7 @@ namespace SKYNET
         private System.Windows.Forms.PictureBox PB_Banner;
         private System.Windows.Forms.PictureBox PB_Logo;
         private System.Windows.Forms.Label LB_Status;
-        private Panel shadowBox1;
+        private Panel ShadowBox;
         private SKYNET_Button BT_GameAction;
         private Label label6;
         private Panel PN_BodyContainer;

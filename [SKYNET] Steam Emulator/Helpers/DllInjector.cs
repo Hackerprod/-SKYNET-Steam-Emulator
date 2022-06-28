@@ -7,7 +7,7 @@ namespace SKYNET
 {
     public class DllInjector
     {
-        public static Process Inject(string executablePath, string parameters, uint appID, bool cSteamworks)
+        public static Process Inject(Game game)
         {
             string x86Dll = Path.Combine(modCommon.GetPath(), "x86", "steam_api.dll");
             string x64Dll = Path.Combine(modCommon.GetPath(), "x64", "steam_api64.dll");
@@ -19,7 +19,7 @@ namespace SKYNET
 
             string pName = "";
             var pInfo = new ProcessStartInfo();
-            pInfo.FileName = executablePath;
+            pInfo.FileName = game.ExecutablePath;
             pInfo.CreateNoWindow = true;
             pInfo.RedirectStandardOutput = false;
             pInfo.UseShellExecute = false;
@@ -31,18 +31,18 @@ namespace SKYNET
             tProcess.Kill();
 
             string DllPath = "";
-            if (cSteamworks)
+            if (game.CSteamworks)
                 DllPath = Is64Bit ? x64CSteamworksDll : x86CSteamworksDll;
             else
                 DllPath = Is64Bit ? x64Dll : x86Dll;
 
             string modifiedConfig = InjectConfig;
 
-            modifiedConfig = modifiedConfig.Replace("$ExecutablePath$", executablePath);
-            modifiedConfig = modifiedConfig.Replace("$Parameters$", parameters);
+            modifiedConfig = modifiedConfig.Replace("$ExecutablePath$", game.ExecutablePath);
+            modifiedConfig = modifiedConfig.Replace("$Parameters$", game.Parameters);
             modifiedConfig = modifiedConfig.Replace("$Dll$", DllPath);
 
-            string tempConfig = Path.Combine(modCommon.GetPath(), "Data", "Injector", $"{appID}.xpr");
+            string tempConfig = Path.Combine(modCommon.GetPath(), "Data", "Injector", $"{game.AppID}.xpr");
             modCommon.EnsureDirectoryExists(tempConfig, true);
             File.WriteAllText(tempConfig, modifiedConfig);
 

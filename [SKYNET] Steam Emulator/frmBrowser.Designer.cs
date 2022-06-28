@@ -29,12 +29,12 @@
         private void InitializeComponent()
         {
             this.panel1 = new System.Windows.Forms.Panel();
+            this.TB_Url = new System.Windows.Forms.TextBox();
+            this.BT_Go = new System.Windows.Forms.Button();
+            this.panel2 = new System.Windows.Forms.Panel();
             this.TB_Message = new System.Windows.Forms.TextBox();
             this.BT_JSFunction = new System.Windows.Forms.Button();
             this.PN_WebContainer = new System.Windows.Forms.Panel();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.TB_Url = new System.Windows.Forms.TextBox();
-            this.BT_Go = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.SuspendLayout();
@@ -50,6 +50,34 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(800, 50);
             this.panel1.TabIndex = 0;
+            this.panel1.Visible = false;
+            // 
+            // TB_Url
+            // 
+            this.TB_Url.Location = new System.Drawing.Point(12, 16);
+            this.TB_Url.Name = "TB_Url";
+            this.TB_Url.Size = new System.Drawing.Size(453, 20);
+            this.TB_Url.TabIndex = 2;
+            // 
+            // BT_Go
+            // 
+            this.BT_Go.Location = new System.Drawing.Point(471, 14);
+            this.BT_Go.Name = "BT_Go";
+            this.BT_Go.Size = new System.Drawing.Size(53, 23);
+            this.BT_Go.TabIndex = 3;
+            this.BT_Go.Text = "GO";
+            this.BT_Go.UseVisualStyleBackColor = true;
+            this.BT_Go.Click += new System.EventHandler(this.BT_Go_Click);
+            // 
+            // panel2
+            // 
+            this.panel2.BackColor = System.Drawing.SystemColors.Control;
+            this.panel2.Controls.Add(this.TB_Message);
+            this.panel2.Controls.Add(this.BT_JSFunction);
+            this.panel2.Location = new System.Drawing.Point(530, 5);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(262, 41);
+            this.panel2.TabIndex = 1;
             // 
             // TB_Message
             // 
@@ -77,33 +105,6 @@
             this.PN_WebContainer.Name = "PN_WebContainer";
             this.PN_WebContainer.Size = new System.Drawing.Size(800, 400);
             this.PN_WebContainer.TabIndex = 1;
-            // 
-            // panel2
-            // 
-            this.panel2.BackColor = System.Drawing.SystemColors.Control;
-            this.panel2.Controls.Add(this.TB_Message);
-            this.panel2.Controls.Add(this.BT_JSFunction);
-            this.panel2.Location = new System.Drawing.Point(530, 5);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(262, 41);
-            this.panel2.TabIndex = 1;
-            // 
-            // TB_Url
-            // 
-            this.TB_Url.Location = new System.Drawing.Point(12, 16);
-            this.TB_Url.Name = "TB_Url";
-            this.TB_Url.Size = new System.Drawing.Size(453, 20);
-            this.TB_Url.TabIndex = 2;
-            // 
-            // BT_Go
-            // 
-            this.BT_Go.Location = new System.Drawing.Point(471, 14);
-            this.BT_Go.Name = "BT_Go";
-            this.BT_Go.Size = new System.Drawing.Size(53, 23);
-            this.BT_Go.TabIndex = 3;
-            this.BT_Go.Text = "GO";
-            this.BT_Go.UseVisualStyleBackColor = true;
-            this.BT_Go.Click += new System.EventHandler(this.BT_Go_Click);
             // 
             // frmBrowser
             // 

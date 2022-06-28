@@ -124,6 +124,12 @@
     <Compile Include="GUI\frmLogin.Designer.cs">
       <DependentUpon>frmLogin.cs</DependentUpon>
     </Compile>
+    <Compile Include="GUI\frmPlayerNotify.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\frmPlayerNotify.designer.cs">
+      <DependentUpon>frmPlayerNotify.cs</DependentUpon>
+    </Compile>
     <Compile Include="GUI\frmUpdateProfile.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -244,7 +250,6 @@
     </Compile>
     <Compile Include="Types\ClientSDK.cs" />
     <Compile Include="Types\RunningGame.cs" />
-    <Compile Include="WebManager.cs" />
     <EmbeddedResource Include="frmBrowser.resx">
       <DependentUpon>frmBrowser.cs</DependentUpon>
     </EmbeddedResource>
@@ -295,6 +300,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\frmMessage.resx">
       <DependentUpon>frmMessage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\frmPlayerNotify.resx">
+      <DependentUpon>frmPlayerNotify.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\frmUpdateProfile.resx">
       <DependentUpon>frmUpdateProfile.cs</DependentUpon>

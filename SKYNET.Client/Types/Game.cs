@@ -3,10 +3,11 @@ using System.Collections.Generic;
 
 namespace SKYNET
 {
-    [Serializable]
-    public class Game : MarshalByRefObject
+    public class Game 
     {
+        public string Guid { get; set; }
         public string Name { get; set; }
+        public string AvatarHex { get; set; }
         public string ExecutablePath { get; set; }
         public uint AppID { get; set; }
         public string Parameters { get; set; }

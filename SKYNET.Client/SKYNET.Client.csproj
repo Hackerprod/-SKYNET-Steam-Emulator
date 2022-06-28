@@ -56,11 +56,13 @@
     <Compile Include="Managers\NetworkManager.cs" />
     <Compile Include="Managers\StatsManager.cs" />
     <Compile Include="Managers\UserManager.cs" />
+    <Compile Include="Managers\WebManager.cs" />
     <Compile Include="Network\WebServer.cs" />
     <Compile Include="Network\NET_Messages.cs" />
     <Compile Include="Network\P2PNetworking.cs" />
     <Compile Include="Network\TCPClient.cs" />
     <Compile Include="Network\TCPServer.cs" />
+    <Compile Include="Network\WebSocketProcessor.cs" />
     <Compile Include="Plugin\IGameCoordinatorPlugin.cs" />
     <Compile Include="Helpers\Settings.cs" />
     <Compile Include="SteamClient.cs" />
@@ -79,6 +81,7 @@
     <Compile Include="Types\Leaderboard.cs" />
     <Compile Include="Types\PlayerStat.cs" />
     <Compile Include="Types\SteamLobby.cs" />
+    <Compile Include="Types\WebMessages.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

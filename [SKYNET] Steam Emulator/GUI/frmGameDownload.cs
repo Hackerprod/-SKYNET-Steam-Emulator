@@ -1,4 +1,5 @@
-﻿using SKYNET.Managers;
+﻿using SKYNET.Helper;
+using SKYNET.Managers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -29,9 +30,19 @@ namespace SKYNET.GUI
             }
 
             WebClient = new WebClient();
-            PB_Avatar.Image = Box.Image;
-            AppId = Box.AppId;
-            LB_Name.Text = Box.GetGame().Name;
+            AppId = Box.Game.AppID;
+            LB_Name.Text = Box.Game.Name;
+
+            try
+            {
+                var imageBytes = Convert.FromBase64String(Box.Game.AvatarHex);
+                Bitmap Avatar = (Bitmap)ImageHelper.ImageFromBytes(imageBytes);
+                PB_Avatar.Image = Avatar;
+            }
+            catch
+            {
+            }
+
 
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache"));
 

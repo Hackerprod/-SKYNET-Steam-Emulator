@@ -110,6 +110,13 @@ namespace SKYNET.Network.Packets
         public uint Port { get; set; }
     }
 
+    public class NET_GameOpened : NET_Base
+    {
+        public uint AppID { get; set; }
+        public uint AccountID { get; set; }
+        public string Name { get; set; }
+    }
+
     public enum MessageType : int
     {
         NET_Announce,
@@ -129,6 +136,6 @@ namespace SKYNET.Network.Packets
         NET_LobbyLeave,
         NET_LobbyRemove,
         NET_LobbyGameserver,
-
+        NET_GameOpened,
     }
 }

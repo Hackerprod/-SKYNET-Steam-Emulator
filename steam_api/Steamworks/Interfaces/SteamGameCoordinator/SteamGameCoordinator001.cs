@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using uint32 = System.UInt32;
 
 namespace SKYNET.Steamworks.Interfaces
@@ -11,14 +12,14 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamGameCoordinator.SendMessage(unMsgType, pubData, cubData);
         }
 
-        public bool IsMessageAvailable(ref uint32 pcubMsgSize)
+        public unsafe bool IsMessageAvailable(uint* pcubMsgSize)
         {
-            return SteamEmulator.SteamGameCoordinator.IsMessageAvailable(ref pcubMsgSize);
+            return SteamEmulator.SteamGameCoordinator.IsMessageAvailable(pcubMsgSize);
         }
 
-        public EGCResults RetrieveMessage(uint32 punMsgType, IntPtr pubDest, uint32 cubDest, ref uint32 pcubMsgSize)
+        public unsafe int RetrieveMessage(uint* punMsgType, IntPtr pubDest, uint32 cubDest, uint* pcubMsgSize)
         {
-            return SteamEmulator.SteamGameCoordinator.RetrieveMessage(ref punMsgType, pubDest, cubDest, ref pcubMsgSize);
+            return SteamEmulator.SteamGameCoordinator.RetrieveMessage(punMsgType, pubDest, cubDest, pcubMsgSize);
         }
     }
 }

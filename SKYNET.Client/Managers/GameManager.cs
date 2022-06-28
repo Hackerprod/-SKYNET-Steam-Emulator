@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
+using SKYNET.Network.Packets;
 
 namespace SKYNET.Managers
 {
@@ -14,6 +15,8 @@ namespace SKYNET.Managers
         public static event EventHandler<Game> OnGameUpdated;
         public static event EventHandler<Game> OnGameRemoved;
         public static EventHandler<GameLaunchedEventArgs> OnGameLaunched;
+        public static event EventHandler<NET_GameOpened> OnUserGameOpened;
+
         public static EventHandler<string> OnGameClosed;
         private static List<Game> Games;
 
@@ -47,9 +50,14 @@ namespace SKYNET.Managers
 
         }
 
-        internal static Game GetGame(uint appID)
+        public static Game GetGame(uint appID)
         {
             return Games.Find(g => g.AppID == appID);
+        }
+
+        public static Game GetGame(string Guid)
+        {
+            return Games.Find(g => g.Guid == Guid);
         }
 
         public static void AddGame(Game game)
@@ -68,9 +76,24 @@ namespace SKYNET.Managers
             }
         }
 
+        public static void Remove(string Guid)
+        {
+            var Game = Games.Find(g => g.Guid == Guid);
+            if (Game != null)
+            {
+                OnGameRemoved?.Invoke(null, Game);
+                Games.RemoveAll(g => g.Guid == Guid);
+            }
+        }
+
+        public static List<Game> GetGames()
+        {
+            return Games;
+        }
+
         public static void Update(Game game)
         {
-            var Game = Games.Find(g => g.AppID == game.AppID);
+            var Game = Games.Find(g => g.Guid == game.Guid);
             if (Game != null)
             {
                 Game.AppID = game.AppID;
@@ -91,6 +114,11 @@ namespace SKYNET.Managers
         public static void InvokeGameLaunched(Game game, int processID, string gameClientID)
         {
             OnGameLaunched?.Invoke(null, new GameLaunchedEventArgs(processID, game, gameClientID));
+        }
+
+        public static void InvokeUserGameOpened(NET_GameOpened gameOpened)
+        {
+            OnUserGameOpened?.Invoke(null, gameOpened);
         }
 
         public static void InvokeGameClosed(string gameClientID)

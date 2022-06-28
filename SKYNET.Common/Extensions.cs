@@ -42,10 +42,22 @@ namespace SKYNET.Common
             return new JavaScriptSerializer().Deserialize<T>(@string);
         }
 
+        public static T Deserialize<T>(this byte[] bytes)
+        {
+            string @string = Encoding.Default.GetString(bytes);
+            return new JavaScriptSerializer().Deserialize<T>(@string);
+        }
+
         public static string ToJson(this object obj)
         {
             return new JavaScriptSerializer().Serialize(obj);
         }
+
+        public static string Serialize(this object obj)
+        {
+            return new JavaScriptSerializer().Serialize(obj);
+        }
+
 
         public static uint Swap(this uint address)
         {

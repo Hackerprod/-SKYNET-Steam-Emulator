@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using SKYNET.GUI;
+using SKYNET.Helper;
 using SKYNET.Managers;
 using TsudaKageyu;
 
@@ -12,7 +13,7 @@ namespace SKYNET
 {
     public partial class frmGameManager : frmBase
     {
-        private int boxHandle;
+        private Game Game;
         public frmGameManager(string filePath)
         {
             InitializeComponent();
@@ -30,7 +31,8 @@ namespace SKYNET
             LB_Name.Text = FileName;
             TB_ExecutablePath.Text = filePath;
 
-            LoadLogo(filePath);
+            var bitmap = (Bitmap)ImageHelper.IconFromFile(filePath);
+            PB_Avatar.Image = bitmap;
 
             TB_AppId.Text = "0";
             if (File.Exists(Path.Combine(PathDirectory, "steam_appid.txt")))
@@ -39,13 +41,13 @@ namespace SKYNET
             }
         }
 
-        public frmGameManager(GameBox game)
+        public frmGameManager(Game game)
         {
             InitializeComponent();
             CheckForIllegalCrossThreadCalls = false;
             SetMouseMove(PN_Top);
 
-            var Game = game.GetGame();
+            Game = game;
             TB_Name.Text = Game.Name;
             LB_Name.Text = Game.Name;
             TB_ExecutablePath.Text = Game.ExecutablePath;
@@ -57,74 +59,32 @@ namespace SKYNET
             CH_RunCallbacks.Checked = Game.RunCallbacks;
             CH_ISteamHTTP.Checked = Game.ISteamHTTP;
             CH_CSteamworks.Checked = Game.CSteamworks;
-
-            LoadLogo(Game.ExecutablePath);
             BT_AddGame.Text = "Update";
-
-            boxHandle = game.Handle.ToInt32();
-        }
-
-
-        private void LoadLogo(string filePath)
-        {
-            PB_Avatar.Image = (Bitmap)IconFromFile(filePath);
-        }
-
-        public static Image IconFromFile(string filePath)
-        {
-            Image image = null;
 
             try
             {
-                var extractor = new IconExtractor(filePath);
-                var icon = extractor.GetIcon(0);
-
-                Icon[] splitIcons = IconUtil.Split(icon);
-
-                Icon selectedIcon = null;
-
-                foreach (var item in splitIcons)
-                {
-                    if (selectedIcon == null)
-                    {
-                        selectedIcon = item;
-                    }
-                    else
-                    {
-                        if (IconUtil.GetBitCount(item) > IconUtil.GetBitCount(selectedIcon))
-                        {
-                            selectedIcon = item;
-                        }
-                        else if (IconUtil.GetBitCount(item) == IconUtil.GetBitCount(selectedIcon) && item.Width > selectedIcon.Width)
-                        {
-                            selectedIcon = item;
-                        }
-                    }
-                }
-                return selectedIcon.ToBitmap();
+                var imageBytes = Convert.FromBase64String(Game.AvatarHex);
+                Bitmap Avatar = (Bitmap)ImageHelper.ImageFromBytes(imageBytes);
+                PB_Avatar.Image = Avatar; 
             }
             catch (Exception)
             {
-
+                if (File.Exists(Game.ExecutablePath))
+                {
+                    var bitmap = (Bitmap)ImageHelper.IconFromFile(Game.ExecutablePath);
+                    var imageBytes = ImageHelper.ImageToBytes(bitmap);
+                    var AvatarHex = Convert.ToBase64String(imageBytes);
+                    Game.AvatarHex = AvatarHex;
+                    PB_Avatar.Image = bitmap;
+                }
             }
-
-            try
-            {
-                image = Icon.ExtractAssociatedIcon(filePath)?.ToBitmap();
-            }
-            catch
-            {
-                image = new Icon(SystemIcons.Application, 256, 256).ToBitmap();
-            }
-
-            return image;
         }
-
 
         private void Close_Clicked(object sender, EventArgs e)
         {
             Close();
         }
+
         protected override void OnActivated(EventArgs e)
         {
             base.OnActivated(e);
@@ -147,34 +107,33 @@ namespace SKYNET
                 return;
             }
 
-            var Game = new Game()
+            if (Game == null)
             {
-                Name = TB_Name.Text,
-                ExecutablePath = TB_ExecutablePath.Text,
-                Parameters = TB_Parameters.Text,
-                AppID = _AppId,
-                LaunchWithoutEmu = CH_WithoutEmu.Checked,
-                GameOverlay = CH_GameOverlay.Checked,
-                LogToFile = CH_LogToFile.Checked,
-                LogToConsole = CH_LogToConsole.Checked,
-                RunCallbacks = CH_RunCallbacks.Checked, 
-                ISteamHTTP = CH_ISteamHTTP.Checked,
-                CSteamworks = CH_CSteamworks.Checked
-            };
-
-            if (boxHandle != 0)
-            {
+                string AvatarHex = "";
                 try
                 {
-                    string appid_Path = Path.Combine(Path.GetDirectoryName(TB_ExecutablePath.Text), "steam_appid.txt");
-                    File.WriteAllText(appid_Path, TB_AppId.Text);
+                    var bitmap = (Bitmap)ImageHelper.IconFromFile(TB_ExecutablePath.Text);
+                    var imageBytes = ImageHelper.ImageToBytes(bitmap);
+                    AvatarHex = Convert.ToBase64String(imageBytes);
                 }
-                catch { }
-                GameManager.Update(Game);
-                Close();
-            }
-            else
-            {
+                catch  { }
+
+                Game = new Game()
+                {
+                    Guid = Guid.NewGuid().ToString(),
+                    Name = TB_Name.Text,
+                    ExecutablePath = TB_ExecutablePath.Text,
+                    Parameters = TB_Parameters.Text,
+                    AppID = _AppId,
+                    LaunchWithoutEmu = CH_WithoutEmu.Checked,
+                    GameOverlay = CH_GameOverlay.Checked,
+                    LogToFile = CH_LogToFile.Checked,
+                    LogToConsole = CH_LogToConsole.Checked,
+                    RunCallbacks = CH_RunCallbacks.Checked,
+                    ISteamHTTP = CH_ISteamHTTP.Checked,
+                    CSteamworks = CH_CSteamworks.Checked,
+                    AvatarHex = AvatarHex
+                };
                 try
                 {
                     string appid_Path = Path.Combine(Path.GetDirectoryName(TB_ExecutablePath.Text), "steam_appid.txt");
@@ -182,10 +141,32 @@ namespace SKYNET
                 }
                 catch { }
                 GameManager.AddGame(Game);
-                Close();
             }
+            else
+            {
+                Game.Name = TB_Name.Text;
+                Game.ExecutablePath = TB_ExecutablePath.Text;
+                Game.Parameters = TB_Parameters.Text;
+                Game.AppID = _AppId;
+                Game.LaunchWithoutEmu = CH_WithoutEmu.Checked;
+                Game.GameOverlay = CH_GameOverlay.Checked;
+                Game.LogToFile = CH_LogToFile.Checked;
+                Game.LogToConsole = CH_LogToConsole.Checked;
+                Game.RunCallbacks = CH_RunCallbacks.Checked;
+                Game.ISteamHTTP = CH_ISteamHTTP.Checked;
+                Game.CSteamworks = CH_CSteamworks.Checked;
+
+                try
+                {
+                    string appid_Path = Path.Combine(Path.GetDirectoryName(TB_ExecutablePath.Text), "steam_appid.txt");
+                    File.WriteAllText(appid_Path, TB_AppId.Text);
+                }
+                catch { }
+                GameManager.Update(Game);
+            }
+            Close();
         }
-        
+
         private void TB_Name_KeyUp(object sender, KeyEventArgs e)
         {
             LB_Name.Text = TB_Name.Text;

@@ -348,9 +348,10 @@ namespace SKYNET
             // 
             // PB_Avatar
             // 
-            this.PB_Avatar.Location = new System.Drawing.Point(66, 17);
+            this.PB_Avatar.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.PB_Avatar.Location = new System.Drawing.Point(66, 15);
             this.PB_Avatar.Name = "PB_Avatar";
-            this.PB_Avatar.Size = new System.Drawing.Size(60, 60);
+            this.PB_Avatar.Size = new System.Drawing.Size(65, 65);
             this.PB_Avatar.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.PB_Avatar.TabIndex = 11;
             this.PB_Avatar.TabStop = false;

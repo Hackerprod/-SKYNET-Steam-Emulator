@@ -84,6 +84,6 @@
         #endregion
 
         private System.Windows.Forms.PictureBox PB_Avatar;
-        private System.Windows.Forms.Label LB_Name;
+        public System.Windows.Forms.Label LB_Name;
     }
 }

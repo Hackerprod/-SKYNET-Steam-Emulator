@@ -16,7 +16,7 @@ using SKYNET.Steamworks.Implementation;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
+
 using AppID      = System.UInt32;
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;

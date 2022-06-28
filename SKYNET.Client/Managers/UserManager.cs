@@ -78,6 +78,8 @@ namespace SKYNET.Managers
                 else
                 {
                     user.PersonaName = personaName;
+                    user.IPAddress = IPAddress;
+                    user.GameID = appID;
                     OnUserUpdated?.Invoke(null, user);
                 }
             });

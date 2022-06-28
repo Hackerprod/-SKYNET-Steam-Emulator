@@ -7,15 +7,13 @@ using SKYNET.Network.Packets;
 using SKYNET.Steamworks;
 using SKYNET.Types;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
+using WebSocketSharp.Server;
 
 namespace SKYNET.Managers
 {
@@ -24,6 +22,8 @@ namespace SKYNET.Managers
         public static int Port = 28880;
         public static TCPServer TCPServer;
         public static WebServer WebServer;
+        public static WebSocketServer WebSocket;
+        public static WebSocketProcessor WebClient;
 
         public static void Initialize()
         {
@@ -38,6 +38,10 @@ namespace SKYNET.Managers
                 TCPServer.OnDataReceived += TCPServer_OnDataReceived;
                 TCPServer.OnConnected += TCPServer_OnConnected;
                 TCPServer.Start();
+
+                WebSocket = new WebSocketServer(8888);
+                WebSocket.AddWebSocketService<WebSocketProcessor>("/OnMessage");
+                WebSocket.Start();
             }
             else
             {
@@ -106,7 +110,9 @@ namespace SKYNET.Managers
                 case MessageType.NET_LobbyGameserver:
                     ProcessLobbyGameserver(message, socket);
                     break;
-
+                case MessageType.NET_GameOpened:
+                    ProcessGameOpened(message, socket);
+                    break;
                 default:
                     break;
             }
@@ -326,6 +332,27 @@ namespace SKYNET.Managers
         }
 
 
+        public static void SendGameOpened(Game game)
+        {
+            var GameOpened = new NET_GameOpened()
+            {
+                AccountID = SteamClient.AccountID,
+                AppID = game.AppID,  
+                Name = game.Name
+            };
+            var message = CreateNetworkMessage(GameOpened, MessageType.NET_GameOpened);
+            SendBroadcast(message);
+        }
+
+        private static void ProcessGameOpened(NetworkMessage message, Socket socket)
+        {
+            try
+            {
+                var GameOpened = message.ParsedBody.FromJson<NET_GameOpened>();
+                GameManager.InvokeUserGameOpened(GameOpened);
+            }
+            catch  { }
+        }
 
         #endregion
 

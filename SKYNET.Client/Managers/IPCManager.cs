@@ -24,7 +24,6 @@ namespace SKYNET.Managers
             server.ClientDisconnected += OnClientDisconnected;
             server.MessageReceived += OnMessageReceived;
             server.ExceptionOccurred += OnExceptionOccurred;
-
             server.StartAsync();
         }
 
@@ -35,7 +34,7 @@ namespace SKYNET.Managers
 
         private static void OnMessageReceived(object sender, ConnectionMessageEventArgs<IPCMessage> e)
         {
-            Log.Write("IPCManager", $"MessageReceived {(IPCMessageType)e.Message.MessageType}");
+            Log.Write("IPCManager", $"Received IPC message {(IPCMessageType)e.Message.MessageType}");
 
             switch ((IPCMessageType)e.Message.MessageType)
             {
@@ -318,7 +317,7 @@ namespace SKYNET.Managers
 
         private static void OnExceptionOccurred(object sender, ExceptionEventArgs e)
         {
-            Log.Write("IPCManager", "Exception Occurred!!!");
+            Log.Write("IPCManager", "Exception Occurred!!! " + e);
         }
 
         public static void AddOrUpdateUser(uint accountID, string personaName, uint appID, string iPAddress)
