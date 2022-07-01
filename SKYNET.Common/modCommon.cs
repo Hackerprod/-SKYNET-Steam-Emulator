@@ -47,6 +47,7 @@ public partial class modCommon
     public static bool Is64Bit => IntPtr.Size == 8;
 
     public static bool ShowShadow { get; set; }
+    public static int BrowserHandle { get; set; }
 
     public static void OpenFolderAndSelectFile(string filePath)
     {

@@ -37,7 +37,7 @@ namespace SKYNET.Common
             return Convert.FromBase64String(@string);
         }
 
-        public static T FromJson<T>(this string @string)
+        public static T Deserialize<T>(this string @string)
         {
             return new JavaScriptSerializer().Deserialize<T>(@string);
         }

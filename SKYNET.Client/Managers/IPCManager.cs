@@ -89,15 +89,64 @@ namespace SKYNET.Managers
                     break;
                 case IPCMessageType.IPC_GCMessageResponse:
                     break;
+                case IPCMessageType.IPC_SetAchievement:
+                    Process_SetAchievement(e.Message);
+                    break;
+                case IPCMessageType.IPC_SetLeaderboard:
+                    Process_SetLeaderboard(e.Message);
+                    break;
+                case IPCMessageType.IPC_SetPlayerStat:
+                    Process_SetPlayerStat(e.Message);
+                    break;
+                case IPCMessageType.IPC_UpdateAchievement:
+                    Process_UpdateAchievement(e.Message);
+                    break;
+                case IPCMessageType.IPC_ResetAllStats:
+                    Process_ResetAllStats(e.Message);
+                    break;
+                    
                 default:
                     break;
             }
         }
 
+        private static void Process_SetAchievement(IPCMessage message)
+        {
+            var Achievement = message.ParsedBody.Deserialize<IPC_SetAchievement>();
+            StatsManager.SetAchievement(Achievement.AppID, Achievement.Achievement);
+        }
+
+        private static void Process_SetLeaderboard(IPCMessage message)
+        {
+            var Leaderboard = message.ParsedBody.Deserialize<IPC_SetLeaderboard>();
+            StatsManager.SetLeaderboard(Leaderboard.AppID, Leaderboard.Leaderboard);
+        }
+
+        private static void Process_SetPlayerStat(IPCMessage message)
+        {
+            var PlayerStat = message.ParsedBody.Deserialize<IPC_SetPlayerStat>();
+            StatsManager.SetPlayerStat(PlayerStat.AppID, PlayerStat.PlayerStat);
+        }
+
+        private static void Process_UpdateAchievement(IPCMessage message)
+        {
+            var UpdateAchievement = message.ParsedBody.Deserialize<IPC_UpdateAchievement>();
+            StatsManager.UpdateAchievement(UpdateAchievement.AppID, UpdateAchievement.Achievement);
+        }
+
+        private static void Process_ResetAllStats(IPCMessage message)
+        {
+            var ResetAllStats = message.ParsedBody.Deserialize<IPC_ResetAllStats>();
+            StatsManager.ResetAllStats(ResetAllStats.AppID, ResetAllStats.AchievementsToo);
+        }
+
         private static void Process_ClientHello(PipeConnection<IPCMessage> connection, IPCMessage message)
         {
-            var ClientHello = message.ParsedBody.FromJson<IPC_ClientHello>();
+            var ClientHello = message.ParsedBody.Deserialize<IPC_ClientHello>();
+            if (ClientHello == null) return;
 
+            var RemoteStoragePath = Path.Combine(modCommon.GetPath(), "Data", "Storage", "Remote");
+            modCommon.EnsureDirectoryExists(RemoteStoragePath);
             // TODO: Send Client welcome with user data
             var ClientWelcome = new IPC_ClientWelcome()
             {
@@ -109,6 +158,7 @@ namespace SKYNET.Managers
                 LogToConsole = false,
                 RunCallbacks = true,
                 ISteamHTTP = true,
+                RemoteStoragePath = RemoteStoragePath
             };
 
             if (ClientHello != null)
@@ -117,6 +167,8 @@ namespace SKYNET.Managers
                 var Game = GameManager.GetGame(AppID);
                 if (Game != null)
                 {
+                    Log.Write("IPCManager", $"Hello received from {Game.Name}");
+
                     GameManager.InvokeGameLaunched(Game, ClientHello.ProcessID, connection.PipeName);
 
                     ClientWelcome.LogToFile = Game.LogToFile;
@@ -138,6 +190,43 @@ namespace SKYNET.Managers
             };
             var AvatarMessage = CreateIPCMessage(AvatarResponse, IPCMessageType.IPC_AvatarResponse);
             connection.WriteAsync(AvatarMessage);
+
+            // TODO: Send user avatar
+            imageBytes = ImageHelper.ImageToBytes(SteamClient.DefaultAvatar);
+            hexAvatar = Convert.ToBase64String(imageBytes);
+            var DefaultAvatarResponse = new IPC_AvatarResponse()
+            {
+                AccountID = 0,
+                HexAvatar = hexAvatar
+            };
+            var DefaultAvatarMessage = CreateIPCMessage(DefaultAvatarResponse, IPCMessageType.IPC_AvatarResponse);
+            connection.WriteAsync(DefaultAvatarMessage);
+
+
+            // TODO: Send Achievements
+            var Achievements = new IPC_Achievements()
+            {
+                Achievements = StatsManager.GetAchievements(ClientHello.AppID)
+            };
+            var AchievementsMessage = CreateIPCMessage(Achievements, IPCMessageType.IPC_Achievements);
+            connection.WriteAsync(AchievementsMessage);
+
+            // TODO: Send Achievements
+            var Leaderboards = new IPC_Leaderboards()
+            {
+                Leaderboards = StatsManager.GetLeaderboards(ClientHello.AppID)
+            };
+            var LeaderboardsMessage = CreateIPCMessage(Leaderboards, IPCMessageType.IPC_Leaderboards);
+            connection.WriteAsync(LeaderboardsMessage);
+
+
+            // TODO: Send Achievements
+            var PlayerStats = new IPC_PlayerStats()
+            {
+                PlayerStats = StatsManager.GetPlayerStats(ClientHello.AppID)
+            };
+            var PlayerStatsMessage = CreateIPCMessage(Achievements, IPCMessageType.IPC_PlayerStats);
+            connection.WriteAsync(PlayerStatsMessage);
         }
 
         #region IPC_P2PPacket
@@ -157,7 +246,7 @@ namespace SKYNET.Managers
 
         private static void Process_P2PPacket(IPCMessage message)
         {
-            var P2PPacket = message.ParsedBody.FromJson<IPC_P2PPacket>();
+            var P2PPacket = message.ParsedBody.Deserialize<IPC_P2PPacket>();
             if (P2PPacket != null)
                 P2PNetworking.SendP2PTo(message.To, P2PPacket);
         }
@@ -165,21 +254,21 @@ namespace SKYNET.Managers
 
         private static void Process_LobbyGameserver(IPCMessage message)
         {
-            var LobbyGameserver = message.ParsedBody.FromJson<IPC_LobbyGameserver>();
+            var LobbyGameserver = message.ParsedBody.Deserialize<IPC_LobbyGameserver>();
             if (LobbyGameserver != null)
                 NetworkManager.SendLobbyGameserver(LobbyGameserver);
         }
 
         private static void Process_UserDataUpdated(IPCMessage message)
         {
-            var UserDataUpdated = message.ParsedBody.FromJson<IPC_UserDataUpdated>();
+            var UserDataUpdated = message.ParsedBody.Deserialize<IPC_UserDataUpdated>();
             if (UserDataUpdated != null)
                 NetworkManager.SendUserDataUpdated(UserDataUpdated);
         }
 
         private static void Process_AvatarRequest(PipeConnection<IPCMessage> connection, IPCMessage message)
         {
-            var AvatarRequest = message.ParsedBody.FromJson<IPC_AvatarRequest>();
+            var AvatarRequest = message.ParsedBody.Deserialize<IPC_AvatarRequest>();
             if (AvatarRequest != null)
             {
                 try
@@ -241,21 +330,21 @@ namespace SKYNET.Managers
 
         private static void Process_LobbyChatUpdate(IPCMessage message)
         {
-            var LobbyChatUpdate = message.ParsedBody.FromJson<IPC_LobbyChatUpdate>();
+            var LobbyChatUpdate = message.ParsedBody.Deserialize<IPC_LobbyChatUpdate>();
             if (LobbyChatUpdate != null)
                 NetworkManager.SendLobbyChatUpdate(message.To, LobbyChatUpdate);
         }
 
         private static void Process_LobbyListRequest(IPCMessage message)
         {
-            var LobbyListRequest = message.ParsedBody.FromJson<IPC_LobbyListRequest>();
+            var LobbyListRequest = message.ParsedBody.Deserialize<IPC_LobbyListRequest>();
             if (LobbyListRequest != null)
                 NetworkManager.SendLobbyListRequest(LobbyListRequest);
         }
 
         private static void Process_LobbyLeave(IPCMessage message)
         {
-            var LobbyRemove = message.ParsedBody.FromJson<IPC_LobbyRemove>();
+            var LobbyRemove = message.ParsedBody.Deserialize<IPC_LobbyRemove>();
             if (LobbyRemove != null)
             {
                 var lobby = LobbyManager.GetLobby(LobbyRemove.LobbyID);
@@ -268,7 +357,7 @@ namespace SKYNET.Managers
 
         private static void Process_LobbyRemove(IPCMessage message)
         {
-            var LobbyRemove = message.ParsedBody.FromJson<IPC_LobbyRemove>();
+            var LobbyRemove = message.ParsedBody.Deserialize<IPC_LobbyRemove>();
             if (LobbyRemove != null)
             {
                 var lobby = LobbyManager.GetLobby(LobbyRemove.LobbyID);
@@ -282,8 +371,8 @@ namespace SKYNET.Managers
 
         private static void Process_LobbyCreate(IPCMessage message)
         {
-            var LobbyCreate = message.ParsedBody.FromJson<IPC_LobbyCreate>();
-            SteamLobby lobby = LobbyCreate.SerializedLobby.FromJson<SteamLobby>();
+            var LobbyCreate = message.ParsedBody.Deserialize<IPC_LobbyCreate>();
+            SteamLobby lobby = LobbyCreate.SerializedLobby.Deserialize<SteamLobby>();
             if (lobby != null)
             {
                 LobbyManager.Create(lobby);
@@ -293,15 +382,15 @@ namespace SKYNET.Managers
 
         private static void Process_LobbyJoinRequest(IPCMessage message)
         {
-            var LobbyJoinRequest = message.ParsedBody.FromJson<IPC_LobbyJoinRequest>();
+            var LobbyJoinRequest = message.ParsedBody.Deserialize<IPC_LobbyJoinRequest>();
             NetworkManager.SendLobbyJoinRequest(LobbyJoinRequest);
         }
 
         private static void Process_LobbyDataUpdate(IPCMessage message)
         {
-            var LobbyDataUpdate = message.ParsedBody.FromJson<IPC_LobbyDataUpdate>();
+            var LobbyDataUpdate = message.ParsedBody.Deserialize<IPC_LobbyDataUpdate>();
             NetworkManager.SendLobbyDataUpdate(LobbyDataUpdate);
-            SteamLobby lobby = LobbyDataUpdate.SerializedLobby.FromJson<SteamLobby>();
+            SteamLobby lobby = LobbyDataUpdate.SerializedLobby.Deserialize<SteamLobby>();
             if (lobby != null)
             {
                 LobbyManager.Update(lobby);

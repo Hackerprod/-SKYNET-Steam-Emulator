@@ -1,7 +1,6 @@
 ﻿using SKYNET.Callback;
 using SKYNET.Helper;
 using SKYNET.Managers;
-using SKYNET.Types;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -23,7 +22,6 @@ namespace SKYNET.Steamworks.Implementation
         public static SteamRemoteStorage Instance;
 
         public string StoragePath;
-        public string AvatarCachePath;
         private List<string> StorageFiles;
         private ConcurrentDictionary<ulong, string> SharedFiles;
         private int LastFile;
@@ -49,10 +47,6 @@ namespace SKYNET.Steamworks.Implementation
             {
                 Write($"Error in StoragePath: {ex}");
             }
-
-            AvatarCachePath = Path.Combine(modCommon.GetPath(), "SKYNET", "AvatarCache");
-            modCommon.EnsureDirectoryExists(AvatarCachePath);
-
         }
 
         public bool FileWrite(string pchFile, IntPtr pvData, int cubData)
@@ -646,19 +640,6 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("EndFileWriteBatch");
             return true;
-        }
-
-        public void StoreAvatar(Bitmap avatar, uint accountID)
-        {
-            try
-            {
-                modCommon.EnsureDirectoryExists(AvatarCachePath);
-                avatar.Save(Path.Combine(AvatarCachePath, accountID + ".jpg"));
-            }
-            catch 
-            {
-
-            }
         }
     }
 }

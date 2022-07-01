@@ -26,6 +26,9 @@ namespace SKYNET.Types
         [INISection("User Info")]
         public string Language { get; set; }
 
+        [INISection("User Info")]
+        public bool AllowRemoteAccess { get; set; }
+
         [INISection("Network")]
         public IPAddress ServerIP { get; set; }
 

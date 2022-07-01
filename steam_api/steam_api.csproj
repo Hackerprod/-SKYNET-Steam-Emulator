@@ -87,36 +87,13 @@
     <Compile Include="Helpers\JSON\JSONParser.cs" />
     <Compile Include="Helpers\JSON\SimpleJSONDotNetTypes.cs" />
     <Compile Include="Helpers\Platform.cs" />
-    <Compile Include="Overlay\SteamUserControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Overlay\SteamUserControl.Designer.cs">
-      <DependentUpon>SteamUserControl.cs</DependentUpon>
-    </Compile>
     <Compile Include="Steamworks\Exported\CSteamworks.cs" />
-    <Compile Include="Overlay\frmOverlay.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Overlay\frmOverlay.Designer.cs">
-      <DependentUpon>frmOverlay.cs</DependentUpon>
-    </Compile>
     <Compile Include="Helpers\ImageHelper.cs" />
     <Compile Include="Helpers\MutexHelper.cs" />
     <Compile Include="Helpers\Settings.cs" />
     <Compile Include="Managers\IPCManager.cs" />
     <Compile Include="Helpers\StreamHelpers.cs" />
     <Compile Include="Managers\TicketManager.cs" />
-    <Compile Include="Overlay\ProfileControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Overlay\ProfileControl.Designer.cs">
-      <DependentUpon>ProfileControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Steamworks\Exported\SteamAPI_vr_IVR.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamGameServerStats.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamHTMLSurface.cs" />
@@ -277,21 +254,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Overlay\frmOverlay.resx">
-      <DependentUpon>frmOverlay.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Overlay\ProfileControl.resx">
-      <DependentUpon>ProfileControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Overlay\SteamUserControl.resx">
-      <DependentUpon>SteamUserControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Image.jpg" />

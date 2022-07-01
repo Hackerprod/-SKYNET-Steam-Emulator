@@ -36,6 +36,7 @@ namespace SKYNET
             this.BT_Minimize = new SKYNET.Controls.SKYNET_MinimizeBox();
             this.BT_Close = new SKYNET.Controls.SKYNET_CloseBox();
             this.panel3 = new System.Windows.Forms.Panel();
+            this.LB_Browser = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.LB_Status = new System.Windows.Forms.Label();
             this.panel4 = new System.Windows.Forms.Panel();
@@ -142,6 +143,7 @@ namespace SKYNET
             // panel3
             // 
             this.panel3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
+            this.panel3.Controls.Add(this.LB_Browser);
             this.panel3.Controls.Add(this.label6);
             this.panel3.Controls.Add(this.LB_Status);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -149,6 +151,20 @@ namespace SKYNET
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(893, 44);
             this.panel3.TabIndex = 7;
+            // 
+            // LB_Browser
+            // 
+            this.LB_Browser.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
+            this.LB_Browser.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.LB_Browser.Font = new System.Drawing.Font("Segoe UI Emoji", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LB_Browser.ForeColor = System.Drawing.Color.White;
+            this.LB_Browser.Location = new System.Drawing.Point(823, 23);
+            this.LB_Browser.Name = "LB_Browser";
+            this.LB_Browser.Size = new System.Drawing.Size(60, 15);
+            this.LB_Browser.TabIndex = 11;
+            this.LB_Browser.Text = "BROWSER";
+            this.LB_Browser.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.LB_Browser.Click += new System.EventHandler(this.LB_Browser_Click);
             // 
             // label6
             // 
@@ -539,13 +555,13 @@ namespace SKYNET
             this.LB_GameTittle.TabIndex = 11;
             this.LB_GameTittle.Text = "[SKYNET] Steam Emulator";
             // 
-            // shadowBox1
+            // ShadowBox
             // 
             this.ShadowBox.BackColor = System.Drawing.Color.Transparent;
             this.ShadowBox.Controls.Add(this.BT_GameAction);
             this.ShadowBox.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.ShadowBox.Location = new System.Drawing.Point(0, 219);
-            this.ShadowBox.Name = "shadowBox1";
+            this.ShadowBox.Name = "ShadowBox";
             this.ShadowBox.Size = new System.Drawing.Size(893, 50);
             this.ShadowBox.TabIndex = 10;
             // 
@@ -776,6 +792,7 @@ namespace SKYNET
         private ToolStripMenuItem GameCacheMenuItem;
         private Panel PN_UserContainer;
         private Controls.SKYNET_WebLogger WebLogger1;
+        private Label LB_Browser;
     }
 }
 

@@ -61,7 +61,7 @@ namespace SKYNET.Managers
 
         private static void TCPServer_OnDataReceived(object sender, NetPacket packet)
         {
-            NetworkMessage message = packet.Data.GetString().FromJson<NetworkMessage>();
+            NetworkMessage message = packet.Data.GetString().Deserialize<NetworkMessage>();
             ProcessMessage(message, packet.Sender.Socket);
         }
 
@@ -122,7 +122,7 @@ namespace SKYNET.Managers
         private static void ProcessLobbyLeave(NetworkMessage message, Socket socket)
         {
             // Steam lobby owner
-            var lobbyLeave = message.ParsedBody.FromJson<NET_LobbyLeave>();
+            var lobbyLeave = message.ParsedBody.Deserialize<NET_LobbyLeave>();
             if (lobbyLeave != null)
             {
                 if (LobbyManager.GetLobby(lobbyLeave.LobbyID, out var lobby))
@@ -138,7 +138,7 @@ namespace SKYNET.Managers
 
         private static void ProcessLobbyRemove(NetworkMessage message, Socket socket)
         {
-            var lobbyRemove = message.ParsedBody.FromJson<NET_LobbyRemove>();
+            var lobbyRemove = message.ParsedBody.Deserialize<NET_LobbyRemove>();
             if (lobbyRemove != null)
             {
                 IPCManager.SendLobbyRemove(lobbyRemove.LobbyID);
@@ -149,7 +149,7 @@ namespace SKYNET.Managers
 
         private static void ProcessLobbyDataUpdate(NetworkMessage message, Socket socket)
         {
-            var LobbyDataUpdate = message.ParsedBody.FromJson<NET_LobbyDataUpdate>();
+            var LobbyDataUpdate = message.ParsedBody.Deserialize<NET_LobbyDataUpdate>();
             if (LobbyDataUpdate != null)
             {
                 IPCManager.SendLobbyDataUpdate(LobbyDataUpdate);
@@ -160,7 +160,7 @@ namespace SKYNET.Managers
         {
             try
             {
-                var LobbyJoinRequest = message.ParsedBody.FromJson<NET_LobbyJoinRequest>();
+                var LobbyJoinRequest = message.ParsedBody.Deserialize<NET_LobbyJoinRequest>();
                 if (LobbyJoinRequest != null)
                 {
                     IPCManager.SendLobbyJoinRequest(LobbyJoinRequest);
@@ -178,7 +178,7 @@ namespace SKYNET.Managers
         {
             try
             {
-                var lobbyJoinResponse = message.ParsedBody.FromJson<NET_LobbyJoinResponse>();
+                var lobbyJoinResponse = message.ParsedBody.Deserialize<NET_LobbyJoinResponse>();
                 if (lobbyJoinResponse != null)
                 {
                     IPCManager.SendLobbyJoinResponse(lobbyJoinResponse);
@@ -196,7 +196,7 @@ namespace SKYNET.Managers
         {
             try
             {
-                var lobbyListRequest = message.ParsedBody.FromJson<NET_LobbyListRequest>();
+                var lobbyListRequest = message.ParsedBody.Deserialize<NET_LobbyListRequest>();
                 if (lobbyListRequest != null)
                 {
                     // TODO: Request lobby list to server
@@ -242,7 +242,7 @@ namespace SKYNET.Managers
         {
             try
             {
-                var lobbyListResponse = message.ParsedBody.FromJson<NET_LobbyListResponse>();
+                var lobbyListResponse = message.ParsedBody.Deserialize<NET_LobbyListResponse>();
                 var NET_LobbyListResponse = new NET_LobbyListResponse()
                 {
                     SerializedLobby = lobbyListResponse.SerializedLobby
@@ -268,11 +268,11 @@ namespace SKYNET.Managers
                 //    return;
                 //}
 
-                var announce = message.ParsedBody.FromJson<NET_Announce>();
+                var announce = message.ParsedBody.Deserialize<NET_Announce>();
                 string IPAddress = ((IPEndPoint)socket.RemoteEndPoint).Address.ToString();
 
                 // Add User to List on both cases (NET_Announce and NET_AnnounceResponse)
-                if (announce != null /*&& announce.AccountID != SteamClient.AccountID*/)
+                if (announce != null && announce.AccountID != SteamClient.AccountID)
                 {
                     UserManager.AddOrUpdateUser(announce.AccountID, announce.PersonaName, announce.AppID, IPAddress);
                     IPCManager.AddOrUpdateUser(announce.AccountID, announce.PersonaName, announce.AppID, IPAddress);
@@ -316,7 +316,7 @@ namespace SKYNET.Managers
         {
             try
             {
-                var StatusChanged = message.ParsedBody.FromJson<NET_UserDataUpdated>();
+                var StatusChanged = message.ParsedBody.Deserialize<NET_UserDataUpdated>();
                 if (StatusChanged != null)
                 {
                     if (StatusChanged.AccountID == (uint)SteamClient.AccountID) return;
@@ -348,7 +348,7 @@ namespace SKYNET.Managers
         {
             try
             {
-                var GameOpened = message.ParsedBody.FromJson<NET_GameOpened>();
+                var GameOpened = message.ParsedBody.Deserialize<NET_GameOpened>();
                 GameManager.InvokeUserGameOpened(GameOpened);
             }
             catch  { }
@@ -505,7 +505,7 @@ namespace SKYNET.Managers
         #region NET_LobbyChatUpdate
         private static void ProcessLobbyChatUpdate(NetworkMessage message, Socket socket)
         {
-            var lobbyChatUpdate = message.ParsedBody.FromJson<NET_LobbyChatUpdate>();
+            var lobbyChatUpdate = message.ParsedBody.Deserialize<NET_LobbyChatUpdate>();
             if (lobbyChatUpdate != null)
             {
                 IPCManager.SendLobbyChatUpdate(lobbyChatUpdate);
@@ -573,7 +573,7 @@ namespace SKYNET.Managers
             {
                 try
                 {
-                    var AvatarResponse = message.ParsedBody.FromJson<NET_AvatarResponse>();
+                    var AvatarResponse = message.ParsedBody.Deserialize<NET_AvatarResponse>();
                     if (AvatarResponse != null)
                     {
                         var imageBytes = Convert.FromBase64String(AvatarResponse.HexAvatar);
@@ -679,7 +679,7 @@ namespace SKYNET.Managers
 
         private static void ProcessLobbyGameserver(NetworkMessage message, Socket socket)
         {
-            var lobbyGameserver = message.ParsedBody.FromJson<NET_LobbyGameserver>();
+            var lobbyGameserver = message.ParsedBody.Deserialize<NET_LobbyGameserver>();
             if (lobbyGameserver != null)
             {
                 IPCManager.SendLobbyGameserver(lobbyGameserver);

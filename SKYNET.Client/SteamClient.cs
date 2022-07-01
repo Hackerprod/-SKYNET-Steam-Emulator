@@ -21,6 +21,7 @@ namespace SKYNET.Client
         public static string PersonaName { get; set; }
         public static string Language { get; set; }
         public static Bitmap Avatar { get; set; }
+        public static Bitmap DefaultAvatar { get; set; }
         public static CSteamID SteamID_GS { get; set; }
 
         public SteamClient(Settings settings)

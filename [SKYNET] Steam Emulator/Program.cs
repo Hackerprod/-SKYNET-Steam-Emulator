@@ -1,20 +1,11 @@
-﻿using SKYNET.Common;
-using SKYNET.GUI;
-using SKYNET.Types;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Web.Script.Serialization;
 using System.Windows.Forms;
 
-namespace SKYNET
+namespace SKYNET // & " = |
 {
     class Program
     {
@@ -25,6 +16,7 @@ namespace SKYNET
         static void Main()
         {
             TestJSON();
+            ClearTempFiles();
 
             Application.ThreadException += UIThreadExceptionHandler;
             AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
@@ -33,6 +25,23 @@ namespace SKYNET
             Application.SetCompatibleTextRenderingDefault(false);
             //Application.Run(new frmLogin());
             Application.Run(new frmMain());
+        }
+
+        private static void ClearTempFiles()
+        {
+            try
+            {
+                foreach (var file in Directory.GetFiles(modCommon.GetPath(), "*.*", SearchOption.TopDirectoryOnly))
+                {
+                    if (Path.GetExtension(file) == ".config" || Path.GetExtension(file) == ".pdb" || Path.GetExtension(file) == ".xml" || Path.GetExtension(file) == ".txt")
+                    {
+                        try { File.Delete(file); } catch { }
+                    }
+                }
+            }
+            catch 
+            {
+            }
         }
 
         #region Log system

@@ -115,8 +115,6 @@
             this.Controls.Add(this.panel1);
             this.Name = "frmBrowser";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "frmBrowser";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FrmBrowser_FormClosing);
             this.Load += new System.EventHandler(this.FrmBrowser_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();

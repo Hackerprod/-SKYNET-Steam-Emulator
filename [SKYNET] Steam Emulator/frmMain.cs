@@ -72,6 +72,7 @@ namespace SKYNET
 
             SteamClient = new SteamClient(settings);
             SteamClient.Initialize();
+            SteamClient.DefaultAvatar = Resources.DefaultImage;
 
             GameManager.OnGameAdded += GameManager_OnGameAdded;
             GameManager.OnGameUpdated += GameManager_OnGameUpdated;
@@ -88,11 +89,6 @@ namespace SKYNET
 
             WebManager.OnGameLaunch += UserManager_OnGameLaunch;
             WebManager.Initialize();
-
-            if (File.Exists(Path.Combine(modCommon.GetPath(), "Browser.txt")))
-            {
-                new frmBrowser().ShowDialog();
-            }
         }
 
         #region GameManager Events
@@ -579,6 +575,12 @@ namespace SKYNET
         private void BT_Connect_Click(object sender, EventArgs e)
         {
             NetworkManager.SendAnnounce();
+        }
+
+        private void LB_Browser_Click(object sender, EventArgs e)
+        {
+            var frmBrowser = new frmBrowser();
+            frmBrowser.Show();
         }
     }
 }

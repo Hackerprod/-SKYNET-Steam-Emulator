@@ -58,9 +58,9 @@ namespace SKYNET.Network
                 WebMessage message = e.RawData.Deserialize<WebMessage>();
                 OnMessageReceived?.Invoke(this, message);
             }
-            catch 
+            catch (Exception ex)
             {
-                Write($"Error in OnMessage {Encoding.ASCII.GetString(e.RawData)}" );
+                Write($"Error in OnMessage {ex}" );
             }
         }
 

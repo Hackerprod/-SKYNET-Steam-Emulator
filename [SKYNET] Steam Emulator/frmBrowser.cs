@@ -21,11 +21,6 @@ namespace SKYNET
         private void FrmBrowser_Load(object sender, EventArgs e)
         {
             string FireFoxPath = Path.Combine(modCommon.GetPath(), "Data", "Firefox");
-            string customFP = Path.Combine(modCommon.GetPath(), "Firefox.txt");
-            if (File.Exists(customFP))
-            {
-                FireFoxPath = File.ReadAllText(customFP);
-            }
             Xpcom.Initialize(FireFoxPath);
 
             InitializePref();
@@ -37,13 +32,19 @@ namespace SKYNET
             };
 
             browser.DocumentCompleted += _browser_DocumentCompleted;
+            //browser.ConsoleMessage += Browser_ConsoleMessage;
 
             PN_WebContainer.Controls.Add(browser);
             Xpcom.InitChromeContext();
-            JavaScriptContext = new AutoJSContext(browser.Window);
+            //JavaScriptContext = new AutoJSContext(browser.Window);
 
             TB_Url.Text = "127.0.0.1/index.html";
             browser.Navigate(TB_Url.Text);
+        }
+
+        private void Browser_ConsoleMessage(object sender, ConsoleMessageEventArgs e)
+        {
+            modCommon.Show(e.Message);
         }
 
         private void CallmeAction(string obj)
@@ -61,8 +62,8 @@ namespace SKYNET
 
         private void UpdateJavaScriptContext()
         {
-            JavaScriptContext = new AutoJSContext(browser.Window);
-            browser.AddMessageEventListener("CallmeAction", CallmeAction);
+            //JavaScriptContext = new AutoJSContext(browser.Window);
+            //browser.AddMessageEventListener("CallmeAction", CallmeAction);
         }
 
         private void InitializePref()
@@ -245,11 +246,6 @@ namespace SKYNET
 
         [DllImport("User32.dll")]
         public static extern void ReleaseDC(IntPtr hWnd, IntPtr hDC);
-
-        private void FrmBrowser_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            Application.Exit();
-        }
 
         private void BT_JSFunction_Click(object sender, EventArgs e)
         {

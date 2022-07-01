@@ -14,30 +14,6 @@ namespace SKYNET.Helper
 {
     public class ImageHelper
     {
-        public static Bitmap CaptureScreen()
-        {
-            Bitmap result = null;
-            try
-            {
-                Rectangle bounds = Screen.GetBounds(Point.Empty);
-                using (Bitmap bitmap = new Bitmap(bounds.Width, bounds.Height))
-                {
-                    using (Graphics graphics = Graphics.FromImage(bitmap))
-                    {
-                        graphics.CopyFromScreen(Point.Empty, Point.Empty, bounds.Size);
-                    }
-                    result = bitmap;
-                }
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = ex;
-                return result;
-            }
-        }
-
         public static Bitmap Resize(Bitmap image, int width, int height)
         {
             Rectangle destRect = new Rectangle(0, 0, width, height);
@@ -57,12 +33,6 @@ namespace SKYNET.Helper
                     return bitmap;
                 }
             }
-        }
-
-        public static Image CreateCopy(Image image)
-        {
-            byte[] sourceImage = ImageToBytes(image);
-            return ImageFromBytes(sourceImage);
         }
 
         public static byte[] ImageToBytes(Image image)
@@ -143,11 +113,6 @@ namespace SKYNET.Helper
         public static Image ImageFromBytes(byte[] bytes)
         {
             MemoryStream stream = new MemoryStream(bytes);
-            return Image.FromStream(stream);
-        }
-
-        public static Image ImageFromStream(Stream stream)
-        {
             return Image.FromStream(stream);
         }
     }

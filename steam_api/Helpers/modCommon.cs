@@ -1,17 +1,9 @@
-﻿using SKYNET;
-using SKYNET.Helper;
-using SKYNET.Overlay;
-using SKYNET.Steamworks;
+﻿using SKYNET.Steamworks;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 public partial class modCommon
@@ -28,8 +20,6 @@ public partial class modCommon
     private static bool SettingsLoaded;
 
     public static DateTime LoadTime { get; set; } = DateTime.Now;
-    public static frmOverlay Overlay;
-
 
 
     public static IntPtr GetObjectPtr(object Obj)

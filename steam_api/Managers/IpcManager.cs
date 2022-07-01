@@ -30,10 +30,10 @@ namespace SKYNET.Managers
 
         public static void Initialize()
         {
-            ThreadPool.QueueUserWorkItem(Initialize); 
+            ThreadPool.QueueUserWorkItem(Connect); 
         }
 
-        private async static void Initialize(object state)
+        private async static void Connect(object state)
         {
             await IPCClient.ConnectAsync();
         }
@@ -47,6 +47,7 @@ namespace SKYNET.Managers
         private static void IPCClient_Disconnected(object sender, ConnectionEventArgs<IPCMessage> e)
         {
             Write("IPCClient Disconnected");
+            ThreadPool.QueueUserWorkItem(Connect);
         }
 
         private static void IPCClient_MessageReceived(object sender, ConnectionMessageEventArgs<IPCMessage> message)
@@ -100,11 +101,11 @@ namespace SKYNET.Managers
                 case IPCMessageType.IPC_LobbyGameserver:
                     ProcessLobbyGameserver(message);
                     break;
-                case IPCMessageType.IPC_Leaderboards:
-                    ProcessLeaderboards(message);
-                    break;
                 case IPCMessageType.IPC_Achievements:
                     ProcessAchievements(message);
+                    break;
+                case IPCMessageType.IPC_Leaderboards:
+                    ProcessLeaderboards(message);
                     break;
                 case IPCMessageType.IPC_PlayerStats:
                     ProcessPlayerStats(message);
@@ -144,6 +145,7 @@ namespace SKYNET.Managers
                 SteamEmulator.LogToConsole = ClientWelcome.LogToConsole;
                 SteamEmulator.RunCallbacks = ClientWelcome.RunCallbacks;
                 SteamEmulator.ISteamHTTP = ClientWelcome.ISteamHTTP;
+                SteamEmulator.SteamRemoteStorage.StoragePath = ClientWelcome.RemoteStoragePath;
 
                 if (ClientWelcome.LogToConsole)
                 {
@@ -275,13 +277,69 @@ namespace SKYNET.Managers
             }
         }
 
-        internal static void SendCreateLobby(SteamLobby lobby)
+        public static void SendCreateLobby(SteamLobby lobby)
         {
             IPC_LobbyCreate CreateLobby = new IPC_LobbyCreate()
             {
                 SerializedLobby = lobby.ToJson()
             };
             var message = CreateIPCMessage(CreateLobby, IPCMessageType.IPC_LobbyCreate);
+            SendTo(IPC_ToServer, message);
+        }
+
+
+        public static void SendAchievement(Achievement achievement)
+        {
+            IPC_SetAchievement Achievement = new IPC_SetAchievement()
+            {
+                AppID = SteamEmulator.AppID,
+                Achievement = achievement
+            };
+            var message = CreateIPCMessage(Achievement, IPCMessageType.IPC_SetAchievement);
+            SendTo(IPC_ToServer, message);
+        }
+
+        public static void SendUpdateAchievement(Achievement achievement)
+        {
+            IPC_UpdateAchievement Achievement = new IPC_UpdateAchievement()
+            {
+                AppID = SteamEmulator.AppID,
+                Achievement = achievement
+            };
+            var message = CreateIPCMessage(Achievement, IPCMessageType.IPC_UpdateAchievement);
+            SendTo(IPC_ToServer, message);
+        }
+
+        public static void SendPlayerStat(PlayerStat playerStat)
+        {
+            var PlayerStat = new IPC_SetPlayerStat()
+            {
+                AppID = SteamEmulator.AppID,
+                PlayerStat = playerStat
+            };
+            var message = CreateIPCMessage(PlayerStat, IPCMessageType.IPC_SetPlayerStat);
+            SendTo(IPC_ToServer, message);
+        }
+
+        public static void SendLeaderboard(Leaderboard leaderboard)
+        {
+            var Leaderboard = new IPC_SetLeaderboard()
+            {
+                AppID = SteamEmulator.AppID,
+                Leaderboard = leaderboard
+            };
+            var message = CreateIPCMessage(Leaderboard, IPCMessageType.IPC_SetLeaderboard);
+            SendTo(IPC_ToServer, message);
+        }
+
+        public static void SendResetAllStats(bool bAchievementsToo)
+        {
+            var ResetAllStats = new IPC_ResetAllStats()
+            {
+                AppID = SteamEmulator.AppID,
+                AchievementsToo = bAchievementsToo
+            };
+            var message = CreateIPCMessage(ResetAllStats, IPCMessageType.IPC_ResetAllStats);
             SendTo(IPC_ToServer, message);
         }
 
@@ -473,16 +531,22 @@ namespace SKYNET.Managers
         {
             try
             {
-                var announceResponse = message.ParsedBody.FromJson<IPC_AvatarResponse>();
-                if (announceResponse != null)
+                var AvatarResponse = message.ParsedBody.FromJson<IPC_AvatarResponse>();
+                if (AvatarResponse != null)
                 {
-                    var imageBytes = Convert.FromBase64String(announceResponse.HexAvatar);
+                    var imageBytes = Convert.FromBase64String(AvatarResponse.HexAvatar);
                     if (imageBytes.Length != 0)
                     {
                         Bitmap Avatar = (Bitmap)ImageHelper.ImageFromBytes(imageBytes);
-                        ulong SteamID = (ulong)new CSteamID(announceResponse.AccountID);
-                        SteamFriends.Instance.AddOrUpdateAvatar(Avatar, SteamID);
-                        SteamRemoteStorage.Instance.StoreAvatar(Avatar, announceResponse.AccountID);
+                        if (AvatarResponse.AccountID == 0)
+                        {
+                            SteamFriends.Instance.AddOrUpdateAvatar(Avatar, 0);
+                        }
+                        else
+                        {
+                            ulong SteamID = (ulong)new CSteamID(AvatarResponse.AccountID);
+                            SteamFriends.Instance.AddOrUpdateAvatar(Avatar, SteamID);
+                        }
                     }
                 }
             }
@@ -505,7 +569,7 @@ namespace SKYNET.Managers
             }
             catch
             {
-
+                //
             }
         }
 
@@ -558,7 +622,7 @@ namespace SKYNET.Managers
             var lobbyGameserver = new IPC_LobbyGameserver()
             {
                 LobbyID = lobby.SteamID,
-                SteamID = lobby.Gameserver.SteamID,
+                SteamID = lobby.Gameserver.SteamID, 
                 IP = lobby.Gameserver.IP,
                 Port = lobby.Gameserver.Port
             };
@@ -633,7 +697,7 @@ namespace SKYNET.Managers
             }
         }
 
-        internal static void SendLobbyRemove(SteamLobby lobby)
+        public static void SendLobbyRemove(SteamLobby lobby)
         {
             foreach (var member in lobby.Members)
             {
@@ -654,15 +718,15 @@ namespace SKYNET.Managers
             }
         }
 
-        internal static void GCRequest(uint MsgType, byte[] bytes)
+        public static void GCRequest(uint MsgType, byte[] bytes)
         {
             var IPC_GCRequest = new IPC_GCMessageRequest()
             {
                 MsgType = MsgType,
                 Buffer = bytes
             };
-            //var message = CreateIPCMessage(IPC_GCRequest, IPCMessageType.IPC_GCMessageRequest);
-            //SendTo(IPC_ToServer, message);
+            var message = CreateIPCMessage(IPC_GCRequest, IPCMessageType.IPC_GCMessageRequest);
+            SendTo(IPC_ToServer, message);
         }
 
 

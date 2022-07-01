@@ -154,6 +154,7 @@ namespace SKYNET
 
         public static void Send(WEB_Base msgBase, WEB_MessageType Type)
         {
+            Write($"Sending WEB message {Type}");
             WebMessage WebMessage = new WebMessage()
             {
                 MessageType = Type,

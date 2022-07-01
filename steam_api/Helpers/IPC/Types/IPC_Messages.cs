@@ -1,9 +1,5 @@
 ﻿using SKYNET.Types;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SKYNET.IPC.Types
 {
@@ -47,6 +43,11 @@ namespace SKYNET.IPC.Types
         IPC_Leaderboards,
         IPC_Achievements,
         IPC_PlayerStats,
+        IPC_SetAchievement,
+        IPC_SetPlayerStat,
+        IPC_SetLeaderboard,
+        IPC_UpdateAchievement,
+        IPC_ResetAllStats,
 
         // Gamecoordinator
         IPC_GCMessageRequest,
@@ -70,6 +71,7 @@ namespace SKYNET.IPC.Types
         public bool LogToConsole { get; set; }
         public bool RunCallbacks { get; set; }
         public bool ISteamHTTP { get; set; }
+        public string RemoteStoragePath { get; set; }
     }
 
     public class IPC_LobbyCreate : IPC_MessageBase
@@ -104,6 +106,7 @@ namespace SKYNET.IPC.Types
 
     public class IPC_AvatarResponse : IPC_MessageBase
     {
+        // TODO: Send AccountID 0 to fill default avatar 
         public uint AccountID { get; set; }
         public string HexAvatar { get; set; }
     }
@@ -194,9 +197,39 @@ namespace SKYNET.IPC.Types
     {
         public List<Achievement> Achievements { get; set; }
     }
+
     public class IPC_PlayerStats : IPC_MessageBase
     {
         public ulong SteamID { get; set; }
         public List<PlayerStat> PlayerStats { get; set; }
+    }
+
+    public class IPC_SetAchievement : IPC_MessageBase
+    {
+        public uint AppID { get; set; }
+        public Achievement Achievement { get; set; }
+    }
+    public class IPC_UpdateAchievement : IPC_MessageBase
+    {
+        public uint AppID { get; set; }
+        public Achievement Achievement { get; set; }
+    }
+
+    public class IPC_SetPlayerStat : IPC_MessageBase
+    {
+        public uint AppID { get; set; }
+        public PlayerStat PlayerStat { get; set; }
+    }
+
+    public class IPC_SetLeaderboard : IPC_MessageBase
+    {
+        public uint AppID { get; set; }
+        public Leaderboard Leaderboard { get; set; }
+    }
+
+    public class IPC_ResetAllStats : IPC_MessageBase
+    {
+        public uint AppID { get; set; }
+        public bool AchievementsToo { get; set; }
     }
 }

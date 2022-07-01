@@ -14,78 +14,78 @@ namespace SKYNET
         private HttpServer httpsv;
         private int ServerPort;
         private readonly string[] _indexFiles =
-            {
-        "index.html",
-        "index.htm",
-        "default.html",
-        "default.htm"
+        {
+            "index.html",
+            "index.htm",
+            "default.html",
+            "default.htm"
         };
-        private static IDictionary<string, string> _mimeTypeMappings = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase) {
+        private static Dictionary<string, string> _mimeTypeMappings = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase) {
         #region extension to MIME type list
-        {".asf", "video/x-ms-asf"},
-        {".asx", "video/x-ms-asf"},
-        {".avi", "video/x-msvideo"},
-        {".bin", "application/octet-stream"},
-        {".cco", "application/x-cocoa"},
-        {".crt", "application/x-x509-ca-cert"},
-        {".css", "text/css"},
-        {".deb", "application/octet-stream"},
-        {".der", "application/x-x509-ca-cert"},
-        {".dll", "application/octet-stream"},
-        {".dmg", "application/octet-stream"},
-        {".ear", "application/java-archive"},
-        {".eot", "application/octet-stream"},
-        {".exe", "application/octet-stream"},
-        {".flv", "video/x-flv"},
-        {".gif", "image/gif"},
-        {".hqx", "application/mac-binhex40"},
-        {".htc", "text/x-component"},
-        {".htm", "text/html"},
-        {".html", "text/html"},
-        {".ico", "image/x-icon"},
-        {".img", "application/octet-stream"},
-        {".iso", "application/octet-stream"},
-        {".jar", "application/java-archive"},
-        {".jardiff", "application/x-java-archive-diff"},
-        {".jng", "image/x-jng"},
-        {".jnlp", "application/x-java-jnlp-file"},
-        {".jpeg", "image/jpeg"},
-        {".jpg", "image/jpeg"},
-        {".js", "application/x-javascript"},
-        {".mml", "text/mathml"},
-        {".mng", "video/x-mng"},
-        {".mov", "video/quicktime"},
-        {".mp3", "audio/mpeg"},
-        {".mpeg", "video/mpeg"},
-        {".mpg", "video/mpeg"},
-        {".msi", "application/octet-stream"},
-        {".msm", "application/octet-stream"},
-        {".msp", "application/octet-stream"},
-        {".pdb", "application/x-pilot"},
-        {".pdf", "application/pdf"},
-        {".pem", "application/x-x509-ca-cert"},
-        {".pl", "application/x-perl"},
-        {".pm", "application/x-perl"},
-        {".png", "image/png"},
-        {".prc", "application/x-pilot"},
-        {".ra", "audio/x-realaudio"},
-        {".rar", "application/x-rar-compressed"},
-        {".rpm", "application/x-redhat-package-manager"},
-        {".rss", "text/xml"},
-        {".run", "application/x-makeself"},
-        {".sea", "application/x-sea"},
-        {".shtml", "text/html"},
-        {".sit", "application/x-stuffit"},
-        {".swf", "application/x-shockwave-flash"},
-        {".tcl", "application/x-tcl"},
-        {".tk", "application/x-tcl"},
-        {".txt", "text/plain"},
-        {".war", "application/java-archive"},
-        {".wbmp", "image/vnd.wap.wbmp"},
-        {".wmv", "video/x-ms-wmv"},
-        {".xml", "text/xml"},
-        {".xpi", "application/x-xpinstall"},
-        {".zip", "application/zip"},
+        { ".asf", "video/x-ms-asf" },
+        { ".asx", "video/x-ms-asf" },
+        { ".avi", "video/x-msvideo" },
+        { ".bin", "application/octet-stream" },
+        { ".cco", "application/x-cocoa" },
+        { ".crt", "application/x-x509-ca-cert" },
+        { ".css", "text/css" },
+        { ".deb", "application/octet-stream" },
+        { ".der", "application/x-x509-ca-cert" },
+        { ".dll", "application/octet-stream" },
+        { ".dmg", "application/octet-stream" },
+        { ".ear", "application/java-archive" },
+        { ".eot", "application/octet-stream" },
+        { ".exe", "application/octet-stream" },
+        { ".flv", "video/x-flv" },
+        { ".gif", "image/gif" },
+        { ".hqx", "application/mac-binhex40" },
+        { ".htc", "text/x-component" },
+        { ".htm", "text/html" },
+        { ".html", "text/html" },
+        { ".ico", "image/x-icon" },
+        { ".img", "application/octet-stream" },
+        { ".iso", "application/octet-stream" },
+        { ".jar", "application/java-archive" },
+        { ".jardiff", "application/x-java-archive-diff" },
+        { ".jng", "image/x-jng" },
+        { ".jnlp", "application/x-java-jnlp-file" },
+        { ".jpeg", "image/jpeg" },
+        { ".jpg", "image/jpeg" },
+        { ".js", "application/x-javascript" },
+        { ".mml", "text/mathml" },
+        { ".mng", "video/x-mng" },
+        { ".mov", "video/quicktime" },
+        { ".mp3", "audio/mpeg" },
+        { ".mpeg", "video/mpeg" },
+        { ".mpg", "video/mpeg" },
+        { ".msi", "application/octet-stream" },
+        { ".msm", "application/octet-stream" },
+        { ".msp", "application/octet-stream" },
+        { ".pdb", "application/x-pilot" },
+        { ".pdf", "application/pdf" },
+        { ".pem", "application/x-x509-ca-cert" },
+        { ".pl", "application/x-perl" },
+        { ".pm", "application/x-perl" },
+        { ".png", "image/png" },
+        { ".prc", "application/x-pilot" },
+        { ".ra", "audio/x-realaudio" },
+        { ".rar", "application/x-rar-compressed" },
+        { ".rpm", "application/x-redhat-package-manager" },
+        { ".rss", "text/xml" },
+        { ".run", "application/x-makeself" },
+        { ".sea", "application/x-sea" },
+        { ".shtml", "text/html" },
+        { ".sit", "application/x-stuffit" },
+        { ".swf", "application/x-shockwave-flash" },
+        { ".tcl", "application/x-tcl" },
+        { ".tk", "application/x-tcl" },
+        { ".txt", "text/plain" },
+        { ".war", "application/java-archive" },
+        { ".wbmp", "image/vnd.wap.wbmp" },
+        { ".wmv", "video/x-ms-wmv" },
+        { ".xml", "text/xml" },
+        { ".xpi", "application/x-xpinstall" },
+        { ".zip", "application/zip" },
         #endregion
     };
 
@@ -102,6 +102,7 @@ namespace SKYNET
         {
             string filename = e.Request.Url.AbsolutePath;
             filename = filename.Substring(1);
+            //Write(e.Request.HttpMethod + " " + e.Request.Url.ToString());
 
             if (string.IsNullOrEmpty(filename))
             {
@@ -154,78 +155,6 @@ namespace SKYNET
             e.Response.OutputStream.Close();
         }
 
-        private string GetFileName(string filePath, string filename)
-        {
-            string path = "";
-            if (filePath[filePath.Length - 1] == '/')
-                path = filePath + filename;
-            else
-                path = filePath + "/" + filename;
-
-            return path;
-        }
-
-        private static string GetcontentType(string extension)
-        {
-            switch (extension)
-            {
-                case ".avi":
-                    return "video/x-msvideo";
-                case ".css":
-                    return "text/css";
-                case ".doc":
-                    return "application/msword";
-                case ".gif":
-                    return "image/gif";
-                case ".htm":
-                case ".html":
-                    return "text/html";
-                case ".jpg":
-                case ".jpeg":
-                    return "image/jpeg";
-                case ".js":
-                    return "application/x-javascript";
-                case ".mp3":
-                    return "audio/mpeg";
-                case ".png":
-                    return "image/png";
-                case ".pdf":
-                    return "application/pdf";
-                case ".ppt":
-                    return "application/vnd.ms-powerpoint";
-                case ".zip":
-                    return "application/zip";
-                case ".txt":
-                    return "text/plain";
-            }
-            return "application/octet-stream";
-        }
-        private bool IsOtherBasePath(string RawUrl)
-        {
-            if (RawUrl == "")
-            {
-                return false;
-            }
-            try
-            {
-                if (RawUrl.Contains(@"\"))
-                {
-                    RawUrl = RawUrl.Replace(@"\", "/");
-                    string[] Directories = RawUrl.Split('/');
-                    if (Directories.Any())
-                    {
-                        if (Directory.GetDirectories(_rootDirectory, Directories[0], SearchOption.TopDirectoryOnly).ToList().Count > 0)
-                            return false;
-                    }
-                }
-            }
-            catch
-            {
-                return false;
-            }
-            return true;
-        }
-
         public bool Start()
         {
             try
@@ -236,7 +165,7 @@ namespace SKYNET
             }
             catch
             {
-                Log.Error("WebServer", $"Error starting File server on port {ServerPort}");
+                Write($"Error starting File server on port {ServerPort}");
                 return false;
             }
         }
@@ -244,6 +173,11 @@ namespace SKYNET
         internal void Stop()
         {
             httpsv.Stop();
+        }
+
+        private void Write(string v)
+        {
+            Log.Write("HTTPServer", v);
         }
     }
 }

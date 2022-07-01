@@ -59,7 +59,7 @@ namespace SKYNET.Network
             Write($"Received P2P packet from {EndPoint.Address}");
 
             string json = Encoding.Default.GetString(Data);
-            NET_P2PPacket P2PPacket = json.FromJson<NET_P2PPacket>();
+            NET_P2PPacket P2PPacket = json.Deserialize<NET_P2PPacket>();
             IPCManager.SendP2PPacket(P2PPacket);
         }
 

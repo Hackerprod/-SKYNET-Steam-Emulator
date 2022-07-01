@@ -2,14 +2,10 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading;
 using SKYNET.Callback;
 using SKYNET.Helper;
 using SKYNET.Managers;
-using SKYNET.Properties;
-using SKYNET.Overlay;
 using SKYNET.Types;
 using SKYNET.IPC.Types;
 
@@ -46,7 +42,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             #region Default Avatar
 
-            DefaultAvatar = new ImageAvatar(Resources.Image, ref ImageIndex);
+            DefaultAvatar = new ImageAvatar(new Bitmap(210, 210), ref ImageIndex);
 
             #endregion
 
@@ -79,7 +75,7 @@ namespace SKYNET.Steamworks.Implementation
 
             #endregion
 
-            return;
+            //return;
             Users.Add(new SteamPlayer()
             {
                 AccountID = 1001,
@@ -143,14 +139,7 @@ namespace SKYNET.Steamworks.Implementation
                 OverlayType type = OverlayType.LobbyInvite;
                 var users = new List<SteamPlayer>();
                 users.AddRange(Users);
-                if (modCommon.Overlay == null)
-                {
-                    modCommon.Overlay = new frmOverlay();
-                    modCommon.Overlay.ProcessOverlay(users, type, steamIDLobby);
-                    modCommon.Overlay.Show();
-                    return;
-                }
-                modCommon.Overlay.ProcessOverlay(users, type, steamIDLobby);
+                // TODO: Show Overlay
             }
             catch (Exception ex)
             {
@@ -209,14 +198,7 @@ namespace SKYNET.Steamworks.Implementation
                 default:
                     break;
             }
-            var users = new List<SteamPlayer>();
-            if (modCommon.Overlay == null)
-            {
-                modCommon.Overlay = new frmOverlay();
-                modCommon.Overlay.ProcessOverlay(users, type, steamID);
-                modCommon.Overlay.Show();
-            }
-            modCommon.Overlay.ProcessOverlay(users, type, steamID);
+            // TODO: Show Overlay
         }
 
         public void ActivateGameOverlayToWebPage(string pchURL, int eMode)
@@ -571,18 +553,16 @@ namespace SKYNET.Steamworks.Implementation
         public int GetSmallFriendAvatar(ulong steamIDFriend)
         {
             Write($"GetSmallFriendAvatar {(CSteamID)steamIDFriend}");
+
+            if (steamIDFriend == 65535) steamIDFriend = (ulong)SteamEmulator.SteamID;
+
             if (Avatars.TryGetValue(steamIDFriend, out ImageAvatar avatar))
             {
                 return avatar.Small;
             }
             else
             {
-                avatar = LoadFromCache(steamIDFriend);
-                if (avatar != null)
-                {
-                    return avatar.Small;
-                }
-                ThreadPool.QueueUserWorkItem(RequestAvatar, steamIDFriend);
+                RequestAvatar(steamIDFriend);
             }
             return DefaultAvatar.Small;
         }
@@ -590,18 +570,16 @@ namespace SKYNET.Steamworks.Implementation
         public int GetMediumFriendAvatar(ulong steamIDFriend)
         {
             Write($"GetMediumFriendAvatar {(CSteamID)steamIDFriend}");
+
+            if (steamIDFriend == 65535) steamIDFriend = (ulong)SteamEmulator.SteamID;
+
             if (Avatars.TryGetValue(steamIDFriend, out ImageAvatar avatar))
             {
                 return avatar.Medium;
             }
             else
             {
-                avatar = LoadFromCache(steamIDFriend);
-                if (avatar != null)
-                {
-                    return avatar.Medium;
-                }
-                ThreadPool.QueueUserWorkItem(RequestAvatar, steamIDFriend);
+                RequestAvatar(steamIDFriend);
             }
             return DefaultAvatar.Medium;
         }
@@ -609,18 +587,16 @@ namespace SKYNET.Steamworks.Implementation
         public int GetLargeFriendAvatar(ulong steamIDFriend)
         {
             Write($"GetLargeFriendAvatar {(CSteamID)steamIDFriend}");
+
+            if (steamIDFriend == 65535) steamIDFriend = (ulong)SteamEmulator.SteamID;
+
             if (Avatars.TryGetValue(steamIDFriend, out ImageAvatar avatar))
             {
                 return avatar.Large;
             }
             else
             {
-                avatar = LoadFromCache(steamIDFriend);
-                if (avatar != null)
-                {
-                    return avatar.Large;
-                }
-                ThreadPool.QueueUserWorkItem(RequestAvatar, steamIDFriend);
+                RequestAvatar(steamIDFriend);
             }
             return DefaultAvatar.Large;
         }
@@ -986,10 +962,8 @@ namespace SKYNET.Steamworks.Implementation
             return null;
         }
 
-        private void RequestAvatar(object threadObj)
+        private void RequestAvatar(ulong steamIDFriend)
         {
-            ulong steamIDFriend = (ulong)threadObj;
-
             try
             {
 
@@ -1011,7 +985,11 @@ namespace SKYNET.Steamworks.Implementation
 
         public void AddOrUpdateAvatar(Bitmap image, ulong steamID)
         {
-            if (Avatars.TryGetValue(steamID, out ImageAvatar avatar))
+            if (steamID == 0)
+            {
+                DefaultAvatar.UpdateImage(image);
+            }
+            else if (Avatars.TryGetValue(steamID, out ImageAvatar avatar))
             {
                 avatar.UpdateImage(image);
             }
@@ -1024,28 +1002,6 @@ namespace SKYNET.Steamworks.Implementation
                 QueryingAvatar.Remove(steamID);
 
             ReportUserChanged(steamID, EPersonaChange.k_EPersonaChangeAvatar);
-        }
-
-        private ImageAvatar LoadFromCache(ulong steamIDFriend)
-        {
-            string fullPath = Path.Combine(SteamEmulator.SteamRemoteStorage.AvatarCachePath, steamIDFriend.GetAccountID() + ".jpg");
-            if (File.Exists(fullPath))
-            {
-                try
-                {
-                    var image = (Bitmap)Bitmap.FromFile(fullPath);
-                    if (image != null)
-                    {
-                        ImageAvatar avatar = new ImageAvatar(image, ref ImageIndex);
-                        Avatars.TryAdd(steamIDFriend, avatar);
-                        return avatar;
-                    }
-                }
-                catch (Exception)
-                {
-                }
-            }
-            return null;
         }
 
         public class ImageAvatar
