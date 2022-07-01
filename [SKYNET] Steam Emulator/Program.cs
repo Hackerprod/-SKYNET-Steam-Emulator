@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -15,6 +16,9 @@ namespace SKYNET // & " = |
         [STAThread]
         static void Main()
         {
+            AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += ResolveAssembly;
+            AppDomain.CurrentDomain.AssemblyResolve += ResolveAssembly;
+
             TestJSON();
             ClearTempFiles();
 
@@ -25,6 +29,17 @@ namespace SKYNET // & " = |
             Application.SetCompatibleTextRenderingDefault(false);
             //Application.Run(new frmLogin());
             Application.Run(new frmMain());
+        }
+
+        private static Assembly ResolveAssembly(object sender, ResolveEventArgs args)
+        {
+            var fullAssemblyName = new AssemblyName(args.Name);
+            string assemblyPathRoot = Path.Combine(modCommon.GetPath(), "Data", "Assemblies", fullAssemblyName.Name + ".dll");
+            if (File.Exists(assemblyPathRoot))
+            {
+                return Assembly.LoadFrom(assemblyPathRoot);
+            }
+            return null;
         }
 
         private static void ClearTempFiles()

@@ -84,13 +84,13 @@
     <Compile Include="Types\WebMessages.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\SKYNET.Common\SKYNET.Common.csproj">
       <Project>{bb307a9e-49f3-4ede-abe4-87ec2086be18}</Project>
       <Name>SKYNET.Common</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
