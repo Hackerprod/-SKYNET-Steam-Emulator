@@ -177,7 +177,7 @@ namespace SKYNET.Managers
                     ClientWelcome.ISteamHTTP = Game.ISteamHTTP;
                 }
             }
-            var welcome = CreateIPCMessage(ClientWelcome, IPCMessageType.IPC_ClientWelcome);
+            var welcome = CreateIPCMessage(ClientWelcome, IPCMessageType.IPC_ClientWelcome, message.JobID);
             connection.WriteAsync(welcome);
 
             // TODO: Send user avatar
@@ -406,7 +406,7 @@ namespace SKYNET.Managers
 
         private static void OnExceptionOccurred(object sender, ExceptionEventArgs e)
         {
-            Log.Write("IPCManager", "Exception Occurred!!! " + e);
+            Log.Write("IPCManager", "Exception Occurred!!! " + e.Exception);
         }
 
         public static void AddOrUpdateUser(uint accountID, string personaName, uint appID, string iPAddress)
@@ -470,12 +470,13 @@ namespace SKYNET.Managers
             SendIPCMessage(IPCMessage);
         }
 
-        private static IPCMessage CreateIPCMessage(IPC_MessageBase Base, IPCMessageType type)
+        private static IPCMessage CreateIPCMessage(IPC_MessageBase Base, IPCMessageType type, ulong jobId = 0)
         {
             var message = new IPCMessage()
-            {
+            { 
+                JobID = jobId,
                 MessageType = (int)type,
-                ParsedBody = Base.ToJson()
+                ParsedBody = Base.ToJson(), Result = "Theresult"
             };
             return message;
         }

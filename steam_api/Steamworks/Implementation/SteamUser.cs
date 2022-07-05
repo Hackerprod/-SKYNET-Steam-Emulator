@@ -71,19 +71,25 @@ namespace SKYNET.Steamworks.Implementation
         public void StartVoiceRecording()
         {
             Write("StartVoiceRecording");
+            IPCManager.SendStartVoiceRecording();
             Recording = true;
         }
 
         public void StopVoiceRecording()
         {
-            //Write("StopVoiceRecording");
+            Write("StopVoiceRecording");
+            IPCManager.SendStopVoiceRecording();
             Recording = false;
         }
 
         public int GetAvailableVoice(ref uint pcbCompressed, ref uint pcbUncompressed_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
         {
-            //Write("GetAvailableVoice");
-            return (int)EVoiceResult.k_EVoiceResultOK;
+            Write("GetAvailableVoice");
+            if (IPCManager.SendGetAvailableVoice(out pcbCompressed, out pcbUncompressed_Deprecated))
+            {
+                return (int)EVoiceResult.k_EVoiceResultOK;
+            }
+            return (int)EVoiceResult.k_EVoiceResultNoData;
         }
 
         public int GetVoice(bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, bool bWantUncompressed_Deprecated, IntPtr pUncompressedDestBuffer_Deprecated, uint cbUncompressedDestBufferSize_Deprecated, uint nUncompressBytesWritten_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)

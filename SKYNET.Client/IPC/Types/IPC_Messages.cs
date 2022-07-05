@@ -5,9 +5,12 @@ namespace SKYNET.IPC.Types
 {
     public class IPCMessage
     {
+        public ulong JobID { get; set; }
         public ulong To { get; set; }
         public int MessageType { get; set; }
         public string ParsedBody { get; set; }
+        public bool WaitResult { get; set; }
+        public object Result { get; set; }
     }
 
     public class IPC_MessageBase

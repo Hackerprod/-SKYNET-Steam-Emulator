@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SKYNET.IPC.Types;
+using System;
+using System.Collections.Generic;
 using System.IO.Pipes;
 using System.Text;
 using System.Threading;
@@ -6,9 +8,21 @@ using System.Threading.Tasks;
 
 namespace SKYNET.IPC
 {
-    public sealed class PipeClient<T>
+    public sealed class PipeClient
     {
         private volatile bool _isConnecting;
+        private ulong _currentJob;
+
+        /// <summary>
+        /// Results that are waiting for collection from the pipe
+        /// </summary>
+        private List<IPCMessage> current_results;
+
+        /// <summary>
+        /// Semaphores for results that are being waited on
+        /// </summary>
+        private Dictionary<ulong, Semaphore> result_semaphores;
+
 
         /// <inheritdoc/>
         public bool AutoReconnect { get; set; } = true;
@@ -34,42 +48,52 @@ namespace SKYNET.IPC
         public string ServerName { get; }
 
         /// <inheritdoc/>
-        public PipeConnection<T>? Connection { get; private set; }
+        public PipeConnection<IPCMessage>? Connection { get; private set; }
 
         private System.Timers.Timer ReconnectionTimer { get; }
+        public ulong NextJobID { get { _currentJob++; return _currentJob; } }
 
 
         /// <summary>
         /// Invoked whenever a message is received from the server.
         /// </summary>
-        public event EventHandler<ConnectionMessageEventArgs<T>>? MessageReceived;
+        public event EventHandler<ConnectionMessageEventArgs<IPCMessage>>? MessageReceived;
 
         /// <summary>
         /// Invoked when the client disconnects from the server (e.g., the pipe is closed or broken).
         /// </summary>
-        public event EventHandler<ConnectionEventArgs<T>>? Disconnected;
+        public event EventHandler<ConnectionEventArgs<IPCMessage>>? Disconnected;
 
         /// <summary>
         /// Invoked after each the client connect to the server (include reconnects).
         /// </summary>
-        public event EventHandler<ConnectionEventArgs<T>>? Connected;
+        public event EventHandler<ConnectionEventArgs<IPCMessage>>? Connected;
 
         /// <summary>
         /// Invoked whenever an exception is thrown during a read or write operation on the named pipe.
         /// </summary>
         public event EventHandler<ExceptionEventArgs>? ExceptionOccurred;
 
-        private void OnMessageReceived(ConnectionMessageEventArgs<T> args)
+        private void OnMessageReceived(ConnectionMessageEventArgs<IPCMessage> args)
         {
-            MessageReceived?.Invoke(this, args);
+            if (result_semaphores.ContainsKey(args.Message.JobID))
+            {
+                current_results.Add(args.Message);
+                var semaphore = result_semaphores[args.Message.JobID];
+                semaphore?.Release();
+            }
+            else
+            {
+                MessageReceived?.Invoke(this, args);
+            }
         }
 
-        private void OnDisconnected(ConnectionEventArgs<T> args)
+        private void OnDisconnected(ConnectionEventArgs<IPCMessage> args)
         {
             Disconnected?.Invoke(this, args);
         }
 
-        private void OnConnected(ConnectionEventArgs<T> args)
+        private void OnConnected(ConnectionEventArgs<IPCMessage> args)
         {
             Connected?.Invoke(this, args);
         }
@@ -92,6 +116,9 @@ namespace SKYNET.IPC
         {
             PipeName = pipeName;
             ServerName = serverName;
+
+            current_results = new List<IPCMessage>();
+            result_semaphores = new Dictionary<ulong, Semaphore>();
 
             ReconnectionInterval = reconnectionInterval ?? TimeSpan.FromMilliseconds(100);
             ReconnectionTimer = new System.Timers.Timer(ReconnectionInterval.TotalMilliseconds);
@@ -152,7 +179,7 @@ namespace SKYNET.IPC
                 // Connect to the actual data pipe
                 var dataPipe = CreateAndConnectAsync(connectionPipeName, ServerName, cancellationToken);
 
-                Connection = new PipeConnection<T>(dataPipe.Result, connectionPipeName, ServerName);
+                Connection = new PipeConnection<IPCMessage>(dataPipe.Result, connectionPipeName, ServerName);
                 Connection.Disconnected += async (_, args) =>
                 {
                     await DisconnectInternalAsync().ConfigureAwait(false);
@@ -163,7 +190,7 @@ namespace SKYNET.IPC
                 Connection.ExceptionOccurred += (_, args) => OnExceptionOccurred();
                 Connection.Start();
 
-                OnConnected(new ConnectionEventArgs<T>(Connection));
+                OnConnected(new ConnectionEventArgs<IPCMessage>(Connection));
             }
             catch (Exception)
             {
@@ -208,7 +235,7 @@ namespace SKYNET.IPC
         /// <param name="value">Message to send to the server.</param>
         /// <param name="cancellationToken"></param>
         /// <exception cref="InvalidOperationException"></exception>
-        public async Task WriteAsync(T value, CancellationToken cancellationToken = default)
+        public async Task<IPCMessage> WriteAsync(IPCMessage value, bool WaitResult = false, CancellationToken cancellationToken = default)
         {
             if (!IsConnected && AutoReconnect)
             {
@@ -216,10 +243,31 @@ namespace SKYNET.IPC
             }
             if (Connection == null)
             {
-                throw new InvalidOperationException("Client is not connected");
+                return null;
             }
 
             await Connection.WriteAsync(value, cancellationToken).ConfigureAwait(false);
+
+            if (WaitResult)
+            {
+                var jobId = value.JobID;
+                result_semaphores.Add(jobId, new Semaphore(0, 1));
+                return WaitForResultForFunction(jobId);
+            }
+            return null;
+        }
+
+        public IPCMessage WaitForResultForFunction(ulong job_id)
+        {
+            // Wait for the semaphore and then remove it so gc collects it
+            var this_semaphore = result_semaphores[job_id];
+            this_semaphore.WaitOne();
+            result_semaphores.Remove(job_id);
+
+            var found = current_results.Find(x => x.JobID == job_id);
+            current_results.Remove(found);
+
+            return found;
         }
 
         /// <summary>

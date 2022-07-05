@@ -92,10 +92,7 @@ namespace SKYNET.IPC
             MessageReceived?.Invoke(this, args);
         }
 
-        private void OnExceptionOccurred()
-        {
-            ExceptionOccurred?.Invoke(this, new ExceptionEventArgs());
-        }
+
 
         /// <summary>
         /// Constructs a new <c>NamedPipeServer</c> object that listens for client connections on the given <paramref name="pipeName"/>.
@@ -181,7 +178,7 @@ namespace SKYNET.IPC
                         var connection = new PipeConnection<T>(connectionStream, connectionPipeName);
                         connection.MessageReceived += (_, args) => OnMessageReceived(args);
                         connection.Disconnected += (_, args) => OnClientDisconnected(args);
-                        connection.ExceptionOccurred += (_, args) => OnExceptionOccurred();
+                        connection.ExceptionOccurred += (_, args) => OnExceptionOccurred(args.Exception);
                         connection.Start();
 
                         Connections.Add(connection);
@@ -199,7 +196,7 @@ namespace SKYNET.IPC
                     }
                     catch (Exception exception)
                     {
-                        OnExceptionOccurred();
+                        OnExceptionOccurred(exception);
                         break;
                     }
                 }
@@ -215,6 +212,11 @@ namespace SKYNET.IPC
 
                 throw;
             }
+        }
+
+        private void OnExceptionOccurred(Exception args)
+        {
+            ExceptionOccurred?.Invoke(this, new ExceptionEventArgs(args));
         }
 
         /// <summary>

@@ -5,9 +5,12 @@ namespace SKYNET.IPC.Types
 {
     public class IPCMessage
     {
+        public ulong JobID { get; set; }
         public ulong To { get; set; }
         public int MessageType { get; set; }
         public string ParsedBody { get; set; }
+        public bool WaitResult { get; set; }
+        public object Result { get; set; }
     }
 
     public class IPC_MessageBase
@@ -52,6 +55,12 @@ namespace SKYNET.IPC.Types
         // Gamecoordinator
         IPC_GCMessageRequest,
         IPC_GCMessageResponse,
+
+        // Voice
+        IPC_StartVoiceRecording,
+        IPC_StopVoiceRecording,
+        IPC_GetAvailableVoiceRequest,
+        IPC_GetAvailableVoiceResponse
     }
 
     public class IPC_ClientHello : IPC_MessageBase
@@ -231,5 +240,24 @@ namespace SKYNET.IPC.Types
     {
         public uint AppID { get; set; }
         public bool AchievementsToo { get; set; }
+    }
+
+    public class IPC_StartVoiceRecording : IPC_MessageBase
+    {
+    }
+
+    public class IPC_StopVoiceRecording : IPC_MessageBase
+    {
+    }
+
+    public class IPC_GetAvailableVoiceRequest : IPC_MessageBase
+    {
+    }
+
+    public class IPC_GetAvailableVoiceResponse : IPC_MessageBase
+    {
+        public uint Compressed { get; set; }
+        public uint UnCompressed { get; set; }
+
     }
 }

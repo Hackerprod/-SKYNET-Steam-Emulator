@@ -117,6 +117,7 @@ namespace SKYNET
         private void GameManager_OnGameOpened(object sender, GameManager.GameLaunchedEventArgs e)
         {
             var game = new RunningGame(e.ProcessID, e.Game, e.GameClientID);
+            if (game.Process == null) return;
             RunningGames.Add(game);
             NetworkManager.SendGameOpened(e.Game);
         }

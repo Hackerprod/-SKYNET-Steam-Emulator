@@ -17,7 +17,11 @@ namespace SKYNET.Types
         {
             Game = game;
             GameClientID = gameClientID;
-            Process = Process.GetProcessById(processID);
+            try
+            {
+                Process = Process.GetProcessById(processID);
+            }
+            catch { }
         }
     }
 }

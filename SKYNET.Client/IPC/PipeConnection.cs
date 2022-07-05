@@ -58,7 +58,7 @@ namespace SKYNET.IPC
         /// <summary>
         /// Invoked when an exception is thrown during any read/write operation over the named pipe.
         /// </summary>
-        public event EventHandler<ConnectionEventArgs<T>>? ExceptionOccurred;
+        public event EventHandler<ExceptionEventArgs>? ExceptionOccurred;
 
         private void OnDisconnected()
         {
@@ -72,7 +72,7 @@ namespace SKYNET.IPC
 
         private void OnExceptionOccurred(Exception exception)
         {
-            ExceptionOccurred?.Invoke(this, new ConnectionExceptionEventArgs<T>(this, exception));
+            ExceptionOccurred?.Invoke(this, new ExceptionEventArgs(exception));
         }
 
         #endregion

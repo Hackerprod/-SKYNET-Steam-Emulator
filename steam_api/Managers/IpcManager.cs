@@ -10,6 +10,7 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace SKYNET.Managers
 {
@@ -17,11 +18,11 @@ namespace SKYNET.Managers
     {
         private const ulong IPC_ToServer  = 0;
         private const ulong IPC_Broadcast = 1;
-        private static PipeClient<IPCMessage> IPCClient;
+        private static PipeClient IPCClient;
 
         static IPCManager()
         {
-            IPCClient = new PipeClient<IPCMessage>("SKYNET");
+            IPCClient = new PipeClient("SKYNET");
             IPCClient.AutoReconnect = true;
             IPCClient.Connected += IPCClient_Connected;
             IPCClient.Disconnected += IPCClient_Disconnected;
@@ -117,6 +118,38 @@ namespace SKYNET.Managers
                     break;
             }
 
+        }
+
+        internal static void SendStartVoiceRecording()
+        {
+            var StartVoiceRecording = new IPC_StartVoiceRecording();
+            var message = CreateIPCMessage(StartVoiceRecording, IPCMessageType.IPC_StartVoiceRecording);
+            SendTo(IPC_ToServer, message);
+        }        
+
+        internal static void SendStopVoiceRecording()
+        {
+            var StopVoiceRecording = new IPC_StopVoiceRecording();
+            var message = CreateIPCMessage(StopVoiceRecording, IPCMessageType.IPC_StopVoiceRecording);
+            SendTo(IPC_ToServer, message);
+        }
+
+        internal static bool SendGetAvailableVoice(out uint pcbCompressed, out uint pcbUncompressed_Deprecated)
+        {
+            pcbCompressed = 0;
+            pcbUncompressed_Deprecated = 0;
+            var result = false;
+            var GetAvailableVoice = new IPC_GetAvailableVoiceRequest();
+            var message = CreateIPCMessage(GetAvailableVoice, IPCMessageType.IPC_GetAvailableVoiceRequest);
+            var Response =  SendTo(IPC_ToServer, message);
+            if (Response != null)
+            {
+                var AvailableVoiceResponse = Response.ParsedBody.FromJson<IPC_GetAvailableVoiceResponse>();
+                if (AvailableVoiceResponse == null) return false;
+                pcbCompressed = AvailableVoiceResponse.Compressed;
+                pcbUncompressed_Deprecated = AvailableVoiceResponse.UnCompressed;
+            }
+            return result;
         }
 
         #region IPC_ClientHello
@@ -730,23 +763,27 @@ namespace SKYNET.Managers
         }
 
 
-        private static void SendTo(ulong SteamID, IPCMessage message)
+        private static IPCMessage SendTo(ulong SteamID, IPCMessage message, bool WaitResponse = false)
         {
             message.To = SteamID;
             if (IPCClient.IsConnected)
             {
-                IPCClient.WriteAsync(message);
+                var TaskResponse = IPCClient.WriteAsync(message, WaitResponse);
+                if (TaskResponse.Result == null) return null;
+                return TaskResponse.Result;
             }
             else
             {
                 IPCClient.ConnectAsync();
             }
+            return null;
         }
 
-        private static IPCMessage CreateIPCMessage(IPC_MessageBase Base, IPCMessageType type)
+        private static IPCMessage CreateIPCMessage(IPC_MessageBase Base, IPCMessageType type, ulong jobID = 0)
         {
             var message = new IPCMessage()
             {
+                JobID = jobID,
                 MessageType = (int)type,
                 ParsedBody = Base.ToJson()
             };
