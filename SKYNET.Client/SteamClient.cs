@@ -43,8 +43,7 @@ namespace SKYNET.Client
             NetworkManager.Initialize();
             IPCManager.Initialize();
             StatsManager.Initialize();
-
-
+            AudioManager.Initialize();
         }
 
         private static void InitializePlugins()

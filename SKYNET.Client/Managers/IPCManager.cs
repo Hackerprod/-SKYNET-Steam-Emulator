@@ -3,7 +3,6 @@ using SKYNET.Common;
 using SKYNET.Helper;
 using SKYNET.IPC;
 using SKYNET.IPC.Types;
-using SKYNET.Manager;
 using SKYNET.Network;
 using SKYNET.Network.Packets;
 using SKYNET.Types;
@@ -18,6 +17,8 @@ namespace SKYNET.Managers
         private const ulong IPC_ToServer = 0;
         private const ulong IPC_Broadcast = 1;
         private static PipeServer<IPCMessage> server;
+        private static string LastMessage;
+
         public static void Initialize()
         {
             server = new PipeServer<IPCMessage>("SKYNET");
@@ -26,6 +27,8 @@ namespace SKYNET.Managers
             server.MessageReceived += OnMessageReceived;
             server.ExceptionOccurred += OnExceptionOccurred;
             server.StartAsync();
+
+            LastMessage = "";
         }
 
         private static void OnClientConnected(object sender, ConnectionEventArgs<IPCMessage> args)
@@ -35,7 +38,7 @@ namespace SKYNET.Managers
 
         private static void OnMessageReceived(object sender, ConnectionMessageEventArgs<IPCMessage> e)
         {
-            Log.Write("IPCManager", $"Received IPC message {(IPCMessageType)e.Message.MessageType}");
+            Write($"Received IPC message {(IPCMessageType)e.Message.MessageType}");
 
             switch ((IPCMessageType)e.Message.MessageType)
             {
@@ -606,9 +609,14 @@ namespace SKYNET.Managers
             SendIPCMessage(message);
         }
 
+        
         private static void Write(object msg)
         {
-            Log.Write("IPCManager", msg);
+            if (LastMessage != msg.ToString())
+            {
+                Log.Write("IPCManager", msg);
+                LastMessage = msg.ToString();
+            }
         }
     }
 }

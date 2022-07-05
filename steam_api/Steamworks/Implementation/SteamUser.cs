@@ -72,24 +72,24 @@ namespace SKYNET.Steamworks.Implementation
         public void StartVoiceRecording()
         {
             Write("StartVoiceRecording");
-            IPCManager.SendStartVoiceRecording();
+            //IPCManager.SendStartVoiceRecording();
             Recording = true;
         }
 
         public void StopVoiceRecording()
         {
             Write("StopVoiceRecording");
-            IPCManager.SendStopVoiceRecording();
+            //IPCManager.SendStopVoiceRecording();
             Recording = false;
         }
 
         public int GetAvailableVoice(ref uint pcbCompressed, ref uint pcbUncompressed_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
         {
             Write("GetAvailableVoice");
-            if (IPCManager.SendGetAvailableVoice(out pcbCompressed, out pcbUncompressed_Deprecated))
-            {
-                return (int)EVoiceResult.k_EVoiceResultOK;
-            }
+            //if (IPCManager.SendGetAvailableVoice(out pcbCompressed, out pcbUncompressed_Deprecated))
+            //{
+            //    return (int)EVoiceResult.k_EVoiceResultOK;
+            //}
             return (int)EVoiceResult.k_EVoiceResultNoData;
         }
 
@@ -98,12 +98,12 @@ namespace SKYNET.Steamworks.Implementation
             Write("GetVoice");
             if (Recording) return (int)EVoiceResult.k_EVoiceResultNotRecording;
             nBytesWritten = 0;
-            if (IPCManager.SendGetVoice(out byte[] buffer))
-            {
-                Marshal.Copy(buffer, 0, pDestBuffer, buffer.Length);
-                nBytesWritten = (uint)buffer.Length;
-                return (int)EVoiceResult.k_EVoiceResultOK;
-            }
+            //if (IPCManager.SendGetVoice(out byte[] buffer))
+            //{
+            //    Marshal.Copy(buffer, 0, pDestBuffer, buffer.Length);
+            //    nBytesWritten = (uint)buffer.Length;
+            //    return (int)EVoiceResult.k_EVoiceResultOK;
+            //}
             return (int)EVoiceResult.k_EVoiceResultNoData;
         }
 
