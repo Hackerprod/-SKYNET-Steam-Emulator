@@ -141,13 +141,31 @@ namespace SKYNET.Managers
             var result = false;
             var GetAvailableVoice = new IPC_GetAvailableVoiceRequest();
             var message = CreateIPCMessage(GetAvailableVoice, IPCMessageType.IPC_GetAvailableVoiceRequest);
-            var Response =  SendTo(IPC_ToServer, message);
+            var Response =  SendTo(IPC_ToServer, message, true);
             if (Response != null)
             {
                 var AvailableVoiceResponse = Response.ParsedBody.FromJson<IPC_GetAvailableVoiceResponse>();
                 if (AvailableVoiceResponse == null) return false;
                 pcbCompressed = AvailableVoiceResponse.Compressed;
                 pcbUncompressed_Deprecated = AvailableVoiceResponse.UnCompressed;
+                result = true;
+            }
+            return result;
+        }
+
+        internal static bool SendGetVoice(out byte[] buffer)
+        {
+            buffer = default;
+            var result = false;
+            var VoiceRequest = new IPC_GetVoiceRequest();
+            var message = CreateIPCMessage(VoiceRequest, IPCMessageType.IPC_GetVoiceRequest);
+            var Response = SendTo(IPC_ToServer, message, true);
+            if (Response != null)
+            {
+                var VoiceResponse = Response.ParsedBody.FromJson<IPC_GetVoiceResponse>();
+                if (VoiceResponse == null) return false;
+                buffer = VoiceResponse.Buffer;
+                result = true;
             }
             return result;
         }

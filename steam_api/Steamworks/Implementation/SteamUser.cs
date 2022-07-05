@@ -5,6 +5,7 @@ using SKYNET.Managers;
 using SteamAPICall_t = System.UInt64;
 using HSteamUser = System.UInt32;
 using HAuthTicket = System.UInt32;
+using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -94,9 +95,15 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetVoice(bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, bool bWantUncompressed_Deprecated, IntPtr pUncompressedDestBuffer_Deprecated, uint cbUncompressedDestBufferSize_Deprecated, uint nUncompressBytesWritten_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
         {
-            //Write("GetVoice");
+            Write("GetVoice");
             if (Recording) return (int)EVoiceResult.k_EVoiceResultNotRecording;
             nBytesWritten = 0;
+            if (IPCManager.SendGetVoice(out byte[] buffer))
+            {
+                Marshal.Copy(buffer, 0, pDestBuffer, buffer.Length);
+                nBytesWritten = (uint)buffer.Length;
+                return (int)EVoiceResult.k_EVoiceResultOK;
+            }
             return (int)EVoiceResult.k_EVoiceResultNoData;
         }
 

@@ -60,7 +60,9 @@ namespace SKYNET.IPC.Types
         IPC_StartVoiceRecording,
         IPC_StopVoiceRecording,
         IPC_GetAvailableVoiceRequest,
-        IPC_GetAvailableVoiceResponse
+        IPC_GetAvailableVoiceResponse,
+        IPC_GetVoiceRequest,
+        IPC_GetVoiceResponse
     }
 
     public class IPC_ClientHello : IPC_MessageBase
@@ -258,6 +260,14 @@ namespace SKYNET.IPC.Types
     {
         public uint Compressed { get; set; }
         public uint UnCompressed { get; set; }
+    }
 
+    public class IPC_GetVoiceRequest : IPC_MessageBase
+    {
+    }
+
+    public class IPC_GetVoiceResponse : IPC_MessageBase
+    {
+        public byte[] Buffer { get; set; }
     }
 }
