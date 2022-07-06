@@ -10,7 +10,7 @@ namespace SKYNET.Managers
 {
     public class AudioManager
     {
-        private static WaveIn sourceStream;
+        private static WaveInEvent waveSource;
         private static List<byte> Buffer;
         private static List<byte> AvailableBuffer;
 
@@ -18,8 +18,10 @@ namespace SKYNET.Managers
         {
             Buffer = new List<byte>();
             AvailableBuffer = new List<byte>();
-            sourceStream = new WaveIn();
-            sourceStream.DataAvailable += OnDataAvailable;
+
+            waveSource = new WaveInEvent();
+            waveSource.WaveFormat = new WaveFormat(4800, 1);
+            waveSource.DataAvailable += OnDataAvailable;
         }
 
         private static void OnDataAvailable(object sender, WaveInEventArgs e)
@@ -32,12 +34,12 @@ namespace SKYNET.Managers
 
         internal static void StartVoiceRecording()
         {
-            sourceStream.StartRecording();
+            waveSource.StartRecording();
         }
 
         internal static void StopVoiceRecording()
         {
-            sourceStream.StopRecording();
+            waveSource.StopRecording();
         }
 
         internal static void GetAvailableVoice(out uint compressed, out uint unCompressed)

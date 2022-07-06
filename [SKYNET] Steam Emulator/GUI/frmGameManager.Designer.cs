@@ -355,6 +355,7 @@ namespace SKYNET
             this.PB_Avatar.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.PB_Avatar.TabIndex = 11;
             this.PB_Avatar.TabStop = false;
+            this.PB_Avatar.Click += new System.EventHandler(this.PB_Avatar_Click);
             // 
             // TB_AppId
             // 

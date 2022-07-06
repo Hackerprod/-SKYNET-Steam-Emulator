@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using SKYNET.GUI;
 using SKYNET.Helper;
 using SKYNET.Managers;
-using TsudaKageyu;
 
 namespace SKYNET
 {
@@ -170,6 +167,18 @@ namespace SKYNET
         private void TB_Name_KeyUp(object sender, KeyEventArgs e)
         {
             LB_Name.Text = TB_Name.Text;
+        }
+
+        private void PB_Avatar_Click(object sender, EventArgs e)
+        {
+            if (File.Exists(Game.ExecutablePath))
+            {
+                var bitmap = (Bitmap)ImageHelper.IconFromFile(Game.ExecutablePath);
+                var imageBytes = ImageHelper.ImageToBytes(bitmap);
+                var AvatarHex = Convert.ToBase64String(imageBytes);
+                Game.AvatarHex = AvatarHex;
+                PB_Avatar.Image = bitmap;
+            }
         }
     }
 }

@@ -119,13 +119,13 @@ namespace SKYNET.Helper
 
             using (MemoryStream stream = new MemoryStream())
             {
-                image.Save(stream, ImageFormat.Jpeg);
+                image.Save(stream, ImageFormat.Png);
                 stream.Close();
                 imageArray = stream.ToArray();
             }
             return imageArray;
         }
-
+        
         public static byte[] ConvertToRGBA(Bitmap image)
         {
             byte[] rgbaB = new byte[4 * (image.Width * image.Height)];
@@ -230,6 +230,16 @@ namespace SKYNET.Helper
                 return null;
         }
 
+        //public static Bitmap ConvertHexToImage(string v)
+        //{
+        //    byte[] bytes = BitConverter.GetBytes(v);
+        //}
+
+        //public static string ConvertImageToHex(Bitmap bitmap)
+        //{
+        //    byte[] bytes = ImageToBytes(bitmap);
+        //    return BitConverter.ToString(bytes).Replace("-", "");
+        //}
 
         public static Image ImageFromBytes(byte[] bytes)
         {

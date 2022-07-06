@@ -8,7 +8,7 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
-
+using System.Threading.Tasks;
 using AppID = System.UInt32;
 
 namespace SKYNET.Client
@@ -43,7 +43,7 @@ namespace SKYNET.Client
             NetworkManager.Initialize();
             IPCManager.Initialize();
             StatsManager.Initialize();
-            AudioManager.Initialize();
+            Task.Run(delegate { AudioManager.Initialize(); });            
         }
 
         private static void InitializePlugins()
