@@ -1,4 +1,5 @@
 ﻿using Gecko;
+using SKYNET.GUI;
 using System;
 using System.Drawing;
 using System.IO;
@@ -7,7 +8,7 @@ using System.Windows.Forms;
 
 namespace SKYNET
 {
-    public partial class frmBrowser : Form
+    public partial class frmBrowser : frmBase
     {
         GeckoWebBrowser browser;
         AutoJSContext JavaScriptContext;
@@ -16,7 +17,9 @@ namespace SKYNET
         public frmBrowser()
         {
             InitializeComponent();
+            BlurEffect = true;
         }
+
 
         private void FrmBrowser_Load(object sender, EventArgs e)
         {
@@ -54,7 +57,7 @@ namespace SKYNET
 
         private void _browser_DocumentCompleted(object sender, Gecko.Events.GeckoDocumentCompletedEventArgs e)
         {
-            Text = e.Uri.ToString();
+            //Text = e.Uri.ToString();
             TB_Url.Text = e.Uri.ToString();
             UpdateJavaScriptContext();
             browser_OnInitCompleted(null, null);
@@ -223,29 +226,6 @@ namespace SKYNET
 
 
         }
-
-        protected override void WndProc(ref Message m)
-        {
-            base.WndProc(ref m);
-            const int WM_NCPAINT = 0x85;
-            if (m.Msg == WM_NCPAINT)
-            {
-                IntPtr hdc = GetWindowDC(m.HWnd);
-                if ((int)hdc != 0)
-                {
-                    Graphics g = Graphics.FromHdc(hdc);
-                    g.FillRectangle(Brushes.Green, new Rectangle(0, 0, 4800, 23));
-                    g.Flush();
-                    ReleaseDC(m.HWnd, hdc);
-                }
-            }
-        }
-
-        [DllImport("User32.dll")]
-        public static extern IntPtr GetWindowDC(IntPtr hWnd);
-
-        [DllImport("User32.dll")]
-        public static extern void ReleaseDC(IntPtr hWnd, IntPtr hDC);
 
         private void BT_JSFunction_Click(object sender, EventArgs e)
         {
@@ -516,5 +496,29 @@ namespace SKYNET
         {
             browser.Navigate(TB_Url.Text);
         }
+
+        [DllImport("User32.dll", CharSet = CharSet.Auto)]
+        public static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
+
+        [DllImport("User32.dll")]
+        private static extern IntPtr GetWindowDC(IntPtr hWnd);
+
+        protected override void WndProc(ref Message m)
+        {
+            base.WndProc(ref m);
+            const int WM_NCPAINT = 0x85;
+            if (m.Msg == WM_NCPAINT)
+            {
+                IntPtr hdc = GetWindowDC(m.HWnd);
+                if ((int)hdc != 0)
+                {
+                    Graphics g = Graphics.FromHdc(hdc);
+                    g.FillRectangle(Brushes.Red, new Rectangle(0, 0, 4800, 23));
+                    g.Flush();
+                    ReleaseDC(m.HWnd, hdc);
+                }
+            }
+        }
     }
 }
+

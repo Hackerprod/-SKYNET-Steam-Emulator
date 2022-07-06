@@ -712,8 +712,11 @@ namespace SKYNET
             this.Controls.Add(this.panel3);
             this.Controls.Add(this.PN_Top);
             this.Controls.Add(this.PN_LeftContainer);
+            this.EnableShadows = true;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
+            this.MaximumSize = new System.Drawing.Size(1366, 728);
             this.Name = "frmMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.PN_Top.ResumeLayout(false);

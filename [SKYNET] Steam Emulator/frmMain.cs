@@ -36,6 +36,11 @@ namespace SKYNET
             SetMouseMove(PN_Top);
             frm = this;
 
+            //new Form1().ShowDialog();
+            //Process.GetCurrentProcess().Kill();
+
+            new DropShadow().ApplyShadows(this);
+
             Log.OnMessage += Log_OnMessage;
             ShadowBox.BackColor = Color.FromArgb(100, 0, 0, 0);
 
@@ -391,20 +396,6 @@ namespace SKYNET
         {
             WindowState = FormWindowState.Minimized;
         }
-        protected override void OnActivated(EventArgs e)
-        {
-            base.OnActivated(e);
-            int attrValue = 2;
-            DwmApi.DwmSetWindowAttribute(base.Handle, 2, ref attrValue, 16);
-            DwmApi.MARGINS mARGINS = default(DwmApi.MARGINS);
-            mARGINS.cyBottomHeight = 1;
-            mARGINS.cxLeftWidth = 0;
-            mARGINS.cxRightWidth = 0;
-            mARGINS.cyTopHeight = 0;
-            DwmApi.MARGINS marInset = mARGINS;
-            DwmApi.DwmExtendFrameIntoClientArea(base.Handle, ref marInset);
-        }
-
 
         private void TB_Search_KeyUp(object sender, KeyEventArgs e)
         {

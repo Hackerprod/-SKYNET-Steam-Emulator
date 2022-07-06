@@ -110,11 +110,14 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BlurEffect = true;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.PN_WebContainer);
             this.Controls.Add(this.panel1);
             this.Name = "frmBrowser";
+            this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.TransparencyKey = System.Drawing.Color.Azure;
             this.Load += new System.EventHandler(this.FrmBrowser_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();

@@ -13,6 +13,17 @@ namespace SKYNET.GUI
         private Color _backColor;
         private bool _blur;
         private bool _shadows;
+        private bool dragSize = true;
+
+        const int HTLEFT = 10;
+        const int HTRIGHT = 11;
+        const int HTTOP = 12;
+        const int HTTOPLEFT = 13;
+        const int HTTOPRIGHT = 14;
+        const int HTBOTTOM = 15;
+        const int HTBOTTOMLEFT = 0x10;
+        const int HTBOTTOMRIGHT = 17;
+        const long WM_DRAG_SIZE = 0x0084;
 
         [Category("SKYNET")]
         public bool BlurEffect 
@@ -33,6 +44,10 @@ namespace SKYNET.GUI
                 }
             }
         }
+
+        [Category("SKYNET")]
+        [DefaultValue(typeof(bool), "true")]
+        public bool DragSize { get { return dragSize; } set { dragSize = value; } }
 
         public override Color BackColor
         {
@@ -163,5 +178,118 @@ namespace SKYNET.GUI
 
             public int cyBottomHeight;
         }
+
+        #region Resize
+        private const long WM_GETMINMAXINFO = 0x24;
+
+        private struct POINTAPI
+        {
+            public int x;
+            public int y;
+        }
+
+        private struct MINMAXINFO
+        {
+            public POINTAPI ptReserved;
+            public POINTAPI ptMaxSize;
+            public POINTAPI ptMaxPosition;
+            public POINTAPI ptMinTrackSize;
+            public POINTAPI ptMaxTrackSize;
+        }
+
+        public struct APPBARDATA
+        {
+            public int cbSize;
+            public IntPtr hWnd;
+            public int uCallbackMessage;
+            public int uEdge;//属性代表上、下、左、右
+            public RECT rc;
+            public IntPtr lParam;
+        }
+
+        protected override void WndProc(ref System.Windows.Forms.Message m)
+        {
+            base.WndProc(ref m);
+            if (m.Msg == WM_GETMINMAXINFO)
+            {
+                this.MaximumSize = SystemInformation.WorkingArea.Size;
+                MINMAXINFO mmi = (MINMAXINFO)m.GetLParam(typeof(MINMAXINFO));
+                mmi.ptMinTrackSize.x = this.MinimumSize.Width;
+                mmi.ptMinTrackSize.y = this.MinimumSize.Height;
+                if (this.MaximumSize.Width != 0 || this.MaximumSize.Height != 0)
+                {
+                    mmi.ptMaxTrackSize.x = this.MaximumSize.Width;
+                    mmi.ptMaxTrackSize.y = this.MaximumSize.Height;
+                }
+                //-------------------------
+                int aaa = 0x00000005;
+                APPBARDATA pdat = new APPBARDATA();
+                SHAppBarMessage(aaa, ref pdat);
+
+                if (pdat.uEdge == 0) //左
+                {
+                    mmi.ptMaxPosition.x = Screen.PrimaryScreen.Bounds.Width - SystemInformation.WorkingArea.Width;
+                    mmi.ptMaxPosition.y = 0;
+                }
+                else if (pdat.uEdge == 1) //上
+                {
+                    mmi.ptMaxPosition.x = 0;
+                    mmi.ptMaxPosition.y = Screen.PrimaryScreen.Bounds.Height - SystemInformation.WorkingArea.Height;
+                }
+                else if (pdat.uEdge == 2) //右
+                {
+                    mmi.ptMaxPosition.x = 0;
+                    mmi.ptMaxPosition.y = 0;
+                }
+                else if (pdat.uEdge == 3) //下
+                {
+                    mmi.ptMaxPosition.x = 0;
+                    mmi.ptMaxPosition.y = 0;
+                }
+
+                Marshal.StructureToPtr(mmi, m.LParam, true);
+            }
+            else if (DragSize && m.Msg == WM_DRAG_SIZE)
+            {
+                Point vPoint = new Point((int)m.LParam & 0xFFFF,
+                           (int)m.LParam >> 16 & 0xFFFF);
+                vPoint = PointToClient(vPoint);
+                if (vPoint.X <= 5)
+                    if (vPoint.Y <= 5)
+                        m.Result = (IntPtr)HTTOPLEFT;
+                    else if (vPoint.Y >= ClientSize.Height - 5)
+                        m.Result = (IntPtr)HTBOTTOMLEFT;
+                    else m.Result = (IntPtr)HTLEFT;
+                else if (vPoint.X >= ClientSize.Width - 5)
+                    if (vPoint.Y <= 5)
+                        m.Result = (IntPtr)HTTOPRIGHT;
+                    else if (vPoint.Y >= ClientSize.Height - 5)
+                        m.Result = (IntPtr)HTBOTTOMRIGHT;
+                    else m.Result = (IntPtr)HTRIGHT;
+                else if (vPoint.Y <= 5)
+                    m.Result = (IntPtr)HTTOP;
+                else if (vPoint.Y >= ClientSize.Height - 5)
+                    m.Result = (IntPtr)HTBOTTOM;
+            }
+        }
+
+        [DllImport("SHELL32", CallingConvention = CallingConvention.StdCall)]
+        public static extern uint SHAppBarMessage(int dwMessage, ref APPBARDATA pData);
+
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        public struct RECT
+        {
+            public int left;
+            public int top;
+            public int right;
+            public int bottom;
+            public override string ToString()
+            {
+                return "{left=" + left.ToString() + ", " + "top=" + top.ToString() + ", " +
+                "right=" + right.ToString() + ", " + "bottom=" + bottom.ToString() + "}";
+            }
+        }
+
+        #endregion
     }
 }

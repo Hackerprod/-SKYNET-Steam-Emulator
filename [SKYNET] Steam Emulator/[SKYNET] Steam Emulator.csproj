@@ -93,6 +93,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Form1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form1.Designer.cs">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </Compile>
     <Compile Include="frmBrowser.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -114,6 +120,7 @@
     <Compile Include="GUI\Controls\SKYNET_UserControl.Designer.cs">
       <DependentUpon>SKYNET_UserControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="GUI\DropShadow.cs" />
     <Compile Include="GUI\frmCropEditor.cs">
       <SubType>Form</SubType>
     </Compile>

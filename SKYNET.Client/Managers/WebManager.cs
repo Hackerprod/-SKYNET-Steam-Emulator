@@ -70,17 +70,18 @@ namespace SKYNET
             else
             {
                 Write($"Requesting Auth for {AuthRequest.Username} = {AuthRequest.Password}, [hackerprod:123]");
-                if (AuthRequest.Username.ToLower() != "hackerprod")
-                {
-                    AuthResponse.Response = WEB_AuthResponseType.AccountNotFound;
-                    Send(AuthResponse, WEB_MessageType.WEB_AuthResponse);
-                }
-                else if (AuthRequest.Password != "123")
-                {
-                    AuthResponse.Response = WEB_AuthResponseType.PasswordWrong;
-                    Send(AuthResponse, WEB_MessageType.WEB_AuthResponse);
-                }
-                else
+
+                //if (AuthRequest.Username.ToLower() != "hackerprod")
+                //{
+                //    AuthResponse.Response = WEB_AuthResponseType.AccountNotFound;
+                //    Send(AuthResponse, WEB_MessageType.WEB_AuthResponse);
+                //}
+                //else if (AuthRequest.Password != "123")
+                //{
+                //    AuthResponse.Response = WEB_AuthResponseType.PasswordWrong;
+                //    Send(AuthResponse, WEB_MessageType.WEB_AuthResponse);
+                //}
+                //else
                 {
                     AuthResponse.Response = WEB_AuthResponseType.Success;
                     var imageBytes = ImageHelper.ImageToBytes(SteamClient.Avatar);
