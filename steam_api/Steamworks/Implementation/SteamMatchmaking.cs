@@ -13,6 +13,7 @@ using SKYNET.Helper.JSON;
 using SKYNET.IPC.Types;
 using SKYNET.Managers;
 using SKYNET.Types;
+using SKYNET.Steamworks.Interfaces;
 
 using SteamAPICall_t = System.UInt64;
 

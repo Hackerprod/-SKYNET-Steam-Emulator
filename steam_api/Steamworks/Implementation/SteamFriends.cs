@@ -8,6 +8,7 @@ using SKYNET.Helper;
 using SKYNET.Managers;
 using SKYNET.Types;
 using SKYNET.IPC.Types;
+using SKYNET.Steamworks.Interfaces;
 
 using SteamAPICall_t = System.UInt64;
 using FriendsGroupID_t = System.UInt16;
@@ -319,8 +320,7 @@ namespace SKYNET.Steamworks.Implementation
             return k_uAPICallInvalid;
         }
 
-        [return: MarshalAs(UnmanagedType.Struct)]
-        public CSteamID GetFriendByIndex([MarshalAs(UnmanagedType.I4)] int iFriend, int iFriendFlags)
+        public CSteamID GetFriendByIndex(int iFriend, int iFriendFlags)
         {
             var Friends = Users.FindAll(f => f.HasFriend);
 

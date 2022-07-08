@@ -38,7 +38,7 @@ namespace SKYNET.Managers
 
         private static void OnMessageReceived(object sender, ConnectionMessageEventArgs<IPCMessage> e)
         {
-            Write($"Received IPC message {(IPCMessageType)e.Message.MessageType}");
+            //Write($"Received IPC message {(IPCMessageType)e.Message.MessageType}");
 
             switch ((IPCMessageType)e.Message.MessageType)
             {
@@ -108,57 +108,10 @@ namespace SKYNET.Managers
                 case IPCMessageType.IPC_ResetAllStats:
                     Process_ResetAllStats(e.Message);
                     break;
-                case IPCMessageType.IPC_StartVoiceRecording:
-                    Process_StartVoiceRecording(e.Message);
-                    break;
-                case IPCMessageType.IPC_StopVoiceRecording:
-                    Process_StopVoiceRecording(e.Message);
-                    break;
-                case IPCMessageType.IPC_GetAvailableVoiceRequest:
-                    Process_GetAvailableVoiceRequest(e.Message, e.Connection);
-                    break;
-                case IPCMessageType.IPC_GetVoiceRequest:
-                    Process_GetVoiceRequest(e.Message, e.Connection);
-                    break;
-
                 default:
                     break;
             }
         }
-        
-        private static void Process_StartVoiceRecording(IPCMessage message)
-        {
-            AudioManager.StartVoiceRecording();
-        }
-
-        private static void Process_StopVoiceRecording(IPCMessage message)
-        {
-            AudioManager.StopVoiceRecording();
-        }
-
-        private static void Process_GetAvailableVoiceRequest(IPCMessage message, PipeConnection<IPCMessage> connection)
-        {
-            AudioManager.GetAvailableVoice(out var compressed, out var unCompressed);
-            var AvailableVoiceResponse = new IPC_GetAvailableVoiceResponse()
-            {
-                Compressed = compressed,
-                UnCompressed = unCompressed
-            };
-            var AvailableVoiceMessage = CreateIPCMessage(AvailableVoiceResponse, IPCMessageType.IPC_GetAvailableVoiceResponse, message.JobID);
-            connection.WriteAsync(AvailableVoiceMessage);
-        }
-
-        private static void Process_GetVoiceRequest(IPCMessage message, PipeConnection<IPCMessage> connection)
-        {
-            AudioManager.GetVoice(out var buffer);
-            var VoiceResponse = new IPC_GetVoiceResponse()
-            {
-                Buffer = buffer
-            };
-            var VoiceMessage = CreateIPCMessage(VoiceResponse, IPCMessageType.IPC_GetVoiceResponse, message.JobID);
-            connection.WriteAsync(VoiceMessage);
-        }
-
 
         private static void Process_SetAchievement(IPCMessage message)
         {

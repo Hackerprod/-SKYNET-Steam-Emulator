@@ -39,7 +39,14 @@ namespace SKYNET.Common
 
         public static T Deserialize<T>(this string @string)
         {
-            return new JavaScriptSerializer().Deserialize<T>(@string);
+            try
+            {
+                return new JavaScriptSerializer().Deserialize<T>(@string);
+            }
+            catch (Exception)
+            {
+                return default;
+            }
         }
 
         public static T Deserialize<T>(this byte[] bytes)

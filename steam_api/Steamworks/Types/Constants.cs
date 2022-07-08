@@ -4,36 +4,8 @@ namespace SKYNET.Steamworks
 {
     public static class Constants
     {
-        public const string STEAMAPPLIST_INTERFACE_VERSION = "STEAMAPPLIST_INTERFACE_VERSION001";
-        public const string STEAMAPPS_INTERFACE_VERSION = "STEAMAPPS_INTERFACE_VERSION007";
-        public const string STEAMAPPTICKET_INTERFACE_VERSION = "STEAMAPPTICKET_INTERFACE_VERSION001";
-        public const string STEAMCLIENT_INTERFACE_VERSION = "SteamClient017";
-        public const string STEAMCONTROLLER_INTERFACE_VERSION = "STEAMCONTROLLER_INTERFACE_VERSION";
-        public const string STEAMFRIENDS_INTERFACE_VERSION = "SteamFriends015";
-        public const string STEAMGAMECOORDINATOR_INTERFACE_VERSION = "SteamGameCoordinator001";
-        public const string STEAMGAMESERVER_INTERFACE_VERSION = "SteamGameServer012";
-        public const string STEAMGAMESERVERSTATS_INTERFACE_VERSION = "SteamGameServerStats001";
-        public const string STEAMHTMLSURFACE_INTERFACE_VERSION = "STEAMHTMLSURFACE_INTERFACE_VERSION_003";
-        public const string STEAMHTTP_INTERFACE_VERSION = "STEAMHTTP_INTERFACE_VERSION002";
-        public const string STEAMINVENTORY_INTERFACE_VERSION = "STEAMINVENTORY_INTERFACE_V001";
-        public const string STEAMMATCHMAKING_INTERFACE_VERSION = "SteamMatchMaking009";
-        public const string STEAMMATCHMAKINGSERVERS_INTERFACE_VERSION = "SteamMatchMakingServers002";
-        public const string STEAMMUSIC_INTERFACE_VERSION = "STEAMMUSIC_INTERFACE_VERSION001";
-        public const string STEAMMUSICREMOTE_INTERFACE_VERSION = "STEAMMUSICREMOTE_INTERFACE_VERSION001";
-        public const string STEAMNETWORKING_INTERFACE_VERSION = "SteamNetworking005";
-        public const string STEAMREMOTESTORAGE_INTERFACE_VERSION = "STEAMREMOTESTORAGE_INTERFACE_VERSION012";
-        public const string STEAMSCREENSHOTS_INTERFACE_VERSION = "STEAMSCREENSHOTS_INTERFACE_VERSION002";
-        public const string STEAMUGC_INTERFACE_VERSION = "STEAMUGC_INTERFACE_VERSION007";
-        public const string STEAMUNIFIEDMESSAGES_INTERFACE_VERSION = "STEAMUNIFIEDMESSAGES_INTERFACE_VERSION001";
-        public const string STEAMUSER_INTERFACE_VERSION = "SteamUser018";
-        public const string STEAMUSERSTATS_INTERFACE_VERSION = "STEAMUSERSTATS_INTERFACE_VERSION011";
-        public const string STEAMUTILS_INTERFACE_VERSION = "SteamUtils007";
-        public const string STEAMVIDEO_INTERFACE_VERSION = "STEAMVIDEO_INTERFACE_V001";
-        public const int k_cubAppProofOfPurchaseKeyMax = 64; // max bytes of a legacy cd key we support
-                                                             //-----------------------------------------------------------------------------
-                                                             // Purpose: Base values for callback identifiers, each callback must
-                                                             //			have a unique ID.
-                                                             //-----------------------------------------------------------------------------
+        public const int k_cubAppProofOfPurchaseKeyMax = 64;
+
         public const int k_iSteamUserCallbacks = 100;
         public const int k_iSteamGameServerCallbacks = 200;
         public const int k_iSteamFriendsCallbacks = 300;
@@ -86,19 +58,13 @@ namespace SKYNET.Steamworks
         // maximum number of groups a single user is allowed
         public const int k_cFriendsGroupLimit = 100;
         public const int k_cEnumerateFollowersMax = 50;
-        // maximum number of characters in a user's name. Two flavors; one for UTF-8 and one for UTF-16.
-        // The UTF-8 version has to be very generous to accomodate characters that get large when encoded
-        // in UTF-8.
         public const int k_cchPersonaNameMax = 128;
         public const int k_cwchPersonaNameMax = 32;
-        // size limit on chat room or member metadata
         public const int k_cubChatMetadataMax = 8192;
-        // size limits on Rich Presence data
         public const int k_cchMaxRichPresenceKeys = 20;
         public const int k_cchMaxRichPresenceKeyLength = 64;
         public const int k_cchMaxRichPresenceValueLength = 256;
 
-        // game server flags
         public const UInt32 k_unServerFlagNone = 0x00;
         public const UInt32 k_unServerFlagActive = 0x01;        // server has users playing
         public const UInt32 k_unServerFlagSecure = 0x02;        // server wants to be secure
@@ -225,29 +191,16 @@ namespace SKYNET.Steamworks
         public const int k_iSteamSTARCallbacks = 5500;
         public const int k_iSteamRemotePlayCallbacks = 5700;
         public const int k_iSteamChatCallbacks = 5900;
-        /// Pass to SteamGameServer_Init to indicate that the same UDP port will be used for game traffic
-        /// UDP queries for server browser pings and LAN discovery.  In this case, Steam will not open up a
-        /// socket to handle server browser queries, and you must use ISteamGameServer::HandleIncomingPacket
-        /// and ISteamGameServer::GetNextOutgoingPacket to handle packets related to server discovery on your socket.
+
         public const ushort STEAMGAMESERVER_QUERY_PORT_SHARED = 0xffff;
         public const int k_unSteamUserDefaultInstance = 1; // fixed instance for all individual users
-        /// Port number(s) assigned to us.  Only the first entries will contain
-        /// nonzero values.  Entries corresponding to ports beyond what was
-        /// allocated for you will be zero.
-        ///
-        /// (NOTE: At the time of this writing, the maximum number of ports you may
-        /// request is 4.)
+
         public const int k_nMaxReturnPorts = 8;
-        /// Max length of diagnostic error message
         public const int k_cchMaxSteamNetworkingErrMsg = 1024;
-        /// Max length, in bytes (including null terminator) of the reason string
-        /// when a connection is closed.
         public const int k_cchSteamNetworkingMaxConnectionCloseReason = 128;
-        /// Max length, in bytes (include null terminator) of debug description
-        /// of a connection.
         public const int k_cchSteamNetworkingMaxConnectionDescription = 128;
-        /// Max length of the app's part of the description
         public const int k_cchSteamNetworkingMaxConnectionAppName = 32;
+
         public const int k_nSteamNetworkConnectionInfoFlags_Unauthenticated = 1; // We don't have a certificate for the remote host.
         public const int k_nSteamNetworkConnectionInfoFlags_Unencrypted = 2; // Information is being sent out over a wire unencrypted (by this library)
         public const int k_nSteamNetworkConnectionInfoFlags_LoopbackBuffers = 4; // Internal loopback buffers.  Won't be true for localhost.  (You can check the address to determine that.)  This implies k_nSteamNetworkConnectionInfoFlags_FastLAN
@@ -261,117 +214,18 @@ namespace SKYNET.Steamworks
                                                                            /// Note: We might be wiling to receive larger messages,
                                                                            /// and our peer might, too.
         public const int k_cbMaxSteamNetworkingSocketsMessageSizeSend = 512 * 1024;
-        //
-        // Flags used to set options for message sending
-        //
-        // Send the message unreliably. Can be lost.  Messages *can* be larger than a
-        // single MTU (UDP packet), but there is no retransmission, so if any piece
-        // of the message is lost, the entire message will be dropped.
-        //
-        // The sending API does have some knowledge of the underlying connection, so
-        // if there is no NAT-traversal accomplished or there is a recognized adjustment
-        // happening on the connection, the packet will be batched until the connection
-        // is open again.
-        //
-        // Migration note: This is not exactly the same as k_EP2PSendUnreliable!  You
-        // probably want k_ESteamNetworkingSendType_UnreliableNoNagle
         public const int k_nSteamNetworkingSend_Unreliable = 0;
-        // Disable Nagle's algorithm.
-        // By default, Nagle's algorithm is applied to all outbound messages.  This means
-        // that the message will NOT be sent immediately, in case further messages are
-        // sent soon after you send this, which can be grouped together.  Any time there
-        // is enough buffered data to fill a packet, the packets will be pushed out immediately,
-        // but partially-full packets not be sent until the Nagle timer expires.  See
-        // ISteamNetworkingSockets::FlushMessagesOnConnection, ISteamNetworkingMessages::FlushMessagesToUser
-        //
-        // NOTE: Don't just send every message without Nagle because you want packets to get there
-        // quicker.  Make sure you understand the problem that Nagle is solving before disabling it.
-        // If you are sending small messages, often many at the same time, then it is very likely that
-        // it will be more efficient to leave Nagle enabled.  A typical proper use of this flag is
-        // when you are sending what you know will be the last message sent for a while (e.g. the last
-        // in the server simulation tick to a particular client), and you use this flag to flush all
-        // messages.
         public const int k_nSteamNetworkingSend_NoNagle = 1;
-        // Send a message unreliably, bypassing Nagle's algorithm for this message and any messages
-        // currently pending on the Nagle timer.  This is equivalent to using k_ESteamNetworkingSend_Unreliable
-        // and then immediately flushing the messages using ISteamNetworkingSockets::FlushMessagesOnConnection
-        // or ISteamNetworkingMessages::FlushMessagesToUser.  (But using this flag is more efficient since you
-        // only make one API call.)
         public const int k_nSteamNetworkingSend_UnreliableNoNagle = k_nSteamNetworkingSend_Unreliable | k_nSteamNetworkingSend_NoNagle;
-        // If the message cannot be sent very soon (because the connection is still doing some initial
-        // handshaking, route negotiations, etc), then just drop it.  This is only applicable for unreliable
-        // messages.  Using this flag on reliable messages is invalid.
         public const int k_nSteamNetworkingSend_NoDelay = 4;
-        // Send an unreliable message, but if it cannot be sent relatively quickly, just drop it instead of queuing it.
-        // This is useful for messages that are not useful if they are excessively delayed, such as voice data.
-        // NOTE: The Nagle algorithm is not used, and if the message is not dropped, any messages waiting on the
-        // Nagle timer are immediately flushed.
-        //
-        // A message will be dropped under the following circumstances:
-        // - the connection is not fully connected.  (E.g. the "Connecting" or "FindingRoute" states)
-        // - there is a sufficiently large number of messages queued up already such that the current message
-        //   will not be placed on the wire in the next ~200ms or so.
-        //
-        // If a message is dropped for these reasons, k_EResultIgnored will be returned.
         public const int k_nSteamNetworkingSend_UnreliableNoDelay = k_nSteamNetworkingSend_Unreliable | k_nSteamNetworkingSend_NoDelay | k_nSteamNetworkingSend_NoNagle;
-        // Reliable message send. Can send up to k_cbMaxSteamNetworkingSocketsMessageSizeSend bytes in a single message.
-        // Does fragmentation/re-assembly of messages under the hood, as well as a sliding window for
-        // efficient sends of large chunks of data.
-        //
-        // The Nagle algorithm is used.  See notes on k_ESteamNetworkingSendType_Unreliable for more details.
-        // See k_ESteamNetworkingSendType_ReliableNoNagle, ISteamNetworkingSockets::FlushMessagesOnConnection,
-        // ISteamNetworkingMessages::FlushMessagesToUser
-        //
-        // Migration note: This is NOT the same as k_EP2PSendReliable, it's more like k_EP2PSendReliableWithBuffering
         public const int k_nSteamNetworkingSend_Reliable = 8;
-        // Send a message reliably, but bypass Nagle's algorithm.
-        //
-        // Migration note: This is equivalent to k_EP2PSendReliable
         public const int k_nSteamNetworkingSend_ReliableNoNagle = k_nSteamNetworkingSend_Reliable | k_nSteamNetworkingSend_NoNagle;
-        // By default, message sending is queued, and the work of encryption and talking to
-        // the operating system sockets, etc is done on a service thread.  This is usually a
-        // a performance win when messages are sent from the "main thread".  However, if this
-        // flag is set, and data is ready to be sent immediately (either from this message
-        // or earlier queued data), then that work will be done in the current thread, before
-        // the current call returns.  If data is not ready to be sent (due to rate limiting
-        // or Nagle), then this flag has no effect.
-        //
-        // This is an advanced flag used to control performance at a very low level.  For
-        // most applications running on modern hardware with more than one CPU core, doing
-        // the work of sending on a service thread will yield the best performance.  Only
-        // use this flag if you have a really good reason and understand what you are doing.
-        // Otherwise you will probably just make performance worse.
         public const int k_nSteamNetworkingSend_UseCurrentThread = 16;
-        // When sending a message using ISteamNetworkingMessages, automatically re-establish
-        // a broken session, without returning k_EResultNoConnection.  Without this flag,
-        // if you attempt to send a message, and the session was proactively closed by the
-        // peer, or an error occurred that disrupted communications, then you must close the
-        // session using ISteamNetworkingMessages::CloseSessionWithUser before attempting to
-        // send another message.  (Or you can simply add this flag and retry.)  In this way,
-        // the disruption cannot go unnoticed, and a more clear order of events can be
-        // ascertained. This is especially important when reliable messages are used, since
-        // if the connection is disrupted, some of those messages will not have been delivered,
-        // and it is in general not possible to know which.  Although a
-        // SteamNetworkingMessagesSessionFailed_t callback will be posted when an error occurs
-        // to notify you that a failure has happened, callbacks are asynchronous, so it is not
-        // possible to tell exactly when it happened.  And because the primary purpose of
-        // ISteamNetworkingMessages is to be like UDP, there is no notification when a peer closes
-        // the session.
-        //
-        // If you are not using any reliable messages (e.g. you are using ISteamNetworkingMessages
-        // exactly as a transport replacement for UDP-style datagrams only), you may not need to
-        // know when an underlying connection fails, and so you may not need this notification.
         public const int k_nSteamNetworkingSend_AutoRestartBrokenSession = 32;
-        /// Max possible length of a ping location, in string format.  This is
-        /// an extremely conservative worst case value which leaves room for future
-        /// syntax enhancements.  Most strings in practice are a lot shorter.
-        /// If you are storing many of these, you will very likely benefit from
-        /// using dynamic memory.
         public const int k_cchMaxSteamNetworkingPingLocationString = 1024;
-        /// Special values that are returned by some functions that return a ping.
         public const int k_nSteamNetworkingPing_Failed = -1;
         public const int k_nSteamNetworkingPing_Unknown = -2;
-        // Bitmask of types to share
         public const int k_nSteamNetworkingConfig_P2P_Transport_ICE_Enable_Default = -1; // Special value - use user defaults
         public const int k_nSteamNetworkingConfig_P2P_Transport_ICE_Enable_Disable = 0; // Do not do any ICE work at all or share any IP addresses with peer
         public const int k_nSteamNetworkingConfig_P2P_Transport_ICE_Enable_Relay = 1; // Relayed connection via TURN server.

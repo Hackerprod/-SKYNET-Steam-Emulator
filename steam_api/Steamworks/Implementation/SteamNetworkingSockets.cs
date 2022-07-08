@@ -1,6 +1,4 @@
-﻿using SKYNET;
-using SKYNET.Steamworks;
-using SKYNET.Types;
+﻿using SKYNET.Steamworks.Interfaces;
 using System;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;

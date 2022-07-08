@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using SKYNET.Steamworks.Interfaces;
 
 using DepotId_t = System.UInt32;
 

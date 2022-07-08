@@ -33,10 +33,6 @@
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NAudio, Version=1.9.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NAudio.1.9.0\lib\net35\NAudio.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="SKYNET.INISerializer, Version=1.0.0.2, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\INISerializer.1.1.0\lib\net472\SKYNET.INISerializer.dll</HintPath>
     </Reference>
@@ -54,7 +50,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IPC\Types\IPC_Messages.cs" />
-    <Compile Include="Managers\AudioManager.cs" />
     <Compile Include="Managers\GameManager.cs" />
     <Compile Include="Managers\IPCManager.cs" />
     <Compile Include="Managers\LobbyManager.cs" />

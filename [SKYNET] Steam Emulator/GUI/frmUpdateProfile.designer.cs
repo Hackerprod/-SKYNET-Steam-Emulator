@@ -39,6 +39,7 @@ namespace SKYNET
             this.acceptBtn = new System.Windows.Forms.Button();
             this.Browser = new System.Windows.Forms.WebBrowser();
             this.panelBody = new System.Windows.Forms.Panel();
+            this.TB_AccountID = new SKYNET.Controls.SKYNET_TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this._password = new System.Windows.Forms.Label();
             this.Password = new SKYNET.Controls.SKYNET_TextBox();
@@ -51,7 +52,6 @@ namespace SKYNET
             this.label6 = new System.Windows.Forms.Label();
             this.panelLogo = new System.Windows.Forms.Panel();
             this.Logo = new System.Windows.Forms.PictureBox();
-            this.TB_AccountID = new SKYNET.Controls.SKYNET_TextBox();
             this.panelBody.SuspendLayout();
             this.panelLogo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.Logo)).BeginInit();
@@ -105,6 +105,23 @@ namespace SKYNET
             this.panelBody.Size = new System.Drawing.Size(393, 267);
             this.panelBody.TabIndex = 34;
             this.panelBody.Click += new System.EventHandler(this.PanelBody_Click);
+            // 
+            // TB_AccountID
+            // 
+            this.TB_AccountID.ActivatedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(61)))), ((int)(((byte)(75)))));
+            this.TB_AccountID.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(61)))), ((int)(((byte)(75)))));
+            this.TB_AccountID.Color = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(61)))), ((int)(((byte)(75)))));
+            this.TB_AccountID.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(220)))), ((int)(((byte)(240)))));
+            this.TB_AccountID.IsPassword = false;
+            this.TB_AccountID.Location = new System.Drawing.Point(162, 168);
+            this.TB_AccountID.Logo = global::SKYNET.Properties.Resources.steam_home_os;
+            this.TB_AccountID.LogoCursor = System.Windows.Forms.Cursors.Default;
+            this.TB_AccountID.Name = "TB_AccountID";
+            this.TB_AccountID.OnlyNumbers = false;
+            this.TB_AccountID.ShowLogo = true;
+            this.TB_AccountID.Size = new System.Drawing.Size(213, 35);
+            this.TB_AccountID.TabIndex = 71;
+            this.TB_AccountID.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
             // 
             // label1
             // 
@@ -264,23 +281,6 @@ namespace SKYNET
             this.Logo.TabIndex = 1;
             this.Logo.TabStop = false;
             // 
-            // TB_AccountID
-            // 
-            this.TB_AccountID.ActivatedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(61)))), ((int)(((byte)(75)))));
-            this.TB_AccountID.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(61)))), ((int)(((byte)(75)))));
-            this.TB_AccountID.Color = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(61)))), ((int)(((byte)(75)))));
-            this.TB_AccountID.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(220)))), ((int)(((byte)(240)))));
-            this.TB_AccountID.IsPassword = false;
-            this.TB_AccountID.Location = new System.Drawing.Point(162, 168);
-            this.TB_AccountID.Logo = global::SKYNET.Properties.Resources.steam_home_os;
-            this.TB_AccountID.LogoCursor = System.Windows.Forms.Cursors.Default;
-            this.TB_AccountID.Name = "TB_AccountID";
-            this.TB_AccountID.OnlyNumbers = false;
-            this.TB_AccountID.ShowLogo = true;
-            this.TB_AccountID.Size = new System.Drawing.Size(213, 35);
-            this.TB_AccountID.TabIndex = 71;
-            this.TB_AccountID.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
-            // 
             // frmUpdateProfile
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
@@ -294,8 +294,10 @@ namespace SKYNET
             this.Controls.Add(this.panelTop);
             this.Font = new System.Drawing.Font("Segoe UI Emoji", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(29)))), ((int)(((byte)(39)))), ((int)(((byte)(51)))));
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.MaximumSize = new System.Drawing.Size(1360, 728);
             this.Name = "frmUpdateProfile";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "[SKYNET] Dota2 GCS";

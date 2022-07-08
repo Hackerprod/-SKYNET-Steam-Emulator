@@ -82,6 +82,7 @@ namespace SKYNET
             this.ToButtomMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.GameCacheMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ConfigureMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.LB_Clear = new System.Windows.Forms.Label();
             this.PN_Top.SuspendLayout();
             this.panel3.SuspendLayout();
             this.panel4.SuspendLayout();
@@ -143,6 +144,7 @@ namespace SKYNET
             // panel3
             // 
             this.panel3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
+            this.panel3.Controls.Add(this.LB_Clear);
             this.panel3.Controls.Add(this.LB_Browser);
             this.panel3.Controls.Add(this.label6);
             this.panel3.Controls.Add(this.LB_Status);
@@ -700,6 +702,20 @@ namespace SKYNET
             this.ConfigureMenuItem.Text = "Properties";
             this.ConfigureMenuItem.Click += new System.EventHandler(this.ConfigureMenuItem_Click);
             // 
+            // LB_Clear
+            // 
+            this.LB_Clear.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
+            this.LB_Clear.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.LB_Clear.Font = new System.Drawing.Font("Segoe UI Emoji", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LB_Clear.ForeColor = System.Drawing.Color.White;
+            this.LB_Clear.Location = new System.Drawing.Point(757, 23);
+            this.LB_Clear.Name = "LB_Clear";
+            this.LB_Clear.Size = new System.Drawing.Size(60, 15);
+            this.LB_Clear.TabIndex = 13;
+            this.LB_Clear.Text = "CLEAR";
+            this.LB_Clear.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.LB_Clear.Click += new System.EventHandler(this.LB_Clear_Click);
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -796,6 +812,7 @@ namespace SKYNET
         private Panel PN_UserContainer;
         private Controls.SKYNET_WebLogger WebLogger1;
         private Label LB_Browser;
+        private Label LB_Clear;
     }
 }
 

@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using SKYNET.Helper;
 using SKYNET.Managers;
+using SKYNET.Steamworks.Interfaces;
 
 using SteamAPICall_t = System.UInt64;
 using HSteamUser = System.UInt32;
 using HAuthTicket = System.UInt32;
-using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -72,51 +73,97 @@ namespace SKYNET.Steamworks.Implementation
         public void StartVoiceRecording()
         {
             Write("StartVoiceRecording");
-            //IPCManager.SendStartVoiceRecording();
+            AudioManager.StartVoiceRecording();
             Recording = true;
         }
 
         public void StopVoiceRecording()
         {
             Write("StopVoiceRecording");
-            //IPCManager.SendStopVoiceRecording();
+            AudioManager.StopVoiceRecording();
             Recording = false;
         }
 
-        public int GetAvailableVoice(ref uint pcbCompressed, ref uint pcbUncompressed_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
+        public int GetAvailableVoice(ref uint pcbCompressed, ref uint pcbUncompressed_Deprecated, uint nUncompressedVoiceDesiredSampleRate)
         {
-            Write("GetAvailableVoice");
-            //if (IPCManager.SendGetAvailableVoice(out pcbCompressed, out pcbUncompressed_Deprecated))
-            //{
-            //    return (int)EVoiceResult.k_EVoiceResultOK;
-            //}
-            return (int)EVoiceResult.k_EVoiceResultNoData;
+            var Result = EVoiceResult.k_EVoiceResultNotRecording;
+            pcbCompressed = 0;
+            pcbUncompressed_Deprecated = 0;
+            if (Recording)
+            {
+                if (AudioManager.GetAvailableVoice(out var Compressed, out var Uncompressed))
+                {
+                    pcbCompressed = Compressed;
+                    pcbUncompressed_Deprecated = Uncompressed;
+                    Result = EVoiceResult.k_EVoiceResultOK;
+                }
+                else
+                    Result = EVoiceResult.k_EVoiceResultNoData;
+            }
+            //Write($"GetAvailableVoice (Compressed = {pcbCompressed}, Uncompressed = {pcbUncompressed_Deprecated}) = {Result}");
+            return (int)Result;
         }
 
-        public int GetVoice(bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, bool bWantUncompressed_Deprecated, IntPtr pUncompressedDestBuffer_Deprecated, uint cbUncompressedDestBufferSize_Deprecated, uint nUncompressBytesWritten_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
+        public int GetVoice(bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, bool bWantUncompressed, IntPtr pUncompressedDestBuffer, uint cbUncompressedDestBufferSize, ref uint nUncompressBytesWritten, uint nUncompressedVoiceDesiredSampleRate)
         {
-            Write("GetVoice");
-            if (Recording) return (int)EVoiceResult.k_EVoiceResultNotRecording;
+            var Result = EVoiceResult.k_EVoiceResultNotRecording;
             nBytesWritten = 0;
-            //if (IPCManager.SendGetVoice(out byte[] buffer))
-            //{
-            //    Marshal.Copy(buffer, 0, pDestBuffer, buffer.Length);
-            //    nBytesWritten = (uint)buffer.Length;
-            //    return (int)EVoiceResult.k_EVoiceResultOK;
-            //}
-            return (int)EVoiceResult.k_EVoiceResultNoData;
+            if (Recording)
+            {
+                if (AudioManager.GetVoice(out byte[] buffer))
+                {
+                    // Compressed 
+                    if (bWantCompressed)
+                    {
+                        var Size = cbDestBufferSize < buffer.Length ? cbDestBufferSize : (uint)buffer.Length;
+                        Marshal.Copy(buffer, 0, pDestBuffer, (int)Size);
+                        nBytesWritten = Size;
+                    }
+
+                    // Uncompressed
+                    if (bWantUncompressed)
+                    {
+                        var Size = cbUncompressedDestBufferSize < buffer.Length ? cbUncompressedDestBufferSize : (uint)buffer.Length;
+                        Marshal.Copy(buffer, 0, pUncompressedDestBuffer, (int)Size);
+                        nUncompressBytesWritten = Size;
+                    }
+
+                    Result = EVoiceResult.k_EVoiceResultOK;
+                }
+                else
+                    Result = EVoiceResult.k_EVoiceResultNoData;
+            }
+            //Write($"GetVoice (BytesWritte = {nBytesWritten}) = {Result}");
+            return (int)Result;
         }
 
-        public int DecompressVoice(IntPtr pCompressed, uint cbCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, uint nBytesWritten, uint nDesiredSampleRate)
+        public int DecompressVoice(IntPtr pCompressed, uint cbCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, uint nDesiredSampleRate)
         {
-            Write("DecompressVoice");
-            return (int)EVoiceResult.k_EVoiceResultNoData;
+            EVoiceResult Result = EVoiceResult.k_EVoiceResultNoData;
+            if (cbCompressed != 0)
+            {
+                try
+                {
+                    var Size = cbCompressed > cbDestBufferSize ? cbDestBufferSize : cbCompressed;
+                    byte[] buffer = new byte[Size];
+                    Marshal.Copy(pCompressed, buffer, 0, (int)Size);
+                    Marshal.Copy(buffer, 0, pDestBuffer, (int)Size);
+                    nBytesWritten = Size;
+                    Result = EVoiceResult.k_EVoiceResultOK;
+                }
+                catch 
+                {
+                }
+            }
+            Write($"DecompressVoice = {Result}");
+            return (int)Result;
         }
 
         public uint GetVoiceOptimalSampleRate()
         {
-            //Write("GetVoiceOptimalSampleRate");
-            return 4800;
+            int SampleRate = AudioManager.SampleRate;
+            Write($"GetVoiceOptimalSampleRate {SampleRate}");
+            return (uint)SampleRate;
         }
 
         public HAuthTicket GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using SKYNET.Steamworks.Interfaces;
 
 using ControllerHandle_t = System.UInt64;
 using ControllerActionSetHandle_t = System.UInt64;

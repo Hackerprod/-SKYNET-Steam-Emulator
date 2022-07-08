@@ -1,4 +1,5 @@
 ﻿using System;
+using SKYNET.Steamworks.Interfaces;
 
 using HHTMLBrowser = System.UInt32;
 

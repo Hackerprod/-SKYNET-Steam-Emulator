@@ -123,7 +123,10 @@ namespace SKYNET
 
         private void Box_DoubleClicked(object sender, MouseEventArgs e)
         {
-            BoxDoubleClicked?.Invoke(this, this);
+            if (e.Button == MouseButtons.Left)
+            {
+                BoxDoubleClicked?.Invoke(this, this);
+            }
         }
     }
 }

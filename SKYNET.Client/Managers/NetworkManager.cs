@@ -261,12 +261,11 @@ namespace SKYNET.Managers
         {
             try
             {
-                //if (IslocalAddress(((IPEndPoint)socket.RemoteEndPoint).Address))
-                //{
-                //    Write("Returning because is local address");
-                //    CloseSocket(socket, message.MessageType);
-                //    return;
-                //}
+                if (NetworkHelper.IslocalAddress(((IPEndPoint)socket.RemoteEndPoint).Address))
+                {
+                    CloseSocket(socket, message.MessageType);
+                    return;
+                }
 
                 var announce = message.ParsedBody.Deserialize<NET_Announce>();
                 string IPAddress = ((IPEndPoint)socket.RemoteEndPoint).Address.ToString();

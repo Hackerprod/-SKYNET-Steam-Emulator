@@ -1,9 +1,7 @@
-﻿using SKYNET;
-using SKYNET.Helper;
+﻿using SKYNET.Helper;
 using SKYNET.Steamworks.Types;
 using System;
-using System.Runtime.InteropServices;
-
+using SKYNET.Steamworks.Interfaces;
 using HServerListRequest = System.IntPtr;
 
 namespace SKYNET.Steamworks.Implementation

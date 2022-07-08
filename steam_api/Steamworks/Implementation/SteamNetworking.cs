@@ -2,6 +2,7 @@
 using SKYNET.Helper;
 using SKYNET.IPC.Types;
 using SKYNET.Managers;
+using SKYNET.Steamworks.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Net;

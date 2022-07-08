@@ -120,56 +120,6 @@ namespace SKYNET.Managers
 
         }
 
-        internal static void SendStartVoiceRecording()
-        {
-            var StartVoiceRecording = new IPC_StartVoiceRecording();
-            var message = CreateIPCMessage(StartVoiceRecording, IPCMessageType.IPC_StartVoiceRecording);
-            SendTo(IPC_ToServer, message);
-        }        
-
-        internal static void SendStopVoiceRecording()
-        {
-            var StopVoiceRecording = new IPC_StopVoiceRecording();
-            var message = CreateIPCMessage(StopVoiceRecording, IPCMessageType.IPC_StopVoiceRecording);
-            SendTo(IPC_ToServer, message);
-        }
-
-        internal static bool SendGetAvailableVoice(out uint pcbCompressed, out uint pcbUncompressed_Deprecated)
-        {
-            pcbCompressed = 0;
-            pcbUncompressed_Deprecated = 0;
-            var result = false;
-            var GetAvailableVoice = new IPC_GetAvailableVoiceRequest();
-            var message = CreateIPCMessage(GetAvailableVoice, IPCMessageType.IPC_GetAvailableVoiceRequest);
-            var Response =  SendTo(IPC_ToServer, message, true);
-            if (Response != null)
-            {
-                var AvailableVoiceResponse = Response.ParsedBody.FromJson<IPC_GetAvailableVoiceResponse>();
-                if (AvailableVoiceResponse == null) return false;
-                pcbCompressed = AvailableVoiceResponse.Compressed;
-                pcbUncompressed_Deprecated = AvailableVoiceResponse.UnCompressed;
-                result = true;
-            }
-            return result;
-        }
-
-        internal static bool SendGetVoice(out byte[] buffer)
-        {
-            buffer = default;
-            var result = false;
-            var VoiceRequest = new IPC_GetVoiceRequest();
-            var message = CreateIPCMessage(VoiceRequest, IPCMessageType.IPC_GetVoiceRequest);
-            var Response = SendTo(IPC_ToServer, message, true);
-            if (Response != null)
-            {
-                var VoiceResponse = Response.ParsedBody.FromJson<IPC_GetVoiceResponse>();
-                if (VoiceResponse == null) return false;
-                buffer = VoiceResponse.Buffer;
-                result = true;
-            }
-            return result;
-        }
-
         #region IPC_ClientHello
 
         private static void SendClientHello()
@@ -200,7 +150,7 @@ namespace SKYNET.Managers
 
                 if (ClientWelcome.LogToConsole)
                 {
-                    modCommon.ActiveConsoleOutput();
+                    ConsoleHelper.CreateConsole("SKYNET");
                 }
 
                 SteamFriends.Instance.Initialize();
@@ -212,6 +162,7 @@ namespace SKYNET.Managers
         }
 
         #endregion
+
         private static void ProcessPlayerStats(IPCMessage message)
         {
             var PlayerStats = message.ParsedBody.FromJson<IPC_PlayerStats>();

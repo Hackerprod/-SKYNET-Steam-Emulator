@@ -19,7 +19,7 @@ namespace SKYNET
 
         private static void Web_OnMessageReceived(object sender, WebMessage e)
         {
-            Write($"Received WEB message {(WEB_MessageType)e.MessageType}");
+            Write($"Received WEB message {e.MessageType}");
             switch (e.MessageType)
             {
                 case WEB_MessageType.WEB_AuthRequest:
@@ -29,7 +29,7 @@ namespace SKYNET
                     // TODO
                     break;
                 case WEB_MessageType.WEB_GameListRequest:
-                    // TODO
+                    ProcessGameListRequest(e);
                     break;
                 case WEB_MessageType.WEB_GameAdded:
                     ProcessGameAdded(e);
@@ -84,8 +84,14 @@ namespace SKYNET
                 //else
                 {
                     AuthResponse.Response = WEB_AuthResponseType.Success;
-                    var imageBytes = ImageHelper.ImageToBytes(SteamClient.Avatar);
-                    var hexAvatar = Convert.ToBase64String(imageBytes);
+
+                    string hexAvatar = "";
+                    if (SteamClient.Avatar != null)
+                    {
+                        var imageBytes = ImageHelper.ImageToBytes(SteamClient.Avatar);
+                        hexAvatar = Convert.ToBase64String(imageBytes);
+                    }
+
                     AuthResponse.UserInfo = new UserInfo()
                     {
                         PersonaName = SteamClient.PersonaName,
@@ -102,6 +108,15 @@ namespace SKYNET
                     Send(GameListResponse, WEB_MessageType.WEB_GameListResponse);
                 }
             }
+        }
+
+        private static void ProcessGameListRequest(WebMessage e)
+        {
+            var GameListResponse = new WEB_GameListResponse()
+            {
+                GameList = GameManager.GetGames()
+            };
+            Send(GameListResponse, WEB_MessageType.WEB_GameListResponse);
         }
 
         private static void ProcessUserInfoRequest(WebMessage e)

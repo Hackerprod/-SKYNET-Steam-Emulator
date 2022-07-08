@@ -116,7 +116,7 @@ namespace SKYNET
 
         private void GameManager_OnGameRemoved(object sender, Game e)
         {
-
+            //
         }
 
         private void GameManager_OnGameOpened(object sender, GameManager.GameLaunchedEventArgs e)
@@ -129,18 +129,24 @@ namespace SKYNET
 
         private void GameManager_OnUserGameOpened(object sender, NET_GameOpened e)
         {
-            for (int i = 0; i < PN_UserContainer.Controls.Count; i++)
+            if (e.AccountID == SteamClient.AccountID) return;
+
+            Image Avatar = default;
+            string personaName = "";
+
+            var User = UserManager.GetUser(e.AccountID);
+            if (User != null)
             {
-                var control = PN_UserContainer.Controls[i];
-                if (control is SKYNET_UserControl)
-                {
-                    var User = (SKYNET_UserControl)control;
-                    if (User.SteamPlayer.AccountID == e.AccountID)
-                    {
-                        new frmPlayerNotify(e, User).ShowDialog();
-                    }
-                }
+                personaName = User.PersonaName;
+                Avatar = User.Avatar;
             }
+            else
+            {
+                personaName = "Some User";
+                Avatar = Resources.DefaultImage;
+            }
+
+            new frmPlayerNotify(e, personaName, Avatar).ShowDialog();
         }
 
         private void GameManager_OnGameClosed(object sender, string gameClientID)
@@ -515,12 +521,12 @@ namespace SKYNET
         private void RemoveMenuItem_Click(object sender, EventArgs e)
         {
             var dialog = modCommon.Show("You are sure you want to remove this game?", MessageBoxButtons.YesNo);
-            if (dialog == DialogResult.OK)
+            if (dialog == DialogResult.Yes)
             {
                 for (int i = 0; i < PN_GameContainer.Controls.Count; i++)
                 {
                     object control = PN_GameContainer.Controls[i];
-                    if (control is GameBox && ((GameBox)control).Handle == MenuBox.Handle)
+                    if (control is GameBox && ((GameBox)control).Game.Guid == MenuBox.Game.Guid)
                     {
                         Game game = ((GameBox)control).Game;
                         GameManager.Remove(game.AppID);
@@ -572,6 +578,11 @@ namespace SKYNET
         {
             var frmBrowser = new frmBrowser();
             frmBrowser.Show();
+        }
+
+        private void LB_Clear_Click(object sender, EventArgs e)
+        {
+            WebLogger1.ClearScreen();
         }
     }
 }

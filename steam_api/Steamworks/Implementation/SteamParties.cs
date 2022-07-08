@@ -1,4 +1,5 @@
 ﻿using System;
+using SKYNET.Steamworks.Interfaces;
 
 using SteamAPICall_t = System.UInt64;
 using PartyBeaconID_t = System.UInt64;

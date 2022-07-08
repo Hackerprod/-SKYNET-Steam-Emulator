@@ -332,6 +332,8 @@
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(56)))), ((int)(((byte)(61)))));
             this.ClientSize = new System.Drawing.Size(480, 332);
             this.Controls.Add(this.PN_Container);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.MaximumSize = new System.Drawing.Size(1360, 728);
             this.Name = "frmLogin";
             this.Padding = new System.Windows.Forms.Padding(1);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

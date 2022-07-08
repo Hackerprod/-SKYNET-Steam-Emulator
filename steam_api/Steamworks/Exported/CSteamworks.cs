@@ -3396,14 +3396,14 @@ namespace SKYNET.Steamworks.Exported
         public static EVoiceResult ISteamUser_GetVoice(bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, bool bWantUncompressed, IntPtr pUncompressedDestBuffer, uint cbUncompressedDestBufferSize, ref uint nUncompressBytesWritten, uint nUncompressedVoiceDesiredSampleRate)
         //public static EVoiceResult ISteamUser_GetVoice(bool bWantCompressed, ref byte[] pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, bool bWantUncompressed, ref byte[] pUncompressedDestBuffer, uint cbUncompressedDestBufferSize, ref uint nUncompressBytesWritten, uint nUncompressedVoiceDesiredSampleRate)
         {
-            return (EVoiceResult)SteamEmulator.SteamUser.GetVoice(bWantCompressed, pDestBuffer, cbDestBufferSize, ref nBytesWritten, bWantUncompressed, pUncompressedDestBuffer, cbUncompressedDestBufferSize, nUncompressBytesWritten, nUncompressedVoiceDesiredSampleRate);
+            return (EVoiceResult)SteamEmulator.SteamUser.GetVoice(bWantCompressed, pDestBuffer, cbDestBufferSize, ref nBytesWritten, bWantUncompressed, pUncompressedDestBuffer, cbUncompressedDestBufferSize, ref nUncompressBytesWritten, nUncompressedVoiceDesiredSampleRate);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static EVoiceResult ISteamUser_DecompressVoice(IntPtr pCompressed, uint cbCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, uint nDesiredSampleRate)
         //public static EVoiceResult ISteamUser_DecompressVoice(ref byte[] pCompressed, uint cbCompressed, ref byte[] pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, uint nDesiredSampleRate)
         {
-            return (EVoiceResult)SteamEmulator.SteamUser.DecompressVoice(pCompressed, cbCompressed, pDestBuffer, cbDestBufferSize, nBytesWritten, nDesiredSampleRate);
+            return (EVoiceResult)SteamEmulator.SteamUser.DecompressVoice(pCompressed, cbCompressed, pDestBuffer, cbDestBufferSize, ref nBytesWritten, nDesiredSampleRate);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

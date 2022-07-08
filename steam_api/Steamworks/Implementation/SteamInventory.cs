@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using SKYNET.Steamworks.Interfaces;
 
 using SteamItemInstanceID_t = System.UInt64;
 using SteamInventoryResult_t = System.UInt32;

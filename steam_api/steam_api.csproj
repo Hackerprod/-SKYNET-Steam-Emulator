@@ -23,6 +23,7 @@
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>preview</LangVersion>
+    <CodeAnalysisIgnoreGeneratedCode>false</CodeAnalysisIgnoreGeneratedCode>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -75,7 +76,7 @@
     <Compile Include="Callback\CCallResult.cs" />
     <Compile Include="Callback\SteamCallback.cs" />
     <Compile Include="Callback\SteamCallBacks.cs" />
-    <Compile Include="Helpers\INISerializer.cs" />
+    <Compile Include="Helpers\ConsoleHelper.cs" />
     <Compile Include="Helpers\IPC\EventArgs.cs" />
     <Compile Include="Helpers\IPC\PipeClient.cs" />
     <Compile Include="Helpers\IPC\PipeConnection.cs" />
@@ -87,10 +88,18 @@
     <Compile Include="Helpers\JSON\JSONParser.cs" />
     <Compile Include="Helpers\JSON\SimpleJSONDotNetTypes.cs" />
     <Compile Include="Helpers\Platform.cs" />
+    <Compile Include="Helpers\Wave\native\MMSYSERR.cs" />
+    <Compile Include="Helpers\Wave\native\WavConstants.cs" />
+    <Compile Include="Helpers\Wave\native\WAVEFORMATEX.cs" />
+    <Compile Include="Helpers\Wave\native\WAVEHDR.cs" />
+    <Compile Include="Helpers\Wave\native\WAVEOUTCAPS.cs" />
+    <Compile Include="Helpers\Wave\native\WavMethods.cs" />
+    <Compile Include="Helpers\Wave\WaveIn.cs" />
+    <Compile Include="Helpers\Wave\WavInDevice.cs" />
+    <Compile Include="Managers\AudioManager.cs" />
     <Compile Include="Steamworks\Exported\CSteamworks.cs" />
     <Compile Include="Helpers\ImageHelper.cs" />
     <Compile Include="Helpers\MutexHelper.cs" />
-    <Compile Include="Helpers\Settings.cs" />
     <Compile Include="Managers\IPCManager.cs" />
     <Compile Include="Helpers\StreamHelpers.cs" />
     <Compile Include="Managers\TicketManager.cs" />
@@ -156,7 +165,7 @@
     <Compile Include="Managers\InterfaceManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SteamEmulator.cs" />
-    <Compile Include="Steamworks\Helpers\ISteamInterface.cs" />
+    <Compile Include="Steamworks\Interfaces\ISteamInterface.cs" />
     <Compile Include="Steamworks\Implementation\SteamAppList.cs" />
     <Compile Include="Steamworks\Implementation\SteamApps.cs" />
     <Compile Include="Steamworks\Implementation\SteamClient.cs" />
@@ -191,7 +200,6 @@
     <Compile Include="Steamworks\Implementation\SteamUserStats.cs" />
     <Compile Include="Steamworks\Implementation\SteamUtils.cs" />
     <Compile Include="Steamworks\Implementation\SteamVideo.cs" />
-    <Compile Include="Steamworks\Interfaces\IBaseInterface.cs" />
     <Compile Include="Steamworks\Interfaces\SteamAppDisableUpdate001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamClient\SteamClient020.cs" />
     <Compile Include="Steamworks\Interfaces\SteamAppList\SteamAppList001.cs" />
@@ -254,12 +262,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Image.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\close.png" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

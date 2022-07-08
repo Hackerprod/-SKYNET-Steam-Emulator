@@ -1,4 +1,5 @@
-﻿
+﻿using SKYNET.Steamworks.Interfaces;
+
 using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Implementation

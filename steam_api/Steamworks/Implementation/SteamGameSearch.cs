@@ -1,7 +1,6 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using SKYNET;
-using SKYNET.Steamworks;
+﻿using SKYNET.Steamworks.Interfaces;
+using System;
+
 
 namespace SKYNET.Steamworks.Implementation
 {

@@ -1,10 +1,10 @@
 ﻿using SKYNET.Callback;
 using SKYNET.Helper;
 using SKYNET.Managers;
+using SKYNET.Steamworks.Interfaces;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -36,17 +36,6 @@ namespace SKYNET.Steamworks.Implementation
             SharedFiles = new ConcurrentDictionary<ulong, string>();
             AsyncFilesRead = new Dictionary<ulong, string>();
             LastFile = 0;
-
-            try
-            {
-                // TODO: Update to new client implementation
-                StoragePath = Path.Combine(modCommon.GetPath(), "SKYNET", "Storage", "Remote");
-                modCommon.EnsureDirectoryExists(StoragePath);
-            }
-            catch (Exception ex)
-            {
-                Write($"Error in StoragePath: {ex}");
-            }
         }
 
         public bool FileWrite(string pchFile, IntPtr pvData, int cubData)

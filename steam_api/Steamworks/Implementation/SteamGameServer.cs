@@ -1,11 +1,12 @@
 ﻿using System;
 using SKYNET.Managers;
 using SKYNET.Types;
+using SKYNET.Callback;
+using SKYNET.Helper;
+using SKYNET.Steamworks.Interfaces;
 
 using SteamAPICall_t = System.UInt64;
 using HAuthTicket = System.UInt32;
-using SKYNET.Callback;
-using SKYNET.Helper;
 
 namespace SKYNET.Steamworks.Implementation
 {

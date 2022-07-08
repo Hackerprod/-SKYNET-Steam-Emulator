@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using SKYNET.Helper;
-using System.Collections.Generic;
-using SKYNET.Callback;
 using System.Linq;
-using SKYNET.Managers;
 using System.Collections.Concurrent;
+using SKYNET.Helper;
+using SKYNET.Callback;
+using SKYNET.Managers;
+using SKYNET.Steamworks.Interfaces;
 
 namespace SKYNET.Steamworks.Implementation
 {

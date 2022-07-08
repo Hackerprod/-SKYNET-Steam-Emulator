@@ -1,5 +1,4 @@
-﻿using SKYNET;
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 
 namespace SKYNET.Types

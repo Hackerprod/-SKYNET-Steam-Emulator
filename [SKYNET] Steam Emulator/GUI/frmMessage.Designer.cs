@@ -174,6 +174,8 @@ namespace SKYNET.GUI
             this.Controls.Add(this.PN_Right);
             this.Controls.Add(this.PN_Bottom);
             this.Controls.Add(this.PN_Top);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.MaximumSize = new System.Drawing.Size(1360, 728);
             this.Name = "frmMessage";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "frmMessage";

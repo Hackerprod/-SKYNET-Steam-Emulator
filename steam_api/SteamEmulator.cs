@@ -118,6 +118,7 @@ public class SteamEmulator
 
             IPCManager.Initialize();
             InterfaceManager.Initialize();
+            AudioManager.Initialize();
 
             #region Interface Initialization
 
@@ -308,11 +309,7 @@ public class SteamEmulator
 
             if (LogToConsole)
             {
-                if (sender.ToUpper() == "DEBUG")
-                    Console.ForegroundColor = ConsoleColor.Red;
-                else
-                    Console.ResetColor();
-                Console.WriteLine(message);
+                ConsoleHelper.WriteLine(message);
             }
             lastMsg = msg.ToString();
         }

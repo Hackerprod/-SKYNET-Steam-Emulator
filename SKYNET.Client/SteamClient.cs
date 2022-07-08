@@ -15,8 +15,6 @@ namespace SKYNET.Client
 {
     public class SteamClient
     {
-        NAudio.Wave.WaveIn sourceStream = null;
-
         public static CSteamID SteamID { get; set; }
         public static uint AccountID { get; set; }
         public static string AccountName { get; set; }
@@ -39,11 +37,10 @@ namespace SKYNET.Client
 
         public void Initialize()
         {
-            UserManager.Initialize();
-            NetworkManager.Initialize();
-            IPCManager.Initialize();
-            StatsManager.Initialize();
-            Task.Run(delegate { AudioManager.Initialize(); });            
+            Task.Run(delegate { UserManager.Initialize(); });
+            Task.Run(delegate { NetworkManager.Initialize(); });
+            Task.Run(delegate { StatsManager.Initialize(); });
+            Task.Run(delegate { IPCManager.Initialize(); });
         }
 
         private static void InitializePlugins()

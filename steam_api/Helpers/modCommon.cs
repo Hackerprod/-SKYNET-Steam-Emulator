@@ -16,9 +16,6 @@ public partial class modCommon
 
     public static bool LogToFile { get; set; }
 
-    private static bool ConsoleEnabled;
-    private static bool SettingsLoaded;
-
     public static DateTime LoadTime { get; set; } = DateTime.Now;
 
 
@@ -61,19 +58,6 @@ public partial class modCommon
     {
         MessageBox.Show(msg.ToString());
     }
-
-    public static void ActiveConsoleOutput()
-    {
-        if (!ConsoleEnabled)
-        {
-            ConsoleEnabled = true;
-            AllocConsole();
-        }
-    }
-
-    [DllImport("kernel32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    static extern bool AllocConsole();
 
     public static ulong GenerateSteamID()
     {

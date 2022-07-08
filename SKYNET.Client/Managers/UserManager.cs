@@ -95,7 +95,6 @@ namespace SKYNET.Managers
                     OnUserRemoved?.Invoke(null, user);
                     Write($"Removed user {user.PersonaName} {user.SteamID}");
                     Users.Remove(user);
-                    
                 }
             });
         }
@@ -110,14 +109,19 @@ namespace SKYNET.Managers
             return player;
         }
 
+        internal static void AvatarReceived(uint accountID, Bitmap avatar)
+        {
+            var User = GetUser(accountID);
+            if (User != null)
+            {
+                User.Avatar = avatar;
+            }
+            OnAvatarReceived?.Invoke(null, new AvatarReceivedEventArgs(accountID, avatar));
+        }
+
         private static void Write(object msg)
         {
             Log.Write("UserManager", msg);
-        }
-
-        internal static void AvatarReceived(uint accountID, Bitmap avatar)
-        {
-            OnAvatarReceived?.Invoke(null, new AvatarReceivedEventArgs(accountID, avatar));
         }
 
         public class AvatarReceivedEventArgs : EventArgs

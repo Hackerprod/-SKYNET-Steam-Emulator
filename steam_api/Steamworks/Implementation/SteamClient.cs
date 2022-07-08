@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using SKYNET;
 using SKYNET.Managers;
+using SKYNET.Steamworks.Interfaces;
 
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;

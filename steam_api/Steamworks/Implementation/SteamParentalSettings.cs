@@ -1,4 +1,5 @@
-﻿
+﻿using SKYNET.Steamworks.Interfaces;
+
 namespace SKYNET.Steamworks.Implementation
 {
     public class SteamParentalSettings : ISteamInterface

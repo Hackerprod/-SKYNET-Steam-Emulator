@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using SKYNET.Callback;
 using SKYNET.Managers;
+using SKYNET.Steamworks.Interfaces;
 
 using SteamNetworkingPOPID = System.UInt32;
 using SteamNetworkingMicroseconds = System.Int64;

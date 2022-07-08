@@ -2,20 +2,13 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using mshtml;
 using Microsoft.VisualBasic.CompilerServices;
-using System.Globalization;
-using System.IO;
 using System.Threading;
 using System.Runtime.InteropServices;
 using SKYNET.Types;
-using System.IO.Pipes;
-using SKYNET.Helper;
 
 namespace SKYNET.Controls
 {

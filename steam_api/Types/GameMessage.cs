@@ -1,4 +1,4 @@
-﻿namespace SKYNET
+﻿namespace SKYNET.Types
 {
     public class GameMessage
     {

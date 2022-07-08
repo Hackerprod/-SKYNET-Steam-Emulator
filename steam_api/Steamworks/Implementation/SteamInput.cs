@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
+using SKYNET.Steamworks.Interfaces;
 using SKYNET.Managers;
 
 using InputHandle_t = System.UInt64;

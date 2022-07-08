@@ -6,6 +6,7 @@ using System.Threading;
 using SKYNET.Network.Packets;
 using SKYNET.GUI.Controls;
 using System.Threading.Tasks;
+using SKYNET.Types;
 
 namespace SKYNET.GUI
 {
@@ -14,15 +15,13 @@ namespace SKYNET.GUI
         private Rectangle rScreen;
         private int yy;
         private NET_GameOpened Game;
-        private SKYNET_UserControl User;
 
-        public frmPlayerNotify(NET_GameOpened game, SKYNET_UserControl user)
+        public frmPlayerNotify(NET_GameOpened game, string personaName, Image avatar)
         {
             InitializeComponent();
             CheckForIllegalCrossThreadCalls = false;
 
             Game = game;
-            User = user;
 
             try
             {
@@ -32,8 +31,8 @@ namespace SKYNET.GUI
             }
             catch { }
 
-            Avatar.Image = User.Avatar;
-            LB_PersonaName.Text = User.SteamPlayer.PersonaName;
+            Avatar.Image = avatar;
+            LB_PersonaName.Text = personaName;
             LB_PlayingMsg.Text = "Is playing " + Game.Name + Environment.NewLine + Game.AppID;
             TopMost = true;
 
@@ -58,6 +57,5 @@ namespace SKYNET.GUI
 
         [DllImport("user32.dll")]
         protected static extern bool SetWindowPos(IntPtr hWnd, int hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
-
     }
 }
