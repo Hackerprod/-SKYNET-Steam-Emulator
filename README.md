@@ -44,28 +44,8 @@ Overlay                    External Overlay for steam and game messages.
 DLC                        Unlock all downloaded DLCs.
 Avatar support             Load avatar from file (Avatar.jpg) inside SKYNET folder and share it through the network.
 Plugin system              Load external plugin to communicate with the emu.
+In game voice              Fully functional voice system
 ```
-## ⚙️ Settings
-When the emulator runs for the first time, it create the directories that it is going to use and generates them inside the SKYNET folder the `[SKYNET] steam_api.ini`<br />
-<details><summary>Settings structure</summary><br />
-
- [User Info]<br />
-PersonaName = Hackerprod<br />
-AccountId = 1000<br />
-
-[Game info]<br />
-Language = english<br />
-AppId = 570<br />
-
-[Network Settings]<br />
-ServerIP = 127.0.0.1<br />
-BroadcastPort = 28025<br />
-
-[Log Settings]<br />
-File = false<br />
-Console = true<br />
-
-</details>
 
 ## 🔨 Currently working on
 Callback system implementation.<br />
