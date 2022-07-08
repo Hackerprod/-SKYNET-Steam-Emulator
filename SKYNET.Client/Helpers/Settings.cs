@@ -1,66 +1,46 @@
-﻿
-using SKYNET.INI;
-using SKYNET.INI.Attributes;
+﻿using SKYNET.Helper;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web.Script.Serialization;
 
 namespace SKYNET.Types
 {
     public class Settings
     {
-        [INISection("User Info")]
         public string AccountName { get; set; }
-
-        [INISection("User Info")]
         public string PersonaName { get; set; }
-
-        [INISection("User Info")]
         public uint AccountID { get; set; }
-
-        [INISection("User Info")]
         public string Language { get; set; }
-
-        [INISection("User Info")]
         public bool AllowRemoteAccess { get; set; }
-
-        [INISection("Network")]
         public IPAddress ServerIP { get; set; }
 
 
+        private static RegistrySettings Registry;
+
+        static Settings()
+        {
+            Registry = new RegistrySettings(@"SOFTWARE\SKYNET\[SKYNET] Steam Emulator\");
+        }
+
         public static Settings Load()
         {
-            Settings settings;
-            string fileName = Path.Combine(modCommon.GetPath(), "Data", "[SKYNET] Steam Emulator.bin");
-            if (!File.Exists(fileName))
+            Settings settings = new Settings()
             {
-                settings = new Settings()
-                {
-                    PersonaName = Environment.UserName,
-                    AccountName = Environment.UserName,
-                    AccountID = (uint)new Random().Next(1000, 9999),
-                    Language = "english",
-                    ServerIP = IPAddress.Loopback,
-                };
-                return settings;
-            }
-            else
-            {
-                settings = INISerializer.DeserializeFromFile<Settings>(fileName);
-            }
+                PersonaName = Registry.Get<string>("PersonaName", Environment.UserName),
+                AccountName = Registry.Get<string>("AccountName", Environment.UserName),
+                AccountID = Registry.Get<uint>("AccountID", (uint)new Random().Next(1000, 9999)),
+                Language = Registry.Get<string>("Language", "english"),
+                ServerIP = Registry.Get<IPAddress>("ServerIP", IPAddress.Loopback),
+            };
             return settings;
         }
 
         public static void Save(Settings settings)
         {
-            string fileName = Path.Combine(modCommon.GetPath(), "Data", "[SKYNET] Steam Emulator.bin");
-            modCommon.EnsureDirectoryExists(fileName, true);
-            INISerializer.SerializeToFile(settings, fileName);
+            Registry.Set("PersonaName", settings.PersonaName);
+            Registry.Set("AccountName", settings.AccountName);
+            Registry.Set("AccountID", settings.AccountID);
+            Registry.Set("Language", settings.Language);
+            Registry.Set("ServerIP", settings.ServerIP);
         }
     }
 }

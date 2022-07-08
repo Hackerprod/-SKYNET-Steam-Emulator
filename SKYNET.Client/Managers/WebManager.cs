@@ -19,42 +19,49 @@ namespace SKYNET
 
         private static void Web_OnMessageReceived(object sender, WebMessage e)
         {
-            Write($"Received WEB message {e.MessageType}");
-            switch (e.MessageType)
+            try
             {
-                case WEB_MessageType.WEB_AuthRequest:
-                    ProcessAuthRequest(e);
-                    break;
-                case WEB_MessageType.WEB_CreateAccountRequest:
-                    // TODO
-                    break;
-                case WEB_MessageType.WEB_GameListRequest:
-                    ProcessGameListRequest(e);
-                    break;
-                case WEB_MessageType.WEB_GameAdded:
-                    ProcessGameAdded(e);
-                    break;
-                case WEB_MessageType.WEB_GameUpdated:
-                    ProcessGameUpdated(e);
-                    break;
-                case WEB_MessageType.WEB_GameRemoved:
-                    ProcessGameRemoved(e);
-                    break;
-                case WEB_MessageType.WEB_GameLaunch:
-                    ProcessGameLaunch(e);
-                    break;
-                case WEB_MessageType.WEB_GameInfoRequest:
-                    ProcessGameInfoRequest(e);
-                    break;
-                case WEB_MessageType.WEB_UserInfoRequest:
-                    ProcessUserInfoRequest(e);
-                    break;
-                case WEB_MessageType.WEB_ChatMessage:
-                    // TODO
-                    break;
-                case WEB_MessageType.WEB_PrivateChatMessage:
-                    // TODO
-                    break;
+                Write($"Received WEB message {e.MessageType}");
+                switch (e.MessageType)
+                {
+                    case WEB_MessageType.WEB_AuthRequest:
+                        ProcessAuthRequest(e);
+                        break;
+                    case WEB_MessageType.WEB_CreateAccountRequest:
+                        // TODO
+                        break;
+                    case WEB_MessageType.WEB_GameListRequest:
+                        ProcessGameListRequest(e);
+                        break;
+                    case WEB_MessageType.WEB_GameAdded:
+                        ProcessGameAdded(e);
+                        break;
+                    case WEB_MessageType.WEB_GameUpdated:
+                        ProcessGameUpdated(e);
+                        break;
+                    case WEB_MessageType.WEB_GameRemoved:
+                        ProcessGameRemoved(e);
+                        break;
+                    case WEB_MessageType.WEB_GameLaunch:
+                        ProcessGameLaunch(e);
+                        break;
+                    case WEB_MessageType.WEB_GameInfoRequest:
+                        ProcessGameInfoRequest(e);
+                        break;
+                    case WEB_MessageType.WEB_UserInfoRequest:
+                        ProcessUserInfoRequest(e);
+                        break;
+                    case WEB_MessageType.WEB_ChatMessage:
+                        // TODO
+                        break;
+                    case WEB_MessageType.WEB_PrivateChatMessage:
+                        // TODO
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Write($"Error proccessing WEB Message {ex}");
             }
         }
 
@@ -143,7 +150,7 @@ namespace SKYNET
         private static void ProcessGameLaunch(WebMessage e)
         {
             var GameLaunch = e.Deserialize<WEB_GameLaunch>();
-            if (GameLaunch == null) return;
+            if (GameLaunch == null || string.IsNullOrEmpty(GameLaunch.Guid)) return;
             OnGameLaunch?.Invoke(null, GameLaunch.Guid);
         }
 
@@ -166,6 +173,24 @@ namespace SKYNET
             var GameAdded = e.Deserialize<WEB_GameAdded>();
             if (GameAdded == null) return;
             GameManager.AddGame(GameAdded.Game);
+        }
+
+        public static void SendGameOppened(string guid)
+        {
+            var GameStoped = new WEB_GameLaunched()
+            {
+                Guid = guid
+            };
+            Send(GameStoped, WEB_MessageType.WEB_GameLaunched);
+        }
+
+        public static void SendGameClosed(string gameClientID)
+        {
+            var GameStoped = new WEB_GameStoped()
+            {
+                Guid = gameClientID
+            };
+            Send(GameStoped, WEB_MessageType.WEB_GameStoped);
         }
 
         public static void Send(WEB_Base msgBase, WEB_MessageType Type)

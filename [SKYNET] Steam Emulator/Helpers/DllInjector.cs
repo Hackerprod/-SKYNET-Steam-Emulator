@@ -22,6 +22,12 @@ namespace SKYNET
             Preparex64Dll();
             PrepareCsteamworks();
 
+            if (!File.Exists(game.ExecutablePath))
+            {
+                modCommon.Show("The game not exists");
+                return null;
+            }
+
             string pName = "";
             var pInfo = new ProcessStartInfo();
             pInfo.FileName = game.ExecutablePath;

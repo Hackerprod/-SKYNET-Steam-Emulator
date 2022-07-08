@@ -45,16 +45,6 @@ namespace SKYNET
             browser.Navigate(TB_Url.Text);
         }
 
-        private void Browser_ConsoleMessage(object sender, ConsoleMessageEventArgs e)
-        {
-            modCommon.Show(e.Message);
-        }
-
-        private void CallmeAction(string obj)
-        {
-            MessageBox.Show(obj, "c# Application");
-        }
-
         private void _browser_DocumentCompleted(object sender, Gecko.Events.GeckoDocumentCompletedEventArgs e)
         {
             //Text = e.Uri.ToString();
@@ -74,6 +64,9 @@ namespace SKYNET
             nsIPrefBranch pref = Xpcom.GetService<nsIPrefBranch>("@mozilla.org/preferences-service;1");
             // Show same page as firefox does for unsecure SSL/TLS connections ...
             pref.SetIntPref("browser.ssl_override_behavior", 1);
+            pref.SetBoolPref("browser.backdropfilter", true);
+            pref.SetBoolPref("backdropfilter", true);
+
             pref.SetIntPref("security.OCSP.enabled", 0);
             pref.SetBoolPref("security.OCSP.require", false);
             pref.SetBoolPref("extensions.hotfix.cert.checkAttributes", true);
@@ -214,6 +207,10 @@ namespace SKYNET
             // which we have no way to do, so it otherwise just fails.
             GeckoPreferences.User["media.navigator.enabled"] = true;
             GeckoPreferences.User["media.navigator.permission.disabled"] = true;
+
+            GeckoPreferences.User["browser.backdropfilter"] = true;
+            GeckoPreferences.User["backdropfilter"] = true;
+
 
             // (In Geckofx60) Video is being rendered with a different thread to the main page.
             // However for some paint operations, the main thread temporary changes the ImageFactory on the container

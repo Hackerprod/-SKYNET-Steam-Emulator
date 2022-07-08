@@ -129,7 +129,15 @@ namespace SKYNET
 
         private void GameManager_OnUserGameOpened(object sender, NET_GameOpened e)
         {
-            if (e.AccountID == SteamClient.AccountID) return;
+            if (e.AccountID == SteamClient.AccountID)
+            {
+                var Game = GameManager.GetGame(e.AppID);
+                if (Game != null)
+                {
+                    WebManager.SendGameOppened(Game.Guid);
+                }
+                return;
+            } 
 
             Image Avatar = default;
             string personaName = "";
@@ -155,6 +163,7 @@ namespace SKYNET
 
             BT_GameAction.Text = "PLAY";
             BT_GameAction.BackColor = Color.FromArgb(46, 186, 65);
+            WebManager.SendGameClosed(gameClientID);
         }
 
         #endregion
@@ -328,10 +337,13 @@ namespace SKYNET
 
             Write("SteamClient", "Opening " + game.Name);
 
-            DllInjector.Inject(game);
+            var gameProcess = DllInjector.Inject(game);
 
-            BT_GameAction.Text = "CLOSE";
-            BT_GameAction.BackColor = Color.Red;
+            if (gameProcess != null)
+            {
+                BT_GameAction.Text = "CLOSE";
+                BT_GameAction.BackColor = Color.Red;
+            }
         }
 
         public static void AvatarUpdated(Bitmap Avatar)

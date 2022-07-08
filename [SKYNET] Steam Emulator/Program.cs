@@ -48,7 +48,7 @@ namespace SKYNET // & " = |
             {
                 foreach (var file in Directory.GetFiles(modCommon.GetPath(), "*.*", SearchOption.TopDirectoryOnly))
                 {
-                    if (Path.GetExtension(file) == ".config" || Path.GetExtension(file) == ".pdb" || Path.GetExtension(file) == ".xml" || Path.GetExtension(file) == ".txt")
+                    if (Path.GetExtension(file) == ".config" || Path.GetExtension(file) == ".pdb" || Path.GetExtension(file) == ".xml" || Path.GetExtension(file) == ".txt" || Path.GetExtension(file) == ".log")
                     {
                         try { File.Delete(file); } catch { }
                     }

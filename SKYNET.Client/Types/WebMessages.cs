@@ -36,6 +36,7 @@ namespace SKYNET.WEB.Types
         WEB_GameUpdated, 
         WEB_GameRemoved,
         WEB_GameLaunch,
+        WEB_GameLaunched,
         WEB_GameStoped,
         WEB_GameInfoRequest,
         WEB_GameInfoResponse,
@@ -133,6 +134,11 @@ namespace SKYNET.WEB.Types
     }
 
     public class WEB_GameLaunch : WEB_Base
+    {
+        public string Guid { get; set; }
+    }
+
+    public class WEB_GameLaunched : WEB_Base
     {
         public string Guid { get; set; }
     }
