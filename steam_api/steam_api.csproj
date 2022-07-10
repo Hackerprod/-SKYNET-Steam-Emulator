@@ -247,7 +247,6 @@
     <Compile Include="Steamworks\Types\CSteamAPIContext.cs" />
     <Compile Include="Steamworks\Types\EAccountType.cs" />
     <Compile Include="Steamworks\Types\EResult.cs" />
-    <Compile Include="Steamworks\Types\FriendGameInfo_t.cs" />
     <Compile Include="Steamworks\Types\SteamEnums.cs" />
     <Compile Include="Steamworks\Types\SteamTypes.cs" />
     <Compile Include="Types\Achievement.cs" />

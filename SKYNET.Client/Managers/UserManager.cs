@@ -25,9 +25,15 @@ namespace SKYNET.Managers
             Users = new List<SteamPlayer>();
         }
 
-        public static void Initialize()
+        public static void Initialize(CSteamID SteamID, string PersonaName)
         {
-            
+            Users.Add(new SteamPlayer()
+            {
+                SteamID = (ulong)SteamID,
+                PersonaName = PersonaName,
+                AccountID = SteamID.AccountID,
+                IPAddress = NetworkHelper.GetIPAddress().ToString(),
+            });
         }
 
         public static SteamPlayer GetUser(ulong steamID)
@@ -133,6 +139,11 @@ namespace SKYNET.Managers
                 AccountID = accountID;
                 Avatar = avatar;
             }
+        }
+
+        internal static List<SteamPlayer> GetFriends()
+        {
+            return Users;
         }
     }
 }

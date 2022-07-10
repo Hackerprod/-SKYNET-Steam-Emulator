@@ -36,6 +36,7 @@ namespace SKYNET
             this.BT_Minimize = new SKYNET.Controls.SKYNET_MinimizeBox();
             this.BT_Close = new SKYNET.Controls.SKYNET_CloseBox();
             this.panel3 = new System.Windows.Forms.Panel();
+            this.LB_Clear = new System.Windows.Forms.Label();
             this.LB_Browser = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.LB_Status = new System.Windows.Forms.Label();
@@ -82,7 +83,6 @@ namespace SKYNET
             this.ToButtomMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.GameCacheMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ConfigureMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.LB_Clear = new System.Windows.Forms.Label();
             this.PN_Top.SuspendLayout();
             this.panel3.SuspendLayout();
             this.panel4.SuspendLayout();
@@ -153,6 +153,20 @@ namespace SKYNET
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(893, 44);
             this.panel3.TabIndex = 7;
+            // 
+            // LB_Clear
+            // 
+            this.LB_Clear.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
+            this.LB_Clear.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.LB_Clear.Font = new System.Drawing.Font("Segoe UI Emoji", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LB_Clear.ForeColor = System.Drawing.Color.White;
+            this.LB_Clear.Location = new System.Drawing.Point(757, 23);
+            this.LB_Clear.Name = "LB_Clear";
+            this.LB_Clear.Size = new System.Drawing.Size(60, 15);
+            this.LB_Clear.TabIndex = 13;
+            this.LB_Clear.Text = "CLEAR";
+            this.LB_Clear.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.LB_Clear.Click += new System.EventHandler(this.LB_Clear_Click);
             // 
             // LB_Browser
             // 
@@ -239,6 +253,7 @@ namespace SKYNET
             this.label2.Size = new System.Drawing.Size(72, 26);
             this.label2.TabIndex = 0;
             this.label2.Text = "STORE";
+            this.label2.Click += new System.EventHandler(this.Label2_Click);
             // 
             // PN_LeftContainer
             // 
@@ -701,20 +716,6 @@ namespace SKYNET
             this.ConfigureMenuItem.Size = new System.Drawing.Size(192, 22);
             this.ConfigureMenuItem.Text = "Properties";
             this.ConfigureMenuItem.Click += new System.EventHandler(this.ConfigureMenuItem_Click);
-            // 
-            // LB_Clear
-            // 
-            this.LB_Clear.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
-            this.LB_Clear.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.LB_Clear.Font = new System.Drawing.Font("Segoe UI Emoji", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.LB_Clear.ForeColor = System.Drawing.Color.White;
-            this.LB_Clear.Location = new System.Drawing.Point(757, 23);
-            this.LB_Clear.Name = "LB_Clear";
-            this.LB_Clear.Size = new System.Drawing.Size(60, 15);
-            this.LB_Clear.TabIndex = 13;
-            this.LB_Clear.Text = "CLEAR";
-            this.LB_Clear.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.LB_Clear.Click += new System.EventHandler(this.LB_Clear_Click);
             // 
             // frmMain
             // 

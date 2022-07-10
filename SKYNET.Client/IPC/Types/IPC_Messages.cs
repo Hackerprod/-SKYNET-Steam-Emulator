@@ -23,12 +23,15 @@ namespace SKYNET.IPC.Types
         // Users
         IPC_ClientHello,
         IPC_ClientWelcome,
-        IPC_AddOrUpdateUser,
         IPC_Settings,
         IPC_AvatarRequest,
         IPC_AvatarResponse,
         IPC_UserDataUpdated,
         IPC_P2PPacket,
+        IPC_GetUserRequest,
+        IPC_GetUserResponse,
+        IPC_GetFriendsRequest,
+        IPC_GetFriendsResponse,
 
         // Lobbies
         IPC_LobbyCreate,
@@ -55,11 +58,19 @@ namespace SKYNET.IPC.Types
         // Gamecoordinator
         IPC_GCMessageRequest,
         IPC_GCMessageResponse,
+
+        // File Log
+        IPC_ModifyFileLog,
+    }
+
+    public class IPC_ModifyFileLog : IPC_MessageBase
+    {
+        public bool Enabled { get; set; }
     }
 
     public class IPC_ClientHello : IPC_MessageBase
     {
-        public uint AppID { get; set; }
+        public string ExecutablePath { get; set; }
         public int ProcessID { get; set; }
     }
 
@@ -75,6 +86,7 @@ namespace SKYNET.IPC.Types
         public bool RunCallbacks { get; set; }
         public bool ISteamHTTP { get; set; }
         public string RemoteStoragePath { get; set; }
+        public uint AppID { get; set; }
     }
 
     public class IPC_LobbyCreate : IPC_MessageBase
@@ -92,14 +104,6 @@ namespace SKYNET.IPC.Types
     {
         public uint MsgType { get; set; }
         public byte[] Buffer { get; set; }
-    }
-
-    public class IPC_AddOrUpdateUser : IPC_MessageBase
-    {
-        public string PersonaName { get; set; }
-        public uint AccountID { get; set; }
-        public uint AppID { get; set; }
-        public string IPAddress { get; set; }
     }
 
     public class IPC_AvatarRequest : IPC_MessageBase
@@ -236,4 +240,30 @@ namespace SKYNET.IPC.Types
         public bool AchievementsToo { get; set; }
     }
 
+    public class IPC_GetUserRequest : IPC_MessageBase
+    {
+        public RequestType Type { get; set; }
+        public ulong SteamID { get; set; }
+
+        public enum RequestType
+        {
+            STEAMID,
+            ACCOUNTID,
+            IPADDRESS
+        }
+    }
+
+    public class IPC_GetUserResponse : IPC_MessageBase
+    {
+        public SteamPlayer User { get; set; }
+    }
+
+    public class IPC_GetFriendsRequest : IPC_MessageBase
+    {
+    }
+
+    public class IPC_GetFriendsResponse : IPC_MessageBase
+    {
+        public List<SteamPlayer> Friends { get; set; }
+    }
 }

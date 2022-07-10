@@ -27,9 +27,9 @@ namespace SKYNET.Types
             {
                 PersonaName = Registry.Get<string>("PersonaName", Environment.UserName),
                 AccountName = Registry.Get<string>("AccountName", Environment.UserName),
-                AccountID = Registry.Get<uint>("AccountID", (uint)new Random().Next(1000, 9999)),
-                Language = Registry.Get<string>("Language", "english"),
-                ServerIP = Registry.Get<IPAddress>("ServerIP", IPAddress.Loopback),
+                AccountID =   Registry.Get<uint>("AccountID", (uint)new Random().Next(1000, 9999)),
+                Language =    Registry.Get<string>("Language", "english"),
+                ServerIP =    Registry.Get<IPAddress>("ServerIP", IPAddress.Loopback),
             };
             return settings;
         }

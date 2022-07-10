@@ -1,14 +1,14 @@
-﻿using SKYNET.Common;
-using SKYNET.Helper;
-using SKYNET.Managers;
-using SKYNET.Plugin;
-using SKYNET.Steamworks;
-using SKYNET.Types;
-using System;
+﻿using System;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+using SKYNET.Common;
+using SKYNET.Managers;
+using SKYNET.Plugin;
+using SKYNET.Steamworks;
+using SKYNET.Types;
+
 using AppID = System.UInt32;
 
 namespace SKYNET.Client
@@ -33,12 +33,13 @@ namespace SKYNET.Client
             PersonaName = settings.PersonaName;
             Language = settings.Language;
             SteamID_GS = CSteamID.GenerateGameServer();
+
         }
 
         public void Initialize()
         {
-            Task.Run(delegate { UserManager.Initialize(); });
-            Task.Run(delegate { NetworkManager.Initialize(); });
+            Task.Run(delegate { UserManager.Initialize(SteamID, PersonaName); });
+            Task.Run(delegate { NetworkManager.Initialize(); }); 
             Task.Run(delegate { StatsManager.Initialize(); });
             Task.Run(delegate { IPCManager.Initialize(); });
         }

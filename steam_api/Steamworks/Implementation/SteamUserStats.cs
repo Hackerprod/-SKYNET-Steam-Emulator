@@ -545,13 +545,14 @@ namespace SKYNET.Steamworks.Implementation
         {
             try
             {
+                var UsersOnline = IPCManager.GetUsersOnline(SteamEmulator.AppID);
                 NumberOfCurrentPlayers_t data = new NumberOfCurrentPlayers_t()
                 {
                     m_bSuccess = 1,
-                    m_cPlayers = SteamFriends.Instance.Users.Count
+                    m_cPlayers = UsersOnline
                 };
 
-                Write($"GetNumberOfCurrentPlayers {SteamFriends.Instance.Users.Count}");
+                Write($"GetNumberOfCurrentPlayers {UsersOnline}");
 
                 return CallbackManager.AddCallbackResult(data);
             }

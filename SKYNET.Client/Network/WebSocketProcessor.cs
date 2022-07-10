@@ -7,6 +7,7 @@ using WebSocketSharp.Server;
 using SKYNET.Managers;
 using WebSocketSharp.Net.WebSockets;
 using SKYNET.WEB.Types;
+using System.Windows.Forms;
 
 namespace SKYNET.Network
 {

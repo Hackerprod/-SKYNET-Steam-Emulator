@@ -110,7 +110,6 @@ public class SteamEmulator
             Write("Initializing Steam Emulator");
 
             if (Initialized) return;
-
             Initializing = true;
 
             SteamID = CSteamID.Invalid;

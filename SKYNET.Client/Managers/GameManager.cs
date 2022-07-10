@@ -60,6 +60,11 @@ namespace SKYNET.Managers
             return Games.Find(g => g.Guid == Guid);
         }
 
+        internal static Game GetGameByPath(string executablePath)
+        {
+            return Games.Find(g => g.ExecutablePath == executablePath);
+        }
+
         public static void AddGame(Game game)
         {
             Games.Add(game);

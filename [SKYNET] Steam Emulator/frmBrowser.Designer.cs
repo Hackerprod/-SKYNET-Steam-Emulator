@@ -48,7 +48,7 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(800, 50);
+            this.panel1.Size = new System.Drawing.Size(1084, 50);
             this.panel1.TabIndex = 0;
             this.panel1.Visible = false;
             // 
@@ -103,7 +103,7 @@
             this.PN_WebContainer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.PN_WebContainer.Location = new System.Drawing.Point(0, 50);
             this.PN_WebContainer.Name = "PN_WebContainer";
-            this.PN_WebContainer.Size = new System.Drawing.Size(800, 400);
+            this.PN_WebContainer.Size = new System.Drawing.Size(1084, 511);
             this.PN_WebContainer.TabIndex = 1;
             // 
             // frmBrowser
@@ -111,7 +111,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BlurEffect = true;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(1084, 561);
             this.Controls.Add(this.PN_WebContainer);
             this.Controls.Add(this.panel1);
             this.Name = "frmBrowser";

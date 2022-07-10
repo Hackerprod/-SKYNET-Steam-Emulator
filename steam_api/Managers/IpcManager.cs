@@ -7,8 +7,10 @@ using SKYNET.Steamworks;
 using SKYNET.Steamworks.Implementation;
 using SKYNET.Types;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,6 +20,8 @@ namespace SKYNET.Managers
     {
         private const ulong IPC_ToServer  = 0;
         private const ulong IPC_Broadcast = 1;
+        private const ulong IPC_Client = 2;
+        
         private static PipeClient IPCClient;
 
         static IPCManager()
@@ -56,8 +60,6 @@ namespace SKYNET.Managers
             ProcessMessage(message.Message);
         }
 
-        #region Message processors
-
         private static void ProcessMessage(IPCMessage message)
         {
             Write($"Received IPC message {(IPCMessageType)message.MessageType}");
@@ -65,9 +67,6 @@ namespace SKYNET.Managers
             {
                 case IPCMessageType.IPC_ClientWelcome:
                     ProcessClientWelcome(message);
-                    break;
-                case IPCMessageType.IPC_AddOrUpdateUser:
-                    ProcessAddOrUpdateUser(message);
                     break;
                 case IPCMessageType.IPC_AvatarResponse:
                     ProcessAvatarResponse(message);
@@ -114,10 +113,33 @@ namespace SKYNET.Managers
                 case IPCMessageType.IPC_P2PPacket:
                     ProcessP2PPacket(message);
                     break;
+                case IPCMessageType.IPC_ModifyFileLog:
+                    ProcessModifyFileLog(message);
+                    break;
                 default:
+                    Write($"Not found Handle for message {(IPCMessageType)message.MessageType}");
                     break;
             }
 
+        }
+
+        private static void ProcessModifyFileLog(IPCMessage message)
+        {
+            var ModifyFileLog = message.ParsedBody.FromJson<IPC_ModifyFileLog>();
+            if (ModifyFileLog != null)
+            {
+                SteamEmulator.LogToFile = ModifyFileLog.Enabled;
+                if (ModifyFileLog.Enabled)
+                {
+                    string logPath = Path.Combine(modCommon.GetPath(), "SKYNET");
+                    modCommon.EnsureDirectoryExists(logPath);
+                }
+            }
+        }
+
+        private static void ProcessDisableFileLog(IPCMessage message)
+        {
+            SteamEmulator.LogToFile = false;
         }
 
         #region IPC_ClientHello
@@ -126,11 +148,16 @@ namespace SKYNET.Managers
         {
             var ClientHello = new IPC_ClientHello()
             {
-                AppID = SteamEmulator.AppID,
+                ExecutablePath = modCommon.GetExecutablePath(),
                 ProcessID = Process.GetCurrentProcess().Id
             };
             var message = CreateIPCMessage(ClientHello, IPCMessageType.IPC_ClientHello);
-            SendTo(IPC_ToServer, message);
+
+            var messageWelcome = SendTo(IPC_ToServer, message, true);
+            if (messageWelcome != null)
+            {
+                ProcessClientWelcome(messageWelcome);
+            }
         }
 
         private static void ProcessClientWelcome(IPCMessage message)
@@ -145,9 +172,15 @@ namespace SKYNET.Managers
                 SteamEmulator.LogToFile = ClientWelcome.LogToFile;
                 SteamEmulator.LogToConsole = ClientWelcome.LogToConsole;
                 SteamEmulator.RunCallbacks = ClientWelcome.RunCallbacks;
+                SteamEmulator.AppID = ClientWelcome.AppID;
                 SteamEmulator.ISteamHTTP = ClientWelcome.ISteamHTTP;
                 SteamEmulator.SteamRemoteStorage.StoragePath = ClientWelcome.RemoteStoragePath;
 
+                if (ClientWelcome.LogToFile)
+                {
+                    string logPath = Path.Combine(modCommon.GetPath(), "SKYNET");
+                    modCommon.EnsureDirectoryExists(logPath);
+                }
                 if (ClientWelcome.LogToConsole)
                 {
                     ConsoleHelper.CreateConsole("SKYNET");
@@ -187,18 +220,6 @@ namespace SKYNET.Managers
             if (Leaderboards != null)
             {
                 SteamUserStats.Instance?.SetLeaderboards(Leaderboards.Leaderboards);
-            }
-        }
-
-        private static void ProcessAddOrUpdateUser(IPCMessage message)
-        {
-            try
-            {
-                var user = message.ParsedBody.FromJson<IPC_AddOrUpdateUser>();
-                SteamFriends.Instance?.AddOrUpdateUser(user.AccountID, user.PersonaName, user.AppID, user.IPAddress);
-            }
-            catch
-            {
             }
         }
 
@@ -259,7 +280,7 @@ namespace SKYNET.Managers
 
                     foreach (var member in lobby.Members)
                     {
-                        var user = SteamFriends.Instance.GetUser(member.m_SteamID);
+                        var user = GetUser(member.m_SteamID);
                         if (user != null)
                         {
                             SendTo(user.SteamID, ChatUpdateMessage);
@@ -398,6 +419,8 @@ namespace SKYNET.Managers
                         });
                     }
 
+                    SteamFriends.Instance.UpdateUserLobby(lobbyJoinRequest.SteamID, lobbyJoinRequest.LobbyID);
+
                     string serialized = lobby.ToJson();
 
                     lobbyJoinResponse.SerializedLobby = serialized;
@@ -433,7 +456,7 @@ namespace SKYNET.Managers
 
                     foreach (var member in lobby.Members)
                     {
-                        var user = SteamFriends.Instance.GetUser(member.m_SteamID);
+                        var user = GetUser(member.m_SteamID);
                         if (user != null)
                         {
                             SendTo(user.SteamID, DataUpdateMessage);
@@ -453,10 +476,6 @@ namespace SKYNET.Managers
                 {
                     var lobby = lobbyJoinResponse.SerializedLobby.FromJson<SteamLobby>();
                     if (lobby != null)
-                    {
-                        SteamMatchmaking.Instance.JoinResponse(lobbyJoinResponse, lobby);
-                    }
-                    else
                     {
                         SteamMatchmaking.Instance.JoinResponse(lobbyJoinResponse, lobby);
                     }
@@ -508,6 +527,12 @@ namespace SKYNET.Managers
             //{
             //    Write(ex);
             //}
+        }
+
+        internal static int GetUsersOnline(uint appID)
+        {
+            // TODO: Request to client
+            return 100;
         }
 
         private static void ProcessLobbyListResponse(IPCMessage message)
@@ -575,8 +600,6 @@ namespace SKYNET.Managers
             }
         }
 
-        #endregion
-
         public static void SendUserDataUpdated(SteamPlayer user)
         {
             var status = new IPC_UserDataUpdated()
@@ -604,7 +627,7 @@ namespace SKYNET.Managers
 
                 var message = CreateIPCMessage(JoinRequest, IPCMessageType.IPC_LobbyJoinRequest);
 
-                var user = SteamFriends.Instance.GetUser(lobby.Owner);
+                var user = GetUser(lobby.Owner);
                 if (user == null)
                 {
                     Write($"Not found user to send LobbyJoinRequest, SteamID {new CSteamID(lobby.Owner).ToString()}");
@@ -635,7 +658,7 @@ namespace SKYNET.Managers
             {
                 if (member.m_SteamID != (ulong)SteamEmulator.SteamID)
                 {
-                    var user = SteamFriends.Instance.GetUser(member.m_SteamID);
+                    var user = GetUser(member.m_SteamID);
                     if (user != null)
                     {
                         SendTo(user.SteamID, GameserverMessage);
@@ -669,7 +692,7 @@ namespace SKYNET.Managers
 
             var message = CreateIPCMessage(lobbyDataUpdate, IPCMessageType.IPC_LobbyDataUpdate);
 
-            var user = SteamFriends.Instance.GetUser(IDTarget);
+            var user = GetUser(IDTarget);
             if (user != null)
             {
                 SendTo(user.SteamID, message);
@@ -684,7 +707,7 @@ namespace SKYNET.Managers
 
         public static void SendLobbyLeave(ulong owner, ulong lobbyID)
         {
-            var user = SteamFriends.Instance.GetUser(owner);
+            var user = GetUser(owner);
             if (user != null)
             {
                 var lobbyLeave = new IPC_LobbyLeave()
@@ -705,7 +728,7 @@ namespace SKYNET.Managers
             {
                 if (member.m_SteamID != lobby.Owner)
                 {
-                    var user = SteamFriends.Instance.GetUser(member.m_SteamID);
+                    var user = GetUser(member.m_SteamID);
                     if (user != null)
                     {
                         var lobbyRemove = new IPC_LobbyRemove()
@@ -718,6 +741,37 @@ namespace SKYNET.Managers
                     }
                 }
             }
+        }
+
+        public static List<SteamPlayer> GetFriends()
+        {
+            var FriendsRequest = new IPC_GetFriendsRequest();
+            var messageRequest = CreateIPCMessage(FriendsRequest, IPCMessageType.IPC_GetFriendsRequest);
+
+            var messageResponse = SendTo(IPC_Client, messageRequest, true);
+            if (messageResponse != null)
+            {
+                var UserResponse = messageResponse.ParsedBody.FromJson<IPC_GetFriendsResponse>();
+                return UserResponse.Friends;
+            }
+            return new List<SteamPlayer>();
+        }
+
+        public static SteamPlayer GetUser(ulong steamID)
+        {
+            var UserRequest = new IPC_GetUserRequest()
+            {
+                SteamID = steamID,
+            };
+            var messageRequest = CreateIPCMessage(UserRequest, IPCMessageType.IPC_GetUserRequest);
+
+            var messageResponse = SendTo(IPC_ToServer, messageRequest, true);
+            if (messageResponse != null)
+            {
+                var UserResponse = messageResponse.ParsedBody.FromJson<IPC_GetUserResponse>();
+                return UserResponse.User;
+            }
+            return null;
         }
 
         public static void GCRequest(uint MsgType, byte[] bytes)

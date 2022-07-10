@@ -29,24 +29,31 @@ namespace SKYNET.WEB.Types
         WEB_CreateAccountRequest,
         WEB_CreateAccountResponse,
         WEB_AuthRequest,
-        WEB_AuthResponse, 
-        WEB_GameListRequest, 
-        WEB_GameListResponse, 
-        WEB_GameAdded, 
-        WEB_GameUpdated, 
+        WEB_AuthResponse,
+        WEB_GameListRequest,
+        WEB_GameListResponse,
+        WEB_GameAdded,
+        WEB_GameUpdated,
         WEB_GameRemoved,
+        WEB_GameOrderUpdated,
         WEB_GameLaunch,
         WEB_GameLaunched,
         WEB_GameStoped,
         WEB_GameInfoRequest,
         WEB_GameInfoResponse,
         WEB_GameInfoMinimalResponse,
+        WEB_GameOpenContainerFolder,
+        WEB_GameOpenWithoutEmulation,
         WEB_UserOnline,
         WEB_UserOffline,
         WEB_UserInfoRequest,
         WEB_UserInfoResponse,
         WEB_ChatMessage,
         WEB_PrivateChatMessage,
+        WEB_FileInfoRequest,
+        WEB_FileInfoResponse,
+        WEB_OpenFileDialogRequest,
+        WEB_OpenFileDialogResponse,
     }
 
     public class WEB_ChatMessage : WEB_Base
@@ -106,7 +113,6 @@ namespace SKYNET.WEB.Types
     public class WEB_CreateAccountResponse : WEB_Base
     {
         public Result CreateAccountResult { get; set; }
-
         public string AccountName { get; set; }
         public uint AccountID { get; set; }
         public ulong SteamID { get; set; }
@@ -167,6 +173,41 @@ namespace SKYNET.WEB.Types
     public class WEB_GameListResponse : WEB_Base
     {
         public List<Game> GameList { get; set; }
+    }
+
+    public class WEB_GameOpenContainerFolder : WEB_Base
+    {
+        public string Guid { get; set; }
+    }
+
+    public class WEB_GameOpenWithoutEmulation : WEB_Base
+    {
+        public string Guid { get; set; }
+    }
+
+    public class WEB_FileInfoRequest : WEB_Base
+    {
+        public string FilePath { get; set; }
+    }
+
+    public class WEB_FileInfoResponse : WEB_Base
+    {
+        public string FilePath { get; set; }
+        public long Size { get; set; }
+        public string ImageHex { get; set; }
+    }
+
+    public class WEB_OpenFileDialogResponse : WEB_Base
+    {
+        public string FilePath { get; set; }
+        public long Size { get; set; }
+        public string ImageHex { get; set; }
+        public int AppID { get; set; }
+    }
+
+    public class WEB_GameOrderUpdated : WEB_Base
+    {
+        public Dictionary<int, string> GameOrder { get; set; }
     }
 
     public enum WEB_AuthResponseType : int

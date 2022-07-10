@@ -223,6 +223,21 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamGameServerClient_()
+        {
+            Write("SteamGameServerClient_");
+            return InterfaceManager.FindOrCreateInterface(SteamEmulator.SteamGameServer.InterfaceVersion);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool GameServer_Init(uint unIP, ushort usSteamPort, ushort usGamePort, ushort usQueryPort, int eServerMode, string pchVersionString)
+        {
+            Write("GameServer_Init");
+            uint nGameAppId = SteamEmulator.AppID;
+            return SteamEmulator.SteamGameServer.InitGameServer(unIP, usGamePort, usQueryPort, (uint)eServerMode, nGameAppId, pchVersionString);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool GameServer_InitSafe(uint unIP, ushort usSteamPort, ushort usGamePort, ushort usQueryPort, EServerMode eServerMode, string pchVersionString)
         {
             return SteamEmulator.SteamGameServer.InitGameServer(unIP, usSteamPort, usGamePort, usQueryPort, (uint)eServerMode, pchVersionString);

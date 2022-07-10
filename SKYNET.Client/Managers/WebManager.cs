@@ -5,6 +5,11 @@ using SKYNET.Managers;
 using SKYNET.Network;
 using SKYNET.WEB.Types;
 using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Threading;
+using System.Windows.Forms;
 
 namespace SKYNET
 {
@@ -57,12 +62,133 @@ namespace SKYNET
                     case WEB_MessageType.WEB_PrivateChatMessage:
                         // TODO
                         break;
+                    case WEB_MessageType.WEB_GameOpenContainerFolder:
+                        ProcessGameOpenContainerFolder(e);
+                        break;
+                    case WEB_MessageType.WEB_GameOpenWithoutEmulation:
+                        ProcessGameOpenWithoutEmulation(e);
+                        break;
+                    case WEB_MessageType.WEB_FileInfoRequest:
+                        ProcessFileInfoRequest(e);
+                        break;
+                    case WEB_MessageType.WEB_GameOrderUpdated:
+                        ProcessGameOrderUpdated(e);
+                        break;
+                    case WEB_MessageType.WEB_OpenFileDialogRequest:
+                        ProcessOpenFileDialogRequest();
+                        break;
                 }
             }
             catch (Exception ex)
             {
                 Write($"Error proccessing WEB Message {ex}");
             }
+        }
+
+        private static void ProcessOpenFileDialogRequest()
+        {
+            Thread s = new Thread(new ThreadStart(delegate
+            {
+                var Dialog = new Form()
+                {
+                    FormBorderStyle = FormBorderStyle.None,
+                    TopMost = true,
+                    Size = new Size(0, 0),
+                    ShowInTaskbar = false,
+                    BackColor = Color.Azure,
+                    TransparencyKey = Color.Azure,
+                };
+                Dialog.Show();
+                modCommon.InvokeAction(Dialog, delegate
+                {
+                    OpenFileDialog fileDialog = new OpenFileDialog()
+                    {
+                        Filter = "exe file | *.exe",
+                        Multiselect = false
+                    };
+                    if (fileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        string FileName = fileDialog.FileName;
+                        FileInfo info = new FileInfo(FileName);
+                        var hexIcon = "";
+                        try
+                        {
+                            var bitmap = (Bitmap)ImageHelper.IconFromFile(FileName);
+                            var imageBytes = ImageHelper.ImageToBytes(bitmap);
+                            hexIcon = Convert.ToBase64String(imageBytes);
+                        }
+                        catch { }
+
+                        int posibleAppID = 0;
+                        try
+                        {
+                            var PathDirectory = Directory.GetParent(FileName).ToString();
+                            if (File.Exists(Path.Combine(PathDirectory, "steam_appid.txt")))
+                            {
+                                posibleAppID = int.Parse(File.ReadAllText(Path.Combine(PathDirectory, "steam_appid.txt")));
+                            }
+                        }
+                        catch { }
+
+                        var FileDialogResponse = new WEB_OpenFileDialogResponse()
+                        {
+                            FilePath = FileName,
+                            Size = info.Length,
+                            ImageHex = hexIcon,
+                            AppID = posibleAppID
+                        };
+                        Send(FileDialogResponse, WEB_MessageType.WEB_OpenFileDialogResponse);
+                    }
+                });
+                Dialog.Close();
+            }));
+            s.SetApartmentState(ApartmentState.STA);
+            s.Start();
+
+            //Thread s = new Thread(new ThreadStart(delegate
+            //{
+            //    OpenFileDialog fileDialog = new OpenFileDialog()
+            //    {
+            //        Filter = "exe file | *.exe",
+            //        Multiselect = false
+            //    };
+            //    if (fileDialog.ShowDialog() == DialogResult.OK)
+            //    {
+            //        string FileName = fileDialog.FileName;
+            //        FileInfo info = new FileInfo(FileName);
+            //        var hexIcon = "";
+            //        try
+            //        {
+            //            var bitmap = (Bitmap)ImageHelper.IconFromFile(FileName);
+            //            var imageBytes = ImageHelper.ImageToBytes(bitmap);
+            //            hexIcon = Convert.ToBase64String(imageBytes);
+            //        }
+            //        catch { }
+
+            //        int posibleAppID = 0;
+            //        try
+            //        {
+            //            var PathDirectory = Directory.GetParent(FileName).ToString();
+            //            if (File.Exists(Path.Combine(PathDirectory, "steam_appid.txt")))
+            //            {
+            //                posibleAppID = int.Parse(File.ReadAllText(Path.Combine(PathDirectory, "steam_appid.txt")));
+            //            }
+            //        }
+            //        catch { }
+
+            //        var FileDialogResponse = new WEB_OpenFileDialogResponse()
+            //        {
+            //            FilePath = FileName,
+            //            Size = info.Length,
+            //            ImageHex = hexIcon,
+            //            AppID = posibleAppID
+            //        };
+            //        Send(FileDialogResponse, WEB_MessageType.WEB_OpenFileDialogResponse);
+
+            //    }
+            //}));
+            //s.SetApartmentState(ApartmentState.STA);
+            //s.Start();
         }
 
         private static void ProcessAuthRequest(WebMessage e)
@@ -170,9 +296,56 @@ namespace SKYNET
 
         private static void ProcessGameAdded(WebMessage e)
         {
+            //e.Body = e.Body.Replace("GameDLC\":\"\"", "GameDLC\":{}");
             var GameAdded = e.Deserialize<WEB_GameAdded>();
             if (GameAdded == null) return;
             GameManager.AddGame(GameAdded.Game);
+        }
+
+        private static void ProcessGameOpenContainerFolder(WebMessage e)
+        {
+            var OpenContainerFolder = e.Deserialize<WEB_GameOpenContainerFolder>();
+            if (OpenContainerFolder == null) return;
+            var Game = GameManager.GetGame(OpenContainerFolder.Guid);
+            if (Game == null) return;
+            modCommon.OpenFolderAndSelectFile(Game.ExecutablePath);
+        }
+
+        private static void ProcessGameOpenWithoutEmulation(WebMessage e)
+        {
+            var OpenWithoutEmulation = e.Deserialize<WEB_GameOpenWithoutEmulation>();
+            if (OpenWithoutEmulation == null) return;
+            var Game = GameManager.GetGame(OpenWithoutEmulation.Guid);
+            if (Game == null) return;
+            try { Process.Start(Game.ExecutablePath, Game.Parameters); } catch { }
+        }
+
+        private static void ProcessFileInfoRequest(WebMessage e)
+        {
+            var FileInfoRequest = e.Deserialize<WEB_FileInfoRequest>();
+            if (FileInfoRequest == null) return;
+            if (!File.Exists(FileInfoRequest.FilePath)) return;
+            FileInfo info = new FileInfo(FileInfoRequest.FilePath);
+            var hexIcon = "";
+            try
+            {
+                var bitmap = (Bitmap)ImageHelper.IconFromFile(FileInfoRequest.FilePath);
+                var imageBytes = ImageHelper.ImageToBytes(bitmap);
+                hexIcon = Convert.ToBase64String(imageBytes);
+            }
+            catch { }
+            var FileInfoResponse = new WEB_FileInfoResponse()
+            {
+                FilePath = FileInfoRequest.FilePath,
+                Size = info.Length,
+                ImageHex = hexIcon
+            };
+            Send(FileInfoResponse, WEB_MessageType.WEB_FileInfoResponse);
+        }
+
+        private static void ProcessGameOrderUpdated(WebMessage e)
+        {
+            // TODO
         }
 
         public static void SendGameOppened(string guid)

@@ -13,6 +13,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using WebSocketSharp.Server;
 
 namespace SKYNET.Managers
@@ -274,7 +275,6 @@ namespace SKYNET.Managers
                 if (announce != null && announce.AccountID != SteamClient.AccountID)
                 {
                     UserManager.AddOrUpdateUser(announce.AccountID, announce.PersonaName, announce.AppID, IPAddress);
-                    IPCManager.AddOrUpdateUser(announce.AccountID, announce.PersonaName, announce.AppID, IPAddress);
                 }
 
                 if (message.MessageType == (int)MessageType.NET_Announce)

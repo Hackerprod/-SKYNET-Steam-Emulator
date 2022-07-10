@@ -149,7 +149,7 @@ namespace SKYNET.Steamworks.Implementation
             Write($"GetP2PSessionState {steamIDRemote}");
 
             uint RemoteIP = NetworkHelper.ConvertFromIPAddress(NetworkHelper.GetIPAddress()); 
-            var user = SteamFriends.Instance.GetUser(steamIDRemote);
+            var user = IPCManager.GetUser(steamIDRemote);
             if (user != null)
             {
                 if (IPAddress.TryParse(user.IPAddress, out var Address))

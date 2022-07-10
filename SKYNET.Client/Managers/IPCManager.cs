@@ -45,9 +45,6 @@ namespace SKYNET.Managers
                 case IPCMessageType.IPC_ClientHello:
                     Process_ClientHello(e.Connection, e.Message);
                     break;
-                case IPCMessageType.IPC_AddOrUpdateUser:
-                    // TODO: Only receive in game IPC client
-                    break;
                 case IPCMessageType.IPC_AvatarRequest:
                     Process_AvatarRequest(e.Connection, e.Message);
                     break;
@@ -108,9 +105,41 @@ namespace SKYNET.Managers
                 case IPCMessageType.IPC_ResetAllStats:
                     Process_ResetAllStats(e.Message);
                     break;
+                case IPCMessageType.IPC_GetUserRequest:
+                    Process_GetUserRequest(e.Message);
+                    break;
+                case IPCMessageType.IPC_GetFriendsRequest:
+                    Process_GetFriendsRequest(e.Message);
+                    break;
                 default:
                     break;
             }
+        }
+
+        private static void Process_GetFriendsRequest(IPCMessage message)
+        {
+            var FriendsResponse = new IPC_GetFriendsResponse();
+            var Friends = UserManager.GetFriends();
+            FriendsResponse.Friends = Friends;
+
+            var messageResponse = CreateIPCMessage(FriendsResponse, IPCMessageType.IPC_GetFriendsResponse, message.JobID);
+            SendIPCMessage(messageResponse);
+        }
+
+        private static void Process_GetUserRequest(IPCMessage message)
+        {
+            var UserRequest = message.ParsedBody.Deserialize<IPC_GetUserRequest>();
+            IPC_GetUserResponse UserResponse = new IPC_GetUserResponse();
+            if (UserRequest != null)
+            {
+                var User = UserManager.GetUser(UserRequest.SteamID);
+                if (User != null)
+                {
+                    UserResponse.User = User;
+                }
+            }
+            var messageResponse = CreateIPCMessage(UserResponse, IPCMessageType.IPC_GetUserResponse, message.JobID);
+            SendIPCMessage(messageResponse);
         }
 
         private static void Process_SetAchievement(IPCMessage message)
@@ -164,20 +193,21 @@ namespace SKYNET.Managers
                 RemoteStoragePath = RemoteStoragePath
             };
 
+            Game Game = null;
             if (ClientHello != null)
             {
-                var AppID = ClientHello.AppID;
-                var Game = GameManager.GetGame(AppID);
+                Game = GameManager.GetGameByPath(ClientHello.ExecutablePath);
                 if (Game != null)
                 {
                     Log.Write("IPCManager", $"Hello received from {Game.Name}");
-
                     GameManager.InvokeGameLaunched(Game, ClientHello.ProcessID, connection.PipeName);
 
                     ClientWelcome.LogToFile = Game.LogToFile;
                     ClientWelcome.LogToConsole = Game.LogToConsole;
                     ClientWelcome.RunCallbacks = Game.RunCallbacks;
                     ClientWelcome.ISteamHTTP = Game.ISteamHTTP;
+                    ClientWelcome.AppID = Game.AppID;
+
                 }
             }
             var welcome = CreateIPCMessage(ClientWelcome, IPCMessageType.IPC_ClientWelcome, message.JobID);
@@ -206,10 +236,12 @@ namespace SKYNET.Managers
             connection.WriteAsync(DefaultAvatarMessage);
 
 
+            if (Game == null) return;
+
             // TODO: Send Achievements
             var Achievements = new IPC_Achievements()
             {
-                Achievements = StatsManager.GetAchievements(ClientHello.AppID)
+                Achievements = StatsManager.GetAchievements(Game.AppID)
             };
             var AchievementsMessage = CreateIPCMessage(Achievements, IPCMessageType.IPC_Achievements);
             connection.WriteAsync(AchievementsMessage);
@@ -217,7 +249,7 @@ namespace SKYNET.Managers
             // TODO: Send Achievements
             var Leaderboards = new IPC_Leaderboards()
             {
-                Leaderboards = StatsManager.GetLeaderboards(ClientHello.AppID)
+                Leaderboards = StatsManager.GetLeaderboards(Game.AppID)
             };
             var LeaderboardsMessage = CreateIPCMessage(Leaderboards, IPCMessageType.IPC_Leaderboards);
             connection.WriteAsync(LeaderboardsMessage);
@@ -226,7 +258,7 @@ namespace SKYNET.Managers
             // TODO: Send Achievements
             var PlayerStats = new IPC_PlayerStats()
             {
-                PlayerStats = StatsManager.GetPlayerStats(ClientHello.AppID)
+                PlayerStats = StatsManager.GetPlayerStats(Game.AppID)
             };
             var PlayerStatsMessage = CreateIPCMessage(Achievements, IPCMessageType.IPC_PlayerStats);
             connection.WriteAsync(PlayerStatsMessage);
@@ -412,19 +444,6 @@ namespace SKYNET.Managers
             Log.Write("IPCManager", "Exception Occurred!!! " + e.Exception);
         }
 
-        public static void AddOrUpdateUser(uint accountID, string personaName, uint appID, string iPAddress)
-        {
-            var update = new IPC_AddOrUpdateUser()
-            {
-                AccountID = accountID,
-                PersonaName = personaName,
-                AppID = appID,
-                IPAddress = iPAddress
-            };
-            var IPCMessage = CreateIPCMessage(update, IPCMessageType.IPC_AddOrUpdateUser);
-            SendIPCMessage(IPCMessage);
-        }
-
         public static void AvatarResponse(string HexAvatar, uint AccountID)
         {
             var AvatarResponse = new IPC_AvatarResponse()
@@ -562,7 +581,16 @@ namespace SKYNET.Managers
             SendIPCMessage(message);
         }
 
-        
+        public static void SendModifyFileLog(Game game)
+        {
+            var ModifyFileLog = new IPC_ModifyFileLog()
+            {
+                Enabled = game.LogToFile
+            };
+            var message = CreateIPCMessage(ModifyFileLog, IPCMessageType.IPC_ModifyFileLog);
+            SendIPCMessage(message);
+        }
+
         private static void Write(object msg)
         {
             if (LastMessage != msg.ToString())

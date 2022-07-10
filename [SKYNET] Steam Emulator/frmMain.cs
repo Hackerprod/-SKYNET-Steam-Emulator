@@ -92,7 +92,7 @@ namespace SKYNET
             UserManager.OnAvatarReceived = UserManager_OnAvatarReceived;
 
             WebManager.OnGameLaunch += UserManager_OnGameLaunch;
-            WebManager.Initialize();
+            WebManager.Initialize();           
         }
 
         #region GameManager Events
@@ -104,19 +104,31 @@ namespace SKYNET
 
         private void GameManager_OnGameUpdated(object sender, Game e)
         {
-            foreach (var control in PN_GameContainer.Controls)
+            var game = RunningGames.Find(g => g.Game.Guid == e.Guid);
+            if (game != null)
             {
-                if (control is GameBox && ((GameBox)control).Handle.ToInt32() == MenuBox.Handle.ToInt32())
+                IPCManager.SendModifyFileLog(game.Game);
+            }
+            for (int i = 0; i < PN_GameContainer.Controls.Count; i++)
+            {
+                object control = PN_GameContainer.Controls[i];
+                if (control is GameBox && ((GameBox)control).Game.Guid == e.Guid)
                 {
                     ((GameBox)control).Game = e;
-                    return;
                 }
             }
         }
 
         private void GameManager_OnGameRemoved(object sender, Game e)
         {
-            //
+            for (int i = 0; i < PN_GameContainer.Controls.Count; i++)
+            {
+                object control = PN_GameContainer.Controls[i];
+                if (control is GameBox && ((GameBox)control).Game.Guid == e.Guid)
+                {
+                    PN_GameContainer.Controls.RemoveAt(i);
+                }
+            }
         }
 
         private void GameManager_OnGameOpened(object sender, GameManager.GameLaunchedEventArgs e)
@@ -125,6 +137,12 @@ namespace SKYNET
             if (game.Process == null) return;
             RunningGames.Add(game);
             NetworkManager.SendGameOpened(e.Game);
+
+            if (e.Game.Guid == MenuBox?.Game.Guid)
+            {
+                BT_GameAction.Text = "CLOSE";
+                BT_GameAction.BackColor = Color.Red;
+            }
         }
 
         private void GameManager_OnUserGameOpened(object sender, NET_GameOpened e)
@@ -248,6 +266,7 @@ namespace SKYNET
             if (e.Button == MouseButtons.Left)
             {
                 SelectBox(b);
+                MenuBox = b;
             }
             if (e.Button == MouseButtons.Right)
             {
@@ -322,8 +341,11 @@ namespace SKYNET
             module.BackColor = Color.FromArgb(23, 33, 43);
             module.Color = Color.FromArgb(23, 33, 43);
             module.Color_MouseHover = Color.FromArgb(33, 43, 53);
-            
-            PN_GameContainer.Controls.Add(module);
+
+            modCommon.InvokeAction(PN_GameContainer, delegate
+            {
+                PN_GameContainer.Controls.Add(module);
+            });
         }
 
 
@@ -337,13 +359,7 @@ namespace SKYNET
 
             Write("SteamClient", "Opening " + game.Name);
 
-            var gameProcess = DllInjector.Inject(game);
-
-            if (gameProcess != null)
-            {
-                BT_GameAction.Text = "CLOSE";
-                BT_GameAction.BackColor = Color.Red;
-            }
+            DllInjector.Inject(game);
         }
 
         public static void AvatarUpdated(Bitmap Avatar)
@@ -596,5 +612,14 @@ namespace SKYNET
         {
             WebLogger1.ClearScreen();
         }
+
+        private void Label2_Click(object sender, EventArgs e)
+        {
+            string exe = @"D:\Juegos\Steam\steamapps\common\dota 2 beta\game\bin\win64\dota2.exe";
+            string arg = "-windowed -console -novid -high -480 -dx11 +map_enable_background_maps 0 -prewarm";
+            string dll = @"D:\Instaladores\Programación\Projects\[SKYNET] Steam Emulator\[SKYNET] Steam Emulator\bin\Debug\x64\steam_api64.dll";
+            Process.Start(@"C:\Users\Administrador\source\repos\SKYNET.Injector\SKYNET.Injector\bin\Debug\x64\SKYNET.Injector.exe", "\"" + exe + "\" \"" + arg + "\" \"" + dll + "\"");
+        }
+
     }
 }

@@ -13,11 +13,7 @@ public partial class modCommon
 #else
     public const int StructPackSize = 8;
 #endif
-
-    public static bool LogToFile { get; set; }
-
     public static DateTime LoadTime { get; set; } = DateTime.Now;
-
 
     public static IntPtr GetObjectPtr(object Obj)
     {
@@ -27,6 +23,7 @@ public partial class modCommon
         gcHandle.Free();
         return Ptr;
     }
+
     public static void EnsureDirectoryExists(string filePath, bool isFile = false)
     {
         if (!string.IsNullOrEmpty(filePath))
@@ -75,6 +72,17 @@ public partial class modCommon
         finally { currentProcess = null; }
     }
 
+    public static string GetExecutablePath()
+    {
+        Process currentProcess;
+        try
+        {
+            currentProcess = Process.GetCurrentProcess();
+            return currentProcess.MainModule.FileName;
+        }
+        finally { currentProcess = null; }
+    }
+    
     public static bool Is64Bit()
     {
         return IntPtr.Size == 8;

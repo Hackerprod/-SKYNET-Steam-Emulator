@@ -9,6 +9,15 @@ using SteamItemDef_t = System.UInt32;
 
 namespace SKYNET.Steamworks
 {
+    public struct FriendGameInfo_t
+    {
+        public uint GameID;
+        public uint GameIP;
+        public ushort GamePort;
+        public ushort QueryPort;
+        public ulong steamIDLobby;
+    }
+
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
     public struct SteamUGCDetails_t
     {

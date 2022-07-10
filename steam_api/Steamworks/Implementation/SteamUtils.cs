@@ -128,7 +128,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public uint GetAppID()
         {
-            uint appId = SteamEmulator.AppID == 0 ? 570 : SteamEmulator.AppID;
+            uint appId = SteamEmulator.AppID;
             Write($"GetAppID {appId}");
             return appId;
         }

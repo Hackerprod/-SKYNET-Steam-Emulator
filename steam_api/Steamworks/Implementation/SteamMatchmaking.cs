@@ -171,6 +171,7 @@ namespace SKYNET.Steamworks.Implementation
 
                 IPCManager.SendCreateLobby(LocalLobby);
                 UpdateLobby(LocalLobby, LocalLobby.SteamID);
+                SteamFriends.Instance.UpdateUserLobby((ulong)SteamEmulator.SteamID, LocalLobby.SteamID);
             }
             catch (Exception)
             {
@@ -640,6 +641,7 @@ namespace SKYNET.Steamworks.Implementation
                     }
 
                     Lobbies[lobby.SteamID] = lobby;
+                    SteamFriends.Instance.UpdateUserLobby((ulong)SteamEmulator.SteamID, lobby.SteamID);
                 }
                 else
                 {
@@ -683,8 +685,16 @@ namespace SKYNET.Steamworks.Implementation
                 m_ulSteamIDLobby = lobbyDataUpdate.SteamIDLobby,
                 m_ulSteamIDMember = lobbyDataUpdate.SteamIDMember
             };
-
             CallbackManager.AddCallbackResult(data);
+
+            var lobby = lobbyDataUpdate.SerializedLobby.FromJson<SteamLobby>();
+            if (lobby != null)
+            {
+                foreach (var member in lobby.Members)
+                {
+                    SteamFriends.Instance.UpdateUserLobby(member.m_SteamID, lobbyDataUpdate.SteamIDLobby);
+                }
+            }
         }
 
         public void LobbyChatUpdated(IPC_LobbyChatUpdate lobbyChatUpdate)
