@@ -34,10 +34,15 @@ namespace SKYNET // & " = |
         private static Assembly ResolveAssembly(object sender, ResolveEventArgs args)
         {
             var fullAssemblyName = new AssemblyName(args.Name);
-            string assemblyPathRoot = Path.Combine(modCommon.GetPath(), "Data", "Assemblies", fullAssemblyName.Name + ".dll");
-            if (File.Exists(assemblyPathRoot))
+            string assembliesPath = Path.Combine(modCommon.GetPath(), "Data", "Assemblies");
+            modCommon.EnsureDirectoryExists(assembliesPath);
+
+            foreach (var file in Directory.GetFiles(assembliesPath, "*.dll", SearchOption.AllDirectories))
             {
-                return Assembly.LoadFrom(assemblyPathRoot);
+                if (Path.GetFileNameWithoutExtension(file) == fullAssemblyName.Name)
+                {
+                    return Assembly.LoadFrom(file);
+                }
             }
             return null;
         }

@@ -64,14 +64,6 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Geckofx-Core, Version=45.0.34.0, Culture=neutral, PublicKeyToken=3209ac31600d1857, processorArchitecture=x86">
-      <HintPath>..\packages\Geckofx45.45.0.34\lib\net45\Geckofx-Core.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Geckofx-Winforms, Version=45.0.34.0, Culture=neutral, PublicKeyToken=3209ac31600d1857, processorArchitecture=x86">
-      <HintPath>..\packages\Geckofx45.45.0.34\lib\net45\Geckofx-Winforms.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Microsoft.mshtml, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
@@ -98,9 +90,6 @@
     </Compile>
     <Compile Include="frmBrowser.Designer.cs">
       <DependentUpon>frmBrowser.cs</DependentUpon>
-    </Compile>
-    <Compile Include="frmBrowser.Eotu.Client.cs">
-      <SubType>Form</SubType>
     </Compile>
     <Compile Include="GUI\Controls\ImageCropControl.cs">
       <SubType>UserControl</SubType>
@@ -335,7 +324,6 @@
     <EmbeddedResource Include="GUI\Controls\SKYNET_Check.resx">
       <DependentUpon>SKYNET_Check.cs</DependentUpon>
     </EmbeddedResource>
-    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -399,11 +387,4 @@
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>Este proyecto hace referencia a los paquetes NuGet que faltan en este equipo. Use la restauración de paquetes NuGet para descargarlos. Para obtener más información, consulte http://go.microsoft.com/fwlink/?LinkID=322105. El archivo que falta es {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Geckofx45.45.0.34\build\Geckofx45.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Geckofx45.45.0.34\build\Geckofx45.targets'))" />
-  </Target>
-  <Import Project="..\packages\Geckofx45.45.0.34\build\Geckofx45.targets" Condition="Exists('..\packages\Geckofx45.45.0.34\build\Geckofx45.targets')" />
 </Project>
