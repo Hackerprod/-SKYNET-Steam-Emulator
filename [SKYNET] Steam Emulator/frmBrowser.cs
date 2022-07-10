@@ -1,5 +1,6 @@
 ﻿using SKYNET.GUI;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -23,10 +24,19 @@ namespace SKYNET
 
         private void FrmBrowser_Load(object sender, EventArgs e)
         {
-            if (LoadChromium()) return;
+            if (LoadChromium())
+            {
+                this.Opacity = 100D;
+                return;
+            }
 
-            if (LoadGecko()) return;
+            if (LoadGecko())
+            {
+                this.Opacity = 100D;
+                return;
+            }
 
+            Process.Start("http://127.0.0.1");
         }
 
         private bool LoadGecko()

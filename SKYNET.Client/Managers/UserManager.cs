@@ -145,5 +145,15 @@ namespace SKYNET.Managers
         {
             return Users;
         }
+
+        internal static void UserDataUpdated(uint accountID, string personaName, uint lobbyID)
+        {
+            var User = GetUser(accountID);
+            if (User != null)
+            {
+                User.PersonaName = personaName;
+                User.LobbyID = new CSteamID(lobbyID).AccountID;
+            }
+        }
     }
 }

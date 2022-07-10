@@ -38,6 +38,7 @@
             this.ClientSize = new System.Drawing.Size(1084, 561);
             this.MaximumSize = new System.Drawing.Size(1366, 728);
             this.Name = "frmBrowser";
+            this.Opacity = 0D;
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.TransparencyKey = System.Drawing.Color.Azure;

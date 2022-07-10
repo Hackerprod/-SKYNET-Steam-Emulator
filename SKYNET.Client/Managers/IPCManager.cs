@@ -298,7 +298,10 @@ namespace SKYNET.Managers
         {
             var UserDataUpdated = message.ParsedBody.Deserialize<IPC_UserDataUpdated>();
             if (UserDataUpdated != null)
+            {
+                UserManager.UserDataUpdated(UserDataUpdated.AccountID, UserDataUpdated.PersonaName, UserDataUpdated.LobbyID);
                 NetworkManager.SendUserDataUpdated(UserDataUpdated);
+            }
         }
 
         private static void Process_AvatarRequest(PipeConnection<IPCMessage> connection, IPCMessage message)
@@ -455,14 +458,14 @@ namespace SKYNET.Managers
             SendIPCMessage(IPCMessage);
         }
 
-        public static void UpdateUserStatus(NET_UserDataUpdated statusChanged, string iPAddress)
+        public static void UpdateUserStatus(NET_UserDataUpdated statusChanged, IPC_UserDataUpdated.UpdateType UpdateType)
         {
             var UserDataUpdated = new IPC_UserDataUpdated()
             {
                 LobbyID = statusChanged.LobbyID,
                 AccountID = statusChanged.AccountID,
                 PersonaName = statusChanged.PersonaName,
-                IPAddress = iPAddress
+                Type = UpdateType
             };
             var IPCMessage = CreateIPCMessage(UserDataUpdated, IPCMessageType.IPC_UserDataUpdated);
             SendIPCMessage(IPCMessage);

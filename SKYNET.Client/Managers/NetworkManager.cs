@@ -28,7 +28,6 @@ namespace SKYNET.Managers
 
         public static void Initialize()
         {
-            //Port = SteamEmulator.BroadcastPort;
             Port = 28080;
 
             if (NetworkHelper.IsAvailablePort(Port))
@@ -39,15 +38,15 @@ namespace SKYNET.Managers
                 TCPServer.OnDataReceived += TCPServer_OnDataReceived;
                 TCPServer.OnConnected += TCPServer_OnConnected;
                 TCPServer.Start();
-
-                WebSocket = new WebSocketServer(8888);
-                WebSocket.AddWebSocketService<WebSocketProcessor>("/OnMessage");
-                WebSocket.Start();
             }
             else
             {
                 Write($"Error initializing TCP server, port {Port} is in use");
             }
+
+            WebSocket = new WebSocketServer(8888);
+            WebSocket.AddWebSocketService<WebSocketProcessor>("/OnMessage");
+            WebSocket.Start();
 
             WebServer = new WebServer(80);
             WebServer.Start();
@@ -65,8 +64,6 @@ namespace SKYNET.Managers
             NetworkMessage message = packet.Data.GetString().Deserialize<NetworkMessage>();
             ProcessMessage(message, packet.Sender.Socket);
         }
-
-        //#region Message processors
 
         private static void ProcessMessage(NetworkMessage message, Socket socket)
         {
@@ -320,7 +317,28 @@ namespace SKYNET.Managers
                 {
                     if (StatusChanged.AccountID == (uint)SteamClient.AccountID) return;
                     var IPAddress = ((IPEndPoint)socket.RemoteEndPoint).Address.ToString();
-                    IPCManager.UpdateUserStatus(StatusChanged, IPAddress);
+
+                    var user = UserManager.GetUser((ulong)new CSteamID(StatusChanged.AccountID));
+                    IPC_UserDataUpdated.UpdateType updateType = default;
+                    if (user != null)
+                    {
+                        user.IPAddress = IPAddress;
+
+                        if (user.PersonaName != StatusChanged.PersonaName)
+                        {
+                            user.PersonaName = StatusChanged.PersonaName;
+                            updateType = IPC_UserDataUpdated.UpdateType.PersonaName;
+                        }
+
+                        if (user.LobbyID != StatusChanged.LobbyID)
+                        {
+                            user.LobbyID = StatusChanged.LobbyID;
+                            updateType = IPC_UserDataUpdated.UpdateType.LobbyID;
+                        }
+                    }
+
+                    IPCManager.UpdateUserStatus(StatusChanged, updateType);
+
                 }
             }
             catch
@@ -634,7 +652,7 @@ namespace SKYNET.Managers
             var UserDataUpdated = new NET_UserDataUpdated()
             {
                 PersonaName = userDataUpdated.PersonaName,
-                AccountID = userDataUpdated.AccountID, 
+                AccountID = userDataUpdated.AccountID,  
                 LobbyID = userDataUpdated.LobbyID
             };
 

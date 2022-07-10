@@ -720,15 +720,11 @@ namespace SKYNET.Steamworks.Implementation
             ReportUserChanged((ulong)SteamEmulator.SteamID, EPersonaChange.k_EPersonaChangeName);
 
             SteamEmulator.PersonaName = pchPersonaName;
-            MutexHelper.Wait("Users", delegate
-            {
-
-            });
             var user = GetUser((ulong)SteamEmulator.SteamID);
             if (user != null)
             {
                 user.PersonaName = pchPersonaName;
-                IPCManager.SendUserDataUpdated(user);
+                IPCManager.SendUserDataUpdated(user, IPC_UserDataUpdated.UpdateType.PersonaName);
             }
 
             return APICall;
@@ -773,38 +769,22 @@ namespace SKYNET.Steamworks.Implementation
                 user.LobbyID = lobbySteamId;
                 if (BroadCast)
                 {
-                    IPCManager.SendUserDataUpdated(user);
+                    IPCManager.SendUserDataUpdated(user, IPC_UserDataUpdated.UpdateType.LobbyID);
                 }
             }
         }
 
         public void UpdateUserStatus(IPC_UserDataUpdated statusChanged)
         {
-            var user = GetUser((ulong)new CSteamID(statusChanged.AccountID));
-            if (user != null)
+            switch (statusChanged.Type)
             {
-                if (!string.IsNullOrEmpty(statusChanged.IPAddress))
-                {
-                    user.IPAddress = statusChanged.IPAddress;
-                }
-                if (!string.IsNullOrEmpty(statusChanged.PersonaName))
-                {
-                    if (user.PersonaName != statusChanged.PersonaName)
-                    {
-                        user.PersonaName = statusChanged.PersonaName;
-                        ReportUserChanged(user.SteamID, EPersonaChange.k_EPersonaChangeName);
-
-                        if (statusChanged.AccountID == SteamEmulator.SteamID.AccountID)
-                        {
-                            SteamEmulator.PersonaName = statusChanged.PersonaName;
-                        }
-                    }
-                }
-                if (user.LobbyID != statusChanged.LobbyID)
-                {
-                    user.LobbyID = statusChanged.LobbyID;
-                    // TODO: Update in SteamMatchmaking
-                }
+                case IPC_UserDataUpdated.UpdateType.PersonaName:
+                    ReportUserChanged(new CSteamID(statusChanged.AccountID).SteamID, EPersonaChange.k_EPersonaChangeName);
+                    break;
+                case IPC_UserDataUpdated.UpdateType.LobbyID:
+                    break;
+                default:
+                    break;
             }
         }
 

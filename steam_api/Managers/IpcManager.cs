@@ -590,7 +590,6 @@ namespace SKYNET.Managers
                 var StatusChanged = message.ParsedBody.FromJson<IPC_UserDataUpdated>();
                 if (StatusChanged != null)
                 {
-                    if (StatusChanged.AccountID == (uint)SteamEmulator.SteamID.AccountID) return;
                     SteamFriends.Instance.UpdateUserStatus(StatusChanged);
                 }
             }
@@ -600,13 +599,14 @@ namespace SKYNET.Managers
             }
         }
 
-        public static void SendUserDataUpdated(SteamPlayer user)
+        public static void SendUserDataUpdated(SteamPlayer user, IPC_UserDataUpdated.UpdateType Type)
         {
             var status = new IPC_UserDataUpdated()
             {
                 PersonaName = user.PersonaName,
                 AccountID = (uint)SteamEmulator.SteamID.AccountID, 
-                LobbyID = user.LobbyID.GetAccountID()
+                LobbyID = user.LobbyID.GetAccountID(),
+                Type = Type
             };
 
             var message = CreateIPCMessage(status, IPCMessageType.IPC_UserDataUpdated);

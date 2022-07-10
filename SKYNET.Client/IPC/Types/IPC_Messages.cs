@@ -132,7 +132,13 @@ namespace SKYNET.IPC.Types
         public uint AccountID { get; set; }
         public string PersonaName { get; set; }
         public uint LobbyID { get; set; }
-        public string IPAddress { get; set; }
+        public UpdateType Type { get; set; }
+
+        public enum UpdateType
+        {
+            PersonaName,
+            LobbyID
+        }
     }
 
     public class IPC_LobbyListRequest : IPC_MessageBase
