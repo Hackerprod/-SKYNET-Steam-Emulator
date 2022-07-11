@@ -20,7 +20,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\..\SKYNET Steam Emulator\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -226,12 +226,6 @@
     </Compile>
     <Compile Include="Helpers\modCommon.cs" />
     <Compile Include="Helpers\NativeMethods.cs" />
-    <Compile Include="OpenFile.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="OpenFile.Designer.cs">
-      <DependentUpon>OpenFile.cs</DependentUpon>
-    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GUI\Controls\SKYNET_TextBox.cs">
@@ -304,9 +298,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\frmUpdateProfile.resx">
       <DependentUpon>frmUpdateProfile.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="OpenFile.resx">
-      <DependentUpon>OpenFile.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

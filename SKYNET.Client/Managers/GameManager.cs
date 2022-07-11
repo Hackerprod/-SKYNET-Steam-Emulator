@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
+using SKYNET.Helper;
 using SKYNET.Network.Packets;
 
 namespace SKYNET.Managers
@@ -142,6 +144,44 @@ namespace SKYNET.Managers
                 Game = game;
                 GameClientID = gameClientID;
             }
+        }
+
+        internal static uint GetLastPlayed(string guid)
+        {
+            return 0;
+        }
+
+        internal static uint GetTimePlayed(string guid)
+        {
+            return 0;
+        }
+
+        internal static uint GetUsersPlaying(string guid)
+        {
+            return 0;
+        }
+
+        internal static bool IsPlaying(string guid)
+        {
+            return true;
+        }
+
+        internal static Bitmap GetGameImage(uint appID, bool Header = false)
+        {
+            string imageName = Header ? appID + "_header.jpg" : appID + "_library_hero.jpg";
+            Bitmap bitmap = new Bitmap(200, 200);
+            try
+            {
+                string ImagePath = Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache", imageName);
+                if (File.Exists(ImagePath))
+                {
+                    bitmap = (Bitmap)ImageHelper.FromFile(ImagePath);
+                }
+            }
+            catch
+            {
+            }
+            return bitmap;
         }
     }
 }

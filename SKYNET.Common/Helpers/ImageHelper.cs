@@ -408,6 +408,18 @@ namespace SKYNET.Helper
             }
         }
 
+        public static string GetImageBase64(Image image)
+        {
+            var Base64 = "";
+            try
+            {
+                var imageBytes = ImageToBytes(image);
+                Base64 = Convert.ToBase64String(imageBytes);
+            }
+            catch { }
+            return Base64;
+        }
+
         public static Image FromFile(string imagePath)
         {
             byte[] bytes = File.ReadAllBytes(imagePath);

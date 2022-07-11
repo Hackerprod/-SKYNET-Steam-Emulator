@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using SKYNET.Types;
+using System.Collections.Generic;
 using System.Web.Script.Serialization;
 
 namespace SKYNET.WEB.Types
@@ -91,9 +92,18 @@ namespace SKYNET.WEB.Types
         public uint LastPlayed { get; set; }
         public uint TimePlayed { get; set; }
         public uint UsersPlaying { get; set; }
-        public uint Description { get; set; }
+        public string Description { get; set; }
         public bool FreeToPlay { get; set; }
-        public string ImageHex { get; set; }
+        public List<FriendPlaying> FriendsPlaying { get; set; }
+        public string LibraryHeroImage { get; set; }
+        public string HeaderImage { get; set; }
+
+        public class FriendPlaying
+        {
+            public uint AccountID { get; set; }
+            public string PersonaName { get; set; }
+            public string AvatarHex { get; set; }
+        }
     }
 
     public class WEB_GameInfoMinimalResponse : WEB_Base
@@ -195,6 +205,7 @@ namespace SKYNET.WEB.Types
         public string FilePath { get; set; }
         public long Size { get; set; }
         public string ImageHex { get; set; }
+        public int AppID { get; set; }
     }
 
     public class WEB_OpenFileDialogResponse : WEB_Base

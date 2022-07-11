@@ -5,6 +5,7 @@ using SKYNET.Managers;
 using SKYNET.Network;
 using SKYNET.WEB.Types;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -114,8 +115,7 @@ namespace SKYNET
                         try
                         {
                             var bitmap = (Bitmap)ImageHelper.IconFromFile(FileName);
-                            var imageBytes = ImageHelper.ImageToBytes(bitmap);
-                            hexIcon = Convert.ToBase64String(imageBytes);
+                            hexIcon = ImageHelper.GetImageBase64(bitmap);
                         }
                         catch { }
 
@@ -221,8 +221,7 @@ namespace SKYNET
                     string hexAvatar = "";
                     if (SteamClient.Avatar != null)
                     {
-                        var imageBytes = ImageHelper.ImageToBytes(SteamClient.Avatar);
-                        hexAvatar = Convert.ToBase64String(imageBytes);
+                        hexAvatar = ImageHelper.GetImageBase64(SteamClient.Avatar);
                     }
 
                     AuthResponse.UserInfo = new UserInfo()
@@ -266,11 +265,61 @@ namespace SKYNET
             if (Game == null) return;
             if (GameInfoRequest.Minimal)
             {
-                Write($"Requesting minimal game info for {Game.Name}, AppID {Game.AppID}");
+                var MinimalResponse = new WEB_GameInfoMinimalResponse()
+                {
+                    LastPlayed = GameManager.GetLastPlayed(GameInfoRequest.Guid),
+                    TimePlayed = GameManager.GetTimePlayed(GameInfoRequest.Guid),
+                    UsersPlaying = GameManager.GetUsersPlaying(GameInfoRequest.Guid),
+                    Playing = GameManager.IsPlaying(GameInfoRequest.Guid),
+                };
+                Send(MinimalResponse, WEB_MessageType.WEB_GameInfoMinimalResponse);
             }
             else
-                Write($"Requesting game info for {Game.Name}, AppID {Game.AppID}");
-            // TODO
+            {
+                var library_hero = "";
+                try
+                {
+                    var bitmap = GameManager.GetGameImage(Game.AppID);
+                    library_hero = ImageHelper.GetImageBase64(bitmap);
+                }
+                catch { }
+                var header = "";
+                try
+                {
+                    var bitmap = GameManager.GetGameImage(Game.AppID, true);
+                    header = ImageHelper.GetImageBase64(bitmap);
+                }
+                catch { }
+
+                var FriendsPlaying = new List<WEB_GameInfoResponse.FriendPlaying>();
+                try
+                {
+                    var Users = UserManager.GetFriends();
+                    for (int i = 0; i < Users.Count; i++)
+                    {
+                        FriendsPlaying.Add(new WEB_GameInfoResponse.FriendPlaying()
+                        {
+                            AccountID = Users[i].AccountID,
+                            PersonaName = Users[i].PersonaName,
+                            AvatarHex = ImageHelper.GetImageBase64(Users[i].Avatar),
+                        });
+                    }
+                }
+                catch { }
+                var Response = new WEB_GameInfoResponse()
+                {
+                    LastPlayed = GameManager.GetLastPlayed(GameInfoRequest.Guid),
+                    TimePlayed = GameManager.GetTimePlayed(GameInfoRequest.Guid),
+                    UsersPlaying = GameManager.GetUsersPlaying(GameInfoRequest.Guid),
+                    FriendsPlaying = FriendsPlaying,
+                    Playing = GameManager.IsPlaying(GameInfoRequest.Guid),
+                    Description = $"{Game.Name} is a Steam game with AppID {Game.AppID}",
+                    FreeToPlay = true,
+                    LibraryHeroImage = library_hero,
+                    HeaderImage = header
+                };
+                Send(Response, WEB_MessageType.WEB_GameInfoResponse);
+            }
         }
 
         private static void ProcessGameLaunch(WebMessage e)
@@ -296,7 +345,6 @@ namespace SKYNET
 
         private static void ProcessGameAdded(WebMessage e)
         {
-            //e.Body = e.Body.Replace("GameDLC\":\"\"", "GameDLC\":{}");
             var GameAdded = e.Deserialize<WEB_GameAdded>();
             if (GameAdded == null) return;
             GameManager.AddGame(GameAdded.Game);
@@ -330,15 +378,25 @@ namespace SKYNET
             try
             {
                 var bitmap = (Bitmap)ImageHelper.IconFromFile(FileInfoRequest.FilePath);
-                var imageBytes = ImageHelper.ImageToBytes(bitmap);
-                hexIcon = Convert.ToBase64String(imageBytes);
+                hexIcon = ImageHelper.GetImageBase64(bitmap);
+            }
+            catch { }
+            int posibleAppID = 0;
+            try
+            {
+                var PathDirectory = Directory.GetParent(FileInfoRequest.FilePath).ToString();
+                if (File.Exists(Path.Combine(PathDirectory, "steam_appid.txt")))
+                {
+                    posibleAppID = int.Parse(File.ReadAllText(Path.Combine(PathDirectory, "steam_appid.txt")));
+                }
             }
             catch { }
             var FileInfoResponse = new WEB_FileInfoResponse()
             {
                 FilePath = FileInfoRequest.FilePath,
                 Size = info.Length,
-                ImageHex = hexIcon
+                ImageHex = hexIcon,
+                AppID = posibleAppID
             };
             Send(FileInfoResponse, WEB_MessageType.WEB_FileInfoResponse);
         }

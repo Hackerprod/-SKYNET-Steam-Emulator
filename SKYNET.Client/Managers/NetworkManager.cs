@@ -285,8 +285,7 @@ namespace SKYNET.Managers
                     string json = messageResponse.ToJson();
                     socket.Send(json.GetBytes());
 
-                    var imageBytes = ImageHelper.ImageToBytes(SteamClient.Avatar);
-                    string hexAvatar = Convert.ToBase64String(imageBytes);
+                    string hexAvatar = ImageHelper.GetImageBase64(SteamClient.Avatar);
                     var avatarResponse = new NET_AvatarResponse()
                     {
                         AccountID = (uint)SteamClient.AccountID,

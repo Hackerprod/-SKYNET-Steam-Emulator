@@ -214,8 +214,7 @@ namespace SKYNET.Managers
             connection.WriteAsync(welcome);
 
             // TODO: Send user avatar
-            var imageBytes = ImageHelper.ImageToBytes(SteamClient.Avatar);
-            var hexAvatar = Convert.ToBase64String(imageBytes);
+            var hexAvatar = ImageHelper.GetImageBase64(SteamClient.Avatar);
             var AvatarResponse = new IPC_AvatarResponse()
             {
                 AccountID = SteamClient.AccountID,
@@ -225,8 +224,7 @@ namespace SKYNET.Managers
             connection.WriteAsync(AvatarMessage);
 
             // TODO: Send user avatar
-            imageBytes = ImageHelper.ImageToBytes(SteamClient.DefaultAvatar);
-            hexAvatar = Convert.ToBase64String(imageBytes);
+            hexAvatar = ImageHelper.GetImageBase64(SteamClient.DefaultAvatar);
             var DefaultAvatarResponse = new IPC_AvatarResponse()
             {
                 AccountID = 0,
@@ -316,8 +314,7 @@ namespace SKYNET.Managers
                     if (File.Exists(AvatarCachePath))
                     {
                         var Avatar = ImageHelper.FromFile(AvatarCachePath);
-                        var imageBytes = ImageHelper.ImageToBytes(Avatar);
-                        var hexAvatar = Convert.ToBase64String(imageBytes);
+                        var hexAvatar = ImageHelper.GetImageBase64(Avatar);
                         var AvatarResponse = new IPC_AvatarResponse()
                         {
                             AccountID = AvatarRequest.AccountID,
@@ -338,8 +335,7 @@ namespace SKYNET.Managers
 
         public static void SendAvatarUpdated(uint AccountID, Bitmap Avatar)
         {
-            var imageBytes = ImageHelper.ImageToBytes(Avatar);
-            var hexAvatar = Convert.ToBase64String(imageBytes);
+            var hexAvatar = ImageHelper.GetImageBase64(Avatar);
             var AvatarResponse = new IPC_AvatarResponse()
             {
                 AccountID = AccountID,
