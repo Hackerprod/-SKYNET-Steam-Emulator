@@ -85,11 +85,9 @@ namespace SKYNET.GUI
                 errorTask = "Error downloading file. " + ex.Message;
             }
 
-            string steamAPI_Key = "";
-
             try
             {
-                StatsManager.GenerateAchievements(AppId, steamAPI_Key);
+                StatsManager.GenerateAchievements(AppId);
                 LB_Info.Text = $"Downloading Achievements for AppId {AppId}";
             }
             catch (Exception ex)
@@ -111,16 +109,6 @@ namespace SKYNET.GUI
             {
                 StatsManager.GenerateItems(AppId);
                 LB_Info.Text = $"Downloading Items for AppId {AppId}";
-            }
-            catch (Exception ex)
-            {
-                errorTask = "Error downloading file. " + ex.Message;
-            }
-
-            try
-            {
-                StatsManager.GenerateDLCs(AppId);
-                LB_Info.Text = $"Downloading DLCs for AppId {AppId}";
             }
             catch (Exception ex)
             {

@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Text;
 using System.Web.Script.Serialization;
 
 namespace SKYNET.Managers
@@ -14,63 +15,107 @@ namespace SKYNET.Managers
         private static ConcurrentDictionary<uint, List<Leaderboard>> Leaderboards;
         private static ConcurrentDictionary<uint, List<Achievement>> Achievements;
         private static ConcurrentDictionary<uint, List<PlayerStat>> PlayerStats;
+        private const string SteamAPIKey = "96BA415C674509039C4C058B99E30F9D";
+
+        private static ConcurrentDictionary<uint, AppDetails> AppDetails;
+        private static ConcurrentDictionary<uint, GameSchema> GameSchemas;
+
 
         static StatsManager()
         {
             Leaderboards = new ConcurrentDictionary<uint, List<Leaderboard>>();
             Achievements = new ConcurrentDictionary<uint, List<Achievement>>();
             PlayerStats = new ConcurrentDictionary<uint, List<PlayerStat>>();
+            AppDetails = new ConcurrentDictionary<uint, AppDetails>();
+            GameSchemas = new ConcurrentDictionary<uint, GameSchema>();
         }
 
         public static void Initialize()
         {
-            try
+            string StoragePath = Path.Combine(modCommon.GetPath(), "Data", "Storage");
+            foreach (var directory in Directory.GetDirectories(StoragePath))
             {
-                string StoragePath = Path.Combine(modCommon.GetPath(), "Data", "Storage");
-                foreach (var directory in Directory.GetDirectories(StoragePath))
+                var appID = new DirectoryInfo(directory).Name; 
+                foreach (var file in Directory.GetFiles(directory))
                 {
-                    var appID = new DirectoryInfo(directory).Name;
-                    foreach (var file in Directory.GetFiles(directory))
+                    var fileName = Path.GetFileNameWithoutExtension(file);
+                    try
                     {
-                        var fileName = Path.GetFileNameWithoutExtension(file);
                         switch (fileName)
                         {
                             case "Achievements":
-                            {
-                                if (uint.TryParse(appID, out var AppID))
                                 {
-                                    string fileContent = File.ReadAllText(file);
-                                    var achievements = new JavaScriptSerializer().Deserialize<List<Achievement>>(fileContent);
-                                    Achievements.TryAdd(AppID, achievements);
+                                    if (uint.TryParse(appID, out var AppID))
+                                    {
+                                        string fileContent = File.ReadAllText(file);
+                                        var achievements = new JavaScriptSerializer().Deserialize<List<Achievement>>(fileContent);
+                                        if (achievements != null)
+                                        {
+                                            Achievements.TryAdd(AppID, achievements);
+                                        }
+                                    }
                                 }
-                            }
-                            break;
+                                break;
                             case "Leaderboards":
-                            {
-                                if (uint.TryParse(appID, out var AppID))
                                 {
-                                    string fileContent = File.ReadAllText(file);
-                                    var leaderboards = new JavaScriptSerializer().Deserialize<List<Leaderboard>>(fileContent);
-                                    Leaderboards.TryAdd(AppID, leaderboards);
+                                    if (uint.TryParse(appID, out var AppID))
+                                    {
+                                        string fileContent = File.ReadAllText(file);
+                                        var leaderboards = new JavaScriptSerializer().Deserialize<List<Leaderboard>>(fileContent);
+                                        if (leaderboards != null)
+                                        {
+                                            Leaderboards.TryAdd(AppID, leaderboards);
+                                        }
+                                    }
                                 }
-                            }
-                            break;
+                                break;
                             case "PlayerStats":
-                            {
-                                if (uint.TryParse(appID, out var AppID))
                                 {
-                                    string fileContent = File.ReadAllText(file);
-                                    var playerStats = new JavaScriptSerializer().Deserialize<List<PlayerStat>>(fileContent);
-                                    PlayerStats.TryAdd(AppID, playerStats);
+                                    if (uint.TryParse(appID, out var AppID))
+                                    {
+                                        string fileContent = File.ReadAllText(file);
+                                        var playerStats = new JavaScriptSerializer().Deserialize<List<PlayerStat>>(fileContent);
+                                        if (playerStats != null)
+                                        {
+                                            PlayerStats.TryAdd(AppID, playerStats);
+                                        }
+                                    }
                                 }
-                            }
-                            break;
+                                break;
+                            case "AppDetails":
+                                {
+                                    if (uint.TryParse(appID, out var AppID))
+                                    {
+                                        string fileContent = File.ReadAllText(file);
+                                        var shema = new JavaScriptSerializer().Deserialize<dynamic>(fileContent);
+                                        AppDetails appDetails = new JavaScriptSerializer().ConvertToType<AppDetails>(shema[appID]);
+                                        if (appDetails != null)
+                                        {
+                                            AppDetails.TryAdd(AppID, appDetails);
+                                        }
+                                    }
+                                }
+                                break;
+                            case "GameSchema":
+                                {
+                                    if (uint.TryParse(appID, out var AppID))
+                                    {
+                                        string fileContent = File.ReadAllText(file);
+                                        var gameSchema = new JavaScriptSerializer().Deserialize<GameSchema>(fileContent);
+                                        if (gameSchema != null)
+                                        {
+                                            GameSchemas.TryAdd(AppID, gameSchema);
+                                        }
+                                    }
+                                }
+                                break;
                         }
                     }
+                    catch 
+                    {
+
+                    }
                 }
-            }
-            catch
-            {
             }
         }
 
@@ -261,10 +306,10 @@ namespace SKYNET.Managers
 
         #region Generate Data online
 
-        public static void GenerateAchievements(uint app_id, string steam_apikey)
+        public static void GenerateAchievements(uint app_id)
         {
-            string URL = $"https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key={steam_apikey}&appid={app_id}";
-            string achievementsPath = Path.Combine(modCommon.GetPath(), "Data", "Storage", app_id.ToString(), "Achievements.json");
+            string URL = $"https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key={SteamAPIKey}&appid={app_id}";
+            string achievementsPath = Path.Combine(modCommon.GetPath(), "Data", "Storage", app_id.ToString(), "GameSchema.json");
             modCommon.EnsureDirectoryExists(achievementsPath, true);
 
             try
@@ -276,38 +321,31 @@ namespace SKYNET.Managers
                 string content = reader.ReadToEnd();
                 File.WriteAllText(achievementsPath, content);
             }
-            catch
+            catch (Exception ex)
             {
-
+                modCommon.Show(ex);
             }
+        }
+
+        internal static string GetGameDescription(uint appID)
+        {
+            string Description = "";
+            try
+            {
+                if (AppDetails.ContainsKey(appID))
+                {
+                    var Details = AppDetails[appID];
+                    Description = Details.success ? Details.data.detailed_description : "";
+                }
+            }
+            catch { }
+            return Description;
         }
 
         public static void GenerateItems(uint app_id)
         {
-            //string URL = $"https://api.steampowered.com/IInventoryService/GetItemDefMeta/v1?key={steam_apikey}&appid={app_id}";
-            string URL = $"https://api.steampowered.com/IGameInventory/GetItemDefArchive/v0001?appid={app_id}";
+            string URL = $"https://api.steampowered.com/IInventoryService/GetItemDefMeta/v1?key={SteamAPIKey}&appid={app_id}";
             string achievementsPath = Path.Combine(modCommon.GetPath(), "Data", "Storage", app_id.ToString(), "Items.json");
-            modCommon.EnsureDirectoryExists(achievementsPath, true);
-
-            try
-            {
-                WebRequest webrequest = HttpWebRequest.Create(URL);
-                webrequest.Method = "GET";
-                HttpWebResponse response = (HttpWebResponse)webrequest.GetResponse();
-                StreamReader reader = new StreamReader(response.GetResponseStream());
-                string content = reader.ReadToEnd();
-                File.WriteAllText(achievementsPath, content);
-            }
-            catch
-            {
-
-            }
-        }
-
-        public static void GenerateDLCs(uint app_id)
-        {
-            string URL = $"https://store.steampowered.com/api/appdetails/?appids={app_id}";
-            string achievementsPath = Path.Combine(modCommon.GetPath(), "Data", "Storage", app_id.ToString(), "DLCs.json");
             modCommon.EnsureDirectoryExists(achievementsPath, true);
 
             try

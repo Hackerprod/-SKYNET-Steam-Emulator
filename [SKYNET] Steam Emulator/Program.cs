@@ -1,9 +1,12 @@
-﻿using System;
+﻿using SKYNET.Managers;
+using SKYNET.Types;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using System.Web.Script.Serialization;
 using System.Windows.Forms;
 
 namespace SKYNET // & " = |
@@ -109,9 +112,14 @@ namespace SKYNET // & " = |
 
         private static void TestJSON()
         {
-            //string JSON = File.ReadAllText(@"D:\Instaladores\Programación\Projects\[SKYNET] Steam Emulator\[SKYNET] Steam Emulator\bin\Debug\Data\Storage\570\AppDetails.json");
-            //AppDetails details = new JavaScriptSerializer().Deserialize<AppDetails>(JSON);
-            //modCommon.Show(details.lolo.data.about_the_game);
+
+            //string JSON = File.ReadAllText(@"D:\Instaladores\Programación\Projects\SKYNET Steam Emulator\Data\Storage\346010\AppDetails.json");
+            //var details = new JavaScriptSerializer().Deserialize<dynamic>(JSON);
+            //AppDetails game = new JavaScriptSerializer().ConvertToType<AppDetails>(details["346010"]); ;
+
+            //modCommon.Show(game.success);
+
+
         }
     }
 }

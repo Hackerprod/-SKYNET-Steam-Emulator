@@ -303,9 +303,17 @@ namespace SKYNET
                             PersonaName = Users[i].PersonaName,
                             AvatarHex = ImageHelper.GetImageBase64(Users[i].Avatar),
                         });
+                        if (i == 10) break;
                     }
                 }
                 catch { }
+
+                string GameDescription = StatsManager.GetGameDescription(Game.AppID);
+                if (string.IsNullOrEmpty(GameDescription))
+                {
+                    GameDescription = $"{Game.Name} is a Steam game with AppID {Game.AppID}";
+                } 
+
                 var Response = new WEB_GameInfoResponse()
                 {
                     LastPlayed = GameManager.GetLastPlayed(GameInfoRequest.Guid),
@@ -313,7 +321,7 @@ namespace SKYNET
                     UsersPlaying = GameManager.GetUsersPlaying(GameInfoRequest.Guid),
                     FriendsPlaying = FriendsPlaying,
                     Playing = GameManager.IsPlaying(GameInfoRequest.Guid),
-                    Description = $"{Game.Name} is a Steam game with AppID {Game.AppID}",
+                    Description = GameDescription,
                     FreeToPlay = true,
                     LibraryHeroImage = library_hero,
                     HeaderImage = header

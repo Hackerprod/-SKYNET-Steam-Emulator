@@ -5,12 +5,8 @@ using System.Globalization;
 
 namespace SKYNET.Types
 {
-    public class AppDetails
-    {
-        public AppID lolo { get; set; }
-    }
 
-    public class AppID
+    public class AppDetails
     {
         public bool success { get; set; }
         public Data data { get; set; }

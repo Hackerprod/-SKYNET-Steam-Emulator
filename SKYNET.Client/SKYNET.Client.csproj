@@ -72,6 +72,7 @@
     <Compile Include="IPC\TaskWorker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Types\AppDetails.cs" />
+    <Compile Include="Types\GameSchema.cs" />
     <Compile Include="Types\SteamPlayer.cs" />
     <Compile Include="Types\Achievement.cs" />
     <Compile Include="Types\Game.cs" />
