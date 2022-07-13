@@ -805,35 +805,6 @@ namespace SKYNET.Managers
             SendTo(IPC_ToServer, IPC_GCRequest, IPCMessageType.IPC_GCMessageRequest);
         }
 
-        private static IPCMessage SendTo(ulong SteamID, IPC_MessageBase Base, IPCMessageType type, bool WaitResponse = false)
-        {
-            var message = new IPCMessage()
-            {
-                To = SteamID,
-                JobID = (ulong) (WaitResponse ? new Random().Next(1000, 999999) : 0),
-                MessageType = (int)type,
-                ParsedBody = Base.ToJson()
-            };
-            message.To = SteamID;
-            if (IPCClient.IsConnected)
-            {
-                if (WaitResponse)
-                {
-                    var jobID = (ulong)new Random().Next(1000, 999999);
-                    message.JobID = jobID;
-                }
-                Write($"Sending IPC message type {(IPCMessageType)message.MessageType}");
-                var TaskResponse = IPCClient.WriteAsync(message, WaitResponse);
-                if (TaskResponse.Result == null) return null;
-                return TaskResponse.Result;
-            }
-            else
-            {
-                IPCClient.ConnectAsync();
-            }
-            return null;
-        }
-
         //internal static SteamLobby GetLobby(ulong steamID, bool byOwner)
         //{
         //    var GetLobby = new IPC_LobbyRequest()
@@ -880,7 +851,7 @@ namespace SKYNET.Managers
                 Key = pchKey,
                 Value = pchValue,
             };
-            SendTo(IPC_ToServer, LobbySetData, IPCMessageType.IPC_LobbySetData, true);
+            SendTo(IPC_ToServer, LobbySetData, IPCMessageType.IPC_LobbySetData);
             return true;
         }
 
@@ -900,6 +871,35 @@ namespace SKYNET.Managers
                 }
             }
             return 0;
+        }
+
+        private static IPCMessage SendTo(ulong SteamID, IPC_MessageBase Base, IPCMessageType type, bool WaitResponse = false)
+        {
+            var message = new IPCMessage()
+            {
+                To = SteamID,
+                JobID = (ulong)(WaitResponse ? new Random().Next(1000, 999999) : 0),
+                MessageType = (int)type,
+                ParsedBody = Base.ToJson()
+            };
+            message.To = SteamID;
+            if (IPCClient.IsConnected)
+            {
+                if (WaitResponse)
+                {
+                    var jobID = (ulong)new Random().Next(1000, 999999);
+                    message.JobID = jobID;
+                }
+                Write($"Sending IPC message type {(IPCMessageType)message.MessageType}");
+                var TaskResponse = IPCClient.WriteAsync(message, WaitResponse);
+                if (TaskResponse.Result == null) return null;
+                return TaskResponse.Result;
+            }
+            else
+            {
+                IPCClient.ConnectAsync();
+            }
+            return null;
         }
 
         private static void Write(object v)
