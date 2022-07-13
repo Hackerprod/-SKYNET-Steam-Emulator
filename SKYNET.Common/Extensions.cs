@@ -41,7 +41,8 @@ namespace SKYNET.Common
         {
             try
             {
-                return new JavaScriptSerializer().Deserialize<T>(@string);
+                var js = new JavaScriptSerializer() { MaxJsonLength = 500000000 };
+                return js.Deserialize<T>(@string);
             }
             catch (Exception)
             {
@@ -51,18 +52,21 @@ namespace SKYNET.Common
 
         public static T Deserialize<T>(this byte[] bytes)
         {
+            var js = new JavaScriptSerializer() { MaxJsonLength = 500000000 };
             string @string = Encoding.Default.GetString(bytes);
-            return new JavaScriptSerializer().Deserialize<T>(@string);
+            return js.Deserialize<T>(@string);
         }
 
         public static string ToJson(this object obj)
         {
-            return new JavaScriptSerializer().Serialize(obj);
+            var js = new JavaScriptSerializer() { MaxJsonLength = 500000000 };
+            return js.Serialize(obj);
         }
 
         public static string Serialize(this object obj)
         {
-            return new JavaScriptSerializer().Serialize(obj);
+            var js = new JavaScriptSerializer() { MaxJsonLength = 500000000 };
+            return js.Serialize(obj);
         }
 
 

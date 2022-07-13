@@ -214,6 +214,7 @@ namespace SKYNET
 
         private static void ProcessGameInfoRequest(WebMessage e)
         {
+            Write(e.Body);
             var GameInfoRequest = e.Deserialize<WEB_GameInfoRequest>();
             if (GameInfoRequest == null) return;
             var Game = GameManager.GetGame(GameInfoRequest.Guid);

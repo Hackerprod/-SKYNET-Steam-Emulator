@@ -12,7 +12,9 @@ namespace SKYNET.WEB.Types
         {
             try
             {
-                return new JavaScriptSerializer().Deserialize<T>(Body);
+                var js = new JavaScriptSerializer();
+                js.MaxJsonLength = 500000000;
+                return js.Deserialize<T>(Body);
             }
             catch 
             {
