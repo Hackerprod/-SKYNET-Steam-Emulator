@@ -11,6 +11,7 @@ namespace SKYNET
     public class WebServer
     {
         private string _rootDirectory;
+        private string _webDirectory;
         private HttpServer httpsv;
         private int ServerPort;
         private readonly string[] _indexFiles =
@@ -92,9 +93,10 @@ namespace SKYNET
         public WebServer(int port)
         {
             httpsv = new HttpServer(port);
-            httpsv.DocumentRootPath = Path.Combine(modCommon.GetPath(), "Data", "www");
+            httpsv.DocumentRootPath = Path.Combine(modCommon.GetPath(), "Data");
             httpsv.OnGet += OnGet;
-            this._rootDirectory = Path.Combine(modCommon.GetPath(), "Data", "www"); 
+            this._rootDirectory = Path.Combine(modCommon.GetPath(), "Data");
+            _webDirectory = Path.Combine(modCommon.GetPath(), "Data", "www");
             ServerPort = port;
         }
 
@@ -102,13 +104,13 @@ namespace SKYNET
         {
             string filename = e.Request.Url.AbsolutePath;
             filename = filename.Substring(1);
-            //Write(e.Request.HttpMethod + " " + e.Request.Url.ToString());
+            Write(e.Request.HttpMethod + " " + e.Request.Url.ToString());
 
             if (string.IsNullOrEmpty(filename))
             {
                 foreach (string indexFile in _indexFiles)
                 {
-                    if (File.Exists(Path.Combine(_rootDirectory, indexFile)))
+                    if (File.Exists(Path.Combine(_webDirectory, indexFile)))
                     {
                         filename = indexFile;
                         break;
@@ -116,7 +118,12 @@ namespace SKYNET
                 }
             }
 
-            filename = Path.Combine(_rootDirectory, filename);
+            var isweb = File.Exists(Path.Combine(_webDirectory, filename));
+            if (isweb)
+                filename = Path.Combine(_webDirectory, filename);
+            else
+                filename = Path.Combine(_rootDirectory, filename);
+
             if (File.Exists(filename))
             {
                 try
@@ -141,7 +148,7 @@ namespace SKYNET
                     e.Response.StatusCode = (int)HttpStatusCode.OK;
                     e.Response.OutputStream.Flush();
                 }
-                catch (Exception ex)
+                catch 
                 {
                     e.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 }
