@@ -323,6 +323,7 @@ namespace SKYNET.Managers
 
             try
             {
+                SetProgress(DownloadID, 0, $"Downloading Library_Hero file for AppId {AppId}");
                 string Url = $"https://steamcdn-a.akamaihd.net/steam/apps/{AppId}/library_hero.jpg";
                 var Data = await WebClient.DownloadDataTaskAsync(Url);
                 File.WriteAllBytes(Path.Combine(AppCachePath, $"{AppId}_library_hero.jpg"), Data);
@@ -331,27 +332,38 @@ namespace SKYNET.Managers
 
             try
             {
+                SetProgress(DownloadID, 25, $"Downloading Header file for AppId {AppId}");
                 string Url = $"https://steamcdn-a.akamaihd.net/steam/apps/{AppId}/header.jpg";
                 var Data = await WebClient.DownloadDataTaskAsync(Url);
                 File.WriteAllBytes(Path.Combine(AppCachePath, $"{AppId}_header.jpg"), Data);
             }
             catch { }
+
             try
             {
-                GenerateAchievements(AppId);
+                SetProgress(DownloadID, 50, $"Downloading Achievements for AppId {AppId}");
+                await GenerateAchievements(AppId);
             }
             catch { }
 
             try
             {
-                GenerateAppDetails(AppId);
+                SetProgress(DownloadID, 75, $"Downloading AppDetails for AppId {AppId}");
+                await GenerateAppDetails(AppId);
             }
             catch { }
+
             try
             {
-                GenerateItems(AppId);
+                SetProgress(DownloadID, 100, $"Downloading Items for AppId {AppId}");
+                await GenerateItems(AppId);
             }
             catch { }
+        }
+
+        private static void SetProgress(int DownloadID, int value, string info)
+        {
+            try { WebManager.SendDownloadProcess(DownloadID, value, info); } catch { }
         }
 
         private static void WebClient_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
@@ -359,7 +371,7 @@ namespace SKYNET.Managers
             // TODO: Notify web Client
         }
 
-        public static async void GenerateAchievements(uint app_id)
+        public static async Task GenerateAchievements(uint app_id)
         {
             string URL = $"https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key={SteamAPIKey}&appid={app_id}";
             string achievementsPath = Path.Combine(modCommon.GetPath(), "Data", "Storage", app_id.ToString(), "GameSchema.json");
@@ -368,7 +380,7 @@ namespace SKYNET.Managers
             try
             {
                 string RequestResponse = await GetResponseString(URL);
-                if (string.IsNullOrEmpty(RequestResponse))
+                if (!string.IsNullOrEmpty(RequestResponse))
                 {
                     File.WriteAllText(achievementsPath, RequestResponse);
                 }
@@ -384,15 +396,16 @@ namespace SKYNET.Managers
             string content = "";
             try
             {
-                WebRequest webrequest = HttpWebRequest.Create(URL);
+                WebRequest webrequest = WebRequest.Create(URL);
                 webrequest.Method = "GET";
                 var ResponseTask = await webrequest.GetResponseAsync();
                 HttpWebResponse response = (HttpWebResponse)ResponseTask;
                 StreamReader reader = new StreamReader(response.GetResponseStream());
                 content = reader.ReadToEnd();
             }
-            catch 
+            catch (Exception ex)
             {
+                modCommon.Show(ex + " " + ex.StackTrace);
             }
             return content;
         }
@@ -412,7 +425,7 @@ namespace SKYNET.Managers
             return Description;
         }
 
-        public static async void GenerateItems(uint app_id)
+        public static async Task GenerateItems(uint app_id)
         {
             string URL = $"https://api.steampowered.com/IInventoryService/GetItemDefMeta/v1?key={SteamAPIKey}&appid={app_id}";
             string itemsPath = Path.Combine(modCommon.GetPath(), "Data", "Storage", app_id.ToString(), "Items.json");
@@ -421,7 +434,7 @@ namespace SKYNET.Managers
             try
             {
                 string RequestResponse = await GetResponseString(URL);
-                if (string.IsNullOrEmpty(RequestResponse))
+                if (!string.IsNullOrEmpty(RequestResponse))
                 {
                     File.WriteAllText(itemsPath, RequestResponse);
                 }
@@ -432,7 +445,7 @@ namespace SKYNET.Managers
             }
         }
 
-        public static async void GenerateAppDetails(uint app_id)
+        public static async Task GenerateAppDetails(uint app_id)
         {
             string URL = $"https://store.steampowered.com/api/appdetails/?appids={app_id}";
             string appDetailsPath = Path.Combine(modCommon.GetPath(), "Data", "Storage", app_id.ToString(), "AppDetails.json");
@@ -441,7 +454,7 @@ namespace SKYNET.Managers
             try
             {
                 string RequestResponse = await GetResponseString(URL);
-                if (string.IsNullOrEmpty(RequestResponse))
+                if (!string.IsNullOrEmpty(RequestResponse))
                 {
                     File.WriteAllText(appDetailsPath, RequestResponse);
                 }

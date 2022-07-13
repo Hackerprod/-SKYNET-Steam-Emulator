@@ -92,7 +92,8 @@ namespace SKYNET
             UserManager.OnAvatarReceived = UserManager_OnAvatarReceived;
 
             WebManager.OnGameLaunch += UserManager_OnGameLaunch;
-            WebManager.Initialize();           
+            WebManager.Initialize();
+
         }
 
         #region GameManager Events

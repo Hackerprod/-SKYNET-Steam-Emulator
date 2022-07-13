@@ -46,6 +46,7 @@ namespace SKYNET.WEB.Types
         WEB_GameOpenContainerFolder,
         WEB_GameOpenWithoutEmulation,
         WEB_GameDownloadCache,
+        WEB_GameCacheDownloadProcess,
         WEB_UserOnline,
         WEB_UserOffline,
         WEB_UserInfoRequest,
@@ -225,6 +226,13 @@ namespace SKYNET.WEB.Types
     public class WEB_GameOrderUpdated : WEB_Base
     {
         public Dictionary<int, string> GameOrder { get; set; }
+    }
+
+    public class WEB_GameCacheDownloadProcess : WEB_Base
+    {
+        public int DownloadID { get; set; }
+        public int Value { get; set; }
+        public string Info { get; set; }
     }
 
     public enum WEB_AuthResponseType : int

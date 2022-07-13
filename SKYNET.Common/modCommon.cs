@@ -33,6 +33,11 @@ public partial class modCommon
         }
     }
 
+    public static int GetRandom()
+    {
+        return new Random().Next(1, 9999);
+    }
+
     public static string GetPath()
     {
         Process currentProcess;

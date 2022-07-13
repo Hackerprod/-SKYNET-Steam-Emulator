@@ -380,6 +380,17 @@ namespace SKYNET
             Send(GameStoped, WEB_MessageType.WEB_GameLaunched);
         }
 
+        public static void SendDownloadProcess(int currentDownloadID, int value, string info)
+        {
+            var CacheProcess = new WEB_GameCacheDownloadProcess()
+            {
+                DownloadID = currentDownloadID,
+                Value = value,
+                Info = info
+            };
+            Send(CacheProcess, WEB_MessageType.WEB_GameCacheDownloadProcess);
+        }
+
         public static void SendGameClosed(string gameClientID)
         {
             var GameStoped = new WEB_GameStoped()
@@ -391,13 +402,16 @@ namespace SKYNET
 
         public static void Send(WEB_Base msgBase, WEB_MessageType Type)
         {
-            Write($"Sending WEB message {Type}");
             WebMessage WebMessage = new WebMessage()
             {
                 MessageType = Type,
                 Body = msgBase.Serialize()
             };
-            NetworkManager.WebClient.Send(WebMessage.Serialize());
+            if (NetworkManager.WebClient != null)
+            {
+                Write($"Sending WEB message {Type}");
+                NetworkManager.WebClient?.Send(WebMessage.Serialize());
+            }
         }
 
         private static void Write(object msg)

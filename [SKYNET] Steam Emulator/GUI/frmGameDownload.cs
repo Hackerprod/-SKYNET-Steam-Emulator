@@ -1,28 +1,26 @@
 ﻿using SKYNET.Helper;
 using SKYNET.Managers;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace SKYNET.GUI
 {
     public partial class frmGameDownload : frmBase
     {
-        uint AppId;
-        WebClient WebClient;
+        private uint AppId;
+        private WebClient WebClient;
+        private int CurrentDownloadID;
 
         public frmGameDownload(GameBox Box)
         {
             InitializeComponent();
+            CheckForIllegalCrossThreadCalls = false;
+
+            CurrentDownloadID = modCommon.GetRandom();
 
             foreach (Control control in Controls)
             {
@@ -42,7 +40,6 @@ namespace SKYNET.GUI
             catch
             {
             }
-
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache"));
 
             Thread DownloadThread = new Thread(StartDownloading);
@@ -55,12 +52,10 @@ namespace SKYNET.GUI
             string errorTask = "";
             string BannerPath = Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache");
 
-            WebClient.DownloadProgressChanged += WebClient_DownloadProgressChanged;
-
             try
             {
                 string Url = $"https://steamcdn-a.akamaihd.net/steam/apps/{AppId}/library_hero.jpg";
-                LB_Info.Text = $"Downloading Library_Hero file for AppId {AppId}";
+                SetProgress(0, $"Downloading Library_Hero file for AppId {AppId}");
                 var Data = await WebClient.DownloadDataTaskAsync(Url);
 
                 File.WriteAllBytes(Path.Combine(BannerPath, $"{AppId}_library_hero.jpg"), Data);
@@ -73,41 +68,41 @@ namespace SKYNET.GUI
             try
             {
                 string Url = $"https://steamcdn-a.akamaihd.net/steam/apps/{AppId}/header.jpg";
-                LB_Info.Text = $"Downloading Header file for AppId {AppId}";
+                SetProgress(25, $"Downloading Header file for AppId {AppId}");
                 var Data = await WebClient.DownloadDataTaskAsync(Url);
 
                 File.WriteAllBytes(Path.Combine(BannerPath, $"{AppId}_header.jpg"), Data);
+            }
+            catch (Exception ex)
+            {
+                errorTask = "Error downloading file. " + ex.Message;
+            }
+
+            try
+            {
+                SetProgress(50, $"Downloading Achievements for AppId {AppId}");
+                await StatsManager.GenerateAchievements(AppId);
+            }
+            catch (Exception ex)
+            {
+                errorTask = "Error downloading file. " + ex.Message;
+            }
+
+            try
+            {
+                SetProgress(75, $"Downloading AppDetails for AppId {AppId}");
+                await StatsManager.GenerateAppDetails(AppId);
+            }
+            catch (Exception ex)
+            {
+                errorTask = "Error downloading file. " + ex.Message;
+            }
+
+            try
+            {
+                SetProgress(100, $"Downloading Items for AppId {AppId}"); 
+                await StatsManager.GenerateItems(AppId);
                 Close();
-            }
-            catch (Exception ex)
-            {
-                errorTask = "Error downloading file. " + ex.Message;
-            }
-
-            try
-            {
-                LB_Info.Text = $"Downloading Achievements for AppId {AppId}";
-                StatsManager.GenerateAchievements(AppId);
-            }
-            catch (Exception ex)
-            {
-                errorTask = "Error downloading file. " + ex.Message;
-            }
-
-            try
-            {
-                LB_Info.Text = $"Downloading AppDetails for AppId {AppId}";
-                StatsManager.GenerateAppDetails(AppId);
-            }
-            catch (Exception ex)
-            {
-                errorTask = "Error downloading file. " + ex.Message;
-            }
-
-            try
-            {
-                LB_Info.Text = $"Downloading Items for AppId {AppId}";
-                StatsManager.GenerateItems(AppId);
             }
             catch (Exception ex)
             {
@@ -121,13 +116,19 @@ namespace SKYNET.GUI
             }
         }
 
-        private void WebClient_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
+        private void SetProgress(int value, string info)
         {
-            PB_Progress.Value = e.ProgressPercentage;
-            if (e.ProgressPercentage == 100)
+            WebManager.SendDownloadProcess(CurrentDownloadID, value, info);
+
+            modCommon.InvokeAction(LB_Info, delegate
             {
-                PB_Progress.Value = 0;
-            }
+                LB_Info.Text = info;
+            });
+
+            modCommon.InvokeAction(PB_Progress, delegate
+            {
+                PB_Progress.Value = value;
+            });
         }
 
         private void Cancel_Click(object sender, EventArgs e)
