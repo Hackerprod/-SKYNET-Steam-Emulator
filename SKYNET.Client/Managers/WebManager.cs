@@ -382,13 +382,13 @@ namespace SKYNET
 
         public static void SendDownloadProcess(int currentDownloadID, int value, string info)
         {
-            var CacheProcess = new WEB_GameCacheDownloadProcess()
+            var CacheProcess = new WEB_GameCacheDownloadProgress()
             {
                 DownloadID = currentDownloadID,
                 Value = value,
                 Info = info
             };
-            Send(CacheProcess, WEB_MessageType.WEB_GameCacheDownloadProcess);
+            Send(CacheProcess, WEB_MessageType.WEB_GameCacheDownloadProgress);
         }
 
         public static void SendGameClosed(string gameClientID)

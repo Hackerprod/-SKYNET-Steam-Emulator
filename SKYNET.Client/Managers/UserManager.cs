@@ -153,9 +153,9 @@ namespace SKYNET.Managers
             IPCManager.SendUpdatedUsers();
         }
 
-        public static void SetRichPresence(ulong steamID, string key, string value)
+        public static void SetRichPresence(uint accountID, string key, string value)
         {
-            var user = UserManager.GetUser(steamID);
+            var user = GetUser(accountID);
             if (user == null) return;
             if (user.RichPresence == null) user.RichPresence = new Dictionary<string, string>();
             if (user.RichPresence.ContainsKey(key))

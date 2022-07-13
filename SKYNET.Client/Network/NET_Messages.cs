@@ -111,6 +111,13 @@
         public string Name { get; set; }
     }
 
+    public class NET_SetRichPresence : NET_Base
+    {
+        public uint AccountID { get; set; }
+        public string Key { get; set; }
+        public string Value { get; set; }
+    }
+
     public enum MessageType : int
     {
         NET_Announce,
@@ -119,6 +126,7 @@
         NET_AvatarResponse,
         NET_UserDataUpdated,
         NET_P2PPacket,
+        NET_SetRichPresence,
 
         // Lobbies
         NET_LobbyListRequest,

@@ -113,6 +113,9 @@ namespace SKYNET.Managers
                     case MessageType.NET_GameOpened:
                         ProcessGameOpened(message, socket);
                         break;
+                    case MessageType.NET_SetRichPresence:
+                        ProcessSetRichPresence(message, socket);
+                        break;
                     default:
                         break;
                 }
@@ -260,6 +263,31 @@ namespace SKYNET.Managers
             }
 
             CloseSocket(socket, message.MessageType);
+        }
+
+        internal static void SendRichPresence(string key, string value)
+        {
+            NET_SetRichPresence RichPresence = new NET_SetRichPresence()
+            {
+                AccountID = SteamClient.AccountID,
+                Key = key,
+                Value = value
+            };
+            var message = CreateNetworkMessage(RichPresence, MessageType.NET_SetRichPresence);
+            SendBroadcast(message);
+        }
+
+        private static void ProcessSetRichPresence(NetworkMessage message, Socket socket)
+        {
+            try
+            {
+                var SetRichPresence = message.ParsedBody.Deserialize<NET_SetRichPresence>();
+                if (SetRichPresence == null) return;
+                UserManager.SetRichPresence(SetRichPresence.AccountID, SetRichPresence.Key, SetRichPresence.Value);
+            }
+            catch (Exception)
+            {
+            }
         }
 
         private static void ProcessAnnounce(NetworkMessage message, Socket socket)

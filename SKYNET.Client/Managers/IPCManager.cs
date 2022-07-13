@@ -216,7 +216,10 @@ namespace SKYNET.Managers
         {
             var SetRichPresence = message.ParsedBody.Deserialize<IPC_SetRichPresence>();
             if (SetRichPresence == null) return;
-            UserManager.SetRichPresence((ulong)SteamClient.SteamID, SetRichPresence.Key, SetRichPresence.Value);
+
+            UserManager.SetRichPresence(SteamClient.SteamID.AccountID, SetRichPresence.Key, SetRichPresence.Value);
+            NetworkManager.SendRichPresence(SetRichPresence.Key, SetRichPresence.Value);
+
         }
 
         private static void Process_ClearRichPresence(IPCMessage message)
