@@ -164,7 +164,7 @@ namespace SKYNET
             if (User != null)
             {
                 personaName = User.PersonaName;
-                Avatar = User.Avatar;
+                Avatar = UserManager.GetAvatar(User.SteamID);
             }
             else
             {

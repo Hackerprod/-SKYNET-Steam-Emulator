@@ -1,4 +1,5 @@
-﻿using SKYNET.Common;
+﻿using SKYNET.Client;
+using SKYNET.Common;
 using SKYNET.Helper;
 using SKYNET.Steamworks;
 using SKYNET.Types;
@@ -19,10 +20,12 @@ namespace SKYNET.Managers
         public static event EventHandler<SteamPlayer> OnUserRemoved;
         public static EventHandler<AvatarReceivedEventArgs> OnAvatarReceived;
         public static List<SteamPlayer> Users;
+        public static Dictionary<ulong, Bitmap> UserAvatars;
 
         static UserManager()
         {
             Users = new List<SteamPlayer>();
+            UserAvatars = new Dictionary<ulong, Bitmap>();
         }
 
         public static void Initialize(CSteamID SteamID, string PersonaName)
@@ -89,6 +92,7 @@ namespace SKYNET.Managers
                     OnUserUpdated?.Invoke(null, user);
                 }
             });
+            IPCManager.SendUpdatedUsers();
         }
 
         public static void RemoveUser(uint accountID)
@@ -103,6 +107,7 @@ namespace SKYNET.Managers
                     Users.Remove(user);
                 }
             });
+            IPCManager.SendUpdatedUsers();
         }
 
         public static SteamPlayer GetUserByAddress(string iPAddress)
@@ -115,14 +120,62 @@ namespace SKYNET.Managers
             return player;
         }
 
-        internal static void AvatarReceived(uint accountID, Bitmap avatar)
+        public static void AvatarReceived(uint accountID, Bitmap avatar)
         {
             var User = GetUser(accountID);
             if (User != null)
             {
-                User.Avatar = avatar;
+                if (UserAvatars.ContainsKey(User.SteamID))
+                {
+                    UserAvatars[User.SteamID] = avatar;
+                }
+                else
+                {
+                    UserAvatars.Add(User.SteamID, avatar);
+                }
             }
             OnAvatarReceived?.Invoke(null, new AvatarReceivedEventArgs(accountID, avatar));
+        }
+
+        public static List<SteamPlayer> GetFriends()
+        {
+            return Users.FindAll(f => f.SteamID != SteamClient.SteamID);
+        }
+
+        public static void UserDataUpdated(uint accountID, string personaName, uint lobbyID)
+        {
+            var User = GetUser(accountID);
+            if (User != null)
+            {
+                User.PersonaName = personaName;
+                User.LobbyID = new CSteamID(lobbyID).AccountID;
+            }
+            IPCManager.SendUpdatedUsers();
+        }
+
+        public static void SetRichPresence(ulong steamID, string key, string value)
+        {
+            var user = UserManager.GetUser(steamID);
+            if (user == null) return;
+            if (user.RichPresence == null) user.RichPresence = new Dictionary<string, string>();
+            if (user.RichPresence.ContainsKey(key))
+                user.RichPresence[key] = value;
+            else
+                user.RichPresence.Add(key, value);
+            IPCManager.SendUpdatedUsers();
+        }
+
+        public static Bitmap GetAvatar(ulong steamID)
+        {
+            var User = GetUser(steamID);
+            if (User != null)
+            {
+                if (UserAvatars.ContainsKey(User.SteamID))
+                {
+                    return UserAvatars[User.SteamID];
+                }
+            }
+            return SteamClient.DefaultAvatar;
         }
 
         private static void Write(object msg)
@@ -138,21 +191,6 @@ namespace SKYNET.Managers
             {
                 AccountID = accountID;
                 Avatar = avatar;
-            }
-        }
-
-        internal static List<SteamPlayer> GetFriends()
-        {
-            return Users;
-        }
-
-        internal static void UserDataUpdated(uint accountID, string personaName, uint lobbyID)
-        {
-            var User = GetUser(accountID);
-            if (User != null)
-            {
-                User.PersonaName = personaName;
-                User.LobbyID = new CSteamID(lobbyID).AccountID;
             }
         }
     }

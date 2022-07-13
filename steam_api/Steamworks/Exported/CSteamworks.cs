@@ -34,6 +34,7 @@ using AccountID_t = System.UInt32;
 using SteamLeaderboardEntries_t = System.UInt64;
 using ClientUnifiedMessageHandle = System.UInt64;
 using HServerListRequest = System.IntPtr;
+using System.Threading.Tasks;
 
 #endregion
 
@@ -2962,7 +2963,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static ulong ISteamRemoteStorage_PublishVideo(EWorkshopVideoProvider eVideoProvider, string pchVideoAccount, string pchVideoIdentifier, string pchPreviewFile, AppId_t nConsumerAppId, string pchTitle, string pchDescription, ERemoteStoragePublishedFileVisibility eVisibility, IntPtr pTags)
         {
-            return SteamEmulator.SteamRemoteStorage.PublishVideo((int)eVideoProvider, pchVideoAccount, pchVideoIdentifier, pchPreviewFile, nConsumerAppId, pchTitle, pchDescription, (int) eVisibility, pTags);
+            return SteamEmulator.SteamRemoteStorage.PublishVideo((int)eVideoProvider, pchVideoAccount, pchVideoIdentifier, pchPreviewFile, nConsumerAppId, pchTitle, pchDescription, (int)eVisibility, pTags);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using SKYNET.Managers;
 
 namespace SKYNET.Steamworks.Exported
@@ -34,7 +35,7 @@ namespace SKYNET.Steamworks.Exported
         public static ulong SteamAPI_ISteamUser_GetSteamID(IntPtr _)
         {
             Write("SteamAPI_ISteamUser_GetSteamID");
-            return SteamEmulator.SteamUser.GetSteamID().SteamID;
+            return (ulong) SteamEmulator.SteamUser.GetSteamID();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

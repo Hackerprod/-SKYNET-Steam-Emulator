@@ -43,7 +43,6 @@ namespace SKYNET.GUI
             {
             }
 
-
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache"));
 
             Thread DownloadThread = new Thread(StartDownloading);
@@ -87,8 +86,8 @@ namespace SKYNET.GUI
 
             try
             {
-                StatsManager.GenerateAchievements(AppId);
                 LB_Info.Text = $"Downloading Achievements for AppId {AppId}";
+                StatsManager.GenerateAchievements(AppId);
             }
             catch (Exception ex)
             {
@@ -97,8 +96,8 @@ namespace SKYNET.GUI
 
             try
             {
-                StatsManager.GenerateAppDetails(AppId);
                 LB_Info.Text = $"Downloading AppDetails for AppId {AppId}";
+                StatsManager.GenerateAppDetails(AppId);
             }
             catch (Exception ex)
             {
@@ -107,8 +106,8 @@ namespace SKYNET.GUI
 
             try
             {
-                StatsManager.GenerateItems(AppId);
                 LB_Info.Text = $"Downloading Items for AppId {AppId}";
+                StatsManager.GenerateItems(AppId);
             }
             catch (Exception ex)
             {

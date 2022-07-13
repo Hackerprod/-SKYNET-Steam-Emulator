@@ -7,6 +7,7 @@ using SKYNET.Steamworks.Interfaces;
 using SteamAPICall_t = System.UInt64;
 using HSteamUser = System.UInt32;
 using HAuthTicket = System.UInt32;
+using System.Threading.Tasks;
 
 namespace SKYNET.Steamworks.Implementation
 {

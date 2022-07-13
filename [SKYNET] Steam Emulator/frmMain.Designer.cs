@@ -379,7 +379,7 @@ namespace SKYNET
             // 
             this.pictureBox3.BackColor = System.Drawing.Color.Transparent;
             this.pictureBox3.Image = global::SKYNET.Properties.Resources.coins;
-            this.pictureBox3.Location = new System.Drawing.Point(83, 49);
+            this.pictureBox3.Location = new System.Drawing.Point(78, 51);
             this.pictureBox3.Name = "pictureBox3";
             this.pictureBox3.Size = new System.Drawing.Size(30, 30);
             this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -389,9 +389,9 @@ namespace SKYNET
             // PB_Avatar
             // 
             this.PB_Avatar.Image = global::SKYNET.Properties.Resources.profile_picture;
-            this.PB_Avatar.Location = new System.Drawing.Point(11, 2);
+            this.PB_Avatar.Location = new System.Drawing.Point(16, 10);
             this.PB_Avatar.Name = "PB_Avatar";
-            this.PB_Avatar.Size = new System.Drawing.Size(73, 73);
+            this.PB_Avatar.Size = new System.Drawing.Size(55, 55);
             this.PB_Avatar.TabIndex = 19;
             // 
             // BT_Connect
@@ -437,33 +437,33 @@ namespace SKYNET
             // LB_SteamID
             // 
             this.LB_SteamID.AutoSize = true;
-            this.LB_SteamID.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LB_SteamID.Font = new System.Drawing.Font("Segoe UI Emoji", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.LB_SteamID.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.LB_SteamID.Location = new System.Drawing.Point(87, 32);
+            this.LB_SteamID.Location = new System.Drawing.Point(82, 35);
             this.LB_SteamID.Name = "LB_SteamID";
-            this.LB_SteamID.Size = new System.Drawing.Size(127, 17);
+            this.LB_SteamID.Size = new System.Drawing.Size(110, 16);
             this.LB_SteamID.TabIndex = 16;
             this.LB_SteamID.Text = "76513692034573246";
             // 
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Font = new System.Drawing.Font("Segoe UI Emoji", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label9.Font = new System.Drawing.Font("Segoe UI Emoji", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label9.ForeColor = System.Drawing.Color.NavajoWhite;
-            this.label9.Location = new System.Drawing.Point(115, 56);
+            this.label9.Location = new System.Drawing.Point(110, 59);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(15, 17);
+            this.label9.Size = new System.Drawing.Size(14, 16);
             this.label9.TabIndex = 15;
             this.label9.Text = "0";
             // 
             // LB_NickName
             // 
             this.LB_NickName.AutoSize = true;
-            this.LB_NickName.Font = new System.Drawing.Font("Segoe UI Emoji", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LB_NickName.Font = new System.Drawing.Font("Segoe UI Emoji", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.LB_NickName.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.LB_NickName.Location = new System.Drawing.Point(84, 3);
+            this.LB_NickName.Location = new System.Drawing.Point(79, 6);
             this.LB_NickName.Name = "LB_NickName";
-            this.LB_NickName.Size = new System.Drawing.Size(120, 26);
+            this.LB_NickName.Size = new System.Drawing.Size(101, 21);
             this.LB_NickName.TabIndex = 12;
             this.LB_NickName.Text = "Hackerprod";
             // 

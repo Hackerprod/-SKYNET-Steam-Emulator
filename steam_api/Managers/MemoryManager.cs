@@ -34,7 +34,7 @@ namespace SKYNET.Managers
 
             string Name = type.Name;
             var Instance = Activator.CreateInstance(type);
-            var new_delegates = new List<System.Delegate>();
+            var new_delegates = new List<Delegate>();
 
             try
             {
@@ -44,16 +44,16 @@ namespace SKYNET.Managers
                 {
                     Type DelegateType = CreateDelegate(methodInfo);
 
-                    System.Delegate new_delegate = null;
+                    Delegate new_delegate = null;
                     try
                     {
-                        new_delegate = System.Delegate.CreateDelegate(DelegateType, Instance, methodInfo, true);
+                        new_delegate = Delegate.CreateDelegate(DelegateType, Instance, methodInfo, true);
                         new_delegates.Add(new_delegate);
                     }
                     catch (Exception e)
                     {
-                        ErrorMessage = ($"EXCEPTION whilst binding function {methodInfo.Name}, class {Name} - {e.Message} {e.StackTrace}");
-                        SteamEmulator.Write("Memory Manager", ErrorMessage);
+                        ErrorMessage = ($"Exception whilst binding function {methodInfo.Name}, class {Name} - {e.Message} {e.StackTrace}");
+                        SteamEmulator.Write("MemoryManager", ErrorMessage);
                         return IntPtr.Zero;
                     }
                 }
@@ -66,12 +66,13 @@ namespace SKYNET.Managers
                 {
                     try
                     {
-                        Marshal.WriteIntPtr(vtable, i * ptr_size, Marshal.GetFunctionPointerForDelegate(new_delegates[i]));
+                        var FunctionPointer = Marshal.GetFunctionPointerForDelegate(new_delegates[i]);
+                        Marshal.WriteIntPtr(vtable, i * ptr_size, FunctionPointer);
                     }
                     catch (Exception ex)
                     {
-                        ErrorMessage = $"Error Injecting Delegate {new_delegates[i]} in {Name}: {ex.Message}";
-                        SteamEmulator.Write("Memory Manager", ErrorMessage);
+                        ErrorMessage = $"Error Writing Delegate ({new_delegates[i]} in {Name}) into Process: {ex.Message}";
+                        SteamEmulator.Write("MemoryManager", ErrorMessage);
                     }
                 }
 
@@ -124,7 +125,7 @@ namespace SKYNET.Managers
             catch (Exception e)
             {
                 ErrorMessage = ($"EXCEPTION whilst binding function {methodInfo.Name}, class {Name} - {e.Message} {e.StackTrace}");
-                SteamEmulator.Write("Memory Manager", ErrorMessage);
+                SteamEmulator.Write("MemoryManager", ErrorMessage);
                 return IntPtr.Zero;
             }
 
@@ -141,7 +142,7 @@ namespace SKYNET.Managers
                 catch (Exception ex)
                 {
                     ErrorMessage = $"Error Injecting Delegate {new_delegates[i]} in {Name}: {ex.Message}";
-                    SteamEmulator.Write("Memory Manager", ErrorMessage);
+                    SteamEmulator.Write("MemoryManager", ErrorMessage);
                 }
             }
 
@@ -180,7 +181,7 @@ namespace SKYNET.Managers
                     catch (Exception e)
                     {
                         ErrorMessage = ($"EXCEPTION whilst binding function {methodInfo.Name}, class {Name} - {e.Message} {e.StackTrace}");
-                        SteamEmulator.Write("Memory Manager", ErrorMessage);
+                        SteamEmulator.Write("MemoryManager", ErrorMessage);
                         return (default, IntPtr.Zero);
                     }
                 }
@@ -198,7 +199,7 @@ namespace SKYNET.Managers
                     catch (Exception ex)
                     {
                         ErrorMessage = $"Error Injecting Delegate {new_delegates[i]} in {Name}: {ex.Message}";
-                        SteamEmulator.Write("Memory Manager", ErrorMessage);
+                        SteamEmulator.Write("MemoryManager", ErrorMessage);
                     }
                 }
 
@@ -373,7 +374,7 @@ namespace SKYNET.Managers
 
             MethodBuilder invokeMethod = del.DefineMethod("Invoke", methodInfo.Attributes & ~MethodAttributes.Abstract, methodInfo.ReturnType, parameterTypes);
             invokeMethod.SetImplementationFlags(MethodImplAttributes.Runtime | MethodImplAttributes.Managed);
-            return del.CreateType(); ;
+            return del.CreateType();
         }
 
         public static bool SaveDelegates(Type type, string filename)

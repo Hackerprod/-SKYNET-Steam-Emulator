@@ -4,6 +4,7 @@ using SKYNET.Steamworks.Implementation;
 
 using SteamAPICall_t = System.UInt64;
 using FriendsGroupID_t = System.UInt16;
+using System.Threading.Tasks;
 
 namespace SKYNET.Steamworks.Exported
 {

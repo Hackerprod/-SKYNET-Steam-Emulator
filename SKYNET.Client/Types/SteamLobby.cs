@@ -72,18 +72,17 @@ namespace SKYNET.Types
             public string m_Key;
             public string m_Value;
         }
-
-        public enum ELobbyType
-        {
-            k_ELobbyTypePrivate = 0,        // only way to join the lobby is to invite to someone else
-            k_ELobbyTypeFriendsOnly = 1,    // shows for friends or invitees, but not in lobby list
-            k_ELobbyTypePublic = 2,         // visible for friends and in lobby list
-            k_ELobbyTypeInvisible = 3,      // returned by search, but not visible to other friends 
-                                            //    useful if you want a user in two lobbies, for example matching groups together
-                                            //	  a user can be in only one regular lobby, and up to two invisible lobbies
-            k_ELobbyTypePrivateUnique = 4,  // private, unique and does not delete when empty - only one of these may exist per unique keypair set
-                                            // can only create from webapi
-        };
-
     }
+
+    public enum ELobbyType
+    {
+        k_ELobbyTypePrivate = 0,        // only way to join the lobby is to invite to someone else
+        k_ELobbyTypeFriendsOnly = 1,    // shows for friends or invitees, but not in lobby list
+        k_ELobbyTypePublic = 2,         // visible for friends and in lobby list
+        k_ELobbyTypeInvisible = 3,      // returned by search, but not visible to other friends 
+                                        //    useful if you want a user in two lobbies, for example matching groups together
+                                        //	  a user can be in only one regular lobby, and up to two invisible lobbies
+        k_ELobbyTypePrivateUnique = 4,  // private, unique and does not delete when empty - only one of these may exist per unique keypair set
+                                        // can only create from webapi
+    };
 }

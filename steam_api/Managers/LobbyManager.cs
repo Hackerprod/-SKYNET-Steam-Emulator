@@ -15,29 +15,6 @@ namespace SKYNET.Managers
             Lobbies = new List<SteamLobby>();
         }
 
-        public static void Initialize()
-        {
-
-        }
-
-        public static void Create(SteamLobby lobby)
-        {
-            MutexHelper.Wait("Lobbies", delegate
-            {
-                Lobbies.Add(lobby);
-            });
-            IPCManager.SendUpdatedLobbies();
-        }
-
-        public static void Remove(ulong lobbyID)
-        {
-            MutexHelper.Wait("Lobbies", delegate
-            {
-                Lobbies.RemoveAll(l => l.SteamID == lobbyID);
-            });
-            IPCManager.SendUpdatedLobbies();
-        }
-
         public static SteamLobby GetLobby(ulong lobbyID)
         {
             SteamLobby lobby = null;
@@ -52,20 +29,6 @@ namespace SKYNET.Managers
         {
             lobby = GetLobby(lobbyID);
             return lobby != null;
-        }
-
-        public static void Update(SteamLobby lobby)
-        {
-            var Lobby = Lobbies.Find(l => l.SteamID == lobby.SteamID);
-            if (Lobby != null)
-            {
-                Lobby = lobby;
-            }
-            else
-            {
-                Create(lobby);
-            }
-            IPCManager.SendUpdatedLobbies();
         }
 
         public static SteamLobby GetLobbyByOwner(ulong steamID)
@@ -98,22 +61,13 @@ namespace SKYNET.Managers
             return Lobbies.FindAll(l => l.AppID == appID); 
         }
 
-        internal static void SetLobbyData(ulong steamID, string key, string value)
+        internal static void UpdateLobbies(List<SteamLobby> UpdatedList)
         {
-            var Lobby = GetLobby(steamID);
-            if (Lobby != null)
+            MutexHelper.Wait("Lobbies", delegate
             {
-                if (Lobby.LobbyData == null) Lobby.LobbyData = new Dictionary<string, string>();
-                if (Lobby.LobbyData.ContainsKey(key))
-                {
-                    Lobby.LobbyData[key] = value;
-                }
-                else
-                {
-                    Lobby.LobbyData.Add(key, value);
-                }
-            }
-            IPCManager.SendUpdatedLobbies();
+                Lobbies.Clear();
+                Lobbies.AddRange(UpdatedList);
+            });
         }
     }
 }

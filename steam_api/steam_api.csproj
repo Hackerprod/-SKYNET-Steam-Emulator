@@ -97,6 +97,8 @@
     <Compile Include="Helpers\Wave\WaveIn.cs" />
     <Compile Include="Helpers\Wave\WavInDevice.cs" />
     <Compile Include="Managers\AudioManager.cs" />
+    <Compile Include="Managers\LobbyManager.cs" />
+    <Compile Include="Managers\UserManager.cs" />
     <Compile Include="Steamworks\Exported\CSteamworks.cs" />
     <Compile Include="Helpers\ImageHelper.cs" />
     <Compile Include="Helpers\MutexHelper.cs" />

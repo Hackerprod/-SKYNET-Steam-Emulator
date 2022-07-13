@@ -21,7 +21,6 @@ namespace SKYNET.Steamworks.Implementation
 
         public  List<ulong> QueryingAvatar;
 
-        private Dictionary<string, string> RichPresence;
         private ConcurrentDictionary<ulong, ImageAvatar> Avatars;
         private int ImageIndex;
         private ImageAvatar DefaultAvatar;
@@ -32,7 +31,6 @@ namespace SKYNET.Steamworks.Implementation
             InterfaceName = "SteamFriends";
             InterfaceVersion = "SteamFriends017";
             QueryingAvatar = new List<SteamAPICall_t>();
-            RichPresence = new Dictionary<string, string>();
             Avatars = new ConcurrentDictionary<ulong, ImageAvatar>();
             ImageIndex = 10; 
         }
@@ -163,6 +161,7 @@ namespace SKYNET.Steamworks.Implementation
         public void ClearRichPresence()
         {
             Write($"ClearRichPresence");
+            IPCManager.SendClearRichPresence();
         }
 
         public bool CloseClanChatWindowInSteam(ulong steamIDClanChat)
@@ -445,24 +444,50 @@ namespace SKYNET.Steamworks.Implementation
 
         public string GetFriendRichPresence(ulong steamIDFriend, string pchKey)
         {
-            Write($"GetFriendRichPresence [{steamIDFriend}]: {pchKey}");
-            if (RichPresence.ContainsKey(pchKey))
+            string Result = "";
+            var friend = GetUser(steamIDFriend);
+            if (friend != null)
             {
-                return RichPresence[pchKey];
+                if (friend.RichPresence.ContainsKey(pchKey))
+                {
+                    Result = friend.RichPresence[pchKey];
+                } 
             }
-            return "";
+            Write($"GetFriendRichPresence (SteamID ={steamIDFriend}, Key = {pchKey}) = {Result}");
+            return Result;
         }
 
         public string GetFriendRichPresenceKeyByIndex(ulong steamIDFriend, int iKey)
         {
-            Write($"GetFriendRichPresenceKeyByIndex {steamIDFriend} {iKey}");
-            return "";
+            string Result = "";
+            var friend = GetUser(steamIDFriend);
+            if (friend != null)
+            {
+                int current = 0;
+                foreach (var item in friend.RichPresence)
+                {
+                    if (current == iKey)
+                    {
+                        Result = item.Key;
+                        break;
+                    }
+                    current++;
+                }
+            }
+            Write($"GetFriendRichPresenceKeyByIndex (SteamID ={steamIDFriend}, Key index = {iKey}) = {Result}");
+            return Result;
         }
 
         public int GetFriendRichPresenceKeyCount(ulong steamIDFriend)
         {
-            Write($"GetFriendRichPresenceKeyCount {steamIDFriend}");
-            return 0;
+            var Result = 0;
+            var friend = GetUser(steamIDFriend);
+            if (friend != null)
+            {
+                Result = friend.RichPresence.Count;
+            }
+            Write($"GetFriendRichPresenceKeyCount (SteamID ={steamIDFriend}) = {Result}");
+            return Result;
         }
 
         public int GetFriendsGroupCount()
@@ -568,19 +593,15 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"GetPlayerNickname {steamIDPlayer}");
             var Result = "";
-            MutexHelper.Wait("Users", delegate
+            if (steamIDPlayer == SteamEmulator.SteamID)
             {
-                if (steamIDPlayer == SteamEmulator.SteamID)
-                {
-                    Result = SteamEmulator.PersonaName;
-                }
-                var friend = GetUser(steamIDPlayer);
-                if (friend == null)
-                {
-                    Result = "";
-                }
-
-            });
+                Result = SteamEmulator.PersonaName;
+            }
+            var friend = GetUser(steamIDPlayer);
+            if (friend == null)
+            {
+                Result = "";
+            }
             return Result;
         }
 
@@ -685,8 +706,9 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool RequestUserInformation(ulong steamIDUser, bool bRequireNameOnly)
         {
-            Write($"RequestUserInformation {(CSteamID)steamIDUser}");
-            return false;
+            var User = GetUser(steamIDUser);
+            Write($"RequestUserInformation (SteamID = {steamIDUser}) = {User != null}");
+            return User != null;
         }
 
         public bool SendClanChatMessage(ulong steamIDClanChat, string pchText)
@@ -739,25 +761,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"SetRichPresence (Key = {pchKey}, Value = {pchValue})");
 
-            if (!string.IsNullOrEmpty(pchValue))
-            {
-                if (RichPresence.ContainsKey(pchKey))
-                {
-                    RichPresence[pchKey] = pchValue;
-                }
-                else
-                {
-                    RichPresence.Add(pchKey, pchValue);
-                }
-            }
-            else
-            {
-                if (RichPresence.ContainsKey(pchKey))
-                {
-                    RichPresence.Remove(pchKey);
-                }
-            }
-
+            IPCManager.SendSetRichPresence(pchKey, pchValue);
             return true;
         }
 
@@ -790,13 +794,13 @@ namespace SKYNET.Steamworks.Implementation
 
         private List<SteamPlayer> GetFriends()
         {
-            var Friends = IPCManager.GetFriends();
+            var Friends = UserManager.Users;
             return Friends;
         }
 
         private SteamPlayer GetUser(ulong steamID)
         {
-            var User = IPCManager.GetUser(steamID);
+            var User = UserManager.GetUser(steamID);
             return User;
         }
 

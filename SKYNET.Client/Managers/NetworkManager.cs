@@ -68,51 +68,58 @@ namespace SKYNET.Managers
         private static void ProcessMessage(NetworkMessage message, Socket socket)
         {
             Write($"Received message {(MessageType)message.MessageType} from {((IPEndPoint)socket.RemoteEndPoint).Address.ToString()}");
-            switch ((MessageType)message.MessageType)
+            try
             {
-                case MessageType.NET_Announce:
-                case MessageType.NET_AnnounceResponse:
-                    ProcessAnnounce(message, socket);
-                    break;
-                case MessageType.NET_AvatarRequest:
-                case MessageType.NET_AvatarResponse:
-                    ProcessAvatar(message, socket);
-                    break;
-                case MessageType.NET_UserDataUpdated:
-                    ProcessUserStatusChanged(message, socket);
-                    break;
-                case MessageType.NET_LobbyListRequest:
-                    ProcessLobbyListRequest(message, socket);
-                    break;
-                case MessageType.NET_LobbyListResponse:
-                    ProcessLobbyListResponse(message, socket);
-                    break;
-                case MessageType.NET_LobbyJoinRequest:
-                    ProcessLobbyJoinRequest(message, socket);
-                    break;
-                case MessageType.NET_LobbyJoinResponse:
-                    ProcessLobbyJoinResponse(message, socket);
-                    break;
-                case MessageType.NET_LobbyDataUpdate:
-                    ProcessLobbyDataUpdate(message, socket);
-                    break;
-                case MessageType.NET_LobbyChatUpdate:
-                    ProcessLobbyChatUpdate(message, socket);
-                    break;
-                case MessageType.NET_LobbyLeave:
-                    ProcessLobbyLeave(message, socket);
-                    break;
-                case MessageType.NET_LobbyRemove:
-                    ProcessLobbyRemove(message, socket);
-                    break;
-                case MessageType.NET_LobbyGameserver:
-                    ProcessLobbyGameserver(message, socket);
-                    break;
-                case MessageType.NET_GameOpened:
-                    ProcessGameOpened(message, socket);
-                    break;
-                default:
-                    break;
+                switch ((MessageType)message.MessageType)
+                {
+                    case MessageType.NET_Announce:
+                    case MessageType.NET_AnnounceResponse:
+                        ProcessAnnounce(message, socket);
+                        break;
+                    case MessageType.NET_AvatarRequest:
+                    case MessageType.NET_AvatarResponse:
+                        ProcessAvatar(message, socket);
+                        break;
+                    case MessageType.NET_UserDataUpdated:
+                        ProcessUserStatusChanged(message, socket);
+                        break;
+                    case MessageType.NET_LobbyListRequest:
+                        ProcessLobbyListRequest(message, socket);
+                        break;
+                    case MessageType.NET_LobbyListResponse:
+                        ProcessLobbyListResponse(message, socket);
+                        break;
+                    case MessageType.NET_LobbyJoinRequest:
+                        ProcessLobbyJoinRequest(message, socket);
+                        break;
+                    case MessageType.NET_LobbyJoinResponse:
+                        ProcessLobbyJoinResponse(message, socket);
+                        break;
+                    case MessageType.NET_LobbyDataUpdate:
+                        ProcessLobbyDataUpdate(message, socket);
+                        break;
+                    case MessageType.NET_LobbyChatUpdate:
+                        ProcessLobbyChatUpdate(message, socket);
+                        break;
+                    case MessageType.NET_LobbyLeave:
+                        ProcessLobbyLeave(message, socket);
+                        break;
+                    case MessageType.NET_LobbyRemove:
+                        ProcessLobbyRemove(message, socket);
+                        break;
+                    case MessageType.NET_LobbyGameserver:
+                        ProcessLobbyGameserver(message, socket);
+                        break;
+                    case MessageType.NET_GameOpened:
+                        ProcessGameOpened(message, socket);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Write($"Error processing message {(MessageType)message.MessageType}" + Environment.NewLine + ex.Message + ex.StackTrace);
             }
         }
 
@@ -303,7 +310,7 @@ namespace SKYNET.Managers
             }
             catch
             {
-
+                modCommon.Show("err");
             }
         }
 

@@ -45,6 +45,7 @@ namespace SKYNET.WEB.Types
         WEB_GameInfoMinimalResponse,
         WEB_GameOpenContainerFolder,
         WEB_GameOpenWithoutEmulation,
+        WEB_GameDownloadCache,
         WEB_UserOnline,
         WEB_UserOffline,
         WEB_UserInfoRequest,
@@ -191,6 +192,11 @@ namespace SKYNET.WEB.Types
     }
 
     public class WEB_GameOpenWithoutEmulation : WEB_Base
+    {
+        public string Guid { get; set; }
+    }
+
+    public class WEB_GameDownloadCache : WEB_Base
     {
         public string Guid { get; set; }
     }

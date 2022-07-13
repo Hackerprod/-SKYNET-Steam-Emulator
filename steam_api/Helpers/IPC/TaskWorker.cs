@@ -4,11 +4,6 @@ using System.Threading.Tasks;
 
 namespace SKYNET.IPC
 {
-    /// <summary>
-    /// A class designed to run code using <see cref="Task"/> with <see cref="TaskCreationOptions.LongRunning"/> <br/>
-    /// and supporting automatic cancellation after <see cref="DisposeAsync"/> <br/>
-    /// <![CDATA[Version: 1.0.0.6]]> <br/>
-    /// </summary>
     internal class TaskWorker
     {
         #region Fields
@@ -19,25 +14,14 @@ namespace SKYNET.IPC
 
         #region Properties
 
-        /// <summary>
-        /// Internal task
-        /// </summary>
         public Task Task { get; set; }
 
-        /// <summary>
-        /// Internal task CancellationTokenSource
-        /// </summary>
         public CancellationTokenSource CancellationTokenSource { get; } = new CancellationTokenSource();
 
         #endregion
 
         #region Constructors
 
-        /// <summary>
-        /// Creates and starts <see cref="TaskWorker"/>
-        /// </summary>
-        /// <param name="action"></param>
-        /// <param name="exceptionAction"></param>
         public TaskWorker(Func<CancellationToken, Task> action, Action<Exception>? exceptionAction = null)
         {
             Task = Task.Factory.StartNew(async () =>
@@ -60,9 +44,6 @@ namespace SKYNET.IPC
 
         #region Methods
 
-        /// <summary>
-        /// Cancel task(if it's not completed) and dispose internal resources <br/>
-        /// </summary>
         public async Task StopAsync()
         {
             if (_isDisposed)
@@ -93,9 +74,6 @@ namespace SKYNET.IPC
 
         #region IDisposable
 
-        /// <summary>
-        /// Cancel task(if it's not completed) and dispose internal resources <br/>
-        /// </summary>
         public async void DisposeAsync()
         {
             await StopAsync().ConfigureAwait(false);

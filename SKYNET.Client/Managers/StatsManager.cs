@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 
 namespace SKYNET.Managers
@@ -20,6 +21,10 @@ namespace SKYNET.Managers
         private static ConcurrentDictionary<uint, AppDetails> AppDetails;
         private static ConcurrentDictionary<uint, GameSchema> GameSchemas;
 
+        private static WebClient WebClient;
+        private static string StoragePath;
+        private static string AppCachePath;
+        private static int DownloadID;
 
         static StatsManager()
         {
@@ -28,11 +33,17 @@ namespace SKYNET.Managers
             PlayerStats = new ConcurrentDictionary<uint, List<PlayerStat>>();
             AppDetails = new ConcurrentDictionary<uint, AppDetails>();
             GameSchemas = new ConcurrentDictionary<uint, GameSchema>();
+            WebClient = new WebClient();
         }
 
         public static void Initialize()
         {
-            string StoragePath = Path.Combine(modCommon.GetPath(), "Data", "Storage");
+            StoragePath = Path.Combine(modCommon.GetPath(), "Data", "Storage");
+            AppCachePath = Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache");
+
+            modCommon.EnsureDirectoryExists(StoragePath);
+            modCommon.EnsureDirectoryExists(AppCachePath);
+
             foreach (var directory in Directory.GetDirectories(StoragePath))
             {
                 var appID = new DirectoryInfo(directory).Name; 
@@ -119,7 +130,7 @@ namespace SKYNET.Managers
             }
         }
 
-        internal static void SetAchievement(uint appID, Achievement achievement)
+        public static void SetAchievement(uint appID, Achievement achievement)
         {
             MutexHelper.Wait("Achievements", delegate
             {
@@ -136,7 +147,7 @@ namespace SKYNET.Managers
             SaveAchievements();
         }
 
-        internal static void SetLeaderboard(uint appID, Leaderboard leaderboard)
+        public static void SetLeaderboard(uint appID, Leaderboard leaderboard)
         {
             MutexHelper.Wait("Leaderboards", delegate
             {
@@ -153,7 +164,7 @@ namespace SKYNET.Managers
             SaveLeaderboards();
         }
 
-        internal static void SetPlayerStat(uint appID, PlayerStat playerStat)
+        public static void SetPlayerStat(uint appID, PlayerStat playerStat)
         {
             MutexHelper.Wait("PlayerStats", delegate
             {
@@ -303,10 +314,52 @@ namespace SKYNET.Managers
             }
         }
 
-
         #region Generate Data online
 
-        public static void GenerateAchievements(uint app_id)
+        public static async void DownloadAppCache(uint AppId)
+        {
+            WebClient.DownloadProgressChanged += WebClient_DownloadProgressChanged;
+            DownloadID = new Random().Next(100, 200);
+
+            try
+            {
+                string Url = $"https://steamcdn-a.akamaihd.net/steam/apps/{AppId}/library_hero.jpg";
+                var Data = await WebClient.DownloadDataTaskAsync(Url);
+                File.WriteAllBytes(Path.Combine(AppCachePath, $"{AppId}_library_hero.jpg"), Data);
+            }
+            catch { }
+
+            try
+            {
+                string Url = $"https://steamcdn-a.akamaihd.net/steam/apps/{AppId}/header.jpg";
+                var Data = await WebClient.DownloadDataTaskAsync(Url);
+                File.WriteAllBytes(Path.Combine(AppCachePath, $"{AppId}_header.jpg"), Data);
+            }
+            catch { }
+            try
+            {
+                GenerateAchievements(AppId);
+            }
+            catch { }
+
+            try
+            {
+                GenerateAppDetails(AppId);
+            }
+            catch { }
+            try
+            {
+                GenerateItems(AppId);
+            }
+            catch { }
+        }
+
+        private static void WebClient_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
+        {
+            // TODO: Notify web Client
+        }
+
+        public static async void GenerateAchievements(uint app_id)
         {
             string URL = $"https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key={SteamAPIKey}&appid={app_id}";
             string achievementsPath = Path.Combine(modCommon.GetPath(), "Data", "Storage", app_id.ToString(), "GameSchema.json");
@@ -314,20 +367,37 @@ namespace SKYNET.Managers
 
             try
             {
-                WebRequest webrequest = HttpWebRequest.Create(URL);
-                webrequest.Method = "GET";
-                HttpWebResponse response = (HttpWebResponse)webrequest.GetResponse();
-                StreamReader reader = new StreamReader(response.GetResponseStream());
-                string content = reader.ReadToEnd();
-                File.WriteAllText(achievementsPath, content);
+                string RequestResponse = await GetResponseString(URL);
+                if (string.IsNullOrEmpty(RequestResponse))
+                {
+                    File.WriteAllText(achievementsPath, RequestResponse);
+                }
             }
-            catch (Exception ex)
+            catch 
             {
-                modCommon.Show(ex);
+
             }
         }
 
-        internal static string GetGameDescription(uint appID)
+        private static async Task<string> GetResponseString(string URL)
+        {
+            string content = "";
+            try
+            {
+                WebRequest webrequest = HttpWebRequest.Create(URL);
+                webrequest.Method = "GET";
+                var ResponseTask = await webrequest.GetResponseAsync();
+                HttpWebResponse response = (HttpWebResponse)ResponseTask;
+                StreamReader reader = new StreamReader(response.GetResponseStream());
+                content = reader.ReadToEnd();
+            }
+            catch 
+            {
+            }
+            return content;
+        }
+
+        public static string GetGameDescription(uint appID)
         {
             string Description = "";
             try
@@ -342,20 +412,19 @@ namespace SKYNET.Managers
             return Description;
         }
 
-        public static void GenerateItems(uint app_id)
+        public static async void GenerateItems(uint app_id)
         {
             string URL = $"https://api.steampowered.com/IInventoryService/GetItemDefMeta/v1?key={SteamAPIKey}&appid={app_id}";
-            string achievementsPath = Path.Combine(modCommon.GetPath(), "Data", "Storage", app_id.ToString(), "Items.json");
-            modCommon.EnsureDirectoryExists(achievementsPath, true);
+            string itemsPath = Path.Combine(modCommon.GetPath(), "Data", "Storage", app_id.ToString(), "Items.json");
+            modCommon.EnsureDirectoryExists(itemsPath, true);
 
             try
             {
-                WebRequest webrequest = HttpWebRequest.Create(URL);
-                webrequest.Method = "GET";
-                HttpWebResponse response = (HttpWebResponse)webrequest.GetResponse();
-                StreamReader reader = new StreamReader(response.GetResponseStream());
-                string content = reader.ReadToEnd();
-                File.WriteAllText(achievementsPath, content);
+                string RequestResponse = await GetResponseString(URL);
+                if (string.IsNullOrEmpty(RequestResponse))
+                {
+                    File.WriteAllText(itemsPath, RequestResponse);
+                }
             }
             catch
             {
@@ -363,20 +432,19 @@ namespace SKYNET.Managers
             }
         }
 
-        public static void GenerateAppDetails(uint app_id)
+        public static async void GenerateAppDetails(uint app_id)
         {
             string URL = $"https://store.steampowered.com/api/appdetails/?appids={app_id}";
-            string achievementsPath = Path.Combine(modCommon.GetPath(), "Data", "Storage", app_id.ToString(), "AppDetails.json");
-            modCommon.EnsureDirectoryExists(achievementsPath, true);
+            string appDetailsPath = Path.Combine(modCommon.GetPath(), "Data", "Storage", app_id.ToString(), "AppDetails.json");
+            modCommon.EnsureDirectoryExists(appDetailsPath, true);
 
             try
             {
-                WebRequest webrequest = HttpWebRequest.Create(URL);
-                webrequest.Method = "GET";
-                HttpWebResponse response = (HttpWebResponse)webrequest.GetResponse();
-                StreamReader reader = new StreamReader(response.GetResponseStream());
-                string content = reader.ReadToEnd();
-                File.WriteAllText(achievementsPath, content);
+                string RequestResponse = await GetResponseString(URL);
+                if (string.IsNullOrEmpty(RequestResponse))
+                {
+                    File.WriteAllText(appDetailsPath, RequestResponse);
+                }
             }
             catch
             {

@@ -44,6 +44,13 @@ namespace SKYNET.IPC.Types
         IPC_LobbyDataUpdate,
         IPC_LobbyChatUpdate,
         IPC_LobbyGameserver,
+        IPC_LobbyRequest,
+        IPC_LobbyResponse,
+        IPC_LobbyByIndexRequest,
+        IPC_LobbyByIndexResponse,
+        IPC_LobbyCountRequest,
+        IPC_LobbyCountResponse,
+        IPC_LobbySetData,
 
         // User stats
         IPC_Leaderboards,
@@ -61,6 +68,15 @@ namespace SKYNET.IPC.Types
 
         // File Log
         IPC_ModifyFileLog,
+
+        // RichPresence
+        IPC_ClearRichPresence,
+        IPC_SetRichPresence,
+
+        IPC_UsersRequest,
+        IPC_UsersResponse,
+        IPC_LobbiesRequest,
+        IPC_LobbiesResponse,
     }
 
     public class IPC_ModifyFileLog : IPC_MessageBase
@@ -271,5 +287,73 @@ namespace SKYNET.IPC.Types
     public class IPC_GetFriendsResponse : IPC_MessageBase
     {
         public List<SteamPlayer> Friends { get; set; }
+    }
+
+    public class IPC_ClearRichPresence : IPC_MessageBase
+    {
+    }
+
+    public class IPC_SetRichPresence : IPC_MessageBase
+    {
+        public string Key { get; set; }
+        public string Value { get; set; }
+    }
+
+    public class IPC_LobbyRequest : IPC_MessageBase
+    {
+        public ulong SteamID { get; internal set; }
+        public bool ByOwner { get; internal set; }
+    }
+
+    public class IPC_LobbyResponse : IPC_MessageBase
+    {
+        public SteamLobby Lobby { get; set; }
+    }
+
+    public class IPC_LobbyByIndexRequest : IPC_MessageBase
+    {
+        public uint AppID { get; set; }
+        public int Index { get; set; }
+    }
+
+    public class IPC_LobbyByIndexResponse : IPC_MessageBase
+    {
+        public SteamLobby Lobby { get; set; }
+    }
+
+    public class IPC_LobbyCountRequest : IPC_MessageBase
+    {
+        public uint AppID { get; set; }
+    }
+
+    public class IPC_LobbyCountResponse : IPC_MessageBase
+    {
+        public uint Count { get; set; }
+    }
+
+    public class IPC_LobbySetData : IPC_MessageBase
+    {
+        public ulong SteamID { get; set; }
+        public string Key { get; set; }
+        public string Value { get; set; }
+    }
+
+    public class IPC_UsersRequest : IPC_MessageBase
+    {
+    }
+
+    public class IPC_UsersResponse : IPC_MessageBase
+    {
+        public List<SteamPlayer> Users { get; set; }
+    }
+
+    public class IPC_LobbiesRequest : IPC_MessageBase
+    {
+        public uint AppID { get; set; }
+    }
+
+    public class IPC_LobbiesResponse : IPC_MessageBase
+    {
+        public List<SteamLobby> Lobbies { get; set; }
     }
 }

@@ -11,76 +11,45 @@ namespace SKYNET.IPC
     public sealed class PipeClient
     {
         private volatile bool _isConnecting;
-        private ulong _currentJob;
 
-        /// <summary>
-        /// Results that are waiting for collection from the pipe
-        /// </summary>
-        private List<IPCMessage> current_results;
+        private List<IPCMessage> CurrentResults;
+        private List<ulong> RequestResults;
 
-        /// <summary>
-        /// Semaphores for results that are being waited on
-        /// </summary>
-        private Dictionary<ulong, Semaphore> result_semaphores;
-
-
-        /// <inheritdoc/>
         public bool AutoReconnect { get; set; } = true;
 
-        /// <inheritdoc/>
         public TimeSpan ReconnectionInterval { get; }
 
-        /// <inheritdoc/>
         public bool IsConnected => Connection != null;
 
-        /// <inheritdoc/>
         public bool IsConnecting
         {
             get => _isConnecting;
             private set => _isConnecting = value;
         }
 
-
-        /// <inheritdoc/>
         public string PipeName { get; }
 
-        /// <inheritdoc/>
         public string ServerName { get; }
 
-        /// <inheritdoc/>
         public PipeConnection<IPCMessage>? Connection { get; private set; }
 
         private System.Timers.Timer ReconnectionTimer { get; }
-        public ulong NextJobID { get { _currentJob++; return _currentJob; } }
 
-
-        /// <summary>
-        /// Invoked whenever a message is received from the server.
-        /// </summary>
         public event EventHandler<ConnectionMessageEventArgs<IPCMessage>>? MessageReceived;
 
-        /// <summary>
-        /// Invoked when the client disconnects from the server (e.g., the pipe is closed or broken).
-        /// </summary>
         public event EventHandler<ConnectionEventArgs<IPCMessage>>? Disconnected;
 
-        /// <summary>
-        /// Invoked after each the client connect to the server (include reconnects).
-        /// </summary>
         public event EventHandler<ConnectionEventArgs<IPCMessage>>? Connected;
 
-        /// <summary>
-        /// Invoked whenever an exception is thrown during a read or write operation on the named pipe.
-        /// </summary>
         public event EventHandler<ExceptionEventArgs>? ExceptionOccurred;
 
         private void OnMessageReceived(ConnectionMessageEventArgs<IPCMessage> args)
         {
-            if (result_semaphores.ContainsKey(args.Message.JobID))
+            if (RequestResults.Contains(args.Message.JobID))
             {
-                current_results.Add(args.Message);
-                var semaphore = result_semaphores[args.Message.JobID];
-                semaphore?.Release();
+                CurrentResults.Add(args.Message);
+                RequestResults.Remove(args.Message.JobID);
+                Write("Founded message waiting response " + args.Message.JobID);
             }
             else
             {
@@ -103,22 +72,13 @@ namespace SKYNET.IPC
             ExceptionOccurred?.Invoke(this, new ExceptionEventArgs());
         }
 
-
-        /// <summary>
-        /// Constructs a new <see cref="PipeClient{T}"/> to connect to the <see cref="PipeServer{T}"/> specified by <paramref name="pipeName"/>. <br/>
-        /// Default reconnection interval - <see langword="100 ms"/>
-        /// </summary>
-        /// <param name="pipeName">Name of the server's pipe</param>
-        /// <param name="serverName">the Name of the server, default is  local machine</param>
-        /// <param name="reconnectionInterval">Default reconnection interval - <see langword="100 ms"/></param>
-        /// <param name="formatter">Default formatter - <see cref="BinaryFormatter"/></param>
         public PipeClient(string pipeName, string serverName = ".", TimeSpan? reconnectionInterval = default)
         {
             PipeName = pipeName;
             ServerName = serverName;
 
-            current_results = new List<IPCMessage>();
-            result_semaphores = new Dictionary<ulong, Semaphore>();
+            CurrentResults = new List<IPCMessage>();
+            RequestResults = new List<ulong>();
 
             ReconnectionInterval = reconnectionInterval ?? TimeSpan.FromMilliseconds(100);
             ReconnectionTimer = new System.Timers.Timer(ReconnectionInterval.TotalMilliseconds);
@@ -148,11 +108,6 @@ namespace SKYNET.IPC
             };
         }
 
-
-        /// <summary>
-        /// Connects to the named pipe server asynchronously.
-        /// </summary>
-        /// <exception cref="InvalidOperationException"></exception>
         public async Task ConnectAsync(CancellationToken cancellationToken = default)
         {
             while (IsConnecting)
@@ -204,11 +159,6 @@ namespace SKYNET.IPC
             }
         }
 
-        /// <summary>
-        /// Disconnects from server
-        /// </summary>
-        /// <param name="_"></param>
-        /// <returns></returns>
         public async Task DisconnectAsync(CancellationToken _ = default)
         {
             ReconnectionTimer.Stop();
@@ -228,13 +178,6 @@ namespace SKYNET.IPC
             Connection = null;
         }
 
-        /// <summary>
-        /// Sends a message to the server over a named pipe. <br/>
-        /// If client is not connected, <see cref="InvalidOperationException"/> is occurred
-        /// </summary>
-        /// <param name="value">Message to send to the server.</param>
-        /// <param name="cancellationToken"></param>
-        /// <exception cref="InvalidOperationException"></exception>
         public async Task<IPCMessage> WriteAsync(IPCMessage value, bool WaitResult = false, CancellationToken cancellationToken = default)
         {
             if (!IsConnected && AutoReconnect)
@@ -251,28 +194,33 @@ namespace SKYNET.IPC
             if (WaitResult)
             {
                 var jobId = value.JobID;
-                result_semaphores.Add(jobId, new Semaphore(0, 1));
-                return WaitForResultForFunction(jobId);
+                RequestResults.Add(jobId);
+                return await WaitForResultForFunction(jobId);
             }
             return null;
         }
 
-        public IPCMessage WaitForResultForFunction(ulong job_id)
+        public async Task<IPCMessage> WaitForResultForFunction(ulong job_id)
         {
-            // Wait for the semaphore and then remove it so gc collects it
-            var this_semaphore = result_semaphores[job_id];
-            this_semaphore.WaitOne();
-            result_semaphores.Remove(job_id);
-
-            var found = current_results.Find(x => x.JobID == job_id);
-            current_results.Remove(found);
-
-            return found;
+            DateTime RequestTime = DateTime.Now;
+            Label:;
+            if ((DateTime.Now - RequestTime).Milliseconds > 500)
+            {
+                return null;
+            }
+            else
+            {
+                var result = CurrentResults.Find(x => x.JobID == job_id);
+                if (result == null)
+                {
+                    await Task.Delay(10);
+                    goto Label;
+                }
+                CurrentResults.Remove(result);
+                return result;
+            }
         }
 
-        /// <summary>
-        /// Dispose internal resources
-        /// </summary>
         public async void DisposeAsync()
         {
             ReconnectionTimer.Dispose();
@@ -280,13 +228,6 @@ namespace SKYNET.IPC
             await DisconnectInternalAsync().ConfigureAwait(false);
         }
 
-
-
-        /// <summary>
-        /// Get the name of the data pipe that should be used from now on by this NamedPipeClient
-        /// </summary>
-        /// <exception cref="InvalidOperationException"></exception>
-        /// <returns></returns>
         private async Task<string> GetConnectionPipeName(CancellationToken cancellationToken = default)
         {
             using var handshake = await ConnectAsync(PipeName, ServerName, cancellationToken).ConfigureAwait(false);
@@ -301,7 +242,6 @@ namespace SKYNET.IPC
             }
         }
 
-        // Client Factory
         private static async Task<PipeStreamWrapper> ConnectAsync(string pipeName, string serverName, CancellationToken cancellationToken = default)
         {
             var pipe = await CreateAndConnectAsync(pipeName, serverName, cancellationToken).ConfigureAwait(false);
@@ -335,6 +275,10 @@ namespace SKYNET.IPC
                 options: PipeOptions.Asynchronous | PipeOptions.WriteThrough);
         }
 
+        private void Write(string v)
+        {
+            SteamEmulator.Write("XXXXXXXXXXXXX", v);
+        }
     }
 }
 

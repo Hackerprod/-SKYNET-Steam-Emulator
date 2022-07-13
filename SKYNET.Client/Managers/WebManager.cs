@@ -78,6 +78,9 @@ namespace SKYNET
                     case WEB_MessageType.WEB_OpenFileDialogRequest:
                         ProcessOpenFileDialogRequest();
                         break;
+                    case WEB_MessageType.WEB_GameDownloadCache:
+                        ProcessGameDownloadCache(e);
+                        break;
                 }
             }
             catch (Exception ex)
@@ -86,109 +89,61 @@ namespace SKYNET
             }
         }
 
+        private static void ProcessGameDownloadCache(WebMessage e)
+        {
+            var GameDownloadCache = e.Deserialize<WEB_GameDownloadCache>();
+            if (GameDownloadCache == null) return;
+            var Game = GameManager.GetGame(GameDownloadCache.Guid);
+            if (Game == null) return;
+            StatsManager.DownloadAppCache(Game.AppID);
+        }
+
         private static void ProcessOpenFileDialogRequest()
         {
             Thread s = new Thread(new ThreadStart(delegate
             {
-                var Dialog = new Form()
+                OpenFileDialog fileDialog = new OpenFileDialog()
                 {
-                    FormBorderStyle = FormBorderStyle.None,
-                    TopMost = true,
-                    Size = new Size(0, 0),
-                    ShowInTaskbar = false,
-                    BackColor = Color.Azure,
-                    TransparencyKey = Color.Azure,
+                    Filter = "exe file | *.exe",
+                    Multiselect = false
                 };
-                Dialog.Show();
-                modCommon.InvokeAction(Dialog, delegate
+                if (fileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    OpenFileDialog fileDialog = new OpenFileDialog()
+                    string FileName = fileDialog.FileName;
+                    FileInfo info = new FileInfo(FileName);
+                    var hexIcon = "";
+                    try
                     {
-                        Filter = "exe file | *.exe",
-                        Multiselect = false
-                    };
-                    if (fileDialog.ShowDialog() == DialogResult.OK)
-                    {
-                        string FileName = fileDialog.FileName;
-                        FileInfo info = new FileInfo(FileName);
-                        var hexIcon = "";
-                        try
-                        {
-                            var bitmap = (Bitmap)ImageHelper.IconFromFile(FileName);
-                            hexIcon = ImageHelper.GetImageBase64(bitmap);
-                        }
-                        catch { }
-
-                        int posibleAppID = 0;
-                        try
-                        {
-                            var PathDirectory = Directory.GetParent(FileName).ToString();
-                            if (File.Exists(Path.Combine(PathDirectory, "steam_appid.txt")))
-                            {
-                                posibleAppID = int.Parse(File.ReadAllText(Path.Combine(PathDirectory, "steam_appid.txt")));
-                            }
-                        }
-                        catch { }
-
-                        var FileDialogResponse = new WEB_OpenFileDialogResponse()
-                        {
-                            FilePath = FileName,
-                            Size = info.Length,
-                            ImageHex = hexIcon,
-                            AppID = posibleAppID
-                        };
-                        Send(FileDialogResponse, WEB_MessageType.WEB_OpenFileDialogResponse);
+                        var bitmap = (Bitmap)ImageHelper.IconFromFile(FileName);
+                        var imageBytes = ImageHelper.ImageToBytes(bitmap);
+                        hexIcon = Convert.ToBase64String(imageBytes);
                     }
-                });
-                Dialog.Close();
+                    catch { }
+
+                    int posibleAppID = 0;
+                    try
+                    {
+                        var PathDirectory = Directory.GetParent(FileName).ToString();
+                        if (File.Exists(Path.Combine(PathDirectory, "steam_appid.txt")))
+                        {
+                            posibleAppID = int.Parse(File.ReadAllText(Path.Combine(PathDirectory, "steam_appid.txt")));
+                        }
+                    }
+                    catch { }
+
+                    var FileDialogResponse = new WEB_OpenFileDialogResponse()
+                    {
+                        FilePath = FileName,
+                        Size = info.Length,
+                        ImageHex = hexIcon,
+                        AppID = posibleAppID
+                    };
+                    Send(FileDialogResponse, WEB_MessageType.WEB_OpenFileDialogResponse);
+
+                }
             }));
             s.SetApartmentState(ApartmentState.STA);
             s.Start();
-
-            //Thread s = new Thread(new ThreadStart(delegate
-            //{
-            //    OpenFileDialog fileDialog = new OpenFileDialog()
-            //    {
-            //        Filter = "exe file | *.exe",
-            //        Multiselect = false
-            //    };
-            //    if (fileDialog.ShowDialog() == DialogResult.OK)
-            //    {
-            //        string FileName = fileDialog.FileName;
-            //        FileInfo info = new FileInfo(FileName);
-            //        var hexIcon = "";
-            //        try
-            //        {
-            //            var bitmap = (Bitmap)ImageHelper.IconFromFile(FileName);
-            //            var imageBytes = ImageHelper.ImageToBytes(bitmap);
-            //            hexIcon = Convert.ToBase64String(imageBytes);
-            //        }
-            //        catch { }
-
-            //        int posibleAppID = 0;
-            //        try
-            //        {
-            //            var PathDirectory = Directory.GetParent(FileName).ToString();
-            //            if (File.Exists(Path.Combine(PathDirectory, "steam_appid.txt")))
-            //            {
-            //                posibleAppID = int.Parse(File.ReadAllText(Path.Combine(PathDirectory, "steam_appid.txt")));
-            //            }
-            //        }
-            //        catch { }
-
-            //        var FileDialogResponse = new WEB_OpenFileDialogResponse()
-            //        {
-            //            FilePath = FileName,
-            //            Size = info.Length,
-            //            ImageHex = hexIcon,
-            //            AppID = posibleAppID
-            //        };
-            //        Send(FileDialogResponse, WEB_MessageType.WEB_OpenFileDialogResponse);
-
-            //    }
-            //}));
-            //s.SetApartmentState(ApartmentState.STA);
-            //s.Start();
         }
 
         private static void ProcessAuthRequest(WebMessage e)
@@ -297,11 +252,12 @@ namespace SKYNET
                     var Users = UserManager.GetFriends();
                     for (int i = 0; i < Users.Count; i++)
                     {
+                        var Avatar = UserManager.GetAvatar(Users[i].SteamID);
                         FriendsPlaying.Add(new WEB_GameInfoResponse.FriendPlaying()
                         {
                             AccountID = Users[i].AccountID,
                             PersonaName = Users[i].PersonaName,
-                            AvatarHex = ImageHelper.GetImageBase64(Users[i].Avatar),
+                            AvatarHex = ImageHelper.GetImageBase64(Avatar),
                         });
                         if (i == 10) break;
                     }
@@ -326,6 +282,7 @@ namespace SKYNET
                     LibraryHeroImage = library_hero,
                     HeaderImage = header
                 };
+
                 Send(Response, WEB_MessageType.WEB_GameInfoResponse);
             }
         }

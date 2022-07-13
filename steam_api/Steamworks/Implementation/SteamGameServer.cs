@@ -52,7 +52,7 @@ namespace SKYNET.Steamworks.Implementation
             ServerData.AppId = nGameAppId;
             ServerData.VersionString = pchVersionString;
 
-            var lobby = SteamMatchmaking.Instance.GetLobbyByOwner((ulong)SteamEmulator.SteamID);
+            var lobby = LobbyManager.GetLobbyByOwner((ulong)SteamEmulator.SteamID);
             if (lobby != null)
             {
                 lobby.Gameserver.IP = IP;

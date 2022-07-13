@@ -7,6 +7,7 @@ using SKYNET.Network;
 using SKYNET.Network.Packets;
 using SKYNET.Types;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 
@@ -38,7 +39,7 @@ namespace SKYNET.Managers
 
         private static void OnMessageReceived(object sender, ConnectionMessageEventArgs<IPCMessage> e)
         {
-            //Write($"Received IPC message {(IPCMessageType)e.Message.MessageType}");
+            Write($"Received IPC message {(IPCMessageType)e.Message.MessageType}, JobID = {e.Message.JobID}");
 
             switch ((IPCMessageType)e.Message.MessageType)
             {
@@ -48,9 +49,6 @@ namespace SKYNET.Managers
                 case IPCMessageType.IPC_AvatarRequest:
                     Process_AvatarRequest(e.Connection, e.Message);
                     break;
-                case IPCMessageType.IPC_AvatarResponse:
-                    // TODO: Only receive in game IPC client
-                    break;
                 case IPCMessageType.IPC_UserDataUpdated:
                     Process_UserDataUpdated(e.Message);
                     break;
@@ -59,9 +57,6 @@ namespace SKYNET.Managers
                     break;
                 case IPCMessageType.IPC_LobbyListRequest:
                     Process_LobbyListRequest(e.Message);
-                    break;
-                case IPCMessageType.IPC_LobbyListResponse:
-                    // TODO: Only receive in game IPC client
                     break;
                 case IPCMessageType.IPC_LobbyJoinRequest:
                     Process_LobbyJoinRequest(e.Message);
@@ -85,6 +80,9 @@ namespace SKYNET.Managers
                     break;
                 case IPCMessageType.IPC_LobbyGameserver:
                     Process_LobbyGameserver(e.Message);
+                    break;
+                case IPCMessageType.IPC_LobbyRequest:
+                    Process_LobbyRequest(e.Message);
                     break;
                 case IPCMessageType.IPC_GCMessageRequest:
                     break;
@@ -111,9 +109,120 @@ namespace SKYNET.Managers
                 case IPCMessageType.IPC_GetFriendsRequest:
                     Process_GetFriendsRequest(e.Message);
                     break;
+                case IPCMessageType.IPC_ClearRichPresence:
+                    Process_ClearRichPresence(e.Message);
+                    break;
+                case IPCMessageType.IPC_SetRichPresence:
+                    Process_SetRichPresence(e.Message);
+                    break;
+                case IPCMessageType.IPC_LobbyByIndexRequest:
+                    Process_LobbyByIndexRequest(e.Message);
+                    break;
+                case IPCMessageType.IPC_LobbyCountRequest:
+                    Process_LobbyCountRequest(e.Message);
+                    break;
+                case IPCMessageType.IPC_LobbySetData:
+                    Process_LobbySetData(e.Message);
+                    break;
+                case IPCMessageType.IPC_UsersRequest:
+                    Process_UsersRequest(e.Message);
+                    break;
+                case IPCMessageType.IPC_LobbiesRequest:
+                    Process_LobbiesRequest(e.Message);
+                    break;
                 default:
+                    Write($"Not implemented Handle for message {(IPCMessageType)e.Message.MessageType}");
                     break;
             }
+        }
+
+        private static void Process_UsersRequest(IPCMessage message)
+        {
+            var UsersResponse = new IPC_UsersResponse()
+            {
+                Users = UserManager.Users
+            };
+            var welcome = CreateIPCMessage(UsersResponse, IPCMessageType.IPC_UsersResponse);
+            SendIPCMessage(welcome);
+        }
+
+        private static void Process_LobbiesRequest(IPCMessage message)
+        {
+            var LobbiesResquest = message.ParsedBody.Deserialize<IPC_LobbiesRequest>();
+            if (LobbiesResquest == null) return;
+            var LobbiesResponse = new IPC_LobbiesResponse()
+            {
+                Lobbies = LobbyManager.GetLobbies(LobbiesResquest.AppID)
+            };
+            var welcome = CreateIPCMessage(LobbiesResponse, IPCMessageType.IPC_LobbiesResponse);
+            SendIPCMessage(welcome);
+        }
+
+        private static void Process_LobbySetData(IPCMessage message)
+        {
+            var LobbySetData = message.ParsedBody.Deserialize<IPC_LobbySetData>();
+            LobbyManager.SetLobbyData(LobbySetData.SteamID, LobbySetData.Key, LobbySetData.Value);
+        }
+
+        private static void Process_LobbyCountRequest(IPCMessage message)
+        {
+            var LobbyCountRequest = message.ParsedBody.Deserialize<IPC_LobbyCountRequest>();
+            var LobbyCountResponse = new IPC_LobbyCountResponse();
+            if (LobbyCountRequest != null)
+            {
+                var lobbies = LobbyManager.GetLobbies(LobbyCountRequest.AppID);
+                LobbyCountResponse.Count = (uint)lobbies.Count;
+            }
+            var welcome = CreateIPCMessage(LobbyCountResponse, IPCMessageType.IPC_LobbyCountResponse, message.JobID);
+            SendIPCMessage(welcome);
+        }
+
+        private static void Process_LobbyRequest(IPCMessage message)
+        {
+            var LobbyRequest = message.ParsedBody.Deserialize<IPC_LobbyRequest>();
+            var LobbyResponse = new IPC_LobbyResponse();
+            if (LobbyRequest != null)
+            {
+                if (LobbyRequest.ByOwner)
+                {
+                    LobbyResponse.Lobby = LobbyManager.GetLobbyByOwner(LobbyRequest.SteamID); 
+                }
+                else
+                {
+                    LobbyResponse.Lobby = LobbyManager.GetLobby(LobbyRequest.SteamID);
+                }
+            }
+            var welcome = CreateIPCMessage(LobbyResponse, IPCMessageType.IPC_LobbyResponse, message.JobID);
+            SendIPCMessage(welcome);
+        }
+
+        private static void Process_LobbyByIndexRequest(IPCMessage message)
+        {
+            var ByIndexRequest = message.ParsedBody.Deserialize<IPC_LobbyByIndexRequest>();
+            var ByIndexResponse = new IPC_LobbyResponse();
+            if (ByIndexRequest != null)
+            {
+                var Lobby = LobbyManager.GetLobbyByIndex(ByIndexRequest.AppID, ByIndexRequest.Index);
+                if (Lobby != null)
+                {
+                    ByIndexResponse.Lobby = Lobby;
+                }
+            }
+            var welcome = CreateIPCMessage(ByIndexResponse, IPCMessageType.IPC_LobbyByIndexResponse, message.JobID);
+            SendIPCMessage(welcome);
+        }
+
+        private static void Process_SetRichPresence(IPCMessage message)
+        {
+            var SetRichPresence = message.ParsedBody.Deserialize<IPC_SetRichPresence>();
+            if (SetRichPresence == null) return;
+            UserManager.SetRichPresence((ulong)SteamClient.SteamID, SetRichPresence.Key, SetRichPresence.Value);
+        }
+
+        private static void Process_ClearRichPresence(IPCMessage message)
+        {
+            var user = UserManager.GetUser(SteamClient.SteamID);
+            user.RichPresence.Clear();
         }
 
         private static void Process_GetFriendsRequest(IPCMessage message)
@@ -212,6 +321,9 @@ namespace SKYNET.Managers
             }
             var welcome = CreateIPCMessage(ClientWelcome, IPCMessageType.IPC_ClientWelcome, message.JobID);
             connection.WriteAsync(welcome);
+
+            SendUpdatedUsers();
+            SendUpdatedLobbies(Game.AppID);
 
             // TODO: Send user avatar
             var hexAvatar = ImageHelper.GetImageBase64(SteamClient.Avatar);
@@ -589,6 +701,27 @@ namespace SKYNET.Managers
             var message = CreateIPCMessage(ModifyFileLog, IPCMessageType.IPC_ModifyFileLog);
             SendIPCMessage(message);
         }
+
+        public static void SendUpdatedUsers()
+        {
+            var UsersResponse = new IPC_UsersResponse()
+            {
+                Users = UserManager.Users
+            };
+            var welcome = CreateIPCMessage(UsersResponse, IPCMessageType.IPC_UsersResponse);
+            SendIPCMessage(welcome);
+        }
+
+        public static void SendUpdatedLobbies(uint AppID = 0)
+        {
+            var LobbiesResponse = new IPC_LobbiesResponse()
+            {
+                Lobbies = AppID == 0 ? LobbyManager.Lobbies : LobbyManager.GetLobbies(AppID)
+            };
+            var welcome = CreateIPCMessage(LobbiesResponse, IPCMessageType.IPC_LobbiesResponse);
+            SendIPCMessage(welcome);
+        }
+
 
         private static void Write(object msg)
         {
