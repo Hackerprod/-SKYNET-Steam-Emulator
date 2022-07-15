@@ -456,7 +456,7 @@ namespace SKYNET.GUI
                     }
                     else
                     {
-                        if (Game.Name.ToLower().Contains(word.ToLower()))
+                        if (Game.Game.Name.ToLower().Contains(word.ToLower()))
                         {
                             Game.Visible = true;
                         }

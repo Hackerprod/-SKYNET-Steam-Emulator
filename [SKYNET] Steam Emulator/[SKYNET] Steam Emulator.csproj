@@ -341,6 +341,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="game.ico" />
+    <None Include="Resources\EditProfile.png" />
     <None Include="Resources\DefaultImage.jpg" />
     <None Include="Resources\profile_picture.png" />
     <None Include="Resources\male_user_100px.png" />
