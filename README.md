@@ -5,12 +5,14 @@ This project is created with the aim of replacing the original `steam_api.dll` f
 This is not a steamworks wrapper like `Steamworks.Net` or `Facepunch`.
 The project is in an initial stage, so it is not functional yet for some Games.
 
+</br>
 <p align="center">
     <img src="https://img.shields.io/github/contributors/Hackerprod/-SKYNET-Steam-Emulator?style=for-the-badge" />
     <img src="https://img.shields.io/github/forks/Hackerprod/-SKYNET-Steam-Emulator?style=for-the-badge" alt="Project forks">
     <img src="https://img.shields.io/github/stars/Hackerprod/-SKYNET-Steam-Emulator?label=Project%20Stars%21%21%21&style=for-the-badge" alt="Project stars">
     <img src="https://img.shields.io/github/issues/Hackerprod/-SKYNET-Steam-Emulator?style=for-the-badge" alt="Project issues">
 </p>
+</br>
 
 ![Screenshot](Capture.png)
 
@@ -19,17 +21,21 @@ The project is in an initial stage, so it is not functional yet for some Games.
 When compiling the project, two folders are generated (x64 and x86) that contain the dll for different target platform, in the case of x64 you must rename the file to steam_api64.dll, to emulate the connection to Steam of a game you must replace the dll with the one that contains the game. In case the game engine is Unity you can rename the dll to CSteamworks.dll and replace it.
 
 ### Client Emulator
-To use the client you simply need to add the game and configure the appid and path of the original steam_api. The client is currently under development so it is not functional yet.
+To use the client you simply need to add the game and configure the appid. The client is currently under development.
 
 ## 📁 Directory structure
 ```
-📁 Root game folder                     
-└──📁 SKYNET
-   ├──📁 AvatarCache                  // Contains avatars cache
+📁 Root client folder                     
+├──📁 x64                             // The x64 version of the SteamAPI dll that will be injected
+├──📁 x86                             // The x64 version of the SteamAPI dll that will be injected
+└──📁 Data
+   ├──📁 Assemblies                   // Contains client libraries (Including cefsharp api or gecko) 
+   ├──📁 Images                       // Contains app cache and avatar images 
+   ├──📁 Injector                     // Contains the DLL injectors
+   ├──📁 www                          // Contains the web files
    ├──📁 Storage                      // Contains stats and achievements files
    |  └──📁 Remote                    // Contains game files
-   ├──📄 [SKYNET] steam_api.ini       
-   └──📑 [SKYNET] steam_api.log       // If option is enabled
+   └──📑 Games.bin                    // Stored game list         
 ```
 
 ## 🔗 Features
@@ -52,7 +58,7 @@ Callback system implementation.<br />
 SteamInternal_ContextInit in x86 Games
 
 ## 📝 Log
-When File log option si enabled in settings, a log file will be created inside SKYNET folder with the following name `[SKYNET] steam_api.log`
+When File log option si enabled in settings, a log file will be created inside "root game folder/SKYNET" folder with the following name `[SKYNET] steam_api.log`
 
 ## 🔌 Plugin system
 The plugin system is developed in order to establish a communication between the game and the game coordinator, the following example shows a basic plugin. <br /><br />
