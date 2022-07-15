@@ -105,8 +105,10 @@ namespace SKYNET.Wave
             // We must delegate reference, otherwise GC will collect it.
             m_pWaveInProc = new waveInProc(this.OnWaveInProc);
             int result = WavMethods.waveInOpen(out m_pWavDevHandle,m_pInDevice.Index,format,m_pWaveInProc,0,WavConstants.CALLBACK_FUNCTION);
-            if(result != MMSYSERR.NOERROR){
-                throw new Exception("Failed to open wav device, error: " + result.ToString() + ".");
+
+            if (result != (int)MMSYSERR.NOERROR)
+            {
+                SteamEmulator.Write("AudioManager", $"Failed to open wav device, error: {(MMSYSERR)result}");
             }
 
             EnsureBuffers();
@@ -155,8 +157,8 @@ namespace SKYNET.Wave
             m_IsRecording = true;
 
             int result = WavMethods.waveInStart(m_pWavDevHandle);
-            if(result != MMSYSERR.NOERROR){
-                throw new Exception("Failed to start wav device, error: " + result + ".");
+            if(result != (int)MMSYSERR.NOERROR){
+                SteamEmulator.Write("AudioManager", $"Failed to start wav device, error: {(MMSYSERR)result}");
             }
         }
 
@@ -168,8 +170,8 @@ namespace SKYNET.Wave
             m_IsRecording = false;
             
             int result = WavMethods.waveInStop(m_pWavDevHandle);
-            if(result != MMSYSERR.NOERROR){
-                throw new Exception("Failed to stop wav device, error: " + result + ".");
+            if(result != (int)MMSYSERR.NOERROR){
+                SteamEmulator.Write("AudioManager", $"Failed to stop wav device, error: {(MMSYSERR)result}");
             }
         }
 
@@ -227,12 +229,12 @@ namespace SKYNET.Wave
                     GCHandle headerHandle = GCHandle.Alloc(wavHeader,GCHandleType.Pinned);
                     int result = 0;        
                     result = WavMethods.waveInPrepareHeader(m_pWavDevHandle,headerHandle.AddrOfPinnedObject(),Marshal.SizeOf(wavHeader));
-                    if(result == MMSYSERR.NOERROR){
+                    if(result == (int)MMSYSERR.NOERROR){
                         m_pBuffers.Add(new BufferItem(ref headerHandle,ref dataHandle,m_BufferSize));
 
                         result = WavMethods.waveInAddBuffer(m_pWavDevHandle,headerHandle.AddrOfPinnedObject(),Marshal.SizeOf(wavHeader));
-                        if(result != MMSYSERR.NOERROR){
-                            throw new Exception("Error adding wave in buffer, error: " + result + ".");
+                        if(result != (int)MMSYSERR.NOERROR){
+                            SteamEmulator.Write("AudioManager", $"Error adding wave in buffer, error: {(MMSYSERR)result}");
                         }
                     }
                 }
@@ -247,7 +249,7 @@ namespace SKYNET.Wave
                 int devicesCount = WavMethods.waveInGetNumDevs();
                 for(int i=0;i<devicesCount;i++){
                     WAVEOUTCAPS pwoc = new WAVEOUTCAPS();
-                    if(WavMethods.waveInGetDevCaps((uint)i,ref pwoc,Marshal.SizeOf(pwoc)) == MMSYSERR.NOERROR){
+                    if(WavMethods.waveInGetDevCaps((uint)i,ref pwoc,Marshal.SizeOf(pwoc)) == (int)MMSYSERR.NOERROR){
                         retVal.Add(new WavInDevice(i,pwoc.szPname,pwoc.wChannels));
                     }
                 }

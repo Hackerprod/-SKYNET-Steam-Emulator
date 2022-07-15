@@ -88,12 +88,7 @@
     <Compile Include="Helpers\JSON\JSONParser.cs" />
     <Compile Include="Helpers\JSON\SimpleJSONDotNetTypes.cs" />
     <Compile Include="Helpers\Platform.cs" />
-    <Compile Include="Helpers\Wave\native\MMSYSERR.cs" />
-    <Compile Include="Helpers\Wave\native\WavConstants.cs" />
-    <Compile Include="Helpers\Wave\native\WAVEFORMATEX.cs" />
-    <Compile Include="Helpers\Wave\native\WAVEHDR.cs" />
-    <Compile Include="Helpers\Wave\native\WAVEOUTCAPS.cs" />
-    <Compile Include="Helpers\Wave\native\WavMethods.cs" />
+    <Compile Include="Helpers\Wave\WavNative.cs" />
     <Compile Include="Helpers\Wave\WaveIn.cs" />
     <Compile Include="Helpers\Wave\WavInDevice.cs" />
     <Compile Include="Managers\AudioManager.cs" />

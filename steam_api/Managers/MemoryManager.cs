@@ -5,20 +5,18 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SKYNET.Managers
 {
     public class MemoryManager
     {
-        public static List<System.Delegate> StoredDelegates;
+        public static List<Delegate> StoredDelegates;
 
         public static string ErrorMessage;
 
         static MemoryManager()
         {
-            StoredDelegates = new List<System.Delegate>();
+            StoredDelegates = new List<Delegate>();
         }
 
         public static T CreateInterface<T>(out IntPtr MemoryAddress)

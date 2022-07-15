@@ -26,6 +26,12 @@ public class SteamEmulator
 {
     public static SteamEmulator Instance;
 
+#if !WIN64
+    static ulong AsyncDelegate = 16;
+#else
+    static ulong AsyncDelegate = 8;
+#endif
+
     #region Client Info
 
     public static string Language;
@@ -119,6 +125,8 @@ public class SteamEmulator
     {
         try
         {
+            modCommon.Show(AsyncDelegate);
+
             Log.Clean();
             Write("Initializing Steam Emulator");
 
