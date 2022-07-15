@@ -151,26 +151,26 @@ namespace SKYNET.Managers
             var AuthResponse = new WEB_AuthResponse();
             if (AuthRequest == null)
             {
-                AuthResponse.Response = WEB_AuthResponseType.UnknownError;
+                AuthResponse.Response = WEB_AuthResponse.AuthResponseType.UnknownError;
                 Send(AuthResponse, WEBMessageType.WEB_AuthResponse);
             }
             else
             {
-                Write($"Requesting Auth for {AuthRequest.Username} = {AuthRequest.Password}, [hackerprod:123]");
-
                 //if (AuthRequest.Username.ToLower() != "hackerprod")
                 //{
+                //    Write($"Account {loginRequest.AccountName} not found");
                 //    AuthResponse.Response = WEB_AuthResponseType.AccountNotFound;
                 //    Send(AuthResponse, WEB_MessageType.WEB_AuthResponse);
                 //}
                 //else if (AuthRequest.Password != "123")
                 //{
+                //    Write($"Invalid authentication from account {loginRequest.AccountName}");
                 //    AuthResponse.Response = WEB_AuthResponseType.PasswordWrong;
                 //    Send(AuthResponse, WEB_MessageType.WEB_AuthResponse);
                 //}
                 //else
                 {
-                    AuthResponse.Response = WEB_AuthResponseType.Success;
+                    AuthResponse.Response = WEB_AuthResponse.AuthResponseType.Success;
 
                     string hexAvatar = "";
                     if (SteamClient.Avatar != null)
@@ -185,6 +185,7 @@ namespace SKYNET.Managers
                         Language = SteamClient.Language,
                         AvatarHex = hexAvatar
                     };
+                    Write($"User {AuthRequest.Username} successfully authenticated");
                     Send(AuthResponse, WEBMessageType.WEB_AuthResponse);
 
                     var GameListResponse = new WEB_GameListResponse()
@@ -207,8 +208,39 @@ namespace SKYNET.Managers
 
         private static void ProcessUserInfoRequest(WEBMessage e)
         {
-            // TODO?
-            //var UserInfoRequest = e.Deserialize<WEB_UserInfoRequest>();
+            var InfoRequest = e.Deserialize<WEB_UserInfoRequest>();
+
+            WEB_UserInfoResponse InfoResponse = new WEB_UserInfoResponse();
+
+            if (InfoRequest == null)
+            {
+                InfoResponse.Response = WEB_UserInfoResponse.UserInfoResponseType.UnknownError;
+                Send(InfoResponse, WEBMessageType.WEB_UserInfoResponse);
+                return;
+            }
+
+            var User = UserManager.GetUser(InfoRequest.AccountID);
+            if (User == null)
+            {
+                InfoResponse.Response = WEB_UserInfoResponse.UserInfoResponseType.AccountNotFound;
+                Send(InfoResponse, WEBMessageType.WEB_UserInfoResponse);
+                return;
+            }
+
+            var AvatarHex = "";
+            if (UserManager.GetAvatar(User.AccountID, out var bitmap))
+            {
+                AvatarHex = ImageHelper.GetImageBase64(bitmap);
+            }
+
+            InfoResponse.Response = WEB_UserInfoResponse.UserInfoResponseType.Success;
+            InfoResponse.Info = new UserInfo()
+            {
+                AccountID = User.AccountID,
+                PersonaName = User.PersonaName,
+                AvatarHex = AvatarHex
+            };
+            Send(InfoResponse, WEBMessageType.WEB_UserInfoResponse);
         }
 
         private static void ProcessGameInfoRequest(WEBMessage e)
@@ -355,11 +387,11 @@ namespace SKYNET.Managers
 
         public static void SendGameClosed(string gameClientID)
         {
-            var GameStoped = new WEB_GameStoped()
+            var GameStoped = new WEB_GameStopped()
             {
                 Guid = gameClientID
             };
-            Send(GameStoped, WEBMessageType.WEB_GameStoped);
+            Send(GameStoped, WEBMessageType.WEB_GameStopped);
         }
 
         public static void Send(WEB_Base msgBase, WEBMessageType Type)

@@ -119,8 +119,6 @@ public class SteamEmulator
     {
         try
         {
-            modCommon.Show(Platform.StructPlatformPackSize);
-
             Log.Clean();
             Write("Initializing Steam Emulator");
 

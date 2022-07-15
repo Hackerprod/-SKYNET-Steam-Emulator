@@ -41,10 +41,9 @@ namespace SKYNET.WEB.Types
         WEB_GameOrderUpdated,
         WEB_GameLaunch,
         WEB_GameLaunched,
-        WEB_GameStoped,
+        WEB_GameStopped,
         WEB_GameInfoRequest,
         WEB_GameInfoResponse,
-        WEB_GameInfoMinimalResponse,
         WEB_GameOpenContainerFolder,
         WEB_GameOpenWithoutEmulation,
         WEB_GameDownloadCache,
@@ -158,7 +157,7 @@ namespace SKYNET.WEB.Types
         public string Guid { get; set; }
     }
 
-    public class WEB_GameStoped : WEB_Base
+    public class WEB_GameStopped : WEB_Base
     {
         public string Guid { get; set; }
     }
@@ -171,8 +170,34 @@ namespace SKYNET.WEB.Types
 
     public class WEB_AuthResponse : WEB_Base
     {
-        public WEB_AuthResponseType Response { get; set; }
+        public AuthResponseType Response { get; set; }
         public UserInfo UserInfo { get; set; }
+
+        public enum AuthResponseType : int
+        {
+            UnknownError = 0,
+            Success = 1,
+            AccountNotFound = 2,
+            PasswordWrong = 3,
+        }
+    }
+
+    public class WEB_UserInfoRequest : WEB_Base
+    {
+        public uint AccountID { get; set; }
+    }
+
+    public class WEB_UserInfoResponse : WEB_Base
+    {
+        public UserInfoResponseType Response { get; set; }
+        public UserInfo Info { get; set; }
+
+        public enum UserInfoResponseType
+        {
+            UnknownError = 0,
+            Success = 1,
+            AccountNotFound = 2,
+        }
     }
 
     public class WEB_GameListRequest : WEB_Base
@@ -232,18 +257,9 @@ namespace SKYNET.WEB.Types
         public string Info { get; set; }
     }
 
-    public enum WEB_AuthResponseType : int
-    {
-        UnknownError    = 0,
-        Success         = 1,
-        AccountNotFound = 2,
-        PasswordWrong   = 3,
-    }
-
     public class UserInfo
     {
         public uint AccountID { get; set; }
-        public ulong SteamID { get; set; }
         public string PersonaName { get; set; }
         public string Language { get; set; }
         public string AvatarHex { get; set; }
