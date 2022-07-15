@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace SKYNET
+namespace SKYNET.Types
 {
     public class Game 
     {

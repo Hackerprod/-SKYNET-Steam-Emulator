@@ -253,6 +253,7 @@
     <Compile Include="Steamworks\Types\SteamTypes.cs" />
     <Compile Include="Types\Achievement.cs" />
     <Compile Include="Types\AppDetails.cs" />
+    <Compile Include="Types\DLC.cs" />
     <Compile Include="Types\GameMessage.cs" />
     <Compile Include="Types\Leaderboard.cs" />
     <Compile Include="Types\OverlayType.cs" />

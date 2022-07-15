@@ -10,7 +10,7 @@ using System.Threading;
 using System.Runtime.InteropServices;
 using SKYNET.Types;
 
-namespace SKYNET.Controls
+namespace SKYNET.GUI.Controls
 {
     [ComVisible(true)]
     public partial class SKYNET_WebLogger : UserControl

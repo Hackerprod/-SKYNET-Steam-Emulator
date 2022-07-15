@@ -51,6 +51,7 @@ namespace SKYNET.IPC.Types
         IPC_LobbyCountRequest,
         IPC_LobbyCountResponse,
         IPC_LobbySetData,
+        IPC_LobbyGameServerEndPoint,
 
         // User stats
         IPC_Leaderboards,
@@ -103,6 +104,7 @@ namespace SKYNET.IPC.Types
         public bool ISteamHTTP { get; set; }
         public string RemoteStoragePath { get; set; }
         public uint AppID { get; set; }
+        public List<Game.DLC> DLCs { get; set; }
     }
 
     public class IPC_LobbyCreate : IPC_MessageBase
@@ -356,4 +358,12 @@ namespace SKYNET.IPC.Types
     {
         public List<SteamLobby> Lobbies { get; set; }
     }
+
+    public class IPC_LobbyGameServerEndPoint : IPC_MessageBase
+    {
+        public ulong LobbySteamID { get; set; }
+        public uint IP { get; set; }
+        public uint Port { get; set; }
+    }
+
 }

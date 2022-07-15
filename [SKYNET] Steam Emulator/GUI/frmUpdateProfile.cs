@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Timers;
-using SKYNET.GUI;
 using SKYNET.Client;
 
-namespace SKYNET
+namespace SKYNET.GUI
 {
     public partial class frmUpdateProfile : frmBase
     {

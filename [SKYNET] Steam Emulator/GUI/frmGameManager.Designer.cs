@@ -1,6 +1,7 @@
-﻿using System.Windows.Forms;
+﻿using SKYNET.GUI.Controls;
+using System.Windows.Forms;
 
-namespace SKYNET
+namespace SKYNET.GUI
 {
     partial class frmGameManager
     {
@@ -31,38 +32,38 @@ namespace SKYNET
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmGameManager));
-            this.PN_Top = new System.Windows.Forms.Panel();
-            this.BT_Close = new SKYNET.Controls.SKYNET_CloseBox();
-            this.panel3 = new System.Windows.Forms.Panel();
+            this.PN_Top = new Panel();
+            this.BT_Close = new SKYNET_CloseBox();
+            this.panel3 = new Panel();
             this.BT_Cancel = new SKYNET_Button();
             this.BT_AddGame = new SKYNET_Button();
-            this.PN_LeftContainer = new System.Windows.Forms.Panel();
-            this.PN_BodyContainer = new System.Windows.Forms.Panel();
-            this.label4 = new System.Windows.Forms.Label();
-            this.CH_CSteamworks = new SKYNET.Controls.SKYNET_Check();
-            this.CH_GameOverlay = new SKYNET.Controls.SKYNET_Check();
-            this.label11 = new System.Windows.Forms.Label();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.CH_ISteamHTTP = new SKYNET.Controls.SKYNET_Check();
-            this.label9 = new System.Windows.Forms.Label();
-            this.CH_RunCallbacks = new SKYNET.Controls.SKYNET_Check();
-            this.label10 = new System.Windows.Forms.Label();
-            this.CH_LogToConsole = new SKYNET.Controls.SKYNET_Check();
-            this.label8 = new System.Windows.Forms.Label();
-            this.CH_LogToFile = new SKYNET.Controls.SKYNET_Check();
-            this.label7 = new System.Windows.Forms.Label();
-            this.CH_WithoutEmu = new SKYNET.Controls.SKYNET_Check();
-            this.label6 = new System.Windows.Forms.Label();
-            this.LB_Name = new System.Windows.Forms.Label();
-            this.PB_Avatar = new System.Windows.Forms.PictureBox();
-            this.TB_AppId = new SKYNET.Controls.SKYNET_TextBox();
-            this.label5 = new System.Windows.Forms.Label();
-            this.TB_Parameters = new SKYNET.Controls.SKYNET_TextBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.TB_ExecutablePath = new SKYNET.Controls.SKYNET_TextBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.TB_Name = new SKYNET.Controls.SKYNET_TextBox();
-            this.label1 = new System.Windows.Forms.Label();
+            this.PN_LeftContainer = new Panel();
+            this.PN_BodyContainer = new Panel();
+            this.label4 = new Label();
+            this.CH_CSteamworks = new SKYNET_Check();
+            this.CH_GameOverlay = new SKYNET_Check();
+            this.label11 = new Label();
+            this.panel1 = new Panel();
+            this.CH_ISteamHTTP = new SKYNET_Check();
+            this.label9 = new Label();
+            this.CH_RunCallbacks = new SKYNET_Check();
+            this.label10 = new Label();
+            this.CH_LogToConsole = new SKYNET_Check();
+            this.label8 = new Label();
+            this.CH_LogToFile = new SKYNET_Check();
+            this.label7 = new Label();
+            this.CH_WithoutEmu = new SKYNET_Check();
+            this.label6 = new Label();
+            this.LB_Name = new Label();
+            this.PB_Avatar = new PictureBox();
+            this.TB_AppId = new SKYNET_TextBox();
+            this.label5 = new Label();
+            this.TB_Parameters = new SKYNET_TextBox();
+            this.label3 = new Label();
+            this.TB_ExecutablePath = new SKYNET_TextBox();
+            this.label2 = new Label();
+            this.TB_Name = new SKYNET_TextBox();
+            this.label1 = new Label();
             this.PN_Top.SuspendLayout();
             this.panel3.SuspendLayout();
             this.PN_BodyContainer.SuspendLayout();
@@ -73,7 +74,7 @@ namespace SKYNET
             // 
             this.PN_Top.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
             this.PN_Top.Controls.Add(this.BT_Close);
-            this.PN_Top.Dock = System.Windows.Forms.DockStyle.Top;
+            this.PN_Top.Dock = DockStyle.Top;
             this.PN_Top.Location = new System.Drawing.Point(0, 0);
             this.PN_Top.Name = "PN_Top";
             this.PN_Top.Size = new System.Drawing.Size(741, 26);
@@ -83,7 +84,7 @@ namespace SKYNET
             // 
             this.BT_Close.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
             this.BT_Close.Color = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
-            this.BT_Close.Dock = System.Windows.Forms.DockStyle.Right;
+            this.BT_Close.Dock = DockStyle.Right;
             this.BT_Close.FocusedColor = System.Drawing.Color.FromArgb(((int)(((byte)(53)))), ((int)(((byte)(64)))), ((int)(((byte)(78)))));
             this.BT_Close.Location = new System.Drawing.Point(707, 0);
             this.BT_Close.MaximumSize = new System.Drawing.Size(34, 26);
@@ -98,7 +99,7 @@ namespace SKYNET
             this.panel3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
             this.panel3.Controls.Add(this.BT_Cancel);
             this.panel3.Controls.Add(this.BT_AddGame);
-            this.panel3.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panel3.Dock = DockStyle.Bottom;
             this.panel3.Location = new System.Drawing.Point(0, 519);
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(741, 76);
@@ -108,7 +109,7 @@ namespace SKYNET
             // 
             this.BT_Cancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(46)))), ((int)(((byte)(88)))));
             this.BT_Cancel.BackColorMouseOver = System.Drawing.Color.Empty;
-            this.BT_Cancel.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.BT_Cancel.Cursor = Cursors.Hand;
             this.BT_Cancel.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.BT_Cancel.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
             this.BT_Cancel.ForeColorMouseOver = System.Drawing.Color.Empty;
@@ -128,7 +129,7 @@ namespace SKYNET
             // 
             this.BT_AddGame.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(34)))), ((int)(((byte)(131)))), ((int)(((byte)(246)))));
             this.BT_AddGame.BackColorMouseOver = System.Drawing.Color.Empty;
-            this.BT_AddGame.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.BT_AddGame.Cursor = Cursors.Hand;
             this.BT_AddGame.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.BT_AddGame.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
             this.BT_AddGame.ForeColorMouseOver = System.Drawing.Color.Empty;
@@ -147,7 +148,7 @@ namespace SKYNET
             // PN_LeftContainer
             // 
             this.PN_LeftContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(42)))), ((int)(((byte)(46)))), ((int)(((byte)(51)))));
-            this.PN_LeftContainer.Dock = System.Windows.Forms.DockStyle.Left;
+            this.PN_LeftContainer.Dock = DockStyle.Left;
             this.PN_LeftContainer.Location = new System.Drawing.Point(0, 0);
             this.PN_LeftContainer.Name = "PN_LeftContainer";
             this.PN_LeftContainer.Size = new System.Drawing.Size(0, 595);
@@ -181,7 +182,7 @@ namespace SKYNET
             this.PN_BodyContainer.Controls.Add(this.label2);
             this.PN_BodyContainer.Controls.Add(this.TB_Name);
             this.PN_BodyContainer.Controls.Add(this.label1);
-            this.PN_BodyContainer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.PN_BodyContainer.Dock = DockStyle.Fill;
             this.PN_BodyContainer.Location = new System.Drawing.Point(0, 26);
             this.PN_BodyContainer.Name = "PN_BodyContainer";
             this.PN_BodyContainer.Size = new System.Drawing.Size(741, 493);
@@ -348,11 +349,11 @@ namespace SKYNET
             // 
             // PB_Avatar
             // 
-            this.PB_Avatar.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.PB_Avatar.Cursor = Cursors.Hand;
             this.PB_Avatar.Location = new System.Drawing.Point(66, 15);
             this.PB_Avatar.Name = "PB_Avatar";
             this.PB_Avatar.Size = new System.Drawing.Size(65, 65);
-            this.PB_Avatar.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.PB_Avatar.SizeMode = PictureBoxSizeMode.Zoom;
             this.PB_Avatar.TabIndex = 11;
             this.PB_Avatar.TabStop = false;
             this.PB_Avatar.Click += new System.EventHandler(this.PB_Avatar_Click);
@@ -366,13 +367,13 @@ namespace SKYNET
             this.TB_AppId.IsPassword = false;
             this.TB_AppId.Location = new System.Drawing.Point(66, 319);
             this.TB_AppId.Logo = null;
-            this.TB_AppId.LogoCursor = System.Windows.Forms.Cursors.Default;
+            this.TB_AppId.LogoCursor = Cursors.Default;
             this.TB_AppId.Name = "TB_AppId";
             this.TB_AppId.OnlyNumbers = false;
             this.TB_AppId.ShowLogo = false;
             this.TB_AppId.Size = new System.Drawing.Size(608, 35);
             this.TB_AppId.TabIndex = 10;
-            this.TB_AppId.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
+            this.TB_AppId.TextAlign = HorizontalAlignment.Left;
             // 
             // label5
             // 
@@ -394,13 +395,13 @@ namespace SKYNET
             this.TB_Parameters.IsPassword = false;
             this.TB_Parameters.Location = new System.Drawing.Point(66, 252);
             this.TB_Parameters.Logo = null;
-            this.TB_Parameters.LogoCursor = System.Windows.Forms.Cursors.Default;
+            this.TB_Parameters.LogoCursor = Cursors.Default;
             this.TB_Parameters.Name = "TB_Parameters";
             this.TB_Parameters.OnlyNumbers = false;
             this.TB_Parameters.ShowLogo = false;
             this.TB_Parameters.Size = new System.Drawing.Size(608, 35);
             this.TB_Parameters.TabIndex = 8;
-            this.TB_Parameters.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
+            this.TB_Parameters.TextAlign = HorizontalAlignment.Left;
             // 
             // label3
             // 
@@ -422,13 +423,13 @@ namespace SKYNET
             this.TB_ExecutablePath.IsPassword = false;
             this.TB_ExecutablePath.Location = new System.Drawing.Point(66, 185);
             this.TB_ExecutablePath.Logo = null;
-            this.TB_ExecutablePath.LogoCursor = System.Windows.Forms.Cursors.Default;
+            this.TB_ExecutablePath.LogoCursor = Cursors.Default;
             this.TB_ExecutablePath.Name = "TB_ExecutablePath";
             this.TB_ExecutablePath.OnlyNumbers = false;
             this.TB_ExecutablePath.ShowLogo = false;
             this.TB_ExecutablePath.Size = new System.Drawing.Size(608, 35);
             this.TB_ExecutablePath.TabIndex = 4;
-            this.TB_ExecutablePath.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
+            this.TB_ExecutablePath.TextAlign = HorizontalAlignment.Left;
             // 
             // label2
             // 
@@ -450,14 +451,14 @@ namespace SKYNET
             this.TB_Name.IsPassword = false;
             this.TB_Name.Location = new System.Drawing.Point(66, 119);
             this.TB_Name.Logo = null;
-            this.TB_Name.LogoCursor = System.Windows.Forms.Cursors.Default;
+            this.TB_Name.LogoCursor = Cursors.Default;
             this.TB_Name.Name = "TB_Name";
             this.TB_Name.OnlyNumbers = false;
             this.TB_Name.ShowLogo = false;
             this.TB_Name.Size = new System.Drawing.Size(608, 35);
             this.TB_Name.TabIndex = 2;
-            this.TB_Name.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
-            this.TB_Name.KeyUp += new System.Windows.Forms.KeyEventHandler(this.TB_Name_KeyUp);
+            this.TB_Name.TextAlign = HorizontalAlignment.Left;
+            this.TB_Name.KeyUp += new KeyEventHandler(this.TB_Name_KeyUp);
             // 
             // label1
             // 
@@ -473,19 +474,19 @@ namespace SKYNET
             // frmGameManager
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(65)))), ((int)(((byte)(73)))));
             this.ClientSize = new System.Drawing.Size(741, 595);
             this.Controls.Add(this.PN_BodyContainer);
             this.Controls.Add(this.panel3);
             this.Controls.Add(this.PN_Top);
             this.Controls.Add(this.PN_LeftContainer);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.FormBorderStyle = FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MaximumSize = new System.Drawing.Size(1366, 728);
             this.Name = "frmGameManager";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.StartPosition = FormStartPosition.CenterScreen;
             this.PN_Top.ResumeLayout(false);
             this.panel3.ResumeLayout(false);
             this.PN_BodyContainer.ResumeLayout(false);
@@ -497,10 +498,10 @@ namespace SKYNET
 
         #endregion
 
-        private System.Windows.Forms.Panel PN_Top;
+        private Panel PN_Top;
         private Controls.SKYNET_CloseBox BT_Close;
-        private System.Windows.Forms.Panel panel3;
-        private System.Windows.Forms.Panel PN_LeftContainer;
+        private Panel panel3;
+        private Panel PN_LeftContainer;
         private Panel PN_BodyContainer;
         private Label label1;
         private Controls.SKYNET_TextBox TB_ExecutablePath;

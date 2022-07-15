@@ -4,7 +4,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 
-namespace SKYNET.Helper
+namespace SKYNET.Helpers
 {
     public class NetworkHelper
     {

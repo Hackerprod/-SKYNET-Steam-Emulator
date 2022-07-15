@@ -7,16 +7,15 @@ using System.Web.Script.Serialization;
 using System.Windows.Forms;
 using SKYNET.Client;
 using SKYNET.Common;
-using SKYNET.GUI;
 using SKYNET.GUI.Controls;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using SKYNET.Managers;
-using SKYNET.Network.Packets;
+using SKYNET.Network.Types;
 using SKYNET.Properties;
 using SKYNET.Steamworks;
 using SKYNET.Types;
 
-namespace SKYNET
+namespace SKYNET.GUI
 {
     public partial class frmMain : frmBase
     {
@@ -63,6 +62,12 @@ namespace SKYNET
             try
             {
                 string AvatarPath = Path.Combine(modCommon.GetPath(), "Data", "Images", "AvatarCache", "Avatar.jpg");
+                if (!File.Exists(AvatarPath))
+                {
+                    var Image = ImageHelper.GetDesktopWallpaper(true);
+                    Image = ImageHelper.Resize(Image, 200, 200);
+                    ImageHelper.ToFile(AvatarPath, Image); 
+                }
                 if (File.Exists(AvatarPath))
                 {
                     var AvatarImage = ImageHelper.FromFile(AvatarPath);
@@ -158,14 +163,14 @@ namespace SKYNET
                 return;
             } 
 
-            Image Avatar = default;
+            Bitmap Avatar = default;
             string personaName = "";
 
             var User = UserManager.GetUser(e.AccountID);
             if (User != null)
             {
                 personaName = User.PersonaName;
-                Avatar = UserManager.GetAvatar(User.SteamID);
+                UserManager.GetAvatar(User.SteamID, out Avatar);
             }
             else
             {
@@ -554,13 +559,16 @@ namespace SKYNET
             {
                 for (int i = 0; i < PN_GameContainer.Controls.Count; i++)
                 {
-                    object control = PN_GameContainer.Controls[i];
-                    if (control is GameBox && ((GameBox)control).Game.Guid == MenuBox.Game.Guid)
+                    try
                     {
-                        Game game = ((GameBox)control).Game;
-                        GameManager.Remove(game.AppID);
-                        PN_GameContainer.Controls.RemoveAt(i);
-                    }
+                        object control = PN_GameContainer.Controls[i];
+                        if (control is GameBox && ((GameBox)control).Game.Guid == MenuBox.Game.Guid)
+                        {
+                            Game game = ((GameBox)control).Game;
+                            GameManager.Remove(game.AppID);
+                            PN_GameContainer.Controls.RemoveAt(i);
+                        }
+                    } catch { }
                 }
             }
         }

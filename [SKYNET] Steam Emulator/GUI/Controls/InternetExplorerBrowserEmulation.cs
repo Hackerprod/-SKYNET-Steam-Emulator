@@ -5,7 +5,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Security;
 
-namespace SKYNET
+namespace SKYNET.GUI
 {
     internal sealed class InternetExplorerBrowserEmulation
     {

@@ -8,8 +8,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using SKYNET.Callback;
-using SKYNET.Helper;
-using SKYNET.Helper.JSON;
+using SKYNET.Helpers;
+using SKYNET.Helpers.JSON;
 using SKYNET.IPC.Types;
 using SKYNET.Managers;
 using SKYNET.Types;
@@ -163,7 +163,7 @@ namespace SKYNET.Steamworks.Implementation
 
                 UpdateLobby(LocalLobby, LocalLobby.SteamID);
 
-                SteamFriends.Instance.UpdateUserLobby((ulong)SteamEmulator.SteamID, LocalLobby.SteamID);
+                IPCManager.SetLobbyData(LocalLobby.SteamID, "publicIP", NetworkHelper.GetIPAddress().ToString()); 
             }
             catch (Exception)
             {
@@ -283,7 +283,7 @@ namespace SKYNET.Steamworks.Implementation
                 var Gameserver = lobby.Gameserver;
                 if (Gameserver.Filled)
                 {
-                    punGameServerIP = (uint)IPAddress.Parse("10.31.0.4").Address; //lobby.Gameserver.IP;
+                    punGameServerIP = lobby.Gameserver.IP; //(uint)IPAddress.Parse("10.31.0.4").Address; //
                     punGameServerPort = lobby.Gameserver.Port;
                     psteamIDGameServer = lobby.Gameserver.SteamID;
                     Result = true;
@@ -480,33 +480,17 @@ namespace SKYNET.Steamworks.Implementation
         public void SetLobbyGameServer(ulong steamIDLobby, uint unGameServerIP, uint unGameServerPort, ulong steamIDGameServer)
         {
             Write($"SetLobbyGameServer (Lobby SteamID = {steamIDLobby}, EndPoint = {unGameServerIP}:{unGameServerPort}, GameServerID = {steamIDGameServer})");
-            if (GetLobby(steamIDLobby, out var lobby))
+
+            IPCManager.SendLobbyGameServer(steamIDLobby, steamIDGameServer, unGameServerIP, unGameServerPort);
+
+            LobbyGameCreated_t data = new LobbyGameCreated_t()
             {
-                Write($"SetLobbyGameServer *** IP = {lobby.Gameserver.IP}, Port = {lobby.Gameserver.Port})");
-
-                uint IP = unGameServerIP != 0 ? unGameServerIP : NetworkHelper.ConvertFromIPAddress(NetworkHelper.GetIPAddress());
-                
-                lobby.Gameserver.SteamID = steamIDGameServer;
-                lobby.Gameserver.IP = IP;
-                lobby.Gameserver.Filled = true;
-
-                if (unGameServerPort != 0)
-                {
-                    lobby.Gameserver.Port = unGameServerPort;
-                }
-
-                LobbyGameCreated_t data = new LobbyGameCreated_t()
-                {
-                    m_ulSteamIDLobby = lobby.Gameserver.SteamID,
-                    m_ulSteamIDGameServer = steamIDGameServer,
-                    m_unIP = lobby.Gameserver.IP,
-                    m_usPort = (ushort)lobby.Gameserver.Port, 
-                };
-                CallbackManager.AddCallbackResult(data);
-
-                IPCManager.SendLobbyGameServer(lobby);
-                UpdateLobby(lobby, lobby.SteamID);
-            }
+                m_ulSteamIDLobby = steamIDLobby,
+                m_ulSteamIDGameServer = steamIDGameServer,
+                m_unIP = unGameServerIP,
+                m_usPort = (ushort)unGameServerPort,
+            };
+            CallbackManager.AddCallbackResult(data);
         }
 
         public bool SetLobbyJoinable(ulong steamIDLobby, bool bLobbyJoinable)
@@ -594,8 +578,6 @@ namespace SKYNET.Steamworks.Implementation
                     {
                         Write($"Not found callback result for handle {JoinRespons.CallbackHandle}");
                     }
-
-                    SteamFriends.Instance.UpdateUserLobby((ulong)SteamEmulator.SteamID, lobby.SteamID);
                 }
                 else
                 {
@@ -635,15 +617,6 @@ namespace SKYNET.Steamworks.Implementation
                 m_ulSteamIDMember = lobbyDataUpdate.SteamIDMember
             };
             CallbackManager.AddCallbackResult(data);
-
-            var lobby = lobbyDataUpdate.SerializedLobby.FromJson<SteamLobby>();
-            if (lobby != null)
-            {
-                foreach (var member in lobby.Members)
-                {
-                    SteamFriends.Instance.UpdateUserLobby(member.m_SteamID, lobbyDataUpdate.SteamIDLobby);
-                }
-            }
         }
 
         public void LobbyChatUpdated(IPC_LobbyChatUpdate lobbyChatUpdate)
@@ -730,12 +703,6 @@ namespace SKYNET.Steamworks.Implementation
                     m_ulSteamIDMember = Member
                 };
                 CallbackManager.AddCallbackResult(data);
-            }
-
-            var Members = lobby.Members.FindAll(m => m.m_SteamID != SteamEmulator.SteamID);
-            foreach (var member in Members)
-            {
-                IPCManager.SendLobbyDataUpdate(member.m_SteamID, lobby.SteamID, Member, lobby);
             }
         }
 

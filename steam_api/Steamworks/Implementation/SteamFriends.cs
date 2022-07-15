@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using SKYNET.Callback;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Types;
 using SKYNET.IPC.Types;
@@ -429,16 +429,14 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetFriendRelationship(ulong steamIDFriend)
         {
-            Write($"GetFriendRelationship {steamIDFriend}");
             EFriendRelationship Result = EFriendRelationship.k_EFriendRelationshipNone;
-
             MutexHelper.Wait("Users", delegate
             {
                 var friend = GetUser(steamIDFriend);
                 if (friend != null && friend.HasFriend)
                     Result = EFriendRelationship.k_EFriendRelationshipFriend;
             });
-
+            Write($"GetFriendRelationship (SteamID = {steamIDFriend}) = {Result}");
             return (int)Result;
         }
 
@@ -585,7 +583,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetPersonaState()
         {
-            Write($"GetPersonaState");
+            Write($"GetPersonaState  = k_EPersonaStateOnline");
             return (int)EPersonaState.k_EPersonaStateOnline;
         }
 
@@ -602,7 +600,7 @@ namespace SKYNET.Steamworks.Implementation
             {
                 Result = "";
             }
-            return Result;
+            return "SKYNET";
         }
 
         public uint GetUserRestrictions()
@@ -765,19 +763,6 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public void UpdateUserLobby(ulong userSteamId, ulong lobbySteamId, bool BroadCast = false)
-        {
-            var user = GetUser(userSteamId);
-            if (user != null)
-            {
-                user.LobbyID = lobbySteamId;
-                if (BroadCast)
-                {
-                    IPCManager.SendUserDataUpdated(user, IPC_UserDataUpdated.UpdateType.LobbyID);
-                }
-            }
-        }
-
         public void UpdateUserStatus(IPC_UserDataUpdated statusChanged)
         {
             switch (statusChanged.Type)
@@ -794,7 +779,7 @@ namespace SKYNET.Steamworks.Implementation
 
         private List<SteamPlayer> GetFriends()
         {
-            var Friends = UserManager.Users;
+            var Friends = UserManager.GetFriends();
             return Friends;
         }
 

@@ -1,4 +1,4 @@
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using SKYNET.Types;
 using System;
 using System.Collections.Concurrent;
@@ -391,7 +391,7 @@ namespace SKYNET.Managers
             }
         }
 
-        private static async Task<string> GetResponseString(string URL)
+        public static async Task<string> GetResponseString(string URL)
         {
             string content = "";
             try
@@ -405,7 +405,7 @@ namespace SKYNET.Managers
             }
             catch (Exception ex)
             {
-                modCommon.Show(ex + " " + ex.StackTrace);
+                //modCommon.Show(ex + " " + ex.StackTrace);
             }
             return content;
         }

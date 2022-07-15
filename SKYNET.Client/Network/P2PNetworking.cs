@@ -1,13 +1,10 @@
-﻿using SKYNET.Client;
-using SKYNET.Common;
-using SKYNET.Helper;
+﻿using SKYNET.Common;
+using SKYNET.Helpers;
 using SKYNET.IPC.Types;
 using SKYNET.Managers;
-using SKYNET.Network.Packets;
-using SKYNET.Steamworks;
+using SKYNET.Network.Types;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -84,7 +81,7 @@ namespace SKYNET.Network
                     Channel = P2PPacket.Channel,
                 };
 
-                string json = p2p.ToJson();
+                string json = p2p.Serialize();
                 byte[] packet = Encoding.Default.GetBytes(json);
 
                 string iPAddress = GetIPAddress(steamIDRemote);

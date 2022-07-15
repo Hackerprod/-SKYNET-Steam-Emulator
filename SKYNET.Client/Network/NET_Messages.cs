@@ -1,9 +1,32 @@
-﻿namespace SKYNET.Network.Packets
+﻿namespace SKYNET.Network.Types
 {
-    public class NetworkMessage
+    public class NETMessage
     {
         public int MessageType { get; set; }
         public string ParsedBody { get; set; }
+    }
+
+    public enum NETMessageType : int
+    {
+        NET_Announce,
+        NET_AnnounceResponse,
+        NET_UserDataUpdated,
+        NET_P2PPacket,
+        NET_SetRichPresence,
+        NET_GameOpened,
+
+        // Lobbies
+        NET_LobbyCreated,
+        NET_LobbyLeave,
+        NET_LobbyRemove,
+        NET_LobbyUpdate,
+        NET_LobbyListRequest,
+        NET_LobbyListResponse,
+        NET_LobbyJoinRequest,
+        NET_LobbyJoinResponse,
+        NET_LobbyDataUpdate,
+        NET_LobbyChatUpdate,
+        NET_LobbyGameserver,
     }
 
     public class NET_Base
@@ -77,6 +100,18 @@
         public string SerializedLobby { get; set; }
     }
 
+    public class NET_LobbyCreated : NET_Base
+    {
+        public ulong SteamID { get; set; }
+        public string SerializedLobby { get; set; }
+    }
+
+    public class NET_LobbyUpdate : NET_Base
+    {
+        public ulong SteamID { get; set; }
+        public string SerializedLobby { get; set; }
+    }
+
     public class NET_LobbyChatUpdate : NET_Base
     {
         public ulong SteamIDLobby { get; set; }
@@ -116,28 +151,5 @@
         public uint AccountID { get; set; }
         public string Key { get; set; }
         public string Value { get; set; }
-    }
-
-    public enum MessageType : int
-    {
-        NET_Announce,
-        NET_AnnounceResponse,
-        NET_AvatarRequest,
-        NET_AvatarResponse,
-        NET_UserDataUpdated,
-        NET_P2PPacket,
-        NET_SetRichPresence,
-
-        // Lobbies
-        NET_LobbyListRequest,
-        NET_LobbyListResponse,
-        NET_LobbyJoinRequest,
-        NET_LobbyJoinResponse,
-        NET_LobbyDataUpdate,
-        NET_LobbyChatUpdate,
-        NET_LobbyLeave,
-        NET_LobbyRemove,
-        NET_LobbyGameserver,
-        NET_GameOpened,
     }
 }

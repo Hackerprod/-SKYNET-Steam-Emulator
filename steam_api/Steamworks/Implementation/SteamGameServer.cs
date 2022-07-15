@@ -2,7 +2,7 @@
 using SKYNET.Managers;
 using SKYNET.Types;
 using SKYNET.Callback;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using SKYNET.Steamworks.Interfaces;
 
 using SteamAPICall_t = System.UInt64;
@@ -55,9 +55,8 @@ namespace SKYNET.Steamworks.Implementation
             var lobby = LobbyManager.GetLobbyByOwner((ulong)SteamEmulator.SteamID);
             if (lobby != null)
             {
-                lobby.Gameserver.IP = IP;
-                lobby.Gameserver.Port = (uint)usQueryPort;
                 Write($"Setting lobby gameserver IP = {IP}, Port = {(uint)usQueryPort}");
+                IPCManager.SendLobbyGameServerEndPoint(lobby.SteamID, IP, (uint)usQueryPort);
             }
             else
             {
@@ -254,8 +253,6 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        // Retrieve ticket to be sent to the entity who wishes to authenticate you ( using BeginAuthSession API ). 
-        // uint32 *pcbTicket  retrieves the length of the actual ticket.
         public HAuthTicket GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
         {
             SteamEmulator.Write($"DEBUG", "GetAuthSessionTicket");

@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace SKYNET.Controls
+namespace SKYNET.GUI.Controls
 {
     public partial class SKYNET_MinimizeBox : UserControl
     {

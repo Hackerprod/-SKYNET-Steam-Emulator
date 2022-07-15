@@ -207,7 +207,7 @@ namespace SKYNET.GUI
             public IntPtr lParam;
         }
 
-        protected override void WndProc(ref System.Windows.Forms.Message m)
+        protected override void WndProc(ref Message m)
         {
             base.WndProc(ref m);
             if (m.Msg == WM_GETMINMAXINFO)

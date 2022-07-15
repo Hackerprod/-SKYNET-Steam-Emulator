@@ -154,8 +154,6 @@
     <Compile Include="websocket-sharp\WebSocketState.cs" />
     <Compile Include="WinMod.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="websocket-sharp\doc\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

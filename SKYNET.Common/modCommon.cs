@@ -49,6 +49,11 @@ public partial class modCommon
         finally { currentProcess = null; }
     }
 
+    public static string GetRootPath(string executablePath)
+    {
+        return new FileInfo(executablePath).Directory?.FullName;
+    }
+
     public static bool Is64Bit => IntPtr.Size == 8;
 
     public static bool ShowShadow { get; set; }
@@ -89,4 +94,3 @@ public partial class modCommon
         }
     }
 }
-namespace SKYNET { }

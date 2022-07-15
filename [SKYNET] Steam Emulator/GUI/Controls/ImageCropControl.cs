@@ -1,6 +1,3 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for details.
-
 using SKYNET.Helpers;
 using System;
 using System.Collections.Generic;
@@ -8,11 +5,9 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Media;
-using System.Text;
 using System.Windows.Forms;
 
-namespace SKYNET
+namespace SKYNET.GUI.Controls
 {
     public partial class ImageCropControl : UserControl
     {

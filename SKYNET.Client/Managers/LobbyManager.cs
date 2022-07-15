@@ -1,4 +1,6 @@
-﻿using SKYNET.Helper;
+﻿using SKYNET.Helpers;
+using SKYNET.IPC.Types;
+using SKYNET.Network.Types;
 using SKYNET.Types;
 using System;
 using System.Collections.Generic;
@@ -113,7 +115,70 @@ namespace SKYNET.Managers
                     Lobby.LobbyData.Add(key, value);
                 }
             }
+            UpdateLobbyMembers(Lobby);
             IPCManager.SendUpdatedLobbies();
+        }
+
+        internal static void SetGameServerEndPoint(ulong lobbySteamID, uint iP, uint port)
+        {
+            var Lobby = GetLobby(lobbySteamID);
+            if (Lobby != null)
+            {
+                if (Lobby.Gameserver == null) Lobby.Gameserver = new SteamLobby.LobbyGameserver();
+                Lobby.Gameserver.IP = iP;
+                Lobby.Gameserver.Port = port;
+                IPCManager.SendUpdatedLobbies();
+                UpdateLobbyMembers(Lobby);
+            }
+        }
+        public static void CreateGameServer(IPC_LobbyGameserver IPC_Lobby)
+        {
+            if (GetLobby(IPC_Lobby.LobbyID, out var Lobby))
+            {
+                //uint IP = unGameServerIP != 0 ? unGameServerIP : NetworkHelper.ConvertFromIPAddress(NetworkHelper.GetIPAddress());
+                if (Lobby.Gameserver == null) Lobby.Gameserver = new SteamLobby.LobbyGameserver();
+                Lobby.Gameserver.SteamID = IPC_Lobby.SteamID;
+                Lobby.Gameserver.IP = IPC_Lobby.IP; 
+                Lobby.Gameserver.Filled = true;
+                Lobby.Gameserver.Port = IPC_Lobby.Port;
+
+                IPCManager.SendUpdatedLobbies();
+                UpdateLobbyMembers(Lobby);
+            }
+        }
+
+        public static void UpdateLobbyMembers(SteamLobby lobby)
+        {
+            NetworkManager.SendUpdateLobby(lobby, false);
+        }
+
+        internal static void LeaveLobby(NET_LobbyLeave lobbyLeave)
+        {
+            if (GetLobby(lobbyLeave.LobbyID, out var lobby))
+            {
+                lobby.Members.RemoveAll(m => m.m_SteamID == lobbyLeave.SteamID);
+
+                NetworkManager.SendUpdateLobby(lobby, false);
+
+                var lobbyChatUpdate = new NET_LobbyChatUpdate()
+                {
+                    SteamIDLobby = lobbyLeave.SteamID,
+                    SteamIDUserChanged = lobbyLeave.SteamID,
+                    SteamIDMakingChange = lobbyLeave.SteamID,
+                    ChatMemberStateChange = (int)EChatMemberStateChange.k_EChatMemberStateChangeLeft
+                };
+
+                var members = lobby.Members.FindAll(m => m.m_SteamID != lobby.Owner); 
+
+                foreach (var member in members)
+                {
+                    var User = UserManager.GetUser(member.m_SteamID);
+                    if (User != null)
+                    {
+                        NetworkManager.SendTo(User.IPAddress, lobbyChatUpdate, NETMessageType.NET_LobbyChatUpdate);
+                    }
+                }
+            }
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using SKYNET.Client;
 using SKYNET.Common;
-using SKYNET.Helper;
-using SKYNET.Managers;
+using SKYNET.Helpers;
 using SKYNET.Network;
 using SKYNET.WEB.Types;
 using System;
@@ -12,7 +11,7 @@ using System.IO;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace SKYNET
+namespace SKYNET.Managers
 {
     public class WebManager
     {
@@ -23,62 +22,62 @@ namespace SKYNET
             WebSocketProcessor.OnMessageReceived += Web_OnMessageReceived;
         }
 
-        private static void Web_OnMessageReceived(object sender, WebMessage e)
+        private static void Web_OnMessageReceived(object sender, WEBMessage e)
         {
             try
             {
                 Write($"Received WEB message {e.MessageType}");
                 switch (e.MessageType)
                 {
-                    case WEB_MessageType.WEB_AuthRequest:
+                    case WEBMessageType.WEB_AuthRequest:
                         ProcessAuthRequest(e);
                         break;
-                    case WEB_MessageType.WEB_CreateAccountRequest:
+                    case WEBMessageType.WEB_CreateAccountRequest:
                         // TODO
                         break;
-                    case WEB_MessageType.WEB_GameListRequest:
+                    case WEBMessageType.WEB_GameListRequest:
                         ProcessGameListRequest(e);
                         break;
-                    case WEB_MessageType.WEB_GameAdded:
+                    case WEBMessageType.WEB_GameAdded:
                         ProcessGameAdded(e);
                         break;
-                    case WEB_MessageType.WEB_GameUpdated:
+                    case WEBMessageType.WEB_GameUpdated:
                         ProcessGameUpdated(e);
                         break;
-                    case WEB_MessageType.WEB_GameRemoved:
+                    case WEBMessageType.WEB_GameRemoved:
                         ProcessGameRemoved(e);
                         break;
-                    case WEB_MessageType.WEB_GameLaunch:
+                    case WEBMessageType.WEB_GameLaunch:
                         ProcessGameLaunch(e);
                         break;
-                    case WEB_MessageType.WEB_GameInfoRequest:
+                    case WEBMessageType.WEB_GameInfoRequest:
                         ProcessGameInfoRequest(e);
                         break;
-                    case WEB_MessageType.WEB_UserInfoRequest:
+                    case WEBMessageType.WEB_UserInfoRequest:
                         ProcessUserInfoRequest(e);
                         break;
-                    case WEB_MessageType.WEB_ChatMessage:
+                    case WEBMessageType.WEB_ChatMessage:
                         // TODO
                         break;
-                    case WEB_MessageType.WEB_PrivateChatMessage:
+                    case WEBMessageType.WEB_PrivateChatMessage:
                         // TODO
                         break;
-                    case WEB_MessageType.WEB_GameOpenContainerFolder:
+                    case WEBMessageType.WEB_GameOpenContainerFolder:
                         ProcessGameOpenContainerFolder(e);
                         break;
-                    case WEB_MessageType.WEB_GameOpenWithoutEmulation:
+                    case WEBMessageType.WEB_GameOpenWithoutEmulation:
                         ProcessGameOpenWithoutEmulation(e);
                         break;
-                    case WEB_MessageType.WEB_FileInfoRequest:
+                    case WEBMessageType.WEB_FileInfoRequest:
                         ProcessFileInfoRequest(e);
                         break;
-                    case WEB_MessageType.WEB_GameOrderUpdated:
+                    case WEBMessageType.WEB_GameOrderUpdated:
                         ProcessGameOrderUpdated(e);
                         break;
-                    case WEB_MessageType.WEB_OpenFileDialogRequest:
+                    case WEBMessageType.WEB_OpenFileDialogRequest:
                         ProcessOpenFileDialogRequest();
                         break;
-                    case WEB_MessageType.WEB_GameDownloadCache:
+                    case WEBMessageType.WEB_GameDownloadCache:
                         ProcessGameDownloadCache(e);
                         break;
                 }
@@ -89,7 +88,7 @@ namespace SKYNET
             }
         }
 
-        private static void ProcessGameDownloadCache(WebMessage e)
+        private static void ProcessGameDownloadCache(WEBMessage e)
         {
             var GameDownloadCache = e.Deserialize<WEB_GameDownloadCache>();
             if (GameDownloadCache == null) return;
@@ -138,7 +137,7 @@ namespace SKYNET
                         ImageHex = hexIcon,
                         AppID = posibleAppID
                     };
-                    Send(FileDialogResponse, WEB_MessageType.WEB_OpenFileDialogResponse);
+                    Send(FileDialogResponse, WEBMessageType.WEB_OpenFileDialogResponse);
 
                 }
             }));
@@ -146,14 +145,14 @@ namespace SKYNET
             s.Start();
         }
 
-        private static void ProcessAuthRequest(WebMessage e)
+        private static void ProcessAuthRequest(WEBMessage e)
         {
             var AuthRequest = e.Deserialize<WEB_AuthRequest>();
             var AuthResponse = new WEB_AuthResponse();
             if (AuthRequest == null)
             {
                 AuthResponse.Response = WEB_AuthResponseType.UnknownError;
-                Send(AuthResponse, WEB_MessageType.WEB_AuthResponse);
+                Send(AuthResponse, WEBMessageType.WEB_AuthResponse);
             }
             else
             {
@@ -186,74 +185,46 @@ namespace SKYNET
                         Language = SteamClient.Language,
                         AvatarHex = hexAvatar
                     };
-                    Send(AuthResponse, WEB_MessageType.WEB_AuthResponse);
+                    Send(AuthResponse, WEBMessageType.WEB_AuthResponse);
 
                     var GameListResponse = new WEB_GameListResponse()
                     {
                         GameList = GameManager.GetGames()
                     };
-                    Send(GameListResponse, WEB_MessageType.WEB_GameListResponse);
+                    Send(GameListResponse, WEBMessageType.WEB_GameListResponse);
                 }
             }
         }
 
-        private static void ProcessGameListRequest(WebMessage e)
+        private static void ProcessGameListRequest(WEBMessage e)
         {
             var GameListResponse = new WEB_GameListResponse()
             {
                 GameList = GameManager.GetGames()
             };
-            Send(GameListResponse, WEB_MessageType.WEB_GameListResponse);
+            Send(GameListResponse, WEBMessageType.WEB_GameListResponse);
         }
 
-        private static void ProcessUserInfoRequest(WebMessage e)
+        private static void ProcessUserInfoRequest(WEBMessage e)
         {
             // TODO?
             //var UserInfoRequest = e.Deserialize<WEB_UserInfoRequest>();
         }
 
-        private static void ProcessGameInfoRequest(WebMessage e)
+        private static void ProcessGameInfoRequest(WEBMessage e)
         {
-            Write(e.Body);
             var GameInfoRequest = e.Deserialize<WEB_GameInfoRequest>();
             if (GameInfoRequest == null) return;
             var Game = GameManager.GetGame(GameInfoRequest.Guid);
             if (Game == null) return;
-            if (GameInfoRequest.Minimal)
             {
-                var MinimalResponse = new WEB_GameInfoMinimalResponse()
-                {
-                    LastPlayed = GameManager.GetLastPlayed(GameInfoRequest.Guid),
-                    TimePlayed = GameManager.GetTimePlayed(GameInfoRequest.Guid),
-                    UsersPlaying = GameManager.GetUsersPlaying(GameInfoRequest.Guid),
-                    Playing = GameManager.IsPlaying(GameInfoRequest.Guid),
-                };
-                Send(MinimalResponse, WEB_MessageType.WEB_GameInfoMinimalResponse);
-            }
-            else
-            {
-                var library_hero = "";
-                try
-                {
-                    var bitmap = GameManager.GetGameImage(Game.AppID);
-                    library_hero = ImageHelper.GetImageBase64(bitmap);
-                }
-                catch { }
-                var header = "";
-                try
-                {
-                    var bitmap = GameManager.GetGameImage(Game.AppID, true);
-                    header = ImageHelper.GetImageBase64(bitmap);
-                }
-                catch { }
-
                 var FriendsPlaying = new List<WEB_GameInfoResponse.FriendPlaying>();
                 try
                 {
                     var Users = UserManager.GetFriends();
                     for (int i = 0; i < Users.Count; i++)
                     {
-                        var Avatar = UserManager.GetAvatar(Users[i].SteamID);
+                        UserManager.GetAvatar(Users[i].SteamID, out var Avatar);
                         FriendsPlaying.Add(new WEB_GameInfoResponse.FriendPlaying()
                         {
                             AccountID = Users[i].AccountID,
@@ -265,12 +236,6 @@ namespace SKYNET
                 }
                 catch { }
 
-                string GameDescription = StatsManager.GetGameDescription(Game.AppID);
-                if (string.IsNullOrEmpty(GameDescription))
-                {
-                    GameDescription = $"{Game.Name} is a Steam game with AppID {Game.AppID}";
-                } 
-
                 var Response = new WEB_GameInfoResponse()
                 {
                     LastPlayed = GameManager.GetLastPlayed(GameInfoRequest.Guid),
@@ -278,45 +243,41 @@ namespace SKYNET
                     UsersPlaying = GameManager.GetUsersPlaying(GameInfoRequest.Guid),
                     FriendsPlaying = FriendsPlaying,
                     Playing = GameManager.IsPlaying(GameInfoRequest.Guid),
-                    Description = GameDescription,
-                    FreeToPlay = true,
-                    LibraryHeroImage = library_hero,
-                    HeaderImage = header
                 };
 
-                Send(Response, WEB_MessageType.WEB_GameInfoResponse);
+                Send(Response, WEBMessageType.WEB_GameInfoResponse);
             }
         }
 
-        private static void ProcessGameLaunch(WebMessage e)
+        private static void ProcessGameLaunch(WEBMessage e)
         {
             var GameLaunch = e.Deserialize<WEB_GameLaunch>();
             if (GameLaunch == null || string.IsNullOrEmpty(GameLaunch.Guid)) return;
             OnGameLaunch?.Invoke(null, GameLaunch.Guid);
         }
 
-        private static void ProcessGameRemoved(WebMessage e)
+        private static void ProcessGameRemoved(WEBMessage e)
         {
             var GameRemoved = e.Deserialize<WEB_GameRemoved>();
             if (GameRemoved == null) return;
             GameManager.Remove(GameRemoved.Guid);
         }
 
-        private static void ProcessGameUpdated(WebMessage e)
+        private static void ProcessGameUpdated(WEBMessage e)
         {
             var GameUpdated = e.Deserialize<WEB_GameUpdated>();
             if (GameUpdated == null) return;
             GameManager.Update(GameUpdated.Game); 
         }
 
-        private static void ProcessGameAdded(WebMessage e)
+        private static void ProcessGameAdded(WEBMessage e)
         {
             var GameAdded = e.Deserialize<WEB_GameAdded>();
             if (GameAdded == null) return;
             GameManager.AddGame(GameAdded.Game);
         }
 
-        private static void ProcessGameOpenContainerFolder(WebMessage e)
+        private static void ProcessGameOpenContainerFolder(WEBMessage e)
         {
             var OpenContainerFolder = e.Deserialize<WEB_GameOpenContainerFolder>();
             if (OpenContainerFolder == null) return;
@@ -325,7 +286,7 @@ namespace SKYNET
             modCommon.OpenFolderAndSelectFile(Game.ExecutablePath);
         }
 
-        private static void ProcessGameOpenWithoutEmulation(WebMessage e)
+        private static void ProcessGameOpenWithoutEmulation(WEBMessage e)
         {
             var OpenWithoutEmulation = e.Deserialize<WEB_GameOpenWithoutEmulation>();
             if (OpenWithoutEmulation == null) return;
@@ -334,7 +295,7 @@ namespace SKYNET
             try { Process.Start(Game.ExecutablePath, Game.Parameters); } catch { }
         }
 
-        private static void ProcessFileInfoRequest(WebMessage e)
+        private static void ProcessFileInfoRequest(WEBMessage e)
         {
             var FileInfoRequest = e.Deserialize<WEB_FileInfoRequest>();
             if (FileInfoRequest == null) return;
@@ -364,10 +325,10 @@ namespace SKYNET
                 ImageHex = hexIcon,
                 AppID = posibleAppID
             };
-            Send(FileInfoResponse, WEB_MessageType.WEB_FileInfoResponse);
+            Send(FileInfoResponse, WEBMessageType.WEB_FileInfoResponse);
         }
 
-        private static void ProcessGameOrderUpdated(WebMessage e)
+        private static void ProcessGameOrderUpdated(WEBMessage e)
         {
             // TODO
         }
@@ -378,7 +339,7 @@ namespace SKYNET
             {
                 Guid = guid
             };
-            Send(GameStoped, WEB_MessageType.WEB_GameLaunched);
+            Send(GameStoped, WEBMessageType.WEB_GameLaunched);
         }
 
         public static void SendDownloadProcess(int currentDownloadID, int value, string info)
@@ -389,7 +350,7 @@ namespace SKYNET
                 Value = value,
                 Info = info
             };
-            Send(CacheProcess, WEB_MessageType.WEB_GameCacheDownloadProgress);
+            Send(CacheProcess, WEBMessageType.WEB_GameCacheDownloadProgress);
         }
 
         public static void SendGameClosed(string gameClientID)
@@ -398,12 +359,12 @@ namespace SKYNET
             {
                 Guid = gameClientID
             };
-            Send(GameStoped, WEB_MessageType.WEB_GameStoped);
+            Send(GameStoped, WEBMessageType.WEB_GameStoped);
         }
 
-        public static void Send(WEB_Base msgBase, WEB_MessageType Type)
+        public static void Send(WEB_Base msgBase, WEBMessageType Type)
         {
-            WebMessage WebMessage = new WebMessage()
+            WEBMessage WebMessage = new WEBMessage()
             {
                 MessageType = Type,
                 Body = msgBase.Serialize()

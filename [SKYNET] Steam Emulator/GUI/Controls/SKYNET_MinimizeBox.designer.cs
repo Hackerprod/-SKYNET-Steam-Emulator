@@ -1,4 +1,6 @@
-﻿namespace SKYNET.Controls
+﻿using System.Windows.Forms;
+
+namespace SKYNET.GUI.Controls
 {
     partial class SKYNET_MinimizeBox
     {
@@ -28,7 +30,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.MinPic = new System.Windows.Forms.PictureBox();
+            this.MinPic = new PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.MinPic)).BeginInit();
             this.SuspendLayout();
             // 
@@ -41,22 +43,22 @@
             this.MinPic.Size = new System.Drawing.Size(13, 12);
             this.MinPic.TabIndex = 5;
             this.MinPic.TabStop = false;
-            this.MinPic.MouseClick += new System.Windows.Forms.MouseEventHandler(this.OnClicked);
+            this.MinPic.MouseClick += new MouseEventHandler(this.OnClicked);
             this.MinPic.MouseLeave += new System.EventHandler(this.OnMouseLeave);
-            this.MinPic.MouseMove += new System.Windows.Forms.MouseEventHandler(this.OnMouseMove);
+            this.MinPic.MouseMove += new MouseEventHandler(this.OnMouseMove);
             // 
             // SKYNET_MinimizeBox
             // 
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+            this.AutoScaleMode = AutoScaleMode.None;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
             this.Controls.Add(this.MinPic);
             this.MaximumSize = new System.Drawing.Size(34, 26);
             this.MinimumSize = new System.Drawing.Size(34, 26);
             this.Name = "SKYNET_MinimizeBox";
             this.Size = new System.Drawing.Size(34, 26);
-            this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.OnClicked);
+            this.MouseClick += new MouseEventHandler(this.OnClicked);
             this.MouseLeave += new System.EventHandler(this.OnMouseLeave);
-            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.OnMouseMove);
+            this.MouseMove += new MouseEventHandler(this.OnMouseMove);
             ((System.ComponentModel.ISupportInitialize)(this.MinPic)).EndInit();
             this.ResumeLayout(false);
 
@@ -64,6 +66,6 @@
 
         #endregion
 
-        private System.Windows.Forms.PictureBox MinPic;
+        private PictureBox MinPic;
     }
 }

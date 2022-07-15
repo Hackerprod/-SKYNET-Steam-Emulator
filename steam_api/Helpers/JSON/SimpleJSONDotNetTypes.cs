@@ -2,11 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Runtime.Serialization;
 using System.Text;
 
-
-namespace SKYNET.Helper.JSON
+namespace SKYNET.Helpers.JSON
 {
     public static class JSONWriter
     {

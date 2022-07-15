@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 
-namespace SKYNET.Helper
+namespace SKYNET.Helpers
 {
     public class ConsoleHelper
     {

@@ -1,6 +1,5 @@
 ﻿using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -8,7 +7,7 @@ using System.IO;
 using System.Windows.Forms;
 using TsudaKageyu;
 
-namespace SKYNET.Helper
+namespace SKYNET.Helpers
 {
     public class ImageHelper
     {
@@ -429,8 +428,15 @@ namespace SKYNET.Helper
 
         public static void ToFile(string imagePath, Image image)
         {
-            byte[] bytes = ImageHelper.ImageToBytes(image);
-            File.WriteAllBytes(imagePath, bytes);
+            try
+            {
+                byte[] bytes = ImageToBytes(image);
+                using (FileStream stream = new FileStream(imagePath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+                {
+                    stream.Write(bytes, 0, bytes.Length);
+                }
+            }
+            catch { }
         }
 
         /// <summary>

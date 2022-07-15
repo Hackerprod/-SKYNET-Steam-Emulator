@@ -1,4 +1,5 @@
-﻿using SKYNET.Helper;
+﻿using SKYNET.GUI.Controls;
+using SKYNET.Helpers;
 using SKYNET.Managers;
 using System;
 using System.Drawing;

@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using SKYNET.Callback;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Types;
 using SKYNET.Steamworks.Interfaces;
@@ -545,14 +545,15 @@ namespace SKYNET.Steamworks.Implementation
         {
             try
             {
-                var UsersOnline = IPCManager.GetUsersOnline(SteamEmulator.AppID);
+                //var UsersOnline = IPCManager.GetUsersOnline(SteamEmulator.AppID);
+                var UsersOnline = UserManager.Users.Count;
                 NumberOfCurrentPlayers_t data = new NumberOfCurrentPlayers_t()
                 {
                     m_bSuccess = 1,
                     m_cPlayers = UsersOnline
                 };
 
-                Write($"GetNumberOfCurrentPlayers {UsersOnline}");
+                Write($"GetNumberOfCurrentPlayers = {UsersOnline}");
 
                 return CallbackManager.AddCallbackResult(data);
             }

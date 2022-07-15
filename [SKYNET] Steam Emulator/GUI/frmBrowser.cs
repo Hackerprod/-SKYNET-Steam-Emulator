@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 
-namespace SKYNET
+namespace SKYNET.GUI
 {
     public partial class frmBrowser : frmBase
     {

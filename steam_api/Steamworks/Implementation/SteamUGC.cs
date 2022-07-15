@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using SKYNET.Callback;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Steamworks.Interfaces;
 
@@ -33,7 +33,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public UGCQueryHandle_t CreateQueryUserUGCRequest(uint unAccountID, int eListType, int eMatchingUGCType, int eSortOrder, uint nCreatorAppID, uint nConsumerAppID, uint unPage)
         {
-            Write($"CreateQueryUserUGCRequest for {unAccountID}");
+            Write($"CreateQueryUserUGCRequest (AccountID = {unAccountID})");
             return CreateOne((eListType == (int)EUserUGCList.k_EUserUGCList_Subscribed || eListType == (int)EUserUGCList.k_EUserUGCList_Published));
         }
 
@@ -59,7 +59,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("SendQueryUGCRequest");
             SteamAPICall_t APICall = k_uAPICallInvalid;
-            MutexHelper.Wait("SendQueryUGCRequest", delegate
+            MutexHelper.Wait("UGCQueries", delegate
             {
                 try
                 {
@@ -79,16 +79,15 @@ namespace SKYNET.Steamworks.Implementation
                             }
                         }
 
-                        //SteamUGCQueryCompleted_t data = new SteamUGCQueryCompleted_t()
-                        //{
-                        //    m_handle = handle,
-                        //    m_eResult = EResult.k_EResultOK,
-                        //    m_unNumResultsReturned = (uint)request.results.Count(),
-                        //    m_unTotalMatchingResults = (uint)request.results.Count(),
-                        //    m_bCachedData = false,
-                        //};
-                        ////APICall = new SteamAPICall_t(CallbackType.k_iSteamUGCQueryCompleted);
-                        //APICall = CallbackManager.AddCallbackResult(data, SteamUGCQueryCompleted_t.k_iCallback);
+                        SteamUGCQueryCompleted_t data = new SteamUGCQueryCompleted_t()
+                        {
+                            m_handle = handle,
+                            m_eResult = EResult.k_EResultOK,
+                            m_unNumResultsReturned = (uint)request.results.Count(),
+                            m_unTotalMatchingResults = (uint)request.results.Count(),
+                            m_bCachedData = false,
+                        };
+                        APICall = CallbackManager.AddCallbackResult(data);
                     }
                 }
                 catch (Exception ex)
@@ -102,19 +101,29 @@ namespace SKYNET.Steamworks.Implementation
         public bool GetQueryUGCResult(UGCQueryHandle_t handle, uint index, ref SteamUGCDetails_t pDetails)
         {
             Write("GetQueryUGCResult");
+
             bool Result = false;
-            MutexHelper.Wait("GetQueryUGCResult", delegate
+            UGC UGC = default;
+
+            MutexHelper.Wait("UGCQueries", delegate
             {
-                var UGC = UGCQueries.Find(u => u.Handle == handle);
-                if (UGC != null && (index < UGC.results.Count))
+                UGC = UGCQueries.Find(u => u.Handle == handle);
+            });
+
+            if (UGC != null && (index < UGC.results.Count))
+            {
+                foreach (var item in UGC.results)
                 {
-                    foreach (var item in UGC.results)
-                    {
-                        //set_details(item, pDetails);
-                    }
+                    //set_details(item, pDetails);
+                    pDetails.m_eResult = EResult.k_EResultOK;
+                    pDetails.m_nPublishedFileId = item;
+                    pDetails.m_eFileType = EWorkshopFileType.k_EWorkshopFileTypeCommunity;
+                    pDetails.m_nCreatorAppID = SteamEmulator.AppID;
+                    pDetails.m_nConsumerAppID = SteamEmulator.AppID;
                 }
                 Result = true;
-            });
+            }
+
             return Result;
         }
 
@@ -194,7 +203,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("ReleaseQueryUGCRequest");
             bool Return = false;
-            MutexHelper.Wait("ReleaseQueryUGCRequest", delegate
+            MutexHelper.Wait("UGCQueries", delegate
             {
                 var UGC = UGCQueries.Find(u => u.Handle == handle);
                 if (UGC != null)
@@ -208,8 +217,8 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool AddRequiredTag(UGCQueryHandle_t handle, string pTagName)
         {
-            Write("AddRequiredTag");
-            return false;
+            Write($"AddRequiredTag (QueryHandle = {handle}, TagName = {pTagName})");
+            return true;
         }
 
         public bool AddRequiredTagGroup(UGCQueryHandle_t handle, IntPtr pTagGroups) 
@@ -731,15 +740,14 @@ namespace SKYNET.Steamworks.Implementation
         {
             UGC instance = new UGC();
 
-            MutexHelper.Wait("CreateOne", delegate
+            MutexHelper.Wait("UGCQueries", delegate
             {
                 instance.ReturnAll = returnAll;
                 instance.Handle = Handle;
-
                 Handle++;
+                UGCQueries.Add(instance);
             });
 
-            UGCQueries.Add(instance);
             return instance.Handle;
         }
 

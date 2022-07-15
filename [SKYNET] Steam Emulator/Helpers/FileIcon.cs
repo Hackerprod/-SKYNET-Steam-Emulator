@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Win32;
 
-namespace SharpBrowser
+namespace SKYNET.Helpers
 {
 
     /// <summary>
@@ -41,6 +38,7 @@ namespace SharpBrowser
                 }
             }
         }
+
         public static string GetAfter(string text, string find, int startAt = 0, bool returnAll = false, bool forward = true)
         {
             if (text == null) { return returnAll ? text : ""; }
@@ -57,7 +55,6 @@ namespace SharpBrowser
             idx += find.Length;
             return text.Substring(idx);
         }
-
 
         #region Custom exceptions class
 
@@ -327,8 +324,6 @@ namespace SharpBrowser
         }
 
         #endregion
-
-
 
         /// <summary>
         /// Get the number of icons in the specified file.

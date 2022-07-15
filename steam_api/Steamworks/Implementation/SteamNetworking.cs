@@ -1,5 +1,5 @@
 ﻿using SKYNET.Callback;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using SKYNET.IPC.Types;
 using SKYNET.Managers;
 using SKYNET.Steamworks.Interfaces;
@@ -149,7 +149,7 @@ namespace SKYNET.Steamworks.Implementation
             Write($"GetP2PSessionState {steamIDRemote}");
 
             uint RemoteIP = NetworkHelper.ConvertFromIPAddress(NetworkHelper.GetIPAddress()); 
-            var user = IPCManager.GetUser(steamIDRemote).Result;
+            var user = IPCManager.GetUser(steamIDRemote);
             if (user != null)
             {
                 if (IPAddress.TryParse(user.IPAddress, out var Address))

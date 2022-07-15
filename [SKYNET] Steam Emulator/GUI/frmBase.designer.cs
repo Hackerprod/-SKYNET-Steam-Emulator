@@ -1,4 +1,6 @@
-﻿namespace SKYNET.GUI
+﻿using System.Windows.Forms;
+
+namespace SKYNET.GUI
 {
     partial class frmBase
     {
@@ -33,7 +35,7 @@
             // frmBase
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(380, 230);
             this.DoubleBuffered = true;
             this.Name = "frmBase";

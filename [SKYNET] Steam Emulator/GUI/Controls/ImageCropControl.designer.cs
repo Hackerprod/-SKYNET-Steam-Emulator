@@ -1,4 +1,4 @@
-namespace SKYNET
+namespace SKYNET.GUI.Controls
 {
     partial class ImageCropControl
     {

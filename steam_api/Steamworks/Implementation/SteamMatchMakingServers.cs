@@ -1,4 +1,4 @@
-﻿using SKYNET.Helper;
+﻿using SKYNET.Helpers;
 using SKYNET.Steamworks.Types;
 using System;
 using SKYNET.Steamworks.Interfaces;

@@ -1,10 +1,10 @@
 ﻿using SKYNET.Client;
 using SKYNET.Common;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using SKYNET.IPC;
 using SKYNET.IPC.Types;
 using SKYNET.Network;
-using SKYNET.Network.Packets;
+using SKYNET.Network.Types;
 using SKYNET.Types;
 using System;
 using System.Collections.Generic;
@@ -130,10 +130,20 @@ namespace SKYNET.Managers
                 case IPCMessageType.IPC_LobbiesRequest:
                     Process_LobbiesRequest(e.Message);
                     break;
+                case IPCMessageType.IPC_LobbyGameServerEndPoint:
+                    Process_LobbyGameServerEndPoint(e.Message);
+                    break;
                 default:
                     Write($"Not implemented Handle for message {(IPCMessageType)e.Message.MessageType}");
                     break;
             }
+        }
+
+        private static void Process_LobbyGameServerEndPoint(IPCMessage message)
+        {
+            var GameServerEndPoint = message.ParsedBody.Deserialize<IPC_LobbyGameServerEndPoint>();
+            if (GameServerEndPoint == null) return;
+            LobbyManager.SetGameServerEndPoint(GameServerEndPoint.LobbySteamID, GameServerEndPoint.IP, GameServerEndPoint.Port);
         }
 
         private static void Process_UsersRequest(IPCMessage message)
@@ -302,13 +312,17 @@ namespace SKYNET.Managers
                 LogToConsole = false,
                 RunCallbacks = true,
                 ISteamHTTP = true,
-                RemoteStoragePath = RemoteStoragePath
+                RemoteStoragePath = RemoteStoragePath,
             };
 
-            Game Game = null;
+            var Game = GameManager.GetGameByPath(ClientHello.ExecutablePath);
+            if (Game == null)
+                Game = GameManager.GetGameByRootPath(ClientHello.ExecutablePath);
+
             if (ClientHello != null)
             {
-                Game = GameManager.GetGameByPath(ClientHello.ExecutablePath);
+                if (Game == null) return;
+
                 if (Game != null)
                 {
                     Log.Write("IPCManager", $"Hello received from {Game.Name}");
@@ -319,9 +333,11 @@ namespace SKYNET.Managers
                     ClientWelcome.RunCallbacks = Game.RunCallbacks;
                     ClientWelcome.ISteamHTTP = Game.ISteamHTTP;
                     ClientWelcome.AppID = Game.AppID;
+                    ClientWelcome.DLCs = Game.GameDLC == null ? new List<Game.DLC>() : Game.GameDLC;
 
                 }
             }
+
             var welcome = CreateIPCMessage(ClientWelcome, IPCMessageType.IPC_ClientWelcome, message.JobID);
             connection.WriteAsync(welcome);
 
@@ -339,7 +355,7 @@ namespace SKYNET.Managers
             connection.WriteAsync(AvatarMessage);
 
             // TODO: Send user avatar
-            hexAvatar = ImageHelper.GetImageBase64(SteamClient.DefaultAvatar);
+           hexAvatar = ImageHelper.GetImageBase64(SteamClient.DefaultAvatar);
             var DefaultAvatarResponse = new IPC_AvatarResponse()
             {
                 AccountID = 0,
@@ -347,9 +363,6 @@ namespace SKYNET.Managers
             };
             var DefaultAvatarMessage = CreateIPCMessage(DefaultAvatarResponse, IPCMessageType.IPC_AvatarResponse);
             connection.WriteAsync(DefaultAvatarMessage);
-
-
-            if (Game == null) return;
 
             // TODO: Send Achievements
             var Achievements = new IPC_Achievements()
@@ -403,8 +416,10 @@ namespace SKYNET.Managers
         private static void Process_LobbyGameserver(IPCMessage message)
         {
             var LobbyGameserver = message.ParsedBody.Deserialize<IPC_LobbyGameserver>();
-            if (LobbyGameserver != null)
-                NetworkManager.SendLobbyGameserver(LobbyGameserver);
+            if (LobbyGameserver == null) return;
+
+            LobbyManager.CreateGameServer(LobbyGameserver);
+            NetworkManager.SendLobbyGameserver(LobbyGameserver);
         }
 
         private static void Process_UserDataUpdated(IPCMessage message)
@@ -426,25 +441,30 @@ namespace SKYNET.Managers
                 {
                     // TODO: Response avatar stored in cache
                     string AvatarCachePath = Path.Combine(modCommon.GetPath(), "Data", "Images", "AvatarCache", AvatarRequest.AccountID + ".jpg");
-                    if (File.Exists(AvatarCachePath))
+
+                    if (!UserManager.GetAvatar(AvatarRequest.AccountID, out var Avatar))
                     {
-                        var Avatar = ImageHelper.FromFile(AvatarCachePath);
-                        var hexAvatar = ImageHelper.GetImageBase64(Avatar);
-                        var AvatarResponse = new IPC_AvatarResponse()
+                        // Avatar return valid default Avatar
+
+                        if (File.Exists(AvatarCachePath))
                         {
-                            AccountID = AvatarRequest.AccountID,
-                            HexAvatar = hexAvatar
-                        };
-                        var AvatarMessage = CreateIPCMessage(AvatarResponse, IPCMessageType.IPC_AvatarResponse);
-                        connection.WriteAsync(AvatarMessage);
+                            // Load Avatar from file if exists
+                            Avatar = (Bitmap)ImageHelper.FromFile(AvatarCachePath);
+                        }
                     }
+                    var hexAvatar = ImageHelper.GetImageBase64(Avatar);
+                    var AvatarResponse = new IPC_AvatarResponse()
+                    {
+                        AccountID = AvatarRequest.AccountID,
+                        HexAvatar = hexAvatar
+                    };
+                    var AvatarMessage = CreateIPCMessage(AvatarResponse, IPCMessageType.IPC_AvatarResponse);
+                    connection.WriteAsync(AvatarMessage);
+
                 }
                 catch 
                 {
                 }
-
-                // Request updated avatar
-                NetworkManager.SendAvatarRequest(AvatarRequest);
             }
         }
 
@@ -525,13 +545,14 @@ namespace SKYNET.Managers
             if (lobby != null)
             {
                 LobbyManager.Create(lobby);
-                // TODO: Send lobby to steam server
+                NetworkManager.SendLobbyCreated(lobby);
             }
         }
 
         private static void Process_LobbyJoinRequest(IPCMessage message)
         {
             var LobbyJoinRequest = message.ParsedBody.Deserialize<IPC_LobbyJoinRequest>();
+            if (LobbyJoinRequest == null) return;
             NetworkManager.SendLobbyJoinRequest(LobbyJoinRequest);
         }
 
@@ -612,7 +633,7 @@ namespace SKYNET.Managers
             { 
                 JobID = jobId,
                 MessageType = (int)type,
-                ParsedBody = Base.ToJson(), Result = "Theresult"
+                ParsedBody = Base.Serialize(), Result = "Theresult"
             };
             return message;
         }
@@ -642,7 +663,9 @@ namespace SKYNET.Managers
         {
             var LobbyListResponse = new IPC_LobbyJoinResponse()
             {
-                SerializedLobby = lobbyJoinResponse.SerializedLobby
+                CallbackHandle = lobbyJoinResponse.CallbackHandle,
+                ChatRoomEnterResponse = lobbyJoinResponse.ChatRoomEnterResponse,
+                SerializedLobby = lobbyJoinResponse.SerializedLobby,
             };
             var message = CreateIPCMessage(LobbyListResponse, IPCMessageType.IPC_LobbyJoinResponse);
             SendIPCMessage(message);

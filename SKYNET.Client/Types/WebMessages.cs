@@ -4,9 +4,9 @@ using System.Web.Script.Serialization;
 
 namespace SKYNET.WEB.Types
 {
-    public class WebMessage
+    public class WEBMessage
     {
-        public WEB_MessageType MessageType { get; set; }
+        public WEBMessageType MessageType { get; set; }
         public string Body { get; set; }
         public T Deserialize<T>()
         {
@@ -27,7 +27,7 @@ namespace SKYNET.WEB.Types
     {
     }
 
-    public enum WEB_MessageType : int
+    public enum WEBMessageType : int
     {
         WEB_CreateAccountRequest,
         WEB_CreateAccountResponse,
@@ -87,7 +87,6 @@ namespace SKYNET.WEB.Types
     public class WEB_GameInfoRequest : WEB_Base
     {
         public string Guid { get; set; }
-        public bool Minimal { get; set; }
     }
 
     public class WEB_GameInfoResponse : WEB_Base
@@ -96,11 +95,7 @@ namespace SKYNET.WEB.Types
         public uint LastPlayed { get; set; }
         public uint TimePlayed { get; set; }
         public uint UsersPlaying { get; set; }
-        public string Description { get; set; }
-        public bool FreeToPlay { get; set; }
         public List<FriendPlaying> FriendsPlaying { get; set; }
-        public string LibraryHeroImage { get; set; }
-        public string HeaderImage { get; set; }
 
         public class FriendPlaying
         {

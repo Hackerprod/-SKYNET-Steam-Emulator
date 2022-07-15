@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Linq;
 using System.Collections.Concurrent;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using SKYNET.Callback;
 using SKYNET.Managers;
 using SKYNET.Steamworks.Interfaces;

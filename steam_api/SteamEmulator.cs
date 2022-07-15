@@ -9,15 +9,16 @@
 */
 
 //#define FORCELOG 
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Steamworks;
 using SKYNET.Steamworks.Implementation;
+using SKYNET.Types;
 using System;
 using System.Collections.Generic;
 using System.IO;
 
-using AppID      = System.UInt32;
+using AppID = System.UInt32;
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
 
@@ -29,12 +30,12 @@ public class SteamEmulator
 
     public static string Language;
     public static string PersonaName;
-    public static string SteamApiPath;
     public static string EmulatorPath;
 
     public static CSteamID SteamID;
     public static CSteamID SteamID_GS;
     public static uint AppID;
+    public static List<DLC> DLCs;
 
     public static HSteamUser HSteamUser;
     public static HSteamPipe HSteamPipe;
@@ -100,6 +101,18 @@ public class SteamEmulator
     public SteamEmulator()
     {
         Instance = this;
+    }
+
+    static SteamEmulator()
+    {
+        // Load Default data
+        Language = "english";
+        PersonaName = "";
+        EmulatorPath = "";
+        SteamID = CSteamID.Invalid;
+        SteamID_GS = CSteamID.Invalid;
+        AppID = 0;
+        DLCs = new List<DLC>();
     }
 
     public static void Initialize()
@@ -203,7 +216,7 @@ public class SteamEmulator
             HSteamPipe_GS = 2;
 
             Initialized = true;
-            Initializing = false;
+            Initializing = false; 
         }
         catch (Exception ex)
         {

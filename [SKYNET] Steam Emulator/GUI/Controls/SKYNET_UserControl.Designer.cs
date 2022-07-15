@@ -1,4 +1,6 @@
-﻿namespace SKYNET.GUI.Controls
+﻿using System.Windows.Forms;
+
+namespace SKYNET.GUI.Controls
 {
     partial class SKYNET_UserControl
     {
@@ -28,9 +30,9 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.PB_Avatar = new System.Windows.Forms.PictureBox();
-            this.LB_PersonaName = new System.Windows.Forms.Label();
-            this.LB_IPAddress = new System.Windows.Forms.Label();
+            this.PB_Avatar = new PictureBox();
+            this.LB_PersonaName = new Label();
+            this.LB_IPAddress = new Label();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Avatar)).BeginInit();
             this.SuspendLayout();
             // 
@@ -39,11 +41,11 @@
             this.PB_Avatar.Location = new System.Drawing.Point(6, 5);
             this.PB_Avatar.Name = "PB_Avatar";
             this.PB_Avatar.Size = new System.Drawing.Size(30, 30);
-            this.PB_Avatar.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.PB_Avatar.SizeMode = PictureBoxSizeMode.StretchImage;
             this.PB_Avatar.TabIndex = 0;
             this.PB_Avatar.TabStop = false;
             this.PB_Avatar.MouseLeave += new System.EventHandler(this.SKYNET_UserControl_MouseLeave);
-            this.PB_Avatar.MouseMove += new System.Windows.Forms.MouseEventHandler(this.SKYNET_UserControl_MouseMove);
+            this.PB_Avatar.MouseMove += new MouseEventHandler(this.SKYNET_UserControl_MouseMove);
             // 
             // LB_PersonaName
             // 
@@ -56,7 +58,7 @@
             this.LB_PersonaName.TabIndex = 1;
             this.LB_PersonaName.Text = "User";
             this.LB_PersonaName.MouseLeave += new System.EventHandler(this.SKYNET_UserControl_MouseLeave);
-            this.LB_PersonaName.MouseMove += new System.Windows.Forms.MouseEventHandler(this.SKYNET_UserControl_MouseMove);
+            this.LB_PersonaName.MouseMove += new MouseEventHandler(this.SKYNET_UserControl_MouseMove);
             // 
             // LB_IPAddress
             // 
@@ -69,12 +71,12 @@
             this.LB_IPAddress.TabIndex = 2;
             this.LB_IPAddress.Text = "label2";
             this.LB_IPAddress.MouseLeave += new System.EventHandler(this.SKYNET_UserControl_MouseLeave);
-            this.LB_IPAddress.MouseMove += new System.Windows.Forms.MouseEventHandler(this.SKYNET_UserControl_MouseMove);
+            this.LB_IPAddress.MouseMove += new MouseEventHandler(this.SKYNET_UserControl_MouseMove);
             // 
             // SKYNET_UserControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(43)))), ((int)(((byte)(53)))));
             this.Controls.Add(this.LB_IPAddress);
             this.Controls.Add(this.LB_PersonaName);
@@ -82,7 +84,7 @@
             this.Name = "SKYNET_UserControl";
             this.Size = new System.Drawing.Size(167, 40);
             this.MouseLeave += new System.EventHandler(this.SKYNET_UserControl_MouseLeave);
-            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.SKYNET_UserControl_MouseMove);
+            this.MouseMove += new MouseEventHandler(this.SKYNET_UserControl_MouseMove);
             ((System.ComponentModel.ISupportInitialize)(this.PB_Avatar)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -91,8 +93,8 @@
 
         #endregion
 
-        private System.Windows.Forms.PictureBox PB_Avatar;
-        private System.Windows.Forms.Label LB_PersonaName;
-        private System.Windows.Forms.Label LB_IPAddress;
+        private PictureBox PB_Avatar;
+        private Label LB_PersonaName;
+        private Label LB_IPAddress;
     }
 }

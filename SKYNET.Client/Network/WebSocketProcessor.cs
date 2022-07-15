@@ -1,13 +1,10 @@
-﻿using SKYNET.Types;
-using SKYNET.Common;
-using System;
-using System.Text;
+﻿using System;
 using WebSocketSharp;
 using WebSocketSharp.Server;
-using SKYNET.Managers;
 using WebSocketSharp.Net.WebSockets;
 using SKYNET.WEB.Types;
-using System.Windows.Forms;
+using SKYNET.Common;
+using SKYNET.Managers;
 
 namespace SKYNET.Network
 {
@@ -15,7 +12,7 @@ namespace SKYNET.Network
     {
         public System.Net.IPEndPoint RemoteEndPoint => this.Context.UserEndPoint;
 
-        public static event EventHandler<WebMessage> OnMessageReceived;
+        public static event EventHandler<WEBMessage> OnMessageReceived;
 
         public bool Connected
         {
@@ -56,7 +53,7 @@ namespace SKYNET.Network
         {
             try
             {
-                WebMessage message = e.RawData.Deserialize<WebMessage>();
+                WEBMessage message = e.RawData.Deserialize<WEBMessage>();
                 OnMessageReceived?.Invoke(this, message);
             }
             catch (Exception ex)

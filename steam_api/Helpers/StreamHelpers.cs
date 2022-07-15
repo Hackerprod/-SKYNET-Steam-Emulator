@@ -3,7 +3,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SKYNET.Helper
+namespace SKYNET.Helpers
 {
     public static class StreamHelpers
     {

@@ -927,9 +927,7 @@ namespace SKYNET.Steamworks
         LinkBlocked = 14,
     }
 
-    //
-    // EChatRoomEnterResponse
-    //
+
     public enum EChatRoomEnterResponse
     {
         k_EChatRoomEnterResponseSuccess = 1,

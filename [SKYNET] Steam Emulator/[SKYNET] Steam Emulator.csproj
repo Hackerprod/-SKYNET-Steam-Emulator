@@ -85,10 +85,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="frmBrowser.cs">
+    <Compile Include="GUI\frmBrowser.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmBrowser.Designer.cs">
+    <Compile Include="GUI\frmBrowser.Designer.cs">
       <DependentUpon>frmBrowser.cs</DependentUpon>
     </Compile>
     <Compile Include="GUI\Controls\ImageCropControl.cs">
@@ -137,11 +137,11 @@
     </Compile>
     <Compile Include="Helpers\Extentions.cs" />
     <Compile Include="Helpers\FileIcon.cs" />
-    <Compile Include="GUI\Controls\CircularPictureBox.cs">
+    <Compile Include="GUI\Controls\SKYNET_CircularPictureBox.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="GUI\Controls\CircularPictureBox.designer.cs">
-      <DependentUpon>CircularPictureBox.cs</DependentUpon>
+    <Compile Include="GUI\Controls\SKYNET_CircularPictureBox.designer.cs">
+      <DependentUpon>SKYNET_CircularPictureBox.cs</DependentUpon>
     </Compile>
     <Compile Include="GUI\Controls\SKYNET_ContextMenuStrip.cs">
       <SubType>Component</SubType>
@@ -159,19 +159,13 @@
       <DependentUpon>frmGameManager.cs</DependentUpon>
     </Compile>
     <Compile Include="GUI\Controls\DwmApi.cs" />
-    <Compile Include="GUI\Controls\GradiantBox.cs">
+    <Compile Include="GUI\Controls\SKYNET_GradiantBox.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="GUI\Controls\GradiantBox.designer.cs">
-      <DependentUpon>GradiantBox.cs</DependentUpon>
+    <Compile Include="GUI\Controls\SKYNET_GradiantBox.designer.cs">
+      <DependentUpon>SKYNET_GradiantBox.cs</DependentUpon>
     </Compile>
     <Compile Include="GUI\Controls\InternetExplorerBrowserEmulation.cs" />
-    <Compile Include="GUI\Controls\ShadowBox.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="GUI\Controls\ShadowBox.designer.cs">
-      <DependentUpon>ShadowBox.cs</DependentUpon>
-    </Compile>
     <Compile Include="GUI\Controls\SKYNET_Button.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -240,13 +234,12 @@
     <Compile Include="GUI\Controls\SKYNET_Check.designer.cs">
       <DependentUpon>SKYNET_Check.cs</DependentUpon>
     </Compile>
-    <Compile Include="Types\ClientSDK.cs" />
     <Compile Include="Types\RunningGame.cs" />
-    <EmbeddedResource Include="frmBrowser.resx">
+    <EmbeddedResource Include="GUI\frmBrowser.resx">
       <DependentUpon>frmBrowser.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GUI\Controls\CircularPictureBox.resx">
-      <DependentUpon>CircularPictureBox.cs</DependentUpon>
+    <EmbeddedResource Include="GUI\Controls\SKYNET_CircularPictureBox.resx">
+      <DependentUpon>SKYNET_CircularPictureBox.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\Controls\SKYNET_UserControl.resx">
       <DependentUpon>SKYNET_UserControl.cs</DependentUpon>
@@ -266,11 +259,8 @@
     <EmbeddedResource Include="GUI\Controls\GameBox.resx">
       <DependentUpon>GameBox.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GUI\Controls\GradiantBox.resx">
-      <DependentUpon>GradiantBox.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GUI\Controls\ShadowBox.resx">
-      <DependentUpon>ShadowBox.cs</DependentUpon>
+    <EmbeddedResource Include="GUI\Controls\SKYNET_GradiantBox.resx">
+      <DependentUpon>SKYNET_GradiantBox.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\Controls\SKYNET_CloseBox.resx">
       <DependentUpon>SKYNET_CloseBox.cs</DependentUpon>

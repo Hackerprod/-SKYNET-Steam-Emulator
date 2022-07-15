@@ -1,6 +1,6 @@
 ﻿using SKYNET.Callback;
-using SKYNET.Helper;
-using SKYNET.Helper.JSON;
+using SKYNET.Helpers;
+using SKYNET.Helpers.JSON;
 using SKYNET.IPC;
 using SKYNET.IPC.Types;
 using SKYNET.Steamworks;
@@ -79,9 +79,6 @@ namespace SKYNET.Managers
                     break;
                 case IPCMessageType.IPC_LobbyListResponse:
                     ProcessLobbyListResponse(message);
-                    break;
-                case IPCMessageType.IPC_LobbyJoinRequest:
-                    ProcessLobbyJoinRequest(message);
                     break;
                 case IPCMessageType.IPC_LobbyJoinResponse:
                     ProcessLobbyJoinResponse(message);
@@ -195,6 +192,7 @@ namespace SKYNET.Managers
                 SteamEmulator.AppID = ClientWelcome.AppID;
                 SteamEmulator.ISteamHTTP = ClientWelcome.ISteamHTTP;
                 SteamEmulator.SteamRemoteStorage.StoragePath = ClientWelcome.RemoteStoragePath;
+                SteamEmulator.DLCs = ClientWelcome.DLCs;
 
                 if (ClientWelcome.LogToFile)
                 {
@@ -215,6 +213,18 @@ namespace SKYNET.Managers
         }
 
         #endregion
+
+        internal static void SendLobbyGameServerEndPoint(ulong steamID, uint iP, uint usQueryPort)
+        {
+            var LobbyGameServerEndPoint = new IPC_LobbyGameServerEndPoint()
+            {
+                LobbySteamID = steamID,
+                IP = iP,
+                Port = usQueryPort
+            };
+
+            SendTo(IPC_ToServer, LobbyGameServerEndPoint, IPCMessageType.IPC_LobbyGameServerEndPoint);
+        }
 
         private static void ProcessPlayerStats(IPCMessage message)
         {
@@ -278,42 +288,19 @@ namespace SKYNET.Managers
             }
         }
 
-        private static async void ProcessLobbyLeave(IPCMessage message)
+        private static void ProcessLobbyLeave(IPCMessage message)
         {
             var lobbyLeave = message.ParsedBody.FromJson<IPC_LobbyLeave>();
             if (lobbyLeave != null)
             {
-                if (SteamMatchmaking.Instance.GetLobby(lobbyLeave.LobbyID, out var lobby))
+                var data = new LobbyChatUpdate_t()
                 {
-                    var lobbyChatUpdate = new IPC_LobbyChatUpdate()
-                    {
-                        SteamIDLobby = lobby.SteamID,
-                        SteamIDUserChanged = lobbyLeave.SteamID,
-                        SteamIDMakingChange = lobbyLeave.SteamID,
-                        ChatMemberStateChange = (int)EChatMemberStateChange.k_EChatMemberStateChangeLeft
-                    };
-
-                    lobby.Members.RemoveAll(m => m.m_SteamID == lobbyLeave.SteamID);
-
-                    foreach (var member in lobby.Members)
-                    {
-                        var user = await GetUser(member.m_SteamID);
-                        if (user != null)
-                        {
-                            SendTo(user.SteamID, lobbyChatUpdate, IPCMessageType.IPC_LobbyChatUpdate);
-                            //SteamMatchmaking.Instance.LobbyDataUpdated();
-                        }
-                    }
-
-                    var data = new LobbyChatUpdate_t()
-                    {
-                        m_ulSteamIDLobby = lobbyLeave.LobbyID,
-                        m_ulSteamIDUserChanged = lobbyLeave.SteamID,
-                        m_ulSteamIDMakingChange = lobbyLeave.SteamID,
-                        m_rgfChatMemberStateChange = (int)EChatMemberStateChange.k_EChatMemberStateChangeLeft
-                    };
-                    CallbackManager.AddCallback(data);
-                }
+                    m_ulSteamIDLobby = lobbyLeave.LobbyID,
+                    m_ulSteamIDUserChanged = lobbyLeave.SteamID,
+                    m_ulSteamIDMakingChange = lobbyLeave.SteamID,
+                    m_rgfChatMemberStateChange = (int)EChatMemberStateChange.k_EChatMemberStateChangeLeft
+                };
+                CallbackManager.AddCallback(data);
             }
         }
 
@@ -401,75 +388,6 @@ namespace SKYNET.Managers
             if (lobbyDataUpdate != null)
             {
                 SteamMatchmaking.Instance.LobbyDataUpdated(lobbyDataUpdate);
-            }
-        }
-
-        private static async void ProcessLobbyJoinRequest(IPCMessage message)
-        {
-            var lobbyJoinRequest = message.ParsedBody.FromJson<IPC_LobbyJoinRequest>();
-            var lobbyJoinResponse = new IPC_LobbyJoinResponse()
-            {
-                CallbackHandle = lobbyJoinRequest.CallbackHandle,
-                ChatRoomEnterResponse = (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess,
-            };
-            if (lobbyJoinRequest != null)
-            {
-                if (SteamMatchmaking.Instance.GetLobby(lobbyJoinRequest.LobbyID, out var lobby))
-                {
-                    if (lobby.Members.Count >= lobby.MaxMembers)
-                    {
-                        lobbyJoinResponse.ChatRoomEnterResponse = (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseFull;
-                    }
-
-                    var Member = lobby.Members.Find(m => m.m_SteamID == lobbyJoinRequest.SteamID);
-                    if (Member == null)
-                    {
-                        lobby.Members.Add(new SteamLobby.LobbyMember()
-                        {
-                            m_SteamID = lobbyJoinRequest.SteamID
-                        });
-                    }
-
-                    SteamFriends.Instance.UpdateUserLobby(lobbyJoinRequest.SteamID, lobbyJoinRequest.LobbyID);
-
-                    string serialized = lobby.ToJson();
-
-                    lobbyJoinResponse.SerializedLobby = serialized;
-
-                    try
-                    {
-                        SendTo(lobbyJoinRequest.SteamID, lobbyJoinResponse, IPCMessageType.IPC_LobbyJoinResponse);
-                    }
-                    catch
-                    {
-                    }
-
-                    // LobbyDataUpdate
-                    var lobbyDataUpdate = new IPC_LobbyDataUpdate()
-                    {
-                        SteamIDLobby = lobby.SteamID,
-                        SteamIDMember = lobbyJoinRequest.SteamID,
-                        SerializedLobby = serialized
-                    };
-
-                    var lobbyChatUpdate = new IPC_LobbyChatUpdate()
-                    {
-                        SteamIDLobby = lobby.SteamID,
-                        SteamIDUserChanged = lobbyJoinRequest.SteamID,
-                        SteamIDMakingChange = lobbyJoinRequest.SteamID,
-                        ChatMemberStateChange = (int)EChatMemberStateChange.k_EChatMemberStateChangeEntered
-                    };
-
-                    foreach (var member in lobby.Members)
-                    {
-                        var user = await GetUser(member.m_SteamID);
-                        if (user != null)
-                        {
-                            SendTo(user.SteamID, lobbyDataUpdate, IPCMessageType.IPC_LobbyDataUpdate);
-                            SendTo(user.SteamID, lobbyChatUpdate, IPCMessageType.IPC_LobbyChatUpdate);
-                        }
-                    }
-                }
             }
         }
 
@@ -619,7 +537,6 @@ namespace SKYNET.Managers
 
         public static async void SendLobbyJoinRequest(ulong APICall, SteamLobby lobby)
         {
-            Write($"Sending lobby request");
             try
             {
                 var JoinRequest = new IPC_LobbyJoinRequest()
@@ -629,7 +546,7 @@ namespace SKYNET.Managers
                     CallbackHandle = APICall
                 };
 
-                var user = await GetUser(lobby.Owner);
+                var user = GetUser(lobby.Owner);
                 if (user == null)
                 {
                     Write($"Not found user to send LobbyJoinRequest, SteamID {new CSteamID(lobby.Owner).ToString()}");
@@ -644,27 +561,17 @@ namespace SKYNET.Managers
             }
         }
 
-        public static async void SendLobbyGameServer(SteamLobby lobby)
+        internal static void SendLobbyGameServer(ulong steamIDLobby, ulong steamIDGameServer, uint unGameServerIP, uint unGameServerPort)
         {
             var lobbyGameserver = new IPC_LobbyGameserver()
             {
-                LobbyID = lobby.SteamID,
-                SteamID = lobby.Gameserver.SteamID, 
-                IP = lobby.Gameserver.IP,
-                Port = lobby.Gameserver.Port
+                LobbyID = steamIDLobby,
+                SteamID = steamIDGameServer, 
+                IP = unGameServerIP,
+                Port = unGameServerPort
             };
 
-            foreach (var member in lobby.Members)
-            {
-                if (member.m_SteamID != (ulong)SteamEmulator.SteamID)
-                {
-                    var user = await GetUser(member.m_SteamID);
-                    if (user != null)
-                    {
-                        SendTo(user.SteamID, lobbyGameserver, IPCMessageType.IPC_LobbyGameserver);
-                    }
-                }
-            }
+            SendTo(IPC_Client, lobbyGameserver, IPCMessageType.IPC_LobbyGameserver);
         }
 
         public static void SendLobbyListRequest(uint currentRequest)
@@ -688,7 +595,7 @@ namespace SKYNET.Managers
                 SerializedLobby = lobby.ToJson()
             };
 
-            var user = await GetUser(IDTarget);
+            var user = UserManager.GetUser(IDTarget);
             if (user != null)
             {
                 SendTo(user.SteamID, lobbyDataUpdate, IPCMessageType.IPC_LobbyDataUpdate);
@@ -712,7 +619,7 @@ namespace SKYNET.Managers
 
         public static async void SendLobbyLeave(ulong owner, ulong lobbyID)
         {
-            var user = await GetUser(owner);
+            var user = UserManager.GetUser(owner);
             if (user != null)
             {
                 var lobbyLeave = new IPC_LobbyLeave()
@@ -731,7 +638,7 @@ namespace SKYNET.Managers
             {
                 if (member.m_SteamID != lobby.Owner)
                 {
-                    var user = await GetUser(member.m_SteamID);
+                    var user = UserManager.GetUser(member.m_SteamID);
                     if (user != null)
                     {
                         var lobbyRemove = new IPC_LobbyRemove()
@@ -757,7 +664,7 @@ namespace SKYNET.Managers
             return new List<SteamPlayer>();
         }
 
-        public static async Task<SteamPlayer> GetUser(ulong steamID)
+        public static SteamPlayer GetUser(ulong steamID)
         {
             var User = UserManager.GetUser(steamID);
             if (User != null)

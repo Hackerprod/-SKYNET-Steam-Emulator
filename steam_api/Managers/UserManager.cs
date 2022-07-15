@@ -1,4 +1,4 @@
-﻿using SKYNET.Helper;
+﻿using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using SKYNET.Types;
 using System.Collections.Generic;

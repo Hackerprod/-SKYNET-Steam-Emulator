@@ -1,14 +1,10 @@
 ﻿using SKYNET.Callback;
 using SKYNET.Steamworks;
-
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 
-namespace SKYNET.Helper
+namespace SKYNET.Helpers
 {
     public static class Extensions
     {

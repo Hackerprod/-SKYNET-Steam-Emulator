@@ -1,4 +1,6 @@
-﻿namespace SKYNET.Controls
+﻿using System.Windows.Forms;
+
+namespace SKYNET.GUI.Controls
 {
     partial class SKYNET_WebLogger
     {
@@ -28,12 +30,12 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.webChat = new System.Windows.Forms.WebBrowser();
+            this.webChat = new WebBrowser();
             this.SuspendLayout();
             // 
             // webChat
             // 
-            this.webChat.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.webChat.Dock = DockStyle.Fill;
             this.webChat.IsWebBrowserContextMenuEnabled = false;
             this.webChat.Location = new System.Drawing.Point(0, 0);
             this.webChat.MinimumSize = new System.Drawing.Size(20, 20);
@@ -45,7 +47,7 @@
             // WebBrowserLogger
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = AutoScaleMode.Font;
             this.Controls.Add(this.webChat);
             this.Name = "WebBrowserLogger";
             this.Size = new System.Drawing.Size(582, 360);
@@ -55,6 +57,6 @@
 
         #endregion
 
-        internal System.Windows.Forms.WebBrowser webChat;
+        internal WebBrowser webChat;
     }
 }

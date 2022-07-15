@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using SKYNET.Callback;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Steamworks.Interfaces;
 

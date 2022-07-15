@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
 using SKYNET.Helpers;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 
 namespace SKYNET.GUI
 {

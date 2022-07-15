@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Threading;
-using SKYNET.Network.Packets;
+using SKYNET.Network.Types;
 using SKYNET.GUI.Controls;
 using System.Threading.Tasks;
 using SKYNET.Types;

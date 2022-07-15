@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace SKYNET.Helper
+namespace SKYNET.Helpers
 {
     internal static class Platform
     {

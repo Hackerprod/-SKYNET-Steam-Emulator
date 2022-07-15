@@ -1,4 +1,6 @@
-﻿namespace SKYNET
+﻿using System.Windows.Forms;
+
+namespace SKYNET.GUI.Controls
 {
     partial class SKYNET_ShadowBox
     {
@@ -33,7 +35,7 @@
             // ButtonBox
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = AutoScaleMode.Font;
             this.Name = "ButtonBox";
             this.Size = new System.Drawing.Size(75, 75);
             this.ResumeLayout(false);

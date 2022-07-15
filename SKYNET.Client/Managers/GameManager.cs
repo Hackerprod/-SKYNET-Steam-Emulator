@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web.Script.Serialization;
-using SKYNET.Helper;
-using SKYNET.Network.Packets;
+using SKYNET.Helpers;
+using SKYNET.Network.Types;
+using SKYNET.Types;
 
 namespace SKYNET.Managers
 {
@@ -65,6 +63,11 @@ namespace SKYNET.Managers
         internal static Game GetGameByPath(string executablePath)
         {
             return Games.Find(g => g.ExecutablePath == executablePath);
+        }
+
+        internal static Game GetGameByRootPath(string executablePath)
+        {
+            return Games.Find(g => modCommon.GetRootPath(g.ExecutablePath) == modCommon.GetRootPath(executablePath));
         }
 
         public static void AddGame(Game game)

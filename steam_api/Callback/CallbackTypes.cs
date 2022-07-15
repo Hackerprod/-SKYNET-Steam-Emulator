@@ -1,4 +1,4 @@
-﻿using SKYNET.Helper;
+﻿using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using SKYNET.Types;
 using System;
@@ -1972,15 +1972,15 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     public struct SteamUGCQueryCompleted_t : ICallbackData
     {
-        public ulong Handle; // m_handle UGCQueryHandle_t
-        public EResult Result; // m_eResult EResult
-        public uint NumResultsReturned; // m_unNumResultsReturned uint32
-        public uint TotalMatchingResults; // m_unTotalMatchingResults uint32
+        public ulong m_handle;
+        public EResult m_eResult; 
+        public uint m_unNumResultsReturned;
+        public uint m_unTotalMatchingResults; 
         [MarshalAs(UnmanagedType.I1)]
-        public bool CachedData; // m_bCachedData bool
-        public string NextCursorUTF8() => System.Text.Encoding.UTF8.GetString(NextCursor, 0, System.Array.IndexOf<byte>(NextCursor, 0));
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)] // byte[] m_rgchNextCursor
-        public byte[] NextCursor; // m_rgchNextCursor char [256]
+        public bool m_bCachedData; // m_bCachedData bool
+        public string NextCursorUTF8() => System.Text.Encoding.UTF8.GetString(m_rgchNextCursor, 0, Array.IndexOf<byte>(m_rgchNextCursor, 0));
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)] 
+        public byte[] m_rgchNextCursor; 
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SteamUGCQueryCompleted_t));

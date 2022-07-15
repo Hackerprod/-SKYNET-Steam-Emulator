@@ -1,13 +1,15 @@
-﻿namespace SKYNET
+﻿using System.Windows.Forms;
+
+namespace SKYNET.GUI
 {
-    partial class ShadowBox
+    partial class frmBrowser
     {
-        /// <summary> 
+        /// <summary>
         /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary> 
+        /// <summary>
         /// Clean up any resources being used.
         /// </summary>
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
@@ -20,22 +22,29 @@
             base.Dispose(disposing);
         }
 
-        #region Component Designer generated code
+        #region Windows Form Designer generated code
 
-        /// <summary> 
-        /// Required method for Designer support - do not modify 
+        /// <summary>
+        /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent()
         {
             this.SuspendLayout();
             // 
-            // ButtonBox
+            // frmBrowser
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Name = "ButtonBox";
-            this.Size = new System.Drawing.Size(75, 75);
+            this.AutoScaleMode = AutoScaleMode.Font;
+            this.BlurEffect = true;
+            this.ClientSize = new System.Drawing.Size(1084, 561);
+            this.MaximumSize = new System.Drawing.Size(1366, 728);
+            this.Name = "frmBrowser";
+            this.Opacity = 0D;
+            this.ShowIcon = false;
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.TransparencyKey = System.Drawing.Color.Azure;
+            this.Load += new System.EventHandler(this.FrmBrowser_Load);
             this.ResumeLayout(false);
 
         }

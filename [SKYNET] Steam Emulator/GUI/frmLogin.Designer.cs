@@ -1,4 +1,7 @@
-﻿namespace SKYNET.GUI
+﻿using SKYNET.GUI.Controls;
+using System.Windows.Forms;
+
+namespace SKYNET.GUI
 {
     partial class frmLogin
     {
@@ -28,26 +31,26 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.PN_Container = new System.Windows.Forms.Panel();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
+            this.PN_Container = new Panel();
+            this.label7 = new Label();
+            this.label6 = new Label();
             this.skyneT_Button3 = new SKYNET_Button();
             this.BT_OfflineMode = new SKYNET_Button();
-            this.gradiantBox1 = new SKYNET.Controls.GradiantBox();
+            this.gradiantBox1 = new SKYNET_GradiantBox();
             this.skyneT_Button1 = new SKYNET_Button();
             this.BT_Login = new SKYNET_Button();
-            this.label5 = new System.Windows.Forms.Label();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.label4 = new System.Windows.Forms.Label();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.skyneT_TextBox2 = new SKYNET.Controls.SKYNET_TextBox();
-            this.skyneT_TextBox1 = new SKYNET.Controls.SKYNET_TextBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.PN_Top = new System.Windows.Forms.Panel();
-            this.MinimizeBox = new SKYNET.Controls.SKYNET_MinimizeBox();
-            this.CloseBox = new SKYNET.Controls.SKYNET_CloseBox();
-            this.label1 = new System.Windows.Forms.Label();
+            this.label5 = new Label();
+            this.checkBox1 = new CheckBox();
+            this.label4 = new Label();
+            this.pictureBox1 = new PictureBox();
+            this.skyneT_TextBox2 = new SKYNET_TextBox();
+            this.skyneT_TextBox1 = new SKYNET_TextBox();
+            this.label3 = new Label();
+            this.label2 = new Label();
+            this.PN_Top = new Panel();
+            this.MinimizeBox = new SKYNET_MinimizeBox();
+            this.CloseBox = new SKYNET_CloseBox();
+            this.label1 = new Label();
             this.PN_Container.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.PN_Top.SuspendLayout();
@@ -72,7 +75,7 @@
             this.PN_Container.Controls.Add(this.label3);
             this.PN_Container.Controls.Add(this.label2);
             this.PN_Container.Controls.Add(this.PN_Top);
-            this.PN_Container.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.PN_Container.Dock = DockStyle.Fill;
             this.PN_Container.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(192)))), ((int)(((byte)(199)))));
             this.PN_Container.Location = new System.Drawing.Point(1, 1);
             this.PN_Container.Name = "PN_Container";
@@ -103,7 +106,7 @@
             // 
             this.skyneT_Button3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(61)))), ((int)(((byte)(66)))), ((int)(((byte)(75)))));
             this.skyneT_Button3.BackColorMouseOver = System.Drawing.Color.Empty;
-            this.skyneT_Button3.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.skyneT_Button3.Cursor = Cursors.Hand;
             this.skyneT_Button3.Font = new System.Drawing.Font("Segoe UI", 8F);
             this.skyneT_Button3.ForeColorMouseOver = System.Drawing.Color.Empty;
             this.skyneT_Button3.ImageAlignment = SKYNET_Button._ImgAlign.Left;
@@ -121,7 +124,7 @@
             // 
             this.BT_OfflineMode.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(61)))), ((int)(((byte)(66)))), ((int)(((byte)(75)))));
             this.BT_OfflineMode.BackColorMouseOver = System.Drawing.Color.Empty;
-            this.BT_OfflineMode.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.BT_OfflineMode.Cursor = Cursors.Hand;
             this.BT_OfflineMode.Font = new System.Drawing.Font("Segoe UI", 8F);
             this.BT_OfflineMode.ForeColorMouseOver = System.Drawing.Color.Empty;
             this.BT_OfflineMode.ImageAlignment = SKYNET_Button._ImgAlign.Left;
@@ -140,7 +143,7 @@
             // 
             this.gradiantBox1.LeftColor = System.Drawing.Color.FromArgb(((int)(((byte)(71)))), ((int)(((byte)(76)))), ((int)(((byte)(85)))));
             this.gradiantBox1.Location = new System.Drawing.Point(22, 227);
-            this.gradiantBox1.Mode = SKYNET.Controls.Mode.Horizontal;
+            this.gradiantBox1.Mode = Mode.Horizontal;
             this.gradiantBox1.Name = "gradiantBox1";
             this.gradiantBox1.RigthColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(54)))), ((int)(((byte)(59)))));
             this.gradiantBox1.Size = new System.Drawing.Size(425, 2);
@@ -150,7 +153,7 @@
             // 
             this.skyneT_Button1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(61)))), ((int)(((byte)(66)))), ((int)(((byte)(75)))));
             this.skyneT_Button1.BackColorMouseOver = System.Drawing.Color.Empty;
-            this.skyneT_Button1.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.skyneT_Button1.Cursor = Cursors.Hand;
             this.skyneT_Button1.Font = new System.Drawing.Font("Segoe UI", 8F);
             this.skyneT_Button1.ForeColorMouseOver = System.Drawing.Color.Empty;
             this.skyneT_Button1.ImageAlignment = SKYNET_Button._ImgAlign.Left;
@@ -168,7 +171,7 @@
             // 
             this.BT_Login.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(61)))), ((int)(((byte)(66)))), ((int)(((byte)(75)))));
             this.BT_Login.BackColorMouseOver = System.Drawing.Color.Empty;
-            this.BT_Login.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.BT_Login.Cursor = Cursors.Hand;
             this.BT_Login.Font = new System.Drawing.Font("Segoe UI", 8F);
             this.BT_Login.ForeColorMouseOver = System.Drawing.Color.Empty;
             this.BT_Login.ImageAlignment = SKYNET_Button._ImgAlign.Left;
@@ -218,7 +221,7 @@
             this.pictureBox1.Location = new System.Drawing.Point(70, 40);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(36, 36);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 7;
             this.pictureBox1.TabStop = false;
             // 
@@ -231,13 +234,13 @@
             this.skyneT_TextBox2.IsPassword = true;
             this.skyneT_TextBox2.Location = new System.Drawing.Point(116, 121);
             this.skyneT_TextBox2.Logo = null;
-            this.skyneT_TextBox2.LogoCursor = System.Windows.Forms.Cursors.Default;
+            this.skyneT_TextBox2.LogoCursor = Cursors.Default;
             this.skyneT_TextBox2.Name = "skyneT_TextBox2";
             this.skyneT_TextBox2.OnlyNumbers = false;
             this.skyneT_TextBox2.ShowLogo = false;
             this.skyneT_TextBox2.Size = new System.Drawing.Size(328, 28);
             this.skyneT_TextBox2.TabIndex = 6;
-            this.skyneT_TextBox2.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
+            this.skyneT_TextBox2.TextAlign = HorizontalAlignment.Left;
             // 
             // skyneT_TextBox1
             // 
@@ -248,13 +251,13 @@
             this.skyneT_TextBox1.IsPassword = false;
             this.skyneT_TextBox1.Location = new System.Drawing.Point(116, 85);
             this.skyneT_TextBox1.Logo = null;
-            this.skyneT_TextBox1.LogoCursor = System.Windows.Forms.Cursors.Default;
+            this.skyneT_TextBox1.LogoCursor = Cursors.Default;
             this.skyneT_TextBox1.Name = "skyneT_TextBox1";
             this.skyneT_TextBox1.OnlyNumbers = false;
             this.skyneT_TextBox1.ShowLogo = false;
             this.skyneT_TextBox1.Size = new System.Drawing.Size(328, 28);
             this.skyneT_TextBox1.TabIndex = 5;
-            this.skyneT_TextBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
+            this.skyneT_TextBox1.TextAlign = HorizontalAlignment.Left;
             // 
             // label3
             // 
@@ -281,7 +284,7 @@
             this.PN_Top.Controls.Add(this.MinimizeBox);
             this.PN_Top.Controls.Add(this.CloseBox);
             this.PN_Top.Controls.Add(this.label1);
-            this.PN_Top.Dock = System.Windows.Forms.DockStyle.Top;
+            this.PN_Top.Dock = DockStyle.Top;
             this.PN_Top.Location = new System.Drawing.Point(0, 0);
             this.PN_Top.Name = "PN_Top";
             this.PN_Top.Size = new System.Drawing.Size(478, 31);
@@ -291,7 +294,7 @@
             // 
             this.MinimizeBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(42)))), ((int)(((byte)(46)))), ((int)(((byte)(51)))));
             this.MinimizeBox.Color = System.Drawing.Color.FromArgb(((int)(((byte)(42)))), ((int)(((byte)(46)))), ((int)(((byte)(51)))));
-            this.MinimizeBox.Dock = System.Windows.Forms.DockStyle.Right;
+            this.MinimizeBox.Dock = DockStyle.Right;
             this.MinimizeBox.FocusedColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(56)))), ((int)(((byte)(61)))));
             this.MinimizeBox.Location = new System.Drawing.Point(410, 0);
             this.MinimizeBox.MaximumSize = new System.Drawing.Size(34, 26);
@@ -305,7 +308,7 @@
             // 
             this.CloseBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(42)))), ((int)(((byte)(46)))), ((int)(((byte)(51)))));
             this.CloseBox.Color = System.Drawing.Color.FromArgb(((int)(((byte)(42)))), ((int)(((byte)(46)))), ((int)(((byte)(51)))));
-            this.CloseBox.Dock = System.Windows.Forms.DockStyle.Right;
+            this.CloseBox.Dock = DockStyle.Right;
             this.CloseBox.FocusedColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(56)))), ((int)(((byte)(61)))));
             this.CloseBox.Location = new System.Drawing.Point(444, 0);
             this.CloseBox.MaximumSize = new System.Drawing.Size(34, 26);
@@ -328,15 +331,15 @@
             // frmLogin
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(56)))), ((int)(((byte)(61)))));
             this.ClientSize = new System.Drawing.Size(480, 332);
             this.Controls.Add(this.PN_Container);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.FormBorderStyle = FormBorderStyle.None;
             this.MaximumSize = new System.Drawing.Size(1360, 728);
             this.Name = "frmLogin";
-            this.Padding = new System.Windows.Forms.Padding(1);
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Padding = new Padding(1);
+            this.StartPosition = FormStartPosition.CenterScreen;
             this.Text = "frmLogin";
             this.PN_Container.ResumeLayout(false);
             this.PN_Container.PerformLayout();
@@ -349,25 +352,25 @@
 
         #endregion
 
-        private System.Windows.Forms.Panel PN_Container;
-        private System.Windows.Forms.Panel PN_Top;
-        private System.Windows.Forms.Label label1;
-        private SKYNET.Controls.SKYNET_MinimizeBox MinimizeBox;
-        private SKYNET.Controls.SKYNET_CloseBox CloseBox;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label2;
-        private SKYNET.Controls.SKYNET_TextBox skyneT_TextBox2;
-        private SKYNET.Controls.SKYNET_TextBox skyneT_TextBox1;
-        private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.CheckBox checkBox1;
+        private Panel PN_Container;
+        private Panel PN_Top;
+        private Label label1;
+        private SKYNET_MinimizeBox MinimizeBox;
+        private SKYNET_CloseBox CloseBox;
+        private Label label3;
+        private Label label2;
+        private SKYNET_TextBox skyneT_TextBox2;
+        private SKYNET_TextBox skyneT_TextBox1;
+        private PictureBox pictureBox1;
+        private Label label4;
+        private Label label5;
+        private CheckBox checkBox1;
         private SKYNET_Button BT_Login;
         private SKYNET_Button skyneT_Button1;
-        private SKYNET.Controls.GradiantBox gradiantBox1;
+        private SKYNET_GradiantBox gradiantBox1;
         private SKYNET_Button BT_OfflineMode;
         private SKYNET_Button skyneT_Button3;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Label label7;
+        private Label label6;
+        private Label label7;
     }
 }

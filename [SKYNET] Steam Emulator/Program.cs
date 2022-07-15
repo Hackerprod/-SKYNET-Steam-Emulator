@@ -1,15 +1,13 @@
-﻿using SKYNET.Managers;
-using SKYNET.Types;
+﻿using SKYNET.GUI;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Threading;
-using System.Web.Script.Serialization;
 using System.Windows.Forms;
 
-namespace SKYNET // & " = |
+namespace SKYNET
 {
     class Program
     {

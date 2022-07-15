@@ -1,4 +1,5 @@
-﻿using SKYNET.Controls;
+﻿using SKYNET.GUI.Controls;
+using System.Windows.Forms;
 
 namespace SKYNET.GUI
 {
@@ -30,17 +31,17 @@ namespace SKYNET.GUI
         /// </summary>
         private void InitializeComponent()
         {
-            this.PN_Top = new SKYNET.Controls.GradiantBox();
-            this.PN_Bottom = new System.Windows.Forms.Panel();
-            this.PN_Right = new System.Windows.Forms.Panel();
-            this.PN_Left = new System.Windows.Forms.Panel();
-            this.PN_Container = new System.Windows.Forms.Panel();
-            this.PB_Progress = new SKYNET.Controls.SKYNET_ProgressBar();
-            this.LB_Info = new System.Windows.Forms.Label();
-            this.LB_Name = new System.Windows.Forms.Label();
-            this.PB_Avatar = new System.Windows.Forms.PictureBox();
-            this.cancel = new System.Windows.Forms.Button();
-            this.ok = new System.Windows.Forms.Button();
+            this.PN_Top = new SKYNET_GradiantBox();
+            this.PN_Bottom = new Panel();
+            this.PN_Right = new Panel();
+            this.PN_Left = new Panel();
+            this.PN_Container = new Panel();
+            this.PB_Progress = new SKYNET_ProgressBar();
+            this.LB_Info = new Label();
+            this.LB_Name = new Label();
+            this.PB_Avatar = new PictureBox();
+            this.cancel = new Button();
+            this.ok = new Button();
             this.BT_Cancel = new SKYNET_Button();
             this.PN_Container.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Avatar)).BeginInit();
@@ -48,10 +49,10 @@ namespace SKYNET.GUI
             // 
             // PN_Top
             // 
-            this.PN_Top.Dock = System.Windows.Forms.DockStyle.Top;
+            this.PN_Top.Dock = DockStyle.Top;
             this.PN_Top.LeftColor = System.Drawing.Color.FromArgb(((int)(((byte)(61)))), ((int)(((byte)(115)))), ((int)(((byte)(139)))));
             this.PN_Top.Location = new System.Drawing.Point(0, 0);
-            this.PN_Top.Mode = SKYNET.Controls.Mode.Horizontal;
+            this.PN_Top.Mode = Mode.Horizontal;
             this.PN_Top.Name = "PN_Top";
             this.PN_Top.RigthColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(69)))), ((int)(((byte)(120)))));
             this.PN_Top.Size = new System.Drawing.Size(523, 2);
@@ -60,7 +61,7 @@ namespace SKYNET.GUI
             // PN_Bottom
             // 
             this.PN_Bottom.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(54)))), ((int)(((byte)(60)))), ((int)(((byte)(67)))));
-            this.PN_Bottom.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.PN_Bottom.Dock = DockStyle.Bottom;
             this.PN_Bottom.Location = new System.Drawing.Point(0, 232);
             this.PN_Bottom.Name = "PN_Bottom";
             this.PN_Bottom.Size = new System.Drawing.Size(523, 1);
@@ -69,7 +70,7 @@ namespace SKYNET.GUI
             // PN_Right
             // 
             this.PN_Right.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(54)))), ((int)(((byte)(60)))), ((int)(((byte)(67)))));
-            this.PN_Right.Dock = System.Windows.Forms.DockStyle.Right;
+            this.PN_Right.Dock = DockStyle.Right;
             this.PN_Right.Location = new System.Drawing.Point(522, 2);
             this.PN_Right.Name = "PN_Right";
             this.PN_Right.Size = new System.Drawing.Size(1, 230);
@@ -78,7 +79,7 @@ namespace SKYNET.GUI
             // PN_Left
             // 
             this.PN_Left.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(54)))), ((int)(((byte)(60)))), ((int)(((byte)(67)))));
-            this.PN_Left.Dock = System.Windows.Forms.DockStyle.Left;
+            this.PN_Left.Dock = DockStyle.Left;
             this.PN_Left.Location = new System.Drawing.Point(0, 2);
             this.PN_Left.Name = "PN_Left";
             this.PN_Left.Size = new System.Drawing.Size(1, 230);
@@ -94,7 +95,7 @@ namespace SKYNET.GUI
             this.PN_Container.Controls.Add(this.cancel);
             this.PN_Container.Controls.Add(this.ok);
             this.PN_Container.Controls.Add(this.BT_Cancel);
-            this.PN_Container.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.PN_Container.Dock = DockStyle.Fill;
             this.PN_Container.Location = new System.Drawing.Point(1, 2);
             this.PN_Container.Name = "PN_Container";
             this.PN_Container.Size = new System.Drawing.Size(521, 230);
@@ -116,7 +117,7 @@ namespace SKYNET.GUI
             this.PB_Progress.TabIndex = 16;
             this.PB_Progress.Text = "skyneT_ProgressBar1";
             this.PB_Progress.Value = 0;
-            this.PB_Progress.ValueAlignment = SKYNET.Controls.SKYNET_ProgressBar.Alignment.Right;
+            this.PB_Progress.ValueAlignment = SKYNET_ProgressBar.Alignment.Right;
             // 
             // LB_Info
             // 
@@ -145,13 +146,13 @@ namespace SKYNET.GUI
             this.PB_Avatar.Location = new System.Drawing.Point(28, 32);
             this.PB_Avatar.Name = "PB_Avatar";
             this.PB_Avatar.Size = new System.Drawing.Size(60, 60);
-            this.PB_Avatar.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.PB_Avatar.SizeMode = PictureBoxSizeMode.Zoom;
             this.PB_Avatar.TabIndex = 13;
             this.PB_Avatar.TabStop = false;
             // 
             // cancel
             // 
-            this.cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.cancel.DialogResult = DialogResult.Cancel;
             this.cancel.Location = new System.Drawing.Point(-10, -10);
             this.cancel.Name = "cancel";
             this.cancel.Size = new System.Drawing.Size(0, 0);
@@ -161,7 +162,7 @@ namespace SKYNET.GUI
             // 
             // ok
             // 
-            this.ok.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.ok.DialogResult = DialogResult.OK;
             this.ok.Location = new System.Drawing.Point(-10, -10);
             this.ok.Name = "ok";
             this.ok.Size = new System.Drawing.Size(0, 0);
@@ -173,7 +174,7 @@ namespace SKYNET.GUI
             // 
             this.BT_Cancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(46)))), ((int)(((byte)(88)))));
             this.BT_Cancel.BackColorMouseOver = System.Drawing.Color.Empty;
-            this.BT_Cancel.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.BT_Cancel.Cursor = Cursors.Hand;
             this.BT_Cancel.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.BT_Cancel.ForeColor = System.Drawing.Color.White;
             this.BT_Cancel.ForeColorMouseOver = System.Drawing.Color.Empty;
@@ -192,17 +193,17 @@ namespace SKYNET.GUI
             // frmGameDownload
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(523, 233);
             this.Controls.Add(this.PN_Container);
             this.Controls.Add(this.PN_Left);
             this.Controls.Add(this.PN_Right);
             this.Controls.Add(this.PN_Bottom);
             this.Controls.Add(this.PN_Top);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.FormBorderStyle = FormBorderStyle.None;
             this.MaximumSize = new System.Drawing.Size(1360, 728);
             this.Name = "frmGameDownload";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.StartPosition = FormStartPosition.CenterScreen;
             this.Text = "frmMessage";
             this.PN_Container.ResumeLayout(false);
             this.PN_Container.PerformLayout();
@@ -213,17 +214,17 @@ namespace SKYNET.GUI
 
         #endregion
 
-        private GradiantBox PN_Top;
-        private System.Windows.Forms.Panel PN_Bottom;
-        private System.Windows.Forms.Panel PN_Right;
-        private System.Windows.Forms.Panel PN_Left;
-        private System.Windows.Forms.Panel PN_Container;
+        private SKYNET_GradiantBox PN_Top;
+        private Panel PN_Bottom;
+        private Panel PN_Right;
+        private Panel PN_Left;
+        private Panel PN_Container;
         private SKYNET_Button BT_Cancel;
-        private System.Windows.Forms.Button cancel;
-        private System.Windows.Forms.Button ok;
-        private System.Windows.Forms.Label LB_Name;
-        private System.Windows.Forms.PictureBox PB_Avatar;
-        private System.Windows.Forms.Label LB_Info;
+        private Button cancel;
+        private Button ok;
+        private Label LB_Name;
+        private PictureBox PB_Avatar;
+        private Label LB_Info;
         private SKYNET_ProgressBar PB_Progress;
     }
 }

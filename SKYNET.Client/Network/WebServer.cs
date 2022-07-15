@@ -2,11 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using WebSocketSharp.Server;
 
-namespace SKYNET
+namespace SKYNET.Network
 {
     public class WebServer
     {
@@ -87,6 +86,7 @@ namespace SKYNET
         { ".xml", "text/xml" },
         { ".xpi", "application/x-xpinstall" },
         { ".zip", "application/zip" },
+        { ".json", "application/json" },
         #endregion
     };
 
@@ -104,7 +104,7 @@ namespace SKYNET
         {
             string filename = e.Request.Url.AbsolutePath;
             filename = filename.Substring(1);
-            Write(e.Request.HttpMethod + " " + e.Request.Url.ToString());
+            //Write(e.Request.HttpMethod + " " + e.Request.Url.ToString());
 
             if (string.IsNullOrEmpty(filename))
             {
@@ -128,14 +128,11 @@ namespace SKYNET
             {
                 try
                 {
-
                     Stream input = new FileStream(filename, FileMode.Open);
 
-                    //Adding permanent http response headers
-                    string mime;
-                    e.Response.ContentType = _mimeTypeMappings.TryGetValue(Path.GetExtension(filename), out mime) ? mime : "application/octet-stream";
+                    e.Response.ContentType = _mimeTypeMappings.TryGetValue(Path.GetExtension(filename), out string mime) ? mime : "application/octet-stream";
                     e.Response.ContentLength64 = input.Length;
-
+                    
                     byte[] buffer = new byte[input.Length];
                     int nbytes;
                     while ((nbytes = input.Read(buffer, 0, buffer.Length)) > 0)
@@ -144,7 +141,7 @@ namespace SKYNET
                         e.Response.ContentLength64 = buffer.Length;
                     }
                     input.Close();
-
+                   
                     e.Response.StatusCode = (int)HttpStatusCode.OK;
                     e.Response.OutputStream.Flush();
                 }
@@ -152,7 +149,6 @@ namespace SKYNET
                 {
                     e.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 }
-
             }
             else
             {
@@ -160,6 +156,7 @@ namespace SKYNET
             }
 
             e.Response.OutputStream.Close();
+            e.Response.Close();
         }
 
         public bool Start()

@@ -1,14 +1,9 @@
 ﻿using NativeSharp;
-using SKYNET.Common;
-using System;
-using System.Collections.Generic;
+using SKYNET.Types;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
 
-namespace SKYNET
+namespace SKYNET.Helpers
 {
     public class DllInjector
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Steamworks.Interfaces;
 

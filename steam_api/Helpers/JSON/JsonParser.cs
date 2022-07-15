@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace SKYNET.Helper.JSON
+namespace SKYNET.Helpers.JSON
 {
     public static class JSONParser
     {

@@ -6,7 +6,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SKYNET.Helper
+namespace SKYNET.Helpers
 {
     public class RegistrySettings
     {

@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace SKYNET.Controls
+namespace SKYNET.GUI.Controls
 {
     public partial class SKYNET_TextBox : UserControl
     {

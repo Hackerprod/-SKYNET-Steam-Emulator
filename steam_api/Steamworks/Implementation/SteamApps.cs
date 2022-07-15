@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using SKYNET.Steamworks.Interfaces;
-
+using SKYNET.Types;
 using DepotId_t = System.UInt32;
 
 namespace SKYNET.Steamworks.Implementation
@@ -10,6 +11,7 @@ namespace SKYNET.Steamworks.Implementation
     public class SteamApps : ISteamInterface
     {
         public static SteamApps Instance;
+        public List<DLC> GameDLC => SteamEmulator.DLCs;
 
         public SteamApps()
         {
@@ -44,8 +46,9 @@ namespace SKYNET.Steamworks.Implementation
 
         public string GetCurrentGameLanguage()
         {
-            Write("GetCurrentGameLanguage");
-            return SteamEmulator.Language;
+            string Language = SteamEmulator.Language;
+            Write($"GetCurrentGameLanguage = {Language}");
+            return Language;
         }
 
         public string GetAvailableGameLanguages()
@@ -57,13 +60,15 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool BIsSubscribedApp(uint appID)
         {
-            Write("BIsSubscribedApp " + appID);
+            Write($"BIsSubscribedApp ({appID})");
             return false;
         }
 
         public bool BIsDlcInstalled(uint appID)
         {
-            Write($"BIsDlcInstalled (AppID = {appID})");
+            var Result = GameDLC.Find(d => d.AppId == appID) != null;
+            Write($"BIsDlcInstalled (AppID = {appID}) = {Result}");
+            // Force DLC load
             return true;
         }
 
@@ -82,8 +87,9 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetDLCCount()
         {
-            Write("GetDLCCount");
-            return 0;
+            var DLCsCount = SteamEmulator.DLCs == null ? 0 :SteamEmulator.DLCs.Count;
+            Write($"GetDLCCount {DLCsCount}");
+            return DLCsCount;
         }
 
         public bool BGetDLCDataByIndex(int iDLC, uint pAppID, bool pbAvailable, string pchName, int cchNameBufferSize)

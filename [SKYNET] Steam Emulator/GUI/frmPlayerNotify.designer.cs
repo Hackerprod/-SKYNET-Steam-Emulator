@@ -1,4 +1,7 @@
 ﻿
+using SKYNET.GUI.Controls;
+using System.Windows.Forms;
+
 namespace SKYNET.GUI
 {
     partial class frmPlayerNotify
@@ -30,16 +33,16 @@ namespace SKYNET.GUI
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmPlayerNotify));
-            this.panelTop = new System.Windows.Forms.Panel();
-            this.acceptBtn = new System.Windows.Forms.Button();
-            this.panelBody = new System.Windows.Forms.Panel();
-            this.LB_PersonaName = new System.Windows.Forms.Label();
-            this.LB_PlayingMsg = new System.Windows.Forms.Label();
-            this.Avatar = new CircularPictureBox();
-            this.ErrorLabel = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.panelLogo = new System.Windows.Forms.Panel();
-            this.Logo = new System.Windows.Forms.PictureBox();
+            this.panelTop = new Panel();
+            this.acceptBtn = new Button();
+            this.panelBody = new Panel();
+            this.LB_PersonaName = new Label();
+            this.LB_PlayingMsg = new Label();
+            this.Avatar = new SKYNET_CircularPictureBox();
+            this.ErrorLabel = new Label();
+            this.label6 = new Label();
+            this.panelLogo = new Panel();
+            this.Logo = new PictureBox();
             this.panelBody.SuspendLayout();
             this.panelLogo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.Logo)).BeginInit();
@@ -48,17 +51,17 @@ namespace SKYNET.GUI
             // panelTop
             // 
             this.panelTop.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
-            this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panelTop.Dock = DockStyle.Top;
             this.panelTop.ForeColor = System.Drawing.Color.White;
             this.panelTop.Location = new System.Drawing.Point(0, 0);
             this.panelTop.Name = "panelTop";
             this.panelTop.Size = new System.Drawing.Size(243, 20);
             this.panelTop.TabIndex = 5;
-            this.panelTop.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Controls_MouseClick);
+            this.panelTop.MouseClick += new MouseEventHandler(this.Controls_MouseClick);
             // 
             // acceptBtn
             // 
-            this.acceptBtn.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.acceptBtn.DialogResult = DialogResult.OK;
             this.acceptBtn.Location = new System.Drawing.Point(819, 372);
             this.acceptBtn.Name = "acceptBtn";
             this.acceptBtn.Size = new System.Drawing.Size(75, 23);
@@ -73,14 +76,14 @@ namespace SKYNET.GUI
             this.panelBody.Controls.Add(this.LB_PlayingMsg);
             this.panelBody.Controls.Add(this.Avatar);
             this.panelBody.Controls.Add(this.ErrorLabel);
-            this.panelBody.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panelBody.Dock = DockStyle.Top;
             this.panelBody.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(33)))), ((int)(((byte)(43)))));
             this.panelBody.Location = new System.Drawing.Point(0, 20);
             this.panelBody.Name = "panelBody";
-            this.panelBody.Padding = new System.Windows.Forms.Padding(8);
+            this.panelBody.Padding = new Padding(8);
             this.panelBody.Size = new System.Drawing.Size(243, 73);
             this.panelBody.TabIndex = 34;
-            this.panelBody.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Controls_MouseClick);
+            this.panelBody.MouseClick += new MouseEventHandler(this.Controls_MouseClick);
             // 
             // LB_PersonaName
             // 
@@ -92,7 +95,7 @@ namespace SKYNET.GUI
             this.LB_PersonaName.Size = new System.Drawing.Size(91, 20);
             this.LB_PersonaName.TabIndex = 85;
             this.LB_PersonaName.Text = "Hackerprod";
-            this.LB_PersonaName.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Controls_MouseClick);
+            this.LB_PersonaName.MouseClick += new MouseEventHandler(this.Controls_MouseClick);
             // 
             // LB_PlayingMsg
             // 
@@ -103,17 +106,17 @@ namespace SKYNET.GUI
             this.LB_PlayingMsg.Size = new System.Drawing.Size(140, 34);
             this.LB_PlayingMsg.TabIndex = 84;
             this.LB_PlayingMsg.Text = "Is playing Dota 2 ";
-            this.LB_PlayingMsg.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Controls_MouseClick);
+            this.LB_PlayingMsg.MouseClick += new MouseEventHandler(this.Controls_MouseClick);
             // 
             // Avatar
             // 
             this.Avatar.Image = global::SKYNET.Properties.Resources.profile_picture;
             this.Avatar.Location = new System.Drawing.Point(16, 10);
-            this.Avatar.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.Avatar.Margin = new Padding(3, 4, 3, 4);
             this.Avatar.Name = "Avatar";
             this.Avatar.Size = new System.Drawing.Size(60, 60);
             this.Avatar.TabIndex = 60;
-            this.Avatar.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Controls_MouseClick);
+            this.Avatar.MouseClick += new MouseEventHandler(this.Controls_MouseClick);
             // 
             // ErrorLabel
             // 
@@ -140,10 +143,10 @@ namespace SKYNET.GUI
             this.panelLogo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(7)))), ((int)(((byte)(164)))), ((int)(((byte)(245)))));
             this.panelLogo.Controls.Add(this.label6);
             this.panelLogo.Controls.Add(this.Logo);
-            this.panelLogo.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panelLogo.Dock = DockStyle.Top;
             this.panelLogo.ForeColor = System.Drawing.Color.White;
             this.panelLogo.Location = new System.Drawing.Point(0, 20);
-            this.panelLogo.Margin = new System.Windows.Forms.Padding(0);
+            this.panelLogo.Margin = new Padding(0);
             this.panelLogo.Name = "panelLogo";
             this.panelLogo.Size = new System.Drawing.Size(243, 0);
             this.panelLogo.TabIndex = 33;
@@ -153,13 +156,13 @@ namespace SKYNET.GUI
             this.Logo.Location = new System.Drawing.Point(136, 7);
             this.Logo.Name = "Logo";
             this.Logo.Size = new System.Drawing.Size(105, 105);
-            this.Logo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.Logo.SizeMode = PictureBoxSizeMode.Zoom;
             this.Logo.TabIndex = 1;
             this.Logo.TabStop = false;
             // 
             // frmPlayerNotify
             // 
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
+            this.AutoScaleMode = AutoScaleMode.Inherit;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(46)))), ((int)(((byte)(60)))));
             this.ClientSize = new System.Drawing.Size(243, 100);
             this.Controls.Add(this.panelBody);
@@ -168,9 +171,9 @@ namespace SKYNET.GUI
             this.Controls.Add(this.panelTop);
             this.Font = new System.Drawing.Font("Segoe UI Emoji", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(29)))), ((int)(((byte)(39)))), ((int)(((byte)(51)))));
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.FormBorderStyle = FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.Margin = new Padding(3, 4, 3, 4);
             this.MaximumSize = new System.Drawing.Size(1360, 728);
             this.Name = "frmPlayerNotify";
             this.ShowIcon = false;
@@ -185,15 +188,15 @@ namespace SKYNET.GUI
         }
 
         #endregion
-        private System.Windows.Forms.Panel panelTop;
-        private System.Windows.Forms.Button acceptBtn;
-        private System.Windows.Forms.Panel panelBody;
-        private System.Windows.Forms.PictureBox Logo;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Panel panelLogo;
-        private System.Windows.Forms.Label ErrorLabel;
-        private CircularPictureBox Avatar;
-        private System.Windows.Forms.Label LB_PlayingMsg;
-        private System.Windows.Forms.Label LB_PersonaName;
+        private Panel panelTop;
+        private Button acceptBtn;
+        private Panel panelBody;
+        private PictureBox Logo;
+        private Label label6;
+        private Panel panelLogo;
+        private Label ErrorLabel;
+        private SKYNET_CircularPictureBox Avatar;
+        private Label LB_PlayingMsg;
+        private Label LB_PersonaName;
     }
 }

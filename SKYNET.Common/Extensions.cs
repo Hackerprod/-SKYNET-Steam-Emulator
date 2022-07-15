@@ -57,12 +57,6 @@ namespace SKYNET.Common
             return js.Deserialize<T>(@string);
         }
 
-        public static string ToJson(this object obj)
-        {
-            var js = new JavaScriptSerializer() { MaxJsonLength = 500000000 };
-            return js.Serialize(obj);
-        }
-
         public static string Serialize(this object obj)
         {
             var js = new JavaScriptSerializer() { MaxJsonLength = 500000000 };

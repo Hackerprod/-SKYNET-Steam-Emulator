@@ -2,11 +2,11 @@
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
-using SKYNET.GUI;
-using SKYNET.Helper;
+using SKYNET.Helpers;
 using SKYNET.Managers;
+using SKYNET.Types;
 
-namespace SKYNET
+namespace SKYNET.GUI
 {
     public partial class frmGameManager : frmBase
     {
