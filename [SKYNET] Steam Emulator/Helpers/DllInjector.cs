@@ -5,7 +5,7 @@ using System.IO;
 
 namespace SKYNET.Helpers
 {
-    public class DllInjector
+    public class DLLInjector
     {
         public static void Inject(Game game)
         {

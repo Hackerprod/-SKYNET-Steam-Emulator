@@ -365,7 +365,7 @@ namespace SKYNET.GUI
 
             Write("SteamClient", "Opening " + game.Name);
 
-            DllInjector.Inject(game);
+            DLLInjector.Inject(game);
         }
 
         public static void AvatarUpdated(Bitmap Avatar)

@@ -128,7 +128,7 @@
     <Compile Include="GUI\frmUpdateProfile.designer.cs">
       <DependentUpon>frmUpdateProfile.cs</DependentUpon>
     </Compile>
-    <Compile Include="Helpers\DllInjector.cs" />
+    <Compile Include="Helpers\DLLInjector.cs" />
     <Compile Include="GUI\Controls\SKYNET_WebLogger.cs">
       <SubType>UserControl</SubType>
     </Compile>
