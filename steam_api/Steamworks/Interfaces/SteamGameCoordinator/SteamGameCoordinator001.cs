@@ -8,19 +8,19 @@ namespace SKYNET.Steamworks.Interfaces
     [Interface("SteamGameCoordinator001")]
     public class SteamGameCoordinator001 : ISteamInterface
     {
-        public EGCResults SendMessage(uint32 unMsgType, IntPtr pubData, uint32 cubData)
+        public int SendMessage(IntPtr _, uint unMsgType, IntPtr pubData, uint cubData)
         {
-            return SteamGameCoordinator.Instance.SendMessage(unMsgType, pubData, cubData);
+            return (int)SteamEmulator.SteamGameCoordinator.SendMessage(unMsgType, pubData, cubData);
         }
 
-        public unsafe bool IsMessageAvailable(uint pcubMsgSize)
+        public bool IsMessageAvailable(IntPtr _, ref uint pcubMsgSize)
         {
-            return SteamGameCoordinator.Instance.IsMessageAvailable(pcubMsgSize);
+            return SteamEmulator.SteamGameCoordinator.IsMessageAvailable(ref pcubMsgSize);
         }
 
-        public unsafe int RetrieveMessage(ref uint punMsgType, IntPtr pubDest, uint32 cubDest, ref uint pcubMsgSize)
+        public int RetrieveMessage(IntPtr _, ref uint punMsgType, IntPtr pubDest, uint cubDest, ref uint pcubMsgSize)
         {
-            return SteamGameCoordinator.Instance.RetrieveMessage(ref punMsgType, pubDest, cubDest, ref pcubMsgSize);
+            return (int)SteamEmulator.SteamGameCoordinator.RetrieveMessage(ref punMsgType, pubDest, cubDest, ref pcubMsgSize);
         }
     }
 }

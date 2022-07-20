@@ -5,7 +5,6 @@ using System.Drawing;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
 using System.Windows.Forms;
 using SKYNET.Client;
 using SKYNET.Common;
@@ -95,6 +94,12 @@ namespace SKYNET.GUI
 
             WebManager.OnGameLaunch += UserManager_OnGameLaunch;
             WebManager.Initialize();
+
+            // Debug 
+            if (settings.PersonaName == "jst4rk" || settings.PersonaName == "Hackerprod")
+            {
+                LB_Browser.Visible = true;
+            }
         }
 
         #region GameManager Events

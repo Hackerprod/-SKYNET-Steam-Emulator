@@ -6,6 +6,7 @@ using SKYNET.Helpers;
 using SKYNET.Callback;
 using SKYNET.Managers;
 using SKYNET.Steamworks.Interfaces;
+using System.Collections.Generic;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -41,80 +42,45 @@ namespace SKYNET.Steamworks.Implementation
 
         public EGCResults SendMessage(uint unMsgType, IntPtr pubData, uint cubData)
         {
-            uint msgType = GetGCMsg(unMsgType);
+            uint gCMsg = GetGCMsg(unMsgType);
             byte[] bytes = pubData.GetBytes(cubData);
-
-            Write($"SendMessage (MsgType = {msgType}], {bytes.Length} bytes)");
-            //IPCManager.GCRequest(msgType, bytes);
+            IPCManager.SendGCMessage(bytes, gCMsg);
+            Write($"SendMessage [{gCMsg}], {bytes.Length} bytes");
             return EGCResults.k_EGCResultOK;
         }
 
-        public bool IsMessageAvailable(uint pcubMsgSize)
+        public bool IsMessageAvailable(ref uint pcubMsgSize)
         {
-            bool Result = false;
-            uint SizeResult = 0;
-            //MutexHelper.Wait("InMessages", delegate
-            //{
-            //    if (InMessages.Any())
-            //    {
-            //        var size = InMessages.FirstOrDefault().Value.Length;
-            //        SizeResult = (uint)size;
-            //        Result = true;
-            //    }
-            //});
-            //pcubMsgSize = SizeResult;
-
-            Write($"IsMessageAvailable (MsgSize = {SizeResult}) = {Result}");
-            return true;
+            bool result = false;
+            if (InMessages.Any())
+            {
+                //pcubMsgSize = (uint)InMessages.First().Value.Length;
+                result = true;
+            }
+            Write($"IsMessageAvailable = {result}");
+            return result;
         }
 
-        public unsafe int RetrieveMessage(ref uint punMsgType, IntPtr pubDest, uint cubDest, ref uint pcubMsgSize)
+        public EGCResults RetrieveMessage(ref uint punMsgType, IntPtr pubDest, uint cubDest, ref uint pcubMsgSize)
         {
-            EGCResults Result = EGCResults.k_EGCResultNoMessage;
-            byte[] Body = null;
-            uint MsgType = 0;
-            uint MsgSize = 0;
-            return (int)Result;
-
-            MutexHelper.Wait("InMessages", delegate
+            Write($"RetrieveMessage cubDest{cubDest}");
+            EGCResults result = EGCResults.k_EGCResultNoMessage;
+            if (InMessages.Any())
             {
-                if (InMessages.Any())
+                try
                 {
-                    var msg = InMessages.First();
-                    Body = msg.Value;
-                    MsgType = msg.Key;
-                    MsgSize = (uint)msg.Value.Length;
-
-                    Result = EGCResults.k_EGCResultOK;
-                    InMessages.TryRemove(msg.Key, out _);
+                    KeyValuePair<uint, byte[]> keyValuePair = InMessages.First();
+                    Marshal.Copy(keyValuePair.Value, 0, pubDest, keyValuePair.Value.Length);
+                    pcubMsgSize = (uint)keyValuePair.Value.Length;
+                    punMsgType = keyValuePair.Key;
+                    result = EGCResults.k_EGCResultOK;
+                    InMessages.TryRemove(keyValuePair.Key, out var _);
                 }
-            });
-
-            if (Body == null)
-            {
-                return (int)EGCResults.k_EGCResultNoMessage;
+                catch
+                {
+                }
             }
-
-            //try
-            //{
-            //    Marshal.Copy(Body, 0, pubDest, (int)MsgSize);
-            //    var values = new uint[2] { MsgType, MsgSize };
-            //    fixed (uint* Type = &values[0])
-            //    {
-            //        punMsgType = Type;
-            //    }
-            //    fixed (uint* Size = &values[1])
-            //    {
-            //        pcubMsgSize = Size;
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    Write($"{ex.Message} {ex.StackTrace}");
-            //}
-
-            Write($"RetrieveMessage (MsgType = {punMsgType}, {pcubMsgSize} bytes) = {Result}");
-            return (int)Result;
+            return result;
         }
 
         private uint GetGCMsg(uint msg)

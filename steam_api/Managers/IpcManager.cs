@@ -119,6 +119,9 @@ namespace SKYNET.Managers
                 case IPCMessageType.IPC_LobbiesResponse:
                     ProcessLobbiesResponse(message);
                     break;
+                case IPCMessageType.IPC_GCMessageResponse:
+                    ProcessGCMessageResponse(message);
+                    break;
                 default:
                     Write($"Not found Handle for message {(IPCMessageType)message.MessageType}");
                     break;
@@ -138,8 +141,25 @@ namespace SKYNET.Managers
             var UsersResponse = message.ParsedBody.FromJson<IPC_UsersResponse>();
             if (UsersResponse == null) return;
             UserManager.UpdateUsers(UsersResponse.Users);
-
         }
+
+        internal static void SendGCMessage(byte[] MsgBody, uint MsgType)
+        {
+            var IPC_GCRequest = new IPC_GCMessageRequest()
+            {
+                MsgType = MsgType,
+                Buffer = MsgBody
+            };
+            SendTo(IPC_ToServer, IPC_GCRequest, IPCMessageType.IPC_GCMessageRequest);
+        }
+
+        private static void ProcessGCMessageResponse(IPCMessage message)
+        {
+            var GCMessageResponse = message.ParsedBody.FromJson<IPC_GCMessageResponse>();
+            if (GCMessageResponse == null) return;
+            SteamGameCoordinator.Instance.PushMessage(GCMessageResponse.MsgType, GCMessageResponse.Buffer);
+        }
+
 
         private static void ProcessModifyFileLog(IPCMessage message)
         {
@@ -700,16 +720,6 @@ namespace SKYNET.Managers
         {
             var LobbiesRequest = new IPC_LobbiesRequest();
             SendTo(IPC_ToServer, LobbiesRequest, IPCMessageType.IPC_LobbiesRequest);
-        }
-
-        public static void GCRequest(uint MsgType, byte[] bytes)
-        {
-            var IPC_GCRequest = new IPC_GCMessageRequest()
-            {
-                MsgType = MsgType,
-                Buffer = bytes
-            };
-            SendTo(IPC_ToServer, IPC_GCRequest, IPCMessageType.IPC_GCMessageRequest);
         }
 
         //internal static SteamLobby GetLobby(ulong steamID, bool byOwner)

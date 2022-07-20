@@ -37,8 +37,12 @@ namespace SKYNET.Managers
         {
             if (!Recording)
             {
-                recorder.Start();
-                Recording = true;
+                try
+                {
+                    recorder.Start();
+                    Recording = true;
+                }
+                catch { }
                 Write("StartVoiceRecording");
             }
         }
@@ -47,8 +51,12 @@ namespace SKYNET.Managers
         {
             if (Recording)
             {
-                recorder.Stop();
-                Recording = false;
+                try
+                {
+                    recorder.Stop();
+                    Recording = false;
+                }
+                catch { }
                 Write("StopVoiceRecording");
             }
         }
