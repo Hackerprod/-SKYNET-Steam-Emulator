@@ -1,5 +1,8 @@
 ﻿using NativeSharp;
+using SKYNET.Client;
 using SKYNET.Types;
+using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 
@@ -51,7 +54,23 @@ namespace SKYNET.Helpers
             iInfo.CreateNoWindow = true;
             iInfo.WindowStyle = ProcessWindowStyle.Hidden;
             iInfo.UseShellExecute = true;
-            Process.Start(iInfo);
+
+            try
+            {
+                Process.Start(iInfo);
+            }
+            catch (FileNotFoundException)
+            {
+                SteamClient.Write("DLLInjector", $"Error starting injection, {Path.GetFileName(Injector)} not found.");
+            }
+            catch (Win32Exception)
+            {
+                SteamClient.Write("DLLInjector", $"Error starting injection, {Path.GetFileName(Injector)} not found.");
+            }
+            catch (Exception)
+            {
+                SteamClient.Write("DLLInjector", $"Error Starting injector.");
+            }
         }
 
         private static void PrepareDlls()

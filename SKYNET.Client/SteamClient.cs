@@ -87,7 +87,7 @@ namespace SKYNET.Client
         }
 
 
-        internal static void Write(string sender, object msg)
+        public static void Write(string sender, object msg)
         {
             Log.Write(sender, msg);
         }

@@ -54,7 +54,7 @@ namespace SKYNET.GUI.Controls
             {
                 _selected = value;
                 if (value)
-                    BackColor = Color_MouseHover;
+                    BackColor = Color.FromArgb(34, 131, 246);
                 else
                     BackColor = Color;
 

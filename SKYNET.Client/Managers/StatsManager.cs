@@ -314,6 +314,16 @@ namespace SKYNET.Managers
             }
         }
 
+        public static AppDetails GetGameDetails(uint AppID)
+        {
+            if (AppDetails.ContainsKey(AppID))
+            {
+                return AppDetails[AppID];
+            }
+            return null;
+        }
+
+
         #region Generate Data online
 
         public static async void DownloadAppCache(uint AppId)

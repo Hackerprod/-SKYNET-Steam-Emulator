@@ -24,7 +24,7 @@ namespace SKYNET.Steamworks.Implementation
 
             // CMsgConnectionStatus serialized
             byte[] ConnectionStatus = new byte[] { 0xA4, 0x0F, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00 };
-            //InMessages.TryAdd(4009U, ConnectionStatus);
+            InMessages.TryAdd(4009U, ConnectionStatus);
         }
 
         public void PushMessage(uint MsgType, byte[] message)
@@ -45,35 +45,30 @@ namespace SKYNET.Steamworks.Implementation
             byte[] bytes = pubData.GetBytes(cubData);
 
             Write($"SendMessage (MsgType = {msgType}], {bytes.Length} bytes)");
-            IPCManager.GCRequest(msgType, bytes);
+            //IPCManager.GCRequest(msgType, bytes);
             return EGCResults.k_EGCResultOK;
         }
 
-        public unsafe bool IsMessageAvailable(uint* pcubMsgSize)
+        public bool IsMessageAvailable(uint pcubMsgSize)
         {
             bool Result = false;
             uint SizeResult = 0;
-            MutexHelper.Wait("InMessages", delegate
-            {
-                if (InMessages.Any())
-                {
-                    var size = InMessages.FirstOrDefault().Value.Length;
-                    SizeResult = (uint)size;
-                    Result = true;
-                }
-            });
+            //MutexHelper.Wait("InMessages", delegate
+            //{
+            //    if (InMessages.Any())
+            //    {
+            //        var size = InMessages.FirstOrDefault().Value.Length;
+            //        SizeResult = (uint)size;
+            //        Result = true;
+            //    }
+            //});
+            //pcubMsgSize = SizeResult;
 
-            var sizes = new uint[1] { SizeResult };
-            fixed (uint* p = &sizes[0])
-            {
-                pcubMsgSize = p;
-            }
-
-            Write($"IsMessageAvailable (MsgSize = {*pcubMsgSize}) = {Result}");
-            return Result;
+            Write($"IsMessageAvailable (MsgSize = {SizeResult}) = {Result}");
+            return true;
         }
 
-        public unsafe int RetrieveMessage(uint* punMsgType, IntPtr pubDest, uint cubDest, uint* pcubMsgSize)
+        public unsafe int RetrieveMessage(ref uint punMsgType, IntPtr pubDest, uint cubDest, ref uint pcubMsgSize)
         {
             EGCResults Result = EGCResults.k_EGCResultNoMessage;
             byte[] Body = null;
@@ -100,25 +95,25 @@ namespace SKYNET.Steamworks.Implementation
                 return (int)EGCResults.k_EGCResultNoMessage;
             }
 
-            try
-            {
-                Marshal.Copy(Body, 0, pubDest, (int)MsgSize);
-                var values = new uint[2] { MsgType, MsgSize };
-                fixed (uint* Type = &values[0])
-                {
-                    punMsgType = Type;
-                }
-                fixed (uint* Size = &values[1])
-                {
-                    pcubMsgSize = Size;
-                }
-            }
-            catch (Exception ex)
-            {
-                Write($"{ex.Message} {ex.StackTrace}");
-            }
+            //try
+            //{
+            //    Marshal.Copy(Body, 0, pubDest, (int)MsgSize);
+            //    var values = new uint[2] { MsgType, MsgSize };
+            //    fixed (uint* Type = &values[0])
+            //    {
+            //        punMsgType = Type;
+            //    }
+            //    fixed (uint* Size = &values[1])
+            //    {
+            //        pcubMsgSize = Size;
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    Write($"{ex.Message} {ex.StackTrace}");
+            //}
 
-            Write($"RetrieveMessage (MsgType = {*punMsgType}, {*pcubMsgSize} bytes) = {Result}");
+            Write($"RetrieveMessage (MsgType = {punMsgType}, {pcubMsgSize} bytes) = {Result}");
             return (int)Result;
         }
 

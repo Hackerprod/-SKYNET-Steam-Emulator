@@ -20,7 +20,6 @@ namespace SKYNET
             AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += ResolveAssembly;
             AppDomain.CurrentDomain.AssemblyResolve += ResolveAssembly;
 
-            TestJSON();
             ClearTempFiles();
 
             Application.ThreadException += UIThreadExceptionHandler;
@@ -107,18 +106,6 @@ namespace SKYNET
         }
 
         #endregion
-
-        private static void TestJSON()
-        {
-
-            //string JSON = File.ReadAllText(@"D:\Instaladores\Programación\Projects\SKYNET Steam Emulator\Data\Storage\346010\AppDetails.json");
-            //var details = new JavaScriptSerializer().Deserialize<dynamic>(JSON);
-            //AppDetails game = new JavaScriptSerializer().ConvertToType<AppDetails>(details["346010"]); ;
-
-            //modCommon.Show(game.success);
-
-
-        }
     }
 }
 

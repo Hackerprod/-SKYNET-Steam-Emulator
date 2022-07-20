@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
 using SKYNET.Client;
@@ -23,7 +25,6 @@ namespace SKYNET.GUI
         public static Types.Settings settings;
         public SteamClient SteamClient;
 
-        private List<RunningGame> RunningGames;
         private GameBox SelectedBox;
         private GameBox MenuBox;
         private Dictionary<uint, List<string>> GameMessages;
@@ -35,9 +36,6 @@ namespace SKYNET.GUI
             SetMouseMove(PN_Top);
             frm = this;
 
-            //new Form1().ShowDialog();
-            //Process.GetCurrentProcess().Kill();
-
             new DropShadow().ApplyShadows(this);
 
             Log.OnMessage += Log_OnMessage;
@@ -45,11 +43,10 @@ namespace SKYNET.GUI
 
             settings = Types.Settings.Load();
             LB_NickName.Text = settings.PersonaName;
-            LB_Menu_NickName.Text = settings.PersonaName.ToUpper();
+            LB_Profile.Text = settings.PersonaName.ToUpper();
             LB_SteamID.Text = new CSteamID(settings.AccountID).SteamID.ToString();
 
             GameMessages = new Dictionary<uint, List<string>>();
-            RunningGames = new List<RunningGame>();
                  
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data"));
             modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "www"));
@@ -98,7 +95,6 @@ namespace SKYNET.GUI
 
             WebManager.OnGameLaunch += UserManager_OnGameLaunch;
             WebManager.Initialize();
-
         }
 
         #region GameManager Events
@@ -110,7 +106,7 @@ namespace SKYNET.GUI
 
         private void GameManager_OnGameUpdated(object sender, Game e)
         {
-            var game = RunningGames.Find(g => g.Game.Guid == e.Guid);
+            var game = GameManager.GetRunningGame(e.Guid); 
             if (game != null)
             {
                 IPCManager.SendModifyFileLog(game.Game);
@@ -134,20 +130,6 @@ namespace SKYNET.GUI
                 {
                     PN_GameContainer.Controls.RemoveAt(i);
                 }
-            }
-        }
-
-        private void GameManager_OnGameOpened(object sender, GameManager.GameLaunchedEventArgs e)
-        {
-            var game = new RunningGame(e.ProcessID, e.Game, e.GameClientID);
-            if (game.Process == null) return;
-            RunningGames.Add(game);
-            NetworkManager.SendGameOpened(e.Game);
-
-            if (e.Game.Guid == MenuBox?.Game.Guid)
-            {
-                BT_GameAction.Text = "CLOSE";
-                BT_GameAction.BackColor = Color.Red;
             }
         }
 
@@ -181,18 +163,48 @@ namespace SKYNET.GUI
             new frmPlayerNotify(e, personaName, Avatar).ShowDialog();
         }
 
+        private void GameManager_OnGameOpened(object sender, GameManager.GameLaunchedEventArgs e)
+        {
+            if (GameManager.AddRunningGame(e.ProcessID, e.Game, e.GameClientID, out RunningGame game))
+            {
+                NetworkManager.SendGameOpened(e.Game);
+
+                if (e.Game.Guid == MenuBox?.Game.Guid)
+                {
+                    BT_GameAction.Text = "CLOSE";
+                    BT_GameAction.BackColor = Color.Red;
+                }
+                GameManager.SetLastPlayedTime(e.Game.Guid);
+            }
+        }
+
         private void GameManager_OnGameClosed(object sender, string gameClientID)
         {
-            RunningGames.RemoveAll(g => g.GameClientID == gameClientID);
+            var ClosedGame = GameManager.GetRunningGame(gameClientID, false);
+            if (ClosedGame == null) return;
 
-            BT_GameAction.Text = "PLAY";
-            BT_GameAction.BackColor = Color.FromArgb(46, 186, 65);
+            GameManager.SetLastPlayedTime(ClosedGame.Game.Guid);
+            GameManager.SetTimePlayed(ClosedGame.Game.Guid, ClosedGame.OppenedTime);
+            GameManager.RemoveRunningGame(gameClientID);
             WebManager.SendGameClosed(gameClientID);
+
+            if (MenuBox.Game.Guid == ClosedGame.Game.Guid)
+            {
+                BT_GameAction.Text = "PLAY";
+                BT_GameAction.BackColor = Color.FromArgb(46, 186, 65);
+            }
         }
 
         #endregion
 
         #region UserManager Events
+
+        private void UserManager_OnGameLaunch(object sender, string Guid)
+        {
+            var Game = GameManager.GetGame(Guid);
+            if (Game == null) return;
+            OpenGame(Game);
+        }
 
         private void UserManager_OnUserAdded(object sender, SteamPlayer user)
         {
@@ -219,6 +231,8 @@ namespace SKYNET.GUI
                 {
                     PN_UserContainer.Controls.Add(userControl);
                 });
+
+                LB_UsersOnline.Text = $"Users Online {UserManager.Users.Count - 1}";
             }
             catch 
             {
@@ -254,13 +268,6 @@ namespace SKYNET.GUI
 
         #endregion
 
-        private void UserManager_OnGameLaunch(object sender, string Guid)
-        {
-            var Game = GameManager.GetGame(Guid);
-            if (Game == null) return;
-            OpenGame(Game);
-        }
-
         private void Log_OnMessage(object sender, LogEventArgs Event)
         {
             Write(Event.Sender, Event.Message);
@@ -284,14 +291,17 @@ namespace SKYNET.GUI
         private void GameBox_DoubleClicked(object sender, GameBox e)
         {
             SelectBox(e);
-            OpenGame(e.Game);
+            if (!GameManager.IsRunningGame(e.Game.Guid))
+            {
+                OpenGame(e.Game);
+            }
         }
 
         private void SelectBox(GameBox e)
         {
             SelectedBox = e;
-
-            if (RunningGames.Find(x => x.Game == e.Game) != null)
+            var Running = GameManager.GetRunningGame(e.Game.Guid);
+            if (Running != null)
             {
                 BT_GameAction.Text = "CLOSE";
                 BT_GameAction.BackColor = Color.Red;
@@ -302,16 +312,27 @@ namespace SKYNET.GUI
                 BT_GameAction.BackColor = Color.FromArgb(46, 186, 65);
             }
 
-            LB_GameTittle.Text = e.Game.Name;
-
             try
             {
                 var imageBytes = Convert.FromBase64String(e.Game.AvatarHex);
                 Bitmap Avatar = (Bitmap)ImageHelper.ImageFromBytes(imageBytes);
                 PB_Logo.Image = Avatar;
+                PB_GameInfo.Image = Avatar;
             }
             catch 
             {
+            }
+
+            var GameDetails = StatsManager.GetGameDetails(e.Game.AppID);
+            if (GameDetails != null && GameDetails.success)
+            {
+                LB_ShortDescription.Text = GameDetails.data.short_description;
+                LB_GameTittle.Text = GameDetails.data.name;
+            }
+            else
+            {
+                LB_ShortDescription.Text = $"{e.Game.Name} is a Steam game with AppID {e.Game.AppID}. For more info please download Game cache.";
+                LB_GameTittle.Text = e.Game.Name;
             }
 
             string imagePath = Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache", e.Game.AppID + "_library_hero.jpg");
@@ -332,9 +353,51 @@ namespace SKYNET.GUI
                 }
             }
 
+            string LastPlayed = "";
+            if (e.Game.LastPlayed == 0)
+            {
+                LastPlayed = "Never played";
+            }
+            else
+            {
+                var Spam = DateTime.Now - e.Game.LastPlayed.ToDateTime();
+                if (Spam.Days != 0) LastPlayed = Spam.Days + (Spam.Days == 1 ? " Day ago" : " Days ago");
+                else if (Spam.Hours != 0) LastPlayed = Spam.Hours + (Spam.Hours == 1 ? " Hour ago" : " Hours ago");
+                else if (Spam.Minutes != 0) LastPlayed = Spam.Minutes + (Spam.Minutes == 1 ? " Minute ago" : " Minutes ago"); 
+                else if (Spam.Seconds != 0) LastPlayed = Spam.Seconds + (Spam.Seconds == 1 ? " Second ago" : " Seconds ago"); 
+            }
+
+            LB_LastPlayed.Text = LastPlayed;
+
+            string TimePlayed = "";
+            if (e.Game.LastPlayed == 0)
+            {
+                TimePlayed = "Never played";
+            }
+            else
+            {
+                var Time = new DateTime().AddSeconds(e.Game.TimePlayed); 
+                if (Time.Hour != 0) TimePlayed = Time.Day + " Hours";
+                if (Time.Minute != 0) TimePlayed = Time.Minute + " Minutes";
+                else if (Time.Second != 0) TimePlayed = Time.Second + " Seconds";
+            }
+
+            LB_PlayedTime.Text = TimePlayed;
+
+            int playing = UserManager.GetUsersPlaying(e.Game.AppID, false).Count;
+            LB_PlayingNow.Text = playing + " friends";
+
             e.Selected = true;
             BT_GameAction.Visible = true;
 
+            LB_LastPlayed.Visible = true;
+            LB_LastPlayedInfo.Visible = true;
+            LB_PlayedTime.Visible = true;
+            LB_PlayedTimeInfo.Visible = true;
+            LB_PlayingNow.Visible = true;
+            LB_PlayingNowInfo.Visible = true;
+            LB_ShortDescription.Visible = true;
+            PB_GameInfo.Visible = true;
         }
 
         private void AddBoxGame(Game game)
@@ -390,7 +453,7 @@ namespace SKYNET.GUI
         {
             SteamClient.PersonaName = PersonaName;
             frm.LB_NickName.Text = PersonaName;
-            frm.LB_Menu_NickName.Text = PersonaName.ToUpper();
+            frm.LB_Profile.Text = PersonaName.ToUpper();
             IPCManager.SendUserDataUpdated(SteamClient.AccountID, PersonaName);
             settings.PersonaName = PersonaName;
             Types.Settings.Save(settings);
@@ -399,7 +462,7 @@ namespace SKYNET.GUI
         public static void AccountIDUpdated(uint accountID)
         {
             SteamClient.AccountID = accountID;
-            SteamClient.SteamID = new Steamworks.CSteamID(accountID);
+            SteamClient.SteamID = new CSteamID(accountID);
             frm.LB_SteamID.Text = SteamClient.SteamID.SteamID.ToString();
             settings.AccountID = accountID;
             Types.Settings.Save(settings);
@@ -412,22 +475,9 @@ namespace SKYNET.GUI
 
         private void Close_Clicked(object sender, EventArgs e)
         {
-            string path = Path.Combine(modCommon.GetPath(), "Data", "Games.bin");
-            modCommon.EnsureDirectoryExists(path, true);
+            GameManager.Save();
 
             Types.Settings.Save(settings);
-
-            List<Game> Games = new List<Game>();
-            foreach (var control in PN_GameContainer.Controls)
-            {
-                if (control is GameBox)
-                {
-                    Games.Add(((GameBox)control).Game);
-                }
-            }
-
-            string json = new JavaScriptSerializer().Serialize(Games);
-            File.WriteAllText(path, json);
 
             Process.GetCurrentProcess().Kill();
         }
@@ -489,23 +539,13 @@ namespace SKYNET.GUI
             }
             else
             {
-                var Game = RunningGames.Find(x => x.Game == SelectedBox.Game);
+                var Game = GameManager.GetRunningGame(SelectedBox.Game.Guid);
+
                 if (Game != null)
                 {
                     try
                     {
                         Game.Process.Kill();
-
-                        foreach (var game in RunningGames)
-                        {
-                            if (GameMessages.ContainsKey(game.Game.AppID) && game.Game.LogToFile)
-                            {
-                                string logPath = Path.Combine(modCommon.GetPath(), "Data", "Storage", game.Game.AppID.ToString(), "GameMessages.log");
-                                File.WriteAllLines(logPath, GameMessages[game.Game.AppID]);
-                            }
-                        }
-
-                        RunningGames.Remove(Game);
                     }
                     catch { }
                 }
@@ -622,13 +662,42 @@ namespace SKYNET.GUI
             WebLogger1.ClearScreen();
         }
 
-        private void Label2_Click(object sender, EventArgs e)
+        private void LB_NickName_Click(object sender, EventArgs e)
         {
-            string exe = @"D:\Juegos\Steam\steamapps\common\dota 2 beta\game\bin\win64\dota2.exe";
-            string arg = "-windowed -console -novid -high -480 -dx11 +map_enable_background_maps 0 -prewarm";
-            string dll = @"D:\Instaladores\Programación\Projects\[SKYNET] Steam Emulator\[SKYNET] Steam Emulator\bin\Debug\x64\steam_api64.dll";
-            Process.Start(@"C:\Users\Administrador\source\repos\SKYNET.Injector\SKYNET.Injector\bin\Debug\x64\SKYNET.Injector.exe", "\"" + exe + "\" \"" + arg + "\" \"" + dll + "\"");
+            int id = modCommon.GetRandom();
+            Task.Run(delegate
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    WebManager.SendDownloadProcess(id, i * 10, $"This is the step {i} of download.");
+                    Thread.Sleep(1000);
+                }
+            });
         }
 
+        private void LB_Library_Click(object sender, EventArgs e)
+        {
+            OpenTab(TP_Library);
+        }
+
+        private void LB_Community_Click(object sender, EventArgs e)
+        {
+            OpenTab(TP_Community);
+        }
+
+        private void LB_Profile_Click(object sender, EventArgs e)
+        {
+            OpenTab(TP_Profile);
+        }
+
+        private void LB_Console_Click(object sender, EventArgs e)
+        {
+            OpenTab(TP_Console);
+        }
+
+        private void OpenTab(TabPage tabPage)
+        {
+            TabControl1.SelectTab(tabPage);
+        }
     }
 }

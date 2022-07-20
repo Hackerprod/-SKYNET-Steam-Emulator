@@ -249,6 +249,7 @@ namespace SKYNET.Managers
             if (GameInfoRequest == null) return;
             var Game = GameManager.GetGame(GameInfoRequest.Guid);
             if (Game == null) return;
+
             {
                 var FriendsPlaying = new List<WEB_GameInfoResponse.FriendPlaying>();
                 try

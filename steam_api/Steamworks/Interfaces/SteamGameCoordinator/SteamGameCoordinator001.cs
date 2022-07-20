@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SKYNET.Steamworks.Implementation;
+using System;
 using System.Runtime.InteropServices;
 using uint32 = System.UInt32;
 
@@ -9,17 +10,17 @@ namespace SKYNET.Steamworks.Interfaces
     {
         public EGCResults SendMessage(uint32 unMsgType, IntPtr pubData, uint32 cubData)
         {
-            return SteamEmulator.SteamGameCoordinator.SendMessage(unMsgType, pubData, cubData);
+            return SteamGameCoordinator.Instance.SendMessage(unMsgType, pubData, cubData);
         }
 
-        public unsafe bool IsMessageAvailable(uint* pcubMsgSize)
+        public unsafe bool IsMessageAvailable(uint pcubMsgSize)
         {
-            return SteamEmulator.SteamGameCoordinator.IsMessageAvailable(pcubMsgSize);
+            return SteamGameCoordinator.Instance.IsMessageAvailable(pcubMsgSize);
         }
 
-        public unsafe int RetrieveMessage(uint* punMsgType, IntPtr pubDest, uint32 cubDest, uint* pcubMsgSize)
+        public unsafe int RetrieveMessage(ref uint punMsgType, IntPtr pubDest, uint32 cubDest, ref uint pcubMsgSize)
         {
-            return SteamEmulator.SteamGameCoordinator.RetrieveMessage(punMsgType, pubDest, cubDest, pcubMsgSize);
+            return SteamGameCoordinator.Instance.RetrieveMessage(ref punMsgType, pubDest, cubDest, ref pcubMsgSize);
         }
     }
 }

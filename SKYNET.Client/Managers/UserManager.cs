@@ -38,7 +38,8 @@ namespace SKYNET.Managers
                 AccountID = SteamID.AccountID,
                 IPAddress = NetworkHelper.GetIPAddress().ToString(),
             });
-            // return;
+             return;
+            // Create TESTS Users
             Users.Add(new SteamPlayer()
             {
                 SteamID = (ulong)new CSteamID(4294967295),
@@ -165,6 +166,21 @@ namespace SKYNET.Managers
             IPCManager.SendUpdatedUsers();
         }
 
+        public static List<SteamPlayer> GetUsersPlaying(uint appID, bool IncludeMe = true)
+        {
+            List<SteamPlayer> users = default;
+
+            if (IncludeMe)
+            {
+                users = Users.FindAll(u => u.GameID == appID);
+            }
+            else
+            {
+                users = Users.FindAll(u => u.GameID == appID && u.SteamID != SteamClient.SteamID);
+            }
+            return users == null ? new List<SteamPlayer>() : users;
+        }
+
         public static void SetRichPresence(uint accountID, string key, string value)
         {
             var user = GetUser(accountID);
@@ -229,20 +245,7 @@ namespace SKYNET.Managers
             }
         }
 
-        private async void DownloadAvatarInternal(object state)
-        {
-
-
-            try
-            {
-            }
-            catch
-            {
-                modCommon.Show("sd");
-            }
-        }
-
-        internal static void UpdateUserPlaying(uint accountID, uint appID)
+        public static void UpdateUserPlaying(uint accountID, uint appID)
         {
             var user = GetUser(accountID);
             if (user != null)
@@ -252,7 +255,7 @@ namespace SKYNET.Managers
             }
         }
 
-        internal static void UpdateUserLobby(ulong userSteamID, ulong lobbySteamID)
+        public static void UpdateUserLobby(ulong userSteamID, ulong lobbySteamID)
         {
             var user = GetUser(userSteamID);
             if (user != null)

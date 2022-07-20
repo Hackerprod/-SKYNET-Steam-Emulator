@@ -85,6 +85,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GUI\Controls\SKYNET_TabControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="GUI\frmBrowser.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -234,7 +237,6 @@
     <Compile Include="GUI\Controls\SKYNET_Check.designer.cs">
       <DependentUpon>SKYNET_Check.cs</DependentUpon>
     </Compile>
-    <Compile Include="Types\RunningGame.cs" />
     <EmbeddedResource Include="GUI\frmBrowser.resx">
       <DependentUpon>frmBrowser.cs</DependentUpon>
     </EmbeddedResource>
@@ -341,6 +343,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="game.ico" />
+    <None Include="Resources\clockface.png" />
+    <None Include="Resources\icon_clock.png" />
     <None Include="Resources\EditProfile.png" />
     <None Include="Resources\DefaultImage.jpg" />
     <None Include="Resources\profile_picture.png" />

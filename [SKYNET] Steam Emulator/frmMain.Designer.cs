@@ -41,9 +41,10 @@ namespace SKYNET.GUI
             this.label6 = new System.Windows.Forms.Label();
             this.LB_Status = new System.Windows.Forms.Label();
             this.panel4 = new System.Windows.Forms.Panel();
-            this.LB_Menu_NickName = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
+            this.LB_Console = new System.Windows.Forms.Label();
+            this.LB_Profile = new System.Windows.Forms.Label();
+            this.LB_Community = new System.Windows.Forms.Label();
+            this.LB_Library = new System.Windows.Forms.Label();
             this.PN_LeftContainer = new System.Windows.Forms.Panel();
             this.PN_GameContainer = new System.Windows.Forms.Panel();
             this.panel8 = new System.Windows.Forms.Panel();
@@ -54,10 +55,8 @@ namespace SKYNET.GUI
             this.TB_Search = new SKYNET.GUI.Controls.SKYNET_TextBox();
             this.panel7 = new System.Windows.Forms.Panel();
             this.BT_Profile = new System.Windows.Forms.PictureBox();
-            this.pictureBox3 = new System.Windows.Forms.PictureBox();
             this.PB_Avatar = new SKYNET.GUI.Controls.SKYNET_CircularPictureBox();
             this.LB_SteamID = new System.Windows.Forms.Label();
-            this.label9 = new System.Windows.Forms.Label();
             this.LB_NickName = new System.Windows.Forms.Label();
             this.gradiantBox1 = new SKYNET.GUI.Controls.SKYNET_GradiantBox();
             this.label5 = new System.Windows.Forms.Label();
@@ -65,14 +64,29 @@ namespace SKYNET.GUI
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.panel2 = new System.Windows.Forms.Panel();
             this.panel5 = new System.Windows.Forms.Panel();
+            this.TabControl1 = new SKYNET.Controls.SKYNET_TabControl();
+            this.TP_Library = new System.Windows.Forms.TabPage();
+            this.LB_ShortDescription = new System.Windows.Forms.Label();
+            this.PB_GameInfo = new System.Windows.Forms.PictureBox();
+            this.PN_RContainer = new System.Windows.Forms.Panel();
+            this.PN_UserContainer = new System.Windows.Forms.Panel();
+            this.LB_UsersOnline = new System.Windows.Forms.Label();
             this.PB_Banner = new System.Windows.Forms.PictureBox();
             this.PB_Logo = new System.Windows.Forms.PictureBox();
             this.LB_GameTittle = new SKYNET.GUI.Controls.SKYNET_Label();
             this.ShadowBox = new System.Windows.Forms.Panel();
+            this.LB_PlayingNowInfo = new System.Windows.Forms.Label();
+            this.LB_PlayingNow = new System.Windows.Forms.Label();
+            this.LB_PlayedTime = new System.Windows.Forms.Label();
+            this.LB_LastPlayedInfo = new System.Windows.Forms.Label();
+            this.LB_LastPlayed = new System.Windows.Forms.Label();
+            this.LB_PlayedTimeInfo = new System.Windows.Forms.Label();
             this.BT_GameAction = new SKYNET.GUI.Controls.SKYNET_Button();
-            this.PN_BodyContainer = new System.Windows.Forms.Panel();
+            this.TP_Community = new System.Windows.Forms.TabPage();
+            this.TP_Profile = new System.Windows.Forms.TabPage();
+            this.TP_Console = new System.Windows.Forms.TabPage();
             this.WebLogger1 = new SKYNET.GUI.Controls.SKYNET_WebLogger();
-            this.PN_UserContainer = new System.Windows.Forms.Panel();
+            this.PN_BodyContainer = new System.Windows.Forms.Panel();
             this.CM_MenuGame = new SKYNET.GUI.Controls.SKYNET_ContextMenuStrip();
             this.OpenMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.OpenWithoutEmuMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -91,13 +105,17 @@ namespace SKYNET.GUI
             this.panel1.SuspendLayout();
             this.panel7.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.BT_Profile)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
             this.gradiantBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.TabControl1.SuspendLayout();
+            this.TP_Library.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_GameInfo)).BeginInit();
+            this.PN_RContainer.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Banner)).BeginInit();
             this.PB_Banner.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Logo)).BeginInit();
             this.ShadowBox.SuspendLayout();
+            this.TP_Console.SuspendLayout();
             this.PN_BodyContainer.SuspendLayout();
             this.CM_MenuGame.SuspendLayout();
             this.SuspendLayout();
@@ -209,51 +227,67 @@ namespace SKYNET.GUI
             // panel4
             // 
             this.panel4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(33)))), ((int)(((byte)(43)))));
-            this.panel4.Controls.Add(this.LB_Menu_NickName);
-            this.panel4.Controls.Add(this.label3);
-            this.panel4.Controls.Add(this.label2);
+            this.panel4.Controls.Add(this.LB_Console);
+            this.panel4.Controls.Add(this.LB_Profile);
+            this.panel4.Controls.Add(this.LB_Community);
+            this.panel4.Controls.Add(this.LB_Library);
             this.panel4.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel4.Location = new System.Drawing.Point(249, 26);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(893, 40);
+            this.panel4.Size = new System.Drawing.Size(893, 34);
             this.panel4.TabIndex = 8;
             // 
-            // LB_Menu_NickName
+            // LB_Console
             // 
-            this.LB_Menu_NickName.AutoSize = true;
-            this.LB_Menu_NickName.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.LB_Menu_NickName.Font = new System.Drawing.Font("Segoe UI Emoji", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.LB_Menu_NickName.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(208)))), ((int)(((byte)(218)))));
-            this.LB_Menu_NickName.Location = new System.Drawing.Point(253, 5);
-            this.LB_Menu_NickName.Name = "LB_Menu_NickName";
-            this.LB_Menu_NickName.Size = new System.Drawing.Size(140, 26);
-            this.LB_Menu_NickName.TabIndex = 2;
-            this.LB_Menu_NickName.Text = "HACKERPROD";
+            this.LB_Console.AutoSize = true;
+            this.LB_Console.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.LB_Console.Font = new System.Drawing.Font("Segoe UI Emoji", 12.25F, System.Drawing.FontStyle.Bold);
+            this.LB_Console.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(208)))), ((int)(((byte)(218)))));
+            this.LB_Console.Location = new System.Drawing.Point(399, 5);
+            this.LB_Console.Name = "LB_Console";
+            this.LB_Console.Size = new System.Drawing.Size(93, 22);
+            this.LB_Console.TabIndex = 3;
+            this.LB_Console.Text = "CONSOLE";
+            this.LB_Console.Click += new System.EventHandler(this.LB_Console_Click);
             // 
-            // label3
+            // LB_Profile
             // 
-            this.label3.AutoSize = true;
-            this.label3.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.label3.Font = new System.Drawing.Font("Segoe UI Emoji", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(208)))), ((int)(((byte)(218)))));
-            this.label3.Location = new System.Drawing.Point(104, 5);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(134, 26);
-            this.label3.TabIndex = 1;
-            this.label3.Text = "COMMUNITY";
+            this.LB_Profile.AutoSize = true;
+            this.LB_Profile.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.LB_Profile.Font = new System.Drawing.Font("Segoe UI Emoji", 12.25F, System.Drawing.FontStyle.Bold);
+            this.LB_Profile.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(208)))), ((int)(((byte)(218)))));
+            this.LB_Profile.Location = new System.Drawing.Point(253, 5);
+            this.LB_Profile.Name = "LB_Profile";
+            this.LB_Profile.Size = new System.Drawing.Size(128, 22);
+            this.LB_Profile.TabIndex = 2;
+            this.LB_Profile.Text = "HACKERPROD";
+            this.LB_Profile.Click += new System.EventHandler(this.LB_Profile_Click);
             // 
-            // label2
+            // LB_Community
             // 
-            this.label2.AutoSize = true;
-            this.label2.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.label2.Font = new System.Drawing.Font("Segoe UI Emoji", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(208)))), ((int)(((byte)(218)))));
-            this.label2.Location = new System.Drawing.Point(13, 5);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(72, 26);
-            this.label2.TabIndex = 0;
-            this.label2.Text = "STORE";
-            this.label2.Click += new System.EventHandler(this.Label2_Click);
+            this.LB_Community.AutoSize = true;
+            this.LB_Community.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.LB_Community.Font = new System.Drawing.Font("Segoe UI Emoji", 12.25F, System.Drawing.FontStyle.Bold);
+            this.LB_Community.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(208)))), ((int)(((byte)(218)))));
+            this.LB_Community.Location = new System.Drawing.Point(111, 5);
+            this.LB_Community.Name = "LB_Community";
+            this.LB_Community.Size = new System.Drawing.Size(121, 22);
+            this.LB_Community.TabIndex = 1;
+            this.LB_Community.Text = "COMMUNITY";
+            this.LB_Community.Click += new System.EventHandler(this.LB_Community_Click);
+            // 
+            // LB_Library
+            // 
+            this.LB_Library.AutoSize = true;
+            this.LB_Library.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.LB_Library.Font = new System.Drawing.Font("Segoe UI Emoji", 12.25F, System.Drawing.FontStyle.Bold);
+            this.LB_Library.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(208)))), ((int)(((byte)(218)))));
+            this.LB_Library.Location = new System.Drawing.Point(13, 5);
+            this.LB_Library.Name = "LB_Library";
+            this.LB_Library.Size = new System.Drawing.Size(80, 22);
+            this.LB_Library.TabIndex = 0;
+            this.LB_Library.Text = "LIBRARY";
+            this.LB_Library.Click += new System.EventHandler(this.LB_Library_Click);
             // 
             // PN_LeftContainer
             // 
@@ -277,9 +311,9 @@ namespace SKYNET.GUI
             this.PN_GameContainer.AllowDrop = true;
             this.PN_GameContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(33)))), ((int)(((byte)(43)))));
             this.PN_GameContainer.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.PN_GameContainer.Location = new System.Drawing.Point(0, 162);
+            this.PN_GameContainer.Location = new System.Drawing.Point(0, 149);
             this.PN_GameContainer.Name = "PN_GameContainer";
-            this.PN_GameContainer.Size = new System.Drawing.Size(249, 403);
+            this.PN_GameContainer.Size = new System.Drawing.Size(249, 416);
             this.PN_GameContainer.TabIndex = 19;
             this.PN_GameContainer.DragDrop += new System.Windows.Forms.DragEventHandler(this.PN_GameContainer_DragDrop);
             this.PN_GameContainer.DragEnter += new System.Windows.Forms.DragEventHandler(this.PN_GameContainer_DragEnter);
@@ -288,7 +322,7 @@ namespace SKYNET.GUI
             // 
             this.panel8.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(33)))), ((int)(((byte)(43)))));
             this.panel8.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel8.Location = new System.Drawing.Point(0, 157);
+            this.panel8.Location = new System.Drawing.Point(0, 144);
             this.panel8.Name = "panel8";
             this.panel8.Size = new System.Drawing.Size(249, 5);
             this.panel8.TabIndex = 18;
@@ -336,9 +370,9 @@ namespace SKYNET.GUI
             this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
             this.panel1.Controls.Add(this.TB_Search);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel1.Location = new System.Drawing.Point(0, 105);
+            this.panel1.Location = new System.Drawing.Point(0, 99);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(249, 52);
+            this.panel1.Size = new System.Drawing.Size(249, 45);
             this.panel1.TabIndex = 15;
             // 
             // TB_Search
@@ -348,7 +382,7 @@ namespace SKYNET.GUI
             this.TB_Search.Color = System.Drawing.Color.FromArgb(((int)(((byte)(23)))), ((int)(((byte)(33)))), ((int)(((byte)(43)))));
             this.TB_Search.ForeColor = System.Drawing.Color.White;
             this.TB_Search.IsPassword = false;
-            this.TB_Search.Location = new System.Drawing.Point(13, 6);
+            this.TB_Search.Location = new System.Drawing.Point(13, 1);
             this.TB_Search.Logo = global::SKYNET.Properties.Resources.search;
             this.TB_Search.LogoCursor = System.Windows.Forms.Cursors.Default;
             this.TB_Search.Name = "TB_Search";
@@ -363,15 +397,13 @@ namespace SKYNET.GUI
             // 
             this.panel7.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
             this.panel7.Controls.Add(this.BT_Profile);
-            this.panel7.Controls.Add(this.pictureBox3);
             this.panel7.Controls.Add(this.PB_Avatar);
             this.panel7.Controls.Add(this.LB_SteamID);
-            this.panel7.Controls.Add(this.label9);
             this.panel7.Controls.Add(this.LB_NickName);
             this.panel7.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel7.Location = new System.Drawing.Point(0, 40);
             this.panel7.Name = "panel7";
-            this.panel7.Size = new System.Drawing.Size(249, 65);
+            this.panel7.Size = new System.Drawing.Size(249, 59);
             this.panel7.TabIndex = 14;
             // 
             // BT_Profile
@@ -386,17 +418,6 @@ namespace SKYNET.GUI
             this.BT_Profile.TabIndex = 21;
             this.BT_Profile.TabStop = false;
             this.BT_Profile.Click += new System.EventHandler(this.BT_Profile_Click);
-            // 
-            // pictureBox3
-            // 
-            this.pictureBox3.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBox3.Image = global::SKYNET.Properties.Resources.coins;
-            this.pictureBox3.Location = new System.Drawing.Point(76, 38);
-            this.pictureBox3.Name = "pictureBox3";
-            this.pictureBox3.Size = new System.Drawing.Size(25, 25);
-            this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox3.TabIndex = 20;
-            this.pictureBox3.TabStop = false;
             // 
             // PB_Avatar
             // 
@@ -417,17 +438,6 @@ namespace SKYNET.GUI
             this.LB_SteamID.TabIndex = 16;
             this.LB_SteamID.Text = "76513692034573246";
             // 
-            // label9
-            // 
-            this.label9.AutoSize = true;
-            this.label9.Font = new System.Drawing.Font("Segoe UI Emoji", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label9.ForeColor = System.Drawing.Color.NavajoWhite;
-            this.label9.Location = new System.Drawing.Point(104, 43);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(14, 16);
-            this.label9.TabIndex = 15;
-            this.label9.Text = "0";
-            // 
             // LB_NickName
             // 
             this.LB_NickName.AutoSize = true;
@@ -438,6 +448,7 @@ namespace SKYNET.GUI
             this.LB_NickName.Size = new System.Drawing.Size(101, 21);
             this.LB_NickName.TabIndex = 12;
             this.LB_NickName.Text = "Hackerprod";
+            this.LB_NickName.Click += new System.EventHandler(this.LB_NickName_Click);
             // 
             // gradiantBox1
             // 
@@ -506,6 +517,91 @@ namespace SKYNET.GUI
             this.panel5.Size = new System.Drawing.Size(249, 5);
             this.panel5.TabIndex = 10;
             // 
+            // TabControl1
+            // 
+            this.TabControl1.Controls.Add(this.TP_Library);
+            this.TabControl1.Controls.Add(this.TP_Community);
+            this.TabControl1.Controls.Add(this.TP_Profile);
+            this.TabControl1.Controls.Add(this.TP_Console);
+            this.TabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.TabControl1.HideBorders = true;
+            this.TabControl1.ItemSize = new System.Drawing.Size(43, 18);
+            this.TabControl1.Location = new System.Drawing.Point(0, 0);
+            this.TabControl1.Multiline = true;
+            this.TabControl1.Name = "TabControl1";
+            this.TabControl1.SelectedIndex = 0;
+            this.TabControl1.Size = new System.Drawing.Size(893, 505);
+            this.TabControl1.TabIndex = 0;
+            // 
+            // TP_Library
+            // 
+            this.TP_Library.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(43)))), ((int)(((byte)(53)))));
+            this.TP_Library.Controls.Add(this.LB_ShortDescription);
+            this.TP_Library.Controls.Add(this.PB_GameInfo);
+            this.TP_Library.Controls.Add(this.PN_RContainer);
+            this.TP_Library.Controls.Add(this.PB_Banner);
+            this.TP_Library.Location = new System.Drawing.Point(4, 22);
+            this.TP_Library.Name = "TP_Library";
+            this.TP_Library.Padding = new System.Windows.Forms.Padding(3);
+            this.TP_Library.Size = new System.Drawing.Size(885, 479);
+            this.TP_Library.TabIndex = 0;
+            this.TP_Library.Text = "Library";
+            // 
+            // LB_ShortDescription
+            // 
+            this.LB_ShortDescription.Font = new System.Drawing.Font("Franklin Gothic Medium", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LB_ShortDescription.ForeColor = System.Drawing.Color.LightGray;
+            this.LB_ShortDescription.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
+            this.LB_ShortDescription.Location = new System.Drawing.Point(132, 301);
+            this.LB_ShortDescription.Name = "LB_ShortDescription";
+            this.LB_ShortDescription.Size = new System.Drawing.Size(555, 80);
+            this.LB_ShortDescription.TabIndex = 12;
+            this.LB_ShortDescription.Visible = false;
+            // 
+            // PB_GameInfo
+            // 
+            this.PB_GameInfo.BackColor = System.Drawing.Color.Transparent;
+            this.PB_GameInfo.Image = global::SKYNET.Properties.Resources.logo;
+            this.PB_GameInfo.Location = new System.Drawing.Point(35, 299);
+            this.PB_GameInfo.Name = "PB_GameInfo";
+            this.PB_GameInfo.Size = new System.Drawing.Size(73, 67);
+            this.PB_GameInfo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.PB_GameInfo.TabIndex = 11;
+            this.PB_GameInfo.TabStop = false;
+            this.PB_GameInfo.Visible = false;
+            // 
+            // PN_RContainer
+            // 
+            this.PN_RContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(43)))), ((int)(((byte)(53)))));
+            this.PN_RContainer.Controls.Add(this.PN_UserContainer);
+            this.PN_RContainer.Controls.Add(this.LB_UsersOnline);
+            this.PN_RContainer.Dock = System.Windows.Forms.DockStyle.Right;
+            this.PN_RContainer.Location = new System.Drawing.Point(715, 272);
+            this.PN_RContainer.Name = "PN_RContainer";
+            this.PN_RContainer.Padding = new System.Windows.Forms.Padding(0, 5, 5, 0);
+            this.PN_RContainer.Size = new System.Drawing.Size(167, 204);
+            this.PN_RContainer.TabIndex = 10;
+            // 
+            // PN_UserContainer
+            // 
+            this.PN_UserContainer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.PN_UserContainer.Location = new System.Drawing.Point(0, 24);
+            this.PN_UserContainer.Name = "PN_UserContainer";
+            this.PN_UserContainer.Size = new System.Drawing.Size(162, 180);
+            this.PN_UserContainer.TabIndex = 11;
+            // 
+            // LB_UsersOnline
+            // 
+            this.LB_UsersOnline.Dock = System.Windows.Forms.DockStyle.Top;
+            this.LB_UsersOnline.Font = new System.Drawing.Font("Verdana", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LB_UsersOnline.ForeColor = System.Drawing.Color.White;
+            this.LB_UsersOnline.Location = new System.Drawing.Point(0, 5);
+            this.LB_UsersOnline.Name = "LB_UsersOnline";
+            this.LB_UsersOnline.Size = new System.Drawing.Size(162, 19);
+            this.LB_UsersOnline.TabIndex = 10;
+            this.LB_UsersOnline.Text = "Users Online 0";
+            this.LB_UsersOnline.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
             // PB_Banner
             // 
             this.PB_Banner.Controls.Add(this.PB_Logo);
@@ -513,9 +609,9 @@ namespace SKYNET.GUI
             this.PB_Banner.Controls.Add(this.ShadowBox);
             this.PB_Banner.Dock = System.Windows.Forms.DockStyle.Top;
             this.PB_Banner.Image = global::SKYNET.Properties.Resources.Header_1;
-            this.PB_Banner.Location = new System.Drawing.Point(249, 66);
+            this.PB_Banner.Location = new System.Drawing.Point(3, 3);
             this.PB_Banner.Name = "PB_Banner";
-            this.PB_Banner.Size = new System.Drawing.Size(893, 269);
+            this.PB_Banner.Size = new System.Drawing.Size(879, 269);
             this.PB_Banner.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.PB_Banner.TabIndex = 9;
             this.PB_Banner.TabStop = false;
@@ -547,12 +643,90 @@ namespace SKYNET.GUI
             // ShadowBox
             // 
             this.ShadowBox.BackColor = System.Drawing.Color.Transparent;
+            this.ShadowBox.Controls.Add(this.LB_PlayingNowInfo);
+            this.ShadowBox.Controls.Add(this.LB_PlayingNow);
+            this.ShadowBox.Controls.Add(this.LB_PlayedTime);
+            this.ShadowBox.Controls.Add(this.LB_LastPlayedInfo);
+            this.ShadowBox.Controls.Add(this.LB_LastPlayed);
+            this.ShadowBox.Controls.Add(this.LB_PlayedTimeInfo);
             this.ShadowBox.Controls.Add(this.BT_GameAction);
             this.ShadowBox.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.ShadowBox.Location = new System.Drawing.Point(0, 219);
             this.ShadowBox.Name = "ShadowBox";
-            this.ShadowBox.Size = new System.Drawing.Size(893, 50);
+            this.ShadowBox.Size = new System.Drawing.Size(879, 50);
             this.ShadowBox.TabIndex = 10;
+            // 
+            // LB_PlayingNowInfo
+            // 
+            this.LB_PlayingNowInfo.Font = new System.Drawing.Font("Franklin Gothic Medium", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LB_PlayingNowInfo.ForeColor = System.Drawing.Color.White;
+            this.LB_PlayingNowInfo.Location = new System.Drawing.Point(670, 12);
+            this.LB_PlayingNowInfo.Name = "LB_PlayingNowInfo";
+            this.LB_PlayingNowInfo.Size = new System.Drawing.Size(111, 13);
+            this.LB_PlayingNowInfo.TabIndex = 6;
+            this.LB_PlayingNowInfo.Text = "Playing now";
+            this.LB_PlayingNowInfo.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.LB_PlayingNowInfo.Visible = false;
+            // 
+            // LB_PlayingNow
+            // 
+            this.LB_PlayingNow.Font = new System.Drawing.Font("Franklin Gothic Medium", 8.25F, System.Drawing.FontStyle.Bold);
+            this.LB_PlayingNow.ForeColor = System.Drawing.Color.LightGray;
+            this.LB_PlayingNow.Location = new System.Drawing.Point(670, 25);
+            this.LB_PlayingNow.Name = "LB_PlayingNow";
+            this.LB_PlayingNow.Size = new System.Drawing.Size(111, 17);
+            this.LB_PlayingNow.TabIndex = 5;
+            this.LB_PlayingNow.Text = "0 friends";
+            this.LB_PlayingNow.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.LB_PlayingNow.Visible = false;
+            // 
+            // LB_PlayedTime
+            // 
+            this.LB_PlayedTime.Font = new System.Drawing.Font("Franklin Gothic Medium", 8.25F, System.Drawing.FontStyle.Bold);
+            this.LB_PlayedTime.ForeColor = System.Drawing.Color.LightGray;
+            this.LB_PlayedTime.Location = new System.Drawing.Point(241, 25);
+            this.LB_PlayedTime.Name = "LB_PlayedTime";
+            this.LB_PlayedTime.Size = new System.Drawing.Size(111, 17);
+            this.LB_PlayedTime.TabIndex = 4;
+            this.LB_PlayedTime.Text = "3.8 Hours";
+            this.LB_PlayedTime.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.LB_PlayedTime.Visible = false;
+            // 
+            // LB_LastPlayedInfo
+            // 
+            this.LB_LastPlayedInfo.Font = new System.Drawing.Font("Franklin Gothic Medium", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LB_LastPlayedInfo.ForeColor = System.Drawing.Color.White;
+            this.LB_LastPlayedInfo.Location = new System.Drawing.Point(457, 12);
+            this.LB_LastPlayedInfo.Name = "LB_LastPlayedInfo";
+            this.LB_LastPlayedInfo.Size = new System.Drawing.Size(111, 13);
+            this.LB_LastPlayedInfo.TabIndex = 3;
+            this.LB_LastPlayedInfo.Text = "Last played";
+            this.LB_LastPlayedInfo.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.LB_LastPlayedInfo.Visible = false;
+            // 
+            // LB_LastPlayed
+            // 
+            this.LB_LastPlayed.Font = new System.Drawing.Font("Franklin Gothic Medium", 8.25F, System.Drawing.FontStyle.Bold);
+            this.LB_LastPlayed.ForeColor = System.Drawing.Color.LightGray;
+            this.LB_LastPlayed.Location = new System.Drawing.Point(457, 25);
+            this.LB_LastPlayed.Name = "LB_LastPlayed";
+            this.LB_LastPlayed.Size = new System.Drawing.Size(111, 17);
+            this.LB_LastPlayed.TabIndex = 2;
+            this.LB_LastPlayed.Text = "3 days ago";
+            this.LB_LastPlayed.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.LB_LastPlayed.Visible = false;
+            // 
+            // LB_PlayedTimeInfo
+            // 
+            this.LB_PlayedTimeInfo.Font = new System.Drawing.Font("Franklin Gothic Medium", 8.25F, System.Drawing.FontStyle.Bold);
+            this.LB_PlayedTimeInfo.ForeColor = System.Drawing.Color.White;
+            this.LB_PlayedTimeInfo.Location = new System.Drawing.Point(241, 12);
+            this.LB_PlayedTimeInfo.Name = "LB_PlayedTimeInfo";
+            this.LB_PlayedTimeInfo.Size = new System.Drawing.Size(111, 13);
+            this.LB_PlayedTimeInfo.TabIndex = 1;
+            this.LB_PlayedTimeInfo.Text = "Played time";
+            this.LB_PlayedTimeInfo.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.LB_PlayedTimeInfo.Visible = false;
             // 
             // BT_GameAction
             // 
@@ -564,7 +738,7 @@ namespace SKYNET.GUI
             this.BT_GameAction.ForeColorMouseOver = System.Drawing.Color.Empty;
             this.BT_GameAction.ImageAlignment = SKYNET.GUI.Controls.SKYNET_Button._ImgAlign.Left;
             this.BT_GameAction.ImageIcon = null;
-            this.BT_GameAction.Location = new System.Drawing.Point(18, 11);
+            this.BT_GameAction.Location = new System.Drawing.Point(32, 11);
             this.BT_GameAction.MenuMode = false;
             this.BT_GameAction.Name = "BT_GameAction";
             this.BT_GameAction.Rounded = false;
@@ -575,38 +749,58 @@ namespace SKYNET.GUI
             this.BT_GameAction.Visible = false;
             this.BT_GameAction.Click += new System.EventHandler(this.GameAction_Click);
             // 
-            // PN_BodyContainer
+            // TP_Community
             // 
-            this.PN_BodyContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(50)))), ((int)(((byte)(57)))));
-            this.PN_BodyContainer.Controls.Add(this.WebLogger1);
-            this.PN_BodyContainer.Controls.Add(this.PN_UserContainer);
-            this.PN_BodyContainer.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.PN_BodyContainer.Location = new System.Drawing.Point(249, 335);
-            this.PN_BodyContainer.Name = "PN_BodyContainer";
-            this.PN_BodyContainer.Size = new System.Drawing.Size(893, 230);
-            this.PN_BodyContainer.TabIndex = 10;
+            this.TP_Community.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(43)))), ((int)(((byte)(53)))));
+            this.TP_Community.Location = new System.Drawing.Point(4, 22);
+            this.TP_Community.Name = "TP_Community";
+            this.TP_Community.Padding = new System.Windows.Forms.Padding(3);
+            this.TP_Community.Size = new System.Drawing.Size(885, 479);
+            this.TP_Community.TabIndex = 1;
+            this.TP_Community.Text = "Community";
+            // 
+            // TP_Profile
+            // 
+            this.TP_Profile.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(43)))), ((int)(((byte)(53)))));
+            this.TP_Profile.Location = new System.Drawing.Point(4, 22);
+            this.TP_Profile.Name = "TP_Profile";
+            this.TP_Profile.Padding = new System.Windows.Forms.Padding(3);
+            this.TP_Profile.Size = new System.Drawing.Size(885, 479);
+            this.TP_Profile.TabIndex = 2;
+            this.TP_Profile.Text = "Profile";
+            // 
+            // TP_Console
+            // 
+            this.TP_Console.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(43)))), ((int)(((byte)(53)))));
+            this.TP_Console.Controls.Add(this.WebLogger1);
+            this.TP_Console.Location = new System.Drawing.Point(4, 22);
+            this.TP_Console.Name = "TP_Console";
+            this.TP_Console.Padding = new System.Windows.Forms.Padding(3);
+            this.TP_Console.Size = new System.Drawing.Size(885, 479);
+            this.TP_Console.TabIndex = 3;
+            this.TP_Console.Text = "Console";
             // 
             // WebLogger1
             // 
             this.WebLogger1.AutoScrollLines = true;
             this.WebLogger1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(43)))), ((int)(((byte)(53)))));
             this.WebLogger1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.WebLogger1.Location = new System.Drawing.Point(0, 0);
+            this.WebLogger1.Location = new System.Drawing.Point(3, 3);
             this.WebLogger1.LoggerBackColor = System.Drawing.Color.Empty;
             this.WebLogger1.Name = "WebLogger1";
             this.WebLogger1.ScrollColors = System.Drawing.Color.Empty;
-            this.WebLogger1.Size = new System.Drawing.Size(726, 230);
+            this.WebLogger1.Size = new System.Drawing.Size(879, 473);
             this.WebLogger1.TabIndex = 2;
             // 
-            // PN_UserContainer
+            // PN_BodyContainer
             // 
-            this.PN_UserContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(43)))), ((int)(((byte)(53)))));
-            this.PN_UserContainer.Dock = System.Windows.Forms.DockStyle.Right;
-            this.PN_UserContainer.Location = new System.Drawing.Point(726, 0);
-            this.PN_UserContainer.Name = "PN_UserContainer";
-            this.PN_UserContainer.Padding = new System.Windows.Forms.Padding(0, 5, 5, 0);
-            this.PN_UserContainer.Size = new System.Drawing.Size(167, 230);
-            this.PN_UserContainer.TabIndex = 1;
+            this.PN_BodyContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(50)))), ((int)(((byte)(57)))));
+            this.PN_BodyContainer.Controls.Add(this.TabControl1);
+            this.PN_BodyContainer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.PN_BodyContainer.Location = new System.Drawing.Point(249, 60);
+            this.PN_BodyContainer.Name = "PN_BodyContainer";
+            this.PN_BodyContainer.Size = new System.Drawing.Size(893, 505);
+            this.PN_BodyContainer.TabIndex = 10;
             // 
             // CM_MenuGame
             // 
@@ -696,7 +890,6 @@ namespace SKYNET.GUI
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(65)))), ((int)(((byte)(73)))));
             this.ClientSize = new System.Drawing.Size(1142, 609);
             this.Controls.Add(this.PN_BodyContainer);
-            this.Controls.Add(this.PB_Banner);
             this.Controls.Add(this.panel4);
             this.Controls.Add(this.panel3);
             this.Controls.Add(this.PN_Top);
@@ -720,14 +913,18 @@ namespace SKYNET.GUI
             this.panel7.ResumeLayout(false);
             this.panel7.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.BT_Profile)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
             this.gradiantBox1.ResumeLayout(false);
             this.gradiantBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.TabControl1.ResumeLayout(false);
+            this.TP_Library.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.PB_GameInfo)).EndInit();
+            this.PN_RContainer.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.PB_Banner)).EndInit();
             this.PB_Banner.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.PB_Logo)).EndInit();
             this.ShadowBox.ResumeLayout(false);
+            this.TP_Console.ResumeLayout(false);
             this.PN_BodyContainer.ResumeLayout(false);
             this.CM_MenuGame.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -741,9 +938,9 @@ namespace SKYNET.GUI
         private SKYNET_CloseBox BT_Close;
         private Panel panel3;
         private Panel panel4;
-        private Label label2;
-        private Label label3;
-        private Label LB_Menu_NickName;
+        private Label LB_Library;
+        private Label LB_Community;
+        private Label LB_Profile;
         private Panel PN_LeftContainer;
         private Panel panel5;
         private SKYNET_TextBox TB_Search;
@@ -767,7 +964,6 @@ namespace SKYNET.GUI
         private Panel panel6;
         private Label LB_NickName;
         private Label LB_SteamID;
-        private Label label9;
         private Panel PN_GameContainer;
         private Panel panel8;
         private SKYNET_ContextMenuStrip CM_MenuGame;
@@ -779,13 +975,28 @@ namespace SKYNET.GUI
         private ToolStripMenuItem OpenWithoutEmuMenuItem;
         private ToolStripMenuItem OpenFileLocationMenuItem;
         private SKYNET_CircularPictureBox PB_Avatar;
-        private PictureBox pictureBox3;
         private ToolStripMenuItem GameCacheMenuItem;
-        private Panel PN_UserContainer;
         private SKYNET_WebLogger WebLogger1;
         private Label LB_Browser;
         private Label LB_Clear;
         private PictureBox BT_Profile;
+        private Label LB_PlayedTimeInfo;
+        private Label LB_LastPlayed;
+        private Label LB_LastPlayedInfo;
+        private Label LB_PlayedTime;
+        private Label LB_PlayingNowInfo;
+        private Label LB_PlayingNow;
+        private Label LB_Console;
+        private SKYNET.Controls.SKYNET_TabControl TabControl1;
+        private TabPage TP_Library;
+        private TabPage TP_Community;
+        private TabPage TP_Profile;
+        private TabPage TP_Console;
+        private Panel PN_RContainer;
+        private Label LB_UsersOnline;
+        private PictureBox PB_GameInfo;
+        private Panel PN_UserContainer;
+        private Label LB_ShortDescription;
     }
 }
 

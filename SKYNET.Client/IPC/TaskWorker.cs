@@ -4,11 +4,6 @@ using System.Threading.Tasks;
 
 namespace SKYNET.IPC
 {
-    /// <summary>
-    /// A class designed to run code using <see cref="Task"/> with <see cref="TaskCreationOptions.LongRunning"/> <br/>
-    /// and supporting automatic cancellation after <see cref="DisposeAsync"/> <br/>
-    /// <![CDATA[Version: 1.0.0.6]]> <br/>
-    /// </summary>
     internal class TaskWorker
     {
         #region Fields

@@ -14,6 +14,7 @@ namespace SKYNET.Helpers
         static Log()
         {
             fileName = Path.Combine(modCommon.GetPath(), "SKYNET", "[SKYNET] steam_api.log");
+            modCommon.EnsureDirectoryExists(fileName, true);
         }
 
         internal static void AppEnd(string formatted)
@@ -38,7 +39,6 @@ namespace SKYNET.Helpers
             }
             catch 
             {
-
             }
         }
 

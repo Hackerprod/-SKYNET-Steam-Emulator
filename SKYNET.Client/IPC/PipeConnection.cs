@@ -48,17 +48,17 @@ namespace SKYNET.IPC
         /// <summary>
         /// Invoked when the named pipe connection terminates.
         /// </summary>
-        public event EventHandler<ConnectionEventArgs<T>>? Disconnected;
+        public EventHandler<ConnectionEventArgs<T>>? Disconnected;
 
         /// <summary>
         /// Invoked whenever a message is received from the other end of the pipe.
         /// </summary>
-        public event EventHandler<ConnectionMessageEventArgs<T>>? MessageReceived;
+        public EventHandler<ConnectionMessageEventArgs<T>>? MessageReceived;
 
         /// <summary>
         /// Invoked when an exception is thrown during any read/write operation over the named pipe.
         /// </summary>
-        public event EventHandler<ExceptionEventArgs>? ExceptionOccurred;
+        public EventHandler<ExceptionEventArgs>? ExceptionOccurred;
 
         private void OnDisconnected()
         {

@@ -60,12 +60,12 @@ namespace SKYNET.IPC
         /// <summary>
         /// Invoked whenever a client connects to the server.
         /// </summary>
-        public event EventHandler<ConnectionEventArgs<T>>? ClientConnected;
+        public EventHandler<ConnectionEventArgs<T>>? ClientConnected;
 
         /// <summary>
         /// Invoked whenever a client disconnects from the server.
         /// </summary>
-        public event EventHandler<ConnectionEventArgs<T>>? ClientDisconnected;
+        public EventHandler<ConnectionEventArgs<T>>? ClientDisconnected;
 
         /// <summary>
         /// Invoked whenever a client sends a message to the server.
@@ -128,7 +128,7 @@ namespace SKYNET.IPC
                 {
                     try
                     {
-                        var connectionPipeName = $"{PipeName}_{Guid.NewGuid()}";
+                        var connectionPipeName = $"{Guid.NewGuid()}";
 
                         // Send the client the name of the data pipe to use
                         try

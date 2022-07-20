@@ -1,15 +1,25 @@
 ﻿using SKYNET.Steamworks;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 
 namespace SKYNET.Common
 {
     public static class Extensions
     {
+        public static uint ToTimestamp(this DateTime d)
+        {
+            var epoch = d - new DateTime(1970, 1, 1, 0, 0, 0, 0).ToLocalTime();
+            return (uint)epoch.TotalSeconds;
+        }
+
+        public static DateTime ToDateTime(this uint timestamp)
+        {
+            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0).ToLocalTime();
+            dateTime = dateTime.AddSeconds(timestamp);
+            return dateTime;
+        }
+
         public static uint GetAccountID(this ulong SteamID)
         {
             try

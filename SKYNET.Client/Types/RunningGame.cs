@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 
 namespace SKYNET.Types
 {
@@ -7,9 +8,11 @@ namespace SKYNET.Types
         public Game Game;
         public Process Process;
         public string GameClientID;
+        public DateTime OppenedTime;
 
         public RunningGame(int processID, Game game, string gameClientID)
         {
+            OppenedTime = DateTime.Now;
             Game = game;
             GameClientID = gameClientID;
             try

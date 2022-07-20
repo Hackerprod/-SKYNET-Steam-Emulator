@@ -36,6 +36,17 @@ namespace SKYNET.GUI
             {
                 TB_AppId.Text = File.ReadAllText(Path.Combine(PathDirectory, "steam_appid.txt"));
             }
+
+            // Dota2 fix and customization
+            if (FileName.ToLower() == "dota2")
+            {
+                TB_Name.Text = "Dota 2";
+                LB_Name.Text = "Dota 2";
+                TB_Parameters.Text = "-console -novid";
+                CH_RunCallbacks.Checked = false;
+                CH_ISteamHTTP.Checked = false;
+                BT_AddGame.Focus();
+            }
         }
 
         public frmGameManager(Game game)

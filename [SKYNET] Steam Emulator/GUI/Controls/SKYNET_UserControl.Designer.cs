@@ -30,10 +30,9 @@ namespace SKYNET.GUI.Controls
         /// </summary>
         private void InitializeComponent()
         {
-            this.PB_Avatar = new PictureBox();
+            this.PB_Avatar = new SKYNET_CircularPictureBox();
             this.LB_PersonaName = new Label();
             this.LB_IPAddress = new Label();
-            ((System.ComponentModel.ISupportInitialize)(this.PB_Avatar)).BeginInit();
             this.SuspendLayout();
             // 
             // PB_Avatar
@@ -41,9 +40,9 @@ namespace SKYNET.GUI.Controls
             this.PB_Avatar.Location = new System.Drawing.Point(6, 5);
             this.PB_Avatar.Name = "PB_Avatar";
             this.PB_Avatar.Size = new System.Drawing.Size(30, 30);
-            this.PB_Avatar.SizeMode = PictureBoxSizeMode.StretchImage;
             this.PB_Avatar.TabIndex = 0;
             this.PB_Avatar.TabStop = false;
+            this.PB_Avatar.Image = null;
             this.PB_Avatar.MouseLeave += new System.EventHandler(this.SKYNET_UserControl_MouseLeave);
             this.PB_Avatar.MouseMove += new MouseEventHandler(this.SKYNET_UserControl_MouseMove);
             // 
@@ -85,7 +84,6 @@ namespace SKYNET.GUI.Controls
             this.Size = new System.Drawing.Size(167, 40);
             this.MouseLeave += new System.EventHandler(this.SKYNET_UserControl_MouseLeave);
             this.MouseMove += new MouseEventHandler(this.SKYNET_UserControl_MouseMove);
-            ((System.ComponentModel.ISupportInitialize)(this.PB_Avatar)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -93,7 +91,7 @@ namespace SKYNET.GUI.Controls
 
         #endregion
 
-        private PictureBox PB_Avatar;
+        private SKYNET_CircularPictureBox PB_Avatar;
         private Label LB_PersonaName;
         private Label LB_IPAddress;
     }

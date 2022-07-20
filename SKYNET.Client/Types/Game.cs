@@ -18,6 +18,9 @@ namespace SKYNET.Types
         public bool LaunchWithoutEmu { get; set; }
         public bool GameOverlay { get; set; }
         public bool CSteamworks { get; set; }
+        public uint LastPlayed { get; set; }
+        public long TimePlayed { get; set; }
+
 
         public Game()
         {

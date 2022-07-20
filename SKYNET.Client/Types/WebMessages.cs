@@ -92,7 +92,7 @@ namespace SKYNET.WEB.Types
     {
         public bool Playing { get; set; }
         public uint LastPlayed { get; set; }
-        public uint TimePlayed { get; set; }
+        public long TimePlayed { get; set; }
         public uint UsersPlaying { get; set; }
         public List<FriendPlaying> FriendsPlaying { get; set; }
 

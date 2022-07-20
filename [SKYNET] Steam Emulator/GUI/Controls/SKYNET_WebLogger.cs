@@ -195,9 +195,9 @@ namespace SKYNET.GUI.Controls
                 }));
 
             }
-            catch (Exception ex)
+            catch 
             {
-                modCommon.Show(ex);
+
             }
         }
 
