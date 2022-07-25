@@ -212,10 +212,27 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ManualDispatch_GetNextCallback(HSteamPipe hSteamPipe, IntPtr pCallbackMsg)
+        public static bool SteamAPI_ManualDispatch_GetNextCallback(HSteamPipe hSteamPipe, ref CallbackMsg_t pCallbackMsg)
         {
-            Write($"SteamAPI_ManualDispatch_GetNextCallback");
-            return false;
+            var Result = false;
+            if (hSteamPipe == SteamEmulator.HSteamPipe || hSteamPipe == SteamEmulator.HSteamPipe_GS)
+            {
+                if (CallbackManager.GetFirstCallResult(out var CallResult, out SteamAPICall_t ApiCall))
+                {
+                    if (!CallResult.Called)
+                    {
+                        pCallbackMsg.m_hSteamUser = hSteamPipe; 
+                        pCallbackMsg.m_iCallback = (int)CallResult.Data.CallbackType;
+                        pCallbackMsg.m_cubParam = CallResult.Data.DataSize;
+                        pCallbackMsg.m_pubParam = Marshal.AllocHGlobal(CallResult.Data.DataSize);
+                        Marshal.StructureToPtr(CallResult.Data, pCallbackMsg.m_pubParam, true);
+                        CallResult.Called = true;
+                        Result = true;
+                    }
+                }
+            }
+            Write($"SteamAPI_ManualDispatch_GetNextCallback (SteamPipe = {hSteamPipe}) = {Result}");
+            return Result;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

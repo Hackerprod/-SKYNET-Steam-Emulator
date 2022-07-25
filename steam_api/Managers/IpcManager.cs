@@ -12,7 +12,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace SKYNET.Managers
 {
@@ -213,6 +212,9 @@ namespace SKYNET.Managers
                 SteamEmulator.ISteamHTTP = ClientWelcome.ISteamHTTP;
                 SteamEmulator.SteamRemoteStorage.StoragePath = ClientWelcome.RemoteStoragePath;
                 SteamEmulator.DLCs = ClientWelcome.DLCs;
+                AudioManager.InputDeviceID = ClientWelcome.InputDeviceID;
+                AudioManager.Initialize();
+
 
                 if (ClientWelcome.LogToFile)
                 {

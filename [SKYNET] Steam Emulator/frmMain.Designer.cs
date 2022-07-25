@@ -54,7 +54,6 @@ namespace SKYNET.GUI
             this.panel1 = new System.Windows.Forms.Panel();
             this.TB_Search = new SKYNET.GUI.Controls.SKYNET_TextBox();
             this.panel7 = new System.Windows.Forms.Panel();
-            this.BT_Profile = new System.Windows.Forms.PictureBox();
             this.PB_Avatar = new SKYNET.GUI.Controls.SKYNET_CircularPictureBox();
             this.LB_SteamID = new System.Windows.Forms.Label();
             this.LB_NickName = new System.Windows.Forms.Label();
@@ -83,7 +82,23 @@ namespace SKYNET.GUI
             this.LB_PlayedTimeInfo = new System.Windows.Forms.Label();
             this.BT_GameAction = new SKYNET.GUI.Controls.SKYNET_Button();
             this.TP_Community = new System.Windows.Forms.TabPage();
+            this.TB_Chat = new SKYNET.GUI.Controls.SKYNET_TextBox();
             this.TP_Profile = new System.Windows.Forms.TabPage();
+            this.CB_InputDeviceID = new SKYNET_ComboBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.TB_Profile_Language = new SKYNET.GUI.Controls.SKYNET_TextBox();
+            this.panel15 = new System.Windows.Forms.Panel();
+            this.LB_Profile_Language = new System.Windows.Forms.Label();
+            this.BT_Profile_Apply = new SKYNET.GUI.Controls.SKYNET_Button();
+            this.PB_Profile_Avatar = new SKYNET.GUI.Controls.SKYNET_CircularPictureBox();
+            this.LB_Profile_ShowDebugConsole = new System.Windows.Forms.Label();
+            this.LB_Profile_PersonaName = new System.Windows.Forms.Label();
+            this.TB_Profile_PersonaName = new SKYNET.GUI.Controls.SKYNET_TextBox();
+            this.CB_Profile_ShowDebugConsole = new SKYNET.GUI.Controls.SKYNET_Check();
+            this.LB_Profile_AccountID = new System.Windows.Forms.Label();
+            this.TB_Profile_AccountID = new SKYNET.GUI.Controls.SKYNET_TextBox();
+            this.CB_Profile_AllowRemoteAccess = new SKYNET.GUI.Controls.SKYNET_Check();
+            this.LB_Profile_AllowRemoteAccess = new System.Windows.Forms.Label();
             this.TP_Console = new System.Windows.Forms.TabPage();
             this.WebLogger1 = new SKYNET.GUI.Controls.SKYNET_WebLogger();
             this.PN_BodyContainer = new System.Windows.Forms.Panel();
@@ -96,6 +111,7 @@ namespace SKYNET.GUI
             this.ToButtomMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.GameCacheMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ConfigureMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.WebChat = new SKYNET.GUI.Controls.SKYNET_WebLogger();
             this.PN_Top.SuspendLayout();
             this.panel3.SuspendLayout();
             this.panel4.SuspendLayout();
@@ -104,7 +120,6 @@ namespace SKYNET.GUI
             ((System.ComponentModel.ISupportInitialize)(this.PB_Add)).BeginInit();
             this.panel1.SuspendLayout();
             this.panel7.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.BT_Profile)).BeginInit();
             this.gradiantBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.TabControl1.SuspendLayout();
@@ -115,6 +130,8 @@ namespace SKYNET.GUI
             this.PB_Banner.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Logo)).BeginInit();
             this.ShadowBox.SuspendLayout();
+            this.TP_Community.SuspendLayout();
+            this.TP_Profile.SuspendLayout();
             this.TP_Console.SuspendLayout();
             this.PN_BodyContainer.SuspendLayout();
             this.CM_MenuGame.SuspendLayout();
@@ -197,6 +214,7 @@ namespace SKYNET.GUI
             this.label6.TabIndex = 11;
             this.label6.Text = "Connected to 10.31.0.1";
             this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.label6.Visible = false;
             // 
             // LB_Status
             // 
@@ -209,6 +227,7 @@ namespace SKYNET.GUI
             this.LB_Status.TabIndex = 10;
             this.LB_Status.Text = "ONLINE";
             this.LB_Status.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.LB_Status.Visible = false;
             // 
             // LB_Clear
             // 
@@ -233,32 +252,39 @@ namespace SKYNET.GUI
             this.panel4.Controls.Add(this.LB_Library);
             this.panel4.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel4.Location = new System.Drawing.Point(249, 26);
+            this.panel4.Margin = new System.Windows.Forms.Padding(8, 3, 3, 3);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(893, 34);
+            this.panel4.Padding = new System.Windows.Forms.Padding(10, 0, 0, 0);
+            this.panel4.Size = new System.Drawing.Size(893, 28);
             this.panel4.TabIndex = 8;
             // 
             // LB_Console
             // 
             this.LB_Console.AutoSize = true;
             this.LB_Console.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.LB_Console.Dock = System.Windows.Forms.DockStyle.Left;
             this.LB_Console.Font = new System.Drawing.Font("Segoe UI Emoji", 12.25F, System.Drawing.FontStyle.Bold);
             this.LB_Console.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(208)))), ((int)(((byte)(218)))));
-            this.LB_Console.Location = new System.Drawing.Point(399, 5);
+            this.LB_Console.Location = new System.Drawing.Point(399, 0);
             this.LB_Console.Name = "LB_Console";
-            this.LB_Console.Size = new System.Drawing.Size(93, 22);
+            this.LB_Console.Padding = new System.Windows.Forms.Padding(10, 0, 10, 0);
+            this.LB_Console.Size = new System.Drawing.Size(113, 22);
             this.LB_Console.TabIndex = 3;
             this.LB_Console.Text = "CONSOLE";
+            this.LB_Console.Visible = false;
             this.LB_Console.Click += new System.EventHandler(this.LB_Console_Click);
             // 
             // LB_Profile
             // 
             this.LB_Profile.AutoSize = true;
             this.LB_Profile.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.LB_Profile.Dock = System.Windows.Forms.DockStyle.Left;
             this.LB_Profile.Font = new System.Drawing.Font("Segoe UI Emoji", 12.25F, System.Drawing.FontStyle.Bold);
             this.LB_Profile.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(208)))), ((int)(((byte)(218)))));
-            this.LB_Profile.Location = new System.Drawing.Point(253, 5);
+            this.LB_Profile.Location = new System.Drawing.Point(251, 0);
             this.LB_Profile.Name = "LB_Profile";
-            this.LB_Profile.Size = new System.Drawing.Size(128, 22);
+            this.LB_Profile.Padding = new System.Windows.Forms.Padding(10, 0, 10, 0);
+            this.LB_Profile.Size = new System.Drawing.Size(148, 22);
             this.LB_Profile.TabIndex = 2;
             this.LB_Profile.Text = "HACKERPROD";
             this.LB_Profile.Click += new System.EventHandler(this.LB_Profile_Click);
@@ -267,11 +293,13 @@ namespace SKYNET.GUI
             // 
             this.LB_Community.AutoSize = true;
             this.LB_Community.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.LB_Community.Dock = System.Windows.Forms.DockStyle.Left;
             this.LB_Community.Font = new System.Drawing.Font("Segoe UI Emoji", 12.25F, System.Drawing.FontStyle.Bold);
             this.LB_Community.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(208)))), ((int)(((byte)(218)))));
-            this.LB_Community.Location = new System.Drawing.Point(111, 5);
+            this.LB_Community.Location = new System.Drawing.Point(110, 0);
             this.LB_Community.Name = "LB_Community";
-            this.LB_Community.Size = new System.Drawing.Size(121, 22);
+            this.LB_Community.Padding = new System.Windows.Forms.Padding(10, 0, 10, 0);
+            this.LB_Community.Size = new System.Drawing.Size(141, 22);
             this.LB_Community.TabIndex = 1;
             this.LB_Community.Text = "COMMUNITY";
             this.LB_Community.Click += new System.EventHandler(this.LB_Community_Click);
@@ -280,11 +308,13 @@ namespace SKYNET.GUI
             // 
             this.LB_Library.AutoSize = true;
             this.LB_Library.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.LB_Library.Dock = System.Windows.Forms.DockStyle.Left;
             this.LB_Library.Font = new System.Drawing.Font("Segoe UI Emoji", 12.25F, System.Drawing.FontStyle.Bold);
             this.LB_Library.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(208)))), ((int)(((byte)(218)))));
-            this.LB_Library.Location = new System.Drawing.Point(13, 5);
+            this.LB_Library.Location = new System.Drawing.Point(10, 0);
             this.LB_Library.Name = "LB_Library";
-            this.LB_Library.Size = new System.Drawing.Size(80, 22);
+            this.LB_Library.Padding = new System.Windows.Forms.Padding(10, 0, 10, 0);
+            this.LB_Library.Size = new System.Drawing.Size(100, 22);
             this.LB_Library.TabIndex = 0;
             this.LB_Library.Text = "LIBRARY";
             this.LB_Library.Click += new System.EventHandler(this.LB_Library_Click);
@@ -396,7 +426,6 @@ namespace SKYNET.GUI
             // panel7
             // 
             this.panel7.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
-            this.panel7.Controls.Add(this.BT_Profile);
             this.panel7.Controls.Add(this.PB_Avatar);
             this.panel7.Controls.Add(this.LB_SteamID);
             this.panel7.Controls.Add(this.LB_NickName);
@@ -405,19 +434,6 @@ namespace SKYNET.GUI
             this.panel7.Name = "panel7";
             this.panel7.Size = new System.Drawing.Size(249, 59);
             this.panel7.TabIndex = 14;
-            // 
-            // BT_Profile
-            // 
-            this.BT_Profile.BackColor = System.Drawing.Color.Transparent;
-            this.BT_Profile.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.BT_Profile.Image = global::SKYNET.Properties.Resources.EditProfile;
-            this.BT_Profile.Location = new System.Drawing.Point(218, 22);
-            this.BT_Profile.Name = "BT_Profile";
-            this.BT_Profile.Size = new System.Drawing.Size(22, 22);
-            this.BT_Profile.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.BT_Profile.TabIndex = 21;
-            this.BT_Profile.TabStop = false;
-            this.BT_Profile.Click += new System.EventHandler(this.BT_Profile_Click);
             // 
             // PB_Avatar
             // 
@@ -519,18 +535,19 @@ namespace SKYNET.GUI
             // 
             // TabControl1
             // 
+            this.TabControl1.Alignment = System.Windows.Forms.TabAlignment.Right;
             this.TabControl1.Controls.Add(this.TP_Library);
             this.TabControl1.Controls.Add(this.TP_Community);
             this.TabControl1.Controls.Add(this.TP_Profile);
             this.TabControl1.Controls.Add(this.TP_Console);
             this.TabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.TabControl1.HideBorders = true;
-            this.TabControl1.ItemSize = new System.Drawing.Size(43, 18);
+            this.TabControl1.ItemSize = new System.Drawing.Size(43, 0);
             this.TabControl1.Location = new System.Drawing.Point(0, 0);
             this.TabControl1.Multiline = true;
             this.TabControl1.Name = "TabControl1";
             this.TabControl1.SelectedIndex = 0;
-            this.TabControl1.Size = new System.Drawing.Size(893, 505);
+            this.TabControl1.Size = new System.Drawing.Size(893, 511);
             this.TabControl1.TabIndex = 0;
             // 
             // TP_Library
@@ -540,10 +557,10 @@ namespace SKYNET.GUI
             this.TP_Library.Controls.Add(this.PB_GameInfo);
             this.TP_Library.Controls.Add(this.PN_RContainer);
             this.TP_Library.Controls.Add(this.PB_Banner);
-            this.TP_Library.Location = new System.Drawing.Point(4, 22);
+            this.TP_Library.Location = new System.Drawing.Point(4, 4);
             this.TP_Library.Name = "TP_Library";
             this.TP_Library.Padding = new System.Windows.Forms.Padding(3);
-            this.TP_Library.Size = new System.Drawing.Size(885, 479);
+            this.TP_Library.Size = new System.Drawing.Size(866, 503);
             this.TP_Library.TabIndex = 0;
             this.TP_Library.Text = "Library";
             // 
@@ -576,10 +593,10 @@ namespace SKYNET.GUI
             this.PN_RContainer.Controls.Add(this.PN_UserContainer);
             this.PN_RContainer.Controls.Add(this.LB_UsersOnline);
             this.PN_RContainer.Dock = System.Windows.Forms.DockStyle.Right;
-            this.PN_RContainer.Location = new System.Drawing.Point(715, 272);
+            this.PN_RContainer.Location = new System.Drawing.Point(696, 272);
             this.PN_RContainer.Name = "PN_RContainer";
             this.PN_RContainer.Padding = new System.Windows.Forms.Padding(0, 5, 5, 0);
-            this.PN_RContainer.Size = new System.Drawing.Size(167, 204);
+            this.PN_RContainer.Size = new System.Drawing.Size(167, 228);
             this.PN_RContainer.TabIndex = 10;
             // 
             // PN_UserContainer
@@ -587,7 +604,7 @@ namespace SKYNET.GUI
             this.PN_UserContainer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.PN_UserContainer.Location = new System.Drawing.Point(0, 24);
             this.PN_UserContainer.Name = "PN_UserContainer";
-            this.PN_UserContainer.Size = new System.Drawing.Size(162, 180);
+            this.PN_UserContainer.Size = new System.Drawing.Size(162, 204);
             this.PN_UserContainer.TabIndex = 11;
             // 
             // LB_UsersOnline
@@ -611,7 +628,7 @@ namespace SKYNET.GUI
             this.PB_Banner.Image = global::SKYNET.Properties.Resources.Header_1;
             this.PB_Banner.Location = new System.Drawing.Point(3, 3);
             this.PB_Banner.Name = "PB_Banner";
-            this.PB_Banner.Size = new System.Drawing.Size(879, 269);
+            this.PB_Banner.Size = new System.Drawing.Size(860, 269);
             this.PB_Banner.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.PB_Banner.TabIndex = 9;
             this.PB_Banner.TabStop = false;
@@ -653,7 +670,7 @@ namespace SKYNET.GUI
             this.ShadowBox.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.ShadowBox.Location = new System.Drawing.Point(0, 219);
             this.ShadowBox.Name = "ShadowBox";
-            this.ShadowBox.Size = new System.Drawing.Size(879, 50);
+            this.ShadowBox.Size = new System.Drawing.Size(860, 50);
             this.ShadowBox.TabIndex = 10;
             // 
             // LB_PlayingNowInfo
@@ -752,32 +769,263 @@ namespace SKYNET.GUI
             // TP_Community
             // 
             this.TP_Community.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(43)))), ((int)(((byte)(53)))));
-            this.TP_Community.Location = new System.Drawing.Point(4, 22);
+            this.TP_Community.Controls.Add(this.WebChat);
+            this.TP_Community.Controls.Add(this.TB_Chat);
+            this.TP_Community.Location = new System.Drawing.Point(4, 4);
             this.TP_Community.Name = "TP_Community";
             this.TP_Community.Padding = new System.Windows.Forms.Padding(3);
-            this.TP_Community.Size = new System.Drawing.Size(885, 479);
+            this.TP_Community.Size = new System.Drawing.Size(866, 503);
             this.TP_Community.TabIndex = 1;
             this.TP_Community.Text = "Community";
+            // 
+            // TB_Chat
+            // 
+            this.TB_Chat.ActivatedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(53)))), ((int)(((byte)(63)))));
+            this.TB_Chat.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(53)))), ((int)(((byte)(63)))));
+            this.TB_Chat.Color = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(53)))), ((int)(((byte)(63)))));
+            this.TB_Chat.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.TB_Chat.ForeColor = System.Drawing.Color.White;
+            this.TB_Chat.IsPassword = false;
+            this.TB_Chat.Location = new System.Drawing.Point(3, 465);
+            this.TB_Chat.Logo = global::SKYNET.Properties.Resources.send;
+            this.TB_Chat.LogoCursor = System.Windows.Forms.Cursors.Hand;
+            this.TB_Chat.Name = "TB_Chat";
+            this.TB_Chat.OnlyNumbers = false;
+            this.TB_Chat.ShowLogo = true;
+            this.TB_Chat.Size = new System.Drawing.Size(860, 35);
+            this.TB_Chat.TabIndex = 0;
+            this.TB_Chat.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
+            this.TB_Chat.OnLogoClicked += new System.EventHandler(this.TB_Chat_Clicked);
+            this.TB_Chat.KeyDown += new System.Windows.Forms.KeyEventHandler(this.TB_Chat_KeyDown);
             // 
             // TP_Profile
             // 
             this.TP_Profile.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(43)))), ((int)(((byte)(53)))));
-            this.TP_Profile.Location = new System.Drawing.Point(4, 22);
+            this.TP_Profile.Controls.Add(this.CB_InputDeviceID);
+            this.TP_Profile.Controls.Add(this.label2);
+            this.TP_Profile.Controls.Add(this.TB_Profile_Language);
+            this.TP_Profile.Controls.Add(this.panel15);
+            this.TP_Profile.Controls.Add(this.LB_Profile_Language);
+            this.TP_Profile.Controls.Add(this.BT_Profile_Apply);
+            this.TP_Profile.Controls.Add(this.PB_Profile_Avatar);
+            this.TP_Profile.Controls.Add(this.LB_Profile_ShowDebugConsole);
+            this.TP_Profile.Controls.Add(this.LB_Profile_PersonaName);
+            this.TP_Profile.Controls.Add(this.TB_Profile_PersonaName);
+            this.TP_Profile.Controls.Add(this.CB_Profile_ShowDebugConsole);
+            this.TP_Profile.Controls.Add(this.LB_Profile_AccountID);
+            this.TP_Profile.Controls.Add(this.TB_Profile_AccountID);
+            this.TP_Profile.Controls.Add(this.CB_Profile_AllowRemoteAccess);
+            this.TP_Profile.Controls.Add(this.LB_Profile_AllowRemoteAccess);
+            this.TP_Profile.Location = new System.Drawing.Point(4, 4);
             this.TP_Profile.Name = "TP_Profile";
             this.TP_Profile.Padding = new System.Windows.Forms.Padding(3);
-            this.TP_Profile.Size = new System.Drawing.Size(885, 479);
+            this.TP_Profile.Size = new System.Drawing.Size(866, 503);
             this.TP_Profile.TabIndex = 2;
             this.TP_Profile.Text = "Profile";
+            // 
+            // CB_InputDeviceID
+            // 
+            this.CB_InputDeviceID.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(61)))), ((int)(((byte)(75)))));
+            this.CB_InputDeviceID.BackColorMouseOver = System.Drawing.Color.Empty;
+            this.CB_InputDeviceID.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.CB_InputDeviceID.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.CB_InputDeviceID.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.CB_InputDeviceID.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.CB_InputDeviceID.ForeColor = System.Drawing.Color.White;
+            this.CB_InputDeviceID.FormattingEnabled = true;
+            this.CB_InputDeviceID.ItemHeight = 28;
+            this.CB_InputDeviceID.Location = new System.Drawing.Point(335, 264);
+            this.CB_InputDeviceID.Name = "CB_InputDeviceID";
+            this.CB_InputDeviceID.Size = new System.Drawing.Size(235, 34);
+            this.CB_InputDeviceID.TabIndex = 90;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Malgun Gothic", 9.75F);
+            this.label2.ForeColor = System.Drawing.Color.White;
+            this.label2.Location = new System.Drawing.Point(332, 245);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(83, 17);
+            this.label2.TabIndex = 87;
+            this.label2.Text = "Input Device";
+            // 
+            // TB_Profile_Language
+            // 
+            this.TB_Profile_Language.ActivatedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(61)))), ((int)(((byte)(75)))));
+            this.TB_Profile_Language.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(61)))), ((int)(((byte)(75)))));
+            this.TB_Profile_Language.Color = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(61)))), ((int)(((byte)(75)))));
+            this.TB_Profile_Language.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(220)))), ((int)(((byte)(240)))));
+            this.TB_Profile_Language.IsPassword = false;
+            this.TB_Profile_Language.Location = new System.Drawing.Point(47, 391);
+            this.TB_Profile_Language.Logo = global::SKYNET.Properties.Resources.male_user_100px;
+            this.TB_Profile_Language.LogoCursor = System.Windows.Forms.Cursors.Default;
+            this.TB_Profile_Language.Name = "TB_Profile_Language";
+            this.TB_Profile_Language.OnlyNumbers = false;
+            this.TB_Profile_Language.Padding = new System.Windows.Forms.Padding(2);
+            this.TB_Profile_Language.ShowLogo = true;
+            this.TB_Profile_Language.Size = new System.Drawing.Size(200, 37);
+            this.TB_Profile_Language.TabIndex = 76;
+            this.TB_Profile_Language.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
+            // 
+            // panel15
+            // 
+            this.panel15.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(54)))), ((int)(((byte)(68)))));
+            this.panel15.Location = new System.Drawing.Point(335, 357);
+            this.panel15.Name = "panel15";
+            this.panel15.Size = new System.Drawing.Size(235, 3);
+            this.panel15.TabIndex = 83;
+            // 
+            // LB_Profile_Language
+            // 
+            this.LB_Profile_Language.AutoSize = true;
+            this.LB_Profile_Language.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LB_Profile_Language.ForeColor = System.Drawing.Color.White;
+            this.LB_Profile_Language.Location = new System.Drawing.Point(47, 372);
+            this.LB_Profile_Language.Name = "LB_Profile_Language";
+            this.LB_Profile_Language.Size = new System.Drawing.Size(67, 17);
+            this.LB_Profile_Language.TabIndex = 72;
+            this.LB_Profile_Language.Text = "Language";
+            // 
+            // BT_Profile_Apply
+            // 
+            this.BT_Profile_Apply.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(61)))), ((int)(((byte)(75)))));
+            this.BT_Profile_Apply.BackColorMouseOver = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(61)))), ((int)(((byte)(75)))));
+            this.BT_Profile_Apply.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.BT_Profile_Apply.Font = new System.Drawing.Font("Segoe UI", 8F);
+            this.BT_Profile_Apply.ForeColor = System.Drawing.Color.White;
+            this.BT_Profile_Apply.ForeColorMouseOver = System.Drawing.Color.Empty;
+            this.BT_Profile_Apply.ImageAlignment = SKYNET.GUI.Controls.SKYNET_Button._ImgAlign.Left;
+            this.BT_Profile_Apply.ImageIcon = null;
+            this.BT_Profile_Apply.Location = new System.Drawing.Point(770, 456);
+            this.BT_Profile_Apply.MenuMode = false;
+            this.BT_Profile_Apply.Name = "BT_Profile_Apply";
+            this.BT_Profile_Apply.Rounded = false;
+            this.BT_Profile_Apply.Size = new System.Drawing.Size(100, 28);
+            this.BT_Profile_Apply.Style = SKYNET.GUI.Controls.SKYNET_Button._Style.TextOnly;
+            this.BT_Profile_Apply.TabIndex = 73;
+            this.BT_Profile_Apply.Text = "Apply";
+            this.BT_Profile_Apply.Click += new System.EventHandler(this.BT_Profile_Apply_Click);
+            // 
+            // PB_Profile_Avatar
+            // 
+            this.PB_Profile_Avatar.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.PB_Profile_Avatar.Image = global::SKYNET.Properties.Resources.profile_picture;
+            this.PB_Profile_Avatar.Location = new System.Drawing.Point(47, 31);
+            this.PB_Profile_Avatar.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.PB_Profile_Avatar.Name = "PB_Profile_Avatar";
+            this.PB_Profile_Avatar.Size = new System.Drawing.Size(200, 200);
+            this.PB_Profile_Avatar.TabIndex = 74;
+            this.PB_Profile_Avatar.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PB_Profile_Avatar_MouseClick);
+            // 
+            // LB_Profile_ShowDebugConsole
+            // 
+            this.LB_Profile_ShowDebugConsole.AutoSize = true;
+            this.LB_Profile_ShowDebugConsole.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LB_Profile_ShowDebugConsole.ForeColor = System.Drawing.Color.White;
+            this.LB_Profile_ShowDebugConsole.Location = new System.Drawing.Point(332, 368);
+            this.LB_Profile_ShowDebugConsole.Name = "LB_Profile_ShowDebugConsole";
+            this.LB_Profile_ShowDebugConsole.Size = new System.Drawing.Size(138, 17);
+            this.LB_Profile_ShowDebugConsole.TabIndex = 86;
+            this.LB_Profile_ShowDebugConsole.Text = "Show debug Console";
+            // 
+            // LB_Profile_PersonaName
+            // 
+            this.LB_Profile_PersonaName.AutoSize = true;
+            this.LB_Profile_PersonaName.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LB_Profile_PersonaName.ForeColor = System.Drawing.Color.White;
+            this.LB_Profile_PersonaName.Location = new System.Drawing.Point(47, 245);
+            this.LB_Profile_PersonaName.Name = "LB_Profile_PersonaName";
+            this.LB_Profile_PersonaName.Size = new System.Drawing.Size(73, 17);
+            this.LB_Profile_PersonaName.TabIndex = 72;
+            this.LB_Profile_PersonaName.Text = "User name";
+            // 
+            // TB_Profile_PersonaName
+            // 
+            this.TB_Profile_PersonaName.ActivatedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(61)))), ((int)(((byte)(75)))));
+            this.TB_Profile_PersonaName.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(61)))), ((int)(((byte)(75)))));
+            this.TB_Profile_PersonaName.Color = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(61)))), ((int)(((byte)(75)))));
+            this.TB_Profile_PersonaName.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(220)))), ((int)(((byte)(240)))));
+            this.TB_Profile_PersonaName.IsPassword = false;
+            this.TB_Profile_PersonaName.Location = new System.Drawing.Point(47, 264);
+            this.TB_Profile_PersonaName.Logo = global::SKYNET.Properties.Resources.male_user_100px;
+            this.TB_Profile_PersonaName.LogoCursor = System.Windows.Forms.Cursors.Default;
+            this.TB_Profile_PersonaName.Name = "TB_Profile_PersonaName";
+            this.TB_Profile_PersonaName.OnlyNumbers = false;
+            this.TB_Profile_PersonaName.Padding = new System.Windows.Forms.Padding(2);
+            this.TB_Profile_PersonaName.ShowLogo = true;
+            this.TB_Profile_PersonaName.Size = new System.Drawing.Size(200, 37);
+            this.TB_Profile_PersonaName.TabIndex = 76;
+            this.TB_Profile_PersonaName.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
+            // 
+            // CB_Profile_ShowDebugConsole
+            // 
+            this.CB_Profile_ShowDebugConsole.BackColor = System.Drawing.Color.Transparent;
+            this.CB_Profile_ShowDebugConsole.Checked = false;
+            this.CB_Profile_ShowDebugConsole.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.CB_Profile_ShowDebugConsole.Location = new System.Drawing.Point(533, 365);
+            this.CB_Profile_ShowDebugConsole.Name = "CB_Profile_ShowDebugConsole";
+            this.CB_Profile_ShowDebugConsole.Size = new System.Drawing.Size(34, 25);
+            this.CB_Profile_ShowDebugConsole.TabIndex = 85;
+            // 
+            // LB_Profile_AccountID
+            // 
+            this.LB_Profile_AccountID.AutoSize = true;
+            this.LB_Profile_AccountID.Font = new System.Drawing.Font("Malgun Gothic", 9.75F);
+            this.LB_Profile_AccountID.ForeColor = System.Drawing.Color.White;
+            this.LB_Profile_AccountID.Location = new System.Drawing.Point(47, 310);
+            this.LB_Profile_AccountID.Name = "LB_Profile_AccountID";
+            this.LB_Profile_AccountID.Size = new System.Drawing.Size(75, 17);
+            this.LB_Profile_AccountID.TabIndex = 79;
+            this.LB_Profile_AccountID.Text = "Account ID";
+            // 
+            // TB_Profile_AccountID
+            // 
+            this.TB_Profile_AccountID.ActivatedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(61)))), ((int)(((byte)(75)))));
+            this.TB_Profile_AccountID.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(61)))), ((int)(((byte)(75)))));
+            this.TB_Profile_AccountID.Color = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(61)))), ((int)(((byte)(75)))));
+            this.TB_Profile_AccountID.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(200)))), ((int)(((byte)(220)))), ((int)(((byte)(240)))));
+            this.TB_Profile_AccountID.IsPassword = false;
+            this.TB_Profile_AccountID.Location = new System.Drawing.Point(47, 329);
+            this.TB_Profile_AccountID.Logo = global::SKYNET.Properties.Resources.steam_home_os;
+            this.TB_Profile_AccountID.LogoCursor = System.Windows.Forms.Cursors.Default;
+            this.TB_Profile_AccountID.Name = "TB_Profile_AccountID";
+            this.TB_Profile_AccountID.OnlyNumbers = false;
+            this.TB_Profile_AccountID.ShowLogo = true;
+            this.TB_Profile_AccountID.Size = new System.Drawing.Size(200, 35);
+            this.TB_Profile_AccountID.TabIndex = 80;
+            this.TB_Profile_AccountID.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
+            // 
+            // CB_Profile_AllowRemoteAccess
+            // 
+            this.CB_Profile_AllowRemoteAccess.BackColor = System.Drawing.Color.Transparent;
+            this.CB_Profile_AllowRemoteAccess.Checked = false;
+            this.CB_Profile_AllowRemoteAccess.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.CB_Profile_AllowRemoteAccess.Location = new System.Drawing.Point(533, 326);
+            this.CB_Profile_AllowRemoteAccess.Name = "CB_Profile_AllowRemoteAccess";
+            this.CB_Profile_AllowRemoteAccess.Size = new System.Drawing.Size(34, 25);
+            this.CB_Profile_AllowRemoteAccess.TabIndex = 83;
+            // 
+            // LB_Profile_AllowRemoteAccess
+            // 
+            this.LB_Profile_AllowRemoteAccess.AutoSize = true;
+            this.LB_Profile_AllowRemoteAccess.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LB_Profile_AllowRemoteAccess.ForeColor = System.Drawing.Color.White;
+            this.LB_Profile_AllowRemoteAccess.Location = new System.Drawing.Point(332, 329);
+            this.LB_Profile_AllowRemoteAccess.Name = "LB_Profile_AllowRemoteAccess";
+            this.LB_Profile_AllowRemoteAccess.Size = new System.Drawing.Size(136, 17);
+            this.LB_Profile_AllowRemoteAccess.TabIndex = 84;
+            this.LB_Profile_AllowRemoteAccess.Text = "Allow Remote Access";
             // 
             // TP_Console
             // 
             this.TP_Console.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(43)))), ((int)(((byte)(53)))));
             this.TP_Console.Controls.Add(this.LB_Clear);
             this.TP_Console.Controls.Add(this.WebLogger1);
-            this.TP_Console.Location = new System.Drawing.Point(4, 22);
+            this.TP_Console.Location = new System.Drawing.Point(4, 4);
             this.TP_Console.Name = "TP_Console";
             this.TP_Console.Padding = new System.Windows.Forms.Padding(3);
-            this.TP_Console.Size = new System.Drawing.Size(885, 479);
+            this.TP_Console.Size = new System.Drawing.Size(866, 503);
             this.TP_Console.TabIndex = 3;
             this.TP_Console.Text = "Console";
             // 
@@ -790,7 +1038,7 @@ namespace SKYNET.GUI
             this.WebLogger1.LoggerBackColor = System.Drawing.Color.Empty;
             this.WebLogger1.Name = "WebLogger1";
             this.WebLogger1.ScrollColors = System.Drawing.Color.Empty;
-            this.WebLogger1.Size = new System.Drawing.Size(879, 473);
+            this.WebLogger1.Size = new System.Drawing.Size(860, 497);
             this.WebLogger1.TabIndex = 2;
             // 
             // PN_BodyContainer
@@ -798,9 +1046,9 @@ namespace SKYNET.GUI
             this.PN_BodyContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(50)))), ((int)(((byte)(57)))));
             this.PN_BodyContainer.Controls.Add(this.TabControl1);
             this.PN_BodyContainer.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.PN_BodyContainer.Location = new System.Drawing.Point(249, 60);
+            this.PN_BodyContainer.Location = new System.Drawing.Point(249, 54);
             this.PN_BodyContainer.Name = "PN_BodyContainer";
-            this.PN_BodyContainer.Size = new System.Drawing.Size(893, 505);
+            this.PN_BodyContainer.Size = new System.Drawing.Size(893, 511);
             this.PN_BodyContainer.TabIndex = 10;
             // 
             // CM_MenuGame
@@ -884,6 +1132,17 @@ namespace SKYNET.GUI
             this.ConfigureMenuItem.Text = "Properties";
             this.ConfigureMenuItem.Click += new System.EventHandler(this.ConfigureMenuItem_Click);
             // 
+            // WebChat
+            // 
+            this.WebChat.AutoScrollLines = true;
+            this.WebChat.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.WebChat.Location = new System.Drawing.Point(3, 3);
+            this.WebChat.LoggerBackColor = System.Drawing.Color.Empty;
+            this.WebChat.Name = "WebChat";
+            this.WebChat.ScrollColors = System.Drawing.Color.Empty;
+            this.WebChat.Size = new System.Drawing.Size(860, 462);
+            this.WebChat.TabIndex = 1;
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -913,7 +1172,6 @@ namespace SKYNET.GUI
             this.panel1.ResumeLayout(false);
             this.panel7.ResumeLayout(false);
             this.panel7.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.BT_Profile)).EndInit();
             this.gradiantBox1.ResumeLayout(false);
             this.gradiantBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -925,6 +1183,9 @@ namespace SKYNET.GUI
             this.PB_Banner.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.PB_Logo)).EndInit();
             this.ShadowBox.ResumeLayout(false);
+            this.TP_Community.ResumeLayout(false);
+            this.TP_Profile.ResumeLayout(false);
+            this.TP_Profile.PerformLayout();
             this.TP_Console.ResumeLayout(false);
             this.PN_BodyContainer.ResumeLayout(false);
             this.CM_MenuGame.ResumeLayout(false);
@@ -980,7 +1241,6 @@ namespace SKYNET.GUI
         private SKYNET_WebLogger WebLogger1;
         private Label LB_Browser;
         private Label LB_Clear;
-        private PictureBox BT_Profile;
         private Label LB_PlayedTimeInfo;
         private Label LB_LastPlayed;
         private Label LB_LastPlayedInfo;
@@ -998,6 +1258,23 @@ namespace SKYNET.GUI
         private PictureBox PB_GameInfo;
         private Panel PN_UserContainer;
         private Label LB_ShortDescription;
+        private SKYNET_TextBox TB_Profile_AccountID;
+        private Label LB_Profile_AccountID;
+        public SKYNET_TextBox TB_Profile_PersonaName;
+        private SKYNET_CircularPictureBox PB_Profile_Avatar;
+        private SKYNET_Button BT_Profile_Apply;
+        private Label LB_Profile_PersonaName;
+        public SKYNET_TextBox TB_Profile_Language;
+        private Label LB_Profile_Language;
+        private Label LB_Profile_AllowRemoteAccess;
+        private SKYNET_Check CB_Profile_AllowRemoteAccess;
+        private Label LB_Profile_ShowDebugConsole;
+        private SKYNET_Check CB_Profile_ShowDebugConsole;
+        private Panel panel15;
+        private Label label2;
+        private SKYNET_ComboBox CB_InputDeviceID;
+        private SKYNET_TextBox TB_Chat;
+        private SKYNET_WebLogger WebChat;
     }
 }
 

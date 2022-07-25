@@ -21,7 +21,7 @@ namespace SKYNET.Managers
 
         static CallbackManager()
         {
-            CurrentCall = 1000000000;
+            CurrentCall = 1000;
 
             SteamCallbacks = new ConcurrentDictionary<CallbackType, SteamCallback>();
             CallbackResults = new ConcurrentDictionary<SteamAPICall_t, CallbackMessage>();
@@ -83,13 +83,13 @@ namespace SKYNET.Managers
             });
         }
 
-        public static SteamAPICall_t AddCallbackResult(ICallbackData data, bool ReadyToCall = true, bool CallComplete = false)
+        public static SteamAPICall_t AddCallbackResult(ICallbackData data, bool ReadyToCall = true)
         {
             CurrentCall++;
 
             MutexHelper.Wait("CallbackResults", delegate
             {
-                CallbackResults.TryAdd(CurrentCall, new CallbackMessage(data, ReadyToCall, CallComplete));
+                CallbackResults.TryAdd(CurrentCall, new CallbackMessage(data, ReadyToCall));
             });
 
             Write($"Added CallbackResult {CurrentCall} {((int)data.CallbackType).GetCallbackType()} {data.CallbackType} ");
@@ -147,16 +147,6 @@ namespace SKYNET.Managers
 
                                     SteamCallback Callback = SteamCallbacks[callbackData.CallbackType];
                                     Callback.Run(callbackData, false, APICall);
-                                    if (CallbackMessage.CallComplete)
-                                    {
-                                        //var SteamAPICallCompleted = new SteamAPICallCompleted_t()
-                                        //{
-                                        //    m_hAsyncCall = APICall,
-                                        //    m_iCallback = (int)callbackData.CallbackType,
-                                        //    m_cubParam = (uint)callbackData.DataSize
-                                        //};
-                                        //Callback.Run(SteamAPICallCompleted);
-                                    }
                                     CallbackMessage.Called = true;
                                     Write($"Called function (IntPtr, bool, SteamAPICall_t) in {callbackData.CallbackType} callback");
                                 }
@@ -235,6 +225,24 @@ namespace SKYNET.Managers
                     }
                 }
             });
+        }
+
+        internal static bool GetFirstCallResult(out CallbackMessage callResult, out SteamAPICall_t APICall_t)
+        {
+            CallbackMessage callback = default;
+            SteamAPICall_t APICall = 0;
+            MutexHelper.Wait("CallbackResults", delegate
+            {
+                if (CallbackResults.Any())
+                {
+                    var KV = CallbackResults.FirstOrDefault();
+                    APICall = KV.Key;
+                    callback = KV.Value;
+                }
+            });
+            APICall_t = APICall;
+            callResult = callback;
+            return callback != null;
         }
 
         internal static bool GetCallResult(ulong handle, out CallbackMessage cCallback)

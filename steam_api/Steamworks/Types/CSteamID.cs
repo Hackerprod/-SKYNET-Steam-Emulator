@@ -51,10 +51,13 @@ namespace SKYNET.Steamworks
             this.SteamID = (SteamID & ~(0xFFFFFul << (ushort)32)) | (((ulong)(instance) & 0xFFFFFul) << (ushort)32);
         }
 
-        public static CSteamID CreateOne()
+        public static CSteamID CreateOne(bool GameServer = false)
         {
-            CSteamID randomID = new CSteamID((uint)new Random().Next(1000, 9999), EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeIndividual);
-            return randomID;
+            if (GameServer)
+            {
+                return new CSteamID((uint)new Random().Next(1000, 9999), EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeGameServer);
+            }
+            return new CSteamID((uint)new Random().Next(1000, 9999), EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeIndividual);
         }
 
         public override int GetHashCode()

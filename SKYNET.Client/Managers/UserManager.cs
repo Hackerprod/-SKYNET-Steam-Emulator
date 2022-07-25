@@ -1,8 +1,8 @@
 ﻿using SKYNET.Client;
-using SKYNET.Common;
 using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using SKYNET.Types;
+using SKYNET.WEB.Types;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -38,18 +38,26 @@ namespace SKYNET.Managers
                 AccountID = SteamID.AccountID,
                 IPAddress = NetworkHelper.GetIPAddress().ToString(),
             });
-             return;
+            // return;
             // Create TESTS Users
             Users.Add(new SteamPlayer()
             {
-                SteamID = (ulong)new CSteamID(4294967295),
-                PersonaName = "Federiko",
-                AccountID = 4294967295,
+                SteamID = (ulong)new CSteamID(2000),
+                PersonaName = "Alejandro",
+                AccountID = 2000,
                 IPAddress = NetworkHelper.GetIPAddress().ToString(),
                 GameID = 570,
                 HasFriend = true,
             });
-            
+            Users.Add(new SteamPlayer()
+            {
+                SteamID = (ulong)new CSteamID(3000),
+                PersonaName = "Elier",
+                AccountID = 3000,
+                IPAddress = NetworkHelper.GetIPAddress().ToString(),
+                GameID = 570,
+                HasFriend = true,
+            });
         }
 
         public static SteamPlayer GetUser(ulong steamID)
@@ -108,6 +116,38 @@ namespace SKYNET.Managers
             IPCManager.SendUpdatedUsers();
         }
 
+        internal static bool UpdateUser(UserInfo info)
+        {
+            var Result = false;
+
+            if (info.AccountID != SteamClient.AccountID)
+            {
+                SteamClient.AccountID = info.AccountID;
+                SteamClient.SteamID = new CSteamID(info.AccountID);
+                Result = true;
+            }
+            if (info.PersonaName != SteamClient.PersonaName)
+            {
+                SteamClient.PersonaName = info.PersonaName;
+                Result = true;
+            }
+            if (info.Language != SteamClient.Language)
+            {
+                SteamClient.Language = info.Language;
+                Result = true;
+            }
+            if (info.Wallet != SteamClient.Wallet)
+            {
+                SteamClient.Wallet = info.Wallet;
+                Result = true;
+            }
+            if (info.AvatarHex.Length != 0 && ImageHelper.ImageToBase64(SteamClient.Avatar) != info.AvatarHex)
+            {
+                UpdateAvatar(ImageHelper.ImageFromBase64(info.AvatarHex));
+            }
+            return Result;
+        }
+
         public static void RemoveUser(uint accountID)
         {
             MutexHelper.Wait("Users", delegate
@@ -121,6 +161,31 @@ namespace SKYNET.Managers
                 }
             });
             IPCManager.SendUpdatedUsers();
+        }
+
+        internal static bool UpdateAvatar(Bitmap Image)
+        {
+            try
+            {
+                if (UserAvatars.ContainsKey((ulong)SteamClient.SteamID))
+                {
+                    UserAvatars[(ulong)SteamClient.SteamID] = Image;
+                }
+                else
+                {
+                    UserAvatars.Add((ulong)SteamClient.SteamID, Image);
+                }
+                SteamClient.Avatar = Image;
+
+                string ImagePath = Path.Combine(Common.GetPath(), "Data", "Images", "AvatarCache", "Avatar.jpg");
+                ImageHelper.ToFile(ImagePath, Image);
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         public static SteamPlayer GetUserByAddress(string iPAddress)
@@ -235,8 +300,8 @@ namespace SKYNET.Managers
                 string Url = $"http://{iPAddress}/Images/AvatarCache/Avatar.jpg";
                 var Data = await WebClient.DownloadDataTaskAsync(Url);
                 var Avatar = (Bitmap)ImageHelper.ImageFromBytes(Data);
-                string AvatarCachePath = Path.Combine(modCommon.GetPath(), "Data", "Images", "AvatarCache", accountID + ".jpg");
-                modCommon.EnsureDirectoryExists(AvatarCachePath, true);
+                string AvatarCachePath = Path.Combine(Common.GetPath(), "Data", "Images", "AvatarCache", accountID + ".jpg");
+                Common.EnsureDirectoryExists(AvatarCachePath, true);
                 ImageHelper.ToFile(AvatarCachePath, Avatar);
                 AvatarReceived(accountID, Avatar);
             }
@@ -263,6 +328,11 @@ namespace SKYNET.Managers
                 user.LobbyID = lobbySteamID;
                 IPCManager.SendUpdatedUsers();
             }
+        }
+
+        internal static bool UserExists(uint accountID)
+        {
+            return GetUser(accountID) != null;
         }
     }
 }

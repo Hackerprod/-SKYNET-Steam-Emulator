@@ -1,12 +1,8 @@
-using SKYNET.Steamworks;
-using SKYNET.Types;
 using System;
-using System.Runtime.InteropServices;
+using SKYNET.Steamworks.Implementation;
 
 using SteamAPICall_t = System.UInt64;
 using FriendsGroupID_t = System.UInt16;
-using SKYNET.Steamworks.Implementation;
-using System.Threading.Tasks;
 
 namespace SKYNET.Steamworks.Interfaces
 {
@@ -53,9 +49,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamFriends.Instance.GetFriendPersonaName(steamID);
         }
 
-        public bool GetFriendGamePlayed(IntPtr _, ulong steamID, IntPtr pFriendGameInfo)
+        public bool GetFriendGamePlayed(IntPtr _, ulong steamID, ref FriendGameInfo_t pFriendGameInfo)
         {
-            return SteamFriends.Instance.GetFriendGamePlayed(steamID, pFriendGameInfo);
+            return SteamFriends.Instance.GetFriendGamePlayed(steamID, ref pFriendGameInfo);
         }
 
         public string GetFriendPersonaNameHistory(IntPtr _, ulong steamID, int index)
@@ -93,9 +89,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamFriends.Instance.GetFriendsGroupMembersCount(friendsGroupID);
         }
 
-        public void GetFriendsGroupMembersList(IntPtr _, FriendsGroupID_t friendsGroupID, IntPtr pOutSteamIDMembers, int nMembersCount)
+        public void GetFriendsGroupMembersList(IntPtr _, FriendsGroupID_t friendsGroupID, ref ulong[] pOutSteamIDMembers, int nMembersCount)
         {
-            SteamFriends.Instance.GetFriendsGroupMembersList(friendsGroupID, pOutSteamIDMembers, nMembersCount);
+            SteamFriends.Instance.GetFriendsGroupMembersList(friendsGroupID, ref pOutSteamIDMembers, nMembersCount);
         }
 
         public bool HasFriend(IntPtr _, ulong steamIDFriend, int iFriendFlags)

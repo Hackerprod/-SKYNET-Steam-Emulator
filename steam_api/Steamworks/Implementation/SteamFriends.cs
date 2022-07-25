@@ -336,10 +336,9 @@ namespace SKYNET.Steamworks.Implementation
             return CSteamID.Invalid;
         }
 
-        public bool GetFriendGamePlayed(ulong steamIDFriend, IntPtr ptrFriendGameInfo)
+        public bool GetFriendGamePlayed(ulong steamIDFriend, ref FriendGameInfo_t pFriendGameInfo)
         {
             bool Result = false;
-            FriendGameInfo_t pFriendGameInfo = Marshal.PtrToStructure<FriendGameInfo_t>(ptrFriendGameInfo);
             if (steamIDFriend == SteamEmulator.SteamID)
             {
                 pFriendGameInfo.GameID = SteamEmulator.AppID;
@@ -367,7 +366,6 @@ namespace SKYNET.Steamworks.Implementation
                 }
             }
 
-            Marshal.StructureToPtr(pFriendGameInfo, ptrFriendGameInfo, false);
             Write($"GetFriendGamePlayed (SteamID = {steamIDFriend}) = {Result}");
             return Result;
         }
@@ -506,10 +504,9 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public void GetFriendsGroupMembersList(FriendsGroupID_t friendsGroupID, IntPtr pOutSteamIDMembers, int nMembersCount)
+        public void GetFriendsGroupMembersList(FriendsGroupID_t friendsGroupID, ref ulong[] pOutSteamIDMembers, int nMembersCount)
         {
             Write($"GetFriendsGroupMembersList {friendsGroupID}");
-            Marshal.StructureToPtr(SteamEmulator.SteamID, pOutSteamIDMembers, false);
         }
 
         public string GetFriendsGroupName(FriendsGroupID_t friendsGroupID)
@@ -530,13 +527,13 @@ namespace SKYNET.Steamworks.Implementation
 
             if (steamIDFriend == 65535) steamIDFriend = (ulong)SteamEmulator.SteamID;
 
-            if (Avatars.TryGetValue(steamIDFriend, out ImageAvatar avatar))
+            if (Avatars.TryGetValue((ulong)steamIDFriend, out ImageAvatar avatar))
             {
                 return avatar.Small;
             }
             else
             {
-                RequestAvatar(steamIDFriend);
+                RequestAvatar((ulong)steamIDFriend);
             }
             return DefaultAvatar.Small;
         }

@@ -69,7 +69,7 @@ namespace SKYNET.Steamworks.Implementation
             var Result = GameDLC.Find(d => d.AppId == appID) != null;
             Write($"BIsDlcInstalled (AppID = {appID}) = {Result}");
             // Force DLC load
-            return true;
+            return Result;
         }
 
         public UInt32 GetEarliestPurchaseUnixTime(uint nAppID)

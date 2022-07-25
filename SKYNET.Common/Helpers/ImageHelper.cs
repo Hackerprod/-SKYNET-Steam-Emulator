@@ -407,7 +407,20 @@ namespace SKYNET.Helpers
             }
         }
 
-        public static string GetImageBase64(Image image)
+        public static Bitmap ImageFromBase64(string avatarHex)
+        {
+            try
+            {
+                var imageBytes = Convert.FromBase64String(avatarHex);
+                return (Bitmap)ImageFromBytes(imageBytes);
+            }
+            catch
+            {
+                return new Bitmap(200, 200);
+            }
+        }
+
+        public static string ImageToBase64(Image image)
         {
             var Base64 = "";
             try

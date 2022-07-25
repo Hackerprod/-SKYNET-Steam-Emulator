@@ -53,14 +53,14 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamFriends.Instance.GetFriendPersonaName((ulong)steamIDFriend);
         }
 
-        public bool GetFriendGamePlayed(IntPtr _, CSteamID steamIDFriend, IntPtr pFriendGameInfo )
+        public bool GetFriendGamePlayed(IntPtr _, ulong steamIDFriend, ref FriendGameInfo_t pFriendGameInfo )
         {
-            return SteamFriends.Instance.GetFriendGamePlayed((ulong)steamIDFriend, pFriendGameInfo);
+            return SteamFriends.Instance.GetFriendGamePlayed(steamIDFriend, ref pFriendGameInfo);
         }
 
-        public string GetFriendPersonaNameHistory(IntPtr _, CSteamID steamIDFriend, int iPersonaName)
+        public string GetFriendPersonaNameHistory(IntPtr _, ulong steamIDFriend, int iPersonaName)
         {
-            return SteamFriends.Instance.GetFriendPersonaNameHistory((ulong)steamIDFriend, iPersonaName);
+            return SteamFriends.Instance.GetFriendPersonaNameHistory(steamIDFriend, iPersonaName);
         }
 
         public int GetFriendSteamLevel(IntPtr _, CSteamID steamIDFriend)
@@ -93,9 +93,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamFriends.Instance.GetFriendsGroupMembersCount(friendsGroupID);
         }
 
-        public void GetFriendsGroupMembersList(IntPtr _, FriendsGroupID_t friendsGroupID, IntPtr pOutSteamIDMembers, int nMembersCount)
+        public void GetFriendsGroupMembersList(IntPtr _, FriendsGroupID_t friendsGroupID, ref ulong[] pOutSteamIDMembers, int nMembersCount)
         {
-            SteamFriends.Instance.GetFriendsGroupMembersList(friendsGroupID, pOutSteamIDMembers, nMembersCount);
+            SteamFriends.Instance.GetFriendsGroupMembersList(friendsGroupID, ref pOutSteamIDMembers, nMembersCount);
         }
 
         public bool HasFriend(IntPtr _, CSteamID steamIDFriend, int iFriendFlags)
@@ -183,9 +183,9 @@ namespace SKYNET.Steamworks.Interfaces
             SteamFriends.Instance.ActivateGameOverlayInviteDialog((ulong)steamIDLobby);
         }
 
-        public int GetSmallFriendAvatar(IntPtr _, CSteamID steamIDFriend)
+        public int GetSmallFriendAvatar(IntPtr _, ulong steamIDFriend)
         {
-            return SteamFriends.Instance.GetSmallFriendAvatar((ulong)steamIDFriend);
+            return SteamFriends.Instance.GetSmallFriendAvatar(steamIDFriend);
         }
 
         public int GetMediumFriendAvatar(IntPtr _, CSteamID steamIDFriend)

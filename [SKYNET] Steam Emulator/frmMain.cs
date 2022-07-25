@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using SKYNET.Client;
-using SKYNET.Common;
 using SKYNET.GUI.Controls;
 using SKYNET.Helpers;
 using SKYNET.Managers;
@@ -15,6 +14,7 @@ using SKYNET.Network.Types;
 using SKYNET.Properties;
 using SKYNET.Steamworks;
 using SKYNET.Types;
+using SKYNET.Wave;
 
 namespace SKYNET.GUI
 {
@@ -41,23 +41,21 @@ namespace SKYNET.GUI
             ShadowBox.BackColor = Color.FromArgb(100, 0, 0, 0);
 
             settings = Types.Settings.Load();
-            LB_NickName.Text = settings.PersonaName;
-            LB_Profile.Text = settings.PersonaName.ToUpper();
-            LB_SteamID.Text = new CSteamID(settings.AccountID).SteamID.ToString();
+            PaintSettings(settings);
 
             GameMessages = new Dictionary<uint, List<string>>();
                  
-            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data"));
-            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "www"));
-            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Storage"));
-            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Injector"));
-            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images"));
-            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache"));
-            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "AvatarCache"));
+            Common.EnsureDirectoryExists(Path.Combine(Common.GetPath(), "Data"));
+            Common.EnsureDirectoryExists(Path.Combine(Common.GetPath(), "Data", "www"));
+            Common.EnsureDirectoryExists(Path.Combine(Common.GetPath(), "Data", "Storage"));
+            Common.EnsureDirectoryExists(Path.Combine(Common.GetPath(), "Data", "Injector"));
+            Common.EnsureDirectoryExists(Path.Combine(Common.GetPath(), "Data", "Images"));
+            Common.EnsureDirectoryExists(Path.Combine(Common.GetPath(), "Data", "Images", "AppCache"));
+            Common.EnsureDirectoryExists(Path.Combine(Common.GetPath(), "Data", "Images", "AvatarCache"));
 
             try
             {
-                string AvatarPath = Path.Combine(modCommon.GetPath(), "Data", "Images", "AvatarCache", "Avatar.jpg");
+                string AvatarPath = Path.Combine(Common.GetPath(), "Data", "Images", "AvatarCache", "Avatar.jpg");
                 if (!File.Exists(AvatarPath))
                 {
                     var Image = ImageHelper.GetDesktopWallpaper(true);
@@ -68,6 +66,7 @@ namespace SKYNET.GUI
                 {
                     var AvatarImage = ImageHelper.FromFile(AvatarPath);
                     PB_Avatar.Image = AvatarImage;
+                    PB_Profile_Avatar.Image = AvatarImage;
                     SteamClient.Avatar = (Bitmap)AvatarImage;
                 }
             }
@@ -92,8 +91,40 @@ namespace SKYNET.GUI
             UserManager.OnUserRemoved += UserManager_OnUserRemoved;
             UserManager.OnAvatarReceived = UserManager_OnAvatarReceived;
 
+            NetworkManager.OnChatMessage = NetworkManager_OnChatMessage;
+
             WebManager.OnGameLaunch += UserManager_OnGameLaunch;
             WebManager.Initialize();
+        }
+
+        private void PaintSettings(Types.Settings settings)
+        {
+            LB_NickName.Text = settings.PersonaName;
+            LB_Profile.Text = settings.PersonaName.ToUpper();
+            LB_SteamID.Text = new CSteamID(settings.AccountID).SteamID.ToString();
+            TB_Profile_PersonaName.Text = settings.PersonaName;
+            TB_Profile_AccountID.Text = settings.AccountID.ToString();
+            TB_Profile_Language.Text = settings.Language;
+            CB_Profile_AllowRemoteAccess.Checked = settings.AllowRemoteAccess;
+            CB_Profile_ShowDebugConsole.Checked = settings.ShowDebugConsole;
+
+            if (settings.ShowDebugConsole)
+            {
+                LB_Console.Visible = true;
+            }
+
+            foreach (WavInDevice device in WaveIn.Devices)
+            {
+                CB_InputDeviceID.Items.Add(device.Name);
+            }
+
+            if (CB_InputDeviceID.Items.Count > 0)
+            {
+                if (CB_InputDeviceID.Items.Count > settings.InputDeviceID)
+                    CB_InputDeviceID.SelectedIndex = settings.InputDeviceID;
+                else
+                    CB_InputDeviceID.SelectedIndex = 0;
+            }
 
             // Debug 
             if (settings.PersonaName == "jst4rk" || settings.PersonaName == "Hackerprod")
@@ -140,16 +171,6 @@ namespace SKYNET.GUI
 
         private void GameManager_OnUserGameOpened(object sender, NET_GameOpened e)
         {
-            if (e.AccountID == SteamClient.AccountID)
-            {
-                var Game = GameManager.GetGame(e.AppID);
-                if (Game != null)
-                {
-                    WebManager.SendGameOppened(Game.Guid);
-                }
-                return;
-            } 
-
             Bitmap Avatar = default;
             string personaName = "";
 
@@ -180,6 +201,7 @@ namespace SKYNET.GUI
                     BT_GameAction.BackColor = Color.Red;
                 }
                 GameManager.SetLastPlayedTime(e.Game.Guid);
+                WebManager.SendGameOppened(e.Game.Guid);
             }
         }
 
@@ -232,7 +254,7 @@ namespace SKYNET.GUI
                 userControl.SteamPlayer = user;
                 userControl.Dock = DockStyle.Top;
 
-                modCommon.InvokeAction(PN_UserContainer, delegate
+                Common.InvokeAction(PN_UserContainer, delegate
                 {
                     PN_UserContainer.Controls.Add(userControl);
                 });
@@ -275,6 +297,8 @@ namespace SKYNET.GUI
 
         private void Log_OnMessage(object sender, LogEventArgs Event)
         {
+            if (!settings.ShowDebugConsole) return;
+
             Write(Event.Sender, Event.Message);
         }
 
@@ -319,8 +343,7 @@ namespace SKYNET.GUI
 
             try
             {
-                var imageBytes = Convert.FromBase64String(e.Game.AvatarHex);
-                Bitmap Avatar = (Bitmap)ImageHelper.ImageFromBytes(imageBytes);
+                var Avatar = ImageHelper.ImageFromBase64(e.Game.AvatarHex);
                 PB_Logo.Image = Avatar;
                 PB_GameInfo.Image = Avatar;
             }
@@ -340,7 +363,7 @@ namespace SKYNET.GUI
                 LB_GameTittle.Text = e.Game.Name;
             }
 
-            string imagePath = Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache", e.Game.AppID + "_library_hero.jpg");
+            string imagePath = Path.Combine(Common.GetPath(), "Data", "Images", "AppCache", e.Game.AppID + "_library_hero.jpg");
             if (File.Exists(imagePath))
             {
                 PB_Banner.Image = Image.FromFile(imagePath);
@@ -416,7 +439,7 @@ namespace SKYNET.GUI
             module.Color = Color.FromArgb(23, 33, 43);
             module.Color_MouseHover = Color.FromArgb(33, 43, 53);
 
-            modCommon.InvokeAction(PN_GameContainer, delegate
+            Common.InvokeAction(PN_GameContainer, delegate
             {
                 PN_GameContainer.Controls.Add(module);
             });
@@ -438,19 +461,21 @@ namespace SKYNET.GUI
 
         public static void AvatarUpdated(Bitmap Avatar)
         {
-            SteamClient.Avatar = Avatar;
-            frm.PB_Avatar.Image = Avatar;
-            IPCManager.SendAvatarUpdated(SteamClient.AccountID, Avatar);
+            Bitmap upDatedAvatar = Avatar;
+            SteamClient.Avatar = upDatedAvatar;
+            frm.PB_Avatar.Image = upDatedAvatar;
+            frm.PB_Profile_Avatar.Image = upDatedAvatar;
+            IPCManager.SendAvatarUpdated(SteamClient.AccountID, upDatedAvatar);
 
             try
             {
-                string AvatarPath = Path.Combine(modCommon.GetPath(), "Data", "Images", "AvatarCache", "Avatar.jpg");
-                modCommon.EnsureDirectoryExists(AvatarPath, true);
+                string AvatarPath = Path.Combine(Common.GetPath(), "Data", "Images", "AvatarCache", "Avatar.jpg");
+                Common.EnsureDirectoryExists(AvatarPath, true);
                 ImageHelper.ToFile(AvatarPath, Avatar);
             }
             catch 
             {
-                modCommon.Show("Error saving avatar image");
+                Common.Show("Error saving avatar image");
             }
         }
 
@@ -476,6 +501,10 @@ namespace SKYNET.GUI
         private void Write(string sender, object msg)
         {
             WebLogger1.WriteLine(new ConsoleMessage(0, sender, msg));
+            if (!msg.ToString().Contains("WEB_ConsoleMessage"))
+            {
+                WebManager.SendConsoleMessage(sender, msg);
+            }
         }
 
         private void Close_Clicked(object sender, EventArgs e)
@@ -589,7 +618,7 @@ namespace SKYNET.GUI
 
         private void OpenFileLocationMenuItem_Click(object sender, EventArgs e)
         {
-            modCommon.OpenFolderAndSelectFile(MenuBox.Game.ExecutablePath);
+            Common.OpenFolderAndSelectFile(MenuBox.Game.ExecutablePath);
         }
 
         private void ConfigureMenuItem_Click(object sender, EventArgs e)
@@ -599,7 +628,7 @@ namespace SKYNET.GUI
 
         private void RemoveMenuItem_Click(object sender, EventArgs e)
         {
-            var dialog = modCommon.Show("You are sure you want to remove this game?", MessageBoxButtons.YesNo);
+            var dialog = Common.Show("You are sure you want to remove this game?", MessageBoxButtons.YesNo);
             if (dialog == DialogResult.Yes)
             {
                 for (int i = 0; i < PN_GameContainer.Controls.Count; i++)
@@ -610,7 +639,7 @@ namespace SKYNET.GUI
                         if (control is GameBox && ((GameBox)control).Game.Guid == MenuBox.Game.Guid)
                         {
                             Game game = ((GameBox)control).Game;
-                            GameManager.Remove(game.AppID);
+                            GameManager.Remove(game.Guid);
                             PN_GameContainer.Controls.RemoveAt(i);
                         }
                     } catch { }
@@ -627,7 +656,7 @@ namespace SKYNET.GUI
         {
             if (MenuBox.Game.AppID == 0)
             {
-                modCommon.Show("Please configure a valid AppId for this game.");
+                Common.Show("Please configure a valid AppId for this game.");
                 return;
             }
             new frmGameDownload(MenuBox).ShowDialog();
@@ -646,16 +675,6 @@ namespace SKYNET.GUI
             e.Effect = DragDropEffects.Copy;
         }
 
-        private void BT_Profile_Click(object sender, EventArgs e)
-        {
-            new frmUpdateProfile().ShowDialog();
-        }
-
-        private void BT_Connect_Click(object sender, EventArgs e)
-        {
-            NetworkManager.SendAnnounce();
-        }
-
         private void LB_Browser_Click(object sender, EventArgs e)
         {
             var frmBrowser = new frmBrowser();
@@ -669,7 +688,7 @@ namespace SKYNET.GUI
 
         private void LB_NickName_Click(object sender, EventArgs e)
         {
-            int id = modCommon.GetRandom();
+            int id = Common.GetRandom();
             Task.Run(delegate
             {
                 for (int i = 0; i < 10; i++)
@@ -677,6 +696,7 @@ namespace SKYNET.GUI
                     WebManager.SendDownloadProcess(id, i * 10, $"This is the step {i} of download.");
                     Thread.Sleep(1000);
                 }
+                WebManager.SendDownloadProcessCompleted(id);
             });
         }
 
@@ -703,6 +723,117 @@ namespace SKYNET.GUI
         private void OpenTab(TabPage tabPage)
         {
             TabControl1.SelectTab(tabPage);
+        }
+
+        private void BT_Profile_Apply_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(TB_Profile_PersonaName.Text)/* | string.IsNullOrEmpty(TB_Profile_Password.Text)*/)
+            {
+                Common.Show("Please... set valid Name.");
+                return;
+            }
+
+            if (Common.UpdatedAvatar != null)
+            {
+                AvatarUpdated(Common.UpdatedAvatar);
+                Common.UpdatedAvatar = null;
+            }
+            if (TB_Profile_PersonaName.Text != SteamClient.PersonaName)
+                PersonaNameUpdated(TB_Profile_PersonaName.Text);
+
+            if (!string.IsNullOrEmpty(TB_Profile_Language.Text))
+            {
+                SteamClient.Language = TB_Profile_Language.Text;
+                settings.Language = TB_Profile_Language.Text;
+            }
+
+            settings.AllowRemoteAccess = CB_Profile_AllowRemoteAccess.Checked;
+            settings.ShowDebugConsole = SteamClient.Debug = CB_Profile_ShowDebugConsole.Checked;
+
+            if (CB_Profile_ShowDebugConsole.Checked)
+            {
+                LB_Console.Visible = true;
+            }
+            else
+            {
+                LB_Console.Visible = false;
+                WebLogger1.ClearScreen();
+            }
+
+            settings.InputDeviceID = CB_InputDeviceID.SelectedIndex;
+            SteamClient.InputDeviceID = CB_InputDeviceID.SelectedIndex;
+
+            //if (Password.Text != SteamClient.Password)
+            //    frmMain.PasswordUpdated(Password.Text);
+
+            if (uint.TryParse(TB_Profile_AccountID.Text, out uint accountID))
+            {
+                if (accountID != SteamClient.AccountID)
+                    AccountIDUpdated(accountID);
+            }
+            else
+            {
+                Common.Show("Please... set a valid account ID");
+                return;
+            }
+        }
+
+        private void PB_Profile_Avatar_MouseClick(object sender, MouseEventArgs e)
+        {
+            var ofdPhoto = new OpenFileDialog()
+            {
+                FileName = string.Empty,
+                Filter = "Picture files|*.png;*.jpg;*.bmp;*.gif|All Files|*.*",
+                Title = "Select Photo",
+                RestoreDirectory = true
+            };
+
+            DialogResult Result = ofdPhoto.ShowDialog();
+
+            if (Result == DialogResult.OK)
+            {
+                WindowState = FormWindowState.Minimized;
+
+                frmCropEditor editor = new frmCropEditor(ofdPhoto.FileName);
+                editor.BringToFront();
+                editor.Activate();
+                var CropResult = editor.ShowDialog();
+                if (CropResult == DialogResult.OK)
+                {
+                    if (Common.UpdatedAvatar != null)
+                    {
+                        PB_Profile_Avatar.Image = Common.UpdatedAvatar;
+                    }
+                }
+            }
+
+            WindowState = FormWindowState.Normal;
+        }
+
+        private void TB_Chat_Clicked(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(TB_Chat.Text))
+            {
+                NetworkManager.SendChatMessage(TB_Chat.Text);
+                TB_Chat.Text = "";
+            }
+        }
+
+        private void TB_Chat_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Return)
+            {
+                if (!string.IsNullOrEmpty(TB_Chat.Text))
+                {
+                    NetworkManager.SendChatMessage(TB_Chat.Text);
+                    TB_Chat.Text = "";
+                }
+            }
+        }
+
+        private void NetworkManager_OnChatMessage(object sender, NET_ChatMessage e)
+        {
+            WebChat.WriteLine(new ConsoleMessage(0, e.PersonaName, e.Message));
         }
     }
 }

@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using WebSocketSharp.Server;
 using SKYNET.Client;
-using SKYNET.Common;
 using SKYNET.Helpers;
 using SKYNET.IPC.Types;
 using SKYNET.Network;
@@ -22,6 +21,7 @@ namespace SKYNET.Managers
         public static WebServer WebServer;
         public static WebSocketServer WebSocket;
         public static WebSocketProcessor WebClient;
+        public static EventHandler<NET_ChatMessage> OnChatMessage;
 
         public static void Initialize()
         {
@@ -64,6 +64,7 @@ namespace SKYNET.Managers
 
         private static void ProcessMessage(NETMessage message, Socket socket)
         {
+            var RemoteEndPoint = ((IPEndPoint)socket.RemoteEndPoint);
             Write($"Received message {(NETMessageType)message.MessageType} from {((IPEndPoint)socket.RemoteEndPoint).Address.ToString()}");
             try
             {
@@ -71,46 +72,49 @@ namespace SKYNET.Managers
                 {
                     case NETMessageType.NET_Announce:
                     case NETMessageType.NET_AnnounceResponse:
-                        ProcessAnnounce(message, socket);
+                        ProcessAnnounce(message, RemoteEndPoint);
                         break;
                     case NETMessageType.NET_UserDataUpdated:
-                        ProcessUserStatusChanged(message, socket);
+                        ProcessUserStatusChanged(message, RemoteEndPoint);
                         break;
                     case NETMessageType.NET_LobbyListRequest:
-                        ProcessLobbyListRequest(message, socket);
+                        ProcessLobbyListRequest(message, RemoteEndPoint);
                         break;
                     case NETMessageType.NET_LobbyListResponse:
-                        ProcessLobbyListResponse(message, socket);
+                        ProcessLobbyListResponse(message);
                         break;
                     case NETMessageType.NET_LobbyJoinRequest:
-                        ProcessLobbyJoinRequest(message, socket);
+                        ProcessLobbyJoinRequest(message, RemoteEndPoint);
                         break;
                     case NETMessageType.NET_LobbyJoinResponse:
-                        ProcessLobbyJoinResponse(message, socket);
+                        ProcessLobbyJoinResponse(message);
                         break;
                     case NETMessageType.NET_LobbyDataUpdate:
-                        ProcessLobbyDataUpdate(message, socket);
+                        ProcessLobbyDataUpdate(message);
                         break;
                     case NETMessageType.NET_LobbyChatUpdate:
-                        ProcessLobbyChatUpdate(message, socket);
+                        ProcessLobbyChatUpdate(message);
                         break;
                     case NETMessageType.NET_LobbyLeave:
-                        ProcessLobbyLeave(message, socket);
+                        ProcessLobbyLeave(message);
                         break;
                     case NETMessageType.NET_LobbyRemove:
-                        ProcessLobbyRemove(message, socket);
+                        ProcessLobbyRemove(message);
                         break;
                     case NETMessageType.NET_LobbyGameserver:
-                        ProcessLobbyGameserver(message, socket);
+                        ProcessLobbyGameserver(message);
                         break;
                     case NETMessageType.NET_GameOpened:
-                        ProcessGameOpened(message, socket);
+                        ProcessGameOpened(message);
                         break;
                     case NETMessageType.NET_SetRichPresence:
-                        ProcessSetRichPresence(message, socket);
+                        ProcessSetRichPresence(message);
                         break;
                     case NETMessageType.NET_LobbyCreated:
-                        ProcessLobbyCreated(message, socket);
+                        ProcessLobbyCreated(message);
+                        break;
+                    case NETMessageType.NET_ChatMessage:
+                        ProcessChatMessage(message);
                         break;
                     default:
                         break;
@@ -120,10 +124,21 @@ namespace SKYNET.Managers
             {
                 Write($"Error processing message {(NETMessageType)message.MessageType}" + Environment.NewLine + ex.Message + ex.StackTrace);
             }
+
+            CloseSocket(socket, message.MessageType);
         }
 
         #region Received Messages
-        private static void ProcessLobbyLeave(NETMessage message, Socket socket)
+
+        private static void ProcessChatMessage(NETMessage message)
+        {
+            var ChatMessage = message.ParsedBody.Deserialize<NET_ChatMessage>();
+            if (ChatMessage == null) return;
+            OnChatMessage?.Invoke(null, ChatMessage);
+            WebManager.SendChatMessage(ChatMessage.AccountID, ChatMessage.PersonaName, ChatMessage.Message);
+        }
+
+        private static void ProcessLobbyLeave(NETMessage message)
         {
             // Steam lobby owner
             var lobbyLeave = message.ParsedBody.Deserialize<NET_LobbyLeave>();
@@ -132,11 +147,9 @@ namespace SKYNET.Managers
                 LobbyManager.LeaveLobby(lobbyLeave);
                 IPCManager.SendLobbyLeave(lobbyLeave);
             }
-
-            CloseSocket(socket, message.MessageType);
         }
 
-        private static void ProcessLobbyRemove(NETMessage message, Socket socket)
+        private static void ProcessLobbyRemove(NETMessage message)
         {
             var lobbyRemove = message.ParsedBody.Deserialize<NET_LobbyRemove>();
             if (lobbyRemove != null)
@@ -144,10 +157,9 @@ namespace SKYNET.Managers
                 IPCManager.SendLobbyRemove(lobbyRemove.LobbyID);
                 LobbyManager.Remove(lobbyRemove.LobbyID);
             }
-            CloseSocket(socket, message.MessageType);
         }
 
-        private static void ProcessLobbyDataUpdate(NETMessage message, Socket socket)
+        private static void ProcessLobbyDataUpdate(NETMessage message)
         {
             var LobbyDataUpdate = message.ParsedBody.Deserialize<NET_LobbyDataUpdate>();
             if (LobbyDataUpdate != null)
@@ -156,11 +168,10 @@ namespace SKYNET.Managers
             }
         }
 
-        private static void ProcessLobbyJoinRequest(NETMessage message, Socket socket)
+        private static void ProcessLobbyJoinRequest(NETMessage message, IPEndPoint RemoteEndPoint)
         {
             try
             {
-                string RemoteIPAddress = ((IPEndPoint)socket.RemoteEndPoint).Address.ToString();
                 var LobbyJoinRequest = message.ParsedBody.Deserialize<NET_LobbyJoinRequest>();
                 var LobbyJoinResponse = new NET_LobbyJoinResponse()
                 {
@@ -175,7 +186,7 @@ namespace SKYNET.Managers
                         if (lobby.Members.Count >= lobby.MaxMembers)
                         {
                             LobbyJoinResponse.ChatRoomEnterResponse = (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseFull;
-                            SendTo(RemoteIPAddress, LobbyJoinResponse, NETMessageType.NET_LobbyJoinResponse);
+                            SendTo(RemoteEndPoint.Address, LobbyJoinResponse, NETMessageType.NET_LobbyJoinResponse);
                         }
 
                         var Member = lobby.Members.Find(m => m.m_SteamID == LobbyJoinRequest.SteamID);
@@ -194,7 +205,7 @@ namespace SKYNET.Managers
 
                         SendUpdateLobby(lobby, false);
 
-                        SendTo(RemoteIPAddress, LobbyJoinResponse, NETMessageType.NET_LobbyJoinResponse);
+                        SendTo(RemoteEndPoint.Address, LobbyJoinResponse, NETMessageType.NET_LobbyJoinResponse);
 
                         // LobbyDataUpdate
                         var lobbyDataUpdate = new NET_LobbyDataUpdate()
@@ -228,11 +239,9 @@ namespace SKYNET.Managers
             {
                 Write(ex);
             }
-
-            CloseSocket(socket, message.MessageType);
         }
 
-        private static void ProcessLobbyJoinResponse(NETMessage message, Socket socket)
+        private static void ProcessLobbyJoinResponse(NETMessage message)
         {
             try
             {
@@ -246,11 +255,9 @@ namespace SKYNET.Managers
             {
                 Write(ex);
             }
-
-            CloseSocket(socket, message.MessageType);
         }
 
-        private static void ProcessLobbyListRequest(NETMessage message, Socket socket)
+        private static void ProcessLobbyListRequest(NETMessage message, IPEndPoint RemoteEndPoint)
         {
             try
             {
@@ -265,15 +272,10 @@ namespace SKYNET.Managers
                     //}
                 }
                 var lobby = LobbyManager.GetLobbyByOwner((ulong)SteamClient.SteamID);
-                if (lobby == null)
-                {
-                    CloseSocket(socket, message.MessageType);
-                }
-                else
-                {
+                if (lobby != null)
+                { 
                     if (lobby.AppID != lobbyListRequest.AppID)
                     {
-                        CloseSocket(socket, message.MessageType);
                         return;
                     }
 
@@ -284,7 +286,7 @@ namespace SKYNET.Managers
                         SerializedLobby = serialized
                     };
 
-                    string RemoteIPAddress = ((IPEndPoint)socket.RemoteEndPoint).Address.ToString();
+                    string RemoteIPAddress = RemoteEndPoint.Address.ToString();
                     SendTo(RemoteIPAddress, lobbyListResponse, NETMessageType.NET_LobbyListResponse);
                 }
             }
@@ -294,7 +296,7 @@ namespace SKYNET.Managers
             }
         }
 
-        private static void ProcessLobbyListResponse(NETMessage message, Socket socket)
+        private static void ProcessLobbyListResponse(NETMessage message)
         {
             try
             {
@@ -309,11 +311,9 @@ namespace SKYNET.Managers
             {
                 Write(ex);
             }
-
-            CloseSocket(socket, message.MessageType);
         }
 
-        internal static void SendRichPresence(string key, string value)
+        public static void SendRichPresence(string key, string value)
         {
             NET_SetRichPresence RichPresence = new NET_SetRichPresence()
             {
@@ -324,7 +324,7 @@ namespace SKYNET.Managers
             SendBroadcast(RichPresence, NETMessageType.NET_SetRichPresence);
         }
 
-        private static void ProcessSetRichPresence(NETMessage message, Socket socket)
+        private static void ProcessSetRichPresence(NETMessage message)
         {
             try
             {
@@ -338,22 +338,19 @@ namespace SKYNET.Managers
             }
         }
 
-        private static void ProcessAnnounce(NETMessage message, Socket socket)
+        private static void ProcessAnnounce(NETMessage message, IPEndPoint RemoteEndPoint)
         {
             try
             {
-                if (NetworkHelper.IslocalAddress(((IPEndPoint)socket.RemoteEndPoint).Address))
-                {
-                    CloseSocket(socket, message.MessageType);
-                    return;
-                }
-
                 var announce = message.ParsedBody.Deserialize<NET_Announce>();
-                string IPAddress = ((IPEndPoint)socket.RemoteEndPoint).Address.ToString();
+                string IPAddress = RemoteEndPoint.Address.ToString();
 
                 // Add User to List on both cases (NET_Announce and NET_AnnounceResponse)
                 if (announce != null && announce.AccountID != SteamClient.AccountID)
                 {
+                    if (!UserManager.UserExists(announce.AccountID))
+                        OnChatMessage?.Invoke(null, new NET_ChatMessage() { AccountID = announce.AccountID, PersonaName = "SKYNET", Message = announce.PersonaName + " joined to the community."  });
+
                     UserManager.AddOrUpdateUser(announce.AccountID, announce.PersonaName, announce.AppID, IPAddress);
                 }
 
@@ -364,23 +361,21 @@ namespace SKYNET.Managers
                         PersonaName = SteamClient.PersonaName,
                         AccountID = SteamClient.AccountID
                     };
-                    string RemoteIPAddress = ((IPEndPoint)socket.RemoteEndPoint).Address.ToString();
-                    SendTo(RemoteIPAddress, announceResponse, NETMessageType.NET_AnnounceResponse);
+                    SendTo(IPAddress, announceResponse, NETMessageType.NET_AnnounceResponse);
                     UserManager.DownloadAvatar(announce.AccountID, IPAddress);
                 }
                 else
                 {
                     UserManager.DownloadAvatar(announce.AccountID, IPAddress);
-                    CloseSocket(socket, message.MessageType);
                 }
             }
             catch
             {
-                modCommon.Show("err");
+                Common.Show("err");
             }
         }
 
-        private static void ProcessUserStatusChanged(NETMessage message, Socket socket)
+        private static void ProcessUserStatusChanged(NETMessage message, IPEndPoint RemoteEndPoint)
         {
             try
             {
@@ -388,7 +383,7 @@ namespace SKYNET.Managers
                 if (StatusChanged != null)
                 {
                     if (StatusChanged.AccountID == (uint)SteamClient.AccountID) return;
-                    var IPAddress = ((IPEndPoint)socket.RemoteEndPoint).Address.ToString();
+                    var IPAddress = RemoteEndPoint.Address.ToString();
 
                     var user = UserManager.GetUser((ulong)new CSteamID(StatusChanged.AccountID));
                     IPC_UserDataUpdated.UpdateType updateType = default;
@@ -410,14 +405,11 @@ namespace SKYNET.Managers
                     }
 
                     IPCManager.UpdateUserStatus(StatusChanged, updateType);
-
                 }
             }
             catch
             {
             }
-
-            CloseSocket(socket, message.MessageType);
         }
 
 
@@ -432,14 +424,13 @@ namespace SKYNET.Managers
             SendBroadcast(GameOpened, NETMessageType.NET_GameOpened);
         }
 
-        private static void ProcessGameOpened(NETMessage message, Socket socket)
+        private static void ProcessGameOpened(NETMessage message)
         {
             try
             {
                 var GameOpened = message.ParsedBody.Deserialize<NET_GameOpened>();
                 if (GameOpened == null) return;
                 UserManager.UpdateUserPlaying(GameOpened.AccountID, GameOpened.AppID);
-
                 GameManager.InvokeUserGameOpened(GameOpened);
             }
             catch  { }
@@ -448,8 +439,18 @@ namespace SKYNET.Managers
         #endregion
 
         #region Send Messages
+        public static void SendChatMessage(string message)
+        {
+            var ChatMessage = new NET_ChatMessage()
+            {
+                AccountID = SteamClient.AccountID,
+                PersonaName = SteamClient.PersonaName,
+                Message = message
+            };
 
-        internal static void SendUpdateLobby(SteamLobby lobby, bool IncludeOwner)
+            SendBroadcast(ChatMessage, NETMessageType.NET_ChatMessage, true);
+        }
+        public static void SendUpdateLobby(SteamLobby lobby, bool IncludeOwner)
         {
             var LobbyUpdate = new NET_LobbyUpdate()
             {
@@ -466,7 +467,7 @@ namespace SKYNET.Managers
             }
         }
 
-        internal static void ProcessLobbyUpdate(NETMessage message, Socket socket)
+        public static void ProcessLobbyUpdate(NETMessage message, Socket socket)
         {
             var LobbyUpdate = message.ParsedBody.Deserialize<NET_LobbyUpdate>();
             if (LobbyUpdate != null) return;
@@ -540,7 +541,7 @@ namespace SKYNET.Managers
             }
         }
 
-        internal static void SendLobbyDataUpdate(IPC_LobbyDataUpdate LobbyDataUpdate)
+        public static void SendLobbyDataUpdate(IPC_LobbyDataUpdate LobbyDataUpdate)
         {
             var user = UserManager.GetUser(LobbyDataUpdate.TargetSteamID);
             if (user != null)
@@ -616,7 +617,7 @@ namespace SKYNET.Managers
             }
         }
 
-        private static void SendBroadcast(NET_Base Base, NETMessageType type)
+        private static void SendBroadcast(NET_Base Base, NETMessageType type, bool IncluyeHost = false)
         {
             var message = new NETMessage()
             {
@@ -629,20 +630,22 @@ namespace SKYNET.Managers
                 foreach (var address in NetworkHelper.GetIPAddresses())
                 {
                     var Addressess = NetworkHelper.GetIPAddressRange(address);
+                    if (!IncluyeHost)
+                    {
+                        Addressess = Addressess.FindAll(a => a != address.ToString());
+                    }
                     foreach (var Address in Addressess)
                     {
-                        if (Address != address.ToString())
+                        try
                         {
-                            try
-                            {
-                                Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                                SocketData SocketData = new SocketData() { socket = socket, Message = message };
-                                socket.BeginConnect(Address, Port, ConnectionCallback, SocketData);
-                            }
-                            catch
-                            {
-                            }
+                            Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                            SocketData SocketData = new SocketData() { socket = socket, Message = message };
+                            socket.BeginConnect(Address, Port, ConnectionCallback, SocketData);
                         }
+                        catch
+                        {
+                        }
+
                     }
                 }
 
@@ -652,7 +655,7 @@ namespace SKYNET.Managers
         #endregion
 
         #region NET_LobbyChatUpdate
-        private static void ProcessLobbyChatUpdate(NETMessage message, Socket socket)
+        private static void ProcessLobbyChatUpdate(NETMessage message)
         {
             var lobbyChatUpdate = message.ParsedBody.Deserialize<NET_LobbyChatUpdate>();
             if (lobbyChatUpdate != null)
@@ -709,7 +712,7 @@ namespace SKYNET.Managers
             }
         }
 
-        internal static void SendLobbyCreated(SteamLobby lobby)
+        public static void SendLobbyCreated(SteamLobby lobby)
         {
             var LobbyCreated = new NET_LobbyCreated()
             {
@@ -719,7 +722,7 @@ namespace SKYNET.Managers
             SendBroadcast(LobbyCreated, NETMessageType.NET_LobbyCreated);
         }
 
-        private static void ProcessLobbyCreated(NETMessage message, Socket socket)
+        private static void ProcessLobbyCreated(NETMessage message)
         {
             var LobbyCreated = message.ParsedBody.Deserialize<NET_LobbyCreated>();
             if (LobbyCreated == null) return;
@@ -772,14 +775,13 @@ namespace SKYNET.Managers
             }
         }
 
-        private static void ProcessLobbyGameserver(NETMessage message, Socket socket)
+        private static void ProcessLobbyGameserver(NETMessage message)
         {
             var lobbyGameserver = message.ParsedBody.Deserialize<NET_LobbyGameserver>();
             if (lobbyGameserver != null)
             {
                 IPCManager.SendLobbyGameserver(lobbyGameserver);
             }
-            CloseSocket(socket, message.MessageType);
         }
         #endregion
 
@@ -797,6 +799,13 @@ namespace SKYNET.Managers
 
         public static void SendTo(string iPAddress, NET_Base Base, NETMessageType type)
         {
+            if (IPAddress.TryParse(iPAddress, out var Address))
+            {
+                SendTo(Address, Base, type);
+            }
+        }
+        public static void SendTo(IPAddress iPAddress, NET_Base Base, NETMessageType type)
+        {
             Write($"Sending {type} to {iPAddress}");
 
             var message = new NETMessage()
@@ -805,18 +814,16 @@ namespace SKYNET.Managers
                 ParsedBody = Base.Serialize()
             };
 
-            if (IPAddress.TryParse(iPAddress, out _))
+            try
             {
-                try
-                {
-                    Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    SocketData SocketData = new SocketData() { socket = socket, Message = message };
-                    socket.BeginConnect(iPAddress, Port, ConnectionCallback, SocketData);
-                }
-                catch
-                {
-                }
+                Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                SocketData SocketData = new SocketData() { socket = socket, Message = message };
+                socket.BeginConnect(iPAddress, Port, ConnectionCallback, SocketData);
             }
+            catch
+            {
+            }
+
         }
 
         #region Conection callback

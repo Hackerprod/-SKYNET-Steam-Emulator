@@ -3,12 +3,11 @@ using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
-using SKYNET.Common;
 using SKYNET.Managers;
 using SKYNET.Plugin;
 using SKYNET.Steamworks;
 using SKYNET.Types;
-
+using SKYNET.Wave;
 using AppID = System.UInt32;
 
 namespace SKYNET.Client
@@ -23,6 +22,9 @@ namespace SKYNET.Client
         public static Bitmap Avatar { get; set; }
         public static Bitmap DefaultAvatar { get; set; }
         public static CSteamID SteamID_GS { get; set; }
+        public static bool Debug { get; set; }
+        public static int InputDeviceID { get; set; }
+        public static double Wallet { get; set; }
 
         public SteamClient(Settings settings)
         {
@@ -33,7 +35,8 @@ namespace SKYNET.Client
             PersonaName = settings.PersonaName;
             Language = settings.Language;
             SteamID_GS = CSteamID.GenerateGameServer();
-
+            Debug = settings.ShowDebugConsole;
+            InputDeviceID = settings.InputDeviceID;
         }
 
         public void Initialize()
@@ -46,7 +49,7 @@ namespace SKYNET.Client
 
         private static void InitializePlugins()
         {
-            string PluginsDirectory = modCommon.GetPath();
+            string PluginsDirectory = Common.GetPath();
             if (Directory.Exists(PluginsDirectory))
             {
                 foreach (var file in Directory.GetFiles(PluginsDirectory, "*.dll"))
@@ -89,6 +92,7 @@ namespace SKYNET.Client
 
         public static void Write(string sender, object msg)
         {
+            if (!Debug) return;
             Log.Write(sender, msg);
         }
     }

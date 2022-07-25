@@ -7,12 +7,15 @@ namespace SKYNET.Managers
 {
     public class AudioManager
     {
+        public static bool Recording;
+        public static int SampleRate = 48000; // 22050
+        public static int InputDeviceID;
+
         private static WaveIn recorder;
         private static List<byte> Buffer;
         private static List<byte> AvailableBuffer;
-        public static int SampleRate = 22050;
+        private static bool Initialized => recorder != null;
 
-        public static bool Recording { get; private set; }
 
         public static void Initialize()
         {
@@ -24,8 +27,17 @@ namespace SKYNET.Managers
             Buffer = new List<byte>();
             AvailableBuffer = new List<byte>();
 
-            recorder = new WaveIn(new WavInDevice(0, "", 1), SampleRate, 16, 1, 400);
-            recorder.BufferFull += OnDataAvailable;
+            try
+            {
+                var InDevice = WaveIn.Devices[InputDeviceID];
+                recorder = new WaveIn(InDevice, SampleRate, 16, 1, 400);
+                recorder.BufferFull += OnDataAvailable;
+                Write($"Audio system initialized in device \"{InDevice.Name}\", sample rate {SampleRate}");
+            }
+            catch (System.Exception)
+            {
+                Write($"Error initializing audio in device ID {InputDeviceID}, sample rate {SampleRate}");
+            }
         }
 
         private static void OnDataAvailable(byte[] buffer)
@@ -37,12 +49,19 @@ namespace SKYNET.Managers
         {
             if (!Recording)
             {
-                try
+                if (Initialized)
                 {
-                    recorder.Start();
-                    Recording = true;
+                    try
+                    {
+                        recorder.Start();
+                        Recording = true;
+                    }
+                    catch { }
                 }
-                catch { }
+                else
+                {
+                    Initialize();
+                }
                 Write("StartVoiceRecording");
             }
         }
@@ -51,12 +70,19 @@ namespace SKYNET.Managers
         {
             if (Recording)
             {
-                try
+                if (Initialized)
                 {
-                    recorder.Stop();
-                    Recording = false;
+                    try
+                    {
+                        recorder.Stop();
+                        Recording = false;
+                    }
+                    catch { }
                 }
-                catch { }
+                else
+                {
+                    Initialize();
+                }
                 Write("StopVoiceRecording");
             }
         }

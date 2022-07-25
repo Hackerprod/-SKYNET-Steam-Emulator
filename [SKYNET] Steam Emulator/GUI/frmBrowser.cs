@@ -99,8 +99,8 @@ namespace SKYNET.GUI
 
         private string GetAssemblyPath(string fileName, bool RootPath = false)
         {
-            string assembliesPath = Path.Combine(modCommon.GetPath(), "Data", "Assemblies");
-            modCommon.EnsureDirectoryExists(assembliesPath);
+            string assembliesPath = Path.Combine(Common.GetPath(), "Data", "Assemblies");
+            Common.EnsureDirectoryExists(assembliesPath);
             foreach (var file in Directory.GetFiles(assembliesPath, "*.dll", SearchOption.AllDirectories))
             {
                 if (Path.GetFileName(file) == fileName)

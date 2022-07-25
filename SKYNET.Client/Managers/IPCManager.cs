@@ -1,12 +1,10 @@
 ﻿using SKYNET.Client;
-using SKYNET.Common;
 using SKYNET.Helpers;
 using SKYNET.IPC;
 using SKYNET.IPC.Types;
 using SKYNET.Network;
 using SKYNET.Network.Types;
 using SKYNET.Types;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -299,8 +297,8 @@ namespace SKYNET.Managers
             var ClientHello = message.ParsedBody.Deserialize<IPC_ClientHello>();
             if (ClientHello == null) return;
 
-            var RemoteStoragePath = Path.Combine(modCommon.GetPath(), "Data", "Storage", "Remote");
-            modCommon.EnsureDirectoryExists(RemoteStoragePath);
+            var RemoteStoragePath = Path.Combine(Common.GetPath(), "Data", "Storage", "Remote");
+            Common.EnsureDirectoryExists(RemoteStoragePath);
             // TODO: Send Client welcome with user data
             var ClientWelcome = new IPC_ClientWelcome()
             {
@@ -313,6 +311,7 @@ namespace SKYNET.Managers
                 RunCallbacks = true,
                 ISteamHTTP = true,
                 RemoteStoragePath = RemoteStoragePath,
+                InputDeviceID = SteamClient.InputDeviceID,
             };
 
             var Game = GameManager.GetGameByPath(ClientHello.ExecutablePath);
@@ -345,7 +344,7 @@ namespace SKYNET.Managers
             SendUpdatedLobbies(Game.AppID);
 
             // TODO: Send user avatar
-            var hexAvatar = ImageHelper.GetImageBase64(SteamClient.Avatar);
+            var hexAvatar = ImageHelper.ImageToBase64(SteamClient.Avatar);
             var AvatarResponse = new IPC_AvatarResponse()
             {
                 AccountID = SteamClient.AccountID,
@@ -355,7 +354,7 @@ namespace SKYNET.Managers
             connection.WriteAsync(AvatarMessage);
 
             // TODO: Send user avatar
-           hexAvatar = ImageHelper.GetImageBase64(SteamClient.DefaultAvatar);
+           hexAvatar = ImageHelper.ImageToBase64(SteamClient.DefaultAvatar);
             var DefaultAvatarResponse = new IPC_AvatarResponse()
             {
                 AccountID = 0,
@@ -440,7 +439,7 @@ namespace SKYNET.Managers
                 try
                 {
                     // TODO: Response avatar stored in cache
-                    string AvatarCachePath = Path.Combine(modCommon.GetPath(), "Data", "Images", "AvatarCache", AvatarRequest.AccountID + ".jpg");
+                    string AvatarCachePath = Path.Combine(Common.GetPath(), "Data", "Images", "AvatarCache", AvatarRequest.AccountID + ".jpg");
 
                     if (!UserManager.GetAvatar(AvatarRequest.AccountID, out var Avatar))
                     {
@@ -452,7 +451,7 @@ namespace SKYNET.Managers
                             Avatar = (Bitmap)ImageHelper.FromFile(AvatarCachePath);
                         }
                     }
-                    var hexAvatar = ImageHelper.GetImageBase64(Avatar);
+                    var hexAvatar = ImageHelper.ImageToBase64(Avatar);
                     var AvatarResponse = new IPC_AvatarResponse()
                     {
                         AccountID = AvatarRequest.AccountID,
@@ -470,7 +469,7 @@ namespace SKYNET.Managers
 
         public static void SendAvatarUpdated(uint AccountID, Bitmap Avatar)
         {
-            var hexAvatar = ImageHelper.GetImageBase64(Avatar);
+            var hexAvatar = ImageHelper.ImageToBase64(Avatar);
             var AvatarResponse = new IPC_AvatarResponse()
             {
                 AccountID = AccountID,

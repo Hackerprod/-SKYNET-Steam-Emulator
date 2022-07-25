@@ -38,11 +38,11 @@ namespace SKYNET.Managers
 
         public static void Initialize()
         {
-            StoragePath = Path.Combine(modCommon.GetPath(), "Data", "Storage");
-            AppCachePath = Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache");
+            StoragePath = Path.Combine(Common.GetPath(), "Data", "Storage");
+            AppCachePath = Path.Combine(Common.GetPath(), "Data", "Images", "AppCache");
 
-            modCommon.EnsureDirectoryExists(StoragePath);
-            modCommon.EnsureDirectoryExists(AppCachePath);
+            Common.EnsureDirectoryExists(StoragePath);
+            Common.EnsureDirectoryExists(AppCachePath);
 
             foreach (var directory in Directory.GetDirectories(StoragePath))
             {
@@ -191,8 +191,8 @@ namespace SKYNET.Managers
                     {
                         var AppID = KV.Key.ToString();
                         var achievements = KV.Value;
-                        var filePath = Path.Combine(modCommon.GetPath(), "Data", "Storage", AppID, "Achievements.json");
-                        modCommon.EnsureDirectoryExists(filePath, true);
+                        var filePath = Path.Combine(Common.GetPath(), "Data", "Storage", AppID, "Achievements.json");
+                        Common.EnsureDirectoryExists(filePath, true);
                         var JSON = new JavaScriptSerializer().Serialize(achievements);
                         File.WriteAllText(filePath, JSON);
                     }
@@ -213,8 +213,8 @@ namespace SKYNET.Managers
                     {
                         var AppID = KV.Key.ToString();
                         var leaderboards = KV.Value;
-                        var filePath = Path.Combine(modCommon.GetPath(), "Data", "Storage", AppID, "Leaderboards.json");
-                        modCommon.EnsureDirectoryExists(filePath, true);
+                        var filePath = Path.Combine(Common.GetPath(), "Data", "Storage", AppID, "Leaderboards.json");
+                        Common.EnsureDirectoryExists(filePath, true);
                         var JSON = new JavaScriptSerializer().Serialize(leaderboards);
                         File.WriteAllText(filePath, JSON);
                     }
@@ -235,8 +235,8 @@ namespace SKYNET.Managers
                     {
                         var AppID = KV.Key.ToString();
                         var playerStats = KV.Value;
-                        var filePath = Path.Combine(modCommon.GetPath(), "Data", "Storage", AppID, "PlayerStats.json");
-                        modCommon.EnsureDirectoryExists(filePath, true);
+                        var filePath = Path.Combine(Common.GetPath(), "Data", "Storage", AppID, "PlayerStats.json");
+                        Common.EnsureDirectoryExists(filePath, true);
                         var JSON = new JavaScriptSerializer().Serialize(playerStats);
                         File.WriteAllText(filePath, JSON);
                     }
@@ -330,13 +330,15 @@ namespace SKYNET.Managers
         {
             WebClient.DownloadProgressChanged += WebClient_DownloadProgressChanged;
             DownloadID = new Random().Next(100, 200);
+            string appCachePath = Path.Combine(AppCachePath, AppId.ToString());
+            Common.EnsureDirectoryExists(appCachePath);
 
             try
             {
                 SetProgress(DownloadID, 0, $"Downloading Library_Hero file for AppId {AppId}");
                 string Url = $"https://steamcdn-a.akamaihd.net/steam/apps/{AppId}/library_hero.jpg";
                 var Data = await WebClient.DownloadDataTaskAsync(Url);
-                File.WriteAllBytes(Path.Combine(AppCachePath, $"{AppId}_library_hero.jpg"), Data);
+                File.WriteAllBytes(Path.Combine(appCachePath, $"{AppId}_library_hero.jpg"), Data);
             }
             catch { }
 
@@ -345,7 +347,7 @@ namespace SKYNET.Managers
                 SetProgress(DownloadID, 25, $"Downloading Header file for AppId {AppId}");
                 string Url = $"https://steamcdn-a.akamaihd.net/steam/apps/{AppId}/header.jpg";
                 var Data = await WebClient.DownloadDataTaskAsync(Url);
-                File.WriteAllBytes(Path.Combine(AppCachePath, $"{AppId}_header.jpg"), Data);
+                File.WriteAllBytes(Path.Combine(appCachePath, $"{AppId}_header.jpg"), Data);
             }
             catch { }
 
@@ -369,6 +371,8 @@ namespace SKYNET.Managers
                 await GenerateItems(AppId);
             }
             catch { }
+
+            WebManager.SendDownloadProcessCompleted(DownloadID);
         }
 
         private static void SetProgress(int DownloadID, int value, string info)
@@ -384,8 +388,8 @@ namespace SKYNET.Managers
         public static async Task GenerateAchievements(uint app_id)
         {
             string URL = $"https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key={SteamAPIKey}&appid={app_id}";
-            string achievementsPath = Path.Combine(modCommon.GetPath(), "Data", "Storage", app_id.ToString(), "GameSchema.json");
-            modCommon.EnsureDirectoryExists(achievementsPath, true);
+            string achievementsPath = Path.Combine(Common.GetPath(), "Data", "Storage", app_id.ToString(), "GameSchema.json");
+            Common.EnsureDirectoryExists(achievementsPath, true);
 
             try
             {
@@ -438,8 +442,8 @@ namespace SKYNET.Managers
         public static async Task GenerateItems(uint app_id)
         {
             string URL = $"https://api.steampowered.com/IInventoryService/GetItemDefMeta/v1?key={SteamAPIKey}&appid={app_id}";
-            string itemsPath = Path.Combine(modCommon.GetPath(), "Data", "Storage", app_id.ToString(), "Items.json");
-            modCommon.EnsureDirectoryExists(itemsPath, true);
+            string itemsPath = Path.Combine(Common.GetPath(), "Data", "Storage", app_id.ToString(), "Items.json");
+            Common.EnsureDirectoryExists(itemsPath, true);
 
             try
             {
@@ -458,8 +462,8 @@ namespace SKYNET.Managers
         public static async Task GenerateAppDetails(uint app_id)
         {
             string URL = $"https://store.steampowered.com/api/appdetails/?appids={app_id}";
-            string appDetailsPath = Path.Combine(modCommon.GetPath(), "Data", "Storage", app_id.ToString(), "AppDetails.json");
-            modCommon.EnsureDirectoryExists(appDetailsPath, true);
+            string appDetailsPath = Path.Combine(Common.GetPath(), "Data", "Storage", app_id.ToString(), "AppDetails.json");
+            Common.EnsureDirectoryExists(appDetailsPath, true);
 
             try
             {

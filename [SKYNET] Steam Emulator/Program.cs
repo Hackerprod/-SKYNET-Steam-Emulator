@@ -34,8 +34,8 @@ namespace SKYNET
         private static Assembly ResolveAssembly(object sender, ResolveEventArgs args)
         {
             var fullAssemblyName = new AssemblyName(args.Name);
-            string assembliesPath = Path.Combine(modCommon.GetPath(), "Data", "Assemblies");
-            modCommon.EnsureDirectoryExists(assembliesPath);
+            string assembliesPath = Path.Combine(Common.GetPath(), "Data", "Assemblies");
+            Common.EnsureDirectoryExists(assembliesPath);
 
             foreach (var file in Directory.GetFiles(assembliesPath, "*.dll", SearchOption.AllDirectories))
             {
@@ -51,7 +51,7 @@ namespace SKYNET
         {
             try
             {
-                foreach (var file in Directory.GetFiles(modCommon.GetPath(), "*.*", SearchOption.TopDirectoryOnly))
+                foreach (var file in Directory.GetFiles(Common.GetPath(), "*.*", SearchOption.TopDirectoryOnly))
                 {
                     if (Path.GetExtension(file) == ".config" || Path.GetExtension(file) == ".pdb" || Path.GetExtension(file) == ".xml" || Path.GetExtension(file) == ".txt" || Path.GetExtension(file) == ".log")
                     {
@@ -85,7 +85,7 @@ namespace SKYNET
             {
                 Exception ex = (Exception)msg;
 
-                string filePath = Path.Combine(modCommon.GetPath(), "Data", "[SKYNET] Steam Emulator.log");
+                string filePath = Path.Combine(Common.GetPath(), "Data", "[SKYNET] Steam Emulator.log");
 
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.Append(msg);

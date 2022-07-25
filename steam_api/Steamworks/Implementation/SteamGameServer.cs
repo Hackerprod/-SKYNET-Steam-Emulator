@@ -145,7 +145,6 @@ namespace SKYNET.Steamworks.Implementation
         public CSteamID GetSteamID()
         {
             var SteamId = SteamEmulator.SteamID_GS;
-            if (!LoggedIn) SteamId = k_steamIDNil;
             Write($"GetSteamID {SteamId.ToString()}");
             return SteamId; 
         }

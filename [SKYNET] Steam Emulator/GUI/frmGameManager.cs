@@ -71,8 +71,7 @@ namespace SKYNET.GUI
 
             try
             {
-                var imageBytes = Convert.FromBase64String(Game.AvatarHex);
-                Bitmap Avatar = (Bitmap)ImageHelper.ImageFromBytes(imageBytes);
+                Bitmap Avatar = ImageHelper.ImageFromBase64(Game.AvatarHex);
                 PB_Avatar.Image = Avatar; 
             }
             catch (Exception)
@@ -80,7 +79,7 @@ namespace SKYNET.GUI
                 if (File.Exists(Game.ExecutablePath))
                 {
                     var bitmap = (Bitmap)ImageHelper.IconFromFile(Game.ExecutablePath);
-                    var AvatarHex = ImageHelper.GetImageBase64(bitmap);
+                    var AvatarHex = ImageHelper.ImageToBase64(bitmap);
                     Game.AvatarHex = AvatarHex;
                     PB_Avatar.Image = bitmap;
                 }
@@ -110,7 +109,7 @@ namespace SKYNET.GUI
         {
             if (!uint.TryParse(TB_AppId.Text, out uint _AppId))
             {
-                modCommon.Show("Please set a valid AppId to continue");
+                Common.Show("Please set a valid AppId to continue");
                 return;
             }
 
@@ -120,7 +119,7 @@ namespace SKYNET.GUI
                 try
                 {
                     var bitmap = (Bitmap)ImageHelper.IconFromFile(TB_ExecutablePath.Text);
-                    AvatarHex = ImageHelper.GetImageBase64(bitmap);
+                    AvatarHex = ImageHelper.ImageToBase64(bitmap);
                 }
                 catch  { }
 
@@ -183,7 +182,7 @@ namespace SKYNET.GUI
             if (File.Exists(Game.ExecutablePath))
             {
                 var bitmap = (Bitmap)ImageHelper.IconFromFile(Game.ExecutablePath);
-                var AvatarHex = ImageHelper.GetImageBase64(bitmap);
+                var AvatarHex = ImageHelper.ImageToBase64(bitmap);
                 Game.AvatarHex = AvatarHex;
                 PB_Avatar.Image = bitmap;
             }

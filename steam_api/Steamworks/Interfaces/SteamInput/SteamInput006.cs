@@ -7,6 +7,7 @@ using InputAnalogActionHandle_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    [Interface("SteamInput005")]
     [Interface("SteamInput006")]
     public class SteamInput006 : ISteamInterface
     {

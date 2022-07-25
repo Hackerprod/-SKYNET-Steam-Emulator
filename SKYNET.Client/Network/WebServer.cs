@@ -1,5 +1,4 @@
-﻿using SKYNET.Common;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -93,10 +92,10 @@ namespace SKYNET.Network
         public WebServer(int port)
         {
             httpsv = new HttpServer(port);
-            httpsv.DocumentRootPath = Path.Combine(modCommon.GetPath(), "Data");
+            httpsv.DocumentRootPath = Path.Combine(Common.GetPath(), "Data");
             httpsv.OnGet += OnGet;
-            this._rootDirectory = Path.Combine(modCommon.GetPath(), "Data");
-            _webDirectory = Path.Combine(modCommon.GetPath(), "Data", "www");
+            this._rootDirectory = Path.Combine(Common.GetPath(), "Data");
+            _webDirectory = Path.Combine(Common.GetPath(), "Data", "www");
             ServerPort = port;
         }
 

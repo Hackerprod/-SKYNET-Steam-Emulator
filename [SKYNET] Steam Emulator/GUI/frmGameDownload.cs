@@ -21,7 +21,7 @@ namespace SKYNET.GUI
             InitializeComponent();
             CheckForIllegalCrossThreadCalls = false;
 
-            CurrentDownloadID = modCommon.GetRandom();
+            CurrentDownloadID = Common.GetRandom();
 
             foreach (Control control in Controls)
             {
@@ -34,14 +34,13 @@ namespace SKYNET.GUI
 
             try
             {
-                var imageBytes = Convert.FromBase64String(Box.Game.AvatarHex);
-                Bitmap Avatar = (Bitmap)ImageHelper.ImageFromBytes(imageBytes);
+                Bitmap Avatar = (Bitmap)ImageHelper.ImageFromBase64(Box.Game.AvatarHex);
                 PB_Avatar.Image = Avatar;
             }
             catch
             {
             }
-            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache"));
+            Common.EnsureDirectoryExists(Path.Combine(Common.GetPath(), "Data", "Images", "AppCache"));
 
             Thread DownloadThread = new Thread(StartDownloading);
             DownloadThread.IsBackground = true;
@@ -51,7 +50,8 @@ namespace SKYNET.GUI
         private async void StartDownloading()
         {
             string errorTask = "";
-            string BannerPath = Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache");
+            string appCachePath = Path.Combine(Common.GetPath(), "Data", "Images", "AppCache", AppId.ToString());
+            Common.EnsureDirectoryExists(appCachePath);
 
             try
             {
@@ -59,7 +59,7 @@ namespace SKYNET.GUI
                 SetProgress(0, $"Downloading Library_Hero file for AppId {AppId}");
                 var Data = await WebClient.DownloadDataTaskAsync(Url);
 
-                File.WriteAllBytes(Path.Combine(BannerPath, $"{AppId}_library_hero.jpg"), Data);
+                File.WriteAllBytes(Path.Combine(appCachePath, $"{AppId}_library_hero.jpg"), Data);
             }
             catch (Exception ex)
             {
@@ -72,7 +72,7 @@ namespace SKYNET.GUI
                 SetProgress(25, $"Downloading Header file for AppId {AppId}");
                 var Data = await WebClient.DownloadDataTaskAsync(Url);
 
-                File.WriteAllBytes(Path.Combine(BannerPath, $"{AppId}_header.jpg"), Data);
+                File.WriteAllBytes(Path.Combine(appCachePath, $"{AppId}_header.jpg"), Data);
             }
             catch (Exception ex)
             {
@@ -103,17 +103,19 @@ namespace SKYNET.GUI
             {
                 SetProgress(100, $"Downloading Items for AppId {AppId}"); 
                 await StatsManager.GenerateItems(AppId);
-                Close();
             }
             catch (Exception ex)
             {
                 errorTask = "Error downloading file. " + ex.Message;
             }
 
+            WebManager.SendDownloadProcessCompleted(CurrentDownloadID);
+            Close();
+
             if (!string.IsNullOrEmpty(errorTask))
             {
                 LB_Info.Text = $"Finished with errors.";
-                modCommon.Show(errorTask);
+                Common.Show(errorTask);
             }
         }
 
@@ -121,12 +123,12 @@ namespace SKYNET.GUI
         {
             WebManager.SendDownloadProcess(CurrentDownloadID, value, info);
 
-            modCommon.InvokeAction(LB_Info, delegate
+            Common.InvokeAction(LB_Info, delegate
             {
                 LB_Info.Text = info;
             });
 
-            modCommon.InvokeAction(PB_Progress, delegate
+            Common.InvokeAction(PB_Progress, delegate
             {
                 PB_Progress.Value = value;
             });

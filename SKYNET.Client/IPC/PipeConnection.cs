@@ -1,5 +1,4 @@
-﻿using SKYNET.Common;
-using System;
+﻿using System;
 using System.IO.Pipes;
 using System.Text;
 using System.Threading;

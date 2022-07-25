@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Web.Script.Serialization;
-using SKYNET.Common;
 using SKYNET.Helpers;
 using SKYNET.Network.Types;
 using SKYNET.Types;
@@ -31,7 +30,7 @@ namespace SKYNET.Managers
         public static void Initialize()
         {
             List<Game> games = new List<Game>();
-            string gamePath = Path.Combine(modCommon.GetPath(), "Data", "Games.bin");
+            string gamePath = Path.Combine(Common.GetPath(), "Data", "Games.bin");
             if (File.Exists(gamePath))
             {
                 try
@@ -42,7 +41,7 @@ namespace SKYNET.Managers
                 catch (Exception)
                 {
                     games = new List<Game>();
-                    modCommon.Show("Error loading Game stored data");
+                    Common.Show("Error loading Game stored data");
                 }
             }
 
@@ -70,7 +69,7 @@ namespace SKYNET.Managers
 
         internal static Game GetGameByRootPath(string executablePath)
         {
-            return Games.Find(g => modCommon.GetRootPath(g.ExecutablePath) == modCommon.GetRootPath(executablePath));
+            return Games.Find(g => Common.GetRootPath(g.ExecutablePath) == Common.GetRootPath(executablePath));
         }
 
         public static void AddGame(Game game)
@@ -78,17 +77,6 @@ namespace SKYNET.Managers
             Games.Add(game);
             Save();
             OnGameAdded?.Invoke(null, game);
-        }
-
-        public static void Remove(uint appID)
-        {
-            var Game = Games.Find(g => g.AppID == appID);
-            if (Game != null)
-            {
-                OnGameRemoved?.Invoke(null, Game);
-                Games.RemoveAll(g => g.AppID == appID);
-            }
-            Save();
         }
 
         public static void Remove(string Guid)
@@ -175,24 +163,6 @@ namespace SKYNET.Managers
             return RunningGames.Find(r => r.Game.Guid == guid) != null;
         }
 
-        internal static Bitmap GetGameImage(uint appID, bool Header = false)
-        {
-            string imageName = Header ? appID + "_header.jpg" : appID + "_library_hero.jpg";
-            Bitmap bitmap = new Bitmap(200, 200);
-            try
-            {
-                string ImagePath = Path.Combine(modCommon.GetPath(), "Data", "Images", "AppCache", imageName);
-                if (File.Exists(ImagePath))
-                {
-                    bitmap = (Bitmap)ImageHelper.FromFile(ImagePath);
-                }
-            }
-            catch
-            {
-            }
-            return bitmap;
-        }
-
         public static void SetLastPlayedTime(string guid)
         {
             var Game = GetGame(guid);
@@ -245,8 +215,8 @@ namespace SKYNET.Managers
         {
             try
             {
-                string path = Path.Combine(modCommon.GetPath(), "Data", "Games.bin");
-                modCommon.EnsureDirectoryExists(path, true);
+                string path = Path.Combine(Common.GetPath(), "Data", "Games.bin");
+                Common.EnsureDirectoryExists(path, true);
                 string json = new JavaScriptSerializer().Serialize(Games);
                 File.WriteAllText(path, json);
             }

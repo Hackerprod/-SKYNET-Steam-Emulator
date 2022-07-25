@@ -360,7 +360,7 @@ namespace SKYNET.Steamworks.Exported
         public static void SteamGameServer_Shutdown()
         {
             Write("SteamGameServer_Shutdown");
-            SteamEmulator.SteamID_GS = CSteamID.GenerateGameServer();
+            SteamEmulator.SteamID_GS = CSteamID.CreateOne(true);
             SteamGameServer.Instance.LoggedIn = false;
         }
 

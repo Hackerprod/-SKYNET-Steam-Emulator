@@ -3,7 +3,6 @@ using WebSocketSharp;
 using WebSocketSharp.Server;
 using WebSocketSharp.Net.WebSockets;
 using SKYNET.WEB.Types;
-using SKYNET.Common;
 using SKYNET.Managers;
 
 namespace SKYNET.Network
@@ -69,7 +68,7 @@ namespace SKYNET.Network
 
         private void Write(object msg)
         {
-            Common.Log.Write("WebSocket", msg);
+            SKYNET.Log.Write("WebSocket", msg);
         }
 
         public void Send(string JSON)

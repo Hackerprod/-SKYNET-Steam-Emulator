@@ -110,7 +110,7 @@ public class SteamEmulator
         PersonaName = "";
         EmulatorPath = "";
         SteamID = CSteamID.Invalid;
-        SteamID_GS = CSteamID.Invalid;
+        SteamID_GS = CSteamID.CreateOne(); 
         AppID = 0;
         DLCs = new List<DLC>();
     }
@@ -130,7 +130,6 @@ public class SteamEmulator
 
             IPCManager.Initialize();
             InterfaceManager.Initialize();
-            AudioManager.Initialize();
 
             #region Interface Initialization
 

@@ -3,7 +3,7 @@ using System;
 using System.Text;
 using System.Web.Script.Serialization;
 
-namespace SKYNET.Common
+namespace SKYNET
 {
     public static class Extensions
     {

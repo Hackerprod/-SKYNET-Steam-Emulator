@@ -1,4 +1,5 @@
 ﻿using SKYNET.Types;
+using SKYNET.Wave;
 using System.Collections.Generic;
 
 namespace SKYNET.IPC.Types
@@ -105,6 +106,7 @@ namespace SKYNET.IPC.Types
         public string RemoteStoragePath { get; set; }
         public uint AppID { get; set; }
         public List<Game.DLC> DLCs { get; set; }
+        public int InputDeviceID { get; set; }
     }
 
     public class IPC_LobbyCreate : IPC_MessageBase

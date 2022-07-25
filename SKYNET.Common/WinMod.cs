@@ -4,7 +4,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace SKYNET.Common
+namespace SKYNET
 {
     public class WinMod
     {

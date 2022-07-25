@@ -76,6 +76,7 @@
     <Compile Include="Callback\CCallResult.cs" />
     <Compile Include="Callback\SteamCallback.cs" />
     <Compile Include="Callback\SteamCallBacks.cs" />
+    <Compile Include="CSteamID2.cs" />
     <Compile Include="Helpers\ConsoleHelper.cs" />
     <Compile Include="Helpers\IPC\EventArgs.cs" />
     <Compile Include="Helpers\IPC\PipeClient.cs" />

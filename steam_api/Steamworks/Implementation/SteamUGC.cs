@@ -85,7 +85,7 @@ namespace SKYNET.Steamworks.Implementation
                             m_eResult = EResult.k_EResultOK,
                             m_unNumResultsReturned = (uint)request.results.Count(),
                             m_unTotalMatchingResults = (uint)request.results.Count(),
-                            m_bCachedData = false,
+                            m_bCachedData = false, 
                         };
                         APICall = CallbackManager.AddCallbackResult(data);
                     }

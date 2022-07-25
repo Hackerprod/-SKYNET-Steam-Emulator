@@ -1,15 +1,12 @@
-﻿using SKYNET.Helpers;
-using SKYNET.Steamworks;
-using SKYNET.Types;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+using SKYNET.Helpers;
+using SKYNET.Steamworks;
 
 using PublishedFileId_t = System.UInt64;
 using SteamAPICall_t = System.UInt64;
+using HSteamPipe = System.UInt32;
+using HSteamUser = System.UInt32;
 
 namespace SKYNET.Callback
 {
@@ -29,14 +26,12 @@ namespace SKYNET.Callback
         public bool ReadyToCall { get; set; }
         public DateTime Time { get; set; }
         public int TimeSeconds => (DateTime.Now - Time).Seconds;
-        public bool CallComplete { get; set; }
 
-        public CallbackMessage(ICallbackData data, bool readyToCall = true, bool callComplete = false)
+        public CallbackMessage(ICallbackData data, bool readyToCall = true)
         {
             Data = data;
             ReadyToCall = readyToCall;
             Time = DateTime.Now;
-            CallComplete = callComplete;
         }
 
         public bool TimedOut()
@@ -44,6 +39,14 @@ namespace SKYNET.Callback
             return (DateTime.Now - Time).Seconds > 20;
         }
     }
+
+    public struct CallbackMsg_t
+    {
+        public HSteamUser m_hSteamUser; // Specific user to whom this callback applies.
+        public int m_iCallback; // Callback identifier.  (Corresponds to the k_iCallback enum in the callback structure.)
+        public IntPtr m_pubParam; // Points to the callback structure
+        public int m_cubParam; // Size of the data pointed to by m_pubParam
+    };
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     public struct SteamServersConnected_t : ICallbackData

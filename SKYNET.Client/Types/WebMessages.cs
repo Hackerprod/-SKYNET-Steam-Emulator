@@ -41,6 +41,7 @@ namespace SKYNET.WEB.Types
         WEB_GameOrderUpdated,
         WEB_GameLaunch,
         WEB_GameLaunched,
+        WEB_GameStop,
         WEB_GameStopped,
         WEB_GameInfoRequest,
         WEB_GameInfoResponse,
@@ -48,6 +49,7 @@ namespace SKYNET.WEB.Types
         WEB_GameOpenWithoutEmulation,
         WEB_GameDownloadCache,
         WEB_GameCacheDownloadProgress,
+        WEB_GameCacheDownloadProgressCompleted,
         WEB_UserOnline,
         WEB_UserOffline,
         WEB_UserInfoRequest,
@@ -58,12 +60,19 @@ namespace SKYNET.WEB.Types
         WEB_FileInfoResponse,
         WEB_OpenFileDialogRequest,
         WEB_OpenFileDialogResponse,
+        WEB_UpdateUser,
+        WEB_UserUpdated,
+        WEB_UpdateAvatar,
+        WEB_AvatarUpdated,
+        WEB_ConsoleMessage,
+        WEB_UserLogOff,
     }
 
     public class WEB_ChatMessage : WEB_Base
     {
         public uint SenderAccountID { get; set; }
-        public uint Message { get; set; }
+        public string PersonaName { get; set; }
+        public string Message { get; set; }
     }
 
     public class WEB_PrivateChatMessage : WEB_Base
@@ -95,6 +104,8 @@ namespace SKYNET.WEB.Types
         public long TimePlayed { get; set; }
         public uint UsersPlaying { get; set; }
         public List<FriendPlaying> FriendsPlaying { get; set; }
+        public string Header_Image { get; set; }
+        public string LibraryHero_Image { get; set; }
 
         public class FriendPlaying
         {
@@ -153,6 +164,11 @@ namespace SKYNET.WEB.Types
     }
 
     public class WEB_GameLaunched : WEB_Base
+    {
+        public string Guid { get; set; }
+    }
+
+    public class WEB_GameStop : WEB_Base
     {
         public string Guid { get; set; }
     }
@@ -257,11 +273,43 @@ namespace SKYNET.WEB.Types
         public string Info { get; set; }
     }
 
+    public class WEB_GameCacheDownloadProgressCompleted : WEB_Base
+    {
+        public int DownloadID { get; set; }
+    }
+
+    public class WEB_UpdateUser : WEB_Base
+    {
+        public UserInfo Info { get; set; }
+    }
+
+    public class WEB_UserUpdated : WEB_Base
+    {
+        public UserInfo Info { get; set; }
+    }
+
+    public class WEB_UpdateAvatar : WEB_Base
+    {
+        public string AvatarHex { get; set; }
+    }
+
+    public class WEB_AvatarUpdated : WEB_Base
+    {
+        public string AvatarHex { get; set; }
+    }
+
+    public class WEB_ConsoleMessage : WEB_Base
+    {
+        public string Sender { get; set; }
+        public string Message { get; set; }
+    }
+
     public class UserInfo
     {
         public uint AccountID { get; set; }
         public string PersonaName { get; set; }
         public string Language { get; set; }
         public string AvatarHex { get; set; }
+        public double Wallet { get; set; }
     }
 }

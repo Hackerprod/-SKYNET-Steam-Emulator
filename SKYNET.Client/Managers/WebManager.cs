@@ -1,5 +1,4 @@
 ﻿using SKYNET.Client;
-using SKYNET.Common;
 using SKYNET.Helpers;
 using SKYNET.Network;
 using SKYNET.WEB.Types;
@@ -57,7 +56,7 @@ namespace SKYNET.Managers
                         ProcessUserInfoRequest(e);
                         break;
                     case WEBMessageType.WEB_ChatMessage:
-                        // TODO
+                        ProcessChatMessage(e);
                         break;
                     case WEBMessageType.WEB_PrivateChatMessage:
                         // TODO
@@ -80,11 +79,85 @@ namespace SKYNET.Managers
                     case WEBMessageType.WEB_GameDownloadCache:
                         ProcessGameDownloadCache(e);
                         break;
+                    case WEBMessageType.WEB_UpdateUser:
+                        ProcessUpdateUser(e);
+                        break;
+                    case WEBMessageType.WEB_UpdateAvatar:
+                        ProcessUpdateAvatar(e);
+                        break;
+                    case WEBMessageType.WEB_GameStop:
+                        ProcessGameStop(e);
+                        break;
+                    case WEBMessageType.WEB_UserLogOff:
+                        ProcessUserLogOff(e);
+                        break;
                 }
             }
             catch (Exception ex)
             {
                 Write($"Error proccessing WEB Message {ex}");
+            }
+        }
+
+        private static void ProcessUserLogOff(WEBMessage e)
+        {
+            GameManager.Save();
+            Process.GetCurrentProcess().Kill();
+        }
+
+        private static void ProcessChatMessage(WEBMessage e)
+        {
+            var ChatMessage = e.Deserialize<WEB_ChatMessage>();
+            if (ChatMessage == null) return;
+            NetworkManager.SendChatMessage(ChatMessage.Message);
+        }
+
+        private static void ProcessGameStop(WEBMessage e)
+        {
+            var GameStop = e.Deserialize<WEB_GameStop>();
+            if (GameStop == null) return;
+            try
+            {
+                var Game = GameManager.GetRunningGame(GameStop.Guid);
+
+                if (Game != null)
+                {
+                    try
+                    {
+                        Game.Process.Kill();
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+        }
+
+        private static void ProcessUpdateUser(WEBMessage e)
+        {
+            var UpdateUser = e.Deserialize<WEB_UpdateUser>();
+            if (UpdateUser == null) return;
+            if (UserManager.UpdateUser(UpdateUser.Info))
+            {
+                var UserUpdated = new WEB_UserUpdated()
+                {
+                    Info = UpdateUser.Info
+                };
+                Send(UserUpdated, WEBMessageType.WEB_UserUpdated);
+            }
+        }
+
+        private static void ProcessUpdateAvatar(WEBMessage e)
+        {
+            var UpdateAvatar = e.Deserialize<WEB_UpdateAvatar>();
+            if (UpdateAvatar == null) return;
+            var Image = ImageHelper.ImageFromBase64(UpdateAvatar.AvatarHex);
+            if (UserManager.UpdateAvatar(Image))
+            {
+                WEB_AvatarUpdated AvatarUpdated = new WEB_AvatarUpdated()
+                {
+                    AvatarHex = UpdateAvatar.AvatarHex
+                };
+                Send(AvatarUpdated, WEBMessageType.WEB_AvatarUpdated);
             }
         }
 
@@ -175,7 +248,7 @@ namespace SKYNET.Managers
                     string hexAvatar = "";
                     if (SteamClient.Avatar != null)
                     {
-                        hexAvatar = ImageHelper.GetImageBase64(SteamClient.Avatar);
+                        hexAvatar = ImageHelper.ImageToBase64(SteamClient.Avatar);
                     }
 
                     AuthResponse.UserInfo = new UserInfo()
@@ -183,7 +256,8 @@ namespace SKYNET.Managers
                         PersonaName = SteamClient.PersonaName,
                         AccountID = SteamClient.AccountID,
                         Language = SteamClient.Language,
-                        AvatarHex = hexAvatar
+                        AvatarHex = hexAvatar, 
+                        Wallet = 10000.00
                     };
                     Write($"User {AuthRequest.Username} successfully authenticated");
                     Send(AuthResponse, WEBMessageType.WEB_AuthResponse);
@@ -230,7 +304,7 @@ namespace SKYNET.Managers
             var AvatarHex = "";
             if (UserManager.GetAvatar(User.AccountID, out var bitmap))
             {
-                AvatarHex = ImageHelper.GetImageBase64(bitmap);
+                AvatarHex = ImageHelper.ImageToBase64(bitmap);
             }
 
             InfoResponse.Response = WEB_UserInfoResponse.UserInfoResponseType.Success;
@@ -262,7 +336,7 @@ namespace SKYNET.Managers
                         {
                             AccountID = Users[i].AccountID,
                             PersonaName = Users[i].PersonaName,
-                            AvatarHex = ImageHelper.GetImageBase64(Avatar),
+                            AvatarHex = ImageHelper.ImageToBase64(Avatar),
                         });
                         if (i == 10) break;
                     }
@@ -276,8 +350,10 @@ namespace SKYNET.Managers
                     UsersPlaying = GameManager.GetUsersPlaying(GameInfoRequest.Guid),
                     FriendsPlaying = FriendsPlaying,
                     Playing = GameManager.IsPlaying(GameInfoRequest.Guid),
+                    Header_Image = "http://127.0.0.1/Images/AppCache/{Game.AppID}/{Game.AppID}_header.jpg",
+                    LibraryHero_Image = "http://127.0.0.1/Images/AppCache/{Game.AppID}/{Game.AppID}_library_hero.jpg"
                 };
-
+                
                 Send(Response, WEBMessageType.WEB_GameInfoResponse);
             }
         }
@@ -316,7 +392,7 @@ namespace SKYNET.Managers
             if (OpenContainerFolder == null) return;
             var Game = GameManager.GetGame(OpenContainerFolder.Guid);
             if (Game == null) return;
-            modCommon.OpenFolderAndSelectFile(Game.ExecutablePath);
+            Common.OpenFolderAndSelectFile(Game.ExecutablePath);
         }
 
         private static void ProcessGameOpenWithoutEmulation(WEBMessage e)
@@ -338,7 +414,7 @@ namespace SKYNET.Managers
             try
             {
                 var bitmap = (Bitmap)ImageHelper.IconFromFile(FileInfoRequest.FilePath);
-                hexIcon = ImageHelper.GetImageBase64(bitmap);
+                hexIcon = ImageHelper.ImageToBase64(bitmap);
             }
             catch { }
             int posibleAppID = 0;
@@ -375,6 +451,17 @@ namespace SKYNET.Managers
             Send(GameStoped, WEBMessageType.WEB_GameLaunched);
         }
 
+        internal static void SendChatMessage(uint accountID, string personaName, string message)
+        {
+            var ChatMessage = new WEB_ChatMessage()
+            {
+                SenderAccountID = accountID,
+                PersonaName = personaName,
+                Message = message
+            };
+            Send(ChatMessage, WEBMessageType.WEB_ChatMessage);
+        }
+
         public static void SendDownloadProcess(int currentDownloadID, int value, string info)
         {
             var CacheProcess = new WEB_GameCacheDownloadProgress()
@@ -384,6 +471,25 @@ namespace SKYNET.Managers
                 Info = info
             };
             Send(CacheProcess, WEBMessageType.WEB_GameCacheDownloadProgress);
+        }
+
+        public static void SendConsoleMessage(string sender, object msg)
+        {
+            var ConsoleMessage = new WEB_ConsoleMessage()
+            {
+                Sender = sender,
+                Message = msg.ToString()
+            };
+            Send(ConsoleMessage, WEBMessageType.WEB_ConsoleMessage);
+        }
+
+        public static void SendDownloadProcessCompleted(int currentDownloadID)
+        {
+            var CacheProcessCompleted = new WEB_GameCacheDownloadProgressCompleted()
+            {
+                DownloadID = currentDownloadID,
+            };
+            Send(CacheProcessCompleted, WEBMessageType.WEB_GameCacheDownloadProgressCompleted);
         }
 
         public static void SendGameClosed(string gameClientID)

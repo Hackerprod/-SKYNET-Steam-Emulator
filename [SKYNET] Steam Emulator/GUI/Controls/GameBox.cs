@@ -33,8 +33,7 @@ namespace SKYNET.GUI.Controls
 
                 if (!string.IsNullOrEmpty(Game.AvatarHex))
                 {
-                    var imageBytes = Convert.FromBase64String(Game.AvatarHex);
-                    Bitmap Avatar = (Bitmap)ImageHelper.ImageFromBytes(imageBytes);
+                    Bitmap Avatar = ImageHelper.ImageFromBase64(Game.AvatarHex);
                     PB_Avatar.Image = Avatar;
                 }
 

@@ -11,7 +11,10 @@ namespace SKYNET.Types
         public uint AccountID { get; set; }
         public string Language { get; set; }
         public bool AllowRemoteAccess { get; set; }
+        public bool ShowDebugConsole { get; set; }
         public IPAddress ServerIP { get; set; }
+        public int InputDeviceID { get; set; }
+
 
 
         private static RegistrySettings Registry;
@@ -30,6 +33,9 @@ namespace SKYNET.Types
                 AccountID =   Registry.Get<uint>("AccountID", (uint)new Random().Next(1000, 9999)),
                 Language =    Registry.Get<string>("Language", "english"),
                 ServerIP =    Registry.Get<IPAddress>("ServerIP", IPAddress.Loopback),
+                AllowRemoteAccess = Registry.Get<bool>("AllowRemoteAccess", false),
+                ShowDebugConsole = Registry.Get<bool>("ShowDebugConsole", false),
+                InputDeviceID = Registry.Get<int>("InputDeviceID", 0),
             };
             return settings;
         }
@@ -41,6 +47,10 @@ namespace SKYNET.Types
             Registry.Set("AccountID", settings.AccountID);
             Registry.Set("Language", settings.Language);
             Registry.Set("ServerIP", settings.ServerIP);
+            Registry.Set("AllowRemoteAccess", settings.AllowRemoteAccess);
+            Registry.Set("ShowDebugConsole", settings.ShowDebugConsole);
+            Registry.Set("InputDeviceID", settings.InputDeviceID);
+            
         }
     }
 }

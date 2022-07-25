@@ -185,7 +185,7 @@ namespace SKYNET.GUI
         {
             Image img = ImageCrop.PreviewBitmap();
             Bitmap image = ImageHelper.ImageResizer.ResizeBitmap((Bitmap)img, 200, 200, ImageFormat.Png);
-            frmUpdateProfile.frm.UpdatedAvatar = image;
+            Common.UpdatedAvatar = image;
             DialogResult.PerformClick();
             Close();
         }

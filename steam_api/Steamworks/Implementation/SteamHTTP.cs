@@ -154,6 +154,7 @@ namespace SKYNET.Steamworks.Implementation
                 APIRequest.SteamAPICall = pCallHandle;
 
                 WebRequest webrequest = WebRequest.Create(request.URL);
+                webrequest.Timeout = (int)(request.TimeoutSeconds != 0 ? request.TimeoutSeconds : 2);
                 webrequest.ContentType = request.ContentType;
                 webrequest.Method = request.RequestMethod.ToString();
                 if (request.RequestMethod == HTTPMethod.POST)

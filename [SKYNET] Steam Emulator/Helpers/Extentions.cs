@@ -5,7 +5,7 @@ namespace SKYNET.Helpers
 {
     public static class Extentions
     {
-        public static DialogResult Show(this modCommon _, object msg, MessageBoxButtons buttons = MessageBoxButtons.OK)
+        public static DialogResult Show(this Common _, object msg, MessageBoxButtons buttons = MessageBoxButtons.OK)
         {
             return new frmMessage(msg, buttons).ShowDialog();
         }

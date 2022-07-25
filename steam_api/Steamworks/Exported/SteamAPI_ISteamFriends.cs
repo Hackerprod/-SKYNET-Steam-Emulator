@@ -236,10 +236,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamFriends_GetFriendGamePlayed(IntPtr _, ulong steamIDFriend, IntPtr pFriendGameInfo)
+        public static bool SteamAPI_ISteamFriends_GetFriendGamePlayed(IntPtr _, ulong steamIDFriend, ref FriendGameInfo_t pFriendGameInfo)
         {
             Write($"SteamAPI_ISteamFriends_GetFriendGamePlayed");
-            return SteamFriends.Instance.GetFriendGamePlayed(steamIDFriend, pFriendGameInfo);
+            return SteamFriends.Instance.GetFriendGamePlayed(steamIDFriend, ref  pFriendGameInfo);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -320,10 +320,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_ISteamFriends_GetFriendsGroupMembersList(IntPtr _, FriendsGroupID_t friendsGroupID, IntPtr pOutSteamIDMembers, int nMembersCount)
+        public static void SteamAPI_ISteamFriends_GetFriendsGroupMembersList(IntPtr _, FriendsGroupID_t friendsGroupID, ref ulong[] pOutSteamIDMembers, int nMembersCount)
         {
             Write($"SteamAPI_ISteamFriends_GetFriendsGroupMembersListint");
-            SteamFriends.Instance.GetFriendsGroupMembersList(friendsGroupID, pOutSteamIDMembers, nMembersCount);
+            SteamFriends.Instance.GetFriendsGroupMembersList(friendsGroupID, ref pOutSteamIDMembers, nMembersCount);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

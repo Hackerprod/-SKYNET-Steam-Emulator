@@ -763,9 +763,9 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamFriends_GetFriendGamePlayed(ulong steamIDFriend, IntPtr pFriendGameInfo)
+        public static bool ISteamFriends_GetFriendGamePlayed(ulong steamIDFriend, ref FriendGameInfo_t pFriendGameInfo)
         {
-            return SteamFriends.Instance.GetFriendGamePlayed((ulong)steamIDFriend, pFriendGameInfo);
+            return SteamFriends.Instance.GetFriendGamePlayed(steamIDFriend, ref pFriendGameInfo);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -811,10 +811,9 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        //public static void ISteamFriends_GetFriendsGroupMembersList(FriendsGroupID_t friendsGroupID, ref ulong[] pOutSteamIDMembers, int nMembersCount)
-        public static void ISteamFriends_GetFriendsGroupMembersList(FriendsGroupID_t friendsGroupID, IntPtr pOutSteamIDMembers, int nMembersCount)
+        public static void ISteamFriends_GetFriendsGroupMembersList(FriendsGroupID_t friendsGroupID, ref ulong[] pOutSteamIDMembers, int nMembersCount)
         {
-            SteamFriends.Instance.GetFriendsGroupMembersList(friendsGroupID, pOutSteamIDMembers, nMembersCount);
+            SteamFriends.Instance.GetFriendsGroupMembersList(friendsGroupID, ref pOutSteamIDMembers, nMembersCount);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -923,7 +922,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int ISteamFriends_GetSmallFriendAvatar(ulong steamIDFriend)
         {
-            return SteamFriends.Instance.GetSmallFriendAvatar((ulong)steamIDFriend);
+            return SteamFriends.Instance.GetSmallFriendAvatar(steamIDFriend);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

@@ -14,6 +14,7 @@
         NET_P2PPacket,
         NET_SetRichPresence,
         NET_GameOpened,
+        NET_ChatMessage,
 
         // Lobbies
         NET_LobbyCreated,
@@ -151,5 +152,12 @@
         public uint AccountID { get; set; }
         public string Key { get; set; }
         public string Value { get; set; }
+    }
+
+    public class NET_ChatMessage : NET_Base
+    {
+        public uint AccountID { get; set; }
+        public string PersonaName { get; set; }
+        public string Message { get; set; }
     }
 }

@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-public partial class modCommon
+public partial class Common
 {
+    public static Bitmap UpdatedAvatar { get; set; }
+
     public static void EnsureDirectoryExists(string filePath, bool isFile = false)
     {
         if (!string.IsNullOrEmpty(filePath))

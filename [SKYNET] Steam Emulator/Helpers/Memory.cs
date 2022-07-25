@@ -152,7 +152,7 @@ namespace SKYNET.Helpers
                 if (result == IntPtr.Zero)
                 {
                     //Process.GetProcessById((int)targetProcess.dwProcessId)?.Kill();
-                    modCommon.Show("Error injecting dll file");
+                    Common.Show("Error injecting dll file");
                     return;
                 }
                 WakeUpProcess(targetProcess.hThread);
