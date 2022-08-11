@@ -38,7 +38,7 @@ namespace SKYNET.Steamworks.Implementation
             CurrentRequest = 0;
             FavoriteGames = new List<FavoriteGame>();
 
-            string FavoriteGamesPath = Path.Combine(modCommon.GetPath(), "SKYNET", "Storage", "FavoriteGames.json");
+            string FavoriteGamesPath = Path.Combine(Common.GetPath(), "SKYNET", "Storage", "FavoriteGames.json");
             if (File.Exists(FavoriteGamesPath))
             {
                 string fileContent = File.ReadAllText(FavoriteGamesPath);
@@ -118,7 +118,7 @@ namespace SKYNET.Steamworks.Implementation
                 {
                     Owner = (ulong)SteamEmulator.SteamID,
                     AppID = SteamEmulator.AppID,
-                    SteamID = modCommon.GenerateSteamID(),
+                    SteamID = Common.GenerateSteamID(),
                     Type = (ELobbyType)eLobbyType,
                     MaxMembers = cMaxMembers,
                     Gameserver = new SteamLobby.LobbyGameserver()
@@ -636,8 +636,8 @@ namespace SKYNET.Steamworks.Implementation
         {
             try
             {
-                string FavoriteGamesPath = Path.Combine(modCommon.GetPath(), "SKYNET", "Storage", "FavoriteGames.json");
-                modCommon.EnsureDirectoryExists(FavoriteGamesPath, true);
+                string FavoriteGamesPath = Path.Combine(Common.GetPath(), "SKYNET", "Storage", "FavoriteGames.json");
+                Common.EnsureDirectoryExists(FavoriteGamesPath, true);
                 string json = FavoriteGames.ToJson();
                 File.WriteAllText(FavoriteGamesPath, json);
             }

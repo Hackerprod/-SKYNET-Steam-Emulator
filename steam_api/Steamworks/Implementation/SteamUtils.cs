@@ -32,7 +32,7 @@ namespace SKYNET.Steamworks.Implementation
         public uint GetSecondsSinceComputerActive()
         {
             Write("GetSecondsSinceComputerActive");
-            return (uint)modCommon.GetInactiveTimeSpan().Value.Seconds;
+            return (uint)Common.GetInactiveTimeSpan().Value.Seconds;
         }
 
         public int GetConnectedUniverse()

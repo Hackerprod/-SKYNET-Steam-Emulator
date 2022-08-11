@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows.Forms;
 
 public partial class Common
@@ -85,15 +87,34 @@ public partial class Common
         return MessageBox.Show(msg.ToString(), "SKYNET", buttons);
     }
 
+    public static string GetTotalTime(DateTime startTime)
+    {
+        TimeSpan duration = DateTime.Now - startTime;
+        StringBuilder stringBuilder = new StringBuilder();
+        if (duration.Days > 0)
+        {
+            stringBuilder.Append(duration.Days);
+            stringBuilder.Append((duration.Days > 1) ? " days " : " day ");
+        }
+        stringBuilder.AppendFormat("{0:d2} : {1:d2} : {2:d2}", duration.Hours, duration.Minutes, duration.Seconds);
+        return stringBuilder.ToString();
+    }
+
     public static void InvokeAction(Control control, Action Action)
     {
-        if (control.InvokeRequired)
+        control.Invoke(Action);
+    }
+
+    public static string GetRandomString(int Length, bool Upper = false)
+    {
+        var Result = "";
+        var random = new Random();
+        var steps = new List<string>() { "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "a", "s", "d", "f", "g", "h", "j", "k", "l", "z", "x", "c", "v", "b", "n", "m" };
+        for (int i = 0; i < Length; i++)
         {
-            control.Invoke(Action);
+            int l = random.Next(0, 25);
+            Result += steps[l];
         }
-        else
-        {
-            Action();
-        }
+        return Upper ? Result.ToUpper() : Result;
     }
 }

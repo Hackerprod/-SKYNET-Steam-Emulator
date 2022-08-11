@@ -11,17 +11,20 @@ using SKYNET.Network;
 using SKYNET.Network.Types;
 using SKYNET.Steamworks;
 using SKYNET.Types;
+using System.Collections.Generic;
 
 namespace SKYNET.Managers
 {
     public class NetworkManager
     {
         public static int Port = 28880;
-        public static TCPServer TCPServer;
-        public static WebServer WebServer;
-        public static WebSocketServer WebSocket;
-        public static WebSocketProcessor WebClient;
         public static EventHandler<NET_ChatMessage> OnChatMessage;
+        public static WebSocketProcessor WebClient;
+
+        private static TCPServer TCPServer;
+        private static WebServer WebServer;
+        private static WebSocketServer WebSocket;
+        private static List<int> ReceivedChatMessages;
 
         public static void Initialize()
         {
@@ -40,6 +43,8 @@ namespace SKYNET.Managers
             {
                 Write($"Error initializing TCP server, port {Port} is in use");
             }
+
+            ReceivedChatMessages = new List<int>();
 
             WebSocket = new WebSocketServer(8888);
             WebSocket.AddWebSocketService<WebSocketProcessor>("/OnMessage");
@@ -134,8 +139,12 @@ namespace SKYNET.Managers
         {
             var ChatMessage = message.ParsedBody.Deserialize<NET_ChatMessage>();
             if (ChatMessage == null) return;
-            OnChatMessage?.Invoke(null, ChatMessage);
-            WebManager.SendChatMessage(ChatMessage.AccountID, ChatMessage.PersonaName, ChatMessage.Message);
+            if (!ReceivedChatMessages.Contains(ChatMessage.ID))
+            {
+                OnChatMessage?.Invoke(null, ChatMessage);
+                WebManager.SendChatMessage(ChatMessage.ID, ChatMessage.AccountID, ChatMessage.PersonaName, ChatMessage.Message);
+                ReceivedChatMessages.Add(ChatMessage.ID);
+            }
         }
 
         private static void ProcessLobbyLeave(NETMessage message)
@@ -443,13 +452,14 @@ namespace SKYNET.Managers
         {
             var ChatMessage = new NET_ChatMessage()
             {
+                ID = Common.GetRandom(),
                 AccountID = SteamClient.AccountID,
                 PersonaName = SteamClient.PersonaName,
                 Message = message
             };
-
             SendBroadcast(ChatMessage, NETMessageType.NET_ChatMessage, true);
         }
+
         public static void SendUpdateLobby(SteamLobby lobby, bool IncludeOwner)
         {
             var LobbyUpdate = new NET_LobbyUpdate()
@@ -619,36 +629,37 @@ namespace SKYNET.Managers
 
         private static void SendBroadcast(NET_Base Base, NETMessageType type, bool IncluyeHost = false)
         {
-            var message = new NETMessage()
+            MutexHelper.Wait("Broadcast", delegate
             {
-                MessageType = (int)type,
-                ParsedBody = Base.Serialize()
-            };
-
-            Task.Run(() =>
-            {
-                foreach (var address in NetworkHelper.GetIPAddresses())
+                var message = new NETMessage()
                 {
-                    var Addressess = NetworkHelper.GetIPAddressRange(address);
-                    if (!IncluyeHost)
-                    {
-                        Addressess = Addressess.FindAll(a => a != address.ToString());
-                    }
-                    foreach (var Address in Addressess)
-                    {
-                        try
-                        {
-                            Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                            SocketData SocketData = new SocketData() { socket = socket, Message = message };
-                            socket.BeginConnect(Address, Port, ConnectionCallback, SocketData);
-                        }
-                        catch
-                        {
-                        }
+                    MessageType = (int)type,
+                    ParsedBody = Base.Serialize()
+                };
 
+                Task.Run(() =>
+                {
+                    foreach (var address in NetworkHelper.GetIPAddresses())
+                    {
+                        var Addressess = NetworkHelper.GetIPAddressRange(address);
+                        if (!IncluyeHost)
+                        {
+                            Addressess = Addressess.FindAll(a => a != address.ToString());
+                        }
+                        foreach (var Address in Addressess)
+                        {
+                            try
+                            {
+                                Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                                SocketData SocketData = new SocketData() { socket = socket, Message = message };
+                                socket.BeginConnect(Address, Port, ConnectionCallback, SocketData);
+                            }
+                            catch
+                            {
+                            }
+                        }
                     }
-                }
-
+                });
             });
         }
 

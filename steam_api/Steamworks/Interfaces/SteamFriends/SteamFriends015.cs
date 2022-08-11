@@ -1,12 +1,10 @@
 using System;
+using SKYNET.Steamworks.Implementation;
 
 using SteamAPICall_t = System.UInt64;
 using FriendsGroupID_t = System.UInt16;
-using uint16 = System.UInt16;
 using uint32 = System.UInt32;
 using AppId_t = System.UInt32;
-using SKYNET.Steamworks.Implementation;
-using System.Threading.Tasks;
 
 namespace SKYNET.Steamworks.Interfaces
 {

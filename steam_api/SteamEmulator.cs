@@ -13,11 +13,12 @@ using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Steamworks;
 using SKYNET.Steamworks.Implementation;
+using SKYNET.Steamworks.Types;
 using SKYNET.Types;
 using System;
 using System.Collections.Generic;
 using System.IO;
-
+using System.Threading;
 using AppID = System.UInt32;
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
@@ -113,15 +114,14 @@ public class SteamEmulator
         SteamID_GS = CSteamID.CreateOne(); 
         AppID = 0;
         DLCs = new List<DLC>();
+        LogToFile = false;
+        LogToConsole = false;
     }
 
     public static void Initialize()
     {
         try
         {
-            Log.Clean();
-            Write("Initializing Steam Emulator");
-
             if (Initialized) return;
             Initializing = true;
 
@@ -215,7 +215,7 @@ public class SteamEmulator
             HSteamPipe_GS = 2;
 
             Initialized = true;
-            Initializing = false; 
+            Initializing = false;
         }
         catch (Exception ex)
         {
@@ -227,7 +227,7 @@ public class SteamEmulator
     {
         try
         {
-            string appid_Path = Path.Combine(modCommon.GetPath(), "steam_appid.txt");
+            string appid_Path = Path.Combine(Common.GetPath(), "steam_appid.txt");
             if (File.Exists(appid_Path))
             {
                 string content = File.ReadAllText(appid_Path);
@@ -239,7 +239,7 @@ public class SteamEmulator
         }
     }
 
-    private static void IsMessageAvailable(object sender, Dictionary<uint, byte[]> gcMessages)
+    private static void IsGCMessageAvailable(object sender, Dictionary<uint, byte[]> gcMessages)
     {
         foreach (var msg in gcMessages)
         {
@@ -272,8 +272,6 @@ public class SteamEmulator
         Write("Steam Emulator", msg);
     }
 
-    private static string lastMsg = "";
-
 #if FORCELOG
 
     public static void Write(string sender, object msg)
@@ -282,8 +280,6 @@ public class SteamEmulator
         message += string.IsNullOrEmpty(sender) ? "" : $"{sender}: ";
         message += msg == null ? "NULL" : msg;
 
-        if (lastMsg != msg.ToString())
-        {
             if (true)
             {
                 Log.AppEnd(message);
@@ -298,32 +294,29 @@ public class SteamEmulator
                     Console.ResetColor();
                 Console.WriteLine(message);
             }
-            lastMsg = msg.ToString();
-        }
+
     }
 
 #else
 
     public static void Write(string sender, object msg)
     {
-        string message = " ";
-        message += string.IsNullOrEmpty(sender) ? "" : $"{sender}: "; 
-        message += msg == null ? "NULL" : msg;
-
-        if (lastMsg != msg.ToString())
+        MutexHelper.Wait("LOG", delegate
         {
+            string message = " ";
+            message += string.IsNullOrEmpty(sender) ? "" : $"{sender}: ";
+            message += msg == null ? "NULL" : msg;
+
             if (LogToFile)
             {
                 Log.AppEnd(message);
-                lastMsg = msg.ToString();
             }
 
             if (LogToConsole)
             {
                 ConsoleHelper.WriteLine(message);
             }
-            lastMsg = msg.ToString();
-        }
+        });
     }
 
 #endif

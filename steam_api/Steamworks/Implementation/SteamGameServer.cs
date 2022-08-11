@@ -229,7 +229,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool SendUserConnectAndAuthenticate(uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, ulong pSteamIDUser)
         {
-            var IPAddress = modCommon.GetIPAddress(unIPClient);
+            var IPAddress = Common.GetIPAddress(unIPClient);
             Write($"SendUserConnectAndAuthenticate (SteamID = {new CSteamID(pSteamIDUser)} | {IPAddress})");
             return TicketManager.ConnectAndAuthenticate(unIPClient, pvAuthBlob, cubAuthBlobSize, pSteamIDUser);
         }

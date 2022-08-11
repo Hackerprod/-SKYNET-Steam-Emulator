@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Web.Script.Serialization;
+using SKYNET.Client;
 using SKYNET.Helpers;
 using SKYNET.Network.Types;
 using SKYNET.Types;
@@ -37,6 +38,7 @@ namespace SKYNET.Managers
                 {
                     string json = File.ReadAllText(gamePath);
                     games = new JavaScriptSerializer().Deserialize<List<Game>>(json);
+                    games.Reverse();
                 }
                 catch (Exception)
                 {
@@ -236,5 +238,18 @@ namespace SKYNET.Managers
             }
         }
 
+        public static void ModifyOrder(List<string> Order)
+        {
+            var games = new List<Game>();
+            foreach (var guid in Order)
+            {
+                var game = GetGame(guid);
+                if (game != null)
+                    games.Add(game);
+            }
+            Games.Clear();
+            Games.AddRange(games);
+            Save();
+        }
     }
 }

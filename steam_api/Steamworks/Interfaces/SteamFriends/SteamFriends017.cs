@@ -3,6 +3,8 @@ using SKYNET.Steamworks.Implementation;
 
 using SteamAPICall_t = System.UInt64;
 using FriendsGroupID_t = System.UInt16;
+using SKYNET.Steamworks.Types;
+using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Interfaces
 {
@@ -46,6 +48,7 @@ namespace SKYNET.Steamworks.Interfaces
 
         public string GetFriendPersonaName(IntPtr _, ulong steamID)
         {
+            //SteamEmulator.Write("zzzzzzzzzzzzzzzzzzzzzz", ID.m_steamid.m_unAll64Bits);
             return SteamFriends.Instance.GetFriendPersonaName(steamID);
         }
 

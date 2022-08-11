@@ -50,7 +50,9 @@
     <Compile Include="Managers\GameManager.cs" />
     <Compile Include="Managers\IPCManager.cs" />
     <Compile Include="Managers\LobbyManager.cs" />
+    <Compile Include="Helpers\NativeMethods.cs" />
     <Compile Include="Managers\NetworkManager.cs" />
+    <Compile Include="Managers\OverlayManager.cs" />
     <Compile Include="Managers\StatsManager.cs" />
     <Compile Include="Managers\UserManager.cs" />
     <Compile Include="Managers\WebManager.cs" />

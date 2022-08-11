@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 
@@ -6,19 +7,27 @@ namespace SKYNET.Helpers
 {
     public class Log
     {
+        public static bool Initialized;
+
         private static List<string> buffered = new List<string>();
         private static object file_lock = new object();
         private static string lastMsg = "";
         private static string fileName;
-        
-        static Log()
+
+
+        public static void Initialize()
         {
-            fileName = Path.Combine(modCommon.GetPath(), "SKYNET", "[SKYNET] steam_api.log");
-            modCommon.EnsureDirectoryExists(fileName, true);
+            var LogPath = Path.Combine(Common.GetPath(), "SKYNET");
+            fileName = Path.Combine(LogPath, "[SKYNET] steam_api.log");
+            Common.EnsureDirectoryExists(LogPath);
+            Clean();
+            Initialized = true;
         }
 
         internal static void AppEnd(string formatted)
         {
+            if (!Initialized) return;
+
             try
             {
                 if (formatted != lastMsg)
@@ -29,7 +38,14 @@ namespace SKYNET.Helpers
                     if (taken)
                     {
                         buffered.Add(formatted);
-                        File.AppendAllLines(fileName, buffered);
+                        if (File.Exists(fileName))
+                        {
+                            File.AppendAllLines(fileName, buffered);
+                        }
+                        else
+                        {
+                            File.WriteAllLines(fileName, buffered);
+                        }
                         buffered.Clear();
 
                         Monitor.Exit(file_lock);
@@ -42,11 +58,19 @@ namespace SKYNET.Helpers
             }
         }
 
+        private static void EnsurePathExists()
+        {
+            Common.EnsureDirectoryExists(fileName, true);
+        }
+
         public static void Clean()
         {
             try
             {
-                File.WriteAllText(fileName, "");
+                if (File.Exists(fileName))
+                {
+                    File.WriteAllText(fileName, "");
+                }
             }
             catch 
             {

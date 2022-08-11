@@ -38,7 +38,7 @@ namespace SKYNET.Managers
                 AccountID = SteamID.AccountID,
                 IPAddress = NetworkHelper.GetIPAddress().ToString(),
             });
-            // return;
+             return;
             // Create TESTS Users
             Users.Add(new SteamPlayer()
             {
@@ -116,35 +116,55 @@ namespace SKYNET.Managers
             IPCManager.SendUpdatedUsers();
         }
 
-        internal static bool UpdateUser(UserInfo info)
+        internal static bool UpdateUser(WEB_UpdateUser info, out bool AvatarUpdated)
         {
             var Result = false;
-
-            if (info.AccountID != SteamClient.AccountID)
+            AvatarUpdated = false;
+            var User = GetUser(SteamClient.AccountID);
+            if (User == null)
             {
-                SteamClient.AccountID = info.AccountID;
+                Write($"Warn... User {SteamClient.AccountID} not fount to edit.");
+                return Result;
+            }
+            if (info.AccountID != 0 && info.AccountID != SteamClient.AccountID)
+            {
+                SteamClient.AccountID = User.AccountID = info.AccountID;
                 SteamClient.SteamID = new CSteamID(info.AccountID);
+                Settings.AccountID = info.AccountID;
+                User.SteamID = (ulong)SteamClient.SteamID;
                 Result = true;
             }
-            if (info.PersonaName != SteamClient.PersonaName)
+            if (!string.IsNullOrEmpty(info.PersonaName) && info.PersonaName != SteamClient.PersonaName)
             {
-                SteamClient.PersonaName = info.PersonaName;
+                SteamClient.PersonaName = User.PersonaName = info.PersonaName;
+                Settings.PersonaName = info.PersonaName;
                 Result = true;
             }
-            if (info.Language != SteamClient.Language)
+            if (!string.IsNullOrEmpty(info.Language) && info.Language != SteamClient.Language)
             {
                 SteamClient.Language = info.Language;
+                Settings.Language = info.Language;
                 Result = true;
             }
-            if (info.Wallet != SteamClient.Wallet)
+            if (info.AllowRemoteAccess != Settings.AllowRemoteAccess)
             {
-                SteamClient.Wallet = info.Wallet;
+                Settings.AllowRemoteAccess = info.AllowRemoteAccess;
                 Result = true;
             }
-            if (info.AvatarHex.Length != 0 && ImageHelper.ImageToBase64(SteamClient.Avatar) != info.AvatarHex)
+            if (info.ShowDebugConsole != Settings.ShowDebugConsole)
             {
-                UpdateAvatar(ImageHelper.ImageFromBase64(info.AvatarHex));
+                Settings.ShowDebugConsole = info.ShowDebugConsole;
+                Result = true;
             }
+            if (!string.IsNullOrEmpty(info.AvatarBase64) && (ImageHelper.ImageToBase64(SteamClient.Avatar) != info.AvatarBase64))
+            {
+                UpdateAvatar(ImageHelper.ImageFromBase64(info.AvatarBase64));
+                AvatarUpdated = true;
+                Result = true;
+            }
+
+            OnUserUpdated?.Invoke(null, User);
+
             return Result;
         }
 
@@ -175,10 +195,13 @@ namespace SKYNET.Managers
                 {
                     UserAvatars.Add((ulong)SteamClient.SteamID, Image);
                 }
+
                 SteamClient.Avatar = Image;
 
                 string ImagePath = Path.Combine(Common.GetPath(), "Data", "Images", "AvatarCache", "Avatar.jpg");
                 ImageHelper.ToFile(ImagePath, Image);
+
+                OnAvatarReceived?.Invoke(null, new AvatarReceivedEventArgs(SteamClient.AccountID,Image));
 
                 return true;
             }

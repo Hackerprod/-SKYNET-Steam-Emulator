@@ -26,17 +26,17 @@ namespace SKYNET.Client
         public static int InputDeviceID { get; set; }
         public static double Wallet { get; set; }
 
-        public SteamClient(Settings settings)
+        public SteamClient()
         {
             Write("SteamClient", "Initializing SteamClient");
-            SteamID = new CSteamID(settings.AccountID);
-            AccountID = settings.AccountID;
-            AccountName = settings.AccountName;
-            PersonaName = settings.PersonaName;
-            Language = settings.Language;
+            SteamID = new CSteamID(Settings.AccountID);
+            AccountID = Settings.AccountID;
+            AccountName = Settings.AccountName;
+            PersonaName = Settings.PersonaName;
+            Language = Settings.Language;
             SteamID_GS = CSteamID.GenerateGameServer();
-            Debug = settings.ShowDebugConsole;
-            InputDeviceID = settings.InputDeviceID;
+            Debug = Settings.ShowDebugConsole;
+            InputDeviceID = Settings.InputDeviceID;
         }
 
         public void Initialize()
@@ -45,6 +45,8 @@ namespace SKYNET.Client
             Task.Run(delegate { NetworkManager.Initialize(); }); 
             Task.Run(delegate { StatsManager.Initialize(); });
             Task.Run(delegate { IPCManager.Initialize(); });
+            Task.Run(delegate { OverlayManager.Initialize(); });
+            
         }
 
         private static void InitializePlugins()

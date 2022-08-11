@@ -16,7 +16,6 @@ namespace SKYNET.Managers
         private const ulong IPC_ToServer = 0;
         private const ulong IPC_Broadcast = 1;
         private static PipeServer<IPCMessage> server;
-        private static string LastMessage;
 
         public static void Initialize()
         {
@@ -26,8 +25,6 @@ namespace SKYNET.Managers
             server.MessageReceived += OnMessageReceived;
             server.ExceptionOccurred += OnExceptionOccurred;
             server.StartAsync();
-
-            LastMessage = "";
         }
 
         private static void OnClientConnected(object sender, ConnectionEventArgs<IPCMessage> args)
@@ -131,10 +128,22 @@ namespace SKYNET.Managers
                 case IPCMessageType.IPC_LobbyGameServerEndPoint:
                     Process_LobbyGameServerEndPoint(e.Message);
                     break;
+                case IPCMessageType.IPC_Direct3DVersionDetected:
+                    Process_Direct3DVersionDetected(e.Message, e.Connection.PipeName);
+                    break;
                 default:
                     Write($"Not implemented Handle for message {(IPCMessageType)e.Message.MessageType}");
                     break;
             }
+        }
+
+        private static void Process_Direct3DVersionDetected(IPCMessage message, string GameClientID)
+        {
+            var Direct3DVersionDetected = message.ParsedBody.Deserialize<IPC_Direct3DVersionDetected>();
+            if (Direct3DVersionDetected == null) return;
+            var Game = GameManager.GetRunningGame(GameClientID);
+            if (Game == null) return;
+            OverlayManager.SetDirect3DVersion((Direct3DVersion)Direct3DVersionDetected.Version, Game);
         }
 
         private static void Process_LobbyGameServerEndPoint(IPCMessage message)
@@ -304,7 +313,7 @@ namespace SKYNET.Managers
             {
                 AccountID = SteamClient.AccountID,
                 PersonaName = SteamClient.PersonaName,
-                Language = SteamClient.Language,
+                Language = SteamClient.Language.ToLower(),
                 GameServerID = SteamClient.SteamID_GS.AccountID,
                 LogToFile = false,
                 LogToConsole = false,
@@ -320,7 +329,11 @@ namespace SKYNET.Managers
 
             if (ClientHello != null)
             {
-                if (Game == null) return;
+                if (Game == null)
+                {
+                    Write($"Warn, the Game {Path.GetFileNameWithoutExtension(ClientHello.ExecutablePath)} not found.");
+                    return;
+                }
 
                 if (Game != null)
                 {
@@ -571,22 +584,12 @@ namespace SKYNET.Managers
         {
             Log.Write("IPCManager", $"Client {e.Connection.PipeName} disconnected");
             GameManager.InvokeGameClosed(e.Connection.PipeName);
+            OverlayManager.RemoveGameData(e.Connection.PipeName);
         }
 
         private static void OnExceptionOccurred(object sender, ExceptionEventArgs e)
         {
             Log.Write("IPCManager", "Exception Occurred!!! " + e.Exception);
-        }
-
-        public static void AvatarResponse(string HexAvatar, uint AccountID)
-        {
-            var AvatarResponse = new IPC_AvatarResponse()
-            {
-                HexAvatar = HexAvatar,
-                AccountID = AccountID
-            };
-            var IPCMessage = CreateIPCMessage(AvatarResponse, IPCMessageType.IPC_AvatarResponse);
-            SendIPCMessage(IPCMessage);
         }
 
         public static void UpdateUserStatus(NET_UserDataUpdated statusChanged, IPC_UserDataUpdated.UpdateType UpdateType)
@@ -750,11 +753,7 @@ namespace SKYNET.Managers
 
         private static void Write(object msg)
         {
-            if (LastMessage != msg.ToString())
-            {
-                Log.Write("IPCManager", msg);
-                LastMessage = msg.ToString();
-            }
+            Log.Write("IPCManager", msg);
         }
     }
 }

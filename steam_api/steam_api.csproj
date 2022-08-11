@@ -69,6 +69,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CallbackInterop.cs" />
     <Compile Include="Callback\CallbackDelegates.cs" />
     <Compile Include="Callback\CallbackEnums.cs" />
     <Compile Include="Callback\CallbackTypes.cs" />
@@ -88,13 +89,16 @@
     <Compile Include="Helpers\IPC\Types\IPC_Messages.cs" />
     <Compile Include="Helpers\JSON\JSONParser.cs" />
     <Compile Include="Helpers\JSON\SimpleJSONDotNetTypes.cs" />
+    <Compile Include="Helpers\NativeMethods.cs" />
     <Compile Include="Helpers\Platform.cs" />
     <Compile Include="Helpers\Wave\WavNative.cs" />
     <Compile Include="Helpers\Wave\WaveIn.cs" />
     <Compile Include="Helpers\Wave\WavInDevice.cs" />
     <Compile Include="Managers\AudioManager.cs" />
     <Compile Include="Managers\LobbyManager.cs" />
+    <Compile Include="Managers\OverlayManager.cs" />
     <Compile Include="Managers\UserManager.cs" />
+    <Compile Include="SteamID.cs" />
     <Compile Include="Steamworks\Exported\CSteamworks.cs" />
     <Compile Include="Helpers\ImageHelper.cs" />
     <Compile Include="Helpers\MutexHelper.cs" />
@@ -141,7 +145,7 @@
     <Compile Include="Helpers\Extensions.cs" />
     <Compile Include="Helpers\IntPtrExtentions.cs" />
     <Compile Include="Helpers\Log.cs" />
-    <Compile Include="Helpers\modCommon.cs" />
+    <Compile Include="Helpers\Common.cs" />
     <Compile Include="Managers\MemoryManager.cs" />
     <Compile Include="Helpers\NetworkHelper.cs" />
     <Compile Include="Steamworks\Interfaces\SteamClient\SteamClient017.cs" />

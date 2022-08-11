@@ -1,6 +1,8 @@
 ﻿using SKYNET.Client;
 using SKYNET.Helpers;
 using SKYNET.Network;
+using SKYNET.Types;
+using SKYNET.Wave;
 using SKYNET.WEB.Types;
 using System;
 using System.Collections.Generic;
@@ -8,6 +10,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Threading;
+using System.Web.Script.Serialization;
 using System.Windows.Forms;
 
 namespace SKYNET.Managers
@@ -15,10 +18,12 @@ namespace SKYNET.Managers
     public class WebManager
     {
         public static event EventHandler<string> OnGameLaunch;
+        private static Form frmWeb;
 
-        public static void Initialize()
+        public static void Initialize(Form form)
         {
             WebSocketProcessor.OnMessageReceived += Web_OnMessageReceived;
+            frmWeb = form;
         }
 
         private static void Web_OnMessageReceived(object sender, WEBMessage e)
@@ -91,6 +96,15 @@ namespace SKYNET.Managers
                     case WEBMessageType.WEB_UserLogOff:
                         ProcessUserLogOff(e);
                         break;
+                    case WEBMessageType.WEB_DeviceInRequest:
+                        ProcessDeviceInRequest(e);
+                        break;
+                    case WEBMessageType.WEB_DeviceInSelected:
+                        ProcessDeviceInSelected(e);
+                        break;
+                    case WEBMessageType.WEB_LoadCompleted:
+                        ProcessLoadCompleted(e);
+                        break;
                 }
             }
             catch (Exception ex)
@@ -99,8 +113,51 @@ namespace SKYNET.Managers
             }
         }
 
+        private static void ProcessLoadCompleted(WEBMessage e)
+        {
+            try
+            {
+                Common.InvokeAction(frmWeb, delegate
+                { 
+                    frmWeb.ShowInTaskbar = true;
+                    frmWeb.Opacity = 100D;
+                    frmWeb.Show();
+                    frmWeb.Activate();
+                });
+            }
+            catch (Exception ex)
+            {
+                Write(ex);
+            }
+        }
+
+        private static void ProcessDeviceInRequest(WEBMessage e)
+        {
+            var DeviceInResponse = new WEB_DeviceInResponse()
+            {
+                Devices = new List<WEB_DeviceInResponse.Device>()
+            };
+            foreach (var device in WaveIn.Devices)
+            {
+                DeviceInResponse.Devices.Add(new WEB_DeviceInResponse.Device()
+                {
+                    Index = device.Index, 
+                    Name = device.Name
+                });
+            }
+            Send(DeviceInResponse, WEBMessageType.WEB_DeviceInResponse);
+        }
+
+        private static void ProcessDeviceInSelected(WEBMessage e)
+        {
+            var DeviceInSelected = e.Deserialize<WEB_DeviceInSelected>();
+            if (DeviceInSelected == null) return;
+            SteamClient.InputDeviceID = DeviceInSelected.Index;
+        }
+
         private static void ProcessUserLogOff(WEBMessage e)
         {
+            Settings.Save();
             GameManager.Save();
             Process.GetCurrentProcess().Kill();
         }
@@ -136,12 +193,28 @@ namespace SKYNET.Managers
         {
             var UpdateUser = e.Deserialize<WEB_UpdateUser>();
             if (UpdateUser == null) return;
-            if (UserManager.UpdateUser(UpdateUser.Info))
+            if (UserManager.UpdateUser(UpdateUser, out var AvatarUpdated))
             {
+                Settings.Save();
                 var UserUpdated = new WEB_UserUpdated()
                 {
-                    Info = UpdateUser.Info
+                    AccountID = UpdateUser.AccountID,
+                    AllowRemoteAccess = UpdateUser.AllowRemoteAccess,
+                    DeviceInSelected = UpdateUser.DeviceInSelected,
+                    Language = UpdateUser.Language,
+                    PersonaName = UpdateUser.PersonaName,
+                    ShowDebugConsole = UpdateUser.ShowDebugConsole
                 };
+                if (AvatarUpdated)
+                {
+                    string AvatarName = $"Avatar_{Common.GetRandomString(8, true)}.jpg";
+                    WebServer.AvatarName = AvatarName;
+                    UserUpdated.AvatarURL = $"http://127.0.0.1/Images/AvatarCache/{AvatarName}";
+                }
+                else
+                {
+                    UserUpdated.AvatarURL = "http://127.0.0.1/Images/AvatarCache/Avatar.jpg";
+                }
                 Send(UserUpdated, WEBMessageType.WEB_UserUpdated);
             }
         }
@@ -150,13 +223,17 @@ namespace SKYNET.Managers
         {
             var UpdateAvatar = e.Deserialize<WEB_UpdateAvatar>();
             if (UpdateAvatar == null) return;
-            var Image = ImageHelper.ImageFromBase64(UpdateAvatar.AvatarHex);
+            var Image = ImageHelper.ImageFromBase64(UpdateAvatar.AvatarBase64);
             if (UserManager.UpdateAvatar(Image))
             {
+                string AvatarName = $"Avatar_{Common.GetRandomString(8, true)}.jpg";
+                WebServer.AvatarName = AvatarName;
+
                 WEB_AvatarUpdated AvatarUpdated = new WEB_AvatarUpdated()
                 {
-                    AvatarHex = UpdateAvatar.AvatarHex
+                    AvatarURL = $"http://127.0.0.1/Images/AvatarCache/{AvatarName}"
                 };
+
                 Send(AvatarUpdated, WEBMessageType.WEB_AvatarUpdated);
             }
         }
@@ -211,11 +288,11 @@ namespace SKYNET.Managers
                         AppID = posibleAppID
                     };
                     Send(FileDialogResponse, WEBMessageType.WEB_OpenFileDialogResponse);
-
                 }
             }));
             s.SetApartmentState(ApartmentState.STA);
             s.Start();
+            Write("xxx");
         }
 
         private static void ProcessAuthRequest(WEBMessage e)
@@ -244,21 +321,14 @@ namespace SKYNET.Managers
                 //else
                 {
                     AuthResponse.Response = WEB_AuthResponse.AuthResponseType.Success;
+                    AuthResponse.PersonaName = SteamClient.PersonaName;
+                    AuthResponse.AccountID = SteamClient.AccountID;
+                    AuthResponse.Language = SteamClient.Language;
+                    AuthResponse.Wallet = 10000.00;
+                    AuthResponse.DeviceInSelected = SteamClient.InputDeviceID;
+                    AuthResponse.ShowDebugConsole = Settings.ShowDebugConsole;
+                    AuthResponse.AllowRemoteAccess = Settings.AllowRemoteAccess;
 
-                    string hexAvatar = "";
-                    if (SteamClient.Avatar != null)
-                    {
-                        hexAvatar = ImageHelper.ImageToBase64(SteamClient.Avatar);
-                    }
-
-                    AuthResponse.UserInfo = new UserInfo()
-                    {
-                        PersonaName = SteamClient.PersonaName,
-                        AccountID = SteamClient.AccountID,
-                        Language = SteamClient.Language,
-                        AvatarHex = hexAvatar, 
-                        Wallet = 10000.00
-                    };
                     Write($"User {AuthRequest.Username} successfully authenticated");
                     Send(AuthResponse, WEBMessageType.WEB_AuthResponse);
 
@@ -308,12 +378,10 @@ namespace SKYNET.Managers
             }
 
             InfoResponse.Response = WEB_UserInfoResponse.UserInfoResponseType.Success;
-            InfoResponse.Info = new UserInfo()
-            {
-                AccountID = User.AccountID,
-                PersonaName = User.PersonaName,
-                AvatarHex = AvatarHex
-            };
+            InfoResponse.AccountID = User.AccountID;
+            InfoResponse.PersonaName = User.PersonaName;
+            InfoResponse.AvatarURL = $"http://127.0.0.1/Images/AvatarCache/{User.AccountID}";
+
             Send(InfoResponse, WEBMessageType.WEB_UserInfoResponse);
         }
 
@@ -323,7 +391,7 @@ namespace SKYNET.Managers
             if (GameInfoRequest == null) return;
             var Game = GameManager.GetGame(GameInfoRequest.Guid);
             if (Game == null) return;
-
+            try
             {
                 var FriendsPlaying = new List<WEB_GameInfoResponse.FriendPlaying>();
                 try
@@ -336,26 +404,33 @@ namespace SKYNET.Managers
                         {
                             AccountID = Users[i].AccountID,
                             PersonaName = Users[i].PersonaName,
-                            AvatarHex = ImageHelper.ImageToBase64(Avatar),
+                            AvatarURL = $"http://127.0.0.1/Images/AvatarCache/{Users[i].AccountID}",
                         });
                         if (i == 10) break;
                     }
                 }
                 catch { }
 
+                var LastPlayed = "";
+                if (Game.LastPlayed != 0)
+                {
+                    var Time = Game.LastPlayed.ToDateTime();
+                    LastPlayed = Time.ToString("yyyy-MM-ddTHH:mm:ss.sssZ");
+                }
+
                 var Response = new WEB_GameInfoResponse()
                 {
-                    LastPlayed = GameManager.GetLastPlayed(GameInfoRequest.Guid),
+                    LastPlayed = LastPlayed,
                     TimePlayed = GameManager.GetTimePlayed(GameInfoRequest.Guid),
                     UsersPlaying = GameManager.GetUsersPlaying(GameInfoRequest.Guid),
                     FriendsPlaying = FriendsPlaying,
                     Playing = GameManager.IsPlaying(GameInfoRequest.Guid),
-                    Header_Image = "http://127.0.0.1/Images/AppCache/{Game.AppID}/{Game.AppID}_header.jpg",
-                    LibraryHero_Image = "http://127.0.0.1/Images/AppCache/{Game.AppID}/{Game.AppID}_library_hero.jpg"
+                    Header_Image = $"http://127.0.0.1/Images/AppCache/{Game.AppID}/{Game.AppID}_header.jpg",
+                    LibraryHero_Image = $"http://127.0.0.1/Images/AppCache/{Game.AppID}/{Game.AppID}_library_hero.jpg"
                 };
-                
                 Send(Response, WEBMessageType.WEB_GameInfoResponse);
             }
+            catch { }
         }
 
         private static void ProcessGameLaunch(WEBMessage e)
@@ -439,7 +514,10 @@ namespace SKYNET.Managers
 
         private static void ProcessGameOrderUpdated(WEBMessage e)
         {
-            // TODO
+            var GameOrderUpdated = e.Deserialize<WEB_GameOrderUpdated>();
+            if (GameOrderUpdated == null) return; 
+            if (GameOrderUpdated.GameOrder == null) return; 
+            GameManager.ModifyOrder(GameOrderUpdated.GameOrder);
         }
 
         public static void SendGameOppened(string guid)
@@ -451,10 +529,11 @@ namespace SKYNET.Managers
             Send(GameStoped, WEBMessageType.WEB_GameLaunched);
         }
 
-        internal static void SendChatMessage(uint accountID, string personaName, string message)
+        internal static void SendChatMessage(int ID, uint accountID, string personaName, string message)
         {
             var ChatMessage = new WEB_ChatMessage()
             {
+                ID = ID,
                 SenderAccountID = accountID,
                 PersonaName = personaName,
                 Message = message
@@ -510,7 +589,10 @@ namespace SKYNET.Managers
             };
             if (NetworkManager.WebClient != null)
             {
-                Write($"Sending WEB message {Type}");
+                if (WebMessage.MessageType != WEBMessageType.WEB_ConsoleMessage)
+                {
+                    Write($"Sending WEB message {Type}");
+                }
                 NetworkManager.WebClient?.Send(WebMessage.Serialize());
             }
         }

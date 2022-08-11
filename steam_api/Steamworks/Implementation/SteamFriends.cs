@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Runtime.InteropServices;
 using SKYNET.Callback;
 using SKYNET.Helpers;
 using SKYNET.Managers;
@@ -449,7 +448,7 @@ namespace SKYNET.Steamworks.Implementation
                     Result = friend.RichPresence[pchKey];
                 } 
             }
-            Write($"GetFriendRichPresence (SteamID ={steamIDFriend}, Key = {pchKey}) = {Result}");
+            Write($"GetFriendRichPresence (SteamID = {steamIDFriend}, Key = {pchKey}) = {Result}");
             return Result;
         }
 

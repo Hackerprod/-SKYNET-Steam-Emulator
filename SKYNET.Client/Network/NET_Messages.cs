@@ -156,6 +156,7 @@
 
     public class NET_ChatMessage : NET_Base
     {
+        public int ID { get; set; }
         public uint AccountID { get; set; }
         public string PersonaName { get; set; }
         public string Message { get; set; }

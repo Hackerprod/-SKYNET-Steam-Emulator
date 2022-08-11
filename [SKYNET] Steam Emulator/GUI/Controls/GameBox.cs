@@ -37,8 +37,25 @@ namespace SKYNET.GUI.Controls
                     PB_Avatar.Image = Avatar;
                 }
 
-                LB_Name.Text = _game.Name;
+                LB_Name.Text = _game.Name.Replace("&", "and");
 
+                try
+                {
+                    string TimePlayed = "";
+                    if (_game.LastPlayed == 0)
+                    {
+                        TimePlayed = "Never";
+                    }
+                    else
+                    {
+                        var Time = new DateTime().AddSeconds(_game.TimePlayed);
+                        if (Time.Hour != 0) TimePlayed = Time.Day + " Hours";
+                        if (Time.Minute != 0) TimePlayed = Time.Minute + " Minutes";
+                        else if (Time.Second != 0) TimePlayed = Time.Second + " Seconds";
+                    }
+                    LB_Time.Text = TimePlayed + " played";
+                }
+                catch { }
             }
         }
 

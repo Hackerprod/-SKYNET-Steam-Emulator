@@ -6,13 +6,8 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-public partial class modCommon
+public partial class Common
 {
-#if WIN32
-        public const int StructPackSize = 4;
-#else
-    public const int StructPackSize = 8;
-#endif
     public static DateTime LoadTime { get; set; } = DateTime.Now;
 
     public static IntPtr GetObjectPtr(object Obj)
@@ -43,10 +38,7 @@ public partial class modCommon
                         }
                     }
                 }
-                catch (Exception exception)
-                {
-
-                }
+                catch { }
             }
         }
     }

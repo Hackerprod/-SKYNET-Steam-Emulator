@@ -82,6 +82,7 @@ namespace SKYNET.GUI
             this.LB_PlayedTimeInfo = new System.Windows.Forms.Label();
             this.BT_GameAction = new SKYNET.GUI.Controls.SKYNET_Button();
             this.TP_Community = new System.Windows.Forms.TabPage();
+            this.WebChat = new SKYNET.GUI.Controls.SKYNET_WebLogger();
             this.TB_Chat = new SKYNET.GUI.Controls.SKYNET_TextBox();
             this.TP_Profile = new System.Windows.Forms.TabPage();
             this.CB_InputDeviceID = new SKYNET_ComboBox();
@@ -111,7 +112,6 @@ namespace SKYNET.GUI
             this.ToButtomMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.GameCacheMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ConfigureMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.WebChat = new SKYNET.GUI.Controls.SKYNET_WebLogger();
             this.PN_Top.SuspendLayout();
             this.panel3.SuspendLayout();
             this.panel4.SuspendLayout();
@@ -465,6 +465,7 @@ namespace SKYNET.GUI
             this.LB_NickName.TabIndex = 12;
             this.LB_NickName.Text = "Hackerprod";
             this.LB_NickName.Click += new System.EventHandler(this.LB_NickName_Click);
+            this.LB_NickName.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.LB_NickName_MouseDoubleClick);
             // 
             // gradiantBox1
             // 
@@ -777,6 +778,17 @@ namespace SKYNET.GUI
             this.TP_Community.Size = new System.Drawing.Size(866, 503);
             this.TP_Community.TabIndex = 1;
             this.TP_Community.Text = "Community";
+            // 
+            // WebChat
+            // 
+            this.WebChat.AutoScrollLines = true;
+            this.WebChat.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.WebChat.Location = new System.Drawing.Point(3, 3);
+            this.WebChat.LoggerBackColor = System.Drawing.Color.Empty;
+            this.WebChat.Name = "WebChat";
+            this.WebChat.ScrollColors = System.Drawing.Color.Empty;
+            this.WebChat.Size = new System.Drawing.Size(860, 462);
+            this.WebChat.TabIndex = 1;
             // 
             // TB_Chat
             // 
@@ -1131,17 +1143,6 @@ namespace SKYNET.GUI
             this.ConfigureMenuItem.Size = new System.Drawing.Size(192, 22);
             this.ConfigureMenuItem.Text = "Properties";
             this.ConfigureMenuItem.Click += new System.EventHandler(this.ConfigureMenuItem_Click);
-            // 
-            // WebChat
-            // 
-            this.WebChat.AutoScrollLines = true;
-            this.WebChat.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.WebChat.Location = new System.Drawing.Point(3, 3);
-            this.WebChat.LoggerBackColor = System.Drawing.Color.Empty;
-            this.WebChat.Name = "WebChat";
-            this.WebChat.ScrollColors = System.Drawing.Color.Empty;
-            this.WebChat.Size = new System.Drawing.Size(860, 462);
-            this.WebChat.TabIndex = 1;
             // 
             // frmMain
             // 

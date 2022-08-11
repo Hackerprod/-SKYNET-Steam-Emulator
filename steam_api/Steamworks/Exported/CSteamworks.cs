@@ -759,7 +759,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static string ISteamFriends_GetFriendPersonaName(ulong steamIDFriend)
         {
-            return SteamFriends.Instance.GetFriendPersonaName((ulong)steamIDFriend);
+            return SteamFriends.Instance.GetFriendPersonaName(steamIDFriend);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

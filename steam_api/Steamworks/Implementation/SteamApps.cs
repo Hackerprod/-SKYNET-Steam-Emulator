@@ -145,7 +145,7 @@ namespace SKYNET.Steamworks.Implementation
         public UInt32 GetAppInstallDir(uint appID, string pchFolder, uint cchFolderBufferSize)
         {
             Write($"GetAppInstallDir {appID} {pchFolder} {cchFolderBufferSize}");
-            string installed_path = modCommon.GetPath();
+            string installed_path = Common.GetPath();
             return (uint)installed_path.Length;
         }
 

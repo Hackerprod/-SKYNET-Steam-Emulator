@@ -79,6 +79,23 @@ namespace SKYNET.IPC.Types
         IPC_UsersResponse,
         IPC_LobbiesRequest,
         IPC_LobbiesResponse,
+        IPC_Direct3DVersionDetected
+    }
+
+    public class IPC_Direct3DVersionDetected : IPC_MessageBase
+    {
+        public Direct3DVersion Version { get; set; }
+
+        public enum Direct3DVersion
+        {
+            Unknown,
+            AutoDetect,
+            Direct3D9,
+            Direct3D10,
+            Direct3D10_1,
+            Direct3D11,
+            Direct3D11_1,
+        }
     }
 
     public class IPC_ModifyFileLog : IPC_MessageBase
@@ -367,5 +384,4 @@ namespace SKYNET.IPC.Types
         public uint IP { get; set; }
         public uint Port { get; set; }
     }
-
 }

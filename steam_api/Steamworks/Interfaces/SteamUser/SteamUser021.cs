@@ -2,6 +2,7 @@ using System;
 
 using SteamAPICall_t = System.UInt64;
 using HSteamUser = System.UInt32;
+using SKYNET.Steamworks.Types;
 
 namespace SKYNET.Steamworks.Interfaces
 {
@@ -19,26 +20,11 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUser.BLoggedOn();
         }
 
-        public CSteamID2 GetSteamID(IntPtr _)
+        public CSteamID GetSteamID(IntPtr _)
         {
-            222
-            SteamEmulator.Write("xxxxxxxxxxxxxxxxxxxx", "GetSteamID");
-            return new CSteamID2()
-            {
-                m_steamid = new SteamID_t()
-                {
-                    m_unAll64Bits = 76561187960266728,
-                    m_comp = new SteamIDComponent_t()
-                    {
-                        m_EAccountType = 1,
-                        m_EUniverse = EUniverse.k_EUniversePublic,
-                        m_unAccountID = 1000,
-                        m_unAccountInstance = 1000
-                    }
-                }
-            }; 
-            // { m_unAccountID = 1000, m_EAccountType = 1, m_EUniverse = EUniverse.k_EUniversePublic, m_unAccountInstance = 1212 };
-            //return SteamEmulator.SteamUser.GetSteamID();
+            //SteamEmulator.Write("xxxxxxxxxxxxxxxxxxxx", "GetSteamID");
+            //return new SteamworksNET.CSteamID(1000, SteamworksNET.EUniverse.k_EUniversePublic, SteamworksNET.EAccountType.k_EAccountTypeIndividual);
+            return SteamEmulator.SteamUser.GetSteamID();
         }
 
         public int InitiateGameConnection(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)

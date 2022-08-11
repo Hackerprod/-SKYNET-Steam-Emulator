@@ -100,7 +100,7 @@ namespace SKYNET.Steamworks.Implementation
             try
             {
                 string fullPath = Path.Combine(StoragePath, pchFile);
-                modCommon.EnsureDirectoryExists(fullPath, true);
+                Common.EnsureDirectoryExists(fullPath, true);
                 byte[] bytes = pvData.GetBytes(cubData);
                 File.WriteAllBytes(fullPath, bytes);
 

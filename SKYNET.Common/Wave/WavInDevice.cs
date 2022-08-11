@@ -24,7 +24,7 @@ namespace SKYNET.Wave
             get{ return m_Channels; }
         }
 
-        internal int Index
+        public int Index
         {
             get{ return m_Index; }
         }

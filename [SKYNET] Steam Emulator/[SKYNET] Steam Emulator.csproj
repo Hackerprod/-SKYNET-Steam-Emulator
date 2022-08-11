@@ -218,7 +218,7 @@
     <Compile Include="GUI\Controls\GameBox.Designer.cs">
       <DependentUpon>GameBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="Helpers\modCommon.cs" />
+    <Compile Include="Helpers\Common.cs" />
     <Compile Include="Helpers\NativeMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

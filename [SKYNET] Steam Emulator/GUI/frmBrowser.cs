@@ -8,8 +8,9 @@ using System.Windows.Forms;
 
 namespace SKYNET.GUI
 {
-    public partial class frmBrowser : frmBase
+    public partial class frmBrowser : Form
     {
+        public bool Initialized;
         private bool browserInitCompleted;
 
         dynamic ChromiumWebBrowser = null;
@@ -17,8 +18,8 @@ namespace SKYNET.GUI
 
         public frmBrowser()
         {
+            Hide();
             InitializeComponent();
-            BlurEffect = true;
         }
 
 
@@ -26,13 +27,11 @@ namespace SKYNET.GUI
         {
             if (LoadChromium())
             {
-                this.Opacity = 100D;
                 return;
             }
 
             if (LoadGecko())
             {
-                this.Opacity = 100D;
                 return;
             }
 
@@ -53,7 +52,7 @@ namespace SKYNET.GUI
                 // Initialize Control
                 this.GeckoWebBrowser = CreateInstance("Geckofx-Winforms.dll", "Gecko.GeckoWebBrowser");
                 if (this.GeckoWebBrowser == null) return false;
-                base.Controls.Add(this.GeckoWebBrowser);
+                WebContainer.Controls.Add(this.GeckoWebBrowser);
                 this.GeckoWebBrowser.Dock = DockStyle.Fill;
                 this.GeckoWebBrowser.Navigate("127.0.0.1");
                 return true;
@@ -86,7 +85,7 @@ namespace SKYNET.GUI
             {
                 this.ChromiumWebBrowser = CreateInstance("CefSharp.WinForms.dll", "CefSharp.WinForms.ChromiumWebBrowser");
                 if (this.ChromiumWebBrowser == null) return false;
-                base.Controls.Add(this.ChromiumWebBrowser);
+                WebContainer.Controls.Add(this.ChromiumWebBrowser);
                 this.ChromiumWebBrowser.Dock = DockStyle.Fill;
                 this.ChromiumWebBrowser.Load("127.0.0.1");
                 return true;
@@ -95,6 +94,14 @@ namespace SKYNET.GUI
             {
                 return false;
             }
+        }
+
+        private void OnLoadingStateChanged(object sender, dynamic args)
+        {
+            //SetCanGoBack(args.CanGoBack);
+            //SetCanGoForward(args.CanGoForward);
+
+            //this.InvokeOnUiThreadIfRequired(() => SetIsLoading(!args.CanReload));
         }
 
         private string GetAssemblyPath(string fileName, bool RootPath = false)
@@ -115,7 +122,20 @@ namespace SKYNET.GUI
             return null;
         }
 
+        private void MinimizeBox_Clicked(object sender, EventArgs e)
+        {
+            WindowState = FormWindowState.Minimized;
+        }
 
+        private void CloseBox_Clicked(object sender, EventArgs e)
+        {
+            Hide();
+        }
+
+        private void SkyneT_CloseBox1_Clicked(object sender, EventArgs e)
+        {
+
+        }
     }
 }
 

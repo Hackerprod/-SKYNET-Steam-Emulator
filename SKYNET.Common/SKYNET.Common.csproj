@@ -58,7 +58,7 @@
     <Compile Include="IconExtractor\NativeMethods.cs" />
     <Compile Include="Helpers\ImageHelper.cs" />
     <Compile Include="Log.cs" />
-    <Compile Include="modCommon.cs" />
+    <Compile Include="Common.cs" />
     <Compile Include="Helpers\MutexHelper.cs" />
     <Compile Include="Helpers\NetworkHelper.cs" />
     <Compile Include="NativeSharp\Additions\ExportTableInfo.cs" />

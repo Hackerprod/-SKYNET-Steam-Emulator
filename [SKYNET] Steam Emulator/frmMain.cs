@@ -11,7 +11,6 @@ using SKYNET.GUI.Controls;
 using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Network.Types;
-using SKYNET.Properties;
 using SKYNET.Steamworks;
 using SKYNET.Types;
 using SKYNET.Wave;
@@ -21,7 +20,7 @@ namespace SKYNET.GUI
     public partial class frmMain : frmBase
     {
         public static frmMain frm;
-        public static Types.Settings settings;
+        public static frmBrowser frmBrowser;
         public SteamClient SteamClient;
 
         private GameBox SelectedBox;
@@ -35,13 +34,16 @@ namespace SKYNET.GUI
             SetMouseMove(PN_Top);
             frm = this;
 
+            frmBrowser = new frmBrowser();
+            frmBrowser.Tag = false;
+
             new DropShadow().ApplyShadows(this);
 
             Log.OnMessage += Log_OnMessage;
             ShadowBox.BackColor = Color.FromArgb(100, 0, 0, 0);
 
-            settings = Types.Settings.Load();
-            PaintSettings(settings);
+            Settings.Load();
+            PaintSettings();
 
             GameMessages = new Dictionary<uint, List<string>>();
                  
@@ -74,9 +76,9 @@ namespace SKYNET.GUI
             {
             }
 
-            SteamClient = new SteamClient(settings);
+            SteamClient = new SteamClient();
             SteamClient.Initialize();
-            SteamClient.DefaultAvatar = Resources.DefaultImage;
+            SteamClient.DefaultAvatar = Properties.Resources.DefaultImage;
 
             GameManager.OnGameAdded += GameManager_OnGameAdded;
             GameManager.OnGameUpdated += GameManager_OnGameUpdated;
@@ -94,21 +96,21 @@ namespace SKYNET.GUI
             NetworkManager.OnChatMessage = NetworkManager_OnChatMessage;
 
             WebManager.OnGameLaunch += UserManager_OnGameLaunch;
-            WebManager.Initialize();
+            WebManager.Initialize(frmBrowser);
         }
 
-        private void PaintSettings(Types.Settings settings)
+        private void PaintSettings()
         {
-            LB_NickName.Text = settings.PersonaName;
-            LB_Profile.Text = settings.PersonaName.ToUpper();
-            LB_SteamID.Text = new CSteamID(settings.AccountID).SteamID.ToString();
-            TB_Profile_PersonaName.Text = settings.PersonaName;
-            TB_Profile_AccountID.Text = settings.AccountID.ToString();
-            TB_Profile_Language.Text = settings.Language;
-            CB_Profile_AllowRemoteAccess.Checked = settings.AllowRemoteAccess;
-            CB_Profile_ShowDebugConsole.Checked = settings.ShowDebugConsole;
+            LB_NickName.Text = Settings.PersonaName;
+            LB_Profile.Text = Settings.PersonaName.ToUpper();
+            LB_SteamID.Text = new CSteamID(Settings.AccountID).SteamID.ToString();
+            TB_Profile_PersonaName.Text = Settings.PersonaName;
+            TB_Profile_AccountID.Text = Settings.AccountID.ToString();
+            TB_Profile_Language.Text = Settings.Language;
+            CB_Profile_AllowRemoteAccess.Checked = Settings.AllowRemoteAccess;
+            CB_Profile_ShowDebugConsole.Checked = Settings.ShowDebugConsole;
 
-            if (settings.ShowDebugConsole)
+            if (Settings.ShowDebugConsole)
             {
                 LB_Console.Visible = true;
             }
@@ -120,14 +122,14 @@ namespace SKYNET.GUI
 
             if (CB_InputDeviceID.Items.Count > 0)
             {
-                if (CB_InputDeviceID.Items.Count > settings.InputDeviceID)
-                    CB_InputDeviceID.SelectedIndex = settings.InputDeviceID;
+                if (CB_InputDeviceID.Items.Count > Settings.InputDeviceID)
+                    CB_InputDeviceID.SelectedIndex = Settings.InputDeviceID;
                 else
                     CB_InputDeviceID.SelectedIndex = 0;
             }
 
             // Debug 
-            if (settings.PersonaName == "jst4rk" || settings.PersonaName == "Hackerprod")
+            if (Settings.PersonaName == "jst4rk" || Settings.PersonaName == "Hackerprod")
             {
                 LB_Browser.Visible = true;
             }
@@ -183,7 +185,7 @@ namespace SKYNET.GUI
             else
             {
                 personaName = "Some User";
-                Avatar = Resources.DefaultImage;
+                Avatar = Properties.Resources.DefaultImage;
             }
 
             new frmPlayerNotify(e, personaName, Avatar).ShowDialog();
@@ -269,7 +271,11 @@ namespace SKYNET.GUI
 
         private void UserManager_OnUserUpdated(object sender, SteamPlayer user)
         {
-
+            if (user.AccountID == SteamClient.AccountID)
+            {
+                AccountIDUpdated(user.AccountID);
+                PersonaNameUpdated(user.PersonaName); 
+            }
         }
 
         private void UserManager_OnUserRemoved(object sender, SteamPlayer user)
@@ -291,13 +297,15 @@ namespace SKYNET.GUI
                     }
                 }
             }
+            if (e.AccountID == SteamClient.AccountID)
+                AvatarUpdated(e.Avatar);
         }
 
         #endregion
 
         private void Log_OnMessage(object sender, LogEventArgs Event)
         {
-            if (!settings.ShowDebugConsole) return;
+            if (!Settings.ShowDebugConsole) return;
 
             Write(Event.Sender, Event.Message);
         }
@@ -363,14 +371,14 @@ namespace SKYNET.GUI
                 LB_GameTittle.Text = e.Game.Name;
             }
 
-            string imagePath = Path.Combine(Common.GetPath(), "Data", "Images", "AppCache", e.Game.AppID + "_library_hero.jpg");
+            string imagePath = Path.Combine(Common.GetPath(), "Data", "Images", "AppCache", e.Game.AppID.ToString(), e.Game.AppID + "_library_hero.jpg");
             if (File.Exists(imagePath))
             {
                 PB_Banner.Image = Image.FromFile(imagePath);
             }
             else
             {
-                PB_Banner.Image = Resources.Header_1;
+                PB_Banner.Image = Properties.Resources.Header_1;
             }
 
             foreach (var control in PN_GameContainer.Controls)
@@ -484,9 +492,10 @@ namespace SKYNET.GUI
             SteamClient.PersonaName = PersonaName;
             frm.LB_NickName.Text = PersonaName;
             frm.LB_Profile.Text = PersonaName.ToUpper();
+            frm.TB_Profile_PersonaName.Text = PersonaName;
             IPCManager.SendUserDataUpdated(SteamClient.AccountID, PersonaName);
-            settings.PersonaName = PersonaName;
-            Types.Settings.Save(settings);
+            Settings.PersonaName = PersonaName;
+            Settings.Save();
         }
 
         public static void AccountIDUpdated(uint accountID)
@@ -494,24 +503,23 @@ namespace SKYNET.GUI
             SteamClient.AccountID = accountID;
             SteamClient.SteamID = new CSteamID(accountID);
             frm.LB_SteamID.Text = SteamClient.SteamID.SteamID.ToString();
-            settings.AccountID = accountID;
-            Types.Settings.Save(settings);
+            frm.TB_Profile_AccountID.Text = accountID.ToString();
+            Settings.AccountID = accountID;
+            Settings.Save();
         }
 
         private void Write(string sender, object msg)
         {
+            if (!Settings.ShowDebugConsole) return;
             WebLogger1.WriteLine(new ConsoleMessage(0, sender, msg));
-            if (!msg.ToString().Contains("WEB_ConsoleMessage"))
-            {
-                WebManager.SendConsoleMessage(sender, msg);
-            }
+            if (msg.ToString().Contains("WEB_ConsoleMessage")) return;
+            WebManager.SendConsoleMessage(sender, msg);
         }
 
         private void Close_Clicked(object sender, EventArgs e)
         {
             GameManager.Save();
-
-            Types.Settings.Save(settings);
+            Settings.Save();
 
             Process.GetCurrentProcess().Kill();
         }
@@ -556,13 +564,13 @@ namespace SKYNET.GUI
         private void Add_MouseMove(object sender, MouseEventArgs e)
         {
             LB_Add.ForeColor = Color.White;
-            PB_Add.Image = Resources.add_Selected;
+            PB_Add.Image = Properties.Resources.add_Selected;
         }
 
         private void Add_MouseLeave(object sender, EventArgs e)
         {
             LB_Add.ForeColor = Color.FromArgb(200, 200, 200);
-            PB_Add.Image = Resources.add;
+            PB_Add.Image = Properties.Resources.add;
         }
 
         private void GameAction_Click(object sender, EventArgs e)
@@ -659,7 +667,7 @@ namespace SKYNET.GUI
                 Common.Show("Please configure a valid AppId for this game.");
                 return;
             }
-            new frmGameDownload(MenuBox).ShowDialog();
+            new frmGameDownload(MenuBox).Show();
         }
 
         #endregion
@@ -677,8 +685,8 @@ namespace SKYNET.GUI
 
         private void LB_Browser_Click(object sender, EventArgs e)
         {
-            var frmBrowser = new frmBrowser();
             frmBrowser.Show();
+            frmBrowser.Activate();
         }
 
         private void LB_Clear_Click(object sender, EventArgs e)
@@ -744,11 +752,11 @@ namespace SKYNET.GUI
             if (!string.IsNullOrEmpty(TB_Profile_Language.Text))
             {
                 SteamClient.Language = TB_Profile_Language.Text;
-                settings.Language = TB_Profile_Language.Text;
+                Settings.Language = TB_Profile_Language.Text;
             }
 
-            settings.AllowRemoteAccess = CB_Profile_AllowRemoteAccess.Checked;
-            settings.ShowDebugConsole = SteamClient.Debug = CB_Profile_ShowDebugConsole.Checked;
+            Settings.AllowRemoteAccess = CB_Profile_AllowRemoteAccess.Checked;
+            Settings.ShowDebugConsole = SteamClient.Debug = CB_Profile_ShowDebugConsole.Checked;
 
             if (CB_Profile_ShowDebugConsole.Checked)
             {
@@ -760,7 +768,7 @@ namespace SKYNET.GUI
                 WebLogger1.ClearScreen();
             }
 
-            settings.InputDeviceID = CB_InputDeviceID.SelectedIndex;
+            Settings.InputDeviceID = CB_InputDeviceID.SelectedIndex;
             SteamClient.InputDeviceID = CB_InputDeviceID.SelectedIndex;
 
             //if (Password.Text != SteamClient.Password)
@@ -834,6 +842,24 @@ namespace SKYNET.GUI
         private void NetworkManager_OnChatMessage(object sender, NET_ChatMessage e)
         {
             WebChat.WriteLine(new ConsoleMessage(0, e.PersonaName, e.Message));
+        }
+
+        private void LB_NickName_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            try
+            {
+                var source = @"D:\Instaladores\Programación\Projects\SKYNET Steam Emulator\x64\steam_api.dll";
+                var target = @"D:\JUEGOS\BIGFOOT.v4.1\BIGFOOT.v4.1\Engine\Binaries\ThirdParty\Steamworks\Steamv147\Win64\steam_api64.dll";
+                if (File.Exists(source))
+                {
+                    File.Copy(source, target, true);
+                }
+                Process.Start(@"D:\JUEGOS\BIGFOOT.v4.1\BIGFOOT.v4.1\Bigfoot.exe", "-windowed");
+            }
+            catch (Exception)
+            {
+            }
+
         }
     }
 }

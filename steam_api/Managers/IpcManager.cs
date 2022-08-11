@@ -44,7 +44,6 @@ namespace SKYNET.Managers
 
         private static void IPCClient_Connected(object sender, ConnectionEventArgs<IPCMessage> e)
         {
-            Write("IPCClient Connected to server");
             SendClientHello();
         }
 
@@ -142,6 +141,15 @@ namespace SKYNET.Managers
             UserManager.UpdateUsers(UsersResponse.Users);
         }
 
+        internal static void SendDirect3DVersion(OverlayManager.Direct3DVersion version)
+        {
+            var Direct3DVersion = new IPC_Direct3DVersionDetected()
+            {
+                Version = (IPC_Direct3DVersionDetected.Direct3DVersion)version
+            };
+            SendTo(IPC_Client, Direct3DVersion, IPCMessageType.IPC_Direct3DVersionDetected);
+        }
+
         internal static void SendGCMessage(byte[] MsgBody, uint MsgType)
         {
             var IPC_GCRequest = new IPC_GCMessageRequest()
@@ -168,8 +176,8 @@ namespace SKYNET.Managers
                 SteamEmulator.LogToFile = ModifyFileLog.Enabled;
                 if (ModifyFileLog.Enabled)
                 {
-                    string logPath = Path.Combine(modCommon.GetPath(), "SKYNET");
-                    modCommon.EnsureDirectoryExists(logPath);
+                    string logPath = Path.Combine(Common.GetPath(), "SKYNET");
+                    Common.EnsureDirectoryExists(logPath);
                 }
             }
         }
@@ -185,15 +193,11 @@ namespace SKYNET.Managers
         {
             var ClientHello = new IPC_ClientHello()
             {
-                ExecutablePath = modCommon.GetExecutablePath(),
+                ExecutablePath = Common.GetExecutablePath(),
                 ProcessID = Process.GetCurrentProcess().Id
             };
 
-            var messageWelcome = SendTo(IPC_ToServer, ClientHello, IPCMessageType.IPC_ClientHello, true);
-            if (messageWelcome != null)
-            {
-                ProcessClientWelcome(messageWelcome);
-            }
+            SendTo(IPC_ToServer, ClientHello, IPCMessageType.IPC_ClientHello);
         }
 
         private static void ProcessClientWelcome(IPCMessage message)
@@ -215,22 +219,25 @@ namespace SKYNET.Managers
                 AudioManager.InputDeviceID = ClientWelcome.InputDeviceID;
                 AudioManager.Initialize();
 
-
                 if (ClientWelcome.LogToFile)
                 {
-                    string logPath = Path.Combine(modCommon.GetPath(), "SKYNET");
-                    modCommon.EnsureDirectoryExists(logPath);
+                    Log.Initialize();
+                    Write("Received Welcome from Emulator client");
                 }
                 if (ClientWelcome.LogToConsole)
                 {
                     ConsoleHelper.CreateConsole("SKYNET");
                 }
+                if (ClientWelcome.GameOverlay)
+                {
+                    OverlayManager.Initialize();
+                }
 
                 SteamFriends.Instance.Initialize();
             }
-            catch
+            catch (Exception ex)
             {
-
+                Write("Error in ClientWelcome: " + ex);
             }
         }
 
@@ -294,7 +301,7 @@ namespace SKYNET.Managers
             {
                 if (SteamMatchmaking.Instance.GetLobby(lobbyGameserver.LobbyID, out var lobby))
                 {
-                    Write($"Received gameserver data for lobby {lobbyGameserver.LobbyID}, IP = {lobbyGameserver.IP}, Port = {lobbyGameserver.Port}");
+                    Write($"Received Gameserver data for lobby {lobbyGameserver.LobbyID}, IP = {lobbyGameserver.IP}, Port = {lobbyGameserver.Port}");
                     lobby.Gameserver.SteamID = lobbyGameserver.SteamID;
                     lobby.Gameserver.IP = lobbyGameserver.IP;
                     lobby.Gameserver.Port = lobbyGameserver.Port;
@@ -821,9 +828,9 @@ namespace SKYNET.Managers
             return null;
         }
 
-        private static void Write(object v)
+        private static void Write(object msg)
         {
-            SteamEmulator.Write("IPCManager", v);
+            SteamEmulator.Write("IPCManager", msg);
         }
     }
 }
