@@ -1,13 +1,32 @@
-﻿using System.Collections.Generic;
+﻿using SKYNET.Types;
+using System.Collections.Generic;
 using System.Web.Script.Serialization;
 
-namespace SKYNET.Network
+namespace SKYNET.Network.Types
 {
     public class NETMessage
     {
-        public ulong SteamId { get; set; }
+        public ulong SteamID { get; set; }
         public NETMessageType MessageType { get; set; }
         public string Body { get; set; }
+
+        public NETMessage()
+        {
+        }
+
+        public NETMessage(NETMessageType msgType, NET_Base message)
+        {
+            MessageType = msgType;
+            Body = message.Serialize();
+        }
+
+        public NETMessage(ulong steamID, NETMessageType msgType, NET_Base message)
+        {
+            MessageType = msgType;
+            Body = message.Serialize();
+            SteamID = steamID;
+        }
+
         public T Deserialize<T>()
         {
             try
@@ -22,6 +41,7 @@ namespace SKYNET.Network
             }
         }
     }
+    public interface INETMessages { }
 
     public class NET_Base { }
 
@@ -42,6 +62,109 @@ namespace SKYNET.Network
         NET_UserUpdated,
         NET_UpdateAvatarRequest,
         NET_UpdateAvatarResponse,
+        NET_GameOpened,
+        NET_P2PPacket,
+        NET_UpdateUserRequest,
+        NET_UpdateUserResponse,
+
+        NET_GetRichPresence,
+        NET_SetRichPresence,
+        NET_RichPresenceUpdated,
+        NET_UserDataUpdated,
+
+        NET_LobbyCreated,
+        NET_LobbyChatUpdate,
+        NET_LobbyGameserver,
+        NET_LobbyUpdate,
+        NET_LobbyJoinRequest,
+        NET_LobbyDataUpdate,
+        NET_LobbyListRequest,
+        NET_LobbyLeave,
+        NET_LobbyRemove
+    }
+
+    public class NET_LobbyLeave : NET_Base
+    {
+        public ulong LobbyID { get; set; }
+        public ulong SteamID { get; set; }
+    }
+
+    public class NET_LobbyRemove : NET_Base
+    {
+        public ulong LobbyID { get; set; }
+    }
+
+    public class NET_LobbyListRequest : NET_Base
+    {
+        public uint AppID { get; set; }
+        public uint RequestID { get; set; }
+    }
+
+    public class NET_LobbyDataUpdate : NET_Base
+    {
+        public ulong SteamIDLobby { get; set; }
+        public ulong SteamIDMember { get; set; }
+        public string SerializedLobby { get; set; }
+    }
+
+    public class NET_LobbyJoinRequest : NET_Base
+    {
+        public ulong SteamID { get; set; }
+        public ulong LobbyID { get; set; }
+        public ulong CallbackHandle { get; set; }
+    }
+
+    public class NET_LobbyUpdate : NET_Base
+    {
+        public ulong SteamID { get; set; }
+        public string SerializedLobby { get; set; }
+    }
+
+    public class NET_LobbyCreated : NET_Base
+    {
+        public ulong SteamID { get; set; }
+        public string SerializedLobby { get; set; }
+    }
+
+    public class NET_UserDataUpdated : NET_Base
+    {
+        public uint AccountID { get; set; }
+        public string PersonaName { get; set; }
+        public uint LobbyID { get; set; }
+    }
+
+    public class NET_LobbyGameserver : NET_Base
+    {
+        public ulong LobbyID { get; set; }
+        public ulong SteamID { get; set; }
+        public uint IP { get; set; }
+        public uint Port { get; set; }
+    }
+
+    public class NET_LobbyChatUpdate : NET_Base
+    {
+        public ulong SteamIDLobby { get; set; }
+        public ulong SteamIDUserChanged { get; set; }
+        public ulong SteamIDMakingChange { get; set; }
+        public uint ChatMemberStateChange { get; set; }
+    }
+
+    public class NET_GetRichPresence : NET_Base
+    {
+        public uint AccountID { get; set; }
+    }
+
+    public class NET_SetRichPresence : NET_Base
+    {
+        public uint AccountID { get; set; }
+        public string Key { get; set; }
+        public string Value { get; set; }
+    }
+
+    public class NET_RichPresenceUpdated : NET_Base
+    {
+        public uint AccountID { get; set; }
+        public List<RichPresence> RichPresence { get; set; }
     }
 
     public class NET_AuthRequest : NET_Base
@@ -54,18 +177,16 @@ namespace SKYNET.Network
     {
         public AuthResponseType Response { get; set; }
         public uint AccountID { get; set; }
+        public string AccountName { get; set; }
         public string PersonaName { get; set; }
-        public string Language { get; set; }
         public double Wallet { get; set; }
-        public int DeviceInSelected { get; set; }
-        public bool AllowRemoteAccess { get; set; }
-        public bool ShowDebugConsole { get; set; }
         public enum AuthResponseType : int
         {
             UnknownError = 0,
             Success = 1,
             AccountNotFound = 2,
             PasswordWrong = 3,
+            AlreadyConnected = 4,
         }
     }
 
@@ -149,7 +270,8 @@ namespace SKYNET.Network
         public UserInfoResponseType Response { get; set; }
         public uint AccountID { get; set; }
         public string PersonaName { get; set; }
-        public string AvatarURL { get; set; }
+        public uint Playing { get; set; }
+        public uint LastLogon { get; set; }
 
         public enum UserInfoResponseType
         {
@@ -159,35 +281,42 @@ namespace SKYNET.Network
         }
     }
 
-    public class NET_UpdateUser : NET_Base
+    public class NET_UpdateUserRequest : NET_Base
     {
-        public uint AccountID { get; set; }
         public string PersonaName { get; set; }
-        public string Language { get; set; }
         public string AvatarBase64 { get; set; }
-        public int DeviceInSelected { get; set; }
-        public bool AllowRemoteAccess { get; set; }
-        public bool ShowDebugConsole { get; set; }
     }
 
-    public class NET_UserUpdated : NET_Base
+    public class NET_UpdateUserResponse : NET_Base
     {
-        public uint AccountID { get; set; }
         public string PersonaName { get; set; }
-        public string Language { get; set; }
-        public string AvatarURL { get; set; }
-        public int DeviceInSelected { get; set; }
-        public bool AllowRemoteAccess { get; set; }
-        public bool ShowDebugConsole { get; set; }
+        public string AvatarName { get; set; }
     }
 
-    public class NET_UpdateAvatar : NET_Base
+    public class NET_UpdateAvatarRequest : NET_Base
     {
         public string AvatarBase64 { get; set; }
     }
 
-    public class NET_AvatarUpdated : NET_Base
+    public class NET_UpdateAvatarResponse : NET_Base
     {
-        public string AvatarURL { get; set; }
+        public string AvatarBase64 { get; set; }
+    }
+
+    public class NET_GameOpened : NET_Base
+    {
+        public ulong AccountID { get; set; }
+        public string Name { get; set; }
+        public uint AppID { get; set; }
+        
+    }
+
+    public class NET_P2PPacket : NET_Base
+    {
+        public uint Sender { get; set; }
+        public uint AccountID { get; set; }
+        public byte[] Buffer { get; set; }
+        public int Channel { get; set; }
+        public int P2PSendType { get; set; }
     }
 }

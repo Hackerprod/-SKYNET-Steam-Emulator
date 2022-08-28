@@ -6,6 +6,8 @@ using SKYNET.WEB.Types;
 using SKYNET.Interfaces;
 using SKYNET.Managers;
 using SKYNET.Processors;
+using SKYNET.Network.Types;
+using System.Collections.Generic;
 
 namespace SKYNET.Network
 {
@@ -34,7 +36,8 @@ namespace SKYNET.Network
 
         protected override void OnOpen()
         {
-            Write($"New client connection from {this.Context.UserEndPoint}");
+            ConnectionsManager.ActiveConnections += 1;
+            Write($"New client connected from {this.Context.UserEndPoint}");
         }
 
         protected override void OnError(ErrorEventArgs e)
@@ -44,7 +47,16 @@ namespace SKYNET.Network
 
         protected override void OnClose(CloseEventArgs e)
         {
-            Write("Alert... web socket is disconnected ");
+            try
+            {
+                ConnectionsManager.ActiveConnections -= 1;
+                ConnectionsManager.Remove(this);
+                Write($"Client disconnected from {this.Context.UserEndPoint}");
+            }
+            catch (Exception ex)
+            {
+                Write(ex);
+            }
         }
 
         protected override void OnMessage(MessageEventArgs e)
@@ -63,7 +75,7 @@ namespace SKYNET.Network
 
         private void UpdateConnections(NETMessage message)
         {
-            ConnectionsManager.AddOrUpdate(message.SteamId, this);
+            ConnectionsManager.AddOrUpdate(message.SteamID, this);
         }
 
         public void Disconnect()

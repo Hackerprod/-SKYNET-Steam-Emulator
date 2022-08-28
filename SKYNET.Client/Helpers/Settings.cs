@@ -6,13 +6,13 @@ namespace SKYNET.Types
 {
     public class Settings
     {
-        public static string AccountName { get; set; }
-        public static string PersonaName { get; set; }
-        public static uint AccountID { get; set; }
+        public static string Username { get; set; }
+        public static string Password { get; set; }
+        public static bool Remember { get; set; }
+        public static IPAddress ServerIP { get; set; }
         public static string Language { get; set; }
         public static bool AllowRemoteAccess { get; set; }
         public static bool ShowDebugConsole { get; set; }
-        public static IPAddress ServerIP { get; set; }
         public static int InputDeviceID { get; set; }
 
 
@@ -26,11 +26,11 @@ namespace SKYNET.Types
 
         public static void Load()
         {
-            PersonaName = Registry.Get<string>("PersonaName", Environment.UserName);
-            AccountName = Registry.Get<string>("AccountName", Environment.UserName);
-            AccountID = Registry.Get<uint>("AccountID", (uint)new Random().Next(1000, 9999));
-            Language = Registry.Get<string>("Language", "english");
+            Username = Registry.Get<string>("Username", "");
+            Password = Registry.Get<string>("Password", "");
+            Remember = Registry.Get<bool>("Remember", false);
             ServerIP = Registry.Get<IPAddress>("ServerIP", IPAddress.Loopback);
+            Language = Registry.Get<string>("Language", "english");
             AllowRemoteAccess = Registry.Get<bool>("AllowRemoteAccess", false);
             ShowDebugConsole = Registry.Get<bool>("ShowDebugConsole", false);
             InputDeviceID = Registry.Get<int>("InputDeviceID", 0);
@@ -38,11 +38,11 @@ namespace SKYNET.Types
 
         public static void Save()
         {
-            Registry.Set("PersonaName", PersonaName);
-            Registry.Set("AccountName", AccountName);
-            Registry.Set("AccountID", AccountID);
-            Registry.Set("Language", Language);
+            Registry.Set("Username", Username);
+            Registry.Set("Password", Password);
+            Registry.Set("Remember", Remember);
             Registry.Set("ServerIP", ServerIP);
+            Registry.Set("Language", Language);
             Registry.Set("AllowRemoteAccess", AllowRemoteAccess);
             Registry.Set("ShowDebugConsole", ShowDebugConsole);
             Registry.Set("InputDeviceID", InputDeviceID);

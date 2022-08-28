@@ -17,10 +17,11 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\..\SKYNET Steam Emulator\SKYNET Steam Server\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>preview</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,11 +30,18 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>preview</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="SKYNET.SQLite">
+      <HintPath>C:\Users\Administrador\Desktop\SKYNET.SQLite.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -42,14 +50,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DB\UsersDB.cs" />
     <Compile Include="Interfaces\IConnection.cs" />
     <Compile Include="Managers\ConnectionsManager.cs" />
     <Compile Include="Managers\DBManager.cs" />
     <Compile Include="Managers\NetworkManager.cs" />
     <Compile Include="Managers\PluginManager.cs" />
     <Compile Include="Managers\UserManager.cs" />
-    <Compile Include="Network\NETMessages.cs" />
-    <Compile Include="Processors\NETProccessor.cs" />
+    <Compile Include="Processors\NETProcessor.cs" />
     <Compile Include="Processors\WebAPIProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MainServer.cs" />

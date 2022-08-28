@@ -116,7 +116,7 @@ namespace WebSocketSharp
         private ClientSslConfiguration _sslConfig;
         private Stream _stream;
         private TcpClient _tcpClient;
-        private Uri _uri;
+        public Uri _uri;
         private const string _version = "13";
         private TimeSpan _waitTime;
 
@@ -252,17 +252,12 @@ namespace WebSocketSharp
         ///   <paramref name="protocols"/> contains a value twice.
         ///   </para>
         /// </exception>
+
         public WebSocket(string url, params string[] protocols)
         {
-            if (url == null)
-                throw new ArgumentNullException("url");
-
-            if (url.Length == 0)
-                throw new ArgumentException("An empty string.", "url");
-
             string msg;
-            if (!url.TryCreateWebSocketUri(out _uri, out msg))
-                throw new ArgumentException(msg, "url");
+            if (url.TryCreateWebSocketUri(out _uri, out msg))
+                throw new ArgumentException(msg, "Uri");
 
             if (protocols != null && protocols.Length > 0)
             {
@@ -277,6 +272,27 @@ namespace WebSocketSharp
             _logger = new Logger();
             _message = messagec;
             _secure = _uri.Scheme == "wss";
+            _waitTime = TimeSpan.FromSeconds(5);
+
+            init();
+        }
+
+        public WebSocket(params string[] protocols)
+        {
+            string msg;
+
+            if (protocols != null && protocols.Length > 0)
+            {
+                if (!checkProtocols(protocols, out msg))
+                    throw new ArgumentException(msg, "protocols");
+
+                _protocols = protocols;
+            }
+
+            _base64Key = CreateBase64Key();
+            _client = true;
+            _logger = new Logger();
+            _message = messagec;
             _waitTime = TimeSpan.FromSeconds(5);
 
             init();
@@ -398,6 +414,12 @@ namespace WebSocketSharp
                     _compression = value;
                 }
             }
+        }
+
+        public void CreateNewURL(string url)
+        {
+            url.TryCreateWebSocketUri(out _uri, out var msg);
+            _secure = _uri.Scheme == "wss";
         }
 
         /// <summary>
@@ -2800,6 +2822,15 @@ namespace WebSocketSharp
             close(1005, String.Empty);
         }
 
+        public void TryClose()
+        {
+            try
+            {
+                close(1005, String.Empty);
+            }
+            catch { }
+        }
+
         /// <summary>
         /// Closes the connection with the specified code.
         /// </summary>
@@ -3555,7 +3586,8 @@ namespace WebSocketSharp
 
             Func<bool> connector = connect;
             connector.BeginInvoke(
-              ar => {
+              ar => 
+              {
                   if (connector.EndInvoke(ar))
                       open();
               },

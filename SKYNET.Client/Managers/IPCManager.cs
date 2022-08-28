@@ -107,6 +107,9 @@ namespace SKYNET.Managers
                 case IPCMessageType.IPC_ClearRichPresence:
                     Process_ClearRichPresence(e.Message);
                     break;
+                case IPCMessageType.IPC_GetRichPresence:
+                    Process_GetRichPresence(e.Message);
+                    break;
                 case IPCMessageType.IPC_SetRichPresence:
                     Process_SetRichPresence(e.Message);
                     break;
@@ -229,14 +232,21 @@ namespace SKYNET.Managers
             SendIPCMessage(welcome);
         }
 
+        private static void Process_GetRichPresence(IPCMessage message)
+        {
+            var GetRichPresence = message.ParsedBody.Deserialize<IPC_GetRichPresence>();
+            if (GetRichPresence == null) return;
+
+            NETProcessor.SendGetRichPresence(GetRichPresence.SteamID, GetRichPresence.Key);
+
+        }
+
         private static void Process_SetRichPresence(IPCMessage message)
         {
             var SetRichPresence = message.ParsedBody.Deserialize<IPC_SetRichPresence>();
             if (SetRichPresence == null) return;
 
-            UserManager.SetRichPresence(SteamClient.SteamID.AccountID, SetRichPresence.Key, SetRichPresence.Value);
-            NetworkManager.SendRichPresence(SetRichPresence.Key, SetRichPresence.Value);
-
+            NETProcessor.SendRichPresence(SetRichPresence.Key, SetRichPresence.Value);
         }
 
         private static void Process_ClearRichPresence(IPCMessage message)
@@ -405,14 +415,7 @@ namespace SKYNET.Managers
         #region IPC_P2PPacket
         internal static void SendP2PPacket(NET_P2PPacket p2PPacket)
         {
-            var P2PPacket = new IPC_P2PPacket()
-            {
-                Sender = p2PPacket.Sender,
-                AccountID = p2PPacket.AccountID,
-                Buffer = p2PPacket.Buffer,
-                Channel = p2PPacket.Channel,
-                P2PSendType = p2PPacket.P2PSendType
-            };
+            var P2PPacket = p2PPacket.CopyTo<IPC_P2PPacket>();
             var IPCMessage = CreateIPCMessage(P2PPacket, IPCMessageType.IPC_P2PPacket);
             SendIPCMessage(IPCMessage);
         }
@@ -431,7 +434,7 @@ namespace SKYNET.Managers
             if (LobbyGameserver == null) return;
 
             LobbyManager.CreateGameServer(LobbyGameserver);
-            NetworkManager.SendLobbyGameserver(LobbyGameserver);
+            NETProcessor.SendLobbyGameserver(LobbyGameserver);
         }
 
         private static void Process_UserDataUpdated(IPCMessage message)
@@ -440,7 +443,7 @@ namespace SKYNET.Managers
             if (UserDataUpdated != null)
             {
                 UserManager.UserDataUpdated(UserDataUpdated.AccountID, UserDataUpdated.PersonaName, UserDataUpdated.LobbyID);
-                NetworkManager.SendUserDataUpdated(UserDataUpdated);
+                NETProcessor.SendUserDataUpdated(UserDataUpdated);
             }
         }
 
@@ -472,7 +475,6 @@ namespace SKYNET.Managers
                     };
                     var AvatarMessage = CreateIPCMessage(AvatarResponse, IPCMessageType.IPC_AvatarResponse);
                     connection.WriteAsync(AvatarMessage);
-
                 }
                 catch 
                 {
@@ -513,14 +515,14 @@ namespace SKYNET.Managers
         {
             var LobbyChatUpdate = message.ParsedBody.Deserialize<IPC_LobbyChatUpdate>();
             if (LobbyChatUpdate != null)
-                NetworkManager.SendLobbyChatUpdate(message.To, LobbyChatUpdate);
+                NETProcessor.SendLobbyChatUpdate(message.To, LobbyChatUpdate);
         }
 
         private static void Process_LobbyListRequest(IPCMessage message)
         {
             var LobbyListRequest = message.ParsedBody.Deserialize<IPC_LobbyListRequest>();
             if (LobbyListRequest != null)
-                NetworkManager.SendLobbyListRequest(LobbyListRequest);
+                NETProcessor.SendLobbyListRequest(LobbyListRequest);
         }
 
         private static void Process_LobbyLeave(IPCMessage message)
@@ -531,7 +533,7 @@ namespace SKYNET.Managers
                 var lobby = LobbyManager.GetLobby(LobbyRemove.LobbyID);
                 if (lobby == null) return;
 
-                NetworkManager.SendLobbyLeave(lobby.Owner, lobby.SteamID);
+                NETProcessor.SendLobbyLeave(lobby.Owner, lobby.SteamID);
                 LobbyManager.Remove(LobbyRemove.LobbyID);
             }
         }
@@ -544,7 +546,7 @@ namespace SKYNET.Managers
                 var lobby = LobbyManager.GetLobby(LobbyRemove.LobbyID);
                 if (lobby == null) return;
 
-                NetworkManager.SendLobbyRemove(lobby);
+                NETProcessor.SendLobbyRemove(lobby);
                 LobbyManager.Remove(LobbyRemove.LobbyID);
                 // TODO: Send lobby to steam server
             }
@@ -557,7 +559,7 @@ namespace SKYNET.Managers
             if (lobby != null)
             {
                 LobbyManager.Create(lobby);
-                NetworkManager.SendLobbyCreated(lobby);
+                NETProcessor.SendLobbyCreated(lobby);
             }
         }
 
@@ -565,18 +567,18 @@ namespace SKYNET.Managers
         {
             var LobbyJoinRequest = message.ParsedBody.Deserialize<IPC_LobbyJoinRequest>();
             if (LobbyJoinRequest == null) return;
-            NetworkManager.SendLobbyJoinRequest(LobbyJoinRequest);
+            NETProcessor.SendLobbyJoinRequest(LobbyJoinRequest);
         }
 
         private static void Process_LobbyDataUpdate(IPCMessage message)
         {
             var LobbyDataUpdate = message.ParsedBody.Deserialize<IPC_LobbyDataUpdate>();
-            NetworkManager.SendLobbyDataUpdate(LobbyDataUpdate);
+            NETProcessor.SendLobbyDataUpdate(LobbyDataUpdate);
             SteamLobby lobby = LobbyDataUpdate.SerializedLobby.Deserialize<SteamLobby>();
             if (lobby != null)
             {
                 LobbyManager.Update(lobby);
-                NetworkManager.SendLobbyDataUpdate(LobbyDataUpdate);
+                NETProcessor.SendLobbyDataUpdate(LobbyDataUpdate);
             }
         }
 
@@ -592,42 +594,42 @@ namespace SKYNET.Managers
             Log.Write("IPCManager", "Exception Occurred!!! " + e.Exception);
         }
 
-        public static void UpdateUserStatus(NET_UserDataUpdated statusChanged, IPC_UserDataUpdated.UpdateType UpdateType)
-        {
-            var UserDataUpdated = new IPC_UserDataUpdated()
-            {
-                LobbyID = statusChanged.LobbyID,
-                AccountID = statusChanged.AccountID,
-                PersonaName = statusChanged.PersonaName,
-                Type = UpdateType
-            };
-            var IPCMessage = CreateIPCMessage(UserDataUpdated, IPCMessageType.IPC_UserDataUpdated);
-            SendIPCMessage(IPCMessage);
-        }
+        //public static void UpdateUserStatus(NET_UserDataUpdated statusChanged, IPC_UserDataUpdated.UpdateType UpdateType)
+        //{
+        //    var UserDataUpdated = new IPC_UserDataUpdated()
+        //    {
+        //        LobbyID = statusChanged.LobbyID,
+        //        AccountID = statusChanged.AccountID,
+        //        PersonaName = statusChanged.PersonaName,
+        //        Type = UpdateType
+        //    };
+        //    var IPCMessage = CreateIPCMessage(UserDataUpdated, IPCMessageType.IPC_UserDataUpdated);
+        //    SendIPCMessage(IPCMessage);
+        //}
 
-        internal static void SendLobbyLeave(NET_LobbyLeave lobbyLeave)
-        {
-            var LobbyLeave = new IPC_LobbyLeave()
-            {
-                LobbyID = lobbyLeave.SteamID,
-                SteamID = lobbyLeave.SteamID
-            };
-            var IPCMessage = CreateIPCMessage(LobbyLeave, IPCMessageType.IPC_LobbyLeave);
-            SendIPCMessage(IPCMessage);
-        }
+        //internal static void SendLobbyLeave(NET_LobbyLeave lobbyLeave)
+        //{
+        //    var LobbyLeave = new IPC_LobbyLeave()
+        //    {
+        //        LobbyID = lobbyLeave.SteamID,
+        //        SteamID = lobbyLeave.SteamID
+        //    };
+        //    var IPCMessage = CreateIPCMessage(LobbyLeave, IPCMessageType.IPC_LobbyLeave);
+        //    SendIPCMessage(IPCMessage);
+        //}
 
-        internal static void SendLobbyChatUpdate(NET_LobbyChatUpdate lobbyChatUpdate)
-        {
-            var LobbyChatUpdate = new IPC_LobbyChatUpdate()
-            {
-                SteamIDLobby = lobbyChatUpdate.SteamIDLobby,
-                ChatMemberStateChange = lobbyChatUpdate.ChatMemberStateChange,
-                SteamIDMakingChange = lobbyChatUpdate.SteamIDMakingChange,
-                SteamIDUserChanged = lobbyChatUpdate.SteamIDUserChanged
-            };
-            var IPCMessage = CreateIPCMessage(LobbyChatUpdate, IPCMessageType.IPC_LobbyChatUpdate);
-            SendIPCMessage(IPCMessage);
-        }
+        //internal static void SendLobbyChatUpdate(NET_LobbyChatUpdate lobbyChatUpdate)
+        //{
+        //    var LobbyChatUpdate = new IPC_LobbyChatUpdate()
+        //    {
+        //        SteamIDLobby = lobbyChatUpdate.SteamIDLobby,
+        //        ChatMemberStateChange = lobbyChatUpdate.ChatMemberStateChange,
+        //        SteamIDMakingChange = lobbyChatUpdate.SteamIDMakingChange,
+        //        SteamIDUserChanged = lobbyChatUpdate.SteamIDUserChanged
+        //    };
+        //    var IPCMessage = CreateIPCMessage(LobbyChatUpdate, IPCMessageType.IPC_LobbyChatUpdate);
+        //    SendIPCMessage(IPCMessage);
+        //}
 
         private static IPCMessage CreateIPCMessage(IPC_MessageBase Base, IPCMessageType type, ulong jobId = 0)
         {
@@ -651,39 +653,39 @@ namespace SKYNET.Managers
             }
         }
 
-        internal static void SendLobbyListResponse(NET_LobbyListResponse lobbyListResponse)
-        {
-            var LobbyListResponse = new IPC_LobbyListResponse()
-            {
-                SerializedLobby = lobbyListResponse.SerializedLobby
-            };
-            var message = CreateIPCMessage(LobbyListResponse, IPCMessageType.IPC_LobbyListResponse);
-            SendIPCMessage(message);
-        }
+        //internal static void SendLobbyListResponse(NET_LobbyListResponse lobbyListResponse)
+        //{
+        //    var LobbyListResponse = new IPC_LobbyListResponse()
+        //    {
+        //        SerializedLobby = lobbyListResponse.SerializedLobby
+        //    };
+        //    var message = CreateIPCMessage(LobbyListResponse, IPCMessageType.IPC_LobbyListResponse);
+        //    SendIPCMessage(message);
+        //}
 
-        internal static void SendLobbyJoinResponse(NET_LobbyJoinResponse lobbyJoinResponse)
-        {
-            var LobbyListResponse = new IPC_LobbyJoinResponse()
-            {
-                CallbackHandle = lobbyJoinResponse.CallbackHandle,
-                ChatRoomEnterResponse = lobbyJoinResponse.ChatRoomEnterResponse,
-                SerializedLobby = lobbyJoinResponse.SerializedLobby,
-            };
-            var message = CreateIPCMessage(LobbyListResponse, IPCMessageType.IPC_LobbyJoinResponse);
-            SendIPCMessage(message);
-        }
+        //internal static void SendLobbyJoinResponse(NET_LobbyJoinResponse lobbyJoinResponse)
+        //{
+        //    var LobbyListResponse = new IPC_LobbyJoinResponse()
+        //    {
+        //        CallbackHandle = lobbyJoinResponse.CallbackHandle,
+        //        ChatRoomEnterResponse = lobbyJoinResponse.ChatRoomEnterResponse,
+        //        SerializedLobby = lobbyJoinResponse.SerializedLobby,
+        //    };
+        //    var message = CreateIPCMessage(LobbyListResponse, IPCMessageType.IPC_LobbyJoinResponse);
+        //    SendIPCMessage(message);
+        //}
 
-        internal static void SendLobbyJoinRequest(NET_LobbyJoinRequest lobbyJoinRequest)
-        {
-            var LobbyJoinRequest = new IPC_LobbyJoinRequest()
-            {
-                CallbackHandle = lobbyJoinRequest.CallbackHandle,
-                LobbyID = lobbyJoinRequest.LobbyID,
-                SteamID = lobbyJoinRequest.SteamID
-            };
-            var message = CreateIPCMessage(LobbyJoinRequest, IPCMessageType.IPC_LobbyJoinResponse);
-            SendIPCMessage(message);
-        }
+        //internal static void SendLobbyJoinRequest(NET_LobbyJoinRequest lobbyJoinRequest)
+        //{
+        //    var LobbyJoinRequest = new IPC_LobbyJoinRequest()
+        //    {
+        //        CallbackHandle = lobbyJoinRequest.CallbackHandle,
+        //        LobbyID = lobbyJoinRequest.LobbyID,
+        //        SteamID = lobbyJoinRequest.SteamID
+        //    };
+        //    var message = CreateIPCMessage(LobbyJoinRequest, IPCMessageType.IPC_LobbyJoinResponse);
+        //    SendIPCMessage(message);
+        //}
 
         internal static void SendLobbyRemove(ulong lobbyID)
         {
@@ -695,30 +697,30 @@ namespace SKYNET.Managers
             SendIPCMessage(message);
         }
 
-        internal static void SendLobbyDataUpdate(NET_LobbyDataUpdate lobbyDataUpdate)
-        {
-            var LobbyDataUpdate = new IPC_LobbyDataUpdate()
-            { 
-                SteamIDLobby = lobbyDataUpdate.SteamIDLobby,
-                SteamIDMember = lobbyDataUpdate.SteamIDMember,
-                SerializedLobby = lobbyDataUpdate.SerializedLobby
-            };
-            var message = CreateIPCMessage(LobbyDataUpdate, IPCMessageType.IPC_LobbyDataUpdate);
-            SendIPCMessage(message);
-        }
+        //internal static void SendLobbyDataUpdate(NET_LobbyDataUpdate lobbyDataUpdate)
+        //{
+        //    var LobbyDataUpdate = new IPC_LobbyDataUpdate()
+        //    { 
+        //        SteamIDLobby = lobbyDataUpdate.SteamIDLobby,
+        //        SteamIDMember = lobbyDataUpdate.SteamIDMember,
+        //        SerializedLobby = lobbyDataUpdate.SerializedLobby
+        //    };
+        //    var message = CreateIPCMessage(LobbyDataUpdate, IPCMessageType.IPC_LobbyDataUpdate);
+        //    SendIPCMessage(message);
+        //}
 
-        internal static void SendLobbyGameserver(NET_LobbyGameserver lobbyGameserver)
-        {
-            var LobbyGameserver = new IPC_LobbyGameserver()
-            {
-                IP = lobbyGameserver.IP,
-                Port = lobbyGameserver.Port,
-                LobbyID = lobbyGameserver.LobbyID,
-                SteamID = lobbyGameserver.SteamID
-            };
-            var message = CreateIPCMessage(LobbyGameserver, IPCMessageType.IPC_LobbyGameserver);
-            SendIPCMessage(message);
-        }
+        //internal static void SendLobbyGameserver(NET_LobbyGameserver lobbyGameserver)
+        //{
+        //    var LobbyGameserver = new IPC_LobbyGameserver()
+        //    {
+        //        IP = lobbyGameserver.IP,
+        //        Port = lobbyGameserver.Port,
+        //        LobbyID = lobbyGameserver.LobbyID,
+        //        SteamID = lobbyGameserver.SteamID
+        //    };
+        //    var message = CreateIPCMessage(LobbyGameserver, IPCMessageType.IPC_LobbyGameserver);
+        //    SendIPCMessage(message);
+        //}
 
         public static void SendModifyFileLog(Game game)
         {

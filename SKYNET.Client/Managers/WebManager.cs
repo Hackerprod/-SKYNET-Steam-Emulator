@@ -1,6 +1,7 @@
 ﻿using SKYNET.Client;
 using SKYNET.Helpers;
 using SKYNET.Network;
+using SKYNET.Network.Types;
 using SKYNET.Types;
 using SKYNET.Wave;
 using SKYNET.WEB.Types;
@@ -9,6 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Net;
 using System.Threading;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
@@ -37,7 +39,7 @@ namespace SKYNET.Managers
                         ProcessAuthRequest(e);
                         break;
                     case WEBMessageType.WEB_CreateAccountRequest:
-                        // TODO
+                        ProcessCreateAccountRequest(e);
                         break;
                     case WEBMessageType.WEB_GameListRequest:
                         ProcessGameListRequest(e);
@@ -105,12 +107,56 @@ namespace SKYNET.Managers
                     case WEBMessageType.WEB_LoadCompleted:
                         ProcessLoadCompleted(e);
                         break;
+                    case WEBMessageType.WEB_ConnectionDataRequest:
+                        ProcessConnectionDataRequest(e);
+                        break;
+                    case WEBMessageType.WEB_ConnectionDataUpdate:
+                        ProcessConnectionDataUpdate(e);
+                        break;
+                    case WEBMessageType.WEB_LoggedOff:
+                        ProcessLoggedOff(e);
+                        break;
+                    default:
+                        Write($"Not implemented message type {e.MessageType}");
+                        break;
                 }
             }
             catch (Exception ex)
             {
                 Write($"Error proccessing WEB Message {ex}");
             }
+        }
+
+        private static void ProcessLoggedOff(WEBMessage _)
+        {
+            NetworkManager.WebSocketClient.Close();
+        }
+
+        private static void ProcessConnectionDataRequest(WEBMessage e)
+        {
+            var ConnectionData = new WEB_ConnectionDataResponse()
+            {
+                ServerIP = Settings.ServerIP == null ? "" : Settings.ServerIP.ToString(),
+                Username = Settings.Username == null ? "" : Settings.Username,
+                Password = Settings.Password == null ? "" : Settings.Password,
+                Remember = Settings.Remember == null ? false : Settings.Remember,
+            };
+            Send(ConnectionData, WEBMessageType.WEB_ConnectionDataResponse);
+        }
+
+        private static void ProcessConnectionDataUpdate(WEBMessage e)
+        {
+            var ConnectionDataUpdate = e.Deserialize<WEB_ConnectionDataUpdate>();
+            if (ConnectionDataUpdate == null) return;
+
+            if (IPAddress.TryParse(ConnectionDataUpdate.ServerIP, out var IP))
+            {
+                Settings.ServerIP = IP;
+                NetworkManager.WebSocketClient.ServerIP = ConnectionDataUpdate.ServerIP;
+            }
+            Settings.Username = ConnectionDataUpdate.Username;
+            Settings.Password = ConnectionDataUpdate.Password;
+            Settings.Save();
         }
 
         private static void ProcessLoadCompleted(WEBMessage e)
@@ -166,7 +212,7 @@ namespace SKYNET.Managers
         {
             var ChatMessage = e.Deserialize<WEB_ChatMessage>();
             if (ChatMessage == null) return;
-            NetworkManager.SendChatMessage(ChatMessage.Message);
+            NETProcessor.SendChatMessage(ChatMessage.Message);
         }
 
         private static void ProcessGameStop(WEBMessage e)
@@ -193,49 +239,23 @@ namespace SKYNET.Managers
         {
             var UpdateUser = e.Deserialize<WEB_UpdateUser>();
             if (UpdateUser == null) return;
-            if (UserManager.UpdateUser(UpdateUser, out var AvatarUpdated))
-            {
-                Settings.Save();
-                var UserUpdated = new WEB_UserUpdated()
-                {
-                    AccountID = UpdateUser.AccountID,
-                    AllowRemoteAccess = UpdateUser.AllowRemoteAccess,
-                    DeviceInSelected = UpdateUser.DeviceInSelected,
-                    Language = UpdateUser.Language,
-                    PersonaName = UpdateUser.PersonaName,
-                    ShowDebugConsole = UpdateUser.ShowDebugConsole
-                };
-                if (AvatarUpdated)
-                {
-                    string AvatarName = $"Avatar_{Common.GetRandomString(8, true)}.jpg";
-                    WebServer.AvatarName = AvatarName;
-                    UserUpdated.AvatarURL = $"http://127.0.0.1/Images/AvatarCache/{AvatarName}";
-                }
-                else
-                {
-                    UserUpdated.AvatarURL = "http://127.0.0.1/Images/AvatarCache/Avatar.jpg";
-                }
-                Send(UserUpdated, WEBMessageType.WEB_UserUpdated);
-            }
+
+            Settings.Language = UpdateUser.Language;
+            Settings.InputDeviceID = UpdateUser.InputDeviceID;
+            Settings.AllowRemoteAccess = UpdateUser.AllowRemoteAccess;
+            Settings.ShowDebugConsole = UpdateUser.ShowDebugConsole;
+            Settings.Save();
+
+            SteamClient.Language = UpdateUser.Language;
+            SteamClient.InputDeviceID = UpdateUser.InputDeviceID;
+
+            var NET_UpdateUser = UpdateUser.CopyTo<NET_UpdateUserRequest>();
+            NETProcessor.Send(NET_UpdateUser, NETMessageType.NET_UpdateUserRequest);
         }
 
         private static void ProcessUpdateAvatar(WEBMessage e)
         {
-            var UpdateAvatar = e.Deserialize<WEB_UpdateAvatar>();
-            if (UpdateAvatar == null) return;
-            var Image = ImageHelper.ImageFromBase64(UpdateAvatar.AvatarBase64);
-            if (UserManager.UpdateAvatar(Image))
-            {
-                string AvatarName = $"Avatar_{Common.GetRandomString(8, true)}.jpg";
-                WebServer.AvatarName = AvatarName;
-
-                WEB_AvatarUpdated AvatarUpdated = new WEB_AvatarUpdated()
-                {
-                    AvatarURL = $"http://127.0.0.1/Images/AvatarCache/{AvatarName}"
-                };
-
-                Send(AvatarUpdated, WEBMessageType.WEB_AvatarUpdated);
-            }
+            //
         }
 
         private static void ProcessGameDownloadCache(WEBMessage e)
@@ -298,46 +318,22 @@ namespace SKYNET.Managers
         private static void ProcessAuthRequest(WEBMessage e)
         {
             var AuthRequest = e.Deserialize<WEB_AuthRequest>();
-            var AuthResponse = new WEB_AuthResponse();
-            if (AuthRequest == null)
+
+            NET_AuthRequest NET_Auth = AuthRequest.CopyTo<NET_AuthRequest>();
+            if (NET_Auth != null)
             {
-                AuthResponse.Response = WEB_AuthResponse.AuthResponseType.UnknownError;
-                Send(AuthResponse, WEBMessageType.WEB_AuthResponse);
+                NETProcessor.Send(NET_Auth, NETMessageType.NET_AuthRequest);
             }
-            else
+        }
+
+        private static void ProcessCreateAccountRequest(WEBMessage e)
+        {
+            var CreateAccountRequest = e.Deserialize<WEB_CreateAccountRequest>();
+            if (CreateAccountRequest == null) return;
+            var NET_CreateRequest = CreateAccountRequest.CopyTo<NET_CreateAccountRequest>();
+            if (NET_CreateRequest != null)
             {
-                //if (AuthRequest.Username.ToLower() != "hackerprod")
-                //{
-                //    Write($"Account {loginRequest.AccountName} not found");
-                //    AuthResponse.Response = WEB_AuthResponseType.AccountNotFound;
-                //    Send(AuthResponse, WEB_MessageType.WEB_AuthResponse);
-                //}
-                //else if (AuthRequest.Password != "123")
-                //{
-                //    Write($"Invalid authentication from account {loginRequest.AccountName}");
-                //    AuthResponse.Response = WEB_AuthResponseType.PasswordWrong;
-                //    Send(AuthResponse, WEB_MessageType.WEB_AuthResponse);
-                //}
-                //else
-                {
-                    AuthResponse.Response = WEB_AuthResponse.AuthResponseType.Success;
-                    AuthResponse.PersonaName = SteamClient.PersonaName;
-                    AuthResponse.AccountID = SteamClient.AccountID;
-                    AuthResponse.Language = SteamClient.Language;
-                    AuthResponse.Wallet = 10000.00;
-                    AuthResponse.DeviceInSelected = SteamClient.InputDeviceID;
-                    AuthResponse.ShowDebugConsole = Settings.ShowDebugConsole;
-                    AuthResponse.AllowRemoteAccess = Settings.AllowRemoteAccess;
-
-                    Write($"User {AuthRequest.Username} successfully authenticated");
-                    Send(AuthResponse, WEBMessageType.WEB_AuthResponse);
-
-                    var GameListResponse = new WEB_GameListResponse()
-                    {
-                        GameList = GameManager.GetGames()
-                    };
-                    Send(GameListResponse, WEBMessageType.WEB_GameListResponse);
-                }
+                NETProcessor.Send(NET_CreateRequest, NETMessageType.NET_CreateAccountRequest);
             }
         }
 
@@ -353,36 +349,10 @@ namespace SKYNET.Managers
         private static void ProcessUserInfoRequest(WEBMessage e)
         {
             var InfoRequest = e.Deserialize<WEB_UserInfoRequest>();
+            if (InfoRequest == null) return;
 
-            WEB_UserInfoResponse InfoResponse = new WEB_UserInfoResponse();
-
-            if (InfoRequest == null)
-            {
-                InfoResponse.Response = WEB_UserInfoResponse.UserInfoResponseType.UnknownError;
-                Send(InfoResponse, WEBMessageType.WEB_UserInfoResponse);
-                return;
-            }
-
-            var User = UserManager.GetUser(InfoRequest.AccountID);
-            if (User == null)
-            {
-                InfoResponse.Response = WEB_UserInfoResponse.UserInfoResponseType.AccountNotFound;
-                Send(InfoResponse, WEBMessageType.WEB_UserInfoResponse);
-                return;
-            }
-
-            var AvatarHex = "";
-            if (UserManager.GetAvatar(User.AccountID, out var bitmap))
-            {
-                AvatarHex = ImageHelper.ImageToBase64(bitmap);
-            }
-
-            InfoResponse.Response = WEB_UserInfoResponse.UserInfoResponseType.Success;
-            InfoResponse.AccountID = User.AccountID;
-            InfoResponse.PersonaName = User.PersonaName;
-            InfoResponse.AvatarURL = $"http://127.0.0.1/Images/AvatarCache/{User.AccountID}";
-
-            Send(InfoResponse, WEBMessageType.WEB_UserInfoResponse);
+            var UserInfoRequest = InfoRequest.CopyTo<NET_UserInfoRequest>();
+            NETProcessor.Send(UserInfoRequest, NETMessageType.NET_UserInfoRequest);
         }
 
         private static void ProcessGameInfoRequest(WEBMessage e)
@@ -404,7 +374,8 @@ namespace SKYNET.Managers
                         {
                             AccountID = Users[i].AccountID,
                             PersonaName = Users[i].PersonaName,
-                            AvatarURL = $"http://127.0.0.1/Images/AvatarCache/{Users[i].AccountID}",
+
+                            AvatarURL = $"http://{Settings.ServerIP}:27080/Images/AvatarCache/{Users[i].AccountID}.jpg",
                         });
                         if (i == 10) break;
                     }
@@ -425,8 +396,8 @@ namespace SKYNET.Managers
                     UsersPlaying = GameManager.GetUsersPlaying(GameInfoRequest.Guid),
                     FriendsPlaying = FriendsPlaying,
                     Playing = GameManager.IsPlaying(GameInfoRequest.Guid),
-                    Header_Image = $"http://127.0.0.1/Images/AppCache/{Game.AppID}/{Game.AppID}_header.jpg",
-                    LibraryHero_Image = $"http://127.0.0.1/Images/AppCache/{Game.AppID}/{Game.AppID}_library_hero.jpg"
+                    Header_Image = $"http://{Settings.ServerIP}:27080/Images/AppCache/{Game.AppID}/{Game.AppID}_header.jpg",
+                    LibraryHero_Image = $"http://{Settings.ServerIP}:27080/Images/AppCache/{Game.AppID}/{Game.AppID}_library_hero.jpg"
                 };
                 Send(Response, WEBMessageType.WEB_GameInfoResponse);
             }

@@ -5,6 +5,7 @@ using System.IO;
 using System.Web.Script.Serialization;
 using SKYNET.Client;
 using SKYNET.Helpers;
+using SKYNET.Network;
 using SKYNET.Network.Types;
 using SKYNET.Types;
 

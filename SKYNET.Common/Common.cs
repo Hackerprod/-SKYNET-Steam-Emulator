@@ -84,7 +84,8 @@ public partial class Common
 
     public static DialogResult Show(object msg, MessageBoxButtons buttons = MessageBoxButtons.OK)
     {
-        return MessageBox.Show(msg.ToString(), "SKYNET", buttons);
+        string message = msg == null ? "NULL" : msg.ToString();
+        return MessageBox.Show(message, "SKYNET", buttons);
     }
 
     public static string GetTotalTime(DateTime startTime)

@@ -11,10 +11,10 @@ namespace SKYNET.Types
         public ulong LobbyID { get; set; }
         public bool HasFriend { get; set; }
         public string IPAddress { get; set; }
-        public Dictionary<string, string> RichPresence { get; set; }
+        public List<RichPresence> RichPresence { get; set; }
         public SteamPlayer()
         {
-            RichPresence = new Dictionary<string, string>();
+            RichPresence = new List<RichPresence>();
         }
     }
 }

@@ -28,7 +28,10 @@ namespace SKYNET
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             //Application.Run(new frmLogin());
-            Application.Run(new frmMain());
+
+            SKYNET.Main.Initialize();
+            Application.Run(SKYNET.Main.frmBrowser);
+            
         }
 
         private static Assembly ResolveAssembly(object sender, ResolveEventArgs args)

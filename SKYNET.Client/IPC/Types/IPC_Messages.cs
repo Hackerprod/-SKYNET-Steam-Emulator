@@ -72,6 +72,7 @@ namespace SKYNET.IPC.Types
         IPC_ModifyFileLog,
 
         // RichPresence
+        IPC_GetRichPresence,
         IPC_ClearRichPresence,
         IPC_SetRichPresence,
 
@@ -312,6 +313,12 @@ namespace SKYNET.IPC.Types
 
     public class IPC_ClearRichPresence : IPC_MessageBase
     {
+    }
+
+    public class IPC_GetRichPresence : IPC_MessageBase
+    {
+        public ulong SteamID { get; set; }
+        public string Key { get; set; }
     }
 
     public class IPC_SetRichPresence : IPC_MessageBase

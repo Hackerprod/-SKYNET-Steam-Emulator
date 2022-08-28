@@ -7,7 +7,7 @@ using SKYNET.Managers;
 using SKYNET.Plugin;
 using SKYNET.Steamworks;
 using SKYNET.Types;
-using SKYNET.Wave;
+
 using AppID = System.UInt32;
 
 namespace SKYNET.Client
@@ -29,10 +29,8 @@ namespace SKYNET.Client
         public SteamClient()
         {
             Write("SteamClient", "Initializing SteamClient");
-            SteamID = new CSteamID(Settings.AccountID);
-            AccountID = Settings.AccountID;
-            AccountName = Settings.AccountName;
-            PersonaName = Settings.PersonaName;
+            SteamID = CSteamID.Invalid;
+            AccountID = 0;
             Language = Settings.Language;
             SteamID_GS = CSteamID.GenerateGameServer();
             Debug = Settings.ShowDebugConsole;
@@ -41,7 +39,7 @@ namespace SKYNET.Client
 
         public void Initialize()
         {
-            Task.Run(delegate { UserManager.Initialize(SteamID, PersonaName); });
+            Task.Run(delegate { UserManager.Initialize(); });
             Task.Run(delegate { NetworkManager.Initialize(); }); 
             Task.Run(delegate { StatsManager.Initialize(); });
             Task.Run(delegate { IPCManager.Initialize(); });

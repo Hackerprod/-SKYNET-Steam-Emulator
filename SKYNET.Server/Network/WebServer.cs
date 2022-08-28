@@ -8,7 +8,7 @@ namespace SKYNET.Network
 {
     public class WebServer
     {
-        public static string AvatarName;
+        public static Dictionary<uint, string> AvatarNames;
         private string _rootDirectory;
         private string _webDirectory;
         private HttpServer httpsv;
@@ -90,6 +90,18 @@ namespace SKYNET.Network
         #endregion
     };
 
+        public static void AddOrUpdateAvatarName(uint accountID, string avatarName)
+        {
+            if (AvatarNames.ContainsKey(accountID))
+            {
+                AvatarNames[accountID] = avatarName;
+            }
+            else
+            {
+                AvatarNames.Add(accountID, avatarName);
+            }
+        }
+
         public WebServer(int port)
         {
             httpsv = new HttpServer(port);
@@ -98,7 +110,7 @@ namespace SKYNET.Network
             this._rootDirectory = Path.Combine(Common.GetPath(), "Data");
             _webDirectory = Path.Combine(Common.GetPath(), "Data", "www");
             ServerPort = port;
-            AvatarName = "avatar.jpg";
+            AvatarNames = new Dictionary<uint, string>();
         }
 
         private void OnGet(object sender, HttpRequestEventArgs e)
@@ -126,9 +138,12 @@ namespace SKYNET.Network
             }
             else
             {
-                if (Path.GetFileName(filename) == AvatarName)
+                string fileName = Path.GetFileNameWithoutExtension(filename);
+                if (AvatarNames.ContainsValue(fileName))
                 {
-                    string newPath = filename.Replace(Path.GetFileName(filename), "avatar.jpg");
+                    Write("Contains " + fileName);
+                    var ID = GetAvatarID(fileName);
+                    string newPath = filename.Replace(Path.GetFileName(filename), ID + ".jpg");
                     filename = Path.Combine(_rootDirectory, newPath);
                 }
                 else
@@ -169,6 +184,17 @@ namespace SKYNET.Network
 
             e.Response.OutputStream.Close();
             e.Response.Close();
+        }
+
+        private uint GetAvatarID(string fileName)
+        {
+            uint response = 0;
+            foreach (var KV in AvatarNames)
+            {
+                if (KV.Value == fileName)
+                    response = KV.Key;
+            }
+            return response;
         }
 
         public bool Start()

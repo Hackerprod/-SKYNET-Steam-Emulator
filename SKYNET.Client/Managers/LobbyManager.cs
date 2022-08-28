@@ -1,5 +1,6 @@
 ﻿using SKYNET.Helpers;
 using SKYNET.IPC.Types;
+using SKYNET.Network;
 using SKYNET.Network.Types;
 using SKYNET.Steamworks;
 using SKYNET.Types;
@@ -150,36 +151,36 @@ namespace SKYNET.Managers
 
         public static void UpdateLobbyMembers(SteamLobby lobby)
         {
-            NetworkManager.SendUpdateLobby(lobby, false);
+            NETProcessor.SendUpdateLobby(lobby, false);
         }
 
-        internal static void LeaveLobby(NET_LobbyLeave lobbyLeave)
-        {
-            if (GetLobby(lobbyLeave.LobbyID, out var lobby))
-            {
-                lobby.Members.RemoveAll(m => m.m_SteamID == lobbyLeave.SteamID);
+        //internal static void LeaveLobby(NET_LobbyLeave lobbyLeave)
+        //{
+        //    if (GetLobby(lobbyLeave.LobbyID, out var lobby))
+        //    {
+        //        lobby.Members.RemoveAll(m => m.m_SteamID == lobbyLeave.SteamID);
 
-                NetworkManager.SendUpdateLobby(lobby, false);
+        //        NetworkManager.SendUpdateLobby(lobby, false);
 
-                var lobbyChatUpdate = new NET_LobbyChatUpdate()
-                {
-                    SteamIDLobby = lobbyLeave.SteamID,
-                    SteamIDUserChanged = lobbyLeave.SteamID,
-                    SteamIDMakingChange = lobbyLeave.SteamID,
-                    ChatMemberStateChange = (int)EChatMemberStateChange.k_EChatMemberStateChangeLeft
-                };
+        //        var lobbyChatUpdate = new NET_LobbyChatUpdate()
+        //        {
+        //            SteamIDLobby = lobbyLeave.SteamID,
+        //            SteamIDUserChanged = lobbyLeave.SteamID,
+        //            SteamIDMakingChange = lobbyLeave.SteamID,
+        //            ChatMemberStateChange = (int)EChatMemberStateChange.k_EChatMemberStateChangeLeft
+        //        };
 
-                var members = lobby.Members.FindAll(m => m.m_SteamID != lobby.Owner); 
+        //        var members = lobby.Members.FindAll(m => m.m_SteamID != lobby.Owner); 
 
-                foreach (var member in members)
-                {
-                    var User = UserManager.GetUser(member.m_SteamID);
-                    if (User != null)
-                    {
-                        NetworkManager.SendTo(User.IPAddress, lobbyChatUpdate, NETMessageType.NET_LobbyChatUpdate);
-                    }
-                }
-            }
-        }
+        //        foreach (var member in members)
+        //        {
+        //            var User = UserManager.GetUser(member.m_SteamID);
+        //            if (User != null)
+        //            {
+        //                NetworkManager.SendTo(User.IPAddress, lobbyChatUpdate, NETMessageType.NET_LobbyChatUpdate);
+        //            }
+        //        }
+        //    }
+        //}
     }
 }

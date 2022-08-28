@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\..\SKYNET Steam Emulator\SKYNET Steam Client\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -71,9 +71,11 @@
     <Compile Include="NativeSharp\NativeMethods.cs" />
     <Compile Include="NativeSharp\NativeModule.cs" />
     <Compile Include="NativeSharp\NativeProcess.cs" />
+    <Compile Include="NETMessages.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Steamworks\CSteamID.cs" />
     <Compile Include="Steamworks\SteamEnums.cs" />
+    <Compile Include="Types\RichPresence.cs" />
     <Compile Include="Wave\WaveIn.cs" />
     <Compile Include="Wave\WavInDevice.cs" />
     <Compile Include="Wave\WavNative.cs" />

@@ -9,12 +9,12 @@ using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace SKYNET.Managers
 {
     public class UserManager
     {
-        public static event EventHandler<SteamPlayer> OnUserAdded;
         public static event EventHandler<SteamPlayer> OnUserUpdated;
         public static event EventHandler<SteamPlayer> OnUserRemoved;
         public static EventHandler<AvatarReceivedEventArgs> OnAvatarReceived;
@@ -29,35 +29,8 @@ namespace SKYNET.Managers
             WebClient = new WebClient();
         }
 
-        public static void Initialize(CSteamID SteamID, string PersonaName)
+        public static void Initialize()
         {
-            Users.Add(new SteamPlayer()
-            {
-                SteamID = (ulong)SteamID,
-                PersonaName = PersonaName,
-                AccountID = SteamID.AccountID,
-                IPAddress = NetworkHelper.GetIPAddress().ToString(),
-            });
-             return;
-            // Create TESTS Users
-            Users.Add(new SteamPlayer()
-            {
-                SteamID = (ulong)new CSteamID(2000),
-                PersonaName = "Alejandro",
-                AccountID = 2000,
-                IPAddress = NetworkHelper.GetIPAddress().ToString(),
-                GameID = 570,
-                HasFriend = true,
-            });
-            Users.Add(new SteamPlayer()
-            {
-                SteamID = (ulong)new CSteamID(3000),
-                PersonaName = "Elier",
-                AccountID = 3000,
-                IPAddress = NetworkHelper.GetIPAddress().ToString(),
-                GameID = 570,
-                HasFriend = true,
-            });
         }
 
         public static SteamPlayer GetUser(ulong steamID)
@@ -84,7 +57,7 @@ namespace SKYNET.Managers
             return GetUser((ulong)steamID);
         }
 
-        public static void AddOrUpdateUser(uint accountID, string personaName, uint appID, string IPAddress)
+        public static void AddOrUpdateUser(uint accountID, string personaName)
         {
             MutexHelper.Wait("Users", delegate
             {
@@ -97,75 +70,39 @@ namespace SKYNET.Managers
                         PersonaName = personaName,
                         AccountID = accountID,
                         SteamID = (ulong)steamID,
-                        GameID = appID,
-                        IPAddress = IPAddress,
-                        HasFriend = true
                     };
                     Users.Add(user);
-                    OnUserAdded?.Invoke(null, user);
-                    Write($"Added user {personaName} {steamID}, from {user.IPAddress}");
+                    Write($"Added user {personaName} {steamID}");
                 }
                 else
                 {
                     user.PersonaName = personaName;
-                    user.IPAddress = IPAddress;
-                    user.GameID = appID;
                     OnUserUpdated?.Invoke(null, user);
                 }
             });
             IPCManager.SendUpdatedUsers();
         }
 
-        internal static bool UpdateUser(WEB_UpdateUser info, out bool AvatarUpdated)
+        public static bool RequestAvatar(uint accountID, out Bitmap avatar)
         {
-            var Result = false;
-            AvatarUpdated = false;
-            var User = GetUser(SteamClient.AccountID);
-            if (User == null)
-            {
-                Write($"Warn... User {SteamClient.AccountID} not fount to edit.");
-                return Result;
-            }
-            if (info.AccountID != 0 && info.AccountID != SteamClient.AccountID)
-            {
-                SteamClient.AccountID = User.AccountID = info.AccountID;
-                SteamClient.SteamID = new CSteamID(info.AccountID);
-                Settings.AccountID = info.AccountID;
-                User.SteamID = (ulong)SteamClient.SteamID;
-                Result = true;
-            }
-            if (!string.IsNullOrEmpty(info.PersonaName) && info.PersonaName != SteamClient.PersonaName)
-            {
-                SteamClient.PersonaName = User.PersonaName = info.PersonaName;
-                Settings.PersonaName = info.PersonaName;
-                Result = true;
-            }
-            if (!string.IsNullOrEmpty(info.Language) && info.Language != SteamClient.Language)
-            {
-                SteamClient.Language = info.Language;
-                Settings.Language = info.Language;
-                Result = true;
-            }
-            if (info.AllowRemoteAccess != Settings.AllowRemoteAccess)
-            {
-                Settings.AllowRemoteAccess = info.AllowRemoteAccess;
-                Result = true;
-            }
-            if (info.ShowDebugConsole != Settings.ShowDebugConsole)
-            {
-                Settings.ShowDebugConsole = info.ShowDebugConsole;
-                Result = true;
-            }
-            if (!string.IsNullOrEmpty(info.AvatarBase64) && (ImageHelper.ImageToBase64(SteamClient.Avatar) != info.AvatarBase64))
-            {
-                UpdateAvatar(ImageHelper.ImageFromBase64(info.AvatarBase64));
-                AvatarUpdated = true;
-                Result = true;
-            }
+            string Url = $"http://{Settings.ServerIP}:27080/Images/AvatarCache/{accountID}.jpg";
+            return RequestAvatar(Url, out avatar); 
+        }
 
-            OnUserUpdated?.Invoke(null, User);
-
-            return Result;
+        public static bool RequestAvatar(string Url, out Bitmap avatar)
+        {
+            avatar = null;
+            try
+            {
+                var WebClient = new WebClient();
+                var Data = WebClient.DownloadData(Url);
+                avatar = (Bitmap)ImageHelper.ImageFromBytes(Data);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public static void RemoveUser(uint accountID)
@@ -181,6 +118,11 @@ namespace SKYNET.Managers
                 }
             });
             IPCManager.SendUpdatedUsers();
+        }
+
+        public static object GetUser(object accountID)
+        {
+            throw new NotImplementedException();
         }
 
         internal static bool UpdateAvatar(Bitmap Image)
@@ -269,23 +211,17 @@ namespace SKYNET.Managers
             return users == null ? new List<SteamPlayer>() : users;
         }
 
-        public static void SetRichPresence(uint accountID, string key, string value)
-        {
-            var user = GetUser(accountID);
-            if (user == null) return;
-            if (user.RichPresence == null) user.RichPresence = new Dictionary<string, string>();
-            if (user.RichPresence.ContainsKey(key))
-                user.RichPresence[key] = value;
-            else
-                user.RichPresence.Add(key, value);
-            IPCManager.SendUpdatedUsers();
-        }
-
         public static bool GetAvatar(ulong steamID, out Bitmap bitmap)
         {
             if (UserAvatars.ContainsKey(steamID))
             {
                 bitmap = UserAvatars[steamID];
+                return true;
+            }
+            else if (RequestAvatar(steamID.GetAccountID(), out var requestedBitmap))
+            {
+                bitmap = requestedBitmap;
+                UserAvatars.Add(steamID, requestedBitmap);
                 return true;
             }
             bitmap = SteamClient.DefaultAvatar;

@@ -443,6 +443,7 @@ namespace SKYNET.Steamworks.Implementation
             var friend = GetUser(steamIDFriend);
             if (friend != null)
             {
+                IPCManager.GetRichPresence(steamIDFriend, pchKey);
                 if (friend.RichPresence.ContainsKey(pchKey))
                 {
                     Result = friend.RichPresence[pchKey];

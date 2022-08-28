@@ -19,7 +19,7 @@ namespace SKYNET.GUI.Controls
             {
                 steamPlayer = value;
                 LB_PersonaName.Text = steamPlayer.PersonaName;
-                LB_IPAddress.Text   = steamPlayer.IPAddress;
+                //LB_IPAddress.Text   = steamPlayer.IPAddress;
             }
         }
 

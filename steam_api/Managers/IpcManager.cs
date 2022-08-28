@@ -558,6 +558,16 @@ namespace SKYNET.Managers
             SendTo(IPC_Broadcast, status, IPCMessageType.IPC_UserDataUpdated);
         }
 
+        internal static void GetRichPresence(ulong steamIDFriend, string pchKey)
+        {
+            var GetRichPresence = new IPC_GetRichPresence()
+            {
+                SteamID = steamIDFriend,
+                Key = pchKey
+            };
+            SendTo(IPC_ToServer, GetRichPresence, IPCMessageType.IPC_ClearRichPresence);
+        }
+
         internal static void SendClearRichPresence()
         {
             var ClearRichPresence = new IPC_ClearRichPresence();

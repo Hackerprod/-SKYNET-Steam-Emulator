@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using SKYNET.Network;
 
 namespace SKYNET.Helpers
 {
@@ -123,6 +125,5 @@ namespace SKYNET.Helpers
         {
             return IPAddress.Parse(address.ToString()).ToString();
         }
-
     }
 }

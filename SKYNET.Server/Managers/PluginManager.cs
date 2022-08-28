@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SKYNET.Server.Managers
+namespace SKYNET.Managers
 {
     public class PluginManager
     {
         public static void Initialize()
         {
-
+            Log.Write("PluginManager", "Initialized plugin system");
         }
     }
 }

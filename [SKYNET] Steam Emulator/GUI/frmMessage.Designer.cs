@@ -31,7 +31,7 @@ namespace SKYNET.GUI
         /// </summary>
         private void InitializeComponent()
         {
-            this.PN_Top = new SKYNET_GradiantBox();
+            this.PN_Top = new Panel();
             this.PN_Bottom = new Panel();
             this.PN_Right = new Panel();
             this.PN_Left = new Panel();
@@ -47,11 +47,8 @@ namespace SKYNET.GUI
             // PN_Top
             // 
             this.PN_Top.Dock = DockStyle.Top;
-            this.PN_Top.LeftColor = System.Drawing.Color.FromArgb(((int)(((byte)(61)))), ((int)(((byte)(115)))), ((int)(((byte)(139)))));
             this.PN_Top.Location = new System.Drawing.Point(0, 0);
-            this.PN_Top.Mode = Mode.Horizontal;
             this.PN_Top.Name = "PN_Top";
-            this.PN_Top.RigthColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(69)))), ((int)(((byte)(120)))));
             this.PN_Top.Size = new System.Drawing.Size(523, 2);
             this.PN_Top.TabIndex = 0;
             // 
@@ -187,7 +184,7 @@ namespace SKYNET.GUI
 
         #endregion
 
-        private SKYNET_GradiantBox PN_Top;
+        private Panel PN_Top;
         private Panel PN_Bottom;
         private Panel PN_Right;
         private Panel PN_Left;

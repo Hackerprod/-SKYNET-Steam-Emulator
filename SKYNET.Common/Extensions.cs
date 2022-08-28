@@ -1,5 +1,7 @@
 ﻿using SKYNET.Steamworks;
 using System;
+using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Web.Script.Serialization;
 
@@ -7,6 +9,38 @@ namespace SKYNET
 {
     public static class Extensions
     {
+        public static T CopyTo<T>(this object obj) where T : class
+        {
+            try
+            {
+                T instance = Activator.CreateInstance<T>();
+
+                Type sourceType = obj.GetType();
+                Type targetType = instance.GetType();
+
+                foreach (var property in sourceType.GetProperties())
+                {
+                    try
+                    {
+                        var targetProperty = targetType.GetProperties().ToList().Find(p => p.Name == property.Name);
+                        if (targetProperty != null)
+                        {
+                            var value = property.GetValue(obj, null);
+                            targetProperty.SetValue(instance, value);
+                        }
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+                return instance;
+            }
+            catch 
+            {
+                return default;
+            }
+        }
+
         public static uint ToTimestamp(this DateTime d)
         {
             var epoch = d - new DateTime(1970, 1, 1, 0, 0, 0, 0).ToLocalTime();
@@ -29,6 +63,18 @@ namespace SKYNET
             catch (Exception)
             {
                 return (uint)SteamID;
+            }
+        }
+
+        public static ulong ToSteamID(this uint AccountID)
+        {
+            try
+            {
+                return (ulong)new CSteamID(AccountID, EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeIndividual);
+            }
+            catch (Exception)
+            {
+                return (ulong)AccountID;
             }
         }
 

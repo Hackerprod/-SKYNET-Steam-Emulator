@@ -59,6 +59,7 @@ namespace SKYNET.GUI
             this.TimeOnline = new System.Windows.Forms.Label();
             this.Logo = new System.Windows.Forms.PictureBox();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.label4 = new System.Windows.Forms.Label();
             this.bodyContainer = new System.Windows.Forms.Panel();
             this.pn_Progress = new System.Windows.Forms.Panel();
             this.pb_Progress = new SKYNET.GUI.Controls.SKYNET_ProgressBar();
@@ -73,7 +74,6 @@ namespace SKYNET.GUI
             this.CM_ReloadItemsDB = new System.Windows.Forms.ToolStripMenuItem();
             this.CM_Export = new System.Windows.Forms.ToolStripMenuItem();
             this.registerTINserverCallbacks = new System.Windows.Forms.ToolStripMenuItem();
-            this.label4 = new System.Windows.Forms.Label();
             this.PN_Top.SuspendLayout();
             this.WebBrowserpnl.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -368,6 +368,16 @@ namespace SKYNET.GUI
             this.panel2.Size = new System.Drawing.Size(917, 64);
             this.panel2.TabIndex = 33;
             // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.label4.Location = new System.Drawing.Point(410, 5);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(28, 15);
+            this.label4.TabIndex = 48;
+            this.label4.Text = "1.00";
+            // 
             // bodyContainer
             // 
             this.bodyContainer.Controls.Add(this.pn_Progress);
@@ -522,16 +532,6 @@ namespace SKYNET.GUI
             this.registerTINserverCallbacks.Name = "registerTINserverCallbacks";
             this.registerTINserverCallbacks.Size = new System.Drawing.Size(189, 22);
             this.registerTINserverCallbacks.Text = "Register TINserver callbacks";
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.label4.Location = new System.Drawing.Point(410, 5);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(28, 15);
-            this.label4.TabIndex = 48;
-            this.label4.Text = "1.00";
             // 
             // frmMain
             // 

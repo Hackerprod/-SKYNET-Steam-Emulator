@@ -69,7 +69,35 @@ namespace SKYNET.WEB.Types
         WEB_DeviceInRequest,
         WEB_DeviceInResponse,
         WEB_DeviceInSelected,
-        WEB_LoadCompleted
+        WEB_LoadCompleted,
+        WEB_ConnectionDataRequest,
+        WEB_ConnectionDataResponse,
+        WEB_ConnectionDataUpdate,
+        WEB_LoggedOff,
+    }
+
+    public class WEB_LoggedOff : WEB_Base
+    {
+    }
+
+    public class WEB_ConnectionDataRequest : WEB_Base
+    {
+    }
+
+    public class WEB_ConnectionDataResponse : WEB_Base
+    {
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public string ServerIP { get; set; }
+        public bool Remember { get; set; }
+    }
+
+    public class WEB_ConnectionDataUpdate : WEB_Base
+    {
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public string ServerIP { get; set; }
+        public bool Remember { get; set; }
     }
 
     public class WEB_LoadCompleted : WEB_Base
@@ -145,14 +173,6 @@ namespace SKYNET.WEB.Types
             public string PersonaName { get; set; }
             public string AvatarURL { get; set; }
         }
-    }
-
-    public class WEB_GameInfoMinimalResponse : WEB_Base
-    {
-        public bool Playing { get; set; }
-        public uint LastPlayed { get; set; }
-        public uint TimePlayed { get; set; }
-        public uint UsersPlaying { get; set; }
     }
 
     public class WEB_CreateAccountRequest : WEB_Base
@@ -232,6 +252,7 @@ namespace SKYNET.WEB.Types
             Success = 1,
             AccountNotFound = 2,
             PasswordWrong = 3,
+            AlreadyConnected = 4,
         }
     }
 
@@ -245,7 +266,9 @@ namespace SKYNET.WEB.Types
         public UserInfoResponseType Response { get; set; }
         public uint AccountID { get; set; }
         public string PersonaName { get; set; }
-        public string AvatarURL { get; set; }
+        public uint Playing { get; set; }
+        public uint LastLogon { get; set; }
+
 
         public enum UserInfoResponseType
         {
@@ -319,18 +342,16 @@ namespace SKYNET.WEB.Types
 
     public class WEB_UpdateUser : WEB_Base
     {
-        public uint AccountID { get; set; }
         public string PersonaName { get; set; }
         public string Language { get; set; }
         public string AvatarBase64 { get; set; }
-        public int DeviceInSelected { get; set; }
+        public int InputDeviceID { get; set; }
         public bool AllowRemoteAccess { get; set; }
         public bool ShowDebugConsole { get; set; }
     }
 
     public class WEB_UserUpdated : WEB_Base
     {
-        public uint AccountID { get; set; }
         public string PersonaName { get; set; }
         public string Language { get; set; }
         public string AvatarURL { get; set; }

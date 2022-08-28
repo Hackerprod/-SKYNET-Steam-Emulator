@@ -79,7 +79,6 @@ namespace SKYNET.Helpers
 
         public void Set(string name, object val)
         {
-            Key.SetValue(name, val);
             try
             {
                 if (val is Enum)
