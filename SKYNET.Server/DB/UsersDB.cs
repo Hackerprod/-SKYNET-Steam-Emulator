@@ -8,25 +8,25 @@ namespace SKYNET.DB
 {
     public class UsersDB
     {
-        private SQLiteDatabase DB;
+        private SQLiteAsyncConnection DB;
         public List<SteamPlayer> Users;
 
-        public UsersDB(SQLiteDatabase db)
+        public UsersDB(SQLiteAsyncConnection db)
         {
             DB = db;
 
-            DB.CreateTable<SteamPlayer>();
+            DB.CreateTableAsync<SteamPlayer>();
 
-            DB.DBConnection.CreateIndex("SteamPlayer", "AccountID");
-            DB.DBConnection.CreateIndex("SteamPlayer", "SteamID");
-            DB.DBConnection.CreateIndex("SteamPlayer", "AccountName");
+            DB.CreateIndexAsync("SteamPlayer", "AccountID");
+            DB.CreateIndexAsync("SteamPlayer", "SteamID");
+            DB.CreateIndexAsync("SteamPlayer", "AccountName");
 
-            Users = DB.GetTables<SteamPlayer>();
+            Reload();
         }
 
-        public void Reload()
+        public async void Reload()
         {
-            Users = DB.GetTables<SteamPlayer>();
+            Users = await DB.Table<SteamPlayer>().ToListAsync();
         }
 
 
@@ -36,7 +36,7 @@ namespace SKYNET.DB
             Users.Sort((u1, u2) => u1.AccountID.CompareTo(u2.AccountID));
             uint AccountID = Users.Count == 0 ? 1000 : Users[Users.Count - 1].AccountID + 1;
             user.AccountID = AccountID;
-            DB.Insert(user);
+            DB.InsertAsync(user);
             Reload();
         }
 
@@ -51,7 +51,7 @@ namespace SKYNET.DB
             {
                 User.LastPlayedTime = (uint)DateTime.Now.ToTimestamp();
             }
-            DB.Update(User);
+            DB.UpdateAsync(User);
         }
 
         public void SetPlayingState(SteamPlayer User, bool playing)
@@ -64,7 +64,7 @@ namespace SKYNET.DB
             {
                 User.LastPlayedTime = (uint)DateTime.Now.ToTimestamp();
             }
-            DB.Update(User);
+            DB.UpdateAsync(User);
         }
 
         internal void SetLastLogOn(uint accountID, uint setLastLogOn)
@@ -74,7 +74,7 @@ namespace SKYNET.DB
 
             User.LastLogon = setLastLogOn;
 
-            DB.Update(User);
+            DB.UpdateAsync(User);
         }
 
         internal bool ValidPersonaName(string personaName)
@@ -98,7 +98,7 @@ namespace SKYNET.DB
             if (User == null) return;
 
             User.LastLogoff = lastLogoff;
-            DB.Update(User);
+            DB.UpdateAsync(User);
         }
     }
 }

@@ -7,15 +7,16 @@ namespace SKYNET.Managers
 {
     public class DBManager
     {
-        private static SQLiteDatabase DB;
+        private static SQLiteAsyncConnection DB;
         public static UsersDB Users;
 
         public static void Initialize()
         {
             try
             {
-                DB = new SQLiteDatabase(Path.Combine(Common.GetPath(), "Data", "DB.bin"));
-                DB.NativeDllPath = Path.Combine(Path.Combine(Common.GetPath(), "Data", "Assemblies"));
+                // Get an absolute path to the database file
+                DB = new SQLiteAsyncConnection(Path.Combine(Common.GetPath(), "Data", "DB.bin"));
+
                 Users = new UsersDB(DB);
                 Write("Initialized local Database");
             }
