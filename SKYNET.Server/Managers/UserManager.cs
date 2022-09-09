@@ -1,17 +1,14 @@
-﻿using SKYNET.Steamworks;
+﻿using SKYNET.DB;
 using SKYNET.Types;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SKYNET.Managers
 {
     public class UserManager
     {
-        public static List<SteamPlayer> Users => DBManager.Users.Users;
         public static ConcurrentDictionary<uint, List<RichPresence>> RichPresence;
         public static ConcurrentDictionary<uint, List<uint>> RegisteredRichPresence;
 
@@ -34,7 +31,7 @@ namespace SKYNET.Managers
         {
             if (RichPresence.TryGetValue(accountID, out var richPrecense))
             {
-                var rich = richPrecense.Find(r => r.Key == key);
+                RichPresence rich = richPrecense.Find((RichPresence r) => r.Key == key);
                 if (rich == null)
                 {
                     richPrecense.Add(new RichPresence(key, value));
@@ -46,33 +43,36 @@ namespace SKYNET.Managers
             }
             else
             {
-                RichPresence.TryAdd(accountID, new List<RichPresence>() { new RichPresence(key, value) });
+                RichPresence.TryAdd(accountID, new List<RichPresence>
+            {
+                new RichPresence(key, value)
+            });
             }
         }
 
-        public static bool ValidPersonaName(string personaName)
+        public static bool IsValidPersonaName(string personaName)
         {
-            return Users.Find(u => u.PersonaName == personaName) == null;
+            return UserDB.GetByPersonaName(personaName) == null;
         }
 
-        public static SteamPlayer GetByAccountName(string username)
+        public static SteamPlayer GetByAccountName(string AccountName)
         {
-            return Users.Find(u => !string.IsNullOrEmpty(u.AccountName) && u.AccountName.ToLower() == username.ToLower());
+            return UserDB.GetByAccountName(AccountName);
         }
 
         public static SteamPlayer Get(uint accountID)
         {
-            return Users.Find(u => u.AccountID == accountID);
+            return UserDB.Get(accountID);
         }
 
         public static SteamPlayer Get(ulong steamId)
         {
-            return Users.Find(u => ((ulong)new CSteamID(u.AccountID, EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeIndividual)) == steamId);
+            return UserDB.Get(steamId);
         }
 
         public static void CreateAccount(SteamPlayer user)
         {
-            DBManager.Users.CreateAccount(user);
+            UserDB.CreateAccount(user);
         }
 
         public static void RegisterToRichPresence(uint accountID, uint subscribedAccountID)
@@ -86,7 +86,7 @@ namespace SKYNET.Managers
             }
             else
             {
-                RegisteredRichPresence.TryAdd(accountID, new List<uint>() { subscribedAccountID });
+                RegisteredRichPresence.TryAdd(accountID, new List<uint> { subscribedAccountID });
             }
         }
 
@@ -102,18 +102,17 @@ namespace SKYNET.Managers
 
         public static void SetPlayingState(uint accountID, bool playing)
         {
-            DBManager.Users.SetPlayingState(accountID, playing);
+            UserDB.SetPlayingState(accountID, playing);
         }
 
         public static void SetPlayingState(SteamPlayer User, bool playing)
         {
-            DBManager.Users.SetPlayingState(User, playing);
+            UserDB.SetPlayingState(User, playing);
         }
 
         public static void SetLastLogOn(uint accountID, uint setLastLogOn)
         {
-            DBManager.Users.SetLastLogOn(accountID, setLastLogOn);
+            UserDB.SetLastLogOn(accountID, setLastLogOn);
         }
-
     }
 }

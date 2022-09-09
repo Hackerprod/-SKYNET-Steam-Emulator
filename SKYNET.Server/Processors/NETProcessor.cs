@@ -128,7 +128,7 @@ namespace SKYNET.Processors
                 AvatarName = User.AccountID.ToString()
             };
 
-            if (UserManager.ValidPersonaName(UpdateUserRequest.PersonaName))
+            if (UserManager.IsValidPersonaName(UpdateUserRequest.PersonaName))
             {
                 UpdateUserResponse.PersonaName = UpdateUserRequest.PersonaName;
             }

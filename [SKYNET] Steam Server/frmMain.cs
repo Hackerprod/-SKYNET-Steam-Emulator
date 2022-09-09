@@ -19,6 +19,7 @@ using System.Drawing.Imaging;
 using System.Threading;
 using SKYNET;
 using SKYNET.Managers;
+using SKYNET.DB;
 
 namespace SKYNET.GUI
 {
@@ -92,7 +93,7 @@ namespace SKYNET.GUI
             try
             {
                 TimeOnline.Text = Common.GetTotalTime(StartTime);
-                Accounts_Created.Text = DBManager.Users.Users.Count().ToString();
+                Accounts_Created.Text = UserDB.Count().ToString();
                 ConnectedClients.Text = ConnectionsManager.ActiveConnections.ToString();
                 //if (GameCoordinator?.Events != null)
                 //{

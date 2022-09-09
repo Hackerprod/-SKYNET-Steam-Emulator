@@ -1,4 +1,5 @@
-﻿using SKYNET.Interfaces;
+﻿using SKYNET.DB;
+using SKYNET.Interfaces;
 using SKYNET.Network;
 using SKYNET.Network.Types;
 using System;
@@ -75,11 +76,11 @@ namespace SKYNET.Managers
                     //Coordinator.PlayerClosedGame(steamid);
                     Write(string.Format("Connection for {0} was removed successfully.", steamid));
 
-                    var user = DBManager.Users.Get(steamid);
+                    var user = UserDB.Get(steamid);
                     if (user != null)
                     {
-                        DBManager.Users.SetLastLogoff(user.AccountID, DateTime.Now.ToTimestamp()); 
-                        DBManager.Users.SetPlayingState(user.AccountID, false);
+                        UserDB.SetLastLogOff(user.SteamID, DateTime.Now);
+                        UserDB.SetPlayingState(user.AccountID, false);
                     }
                 }
                 else

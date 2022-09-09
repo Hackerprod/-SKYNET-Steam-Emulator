@@ -5,12 +5,18 @@ namespace SKYNET
 {
     public class MainServer
     {
-        public void Start()
+        public async void Start()
         {
             Log.Write("MainServer", "Initializing Steam Server");
             EnsurePaths();
 
-            DBManager.Initialize();
+            var DatabaseResult = await DBManager.Initialize();
+
+            if (!DatabaseResult)
+            {
+                return;
+            }
+
             ConnectionsManager.Initialize();
             UserManager.Initialize();
             NetworkManager.Initialize();
