@@ -38,6 +38,15 @@ To use the client you simply need to add the game and configure the appid. The c
    └──📑 Games.bin                    // Stored game list         
 ```
 
+```
+📁 Root server folder                     
+└──📁 Data
+   ├──📁 Assemblies                   // Contains client libraries (Including cefsharp api or gecko) 
+   ├──📁 Images                       // Contains app cache and avatar images 
+   ├──📁 MongoDB                      // Contains local MongoDB server
+   └──📁 Storage                      // Contains some server files      
+```
+
 ## 🔗 Features
 
 ```
