@@ -284,25 +284,30 @@ namespace SKYNET.Managers
         private static void Process_SetAchievement(IPCMessage message)
         {
             var Achievement = message.ParsedBody.Deserialize<IPC_SetAchievement>();
+            if (Achievement == null) return;
             StatsManager.SetAchievement(Achievement.AppID, Achievement.Achievement);
+            NETProcessor.SendAchievement(Achievement.AppID, Achievement.Achievement);
         }
 
         private static void Process_SetLeaderboard(IPCMessage message)
         {
             var Leaderboard = message.ParsedBody.Deserialize<IPC_SetLeaderboard>();
             StatsManager.SetLeaderboard(Leaderboard.AppID, Leaderboard.Leaderboard);
+            NETProcessor.SendLeaderboard(Leaderboard.AppID, Leaderboard.Leaderboard);
         }
 
         private static void Process_SetPlayerStat(IPCMessage message)
         {
             var PlayerStat = message.ParsedBody.Deserialize<IPC_SetPlayerStat>();
             StatsManager.SetPlayerStat(PlayerStat.AppID, PlayerStat.PlayerStat);
+            NETProcessor.SendPlayerStat(PlayerStat.AppID, PlayerStat.PlayerStat);
         }
 
         private static void Process_UpdateAchievement(IPCMessage message)
         {
             var UpdateAchievement = message.ParsedBody.Deserialize<IPC_UpdateAchievement>();
             StatsManager.UpdateAchievement(UpdateAchievement.AppID, UpdateAchievement.Achievement);
+            NETProcessor.SendUpdateAchievement(UpdateAchievement.AppID, UpdateAchievement.Achievement);
         }
 
         private static void Process_ResetAllStats(IPCMessage message)
@@ -356,9 +361,10 @@ namespace SKYNET.Managers
                     ClientWelcome.ISteamHTTP = Game.ISteamHTTP;
                     ClientWelcome.AppID = Game.AppID;
                     ClientWelcome.DLCs = Game.GameDLC == null ? new List<Game.DLC>() : Game.GameDLC;
-
                 }
             }
+
+            NETProcessor.SendGameOppened(Game.AppID, Game.Name);
 
             var welcome = CreateIPCMessage(ClientWelcome, IPCMessageType.IPC_ClientWelcome, message.JobID);
             connection.WriteAsync(welcome);
@@ -408,7 +414,7 @@ namespace SKYNET.Managers
             {
                 PlayerStats = StatsManager.GetPlayerStats(Game.AppID)
             };
-            var PlayerStatsMessage = CreateIPCMessage(Achievements, IPCMessageType.IPC_PlayerStats);
+            var PlayerStatsMessage = CreateIPCMessage(PlayerStats, IPCMessageType.IPC_PlayerStats);
             connection.WriteAsync(PlayerStatsMessage);
         }
 
@@ -585,6 +591,13 @@ namespace SKYNET.Managers
         private static void OnClientDisconnected(object sender, ConnectionEventArgs<IPCMessage> e)
         {
             Log.Write("IPCManager", $"Client {e.Connection.PipeName} disconnected");
+
+            var Game = GameManager.GetRunningGame(e.Connection.PipeName, false);
+            if (Game != null)
+            {
+                NETProcessor.SendGameClosed(Game.Game.AppID);
+            }
+
             GameManager.InvokeGameClosed(e.Connection.PipeName);
             OverlayManager.RemoveGameData(e.Connection.PipeName);
         }

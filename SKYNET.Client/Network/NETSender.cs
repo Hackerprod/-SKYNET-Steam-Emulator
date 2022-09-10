@@ -14,6 +14,54 @@ namespace SKYNET.Network
 {
     public partial class NETProcessor : INETMessages
     {
+        public static void SendUpdateAchievement(uint appID, Achievement achievement)
+        {
+            achievement.AppID = appID;
+            achievement.SteamID = SteamClient.SteamID.SteamID;
+
+            var SetPlayerStat = new NET_UpdateAchievement()
+            {
+                Achievement = achievement
+            };
+            Send(SetPlayerStat, NETMessageType.NET_UpdateAchievement);
+        }
+
+        public static void SendPlayerStat(uint appID, PlayerStat playerStat)
+        {
+            playerStat.AppID = appID;
+            playerStat.SteamID = SteamClient.SteamID.SteamID;
+
+            var SetPlayerStat = new NET_SetPlayerStat()
+            {
+                PlayerStat = playerStat
+            };
+            Send(SetPlayerStat, NETMessageType.NET_SetPlayerStat);
+        }
+
+        public static void SendAchievement(uint appID, Achievement achievement)
+        {
+            achievement.AppID = appID;
+            achievement.SteamID = SteamClient.SteamID.SteamID;
+
+            var SetAchievement = new NET_SetAchievement()
+            {
+                Achievement = achievement
+            };
+            Send(SetAchievement, NETMessageType.NET_SetAchievement);
+        }
+
+        internal static void SendLeaderboard(uint appID, Leaderboard leaderboard)
+        {
+            leaderboard.AppID = appID;
+            leaderboard.SteamID = SteamClient.SteamID.SteamID;
+
+            var SetLeaderboard = new NET_SetLeaderboard()
+            {
+                Leaderboard = leaderboard,
+            };
+            Send(SetLeaderboard, NETMessageType.NET_SetLeaderboard);
+        }
+
         public static void SendGetRichPresence(ulong friendSteamID, string key)
         {
             var GetRichPresence = new NET_GetRichPresence()
@@ -22,7 +70,6 @@ namespace SKYNET.Network
             };
             Send(GetRichPresence, NETMessageType.NET_GetRichPresence);
         }
-
 
         public static void SendRichPresence(string key, string value)
         {
@@ -292,6 +339,27 @@ namespace SKYNET.Network
                     }
                 }
             }
+        }
+
+        public static void SendGameOppened(uint appID, string Name)
+        {
+            var GameOppened = new NET_GameOpened()
+            {
+                AppID = appID,
+                AccountID = SteamClient.AccountID,
+                Name = Name
+            };
+            Send(GameOppened, NETMessageType.NET_GameOpened);
+        }
+
+        public static void SendGameClosed(uint appID)
+        {
+            var GameClosed = new NET_GameClosed()
+            {
+                AppID = appID,
+                AccountID = SteamClient.AccountID
+            };
+            Send(GameClosed, NETMessageType.NET_GameClosed);
         }
 
         public static async void Send(NET_Base message, NETMessageType msgType)

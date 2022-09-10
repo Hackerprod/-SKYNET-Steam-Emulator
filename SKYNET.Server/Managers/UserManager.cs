@@ -100,9 +100,14 @@ namespace SKYNET.Managers
             return clients;
         }
 
-        public static void SetPlayingState(uint accountID, bool playing)
+        public static void SetPlayingState(uint accountID, uint appID)
         {
-            UserDB.SetPlayingState(accountID, playing);
+            UserDB.SetPlayingState(accountID, appID);
+        }
+
+        internal static List<ulong> GetFriends(ulong steamID)
+        {
+            return UserDB.GetFriends(steamID);
         }
 
         public static void SetPlayingState(SteamPlayer User, bool playing)

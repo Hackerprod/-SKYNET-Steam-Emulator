@@ -37,10 +37,20 @@ namespace SKYNET.Network
                 case NETMessageType.NET_RichPresenceUpdated:
                     ProcessRichPresenceUpdated(message);
                     break;
+                case NETMessageType.NET_GameOpened:
+                    ProcessGameOpened(message);
+                    break;
                 default:
                     Write($"Not implemented message type {message.MessageType}");
                     break;
             }
+        }
+
+        private static void ProcessGameOpened(NETMessage message)
+        {
+            var GameOpened = message.Deserialize<NET_GameOpened>();
+            if (GameOpened == null) return;
+            GameManager.InvokeUserGameOpened(GameOpened);
         }
 
         private static void ProcessRichPresenceUpdated(NETMessage message)

@@ -145,11 +145,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DB\MongoConverters.cs" />
-    <Compile Include="DB\MongoDbCollection.cs" />
-    <Compile Include="DB\KeyValueCollection.cs" />
-    <Compile Include="DB\MongoIngoreConvention.cs" />
-    <Compile Include="DB\UnsignedConventions.cs" />
+    <Compile Include="DB\Helpers\MongoConverters.cs" />
+    <Compile Include="DB\Helpers\MongoDbCollection.cs" />
+    <Compile Include="DB\Helpers\KeyValueCollection.cs" />
+    <Compile Include="DB\Helpers\MongoIngoreConvention.cs" />
+    <Compile Include="DB\Helpers\UnsignedConventions.cs" />
+    <Compile Include="DB\StatsDB.cs" />
     <Compile Include="DB\UserDB.cs" />
     <Compile Include="Interfaces\IConnection.cs" />
     <Compile Include="Managers\ConnectionsManager.cs" />
@@ -161,12 +162,9 @@
     <Compile Include="Processors\WebAPIProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MainServer.cs" />
-    <Compile Include="Types\Achievement.cs" />
     <Compile Include="Types\AppDetails.cs" />
     <Compile Include="Types\Game.cs" />
     <Compile Include="Types\GameSchema.cs" />
-    <Compile Include="Types\Leaderboard.cs" />
-    <Compile Include="Types\PlayerStat.cs" />
     <Compile Include="Types\RunningGame.cs" />
     <Compile Include="Types\SteamLobby.cs" />
     <Compile Include="Types\SteamPlayer.cs" />

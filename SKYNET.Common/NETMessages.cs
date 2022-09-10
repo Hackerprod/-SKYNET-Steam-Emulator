@@ -63,6 +63,7 @@ namespace SKYNET.Network.Types
         NET_UpdateAvatarRequest,
         NET_UpdateAvatarResponse,
         NET_GameOpened,
+        NET_GameClosed,
         NET_P2PPacket,
         NET_UpdateUserRequest,
         NET_UpdateUserResponse,
@@ -80,7 +81,13 @@ namespace SKYNET.Network.Types
         NET_LobbyDataUpdate,
         NET_LobbyListRequest,
         NET_LobbyLeave,
-        NET_LobbyRemove
+        NET_LobbyRemove,
+
+        // STATS
+        NET_SetAchievement,
+        NET_UpdateAchievement,
+        NET_SetLeaderboard,
+        NET_SetPlayerStat,
     }
 
     public class NET_LobbyLeave : NET_Base
@@ -305,10 +312,16 @@ namespace SKYNET.Network.Types
 
     public class NET_GameOpened : NET_Base
     {
-        public ulong AccountID { get; set; }
+        public uint AccountID { get; set; }
         public string Name { get; set; }
         public uint AppID { get; set; }
-        
+    }
+
+    public class NET_GameClosed : NET_Base
+    {
+        public uint AccountID { get; set; }
+        public string Name { get; set; }
+        public uint AppID { get; set; }
     }
 
     public class NET_P2PPacket : NET_Base
@@ -319,4 +332,26 @@ namespace SKYNET.Network.Types
         public int Channel { get; set; }
         public int P2PSendType { get; set; }
     }
+
+    public class NET_SetAchievement : NET_Base
+    {
+        public Achievement Achievement { get; set; }
+    }
+
+    public class NET_SetLeaderboard : NET_Base
+    {
+        public Leaderboard Leaderboard { get; set; }
+    }
+
+    public class NET_SetPlayerStat : NET_Base
+    {
+        public PlayerStat PlayerStat { get; set; }
+    }
+
+    public class NET_UpdateAchievement : NET_Base
+    {
+        public Achievement Achievement { get; set; }
+    }
+
+    
 }

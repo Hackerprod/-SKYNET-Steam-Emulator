@@ -92,6 +92,7 @@ namespace SKYNET.Managers
                 SetIgnoreConvention();
 
                 UserDB.Initialize();
+                StatsDB.Initialize();
 
                 Write("Database connected successfully");
                 return true;

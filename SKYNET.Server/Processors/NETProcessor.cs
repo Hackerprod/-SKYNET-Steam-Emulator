@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using SKYNET.DB;
 using SKYNET.Helpers;
 using SKYNET.Interfaces;
 using SKYNET.Managers;
@@ -44,10 +45,79 @@ namespace SKYNET.Processors
                 case NETMessageType.NET_SetRichPresence:
                     ProcessSetRichPresence(message, connection);
                     break;
+                case NETMessageType.NET_SetAchievement:
+                    ProcessSetAchievement(message, connection);
+                    break;
+                case NETMessageType.NET_SetLeaderboard:
+                    ProcessSetLeaderboard(message, connection);
+                    break;
+                case NETMessageType.NET_SetPlayerStat:
+                    ProcessSetPlayerStat(message, connection);
+                    break;
+                case NETMessageType.NET_UpdateAchievement:
+                    ProcessUpdateAchievement(message, connection);
+                    break;
+                case NETMessageType.NET_GameOpened:
+                    ProcessGameOpened(message, connection);
+                    break;
+                case NETMessageType.NET_GameClosed:
+                    ProcessGameClosed(message, connection);
+                    break;
                 default:
                     Write($"Not implemented message type {message.MessageType}");
                     break;
             }
+        }
+
+        private static void ProcessGameOpened(NETMessage message, IConnection connection)
+        {
+            var GameOpened = message.Deserialize<NET_GameOpened>();
+            if (GameOpened == null) return;
+            UserManager.SetPlayingState(GameOpened.AccountID, GameOpened.AppID);
+
+            foreach (var friendSteamID in UserManager.GetFriends(message.SteamID))
+            {
+                var IConnection = ConnectionsManager.Get(friendSteamID);
+                if (IConnection != null)
+                {
+                    Send(GameOpened, NETMessageType.NET_GameOpened, IConnection);
+                }
+            }
+        }
+
+        private static void ProcessGameClosed(NETMessage message, IConnection connection)
+        {
+            var GameClosed = message.Deserialize<NET_GameClosed>();
+            if (GameClosed == null) return;
+            UserManager.SetPlayingState(GameClosed.AccountID, 0);
+        }
+
+        private static void ProcessUpdateAchievement(NETMessage message, IConnection connection)
+        {
+            var UpdateAchievement = message.Deserialize<NET_UpdateAchievement>();
+            if (UpdateAchievement == null) return;
+            StatsDB.UpdateAchievement(message.SteamID, UpdateAchievement.Achievement);
+        }
+
+        private static void ProcessSetPlayerStat(NETMessage message, IConnection connection)
+        {
+            var SetPlayerStat = message.Deserialize<NET_SetPlayerStat>();
+            if (SetPlayerStat == null) return;
+            StatsDB.SetPlayerStat(message.SteamID, SetPlayerStat.PlayerStat);
+        }
+
+        private static void ProcessSetLeaderboard(NETMessage message, IConnection connection)
+        {
+            var SetLeaderboard = message.Deserialize<NET_SetLeaderboard>();
+            if (SetLeaderboard == null) return;
+            StatsDB.SetLeaderboard(message.SteamID, SetLeaderboard.Leaderboard);
+        }
+
+        private static void ProcessSetAchievement(NETMessage message, IConnection connection)
+        {
+            var SetAchievement = message.Deserialize<NET_SetAchievement>();
+            if (SetAchievement == null) return;
+            StatsDB.SetAchievement(message.SteamID, SetAchievement.Achievement);
         }
 
         private static void ProcessGetRichPresence(NETMessage message, IConnection connection)
@@ -108,7 +178,7 @@ namespace SKYNET.Processors
             UserInfoResponse.Response = NET_UserInfoResponse.UserInfoResponseType.Success;
             UserInfoResponse.AccountID = User.AccountID;
             UserInfoResponse.PersonaName = User.PersonaName;
-            UserInfoResponse.Playing = (uint) (User.IsPlaying ? 0 : 0);
+            UserInfoResponse.Playing = User.PlayingAppID;
             UserInfoResponse.LastLogon = User.LastLogon;
 
             Send(UserInfoResponse, NETMessageType.NET_UserInfoResponse, connection);
@@ -260,7 +330,7 @@ namespace SKYNET.Processors
             }
 
             uint SetLastLogOn = DateTime.Now.ToTimestamp();
-            UserManager.SetPlayingState(user.AccountID, false);
+            UserManager.SetPlayingState(user.AccountID, 0);
             UserManager.SetLastLogOn(user.AccountID, SetLastLogOn);
 
             AuthResponse.AccountName = user.AccountName;

@@ -59,7 +59,6 @@
     <Compile Include="Network\NETProcessor.cs" />
     <Compile Include="Network\NETSender.cs" />
     <Compile Include="Network\WebServer.cs" />
-    <Compile Include="Network\NET_Messages.cs" />
     <Compile Include="Network\P2PNetworking.cs" />
     <Compile Include="Network\TCPClient.cs" />
     <Compile Include="Network\TCPServer.cs" />
@@ -80,10 +79,7 @@
     <Compile Include="Types\GameSchema.cs" />
     <Compile Include="Types\RunningGame.cs" />
     <Compile Include="Types\SteamPlayer.cs" />
-    <Compile Include="Types\Achievement.cs" />
     <Compile Include="Types\Game.cs" />
-    <Compile Include="Types\Leaderboard.cs" />
-    <Compile Include="Types\PlayerStat.cs" />
     <Compile Include="Types\SteamLobby.cs" />
     <Compile Include="Types\WebMessages.cs" />
   </ItemGroup>

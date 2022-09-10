@@ -75,6 +75,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Steamworks\CSteamID.cs" />
     <Compile Include="Steamworks\SteamEnums.cs" />
+    <Compile Include="Types\Achievement.cs" />
+    <Compile Include="Types\Leaderboard.cs" />
+    <Compile Include="Types\PlayerStat.cs" />
     <Compile Include="Types\RichPresence.cs" />
     <Compile Include="Wave\WaveIn.cs" />
     <Compile Include="Wave\WavInDevice.cs" />
