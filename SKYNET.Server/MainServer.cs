@@ -27,6 +27,7 @@ namespace SKYNET
         private void EnsurePaths()
         {
             Common.EnsureDirectoryExists(Path.Combine(Common.GetPath(), "Data"));
+            Common.EnsureDirectoryExists(Path.Combine(Common.GetPath(), "Data", "MongoDB"));
             Common.EnsureDirectoryExists(Path.Combine(Common.GetPath(), "Data", "Storage"));
             Common.EnsureDirectoryExists(Path.Combine(Common.GetPath(), "Data", "Images"));
             Common.EnsureDirectoryExists(Path.Combine(Common.GetPath(), "Data", "Images", "AppCache"));

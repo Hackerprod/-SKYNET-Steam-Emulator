@@ -43,8 +43,8 @@ namespace SKYNET.Managers
                     ServerSelectionTimeout = TimeSpan.FromSeconds(3.0)
                 };
 
-                Client = new MongoClient(mongoUrlBuilder.ToMongoUrl()); 
-                var db = Client.GetDatabase(mongoUrlBuilder.DatabaseName); 
+                Client = new MongoClient(mongoUrlBuilder.ToMongoUrl());
+                var db = Client.GetDatabase(mongoUrlBuilder.DatabaseName);
 
                 bool errorCollecting = true;
 
@@ -57,8 +57,6 @@ namespace SKYNET.Managers
                         var DBPath = Path.Combine(Common.GetPath(), "Data", "MongoDB", "Database.cmd");
                         if (File.Exists(DBPath))
                         {
-                            var iInfo =
-
                             Process.Start(new ProcessStartInfo()
                             {
                                 FileName = "Database.cmd",
@@ -71,10 +69,10 @@ namespace SKYNET.Managers
                         }
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-
-                    throw;
+                    Write("Error initializing database " + Environment.NewLine + ex);
+                    return false;
                 }
 
                 while (errorCollecting)
@@ -97,9 +95,9 @@ namespace SKYNET.Managers
                 Write("Database connected successfully");
                 return true;
             }
-            catch 
+            catch (Exception ex)
             {
-                Write("Error initializing database");
+                Write("Error initializing database " + Environment.NewLine + ex);
                 return false;
             }
         }
