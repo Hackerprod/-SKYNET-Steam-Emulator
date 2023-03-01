@@ -6,6 +6,10 @@ This is not a steamworks wrapper like `Steamworks.Net` or `Facepunch`.
 The project is in an initial stage, so it is not functional yet for some Games.
 
 </br>
+
+Some time ago I have not been able to update the Repository due to personal problems so those who want to collaborate with the development are welcome
+
+</br>
 <p align="center">
     <img src="https://img.shields.io/github/contributors/Hackerprod/-SKYNET-Steam-Emulator?style=for-the-badge" />
     <img src="https://img.shields.io/github/forks/Hackerprod/-SKYNET-Steam-Emulator?style=for-the-badge" alt="Project forks">
