@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace SKYNET.Managers
 {
@@ -66,6 +67,10 @@ namespace SKYNET.Managers
                 };
 
                 int size = Marshal.SizeOf(ticket);
+                Write($"Ticket {ticket.AppID.ToString()}");
+                Write($"Ticket {ticket.Handle.ToString()}");
+                Write($"Ticket {ticket.TicketID.ToString()}");
+                Write($"Ticket {ticket.UserSteamID.ToString()}");
                 pcbTicket = (uint)size;
                 Marshal.StructureToPtr(ticket, pTicket, false);
 

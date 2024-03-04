@@ -7,6 +7,7 @@ using SKYNET.Steamworks.Interfaces;
 using SteamAPICall_t = System.UInt64;
 using HSteamUser = System.UInt32;
 using HAuthTicket = System.UInt32;
+using CGameID = System.UInt32;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -20,7 +21,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Instance = this;
             InterfaceName = "SteamUser";
-            InterfaceVersion = "SteamUser020";
+            InterfaceVersion = "";
         }
 
         public HSteamUser GetHSteamUser()
@@ -42,10 +43,20 @@ namespace SKYNET.Steamworks.Implementation
             return SteamId;
         }
 
-        public int InitiateGameConnection(IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)
+        public int InitiateGameConnection(IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, CGameID gameID, uint unIPServer, uint usPortServer, bool bSecure)
         {
             Write("InitiateGameConnection");
             MutexHelper.Wait("InitiateGameConnection", delegate
+            {
+                // TODO
+            });
+            return 0;
+        }
+
+        internal int InitiateGameConnection(IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)
+        {
+            Write("InitiateGameConnection");
+            MutexHelper.Wait("InitiateGameConnection2", delegate
             {
                 // TODO
             });
@@ -57,7 +68,7 @@ namespace SKYNET.Steamworks.Implementation
             Write("TerminateGameConnection");
         }
 
-        public void TrackAppUsageEvent(IntPtr gameID, int eAppUsageEvent, string pchExtraInfo)
+        public void TrackAppUsageEvent(CGameID gameID, int eAppUsageEvent, string pchExtraInfo)
         {
             Write("TrackAppUsageEvent");
         }
@@ -84,7 +95,7 @@ namespace SKYNET.Steamworks.Implementation
             Recording = false;
         }
 
-        public int GetAvailableVoice(ref uint pcbCompressed, ref uint pcbUncompressed_Deprecated, uint nUncompressedVoiceDesiredSampleRate)
+        public EVoiceResult GetAvailableVoice(ref uint pcbCompressed, ref uint pcbUncompressed_Deprecated, uint nUncompressedVoiceDesiredSampleRate)
         {
             var Result = EVoiceResult.k_EVoiceResultNotRecording;
             pcbCompressed = 0;
@@ -101,10 +112,10 @@ namespace SKYNET.Steamworks.Implementation
                     Result = EVoiceResult.k_EVoiceResultNoData;
             }
             //Write($"GetAvailableVoice (Compressed = {pcbCompressed}, Uncompressed = {pcbUncompressed_Deprecated}) = {Result}");
-            return (int)Result;
+            return Result;
         }
 
-        public int GetVoice(bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, bool bWantUncompressed, IntPtr pUncompressedDestBuffer, uint cbUncompressedDestBufferSize, ref uint nUncompressBytesWritten, uint nUncompressedVoiceDesiredSampleRate)
+        public EVoiceResult GetVoice(bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, bool bWantUncompressed, IntPtr pUncompressedDestBuffer, uint cbUncompressedDestBufferSize, ref uint nUncompressBytesWritten, uint nUncompressedVoiceDesiredSampleRate)
         {
             var Result = EVoiceResult.k_EVoiceResultNotRecording;
             nBytesWritten = 0;
@@ -134,10 +145,10 @@ namespace SKYNET.Steamworks.Implementation
                     Result = EVoiceResult.k_EVoiceResultNoData;
             }
             //Write($"GetVoice (BytesWritte = {nBytesWritten}) = {Result}");
-            return (int)Result;
+            return Result;
         }
 
-        public int DecompressVoice(IntPtr pCompressed, uint cbCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, uint nDesiredSampleRate)
+        public EVoiceResult DecompressVoice(IntPtr pCompressed, uint cbCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, uint nDesiredSampleRate)
         {
             EVoiceResult Result = EVoiceResult.k_EVoiceResultNoData;
             if (cbCompressed != 0)
@@ -156,7 +167,7 @@ namespace SKYNET.Steamworks.Implementation
                 }
             }
             Write($"DecompressVoice = {Result}");
-            return (int)Result;
+            return Result;
         }
 
         public uint GetVoiceOptimalSampleRate()

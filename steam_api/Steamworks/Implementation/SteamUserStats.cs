@@ -111,7 +111,7 @@ namespace SKYNET.Steamworks.Implementation
                         playerStat.Data = 0;
 
                         playerStats.Add(playerStat);
-                        IPCManager.SendPlayerStat(playerStat);
+                        //IPCManager.SendPlayerStat(playerStat);
                     }
                     Data = playerStat.Data;
                     Result = true;
@@ -126,7 +126,7 @@ namespace SKYNET.Steamworks.Implementation
 
                     playerStats.Add(playerStat);
                     PlayerStats.TryAdd((ulong)SteamEmulator.SteamID, playerStats);
-                    IPCManager.SendPlayerStat(playerStat);
+                    //IPCManager.SendPlayerStat(playerStat);
                 }
             });
             pData = Data;
@@ -156,7 +156,7 @@ namespace SKYNET.Steamworks.Implementation
                 Result = true;
             }
             Write($"SetStat (Name = {pchName}, Data = {nData}) = {Result}");
-            IPCManager.SendPlayerStat(playerStat);
+            //IPCManager.SendPlayerStat(playerStat);
             return Result;
         }
 
@@ -205,7 +205,7 @@ namespace SKYNET.Steamworks.Implementation
                         Earned = true
                     };
                     Achievements.Add(achievement);
-                    IPCManager.SendAchievement(achievement);
+                    //IPCManager.SendAchievement(achievement);
                     // TODO: Show Overlay with Achievement
                     Result = true;
                 }
@@ -224,7 +224,7 @@ namespace SKYNET.Steamworks.Implementation
                 {
                     achievement.Earned = false;
                     achievement.Progress = 0;
-                    IPCManager.SendUpdateAchievement(achievement);
+                    //IPCManager.SendUpdateAchievement(achievement);
                 }
             });
             return true;
@@ -298,7 +298,7 @@ namespace SKYNET.Steamworks.Implementation
                     achievement.MaxProgress = nMaxProgress;
                     Archived = achievement.Earned;
                     Result = true;
-                    IPCManager.SendUpdateAchievement(achievement);
+                    //IPCManager.SendUpdateAchievement(achievement);
                 }
             });
 
@@ -412,7 +412,7 @@ namespace SKYNET.Steamworks.Implementation
             PlayerStats.Clear();
             if (bAchievementsToo)
                 Achievements.Clear();
-            IPCManager.SendResetAllStats(bAchievementsToo);
+            //IPCManager.SendResetAllStats(bAchievementsToo);
             return true;
         }
 

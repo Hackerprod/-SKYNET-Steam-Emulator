@@ -6,11 +6,12 @@ using SKYNET.Callback;
 using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Types;
-using SKYNET.IPC.Types;
+//using SKYNET.IPC.Types;
 using SKYNET.Steamworks.Interfaces;
 
 using SteamAPICall_t = System.UInt64;
 using FriendsGroupID_t = System.UInt16;
+using SKYNET.Network.Packets;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -18,7 +19,9 @@ namespace SKYNET.Steamworks.Implementation
     {
         public static SteamFriends Instance;
 
-        public  List<ulong> QueryingAvatar;
+        public List<SKYNET.Types.SteamUser> Users;
+
+        public List<ulong> QueryingAvatar;
 
         private ConcurrentDictionary<ulong, ImageAvatar> Avatars;
         private int ImageIndex;
@@ -31,7 +34,7 @@ namespace SKYNET.Steamworks.Implementation
             InterfaceVersion = "SteamFriends017";
             QueryingAvatar = new List<SteamAPICall_t>();
             Avatars = new ConcurrentDictionary<ulong, ImageAvatar>();
-            ImageIndex = 10; 
+            ImageIndex = 10;
         }
 
         public void Initialize()
@@ -160,7 +163,7 @@ namespace SKYNET.Steamworks.Implementation
         public void ClearRichPresence()
         {
             Write($"ClearRichPresence");
-            IPCManager.SendClearRichPresence();
+            //IPCManager.SendClearRichPresence();
         }
 
         public bool CloseClanChatWindowInSteam(ulong steamIDClanChat)
@@ -443,11 +446,11 @@ namespace SKYNET.Steamworks.Implementation
             var friend = GetUser(steamIDFriend);
             if (friend != null)
             {
-                IPCManager.GetRichPresence(steamIDFriend, pchKey);
+                //IPCManager.GetRichPresence(steamIDFriend, pchKey);
                 if (friend.RichPresence.ContainsKey(pchKey))
                 {
                     Result = friend.RichPresence[pchKey];
-                } 
+                }
             }
             Write($"GetFriendRichPresence (SteamID = {steamIDFriend}, Key = {pchKey}) = {Result}");
             return Result;
@@ -741,10 +744,64 @@ namespace SKYNET.Steamworks.Implementation
             if (user != null)
             {
                 user.PersonaName = pchPersonaName;
-                IPCManager.SendUserDataUpdated(user, IPC_UserDataUpdated.UpdateType.PersonaName);
+                //IPCManager.SendUserDataUpdated(user, IPC_UserDataUpdated.UpdateType.PersonaName);
             }
 
             return APICall;
+        }
+
+        public void AddOrUpdateUser(uint accountID, string personaName, uint appID, string senderAddress = "")
+        {
+            SKYNET.Types.SteamUser steamUser = Users.Find((SKYNET.Types.SteamUser u) => u.AccountID == accountID);
+            if (steamUser == null)
+            {
+                CSteamID cSteamID = new CSteamID(accountID);
+                steamUser = new SKYNET.Types.SteamUser
+                {
+                    PersonaName = personaName,
+                    AccountID = accountID,
+                    SteamID = (ulong)cSteamID,
+                    GameID = appID,
+                    IPAddress = senderAddress,
+                    HasFriend = true
+                };
+                Users.Add(steamUser);
+                Write($"Added user {personaName} {cSteamID}, from {senderAddress}");
+            }
+            else
+            {
+                steamUser.PersonaName = personaName;
+            }
+        }
+
+        public void UpdateUserStatus(NET_UserDataUpdated statusChanged, string ipaddress)
+        {
+            SKYNET.Types.SteamUser steamUser = Users.Find((SKYNET.Types.SteamUser f) => f.AccountID == statusChanged.AccountID);
+            if (steamUser != null)
+            {
+                steamUser.LobbyID = statusChanged.LobbyID;
+                if (steamUser.PersonaName != statusChanged.PersonaName)
+                {
+                    steamUser.PersonaName = statusChanged.PersonaName;
+                    ReportUserChanged(steamUser.SteamID, EPersonaChange.k_EPersonaChangeName);
+                }
+                if (steamUser.LobbyID != statusChanged.LobbyID)
+                {
+                    steamUser.LobbyID = statusChanged.LobbyID;
+                }
+            }
+            else
+            {
+                steamUser = new SKYNET.Types.SteamUser
+                {
+                    AccountID = statusChanged.AccountID,
+                    SteamID = (ulong)new CSteamID(statusChanged.AccountID),
+                    HasFriend = true,
+                    PersonaName = statusChanged.PersonaName,
+                    IPAddress = ipaddress
+                };
+                Users.Add(steamUser);
+            }
         }
 
         public void SetPlayedWith(ulong steamIDUserPlayedWith)
@@ -756,10 +813,11 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"SetRichPresence (Key = {pchKey}, Value = {pchValue})");
 
-            IPCManager.SendSetRichPresence(pchKey, pchValue);
+            //IPCManager.SendSetRichPresence(pchKey, pchValue);
             return true;
         }
 
+        /*
         public void UpdateUserStatus(IPC_UserDataUpdated statusChanged)
         {
             switch (statusChanged.Type)
@@ -773,6 +831,7 @@ namespace SKYNET.Steamworks.Implementation
                     break;
             }
         }
+        */
 
         private List<SteamPlayer> GetFriends()
         {
@@ -780,10 +839,15 @@ namespace SKYNET.Steamworks.Implementation
             return Friends;
         }
 
-        private SteamPlayer GetUser(ulong steamID)
+        public SteamPlayer GetUser(ulong steamID)
         {
             var User = UserManager.GetUser(steamID);
             return User;
+        }
+
+        public SKYNET.Types.SteamUser GetUser2(ulong steamID)
+        {
+            return Users.Find((SKYNET.Types.SteamUser u) => u.SteamID == steamID);
         }
 
         public byte[] GetAvatar(ulong steamID)
@@ -840,7 +904,7 @@ namespace SKYNET.Steamworks.Implementation
                 if (User != null)
                 {
                     QueryingAvatar.Add(steamIDFriend);
-                    IPCManager.RequestAvatar(User.SteamID);
+                    //IPCManager.RequestAvatar(User.SteamID);
                 }
             }
             catch

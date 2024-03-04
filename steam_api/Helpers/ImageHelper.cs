@@ -30,6 +30,19 @@ namespace SKYNET.Helpers
             }
         }
 
+        public static void ToFile(string imagePath, Image image)
+        {
+            try
+            {
+                byte[] bytes = ImageToBytes(image);
+                using (FileStream stream = new FileStream(imagePath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+                {
+                    stream.Write(bytes, 0, bytes.Length);
+                }
+            }
+            catch { }
+        }
+
         public static byte[] ImageToBytes(Image image)
         {
             byte[] imageArray = new byte[0];

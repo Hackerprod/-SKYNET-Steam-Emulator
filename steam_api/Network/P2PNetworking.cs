@@ -1,6 +1,8 @@
 ﻿using SKYNET.Callback;
-using SKYNET.Helper;
-using SKYNET.Helper.JSON;
+using SKYNET.Helpers;
+using SKYNET.Helpers.JSON;
+//using SKYNET.Helper;
+//using SKYNET.Helper.JSON;
 using SKYNET.Managers;
 using SKYNET.Network.Packets;
 using SKYNET.Steamworks;
@@ -112,7 +114,7 @@ namespace SKYNET.Network
                 {
                     AccountID = steamIDRemote.GetAccountID(),
                     Buffer = Convert.ToBase64String(bytes),
-                    Sender = SteamEmulator.SteamID.AccountId,
+                    Sender = SteamEmulator.SteamID.AccountID,
                     P2PSendType = eP2PSendType,
                     Channel = nChannel
                 }; 
@@ -146,6 +148,7 @@ namespace SKYNET.Network
             {
                 return user.IPAddress;
             }
+            /*
             var lobby = SteamEmulator.SteamMatchmaking.GetLobbyByGameserver(steamIDRemote);
             if (lobby != null)
             {
@@ -155,6 +158,7 @@ namespace SKYNET.Network
                     return user.IPAddress;
                 }
             }
+            */
             return "";
         }
 

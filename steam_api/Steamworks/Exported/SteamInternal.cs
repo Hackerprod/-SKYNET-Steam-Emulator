@@ -19,6 +19,20 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamInternal_SteamAPI_Init()
+        {
+            Write($"SteamInternal_SteamAPI_Init");
+            return true;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamInternal_GameServer_Init_V2()
+        {
+            Write($"SteamInternal_GameServer_Init_V2");
+            return true;
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamInternal_FindOrCreateUserInterface(int hSteamUser, [MarshalAs(UnmanagedType.LPStr)] string pszVersion)
         {
             Write($"SteamInternal_FindOrCreateUserInterface {pszVersion}");

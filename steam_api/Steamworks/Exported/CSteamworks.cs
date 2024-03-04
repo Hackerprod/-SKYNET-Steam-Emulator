@@ -34,7 +34,7 @@ using AccountID_t = System.UInt32;
 using SteamLeaderboardEntries_t = System.UInt64;
 using ClientUnifiedMessageHandle = System.UInt64;
 using HServerListRequest = System.IntPtr;
-using System.Threading.Tasks;
+using CGameID = System.UInt32;
 
 #endregion
 
@@ -3365,10 +3365,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int ISteamUser_InitiateGameConnection(IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, ushort usPortServer, bool bSecure)
+        public static int ISteamUser_InitiateGameConnection(IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, CGameID gameID, uint unIPServer, ushort usPortServer, bool bSecure)
         //public static int ISteamUser_InitiateGameConnection(ref byte[] pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, ushort usPortServer, bool bSecure)
         {
-            return SteamEmulator.SteamUser.InitiateGameConnection(pAuthBlob, cbMaxAuthBlob, (ulong)steamIDGameServer, unIPServer, usPortServer, bSecure);
+            return SteamEmulator.SteamUser.InitiateGameConnection(pAuthBlob, cbMaxAuthBlob, (ulong)steamIDGameServer, gameID, unIPServer, usPortServer, bSecure);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -3378,7 +3378,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void ISteamUser_TrackAppUsageEvent(IntPtr gameID, int eAppUsageEvent, string pchExtraInfo)
+        public static void ISteamUser_TrackAppUsageEvent(CGameID gameID, int eAppUsageEvent, string pchExtraInfo)
         {
             SteamEmulator.SteamUser.TrackAppUsageEvent(gameID, eAppUsageEvent, pchExtraInfo);
         }

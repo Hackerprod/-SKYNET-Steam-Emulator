@@ -56,7 +56,7 @@ namespace SKYNET.Steamworks.Implementation
             if (lobby != null)
             {
                 Write($"Setting lobby gameserver IP = {IP}, Port = {(uint)usQueryPort}");
-                IPCManager.SendLobbyGameServerEndPoint(lobby.SteamID, IP, (uint)usQueryPort);
+                //IPCManager.SendLobbyGameServerEndPoint(lobby.SteamID, IP, (uint)usQueryPort);
             }
             else
             {

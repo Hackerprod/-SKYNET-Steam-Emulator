@@ -208,10 +208,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SKYNET.Common\SKYNET.Common.csproj">
-      <Project>{bb307a9e-49f3-4ede-abe4-87ec2086be18}</Project>
-      <Name>SKYNET.Common</Name>
-    </ProjectReference>
     <ProjectReference Include="..\SKYNET.Server\SKYNET.Server.csproj">
       <Project>{f320b683-ef4c-4a0f-971a-3e1965a25e0d}</Project>
       <Name>SKYNET.Server</Name>

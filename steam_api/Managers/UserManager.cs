@@ -1,26 +1,35 @@
 ﻿using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using SKYNET.Types;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SKYNET.Managers
 {
     public class UserManager
     {
+        public static event EventHandler<SteamPlayer> OnUserUpdated;
+        public static event EventHandler<SteamPlayer> OnUserRemoved;
+        public static EventHandler<AvatarReceivedEventArgs> OnAvatarReceived;
         public static List<SteamPlayer> Users;
+        public static Dictionary<ulong, Bitmap> UserAvatars;
+        private static WebClient WebClient;
 
         static UserManager()
         {
             Users = new List<SteamPlayer>();
+            UserAvatars = new Dictionary<ulong, Bitmap>();
+            WebClient = new WebClient();
         }
 
-        public static void UpdateUsers(List<SteamPlayer> UpdatedList)
+        public static void Initialize()
         {
-            MutexHelper.Wait("Users", delegate
-            {
-                Users.Clear();
-                Users.AddRange(UpdatedList);
-            });
+
         }
 
         public static SteamPlayer GetUser(ulong steamID)
@@ -47,6 +56,90 @@ namespace SKYNET.Managers
             return GetUser((ulong)steamID);
         }
 
+        public static void AddOrUpdateUser(uint accountID, string personaName)
+        {
+            MutexHelper.Wait("Users", delegate
+            {
+                var user = GetUser((ulong)new CSteamID(accountID));
+                if (user == null)
+                {
+                    CSteamID steamID = new CSteamID(accountID);
+                    user = new SteamPlayer()
+                    {
+                        PersonaName = personaName,
+                        AccountID = accountID,
+                        SteamID = (ulong)steamID,
+                    };
+                    Users.Add(user);
+                    Write($"Added user {personaName} {steamID}");
+                }
+                else
+                {
+                    user.PersonaName = personaName;
+                    OnUserUpdated?.Invoke(null, user);
+                }
+            });
+            //NetworkManager.SendUpdatedUsers();
+        }
+
+        /*
+        public static bool RequestAvatar(uint accountID, out Bitmap avatar)
+        {
+            string Url = $"http://{Settings.ServerIP}:27080/Images/AvatarCache/{accountID}.jpg";
+            return RequestAvatar(Url, out avatar);
+        }
+        */
+
+        public static void RemoveUser(uint accountID)
+        {
+            MutexHelper.Wait("Users", delegate
+            {
+                var user = GetUser((ulong)new CSteamID(accountID));
+                if (user != null)
+                {
+                    OnUserRemoved?.Invoke(null, user);
+                    Write($"Removed user {user.PersonaName} {user.SteamID}");
+                    Users.Remove(user);
+                }
+            });
+            //NetworkManager.SendUpdatedUsers();
+        }
+
+        public static object GetUser(object accountID)
+        {
+            throw new NotImplementedException();
+        }
+
+        /*
+        internal static bool UpdateAvatar(Bitmap Image)
+        {
+            try
+            {
+                if (UserAvatars.ContainsKey((ulong)SteamClient.SteamID))
+                {
+                    UserAvatars[(ulong)SteamClient.SteamID] = Image;
+                }
+                else
+                {
+                    UserAvatars.Add((ulong)SteamClient.SteamID, Image);
+                }
+
+                SteamClient.Avatar = Image;
+
+                string ImagePath = Path.Combine(Common.GetPath(), "Data", "Images", "AvatarCache", "Avatar.jpg");
+                ImageHelper.ToFile(ImagePath, Image);
+
+                OnAvatarReceived?.Invoke(null, new AvatarReceivedEventArgs(SteamClient.AccountID, Image));
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+        */
+
         public static SteamPlayer GetUserByAddress(string iPAddress)
         {
             SteamPlayer player = null;
@@ -57,14 +150,137 @@ namespace SKYNET.Managers
             return player;
         }
 
+        public static void AvatarReceived(uint accountID, Bitmap avatar)
+        {
+            var User = GetUser(accountID);
+            if (User != null)
+            {
+                if (UserAvatars.ContainsKey(User.SteamID))
+                {
+                    UserAvatars[User.SteamID] = avatar;
+                }
+                else
+                {
+                    UserAvatars.Add(User.SteamID, avatar);
+                }
+            }
+            OnAvatarReceived?.Invoke(null, new AvatarReceivedEventArgs(accountID, avatar));
+        }
+
         public static List<SteamPlayer> GetFriends()
         {
             return Users.FindAll(f => f.SteamID != SteamEmulator.SteamID);
         }
 
+        public static void UserDataUpdated(uint accountID, string personaName, uint lobbyID)
+        {
+            var User = GetUser(accountID);
+            if (User != null)
+            {
+                User.PersonaName = personaName;
+                User.LobbyID = new CSteamID(lobbyID).AccountID;
+            }
+            //NetworkManager.SendUpdatedUsers();
+        }
+
+        public static List<SteamPlayer> GetUsersPlaying(uint appID, bool IncludeMe = true)
+        {
+            List<SteamPlayer> users = default;
+
+            if (IncludeMe)
+            {
+                users = Users.FindAll(u => u.GameID == appID);
+            }
+            else
+            {
+                users = Users.FindAll(u => u.GameID == appID && u.SteamID != SteamEmulator.SteamID);
+            }
+            return users == null ? new List<SteamPlayer>() : users;
+        }
+
+        public static bool GetAvatar(ulong steamID, out Bitmap bitmap)
+        {
+            if (UserAvatars.ContainsKey(steamID))
+            {
+                bitmap = UserAvatars[steamID];
+                return true;
+            }
+            /*
+            else if (RequestAvatar(steamID.GetAccountID(), out var requestedBitmap))
+            {
+                bitmap = requestedBitmap;
+                UserAvatars.Add(steamID, requestedBitmap);
+                return true;
+            }
+            */
+            bitmap = UserAvatars[steamID];//SteamClient.DefaultAvatar;
+            return false;
+        }
+
         private static void Write(object msg)
         {
-            SteamEmulator.Write("UserManager", msg);
+            //Log.Write("UserManager", msg);
+        }
+
+        public class AvatarReceivedEventArgs : EventArgs
+        {
+            public Bitmap Avatar;
+            public uint AccountID;
+            public AvatarReceivedEventArgs(uint accountID, Bitmap avatar)
+            {
+                AccountID = accountID;
+                Avatar = avatar;
+            }
+        }
+
+        public static void DownloadAvatar(uint accountID, string iPAddress)
+        {
+            ThreadPool.QueueUserWorkItem(DownloadAvatarTask, new object[] { accountID, iPAddress });
+        }
+
+        private static async void DownloadAvatarTask(object state)
+        {
+            try
+            {
+                object[] objects = (object[])state;
+                uint accountID = (uint)objects[0];
+                string iPAddress = (string)objects[1];
+                string Url = $"http://{iPAddress}/Images/AvatarCache/Avatar.jpg";
+                var Data = await WebClient.DownloadDataTaskAsync(Url);
+                var Avatar = (Bitmap)ImageHelper.ImageFromBytes(Data);
+                string AvatarCachePath = Path.Combine(Common.GetPath(), "Data", "Images", "AvatarCache", accountID + ".jpg");
+                Common.EnsureDirectoryExists(AvatarCachePath, true);
+                ImageHelper.ToFile(AvatarCachePath, Avatar);
+                AvatarReceived(accountID, Avatar);
+            }
+            catch
+            {
+            }
+        }
+
+        public static void UpdateUserPlaying(uint accountID, uint appID)
+        {
+            var user = GetUser(accountID);
+            if (user != null)
+            {
+                user.GameID = appID;
+                //NetworkManager.SendUpdatedUsers();
+            }
+        }
+
+        public static void UpdateUserLobby(ulong userSteamID, ulong lobbySteamID)
+        {
+            var user = GetUser(userSteamID);
+            if (user != null)
+            {
+                user.LobbyID = lobbySteamID;
+                //NetworkManager.SendUpdatedUsers();
+            }
+        }
+
+        internal static bool UserExists(uint accountID)
+        {
+            return GetUser(accountID) != null;
         }
     }
 }

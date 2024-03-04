@@ -47,31 +47,31 @@ namespace SKYNET.Managers
             {
                 Write("Autodetect found Direct3D 11.1");
                 version = Direct3DVersion.Direct3D11_1;
-                IPCManager.SendDirect3DVersion(version);
+                //IPCManager.SendDirect3DVersion(version);
             }
             if (d3D11Loaded != IntPtr.Zero)
             {
                 Write("Autodetect found Direct3D 11");
                 version = Direct3DVersion.Direct3D11;
-                IPCManager.SendDirect3DVersion(version);
+                //IPCManager.SendDirect3DVersion(version);
             }
             if (d3D10_1Loaded != IntPtr.Zero)
             {
                 Write("Autodetect found Direct3D 10.1");
                 version = Direct3DVersion.Direct3D10_1;
-                IPCManager.SendDirect3DVersion(version);
+                //IPCManager.SendDirect3DVersion(version);
             }
             if (d3D10Loaded != IntPtr.Zero)
             {
                 Write("Autodetect found Direct3D 10");
                 version = Direct3DVersion.Direct3D10;
-                IPCManager.SendDirect3DVersion(version);
+                //IPCManager.SendDirect3DVersion(version);
             }
             if (d3D9Loaded != IntPtr.Zero)
             {
                 Write("Autodetect found Direct3D 9");
                 version = Direct3DVersion.Direct3D9;
-                IPCManager.SendDirect3DVersion(version);
+                //IPCManager.SendDirect3DVersion(version);
             }
         }
 

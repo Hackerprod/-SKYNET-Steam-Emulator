@@ -39,6 +39,7 @@ namespace SKYNET.Network.Packets
     {
         public uint AccountID { get; set; }
         public string Buffer { get; set; }
+        public uint IDRemote { get; set; }
         public uint Sender { get; set; }
         public int P2PSendType { get; set; }
         public int Channel { get; set; }

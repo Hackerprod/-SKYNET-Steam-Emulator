@@ -44,7 +44,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             uint gCMsg = GetGCMsg(unMsgType);
             byte[] bytes = pubData.GetBytes(cubData);
-            IPCManager.SendGCMessage(bytes, gCMsg);
+            //IPCManager.SendGCMessage(bytes, gCMsg);
             Write($"SendMessage (MsgType = {gCMsg}, MsgSize = {cubData}) = k_EGCResultOK");
             return EGCResults.k_EGCResultOK;
         }

@@ -8,11 +8,14 @@
                                 ╚═════╝░╚═╝░░╚═╝░░░╚═╝░░░╚═╝░░╚══╝╚══════╝░░░╚═╝░░░   
 */
 
-//#define FORCELOG 
+#define FORCELOG 
+using SKYNET;
+using SKYNET.Helper;
 using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Steamworks;
 using SKYNET.Steamworks.Implementation;
+using SKYNET.Steamworks.Interfaces;
 using SKYNET.Steamworks.Types;
 using SKYNET.Types;
 using System;
@@ -22,6 +25,7 @@ using System.Threading;
 using AppID = System.UInt32;
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
+using System.Windows.Forms;
 
 public class SteamEmulator
 {
@@ -45,6 +49,8 @@ public class SteamEmulator
     public static HSteamPipe HSteamPipe_GS;
 
     public static bool GameOverlay;
+    public static bool SendLog;
+    public static bool ConsoleLog;
     public static bool LogToFile;
     public static bool LogToConsole;
 
@@ -54,14 +60,16 @@ public class SteamEmulator
     // Debug options
     public static bool RunCallbacks;
     public static bool ISteamHTTP;
- 
+
+    public static int BroadCastPort = 28032;
+
     #endregion
 
     #region Interfaces 
 
     //Client
     public static SteamClient SteamClient;
-    public static SteamUser SteamUser;
+    public static SKYNET.Steamworks.Implementation.SteamUser SteamUser;
     public static SteamFriends SteamFriends;
     public static SteamUtils SteamUtils;
     public static SteamMatchmaking SteamMatchmaking;
@@ -114,8 +122,8 @@ public class SteamEmulator
         SteamID_GS = CSteamID.CreateOne(); 
         AppID = 0;
         DLCs = new List<DLC>();
-        LogToFile = false;
-        LogToConsole = false;
+        LogToFile = true;
+        LogToConsole = true;
     }
 
     public static void Initialize()
@@ -128,7 +136,14 @@ public class SteamEmulator
             SteamID = CSteamID.Invalid;
             LoadAppID();
 
-            IPCManager.Initialize();
+            Settings.Load();
+
+            Log.Initialize();
+
+            Write("Initializing Steam emulator");
+
+            UserManager.Initialize();
+            NetworkManager.Initialize();
             InterfaceManager.Initialize();
 
             #region Interface Initialization
@@ -137,7 +152,7 @@ public class SteamEmulator
 
             SteamClient = new SteamClient(); 
 
-            SteamUser = new SteamUser(); 
+            SteamUser = new SKYNET.Steamworks.Implementation.SteamUser(); 
 
             SteamFriends = new SteamFriends(); 
 
@@ -196,7 +211,6 @@ public class SteamEmulator
             SteamTV = new SteamTV();
 
             SteamInput = new SteamInput();
-
 
             // Server Interfaces
 
@@ -283,7 +297,7 @@ public class SteamEmulator
             if (true)
             {
                 Log.AppEnd(message);
-                lastMsg = msg.ToString();
+                //lastMsg = msg.ToString();
             }
 
             if (true)
@@ -309,6 +323,7 @@ public class SteamEmulator
 
             if (LogToFile)
             {
+                MessageBox.Show("Aqui");
                 Log.AppEnd(message);
             }
 
@@ -325,6 +340,8 @@ public class SteamEmulator
     {
         Console.ForegroundColor = color;
         Console.WriteLine($" DEBUG: {msg}");
+
+        MessageBox.Show("DEBUG");
     }
 }
 

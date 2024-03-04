@@ -14,6 +14,7 @@ using SteamAPICall_t = System.UInt64;
 using UGCFileWriteStreamHandle_t = System.UInt64;
 using UGCHandle_t = System.UInt64;
 using PublishedFileUpdateHandle_t = System.UInt64;
+using System.Drawing;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -22,6 +23,7 @@ namespace SKYNET.Steamworks.Implementation
         public static SteamRemoteStorage Instance;
 
         public string StoragePath;
+        public string AvatarCachePath;
         private List<string> StorageFiles;
         private ConcurrentDictionary<ulong, string> SharedFiles;
         private int LastFile;
@@ -629,6 +631,18 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("EndFileWriteBatch");
             return true;
+        }
+
+        public void StoreAvatar(Bitmap avatar, uint accountID)
+        {
+            try
+            {
+                modCommon.EnsureDirectoryExists(AvatarCachePath);
+                avatar.Save(Path.Combine(AvatarCachePath, accountID + ".jpg"));
+            }
+            catch
+            {
+            }
         }
     }
 }

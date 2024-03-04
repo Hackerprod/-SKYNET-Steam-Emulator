@@ -10,10 +10,11 @@ using System.Threading;
 using SKYNET.Callback;
 using SKYNET.Helpers;
 using SKYNET.Helpers.JSON;
-using SKYNET.IPC.Types;
+//using SKYNET.IPC.Types;
 using SKYNET.Managers;
 using SKYNET.Types;
 using SKYNET.Steamworks.Interfaces;
+using SKYNET.Network.Packets;
 
 using SteamAPICall_t = System.UInt64;
 
@@ -22,6 +23,7 @@ namespace SKYNET.Steamworks.Implementation
     public class SteamMatchmaking : ISteamInterface
     {
         public  static SteamMatchmaking Instance;
+
         public  uint CurrentRequest;
         public ConcurrentDictionary<string, string> DataAwaiting;
         private FilterLobby filters;
@@ -159,11 +161,11 @@ namespace SKYNET.Steamworks.Implementation
 
                 CallbackManager.AddCallbackResult(lobbyEnter);
 
-                IPCManager.SendCreateLobby(LocalLobby);
+                //IPCManager.SendCreateLobby(LocalLobby);
 
                 UpdateLobby(LocalLobby, LocalLobby.SteamID);
 
-                IPCManager.SetLobbyData(LocalLobby.SteamID, "publicIP", NetworkHelper.GetIPAddress().ToString()); 
+                //IPCManager.SetLobbyData(LocalLobby.SteamID, "publicIP", NetworkHelper.GetIPAddress().ToString()); 
             }
             catch (Exception)
             {
@@ -381,7 +383,7 @@ namespace SKYNET.Steamworks.Implementation
             if (GetLobby(steamIDLobby, out var lobby))
             {
                 APICall = CallbackManager.AddCallbackResult(data, false);
-                IPCManager.SendLobbyJoinRequest(APICall, lobby);
+                NetworkManager.SendLobbyJoinRequest(APICall, lobby);
             }
             else
             {
@@ -396,10 +398,12 @@ namespace SKYNET.Steamworks.Implementation
             Write($"LeaveLobby (Lobby SteamID: {steamIDLobby})");
             if (GetLobby(steamIDLobby, out var lobby))
             {
+                /*
                 if (lobby.Owner == SteamEmulator.SteamID)
                     IPCManager.SendLobbyRemove(lobby);
                 else
                     IPCManager.SendLobbyLeave(lobby.Owner, lobby.SteamID);
+                */
             }
         }
 
@@ -435,7 +439,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"RequestLobbyList");
             CurrentRequest++;
-            IPCManager.SendLobbyListRequest(CurrentRequest);
+            //IPCManager.SendLobbyListRequest(CurrentRequest);
             SteamAPICall_t APICall = CallbackManager.AddCallbackResult(new LobbyMatchList_t(), false);
             ThreadPool.QueueUserWorkItem(WaitLobbyMatchList, APICall);
             return APICall;
@@ -472,7 +476,7 @@ namespace SKYNET.Steamworks.Implementation
         public bool SetLobbyData(ulong steamIDLobby, string pchKey, string pchValue)
         {
             var Result = false;
-            Result = IPCManager.SetLobbyData(steamIDLobby, pchKey, pchValue);
+            //Result = IPCManager.SetLobbyData(steamIDLobby, pchKey, pchValue);
             Write($"SetLobbyData (Lobby SteamID: {steamIDLobby}, Key: {pchKey}, Value: {pchValue}) = {Result}");
             return Result;
         }
@@ -481,7 +485,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"SetLobbyGameServer (Lobby SteamID = {steamIDLobby}, EndPoint = {unGameServerIP}:{unGameServerPort}, GameServerID = {steamIDGameServer})");
 
-            IPCManager.SendLobbyGameServer(steamIDLobby, steamIDGameServer, unGameServerIP, unGameServerPort);
+            //IPCManager.SendLobbyGameServer(steamIDLobby, steamIDGameServer, unGameServerIP, unGameServerPort);
 
             LobbyGameCreated_t data = new LobbyGameCreated_t()
             {
@@ -556,7 +560,7 @@ namespace SKYNET.Steamworks.Implementation
             Write("CheckForPSNGameBootInvite");
         }
 
-        public void JoinResponse(IPC_LobbyJoinResponse JoinRespons, SteamLobby lobby)
+        public void JoinResponse(NET_LobbyJoinResponse JoinRespons, SteamLobby lobby)
         {
             try
             {
@@ -608,18 +612,18 @@ namespace SKYNET.Steamworks.Implementation
             }
         }
 
-        public void LobbyDataUpdated(IPC_LobbyDataUpdate lobbyDataUpdate)
+        public void LobbyDataUpdated(NET_LobbyDataUpdate lobbyDataUpdate)
         {
             LobbyDataUpdate_t data = new LobbyDataUpdate_t()
             {
                 m_bSuccess = true,
                 m_ulSteamIDLobby = lobbyDataUpdate.SteamIDLobby,
-                m_ulSteamIDMember = lobbyDataUpdate.SteamIDMember
+                m_ulSteamIDMember = lobbyDataUpdate.SteamIDLobby
             };
             CallbackManager.AddCallbackResult(data);
         }
 
-        public void LobbyChatUpdated(IPC_LobbyChatUpdate lobbyChatUpdate)
+        public void LobbyChatUpdated(NET_LobbyChatUpdate lobbyChatUpdate)
         {
             LobbyChatUpdate_t data = new LobbyChatUpdate_t()
             {
@@ -715,7 +719,7 @@ namespace SKYNET.Steamworks.Implementation
 
             if (lobby == null)
             {
-                IPCManager.SendLobbiesRequest();
+                //IPCManager.SendLobbiesRequest();
             }
 
             return lobby != null;
