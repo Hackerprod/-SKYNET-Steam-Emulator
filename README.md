@@ -60,3 +60,9 @@ http://127.0.0.1:27080/
 ## Status
 
 This project is still an emulator and compatibility layer, not a full Steamworks implementation. The core direction is now backend-backed behavior rather than standalone LAN emulation.
+
+## Contributions
+
+Code contributions are welcome.
+
+Keep pull requests focused, document the behavior being changed, and include enough detail to reproduce or validate the result. For `steam_api`, preserve Steam ABI compatibility and prefer changes that follow documented Steam behavior instead of ad-hoc shortcuts. For `SKYNET server`, keep endpoints and payloads aligned with the DLL client contract.

@@ -339,6 +339,12 @@ __pycache__/
 .vscode/
 .agents/
 skills-lock.json
+
+# Repository-local agent and SDK artifacts
+/.github/
+AGENTS.md
+/steam_api/AGENTS.md
+/steam_api/sdk/
 # !tools/packages.config
 
 # Tabs Studio
