@@ -7,6 +7,7 @@ using SteamNetworkingMicroseconds = System.Int64;
 namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("SteamNetworkingUtils003")]
+    [Interface("SteamNetworkingUtils004")]
     public class SteamNetworkingUtils003 : ISteamInterface
     {
         public IntPtr AllocateMessage(IntPtr _, int cbAllocateBuffer)

@@ -24,13 +24,15 @@ namespace SKYNET.Callback
         public ICallbackData Data { get; set; }
         public bool Called { get; set; }
         public bool ReadyToCall { get; set; }
+        public bool IOFailure { get; set; }
         public DateTime Time { get; set; }
         public int TimeSeconds => (DateTime.Now - Time).Seconds;
 
-        public CallbackMessage(ICallbackData data, bool readyToCall = true)
+        public CallbackMessage(ICallbackData data, bool readyToCall = true, bool ioFailure = false)
         {
             Data = data;
             ReadyToCall = readyToCall;
+            IOFailure = ioFailure;
             Time = DateTime.Now;
         }
 
@@ -3058,7 +3060,7 @@ namespace SKYNET.Callback
     public struct GCMessageFailed_t : ICallbackData
     {
         #region SteamCallback
-        public static int _datasize = Marshal.SizeOf(typeof(GCMessageAvailable_t));
+        public static int _datasize = Marshal.SizeOf(typeof(GCMessageFailed_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.SteamGameCoordinatorFailed;
         #endregion

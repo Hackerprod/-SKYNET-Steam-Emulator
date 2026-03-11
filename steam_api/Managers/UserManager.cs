@@ -82,6 +82,33 @@ namespace SKYNET.Managers
             //NetworkManager.SendUpdatedUsers();
         }
 
+        public static void ReplaceUsers(IEnumerable<SteamPlayer> users)
+        {
+            MutexHelper.Wait("Users", delegate
+            {
+                Users.Clear();
+                if (users == null)
+                {
+                    return;
+                }
+
+                foreach (var user in users)
+                {
+                    Users.Add(new SteamPlayer
+                    {
+                        AccountID = user.AccountID,
+                        SteamID = user.SteamID,
+                        PersonaName = user.PersonaName,
+                        GameID = user.GameID,
+                        LobbyID = user.LobbyID,
+                        HasFriend = user.HasFriend,
+                        IPAddress = user.IPAddress,
+                        RichPresence = new Dictionary<string, string>(user.RichPresence ?? new Dictionary<string, string>())
+                    });
+                }
+            });
+        }
+
         /*
         public static bool RequestAvatar(uint accountID, out Bitmap avatar)
         {

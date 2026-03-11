@@ -1,0 +1,69 @@
+@page "/games"
+@model SKYNET_server.Pages.Games.IndexModel
+
+<div class="space-y-8">
+    <header class="relative overflow-hidden rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-8 shadow-2xl shadow-black/50">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(6,182,212,0.1),transparent_70%)] z-0"></div>
+        <div class="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div class="space-y-3">
+                <span class="text-[10px] px-2.5 py-1 rounded-full font-black bg-cyan-500/10 text-cyan-500 border border-cyan-500/30 uppercase tracking-[0.2em]">Library</span>
+                <h1 class="text-4xl font-black text-white leading-tight">Your game collection.</h1>
+                <p class="max-w-2xl text-zinc-400 text-sm leading-relaxed">Explore your installed titles, track your achievement progress and play hours synchronized with the server.</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                @foreach (var filter in new[] { "All", "Installed", "Playing", "Cloud" })
+                {
+                    <button class="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all @(filter == "All" ? "bg-gradient-to-br from-cyan-500 to-purple-500 text-white shadow-glow-cyan" : "bg-zinc-800/60 text-zinc-500 border border-zinc-700/40 hover:text-white")">
+                        @filter
+                    </button>
+                }
+            </div>
+        </div>
+    </header>
+
+    <div class="grid gap-6 md:grid-cols-2">
+        @foreach (var game in Model.Games)
+        {
+            <article class="group relative overflow-hidden rounded-2xl border border-zinc-800/60 bg-zinc-900/60 hover:border-cyan-500/50 hover:-translate-y-1 transition-all duration-300">
+                <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(168,85,247,0.05)_0%,transparent_60%)]"></div>
+                
+                <div class="p-6 relative z-10">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <span class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">@game.Genre</span>
+                            <h2 class="text-2xl font-black text-white mt-1 group-hover:text-cyan-400 transition-colors">@game.Name</h2>
+                        </div>
+                        <span class="text-[9px] px-2 py-1 rounded bg-zinc-950/80 text-cyan-500 border border-cyan-500/30 font-bold uppercase tracking-widest">@game.Status</span>
+                    </div>
+
+                    <p class="text-sm text-zinc-400 leading-relaxed line-clamp-2 mb-6">@game.Description</p>
+
+                    <div class="grid grid-cols-3 gap-3 mb-6">
+                        <div class="p-3 rounded-xl bg-zinc-950/60 border border-zinc-800/60">
+                            <p class="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Hours</p>
+                            <p class="text-lg font-black text-white mt-1">@game.HoursPlayed h</p>
+                        </div>
+                        <div class="p-3 rounded-xl bg-zinc-950/60 border border-zinc-800/60">
+                            <p class="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Achievements</p>
+                            <p class="text-lg font-black text-white mt-1">@game.AchievementsUnlocked/@game.TotalAchievements</p>
+                        </div>
+                        <div class="p-3 rounded-xl bg-zinc-950/60 border border-zinc-800/60">
+                            <p class="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Progress</p>
+                            <p class="text-lg font-black text-white mt-1">@game.Progress%</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
+                            <span class="text-zinc-600">Campaign Synchronization</span>
+                            <span class="text-cyan-500">@game.Progress%</span>
+                        </div>
+                        <div class="h-2 rounded-full bg-zinc-800 overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-cyan-500 to-purple-500 shadow-glow-cyan transition-all duration-1000" style="width: @game.Progress%"></div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        }
+    </div>
+</div>

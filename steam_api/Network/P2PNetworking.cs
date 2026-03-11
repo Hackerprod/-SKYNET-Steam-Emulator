@@ -26,6 +26,12 @@ namespace SKYNET.Network
 
         public static void Initialize()
         {
+            if (SkyNetApiClient.IsEnabled)
+            {
+                Write("Skipping direct P2P socket initialization because server API mode is enabled");
+                return;
+            }
+
             Connections = new ConcurrentDictionary<string, ClientSocket>();
             P2PSession = new List<ulong>();
 
@@ -64,7 +70,7 @@ namespace SKYNET.Network
                 {
                     m_steamIDRemote = steamIDRemote
                 };
-                CallbackManager.AddCallbackResult(data);
+                CallbackManager.AddCallback(data);
                 P2PSession.Add(steamIDRemote);
             }
 
@@ -108,6 +114,11 @@ namespace SKYNET.Network
 
         public static bool SendP2PTo(ulong steamIDRemote, byte[] bytes, int eP2PSendType, int nChannel)
         {
+            if (SkyNetApiClient.IsEnabled)
+            {
+                return SkyNetApiClient.SendP2PPacket(steamIDRemote, bytes, eP2PSendType, nChannel);
+            }
+
             try
             {
                 NET_P2PPacket p2p = new NET_P2PPacket()

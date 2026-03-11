@@ -7,12 +7,13 @@ namespace SKYNET.Steamworks.Implementation
     public class SteamRemotePlay : ISteamInterface
     {
         public static SteamRemotePlay Instance;
+        private uint nextCursorId = 1;
 
         public SteamRemotePlay()
         {
             Instance = this;
             InterfaceName = "SteamRemotePlay";
-            InterfaceVersion = "STEAMREMOTEPLAY_INTERFACE_VERSION001";
+            InterfaceVersion = "STEAMREMOTEPLAY_INTERFACE_VERSION003";
         }
 
         public uint GetSessionCount()
@@ -55,6 +56,50 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("BSendRemotePlayTogetherInvite");
             return false;
+        }
+
+        public bool ShowRemotePlayTogetherUI()
+        {
+            Write("ShowRemotePlayTogetherUI");
+            return false;
+        }
+
+        public bool BEnableRemotePlayTogetherDirectInput()
+        {
+            Write("BEnableRemotePlayTogetherDirectInput");
+            return false;
+        }
+
+        public void DisableRemotePlayTogetherDirectInput()
+        {
+            Write("DisableRemotePlayTogetherDirectInput");
+        }
+
+        public uint GetInput(System.IntPtr pInput, uint unMaxEvents)
+        {
+            Write("GetInput");
+            return 0;
+        }
+
+        public void SetMouseVisibility(RemotePlaySessionID_t unSessionID, bool bVisible)
+        {
+            Write("SetMouseVisibility");
+        }
+
+        public void SetMousePosition(RemotePlaySessionID_t unSessionID, float flNormalizedX, float flNormalizedY)
+        {
+            Write("SetMousePosition");
+        }
+
+        public uint CreateMouseCursor(int nWidth, int nHeight, int nHotX, int nHotY, System.IntPtr pBGRA, int nPitch)
+        {
+            Write("CreateMouseCursor");
+            return nextCursorId++;
+        }
+
+        public void SetMouseCursor(RemotePlaySessionID_t unSessionID, uint unCursorID)
+        {
+            Write("SetMouseCursor");
         }
     }
 }

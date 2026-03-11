@@ -6,6 +6,7 @@ using HSteamUser = System.UInt32;
 using SteamAPICall_t = System.UInt64;
 using HAuthTicket = System.UInt32;
 using AppId_t = System.UInt32;
+using SKYNET.Managers;
 using SKYNET.Steamworks.Implementation;
 
 namespace SKYNET.Steamworks.Exported
@@ -217,7 +218,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static HAuthTicket SteamAPI_ISteamGameServer_GetAuthSessionTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
+        public static HAuthTicket SteamAPI_ISteamGameServer_GetAuthSessionTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket, IntPtr pSnid)
         {
             Write("SteamAPI_ISteamGameServer_GetAuthSessionTicket");
             return SteamEmulator.SteamGameServer.GetAuthSessionTicket(pTicket, cbMaxTicket, ref pcbTicket);
@@ -368,6 +369,7 @@ namespace SKYNET.Steamworks.Exported
         public static void SteamGameServer_RunCallbacks()
         {
             Write("SteamGameServer_RunCallbacks");
+            CallbackManager.RunCallbacks(true);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

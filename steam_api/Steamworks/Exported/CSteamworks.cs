@@ -106,7 +106,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void RunCallbacks()
         {
-            CallbackManager.RunCallbacks();
+            CallbackManager.RunCallbacks(false);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -174,7 +174,7 @@ namespace SKYNET.Steamworks.Exported
         public static void Steam_RunCallbacks_(HSteamPipe hSteamPipe, bool bGameServerCallbacks)
         {
             Write($"Steam_RunCallbacks");
-            CallbackManager.RunCallbacks();
+            CallbackManager.RunCallbacks(bGameServerCallbacks);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -253,7 +253,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void GameServer_RunCallbacks()
         {
-            //SteamEmulator.SteamGameServer.call();
+            CallbackManager.RunCallbacks(true);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -1305,7 +1305,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static uint ISteamGameServer_GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
+        public static uint ISteamGameServer_GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket, IntPtr pSnid)
         //public static uint ISteamGameServer_GetAuthSessionTicket(ref byte[] pTicket, int cbMaxTicket, ref uint pcbTicket)
         {
             return SteamEmulator.SteamGameServer.GetAuthSessionTicket(pTicket, cbMaxTicket, ref pcbTicket);
@@ -3386,7 +3386,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamUser_GetUserDataFolder(ref string pchBuffer, int cubBuffer)
         {
-            return SteamEmulator.SteamUser.GetUserDataFolder(ref pchBuffer, cubBuffer);
+            return SteamEmulator.SteamUser.GetUserDataFolder(out pchBuffer, cubBuffer);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -3404,21 +3404,21 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static EVoiceResult ISteamUser_GetAvailableVoice(ref uint pcbCompressed, ref uint pcbUncompressed, uint nUncompressedVoiceDesiredSampleRate)
         {
-            return (EVoiceResult)SteamEmulator.SteamUser.GetAvailableVoice(ref pcbCompressed, ref pcbUncompressed, nUncompressedVoiceDesiredSampleRate);
+            return (EVoiceResult)SteamEmulator.SteamUser.GetAvailableVoice(out pcbCompressed, out pcbUncompressed, nUncompressedVoiceDesiredSampleRate);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static EVoiceResult ISteamUser_GetVoice(bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, bool bWantUncompressed, IntPtr pUncompressedDestBuffer, uint cbUncompressedDestBufferSize, ref uint nUncompressBytesWritten, uint nUncompressedVoiceDesiredSampleRate)
         //public static EVoiceResult ISteamUser_GetVoice(bool bWantCompressed, ref byte[] pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, bool bWantUncompressed, ref byte[] pUncompressedDestBuffer, uint cbUncompressedDestBufferSize, ref uint nUncompressBytesWritten, uint nUncompressedVoiceDesiredSampleRate)
         {
-            return (EVoiceResult)SteamEmulator.SteamUser.GetVoice(bWantCompressed, pDestBuffer, cbDestBufferSize, ref nBytesWritten, bWantUncompressed, pUncompressedDestBuffer, cbUncompressedDestBufferSize, ref nUncompressBytesWritten, nUncompressedVoiceDesiredSampleRate);
+            return (EVoiceResult)SteamEmulator.SteamUser.GetVoice(bWantCompressed, pDestBuffer, cbDestBufferSize, out nBytesWritten, bWantUncompressed, pUncompressedDestBuffer, cbUncompressedDestBufferSize, out nUncompressBytesWritten, nUncompressedVoiceDesiredSampleRate);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static EVoiceResult ISteamUser_DecompressVoice(IntPtr pCompressed, uint cbCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, uint nDesiredSampleRate)
         //public static EVoiceResult ISteamUser_DecompressVoice(ref byte[] pCompressed, uint cbCompressed, ref byte[] pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, uint nDesiredSampleRate)
         {
-            return (EVoiceResult)SteamEmulator.SteamUser.DecompressVoice(pCompressed, cbCompressed, pDestBuffer, cbDestBufferSize, ref nBytesWritten, nDesiredSampleRate);
+            return (EVoiceResult)SteamEmulator.SteamUser.DecompressVoice(pCompressed, cbCompressed, pDestBuffer, cbDestBufferSize, out nBytesWritten, nDesiredSampleRate);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -3428,9 +3428,9 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static uint ISteamUser_GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
+        public static uint ISteamUser_GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket, IntPtr pSteamNetworkingIdentity)
         {
-            return SteamEmulator.SteamUser.GetAuthSessionTicket(pTicket, cbMaxTicket, ref pcbTicket);
+            return SteamEmulator.SteamUser.GetAuthSessionTicket(pTicket, cbMaxTicket, out pcbTicket);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

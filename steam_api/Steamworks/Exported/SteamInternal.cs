@@ -63,21 +63,61 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr SteamInternal_ContextInit(IntPtr contextInitData_ptr)
+        public static IntPtr SteamInternal_ContextInit(IntPtr pContextInitData)
         {
-            var contextData = Marshal.PtrToStructure<ContextInitData>(contextInitData_ptr);
-            var apiContext_ptr = contextInitData_ptr + (IntPtr.Size * 2);                       // 16 for x64 process, 8 for x86 process
-            var counter = Marshal.ReadInt32(contextInitData_ptr, IntPtr.Size);
-
-            if (counter != 1)
+            if (pContextInitData == IntPtr.Zero)
             {
-                Write($"SteamInternal_ContextInit");
-                Marshal.WriteInt32(contextInitData_ptr, IntPtr.Size, 1);
-                contextData.pFn(apiContext_ptr);
+                Console.WriteLine("Error: Puntero de inicialización nulo.");
+                return IntPtr.Zero;
             }
 
-            return apiContext_ptr;
+            try
+            {
+                // Leer la estructura que contiene los datos de inicialización
+                var contextInitData = Marshal.PtrToStructure<SteamContextInitData>(pContextInitData);
+
+                // Validar que la función delegada no sea nula
+                if (contextInitData.pFn == IntPtr.Zero)
+                {
+                    Console.WriteLine("Error: Delegado nulo en pFn.");
+                    return IntPtr.Zero;
+                }
+
+                // Obtener el puntero del contexto de la API
+                IntPtr apiContextPtr = pContextInitData + IntPtr.Size * 2;
+
+                // Leer el contador y verificar si el contexto ya fue inicializado
+                int counter = Marshal.ReadInt32(pContextInitData, IntPtr.Size);
+                if (counter != 1)
+                {
+                    // Actualizar el contador e invocar la función de inicialización
+                    Marshal.WriteInt32(pContextInitData, IntPtr.Size, 1);
+                    var initFn = Marshal.GetDelegateForFunctionPointer<SteamInitFunction>(contextInitData.pFn);
+                    initFn(apiContextPtr);
+                    Console.WriteLine("Contexto inicializado correctamente.");
+                }
+                else
+                {
+                    Console.WriteLine("El contexto ya está inicializado.");
+                }
+
+                return apiContextPtr;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al inicializar el contexto: {ex.Message}");
+                return IntPtr.Zero;
+            }
         }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct SteamContextInitData
+        {
+            public IntPtr pFn; // Puntero a la función de inicialización
+        }
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void SteamInitFunction(IntPtr contextPtr);
 
         private static void Write(object msg)
         {

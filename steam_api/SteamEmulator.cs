@@ -60,6 +60,11 @@ public class SteamEmulator
     // Debug options
     public static bool RunCallbacks;
     public static bool ISteamHTTP;
+    public static bool UseServerApi;
+    public static string SkyNetServerUrl;
+    public static string SkyNetAccessToken;
+    public static string SkyNetRefreshToken;
+    public static int SkyNetPollIntervalMs;
 
     public static int BroadCastPort = 28032;
 
@@ -98,6 +103,7 @@ public class SteamEmulator
     public static SteamInput SteamInput;
     public static SteamParties SteamParties;
     public static SteamRemotePlay SteamRemotePlay;
+    public static SteamTimeline SteamTimeline;
     public static SteamTV SteamTV;
 
     //GameServer
@@ -124,6 +130,11 @@ public class SteamEmulator
         DLCs = new List<DLC>();
         LogToFile = true;
         LogToConsole = true;
+        UseServerApi = true;
+        SkyNetServerUrl = "http://127.0.0.1:27080/";
+        SkyNetAccessToken = string.Empty;
+        SkyNetRefreshToken = string.Empty;
+        SkyNetPollIntervalMs = 1000;
     }
 
     public static void Initialize()
@@ -142,9 +153,10 @@ public class SteamEmulator
 
             Write("Initializing Steam emulator");
 
-            UserManager.Initialize();
-            NetworkManager.Initialize();
+            //UserManager.Initialize();
+            //NetworkManager.Initialize();
             InterfaceManager.Initialize();
+            SkyNetApiClient.Initialize();
 
             #region Interface Initialization
 
@@ -207,6 +219,8 @@ public class SteamEmulator
             SteamParties = new SteamParties();
 
             SteamRemotePlay = new SteamRemotePlay();
+
+            SteamTimeline = new SteamTimeline();
 
             SteamTV = new SteamTV();
 

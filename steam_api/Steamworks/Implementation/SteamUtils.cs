@@ -19,7 +19,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Instance = this;
             InterfaceName = "SteamUtils";
-            InterfaceVersion = "SteamUtils009";
+            InterfaceVersion = "SteamUtils010";
             ActiveTime = DateTime.Now;
         }
 
@@ -140,35 +140,31 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool IsAPICallCompleted(SteamAPICall_t hSteamAPICall, ref bool pbFailed)
         {
-            bool Result = false;
-            if (CallbackManager.IsCompleted(hSteamAPICall))
+            bool Result = CallbackManager.IsCompleted(hSteamAPICall);
+            pbFailed = false;
+
+            if (Result && CallbackManager.GetCallResult(hSteamAPICall, out var callback))
             {
-                Result = true;
-                pbFailed = false;
+                pbFailed = callback.IOFailure;
             }
+
             Write($"IsAPICallCompleted (SteamAPICall = {hSteamAPICall}) = {Result}");
             return Result;
         }
 
         public int GetAPICallFailureReason(SteamAPICall_t hSteamAPICall)
         {
-            Write("GetAPICallFailureReason");
-            return (int)ESteamAPICallFailure.k_ESteamAPICallFailureNone;
+            int result = CallbackManager.GetAPICallFailureReason(hSteamAPICall);
+            Write($"GetAPICallFailureReason (SteamAPICall = {hSteamAPICall}) = {(ESteamAPICallFailure)result}");
+            return result;
         }
 
         public bool GetAPICallResult(SteamAPICall_t handle, IntPtr callback, int callback_size, int callback_expected, ref bool failed)
         {
             bool Result = false;
-            failed = true;
             try
             {
-                if (CallbackManager.GetCallResult(handle, out var cCallback))
-                {
-                    Marshal.StructureToPtr(cCallback.Data, callback, false);
-                    cCallback.Called = true;
-                    failed = false;
-                    Result = true;
-                }
+                Result = CallbackManager.GetAPICallResult(handle, callback, callback_size, callback_expected, ref failed);
             }
             catch (Exception ex)
             {

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Linq;
-using System.Collections.Concurrent;
 using SKYNET.Helpers;
 using SKYNET.Callback;
 using SKYNET.Managers;
@@ -14,14 +12,15 @@ namespace SKYNET.Steamworks.Implementation
     {
         public static SteamGameCoordinator Instance;
 
-        private ConcurrentDictionary<uint, byte[]> InMessages;
+        private readonly Queue<GCMessage> inMessages;
+        private readonly object inMessagesLock = new object();
 
         public SteamGameCoordinator()
         {
             Instance = this;
             InterfaceName = "SteamGameCoordinator";
             InterfaceVersion = "SteamGameCoordinator001";
-            InMessages = new ConcurrentDictionary<uint, byte[]>();
+            inMessages = new Queue<GCMessage>();
 
             // CMsgConnectionStatus serialized
             byte[] ConnectionStatus = new byte[] { 0xA4, 0x0F, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00 };
@@ -30,35 +29,54 @@ namespace SKYNET.Steamworks.Implementation
 
         public void PushMessage(uint MsgType, byte[] message)
         {
-            if (InMessages.Any())
+            byte[] payload = message ?? Array.Empty<byte>();
+
+            lock (inMessagesLock)
             {
-                InMessages.TryAdd(MsgType, message);
+                inMessages.Enqueue(new GCMessage(MsgType, payload));
             }
 
-            GCMessageAvailable_t data = new GCMessageAvailable_t();
-            data.m_nMessageSize = (uint)message.Length;
-            CallbackManager.AddCallbackResult(data);
+            GCMessageAvailable_t data = new GCMessageAvailable_t
+            {
+                m_nMessageSize = (uint)payload.Length
+            };
+            CallbackManager.AddCallback(data);
         }
 
         public EGCResults SendMessage(uint unMsgType, IntPtr pubData, uint cubData)
         {
+            if (cubData > 0 && pubData == IntPtr.Zero)
+            {
+                Write($"SendMessage (MsgType = {GetGCMsg(unMsgType)}, MsgSize = {cubData}) = k_EGCResultInvalidMessage");
+                return EGCResults.k_EGCResultInvalidMessage;
+            }
+
             uint gCMsg = GetGCMsg(unMsgType);
             byte[] bytes = pubData.GetBytes(cubData);
-            //IPCManager.SendGCMessage(bytes, gCMsg);
+            if (SkyNetApiClient.IsEnabled && !SkyNetApiClient.SendGCMessage(gCMsg, bytes))
+            {
+                Write($"SendMessage (MsgType = {gCMsg}, MsgSize = {cubData}) = k_EGCResultInvalidMessage");
+                return EGCResults.k_EGCResultInvalidMessage;
+            }
             Write($"SendMessage (MsgType = {gCMsg}, MsgSize = {cubData}) = k_EGCResultOK");
             return EGCResults.k_EGCResultOK;
         }
 
         public bool IsMessageAvailable(ref uint pcubMsgSize)
         {
-            bool result = false;
-            if (InMessages.Any())
+            lock (inMessagesLock)
             {
-                //pcubMsgSize = (uint)InMessages.First().Value.Length;
-                result = true;
+                if (inMessages.Count > 0)
+                {
+                    pcubMsgSize = (uint)inMessages.Peek().MessageBody.Length;
+                    Write($"IsMessageAvailable = True");
+                    return true;
+                }
             }
-            Write($"IsMessageAvailable = {result}");
-            return result;
+
+            pcubMsgSize = 0;
+            Write($"IsMessageAvailable = False");
+            return false;
         }
 
         public EGCResults RetrieveMessage(ref uint punMsgType, IntPtr pubDest, uint cubDest, ref uint pcubMsgSize)
@@ -66,22 +84,35 @@ namespace SKYNET.Steamworks.Implementation
             EGCResults result = EGCResults.k_EGCResultNoMessage;
             pcubMsgSize = 0;
             punMsgType = 0;
-            if (InMessages.Any())
+            lock (inMessagesLock)
             {
-                try
+                if (inMessages.Count > 0)
                 {
-                    var keyValuePair = InMessages.First();
-                    var MsgType = keyValuePair.Key;
-                    var MsgBody = keyValuePair.Value;
-                    //Marshal.Copy(MsgBody, 0, pubDest, MsgBody.Length);
-                    //pcubMsgSize = (uint)MsgBody.Length;
-                    //punMsgType = MsgType;
-                    //result = EGCResults.k_EGCResultOK;
-                    InMessages.TryRemove(keyValuePair.Key, out var _);
-                }
-                catch (Exception ex)
-                {
-                    Write($"RetrieveMessage {ex}");
+                    try
+                    {
+                        var message = inMessages.Peek();
+                        pcubMsgSize = (uint)message.MessageBody.Length;
+                        punMsgType = message.MessageType;
+
+                        if (cubDest < pcubMsgSize || (pcubMsgSize > 0 && pubDest == IntPtr.Zero))
+                        {
+                            result = EGCResults.k_EGCResultBufferTooSmall;
+                        }
+                        else
+                        {
+                            if (pcubMsgSize > 0)
+                            {
+                                Marshal.Copy(message.MessageBody, 0, pubDest, message.MessageBody.Length);
+                            }
+
+                            inMessages.Dequeue();
+                            result = EGCResults.k_EGCResultOK;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Write($"RetrieveMessage {ex}");
+                    }
                 }
             }
             Write($"RetrieveMessage (MsgType = {punMsgType}, MsgSize = {pcubMsgSize}) = {result}");
@@ -91,6 +122,18 @@ namespace SKYNET.Steamworks.Implementation
         private uint GetGCMsg(uint msg)
         {
             return msg & 0x7FFFFFFFu;
+        }
+
+        private readonly struct GCMessage
+        {
+            public uint MessageType { get; }
+            public byte[] MessageBody { get; }
+
+            public GCMessage(uint messageType, byte[] messageBody)
+            {
+                MessageType = messageType;
+                MessageBody = messageBody;
+            }
         }
     }
 }

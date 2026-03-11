@@ -19,7 +19,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Instance = this;
             InterfaceName = "SteamNetworkingSockets";
-            InterfaceVersion = "SteamNetworkingSockets008";
+            InterfaceVersion = "SteamNetworkingSockets012";
             Sockets = new List<SocketConnection>();
             CurrentSocketID = 0;
         }

@@ -110,6 +110,27 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static uint SteamAPI_ISteamUGC_GetNumSupportedGameVersions(IntPtr _, UGCQueryHandle_t handle, uint index)
+        {
+            Write("SteamAPI_ISteamUGC_GetNumSupportedGameVersions");
+            return SteamEmulator.SteamUGC.GetNumSupportedGameVersions(handle, index);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUGC_GetSupportedGameVersionData(IntPtr _, UGCQueryHandle_t handle, uint index, uint versionIndex, string pchGameBranchMin, string pchGameBranchMax, uint cchGameBranchSize)
+        {
+            Write("SteamAPI_ISteamUGC_GetSupportedGameVersionData");
+            return SteamEmulator.SteamUGC.GetSupportedGameVersionData(handle, index, versionIndex, pchGameBranchMin, pchGameBranchMax, cchGameBranchSize);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static uint SteamAPI_ISteamUGC_GetQueryUGCContentDescriptors(IntPtr _, UGCQueryHandle_t handle, uint index, IntPtr pvecDescriptors, uint cMaxEntries)
+        {
+            Write("SteamAPI_ISteamUGC_GetQueryUGCContentDescriptors");
+            return SteamEmulator.SteamUGC.GetQueryUGCContentDescriptors(handle, index, pvecDescriptors, cMaxEntries);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ISteamUGC_ReleaseQueryUGCRequest(IntPtr _, UGCQueryHandle_t handle)
         {
             Write("SteamAPI_ISteamUGC_ReleaseQueryUGCRequest");
@@ -208,6 +229,13 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUGC_SetAdminQuery(IntPtr _, UGCUpdateHandle_t handle, bool bAdminQuery)
+        {
+            Write("SteamAPI_ISteamUGC_SetAdminQuery");
+            return SteamEmulator.SteamUGC.SetAdminQuery(handle, bAdminQuery);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ISteamUGC_SetCloudFileNameFilter(IntPtr _, UGCQueryHandle_t handle, string pMatchCloudFileName)
         {
             Write("SteamAPI_ISteamUGC_SetCloudFileNameFilter");
@@ -299,10 +327,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUGC_SetItemTags(IntPtr _, UGCUpdateHandle_t updateHandle, IntPtr pTags) // change the tags of an UGC item 
+        public static bool SteamAPI_ISteamUGC_SetItemTags(IntPtr _, UGCUpdateHandle_t updateHandle, IntPtr pTags, bool bAllowAdminTags) // change the tags of an UGC item 
         {
             Write("SteamAPI_ISteamUGC_SetItemTags");
-            return SteamEmulator.SteamUGC.SetItemTags(updateHandle, pTags);
+            return SteamEmulator.SteamUGC.SetItemTags(updateHandle, pTags, bAllowAdminTags);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -383,6 +411,27 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUGC_AddContentDescriptor(IntPtr _, UGCUpdateHandle_t handle, int descid)
+        {
+            Write("SteamAPI_ISteamUGC_AddContentDescriptor");
+            return SteamEmulator.SteamUGC.AddContentDescriptor(handle, descid);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUGC_RemoveContentDescriptor(IntPtr _, UGCUpdateHandle_t handle, int descid)
+        {
+            Write("SteamAPI_ISteamUGC_RemoveContentDescriptor");
+            return SteamEmulator.SteamUGC.RemoveContentDescriptor(handle, descid);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUGC_SetRequiredGameVersions(IntPtr _, UGCUpdateHandle_t handle, string pszGameBranchMin, string pszGameBranchMax)
+        {
+            Write("SteamAPI_ISteamUGC_SetRequiredGameVersions");
+            return SteamEmulator.SteamUGC.SetRequiredGameVersions(handle, pszGameBranchMin, pszGameBranchMax);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static SteamAPICall_t SteamAPI_ISteamUGC_SubmitItemUpdate(IntPtr _, UGCUpdateHandle_t handle, string pchChangeNote) // commit update process started with StartItemUpdate() 
         {
             Write("SteamAPI_ISteamUGC_SubmitItemUpdate");
@@ -439,17 +488,17 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static uint SteamAPI_ISteamUGC_GetNumSubscribedItems(IntPtr _) // number of subscribed items  
+        public static uint SteamAPI_ISteamUGC_GetNumSubscribedItems(IntPtr _, bool bIncludeLocallyDisabled) // number of subscribed items  
         {
             Write("SteamAPI_ISteamUGC_GetNumSubscribedItems");
-            return SteamEmulator.SteamUGC.GetNumSubscribedItems();
+            return SteamEmulator.SteamUGC.GetNumSubscribedItems(bIncludeLocallyDisabled);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static uint SteamAPI_ISteamUGC_GetSubscribedItems(IntPtr _, PublishedFileId_t pvecPublishedFileID, uint cMaxEntries) // all subscribed item PublishFileIDs 
+        public static uint SteamAPI_ISteamUGC_GetSubscribedItems(IntPtr _, PublishedFileId_t pvecPublishedFileID, uint cMaxEntries, bool bIncludeLocallyDisabled) // all subscribed item PublishFileIDs 
         {
             Write("SteamAPI_ISteamUGC_GetSubscribedItems");
-            return SteamEmulator.SteamUGC.GetSubscribedItems(pvecPublishedFileID, cMaxEntries);
+            return SteamEmulator.SteamUGC.GetSubscribedItems(pvecPublishedFileID, cMaxEntries, bIncludeLocallyDisabled);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -555,6 +604,41 @@ namespace SKYNET.Steamworks.Exported
         {
             Write("SteamAPI_ISteamUGC_DeleteItem");
             return SteamEmulator.SteamUGC.DeleteItem(nPublishedFileID);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUGC_ShowWorkshopEULA(IntPtr _)
+        {
+            Write("SteamAPI_ISteamUGC_ShowWorkshopEULA");
+            return SteamEmulator.SteamUGC.ShowWorkshopEULA();
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static SteamAPICall_t SteamAPI_ISteamUGC_GetWorkshopEULAStatus(IntPtr _)
+        {
+            Write("SteamAPI_ISteamUGC_GetWorkshopEULAStatus");
+            return SteamEmulator.SteamUGC.GetWorkshopEULAStatus();
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static uint SteamAPI_ISteamUGC_GetUserContentDescriptorPreferences(IntPtr _, IntPtr pvecDescriptors, uint cMaxEntries)
+        {
+            Write("SteamAPI_ISteamUGC_GetUserContentDescriptorPreferences");
+            return SteamEmulator.SteamUGC.GetUserContentDescriptorPreferences(pvecDescriptors, cMaxEntries);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUGC_SetItemsDisabledLocally(IntPtr _, PublishedFileId_t pvecPublishedFileIDs, uint unNumPublishedFileIDs, bool bDisabledLocally)
+        {
+            Write("SteamAPI_ISteamUGC_SetItemsDisabledLocally");
+            return SteamEmulator.SteamUGC.SetItemsDisabledLocally(pvecPublishedFileIDs, unNumPublishedFileIDs, bDisabledLocally);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUGC_SetSubscriptionsLoadOrder(IntPtr _, PublishedFileId_t pvecPublishedFileIDs, uint unNumPublishedFileIDs)
+        {
+            Write("SteamAPI_ISteamUGC_SetSubscriptionsLoadOrder");
+            return SteamEmulator.SteamUGC.SetSubscriptionsLoadOrder(pvecPublishedFileIDs, unNumPublishedFileIDs);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

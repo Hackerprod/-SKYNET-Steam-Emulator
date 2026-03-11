@@ -88,9 +88,14 @@
     <Compile Include="Helpers\Wave\WaveIn.cs" />
     <Compile Include="Helpers\Wave\WavInDevice.cs" />
     <Compile Include="Managers\AudioManager.cs" />
+    <Compile Include="Managers\CallbackManager_.cs" />
+    <Compile Include="Managers\ContextManager.cs" />
     <Compile Include="Managers\LobbyManager.cs" />
     <Compile Include="Managers\NetworkManager.cs" />
     <Compile Include="Managers\OverlayManager.cs" />
+    <Compile Include="Managers\SkyNetApiClient.cs" />
+    <Compile Include="Managers\SkyNetEventPump.cs" />
+    <Compile Include="Managers\SkyNetStateCache.cs" />
     <Compile Include="Managers\UserManager.cs" />
     <Compile Include="modCommon.cs" />
     <Compile Include="Network\ClientSocket.cs" />
@@ -124,6 +129,7 @@
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamRemotePlay.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamRemoteStorage.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamScreenshots.cs" />
+    <Compile Include="Steamworks\Exported\SteamAPI_ISteamTimeline.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamUGC.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamUser.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamUserStats.cs" />
@@ -147,6 +153,7 @@
     <Compile Include="Managers\MemoryManager.cs" />
     <Compile Include="Helpers\NetworkHelper.cs" />
     <Compile Include="Steamworks\Interfaces\SteamClient\SteamClient017.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamClient\SteamClient021.cs" />
     <Compile Include="Steamworks\Interfaces\SteamController\SteamController005.cs" />
     <Compile Include="Steamworks\Interfaces\SteamInput\SteamInput006.cs" />
     <Compile Include="Steamworks\Interfaces\SteamInput\SteamInput002.cs" />
@@ -155,6 +162,8 @@
     <Compile Include="Steamworks\Interfaces\SteamNetworkingUtils\SteamNetworkingUtils003.cs" />
     <Compile Include="Steamworks\Interfaces\SteamParties\SteamParties002.cs" />
     <Compile Include="Steamworks\Interfaces\SteamRemotePlay\SteamRemotePlay001.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamRemotePlay\SteamRemotePlay003.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamTimeline\SteamTimeline004.cs" />
     <Compile Include="Steamworks\Interfaces\SteamUnifiedMessages\SteamUnifiedMessages001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamUser\SteamUser023.cs" />
     <Compile Include="Steamworks\Types\ISteamMatchmakingServerListResponse.cs" />
@@ -195,6 +204,7 @@
     <Compile Include="Steamworks\Implementation\SteamRemotePlay.cs" />
     <Compile Include="Steamworks\Implementation\SteamRemoteStorage.cs" />
     <Compile Include="Steamworks\Implementation\SteamScreenshots.cs" />
+    <Compile Include="Steamworks\Implementation\SteamTimeline.cs" />
     <Compile Include="Steamworks\Implementation\SteamTV.cs" />
     <Compile Include="Steamworks\Implementation\SteamUGC.cs" />
     <Compile Include="Steamworks\Implementation\SteamUser.cs" />
@@ -206,9 +216,11 @@
     <Compile Include="Steamworks\Interfaces\SteamAppList\SteamAppList001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamApps\SteamApps008.cs" />
     <Compile Include="Steamworks\Interfaces\SteamController\SteamController008.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamFriends\SteamFriends018.cs" />
     <Compile Include="Steamworks\Interfaces\SteamFriends\SteamFriends017.cs" />
     <Compile Include="Steamworks\Interfaces\SteamFriends\SteamFriends015.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameCoordinator\SteamGameCoordinator001.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamGameServer\SteamGameServer015.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameServer\SteamGameServer014.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameServer\SteamGameServer012.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameServerStats\SteamGameServerStats001.cs" />
@@ -236,6 +248,7 @@
     <Compile Include="Steamworks\Interfaces\SteamRemoteStorage\SteamRemoteStorage016.cs" />
     <Compile Include="Steamworks\Interfaces\SteamScreenshots\SteamScreenshots003.cs" />
     <Compile Include="Steamworks\Interfaces\SteamUGC\SteamUGC016.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamUGC\SteamUGC021.cs" />
     <Compile Include="Steamworks\Interfaces\SteamUGC\SteamUGC015.cs" />
     <Compile Include="Steamworks\Interfaces\SteamUGC\SteamUGC014.cs" />
     <Compile Include="Steamworks\Interfaces\SteamUser\SteamUser021.cs" />

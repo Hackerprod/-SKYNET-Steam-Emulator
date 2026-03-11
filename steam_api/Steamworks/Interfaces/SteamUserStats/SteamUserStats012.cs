@@ -6,6 +6,7 @@ namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("STEAMUSERSTATS_INTERFACE_VERSION011")] // Verified
     [Interface("STEAMUSERSTATS_INTERFACE_VERSION012")]
+    [Interface("STEAMUSERSTATS_INTERFACE_VERSION013")]
     public class SteamUserStats012 : ISteamInterface
     {
         public bool RequestCurrentStats(IntPtr _)

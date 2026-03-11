@@ -31,7 +31,8 @@ namespace SKYNET.Steamworks.Implementation
         {
             Instance = this;
             InterfaceName = "SteamFriends";
-            InterfaceVersion = "SteamFriends017";
+            InterfaceVersion = "SteamFriends018";
+            Users = new List<SKYNET.Types.SteamUser>();
             QueryingAvatar = new List<SteamAPICall_t>();
             Avatars = new ConcurrentDictionary<ulong, ImageAvatar>();
             ImageIndex = 10;
@@ -66,11 +67,12 @@ namespace SKYNET.Steamworks.Implementation
             PersonaStateChange_t data = new PersonaStateChange_t();
             data.m_ulSteamID = SteamID;
             data.m_nChangeFlags = (int)changeFlags;
-            CallbackManager.AddCallbackResult(data);
+            CallbackManager.AddCallback(data);
         }
 
         public string GetPersonaName()
         {
+            SkyNetApiClient.RefreshSelf();
             string PersonaName = SteamEmulator.PersonaName;
             Write($"GetPersonaName {PersonaName}");
             return PersonaName;
@@ -176,6 +178,30 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"DownloadClanActivityCounts {cClansToRequest}");
             return k_uAPICallInvalid;
+        }
+
+        public SteamAPICall_t RequestEquippedProfileItems(ulong steamID)
+        {
+            Write($"RequestEquippedProfileItems (SteamID = {steamID})");
+            return k_uAPICallInvalid;
+        }
+
+        public bool BHasEquippedProfileItem(ulong steamID, int itemType)
+        {
+            Write($"BHasEquippedProfileItem (SteamID = {steamID}, ItemType = {itemType})");
+            return false;
+        }
+
+        public string GetProfileItemPropertyString(ulong steamID, int itemType, int prop)
+        {
+            Write($"GetProfileItemPropertyString (SteamID = {steamID}, ItemType = {itemType}, Prop = {prop})");
+            return string.Empty;
+        }
+
+        public uint GetProfileItemPropertyUint(ulong steamID, int itemType, int prop)
+        {
+            Write($"GetProfileItemPropertyUint (SteamID = {steamID}, ItemType = {itemType}, Prop = {prop})");
+            return 0;
         }
 
         public SteamAPICall_t EnumerateFollowingList(uint unStartIndex)
@@ -316,6 +342,7 @@ namespace SKYNET.Steamworks.Implementation
             int Result = 0;
             if ((iFriendFlags & (int)EFriendFlags.k_EFriendFlagImmediate) == (int)EFriendFlags.k_EFriendFlagImmediate)
             {
+                SkyNetApiClient.RefreshFriends();
                 MutexHelper.Wait("Users", delegate
                 {
                     var Friends = GetFriends();
@@ -704,6 +731,16 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool RequestUserInformation(ulong steamIDUser, bool bRequireNameOnly)
         {
+            if (steamIDUser == (ulong)SteamEmulator.SteamID)
+            {
+                SkyNetApiClient.RefreshSelf();
+            }
+            else
+            {
+                SkyNetApiClient.RefreshUserProfile(steamIDUser);
+                SkyNetApiClient.RefreshFriends();
+            }
+
             var User = GetUser(steamIDUser);
             Write($"RequestUserInformation (SteamID = {steamIDUser}) = {User != null}");
             return User != null;
@@ -737,15 +774,11 @@ namespace SKYNET.Steamworks.Implementation
             data.m_result = EResult.k_EResultOK;
 
             APICall = CallbackManager.AddCallbackResult(data);
-            ReportUserChanged((ulong)SteamEmulator.SteamID, EPersonaChange.k_EPersonaChangeName);
-
-            SteamEmulator.PersonaName = pchPersonaName;
-            var user = GetUser((ulong)SteamEmulator.SteamID);
-            if (user != null)
+            if (!SkyNetApiClient.UpdatePersonaName(pchPersonaName))
             {
-                user.PersonaName = pchPersonaName;
-                //IPCManager.SendUserDataUpdated(user, IPC_UserDataUpdated.UpdateType.PersonaName);
+                SteamEmulator.PersonaName = pchPersonaName;
             }
+            ReportUserChanged((ulong)SteamEmulator.SteamID, EPersonaChange.k_EPersonaChangeName);
 
             return APICall;
         }
@@ -812,9 +845,7 @@ namespace SKYNET.Steamworks.Implementation
         public bool SetRichPresence(string pchKey, string pchValue)
         {
             Write($"SetRichPresence (Key = {pchKey}, Value = {pchValue})");
-
-            //IPCManager.SendSetRichPresence(pchKey, pchValue);
-            return true;
+            return !SkyNetApiClient.IsEnabled || SkyNetApiClient.SetRichPresence(pchKey, pchValue);
         }
 
         /*
@@ -835,14 +866,47 @@ namespace SKYNET.Steamworks.Implementation
 
         private List<SteamPlayer> GetFriends()
         {
-            var Friends = UserManager.GetFriends();
-            return Friends;
+            if (SkyNetApiClient.IsEnabled)
+            {
+                SkyNetApiClient.RefreshFriends();
+                return SkyNetStateCache.GetFriends();
+            }
+
+            return UserManager.GetFriends();
         }
 
         public SteamPlayer GetUser(ulong steamID)
         {
-            var User = UserManager.GetUser(steamID);
-            return User;
+            if (steamID == (ulong)SteamEmulator.SteamID)
+            {
+                if (SkyNetApiClient.IsEnabled)
+                {
+                    SkyNetApiClient.RefreshSelf();
+                    if (SkyNetStateCache.TryGetSelf(out var self))
+                    {
+                        return self;
+                    }
+                }
+
+                return new SteamPlayer
+                {
+                    AccountID = SteamEmulator.SteamID.GetAccountID(),
+                    SteamID = (ulong)SteamEmulator.SteamID,
+                    PersonaName = SteamEmulator.PersonaName,
+                    HasFriend = true
+                };
+            }
+
+            if (SkyNetApiClient.IsEnabled)
+            {
+                SkyNetApiClient.RefreshFriends();
+                if (SkyNetStateCache.TryGetFriend(steamID, out var friend))
+                {
+                    return friend;
+                }
+            }
+
+            return UserManager.GetUser(steamID);
         }
 
         public SKYNET.Types.SteamUser GetUser2(ulong steamID)
@@ -897,14 +961,16 @@ namespace SKYNET.Steamworks.Implementation
         {
             try
             {
-
                 if (QueryingAvatar.Contains(steamIDFriend)) return;
 
                 var User = GetUser(steamIDFriend);
                 if (User != null)
                 {
                     QueryingAvatar.Add(steamIDFriend);
-                    //IPCManager.RequestAvatar(User.SteamID);
+                    if (!SkyNetApiClient.RefreshAvatar(User.SteamID))
+                    {
+                        QueryingAvatar.Remove(steamIDFriend);
+                    }
                 }
             }
             catch

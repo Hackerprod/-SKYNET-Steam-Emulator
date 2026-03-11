@@ -14,7 +14,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Instance = this;
             InterfaceName = "SteamParties";
-            InterfaceVersion = "xxx";
+            InterfaceVersion = "SteamParties002";
         }
 
         public void CancelReservation(PartyBeaconID_t ulBeacon, ulong steamIDUser)

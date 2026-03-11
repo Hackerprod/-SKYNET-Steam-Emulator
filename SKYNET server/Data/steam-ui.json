@@ -1,0 +1,179 @@
+{
+  "profile": {
+    "displayName": "Hackerprod",
+    "status": "Online",
+    "level": 48,
+    "libraryCount": 12,
+    "completedGames": 9
+  },
+  "featuredGame": {
+    "name": "Dota 2 Rewired",
+    "genre": "MOBA",
+    "status": "Running",
+    "description": "Sesion principal conectada al lobby tactico. Prioridad en amigos, matchmaking y overlays del cliente.",
+    "hoursPlayed": 128,
+    "progress": 84,
+    "achievementsUnlocked": 32,
+    "totalAchievements": 54
+  },
+  "metrics": [
+    {
+      "label": "Horas esta semana",
+      "value": "37.4h",
+      "detail": "4 sesiones de alto trafico en overlays y logros."
+    },
+    {
+      "label": "Amigos activos",
+      "value": "8",
+      "detail": "3 in-game, 3 online y 2 en espera."
+    },
+    {
+      "label": "Achievements",
+      "value": "46",
+      "detail": "12 raros y 3 legendarios desbloqueados."
+    },
+    {
+      "label": "Juegos listos",
+      "value": "12",
+      "detail": "Biblioteca filtrada para UI del launcher."
+    }
+  ],
+  "games": [
+    {
+      "name": "Dota 2 Rewired",
+      "genre": "MOBA",
+      "status": "Running",
+      "description": "Sesion principal conectada al lobby tactico. Prioridad en amigos, matchmaking y overlays del cliente.",
+      "hoursPlayed": 128,
+      "progress": 84,
+      "achievementsUnlocked": 32,
+      "totalAchievements": 54
+    },
+    {
+      "name": "Lethal Company LAN",
+      "genre": "Co-op Horror",
+      "status": "Installed",
+      "description": "Build cooperativa enfocada en presencia social, inventario y actividad de voz en overlay.",
+      "hoursPlayed": 46,
+      "progress": 61,
+      "achievementsUnlocked": 18,
+      "totalAchievements": 27
+    },
+    {
+      "name": "Helldivers Nexus",
+      "genre": "Shooter",
+      "status": "Queued",
+      "description": "Vista pensada para progreso global, rareza de logros y sincronizacion de partidas en curso.",
+      "hoursPlayed": 74,
+      "progress": 49,
+      "achievementsUnlocked": 22,
+      "totalAchievements": 39
+    },
+    {
+      "name": "Project Zomboid Grid",
+      "genre": "Survival",
+      "status": "Cloud Ready",
+      "description": "Seguimiento denso de progreso, sesiones compartidas y supervivencia por squad.",
+      "hoursPlayed": 91,
+      "progress": 67,
+      "achievementsUnlocked": 15,
+      "totalAchievements": 33
+    }
+  ],
+  "friends": [
+    {
+      "displayName": "ZeroCool",
+      "initials": "ZC",
+      "status": "In game",
+      "currentGame": "Dota 2 Rewired",
+      "note": "Liderando party de 5"
+    },
+    {
+      "displayName": "Mantis",
+      "initials": "MN",
+      "status": "Online",
+      "currentGame": "Revisando biblioteca",
+      "note": "Disponible para invitacion"
+    },
+    {
+      "displayName": "NovaHex",
+      "initials": "NH",
+      "status": "Away",
+      "currentGame": "Helldivers Nexus",
+      "note": "Ultima actividad hace 18 min"
+    },
+    {
+      "displayName": "Razor",
+      "initials": "RZ",
+      "status": "In game",
+      "currentGame": "Lethal Company LAN",
+      "note": "Canal de voz activo"
+    },
+    {
+      "displayName": "ByteMuse",
+      "initials": "BM",
+      "status": "Online",
+      "currentGame": "Project Zomboid Grid",
+      "note": "Farm de logros raros"
+    }
+  ],
+  "achievements": [
+    {
+      "title": "First Bloodline",
+      "game": "Dota 2 Rewired",
+      "description": "Gana una teamfight con cero bajas en tu escuadron.",
+      "rarity": "3.1% ultra raro",
+      "unlocked": true,
+      "progress": 100
+    },
+    {
+      "title": "No Witnesses",
+      "game": "Lethal Company LAN",
+      "description": "Extrae la squad completa sin perdidas ni ruido de alerta.",
+      "rarity": "8.7% raro",
+      "unlocked": true,
+      "progress": 100
+    },
+    {
+      "title": "Orbital Discipline",
+      "game": "Helldivers Nexus",
+      "description": "Completa 12 objetivos usando solo soporte tactico.",
+      "rarity": "14% epico",
+      "unlocked": false,
+      "progress": 72
+    },
+    {
+      "title": "Still Breathing",
+      "game": "Project Zomboid Grid",
+      "description": "Sobrevive 30 dias con un solo personaje.",
+      "rarity": "6.4% raro",
+      "unlocked": false,
+      "progress": 58
+    },
+    {
+      "title": "Packet Whisperer",
+      "game": "SKYNET Core",
+      "description": "Manten 6 sesiones concurrentes sin perdida de presencia.",
+      "rarity": "1.2% legendario",
+      "unlocked": true,
+      "progress": 100
+    }
+  ],
+  "activities": [
+    {
+      "title": "Overlay pulse estable",
+      "description": "La cola visual de invites, chat y notificaciones quedo lista para la proxima sesion.",
+      "when": "hace 3 min"
+    },
+    {
+      "title": "Rareza recalculada",
+      "description": "El panel de achievements actualizo porcentajes y estados de progreso de la biblioteca destacada.",
+      "when": "hace 8 min"
+    },
+    {
+      "title": "Party abierta",
+      "description": "ZeroCool abrio una escuadra para Dota 2 Rewired con dos slots disponibles.",
+      "when": "hace 11 min"
+    }
+  ]
+}

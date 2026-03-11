@@ -40,6 +40,34 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static SteamAPICall_t SteamAPI_ISteamFriends_RequestEquippedProfileItems(IntPtr _, ulong steamID)
+        {
+            Write($"SteamAPI_ISteamFriends_RequestEquippedProfileItems");
+            return SteamFriends.Instance.RequestEquippedProfileItems(steamID);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamFriends_BHasEquippedProfileItem(IntPtr _, ulong steamID, int itemType)
+        {
+            Write($"SteamAPI_ISteamFriends_BHasEquippedProfileItem");
+            return SteamFriends.Instance.BHasEquippedProfileItem(steamID, itemType);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static string SteamAPI_ISteamFriends_GetProfileItemPropertyString(IntPtr _, ulong steamID, int itemType, int prop)
+        {
+            Write($"SteamAPI_ISteamFriends_GetProfileItemPropertyString");
+            return SteamFriends.Instance.GetProfileItemPropertyString(steamID, itemType, prop);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static uint SteamAPI_ISteamFriends_GetProfileItemPropertyUint(IntPtr _, ulong steamID, int itemType, int prop)
+        {
+            Write($"SteamAPI_ISteamFriends_GetProfileItemPropertyUint");
+            return SteamFriends.Instance.GetProfileItemPropertyUint(steamID, itemType, prop);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_ISteamFriends_ActivateGameOverlayRemotePlayTogetherInviteDialog(IntPtr _, ulong steamIDLobby)
         {
             Write($"SteamAPI_ISteamFriends_ActivateGameOverlayRemotePlayTogetherInviteDialog");

@@ -253,6 +253,26 @@ namespace SKYNET.Managers
                 SteamEmulator.SteamApps.InterfaceName = type.Name;
                 SteamEmulator.SteamApps.InterfaceVersion = pszVersion;
             }
+            if (pszVersion.StartsWith("SteamNetworkingMessages"))
+            {
+                SteamEmulator.SteamNetworkingMessages.InterfaceName = type.Name;
+                SteamEmulator.SteamNetworkingMessages.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("SteamNetworkingSocketsSerialized"))
+            {
+                SteamEmulator.SteamNetworkingSocketsSerialized.InterfaceName = type.Name;
+                SteamEmulator.SteamNetworkingSocketsSerialized.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("SteamNetworkingSockets"))
+            {
+                SteamEmulator.SteamNetworkingSockets.InterfaceName = type.Name;
+                SteamEmulator.SteamNetworkingSockets.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("SteamNetworkingUtils"))
+            {
+                SteamEmulator.SteamNetworkingUtils.InterfaceName = type.Name;
+                SteamEmulator.SteamNetworkingUtils.InterfaceVersion = pszVersion;
+            }
             if (pszVersion.StartsWith("SteamNetworking"))
             {
                 SteamEmulator.SteamNetworking.InterfaceName = type.Name;
@@ -318,6 +338,26 @@ namespace SKYNET.Managers
                 SteamEmulator.SteamParentalSettings.InterfaceName = type.Name;
                 SteamEmulator.SteamParentalSettings.InterfaceVersion = pszVersion;
             }
+            if (pszVersion.StartsWith("SteamInput"))
+            {
+                SteamEmulator.SteamInput.InterfaceName = type.Name;
+                SteamEmulator.SteamInput.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("SteamParties"))
+            {
+                SteamEmulator.SteamParties.InterfaceName = type.Name;
+                SteamEmulator.SteamParties.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("STEAMREMOTEPLAY_INTERFACE_VERSION"))
+            {
+                SteamEmulator.SteamRemotePlay.InterfaceName = type.Name;
+                SteamEmulator.SteamRemotePlay.InterfaceVersion = pszVersion;
+            }
+            if (pszVersion.StartsWith("STEAMTIMELINE_INTERFACE_V"))
+            {
+                SteamEmulator.SteamTimeline.InterfaceName = type.Name;
+                SteamEmulator.SteamTimeline.InterfaceVersion = pszVersion;
+            }
             if (pszVersion.StartsWith("SteamGameServer0"))
             {
                 SteamEmulator.SteamGameServer.InterfaceName = type.Name;
@@ -327,11 +367,6 @@ namespace SKYNET.Managers
             {
                 SteamEmulator.SteamGameCoordinator.InterfaceName = type.Name;
                 SteamEmulator.SteamGameCoordinator.InterfaceVersion = pszVersion;
-            }
-            if (pszVersion.StartsWith("SteamNetworkingSocketsSerialized"))
-            {
-                SteamEmulator.SteamNetworkingSocketsSerialized.InterfaceName = type.Name;
-                SteamEmulator.SteamNetworkingSocketsSerialized.InterfaceVersion = pszVersion;
             }
         }
 

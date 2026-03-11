@@ -43,6 +43,11 @@ namespace SKYNET.Helper
 
                     config.AppendLine("[Network Settings]");
                     config.AppendLine("# When the emulator is in LAN mode (without dedicated server) it sends and receives data through broadcast ");
+                    config.AppendLine("UseServerApi = true");
+                    config.AppendLine("SkyNetServerUrl = http://127.0.0.1:27080/");
+                    config.AppendLine("SkyNetPollIntervalMs = 1000");
+                    config.AppendLine("SkyNetAccessToken = ");
+                    config.AppendLine("SkyNetRefreshToken = ");
                     config.AppendLine("ServerIP = 127.0.0.1");
                     config.AppendLine("BroadCastPort = 28025");
                     config.AppendLine();
@@ -76,6 +81,34 @@ namespace SKYNET.Helper
                 SteamEmulator.SendLog = (bool)IniParser["Log Settings"]["File"];
 
                 SteamEmulator.ConsoleLog = (bool)IniParser["Log Settings"]["Console"];
+
+                foreach (var item in IniParser["Network Settings"].Settings)
+                {
+                    switch (item.Key)
+                    {
+                        case "UseServerApi":
+                            if (bool.TryParse(item.Value.ToString(), out bool useServerApi))
+                            {
+                                SteamEmulator.UseServerApi = useServerApi;
+                            }
+                            break;
+                        case "SkyNetServerUrl":
+                            SteamEmulator.SkyNetServerUrl = item.Value.ToString();
+                            break;
+                        case "SkyNetPollIntervalMs":
+                            if (int.TryParse(item.Value.ToString(), out int pollIntervalMs))
+                            {
+                                SteamEmulator.SkyNetPollIntervalMs = pollIntervalMs;
+                            }
+                            break;
+                        case "SkyNetAccessToken":
+                            SteamEmulator.SkyNetAccessToken = item.Value.ToString();
+                            break;
+                        case "SkyNetRefreshToken":
+                            SteamEmulator.SkyNetRefreshToken = item.Value.ToString();
+                            break;
+                    }
+                }
 
                 if (SteamEmulator.ConsoleLog)
                 {

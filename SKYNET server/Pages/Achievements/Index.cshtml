@@ -1,0 +1,85 @@
+@page "/achievements"
+@model SKYNET_server.Pages.Achievements.IndexModel
+@{
+    var unlockedCount = Model.Achievements.Count(achievement => achievement.Unlocked);
+    var inProgressCount = Model.Achievements.Count(achievement => !achievement.Unlocked && achievement.Progress > 0);
+    var legendaryCount = Model.Achievements.Count(achievement => achievement.Rarity.Contains("legendario", StringComparison.OrdinalIgnoreCase));
+    var completionRate = Model.Achievements.Count == 0 ? 0 : (int)Math.Round(Model.Achievements.Average(achievement => achievement.Progress));
+}
+
+<div class="space-y-8">
+    <div class="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
+        <header class="relative overflow-hidden rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-8 shadow-2xl shadow-black/50">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(245,158,11,0.1),transparent_70%)] z-0"></div>
+            <div class="relative z-10 space-y-4">
+                <span class="text-[10px] px-2.5 py-1 rounded-full font-black bg-amber-500/10 text-amber-500 border border-amber-500/30 uppercase tracking-[0.2em]">Achievement Matrix</span>
+                <h1 class="text-4xl font-black text-white leading-tight">Rarity and Unlocks.</h1>
+                <p class="max-w-2xl text-zinc-400 text-sm leading-relaxed">Track your completion progress, view the rarity of your achievements and review the most important milestones of your career on the server.</p>
+
+                <div class="grid grid-cols-3 gap-4 mt-8">
+                    <div class="p-4 rounded-xl bg-zinc-950/60 border border-zinc-800/60 text-center">
+                        <p class="text-[9px] font-black text-cyan-500 uppercase tracking-widest mb-1">Unlocked</p>
+                        <p class="text-3xl font-black text-white">@unlockedCount</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-zinc-950/60 border border-zinc-800/60 text-center">
+                        <p class="text-[9px] font-black text-purple-500 uppercase tracking-widest mb-1">In Progress</p>
+                        <p class="text-3xl font-black text-white">@inProgressCount</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-zinc-950/60 border border-zinc-800/60 text-center">
+                        <p class="text-[9px] font-black text-amber-500 uppercase tracking-widest mb-1">Legendary</p>
+                        <p class="text-3xl font-black text-white">@legendaryCount</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <aside class="relative overflow-hidden rounded-2xl border border-zinc-800/60 bg-gradient-to-br from-amber-500/10 via-zinc-950 to-cyan-500/10 p-8 flex flex-col justify-center">
+            <div class="relative z-10">
+                <span class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-4 block">Completion Rate</span>
+                <div class="p-6 rounded-2xl bg-zinc-950/60 border border-zinc-800/60 text-center">
+                    <p class="text-6xl font-black text-white tracking-tighter">@completionRate<span class="text-2xl text-zinc-500">%</span></p>
+                    <p class="text-xs font-bold text-zinc-400 mt-2 uppercase tracking-widest">Global Progress</p>
+                    <div class="mt-6 h-3 rounded-full bg-zinc-800 overflow-hidden shadow-inner">
+                        <div class="h-full bg-gradient-to-r from-amber-500 via-cyan-500 to-purple-500 shadow-[0_0_15px_rgba(245,158,11,0.4)] transition-all duration-1000" style="width: @completionRate%"></div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <div class="grid gap-6 md:grid-cols-2">
+        @foreach (var achievement in Model.Achievements)
+        {
+            <article class="group relative overflow-hidden rounded-2xl border border-zinc-800/60 bg-zinc-900/60 hover:border-amber-500/50 hover:-translate-y-1 transition-all duration-300">
+                <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(245,158,11,0.05)_0%,transparent_60%)]"></div>
+                
+                <div class="p-6 relative z-10">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-zinc-950/80 border border-zinc-800/60 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform @(achievement.Unlocked ? "opacity-100" : "opacity-40 grayscale")">
+                                @(achievement.Unlocked ? "🏆" : "🔒")
+                            </div>
+                            <div>
+                                <span class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">@achievement.Game</span>
+                                <h2 class="text-xl font-black text-white mt-0.5 group-hover:text-amber-500 transition-colors">@achievement.Title</h2>
+                            </div>
+                        </div>
+                        <span class="text-[9px] px-2 py-1 rounded bg-zinc-950/80 text-amber-500 border border-amber-500/30 font-black uppercase tracking-widest">@achievement.Rarity</span>
+                    </div>
+
+                    <p class="text-sm text-zinc-400 leading-relaxed mb-6 h-10 line-clamp-2">@achievement.Description</p>
+
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
+                            <span class="@(achievement.Unlocked ? "text-green-500" : "text-zinc-600")">@(achievement.Unlocked ? "Unlocked" : "In Progress")</span>
+                            <span class="text-amber-500">@achievement.Progress%</span>
+                        </div>
+                        <div class="h-1.5 rounded-full bg-zinc-800 overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-amber-500 to-amber-200 transition-all duration-1000 shadow-glow-purple" style="width: @achievement.Progress%"></div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        }
+    </div>
+</div>

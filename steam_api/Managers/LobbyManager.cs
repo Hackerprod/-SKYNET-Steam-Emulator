@@ -69,5 +69,34 @@ namespace SKYNET.Managers
                 Lobbies.AddRange(UpdatedList);
             });
         }
+
+        internal static void UpsertLobby(SteamLobby updatedLobby)
+        {
+            if (updatedLobby == null)
+            {
+                return;
+            }
+
+            MutexHelper.Wait("Lobbies", delegate
+            {
+                var current = Lobbies.FindIndex(l => l.SteamID == updatedLobby.SteamID);
+                if (current >= 0)
+                {
+                    Lobbies[current] = updatedLobby;
+                }
+                else
+                {
+                    Lobbies.Add(updatedLobby);
+                }
+            });
+        }
+
+        internal static void RemoveLobby(ulong lobbyId)
+        {
+            MutexHelper.Wait("Lobbies", delegate
+            {
+                Lobbies.RemoveAll(l => l.SteamID == lobbyId);
+            });
+        }
     }
 }

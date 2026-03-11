@@ -17,7 +17,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Instance = this;
             InterfaceName = "SteamInput";
-            InterfaceVersion = "SteamInput001";
+            InterfaceVersion = "SteamInput006";
         }
 
         public void ActivateActionSet(InputHandle_t inputHandle, InputActionSetHandle_t actionSetHandle)

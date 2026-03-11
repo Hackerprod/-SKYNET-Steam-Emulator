@@ -24,6 +24,12 @@ namespace SKYNET.Managers
 
         public static void Initialize()
         {
+            if (SkyNetApiClient.IsEnabled)
+            {
+                Write("Skipping LAN network initialization because server API mode is enabled");
+                return;
+            }
+
             Port = SteamEmulator.BroadCastPort;
             Write($"Initializing TCP server on port {Port}");
 
@@ -835,6 +841,12 @@ namespace SKYNET.Managers
 
         public static void SendP2PTo(ulong steamIDRemote, byte[] bytes, int eP2PSendType, int nChannel)
         {
+            if (SkyNetApiClient.IsEnabled)
+            {
+                SkyNetApiClient.SendP2PPacket(steamIDRemote, bytes, eP2PSendType, nChannel);
+                return;
+            }
+
             try
             {
                 NET_P2PPacket item = new NET_P2PPacket

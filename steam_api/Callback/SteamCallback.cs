@@ -51,33 +51,52 @@ namespace SKYNET.Callback
         public void Run(ICallbackData data)
         {
             IntPtr pvParam = Marshal.AllocHGlobal(data.DataSize);
-            Marshal.StructureToPtr(data, pvParam, false);
-            Run(pvParam);
+            try
+            {
+                Marshal.StructureToPtr(data, pvParam, false);
+                Run(pvParam);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(pvParam);
+            }
         }
 
         public void Run(ICallbackData data, bool bIOFailure, ulong hSteamAPICall)
         {
             IntPtr pvParam = Marshal.AllocHGlobal(data.DataSize);
-            Marshal.StructureToPtr(data, pvParam, false);
+            try
+            {
+                Marshal.StructureToPtr(data, pvParam, false);
 
-            if (HasResult)
-            {
-                Run(pvParam, bIOFailure, hSteamAPICall);
+                if (HasResult)
+                {
+                    Run(pvParam, bIOFailure, hSteamAPICall);
+                }
+                else
+                {
+                    Run(pvParam);
+                }
             }
-            else
+            finally
             {
-                Run(pvParam);
+                Marshal.FreeHGlobal(pvParam);
             }
         }
 
         public void Run(IntPtr pvParam)
         {
-            CallResult.m_RunCallback(IntPtr.Zero, pvParam);
+            CallResult.m_RunCallback(Pointer, pvParam);
         }
 
         public void Run(IntPtr pvParam, bool bIOFailure, ulong hSteamAPICall)
         {
-            CallResult.m_RunCallResult(IntPtr.Zero, pvParam, bIOFailure, (ulong)hSteamAPICall);
+            CallResult.m_RunCallResult(Pointer, pvParam, bIOFailure, (ulong)hSteamAPICall);
+        }
+
+        public int GetCallbackSizeBytes()
+        {
+            return CallResult.m_GetCallbackSizeBytes(Pointer);
         }
 
         public void Update()
@@ -93,7 +112,7 @@ namespace SKYNET.Callback
         }
         public void Unregister()
         {
-            CallbackBase.m_nCallbackFlags &= k_ECallbackFlagsRegistered;
+            CallbackBase.m_nCallbackFlags &= unchecked((byte)~k_ECallbackFlagsRegistered);
             Update();
         }
     }

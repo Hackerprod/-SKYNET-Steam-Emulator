@@ -21,7 +21,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Instance = this;
             InterfaceName = "SteamUser";
-            InterfaceVersion = "";
+            InterfaceVersion = "SteamUser023";
         }
 
         public HSteamUser GetHSteamUser()
@@ -32,12 +32,20 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool BLoggedOn()
         {
+            if (SkyNetApiClient.IsEnabled)
+            {
+                bool loggedOn = SkyNetApiClient.EnsureSession() || SkyNetApiClient.RefreshSelf();
+                Write($"BLoggedOn = {loggedOn}");
+                return loggedOn;
+            }
+
             Write("BLoggedOn");
             return true;
         }
 
         public CSteamID GetSteamID()
         {
+            SkyNetApiClient.RefreshSelf();
             var SteamId = SteamEmulator.SteamID;
             Write($"GetSteamID {SteamId}");
             return SteamId;
@@ -73,11 +81,11 @@ namespace SKYNET.Steamworks.Implementation
             Write("TrackAppUsageEvent");
         }
 
-        public bool GetUserDataFolder(ref string pchBuffer, int cubBuffer)
+        public bool GetUserDataFolder(out string pchBuffer, int cubBuffer)
         {
             Write("GetUserDataFolder");
-            if (cubBuffer == 0) return false;
             pchBuffer = SteamEmulator.SteamRemoteStorage.StoragePath;
+            if (cubBuffer == 0) return false;
             return true;
         }
 
@@ -95,7 +103,7 @@ namespace SKYNET.Steamworks.Implementation
             Recording = false;
         }
 
-        public EVoiceResult GetAvailableVoice(ref uint pcbCompressed, ref uint pcbUncompressed_Deprecated, uint nUncompressedVoiceDesiredSampleRate)
+        public EVoiceResult GetAvailableVoice(out uint pcbCompressed, out uint pcbUncompressed_Deprecated, uint nUncompressedVoiceDesiredSampleRate)
         {
             var Result = EVoiceResult.k_EVoiceResultNotRecording;
             pcbCompressed = 0;
@@ -115,9 +123,10 @@ namespace SKYNET.Steamworks.Implementation
             return Result;
         }
 
-        public EVoiceResult GetVoice(bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, bool bWantUncompressed, IntPtr pUncompressedDestBuffer, uint cbUncompressedDestBufferSize, ref uint nUncompressBytesWritten, uint nUncompressedVoiceDesiredSampleRate)
+        public EVoiceResult GetVoice(bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, out uint nBytesWritten, bool bWantUncompressed, IntPtr pUncompressedDestBuffer, uint cbUncompressedDestBufferSize, out uint nUncompressBytesWritten, uint nUncompressedVoiceDesiredSampleRate)
         {
             var Result = EVoiceResult.k_EVoiceResultNotRecording;
+            nUncompressBytesWritten = 0;
             nBytesWritten = 0;
             if (Recording)
             {
@@ -148,8 +157,9 @@ namespace SKYNET.Steamworks.Implementation
             return Result;
         }
 
-        public EVoiceResult DecompressVoice(IntPtr pCompressed, uint cbCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, uint nDesiredSampleRate)
+        public EVoiceResult DecompressVoice(IntPtr pCompressed, uint cbCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, out uint nBytesWritten, uint nDesiredSampleRate)
         {
+            nBytesWritten = 0;
             EVoiceResult Result = EVoiceResult.k_EVoiceResultNoData;
             if (cbCompressed != 0)
             {
@@ -177,39 +187,29 @@ namespace SKYNET.Steamworks.Implementation
             return (uint)SampleRate;
         }
 
-        public HAuthTicket GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
+        public HAuthTicket GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, out uint pcbTicket)
         {
             Write("GetAuthSessionTicket");
-            HAuthTicket Ticket = TicketManager.GetAuthSessionTicket(pTicket, cbMaxTicket, ref pcbTicket);
+            HAuthTicket Ticket = TicketManager.GetAuthSessionTicket(pTicket, cbMaxTicket, out pcbTicket, false);
             return Ticket;
         }
 
         public int BeginAuthSession(IntPtr pAuthTicket, int cbAuthTicket, ulong steamID)
         {
             Write("BeginAuthSession");
-            MutexHelper.Wait("BeginAuthSession", delegate
-            {
-                // TODO
-            });
-            return (int)EBeginAuthSessionResult.k_EBeginAuthSessionResultOK;
+            return TicketManager.BeginAuthSession(pAuthTicket, cbAuthTicket, steamID, false);
         }
 
         public void EndAuthSession(ulong steamID)
         {
             Write("EndAuthSession");
-            MutexHelper.Wait("EndAuthSession", delegate
-            {
-                // TODO
-            });
+            TicketManager.EndAuthSession(steamID, false);
         }
 
         public void CancelAuthTicket(uint hAuthTicket)
         {
             Write("CancelAuthTicket");
-            MutexHelper.Wait("CancelAuthTicket", delegate
-            {
-                // TODO
-            });
+            TicketManager.CancelAuthTicket(hAuthTicket, false);
         }
 
         public int UserHasLicenseForApp(ulong steamID, uint appID)
@@ -254,8 +254,10 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetPlayerSteamLevel()
         {
-            Write("GetPlayerSteamLevel");
-            return 100;
+            SkyNetApiClient.RefreshSelf();
+            int level = SkyNetStateCache.GetSelfPlayerLevel();
+            Write($"GetPlayerSteamLevel {level}");
+            return level == 0 ? 100 : level;
         }
 
         public SteamAPICall_t RequestStoreAuthURL(string pchRedirectURL)
@@ -307,6 +309,25 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("BSetDurationControlOnlineState");
             return false;
+        }
+
+        public int InitiateGameConnection_DEPRECATED(IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, ushort usPortServer, bool bSecure)
+        {
+            Write("InitiateGameConnection_DEPRECATED");
+            return 1;
+        }
+
+        public void TerminateGameConnection_DEPRECATED(uint unIPServer, ushort usPortServer)
+        {
+            Write("TerminateGameConnection_DEPRECATED");
+        }
+
+
+
+        internal uint GetAuthTicketForWebApi(string pchIdentity)
+        {
+            Write($"GetAuthTicketForWebApi {pchIdentity}");
+            return 1;
         }
     }
 }

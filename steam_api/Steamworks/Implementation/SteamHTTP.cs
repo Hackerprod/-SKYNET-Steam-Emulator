@@ -150,25 +150,25 @@ namespace SKYNET.Steamworks.Implementation
                     HTTPRequestHandle = request.Handle,
                 };
 
-                pCallHandle = CallbackManager.AddCallbackResult(data, false);
-                APIRequest.SteamAPICall = pCallHandle;
+                //pCallHandle = CallbackManager.AddCallbackResult(data, false);
+                //APIRequest.SteamAPICall = pCallHandle;
 
-                WebRequest webrequest = WebRequest.Create(request.URL);
-                webrequest.Timeout = (int)(request.TimeoutSeconds != 0 ? request.TimeoutSeconds : 2);
-                webrequest.ContentType = request.ContentType;
-                webrequest.Method = request.RequestMethod.ToString();
-                if (request.RequestMethod == HTTPMethod.POST)
-                {
-                    // TODO: Write raw into Request stream
-                }
+                //WebRequest webrequest = WebRequest.Create(request.URL);
+                //webrequest.Timeout = (int)(request.TimeoutSeconds != 0 ? request.TimeoutSeconds : 2);
+                //webrequest.ContentType = request.ContentType;
+                //webrequest.Method = request.RequestMethod.ToString();
+                //if (request.RequestMethod == HTTPMethod.POST)
+                //{
+                //    // TODO: Write raw into Request stream
+                //}
 
-                RequestState RequestState = new RequestState()
-                {
-                    Request = webrequest,
-                    HTTPRequest = APIRequest
-                };
+                //RequestState RequestState = new RequestState()
+                //{
+                //    Request = webrequest,
+                //    HTTPRequest = APIRequest
+                //};
 
-                webrequest.BeginGetResponse(FinishWebRequest, RequestState);
+                //webrequest.BeginGetResponse(FinishWebRequest, RequestState);
 
                 Result = true;
             }
@@ -208,11 +208,11 @@ namespace SKYNET.Steamworks.Implementation
                 data.BodySize = 0;
             }
 
-            if (CallbackManager.GetCallResult(RequestState.HTTPRequest.SteamAPICall, out var callback))
-            {
-                callback.Data = data;
-                callback.ReadyToCall = true;
-            }
+            //if (CallbackManager.GetCallResult(RequestState.HTTPRequest.SteamAPICall, out var callback))
+            //{
+            //    callback.Data = data;
+            //    callback.ReadyToCall = true;
+            //}
         }
 
         private void SendRequest(object state)
@@ -247,11 +247,11 @@ namespace SKYNET.Steamworks.Implementation
                 Write(ex);
             }
 
-            if (CallbackManager.GetCallResult(RequestAPI.SteamAPICall, out var callback))
-            {
-                callback.Data = data;
-                callback.ReadyToCall = true;
-            }
+            //if (CallbackManager.GetCallResult(RequestAPI.SteamAPICall, out var callback))
+            //{
+            //    callback.Data = data;
+            //    callback.ReadyToCall = true;
+            //}
         }
 
 

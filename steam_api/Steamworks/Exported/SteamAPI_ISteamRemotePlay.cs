@@ -56,10 +56,66 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamRemotePlay_ShowRemotePlayTogetherUI(IntPtr _)
+        {
+            Write("SteamAPI_ISteamRemotePlay_ShowRemotePlayTogetherUI");
+            return SteamEmulator.SteamRemotePlay.ShowRemotePlayTogetherUI();
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_ISteamRemotePlay_BSendRemotePlayTogetherInvite(IntPtr _, ulong steamIDFriend)
         {
             Write("SteamAPI_ISteamRemotePlay_BSendRemotePlayTogetherInvite");
             return SteamEmulator.SteamRemotePlay.BSendRemotePlayTogetherInvite(steamIDFriend);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamRemotePlay_BEnableRemotePlayTogetherDirectInput(IntPtr _)
+        {
+            Write("SteamAPI_ISteamRemotePlay_BEnableRemotePlayTogetherDirectInput");
+            return SteamEmulator.SteamRemotePlay.BEnableRemotePlayTogetherDirectInput();
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamRemotePlay_DisableRemotePlayTogetherDirectInput(IntPtr _)
+        {
+            Write("SteamAPI_ISteamRemotePlay_DisableRemotePlayTogetherDirectInput");
+            SteamEmulator.SteamRemotePlay.DisableRemotePlayTogetherDirectInput();
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static uint SteamAPI_ISteamRemotePlay_GetInput(IntPtr _, IntPtr pInput, uint unMaxEvents)
+        {
+            Write("SteamAPI_ISteamRemotePlay_GetInput");
+            return SteamEmulator.SteamRemotePlay.GetInput(pInput, unMaxEvents);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamRemotePlay_SetMouseVisibility(IntPtr _, uint unSessionID, bool bVisible)
+        {
+            Write("SteamAPI_ISteamRemotePlay_SetMouseVisibility");
+            SteamEmulator.SteamRemotePlay.SetMouseVisibility(unSessionID, bVisible);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamRemotePlay_SetMousePosition(IntPtr _, uint unSessionID, float flNormalizedX, float flNormalizedY)
+        {
+            Write("SteamAPI_ISteamRemotePlay_SetMousePosition");
+            SteamEmulator.SteamRemotePlay.SetMousePosition(unSessionID, flNormalizedX, flNormalizedY);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static uint SteamAPI_ISteamRemotePlay_CreateMouseCursor(IntPtr _, int nWidth, int nHeight, int nHotX, int nHotY, IntPtr pBGRA, int nPitch)
+        {
+            Write("SteamAPI_ISteamRemotePlay_CreateMouseCursor");
+            return SteamEmulator.SteamRemotePlay.CreateMouseCursor(nWidth, nHeight, nHotX, nHotY, pBGRA, nPitch);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamRemotePlay_SetMouseCursor(IntPtr _, uint unSessionID, uint unCursorID)
+        {
+            Write("SteamAPI_ISteamRemotePlay_SetMouseCursor");
+            SteamEmulator.SteamRemotePlay.SetMouseCursor(unSessionID, unCursorID);
         }
 
         private static void Write(string msg)

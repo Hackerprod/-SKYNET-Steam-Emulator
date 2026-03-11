@@ -1,0 +1,74 @@
+@page "/login"
+@model SKYNET_server.Pages.Auth.LoginModel
+@using SKYNET_server.Services
+@inject SteamUiMockService SteamUiService
+@{
+    var snapshot = SteamUiService.GetSnapshot();
+}
+
+<div class="mx-auto grid min-h-[92vh] max-w-7xl items-center gap-6 lg:grid-cols-[1.1fr_0.9fr] py-8">
+    <section class="relative overflow-hidden rounded-3xl border border-zinc-800/60 bg-zinc-950/80 p-8 shadow-2xl md:p-12">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(6,182,212,0.15),transparent_40%),radial-gradient(circle_at_bottom_left,rgba(168,85,247,0.15),transparent_40%)]"></div>
+        <div class="relative z-10 max-w-2xl space-y-10">
+            <div class="space-y-4">
+                <span class="text-[10px] px-2.5 py-1 rounded-full font-black bg-cyan-500/10 text-cyan-500 border border-cyan-500/30 uppercase tracking-[0.2em]">Steam-like Access</span>
+                <h1 class="text-5xl font-black tracking-tight text-white md:text-6xl leading-[1.1]">Enter the social core of SKYNET.</h1>
+                <p class="max-w-xl text-zinc-400 text-sm leading-relaxed">Conceptual login with launcher presence: active friends, rare achievements and your featured games visible from the first second.</p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-3">
+                <div class="rounded-2xl border border-zinc-800/60 bg-zinc-900/60 p-5 group hover:border-cyan-500/30 transition-colors">
+                    <p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1">Friends</p>
+                    <p class="text-3xl font-black text-white group-hover:text-cyan-500 transition-colors">@snapshot.Friends.Count.ToString("D2")</p>
+                    <p class="text-[10px] text-zinc-500 mt-2 font-medium">Invites and squads ready.</p>
+                </div>
+                <div class="rounded-2xl border border-zinc-800/60 bg-zinc-900/60 p-5 group hover:border-purple-500/30 transition-colors">
+                    <p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1">Achievements</p>
+                    <p class="text-3xl font-black text-white group-hover:text-purple-500 transition-colors">@snapshot.Achievements.Count</p>
+                    <p class="text-[10px] text-zinc-500 mt-2 font-medium">Rarity and visual progress.</p>
+                </div>
+                <div class="rounded-2xl border border-zinc-800/60 bg-zinc-900/60 p-5 group hover:border-amber-500/30 transition-colors">
+                    <p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1">Library</p>
+                    <p class="text-3xl font-black text-white group-hover:text-amber-500 transition-colors">@snapshot.Games.Count</p>
+                    <p class="text-[10px] text-zinc-500 mt-2 font-medium">Quick access to your collection.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="rounded-3xl border border-zinc-800/60 bg-zinc-900/95 p-8 shadow-2xl md:p-10 backdrop-blur-xl relative overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.05),transparent_70%)]"></div>
+        <div class="relative z-10">
+            <div class="mb-10 flex items-center gap-4">
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-purple-500 text-lg font-black text-white shadow-glow-cyan">SK</div>
+                <div>
+                    <p class="text-[9px] font-black text-cyan-500 uppercase tracking-[0.2em]">SKYNET Server</p>
+                    <h2 class="text-2xl font-black text-white">Command Login</h2>
+                </div>
+            </div>
+
+            <form class="space-y-6">
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Email or Username</label>
+                    <input type="text" placeholder="hackerprod" class="w-full rounded-xl border border-zinc-800/60 bg-zinc-950/60 px-5 py-4 text-sm text-white placeholder:text-zinc-600 focus:border-cyan-500/50 focus:ring-0 transition-colors" />
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Password</label>
+                    <input type="password" placeholder="••••••••••••" class="w-full rounded-xl border border-zinc-800/60 bg-zinc-950/60 px-5 py-4 text-sm text-white placeholder:text-zinc-600 focus:border-cyan-500/50 focus:ring-0 transition-colors" />
+                </div>
+
+                <div class="flex items-center justify-between text-[11px] font-bold">
+                    <label class="flex items-center gap-3 text-zinc-500 cursor-pointer group">
+                        <input type="checkbox" class="rounded border-zinc-800 bg-zinc-950 text-cyan-500 focus:ring-0" checked />
+                        <span class="group-hover:text-zinc-400">Remember session</span>
+                    </label>
+                    <a asp-page="/Auth/Register" class="text-cyan-500 hover:text-cyan-400 transition-colors">Create Account</a>
+                </div>
+
+                <button type="button" class="w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-widest bg-gradient-to-br from-cyan-500 to-purple-500 text-white shadow-glow-cyan hover:scale-[1.02] transition-transform">
+                    Enter Command Deck
+                </button>
+            </form>
+        </div>
+    </section>
+</div>

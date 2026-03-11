@@ -64,7 +64,7 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamAPI_ISteamUser_GetUserDataFolder(IntPtr _, ref string pchBuffer, int cubBuffer)
         {
             Write("SteamAPI_ISteamUser_GetUserDataFolder");
-            return SteamEmulator.SteamUser.GetUserDataFolder(ref pchBuffer, cubBuffer);
+            return SteamEmulator.SteamUser.GetUserDataFolder(out pchBuffer, cubBuffer);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -85,21 +85,21 @@ namespace SKYNET.Steamworks.Exported
         public static EVoiceResult SteamAPI_ISteamUser_GetAvailableVoice(IntPtr _, ref uint pcbCompressed, ref uint pcbUncompressed_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
         {
             //Write("SteamAPI_ISteamUser_GetAvailableVoice");
-            return SteamEmulator.SteamUser.GetAvailableVoice(ref pcbCompressed, ref pcbUncompressed_Deprecated, nUncompressedVoiceDesiredSampleRate_Deprecated);
+            return SteamEmulator.SteamUser.GetAvailableVoice(out pcbCompressed, out pcbUncompressed_Deprecated, nUncompressedVoiceDesiredSampleRate_Deprecated);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static EVoiceResult SteamAPI_ISteamUser_GetVoice(IntPtr _, bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, bool bWantUncompressed_Deprecated, IntPtr pUncompressedDestBuffer_Deprecated, uint cbUncompressedDestBufferSize_Deprecated, ref uint nUncompressBytesWritten_Deprecated, uint nUncompressedVoiceDesiredSampleRate_Deprecated)
         {
             Write("SteamAPI_ISteamUser_GetVoice");
-            return SteamEmulator.SteamUser.GetVoice(bWantCompressed, pDestBuffer, cbDestBufferSize, ref nBytesWritten, bWantUncompressed_Deprecated, pUncompressedDestBuffer_Deprecated, cbUncompressedDestBufferSize_Deprecated, ref nUncompressBytesWritten_Deprecated, nUncompressedVoiceDesiredSampleRate_Deprecated);
+            return SteamEmulator.SteamUser.GetVoice(bWantCompressed, pDestBuffer, cbDestBufferSize, out nBytesWritten, bWantUncompressed_Deprecated, pUncompressedDestBuffer_Deprecated, cbUncompressedDestBufferSize_Deprecated, out nUncompressBytesWritten_Deprecated, nUncompressedVoiceDesiredSampleRate_Deprecated);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static EVoiceResult SteamAPI_ISteamUser_DecompressVoice(IntPtr _, IntPtr pCompressed, uint cbCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, uint nDesiredSampleRate)
         {
             Write("SteamAPI_ISteamUser_DecompressVoice");
-            return SteamEmulator.SteamUser.DecompressVoice(pCompressed, cbCompressed, pDestBuffer, cbDestBufferSize, ref nBytesWritten, nDesiredSampleRate);
+            return SteamEmulator.SteamUser.DecompressVoice(pCompressed, cbCompressed, pDestBuffer, cbDestBufferSize, out nBytesWritten, nDesiredSampleRate);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -110,10 +110,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static uint SteamAPI_ISteamUser_GetAuthSessionTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
+        public static uint SteamAPI_ISteamUser_GetAuthSessionTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket, IntPtr pSteamNetworkingIdentity)
         {
             Write("SteamAPI_ISteamUser_GetAuthSessionTicket");
-            return SteamEmulator.SteamUser.GetAuthSessionTicket(pTicket, cbMaxTicket, ref pcbTicket);
+            return SteamEmulator.SteamUser.GetAuthSessionTicket(pTicket, cbMaxTicket, out pcbTicket);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

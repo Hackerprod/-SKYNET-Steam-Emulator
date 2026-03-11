@@ -26,7 +26,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Instance = this;
             InterfaceName = "SteamUGC";
-            InterfaceVersion = "STEAMUGC_INTERFACE_VERSION012";
+            InterfaceVersion = "STEAMUGC_INTERFACE_VERSION021";
             UGCQueries = new List<UGC>();
             subscribed = new List<PublishedFileId_t>();
         }
@@ -293,6 +293,12 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
+        public bool SetAdminQuery(UGCUpdateHandle_t handle, bool bAdminQuery)
+        {
+            Write("SetAdminQuery");
+            return true;
+        }
+
         public bool SetCloudFileNameFilter(UGCQueryHandle_t handle, string pMatchCloudFileName)
         {
             Write("SetCloudFileNameFilter");
@@ -391,6 +397,12 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
+        public bool SetItemTags(ulong updateHandle, IntPtr pTags, bool bAllowAdminTags)
+        {
+            Write("SetItemTags");
+            return SetItemTags(updateHandle, pTags);
+        }
+
         public bool SetItemContent(UGCQueryHandle_t handle, string pszContentFolder) 
         {
             Write("SetItemContent");
@@ -454,6 +466,24 @@ namespace SKYNET.Steamworks.Implementation
         public bool RemoveItemPreview(UGCQueryHandle_t handle, uint index) 
         {
             Write("RemoveItemPreview");
+            return false;
+        }
+
+        public bool AddContentDescriptor(UGCQueryHandle_t handle, int descid)
+        {
+            Write("AddContentDescriptor");
+            return false;
+        }
+
+        public bool RemoveContentDescriptor(UGCQueryHandle_t handle, int descid)
+        {
+            Write("RemoveContentDescriptor");
+            return false;
+        }
+
+        public bool SetRequiredGameVersions(UGCQueryHandle_t handle, string pszGameBranchMin, string pszGameBranchMax)
+        {
+            Write("SetRequiredGameVersions");
             return false;
         }
 
@@ -558,6 +588,12 @@ namespace SKYNET.Steamworks.Implementation
             return (uint)subscribed.Count();
         }
 
+        public uint GetNumSubscribedItems(bool bIncludeLocallyDisabled)
+        {
+            Write("GetNumSubscribedItems");
+            return GetNumSubscribedItems();
+        }
+
         public uint GetSubscribedItems(ulong pvecPublishedFileID, uint cMaxEntries) 
         {
             Write("GetSubscribedItems");
@@ -571,6 +607,12 @@ namespace SKYNET.Steamworks.Implementation
             });
             cMaxEntries = MaxEntries;
             return MaxEntries;
+        }
+
+        public uint GetSubscribedItems(ulong pvecPublishedFileID, uint cMaxEntries, bool bIncludeLocallyDisabled)
+        {
+            Write("GetSubscribedItems");
+            return GetSubscribedItems(pvecPublishedFileID, cMaxEntries);
         }
 
         public uint GetItemState(ulong nPublishedFileID)
@@ -732,6 +774,42 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("GetWorkshopEULAStatus");
             return k_uAPICallInvalid;
+        }
+
+        public uint GetNumSupportedGameVersions(UGCQueryHandle_t handle, uint index)
+        {
+            Write("GetNumSupportedGameVersions");
+            return 0;
+        }
+
+        public bool GetSupportedGameVersionData(UGCQueryHandle_t handle, uint index, uint versionIndex, string pchGameBranchMin, string pchGameBranchMax, uint cchGameBranchSize)
+        {
+            Write("GetSupportedGameVersionData");
+            return false;
+        }
+
+        public uint GetQueryUGCContentDescriptors(UGCQueryHandle_t handle, uint index, IntPtr pvecDescriptors, uint cMaxEntries)
+        {
+            Write("GetQueryUGCContentDescriptors");
+            return 0;
+        }
+
+        public uint GetUserContentDescriptorPreferences(IntPtr pvecDescriptors, uint cMaxEntries)
+        {
+            Write("GetUserContentDescriptorPreferences");
+            return 0;
+        }
+
+        public bool SetItemsDisabledLocally(ulong pvecPublishedFileIDs, uint unNumPublishedFileIDs, bool bDisabledLocally)
+        {
+            Write("SetItemsDisabledLocally");
+            return false;
+        }
+
+        public bool SetSubscriptionsLoadOrder(ulong pvecPublishedFileIDs, uint unNumPublishedFileIDs)
+        {
+            Write("SetSubscriptionsLoadOrder");
+            return false;
         }
 
         ////////////////////////////////////////////////////////////////////////////

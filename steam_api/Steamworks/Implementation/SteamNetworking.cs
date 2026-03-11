@@ -30,7 +30,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Instance = this;
             InterfaceName = "SteamNetworking";
-            InterfaceVersion = "SteamNetworking005";
+            InterfaceVersion = "SteamNetworking006";
             P2PIncoming = new List<NET_P2PPacket>();
             P2PSocket = new Dictionary<SNetListenSocket_t, Socket>();
             P2PListenSocket = new Dictionary<SNetListenSocket_t, Socket>();
@@ -48,7 +48,7 @@ namespace SKYNET.Steamworks.Implementation
                     {
                         m_steamIDRemote = steamIDRemote
                     };
-                    CallbackManager.AddCallbackResult(data);
+                    CallbackManager.AddCallback(data);
                     P2PSession.Add(steamIDRemote);
                 }
             });
@@ -63,6 +63,11 @@ namespace SKYNET.Steamworks.Implementation
                 return false;
             }
             byte[] bytes = pubData.GetBytes(cubData);
+            if (SkyNetApiClient.IsEnabled)
+            {
+                return SkyNetApiClient.SendP2PPacket(steamIDRemote, bytes, eP2PSendType, nChannel);
+            }
+
             NetworkManager.SendP2PTo(steamIDRemote, bytes, eP2PSendType, nChannel);
             return true;
         }
@@ -127,7 +132,20 @@ namespace SKYNET.Steamworks.Implementation
         public bool IsP2PPacketAvailable(ref uint pcubMsgSize, int nChannel)
         {
             Write("IsP2PPacketAvailable");
-            return P2PIncoming.Any();
+            NET_P2PPacket packet = null;
+            MutexHelper.Wait("P2PPacket", delegate
+            {
+                packet = P2PIncoming.Find(p => p.Channel == nChannel);
+            });
+
+            if (packet == null)
+            {
+                pcubMsgSize = 0;
+                return false;
+            }
+
+            pcubMsgSize = (uint)packet.Buffer.GetBytesFromBase64String().Length;
+            return true;
         }
 
         /*
@@ -155,24 +173,50 @@ namespace SKYNET.Steamworks.Implementation
         public bool ReadP2PPacket( IntPtr pubDest, uint cubDest, ref uint pcubMsgSize, ref ulong psteamIDRemote, int nChannel)
         {
             Write("ReadP2PPacket");
-            if (P2PIncoming.Any())
+            NET_P2PPacket packet = null;
+            MutexHelper.Wait("P2PPacket", delegate
             {
-                NET_P2PPacket nET_P2PPacket = P2PIncoming[0];
-                Marshal.Copy(nET_P2PPacket.Buffer.GetBytesFromBase64String(), 0, pubDest, nET_P2PPacket.Buffer.GetBytesFromBase64String().Length);
-                P2PIncoming.RemoveAt(0);
+                packet = P2PIncoming.Find(p => p.Channel == nChannel);
+            });
+
+            if (packet == null)
+            {
+                pcubMsgSize = 0;
+                psteamIDRemote = 0;
+                return false;
             }
-            return false;
+
+            var bytes = packet.Buffer.GetBytesFromBase64String();
+            pcubMsgSize = (uint)bytes.Length;
+            psteamIDRemote = (ulong)new CSteamID(packet.Sender);
+
+            if (cubDest < bytes.Length || pubDest == IntPtr.Zero)
+            {
+                return false;
+            }
+
+            Marshal.Copy(bytes, 0, pubDest, bytes.Length);
+            MutexHelper.Wait("P2PPacket", delegate
+            {
+                P2PIncoming.Remove(packet);
+            });
+            return true;
         }
 
         public bool AcceptP2PSessionWithUser(ulong steamIDRemote)
         {
             Write($"AcceptP2PSessionWithUser (User SteamID = {steamIDRemote})");
+            if (!P2PSession.Contains(steamIDRemote))
+            {
+                P2PSession.Add(steamIDRemote);
+            }
             return true;
         }
 
         public bool CloseP2PSessionWithUser(ulong steamIDRemote)
         {
             Write($"CloseP2PSessionWithUser (User SteamID = {steamIDRemote})");
+            P2PSession.Remove(steamIDRemote);
             return true;
         }
 
