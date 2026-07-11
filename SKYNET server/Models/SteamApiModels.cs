@@ -625,6 +625,7 @@ public sealed class ApiSession
     public string RefreshToken { get; set; } = string.Empty;
     public ulong SteamId { get; set; }
     public string ClientInstanceId { get; set; } = string.Empty;
+    public string? RemoteIp { get; set; }
     public DateTime LastSeenUtc { get; set; } = DateTime.UtcNow;
     public bool WebSession { get; set; }
     public bool Persistent { get; set; }

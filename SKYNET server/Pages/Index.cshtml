@@ -24,7 +24,7 @@
                         <button class="rounded-lg bg-cyan-600 px-4 py-2 text-xs font-black uppercase tracking-widest text-white hover:bg-cyan-500">Guardar</button>
                     </form>
                     <form method="post" asp-page-handler="Avatar" enctype="multipart/form-data" class="grid gap-2 md:grid-cols-[1fr_auto]">
-                        <input asp-for="AvatarFile" type="file" accept="image/png" class="min-w-0 rounded-lg border border-zinc-700 bg-zinc-950 text-sm text-zinc-200 file:mr-3 file:border-0 file:bg-zinc-800 file:px-3 file:py-2 file:text-xs file:font-black file:uppercase file:tracking-widest file:text-zinc-100 hover:file:bg-zinc-700" />
+                        <input asp-for="AvatarFile" type="file" accept="image/*" class="min-w-0 rounded-lg border border-zinc-700 bg-zinc-950 text-sm text-zinc-200 file:mr-3 file:border-0 file:bg-zinc-800 file:px-3 file:py-2 file:text-xs file:font-black file:uppercase file:tracking-widest file:text-zinc-100 hover:file:bg-zinc-700" />
                         <button class="rounded-lg border border-cyan-500 bg-cyan-500/10 px-4 py-2 text-xs font-black uppercase tracking-widest text-cyan-100 hover:bg-cyan-500/20">Avatar</button>
                     </form>
                 </div>

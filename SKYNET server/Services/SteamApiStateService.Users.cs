@@ -4,13 +4,13 @@ namespace SKYNET_server.Services;
 
 public sealed partial class SteamApiStateService
 {
-    public SkyNetSessionDto? StartSession(SkyNetSessionRequestDto request)
+    public SkyNetSessionDto? StartSession(SkyNetSessionRequestDto request, string? clientIp)
     {
         lock (_sync)
         {
             ExpireStaleSessionsLocked();
             var clientInstanceId = NormalizeClientInstanceId(request.ClientInstanceId, request.SteamId, request.AccountId);
-            var activeWebUser = request.UseActiveWebUser ? GetActiveWebUserLocked() : null;
+            var activeWebUser = request.UseActiveWebUser ? GetActiveWebUserForIpLocked(clientIp) : null;
             if (request.UseActiveWebUser && activeWebUser == null)
             {
                 return null;
@@ -28,6 +28,7 @@ public sealed partial class SteamApiStateService
                 AccessToken = Guid.NewGuid().ToString("N"),
                 RefreshToken = Guid.NewGuid().ToString("N"),
                 ClientInstanceId = clientInstanceId,
+                RemoteIp = clientIp,
                 LastSeenUtc = DateTime.UtcNow
             };
 
@@ -211,12 +212,12 @@ public sealed partial class SteamApiStateService
                 string.IsNullOrWhiteSpace(request.ContentBase64) ||
                 !TryDecodeAvatar(request.ContentBase64, out var avatar) ||
                 avatar.Length == 0 ||
-                avatar.Length > 512 * 1024)
+                !AvatarImage.TryNormalize(avatar, out var normalized))
             {
                 return false;
             }
 
-            _state.Avatars[user.SteamId] = Convert.ToBase64String(avatar);
+            _state.Avatars[user.SteamId] = Convert.ToBase64String(normalized);
             SaveState();
             EnqueueFriendEvents(user.SteamId, "persona_state_changed", PersonaChangeAvatar);
             return true;
@@ -379,13 +380,32 @@ public sealed partial class SteamApiStateService
         return ToSteamId(NextAvailableAccountIdLocked());
     }
 
-    private SkyNetUserDto? GetActiveWebUserLocked()
+    // Resolves the web-logged-in user bound to the calling machine's IP. Each PC
+    // on the LAN logs in through the web with its own account, so a game client
+    // is matched to whoever is logged in from the same address. No global "active
+    // user", no manual pairing: if nobody logged in from this IP, there is no
+    // identity to hand out and the game session is refused.
+    private SkyNetUserDto? GetActiveWebUserForIpLocked(string? clientIp)
     {
-        return _state.ActiveWebSteamId != 0 &&
-            HasActiveWebSessionLocked(_state.ActiveWebSteamId) &&
-            _state.Users.TryGetValue(_state.ActiveWebSteamId, out var user)
-            ? user
-            : null;
+        if (string.IsNullOrWhiteSpace(clientIp))
+        {
+            return null;
+        }
+
+        var now = DateTime.UtcNow;
+        var session = _sessions.Values
+            .Where(s => s.WebSession
+                && string.Equals(s.RemoteIp, clientIp, StringComparison.Ordinal)
+                && s.ExpiresAtUtc > now)
+            .OrderByDescending(s => s.LastSeenUtc)
+            .FirstOrDefault();
+
+        if (session == null)
+        {
+            return null;
+        }
+
+        return _state.Users.TryGetValue(session.SteamId, out var user) ? user : null;
     }
 
     private uint NextAvailableAccountIdLocked()

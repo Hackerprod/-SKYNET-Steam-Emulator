@@ -16,6 +16,31 @@ public sealed partial class SteamApiStateService
             : null;
     }
 
+    // Identity of the machine that made the request. On a LAN / ZeroTier network
+    // each PC has a distinct address, so this is what ties a game client to the
+    // web session the same PC logged in with.
+    public static string? GetClientIp(HttpRequest request)
+    {
+        return NormalizeIp(request.HttpContext.Connection.RemoteIpAddress);
+    }
+
+    public static string? NormalizeIp(IPAddress? address)
+    {
+        if (address == null)
+        {
+            return null;
+        }
+
+        if (address.IsIPv4MappedToIPv6)
+        {
+            address = address.MapToIPv4();
+        }
+
+        // Treat every loopback form (127.0.0.1, ::1) as the same host so the web
+        // browser and the game on a single PC always match.
+        return IPAddress.IsLoopback(address) ? "127.0.0.1" : address.ToString();
+    }
+
     private bool TryGetSession(string token, out ApiSession? session)
     {
         session = null;

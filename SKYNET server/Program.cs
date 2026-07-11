@@ -27,9 +27,9 @@ app.UseAuthorization();
 
 var api = app.MapGroup("/api");
 
-api.MapPost("/auth/steam/session", (SkyNetSessionRequestDto request, SteamApiStateService state) =>
+api.MapPost("/auth/steam/session", (HttpRequest request, SkyNetSessionRequestDto payload, SteamApiStateService state) =>
 {
-    var session = state.StartSession(request);
+    var session = state.StartSession(payload, SteamApiStateService.GetClientIp(request));
     return session == null ? Results.Unauthorized() : Results.Ok(session);
 });
 

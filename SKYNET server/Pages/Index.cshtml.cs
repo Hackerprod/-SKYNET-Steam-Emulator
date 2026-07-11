@@ -57,25 +57,28 @@ public class IndexModel : PageModel
         var token = GetToken();
         if (AvatarFile == null || AvatarFile.Length == 0)
         {
-            StatusMessage = "Selecciona una imagen PNG.";
+            StatusMessage = "Selecciona una imagen.";
             return RedirectToPage();
         }
 
-        if (!string.Equals(AvatarFile.ContentType, "image/png", StringComparison.OrdinalIgnoreCase) ||
-            AvatarFile.Length > 512 * 1024)
+        if (AvatarFile.Length > AvatarImage.MaxSourceBytes)
         {
-            StatusMessage = "El avatar debe ser PNG y pesar 512 KB o menos.";
+            StatusMessage = "La imagen es demasiado grande (máximo 20 MB).";
             return RedirectToPage();
         }
 
         using var stream = new MemoryStream();
         AvatarFile.CopyTo(stream);
+        // El servidor comprime y recorta la imagen internamente, así que se
+        // acepta cualquier formato/tamaño razonable (PNG, JPG, WEBP, ...).
         var updated = _state.PutSelfAvatar(token, new SkyNetAvatarUpdateDto
         {
             ContentBase64 = Convert.ToBase64String(stream.ToArray())
         });
 
-        StatusMessage = updated ? "Avatar actualizado." : "No se pudo cambiar el avatar.";
+        StatusMessage = updated
+            ? "Avatar actualizado."
+            : "No se pudo procesar la imagen. Usa un formato válido (PNG, JPG, WEBP...).";
         return RedirectToPage();
     }
 

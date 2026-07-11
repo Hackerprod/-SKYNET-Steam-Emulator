@@ -36,7 +36,7 @@ public class LoginModel : PageModel
         ViewData["UseAppShell"] = false;
         ViewData["Title"] = "Login";
 
-        var result = _state.LoginWeb(Username, Password, RememberMe);
+        var result = _state.LoginWeb(Username, Password, RememberMe, SteamApiStateService.GetClientIp(Request));
         if (result == null)
         {
             ErrorMessage = "Credenciales invalidas.";

@@ -15,7 +15,7 @@ public sealed partial class SteamApiStateService
     private static readonly TimeSpan WebSessionLifetime = TimeSpan.FromHours(12);
     private static readonly TimeSpan RememberedWebSessionLifetime = TimeSpan.FromDays(30);
 
-    public SkyNetWebLoginResultDto? LoginWeb(string username, string password, bool rememberMe)
+    public SkyNetWebLoginResultDto? LoginWeb(string username, string password, bool rememberMe, string? remoteIp)
     {
         lock (_sync)
         {
@@ -32,7 +32,7 @@ public sealed partial class SteamApiStateService
 
             account.LastLoginAt = DateTime.UtcNow;
             _state.ActiveWebSteamId = account.SteamId;
-            var session = CreateSessionLocked(account.SteamId, rememberMe);
+            var session = CreateSessionLocked(account.SteamId, rememberMe, remoteIp);
             SaveState();
 
             return new SkyNetWebLoginResultDto
@@ -44,7 +44,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetWebLoginResultDto? RegisterWeb(string username, string personaName, string password)
+    public SkyNetWebLoginResultDto? RegisterWeb(string username, string personaName, string password, string? remoteIp)
     {
         lock (_sync)
         {
@@ -74,7 +74,7 @@ public sealed partial class SteamApiStateService
 
             _state.WebAccounts[key] = account;
             _state.ActiveWebSteamId = steamId;
-            var session = CreateSessionLocked(steamId, false);
+            var session = CreateSessionLocked(steamId, false, remoteIp);
             SaveState();
 
             return new SkyNetWebLoginResultDto
@@ -407,7 +407,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    private ApiSession CreateSessionLocked(ulong steamId, bool rememberMe)
+    private ApiSession CreateSessionLocked(ulong steamId, bool rememberMe, string? remoteIp)
     {
         var now = DateTime.UtcNow;
         var session = new ApiSession
@@ -415,6 +415,7 @@ public sealed partial class SteamApiStateService
             SteamId = steamId,
             AccessToken = Guid.NewGuid().ToString("N"),
             RefreshToken = Guid.NewGuid().ToString("N"),
+            RemoteIp = remoteIp,
             LastSeenUtc = now,
             WebSession = true,
             Persistent = rememberMe,

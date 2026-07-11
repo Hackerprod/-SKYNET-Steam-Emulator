@@ -45,7 +45,7 @@ public class RegisterModel : PageModel
             return Page();
         }
 
-        var result = _state.RegisterWeb(Username, PersonaName, Password);
+        var result = _state.RegisterWeb(Username, PersonaName, Password, SteamApiStateService.GetClientIp(Request));
         if (result == null)
         {
             ErrorMessage = "No se pudo crear el usuario. Revisa los datos o usa otro nombre.";
