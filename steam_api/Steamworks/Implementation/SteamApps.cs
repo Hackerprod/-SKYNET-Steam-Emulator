@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using SKYNET.Callback;
+using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Steamworks.Interfaces;
 using SKYNET.Types;
-using DepotId_t = System.UInt32;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -14,11 +14,15 @@ namespace SKYNET.Steamworks.Implementation
     {
         public static SteamApps Instance;
 
+        private uint currentDlcContext;
+        private string activeBetaName;
+
         public SteamApps()
         {
             Instance = this;
             InterfaceName = "SteamApps";
             InterfaceVersion = "STEAMAPPS_INTERFACE_VERSION008";
+            activeBetaName = string.Empty;
         }
 
         public bool BIsSubscribed()
@@ -45,34 +49,29 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public string GetCurrentGameLanguage()
+        public IntPtr GetCurrentGameLanguage()
         {
             string Language = SteamEmulator.Language;
             Write($"GetCurrentGameLanguage = {Language}");
-            return Language;
+            return NativeStringCache.ToUtf8Ptr(Language);
         }
 
-        public string GetAvailableGameLanguages()
+        public IntPtr GetAvailableGameLanguages()
         {
             Write("GetAvailableGameLanguages");
-            //TODO?
-            return "";
+            return NativeStringCache.ToUtf8Ptr(SteamEmulator.Language);
         }
 
         public bool BIsSubscribedApp(uint appID)
         {
             bool result;
-            if (appID == 0)
+            if (appID == SteamEmulator.AppID)
             {
-                result = true;                      // appid 0 is always owned
-            }
-            else if (appID == SteamEmulator.AppID)
-            {
-                result = true;                      // the base game itself
+                result = true;
             }
             else
             {
-                result = DLCManager.HasDLC(appID);  // owned DLC (or unlock-all)
+                result = DLCManager.IsOwned(appID);
             }
 
             Write($"BIsSubscribedApp (AppID = {appID}) = {result}");
@@ -81,7 +80,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool BIsDlcInstalled(uint appID)
         {
-            bool result = appID == 0 || DLCManager.HasDLC(appID);
+            bool result = DLCManager.HasDLC(appID);
             Write($"BIsDlcInstalled (AppID = {appID}) = {result}");
             return result;
         }
@@ -151,17 +150,20 @@ namespace SKYNET.Steamworks.Implementation
         public void InstallDLC(uint nAppID)
         {
             Write($"InstallDLC (AppID = {nAppID})");
-            // The DLC is already considered installed; notify the game so callers
-            // that wait for DlcInstalled_t after InstallDLC can proceed.
-            if (nAppID != 0)
+            if (DLCManager.TryInstall(nAppID))
             {
                 CallbackManager.AddCallback(new DlcInstalled_t { AppID = nAppID });
+            }
+            else
+            {
+                Write($"InstallDLC rejected: DLC {nAppID} is not owned");
             }
         }
 
         public void UninstallDLC(uint nAppID)
         {
-            Write($"UninstallDLC (AppID = {nAppID})");
+            bool removed = DLCManager.TryUninstall(nAppID);
+            Write($"UninstallDLC (AppID = {nAppID}) = {removed}");
         }
 
         public void RequestAppProofOfPurchaseKey(uint nAppID)
@@ -171,19 +173,9 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool GetCurrentBetaName(IntPtr pchName, int cchNameBufferSize)
         {
-            try
-            {
-                Write("GetCurrentBetaName");
-                byte[] PublicBeta = Encoding.Default.GetBytes("Public");
-                if (PublicBeta.Length > cchNameBufferSize) return false;
-                Marshal.Copy(PublicBeta, 0, pchName, PublicBeta.Length);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Write("GetCurrentBetaName " + ex);
-                return false;
-            }
+            Write("GetCurrentBetaName");
+            WriteUtf8Buffer(pchName, cchNameBufferSize, activeBetaName);
+            return !string.IsNullOrEmpty(activeBetaName);
         }
 
         public bool MarkContentCorrupt(bool bMissingFilesOnly)
@@ -192,23 +184,25 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public UInt32 GetInstalledDepots(uint appID, ref DepotId_t[] pvecDepots, uint cMaxDepots)
+        public UInt32 GetInstalledDepots(uint appID, IntPtr pvecDepots, uint cMaxDepots)
         {
             Write($"GetInstalledDepots {appID}, {cMaxDepots}");
             return 0;
         }
 
-        public UInt32 GetAppInstallDir(uint appID, string pchFolder, uint cchFolderBufferSize)
+        public UInt32 GetAppInstallDir(uint appID, IntPtr pchFolder, uint cchFolderBufferSize)
         {
-            Write($"GetAppInstallDir {appID} {pchFolder} {cchFolderBufferSize}");
             string installed_path = Common.GetPath();
-            return (uint)installed_path.Length;
+            uint copied = (uint)WriteUtf8Buffer(pchFolder, cchFolderBufferSize, installed_path);
+            Write($"GetAppInstallDir {appID} = {installed_path} ({copied} bytes)");
+            return copied;
         }
 
         public bool BIsAppInstalled(uint appID)
         {
-            Write($"BIsAppInstalled {appID}");
-            return true;
+            bool installed = appID == SteamEmulator.AppID;
+            Write($"BIsAppInstalled {appID} = {installed}");
+            return installed;
         }
 
         public CSteamID GetAppOwner()
@@ -219,13 +213,15 @@ namespace SKYNET.Steamworks.Implementation
 
         public IntPtr GetLaunchQueryParam(string pchKey)
         {
-            Write("GetLaunchQueryParam");
-            return default;
+            Write($"GetLaunchQueryParam {pchKey}");
+            return NativeStringCache.ToUtf8Ptr(string.Empty);
         }
 
-        public bool GetDlcDownloadProgress(uint nAppID, UInt64 punBytesDownloaded, UInt64 punBytesTotal)
+        public bool GetDlcDownloadProgress(uint nAppID, IntPtr punBytesDownloaded, IntPtr punBytesTotal)
         {
             Write($"GetDlcDownloadProgress (AppID = {nAppID})");
+            WriteUInt64(punBytesDownloaded, 0);
+            WriteUInt64(punBytesTotal, 0);
             return false;
         }
 
@@ -253,16 +249,123 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool BIsTimedTrial(UInt32 punSecondsAllowed, UInt32 punSecondsPlayed)
+        public bool BIsTimedTrial(IntPtr punSecondsAllowed, IntPtr punSecondsPlayed)
         {
             Write("BIsTimedTrial");
+            WriteUInt32(punSecondsAllowed, 0);
+            WriteUInt32(punSecondsPlayed, 0);
             return false;
         }
 
-        public int GetLaunchCommandLine(string pszCommandLine, int cubCommandLine)
+        public int GetLaunchCommandLine(IntPtr pszCommandLine, int cubCommandLine)
         {
             Write("GetLaunchCommandLine");
+            WriteUtf8Buffer(pszCommandLine, cubCommandLine, string.Empty);
             return 0;
+        }
+
+        public bool SetDlcContext(uint nAppID)
+        {
+            if (nAppID == 0)
+            {
+                currentDlcContext = 0;
+                Write("SetDlcContext cleared");
+                return true;
+            }
+
+            if (!DLCManager.IsOwned(nAppID))
+            {
+                Write($"SetDlcContext (AppID = {nAppID}) = false");
+                return false;
+            }
+
+            currentDlcContext = nAppID;
+            Write($"SetDlcContext (AppID = {currentDlcContext}) = true");
+            return true;
+        }
+
+        public int GetNumBetas(IntPtr pnAvailable, IntPtr pnPrivate)
+        {
+            WriteUInt32(pnAvailable, 1);
+            WriteUInt32(pnPrivate, 0);
+            Write("GetNumBetas = 1");
+            return 1;
+        }
+
+        public bool GetBetaInfo(
+            int iBetaIndex,
+            IntPtr punFlags,
+            IntPtr punBuildID,
+            IntPtr pchBetaName,
+            int cchBetaName,
+            IntPtr pchDescription,
+            int cchDescription)
+        {
+            if (iBetaIndex != 0)
+            {
+                Write($"GetBetaInfo ({iBetaIndex}) = false");
+                return false;
+            }
+
+            WriteUInt32(punFlags, 0);
+            WriteUInt32(punBuildID, unchecked((uint)GetAppBuildId()));
+            WriteUtf8Buffer(pchBetaName, cchBetaName, "public");
+            WriteUtf8Buffer(pchDescription, cchDescription, "Default branch");
+            Write("GetBetaInfo (0) = public");
+            return true;
+        }
+
+        public bool SetActiveBeta(string pchBetaName)
+        {
+            string requested = (pchBetaName ?? string.Empty).Trim();
+            if (requested.Length == 0 || requested.Equals("public", StringComparison.OrdinalIgnoreCase))
+            {
+                activeBetaName = string.Empty;
+                Write("SetActiveBeta = public");
+                return true;
+            }
+
+            Write($"SetActiveBeta ({requested}) = false");
+            return false;
+        }
+
+        private static int WriteUtf8Buffer(IntPtr destination, uint destinationSize, string value)
+        {
+            return WriteUtf8Buffer(destination, destinationSize > int.MaxValue ? int.MaxValue : (int)destinationSize, value);
+        }
+
+        private static int WriteUtf8Buffer(IntPtr destination, int destinationSize, string value)
+        {
+            if (destination == IntPtr.Zero || destinationSize <= 0)
+            {
+                return 0;
+            }
+
+            byte[] bytes = Encoding.UTF8.GetBytes(value ?? string.Empty);
+            int length = Math.Min(bytes.Length, destinationSize - 1);
+            if (length > 0)
+            {
+                Marshal.Copy(bytes, 0, destination, length);
+            }
+
+            Marshal.WriteByte(destination, length, 0);
+            return length;
+        }
+
+        private static void WriteUInt32(IntPtr destination, uint value)
+        {
+            if (destination != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(destination, unchecked((int)value));
+            }
+        }
+
+        private static void WriteUInt64(IntPtr destination, ulong value)
+        {
+            if (destination != IntPtr.Zero)
+            {
+                Marshal.WriteInt64(destination, unchecked((long)value));
+            }
         }
     }
 }

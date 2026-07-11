@@ -4,18 +4,32 @@ using SKYNET.Types;
 namespace SKYNET.Managers
 {
     /// <summary>
-    /// Central store and query logic for DLC ownership. When <see cref="UnlockAll"/>
-    /// is enabled every DLC is reported as owned/installed; otherwise only explicitly
-    /// configured DLCs that are marked available are reported.
+    /// Central store for DLC catalog visibility, ownership and runtime install state.
+    /// Unlock-all grants ownership/install state while explicit uninstall overrides
+    /// remain effective for the lifetime of the process.
     /// </summary>
     public static class DLCManager
     {
         private static readonly object Sync = new object();
+        private static readonly HashSet<uint> InstalledOverrides = new HashSet<uint>();
+        private static readonly HashSet<uint> UninstalledOverrides = new HashSet<uint>();
 
         public static bool UnlockAll
         {
-            get { return SteamEmulator.UnlockAllDLC; }
-            set { SteamEmulator.UnlockAllDLC = value; }
+            get
+            {
+                lock (Sync)
+                {
+                    return SteamEmulator.UnlockAllDLC;
+                }
+            }
+            set
+            {
+                lock (Sync)
+                {
+                    SteamEmulator.UnlockAllDLC = value;
+                }
+            }
         }
 
         private static List<DLC> Store
@@ -35,10 +49,17 @@ namespace SKYNET.Managers
             lock (Sync)
             {
                 Store.Clear();
+                InstalledOverrides.Clear();
+                UninstalledOverrides.Clear();
             }
         }
 
-        public static void AddOrUpdate(uint appId, string name, bool available = true)
+        public static void AddOrUpdate(
+            uint appId,
+            string name,
+            bool available = true,
+            bool owned = true,
+            bool installed = true)
         {
             if (appId == 0)
             {
@@ -52,6 +73,8 @@ namespace SKYNET.Managers
                 {
                     existing.Name = name ?? string.Empty;
                     existing.Available = available;
+                    existing.Owned = owned;
+                    existing.Installed = installed;
                     return;
                 }
 
@@ -59,7 +82,9 @@ namespace SKYNET.Managers
                 {
                     AppId = appId,
                     Name = name ?? string.Empty,
-                    Available = available
+                    Available = available,
+                    Owned = owned,
+                    Installed = installed
                 });
             }
         }
@@ -76,19 +101,73 @@ namespace SKYNET.Managers
         }
 
         /// <summary>
-        /// Returns true when the given DLC AppId should be reported as owned/installed.
+        /// Returns true when the given DLC AppId is both owned and installed.
         /// </summary>
         public static bool HasDLC(uint appId)
         {
-            if (UnlockAll)
-            {
-                return true;
-            }
-
             lock (Sync)
             {
+                return IsOwnedLocked(appId) && IsInstalledLocked(appId);
+            }
+        }
+
+        public static bool IsOwned(uint appId)
+        {
+            lock (Sync)
+            {
+                return IsOwnedLocked(appId);
+            }
+        }
+
+        public static bool IsInstalled(uint appId)
+        {
+            lock (Sync)
+            {
+                return IsInstalledLocked(appId);
+            }
+        }
+
+        public static bool TryInstall(uint appId)
+        {
+            lock (Sync)
+            {
+                if (!IsOwnedLocked(appId))
+                {
+                    return false;
+                }
+
+                UninstalledOverrides.Remove(appId);
+                InstalledOverrides.Add(appId);
+
                 var entry = Store.Find(d => d.AppId == appId);
-                return entry != null && entry.Available;
+                if (entry != null)
+                {
+                    entry.Installed = true;
+                }
+
+                return true;
+            }
+        }
+
+        public static bool TryUninstall(uint appId)
+        {
+            lock (Sync)
+            {
+                if (!IsOwnedLocked(appId))
+                {
+                    return false;
+                }
+
+                InstalledOverrides.Remove(appId);
+                UninstalledOverrides.Add(appId);
+
+                var entry = Store.Find(d => d.AppId == appId);
+                if (entry != null)
+                {
+                    entry.Installed = false;
+                }
+
+                return true;
             }
         }
 
@@ -111,6 +190,38 @@ namespace SKYNET.Managers
                 name = entry.Name ?? string.Empty;
                 return true;
             }
+        }
+
+        private static bool IsOwnedLocked(uint appId)
+        {
+            if (appId == 0)
+            {
+                return false;
+            }
+
+            if (SteamEmulator.UnlockAllDLC)
+            {
+                return true;
+            }
+
+            var entry = Store.Find(d => d.AppId == appId);
+            return entry != null && entry.Owned;
+        }
+
+        private static bool IsInstalledLocked(uint appId)
+        {
+            if (appId == 0 || UninstalledOverrides.Contains(appId))
+            {
+                return false;
+            }
+
+            if (InstalledOverrides.Contains(appId) || SteamEmulator.UnlockAllDLC)
+            {
+                return true;
+            }
+
+            var entry = Store.Find(d => d.AppId == appId);
+            return entry != null && entry.Installed;
         }
     }
 }

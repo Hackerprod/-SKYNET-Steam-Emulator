@@ -2,8 +2,6 @@ using SKYNET.Steamworks;
 using System;
 using SKYNET.Helpers;
 
-using DepotId_t = System.UInt32;
-
 namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("STEAMAPPS_INTERFACE_VERSION008")]
@@ -29,12 +27,12 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamApps.BIsVACBanned();
         }
 
-        public string GetCurrentGameLanguage(IntPtr _)
+        public IntPtr GetCurrentGameLanguage(IntPtr _)
         {
             return SteamEmulator.SteamApps.GetCurrentGameLanguage();
         }
 
-        public string GetAvailableGameLanguages(IntPtr _)
+        public IntPtr GetAvailableGameLanguages(IntPtr _)
         {
             return SteamEmulator.SteamApps.GetAvailableGameLanguages();
         }
@@ -94,12 +92,12 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamApps.MarkContentCorrupt(bMissingFilesOnly);
         }
 
-        public uint GetInstalledDepots(IntPtr _, uint appID, ref DepotId_t[] pvecDepots, uint cMaxDepots)  
+        public uint GetInstalledDepots(IntPtr _, uint appID, IntPtr pvecDepots, uint cMaxDepots)
         {
-            return SteamEmulator.SteamApps.GetInstalledDepots(appID, ref pvecDepots, cMaxDepots);
+            return SteamEmulator.SteamApps.GetInstalledDepots(appID, pvecDepots, cMaxDepots);
         }
 
-        public uint GetAppInstallDir(IntPtr _, uint appID, string pchFolder, uint cchFolderBufferSize)
+        public uint GetAppInstallDir(IntPtr _, uint appID, IntPtr pchFolder, uint cchFolderBufferSize)
         {
             return SteamEmulator.SteamApps.GetAppInstallDir(appID, pchFolder, cchFolderBufferSize);
         }
@@ -119,7 +117,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamApps.GetLaunchQueryParam(pchKey);
         }
 
-        public bool GetDlcDownloadProgress(IntPtr _, uint nAppID, ulong punBytesDownloaded, ulong punBytesTotal)
+        public bool GetDlcDownloadProgress(IntPtr _, uint nAppID, IntPtr punBytesDownloaded, IntPtr punBytesTotal)
         {
             return SteamEmulator.SteamApps.GetDlcDownloadProgress(nAppID, punBytesDownloaded, punBytesTotal);
         }
@@ -139,7 +137,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamApps.GetFileDetails(pszFileName);
         }
 
-        public int GetLaunchCommandLine(IntPtr _, string pszCommandLine, int cubCommandLine)
+        public int GetLaunchCommandLine(IntPtr _, IntPtr pszCommandLine, int cubCommandLine)
         {
             return SteamEmulator.SteamApps.GetLaunchCommandLine(pszCommandLine, cubCommandLine);
         }
@@ -149,9 +147,46 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamApps.BIsSubscribedFromFamilySharing();
         }
 
-        public bool BIsTimedTrial(IntPtr _, uint punSecondsAllowed, uint punSecondsPlayed)
+        public bool BIsTimedTrial(IntPtr _, IntPtr punSecondsAllowed, IntPtr punSecondsPlayed)
         {
             return SteamEmulator.SteamApps.BIsTimedTrial(punSecondsAllowed, punSecondsPlayed);
+        }
+
+        // Slots 29-32 are part of SteamApps008 in SDK 1.60+ even though the
+        // interface version string remained unchanged.
+        public bool SetDlcContext(IntPtr _, uint nAppID)
+        {
+            return SteamEmulator.SteamApps.SetDlcContext(nAppID);
+        }
+
+        public int GetNumBetas(IntPtr _, IntPtr pnAvailable, IntPtr pnPrivate)
+        {
+            return SteamEmulator.SteamApps.GetNumBetas(pnAvailable, pnPrivate);
+        }
+
+        public bool GetBetaInfo(
+            IntPtr _,
+            int iBetaIndex,
+            IntPtr punFlags,
+            IntPtr punBuildID,
+            IntPtr pchBetaName,
+            int cchBetaName,
+            IntPtr pchDescription,
+            int cchDescription)
+        {
+            return SteamEmulator.SteamApps.GetBetaInfo(
+                iBetaIndex,
+                punFlags,
+                punBuildID,
+                pchBetaName,
+                cchBetaName,
+                pchDescription,
+                cchDescription);
+        }
+
+        public bool SetActiveBeta(IntPtr _, string pchBetaName)
+        {
+            return SteamEmulator.SteamApps.SetActiveBeta(pchBetaName);
         }
     }
 }

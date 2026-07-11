@@ -11,8 +11,9 @@ namespace SKYNET.Types
         public string Name { get; set; }
         public uint AppId { get; set; }
 
-        // Whether the DLC is reported as available/installed to the game.
-        // Defaults to true so a configured DLC is owned unless explicitly disabled.
+        // Store/catalog visibility is independent from license ownership and install state.
         public bool Available { get; set; } = true;
+        public bool Owned { get; set; } = true;
+        public bool Installed { get; set; } = true;
     }
 }

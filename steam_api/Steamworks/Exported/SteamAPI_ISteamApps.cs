@@ -1,8 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
 
-using DepotId_t = System.UInt32;
-
 namespace SKYNET.Steamworks.Exported
 {
     public class SteamAPI_ISteamApps
@@ -44,14 +42,14 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_ISteamApps_GetCurrentGameLanguage(IntPtr _)
+        public static IntPtr SteamAPI_ISteamApps_GetCurrentGameLanguage(IntPtr _)
         {
             Write("SteamAPI_ISteamApps_GetCurrentGameLanguage");
             return SteamEmulator.SteamApps.GetCurrentGameLanguage();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_ISteamApps_GetAvailableGameLanguages(IntPtr _)
+        public static IntPtr SteamAPI_ISteamApps_GetAvailableGameLanguages(IntPtr _)
         {
             Write("SteamAPI_ISteamApps_GetAvailableGameLanguages");
             return SteamEmulator.SteamApps.GetAvailableGameLanguages();
@@ -135,10 +133,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static UInt32 SteamAPI_ISteamApps_GetInstalledDepots(IntPtr _, uint appID, ref DepotId_t[] pvecDepots, uint cMaxDepots)
+        public static UInt32 SteamAPI_ISteamApps_GetInstalledDepots(IntPtr _, uint appID, IntPtr pvecDepots, uint cMaxDepots)
         {
             Write($"SteamAPI_ISteamApps_GetInstalledDepots");
-            return SteamEmulator.SteamApps.GetInstalledDepots(appID, ref pvecDepots, cMaxDepots);
+            return SteamEmulator.SteamApps.GetInstalledDepots(appID, pvecDepots, cMaxDepots);
         }
 
         //[DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -149,7 +147,7 @@ namespace SKYNET.Steamworks.Exported
         //}
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static UInt32 SteamAPI_ISteamApps_GetAppInstallDir(IntPtr _, uint appID, string pchFolder, uint cchFolderBufferSize)
+        public static UInt32 SteamAPI_ISteamApps_GetAppInstallDir(IntPtr _, uint appID, IntPtr pchFolder, uint cchFolderBufferSize)
         {
             Write($"SteamAPI_ISteamApps_GetAppInstallDir");
             return SteamEmulator.SteamApps.GetAppInstallDir(appID, pchFolder, cchFolderBufferSize);
@@ -177,7 +175,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamApps_GetDlcDownloadProgress(IntPtr _, uint nAppID, UInt64 punBytesDownloaded, UInt64 punBytesTotal)
+        public static bool SteamAPI_ISteamApps_GetDlcDownloadProgress(IntPtr _, uint nAppID, IntPtr punBytesDownloaded, IntPtr punBytesTotal)
         {
             Write("SteamAPI_ISteamApps_GetDlcDownloadProgress");
             return SteamEmulator.SteamApps.GetDlcDownloadProgress(nAppID, punBytesDownloaded, punBytesTotal);
@@ -205,7 +203,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamApps_GetLaunchCommandLine(IntPtr _, string pszCommandLine, int cubCommandLine)
+        public static int SteamAPI_ISteamApps_GetLaunchCommandLine(IntPtr _, IntPtr pszCommandLine, int cubCommandLine)
         {
             Write("SteamAPI_ISteamApps_GetLaunchCommandLine");
             return SteamEmulator.SteamApps.GetLaunchCommandLine(pszCommandLine, cubCommandLine);
@@ -219,10 +217,53 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamApps_BIsTimedTrial(IntPtr _, UInt32 punSecondsAllowed, UInt32 punSecondsPlayed)
+        public static bool SteamAPI_ISteamApps_BIsTimedTrial(IntPtr _, IntPtr punSecondsAllowed, IntPtr punSecondsPlayed)
         {
             Write("SteamAPI_ISteamApps_BIsTimedTrial");
             return SteamEmulator.SteamApps.BIsTimedTrial(punSecondsAllowed, punSecondsPlayed);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamApps_SetDlcContext(IntPtr _, uint nAppID)
+        {
+            Write("SteamAPI_ISteamApps_SetDlcContext");
+            return SteamEmulator.SteamApps.SetDlcContext(nAppID);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_ISteamApps_GetNumBetas(IntPtr _, IntPtr pnAvailable, IntPtr pnPrivate)
+        {
+            Write("SteamAPI_ISteamApps_GetNumBetas");
+            return SteamEmulator.SteamApps.GetNumBetas(pnAvailable, pnPrivate);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamApps_GetBetaInfo(
+            IntPtr _,
+            int iBetaIndex,
+            IntPtr punFlags,
+            IntPtr punBuildID,
+            IntPtr pchBetaName,
+            int cchBetaName,
+            IntPtr pchDescription,
+            int cchDescription)
+        {
+            Write("SteamAPI_ISteamApps_GetBetaInfo");
+            return SteamEmulator.SteamApps.GetBetaInfo(
+                iBetaIndex,
+                punFlags,
+                punBuildID,
+                pchBetaName,
+                cchBetaName,
+                pchDescription,
+                cchDescription);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamApps_SetActiveBeta(IntPtr _, string pchBetaName)
+        {
+            Write("SteamAPI_ISteamApps_SetActiveBeta");
+            return SteamEmulator.SteamApps.SetActiveBeta(pchBetaName);
         }
 
         private static void Write(string msg)
