@@ -36,19 +36,34 @@ namespace SKYNET.Steamworks.Implementation
         {
             if (SkyNetApiClient.IsEnabled)
             {
-                bool serverSession = SkyNetApiClient.EnsureSession() && SkyNetApiClient.RefreshSelf();
-                Write($"BLoggedOn = {serverSession}");
-                if (serverSession)
+                // Report the cached connection state without blocking. If we are
+                // not connected yet, the handshake is kicked off in background and
+                // the connected callback fires from OnServerSessionConnected().
+                bool connected = SkyNetApiClient.IsConnected;
+                if (connected)
                 {
+                    SkyNetApiClient.QueueSelfRefresh();
                     QueueSteamServersConnected();
                 }
+                else
+                {
+                    SkyNetApiClient.EnsureSession();
+                }
 
-                return serverSession;
+                Write($"BLoggedOn = {connected}");
+                return connected;
             }
 
             Write("BLoggedOn");
             QueueSteamServersConnected();
             return true;
+        }
+
+        // Invoked from the background session handshake once a token is obtained,
+        // so the game receives SteamServersConnected_t without polling.
+        public void OnServerSessionConnected()
+        {
+            QueueSteamServersConnected();
         }
 
         private void QueueSteamServersConnected()
@@ -64,10 +79,17 @@ namespace SKYNET.Steamworks.Implementation
 
         public CSteamID GetSteamID()
         {
-            if (SkyNetApiClient.IsEnabled && !SkyNetApiClient.RefreshSelf())
+            if (SkyNetApiClient.IsEnabled)
             {
-                Write("GetSteamID unavailable: no active server session");
-                return CSteamID.Invalid;
+                if (!SkyNetApiClient.IsConnected)
+                {
+                    SkyNetApiClient.EnsureSession();
+                    Write("GetSteamID unavailable: no active server session");
+                    return CSteamID.Invalid;
+                }
+
+                // Connected: return the cached identity and refresh in background.
+                SkyNetApiClient.QueueSelfRefresh();
             }
 
             var SteamId = SteamEmulator.SteamID;
@@ -274,7 +296,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetPlayerSteamLevel()
         {
-            SkyNetApiClient.RefreshSelf();
+            SkyNetApiClient.QueueSelfRefresh();
             int level = SkyNetStateCache.GetSelfPlayerLevel();
             Write($"GetPlayerSteamLevel {level}");
             return level == 0 ? 100 : level;

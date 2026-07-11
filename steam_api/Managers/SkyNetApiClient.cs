@@ -30,6 +30,14 @@ namespace SKYNET.Managers
         private static readonly ConcurrentDictionary<ulong, byte> PendingUserProfileRefreshes = new ConcurrentDictionary<ulong, byte>();
         private static int FriendsRefreshQueued;
         private static int SelfRefreshQueued;
+        private static int SessionHandshakeRunning;
+        private static readonly ConcurrentDictionary<string, string> PendingPresence = new ConcurrentDictionary<string, string>();
+        private static readonly AutoResetEvent PresenceSignal = new AutoResetEvent(false);
+        private static int PresenceDispatcherStarted;
+
+        // True once a server session token exists. Safe to read on the game
+        // thread without blocking; the handshake that sets it runs in background.
+        public static bool IsConnected => IsEnabled && !string.IsNullOrWhiteSpace(SteamEmulator.SkyNetAccessToken);
         private const int MaxP2PQueue = 2048;
         private const int MaxP2PBatch = 64;
         private static readonly ConcurrentQueue<SkyNetP2PPacketSendDto> P2PQueue = new ConcurrentQueue<SkyNetP2PPacketSendDto>();
@@ -44,7 +52,63 @@ namespace SKYNET.Managers
         {
         }
 
+        // Non-blocking on the caller (game) thread: returns whether a session
+        // token already exists, and otherwise kicks off the handshake in the
+        // background. The blocking network round-trip never runs on the game
+        // thread, so latency to the server no longer stalls frames.
         public static bool EnsureSession()
+        {
+            if (!IsEnabled)
+            {
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(SteamEmulator.SkyNetAccessToken))
+            {
+                return true;
+            }
+
+            QueueSessionHandshake();
+            return false;
+        }
+
+        private static void QueueSessionHandshake()
+        {
+            if (!IsEnabled || !string.IsNullOrWhiteSpace(SteamEmulator.SkyNetAccessToken))
+            {
+                return;
+            }
+
+            if (Interlocked.Exchange(ref SessionHandshakeRunning, 1) == 1)
+            {
+                return;
+            }
+
+            ThreadPool.QueueUserWorkItem(_ =>
+            {
+                try
+                {
+                    if (EstablishSessionBlocking())
+                    {
+                        RefreshSelf(true);
+                        RefreshFriends(true);
+                        SteamEmulator.SteamUser?.OnServerSessionConnected();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    SteamEmulator.Write("SkyNetApiClient", $"Session handshake failed: {ex.Message}");
+                }
+                finally
+                {
+                    Interlocked.Exchange(ref SessionHandshakeRunning, 0);
+                }
+            });
+        }
+
+        // The actual blocking handshake. Only ever called from the background
+        // worker above, never from the game thread.
+        private static bool EstablishSessionBlocking()
         {
             if (!IsEnabled)
             {
@@ -1026,19 +1090,85 @@ namespace SKYNET.Managers
             return true;
         }
 
+        // Non-blocking: the game sets rich presence dozens of times per update.
+        // We only stash the latest value per key (coalescing) and let a
+        // background thread push it to the server, so this never stalls a frame.
         public static bool SetRichPresence(string key, string value)
         {
-            if (!IsEnabled)
+            if (!IsEnabled || key == null)
             {
                 return false;
             }
 
-            EnsureSession();
-            return Send<VoidDto>(HttpMethod.Put, "api/presence", new SkyNetPresenceUpdateDto
+            PendingPresence[key] = value ?? string.Empty;
+            StartPresenceDispatcher();
+            PresenceSignal.Set();
+            return true;
+        }
+
+        private static void StartPresenceDispatcher()
+        {
+            if (Interlocked.Exchange(ref PresenceDispatcherStarted, 1) == 1)
             {
-                Key = key,
-                Value = value
-            }) != null;
+                return;
+            }
+
+            var thread = new Thread(PresenceDispatchLoop)
+            {
+                IsBackground = true,
+                Name = "SkyNetPresence"
+            };
+            thread.Start();
+        }
+
+        private static void PresenceDispatchLoop()
+        {
+            while (true)
+            {
+                try
+                {
+                    PresenceSignal.WaitOne(250);
+
+                    if (!IsEnabled || PendingPresence.IsEmpty)
+                    {
+                        continue;
+                    }
+
+                    // Wait until the session is up; keep the pending values so
+                    // the latest presence is sent once we are connected.
+                    if (!EnsureSession())
+                    {
+                        Thread.Sleep(200);
+                        continue;
+                    }
+
+                    foreach (var key in PendingPresence.Keys)
+                    {
+                        if (!PendingPresence.TryRemove(key, out var value))
+                        {
+                            continue;
+                        }
+
+                        try
+                        {
+                            Send<VoidDto>(HttpMethod.Put, "api/presence", new SkyNetPresenceUpdateDto
+                            {
+                                Key = key,
+                                Value = value
+                            });
+                        }
+                        catch
+                        {
+                            // Presence is ephemeral; drop on failure. The game
+                            // re-sends it constantly, so it self-heals.
+                        }
+                    }
+                }
+                catch
+                {
+                    Thread.Sleep(200);
+                }
+            }
         }
 
         public static bool RefreshAvatar(ulong steamId)
