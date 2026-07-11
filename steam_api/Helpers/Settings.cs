@@ -1,4 +1,5 @@
 ﻿using SKYNET;
+using SKYNET.Managers;
 using SKYNET.Steamworks;
 using System;
 using System.Collections.Generic;
@@ -39,6 +40,15 @@ namespace SKYNET.Helper
                     config.AppendLine("[Game Settings]");
                     config.AppendLine($"Languaje = english");
                     config.AppendLine($"AppId = 570");
+                    config.AppendLine("# Report every DLC as owned and installed (default). Set to false and list the");
+                    config.AppendLine("# owned DLC in the [DLC] section below (or in a \"[SKYNET] DLC.txt\" file) to restrict.");
+                    config.AppendLine("UnlockAllDLC = true");
+                    config.AppendLine();
+
+                    config.AppendLine("[DLC]");
+                    config.AppendLine("# Optional list of owned DLC, one entry per line: <AppId> = <Name>");
+                    config.AppendLine("# Only enforced when UnlockAllDLC = false. Example:");
+                    config.AppendLine("# 247175 = Left 4 Dead 2 - The Passing");
                     config.AppendLine();
 
                     // Network Configuration
@@ -78,6 +88,8 @@ namespace SKYNET.Helper
                     if (item.Key == "AppId")
                         if (uint.TryParse((string)item.Value, out uint appId))
                             SteamEmulator.AppID = appId;
+
+                LoadDLCs();
 
                 SteamEmulator.SendLog = (bool)IniParser["Log Settings"]["File"];
                 SteamEmulator.LogToFile = SteamEmulator.SendLog;
@@ -168,6 +180,7 @@ namespace SKYNET.Helper
         private static bool EnsureMissingDefaults()
         {
             bool changed = false;
+            changed |= EnsureSetting("Game Settings", "UnlockAllDLC", "true");
             changed |= EnsureSetting("User Settings", "ClientInstanceId", GenerateClientInstanceId());
             changed |= MigrateSettingName("User Settings", "PersonaName", "FallbackPersonaName", Environment.UserName);
             changed |= MigrateSettingName("User Settings", "AccountId", "FallbackAccountId", GenerateStableAccountId().ToString());
@@ -228,6 +241,81 @@ namespace SKYNET.Helper
             var settings = IniParser[section].Settings;
             int removed = settings.RemoveAll(s => string.Equals(s.Key, key, StringComparison.OrdinalIgnoreCase));
             return removed > 0;
+        }
+
+        private static bool GetBool(string section, string key, bool fallback)
+        {
+            var value = IniParser[section][key];
+            if (value != null && bool.TryParse(value.ToString(), out var parsed))
+            {
+                return parsed;
+            }
+
+            return fallback;
+        }
+
+        /// <summary>
+        /// Loads DLC ownership configuration:
+        ///  - [Game Settings] UnlockAllDLC toggles reporting every DLC as owned (default true).
+        ///  - The optional [DLC] ini section and a "[SKYNET] DLC.txt" file list owned DLC as
+        ///    "AppId = Name". If the DLC.txt file exists, unlock-all is forced off so only the
+        ///    listed DLC are reported.
+        /// </summary>
+        private static void LoadDLCs()
+        {
+            try
+            {
+                DLCManager.Clear();
+                DLCManager.UnlockAll = GetBool("Game Settings", "UnlockAllDLC", true);
+
+                // DLC entries declared inline in the ini [DLC] section.
+                foreach (var item in IniParser["DLC"].Settings)
+                {
+                    AddDLCEntry(item.Key, item.Value == null ? string.Empty : item.Value.ToString());
+                }
+
+                // DLC entries declared in an external plain-text file.
+                string dlcFile = Path.Combine(modCommon.GetPath(), "SKYNET", "[SKYNET] DLC.txt");
+                if (File.Exists(dlcFile))
+                {
+                    DLCManager.UnlockAll = false;
+                    foreach (var rawLine in File.ReadAllLines(dlcFile))
+                    {
+                        string line = rawLine.Trim();
+                        if (line.Length == 0 || line[0] == '#' || line[0] == ';')
+                        {
+                            continue;
+                        }
+
+                        int separator = line.IndexOf('=');
+                        if (separator <= 0)
+                        {
+                            continue;
+                        }
+
+                        AddDLCEntry(line.Substring(0, separator).Trim(), line.Substring(separator + 1).Trim());
+                    }
+                }
+
+                SteamEmulator.Write("Settings", $"Loaded DLC config: UnlockAll = {DLCManager.UnlockAll}, Count = {DLCManager.Count}");
+            }
+            catch (Exception ex)
+            {
+                SteamEmulator.Write("Settings", $"Failed to load DLC config: {ex.Message}");
+            }
+        }
+
+        private static void AddDLCEntry(string appIdText, string name)
+        {
+            if (string.IsNullOrWhiteSpace(appIdText))
+            {
+                return;
+            }
+
+            if (uint.TryParse(appIdText.Trim(), out uint appId) && appId != 0)
+            {
+                DLCManager.AddOrUpdate(appId, name == null ? string.Empty : name.Trim(), true);
+            }
         }
 
         private static string GetString(string section, string key, string fallback)

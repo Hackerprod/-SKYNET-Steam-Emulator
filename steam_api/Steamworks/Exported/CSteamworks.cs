@@ -384,7 +384,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamApps_BGetDLCDataByIndex(int iDLC, AppId_t pAppID, bool pbAvailable, string pchName, int cchNameBufferSize)
+        public static bool ISteamApps_BGetDLCDataByIndex(int iDLC, IntPtr pAppID, IntPtr pbAvailable, IntPtr pchName, int cchNameBufferSize)
         {
             return SteamEmulator.SteamApps.BGetDLCDataByIndex(iDLC, pAppID, pbAvailable, pchName, cchNameBufferSize);
         }

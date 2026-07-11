@@ -10,5 +10,9 @@ namespace SKYNET.Types
     {
         public string Name { get; set; }
         public uint AppId { get; set; }
+
+        // Whether the DLC is reported as available/installed to the game.
+        // Defaults to true so a configured DLC is owned unless explicitly disabled.
+        public bool Available { get; set; } = true;
     }
 }

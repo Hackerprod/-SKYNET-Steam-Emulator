@@ -94,6 +94,7 @@
     <Compile Include="Managers\AudioManager.cs" />
     <Compile Include="Managers\CallbackManager_.cs" />
     <Compile Include="Managers\ContextManager.cs" />
+    <Compile Include="Managers\DLCManager.cs" />
     <Compile Include="Managers\LobbyManager.cs" />
     <Compile Include="Managers\NetworkManager.cs" />
     <Compile Include="Managers\OverlayManager.cs" />

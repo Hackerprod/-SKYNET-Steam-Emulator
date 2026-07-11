@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using SKYNET.Callback;
+using SKYNET.Managers;
 using SKYNET.Steamworks.Interfaces;
 using SKYNET.Types;
 using DepotId_t = System.UInt32;
@@ -11,7 +13,6 @@ namespace SKYNET.Steamworks.Implementation
     public class SteamApps : ISteamInterface
     {
         public static SteamApps Instance;
-        public List<DLC> GameDLC => SteamEmulator.DLCs;
 
         public SteamApps()
         {
@@ -60,16 +61,29 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool BIsSubscribedApp(uint appID)
         {
-            Write($"BIsSubscribedApp ({appID})");
-            return false;
+            bool result;
+            if (appID == 0)
+            {
+                result = true;                      // appid 0 is always owned
+            }
+            else if (appID == SteamEmulator.AppID)
+            {
+                result = true;                      // the base game itself
+            }
+            else
+            {
+                result = DLCManager.HasDLC(appID);  // owned DLC (or unlock-all)
+            }
+
+            Write($"BIsSubscribedApp (AppID = {appID}) = {result}");
+            return result;
         }
 
         public bool BIsDlcInstalled(uint appID)
         {
-            var Result = GameDLC.Find(d => d.AppId == appID) != null;
-            Write($"BIsDlcInstalled (AppID = {appID}) = {Result}");
-            // Force DLC load
-            return Result;
+            bool result = appID == 0 || DLCManager.HasDLC(appID);
+            Write($"BIsDlcInstalled (AppID = {appID}) = {result}");
+            return result;
         }
 
         public UInt32 GetEarliestPurchaseUnixTime(uint nAppID)
@@ -87,20 +101,62 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetDLCCount()
         {
-            var DLCsCount = SteamEmulator.DLCs == null ? 0 :SteamEmulator.DLCs.Count;
-            Write($"GetDLCCount {DLCsCount}");
-            return DLCsCount;
+            int count = DLCManager.Count;
+            Write($"GetDLCCount {count}");
+            return count;
         }
 
-        public bool BGetDLCDataByIndex(int iDLC, uint pAppID, bool pbAvailable, string pchName, int cchNameBufferSize)
+        public bool BGetDLCDataByIndex(int iDLC, IntPtr pAppID, IntPtr pbAvailable, IntPtr pchName, int cchNameBufferSize)
         {
-            Write("BGetDLCDataByIndex");
+            if (!DLCManager.TryGet(iDLC, out uint appId, out bool available, out string name))
+            {
+                Write($"BGetDLCDataByIndex (iDLC = {iDLC}) = false");
+                return false;
+            }
+
+            if (pAppID != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(pAppID, (int)appId);
+            }
+
+            if (pbAvailable != IntPtr.Zero)
+            {
+                Marshal.WriteByte(pbAvailable, (byte)(available ? 1 : 0));
+            }
+
+            if (pchName != IntPtr.Zero && cchNameBufferSize > 0)
+            {
+                byte[] nameBytes = Encoding.UTF8.GetBytes(name ?? string.Empty);
+                int copyLength = nameBytes.Length;
+                if (copyLength > cchNameBufferSize - 1)
+                {
+                    copyLength = cchNameBufferSize - 1;
+                }
+                if (copyLength < 0)
+                {
+                    copyLength = 0;
+                }
+
+                if (copyLength > 0)
+                {
+                    Marshal.Copy(nameBytes, 0, pchName, copyLength);
+                }
+                Marshal.WriteByte(pchName, copyLength, 0); // null terminator
+            }
+
+            Write($"BGetDLCDataByIndex (iDLC = {iDLC}) AppID = {appId} Available = {available} Name = {name}");
             return true;
         }
 
         public void InstallDLC(uint nAppID)
         {
             Write($"InstallDLC (AppID = {nAppID})");
+            // The DLC is already considered installed; notify the game so callers
+            // that wait for DlcInstalled_t after InstallDLC can proceed.
+            if (nAppID != 0)
+            {
+                CallbackManager.AddCallback(new DlcInstalled_t { AppID = nAppID });
+            }
         }
 
         public void UninstallDLC(uint nAppID)

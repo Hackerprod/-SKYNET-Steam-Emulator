@@ -1566,17 +1566,17 @@ namespace SKYNET.Callback
         #endregion
     }
 
-    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //public struct DlcInstalled_t : ICallbackData
-    //{
-    //    public AppId AppID; // m_nAppID AppId_t
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    public struct DlcInstalled_t : ICallbackData
+    {
+        public uint AppID; // m_nAppID AppId_t
 
-    //    #region SteamCallback
-    //    public static int _datasize = Marshal.SizeOf(typeof(DlcInstalled_t));
-    //    public int DataSize => _datasize;
-    //    public CallbackType CallbackType => CallbackType.DlcInstalled;
-    //    #endregion
-    //}
+        #region SteamCallback
+        public static int _datasize = Marshal.SizeOf(typeof(DlcInstalled_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.DlcInstalled;
+        #endregion
+    }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     public struct RegisterActivationCodeResponse_t : ICallbackData

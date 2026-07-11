@@ -64,7 +64,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamApps.GetDLCCount();
         }
 
-        public bool BGetDLCDataByIndex(IntPtr _, int iDLC, uint pAppID, bool pbAvailable, string pchName, int cchNameBufferSize)
+        public bool BGetDLCDataByIndex(IntPtr _, int iDLC, IntPtr pAppID, IntPtr pbAvailable, IntPtr pchName, int cchNameBufferSize)
         {
             return SteamEmulator.SteamApps.BGetDLCDataByIndex(iDLC, pAppID, pbAvailable, pchName, cchNameBufferSize);
         }

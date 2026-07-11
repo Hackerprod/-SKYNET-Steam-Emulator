@@ -41,6 +41,7 @@ public class SteamEmulator
     public static CSteamID SteamID_GS;
     public static uint AppID;
     public static List<DLC> DLCs;
+    public static bool UnlockAllDLC;
 
     public static HSteamUser HSteamUser;
     public static HSteamPipe HSteamPipe;
@@ -132,6 +133,7 @@ public class SteamEmulator
         SteamID_GS = CSteamID.CreateOne(true); 
         AppID = 0;
         DLCs = new List<DLC>();
+        UnlockAllDLC = true;
         LogToFile = true;
         LogToConsole = true;
         ISteamHTTP = true;
