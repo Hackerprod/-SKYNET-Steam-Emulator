@@ -58,7 +58,7 @@ namespace SKYNET.Steamworks.Implementation
         public IntPtr GetISteamGameServer(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
             Write($"GetISteamGameServer {pchVersion}");
-            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion, true);
         }
 
         public void SetLocalIPBinding(UInt32 unIP, uint usPort)
@@ -93,7 +93,8 @@ namespace SKYNET.Steamworks.Implementation
         public IntPtr GetISteamGenericInterface(HSteamUser hSteamUser, HSteamPipe hSteamPipe, [MarshalAs(UnmanagedType.LPStr)] string pchVersion)
         {
             Write($"GetISteamGenericInterface {pchVersion}");
-            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
+            bool gameServerContext = hSteamUser == SteamEmulator.HSteamUser_GS || hSteamPipe == SteamEmulator.HSteamPipe_GS;
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion, gameServerContext);
         }
 
         public IntPtr GetISteamUserStats(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
@@ -105,7 +106,7 @@ namespace SKYNET.Steamworks.Implementation
         public IntPtr GetISteamGameServerStats(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
             Write($"GetISteamGameServerStats {pchVersion}");
-            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion);
+            return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion, true);
         }
 
         public IntPtr GetISteamApps(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)

@@ -1,5 +1,6 @@
 using SKYNET.Steamworks;
 using System;
+using SKYNET.Helpers;
 
 using RemotePlaySessionID_t = System.UInt32;
 
@@ -18,9 +19,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamRemotePlay.GetSessionID(iSessionIndex);
         }
 
-        public CSteamID GetSessionSteamID(IntPtr _, RemotePlaySessionID_t unSessionID)
+        public IntPtr GetSessionSteamID(IntPtr _, IntPtr pSteamID, RemotePlaySessionID_t unSessionID)
         {
-            return SteamEmulator.SteamRemotePlay.GetSessionSteamID(unSessionID);
+            return NativeSteamId.Write(pSteamID, SteamEmulator.SteamRemotePlay.GetSessionSteamID(unSessionID));
         }
 
         public string GetSessionClientName(IntPtr _, RemotePlaySessionID_t unSessionID)

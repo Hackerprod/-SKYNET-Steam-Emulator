@@ -18,7 +18,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamHTTP_GetHTTPRequestWasTimedOut(IntPtr _, uint hRequest, bool pbWasTimedOut)
+        public static bool SteamAPI_ISteamHTTP_GetHTTPRequestWasTimedOut(IntPtr _, uint hRequest, IntPtr pbWasTimedOut)
         {
             Write($"SteamAPI_ISteamHTTP_GetHTTPRequestWasTimedOut");
             return SteamEmulator.SteamHTTP.GetHTTPRequestWasTimedOut(hRequest, pbWasTimedOut);
@@ -81,7 +81,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamHTTP_GetHTTPDownloadProgressPct(IntPtr _, uint hRequest, float pflPercentOut)
+        public static bool SteamAPI_ISteamHTTP_GetHTTPDownloadProgressPct(IntPtr _, uint hRequest, IntPtr pflPercentOut)
         {
             Write($"SteamAPI_ISteamHTTP_GetHTTPDownloadProgressPct");
             return SteamEmulator.SteamHTTP.GetHTTPDownloadProgressPct(hRequest, pflPercentOut);
@@ -109,21 +109,21 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamHTTP_GetHTTPResponseBodySize(IntPtr _, uint hRequest, uint unBodySize)
+        public static bool SteamAPI_ISteamHTTP_GetHTTPResponseBodySize(IntPtr _, uint hRequest, IntPtr unBodySize)
         {
             Write($"SteamAPI_ISteamHTTP_GetHTTPResponseBodySize");
             return SteamEmulator.SteamHTTP.GetHTTPResponseBodySize(hRequest, unBodySize);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamHTTP_GetHTTPResponseHeaderValue(IntPtr _, uint hRequest, string pchHeaderName, int pHeaderValueBuffer, uint unBufferSize)
+        public static bool SteamAPI_ISteamHTTP_GetHTTPResponseHeaderValue(IntPtr _, uint hRequest, string pchHeaderName, IntPtr pHeaderValueBuffer, uint unBufferSize)
         {
             Write($"SteamAPI_ISteamHTTP_GetHTTPResponseHeaderValue");
             return SteamEmulator.SteamHTTP.GetHTTPResponseHeaderValue(hRequest, pchHeaderName, pHeaderValueBuffer, unBufferSize);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamHTTP_GetHTTPResponseHeaderSize(IntPtr _, uint hRequest, string pchHeaderName, uint unResponseHeaderSize)
+        public static bool SteamAPI_ISteamHTTP_GetHTTPResponseHeaderSize(IntPtr _, uint hRequest, string pchHeaderName, IntPtr unResponseHeaderSize)
         {
             Write($"SteamAPI_ISteamHTTP_GetHTTPResponseHeaderSize");
             return SteamEmulator.SteamHTTP.GetHTTPResponseHeaderSize(hRequest, pchHeaderName, unResponseHeaderSize);
@@ -144,10 +144,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamHTTP_SendHTTPRequestAndStreamResponse(IntPtr _, uint hRequest, ulong pCallHandle)
+        public static bool SteamAPI_ISteamHTTP_SendHTTPRequestAndStreamResponse(IntPtr _, uint hRequest, ref ulong pCallHandle)
         {
             Write($"SteamAPI_ISteamHTTP_SendHTTPRequestAndStreamResponse");
-            return SteamEmulator.SteamHTTP.SendHTTPRequestAndStreamResponse(hRequest, pCallHandle);
+            return SteamEmulator.SteamHTTP.SendHTTPRequestAndStreamResponse(hRequest, ref pCallHandle);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

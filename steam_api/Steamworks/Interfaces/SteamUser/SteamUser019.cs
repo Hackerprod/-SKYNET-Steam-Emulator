@@ -1,4 +1,5 @@
 using System;
+using SKYNET.Helpers;
 
 using SteamAPICall_t = System.UInt64;
 using HSteamUser = System.UInt32;
@@ -23,14 +24,14 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUser.BLoggedOn();
         }
 
-        public CSteamID GetSteamID(IntPtr _)
+        public IntPtr GetSteamID(IntPtr _, IntPtr pSteamID)
         {
-            return SteamEmulator.SteamUser.GetSteamID();
+            return NativeSteamId.Write(pSteamID, SteamEmulator.SteamUser.GetSteamID());
         }
 
-        public int InitiateGameConnection(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, CSteamID steamIDGameServer, CGameID gameID,uint32 unIPServer, uint16 usPortServer, bool bSecure)
+        public int InitiateGameConnection(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, CGameID gameID,uint32 unIPServer, uint16 usPortServer, bool bSecure)
         {
-            return SteamEmulator.SteamUser.InitiateGameConnection(pAuthBlob, cbMaxAuthBlob, (ulong)steamIDGameServer, gameID, unIPServer, usPortServer, bSecure);
+            return SteamEmulator.SteamUser.InitiateGameConnection(pAuthBlob, cbMaxAuthBlob, steamIDGameServer, gameID, unIPServer, usPortServer, bSecure);
         }
 
         public void TerminateGameConnection(IntPtr _, uint32 unIPServer, uint16 usPortServer)
@@ -43,9 +44,9 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamUser.TrackAppUsageEvent(gameID, eAppUsageEvent, pchExtraInfo);
         }
 
-        public bool GetUserDataFolder(IntPtr _, ref string pchBuffer, int cubBuffer)
+        public bool GetUserDataFolder(IntPtr _, IntPtr pchBuffer, int cubBuffer)
         {
-            return SteamEmulator.SteamUser.GetUserDataFolder(out pchBuffer, cubBuffer);
+            return SteamEmulator.SteamUser.GetUserDataFolder(pchBuffer, cubBuffer);
         }
 
         public void StartVoiceRecording(IntPtr _)
@@ -83,14 +84,14 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUser.GetAuthSessionTicket(pTicket, cbMaxTicket, out pcbTicket);
         }
 
-        public EBeginAuthSessionResult BeginAuthSession(IntPtr _, IntPtr pAuthTicket, int cbAuthTicket, CSteamID steamID)
+        public EBeginAuthSessionResult BeginAuthSession(IntPtr _, IntPtr pAuthTicket, int cbAuthTicket, ulong steamID)
         {
-            return (EBeginAuthSessionResult)SteamEmulator.SteamUser.BeginAuthSession(pAuthTicket, cbAuthTicket, (ulong)steamID);
+            return (EBeginAuthSessionResult)SteamEmulator.SteamUser.BeginAuthSession(pAuthTicket, cbAuthTicket, steamID);
         }
 
-        public void EndAuthSession(IntPtr _, CSteamID steamID)
+        public void EndAuthSession(IntPtr _, ulong steamID)
         {
-            SteamEmulator.SteamUser.EndAuthSession((ulong)steamID);
+            SteamEmulator.SteamUser.EndAuthSession(steamID);
         }
 
         public void CancelAuthTicket(IntPtr _, HAuthTicket hAuthTicket)
@@ -98,9 +99,9 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamUser.CancelAuthTicket(hAuthTicket);
         }
 
-        public EUserHasLicenseForAppResult UserHasLicenseForApp(IntPtr _, CSteamID steamID, AppId_t appID)
+        public EUserHasLicenseForAppResult UserHasLicenseForApp(IntPtr _, ulong steamID, AppId_t appID)
         {
-            return (EUserHasLicenseForAppResult)SteamEmulator.SteamUser.UserHasLicenseForApp((ulong)steamID, appID);
+            return (EUserHasLicenseForAppResult)SteamEmulator.SteamUser.UserHasLicenseForApp(steamID, appID);
         }
 
         public bool BIsBehindNAT(IntPtr _)
@@ -108,9 +109,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUser.BIsBehindNAT();
         }
 
-        public void AdvertiseGame(IntPtr _, CSteamID steamIDGameServer, uint32 unIPServer, uint16 usPortServer)
+        public void AdvertiseGame(IntPtr _, ulong steamIDGameServer, uint32 unIPServer, uint16 usPortServer)
         {
-            SteamEmulator.SteamUser.AdvertiseGame((ulong)steamIDGameServer, unIPServer, usPortServer);
+            SteamEmulator.SteamUser.AdvertiseGame(steamIDGameServer, unIPServer, usPortServer);
         }
 
         public SteamAPICall_t RequestEncryptedAppTicket(IntPtr _, IntPtr pDataToInclude, int cbDataToInclude)

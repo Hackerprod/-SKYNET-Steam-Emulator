@@ -27,7 +27,7 @@ namespace SKYNET.Steamworks.Implementation
             InterfaceName = "SteamHTTP";
             InterfaceVersion = "STEAMHTTP_INTERFACE_VERSION003";
             HTTPRequests = new List<HTTPRequest>();
-            Handle = 0;
+            Handle = 1;
         }
 
         public uint CreateCookieContainer(bool bAllowResponsesToModify)
@@ -59,40 +59,152 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public bool GetHTTPDownloadProgressPct(HTTPRequestHandle hRequest, float pflPercentOut)
+        public bool GetHTTPDownloadProgressPct(HTTPRequestHandle hRequest, IntPtr pflPercentOut)
         {
             Write($"GetHTTPDownloadProgressPct");
-            return true;
+            if (pflPercentOut != IntPtr.Zero)
+            {
+                var bytes = BitConverter.GetBytes(1.0f);
+                Marshal.Copy(bytes, 0, pflPercentOut, bytes.Length);
+            }
+            return GetHTTPRequest(hRequest) != null;
         }
 
-        public bool GetHTTPRequestWasTimedOut(HTTPRequestHandle hRequest, bool pbWasTimedOut)
+        public bool GetHTTPDownloadProgressPct(HTTPRequestHandle hRequest, ref float pflPercentOut)
+        {
+            pflPercentOut = 1.0f;
+            return GetHTTPRequest(hRequest) != null;
+        }
+
+        public bool GetHTTPRequestWasTimedOut(HTTPRequestHandle hRequest, IntPtr pbWasTimedOut)
         {
             Write($"GetHTTPRequestWasTimedOut");
-            return true;
+            if (pbWasTimedOut != IntPtr.Zero)
+            {
+                Marshal.WriteByte(pbWasTimedOut, 0);
+            }
+            return GetHTTPRequest(hRequest) != null;
+        }
+
+        public bool GetHTTPRequestWasTimedOut(HTTPRequestHandle hRequest, ref bool pbWasTimedOut)
+        {
+            pbWasTimedOut = false;
+            return GetHTTPRequest(hRequest) != null;
         }
 
         public bool GetHTTPResponseBodyData(HTTPRequestHandle hRequest, IntPtr pBodyDataBuffer, uint unBufferSize)
         {
             Write($"GetHTTPResponseBodyData");
+            var request = GetHTTPRequest(hRequest);
+            if (request == null)
+            {
+                return false;
+            }
+
+            byte[] response = request.ResponseBytes ?? Array.Empty<byte>();
+            if (response.Length > unBufferSize)
+            {
+                return false;
+            }
+
+            if (response.Length > 0 && pBodyDataBuffer != IntPtr.Zero)
+            {
+                Marshal.Copy(response, 0, pBodyDataBuffer, response.Length);
+            }
             return true;
         }
 
-        public bool GetHTTPResponseBodySize(HTTPRequestHandle hRequest, uint unBodySize)
+        public bool GetHTTPResponseBodySize(HTTPRequestHandle hRequest, IntPtr unBodySize)
         {
             Write($"GetHTTPResponseBodySize");
+            var request = GetHTTPRequest(hRequest);
+            if (request == null)
+            {
+                return false;
+            }
+
+            if (unBodySize != IntPtr.Zero)
+            {
+                byte[] response = request.ResponseBytes ?? Array.Empty<byte>();
+                Marshal.WriteInt32(unBodySize, response.Length);
+            }
             return true;
         }
 
-        public bool GetHTTPResponseHeaderSize(HTTPRequestHandle hRequest, string pchHeaderName, uint unResponseHeaderSize)
+        public bool GetHTTPResponseBodySize(HTTPRequestHandle hRequest, ref uint unBodySize)
+        {
+            var request = GetHTTPRequest(hRequest);
+            if (request == null)
+            {
+                return false;
+            }
+
+            byte[] response = request.ResponseBytes ?? Array.Empty<byte>();
+            unBodySize = (uint)response.Length;
+            return true;
+        }
+
+        public bool GetHTTPResponseHeaderSize(HTTPRequestHandle hRequest, string pchHeaderName, IntPtr unResponseHeaderSize)
         {
             Write($"GetHTTPResponseHeaderSize");
+            var request = GetHTTPRequest(hRequest);
+            string headerValue;
+            if (request != null && TryGetResponseHeader(request, pchHeaderName, out headerValue))
+            {
+                if (unResponseHeaderSize != IntPtr.Zero)
+                {
+                    Marshal.WriteInt32(unResponseHeaderSize, Encoding.UTF8.GetByteCount(headerValue) + 1);
+                }
+
+                return true;
+            }
+
+            if (unResponseHeaderSize != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(unResponseHeaderSize, 0);
+            }
+
+            return false;
+        }
+
+        public bool GetHTTPResponseHeaderSize(HTTPRequestHandle hRequest, string pchHeaderName, ref uint unResponseHeaderSize)
+        {
+            var request = GetHTTPRequest(hRequest);
+            string headerValue;
+            if (request != null && TryGetResponseHeader(request, pchHeaderName, out headerValue))
+            {
+                unResponseHeaderSize = (uint)Encoding.UTF8.GetByteCount(headerValue) + 1;
+                return true;
+            }
+
+            unResponseHeaderSize = 0;
+            return false;
+        }
+
+        public bool GetHTTPResponseHeaderValue(HTTPRequestHandle hRequest, string pchHeaderName, IntPtr pHeaderValueBuffer, uint unBufferSize)
+        {
+            Write($"GetHTTPResponseHeaderValue");
+            var request = GetHTTPRequest(hRequest);
+            string headerValue;
+            if (request == null || !TryGetResponseHeader(request, pchHeaderName, out headerValue))
+            {
+                return false;
+            }
+
+            byte[] bytes = Encoding.UTF8.GetBytes(headerValue);
+            if (pHeaderValueBuffer == IntPtr.Zero || unBufferSize < bytes.Length + 1)
+            {
+                return false;
+            }
+
+            Marshal.Copy(bytes, 0, pHeaderValueBuffer, bytes.Length);
+            Marshal.WriteByte(pHeaderValueBuffer, bytes.Length, 0);
             return true;
         }
 
         public bool GetHTTPResponseHeaderValue(HTTPRequestHandle hRequest, string pchHeaderName, int pHeaderValueBuffer, uint unBufferSize)
         {
-            Write($"GetHTTPResponseHeaderValue");
-            return true;
+            return GetHTTPResponseHeaderValue(hRequest, pchHeaderName, (IntPtr)pHeaderValueBuffer, unBufferSize);
         }
 
         public bool GetHTTPStreamingResponseBodyData(HTTPRequestHandle hRequest, uint cOffset, IntPtr pBodyDataBuffer, uint unBufferSize)
@@ -141,7 +253,11 @@ namespace SKYNET.Steamworks.Implementation
                 }
                 HTTPRequestCompleted_t data = new HTTPRequestCompleted_t()
                 {
-                    Request = (uint)request.Handle
+                    Request = (uint)request.Handle,
+                    ContextValue = request.ContextValue,
+                    RequestSuccessful = true,
+                    StatusCode = HTTPStatusCode.Code200OK,
+                    BodySize = 0
                 };
 
                 var APIRequest = new RequestHTTPAPI()
@@ -150,8 +266,11 @@ namespace SKYNET.Steamworks.Implementation
                     HTTPRequestHandle = request.Handle,
                 };
 
-                //pCallHandle = CallbackManager.AddCallbackResult(data, false);
-                //APIRequest.SteamAPICall = pCallHandle;
+                request.ResponseBytes = BuildLocalResponseBytes(request);
+                request.ResponseHeaders = BuildLocalResponseHeaders(request);
+                data.BodySize = (uint)request.ResponseBytes.Length;
+                pCallHandle = CallbackManager.AddCallbackResult(data);
+                APIRequest.SteamAPICall = pCallHandle;
 
                 //WebRequest webrequest = WebRequest.Create(request.URL);
                 //webrequest.Timeout = (int)(request.TimeoutSeconds != 0 ? request.TimeoutSeconds : 2);
@@ -258,10 +377,15 @@ namespace SKYNET.Steamworks.Implementation
         // Sends the HTTP request, will return false on a bad handle, otherwise use SteamCallHandle to wait on
         // asynchronous response via callback for completion, and listen for HTTPRequestHeadersReceived_t and 
         // HTTPRequestDataReceived_t callbacks while streaming.
-        public bool SendHTTPRequestAndStreamResponse(HTTPRequestHandle hRequest, SteamAPICall_t pCallHandle)
+        public bool SendHTTPRequestAndStreamResponse(HTTPRequestHandle hRequest, ref SteamAPICall_t pCallHandle)
         {
             Write($"SendHTTPRequestAndStreamResponse");
-            return true;
+            return SendHTTPRequest(hRequest, ref pCallHandle);
+        }
+
+        public bool SendHTTPRequestAndStreamResponse(HTTPRequestHandle hRequest, SteamAPICall_t pCallHandle)
+        {
+            return SendHTTPRequestAndStreamResponse(hRequest, ref pCallHandle);
         }
 
         public bool SetCookie(HTTPCookieContainerHandle hCookieContainer, string pchHost, string pchUrl, string pchCookie)
@@ -369,6 +493,92 @@ namespace SKYNET.Steamworks.Implementation
             return HTTPRequests.Find(r => r.Handle == hTTPRequestHandle);
         }
 
+        private static byte[] BuildLocalResponseBytes(HTTPRequest request)
+        {
+            string body = BuildLocalResponseBody(request.URL);
+            return Encoding.UTF8.GetBytes(body);
+        }
+
+        private static string BuildLocalResponseBody(string url)
+        {
+            if (string.IsNullOrEmpty(url))
+            {
+                return "{}";
+            }
+
+            if (url.IndexOf("ISteamApps/GetSDRConfig", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "{\"revision\":1,\"pops\":{\"iad\":{\"desc\":\"Local\",\"geo\":[-77.0365,38.8977],\"partners\":1,\"tier\":1,\"relays\":[{\"ipv4\":\"127.0.0.1\",\"port_range\":[27015,27060]}]}}}";
+            }
+
+            if (url.IndexOf("events/ajaxgetpartnereventspageable", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "{\"success\":1,\"events\":[],\"results_html\":\"\",\"last_time\":0,\"more_events\":false,\"total_count\":0}";
+            }
+
+            if (url.IndexOf("proregistration/getdpcdata", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "{\"success\":true,\"leagues\":[],\"teams\":[],\"players\":[]}";
+            }
+
+            return "{}";
+        }
+
+        private static bool TryFetchRemoteBody(string url, out string body)
+        {
+            body = null;
+            try
+            {
+                var request = (HttpWebRequest)WebRequest.Create(url);
+                request.Method = "GET";
+                request.Timeout = 3000;
+                request.ReadWriteTimeout = 3000;
+                request.UserAgent = "SKYNET Steam Emulator";
+                using (var response = (HttpWebResponse)request.GetResponse())
+                using (var stream = response.GetResponseStream())
+                using (var reader = new StreamReader(stream, Encoding.UTF8))
+                {
+                    if ((int)response.StatusCode < 200 || (int)response.StatusCode >= 300)
+                    {
+                        return false;
+                    }
+
+                    body = reader.ReadToEnd();
+                    return !string.IsNullOrEmpty(body);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (Instance != null)
+                {
+                    Instance.Write($"FetchRemoteBody failed {url}: {ex.Message}");
+                }
+
+                return false;
+            }
+        }
+
+        private static Dictionary<string, string> BuildLocalResponseHeaders(HTTPRequest request)
+        {
+            var headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Content-Type", "application/json; charset=utf-8" },
+                { "Content-Length", (request.ResponseBytes ?? Array.Empty<byte>()).Length.ToString() }
+            };
+            return headers;
+        }
+
+        private static bool TryGetResponseHeader(HTTPRequest request, string name, out string value)
+        {
+            value = null;
+            if (request.ResponseHeaders == null || string.IsNullOrEmpty(name))
+            {
+                return false;
+            }
+
+            return request.ResponseHeaders.TryGetValue(name, out value);
+        }
+
         private class RequestHTTPAPI
         {
             public HTTPRequestCompleted_t HTTPRequestCompleted { get; set; }
@@ -385,6 +595,8 @@ namespace SKYNET.Steamworks.Implementation
             public string URL;
             public uint TimeoutSeconds;
             public byte[] RawPostBody;
+            public byte[] ResponseBytes;
+            public Dictionary<string, string> ResponseHeaders;
             public string ContentType;
         }
 

@@ -10,12 +10,8 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential)]
     public class CCallResult
     {
-        public RunCallResultDelegate m_RunCallResult;
         public RunCallbackDelegate m_RunCallback;
+        public RunCallResultDelegate m_RunCallResult;
         public GetCallbackSizeBytesDelegate m_GetCallbackSizeBytes;
-
-        //public RunCallbackDelegate m_RunCallback;
-        //public RunCallResultDelegate m_RunCallResult;
-        //public GetCallbackSizeBytesDelegate m_GetCallbackSizeBytes;
     }
 }

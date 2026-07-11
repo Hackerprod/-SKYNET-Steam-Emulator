@@ -1,5 +1,6 @@
 using SKYNET.Managers;
 using System;
+using SKYNET.Helpers;
 
 using SteamAPICall_t = System.UInt64;
 
@@ -22,7 +23,7 @@ namespace SKYNET.Steamworks.Interfaces
         public void LogOff(IntPtr _) { SteamEmulator.SteamGameServer.LogOff(); }
         public bool BLoggedOn(IntPtr _) { return SteamEmulator.SteamGameServer.BLoggedOn(); }
         public bool BSecure(IntPtr _) { return SteamEmulator.SteamGameServer.BSecure(); }
-        public CSteamID GetSteamID(IntPtr _) { return SteamEmulator.SteamGameServer.GetSteamID(); }
+        public IntPtr GetSteamID(IntPtr _, IntPtr pSteamID) { return NativeSteamId.Write(pSteamID, SteamEmulator.SteamGameServer.GetSteamID()); }
         public bool WasRestartRequested(IntPtr _) { return SteamEmulator.SteamGameServer.WasRestartRequested(); }
         public void SetMaxPlayerCount(IntPtr _, int cPlayersMax) { SteamEmulator.SteamGameServer.SetMaxPlayerCount(cPlayersMax); }
         public void SetBotPlayerCount(IntPtr _, int cBotplayers) { SteamEmulator.SteamGameServer.SetBotPlayerCount(cBotplayers); }
@@ -50,13 +51,13 @@ namespace SKYNET.Steamworks.Interfaces
         public bool RequestUserGroupStatus(IntPtr _, ulong steamIDUser, ulong steamIDGroup) { return SteamEmulator.SteamGameServer.RequestUserGroupStatus(steamIDUser, steamIDGroup); }
         public void GetGameplayStats(IntPtr _) { SteamEmulator.SteamGameServer.GetGameplayStats(); }
         public SteamAPICall_t GetServerReputation(IntPtr _) { return SteamEmulator.SteamGameServer.GetServerReputation(); }
-        public uint GetPublicIP(IntPtr _) { return SteamEmulator.SteamGameServer.GetPublicIP(); }
+        public IntPtr GetPublicIP(IntPtr arg0, IntPtr arg1) { return SteamEmulator.SteamGameServer.GetPublicIP(arg0, arg1); }
         public bool HandleIncomingPacket(IntPtr _, IntPtr pData, int cbData, uint srcIP, uint srcPort) { return SteamEmulator.SteamGameServer.HandleIncomingPacket(pData, cbData, srcIP, srcPort); }
         public int GetNextOutgoingPacket(IntPtr _, IntPtr pOut, int cbMaxOut, uint pNetAdr, uint pPort) { return SteamEmulator.SteamGameServer.GetNextOutgoingPacket(pOut, cbMaxOut, pNetAdr, pPort); }
         public SteamAPICall_t AssociateWithClan(IntPtr _, ulong steamIDClan) { return SteamEmulator.SteamGameServer.AssociateWithClan(steamIDClan); }
         public SteamAPICall_t ComputeNewPlayerCompatibility(IntPtr _, ulong steamIDNewPlayer) { return SteamEmulator.SteamGameServer.ComputeNewPlayerCompatibility(steamIDNewPlayer); }
         public bool SendUserConnectAndAuthenticate_DEPRECATED(IntPtr _, uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, ulong pSteamIDUser) { return SteamEmulator.SteamGameServer.SendUserConnectAndAuthenticate_DEPRECATED(unIPClient, pvAuthBlob, cubAuthBlobSize, pSteamIDUser); }
-        public CSteamID CreateUnauthenticatedUserConnection(IntPtr _) { return SteamEmulator.SteamGameServer.CreateUnauthenticatedUserConnection(); }
+        public IntPtr CreateUnauthenticatedUserConnection(IntPtr _, IntPtr pSteamID) { return NativeSteamId.Write(pSteamID, SteamEmulator.SteamGameServer.CreateUnauthenticatedUserConnection()); }
         public void SendUserDisconnect_DEPRECATED(IntPtr _, ulong steamIDUser) { SteamEmulator.SteamGameServer.SendUserDisconnect_DEPRECATED(steamIDUser); }
         public bool BUpdateUserData(IntPtr _, ulong steamIDUser, string pchPlayerName, uint uScore) { return SteamEmulator.SteamGameServer.BUpdateUserData(steamIDUser, pchPlayerName, uScore); }
         public void SetMasterServerHeartbeatInterval_DEPRECATED(IntPtr _, int iHeartbeatInterval) { SteamEmulator.SteamGameServer.SetMasterServerHeartbeatInterval_DEPRECATED(iHeartbeatInterval); }

@@ -5,6 +5,7 @@ using SteamAPICall_t = System.UInt64;
 using HSteamUser = System.UInt32;
 using HAuthTicket = System.UInt32;
 using AppId_t = System.UInt32;
+using SKYNET.Helpers;
 using SKYNET.Steamworks.Types;
 
 namespace SKYNET.Steamworks.Interfaces
@@ -22,9 +23,9 @@ namespace SKYNET.Steamworks.Interfaces
 			return SteamEmulator.SteamUser.BLoggedOn();
 		}
 
-		public CSteamID2 GetSteamID(IntPtr _)
+		public IntPtr GetSteamID(IntPtr _, IntPtr pSteamID)
 		{
-			return new CSteamID2(1000, CSteamID2.EUniverse.Public, CSteamID2.EAccountType.Individual);
+			return NativeSteamId.Write(pSteamID, SteamEmulator.SteamUser.GetSteamID());
 		}
 
 		public int InitiateGameConnection_DEPRECATED(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, ushort usPortServer, bool bSecure)
@@ -42,9 +43,9 @@ namespace SKYNET.Steamworks.Interfaces
 			SteamEmulator.SteamUser.TrackAppUsageEvent(gameID, eAppUsageEvent, pchExtraInfo);
 		}
 
-		public bool GetUserDataFolder(IntPtr _, out string pchBuffer, int cubBuffer)
+		public bool GetUserDataFolder(IntPtr _, IntPtr pchBuffer, int cubBuffer)
 		{
-			return SteamEmulator.SteamUser.GetUserDataFolder(out pchBuffer, cubBuffer);
+			return SteamEmulator.SteamUser.GetUserDataFolder(pchBuffer, cubBuffer);
 		}
 
 		public void StartVoiceRecording(IntPtr _)
@@ -102,6 +103,11 @@ namespace SKYNET.Steamworks.Interfaces
 			SteamEmulator.SteamUser.CancelAuthTicket(hAuthTicket);
 		}
 
+		public int UserHasLicenseForApp(IntPtr _, ulong steamID, AppId_t appID)
+		{
+			return SteamEmulator.SteamUser.UserHasLicenseForApp(steamID, appID);
+		}
+
 		public bool BIsBehindNAT(IntPtr _)
 		{
 			return SteamEmulator.SteamUser.BIsBehindNAT();
@@ -110,6 +116,67 @@ namespace SKYNET.Steamworks.Interfaces
 		public void AdvertiseGame(IntPtr _, ulong steamIDGameServer, uint unIPServer, ushort usPortServer)
 		{
 			SteamEmulator.SteamUser.AdvertiseGame(steamIDGameServer, unIPServer, usPortServer);
+		}
+
+		public SteamAPICall_t RequestEncryptedAppTicket(IntPtr _, IntPtr pDataToInclude, int cbDataToInclude)
+		{
+			return SteamEmulator.SteamUser.RequestEncryptedAppTicket(pDataToInclude, cbDataToInclude);
+		}
+
+		public bool GetEncryptedAppTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
+		{
+			pcbTicket = 0;
+			return SteamEmulator.SteamUser.GetEncryptedAppTicket(pTicket, cbMaxTicket, pcbTicket);
+		}
+
+		public int GetGameBadgeLevel(IntPtr _, int nSeries, bool bFoil)
+		{
+			return SteamEmulator.SteamUser.GetGameBadgeLevel(nSeries, bFoil);
+		}
+
+		public int GetPlayerSteamLevel(IntPtr _)
+		{
+			return SteamEmulator.SteamUser.GetPlayerSteamLevel();
+		}
+
+		public SteamAPICall_t RequestStoreAuthURL(IntPtr _, string pchRedirectURL)
+		{
+			return SteamEmulator.SteamUser.RequestStoreAuthURL(pchRedirectURL);
+		}
+
+		public bool BIsPhoneVerified(IntPtr _)
+		{
+			return SteamEmulator.SteamUser.BIsPhoneVerified();
+		}
+
+		public bool BIsTwoFactorEnabled(IntPtr _)
+		{
+			return SteamEmulator.SteamUser.BIsTwoFactorEnabled();
+		}
+
+		public bool BIsPhoneIdentifying(IntPtr _)
+		{
+			return SteamEmulator.SteamUser.BIsPhoneIdentifying();
+		}
+
+		public bool BIsPhoneRequiringVerification(IntPtr _)
+		{
+			return SteamEmulator.SteamUser.BIsPhoneRequiringVerification();
+		}
+
+		public SteamAPICall_t GetMarketEligibility(IntPtr _)
+		{
+			return SteamEmulator.SteamUser.GetMarketEligibility();
+		}
+
+		public SteamAPICall_t GetDurationControl(IntPtr _)
+		{
+			return SteamEmulator.SteamUser.GetDurationControl();
+		}
+
+		public bool BSetDurationControlOnlineState(IntPtr _, int eNewState)
+		{
+			return SteamEmulator.SteamUser.BSetDurationControlOnlineState(eNewState);
 		}
 	}
 

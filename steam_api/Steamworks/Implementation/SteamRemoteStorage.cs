@@ -30,6 +30,8 @@ namespace SKYNET.Steamworks.Implementation
         private int LastFile;
         private Dictionary<ulong, string> AsyncFilesRead;
         private ConcurrentDictionary<ulong, PendingWriteStream> PendingWriteStreams;
+        private ConcurrentDictionary<string, DateTime> MissingRemoteFiles;
+        private static readonly TimeSpan MissingRemoteFileWindow = TimeSpan.FromMinutes(5);
 
         public SteamRemoteStorage()
         {
@@ -43,6 +45,7 @@ namespace SKYNET.Steamworks.Implementation
             SharedFiles = new ConcurrentDictionary<ulong, string>();
             AsyncFilesRead = new Dictionary<ulong, string>();
             PendingWriteStreams = new ConcurrentDictionary<ulong, PendingWriteStream>();
+            MissingRemoteFiles = new ConcurrentDictionary<string, DateTime>();
             LastFile = 0;
         }
 
@@ -61,6 +64,7 @@ namespace SKYNET.Steamworks.Implementation
                         Result = SkyNetApiClient.UploadRemoteStorageFile(pchFile, buffer);
                         if (Result)
                         {
+                            MissingRemoteFiles.TryRemove(NormalizeRemoteFileName(pchFile), out _);
                             File.WriteAllBytes(fullPath, buffer);
                         }
                     }
@@ -128,6 +132,8 @@ namespace SKYNET.Steamworks.Implementation
                     {
                         return APICall;
                     }
+
+                    MissingRemoteFiles.TryRemove(NormalizeRemoteFileName(pchFile), out _);
                 }
 
                 File.WriteAllBytes(fullPath, bytes);
@@ -747,23 +753,53 @@ namespace SKYNET.Steamworks.Implementation
                 return File.Exists(fullPath);
             }
 
+            var remoteKey = NormalizeRemoteFileName(pchFile);
+            if (IsRemoteFileKnownMissing(remoteKey))
+            {
+                return false;
+            }
+
             try
             {
                 var file = SkyNetApiClient.DownloadRemoteStorageFile(pchFile);
                 if (file == null || string.IsNullOrWhiteSpace(file.ContentBase64))
                 {
+                    MissingRemoteFiles[remoteKey] = DateTime.UtcNow + MissingRemoteFileWindow;
                     return false;
                 }
 
                 Common.EnsureDirectoryExists(fullPath, true);
                 File.WriteAllBytes(fullPath, Convert.FromBase64String(file.ContentBase64));
+                MissingRemoteFiles.TryRemove(remoteKey, out _);
                 return true;
             }
             catch (Exception ex)
             {
+                MissingRemoteFiles[remoteKey] = DateTime.UtcNow + MissingRemoteFileWindow;
                 Write($"EnsureRemoteFileCached {pchFile} {ex}");
                 return false;
             }
+        }
+
+        private bool IsRemoteFileKnownMissing(string remoteKey)
+        {
+            if (!MissingRemoteFiles.TryGetValue(remoteKey, out var expiresAt))
+            {
+                return false;
+            }
+
+            if (DateTime.UtcNow < expiresAt)
+            {
+                return true;
+            }
+
+            MissingRemoteFiles.TryRemove(remoteKey, out _);
+            return false;
+        }
+
+        private static string NormalizeRemoteFileName(string pchFile)
+        {
+            return (pchFile ?? string.Empty).Replace('\\', '/').ToLowerInvariant();
         }
 
         public void StoreAvatar(Bitmap avatar, uint accountID)

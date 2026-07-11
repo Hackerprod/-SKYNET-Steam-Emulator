@@ -18,7 +18,7 @@ namespace SKYNET.Helpers
         public static void Initialize()
         {
             var LogPath = Path.Combine(Common.GetPath(), "SKYNET");
-            fileName = Path.Combine(LogPath, "[SKYNET] steam_api.log");
+            fileName = Path.Combine(LogPath, "steam_api.log");
             Common.EnsureDirectoryExists(LogPath);
             Clean();
             Initialized = true;

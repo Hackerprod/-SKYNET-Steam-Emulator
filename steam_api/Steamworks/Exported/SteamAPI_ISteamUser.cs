@@ -61,10 +61,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUser_GetUserDataFolder(IntPtr _, ref string pchBuffer, int cubBuffer)
+        public static bool SteamAPI_ISteamUser_GetUserDataFolder(IntPtr _, IntPtr pchBuffer, int cubBuffer)
         {
             Write("SteamAPI_ISteamUser_GetUserDataFolder");
-            return SteamEmulator.SteamUser.GetUserDataFolder(out pchBuffer, cubBuffer);
+            return SteamEmulator.SteamUser.GetUserDataFolder(pchBuffer, cubBuffer);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

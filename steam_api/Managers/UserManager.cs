@@ -102,6 +102,7 @@ namespace SKYNET.Managers
                         GameID = user.GameID,
                         LobbyID = user.LobbyID,
                         HasFriend = user.HasFriend,
+                        FriendRelationship = user.FriendRelationship,
                         IPAddress = user.IPAddress,
                         RichPresence = new Dictionary<string, string>(user.RichPresence ?? new Dictionary<string, string>())
                     });

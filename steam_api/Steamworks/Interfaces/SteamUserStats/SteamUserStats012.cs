@@ -1,5 +1,6 @@
 
 using System;
+using SKYNET.Helpers;
 using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
@@ -69,9 +70,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUserStats.GetAchievementIcon(pchName);
         }
 
-        public string GetAchievementDisplayAttribute(IntPtr _, string pchName, string pchKey)
+        public IntPtr GetAchievementDisplayAttribute(IntPtr _, string pchName, string pchKey)
         {
-            return SteamEmulator.SteamUserStats.GetAchievementDisplayAttribute(pchName, pchKey);
+            return NativeStringCache.ToUtf8Ptr(SteamEmulator.SteamUserStats.GetAchievementDisplayAttribute(pchName, pchKey));
         }
 
         public bool IndicateAchievementProgress(IntPtr _, string pchName, uint nCurProgress, uint nMaxProgress)
@@ -84,9 +85,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUserStats.GetNumAchievements();
         }
 
-        public string GetAchievementName(IntPtr _, uint iAchievement)
+        public IntPtr GetAchievementName(IntPtr _, uint iAchievement)
         {
-            return SteamEmulator.SteamUserStats.GetAchievementName(iAchievement);
+            return NativeStringCache.ToUtf8Ptr(SteamEmulator.SteamUserStats.GetAchievementName(iAchievement));
         }
 
         public SteamAPICall_t RequestUserStats(IntPtr _, ulong steamIDUser)
@@ -129,9 +130,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUserStats.FindLeaderboard(pchLeaderboardName);
         }
 
-        public string GetLeaderboardName(IntPtr _, ulong hSteamLeaderboard)
+        public IntPtr GetLeaderboardName(IntPtr _, ulong hSteamLeaderboard)
         {
-            return SteamEmulator.SteamUserStats.GetLeaderboardName(hSteamLeaderboard);
+            return NativeStringCache.ToUtf8Ptr(SteamEmulator.SteamUserStats.GetLeaderboardName(hSteamLeaderboard));
         }
 
         public int GetLeaderboardEntryCount(IntPtr _, ulong hSteamLeaderboard)

@@ -1,6 +1,8 @@
 using SKYNET.Steamworks;
 
 using System;
+using SKYNET.Helpers;
+using System.Runtime.InteropServices;
 using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
@@ -28,9 +30,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUtils.GetServerRealTime();
         }
 
-        public string GetIPCountry(IntPtr _)
+        public IntPtr GetIPCountry(IntPtr _)
         {
-            return SteamEmulator.SteamUtils.GetIPCountry();
+            return NativeStringCache.ToUtf8Ptr(SteamEmulator.SteamUtils.GetIPCountry());
         }
 
         public bool GetImageSize(IntPtr _, int iImage, ref uint pnWidth, ref uint pnHeight)
@@ -43,7 +45,6 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUtils.GetImageRGBA(iImage, pubDest, nDestBufferSize);
         }
 
-        // Deprecated.  Do not call this.
         public bool GetCSERIPPort(IntPtr _, uint unIP, uint usPort)
         {
             return SteamEmulator.SteamUtils.GetCSERIPPort(unIP, usPort);
@@ -64,9 +65,15 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamUtils.SetOverlayNotificationPosition(eNotificationPosition);
         }
 
-        public bool IsAPICallCompleted(IntPtr _, SteamAPICall_t hSteamAPICall, bool pbFailed)
+        public bool IsAPICallCompleted(IntPtr _, SteamAPICall_t hSteamAPICall, IntPtr pbFailed)
         {
-            return SteamEmulator.SteamUtils.IsAPICallCompleted(hSteamAPICall, ref pbFailed);
+            bool failed = false;
+            bool result = SteamEmulator.SteamUtils.IsAPICallCompleted(hSteamAPICall, ref failed);
+            if (pbFailed != IntPtr.Zero)
+            {
+                Marshal.WriteByte(pbFailed, failed ? (byte)1 : (byte)0);
+            }
+            return result;
         }
 
         public int GetAPICallFailureReason(IntPtr _, SteamAPICall_t hSteamAPICall)
@@ -79,7 +86,6 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUtils.GetAPICallResult(hSteamAPICall, pCallback, cubCallback, iCallbackExpected, ref pbFailed);
         }
 
-        // Deprecated. Applications should use SteamAPI_RunCallbacks() instead. Game servers do not need to call this function.
         public void RunFrame(IntPtr _)
         {
             SteamEmulator.SteamUtils.RunFrame();
@@ -120,14 +126,15 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUtils.GetEnteredGamepadTextLength();
         }
 
-        public bool GetEnteredGamepadTextInput(IntPtr _, string pchText, uint cchText)
+        public bool GetEnteredGamepadTextInput(IntPtr _, IntPtr pchText, uint cchText)
         {
-            return SteamEmulator.SteamUtils.GetEnteredGamepadTextInput(pchText, cchText);
+            NativeStringCache.WriteUtf8Buffer(pchText, checked((int)cchText), string.Empty);
+            return SteamEmulator.SteamUtils.GetEnteredGamepadTextInput(string.Empty, cchText);
         }
 
-        public string GetSteamUILanguage(IntPtr _)
+        public IntPtr GetSteamUILanguage(IntPtr _)
         {
-            return SteamEmulator.SteamUtils.GetSteamUILanguage();
+            return NativeStringCache.ToUtf8Ptr(SteamEmulator.SteamUtils.GetSteamUILanguage());
         }
 
         public bool IsSteamRunningInVR(IntPtr _)
@@ -170,14 +177,39 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUtils.InitFilterText();
         }
 
-        public int FilterText(IntPtr _, int eContext, ulong sourceSteamID, string pchInputMessage, string pchOutFilteredText, uint nByteSizeOutFilteredText )
+        public int FilterText(IntPtr _, int eContext, ulong sourceSteamID, string pchInputMessage, IntPtr pchOutFilteredText, uint nByteSizeOutFilteredText )
         {
-            return SteamEmulator.SteamUtils.FilterText(eContext, sourceSteamID, pchInputMessage, pchOutFilteredText, nByteSizeOutFilteredText);
+            NativeStringCache.WriteUtf8Buffer(pchOutFilteredText, checked((int)nByteSizeOutFilteredText), pchInputMessage);
+            return SteamEmulator.SteamUtils.FilterText(eContext, sourceSteamID, pchInputMessage, pchInputMessage, nByteSizeOutFilteredText);
         }
 
         public int GetIPv6ConnectivityState(IntPtr _, int eProtocol)
         {
             return SteamEmulator.SteamUtils.GetIPv6ConnectivityState(eProtocol);
+        }
+
+        public bool IsSteamRunningOnSteamDeck(IntPtr _)
+        {
+            return false;
+        }
+
+        public bool ShowFloatingGamepadTextInput(IntPtr _, int eKeyboardMode, int nTextFieldXPosition, int nTextFieldYPosition, int nTextFieldWidth, int nTextFieldHeight)
+        {
+            return false;
+        }
+
+        public void SetGameLauncherMode(IntPtr _, bool bLauncherMode)
+        {
+        }
+
+        public bool DismissFloatingGamepadTextInput(IntPtr _)
+        {
+            return false;
+        }
+
+        public bool DismissGamepadTextInput(IntPtr _)
+        {
+            return false;
         }
     }
 }

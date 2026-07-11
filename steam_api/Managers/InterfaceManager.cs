@@ -14,12 +14,14 @@ namespace SKYNET.Managers
         private static ConcurrentDictionary<string, Type> interfaceTypes;
         private static ConcurrentDictionary<string, IntPtr> StoredInterfaces;
         private static ConcurrentDictionary<string, IntPtr> StoredInterfaces_Gameserver;
+        private static ConcurrentDictionary<IntPtr, bool> GameServerInterfacePointers;
 
         static InterfaceManager()
         {
             interfaceTypes = new ConcurrentDictionary<string, Type>();
             StoredInterfaces = new ConcurrentDictionary<string, IntPtr>();
             StoredInterfaces_Gameserver = new ConcurrentDictionary<string, IntPtr>();
+            GameServerInterfacePointers = new ConcurrentDictionary<IntPtr, bool>();
         }
 
         public static void Initialize()
@@ -50,15 +52,21 @@ namespace SKYNET.Managers
                 return default;
             }
 
-            if (GameServer)
+            bool gameServerContext = GameServer
+                || hSteamUser == SteamEmulator.HSteamUser_GS
+                || hSteamPipe == SteamEmulator.HSteamPipe_GS;
+
+            if (gameServerContext)
             {
                 if (StoredInterfaces_Gameserver.TryGetValue(pszVersion, out IntPtr BaseAddress))
                 {
+                    GameServerInterfacePointers[BaseAddress] = true;
                     return BaseAddress;
                 }
             }
             else if (StoredInterfaces.TryGetValue(pszVersion, out IntPtr BaseAddress))
             {
+                GameServerInterfacePointers.TryAdd(BaseAddress, false);
                 return BaseAddress;
             }
 
@@ -78,18 +86,53 @@ namespace SKYNET.Managers
                 return address;
             }
 
-            if (GameServer)
+            if (gameServerContext)
             {
                 StoredInterfaces_Gameserver.TryAdd(pszVersion, address);
+                GameServerInterfacePointers[address] = true;
             }
             else
             {
                 StoredInterfaces.TryAdd(pszVersion, address);
+                GameServerInterfacePointers.TryAdd(address, false);
             }
             
             SetInterfaceName(pszVersion, interfaceType);
 
             return address;
+        }
+
+        public static bool IsGameServerInterfacePointer(IntPtr address)
+        {
+            return address != IntPtr.Zero
+                && GameServerInterfacePointers.TryGetValue(address, out bool gameServer)
+                && gameServer;
+        }
+
+        public static bool IsKnownInterfacePointer(IntPtr address)
+        {
+            if (address == IntPtr.Zero)
+            {
+                return false;
+            }
+
+            foreach (var storedAddress in StoredInterfaces.Values)
+            {
+                if (storedAddress == address)
+                {
+                    return true;
+                }
+            }
+
+            foreach (var storedAddress in StoredInterfaces_Gameserver.Values)
+            {
+                if (storedAddress == address)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static bool InvalidateInterface(string pszVersion)

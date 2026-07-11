@@ -1,5 +1,6 @@
 using SKYNET.Steamworks;
 using System;
+using SKYNET.Helpers;
 
 namespace SKYNET.Steamworks.Interfaces
 {
@@ -66,9 +67,9 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamMatchmaking.AddRequestLobbyListCompatibleMembersFilter(steamIDLobby);
         }
 
-        public CSteamID GetLobbyByIndex(IntPtr _, int iLobby)
+        public IntPtr GetLobbyByIndex(IntPtr _, IntPtr pSteamID, int iLobby)
         {
-            return SteamEmulator.SteamMatchmaking.GetLobbyByIndex(iLobby);
+            return NativeSteamId.Write(pSteamID, SteamEmulator.SteamMatchmaking.GetLobbyByIndex(iLobby));
         }
 
         public ulong CreateLobby(IntPtr _, int eLobbyType, int cMaxMembers)
@@ -96,9 +97,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamMatchmaking.GetNumLobbyMembers(steamIDLobby);
         }
 
-        public CSteamID GetLobbyMemberByIndex(IntPtr _, ulong steamIDLobby, int iMember)
+        public IntPtr GetLobbyMemberByIndex(IntPtr _, IntPtr pSteamID, ulong steamIDLobby, int iMember)
         {
-            return SteamEmulator.SteamMatchmaking.GetLobbyMemberByIndex(steamIDLobby, iMember);
+            return NativeSteamId.Write(pSteamID, SteamEmulator.SteamMatchmaking.GetLobbyMemberByIndex(steamIDLobby, iMember));
         }
 
         public string GetLobbyData(IntPtr _, ulong steamIDLobby, string pchKey)
@@ -181,9 +182,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamMatchmaking.SetLobbyJoinable(steamIDLobby, bLobbyJoinable);
         }
 
-        public CSteamID GetLobbyOwner(IntPtr _, ulong steamIDLobby)
+        public IntPtr GetLobbyOwner(IntPtr _, IntPtr pSteamID, ulong steamIDLobby)
         {
-            return SteamEmulator.SteamMatchmaking.GetLobbyOwner(steamIDLobby);
+            return NativeSteamId.Write(pSteamID, SteamEmulator.SteamMatchmaking.GetLobbyOwner(steamIDLobby));
         }
 
         public bool SetLobbyOwner(IntPtr _, ulong steamIDLobby, ulong steamIDNewOwner)

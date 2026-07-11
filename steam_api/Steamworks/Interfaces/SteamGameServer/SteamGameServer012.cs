@@ -1,4 +1,5 @@
 using System;
+using SKYNET.Helpers;
 
 using SteamAPICall_t = System.UInt64;
 using HAuthTicket = System.UInt32;
@@ -58,9 +59,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamGameServer.BSecure();
         }
 
-        public CSteamID GetSteamID(IntPtr _)
+        public IntPtr GetSteamID(IntPtr _, IntPtr pSteamID)
         {
-            return SteamEmulator.SteamGameServer.GetSteamID();
+            return NativeSteamId.Write(pSteamID, SteamEmulator.SteamGameServer.GetSteamID());
         }
 
         public bool WasRestartRequested(IntPtr _)
@@ -133,9 +134,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamGameServer.SendUserConnectAndAuthenticate(unIPClient, pvAuthBlob, cubAuthBlobSize, pSteamIDUser);
         }
 
-        public CSteamID CreateUnauthenticatedUserConnection(IntPtr _)
+        public IntPtr CreateUnauthenticatedUserConnection(IntPtr _, IntPtr pSteamID)
         {
-            return SteamEmulator.SteamGameServer.CreateUnauthenticatedUserConnection();
+            return NativeSteamId.Write(pSteamID, SteamEmulator.SteamGameServer.CreateUnauthenticatedUserConnection());
         }
 
         public void SendUserDisconnect(IntPtr _, ulong steamIDUser)

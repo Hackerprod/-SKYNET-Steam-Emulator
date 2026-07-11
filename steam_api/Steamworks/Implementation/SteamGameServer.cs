@@ -49,6 +49,7 @@ namespace SKYNET.Steamworks.Implementation
             ServerData.Port = usGamePort;
             ServerData.QueryPort = usQueryPort;
             ServerData.Flags = unFlags;
+            ServerData.Secure = 0;
             ServerData.AppId = nGameAppId;
             ServerData.VersionString = pchVersionString;
 
@@ -66,7 +67,7 @@ namespace SKYNET.Steamworks.Implementation
             // TODO: Necessary
             GSPolicyResponse_t Policy = new GSPolicyResponse_t()
             {
-                Secure = (byte)(ServerData.Flags & Constants.k_unServerFlagSecure)
+                Secure = 0
             };
 
             if (SkyNetApiClient.IsEnabled)
@@ -79,7 +80,8 @@ namespace SKYNET.Steamworks.Implementation
 
                 if (result != null)
                 {
-                    Policy.Secure = result.Secure;
+                    ServerData.Secure = NormalizeSecure(result.Secure);
+                    Policy.Secure = ServerData.Secure;
                 }
             }
 
@@ -119,11 +121,12 @@ namespace SKYNET.Steamworks.Implementation
         public void LogOn(string pszToken)
         {
             Write($"LogOn (Token = {pszToken})");
+            CallbackManager.ResetGameServerConnectionReplay();
 
             if (SkyNetApiClient.IsEnabled)
             {
                 var result = SkyNetApiClient.LogOnGameServer(ServerData, pszToken, false);
-                LoggedIn = result != null && result.Success;
+                LoggedIn = result == null || result.Success;
                 if (result != null && result.PublicIP != 0)
                 {
                     ServerData.IP = result.PublicIP;
@@ -134,17 +137,19 @@ namespace SKYNET.Steamworks.Implementation
                 LoggedIn = true;
             }
 
+            EmitSecurePolicy();
             CallbackManager.AddCallbackGameServer(new SteamServersConnected_t());
         }
 
         public void LogOnAnonymous()
         {
             Write($"LogOnAnonymous");
+            CallbackManager.ResetGameServerConnectionReplay();
 
             if (SkyNetApiClient.IsEnabled)
             {
                 var result = SkyNetApiClient.LogOnGameServer(ServerData, string.Empty, true);
-                LoggedIn = result != null && result.Success;
+                LoggedIn = result == null || result.Success;
                 if (result != null && result.PublicIP != 0)
                 {
                     ServerData.IP = result.PublicIP;
@@ -155,6 +160,7 @@ namespace SKYNET.Steamworks.Implementation
                 LoggedIn = true;
             }
 
+            EmitSecurePolicy();
             CallbackManager.AddCallbackGameServer(new SteamServersConnected_t());
         }
 
@@ -184,7 +190,7 @@ namespace SKYNET.Steamworks.Implementation
         public bool BSecure()
         {
             Write($"BSecure");
-            return true;
+            return ServerData.Secure != 0;
         }
 
         public CSteamID GetSteamID()
@@ -266,7 +272,7 @@ namespace SKYNET.Steamworks.Implementation
         public void SetGameTags(string pchGameTags)
         {
             Write($"SetGameTags (GameTags = {pchGameTags})");
-            ServerData.GameTags = pchGameTags;
+            ServerData.GameTags = NormalizeGameTags(pchGameTags);
             SyncServerState();
         }
 
@@ -371,7 +377,7 @@ namespace SKYNET.Steamworks.Implementation
         public uint GetPublicIP_old()
         {
             Write($"GetPublicIP_old");
-            return 0;
+            return GetPublicIPv4();
         }
 
         public bool HandleIncomingPacket(IntPtr pData, int cbData, uint srcIP, uint srcPort)
@@ -386,10 +392,64 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        internal uint GetPublicIP()
+        internal SteamIPAddress_t GetPublicIP()
         {
             Write($"GetPublicIP");
-            return SkyNetApiClient.IsEnabled ? SkyNetApiClient.GetGameServerPublicIP() : 0;
+            return new SteamIPAddress_t(GetPublicIPv4());
+        }
+
+        internal IntPtr GetPublicIP(IntPtr returnBuffer)
+        {
+            Write($"GetPublicIP");
+            if (returnBuffer != IntPtr.Zero)
+            {
+                WriteSteamIPAddress(returnBuffer, GetPublicIPv4());
+            }
+
+            return returnBuffer;
+        }
+
+        internal IntPtr GetPublicIP(IntPtr arg0, IntPtr arg1)
+        {
+            var arg0IsInterface = InterfaceManager.IsKnownInterfacePointer(arg0);
+            var arg1IsInterface = InterfaceManager.IsKnownInterfacePointer(arg1);
+            var returnBuffer = arg1IsInterface || !arg0IsInterface ? arg0 : arg1;
+
+            Write($"GetPublicIP ABI (Arg0=0x{arg0.ToInt64():X}, Arg1=0x{arg1.ToInt64():X}, Arg0Interface={arg0IsInterface}, Arg1Interface={arg1IsInterface}, ReturnBuffer=0x{returnBuffer.ToInt64():X})");
+
+            if (returnBuffer == IntPtr.Zero || InterfaceManager.IsKnownInterfacePointer(returnBuffer))
+            {
+                return new IntPtr(unchecked((int)GetPublicIPv4()));
+            }
+
+            var ip = GetPublicIPv4();
+            WriteSteamIPAddress(returnBuffer, ip);
+            Write($"GetPublicIP ABI wrote IPv4=0x{ip:X8}");
+            return returnBuffer;
+        }
+
+        private static void WriteSteamIPAddress(IntPtr destination, uint ipv4)
+        {
+            System.Runtime.InteropServices.Marshal.WriteInt32(destination, 0, unchecked((int)ipv4));
+            System.Runtime.InteropServices.Marshal.WriteInt32(destination, 4, 0);
+            System.Runtime.InteropServices.Marshal.WriteInt64(destination, 8, 0);
+            System.Runtime.InteropServices.Marshal.WriteInt32(destination, 16, (int)SteamIPType.Type4);
+        }
+
+        internal uint GetPublicIPv4()
+        {
+            if (ServerData.IP != 0)
+            {
+                return ServerData.IP;
+            }
+
+            var ip = SkyNetApiClient.IsEnabled ? SkyNetApiClient.GetGameServerPublicIP() : 0;
+            if (ip != 0)
+            {
+                ServerData.IP = ip;
+            }
+
+            return ip;
         }
 
         public void EnableHeartbeats(bool bActive)
@@ -420,6 +480,49 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"ComputeNewPlayerCompatibility (SteamID = {steamIDNewPlayer})");
             return k_uAPICallInvalid;
+        }
+
+        private static bool IsSecureFlagSet(uint flags)
+        {
+            return (flags & Constants.k_unServerFlagSecure) != 0;
+        }
+
+        private static byte NormalizeSecure(byte secure)
+        {
+            return 0;
+        }
+
+        private void EmitSecurePolicy()
+        {
+            ServerData.Secure = NormalizeSecure(ServerData.Secure);
+            var steamId = (ulong)SteamEmulator.SteamID;
+            CallbackManager.AddCallbackGameServer(new GSPolicyResponse_t
+            {
+                Secure = ServerData.Secure
+            });
+            CallbackManager.AddCallbackGameServer(new ValidateAuthTicketResponse_t
+            {
+                m_SteamID = steamId,
+                m_OwnerSteamID = steamId,
+                m_eAuthSessionResponse = EAuthSessionResponse.OK
+            });
+            CallbackManager.AddCallbackGameServer(new GSClientApprove_t
+            {
+                SteamID = steamId,
+                OwnerSteamID = steamId
+            });
+        }
+
+        private static string NormalizeGameTags(string gameTags)
+        {
+            if (string.IsNullOrWhiteSpace(gameTags))
+            {
+                return string.Empty;
+            }
+
+            return string.Equals(gameTags.Trim(), "secure", StringComparison.OrdinalIgnoreCase)
+                ? "insecure"
+                : gameTags;
         }
 
         public bool SendUserConnectAndAuthenticate_DEPRECATED(uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, ulong pSteamIDUser)

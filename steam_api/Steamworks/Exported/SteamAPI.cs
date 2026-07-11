@@ -29,6 +29,13 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_InitFlat(IntPtr pOutErrMsg)
+        {
+            Write($"SteamAPI_InitFlat");
+            return 0; // k_ESteamAPIInitResult_OK
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_Shutdown(IntPtr pContextInitData)
         {
             Write("SteamAPI_Shutdown");
@@ -642,10 +649,24 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamUGC_v019()
+        {
+            Write($"SteamAPI_SteamUGC_v019");
+            return InterfaceManager.FindOrCreateInterface("STEAMUGC_INTERFACE_VERSION019");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamUGC_v021()
         {
             Write($"SteamAPI_SteamUGC_v021");
             return InterfaceManager.FindOrCreateInterface("STEAMUGC_INTERFACE_VERSION021");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_SteamGameServerUGC_v019()
+        {
+            Write($"SteamAPI_SteamGameServerUGC_v019");
+            return InterfaceManager.FindOrCreateInterface("STEAMUGC_INTERFACE_VERSION019");
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -673,7 +694,7 @@ namespace SKYNET.Steamworks.Exported
         public static IntPtr SteamAPI_SteamGameServerStats_v001()
         {
             Write($"SteamAPI_SteamGameServerStats_v001");
-            return InterfaceManager.FindOrCreateInterface("STEAMUSERSTATS_INTERFACE_VERSION001");
+            return InterfaceManager.FindOrCreateInterface("SteamGameServerStats001");
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -876,8 +897,8 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamUnifiedMessages()
         {
-            Write($"SteamUnifiedMessages not implemented Interface");
-            return default;
+            Write($"SteamUnifiedMessages");
+            return InterfaceManager.FindOrCreateInterface("STEAMUNIFIEDMESSAGES_INTERFACE_VERSION001");
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

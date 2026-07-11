@@ -1,5 +1,7 @@
 using System.Net;
+using System.Text;
 using System.Text.Json;
+using SKYNET_server.GC.Dota2;
 using SKYNET_server.Models;
 
 namespace SKYNET_server.Services;
@@ -22,7 +24,26 @@ public sealed partial class SteamApiStateService
             return false;
         }
 
-        return _sessions.TryGetValue(token, out session);
+        if (!_sessions.TryGetValue(token, out session))
+        {
+            if (!_state.WebSessions.TryGetValue(token, out session))
+            {
+                return false;
+            }
+
+            _sessions[token] = session;
+        }
+
+        var now = DateTime.UtcNow;
+        if (IsSessionExpired(session, now))
+        {
+            RemoveSessionLocked(token);
+            SaveState();
+            return false;
+        }
+
+        session.LastSeenUtc = now;
+        return true;
     }
 
     private bool TryGetUserByToken(string token, out SkyNetUserDto user)
@@ -41,7 +62,7 @@ public sealed partial class SteamApiStateService
                 AccountId = accountId != 0 ? accountId : SteamIdToAccountId(steamId),
                 AppId = appId,
                 PersonaName = string.IsNullOrWhiteSpace(personaName) ? $"User{SteamIdToAccountId(steamId)}" : personaName,
-                HasFriend = true,
+                HasFriend = false,
                 PersonaState = 1,
                 PlayerLevel = 1
             };
@@ -67,44 +88,30 @@ public sealed partial class SteamApiStateService
             };
         }
 
-        EnsureSeedFriends(steamId, user.AppId);
+        if (!_state.FriendLinks.ContainsKey(steamId))
+        {
+            _state.FriendLinks[steamId] = new HashSet<ulong>();
+        }
+
         SaveState();
         return user;
     }
 
-    private void EnsureSeedFriends(ulong selfSteamId, uint appId)
+    private DotaStatsAccountIdentity? ResolveDotaStatsIdentity(uint accountId)
     {
-        if (_state.FriendLinks.ContainsKey(selfSteamId))
+        lock (_sync)
         {
-            return;
-        }
-
-        var friends = _uiMockService.GetFriends();
-        var links = new HashSet<ulong>();
-        for (var index = 0; index < friends.Count; index++)
-        {
-            var friendSteamId = ToSteamId((uint)(2000 + index + 1));
-            if (!_state.Users.ContainsKey(friendSteamId))
+            var steamId = ToSteamId(accountId);
+            if (_state.Users.TryGetValue(steamId, out var user))
             {
-                _state.Users[friendSteamId] = new SkyNetUserDto
-                {
-                    SteamId = friendSteamId,
-                    AccountId = (uint)(2000 + index + 1),
-                    AppId = appId,
-                    PersonaName = friends[index].DisplayName,
-                    HasFriend = true,
-                    PersonaState = 1,
-                    PlayerLevel = 1,
-                    RichPresence = string.IsNullOrWhiteSpace(friends[index].CurrentGame)
-                        ? new Dictionary<string, string>()
-                        : new Dictionary<string, string> { ["status"] = friends[index].CurrentGame }
-                };
+                return new DotaStatsAccountIdentity(user.AccountId, user.SteamId, user.PersonaName);
             }
 
-            links.Add(friendSteamId);
+            var byAccount = _state.Users.Values.FirstOrDefault(user => user.AccountId == accountId);
+            return byAccount == null
+                ? new DotaStatsAccountIdentity(accountId, steamId, $"User{accountId}")
+                : new DotaStatsAccountIdentity(byAccount.AccountId, byAccount.SteamId, byAccount.PersonaName);
         }
-
-        _state.FriendLinks[selfSteamId] = links;
     }
 
     private void EnqueueFriendEvents(ulong steamId, string type, int flags)
@@ -114,16 +121,40 @@ public sealed partial class SteamApiStateService
             return;
         }
 
-        EnqueueEvent(steamId, new SkyNetEventDto
+        var recipients = new HashSet<ulong> { steamId };
+        if (_state.FriendLinks.TryGetValue(steamId, out var linkedUsers))
         {
-            Type = type,
-            SteamId = steamId,
-            AccountId = user.AccountId,
-            PersonaName = user.PersonaName,
-            AppId = user.AppId,
-            ChangeFlags = flags,
-            RichPresence = new Dictionary<string, string>(user.RichPresence)
-        });
+            foreach (var linkedUser in linkedUsers)
+            {
+                recipients.Add(linkedUser);
+            }
+        }
+
+        foreach (var request in _state.FriendRequests.Where(IsPending))
+        {
+            if (request.FromSteamId == steamId)
+            {
+                recipients.Add(request.ToSteamId);
+            }
+            else if (request.ToSteamId == steamId)
+            {
+                recipients.Add(request.FromSteamId);
+            }
+        }
+
+        foreach (var recipient in recipients)
+        {
+            EnqueueEvent(recipient, new SkyNetEventDto
+            {
+                Type = type,
+                SteamId = steamId,
+                AccountId = user.AccountId,
+                PersonaName = user.PersonaName,
+                AppId = user.AppId,
+                ChangeFlags = flags,
+                RichPresence = new Dictionary<string, string>(user.RichPresence)
+            });
+        }
     }
 
     private void EnqueueLobbyEvent(SkyNetLobbyDto lobby, string type, ulong recipientSteamId)
@@ -144,26 +175,315 @@ public sealed partial class SteamApiStateService
             RecipientSteamId = recipientSteamId,
             Event = evt
         });
+
+        Monitor.PulseAll(_sync);
+        TrimQueuedEventsLocked();
+    }
+
+    private void EnqueueGcMessageEvent(ulong recipientSteamId, SkyNetGCMessageDto message)
+    {
+        lock (_sync)
+        {
+            EnqueueEvent(recipientSteamId, new SkyNetEventDto
+            {
+                Type = "gc_message",
+                AppId = message.AppId,
+                MessageType = message.MessageType,
+                PayloadBase64 = message.PayloadBase64,
+                TargetJobId = message.TargetJobId,
+                Protobuf = message.Protobuf
+            });
+        }
+
+        _gameCoordinatorTrace.Record("push", message.AppId, recipientSteamId, message.MessageType,
+            GameCoordinatorTraceService.EstimatePayloadSize(message.PayloadBase64));
+    }
+
+    private void TrimQueuedEventsLocked()
+    {
+        const int maxEvents = 4096;
+        if (_events.Count <= maxEvents)
+        {
+            return;
+        }
+
+        _events.RemoveRange(0, _events.Count - maxEvents);
+    }
+
+    private void ExpireStaleSessionsLocked()
+    {
+        var now = DateTime.UtcNow;
+        var expired = _sessions
+            .Where(pair => IsSessionExpired(pair.Value, now))
+            .Select(pair => pair.Key)
+            .ToList();
+
+        foreach (var token in expired)
+        {
+            RemoveSessionLocked(token);
+        }
+
+        var stalePersistent = _state.WebSessions
+            .Where(pair => IsSessionExpired(pair.Value, now))
+            .Select(pair => pair.Key)
+            .ToList();
+
+        foreach (var token in stalePersistent)
+        {
+            RemoveSessionLocked(token);
+        }
+
+        var activeWebSessionCleared = false;
+        if (_state.ActiveWebSteamId != 0 && !HasActiveWebSessionLocked(_state.ActiveWebSteamId))
+        {
+            _state.ActiveWebSteamId = 0;
+            activeWebSessionCleared = true;
+        }
+
+        if (expired.Count > 0)
+        {
+            DotaGcBackend.ExpireInactiveSessions(_sessions.Values.Select(session => session.SteamId).ToHashSet());
+        }
+
+        if (expired.Count > 0 || stalePersistent.Count > 0 || activeWebSessionCleared)
+        {
+            SaveState();
+        }
+    }
+
+    private bool IsSessionExpired(ApiSession session, DateTime now)
+    {
+        if (session.WebSession || session.Persistent)
+        {
+            return session.ExpiresAtUtc != DateTime.MinValue && session.ExpiresAtUtc <= now;
+        }
+
+        return session.LastSeenUtc < now - _sessionTimeout;
+    }
+
+    private void RemoveSessionLocked(string token)
+    {
+        _sessions.Remove(token);
+        _state.WebSessions.Remove(token);
+    }
+
+    private bool HasActiveWebSessionLocked(ulong steamId)
+    {
+        var now = DateTime.UtcNow;
+        foreach (var pair in _state.WebSessions.ToList())
+        {
+            if (IsSessionExpired(pair.Value, now))
+            {
+                RemoveSessionLocked(pair.Key);
+                continue;
+            }
+
+            _sessions[pair.Key] = pair.Value;
+        }
+
+        return _sessions.Values.Any(session =>
+            session.WebSession &&
+            session.SteamId == steamId &&
+            !IsSessionExpired(session, now));
     }
 
     private void LoadState()
     {
-        if (File.Exists(_statePath))
+        if (!File.Exists(_statePath))
+        {
+            _state = new ApiState();
+            return;
+        }
+
+        try
         {
             var json = File.ReadAllText(_statePath);
-            _state = JsonSerializer.Deserialize<ApiState>(json, _jsonOptions) ?? new ApiState();
+            _state = string.IsNullOrWhiteSpace(json)
+                ? new ApiState()
+                : JsonSerializer.Deserialize<ApiState>(json, _jsonOptions) ?? new ApiState();
         }
-        else
+        catch (JsonException)
+        {
+            _state = new ApiState();
+        }
+        catch (IOException)
         {
             _state = new ApiState();
         }
     }
 
+    private void NormalizeState()
+    {
+        _state.Users ??= new Dictionary<ulong, SkyNetUserDto>();
+        _state.FriendLinks ??= new Dictionary<ulong, HashSet<ulong>>();
+        _state.FriendRequests ??= new List<SkyNetFriendRequestDto>();
+        _state.Avatars ??= new Dictionary<ulong, string>();
+        _state.Stats ??= new Dictionary<ulong, SkyNetStatsEnvelopeDto>();
+        _state.Lobbies ??= new Dictionary<ulong, SkyNetLobbyDto>();
+        _state.Files ??= new Dictionary<string, SkyNetRemoteStorageFileDto>(StringComparer.OrdinalIgnoreCase);
+        _state.GameServers ??= new Dictionary<ulong, SkyNetGameServerDto>();
+        _state.WebAccounts ??= new Dictionary<string, SkyNetWebAccountDto>(StringComparer.OrdinalIgnoreCase);
+        _state.WebSessions = new Dictionary<string, ApiSession>(_state.WebSessions ?? new Dictionary<string, ApiSession>(), StringComparer.Ordinal);
+        _state.DotaItems ??= new Dictionary<uint, SkyNetDotaItemDto>();
+        _state.DotaEquipment ??= new Dictionary<ulong, List<SkyNetDotaEquipmentDto>>();
+        _state.DotaMatches ??= new Dictionary<ulong, SkyNetDotaMatchDto>();
+        _state.DotaHeroIds ??= new Dictionary<string, uint>(StringComparer.OrdinalIgnoreCase);
+        _state.DotaHeroSlots = NormalizeDotaHeroSlots(_state.DotaHeroSlots);
+        _state.DotaCosmetics ??= new SkyNetDotaCosmeticSettingsDto();
+        EnsureDotaHeroSlotsLoadedLocked();
+        NormalizeDotaItemSlotsLocked();
+        var now = DateTime.UtcNow;
+        foreach (var pair in _state.WebSessions.ToList())
+        {
+            pair.Value.WebSession = true;
+            pair.Value.Persistent = true;
+            if (pair.Value.ExpiresAtUtc == DateTime.MinValue)
+            {
+                pair.Value.ExpiresAtUtc = now.AddDays(30);
+            }
+
+            if (!_state.Users.ContainsKey(pair.Value.SteamId) || IsSessionExpired(pair.Value, now))
+            {
+                _state.WebSessions.Remove(pair.Key);
+                continue;
+            }
+
+            _sessions[pair.Key] = pair.Value;
+        }
+
+        if (_state.ActiveWebSteamId != 0 && (!_state.Users.ContainsKey(_state.ActiveWebSteamId) || !HasActiveWebSessionLocked(_state.ActiveWebSteamId)))
+        {
+            _state.ActiveWebSteamId = 0;
+        }
+
+        foreach (var user in _state.Users.Values)
+        {
+            user.FriendRelationship = FriendRelationshipNone;
+            _state.FriendLinks.TryAdd(user.SteamId, new HashSet<ulong>());
+        }
+
+        foreach (var request in _state.FriendRequests)
+        {
+            if (string.IsNullOrWhiteSpace(request.Id))
+            {
+                request.Id = Guid.NewGuid().ToString("N");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Status))
+            {
+                request.Status = "pending";
+            }
+        }
+
+        foreach (var item in _state.DotaItems.Values)
+        {
+            item.HeroNames ??= new List<string>();
+            item.HeroIds ??= new List<uint>();
+        }
+
+        foreach (var pair in _state.DotaEquipment.ToList())
+        {
+            var list = pair.Value ?? new List<SkyNetDotaEquipmentDto>();
+            foreach (var item in list)
+            {
+                if (item.ItemId == 0)
+                {
+                    item.ItemId = BuildDotaItemInstanceId(item.SteamId, item.DefIndex);
+                }
+            }
+
+            _state.DotaEquipment[pair.Key] = NormalizeDotaEquipmentList(list);
+        }
+
+        foreach (var match in _state.DotaMatches.Values)
+        {
+            match.Players ??= new List<SkyNetDotaMatchPlayerDto>();
+            foreach (var player in match.Players)
+            {
+                player.Equipment ??= new List<SkyNetDotaEquipmentDto>();
+            }
+        }
+    }
+
+    // Persist state on demand (e.g. on graceful shutdown).
+    public void FlushState()
+    {
+        SaveState();
+    }
+
+    // Remove atomic-write temp files left behind by force-killed previous runs.
+    // The write path names them "<state>.<pid>.<guid>.tmp"; a clean run deletes
+    // its own, but a hard kill between write and move orphans them (~10 MB each).
+    private void CleanupOrphanStateTempFiles()
+    {
+        try
+        {
+            var dir = Path.GetDirectoryName(_statePath)!;
+            if (!Directory.Exists(dir))
+            {
+                return;
+            }
+
+            foreach (var file in Directory.EnumerateFiles(dir, $"{Path.GetFileName(_statePath)}.*.tmp"))
+            {
+                try { File.Delete(file); } catch { /* locked/absent: best effort */ }
+            }
+        }
+        catch
+        {
+            // best effort; never block startup on cleanup
+        }
+    }
+
     private void SaveState()
     {
-        Directory.CreateDirectory(Path.GetDirectoryName(_statePath)!);
-        File.WriteAllText(_statePath, JsonSerializer.Serialize(_state, _jsonOptions));
+        lock (_sync)
+        {
+            var stateDirectory = Path.GetDirectoryName(_statePath)!;
+            Directory.CreateDirectory(stateDirectory);
+
+            var tempPath = Path.Combine(
+                stateDirectory,
+                $"{Path.GetFileName(_statePath)}.{Environment.ProcessId}.{Guid.NewGuid():N}.tmp");
+
+            try
+            {
+                File.WriteAllText(tempPath, JsonSerializer.Serialize(_state, _jsonOptions), Encoding.UTF8);
+
+                for (var attempt = 0; ; attempt++)
+                {
+                    try
+                    {
+                        File.Move(tempPath, _statePath, true);
+                        break;
+                    }
+                    catch (Exception ex) when (IsTransientStateSaveException(ex) && attempt < 5)
+                    {
+                        System.Threading.Thread.Sleep(25 * (attempt + 1));
+                    }
+                }
+            }
+            finally
+            {
+                try
+                {
+                    if (File.Exists(tempPath))
+                    {
+                        File.Delete(tempPath);
+                    }
+                }
+                catch (IOException)
+                {
+                }
+                catch (UnauthorizedAccessException)
+                {
+                }
+            }
+        }
     }
+
+    private static bool IsTransientStateSaveException(Exception exception) =>
+        exception is IOException or UnauthorizedAccessException;
 
     private static SkyNetUserDto CloneUser(SkyNetUserDto user) => new()
     {
@@ -173,8 +493,11 @@ public sealed partial class SteamApiStateService
         AppId = user.AppId,
         LobbyId = user.LobbyId,
         HasFriend = user.HasFriend,
+        FriendRelationship = user.FriendRelationship,
         PersonaState = user.PersonaState,
         PlayerLevel = user.PlayerLevel,
+        GameState = user.GameState,
+        HeroId = user.HeroId,
         RichPresence = new Dictionary<string, string>(user.RichPresence)
     };
 
@@ -234,8 +557,12 @@ public sealed partial class SteamApiStateService
         Lobby = evt.Lobby == null ? null : CloneLobby(evt.Lobby),
         PayloadBase64 = evt.PayloadBase64,
         MessageType = evt.MessageType,
+        TargetJobId = evt.TargetJobId,
+        Protobuf = evt.Protobuf,
         Channel = evt.Channel,
-        RemoteSteamId = evt.RemoteSteamId
+        RemoteSteamId = evt.RemoteSteamId,
+        FriendRelationship = evt.FriendRelationship,
+        RequestId = evt.RequestId
     };
 
     private static SkyNetRemoteStorageFileDto CloneFile(SkyNetRemoteStorageFileDto file) => new()
@@ -245,6 +572,107 @@ public sealed partial class SteamApiStateService
         Size = file.Size,
         Timestamp = file.Timestamp
     };
+
+    private static SkyNetDotaItemDto CloneDotaItem(SkyNetDotaItemDto item) => new()
+    {
+        DefIndex = item.DefIndex,
+        Name = item.Name,
+        Prefab = item.Prefab,
+        Slot = item.Slot,
+        Quality = item.Quality,
+        QualityId = item.QualityId,
+        Rarity = item.Rarity,
+        RarityId = item.RarityId,
+        ImageInventory = item.ImageInventory,
+        IsDefault = item.IsDefault,
+        IsTool = item.IsTool,
+        IsBundle = item.IsBundle,
+        HeroNames = item.HeroNames.ToList(),
+        HeroIds = item.HeroIds.ToList()
+    };
+
+    private static SkyNetDotaEquipmentDto CloneDotaEquipment(SkyNetDotaEquipmentDto item) => new()
+    {
+        SteamId = item.SteamId,
+        HeroId = item.HeroId,
+        HeroName = item.HeroName,
+        Slot = item.Slot,
+        SlotId = item.SlotId,
+        DefIndex = item.DefIndex,
+        ItemId = item.ItemId,
+        Style = item.Style,
+        UpdatedAt = item.UpdatedAt
+    };
+
+    private static SkyNetDotaMatchDto CloneDotaMatch(SkyNetDotaMatchDto match) => new()
+    {
+        LobbyId = match.LobbyId,
+        MatchId = match.MatchId,
+        ServerSteamId = match.ServerSteamId,
+        Connect = match.Connect,
+        State = match.State,
+        GameState = match.GameState,
+        GameStartTime = match.GameStartTime,
+        UpdatedAt = match.UpdatedAt,
+        Players = match.Players.Select(player => new SkyNetDotaMatchPlayerDto
+        {
+            SteamId = player.SteamId,
+            AccountId = player.AccountId,
+            PersonaName = player.PersonaName,
+            Team = player.Team,
+            Slot = player.Slot,
+            CoachTeam = player.CoachTeam,
+            HeroId = player.HeroId,
+            Equipment = player.Equipment.Select(CloneDotaEquipment).ToList()
+        }).ToList()
+    };
+
+    private SkyNetDotaCosmeticSummaryDto BuildDotaCosmeticSummaryLocked() => new()
+    {
+        ItemCount = _state.DotaItems.Count,
+        HeroCount = _state.DotaHeroIds.Count,
+        EquippedCount = _state.DotaEquipment.Values.Sum(items => items.Count),
+        DotaPath = _state.DotaCosmetics.DotaPath,
+        LastImportAt = _state.DotaCosmetics.LastImportAt,
+        LastImportStatus = _state.DotaCosmetics.LastImportStatus
+    };
+
+    private static Dictionary<string, Dictionary<string, uint>> NormalizeDotaHeroSlots(
+        Dictionary<string, Dictionary<string, uint>>? source)
+    {
+        var normalized = new Dictionary<string, Dictionary<string, uint>>(StringComparer.OrdinalIgnoreCase);
+        if (source == null)
+        {
+            return normalized;
+        }
+
+        foreach (var hero in source)
+        {
+            if (string.IsNullOrWhiteSpace(hero.Key) || hero.Value == null)
+            {
+                continue;
+            }
+
+            var slots = new Dictionary<string, uint>(StringComparer.OrdinalIgnoreCase);
+            foreach (var slot in hero.Value)
+            {
+                if (!string.IsNullOrWhiteSpace(slot.Key))
+                {
+                    slots[slot.Key.Trim().ToLowerInvariant()] = slot.Value;
+                }
+            }
+
+            normalized[hero.Key.Trim()] = slots;
+        }
+
+        return normalized;
+    }
+
+    private static ulong BuildDotaItemInstanceId(ulong steamId, uint defIndex)
+    {
+        ulong accountBits = steamId & 0xFFFFFFFFUL;
+        return 0x7000000000000000UL | (accountBits << 20) | defIndex;
+    }
 
     private static bool CompareNumber(int left, int right, int comparisonType) => comparisonType switch
     {

@@ -1,0 +1,86 @@
+@page "/users"
+@model SKYNET_server.Pages.Users.IndexModel
+@{
+    string RelationshipLabel(int relationship) => relationship switch
+    {
+        2 => "Solicitud recibida",
+        3 => "Amigo",
+        4 => "Solicitud enviada",
+        _ => "Sin relacion"
+    };
+}
+
+<div class="space-y-6">
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        <div class="rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-sm font-bold text-cyan-100">@Model.StatusMessage</div>
+    }
+
+    <header class="rounded-lg border border-zinc-800 bg-zinc-900/70 p-6">
+        <p class="text-[10px] font-black uppercase tracking-[0.22em] text-cyan-400">Users</p>
+        <div class="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+                <h1 class="text-3xl font-black text-white">Usuarios registrados</h1>
+                <p class="mt-2 max-w-2xl text-sm text-zinc-400">Perfiles persistidos del emulador. Desde aqui puedes entrar al perfil, enviar solicitudes o administrar amistades.</p>
+            </div>
+            <div class="rounded-lg border border-zinc-800 bg-zinc-950 px-5 py-4 text-center">
+                <p class="text-2xl font-black text-white">@Model.Users.Count</p>
+                <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Perfiles visibles</p>
+            </div>
+        </div>
+    </header>
+
+    <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        @if (Model.Users.Count == 0)
+        {
+            <div class="rounded-lg border border-zinc-800 bg-zinc-900/70 p-6">
+                <h2 class="text-lg font-black text-white">No hay otros usuarios</h2>
+                <p class="mt-2 text-sm text-zinc-400">Registra otra cuenta web o inicia Dota con otro AccountID para poblar esta lista.</p>
+            </div>
+        }
+        @foreach (var user in Model.Users)
+        {
+            var status = user.PersonaState == 0 ? "Offline" : "Online";
+            <article class="rounded-lg border border-zinc-800 bg-zinc-900/70 p-5">
+                <div class="flex items-start gap-4">
+                    <img src="/api/users/@user.SteamId/avatar" alt="" class="h-14 w-14 shrink-0 rounded-lg border border-zinc-700 bg-zinc-950 object-cover" />
+                    <div class="min-w-0 flex-1">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <a asp-page="/Users/Profile" asp-route-steamId="@user.SteamId" class="truncate text-lg font-black text-white hover:text-cyan-300">@user.PersonaName</a>
+                            <span class="rounded border border-zinc-700 px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-cyan-400">@status</span>
+                        </div>
+                        <p class="mt-1 text-xs text-zinc-500">SteamID @user.SteamId</p>
+                        <p class="mt-1 text-xs text-zinc-500">AccountID @user.AccountId</p>
+                    </div>
+                </div>
+
+                <div class="mt-4 flex items-center justify-between gap-3">
+                    <span class="rounded border border-zinc-700 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-zinc-400">@RelationshipLabel(user.FriendRelationship)</span>
+                    <div class="flex gap-2">
+                        @if (user.FriendRelationship == 0)
+                        {
+                            <form method="post" asp-page-handler="Request">
+                                <input type="hidden" name="TargetSteamId" value="@user.SteamId" />
+                                <button class="rounded-lg bg-cyan-600 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white hover:bg-cyan-500">Agregar</button>
+                            </form>
+                        }
+                        else if (user.FriendRelationship == 2)
+                        {
+                            <form method="post" asp-page-handler="Accept">
+                                <input type="hidden" name="TargetSteamId" value="@user.SteamId" />
+                                <button class="rounded-lg bg-cyan-600 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white hover:bg-cyan-500">Aceptar</button>
+                            </form>
+                        }
+                        @if (user.FriendRelationship == 2 || user.FriendRelationship == 3 || user.FriendRelationship == 4)
+                        {
+                            <form method="post" asp-page-handler="Remove">
+                                <input type="hidden" name="TargetSteamId" value="@user.SteamId" />
+                                <button class="rounded-lg border border-red-500/30 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-red-300 hover:bg-red-500/10">Quitar</button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </article>
+        }
+    </section>
+</div>

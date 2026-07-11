@@ -1,5 +1,6 @@
 using SKYNET.Steamworks;
 using System;
+using SKYNET.Helpers;
 
 using DepotId_t = System.UInt32;
 
@@ -108,9 +109,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamApps.BIsAppInstalled(appID);
         }
 
-        public CSteamID GetAppOwner(IntPtr _)
+        public IntPtr GetAppOwner(IntPtr _, IntPtr pSteamID)
         {
-            return SteamEmulator.SteamApps.GetAppOwner();
+            return NativeSteamId.Write(pSteamID, SteamEmulator.SteamApps.GetAppOwner());
         }
 
         public IntPtr GetLaunchQueryParam(IntPtr _, string pchKey)

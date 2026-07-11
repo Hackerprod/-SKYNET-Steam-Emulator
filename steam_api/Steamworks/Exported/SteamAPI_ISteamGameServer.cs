@@ -274,10 +274,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static uint SteamAPI_ISteamGameServer_GetPublicIP(IntPtr _, IntPtr instancePtr_possible)
+        public static IntPtr SteamAPI_ISteamGameServer_GetPublicIP(IntPtr returnBufferOrSelf, IntPtr selfMaybe)
         {
             Write("SteamAPI_ISteamGameServer_GetPublicIP");
-            return (uint)SteamEmulator.SteamGameServer.GetPublicIP();
+            return SteamEmulator.SteamGameServer.GetPublicIP(returnBufferOrSelf, selfMaybe);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -376,7 +376,7 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamGameServer_BSecure()
         {
             Write("SteamGameServer_BSecure");
-            return false;
+            return SteamEmulator.SteamGameServer.BSecure();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

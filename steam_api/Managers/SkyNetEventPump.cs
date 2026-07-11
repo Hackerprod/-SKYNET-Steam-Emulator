@@ -1,15 +1,15 @@
 using SKYNET.Callback;
+using SKYNET.Helpers;
 using SKYNET.Network.Packets;
 using SKYNET.Steamworks;
 using System;
+using System.Threading;
 
 namespace SKYNET.Managers
 {
     public static class SkyNetEventPump
     {
-        private static readonly object SyncRoot = new object();
-        private static DateTime LastPoll = DateTime.MinValue;
-        private static bool Polling;
+        private static int Started;
 
         public static void RunFrame(bool gameServer)
         {
@@ -18,40 +18,48 @@ namespace SKYNET.Managers
                 return;
             }
 
-            lock (SyncRoot)
+            EnsureStarted();
+        }
+
+        private static void EnsureStarted()
+        {
+            if (Interlocked.Exchange(ref Started, 1) == 1)
             {
-                if (Polling)
-                {
-                    return;
-                }
-
-                if (DateTime.UtcNow - LastPoll < TimeSpan.FromMilliseconds(SteamEmulator.SkyNetPollIntervalMs))
-                {
-                    return;
-                }
-
-                Polling = true;
-                LastPoll = DateTime.UtcNow;
+                return;
             }
 
-            try
+            var thread = new Thread(PumpLoop)
             {
-                var envelope = SkyNetApiClient.PollEvents();
-                if (envelope?.Events == null)
-                {
-                    return;
-                }
+                IsBackground = true,
+                Name = "SKYNET event pump"
+            };
+            thread.Start();
+        }
 
-                foreach (var serverEvent in envelope.Events)
-                {
-                    ApplyEvent(serverEvent);
-                }
-            }
-            finally
+        private static void PumpLoop()
+        {
+            while (true)
             {
-                lock (SyncRoot)
+                try
                 {
-                    Polling = false;
+                    if (!SkyNetApiClient.IsEnabled)
+                    {
+                        Thread.Sleep(250);
+                        continue;
+                    }
+
+                    var envelope = SkyNetApiClient.PollEvents(1000);
+                    if (envelope?.Events != null)
+                    {
+                        foreach (var serverEvent in envelope.Events)
+                        {
+                            ApplyEvent(serverEvent);
+                        }
+                    }
+                }
+                catch
+                {
+                    Thread.Sleep(Math.Max(50, SteamEmulator.SkyNetPollIntervalMs));
                 }
             }
         }
@@ -67,6 +75,8 @@ namespace SKYNET.Managers
             {
                 case "persona_state_changed":
                 case "friend_added":
+                case "friend_request_received":
+                case "friend_request_sent":
                 case "friend_presence_changed":
                     SkyNetStateCache.UpsertFriendFromEvent(serverEvent);
                     EmitPersonaStateChange(serverEvent);
@@ -121,6 +131,11 @@ namespace SKYNET.Managers
             };
 
             CallbackManager.AddCallback(callback);
+
+            if ((callback.m_nChangeFlags & (int)EPersonaChange.k_EPersonaChangeAvatar) != 0)
+            {
+                ThreadPool.QueueUserWorkItem(_ => SkyNetApiClient.RefreshAvatar(steamId));
+            }
         }
 
         private static void ApplyLobby(SkyNetApiClient.SkyNetEventDto serverEvent)
@@ -189,7 +204,11 @@ namespace SKYNET.Managers
 
             try
             {
-                SteamEmulator.SteamGameCoordinator.PushMessage(serverEvent.MessageType, Convert.FromBase64String(serverEvent.PayloadBase64));
+                SteamEmulator.SteamGameCoordinator.PushServerMessage(
+                    serverEvent.MessageType,
+                    Convert.FromBase64String(serverEvent.PayloadBase64),
+                    serverEvent.TargetJobId ?? ulong.MaxValue,
+                    serverEvent.Protobuf);
             }
             catch
             {

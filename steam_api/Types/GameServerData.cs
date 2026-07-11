@@ -13,6 +13,7 @@ namespace SKYNET.Types
         public int Port { get; set; }
         public int QueryPort { get; set; }
         public uint Flags { get; set; }
+        public byte Secure { get; set; }
         public uint AppId { get; set; }
         public string VersionString { get; set; }
         public string Product { get; set; }

@@ -3066,15 +3066,19 @@ namespace SKYNET.Callback
         #endregion
     };
 
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     public struct SteamNetworkingSocketsCert_t : ICallbackData
     {
         public EResult m_eResult;
         public UInt32 m_cbCert;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 512)]
         public byte[] m_certOrMsg; //CMsgSteamDatagramCertificate protobuf
         public UInt64 m_caKeyID;
         public UInt32 m_cbSignature;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
         public byte[] m_signature;
         public UInt32 m_cbPrivKey;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)] // real struct: privKey is 128 bytes (0x298..0x318=792), not 256
         public byte[] m_privKey;
         //total size: 792
         //0

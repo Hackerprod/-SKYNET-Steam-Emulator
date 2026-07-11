@@ -5,6 +5,8 @@ namespace SKYNET_server.Services;
 
 public sealed partial class SteamApiStateService
 {
+    private const uint ServerFlagSecure = 0x02;
+
     public bool PutFile(string token, SkyNetRemoteStorageFileDto file)
     {
         lock (_sync)
@@ -122,6 +124,17 @@ public sealed partial class SteamApiStateService
             var ticket = _tickets.Values.FirstOrDefault(t => t.TicketBase64 == request.TicketBase64 && t.AppId == request.AppId);
             if (ticket == null)
             {
+                if (!string.IsNullOrWhiteSpace(request.TicketBase64))
+                {
+                    return new SkyNetAuthValidateResultDto
+                    {
+                        Success = true,
+                        BeginAuthSessionResult = BeginAuthOk,
+                        AuthSessionResponse = AuthResponseOk,
+                        OwnerSteamId = request.SteamId
+                    };
+                }
+
                 return new SkyNetAuthValidateResultDto
                 {
                     Success = false,
@@ -179,9 +192,12 @@ public sealed partial class SteamApiStateService
         {
             var server = request.Server ?? new SkyNetGameServerDto();
             var publicIp = server.IP != 0 ? server.IP : ToUInt32(IPAddress.Loopback);
+            server.Flags &= ~ServerFlagSecure;
+            server.GameTags = NormalizeGameServerTags(server.GameTags);
+
             _state.GameServers[(ulong)publicIp] = server;
             SaveState();
-            return new SkyNetGameServerResultDto { Success = true, PublicIP = publicIp, Secure = (byte)(server.Flags & 1), SteamId = (ulong)publicIp };
+            return new SkyNetGameServerResultDto { Success = true, PublicIP = publicIp, Secure = 0, SteamId = (ulong)publicIp };
         }
     }
 
@@ -195,6 +211,8 @@ public sealed partial class SteamApiStateService
     {
         lock (_sync)
         {
+            server.Flags &= ~ServerFlagSecure;
+            server.GameTags = NormalizeGameServerTags(server.GameTags);
             _state.GameServers[(ulong)(server.IP == 0 ? ToUInt32(IPAddress.Loopback) : server.IP)] = server;
             SaveState();
             return true;
@@ -237,19 +255,13 @@ public sealed partial class SteamApiStateService
                 return false;
             }
 
-            EnqueueEvent(request.RemoteSteamId, new SkyNetEventDto
-            {
-                Type = "p2p_packet",
-                RemoteSteamId = session.SteamId,
-                PayloadBase64 = request.BufferBase64,
-                Channel = request.Channel
-            });
+            EnqueueP2PLocked(session!, request);
 
             return true;
         }
     }
 
-    public bool SendGCMessage(string token, SkyNetGCMessageDto request)
+    public bool SendP2PBatch(string token, SkyNetP2PPacketBatchDto request)
     {
         lock (_sync)
         {
@@ -258,15 +270,130 @@ public sealed partial class SteamApiStateService
                 return false;
             }
 
-            EnqueueEvent(session.SteamId, new SkyNetEventDto
+            foreach (var packet in request.Packets ?? new List<SkyNetP2PPacketSendDto>())
             {
-                Type = "gc_message",
-                SteamId = session.SteamId,
-                MessageType = request.MessageType,
-                PayloadBase64 = request.PayloadBase64
-            });
+                if (packet?.RemoteSteamId != 0)
+                {
+                    EnqueueP2PLocked(session!, packet);
+                }
+            }
 
             return true;
+        }
+    }
+
+    private void EnqueueP2PLocked(ApiSession session, SkyNetP2PPacketSendDto request)
+    {
+        EnqueueEvent(request.RemoteSteamId, new SkyNetEventDto
+        {
+            Type = "p2p_packet",
+            RemoteSteamId = session.SteamId,
+            PayloadBase64 = request.BufferBase64,
+            Channel = request.Channel
+        });
+    }
+
+    private static string NormalizeGameServerTags(string? gameTags)
+    {
+        if (string.IsNullOrWhiteSpace(gameTags))
+        {
+            return "insecure";
+        }
+
+        var tags = gameTags
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(tag => tag.Equals("secure", StringComparison.OrdinalIgnoreCase) ? "insecure" : tag)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (!tags.Any(tag => tag.Equals("insecure", StringComparison.OrdinalIgnoreCase)))
+        {
+            tags.Add("insecure");
+        }
+
+        return string.Join(',', tags);
+    }
+
+    public bool SendGCMessage(string token, SkyNetGCMessageDto request)
+    {
+        lock (_sync)
+        {
+            if (!TryGetSession(token, out _))
+            {
+                return false;
+            }
+
+            // One-way GC sends are acknowledged here. Request/response GC traffic is
+            // handled by /gamecoordinator/exchange and routed through per-app plugins.
+            return true;
+        }
+    }
+
+    public bool TryResolveSessionIdentity(string token, ulong requestedSteamId, uint requestedAppId, out ulong steamId, out uint appId)
+    {
+        lock (_sync)
+        {
+            steamId = 0;
+            appId = 0;
+            if (!TryGetSession(token, out var session))
+            {
+                return false;
+            }
+
+            steamId = requestedSteamId != 0 ? requestedSteamId : session!.SteamId;
+            _state.Users.TryGetValue(steamId, out var user);
+            appId = requestedAppId != 0 ? requestedAppId : user?.AppId ?? 0;
+            return true;
+        }
+    }
+
+    public SkyNetGCExchangeResponseDto? ExchangeGCMessage(string token, SkyNetGCExchangeRequestDto request)
+    {
+        lock (_sync)
+        {
+            if (!TryGetSession(token, out var session))
+            {
+                return null;
+            }
+
+            var contextSteamId = request.SteamId != 0 ? request.SteamId : session!.SteamId;
+            _state.Users.TryGetValue(contextSteamId, out var user);
+            _state.Users.TryGetValue(session!.SteamId, out var sessionUser);
+            var appId = request.AppId != 0 ? request.AppId : user?.AppId ?? 0;
+            var context = new GameCoordinatorContext
+            {
+                AppId = appId,
+                SteamId = contextSteamId,
+                AccountId = SteamIdToAccountId(contextSteamId),
+                PersonaName = user?.PersonaName ?? sessionUser?.PersonaName ?? string.Empty
+            };
+
+            return _gameCoordinatorPlugins.Exchange(context, request);
+        }
+    }
+
+    public SkyNetGCExchangeResponseDto? PollGCMessages(string token, SkyNetGCPollRequestDto request)
+    {
+        lock (_sync)
+        {
+            if (!TryGetSession(token, out var session))
+            {
+                return null;
+            }
+
+            var contextSteamId = request.SteamId != 0 ? request.SteamId : session!.SteamId;
+            _state.Users.TryGetValue(contextSteamId, out var user);
+            _state.Users.TryGetValue(session!.SteamId, out var sessionUser);
+            var appId = request.AppId != 0 ? request.AppId : user?.AppId ?? sessionUser?.AppId ?? 0;
+            var context = new GameCoordinatorContext
+            {
+                AppId = appId,
+                SteamId = contextSteamId,
+                AccountId = SteamIdToAccountId(contextSteamId),
+                PersonaName = user?.PersonaName ?? sessionUser?.PersonaName ?? string.Empty
+            };
+
+            return _gameCoordinatorPlugins.Poll(context);
         }
     }
 }

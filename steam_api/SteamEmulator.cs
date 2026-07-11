@@ -64,7 +64,11 @@ public class SteamEmulator
     public static string SkyNetServerUrl;
     public static string SkyNetAccessToken;
     public static string SkyNetRefreshToken;
+    public static string SkyNetClientInstanceId;
+    public static bool SkyNetUseActiveWebUser;
     public static int SkyNetPollIntervalMs;
+    public static int SkyNetHttpTimeoutMs;
+    public static int SkyNetDiscoveryPort;
 
     public static int BroadCastPort = 28032;
 
@@ -125,16 +129,21 @@ public class SteamEmulator
         PersonaName = "";
         EmulatorPath = "";
         SteamID = CSteamID.Invalid;
-        SteamID_GS = CSteamID.CreateOne(); 
+        SteamID_GS = CSteamID.CreateOne(true); 
         AppID = 0;
         DLCs = new List<DLC>();
         LogToFile = true;
         LogToConsole = true;
+        ISteamHTTP = true;
         UseServerApi = true;
         SkyNetServerUrl = "http://127.0.0.1:27080/";
         SkyNetAccessToken = string.Empty;
         SkyNetRefreshToken = string.Empty;
-        SkyNetPollIntervalMs = 1000;
+        SkyNetClientInstanceId = string.Empty;
+        SkyNetUseActiveWebUser = true;
+        SkyNetPollIntervalMs = 50;
+        SkyNetHttpTimeoutMs = 8000;
+        SkyNetDiscoveryPort = 27081;
     }
 
     public static void Initialize()
@@ -155,13 +164,23 @@ public class SteamEmulator
 
             //UserManager.Initialize();
             //NetworkManager.Initialize();
+            Write("Initializing InterfaceManager");
             InterfaceManager.Initialize();
+            Write("InterfaceManager initialized");
+
+            Write("Initializing SkyNetApiClient");
             SkyNetApiClient.Initialize();
+            Write("SkyNetApiClient initialized");
+
+            // Note: the SDR cert patcher is started lazily from the networking
+            // interface (GetCertAsync/GetNetworkConfigJSON), not here. Spawning a
+            // thread during DLL init runs under the loader lock and deadlocks.
 
             #region Interface Initialization
 
             // Client Interfaces
 
+            Write("Creating client interfaces");
             SteamClient = new SteamClient(); 
 
             SteamUser = new SKYNET.Steamworks.Implementation.SteamUser(); 
@@ -228,6 +247,7 @@ public class SteamEmulator
 
             // Server Interfaces
 
+            Write("Creating server interfaces");
             SteamGameServer = new SteamGameServer();
 
             SteamGameServerStats = new SteamGameServerStats();
@@ -244,6 +264,7 @@ public class SteamEmulator
 
             Initialized = true;
             Initializing = false;
+            Write("Steam emulator initialized");
         }
         catch (Exception ex)
         {
@@ -304,6 +325,11 @@ public class SteamEmulator
 
     public static void Write(string sender, object msg)
     {
+        if (ShouldSuppressHotLog(sender, msg))
+        {
+            return;
+        }
+
         string message = " ";
         message += string.IsNullOrEmpty(sender) ? "" : $"{sender}: ";
         message += msg == null ? "NULL" : msg;
@@ -329,6 +355,11 @@ public class SteamEmulator
 
     public static void Write(string sender, object msg)
     {
+        if (ShouldSuppressHotLog(sender, msg))
+        {
+            return;
+        }
+
         MutexHelper.Wait("LOG", delegate
         {
             string message = " ";
@@ -337,7 +368,6 @@ public class SteamEmulator
 
             if (LogToFile)
             {
-                MessageBox.Show("Aqui");
                 Log.AppEnd(message);
             }
 
@@ -349,6 +379,32 @@ public class SteamEmulator
     }
 
 #endif
+
+    private static bool ShouldSuppressHotLog(string sender, object msg)
+    {
+        if (msg == null)
+        {
+            return false;
+        }
+
+        string text = msg.ToString();
+        if (string.IsNullOrEmpty(text))
+        {
+            return false;
+        }
+
+        switch (text)
+        {
+            case "SteamAPI_RunCallbacks":
+            case "SteamGameServer_RunCallbacks":
+            case "RunFrame":
+            case "GetServerRealTime":
+            case "IsMessageAvailable = False":
+                return true;
+        }
+
+        return text.Contains("GetPersonaState  = k_EPersonaStateOnline");
+    }
 
     public static void Debug(object msg, ConsoleColor color = ConsoleColor.Red)
     {

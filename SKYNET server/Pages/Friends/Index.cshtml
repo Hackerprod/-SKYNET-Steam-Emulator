@@ -1,107 +1,97 @@
 @page "/friends"
 @model SKYNET_server.Pages.Friends.IndexModel
 @{
-    var inGameCount = Model.Friends.Count(friend => friend.Status == "In game");
-    var onlineCount = Model.Friends.Count(friend => friend.Status == "Online");
-    var awayCount = Model.Friends.Count(friend => friend.Status == "Away");
-    var squadLead = Model.Friends.FirstOrDefault(friend => friend.Status == "In game");
+    var onlineCount = Model.Friends.Count(friend => friend.PersonaState != 0);
+    var inGameCount = Model.Friends.Count(friend => friend.RichPresence.Values.Any(value => value.Contains("game", StringComparison.OrdinalIgnoreCase) || value.Contains("DOTA", StringComparison.OrdinalIgnoreCase)));
 }
 
-<div class="space-y-8">
-    <div class="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-        <header class="relative overflow-hidden rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-8 shadow-2xl shadow-black/50">
-            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(6,182,212,0.1),transparent_70%)] z-0"></div>
-            <div class="relative z-10 space-y-4">
-                <span class="text-[10px] px-2.5 py-1 rounded-full font-black bg-cyan-500/10 text-cyan-500 border border-cyan-500/30 uppercase tracking-[0.2em]">Social Graph</span>
-                <h1 class="text-4xl font-black text-white leading-tight">Presence and Squads.</h1>
-                <p class="max-w-2xl text-zinc-400 text-sm leading-relaxed">Manage your contact network, view real-time statuses and coordinate group games with the direct invitation system.</p>
+<div class="space-y-6">
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        <div class="rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-sm font-bold text-cyan-100">@Model.StatusMessage</div>
+    }
 
-                <div class="grid grid-cols-3 gap-4 mt-8">
-                    <div class="p-4 rounded-xl bg-zinc-950/60 border border-zinc-800/60 text-center">
-                        <p class="text-[9px] font-black text-green-500 uppercase tracking-widest mb-1">In Game</p>
-                        <p class="text-3xl font-black text-white">@inGameCount</p>
+    <section class="grid gap-5 xl:grid-cols-[1.4fr_0.9fr]">
+        <header class="rounded-lg border border-zinc-800 bg-zinc-900/70 p-6">
+            <p class="text-[10px] font-black uppercase tracking-[0.22em] text-cyan-400">Social</p>
+            <div class="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                    <h1 class="text-3xl font-black text-white">Amigos reales del emulador</h1>
+                    <p class="mt-2 max-w-2xl text-sm text-zinc-400">Estas relaciones salen del estado persistido del server y son las mismas que consume la API de Steam.</p>
+                </div>
+                <div class="grid grid-cols-3 gap-2 text-center">
+                    <div class="rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-3">
+                        <p class="text-2xl font-black text-white">@Model.Friends.Count</p>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Total</p>
                     </div>
-                    <div class="p-4 rounded-xl bg-zinc-950/60 border border-zinc-800/60 text-center">
-                        <p class="text-[9px] font-black text-cyan-500 uppercase tracking-widest mb-1">Online</p>
-                        <p class="text-3xl font-black text-white">@onlineCount</p>
+                    <div class="rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-3">
+                        <p class="text-2xl font-black text-white">@onlineCount</p>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Online</p>
                     </div>
-                    <div class="p-4 rounded-xl bg-zinc-950/60 border border-zinc-800/60 text-center">
-                        <p class="text-[9px] font-black text-amber-500 uppercase tracking-widest mb-1">Away</p>
-                        <p class="text-3xl font-black text-white">@awayCount</p>
+                    <div class="rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-3">
+                        <p class="text-2xl font-black text-white">@inGameCount</p>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">In game</p>
                     </div>
                 </div>
             </div>
         </header>
 
-        <aside class="relative overflow-hidden rounded-2xl border border-zinc-800/60 bg-gradient-to-br from-cyan-500/10 via-zinc-950 to-purple-500/10 p-8 flex flex-col justify-center">
-            <div class="relative z-10">
-                <span class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2 block">Party Status</span>
-                <h2 class="text-2xl font-black text-white mb-3">Squad ready to enter</h2>
-                <p class="text-sm text-zinc-400 leading-relaxed">
-                    @(squadLead is null ? "There is no active squad at this time." : $"{squadLead.DisplayName} keeps the party active in {squadLead.CurrentGame}.")
-                </p>
-                <button class="mt-8 w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-widest bg-gradient-to-br from-cyan-500 to-purple-500 text-white shadow-glow-cyan hover:scale-[1.02] transition-transform">
-                    Open Party Panel
-                </button>
-            </div>
-        </aside>
-    </div>
+        <form method="post" asp-page-handler="Add" class="rounded-lg border border-zinc-800 bg-zinc-900/70 p-6">
+            <label asp-for="FriendIdentifier" class="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">Enviar solicitud</label>
+            <input asp-for="FriendIdentifier" class="mt-3 w-full rounded-lg border-zinc-700 bg-zinc-950 text-sm text-white placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-cyan-500" placeholder="Usuario, SteamID, AccountID o nombre" />
+            <button type="submit" class="mt-4 w-full rounded-lg bg-cyan-600 px-4 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-cyan-500">Enviar</button>
+            @if (Model.Users.Count > 0)
+            {
+                <div class="mt-5 space-y-2">
+                    <p class="text-[10px] font-black uppercase tracking-widest text-zinc-600">Usuarios disponibles</p>
+                    @foreach (var user in Model.Users.Take(6))
+                    {
+                        <button type="submit" name="FriendIdentifier" value="@user.SteamId" class="flex w-full items-center justify-between rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-left text-xs text-zinc-300 hover:border-cyan-500/50">
+                            <span class="truncate font-bold">@user.PersonaName</span>
+                            <span class="shrink-0 text-zinc-600">@user.AccountId</span>
+                        </button>
+                    }
+                </div>
+            }
+        </form>
+    </section>
 
-    <div class="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
-        <div class="space-y-3">
-            <div class="flex items-center justify-between mb-4 px-2">
-                <h3 class="text-xs font-black text-zinc-500 uppercase tracking-widest">Contact List</h3>
-                <span class="text-[10px] font-bold text-cyan-500">@Model.Friends.Count Contacts</span>
+    <section class="grid gap-4 lg:grid-cols-2">
+        @if (Model.Friends.Count == 0)
+        {
+            <div class="rounded-lg border border-zinc-800 bg-zinc-900/70 p-6">
+                <h2 class="text-lg font-black text-white">Sin amigos vinculados</h2>
+                <p class="mt-2 text-sm text-zinc-400">Envia una solicitud desde Users o desde el formulario superior.</p>
             </div>
-            
+        }
+        else
+        {
             @foreach (var friend in Model.Friends)
             {
-                <article class="group flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl border border-zinc-800/60 bg-zinc-900/60 hover:border-zinc-700/60 transition-all">
-                    <div class="flex items-center gap-4">
-                        <div class="relative">
-                            <div class="w-14 h-14 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center text-sm font-black text-white group-hover:border-cyan-500/50 transition-colors">
-                                @friend.Initials
+                var status = friend.PersonaState == 0 ? "Offline" : "Online";
+                var presence = friend.RichPresence.Count == 0
+                    ? "Sin rich presence"
+                    : string.Join(" | ", friend.RichPresence.Take(2).Select(pair => $"{pair.Key}: {pair.Value}"));
+                var initial = string.IsNullOrWhiteSpace(friend.PersonaName) ? "U" : friend.PersonaName[..1].ToUpperInvariant();
+
+                <article class="rounded-lg border border-zinc-800 bg-zinc-900/70 p-5">
+                    <div class="flex items-start gap-4">
+                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-zinc-800 text-sm font-black text-white">@initial</div>
+                        <div class="min-w-0 flex-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h2 class="truncate text-lg font-black text-white">@friend.PersonaName</h2>
+                                <span class="rounded border border-zinc-700 px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-cyan-400">@status</span>
                             </div>
-                            <span class="absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-zinc-900 @(friend.Status == "In game" ? "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]" : friend.Status == "Online" ? "bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)]" : "bg-amber-500")"></span>
-                        </div>
-                        <div class="min-w-0">
-                            <div class="flex items-center gap-2">
-                                <h3 class="text-lg font-black text-white truncate">@friend.DisplayName</h3>
-                            </div>
-                            <p class="text-xs font-bold text-cyan-500 mt-0.5">@friend.CurrentGame</p>
-                            <p class="text-[10px] text-zinc-500 mt-1 italic">@friend.Note</p>
+                            <p class="mt-1 text-xs text-zinc-500">SteamID @friend.SteamId | AccountID @friend.AccountId</p>
+                            <p class="mt-3 text-sm text-zinc-400">@presence</p>
                         </div>
                     </div>
-                    <div class="flex gap-2">
-                        <button class="flex-1 md:flex-none px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest bg-cyan-500/10 text-cyan-500 border border-cyan-500/30 hover:bg-cyan-500/20 transition-colors">
-                            Invite
-                        </button>
-                        <button class="flex-1 md:flex-none px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest bg-zinc-800/60 text-zinc-400 border border-zinc-700/40 hover:text-white transition-colors">
-                            Chat
-                        </button>
-                    </div>
+                    <form method="post" asp-page-handler="Remove" class="mt-4">
+                        <input type="hidden" asp-for="FriendSteamId" value="@friend.SteamId" />
+                        <button type="submit" class="rounded-lg border border-red-500/30 px-4 py-2 text-xs font-black uppercase tracking-widest text-red-300 hover:bg-red-500/10">Quitar</button>
+                    </form>
                 </article>
             }
-        </div>
-
-        <aside class="space-y-6">
-            <section class="rounded-2xl border border-zinc-800/60 bg-zinc-900/80 p-6">
-                <h3 class="text-xs font-black text-zinc-500 uppercase tracking-widest mb-6">Overlay Preview</h3>
-                <div class="space-y-4">
-                    <div class="p-4 rounded-xl bg-zinc-950/40 border border-zinc-800/60 group hover:border-cyan-500/30 transition-colors">
-                        <p class="text-sm font-black text-white">Quick Chat</p>
-                        <p class="text-[11px] text-zinc-500 mt-2 leading-relaxed">Compact cards with status, current game and direct invitation buttons.</p>
-                    </div>
-                    <div class="p-4 rounded-xl bg-zinc-950/40 border border-zinc-800/60 group hover:border-cyan-500/30 transition-colors">
-                        <p class="text-sm font-black text-white">Active Presence</p>
-                        <p class="text-[11px] text-zinc-500 mt-2 leading-relaxed">Visual signal by status through glow rings for In-Game and Online.</p>
-                    </div>
-                    <div class="p-4 rounded-xl bg-zinc-950/40 border border-zinc-800/60 group hover:border-cyan-500/30 transition-colors">
-                        <p class="text-sm font-black text-white">Voice Hooks</p>
-                        <p class="text-[11px] text-zinc-500 mt-2 leading-relaxed">Planned space for voice indicators, party status and push notifications.</p>
-                    </div>
-                </div>
-            </section>
-        </aside>
-    </div>
+        }
+    </section>
 </div>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using SKYNET.Callback;
 using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Steamworks.Interfaces;
@@ -16,6 +17,7 @@ namespace SKYNET.Steamworks.Implementation
         public static SteamUser Instance;
 
         private bool Recording;
+        private bool SteamServersConnectedQueued;
 
         public SteamUser()
         {
@@ -34,18 +36,40 @@ namespace SKYNET.Steamworks.Implementation
         {
             if (SkyNetApiClient.IsEnabled)
             {
-                bool loggedOn = SkyNetApiClient.EnsureSession() || SkyNetApiClient.RefreshSelf();
-                Write($"BLoggedOn = {loggedOn}");
-                return loggedOn;
+                bool serverSession = SkyNetApiClient.EnsureSession() && SkyNetApiClient.RefreshSelf();
+                Write($"BLoggedOn = {serverSession}");
+                if (serverSession)
+                {
+                    QueueSteamServersConnected();
+                }
+
+                return serverSession;
             }
 
             Write("BLoggedOn");
+            QueueSteamServersConnected();
             return true;
+        }
+
+        private void QueueSteamServersConnected()
+        {
+            if (SteamServersConnectedQueued)
+            {
+                return;
+            }
+
+            SteamServersConnectedQueued = true;
+            CallbackManager.AddCallback(new SteamServersConnected_t());
         }
 
         public CSteamID GetSteamID()
         {
-            SkyNetApiClient.RefreshSelf();
+            if (SkyNetApiClient.IsEnabled && !SkyNetApiClient.RefreshSelf())
+            {
+                Write("GetSteamID unavailable: no active server session");
+                return CSteamID.Invalid;
+            }
+
             var SteamId = SteamEmulator.SteamID;
             Write($"GetSteamID {SteamId}");
             return SteamId;
@@ -53,22 +77,12 @@ namespace SKYNET.Steamworks.Implementation
 
         public int InitiateGameConnection(IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, CGameID gameID, uint unIPServer, uint usPortServer, bool bSecure)
         {
-            Write("InitiateGameConnection");
-            MutexHelper.Wait("InitiateGameConnection", delegate
-            {
-                // TODO
-            });
-            return 0;
+            return CreateGameConnectionAuthBlob("InitiateGameConnection", pAuthBlob, cbMaxAuthBlob, steamIDGameServer, unIPServer, usPortServer, bSecure);
         }
 
         internal int InitiateGameConnection(IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)
         {
-            Write("InitiateGameConnection");
-            MutexHelper.Wait("InitiateGameConnection2", delegate
-            {
-                // TODO
-            });
-            return 0;
+            return CreateGameConnectionAuthBlob("InitiateGameConnection2", pAuthBlob, cbMaxAuthBlob, steamIDGameServer, unIPServer, usPortServer, bSecure);
         }
 
         public void TerminateGameConnection(uint unIPServer, uint usPortServer)
@@ -87,6 +101,12 @@ namespace SKYNET.Steamworks.Implementation
             pchBuffer = SteamEmulator.SteamRemoteStorage.StoragePath;
             if (cubBuffer == 0) return false;
             return true;
+        }
+
+        public bool GetUserDataFolder(IntPtr pchBuffer, int cubBuffer)
+        {
+            Write("GetUserDataFolder");
+            return NativeStringCache.WriteUtf8Buffer(pchBuffer, cubBuffer, SteamEmulator.SteamRemoteStorage.StoragePath);
         }
 
         public void StartVoiceRecording()
@@ -313,8 +333,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public int InitiateGameConnection_DEPRECATED(IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, ushort usPortServer, bool bSecure)
         {
-            Write("InitiateGameConnection_DEPRECATED");
-            return 1;
+            return CreateGameConnectionAuthBlob("InitiateGameConnection_DEPRECATED", pAuthBlob, cbMaxAuthBlob, steamIDGameServer, unIPServer, usPortServer, bSecure);
         }
 
         public void TerminateGameConnection_DEPRECATED(uint unIPServer, ushort usPortServer)
@@ -328,6 +347,20 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"GetAuthTicketForWebApi {pchIdentity}");
             return 1;
+        }
+
+        private int CreateGameConnectionAuthBlob(string caller, IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, uint usPortServer, bool bSecure)
+        {
+            uint ticketSize = 0;
+            Write($"{caller} (GameServer = {(CSteamID)steamIDGameServer}, IP = {Common.GetIPAddress(unIPServer)}, Port = {usPortServer}, Secure = {bSecure}, MaxBlob = {cbMaxAuthBlob})");
+
+            MutexHelper.Wait(caller, delegate
+            {
+                TicketManager.GetAuthSessionTicket(pAuthBlob, cbMaxAuthBlob, out ticketSize, false);
+            });
+
+            Write($"{caller} = {ticketSize}");
+            return (int)ticketSize;
         }
     }
 }

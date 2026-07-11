@@ -1,5 +1,6 @@
 ﻿using SKYNET.Managers;
 using System;
+using SKYNET.Helpers;
 using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Exported
@@ -86,10 +87,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_ISteamUserStats_GetAchievementDisplayAttribute(IntPtr _, string pchName, string pchKey)
+        public static IntPtr SteamAPI_ISteamUserStats_GetAchievementDisplayAttribute(IntPtr _, string pchName, string pchKey)
         {
             Write("SteamAPI_ISteamUserStats_GetAchievementDisplayAttribute");
-            return SteamEmulator.SteamUserStats.GetAchievementDisplayAttribute(pchName, pchKey);
+            return NativeStringCache.ToUtf8Ptr(SteamEmulator.SteamUserStats.GetAchievementDisplayAttribute(pchName, pchKey));
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -107,10 +108,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_ISteamUserStats_GetAchievementName(IntPtr _, uint iAchievement)
+        public static IntPtr SteamAPI_ISteamUserStats_GetAchievementName(IntPtr _, uint iAchievement)
         {
             Write("SteamAPI_ISteamUserStats_GetAchievementName");
-            return SteamEmulator.SteamUserStats.GetAchievementName(iAchievement);
+            return NativeStringCache.ToUtf8Ptr(SteamEmulator.SteamUserStats.GetAchievementName(iAchievement));
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -164,10 +165,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_ISteamUserStats_GetLeaderboardName(IntPtr _, ulong hSteamLeaderboard)
+        public static IntPtr SteamAPI_ISteamUserStats_GetLeaderboardName(IntPtr _, ulong hSteamLeaderboard)
         {
             Write("SteamAPI_ISteamUserStats_GetLeaderboardName");
-            return SteamEmulator.SteamUserStats.GetLeaderboardName(hSteamLeaderboard);
+            return NativeStringCache.ToUtf8Ptr(SteamEmulator.SteamUserStats.GetLeaderboardName(hSteamLeaderboard));
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

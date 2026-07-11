@@ -5,6 +5,7 @@ using SKYNET.Steamworks.Implementation;
 using SteamAPICall_t = System.UInt64;
 using FriendsGroupID_t = System.UInt16;
 using System.Threading.Tasks;
+using SKYNET.Helpers;
 
 namespace SKYNET.Steamworks.Exported
 {
@@ -54,10 +55,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_ISteamFriends_GetProfileItemPropertyString(IntPtr _, ulong steamID, int itemType, int prop)
+        public static IntPtr SteamAPI_ISteamFriends_GetProfileItemPropertyString(IntPtr _, ulong steamID, int itemType, int prop)
         {
             Write($"SteamAPI_ISteamFriends_GetProfileItemPropertyString");
-            return SteamFriends.Instance.GetProfileItemPropertyString(steamID, itemType, prop);
+            return NativeStringCache.ToUtf8Ptr(SteamFriends.Instance.GetProfileItemPropertyString(steamID, itemType, prop));
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -166,10 +167,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_ISteamFriends_GetClanName(IntPtr _, ulong steamIDClan)
+        public static IntPtr SteamAPI_ISteamFriends_GetClanName(IntPtr _, ulong steamIDClan)
         {
             Write($"SteamAPI_ISteamFriends_GetClanName");
-            return SteamFriends.Instance.GetClanName(steamIDClan);
+            return NativeStringCache.ToUtf8Ptr(SteamFriends.Instance.GetClanName(steamIDClan));
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -194,10 +195,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_ISteamFriends_GetClanTag(IntPtr _, ulong steamIDClan)
+        public static IntPtr SteamAPI_ISteamFriends_GetClanTag(IntPtr _, ulong steamIDClan)
         {
             Write($"SteamAPI_ISteamFriends_GetClanTag");
-            return SteamFriends.Instance.GetClanTag(steamIDClan);
+            return NativeStringCache.ToUtf8Ptr(SteamFriends.Instance.GetClanTag(steamIDClan));
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -278,17 +279,17 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_ISteamFriends_GetFriendPersonaName(IntPtr _, ulong steamIDFriend)
+        public static IntPtr SteamAPI_ISteamFriends_GetFriendPersonaName(IntPtr _, ulong steamIDFriend)
         {
             Write($"SteamAPI_ISteamFriends_GetFriendPersonaName");
-            return SteamFriends.Instance.GetFriendPersonaName(steamIDFriend);
+            return NativeStringCache.ToUtf8Ptr(SteamFriends.Instance.GetFriendPersonaName(steamIDFriend));
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_ISteamFriends_GetFriendPersonaNameHistory(IntPtr _, ulong steamIDFriend, int iPersonaName)
+        public static IntPtr SteamAPI_ISteamFriends_GetFriendPersonaNameHistory(IntPtr _, ulong steamIDFriend, int iPersonaName)
         {
             Write($"SteamAPI_ISteamFriends_GetFriendPersonaNameHistory");
-            return SteamFriends.Instance.GetFriendPersonaNameHistory(steamIDFriend, iPersonaName);
+            return NativeStringCache.ToUtf8Ptr(SteamFriends.Instance.GetFriendPersonaNameHistory(steamIDFriend, iPersonaName));
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -306,17 +307,17 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_ISteamFriends_GetFriendRichPresence(IntPtr _, ulong steamIDFriend, string pchKey)
+        public static IntPtr SteamAPI_ISteamFriends_GetFriendRichPresence(IntPtr _, ulong steamIDFriend, string pchKey)
         {
             Write($"SteamAPI_ISteamFriends_GetFriendRichPresence");
-            return SteamFriends.Instance.GetFriendRichPresence(steamIDFriend, pchKey);
+            return NativeStringCache.ToUtf8Ptr(SteamFriends.Instance.GetFriendRichPresence(steamIDFriend, pchKey));
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_ISteamFriends_GetFriendRichPresenceKeyByIndex(IntPtr _, ulong steamIDFriend, int iKey)
+        public static IntPtr SteamAPI_ISteamFriends_GetFriendRichPresenceKeyByIndex(IntPtr _, ulong steamIDFriend, int iKey)
         {
             Write($"SteamAPI_ISteamFriends_GetFriendRichPresenceKeyByIndex");
-            return SteamFriends.Instance.GetFriendRichPresenceKeyByIndex(steamIDFriend, iKey);
+            return NativeStringCache.ToUtf8Ptr(SteamFriends.Instance.GetFriendRichPresenceKeyByIndex(steamIDFriend, iKey));
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -355,10 +356,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_ISteamFriends_GetFriendsGroupName(IntPtr _, FriendsGroupID_t friendsGroupID)
+        public static IntPtr SteamAPI_ISteamFriends_GetFriendsGroupName(IntPtr _, FriendsGroupID_t friendsGroupID)
         {
             Write($"SteamAPI_ISteamFriends_GetFriendsGroupNameint");
-            return SteamFriends.Instance.GetFriendsGroupName(friendsGroupID);
+            return NativeStringCache.ToUtf8Ptr(SteamFriends.Instance.GetFriendsGroupName(friendsGroupID));
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -397,10 +398,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_ISteamFriends_GetPersonaName(IntPtr _)
+        public static IntPtr SteamAPI_ISteamFriends_GetPersonaName(IntPtr _)
         {
             Write($"SteamAPI_ISteamFriends_GetPersonaName");
-            return SteamFriends.Instance.GetPersonaName();
+            return NativeStringCache.ToUtf8Ptr(SteamFriends.Instance.GetPersonaName());
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -411,10 +412,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_ISteamFriends_GetPlayerNickname(IntPtr _, ulong steamIDPlayer)
+        public static IntPtr SteamAPI_ISteamFriends_GetPlayerNickname(IntPtr _, ulong steamIDPlayer)
         {
             Write($"SteamAPI_ISteamFriends_GetPlayerNickname {steamIDPlayer}");
-            return SteamFriends.Instance.GetPlayerNickname(steamIDPlayer);
+            return NativeStringCache.ToUtf8PtrOrNull(SteamFriends.Instance.GetPlayerNickname(steamIDPlayer));
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

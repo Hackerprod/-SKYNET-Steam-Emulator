@@ -30,18 +30,23 @@ namespace SKYNET.Steamworks.Implementation
         public void InitRelayNetworkAccess()
         {
             Write("InitRelayNetworkAccess");
+            SteamNetworkingSocketsSerialized.EnsureSecureCertPatcherStarted("InitRelayNetworkAccess");
         }
 
         public int GetRelayNetworkStatus(IntPtr pDetails)
         {
             Write("GetRelayNetworkStatus");
+            SteamNetworkingSocketsSerialized.EnsureSecureCertPatcherStarted("GetRelayNetworkStatus");
             SteamRelayNetworkStatus_t data = new SteamRelayNetworkStatus_t()
             {
                 m_eAvail = ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Current,
                 m_bPingMeasurementInProgress = 0,
                 m_eAvailAnyRelay = ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Current,
-                m_eAvailNetworkConfig = ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Current
+                m_eAvailNetworkConfig = ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Current,
+                DebugMsg = new byte[256]
             };
+            byte[] message = System.Text.Encoding.UTF8.GetBytes("OK");
+            Array.Copy(message, data.DebugMsg, message.Length);
             CallbackManager.AddCallbackResult(data);
             if (pDetails != IntPtr.Zero)
             {
@@ -85,6 +90,7 @@ namespace SKYNET.Steamworks.Implementation
         public bool CheckPingDataUpToDate(float flMaxAgeSeconds)
         {
             Write("CheckPingDataUpToDate");
+            SteamNetworkingSocketsSerialized.EnsureSecureCertPatcherStarted("CheckPingDataUpToDate");
             return true;
         }
 

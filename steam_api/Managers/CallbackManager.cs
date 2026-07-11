@@ -3,7 +3,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using SKYNET.Callback;
+using SKYNET.Helpers;
 using SKYNET.Steamworks;
 
 using HSteamPipe = System.UInt32;
@@ -29,11 +31,13 @@ namespace SKYNET.Managers
         private static readonly ConcurrentDictionary<HSteamPipe, ManualDispatchLease> ManualDispatchLeases = new ConcurrentDictionary<HSteamPipe, ManualDispatchLease>();
 
         private static SteamAPICall_t currentCall = 1000;
+        private static int gameServerConnectionReplayIssued;
 
         public static void RegisterCallback(SteamCallback callback)
         {
             callback.Register();
             RegisteredCallbacks[callback.Pointer] = callback;
+            ReplayGameServerConnectionStateIfNeeded(callback);
         }
 
         public static void RegisterCallResult(SteamCallback callback)
@@ -57,6 +61,25 @@ namespace SKYNET.Managers
             return handle;
         }
 
+        public static bool CompleteCallbackResult(SteamAPICall_t handle, ICallbackData data, bool ioFailure = false)
+        {
+            lock (AsyncLock)
+            {
+                if (!AsyncCalls.TryGetValue(handle, out var state))
+                {
+                    return false;
+                }
+
+                state.Result = new CallbackMessage(data, true, ioFailure);
+                state.LastFailureReason = ioFailure
+                    ? ESteamAPICallFailure.k_ESteamAPICallFailureNetworkFailure
+                    : ESteamAPICallFailure.k_ESteamAPICallFailureNone;
+                QueueAPICallCompleted(state);
+                Write($"Completed CallbackResult {handle} {((int)data.CallbackType).GetCallbackType()} {data.CallbackType}");
+                return true;
+            }
+        }
+
         public static void AddCallback(ICallbackData data, bool readyToCall = true)
         {
             if (!readyToCall)
@@ -77,6 +100,11 @@ namespace SKYNET.Managers
 
             EnqueueBroadcast(data, true);
             Write($"Added GameServer Callback {((int)data.CallbackType).GetCallbackType()} {data.CallbackType}");
+        }
+
+        public static void ResetGameServerConnectionReplay()
+        {
+            Interlocked.Exchange(ref gameServerConnectionReplayIssued, 0);
         }
 
         public static void RunCallbacks(bool gameServer = false)
@@ -353,18 +381,67 @@ namespace SKYNET.Managers
                     continue;
                 }
 
-                foreach (var registration in registrations.Values.Where(c => c.HasGameserver == gameServer && c.CallbackType == state.Result.Data.CallbackType).ToList())
+                var matches = registrations.Values
+                    .Where(c => c.HasGameserver == gameServer && c.CallbackType == state.Result.Data.CallbackType)
+                    .ToList();
+
+                foreach (var registration in matches)
                 {
-                    registration.Run(state.Result.Data, state.Result.IOFailure, state.Handle);
-                    registrations.TryRemove(registration.Pointer, out _);
-                    registration.Unregister();
+                    try
+                    {
+                        Write($"Dispatch CallResult {state.Handle} {state.Result.Data.CallbackType} Size={state.Result.Data.DataSize}");
+                        registration.Run(state.Result.Data, state.Result.IOFailure, state.Handle);
+                        Write($"Dispatched CallResult {state.Handle} {state.Result.Data.CallbackType}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Write($"Dispatch CallResult {state.Handle} {state.Result.Data.CallbackType} failed: {ex}");
+                    }
+                    finally
+                    {
+                        registrations.TryRemove(registration.Pointer, out _);
+                        registration.Unregister();
+                    }
                 }
 
                 if (registrations.IsEmpty)
                 {
                     RegisteredCallResults.TryRemove(state.Handle, out _);
+                    AsyncCalls.TryRemove(state.Handle, out _);
                 }
             }
+        }
+
+        private static void ReplayGameServerConnectionStateIfNeeded(SteamCallback callback)
+        {
+            if (!callback.HasGameserver ||
+                SteamEmulator.SteamGameServer == null ||
+                !SteamEmulator.SteamGameServer.LoggedIn)
+            {
+                return;
+            }
+
+            if (callback.CallbackType != CallbackType.SteamServersConnected &&
+                callback.CallbackType != CallbackType.SteamGameCoordinator)
+            {
+                return;
+            }
+
+            if (Interlocked.Exchange(ref gameServerConnectionReplayIssued, 1) != 0)
+            {
+                return;
+            }
+
+            ThreadPool.QueueUserWorkItem(_ =>
+            {
+                Thread.Sleep(250);
+                EnqueueBroadcast(new SteamServersConnected_t(), true);
+                EnqueueBroadcast(new GSPolicyResponse_t
+                {
+                    Secure = SteamEmulator.SteamGameServer.ServerData?.Secure ?? 0
+                }, true);
+                Write($"Replayed GameServer connected state for late {callback.CallbackType} registration");
+            });
         }
 
         private static bool TryGetManualQueue(HSteamPipe hSteamPipe, out ConcurrentQueue<ManualDispatchItem> queue)

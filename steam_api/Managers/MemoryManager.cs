@@ -417,6 +417,7 @@ namespace SKYNET.Managers
         {
             var all_methods = new List<MethodInfo>(t.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly));
             all_methods.RemoveAll(x => x.Name.StartsWith("get_") || x.Name.StartsWith("set_"));
+            all_methods.Sort((left, right) => left.MetadataToken.CompareTo(right.MetadataToken));
             return all_methods;
         }
 

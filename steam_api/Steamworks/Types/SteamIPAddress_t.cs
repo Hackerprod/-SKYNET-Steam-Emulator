@@ -3,16 +3,36 @@
 namespace SKYNET.Steamworks
 {
     [System.Serializable]
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 20)]
     public struct SteamIPAddress_t
     {
-        private long m_ip0;
-        private long m_ip1;
+        [FieldOffset(0)]
+        private uint m_unIPv4;
 
+        [FieldOffset(0)]
+        private ulong m_ipv6Qword0;
+
+        [FieldOffset(8)]
+        private ulong m_ipv6Qword1;
+
+        [FieldOffset(16)]
         private SteamIPType m_eType;
+
+        public SteamIPAddress_t(uint ipv4)
+        {
+            m_ipv6Qword0 = 0;
+            m_ipv6Qword1 = 0;
+            m_eType = SteamIPType.Type4;
+            m_unIPv4 = ipv4;
+        }
 
         public SteamIPAddress_t(System.Net.IPAddress iPAddress)
         {
+            m_unIPv4 = 0;
+            m_ipv6Qword0 = 0;
+            m_ipv6Qword1 = 0;
+            m_eType = SteamIPType.Type4;
+
             byte[] bytes = iPAddress.GetAddressBytes();
             switch (iPAddress.AddressFamily)
             {
@@ -23,8 +43,7 @@ namespace SKYNET.Steamworks
                             throw new System.TypeInitializationException("SteamIPAddress_t: Unexpected byte length for Ipv4." + bytes.Length, null);
                         }
 
-                        m_ip0 = (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3];
-                        m_ip1 = 0;
+                        m_unIPv4 = (uint)((bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3]);
                         m_eType = SteamIPType.Type4;
                         break;
                     }
@@ -35,8 +54,8 @@ namespace SKYNET.Steamworks
                             throw new System.TypeInitializationException("SteamIPAddress_t: Unexpected byte length for Ipv6: " + bytes.Length, null);
                         }
 
-                        m_ip0 = (bytes[1] << 56) | (bytes[0] << 48) | (bytes[3] << 40) | (bytes[2] << 32) | (bytes[5] << 24) | (bytes[4] << 16) | (bytes[7] << 8) | bytes[6];
-                        m_ip1 = (bytes[9] << 56) | (bytes[8] << 48) | (bytes[11] << 40) | (bytes[10] << 32) | (bytes[13] << 24) | (bytes[12] << 16) | (bytes[15] << 8) | bytes[14];
+                        m_ipv6Qword0 = System.BitConverter.ToUInt64(bytes, 0);
+                        m_ipv6Qword1 = System.BitConverter.ToUInt64(bytes, 8);
                         m_eType = SteamIPType.Type6;
                         break;
                     }
@@ -51,14 +70,14 @@ namespace SKYNET.Steamworks
         {
             if (m_eType == SteamIPType.Type4)
             {
-                byte[] bytes = System.BitConverter.GetBytes(m_ip0);
+                byte[] bytes = System.BitConverter.GetBytes(m_unIPv4);
                 return new System.Net.IPAddress(new byte[] { bytes[3], bytes[2], bytes[1], bytes[0] });
             }
             else
             {
                 byte[] bytes = new byte[16];
-                System.BitConverter.GetBytes(m_ip0).CopyTo(bytes, 0);
-                System.BitConverter.GetBytes(m_ip1).CopyTo(bytes, 8);
+                System.BitConverter.GetBytes(m_ipv6Qword0).CopyTo(bytes, 0);
+                System.BitConverter.GetBytes(m_ipv6Qword1).CopyTo(bytes, 8);
                 return new System.Net.IPAddress(bytes);
             }
         }
@@ -75,7 +94,9 @@ namespace SKYNET.Steamworks
 
         public bool IsSet()
         {
-            return m_ip0 != 0 || m_ip1 != 0;
+            return m_eType == SteamIPType.Type4
+                ? m_unIPv4 != 0
+                : m_ipv6Qword0 != 0 || m_ipv6Qword1 != 0;
         }
     }
 }

@@ -56,8 +56,8 @@
                 <div class="p-6 relative z-10">
                     <div class="flex items-start justify-between mb-4">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-xl bg-zinc-950/80 border border-zinc-800/60 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform @(achievement.Unlocked ? "opacity-100" : "opacity-40 grayscale")">
-                                @(achievement.Unlocked ? "🏆" : "🔒")
+                            <div class="w-12 h-12 rounded-xl bg-zinc-950/80 border border-zinc-800/60 flex items-center justify-center text-xs font-black uppercase tracking-widest group-hover:scale-110 transition-transform @(achievement.Unlocked ? "text-amber-300 opacity-100" : "text-zinc-600 opacity-60")">
+                                @(achievement.Unlocked ? "OK" : "LOCK")
                             </div>
                             <div>
                                 <span class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">@achievement.Game</span>

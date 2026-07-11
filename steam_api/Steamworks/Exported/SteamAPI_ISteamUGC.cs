@@ -54,28 +54,28 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUGC_GetQueryUGCPreviewURL(IntPtr _, UGCQueryHandle_t handle, uint index, string pchURL, uint cchURLSize)
+        public static bool SteamAPI_ISteamUGC_GetQueryUGCPreviewURL(IntPtr _, UGCQueryHandle_t handle, uint index, IntPtr pchURL, uint cchURLSize)
         {
             Write("SteamAPI_ISteamUGC_GetQueryUGCPreviewURL");
             return SteamEmulator.SteamUGC.GetQueryUGCPreviewURL(handle, index, pchURL, cchURLSize);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUGC_GetQueryUGCMetadata(IntPtr _, UGCQueryHandle_t handle, uint index, string pchMetadata, uint cchMetadatasize)
+        public static bool SteamAPI_ISteamUGC_GetQueryUGCMetadata(IntPtr _, UGCQueryHandle_t handle, uint index, IntPtr pchMetadata, uint cchMetadatasize)
         {
             Write("SteamAPI_ISteamUGC_GetQueryUGCMetadata");
             return SteamEmulator.SteamUGC.GetQueryUGCMetadata(handle, index, pchMetadata, cchMetadatasize);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUGC_GetQueryUGCChildren(IntPtr _, UGCQueryHandle_t handle, uint index, ref PublishedFileId_t[] pvecPublishedFileID, uint cMaxEntries)
+        public static bool SteamAPI_ISteamUGC_GetQueryUGCChildren(IntPtr _, UGCQueryHandle_t handle, uint index, IntPtr pvecPublishedFileID, uint cMaxEntries)
         {
             Write("SteamAPI_ISteamUGC_GetQueryUGCChildren");
-            return SteamEmulator.SteamUGC.GetQueryUGCChildren(handle, index, ref pvecPublishedFileID, cMaxEntries);
+            return SteamEmulator.SteamUGC.GetQueryUGCChildren(handle, index, pvecPublishedFileID, cMaxEntries);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUGC_GetQueryUGCStatistic(IntPtr _, UGCQueryHandle_t handle, uint index, int eStatType, uint pStatValue)
+        public static bool SteamAPI_ISteamUGC_GetQueryUGCStatistic(IntPtr _, UGCQueryHandle_t handle, uint index, int eStatType, IntPtr pStatValue)
         {
             Write("SteamAPI_ISteamUGC_GetQueryUGCStatistic");
             return SteamEmulator.SteamUGC.GetQueryUGCStatistic(handle, index, eStatType, pStatValue);
@@ -89,7 +89,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUGC_GetQueryUGCAdditionalPreview(IntPtr _, UGCQueryHandle_t handle, uint index, uint previewIndex, string pchURLOrVideoID, uint cchURLSize, string pchOriginalFileName, uint cchOriginalFileNameSize, int pPreviewType)
+        public static bool SteamAPI_ISteamUGC_GetQueryUGCAdditionalPreview(IntPtr _, UGCQueryHandle_t handle, uint index, uint previewIndex, IntPtr pchURLOrVideoID, uint cchURLSize, IntPtr pchOriginalFileName, uint cchOriginalFileNameSize, IntPtr pPreviewType)
         {
             Write("SteamAPI_ISteamUGC_GetQueryUGCAdditionalPreview");
             return SteamEmulator.SteamUGC.GetQueryUGCAdditionalPreview(handle, index, previewIndex, pchURLOrVideoID, cchURLSize, pchOriginalFileName, cchOriginalFileNameSize, pPreviewType);
@@ -103,7 +103,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUGC_GetQueryUGCKeyValueTag(IntPtr _, UGCQueryHandle_t handle, uint index, uint keyValueTagIndex, string pchKey, uint cchKeySize, string pchValue, uint cchValueSize)
+        public static bool SteamAPI_ISteamUGC_GetQueryUGCKeyValueTag(IntPtr _, UGCQueryHandle_t handle, uint index, uint keyValueTagIndex, IntPtr pchKey, uint cchKeySize, IntPtr pchValue, uint cchValueSize)
         {
             Write("SteamAPI_ISteamUGC_GetQueryUGCKeyValueTag");
             return SteamEmulator.SteamUGC.GetQueryUGCKeyValueTag(handle, index, keyValueTagIndex, pchKey, cchKeySize, pchValue, cchValueSize);
@@ -117,7 +117,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUGC_GetSupportedGameVersionData(IntPtr _, UGCQueryHandle_t handle, uint index, uint versionIndex, string pchGameBranchMin, string pchGameBranchMax, uint cchGameBranchSize)
+        public static bool SteamAPI_ISteamUGC_GetSupportedGameVersionData(IntPtr _, UGCQueryHandle_t handle, uint index, uint versionIndex, IntPtr pchGameBranchMin, IntPtr pchGameBranchMax, uint cchGameBranchSize)
         {
             Write("SteamAPI_ISteamUGC_GetSupportedGameVersionData");
             return SteamEmulator.SteamUGC.GetSupportedGameVersionData(handle, index, versionIndex, pchGameBranchMin, pchGameBranchMax, cchGameBranchSize);
@@ -509,7 +509,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUGC_GetItemInstallInfo(IntPtr _, PublishedFileId_t nPublishedFileID, uint punSizeOnDisk, string pchFolder, uint cchFolderSize, uint punTimeStamp)
+        public static bool SteamAPI_ISteamUGC_GetItemInstallInfo(IntPtr _, PublishedFileId_t nPublishedFileID, IntPtr punSizeOnDisk, IntPtr pchFolder, uint cchFolderSize, IntPtr punTimeStamp)
         {
             Write("SteamAPI_ISteamUGC_GetItemInstallInfo");
             return SteamEmulator.SteamUGC.GetItemInstallInfo(nPublishedFileID, punSizeOnDisk, pchFolder, cchFolderSize, punTimeStamp);

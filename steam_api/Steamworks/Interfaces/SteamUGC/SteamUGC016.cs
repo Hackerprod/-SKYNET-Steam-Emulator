@@ -217,7 +217,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUGC.CreateItem(nConsumerAppId, eFileType);
         }
 
-        public UGCUpdateHandle_t StartItemUpdate(uint nConsumerAppId, ulong nPublishedFileID) 
+        public UGCUpdateHandle_t StartItemUpdate(IntPtr _, uint nConsumerAppId, ulong nPublishedFileID) 
         {
             return SteamEmulator.SteamUGC.StartItemUpdate(nConsumerAppId, nPublishedFileID);
         }

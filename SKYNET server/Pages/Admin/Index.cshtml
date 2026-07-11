@@ -1,0 +1,302 @@
+@page "/admin"
+@model SKYNET_server.Pages.Admin.IndexModel
+@{
+    var adminAccount = Model.Overview.Accounts.FirstOrDefault(account => account.IsAdmin);
+}
+
+<div class="space-y-6">
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        <div class="rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-sm font-bold text-cyan-100">@Model.StatusMessage</div>
+    }
+
+    <section class="rounded-lg border border-zinc-800 bg-zinc-900/70 p-6">
+        <p class="text-[10px] font-black uppercase tracking-[0.22em] text-cyan-400">Admin</p>
+        <div class="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+                <h1 class="text-3xl font-black text-white">Panel de control local</h1>
+                <p class="mt-2 max-w-2xl text-sm text-zinc-400">Gestiona cuentas web, nombres, amigos, lobbies y servidores registrados por el emulador.</p>
+            </div>
+            <div class="grid grid-cols-2 gap-2 md:grid-cols-4 xl:grid-cols-8">
+                <div class="rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-3 text-center">
+                    <p class="text-2xl font-black text-white">@Model.Overview.Users.Count</p>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Usuarios</p>
+                </div>
+                <div class="rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-3 text-center">
+                    <p class="text-2xl font-black text-white">@Model.Overview.Accounts.Count</p>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Cuentas</p>
+                </div>
+                <div class="rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-3 text-center">
+                    <p class="text-2xl font-black text-white">@Model.Overview.FriendLinks</p>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Links</p>
+                </div>
+                <div class="rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-3 text-center">
+                    <p class="text-2xl font-black text-white">@Model.Overview.PendingFriendRequests</p>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Pendientes</p>
+                </div>
+                <div class="rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-3 text-center">
+                    <p class="text-2xl font-black text-white">@Model.Overview.Lobbies.Count</p>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Lobbies</p>
+                </div>
+                <div class="rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-3 text-center">
+                    <p class="text-2xl font-black text-white">@Model.Overview.GameServers.Count</p>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Servers</p>
+                </div>
+                <div class="rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-3 text-center">
+                    <p class="text-2xl font-black text-white">@Model.Overview.DotaCosmetics.ItemCount</p>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Items</p>
+                </div>
+                <div class="rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-3 text-center">
+                    <p class="text-2xl font-black text-white">@Model.Overview.DotaCosmetics.EquippedCount</p>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Equipados</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="grid gap-5 xl:grid-cols-3">
+        <form method="post" asp-page-handler="Credentials" class="rounded-lg border border-zinc-800 bg-zinc-900/70 p-5">
+            <h2 class="text-sm font-black uppercase tracking-widest text-white">Credenciales admin</h2>
+            <p class="mt-1 text-xs text-zinc-500">Admin actual: @(adminAccount?.Username ?? "sin admin")</p>
+            <label asp-for="AdminUsername" class="mt-5 block text-[10px] font-black uppercase tracking-widest text-zinc-500">Usuario</label>
+            <input asp-for="AdminUsername" class="mt-2 w-full rounded-lg border-zinc-700 bg-zinc-950 text-sm text-white focus:border-cyan-500 focus:ring-cyan-500" />
+            <label asp-for="CurrentAdminPassword" class="mt-4 block text-[10px] font-black uppercase tracking-widest text-zinc-500">Password actual</label>
+            <input asp-for="CurrentAdminPassword" type="password" class="mt-2 w-full rounded-lg border-zinc-700 bg-zinc-950 text-sm text-white focus:border-cyan-500 focus:ring-cyan-500" />
+            <label asp-for="NewAdminPassword" class="mt-4 block text-[10px] font-black uppercase tracking-widest text-zinc-500">Nuevo password</label>
+            <input asp-for="NewAdminPassword" type="password" class="mt-2 w-full rounded-lg border-zinc-700 bg-zinc-950 text-sm text-white focus:border-cyan-500 focus:ring-cyan-500" placeholder="Dejar vacio para no cambiar" />
+            <button type="submit" class="mt-5 w-full rounded-lg bg-cyan-600 px-4 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-cyan-500">Guardar</button>
+        </form>
+
+        <form method="post" asp-page-handler="Persona" class="rounded-lg border border-zinc-800 bg-zinc-900/70 p-5">
+            <h2 class="text-sm font-black uppercase tracking-widest text-white">Cambiar nombre</h2>
+            <label asp-for="TargetSteamId" class="mt-5 block text-[10px] font-black uppercase tracking-widest text-zinc-500">Usuario</label>
+            <select asp-for="TargetSteamId" class="mt-2 w-full rounded-lg border-zinc-700 bg-zinc-950 text-sm text-white focus:border-cyan-500 focus:ring-cyan-500">
+                @foreach (var user in Model.Overview.Users)
+                {
+                    <option value="@user.SteamId">@user.PersonaName (@user.AccountId)</option>
+                }
+            </select>
+            <label asp-for="TargetPersonaName" class="mt-4 block text-[10px] font-black uppercase tracking-widest text-zinc-500">Nuevo nombre</label>
+            <input asp-for="TargetPersonaName" class="mt-2 w-full rounded-lg border-zinc-700 bg-zinc-950 text-sm text-white focus:border-cyan-500 focus:ring-cyan-500" placeholder="Persona name" />
+            <button type="submit" class="mt-5 w-full rounded-lg bg-cyan-600 px-4 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-cyan-500">Renombrar</button>
+        </form>
+
+        <div class="rounded-lg border border-zinc-800 bg-zinc-900/70 p-5">
+            <h2 class="text-sm font-black uppercase tracking-widest text-white">Amistades</h2>
+            <form method="post" asp-page-handler="Link" class="mt-5 space-y-4">
+                <select asp-for="LeftSteamId" class="w-full rounded-lg border-zinc-700 bg-zinc-950 text-sm text-white focus:border-cyan-500 focus:ring-cyan-500">
+                    @foreach (var user in Model.Overview.Users)
+                    {
+                        <option value="@user.SteamId">@user.PersonaName (@user.AccountId)</option>
+                    }
+                </select>
+                <select asp-for="RightSteamId" class="w-full rounded-lg border-zinc-700 bg-zinc-950 text-sm text-white focus:border-cyan-500 focus:ring-cyan-500">
+                    @foreach (var user in Model.Overview.Users)
+                    {
+                        <option value="@user.SteamId">@user.PersonaName (@user.AccountId)</option>
+                    }
+                </select>
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="submit" class="rounded-lg bg-cyan-600 px-4 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-cyan-500">Link</button>
+                    <button type="submit" formaction="?handler=Unlink" class="rounded-lg border border-red-500/30 px-4 py-3 text-xs font-black uppercase tracking-widest text-red-300 hover:bg-red-500/10">Unlink</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <section class="grid gap-5 xl:grid-cols-[1.4fr_1fr]">
+        <div class="rounded-lg border border-zinc-800 bg-zinc-900/70">
+            <div class="border-b border-zinc-800 px-5 py-4">
+                <h2 class="text-sm font-black uppercase tracking-widest text-white">Usuarios</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-zinc-800 text-sm">
+                    <thead class="bg-zinc-950 text-[10px] uppercase tracking-widest text-zinc-500">
+                        <tr>
+                            <th class="px-4 py-3 text-left">Nombre</th>
+                            <th class="px-4 py-3 text-left">SteamID</th>
+                            <th class="px-4 py-3 text-left">AccountID</th>
+                            <th class="px-4 py-3 text-left">App</th>
+                            <th class="px-4 py-3 text-left">Lobby</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-zinc-800">
+                        @foreach (var user in Model.Overview.Users)
+                        {
+                            <tr class="text-zinc-300">
+                                <td class="px-4 py-3 font-bold text-white">@user.PersonaName</td>
+                                <td class="px-4 py-3 font-mono text-xs">@user.SteamId</td>
+                                <td class="px-4 py-3">@user.AccountId</td>
+                                <td class="px-4 py-3">@user.AppId</td>
+                                <td class="px-4 py-3">@user.LobbyId</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="space-y-5">
+            <section class="rounded-lg border border-zinc-800 bg-zinc-900/70">
+                <div class="border-b border-zinc-800 px-5 py-4">
+                    <h2 class="text-sm font-black uppercase tracking-widest text-white">Cuentas web</h2>
+                </div>
+                <div class="divide-y divide-zinc-800">
+                    @foreach (var account in Model.Overview.Accounts)
+                    {
+                        <div class="px-5 py-4">
+                            <div class="flex items-center justify-between gap-3">
+                                <p class="font-bold text-white">@account.Username</p>
+                                <span class="rounded border border-zinc-700 px-2 py-0.5 text-[10px] font-black uppercase tracking-widest @(account.IsAdmin ? "text-cyan-400" : "text-zinc-500")">@(account.IsAdmin ? "admin" : "user")</span>
+                            </div>
+                            <p class="mt-1 text-xs text-zinc-500">@account.PersonaName | @account.SteamId</p>
+                            <p class="mt-1 text-xs text-zinc-600">Ultimo login: @(account.LastLoginAt == DateTime.MinValue ? "nunca" : account.LastLoginAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm"))</p>
+                        </div>
+                    }
+                </div>
+            </section>
+
+            <section class="rounded-lg border border-zinc-800 bg-zinc-900/70 p-5">
+                <h2 class="text-sm font-black uppercase tracking-widest text-white">Runtime</h2>
+                <div class="mt-4 space-y-3 text-sm text-zinc-400">
+                    <p>Lobbies activos: @Model.Overview.Lobbies.Count</p>
+                    <p>Servidores registrados: @Model.Overview.GameServers.Count</p>
+                    <p>Perfiles con stats: @Model.Overview.StatsProfiles</p>
+                </div>
+            </section>
+        </div>
+    </section>
+
+    <section class="rounded-lg border border-zinc-800 bg-zinc-900/70">
+        <div class="border-b border-zinc-800 px-5 py-4">
+            <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                    <h2 class="text-sm font-black uppercase tracking-widest text-white">Cosmeticos Dota</h2>
+                    <p class="mt-1 text-xs text-zinc-500">@Model.Overview.DotaCosmetics.LastImportStatus</p>
+                </div>
+                <p class="text-xs text-zinc-500">Ultima importacion: @(Model.Overview.DotaCosmetics.LastImportAt == DateTime.MinValue ? "nunca" : Model.Overview.DotaCosmetics.LastImportAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm"))</p>
+            </div>
+        </div>
+
+        <div class="grid gap-5 p-5 xl:grid-cols-[1fr_0.8fr]">
+            <div class="space-y-4">
+                <form method="post" asp-page-handler="ImportDotaItems" class="grid gap-3 lg:grid-cols-[1fr_auto]">
+                    <input asp-for="DotaPath" class="rounded-lg border-zinc-700 bg-zinc-950 text-sm text-white focus:border-cyan-500 focus:ring-cyan-500" placeholder="Ruta de Dota 2" />
+                    <button type="submit" class="rounded-lg bg-cyan-600 px-5 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-cyan-500">Actualizar DB</button>
+                </form>
+
+                <form method="get" class="grid gap-3 lg:grid-cols-[1fr_auto]">
+                    <input asp-for="ItemSearch" class="rounded-lg border-zinc-700 bg-zinc-950 text-sm text-white focus:border-cyan-500 focus:ring-cyan-500" placeholder="Buscar item, heroe, slot o defindex" />
+                    <button type="submit" class="rounded-lg border border-zinc-700 px-5 py-3 text-xs font-black uppercase tracking-widest text-zinc-200 hover:bg-zinc-800">Filtrar</button>
+                </form>
+
+                <div class="overflow-x-auto rounded-lg border border-zinc-800">
+                    <table class="min-w-full divide-y divide-zinc-800 text-sm">
+                        <thead class="bg-zinc-950 text-[10px] uppercase tracking-widest text-zinc-500">
+                            <tr>
+                                <th class="px-4 py-3 text-left">Item</th>
+                                <th class="px-4 py-3 text-left">Slot</th>
+                                <th class="px-4 py-3 text-left">Heroes</th>
+                                <th class="px-4 py-3 text-left">Asignar</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-zinc-800">
+                            @foreach (var item in Model.Cosmetics.Items)
+                            {
+                                <tr class="align-top text-zinc-300">
+                                    <td class="px-4 py-3">
+                                        <p class="font-bold text-white">@item.Name</p>
+                                        <p class="mt-1 font-mono text-xs text-zinc-500">#@item.DefIndex</p>
+                                        <p class="mt-1 text-xs text-zinc-600">@item.Prefab</p>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <span class="rounded border border-zinc-700 px-2 py-1 text-xs text-zinc-300">@(string.IsNullOrWhiteSpace(item.Slot) ? "slot_0" : item.Slot)</span>
+                                    </td>
+                                    <td class="px-4 py-3 text-xs text-zinc-400">
+                                        @(item.HeroNames.Count == 0 ? "Global" : string.Join(", ", item.HeroNames.Take(4)))
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <form method="post" asp-page-handler="EquipDotaItem" class="grid min-w-[320px] gap-2">
+                                            <input type="hidden" name="EquipmentDefIndex" value="@item.DefIndex" />
+                                            <input type="hidden" name="EquipmentSlot" value="@item.Slot" />
+                                            <input type="hidden" name="EquipmentSlotId" value="0" />
+                                            <select name="EquipmentSteamId" class="rounded-lg border-zinc-700 bg-zinc-950 text-xs text-white focus:border-cyan-500 focus:ring-cyan-500">
+                                                @foreach (var user in Model.Overview.Users)
+                                                {
+                                                    <option value="@user.SteamId">@user.PersonaName (@user.AccountId)</option>
+                                                }
+                                            </select>
+                                            <select name="EquipmentHeroId" class="rounded-lg border-zinc-700 bg-zinc-950 text-xs text-white focus:border-cyan-500 focus:ring-cyan-500">
+                                                @if (item.HeroIds.Count == 0)
+                                                {
+                                                    <option value="0">Global</option>
+                                                }
+                                                else
+                                                {
+                                                    for (var i = 0; i < item.HeroIds.Count; i++)
+                                                    {
+                                                        <option value="@item.HeroIds[i]">@(item.HeroNames.ElementAtOrDefault(i) ?? $"hero_{item.HeroIds[i]}")</option>
+                                                    }
+                                                }
+                                            </select>
+                                            <input name="EquipmentStyle" value="0" type="number" min="0" class="rounded-lg border-zinc-700 bg-zinc-950 text-xs text-white focus:border-cyan-500 focus:ring-cyan-500" />
+                                            <button type="submit" class="rounded-lg bg-cyan-600 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white hover:bg-cyan-500">Equipar</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="space-y-5">
+                <section class="rounded-lg border border-zinc-800 bg-zinc-950/70 p-5">
+                    <h3 class="text-xs font-black uppercase tracking-widest text-white">Equipamiento activo</h3>
+                    <div class="mt-4 space-y-3">
+                        @foreach (var group in Model.Cosmetics.Equipment.GroupBy(item => item.SteamId))
+                        {
+                            var user = Model.Overview.Users.FirstOrDefault(candidate => candidate.SteamId == group.Key);
+                            <div class="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+                                <div class="flex items-center justify-between gap-3">
+                                    <p class="text-sm font-bold text-white">@(user?.PersonaName ?? group.Key.ToString())</p>
+                                    <form method="post" asp-page-handler="ClearDotaEquipment">
+                                        <input type="hidden" name="EquipmentSteamId" value="@group.Key" />
+                                        <button type="submit" class="rounded border border-red-500/30 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-red-300 hover:bg-red-500/10">Limpiar</button>
+                                    </form>
+                                </div>
+                                <div class="mt-3 space-y-2 text-xs text-zinc-400">
+                                    @foreach (var equipped in group.OrderBy(item => item.HeroName).ThenBy(item => item.Slot))
+                                    {
+                                        <p><span class="font-mono text-zinc-500">#@equipped.DefIndex</span> @equipped.HeroName / @equipped.Slot / style @equipped.Style</p>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </section>
+
+                <section class="rounded-lg border border-zinc-800 bg-zinc-950/70 p-5">
+                    <h3 class="text-xs font-black uppercase tracking-widest text-white">Matches GC</h3>
+                    <div class="mt-4 space-y-3 text-xs text-zinc-400">
+                        @foreach (var match in Model.Overview.DotaMatches)
+                        {
+                            <div class="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+                                <p class="font-mono text-zinc-300">Lobby @match.LobbyId</p>
+                                <p>Match @match.MatchId | state @match.State | gameState @match.GameState | server @match.ServerSteamId</p>
+                                <p>@match.Connect</p>
+                                <p>@match.Players.Count jugadores | @match.UpdatedAt.ToLocalTime().ToString("HH:mm:ss")</p>
+                                <div class="mt-2 space-y-1">
+                                    @foreach (var player in match.Players)
+                                    {
+                                        <p>@player.PersonaName: team @player.Team / slot @player.Slot / hero @player.HeroId / items @player.Equipment.Count</p>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </section>
+            </div>
+        </div>
+    </section>
+</div>

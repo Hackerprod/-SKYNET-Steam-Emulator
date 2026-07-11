@@ -8,6 +8,10 @@ namespace SKYNET.Helpers
 {
     public static class Extensions
     {
+        public static uint GetAccountID(this CSteamID SteamID)
+        {
+            return SteamID.AccountID;
+        }
         
         public static uint GetAccountID(this ulong SteamID)
         {

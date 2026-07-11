@@ -86,6 +86,7 @@ namespace SKYNET.Steamworks.Implementation
                             m_unNumResultsReturned = (uint)request.results.Count(),
                             m_unTotalMatchingResults = (uint)request.results.Count(),
                             m_bCachedData = false, 
+                            m_rgchNextCursor = new byte[256],
                         };
                         APICall = CallbackManager.AddCallbackResult(data);
                     }
@@ -129,11 +130,21 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool GetQueryUGCPreviewURL(UGCQueryHandle_t handle, uint index, string pchURL, uint cchURLSize)
         {
+            return GetQueryUGCPreviewURL(handle, index, IntPtr.Zero, cchURLSize);
+        }
+
+        public bool GetQueryUGCPreviewURL(UGCQueryHandle_t handle, uint index, IntPtr pchURL, uint cchURLSize)
+        {
             Write("GetQueryUGCPreviewURL");
             return false;
         }
 
         public bool GetQueryUGCMetadata(UGCQueryHandle_t handle, uint index, string pchMetadata, uint cchMetadatasize)
+        {
+            return GetQueryUGCMetadata(handle, index, IntPtr.Zero, cchMetadatasize);
+        }
+
+        public bool GetQueryUGCMetadata(UGCQueryHandle_t handle, uint index, IntPtr pchMetadata, uint cchMetadatasize)
         {
             Write("GetQueryUGCMetadata");
             return false;
@@ -147,11 +158,21 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool GetQueryUGCChildren(UGCQueryHandle_t handle, uint index, ref PublishedFileId_t[] pvecPublishedFileID, uint cMaxEntries)
         {
+            return GetQueryUGCChildren(handle, index, IntPtr.Zero, cMaxEntries);
+        }
+
+        public bool GetQueryUGCChildren(UGCQueryHandle_t handle, uint index, IntPtr pvecPublishedFileID, uint cMaxEntries)
+        {
             Write("GetQueryUGCChildren");
             return false;
         }
 
         internal bool GetQueryUGCTag(UGCQueryHandle_t handle, uint index, uint indexTag, string pchValue, uint cchValueSize)
+        {
+            return GetQueryUGCTag(handle, index, indexTag, IntPtr.Zero, cchValueSize);
+        }
+
+        internal bool GetQueryUGCTag(UGCQueryHandle_t handle, uint index, uint indexTag, IntPtr pchValue, uint cchValueSize)
         {
             Write("GetQueryUGCTag");
             return false;
@@ -159,11 +180,21 @@ namespace SKYNET.Steamworks.Implementation
 
         internal bool GetQueryUGCTagDisplayName(UGCQueryHandle_t handle, uint index, uint indexTag, string pchValue, uint cchValueSize)
         {
+            return GetQueryUGCTagDisplayName(handle, index, indexTag, IntPtr.Zero, cchValueSize);
+        }
+
+        internal bool GetQueryUGCTagDisplayName(UGCQueryHandle_t handle, uint index, uint indexTag, IntPtr pchValue, uint cchValueSize)
+        {
             Write("GetQueryUGCTagDisplayName");
             return false;
         }
 
         public bool GetQueryUGCStatistic(UGCQueryHandle_t handle, uint index, int eStatType, ulong pStatValue)
+        {
+            return GetQueryUGCStatistic(handle, index, eStatType, IntPtr.Zero);
+        }
+
+        public bool GetQueryUGCStatistic(UGCQueryHandle_t handle, uint index, int eStatType, IntPtr pStatValue)
         {
             Write("GetQueryUGCStatistic");
             return false;
@@ -177,6 +208,11 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool GetQueryUGCAdditionalPreview(UGCQueryHandle_t handle, uint index, uint previewIndex, string pchURLOrVideoID, uint cchURLSize, string pchOriginalFileName, uint cchOriginalFileNameSize, int pPreviewType)
         {
+            return GetQueryUGCAdditionalPreview(handle, index, previewIndex, IntPtr.Zero, cchURLSize, IntPtr.Zero, cchOriginalFileNameSize, IntPtr.Zero);
+        }
+
+        public bool GetQueryUGCAdditionalPreview(UGCQueryHandle_t handle, uint index, uint previewIndex, IntPtr pchURLOrVideoID, uint cchURLSize, IntPtr pchOriginalFileName, uint cchOriginalFileNameSize, IntPtr pPreviewType)
+        {
             Write("GetQueryUGCAdditionalPreview");
             return false;
         }
@@ -189,11 +225,21 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool GetQueryUGCKeyValueTag(UGCQueryHandle_t handle, uint index, uint keyValueTagIndex, string pchKey, uint cchKeySize, string pchValue, uint cchValueSize)
         {
+            return GetQueryUGCKeyValueTag(handle, index, keyValueTagIndex, IntPtr.Zero, cchKeySize, IntPtr.Zero, cchValueSize);
+        }
+
+        public bool GetQueryUGCKeyValueTag(UGCQueryHandle_t handle, uint index, uint keyValueTagIndex, IntPtr pchKey, uint cchKeySize, IntPtr pchValue, uint cchValueSize)
+        {
             Write("GetQueryUGCKeyValueTag");
             return false;
         }
 
         public bool GetQueryUGCKeyValueTag(UGCQueryHandle_t handle, uint index, string pchKey, string pchValue, uint cchValueSize)
+        {
+            return GetQueryUGCKeyValueTag(handle, index, pchKey, IntPtr.Zero, cchValueSize);
+        }
+
+        public bool GetQueryUGCKeyValueTag(UGCQueryHandle_t handle, uint index, string pchKey, IntPtr pchValue, uint cchValueSize)
         {
             Write("GetQueryUGCKeyValueTag");
             return false;
@@ -627,6 +673,11 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool GetItemInstallInfo(ulong nPublishedFileID, ulong punSizeOnDisk, string pchFolder, uint cchFolderSize, uint punTimeStamp)
         {
+            return GetItemInstallInfo(nPublishedFileID, IntPtr.Zero, IntPtr.Zero, cchFolderSize, IntPtr.Zero);
+        }
+
+        public bool GetItemInstallInfo(ulong nPublishedFileID, IntPtr punSizeOnDisk, IntPtr pchFolder, uint cchFolderSize, IntPtr punTimeStamp)
+        {
             Write("GetItemInstallInfo");
             MutexHelper.Wait("GetItemInstallInfo", delegate
             {
@@ -783,6 +834,11 @@ namespace SKYNET.Steamworks.Implementation
         }
 
         public bool GetSupportedGameVersionData(UGCQueryHandle_t handle, uint index, uint versionIndex, string pchGameBranchMin, string pchGameBranchMax, uint cchGameBranchSize)
+        {
+            return GetSupportedGameVersionData(handle, index, versionIndex, IntPtr.Zero, IntPtr.Zero, cchGameBranchSize);
+        }
+
+        public bool GetSupportedGameVersionData(UGCQueryHandle_t handle, uint index, uint versionIndex, IntPtr pchGameBranchMin, IntPtr pchGameBranchMax, uint cchGameBranchSize)
         {
             Write("GetSupportedGameVersionData");
             return false;

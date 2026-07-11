@@ -42,9 +42,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamHTTP.SendHTTPRequest(hRequest, ref pCallHandle);
         }
 
-        public bool SendHTTPRequestAndStreamResponse(IntPtr _, HTTPRequestHandle hRequest, SteamAPICall_t pCallHandle)
+        public bool SendHTTPRequestAndStreamResponse(IntPtr _, HTTPRequestHandle hRequest, ref SteamAPICall_t pCallHandle)
         {
-            return SteamEmulator.SteamHTTP.SendHTTPRequestAndStreamResponse(hRequest, pCallHandle);
+            return SteamEmulator.SteamHTTP.SendHTTPRequestAndStreamResponse(hRequest, ref pCallHandle);
         }
 
         public bool DeferHTTPRequest(IntPtr _, HTTPRequestHandle hRequest)
@@ -57,17 +57,17 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamHTTP.PrioritizeHTTPRequest(hRequest);
         }
 
-        public bool GetHTTPResponseHeaderSize(IntPtr _, HTTPRequestHandle hRequest, string pchHeaderName, uint unResponseHeaderSize)
+        public bool GetHTTPResponseHeaderSize(IntPtr _, HTTPRequestHandle hRequest, string pchHeaderName, IntPtr unResponseHeaderSize)
         {
             return SteamEmulator.SteamHTTP.GetHTTPResponseHeaderSize(hRequest, pchHeaderName, unResponseHeaderSize);
         }
 
-        public bool GetHTTPResponseHeaderValue(IntPtr _, HTTPRequestHandle hRequest, string pchHeaderName, int pHeaderValueBuffer, uint unBufferSize)
+        public bool GetHTTPResponseHeaderValue(IntPtr _, HTTPRequestHandle hRequest, string pchHeaderName, IntPtr pHeaderValueBuffer, uint unBufferSize)
         {
             return SteamEmulator.SteamHTTP.GetHTTPResponseHeaderValue(hRequest, pchHeaderName, pHeaderValueBuffer, unBufferSize);
         }
 
-        public bool GetHTTPResponseBodySize(IntPtr _, HTTPRequestHandle hRequest, uint unBodySize)
+        public bool GetHTTPResponseBodySize(IntPtr _, HTTPRequestHandle hRequest, IntPtr unBodySize)
         {
             return SteamEmulator.SteamHTTP.GetHTTPResponseBodySize(hRequest, unBodySize);
         }
@@ -87,7 +87,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamHTTP.ReleaseHTTPRequest(hRequest);
         }
 
-        public bool GetHTTPDownloadProgressPct(IntPtr _, HTTPRequestHandle hRequest, float pflPercentOut)
+        public bool GetHTTPDownloadProgressPct(IntPtr _, HTTPRequestHandle hRequest, IntPtr pflPercentOut)
         {
             return SteamEmulator.SteamHTTP.GetHTTPDownloadProgressPct(hRequest, pflPercentOut);
         }
@@ -132,7 +132,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamHTTP.SetHTTPRequestAbsoluteTimeoutMS(hRequest, unMilliseconds);
         }
 
-        public bool GetHTTPRequestWasTimedOut(IntPtr _, HTTPRequestHandle hRequest, bool pbWasTimedOut)
+        public bool GetHTTPRequestWasTimedOut(IntPtr _, HTTPRequestHandle hRequest, IntPtr pbWasTimedOut)
         {
             return SteamEmulator.SteamHTTP.GetHTTPRequestWasTimedOut(hRequest, pbWasTimedOut);
         }

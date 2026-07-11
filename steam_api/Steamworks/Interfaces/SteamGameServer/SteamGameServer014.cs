@@ -1,5 +1,6 @@
 using SKYNET.Managers;
 using System;
+using SKYNET.Helpers;
 
 using SteamAPICall_t = System.UInt64;
 
@@ -59,9 +60,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamGameServer.BSecure();
         }
 
-        public CSteamID GetSteamID(IntPtr _)
+        public IntPtr GetSteamID(IntPtr _, IntPtr pSteamID)
         {
-            return SteamEmulator.SteamGameServer.GetSteamID();
+            return NativeSteamId.Write(pSteamID, SteamEmulator.SteamGameServer.GetSteamID());
         }
 
         public bool WasRestartRequested(IntPtr _)
@@ -174,9 +175,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamGameServer.GetServerReputation();
         }
 
-        public uint GetPublicIP(IntPtr _)
+        public IntPtr GetPublicIP(IntPtr arg0, IntPtr arg1)
         {
-            return SteamEmulator.SteamGameServer.GetPublicIP();
+            return SteamEmulator.SteamGameServer.GetPublicIP(arg0, arg1);
         }
 
         public bool HandleIncomingPacket(IntPtr _, IntPtr pData, int cbData, uint srcIP, uint srcPort)
@@ -204,9 +205,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamGameServer.SendUserConnectAndAuthenticate_DEPRECATED(unIPClient, pvAuthBlob, cubAuthBlobSize, pSteamIDUser);
         }
 
-        public CSteamID CreateUnauthenticatedUserConnection(IntPtr _)
+        public IntPtr CreateUnauthenticatedUserConnection(IntPtr _, IntPtr pSteamID)
         {
-            return SteamEmulator.SteamGameServer.CreateUnauthenticatedUserConnection();
+            return NativeSteamId.Write(pSteamID, SteamEmulator.SteamGameServer.CreateUnauthenticatedUserConnection());
         }
 
         public void SendUserDisconnect_DEPRECATED(IntPtr _, ulong steamIDUser)

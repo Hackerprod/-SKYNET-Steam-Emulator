@@ -1,141 +1,181 @@
 @page
 @model IndexModel
 
-<div class="space-y-6">
-    <div class="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
-        
-        <div class="space-y-6">
-            <section class="relative overflow-hidden rounded-2xl border border-zinc-800/60 bg-zinc-900/40 shadow-2xl shadow-black/50" style="height: 320px;">
-                <div class="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-950/70 to-transparent z-10"></div>
-                <div class="absolute inset-0 bg-gradient-to-t from-zinc-950/80 to-transparent z-10"></div>
-                <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(6,182,212,0.15),transparent_70%)] z-10"></div>
-                
-                <div class="absolute inset-0 w-full h-full bg-zinc-800 animate-pulse"></div>
+<div class="space-y-5">
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        <div class="rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-4 py-3 text-sm font-semibold text-cyan-100">@Model.StatusMessage</div>
+    }
 
-                <div class="absolute inset-0 z-20 flex flex-col justify-end p-8">
-                    <div class="flex items-center gap-2 mb-3">
-                        <span class="text-[10px] px-2.5 py-1 rounded-full font-bold border bg-green-500/10 text-green-500 border-green-500/30 uppercase tracking-widest">
-                            ● @Model.Snapshot.FeaturedGame.Status
-                        </span>
-                        <span class="text-xs text-zinc-400 font-medium">@Model.Snapshot.FeaturedGame.Name</span>
-                    </div>
-                    <h2 class="text-4xl font-black text-white mb-2 leading-none">@Model.Snapshot.FeaturedGame.Name</h2>
-                    <p class="text-zinc-400 text-sm mb-6 max-w-md line-clamp-2">@Model.Snapshot.FeaturedGame.Description</p>
-                    
-                    <div class="flex items-center gap-4">
-                        <button class="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white bg-gradient-to-br from-cyan-500 to-purple-500 shadow-glow-cyan hover:scale-105 transition-transform">
-                            Play Now
-                        </button>
-                        <div class="px-4 py-2 rounded-xl border border-zinc-800/60 bg-zinc-950/80 backdrop-blur">
-                            <p class="text-lg font-black text-white leading-none">@Model.Snapshot.FeaturedGame.HoursPlayed h</p>
-                            <p class="text-[10px] text-zinc-500 uppercase font-bold mt-1">Playtime</p>
-                        </div>
+    <section class="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+        <div class="rounded-lg border border-zinc-800 bg-zinc-900 p-5">
+            <div class="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+                <div class="flex min-w-0 items-start gap-4">
+                    <img src="/api/users/@Model.CurrentUser.SteamId/avatar?v=@DateTimeOffset.UtcNow.ToUnixTimeSeconds()" alt="" class="h-20 w-20 shrink-0 rounded-lg border border-zinc-700 bg-zinc-950 object-cover" />
+                    <div class="min-w-0">
+                        <p class="text-[10px] font-black uppercase tracking-[0.22em] text-cyan-400">Sesion activa</p>
+                        <h1 class="mt-2 truncate text-3xl font-black text-white">@Model.CurrentUser.PersonaName</h1>
+                        <p class="mt-2 text-sm text-zinc-400">SteamID @Model.CurrentUser.SteamId - Account @Model.CurrentUser.AccountId - App @Model.CurrentUser.AppId</p>
                     </div>
                 </div>
-            </section>
+                <div class="grid w-full gap-3 xl:w-[30rem]">
+                    <form method="post" asp-page-handler="Persona" class="flex w-full gap-2">
+                        <input asp-for="PersonaName" class="min-w-0 flex-1 rounded-lg border-zinc-700 bg-zinc-950 text-sm text-white focus:border-cyan-500 focus:ring-cyan-500" />
+                        <button class="rounded-lg bg-cyan-600 px-4 py-2 text-xs font-black uppercase tracking-widest text-white hover:bg-cyan-500">Guardar</button>
+                    </form>
+                    <form method="post" asp-page-handler="Avatar" enctype="multipart/form-data" class="grid gap-2 md:grid-cols-[1fr_auto]">
+                        <input asp-for="AvatarFile" type="file" accept="image/png" class="min-w-0 rounded-lg border border-zinc-700 bg-zinc-950 text-sm text-zinc-200 file:mr-3 file:border-0 file:bg-zinc-800 file:px-3 file:py-2 file:text-xs file:font-black file:uppercase file:tracking-widest file:text-zinc-100 hover:file:bg-zinc-700" />
+                        <button class="rounded-lg border border-cyan-500 bg-cyan-500/10 px-4 py-2 text-xs font-black uppercase tracking-widest text-cyan-100 hover:bg-cyan-500/20">Avatar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                @foreach (var metric in Model.Snapshot.Metrics)
-                {
-                    <div class="rounded-2xl p-5 border border-zinc-800/60 bg-zinc-900/90 relative overflow-hidden group hover:-translate-y-1 transition-all duration-300">
-                        <div class="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_20%_20%,rgba(6,182,212,0.12)_0%,transparent_60%)]"></div>
-                        <div class="relative">
-                            <div class="flex items-center justify-between mb-3">
-                                <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-cyan-500/10 border border-cyan-500/30 text-cyan-500 shadow-glow-cyan">
-                                    <span class="text-xs font-bold">@metric.Label[0]</span>
+        <div class="grid grid-cols-2 gap-3">
+            @foreach (var metric in Model.Snapshot.Metrics)
+            {
+                <div class="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+                    <p class="text-[10px] font-black uppercase tracking-widest text-zinc-500">@metric.Label</p>
+                    <p class="mt-2 text-2xl font-black text-white">@metric.Value</p>
+                    <p class="mt-1 text-xs text-zinc-500">@metric.Detail</p>
+                </div>
+            }
+        </div>
+    </section>
+
+    @if (Model.IncomingFriendRequests.Count > 0 || Model.OutgoingFriendRequests.Count > 0)
+    {
+        <section class="grid gap-5 xl:grid-cols-2">
+            <div class="rounded-lg border border-cyan-500/30 bg-cyan-500/10">
+                <div class="border-b border-cyan-500/20 px-5 py-4">
+                    <h2 class="text-lg font-black text-white">Solicitudes recibidas</h2>
+                    <p class="text-xs text-cyan-100/70">Estas tambien se publican por eventos para la DLL.</p>
+                </div>
+                <div class="divide-y divide-cyan-500/20">
+                    @if (Model.IncomingFriendRequests.Count == 0)
+                    {
+                        <p class="px-5 py-5 text-sm text-cyan-100/60">No hay solicitudes entrantes.</p>
+                    }
+                    @foreach (var request in Model.IncomingFriendRequests)
+                    {
+                        <article class="flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center md:justify-between">
+                            <div class="flex min-w-0 items-center gap-3">
+                                <img src="/api/users/@request.FromUser.SteamId/avatar" alt="" class="h-11 w-11 rounded-lg border border-cyan-500/30 bg-zinc-950 object-cover" />
+                                <div class="min-w-0">
+                                    <a asp-page="/Users/Profile" asp-route-steamId="@request.FromUser.SteamId" class="truncate text-sm font-black text-white hover:text-cyan-200">@request.FromUser.PersonaName</a>
+                                    <p class="text-xs text-cyan-100/60">SteamID @request.FromUser.SteamId</p>
                                 </div>
                             </div>
-                            <p class="text-2xl font-black text-white">@metric.Value</p>
-                            <p class="text-[10px] text-zinc-500 mt-1 uppercase font-bold tracking-widest">@metric.Label</p>
-                            <p class="text-[10px] mt-1 font-bold text-cyan-400">@metric.Detail</p>
-                        </div>
+                            <div class="flex gap-2">
+                                <form method="post" asp-page-handler="AcceptFriend">
+                                    <input type="hidden" name="RequestId" value="@request.Id" />
+                                    <button class="rounded-lg bg-cyan-600 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white hover:bg-cyan-500">Aceptar</button>
+                                </form>
+                                <form method="post" asp-page-handler="DeclineFriend">
+                                    <input type="hidden" name="RequestId" value="@request.Id" />
+                                    <button class="rounded-lg border border-red-500/30 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-red-200 hover:bg-red-500/10">Rechazar</button>
+                                </form>
+                            </div>
+                        </article>
+                    }
+                </div>
+            </div>
+
+            <div class="rounded-lg border border-zinc-800 bg-zinc-900">
+                <div class="border-b border-zinc-800 px-5 py-4">
+                    <h2 class="text-lg font-black text-white">Solicitudes enviadas</h2>
+                    <p class="text-xs text-zinc-500">Pendientes de respuesta del otro usuario.</p>
+                </div>
+                <div class="divide-y divide-zinc-800">
+                    @if (Model.OutgoingFriendRequests.Count == 0)
+                    {
+                        <p class="px-5 py-5 text-sm text-zinc-500">No hay solicitudes salientes.</p>
+                    }
+                    @foreach (var request in Model.OutgoingFriendRequests)
+                    {
+                        <article class="flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center md:justify-between">
+                            <div class="flex min-w-0 items-center gap-3">
+                                <img src="/api/users/@request.ToUser.SteamId/avatar" alt="" class="h-11 w-11 rounded-lg border border-zinc-700 bg-zinc-950 object-cover" />
+                                <div class="min-w-0">
+                                    <a asp-page="/Users/Profile" asp-route-steamId="@request.ToUser.SteamId" class="truncate text-sm font-black text-white hover:text-cyan-300">@request.ToUser.PersonaName</a>
+                                    <p class="text-xs text-zinc-500">SteamID @request.ToUser.SteamId</p>
+                                </div>
+                            </div>
+                            <form method="post" asp-page-handler="CancelFriend">
+                                <input type="hidden" name="RequestId" value="@request.Id" />
+                                <button class="rounded-lg border border-zinc-700 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-300 hover:text-white">Cancelar</button>
+                            </form>
+                        </article>
+                    }
+                </div>
+            </div>
+        </section>
+    }
+
+    <section class="grid gap-5 xl:grid-cols-[1fr_0.9fr]">
+        <div class="rounded-lg border border-zinc-800 bg-zinc-900">
+            <div class="flex items-center justify-between border-b border-zinc-800 px-5 py-4">
+                <div>
+                    <h2 class="text-lg font-black text-white">Stats</h2>
+                    <p class="text-xs text-zinc-500">Persisten en el backend y tambien las puede actualizar Dota.</p>
+                </div>
+            </div>
+            <div class="divide-y divide-zinc-800">
+                @if (Model.Stats.Stats.Count == 0)
+                {
+                    <p class="px-5 py-6 text-sm text-zinc-500">No hay stats guardados.</p>
+                }
+                @foreach (var stat in Model.Stats.Stats.OrderBy(s => s.Name))
+                {
+                    <div class="flex items-center justify-between px-5 py-3">
+                        <span class="text-sm font-semibold text-zinc-200">@stat.Name</span>
+                        <span class="font-mono text-sm text-cyan-300">@stat.Data</span>
+                    </div>
+                }
+            </div>
+            <form method="post" asp-page-handler="Stat" class="grid gap-3 border-t border-zinc-800 p-5 md:grid-cols-[1fr_140px_auto]">
+                <input asp-for="StatName" placeholder="wins" class="rounded-lg border-zinc-700 bg-zinc-950 text-sm text-white focus:border-cyan-500 focus:ring-cyan-500" />
+                <input asp-for="StatValue" type="number" min="0" class="rounded-lg border-zinc-700 bg-zinc-950 text-sm text-white focus:border-cyan-500 focus:ring-cyan-500" />
+                <button class="rounded-lg border border-cyan-500 bg-cyan-500/10 px-4 py-2 text-xs font-black uppercase tracking-widest text-cyan-100 hover:bg-cyan-500/20">Actualizar</button>
+            </form>
+        </div>
+
+        <div class="rounded-lg border border-zinc-800 bg-zinc-900">
+            <div class="border-b border-zinc-800 px-5 py-4">
+                <h2 class="text-lg font-black text-white">Actividad</h2>
+                <p class="text-xs text-zinc-500">Resumen generado desde el estado real del server.</p>
+            </div>
+            <div class="divide-y divide-zinc-800">
+                @foreach (var item in Model.Snapshot.Activities)
+                {
+                    <div class="px-5 py-4">
+                        <p class="text-sm font-bold text-white">@item.Title</p>
+                        <p class="mt-1 text-xs text-zinc-500">@item.Description</p>
+                        <p class="mt-2 text-[10px] font-black uppercase tracking-widest text-cyan-500">@item.When</p>
                     </div>
                 }
             </div>
         </div>
+    </section>
 
-        <aside class="space-y-6">
-            <section class="rounded-2xl border border-zinc-800/60 bg-zinc-900/80 backdrop-blur-xl p-6 shadow-xl">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h3 class="font-black text-white text-lg">Achievement Radar</h3>
-                        <p class="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mt-1">Latest Unlocks</p>
-                    </div>
-                    <span class="text-[10px] px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/30 font-bold uppercase tracking-widest">
-                        @Model.Snapshot.Achievements.Count Total
-                    </span>
-                </div>
-                <div class="space-y-3">
-                    @foreach (var achievement in Model.Snapshot.Achievements.Take(3))
-                    {
-                        <div class="flex items-center gap-4 p-4 rounded-xl border border-zinc-800/60 bg-zinc-950/40 group hover:bg-zinc-800/40 transition-colors">
-                            <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-xl shadow-glow-purple">
-                                🏆
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm font-bold text-white truncate">@achievement.Title</p>
-                                <p class="text-[10px] text-zinc-500 uppercase font-bold tracking-wider mt-0.5">@achievement.Game</p>
-                            </div>
-                            <span class="text-[9px] font-black text-amber-500 uppercase px-2 py-0.5 rounded-md bg-amber-500/10">@achievement.Rarity</span>
-                        </div>
-                    }
-                </div>
-            </section>
-
-            <section class="rounded-2xl border border-zinc-800/60 bg-gradient-to-br from-cyan-500/5 via-zinc-950 to-purple-500/5 p-6 border-l-4 border-l-cyan-500">
-                <div class="flex items-center gap-3 mb-4">
-                    <span class="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></span>
-                    <p class="text-[10px] text-zinc-400 uppercase font-black tracking-widest">Live Feed</p>
-                </div>
-                <div class="space-y-4">
-                    @foreach (var item in Model.Snapshot.Activities.Take(3))
-                    {
-                        <div class="relative pl-4 border-l border-zinc-800/60">
-                            <div class="absolute -left-[4.5px] top-0 w-2 h-2 rounded-full bg-zinc-800 border border-zinc-700"></div>
-                            <p class="text-xs font-bold text-white">@item.Title</p>
-                            <p class="text-[10px] text-zinc-500 mt-1">@item.Description</p>
-                            <p class="text-[9px] font-black text-cyan-600 uppercase mt-1 tracking-widest">@item.When</p>
-                        </div>
-                    }
-                </div>
-            </section>
-        </aside>
-    </div>
-
-    <section>
-        <div class="flex items-center justify-between mb-6">
-            <div>
-                <h3 class="font-black text-white text-2xl">My Library</h3>
-                <p class="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mt-1">@Model.Snapshot.Games.Count Games Installed</p>
-            </div>
-            <button class="text-[10px] font-black text-cyan-500 uppercase tracking-widest hover:text-cyan-400 transition-colors">View All →</button>
+    <section class="rounded-lg border border-zinc-800 bg-zinc-900">
+        <div class="border-b border-zinc-800 px-5 py-4">
+            <h2 class="text-lg font-black text-white">Achievements</h2>
         </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            @foreach (var game in Model.Snapshot.Games.Take(3))
+        <div class="grid gap-3 p-5 md:grid-cols-2 xl:grid-cols-3">
+            @if (Model.Snapshot.Achievements.Count == 0)
             {
-                <article class="group relative overflow-hidden rounded-2xl border border-zinc-800/60 bg-zinc-900/60 hover:border-cyan-500/50 hover:-translate-y-1 transition-all duration-300">
-                    <div class="h-32 bg-zinc-800 relative overflow-hidden">
-                        <div class="absolute inset-0 bg-gradient-to-t from-zinc-900 to-transparent"></div>
-                        <div class="absolute bottom-3 left-4">
-                            <span class="text-[9px] px-2 py-0.5 rounded bg-zinc-950/80 text-zinc-400 font-bold uppercase tracking-widest">@game.Genre</span>
-                        </div>
+                <p class="text-sm text-zinc-500">No hay achievements guardados.</p>
+            }
+            @foreach (var achievement in Model.Snapshot.Achievements)
+            {
+                <article class="rounded-lg border border-zinc-800 bg-zinc-950 p-4">
+                    <div class="flex items-center justify-between gap-3">
+                        <h3 class="truncate text-sm font-bold text-white">@achievement.Title</h3>
+                        <span class="rounded border border-zinc-700 px-2 py-1 text-[10px] font-black uppercase text-zinc-400">@achievement.Rarity</span>
                     </div>
-                    <div class="p-5">
-                        <h4 class="text-lg font-black text-white group-hover:text-cyan-400 transition-colors">@game.Name</h4>
-                        <div class="flex items-center justify-between mt-4">
-                            <div class="flex flex-col">
-                                <span class="text-xl font-black text-white">@game.HoursPlayed h</span>
-                                <span class="text-[9px] text-zinc-500 uppercase font-bold">Played</span>
-                            </div>
-                            <div class="text-right flex flex-col">
-                                <span class="text-xs font-bold text-cyan-500">@game.AchievementsUnlocked/@game.TotalAchievements</span>
-                                <span class="text-[9px] text-zinc-500 uppercase font-bold">Achievements</span>
-                            </div>
-                        </div>
-                        <div class="mt-4 h-1.5 rounded-full bg-zinc-800 overflow-hidden">
-                            <div class="h-full bg-gradient-to-r from-cyan-500 to-purple-500" style="width: @game.Progress%"></div>
-                        </div>
+                    <div class="mt-3 h-1.5 rounded bg-zinc-800">
+                        <div class="h-1.5 rounded bg-cyan-500" style="width:@achievement.Progress%"></div>
                     </div>
                 </article>
             }
