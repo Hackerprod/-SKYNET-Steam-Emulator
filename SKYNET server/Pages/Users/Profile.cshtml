@@ -6,31 +6,31 @@
     var relationship = Model.Profile.FriendRelationship;
     var relationLabel = relationship switch
     {
-        2 => "Solicitud recibida",
-        3 => "Amigo",
-        4 => "Solicitud enviada",
-        _ => Model.Profile.IsSelf ? "Tu perfil" : "Sin relacion"
+        2 => "Request received",
+        3 => "Friend",
+        4 => "Request sent",
+        _ => Model.Profile.IsSelf ? "Your profile" : "No relationship"
     };
 }
 
 <div class="space-y-6">
     @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
     {
-        <div class="rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-sm font-bold text-cyan-100">@Model.StatusMessage</div>
+        <div class="rounded-2xl border border-skynet-accent/30 bg-skynet-accent/10 px-5 py-3 text-sm font-bold text-blue-200">@Model.StatusMessage</div>
     }
 
-    <section class="rounded-lg border border-zinc-800 bg-zinc-900/70 p-6">
+    <section class="rounded-2xl border border-skynet-border bg-skynet-card p-6">
         <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div class="flex min-w-0 items-start gap-5">
-                <img src="/api/users/@user.SteamId/avatar" alt="" class="h-24 w-24 shrink-0 rounded-lg border border-zinc-700 bg-zinc-950 object-cover" />
+                <img src="/api/users/@user.SteamId/avatar" alt="" class="h-24 w-24 shrink-0 rounded-xl border border-skynet-border bg-skynet-black object-cover" />
                 <div class="min-w-0">
-                    <p class="text-[10px] font-black uppercase tracking-[0.22em] text-cyan-400">Perfil</p>
+                    <p class="text-[10px] font-black uppercase tracking-[0.22em] text-skynet-accent">Profile</p>
                     <h1 class="mt-2 truncate text-3xl font-black text-white">@user.PersonaName</h1>
-                    <p class="mt-2 text-sm text-zinc-400">SteamID @user.SteamId</p>
-                    <p class="mt-1 text-sm text-zinc-400">AccountID @user.AccountId - App @user.AppId</p>
+                    <p class="mt-2 text-sm text-skynet-muted">SteamID @user.SteamId</p>
+                    <p class="mt-1 text-sm text-skynet-muted">AccountID @user.AccountId - App @user.AppId</p>
                     <div class="mt-4 flex flex-wrap gap-2">
-                        <span class="rounded border border-zinc-700 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-zinc-300">@relationLabel</span>
-                        <span class="rounded border border-zinc-700 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-cyan-400">Nivel @user.PlayerLevel</span>
+                        <span class="rounded border border-skynet-border px-3 py-1 text-[10px] font-black uppercase tracking-widest text-zinc-300">@relationLabel</span>
+                        <span class="rounded border border-skynet-accent/30 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-skynet-accent">Level @user.PlayerLevel</span>
                     </div>
                 </div>
             </div>
@@ -42,21 +42,21 @@
                     {
                         <form method="post" asp-page-handler="Request">
                             <input type="hidden" asp-for="SteamId" value="@user.SteamId" />
-                            <button class="rounded-lg bg-cyan-600 px-4 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-cyan-500">Agregar amigo</button>
+                            <button class="rounded-lg bg-skynet-accent px-4 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-blue-600 transition-all">Add friend</button>
                         </form>
                     }
                     else if (relationship == 2)
                     {
                         <form method="post" asp-page-handler="Accept">
                             <input type="hidden" asp-for="SteamId" value="@user.SteamId" />
-                            <button class="rounded-lg bg-cyan-600 px-4 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-cyan-500">Aceptar solicitud</button>
+                            <button class="rounded-lg bg-skynet-accent px-4 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-blue-600 transition-all">Accept request</button>
                         </form>
                     }
                     @if (relationship == 2 || relationship == 3 || relationship == 4)
                     {
                         <form method="post" asp-page-handler="Remove">
                             <input type="hidden" asp-for="SteamId" value="@user.SteamId" />
-                            <button class="rounded-lg border border-red-500/30 px-4 py-3 text-xs font-black uppercase tracking-widest text-red-300 hover:bg-red-500/10">Quitar</button>
+                            <button class="rounded-lg border border-red-500/30 px-4 py-3 text-xs font-black uppercase tracking-widest text-red-300 hover:bg-red-500/10 transition-all">Remove</button>
                         </form>
                     }
                 </div>
@@ -65,35 +65,35 @@
     </section>
 
     <section class="grid gap-5 xl:grid-cols-[1fr_0.8fr]">
-        <div class="rounded-lg border border-zinc-800 bg-zinc-900">
-            <div class="border-b border-zinc-800 px-5 py-4">
+        <div class="rounded-2xl border border-skynet-border bg-skynet-card">
+            <div class="border-b border-skynet-border px-5 py-4">
                 <h2 class="text-lg font-black text-white">Stats</h2>
-                <p class="text-xs text-zinc-500">Valores guardados en el backend para este usuario.</p>
+                <p class="text-xs text-skynet-muted">Saved values in the backend for this user.</p>
             </div>
-            <div class="divide-y divide-zinc-800">
+            <div class="divide-y divide-skynet-border">
                 @if (stats.Stats.Count == 0)
                 {
-                    <p class="px-5 py-6 text-sm text-zinc-500">No hay stats guardados.</p>
+                    <p class="px-5 py-6 text-sm text-skynet-muted">No saved stats.</p>
                 }
                 @foreach (var stat in stats.Stats.OrderBy(stat => stat.Name))
                 {
                     <div class="flex items-center justify-between px-5 py-3">
                         <span class="text-sm font-semibold text-zinc-200">@stat.Name</span>
-                        <span class="font-mono text-sm text-cyan-300">@stat.Data</span>
+                        <span class="font-mono text-sm text-skynet-accent">@stat.Data</span>
                     </div>
                 }
             </div>
         </div>
 
-        <div class="rounded-lg border border-zinc-800 bg-zinc-900">
-            <div class="border-b border-zinc-800 px-5 py-4">
+        <div class="rounded-2xl border border-skynet-border bg-skynet-card">
+            <div class="border-b border-skynet-border px-5 py-4">
                 <h2 class="text-lg font-black text-white">Achievements</h2>
-                <p class="text-xs text-zinc-500">Resumen de progreso persistido.</p>
+                <p class="text-xs text-skynet-muted">Persisted progress summary.</p>
             </div>
-            <div class="divide-y divide-zinc-800">
+            <div class="divide-y divide-skynet-border">
                 @if (stats.Achievements.Count == 0)
                 {
-                    <p class="px-5 py-6 text-sm text-zinc-500">No hay achievements guardados.</p>
+                    <p class="px-5 py-6 text-sm text-skynet-muted">No saved achievements.</p>
                 }
                 @foreach (var achievement in stats.Achievements.OrderBy(achievement => achievement.Name))
                 {
@@ -101,10 +101,10 @@
                     <div class="px-5 py-4">
                         <div class="flex items-center justify-between gap-3">
                             <p class="truncate text-sm font-bold text-white">@achievement.Name</p>
-                            <span class="rounded border border-zinc-700 px-2 py-0.5 text-[10px] font-black uppercase tracking-widest @(achievement.Earned ? "text-cyan-400" : "text-zinc-500")">@(achievement.Earned ? "OK" : "LOCK")</span>
+                            <span class="rounded border border-skynet-border px-2 py-0.5 text-[10px] font-black uppercase tracking-widest @(achievement.Earned ? "text-skynet-accent" : "text-skynet-muted")">@(achievement.Earned ? "OK" : "LOCK")</span>
                         </div>
-                        <div class="mt-3 h-1.5 rounded bg-zinc-800">
-                            <div class="h-1.5 rounded bg-cyan-500" style="width:@progress%"></div>
+                        <div class="mt-3 h-1.5 rounded bg-skynet-dark">
+                            <div class="h-1.5 rounded bg-skynet-accent" style="width:@progress%"></div>
                         </div>
                     </div>
                 }

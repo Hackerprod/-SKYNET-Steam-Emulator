@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Threading;
 using SKYNET.Callback;
 using SKYNET.Managers;
 using SKYNET.Steamworks.Interfaces;
@@ -13,6 +14,15 @@ namespace SKYNET.Steamworks.Implementation
     public class SteamNetworkingUtils : ISteamInterface
     {
         public static SteamNetworkingUtils Instance;
+        private IntPtr _connectionStatusCallback;
+        private IntPtr _authenticationStatusCallback;
+        private IntPtr _relayNetworkStatusCallback;
+        private IntPtr _fakeIpCallback;
+        private IntPtr _messagesSessionRequestCallback;
+        private IntPtr _messagesSessionFailedCallback;
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate void NativeStatusCallback(IntPtr status);
 
         public SteamNetworkingUtils()
         {
@@ -30,23 +40,25 @@ namespace SKYNET.Steamworks.Implementation
         public void InitRelayNetworkAccess()
         {
             Write("InitRelayNetworkAccess");
-            SteamNetworkingSocketsSerialized.EnsureSecureCertPatcherStarted("InitRelayNetworkAccess");
+            if (SteamNetworkingSocketsSerialized.SecureCertMode)
+            {
+                SteamNetworkingSocketsSerialized.EnsureSecureCertPatcherStarted("InitRelayNetworkAccess");
+            }
+            else
+            {
+                SteamNetworkingSocketsSerialized.QueueCurrentNetworkStatusCallbacks();
+            }
         }
 
         public int GetRelayNetworkStatus(IntPtr pDetails)
         {
             Write("GetRelayNetworkStatus");
-            SteamNetworkingSocketsSerialized.EnsureSecureCertPatcherStarted("GetRelayNetworkStatus");
-            SteamRelayNetworkStatus_t data = new SteamRelayNetworkStatus_t()
+            if (SteamNetworkingSocketsSerialized.SecureCertMode)
             {
-                m_eAvail = ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Current,
-                m_bPingMeasurementInProgress = 0,
-                m_eAvailAnyRelay = ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Current,
-                m_eAvailNetworkConfig = ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Current,
-                DebugMsg = new byte[256]
-            };
-            byte[] message = System.Text.Encoding.UTF8.GetBytes("OK");
-            Array.Copy(message, data.DebugMsg, message.Length);
+                SteamNetworkingSocketsSerialized.EnsureSecureCertPatcherStarted("GetRelayNetworkStatus");
+            }
+
+            SteamRelayNetworkStatus_t data = SteamNetworkingSocketsSerialized.BuildRelayNetworkStatus();
             CallbackManager.AddCallbackResult(data);
             if (pDetails != IntPtr.Zero)
             {
@@ -90,7 +102,14 @@ namespace SKYNET.Steamworks.Implementation
         public bool CheckPingDataUpToDate(float flMaxAgeSeconds)
         {
             Write("CheckPingDataUpToDate");
-            SteamNetworkingSocketsSerialized.EnsureSecureCertPatcherStarted("CheckPingDataUpToDate");
+            if (SteamNetworkingSocketsSerialized.SecureCertMode)
+            {
+                SteamNetworkingSocketsSerialized.EnsureSecureCertPatcherStarted("CheckPingDataUpToDate");
+            }
+            else
+            {
+                SteamNetworkingSocketsSerialized.QueueCurrentNetworkStatusCallbacks();
+            }
             return true;
         }
 
@@ -137,68 +156,96 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool SetGlobalConfigValueInt32(int eValue, Int32 val)
         {
-            Write("SetGlobalConfigValueInt32");
-            return false;
+            Write($"SetGlobalConfigValueInt32 (Value={eValue}, Data={val})");
+            return SetConfigValue(eValue, (int)NetConfigScope.Global, IntPtr.Zero, (int)ESteamNetworkingConfigDataType.Int32, IntPtr.Zero);
         }
 
         public bool SetGlobalConfigValueFloat(int eValue, float val)
         {
-            Write("SetGlobalConfigValueFloat");
-            return false;
+            Write($"SetGlobalConfigValueFloat (Value={eValue}, Data={val})");
+            return SetConfigValue(eValue, (int)NetConfigScope.Global, IntPtr.Zero, (int)ESteamNetworkingConfigDataType.Float, IntPtr.Zero);
         }
 
         public bool SetGlobalConfigValueString(int eValue, string val)
         {
-            Write("SetGlobalConfigValueString");
-            return false;
+            Write($"SetGlobalConfigValueString (Value={eValue}, Data={val})");
+            return SetConfigValue(eValue, (int)NetConfigScope.Global, IntPtr.Zero, (int)ESteamNetworkingConfigDataType.String, IntPtr.Zero);
         }
 
         public bool SetConnectionConfigValueInt32(HSteamNetConnection hConn, int eValue, Int32 val)
         {
-            Write("SetConnectionConfigValueInt32");
-            return false;
+            Write($"SetConnectionConfigValueInt32 (Conn={hConn}, Value={eValue}, Data={val})");
+            return SetConfigValue(eValue, (int)NetConfigScope.Connection, new IntPtr((int)hConn), (int)ESteamNetworkingConfigDataType.Int32, IntPtr.Zero);
         }
 
         public bool SetConnectionConfigValueFloat(HSteamNetConnection hConn, int eValue, float val)
         {
-            Write("SetConnectionConfigValueFloat");
-            return false;
+            Write($"SetConnectionConfigValueFloat (Conn={hConn}, Value={eValue}, Data={val})");
+            return SetConfigValue(eValue, (int)NetConfigScope.Connection, new IntPtr((int)hConn), (int)ESteamNetworkingConfigDataType.Float, IntPtr.Zero);
         }
 
         public bool SetGlobalConfigValuePtr(int eValue, IntPtr val)
         {
-            Write("SetGlobalConfigValuePtr");
-            return false;
+            Write($"SetGlobalConfigValuePtr (Value={eValue}, Ptr=0x{val.ToInt64():X})");
+            return SetPointerConfigValue(eValue, val);
         }
 
         public bool SetConnectionConfigValueString(HSteamNetConnection hConn, int eValue, string val)
         {
-            Write("SetConnectionConfigValueString");
-            return false;
+            Write($"SetConnectionConfigValueString (Conn={hConn}, Value={eValue}, Data={val})");
+            return SetConfigValue(eValue, (int)NetConfigScope.Connection, new IntPtr((int)hConn), (int)ESteamNetworkingConfigDataType.String, IntPtr.Zero);
         }
 
         public bool SetConfigValue(int eValue, int eScopeType, IntPtr scopeObj, int eDataType, IntPtr pArg)
         {
-            Write("SetConfigValue");
-            return false;
+            Write($"SetConfigValue (Value={eValue}, Scope={eScopeType}, DataType={eDataType}, Arg=0x{pArg.ToInt64():X})");
+            if (eDataType == (int)ESteamNetworkingConfigDataType.Ptr && IsGlobalCallbackConfig(eValue))
+            {
+                IntPtr callback = IntPtr.Zero;
+                if (pArg != IntPtr.Zero)
+                {
+                    try
+                    {
+                        // Steamworks passes a pointer to the function pointer for Ptr config values.
+                        callback = Marshal.ReadIntPtr(pArg);
+                    }
+                    catch (Exception ex)
+                    {
+                        Write($"SetConfigValue pointer read failed: {ex.Message}");
+                        return false;
+                    }
+                }
+
+                return SetPointerConfigValue(eValue, callback);
+            }
+
+            if (eValue == (int)ESteamNetworkingConfigValue.Callback_AuthStatusChanged ||
+                eValue == (int)ESteamNetworkingConfigValue.Callback_RelayNetworkStatusChanged ||
+                eValue == (int)ESteamNetworkingConfigValue.IP_AllowWithoutAuth ||
+                eValue == (int)ESteamNetworkingConfigValue.Unencrypted)
+            {
+                SteamNetworkingSocketsSerialized.QueueCurrentNetworkStatusCallbacks();
+            }
+
+            return true;
         }
 
         public bool SetConfigValueStruct(IntPtr opt, int eScopeType, IntPtr scopeObj)
         {
             Write("SetConfigValueStruct");
-            return false;
+            return true;
         }
 
         internal bool SetGlobalCallback_SteamNetConnectionStatusChanged(IntPtr fnCallback)
         {
-            Write("SetGlobalCallback_SteamNetConnectionStatusChanged");
-            return true;
+            Write($"SetGlobalCallback_SteamNetConnectionStatusChanged (Ptr=0x{fnCallback.ToInt64():X})");
+            return SetPointerConfigValue((int)ESteamNetworkingConfigValue.Callback_ConnectionStatusChanged, fnCallback);
         }
 
         internal bool SetGlobalCallback_SteamNetAuthenticationStatusChanged(IntPtr fnCallback)
         {
-            Write("SetGlobalCallback_SteamNetAuthenticationStatusChanged");
-            return true;
+            Write($"SetGlobalCallback_SteamNetAuthenticationStatusChanged (Ptr=0x{fnCallback.ToInt64():X})");
+            return SetPointerConfigValue((int)ESteamNetworkingConfigValue.Callback_AuthStatusChanged, fnCallback);
         }
 
         public int GetConfigValue(int eValue, int eScopeType, IntPtr scopeObj, int pOutDataType, IntPtr pResult, IntPtr cbResult)
@@ -209,20 +256,117 @@ namespace SKYNET.Steamworks.Implementation
 
         internal bool SetGlobalCallback_MessagesSessionRequest(IntPtr fnCallback)
         {
-            Write("SetGlobalCallback_MessagesSessionRequest");
-            return true;
+            Write($"SetGlobalCallback_MessagesSessionRequest (Ptr=0x{fnCallback.ToInt64():X})");
+            return SetPointerConfigValue((int)ESteamNetworkingConfigValue.Callback_MessagesSessionRequest, fnCallback);
         }
 
         internal bool SetGlobalCallback_MessagesSessionFailed(IntPtr fnCallback)
         {
-            Write("SetGlobalCallback_MessagesSessionFailed");
-            return true;
+            Write($"SetGlobalCallback_MessagesSessionFailed (Ptr=0x{fnCallback.ToInt64():X})");
+            return SetPointerConfigValue((int)ESteamNetworkingConfigValue.Callback_MessagesSessionFailed, fnCallback);
         }
 
         internal bool SetGlobalCallback_SteamRelayNetworkStatusChanged(IntPtr fnCallback)
         {
-            Write("SetGlobalCallback_SteamRelayNetworkStatusChanged");
-            return true;
+            Write($"SetGlobalCallback_SteamRelayNetworkStatusChanged (Ptr=0x{fnCallback.ToInt64():X})");
+            return SetPointerConfigValue((int)ESteamNetworkingConfigValue.Callback_RelayNetworkStatusChanged, fnCallback);
+        }
+
+        internal void QueueNativeNetworkStatusCallbacks(int delayMs = 0)
+        {
+            var authStatus = SteamNetworkingSocketsSerialized.BuildAuthenticationStatus();
+            var relayStatus = SteamNetworkingSocketsSerialized.BuildRelayNetworkStatus();
+
+            ThreadPool.QueueUserWorkItem(_ =>
+            {
+                if (delayMs > 0)
+                {
+                    Thread.Sleep(delayMs);
+                }
+
+                InvokeNativeCallback(_authenticationStatusCallback, authStatus, nameof(SteamNetAuthenticationStatus_t));
+                InvokeNativeCallback(_relayNetworkStatusCallback, relayStatus, nameof(SteamRelayNetworkStatus_t));
+            });
+        }
+
+        private bool SetPointerConfigValue(int eValue, IntPtr callback)
+        {
+            switch ((ESteamNetworkingConfigValue)eValue)
+            {
+                case ESteamNetworkingConfigValue.Callback_ConnectionStatusChanged:
+                    _connectionStatusCallback = callback;
+                    return true;
+                case ESteamNetworkingConfigValue.Callback_AuthStatusChanged:
+                    _authenticationStatusCallback = callback;
+                    QueueNativeNetworkStatusCallbacks();
+                    return true;
+                case ESteamNetworkingConfigValue.Callback_RelayNetworkStatusChanged:
+                    _relayNetworkStatusCallback = callback;
+                    QueueNativeNetworkStatusCallbacks();
+                    return true;
+                case ESteamNetworkingConfigValue.Callback_FakeIPResult:
+                    _fakeIpCallback = callback;
+                    return true;
+                case ESteamNetworkingConfigValue.Callback_MessagesSessionRequest:
+                    _messagesSessionRequestCallback = callback;
+                    return true;
+                case ESteamNetworkingConfigValue.Callback_MessagesSessionFailed:
+                    _messagesSessionFailedCallback = callback;
+                    return true;
+                default:
+                    return true;
+            }
+        }
+
+        private static bool IsGlobalCallbackConfig(int eValue)
+        {
+            return eValue == (int)ESteamNetworkingConfigValue.Callback_ConnectionStatusChanged ||
+                   eValue == (int)ESteamNetworkingConfigValue.Callback_AuthStatusChanged ||
+                   eValue == (int)ESteamNetworkingConfigValue.Callback_RelayNetworkStatusChanged ||
+                   eValue == (int)ESteamNetworkingConfigValue.Callback_FakeIPResult ||
+                   eValue == (int)ESteamNetworkingConfigValue.Callback_MessagesSessionRequest ||
+                   eValue == (int)ESteamNetworkingConfigValue.Callback_MessagesSessionFailed;
+        }
+
+        private void InvokeNativeCallback<T>(IntPtr callback, T data, string name) where T : struct
+        {
+            if (callback == IntPtr.Zero)
+            {
+                return;
+            }
+
+            IntPtr ptr = IntPtr.Zero;
+            try
+            {
+                ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(T)));
+                Marshal.StructureToPtr(data, ptr, false);
+                Marshal.GetDelegateForFunctionPointer<NativeStatusCallback>(callback)(ptr);
+                Write($"Native {name} callback invoked");
+            }
+            catch (Exception ex)
+            {
+                Write($"Native {name} callback failed: {ex.Message}");
+            }
+            finally
+            {
+                if (ptr != IntPtr.Zero)
+                {
+                    Marshal.DestroyStructure(ptr, typeof(T));
+                    Marshal.FreeHGlobal(ptr);
+                }
+            }
+        }
+
+        public int GetIPv4FakeIPType(uint nIPv4)
+        {
+            Write($"GetIPv4FakeIPType ({nIPv4})");
+            return (int)SteamNetworkingFakeIPType.NotFake;
+        }
+
+        public int GetRealIdentityForFakeIP(IntPtr fakeIP, IntPtr pOutRealIdentity)
+        {
+            Write("GetRealIdentityForFakeIP");
+            return (int)EResult.k_EResultNoMatch;
         }
 
         public bool GetConfigValueInfo(int eValue, string pOutName, int pOutDataType, int pOutScope, int pOutNextValue)

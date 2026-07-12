@@ -26,6 +26,13 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
     public static Func<ulong, bool>? MatchSnapshotDeleteSink { get; set; }
     public static Func<ulong, bool>? UserExistsProvider { get; set; }
     public static Func<ulong, bool>? UserOnlineProvider { get; set; }
+    public static Func<string, string, string, string, string>? GameServerConnectIpResolver { get; set; }
+    public static Func<string, string, string, string, string>? GameServerConnectIpsResolver { get; set; }
+    public static Func<ulong, string, DotaDedicatedServerSupervisor.DedicatedLaunchResult>? DedicatedServerStart { get; set; }
+    public static Func<ulong, uint, string>? DedicatedServerClaim { get; set; }
+    public static Func<uint, bool>? DedicatedServerPortReserved { get; set; }
+    public static Func<ulong, string>? DedicatedServerStatus { get; set; }
+    public static Func<ulong, string, bool>? DedicatedServerRelease { get; set; }
     public static DotaStatsStore? StatsStore { get; set; }
     public static DotaPartyStore? PartyStore { get; set; }
     public static DotaLobbyInviteStore? LobbyInviteStore { get; set; }
@@ -181,6 +188,53 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
     public string BodyBase64 => Encode(_requestBody);
     public string BodyHex => Convert.ToHexString(_requestBody);
     public SkyNetGCExchangeResponseDto Response { get; }
+
+    public string DotaResolveGameServerConnectIp(string publicIpValue, string privateIpValue, string fallbackIp)
+    {
+        return GameServerConnectIpResolver?.Invoke(ClientIp, publicIpValue, privateIpValue, fallbackIp)
+            ?? (string.IsNullOrWhiteSpace(fallbackIp) ? "127.0.0.1" : fallbackIp);
+    }
+
+    // Space-separated list (up to two) of host addresses reachable across the
+    // different interfaces the dedicated server binds (0.0.0.0). The Dota connect
+    // field carries two endpoints, so WiFi + ZeroTier peers each get a routable one.
+    public string DotaGetHostConnectIps(string publicIpValue, string privateIpValue, string fallbackIp)
+    {
+        return GameServerConnectIpsResolver?.Invoke(ClientIp, publicIpValue, privateIpValue, fallbackIp)
+            ?? DotaResolveGameServerConnectIp(publicIpValue, privateIpValue, fallbackIp);
+    }
+
+    public string DotaStartDedicatedServer(string lobbyId, string map)
+    {
+        var result = DedicatedServerStart?.Invoke(ParseUInt64(lobbyId), map);
+        if (result == null || !result.Started)
+        {
+            Console.WriteLine($"[SKYNET][dedicated] start failed lobby={lobbyId}: {result?.Error ?? "supervisor unavailable"}");
+            return "0";
+        }
+
+        return result.Port.ToString(System.Globalization.CultureInfo.InvariantCulture);
+    }
+
+    public string DotaClaimDedicatedServer(string gameServerSteamId, uint reportedPort)
+    {
+        return DedicatedServerClaim?.Invoke(ParseUInt64(gameServerSteamId), reportedPort) ?? "0";
+    }
+
+    public bool DotaDedicatedServerPortReserved(uint reportedPort)
+    {
+        return DedicatedServerPortReserved?.Invoke(reportedPort) ?? false;
+    }
+
+    public string DotaDedicatedServerStatus(string lobbyId)
+    {
+        return DedicatedServerStatus?.Invoke(ParseUInt64(lobbyId)) ?? "not_available";
+    }
+
+    public bool DotaReleaseDedicatedServer(string lobbyId, string reason)
+    {
+        return DedicatedServerRelease?.Invoke(ParseUInt64(lobbyId), reason ?? string.Empty) ?? false;
+    }
 
     public static SkyNetGCExchangeResponseDto Poll(GameCoordinatorContext context)
     {
@@ -1069,6 +1123,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
         uint state,
         uint gameState,
         uint gameStartTime,
+        bool dedicated,
         string players)
     {
         if (MatchSnapshotSink == null)
@@ -1085,6 +1140,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
             State = state,
             GameState = gameState,
             GameStartTime = gameStartTime,
+            Dedicated = dedicated,
             UpdatedAt = DateTime.UtcNow,
             Players = ParseSnapshotPlayers(players)
         };

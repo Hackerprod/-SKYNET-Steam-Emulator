@@ -10,110 +10,120 @@
     var incomingFriendRequests = currentUser == null ? 0 : SteamState.GetIncomingFriendRequests(token ?? string.Empty).Count;
     var initial = string.IsNullOrWhiteSpace(snapshot.Profile.DisplayName) ? "U" : snapshot.Profile.DisplayName[..1].ToUpperInvariant();
     Func<string, string> navClass = prefix => currentPage.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
-        ? "border-cyan-500 bg-cyan-500/10 text-white"
-        : "border-zinc-800 bg-zinc-950 text-zinc-400 hover:border-zinc-700 hover:text-white";
+        ? "text-skynet-accent bg-skynet-accent/5"
+        : "text-skynet-muted hover:text-white hover:bg-white/5";
 }
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - SKYNET server</title>
+    <title>@ViewData["Title"] - SKYNETEMU</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: { zinc: { 950: '#09090b' } }
+                    colors: {
+                        skynet: {
+                            black: '#0a0a0a',
+                            dark: '#111111',
+                            card: '#161616',
+                            border: '#222222',
+                            accent: '#3b82f6',
+                            muted: '#888888'
+                        },
+                        zinc: {
+                            500: '#888888',
+                            600: '#555555',
+                            700: '#333333',
+                            800: '#222222',
+                            900: '#161616',
+                            950: '#0a0a0a'
+                        },
+                        cyan: {
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb'
+                        }
+                    }
                 }
             }
         };
     </script>
+    <style>
+        .nav-link { transition: all 0.2s; }
+        .nav-link:hover { color: #fff; background: rgba(255,255,255,0.05); }
+        .nav-link.active { color: #3b82f6; background: rgba(59, 130, 246, 0.05); }
+    </style>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/SKYNET_server.styles.css" asp-append-version="true" />
 </head>
-<body class="min-h-screen bg-zinc-950 text-zinc-100 antialiased">
+<body class="flex flex-col h-screen overflow-hidden bg-skynet-black text-gray-200 antialiased">
     @if (useAppShell)
     {
-        <div class="flex min-h-screen">
-            <aside class="hidden w-72 shrink-0 border-r border-zinc-800 bg-zinc-950 lg:flex lg:flex-col">
-                <div class="border-b border-zinc-800 px-5 py-5">
-                    <div class="flex items-center gap-3">
-                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-600 text-sm font-black text-white">SK</div>
-                        <div>
-                            <h1 class="text-lg font-black leading-none">SKYNET</h1>
-                            <p class="mt-1 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Steam Emulator</p>
-                        </div>
+        <!-- Header -->
+        <header class="h-16 bg-skynet-black border-b border-skynet-border flex items-center justify-between px-8 z-20 shrink-0">
+            <div class="flex items-center space-x-12">
+                <a asp-page="/Index" class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-white rounded flex items-center justify-center">
+                        <i class="fas fa-microchip text-skynet-black text-lg"></i>
                     </div>
-                </div>
-
-                <nav class="flex-1 space-y-2 p-4">
-                    <a asp-page="/Index" class="flex items-center justify-between rounded-lg border px-3 py-3 text-sm font-bold transition @navClass("/Index")">
-                        <span>Dashboard</span>
-                        <span class="text-xs text-zinc-500">@snapshot.Metrics.Count</span>
-                    </a>
-                    <a asp-page="/Friends/Index" class="flex items-center justify-between rounded-lg border px-3 py-3 text-sm font-bold transition @navClass("/Friends")">
-                        <span>Amigos</span>
-                        <span class="text-xs text-zinc-500">@snapshot.Friends.Count</span>
-                    </a>
-                    <a asp-page="/Users/Index" class="flex items-center justify-between rounded-lg border px-3 py-3 text-sm font-bold transition @navClass("/Users")">
-                        <span>Users</span>
-                        <span class="text-xs @(incomingFriendRequests > 0 ? "text-cyan-400" : "text-zinc-500")">@(incomingFriendRequests > 0 ? incomingFriendRequests : snapshot.Profile.LibraryCount)</span>
-                    </a>
-                    <a asp-page="/Games/Index" class="flex items-center justify-between rounded-lg border px-3 py-3 text-sm font-bold transition @navClass("/Games")">
-                        <span>Juegos</span>
-                        <span class="text-xs text-zinc-500">@snapshot.Games.Count</span>
-                    </a>
-                    <a asp-page="/Achievements/Index" class="flex items-center justify-between rounded-lg border px-3 py-3 text-sm font-bold transition @navClass("/Achievements")">
-                        <span>Stats</span>
-                        <span class="text-xs text-zinc-500">@snapshot.Achievements.Count</span>
-                    </a>
+                    <span class="font-bold tracking-tighter text-lg">SKYNET<span class="text-skynet-accent">EMU</span></span>
+                </a>
+                <nav class="flex space-x-1 h-16">
+                    <a asp-page="/Index" class="nav-link flex items-center px-4 text-xs font-bold uppercase tracking-widest @navClass("/Index")">Dashboard</a>
+                    <a asp-page="/Friends/Index" class="nav-link flex items-center px-4 text-xs font-bold uppercase tracking-widest @navClass("/Friends")">Friends</a>
+                    <a asp-page="/Users/Index" class="nav-link flex items-center px-4 text-xs font-bold uppercase tracking-widest @navClass("/Users")">Users</a>
+                    <a asp-page="/Games/Index" class="nav-link flex items-center px-4 text-xs font-bold uppercase tracking-widest @navClass("/Games")">Games</a>
+                    <a asp-page="/Achievements/Index" class="nav-link flex items-center px-4 text-xs font-bold uppercase tracking-widest @navClass("/Achievements")">Stats</a>
                     @if (isAdmin)
                     {
-                        <a asp-page="/Admin/Index" class="flex items-center justify-between rounded-lg border px-3 py-3 text-sm font-bold transition @navClass("/Admin")">
-                            <span>Admin</span>
-                            <span class="text-xs text-cyan-400">root</span>
-                        </a>
+                        <a asp-page="/Admin/Index" class="nav-link flex items-center px-4 text-xs font-bold uppercase tracking-widest @navClass("/Admin")">Admin</a>
                     }
                 </nav>
-
-                <div class="border-t border-zinc-800 p-4">
-                    <div class="flex items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900 p-3">
-                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-800 text-sm font-black">@initial</div>
-                        <div class="min-w-0 flex-1">
-                            <p class="truncate text-sm font-bold text-white">@snapshot.Profile.DisplayName</p>
-                            <p class="text-[10px] uppercase tracking-widest text-zinc-500">@snapshot.Profile.Status</p>
-                        </div>
-                    </div>
-                </div>
-            </aside>
-
-            <div class="flex min-w-0 flex-1 flex-col">
-                <header class="flex items-center justify-between border-b border-zinc-800 bg-zinc-950/95 px-5 py-4">
-                    <div>
-                        <p class="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">@ViewData["Title"]</p>
-                        <p class="mt-1 text-sm text-zinc-400">Estado persistente local del emulador.</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        @if (currentUser == null)
-                        {
-                            <a asp-page="/Auth/Login" class="rounded-lg bg-cyan-600 px-4 py-2 text-xs font-black uppercase tracking-widest text-white hover:bg-cyan-500">Login</a>
-                        }
-                        else
-                        {
-                            <a asp-page="/Auth/Logout" class="rounded-lg border border-zinc-700 px-4 py-2 text-xs font-black uppercase tracking-widest text-zinc-300 hover:text-white">Logout</a>
-                        }
-                    </div>
-                </header>
-                <main class="flex-1 overflow-y-auto p-5">
-                    @RenderBody()
-                </main>
             </div>
-        </div>
+            <div class="flex items-center space-x-6">
+                @if (currentUser == null)
+                {
+                    <a asp-page="/Auth/Login" class="bg-white text-skynet-black font-bold py-2 px-4 rounded-lg text-xs uppercase tracking-widest hover:bg-gray-200 transition-all duration-200">Login</a>
+                }
+                else
+                {
+                    <div class="text-right hidden md:block">
+                        <p class="text-xs font-bold">@snapshot.Profile.DisplayName</p>
+                        <p class="text-[10px] text-skynet-muted uppercase tracking-widest">Online</p>
+                    </div>
+                    <a asp-page="/Auth/Logout" class="w-10 h-10 rounded-lg border border-skynet-border bg-skynet-card flex items-center justify-center text-skynet-muted hover:text-white hover:border-skynet-accent transition-all" title="Sign out">
+                        <i class="fas fa-right-from-bracket text-sm"></i>
+                    </a>
+                }
+            </div>
+        </header>
+
+        <!-- Main -->
+        <main class="flex-1 overflow-y-auto p-8">
+            <div class="max-w-7xl mx-auto space-y-8">
+                @RenderBody()
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="h-8 bg-skynet-black border-t border-skynet-border flex items-center justify-between px-6 text-[10px] text-skynet-muted uppercase tracking-[0.2em] shrink-0">
+            <div class="flex items-center space-x-4">
+                <span>SKYNET_OS_v2.0</span>
+                <span class="text-green-500">&#9679; GC_CONNECTED</span>
+            </div>
+            <span>SKYNET_NETWORK_ENCRYPTION_ACTIVE</span>
+        </footer>
     }
     else
     {

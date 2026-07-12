@@ -465,6 +465,7 @@ public sealed partial class SteamApiStateService
 
         var now = DateTime.UtcNow;
         var session = _sessions.Values
+            .Concat(_state.WebSessions.Values)
             .Where(s => s.WebSession
                 && string.Equals(s.RemoteIp, clientIp, StringComparison.Ordinal)
                 && s.ExpiresAtUtc > now)

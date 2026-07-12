@@ -389,7 +389,15 @@ namespace SKYNET.Managers
                 {
                     try
                     {
-                        Write($"Dispatch CallResult {state.Handle} {state.Result.Data.CallbackType} Size={state.Result.Data.DataSize}");
+                        var expectedSize = registration.GetCallbackSizeBytes();
+                        if (state.Result.Data is SteamNetworkingSocketsCert_t cert)
+                        {
+                            Write($"Dispatch CallResult {state.Handle} {state.Result.Data.CallbackType} Size={state.Result.Data.DataSize} Expected={expectedSize} Result={(int)cert.m_eResult} Cert={cert.m_cbCert} Signature={cert.m_cbSignature} PrivateKey={cert.m_cbPrivKey} CaKeyId={cert.m_caKeyID:X16}");
+                        }
+                        else
+                        {
+                            Write($"Dispatch CallResult {state.Handle} {state.Result.Data.CallbackType} Size={state.Result.Data.DataSize} Expected={expectedSize}");
+                        }
                         registration.Run(state.Result.Data, state.Result.IOFailure, state.Handle);
                         Write($"Dispatched CallResult {state.Handle} {state.Result.Data.CallbackType}");
                     }

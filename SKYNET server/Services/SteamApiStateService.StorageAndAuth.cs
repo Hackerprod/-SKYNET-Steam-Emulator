@@ -191,13 +191,17 @@ public sealed partial class SteamApiStateService
         lock (_sync)
         {
             var server = request.Server ?? new SkyNetGameServerDto();
-            var publicIp = server.IP != 0 ? server.IP : ToUInt32(IPAddress.Loopback);
+            var publicIp = ResolveGameServerPublicIp(server.IP);
+            server.IP = publicIp;
+            var serverId = server.SteamId != 0 ? server.SteamId : (ulong)publicIp;
+            server.SteamId = serverId;
             server.Flags &= ~ServerFlagSecure;
             server.GameTags = NormalizeGameServerTags(server.GameTags);
 
-            _state.GameServers[(ulong)publicIp] = server;
+            _state.GameServers[serverId] = server;
+            _dotaDedicatedServers.ObserveRegistration(serverId, server);
             SaveState();
-            return new SkyNetGameServerResultDto { Success = true, PublicIP = publicIp, Secure = 0, SteamId = (ulong)publicIp };
+            return new SkyNetGameServerResultDto { Success = true, PublicIP = publicIp, Secure = 0, SteamId = serverId };
         }
     }
 
@@ -211,9 +215,14 @@ public sealed partial class SteamApiStateService
     {
         lock (_sync)
         {
+            var publicIp = ResolveGameServerPublicIp(server.IP);
+            server.IP = publicIp;
+            var serverId = server.SteamId != 0 ? server.SteamId : (ulong)publicIp;
+            server.SteamId = serverId;
             server.Flags &= ~ServerFlagSecure;
             server.GameTags = NormalizeGameServerTags(server.GameTags);
-            _state.GameServers[(ulong)(server.IP == 0 ? ToUInt32(IPAddress.Loopback) : server.IP)] = server;
+            _state.GameServers[serverId] = server;
+            _dotaDedicatedServers.ObserveRegistration(serverId, server);
             SaveState();
             return true;
         }
@@ -225,7 +234,7 @@ public sealed partial class SteamApiStateService
     {
         lock (_sync)
         {
-            var ip = _state.GameServers.Values.LastOrDefault()?.IP ?? ToUInt32(IPAddress.Loopback);
+            var ip = ResolveGameServerPublicIp(_state.GameServers.Values.LastOrDefault()?.IP ?? 0);
             return new SkyNetGameServerPublicIpDto { PublicIP = ip };
         }
     }

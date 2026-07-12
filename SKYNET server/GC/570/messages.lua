@@ -85,6 +85,7 @@ MSG = {
     GCPracticeLobbySetTeamSlot = 7047,
     GCLiveScoreboardUpdate = 7057,
     GCPracticeLobbyResponse = 7055,
+    GCToClientBroadcastNotification = 7056,
     GCPracticeLobbyJoinResponse = 7113,
     GCApplyTeamToPracticeLobby = 7142,
     GCMatchmakingStatsRequest = 7197,

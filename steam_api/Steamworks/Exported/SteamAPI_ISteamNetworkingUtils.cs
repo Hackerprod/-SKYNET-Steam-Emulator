@@ -25,7 +25,7 @@ namespace SKYNET.Steamworks.Exported
         public static void SteamAPI_ISteamNetworkingUtils_InitRelayNetworkAccess(IntPtr _)
         {
             Write("SteamAPI_ISteamNetworkingUtils_InitRelayNetworkAccess");
-            //
+            SteamEmulator.SteamNetworkingUtils.InitRelayNetworkAccess();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -116,7 +116,21 @@ namespace SKYNET.Steamworks.Exported
         public static void SteamAPI_ISteamNetworkingUtils_SetDebugOutputFunction(IntPtr _, int eDetailLevel, IntPtr pfnFunc)
         {
             Write("SteamAPI_ISteamNetworkingUtils_SetDebugOutputFunction");
-            //
+            SteamEmulator.SteamNetworkingUtils.SetDebugOutputFunction(eDetailLevel, pfnFunc);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_ISteamNetworkingUtils_GetIPv4FakeIPType(IntPtr _, uint nIPv4)
+        {
+            Write("SteamAPI_ISteamNetworkingUtils_GetIPv4FakeIPType");
+            return SteamEmulator.SteamNetworkingUtils.GetIPv4FakeIPType(nIPv4);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_ISteamNetworkingUtils_GetRealIdentityForFakeIP(IntPtr _, IntPtr fakeIP, IntPtr pOutRealIdentity)
+        {
+            Write("SteamAPI_ISteamNetworkingUtils_GetRealIdentityForFakeIP");
+            return SteamEmulator.SteamNetworkingUtils.GetRealIdentityForFakeIP(fakeIP, pOutRealIdentity);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -159,6 +173,48 @@ namespace SKYNET.Steamworks.Exported
         {
             Write("SteamAPI_ISteamNetworkingUtils_SetConnectionConfigValueString");
             return SteamEmulator.SteamNetworkingUtils.SetConnectionConfigValueString(hConn, eValue, val);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_SteamNetConnectionStatusChanged(IntPtr _, IntPtr fnCallback)
+        {
+            Write("SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_SteamNetConnectionStatusChanged");
+            return SteamEmulator.SteamNetworkingUtils.SetGlobalCallback_SteamNetConnectionStatusChanged(fnCallback);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_SteamNetAuthenticationStatusChanged(IntPtr _, IntPtr fnCallback)
+        {
+            Write("SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_SteamNetAuthenticationStatusChanged");
+            return SteamEmulator.SteamNetworkingUtils.SetGlobalCallback_SteamNetAuthenticationStatusChanged(fnCallback);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_SteamRelayNetworkStatusChanged(IntPtr _, IntPtr fnCallback)
+        {
+            Write("SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_SteamRelayNetworkStatusChanged");
+            return SteamEmulator.SteamNetworkingUtils.SetGlobalCallback_SteamRelayNetworkStatusChanged(fnCallback);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_FakeIPResult(IntPtr _, IntPtr fnCallback)
+        {
+            Write("SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_FakeIPResult");
+            return SteamEmulator.SteamNetworkingUtils.SetGlobalConfigValuePtr((int)ESteamNetworkingConfigValue.Callback_FakeIPResult, fnCallback);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_MessagesSessionRequest(IntPtr _, IntPtr fnCallback)
+        {
+            Write("SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_MessagesSessionRequest");
+            return SteamEmulator.SteamNetworkingUtils.SetGlobalCallback_MessagesSessionRequest(fnCallback);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_MessagesSessionFailed(IntPtr _, IntPtr fnCallback)
+        {
+            Write("SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_MessagesSessionFailed");
+            return SteamEmulator.SteamNetworkingUtils.SetGlobalCallback_MessagesSessionFailed(fnCallback);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

@@ -5,15 +5,15 @@ html {
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #09090b;
+  background-color: #0a0a0a;
 }
 
 ::selection {
-  background: rgba(6, 182, 212, 0.3);
+  background: rgba(59, 130, 246, 0.3);
   color: #ffffff;
 }
 
-/* Custom Scrollbar from UI.txt style */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -25,11 +25,11 @@ body {
 
 ::-webkit-scrollbar-thumb {
   border-radius: 999px;
-  background: rgba(39, 39, 42, 0.8);
+  background: rgba(34, 34, 34, 0.8);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(63, 63, 70, 1);
+  background: rgba(85, 85, 85, 1);
 }
 
 /* Chrome, Safari, Edge, Opera */

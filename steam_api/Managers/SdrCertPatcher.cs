@@ -38,6 +38,8 @@ namespace SKYNET.Managers
             "9AECA04E1751CE6268D569002CA1E1FA1B2DBC26D36B4EA3A0083AD372829B84";
 
         private static int Started;
+        private static int PatchSucceeded;
+        private static readonly ManualResetEventSlim PatchFinished = new ManualResetEventSlim(false);
 
         public static void Start()
         {
@@ -50,41 +52,76 @@ namespace SKYNET.Managers
             thread.Start();
         }
 
-        private static void Run()
+        /// <summary>
+        /// Starts the background patcher and, when a caller is about to ask the
+        /// native networking library for a certificate, waits briefly for the
+        /// in-memory CA replacement.  The timeout is deliberately bounded: a
+        /// missing standalone networking module must never stall Dota startup.
+        /// </summary>
+        public static bool EnsurePatched(int timeoutMs)
         {
-            Write("SDR patcher thread started");
-            byte[] valveRaw = ParseHex(ValveCaPublicKeyHex);
-            byte[] emuRaw = ParseHex(EmulatorCaPublicKeyHex);
-            if (valveRaw == null || valveRaw.Length != 32 || emuRaw == null || emuRaw.Length != 32)
+            Start();
+
+            if (Volatile.Read(ref PatchSucceeded) != 0)
             {
-                Write("SDR CA keys invalid in code, patcher aborted");
-                return;
+                return true;
             }
 
-            // The key is embedded as an OpenSSH ed25519 base64 token; both tokens are
-            // the same length (68 chars), so replacement is in place. Fall back to the
-            // raw 32-byte form for builds that store the decoded key.
-            var pairs = new List<KeyValuePair<byte[], byte[]>>
+            if (timeoutMs > 0)
             {
-                new KeyValuePair<byte[], byte[]>(Ascii(ToOpenSshToken(valveRaw)), Ascii(ToOpenSshToken(emuRaw))),
-                new KeyValuePair<byte[], byte[]>(valveRaw, emuRaw)
-            };
+                PatchFinished.Wait(timeoutMs);
+            }
 
-            // Patch once the module is present; it is normally loaded from startup and
-            // parses the CA key lazily (at connect/match time), so patching the text at
-            // init lands before it is ever read. Keep polling in case it loads later.
-            for (int attempt = 0; attempt < 600; attempt++)
+            return Volatile.Read(ref PatchSucceeded) != 0;
+        }
+
+        private static void Run()
+        {
+            try
             {
-                if (TryPatchLoadedModule(pairs, out int patched) && patched > 0)
+                Write("SDR patcher thread started");
+                byte[] valveRaw = ParseHex(ValveCaPublicKeyHex);
+                byte[] emuRaw = ParseHex(EmulatorCaPublicKeyHex);
+                if (valveRaw == null || valveRaw.Length != 32 || emuRaw == null || emuRaw.Length != 32)
                 {
-                    Write($"SDR CA public key patched ({patched} occurrence(s))");
+                    Write("SDR CA keys invalid in code, patcher aborted");
                     return;
                 }
 
-                Thread.Sleep(500);
-            }
+                // The key is embedded as an OpenSSH ed25519 base64 token; both tokens are
+                // the same length (68 chars), so replacement is in place. Fall back to the
+                // raw 32-byte form for builds that store the decoded key.
+                var pairs = new List<KeyValuePair<byte[], byte[]>>
+                {
+                    new KeyValuePair<byte[], byte[]>(Ascii(ToOpenSshToken(valveRaw)), Ascii(ToOpenSshToken(emuRaw))),
+                    new KeyValuePair<byte[], byte[]>(valveRaw, emuRaw)
+                };
 
-            Write("steamnetworkingsockets module not found or key pattern absent after timeout");
+                // Start polling before GetCertAsync.  The networking module may not be
+                // resident during Steam API initialization, but once it appears we patch
+                // it in tens of milliseconds rather than after a half-second race.
+                for (int attempt = 0; attempt < 1200; attempt++)
+                {
+                    if (TryPatchLoadedModule(pairs, out int patched) && patched > 0)
+                    {
+                        Interlocked.Exchange(ref PatchSucceeded, 1);
+                        Write($"SDR CA public key patched ({patched} occurrence(s))");
+                        return;
+                    }
+
+                    Thread.Sleep(25);
+                }
+
+                Write("steamnetworkingsockets module not found or key pattern absent after timeout");
+            }
+            catch (Exception ex)
+            {
+                Write($"SDR patcher failed: {ex.Message}");
+            }
+            finally
+            {
+                PatchFinished.Set();
+            }
         }
 
         private static byte[] Ascii(string value)
@@ -168,11 +205,7 @@ namespace SKYNET.Managers
         private static int ScanAndPatchRegion(long start, long length, List<KeyValuePair<byte[], byte[]>> pairs)
         {
             var buffer = new byte[length];
-            try
-            {
-                Marshal.Copy((IntPtr)start, buffer, 0, (int)length);
-            }
-            catch
+            if (!ReadProcessMemory(GetCurrentProcess(), (IntPtr)start, buffer, (UIntPtr)length, out var read) || (long)read != length)
             {
                 return 0;
             }
@@ -225,7 +258,11 @@ namespace SKYNET.Managers
 
             try
             {
-                Marshal.Copy(data, 0, address, data.Length);
+                if (!WriteProcessMemory(GetCurrentProcess(), address, data, (UIntPtr)data.Length, out var written) || (long)written != data.Length)
+                {
+                    return false;
+                }
+
                 FlushInstructionCache(GetCurrentProcess(), address, (UIntPtr)data.Length);
                 return true;
             }
@@ -324,6 +361,15 @@ namespace SKYNET.Managers
 
         [DllImport("kernel32.dll")]
         private static extern bool FlushInstructionCache(IntPtr hProcess, IntPtr lpBaseAddress, UIntPtr dwSize);
+
+        // Read/WriteProcessMemory fail gracefully (return false) on an invalid or
+        // just-unmapped page instead of raising an uncatchable AccessViolation the
+        // way Marshal.Copy does, which was crashing DLL load under SDR mode.
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, UIntPtr nSize, out UIntPtr lpNumberOfBytesRead);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, UIntPtr nSize, out UIntPtr lpNumberOfBytesWritten);
 
         [DllImport("psapi.dll", SetLastError = true)]
         private static extern bool GetModuleInformation(IntPtr hProcess, IntPtr hModule, out MODULEINFO lpmodinfo, uint cb);

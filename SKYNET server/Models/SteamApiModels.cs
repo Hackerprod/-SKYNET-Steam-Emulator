@@ -403,6 +403,7 @@ public sealed class SkyNetDisconnectGameServerUserDto
 
 public sealed class SkyNetGameServerDto
 {
+    public ulong SteamId { get; set; }
     public uint AppId { get; set; }
     public uint IP { get; set; }
     public int Port { get; set; }
@@ -591,6 +592,7 @@ public sealed class SkyNetDotaMatchDto
     public uint State { get; set; }
     public uint GameState { get; set; }
     public uint GameStartTime { get; set; }
+    public bool Dedicated { get; set; }
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public List<SkyNetDotaMatchPlayerDto> Players { get; set; } = new();
 }

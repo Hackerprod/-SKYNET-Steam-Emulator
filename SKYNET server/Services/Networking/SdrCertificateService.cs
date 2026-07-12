@@ -92,8 +92,11 @@ public sealed class SdrCertificateService
         writer.WriteVarint(1, 1);                       // key_type = ED25519
         writer.WriteBytes(2, identityPublicKey);        // key_data
         writer.WriteFixed64(4, steamId);                // legacy_steam_id
-        writer.WriteVarint(8, now);                     // time_created
-        writer.WriteVarint(9, expiry);                  // time_expiry
+        // These are fixed32 in CMsgSteamDatagramCertificate.  Encoding them
+        // as varints makes the native protobuf reader ignore both fields,
+        // leaving the certificate without a valid time window.
+        writer.WriteFixed32(8, now);                     // time_created
+        writer.WriteFixed32(9, expiry);                  // time_expiry
         if (appId != 0)
         {
             writer.WriteVarint(10, appId);              // app_ids (packed-compatible repeated)
@@ -193,6 +196,12 @@ public sealed class SdrCertificateService
         public void WriteFixed64(int field, ulong value)
         {
             WriteTag(field, 1);
+            _buffer.AddRange(BitConverter.GetBytes(value));
+        }
+
+        public void WriteFixed32(int field, uint value)
+        {
+            WriteTag(field, 5);
             _buffer.AddRange(BitConverter.GetBytes(value));
         }
 

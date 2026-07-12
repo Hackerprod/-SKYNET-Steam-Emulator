@@ -59,7 +59,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamNetworkingSocketsSerialized.BAllowDirectConnectToPeer(identity);
         }
 
-        public bool BeginAsyncRequestFakeIP(IntPtr _, int nNumPorts)
+        public int BeginAsyncRequestFakeIP(IntPtr _, int nNumPorts)
         {
             return SteamEmulator.SteamNetworkingSocketsSerialized.BeginAsyncRequestFakeIP(nNumPorts);
         }

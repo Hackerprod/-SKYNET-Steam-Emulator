@@ -1354,6 +1354,7 @@ namespace SKYNET.Managers
 
             return new SkyNetGameServerDto
             {
+                SteamId = (ulong)SteamEmulator.SteamID_GS,
                 AppId = server.AppId,
                 IP = server.IP,
                 Port = server.Port,
@@ -2088,6 +2089,7 @@ namespace SKYNET.Managers
 
         public sealed class SkyNetGameServerDto
         {
+            public ulong SteamId { get; set; }
             public uint AppId { get; set; }
             public uint IP { get; set; }
             public int Port { get; set; }

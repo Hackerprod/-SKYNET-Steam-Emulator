@@ -11,19 +11,47 @@
         align-items: center;
         margin-bottom: 0.75rem;
         flex-wrap: wrap;
+        color: #ededed;
     }
 
     .gc-console-toolbar input[type="text"] {
         min-width: 220px;
         padding: 0.25rem 0.5rem;
+        background: #0a0a0a;
+        border: 1px solid #222222;
+        border-radius: 0.5rem;
+        color: #ededed;
+        font-size: 0.875rem;
+    }
+
+    .gc-console-toolbar input[type="text"]:focus {
+        border-color: #3b82f6;
+        outline: none;
+    }
+
+    .gc-console-toolbar button {
+        background: #161616;
+        border: 1px solid #222222;
+        border-radius: 0.5rem;
+        color: #ededed;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        cursor: pointer;
+    }
+
+    .gc-console-toolbar button:hover {
+        background: #222222;
     }
 
     .gc-console-wrap {
         max-height: 70vh;
         overflow-y: auto;
-        border: 1px solid #444;
-        border-radius: 4px;
-        background: #111;
+        border: 1px solid #222222;
+        border-radius: 0.75rem;
+        background: #111111;
     }
 
     .gc-console-table {
@@ -31,21 +59,21 @@
         border-collapse: collapse;
         font-family: Consolas, monospace;
         font-size: 0.8rem;
-        color: #ddd;
+        color: #ededed;
     }
 
     .gc-console-table th {
         position: sticky;
         top: 0;
-        background: #222;
+        background: #161616;
         text-align: left;
         padding: 0.3rem 0.5rem;
-        border-bottom: 1px solid #555;
+        border-bottom: 1px solid #222222;
     }
 
     .gc-console-table td {
         padding: 0.15rem 0.5rem;
-        border-bottom: 1px solid #1d1d1d;
+        border-bottom: 1px solid #1a1a1a;
         white-space: nowrap;
     }
 
@@ -63,8 +91,8 @@
 
     .gc-live { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
     @@media (max-width: 900px) { .gc-live { grid-template-columns: 1fr; } }
-    .gc-card { border: 1px solid #444; border-radius: 4px; background: #111; padding: 0.5rem 0.75rem; }
-    .gc-card h2 { margin: 0 0 0.4rem; font-size: 0.85rem; color: #9fd0ff; text-transform: uppercase; letter-spacing: 0.1em; }
+    .gc-card { border: 1px solid #222222; border-radius: 0.75rem; background: #161616; padding: 0.5rem 0.75rem; }
+    .gc-card h2 { margin: 0 0 0.4rem; font-size: 0.85rem; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.1em; }
     .gc-card table { width: 100%; border-collapse: collapse; font-family: Consolas, monospace; font-size: 0.78rem; color: #ddd; }
     .gc-card td, .gc-card th { padding: 0.15rem 0.4rem; border-bottom: 1px solid #1d1d1d; text-align: left; white-space: nowrap; }
     .gc-on { color: #8be98b; font-weight: bold; }
@@ -72,28 +100,29 @@
     .gc-muted { color: #777; font-size: 0.75rem; }
 </style>
 
-<h1>Game Coordinator Console</h1>
-<p>Trafico GC en vivo: mensajes entrantes (<span class="gc-kind-in">in</span>), respuestas (<span class="gc-kind-out">out</span>), push asincronos (<span class="gc-kind-push">push</span>), <code>runtime.Log</code> de Lua (<span class="gc-kind-log">log</span>), no manejados (<span class="gc-kind-unhandled">unhandled</span>) y errores (<span class="gc-kind-error">error</span>).</p>
+<div class="space-y-4">
+<h1 class="text-2xl font-black text-white">Game Coordinator Console</h1>
+<p class="text-sm text-skynet-muted">Live GC traffic: incoming (<span class="gc-kind-in">in</span>), responses (<span class="gc-kind-out">out</span>), async pushes (<span class="gc-kind-push">push</span>), Lua <code>runtime.Log</code> (<span class="gc-kind-log">log</span>), unhandled (<span class="gc-kind-unhandled">unhandled</span>) and errors (<span class="gc-kind-error">error</span>).</p>
 
 <div class="gc-live">
     <div class="gc-card">
-        <h2>Sesiones de juego <span id="liveSummary" class="gc-muted"></span></h2>
+        <h2>Game Sessions <span id="liveSummary" class="gc-muted"></span></h2>
         <table>
-            <thead><tr><th>SteamID</th><th>Persona</th><th>Estado</th><th>Visto</th></tr></thead>
-            <tbody id="liveSessions"><tr><td colspan="4" class="gc-muted">Cargando...</td></tr></tbody>
+            <thead><tr><th>SteamID</th><th>Persona</th><th>Status</th><th>Seen</th></tr></thead>
+            <tbody id="liveSessions"><tr><td colspan="4" class="gc-muted">Loading...</td></tr></tbody>
         </table>
     </div>
     <div class="gc-card">
-        <h2>Matches activos</h2>
-        <div id="liveMatches" class="gc-muted">Cargando...</div>
+        <h2>Active Matches</h2>
+        <div id="liveMatches" class="gc-muted">Loading...</div>
     </div>
 </div>
 
 <div class="gc-console-toolbar">
-    <label><input type="checkbox" id="gcPause" /> Pausar</label>
+    <label><input type="checkbox" id="gcPause" /> Pause</label>
     <label><input type="checkbox" id="gcAutoScroll" checked /> Auto-scroll</label>
-    <input type="text" id="gcFilter" placeholder="Filtrar (kind, msg, steamid, texto)..." />
-    <button type="button" id="gcClear">Limpiar</button>
+    <input type="text" id="gcFilter" placeholder="Filter (kind, msg, steamid, text)..." />
+    <button type="button" id="gcClear">Clear</button>
     <span id="gcStatus"></span>
 </div>
 
@@ -101,13 +130,13 @@
     <table class="gc-console-table">
         <thead>
             <tr>
-                <th>Hora</th>
+                <th>Time</th>
                 <th>Kind</th>
                 <th>App</th>
                 <th>SteamID</th>
                 <th>Msg</th>
                 <th>Bytes</th>
-                <th>Detalle</th>
+                <th>Detail</th>
             </tr>
         </thead>
         <tbody id="gcRows"></tbody>
@@ -205,7 +234,7 @@
                     setTimeout(poll, 1000);
                 })
                 .catch(function (err) {
-                    status.textContent = "Sin conexion (" + err.message + ")";
+                    status.textContent = "No connection (" + err.message + ")";
                     setTimeout(poll, 3000);
                 });
         }
@@ -221,9 +250,9 @@
         function esc(s) { return String(s == null ? "" : s).replace(/[&<>]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; }); }
 
         function renderSessions(data) {
-            summary.textContent = "(" + data.liveGameSessions + " vivas, " + data.sweepUsersOnline + " online, ventana " + data.presenceTimeoutSeconds + "s)";
+            summary.textContent = "(" + data.liveGameSessions + " live, " + data.sweepUsersOnline + " online, window " + data.presenceTimeoutSeconds + "s)";
             if (!data.sessions.length) {
-                sessionsBody.innerHTML = '<tr><td colspan="4" class="gc-muted">Ninguna sesion de juego activa</td></tr>';
+                sessionsBody.innerHTML = '<tr><td colspan="4" class="gc-muted">No active game sessions</td></tr>';
                 return;
             }
             sessionsBody.innerHTML = data.sessions.map(function (s) {
@@ -234,7 +263,7 @@
 
         function renderMatches(data) {
             if (!data.matches.length) {
-                matchesBox.innerHTML = '<span class="gc-muted">Sin matches recientes</span>';
+                matchesBox.innerHTML = '<span class="gc-muted">No recent matches</span>';
                 return;
             }
             matchesBox.innerHTML = data.matches.map(function (m) {
@@ -242,7 +271,7 @@
                     return "<tr><td>" + esc(p.persona || p.steamId) + "</td><td>team " + p.team + "</td><td>hero " + p.heroId + "</td><td>" + p.equippedItems + " items</td></tr>";
                 }).join("");
                 return '<div style="margin-bottom:0.5rem;">' +
-                    '<div class="gc-muted">lobby ' + esc(m.lobbyId) + ' &middot; match ' + esc(m.matchId) + ' &middot; state ' + m.state + '/gs ' + m.gameState + ' &middot; hace ' + m.updatedSecondsAgo + 's</div>' +
+                    '<div class="gc-muted">lobby ' + esc(m.lobbyId) + ' &middot; match ' + esc(m.matchId) + ' &middot; state ' + m.state + '/gs ' + m.gameState + ' &middot; ' + m.updatedSecondsAgo + 's ago</div>' +
                     '<table>' + players + '</table></div>';
             }).join("");
         }
@@ -257,3 +286,5 @@
         pollLive();
     })();
 </script>
+</div>
+

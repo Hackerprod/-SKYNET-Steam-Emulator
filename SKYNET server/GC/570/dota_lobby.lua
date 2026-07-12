@@ -22,6 +22,7 @@ local TEAM_NONE = 5
 local LOBBY_UI = 0
 local LOBBY_SERVER_SETUP = 1
 local LOBBY_RUN = 2
+local LOBBY_SERVER_ASSIGN = 6
 
 local GAME_INIT = 0
 local GAME_WAIT_FOR_PLAYERS = 1
@@ -653,6 +654,7 @@ local function publish_lobby(lobby)
         lobby.state or 0,
         lobby.game_state or 0,
         lobby.game_start_time or 0,
+        lobby.dedicated == true,
         snapshot_players(lobby))
 end
 
@@ -823,6 +825,30 @@ local function persisted_match_for_lobby(lobby_id)
     return match
 end
 
+-- Lua is hot-reloadable. After a reload the in-memory table is new but the
+-- durable match snapshot still identifies a dedicated process owned by us.
+-- Clear that process before a new lobby replaces the old state.
+local function release_persisted_match(match, reason)
+    if match == nil then
+        return false
+    end
+
+    local lobby_id = tostring(match.LobbyId or "0")
+    if lobby_id == "0" then
+        return false
+    end
+
+    if match.Dedicated == true and gc.DotaReleaseDedicatedServer ~= nil then
+        gc.DotaReleaseDedicatedServer(lobby_id, tostring(reason or "persisted_release"))
+    end
+    if gc.DotaRemoveMatchSnapshot ~= nil then
+        gc.DotaRemoveMatchSnapshot(lobby_id)
+    end
+    runtime.Log("release_persisted_match lobby=" .. lobby_id .. " dedicated=" .. tostring(match.Dedicated == true) ..
+        " reason=" .. tostring(reason or "unknown"))
+    return true
+end
+
 local function hydrate_persisted_match(match, require_current_member)
     if match == nil then
         return nil
@@ -854,7 +880,8 @@ local function hydrate_persisted_match(match, require_current_member)
         game_mode = 1,
         name = "Recovered match",
         region = 0,
-        lan = true,
+        lan = match.Dedicated ~= true,
+        dedicated = match.Dedicated == true,
         allow_spectating = false,
         dota_tv_delay = 0,
         visibility = 0,
@@ -975,6 +1002,10 @@ local function destroy_lobby(lobby, reason)
         state().by_server[server] = nil
     end
 
+    if lobby.dedicated == true and gc.DotaReleaseDedicatedServer ~= nil then
+        gc.DotaReleaseDedicatedServer(tostring(lobby.id), tostring(reason or "destroy_lobby"))
+    end
+
     delete_lobby_invites_for_group(lobby.id)
 
     state().lobbies[lobby.id] = nil
@@ -1024,9 +1055,7 @@ local function abandon_current_game()
         local persisted_lobby_id = persisted ~= nil and tostring(persisted.LobbyId or "0") or "0"
         if persisted_lobby_id ~= "0" then
             gc.Proto(MSG.SOCacheUnsubscribed, PB.bytes(2, owner_soid(3, persisted_lobby_id)))
-            if gc.DotaRemoveMatchSnapshot ~= nil then
-                gc.DotaRemoveMatchSnapshot(persisted_lobby_id)
-            end
+            release_persisted_match(persisted, "abandon_persisted_match")
             runtime.Log("abandon_current_game cleared persisted lobby=" .. persisted_lobby_id .. " steam=" .. steam)
             return true
         end
@@ -1097,6 +1126,9 @@ local function apply_details(lobby, details)
 end
 
 local function create_lobby()
+    if state().by_steam[current_steam()] == nil then
+        release_persisted_match(persisted_match_for_current(), "create_replaces_persisted_match")
+    end
     leave_current(nil)
 
     local id = PB.next_id()
@@ -1384,13 +1416,50 @@ local function launch_lobby()
         -- game server is attached. Adding match_id only with RUN can make Dota
         -- discard that transition and remain in INIT on subsequent lobbies.
         ensure_match_id(lobby)
-        lobby.state = LOBBY_SERVER_SETUP
+        -- The current client marks a local lobby with lan=true. It owns the
+        -- listen-server process, so its later LANServerAvailable message is the
+        -- only valid trigger for attaching that server. Non-local lobbies use a
+        -- supervisor reservation and stay SERVERASSIGN until the dedicated
+        -- process reports GCGameServerInfo from the reserved game port.
+        -- Match_Helper.LaunchWithDedicated in the reference coordinator uses a
+        -- non-LAN lobby with an explicit server_region. Region zero is the
+        -- local/listen-server route even if an older client omits the LAN bit.
+        lobby.dedicated = lobby.lan ~= true and (lobby.region or 0) ~= 0
+        if lobby.dedicated == true then
+            local port_text = gc.DotaStartDedicatedServer ~= nil and
+                gc.DotaStartDedicatedServer(tostring(lobby.id), tostring(lobby.custom_map or "dota")) or "0"
+            local dedicated_port = tonumber(port_text or "0") or 0
+            if dedicated_port == 0 then
+                lobby.dedicated = false
+                lobby.state = LOBBY_UI
+                lobby.connect = ""
+                lobby.server_steam = "0"
+                lobby.game_start_time = 0
+                lobby.game_state = GAME_INIT
+                lobby.realtime_sent = false
+                refresh_lobby(lobby)
+                broadcast_lobby(lobby, nil, false)
+                publish_lobby(lobby)
+                gc.Proto(MSG.GCToClientBroadcastNotification,
+                    PB.str(1, "No se pudo iniciar el servidor dedicado de la sala."))
+                runtime.Log("launch_lobby dedicated failed id=" .. tostring(lobby.id))
+                return true
+            end
+
+            lobby.state = LOBBY_SERVER_ASSIGN
+            lobby.server_port = dedicated_port
+            runtime.Log("launch_lobby dedicated id=" .. tostring(lobby.id) .. " port=" .. tostring(dedicated_port) ..
+                " members=" .. tostring(member_count(lobby)))
+        else
+            lobby.state = LOBBY_SERVER_SETUP
+            runtime.Log("launch_lobby local id=" .. tostring(lobby.id) .. " members=" .. tostring(member_count(lobby)))
+        end
         lobby.connect = ""
+        lobby.server_steam = "0"
         lobby.game_start_time = 0
         lobby.game_state = GAME_INIT
         lobby.realtime_sent = false
         refresh_lobby(lobby)
-        runtime.Log("launch_lobby id=" .. tostring(lobby.id) .. " members=" .. tostring(member_count(lobby)))
         if not replay_lobby_update(lobby, "server_26_0002.bin", nil, false) then
             broadcast_lobby(lobby, nil, false)
         end
@@ -1403,7 +1472,8 @@ end
 local function waiting_lobby()
     local selected = nil
     for _, lobby in pairs(state().lobbies) do
-        if lobby.state == LOBBY_SERVER_SETUP and (selected == nil or (lobby.seq or 0) > (selected.seq or 0)) then
+        if lobby.state == LOBBY_SERVER_SETUP and lobby.dedicated ~= true and
+            (selected == nil or (lobby.seq or 0) > (selected.seq or 0)) then
             selected = lobby
         end
     end
@@ -1413,16 +1483,32 @@ end
 
 local function connect_string(lobby)
     local port = lobby.server_port ~= nil and lobby.server_port ~= 0 and lobby.server_port or 27015
-    -- Advertise the launcher's real address (LAN/ZeroTier) captured on server
-    -- registration; fall back to loopback only when nothing routable is known
-    -- (e.g. host and SKYNET server share one machine).
-    local ip = lobby.server_ip
-    if not is_routable_ip(ip) then
-        ip = "127.0.0.1"
+
+    -- The Dota connect field holds two space-separated endpoints; the client tries
+    -- both and connects over whichever it can route to. When the host is multi-homed
+    -- (WiFi + ZeroTier) advertise one address per interface so every peer reaches it.
+    local endpoints = {}
+    local ips = lobby.server_ips
+    if ips ~= nil and ips ~= "" then
+        for ip in string.gmatch(ips, "%S+") do
+            if is_routable_ip(ip) then
+                endpoints[#endpoints + 1] = ip .. ":" .. tostring(port)
+            end
+        end
     end
 
-    local endpoint = ip .. ":" .. tostring(port)
-    return endpoint .. " " .. endpoint
+    if #endpoints == 0 then
+        -- Fall back to the single captured address, then loopback (host == server).
+        local ip = lobby.server_ip
+        if not is_routable_ip(ip) then
+            ip = "127.0.0.1"
+        end
+        endpoints[1] = ip .. ":" .. tostring(port)
+    end
+
+    local first = endpoints[1]
+    local second = endpoints[2] or first
+    return first .. " " .. second
 end
 
 local function start_realtime_stats(lobby)
@@ -1466,12 +1552,33 @@ local function attach_server(lobby, mark_run)
     end
 
     -- Remember the launcher's reachable address so the match connect string
-    -- points other players at the real host, not 127.0.0.1. Keep a previously
-    -- captured routable IP if this registration came in over loopback.
+    -- points other players at the real host, not 127.0.0.1. Dedicated/listen
+    -- servers running beside SKYNET reach the web API over loopback, so use the
+    -- IPs from CMsgGameServerInfo before falling back to ClientIp.
+    local public_ip = gc.ReadVarintString(1, "0")
+    local private_ip = gc.ReadVarintString(2, "0")
+    local previous_ip = tostring(lobby.server_ip or "")
     local server_ip = current_ip()
-    if is_routable_ip(server_ip) then
+    if gc.DotaResolveGameServerConnectIp ~= nil then
+        server_ip = gc.DotaResolveGameServerConnectIp(public_ip, private_ip, previous_ip)
+    end
+    if server_ip ~= nil and server_ip ~= "" then
         lobby.server_ip = server_ip
     end
+    -- Collect up to two reachable host addresses (WiFi + ZeroTier). The connect
+    -- field carries two endpoints, so each peer gets one it can route to.
+    if gc.DotaGetHostConnectIps ~= nil then
+        local ips = gc.DotaGetHostConnectIps(public_ip, private_ip, previous_ip)
+        if ips ~= nil and ips ~= "" then
+            lobby.server_ips = ips
+        end
+    end
+    runtime.Log("attach_server endpoint lobby=" .. tostring(lobby.id) ..
+        " ip=" .. tostring(lobby.server_ip or "") ..
+        " port=" .. tostring(lobby.server_port or 0) ..
+        " public=" .. tostring(public_ip) ..
+        " private=" .. tostring(private_ip) ..
+        " client_ip=" .. current_ip())
 
     if mark_run == true then
         ensure_match_id(lobby)
@@ -1492,7 +1599,34 @@ local function attach_server(lobby, mark_run)
         lobby.lan_after_setup_count = 0
     end
 
-    if mark_run == true then
+    if lobby.dedicated == true then
+        -- Dedicated Dota servers have a two-stage contract.  The old, working
+        -- coordinator sends player econ caches and the SERVERSETUP lobby cache
+        -- on GameServerInfo (4508).  ServerAvailable (4506) then carries only
+        -- the RUN update.  Sending the caches a second time after 4506 makes a
+        -- current dedicated process tear down during its map transition.
+        if mark_run == true then
+            refresh_lobby(lobby)
+            queue_proto(lobby.server_steam, MSG.SOCacheUpdated, lobby_server_multiple_objects(lobby))
+            emit_pending_batch_player_resources(lobby)
+        else
+            refresh_lobby(lobby)
+            queue_lobby_items_to_server(lobby)
+            queue_proto(lobby.server_steam, MSG.SOCacheSubscribed, lobby_server_so_cache_subscribed(lobby))
+            -- Current Dota builds do not transition a dedicated process out of
+            -- INIT from CacheSubscribed alone.  The legacy coordinator predates
+            -- that requirement, while the current-client capture shows that one
+            -- SERVERSETUP UpdateMultiple after the cache is the activation edge
+            -- which makes the server emit 4506.  This is deliberately before
+            -- RUN, and is not a duplicate cache delivery.
+            queue_proto(lobby.server_steam, MSG.SOCacheUpdated, lobby_server_multiple_objects(lobby))
+            lobby.server_setup_update_attempts = 1
+            lobby.server_setup_update_at = PB.now()
+            -- The dedicated already owns the cache above.  Only lobby members
+            -- need this SERVERSETUP transition, exactly as the legacy GC did.
+            broadcast_lobby(lobby, "0", false)
+        end
+    elseif mark_run == true then
         refresh_lobby(lobby)
         if LOBBY_REPLAY_NETHOOK then
             replay_lobby_update(lobby, "server_26_0003.bin", nil, true)
@@ -1502,12 +1636,9 @@ local function attach_server(lobby, mark_run)
             queue_proto(lobby.server_steam, MSG.SOCacheUpdated, lobby_server_multiple_objects(lobby))
         end
 
-        -- Runtime-validated ordering for current Dota builds:
-        --   lobby RUN update -> deferred 7451 -> server lobby cache -> econ caches.
-        -- Replying to 7450 while the lobby is still SERVERSETUP leaves the listen
-        -- server in INIT and the client shows an empty hero-selection screen.
-        -- Keep the item caches after the server owner has consumed the RUN lobby;
-        -- this is also the path verified to apply equipped hero items in-game.
+        -- Listen-server ordering is independently validated by the local
+        -- hero-selection and cosmetic path.  Do not fold it into the dedicated
+        -- path above: the two server types emit different GC transitions.
         emit_pending_batch_player_resources(lobby)
         queue_proto(lobby.server_steam, MSG.SOCacheSubscribed, lobby_server_so_cache_subscribed(lobby))
         queue_lobby_items_to_server(lobby)
@@ -1525,13 +1656,21 @@ end
 
 local function game_server_hello()
     local version = gc.ReadVarint(1, 20)
-    local empty_cache = PB.cat(
-        PB.f64s(3, PB.next_id()),
-        PB.v(5, 0)
+    -- CMsgClientWelcome must establish the dedicated server's own service-0
+    -- cache.  A partial cache (only version/service_id) happens to pass the
+    -- first handshake but leaves the server with no owner subscription when it
+    -- changes level after ServerAvailable, which crashes current Dota builds.
+    local cache_version = PB.next_id()
+    local server_cache = PB.cat(
+        PB.f64s(3, cache_version),
+        PB.bytes(4, owner_soid(1, current_steam())),
+        PB.v(5, 0),
+        PB.v(6, 1),
+        PB.f64s(7, cache_version)
     )
     local welcome = PB.cat(
         PB.v(1, version ~= 0 and version or 20),
-        PB.bytes(3, empty_cache),
+        PB.bytes(3, server_cache),
         PB.v(9, 20)
     )
 
@@ -1541,9 +1680,27 @@ end
 
 local function game_server_info()
     local lobby = nil
+    local reported_port = gc.ReadVarint(3, 0)
     local assigned_id = state().by_server[current_steam()]
     if assigned_id ~= nil then
         lobby = state().lobbies[assigned_id]
+    end
+
+    if lobby == nil and gc.DotaClaimDedicatedServer ~= nil then
+        local claimed_id = gc.DotaClaimDedicatedServer(current_steam(), reported_port)
+        if claimed_id ~= nil and claimed_id ~= "" and claimed_id ~= "0" then
+            lobby = state().lobbies[tostring(claimed_id)]
+            if lobby ~= nil then
+                runtime.Log("game_server_info claimed dedicated lobby=" .. tostring(lobby.id) ..
+                    " server=" .. current_steam() .. " port=" .. tostring(reported_port))
+            end
+        end
+    end
+
+    if lobby == nil and gc.DotaDedicatedServerPortReserved ~= nil and gc.DotaDedicatedServerPortReserved(reported_port) then
+        runtime.Log("game_server_info rejected reserved dedicated server=" .. current_steam() ..
+            " port=" .. tostring(reported_port) .. " because its lobby claim failed")
+        return true
     end
 
     if lobby == nil then
@@ -1593,6 +1750,14 @@ local function lan_server_available()
         recovered = lobby ~= nil
     end
     if lobby ~= nil then
+        if lobby.dedicated == true then
+            -- A dedicated server must claim its supervisor reservation through
+            -- GCGameServerInfo. LANServerAvailable is only authoritative for a
+            -- listen server started by the lobby owner.
+            runtime.Log("lan_server_available ignored for dedicated lobby=" .. tostring(lobby.id) ..
+                " server=" .. current_steam())
+            return true
+        end
         if same_running_server(lobby) then
             runtime.Log((recovered and "lan_server_available recovered lobby=" or "lan_server_available ignored duplicate for lobby=") ..
                 tostring(lobby.id) .. " server=" .. current_steam())
@@ -1800,25 +1965,58 @@ end
 local function player_failed_to_connect()
     local lobby_id = state().by_server[current_steam()]
     local lobby = lobby_id ~= nil and state().lobbies[lobby_id] or nil
-    if lobby ~= nil then
-        local server = tostring(lobby.server_steam or "0")
-        lobby.state = LOBBY_UI
-        lobby.game_state = GAME_INIT
-        lobby.server_steam = "0"
-        lobby.connect = ""
-        lobby.match_id = "0"
-        lobby.game_start_time = 0
-        lobby.realtime_sent = false
-        refresh_lobby(lobby)
-        broadcast_lobby(lobby, nil, false)
-        publish_lobby(lobby)
-        if server ~= "0" then
-            queue_proto(server, MSG.SOCacheUnsubscribed, lobby_so_cache_unsubscribed(lobby))
-            state().by_server[server] = nil
-        end
-        runtime.Log("player_failed_to_connect reset lobby=" .. tostring(lobby.id) .. " server=" .. server)
+    if lobby == nil then
+        return true
     end
 
+    -- CMsgDOTAPlayerFailedToConnect is a per-player, retryable report.  It is
+    -- not a match teardown signal: clearing the lobby here removed the
+    -- dedicated server precisely when a remote client needed to retry.  Keep
+    -- the RUN lobby and its reservation intact, record only the failed or
+    -- abandoned members, and let ConnectedPlayers clear this state on a later
+    -- successful reconnect.
+    local changed = false
+    local failed = 0
+    local abandoned = 0
+    local function mark_failed_members(field, is_abandoned)
+        local count = gc.FieldCount(field)
+        for index = 1, count do
+            local steam = gc.ReadFixed64AtString(field, index, "0")
+            local member = steam ~= "0" and lobby.members[steam] or nil
+            if member ~= nil then
+                local next_leaver = is_abandoned and LEAVER_ABANDONED or LEAVER_DISCONNECTED
+                if member.leaver ~= next_leaver or member.disconnected_at == nil then
+                    changed = true
+                end
+                member.leaver = next_leaver
+                member.disconnect_reason = 0
+                member.disconnected_at = member.disconnected_at or PB.now()
+                member.last_seen = PB.now()
+                if is_abandoned then
+                    abandoned = abandoned + 1
+                else
+                    failed = failed + 1
+                end
+            else
+                runtime.Log("player_failed_to_connect unknown member=" .. tostring(steam) ..
+                    " lobby=" .. tostring(lobby.id))
+            end
+        end
+    end
+
+    -- CMsgDOTAPlayerFailedToConnect:
+    --   1 = failed_loaders (fixed64), 2 = abandoned_loaders (fixed64).
+    mark_failed_members(1, false)
+    mark_failed_members(2, true)
+
+    if changed then
+        refresh_lobby(lobby)
+        broadcast_lobby(lobby, nil, true)
+        publish_lobby(lobby)
+    end
+    runtime.Log("player_failed_to_connect preserved lobby=" .. tostring(lobby.id) ..
+        " server=" .. tostring(lobby.server_steam or "0") ..
+        " failed=" .. tostring(failed) .. " abandoned=" .. tostring(abandoned))
     return true
 end
 
@@ -2025,6 +2223,47 @@ function dota_lobby_tick()
             expired[#expired + 1] = id
         else
             local changed = false
+            if lobby.dedicated == true and lobby.state == LOBBY_SERVER_ASSIGN and gc.DotaDedicatedServerStatus ~= nil then
+                local dedicated_status = tostring(gc.DotaDedicatedServerStatus(tostring(lobby.id)) or "")
+                if dedicated_status == "failed" or dedicated_status == "stopped" or dedicated_status == "not_found" then
+                    runtime.Log("dedicated_start_failed lobby=" .. tostring(lobby.id) .. " status=" .. dedicated_status)
+                    lobby.dedicated = false
+                    lobby.state = LOBBY_UI
+                    lobby.server_steam = "0"
+                    lobby.connect = ""
+                    lobby.game_state = GAME_INIT
+                    lobby.game_start_time = 0
+                    lobby.realtime_sent = false
+                    changed = true
+                    local notice = PB.str(1, "El servidor dedicado no pudo iniciar la partida.")
+                    for _, member in ipairs(member_order(lobby)) do
+                        queue_proto(member.steam, MSG.GCToClientBroadcastNotification, notice)
+                    end
+                end
+            end
+
+            -- Map loading and the GC poll loop race on some dedicated starts.
+            -- If the first SERVERSETUP update was delivered while Dota was
+            -- still switching loop modes it is consumed without producing
+            -- ServerAvailable (4506). Re-issue only the SO update, with a new
+            -- version, after the lobby cache has had time to install. Caches
+            -- and RUN are never retransmitted here; 4506 remains authoritative.
+            if lobby.dedicated == true and lobby.state == LOBBY_SERVER_SETUP and
+                lobby.server_setup_ready == true and lobby.server_steam ~= nil and
+                lobby.server_steam ~= "0" then
+                local attempts = tonumber(lobby.server_setup_update_attempts or 0) or 0
+                local last_update = tonumber(lobby.server_setup_update_at or 0) or 0
+                if attempts > 0 and attempts < 3 and now - last_update >= 2 then
+                    refresh_lobby(lobby)
+                    queue_proto(lobby.server_steam, MSG.SOCacheUpdated, lobby_server_multiple_objects(lobby))
+                    lobby.server_setup_update_attempts = attempts + 1
+                    lobby.server_setup_update_at = now
+                    changed = true
+                    runtime.Log("dedicated_setup_update_retry lobby=" .. tostring(lobby.id) ..
+                        " server=" .. tostring(lobby.server_steam) ..
+                        " attempt=" .. tostring(lobby.server_setup_update_attempts))
+                end
+            end
             for _, member in ipairs(member_order(lobby)) do
                 if member.leaver == LEAVER_DISCONNECTED and member.disconnected_at ~= nil and
                     now - member.disconnected_at >= RECONNECT_TIMEOUT_SECONDS then

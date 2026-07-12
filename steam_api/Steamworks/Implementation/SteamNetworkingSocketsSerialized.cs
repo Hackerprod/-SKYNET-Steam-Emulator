@@ -65,19 +65,13 @@ namespace SKYNET.Steamworks.Implementation
             {
                 Write("GetCertAsync: insecure LAN mode, returning successful empty certificate");
                 QueueCurrentNetworkStatusCallbacks();
-                QueueCurrentNetworkStatusCallbacks(250);
-                QueueCurrentNetworkStatusCallbacks(1500);
                 return CallbackManager.AddCallbackResult(CreateEmptyCertResult(EResult.k_EResultOK));
             }
 
             Write("GetCertAsync: secure SDR request queued");
 
             // Secure mode only: patch the SDR CA so the game trusts our cert.
-            EnsureSecureCertPatcherStarted("GetCertAsync");
-
-            QueueCurrentNetworkStatusCallbacks();
-            QueueCurrentNetworkStatusCallbacks(250);
-            QueueCurrentNetworkStatusCallbacks(1500);
+            EnsureSecureCertPatcherStarted("GetCertAsync", 750);
 
             var handle = CallbackManager.AddCallbackResult(CreateEmptyCertResult(EResult.k_EResultNoConnection), false);
             StartCertRequestWorker(handle);
@@ -279,6 +273,7 @@ namespace SKYNET.Steamworks.Implementation
         public void PostConnectionStateMsg(IntPtr pMsg, uint cbMsg)
         {
             Write("PostConnectionStateMsg");
+            QueueCurrentNetworkStatusCallbacks();
         }
 
         public bool GetSTUNServer(int dont_know, IntPtr buf, int len)
@@ -294,11 +289,14 @@ namespace SKYNET.Steamworks.Implementation
             return allow;
         }
 
-        public bool BeginAsyncRequestFakeIP(int nNumPorts)
+        public int BeginAsyncRequestFakeIP(int nNumPorts)
         {
             bool accepted = !SecureCertMode;
             Write($"BeginAsyncRequestFakeIP ({nNumPorts}) = {accepted}");
-            return accepted;
+            // SteamNetworkingSocketsSerialized005 uses a 32-bit int here.
+            // Returning an explicit 0/1 keeps the native x64 return register
+            // defined, matching the Goldberg LAN implementation.
+            return accepted ? 1 : 0;
         }
 
         private int WriteNetworkConfigJSON(IntPtr buf, uint cbBuf)
@@ -320,11 +318,11 @@ namespace SKYNET.Steamworks.Implementation
             return "{\"revision\":1,\"pops\":{\"iad\":{\"desc\":\"Local\",\"geo\":[-77.0365,38.8977],\"partners\":1,\"tier\":1,\"relays\":[{\"ipv4\":\"127.0.0.1\",\"port_range\":[27015,27060]}]}}}";
         }
 
-        internal static void EnsureSecureCertPatcherStarted(string reason)
+        internal static bool EnsureSecureCertPatcherStarted(string reason, int waitMs = 0)
         {
             if (!SecureCertMode)
             {
-                return;
+                return false;
             }
 
             if (Interlocked.CompareExchange(ref SecureCertPatcherStartLogged, 1, 0) == 0)
@@ -332,7 +330,13 @@ namespace SKYNET.Steamworks.Implementation
                 SteamEmulator.Write("SteamNetworkingSocketsSerialized", $"Starting SDR cert patcher ({reason})");
             }
 
-            SdrCertPatcher.Start();
+            bool patched = SdrCertPatcher.EnsurePatched(waitMs);
+            if (waitMs > 0 && !patched)
+            {
+                SteamEmulator.Write("SteamNetworkingSocketsSerialized", $"SDR CA patch was not ready after {waitMs}ms; background patch remains active");
+            }
+
+            return patched;
         }
 
         private static bool TryFetchSdrConfig(out string body)
@@ -364,7 +368,7 @@ namespace SKYNET.Steamworks.Implementation
             }
         }
 
-        private static SteamRelayNetworkStatus_t BuildRelayNetworkStatus()
+        internal static SteamRelayNetworkStatus_t BuildRelayNetworkStatus()
         {
             var status = new SteamRelayNetworkStatus_t
             {
@@ -379,7 +383,7 @@ namespace SKYNET.Steamworks.Implementation
             return status;
         }
 
-        private static SteamNetAuthenticationStatus_t BuildAuthenticationStatus()
+        internal static SteamNetAuthenticationStatus_t BuildAuthenticationStatus()
         {
             var status = new SteamNetAuthenticationStatus_t
             {
@@ -391,12 +395,13 @@ namespace SKYNET.Steamworks.Implementation
             return status;
         }
 
-        private static void QueueCurrentNetworkStatusCallbacks(int delayMs = 0)
+        internal static void QueueCurrentNetworkStatusCallbacks(int delayMs = 0)
         {
             if (delayMs <= 0)
             {
                 CallbackManager.AddCallback(BuildAuthenticationStatus());
                 CallbackManager.AddCallback(BuildRelayNetworkStatus());
+                SteamNetworkingUtils.Instance?.QueueNativeNetworkStatusCallbacks();
                 return;
             }
 
@@ -405,6 +410,7 @@ namespace SKYNET.Steamworks.Implementation
                 Thread.Sleep(delayMs);
                 CallbackManager.AddCallback(BuildAuthenticationStatus());
                 CallbackManager.AddCallback(BuildRelayNetworkStatus());
+                SteamNetworkingUtils.Instance?.QueueNativeNetworkStatusCallbacks();
             });
         }
     }

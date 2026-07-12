@@ -1,86 +1,95 @@
 @page "/users"
 @model SKYNET_server.Pages.Users.IndexModel
-@{
-    string RelationshipLabel(int relationship) => relationship switch
-    {
-        2 => "Solicitud recibida",
-        3 => "Amigo",
-        4 => "Solicitud enviada",
-        _ => "Sin relacion"
-    };
-}
 
 <div class="space-y-6">
     @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
     {
-        <div class="rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-sm font-bold text-cyan-100">@Model.StatusMessage</div>
+        <div class="rounded-2xl border border-skynet-accent/30 bg-skynet-accent/10 px-5 py-3 text-sm font-bold text-blue-200">@Model.StatusMessage</div>
     }
 
-    <header class="rounded-lg border border-zinc-800 bg-zinc-900/70 p-6">
-        <p class="text-[10px] font-black uppercase tracking-[0.22em] text-cyan-400">Users</p>
-        <div class="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-                <h1 class="text-3xl font-black text-white">Usuarios registrados</h1>
-                <p class="mt-2 max-w-2xl text-sm text-zinc-400">Perfiles persistidos del emulador. Desde aqui puedes entrar al perfil, enviar solicitudes o administrar amistades.</p>
-            </div>
-            <div class="rounded-lg border border-zinc-800 bg-zinc-950 px-5 py-4 text-center">
-                <p class="text-2xl font-black text-white">@Model.Users.Count</p>
-                <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Perfiles visibles</p>
-            </div>
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+            <h1 class="text-3xl font-bold tracking-tight">User Network</h1>
+            <p class="text-skynet-muted mt-1">Connect with other active agents on the SKYNET network.</p>
         </div>
-    </header>
+        <div class="relative w-full md:w-80">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-skynet-muted text-xs"></i>
+            <input type="text" id="userSearch" class="w-full bg-skynet-card border border-skynet-border rounded-lg py-2 pl-10 pr-4 text-sm focus:border-skynet-accent outline-none transition text-gray-200" placeholder="Search by username or ID..." oninput="filterUsers(this.value)">
+        </div>
+    </div>
 
-    <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @if (Model.Users.Count == 0)
         {
-            <div class="rounded-lg border border-zinc-800 bg-zinc-900/70 p-6">
-                <h2 class="text-lg font-black text-white">No hay otros usuarios</h2>
-                <p class="mt-2 text-sm text-zinc-400">Registra otra cuenta web o inicia Dota con otro AccountID para poblar esta lista.</p>
+            <div class="bg-skynet-card border border-skynet-border rounded-xl p-6">
+                <h2 class="font-bold">No other users</h2>
+                <p class="text-[10px] text-skynet-muted uppercase tracking-widest mt-1">Register another web account or launch Dota with a different AccountID.</p>
             </div>
         }
         @foreach (var user in Model.Users)
         {
-            var status = user.PersonaState == 0 ? "Offline" : "Online";
-            <article class="rounded-lg border border-zinc-800 bg-zinc-900/70 p-5">
-                <div class="flex items-start gap-4">
-                    <img src="/api/users/@user.SteamId/avatar" alt="" class="h-14 w-14 shrink-0 rounded-lg border border-zinc-700 bg-zinc-950 object-cover" />
-                    <div class="min-w-0 flex-1">
-                        <div class="flex flex-wrap items-center gap-2">
-                            <a asp-page="/Users/Profile" asp-route-steamId="@user.SteamId" class="truncate text-lg font-black text-white hover:text-cyan-300">@user.PersonaName</a>
-                            <span class="rounded border border-zinc-700 px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-cyan-400">@status</span>
-                        </div>
-                        <p class="mt-1 text-xs text-zinc-500">SteamID @user.SteamId</p>
-                        <p class="mt-1 text-xs text-zinc-500">AccountID @user.AccountId</p>
-                    </div>
-                </div>
+            var isOnline = user.PersonaState != 0;
+            var isFriend = user.FriendRelationship == 3;
+            var isIncoming = user.FriendRelationship == 2;
+            var isOutgoing = user.FriendRelationship == 4;
 
-                <div class="mt-4 flex items-center justify-between gap-3">
-                    <span class="rounded border border-zinc-700 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-zinc-400">@RelationshipLabel(user.FriendRelationship)</span>
-                    <div class="flex gap-2">
-                        @if (user.FriendRelationship == 0)
-                        {
-                            <form method="post" asp-page-handler="Request">
-                                <input type="hidden" name="TargetSteamId" value="@user.SteamId" />
-                                <button class="rounded-lg bg-cyan-600 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white hover:bg-cyan-500">Agregar</button>
-                            </form>
-                        }
-                        else if (user.FriendRelationship == 2)
-                        {
-                            <form method="post" asp-page-handler="Accept">
-                                <input type="hidden" name="TargetSteamId" value="@user.SteamId" />
-                                <button class="rounded-lg bg-cyan-600 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white hover:bg-cyan-500">Aceptar</button>
-                            </form>
-                        }
-                        @if (user.FriendRelationship == 2 || user.FriendRelationship == 3 || user.FriendRelationship == 4)
-                        {
-                            <form method="post" asp-page-handler="Remove">
-                                <input type="hidden" name="TargetSteamId" value="@user.SteamId" />
-                                <button class="rounded-lg border border-red-500/30 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-red-300 hover:bg-red-500/10">Quitar</button>
-                            </form>
-                        }
-                    </div>
+            string statusDotColor = isOnline ? "bg-green-500" : "bg-gray-500";
+            string statusText = isOnline ? "Online" : "Offline";
+
+            <article data-user="@user.PersonaName @user.SteamId @user.AccountId" class="bg-skynet-card border border-skynet-border rounded-xl p-6 flex items-center space-x-4 hover:bg-skynet-dark transition group">
+                <div class="relative">
+                    <img src="/api/users/@user.SteamId/avatar" alt="" class="w-14 h-14 rounded-xl border border-skynet-border object-cover bg-skynet-black" />
+                    <div class="absolute -bottom-1 -right-1 w-3 h-3 @statusDotColor rounded-full border-2 border-skynet-card"></div>
                 </div>
+                <div class="flex-1 min-w-0">
+                    <a asp-page="/Users/Profile" asp-route-steamId="@user.SteamId" class="font-bold truncate block hover:text-skynet-accent transition">@user.PersonaName</a>
+                    <p class="text-[10px] text-skynet-muted uppercase tracking-widest">@statusText</p>
+                </div>
+                @if (isFriend)
+                {
+                    <form method="post" asp-page-handler="Remove">
+                        <input type="hidden" name="TargetSteamId" value="@user.SteamId" />
+                        <button type="submit" class="w-10 h-10 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20 flex items-center justify-center hover:bg-red-500 hover:text-white transition" title="Remove friend">
+                            <i class="fas fa-user-minus text-xs"></i>
+                        </button>
+                    </form>
+                }
+                else if (isIncoming)
+                {
+                    <form method="post" asp-page-handler="Accept">
+                        <input type="hidden" name="TargetSteamId" value="@user.SteamId" />
+                        <button type="submit" class="w-10 h-10 rounded-lg bg-skynet-accent/10 text-skynet-accent border border-skynet-accent/20 flex items-center justify-center hover:bg-skynet-accent hover:text-white transition" title="Accept request">
+                            <i class="fas fa-user-check text-xs"></i>
+                        </button>
+                    </form>
+                }
+                else if (isOutgoing)
+                {
+                    <div class="w-10 h-10 rounded-lg bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 flex items-center justify-center" title="Request sent">
+                        <i class="fas fa-clock text-xs"></i>
+                    </div>
+                }
+                else
+                {
+                    <form method="post" asp-page-handler="Request">
+                        <input type="hidden" name="TargetSteamId" value="@user.SteamId" />
+                        <button type="submit" class="w-10 h-10 rounded-lg bg-skynet-accent/10 text-skynet-accent border border-skynet-accent/20 flex items-center justify-center hover:bg-skynet-accent hover:text-white transition" title="Add friend">
+                            <i class="fas fa-user-plus text-xs"></i>
+                        </button>
+                    </form>
+                }
             </article>
         }
-    </section>
+    </div>
 </div>
+
+<script>
+    function filterUsers(term) {
+        var t = term.toLowerCase();
+        var cards = document.querySelectorAll('article[data-user]');
+        cards.forEach(function(card) {
+            var name = (card.getAttribute('data-user') || '').toLowerCase();
+            card.style.display = !t || name.indexOf(t) >= 0 ? '' : 'none';
+        });
+    }
+</script>

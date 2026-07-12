@@ -436,6 +436,7 @@ public sealed partial class SteamApiStateService
         match.State,
         match.GameState,
         match.GameStartTime,
+        match.Dedicated,
         UpdatedAtUnix = new DateTimeOffset(match.UpdatedAt).ToUnixTimeSeconds(),
         Players = match.Players.Select(player => new
         {

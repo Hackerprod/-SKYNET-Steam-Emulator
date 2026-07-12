@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using SKYNET_server.GC.Dota2;
@@ -37,6 +38,8 @@ public sealed partial class SteamApiStateService
     private readonly DotaStatsStore _dotaStatsStore;
     private readonly DotaPartyStore _dotaPartyStore;
     private readonly DotaLobbyInviteStore _dotaLobbyInviteStore;
+    private readonly DotaDedicatedServerSupervisor _dotaDedicatedServers;
+    private readonly string _advertisedGameServerIp;
     // Auth session lifetime and the (much shorter) presence window used to
     // derive online/offline. Both configurable via appsettings:
     //   "Session:TimeoutMinutes" (default 30), "Presence:TimeoutSeconds" (default 90).
@@ -53,12 +56,15 @@ public sealed partial class SteamApiStateService
         IHostEnvironment hostEnvironment,
         GameCoordinatorPluginRegistry gameCoordinatorPlugins,
         GameCoordinatorTraceService gameCoordinatorTrace,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        DotaDedicatedServerSupervisor dotaDedicatedServers)
     {
         _gameCoordinatorPlugins = gameCoordinatorPlugins;
         _gameCoordinatorTrace = gameCoordinatorTrace;
+        _dotaDedicatedServers = dotaDedicatedServers;
         _sessionTimeout = TimeSpan.FromMinutes(Math.Clamp(configuration.GetValue("Session:TimeoutMinutes", 30), 1, 1440));
         _presenceTimeout = TimeSpan.FromSeconds(Math.Clamp(configuration.GetValue("Presence:TimeoutSeconds", 90), 15, 3600));
+        _advertisedGameServerIp = configuration.GetValue<string>("GameCoordinator:Dota:AdvertisedGameServerIp")?.Trim() ?? string.Empty;
         _statePath = Path.Combine(hostEnvironment.ContentRootPath, "Data", "api-state.json");
         _dotaStatsStore = new DotaStatsStore(
             Path.Combine(hostEnvironment.ContentRootPath, "Data", "skynet-dota-stats.db"),
@@ -86,6 +92,13 @@ public sealed partial class SteamApiStateService
         DotaGcBackend.MatchSnapshotDeleteSink = RemoveDotaMatchSnapshot;
         DotaGcBackend.UserExistsProvider = IsKnownDotaUser;
         DotaGcBackend.UserOnlineProvider = IsOnlineDotaUser;
+        DotaGcBackend.GameServerConnectIpResolver = ResolveDotaGameServerConnectIp;
+        DotaGcBackend.GameServerConnectIpsResolver = ResolveDotaGameServerConnectIps;
+        DotaGcBackend.DedicatedServerStart = (lobbyId, map) => _dotaDedicatedServers.Start(lobbyId, map);
+        DotaGcBackend.DedicatedServerClaim = (gameServerSteamId, port) => _dotaDedicatedServers.ClaimLobby(gameServerSteamId, port);
+        DotaGcBackend.DedicatedServerPortReserved = port => _dotaDedicatedServers.HasReservationForPort(port);
+        DotaGcBackend.DedicatedServerStatus = lobbyId => _dotaDedicatedServers.GetStatus(lobbyId);
+        DotaGcBackend.DedicatedServerRelease = (lobbyId, reason) => _dotaDedicatedServers.Release(lobbyId, reason);
         DotaGcBackend.ItemDefResolver = ResolveDotaItemDefFromGameCoordinator;
         DotaGcBackend.EquipmentJsonProvider = GetDotaEquipmentJson;
         DotaGcBackend.EquipmentJsonSink = SetDotaEquipmentJson;

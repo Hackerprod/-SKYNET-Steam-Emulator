@@ -8,47 +8,47 @@
 <div class="space-y-6">
     @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
     {
-        <div class="rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-sm font-bold text-cyan-100">@Model.StatusMessage</div>
+        <div class="rounded-2xl border border-skynet-accent/30 bg-skynet-accent/10 px-5 py-3 text-sm font-bold text-blue-200">@Model.StatusMessage</div>
     }
 
     <section class="grid gap-5 xl:grid-cols-[1.4fr_0.9fr]">
-        <header class="rounded-lg border border-zinc-800 bg-zinc-900/70 p-6">
-            <p class="text-[10px] font-black uppercase tracking-[0.22em] text-cyan-400">Social</p>
+        <header class="rounded-2xl border border-skynet-border bg-skynet-card p-6">
+            <p class="text-[10px] font-black uppercase tracking-[0.22em] text-skynet-accent">Social</p>
             <div class="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                    <h1 class="text-3xl font-black text-white">Amigos reales del emulador</h1>
-                    <p class="mt-2 max-w-2xl text-sm text-zinc-400">Estas relaciones salen del estado persistido del server y son las mismas que consume la API de Steam.</p>
+                    <h1 class="text-3xl font-black text-white">Real friends from the emulator</h1>
+                    <p class="mt-2 max-w-2xl text-sm text-skynet-muted">These relationships come from the server's persisted state and are the same ones consumed by the Steam API.</p>
                 </div>
                 <div class="grid grid-cols-3 gap-2 text-center">
-                    <div class="rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-3">
+                    <div class="rounded-xl border border-skynet-border bg-skynet-black px-4 py-3">
                         <p class="text-2xl font-black text-white">@Model.Friends.Count</p>
-                        <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Total</p>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-skynet-muted">Total</p>
                     </div>
-                    <div class="rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-3">
+                    <div class="rounded-xl border border-skynet-border bg-skynet-black px-4 py-3">
                         <p class="text-2xl font-black text-white">@onlineCount</p>
-                        <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Online</p>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-skynet-muted">Online</p>
                     </div>
-                    <div class="rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-3">
+                    <div class="rounded-xl border border-skynet-border bg-skynet-black px-4 py-3">
                         <p class="text-2xl font-black text-white">@inGameCount</p>
-                        <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">In game</p>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-skynet-muted">In game</p>
                     </div>
                 </div>
             </div>
         </header>
 
-        <form method="post" asp-page-handler="Add" class="rounded-lg border border-zinc-800 bg-zinc-900/70 p-6">
-            <label asp-for="FriendIdentifier" class="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">Enviar solicitud</label>
-            <input asp-for="FriendIdentifier" class="mt-3 w-full rounded-lg border-zinc-700 bg-zinc-950 text-sm text-white placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-cyan-500" placeholder="Usuario, SteamID, AccountID o nombre" />
-            <button type="submit" class="mt-4 w-full rounded-lg bg-cyan-600 px-4 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-cyan-500">Enviar</button>
+        <form method="post" asp-page-handler="Add" class="rounded-2xl border border-skynet-border bg-skynet-card p-6">
+            <label asp-for="FriendIdentifier" class="text-[10px] font-black uppercase tracking-[0.22em] text-skynet-muted">Send request</label>
+            <input asp-for="FriendIdentifier" class="mt-3 w-full rounded-lg border border-skynet-border bg-skynet-black text-sm text-white placeholder:text-skynet-muted focus:border-skynet-accent focus:ring-skynet-accent" placeholder="Username, SteamID, AccountID or name" />
+            <button type="submit" class="mt-4 w-full rounded-lg bg-white text-skynet-black px-4 py-3 text-xs font-black uppercase tracking-widest hover:bg-gray-200 transition-all">Send</button>
             @if (Model.Users.Count > 0)
             {
                 <div class="mt-5 space-y-2">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-zinc-600">Usuarios disponibles</p>
+                    <p class="text-[10px] font-black uppercase tracking-widest text-skynet-muted">Available users</p>
                     @foreach (var user in Model.Users.Take(6))
                     {
-                        <button type="submit" name="FriendIdentifier" value="@user.SteamId" class="flex w-full items-center justify-between rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-left text-xs text-zinc-300 hover:border-cyan-500/50">
+                        <button type="submit" name="FriendIdentifier" value="@user.SteamId" class="flex w-full items-center justify-between rounded-xl border border-skynet-border bg-skynet-black px-3 py-2 text-left text-xs text-zinc-300 hover:border-skynet-accent/50 transition-all">
                             <span class="truncate font-bold">@user.PersonaName</span>
-                            <span class="shrink-0 text-zinc-600">@user.AccountId</span>
+                            <span class="shrink-0 text-skynet-muted">@user.AccountId</span>
                         </button>
                     }
                 </div>
@@ -59,9 +59,9 @@
     <section class="grid gap-4 lg:grid-cols-2">
         @if (Model.Friends.Count == 0)
         {
-            <div class="rounded-lg border border-zinc-800 bg-zinc-900/70 p-6">
-                <h2 class="text-lg font-black text-white">Sin amigos vinculados</h2>
-                <p class="mt-2 text-sm text-zinc-400">Envia una solicitud desde Users o desde el formulario superior.</p>
+            <div class="rounded-2xl border border-skynet-border bg-skynet-card p-6">
+                <h2 class="text-lg font-black text-white">No linked friends</h2>
+                <p class="mt-2 text-sm text-skynet-muted">Send a request from Users or the form above.</p>
             </div>
         }
         else
@@ -70,25 +70,25 @@
             {
                 var status = friend.PersonaState == 0 ? "Offline" : "Online";
                 var presence = friend.RichPresence.Count == 0
-                    ? "Sin rich presence"
+                    ? "No rich presence"
                     : string.Join(" | ", friend.RichPresence.Take(2).Select(pair => $"{pair.Key}: {pair.Value}"));
                 var initial = string.IsNullOrWhiteSpace(friend.PersonaName) ? "U" : friend.PersonaName[..1].ToUpperInvariant();
 
-                <article class="rounded-lg border border-zinc-800 bg-zinc-900/70 p-5">
+                <article class="rounded-2xl border border-skynet-border bg-skynet-card p-5">
                     <div class="flex items-start gap-4">
-                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-zinc-800 text-sm font-black text-white">@initial</div>
+                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-skynet-dark text-sm font-black text-white">@initial</div>
                         <div class="min-w-0 flex-1">
                             <div class="flex flex-wrap items-center gap-2">
                                 <h2 class="truncate text-lg font-black text-white">@friend.PersonaName</h2>
-                                <span class="rounded border border-zinc-700 px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-cyan-400">@status</span>
+                                <span class="rounded border border-skynet-border px-2 py-0.5 text-[10px] font-black uppercase tracking-widest @(friend.PersonaState == 0 ? "text-skynet-muted" : "text-green-500")">@status</span>
                             </div>
-                            <p class="mt-1 text-xs text-zinc-500">SteamID @friend.SteamId | AccountID @friend.AccountId</p>
-                            <p class="mt-3 text-sm text-zinc-400">@presence</p>
+                            <p class="mt-1 text-xs text-skynet-muted">SteamID @friend.SteamId | AccountID @friend.AccountId</p>
+                            <p class="mt-3 text-sm text-skynet-muted">@presence</p>
                         </div>
                     </div>
                     <form method="post" asp-page-handler="Remove" class="mt-4">
                         <input type="hidden" asp-for="FriendSteamId" value="@friend.SteamId" />
-                        <button type="submit" class="rounded-lg border border-red-500/30 px-4 py-2 text-xs font-black uppercase tracking-widest text-red-300 hover:bg-red-500/10">Quitar</button>
+                        <button type="submit" class="rounded-lg border border-red-500/30 px-4 py-2 text-xs font-black uppercase tracking-widest text-red-300 hover:bg-red-500/10 transition-all">Remove</button>
                     </form>
                 </article>
             }

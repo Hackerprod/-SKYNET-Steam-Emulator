@@ -27,6 +27,11 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool InitGameServer(uint unIP, int usGamePort, int usQueryPort, uint unFlags, uint nGameAppId, string pchVersionString)
         {
+            if (!SteamEmulator.SecureNetworking)
+            {
+                unFlags &= ~Constants.k_unServerFlagSecure;
+            }
+
             Write($"InitGameServer (IP = {unIP}, GamePort = {usGamePort}, QueryPort = {usQueryPort}, Flags = {unFlags}, GameAppId = {nGameAppId}, VersionString = {pchVersionString})");
 
             if (LoggedIn)

@@ -1,23 +1,17 @@
 using System;
 
 using SteamNetworkingPOPID = System.UInt32;
-using HSteamNetConnection = System.UInt32;
 using SteamNetworkingMicroseconds = System.Int64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("SteamNetworkingUtils003")]
-    public class SteamNetworkingUtils003 : ISteamInterface
+    [Interface("SteamNetworkingUtils004")]
+    public class SteamNetworkingUtils004 : ISteamInterface
     {
         public IntPtr AllocateMessage(IntPtr _, int cbAllocateBuffer)
         {
             return SteamEmulator.SteamNetworkingUtils.AllocateMessage(cbAllocateBuffer);
         }
-
-        //public void InitRelayNetworkAccess(IntPtr _)
-        //{
-        //    SteamEmulator.SteamNetworkingUtils.InitRelayNetworkAccess();
-        //}
 
         public int GetRelayNetworkStatus(IntPtr _, IntPtr pDetails)
         {
@@ -84,75 +78,20 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamNetworkingUtils.SetDebugOutputFunction(eDetailLevel, pfnFunc);
         }
 
-        //public bool SetGlobalConfigValueInt32(IntPtr _, int eValue, Int32 val)
-        //{
-        //    return SteamEmulator.SteamNetworkingUtils.SetGlobalConfigValueInt32(eValue, val);
-        //}
+        public int GetIPv4FakeIPType(IntPtr _, uint nIPv4)
+        {
+            return SteamEmulator.SteamNetworkingUtils.GetIPv4FakeIPType(nIPv4);
+        }
 
-        //public bool SetGlobalConfigValueFloat(IntPtr _, int eValue, float val)
-        //{
-        //    return SteamEmulator.SteamNetworkingUtils.SetGlobalConfigValueFloat(eValue, val);
-        //}
-
-        //public bool SetGlobalConfigValueString(IntPtr _, int eValue, string val)
-        //{
-        //    return SteamEmulator.SteamNetworkingUtils.SetGlobalConfigValueString(eValue, val);
-        //}
-
-        //public bool SetGlobalConfigValuePtr(IntPtr _, int eValue, IntPtr val)
-        //{
-        //    return SteamEmulator.SteamNetworkingUtils.SetGlobalConfigValuePtr(eValue, val);
-        //}
-
-        //public bool SetConnectionConfigValueInt32(IntPtr _, HSteamNetConnection hConn, int eValue, Int32 val)
-        //{
-        //    return SteamEmulator.SteamNetworkingUtils.SetConnectionConfigValueInt32(hConn, eValue, val);
-        //}
-
-        //public bool SetConnectionConfigValueFloat(IntPtr _, HSteamNetConnection hConn, int eValue, float val)
-        //{
-        //    return SteamEmulator.SteamNetworkingUtils.SetConnectionConfigValueFloat(hConn, eValue, val);
-        //}
-
-        //public bool SetConnectionConfigValueString(IntPtr _, HSteamNetConnection hConn, int eValue, string val)
-        //{
-        //    return SteamEmulator.SteamNetworkingUtils.SetConnectionConfigValueString(hConn, eValue, val);
-        //}
-
-        //public bool SetGlobalCallback_SteamNetConnectionStatusChanged(IntPtr _, IntPtr fnCallback)
-        //{
-        //    return SteamEmulator.SteamNetworkingUtils.SetGlobalCallback_SteamNetConnectionStatusChanged(fnCallback);
-        //}
-
-        //public bool SetGlobalCallback_SteamNetAuthenticationStatusChanged(IntPtr _, IntPtr fnCallback)
-        //{
-        //    return SteamEmulator.SteamNetworkingUtils.SetGlobalCallback_SteamNetAuthenticationStatusChanged(fnCallback);
-        //}
-
-        //public bool SetGlobalCallback_SteamRelayNetworkStatusChanged(IntPtr _, IntPtr fnCallback)
-        //{
-        //    return SteamEmulator.SteamNetworkingUtils.SetGlobalCallback_SteamRelayNetworkStatusChanged(fnCallback);
-        //}
-
-        //public bool SetGlobalCallback_MessagesSessionRequest(IntPtr _, IntPtr fnCallback)
-        //{
-        //    return SteamEmulator.SteamNetworkingUtils.SetGlobalCallback_MessagesSessionRequest(fnCallback);
-        //}
-
-        //public bool SetGlobalCallback_MessagesSessionFailed(IntPtr _, IntPtr fnCallback)
-        //{
-        //    return SteamEmulator.SteamNetworkingUtils.SetGlobalCallback_MessagesSessionFailed(fnCallback);
-        //}
+        public int GetRealIdentityForFakeIP(IntPtr _, IntPtr fakeIP, IntPtr pOutRealIdentity)
+        {
+            return SteamEmulator.SteamNetworkingUtils.GetRealIdentityForFakeIP(fakeIP, pOutRealIdentity);
+        }
 
         public bool SetConfigValue(IntPtr _, int eValue, int eScopeType, IntPtr scopeObj, int eDataType, IntPtr pArg)
         {
             return SteamEmulator.SteamNetworkingUtils.SetConfigValue(eValue, eScopeType, scopeObj, eDataType, pArg);
         }
-
-        //public bool SetConfigValueStruct(IntPtr _, IntPtr opt, int eScopeType, IntPtr scopeObj)
-        //{
-        //    return SteamEmulator.SteamNetworkingUtils.SetConfigValueStruct(opt, eScopeType, scopeObj);
-        //}
 
         public int GetConfigValue(IntPtr _, int eValue, int eScopeType, IntPtr scopeObj, int pOutDataType, IntPtr pResult, IntPtr cbResult)
         {

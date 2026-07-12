@@ -4,38 +4,73 @@
     ViewData["UseAppShell"] = false;
 }
 
-<div class="flex min-h-screen items-center justify-center bg-zinc-950 px-4 py-10">
-    <section class="w-full max-w-md rounded-lg border border-zinc-800 bg-zinc-900 p-6 shadow-xl">
-        <div class="mb-6">
-            <p class="text-[10px] font-black uppercase tracking-[0.22em] text-cyan-400">SKYNET Server</p>
-            <h1 class="mt-2 text-2xl font-black text-white">Login</h1>
-            <p class="mt-2 text-sm text-zinc-500">Admin inicial: Hackerprod / Steam2026. Puedes cambiarlo desde el panel admin.</p>
-        </div>
-
-        @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
-        {
-            <div class="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-100">@Model.ErrorMessage</div>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: { sans: ['Inter', 'sans-serif'] },
+                colors: {
+                    skynet: {
+                        black: '#0a0a0a',
+                        dark: '#111111',
+                        card: '#161616',
+                        border: '#222222',
+                        accent: '#3b82f6',
+                        muted: '#888888'
+                    }
+                }
+            }
         }
+    }
+</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        <form method="post" class="space-y-4">
-            <div>
-                <label asp-for="Username" class="mb-2 block text-[10px] font-black uppercase tracking-widest text-zinc-500">Usuario</label>
-                <input asp-for="Username" autocomplete="username" class="w-full rounded-lg border-zinc-700 bg-zinc-950 text-white focus:border-cyan-500 focus:ring-cyan-500" />
+<div class="h-screen flex items-center justify-center p-6 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-900/10 via-skynet-black to-skynet-black">
+    <div class="w-full max-w-md space-y-8">
+        <!-- Logo -->
+        <div class="text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-white rounded-xl mb-4 shadow-[0_0_30px_rgba(59,130,246,0.2)]">
+                <i class="fas fa-microchip text-3xl text-skynet-black"></i>
             </div>
-            <div>
-                <label asp-for="Password" class="mb-2 block text-[10px] font-black uppercase tracking-widest text-zinc-500">Password</label>
-                <input asp-for="Password" type="password" autocomplete="current-password" class="w-full rounded-lg border-zinc-700 bg-zinc-950 text-white focus:border-cyan-500 focus:ring-cyan-500" />
-            </div>
-            <label class="flex items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-3 text-sm font-semibold text-zinc-300">
-                <input asp-for="RememberMe" class="rounded border-zinc-700 bg-zinc-900 text-cyan-500 focus:ring-cyan-500" />
-                Recordar sesion por 30 dias
-            </label>
-            <button class="w-full rounded-lg bg-cyan-600 px-4 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-cyan-500">Entrar</button>
-        </form>
-
-        <div class="mt-5 flex items-center justify-between text-sm">
-            <a asp-page="/Auth/Register" class="font-semibold text-cyan-400 hover:text-cyan-300">Crear usuario</a>
-            <a asp-page="/Index" class="text-zinc-500 hover:text-zinc-300">Dashboard</a>
+            <h1 class="text-3xl font-bold tracking-tighter">SKYNET<span class="text-skynet-accent">EMU</span></h1>
+            <p class="text-skynet-muted text-sm mt-2">Centralized emulation protocol</p>
         </div>
-    </section>
+
+        <!-- Auth Card -->
+        <div class="border border-skynet-border bg-skynet-dark p-8 rounded-2xl shadow-2xl">
+            <h2 class="text-xl font-semibold mb-6">Sign In</h2>
+
+            @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+            {
+                <div class="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-300">@Model.ErrorMessage</div>
+            }
+
+            <form method="post" class="space-y-4">
+                <div>
+                    <label asp-for="Username" class="block text-xs font-medium text-skynet-muted uppercase tracking-widest mb-2">Username</label>
+                    <input asp-for="Username" autocomplete="username" class="w-full px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="Your username">
+                </div>
+                <div>
+                    <label asp-for="Password" class="block text-xs font-medium text-skynet-muted uppercase tracking-widest mb-2">Password</label>
+                    <input asp-for="Password" type="password" autocomplete="current-password" class="w-full px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="••••••••">
+                </div>
+                <label class="flex items-center space-x-2 cursor-pointer">
+                    <input asp-for="RememberMe" class="rounded border-skynet-border bg-skynet-black text-skynet-accent focus:ring-skynet-accent">
+                    <span class="text-xs text-skynet-muted">Remember me for 30 days</span>
+                </label>
+                <button type="submit" class="w-full bg-white text-skynet-black font-bold py-3 rounded-lg hover:bg-gray-200 transition-all duration-200 mt-6">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="mt-8 pt-6 border-t border-skynet-border text-center">
+                <p class="text-sm text-skynet-muted">
+                    Don't have an account?
+                    <a asp-page="/Auth/Register" class="text-skynet-accent font-semibold hover:underline">Sign up</a>
+                </p>
+            </div>
+        </div>
+
+        <p class="text-center text-[10px] text-skynet-muted uppercase tracking-[0.3em]">SKYNET_NETWORK_ENCRYPTION_ACTIVE</p>
+    </div>
 </div>

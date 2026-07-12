@@ -1,4 +1,6 @@
 using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using SKYNET_server.GC.Dota2;
@@ -355,6 +357,21 @@ public sealed partial class SteamApiStateService
         _state.Lobbies ??= new Dictionary<ulong, SkyNetLobbyDto>();
         _state.Files ??= new Dictionary<string, SkyNetRemoteStorageFileDto>(StringComparer.OrdinalIgnoreCase);
         _state.GameServers ??= new Dictionary<ulong, SkyNetGameServerDto>();
+        // State files written before dedicated support used the host IP as key.
+        // Several dedicated processes share an IP, so current entries are keyed
+        // by their game-server SteamID instead.
+        if (_state.GameServers.Count > 0)
+        {
+            var normalizedServers = new Dictionary<ulong, SkyNetGameServerDto>();
+            foreach (var pair in _state.GameServers)
+            {
+                var server = pair.Value ?? new SkyNetGameServerDto();
+                var key = server.SteamId != 0 ? server.SteamId : pair.Key;
+                server.SteamId = key;
+                normalizedServers[key] = server;
+            }
+            _state.GameServers = normalizedServers;
+        }
         _state.WebAccounts ??= new Dictionary<string, SkyNetWebAccountDto>(StringComparer.OrdinalIgnoreCase);
         _state.WebSessions = new Dictionary<string, ApiSession>(_state.WebSessions ?? new Dictionary<string, ApiSession>(), StringComparer.Ordinal);
         _state.DotaItems ??= new Dictionary<uint, SkyNetDotaItemDto>();
@@ -646,6 +663,7 @@ public sealed partial class SteamApiStateService
         State = match.State,
         GameState = match.GameState,
         GameStartTime = match.GameStartTime,
+        Dedicated = match.Dedicated,
         UpdatedAt = match.UpdatedAt,
         Players = match.Players.Select(player => new SkyNetDotaMatchPlayerDto
         {
@@ -705,6 +723,298 @@ public sealed partial class SteamApiStateService
     {
         ulong accountBits = steamId & 0xFFFFFFFFUL;
         return 0x7000000000000000UL | (accountBits << 20) | defIndex;
+    }
+
+    private uint ResolveGameServerPublicIp(uint candidate)
+    {
+        if (TryGetConfiguredAdvertisedGameServerIp(out var configured))
+        {
+            return configured;
+        }
+
+        return candidate != 0 ? candidate : ToUInt32(IPAddress.Loopback);
+    }
+
+    private string ResolveDotaGameServerConnectIp(
+        string clientIp,
+        string publicIpValue,
+        string privateIpValue,
+        string fallbackIp)
+    {
+        // Prefer a host-local interface on the same subnet as the requesting client.
+        // A multi-homed host (WiFi + ZeroTier) must advertise the address that client
+        // can actually route to, not a single hardcoded interface. This takes priority
+        // over the configured/advertised IP precisely so ZeroTier peers (10.0.0.x) get
+        // the host's ZeroTier address instead of the WiFi one.
+        if (TryPickHostIpForClientSubnet(clientIp, out var sameSubnetHostIp))
+        {
+            return sameSubnetHostIp;
+        }
+
+        if (TryGetConfiguredAdvertisedGameServerIp(out var configured))
+        {
+            return ToIPv4String(configured);
+        }
+
+        if (TryNormalizeUsableIPv4(clientIp, out var normalizedClientIp))
+        {
+            return normalizedClientIp;
+        }
+
+        if (TryParseIPv4Value(publicIpValue, out var publicIp) && IsUsableIPv4(publicIp))
+        {
+            return ToIPv4String(publicIp);
+        }
+
+        if (TryParseIPv4Value(privateIpValue, out var privateIp) && IsUsableIPv4(privateIp))
+        {
+            return ToIPv4String(privateIp);
+        }
+
+        if (TryNormalizeUsableIPv4(fallbackIp, out var normalizedFallbackIp))
+        {
+            return normalizedFallbackIp;
+        }
+
+        return string.IsNullOrWhiteSpace(fallbackIp) ? "127.0.0.1" : fallbackIp.Trim();
+    }
+
+    // Builds a space-separated pair "primaryIp secondaryIp" for the Dota connect
+    // field. The dedicated server binds every interface (0.0.0.0), so we advertise
+    // the two most useful host addresses (e.g. WiFi + ZeroTier); the client tries
+    // both endpoints and connects over whichever one it can route to.
+    private string ResolveDotaGameServerConnectIps(
+        string clientIp,
+        string publicIpValue,
+        string privateIpValue,
+        string fallbackIp)
+    {
+        var ordered = new List<string>();
+
+        void Add(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value) ||
+                !IPAddress.TryParse(value.Trim(), out var parsed) ||
+                parsed.AddressFamily != AddressFamily.InterNetwork ||
+                !IsUsableIPv4(ToUInt32(parsed)))
+            {
+                return;
+            }
+
+            var text = parsed.ToString();
+            if (!ordered.Contains(text))
+            {
+                ordered.Add(text);
+            }
+        }
+
+        // 1) Best single match (subnet-aware → configured → CMsgGameServerInfo chain).
+        Add(ResolveDotaGameServerConnectIp(clientIp, publicIpValue, privateIpValue, fallbackIp));
+
+        // 2) The configured/advertised address so LAN peers always have it explicitly.
+        if (TryGetConfiguredAdvertisedGameServerIp(out var configured))
+        {
+            Add(ToIPv4String(configured));
+        }
+
+        // 3) Every other usable host interface (covers ZeroTier / overlay NICs).
+        foreach (var ip in EnumerateUsableHostIPv4())
+        {
+            Add(ip);
+        }
+
+        if (ordered.Count == 0)
+        {
+            return string.IsNullOrWhiteSpace(fallbackIp) ? "127.0.0.1" : fallbackIp.Trim();
+        }
+
+        return string.Join(' ', ordered.Take(2));
+    }
+
+    private static IEnumerable<string> EnumerateUsableHostIPv4()
+    {
+        var result = new List<string>();
+        try
+        {
+            foreach (var nic in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                if (nic.OperationalStatus != OperationalStatus.Up ||
+                    nic.NetworkInterfaceType == NetworkInterfaceType.Loopback)
+                {
+                    continue;
+                }
+
+                foreach (var unicast in nic.GetIPProperties().UnicastAddresses)
+                {
+                    if (unicast.Address.AddressFamily == AddressFamily.InterNetwork &&
+                        IsUsableIPv4(ToUInt32(unicast.Address)))
+                    {
+                        result.Add(unicast.Address.ToString());
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // Interface enumeration is best-effort; fall back to what we already have.
+        }
+
+        return result;
+    }
+
+    private bool TryGetConfiguredAdvertisedGameServerIp(out uint ip)
+    {
+        ip = 0;
+        if (string.IsNullOrWhiteSpace(_advertisedGameServerIp) ||
+            string.Equals(_advertisedGameServerIp, "auto", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        if (!IPAddress.TryParse(_advertisedGameServerIp, out var parsed) ||
+            parsed.AddressFamily != AddressFamily.InterNetwork)
+        {
+            return false;
+        }
+
+        ip = ToUInt32(parsed);
+        return true;
+    }
+
+    private static bool TryNormalizeUsableIPv4(string? value, out string ip)
+    {
+        ip = string.Empty;
+        if (string.IsNullOrWhiteSpace(value) ||
+            !IPAddress.TryParse(value.Trim(), out var parsed) ||
+            parsed.AddressFamily != AddressFamily.InterNetwork)
+        {
+            return false;
+        }
+
+        var numeric = ToUInt32(parsed);
+        if (!IsUsableIPv4(numeric))
+        {
+            return false;
+        }
+
+        ip = parsed.ToString();
+        return true;
+    }
+
+    private static bool TryParseIPv4Value(string? value, out uint ip)
+    {
+        ip = 0;
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return false;
+        }
+
+        value = value.Trim();
+        if (IPAddress.TryParse(value, out var parsed) && parsed.AddressFamily == AddressFamily.InterNetwork)
+        {
+            ip = ToUInt32(parsed);
+            return true;
+        }
+
+        if (!ulong.TryParse(value, out var raw) || raw > uint.MaxValue)
+        {
+            return false;
+        }
+
+        ip = (uint)raw;
+        return true;
+    }
+
+    private static bool IsUsableIPv4(uint ip)
+    {
+        var a = (byte)(ip >> 24);
+        var b = (byte)(ip >> 16);
+        var c = (byte)(ip >> 8);
+        var d = (byte)ip;
+
+        if (a == 0 || a == 127 || a == 255 || (a == 169 && b == 254))
+        {
+            return false;
+        }
+
+        return !(a == 0 && b == 0 && c == 0 && d == 0) &&
+               !(a == 255 && b == 255 && c == 255 && d == 255);
+    }
+
+    private static bool TryPickHostIpForClientSubnet(string? clientIp, out string hostIp)
+    {
+        hostIp = string.Empty;
+        if (!IPAddress.TryParse(clientIp?.Trim(), out var client) ||
+            client.AddressFamily != AddressFamily.InterNetwork ||
+            !IsUsableIPv4(ToUInt32(client)))
+        {
+            return false;
+        }
+
+        try
+        {
+            foreach (var nic in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                if (nic.OperationalStatus != OperationalStatus.Up ||
+                    nic.NetworkInterfaceType == NetworkInterfaceType.Loopback)
+                {
+                    continue;
+                }
+
+                foreach (var unicast in nic.GetIPProperties().UnicastAddresses)
+                {
+                    if (unicast.Address.AddressFamily != AddressFamily.InterNetwork ||
+                        !IsUsableIPv4(ToUInt32(unicast.Address)))
+                    {
+                        continue;
+                    }
+
+                    var mask = unicast.IPv4Mask;
+                    if (mask == null || Equals(mask, IPAddress.Any))
+                    {
+                        continue;
+                    }
+
+                    if (SameSubnet(unicast.Address, client, mask))
+                    {
+                        hostIp = unicast.Address.ToString();
+                        return true;
+                    }
+                }
+            }
+        }
+        catch
+        {
+            return false;
+        }
+
+        return false;
+    }
+
+    private static bool SameSubnet(IPAddress a, IPAddress b, IPAddress mask)
+    {
+        var ab = a.GetAddressBytes();
+        var bb = b.GetAddressBytes();
+        var mb = mask.GetAddressBytes();
+        if (ab.Length != bb.Length || ab.Length != mb.Length)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < ab.Length; i++)
+        {
+            if ((ab[i] & mb[i]) != (bb[i] & mb[i]))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static string ToIPv4String(uint ip)
+    {
+        return $"{(byte)(ip >> 24)}.{(byte)(ip >> 16)}.{(byte)(ip >> 8)}.{(byte)ip}";
     }
 
     private static bool CompareNumber(int left, int right, int comparisonType) => comparisonType switch

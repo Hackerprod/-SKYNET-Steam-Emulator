@@ -22,13 +22,22 @@ namespace SKYNET.Steamworks.Exported
         public static int SteamInternal_SteamAPI_Init(IntPtr pszInternalCheckInterfaceVersions, IntPtr pOutErrMsg)
         {
             Write($"SteamInternal_SteamAPI_Init");
+            if (SteamEmulator.SecureNetworking)
+            {
+                // This runs before Dota asks the standalone networking library for
+                // its certificate.  Do not block indefinitely if that library has
+                // not been loaded yet; the patcher's short polling loop continues.
+                SdrCertPatcher.EnsurePatched(250);
+            }
             return 0; // k_ESteamAPIInitResult_OK
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int SteamInternal_GameServer_Init_V2(uint unIP, ushort usGamePort, ushort usQueryPort, uint eServerMode, [MarshalAs(UnmanagedType.LPStr)] string pchVersionString, IntPtr pszInternalCheckInterfaceVersions, IntPtr pOutErrMsg)
         {
-            var unFlags = eServerMode == (uint)EServerMode.AuthenticationAndSecure ? Constants.k_unServerFlagSecure : 0;
+            var unFlags = SteamEmulator.SecureNetworking && eServerMode == (uint)EServerMode.AuthenticationAndSecure
+                ? Constants.k_unServerFlagSecure
+                : 0;
             var result = SteamEmulator.SteamGameServer.InitGameServer(unIP, usGamePort, usQueryPort, unFlags, SteamEmulator.AppID, pchVersionString);
             Write($"SteamInternal_GameServer_Init_V2 = {result} (IP = {unIP}, GamePort = {usGamePort}, QueryPort = {usQueryPort}, ServerMode = {eServerMode}, Flags = {unFlags}, VersionString = {pchVersionString})");
             return result ? 0 : 1; // k_ESteamAPIInitResult_OK / generic failure
@@ -58,7 +67,9 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamInternal_GameServer_Init(uint unIP, int usPort, int usGamePort, uint usQueryPort, uint eServerMode, string pchVersionString)
         {
-            var unFlags = eServerMode == (int)EServerMode.AuthenticationAndSecure ? Constants.k_unServerFlagSecure : 0;
+            var unFlags = SteamEmulator.SecureNetworking && eServerMode == (int)EServerMode.AuthenticationAndSecure
+                ? Constants.k_unServerFlagSecure
+                : 0;
             var result = SteamEmulator.SteamGameServer.InitGameServer(unIP, usPort, (int)usQueryPort, unFlags, SteamEmulator.AppID, pchVersionString);
             Write($"SteamInternal_GameServer_Init = {result}");
             return result;

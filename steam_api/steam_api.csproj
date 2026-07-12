@@ -168,6 +168,7 @@
     <Compile Include="Steamworks\Interfaces\SteamNetworkingMessages\SteamNetworkingMessages002.cs" />
     <Compile Include="Steamworks\Interfaces\SteamNetworkingSockets\SteamNetworkingSockets012.cs" />
     <Compile Include="Steamworks\Interfaces\SteamNetworkingUtils\SteamNetworkingUtils003.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamNetworkingUtils\SteamNetworkingUtils004.cs" />
     <Compile Include="Steamworks\Interfaces\SteamParties\SteamParties002.cs" />
     <Compile Include="Steamworks\Interfaces\SteamRemotePlay\SteamRemotePlay001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamRemotePlay\SteamRemotePlay003.cs" />
