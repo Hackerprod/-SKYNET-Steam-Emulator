@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -152,6 +153,34 @@ namespace SKYNET.Managers
 
             ApplySession(session);
             return true;
+        }
+
+        // Tell the server we are going offline (game shutting down) so friends
+        // flip to offline immediately instead of waiting out the presence timeout.
+        // Time-boxed and best-effort so shutdown never hangs on a slow server.
+        public static void GoOffline()
+        {
+            if (!IsEnabled || string.IsNullOrWhiteSpace(SteamEmulator.SkyNetAccessToken))
+            {
+                return;
+            }
+
+            var thread = new Thread(() =>
+            {
+                try
+                {
+                    Send<VoidDto>(HttpMethod.Post, "api/presence/offline");
+                }
+                catch
+                {
+                }
+            })
+            {
+                IsBackground = true
+            };
+
+            thread.Start();
+            thread.Join(1500);
         }
 
         public static bool RefreshSelf(bool force = false)
@@ -1193,12 +1222,32 @@ namespace SKYNET.Managers
                             return false;
                         }
 
+                        if (response.Headers.TryGetValues("X-SKYNET-Avatar-SteamId", out var steamIdHeaders))
+                        {
+                            var returnedSteamId = steamIdHeaders.FirstOrDefault();
+                            if (!ulong.TryParse(returnedSteamId, out var parsedSteamId) || parsedSteamId != steamId)
+                            {
+                                SteamEmulator.Write("SkyNetApiClient", $"Rejected avatar identity mismatch requested={steamId} returned={returnedSteamId}");
+                                return false;
+                            }
+                        }
+
+                        var isDefault = response.Headers.TryGetValues("X-SKYNET-Avatar-Default", out var defaultHeaders) &&
+                            bool.TryParse(defaultHeaders.FirstOrDefault(), out var parsedDefault) && parsedDefault;
+
                         var data = response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
                         using (var stream = new MemoryStream(data))
                         {
                             var avatar = (Bitmap)Image.FromStream(stream);
                             SteamEmulator.SteamFriends.AddOrUpdateAvatar(avatar, steamId);
-                            SteamEmulator.SteamRemoteStorage.StoreAvatar(avatar, steamId.GetAccountID());
+                            if (isDefault)
+                            {
+                                SteamEmulator.SteamFriends.RemoveCachedAvatar(steamId);
+                            }
+                            else
+                            {
+                                SteamEmulator.SteamFriends.StoreCachedAvatar(avatar, steamId);
+                            }
                             avatar.Dispose();
                             return true;
                         }
@@ -1407,9 +1456,15 @@ namespace SKYNET.Managers
 
             if (session.User != null)
             {
-                if (session.User.SteamId != 0 && (ulong)SteamEmulator.SteamID != session.User.SteamId)
+                var previousSteamId = (ulong)SteamEmulator.SteamID;
+                var sessionSteamId = session.User.SteamId != 0
+                    ? session.User.SteamId
+                    : (session.User.AccountId != 0 ? (ulong)new CSteamID(session.User.AccountId) : 0UL);
+                if (sessionSteamId != 0 && previousSteamId != sessionSteamId)
                 {
-                    SteamEmulator.SteamID = new CSteamID(session.User.SteamId);
+                    SteamEmulator.SteamID = new CSteamID(sessionSteamId);
+                    SkyNetStateCache.ResetForIdentityChange();
+                    SteamEmulator.SteamFriends?.OnIdentityChanged(previousSteamId, sessionSteamId);
                 }
 
                 if (!string.IsNullOrWhiteSpace(session.User.PersonaName))
@@ -1806,6 +1861,7 @@ namespace SKYNET.Managers
             public string PersonaName { get; set; }
             public uint AppId { get; set; }
             public ulong LobbyId { get; set; }
+            public int PersonaState { get; set; }
             public int ChangeFlags { get; set; }
             public Dictionary<string, string> RichPresence { get; set; }
             public string StatName { get; set; }

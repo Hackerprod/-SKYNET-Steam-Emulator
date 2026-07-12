@@ -266,7 +266,20 @@ namespace SKYNET.Steamworks.Implementation
                     HTTPRequestHandle = request.Handle,
                 };
 
-                request.ResponseBytes = BuildLocalResponseBytes(request);
+                bool blockSdrConfig = IsSdrConfigRequest(request.URL) &&
+                    !SteamNetworkingSocketsSerialized.SecureCertMode;
+                if (blockSdrConfig)
+                {
+                    request.ResponseBytes = Array.Empty<byte>();
+                    data.RequestSuccessful = false;
+                    data.StatusCode = HTTPStatusCode.Code404NotFound;
+                    Write("SendHTTPRequest: SDR config disabled in insecure LAN mode");
+                }
+                else
+                {
+                    request.ResponseBytes = BuildLocalResponseBytes(request);
+                }
+
                 request.ResponseHeaders = BuildLocalResponseHeaders(request);
                 data.BodySize = (uint)request.ResponseBytes.Length;
                 pCallHandle = CallbackManager.AddCallbackResult(data);
@@ -497,6 +510,12 @@ namespace SKYNET.Steamworks.Implementation
         {
             string body = BuildLocalResponseBody(request.URL);
             return Encoding.UTF8.GetBytes(body);
+        }
+
+        private static bool IsSdrConfigRequest(string url)
+        {
+            return !string.IsNullOrEmpty(url) &&
+                url.IndexOf("ISteamApps/GetSDRConfig", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         private static string BuildLocalResponseBody(string url)

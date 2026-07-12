@@ -2,7 +2,10 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
 using SKYNET.Callback;
 using SKYNET.Helpers;
@@ -26,10 +29,11 @@ namespace SKYNET.Steamworks.Implementation
         public List<ulong> QueryingAvatar;
 
         private ConcurrentDictionary<ulong, ImageAvatar> Avatars;
+        private ConcurrentDictionary<int, ImageAvatar> AvatarsByHandle;
+        private readonly object AvatarSync = new object();
+        private readonly object AvatarCacheSync = new object();
         private int ImageIndex;
         private ImageAvatar DefaultAvatar;
-        private bool SelfAvatarSynced;
-        private ulong SelfAvatarSyncedSteamId;
 
         public SteamFriends()
         {
@@ -39,6 +43,7 @@ namespace SKYNET.Steamworks.Implementation
             Users = new List<SKYNET.Types.SteamUser>();
             QueryingAvatar = new List<SteamAPICall_t>();
             Avatars = new ConcurrentDictionary<ulong, ImageAvatar>();
+            AvatarsByHandle = new ConcurrentDictionary<int, ImageAvatar>();
             ImageIndex = 10;
             EnsureDefaultAvatar();
         }
@@ -51,20 +56,9 @@ namespace SKYNET.Steamworks.Implementation
 
             #endregion
 
-            #region Own Avatar
-
-            try
-            {
-                var Avatar = ImageHelper.GetDesktopWallpaper(true);
-                ImageAvatar avatar = new ImageAvatar(Avatar, ref ImageIndex);
-                Avatars.TryAdd((ulong)SteamEmulator.SteamID, avatar);
-            }
-            catch (Exception ex)
-            {
-                Write($"Error loading default avatar {ex}");
-            }
-
-            #endregion
+            // The server owns avatar identity. Loading the local wallpaper here
+            // used the pre-session SteamID and could assign our image to another
+            // account when the active web user changed.
         }
 
         public void ReportUserChanged(ulong SteamID, EPersonaChange changeFlags)
@@ -391,8 +385,9 @@ namespace SKYNET.Steamworks.Implementation
             else
             {
                 var friend = GetUser(steamIDFriend);
-                if (friend == null)
+                if (friend == null || friend.GameID == 0)
                 {
+                    // No live game (offline / not playing) -> not "in game".
                     pFriendGameInfo.GameID = 0;
                     pFriendGameInfo.GameIP = 0;
                     pFriendGameInfo.GamePort = 0;
@@ -455,20 +450,25 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetFriendPersonaState(ulong steamIDFriend)
         {
-            Write($"GetFriendPersonaState {steamIDFriend}");
-            EPersonaState Result = EPersonaState.k_EPersonaStateOnline;
+            EPersonaState Result = EPersonaState.k_EPersonaStateOffline;
             MutexHelper.Wait("Users", delegate
             {
                 if (steamIDFriend == SteamEmulator.SteamID)
                 {
                     Result = EPersonaState.k_EPersonaStateOnline;
+                    return;
                 }
-                else if (GetUser(steamIDFriend) != null)
+
+                var friend = GetUser(steamIDFriend);
+                if (friend != null)
                 {
-                    Result = EPersonaState.k_EPersonaStateOnline;
+                    // Reflect the real server-reported state; a disconnected friend
+                    // must show as offline, not permanently online.
+                    Result = (EPersonaState)friend.PersonaState;
                 }
             });
 
+            Write($"GetFriendPersonaState {steamIDFriend} = {Result}");
             return (int)Result;
         }
 
@@ -996,14 +996,8 @@ namespace SKYNET.Steamworks.Implementation
 
         public (int, int) GetImageSize(int index)
         {
-            var defaultAvatar = EnsureDefaultAvatar();
-            if (defaultAvatar.Small == index) return (32, 32);
-            if (defaultAvatar.Medium == index) return (64, 64);
-            if (defaultAvatar.Large == index) return (184, 184);
-
-            foreach (var KV in SteamFriends.Instance.Avatars)
+            if (AvatarsByHandle.TryGetValue(index, out var avatar))
             {
-                var avatar = KV.Value;
                 if (avatar.Small == index)  return (32, 32);
                 if (avatar.Medium == index) return (64, 64);
                 if (avatar.Large == index)  return (184, 184);
@@ -1014,29 +1008,36 @@ namespace SKYNET.Steamworks.Implementation
 
         public ImageAvatar GetImageAvatar(int index)
         {
-            var defaultAvatar = EnsureDefaultAvatar();
-            if (defaultAvatar.Small == index) return defaultAvatar;
-            if (defaultAvatar.Medium == index) return defaultAvatar;
-            if (defaultAvatar.Large == index) return defaultAvatar;
-
-            foreach (var KV in Avatars)
-            {
-                var avatar = KV.Value;
-                if (avatar.Small == index || avatar.Medium == index || avatar.Large == index)
-                {
-                    return avatar;
-                }
-            }
-            return null;
+            AvatarsByHandle.TryGetValue(index, out var avatar);
+            return avatar;
         }
 
         private ImageAvatar EnsureDefaultAvatar()
         {
             if (DefaultAvatar == null)
             {
-                DefaultAvatar = new ImageAvatar(null, ref ImageIndex);
+                lock (AvatarSync)
+                {
+                    if (DefaultAvatar == null)
+                    {
+                        DefaultAvatar = new ImageAvatar(null, AllocateImageHandle);
+                        RegisterAvatarHandles(DefaultAvatar);
+                    }
+                }
             }
             return DefaultAvatar;
+        }
+
+        private int AllocateImageHandle()
+        {
+            return Interlocked.Increment(ref ImageIndex);
+        }
+
+        private void RegisterAvatarHandles(ImageAvatar avatar)
+        {
+            AvatarsByHandle[avatar.Small] = avatar;
+            AvatarsByHandle[avatar.Medium] = avatar;
+            AvatarsByHandle[avatar.Large] = avatar;
         }
 
         private void RequestAvatar(ulong steamIDFriend)
@@ -1045,12 +1046,6 @@ namespace SKYNET.Steamworks.Implementation
             {
                 if (steamIDFriend == 0)
                 {
-                    return;
-                }
-
-                if (steamIDFriend == (ulong)SteamEmulator.SteamID)
-                {
-                    SyncSelfAvatarWithServer();
                     return;
                 }
 
@@ -1072,13 +1067,12 @@ namespace SKYNET.Steamworks.Implementation
                         {
                             AddOrUpdateAvatar(cachedAvatar, steamIDFriend);
                             cachedAvatar.Dispose();
-                            return;
                         }
 
-                        if (SkyNetApiClient.RefreshAvatar(steamIDFriend))
-                        {
-                            return;
-                        }
+                        // Disk is only a fast first frame. Revalidate every
+                        // process lifetime so changed/default avatars cannot
+                        // remain pinned forever.
+                        SkyNetApiClient.RefreshAvatar(steamIDFriend);
                     }
                     catch (Exception ex)
                     {
@@ -1105,41 +1099,26 @@ namespace SKYNET.Steamworks.Implementation
 
         public void SyncSelfAvatarWithServer()
         {
-            try
+            var steamId = (ulong)SteamEmulator.SteamID;
+            if (steamId != 0 && steamId != ulong.MaxValue)
             {
-                var steamId = (ulong)SteamEmulator.SteamID;
-                if (steamId == 0 || steamId == ulong.MaxValue)
-                {
-                    return;
-                }
-
-                if (!Avatars.ContainsKey(steamId))
-                {
-                    var bitmap = LoadSelfAvatarBitmap();
-                    AddOrUpdateAvatar(bitmap, steamId);
-                    bitmap.Dispose();
-                }
-
-                if (SelfAvatarSynced && SelfAvatarSyncedSteamId == steamId)
-                {
-                    return;
-                }
-
-                if (GetAvatarBitmap(steamId, out var avatar))
-                {
-                    var uploaded = SkyNetApiClient.UploadSelfAvatar(avatar);
-                    avatar.Dispose();
-
-                    if (uploaded)
-                    {
-                        SelfAvatarSynced = true;
-                        SelfAvatarSyncedSteamId = steamId;
-                    }
-                }
+                RequestAvatar(steamId);
             }
-            catch (Exception ex)
+        }
+
+        public void OnIdentityChanged(ulong previousSteamId, ulong currentSteamId)
+        {
+            if (previousSteamId == currentSteamId)
             {
-                Write($"SyncSelfAvatarWithServer {ex.Message}");
+                return;
+            }
+
+            Avatars.Clear();
+            AvatarsByHandle.Clear();
+            RegisterAvatarHandles(EnsureDefaultAvatar());
+            lock (QueryingAvatar)
+            {
+                QueryingAvatar.Clear();
             }
         }
 
@@ -1148,21 +1127,9 @@ namespace SKYNET.Steamworks.Implementation
             avatar = null;
             try
             {
-                var accountId = steamID.GetAccountID();
-                var basePath = Path.Combine(Common.GetPath(), "Data", "Images", "AvatarCache");
-                var candidates = new[]
+                var candidate = GetAvatarCachePath(steamID);
+                if (File.Exists(candidate))
                 {
-                    Path.Combine(basePath, accountId + ".jpg"),
-                    Path.Combine(basePath, accountId + ".png")
-                };
-
-                foreach (var candidate in candidates)
-                {
-                    if (!File.Exists(candidate))
-                    {
-                        continue;
-                    }
-
                     using (var loaded = (Bitmap)Image.FromFile(candidate))
                     {
                         avatar = new Bitmap(loaded);
@@ -1178,76 +1145,82 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        private Bitmap LoadSelfAvatarBitmap()
+        public void StoreCachedAvatar(Bitmap avatar, ulong steamID)
         {
-            if (TryLoadCachedAvatar((ulong)SteamEmulator.SteamID, out var cachedAvatar))
+            if (avatar == null || steamID == 0)
             {
-                return cachedAvatar;
+                return;
             }
 
-            var wallpaper = ImageHelper.GetDesktopWallpaper(true) ?? ImageHelper.GetDesktopWallpaper(false);
-            if (wallpaper != null)
+            var destination = GetAvatarCachePath(steamID);
+            var temporary = destination + "." + Guid.NewGuid().ToString("N") + ".tmp";
+            lock (AvatarCacheSync)
             {
-                return wallpaper;
-            }
-
-            return CreateDefaultAvatarBitmap();
-        }
-
-        private bool GetAvatarBitmap(ulong steamID, out Bitmap bitmap)
-        {
-            bitmap = null;
-            if (!Avatars.TryGetValue(steamID, out var avatar))
-            {
-                return false;
-            }
-
-            try
-            {
-                var bytes = avatar.GetImage(avatar.Large);
-                using (var image = new Bitmap(184, 184))
+                try
                 {
-                    var index = 0;
-                    for (var y = 0; y < image.Height; y++)
+                    Common.EnsureDirectoryExists(Path.GetDirectoryName(destination));
+                    avatar.Save(temporary, ImageFormat.Png);
+                    if (File.Exists(destination))
                     {
-                        for (var x = 0; x < image.Width; x++)
+                        try
                         {
-                            image.SetPixel(x, y, Color.FromArgb(bytes[index + 3], bytes[index], bytes[index + 1], bytes[index + 2]));
-                            index += 4;
+                            File.Replace(temporary, destination, null);
+                        }
+                        catch
+                        {
+                            File.Delete(destination);
+                            File.Move(temporary, destination);
                         }
                     }
-
-                    bitmap = new Bitmap(image);
+                    else
+                    {
+                        File.Move(temporary, destination);
+                    }
                 }
-
-                return true;
-            }
-            catch
-            {
-                bitmap = null;
-                return false;
+                finally
+                {
+                    if (File.Exists(temporary))
+                    {
+                        File.Delete(temporary);
+                    }
+                }
             }
         }
 
-        private static Bitmap CreateDefaultAvatarBitmap()
+        public void RemoveCachedAvatar(ulong steamID)
         {
-            var bitmap = new Bitmap(184, 184);
-            using (var graphics = Graphics.FromImage(bitmap))
-            using (var background = new SolidBrush(Color.FromArgb(24, 24, 27)))
-            using (var accent = new SolidBrush(Color.FromArgb(8, 145, 178)))
-            using (var textBrush = new SolidBrush(Color.White))
-            using (var font = new Font("Arial", 54, FontStyle.Bold, GraphicsUnit.Pixel))
+            if (steamID == 0)
             {
-                graphics.FillRectangle(background, 0, 0, bitmap.Width, bitmap.Height);
-                graphics.FillEllipse(accent, 42, 28, 100, 100);
-                var initial = string.IsNullOrWhiteSpace(SteamEmulator.PersonaName)
-                    ? "S"
-                    : SteamEmulator.PersonaName.Substring(0, 1).ToUpperInvariant();
-                var size = graphics.MeasureString(initial, font);
-                graphics.DrawString(initial, font, textBrush, (bitmap.Width - size.Width) / 2, 48);
+                return;
             }
 
-            return bitmap;
+            lock (AvatarCacheSync)
+            {
+                var path = GetAvatarCachePath(steamID);
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+            }
+        }
+
+        private static string GetAvatarCachePath(ulong steamID)
+        {
+            var server = (SteamEmulator.SkyNetServerUrl ?? string.Empty).Trim().TrimEnd('/').ToLowerInvariant();
+            byte[] hash;
+            using (var sha = SHA256.Create())
+            {
+                hash = sha.ComputeHash(Encoding.UTF8.GetBytes(server));
+            }
+
+            var namespaceKey = BitConverter.ToString(hash, 0, 8).Replace("-", string.Empty).ToLowerInvariant();
+            return Path.Combine(
+                Common.GetPath(),
+                "Data",
+                "Images",
+                "AvatarCache",
+                "server_" + namespaceKey,
+                steamID.ToString() + ".png");
         }
 
         public void AddOrUpdateAvatar(Bitmap image, ulong steamID)
@@ -1264,8 +1237,17 @@ namespace SKYNET.Steamworks.Implementation
             }
             else
             {
-                imageAvatar = new ImageAvatar(image, ref ImageIndex);
-                Avatars.TryAdd(steamID, imageAvatar);
+                var created = new ImageAvatar(image, AllocateImageHandle);
+                if (Avatars.TryAdd(steamID, created))
+                {
+                    imageAvatar = created;
+                    RegisterAvatarHandles(imageAvatar);
+                }
+                else
+                {
+                    imageAvatar = Avatars[steamID];
+                    imageAvatar.UpdateImage(image);
+                }
             }
 
             lock (QueryingAvatar)
@@ -1288,6 +1270,8 @@ namespace SKYNET.Steamworks.Implementation
 
         public class ImageAvatar
         {
+            private readonly object SyncRoot = new object();
+
             public int Small;
             public int Medium;
             public int Large;
@@ -1300,16 +1284,11 @@ namespace SKYNET.Steamworks.Implementation
             public uint Height;
             public byte[] Image;
 
-            public ImageAvatar(Bitmap image, ref int imageIndex)
+            public ImageAvatar(Bitmap image, Func<int> allocateHandle)
             {
-                imageIndex++;
-                Small = imageIndex;
-
-                imageIndex++;
-                Medium = imageIndex;
-
-                imageIndex++;
-                Large = imageIndex;
+                Small = allocateHandle();
+                Medium = allocateHandle();
+                Large = allocateHandle();
 
                 SetImage(image);
             }
@@ -1324,17 +1303,28 @@ namespace SKYNET.Steamworks.Implementation
                         return;
                     }
 
-                    var resized32 = ImageHelper.Resize(image, 32, 32); 
-                    SmallBytes = ImageHelper.ConvertToRGBA(resized32); 
+                    byte[] small;
+                    byte[] medium;
+                    byte[] large;
+                    byte[] encoded;
+                    using (var resized32 = ImageHelper.Resize(image, 32, 32))
+                    using (var resized64 = ImageHelper.Resize(image, 64, 64))
+                    using (var resized184 = ImageHelper.Resize(image, 184, 184))
+                    using (var resized = ImageHelper.Resize(image, 200, 200))
+                    {
+                        small = ImageHelper.ConvertToRGBA(resized32);
+                        medium = ImageHelper.ConvertToRGBA(resized64);
+                        large = ImageHelper.ConvertToRGBA(resized184);
+                        encoded = ImageHelper.ImageToBytes(resized);
+                    }
 
-                    var resized64 = ImageHelper.Resize(image, 64, 64); 
-                    MediumBytes = ImageHelper.ConvertToRGBA(resized64); 
-
-                    var resized184 = ImageHelper.Resize(image, 184, 184); 
-                    LargeBytes = ImageHelper.ConvertToRGBA(resized184); 
-
-                    var resized = ImageHelper.Resize(image, 200, 200); 
-                    Image = ImageHelper.ImageToBytes(resized);
+                    lock (SyncRoot)
+                    {
+                        SmallBytes = small;
+                        MediumBytes = medium;
+                        LargeBytes = large;
+                        Image = encoded;
+                    }
                 }
                 catch
                 {
@@ -1344,26 +1334,32 @@ namespace SKYNET.Steamworks.Implementation
 
             public byte[] GetImage()
             {
-                return Image ?? new byte[0];
+                lock (SyncRoot)
+                {
+                    return Image ?? new byte[0];
+                }
             }
 
 
             public byte[] GetImage(int iImage)
             {
-                if (iImage == Small)
+                lock (SyncRoot)
                 {
-                    if (SmallBytes == null || SmallBytes.Length == 0) SmallBytes = BlankRGBA(32, 32);
-                    return SmallBytes;
-                } 
-                if (iImage == Medium)
-                {
-                    if (MediumBytes == null || MediumBytes.Length == 0) MediumBytes = BlankRGBA(64, 64);
-                    return MediumBytes;
-                }
-                if (iImage == Large)
-                {
-                    if (LargeBytes == null || LargeBytes.Length == 0) LargeBytes = BlankRGBA(184, 184);
-                    return LargeBytes;
+                    if (iImage == Small)
+                    {
+                        if (SmallBytes == null || SmallBytes.Length == 0) SmallBytes = BlankRGBA(32, 32);
+                        return SmallBytes;
+                    }
+                    if (iImage == Medium)
+                    {
+                        if (MediumBytes == null || MediumBytes.Length == 0) MediumBytes = BlankRGBA(64, 64);
+                        return MediumBytes;
+                    }
+                    if (iImage == Large)
+                    {
+                        if (LargeBytes == null || LargeBytes.Length == 0) LargeBytes = BlankRGBA(184, 184);
+                        return LargeBytes;
+                    }
                 }
 
                 return BlankRGBA(32, 32);
@@ -1376,10 +1372,13 @@ namespace SKYNET.Steamworks.Implementation
 
             private void SetBlankImage()
             {
-                SmallBytes = BlankRGBA(32, 32);
-                MediumBytes = BlankRGBA(64, 64);
-                LargeBytes = BlankRGBA(184, 184);
-                Image = new byte[0];
+                lock (SyncRoot)
+                {
+                    SmallBytes = BlankRGBA(32, 32);
+                    MediumBytes = BlankRGBA(64, 64);
+                    LargeBytes = BlankRGBA(184, 184);
+                    Image = new byte[0];
+                }
             }
 
             private static byte[] BlankRGBA(int width, int height)

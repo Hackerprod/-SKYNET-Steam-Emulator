@@ -19,11 +19,10 @@ namespace SKYNET.Steamworks.Implementation
         // ---------------------------------------------------------------------
         // SDR SECURE-CERT MODE TOGGLE
         // ---------------------------------------------------------------------
-        // false (default, SAFE/REVERT):
-        //     GetCertAsync reports "no cert available" (k_EResultNoConnection).
-        //     The SDR CA in-memory patch is NOT applied. This is the behaviour
-        //     to fall back to if the signed-cert path causes problems (e.g. the
-        //     match-start crash). Nothing depends on a server restart.
+        // false (default, INSECURE LAN):
+        //     GetCertAsync succeeds with an empty certificate, matching the
+        //     Goldberg LAN behaviour. The native SDR CA is not patched and the
+        //     SKYNET server is never contacted for a certificate.
         //
         // true (SECURE MODE):
         //     GetCertAsync returns the real signed certificate issued by the
@@ -32,10 +31,11 @@ namespace SKYNET.Steamworks.Implementation
         //     cert against the emulator CA. Use this to verify GetCertAsync
         //     end to end.
         //
-        // Flip this single constant and rebuild to switch modes; the old
-        // (insecure) behaviour stays intact and revertible.
+        // Configure this with [Network Settings] SecureNetworking in the client
+        // INI. A game restart is required because the native networking library
+        // caches authentication state for the lifetime of the process.
         // ---------------------------------------------------------------------
-        private const bool SecureCertMode = true;
+        internal static bool SecureCertMode => SteamEmulator.SecureNetworking;
         private static readonly object CertCacheLock = new object();
         private static readonly TimeSpan CertCacheTtl = TimeSpan.FromMinutes(5);
         private static SteamNetworkingSocketsCert_t CachedCert;
@@ -61,7 +61,16 @@ namespace SKYNET.Steamworks.Implementation
 
         public SteamAPICall_t GetCertAsync()
         {
-            Write("GetCertAsync: queued");
+            if (!SecureCertMode)
+            {
+                Write("GetCertAsync: insecure LAN mode, returning successful empty certificate");
+                QueueCurrentNetworkStatusCallbacks();
+                QueueCurrentNetworkStatusCallbacks(250);
+                QueueCurrentNetworkStatusCallbacks(1500);
+                return CallbackManager.AddCallbackResult(CreateEmptyCertResult(EResult.k_EResultOK));
+            }
+
+            Write("GetCertAsync: secure SDR request queued");
 
             // Secure mode only: patch the SDR CA so the game trusts our cert.
             EnsureSecureCertPatcherStarted("GetCertAsync");
@@ -70,16 +79,16 @@ namespace SKYNET.Steamworks.Implementation
             QueueCurrentNetworkStatusCallbacks(250);
             QueueCurrentNetworkStatusCallbacks(1500);
 
-            var handle = CallbackManager.AddCallbackResult(CreateEmptyCertResult(), false);
+            var handle = CallbackManager.AddCallbackResult(CreateEmptyCertResult(EResult.k_EResultNoConnection), false);
             StartCertRequestWorker(handle);
             return handle;
         }
 
-        private static SteamNetworkingSocketsCert_t CreateEmptyCertResult()
+        private static SteamNetworkingSocketsCert_t CreateEmptyCertResult(EResult result)
         {
             return new SteamNetworkingSocketsCert_t
             {
-                m_eResult = EResult.k_EResultNoConnection,
+                m_eResult = result,
                 m_cbCert = 0,
                 m_certOrMsg = new byte[512],
                 m_caKeyID = 0,
@@ -107,15 +116,13 @@ namespace SKYNET.Steamworks.Implementation
 
         private SteamNetworkingSocketsCert_t BuildCertResult()
         {
-            var empty = CreateEmptyCertResult();
+            var empty = CreateEmptyCertResult(EResult.k_EResultNoConnection);
 
-            // REVERT PATH: without secure mode we advertise "no cert available".
-            // The game then falls back to its unauthenticated path (which is what
-            // LAN/bot matches use anyway) and never consumes a signed cert.
+            // Guard against the mode changing while the secure worker is queued.
             if (!SecureCertMode)
             {
-                Write("GetCertAsync: secure mode disabled, returning empty cert (revert path)");
-                return empty;
+                Write("GetCertAsync: switched to insecure LAN mode, returning successful empty certificate");
+                return CreateEmptyCertResult(EResult.k_EResultOK);
             }
 
             if (!SkyNetApiClient.IsEnabled)
@@ -229,6 +236,12 @@ namespace SKYNET.Steamworks.Implementation
         public int GetNetworkConfigJSON(IntPtr buf, uint cbBuf)
         {
             Write("GetNetworkConfigJSON");
+            if (!SecureCertMode)
+            {
+                Write("GetNetworkConfigJSON: disabled in insecure LAN mode");
+                return 0;
+            }
+
             EnsureSecureCertPatcherStarted("GetNetworkConfigJSON");
             return WriteNetworkConfigJSON(buf, cbBuf);
         }
@@ -247,6 +260,12 @@ namespace SKYNET.Steamworks.Implementation
         public int GetNetworkConfigJSON(IntPtr buf, uint cbBuf, string pszLauncherPartner)
         {
             Write($"GetNetworkConfigJSON (LauncherPartner = {pszLauncherPartner})");
+            if (!SecureCertMode)
+            {
+                Write("GetNetworkConfigJSON: disabled in insecure LAN mode");
+                return 0;
+            }
+
             EnsureSecureCertPatcherStarted("GetNetworkConfigJSON(partner)");
             return WriteNetworkConfigJSON(buf, cbBuf);
         }
@@ -270,14 +289,16 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool BAllowDirectConnectToPeer(IntPtr identity)
         {
-            Write("BAllowDirectConnectToPeer");
-            return false;
+            bool allow = !SecureCertMode;
+            Write($"BAllowDirectConnectToPeer = {allow}");
+            return allow;
         }
 
         public bool BeginAsyncRequestFakeIP(int nNumPorts)
         {
-            Write("BAllowDirectConnectToPeer");
-            return false;
+            bool accepted = !SecureCertMode;
+            Write($"BeginAsyncRequestFakeIP ({nNumPorts}) = {accepted}");
+            return accepted;
         }
 
         private int WriteNetworkConfigJSON(IntPtr buf, uint cbBuf)
@@ -353,7 +374,7 @@ namespace SKYNET.Steamworks.Implementation
                 m_eAvailAnyRelay = ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Current,
                 DebugMsg = new byte[256]
             };
-            byte[] message = Encoding.UTF8.GetBytes("OK");
+            byte[] message = Encoding.UTF8.GetBytes(SecureCertMode ? "Secure SDR" : "Insecure LAN");
             Array.Copy(message, status.DebugMsg, message.Length);
             return status;
         }
@@ -365,7 +386,7 @@ namespace SKYNET.Steamworks.Implementation
                 Avail = ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Current,
                 DebugMsg = new byte[256]
             };
-            byte[] message = Encoding.UTF8.GetBytes("OK");
+            byte[] message = Encoding.UTF8.GetBytes(SecureCertMode ? "Secure SDR" : "Insecure LAN");
             Array.Copy(message, status.DebugMsg, message.Length);
             return status;
         }

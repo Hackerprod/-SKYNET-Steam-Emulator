@@ -23,7 +23,16 @@ namespace SKYNET.Helper
 
             try
             {
-                string fileName = Path.Combine(modCommon.GetPath(), "SKYNET", "[SKYNET] steam_api.ini");
+                string fileName = Path.Combine(modCommon.GetPath(), "SKYNET", "steam_api.ini");
+
+                // Migrate an older "[SKYNET] steam_api.ini" to the new name so
+                // existing installs keep their configuration.
+                string legacyFileName = Path.Combine(modCommon.GetPath(), "SKYNET", "[SKYNET] steam_api.ini");
+                if (!File.Exists(fileName) && File.Exists(legacyFileName))
+                {
+                    try { File.Move(legacyFileName, fileName); }
+                    catch { }
+                }
 
                 if (!File.Exists(fileName))
                 {
@@ -41,7 +50,7 @@ namespace SKYNET.Helper
                     config.AppendLine($"Languaje = english");
                     config.AppendLine($"AppId = 570");
                     config.AppendLine("# Report every DLC as owned and installed (default). Set to false and list the");
-                    config.AppendLine("# owned DLC in the [DLC] section below (or in a \"[SKYNET] DLC.txt\" file) to restrict.");
+                    config.AppendLine("# owned DLC in the [DLC] section below (or in a \"DLC.txt\" file) to restrict.");
                     config.AppendLine("UnlockAllDLC = true");
                     config.AppendLine();
 
@@ -56,11 +65,14 @@ namespace SKYNET.Helper
                     config.AppendLine("[Network Settings]");
                     config.AppendLine("# When the emulator is in LAN mode (without dedicated server) it sends and receives data through broadcast ");
                     config.AppendLine("UseServerApi = true");
-                    config.AppendLine("SkyNetServerUrl = http://127.0.0.1:27080/");
-                    config.AppendLine("SkyNetPollIntervalMs = 50");
-                    config.AppendLine("SkyNetHttpTimeoutMs = 8000");
-                    config.AppendLine("SkyNetDiscoveryPort = 27081");
-                    config.AppendLine("SkyNetUseActiveWebUser = true");
+                    config.AppendLine("# Enable SKYNET-signed SDR certificates and patch the native SDR CA.");
+                    config.AppendLine("# Disabled by default for unauthenticated LAN play. Restart the game after changing it.");
+                    config.AppendLine("SecureNetworking = false");
+                    config.AppendLine("ServerUrl = http://127.0.0.1:27080/");
+                    config.AppendLine("PollIntervalMs = 50");
+                    config.AppendLine("HttpTimeoutMs = 8000");
+                    config.AppendLine("DiscoveryPort = 27081");
+                    config.AppendLine("UseActiveWebUser = true");
                     config.AppendLine("BroadCastPort = 28032");
                     config.AppendLine();
 
@@ -101,39 +113,52 @@ namespace SKYNET.Helper
                 {
                     switch (item.Key)
                     {
+                        case "SecureNetworking":
+                            if (bool.TryParse(item.Value.ToString(), out bool secureNetworking))
+                            {
+                                SteamEmulator.SecureNetworking = secureNetworking;
+                            }
+                            break;
                         case "UseServerApi":
                             if (bool.TryParse(item.Value.ToString(), out bool useServerApi))
                             {
                                 SteamEmulator.UseServerApi = useServerApi;
                             }
                             break;
+                        case "ServerUrl":
                         case "SkyNetServerUrl":
                             SteamEmulator.SkyNetServerUrl = item.Value.ToString();
                             break;
+                        case "PollIntervalMs":
                         case "SkyNetPollIntervalMs":
                             if (int.TryParse(item.Value.ToString(), out int pollIntervalMs))
                             {
                                 SteamEmulator.SkyNetPollIntervalMs = Math.Max(10, pollIntervalMs);
                             }
                             break;
+                        case "HttpTimeoutMs":
                         case "SkyNetHttpTimeoutMs":
                             if (int.TryParse(item.Value.ToString(), out int timeoutMs))
                             {
                                 SteamEmulator.SkyNetHttpTimeoutMs = Math.Max(250, timeoutMs);
                             }
                             break;
+                        case "DiscoveryPort":
                         case "SkyNetDiscoveryPort":
                             if (int.TryParse(item.Value.ToString(), out int discoveryPort))
                             {
                                 SteamEmulator.SkyNetDiscoveryPort = discoveryPort;
                             }
                             break;
+                        case "AccessToken":
                         case "SkyNetAccessToken":
                             SteamEmulator.SkyNetAccessToken = item.Value.ToString();
                             break;
+                        case "RefreshToken":
                         case "SkyNetRefreshToken":
                             SteamEmulator.SkyNetRefreshToken = item.Value.ToString();
                             break;
+                        case "UseActiveWebUser":
                         case "SkyNetUseActiveWebUser":
                             if (bool.TryParse(item.Value.ToString(), out bool useActiveWebUser))
                             {
@@ -186,15 +211,26 @@ namespace SKYNET.Helper
             changed |= MigrateSettingName("User Settings", "AccountId", "FallbackAccountId", GenerateStableAccountId().ToString());
             changed |= EnsureSetting("User Settings", "FallbackPersonaName", Environment.UserName);
             changed |= EnsureSetting("User Settings", "FallbackAccountId", GenerateStableAccountId().ToString());
-            changed |= EnsureSetting("Network Settings", "SkyNetPollIntervalMs", "50");
-            changed |= EnsureSetting("Network Settings", "SkyNetHttpTimeoutMs", "8000");
-            changed |= EnsureSetting("Network Settings", "SkyNetDiscoveryPort", "27081");
-            changed |= EnsureSetting("Network Settings", "SkyNetUseActiveWebUser", "true");
+
+            // Drop the "SkyNet" prefix from the network keys, preserving values.
+            changed |= MigrateSettingName("Network Settings", "SkyNetServerUrl", "ServerUrl", "http://127.0.0.1:27080/");
+            changed |= MigrateSettingName("Network Settings", "SkyNetPollIntervalMs", "PollIntervalMs", "50");
+            changed |= MigrateSettingName("Network Settings", "SkyNetHttpTimeoutMs", "HttpTimeoutMs", "8000");
+            changed |= MigrateSettingName("Network Settings", "SkyNetDiscoveryPort", "DiscoveryPort", "27081");
+            changed |= MigrateSettingName("Network Settings", "SkyNetUseActiveWebUser", "UseActiveWebUser", "true");
+
+            changed |= EnsureSetting("Network Settings", "PollIntervalMs", "50");
+            changed |= EnsureSetting("Network Settings", "SecureNetworking", "false");
+            changed |= EnsureSetting("Network Settings", "HttpTimeoutMs", "8000");
+            changed |= EnsureSetting("Network Settings", "DiscoveryPort", "27081");
+            changed |= EnsureSetting("Network Settings", "UseActiveWebUser", "true");
             changed |= EnsureSetting("Network Settings", "BroadCastPort", "28032");
-            changed |= MigrateSetting("Network Settings", "SkyNetPollIntervalMs", "1000", "50");
-            changed |= MigrateSetting("Network Settings", "SkyNetHttpTimeoutMs", "2000", "8000");
+            changed |= MigrateSetting("Network Settings", "PollIntervalMs", "1000", "50");
+            changed |= MigrateSetting("Network Settings", "HttpTimeoutMs", "2000", "8000");
             changed |= MigrateSetting("Network Settings", "BroadCastPort", "28025", "28032");
             changed |= RemoveSetting("Network Settings", "ServerIP");
+            changed |= RemoveSetting("Network Settings", "AccessToken");
+            changed |= RemoveSetting("Network Settings", "RefreshToken");
             changed |= RemoveSetting("Network Settings", "SkyNetAccessToken");
             changed |= RemoveSetting("Network Settings", "SkyNetRefreshToken");
             return changed;
@@ -257,7 +293,7 @@ namespace SKYNET.Helper
         /// <summary>
         /// Loads DLC ownership configuration:
         ///  - [Game Settings] UnlockAllDLC toggles reporting every DLC as owned (default true).
-        ///  - The optional [DLC] ini section and a "[SKYNET] DLC.txt" file list owned DLC as
+        ///  - The optional [DLC] ini section and a "DLC.txt" file list owned DLC as
         ///    "AppId = Name". If the DLC.txt file exists, unlock-all is forced off so only the
         ///    listed DLC are reported.
         /// </summary>
@@ -275,7 +311,13 @@ namespace SKYNET.Helper
                 }
 
                 // DLC entries declared in an external plain-text file.
-                string dlcFile = Path.Combine(modCommon.GetPath(), "SKYNET", "[SKYNET] DLC.txt");
+                string dlcFile = Path.Combine(modCommon.GetPath(), "SKYNET", "DLC.txt");
+                string legacyDlcFile = Path.Combine(modCommon.GetPath(), "SKYNET", "[SKYNET] DLC.txt");
+                if (!File.Exists(dlcFile) && File.Exists(legacyDlcFile))
+                {
+                    try { File.Move(legacyDlcFile, dlcFile); }
+                    catch { }
+                }
                 if (File.Exists(dlcFile))
                 {
                     DLCManager.UnlockAll = false;

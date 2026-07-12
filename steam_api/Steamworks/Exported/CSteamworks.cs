@@ -61,6 +61,7 @@ namespace SKYNET.Steamworks.Exported
         public static void Shutdown()
         {
             Write("Shutdown");
+            SkyNetApiClient.GoOffline();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

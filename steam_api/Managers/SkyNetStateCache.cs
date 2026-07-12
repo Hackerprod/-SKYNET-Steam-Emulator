@@ -45,6 +45,23 @@ namespace SKYNET.Managers
             return DateTime.UtcNow - refreshedAt > maxAge;
         }
 
+        public static void ResetForIdentityChange()
+        {
+            lock (SyncRoot)
+            {
+                Self = null;
+                Friends.Clear();
+                LastSelfRefresh = DateTime.MinValue;
+                LastFriendsRefresh = DateTime.MinValue;
+                SelfStatsDirty = false;
+                SelfAchievementsDirty = false;
+                EventCursor = string.Empty;
+                CurrentPlayers = 0;
+                SelfPlayerLevel = 0;
+                UserManager.ReplaceUsers(new List<SteamPlayer>());
+            }
+        }
+
         public static void ApplySelf(SkyNetApiClient.SkyNetUserDto user)
         {
             if (user == null)
@@ -349,6 +366,7 @@ namespace SKYNET.Managers
                 PersonaName = serverEvent.PersonaName ?? string.Empty,
                 GameID = serverEvent.AppId,
                 LobbyID = serverEvent.LobbyId,
+                PersonaState = serverEvent.PersonaState,
                 HasFriend = relationship == (int)EFriendRelationship.k_EFriendRelationshipFriend,
                 FriendRelationship = relationship,
                 RichPresence = serverEvent.RichPresence ?? new Dictionary<string, string>()
@@ -377,6 +395,7 @@ namespace SKYNET.Managers
                 PersonaName = user.PersonaName ?? string.Empty,
                 GameID = user.AppId,
                 LobbyID = user.LobbyId,
+                PersonaState = user.PersonaState,
                 FriendRelationship = user.FriendRelationship != 0
                     ? user.FriendRelationship
                     : (user.HasFriend || steamId == (ulong)SteamEmulator.SteamID

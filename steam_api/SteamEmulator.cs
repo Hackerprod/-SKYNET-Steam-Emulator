@@ -62,6 +62,9 @@ public class SteamEmulator
     public static bool RunCallbacks;
     public static bool ISteamHTTP;
     public static bool UseServerApi;
+    // Enables SKYNET-issued SDR certificates and the native CA patch. Keep this
+    // disabled for unauthenticated LAN transport unless secure SDR is required.
+    public static bool SecureNetworking;
     public static string SkyNetServerUrl;
     public static string SkyNetAccessToken;
     public static string SkyNetRefreshToken;
@@ -138,6 +141,7 @@ public class SteamEmulator
         LogToConsole = true;
         ISteamHTTP = true;
         UseServerApi = true;
+        SecureNetworking = false;
         SkyNetServerUrl = "http://127.0.0.1:27080/";
         SkyNetAccessToken = string.Empty;
         SkyNetRefreshToken = string.Empty;
@@ -163,6 +167,7 @@ public class SteamEmulator
             Log.Initialize();
 
             Write("Initializing Steam emulator");
+            Write($"Networking security mode: {(SecureNetworking ? "secure SDR certificate" : "insecure LAN (no SDR certificate)")}");
 
             //UserManager.Initialize();
             //NetworkManager.Initialize();
