@@ -4,59 +4,76 @@
     var user = Model.Profile.User;
     var stats = Model.Profile.Stats;
     var relationship = Model.Profile.FriendRelationship;
-    var relationLabel = relationship switch
-    {
-        2 => "Request received",
-        3 => "Friend",
-        4 => "Request sent",
-        _ => Model.Profile.IsSelf ? "Your profile" : "No relationship"
-    };
+    var isSelf = Model.Profile.IsSelf;
+    var achievementUnlocked = stats.Achievements.Count(a => a.Earned);
+    var achievementTotal = stats.Achievements.Count;
+    var totalStats = stats.Stats.Sum(s => s.Data);
 }
 
 <div class="space-y-6">
-    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
-    {
-        <div class="rounded-2xl border border-skynet-accent/30 bg-skynet-accent/10 px-5 py-3 text-sm font-bold text-blue-200">@Model.StatusMessage</div>
-    }
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    var isError = Model.StatusMessage.StartsWith("Could not") || Model.StatusMessage.StartsWith("Invalid");
+    <script>showToast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.StatusMessage)), '@(isError ? "error" : "success")')</script>
+}
 
-    <section class="rounded-2xl border border-skynet-border bg-skynet-card p-6">
-        <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-            <div class="flex min-w-0 items-start gap-5">
-                <img src="/api/users/@user.SteamId/avatar" alt="" class="h-24 w-24 shrink-0 rounded-xl border border-skynet-border bg-skynet-black object-cover" />
-                <div class="min-w-0">
-                    <p class="text-[10px] font-black uppercase tracking-[0.22em] text-skynet-accent">Profile</p>
-                    <h1 class="mt-2 truncate text-3xl font-black text-white">@user.PersonaName</h1>
-                    <p class="mt-2 text-sm text-skynet-muted">SteamID @user.SteamId</p>
-                    <p class="mt-1 text-sm text-skynet-muted">AccountID @user.AccountId - App @user.AppId</p>
-                    <div class="mt-4 flex flex-wrap gap-2">
-                        <span class="rounded border border-skynet-border px-3 py-1 text-[10px] font-black uppercase tracking-widest text-zinc-300">@relationLabel</span>
-                        <span class="rounded border border-skynet-accent/30 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-skynet-accent">Level @user.PlayerLevel</span>
-                    </div>
+    <!-- Profile Hero -->
+    <section class="relative overflow-hidden rounded-2xl border border-skynet-border bg-skynet-card">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.06),transparent_70%)]"></div>
+        <div class="relative z-10 p-8 flex flex-col md:flex-row items-center gap-8">
+            <div class="relative">
+                <img src="/api/users/@user.SteamId/avatar" alt="" class="w-28 h-28 rounded-2xl border-2 border-skynet-border object-cover bg-skynet-black" />
+                <div class="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-skynet-card border-2 border-skynet-border flex items-center justify-center">
+                    <div class="w-3 h-3 rounded-full @(user.PersonaState != 0 ? "bg-green-500" : "bg-gray-500")"></div>
                 </div>
             </div>
 
-            @if (!Model.Profile.IsSelf)
+            <div class="flex-1 text-center md:text-left min-w-0">
+                <div class="flex items-center justify-center md:justify-start gap-3">
+                    <h1 class="text-3xl font-black text-white truncate">@user.PersonaName</h1>
+                </div>
+                <p class="text-sm text-skynet-muted mt-1">SteamID @user.SteamId &middot; Account @user.AccountId</p>
+                <div class="flex flex-wrap justify-center md:justify-start gap-3 mt-4">
+                    <span class="inline-flex items-center gap-1.5 rounded-lg bg-skynet-black/60 border border-skynet-border px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest @(user.PersonaState != 0 ? "text-green-500" : "text-skynet-muted")">
+                        <i class="fas fa-circle text-[6px]"></i> @(user.PersonaState != 0 ? "Online" : "Offline")
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 rounded-lg bg-skynet-black/60 border border-skynet-border px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-skynet-accent">
+                        <i class="fas fa-layer-group text-[8px]"></i> Level @user.PlayerLevel
+                    </span>
+                    @if (user.AppId > 0)
+                    {
+                        <span class="inline-flex items-center gap-1.5 rounded-lg bg-skynet-black/60 border border-skynet-border px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-skynet-muted">
+                            <i class="fas fa-gamepad text-[8px]"></i> App @user.AppId
+                        </span>
+                    }
+                    <span class="inline-flex items-center gap-1.5 rounded-lg bg-skynet-black/60 border border-skynet-border px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-skynet-muted">
+                        @(relationship switch { 2 => "Request received", 3 => "Friend", 4 => "Request sent", _ => isSelf ? "Your profile" : "Not connected" })
+                    </span>
+                </div>
+            </div>
+
+            @if (!isSelf)
             {
-                <div class="flex flex-wrap gap-2">
+                <div class="flex gap-2 shrink-0">
                     @if (relationship == 0)
                     {
                         <form method="post" asp-page-handler="Request">
                             <input type="hidden" asp-for="SteamId" value="@user.SteamId" />
-                            <button class="rounded-lg bg-skynet-accent px-4 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-blue-600 transition-all">Add friend</button>
+                            <button class="rounded-lg bg-skynet-accent px-5 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-blue-600 transition-all"><i class="fas fa-user-plus mr-2"></i>Add Friend</button>
                         </form>
                     }
                     else if (relationship == 2)
                     {
                         <form method="post" asp-page-handler="Accept">
                             <input type="hidden" asp-for="SteamId" value="@user.SteamId" />
-                            <button class="rounded-lg bg-skynet-accent px-4 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-blue-600 transition-all">Accept request</button>
+                            <button class="rounded-lg bg-skynet-accent px-5 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-blue-600 transition-all"><i class="fas fa-user-check mr-2"></i>Accept</button>
                         </form>
                     }
                     @if (relationship == 2 || relationship == 3 || relationship == 4)
                     {
                         <form method="post" asp-page-handler="Remove">
                             <input type="hidden" asp-for="SteamId" value="@user.SteamId" />
-                            <button class="rounded-lg border border-red-500/30 px-4 py-3 text-xs font-black uppercase tracking-widest text-red-300 hover:bg-red-500/10 transition-all">Remove</button>
+                            <button class="rounded-lg border border-red-500/30 px-5 py-3 text-xs font-black uppercase tracking-widest text-red-300 hover:bg-red-500/10 transition-all"><i class="fas fa-user-minus mr-2"></i>Remove</button>
                         </form>
                     }
                 </div>
@@ -64,51 +81,66 @@
         </div>
     </section>
 
+    <!-- Stats + Achievements -->
     <section class="grid gap-5 xl:grid-cols-[1fr_0.8fr]">
+        <!-- Stats -->
         <div class="rounded-2xl border border-skynet-border bg-skynet-card">
             <div class="border-b border-skynet-border px-5 py-4">
-                <h2 class="text-lg font-black text-white">Stats</h2>
-                <p class="text-xs text-skynet-muted">Saved values in the backend for this user.</p>
+                <h2 class="text-sm font-black uppercase tracking-widest text-white">Stats</h2>
+                <p class="text-xs text-skynet-muted mt-1">Backend persisted values.</p>
             </div>
-            <div class="divide-y divide-skynet-border">
-                @if (stats.Stats.Count == 0)
-                {
-                    <p class="px-5 py-6 text-sm text-skynet-muted">No saved stats.</p>
-                }
-                @foreach (var stat in stats.Stats.OrderBy(stat => stat.Name))
-                {
-                    <div class="flex items-center justify-between px-5 py-3">
-                        <span class="text-sm font-semibold text-zinc-200">@stat.Name</span>
-                        <span class="font-mono text-sm text-skynet-accent">@stat.Data</span>
-                    </div>
-                }
-            </div>
+            @if (stats.Stats.Count == 0)
+            {
+                <p class="px-5 py-6 text-sm text-skynet-muted">No saved stats.</p>
+            }
+            else
+            {
+                <div class="grid grid-cols-2 gap-px bg-skynet-border">
+                    @foreach (var stat in stats.Stats.OrderBy(s => s.Name))
+                    {
+                        <div class="bg-skynet-card p-4 text-center">
+                            <p class="text-2xl font-black text-skynet-accent">@stat.Data.ToString("N0")</p>
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-skynet-muted mt-1">@stat.Name</p>
+                        </div>
+                    }
+                </div>
+            }
         </div>
 
+        <!-- Achievements -->
         <div class="rounded-2xl border border-skynet-border bg-skynet-card">
-            <div class="border-b border-skynet-border px-5 py-4">
-                <h2 class="text-lg font-black text-white">Achievements</h2>
-                <p class="text-xs text-skynet-muted">Persisted progress summary.</p>
-            </div>
-            <div class="divide-y divide-skynet-border">
-                @if (stats.Achievements.Count == 0)
+            <div class="border-b border-skynet-border px-5 py-4 flex items-center justify-between">
+                <h2 class="text-sm font-black uppercase tracking-widest text-white">Achievements</h2>
+                @if (achievementTotal > 0)
                 {
-                    <p class="px-5 py-6 text-sm text-skynet-muted">No saved achievements.</p>
-                }
-                @foreach (var achievement in stats.Achievements.OrderBy(achievement => achievement.Name))
-                {
-                    var progress = achievement.MaxProgress == 0 ? (achievement.Earned ? 100 : 0) : (int)Math.Min(100, (achievement.Progress * 100UL) / achievement.MaxProgress);
-                    <div class="px-5 py-4">
-                        <div class="flex items-center justify-between gap-3">
-                            <p class="truncate text-sm font-bold text-white">@achievement.Name</p>
-                            <span class="rounded border border-skynet-border px-2 py-0.5 text-[10px] font-black uppercase tracking-widest @(achievement.Earned ? "text-skynet-accent" : "text-skynet-muted")">@(achievement.Earned ? "OK" : "LOCK")</span>
-                        </div>
-                        <div class="mt-3 h-1.5 rounded bg-skynet-dark">
-                            <div class="h-1.5 rounded bg-skynet-accent" style="width:@progress%"></div>
-                        </div>
-                    </div>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-skynet-accent">@achievementUnlocked / @achievementTotal</span>
                 }
             </div>
+            @if (stats.Achievements.Count == 0)
+            {
+                <p class="px-5 py-6 text-sm text-skynet-muted">No saved achievements.</p>
+            }
+            else
+            {
+                <div class="divide-y divide-skynet-border">
+                    @foreach (var achievement in stats.Achievements.OrderByDescending(a => a.Earned).ThenByDescending(a => a.Progress).Take(8))
+                    {
+                        var progress = achievement.MaxProgress == 0 ? (achievement.Earned ? 100 : 0) : (int)Math.Min(100, (achievement.Progress * 100UL) / achievement.MaxProgress);
+                        <div class="px-5 py-3">
+                            <div class="flex items-center justify-between gap-3">
+                                <p class="truncate text-sm font-bold text-white">@achievement.Name</p>
+                                <span class="shrink-0 rounded px-2 py-0.5 text-[10px] font-black uppercase @(achievement.Earned ? "bg-skynet-accent/10 text-skynet-accent border border-skynet-accent/20" : "text-skynet-muted border border-skynet-border")">@(achievement.Earned ? "OK" : "LOCK")</span>
+                            </div>
+                            @if (!achievement.Earned && achievement.MaxProgress > 0)
+                            {
+                                <div class="mt-2 h-1 rounded bg-skynet-dark overflow-hidden">
+                                    <div class="h-full rounded bg-skynet-accent" style="width:@progress%"></div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
         </div>
     </section>
 </div>

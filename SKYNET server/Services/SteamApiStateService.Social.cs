@@ -13,6 +13,14 @@ public sealed partial class SteamApiStateService
                 return new List<SkyNetUserDto>();
             }
 
+            foreach (var account in _state.WebAccounts.Values)
+            {
+                if (!_state.Users.ContainsKey(account.SteamId))
+                {
+                    EnsureUser(account.SteamId, SteamIdToAccountId(account.SteamId), DefaultAppId, account.Username);
+                }
+            }
+
             return _state.Users.Values
                 .OrderBy(u => u.PersonaName)
                 .Select(user => CloneUserForViewerLocked(user, session!.SteamId))
@@ -319,7 +327,7 @@ public sealed partial class SteamApiStateService
     }
 
     // Fills the viewer-facing GameState/HeroId from live presence + active match,
-    // so friends see "en partida (héroe X)" / "en menú" / "offline" instead of a
+    // so friends see "in match (hero X)" / "in menu" / "offline" instead of a
     // bare online flag with stale rich presence.
     private void ApplyDerivedPresenceLocked(SkyNetUserDto clone)
     {

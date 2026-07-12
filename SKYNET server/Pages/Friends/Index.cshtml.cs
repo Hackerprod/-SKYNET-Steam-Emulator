@@ -29,7 +29,7 @@ public class IndexModel : PageModel
 
     public IActionResult OnGet()
     {
-        ViewData["Title"] = "Amigos";
+        ViewData["Title"] = "Friends";
         return LoadPage();
     }
 
@@ -37,8 +37,8 @@ public class IndexModel : PageModel
     {
         var token = GetToken();
         StatusMessage = _state.AddFriend(token, FriendIdentifier)
-            ? "Solicitud enviada."
-            : "No se pudo enviar la solicitud. Usa usuario, SteamID, AccountID o nombre exacto.";
+            ? "Request sent."
+            : "Could not send request. Use username, SteamID, AccountID or exact name.";
 
         return RedirectToPage();
     }
@@ -47,8 +47,8 @@ public class IndexModel : PageModel
     {
         var token = GetToken();
         StatusMessage = _state.RemoveFriend(token, FriendSteamId)
-            ? "Relacion actualizada."
-            : "No se pudo actualizar la relacion.";
+            ? "Relationship updated."
+            : "Could not update relationship.";
 
         return RedirectToPage();
     }

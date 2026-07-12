@@ -24,15 +24,15 @@ public class ProfileModel : PageModel
 
     public IActionResult OnGet()
     {
-        ViewData["Title"] = "Perfil";
+        ViewData["Title"] = "Profile";
         return LoadPage();
     }
 
     public IActionResult OnPostRequest()
     {
         StatusMessage = _state.SendFriendRequest(GetToken(), SteamId)
-            ? "Solicitud enviada."
-            : "No se pudo enviar la solicitud.";
+            ? "Request sent."
+            : "Could not send request.";
 
         return RedirectToPage(new { steamId = SteamId });
     }
@@ -40,8 +40,8 @@ public class ProfileModel : PageModel
     public IActionResult OnPostAccept()
     {
         StatusMessage = _state.AcceptFriendRequestFrom(GetToken(), SteamId)
-            ? "Solicitud aceptada."
-            : "No se pudo aceptar la solicitud.";
+            ? "Request accepted."
+            : "Could not accept request.";
 
         return RedirectToPage(new { steamId = SteamId });
     }
@@ -49,8 +49,8 @@ public class ProfileModel : PageModel
     public IActionResult OnPostRemove()
     {
         StatusMessage = _state.RemoveFriendOrRequest(GetToken(), SteamId)
-            ? "Relacion actualizada."
-            : "No se pudo actualizar la relacion.";
+            ? "Relationship updated."
+            : "Could not update relationship.";
 
         return RedirectToPage(new { steamId = SteamId });
     }

@@ -42,7 +42,7 @@
 
             @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
             {
-                <div class="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-300">@Model.ErrorMessage</div>
+                <script>showToast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ErrorMessage)), 'error')</script>
             }
 
             <form method="post" class="space-y-4">

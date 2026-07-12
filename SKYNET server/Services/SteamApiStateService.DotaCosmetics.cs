@@ -104,7 +104,7 @@ public sealed partial class SteamApiStateService
                 _state.DotaHeroSlots = heroSlots;
                 _state.DotaCosmetics.DotaPath = importPath;
                 _state.DotaCosmetics.LastImportAt = DateTime.UtcNow;
-                _state.DotaCosmetics.LastImportStatus = $"OK: {items.Count} items, {heroIds.Count} heroes desde {pakPath}";
+                _state.DotaCosmetics.LastImportStatus = $"OK: {items.Count} items, {heroIds.Count} heroes from {pakPath}";
                 TouchDotaEquipmentVersionLocked();
                 SaveState();
             }
@@ -112,7 +112,7 @@ public sealed partial class SteamApiStateService
             return new SkyNetDotaItemImportResultDto
             {
                 Success = true,
-                Message = "Catalogo de items actualizado.",
+                Message = "Item catalog updated.",
                 ItemCount = items.Count,
                 HeroCount = heroIds.Count,
                 SourcePath = pakPath
@@ -825,7 +825,7 @@ public sealed partial class SteamApiStateService
         var found = candidates.FirstOrDefault(File.Exists);
         if (found == null)
         {
-            throw new FileNotFoundException("No se encontro pak01_dir.vpk. Selecciona la raiz de Dota 2 o game\\dota.", candidates[0]);
+            throw new FileNotFoundException("pak01_dir.vpk not found. Select the Dota 2 root or game\\dota.", candidates[0]);
         }
 
         return found;
@@ -942,7 +942,7 @@ public sealed partial class SteamApiStateService
                 }
             }
 
-            throw new FileNotFoundException($"No se encontro {vpkPath} dentro de {dirPath}.", vpkPath);
+            throw new FileNotFoundException($"{vpkPath} not found inside {dirPath}.", vpkPath);
         }
 
         private static string BuildPath(string directory, string fileName, string extension)

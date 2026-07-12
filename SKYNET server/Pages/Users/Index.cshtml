@@ -2,19 +2,20 @@
 @model SKYNET_server.Pages.Users.IndexModel
 
 <div class="space-y-6">
-    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
-    {
-        <div class="rounded-2xl border border-skynet-accent/30 bg-skynet-accent/10 px-5 py-3 text-sm font-bold text-blue-200">@Model.StatusMessage</div>
-    }
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    var isError = Model.StatusMessage.StartsWith("Could not") || Model.StatusMessage.StartsWith("Invalid");
+    <script>showToast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.StatusMessage)), '@(isError ? "error" : "success")')</script>
+}
 
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
             <h1 class="text-3xl font-bold tracking-tight">User Network</h1>
-            <p class="text-skynet-muted mt-1">Connect with other active agents on the SKYNET network.</p>
+            <p class="text-skynet-muted mt-1">Browse players connected to the SKYNET network.</p>
         </div>
         <div class="relative w-full md:w-80">
             <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-skynet-muted text-xs"></i>
-            <input type="text" id="userSearch" class="w-full bg-skynet-card border border-skynet-border rounded-lg py-2 pl-10 pr-4 text-sm focus:border-skynet-accent outline-none transition text-gray-200" placeholder="Search by username or ID..." oninput="filterUsers(this.value)">
+            <input type="text" id="userSearch" class="w-full pl-10 pr-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="Search by username or ID..." oninput="filterUsers(this.value)">
         </div>
     </div>
 

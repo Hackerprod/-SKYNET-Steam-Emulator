@@ -31,24 +31,24 @@ public class RegisterModel : PageModel
     public void OnGet()
     {
         ViewData["UseAppShell"] = false;
-        ViewData["Title"] = "Registro";
+        ViewData["Title"] = "Register";
     }
 
     public IActionResult OnPost()
     {
         ViewData["UseAppShell"] = false;
-        ViewData["Title"] = "Registro";
+        ViewData["Title"] = "Register";
 
         if (!string.Equals(Password, ConfirmPassword, StringComparison.Ordinal))
         {
-            ErrorMessage = "La confirmacion no coincide.";
+            ErrorMessage = "Passwords do not match.";
             return Page();
         }
 
         var result = _state.RegisterWeb(Username, PersonaName, Password, SteamApiStateService.GetClientIp(Request));
         if (result == null)
         {
-            ErrorMessage = "No se pudo crear el usuario. Revisa los datos o usa otro nombre.";
+            ErrorMessage = "Could not create account. Check your data or try a different name.";
             return Page();
         }
 

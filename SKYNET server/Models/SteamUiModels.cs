@@ -41,6 +41,7 @@ public sealed class SteamGame
 
 public sealed class SteamFriend
 {
+    public ulong SteamId { get; init; }
     public string DisplayName { get; init; } = string.Empty;
     public string Initials { get; init; } = string.Empty;
     public string Status { get; init; } = string.Empty;

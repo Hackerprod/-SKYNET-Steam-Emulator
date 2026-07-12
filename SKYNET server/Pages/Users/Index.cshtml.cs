@@ -32,8 +32,8 @@ public class IndexModel : PageModel
     public IActionResult OnPostRequest()
     {
         StatusMessage = _state.SendFriendRequest(GetToken(), TargetSteamId)
-            ? "Solicitud enviada."
-            : "No se pudo enviar la solicitud.";
+            ? "Request sent."
+            : "Could not send request.";
 
         return RedirectToPage();
     }
@@ -41,8 +41,8 @@ public class IndexModel : PageModel
     public IActionResult OnPostAccept()
     {
         StatusMessage = _state.AcceptFriendRequestFrom(GetToken(), TargetSteamId)
-            ? "Solicitud aceptada."
-            : "No se pudo aceptar la solicitud.";
+            ? "Request accepted."
+            : "Could not accept request.";
 
         return RedirectToPage();
     }
@@ -50,8 +50,8 @@ public class IndexModel : PageModel
     public IActionResult OnPostRemove()
     {
         StatusMessage = _state.RemoveFriendOrRequest(GetToken(), TargetSteamId)
-            ? "Relacion actualizada."
-            : "No se pudo actualizar la relacion.";
+            ? "Relationship updated."
+            : "Could not update relationship.";
 
         return RedirectToPage();
     }

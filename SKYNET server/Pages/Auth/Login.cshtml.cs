@@ -39,7 +39,7 @@ public class LoginModel : PageModel
         var result = _state.LoginWeb(Username, Password, RememberMe, SteamApiStateService.GetClientIp(Request));
         if (result == null)
         {
-            ErrorMessage = "Credenciales invalidas.";
+            ErrorMessage = "Invalid credentials.";
             return Page();
         }
 

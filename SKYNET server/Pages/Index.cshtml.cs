@@ -30,6 +30,9 @@ public class IndexModel : PageModel
     [BindProperty]
     public string RequestId { get; set; } = string.Empty;
 
+    [BindProperty]
+    public ulong FriendSteamId { get; set; }
+
     [TempData]
     public string StatusMessage { get; set; } = string.Empty;
 
@@ -48,7 +51,7 @@ public class IndexModel : PageModel
     {
         var token = GetToken();
         var user = _state.UpdatePersona(token, PersonaName);
-        StatusMessage = user == null ? "No se pudo cambiar el nombre." : "Nombre actualizado.";
+        StatusMessage = user == null ? "Could not update name." : "Name updated.";
         return RedirectToPage();
     }
 
@@ -57,28 +60,28 @@ public class IndexModel : PageModel
         var token = GetToken();
         if (AvatarFile == null || AvatarFile.Length == 0)
         {
-            StatusMessage = "Selecciona una imagen.";
+            StatusMessage = "Select an image.";
             return RedirectToPage();
         }
 
         if (AvatarFile.Length > AvatarImage.MaxSourceBytes)
         {
-            StatusMessage = "La imagen es demasiado grande (máximo 20 MB).";
+            StatusMessage = "Image is too large (max 20 MB).";
             return RedirectToPage();
         }
 
         using var stream = new MemoryStream();
         AvatarFile.CopyTo(stream);
-        // El servidor comprime y recorta la imagen internamente, así que se
-        // acepta cualquier formato/tamaño razonable (PNG, JPG, WEBP, ...).
+        // The server compresses and crops the image internally, so any
+        // reasonable format/size is accepted (PNG, JPG, WEBP, ...).
         var updated = _state.PutSelfAvatar(token, new SkyNetAvatarUpdateDto
         {
             ContentBase64 = Convert.ToBase64String(stream.ToArray())
         });
 
         StatusMessage = updated
-            ? "Avatar actualizado."
-            : "No se pudo procesar la imagen. Usa un formato válido (PNG, JPG, WEBP...).";
+            ? "Avatar updated."
+            : "Could not process image. Use a valid format (PNG, JPG, WEBP...).";
         return RedirectToPage();
     }
 
@@ -88,7 +91,7 @@ public class IndexModel : PageModel
         var current = _state.GetStats(token, 0, true);
         if (current == null || string.IsNullOrWhiteSpace(StatName))
         {
-            StatusMessage = "No se pudo guardar el stat.";
+            StatusMessage = "Could not save stat.";
             return RedirectToPage();
         }
 
@@ -100,15 +103,15 @@ public class IndexModel : PageModel
             Stats = stats,
             Achievements = current.Achievements
         });
-        StatusMessage = "Stat actualizado.";
+        StatusMessage = "Stat updated.";
         return RedirectToPage();
     }
 
     public IActionResult OnPostAcceptFriend()
     {
         StatusMessage = _state.AcceptFriendRequest(GetToken(), RequestId)
-            ? "Solicitud aceptada."
-            : "No se pudo aceptar la solicitud.";
+            ? "Request accepted."
+            : "Could not accept request.";
 
         return RedirectToPage();
     }
@@ -116,8 +119,8 @@ public class IndexModel : PageModel
     public IActionResult OnPostDeclineFriend()
     {
         StatusMessage = _state.DeclineFriendRequest(GetToken(), RequestId)
-            ? "Solicitud rechazada."
-            : "No se pudo rechazar la solicitud.";
+            ? "Request declined."
+            : "Could not decline request.";
 
         return RedirectToPage();
     }
@@ -125,8 +128,17 @@ public class IndexModel : PageModel
     public IActionResult OnPostCancelFriend()
     {
         StatusMessage = _state.CancelFriendRequest(GetToken(), RequestId)
-            ? "Solicitud cancelada."
-            : "No se pudo cancelar la solicitud.";
+            ? "Request cancelled."
+            : "Could not cancel request.";
+
+        return RedirectToPage();
+    }
+
+    public IActionResult OnPostRemoveFriend()
+    {
+        StatusMessage = _state.RemoveFriend(GetToken(), FriendSteamId)
+            ? "Friend removed."
+            : "Could not remove friend.";
 
         return RedirectToPage();
     }

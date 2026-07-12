@@ -1,1 +1,1 @@
-dotnet run
+dotnet watch

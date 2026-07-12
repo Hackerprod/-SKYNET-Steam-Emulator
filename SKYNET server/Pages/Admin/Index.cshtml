@@ -1,14 +1,14 @@
 @page "/admin"
 @model SKYNET_server.Pages.Admin.IndexModel
 @{
-    var adminAccount = Model.Overview.Accounts.FirstOrDefault(account => account.IsAdmin);
 }
 
 <div class="space-y-6">
-    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
-    {
-        <div class="rounded-2xl border border-skynet-accent/30 bg-skynet-accent/10 px-5 py-3 text-sm font-bold text-blue-200">@Model.StatusMessage</div>
-    }
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    var isError = Model.StatusMessage.StartsWith("Could not") || Model.StatusMessage.StartsWith("Invalid");
+    <script>showToast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.StatusMessage)), '@(isError ? "error" : "success")')</script>
+}
 
     <section class="rounded-2xl border border-skynet-border bg-skynet-card p-6">
         <p class="text-[10px] font-black uppercase tracking-[0.22em] text-skynet-accent">Admin</p>
@@ -17,7 +17,7 @@
                 <h1 class="text-3xl font-black text-white">Local Control Panel</h1>
                 <p class="mt-2 max-w-2xl text-sm text-skynet-muted">Manage web accounts, names, friends, lobbies and servers registered by the emulator.</p>
             </div>
-            <div class="grid grid-cols-2 gap-2 md:grid-cols-4 xl:grid-cols-8">
+            <div class="grid grid-cols-2 gap-2 md:grid-cols-4 xl:grid-cols-6">
                 <div class="rounded-xl border border-skynet-border bg-skynet-black px-4 py-3 text-center">
                     <p class="text-2xl font-black text-white">@Model.Overview.Users.Count</p>
                     <p class="text-[10px] font-bold uppercase tracking-widest text-skynet-muted">Users</p>
@@ -28,7 +28,7 @@
                 </div>
                 <div class="rounded-xl border border-skynet-border bg-skynet-black px-4 py-3 text-center">
                     <p class="text-2xl font-black text-white">@Model.Overview.FriendLinks</p>
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-skynet-muted">Links</p>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-skynet-muted">Friend Links</p>
                 </div>
                 <div class="rounded-xl border border-skynet-border bg-skynet-black px-4 py-3 text-center">
                     <p class="text-2xl font-black text-white">@Model.Overview.PendingFriendRequests</p>
@@ -42,66 +42,47 @@
                     <p class="text-2xl font-black text-white">@Model.Overview.GameServers.Count</p>
                     <p class="text-[10px] font-bold uppercase tracking-widest text-skynet-muted">Servers</p>
                 </div>
-                <div class="rounded-xl border border-skynet-border bg-skynet-black px-4 py-3 text-center">
-                    <p class="text-2xl font-black text-white">@Model.Overview.DotaCosmetics.ItemCount</p>
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-skynet-muted">Items</p>
-                </div>
-                <div class="rounded-xl border border-skynet-border bg-skynet-black px-4 py-3 text-center">
-                    <p class="text-2xl font-black text-white">@Model.Overview.DotaCosmetics.EquippedCount</p>
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-skynet-muted">Equipped</p>
-                </div>
             </div>
         </div>
     </section>
 
     <section class="grid gap-5 xl:grid-cols-3">
-        <form method="post" asp-page-handler="Credentials" class="rounded-2xl border border-skynet-border bg-skynet-card p-5">
-            <h2 class="text-sm font-black uppercase tracking-widest text-white">Admin credentials</h2>
-            <p class="mt-1 text-xs text-skynet-muted">Current admin: @(adminAccount?.Username ?? "none")</p>
-            <label asp-for="AdminUsername" class="mt-5 block text-[10px] font-black uppercase tracking-widest text-skynet-muted">Username</label>
-            <input asp-for="AdminUsername" class="mt-2 w-full rounded-lg border border-skynet-border bg-skynet-black text-sm text-white focus:border-skynet-accent focus:ring-skynet-accent" />
-            <label asp-for="CurrentAdminPassword" class="mt-4 block text-[10px] font-black uppercase tracking-widest text-skynet-muted">Current password</label>
-            <input asp-for="CurrentAdminPassword" type="password" class="mt-2 w-full rounded-lg border border-skynet-border bg-skynet-black text-sm text-white focus:border-skynet-accent focus:ring-skynet-accent" />
+        <form method="post" asp-page-handler="ResetPassword" class="rounded-2xl border border-skynet-border bg-skynet-card p-5">
+            <h2 class="text-sm font-black uppercase tracking-widest text-white">Reset password</h2>
+            <label asp-for="ResetTargetSteamId" class="mt-5 block text-[10px] font-black uppercase tracking-widest text-skynet-muted">User</label>
+            <select asp-for="ResetTargetSteamId" class="mt-2 w-full skynet-select px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200">
+                @foreach (var user in Model.Overview.Users)
+                {
+                    <option value="@user.SteamId">@user.PersonaName (@user.AccountId)</option>
+                }
+            </select>
             <label asp-for="NewAdminPassword" class="mt-4 block text-[10px] font-black uppercase tracking-widest text-skynet-muted">New password</label>
-            <input asp-for="NewAdminPassword" type="password" class="mt-2 w-full rounded-lg border border-skynet-border bg-skynet-black text-sm text-white focus:border-skynet-accent focus:ring-skynet-accent" placeholder="Leave empty to keep unchanged" />
-            <button type="submit" class="mt-5 w-full rounded-lg bg-white text-skynet-black px-4 py-3 text-xs font-black uppercase tracking-widest hover:bg-gray-200 transition-all">Save</button>
+            <input asp-for="NewAdminPassword" type="password" class="mt-2 w-full px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="New password">
+            <button type="submit" class="mt-5 w-full rounded-lg bg-white text-skynet-black px-4 py-3 text-xs font-black uppercase tracking-widest hover:bg-gray-200 transition-all">Reset</button>
         </form>
 
         <form method="post" asp-page-handler="Persona" class="rounded-2xl border border-skynet-border bg-skynet-card p-5">
             <h2 class="text-sm font-black uppercase tracking-widest text-white">Rename</h2>
             <label asp-for="TargetSteamId" class="mt-5 block text-[10px] font-black uppercase tracking-widest text-skynet-muted">User</label>
-            <select asp-for="TargetSteamId" class="mt-2 w-full rounded-lg border border-skynet-border bg-skynet-black text-sm text-white focus:border-skynet-accent focus:ring-skynet-accent">
+            <select asp-for="TargetSteamId" class="mt-2 w-full skynet-select px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200">
                 @foreach (var user in Model.Overview.Users)
                 {
                     <option value="@user.SteamId">@user.PersonaName (@user.AccountId)</option>
                 }
             </select>
             <label asp-for="TargetPersonaName" class="mt-4 block text-[10px] font-black uppercase tracking-widest text-skynet-muted">New name</label>
-            <input asp-for="TargetPersonaName" class="mt-2 w-full rounded-lg border border-skynet-border bg-skynet-black text-sm text-white focus:border-skynet-accent focus:ring-skynet-accent" placeholder="Persona name" />
+            <input asp-for="TargetPersonaName" class="mt-2 w-full px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="Persona name" />
             <button type="submit" class="mt-5 w-full rounded-lg bg-white text-skynet-black px-4 py-3 text-xs font-black uppercase tracking-widest hover:bg-gray-200 transition-all">Rename</button>
         </form>
 
-        <div class="rounded-2xl border border-skynet-border bg-skynet-card p-5">
-            <h2 class="text-sm font-black uppercase tracking-widest text-white">Friendships</h2>
-            <form method="post" asp-page-handler="Link" class="mt-5 space-y-4">
-                <select asp-for="LeftSteamId" class="w-full rounded-lg border border-skynet-border bg-skynet-black text-sm text-white focus:border-skynet-accent focus:ring-skynet-accent">
-                    @foreach (var user in Model.Overview.Users)
-                    {
-                        <option value="@user.SteamId">@user.PersonaName (@user.AccountId)</option>
-                    }
-                </select>
-                <select asp-for="RightSteamId" class="w-full rounded-lg border border-skynet-border bg-skynet-black text-sm text-white focus:border-skynet-accent focus:ring-skynet-accent">
-                    @foreach (var user in Model.Overview.Users)
-                    {
-                        <option value="@user.SteamId">@user.PersonaName (@user.AccountId)</option>
-                    }
-                </select>
-                <div class="grid grid-cols-2 gap-2">
-                    <button type="submit" class="rounded-lg bg-skynet-accent px-4 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-blue-600 transition-all">Link</button>
-                    <button type="submit" formaction="?handler=Unlink" class="rounded-lg border border-red-500/30 px-4 py-3 text-xs font-black uppercase tracking-widest text-red-300 hover:bg-red-500/10 transition-all">Unlink</button>
-                </div>
-            </form>
-        </div>
+        <form method="post" asp-page-handler="CreateAccount" class="rounded-2xl border border-skynet-border bg-skynet-card p-5">
+            <h2 class="text-sm font-black uppercase tracking-widest text-white">Create Account</h2>
+            <label class="mt-5 block text-[10px] font-black uppercase tracking-widest text-skynet-muted">Username</label>
+            <input asp-for="CreateUsername" class="mt-2 w-full px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="johndoe" />
+            <label class="mt-4 block text-[10px] font-black uppercase tracking-widest text-skynet-muted">Password</label>
+            <input asp-for="CreatePassword" type="password" class="mt-2 w-full px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="••••••••">
+            <button type="submit" class="mt-5 w-full rounded-lg bg-white text-skynet-black px-4 py-3 text-xs font-black uppercase tracking-widest hover:bg-gray-200 transition-all">Create</button>
+        </form>
     </section>
 
     <section class="grid gap-5 xl:grid-cols-[1.4fr_1fr]">
@@ -113,22 +94,58 @@
                 <table class="min-w-full divide-y divide-skynet-border text-sm">
                     <thead class="bg-skynet-black text-[10px] uppercase tracking-widest text-skynet-muted">
                         <tr>
-                            <th class="px-4 py-3 text-left">Name</th>
+                            <th class="px-4 py-3 text-left">User</th>
                             <th class="px-4 py-3 text-left">SteamID</th>
                             <th class="px-4 py-3 text-left">AccountID</th>
-                            <th class="px-4 py-3 text-left">App</th>
-                            <th class="px-4 py-3 text-left">Lobby</th>
+                            <th class="px-4 py-3 text-left">Role</th>
+                            <th class="px-4 py-3 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-skynet-border">
                         @foreach (var user in Model.Overview.Users)
                         {
-                            <tr class="text-zinc-300">
-                                <td class="px-4 py-3 font-bold text-white">@user.PersonaName</td>
+                            var userAccount = Model.Overview.Accounts.FirstOrDefault(a => a.SteamId == user.SteamId);
+                            var isAdminUser = userAccount?.IsAdmin == true;
+                            var adminCount = Model.Overview.Accounts.Count(a => a.IsAdmin);
+
+                            <tr class="text-zinc-300 hover:bg-skynet-dark/50 transition">
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center gap-3">
+                                        <img src="/api/users/@user.SteamId/avatar" alt="" class="w-9 h-9 rounded-lg border border-skynet-border object-cover bg-skynet-black" />
+                                        <span class="font-bold text-white">@user.PersonaName</span>
+                                    </div>
+                                </td>
                                 <td class="px-4 py-3 font-mono text-xs">@user.SteamId</td>
                                 <td class="px-4 py-3">@user.AccountId</td>
-                                <td class="px-4 py-3">@user.AppId</td>
-                                <td class="px-4 py-3">@user.LobbyId</td>
+                                <td class="px-4 py-3">
+                                    @if (isAdminUser)
+                                    {
+                                        <span class="rounded bg-skynet-accent/10 border border-skynet-accent/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-skynet-accent">Admin</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="rounded border border-skynet-border px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-skynet-muted">User</span>
+                                    }
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center justify-end gap-2">
+                                        @if (userAccount != null)
+                                        {
+                                            <form method="post" asp-page-handler="ToggleAdmin">
+                                                <input type="hidden" name="ToggleAdminSteamId" value="@user.SteamId" />
+                                                <button type="submit" class="w-8 h-8 rounded-lg @(isAdminUser ? "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 hover:bg-yellow-500 hover:text-white" : "bg-skynet-accent/10 text-skynet-accent border border-skynet-accent/20 hover:bg-skynet-accent hover:text-white") flex items-center justify-center transition text-xs" title="@(isAdminUser ? "Remove admin" : "Make admin")">
+                                                    <i class="fas fa-crown text-[10px]"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        <form method="post" asp-page-handler="DeleteUser">
+                                            <input type="hidden" name="DeleteSteamId" value="@user.SteamId" />
+                                            <button type="button" onclick="showConfirm('Delete User','Delete @user.PersonaName? This action cannot be undone.','Delete','bg-red-500 text-white hover:bg-red-600',function(){this.closest('form').submit()}.bind(this))" class="w-8 h-8 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20 flex items-center justify-center hover:bg-red-500 hover:text-white transition text-xs" title="Delete user" @(isAdminUser && adminCount <= 1 ? "disabled" : "")>
+                                                <i class="fas fa-trash text-[10px]"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
                             </tr>
                         }
                     </tbody>
@@ -159,9 +176,17 @@
             <section class="rounded-2xl border border-skynet-border bg-skynet-card p-5">
                 <h2 class="text-sm font-black uppercase tracking-widest text-white">Runtime</h2>
                 <div class="mt-4 space-y-3 text-sm text-skynet-muted">
-                    <p>Active lobbies: @Model.Overview.Lobbies.Count</p>
-                    <p>Registered servers: @Model.Overview.GameServers.Count</p>
-                    <p>Profiles with stats: @Model.Overview.StatsProfiles</p>
+                    @{
+                        var uptime = DateTime.UtcNow - Model.Overview.ServerStartTime;
+                        var uptimeStr = uptime.TotalDays >= 1
+                            ? $"{(int)uptime.TotalDays}d {uptime.Hours}h {uptime.Minutes}m"
+                            : uptime.TotalHours >= 1
+                                ? $"{(int)uptime.TotalHours}h {uptime.Minutes}m"
+                                : $"{uptime.Minutes}m {uptime.Seconds}s";
+                    }
+                    <p>Uptime: <span class="text-white font-bold">@uptimeStr</span></p>
+                    <p>Profiles with stats: <span class="text-white font-bold">@Model.Overview.StatsProfiles</span></p>
+                    <p>Dota matches: <span class="text-white font-bold">@Model.Overview.DotaMatches.Count</span></p>
                 </div>
             </section>
         </div>
@@ -179,9 +204,9 @@
         </div>
 
         <div class="p-5">
-            <form method="post" asp-page-handler="ImportDotaItems" class="grid gap-3 lg:grid-cols-[1fr_auto]">
-                <input asp-for="DotaPath" class="rounded-lg border border-skynet-border bg-skynet-black text-sm text-white focus:border-skynet-accent focus:ring-skynet-accent" placeholder="Dota 2 path" />
-                <button type="submit" class="rounded-lg bg-skynet-accent px-5 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-blue-600 transition-all">Update DB</button>
+            <form method="post" asp-page-handler="ImportDotaItems" class="flex gap-3">
+                <input asp-for="DotaPath" class="flex-1 px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="Dota 2 path" />
+                <button type="submit" class="shrink-0 rounded-lg bg-skynet-accent px-5 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-blue-600 transition-all">Update DB</button>
             </form>
         </div>
     </section>

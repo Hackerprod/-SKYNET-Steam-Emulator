@@ -149,35 +149,21 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public bool ChangeAdminCredentials(string token, string username, string currentPassword, string nextPassword)
+    public bool ResetUserPassword(string token, ulong targetSteamId, string newPassword)
     {
         lock (_sync)
         {
-            if (!TryGetWebAccountByToken(token, out var account) ||
-                !account.IsAdmin ||
-                !VerifyPassword(currentPassword, account.PasswordHash))
-            {
+            if (!TryGetWebAccountByToken(token, out var admin) || !admin.IsAdmin)
                 return false;
-            }
 
-            var nextKey = NormalizeUsername(username);
-            if (!string.IsNullOrWhiteSpace(nextKey) && !string.Equals(nextKey, NormalizeUsername(account.Username), StringComparison.OrdinalIgnoreCase))
-            {
-                if (_state.WebAccounts.ContainsKey(nextKey))
-                {
-                    return false;
-                }
+            if (string.IsNullOrWhiteSpace(newPassword))
+                return false;
 
-                _state.WebAccounts.Remove(NormalizeUsername(account.Username));
-                account.Username = username.Trim();
-                _state.WebAccounts[nextKey] = account;
-            }
+            var target = _state.WebAccounts.Values.FirstOrDefault(a => a.SteamId == targetSteamId);
+            if (target == null)
+                return false;
 
-            if (!string.IsNullOrWhiteSpace(nextPassword))
-            {
-                account.PasswordHash = HashPassword(nextPassword);
-            }
-
+            target.PasswordHash = HashPassword(newPassword);
             SaveState();
             return true;
         }
@@ -282,7 +268,8 @@ public sealed partial class SteamApiStateService
                     .OrderByDescending(match => match.UpdatedAt)
                     .Take(12)
                     .Select(CloneDotaMatch)
-                    .ToList()
+                    .ToList(),
+                ServerStartTime = _serverStartTime
             };
         }
     }
@@ -378,6 +365,123 @@ public sealed partial class SteamApiStateService
             EnqueueRelationshipEventLocked(leftSteamId, rightSteamId, "friend_removed", FriendRelationshipNone, string.Empty);
             EnqueueRelationshipEventLocked(rightSteamId, leftSteamId, "friend_removed", FriendRelationshipNone, string.Empty);
             return true;
+        }
+    }
+
+    public bool AdminDeleteUser(string token, ulong steamId)
+    {
+        lock (_sync)
+        {
+            if (!IsWebAdmin(token) || !_state.Users.ContainsKey(steamId))
+            {
+                return false;
+            }
+
+            var account = _state.WebAccounts.Values.FirstOrDefault(a => a.SteamId == steamId);
+            if (account != null && account.IsAdmin)
+            {
+                var adminCount = _state.WebAccounts.Values.Count(a => a.IsAdmin);
+                if (adminCount <= 1)
+                {
+                    return false;
+                }
+            }
+
+            _state.Users.Remove(steamId);
+            _state.FriendLinks.Remove(steamId);
+            foreach (var links in _state.FriendLinks.Values)
+            {
+                links.Remove(steamId);
+            }
+            _state.Stats.Remove(steamId);
+            _state.Avatars.Remove(steamId);
+            _state.DotaEquipment.Remove(steamId);
+
+            if (account != null)
+            {
+                _state.WebAccounts.Remove(account.Username);
+            }
+
+            var pendingRequests = _state.FriendRequests
+                .Where(r => r.FromSteamId == steamId || r.ToSteamId == steamId && r.Status == "pending")
+                .ToList();
+            foreach (var req in pendingRequests)
+            {
+                req.Status = "cancelled";
+                req.RespondedAt = DateTime.UtcNow;
+            }
+
+            SaveState();
+            return true;
+        }
+    }
+
+    public bool AdminSetAdmin(string token, ulong steamId, bool makeAdmin)
+    {
+        lock (_sync)
+        {
+            if (!IsWebAdmin(token))
+            {
+                return false;
+            }
+
+            var account = _state.WebAccounts.Values.FirstOrDefault(a => a.SteamId == steamId);
+            if (account == null)
+            {
+                return false;
+            }
+
+            if (!makeAdmin)
+            {
+                var adminCount = _state.WebAccounts.Values.Count(a => a.IsAdmin);
+                if (adminCount <= 1 && account.IsAdmin)
+                {
+                    return false;
+                }
+            }
+
+            account.IsAdmin = makeAdmin;
+            SaveState();
+            return true;
+        }
+    }
+
+    public SkyNetWebAccountViewDto? AdminCreateWebAccount(string token, string username, string personaName, string password, bool isAdmin)
+    {
+        lock (_sync)
+        {
+            if (!IsWebAdmin(token))
+            {
+                return null;
+            }
+
+            var key = NormalizeUsername(username);
+            if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(personaName) || string.IsNullOrWhiteSpace(password))
+            {
+                return null;
+            }
+
+            if (_state.WebAccounts.ContainsKey(key))
+            {
+                return null;
+            }
+
+            var accountId = AllocateAccountIdLocked();
+            var steamId = ToSteamId(accountId);
+            var user = EnsureUser(steamId, accountId, DefaultAppId, personaName.Trim());
+            var account = new SkyNetWebAccountDto
+            {
+                Username = username.Trim(),
+                PasswordHash = HashPassword(password),
+                SteamId = steamId,
+                IsAdmin = isAdmin,
+                CreatedAt = DateTime.UtcNow,
+                LastLoginAt = DateTime.MinValue
+            };
+
+            _state.WebAccounts[key] = account;
+            SaveState();
+            return CloneWebAccountView(account);
         }
     }
 
@@ -592,6 +696,7 @@ public sealed partial class SteamApiStateService
 
         return new SteamFriend
         {
+            SteamId = user.SteamId,
             DisplayName = user.PersonaName,
             Initials = BuildInitials(user.PersonaName),
             Status = status.Contains("DOTA", StringComparison.OrdinalIgnoreCase) || status.Contains("game", StringComparison.OrdinalIgnoreCase) ? "In game" : status,

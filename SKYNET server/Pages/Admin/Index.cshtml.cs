@@ -13,13 +13,10 @@ public class IndexModel : PageModel
     public SkyNetDotaCosmeticOverviewDto Cosmetics { get; private set; } = new();
 
     [BindProperty]
-    public string AdminUsername { get; set; } = string.Empty;
-
-    [BindProperty]
-    public string CurrentAdminPassword { get; set; } = string.Empty;
-
-    [BindProperty]
     public string NewAdminPassword { get; set; } = string.Empty;
+
+    [BindProperty]
+    public ulong ResetTargetSteamId { get; set; }
 
     [BindProperty]
     public ulong TargetSteamId { get; set; }
@@ -28,10 +25,10 @@ public class IndexModel : PageModel
     public string TargetPersonaName { get; set; } = string.Empty;
 
     [BindProperty]
-    public ulong LeftSteamId { get; set; }
+    public string CreateUsername { get; set; } = string.Empty;
 
     [BindProperty]
-    public ulong RightSteamId { get; set; }
+    public string CreatePassword { get; set; } = string.Empty;
 
     [BindProperty]
     public string DotaPath { get; set; } = @"D:\Juegos\Steam\steamapps\common\dota 2 beta";
@@ -60,6 +57,12 @@ public class IndexModel : PageModel
     [BindProperty]
     public uint EquipmentStyle { get; set; }
 
+    [BindProperty]
+    public ulong DeleteSteamId { get; set; }
+
+    [BindProperty]
+    public ulong ToggleAdminSteamId { get; set; }
+
     [TempData]
     public string StatusMessage { get; set; } = string.Empty;
 
@@ -74,12 +77,12 @@ public class IndexModel : PageModel
         return LoadPage();
     }
 
-    public IActionResult OnPostCredentials()
+    public IActionResult OnPostResetPassword()
     {
         var token = GetToken();
-        StatusMessage = _state.ChangeAdminCredentials(token, AdminUsername, CurrentAdminPassword, NewAdminPassword)
-            ? "Credenciales admin actualizadas."
-            : "No se pudieron cambiar las credenciales admin.";
+        StatusMessage = _state.ResetUserPassword(token, ResetTargetSteamId, NewAdminPassword)
+            ? "Password reset."
+            : "Could not reset password.";
 
         return RedirectToPage();
     }
@@ -88,28 +91,19 @@ public class IndexModel : PageModel
     {
         var token = GetToken();
         StatusMessage = _state.AdminSetPersona(token, TargetSteamId, TargetPersonaName)
-            ? "Nombre de usuario actualizado."
-            : "No se pudo actualizar el nombre.";
+            ? "Username updated."
+            : "Could not update username.";
 
         return RedirectToPage();
     }
 
-    public IActionResult OnPostLink()
+    public IActionResult OnPostCreateAccount()
     {
         var token = GetToken();
-        StatusMessage = _state.AdminLinkFriends(token, LeftSteamId, RightSteamId)
-            ? "Relacion de amistad creada."
-            : "No se pudo crear la relacion.";
-
-        return RedirectToPage();
-    }
-
-    public IActionResult OnPostUnlink()
-    {
-        var token = GetToken();
-        StatusMessage = _state.AdminUnlinkFriends(token, LeftSteamId, RightSteamId)
-            ? "Relacion de amistad eliminada."
-            : "No se pudo eliminar la relacion.";
+        var result = _state.AdminCreateWebAccount(token, CreateUsername, CreateUsername, CreatePassword, false);
+        StatusMessage = result != null
+            ? $"Account '{result.Username}' created."
+            : "Could not create account. Username may already exist.";
 
         return RedirectToPage();
     }
@@ -119,8 +113,8 @@ public class IndexModel : PageModel
         var token = GetToken();
         var result = _state.ImportDotaCosmetics(token, new SkyNetDotaImportRequestDto { DotaPath = DotaPath });
         StatusMessage = result.Success
-            ? $"Catalogo actualizado: {result.ItemCount} items, {result.HeroCount} heroes."
-            : $"No se pudo importar el catalogo: {result.Message}";
+            ? $"Catalog updated: {result.ItemCount} items, {result.HeroCount} heroes."
+            : $"Could not import catalog: {result.Message}";
 
         return RedirectToPage(new { ItemSearch });
     }
@@ -138,8 +132,8 @@ public class IndexModel : PageModel
             DefIndex = EquipmentDefIndex,
             Style = EquipmentStyle
         })
-            ? "Item equipado."
-            : "No se pudo equipar el item.";
+            ? "Item equipped."
+            : "Could not equip item.";
 
         return RedirectToPage(new { ItemSearch });
     }
@@ -148,8 +142,30 @@ public class IndexModel : PageModel
     {
         var token = GetToken();
         StatusMessage = _state.ClearDotaEquipmentFromAdmin(token, EquipmentSteamId)
-            ? "Equipamiento del usuario limpiado."
-            : "No se pudo limpiar el equipamiento.";
+            ? "Equipment cleared."
+            : "Could not clear equipment.";
+
+        return RedirectToPage(new { ItemSearch });
+    }
+
+    public IActionResult OnPostDeleteUser()
+    {
+        var token = GetToken();
+        StatusMessage = _state.AdminDeleteUser(token, DeleteSteamId)
+            ? "User deleted."
+            : "Could not delete user. Ensure at least one admin remains.";
+
+        return RedirectToPage(new { ItemSearch });
+    }
+
+    public IActionResult OnPostToggleAdmin()
+    {
+        var token = GetToken();
+        var account = Overview.Accounts.FirstOrDefault(a => a.SteamId == ToggleAdminSteamId);
+        var makeAdmin = account != null && !account.IsAdmin;
+        StatusMessage = _state.AdminSetAdmin(token, ToggleAdminSteamId, makeAdmin)
+            ? (makeAdmin ? "User promoted to admin." : "Admin rights removed.")
+            : "Could not update admin status. Ensure at least one admin remains.";
 
         return RedirectToPage(new { ItemSearch });
     }
@@ -165,9 +181,9 @@ public class IndexModel : PageModel
 
         Overview = overview;
         Cosmetics = _state.GetDotaCosmeticsOverview(token, ItemSearch, null, 120) ?? new SkyNetDotaCosmeticOverviewDto();
-        AdminUsername = overview.Accounts.FirstOrDefault(account => account.IsAdmin)?.Username ?? string.Empty;
         DotaPath = string.IsNullOrWhiteSpace(overview.DotaCosmetics.DotaPath) ? DotaPath : overview.DotaCosmetics.DotaPath;
         EquipmentSteamId = overview.Users.FirstOrDefault()?.SteamId ?? 0;
+        ResetTargetSteamId = overview.Users.FirstOrDefault()?.SteamId ?? 0;
         return Page();
     }
 

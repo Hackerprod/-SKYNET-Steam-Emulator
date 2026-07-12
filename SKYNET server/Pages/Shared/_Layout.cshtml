@@ -81,7 +81,6 @@
                 </a>
                 <nav class="flex space-x-1 h-16">
                     <a asp-page="/Index" class="nav-link flex items-center px-4 text-xs font-bold uppercase tracking-widest @navClass("/Index")">Dashboard</a>
-                    <a asp-page="/Friends/Index" class="nav-link flex items-center px-4 text-xs font-bold uppercase tracking-widest @navClass("/Friends")">Friends</a>
                     <a asp-page="/Users/Index" class="nav-link flex items-center px-4 text-xs font-bold uppercase tracking-widest @navClass("/Users")">Users</a>
                     <a asp-page="/Games/Index" class="nav-link flex items-center px-4 text-xs font-bold uppercase tracking-widest @navClass("/Games")">Games</a>
                     <a asp-page="/Achievements/Index" class="nav-link flex items-center px-4 text-xs font-bold uppercase tracking-widest @navClass("/Achievements")">Stats</a>
@@ -133,5 +132,100 @@
     }
 
     @await RenderSectionAsync("Scripts", required: false)
+
+    <!-- Global Toast + Confirm -->
+    <div id="snToast" class="fixed top-6 right-6 z-[100] hidden max-w-sm w-full pointer-events-none">
+        <div class="rounded-xl border border-skynet-border bg-skynet-card shadow-2xl p-4 flex items-start gap-3 pointer-events-auto animate-sn-in">
+            <div id="snToastIcon" class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-sm"></div>
+            <p id="snToastMsg" class="text-sm font-semibold text-white flex-1 pt-1"></p>
+            <button onclick="hideToast()" class="text-skynet-muted hover:text-white transition text-xs pt-1"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+
+    <div id="snConfirm" class="fixed inset-0 z-[110] hidden">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="cancelConfirm()"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md px-4">
+            <div class="rounded-2xl border border-skynet-border bg-skynet-card p-6 shadow-2xl">
+                <div class="flex items-center gap-3 mb-4">
+                    <div id="snConfirmIcon" class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"></div>
+                    <h3 id="snConfirmTitle" class="text-lg font-black text-white"></h3>
+                </div>
+                <p id="snConfirmMsg" class="text-sm text-skynet-muted mb-6"></p>
+                <div class="flex gap-3 justify-end">
+                    <button onclick="cancelConfirm()" class="rounded-lg border border-skynet-border px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-skynet-muted hover:text-white hover:border-skynet-accent transition">Cancel</button>
+                    <button id="snConfirmBtn" onclick="acceptConfirm()" class="rounded-lg px-5 py-2.5 text-xs font-black uppercase tracking-widest transition"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @@keyframes sn-in { from { opacity: 0; transform: translateY(-12px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @@keyframes sn-out { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(-12px) scale(0.96); } }
+        .animate-sn-in { animation: sn-in 0.25s ease-out; }
+        .animate-sn-out { animation: sn-out 0.2s ease-in forwards; }
+    </style>
+
+    <script>
+        var _snTimer = null;
+        var _snConfirmCb = null;
+
+        function showToast(msg, type) {
+            type = type || 'info';
+            var el = document.getElementById('snToast');
+            var icon = document.getElementById('snToastIcon');
+            var msgEl = document.getElementById('snToastMsg');
+            clearTimeout(_snTimer);
+            el.classList.add('hidden');
+            el.querySelector('div').classList.remove('animate-sn-out');
+            msgEl.textContent = msg;
+            icon.className = 'w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-sm';
+            if (type === 'success') {
+                icon.classList.add('bg-green-500/10', 'text-green-500', 'border', 'border-green-500/20');
+                icon.innerHTML = '<i class="fas fa-check"></i>';
+            } else if (type === 'error') {
+                icon.classList.add('bg-red-500/10', 'text-red-500', 'border', 'border-red-500/20');
+                icon.innerHTML = '<i class="fas fa-times"></i>';
+            } else if (type === 'warning') {
+                icon.classList.add('bg-yellow-500/10', 'text-yellow-500', 'border', 'border-yellow-500/20');
+                icon.innerHTML = '<i class="fas fa-exclamation"></i>';
+            } else {
+                icon.classList.add('bg-skynet-accent/10', 'text-skynet-accent', 'border', 'border-skynet-accent/20');
+                icon.innerHTML = '<i class="fas fa-info"></i>';
+            }
+            el.classList.remove('hidden');
+            _snTimer = setTimeout(hideToast, 4000);
+        }
+
+        function hideToast() {
+            var el = document.getElementById('snToast');
+            el.querySelector('div').classList.add('animate-sn-out');
+            setTimeout(function () { el.classList.add('hidden'); el.querySelector('div').classList.remove('animate-sn-out'); }, 200);
+        }
+
+        function showConfirm(title, msg, btnText, btnClass, cb) {
+            _snConfirmCb = cb || null;
+            document.getElementById('snConfirmTitle').textContent = title;
+            document.getElementById('snConfirmMsg').textContent = msg;
+            var btn = document.getElementById('snConfirmBtn');
+            btn.textContent = btnText || 'Confirm';
+            btn.className = 'rounded-lg px-5 py-2.5 text-xs font-black uppercase tracking-widest transition ' + (btnClass || 'bg-red-500 text-white hover:bg-red-600');
+            document.getElementById('snConfirm').classList.remove('hidden');
+        }
+
+        function acceptConfirm() {
+            document.getElementById('snConfirm').classList.add('hidden');
+            if (_snConfirmCb) _snConfirmCb();
+        }
+
+        function cancelConfirm() {
+            document.getElementById('snConfirm').classList.add('hidden');
+            _snConfirmCb = null;
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') cancelConfirm();
+        });
+    </script>
 </body>
 </html>

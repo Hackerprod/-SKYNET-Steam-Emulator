@@ -45,6 +45,7 @@ public sealed partial class SteamApiStateService
     //   "Session:TimeoutMinutes" (default 30), "Presence:TimeoutSeconds" (default 90).
     private readonly TimeSpan _sessionTimeout;
     private readonly TimeSpan _presenceTimeout;
+    private static readonly DateTime _serverStartTime = DateTime.UtcNow;
 
     private ApiState _state = new();
     private long _nextEventSequence = 1;

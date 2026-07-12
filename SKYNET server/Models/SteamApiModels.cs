@@ -122,6 +122,7 @@ public sealed class SkyNetAdminOverviewDto
     public int StatsProfiles { get; set; }
     public SkyNetDotaCosmeticSummaryDto DotaCosmetics { get; set; } = new();
     public List<SkyNetDotaMatchDto> DotaMatches { get; set; } = new();
+    public DateTime ServerStartTime { get; set; }
 }
 
 public sealed class SkyNetFriendRequestDto
