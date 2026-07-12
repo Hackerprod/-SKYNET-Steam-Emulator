@@ -19,6 +19,14 @@ public sealed class SkyNetSessionDto
     public SkyNetUserDto User { get; set; } = new();
 }
 
+public sealed class SkyNetAvatarContentDto
+{
+    public ulong SteamId { get; set; }
+    public byte[] Content { get; set; } = Array.Empty<byte>();
+    public bool IsDefault { get; set; }
+    public string ETag { get; set; } = string.Empty;
+}
+
 public sealed class SkyNetUserDto
 {
     public uint AccountId { get; set; }
@@ -172,6 +180,7 @@ public sealed class SkyNetEventDto
     public string PersonaName { get; set; } = string.Empty;
     public uint AppId { get; set; }
     public ulong LobbyId { get; set; }
+    public int PersonaState { get; set; }
     public int ChangeFlags { get; set; }
     public Dictionary<string, string> RichPresence { get; set; } = new();
     public string StatName { get; set; } = string.Empty;

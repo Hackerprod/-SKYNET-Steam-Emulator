@@ -347,7 +347,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetGCExchangeResponseDto? ExchangeGCMessage(string token, SkyNetGCExchangeRequestDto request)
+    public SkyNetGCExchangeResponseDto? ExchangeGCMessage(string token, SkyNetGCExchangeRequestDto request, string? clientIp = null)
     {
         lock (_sync)
         {
@@ -365,14 +365,15 @@ public sealed partial class SteamApiStateService
                 AppId = appId,
                 SteamId = contextSteamId,
                 AccountId = SteamIdToAccountId(contextSteamId),
-                PersonaName = user?.PersonaName ?? sessionUser?.PersonaName ?? string.Empty
+                PersonaName = user?.PersonaName ?? sessionUser?.PersonaName ?? string.Empty,
+                ClientIp = clientIp ?? string.Empty
             };
 
             return _gameCoordinatorPlugins.Exchange(context, request);
         }
     }
 
-    public SkyNetGCExchangeResponseDto? PollGCMessages(string token, SkyNetGCPollRequestDto request)
+    public SkyNetGCExchangeResponseDto? PollGCMessages(string token, SkyNetGCPollRequestDto request, string? clientIp = null)
     {
         lock (_sync)
         {
@@ -390,7 +391,8 @@ public sealed partial class SteamApiStateService
                 AppId = appId,
                 SteamId = contextSteamId,
                 AccountId = SteamIdToAccountId(contextSteamId),
-                PersonaName = user?.PersonaName ?? sessionUser?.PersonaName ?? string.Empty
+                PersonaName = user?.PersonaName ?? sessionUser?.PersonaName ?? string.Empty,
+                ClientIp = clientIp ?? string.Empty
             };
 
             return _gameCoordinatorPlugins.Poll(context);

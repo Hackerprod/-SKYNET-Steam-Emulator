@@ -39,6 +39,13 @@ api.MapGet("/users/me", (HttpRequest request, SteamApiStateService state) =>
     return user == null ? Results.Unauthorized() : Results.Ok(user);
 });
 
+api.MapPost("/presence/offline", (HttpRequest request, SteamApiStateService state) =>
+{
+    return state.MarkSelfOffline(SteamApiStateService.GetBearerToken(request) ?? string.Empty)
+        ? Results.Ok()
+        : Results.Unauthorized();
+});
+
 api.MapGet("/users/{steamId}", (HttpRequest request, ulong steamId, SteamApiStateService state) =>
 {
     var user = state.GetUser(SteamApiStateService.GetBearerToken(request) ?? string.Empty, steamId);
@@ -126,7 +133,12 @@ api.MapPut("/presence", (HttpRequest request, SkyNetPresenceUpdateDto update, St
 
 api.MapGet("/users/{steamId}/avatar", (HttpRequest request, ulong steamId, SteamApiStateService state) =>
 {
-    return Results.File(state.GetAvatar(SteamApiStateService.GetBearerToken(request) ?? string.Empty, steamId), "image/png");
+    var avatar = state.GetAvatar(SteamApiStateService.GetBearerToken(request) ?? string.Empty, steamId);
+    request.HttpContext.Response.Headers.CacheControl = "no-cache, must-revalidate";
+    request.HttpContext.Response.Headers.ETag = $"\"{avatar.ETag}\"";
+    request.HttpContext.Response.Headers["X-SKYNET-Avatar-SteamId"] = avatar.SteamId.ToString();
+    request.HttpContext.Response.Headers["X-SKYNET-Avatar-Default"] = avatar.IsDefault ? "true" : "false";
+    return Results.File(avatar.Content, "image/png");
 });
 
 api.MapPut("/users/me/avatar", (HttpRequest request, SkyNetAvatarUpdateDto payload, SteamApiStateService state) =>
@@ -136,9 +148,14 @@ api.MapPut("/users/me/avatar", (HttpRequest request, SkyNetAvatarUpdateDto paylo
         : Results.BadRequest();
 });
 
-app.MapGet("/Images/AvatarCache/{accountId}.jpg", (uint accountId, SteamApiStateService state) =>
+app.MapGet("/Images/AvatarCache/{accountId}.jpg", (HttpRequest request, uint accountId, SteamApiStateService state) =>
 {
-    return Results.File(state.GetAvatarByAccountId(accountId), "image/png");
+    var avatar = state.GetAvatarByAccountId(accountId);
+    request.HttpContext.Response.Headers.CacheControl = "no-cache, must-revalidate";
+    request.HttpContext.Response.Headers.ETag = $"\"{avatar.ETag}\"";
+    request.HttpContext.Response.Headers["X-SKYNET-Avatar-SteamId"] = avatar.SteamId.ToString();
+    request.HttpContext.Response.Headers["X-SKYNET-Avatar-Default"] = avatar.IsDefault ? "true" : "false";
+    return Results.File(avatar.Content, "image/png");
 });
 
 api.MapGet("/stats/me", (HttpRequest request, SteamApiStateService state) =>
@@ -380,13 +397,13 @@ api.MapPost("/gamecoordinator/messages", (HttpRequest request, SkyNetGCMessageDt
 
 api.MapPost("/gamecoordinator/exchange", (HttpRequest request, SkyNetGCExchangeRequestDto payload, SteamApiStateService state) =>
 {
-    var response = state.ExchangeGCMessage(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload);
+    var response = state.ExchangeGCMessage(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload, SteamApiStateService.GetClientIp(request));
     return response == null ? Results.Unauthorized() : Results.Ok(response);
 });
 
 api.MapPost("/gamecoordinator/poll", (HttpRequest request, SkyNetGCPollRequestDto payload, SteamApiStateService state) =>
 {
-    var response = state.PollGCMessages(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload);
+    var response = state.PollGCMessages(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload, SteamApiStateService.GetClientIp(request));
     return response == null ? Results.Unauthorized() : Results.Ok(response);
 });
 

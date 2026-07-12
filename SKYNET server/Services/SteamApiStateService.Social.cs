@@ -325,9 +325,15 @@ public sealed partial class SteamApiStateService
     {
         if (!IsUserOnlineLocked(clone.SteamId))
         {
+            // Offline: report no game/lobby/rich presence so friends never show
+            // an offline user as "In game". GetFriendGamePlayed on the client is
+            // driven by AppId, so it must be zeroed here.
             clone.PersonaState = 0;
             clone.GameState = "offline";
             clone.HeroId = 0;
+            clone.AppId = 0;
+            clone.LobbyId = 0;
+            clone.RichPresence.Clear();
             return;
         }
 

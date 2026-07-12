@@ -1,4 +1,5 @@
 using SKYNET_server.Models;
+using System.Security.Cryptography;
 
 namespace SKYNET_server.Services;
 
@@ -64,6 +65,22 @@ public sealed partial class SteamApiStateService
         return false;
     }
 
+    private bool IsKnownDotaUser(ulong steamId)
+    {
+        lock (_sync)
+        {
+            return steamId != 0 && _state.Users.ContainsKey(steamId);
+        }
+    }
+
+    private bool IsOnlineDotaUser(ulong steamId)
+    {
+        lock (_sync)
+        {
+            return IsUserOnlineLocked(steamId);
+        }
+    }
+
     private void MarkUserOnlineLocked(ulong steamId)
     {
         if (_state.Users.TryGetValue(steamId, out var user) && user.PersonaState != 1)
@@ -106,6 +123,42 @@ public sealed partial class SteamApiStateService
             {
                 SaveState();
             }
+        }
+    }
+
+    // Explicit "going offline" from the client (e.g. on game shutdown). Drops the
+    // caller's live game sessions so presence flips to offline immediately instead
+    // of waiting out the presence timeout, and notifies friends.
+    public bool MarkSelfOffline(string token)
+    {
+        lock (_sync)
+        {
+            if (!TryGetSession(token, out var session))
+            {
+                return false;
+            }
+
+            var steamId = session!.SteamId;
+            var gameSessions = _sessions
+                .Where(kv => kv.Value.SteamId == steamId && !kv.Value.WebSession)
+                .Select(kv => kv.Key)
+                .ToList();
+            foreach (var key in gameSessions)
+            {
+                _sessions.Remove(key);
+            }
+
+            if (_state.Users.TryGetValue(steamId, out var user) && user.PersonaState != 0)
+            {
+                user.PersonaState = 0;
+                user.GameState = "offline";
+                user.HeroId = 0;
+                user.RichPresence.Clear();
+                EnqueueFriendEvents(steamId, "persona_state_changed", PersonaChangeStatus);
+            }
+
+            SaveState();
+            return true;
         }
     }
 
@@ -175,21 +228,21 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public byte[] GetAvatar(string token, ulong steamId)
+    public SkyNetAvatarContentDto GetAvatar(string token, ulong steamId)
     {
         lock (_sync)
         {
             if (_state.Avatars.TryGetValue(steamId, out var avatarBase64) &&
                 TryDecodeAvatar(avatarBase64, out var avatar))
             {
-                return avatar;
+                return BuildAvatarContent(steamId, avatar, false);
             }
 
-            return DefaultAvatarPng;
+            return BuildAvatarContent(steamId, DefaultAvatarPng, true);
         }
     }
 
-    public byte[] GetAvatarByAccountId(uint accountId)
+    public SkyNetAvatarContentDto GetAvatarByAccountId(uint accountId)
     {
         lock (_sync)
         {
@@ -197,10 +250,10 @@ public sealed partial class SteamApiStateService
             if (_state.Avatars.TryGetValue(steamId, out var avatarBase64) &&
                 TryDecodeAvatar(avatarBase64, out var avatar))
             {
-                return avatar;
+                return BuildAvatarContent(steamId, avatar, false);
             }
 
-            return DefaultAvatarPng;
+            return BuildAvatarContent(steamId, DefaultAvatarPng, true);
         }
     }
 
@@ -217,7 +270,14 @@ public sealed partial class SteamApiStateService
                 return false;
             }
 
-            _state.Avatars[user.SteamId] = Convert.ToBase64String(normalized);
+            var normalizedBase64 = Convert.ToBase64String(normalized);
+            if (_state.Avatars.TryGetValue(user.SteamId, out var current) &&
+                string.Equals(current, normalizedBase64, StringComparison.Ordinal))
+            {
+                return true;
+            }
+
+            _state.Avatars[user.SteamId] = normalizedBase64;
             SaveState();
             EnqueueFriendEvents(user.SteamId, "persona_state_changed", PersonaChangeAvatar);
             return true;
@@ -236,6 +296,17 @@ public sealed partial class SteamApiStateService
         {
             return false;
         }
+    }
+
+    private static SkyNetAvatarContentDto BuildAvatarContent(ulong steamId, byte[] content, bool isDefault)
+    {
+        return new SkyNetAvatarContentDto
+        {
+            SteamId = steamId,
+            Content = content,
+            IsDefault = isDefault,
+            ETag = Convert.ToHexString(SHA256.HashData(content)).ToLowerInvariant()
+        };
     }
 
     public SkyNetStatsEnvelopeDto? GetStats(string token, ulong steamId, bool currentUser)

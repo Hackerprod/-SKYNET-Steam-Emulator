@@ -10,6 +10,7 @@ public sealed partial class DotaGcBackend
     private const uint DotaPartyOwnerType = 2;
     private const uint DotaPartyInviteOwnerType = 4;
     private const uint EMsgGCInviteToParty = 4501;
+    private const uint EMsgGCInvitationCreated = 4502;
     private const uint EMsgGCPartyInviteResponse = 4503;
     private const uint EMsgGCKickFromParty = 4504;
     private const uint EMsgGCLeaveParty = 4505;
@@ -17,18 +18,36 @@ public sealed partial class DotaGcBackend
     private const uint EMsgClientToGCSetPartyLeader = 7588;
     private const uint EMsgClientToGCPingData = 8068;
     private const uint EMsgPartyReadyCheckResponse = 8263;
+    private const uint PartyInviteLifetimeSeconds = 600;
 
     public bool DotaPartyEmitCurrent()
     {
+        var emitted = false;
+        var store = PartyStoreOrThrow();
         var party = PartyStoreOrThrow().GetPartyByMember(SteamId);
-        if (party == null)
+        if (party != null)
         {
-            return false;
+            QueuePartySubscribe(SteamId, party);
+            QueuePartyUpdate(party);
+            emitted = true;
         }
 
-        QueuePartySubscribe(SteamId, party);
-        QueuePartyUpdate(party);
-        return true;
+        var cutoff = PartyInviteCutoff();
+        foreach (var invite in store.GetInvitesForTarget(SteamId, cutoff))
+        {
+            var invitedParty = store.GetParty(invite.PartyId);
+            if (invitedParty == null || invitedParty.Members.Count >= 5 ||
+                invitedParty.Members.Any(member => member.SteamId == SteamId))
+            {
+                store.TakeInvite(invite.PartyId, SteamId, 0);
+                continue;
+            }
+
+            QueuePartyInvite(SteamId, invitedParty, invite);
+            emitted = true;
+        }
+
+        return emitted;
     }
 
     public bool DotaPartyInviteToParty()
@@ -39,6 +58,12 @@ public sealed partial class DotaGcBackend
             return Ignore();
         }
 
+        if (targetSteamId == 0 || targetSteamId == SteamId ||
+            (UserExistsProvider != null && !UserExistsProvider(targetSteamId)))
+        {
+            return Reply(EMsgGCInvitationCreated, BuildInvitationCreated(0, targetSteamId, true));
+        }
+
         var ping = TryReadLengthDelimitedField(_requestBody, 5, out var pingBody)
             ? ReadPartyPingData(pingBody)
             : new DotaPartyPingData();
@@ -46,24 +71,41 @@ public sealed partial class DotaGcBackend
         var asCoach = ReadVarint(4, 0) != 0;
         var store = PartyStoreOrThrow();
         var party = store.EnsureParty(SteamId, AccountId, PersonaName, ping);
-        if (party.Members.Count >= 5)
+        if (party.Members.Count >= 5 || party.Members.Any(member => member.SteamId == targetSteamId))
         {
-            return Ignore();
+            return Reply(EMsgGCInvitationCreated, BuildInvitationCreated(0, targetSteamId, false));
         }
 
         QueuePartySubscribe(SteamId, party);
         QueuePartyUpdate(party);
 
-        var invite = store.CreateInvite(party.PartyId, targetSteamId, SteamId, PersonaName, teamId, asCoach);
+        var invite = store.CreateInvite(
+            party.PartyId,
+            targetSteamId,
+            SteamId,
+            PersonaName,
+            teamId,
+            asCoach,
+            out var replaced);
+        if (replaced != null)
+        {
+            QueuePartyInviteDestroy(targetSteamId, replaced);
+        }
+
         QueuePartyInvite(targetSteamId, party, invite);
-        return true;
+        return Reply(
+            EMsgGCInvitationCreated,
+            BuildInvitationCreated(
+                party.PartyId,
+                targetSteamId,
+                UserOnlineProvider != null && !UserOnlineProvider(targetSteamId)));
     }
 
     public bool DotaPartyInviteResponse()
     {
         var partyId = ReadVarint(1, 0);
         var accept = ReadVarint(2, 0) != 0;
-        if (partyId == 0 || !accept)
+        if (partyId == 0)
         {
             return Ignore();
         }
@@ -72,13 +114,36 @@ public sealed partial class DotaGcBackend
             ? ReadPartyPingData(pingBody)
             : new DotaPartyPingData();
         var store = PartyStoreOrThrow();
+        var invite = store.TakeInvite(partyId, SteamId, PartyInviteCutoff());
+        if (invite == null)
+        {
+            return Ignore();
+        }
+
+        QueuePartyInviteDestroy(SteamId, invite);
+        if (!accept)
+        {
+            return true;
+        }
+
+        var invitedParty = store.GetParty(partyId);
+        if (invitedParty == null || invitedParty.Members.Count >= 5)
+        {
+            return true;
+        }
+
         var current = store.GetPartyByMember(SteamId);
         if (current != null && current.PartyId != partyId)
         {
             DetachPartyMember(SteamId);
         }
 
-        var party = store.AddMember(partyId, SteamId, AccountId, PersonaName, ping);
+        foreach (var cancelled in store.DeleteInvitesForTarget(SteamId))
+        {
+            QueuePartyInviteDestroy(SteamId, cancelled);
+        }
+
+        var party = store.AddMember(partyId, SteamId, AccountId, PersonaName, ping, invite.AsCoach);
         if (party == null)
         {
             return Ignore();
@@ -86,6 +151,24 @@ public sealed partial class DotaGcBackend
 
         QueuePartySubscribe(SteamId, party);
         QueuePartyUpdate(party);
+        if (party.Members.Count >= 5)
+        {
+            foreach (var cancelled in store.DeleteInvitesForParty(party.PartyId))
+            {
+                QueuePartyInviteDestroy(cancelled.TargetSteamId, cancelled);
+            }
+        }
+
+        return true;
+    }
+
+    public bool DotaPartyTick()
+    {
+        foreach (var expired in PartyStoreOrThrow().PruneInvitesCreatedBefore(PartyInviteCutoff()))
+        {
+            QueuePartyInviteDestroy(expired.TargetSteamId, expired);
+        }
+
         return true;
     }
 
@@ -117,7 +200,8 @@ public sealed partial class DotaGcBackend
 
         var store = PartyStoreOrThrow();
         var party = store.GetPartyByMember(SteamId);
-        if (party == null)
+        if (party == null || party.LeaderSteamId != SteamId ||
+            party.Members.All(member => member.SteamId != leaderSteamId))
         {
             return Ignore();
         }
@@ -141,6 +225,14 @@ public sealed partial class DotaGcBackend
     {
         if (!TryReadFixed64Field(_requestBody, 1, out var kickedSteamId) &&
             !TryReadVarintField(_requestBody, 1, out kickedSteamId))
+        {
+            return Ignore();
+        }
+
+        var store = PartyStoreOrThrow();
+        var party = store.GetPartyByMember(SteamId);
+        if (party == null || party.LeaderSteamId != SteamId || kickedSteamId == party.LeaderSteamId ||
+            party.Members.All(member => member.SteamId != kickedSteamId))
         {
             return Ignore();
         }
@@ -228,10 +320,16 @@ public sealed partial class DotaGcBackend
         var recipients = party.Members.Select(member => member.SteamId).ToList();
         if (party.Members.Count <= 2)
         {
+            var invites = store.GetInvitesForParty(party.PartyId);
             store.DeleteParty(party.PartyId);
             foreach (var recipient in recipients)
             {
                 QueuePartyDestroy(recipient, party);
+            }
+
+            foreach (var invite in invites)
+            {
+                QueuePartyInviteDestroy(invite.TargetSteamId, invite);
             }
 
             return;
@@ -272,6 +370,11 @@ public sealed partial class DotaGcBackend
     private void QueuePartyInvite(ulong targetSteamId, DotaPartyState party, DotaPartyInvite invite)
     {
         QueuePartyClientProto(targetSteamId, EMsgSOCacheSubscribed, BuildPartyInviteSubscribed(party, invite));
+    }
+
+    private void QueuePartyInviteDestroy(ulong targetSteamId, DotaPartyInvite invite)
+    {
+        QueuePartyClientProto(targetSteamId, EMsgSOCacheUnsubscribed, BuildPartyInviteUnsubscribed(invite.InviteGid));
     }
 
     private void QueuePartyClientProto(ulong recipientSteamId, uint messageType, byte[] payload)
@@ -341,6 +444,22 @@ public sealed partial class DotaGcBackend
         WriteBytesField(response, 2, BuildSubscribedType(DotaPartyInviteObjectTypeId, BuildPartyInviteObject(party, invite)));
         WriteFixed64Field(response, 3, GenerateSteamObjectId());
         WriteBytesField(response, 4, BuildOwnerSoid(DotaPartyInviteOwnerType, invite.InviteGid));
+        return response.ToArray();
+    }
+
+    private static byte[] BuildPartyInviteUnsubscribed(ulong inviteGid)
+    {
+        var response = new List<byte>();
+        WriteBytesField(response, 2, BuildOwnerSoid(DotaPartyInviteOwnerType, inviteGid));
+        return response.ToArray();
+    }
+
+    private static byte[] BuildInvitationCreated(ulong groupId, ulong targetSteamId, bool userOffline)
+    {
+        var response = new List<byte>();
+        WriteVarintField(response, 1, groupId);
+        WriteFixed64Field(response, 2, targetSteamId);
+        WriteVarintField(response, 3, userOffline ? 1u : 0u);
         return response.ToArray();
     }
 
@@ -435,5 +554,11 @@ public sealed partial class DotaGcBackend
             RegionPings = ReadVarintFields(body, 9).Select(value => (uint)value).ToList(),
             RegionPingFailedBitmask = (uint)ReadVarintField(body, 10)
         };
+    }
+
+    private static uint PartyInviteCutoff()
+    {
+        var now = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        return now > PartyInviteLifetimeSeconds ? now - PartyInviteLifetimeSeconds : 0;
     }
 }

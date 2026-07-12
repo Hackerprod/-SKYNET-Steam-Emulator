@@ -68,7 +68,13 @@ public sealed class DotaPartyStore
         }
     }
 
-    public DotaPartyState? AddMember(ulong partyId, ulong steamId, uint accountId, string personaName, DotaPartyPingData ping)
+    public DotaPartyState? AddMember(
+        ulong partyId,
+        ulong steamId,
+        uint accountId,
+        string personaName,
+        DotaPartyPingData ping,
+        bool isCoach = false)
     {
         lock (_sync)
         {
@@ -84,7 +90,7 @@ public sealed class DotaPartyStore
             var position = party.Members.Any(member => member.SteamId == steamId)
                 ? party.Members.First(member => member.SteamId == steamId).Position
                 : party.Members.Select(member => member.Position).DefaultIfEmpty(-1).Max() + 1;
-            UpsertMemberLocked(connection, transaction, partyId, steamId, accountId, personaName, position, false, ping);
+            UpsertMemberLocked(connection, transaction, partyId, steamId, accountId, personaName, position, isCoach, ping);
             TouchPartyLocked(connection, transaction, partyId);
             DeleteInvitesForTargetLocked(connection, transaction, partyId, steamId);
             transaction.Commit();
@@ -229,13 +235,16 @@ public sealed class DotaPartyStore
         ulong senderSteamId,
         string senderName,
         uint teamId,
-        bool asCoach)
+        bool asCoach,
+        out DotaPartyInvite? replaced)
     {
         lock (_sync)
         {
             using var connection = OpenConnection();
             using var transaction = connection.BeginTransaction();
+            replaced = ReadInviteForTargetLocked(connection, partyId, targetSteamId, transaction);
             var inviteGid = NextIdLocked(connection, transaction, "party_invites", "invite_gid", 200000);
+            DeleteInviteForTargetLocked(connection, transaction, partyId, targetSteamId);
             using var command = connection.CreateCommand();
             command.Transaction = transaction;
             command.CommandText = """
@@ -253,6 +262,112 @@ public sealed class DotaPartyStore
             command.ExecuteNonQuery();
             transaction.Commit();
             return ReadInviteLocked(connection, inviteGid) ?? throw new InvalidOperationException("Party invite was not created.");
+        }
+    }
+
+    public DotaPartyInvite? GetInviteForTarget(ulong partyId, ulong targetSteamId, uint createdAtOrAfter)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            var invite = ReadInviteForTargetLocked(connection, partyId, targetSteamId);
+            return invite != null && invite.CreatedAt >= createdAtOrAfter ? invite : null;
+        }
+    }
+
+    public IReadOnlyList<DotaPartyInvite> GetInvitesForTarget(ulong targetSteamId, uint createdAtOrAfter = 0)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            return ReadInvitesLocked(
+                connection,
+                "target_steam_id = $target_steam_id AND created_at >= $created_at",
+                ("$target_steam_id", targetSteamId),
+                ("$created_at", createdAtOrAfter));
+        }
+    }
+
+    public IReadOnlyList<DotaPartyInvite> GetInvitesForParty(ulong partyId)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            return ReadInvitesLocked(connection, "party_id = $party_id", ("$party_id", partyId));
+        }
+    }
+
+    public DotaPartyInvite? TakeInvite(ulong partyId, ulong targetSteamId, uint createdAtOrAfter)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            using var transaction = connection.BeginTransaction();
+            var invite = ReadInviteForTargetLocked(connection, partyId, targetSteamId, transaction);
+            if (invite == null || invite.CreatedAt < createdAtOrAfter)
+            {
+                transaction.Commit();
+                return null;
+            }
+
+            DeleteInviteForTargetLocked(connection, transaction, partyId, targetSteamId);
+            transaction.Commit();
+            return invite;
+        }
+    }
+
+    public IReadOnlyList<DotaPartyInvite> DeleteInvitesForTarget(ulong targetSteamId)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            using var transaction = connection.BeginTransaction();
+            var invites = ReadInvitesLocked(
+                connection,
+                "target_steam_id = $target_steam_id",
+                transaction,
+                ("$target_steam_id", targetSteamId));
+            using var command = connection.CreateCommand();
+            command.Transaction = transaction;
+            command.CommandText = "DELETE FROM party_invites WHERE target_steam_id = $target_steam_id";
+            Add(command, "$target_steam_id", targetSteamId);
+            command.ExecuteNonQuery();
+            transaction.Commit();
+            return invites;
+        }
+    }
+
+    public IReadOnlyList<DotaPartyInvite> DeleteInvitesForParty(ulong partyId)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            using var transaction = connection.BeginTransaction();
+            var invites = ReadInvitesLocked(connection, "party_id = $party_id", transaction, ("$party_id", partyId));
+            using var command = connection.CreateCommand();
+            command.Transaction = transaction;
+            command.CommandText = "DELETE FROM party_invites WHERE party_id = $party_id";
+            Add(command, "$party_id", partyId);
+            command.ExecuteNonQuery();
+            transaction.Commit();
+            return invites;
+        }
+    }
+
+    public IReadOnlyList<DotaPartyInvite> PruneInvitesCreatedBefore(uint cutoff)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            using var transaction = connection.BeginTransaction();
+            var invites = ReadInvitesLocked(connection, "created_at < $cutoff", transaction, ("$cutoff", cutoff));
+            using var command = connection.CreateCommand();
+            command.Transaction = transaction;
+            command.CommandText = "DELETE FROM party_invites WHERE created_at < $cutoff";
+            Add(command, "$cutoff", cutoff);
+            command.ExecuteNonQuery();
+            transaction.Commit();
+            return invites;
         }
     }
 
@@ -387,6 +502,16 @@ public sealed class DotaPartyStore
             );
 
             CREATE INDEX IF NOT EXISTS idx_party_invites_target ON party_invites (target_steam_id);
+
+            DELETE FROM party_invites
+            WHERE invite_gid NOT IN (
+                SELECT MAX(invite_gid)
+                FROM party_invites
+                GROUP BY party_id, target_steam_id
+            );
+
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_party_invites_party_target
+            ON party_invites (party_id, target_steam_id);
             """;
         command.ExecuteNonQuery();
     }
@@ -492,8 +617,66 @@ public sealed class DotaPartyStore
             SenderName = Str(reader, "sender_name"),
             TeamId = U32(reader, "team_id"),
             AsCoach = U32(reader, "as_coach") != 0,
-            LowPriorityStatus = U32(reader, "low_priority_status") != 0
+            LowPriorityStatus = U32(reader, "low_priority_status") != 0,
+            CreatedAt = U32(reader, "created_at")
         };
+    }
+
+    private DotaPartyInvite? ReadInviteForTargetLocked(
+        SqliteConnection connection,
+        ulong partyId,
+        ulong targetSteamId,
+        SqliteTransaction? transaction = null)
+    {
+        return ReadInvitesLocked(
+            connection,
+            "party_id = $party_id AND target_steam_id = $target_steam_id",
+            transaction,
+            ("$party_id", partyId),
+            ("$target_steam_id", targetSteamId)).FirstOrDefault();
+    }
+
+    private static IReadOnlyList<DotaPartyInvite> ReadInvitesLocked(
+        SqliteConnection connection,
+        string where,
+        params (string Name, object Value)[] parameters)
+    {
+        return ReadInvitesLocked(connection, where, null, parameters);
+    }
+
+    private static IReadOnlyList<DotaPartyInvite> ReadInvitesLocked(
+        SqliteConnection connection,
+        string where,
+        SqliteTransaction? transaction,
+        params (string Name, object Value)[] parameters)
+    {
+        var invites = new List<DotaPartyInvite>();
+        using var command = connection.CreateCommand();
+        command.Transaction = transaction;
+        command.CommandText = $"SELECT * FROM party_invites WHERE {where} ORDER BY created_at DESC, invite_gid DESC";
+        foreach (var parameter in parameters)
+        {
+            Add(command, parameter.Name, parameter.Value);
+        }
+
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            invites.Add(new DotaPartyInvite
+            {
+                InviteGid = U64(reader, "invite_gid"),
+                PartyId = U64(reader, "party_id"),
+                TargetSteamId = U64(reader, "target_steam_id"),
+                SenderSteamId = U64(reader, "sender_steam_id"),
+                SenderName = Str(reader, "sender_name"),
+                TeamId = U32(reader, "team_id"),
+                AsCoach = U32(reader, "as_coach") != 0,
+                LowPriorityStatus = U32(reader, "low_priority_status") != 0,
+                CreatedAt = U32(reader, "created_at")
+            });
+        }
+
+        return invites;
     }
 
     private void UpsertMemberLocked(
@@ -563,6 +746,11 @@ public sealed class DotaPartyStore
     }
 
     private static void DeleteInvitesForTargetLocked(SqliteConnection connection, SqliteTransaction transaction, ulong partyId, ulong steamId)
+    {
+        DeleteInviteForTargetLocked(connection, transaction, partyId, steamId);
+    }
+
+    private static void DeleteInviteForTargetLocked(SqliteConnection connection, SqliteTransaction transaction, ulong partyId, ulong steamId)
     {
         using var command = connection.CreateCommand();
         command.Transaction = transaction;
@@ -685,6 +873,7 @@ public sealed class DotaPartyInvite
     public uint TeamId { get; init; }
     public bool AsCoach { get; init; }
     public bool LowPriorityStatus { get; init; }
+    public uint CreatedAt { get; init; }
 }
 
 public sealed class DotaPartyPingData

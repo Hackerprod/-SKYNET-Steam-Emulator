@@ -24,8 +24,11 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
     public static Func<ulong, string>? MatchSnapshotJsonProvider { get; set; }
     public static Func<ulong, string>? MatchSnapshotByLobbyJsonProvider { get; set; }
     public static Func<ulong, bool>? MatchSnapshotDeleteSink { get; set; }
+    public static Func<ulong, bool>? UserExistsProvider { get; set; }
+    public static Func<ulong, bool>? UserOnlineProvider { get; set; }
     public static DotaStatsStore? StatsStore { get; set; }
     public static DotaPartyStore? PartyStore { get; set; }
+    public static DotaLobbyInviteStore? LobbyInviteStore { get; set; }
 
     // Dumb-storage primitives for the Lua-owned equip logic: resolve item ids,
     // read/replace the persisted equipment list and query the catalog. Rules
@@ -173,6 +176,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
     public ulong SteamId => _context.SteamId;
     public string SteamIdString => _context.SteamId.ToString(System.Globalization.CultureInfo.InvariantCulture);
     public string PersonaName => _context.PersonaName;
+    public string ClientIp => _context.ClientIp ?? string.Empty;
     public ulong SourceJobId => _sourceJobId;
     public string BodyBase64 => Encode(_requestBody);
     public string BodyHex => Convert.ToHexString(_requestBody);
@@ -940,6 +944,18 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
     {
         return TryReadFixed64FieldAt(_requestBody, fieldNumber, occurrence, out var value)
             ? value.ToString(System.Globalization.CultureInfo.InvariantCulture)
+            : defaultValue;
+    }
+
+    public uint ReadFixed32(int fieldNumber, uint defaultValue = 0)
+    {
+        return ReadFixed32At(fieldNumber, 1, defaultValue);
+    }
+
+    public uint ReadFixed32At(int fieldNumber, int occurrence, uint defaultValue = 0)
+    {
+        return TryReadFixed32FieldAt(_requestBody, fieldNumber, occurrence, out var value)
+            ? value
             : defaultValue;
     }
 
@@ -3812,6 +3828,45 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
                 }
 
                 index += 8;
+            }
+            else if (!SkipField(source, ref index, wireType))
+            {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool TryReadFixed32FieldAt(byte[] source, int expectedFieldNumber, int occurrence, out uint value)
+    {
+        value = 0;
+        int seen = 0;
+        int index = 0;
+
+        while (source != null && index < source.Length)
+        {
+            if (!TryReadVarint(source, ref index, out ulong key))
+            {
+                return false;
+            }
+
+            int fieldNumber = (int)(key >> 3);
+            int wireType = (int)(key & 7);
+            if (wireType == 5)
+            {
+                if (index + 4 > source.Length)
+                {
+                    return false;
+                }
+
+                if (fieldNumber == expectedFieldNumber && ++seen == occurrence)
+                {
+                    value = BitConverter.ToUInt32(source, index);
+                    return true;
+                }
+
+                index += 4;
             }
             else if (!SkipField(source, ref index, wireType))
             {

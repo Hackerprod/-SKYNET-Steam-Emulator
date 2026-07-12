@@ -53,6 +53,7 @@ function login_from_nethook()
     if gc.ClientHello ~= nil then
         runtime.Log("GCClientHello handled by DotaGcBackend.ClientHello")
         if gc.ClientHello() then
+            dota_party_on_login()
             dota_lobby_on_client_hello()
             return true
         end
@@ -214,5 +215,8 @@ function handle()
 end
 
 function tick()
+    if gc.DotaPartyTick ~= nil then
+        gc.DotaPartyTick()
+    end
     dota_lobby_tick()
 end

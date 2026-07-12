@@ -133,6 +133,19 @@ local function current_name()
     return name
 end
 
+-- Source IP of the machine talking to the GC right now (the launcher's address
+-- as seen by the server). Empty when unavailable.
+local function current_ip()
+    return tostring(gc.ClientIp or "")
+end
+
+-- Only addresses another player can actually reach are useful for the connect
+-- string; loopback means "same machine as the SKYNET server", which a remote
+-- player cannot use.
+local function is_routable_ip(ip)
+    return ip ~= nil and ip ~= "" and ip ~= "127.0.0.1" and ip ~= "::1" and ip ~= "0.0.0.0"
+end
+
 local function bump_seq()
     local s = state()
     s.seq = (s.seq or 0) + 1
@@ -471,6 +484,88 @@ local function queue_proto(steam, message_type, payload)
     end
 
     return gc.QueueToString(steam, message_type, payload)
+end
+
+local function parse_json_table(json)
+    if json == nil or json == "" then
+        return nil
+    end
+
+    local ok, value = pcall(function() return runtime.JsonToTable(json) end)
+    return ok and value or nil
+end
+
+local function lobby_invite_records(json)
+    return parse_json_table(json) or {}
+end
+
+local function lobby_invite_object(record, metadata)
+    local parts = {
+        PB.vs(1, record.lobbyId or "0"),
+        PB.f64s(2, record.senderSteamId or "0"),
+        PB.str(3, metadata.senderName or ""),
+        PB.f64s(6, record.inviteGid or "0")
+    }
+
+    for _, member in ipairs(metadata.members or {}) do
+        parts[#parts + 1] = PB.bytes(4, PB.cat(
+            PB.str(1, member.name or ""),
+            PB.f64s(2, member.steam or "0")
+        ))
+    end
+
+    local custom_game_id = tostring(metadata.customGameId or "0")
+    local custom_game_crc = tostring(metadata.customGameCrc or "0")
+    local custom_game_timestamp = tonumber(metadata.customGameTimestamp or 0) or 0
+    if custom_game_id ~= "0" then
+        parts[#parts + 1] = PB.vs(5, custom_game_id)
+    end
+    if custom_game_crc ~= "0" then
+        parts[#parts + 1] = PB.f64s(7, custom_game_crc)
+    end
+    if custom_game_timestamp ~= 0 then
+        parts[#parts + 1] = PB.f32(8, custom_game_timestamp)
+    end
+
+    return PB.cat(table.unpack(parts))
+end
+
+local function lobby_invite_subscribed(record)
+    local metadata = parse_json_table(record.payloadJson) or {}
+    return PB.cat(
+        PB.bytes(2, subscribed_type(LOBBY_INVITE_OBJECT_TYPE, lobby_invite_object(record, metadata))),
+        PB.f64s(3, record.inviteGid or PB.next_id()),
+        PB.bytes(4, owner_soid(4, record.lobbyId or "0"))
+    )
+end
+
+local function lobby_invite_unsubscribed(lobby_id)
+    return PB.bytes(2, owner_soid(4, lobby_id or "0"))
+end
+
+local function queue_lobby_invite_record(record)
+    if record == nil or tostring(record.targetSteamId or "0") == "0" then
+        return false
+    end
+
+    return queue_proto(record.targetSteamId, MSG.SOCacheSubscribed, lobby_invite_subscribed(record))
+end
+
+local function queue_lobby_invite_removed(record)
+    if record == nil or tostring(record.targetSteamId or "0") == "0" then
+        return false
+    end
+
+    return queue_proto(record.targetSteamId, MSG.SOCacheUnsubscribed,
+        lobby_invite_unsubscribed(record.lobbyId))
+end
+
+local function invitation_created(group_id, target_steam, user_offline)
+    return PB.cat(
+        PB.vs(1, group_id or "0"),
+        PB.f64s(2, target_steam or "0"),
+        PB.v(3, user_offline and 1 or 0)
+    )
 end
 
 local function batch_player_resources_payload()
@@ -812,6 +907,54 @@ local function hydrate_persisted_match(match, require_current_member)
     return lobby
 end
 
+local function delete_lobby_invites_for_group(lobby_id)
+    if gc.DotaLobbyInviteDeleteLobby == nil then
+        return
+    end
+
+    for _, record in ipairs(lobby_invite_records(gc.DotaLobbyInviteDeleteLobby(tostring(lobby_id)))) do
+        queue_lobby_invite_removed(record)
+    end
+end
+
+local function delete_current_lobby_invites()
+    if gc.DotaLobbyInviteDeleteForCurrent == nil then
+        return
+    end
+
+    for _, record in ipairs(lobby_invite_records(gc.DotaLobbyInviteDeleteForCurrent())) do
+        queue_lobby_invite_removed(record)
+    end
+end
+
+local function emit_current_lobby_invites()
+    if gc.DotaLobbyInvitesForCurrent == nil then
+        return false
+    end
+
+    local emitted = false
+    for _, record in ipairs(lobby_invite_records(gc.DotaLobbyInvitesForCurrent())) do
+        local lobby_id = tostring(record.lobbyId or "0")
+        local lobby = state().lobbies[lobby_id]
+        if lobby == nil then
+            lobby = hydrate_persisted_match(persisted_match_for_lobby(lobby_id), false)
+        end
+
+        if lobby == nil or lobby.state ~= LOBBY_UI or member_count(lobby) >= MAX_MEMBERS or
+            lobby.members[current_steam()] ~= nil then
+            local removed = parse_json_table(gc.DotaLobbyInviteTake(lobby_id))
+            if removed ~= nil then
+                queue_lobby_invite_removed(removed)
+            end
+        else
+            queue_lobby_invite_record(record)
+            emitted = true
+        end
+    end
+
+    return emitted
+end
+
 local function destroy_lobby(lobby, reason)
     if lobby == nil or state().lobbies[lobby.id] == nil then
         return false
@@ -831,6 +974,8 @@ local function destroy_lobby(lobby, reason)
         queue_proto(server, MSG.SOCacheUnsubscribed, unsubscribed)
         state().by_server[server] = nil
     end
+
+    delete_lobby_invites_for_group(lobby.id)
 
     state().lobbies[lobby.id] = nil
     if gc.DotaRemoveMatchSnapshot ~= nil then
@@ -947,6 +1092,8 @@ local function apply_details(lobby, details)
     lobby.custom_min_players = runtime.ProtoVarint(details, 30, 1, lobby.custom_min_players or 0)
     lobby.custom_max_players = runtime.ProtoVarint(details, 31, 1, lobby.custom_max_players or 0)
     lobby.visibility = runtime.ProtoVarint(details, 33, 1, lobby.visibility or 0)
+    lobby.custom_game_crc = runtime.ProtoFixed64String(details, 34, 1, tostring(lobby.custom_game_crc or "0"))
+    lobby.custom_game_timestamp = runtime.ProtoFixed32(details, 37, 1, lobby.custom_game_timestamp or 0)
 end
 
 local function create_lobby()
@@ -1007,17 +1154,13 @@ local function create_lobby()
     return gc.Reply(MSG.GCPracticeLobbyResponse, PB.result(1))
 end
 
-local function join_lobby()
+local function join_lobby_state(lobby, pass_key, bypass_password)
     local result = JOIN_INVALID_LOBBY
-    local lobby_id = gc.ReadVarintString(1, "0")
-    local pass_key = gc.ReadString(3)
-    local lobby = state().lobbies[lobby_id]
-
     if lobby == nil then
         result = JOIN_INVALID_LOBBY
     elseif lobby.state ~= LOBBY_UI then
         result = JOIN_ALREADY_IN_GAME
-    elseif lobby.pass_key ~= nil and lobby.pass_key ~= "" and lobby.pass_key ~= pass_key then
+    elseif bypass_password ~= true and lobby.pass_key ~= nil and lobby.pass_key ~= "" and lobby.pass_key ~= pass_key then
         result = JOIN_BAD_PASSWORD
     elseif member_count(lobby) >= MAX_MEMBERS and lobby.members[current_steam()] == nil then
         result = JOIN_FULL
@@ -1035,10 +1178,115 @@ local function join_lobby()
         gc.Proto(MSG.SOSingleObject, lobby_single_object(lobby))
         broadcast_lobby(lobby, current_steam(), false)
         publish_lobby(lobby)
+        delete_current_lobby_invites()
         result = JOIN_SUCCESS
     end
 
+    return result
+end
+
+local function join_lobby()
+    local lobby_id = gc.ReadVarintString(1, "0")
+    local pass_key = gc.ReadString(3)
+    local lobby = state().lobbies[lobby_id]
+    if lobby == nil then
+        lobby = hydrate_persisted_match(persisted_match_for_lobby(lobby_id), false)
+    end
+
+    local result = join_lobby_state(lobby, pass_key, false)
     return gc.Reply(MSG.GCPracticeLobbyJoinResponse, PB.result(result))
+end
+
+local function invite_to_lobby()
+    local target = gc.ReadFixed64String(1, "0")
+    if target == "0" then
+        target = gc.ReadVarintString(1, "0")
+    end
+
+    local lobby, sender = current_lobby()
+    local target_lobby_id = state().by_steam[target]
+    local target_lobby = target_lobby_id ~= nil and state().lobbies[target_lobby_id] or nil
+    local target_known = gc.DotaUserExists == nil or gc.DotaUserExists(target)
+    local invalid = target == "0" or target == current_steam() or not target_known or
+        lobby == nil or sender == nil or lobby.state ~= LOBBY_UI or
+        lobby.members[target] ~= nil or member_count(lobby) >= MAX_MEMBERS or
+        (target_lobby ~= nil and target_lobby.state ~= LOBBY_UI)
+    if invalid or gc.DotaLobbyInviteUpsert == nil then
+        return gc.Reply(MSG.GCInvitationCreated, invitation_created("0", target, not target_known))
+    end
+
+    local members = {}
+    for _, member in ipairs(member_order(lobby)) do
+        members[#members + 1] = {
+            name = member.name or "",
+            steam = tostring(member.steam or "0")
+        }
+    end
+
+    local metadata = {
+        senderName = current_name(),
+        members = members,
+        customGameId = tostring(lobby.custom_game_id or "0"),
+        customGameCrc = tostring(lobby.custom_game_crc or "0"),
+        customGameTimestamp = lobby.custom_game_timestamp or 0
+    }
+    local payload_json = runtime.TableToJson(metadata)
+    local mutation = parse_json_table(gc.DotaLobbyInviteUpsert(
+        tostring(lobby.id), target, current_steam(), payload_json))
+    if mutation == nil or mutation.invite == nil then
+        return gc.Reply(MSG.GCInvitationCreated, invitation_created("0", target, false))
+    end
+
+    if mutation.replaced ~= nil then
+        queue_lobby_invite_removed(mutation.replaced)
+    end
+    queue_lobby_invite_record(mutation.invite)
+    runtime.Log("lobby_invite created lobby=" .. tostring(lobby.id) ..
+        " sender=" .. current_steam() .. " target=" .. target ..
+        " invite=" .. tostring(mutation.invite.inviteGid or "0"))
+    local offline = gc.DotaUserOnline ~= nil and not gc.DotaUserOnline(target)
+    return gc.Reply(MSG.GCInvitationCreated, invitation_created(lobby.id, target, offline))
+end
+
+local function lobby_invite_response()
+    local lobby_id = gc.ReadFixed64String(1, "0")
+    if lobby_id == "0" then
+        lobby_id = gc.ReadVarintString(1, "0")
+    end
+
+    local accept = gc.ReadVarint(2, 0) ~= 0
+    if lobby_id == "0" or gc.DotaLobbyInviteTake == nil then
+        return gc.Reply(MSG.GCPracticeLobbyJoinResponse, PB.result(JOIN_INVALID_LOBBY))
+    end
+
+    local record = parse_json_table(gc.DotaLobbyInviteTake(lobby_id))
+    if record == nil then
+        return gc.Reply(MSG.GCPracticeLobbyJoinResponse, PB.result(JOIN_INVALID_LOBBY))
+    end
+
+    queue_lobby_invite_removed(record)
+    runtime.Log("lobby_invite response lobby=" .. lobby_id .. " target=" .. current_steam() ..
+        " accept=" .. tostring(accept))
+    if not accept then
+        return true
+    end
+
+    local metadata = parse_json_table(record.payloadJson) or {}
+    local expected_crc = tostring(metadata.customGameCrc or "0")
+    local expected_timestamp = tonumber(metadata.customGameTimestamp or 0) or 0
+    local client_crc = gc.ReadFixed64String(6, "0")
+    local client_timestamp = gc.ReadFixed32(7, 0)
+    if (expected_crc ~= "0" and client_crc ~= "0" and expected_crc ~= client_crc) or
+        (expected_timestamp ~= 0 and client_timestamp ~= 0 and expected_timestamp ~= client_timestamp) then
+        return gc.Reply(MSG.GCPracticeLobbyJoinResponse, PB.result(JOIN_INVALID_LOBBY))
+    end
+
+    local lobby = state().lobbies[lobby_id]
+    if lobby == nil then
+        lobby = hydrate_persisted_match(persisted_match_for_lobby(lobby_id), false)
+    end
+
+    return gc.Reply(MSG.GCPracticeLobbyJoinResponse, PB.result(join_lobby_state(lobby, "", true)))
 end
 
 local function set_details()
@@ -1165,7 +1413,16 @@ end
 
 local function connect_string(lobby)
     local port = lobby.server_port ~= nil and lobby.server_port ~= 0 and lobby.server_port or 27015
-    return "127.0.0.1:" .. tostring(port) .. " 127.0.0.1:" .. tostring(port)
+    -- Advertise the launcher's real address (LAN/ZeroTier) captured on server
+    -- registration; fall back to loopback only when nothing routable is known
+    -- (e.g. host and SKYNET server share one machine).
+    local ip = lobby.server_ip
+    if not is_routable_ip(ip) then
+        ip = "127.0.0.1"
+    end
+
+    local endpoint = ip .. ":" .. tostring(port)
+    return endpoint .. " " .. endpoint
 end
 
 local function start_realtime_stats(lobby)
@@ -1206,6 +1463,14 @@ local function attach_server(lobby, mark_run)
         lobby.server_port = port
     elseif lobby.server_port == nil or lobby.server_port == 0 then
         lobby.server_port = 27015
+    end
+
+    -- Remember the launcher's reachable address so the match connect string
+    -- points other players at the real host, not 127.0.0.1. Keep a previously
+    -- captured routable IP if this registration came in over loopback.
+    local server_ip = current_ip()
+    if is_routable_ip(server_ip) then
+        lobby.server_ip = server_ip
     end
 
     if mark_run == true then
@@ -1618,12 +1883,71 @@ local function recent_accomplishments()
     return gc.Reply(MSG.ServerToGCRequestPlayerRecentAccomplishmentsResponse, gc.DotaStatsServerRecentAccomplishmentsResponse())
 end
 
+-- CMsgPracticeLobbyListResponseEntry: the shared entry used by the practice,
+-- friend-practice and generic lobby list responses. It lets other players
+-- discover an open lobby (id + members) so they can join it.
+local function lobby_list_entry(lobby)
+    local parts = {
+        PB.vs(1, lobby.id),
+        PB.v(6, (lobby.pass_key ~= nil and lobby.pass_key ~= "") and 1 or 0),
+        PB.v(7, lobby.leader_account or 0),
+        PB.str(10, lobby.name or "Sala"),
+        PB.v(12, lobby.game_mode or 1),
+        PB.v(13, 1),                       -- friend_present: surface it on the LAN
+        PB.v(14, member_count(lobby)),     -- players
+        PB.v(16, MAX_MEMBERS),             -- max_player_count
+        PB.v(17, lobby.region or 0)        -- server_region
+    }
+
+    for _, member in ipairs(member_order(lobby)) do
+        local entry = PB.cat(PB.v(1, member.account or 0), PB.str(2, member.name or ""))
+        parts[#parts + 1] = PB.bytes(5, entry)
+    end
+
+    return PB.cat(table.unpack(parts))
+end
+
+-- Builds the repeated "lobbies" field for a list response. Only open (UI-state)
+-- lobbies with members are joinable, so those are the ones advertised. The
+-- practice-list response numbers the field 2, the others use 1.
+local function lobby_list_payload(lobbies_field)
+    local parts = {}
+    for _, lobby in pairs(state().lobbies) do
+        if lobby.state == LOBBY_UI and member_count(lobby) > 0 then
+            parts[#parts + 1] = PB.bytes(lobbies_field, lobby_list_entry(lobby))
+        end
+    end
+
+    if #parts == 0 then
+        return ""
+    end
+
+    return PB.cat(table.unpack(parts))
+end
+
+local function friend_practice_lobby_list()
+    return gc.Reply(MSG.GCFriendPracticeLobbyListResponse, lobby_list_payload(1))
+end
+
+local function lobby_list()
+    return gc.Reply(MSG.GCLobbyListResponse, lobby_list_payload(1))
+end
+
+local function practice_lobby_list()
+    return gc.Reply(MSG.GCPracticeLobbyListResponse, lobby_list_payload(2))
+end
+
 function dota_lobby_handle(message_type)
     local handlers = {
         [MSG.GCPracticeLobbyCreate] = create_lobby,
         [MSG.GCAbandonCurrentGame] = abandon_current_game,
         [MSG.GCPracticeLobbyLeave] = function() leave_current(nil) return true end,
         [MSG.GCPracticeLobbyJoin] = join_lobby,
+        [MSG.GCInviteToLobby] = invite_to_lobby,
+        [MSG.GCLobbyInviteResponse] = lobby_invite_response,
+        [MSG.GCPracticeLobbyList] = practice_lobby_list,
+        [MSG.GCFriendPracticeLobbyListRequest] = friend_practice_lobby_list,
+        [MSG.GCLobbyList] = lobby_list,
         [MSG.GCPracticeLobbySetDetails] = set_details,
         [MSG.GCPracticeLobbySetTeamSlot] = set_team_slot,
         [MSG.GCPracticeLobbySetCoach] = set_coach,
@@ -1651,6 +1975,7 @@ function dota_lobby_handle(message_type)
 end
 
 function dota_lobby_on_client_hello()
+    local emitted_invite = emit_current_lobby_invites()
     local steam = current_steam()
     local lobby_id = state().by_steam[steam]
     local lobby = lobby_id ~= nil and state().lobbies[lobby_id] or nil
@@ -1659,7 +1984,7 @@ function dota_lobby_on_client_hello()
     end
     local member = lobby ~= nil and lobby.members[steam] or nil
     if lobby == nil or member == nil then
-        return false
+        return emitted_invite
     end
 
     member.last_seen = PB.now()
@@ -1686,6 +2011,12 @@ function dota_lobby_current_server()
 end
 
 function dota_lobby_tick()
+    if gc.DotaLobbyInvitePrune ~= nil then
+        for _, record in ipairs(lobby_invite_records(gc.DotaLobbyInvitePrune())) do
+            queue_lobby_invite_removed(record)
+        end
+    end
+
     local now = PB.now()
     local cutoff = now - LOBBY_TIMEOUT_SECONDS
     local expired = {}

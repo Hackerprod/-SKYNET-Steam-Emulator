@@ -167,6 +167,10 @@ public sealed partial class SteamApiStateService
             }
         }
 
+        // Carry the live presence in every friend event so clients never keep a
+        // stale "online / in game" for someone who left. Offline users report no
+        // game, lobby or rich presence.
+        var online = IsUserOnlineLocked(steamId) ? 1 : 0;
         foreach (var recipient in recipients)
         {
             EnqueueEvent(recipient, new SkyNetEventDto
@@ -175,9 +179,13 @@ public sealed partial class SteamApiStateService
                 SteamId = steamId,
                 AccountId = user.AccountId,
                 PersonaName = user.PersonaName,
-                AppId = user.AppId,
+                AppId = online == 1 ? user.AppId : 0,
+                LobbyId = online == 1 ? user.LobbyId : 0,
+                PersonaState = online,
                 ChangeFlags = flags,
-                RichPresence = new Dictionary<string, string>(user.RichPresence)
+                RichPresence = online == 1
+                    ? new Dictionary<string, string>(user.RichPresence)
+                    : new Dictionary<string, string>()
             });
         }
     }

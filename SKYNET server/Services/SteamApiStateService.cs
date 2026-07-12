@@ -36,6 +36,7 @@ public sealed partial class SteamApiStateService
     private readonly GameCoordinatorTraceService _gameCoordinatorTrace;
     private readonly DotaStatsStore _dotaStatsStore;
     private readonly DotaPartyStore _dotaPartyStore;
+    private readonly DotaLobbyInviteStore _dotaLobbyInviteStore;
     // Auth session lifetime and the (much shorter) presence window used to
     // derive online/offline. Both configurable via appsettings:
     //   "Session:TimeoutMinutes" (default 30), "Presence:TimeoutSeconds" (default 90).
@@ -65,6 +66,8 @@ public sealed partial class SteamApiStateService
         _dotaPartyStore = new DotaPartyStore(
             Path.Combine(hostEnvironment.ContentRootPath, "Data", "skynet-dota-party.db"),
             ResolveDotaStatsIdentity);
+        _dotaLobbyInviteStore = new DotaLobbyInviteStore(
+            Path.Combine(hostEnvironment.ContentRootPath, "Data", "skynet-dota-lobby-invites.db"));
         CleanupOrphanStateTempFiles();
         LoadState();
         NormalizeState();
@@ -72,6 +75,7 @@ public sealed partial class SteamApiStateService
         EnsureDefaultAdminAccount();
         DotaGcBackend.StatsStore = _dotaStatsStore;
         DotaGcBackend.PartyStore = _dotaPartyStore;
+        DotaGcBackend.LobbyInviteStore = _dotaLobbyInviteStore;
         DotaGcBackend.PendingMessageQueued = EnqueueGcMessageEvent;
         DotaGcBackend.InventoryProvider = GetDotaRuntimeInventory;
         DotaGcBackend.EquipItemSink = EquipDotaItemFromGameCoordinator;
@@ -80,6 +84,8 @@ public sealed partial class SteamApiStateService
         DotaGcBackend.MatchSnapshotJsonProvider = GetDotaActiveMatchJson;
         DotaGcBackend.MatchSnapshotByLobbyJsonProvider = GetDotaMatchByLobbyJson;
         DotaGcBackend.MatchSnapshotDeleteSink = RemoveDotaMatchSnapshot;
+        DotaGcBackend.UserExistsProvider = IsKnownDotaUser;
+        DotaGcBackend.UserOnlineProvider = IsOnlineDotaUser;
         DotaGcBackend.ItemDefResolver = ResolveDotaItemDefFromGameCoordinator;
         DotaGcBackend.EquipmentJsonProvider = GetDotaEquipmentJson;
         DotaGcBackend.EquipmentJsonSink = SetDotaEquipmentJson;

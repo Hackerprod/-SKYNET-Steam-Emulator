@@ -179,6 +179,18 @@ public sealed class LuaGameCoordinatorBackend : ILuaGameCoordinatorBackend
             : defaultValue;
     }
 
+    public uint ReadFixed32(int fieldNumber, uint defaultValue = 0)
+    {
+        return ReadFixed32At(fieldNumber, 1, defaultValue);
+    }
+
+    public uint ReadFixed32At(int fieldNumber, int occurrence, uint defaultValue = 0)
+    {
+        return GcWire.TryReadFixed32Field(_requestBody, fieldNumber, occurrence, out var value)
+            ? value
+            : defaultValue;
+    }
+
     public string ReadString(int fieldNumber)
     {
         return ReadStringAt(fieldNumber, 1);
@@ -520,6 +532,44 @@ internal static class GcWire
         return false;
     }
 
+    public static bool TryReadFixed32Field(byte[] source, int expectedFieldNumber, int occurrence, out uint value)
+    {
+        value = 0;
+        int seen = 0;
+        int index = 0;
+        while (index < source.Length)
+        {
+            if (!TryReadVarint(source, ref index, out ulong tag))
+            {
+                return false;
+            }
+
+            int fieldNumber = (int)(tag >> 3);
+            int wireType = (int)(tag & 7);
+            if (wireType == 5)
+            {
+                if (index + 4 > source.Length)
+                {
+                    return false;
+                }
+
+                if (fieldNumber == expectedFieldNumber && ++seen == occurrence)
+                {
+                    value = BitConverter.ToUInt32(source, index);
+                    return true;
+                }
+
+                index += 4;
+            }
+            else if (!SkipField(source, ref index, wireType))
+            {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
     private static bool TryReadVarint(byte[] source, ref int index, out ulong value)
     {
         value = 0;
@@ -670,6 +720,13 @@ public sealed class LuaGameCoordinatorRuntime
     {
         return GcWire.TryReadFixed64Field(DecodePayload(payloadBase64), fieldNumber, occurrence, out var value)
             ? value.ToString(System.Globalization.CultureInfo.InvariantCulture)
+            : defaultValue;
+    }
+
+    public uint ProtoFixed32(string payloadBase64, int fieldNumber, int occurrence = 1, uint defaultValue = 0)
+    {
+        return GcWire.TryReadFixed32Field(DecodePayload(payloadBase64), fieldNumber, occurrence, out var value)
+            ? value
             : defaultValue;
     }
 

@@ -8,6 +8,11 @@ public sealed class GameCoordinatorContext
     public ulong SteamId { get; init; }
     public uint AccountId { get; init; }
     public string PersonaName { get; init; } = string.Empty;
+
+    // Source IP of the machine sending this GC exchange. Used so a launched game
+    // server advertises the launcher's reachable address (LAN/ZeroTier) instead
+    // of 127.0.0.1, letting other players connect to the match.
+    public string ClientIp { get; init; } = string.Empty;
 }
 
 public interface IGameCoordinatorPlugin
