@@ -47,18 +47,13 @@
     </section>
 
     <section class="grid gap-5 xl:grid-cols-3">
-        <form method="post" asp-page-handler="ResetPassword" class="rounded-2xl border border-skynet-border bg-skynet-card p-5">
-            <h2 class="text-sm font-black uppercase tracking-widest text-white">Reset password</h2>
-            <label asp-for="ResetTargetSteamId" class="mt-5 block text-[10px] font-black uppercase tracking-widest text-skynet-muted">User</label>
-            <select asp-for="ResetTargetSteamId" class="mt-2 w-full skynet-select px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200">
-                @foreach (var user in Model.Overview.Users)
-                {
-                    <option value="@user.SteamId">@user.PersonaName (@user.AccountId)</option>
-                }
-            </select>
-            <label asp-for="NewAdminPassword" class="mt-4 block text-[10px] font-black uppercase tracking-widest text-skynet-muted">New password</label>
-            <input asp-for="NewAdminPassword" type="password" class="mt-2 w-full px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="New password">
-            <button type="submit" class="mt-5 w-full rounded-lg bg-white text-skynet-black px-4 py-3 text-xs font-black uppercase tracking-widest hover:bg-gray-200 transition-all">Reset</button>
+        <form method="post" asp-page-handler="CreateAccount" class="rounded-2xl border border-skynet-border bg-skynet-card p-5">
+            <h2 class="text-sm font-black uppercase tracking-widest text-white">Create Account</h2>
+            <label class="mt-5 block text-[10px] font-black uppercase tracking-widest text-skynet-muted">Username</label>
+            <input asp-for="CreateUsername" class="mt-2 w-full px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="johndoe" />
+            <label class="mt-4 block text-[10px] font-black uppercase tracking-widest text-skynet-muted">Password</label>
+            <input asp-for="CreatePassword" type="password" class="mt-2 w-full px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="••••••••">
+            <button type="submit" class="mt-5 w-full rounded-lg bg-white text-skynet-black px-4 py-3 text-xs font-black uppercase tracking-widest hover:bg-gray-200 transition-all">Create</button>
         </form>
 
         <form method="post" asp-page-handler="Persona" class="rounded-2xl border border-skynet-border bg-skynet-card p-5">
@@ -75,13 +70,18 @@
             <button type="submit" class="mt-5 w-full rounded-lg bg-white text-skynet-black px-4 py-3 text-xs font-black uppercase tracking-widest hover:bg-gray-200 transition-all">Rename</button>
         </form>
 
-        <form method="post" asp-page-handler="CreateAccount" class="rounded-2xl border border-skynet-border bg-skynet-card p-5">
-            <h2 class="text-sm font-black uppercase tracking-widest text-white">Create Account</h2>
-            <label class="mt-5 block text-[10px] font-black uppercase tracking-widest text-skynet-muted">Username</label>
-            <input asp-for="CreateUsername" class="mt-2 w-full px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="johndoe" />
-            <label class="mt-4 block text-[10px] font-black uppercase tracking-widest text-skynet-muted">Password</label>
-            <input asp-for="CreatePassword" type="password" class="mt-2 w-full px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="••••••••">
-            <button type="submit" class="mt-5 w-full rounded-lg bg-white text-skynet-black px-4 py-3 text-xs font-black uppercase tracking-widest hover:bg-gray-200 transition-all">Create</button>
+        <form method="post" asp-page-handler="ResetPassword" class="rounded-2xl border border-skynet-border bg-skynet-card p-5">
+            <h2 class="text-sm font-black uppercase tracking-widest text-white">Reset password</h2>
+            <label asp-for="ResetTargetSteamId" class="mt-5 block text-[10px] font-black uppercase tracking-widest text-skynet-muted">User</label>
+            <select asp-for="ResetTargetSteamId" class="mt-2 w-full skynet-select px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200">
+                @foreach (var user in Model.Overview.Users)
+                {
+                    <option value="@user.SteamId">@user.PersonaName (@user.AccountId)</option>
+                }
+            </select>
+            <label asp-for="NewAdminPassword" class="mt-4 block text-[10px] font-black uppercase tracking-widest text-skynet-muted">New password</label>
+            <input asp-for="NewAdminPassword" type="password" class="mt-2 w-full px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="New password">
+            <button type="submit" class="mt-5 w-full rounded-lg bg-white text-skynet-black px-4 py-3 text-xs font-black uppercase tracking-widest hover:bg-gray-200 transition-all">Reset</button>
         </form>
     </section>
 

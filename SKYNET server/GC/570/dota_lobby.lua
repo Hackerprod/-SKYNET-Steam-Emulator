@@ -52,8 +52,6 @@ local MAX_MEMBERS = 20
 local LOBBY_TIMEOUT_SECONDS = 3600
 local RECONNECT_TIMEOUT_SECONDS = 600
 local ACTIVE_EVENT_ID = 54
-local LOBBY_REPLAY_NETHOOK = false
-local LOBBY_REPLAY_ROOT = "fixtures/lobby_replay_20260710/"
 
 local DISABLED_RANDOM_HERO_BITS = { 0, 194756608, 1780819944 }
 local LOBBY_EVENT_IDS = { 19, 26, 39, ACTIVE_EVENT_ID, 57 }
@@ -243,6 +241,12 @@ local function member_order(lobby)
 end
 
 local function lobby_object(lobby)
+    -- Once the match is being set up, present it to the client as a LAN game
+    -- (lan=1, server_region=0). Dota only enforces VAC / secure-session checks on
+    -- non-LAN matches, so this is what lets players connect to our insecure
+    -- dedicated without the "VAC" popup -- exactly what the reference coordinator
+    -- forced in its Update path and what the real local-lobby capture carried.
+    local lan_match = (lobby.state or LOBBY_UI) ~= LOBBY_UI
     local parts = {
         PB.vs(1, lobby.id),
         PB.v(3, lobby.game_mode or 1),
@@ -252,7 +256,7 @@ local function lobby_object(lobby)
         PB.v(13, 0),
         PB.v(14, 0),
         PB.str(16, lobby.name or "Sala 1"),
-        PB.v(21, lobby.region or 0),
+        PB.v(21, lan_match and 0 or (lobby.region or 0)),
         PB.v(28, lobby.game_state or GAME_INIT),
         PB.v(31, lobby.allow_spectating and 1 or 0),
         PB.v(36, 3),
@@ -264,7 +268,7 @@ local function lobby_object(lobby)
         PB.v(48, 0),
         PB.v(51, 0),
         PB.v(53, lobby.dota_tv_delay or 0),
-        PB.v(57, lobby.lan and 1 or 0),
+        PB.v(57, (lan_match or lobby.lan) and 1 or 0),
         PB.bytes(62, selection_priority_rule(lobby)),
         PB.v(75, lobby.visibility or 0),
         PB.v(82, 0),
@@ -672,50 +676,6 @@ local function queue_lobby_items_to_server(lobby)
     local ok = gc.QueueLobbyPlayerItemsToServer(server, snapshot_players(lobby))
     runtime.Log("items: queue_lobby_items_to_server server=" .. server .. " ok=" .. tostring(ok))
     return ok
-end
-
-local function replay_lobby_payload(lobby, fixture_name)
-    if not LOBBY_REPLAY_NETHOOK or gc.DotaPatchLobbyReplayPayload == nil then
-        return nil
-    end
-
-    local payload = runtime.Fixture(LOBBY_REPLAY_ROOT .. fixture_name)
-    return gc.DotaPatchLobbyReplayPayload(
-        payload,
-        tostring(lobby.version or PB.next_id()),
-        tostring(lobby.id),
-        tostring(lobby.leader_steam or current_steam()),
-        tostring(lobby.server_steam or "0"),
-        tostring(lobby.match_id or "0"),
-        tostring(lobby.connect or ""),
-        lobby.state or LOBBY_UI,
-        lobby.game_state or GAME_INIT,
-        lobby.game_start_time or 0,
-        snapshot_players(lobby),
-        tostring(lobby.name or "Sala 1"))
-end
-
-local function replay_lobby_update(lobby, fixture_name, except_steam, include_server)
-    local payload = replay_lobby_payload(lobby, fixture_name)
-    if payload == nil or payload == "" then
-        return false
-    end
-
-    runtime.Log("lobby_replay " .. fixture_name .. " lobby=" .. tostring(lobby.id) ..
-        " state=" .. tostring(lobby.state or 0) .. " game_state=" .. tostring(lobby.game_state or 0) ..
-        " server=" .. tostring(lobby.server_steam or "0"))
-
-    if include_server == true and lobby.server_steam ~= nil and lobby.server_steam ~= "0" and lobby.server_steam ~= except_steam then
-        queue_proto(lobby.server_steam, MSG.SOCacheUpdated, payload)
-    end
-
-    for _, member in ipairs(member_order(lobby)) do
-        if member.steam ~= except_steam then
-            queue_proto(member.steam, MSG.SOCacheUpdated, payload)
-        end
-    end
-
-    return true
 end
 
 local function broadcast_lobby(lobby, except_steam, include_server)
@@ -1174,14 +1134,8 @@ local function create_lobby()
     refresh_lobby(lobby)
     runtime.Log("create_lobby id=" .. tostring(lobby.id) .. " steam=" .. current_steam() ..
         " account=" .. tostring(current_account()) .. " members=" .. tostring(member_count(lobby)))
-    local replay = replay_lobby_payload(lobby, "server_24_0001.bin")
-    if replay ~= nil and replay ~= "" then
-        runtime.Log("lobby_replay server_24_0001.bin lobby=" .. tostring(lobby.id))
-        gc.Proto(MSG.SOCacheSubscribed, replay)
-    else
-        gc.Proto(MSG.SOCacheSubscribed, lobby_so_cache_subscribed(lobby))
-        gc.Proto(MSG.SOSingleObject, lobby_single_object(lobby))
-    end
+    gc.Proto(MSG.SOCacheSubscribed, lobby_so_cache_subscribed(lobby))
+    gc.Proto(MSG.SOSingleObject, lobby_single_object(lobby))
     publish_lobby(lobby)
     return gc.Reply(MSG.GCPracticeLobbyResponse, PB.result(1))
 end
@@ -1386,9 +1340,7 @@ local function apply_team()
     local lobby = current_lobby()
     if lobby ~= nil then
         refresh_lobby(lobby)
-        if not replay_lobby_update(lobby, "server_26_0001.bin", "0", true) then
-            broadcast_lobby(lobby, "0", true)
-        end
+        broadcast_lobby(lobby, "0", true)
         publish_lobby(lobby)
     end
 
@@ -1460,9 +1412,7 @@ local function launch_lobby()
         lobby.game_state = GAME_INIT
         lobby.realtime_sent = false
         refresh_lobby(lobby)
-        if not replay_lobby_update(lobby, "server_26_0002.bin", nil, false) then
-            broadcast_lobby(lobby, nil, false)
-        end
+        broadcast_lobby(lobby, nil, false)
         publish_lobby(lobby)
     end
 
@@ -1594,9 +1544,28 @@ local function attach_server(lobby, mark_run)
             lobby.game_start_time = PB.now()
         end
     elseif lobby.state ~= LOBBY_RUN then
-        lobby.state = LOBBY_SERVER_SETUP
-        lobby.server_setup_ready = true
-        lobby.lan_after_setup_count = 0
+        if lobby.dedicated == true then
+            -- CSODOTALobby.State enum is UI=0, READYUP=1, SERVERSETUP=2, RUN=3.
+            -- Our LOBBY_RUN constant is value 2 = the real SERVERSETUP state where
+            -- the captured GC publishes the connect string and clients dial the
+            -- server. A dedicated process has no client session and never emits
+            -- GCServerAvailable (4506), so we advance straight to that connect-
+            -- bearing state from GCGameServerInfo (4508). The subscribe+broadcast
+            -- path below still runs (mark_run stays false) so both the server gets
+            -- its lobby cache and the members receive the connect endpoint.
+            ensure_match_id(lobby)
+            lobby.state = LOBBY_RUN
+            lobby.connect = connect_string(lobby)
+            lobby.game_state = GAME_INIT
+            lobby.server_setup_ready = false
+            if lobby.game_start_time == nil or lobby.game_start_time == 0 then
+                lobby.game_start_time = PB.now()
+            end
+        else
+            lobby.state = LOBBY_SERVER_SETUP
+            lobby.server_setup_ready = true
+            lobby.lan_after_setup_count = 0
+        end
     end
 
     if lobby.dedicated == true then
@@ -1628,13 +1597,7 @@ local function attach_server(lobby, mark_run)
         end
     elseif mark_run == true then
         refresh_lobby(lobby)
-        if LOBBY_REPLAY_NETHOOK then
-            replay_lobby_update(lobby, "server_26_0003.bin", nil, true)
-            replay_lobby_update(lobby, "server_26_0004.bin", nil, true)
-            replay_lobby_update(lobby, "server_26_0005.bin", nil, false)
-        else
-            queue_proto(lobby.server_steam, MSG.SOCacheUpdated, lobby_server_multiple_objects(lobby))
-        end
+        queue_proto(lobby.server_steam, MSG.SOCacheUpdated, lobby_server_multiple_objects(lobby))
 
         -- Listen-server ordering is independently validated by the local
         -- hero-selection and cosmetic path.  Do not fold it into the dedicated
@@ -1645,9 +1608,7 @@ local function attach_server(lobby, mark_run)
     else
         refresh_lobby(lobby)
         queue_proto(lobby.server_steam, MSG.SOCacheSubscribed, lobby_server_so_cache_subscribed(lobby))
-        if not replay_lobby_update(lobby, "server_26_0003.bin", "0", true) then
-            broadcast_lobby(lobby, "0", true)
-        end
+        broadcast_lobby(lobby, "0", true)
     end
 
     publish_lobby(lobby)
@@ -1712,9 +1673,8 @@ local function game_server_info()
         return true
     end
 
-    -- Steam first lets the local server consume the SERVERSETUP lobby and emit
-    -- GCServerAvailable (4506). Sending RUN from this handler races that path
-    -- and leaves the listen server stuck in INIT on current Dota builds.
+    -- A dedicated process never sends GCServerAvailable (4506); the connect-bearing
+    -- transition is published from GCGameServerInfo (4508) inside attach_server.
     return attach_server(lobby, false) or true
 end
 
@@ -1955,9 +1915,7 @@ local function connected_players()
     end
 
     refresh_lobby(lobby)
-    if not replay_lobby_update(lobby, "server_26_0005.bin", nil, true) then
-        broadcast_lobby(lobby, nil, true)
-    end
+    broadcast_lobby(lobby, nil, true)
     publish_lobby(lobby)
     return true
 end
