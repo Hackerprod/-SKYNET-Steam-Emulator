@@ -26,8 +26,8 @@
                 <label for="avatarFile" class="absolute inset-0 rounded-2xl bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-all">
                     <i class="fas fa-camera text-white text-lg"></i>
                 </label>
-                <form method="post" asp-page-handler="Avatar" enctype="multipart/form-data" id="avatarForm">
-                    <input asp-for="AvatarFile" type="file" accept="image/*" id="avatarFile" class="hidden" onchange="document.getElementById('avatarForm').submit()" />
+                <form method="post" asp-page-handler="Avatar" OnComplete="onAvatarComplete" enctype="multipart/form-data" id="avatarForm">
+                    <input asp-for="AvatarFile" type="file" accept="image/*" id="avatarFile" class="hidden" onchange="document.getElementById('avatarForm').requestSubmit()" />
                 </form>
             </div>
 
@@ -89,11 +89,11 @@
                                     <a asp-page="/Users/Profile" asp-route-steamId="@request.FromUser.SteamId" class="text-sm font-bold text-white hover:text-skynet-accent truncate block">@request.FromUser.PersonaName</a>
                                 </div>
                                 <div class="flex gap-2 shrink-0">
-                                    <form method="post" asp-page-handler="AcceptFriend">
+                                    <form method="post" asp-page-handler="AcceptFriend" OnComplete="onDashFriendAction">
                                         <input type="hidden" name="RequestId" value="@request.Id" />
                                         <button class="w-8 h-8 rounded-lg bg-skynet-accent text-white flex items-center justify-center hover:bg-blue-600 transition text-xs"><i class="fas fa-check"></i></button>
                                     </form>
-                                    <form method="post" asp-page-handler="DeclineFriend">
+                                    <form method="post" asp-page-handler="DeclineFriend" OnComplete="onDashFriendAction">
                                         <input type="hidden" name="RequestId" value="@request.Id" />
                                         <button class="w-8 h-8 rounded-lg border border-red-500/30 text-red-300 flex items-center justify-center hover:bg-red-500/10 transition text-xs"><i class="fas fa-times"></i></button>
                                     </form>
@@ -115,7 +115,7 @@
                                 <div class="flex-1 min-w-0">
                                     <a asp-page="/Users/Profile" asp-route-steamId="@request.ToUser.SteamId" class="text-sm font-bold text-white hover:text-skynet-accent truncate block">@request.ToUser.PersonaName</a>
                                 </div>
-                                <form method="post" asp-page-handler="CancelFriend" class="shrink-0">
+                                <form method="post" asp-page-handler="CancelFriend" OnComplete="onDashFriendAction" class="shrink-0">
                                     <input type="hidden" name="RequestId" value="@request.Id" />
                                     <button class="w-8 h-8 rounded-lg border border-skynet-border text-skynet-muted flex items-center justify-center hover:text-white hover:border-skynet-accent transition text-xs" title="Cancel"><i class="fas fa-times"></i></button>
                                 </form>
@@ -240,7 +240,7 @@
                             <a asp-page="/Users/Profile" asp-route-steamId="@friend.SteamId" class="text-sm font-bold text-white truncate block hover:text-skynet-accent transition">@friend.DisplayName</a>
                             <p class="text-[10px] text-skynet-muted truncate">@friend.Status</p>
                         </div>
-                        <form method="post" asp-page-handler="RemoveFriend" class="shrink-0 opacity-0 group-hover:opacity-100 transition">
+                        <form method="post" asp-page-handler="RemoveFriend" OnComplete="onDashRemoveFriend" class="shrink-0 opacity-0 group-hover:opacity-100 transition">
                             <input type="hidden" name="FriendSteamId" value="@friend.SteamId" />
                             <button type="submit" class="w-8 h-8 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20 flex items-center justify-center hover:bg-red-500 hover:text-white transition" title="Remove friend">
                                 <i class="fas fa-user-minus text-[10px]"></i>
@@ -260,7 +260,7 @@
         <div class="rounded-2xl border border-skynet-border bg-skynet-card p-6 shadow-2xl">
             <h3 class="text-lg font-black text-white mb-1">Edit Display Name</h3>
             <p class="text-xs text-skynet-muted mb-5">This is the name other users will see.</p>
-            <form method="post" asp-page-handler="Persona">
+            <form method="post" asp-page-handler="Persona" OnComplete="onPersonaComplete">
                 <input asp-for="PersonaName" class="w-full px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" />
                 <div class="flex gap-3 mt-5">
                     <button type="button" onclick="closeNameModal()" class="flex-1 rounded-lg border border-skynet-border px-4 py-2.5 text-xs font-bold uppercase tracking-widest text-skynet-muted hover:text-white hover:border-skynet-accent transition">Cancel</button>
@@ -279,6 +279,65 @@
     }
     function closeNameModal() {
         document.getElementById('nameModal').classList.add('hidden');
+    }
+    function onAvatarComplete(data, form) {
+        if (data && data.success) {
+            showToast(data.message, 'success');
+            var img = document.querySelector('.relative.group img[alt]');
+            if (img) img.src = '/api/users/' + img.src.split('/api/users/')[1].split('?')[0] + '?v=' + Date.now();
+        } else {
+            showToast(data && data.message ? data.message : 'Could not process image.', 'error');
+        }
+    }
+    function onPersonaComplete(data, form) {
+        closeNameModal();
+        if (data && data.success) {
+            showToast(data.message, 'success');
+            var h1 = document.querySelector('h1.text-3xl');
+            var input = form.querySelector('input[name="PersonaName"]');
+            if (h1 && input && input.value.trim()) h1.textContent = input.value.trim();
+        } else {
+            showToast(data && data.message ? data.message : 'Could not update name.', 'error');
+        }
+    }
+    function onDashFriendAction(data, form) {
+        if (data && data.success) {
+            showToast(data.message, 'success');
+            var card = form.closest('.flex.items-center.gap-3.rounded-xl');
+            if (card) {
+                card.style.transition = 'opacity 0.3s, transform 0.3s';
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.95)';
+                setTimeout(function() {
+                    card.remove();
+                    var container = document.querySelector('.space-y-3');
+                    if (container && container.children.length === 0) {
+                        var section = container.closest('.rounded-2xl');
+                        if (section) {
+                            var parent = section.closest('.grid');
+                            section.remove();
+                            if (parent && parent.children.length === 0) parent.remove();
+                        }
+                    }
+                }, 300);
+            }
+        } else {
+            showToast(data && data.message ? data.message : 'Action failed.', 'error');
+        }
+    }
+    function onDashRemoveFriend(data, form) {
+        if (data && data.success) {
+            showToast(data.message, 'success');
+            var card = form.closest('article');
+            if (card) {
+                card.style.transition = 'opacity 0.3s, transform 0.3s';
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.9)';
+                setTimeout(function() { card.remove(); }, 300);
+            }
+        } else {
+            showToast(data && data.message ? data.message : 'Could not remove friend.', 'error');
+        }
     }
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') closeNameModal();

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SKYNET_server.Models;
@@ -51,38 +52,25 @@ public class IndexModel : PageModel
     {
         var token = GetToken();
         var user = _state.UpdatePersona(token, PersonaName);
-        StatusMessage = user == null ? "Could not update name." : "Name updated.";
-        return RedirectToPage();
+        return AjaxResult(user != null, user != null ? "Name updated." : "Could not update name.");
     }
 
     public IActionResult OnPostAvatar()
     {
         var token = GetToken();
         if (AvatarFile == null || AvatarFile.Length == 0)
-        {
-            StatusMessage = "Select an image.";
-            return RedirectToPage();
-        }
+            return AjaxResult(false, "Select an image.");
 
         if (AvatarFile.Length > AvatarImage.MaxSourceBytes)
-        {
-            StatusMessage = "Image is too large (max 20 MB).";
-            return RedirectToPage();
-        }
+            return AjaxResult(false, "Image is too large (max 20 MB).");
 
         using var stream = new MemoryStream();
         AvatarFile.CopyTo(stream);
-        // The server compresses and crops the image internally, so any
-        // reasonable format/size is accepted (PNG, JPG, WEBP, ...).
         var updated = _state.PutSelfAvatar(token, new SkyNetAvatarUpdateDto
         {
             ContentBase64 = Convert.ToBase64String(stream.ToArray())
         });
-
-        StatusMessage = updated
-            ? "Avatar updated."
-            : "Could not process image. Use a valid format (PNG, JPG, WEBP...).";
-        return RedirectToPage();
+        return AjaxResult(updated, updated ? "Avatar updated." : "Could not process image. Use a valid format (PNG, JPG, WEBP...).");
     }
 
     public IActionResult OnPostStat()
@@ -90,10 +78,7 @@ public class IndexModel : PageModel
         var token = GetToken();
         var current = _state.GetStats(token, 0, true);
         if (current == null || string.IsNullOrWhiteSpace(StatName))
-        {
-            StatusMessage = "Could not save stat.";
-            return RedirectToPage();
-        }
+            return AjaxResult(false, "Could not save stat.");
 
         var stats = current.Stats.Where(s => !s.Name.Equals(StatName.Trim(), StringComparison.OrdinalIgnoreCase)).ToList();
         stats.Add(new SkyNetStatDto { Name = StatName.Trim(), Data = StatValue });
@@ -103,44 +88,35 @@ public class IndexModel : PageModel
             Stats = stats,
             Achievements = current.Achievements
         });
-        StatusMessage = "Stat updated.";
-        return RedirectToPage();
+        return AjaxResult(true, "Stat updated.");
     }
 
     public IActionResult OnPostAcceptFriend()
     {
-        StatusMessage = _state.AcceptFriendRequest(GetToken(), RequestId)
-            ? "Request accepted."
-            : "Could not accept request.";
-
-        return RedirectToPage();
+        return AjaxResult(
+            _state.AcceptFriendRequest(GetToken(), RequestId),
+            "Request accepted.");
     }
 
     public IActionResult OnPostDeclineFriend()
     {
-        StatusMessage = _state.DeclineFriendRequest(GetToken(), RequestId)
-            ? "Request declined."
-            : "Could not decline request.";
-
-        return RedirectToPage();
+        return AjaxResult(
+            _state.DeclineFriendRequest(GetToken(), RequestId),
+            "Request declined.");
     }
 
     public IActionResult OnPostCancelFriend()
     {
-        StatusMessage = _state.CancelFriendRequest(GetToken(), RequestId)
-            ? "Request cancelled."
-            : "Could not cancel request.";
-
-        return RedirectToPage();
+        return AjaxResult(
+            _state.CancelFriendRequest(GetToken(), RequestId),
+            "Request cancelled.");
     }
 
     public IActionResult OnPostRemoveFriend()
     {
-        StatusMessage = _state.RemoveFriend(GetToken(), FriendSteamId)
-            ? "Friend removed."
-            : "Could not remove friend.";
-
-        return RedirectToPage();
+        return AjaxResult(
+            _state.RemoveFriend(GetToken(), FriendSteamId),
+            "Friend removed.");
     }
 
     private IActionResult LoadPage()
@@ -162,4 +138,12 @@ public class IndexModel : PageModel
     }
 
     private string GetToken() => Request.Cookies[SteamApiStateService.WebSessionCookieName] ?? string.Empty;
+
+    private IActionResult AjaxResult(bool success, string message)
+    {
+        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            return new JsonResult(new { success, message });
+        StatusMessage = message;
+        return RedirectToPage();
+    }
 }

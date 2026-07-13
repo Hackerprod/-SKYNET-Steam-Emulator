@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SKYNET_server.Services;
@@ -39,6 +40,8 @@ public class LoginModel : PageModel
         var result = _state.LoginWeb(Username, Password, RememberMe, SteamApiStateService.GetClientIp(Request));
         if (result == null)
         {
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                return new JsonResult(new { success = false, message = "Invalid credentials." });
             ErrorMessage = "Invalid credentials.";
             return Page();
         }
@@ -52,6 +55,9 @@ public class LoginModel : PageModel
         };
 
         Response.Cookies.Append(SteamApiStateService.WebSessionCookieName, result.AccessToken, cookieOptions);
+
+        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            return new JsonResult(new { success = true, message = "Welcome back!", redirect = Url.Page("/Index") });
 
         return RedirectToPage("/Index");
     }

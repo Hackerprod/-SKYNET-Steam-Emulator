@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SKYNET_server.Services;
@@ -41,6 +42,8 @@ public class RegisterModel : PageModel
 
         if (!string.Equals(Password, ConfirmPassword, StringComparison.Ordinal))
         {
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                return new JsonResult(new { success = false, message = "Passwords do not match." });
             ErrorMessage = "Passwords do not match.";
             return Page();
         }
@@ -48,6 +51,8 @@ public class RegisterModel : PageModel
         var result = _state.RegisterWeb(Username, PersonaName, Password, SteamApiStateService.GetClientIp(Request));
         if (result == null)
         {
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                return new JsonResult(new { success = false, message = "Could not create account. Check your data or try a different name." });
             ErrorMessage = "Could not create account. Check your data or try a different name.";
             return Page();
         }
@@ -58,6 +63,9 @@ public class RegisterModel : PageModel
             SameSite = SameSiteMode.Lax,
             Expires = DateTimeOffset.UtcNow.AddDays(14)
         });
+
+        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            return new JsonResult(new { success = true, message = "Account created!", redirect = Url.Page("/Index") });
 
         return RedirectToPage("/Index");
     }

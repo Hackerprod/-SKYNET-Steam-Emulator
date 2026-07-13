@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SKYNET_server.Models;
@@ -80,94 +81,75 @@ public class IndexModel : PageModel
     public IActionResult OnPostResetPassword()
     {
         var token = GetToken();
-        StatusMessage = _state.ResetUserPassword(token, ResetTargetSteamId, NewAdminPassword)
-            ? "Password reset."
-            : "Could not reset password.";
-
-        return RedirectToPage();
+        return AjaxResult(
+            _state.ResetUserPassword(token, ResetTargetSteamId, NewAdminPassword),
+            "Password reset.");
     }
 
     public IActionResult OnPostPersona()
     {
         var token = GetToken();
-        StatusMessage = _state.AdminSetPersona(token, TargetSteamId, TargetPersonaName)
-            ? "Username updated."
-            : "Could not update username.";
-
-        return RedirectToPage();
+        return AjaxResult(
+            _state.AdminSetPersona(token, TargetSteamId, TargetPersonaName),
+            "Username updated.");
     }
 
     public IActionResult OnPostCreateAccount()
     {
         var token = GetToken();
         var result = _state.AdminCreateWebAccount(token, CreateUsername, CreateUsername, CreatePassword, false);
-        StatusMessage = result != null
-            ? $"Account '{result.Username}' created."
-            : "Could not create account. Username may already exist.";
-
-        return RedirectToPage();
+        return AjaxResult(result != null, result != null ? $"Account '{result.Username}' created." : "Could not create account. Username may already exist.");
     }
 
     public IActionResult OnPostImportDotaItems()
     {
         var token = GetToken();
         var result = _state.ImportDotaCosmetics(token, new SkyNetDotaImportRequestDto { DotaPath = DotaPath });
-        StatusMessage = result.Success
-            ? $"Catalog updated: {result.ItemCount} items, {result.HeroCount} heroes."
-            : $"Could not import catalog: {result.Message}";
-
-        return RedirectToPage(new { ItemSearch });
+        return AjaxResult(result.Success, result.Success ? $"Catalog updated: {result.ItemCount} items, {result.HeroCount} heroes." : $"Could not import catalog: {result.Message}");
     }
 
     public IActionResult OnPostEquipDotaItem()
     {
         var token = GetToken();
-        StatusMessage = _state.EquipDotaItemFromAdmin(token, new SkyNetDotaEquipItemRequestDto
-        {
-            SteamId = EquipmentSteamId,
-            HeroId = EquipmentHeroId,
-            HeroName = EquipmentHeroName,
-            Slot = EquipmentSlot,
-            SlotId = EquipmentSlotId,
-            DefIndex = EquipmentDefIndex,
-            Style = EquipmentStyle
-        })
-            ? "Item equipped."
-            : "Could not equip item.";
-
-        return RedirectToPage(new { ItemSearch });
+        return AjaxResult(
+            _state.EquipDotaItemFromAdmin(token, new SkyNetDotaEquipItemRequestDto
+            {
+                SteamId = EquipmentSteamId,
+                HeroId = EquipmentHeroId,
+                HeroName = EquipmentHeroName,
+                Slot = EquipmentSlot,
+                SlotId = EquipmentSlotId,
+                DefIndex = EquipmentDefIndex,
+                Style = EquipmentStyle
+            }),
+            "Item equipped.");
     }
 
     public IActionResult OnPostClearDotaEquipment()
     {
         var token = GetToken();
-        StatusMessage = _state.ClearDotaEquipmentFromAdmin(token, EquipmentSteamId)
-            ? "Equipment cleared."
-            : "Could not clear equipment.";
-
-        return RedirectToPage(new { ItemSearch });
+        return AjaxResult(
+            _state.ClearDotaEquipmentFromAdmin(token, EquipmentSteamId),
+            "Equipment cleared.");
     }
 
     public IActionResult OnPostDeleteUser()
     {
         var token = GetToken();
-        StatusMessage = _state.AdminDeleteUser(token, DeleteSteamId)
-            ? "User deleted."
-            : "Could not delete user. Ensure at least one admin remains.";
-
-        return RedirectToPage(new { ItemSearch });
+        return AjaxResult(
+            _state.AdminDeleteUser(token, DeleteSteamId),
+            "User deleted.");
     }
 
     public IActionResult OnPostToggleAdmin()
     {
         var token = GetToken();
-        var account = Overview.Accounts.FirstOrDefault(a => a.SteamId == ToggleAdminSteamId);
+        var overview = _state.GetAdminOverview(token);
+        var account = overview?.Accounts.FirstOrDefault(a => a.SteamId == ToggleAdminSteamId);
         var makeAdmin = account != null && !account.IsAdmin;
-        StatusMessage = _state.AdminSetAdmin(token, ToggleAdminSteamId, makeAdmin)
-            ? (makeAdmin ? "User promoted to admin." : "Admin rights removed.")
-            : "Could not update admin status. Ensure at least one admin remains.";
-
-        return RedirectToPage(new { ItemSearch });
+        return AjaxResult(
+            _state.AdminSetAdmin(token, ToggleAdminSteamId, makeAdmin),
+            makeAdmin ? "User promoted to admin." : "Admin rights removed.");
     }
 
     private IActionResult LoadPage()
@@ -188,4 +170,12 @@ public class IndexModel : PageModel
     }
 
     private string GetToken() => Request.Cookies[SteamApiStateService.WebSessionCookieName] ?? string.Empty;
+
+    private IActionResult AjaxResult(bool success, string message)
+    {
+        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            return new JsonResult(new { success, message });
+        StatusMessage = message;
+        return RedirectToPage();
+    }
 }

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SKYNET_server.Models;
@@ -30,29 +31,23 @@ public class ProfileModel : PageModel
 
     public IActionResult OnPostRequest()
     {
-        StatusMessage = _state.SendFriendRequest(GetToken(), SteamId)
-            ? "Request sent."
-            : "Could not send request.";
-
-        return RedirectToPage(new { steamId = SteamId });
+        return AjaxResult(
+            _state.SendFriendRequest(GetToken(), SteamId),
+            "Request sent.");
     }
 
     public IActionResult OnPostAccept()
     {
-        StatusMessage = _state.AcceptFriendRequestFrom(GetToken(), SteamId)
-            ? "Request accepted."
-            : "Could not accept request.";
-
-        return RedirectToPage(new { steamId = SteamId });
+        return AjaxResult(
+            _state.AcceptFriendRequestFrom(GetToken(), SteamId),
+            "Request accepted.");
     }
 
     public IActionResult OnPostRemove()
     {
-        StatusMessage = _state.RemoveFriendOrRequest(GetToken(), SteamId)
-            ? "Relationship updated."
-            : "Could not update relationship.";
-
-        return RedirectToPage(new { steamId = SteamId });
+        return AjaxResult(
+            _state.RemoveFriendOrRequest(GetToken(), SteamId),
+            "Relationship updated.");
     }
 
     private IActionResult LoadPage()
@@ -69,4 +64,12 @@ public class ProfileModel : PageModel
     }
 
     private string GetToken() => Request.Cookies[SteamApiStateService.WebSessionCookieName] ?? string.Empty;
+
+    private IActionResult AjaxResult(bool success, string message)
+    {
+        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            return new JsonResult(new { success, message });
+        StatusMessage = message;
+        return RedirectToPage(new { steamId = SteamId });
+    }
 }

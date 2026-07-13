@@ -47,7 +47,7 @@
     </section>
 
     <section class="grid gap-5 xl:grid-cols-3">
-        <form method="post" asp-page-handler="CreateAccount" class="rounded-2xl border border-skynet-border bg-skynet-card p-5">
+        <form method="post" asp-page-handler="CreateAccount" OnComplete="onAdminCreateAccount" class="rounded-2xl border border-skynet-border bg-skynet-card p-5">
             <h2 class="text-sm font-black uppercase tracking-widest text-white">Create Account</h2>
             <label class="mt-5 block text-[10px] font-black uppercase tracking-widest text-skynet-muted">Username</label>
             <input asp-for="CreateUsername" class="mt-2 w-full px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="johndoe" />
@@ -56,7 +56,7 @@
             <button type="submit" class="mt-5 w-full rounded-lg bg-white text-skynet-black px-4 py-3 text-xs font-black uppercase tracking-widest hover:bg-gray-200 transition-all">Create</button>
         </form>
 
-        <form method="post" asp-page-handler="Persona" class="rounded-2xl border border-skynet-border bg-skynet-card p-5">
+        <form method="post" asp-page-handler="Persona" OnComplete="onAdminRename" class="rounded-2xl border border-skynet-border bg-skynet-card p-5">
             <h2 class="text-sm font-black uppercase tracking-widest text-white">Rename</h2>
             <label asp-for="TargetSteamId" class="mt-5 block text-[10px] font-black uppercase tracking-widest text-skynet-muted">User</label>
             <select asp-for="TargetSteamId" class="mt-2 w-full skynet-select px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200">
@@ -70,7 +70,7 @@
             <button type="submit" class="mt-5 w-full rounded-lg bg-white text-skynet-black px-4 py-3 text-xs font-black uppercase tracking-widest hover:bg-gray-200 transition-all">Rename</button>
         </form>
 
-        <form method="post" asp-page-handler="ResetPassword" class="rounded-2xl border border-skynet-border bg-skynet-card p-5">
+        <form method="post" asp-page-handler="ResetPassword" OnComplete="onAdminResetPassword" class="rounded-2xl border border-skynet-border bg-skynet-card p-5">
             <h2 class="text-sm font-black uppercase tracking-widest text-white">Reset password</h2>
             <label asp-for="ResetTargetSteamId" class="mt-5 block text-[10px] font-black uppercase tracking-widest text-skynet-muted">User</label>
             <select asp-for="ResetTargetSteamId" class="mt-2 w-full skynet-select px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200">
@@ -131,16 +131,16 @@
                                     <div class="flex items-center justify-end gap-2">
                                         @if (userAccount != null)
                                         {
-                                            <form method="post" asp-page-handler="ToggleAdmin">
+                                            <form method="post" asp-page-handler="ToggleAdmin" OnComplete="onAdminToggleAdmin">
                                                 <input type="hidden" name="ToggleAdminSteamId" value="@user.SteamId" />
                                                 <button type="submit" class="w-8 h-8 rounded-lg @(isAdminUser ? "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 hover:bg-yellow-500 hover:text-white" : "bg-skynet-accent/10 text-skynet-accent border border-skynet-accent/20 hover:bg-skynet-accent hover:text-white") flex items-center justify-center transition text-xs" title="@(isAdminUser ? "Remove admin" : "Make admin")">
                                                     <i class="fas fa-crown text-[10px]"></i>
                                                 </button>
                                             </form>
                                         }
-                                        <form method="post" asp-page-handler="DeleteUser">
+                                        <form method="post" asp-page-handler="DeleteUser" OnComplete="onAdminDeleteUser">
                                             <input type="hidden" name="DeleteSteamId" value="@user.SteamId" />
-                                            <button type="button" onclick="showConfirm('Delete User','Delete @user.PersonaName? This action cannot be undone.','Delete','bg-red-500 text-white hover:bg-red-600',function(){this.closest('form').submit()}.bind(this))" class="w-8 h-8 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20 flex items-center justify-center hover:bg-red-500 hover:text-white transition text-xs" title="Delete user" @(isAdminUser && adminCount <= 1 ? "disabled" : "")>
+                                            <button type="button" onclick="showConfirm('Delete User','Delete @user.PersonaName? This action cannot be undone.','Delete','bg-red-500 text-white hover:bg-red-600',function(){this.closest('form').requestSubmit()}.bind(this))" class="w-8 h-8 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20 flex items-center justify-center hover:bg-red-500 hover:text-white transition text-xs" title="Delete user" @(isAdminUser && adminCount <= 1 ? "disabled" : "")>
                                                 <i class="fas fa-trash text-[10px]"></i>
                                             </button>
                                         </form>
@@ -161,7 +161,7 @@
                 <div class="divide-y divide-skynet-border">
                     @foreach (var account in Model.Overview.Accounts)
                     {
-                        <div class="px-5 py-4">
+                        <div class="px-5 py-4" data-account-steamid="@account.SteamId">
                             <div class="flex items-center justify-between gap-3">
                                 <p class="font-bold text-white">@account.Username</p>
                                 <span class="rounded border border-skynet-border px-2 py-0.5 text-[10px] font-black uppercase tracking-widest @(account.IsAdmin ? "text-skynet-accent" : "text-skynet-muted")">@(account.IsAdmin ? "admin" : "user")</span>
@@ -174,7 +174,10 @@
             </section>
 
             <section class="rounded-2xl border border-skynet-border bg-skynet-card p-5">
-                <h2 class="text-sm font-black uppercase tracking-widest text-white">Runtime</h2>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-sm font-black uppercase tracking-widest text-white">Runtime</h2>
+                    <a asp-page="/Admin/GcConsole" class="rounded-lg bg-skynet-accent/10 text-skynet-accent border border-skynet-accent/20 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest hover:bg-skynet-accent hover:text-white transition-all">GC Console</a>
+                </div>
                 <div class="mt-4 space-y-3 text-sm text-skynet-muted">
                     @{
                         var uptime = DateTime.UtcNow - Model.Overview.ServerStartTime;
@@ -204,10 +207,91 @@
         </div>
 
         <div class="p-5">
-            <form method="post" asp-page-handler="ImportDotaItems" class="flex gap-3">
+            <form method="post" asp-page-handler="ImportDotaItems" OnComplete="onAjaxComplete" class="flex gap-3">
                 <input asp-for="DotaPath" class="flex-1 px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="Dota 2 path" />
                 <button type="submit" class="shrink-0 rounded-lg bg-skynet-accent px-5 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-blue-600 transition-all">Update DB</button>
             </form>
         </div>
     </section>
 </div>
+
+<script>
+    function onAdminCreateAccount(data, form) {
+        if (data && data.success) {
+            showToast(data.message, 'success');
+            form.querySelector('input[name="CreateUsername"]').value = '';
+            form.querySelector('input[name="CreatePassword"]').value = '';
+        } else {
+            showToast(data && data.message ? data.message : 'Could not create account.', 'error');
+        }
+    }
+    function onAdminRename(data, form) {
+        if (data && data.success) {
+            showToast(data.message, 'success');
+            form.querySelector('input[name="TargetPersonaName"]').value = '';
+            var opt = form.querySelector('select[name="TargetSteamId"]');
+            if (opt) { var name = opt.options[opt.selectedIndex].text.split(' (')[0]; form.closest('table') && location.reload(); }
+        } else {
+            showToast(data && data.message ? data.message : 'Could not rename.', 'error');
+        }
+    }
+    function onAdminResetPassword(data, form) {
+        if (data && data.success) {
+            showToast(data.message, 'success');
+            form.querySelector('input[name="NewAdminPassword"]').value = '';
+        } else {
+            showToast(data && data.message ? data.message : 'Could not reset password.', 'error');
+        }
+    }
+    function onAdminToggleAdmin(data, form) {
+        if (data && data.success) {
+            showToast(data.message, 'success');
+            var row = form.closest('tr');
+            if (!row) return;
+            var badge = row.querySelector('td:nth-child(4) span');
+            var btn = form.querySelector('button');
+            var wasAdmin = badge && badge.textContent.trim() === 'Admin';
+            if (badge) {
+                if (wasAdmin) {
+                    badge.className = 'rounded border border-skynet-border px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-skynet-muted';
+                    badge.textContent = 'User';
+                } else {
+                    badge.className = 'rounded bg-skynet-accent/10 border border-skynet-accent/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-skynet-accent';
+                    badge.textContent = 'Admin';
+                }
+            }
+            if (btn) {
+                if (wasAdmin) {
+                    btn.className = 'w-8 h-8 rounded-lg bg-skynet-accent/10 text-skynet-accent border border-skynet-accent/20 hover:bg-skynet-accent hover:text-white flex items-center justify-center transition text-xs';
+                    btn.title = 'Make admin';
+                } else {
+                    btn.className = 'w-8 h-8 rounded-lg bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 hover:bg-yellow-500 hover:text-white flex items-center justify-center transition text-xs';
+                    btn.title = 'Remove admin';
+                }
+            }
+        } else {
+            showToast(data && data.message ? data.message : 'Could not update admin status.', 'error');
+        }
+    }
+    function onAdminDeleteUser(data, form) {
+        if (data && data.success) {
+            showToast(data.message, 'success');
+            var row = form.closest('tr');
+            if (row) {
+                var steamId = form.querySelector('input[name="DeleteSteamId"]').value;
+                row.style.transition = 'opacity 0.3s, transform 0.3s';
+                row.style.opacity = '0';
+                row.style.transform = 'translateX(20px)';
+                setTimeout(function() { row.remove(); }, 300);
+                var accountEntry = document.querySelector('[data-account-steamid="' + steamId + '"]');
+                if (accountEntry) {
+                    accountEntry.style.transition = 'opacity 0.3s';
+                    accountEntry.style.opacity = '0';
+                    setTimeout(function() { accountEntry.remove(); }, 300);
+                }
+            }
+        } else {
+            showToast(data && data.message ? data.message : 'Could not delete user.', 'error');
+        }
+    }
+</script>

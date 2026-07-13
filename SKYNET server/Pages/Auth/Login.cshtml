@@ -45,7 +45,7 @@
                 <script>showToast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ErrorMessage)), 'error')</script>
             }
 
-            <form method="post" class="space-y-4">
+            <form method="post" OnComplete="onAuthComplete" class="space-y-4">
                 <div>
                     <label asp-for="Username" class="block text-xs font-medium text-skynet-muted uppercase tracking-widest mb-2">Username</label>
                     <input asp-for="Username" autocomplete="username" class="w-full px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="Your username">
@@ -74,3 +74,14 @@
         <p class="text-center text-[10px] text-skynet-muted uppercase tracking-[0.3em]">SKYNET_NETWORK_ENCRYPTION_ACTIVE</p>
     </div>
 </div>
+
+<script>
+    function onAuthComplete(data) {
+        if (data && data.success) {
+            showToast(data.message, 'success');
+            setTimeout(function () { window.location.href = data.redirect || '/'; }, 600);
+        } else {
+            showToast(data && data.message ? data.message : 'Authentication failed.', 'error');
+        }
+    }
+</script>

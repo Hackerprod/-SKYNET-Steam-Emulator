@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SKYNET_server.Models;
@@ -36,21 +37,17 @@ public class IndexModel : PageModel
     public IActionResult OnPostAdd()
     {
         var token = GetToken();
-        StatusMessage = _state.AddFriend(token, FriendIdentifier)
-            ? "Request sent."
-            : "Could not send request. Use username, SteamID, AccountID or exact name.";
-
-        return RedirectToPage();
+        return AjaxResult(
+            _state.AddFriend(token, FriendIdentifier),
+            "Request sent.");
     }
 
     public IActionResult OnPostRemove()
     {
         var token = GetToken();
-        StatusMessage = _state.RemoveFriend(token, FriendSteamId)
-            ? "Relationship updated."
-            : "Could not update relationship.";
-
-        return RedirectToPage();
+        return AjaxResult(
+            _state.RemoveFriend(token, FriendSteamId),
+            "Relationship updated.");
     }
 
     private IActionResult LoadPage()
@@ -71,4 +68,12 @@ public class IndexModel : PageModel
     }
 
     private string GetToken() => Request.Cookies[SteamApiStateService.WebSessionCookieName] ?? string.Empty;
+
+    private IActionResult AjaxResult(bool success, string message)
+    {
+        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            return new JsonResult(new { success, message });
+        StatusMessage = message;
+        return RedirectToPage();
+    }
 }

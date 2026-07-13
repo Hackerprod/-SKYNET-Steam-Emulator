@@ -65,9 +65,11 @@
         .nav-link.active { color: #3b82f6; background: rgba(59, 130, 246, 0.05); }
     </style>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <script src="~/js/CallHelper.js" asp-append-version="true"></script>
     <script>
         var _snTimer = null;
         var _snConfirmCb = null;
+        var _snConfirmResolve = null;
 
         function showToast(msg, type) {
             type = type || 'info';
@@ -116,11 +118,27 @@
         function acceptConfirm() {
             document.getElementById('snConfirm').classList.add('hidden');
             if (_snConfirmCb) _snConfirmCb();
+            if (_snConfirmResolve) { _snConfirmResolve(true); _snConfirmResolve = null; }
         }
 
         function cancelConfirm() {
             document.getElementById('snConfirm').classList.add('hidden');
             _snConfirmCb = null;
+            if (_snConfirmResolve) { _snConfirmResolve(false); _snConfirmResolve = null; }
+        }
+
+        function confirmAsync(title, msg, btnText, btnClass) {
+            return new Promise(function (resolve) {
+                _snConfirmResolve = resolve;
+                showConfirm(title, msg, btnText, btnClass, function () { resolve(true); });
+            });
+        }
+
+        function onAjaxComplete(data) {
+            showToast(data.message, data.success ? 'success' : 'error');
+            if (data.success) {
+                setTimeout(function () { location.reload(); }, 800);
+            }
         }
 
         document.addEventListener('keydown', function (e) {
@@ -226,6 +244,5 @@
         .animate-sn-in { animation: sn-in 0.25s ease-out; }
         .animate-sn-out { animation: sn-out 0.2s ease-in forwards; }
     </style>
-
-    <!-- Global Toast + Confirm -->
-    <div id="snToast" class="fixed top-6 right-6 z-[100] hidden max-w-sm w-full pointer-events-none">
+</body>
+</html>

@@ -48,7 +48,7 @@
                 </div>
                 @if (isFriend)
                 {
-                    <form method="post" asp-page-handler="Remove">
+                    <form method="post" asp-page-handler="Remove" OnComplete="onUsersRelation">
                         <input type="hidden" name="TargetSteamId" value="@user.SteamId" />
                         <button type="submit" class="w-10 h-10 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20 flex items-center justify-center hover:bg-red-500 hover:text-white transition" title="Remove friend">
                             <i class="fas fa-user-minus text-xs"></i>
@@ -57,7 +57,7 @@
                 }
                 else if (isIncoming)
                 {
-                    <form method="post" asp-page-handler="Accept">
+                    <form method="post" asp-page-handler="Accept" OnComplete="onUsersRelation">
                         <input type="hidden" name="TargetSteamId" value="@user.SteamId" />
                         <button type="submit" class="w-10 h-10 rounded-lg bg-skynet-accent/10 text-skynet-accent border border-skynet-accent/20 flex items-center justify-center hover:bg-skynet-accent hover:text-white transition" title="Accept request">
                             <i class="fas fa-user-check text-xs"></i>
@@ -72,7 +72,7 @@
                 }
                 else
                 {
-                    <form method="post" asp-page-handler="Request">
+                    <form method="post" asp-page-handler="Request" OnComplete="onUsersRelation">
                         <input type="hidden" name="TargetSteamId" value="@user.SteamId" />
                         <button type="submit" class="w-10 h-10 rounded-lg bg-skynet-accent/10 text-skynet-accent border border-skynet-accent/20 flex items-center justify-center hover:bg-skynet-accent hover:text-white transition" title="Add friend">
                             <i class="fas fa-user-plus text-xs"></i>
@@ -92,5 +92,34 @@
             var name = (card.getAttribute('data-user') || '').toLowerCase();
             card.style.display = !t || name.indexOf(t) >= 0 ? '' : 'none';
         });
+    }
+    function onUsersRelation(data, form) {
+        if (data && data.success) {
+            showToast(data.message, 'success');
+            var article = form.closest('article[data-user]');
+            if (!article) return;
+            var targetId = form.querySelector('input[name="TargetSteamId"]');
+            if (!targetId) return;
+            var steamId = targetId.value;
+            var action = form.getAttribute('asp-page-handler') || '';
+            var pageUrl = window.location.pathname;
+            if (action === 'Request') {
+                form.outerHTML =
+                    '<div class="w-10 h-10 rounded-lg bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 flex items-center justify-center" title="Request sent">' +
+                    '<i class="fas fa-clock text-xs"></i></div>';
+            } else if (action === 'Accept') {
+                form.outerHTML =
+                    '<form method="post" action="' + pageUrl + '?handler=Remove"><input type="hidden" name="TargetSteamId" value="' + steamId + '" />' +
+                    '<button type="submit" class="w-10 h-10 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20 flex items-center justify-center hover:bg-red-500 hover:text-white transition" title="Remove friend">' +
+                    '<i class="fas fa-user-minus text-xs"></i></button></form>';
+            } else if (action === 'Remove') {
+                form.outerHTML =
+                    '<form method="post" action="' + pageUrl + '?handler=Request"><input type="hidden" name="TargetSteamId" value="' + steamId + '" />' +
+                    '<button type="submit" class="w-10 h-10 rounded-lg bg-skynet-accent/10 text-skynet-accent border border-skynet-accent/20 flex items-center justify-center hover:bg-skynet-accent hover:text-white transition" title="Add friend">' +
+                    '<i class="fas fa-user-plus text-xs"></i></button></form>';
+            }
+        } else {
+            showToast(data && data.message ? data.message : 'Action failed.', 'error');
+        }
     }
 </script>
