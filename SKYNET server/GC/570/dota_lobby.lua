@@ -241,12 +241,6 @@ local function member_order(lobby)
 end
 
 local function lobby_object(lobby)
-    -- Once the match is being set up, present it to the client as a LAN game
-    -- (lan=1, server_region=0). Dota only enforces VAC / secure-session checks on
-    -- non-LAN matches, so this is what lets players connect to our insecure
-    -- dedicated without the "VAC" popup -- exactly what the reference coordinator
-    -- forced in its Update path and what the real local-lobby capture carried.
-    local lan_match = (lobby.state or LOBBY_UI) ~= LOBBY_UI
     local parts = {
         PB.vs(1, lobby.id),
         PB.v(3, lobby.game_mode or 1),
@@ -256,7 +250,7 @@ local function lobby_object(lobby)
         PB.v(13, 0),
         PB.v(14, 0),
         PB.str(16, lobby.name or "Sala 1"),
-        PB.v(21, lan_match and 0 or (lobby.region or 0)),
+        PB.v(21, lobby.region or 0),
         PB.v(28, lobby.game_state or GAME_INIT),
         PB.v(31, lobby.allow_spectating and 1 or 0),
         PB.v(36, 3),
@@ -268,7 +262,7 @@ local function lobby_object(lobby)
         PB.v(48, 0),
         PB.v(51, 0),
         PB.v(53, lobby.dota_tv_delay or 0),
-        PB.v(57, (lan_match or lobby.lan) and 1 or 0),
+        PB.v(57, lobby.lan and 1 or 0),
         PB.bytes(62, selection_priority_rule(lobby)),
         PB.v(75, lobby.visibility or 0),
         PB.v(82, 0),

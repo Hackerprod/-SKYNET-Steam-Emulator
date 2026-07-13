@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Threading;
 using SKYNET.Callback;
 using SKYNET.Helpers;
 using SKYNET.Managers;
@@ -20,6 +21,7 @@ namespace SKYNET.Steamworks.Implementation
         private readonly Queue<GCMessage> gameServerMessages;
         private readonly object inMessagesLock = new object();
         private DateTime nextServerPollUtc = DateTime.MinValue;
+        private int serverPollQueued;
 
         public SteamGameCoordinator()
         {
@@ -99,7 +101,7 @@ namespace SKYNET.Steamworks.Implementation
             bool handled = TryQueueServerResponses(gcMsg, requestData.Body, requestData.SourceJobId, gameServer);
             if (!handled)
             {
-                Write($"GC message not handled by server (AppId = {SteamEmulator.AppID}, MsgType = {gcMsg}, BodySize = {requestData.Body.Length}, Body = {ToHex(requestData.Body, 64)})");
+                Write($"GC message queued without immediate server response (AppId = {SteamEmulator.AppID}, MsgType = {gcMsg}, BodySize = {requestData.Body.Length}, Body = {ToHex(requestData.Body, 64)})");
             }
 
             Write($"SendMessage (MsgType = {gcMsg}, MsgSize = {cubData}) = k_EGCResultOK");
@@ -114,17 +116,22 @@ namespace SKYNET.Steamworks.Implementation
                 return false;
             }
 
-            var response = SkyNetApiClient.ExchangeGCMessage(SteamEmulator.AppID, requestMsg, requestBody, sourceJobId, gameServer);
-            if (response == null)
+            var body = requestBody ?? Array.Empty<byte>();
+            return SkyNetWorkQueue.Enqueue($"GC exchange {requestMsg}", () =>
             {
-                Write($"GC server exchange unavailable; no local fallback (MsgType = {requestMsg})");
-                return false;
-            }
+                var response = SkyNetApiClient.ExchangeGCMessage(SteamEmulator.AppID, requestMsg, body, sourceJobId, gameServer);
+                if (response == null)
+                {
+                    Write($"GC server exchange unavailable; no local fallback (MsgType = {requestMsg})");
+                    return;
+                }
 
-            bool queued = false;
-            queued = QueueServerMessages(response, requestMsg, gameServer);
-
-            return response.Handled || queued;
+                var queued = QueueServerMessages(response, requestMsg, gameServer);
+                if (!response.Handled && !queued)
+                {
+                    Write($"GC server did not handle message (MsgType = {requestMsg})");
+                }
+            }, highPriority: true);
         }
 
         private bool QueueServerMessages(SkyNetApiClient.SkyNetGCExchangeResponseDto response, uint requestMsg, bool gameServer)
@@ -187,15 +194,33 @@ namespace SKYNET.Steamworks.Implementation
             }
 
             nextServerPollUtc = now.Add(ServerPollInterval);
-            try
+            if (Interlocked.Exchange(ref serverPollQueued, 1) == 1)
             {
-                return QueueServerMessages(SkyNetApiClient.PollGCMessages(SteamEmulator.AppID, true), 0, true);
-            }
-            catch (Exception ex)
-            {
-                Write($"GC server poll failed: {ex.Message}");
                 return false;
             }
+
+            var queued = SkyNetWorkQueue.Enqueue("GC server poll", () =>
+            {
+                try
+                {
+                    QueueServerMessages(SkyNetApiClient.PollGCMessages(SteamEmulator.AppID, true), 0, true);
+                }
+                catch (Exception ex)
+                {
+                    Write($"GC server poll failed: {ex.Message}");
+                }
+                finally
+                {
+                    Interlocked.Exchange(ref serverPollQueued, 0);
+                }
+            }, highPriority: true);
+
+            if (!queued)
+            {
+                Interlocked.Exchange(ref serverPollQueued, 0);
+            }
+
+            return queued;
         }
 
         public bool IsMessageAvailable(IntPtr nativeSelf, ref uint pcubMsgSize)

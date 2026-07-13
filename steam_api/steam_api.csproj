@@ -102,6 +102,7 @@
     <Compile Include="Managers\SkyNetApiClient.cs" />
     <Compile Include="Managers\SkyNetEventPump.cs" />
     <Compile Include="Managers\SkyNetStateCache.cs" />
+    <Compile Include="Managers\SkyNetWorkQueue.cs" />
     <Compile Include="Managers\UserManager.cs" />
     <Compile Include="modCommon.cs" />
     <Compile Include="Network\ClientSocket.cs" />

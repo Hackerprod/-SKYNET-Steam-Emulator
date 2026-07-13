@@ -20,42 +20,11 @@ namespace SKYNET.Managers
                 ? new byte[0]
                 : pvAuthBlob.GetBytes(cubAuthBlobSize);
 
-            if (SkyNetApiClient.IsEnabled)
-            {
-                var result = SkyNetApiClient.ConnectAndAuthenticate(unIPClient, authBlob, pSteamIDUser);
-                if (result == null)
-                {
-                    return false;
-                }
-
-                if (result.Success)
-                {
-                    ConnectedUsers[pSteamIDUser] = new TicketData
-                    {
-                        IPClient = unIPClient,
-                        BlobSize = cubAuthBlobSize,
-                        SteamID = pSteamIDUser
-                    };
-
-                    CallbackManager.AddCallbackGameServer(new GSClientApprove_t
-                    {
-                        SteamID = result.SteamId != 0 ? result.SteamId : pSteamIDUser,
-                        OwnerSteamID = result.OwnerSteamId != 0 ? result.OwnerSteamId : pSteamIDUser
-                    });
-                }
-                else
-                {
-                    CallbackManager.AddCallbackGameServer(new GSClientDeny_t
-                    {
-                        SteamID = pSteamIDUser,
-                        DenyReason = (DenyReason)result.DenyReason,
-                        OptionalText = EncodeFixed(result.DenyMessage, 128)
-                    });
-                }
-
-                return result.Success;
-            }
-
+            // Approve the connecting user locally and immediately (Goldberg-style).
+            // Gating this on a blocking server round-trip stalls Dota's client
+            // connection handshake, which makes the joining player fail VAC/session
+            // verification. On a trusted LAN every SKYNET user is authorised, so we
+            // accept here and only notify the server asynchronously for presence.
             ConnectedUsers[pSteamIDUser] = new TicketData
             {
                 IPClient = unIPClient,
@@ -63,6 +32,19 @@ namespace SKYNET.Managers
                 BlobSize = cubAuthBlobSize,
                 SteamID = pSteamIDUser
             };
+
+            CallbackManager.AddCallbackGameServer(new GSClientApprove_t
+            {
+                SteamID = pSteamIDUser,
+                OwnerSteamID = pSteamIDUser
+            });
+
+            if (SkyNetApiClient.IsEnabled)
+            {
+                SkyNetWorkQueue.Enqueue("ConnectAndAuthenticate", () => SkyNetApiClient.ConnectAndAuthenticate(unIPClient, authBlob, pSteamIDUser),
+                    "ticket:connect:" + pSteamIDUser, true);
+            }
+
             return true;
         }
 
@@ -77,34 +59,15 @@ namespace SKYNET.Managers
 
             try
             {
+                // The ticket must be produced immediately: the joining client sends it
+                // during the connection handshake, and a blocking server round-trip
+                // here delays it enough that Dota fails the session (VAC). Generate it
+                // locally (Goldberg-style) and register it with the server in the
+                // background so cross-user tracking still works.
                 if (SkyNetApiClient.IsEnabled)
                 {
-                    var response = SkyNetApiClient.CreateAuthSessionTicket(gameServer, cbMaxTicket);
-                    if (response == null)
-                    {
-                        return 0;
-                    }
-
-                    var ticketBytes = string.IsNullOrWhiteSpace(response.TicketBase64)
-                        ? new byte[0]
-                        : Convert.FromBase64String(response.TicketBase64);
-
-                    pcbTicket = response.TicketSize != 0 ? response.TicketSize : (uint)ticketBytes.Length;
-
-                    if (pTicket != IntPtr.Zero && cbMaxTicket > 0 && ticketBytes.Length > 0)
-                    {
-                        Marshal.Copy(ticketBytes, 0, pTicket, Math.Min(cbMaxTicket, ticketBytes.Length));
-                    }
-
-                    Tickets[response.Handle] = new TicketRecord
-                    {
-                        Handle = response.Handle,
-                        Bytes = ticketBytes,
-                        GameServer = gameServer
-                    };
-
-                    EmitAuthTicketResponse(response.Handle, gameServer);
-                    return response.Handle;
+                    SkyNetWorkQueue.Enqueue("CreateAuthSessionTicket", () => SkyNetApiClient.CreateAuthSessionTicket(gameServer, cbMaxTicket),
+                        null, true);
                 }
 
                 CurrentTicket++;
@@ -148,17 +111,14 @@ namespace SKYNET.Managers
                 ? new byte[0]
                 : pAuthTicket.GetBytes((uint)cbAuthTicket);
 
+            // Validate locally and immediately (Goldberg-style). A blocking server
+            // round-trip here delays the ValidateAuthTicketResponse callback past the
+            // point Dota expects it, so the session is treated as unverified (VAC).
+            // The server is still notified asynchronously so it can track the session.
             if (SkyNetApiClient.IsEnabled)
             {
-                var response = SkyNetApiClient.ValidateAuthSessionTicket(ticketBytes, steamID, gameServer);
-                if (response == null)
-                {
-                    EmitValidateAuthTicket(steamID, steamID, EAuthSessionResponse.AuthTicketInvalid, gameServer);
-                    return (int)EBeginAuthSessionResult.k_EBeginAuthSessionResultInvalidTicket;
-                }
-
-                EmitValidateAuthTicket(steamID, response.OwnerSteamId != 0 ? response.OwnerSteamId : steamID, (EAuthSessionResponse)response.AuthSessionResponse, gameServer);
-                return response.BeginAuthSessionResult;
+                SkyNetWorkQueue.Enqueue("ValidateAuthSessionTicket", () => SkyNetApiClient.ValidateAuthSessionTicket(ticketBytes, steamID, gameServer),
+                    null, true);
             }
 
             EmitValidateAuthTicket(steamID, steamID, EAuthSessionResponse.OK, gameServer);
@@ -169,7 +129,8 @@ namespace SKYNET.Managers
         {
             if (SkyNetApiClient.IsEnabled)
             {
-                SkyNetApiClient.EndAuthSession(steamID, gameServer);
+                SkyNetWorkQueue.Enqueue("EndAuthSession", () => SkyNetApiClient.EndAuthSession(steamID, gameServer),
+                    "ticket:end:" + steamID + ":" + (gameServer ? "gs" : "client"));
             }
 
             ConnectedUsers.TryRemove(steamID, out _);
@@ -179,7 +140,8 @@ namespace SKYNET.Managers
         {
             if (SkyNetApiClient.IsEnabled)
             {
-                SkyNetApiClient.CancelAuthTicket(hAuthTicket, gameServer);
+                SkyNetWorkQueue.Enqueue("CancelAuthTicket", () => SkyNetApiClient.CancelAuthTicket(hAuthTicket, gameServer),
+                    "ticket:cancel:" + hAuthTicket + ":" + (gameServer ? "gs" : "client"));
             }
 
             Tickets.TryRemove(hAuthTicket, out _);

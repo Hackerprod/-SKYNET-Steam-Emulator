@@ -25,11 +25,9 @@ namespace SKYNET.Steamworks.Implementation
         //     SKYNET server is never contacted for a certificate.
         //
         // true (SECURE MODE):
-        //     GetCertAsync returns the real signed certificate issued by the
-        //     SKYNET server and applies the CA public-key patch to
-        //     steamnetworkingsockets.dll, so the game actually validates our
-        //     cert against the emulator CA. Use this to verify GetCertAsync
-        //     end to end.
+        //     GetCertAsync returns the signed certificate issued by the
+        //     SKYNET server. Native SDR CA patching is intentionally disabled
+        //     in this build; do not reintroduce a blocking patch wait here.
         //
         // Configure this with [Network Settings] SecureNetworking in the client
         // INI. A game restart is required because the native networking library
@@ -70,12 +68,15 @@ namespace SKYNET.Steamworks.Implementation
 
             Write("GetCertAsync: secure SDR request queued");
 
-            // Secure mode only: patch the SDR CA so the game trusts our cert.
             EnsureSecureCertPatcherStarted("GetCertAsync", 750);
 
-            var handle = CallbackManager.AddCallbackResult(CreateEmptyCertResult(EResult.k_EResultNoConnection), false);
-            StartCertRequestWorker(handle);
-            return handle;
+            return SkyNetWorkQueue.EnqueueCallbackResult(
+                CreateEmptyCertResult(EResult.k_EResultNoConnection),
+                () => BuildCertResult(),
+                false,
+                "GetCertAsync",
+                "networking:get-cert",
+                true);
         }
 
         private static SteamNetworkingSocketsCert_t CreateEmptyCertResult(EResult result)
@@ -91,21 +92,6 @@ namespace SKYNET.Steamworks.Implementation
                 m_cbPrivKey = 0,
                 m_privKey = new byte[128]
             };
-        }
-
-        private void StartCertRequestWorker(SteamAPICall_t handle)
-        {
-            var thread = new Thread(() =>
-            {
-                var cert = BuildCertResult();
-                CallbackManager.CompleteCallbackResult(handle, cert, false);
-            })
-            {
-                IsBackground = true,
-                Name = "SdrCertRequest"
-            };
-
-            thread.Start();
         }
 
         private SteamNetworkingSocketsCert_t BuildCertResult()
@@ -315,7 +301,11 @@ namespace SKYNET.Steamworks.Implementation
 
         private static string GetNetworkConfigJson()
         {
-            return "{\"revision\":1,\"pops\":{\"iad\":{\"desc\":\"Local\",\"geo\":[-77.0365,38.8977],\"partners\":1,\"tier\":1,\"relays\":[{\"ipv4\":\"127.0.0.1\",\"port_range\":[27015,27060]}]}}}";
+            // Full SDR config (relay certs signed by our CA + POP/relay list), shared
+            // with the SteamHTTP GetSDRConfig interception. Valve fetches the HTTP
+            // config "only-if-cached" (never hits our HTTP), so this serialized path
+            // is the one that actually feeds the native library its network config.
+            return SteamHTTP.SdrConfigJson;
         }
 
         internal static bool EnsureSecureCertPatcherStarted(string reason, int waitMs = 0)
@@ -330,43 +320,14 @@ namespace SKYNET.Steamworks.Implementation
                 SteamEmulator.Write("SteamNetworkingSocketsSerialized", $"Starting SDR cert patcher ({reason})");
             }
 
-            bool patched = SdrCertPatcher.EnsurePatched(waitMs);
-            if (waitMs > 0 && !patched)
+            if (waitMs > 0)
             {
-                SteamEmulator.Write("SteamNetworkingSocketsSerialized", $"SDR CA patch was not ready after {waitMs}ms; background patch remains active");
+                SteamEmulator.Write("SteamNetworkingSocketsSerialized", $"Native SDR patching disabled; skipping patch request ({reason})");
             }
 
-            return patched;
+            return false;
         }
 
-        private static bool TryFetchSdrConfig(out string body)
-        {
-            body = null;
-            try
-            {
-                var request = (HttpWebRequest)WebRequest.Create("https://api.steampowered.com/ISteamApps/GetSDRConfig/v1?appid=570");
-                request.Method = "GET";
-                request.Timeout = 3000;
-                request.ReadWriteTimeout = 3000;
-                request.UserAgent = "SKYNET Steam Emulator";
-                using (var response = (HttpWebResponse)request.GetResponse())
-                using (var stream = response.GetResponseStream())
-                using (var reader = new StreamReader(stream, Encoding.UTF8))
-                {
-                    if ((int)response.StatusCode < 200 || (int)response.StatusCode >= 300)
-                    {
-                        return false;
-                    }
-
-                    body = reader.ReadToEnd();
-                    return !string.IsNullOrEmpty(body);
-                }
-            }
-            catch
-            {
-                return false;
-            }
-        }
 
         internal static SteamRelayNetworkStatus_t BuildRelayNetworkStatus()
         {

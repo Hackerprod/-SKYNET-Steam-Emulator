@@ -95,7 +95,6 @@ namespace SKYNET.Managers
         {
             if (friends == null)
             {
-                ClearFriends();
                 return;
             }
 
@@ -348,6 +347,13 @@ namespace SKYNET.Managers
                 ? serverEvent.SteamId
                 : (ulong)new CSteamID(serverEvent.AccountId);
 
+            if (steamId == 0 || steamId == (ulong)SteamEmulator.SteamID)
+            {
+                return;
+            }
+
+            Friends.TryGetValue(steamId, out var existing);
+
             var relationship = serverEvent.FriendRelationship;
             if (relationship == 0)
             {
@@ -357,19 +363,34 @@ namespace SKYNET.Managers
                     relationship = (int)EFriendRelationship.k_EFriendRelationshipRequestRecipient;
                 else if (serverEvent.Type == "friend_request_sent")
                     relationship = (int)EFriendRelationship.k_EFriendRelationshipRequestInitiator;
+                else if (existing != null)
+                    relationship = existing.FriendRelationship != 0
+                        ? existing.FriendRelationship
+                        : (existing.HasFriend
+                            ? (int)EFriendRelationship.k_EFriendRelationshipFriend
+                            : (int)EFriendRelationship.k_EFriendRelationshipNone);
+            }
+
+            var richPresence = new Dictionary<string, string>(existing?.RichPresence ?? new Dictionary<string, string>());
+            if (serverEvent.RichPresence != null)
+            {
+                richPresence = new Dictionary<string, string>(serverEvent.RichPresence);
             }
 
             var user = new SteamPlayer
             {
-                AccountID = serverEvent.AccountId != 0 ? serverEvent.AccountId : steamId.GetAccountID(),
+                AccountID = serverEvent.AccountId != 0 ? serverEvent.AccountId : (existing?.AccountID ?? steamId.GetAccountID()),
                 SteamID = steamId,
-                PersonaName = serverEvent.PersonaName ?? string.Empty,
+                PersonaName = !string.IsNullOrWhiteSpace(serverEvent.PersonaName)
+                    ? serverEvent.PersonaName
+                    : (existing?.PersonaName ?? string.Empty),
                 GameID = serverEvent.AppId,
                 LobbyID = serverEvent.LobbyId,
                 PersonaState = serverEvent.PersonaState,
                 HasFriend = relationship == (int)EFriendRelationship.k_EFriendRelationshipFriend,
                 FriendRelationship = relationship,
-                RichPresence = serverEvent.RichPresence ?? new Dictionary<string, string>()
+                IPAddress = existing?.IPAddress ?? string.Empty,
+                RichPresence = richPresence
             };
 
             Friends[steamId] = user;
@@ -421,6 +442,7 @@ namespace SKYNET.Managers
                 PersonaName = player.PersonaName,
                 GameID = player.GameID,
                 LobbyID = player.LobbyID,
+                PersonaState = player.PersonaState,
                 HasFriend = player.HasFriend,
                 FriendRelationship = player.FriendRelationship,
                 IPAddress = player.IPAddress,

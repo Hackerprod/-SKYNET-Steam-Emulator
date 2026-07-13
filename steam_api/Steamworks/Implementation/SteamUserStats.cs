@@ -54,8 +54,18 @@ namespace SKYNET.Steamworks.Implementation
                 var requestSucceeded = true;
                 if (SkyNetApiClient.IsEnabled)
                 {
-                    requestSucceeded = SkyNetApiClient.RefreshCurrentStats(true);
-                    SyncSelfFromCache();
+                    SkyNetWorkQueue.Enqueue("RequestCurrentStats", () =>
+                    {
+                        var ok = SkyNetApiClient.RefreshCurrentStats(true);
+                        SyncSelfFromCache(false);
+                        CallbackManager.AddCallback(new UserStatsReceived_t
+                        {
+                            m_nGameID = SteamEmulator.AppID,
+                            m_eResult = ok ? EResult.k_EResultOK : EResult.k_EResultFail,
+                            m_steamIDUser = SteamEmulator.SteamID
+                        });
+                    }, "stats:current", true);
+                    return true;
                 }
 
                 UserStatsReceived_t data = new UserStatsReceived_t()
@@ -278,8 +288,17 @@ namespace SKYNET.Steamworks.Implementation
                 var stored = true;
                 if (SkyNetApiClient.IsEnabled)
                 {
-                    SyncSelfFromCache();
-                    stored = SkyNetApiClient.StoreStats();
+                    SyncSelfFromCache(false);
+                    SkyNetWorkQueue.Enqueue("StoreStats", () =>
+                    {
+                        var ok = SkyNetApiClient.StoreStats();
+                        CallbackManager.AddCallback(new UserStatsStored_t
+                        {
+                            m_nGameID = SteamEmulator.AppID,
+                            m_eResult = ok ? EResult.k_EResultOK : EResult.k_EResultFail
+                        });
+                    }, "stats:store", true);
+                    return true;
                 }
 
                 UserStatsStored_t data = new UserStatsStored_t()
@@ -370,8 +389,22 @@ namespace SKYNET.Steamworks.Implementation
                 Write($"RequestUserStats {steamIDUser}");
                 if (SkyNetApiClient.IsEnabled)
                 {
-                    SkyNetApiClient.RefreshStatsForUser(steamIDUser, true);
-                    SyncUserFromCache(steamIDUser);
+                    return SkyNetWorkQueue.EnqueueCallbackResult(new UserStatsReceived_t
+                    {
+                        m_nGameID = SteamEmulator.AppID,
+                        m_eResult = EResult.k_EResultFail,
+                        m_steamIDUser = (CSteamID)steamIDUser
+                    }, () =>
+                    {
+                        var ok = SkyNetApiClient.RefreshStatsForUser(steamIDUser, true);
+                        SyncUserFromCache(steamIDUser, false);
+                        return new UserStatsReceived_t
+                        {
+                            m_nGameID = SteamEmulator.AppID,
+                            m_eResult = ok ? EResult.k_EResultOK : EResult.k_EResultFail,
+                            m_steamIDUser = (CSteamID)steamIDUser
+                        };
+                    }, name: "RequestUserStats " + steamIDUser, coalesceKey: "stats:user:" + steamIDUser);
                 }
 
                 UserStatsReceived_t data = new UserStatsReceived_t()
@@ -585,7 +618,8 @@ namespace SKYNET.Steamworks.Implementation
             {
                 if (SkyNetApiClient.IsEnabled)
                 {
-                    SkyNetApiClient.RefreshCurrentStats();
+                    SkyNetWorkQueue.Enqueue("Refresh current players", () => SkyNetApiClient.RefreshCurrentStats(),
+                        "stats:current-players");
                 }
 
                 var UsersOnline = SkyNetApiClient.IsEnabled ? SkyNetStateCache.GetCurrentPlayers() : UserManager.Users.Count;
@@ -638,7 +672,8 @@ namespace SKYNET.Steamworks.Implementation
                 Write($"RequestGlobalStats {nHistoryDays} days");
                 if (SkyNetApiClient.IsEnabled)
                 {
-                    SkyNetApiClient.RefreshCurrentStats(true);
+                    SkyNetWorkQueue.Enqueue("RequestGlobalStats", () => SkyNetApiClient.RefreshCurrentStats(true),
+                        "stats:global", true);
                 }
 
                 GlobalStatsReceived_t data = new GlobalStatsReceived_t()
@@ -674,31 +709,34 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        private void SyncSelfFromCache()
+        private void SyncSelfFromCache(bool refresh = false)
         {
-            if (SkyNetApiClient.IsEnabled)
+            if (refresh && SkyNetApiClient.IsEnabled)
             {
-                SkyNetApiClient.RefreshCurrentStats();
+                SkyNetWorkQueue.Enqueue("Sync self stats", () => SkyNetApiClient.RefreshCurrentStats(),
+                    "stats:self");
             }
 
-            SyncUserFromCache((ulong)SteamEmulator.SteamID);
+            SyncUserFromCache((ulong)SteamEmulator.SteamID, false);
             Achievements = SkyNetStateCache.GetAchievements((ulong)SteamEmulator.SteamID);
         }
 
-        private void SyncUserFromCache(ulong steamIDUser)
+        private void SyncUserFromCache(ulong steamIDUser, bool refresh = false)
         {
             if (!SkyNetApiClient.IsEnabled)
             {
                 return;
             }
 
-            if (steamIDUser == (ulong)SteamEmulator.SteamID)
+            if (refresh && steamIDUser == (ulong)SteamEmulator.SteamID)
             {
-                SkyNetApiClient.RefreshCurrentStats();
+                SkyNetWorkQueue.Enqueue("Sync current user stats", () => SkyNetApiClient.RefreshCurrentStats(),
+                    "stats:self");
             }
-            else
+            else if (refresh)
             {
-                SkyNetApiClient.RefreshStatsForUser(steamIDUser);
+                SkyNetWorkQueue.Enqueue("Sync user stats", () => SkyNetApiClient.RefreshStatsForUser(steamIDUser),
+                    "stats:user:" + steamIDUser);
             }
 
             PlayerStats[steamIDUser] = SkyNetStateCache.GetStats(steamIDUser);

@@ -224,14 +224,12 @@ namespace SKYNET.Managers
 
             if (!EnsureSession())
             {
-                SkyNetStateCache.ClearFriends();
                 return false;
             }
 
             var friends = Send<List<SkyNetUserDto>>(HttpMethod.Get, "api/friends");
             if (friends == null)
             {
-                SkyNetStateCache.ClearFriends();
                 return false;
             }
 

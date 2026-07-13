@@ -175,6 +175,7 @@ public sealed partial class SteamApiStateService
         var online = IsUserOnlineLocked(steamId) ? 1 : 0;
         foreach (var recipient in recipients)
         {
+            var relationship = GetRelationshipLocked(recipient, steamId);
             EnqueueEvent(recipient, new SkyNetEventDto
             {
                 Type = type,
@@ -187,7 +188,8 @@ public sealed partial class SteamApiStateService
                 ChangeFlags = flags,
                 RichPresence = online == 1
                     ? new Dictionary<string, string>(user.RichPresence)
-                    : new Dictionary<string, string>()
+                    : new Dictionary<string, string>(),
+                FriendRelationship = relationship
             });
         }
     }
@@ -596,8 +598,9 @@ public sealed partial class SteamApiStateService
         PersonaName = evt.PersonaName,
         AppId = evt.AppId,
         LobbyId = evt.LobbyId,
+        PersonaState = evt.PersonaState,
         ChangeFlags = evt.ChangeFlags,
-        RichPresence = new Dictionary<string, string>(evt.RichPresence),
+        RichPresence = new Dictionary<string, string>(evt.RichPresence ?? new Dictionary<string, string>()),
         StatName = evt.StatName,
         StatValue = evt.StatValue,
         AchievementName = evt.AchievementName,

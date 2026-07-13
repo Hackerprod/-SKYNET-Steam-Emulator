@@ -32,6 +32,8 @@ namespace SKYNET.Steamworks.Implementation
         private ConcurrentDictionary<ulong, PendingWriteStream> PendingWriteStreams;
         private ConcurrentDictionary<string, DateTime> MissingRemoteFiles;
         private static readonly TimeSpan MissingRemoteFileWindow = TimeSpan.FromMinutes(5);
+        private ulong CachedQuotaTotalBytes = 1024UL * 1024UL * 1024UL;
+        private ulong CachedQuotaAvailableBytes = 1024UL * 1024UL * 1024UL;
 
         public SteamRemoteStorage()
         {
@@ -59,20 +61,10 @@ namespace SKYNET.Steamworks.Implementation
                     string fullPath = Path.Combine(StoragePath, pchFile);
                     Common.EnsureDirectoryExists(fullPath, true);
                     byte[] buffer = pvData.GetBytes(cubData);
-                    if (SkyNetApiClient.IsEnabled)
-                    {
-                        Result = SkyNetApiClient.UploadRemoteStorageFile(pchFile, buffer);
-                        if (Result)
-                        {
-                            MissingRemoteFiles.TryRemove(NormalizeRemoteFileName(pchFile), out _);
-                            File.WriteAllBytes(fullPath, buffer);
-                        }
-                    }
-                    else
-                    {
-                        File.WriteAllBytes(fullPath, buffer);
-                        Result = true;
-                    }
+                    File.WriteAllBytes(fullPath, buffer);
+                    MissingRemoteFiles.TryRemove(NormalizeRemoteFileName(pchFile), out _);
+                    Result = true;
+                    QueueRemoteUpload(pchFile, buffer);
                     Write($"FileWrite {pchFile}, {buffer.Length} bytes");
                 }
                 catch (Exception ex)
@@ -126,17 +118,9 @@ namespace SKYNET.Steamworks.Implementation
                 string fullPath = Path.Combine(StoragePath, pchFile);
                 Common.EnsureDirectoryExists(fullPath, true);
                 byte[] bytes = pvData.GetBytes(cubData);
-                if (SkyNetApiClient.IsEnabled)
-                {
-                    if (!SkyNetApiClient.UploadRemoteStorageFile(pchFile, bytes))
-                    {
-                        return APICall;
-                    }
-
-                    MissingRemoteFiles.TryRemove(NormalizeRemoteFileName(pchFile), out _);
-                }
-
                 File.WriteAllBytes(fullPath, bytes);
+                MissingRemoteFiles.TryRemove(NormalizeRemoteFileName(pchFile), out _);
+                QueueRemoteUpload(pchFile, bytes);
 
                 RemoteStorageFileWriteAsyncComplete_t data = new RemoteStorageFileWriteAsyncComplete_t()
                 {
@@ -236,46 +220,56 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"FileDelete {pchFile}");
             string fullPath = Path.Combine(StoragePath, pchFile);
-            var deletedRemotely = true;
-            if (SkyNetApiClient.IsEnabled && !SkyNetApiClient.DeleteRemoteStorageFile(pchFile))
-            {
-                return false;
-            }
 
             if (File.Exists(fullPath))
             {
                 try
                 {
                     File.Delete(fullPath);
-                    return true;
                 }
                 catch (Exception)
                 {
                     return false;
                 }
             }
-            return deletedRemotely;
+
+            if (SkyNetApiClient.IsEnabled)
+            {
+                SkyNetWorkQueue.Enqueue("Delete remote storage file", () => SkyNetApiClient.DeleteRemoteStorageFile(pchFile),
+                    "storage:delete:" + NormalizeRemoteFileName(pchFile));
+            }
+
+            return true;
         }
 
         public SteamAPICall_t FileShare(string pchFile)
         {
             Write("FileShare");
-            SteamAPICall_t APICall = k_uAPICallInvalid;
-            MutexHelper.Wait("FileShare", delegate
+            try
             {
-                try
+                string fullPath = Path.Combine(StoragePath, pchFile);
+                EnsureRemoteFileCached(pchFile);
+                if (!File.Exists(fullPath))
                 {
-                    RemoteStorageFileShareResult_t data = new RemoteStorageFileShareResult_t();
-                    string fullPath = Path.Combine(StoragePath, pchFile);
-                    EnsureRemoteFileCached(pchFile);
-                    if (!File.Exists(fullPath))
+                    return CallbackManager.AddCallbackResult(new RemoteStorageFileShareResult_t
                     {
-                        data.m_eResult = EResult.k_EResultFileNotFound;
-                    }
-                    else
+                        m_eResult = EResult.k_EResultFileNotFound,
+                        m_rgchFilename = Encoding.Default.GetBytes(pchFile)
+                    });
+                }
+
+                var pending = new RemoteStorageFileShareResult_t
+                {
+                    m_eResult = EResult.k_EResultOK,
+                    m_hFile = (ulong)CSteamID.CreateOne(),
+                    m_rgchFilename = Encoding.Default.GetBytes(pchFile)
+                };
+
+                return SkyNetWorkQueue.EnqueueCallbackResult(
+                    pending,
+                    () =>
                     {
-                        data.m_eResult = EResult.k_EResultOK;
-                        data.m_hFile = (ulong)CSteamID.CreateOne();
+                        var data = pending;
                         if (SkyNetApiClient.IsEnabled)
                         {
                             var share = SkyNetApiClient.ShareRemoteStorageFile(pchFile);
@@ -285,17 +279,24 @@ namespace SKYNET.Steamworks.Implementation
                                 data.m_hFile = share.Handle;
                             }
                         }
-                        data.m_rgchFilename = Encoding.Default.GetBytes(pchFile);
+
                         SharedFiles.TryAdd(data.m_hFile, pchFile);
-                        APICall = CallbackManager.AddCallbackResult(data);
-                    }
-                }
-                catch (Exception ex)
+                        return data;
+                    },
+                    false,
+                    "Share remote storage file",
+                    "storage:share:" + NormalizeRemoteFileName(pchFile),
+                    false);
+            }
+            catch (Exception ex)
+            {
+                Write($"Error Sharing file {pchFile} {ex}");
+                return CallbackManager.AddCallbackResult(new RemoteStorageFileShareResult_t
                 {
-                    Write($"Error Sharing file {pchFile} {ex}");
-                }
-            });
-            return APICall;
+                    m_eResult = EResult.k_EResultFail,
+                    m_rgchFilename = Encoding.Default.GetBytes(pchFile)
+                });
+            }
         }
 
         public bool SetSyncPlatforms(string pchFile, int eRemoteStoragePlatform)
@@ -410,18 +411,13 @@ namespace SKYNET.Steamworks.Implementation
         {
             if (SkyNetApiClient.IsEnabled)
             {
-                RemoteStorageFiles = SkyNetApiClient.ListRemoteStorageFiles() ?? new List<SkyNetApiClient.SkyNetRemoteStorageFileListItemDto>();
-                StorageFiles = RemoteStorageFiles.ConvertAll(file => file.FileName);
-                LastFile = 0;
-                Write($"GetFileCount {RemoteStorageFiles.Count}");
-                return RemoteStorageFiles.Count;
+                QueueRemoteFileList();
+                RefreshLocalFileList();
+                Write($"GetFileCount {StorageFiles.Count}");
+                return StorageFiles.Count;
             }
 
-            if (Directory.Exists(StoragePath))
-            {
-                StorageFiles = Directory.GetFiles(StoragePath, "*.*", SearchOption.AllDirectories).ToList();
-                LastFile = 0;
-            }
+            RefreshLocalFileList();
             Write($"GetFileCount {StorageFiles.Count}");
             return StorageFiles.Count;
         }
@@ -432,10 +428,17 @@ namespace SKYNET.Steamworks.Implementation
             {
                 if (RemoteStorageFiles == null || RemoteStorageFiles.Count == 0)
                 {
-                    RemoteStorageFiles = SkyNetApiClient.ListRemoteStorageFiles() ?? new List<SkyNetApiClient.SkyNetRemoteStorageFileListItemDto>();
+                    QueueRemoteFileList();
                 }
 
-                if (iFile < 0 || iFile >= RemoteStorageFiles.Count)
+                if (iFile >= 0 && iFile < StorageFiles.Count)
+                {
+                    string filename = StorageFiles[iFile];
+                    pnFileSizeInBytes = File.Exists(filename) ? (int)new FileInfo(filename).Length : 0;
+                    return ToRemoteStorageName(filename);
+                }
+
+                if (RemoteStorageFiles == null || iFile < 0 || iFile >= RemoteStorageFiles.Count)
                 {
                     return string.Empty;
                 }
@@ -478,19 +481,23 @@ namespace SKYNET.Steamworks.Implementation
         public bool GetQuota(ref ulong pnTotalBytes, ref ulong puAvailableBytes)
         {
             Write("GetQuota");
+            pnTotalBytes = CachedQuotaTotalBytes;
+            puAvailableBytes = CachedQuotaAvailableBytes;
+
             if (SkyNetApiClient.IsEnabled)
             {
-                var quota = SkyNetApiClient.GetRemoteStorageQuota();
-                if (quota != null)
-                {
-                    pnTotalBytes = quota.TotalBytes;
-                    puAvailableBytes = quota.AvailableBytes;
-                    return true;
-                }
+                SkyNetWorkQueue.Enqueue("Refresh remote storage quota", () =>
+                    {
+                        var quota = SkyNetApiClient.GetRemoteStorageQuota();
+                        if (quota != null)
+                        {
+                            CachedQuotaTotalBytes = quota.TotalBytes;
+                            CachedQuotaAvailableBytes = quota.AvailableBytes;
+                        }
+                    },
+                    "storage:quota");
             }
 
-            pnTotalBytes = 1024 * 1024 * 1024;
-            puAvailableBytes = 1024 * 1024 * 1024;
             return true;
         }
 
@@ -759,26 +766,94 @@ namespace SKYNET.Steamworks.Implementation
                 return false;
             }
 
-            try
+            QueueRemoteFileFetch(pchFile, fullPath, remoteKey);
+            return false;
+        }
+
+        private void QueueRemoteUpload(string fileName, byte[] content)
+        {
+            if (!SkyNetApiClient.IsEnabled)
             {
-                var file = SkyNetApiClient.DownloadRemoteStorageFile(pchFile);
-                if (file == null || string.IsNullOrWhiteSpace(file.ContentBase64))
+                return;
+            }
+
+            var copy = content == null ? new byte[0] : (byte[])content.Clone();
+            SkyNetWorkQueue.Enqueue("RemoteStorage upload", () =>
+            {
+                if (!SkyNetApiClient.UploadRemoteStorageFile(fileName, copy))
+                {
+                    Write($"Remote upload failed {fileName}");
+                }
+            }, "remote-storage:upload:" + NormalizeRemoteFileName(fileName));
+        }
+
+        private void QueueRemoteFileList()
+        {
+            if (!SkyNetApiClient.IsEnabled)
+            {
+                return;
+            }
+
+            SkyNetWorkQueue.Enqueue("RemoteStorage list", () =>
+            {
+                var files = SkyNetApiClient.ListRemoteStorageFiles();
+                if (files != null)
+                {
+                    RemoteStorageFiles = files;
+                }
+            }, "remote-storage:list");
+        }
+
+        private void QueueRemoteFileFetch(string fileName, string fullPath, string remoteKey)
+        {
+            SkyNetWorkQueue.Enqueue("RemoteStorage fetch", () =>
+            {
+                try
+                {
+                    var file = SkyNetApiClient.DownloadRemoteStorageFile(fileName);
+                    if (file == null || string.IsNullOrWhiteSpace(file.ContentBase64))
+                    {
+                        MissingRemoteFiles[remoteKey] = DateTime.UtcNow + MissingRemoteFileWindow;
+                        return;
+                    }
+
+                    Common.EnsureDirectoryExists(fullPath, true);
+                    File.WriteAllBytes(fullPath, Convert.FromBase64String(file.ContentBase64));
+                    MissingRemoteFiles.TryRemove(remoteKey, out _);
+                }
+                catch (Exception ex)
                 {
                     MissingRemoteFiles[remoteKey] = DateTime.UtcNow + MissingRemoteFileWindow;
-                    return false;
+                    Write($"Remote fetch failed {fileName} {ex.Message}");
                 }
+            }, "remote-storage:fetch:" + remoteKey);
+        }
 
-                Common.EnsureDirectoryExists(fullPath, true);
-                File.WriteAllBytes(fullPath, Convert.FromBase64String(file.ContentBase64));
-                MissingRemoteFiles.TryRemove(remoteKey, out _);
-                return true;
-            }
-            catch (Exception ex)
+        private void RefreshLocalFileList()
+        {
+            if (Directory.Exists(StoragePath))
             {
-                MissingRemoteFiles[remoteKey] = DateTime.UtcNow + MissingRemoteFileWindow;
-                Write($"EnsureRemoteFileCached {pchFile} {ex}");
-                return false;
+                StorageFiles = Directory.GetFiles(StoragePath, "*.*", SearchOption.AllDirectories).ToList();
+                LastFile = 0;
             }
+            else
+            {
+                StorageFiles = new List<string>();
+            }
+        }
+
+        private string ToRemoteStorageName(string fullPath)
+        {
+            if (string.IsNullOrEmpty(fullPath))
+            {
+                return string.Empty;
+            }
+
+            var root = Path.GetFullPath(StoragePath).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+            var path = Path.GetFullPath(fullPath);
+            return path.StartsWith(root, StringComparison.OrdinalIgnoreCase)
+                ? path.Substring(root.Length).Replace('\\', '/')
+                : Path.GetFileName(path);
         }
 
         private bool IsRemoteFileKnownMissing(string remoteKey)

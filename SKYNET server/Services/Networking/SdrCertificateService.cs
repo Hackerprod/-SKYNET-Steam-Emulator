@@ -22,7 +22,12 @@ public sealed class SdrCertificateService
     // Fixed CA. Generated once and pinned in code so it never changes and always
     // matches the public key hard-coded in the DLL patcher. The private seed lives
     // only here (the server is trusted); the DLL only ever sees the public key.
-    private const string DefaultSeedBase64 = "WfXuH+6DV2sY/9Kda3THnqLAUYKTT8FApSi9nbH5CcY=";
+    // Proven CA from the reference coordinator (NetworkingCertManager): its private
+    // seed is literally the first 32 bytes of the old private.pem, giving CA public
+    // key FEAA97C32C7E5BF684DF86F120F3C40C785DCECDEDCB91FC223E54E76AA30F59. Steam's
+    // key-id for it is 13962645978238679445 (set via Sdr:CaKeyId). The Dota
+    // steamnetworkingsockets.dll must be patched with this same public key.
+    private const string DefaultSeedBase64 = "LS0tLS1CRUdJTiBPUEVOU1NIIFBSSVZBVEUgS0VZLS0=";
 
     private readonly object _sync = new();
     private readonly string _keyPath;
@@ -63,14 +68,19 @@ public sealed class SdrCertificateService
     {
         lock (_sync)
         {
-            // Per-session identity key pair. The private key travels to the DLL so
-            // the networking library can perform the connection handshake; it never
-            // needs the CA private key.
-            var identityPrivate = new Ed25519PrivateKeyParameters(RandomNumberGenerator.GetBytes(Ed25519PrivateKeyParameters.KeySize), 0);
+            // Deterministic identity key pair per steamId. Steam's networking library
+            // adopts the private key from the first cert and then requires every later
+            // cert to carry the SAME key (otherwise "Private key mismatch" -> reject).
+            // A random key per request breaks re-requests / cache misses, so we derive
+            // the identity seed deterministically from the identity.
+            var seed = System.Security.Cryptography.SHA256.HashData(
+                System.Text.Encoding.UTF8.GetBytes($"skynet-sdr-identity:{steamId}"));
+            var identityPrivate = new Ed25519PrivateKeyParameters(seed, 0);
             var identityPublic = identityPrivate.GeneratePublicKey();
 
-            var cert = BuildCertificate(identityPublic.GetEncoded(), steamId, appId);
-            var signature = Sign(_caPrivate, cert);
+            // Build/sign exactly like the reference coordinator's NetworkingCertManager.
+            var (cert, signature) = SKYNET_server.Certificate.NetworkingCertManager.BuildSignedCert(
+                identityPublic.GetEncoded(), steamId, appId, _caPrivate);
 
             return new SdrCertResult
             {
@@ -92,6 +102,17 @@ public sealed class SdrCertificateService
         writer.WriteVarint(1, 1);                       // key_type = ED25519
         writer.WriteBytes(2, identityPublicKey);        // key_data
         writer.WriteFixed64(4, steamId);                // legacy_steam_id
+        // The reference coordinator (proven working) sets BOTH identity forms, and
+        // current Dota validates the modern identity rather than legacy_steam_id.
+        if (steamId != 0)
+        {
+            // legacy_identity_binary (field 11) = { steam_id (field 16, fixed64) }
+            var legacyIdentity = new ProtoWriter();
+            legacyIdentity.WriteFixed64(16, steamId);
+            writer.WriteBytes(11, legacyIdentity.ToArray());
+            // identity_string (field 12) = "steamid:<steamid64>"
+            writer.WriteBytes(12, System.Text.Encoding.UTF8.GetBytes($"steamid:{steamId}"));
+        }
         // These are fixed32 in CMsgSteamDatagramCertificate.  Encoding them
         // as varints makes the native protobuf reader ignore both fields,
         // leaving the certificate without a valid time window.

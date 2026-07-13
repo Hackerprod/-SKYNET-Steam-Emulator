@@ -24,10 +24,7 @@ namespace SKYNET.Steamworks.Exported
             Write($"SteamInternal_SteamAPI_Init");
             if (SteamEmulator.SecureNetworking)
             {
-                // This runs before Dota asks the standalone networking library for
-                // its certificate.  Do not block indefinitely if that library has
-                // not been loaded yet; the patcher's short polling loop continues.
-                SdrCertPatcher.EnsurePatched(250);
+                Write("SecureNetworking requested, but native SDR patching is disabled in this build");
             }
             return 0; // k_ESteamAPIInitResult_OK
         }

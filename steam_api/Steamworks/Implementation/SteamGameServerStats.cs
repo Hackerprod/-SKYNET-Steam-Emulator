@@ -49,23 +49,36 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"RequestUserStats {steamIDUser}");
 
-            var result = EResult.k_EResultFail;
-            if (SkyNetApiClient.IsEnabled)
-            {
-                var envelope = SkyNetApiClient.RequestGameServerUserStats(steamIDUser);
-                if (envelope != null)
+            return SkyNetWorkQueue.EnqueueCallbackResult(
+                new GSStatsReceived_t
                 {
-                    SkyNetStateCache.ApplyStats(steamIDUser, envelope.Stats);
-                    SkyNetStateCache.ApplyAchievements(steamIDUser, envelope.Achievements);
-                    result = EResult.k_EResultOK;
-                }
-            }
+                    Result = EResult.k_EResultFail,
+                    SteamIDUser = steamIDUser
+                },
+                () =>
+                {
+                    var result = EResult.k_EResultFail;
+                    if (SkyNetApiClient.IsEnabled)
+                    {
+                        var envelope = SkyNetApiClient.RequestGameServerUserStats(steamIDUser);
+                        if (envelope != null)
+                        {
+                            SkyNetStateCache.ApplyStats(steamIDUser, envelope.Stats);
+                            SkyNetStateCache.ApplyAchievements(steamIDUser, envelope.Achievements);
+                            result = EResult.k_EResultOK;
+                        }
+                    }
 
-            return CallbackManager.AddCallbackResultGameServer(new GSStatsReceived_t
-            {
-                Result = result,
-                SteamIDUser = steamIDUser
-            });
+                    return new GSStatsReceived_t
+                    {
+                        Result = result,
+                        SteamIDUser = steamIDUser
+                    };
+                },
+                true,
+                "GameServer request user stats",
+                "gsstats:request:" + steamIDUser,
+                true);
         }
 
         public bool SetUserAchievement(ulong steamIDUser, string pchName)
@@ -93,33 +106,46 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"StoreUserStats {steamIDUser}");
 
-            var result = EResult.k_EResultFail;
-            if (SkyNetApiClient.IsEnabled)
-            {
-                result = SkyNetApiClient.StoreGameServerUserStats(
-                    steamIDUser,
-                    SkyNetStateCache.GetStats(steamIDUser).ConvertAll(s => new SkyNetApiClient.SkyNetStatDto
+            return SkyNetWorkQueue.EnqueueCallbackResult(
+                new GSStatsStored_t
+                {
+                    Result = EResult.k_EResultFail,
+                    SteamIDUser = steamIDUser
+                },
+                () =>
+                {
+                    var result = EResult.k_EResultFail;
+                    if (SkyNetApiClient.IsEnabled)
                     {
-                        Name = s.Name,
-                        Data = s.Data
-                    }),
-                    SkyNetStateCache.GetAchievements(steamIDUser).ConvertAll(a => new SkyNetApiClient.SkyNetAchievementDto
-                    {
-                        Name = a.Name,
-                        Earned = a.Earned,
-                        Date = a.Date,
-                        Progress = a.Progress,
-                        MaxProgress = a.MaxProgress
-                    }))
-                    ? EResult.k_EResultOK
-                    : EResult.k_EResultFail;
-            }
+                        result = SkyNetApiClient.StoreGameServerUserStats(
+                            steamIDUser,
+                            SkyNetStateCache.GetStats(steamIDUser).ConvertAll(s => new SkyNetApiClient.SkyNetStatDto
+                            {
+                                Name = s.Name,
+                                Data = s.Data
+                            }),
+                            SkyNetStateCache.GetAchievements(steamIDUser).ConvertAll(a => new SkyNetApiClient.SkyNetAchievementDto
+                            {
+                                Name = a.Name,
+                                Earned = a.Earned,
+                                Date = a.Date,
+                                Progress = a.Progress,
+                                MaxProgress = a.MaxProgress
+                            }))
+                            ? EResult.k_EResultOK
+                            : EResult.k_EResultFail;
+                    }
 
-            return CallbackManager.AddCallbackResultGameServer(new GSStatsStored_t
-            {
-                Result = result,
-                SteamIDUser = steamIDUser
-            });
+                    return new GSStatsStored_t
+                    {
+                        Result = result,
+                        SteamIDUser = steamIDUser
+                    };
+                },
+                true,
+                "GameServer store user stats",
+                "gsstats:store:" + steamIDUser,
+                true);
         }
 
         public bool UpdateUserAvgRateStat(ulong steamIDUser, string pchName, float flCountThisSession, double dSessionLength)

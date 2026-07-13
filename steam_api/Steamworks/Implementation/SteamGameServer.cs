@@ -77,17 +77,7 @@ namespace SKYNET.Steamworks.Implementation
 
             if (SkyNetApiClient.IsEnabled)
             {
-                var result = SkyNetApiClient.RegisterGameServer(ServerData);
-                if (result != null && result.PublicIP != 0)
-                {
-                    ServerData.IP = result.PublicIP;
-                }
-
-                if (result != null)
-                {
-                    ServerData.Secure = NormalizeSecure(result.Secure);
-                    Policy.Secure = ServerData.Secure;
-                }
+                QueueRegisterGameServer();
             }
 
             CallbackManager.AddCallbackGameServer(Policy);
@@ -128,18 +118,10 @@ namespace SKYNET.Steamworks.Implementation
             Write($"LogOn (Token = {pszToken})");
             CallbackManager.ResetGameServerConnectionReplay();
 
+            LoggedIn = true;
             if (SkyNetApiClient.IsEnabled)
             {
-                var result = SkyNetApiClient.LogOnGameServer(ServerData, pszToken, false);
-                LoggedIn = result == null || result.Success;
-                if (result != null && result.PublicIP != 0)
-                {
-                    ServerData.IP = result.PublicIP;
-                }
-            }
-            else
-            {
-                LoggedIn = true;
+                QueueLogOnGameServer(pszToken, false);
             }
 
             EmitSecurePolicy();
@@ -151,18 +133,10 @@ namespace SKYNET.Steamworks.Implementation
             Write($"LogOnAnonymous");
             CallbackManager.ResetGameServerConnectionReplay();
 
+            LoggedIn = true;
             if (SkyNetApiClient.IsEnabled)
             {
-                var result = SkyNetApiClient.LogOnGameServer(ServerData, string.Empty, true);
-                LoggedIn = result == null || result.Success;
-                if (result != null && result.PublicIP != 0)
-                {
-                    ServerData.IP = result.PublicIP;
-                }
-            }
-            else
-            {
-                LoggedIn = true;
+                QueueLogOnGameServer(string.Empty, true);
             }
 
             EmitSecurePolicy();
@@ -174,7 +148,7 @@ namespace SKYNET.Steamworks.Implementation
             Write($"LogOff");
             if (SkyNetApiClient.IsEnabled)
             {
-                SkyNetApiClient.LogOffGameServer();
+                SkyNetWorkQueue.Enqueue("GameServer logoff", () => SkyNetApiClient.LogOffGameServer(), "gameserver:logoff");
             }
 
             LoggedIn = false;
@@ -313,7 +287,8 @@ namespace SKYNET.Steamworks.Implementation
             Write($"SendUserDisconnect (SteamID = {steamIDUser})");
             if (SkyNetApiClient.IsEnabled)
             {
-                SkyNetApiClient.DisconnectGameServerUser(steamIDUser);
+                SkyNetWorkQueue.Enqueue("GameServer user disconnect", () => SkyNetApiClient.DisconnectGameServerUser(steamIDUser),
+                    "gameserver:user-disconnect:" + steamIDUser, true);
             }
             TicketManager.RemoveTicket(steamIDUser);
         }
@@ -321,7 +296,13 @@ namespace SKYNET.Steamworks.Implementation
         public bool BUpdateUserData(ulong steamIDUser, string pchPlayerName, uint uScore)
         {
             Write($"BUpdateUserData (SteamID = {steamIDUser}, PlayerName = {pchPlayerName})");
-            return !SkyNetApiClient.IsEnabled || SkyNetApiClient.UpdateGameServerUserData(steamIDUser, pchPlayerName, uScore);
+            if (SkyNetApiClient.IsEnabled)
+            {
+                SkyNetWorkQueue.Enqueue("GameServer user data", () => SkyNetApiClient.UpdateGameServerUserData(steamIDUser, pchPlayerName, uScore),
+                    "gameserver:user-data:" + steamIDUser);
+            }
+
+            return true;
         }
 
         public HAuthTicket GetAuthSessionTicket(IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
@@ -448,13 +429,19 @@ namespace SKYNET.Steamworks.Implementation
                 return ServerData.IP;
             }
 
-            var ip = SkyNetApiClient.IsEnabled ? SkyNetApiClient.GetGameServerPublicIP() : 0;
-            if (ip != 0)
+            if (SkyNetApiClient.IsEnabled)
             {
-                ServerData.IP = ip;
+                SkyNetWorkQueue.Enqueue("GameServer public ip", () =>
+                {
+                    var ip = SkyNetApiClient.GetGameServerPublicIP();
+                    if (ip != 0)
+                    {
+                        ServerData.IP = ip;
+                    }
+                }, "gameserver:public-ip");
             }
 
-            return ip;
+            return ServerData.IP;
         }
 
         public void EnableHeartbeats(bool bActive)
@@ -472,7 +459,8 @@ namespace SKYNET.Steamworks.Implementation
             Write($"ForceHeartbeat");
             if (SkyNetApiClient.IsEnabled)
             {
-                SkyNetApiClient.HeartbeatGameServer(ServerData);
+                SkyNetWorkQueue.Enqueue("GameServer heartbeat", () => SkyNetApiClient.HeartbeatGameServer(ServerData),
+                    "gameserver:heartbeat");
             }
         }
         public SteamAPICall_t AssociateWithClan(ulong steamIDClan)
@@ -555,8 +543,46 @@ namespace SKYNET.Steamworks.Implementation
         {
             if (LoggedIn && SkyNetApiClient.IsEnabled)
             {
-                SkyNetApiClient.UpdateGameServerState(ServerData);
+                SkyNetWorkQueue.Enqueue("GameServer state", () => SkyNetApiClient.UpdateGameServerState(ServerData),
+                    "gameserver:state");
             }
+        }
+
+        private void QueueRegisterGameServer()
+        {
+            SkyNetWorkQueue.Enqueue("GameServer register", () =>
+            {
+                var result = SkyNetApiClient.RegisterGameServer(ServerData);
+                ApplyServerResult(result);
+            }, "gameserver:register", true);
+        }
+
+        private void QueueLogOnGameServer(string token, bool anonymous)
+        {
+            SkyNetWorkQueue.Enqueue("GameServer logon", () =>
+            {
+                var result = SkyNetApiClient.LogOnGameServer(ServerData, token, anonymous);
+                ApplyServerResult(result);
+                if (result != null && !result.Success)
+                {
+                    Write("GameServer backend logon failed; keeping local gameserver logged on");
+                }
+            }, "gameserver:logon", true);
+        }
+
+        private void ApplyServerResult(SkyNetApiClient.SkyNetGameServerResultDto result)
+        {
+            if (result == null)
+            {
+                return;
+            }
+
+            if (result.PublicIP != 0)
+            {
+                ServerData.IP = result.PublicIP;
+            }
+
+            ServerData.Secure = NormalizeSecure(result.Secure);
         }
     }
 }

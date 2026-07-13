@@ -15,6 +15,7 @@ builder.Services.AddHostedService<SkyNetDiscoveryService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<DotaDedicatedServerSupervisor>());
 builder.Services.AddHostedService<GameCoordinatorTickService>();
 builder.Services.AddHostedService<PresenceSweepService>();
+builder.Services.AddHostedService<SKYNET_server.Services.Networking.SdrRelayService>();
 
 var app = builder.Build();
 

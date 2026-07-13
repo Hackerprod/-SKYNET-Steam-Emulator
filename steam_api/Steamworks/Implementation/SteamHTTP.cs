@@ -506,6 +506,12 @@ namespace SKYNET.Steamworks.Implementation
             return HTTPRequests.Find(r => r.Handle == hTTPRequestHandle);
         }
 
+        // Full SDR network config (revision, relay certs signed by our CA, POP
+        // and relay list) modelled on the reference coordinator's GetSDRConfig
+        // endpoint, edited with our own relay address. Served synchronously from
+        // memory so no blocking outbound HTTP is ever made.
+        internal const string SdrConfigJson = @"{""revision"":300,""certs"":[""Ii4IARIgro2l/s9N3hEkchfAR7j0aZhJgtyE5FYtC/RYYTOYjIRFUWnrYE3RRxRhKUOsygDiAjPJMkCFO65SjC8vIG+EkmOIrcOZNOM/4uB9srcF+s/RjJtbIc7hsZwSTiK+QOKZWAco9D21dH8snA6P3Yz++3SG5oIO"",""Ij4IARIgro2l/s9N3hEkchfAR7j0aZhJgtyE5FYtC/RYYTOYjIRFUWnrYE3RRxRhUJrVEFCO0iNQ+pQ+UIy8TSlDrMoA4gIzyTJAsKQ+6bbEvQissoLo4PuRhUzl5YnR/TKXaZe4kejjP8yE0NWzfb4lyVckpWrwoTJLF0dxtR7FnKT72yBKW0udBg=="",""IjIIARIgro2l/s9N3hEkchfAR7j0aZhJgtyE5FYtC/RYYTOYjIRFUWnrYE3RRxRhULLKNClDrMoA4gIzyTJAoC084KeUil/GK3m4UaaXKhjGy6p4VdEoSvE+fpLPMroSG9FXx16OWH4tThlvFop3LcwnvH39lZkvPDQUelxpDA=="",""IjIIARIgro2l/s9N3hEkchfAR7j0aZhJgtyE5FYtC/RYYTOYjIRFUWnrYE3RRxRhUNiiQSlDrMoA4gIzyTJALUXavGHb5ie4svZCE41eeLMsvrqyjQ/zPD+dYRd/8b9mt/X7dCCNXtMCY3kTQ8pIWkjWNL1nZYbf2SOfSD1uBg=="",""IjYIARIgro2l/s9N3hEkchfAR7j0aZhJgtyE5FYtC/RYYTOYjIRFUWnrYE3RRxRhUKSZFVDcoUIpQ6zKAOICM8kyQEsDZQYOHQxv7fhouBIK2zNc5DLTrb2iNLoXtVXTDRCCOfpvzqwp1LmpOSYoEQSrSEHAt0hHF1XXU1yeo/1gvAk="",""IjYIARIgro2l/s9N3hEkchfAR7j0aZhJgtyE5FYtC/RYYTOYjIRFUWnrYE3RRxRhUJrWE1CK+BQpQ6zKAOICM8kyQCMH1rpJtEL4ahXhPaVtmcjMuHW1G5AdB1KeUpIjDR9tsLhRZlnm0387g/FzTjMuhR5UCfamybb1RVV+zkwsxgs="",""IjYIARIgro2l/s9N3hEkchfAR7j0aZhJgtyE5FYtC/RYYTOYjIRFUWnrYE3RRxRhUKSZFVDcoUIpQ6zKAOICM8kyQEsDZQYOHQxv7fhouBIK2zNc5DLTrb2iNLoXtVXTDRCCOfpvzqwp1LmpOSYoEQSrSEHAt0hHF1XXU1yeo/1gvAk="",""IjcIARIgro2l/s9N3hEkchfAR7j0aZhJgtyE5FYtC/RYYTOYjIRFUWnrYE3RRxRhULgDUIgEUKoGKUOsygDiAjPJMkBhhrHHeS4iZ9HVQfpeA/x2vfs4AQgmVdSt09OLkkwErQWtDqJNDEOO8ZTd+ybotsc1G4IBrTSv28Z435EBpikM"",""IjoIARIgro2l/s9N3hEkchfAR7j0aZhJgtyE5FYtC/RYYTOYjIRFUWnrYE3RRxRhUKLCPlCS8z9Qmr5DKUOsygDiAjPJMkCnebkZgPYMpBsrg4DzChS0bDUPZhkRHUN47KiJTiiyL8hRKK+6F9Np7AFdjlPWvKFp+lAPnxwrk2FFvZ6qHloK"",""IjsIARIgro2l/s9N3hEkchfAR7j0aZhJgtyE5FYtC/RYYTOYjIRFUWnrYE3RRxRhUMYFUNAFUNoFUJixEClDrMoA4gIzyTJA2bXv0pmtSbsJDyzRBKm08NKZaeZ3zOZwF0HsYz/zDbiflW0jdWfrz5a4555EbjVzreLGo8OaBiezMYu1Ibn7Ag=="",""IkgIARIgro2l/s9N3hEkchfAR7j0aZhJgtyE5FYtC/RYYTOYjIRFUWnrYE3RRxRhULoEULAGUICKD1DexwxQosI+UJLzP1CavkMpQ6zKAOICM8kyQGu1a7rxtTGuLPH+4Zkk/1NkthbyWSm5OxpsCig0J9xYCVkt8EFPdSkAhr4LK7+dhiG30Aug2pIk/NKKDPkdUwc="",""IkoIARIgro2l/s9N3hEkchfAR7j0aZhJgtyE5FYtC/RYYTOYjIRFUWnrYE3RRxRhUOyjHFDtoxxQ7qMcULLkHlC41DVQxIsaUNrcOClDrMoA4gIzyTJAoHjTDEIwtxQVo/TxWfUWc4hWgo+XbzHXyB/FxlWZ5In5xfXLW9BaWLuFbS4BVbsHGwwSazLaTMJT+MZUANiRCQ==""],""p2p_share_ip"":{""cn"":20,""default"":40,""ru"":20},""pops"":{""SKY"":{""desc"":""SKYNET"",""geo"":[4.9,52.37],""relay_addresses"":[""10.11.49.120:28009-28009""],""partners"":1,""groups"":[""valve""],""relays"":[{""ipv4"":""10.11.49.120"",""port_range"":[28009,28009]}]}},""relay_public_key"":""5AC884C1045BA0FF44142AC8DCA51B8A98C8F1CB4FEE36284AFBE92FCF594932"",""revoked_keys"":[""123456789""],""success"":1}";
+
         private static byte[] BuildLocalResponseBytes(HTTPRequest request)
         {
             string body = BuildLocalResponseBody(request.URL);
@@ -527,7 +533,7 @@ namespace SKYNET.Steamworks.Implementation
 
             if (url.IndexOf("ISteamApps/GetSDRConfig", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                return "{\"revision\":1,\"pops\":{\"iad\":{\"desc\":\"Local\",\"geo\":[-77.0365,38.8977],\"partners\":1,\"tier\":1,\"relays\":[{\"ipv4\":\"127.0.0.1\",\"port_range\":[27015,27060]}]}}}";
+                return SdrConfigJson;
             }
 
             if (url.IndexOf("events/ajaxgetpartnereventspageable", StringComparison.OrdinalIgnoreCase) >= 0)
@@ -543,39 +549,6 @@ namespace SKYNET.Steamworks.Implementation
             return "{}";
         }
 
-        private static bool TryFetchRemoteBody(string url, out string body)
-        {
-            body = null;
-            try
-            {
-                var request = (HttpWebRequest)WebRequest.Create(url);
-                request.Method = "GET";
-                request.Timeout = 3000;
-                request.ReadWriteTimeout = 3000;
-                request.UserAgent = "SKYNET Steam Emulator";
-                using (var response = (HttpWebResponse)request.GetResponse())
-                using (var stream = response.GetResponseStream())
-                using (var reader = new StreamReader(stream, Encoding.UTF8))
-                {
-                    if ((int)response.StatusCode < 200 || (int)response.StatusCode >= 300)
-                    {
-                        return false;
-                    }
-
-                    body = reader.ReadToEnd();
-                    return !string.IsNullOrEmpty(body);
-                }
-            }
-            catch (Exception ex)
-            {
-                if (Instance != null)
-                {
-                    Instance.Write($"FetchRemoteBody failed {url}: {ex.Message}");
-                }
-
-                return false;
-            }
-        }
 
         private static Dictionary<string, string> BuildLocalResponseHeaders(HTTPRequest request)
         {

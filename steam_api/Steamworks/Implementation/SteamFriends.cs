@@ -140,19 +140,23 @@ namespace SKYNET.Steamworks.Implementation
                     break;
                 case "friendadd":
                     type = OverlayType.FriendAdd;
-                    SkyNetApiClient.SendFriendRequest(steamID);
+                    SkyNetWorkQueue.Enqueue("Send friend request", () => SkyNetApiClient.SendFriendRequest(steamID),
+                        "friends:request:" + steamID);
                     break;
                 case "friendremove":
                     type = OverlayType.FriendRemove;
-                    SkyNetApiClient.RemoveFriendOrRequest(steamID);
+                    SkyNetWorkQueue.Enqueue("Remove friend or request", () => SkyNetApiClient.RemoveFriendOrRequest(steamID),
+                        "friends:remove:" + steamID);
                     break;
                 case "friendrequestaccept":
                     type = OverlayType.FriendRequestAccept;
-                    SkyNetApiClient.AcceptFriendRequest(steamID);
+                    SkyNetWorkQueue.Enqueue("Accept friend request", () => SkyNetApiClient.AcceptFriendRequest(steamID),
+                        "friends:accept:" + steamID);
                     break;
                 case "friendrequestignore":
                     type = OverlayType.FriendRequestIgnore;
-                    SkyNetApiClient.RemoveFriendOrRequest(steamID);
+                    SkyNetWorkQueue.Enqueue("Ignore friend request", () => SkyNetApiClient.RemoveFriendOrRequest(steamID),
+                        "friends:ignore:" + steamID);
                     break;
                 default:
                     break;
@@ -788,7 +792,18 @@ namespace SKYNET.Steamworks.Implementation
             data.m_result = EResult.k_EResultOK;
 
             APICall = CallbackManager.AddCallbackResult(data);
-            if (!SkyNetApiClient.UpdatePersonaName(pchPersonaName))
+            SteamEmulator.PersonaName = pchPersonaName;
+            if (SkyNetApiClient.IsEnabled)
+            {
+                SkyNetWorkQueue.Enqueue("Update persona name", () =>
+                {
+                    if (!SkyNetApiClient.UpdatePersonaName(pchPersonaName))
+                    {
+                        Write($"SetPersonaName backend update failed for {pchPersonaName}");
+                    }
+                }, "friends:persona-name", true);
+            }
+            else
             {
                 SteamEmulator.PersonaName = pchPersonaName;
             }
@@ -859,7 +874,12 @@ namespace SKYNET.Steamworks.Implementation
         public bool SetRichPresence(string pchKey, string pchValue)
         {
             Write($"SetRichPresence (Key = {pchKey}, Value = {pchValue})");
-            return !SkyNetApiClient.IsEnabled || SkyNetApiClient.SetRichPresence(pchKey, pchValue);
+            if (SkyNetApiClient.IsEnabled)
+            {
+                SkyNetWorkQueue.Enqueue("SetRichPresence", () => SkyNetApiClient.SetRichPresence(pchKey, pchValue),
+                    "presence:" + (pchKey ?? string.Empty));
+            }
+            return true;
         }
 
         /*

@@ -427,16 +427,20 @@ public sealed partial class SteamApiStateService
             return;
         }
 
+        var online = IsUserOnlineLocked(relatedSteamId) ? 1 : 0;
         EnqueueEvent(recipientSteamId, new SkyNetEventDto
         {
             Type = type,
             SteamId = relatedUser.SteamId,
             AccountId = relatedUser.AccountId,
             PersonaName = relatedUser.PersonaName,
-            AppId = relatedUser.AppId,
-            LobbyId = relatedUser.LobbyId,
+            AppId = online == 1 ? relatedUser.AppId : 0,
+            LobbyId = online == 1 ? relatedUser.LobbyId : 0,
+            PersonaState = online,
             ChangeFlags = PersonaChangeRelationship,
-            RichPresence = new Dictionary<string, string>(relatedUser.RichPresence),
+            RichPresence = online == 1
+                ? new Dictionary<string, string>(relatedUser.RichPresence)
+                : new Dictionary<string, string>(),
             FriendRelationship = relationship,
             RequestId = requestId ?? string.Empty
         });
