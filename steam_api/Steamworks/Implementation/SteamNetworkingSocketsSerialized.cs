@@ -320,12 +320,13 @@ namespace SKYNET.Steamworks.Implementation
                 SteamEmulator.Write("SteamNetworkingSocketsSerialized", $"Starting SDR cert patcher ({reason})");
             }
 
-            if (waitMs > 0)
+            bool patched = SdrCertPatcher.EnsurePatched(waitMs);
+            if (waitMs > 0 && !patched)
             {
-                SteamEmulator.Write("SteamNetworkingSocketsSerialized", $"Native SDR patching disabled; skipping patch request ({reason})");
+                SteamEmulator.Write("SteamNetworkingSocketsSerialized", $"SDR CA patch was not ready after {waitMs}ms; background patch remains active");
             }
 
-            return false;
+            return patched;
         }
 
 

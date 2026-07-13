@@ -26,9 +26,21 @@ namespace SKYNET.Managers
 
         // Emulator CA public key. Replaces Valve's key inside
         // steamnetworkingsockets.dll so certs signed by the SKYNET server validate.
-        // MUST match the CA public key the server pins/prints on startup.
+        // MUST match the CA public key the server pins/prints on startup: the server
+        // signs with the seed = first 32 bytes of the reference private.pem, whose
+        // Ed25519 public key is this value. Its Steam key-id (SHA256 leading 8 bytes,
+        // little-endian) is 14779564839147732469 == Sdr:CaKeyId in appsettings.json.
         private const string EmulatorCaPublicKeyHex =
-            "308014855F1E57039D317B72A4071B14EEB3CEB8C3920E26EFB6E4769723C609";
+            "FEAA97C32C7E5BF684DF86F120F3C40C785DCECDEDCB91FC223E54E76AA30F59";
+
+        // Valve stores the CA key-id in the OpenSSH comment ("ID<decimal>") and reads
+        // it from there at runtime rather than re-deriving it from the key bytes. The
+        // patcher only swaps the key body, so we must also rewrite this comment to the
+        // key-id of our CA, otherwise the game looks up the wrong id and the cert's
+        // ca_key_id (14779564839147732469) never matches. Both ids are 20 digits, so
+        // the replacement is in place.
+        private const string ValveCaKeyIdComment = "ID18220590129359924542";
+        private const string EmulatorCaKeyIdComment = "ID14779564839147732469";
 
         // Valve's SDR cert-authority public key, extracted from
         // steamnetworkingsockets.dll. The DLL stores it as an OpenSSH ed25519 text
@@ -94,7 +106,9 @@ namespace SKYNET.Managers
                 var pairs = new List<KeyValuePair<byte[], byte[]>>
                 {
                     new KeyValuePair<byte[], byte[]>(Ascii(ToOpenSshToken(valveRaw)), Ascii(ToOpenSshToken(emuRaw))),
-                    new KeyValuePair<byte[], byte[]>(valveRaw, emuRaw)
+                    new KeyValuePair<byte[], byte[]>(valveRaw, emuRaw),
+                    // Rewrite the key-id comment so the game resolves our cert's ca_key_id.
+                    new KeyValuePair<byte[], byte[]>(Ascii(ValveCaKeyIdComment), Ascii(EmulatorCaKeyIdComment))
                 };
 
                 // Start polling before GetCertAsync.  The networking module may not be
