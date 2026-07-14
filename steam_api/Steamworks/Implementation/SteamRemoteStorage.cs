@@ -25,7 +25,7 @@ namespace SKYNET.Steamworks.Implementation
         public string StoragePath;
         public string AvatarCachePath;
         private List<string> StorageFiles;
-        private List<SkyNetApiClient.SkyNetRemoteStorageFileListItemDto> RemoteStorageFiles;
+        private List<SkyNetApiClient.ApiRemoteStorageFileListItem> RemoteStorageFiles;
         private ConcurrentDictionary<ulong, string> SharedFiles;
         private int LastFile;
         private Dictionary<ulong, string> AsyncFilesRead;
@@ -41,9 +41,9 @@ namespace SKYNET.Steamworks.Implementation
             InterfaceName = "SteamRemoteStorage";
             InterfaceVersion = "STEAMREMOTESTORAGE_INTERFACE_VERSION016";
             StoragePath = Path.Combine(Common.GetPath(), "SKYNET", "Storage", "Remote");
-            AvatarCachePath = Path.Combine(Common.GetPath(), "Data", "Images", "AvatarCache");
+            AvatarCachePath = Path.Combine(Common.GetPath(), "SKYNET", "Images", "AvatarCache");
             StorageFiles = new List<string>();
-            RemoteStorageFiles = new List<SkyNetApiClient.SkyNetRemoteStorageFileListItemDto>();
+            RemoteStorageFiles = new List<SkyNetApiClient.ApiRemoteStorageFileListItem>();
             SharedFiles = new ConcurrentDictionary<ulong, string>();
             AsyncFilesRead = new Dictionary<ulong, string>();
             PendingWriteStreams = new ConcurrentDictionary<ulong, PendingWriteStream>();
@@ -235,7 +235,7 @@ namespace SKYNET.Steamworks.Implementation
 
             if (SkyNetApiClient.IsEnabled)
             {
-                SkyNetWorkQueue.Enqueue("Delete remote storage file", () => SkyNetApiClient.DeleteRemoteStorageFile(pchFile),
+                WorkQueue.Enqueue("Delete remote storage file", () => SkyNetApiClient.DeleteRemoteStorageFile(pchFile),
                     "storage:delete:" + NormalizeRemoteFileName(pchFile));
             }
 
@@ -265,7 +265,7 @@ namespace SKYNET.Steamworks.Implementation
                     m_rgchFilename = Encoding.Default.GetBytes(pchFile)
                 };
 
-                return SkyNetWorkQueue.EnqueueCallbackResult(
+                return WorkQueue.EnqueueCallbackResult(
                     pending,
                     () =>
                     {
@@ -486,7 +486,7 @@ namespace SKYNET.Steamworks.Implementation
 
             if (SkyNetApiClient.IsEnabled)
             {
-                SkyNetWorkQueue.Enqueue("Refresh remote storage quota", () =>
+                WorkQueue.Enqueue("Refresh remote storage quota", () =>
                     {
                         var quota = SkyNetApiClient.GetRemoteStorageQuota();
                         if (quota != null)
@@ -778,7 +778,7 @@ namespace SKYNET.Steamworks.Implementation
             }
 
             var copy = content == null ? new byte[0] : (byte[])content.Clone();
-            SkyNetWorkQueue.Enqueue("RemoteStorage upload", () =>
+            WorkQueue.Enqueue("RemoteStorage upload", () =>
             {
                 if (!SkyNetApiClient.UploadRemoteStorageFile(fileName, copy))
                 {
@@ -794,7 +794,7 @@ namespace SKYNET.Steamworks.Implementation
                 return;
             }
 
-            SkyNetWorkQueue.Enqueue("RemoteStorage list", () =>
+            WorkQueue.Enqueue("RemoteStorage list", () =>
             {
                 var files = SkyNetApiClient.ListRemoteStorageFiles();
                 if (files != null)
@@ -806,7 +806,7 @@ namespace SKYNET.Steamworks.Implementation
 
         private void QueueRemoteFileFetch(string fileName, string fullPath, string remoteKey)
         {
-            SkyNetWorkQueue.Enqueue("RemoteStorage fetch", () =>
+            WorkQueue.Enqueue("RemoteStorage fetch", () =>
             {
                 try
                 {

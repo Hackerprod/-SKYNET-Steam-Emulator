@@ -4,13 +4,13 @@ namespace SKYNET_server.Services;
 
 public sealed partial class SteamApiStateService
 {
-    public List<SkyNetUserDto> GetWebUsersWithRelationships(string token)
+    public List<ApiUser> GetWebUsersWithRelationships(string token)
     {
         lock (_sync)
         {
             if (!TryGetSession(token, out var session))
             {
-                return new List<SkyNetUserDto>();
+                return new List<ApiUser>();
             }
 
             foreach (var account in _state.WebAccounts.Values)
@@ -28,7 +28,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetUserProfileDto? GetWebUserProfile(string token, ulong steamId)
+    public ApiUserProfile? GetWebUserProfile(string token, ulong steamId)
     {
         lock (_sync)
         {
@@ -39,11 +39,11 @@ public sealed partial class SteamApiStateService
 
             if (!_state.Stats.TryGetValue(steamId, out var stats))
             {
-                stats = new SkyNetStatsEnvelopeDto { SteamId = steamId, CurrentPlayers = 1 };
+                stats = new ApiStatsEnvelope { SteamId = steamId, CurrentPlayers = 1 };
                 _state.Stats[steamId] = stats;
             }
 
-            return new SkyNetUserProfileDto
+            return new ApiUserProfile
             {
                 User = CloneUserForViewerLocked(user, session!.SteamId),
                 Stats = CloneStats(stats),
@@ -55,13 +55,13 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public List<SkyNetFriendRequestViewDto> GetIncomingFriendRequests(string token)
+    public List<ApiFriendRequestView> GetIncomingFriendRequests(string token)
     {
         lock (_sync)
         {
             if (!TryGetSession(token, out var session))
             {
-                return new List<SkyNetFriendRequestViewDto>();
+                return new List<ApiFriendRequestView>();
             }
 
             return _state.FriendRequests
@@ -72,13 +72,13 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public List<SkyNetFriendRequestViewDto> GetOutgoingFriendRequests(string token)
+    public List<ApiFriendRequestView> GetOutgoingFriendRequests(string token)
     {
         lock (_sync)
         {
             if (!TryGetSession(token, out var session))
             {
-                return new List<SkyNetFriendRequestViewDto>();
+                return new List<ApiFriendRequestView>();
             }
 
             return _state.FriendRequests
@@ -220,7 +220,7 @@ public sealed partial class SteamApiStateService
             return true;
         }
 
-        var request = new SkyNetFriendRequestDto
+        var request = new ApiFriendRequest
         {
             Id = Guid.NewGuid().ToString("N"),
             FromSteamId = fromSteamId,
@@ -236,7 +236,7 @@ public sealed partial class SteamApiStateService
         return true;
     }
 
-    private bool AcceptFriendRequestLocked(SkyNetFriendRequestDto request)
+    private bool AcceptFriendRequestLocked(ApiFriendRequest request)
     {
         if (!IsPending(request) || !_state.Users.ContainsKey(request.FromSteamId) || !_state.Users.ContainsKey(request.ToSteamId))
         {
@@ -252,7 +252,7 @@ public sealed partial class SteamApiStateService
         return true;
     }
 
-    private bool CloseFriendRequestLocked(SkyNetFriendRequestDto request, string status)
+    private bool CloseFriendRequestLocked(ApiFriendRequest request, string status)
     {
         if (!IsPending(request))
         {
@@ -302,9 +302,9 @@ public sealed partial class SteamApiStateService
         return true;
     }
 
-    private List<SkyNetUserDto> GetKnownSocialUsersLocked(ulong steamId)
+    private List<ApiUser> GetKnownSocialUsersLocked(ulong steamId)
     {
-        var result = new Dictionary<ulong, SkyNetUserDto>();
+        var result = new Dictionary<ulong, ApiUser>();
 
         if (_state.FriendLinks.TryGetValue(steamId, out var friendLinks))
         {
@@ -317,7 +317,7 @@ public sealed partial class SteamApiStateService
         return result.Values.OrderBy(user => user.PersonaName).ToList();
     }
 
-    private SkyNetUserDto CloneUserForViewerLocked(SkyNetUserDto user, ulong viewerSteamId)
+    private ApiUser CloneUserForViewerLocked(ApiUser user, ulong viewerSteamId)
     {
         var clone = CloneUser(user);
         clone.FriendRelationship = GetRelationshipLocked(viewerSteamId, user.SteamId);
@@ -329,7 +329,7 @@ public sealed partial class SteamApiStateService
     // Fills the viewer-facing GameState/HeroId from live presence + active match,
     // so friends see "in match (hero X)" / "in menu" / "offline" instead of a
     // bare online flag with stale rich presence.
-    private void ApplyDerivedPresenceLocked(SkyNetUserDto clone)
+    private void ApplyDerivedPresenceLocked(ApiUser clone)
     {
         if (!IsUserOnlineLocked(clone.SteamId))
         {
@@ -397,7 +397,7 @@ public sealed partial class SteamApiStateService
         return _state.FriendLinks.TryGetValue(leftSteamId, out var links) && links.Contains(rightSteamId);
     }
 
-    private SkyNetFriendRequestDto? FindPendingRequestLocked(ulong fromSteamId, ulong toSteamId)
+    private ApiFriendRequest? FindPendingRequestLocked(ulong fromSteamId, ulong toSteamId)
     {
         return _state.FriendRequests.FirstOrDefault(request =>
             IsPending(request) &&
@@ -405,16 +405,16 @@ public sealed partial class SteamApiStateService
             request.ToSteamId == toSteamId);
     }
 
-    private SkyNetFriendRequestViewDto CloneFriendRequestViewLocked(SkyNetFriendRequestDto request)
+    private ApiFriendRequestView CloneFriendRequestViewLocked(ApiFriendRequest request)
     {
         _state.Users.TryGetValue(request.FromSteamId, out var fromUser);
         _state.Users.TryGetValue(request.ToSteamId, out var toUser);
 
-        return new SkyNetFriendRequestViewDto
+        return new ApiFriendRequestView
         {
             Id = request.Id,
-            FromUser = fromUser == null ? new SkyNetUserDto { SteamId = request.FromSteamId } : CloneUserForViewerLocked(fromUser, request.ToSteamId),
-            ToUser = toUser == null ? new SkyNetUserDto { SteamId = request.ToSteamId } : CloneUserForViewerLocked(toUser, request.FromSteamId),
+            FromUser = fromUser == null ? new ApiUser { SteamId = request.FromSteamId } : CloneUserForViewerLocked(fromUser, request.ToSteamId),
+            ToUser = toUser == null ? new ApiUser { SteamId = request.ToSteamId } : CloneUserForViewerLocked(toUser, request.FromSteamId),
             Status = request.Status,
             CreatedAt = request.CreatedAt
         };
@@ -428,7 +428,7 @@ public sealed partial class SteamApiStateService
         }
 
         var online = IsUserOnlineLocked(relatedSteamId) ? 1 : 0;
-        EnqueueEvent(recipientSteamId, new SkyNetEventDto
+        EnqueueEvent(recipientSteamId, new ApiEvent
         {
             Type = type,
             SteamId = relatedUser.SteamId,
@@ -446,7 +446,7 @@ public sealed partial class SteamApiStateService
         });
     }
 
-    private static bool IsPending(SkyNetFriendRequestDto request)
+    private static bool IsPending(ApiFriendRequest request)
     {
         return request.Status.Equals("pending", StringComparison.OrdinalIgnoreCase);
     }

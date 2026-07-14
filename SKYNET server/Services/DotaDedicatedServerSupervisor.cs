@@ -190,7 +190,7 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
         }
     }
 
-    public void ObserveRegistration(ulong gameServerSteamId, SkyNetGameServerDto server)
+    public void ObserveRegistration(ulong gameServerSteamId, ApiGameServer server)
     {
         if (gameServerSteamId == 0 || server == null || server.Port <= 0 || !server.Dedicated)
         {

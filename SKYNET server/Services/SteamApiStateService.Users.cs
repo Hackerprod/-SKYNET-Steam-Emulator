@@ -5,7 +5,7 @@ namespace SKYNET_server.Services;
 
 public sealed partial class SteamApiStateService
 {
-    public SkyNetSessionDto? StartSession(SkyNetSessionRequestDto request, string? clientIp)
+    public ApiSessionResult? StartSession(ApiSessionRequest request, string? clientIp)
     {
         lock (_sync)
         {
@@ -35,7 +35,7 @@ public sealed partial class SteamApiStateService
 
             _sessions[session.AccessToken] = session;
             MarkUserOnlineLocked(steamId);
-            return new SkyNetSessionDto
+            return new ApiSessionResult
             {
                 AccessToken = session.AccessToken,
                 RefreshToken = session.RefreshToken,
@@ -162,7 +162,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetUserDto? GetSelf(string token)
+    public ApiUser? GetSelf(string token)
     {
         lock (_sync)
         {
@@ -170,7 +170,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public List<SkyNetUserDto>? GetFriends(string token)
+    public List<ApiUser>? GetFriends(string token)
     {
         lock (_sync)
         {
@@ -183,7 +183,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetUserDto? GetUser(string token, ulong steamId)
+    public ApiUser? GetUser(string token, ulong steamId)
     {
         lock (_sync)
         {
@@ -196,7 +196,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetUserDto? UpdatePersona(string token, string personaName)
+    public ApiUser? UpdatePersona(string token, string personaName)
     {
         lock (_sync)
         {
@@ -228,7 +228,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetAvatarContentDto GetAvatar(string token, ulong steamId)
+    public ApiAvatarContent GetAvatar(string token, ulong steamId)
     {
         lock (_sync)
         {
@@ -242,7 +242,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetAvatarContentDto GetAvatarByAccountId(uint accountId)
+    public ApiAvatarContent GetAvatarByAccountId(uint accountId)
     {
         lock (_sync)
         {
@@ -257,7 +257,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public bool PutSelfAvatar(string token, SkyNetAvatarUpdateDto request)
+    public bool PutSelfAvatar(string token, ApiAvatarUpdate request)
     {
         lock (_sync)
         {
@@ -298,9 +298,9 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    private static SkyNetAvatarContentDto BuildAvatarContent(ulong steamId, byte[] content, bool isDefault)
+    private static ApiAvatarContent BuildAvatarContent(ulong steamId, byte[] content, bool isDefault)
     {
-        return new SkyNetAvatarContentDto
+        return new ApiAvatarContent
         {
             SteamId = steamId,
             Content = content,
@@ -309,7 +309,7 @@ public sealed partial class SteamApiStateService
         };
     }
 
-    public SkyNetStatsEnvelopeDto? GetStats(string token, ulong steamId, bool currentUser)
+    public ApiStatsEnvelope? GetStats(string token, ulong steamId, bool currentUser)
     {
         lock (_sync)
         {
@@ -327,7 +327,7 @@ public sealed partial class SteamApiStateService
 
             if (!_state.Stats.TryGetValue(steamId, out var stats))
             {
-                stats = new SkyNetStatsEnvelopeDto { SteamId = steamId, CurrentPlayers = 1 };
+                stats = new ApiStatsEnvelope { SteamId = steamId, CurrentPlayers = 1 };
                 _state.Stats[steamId] = stats;
             }
 
@@ -335,7 +335,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public bool StoreStats(string token, SkyNetStoreStatsRequestDto request)
+    public bool StoreStats(string token, ApiStoreStatsRequest request)
     {
         lock (_sync)
         {
@@ -345,18 +345,18 @@ public sealed partial class SteamApiStateService
             }
 
             var steamId = request.SteamId != 0 ? request.SteamId : session.SteamId;
-            _state.Stats[steamId] = new SkyNetStatsEnvelopeDto
+            _state.Stats[steamId] = new ApiStatsEnvelope
             {
                 SteamId = steamId,
                 CurrentPlayers = 1,
-                Stats = request.Stats ?? new List<SkyNetStatDto>(),
-                Achievements = request.Achievements ?? new List<SkyNetAchievementDto>()
+                Stats = request.Stats ?? new List<ApiStat>(),
+                Achievements = request.Achievements ?? new List<ApiAchievement>()
             };
 
             SaveState();
             foreach (var stat in _state.Stats[steamId].Stats)
             {
-                EnqueueEvent(steamId, new SkyNetEventDto
+                EnqueueEvent(steamId, new ApiEvent
                 {
                     Type = "stats_updated",
                     SteamId = steamId,
@@ -367,7 +367,7 @@ public sealed partial class SteamApiStateService
 
             foreach (var achievement in _state.Stats[steamId].Achievements.Where(a => a.Earned))
             {
-                EnqueueEvent(steamId, new SkyNetEventDto
+                EnqueueEvent(steamId, new ApiEvent
                 {
                     Type = "achievement_unlocked",
                     SteamId = steamId,
@@ -382,13 +382,13 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetEventEnvelopeDto PollEvents(string token, string? since, int waitMs = 0)
+    public ApiEventEnvelope PollEvents(string token, string? since, int waitMs = 0)
     {
         lock (_sync)
         {
             if (!TryGetSession(token, out var session))
             {
-                return new SkyNetEventEnvelopeDto();
+                return new ApiEventEnvelope();
             }
 
             var lastSeen = 0L;
@@ -418,7 +418,7 @@ public sealed partial class SteamApiStateService
             }
             while (true);
 
-            return new SkyNetEventEnvelopeDto
+            return new ApiEventEnvelope
             {
                 Cursor = matched.Count == 0 ? lastSeen.ToString() : matched.Max(e => e.Sequence).ToString(),
                 Events = matched.Select(e => CloneEvent(e.Event)).ToList()
@@ -456,7 +456,7 @@ public sealed partial class SteamApiStateService
     // is matched to whoever is logged in from the same address. No global "active
     // user", no manual pairing: if nobody logged in from this IP, there is no
     // identity to hand out and the game session is refused.
-    private SkyNetUserDto? GetActiveWebUserForIpLocked(string? clientIp)
+    private ApiUser? GetActiveWebUserForIpLocked(string? clientIp)
     {
         if (string.IsNullOrWhiteSpace(clientIp))
         {

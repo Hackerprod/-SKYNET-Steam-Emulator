@@ -11,7 +11,7 @@ builder.Services.AddSingleton<IGameCoordinatorPlugin>(sp => sp.GetRequiredServic
 builder.Services.AddSingleton<GameCoordinatorPluginRegistry>();
 builder.Services.AddSingleton<SdrCertificateService>();
 builder.Services.AddSingleton<SteamApiStateService>();
-builder.Services.AddHostedService<SkyNetDiscoveryService>();
+builder.Services.AddHostedService<DiscoveryService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<DotaDedicatedServerSupervisor>());
 builder.Services.AddHostedService<GameCoordinatorTickService>();
 builder.Services.AddHostedService<PresenceSweepService>();
@@ -30,7 +30,7 @@ app.UseAuthorization();
 
 var api = app.MapGroup("/api");
 
-api.MapPost("/auth/steam/session", (HttpRequest request, SkyNetSessionRequestDto payload, SteamApiStateService state) =>
+api.MapPost("/auth/steam/session", (HttpRequest request, ApiSessionRequest payload, SteamApiStateService state) =>
 {
     var session = state.StartSession(payload, SteamApiStateService.GetClientIp(request));
     return session == null ? Results.Unauthorized() : Results.Ok(session);
@@ -77,7 +77,7 @@ api.MapGet("/friends/requests/outgoing", (HttpRequest request, SteamApiStateServ
     return Results.Ok(state.GetOutgoingFriendRequests(SteamApiStateService.GetBearerToken(request) ?? string.Empty));
 });
 
-api.MapPost("/friends/request", (HttpRequest request, SkyNetFriendActionRequestDto payload, SteamApiStateService state) =>
+api.MapPost("/friends/request", (HttpRequest request, ApiFriendActionRequest payload, SteamApiStateService state) =>
 {
     var token = SteamApiStateService.GetBearerToken(request) ?? string.Empty;
     var ok = payload.SteamId != 0
@@ -121,13 +121,13 @@ api.MapPost("/friends/{steamId}/remove", (HttpRequest request, ulong steamId, St
         : Results.BadRequest();
 });
 
-api.MapMethods("/users/me/persona", new[] { "PATCH" }, (HttpRequest request, SkyNetPersonaUpdateDto update, SteamApiStateService state) =>
+api.MapMethods("/users/me/persona", new[] { "PATCH" }, (HttpRequest request, ApiPersonaUpdate update, SteamApiStateService state) =>
 {
     var user = state.UpdatePersona(SteamApiStateService.GetBearerToken(request) ?? string.Empty, update.PersonaName);
     return user == null ? Results.Unauthorized() : Results.Ok(user);
 });
 
-api.MapPut("/presence", (HttpRequest request, SkyNetPresenceUpdateDto update, SteamApiStateService state) =>
+api.MapPut("/presence", (HttpRequest request, ApiPresenceUpdate update, SteamApiStateService state) =>
 {
     return state.SetPresence(SteamApiStateService.GetBearerToken(request) ?? string.Empty, update.Key, update.Value)
         ? Results.Ok()
@@ -144,7 +144,7 @@ api.MapGet("/users/{steamId}/avatar", (HttpRequest request, ulong steamId, Steam
     return Results.File(avatar.Content, "image/png");
 });
 
-api.MapPut("/users/me/avatar", (HttpRequest request, SkyNetAvatarUpdateDto payload, SteamApiStateService state) =>
+api.MapPut("/users/me/avatar", (HttpRequest request, ApiAvatarUpdate payload, SteamApiStateService state) =>
 {
     return state.PutSelfAvatar(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload)
         ? Results.Ok()
@@ -173,7 +173,7 @@ api.MapGet("/stats/users/{steamId}", (HttpRequest request, ulong steamId, SteamA
     return stats == null ? Results.NotFound() : Results.Ok(stats);
 });
 
-api.MapPut("/stats/me", (HttpRequest request, SkyNetStoreStatsRequestDto payload, SteamApiStateService state) =>
+api.MapPut("/stats/me", (HttpRequest request, ApiStoreStatsRequest payload, SteamApiStateService state) =>
 {
     return state.StoreStats(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload)
         ? Results.Ok()
@@ -185,13 +185,13 @@ api.MapGet("/events", (HttpRequest request, string? since, int? waitMs, SteamApi
     return Results.Ok(state.PollEvents(SteamApiStateService.GetBearerToken(request) ?? string.Empty, since, waitMs ?? 0));
 });
 
-api.MapPost("/lobbies/query", (HttpRequest request, SkyNetLobbyQueryRequestDto payload, SteamApiStateService state) =>
+api.MapPost("/lobbies/query", (HttpRequest request, ApiLobbyQueryRequest payload, SteamApiStateService state) =>
 {
     var result = state.QueryLobbies(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload);
     return result == null ? Results.Unauthorized() : Results.Ok(result);
 });
 
-api.MapPost("/lobbies", (HttpRequest request, SkyNetCreateLobbyRequestDto payload, SteamApiStateService state) =>
+api.MapPost("/lobbies", (HttpRequest request, ApiCreateLobbyRequest payload, SteamApiStateService state) =>
 {
     var lobby = state.CreateLobby(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload);
     return lobby == null ? Results.BadRequest() : Results.Ok(lobby);
@@ -216,42 +216,42 @@ api.MapPost("/lobbies/{lobbyId}/leave", (HttpRequest request, ulong lobbyId, Ste
         : Results.BadRequest();
 });
 
-api.MapPut("/lobbies/{lobbyId}/data", (HttpRequest request, ulong lobbyId, SkyNetLobbyDataUpdateRequestDto payload, SteamApiStateService state) =>
+api.MapPut("/lobbies/{lobbyId}/data", (HttpRequest request, ulong lobbyId, ApiLobbyDataUpdateRequest payload, SteamApiStateService state) =>
 {
     return state.UpdateLobbyData(SteamApiStateService.GetBearerToken(request) ?? string.Empty, lobbyId, payload.Key, payload.Value)
         ? Results.Ok()
         : Results.BadRequest();
 });
 
-api.MapPost("/lobbies/{lobbyId}/data/delete", (HttpRequest request, ulong lobbyId, SkyNetLobbyDeleteDataRequestDto payload, SteamApiStateService state) =>
+api.MapPost("/lobbies/{lobbyId}/data/delete", (HttpRequest request, ulong lobbyId, ApiLobbyDeleteDataRequest payload, SteamApiStateService state) =>
 {
     return state.DeleteLobbyData(SteamApiStateService.GetBearerToken(request) ?? string.Empty, lobbyId, payload.Key)
         ? Results.Ok()
         : Results.BadRequest();
 });
 
-api.MapPut("/lobbies/{lobbyId}/settings", (HttpRequest request, ulong lobbyId, SkyNetLobbySettingsUpdateRequestDto payload, SteamApiStateService state) =>
+api.MapPut("/lobbies/{lobbyId}/settings", (HttpRequest request, ulong lobbyId, ApiLobbySettingsUpdateRequest payload, SteamApiStateService state) =>
 {
     return state.UpdateLobbySettings(SteamApiStateService.GetBearerToken(request) ?? string.Empty, lobbyId, payload)
         ? Results.Ok()
         : Results.BadRequest();
 });
 
-api.MapPut("/lobbies/{lobbyId}/member-data", (HttpRequest request, ulong lobbyId, SkyNetLobbyDataUpdateRequestDto payload, SteamApiStateService state) =>
+api.MapPut("/lobbies/{lobbyId}/member-data", (HttpRequest request, ulong lobbyId, ApiLobbyDataUpdateRequest payload, SteamApiStateService state) =>
 {
     return state.UpdateLobbyMemberData(SteamApiStateService.GetBearerToken(request) ?? string.Empty, lobbyId, payload.Key, payload.Value)
         ? Results.Ok()
         : Results.BadRequest();
 });
 
-api.MapPut("/lobbies/{lobbyId}/gameserver", (HttpRequest request, ulong lobbyId, SkyNetLobbyGameServerUpdateRequestDto payload, SteamApiStateService state) =>
+api.MapPut("/lobbies/{lobbyId}/gameserver", (HttpRequest request, ulong lobbyId, ApiLobbyGameServerUpdateRequest payload, SteamApiStateService state) =>
 {
     return state.UpdateLobbyGameServer(SteamApiStateService.GetBearerToken(request) ?? string.Empty, lobbyId, payload)
         ? Results.Ok()
         : Results.BadRequest();
 });
 
-api.MapPut("/storage/files", (HttpRequest request, SkyNetRemoteStorageFileDto payload, SteamApiStateService state) =>
+api.MapPut("/storage/files", (HttpRequest request, ApiRemoteStorageFile payload, SteamApiStateService state) =>
 {
     return state.PutFile(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload)
         ? Results.Ok()
@@ -270,14 +270,14 @@ api.MapGet("/storage/files/{*fileName}", (HttpRequest request, string fileName, 
     return file == null ? Results.NotFound() : Results.Ok(file);
 });
 
-api.MapPost("/storage/files/delete", (HttpRequest request, SkyNetRemoteStorageDeleteRequestDto payload, SteamApiStateService state) =>
+api.MapPost("/storage/files/delete", (HttpRequest request, ApiRemoteStorageDeleteRequest payload, SteamApiStateService state) =>
 {
     return state.DeleteFile(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload.FileName)
         ? Results.Ok()
         : Results.NotFound();
 });
 
-api.MapPost("/storage/files/share", (HttpRequest request, SkyNetRemoteStorageDeleteRequestDto payload, SteamApiStateService state) =>
+api.MapPost("/storage/files/share", (HttpRequest request, ApiRemoteStorageDeleteRequest payload, SteamApiStateService state) =>
 {
     var result = state.ShareFile(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload.FileName);
     return result == null ? Results.NotFound() : Results.Ok(result);
@@ -288,29 +288,29 @@ api.MapGet("/storage/quota", (HttpRequest request, SteamApiStateService state) =
     return Results.Ok(state.GetQuota(SteamApiStateService.GetBearerToken(request) ?? string.Empty));
 });
 
-api.MapPost("/auth/tickets/session", (SkyNetAuthTicketRequestDto payload, SteamApiStateService state) =>
+api.MapPost("/auth/tickets/session", (ApiAuthTicketRequest payload, SteamApiStateService state) =>
 {
     return Results.Ok(state.CreateTicket(payload));
 });
 
-api.MapPost("/auth/tickets/validate", (SkyNetAuthValidateRequestDto payload, SteamApiStateService state) =>
+api.MapPost("/auth/tickets/validate", (ApiAuthValidateRequest payload, SteamApiStateService state) =>
 {
     return Results.Ok(state.ValidateTicket(payload));
 });
 
-api.MapPost("/gameservers/users/connect", (SkyNetConnectAuthRequestDto payload, SteamApiStateService state) =>
+api.MapPost("/gameservers/users/connect", (ApiConnectAuthRequest payload, SteamApiStateService state) =>
 {
     return Results.Ok(state.ConnectAndAuthenticate(payload));
 });
 
 // Steam Datagram (SDR) networking certificate authority.
-api.MapGet("/networking/sdr/ca", (SdrCertificateService sdr) => Results.Ok(new SkyNetSdrCaDto
+api.MapGet("/networking/sdr/ca", (SdrCertificateService sdr) => Results.Ok(new ApiSdrCa
 {
     CaPublicKeyBase64 = Convert.ToBase64String(sdr.CaPublicKey),
     CaKeyId = sdr.CaKeyId
 }));
 
-api.MapPost("/networking/sdr/cert", (HttpRequest request, SkyNetSdrCertRequestDto payload, SteamApiStateService state, SdrCertificateService sdr) =>
+api.MapPost("/networking/sdr/cert", (HttpRequest request, ApiSdrCertRequest payload, SteamApiStateService state, SdrCertificateService sdr) =>
 {
     if (!state.TryResolveSessionIdentity(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload.SteamId, payload.AppId, out var steamId, out var appId))
     {
@@ -318,7 +318,7 @@ api.MapPost("/networking/sdr/cert", (HttpRequest request, SkyNetSdrCertRequestDt
     }
 
     var result = sdr.IssueCertificate(steamId, appId);
-    return Results.Ok(new SkyNetSdrCertDto
+    return Results.Ok(new ApiSdrCert
     {
         CertBase64 = Convert.ToBase64String(result.Certificate),
         SignatureBase64 = Convert.ToBase64String(result.Signature),
@@ -328,28 +328,28 @@ api.MapPost("/networking/sdr/cert", (HttpRequest request, SkyNetSdrCertRequestDt
     });
 });
 
-api.MapPost("/auth/tickets/end-session", (SkyNetAuthEndSessionRequestDto payload, SteamApiStateService state) =>
+api.MapPost("/auth/tickets/end-session", (ApiAuthEndSessionRequest payload, SteamApiStateService state) =>
 {
     state.EndAuthSession(payload);
     return Results.Ok();
 });
 
-api.MapPost("/auth/tickets/cancel", (SkyNetCancelAuthTicketRequestDto payload, SteamApiStateService state) =>
+api.MapPost("/auth/tickets/cancel", (ApiCancelAuthTicketRequest payload, SteamApiStateService state) =>
 {
     state.CancelTicket(payload);
     return Results.Ok();
 });
 
-api.MapPost("/gameservers/register", (SkyNetGameServerStateDto payload, SteamApiStateService state) => Results.Ok(state.RegisterGameServer(payload)));
-api.MapPost("/gameservers/logon", (SkyNetGameServerStateDto payload, SteamApiStateService state) => Results.Ok(state.LogOnGameServer(payload)));
+api.MapPost("/gameservers/register", (ApiGameServerState payload, SteamApiStateService state) => Results.Ok(state.RegisterGameServer(payload)));
+api.MapPost("/gameservers/logon", (ApiGameServerState payload, SteamApiStateService state) => Results.Ok(state.LogOnGameServer(payload)));
 api.MapPost("/gameservers/logoff", (SteamApiStateService state) => { state.LogOffGameServer(); return Results.Ok(); });
-api.MapPut("/gameservers/state", (SkyNetGameServerDto payload, SteamApiStateService state) => state.UpdateGameServerState(payload) ? Results.Ok() : Results.BadRequest());
-api.MapPost("/gameservers/heartbeat", (SkyNetGameServerDto payload, SteamApiStateService state) => state.HeartbeatGameServer(payload) ? Results.Ok() : Results.BadRequest());
+api.MapPut("/gameservers/state", (ApiGameServer payload, SteamApiStateService state) => state.UpdateGameServerState(payload) ? Results.Ok() : Results.BadRequest());
+api.MapPost("/gameservers/heartbeat", (ApiGameServer payload, SteamApiStateService state) => state.HeartbeatGameServer(payload) ? Results.Ok() : Results.BadRequest());
 api.MapGet("/gameservers/public-ip", (SteamApiStateService state) => Results.Ok(state.GetPublicIp()));
-api.MapPost("/gameservers/users/disconnect", (SkyNetDisconnectGameServerUserDto payload, SteamApiStateService state) => state.DisconnectGameServerUser(payload.SteamId) ? Results.Ok() : Results.BadRequest());
-api.MapPut("/gameservers/users/data", (SkyNetGameServerUserDataDto payload, SteamApiStateService state) => state.UpdateGameServerUserData(payload) ? Results.Ok() : Results.BadRequest());
+api.MapPost("/gameservers/users/disconnect", (ApiDisconnectGameServerUser payload, SteamApiStateService state) => state.DisconnectGameServerUser(payload.SteamId) ? Results.Ok() : Results.BadRequest());
+api.MapPut("/gameservers/users/data", (ApiGameServerUserData payload, SteamApiStateService state) => state.UpdateGameServerUserData(payload) ? Results.Ok() : Results.BadRequest());
 api.MapGet("/gameservers/stats/users/{steamId}", (ulong steamId, SteamApiStateService state) => Results.Ok(state.GetGameServerUserStats(steamId)));
-api.MapPut("/gameservers/stats/users/{steamId}", (ulong steamId, SkyNetStoreStatsRequestDto payload, SteamApiStateService state) => state.StoreGameServerUserStats(steamId, payload) ? Results.Ok() : Results.BadRequest());
+api.MapPut("/gameservers/stats/users/{steamId}", (ulong steamId, ApiStoreStatsRequest payload, SteamApiStateService state) => state.StoreGameServerUserStats(steamId, payload) ? Results.Ok() : Results.BadRequest());
 
 api.MapGet("/dota/cosmetics", (HttpRequest request, string? search, uint? heroId, int? take, SteamApiStateService state) =>
 {
@@ -357,13 +357,13 @@ api.MapGet("/dota/cosmetics", (HttpRequest request, string? search, uint? heroId
     return overview == null ? Results.Unauthorized() : Results.Ok(overview);
 });
 
-api.MapPost("/dota/cosmetics/import", (HttpRequest request, SkyNetDotaImportRequestDto payload, SteamApiStateService state) =>
+api.MapPost("/dota/cosmetics/import", (HttpRequest request, ApiDotaImportRequest payload, SteamApiStateService state) =>
 {
     var result = state.ImportDotaCosmetics(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload);
     return result.Success ? Results.Ok(result) : Results.BadRequest(result);
 });
 
-api.MapPost("/dota/equipment", (HttpRequest request, SkyNetDotaEquipItemRequestDto payload, SteamApiStateService state) =>
+api.MapPost("/dota/equipment", (HttpRequest request, ApiDotaEquipItemRequest payload, SteamApiStateService state) =>
 {
     return state.EquipDotaItemFromAdmin(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload)
         ? Results.Ok()
@@ -377,34 +377,34 @@ api.MapPost("/dota/equipment/{steamId}/clear", (HttpRequest request, ulong steam
         : Results.BadRequest();
 });
 
-api.MapPost("/network/p2p/send", (HttpRequest request, SkyNetP2PPacketSendDto payload, SteamApiStateService state) =>
+api.MapPost("/network/p2p/send", (HttpRequest request, ApiP2PPacketSend payload, SteamApiStateService state) =>
 {
     return state.SendP2P(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload)
         ? Results.Ok()
         : Results.Unauthorized();
 });
 
-api.MapPost("/network/p2p/send-batch", (HttpRequest request, SkyNetP2PPacketBatchDto payload, SteamApiStateService state) =>
+api.MapPost("/network/p2p/send-batch", (HttpRequest request, ApiP2PPacketBatch payload, SteamApiStateService state) =>
 {
     return state.SendP2PBatch(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload)
         ? Results.Ok()
         : Results.Unauthorized();
 });
 
-api.MapPost("/gamecoordinator/messages", (HttpRequest request, SkyNetGCMessageDto payload, SteamApiStateService state) =>
+api.MapPost("/gamecoordinator/messages", (HttpRequest request, ApiGCMessage payload, SteamApiStateService state) =>
 {
     return state.SendGCMessage(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload)
         ? Results.Ok()
         : Results.Unauthorized();
 });
 
-api.MapPost("/gamecoordinator/exchange", (HttpRequest request, SkyNetGCExchangeRequestDto payload, SteamApiStateService state) =>
+api.MapPost("/gamecoordinator/exchange", (HttpRequest request, ApiGCExchangeRequest payload, SteamApiStateService state) =>
 {
     var response = state.ExchangeGCMessage(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload, SteamApiStateService.GetClientIp(request));
     return response == null ? Results.Unauthorized() : Results.Ok(response);
 });
 
-api.MapPost("/gamecoordinator/poll", (HttpRequest request, SkyNetGCPollRequestDto payload, SteamApiStateService state) =>
+api.MapPost("/gamecoordinator/poll", (HttpRequest request, ApiGCPollRequest payload, SteamApiStateService state) =>
 {
     var response = state.PollGCMessages(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload, SteamApiStateService.GetClientIp(request));
     return response == null ? Results.Unauthorized() : Results.Ok(response);

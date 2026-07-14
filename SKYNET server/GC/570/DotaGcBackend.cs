@@ -9,18 +9,18 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
     private static readonly Dictionary<ulong, PracticeLobbyState> PracticeLobbies = new();
     private static readonly Dictionary<ulong, ulong> PracticeLobbyBySteamId = new();
     private static readonly Dictionary<ulong, ulong> PracticeLobbyByServerSteamId = new();
-    private static readonly Dictionary<ulong, Queue<SkyNetGCMessageDto>> PendingGcMessages = new();
+    private static readonly Dictionary<ulong, Queue<ApiGCMessage>> PendingGcMessages = new();
     private static readonly object ObservedFixtureSync = new();
     private static readonly Dictionary<string, int> ObservedFixtureIndexes = new(StringComparer.Ordinal);
     private static long SteamObjectCounter = Environment.TickCount64 & 0xFFFFFF;
     private static ulong MatchIdCounter = (ulong)DateTimeOffset.UtcNow.ToUnixTimeSeconds() * 5UL;
     private static readonly TimeSpan PracticeLobbyTimeout = TimeSpan.FromSeconds(45);
 
-    public static Action<ulong, SkyNetGCMessageDto>? PendingMessageQueued { get; set; }
-    public static Func<ulong, SkyNetDotaRuntimeInventoryDto>? InventoryProvider { get; set; }
-    public static Func<ulong, ulong, uint, uint, uint, List<SkyNetDotaEquipmentDto>>? EquipItemSink { get; set; }
-    public static Func<ulong, ulong, uint, List<SkyNetDotaEquipmentDto>>? SetItemStyleSink { get; set; }
-    public static Action<SkyNetDotaMatchDto>? MatchSnapshotSink { get; set; }
+    public static Action<ulong, ApiGCMessage>? PendingMessageQueued { get; set; }
+    public static Func<ulong, ApiDotaRuntimeInventory>? InventoryProvider { get; set; }
+    public static Func<ulong, ulong, uint, uint, uint, List<ApiDotaEquipment>>? EquipItemSink { get; set; }
+    public static Func<ulong, ulong, uint, List<ApiDotaEquipment>>? SetItemStyleSink { get; set; }
+    public static Action<ApiDotaMatch>? MatchSnapshotSink { get; set; }
     public static Func<ulong, string>? MatchSnapshotJsonProvider { get; set; }
     public static Func<ulong, string>? MatchSnapshotByLobbyJsonProvider { get; set; }
     public static Func<ulong, bool>? MatchSnapshotDeleteSink { get; set; }
@@ -161,19 +161,19 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
     private const int MaxPracticeLobbyMembers = 20;
 
     private readonly GameCoordinatorContext _context;
-    private readonly SkyNetGCExchangeRequestDto _request;
+    private readonly ApiGCExchangeRequest _request;
     private readonly byte[] _requestBody;
     private readonly ulong _sourceJobId;
-    private readonly List<SkyNetDotaEquipmentDto> _dotaItemChanges = new();
-    private SkyNetDotaRuntimeInventoryDto? _dotaInventoryAfterChanges;
+    private readonly List<ApiDotaEquipment> _dotaItemChanges = new();
+    private ApiDotaRuntimeInventory? _dotaInventoryAfterChanges;
 
-    public DotaGcBackend(GameCoordinatorContext context, SkyNetGCExchangeRequestDto request)
+    public DotaGcBackend(GameCoordinatorContext context, ApiGCExchangeRequest request)
     {
         _context = context;
         _request = request;
         _requestBody = Decode(request.BodyBase64);
         _sourceJobId = request.SourceJobId ?? InvalidJobId;
-        Response = new SkyNetGCExchangeResponseDto { Handled = true };
+        Response = new ApiGCExchangeResponse { Handled = true };
     }
 
     public uint MessageType => _request.MessageType;
@@ -187,7 +187,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
     public ulong SourceJobId => _sourceJobId;
     public string BodyBase64 => Encode(_requestBody);
     public string BodyHex => Convert.ToHexString(_requestBody);
-    public SkyNetGCExchangeResponseDto Response { get; }
+    public ApiGCExchangeResponse Response { get; }
 
     public string DotaResolveGameServerConnectIp(string publicIpValue, string privateIpValue, string fallbackIp)
     {
@@ -236,9 +236,9 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
         return DedicatedServerRelease?.Invoke(ParseUInt64(lobbyId), reason ?? string.Empty) ?? false;
     }
 
-    public static SkyNetGCExchangeResponseDto Poll(GameCoordinatorContext context)
+    public static ApiGCExchangeResponse Poll(GameCoordinatorContext context)
     {
-        var response = new SkyNetGCExchangeResponseDto { Handled = true };
+        var response = new ApiGCExchangeResponse { Handled = true };
         lock (PracticeLobbySync)
         {
             ExpireInactiveSessionsLocked(null);
@@ -490,7 +490,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
 
     public bool EquipItems()
     {
-        var changedItems = new List<SkyNetDotaEquipmentDto>();
+        var changedItems = new List<ApiDotaEquipment>();
         foreach (var equipBody in ReadLengthDelimitedFields(_requestBody, 1))
         {
             TryReadVarintField(equipBody, 1, out ulong itemId);
@@ -527,7 +527,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
     {
         TryReadVarintField(_requestBody, 1, out ulong itemId);
         TryReadVarintField(_requestBody, 2, out ulong styleIndex);
-        var changed = SetItemStyleSink?.Invoke(SteamId, itemId, (uint)styleIndex) ?? new List<SkyNetDotaEquipmentDto>();
+        var changed = SetItemStyleSink?.Invoke(SteamId, itemId, (uint)styleIndex) ?? new List<ApiDotaEquipment>();
         var inventory = InventoryProvider?.Invoke(SteamId);
         if (changed.Count > 0 && inventory != null)
         {
@@ -1044,7 +1044,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
 
     public bool QueueTo(ulong steamId, uint messageType, string payloadBase64, bool protobuf = true)
     {
-        PendingMessageQueued?.Invoke(steamId, new SkyNetGCMessageDto
+        PendingMessageQueued?.Invoke(steamId, new ApiGCMessage
         {
             AppId = AppId,
             MessageType = messageType,
@@ -1061,7 +1061,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
 
     public bool QueueReplyTo(ulong steamId, uint messageType, string payloadBase64, ulong targetJobId)
     {
-        PendingMessageQueued?.Invoke(steamId, new SkyNetGCMessageDto
+        PendingMessageQueued?.Invoke(steamId, new ApiGCMessage
         {
             AppId = AppId,
             MessageType = messageType,
@@ -1078,7 +1078,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
 
     public bool QueueToPoll(ulong steamId, uint messageType, string payloadBase64, bool protobuf = true)
     {
-        GameCoordinatorPendingMessages.Enqueue(AppId, steamId, new SkyNetGCMessageDto
+        GameCoordinatorPendingMessages.Enqueue(AppId, steamId, new ApiGCMessage
         {
             AppId = AppId,
             MessageType = messageType,
@@ -1095,7 +1095,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
 
     public bool QueueReplyToPoll(ulong steamId, uint messageType, string payloadBase64, ulong targetJobId)
     {
-        GameCoordinatorPendingMessages.Enqueue(AppId, steamId, new SkyNetGCMessageDto
+        GameCoordinatorPendingMessages.Enqueue(AppId, steamId, new ApiGCMessage
         {
             AppId = AppId,
             MessageType = messageType,
@@ -1131,7 +1131,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
             return false;
         }
 
-        var snapshot = new SkyNetDotaMatchDto
+        var snapshot = new ApiDotaMatch
         {
             LobbyId = ParseUInt64(lobbyId),
             MatchId = ParseUInt64(matchId),
@@ -1339,9 +1339,9 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
         return true;
     }
 
-    private static List<SkyNetDotaEquipmentDto> ParseDefIndexCsv(string? csv)
+    private static List<ApiDotaEquipment> ParseDefIndexCsv(string? csv)
     {
-        var result = new List<SkyNetDotaEquipmentDto>();
+        var result = new List<ApiDotaEquipment>();
         if (string.IsNullOrWhiteSpace(csv))
         {
             return result;
@@ -1351,7 +1351,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
         {
             if (uint.TryParse(part, out var defIndex) && defIndex != 0)
             {
-                result.Add(new SkyNetDotaEquipmentDto { DefIndex = defIndex });
+                result.Add(new ApiDotaEquipment { DefIndex = defIndex });
             }
         }
 
@@ -1374,7 +1374,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
         return GetCurrentCacheVersion(1).ToString(System.Globalization.CultureInfo.InvariantCulture);
     }
 
-    private SkyNetDotaRuntimeInventoryDto? RefreshDotaInventoryAfterChanges()
+    private ApiDotaRuntimeInventory? RefreshDotaInventoryAfterChanges()
     {
         _dotaInventoryAfterChanges = InventoryProvider?.Invoke(SteamId);
         return _dotaInventoryAfterChanges;
@@ -1453,7 +1453,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
 
     private void AddMessage(uint messageType, byte[] payload, ulong? targetJobId, bool protobuf)
     {
-        Response.Messages.Add(new SkyNetGCMessageDto
+        Response.Messages.Add(new ApiGCMessage
         {
             AppId = AppId,
             MessageType = messageType,
@@ -2233,8 +2233,8 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
 
     private static byte[] BuildEconMultipleObjects(
         ulong ownerSteamId,
-        SkyNetDotaRuntimeInventoryDto inventory,
-        IEnumerable<SkyNetDotaEquipmentDto> changedEquipment,
+        ApiDotaRuntimeInventory inventory,
+        IEnumerable<ApiDotaEquipment> changedEquipment,
         EconObjectUpdateKind updateKind)
     {
         var changedObjects = new List<byte[]>();
@@ -2253,7 +2253,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
             {
                 equipmentByDefIndex.TryGetValue(defIndex, out var currentEquipment);
                 inventoryPositions.TryGetValue(defIndex, out var inventoryPosition);
-                changedObjects.Add(BuildSubscribedType(1, BuildEconItem(ownerSteamId, item, currentEquipment ?? Enumerable.Empty<SkyNetDotaEquipmentDto>(), inventoryPosition)));
+                changedObjects.Add(BuildSubscribedType(1, BuildEconItem(ownerSteamId, item, currentEquipment ?? Enumerable.Empty<ApiDotaEquipment>(), inventoryPosition)));
             }
         }
 
@@ -2276,7 +2276,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
         return response.ToArray();
     }
 
-    private static Dictionary<uint, uint> BuildEconInventoryPositions(SkyNetDotaRuntimeInventoryDto inventory)
+    private static Dictionary<uint, uint> BuildEconInventoryPositions(ApiDotaRuntimeInventory inventory)
     {
         var result = new Dictionary<uint, uint>();
         uint index = 1;
@@ -2291,8 +2291,8 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
     private void QueueEconItemChangesToServer(
         ulong serverSteamId,
         ulong ownerSteamId,
-        SkyNetDotaRuntimeInventoryDto inventory,
-        IEnumerable<SkyNetDotaEquipmentDto> changedEquipment)
+        ApiDotaRuntimeInventory inventory,
+        IEnumerable<ApiDotaEquipment> changedEquipment)
     {
         var equipmentByDefIndex = inventory.Equipment
             .GroupBy(item => item.DefIndex)
@@ -2311,7 +2311,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
             }
 
             equipmentByDefIndex.TryGetValue(defIndex, out var currentEquipment);
-            var current = currentEquipment ?? new List<SkyNetDotaEquipmentDto>();
+            var current = currentEquipment ?? new List<ApiDotaEquipment>();
             inventoryPositions.TryGetValue(defIndex, out var inventoryPosition);
             var itemId = BuildDotaItemInstanceId(ownerSteamId, item.DefIndex);
 
@@ -2346,7 +2346,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
 
     private static List<byte[]> BuildEconItemsForUser(
         ulong ownerSteamId,
-        SkyNetDotaRuntimeInventoryDto? inventory,
+        ApiDotaRuntimeInventory? inventory,
         bool onlyEquipped)
     {
         if (inventory == null)
@@ -2367,13 +2367,13 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
                 continue;
             }
 
-            items.Add(BuildEconItem(ownerSteamId, item, equipped ?? Enumerable.Empty<SkyNetDotaEquipmentDto>(), (uint)(items.Count + 1)));
+            items.Add(BuildEconItem(ownerSteamId, item, equipped ?? Enumerable.Empty<ApiDotaEquipment>(), (uint)(items.Count + 1)));
         }
 
         return items;
     }
 
-    private static byte[] BuildEconItem(ulong ownerSteamId, SkyNetDotaItemDto item, IEnumerable<SkyNetDotaEquipmentDto> equipment, uint inventoryPosition)
+    private static byte[] BuildEconItem(ulong ownerSteamId, ApiDotaItem item, IEnumerable<ApiDotaEquipment> equipment, uint inventoryPosition)
     {
         var response = new List<byte>();
         var itemId = BuildDotaItemInstanceId(ownerSteamId, item.DefIndex);
@@ -2434,7 +2434,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
             Version = GenerateSteamObjectId(),
             State = LobbyStateUi,
             GameMode = 1,
-            GameName = "Sala 1",
+            GameName = "Room 1",
             ServerRegion = 0,
             Lan = true,
             AllowSpectating = false,
@@ -2581,7 +2581,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
             return;
         }
 
-        var snapshot = new SkyNetDotaMatchDto
+        var snapshot = new ApiDotaMatch
         {
             LobbyId = lobby.LobbyId,
             MatchId = lobby.MatchId,
@@ -2591,7 +2591,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
             GameState = lobby.GameState,
             GameStartTime = lobby.GameStartTime,
             UpdatedAt = DateTime.UtcNow,
-            Players = lobby.Members.Select(member => new SkyNetDotaMatchPlayerDto
+            Players = lobby.Members.Select(member => new ApiDotaMatchPlayer
             {
                 SteamId = member.SteamId,
                 AccountId = member.AccountId,
@@ -2614,7 +2614,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
             return;
         }
 
-        var message = new SkyNetGCMessageDto
+        var message = new ApiGCMessage
         {
             AppId = AppId,
             MessageType = messageType,
@@ -2629,7 +2629,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
         {
             if (!PendingGcMessages.TryGetValue(recipientSteamId, out var queue))
             {
-                queue = new Queue<SkyNetGCMessageDto>();
+                queue = new Queue<ApiGCMessage>();
                 PendingGcMessages[recipientSteamId] = queue;
             }
 
@@ -2692,7 +2692,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
 
     private static void QueueStaticProtoLocked(ulong recipientSteamId, PracticeLobbyState lobby, uint messageType, byte[] payload)
     {
-        var message = new SkyNetGCMessageDto
+        var message = new ApiGCMessage
         {
             AppId = 570,
             MessageType = messageType,
@@ -2705,7 +2705,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
         {
             if (!PendingGcMessages.TryGetValue(recipientSteamId, out var queue))
             {
-                queue = new Queue<SkyNetGCMessageDto>();
+                queue = new Queue<ApiGCMessage>();
                 PendingGcMessages[recipientSteamId] = queue;
             }
 
@@ -3563,9 +3563,9 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
             : 0U;
     }
 
-    private static List<SkyNetDotaMatchPlayerDto> ParseSnapshotPlayers(string? players)
+    private static List<ApiDotaMatchPlayer> ParseSnapshotPlayers(string? players)
     {
-        var result = new List<SkyNetDotaMatchPlayerDto>();
+        var result = new List<ApiDotaMatchPlayer>();
         if (string.IsNullOrWhiteSpace(players))
         {
             return result;
@@ -3579,7 +3579,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
                 continue;
             }
 
-            result.Add(new SkyNetDotaMatchPlayerDto
+            result.Add(new ApiDotaMatchPlayer
             {
                 SteamId = ParseUInt64(parts[0]),
                 AccountId = ParseUInt32(parts[1]),

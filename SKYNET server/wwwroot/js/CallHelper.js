@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // Variable para controlar si el formulario está en proceso de envío
+    // Variable to control whether the form is being submitted
     let isSubmitting = false;
     let lastSubmitter = null;
 
@@ -7,17 +7,17 @@ document.addEventListener("DOMContentLoaded", function () {
         lastSubmitter = event.submitter;
     }, true);
 
-    // Delegar el evento para todos los formularios con OnSend o OnComplete
+    // Delegate the event for all forms with OnSend or OnComplete
     document.body.addEventListener("submit", async function (event) {
         const form = event.target;
 
-        // Solo aplicar en formularios con al menos un atributo OnSend o OnComplete
+        // Only apply to forms with at least one OnSend or OnComplete attribute
         if (form.hasAttribute("OnSend") || form.hasAttribute("OnComplete")) {
-            event.preventDefault(); // Detener el envío por defecto del formulario
+            event.preventDefault(); // Stop the default form submission
 
-            // Evitar múltiples envíos simultáneos
+            // Prevent multiple simultaneous submissions
             if (isSubmitting) {
-                console.log("Formulario ya está siendo enviado");
+                console.log("Form is already being submitted");
                 return;
             }
 
@@ -27,41 +27,41 @@ document.addEventListener("DOMContentLoaded", function () {
                 const onSendFunctionName = form.getAttribute("OnSend");
                 const onCompleteFunctionName = form.getAttribute("OnComplete");
 
-                // Verificar si las funciones están definidas globalmente
+                // Check if the functions are defined globally
                 const onSend = onSendFunctionName ? window[onSendFunctionName] : null;
                 const onComplete = onCompleteFunctionName ? window[onCompleteFunctionName] : null;
 
                 if (onSend && typeof onSend !== "function") {
-                    console.error(`No se encontró la función OnSend (${onSendFunctionName})`);
+                    console.error(`OnSend function not found (${onSendFunctionName})`);
                     return;
                 }
 
                 if (onComplete && typeof onComplete !== "function") {
-                    console.error(`No se encontró la función OnComplete (${onCompleteFunctionName})`);
+                    console.error(`OnComplete function not found (${onCompleteFunctionName})`);
                     return;
                 }
 
-                // Si hay un OnSend, ejecutarlo primero
+                // If there is an OnSend, execute it first
                 let shouldContinue = true;
                 if (onSend) {
                     shouldContinue = await onSend(form);
                 }
 
                 if (!shouldContinue) {
-                    console.log("El envío del formulario fue cancelado.");
-                    return; // Si el usuario cancela, no enviar el formulario
+                    console.log("Form submission was cancelled.");
+                    return; // If the user cancels, do not submit the form
                 }
 
-                // Obtener el token antiforgery
+                // Get the antiforgery token
                 const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
 
-                // Crear FormData con los datos del formulario
+                // Create FormData with the form data
                 const formData = new FormData(form, lastSubmitter);
                 lastSubmitter = null;
                 const action = form.getAttribute("action") || window.location.href;
                 const method = form.getAttribute("method") || "POST";
 
-                // Enviar la solicitud de forma manual usando fetch
+                // Send the request manually using fetch
                 const response = await fetch(action, {
                     method: method,
                     body: formData,
@@ -74,14 +74,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 const data = await response.json();
 
-                // Llamar a la función OnComplete si está definida
+                // Call the OnComplete function if defined
                 if (onComplete) {
                     onComplete(data, form);
                 }
             } catch (error) {
-                console.error("Error al enviar el formulario:", error);
+                console.error("Error sending form:", error);
             } finally {
-                // Restaurar el estado de envío
+                // Restore the submission state
                 isSubmitting = false;
             }
         }
@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-    // Buscar elementos con el atributo auto-submit
+    // Look for elements with the auto-submit attribute
     document.querySelectorAll('[auto-submit]').forEach(input => {
         input.addEventListener('change', function () {
             const form = this.closest('form');

@@ -4,6 +4,7 @@ using System.Net;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using SKYNET.Callback;
 using SKYNET.Steamworks.Interfaces;
 using SKYNET.Managers;
@@ -38,8 +39,6 @@ namespace SKYNET.Steamworks.Implementation
 
         public HTTPRequestHandle CreateHTTPRequest(uint eHTTPRequestMethod, string pchAbsoluteURL)
         {
-            Write($"CreateHTTPRequest {(HTTPMethod)eHTTPRequestMethod} {pchAbsoluteURL}");
-
             var CreatedHandle = Handle;
             Handle++;
 
@@ -50,6 +49,7 @@ namespace SKYNET.Steamworks.Implementation
             HttpRequest.ContextValue = 0;
 
             HTTPRequests.Add(HttpRequest);
+            Write($"CreateHTTPRequest handle={CreatedHandle} method={(HTTPMethod)eHTTPRequestMethod} url={pchAbsoluteURL} active=[{DescribeActiveHandles()}]");
             return CreatedHandle;
         }
 
@@ -94,14 +94,15 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool GetHTTPResponseBodyData(HTTPRequestHandle hRequest, IntPtr pBodyDataBuffer, uint unBufferSize)
         {
-            Write($"GetHTTPResponseBodyData");
             var request = GetHTTPRequest(hRequest);
             if (request == null)
             {
+                Write($"GetHTTPResponseBodyData handle={hRequest} not found active=[{DescribeActiveHandles()}]");
                 return false;
             }
 
             byte[] response = request.ResponseBytes ?? Array.Empty<byte>();
+            Write($"GetHTTPResponseBodyData handle={hRequest} buffer={unBufferSize} body={response.Length} preview={PreviewBody(response)}");
             if (response.Length > unBufferSize)
             {
                 return false;
@@ -116,10 +117,10 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool GetHTTPResponseBodySize(HTTPRequestHandle hRequest, IntPtr unBodySize)
         {
-            Write($"GetHTTPResponseBodySize");
             var request = GetHTTPRequest(hRequest);
             if (request == null)
             {
+                Write($"GetHTTPResponseBodySize handle={hRequest} not found active=[{DescribeActiveHandles()}]");
                 return false;
             }
 
@@ -127,6 +128,7 @@ namespace SKYNET.Steamworks.Implementation
             {
                 byte[] response = request.ResponseBytes ?? Array.Empty<byte>();
                 Marshal.WriteInt32(unBodySize, response.Length);
+                Write($"GetHTTPResponseBodySize handle={hRequest} body={response.Length}");
             }
             return true;
         }
@@ -136,17 +138,18 @@ namespace SKYNET.Steamworks.Implementation
             var request = GetHTTPRequest(hRequest);
             if (request == null)
             {
+                Write($"GetHTTPResponseBodySize(ref) handle={hRequest} not found active=[{DescribeActiveHandles()}]");
                 return false;
             }
 
             byte[] response = request.ResponseBytes ?? Array.Empty<byte>();
             unBodySize = (uint)response.Length;
+            Write($"GetHTTPResponseBodySize(ref) handle={hRequest} body={response.Length}");
             return true;
         }
 
         public bool GetHTTPResponseHeaderSize(HTTPRequestHandle hRequest, string pchHeaderName, IntPtr unResponseHeaderSize)
         {
-            Write($"GetHTTPResponseHeaderSize");
             var request = GetHTTPRequest(hRequest);
             string headerValue;
             if (request != null && TryGetResponseHeader(request, pchHeaderName, out headerValue))
@@ -156,6 +159,7 @@ namespace SKYNET.Steamworks.Implementation
                     Marshal.WriteInt32(unResponseHeaderSize, Encoding.UTF8.GetByteCount(headerValue) + 1);
                 }
 
+                Write($"GetHTTPResponseHeaderSize handle={hRequest} header={pchHeaderName} size={Encoding.UTF8.GetByteCount(headerValue) + 1}");
                 return true;
             }
 
@@ -164,6 +168,7 @@ namespace SKYNET.Steamworks.Implementation
                 Marshal.WriteInt32(unResponseHeaderSize, 0);
             }
 
+            Write($"GetHTTPResponseHeaderSize handle={hRequest} header={pchHeaderName} not found");
             return false;
         }
 
@@ -183,22 +188,24 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool GetHTTPResponseHeaderValue(HTTPRequestHandle hRequest, string pchHeaderName, IntPtr pHeaderValueBuffer, uint unBufferSize)
         {
-            Write($"GetHTTPResponseHeaderValue");
             var request = GetHTTPRequest(hRequest);
             string headerValue;
             if (request == null || !TryGetResponseHeader(request, pchHeaderName, out headerValue))
             {
+                Write($"GetHTTPResponseHeaderValue handle={hRequest} header={pchHeaderName} not found");
                 return false;
             }
 
             byte[] bytes = Encoding.UTF8.GetBytes(headerValue);
             if (pHeaderValueBuffer == IntPtr.Zero || unBufferSize < bytes.Length + 1)
             {
+                Write($"GetHTTPResponseHeaderValue handle={hRequest} header={pchHeaderName} buffer={unBufferSize} needed={bytes.Length + 1}");
                 return false;
             }
 
             Marshal.Copy(bytes, 0, pHeaderValueBuffer, bytes.Length);
             Marshal.WriteByte(pHeaderValueBuffer, bytes.Length, 0);
+            Write($"GetHTTPResponseHeaderValue handle={hRequest} header={pchHeaderName} value={headerValue}");
             return true;
         }
 
@@ -227,13 +234,13 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool ReleaseHTTPRequest(HTTPRequestHandle hRequest)
         {
-            Write($"ReleaseHTTPRequest, Header: {hRequest}");
+            Write($"ReleaseHTTPRequest, Header: {hRequest} active-before=[{DescribeActiveHandles()}]");
             for (int i = 0; i < HTTPRequests.Count; i++)
             {
                 if (HTTPRequests[i].Handle == hRequest)
                 {
                     HTTPRequests.RemoveAt(i);
-                    Write("---------------------------------------- removed");
+                    Write($"ReleaseHTTPRequest removed handle={hRequest} active-after=[{DescribeActiveHandles()}]");
                     return true;
                 }
             }
@@ -282,8 +289,26 @@ namespace SKYNET.Steamworks.Implementation
 
                 request.ResponseHeaders = BuildLocalResponseHeaders(request);
                 data.BodySize = (uint)request.ResponseBytes.Length;
-                pCallHandle = CallbackManager.AddCallbackResult(data);
+                if (IsSdrConfigRequest(request.URL))
+                {
+                    pCallHandle = WorkQueue.EnqueueCallbackResult(
+                        data,
+                        () =>
+                        {
+                            Thread.Sleep(250);
+                            return data;
+                        },
+                        false,
+                        "SendHTTPRequest:GetSDRConfig",
+                        null,
+                        true);
+                }
+                else
+                {
+                    pCallHandle = CallbackManager.AddCallbackResult(data);
+                }
                 APIRequest.SteamAPICall = pCallHandle;
+                Write($"SendHTTPRequest prepared handle={hRequest} call={pCallHandle} url={request.URL} context={data.ContextValue} success={data.RequestSuccessful} status={(int)data.StatusCode} body={data.BodySize} preview={PreviewBody(request.ResponseBytes)} active=[{DescribeActiveHandles()}]");
 
                 //WebRequest webrequest = WebRequest.Create(request.URL);
                 //webrequest.Timeout = (int)(request.TimeoutSeconds != 0 ? request.TimeoutSeconds : 2);
@@ -304,7 +329,10 @@ namespace SKYNET.Steamworks.Implementation
 
                 Result = true;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Write($"SendHTTPRequest handle={hRequest} failed: {ex.Message}");
+            }
 
             Write($"SendHTTPRequest (HTTPRequestHandle = {hRequest}) = {Result}");
 
@@ -440,7 +468,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool SetHTTPRequestHeaderValue(HTTPRequestHandle hRequest, string pchHeaderName, string pchHeaderValue)
         {
-            Write($"SetHTTPRequestHeaderValue, Handle {hRequest}");
+            Write($"SetHTTPRequestHeaderValue handle={hRequest} name={pchHeaderName ?? "<null>"} value={pchHeaderValue ?? "<null>"}");
             HTTPRequest request = GetHTTPRequest(hRequest);
             if (request == null)
             {
@@ -506,11 +534,45 @@ namespace SKYNET.Steamworks.Implementation
             return HTTPRequests.Find(r => r.Handle == hTTPRequestHandle);
         }
 
-        // Full SDR network config (revision, relay certs signed by our CA, POP
-        // and relay list) modelled on the reference coordinator's GetSDRConfig
-        // endpoint, edited with our own relay address. Served synchronously from
-        // memory so no blocking outbound HTTP is ever made.
-        internal const string SdrConfigJson = @"{""revision"":300,""certs"":[""Ii4IARIgro2l/s9N3hEkchfAR7j0aZhJgtyE5FYtC/RYYTOYjIRFUWnrYE3RRxRhKUOsygDiAjPJMkCFO65SjC8vIG+EkmOIrcOZNOM/4uB9srcF+s/RjJtbIc7hsZwSTiK+QOKZWAco9D21dH8snA6P3Yz++3SG5oIO"",""Ij4IARIgro2l/s9N3hEkchfAR7j0aZhJgtyE5FYtC/RYYTOYjIRFUWnrYE3RRxRhUJrVEFCO0iNQ+pQ+UIy8TSlDrMoA4gIzyTJAsKQ+6bbEvQissoLo4PuRhUzl5YnR/TKXaZe4kejjP8yE0NWzfb4lyVckpWrwoTJLF0dxtR7FnKT72yBKW0udBg=="",""IjIIARIgro2l/s9N3hEkchfAR7j0aZhJgtyE5FYtC/RYYTOYjIRFUWnrYE3RRxRhULLKNClDrMoA4gIzyTJAoC084KeUil/GK3m4UaaXKhjGy6p4VdEoSvE+fpLPMroSG9FXx16OWH4tThlvFop3LcwnvH39lZkvPDQUelxpDA=="",""IjIIARIgro2l/s9N3hEkchfAR7j0aZhJgtyE5FYtC/RYYTOYjIRFUWnrYE3RRxRhUNiiQSlDrMoA4gIzyTJALUXavGHb5ie4svZCE41eeLMsvrqyjQ/zPD+dYRd/8b9mt/X7dCCNXtMCY3kTQ8pIWkjWNL1nZYbf2SOfSD1uBg=="",""IjYIARIgro2l/s9N3hEkchfAR7j0aZhJgtyE5FYtC/RYYTOYjIRFUWnrYE3RRxRhUKSZFVDcoUIpQ6zKAOICM8kyQEsDZQYOHQxv7fhouBIK2zNc5DLTrb2iNLoXtVXTDRCCOfpvzqwp1LmpOSYoEQSrSEHAt0hHF1XXU1yeo/1gvAk="",""IjYIARIgro2l/s9N3hEkchfAR7j0aZhJgtyE5FYtC/RYYTOYjIRFUWnrYE3RRxRhUJrWE1CK+BQpQ6zKAOICM8kyQCMH1rpJtEL4ahXhPaVtmcjMuHW1G5AdB1KeUpIjDR9tsLhRZlnm0387g/FzTjMuhR5UCfamybb1RVV+zkwsxgs="",""IjYIARIgro2l/s9N3hEkchfAR7j0aZhJgtyE5FYtC/RYYTOYjIRFUWnrYE3RRxRhUKSZFVDcoUIpQ6zKAOICM8kyQEsDZQYOHQxv7fhouBIK2zNc5DLTrb2iNLoXtVXTDRCCOfpvzqwp1LmpOSYoEQSrSEHAt0hHF1XXU1yeo/1gvAk="",""IjcIARIgro2l/s9N3hEkchfAR7j0aZhJgtyE5FYtC/RYYTOYjIRFUWnrYE3RRxRhULgDUIgEUKoGKUOsygDiAjPJMkBhhrHHeS4iZ9HVQfpeA/x2vfs4AQgmVdSt09OLkkwErQWtDqJNDEOO8ZTd+ybotsc1G4IBrTSv28Z435EBpikM"",""IjoIARIgro2l/s9N3hEkchfAR7j0aZhJgtyE5FYtC/RYYTOYjIRFUWnrYE3RRxRhUKLCPlCS8z9Qmr5DKUOsygDiAjPJMkCnebkZgPYMpBsrg4DzChS0bDUPZhkRHUN47KiJTiiyL8hRKK+6F9Np7AFdjlPWvKFp+lAPnxwrk2FFvZ6qHloK"",""IjsIARIgro2l/s9N3hEkchfAR7j0aZhJgtyE5FYtC/RYYTOYjIRFUWnrYE3RRxRhUMYFUNAFUNoFUJixEClDrMoA4gIzyTJA2bXv0pmtSbsJDyzRBKm08NKZaeZ3zOZwF0HsYz/zDbiflW0jdWfrz5a4555EbjVzreLGo8OaBiezMYu1Ibn7Ag=="",""IkgIARIgro2l/s9N3hEkchfAR7j0aZhJgtyE5FYtC/RYYTOYjIRFUWnrYE3RRxRhULoEULAGUICKD1DexwxQosI+UJLzP1CavkMpQ6zKAOICM8kyQGu1a7rxtTGuLPH+4Zkk/1NkthbyWSm5OxpsCig0J9xYCVkt8EFPdSkAhr4LK7+dhiG30Aug2pIk/NKKDPkdUwc="",""IkoIARIgro2l/s9N3hEkchfAR7j0aZhJgtyE5FYtC/RYYTOYjIRFUWnrYE3RRxRhUOyjHFDtoxxQ7qMcULLkHlC41DVQxIsaUNrcOClDrMoA4gIzyTJAoHjTDEIwtxQVo/TxWfUWc4hWgo+XbzHXyB/FxlWZ5In5xfXLW9BaWLuFbS4BVbsHGwwSazLaTMJT+MZUANiRCQ==""],""p2p_share_ip"":{""cn"":20,""default"":40,""ru"":20},""pops"":{""SKY"":{""desc"":""SKYNET"",""geo"":[4.9,52.37],""relay_addresses"":[""10.11.49.120:28009-28009""],""partners"":1,""groups"":[""valve""],""relays"":[{""ipv4"":""10.11.49.120"",""port_range"":[28009,28009]}]}},""relay_public_key"":""5AC884C1045BA0FF44142AC8DCA51B8A98C8F1CB4FEE36284AFBE92FCF594932"",""revoked_keys"":[""123456789""],""success"":1}";
+        private string DescribeActiveHandles()
+        {
+            if (HTTPRequests == null || HTTPRequests.Count == 0)
+            {
+                return "";
+            }
+
+            var handles = new string[HTTPRequests.Count];
+            for (int i = 0; i < HTTPRequests.Count; i++)
+            {
+                handles[i] = HTTPRequests[i].Handle.ToString();
+            }
+
+            return string.Join(",", handles);
+        }
+
+        // Full SDR network config modelled on the reference coordinator's
+        // GetSDRConfig endpoint, edited with our own relay address. The certs
+        // are CertTool-style CA certs regenerated for the emulator CA patched
+        // into steamnetworkingsockets.dll, not the old 2021 AE8D root.
+        private static readonly string[] SdrConfigCerts =
+        {
+            "Ii4IARIg/qqXwyx+W/aE34bxIPPEDHhdzs3ty5H8Ij5U52qjD1lFPmRVak2+lzZsKfX9QGzqjxvNMkA+v31mfE0jEauJQR50GDcixRlwb+hcaZzjP4Rf8o4cZJdyASZ0sTm/cxo84lz6OIvu71W69ufkS/+s62qgGGoD",
+            "IjwIARIg/qqXwyx+W/aE34bxIPPEDHhdzs3ty5H8Ij5U52qjD1lFPmRVak2+lzZsUJrVEFCO0iNQ+pQ+UH4p9f1AbOqPG80yQDeIEI62KYx3jxivmSsn8+ZCR6G5Cx4OykN2+j7vqmDXyI/ixPXzWQ2IN/0Vei9LwKQrR4D1ZqKNXFmJv9OIRQ0=",
+            "IjIIARIg/qqXwyx+W/aE34bxIPPEDHhdzs3ty5H8Ij5U52qjD1lFPmRVak2+lzZsULLKNCn1/UBs6o8bzTJAGHXwo6qT26fP4hQ9ZBC6EY+GsZpMHXSqXCKJeKw1bPkAzSp8lozfP8HXOGDFxsWRCBkmEt6iK29GVnJfM3GZAQ==",
+            "IjIIARIg/qqXwyx+W/aE34bxIPPEDHhdzs3ty5H8Ij5U52qjD1lFPmRVak2+lzZsUNiiQSn1/UBs6o8bzTJA4GeaOYoTnj1dPxfowErcoUqiQ9Y1dreTq80k61isymuqh6jXlSrSb9UxWOYiHeU4EFS0RMyK46yakMe9YvERAg==",
+            "IjYIARIg/qqXwyx+W/aE34bxIPPEDHhdzs3ty5H8Ij5U52qjD1lFPmRVak2+lzZsUKSZFVDcoUIp9f1AbOqPG80yQAWnjxLJBPsIscy+QBX2IAxn3nW8qesT5/6yWIcxeQ5UAMSreqBk9OxkaWb0JDbV9hED21gMFwwSwAVXS7w57wg=",
+            "IjYIARIg/qqXwyx+W/aE34bxIPPEDHhdzs3ty5H8Ij5U52qjD1lFPmRVak2+lzZsUJrWE1CK+BQp9f1AbOqPG80yQPe6oyKSTCwaqh7CFm3NPpmy+F0v0PwUtIBSw72LfcJXE6gsHdJStyKNSWHzwaQU3fQvSCW4mAsSHRNN9ACZZws=",
+            "IjYIARIg/qqXwyx+W/aE34bxIPPEDHhdzs3ty5H8Ij5U52qjD1lFPmRVak2+lzZsUKSZFVDcoUIp9f1AbOqPG80yQAWnjxLJBPsIscy+QBX2IAxn3nW8qesT5/6yWIcxeQ5UAMSreqBk9OxkaWb0JDbV9hED21gMFwwSwAVXS7w57wg=",
+            "IjcIARIg/qqXwyx+W/aE34bxIPPEDHhdzs3ty5H8Ij5U52qjD1lFPmRVak2+lzZsULgDUIgEUKoGKfX9QGzqjxvNMkDdtqMy/lVDuntmqf87orV0++4pcO4EJw5srMil3F1J98UfakM4fJWlQSPcsROyEKPGZzKzGb+Xu1jvIBUP3wEF",
+            "IjoIARIg/qqXwyx+W/aE34bxIPPEDHhdzs3ty5H8Ij5U52qjD1lFPmRVak2+lzZsUKLCPlCS8z9Qmr5DKfX9QGzqjxvNMkBUzZfJdXLs22BjNUUv/GgJCmLluyG/L7qavF2S6YxAKVLJ0MNRBSVIIA7ffyH/PWHwuuMtlmImrQ/Jy1T9BIUM",
+            "IjsIARIg/qqXwyx+W/aE34bxIPPEDHhdzs3ty5H8Ij5U52qjD1lFPmRVak2+lzZsUMYFUNAFUNoFUJixECn1/UBs6o8bzTJAYSjeD9rxx1Ebye6SUwvQEMLrkSkNQnwlCd7/zLdgiRnOpbCEsSr8XmCwE+7MbNqq4VVBSREvGwxkX7Ec/reMAQ==",
+            "Ij4IARIg/qqXwyx+W/aE34bxIPPEDHhdzs3ty5H8Ij5U52qjD1lFPmRVak2+lzZsULoEULAGUICKD1DexwxQZin1/UBs6o8bzTJAqPgvi4s+yjuARGZbWm33QDZzeBIc0H8PxCIRGgbhzlAMgwaTm9K2Sfs454w8joKgKLOyoc6Zw8kWhsngUZW7Bg==",
+            "Ij4IARIg/qqXwyx+W/aE34bxIPPEDHhdzs3ty5H8Ij5U52qjD1lFPmRVak2+lzZsUOyjHFDtoxxQ7qMcULLkHin1/UBs6o8bzTJAfHCetKqWilvc89+cwmkVh5wHJ9RqWyfqzo7fnYOObrz+5iPAN97T0Lohsu4GfzPTPftpcJ+OlmMgxUOjcW/YCg=="
+        };
+
+        internal static readonly string SdrConfigJson = @"{""revision"":1783546117,""pops"":{""sky"":{""desc"":""SKYNET"",""geo"":[-118.25,34.05],""partners"":1,""tier"":0,""relays"":[{""ipv4"":""10.11.49.120"",""port_range"":[28009,28009]}]}},""certs"":[""" +
+            string.Join(@""",""", SdrConfigCerts) +
+            @"""],""p2p_share_ip"":{""cn"":20,""default"":40,""ru"":20},""relay_public_key"":""5AC884C1045BA0FF44142AC8DCA51B8A98C8F1CB4FEE36284AFBE92FCF594932"",""revoked_keys"":[],""typical_pings"":[],""success"":true}";
 
         private static byte[] BuildLocalResponseBytes(HTTPRequest request)
         {
@@ -558,6 +620,17 @@ namespace SKYNET.Steamworks.Implementation
                 { "Content-Length", (request.ResponseBytes ?? Array.Empty<byte>()).Length.ToString() }
             };
             return headers;
+        }
+
+        private static string PreviewBody(byte[] response)
+        {
+            if (response == null || response.Length == 0)
+            {
+                return "<empty>";
+            }
+
+            int count = Math.Min(response.Length, 160);
+            return Encoding.UTF8.GetString(response, 0, count).Replace("\r", "").Replace("\n", "");
         }
 
         private static bool TryGetResponseHeader(HTTPRequest request, string name, out string value)

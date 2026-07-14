@@ -249,7 +249,7 @@ local function lobby_object(lobby)
         PB.v(12, 1),
         PB.v(13, 0),
         PB.v(14, 0),
-        PB.str(16, lobby.name or "Sala 1"),
+        PB.str(16, lobby.name or "Room 1"),
         PB.v(21, lobby.region or 0),
         PB.v(28, lobby.game_state or GAME_INIT),
         PB.v(31, lobby.allow_spectating and 1 or 0),
@@ -1093,7 +1093,7 @@ local function create_lobby()
         version = PB.next_id(),
         state = LOBBY_UI,
         game_mode = 1,
-        name = "Sala 1",
+        name = "Room 1",
         region = 0,
         lan = true,
         allow_spectating = false,
@@ -1387,7 +1387,7 @@ local function launch_lobby()
                 broadcast_lobby(lobby, nil, false)
                 publish_lobby(lobby)
                 gc.Proto(MSG.GCToClientBroadcastNotification,
-                    PB.str(1, "No se pudo iniciar el servidor dedicado de la sala."))
+                    PB.str(1, "Could not start the dedicated server for the lobby."))
                 runtime.Log("launch_lobby dedicated failed id=" .. tostring(lobby.id))
                 return true
             end
@@ -2041,7 +2041,7 @@ local function lobby_list_entry(lobby)
         PB.vs(1, lobby.id),
         PB.v(6, (lobby.pass_key ~= nil and lobby.pass_key ~= "") and 1 or 0),
         PB.v(7, lobby.leader_account or 0),
-        PB.str(10, lobby.name or "Sala"),
+        PB.str(10, lobby.name or "Room"),
         PB.v(12, lobby.game_mode or 1),
         PB.v(13, 1),                       -- friend_present: surface it on the LAN
         PB.v(14, member_count(lobby)),     -- players
@@ -2187,7 +2187,7 @@ function dota_lobby_tick()
                     lobby.game_start_time = 0
                     lobby.realtime_sent = false
                     changed = true
-                    local notice = PB.str(1, "El servidor dedicado no pudo iniciar la partida.")
+                    local notice = PB.str(1, "The dedicated server could not start the match.")
                     for _, member in ipairs(member_order(lobby)) do
                         queue_proto(member.steam, MSG.GCToClientBroadcastNotification, notice)
                     end

@@ -4,7 +4,7 @@ namespace SKYNET_server.Services;
 
 public sealed partial class SteamApiStateService
 {
-    public List<SkyNetLobbyDto>? QueryLobbies(string token, SkyNetLobbyQueryRequestDto request)
+    public List<ApiLobby>? QueryLobbies(string token, ApiLobbyQueryRequest request)
     {
         lock (_sync)
         {
@@ -13,7 +13,7 @@ public sealed partial class SteamApiStateService
                 return null;
             }
 
-            IEnumerable<SkyNetLobbyDto> lobbies = _state.Lobbies.Values.Where(l => l.AppId == request.AppId);
+            IEnumerable<ApiLobby> lobbies = _state.Lobbies.Values.Where(l => l.AppId == request.AppId);
 
             if (request.SlotsAvailable > 0)
             {
@@ -36,7 +36,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetLobbyDto? CreateLobby(string token, SkyNetCreateLobbyRequestDto request)
+    public ApiLobby? CreateLobby(string token, ApiCreateLobbyRequest request)
     {
         lock (_sync)
         {
@@ -45,7 +45,7 @@ public sealed partial class SteamApiStateService
                 return null;
             }
 
-            var lobby = new SkyNetLobbyDto
+            var lobby = new ApiLobby
             {
                 SteamId = ++_nextLobbyId,
                 AppId = request.AppId,
@@ -54,7 +54,7 @@ public sealed partial class SteamApiStateService
                 MaxMembers = request.MaxMembers,
                 Joinable = true,
                 LobbyData = request.LobbyData ?? new Dictionary<string, string>(),
-                Members = new List<SkyNetLobbyMemberDto> { new() { SteamId = session.SteamId } }
+                Members = new List<ApiLobbyMember> { new() { SteamId = session.SteamId } }
             };
 
             owner.LobbyId = lobby.SteamId;
@@ -65,7 +65,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetLobbyDto? JoinLobby(string token, ulong lobbyId)
+    public ApiLobby? JoinLobby(string token, ulong lobbyId)
     {
         lock (_sync)
         {
@@ -81,7 +81,7 @@ public sealed partial class SteamApiStateService
                     return null;
                 }
 
-                lobby.Members.Add(new SkyNetLobbyMemberDto { SteamId = session.SteamId });
+                lobby.Members.Add(new ApiLobbyMember { SteamId = session.SteamId });
             }
 
             if (_state.Users.TryGetValue(session.SteamId, out var user))
@@ -114,7 +114,7 @@ public sealed partial class SteamApiStateService
             {
                 _state.Lobbies.Remove(lobbyId);
                 SaveState();
-                EnqueueEvent(0, new SkyNetEventDto { Type = "lobby_removed", LobbyId = lobbyId, SteamId = session.SteamId });
+                EnqueueEvent(0, new ApiEvent { Type = "lobby_removed", LobbyId = lobbyId, SteamId = session.SteamId });
                 return true;
             }
 
@@ -124,12 +124,12 @@ public sealed partial class SteamApiStateService
             }
 
             SaveState();
-            EnqueueEvent(0, new SkyNetEventDto { Type = "lobby_left", LobbyId = lobbyId, SteamId = session.SteamId });
+            EnqueueEvent(0, new ApiEvent { Type = "lobby_left", LobbyId = lobbyId, SteamId = session.SteamId });
             return true;
         }
     }
 
-    public SkyNetLobbyDto? GetLobby(string token, ulong lobbyId)
+    public ApiLobby? GetLobby(string token, ulong lobbyId)
     {
         lock (_sync)
         {
@@ -173,7 +173,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public bool UpdateLobbySettings(string token, ulong lobbyId, SkyNetLobbySettingsUpdateRequestDto request)
+    public bool UpdateLobbySettings(string token, ulong lobbyId, ApiLobbySettingsUpdateRequest request)
     {
         lock (_sync)
         {
@@ -204,14 +204,14 @@ public sealed partial class SteamApiStateService
             var member = lobby.Members.FirstOrDefault(m => m.SteamId == session.SteamId);
             if (member == null)
             {
-                member = new SkyNetLobbyMemberDto { SteamId = session.SteamId };
+                member = new ApiLobbyMember { SteamId = session.SteamId };
                 lobby.Members.Add(member);
             }
 
             var item = member.Data.FirstOrDefault(d => d.Key == key);
             if (item == null)
             {
-                member.Data.Add(new SkyNetLobbyMetaDataDto { Key = key, Value = value });
+                member.Data.Add(new ApiLobbyMetaData { Key = key, Value = value });
             }
             else
             {
@@ -224,7 +224,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public bool UpdateLobbyGameServer(string token, ulong lobbyId, SkyNetLobbyGameServerUpdateRequestDto request)
+    public bool UpdateLobbyGameServer(string token, ulong lobbyId, ApiLobbyGameServerUpdateRequest request)
     {
         lock (_sync)
         {
@@ -233,7 +233,7 @@ public sealed partial class SteamApiStateService
                 return false;
             }
 
-            lobby.GameServer = new SkyNetLobbyGameServerDto
+            lobby.GameServer = new ApiLobbyGameServer
             {
                 SteamId = request.SteamIdGameServer,
                 IP = request.IP,

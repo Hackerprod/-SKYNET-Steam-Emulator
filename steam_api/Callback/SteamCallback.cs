@@ -91,12 +91,41 @@ namespace SKYNET.Callback
 
         public void Run(IntPtr pvParam, bool bIOFailure, ulong hSteamAPICall)
         {
-            CallResult.m_RunCallResult(Pointer, pvParam, bIOFailure, (ulong)hSteamAPICall);
+            ulong beforeApiCall = ReadCallResultHandle();
+            if (bIOFailure)
+            {
+                CallResult.m_RunCallResult(Pointer, pvParam, bIOFailure, (ulong)hSteamAPICall);
+            }
+            else
+            {
+                CallResult.m_RunCallback(Pointer, pvParam);
+            }
+            ulong afterApiCall = ReadCallResultHandle();
+            SteamEmulator.Write(
+                "CallbackManager",
+                $"RunCallResult ptr=0x{Pointer.ToInt64():X} callback={(int)CallbackType} handle={hSteamAPICall} objectHandleBefore={beforeApiCall} objectHandleAfter={afterApiCall} ioFailure={bIOFailure}");
         }
 
         public int GetCallbackSizeBytes()
         {
             return CallResult.m_GetCallbackSizeBytes(Pointer);
+        }
+
+        private ulong ReadCallResultHandle()
+        {
+            if (Pointer == IntPtr.Zero)
+            {
+                return 0;
+            }
+
+            try
+            {
+                return (ulong)Marshal.ReadInt64(Pointer, IntPtr.Size + 8);
+            }
+            catch
+            {
+                return 0;
+            }
         }
 
         public void Update()

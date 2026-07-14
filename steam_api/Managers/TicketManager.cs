@@ -41,7 +41,7 @@ namespace SKYNET.Managers
 
             if (SkyNetApiClient.IsEnabled)
             {
-                SkyNetWorkQueue.Enqueue("ConnectAndAuthenticate", () => SkyNetApiClient.ConnectAndAuthenticate(unIPClient, authBlob, pSteamIDUser),
+                WorkQueue.Enqueue("ConnectAndAuthenticate", () => SkyNetApiClient.ConnectAndAuthenticate(unIPClient, authBlob, pSteamIDUser),
                     "ticket:connect:" + pSteamIDUser, true);
             }
 
@@ -66,7 +66,7 @@ namespace SKYNET.Managers
                 // background so cross-user tracking still works.
                 if (SkyNetApiClient.IsEnabled)
                 {
-                    SkyNetWorkQueue.Enqueue("CreateAuthSessionTicket", () => SkyNetApiClient.CreateAuthSessionTicket(gameServer, cbMaxTicket),
+                    WorkQueue.Enqueue("CreateAuthSessionTicket", () => SkyNetApiClient.CreateAuthSessionTicket(gameServer, cbMaxTicket),
                         null, true);
                 }
 
@@ -117,7 +117,7 @@ namespace SKYNET.Managers
             // The server is still notified asynchronously so it can track the session.
             if (SkyNetApiClient.IsEnabled)
             {
-                SkyNetWorkQueue.Enqueue("ValidateAuthSessionTicket", () => SkyNetApiClient.ValidateAuthSessionTicket(ticketBytes, steamID, gameServer),
+                WorkQueue.Enqueue("ValidateAuthSessionTicket", () => SkyNetApiClient.ValidateAuthSessionTicket(ticketBytes, steamID, gameServer),
                     null, true);
             }
 
@@ -129,7 +129,7 @@ namespace SKYNET.Managers
         {
             if (SkyNetApiClient.IsEnabled)
             {
-                SkyNetWorkQueue.Enqueue("EndAuthSession", () => SkyNetApiClient.EndAuthSession(steamID, gameServer),
+                WorkQueue.Enqueue("EndAuthSession", () => SkyNetApiClient.EndAuthSession(steamID, gameServer),
                     "ticket:end:" + steamID + ":" + (gameServer ? "gs" : "client"));
             }
 
@@ -140,7 +140,7 @@ namespace SKYNET.Managers
         {
             if (SkyNetApiClient.IsEnabled)
             {
-                SkyNetWorkQueue.Enqueue("CancelAuthTicket", () => SkyNetApiClient.CancelAuthTicket(hAuthTicket, gameServer),
+                WorkQueue.Enqueue("CancelAuthTicket", () => SkyNetApiClient.CancelAuthTicket(hAuthTicket, gameServer),
                     "ticket:cancel:" + hAuthTicket + ":" + (gameServer ? "gs" : "client"));
             }
 

@@ -7,7 +7,7 @@ public sealed partial class SteamApiStateService
 {
     private const uint ServerFlagSecure = 0x02;
 
-    public bool PutFile(string token, SkyNetRemoteStorageFileDto file)
+    public bool PutFile(string token, ApiRemoteStorageFile file)
     {
         lock (_sync)
         {
@@ -24,7 +24,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetRemoteStorageFileDto? GetFile(string token, string fileName)
+    public ApiRemoteStorageFile? GetFile(string token, string fileName)
     {
         lock (_sync)
         {
@@ -32,7 +32,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public List<SkyNetRemoteStorageFileListItemDto>? ListFiles(string token)
+    public List<ApiRemoteStorageFileListItem>? ListFiles(string token)
     {
         lock (_sync)
         {
@@ -43,7 +43,7 @@ public sealed partial class SteamApiStateService
 
             return _state.Files.Values
                 .OrderBy(f => f.FileName)
-                .Select(f => new SkyNetRemoteStorageFileListItemDto { FileName = f.FileName, Size = f.Size, Timestamp = f.Timestamp })
+                .Select(f => new ApiRemoteStorageFileListItem { FileName = f.FileName, Size = f.Size, Timestamp = f.Timestamp })
                 .ToList();
         }
     }
@@ -62,7 +62,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetRemoteStorageShareDto? ShareFile(string token, string fileName)
+    public ApiRemoteStorageShare? ShareFile(string token, string fileName)
     {
         lock (_sync)
         {
@@ -71,7 +71,7 @@ public sealed partial class SteamApiStateService
                 return null;
             }
 
-            return new SkyNetRemoteStorageShareDto
+            return new ApiRemoteStorageShare
             {
                 Handle = ++_nextFileShareHandle,
                 Result = ResultOk
@@ -79,13 +79,13 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetRemoteStorageQuotaDto GetQuota(string token)
+    public ApiRemoteStorageQuota GetQuota(string token)
     {
         lock (_sync)
         {
             var used = (ulong)_state.Files.Values.Sum(f => (long)f.Size);
             const ulong total = 1024UL * 1024UL * 1024UL;
-            return new SkyNetRemoteStorageQuotaDto
+            return new ApiRemoteStorageQuota
             {
                 TotalBytes = total,
                 AvailableBytes = total > used ? total - used : 0
@@ -93,7 +93,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetAuthTicketDto CreateTicket(SkyNetAuthTicketRequestDto request)
+    public ApiAuthTicket CreateTicket(ApiAuthTicketRequest request)
     {
         lock (_sync)
         {
@@ -108,7 +108,7 @@ public sealed partial class SteamApiStateService
                 TicketBase64 = payload
             };
 
-            return new SkyNetAuthTicketDto
+            return new ApiAuthTicket
             {
                 Handle = handle,
                 TicketBase64 = payload,
@@ -117,7 +117,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetAuthValidateResultDto ValidateTicket(SkyNetAuthValidateRequestDto request)
+    public ApiAuthValidateResult ValidateTicket(ApiAuthValidateRequest request)
     {
         lock (_sync)
         {
@@ -126,7 +126,7 @@ public sealed partial class SteamApiStateService
             {
                 if (!string.IsNullOrWhiteSpace(request.TicketBase64))
                 {
-                    return new SkyNetAuthValidateResultDto
+                    return new ApiAuthValidateResult
                     {
                         Success = true,
                         BeginAuthSessionResult = BeginAuthOk,
@@ -135,7 +135,7 @@ public sealed partial class SteamApiStateService
                     };
                 }
 
-                return new SkyNetAuthValidateResultDto
+                return new ApiAuthValidateResult
                 {
                     Success = false,
                     BeginAuthSessionResult = BeginAuthInvalidTicket,
@@ -144,7 +144,7 @@ public sealed partial class SteamApiStateService
                 };
             }
 
-            return new SkyNetAuthValidateResultDto
+            return new ApiAuthValidateResult
             {
                 Success = true,
                 BeginAuthSessionResult = BeginAuthOk,
@@ -154,9 +154,9 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetConnectAuthResultDto ConnectAndAuthenticate(SkyNetConnectAuthRequestDto request)
+    public ApiConnectAuthResult ConnectAndAuthenticate(ApiConnectAuthRequest request)
     {
-        var validation = ValidateTicket(new SkyNetAuthValidateRequestDto
+        var validation = ValidateTicket(new ApiAuthValidateRequest
         {
             AppId = request.AppId,
             SteamId = request.SteamId,
@@ -164,7 +164,7 @@ public sealed partial class SteamApiStateService
             GameServer = true
         });
 
-        return new SkyNetConnectAuthResultDto
+        return new ApiConnectAuthResult
         {
             Success = validation.Success,
             SteamId = request.SteamId,
@@ -174,11 +174,11 @@ public sealed partial class SteamApiStateService
         };
     }
 
-    public void EndAuthSession(SkyNetAuthEndSessionRequestDto request)
+    public void EndAuthSession(ApiAuthEndSessionRequest request)
     {
     }
 
-    public void CancelTicket(SkyNetCancelAuthTicketRequestDto request)
+    public void CancelTicket(ApiCancelAuthTicketRequest request)
     {
         lock (_sync)
         {
@@ -186,11 +186,11 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetGameServerResultDto RegisterGameServer(SkyNetGameServerStateDto request)
+    public ApiGameServerResult RegisterGameServer(ApiGameServerState request)
     {
         lock (_sync)
         {
-            var server = request.Server ?? new SkyNetGameServerDto();
+            var server = request.Server ?? new ApiGameServer();
             var publicIp = ResolveGameServerPublicIp(server.IP);
             server.IP = publicIp;
             var serverId = server.SteamId != 0 ? server.SteamId : (ulong)publicIp;
@@ -201,17 +201,17 @@ public sealed partial class SteamApiStateService
             _state.GameServers[serverId] = server;
             _dotaDedicatedServers.ObserveRegistration(serverId, server);
             SaveState();
-            return new SkyNetGameServerResultDto { Success = true, PublicIP = publicIp, Secure = 0, SteamId = serverId };
+            return new ApiGameServerResult { Success = true, PublicIP = publicIp, Secure = 0, SteamId = serverId };
         }
     }
 
-    public SkyNetGameServerResultDto LogOnGameServer(SkyNetGameServerStateDto request) => RegisterGameServer(request);
+    public ApiGameServerResult LogOnGameServer(ApiGameServerState request) => RegisterGameServer(request);
 
     public void LogOffGameServer()
     {
     }
 
-    public bool UpdateGameServerState(SkyNetGameServerDto server)
+    public bool UpdateGameServerState(ApiGameServer server)
     {
         lock (_sync)
         {
@@ -228,20 +228,20 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public bool HeartbeatGameServer(SkyNetGameServerDto server) => UpdateGameServerState(server);
+    public bool HeartbeatGameServer(ApiGameServer server) => UpdateGameServerState(server);
 
-    public SkyNetGameServerPublicIpDto GetPublicIp()
+    public ApiGameServerPublicIp GetPublicIp()
     {
         lock (_sync)
         {
             var ip = ResolveGameServerPublicIp(_state.GameServers.Values.LastOrDefault()?.IP ?? 0);
-            return new SkyNetGameServerPublicIpDto { PublicIP = ip };
+            return new ApiGameServerPublicIp { PublicIP = ip };
         }
     }
 
     public bool DisconnectGameServerUser(ulong steamId) => true;
 
-    public bool UpdateGameServerUserData(SkyNetGameServerUserDataDto request)
+    public bool UpdateGameServerUserData(ApiGameServerUserData request)
     {
         lock (_sync)
         {
@@ -255,7 +255,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public bool SendP2P(string token, SkyNetP2PPacketSendDto request)
+    public bool SendP2P(string token, ApiP2PPacketSend request)
     {
         lock (_sync)
         {
@@ -270,7 +270,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public bool SendP2PBatch(string token, SkyNetP2PPacketBatchDto request)
+    public bool SendP2PBatch(string token, ApiP2PPacketBatch request)
     {
         lock (_sync)
         {
@@ -279,7 +279,7 @@ public sealed partial class SteamApiStateService
                 return false;
             }
 
-            foreach (var packet in request.Packets ?? new List<SkyNetP2PPacketSendDto>())
+            foreach (var packet in request.Packets ?? new List<ApiP2PPacketSend>())
             {
                 if (packet?.RemoteSteamId != 0)
                 {
@@ -291,9 +291,9 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    private void EnqueueP2PLocked(ApiSession session, SkyNetP2PPacketSendDto request)
+    private void EnqueueP2PLocked(ApiSession session, ApiP2PPacketSend request)
     {
-        EnqueueEvent(request.RemoteSteamId, new SkyNetEventDto
+        EnqueueEvent(request.RemoteSteamId, new ApiEvent
         {
             Type = "p2p_packet",
             RemoteSteamId = session.SteamId,
@@ -323,7 +323,7 @@ public sealed partial class SteamApiStateService
         return string.Join(',', tags);
     }
 
-    public bool SendGCMessage(string token, SkyNetGCMessageDto request)
+    public bool SendGCMessage(string token, ApiGCMessage request)
     {
         lock (_sync)
         {
@@ -356,7 +356,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetGCExchangeResponseDto? ExchangeGCMessage(string token, SkyNetGCExchangeRequestDto request, string? clientIp = null)
+    public ApiGCExchangeResponse? ExchangeGCMessage(string token, ApiGCExchangeRequest request, string? clientIp = null)
     {
         lock (_sync)
         {
@@ -382,7 +382,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetGCExchangeResponseDto? PollGCMessages(string token, SkyNetGCPollRequestDto request, string? clientIp = null)
+    public ApiGCExchangeResponse? PollGCMessages(string token, ApiGCPollRequest request, string? clientIp = null)
     {
         lock (_sync)
         {

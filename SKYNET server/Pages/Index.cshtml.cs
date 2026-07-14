@@ -11,10 +11,10 @@ public class IndexModel : PageModel
     private readonly SteamApiStateService _state;
 
     public SteamUiSnapshot Snapshot { get; private set; } = new();
-    public SkyNetUserDto CurrentUser { get; private set; } = new();
-    public SkyNetStatsEnvelopeDto Stats { get; private set; } = new();
-    public IReadOnlyList<SkyNetFriendRequestViewDto> IncomingFriendRequests { get; private set; } = Array.Empty<SkyNetFriendRequestViewDto>();
-    public IReadOnlyList<SkyNetFriendRequestViewDto> OutgoingFriendRequests { get; private set; } = Array.Empty<SkyNetFriendRequestViewDto>();
+    public ApiUser CurrentUser { get; private set; } = new();
+    public ApiStatsEnvelope Stats { get; private set; } = new();
+    public IReadOnlyList<ApiFriendRequestView> IncomingFriendRequests { get; private set; } = Array.Empty<ApiFriendRequestView>();
+    public IReadOnlyList<ApiFriendRequestView> OutgoingFriendRequests { get; private set; } = Array.Empty<ApiFriendRequestView>();
 
     [BindProperty]
     public string PersonaName { get; set; } = string.Empty;
@@ -66,7 +66,7 @@ public class IndexModel : PageModel
 
         using var stream = new MemoryStream();
         AvatarFile.CopyTo(stream);
-        var updated = _state.PutSelfAvatar(token, new SkyNetAvatarUpdateDto
+        var updated = _state.PutSelfAvatar(token, new ApiAvatarUpdate
         {
             ContentBase64 = Convert.ToBase64String(stream.ToArray())
         });
@@ -81,8 +81,8 @@ public class IndexModel : PageModel
             return AjaxResult(false, "Could not save stat.");
 
         var stats = current.Stats.Where(s => !s.Name.Equals(StatName.Trim(), StringComparison.OrdinalIgnoreCase)).ToList();
-        stats.Add(new SkyNetStatDto { Name = StatName.Trim(), Data = StatValue });
-        _state.StoreStats(token, new SkyNetStoreStatsRequestDto
+        stats.Add(new ApiStat { Name = StatName.Trim(), Data = StatValue });
+        _state.StoreStats(token, new ApiStoreStatsRequest
         {
             SteamId = current.SteamId,
             Stats = stats,
@@ -131,7 +131,7 @@ public class IndexModel : PageModel
         CurrentUser = user;
         PersonaName = user.PersonaName;
         Snapshot = _state.GetWebSnapshot(token);
-        Stats = _state.GetStats(token, 0, true) ?? new SkyNetStatsEnvelopeDto { SteamId = user.SteamId };
+        Stats = _state.GetStats(token, 0, true) ?? new ApiStatsEnvelope { SteamId = user.SteamId };
         IncomingFriendRequests = _state.GetIncomingFriendRequests(token);
         OutgoingFriendRequests = _state.GetOutgoingFriendRequests(token);
         return Page();

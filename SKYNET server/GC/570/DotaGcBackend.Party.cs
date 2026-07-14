@@ -385,7 +385,7 @@ public sealed partial class DotaGcBackend
             return;
         }
 
-        PendingMessageQueued?.Invoke(recipientSteamId, new SkyNetGCMessageDto
+        PendingMessageQueued?.Invoke(recipientSteamId, new ApiGCMessage
         {
             AppId = AppId,
             MessageType = messageType,

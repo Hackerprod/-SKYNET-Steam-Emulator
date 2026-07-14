@@ -227,6 +227,6 @@ public class CSteamID2
 
     public static CSteamID2 CreateDefault()
     {
-        return new CSteamID2(12345, EUniverse.Public, EAccountType.Individual); // Cambiar a valores válidos.
+        return new CSteamID2(12345, EUniverse.Public, EAccountType.Individual); // Change to valid values.
     }
 }

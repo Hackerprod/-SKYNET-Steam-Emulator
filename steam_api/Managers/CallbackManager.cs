@@ -109,7 +109,7 @@ namespace SKYNET.Managers
 
         public static void RunCallbacks(bool gameServer = false)
         {
-            SkyNetEventPump.RunFrame(gameServer);
+            EventPump.RunFrame(gameServer);
             DispatchQueuedCallbacks(gameServer);
             DispatchReadyCallResults(gameServer);
         }
@@ -393,6 +393,11 @@ namespace SKYNET.Managers
                         if (state.Result.Data is SteamNetworkingSocketsCert_t cert)
                         {
                             Write($"Dispatch CallResult {state.Handle} {state.Result.Data.CallbackType} Size={state.Result.Data.DataSize} Expected={expectedSize} Result={(int)cert.m_eResult} Cert={cert.m_cbCert} Signature={cert.m_cbSignature} PrivateKey={cert.m_cbPrivKey} CaKeyId={cert.m_caKeyID:X16}");
+                        }
+                        else if (state.Result.Data is HTTPRequestCompleted_t http)
+                        {
+                            var bytes = Serialize(http);
+                            Write($"Dispatch CallResult {state.Handle} {state.Result.Data.CallbackType} Size={state.Result.Data.DataSize} Expected={expectedSize} Request={http.Request} Context={http.ContextValue} Success={http.RequestSuccessful} Status={(int)http.StatusCode} Body={http.BodySize} Raw={BitConverter.ToString(bytes)}");
                         }
                         else
                         {

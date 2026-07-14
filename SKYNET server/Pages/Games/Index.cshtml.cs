@@ -18,7 +18,7 @@ public class IndexModel : PageModel
 
     public IActionResult OnGet()
     {
-        ViewData["Title"] = "Juegos";
+        ViewData["Title"] = "Games";
         var token = Request.Cookies[SteamApiStateService.WebSessionCookieName] ?? string.Empty;
         if (_state.GetWebUser(token) == null)
         {

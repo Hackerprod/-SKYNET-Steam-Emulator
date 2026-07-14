@@ -1226,7 +1226,7 @@ namespace SKYNET.Steamworks.Implementation
 
         private static string GetAvatarCachePath(ulong steamID)
         {
-            var server = (SteamEmulator.SkyNetServerUrl ?? string.Empty).Trim().TrimEnd('/').ToLowerInvariant();
+            var server = (SteamEmulator.ServerUrl ?? string.Empty).Trim().TrimEnd('/').ToLowerInvariant();
             byte[] hash;
             using (var sha = SHA256.Create())
             {

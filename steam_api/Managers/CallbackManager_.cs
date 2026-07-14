@@ -17,11 +17,11 @@ public static class CallbackManager_
         if (!Callbacks.ContainsKey(callbackID))
         {
             Callbacks[callbackID] = pCallback;
-            SteamEmulator.Write("CallbackManager", $"Callback registrado: ID {callbackID}");
+            SteamEmulator.Write("CallbackManager", $"Callback registered: ID {callbackID}");
             return callbackID;
         }
 
-        SteamEmulator.Write("CallbackManager", $"Error: Callback ID {callbackID} ya está registrado.");
+        SteamEmulator.Write("CallbackManager", $"Error: Callback ID {callbackID} is already registered.");
         return -1;
     }
 
@@ -29,11 +29,11 @@ public static class CallbackManager_
     {
         if (Callbacks.TryRemove(callbackID, out _))
         {
-            SteamEmulator.Write("CallbackManager", $"Callback desregistrado: ID {callbackID}");
+            SteamEmulator.Write("CallbackManager", $"Callback unregistered: ID {callbackID}");
         }
         else
         {
-            SteamEmulator.Write("CallbackManager", $"Error: No se encontró callback con ID {callbackID} para desregistrar.");
+            SteamEmulator.Write("CallbackManager", $"Error: No callback found with ID {callbackID} to unregister.");
         }
     }
 
@@ -42,20 +42,20 @@ public static class CallbackManager_
     {
         if (CallResults.TryAdd(hAPICall, pCallback))
         {
-            SteamEmulator.Write("CallbackManager", $"Call result registrado: APICallID {hAPICall}");
+            SteamEmulator.Write("CallbackManager", $"Call result registered: APICallID {hAPICall}");
             return true;
         }
 
-        SteamEmulator.Write("CallbackManager", $"Error al registrar call result: APICallID {hAPICall}");
+        SteamEmulator.Write("CallbackManager", $"Error registering call result: APICallID {hAPICall}");
         return false;
     }
 
-    // Agregar un Callback Result asociado a una estructura específica
+    // Add a Callback Result associated with a specific structure
     public static SteamAPICall_t AddCallbackResult<T>(T result, bool ready = false) where T : struct
     {
         var apiCallID = GetNextAPICallID();
 
-        //// Asignar el resultado del callback
+        //// Assign the callback result
         //var callbackResult = new CallbackResult
         //{
         //    APICallID = apiCallID,
@@ -65,11 +65,11 @@ public static class CallbackManager_
 
         //if (CallResults.TryAdd(apiCallID, callbackResult))
         //{
-        //    SteamEmulator.Write("CallbackManager", $"Callback result registrado para APICallID {apiCallID}, estructura {typeof(T).Name}");
+        //    SteamEmulator.Write("CallbackManager", $"Callback result registered for APICallID {apiCallID}, structure {typeof(T).Name}");
         //}
         //else
         //{
-        //    SteamEmulator.Write("CallbackManager", $"Error al registrar callback result para APICallID {apiCallID}");
+        //    SteamEmulator.Write("CallbackManager", $"Error registering callback result for APICallID {apiCallID}");
         //}
 
         return apiCallID;
@@ -79,11 +79,11 @@ public static class CallbackManager_
     {
         if (CallResults.TryRemove(hAPICall, out _))
         {
-            SteamEmulator.Write("CallbackManager", $"Call result desregistrado: APICallID {hAPICall}");
+            SteamEmulator.Write("CallbackManager", $"Call result unregistered: APICallID {hAPICall}");
         }
         else
         {
-            SteamEmulator.Write("CallbackManager", $"Error al desregistrar call result: APICallID {hAPICall}");
+            SteamEmulator.Write("CallbackManager", $"Error unregistering call result: APICallID {hAPICall}");
         }
     }
 
@@ -103,7 +103,7 @@ public static class CallbackManager_
                 {
                     var runDelegate = Marshal.GetDelegateForFunctionPointer<RunCallbackDelegate>(callbackBase.Run);
                     runDelegate(dataPtr);
-                    SteamEmulator.Write("CallbackManager", $"Callback ejecutado para ID {callbackID}");
+                    SteamEmulator.Write("CallbackManager", $"Callback executed for ID {callbackID}");
                 }
             }
             finally
@@ -113,7 +113,7 @@ public static class CallbackManager_
         }
         else
         {
-            SteamEmulator.Write("CallbackManager", $"No se encontró callback con ID {callbackID}");
+            SteamEmulator.Write("CallbackManager", $"No callback found with ID {callbackID}");
         }
     }
 
@@ -133,7 +133,7 @@ public static class CallbackManager_
                 {
                     var runDelegate = Marshal.GetDelegateForFunctionPointer<RunCallResultDelegate>(callbackBase.Run);
                     runDelegate(dataPtr, ioFailure, hAPICall);
-                    SteamEmulator.Write("CallbackManager", $"Call result ejecutado para APICallID {hAPICall}");
+                    SteamEmulator.Write("CallbackManager", $"Call result executed for APICallID {hAPICall}");
                 }
             }
             finally
@@ -143,7 +143,7 @@ public static class CallbackManager_
         }
         else
         {
-            SteamEmulator.Write("CallbackManager", $"No se encontró call result para APICallID {hAPICall}");
+            SteamEmulator.Write("CallbackManager", $"No call result found for APICallID {hAPICall}");
         }
     }
 
@@ -159,7 +159,7 @@ public static class CallbackManager_
                 {
                     var runDelegate = Marshal.GetDelegateForFunctionPointer<RunCallbackDelegate>(callbackBase.Run);
                     runDelegate(callbackMsg.m_pubParam);
-                    SteamEmulator.Write("CallbackManager", $"Callback ejecutado: ID {callbackMsg.m_iCallback}");
+                    SteamEmulator.Write("CallbackManager", $"Callback executed: ID {callbackMsg.m_iCallback}");
                 }
             }
         }
@@ -181,7 +181,7 @@ public static class CallbackManager_
         };
 
         CallbackQueue.Enqueue(callbackMsg);
-        SteamEmulator.Write("CallbackManager", $"Mensaje de callback agregado: ID {callbackID}");
+        SteamEmulator.Write("CallbackManager", $"Callback message added: ID {callbackID}");
     }
 
     internal static void AddCallback(ICallbackData data)
@@ -189,7 +189,7 @@ public static class CallbackManager_
         
     }
 
-    // Generar un nuevo ID para API Calls
+    // Generate a new ID for API Calls
     private static SteamAPICall_t GetNextAPICallID()
     {
         return NextAPICallID++;
@@ -214,7 +214,7 @@ public static class CallbackManager_
         public int m_cubParam;
     }
 
-    // Estructura para almacenar resultados de callbacks
+    // Structure to store callback results
     internal class CallbackResult
     {
         public SteamAPICall_t APICallID { get; set; }

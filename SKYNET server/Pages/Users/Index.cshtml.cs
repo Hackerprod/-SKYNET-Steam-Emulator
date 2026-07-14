@@ -10,8 +10,8 @@ public class IndexModel : PageModel
 {
     private readonly SteamApiStateService _state;
 
-    public SkyNetUserDto CurrentUser { get; private set; } = new();
-    public IReadOnlyList<SkyNetUserDto> Users { get; private set; } = Array.Empty<SkyNetUserDto>();
+    public ApiUser CurrentUser { get; private set; } = new();
+    public IReadOnlyList<ApiUser> Users { get; private set; } = Array.Empty<ApiUser>();
 
     [BindProperty]
     public ulong TargetSteamId { get; set; }

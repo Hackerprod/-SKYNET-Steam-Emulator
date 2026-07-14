@@ -10,9 +10,9 @@ public class IndexModel : PageModel
 {
     private readonly SteamApiStateService _state;
 
-    public SkyNetUserDto CurrentUser { get; private set; } = new();
-    public IReadOnlyList<SkyNetUserDto> Friends { get; private set; } = Array.Empty<SkyNetUserDto>();
-    public IReadOnlyList<SkyNetUserDto> Users { get; private set; } = Array.Empty<SkyNetUserDto>();
+    public ApiUser CurrentUser { get; private set; } = new();
+    public IReadOnlyList<ApiUser> Friends { get; private set; } = Array.Empty<ApiUser>();
+    public IReadOnlyList<ApiUser> Users { get; private set; } = Array.Empty<ApiUser>();
 
     [BindProperty]
     public string FriendIdentifier { get; set; } = string.Empty;

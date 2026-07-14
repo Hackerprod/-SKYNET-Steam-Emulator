@@ -10,8 +10,8 @@ public class IndexModel : PageModel
 {
     private readonly SteamApiStateService _state;
 
-    public SkyNetAdminOverviewDto Overview { get; private set; } = new();
-    public SkyNetDotaCosmeticOverviewDto Cosmetics { get; private set; } = new();
+    public ApiAdminOverview Overview { get; private set; } = new();
+    public ApiDotaCosmeticOverview Cosmetics { get; private set; } = new();
 
     [BindProperty]
     public string NewAdminPassword { get; set; } = string.Empty;
@@ -32,7 +32,7 @@ public class IndexModel : PageModel
     public string CreatePassword { get; set; } = string.Empty;
 
     [BindProperty]
-    public string DotaPath { get; set; } = @"D:\Juegos\Steam\steamapps\common\dota 2 beta";
+    public string DotaPath { get; set; } = @"D:\Games\Steam\steamapps\common\dota 2 beta";
 
     [BindProperty(SupportsGet = true)]
     public string ItemSearch { get; set; } = string.Empty;
@@ -104,7 +104,7 @@ public class IndexModel : PageModel
     public IActionResult OnPostImportDotaItems()
     {
         var token = GetToken();
-        var result = _state.ImportDotaCosmetics(token, new SkyNetDotaImportRequestDto { DotaPath = DotaPath });
+        var result = _state.ImportDotaCosmetics(token, new ApiDotaImportRequest { DotaPath = DotaPath });
         return AjaxResult(result.Success, result.Success ? $"Catalog updated: {result.ItemCount} items, {result.HeroCount} heroes." : $"Could not import catalog: {result.Message}");
     }
 
@@ -112,7 +112,7 @@ public class IndexModel : PageModel
     {
         var token = GetToken();
         return AjaxResult(
-            _state.EquipDotaItemFromAdmin(token, new SkyNetDotaEquipItemRequestDto
+            _state.EquipDotaItemFromAdmin(token, new ApiDotaEquipItemRequest
             {
                 SteamId = EquipmentSteamId,
                 HeroId = EquipmentHeroId,
@@ -162,7 +162,7 @@ public class IndexModel : PageModel
         }
 
         Overview = overview;
-        Cosmetics = _state.GetDotaCosmeticsOverview(token, ItemSearch, null, 120) ?? new SkyNetDotaCosmeticOverviewDto();
+        Cosmetics = _state.GetDotaCosmeticsOverview(token, ItemSearch, null, 120) ?? new ApiDotaCosmeticOverview();
         DotaPath = string.IsNullOrWhiteSpace(overview.DotaCosmetics.DotaPath) ? DotaPath : overview.DotaCosmetics.DotaPath;
         EquipmentSteamId = overview.Users.FirstOrDefault()?.SteamId ?? 0;
         ResetTargetSteamId = overview.Users.FirstOrDefault()?.SteamId ?? 0;

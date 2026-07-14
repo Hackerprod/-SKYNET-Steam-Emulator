@@ -27,9 +27,9 @@ public sealed partial class SteamApiStateService
         public uint Style { get; set; }
     }
 
-    private const string DefaultDotaPath = @"D:\Juegos\Steam\steamapps\common\dota 2 beta";
+    private const string DefaultDotaPath = @"D:\Games\Steam\steamapps\common\dota 2 beta";
 
-    public SkyNetDotaCosmeticOverviewDto? GetDotaCosmeticsOverview(string token, string? search, uint? heroId, int take = 300)
+    public ApiDotaCosmeticOverview? GetDotaCosmeticsOverview(string token, string? search, uint? heroId, int take = 300)
     {
         lock (_sync)
         {
@@ -38,7 +38,7 @@ public sealed partial class SteamApiStateService
                 return null;
             }
 
-            IEnumerable<SkyNetDotaItemDto> items = _state.DotaItems.Values;
+            IEnumerable<ApiDotaItem> items = _state.DotaItems.Values;
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var needle = search.Trim();
@@ -55,7 +55,7 @@ public sealed partial class SteamApiStateService
                 items = items.Where(item => item.HeroIds.Contains(heroId.Value));
             }
 
-            return new SkyNetDotaCosmeticOverviewDto
+            return new ApiDotaCosmeticOverview
             {
                 Summary = BuildDotaCosmeticSummaryLocked(),
                 Items = items
@@ -77,13 +77,13 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetDotaItemImportResultDto ImportDotaCosmetics(string token, SkyNetDotaImportRequestDto request)
+    public ApiDotaItemImportResult ImportDotaCosmetics(string token, ApiDotaImportRequest request)
     {
         lock (_sync)
         {
             if (!IsWebAdmin(token))
             {
-                return new SkyNetDotaItemImportResultDto { Success = false, Message = "No autorizado." };
+                return new ApiDotaItemImportResult { Success = false, Message = "Not authorized." };
             }
         }
 
@@ -109,7 +109,7 @@ public sealed partial class SteamApiStateService
                 SaveState();
             }
 
-            return new SkyNetDotaItemImportResultDto
+            return new ApiDotaItemImportResult
             {
                 Success = true,
                 Message = "Item catalog updated.",
@@ -128,7 +128,7 @@ public sealed partial class SteamApiStateService
                 SaveState();
             }
 
-            return new SkyNetDotaItemImportResultDto
+            return new ApiDotaItemImportResult
             {
                 Success = false,
                 Message = ex.Message,
@@ -137,7 +137,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public bool EquipDotaItemFromAdmin(string token, SkyNetDotaEquipItemRequestDto request)
+    public bool EquipDotaItemFromAdmin(string token, ApiDotaEquipItemRequest request)
     {
         lock (_sync)
         {
@@ -176,7 +176,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    private SkyNetDotaRuntimeInventoryDto GetDotaRuntimeInventory(ulong steamId)
+    private ApiDotaRuntimeInventory GetDotaRuntimeInventory(ulong steamId)
     {
         lock (_sync)
         {
@@ -187,9 +187,9 @@ public sealed partial class SteamApiStateService
                 .ToList();
             var equipment = _state.DotaEquipment.TryGetValue(steamId, out var equipped)
                 ? equipped.Select(CloneDotaEquipment).ToList()
-                : new List<SkyNetDotaEquipmentDto>();
+                : new List<ApiDotaEquipment>();
 
-            return new SkyNetDotaRuntimeInventoryDto
+            return new ApiDotaRuntimeInventory
             {
                 SteamId = steamId,
                 Items = items,
@@ -199,20 +199,20 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    private List<SkyNetDotaEquipmentDto> EquipDotaItemFromGameCoordinator(ulong steamId, ulong itemId, uint heroId, uint slotId, uint style)
+    private List<ApiDotaEquipment> EquipDotaItemFromGameCoordinator(ulong steamId, ulong itemId, uint heroId, uint slotId, uint style)
     {
         lock (_sync)
         {
             var defIndex = ResolveDefIndexFromItemIdLocked(steamId, itemId);
             if (defIndex == 0 && itemId != 0)
             {
-                return new List<SkyNetDotaEquipmentDto>();
+                return new List<ApiDotaEquipment>();
             }
 
             var changed = EquipDotaItemLocked(steamId, heroId, string.Empty, slotId, string.Empty, defIndex, style, slotIdIsExplicit: true);
             if (changed == null)
             {
-                return new List<SkyNetDotaEquipmentDto>();
+                return new List<ApiDotaEquipment>();
             }
 
             if (changed.Count == 0)
@@ -287,7 +287,7 @@ public sealed partial class SteamApiStateService
             }
 
             var now = DateTime.UtcNow;
-            var rebuilt = new List<SkyNetDotaEquipmentDto>();
+            var rebuilt = new List<ApiDotaEquipment>();
             foreach (var entry in entries)
             {
                 if (entry == null || entry.DefIndex == 0 || !_state.DotaItems.TryGetValue(entry.DefIndex, out var catalogItem))
@@ -307,7 +307,7 @@ public sealed partial class SteamApiStateService
                     ? entry.Slot!
                     : !string.IsNullOrWhiteSpace(catalogItem.Slot) ? catalogItem.Slot : $"slot_{entry.SlotId}";
 
-                rebuilt.Add(new SkyNetDotaEquipmentDto
+                rebuilt.Add(new ApiDotaEquipment
                 {
                     SteamId = steamId,
                     HeroId = entry.HeroId,
@@ -351,7 +351,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    private List<SkyNetDotaEquipmentDto> SetDotaItemStyleFromGameCoordinator(ulong steamId, ulong itemId, uint style)
+    private List<ApiDotaEquipment> SetDotaItemStyleFromGameCoordinator(ulong steamId, ulong itemId, uint style)
     {
         lock (_sync)
         {
@@ -359,7 +359,7 @@ public sealed partial class SteamApiStateService
             var changed = SetDotaItemStyleLocked(steamId, defIndex, style);
             if (changed == null)
             {
-                return new List<SkyNetDotaEquipmentDto>();
+                return new List<ApiDotaEquipment>();
             }
 
             if (changed.Count > 0)
@@ -372,7 +372,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    private void UpsertDotaMatchSnapshot(SkyNetDotaMatchDto snapshot)
+    private void UpsertDotaMatchSnapshot(ApiDotaMatch snapshot)
     {
         lock (_sync)
         {
@@ -380,7 +380,7 @@ public sealed partial class SteamApiStateService
             {
                 player.Equipment = _state.DotaEquipment.TryGetValue(player.SteamId, out var equipment)
                     ? equipment.Select(CloneDotaEquipment).ToList()
-                    : new List<SkyNetDotaEquipmentDto>();
+                    : new List<ApiDotaEquipment>();
             }
 
             _state.DotaMatches[snapshot.LobbyId] = CloneDotaMatch(snapshot);
@@ -427,7 +427,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    private static string SerializeDotaMatchForLua(SkyNetDotaMatchDto match) => JsonSerializer.Serialize(new
+    private static string SerializeDotaMatchForLua(ApiDotaMatch match) => JsonSerializer.Serialize(new
     {
         LobbyId = match.LobbyId.ToString(System.Globalization.CultureInfo.InvariantCulture),
         MatchId = match.MatchId.ToString(System.Globalization.CultureInfo.InvariantCulture),
@@ -469,7 +469,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    private List<SkyNetDotaEquipmentDto>? EquipDotaItemLocked(
+    private List<ApiDotaEquipment>? EquipDotaItemLocked(
         ulong steamId,
         uint heroId,
         string heroName,
@@ -484,7 +484,7 @@ public sealed partial class SteamApiStateService
             return null;
         }
 
-        SkyNetDotaItemDto? item = null;
+        ApiDotaItem? item = null;
         if (defIndex != 0 && !_state.DotaItems.TryGetValue(defIndex, out item))
         {
             return null;
@@ -497,7 +497,7 @@ public sealed partial class SteamApiStateService
             // and roughly half the catalog has no inferable slot name.
             if (!slotIdIsExplicit && string.IsNullOrWhiteSpace(item.Slot))
             {
-                return new List<SkyNetDotaEquipmentDto>();
+                return new List<ApiDotaEquipment>();
             }
 
             if (heroId == 0 && item.HeroIds.Count == 1)
@@ -530,7 +530,7 @@ public sealed partial class SteamApiStateService
 
         if (!_state.DotaEquipment.TryGetValue(steamId, out var equipment))
         {
-            equipment = new List<SkyNetDotaEquipmentDto>();
+            equipment = new List<ApiDotaEquipment>();
             _state.DotaEquipment[steamId] = equipment;
         }
 
@@ -554,7 +554,7 @@ public sealed partial class SteamApiStateService
         }
 
         var now = DateTime.UtcNow;
-        var equipped = new SkyNetDotaEquipmentDto
+        var equipped = new ApiDotaEquipment
         {
             SteamId = steamId,
             HeroId = heroId,
@@ -581,7 +581,7 @@ public sealed partial class SteamApiStateService
 
         foreach (var pair in _state.DotaEquipment.ToList())
         {
-            var normalized = new List<SkyNetDotaEquipmentDto>();
+            var normalized = new List<ApiDotaEquipment>();
             foreach (var equipped in pair.Value.Where(item => item != null))
             {
                 if (equipped.DefIndex != 0 && _state.DotaItems.TryGetValue(equipped.DefIndex, out var catalogItem))
@@ -613,7 +613,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    private List<SkyNetDotaEquipmentDto>? SetDotaItemStyleLocked(ulong steamId, uint defIndex, uint style)
+    private List<ApiDotaEquipment>? SetDotaItemStyleLocked(ulong steamId, uint defIndex, uint style)
     {
         if (!_state.Users.ContainsKey(steamId))
         {
@@ -622,11 +622,11 @@ public sealed partial class SteamApiStateService
 
         if (defIndex == 0 || !_state.DotaEquipment.TryGetValue(steamId, out var equipment))
         {
-            return new List<SkyNetDotaEquipmentDto>();
+            return new List<ApiDotaEquipment>();
         }
 
         var now = DateTime.UtcNow;
-        var changed = new List<SkyNetDotaEquipmentDto>();
+        var changed = new List<ApiDotaEquipment>();
         foreach (var equipped in equipment.Where(item => item.DefIndex == defIndex))
         {
             equipped.Style = style == 255 ? 0 : style;
@@ -655,7 +655,7 @@ public sealed partial class SteamApiStateService
         return 0;
     }
 
-    private static List<SkyNetDotaEquipmentDto> NormalizeDotaEquipmentList(List<SkyNetDotaEquipmentDto> equipment)
+    private static List<ApiDotaEquipment> NormalizeDotaEquipmentList(List<ApiDotaEquipment> equipment)
     {
         return equipment
             .Where(item => item != null)
@@ -667,7 +667,7 @@ public sealed partial class SteamApiStateService
             .ToList();
     }
 
-    private static string BuildDotaEquipmentSlotKey(SkyNetDotaEquipmentDto item)
+    private static string BuildDotaEquipmentSlotKey(ApiDotaEquipment item)
     {
         var slot = NormalizeDotaSlot(item.Slot);
         if (string.IsNullOrWhiteSpace(slot))
@@ -678,7 +678,7 @@ public sealed partial class SteamApiStateService
         return $"{item.SteamId}:{item.HeroId}:{slot}";
     }
 
-    private static bool SameDotaEquipmentSlot(SkyNetDotaEquipmentDto existing, uint heroId, uint slotId, string slot)
+    private static bool SameDotaEquipmentSlot(ApiDotaEquipment existing, uint heroId, uint slotId, string slot)
     {
         if (existing.HeroId != heroId)
         {
@@ -696,7 +696,7 @@ public sealed partial class SteamApiStateService
     }
 
     private static bool MatchesDotaUnequip(
-        SkyNetDotaEquipmentDto existing,
+        ApiDotaEquipment existing,
         uint heroId,
         uint defIndex,
         ulong itemInstanceId,
@@ -870,7 +870,7 @@ public sealed partial class SteamApiStateService
             var signature = reader.ReadUInt32();
             if (signature != Signature)
             {
-                throw new InvalidDataException($"VPK invalido: firma {signature:X8}.");
+                throw new InvalidDataException($"Invalid VPK: signature {signature:X8}.");
             }
 
             var version = reader.ReadUInt32();
@@ -1080,13 +1080,13 @@ public sealed partial class SteamApiStateService
             return heroes;
         }
 
-        public static List<SkyNetDotaItemDto> ParseItems(string text, Dictionary<string, uint> heroIds)
+        public static List<ApiDotaItem> ParseItems(string text, Dictionary<string, uint> heroIds)
         {
-            var items = new List<SkyNetDotaItemDto>();
+            var items = new List<ApiDotaItem>();
             var bodyStart = FindSectionBodyStart(text, "items");
             if (bodyStart < 0)
             {
-                throw new InvalidDataException("items_game.txt no contiene la seccion items.");
+                throw new InvalidDataException("items_game.txt does not contain the items section.");
             }
 
             foreach (var child in EnumerateObjectChildren(text, bodyStart))
@@ -1121,7 +1121,7 @@ public sealed partial class SteamApiStateService
                     continue;
                 }
 
-                items.Add(new SkyNetDotaItemDto
+                items.Add(new ApiDotaItem
                 {
                     DefIndex = defIndex,
                     Name = name,

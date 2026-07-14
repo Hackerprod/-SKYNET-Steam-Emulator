@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 
 namespace SKYNET_server.Models;
 
-public sealed class SkyNetSessionRequestDto
+public sealed class ApiSessionRequest
 {
     public uint AccountId { get; set; }
     public ulong SteamId { get; set; }
@@ -12,14 +12,14 @@ public sealed class SkyNetSessionRequestDto
     public bool UseActiveWebUser { get; set; }
 }
 
-public sealed class SkyNetSessionDto
+public sealed class ApiSessionResult
 {
     public string AccessToken { get; set; } = string.Empty;
     public string RefreshToken { get; set; } = string.Empty;
-    public SkyNetUserDto User { get; set; } = new();
+    public ApiUser User { get; set; } = new();
 }
 
-public sealed class SkyNetAvatarContentDto
+public sealed class ApiAvatarContent
 {
     public ulong SteamId { get; set; }
     public byte[] Content { get; set; } = Array.Empty<byte>();
@@ -27,7 +27,7 @@ public sealed class SkyNetAvatarContentDto
     public string ETag { get; set; } = string.Empty;
 }
 
-public sealed class SkyNetUserDto
+public sealed class ApiUser
 {
     public uint AccountId { get; set; }
     public ulong SteamId { get; set; }
@@ -45,29 +45,29 @@ public sealed class SkyNetUserDto
     public Dictionary<string, string> RichPresence { get; set; } = new();
 }
 
-public sealed class SkyNetPersonaUpdateDto
+public sealed class ApiPersonaUpdate
 {
     public string PersonaName { get; set; } = string.Empty;
 }
 
-public sealed class SkyNetPresenceUpdateDto
+public sealed class ApiPresenceUpdate
 {
     public string Key { get; set; } = string.Empty;
     public string Value { get; set; } = string.Empty;
 }
 
-public sealed class SkyNetAvatarUpdateDto
+public sealed class ApiAvatarUpdate
 {
     public string ContentBase64 { get; set; } = string.Empty;
 }
 
-public sealed class SkyNetStatDto
+public sealed class ApiStat
 {
     public string Name { get; set; } = string.Empty;
     public uint Data { get; set; }
 }
 
-public sealed class SkyNetAchievementDto
+public sealed class ApiAchievement
 {
     public string Name { get; set; } = string.Empty;
     public bool Earned { get; set; }
@@ -76,15 +76,15 @@ public sealed class SkyNetAchievementDto
     public uint MaxProgress { get; set; }
 }
 
-public sealed class SkyNetStatsEnvelopeDto
+public sealed class ApiStatsEnvelope
 {
     public ulong SteamId { get; set; }
-    public List<SkyNetStatDto> Stats { get; set; } = new();
-    public List<SkyNetAchievementDto> Achievements { get; set; } = new();
+    public List<ApiStat> Stats { get; set; } = new();
+    public List<ApiAchievement> Achievements { get; set; } = new();
     public int CurrentPlayers { get; set; }
 }
 
-public sealed class SkyNetWebAccountDto
+public sealed class ApiWebAccount
 {
     public string Username { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty;
@@ -94,7 +94,7 @@ public sealed class SkyNetWebAccountDto
     public DateTime LastLoginAt { get; set; }
 }
 
-public sealed class SkyNetWebAccountViewDto
+public sealed class ApiWebAccountView
 {
     public string Username { get; set; } = string.Empty;
     public ulong SteamId { get; set; }
@@ -104,28 +104,28 @@ public sealed class SkyNetWebAccountViewDto
     public DateTime LastLoginAt { get; set; }
 }
 
-public sealed class SkyNetWebLoginResultDto
+public sealed class ApiWebLoginResult
 {
     public string AccessToken { get; set; } = string.Empty;
-    public SkyNetUserDto User { get; set; } = new();
+    public ApiUser User { get; set; } = new();
     public bool IsAdmin { get; set; }
 }
 
-public sealed class SkyNetAdminOverviewDto
+public sealed class ApiAdminOverview
 {
-    public List<SkyNetUserDto> Users { get; set; } = new();
-    public List<SkyNetWebAccountViewDto> Accounts { get; set; } = new();
-    public List<SkyNetLobbyDto> Lobbies { get; set; } = new();
-    public List<SkyNetGameServerDto> GameServers { get; set; } = new();
+    public List<ApiUser> Users { get; set; } = new();
+    public List<ApiWebAccountView> Accounts { get; set; } = new();
+    public List<ApiLobby> Lobbies { get; set; } = new();
+    public List<ApiGameServer> GameServers { get; set; } = new();
     public int FriendLinks { get; set; }
     public int PendingFriendRequests { get; set; }
     public int StatsProfiles { get; set; }
-    public SkyNetDotaCosmeticSummaryDto DotaCosmetics { get; set; } = new();
-    public List<SkyNetDotaMatchDto> DotaMatches { get; set; } = new();
+    public ApiDotaCosmeticSummary DotaCosmetics { get; set; } = new();
+    public List<ApiDotaMatch> DotaMatches { get; set; } = new();
     public DateTime ServerStartTime { get; set; }
 }
 
-public sealed class SkyNetFriendRequestDto
+public sealed class ApiFriendRequest
 {
     public string Id { get; set; } = string.Empty;
     public ulong FromSteamId { get; set; }
@@ -135,45 +135,45 @@ public sealed class SkyNetFriendRequestDto
     public DateTime? RespondedAt { get; set; }
 }
 
-public sealed class SkyNetFriendRequestViewDto
+public sealed class ApiFriendRequestView
 {
     public string Id { get; set; } = string.Empty;
-    public SkyNetUserDto FromUser { get; set; } = new();
-    public SkyNetUserDto ToUser { get; set; } = new();
+    public ApiUser FromUser { get; set; } = new();
+    public ApiUser ToUser { get; set; } = new();
     public string Status { get; set; } = "pending";
     public DateTime CreatedAt { get; set; }
 }
 
-public sealed class SkyNetUserProfileDto
+public sealed class ApiUserProfile
 {
-    public SkyNetUserDto User { get; set; } = new();
-    public SkyNetStatsEnvelopeDto Stats { get; set; } = new();
+    public ApiUser User { get; set; } = new();
+    public ApiStatsEnvelope Stats { get; set; } = new();
     public int FriendRelationship { get; set; }
     public bool IsSelf { get; set; }
-    public SkyNetFriendRequestViewDto? IncomingRequest { get; set; }
-    public SkyNetFriendRequestViewDto? OutgoingRequest { get; set; }
+    public ApiFriendRequestView? IncomingRequest { get; set; }
+    public ApiFriendRequestView? OutgoingRequest { get; set; }
 }
 
-public sealed class SkyNetFriendActionRequestDto
+public sealed class ApiFriendActionRequest
 {
     public ulong SteamId { get; set; }
     public string Identifier { get; set; } = string.Empty;
 }
 
-public sealed class SkyNetStoreStatsRequestDto
+public sealed class ApiStoreStatsRequest
 {
     public ulong SteamId { get; set; }
-    public List<SkyNetStatDto> Stats { get; set; } = new();
-    public List<SkyNetAchievementDto> Achievements { get; set; } = new();
+    public List<ApiStat> Stats { get; set; } = new();
+    public List<ApiAchievement> Achievements { get; set; } = new();
 }
 
-public sealed class SkyNetEventEnvelopeDto
+public sealed class ApiEventEnvelope
 {
     public string Cursor { get; set; } = string.Empty;
-    public List<SkyNetEventDto> Events { get; set; } = new();
+    public List<ApiEvent> Events { get; set; } = new();
 }
 
-public sealed class SkyNetEventDto
+public sealed class ApiEvent
 {
     public string Type { get; set; } = string.Empty;
     public ulong SteamId { get; set; }
@@ -190,7 +190,7 @@ public sealed class SkyNetEventDto
     public bool AchievementEarned { get; set; }
     public uint AchievementProgress { get; set; }
     public uint AchievementMaxProgress { get; set; }
-    public SkyNetLobbyDto? Lobby { get; set; }
+    public ApiLobby? Lobby { get; set; }
     public string PayloadBase64 { get; set; } = string.Empty;
     public uint MessageType { get; set; }
     public ulong? TargetJobId { get; set; }
@@ -201,7 +201,7 @@ public sealed class SkyNetEventDto
     public string RequestId { get; set; } = string.Empty;
 }
 
-public sealed class SkyNetLobbyQueryRequestDto
+public sealed class ApiLobbyQueryRequest
 {
     public uint AppId { get; set; }
     public int Distance { get; set; }
@@ -212,7 +212,7 @@ public sealed class SkyNetLobbyQueryRequestDto
     public string? StringValueToMatch { get; set; }
 }
 
-public sealed class SkyNetCreateLobbyRequestDto
+public sealed class ApiCreateLobbyRequest
 {
     public uint AppId { get; set; }
     public int LobbyType { get; set; }
@@ -220,18 +220,18 @@ public sealed class SkyNetCreateLobbyRequestDto
     public Dictionary<string, string> LobbyData { get; set; } = new();
 }
 
-public sealed class SkyNetLobbyDataUpdateRequestDto
+public sealed class ApiLobbyDataUpdateRequest
 {
     public string Key { get; set; } = string.Empty;
     public string Value { get; set; } = string.Empty;
 }
 
-public sealed class SkyNetLobbyDeleteDataRequestDto
+public sealed class ApiLobbyDeleteDataRequest
 {
     public string Key { get; set; } = string.Empty;
 }
 
-public sealed class SkyNetLobbySettingsUpdateRequestDto
+public sealed class ApiLobbySettingsUpdateRequest
 {
     public bool? Joinable { get; set; }
     public int? LobbyType { get; set; }
@@ -239,14 +239,14 @@ public sealed class SkyNetLobbySettingsUpdateRequestDto
     public int? MaxMembers { get; set; }
 }
 
-public sealed class SkyNetLobbyGameServerUpdateRequestDto
+public sealed class ApiLobbyGameServerUpdateRequest
 {
     public ulong SteamIdGameServer { get; set; }
     public uint IP { get; set; }
     public uint Port { get; set; }
 }
 
-public sealed class SkyNetLobbyDto
+public sealed class ApiLobby
 {
     public ulong SteamId { get; set; }
     public uint AppId { get; set; }
@@ -255,30 +255,30 @@ public sealed class SkyNetLobbyDto
     public int MaxMembers { get; set; }
     public bool Joinable { get; set; } = true;
     public Dictionary<string, string> LobbyData { get; set; } = new();
-    public List<SkyNetLobbyMemberDto> Members { get; set; } = new();
-    public SkyNetLobbyGameServerDto? GameServer { get; set; }
+    public List<ApiLobbyMember> Members { get; set; } = new();
+    public ApiLobbyGameServer? GameServer { get; set; }
 }
 
-public sealed class SkyNetLobbyMemberDto
+public sealed class ApiLobbyMember
 {
     public ulong SteamId { get; set; }
-    public List<SkyNetLobbyMetaDataDto> Data { get; set; } = new();
+    public List<ApiLobbyMetaData> Data { get; set; } = new();
 }
 
-public sealed class SkyNetLobbyMetaDataDto
+public sealed class ApiLobbyMetaData
 {
     public string Key { get; set; } = string.Empty;
     public string Value { get; set; } = string.Empty;
 }
 
-public sealed class SkyNetLobbyGameServerDto
+public sealed class ApiLobbyGameServer
 {
     public ulong SteamId { get; set; }
     public uint IP { get; set; }
     public uint Port { get; set; }
 }
 
-public sealed class SkyNetRemoteStorageFileDto
+public sealed class ApiRemoteStorageFile
 {
     public string FileName { get; set; } = string.Empty;
     public string ContentBase64 { get; set; } = string.Empty;
@@ -286,31 +286,31 @@ public sealed class SkyNetRemoteStorageFileDto
     public uint Timestamp { get; set; }
 }
 
-public sealed class SkyNetRemoteStorageFileListItemDto
+public sealed class ApiRemoteStorageFileListItem
 {
     public string FileName { get; set; } = string.Empty;
     public int Size { get; set; }
     public uint Timestamp { get; set; }
 }
 
-public sealed class SkyNetRemoteStorageDeleteRequestDto
+public sealed class ApiRemoteStorageDeleteRequest
 {
     public string FileName { get; set; } = string.Empty;
 }
 
-public sealed class SkyNetRemoteStorageShareDto
+public sealed class ApiRemoteStorageShare
 {
     public ulong Handle { get; set; }
     public int Result { get; set; }
 }
 
-public sealed class SkyNetRemoteStorageQuotaDto
+public sealed class ApiRemoteStorageQuota
 {
     public ulong TotalBytes { get; set; }
     public ulong AvailableBytes { get; set; }
 }
 
-public sealed class SkyNetAuthTicketRequestDto
+public sealed class ApiAuthTicketRequest
 {
     public uint AppId { get; set; }
     public ulong SteamId { get; set; }
@@ -318,14 +318,14 @@ public sealed class SkyNetAuthTicketRequestDto
     public int TicketBufferSize { get; set; }
 }
 
-public sealed class SkyNetAuthTicketDto
+public sealed class ApiAuthTicket
 {
     public uint Handle { get; set; }
     public string TicketBase64 { get; set; } = string.Empty;
     public uint TicketSize { get; set; }
 }
 
-public sealed class SkyNetAuthValidateRequestDto
+public sealed class ApiAuthValidateRequest
 {
     public ulong SteamId { get; set; }
     public string TicketBase64 { get; set; } = string.Empty;
@@ -333,7 +333,7 @@ public sealed class SkyNetAuthValidateRequestDto
     public uint AppId { get; set; }
 }
 
-public sealed class SkyNetAuthValidateResultDto
+public sealed class ApiAuthValidateResult
 {
     public int BeginAuthSessionResult { get; set; }
     public int AuthSessionResponse { get; set; }
@@ -341,7 +341,7 @@ public sealed class SkyNetAuthValidateResultDto
     public bool Success { get; set; }
 }
 
-public sealed class SkyNetConnectAuthRequestDto
+public sealed class ApiConnectAuthRequest
 {
     public uint IpClient { get; set; }
     public ulong SteamId { get; set; }
@@ -349,7 +349,7 @@ public sealed class SkyNetConnectAuthRequestDto
     public uint AppId { get; set; }
 }
 
-public sealed class SkyNetConnectAuthResultDto
+public sealed class ApiConnectAuthResult
 {
     public bool Success { get; set; }
     public ulong SteamId { get; set; }
@@ -358,26 +358,26 @@ public sealed class SkyNetConnectAuthResultDto
     public string DenyMessage { get; set; } = string.Empty;
 }
 
-public sealed class SkyNetAuthEndSessionRequestDto
+public sealed class ApiAuthEndSessionRequest
 {
     public ulong SteamId { get; set; }
     public bool GameServer { get; set; }
 }
 
-public sealed class SkyNetCancelAuthTicketRequestDto
+public sealed class ApiCancelAuthTicketRequest
 {
     public uint Handle { get; set; }
     public bool GameServer { get; set; }
 }
 
-public sealed class SkyNetGameServerStateDto
+public sealed class ApiGameServerState
 {
-    public SkyNetGameServerDto? Server { get; set; }
+    public ApiGameServer? Server { get; set; }
     public string Token { get; set; } = string.Empty;
     public bool Anonymous { get; set; }
 }
 
-public sealed class SkyNetGameServerResultDto
+public sealed class ApiGameServerResult
 {
     public bool Success { get; set; }
     public uint PublicIP { get; set; }
@@ -385,24 +385,24 @@ public sealed class SkyNetGameServerResultDto
     public ulong SteamId { get; set; }
 }
 
-public sealed class SkyNetGameServerPublicIpDto
+public sealed class ApiGameServerPublicIp
 {
     public uint PublicIP { get; set; }
 }
 
-public sealed class SkyNetGameServerUserDataDto
+public sealed class ApiGameServerUserData
 {
     public ulong SteamId { get; set; }
     public string PlayerName { get; set; } = string.Empty;
     public uint Score { get; set; }
 }
 
-public sealed class SkyNetDisconnectGameServerUserDto
+public sealed class ApiDisconnectGameServerUser
 {
     public ulong SteamId { get; set; }
 }
 
-public sealed class SkyNetGameServerDto
+public sealed class ApiGameServer
 {
     public ulong SteamId { get; set; }
     public uint AppId { get; set; }
@@ -428,7 +428,7 @@ public sealed class SkyNetGameServerDto
     public Dictionary<string, string> KeyValues { get; set; } = new();
 }
 
-public sealed class SkyNetP2PPacketSendDto
+public sealed class ApiP2PPacketSend
 {
     public ulong RemoteSteamId { get; set; }
     public string BufferBase64 { get; set; } = string.Empty;
@@ -436,12 +436,12 @@ public sealed class SkyNetP2PPacketSendDto
     public int Channel { get; set; }
 }
 
-public sealed class SkyNetP2PPacketBatchDto
+public sealed class ApiP2PPacketBatch
 {
-    public List<SkyNetP2PPacketSendDto> Packets { get; set; } = new();
+    public List<ApiP2PPacketSend> Packets { get; set; } = new();
 }
 
-public sealed class SkyNetGCMessageDto
+public sealed class ApiGCMessage
 {
     public uint AppId { get; set; }
     public uint MessageType { get; set; }
@@ -450,19 +450,19 @@ public sealed class SkyNetGCMessageDto
     public bool Protobuf { get; set; }
 }
 
-public sealed class SkyNetSdrCaDto
+public sealed class ApiSdrCa
 {
     public string CaPublicKeyBase64 { get; set; } = string.Empty;
     public ulong CaKeyId { get; set; }
 }
 
-public sealed class SkyNetSdrCertRequestDto
+public sealed class ApiSdrCertRequest
 {
     public ulong SteamId { get; set; }
     public uint AppId { get; set; }
 }
 
-public sealed class SkyNetSdrCertDto
+public sealed class ApiSdrCert
 {
     public string CertBase64 { get; set; } = string.Empty;
     public string SignatureBase64 { get; set; } = string.Empty;
@@ -471,7 +471,7 @@ public sealed class SkyNetSdrCertDto
     public ulong CaKeyId { get; set; }
 }
 
-public sealed class SkyNetGCExchangeRequestDto
+public sealed class ApiGCExchangeRequest
 {
     public uint AppId { get; set; }
     public uint MessageType { get; set; }
@@ -481,20 +481,20 @@ public sealed class SkyNetGCExchangeRequestDto
     public bool GameServer { get; set; }
 }
 
-public sealed class SkyNetGCPollRequestDto
+public sealed class ApiGCPollRequest
 {
     public uint AppId { get; set; }
     public ulong SteamId { get; set; }
     public bool GameServer { get; set; }
 }
 
-public sealed class SkyNetGCExchangeResponseDto
+public sealed class ApiGCExchangeResponse
 {
     public bool Handled { get; set; }
-    public List<SkyNetGCMessageDto> Messages { get; set; } = new();
+    public List<ApiGCMessage> Messages { get; set; } = new();
 }
 
-public sealed class SkyNetDotaItemDto
+public sealed class ApiDotaItem
 {
     public uint DefIndex { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -512,7 +512,7 @@ public sealed class SkyNetDotaItemDto
     public List<uint> HeroIds { get; set; } = new();
 }
 
-public sealed class SkyNetDotaEquipmentDto
+public sealed class ApiDotaEquipment
 {
     public ulong SteamId { get; set; }
     public uint HeroId { get; set; }
@@ -525,7 +525,7 @@ public sealed class SkyNetDotaEquipmentDto
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }
 
-public sealed class SkyNetDotaCosmeticSettingsDto
+public sealed class ApiDotaCosmeticSettings
 {
     public string DotaPath { get; set; } = string.Empty;
     public DateTime LastImportAt { get; set; }
@@ -533,7 +533,7 @@ public sealed class SkyNetDotaCosmeticSettingsDto
     public ulong EquipmentVersion { get; set; }
 }
 
-public sealed class SkyNetDotaCosmeticSummaryDto
+public sealed class ApiDotaCosmeticSummary
 {
     public int ItemCount { get; set; }
     public int HeroCount { get; set; }
@@ -543,20 +543,20 @@ public sealed class SkyNetDotaCosmeticSummaryDto
     public string LastImportStatus { get; set; } = string.Empty;
 }
 
-public sealed class SkyNetDotaCosmeticOverviewDto
+public sealed class ApiDotaCosmeticOverview
 {
-    public SkyNetDotaCosmeticSummaryDto Summary { get; set; } = new();
-    public List<SkyNetDotaItemDto> Items { get; set; } = new();
-    public List<SkyNetDotaEquipmentDto> Equipment { get; set; } = new();
-    public List<SkyNetUserDto> Users { get; set; } = new();
+    public ApiDotaCosmeticSummary Summary { get; set; } = new();
+    public List<ApiDotaItem> Items { get; set; } = new();
+    public List<ApiDotaEquipment> Equipment { get; set; } = new();
+    public List<ApiUser> Users { get; set; } = new();
 }
 
-public sealed class SkyNetDotaImportRequestDto
+public sealed class ApiDotaImportRequest
 {
     public string DotaPath { get; set; } = string.Empty;
 }
 
-public sealed class SkyNetDotaItemImportResultDto
+public sealed class ApiDotaItemImportResult
 {
     public bool Success { get; set; }
     public string Message { get; set; } = string.Empty;
@@ -565,7 +565,7 @@ public sealed class SkyNetDotaItemImportResultDto
     public string SourcePath { get; set; } = string.Empty;
 }
 
-public sealed class SkyNetDotaEquipItemRequestDto
+public sealed class ApiDotaEquipItemRequest
 {
     public ulong SteamId { get; set; }
     public uint HeroId { get; set; }
@@ -576,15 +576,15 @@ public sealed class SkyNetDotaEquipItemRequestDto
     public uint Style { get; set; }
 }
 
-public sealed class SkyNetDotaRuntimeInventoryDto
+public sealed class ApiDotaRuntimeInventory
 {
     public ulong SteamId { get; set; }
-    public List<SkyNetDotaItemDto> Items { get; set; } = new();
-    public List<SkyNetDotaEquipmentDto> Equipment { get; set; } = new();
+    public List<ApiDotaItem> Items { get; set; } = new();
+    public List<ApiDotaEquipment> Equipment { get; set; } = new();
     public ulong Version { get; set; }
 }
 
-public sealed class SkyNetDotaMatchDto
+public sealed class ApiDotaMatch
 {
     public ulong LobbyId { get; set; }
     public ulong MatchId { get; set; }
@@ -595,10 +595,10 @@ public sealed class SkyNetDotaMatchDto
     public uint GameStartTime { get; set; }
     public bool Dedicated { get; set; }
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-    public List<SkyNetDotaMatchPlayerDto> Players { get; set; } = new();
+    public List<ApiDotaMatchPlayer> Players { get; set; } = new();
 }
 
-public sealed class SkyNetDotaMatchPlayerDto
+public sealed class ApiDotaMatchPlayer
 {
     public ulong SteamId { get; set; }
     public uint AccountId { get; set; }
@@ -607,28 +607,28 @@ public sealed class SkyNetDotaMatchPlayerDto
     public uint Slot { get; set; }
     public uint CoachTeam { get; set; }
     public uint HeroId { get; set; }
-    public List<SkyNetDotaEquipmentDto> Equipment { get; set; } = new();
+    public List<ApiDotaEquipment> Equipment { get; set; } = new();
 }
 
 public sealed class ApiState
 {
-    public Dictionary<ulong, SkyNetUserDto> Users { get; set; } = new();
+    public Dictionary<ulong, ApiUser> Users { get; set; } = new();
     public Dictionary<ulong, HashSet<ulong>> FriendLinks { get; set; } = new();
-    public List<SkyNetFriendRequestDto> FriendRequests { get; set; } = new();
+    public List<ApiFriendRequest> FriendRequests { get; set; } = new();
     public Dictionary<ulong, string> Avatars { get; set; } = new();
-    public Dictionary<ulong, SkyNetStatsEnvelopeDto> Stats { get; set; } = new();
-    public Dictionary<ulong, SkyNetLobbyDto> Lobbies { get; set; } = new();
-    public Dictionary<string, SkyNetRemoteStorageFileDto> Files { get; set; } = new(StringComparer.OrdinalIgnoreCase);
-    public Dictionary<ulong, SkyNetGameServerDto> GameServers { get; set; } = new();
-    public Dictionary<string, SkyNetWebAccountDto> WebAccounts { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    public Dictionary<ulong, ApiStatsEnvelope> Stats { get; set; } = new();
+    public Dictionary<ulong, ApiLobby> Lobbies { get; set; } = new();
+    public Dictionary<string, ApiRemoteStorageFile> Files { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    public Dictionary<ulong, ApiGameServer> GameServers { get; set; } = new();
+    public Dictionary<string, ApiWebAccount> WebAccounts { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public Dictionary<string, ApiSession> WebSessions { get; set; } = new(StringComparer.Ordinal);
     public ulong ActiveWebSteamId { get; set; }
-    public Dictionary<uint, SkyNetDotaItemDto> DotaItems { get; set; } = new();
-    public Dictionary<ulong, List<SkyNetDotaEquipmentDto>> DotaEquipment { get; set; } = new();
-    public Dictionary<ulong, SkyNetDotaMatchDto> DotaMatches { get; set; } = new();
+    public Dictionary<uint, ApiDotaItem> DotaItems { get; set; } = new();
+    public Dictionary<ulong, List<ApiDotaEquipment>> DotaEquipment { get; set; } = new();
+    public Dictionary<ulong, ApiDotaMatch> DotaMatches { get; set; } = new();
     public Dictionary<string, uint> DotaHeroIds { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public Dictionary<string, Dictionary<string, uint>> DotaHeroSlots { get; set; } = new(StringComparer.OrdinalIgnoreCase);
-    public SkyNetDotaCosmeticSettingsDto DotaCosmetics { get; set; } = new();
+    public ApiDotaCosmeticSettings DotaCosmetics { get; set; } = new();
 }
 
 public sealed class ApiSession
@@ -657,5 +657,5 @@ public sealed class ApiQueuedEvent
 {
     public long Sequence { get; set; }
     public ulong RecipientSteamId { get; set; }
-    public SkyNetEventDto Event { get; set; } = new();
+    public ApiEvent Event { get; set; } = new();
 }

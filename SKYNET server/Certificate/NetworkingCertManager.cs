@@ -1,18 +1,20 @@
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Crypto.Signers;
+using ProtoBuf;
 
 namespace SKYNET_server.Certificate;
 
 // Port of the reference coordinator's NetworkingCertManager. Builds and signs a
-// CMsgSteamDatagramCertificate with the exact same fields, identity and CA key-id
-// that the old (working) coordinator used. The Dota steamnetworkingsockets.dll must
-// be patched with the matching CA public key (FEAA97C3...), whose Steam key-id is
-// the constant below.
+// CMsgSteamDatagramCertificate with typed protobuf classes instead of hand-written
+// wire tags. The Dota steamnetworkingsockets.dll must be patched with the matching
+// CA public key (FEAA97C3...), whose Steam key-id is the constant below.
 public static class NetworkingCertManager
 {
-    public const ulong CaKeyId = 13962645978238679445;
+    public const ulong CaKeyId = 14779564839147732469;
 
     public static (byte[] cert, byte[] signature) BuildSignedCert(
         byte[] keyData, ulong steamId, uint appId, Ed25519PrivateKeyParameters caPrivate)
@@ -20,24 +22,25 @@ public static class NetworkingCertManager
         uint now = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         uint expiry = (uint)DateTimeOffset.UtcNow.AddDays(30).ToUnixTimeSeconds();
 
-        // CMsgSteamDatagramCertificate, fields in tag order (matches the reference
-        // coordinator's protobuf serialization).
-        var w = new CertProto();
-        w.Varint(1, 1);                          // key_type = ED25519
-        w.Bytes(2, keyData);                     // key_data
-        w.Fixed64(4, steamId);                   // legacy_steam_id
-        w.Fixed32(8, now);                       // time_created
-        w.Fixed32(9, expiry);                    // time_expiry
+        var certificate = new SteamDatagramCertificateMessage
+        {
+            KeyType = SteamDatagramCertificateMessage.EKeyType.ED25519,
+            KeyData = keyData,
+            LegacySteamId = steamId,
+            LegacyIdentityBinary = new SteamNetworkingIdentityLegacyBinaryMessage
+            {
+                SteamId = steamId
+            },
+            IdentityString = $"steamid:{steamId}",
+            TimeCreated = now,
+            TimeExpiry = expiry
+        };
         if (appId != 0)
         {
-            w.Varint(10, appId);                 // app_ids (repeated)
+            certificate.AppIds.Add(appId);
         }
-        var legacy = new CertProto();
-        legacy.Fixed64(16, steamId);             // CMsgSteamNetworkingIdentityLegacyBinary.steam_id
-        w.Bytes(11, legacy.ToArray());           // legacy_identity_binary
-        w.Bytes(12, System.Text.Encoding.UTF8.GetBytes($"steamid:{steamId}")); // identity_string
 
-        byte[] cert = w.ToArray();
+        byte[] cert = certificate.Serialize();
 
         var signer = new Ed25519Signer();
         signer.Init(true, caPrivate);
@@ -46,46 +49,64 @@ public static class NetworkingCertManager
 
         return (cert, signature);
     }
+}
 
-    private sealed class CertProto
+[ProtoContract(Name = @"CMsgSteamNetworkingIdentityLegacyBinary")]
+internal sealed class SteamNetworkingIdentityLegacyBinaryMessage
+{
+    [ProtoMember(16, IsRequired = false, Name = @"steam_id", DataFormat = DataFormat.FixedSize)]
+    [DefaultValue(default(ulong))]
+    public ulong SteamId { get; set; }
+}
+
+[ProtoContract(Name = @"CMsgSteamDatagramCertificate")]
+internal sealed class SteamDatagramCertificateMessage
+{
+    [ProtoMember(1, IsRequired = false, Name = @"key_type", DataFormat = DataFormat.TwosComplement)]
+    [DefaultValue(EKeyType.INVALID)]
+    public EKeyType KeyType { get; set; } = EKeyType.INVALID;
+
+    [ProtoMember(2, IsRequired = false, Name = @"key_data", DataFormat = DataFormat.Default)]
+    [DefaultValue(null)]
+    public byte[]? KeyData { get; set; }
+
+    [ProtoMember(4, IsRequired = false, Name = @"legacy_steam_id", DataFormat = DataFormat.FixedSize)]
+    [DefaultValue(default(ulong))]
+    public ulong LegacySteamId { get; set; }
+
+    [ProtoMember(5, Name = @"gameserver_datacenter_ids", DataFormat = DataFormat.FixedSize)]
+    public List<uint> GameServerDatacenterIds { get; set; } = new();
+
+    [ProtoMember(8, IsRequired = false, Name = @"time_created", DataFormat = DataFormat.FixedSize)]
+    [DefaultValue(default(uint))]
+    public uint TimeCreated { get; set; }
+
+    [ProtoMember(9, IsRequired = false, Name = @"time_expiry", DataFormat = DataFormat.FixedSize)]
+    [DefaultValue(default(uint))]
+    public uint TimeExpiry { get; set; }
+
+    [ProtoMember(10, Name = @"app_ids", DataFormat = DataFormat.TwosComplement)]
+    public List<uint> AppIds { get; set; } = new();
+
+    [ProtoMember(11, IsRequired = false, Name = @"legacy_identity_binary", DataFormat = DataFormat.Default)]
+    [DefaultValue(null)]
+    public SteamNetworkingIdentityLegacyBinaryMessage? LegacyIdentityBinary { get; set; }
+
+    [ProtoMember(12, IsRequired = false, Name = @"identity_string", DataFormat = DataFormat.Default)]
+    [DefaultValue("")]
+    public string IdentityString { get; set; } = string.Empty;
+
+    public byte[] Serialize()
     {
-        private readonly MemoryStream _ms = new();
+        using var stream = new MemoryStream();
+        Serializer.Serialize(stream, this);
+        return stream.ToArray();
+    }
 
-        public void Varint(int field, ulong value)
-        {
-            WriteVarint((ulong)((field << 3) | 0));
-            WriteVarint(value);
-        }
+    public enum EKeyType
+    {
+        INVALID = 0,
 
-        public void Fixed64(int field, ulong value)
-        {
-            WriteVarint((ulong)((field << 3) | 1));
-            _ms.Write(BitConverter.GetBytes(value), 0, 8);
-        }
-
-        public void Fixed32(int field, uint value)
-        {
-            WriteVarint((ulong)((field << 3) | 5));
-            _ms.Write(BitConverter.GetBytes(value), 0, 4);
-        }
-
-        public void Bytes(int field, byte[] value)
-        {
-            WriteVarint((ulong)((field << 3) | 2));
-            WriteVarint((ulong)value.Length);
-            _ms.Write(value, 0, value.Length);
-        }
-
-        private void WriteVarint(ulong value)
-        {
-            while (value >= 0x80)
-            {
-                _ms.WriteByte((byte)(value | 0x80));
-                value >>= 7;
-            }
-            _ms.WriteByte((byte)value);
-        }
-
-        public byte[] ToArray() => _ms.ToArray();
+        ED25519 = 1
     }
 }

@@ -5,15 +5,15 @@ using System.Text;
 
 namespace SKYNET_server.Services;
 
-public sealed class SkyNetDiscoveryService : BackgroundService
+public sealed class DiscoveryService : BackgroundService
 {
     private const int DiscoveryPort = 27081;
     private const string DiscoveryRequest = "SKYNET_DISCOVER";
     private const string DiscoveryPrefix = "SKYNET_SERVER ";
 
-    private readonly ILogger<SkyNetDiscoveryService> _logger;
+    private readonly ILogger<DiscoveryService> _logger;
 
-    public SkyNetDiscoveryService(ILogger<SkyNetDiscoveryService> logger)
+    public DiscoveryService(ILogger<DiscoveryService> logger)
     {
         _logger = logger;
     }

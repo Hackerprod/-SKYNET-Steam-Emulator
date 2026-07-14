@@ -54,7 +54,7 @@ namespace SKYNET.Steamworks.Implementation
                 var requestSucceeded = true;
                 if (SkyNetApiClient.IsEnabled)
                 {
-                    SkyNetWorkQueue.Enqueue("RequestCurrentStats", () =>
+                    WorkQueue.Enqueue("RequestCurrentStats", () =>
                     {
                         var ok = SkyNetApiClient.RefreshCurrentStats(true);
                         SyncSelfFromCache(false);
@@ -130,7 +130,6 @@ namespace SKYNET.Steamworks.Implementation
                         playerStat.Data = 0;
 
                         playerStats.Add(playerStat);
-                        //IPCManager.SendPlayerStat(playerStat);
                     }
                     Data = playerStat.Data;
                     Result = true;
@@ -145,7 +144,6 @@ namespace SKYNET.Steamworks.Implementation
 
                     playerStats.Add(playerStat);
                     PlayerStats.TryAdd((ulong)SteamEmulator.SteamID, playerStats);
-                    //IPCManager.SendPlayerStat(playerStat);
                 }
             });
             pData = Data;
@@ -176,7 +174,7 @@ namespace SKYNET.Steamworks.Implementation
                 Result = true;
             }
             Write($"SetStat (Name = {pchName}, Data = {nData}) = {Result}");
-            SkyNetStateCache.SetLocalStat(pchName, nData);
+            StateCache.SetLocalStat(pchName, nData);
             return Result;
         }
 
@@ -227,7 +225,6 @@ namespace SKYNET.Steamworks.Implementation
                         Earned = true
                     };
                     Achievements.Add(achievement);
-                    //IPCManager.SendAchievement(achievement);
                     // TODO: Show Overlay with Achievement
                     Result = true;
                 }
@@ -235,7 +232,7 @@ namespace SKYNET.Steamworks.Implementation
 
             if (Result)
             {
-                SkyNetStateCache.SetLocalAchievement(pchName, true);
+                StateCache.SetLocalAchievement(pchName, true);
             }
 
             return Result;
@@ -252,10 +249,9 @@ namespace SKYNET.Steamworks.Implementation
                 {
                     achievement.Earned = false;
                     achievement.Progress = 0;
-                    //IPCManager.SendUpdateAchievement(achievement);
                 }
             });
-            SkyNetStateCache.SetLocalAchievement(pchName, false);
+            StateCache.SetLocalAchievement(pchName, false);
             return true;
         }
 
@@ -289,7 +285,7 @@ namespace SKYNET.Steamworks.Implementation
                 if (SkyNetApiClient.IsEnabled)
                 {
                     SyncSelfFromCache(false);
-                    SkyNetWorkQueue.Enqueue("StoreStats", () =>
+                    WorkQueue.Enqueue("StoreStats", () =>
                     {
                         var ok = SkyNetApiClient.StoreStats();
                         CallbackManager.AddCallback(new UserStatsStored_t
@@ -343,7 +339,6 @@ namespace SKYNET.Steamworks.Implementation
                     achievement.MaxProgress = nMaxProgress;
                     Archived = achievement.Earned;
                     Result = true;
-                    //IPCManager.SendUpdateAchievement(achievement);
                 }
             });
 
@@ -389,7 +384,7 @@ namespace SKYNET.Steamworks.Implementation
                 Write($"RequestUserStats {steamIDUser}");
                 if (SkyNetApiClient.IsEnabled)
                 {
-                    return SkyNetWorkQueue.EnqueueCallbackResult(new UserStatsReceived_t
+                    return WorkQueue.EnqueueCallbackResult(new UserStatsReceived_t
                     {
                         m_nGameID = SteamEmulator.AppID,
                         m_eResult = EResult.k_EResultFail,
@@ -448,7 +443,7 @@ namespace SKYNET.Steamworks.Implementation
             bool Archived = false;
             var achievements = steamIDUser == SteamEmulator.SteamID
                 ? Achievements
-                : SkyNetStateCache.GetAchievements(steamIDUser);
+                : StateCache.GetAchievements(steamIDUser);
 
             if (achievements != null)
             {
@@ -478,12 +473,11 @@ namespace SKYNET.Steamworks.Implementation
             PlayerStats.Clear();
             if (bAchievementsToo)
                 Achievements.Clear();
-            SkyNetStateCache.ApplyStats((ulong)SteamEmulator.SteamID, new List<SkyNetApiClient.SkyNetStatDto>());
+            StateCache.ApplyStats((ulong)SteamEmulator.SteamID, new List<SkyNetApiClient.ApiStat>());
             if (bAchievementsToo)
             {
-                SkyNetStateCache.ApplyAchievements((ulong)SteamEmulator.SteamID, new List<SkyNetApiClient.SkyNetAchievementDto>());
+                StateCache.ApplyAchievements((ulong)SteamEmulator.SteamID, new List<SkyNetApiClient.ApiAchievement>());
             }
-            //IPCManager.SendResetAllStats(bAchievementsToo);
             return true;
         }
 
@@ -618,11 +612,11 @@ namespace SKYNET.Steamworks.Implementation
             {
                 if (SkyNetApiClient.IsEnabled)
                 {
-                    SkyNetWorkQueue.Enqueue("Refresh current players", () => SkyNetApiClient.RefreshCurrentStats(),
+                    WorkQueue.Enqueue("Refresh current players", () => SkyNetApiClient.RefreshCurrentStats(),
                         "stats:current-players");
                 }
 
-                var UsersOnline = SkyNetApiClient.IsEnabled ? SkyNetStateCache.GetCurrentPlayers() : UserManager.Users.Count;
+                var UsersOnline = SkyNetApiClient.IsEnabled ? StateCache.GetCurrentPlayers() : UserManager.Users.Count;
                 NumberOfCurrentPlayers_t data = new NumberOfCurrentPlayers_t()
                 {
                     m_bSuccess = 1,
@@ -672,7 +666,7 @@ namespace SKYNET.Steamworks.Implementation
                 Write($"RequestGlobalStats {nHistoryDays} days");
                 if (SkyNetApiClient.IsEnabled)
                 {
-                    SkyNetWorkQueue.Enqueue("RequestGlobalStats", () => SkyNetApiClient.RefreshCurrentStats(true),
+                    WorkQueue.Enqueue("RequestGlobalStats", () => SkyNetApiClient.RefreshCurrentStats(true),
                         "stats:global", true);
                 }
 
@@ -713,12 +707,12 @@ namespace SKYNET.Steamworks.Implementation
         {
             if (refresh && SkyNetApiClient.IsEnabled)
             {
-                SkyNetWorkQueue.Enqueue("Sync self stats", () => SkyNetApiClient.RefreshCurrentStats(),
+                WorkQueue.Enqueue("Sync self stats", () => SkyNetApiClient.RefreshCurrentStats(),
                     "stats:self");
             }
 
             SyncUserFromCache((ulong)SteamEmulator.SteamID, false);
-            Achievements = SkyNetStateCache.GetAchievements((ulong)SteamEmulator.SteamID);
+            Achievements = StateCache.GetAchievements((ulong)SteamEmulator.SteamID);
         }
 
         private void SyncUserFromCache(ulong steamIDUser, bool refresh = false)
@@ -730,19 +724,19 @@ namespace SKYNET.Steamworks.Implementation
 
             if (refresh && steamIDUser == (ulong)SteamEmulator.SteamID)
             {
-                SkyNetWorkQueue.Enqueue("Sync current user stats", () => SkyNetApiClient.RefreshCurrentStats(),
+                WorkQueue.Enqueue("Sync current user stats", () => SkyNetApiClient.RefreshCurrentStats(),
                     "stats:self");
             }
             else if (refresh)
             {
-                SkyNetWorkQueue.Enqueue("Sync user stats", () => SkyNetApiClient.RefreshStatsForUser(steamIDUser),
+                WorkQueue.Enqueue("Sync user stats", () => SkyNetApiClient.RefreshStatsForUser(steamIDUser),
                     "stats:user:" + steamIDUser);
             }
 
-            PlayerStats[steamIDUser] = SkyNetStateCache.GetStats(steamIDUser);
+            PlayerStats[steamIDUser] = StateCache.GetStats(steamIDUser);
             if (steamIDUser == (ulong)SteamEmulator.SteamID)
             {
-                Achievements = SkyNetStateCache.GetAchievements(steamIDUser);
+                Achievements = StateCache.GetAchievements(steamIDUser);
             }
         }
 

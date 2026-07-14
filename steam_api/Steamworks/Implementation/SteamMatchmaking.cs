@@ -120,7 +120,7 @@ namespace SKYNET.Steamworks.Implementation
                 {
                     var lobbyData = DataAwaiting.ToDictionary(k => k.Key, v => v.Value);
                     DataAwaiting.Clear();
-                    return SkyNetWorkQueue.EnqueueCallbackResult(new LobbyCreated_t
+                    return WorkQueue.EnqueueCallbackResult(new LobbyCreated_t
                     {
                         m_eResult = EResult.k_EResultFail,
                         m_ulSteamIDLobby = 0
@@ -225,7 +225,7 @@ namespace SKYNET.Steamworks.Implementation
                     EmitLobbyDataUpdate(steamIDLobby, (ulong)SteamEmulator.SteamID, true);
                 }
 
-                SkyNetWorkQueue.Enqueue("DeleteLobbyData", () =>
+                WorkQueue.Enqueue("DeleteLobbyData", () =>
                 {
                     if (SkyNetApiClient.DeleteLobbyData(steamIDLobby, pchKey))
                     {
@@ -284,7 +284,7 @@ namespace SKYNET.Steamworks.Implementation
             if (SkyNetApiClient.IsEnabled)
             {
                 var filterSnapshot = CloneFilter(filters);
-                SkyNetWorkQueue.Enqueue("QueryLobbies index", () =>
+                WorkQueue.Enqueue("QueryLobbies index", () =>
                 {
                     var lobbies = SkyNetApiClient.QueryLobbies(SteamEmulator.AppID, filterSnapshot);
                     if (lobbies != null)
@@ -451,7 +451,7 @@ namespace SKYNET.Steamworks.Implementation
 
             if (SkyNetApiClient.IsEnabled)
             {
-                return SkyNetWorkQueue.EnqueueCallbackResult(data, () =>
+                return WorkQueue.EnqueueCallbackResult(data, () =>
                 {
                     var joinedLobby = SkyNetApiClient.JoinLobby(steamIDLobby);
                     if (joinedLobby == null)
@@ -517,7 +517,7 @@ namespace SKYNET.Steamworks.Implementation
                     m_ulSteamIDLobby = steamIDLobby,
                     m_ulSteamIDMember = (ulong)SteamEmulator.SteamID
                 });
-                SkyNetWorkQueue.Enqueue("LeaveLobby", () => SkyNetApiClient.LeaveLobby(steamIDLobby), "lobby:leave:" + steamIDLobby);
+                WorkQueue.Enqueue("LeaveLobby", () => SkyNetApiClient.LeaveLobby(steamIDLobby), "lobby:leave:" + steamIDLobby);
                 return;
             }
 
@@ -525,9 +525,9 @@ namespace SKYNET.Steamworks.Implementation
             {
                 /*
                 if (lobby.Owner == SteamEmulator.SteamID)
-                    IPCManager.SendLobbyRemove(lobby);
+                    SendLobbyRemove(lobby);
                 else
-                    IPCManager.SendLobbyLeave(lobby.Owner, lobby.SteamID);
+                    SendLobbyLeave(lobby.Owner, lobby.SteamID);
                 */
             }
         }
@@ -557,7 +557,7 @@ namespace SKYNET.Steamworks.Implementation
                     data.m_ulSteamIDMember = cached.Owner;
                 }
 
-                SkyNetWorkQueue.Enqueue("RequestLobbyData", () =>
+                WorkQueue.Enqueue("RequestLobbyData", () =>
                 {
                     var refreshed = SkyNetApiClient.RefreshLobby(steamIDLobby);
                     var callback = data;
@@ -594,7 +594,7 @@ namespace SKYNET.Steamworks.Implementation
             if (SkyNetApiClient.IsEnabled)
             {
                 var filterSnapshot = CloneFilter(filters);
-                return SkyNetWorkQueue.EnqueueCallbackResult(new LobbyMatchList_t(), () =>
+                return WorkQueue.EnqueueCallbackResult(new LobbyMatchList_t(), () =>
                 {
                     var lobbies = SkyNetApiClient.QueryLobbies(SteamEmulator.AppID, filterSnapshot) ?? new List<SteamLobby>();
                     LobbyManager.UpdateLobbies(lobbies);
@@ -656,7 +656,7 @@ namespace SKYNET.Steamworks.Implementation
                 }
 
                 Result = true;
-                SkyNetWorkQueue.Enqueue("SetLobbyData", () =>
+                WorkQueue.Enqueue("SetLobbyData", () =>
                 {
                     if (SkyNetApiClient.UpdateLobbyData(steamIDLobby, pchKey, pchValue))
                     {
@@ -693,7 +693,7 @@ namespace SKYNET.Steamworks.Implementation
                     EmitLobbyDataUpdate(steamIDLobby, cached.Owner, true);
                 }
 
-                SkyNetWorkQueue.Enqueue("SetLobbyGameServer", () =>
+                WorkQueue.Enqueue("SetLobbyGameServer", () =>
                 {
                     if (SkyNetApiClient.SetLobbyGameServer(steamIDLobby, unGameServerIP, unGameServerPort, steamIDGameServer))
                     {
@@ -722,7 +722,7 @@ namespace SKYNET.Steamworks.Implementation
                     cached.Joinable = bLobbyJoinable;
                     EmitLobbyDataUpdate(steamIDLobby, cached.Owner, true);
                 }
-                SkyNetWorkQueue.Enqueue("SetLobbyJoinable", () =>
+                WorkQueue.Enqueue("SetLobbyJoinable", () =>
                 {
                     if (SkyNetApiClient.SetLobbyJoinable(steamIDLobby, bLobbyJoinable))
                     {
@@ -748,7 +748,7 @@ namespace SKYNET.Steamworks.Implementation
             {
                 UpsertLocalMemberData(steamIDLobby, (ulong)SteamEmulator.SteamID, pchKey, pchValue);
                 EmitLobbyDataUpdate(steamIDLobby, (ulong)SteamEmulator.SteamID, true);
-                SkyNetWorkQueue.Enqueue("SetLobbyMemberData", () =>
+                WorkQueue.Enqueue("SetLobbyMemberData", () =>
                 {
                     if (SkyNetApiClient.SetLobbyMemberData(steamIDLobby, pchKey, pchValue))
                     {
@@ -798,7 +798,7 @@ namespace SKYNET.Steamworks.Implementation
                     cached.MaxMembers = cMaxMembers;
                     EmitLobbyDataUpdate(steamIDLobby, cached.Owner, true);
                 }
-                SkyNetWorkQueue.Enqueue("SetLobbyMemberLimit", () =>
+                WorkQueue.Enqueue("SetLobbyMemberLimit", () =>
                 {
                     if (SkyNetApiClient.SetLobbyMemberLimit(steamIDLobby, cMaxMembers))
                     {
@@ -827,7 +827,7 @@ namespace SKYNET.Steamworks.Implementation
                     cached.Owner = steamIDNewOwner;
                     EmitLobbyDataUpdate(steamIDLobby, steamIDNewOwner, true);
                 }
-                SkyNetWorkQueue.Enqueue("SetLobbyOwner", () =>
+                WorkQueue.Enqueue("SetLobbyOwner", () =>
                 {
                     if (SkyNetApiClient.SetLobbyOwner(steamIDLobby, steamIDNewOwner))
                     {
@@ -856,7 +856,7 @@ namespace SKYNET.Steamworks.Implementation
                     cached.Type = (ELobbyType)eLobbyType;
                     EmitLobbyDataUpdate(steamIDLobby, cached.Owner, true);
                 }
-                SkyNetWorkQueue.Enqueue("SetLobbyType", () =>
+                WorkQueue.Enqueue("SetLobbyType", () =>
                 {
                     if (SkyNetApiClient.SetLobbyType(steamIDLobby, eLobbyType))
                     {
@@ -1013,7 +1013,7 @@ namespace SKYNET.Steamworks.Implementation
 
         private void QueueLobbyRefresh(ulong lobbyId, ulong memberId)
         {
-            SkyNetWorkQueue.Enqueue("Lobby refresh", () =>
+            WorkQueue.Enqueue("Lobby refresh", () =>
             {
                 var refreshed = SkyNetApiClient.RefreshLobby(lobbyId);
                 if (refreshed != null)
@@ -1093,7 +1093,7 @@ namespace SKYNET.Steamworks.Implementation
 
             if (lobby == null && SkyNetApiClient.IsEnabled && !byOwner)
             {
-                SkyNetWorkQueue.Enqueue("GetLobby refresh", () =>
+                WorkQueue.Enqueue("GetLobby refresh", () =>
                 {
                     var refreshed = SkyNetApiClient.RefreshLobby(SteamID);
                     if (refreshed != null)

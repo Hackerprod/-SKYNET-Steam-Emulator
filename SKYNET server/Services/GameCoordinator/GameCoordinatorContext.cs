@@ -18,28 +18,28 @@ public sealed class GameCoordinatorContext
 public interface IGameCoordinatorPlugin
 {
     bool CanHandle(uint appId);
-    SkyNetGCExchangeResponseDto Exchange(GameCoordinatorContext context, SkyNetGCExchangeRequestDto request);
-    SkyNetGCExchangeResponseDto Poll(GameCoordinatorContext context);
+    ApiGCExchangeResponse Exchange(GameCoordinatorContext context, ApiGCExchangeRequest request);
+    ApiGCExchangeResponse Poll(GameCoordinatorContext context);
 }
 
 public interface ILuaGameCoordinatorBackend
 {
-    SkyNetGCExchangeResponseDto Response { get; }
+    ApiGCExchangeResponse Response { get; }
 }
 
 public static class GameCoordinatorPendingMessages
 {
     private const int MaxQueuedPerRecipient = 256;
     private static readonly object Sync = new();
-    private static readonly Dictionary<(uint AppId, ulong SteamId), Queue<SkyNetGCMessageDto>> Queues = new();
+    private static readonly Dictionary<(uint AppId, ulong SteamId), Queue<ApiGCMessage>> Queues = new();
 
-    public static void Enqueue(uint appId, ulong steamId, SkyNetGCMessageDto message)
+    public static void Enqueue(uint appId, ulong steamId, ApiGCMessage message)
     {
         lock (Sync)
         {
             if (!Queues.TryGetValue((appId, steamId), out var queue))
             {
-                queue = new Queue<SkyNetGCMessageDto>();
+                queue = new Queue<ApiGCMessage>();
                 Queues[(appId, steamId)] = queue;
             }
 
@@ -51,13 +51,13 @@ public static class GameCoordinatorPendingMessages
         }
     }
 
-    public static List<SkyNetGCMessageDto> Drain(uint appId, ulong steamId)
+    public static List<ApiGCMessage> Drain(uint appId, ulong steamId)
     {
         lock (Sync)
         {
             if (!Queues.TryGetValue((appId, steamId), out var queue) || queue.Count == 0)
             {
-                return new List<SkyNetGCMessageDto>();
+                return new List<ApiGCMessage>();
             }
 
             var drained = queue.ToList();
@@ -76,25 +76,25 @@ public sealed class GameCoordinatorPluginRegistry
         _plugins = plugins.ToList();
     }
 
-    public SkyNetGCExchangeResponseDto Exchange(GameCoordinatorContext context, SkyNetGCExchangeRequestDto request)
+    public ApiGCExchangeResponse Exchange(GameCoordinatorContext context, ApiGCExchangeRequest request)
     {
         var plugin = _plugins.FirstOrDefault(candidate => candidate.CanHandle(context.AppId));
         if (plugin == null)
         {
-            return new SkyNetGCExchangeResponseDto();
+            return new ApiGCExchangeResponse();
         }
 
-        return plugin.Exchange(context, request) ?? new SkyNetGCExchangeResponseDto();
+        return plugin.Exchange(context, request) ?? new ApiGCExchangeResponse();
     }
 
-    public SkyNetGCExchangeResponseDto Poll(GameCoordinatorContext context)
+    public ApiGCExchangeResponse Poll(GameCoordinatorContext context)
     {
         var plugin = _plugins.FirstOrDefault(candidate => candidate.CanHandle(context.AppId));
         if (plugin == null)
         {
-            return new SkyNetGCExchangeResponseDto();
+            return new ApiGCExchangeResponse();
         }
 
-        return plugin.Poll(context) ?? new SkyNetGCExchangeResponseDto();
+        return plugin.Poll(context) ?? new ApiGCExchangeResponse();
     }
 }

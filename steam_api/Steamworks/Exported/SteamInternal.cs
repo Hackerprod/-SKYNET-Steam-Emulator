@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Threading;
 using SKYNET.Managers;
-using SKYNET.Types;
 
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
@@ -10,6 +10,9 @@ namespace SKYNET.Steamworks.Exported
 {
     public class SteamInternal
     {
+        private static readonly object ContextInitLock = new object();
+        private static long contextCounter = 1;
+
         static SteamInternal()
         {
             if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
@@ -22,9 +25,10 @@ namespace SKYNET.Steamworks.Exported
         public static int SteamInternal_SteamAPI_Init(IntPtr pszInternalCheckInterfaceVersions, IntPtr pOutErrMsg)
         {
             Write($"SteamInternal_SteamAPI_Init");
+            BumpContextCounter("SteamInternal_SteamAPI_Init");
             if (SteamEmulator.SecureNetworking)
             {
-                Write("SecureNetworking requested, but native SDR patching is disabled in this build");
+                Write("SecureNetworking requested; native SDR CA patching is enabled");
             }
             return 0; // k_ESteamAPIInitResult_OK
         }
@@ -36,6 +40,10 @@ namespace SKYNET.Steamworks.Exported
                 ? Constants.k_unServerFlagSecure
                 : 0;
             var result = SteamEmulator.SteamGameServer.InitGameServer(unIP, usGamePort, usQueryPort, unFlags, SteamEmulator.AppID, pchVersionString);
+            if (result)
+            {
+                BumpContextCounter("SteamInternal_GameServer_Init_V2");
+            }
             Write($"SteamInternal_GameServer_Init_V2 = {result} (IP = {unIP}, GamePort = {usGamePort}, QueryPort = {usQueryPort}, ServerMode = {eServerMode}, Flags = {unFlags}, VersionString = {pchVersionString})");
             return result ? 0 : 1; // k_ESteamAPIInitResult_OK / generic failure
         }
@@ -68,6 +76,10 @@ namespace SKYNET.Steamworks.Exported
                 ? Constants.k_unServerFlagSecure
                 : 0;
             var result = SteamEmulator.SteamGameServer.InitGameServer(unIP, usPort, (int)usQueryPort, unFlags, SteamEmulator.AppID, pchVersionString);
+            if (result)
+            {
+                BumpContextCounter("SteamInternal_GameServer_Init");
+            }
             Write($"SteamInternal_GameServer_Init = {result}");
             return result;
         }
@@ -77,57 +89,55 @@ namespace SKYNET.Steamworks.Exported
         {
             if (pContextInitData == IntPtr.Zero)
             {
-                Console.WriteLine("Error: Puntero de inicialización nulo.");
+                Write("SteamInternal_ContextInit failed: null data");
                 return IntPtr.Zero;
             }
 
             try
             {
-                // Leer la estructura que contiene los datos de inicialización
-                var contextInitData = Marshal.PtrToStructure<SteamContextInitData>(pContextInitData);
-
-                // Validar que la función delegada no sea nula
-                if (contextInitData.pFn == IntPtr.Zero)
+                IntPtr initFnPtr = Marshal.ReadIntPtr(pContextInitData);
+                if (initFnPtr == IntPtr.Zero)
                 {
-                    Console.WriteLine("Error: Delegado nulo en pFn.");
+                    Write("SteamInternal_ContextInit failed: null init function");
                     return IntPtr.Zero;
                 }
 
-                // Obtener el puntero del contexto de la API
-                IntPtr apiContextPtr = pContextInitData + IntPtr.Size * 2;
+                IntPtr counterPtr = IntPtr.Add(pContextInitData, IntPtr.Size);
+                IntPtr contextSlotPtr = IntPtr.Add(pContextInitData, IntPtr.Size * 2);
 
-                // Leer el contador y verificar si el contexto ya fue inicializado
-                int counter = Marshal.ReadInt32(pContextInitData, IntPtr.Size);
-                if (counter != 1)
+                lock (ContextInitLock)
                 {
-                    // Actualizar el contador e invocar la función de inicialización
-                    Marshal.WriteInt32(pContextInitData, IntPtr.Size, 1);
-                    var initFn = Marshal.GetDelegateForFunctionPointer<SteamInitFunction>(contextInitData.pFn);
-                    initFn(apiContextPtr);
-                    Console.WriteLine("Contexto inicializado correctamente.");
-                }
-                else
-                {
-                    Console.WriteLine("El contexto ya está inicializado.");
+                    long currentCounter = Interlocked.Read(ref contextCounter);
+                    long storedCounter = Marshal.ReadIntPtr(counterPtr).ToInt64();
+
+                    if (storedCounter != currentCounter)
+                    {
+                        var initFn = Marshal.GetDelegateForFunctionPointer<SteamContextInitDelegate>(initFnPtr);
+                        initFn(contextSlotPtr);
+                        Marshal.WriteIntPtr(counterPtr, new IntPtr(currentCounter));
+
+                        IntPtr contextValue = Marshal.ReadIntPtr(contextSlotPtr);
+                        Write($"SteamInternal_ContextInit initialized counter={currentCounter} context=0x{contextValue.ToInt64():X}");
+                    }
                 }
 
-                return apiContextPtr;
+                return contextSlotPtr;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al inicializar el contexto: {ex.Message}");
+                Write($"SteamInternal_ContextInit failed: {ex.Message}");
                 return IntPtr.Zero;
             }
         }
 
-        [StructLayout(LayoutKind.Sequential)]
-        public struct SteamContextInitData
-        {
-            public IntPtr pFn; // Puntero a la función de inicialización
-        }
-
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate void SteamInitFunction(IntPtr contextPtr);
+        private delegate void SteamContextInitDelegate(IntPtr contextSlotPtr);
+
+        private static void BumpContextCounter(string reason)
+        {
+            long value = Interlocked.Increment(ref contextCounter);
+            Write($"SteamInternal context counter {value} ({reason})");
+        }
 
         private static void Write(object msg)
         {

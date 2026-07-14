@@ -35,13 +35,13 @@ public sealed class LuaGameCoordinatorPlugin : IGameCoordinatorPlugin
         return File.Exists(GetMainScriptPath(appId));
     }
 
-    public SkyNetGCExchangeResponseDto Exchange(GameCoordinatorContext context, SkyNetGCExchangeRequestDto request)
+    public ApiGCExchangeResponse Exchange(GameCoordinatorContext context, ApiGCExchangeRequest request)
     {
         var scriptRoot = GetScriptRoot(context.AppId);
         var scriptPath = Path.Combine(scriptRoot, "main.lua");
         if (!File.Exists(scriptPath))
         {
-            return new SkyNetGCExchangeResponseDto { Handled = false };
+            return new ApiGCExchangeResponse { Handled = false };
         }
 
         ILuaGameCoordinatorBackend backend = CreateBackend(context, request);
@@ -61,14 +61,14 @@ public sealed class LuaGameCoordinatorPlugin : IGameCoordinatorPlugin
                 var handler = script.Globals.Get("handle");
                 if (handler.Type != DataType.Function)
                 {
-                    return new SkyNetGCExchangeResponseDto { Handled = false };
+                    return new ApiGCExchangeResponse { Handled = false };
                 }
 
                 var handled = script.Call(handler).CastToBool();
                 if (!handled)
                 {
                     _trace.Record("unhandled", context.AppId, context.SteamId, request.MessageType, 0);
-                    return new SkyNetGCExchangeResponseDto { Handled = false };
+                    return new ApiGCExchangeResponse { Handled = false };
                 }
 
                 foreach (var message in backend.Response.Messages)
@@ -85,15 +85,15 @@ public sealed class LuaGameCoordinatorPlugin : IGameCoordinatorPlugin
         {
             _logger.LogError(ex, "GC Lua script failed for app {AppId}, message {MessageType}", context.AppId, request.MessageType);
             _trace.Record("error", context.AppId, context.SteamId, request.MessageType, 0, ex.Message);
-            return new SkyNetGCExchangeResponseDto { Handled = false };
+            return new ApiGCExchangeResponse { Handled = false };
         }
     }
 
-    public SkyNetGCExchangeResponseDto Poll(GameCoordinatorContext context)
+    public ApiGCExchangeResponse Poll(GameCoordinatorContext context)
     {
         var response = context.AppId == 570
             ? DotaGcBackend.Poll(context)
-            : new SkyNetGCExchangeResponseDto { Handled = true };
+            : new ApiGCExchangeResponse { Handled = true };
 
         response.Messages.AddRange(GameCoordinatorPendingMessages.Drain(context.AppId, context.SteamId));
         return response;
@@ -117,7 +117,7 @@ public sealed class LuaGameCoordinatorPlugin : IGameCoordinatorPlugin
             }
 
             var context = new GameCoordinatorContext { AppId = appId };
-            var backend = CreateBackend(context, new SkyNetGCExchangeRequestDto { AppId = appId });
+            var backend = CreateBackend(context, new ApiGCExchangeRequest { AppId = appId });
             var runtime = new LuaGameCoordinatorRuntime(scriptRoot, _logger, context, _trace);
 
             try
@@ -145,7 +145,7 @@ public sealed class LuaGameCoordinatorPlugin : IGameCoordinatorPlugin
         }
     }
 
-    private ILuaGameCoordinatorBackend CreateBackend(GameCoordinatorContext context, SkyNetGCExchangeRequestDto request)
+    private ILuaGameCoordinatorBackend CreateBackend(GameCoordinatorContext context, ApiGCExchangeRequest request)
     {
         if (context.AppId == 570)
         {

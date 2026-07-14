@@ -25,7 +25,7 @@ public sealed class SdrCertificateService
     // Proven CA from the reference coordinator (NetworkingCertManager): its private
     // seed is literally the first 32 bytes of the old private.pem, giving CA public
     // key FEAA97C32C7E5BF684DF86F120F3C40C785DCECDEDCB91FC223E54E76AA30F59. Steam's
-    // key-id for it is 13962645978238679445 (set via Sdr:CaKeyId). The Dota
+    // key-id for it is 14779564839147732469 (set via Sdr:CaKeyId). The Dota
     // steamnetworkingsockets.dll must be patched with this same public key.
     private const string DefaultSeedBase64 = "LS0tLS1CRUdJTiBPUEVOU1NIIFBSSVZBVEUgS0VZLS0=";
 

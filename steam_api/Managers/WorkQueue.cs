@@ -13,7 +13,7 @@ namespace SKYNET.Managers
     /// Steamworks caller thread. Keep game-facing state changes synchronous and
     /// put only HTTP, disk-heavy sync, and slow retries here.
     /// </summary>
-    public static class SkyNetWorkQueue
+    public static class WorkQueue
     {
         private const int WorkerCount = 3;
         private const int MaxQueuedItems = 4096;
@@ -50,7 +50,7 @@ namespace SKYNET.Managers
                     CoalescedKeys.TryRemove(coalesceKey, out _);
                 }
 
-                SteamEmulator.Write("SkyNetWorkQueue", $"Dropped work item because queue is saturated (Name = {name}, Queue = {nextCount})");
+                SteamEmulator.Write("WorkQueue", $"Dropped work item because queue is saturated (Name = {name}, Queue = {nextCount})");
                 return false;
             }
 
@@ -98,7 +98,7 @@ namespace SKYNET.Managers
                 catch (Exception ex)
                 {
                     failed = true;
-                    SteamEmulator.Write("SkyNetWorkQueue", $"{name ?? "callback work"} failed: {ex.Message}");
+                    SteamEmulator.Write("WorkQueue", $"{name ?? "callback work"} failed: {ex.Message}");
                 }
 
                 CallbackManager.CompleteCallbackResult(handle, result, failed);
@@ -144,7 +144,7 @@ namespace SKYNET.Managers
                     }
                     catch (Exception ex)
                     {
-                        SteamEmulator.Write("SkyNetWorkQueue", $"{item.Name} failed: {ex.Message}");
+                        SteamEmulator.Write("WorkQueue", $"{item.Name} failed: {ex.Message}");
                     }
                     finally
                     {

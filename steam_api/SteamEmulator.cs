@@ -65,14 +65,14 @@ public class SteamEmulator
     // Enables SKYNET-issued SDR certificates and the native CA patch. Keep this
     // disabled for unauthenticated LAN transport unless secure SDR is required.
     public static bool SecureNetworking;
-    public static string SkyNetServerUrl;
-    public static string SkyNetAccessToken;
-    public static string SkyNetRefreshToken;
-    public static string SkyNetClientInstanceId;
-    public static bool SkyNetUseActiveWebUser;
-    public static int SkyNetPollIntervalMs;
-    public static int SkyNetHttpTimeoutMs;
-    public static int SkyNetDiscoveryPort;
+    public static string ServerUrl;
+    public static string AccessToken;
+    public static string RefreshToken;
+    public static string ClientInstanceId;
+    public static bool UseActiveWebUser;
+    public static int PollIntervalMs;
+    public static int HttpTimeoutMs;
+    public static int DiscoveryPort;
 
     public static int BroadCastPort = 28032;
 
@@ -142,14 +142,14 @@ public class SteamEmulator
         ISteamHTTP = true;
         UseServerApi = true;
         SecureNetworking = false;
-        SkyNetServerUrl = "http://127.0.0.1:27080/";
-        SkyNetAccessToken = string.Empty;
-        SkyNetRefreshToken = string.Empty;
-        SkyNetClientInstanceId = string.Empty;
-        SkyNetUseActiveWebUser = true;
-        SkyNetPollIntervalMs = 50;
-        SkyNetHttpTimeoutMs = 8000;
-        SkyNetDiscoveryPort = 27081;
+        ServerUrl = "http://127.0.0.1:27080/";
+        AccessToken = string.Empty;
+        RefreshToken = string.Empty;
+        ClientInstanceId = string.Empty;
+        UseActiveWebUser = true;
+        PollIntervalMs = 50;
+        HttpTimeoutMs = 8000;
+        DiscoveryPort = 27081;
     }
 
     public static void Initialize()

@@ -73,17 +73,17 @@ public sealed partial class SteamApiStateService
         return true;
     }
 
-    private bool TryGetUserByToken(string token, out SkyNetUserDto user)
+    private bool TryGetUserByToken(string token, out ApiUser user)
     {
-        user = new SkyNetUserDto();
+        user = new ApiUser();
         return TryGetSession(token, out var session) && _state.Users.TryGetValue(session!.SteamId, out user!);
     }
 
-    private SkyNetUserDto EnsureUser(ulong steamId, uint accountId, uint appId, string personaName)
+    private ApiUser EnsureUser(ulong steamId, uint accountId, uint appId, string personaName)
     {
         if (!_state.Users.TryGetValue(steamId, out var user))
         {
-            user = new SkyNetUserDto
+            user = new ApiUser
             {
                 SteamId = steamId,
                 AccountId = accountId != 0 ? accountId : SteamIdToAccountId(steamId),
@@ -106,12 +106,12 @@ public sealed partial class SteamApiStateService
 
         if (!_state.Stats.ContainsKey(steamId))
         {
-            _state.Stats[steamId] = new SkyNetStatsEnvelopeDto
+            _state.Stats[steamId] = new ApiStatsEnvelope
             {
                 SteamId = steamId,
                 CurrentPlayers = 1,
-                Stats = new List<SkyNetStatDto> { new() { Name = "wins", Data = 0 }, new() { Name = "kills", Data = 0 } },
-                Achievements = new List<SkyNetAchievementDto> { new() { Name = "first_launch", Earned = true, Date = DateTime.UtcNow } }
+                Stats = new List<ApiStat> { new() { Name = "wins", Data = 0 }, new() { Name = "kills", Data = 0 } },
+                Achievements = new List<ApiAchievement> { new() { Name = "first_launch", Earned = true, Date = DateTime.UtcNow } }
             };
         }
 
@@ -176,7 +176,7 @@ public sealed partial class SteamApiStateService
         foreach (var recipient in recipients)
         {
             var relationship = GetRelationshipLocked(recipient, steamId);
-            EnqueueEvent(recipient, new SkyNetEventDto
+            EnqueueEvent(recipient, new ApiEvent
             {
                 Type = type,
                 SteamId = steamId,
@@ -194,9 +194,9 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    private void EnqueueLobbyEvent(SkyNetLobbyDto lobby, string type, ulong recipientSteamId)
+    private void EnqueueLobbyEvent(ApiLobby lobby, string type, ulong recipientSteamId)
     {
-        EnqueueEvent(recipientSteamId, new SkyNetEventDto
+        EnqueueEvent(recipientSteamId, new ApiEvent
         {
             Type = type,
             LobbyId = lobby.SteamId,
@@ -204,7 +204,7 @@ public sealed partial class SteamApiStateService
         });
     }
 
-    private void EnqueueEvent(ulong recipientSteamId, SkyNetEventDto evt)
+    private void EnqueueEvent(ulong recipientSteamId, ApiEvent evt)
     {
         _events.Add(new ApiQueuedEvent
         {
@@ -217,11 +217,11 @@ public sealed partial class SteamApiStateService
         TrimQueuedEventsLocked();
     }
 
-    private void EnqueueGcMessageEvent(ulong recipientSteamId, SkyNetGCMessageDto message)
+    private void EnqueueGcMessageEvent(ulong recipientSteamId, ApiGCMessage message)
     {
         lock (_sync)
         {
-            EnqueueEvent(recipientSteamId, new SkyNetEventDto
+            EnqueueEvent(recipientSteamId, new ApiEvent
             {
                 Type = "gc_message",
                 AppId = message.AppId,
@@ -351,37 +351,37 @@ public sealed partial class SteamApiStateService
 
     private void NormalizeState()
     {
-        _state.Users ??= new Dictionary<ulong, SkyNetUserDto>();
+        _state.Users ??= new Dictionary<ulong, ApiUser>();
         _state.FriendLinks ??= new Dictionary<ulong, HashSet<ulong>>();
-        _state.FriendRequests ??= new List<SkyNetFriendRequestDto>();
+        _state.FriendRequests ??= new List<ApiFriendRequest>();
         _state.Avatars ??= new Dictionary<ulong, string>();
-        _state.Stats ??= new Dictionary<ulong, SkyNetStatsEnvelopeDto>();
-        _state.Lobbies ??= new Dictionary<ulong, SkyNetLobbyDto>();
-        _state.Files ??= new Dictionary<string, SkyNetRemoteStorageFileDto>(StringComparer.OrdinalIgnoreCase);
-        _state.GameServers ??= new Dictionary<ulong, SkyNetGameServerDto>();
+        _state.Stats ??= new Dictionary<ulong, ApiStatsEnvelope>();
+        _state.Lobbies ??= new Dictionary<ulong, ApiLobby>();
+        _state.Files ??= new Dictionary<string, ApiRemoteStorageFile>(StringComparer.OrdinalIgnoreCase);
+        _state.GameServers ??= new Dictionary<ulong, ApiGameServer>();
         // State files written before dedicated support used the host IP as key.
         // Several dedicated processes share an IP, so current entries are keyed
         // by their game-server SteamID instead.
         if (_state.GameServers.Count > 0)
         {
-            var normalizedServers = new Dictionary<ulong, SkyNetGameServerDto>();
+            var normalizedServers = new Dictionary<ulong, ApiGameServer>();
             foreach (var pair in _state.GameServers)
             {
-                var server = pair.Value ?? new SkyNetGameServerDto();
+                var server = pair.Value ?? new ApiGameServer();
                 var key = server.SteamId != 0 ? server.SteamId : pair.Key;
                 server.SteamId = key;
                 normalizedServers[key] = server;
             }
             _state.GameServers = normalizedServers;
         }
-        _state.WebAccounts ??= new Dictionary<string, SkyNetWebAccountDto>(StringComparer.OrdinalIgnoreCase);
+        _state.WebAccounts ??= new Dictionary<string, ApiWebAccount>(StringComparer.OrdinalIgnoreCase);
         _state.WebSessions = new Dictionary<string, ApiSession>(_state.WebSessions ?? new Dictionary<string, ApiSession>(), StringComparer.Ordinal);
-        _state.DotaItems ??= new Dictionary<uint, SkyNetDotaItemDto>();
-        _state.DotaEquipment ??= new Dictionary<ulong, List<SkyNetDotaEquipmentDto>>();
-        _state.DotaMatches ??= new Dictionary<ulong, SkyNetDotaMatchDto>();
+        _state.DotaItems ??= new Dictionary<uint, ApiDotaItem>();
+        _state.DotaEquipment ??= new Dictionary<ulong, List<ApiDotaEquipment>>();
+        _state.DotaMatches ??= new Dictionary<ulong, ApiDotaMatch>();
         _state.DotaHeroIds ??= new Dictionary<string, uint>(StringComparer.OrdinalIgnoreCase);
         _state.DotaHeroSlots = NormalizeDotaHeroSlots(_state.DotaHeroSlots);
-        _state.DotaCosmetics ??= new SkyNetDotaCosmeticSettingsDto();
+        _state.DotaCosmetics ??= new ApiDotaCosmeticSettings();
         EnsureDotaHeroSlotsLoadedLocked();
         NormalizeDotaItemSlotsLocked();
         var now = DateTime.UtcNow;
@@ -435,7 +435,7 @@ public sealed partial class SteamApiStateService
 
         foreach (var pair in _state.DotaEquipment.ToList())
         {
-            var list = pair.Value ?? new List<SkyNetDotaEquipmentDto>();
+            var list = pair.Value ?? new List<ApiDotaEquipment>();
             foreach (var item in list)
             {
                 if (item.ItemId == 0)
@@ -449,10 +449,10 @@ public sealed partial class SteamApiStateService
 
         foreach (var match in _state.DotaMatches.Values)
         {
-            match.Players ??= new List<SkyNetDotaMatchPlayerDto>();
+            match.Players ??= new List<ApiDotaMatchPlayer>();
             foreach (var player in match.Players)
             {
-                player.Equipment ??= new List<SkyNetDotaEquipmentDto>();
+                player.Equipment ??= new List<ApiDotaEquipment>();
             }
         }
     }
@@ -537,7 +537,7 @@ public sealed partial class SteamApiStateService
     private static bool IsTransientStateSaveException(Exception exception) =>
         exception is IOException or UnauthorizedAccessException;
 
-    private static SkyNetUserDto CloneUser(SkyNetUserDto user) => new()
+    private static ApiUser CloneUser(ApiUser user) => new()
     {
         AccountId = user.AccountId,
         SteamId = user.SteamId,
@@ -553,12 +553,12 @@ public sealed partial class SteamApiStateService
         RichPresence = new Dictionary<string, string>(user.RichPresence)
     };
 
-    private static SkyNetStatsEnvelopeDto CloneStats(SkyNetStatsEnvelopeDto stats) => new()
+    private static ApiStatsEnvelope CloneStats(ApiStatsEnvelope stats) => new()
     {
         SteamId = stats.SteamId,
         CurrentPlayers = stats.CurrentPlayers,
-        Stats = stats.Stats.Select(s => new SkyNetStatDto { Name = s.Name, Data = s.Data }).ToList(),
-        Achievements = stats.Achievements.Select(a => new SkyNetAchievementDto
+        Stats = stats.Stats.Select(s => new ApiStat { Name = s.Name, Data = s.Data }).ToList(),
+        Achievements = stats.Achievements.Select(a => new ApiAchievement
         {
             Name = a.Name,
             Earned = a.Earned,
@@ -568,7 +568,7 @@ public sealed partial class SteamApiStateService
         }).ToList()
     };
 
-    private static SkyNetLobbyDto CloneLobby(SkyNetLobbyDto lobby) => new()
+    private static ApiLobby CloneLobby(ApiLobby lobby) => new()
     {
         SteamId = lobby.SteamId,
         AppId = lobby.AppId,
@@ -577,12 +577,12 @@ public sealed partial class SteamApiStateService
         MaxMembers = lobby.MaxMembers,
         Joinable = lobby.Joinable,
         LobbyData = new Dictionary<string, string>(lobby.LobbyData),
-        Members = lobby.Members.Select(m => new SkyNetLobbyMemberDto
+        Members = lobby.Members.Select(m => new ApiLobbyMember
         {
             SteamId = m.SteamId,
-            Data = m.Data.Select(d => new SkyNetLobbyMetaDataDto { Key = d.Key, Value = d.Value }).ToList()
+            Data = m.Data.Select(d => new ApiLobbyMetaData { Key = d.Key, Value = d.Value }).ToList()
         }).ToList(),
-        GameServer = lobby.GameServer == null ? null : new SkyNetLobbyGameServerDto
+        GameServer = lobby.GameServer == null ? null : new ApiLobbyGameServer
         {
             SteamId = lobby.GameServer.SteamId,
             IP = lobby.GameServer.IP,
@@ -590,7 +590,7 @@ public sealed partial class SteamApiStateService
         }
     };
 
-    private static SkyNetEventDto CloneEvent(SkyNetEventDto evt) => new()
+    private static ApiEvent CloneEvent(ApiEvent evt) => new()
     {
         Type = evt.Type,
         SteamId = evt.SteamId,
@@ -618,7 +618,7 @@ public sealed partial class SteamApiStateService
         RequestId = evt.RequestId
     };
 
-    private static SkyNetRemoteStorageFileDto CloneFile(SkyNetRemoteStorageFileDto file) => new()
+    private static ApiRemoteStorageFile CloneFile(ApiRemoteStorageFile file) => new()
     {
         FileName = file.FileName,
         ContentBase64 = file.ContentBase64,
@@ -626,7 +626,7 @@ public sealed partial class SteamApiStateService
         Timestamp = file.Timestamp
     };
 
-    private static SkyNetDotaItemDto CloneDotaItem(SkyNetDotaItemDto item) => new()
+    private static ApiDotaItem CloneDotaItem(ApiDotaItem item) => new()
     {
         DefIndex = item.DefIndex,
         Name = item.Name,
@@ -644,7 +644,7 @@ public sealed partial class SteamApiStateService
         HeroIds = item.HeroIds.ToList()
     };
 
-    private static SkyNetDotaEquipmentDto CloneDotaEquipment(SkyNetDotaEquipmentDto item) => new()
+    private static ApiDotaEquipment CloneDotaEquipment(ApiDotaEquipment item) => new()
     {
         SteamId = item.SteamId,
         HeroId = item.HeroId,
@@ -657,7 +657,7 @@ public sealed partial class SteamApiStateService
         UpdatedAt = item.UpdatedAt
     };
 
-    private static SkyNetDotaMatchDto CloneDotaMatch(SkyNetDotaMatchDto match) => new()
+    private static ApiDotaMatch CloneDotaMatch(ApiDotaMatch match) => new()
     {
         LobbyId = match.LobbyId,
         MatchId = match.MatchId,
@@ -668,7 +668,7 @@ public sealed partial class SteamApiStateService
         GameStartTime = match.GameStartTime,
         Dedicated = match.Dedicated,
         UpdatedAt = match.UpdatedAt,
-        Players = match.Players.Select(player => new SkyNetDotaMatchPlayerDto
+        Players = match.Players.Select(player => new ApiDotaMatchPlayer
         {
             SteamId = player.SteamId,
             AccountId = player.AccountId,
@@ -681,7 +681,7 @@ public sealed partial class SteamApiStateService
         }).ToList()
     };
 
-    private SkyNetDotaCosmeticSummaryDto BuildDotaCosmeticSummaryLocked() => new()
+    private ApiDotaCosmeticSummary BuildDotaCosmeticSummaryLocked() => new()
     {
         ItemCount = _state.DotaItems.Count,
         HeroCount = _state.DotaHeroIds.Count,

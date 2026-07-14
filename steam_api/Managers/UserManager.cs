@@ -79,7 +79,6 @@ namespace SKYNET.Managers
                     OnUserUpdated?.Invoke(null, user);
                 }
             });
-            //NetworkManager.SendUpdatedUsers();
         }
 
         public static void ReplaceUsers(IEnumerable<SteamPlayer> users)
@@ -130,7 +129,6 @@ namespace SKYNET.Managers
                     Users.Remove(user);
                 }
             });
-            //NetworkManager.SendUpdatedUsers();
         }
 
         public static object GetUser(object accountID)
@@ -208,7 +206,6 @@ namespace SKYNET.Managers
                 User.PersonaName = personaName;
                 User.LobbyID = new CSteamID(lobbyID).AccountID;
             }
-            //NetworkManager.SendUpdatedUsers();
         }
 
         public static List<SteamPlayer> GetUsersPlaying(uint appID, bool IncludeMe = true)
@@ -276,7 +273,7 @@ namespace SKYNET.Managers
                 string Url = $"http://{iPAddress}/Images/AvatarCache/Avatar.jpg";
                 var Data = await WebClient.DownloadDataTaskAsync(Url);
                 var Avatar = (Bitmap)ImageHelper.ImageFromBytes(Data);
-                string AvatarCachePath = Path.Combine(Common.GetPath(), "Data", "Images", "AvatarCache", accountID + ".jpg");
+                string AvatarCachePath = Path.Combine(Common.GetPath(), "SKYNET", "Images", "AvatarCache", accountID + ".jpg");
                 Common.EnsureDirectoryExists(AvatarCachePath, true);
                 ImageHelper.ToFile(AvatarCachePath, Avatar);
                 AvatarReceived(accountID, Avatar);
@@ -292,7 +289,6 @@ namespace SKYNET.Managers
             if (user != null)
             {
                 user.GameID = appID;
-                //NetworkManager.SendUpdatedUsers();
             }
         }
 
@@ -302,7 +298,6 @@ namespace SKYNET.Managers
             if (user != null)
             {
                 user.LobbyID = lobbySteamID;
-                //NetworkManager.SendUpdatedUsers();
             }
         }
 

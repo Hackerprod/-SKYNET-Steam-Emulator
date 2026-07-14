@@ -8,20 +8,20 @@ public sealed class LuaGameCoordinatorBackend : ILuaGameCoordinatorBackend
 {
     private const ulong InvalidJobId = ulong.MaxValue;
 
-    public static Action<ulong, SkyNetGCMessageDto>? PendingMessageQueued { get; set; }
+    public static Action<ulong, ApiGCMessage>? PendingMessageQueued { get; set; }
 
     private readonly GameCoordinatorContext _context;
-    private readonly SkyNetGCExchangeRequestDto _request;
+    private readonly ApiGCExchangeRequest _request;
     private readonly byte[] _requestBody;
     private readonly ulong _sourceJobId;
 
-    public LuaGameCoordinatorBackend(GameCoordinatorContext context, SkyNetGCExchangeRequestDto request)
+    public LuaGameCoordinatorBackend(GameCoordinatorContext context, ApiGCExchangeRequest request)
     {
         _context = context;
         _request = request;
         _requestBody = Decode(request.BodyBase64);
         _sourceJobId = request.SourceJobId ?? InvalidJobId;
-        Response = new SkyNetGCExchangeResponseDto { Handled = true };
+        Response = new ApiGCExchangeResponse { Handled = true };
     }
 
     public uint MessageType => _request.MessageType;
@@ -34,7 +34,7 @@ public sealed class LuaGameCoordinatorBackend : ILuaGameCoordinatorBackend
     public ulong SourceJobId => _sourceJobId;
     public string BodyBase64 => Encode(_requestBody);
     public string BodyHex => Convert.ToHexString(_requestBody);
-    public SkyNetGCExchangeResponseDto Response { get; }
+    public ApiGCExchangeResponse Response { get; }
 
     public bool Ignore()
     {
@@ -222,7 +222,7 @@ public sealed class LuaGameCoordinatorBackend : ILuaGameCoordinatorBackend
 
     public bool QueueTo(ulong steamId, uint messageType, string payloadBase64, bool protobuf = true)
     {
-        var message = new SkyNetGCMessageDto
+        var message = new ApiGCMessage
         {
             AppId = AppId,
             MessageType = messageType,
@@ -241,7 +241,7 @@ public sealed class LuaGameCoordinatorBackend : ILuaGameCoordinatorBackend
 
     public bool QueueReplyTo(ulong steamId, uint messageType, string payloadBase64, ulong targetJobId)
     {
-        var message = new SkyNetGCMessageDto
+        var message = new ApiGCMessage
         {
             AppId = AppId,
             MessageType = messageType,
@@ -262,7 +262,7 @@ public sealed class LuaGameCoordinatorBackend : ILuaGameCoordinatorBackend
     // drain /gamecoordinator/poll instead.
     public bool QueueToPoll(ulong steamId, uint messageType, string payloadBase64, bool protobuf = true)
     {
-        GameCoordinatorPendingMessages.Enqueue(AppId, steamId, new SkyNetGCMessageDto
+        GameCoordinatorPendingMessages.Enqueue(AppId, steamId, new ApiGCMessage
         {
             AppId = AppId,
             MessageType = messageType,
@@ -280,7 +280,7 @@ public sealed class LuaGameCoordinatorBackend : ILuaGameCoordinatorBackend
 
     public bool QueueReplyToPoll(ulong steamId, uint messageType, string payloadBase64, ulong targetJobId)
     {
-        GameCoordinatorPendingMessages.Enqueue(AppId, steamId, new SkyNetGCMessageDto
+        GameCoordinatorPendingMessages.Enqueue(AppId, steamId, new ApiGCMessage
         {
             AppId = AppId,
             MessageType = messageType,
@@ -312,7 +312,7 @@ public sealed class LuaGameCoordinatorBackend : ILuaGameCoordinatorBackend
 
     private void AddProto(uint messageType, byte[] payload)
     {
-        Response.Messages.Add(new SkyNetGCMessageDto
+        Response.Messages.Add(new ApiGCMessage
         {
             MessageType = messageType,
             PayloadBase64 = Encode(payload),
@@ -322,7 +322,7 @@ public sealed class LuaGameCoordinatorBackend : ILuaGameCoordinatorBackend
 
     private void AddRaw(uint messageType, byte[] payload, ulong targetJobId)
     {
-        Response.Messages.Add(new SkyNetGCMessageDto
+        Response.Messages.Add(new ApiGCMessage
         {
             MessageType = messageType,
             PayloadBase64 = Encode(payload),

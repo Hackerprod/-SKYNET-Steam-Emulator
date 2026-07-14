@@ -117,7 +117,7 @@ namespace SKYNET.Steamworks.Implementation
             }
 
             var body = requestBody ?? Array.Empty<byte>();
-            return SkyNetWorkQueue.Enqueue($"GC exchange {requestMsg}", () =>
+            return WorkQueue.Enqueue($"GC exchange {requestMsg}", () =>
             {
                 var response = SkyNetApiClient.ExchangeGCMessage(SteamEmulator.AppID, requestMsg, body, sourceJobId, gameServer);
                 if (response == null)
@@ -134,7 +134,7 @@ namespace SKYNET.Steamworks.Implementation
             }, highPriority: true);
         }
 
-        private bool QueueServerMessages(SkyNetApiClient.SkyNetGCExchangeResponseDto response, uint requestMsg, bool gameServer)
+        private bool QueueServerMessages(SkyNetApiClient.ApiGCExchangeResponse response, uint requestMsg, bool gameServer)
         {
             bool queued = false;
             if (response != null && response.Messages != null)
@@ -199,7 +199,7 @@ namespace SKYNET.Steamworks.Implementation
                 return false;
             }
 
-            var queued = SkyNetWorkQueue.Enqueue("GC server poll", () =>
+            var queued = WorkQueue.Enqueue("GC server poll", () =>
             {
                 try
                 {

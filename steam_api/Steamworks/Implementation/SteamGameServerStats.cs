@@ -23,33 +23,33 @@ namespace SKYNET.Steamworks.Implementation
         public bool ClearUserAchievement(ulong steamIDUser, string pchName)
         {
             Write($"ClearUserAchievement ({steamIDUser}, {pchName})");
-            SkyNetStateCache.UpsertAchievement(steamIDUser, pchName, false, 0, 0, false);
+            StateCache.UpsertAchievement(steamIDUser, pchName, false, 0, 0, false);
             return true;
         }
 
         public bool GetUserAchievement(ulong steamIDUser, string pchName, bool pbAchieved)
         {
             Write($"GetUserAchievement (SteamID: {steamIDUser}, Name: {pchName})");
-            return SkyNetStateCache.GetAchievements(steamIDUser).Any(a => a.Name == pchName && a.Earned);
+            return StateCache.GetAchievements(steamIDUser).Any(a => a.Name == pchName && a.Earned);
         }
 
         public bool GetUserStat(ulong steamIDUser, string pchName, float pData)
         {
             Write($"GetUserStat ({steamIDUser}, {pchName})");
-            return SkyNetStateCache.GetStats(steamIDUser).Any(s => s.Name == pchName);
+            return StateCache.GetStats(steamIDUser).Any(s => s.Name == pchName);
         }
 
         public bool GetUserStat(ulong steamIDUser, string pchName, int pData)
         {
             Write($"GetUserStat ({steamIDUser}, {pchName})");
-            return SkyNetStateCache.GetStats(steamIDUser).Any(s => s.Name == pchName);
+            return StateCache.GetStats(steamIDUser).Any(s => s.Name == pchName);
         }
 
         public SteamAPICall_t RequestUserStats(ulong steamIDUser)
         {
             Write($"RequestUserStats {steamIDUser}");
 
-            return SkyNetWorkQueue.EnqueueCallbackResult(
+            return WorkQueue.EnqueueCallbackResult(
                 new GSStatsReceived_t
                 {
                     Result = EResult.k_EResultFail,
@@ -63,8 +63,8 @@ namespace SKYNET.Steamworks.Implementation
                         var envelope = SkyNetApiClient.RequestGameServerUserStats(steamIDUser);
                         if (envelope != null)
                         {
-                            SkyNetStateCache.ApplyStats(steamIDUser, envelope.Stats);
-                            SkyNetStateCache.ApplyAchievements(steamIDUser, envelope.Achievements);
+                            StateCache.ApplyStats(steamIDUser, envelope.Stats);
+                            StateCache.ApplyAchievements(steamIDUser, envelope.Achievements);
                             result = EResult.k_EResultOK;
                         }
                     }
@@ -84,21 +84,21 @@ namespace SKYNET.Steamworks.Implementation
         public bool SetUserAchievement(ulong steamIDUser, string pchName)
         {
             Write($"SetUserAchievement ({steamIDUser}, {pchName})");
-            SkyNetStateCache.UpsertAchievement(steamIDUser, pchName, true, 0, 0, false);
+            StateCache.UpsertAchievement(steamIDUser, pchName, true, 0, 0, false);
             return true;
         }
 
         public bool SetUserStat(ulong steamIDUser, string pchName, float nData)
         {
             Write($"SetUserStat ({steamIDUser}, {pchName}, {nData})");
-            SkyNetStateCache.UpsertStat(steamIDUser, pchName, (uint)Math.Max(0, (int)nData), false);
+            StateCache.UpsertStat(steamIDUser, pchName, (uint)Math.Max(0, (int)nData), false);
             return true;
         }
 
         public bool SetUserStat(ulong steamIDUser, string pchName, int nData)
         {
             Write($"SetUserStat ({steamIDUser}, {pchName}, {nData})");
-            SkyNetStateCache.UpsertStat(steamIDUser, pchName, (uint)Math.Max(0, nData), false);
+            StateCache.UpsertStat(steamIDUser, pchName, (uint)Math.Max(0, nData), false);
             return true;
         }
 
@@ -106,7 +106,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"StoreUserStats {steamIDUser}");
 
-            return SkyNetWorkQueue.EnqueueCallbackResult(
+            return WorkQueue.EnqueueCallbackResult(
                 new GSStatsStored_t
                 {
                     Result = EResult.k_EResultFail,
@@ -119,12 +119,12 @@ namespace SKYNET.Steamworks.Implementation
                     {
                         result = SkyNetApiClient.StoreGameServerUserStats(
                             steamIDUser,
-                            SkyNetStateCache.GetStats(steamIDUser).ConvertAll(s => new SkyNetApiClient.SkyNetStatDto
+                            StateCache.GetStats(steamIDUser).ConvertAll(s => new SkyNetApiClient.ApiStat
                             {
                                 Name = s.Name,
                                 Data = s.Data
                             }),
-                            SkyNetStateCache.GetAchievements(steamIDUser).ConvertAll(a => new SkyNetApiClient.SkyNetAchievementDto
+                            StateCache.GetAchievements(steamIDUser).ConvertAll(a => new SkyNetApiClient.ApiAchievement
                             {
                                 Name = a.Name,
                                 Earned = a.Earned,
@@ -157,7 +157,7 @@ namespace SKYNET.Steamworks.Implementation
             }
 
             var average = (uint)Math.Max(0, (int)(flCountThisSession / dSessionLength));
-            SkyNetStateCache.UpsertStat(steamIDUser, pchName, average, false);
+            StateCache.UpsertStat(steamIDUser, pchName, average, false);
             return true;
         }
     }

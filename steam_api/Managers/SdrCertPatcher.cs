@@ -7,13 +7,14 @@ namespace SKYNET.Managers
 {
     /// <summary>
     /// Patches the Steam Datagram (SDR) certificate authority public key inside
-    /// steamnetworkingsockets.dll in memory, so certs signed by the emulator's CA
-    /// are accepted. The DLL file on disk is never touched.
+    /// steamnetworkingsockets.dll, so certs signed by the emulator's CA are
+    /// accepted. The disk patch runs before the native DLL is loaded; the memory
+    /// patcher remains as a fallback when the module is already resident.
     ///
-    /// The search key (Valve's CA public key, 32 bytes) comes from configuration;
-    /// the replacement key (the emulator CA public key) comes from the server. All
-    /// occurrences are replaced by signature scan, so the patch survives game
-    /// updates as long as the embedded key value does not change.
+    /// The search keys are Valve's CA and the older SKYNET CA seen in existing
+    /// patched installs. The replacement key is the emulator CA used by the
+    /// server. All occurrences are replaced by signature scan, so the patch
+    /// survives game updates as long as the embedded key value does not change.
     /// </summary>
     public static class SdrCertPatcher
     {
@@ -40,6 +41,7 @@ namespace SKYNET.Managers
         // ca_key_id (14779564839147732469) never matches. Both ids are 20 digits, so
         // the replacement is in place.
         private const string ValveCaKeyIdComment = "ID18220590129359924542";
+        private const string StaleSkynetCaKeyIdComment = "ID14497934795134905411";
         private const string EmulatorCaKeyIdComment = "ID14779564839147732469";
 
         // Valve's SDR cert-authority public key, extracted from
@@ -48,6 +50,12 @@ namespace SKYNET.Managers
         // form is kept as a fallback for builds that embed it directly.
         private const string ValveCaPublicKeyHex =
             "9AECA04E1751CE6268D569002CA1E1FA1B2DBC26D36B4EA3A0083AD372829B84";
+
+        // Older SKYNET builds patched steamnetworkingsockets.dll on disk with a
+        // different CA. Patch that stale key too so installs can recover without
+        // manually restoring Valve's original DLL first.
+        private const string StaleSkynetCaPublicKeyHex =
+            "AE8DA5FECF4DDE11247217C047B8F469984982DC84E4562D0BF4586133988C84";
 
         private static int Started;
         private static int PatchSucceeded;
@@ -62,6 +70,63 @@ namespace SKYNET.Managers
 
             var thread = new Thread(Run) { IsBackground = true, Name = "SdrCertPatcher" };
             thread.Start();
+        }
+
+        public static bool EnsureDiskPatched()
+        {
+            string baseDirectory;
+            try
+            {
+                baseDirectory = global::Common.GetPath();
+            }
+            catch (Exception ex)
+            {
+                Write($"SDR disk patch skipped: process path unavailable ({ex.Message})");
+                return false;
+            }
+
+            return EnsureDiskPatched(baseDirectory);
+        }
+
+        internal static bool EnsureDiskPatched(string baseDirectory)
+        {
+            if (string.IsNullOrWhiteSpace(baseDirectory))
+            {
+                Write("SDR disk patch skipped: process path unavailable");
+                return false;
+            }
+
+            var pairs = BuildPatchPairs();
+            byte[] emuRaw = ParseHex(EmulatorCaPublicKeyHex);
+            if (pairs == null || emuRaw == null || emuRaw.Length != 32)
+            {
+                Write("SDR CA keys invalid in code, disk patch aborted");
+                return false;
+            }
+
+            string emuToken = ToOpenSshToken(emuRaw);
+            bool foundTarget = false;
+            bool ready = false;
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var name in TargetModules)
+            {
+                string path = System.IO.Path.Combine(baseDirectory, name);
+                if (!seen.Add(path) || !System.IO.File.Exists(path))
+                {
+                    continue;
+                }
+
+                foundTarget = true;
+                ready |= TryPatchFileOnDisk(path, pairs, emuRaw, emuToken);
+            }
+
+            if (!foundTarget)
+            {
+                Write($"SDR disk patch skipped: no steamnetworkingsockets DLL in {baseDirectory}");
+            }
+
+            return ready;
         }
 
         /// <summary>
@@ -92,34 +157,32 @@ namespace SKYNET.Managers
             try
             {
                 Write("SDR patcher thread started");
-                byte[] valveRaw = ParseHex(ValveCaPublicKeyHex);
-                byte[] emuRaw = ParseHex(EmulatorCaPublicKeyHex);
-                if (valveRaw == null || valveRaw.Length != 32 || emuRaw == null || emuRaw.Length != 32)
+                var pairs = BuildPatchPairs();
+                if (pairs == null)
                 {
                     Write("SDR CA keys invalid in code, patcher aborted");
                     return;
                 }
 
-                // The key is embedded as an OpenSSH ed25519 base64 token; both tokens are
-                // the same length (68 chars), so replacement is in place. Fall back to the
-                // raw 32-byte form for builds that store the decoded key.
-                var pairs = new List<KeyValuePair<byte[], byte[]>>
-                {
-                    new KeyValuePair<byte[], byte[]>(Ascii(ToOpenSshToken(valveRaw)), Ascii(ToOpenSshToken(emuRaw))),
-                    new KeyValuePair<byte[], byte[]>(valveRaw, emuRaw),
-                    // Rewrite the key-id comment so the game resolves our cert's ca_key_id.
-                    new KeyValuePair<byte[], byte[]>(Ascii(ValveCaKeyIdComment), Ascii(EmulatorCaKeyIdComment))
-                };
-
                 // Start polling before GetCertAsync.  The networking module may not be
                 // resident during Steam API initialization, but once it appears we patch
                 // it in tens of milliseconds rather than after a half-second race.
+                byte[] emuRaw = ParseHex(EmulatorCaPublicKeyHex);
+                string emuToken = emuRaw == null ? null : ToOpenSshToken(emuRaw);
+
                 for (int attempt = 0; attempt < 1200; attempt++)
                 {
-                    if (TryPatchLoadedModule(pairs, out int patched) && patched > 0)
+                    if (TryPatchLoadedModule(pairs, emuRaw, emuToken, out int patched, out bool alreadyPatched) && (patched > 0 || alreadyPatched))
                     {
                         Interlocked.Exchange(ref PatchSucceeded, 1);
-                        Write($"SDR CA public key patched ({patched} occurrence(s))");
+                        if (patched > 0)
+                        {
+                            Write($"SDR CA public key patched ({patched} occurrence(s))");
+                        }
+                        else
+                        {
+                            Write("SDR CA public key already patched in loaded module");
+                        }
                         return;
                     }
 
@@ -136,6 +199,147 @@ namespace SKYNET.Managers
             {
                 PatchFinished.Set();
             }
+        }
+
+        private static List<KeyValuePair<byte[], byte[]>> BuildPatchPairs()
+        {
+            byte[] valveRaw = ParseHex(ValveCaPublicKeyHex);
+            byte[] staleSkynetRaw = ParseHex(StaleSkynetCaPublicKeyHex);
+            byte[] emuRaw = ParseHex(EmulatorCaPublicKeyHex);
+            if (valveRaw == null || valveRaw.Length != 32 ||
+                staleSkynetRaw == null || staleSkynetRaw.Length != 32 ||
+                emuRaw == null || emuRaw.Length != 32)
+            {
+                return null;
+            }
+
+            // The key is embedded as an OpenSSH ed25519 base64 token; all ed25519
+            // tokens have the same length, so replacement is in place. Fall back to
+            // the raw 32-byte form for builds that store the decoded key.
+            return new List<KeyValuePair<byte[], byte[]>>
+            {
+                new KeyValuePair<byte[], byte[]>(Ascii(ToOpenSshToken(valveRaw)), Ascii(ToOpenSshToken(emuRaw))),
+                new KeyValuePair<byte[], byte[]>(Ascii(ToOpenSshToken(staleSkynetRaw)), Ascii(ToOpenSshToken(emuRaw))),
+                new KeyValuePair<byte[], byte[]>(valveRaw, emuRaw),
+                new KeyValuePair<byte[], byte[]>(staleSkynetRaw, emuRaw),
+                // Rewrite the key-id comment so the game resolves our cert's ca_key_id.
+                new KeyValuePair<byte[], byte[]>(Ascii(ValveCaKeyIdComment), Ascii(EmulatorCaKeyIdComment)),
+                new KeyValuePair<byte[], byte[]>(Ascii(StaleSkynetCaKeyIdComment), Ascii(EmulatorCaKeyIdComment))
+            };
+        }
+
+        private static bool TryPatchFileOnDisk(string path, List<KeyValuePair<byte[], byte[]>> pairs, byte[] emuRaw, string emuToken)
+        {
+            string name = System.IO.Path.GetFileName(path);
+            try
+            {
+                byte[] bytes = System.IO.File.ReadAllBytes(path);
+                int patched = PatchBuffer(bytes, pairs);
+                if (patched > 0)
+                {
+                    string backupPath = GetDiskPatchBackupPath(path);
+                    if (!System.IO.File.Exists(backupPath))
+                    {
+                        System.IO.File.Copy(path, backupPath, false);
+                    }
+
+                    System.IO.File.WriteAllBytes(path, bytes);
+                    Write($"SDR disk CA patched in {name} ({patched} occurrence(s)); backup {System.IO.Path.GetFileName(backupPath)}");
+                    return true;
+                }
+
+                if (ContainsEmulatorCa(bytes, emuRaw, emuToken))
+                {
+                    Write($"SDR disk CA already patched in {name}");
+                    return true;
+                }
+
+                Write($"SDR disk CA pattern not found in {name}");
+            }
+            catch (Exception ex)
+            {
+                Write($"SDR disk patch failed for {name}: {ex.Message}");
+            }
+
+            return false;
+        }
+
+        private static string GetDiskPatchBackupPath(string path)
+        {
+            string directory = System.IO.Path.GetDirectoryName(path);
+            string fileName = System.IO.Path.GetFileNameWithoutExtension(path);
+            string extension = System.IO.Path.GetExtension(path);
+            return System.IO.Path.Combine(directory, fileName + ".skynet-prepatch" + extension);
+        }
+
+        private static int PatchBuffer(byte[] buffer, List<KeyValuePair<byte[], byte[]>> pairs)
+        {
+            int patched = 0;
+            foreach (var pair in pairs)
+            {
+                if (pair.Key.Length != pair.Value.Length)
+                {
+                    Write($"SDR disk patch pair size mismatch ({pair.Key.Length} != {pair.Value.Length})");
+                    continue;
+                }
+
+                patched += ReplaceInBuffer(buffer, pair.Key, pair.Value);
+            }
+
+            return patched;
+        }
+
+        private static int ReplaceInBuffer(byte[] buffer, byte[] search, byte[] replacement)
+        {
+            if (buffer.Length < search.Length)
+            {
+                return 0;
+            }
+
+            int patched = 0;
+            int i = 0;
+            int limit = buffer.Length - search.Length;
+            while (i <= limit)
+            {
+                if (Matches(buffer, i, search))
+                {
+                    Array.Copy(replacement, 0, buffer, i, replacement.Length);
+                    patched++;
+                    i += search.Length;
+                }
+                else
+                {
+                    i++;
+                }
+            }
+
+            return patched;
+        }
+
+        private static bool ContainsEmulatorCa(byte[] buffer, byte[] emuRaw, string emuToken)
+        {
+            bool hasEmulatorKey = ContainsPattern(buffer, Ascii(emuToken)) || ContainsPattern(buffer, emuRaw);
+            bool hasEmulatorId = ContainsPattern(buffer, Ascii(EmulatorCaKeyIdComment));
+            return hasEmulatorKey && hasEmulatorId;
+        }
+
+        private static bool ContainsPattern(byte[] buffer, byte[] pattern)
+        {
+            if (buffer.Length < pattern.Length)
+            {
+                return false;
+            }
+
+            int limit = buffer.Length - pattern.Length;
+            for (int i = 0; i <= limit; i++)
+            {
+                if (Matches(buffer, i, pattern))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static byte[] Ascii(string value)
@@ -161,9 +365,12 @@ namespace SKYNET.Managers
             ms.Write(value, 0, value.Length);
         }
 
-        private static bool TryPatchLoadedModule(List<KeyValuePair<byte[], byte[]>> pairs, out int totalPatched)
+        private static bool TryPatchLoadedModule(List<KeyValuePair<byte[], byte[]>> pairs, byte[] emuRaw, string emuToken, out int totalPatched, out bool alreadyPatched)
         {
             totalPatched = 0;
+            alreadyPatched = false;
+            bool foundEmulatorKey = false;
+            bool foundEmulatorId = false;
             IntPtr module = IntPtr.Zero;
             foreach (var name in TargetModules)
             {
@@ -207,21 +414,32 @@ namespace SKYNET.Managers
                 {
                     long scanStart = Math.Max(regionBase, baseAddr);
                     long scanEnd = Math.Min(next, endAddr);
-                    totalPatched += ScanAndPatchRegion(scanStart, scanEnd - scanStart, pairs);
+                    totalPatched += ScanAndPatchRegion(scanStart, scanEnd - scanStart, pairs, emuRaw, emuToken, ref foundEmulatorKey, ref foundEmulatorId);
                 }
 
                 cursor = next;
             }
 
+            alreadyPatched = foundEmulatorKey && foundEmulatorId;
             return true;
         }
 
-        private static int ScanAndPatchRegion(long start, long length, List<KeyValuePair<byte[], byte[]>> pairs)
+        private static int ScanAndPatchRegion(long start, long length, List<KeyValuePair<byte[], byte[]>> pairs, byte[] emuRaw, string emuToken, ref bool foundEmulatorKey, ref bool foundEmulatorId)
         {
             var buffer = new byte[length];
             if (!ReadProcessMemory(GetCurrentProcess(), (IntPtr)start, buffer, (UIntPtr)length, out var read) || (long)read != length)
             {
                 return 0;
+            }
+
+            if (!foundEmulatorKey && emuRaw != null && !string.IsNullOrEmpty(emuToken))
+            {
+                foundEmulatorKey = ContainsPattern(buffer, Ascii(emuToken)) || ContainsPattern(buffer, emuRaw);
+            }
+
+            if (!foundEmulatorId)
+            {
+                foundEmulatorId = ContainsPattern(buffer, Ascii(EmulatorCaKeyIdComment));
             }
 
             int patched = 0;

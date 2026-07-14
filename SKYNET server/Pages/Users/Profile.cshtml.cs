@@ -10,7 +10,7 @@ public class ProfileModel : PageModel
 {
     private readonly SteamApiStateService _state;
 
-    public SkyNetUserProfileDto Profile { get; private set; } = new();
+    public ApiUserProfile Profile { get; private set; } = new();
 
     [BindProperty(SupportsGet = true)]
     public ulong SteamId { get; set; }

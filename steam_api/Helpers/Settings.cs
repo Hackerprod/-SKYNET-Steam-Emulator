@@ -92,7 +92,7 @@ namespace SKYNET.Helper
 
                 SteamEmulator.PersonaName = GetString("User Settings", "FallbackPersonaName", Environment.UserName);
                 SteamEmulator.Language = (string)IniParser["Game Settings"]["Languaje"];
-                SteamEmulator.SkyNetClientInstanceId = GetString("User Settings", "ClientInstanceId", GenerateClientInstanceId());
+                SteamEmulator.ClientInstanceId = GetString("User Settings", "ClientInstanceId", GenerateClientInstanceId());
                 var fallbackAccountId = GetUInt("User Settings", "FallbackAccountId", GenerateStableAccountId());
                 SteamEmulator.SteamID = new CSteamID(fallbackAccountId, Steamworks.EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeIndividual);
 
@@ -127,42 +127,42 @@ namespace SKYNET.Helper
                             break;
                         case "ServerUrl":
                         case "SkyNetServerUrl":
-                            SteamEmulator.SkyNetServerUrl = item.Value.ToString();
+                            SteamEmulator.ServerUrl = item.Value.ToString();
                             break;
                         case "PollIntervalMs":
                         case "SkyNetPollIntervalMs":
                             if (int.TryParse(item.Value.ToString(), out int pollIntervalMs))
                             {
-                                SteamEmulator.SkyNetPollIntervalMs = Math.Max(10, pollIntervalMs);
+                                SteamEmulator.PollIntervalMs = Math.Max(10, pollIntervalMs);
                             }
                             break;
                         case "HttpTimeoutMs":
                         case "SkyNetHttpTimeoutMs":
                             if (int.TryParse(item.Value.ToString(), out int timeoutMs))
                             {
-                                SteamEmulator.SkyNetHttpTimeoutMs = Math.Max(250, timeoutMs);
+                                SteamEmulator.HttpTimeoutMs = Math.Max(250, timeoutMs);
                             }
                             break;
                         case "DiscoveryPort":
                         case "SkyNetDiscoveryPort":
                             if (int.TryParse(item.Value.ToString(), out int discoveryPort))
                             {
-                                SteamEmulator.SkyNetDiscoveryPort = discoveryPort;
+                                SteamEmulator.DiscoveryPort = discoveryPort;
                             }
                             break;
                         case "AccessToken":
                         case "SkyNetAccessToken":
-                            SteamEmulator.SkyNetAccessToken = item.Value.ToString();
+                            SteamEmulator.AccessToken = item.Value.ToString();
                             break;
                         case "RefreshToken":
                         case "SkyNetRefreshToken":
-                            SteamEmulator.SkyNetRefreshToken = item.Value.ToString();
+                            SteamEmulator.RefreshToken = item.Value.ToString();
                             break;
                         case "UseActiveWebUser":
                         case "SkyNetUseActiveWebUser":
                             if (bool.TryParse(item.Value.ToString(), out bool useActiveWebUser))
                             {
-                                SteamEmulator.SkyNetUseActiveWebUser = useActiveWebUser;
+                                SteamEmulator.UseActiveWebUser = useActiveWebUser;
                             }
                             break;
                         case "BroadCastPort":

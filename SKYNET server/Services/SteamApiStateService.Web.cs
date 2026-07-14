@@ -15,7 +15,7 @@ public sealed partial class SteamApiStateService
     private static readonly TimeSpan WebSessionLifetime = TimeSpan.FromHours(12);
     private static readonly TimeSpan RememberedWebSessionLifetime = TimeSpan.FromDays(30);
 
-    public SkyNetWebLoginResultDto? LoginWeb(string username, string password, bool rememberMe, string? remoteIp)
+    public ApiWebLoginResult? LoginWeb(string username, string password, bool rememberMe, string? remoteIp)
     {
         lock (_sync)
         {
@@ -35,7 +35,7 @@ public sealed partial class SteamApiStateService
             var session = CreateSessionLocked(account.SteamId, rememberMe, remoteIp);
             SaveState();
 
-            return new SkyNetWebLoginResultDto
+            return new ApiWebLoginResult
             {
                 AccessToken = session.AccessToken,
                 User = CloneUser(existingUser),
@@ -44,7 +44,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetWebLoginResultDto? RegisterWeb(string username, string personaName, string password, string? remoteIp)
+    public ApiWebLoginResult? RegisterWeb(string username, string personaName, string password, string? remoteIp)
     {
         lock (_sync)
         {
@@ -62,7 +62,7 @@ public sealed partial class SteamApiStateService
             var accountId = AllocateAccountIdLocked();
             var steamId = ToSteamId(accountId);
             var user = EnsureUser(steamId, accountId, DefaultAppId, personaName.Trim());
-            var account = new SkyNetWebAccountDto
+            var account = new ApiWebAccount
             {
                 Username = username.Trim(),
                 PasswordHash = HashPassword(password),
@@ -77,7 +77,7 @@ public sealed partial class SteamApiStateService
             var session = CreateSessionLocked(steamId, false, remoteIp);
             SaveState();
 
-            return new SkyNetWebLoginResultDto
+            return new ApiWebLoginResult
             {
                 AccessToken = session.AccessToken,
                 User = CloneUser(user),
@@ -103,7 +103,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetUserDto? GetWebUser(string? token)
+    public ApiUser? GetWebUser(string? token)
     {
         lock (_sync)
         {
@@ -119,7 +119,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetWebAccountViewDto? GetWebAccount(string? token)
+    public ApiWebAccountView? GetWebAccount(string? token)
     {
         lock (_sync)
         {
@@ -173,16 +173,16 @@ public sealed partial class SteamApiStateService
     {
         lock (_sync)
         {
-            SkyNetUserDto user;
+            ApiUser user;
             if (!TryGetUserByToken(token ?? string.Empty, out user))
             {
-                user = GetDefaultWebUserLocked() ?? new SkyNetUserDto();
+                user = GetDefaultWebUserLocked() ?? new ApiUser();
             }
 
             var stats = user == null || !_state.Stats.TryGetValue(user.SteamId, out var foundStats)
-                ? new SkyNetStatsEnvelopeDto()
+                ? new ApiStatsEnvelope()
                 : foundStats;
-            var friends = user == null ? new List<SkyNetUserDto>() : GetFriendUsersLocked(user.SteamId);
+            var friends = user == null ? new List<ApiUser>() : GetFriendUsersLocked(user.SteamId);
             var activeServers = _state.GameServers.Count;
             var activeLobbies = _state.Lobbies.Values.Count(l => l.Members.Count > 0);
             var statCount = stats.Stats.Count;
@@ -245,7 +245,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetAdminOverviewDto? GetAdminOverview(string token)
+    public ApiAdminOverview? GetAdminOverview(string token)
     {
         lock (_sync)
         {
@@ -254,7 +254,7 @@ public sealed partial class SteamApiStateService
                 return null;
             }
 
-            return new SkyNetAdminOverviewDto
+            return new ApiAdminOverview
             {
                 Users = _state.Users.Values.OrderBy(u => u.PersonaName).Select(CloneUser).ToList(),
                 Accounts = _state.WebAccounts.Values.OrderBy(a => a.Username).Select(CloneWebAccountView).ToList(),
@@ -274,26 +274,26 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public List<SkyNetUserDto> GetWebUsers(string token)
+    public List<ApiUser> GetWebUsers(string token)
     {
         lock (_sync)
         {
             if (!TryGetSession(token, out var session))
             {
-                return new List<SkyNetUserDto>();
+                return new List<ApiUser>();
             }
 
             return _state.Users.Values.OrderBy(u => u.PersonaName).Select(user => CloneUserForViewerLocked(user, session!.SteamId)).ToList();
         }
     }
 
-    public List<SkyNetUserDto> GetWebFriends(string token)
+    public List<ApiUser> GetWebFriends(string token)
     {
         lock (_sync)
         {
             if (!TryGetSession(token, out var session))
             {
-                return new List<SkyNetUserDto>();
+                return new List<ApiUser>();
             }
 
             return GetFriendUsersLocked(session!.SteamId).Select(user => CloneUserForViewerLocked(user, session.SteamId)).ToList();
@@ -446,7 +446,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public SkyNetWebAccountViewDto? AdminCreateWebAccount(string token, string username, string personaName, string password, bool isAdmin)
+    public ApiWebAccountView? AdminCreateWebAccount(string token, string username, string personaName, string password, bool isAdmin)
     {
         lock (_sync)
         {
@@ -469,7 +469,7 @@ public sealed partial class SteamApiStateService
             var accountId = AllocateAccountIdLocked();
             var steamId = ToSteamId(accountId);
             var user = EnsureUser(steamId, accountId, DefaultAppId, personaName.Trim());
-            var account = new SkyNetWebAccountDto
+            var account = new ApiWebAccount
             {
                 Username = username.Trim(),
                 PasswordHash = HashPassword(password),
@@ -497,7 +497,7 @@ public sealed partial class SteamApiStateService
             var steamId = ToSteamId(DefaultAdminAccountId);
             var user = EnsureUser(steamId, DefaultAdminAccountId, DefaultAppId, DefaultAdminUsername);
             user.HasFriend = false;
-            _state.WebAccounts[NormalizeUsername(DefaultAdminUsername)] = new SkyNetWebAccountDto
+            _state.WebAccounts[NormalizeUsername(DefaultAdminUsername)] = new ApiWebAccount
             {
                 Username = DefaultAdminUsername,
                 PasswordHash = HashPassword(DefaultAdminPassword),
@@ -535,9 +535,9 @@ public sealed partial class SteamApiStateService
         return session;
     }
 
-    private bool TryGetWebAccountByToken(string token, out SkyNetWebAccountDto account)
+    private bool TryGetWebAccountByToken(string token, out ApiWebAccount account)
     {
-        account = new SkyNetWebAccountDto();
+        account = new ApiWebAccount();
         if (!TryGetSession(token, out var session) || session == null || !session.WebSession)
         {
             return false;
@@ -553,7 +553,7 @@ public sealed partial class SteamApiStateService
         return true;
     }
 
-    private SkyNetUserDto? GetDefaultWebUserLocked()
+    private ApiUser? GetDefaultWebUserLocked()
     {
         var admin = _state.WebAccounts.Values.FirstOrDefault(a => a.IsAdmin);
         if (admin != null && _state.Users.TryGetValue(admin.SteamId, out var adminUser))
@@ -564,11 +564,11 @@ public sealed partial class SteamApiStateService
         return _state.Users.Values.OrderBy(u => u.PersonaName).FirstOrDefault();
     }
 
-    private List<SkyNetUserDto> GetFriendUsersLocked(ulong steamId)
+    private List<ApiUser> GetFriendUsersLocked(ulong steamId)
     {
         if (!_state.FriendLinks.TryGetValue(steamId, out var links))
         {
-            return new List<SkyNetUserDto>();
+            return new List<ApiUser>();
         }
 
         return links
@@ -583,9 +583,9 @@ public sealed partial class SteamApiStateService
             .ToList();
     }
 
-    private bool TryResolveUserLocked(string value, out SkyNetUserDto user)
+    private bool TryResolveUserLocked(string value, out ApiUser user)
     {
-        user = new SkyNetUserDto();
+        user = new ApiUser();
         if (string.IsNullOrWhiteSpace(value))
         {
             return false;
@@ -674,10 +674,10 @@ public sealed partial class SteamApiStateService
         return Math.Max(max + 1U, 100_000U);
     }
 
-    private SkyNetWebAccountViewDto CloneWebAccountView(SkyNetWebAccountDto account)
+    private ApiWebAccountView CloneWebAccountView(ApiWebAccount account)
     {
         _state.Users.TryGetValue(account.SteamId, out var user);
-        return new SkyNetWebAccountViewDto
+        return new ApiWebAccountView
         {
             Username = account.Username,
             SteamId = account.SteamId,
@@ -688,7 +688,7 @@ public sealed partial class SteamApiStateService
         };
     }
 
-    private static SteamFriend MapFriend(SkyNetUserDto user)
+    private static SteamFriend MapFriend(ApiUser user)
     {
         var status = user.RichPresence.TryGetValue("status", out var richPresence) && !string.IsNullOrWhiteSpace(richPresence)
             ? richPresence
@@ -705,7 +705,7 @@ public sealed partial class SteamApiStateService
         };
     }
 
-    private List<SteamActivity> BuildActivitiesLocked(SkyNetUserDto? user, SkyNetStatsEnvelopeDto stats)
+    private List<SteamActivity> BuildActivitiesLocked(ApiUser? user, ApiStatsEnvelope stats)
     {
         var activities = new List<SteamActivity>();
         if (user != null)

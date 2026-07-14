@@ -1,10 +1,10 @@
 ﻿using System;
 using SKYNET.Steamworks.Interfaces;
+using System.Collections.Generic;
 using System.Text;
 using SKYNET.Callback;
 using SKYNET.Managers;
 using System.Net;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -26,8 +26,8 @@ namespace SKYNET.Steamworks.Implementation
         //
         // true (SECURE MODE):
         //     GetCertAsync returns the signed certificate issued by the
-        //     SKYNET server. Native SDR CA patching is intentionally disabled
-        //     in this build; do not reintroduce a blocking patch wait here.
+        //     SKYNET server. Native SDR CA patching runs during emulator
+        //     initialization and is retried in memory from networking calls.
         //
         // Configure this with [Network Settings] SecureNetworking in the client
         // INI. A game restart is required because the native networking library
@@ -70,7 +70,7 @@ namespace SKYNET.Steamworks.Implementation
 
             EnsureSecureCertPatcherStarted("GetCertAsync", 750);
 
-            return SkyNetWorkQueue.EnqueueCallbackResult(
+            return WorkQueue.EnqueueCallbackResult(
                 CreateEmptyCertResult(EResult.k_EResultNoConnection),
                 () => BuildCertResult(),
                 false,
@@ -128,12 +128,31 @@ namespace SKYNET.Steamworks.Implementation
                 byte[] certBytes = FromBase64(dto.CertBase64);
                 byte[] signatureBytes = FromBase64(dto.SignatureBase64);
                 byte[] privKeyBytes = FromBase64(dto.PrivateKeyBase64);
+                byte[] publicKeyBytes = FromBase64(dto.PublicKeyBase64);
 
                 if (certBytes.Length == 0 || certBytes.Length > 512 ||
-                    signatureBytes.Length > 128 || privKeyBytes.Length > 128)
+                    signatureBytes.Length != 64 || privKeyBytes.Length != 32)
                 {
-                    Write($"GetCertAsync: cert sizes out of range (cert={certBytes.Length}, sig={signatureBytes.Length}, key={privKeyBytes.Length})");
+                    Write($"GetCertAsync: cert sizes invalid (cert={certBytes.Length}, sig={signatureBytes.Length}, key={privKeyBytes.Length})");
                     return empty;
+                }
+
+                ulong expectedSteamId = GetExpectedSdrSteamId();
+                uint expectedAppId = GetExpectedSdrAppId();
+                if (!TryValidateInnerCert(certBytes, publicKeyBytes, expectedSteamId, expectedAppId, out var validationError))
+                {
+                    Write($"GetCertAsync: cert protobuf invalid ({validationError})");
+                    return empty;
+                }
+                if (TryReadInnerCert(certBytes, out var certInfo, out _))
+                {
+                    uint now = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                    Write(
+                        "GetCertAsync: cert fields " +
+                        $"keyType={certInfo.KeyType} key={FormatBytes(certInfo.KeyData, 8)} " +
+                        $"legacySteamId={certInfo.LegacySteamId} identity={certInfo.IdentityString ?? "<null>"} " +
+                        $"appIds=[{string.Join(",", certInfo.AppIds.ToArray())}] " +
+                        $"created={certInfo.TimeCreated} expires={certInfo.TimeExpiry} expiresIn={certInfo.TimeExpiry - now}s");
                 }
 
                 var cert = new SteamNetworkingSocketsCert_t
@@ -148,7 +167,11 @@ namespace SKYNET.Steamworks.Implementation
                     m_privKey = FitBuffer(privKeyBytes, 128)
                 };
 
-                Write($"GetCertAsync: signed cert issued (cert={certBytes.Length}, sig={signatureBytes.Length}, key={privKeyBytes.Length}, caKeyId={dto.CaKeyId:X})");
+                Write(
+                    "GetCertAsync: signed cert issued " +
+                    $"(cert={certBytes.Length}, sig={signatureBytes.Length}, key={privKeyBytes.Length}, " +
+                    $"caKeyId={dto.CaKeyId:X}, steamId={expectedSteamId}, appId={expectedAppId}, " +
+                    $"certB64={Convert.ToBase64String(certBytes)}, sigB64={Convert.ToBase64String(signatureBytes)}, pub={FormatBytes(publicKeyBytes, 32)})");
                 CacheCert(cert);
                 return cert;
             }
@@ -211,6 +234,281 @@ namespace SKYNET.Steamworks.Implementation
             }
 
             return buffer;
+        }
+
+        private static ulong GetExpectedSdrSteamId()
+        {
+            bool gameServer = SteamEmulator.SteamGameServer?.LoggedIn == true;
+            return (ulong)(gameServer ? SteamEmulator.SteamID_GS : SteamEmulator.SteamID);
+        }
+
+        private static uint GetExpectedSdrAppId()
+        {
+            bool gameServer = SteamEmulator.SteamGameServer?.LoggedIn == true;
+            return gameServer && SteamEmulator.SteamGameServer?.ServerData?.AppId != 0
+                ? SteamEmulator.SteamGameServer.ServerData.AppId
+                : SteamEmulator.AppID;
+        }
+
+        private static bool TryValidateInnerCert(
+            byte[] certBytes,
+            byte[] publicKeyBytes,
+            ulong expectedSteamId,
+            uint expectedAppId,
+            out string error)
+        {
+            error = string.Empty;
+
+            if (!TryReadInnerCert(certBytes, out var info, out error))
+            {
+                return false;
+            }
+
+            if (info.KeyType != 1)
+            {
+                error = $"key_type={info.KeyType}";
+                return false;
+            }
+
+            if (info.KeyData == null || info.KeyData.Length != 32)
+            {
+                error = $"key_data={info.KeyData?.Length ?? 0}";
+                return false;
+            }
+
+            if (publicKeyBytes.Length != 0 && (publicKeyBytes.Length != 32 || !BytesEqual(publicKeyBytes, info.KeyData)))
+            {
+                error = $"public key mismatch dto={publicKeyBytes.Length} cert={info.KeyData.Length}";
+                return false;
+            }
+
+            if (expectedSteamId != 0)
+            {
+                if (info.LegacySteamId != 0 && info.LegacySteamId != expectedSteamId)
+                {
+                    error = $"legacy_steam_id={info.LegacySteamId} expected={expectedSteamId}";
+                    return false;
+                }
+
+                string expectedIdentity = $"steamid:{expectedSteamId}";
+                if (!string.Equals(info.IdentityString, expectedIdentity, StringComparison.Ordinal))
+                {
+                    error = $"identity_string={info.IdentityString ?? "<null>"} expected={expectedIdentity}";
+                    return false;
+                }
+            }
+
+            if (expectedAppId != 0 && !info.AppIds.Contains(expectedAppId))
+            {
+                error = $"missing app_id={expectedAppId}";
+                return false;
+            }
+
+            uint now = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            if (info.TimeCreated > now + 300)
+            {
+                error = $"time_created={info.TimeCreated} now={now}";
+                return false;
+            }
+
+            if (info.TimeExpiry <= now)
+            {
+                error = $"time_expiry={info.TimeExpiry} now={now}";
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool TryReadInnerCert(byte[] certBytes, out InnerCertInfo info, out string error)
+        {
+            info = new InnerCertInfo();
+            error = string.Empty;
+
+            int offset = 0;
+            while (offset < certBytes.Length)
+            {
+                if (!TryReadVarint(certBytes, ref offset, out var tag))
+                {
+                    error = "bad tag";
+                    return false;
+                }
+
+                int field = (int)(tag >> 3);
+                int wireType = (int)(tag & 7);
+                switch (wireType)
+                {
+                    case 0:
+                        if (!TryReadVarint(certBytes, ref offset, out var varintValue))
+                        {
+                            error = $"bad varint field={field}";
+                            return false;
+                        }
+
+                        if (field == 1)
+                        {
+                            info.KeyType = (int)varintValue;
+                        }
+                        else if (field == 10)
+                        {
+                            info.AppIds.Add((uint)varintValue);
+                        }
+                        break;
+
+                    case 1:
+                        if (offset + 8 > certBytes.Length)
+                        {
+                            error = $"truncated fixed64 field={field}";
+                            return false;
+                        }
+
+                        if (field == 4)
+                        {
+                            info.LegacySteamId = BitConverter.ToUInt64(certBytes, offset);
+                        }
+                        offset += 8;
+                        break;
+
+                    case 2:
+                        if (!TryReadVarint(certBytes, ref offset, out var length64) || length64 > int.MaxValue)
+                        {
+                            error = $"bad length field={field}";
+                            return false;
+                        }
+
+                        int length = (int)length64;
+                        if (length < 0 || offset + length > certBytes.Length)
+                        {
+                            error = $"truncated bytes field={field}";
+                            return false;
+                        }
+
+                        if (field == 2)
+                        {
+                            info.KeyData = new byte[length];
+                            Array.Copy(certBytes, offset, info.KeyData, 0, length);
+                        }
+                        else if (field == 10)
+                        {
+                            if (!TryReadPackedAppIds(certBytes, offset, length, info.AppIds, out error))
+                            {
+                                return false;
+                            }
+                        }
+                        else if (field == 12)
+                        {
+                            info.IdentityString = Encoding.UTF8.GetString(certBytes, offset, length);
+                        }
+
+                        offset += length;
+                        break;
+
+                    case 5:
+                        if (offset + 4 > certBytes.Length)
+                        {
+                            error = $"truncated fixed32 field={field}";
+                            return false;
+                        }
+
+                        uint fixed32 = BitConverter.ToUInt32(certBytes, offset);
+                        if (field == 8)
+                        {
+                            info.TimeCreated = fixed32;
+                        }
+                        else if (field == 9)
+                        {
+                            info.TimeExpiry = fixed32;
+                        }
+                        offset += 4;
+                        break;
+
+                    default:
+                        error = $"unsupported wire type={wireType} field={field}";
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool TryReadPackedAppIds(byte[] bytes, int offset, int length, List<uint> appIds, out string error)
+        {
+            error = string.Empty;
+            int end = offset + length;
+            while (offset < end)
+            {
+                if (!TryReadVarint(bytes, ref offset, out var value) || offset > end)
+                {
+                    error = "bad packed app_ids";
+                    return false;
+                }
+                appIds.Add((uint)value);
+            }
+
+            return offset == end;
+        }
+
+        private static bool TryReadVarint(byte[] bytes, ref int offset, out ulong value)
+        {
+            value = 0;
+            int shift = 0;
+            while (offset < bytes.Length && shift < 64)
+            {
+                byte b = bytes[offset++];
+                value |= (ulong)(b & 0x7F) << shift;
+                if ((b & 0x80) == 0)
+                {
+                    return true;
+                }
+                shift += 7;
+            }
+
+            return false;
+        }
+
+        private static bool BytesEqual(byte[] left, byte[] right)
+        {
+            if (left.Length != right.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < left.Length; i++)
+            {
+                if (left[i] != right[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static string FormatBytes(byte[] bytes, int maxBytes)
+        {
+            if (bytes == null || bytes.Length == 0)
+            {
+                return "<empty>";
+            }
+
+            int count = Math.Min(bytes.Length, maxBytes);
+            var prefix = new byte[count];
+            Array.Copy(bytes, prefix, count);
+            string text = BitConverter.ToString(prefix).Replace("-", "");
+            return bytes.Length > count
+                ? $"{text}...({bytes.Length})"
+                : text;
+        }
+
+        private sealed class InnerCertInfo
+        {
+            public int KeyType { get; set; }
+            public byte[] KeyData { get; set; }
+            public ulong LegacySteamId { get; set; }
+            public uint TimeCreated { get; set; }
+            public uint TimeExpiry { get; set; }
+            public List<uint> AppIds { get; } = new List<uint>();
+            public string IdentityString { get; set; }
         }
 
         public int GetNetworkConfigJSON(IntPtr buf, uint cbBuf)
@@ -375,5 +673,6 @@ namespace SKYNET.Steamworks.Implementation
                 SteamNetworkingUtils.Instance?.QueueNativeNetworkStatusCallbacks();
             });
         }
+
     }
 }

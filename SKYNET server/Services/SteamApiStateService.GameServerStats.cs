@@ -4,13 +4,13 @@ namespace SKYNET_server.Services;
 
 public sealed partial class SteamApiStateService
 {
-    public SkyNetStatsEnvelopeDto GetGameServerUserStats(ulong steamId)
+    public ApiStatsEnvelope GetGameServerUserStats(ulong steamId)
     {
         lock (_sync)
         {
             if (!_state.Stats.TryGetValue(steamId, out var stats))
             {
-                stats = new SkyNetStatsEnvelopeDto { SteamId = steamId, CurrentPlayers = 1 };
+                stats = new ApiStatsEnvelope { SteamId = steamId, CurrentPlayers = 1 };
                 _state.Stats[steamId] = stats;
                 SaveState();
             }
@@ -19,16 +19,16 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public bool StoreGameServerUserStats(ulong steamId, SkyNetStoreStatsRequestDto request)
+    public bool StoreGameServerUserStats(ulong steamId, ApiStoreStatsRequest request)
     {
         lock (_sync)
         {
-            _state.Stats[steamId] = new SkyNetStatsEnvelopeDto
+            _state.Stats[steamId] = new ApiStatsEnvelope
             {
                 SteamId = steamId,
                 CurrentPlayers = 1,
-                Stats = request.Stats ?? new List<SkyNetStatDto>(),
-                Achievements = request.Achievements ?? new List<SkyNetAchievementDto>()
+                Stats = request.Stats ?? new List<ApiStat>(),
+                Achievements = request.Achievements ?? new List<ApiAchievement>()
             };
 
             SaveState();

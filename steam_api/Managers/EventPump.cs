@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace SKYNET.Managers
 {
-    public static class SkyNetEventPump
+    public static class EventPump
     {
         private static int Started;
 
@@ -59,12 +59,12 @@ namespace SKYNET.Managers
                 }
                 catch
                 {
-                    Thread.Sleep(Math.Max(50, SteamEmulator.SkyNetPollIntervalMs));
+                    Thread.Sleep(Math.Max(50, SteamEmulator.PollIntervalMs));
                 }
             }
         }
 
-        private static void ApplyEvent(SkyNetApiClient.SkyNetEventDto serverEvent)
+        private static void ApplyEvent(SkyNetApiClient.ApiEvent serverEvent)
         {
             if (serverEvent == null || string.IsNullOrWhiteSpace(serverEvent.Type))
             {
@@ -78,21 +78,21 @@ namespace SKYNET.Managers
                 case "friend_request_received":
                 case "friend_request_sent":
                 case "friend_presence_changed":
-                    SkyNetStateCache.UpsertFriendFromEvent(serverEvent);
+                    StateCache.UpsertFriendFromEvent(serverEvent);
                     EmitPersonaStateChange(serverEvent);
                     break;
 
                 case "friend_removed":
-                    SkyNetStateCache.RemoveFriend(serverEvent.SteamId != 0 ? serverEvent.SteamId : (ulong)new CSteamID(serverEvent.AccountId));
+                    StateCache.RemoveFriend(serverEvent.SteamId != 0 ? serverEvent.SteamId : (ulong)new CSteamID(serverEvent.AccountId));
                     EmitPersonaStateChange(serverEvent);
                     break;
 
                 case "stats_updated":
-                    SkyNetStateCache.UpsertStat(serverEvent.SteamId != 0 ? serverEvent.SteamId : (ulong)new CSteamID(serverEvent.AccountId), serverEvent.StatName, serverEvent.StatValue, false);
+                    StateCache.UpsertStat(serverEvent.SteamId != 0 ? serverEvent.SteamId : (ulong)new CSteamID(serverEvent.AccountId), serverEvent.StatName, serverEvent.StatValue, false);
                     break;
 
                 case "achievement_unlocked":
-                    SkyNetStateCache.UpsertAchievement(serverEvent.SteamId != 0 ? serverEvent.SteamId : (ulong)new CSteamID(serverEvent.AccountId), serverEvent.AchievementName, serverEvent.AchievementEarned, serverEvent.AchievementProgress, serverEvent.AchievementMaxProgress, false);
+                    StateCache.UpsertAchievement(serverEvent.SteamId != 0 ? serverEvent.SteamId : (ulong)new CSteamID(serverEvent.AccountId), serverEvent.AchievementName, serverEvent.AchievementEarned, serverEvent.AchievementProgress, serverEvent.AchievementMaxProgress, false);
                     break;
 
                 case "lobby_updated":
@@ -116,7 +116,7 @@ namespace SKYNET.Managers
             }
         }
 
-        private static void EmitPersonaStateChange(SkyNetApiClient.SkyNetEventDto serverEvent)
+        private static void EmitPersonaStateChange(SkyNetApiClient.ApiEvent serverEvent)
         {
             var steamId = serverEvent.SteamId != 0
                 ? serverEvent.SteamId
@@ -138,7 +138,7 @@ namespace SKYNET.Managers
             }
         }
 
-        private static void ApplyLobby(SkyNetApiClient.SkyNetEventDto serverEvent)
+        private static void ApplyLobby(SkyNetApiClient.ApiEvent serverEvent)
         {
             var lobby = serverEvent.Lobby == null ? null : SkyNetApiClient.MapLobbyForEvents(serverEvent.Lobby);
             if (lobby == null)
@@ -156,7 +156,7 @@ namespace SKYNET.Managers
             });
         }
 
-        private static void RemoveLobby(SkyNetApiClient.SkyNetEventDto serverEvent)
+        private static void RemoveLobby(SkyNetApiClient.ApiEvent serverEvent)
         {
             var lobbyId = serverEvent.Lobby?.SteamId ?? serverEvent.LobbyId;
             if (lobbyId == 0)
@@ -174,7 +174,7 @@ namespace SKYNET.Managers
             });
         }
 
-        private static void ApplyP2PPacket(SkyNetApiClient.SkyNetEventDto serverEvent)
+        private static void ApplyP2PPacket(SkyNetApiClient.ApiEvent serverEvent)
         {
             if (SteamEmulator.SteamNetworking == null || string.IsNullOrWhiteSpace(serverEvent.PayloadBase64))
             {
@@ -195,7 +195,7 @@ namespace SKYNET.Managers
             });
         }
 
-        private static void ApplyGCMessage(SkyNetApiClient.SkyNetEventDto serverEvent)
+        private static void ApplyGCMessage(SkyNetApiClient.ApiEvent serverEvent)
         {
             if (SteamEmulator.SteamGameCoordinator == null || string.IsNullOrWhiteSpace(serverEvent.PayloadBase64))
             {

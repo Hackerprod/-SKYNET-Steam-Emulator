@@ -297,7 +297,7 @@ namespace SKYNET.Steamworks.Implementation
         public int GetPlayerSteamLevel()
         {
             SkyNetApiClient.QueueSelfRefresh();
-            int level = SkyNetStateCache.GetSelfPlayerLevel();
+            int level = StateCache.GetSelfPlayerLevel();
             Write($"GetPlayerSteamLevel {level}");
             return level == 0 ? 100 : level;
         }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 
 namespace SKYNET.Helpers
 {
@@ -30,26 +29,23 @@ namespace SKYNET.Helpers
 
             try
             {
-                if (formatted != lastMsg)
+                lock (file_lock)
                 {
-                    var taken = false;
-                    Monitor.TryEnter(file_lock, ref taken);
-
-                    if (taken)
+                    if (formatted == lastMsg)
                     {
-                        buffered.Add(formatted);
-                        if (File.Exists(fileName))
-                        {
-                            File.AppendAllLines(fileName, buffered);
-                        }
-                        else
-                        {
-                            File.WriteAllLines(fileName, buffered);
-                        }
-                        buffered.Clear();
-
-                        Monitor.Exit(file_lock);
+                        return;
                     }
+
+                    buffered.Add(formatted);
+                    if (File.Exists(fileName))
+                    {
+                        File.AppendAllLines(fileName, buffered);
+                    }
+                    else
+                    {
+                        File.WriteAllLines(fileName, buffered);
+                    }
+                    buffered.Clear();
                     lastMsg = formatted;
                 }
             }
