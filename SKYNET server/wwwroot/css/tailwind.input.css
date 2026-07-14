@@ -1,0 +1,44 @@
+/* Self-hosted Inter (latin, weights 300–900) — replaces the Google Fonts CDN link. */
+@font-face { font-family: 'Inter'; font-style: normal; font-display: swap; font-weight: 300; src: url('/lib/inter/inter-latin-300-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-display: swap; font-weight: 400; src: url('/lib/inter/inter-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-display: swap; font-weight: 500; src: url('/lib/inter/inter-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-display: swap; font-weight: 600; src: url('/lib/inter/inter-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-display: swap; font-weight: 700; src: url('/lib/inter/inter-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-display: swap; font-weight: 800; src: url('/lib/inter/inter-latin-800-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-display: swap; font-weight: 900; src: url('/lib/inter/inter-latin-900-normal.woff2') format('woff2'); }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    /* Navigation links (moved out of the _Layout inline <style>). */
+    .nav-link {
+        transition: all 0.2s;
+    }
+    .nav-link:hover {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.05);
+    }
+    .nav-link.active {
+        color: #3b82f6;
+        background: rgba(59, 130, 246, 0.05);
+    }
+
+    /* Toast / confirm entrance + exit animations. */
+    .animate-sn-in {
+        animation: sn-in 0.25s ease-out;
+    }
+    .animate-sn-out {
+        animation: sn-out 0.2s ease-in forwards;
+    }
+}
+
+@keyframes sn-in {
+    from { opacity: 0; transform: translateY(-12px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes sn-out {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to { opacity: 0; transform: translateY(-12px) scale(0.96); }
+}

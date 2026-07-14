@@ -24,7 +24,35 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        // Assets are referenced with asp-append-version="true", which appends a
+        // content hash (?v=...) to every URL. A rebuilt file gets a new URL, so we
+        // can cache the current URL aggressively without risking stale assets.
+        var headers = ctx.Context.Response.GetTypedHeaders();
+        if (ctx.Context.Request.Query.ContainsKey("v"))
+        {
+            headers.CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue
+            {
+                Public = true,
+                MaxAge = TimeSpan.FromDays(365),
+                Extensions = { new Microsoft.Net.Http.Headers.NameValueHeaderValue("immutable") }
+            };
+        }
+        else
+        {
+            // Un-versioned requests (e.g. direct hits): cache briefly but revalidate.
+            headers.CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue
+            {
+                Public = true,
+                MaxAge = TimeSpan.FromHours(1),
+                MustRevalidate = true
+            };
+        }
+    }
+});
 app.UseRouting();
 app.UseAuthorization();
 
