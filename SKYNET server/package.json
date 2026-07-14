@@ -1,0 +1,17 @@
+{
+  "name": "skynet-server-ui",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tailwind CSS build pipeline for the SKYNET server admin UI.",
+  "scripts": {
+    "css:build": "tailwindcss -i ./wwwroot/css/tailwind.input.css -o ./wwwroot/css/app.css --minify",
+    "css:watch": "tailwindcss -i ./wwwroot/css/tailwind.input.css -o ./wwwroot/css/app.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.13"
+  },
+  "dependencies": {
+    "@fontsource/inter": "^5.0.18",
+    "@fortawesome/fontawesome-free": "^6.5.2"
+  }
+}

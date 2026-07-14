@@ -19,51 +19,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - SKYNETEMU</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: {
-                        skynet: {
-                            black: '#0a0a0a',
-                            dark: '#111111',
-                            card: '#161616',
-                            border: '#222222',
-                            accent: '#3b82f6',
-                            muted: '#888888'
-                        },
-                        zinc: {
-                            500: '#888888',
-                            600: '#555555',
-                            700: '#333333',
-                            800: '#222222',
-                            900: '#161616',
-                            950: '#0a0a0a'
-                        },
-                        cyan: {
-                            100: '#dbeafe',
-                            200: '#bfdbfe',
-                            300: '#93c5fd',
-                            400: '#60a5fa',
-                            500: '#3b82f6',
-                            600: '#2563eb'
-                        }
-                    }
-                }
-            }
-        };
-    </script>
-    <style>
-        .nav-link { transition: all 0.2s; }
-        .nav-link:hover { color: #fff; background: rgba(255,255,255,0.05); }
-        .nav-link.active { color: #3b82f6; background: rgba(59, 130, 246, 0.05); }
-    </style>
+    <link rel="stylesheet" href="~/lib/fontawesome/css/all.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <script src="~/js/CallHelper.js" asp-append-version="true"></script>
     <script>
@@ -141,24 +98,41 @@
             }
         }
 
+        function openMobileNav() {
+            var el = document.getElementById('snMobileNav');
+            if (!el) return;
+            el.classList.remove('hidden');
+            requestAnimationFrame(function () {
+                document.getElementById('snMobileNavPanel').classList.remove('translate-x-full');
+            });
+        }
+
+        function closeMobileNav() {
+            var el = document.getElementById('snMobileNav');
+            if (!el) return;
+            var panel = document.getElementById('snMobileNavPanel');
+            panel.classList.add('translate-x-full');
+            setTimeout(function () { el.classList.add('hidden'); }, 300);
+        }
+
         document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') cancelConfirm();
+            if (e.key === 'Escape') { cancelConfirm(); closeMobileNav(); }
         });
     </script>
 </head>
-<body class="flex flex-col h-screen overflow-hidden bg-skynet-black text-gray-200 antialiased">
+<body class="flex flex-col h-[100dvh] overflow-hidden bg-skynet-black text-gray-200 antialiased">
     @if (useAppShell)
     {
         <!-- Header -->
-        <header class="h-16 bg-skynet-black border-b border-skynet-border flex items-center justify-between px-8 z-20 shrink-0">
-            <div class="flex items-center space-x-12">
+        <header class="h-16 bg-skynet-black border-b border-skynet-border flex items-center justify-between px-4 md:px-8 z-20 shrink-0">
+            <div class="flex items-center md:space-x-12">
                 <a asp-page="/Index" class="flex items-center space-x-3">
                     <div class="w-8 h-8 bg-white rounded flex items-center justify-center">
                         <i class="fas fa-microchip text-skynet-black text-lg"></i>
                     </div>
                     <span class="font-bold tracking-tighter text-lg">SKYNET<span class="text-skynet-accent">EMU</span></span>
                 </a>
-                <nav class="flex space-x-1 h-16">
+                <nav class="hidden md:flex space-x-1 h-16">
                     <a asp-page="/Index" class="nav-link flex items-center px-4 text-xs font-bold uppercase tracking-widest @navClass("/Index")">Dashboard</a>
                     <a asp-page="/Users/Index" class="nav-link flex items-center px-4 text-xs font-bold uppercase tracking-widest @navClass("/Users")">Users</a>
                     <a asp-page="/Games/Index" class="nav-link flex items-center px-4 text-xs font-bold uppercase tracking-widest @navClass("/Games")">Games</a>
@@ -180,10 +154,13 @@
                         <p class="text-xs font-bold">@snapshot.Profile.DisplayName</p>
                         <p class="text-[10px] text-skynet-muted uppercase tracking-widest">Online</p>
                     </div>
-                    <a asp-page="/Auth/Logout" class="w-10 h-10 rounded-lg border border-skynet-border bg-skynet-card flex items-center justify-center text-skynet-muted hover:text-white hover:border-skynet-accent transition-all" title="Sign out">
+                    <a asp-page="/Auth/Logout" class="hidden md:flex w-10 h-10 rounded-lg border border-skynet-border bg-skynet-card items-center justify-center text-skynet-muted hover:text-white hover:border-skynet-accent transition-all" title="Sign out">
                         <i class="fas fa-right-from-bracket text-sm"></i>
                     </a>
                 }
+                <button type="button" onclick="openMobileNav()" class="md:hidden w-10 h-10 rounded-lg border border-skynet-border bg-skynet-card flex items-center justify-center text-skynet-muted hover:text-white hover:border-skynet-accent transition-all" aria-label="Open menu">
+                    <i class="fas fa-bars text-sm"></i>
+                </button>
             </div>
         </header>
 
@@ -195,13 +172,54 @@
         </main>
 
         <!-- Footer -->
-        <footer class="h-8 bg-skynet-black border-t border-skynet-border flex items-center justify-between px-6 text-[10px] text-skynet-muted uppercase tracking-[0.2em] shrink-0">
+        <footer class="h-8 bg-skynet-black border-t border-skynet-border flex items-center justify-between px-4 sm:px-6 text-[10px] text-skynet-muted uppercase tracking-[0.2em] shrink-0">
             <div class="flex items-center space-x-4">
                 <span>SKYNET_OS_v2.0</span>
                 <span class="text-green-500">&#9679; GC_CONNECTED</span>
             </div>
-            <span>SKYNET_NETWORK_ENCRYPTION_ACTIVE</span>
+            <span class="hidden sm:inline">SKYNET_NETWORK_ENCRYPTION_ACTIVE</span>
         </footer>
+
+        <!-- Mobile sidenav -->
+        <div id="snMobileNav" class="fixed inset-0 z-[105] hidden md:hidden">
+            <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeMobileNav()"></div>
+            <div id="snMobileNavPanel" class="absolute right-0 top-0 h-full w-72 max-w-[80%] bg-skynet-card border-l border-skynet-border flex flex-col transform translate-x-full transition-transform duration-300 ease-out">
+                <div class="h-16 flex items-center justify-between px-5 border-b border-skynet-border shrink-0">
+                    <span class="font-bold tracking-tighter text-lg">SKYNET<span class="text-skynet-accent">EMU</span></span>
+                    <button type="button" onclick="closeMobileNav()" class="w-9 h-9 rounded-lg border border-skynet-border flex items-center justify-center text-skynet-muted hover:text-white hover:border-skynet-accent transition-all" aria-label="Close menu">
+                        <i class="fas fa-times text-sm"></i>
+                    </button>
+                </div>
+                <nav class="flex-1 overflow-y-auto p-3 space-y-1">
+                    <a asp-page="/Index" onclick="closeMobileNav()" class="flex items-center px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-widest @navClass("/Index")">Dashboard</a>
+                    <a asp-page="/Users/Index" onclick="closeMobileNav()" class="flex items-center px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-widest @navClass("/Users")">Users</a>
+                    <a asp-page="/Games/Index" onclick="closeMobileNav()" class="flex items-center px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-widest @navClass("/Games")">Games</a>
+                    <a asp-page="/Achievements/Index" onclick="closeMobileNav()" class="flex items-center px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-widest @navClass("/Achievements")">Stats</a>
+                    @if (isAdmin)
+                    {
+                        <a asp-page="/Admin/Index" onclick="closeMobileNav()" class="flex items-center px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-widest @navClass("/Admin")">Admin</a>
+                    }
+                </nav>
+                <div class="p-3 border-t border-skynet-border shrink-0">
+                    @if (currentUser == null)
+                    {
+                        <a asp-page="/Auth/Login" onclick="closeMobileNav()" class="block text-center bg-white text-skynet-black font-bold py-3 px-4 rounded-lg text-xs uppercase tracking-widest hover:bg-gray-200 transition-all">Login</a>
+                    }
+                    else
+                    {
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="min-w-0">
+                                <p class="text-xs font-bold truncate">@snapshot.Profile.DisplayName</p>
+                                <p class="text-[10px] text-skynet-muted uppercase tracking-widest">Online</p>
+                            </div>
+                            <a asp-page="/Auth/Logout" class="w-10 h-10 rounded-lg border border-skynet-border flex items-center justify-center text-skynet-muted hover:text-white hover:border-skynet-accent transition-all shrink-0" title="Sign out">
+                                <i class="fas fa-right-from-bracket text-sm"></i>
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
     }
     else
     {
@@ -237,12 +255,5 @@
             </div>
         </div>
     </div>
-
-    <style>
-        @@keyframes sn-in { from { opacity: 0; transform: translateY(-12px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        @@keyframes sn-out { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(-12px) scale(0.96); } }
-        .animate-sn-in { animation: sn-in 0.25s ease-out; }
-        .animate-sn-out { animation: sn-out 0.2s ease-in forwards; }
-    </style>
 </body>
 </html>

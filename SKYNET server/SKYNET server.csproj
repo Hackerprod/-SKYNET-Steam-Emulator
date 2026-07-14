@@ -27,4 +27,21 @@
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
   </ItemGroup>
 
+  <!--
+    Tailwind CSS build. Compiles wwwroot/css/app.css from the markup + input CSS
+    so the browser gets fully-formed, cacheable CSS (no runtime CDN compiler).
+    Runs only when node_modules is present (i.e. a dev machine that ran
+    `npm install`); CI / machines without Node fall back to the committed
+    app.css. Incremental: reruns only when the markup or config changes.
+  -->
+  <ItemGroup>
+    <TailwindInput Include="wwwroot/css/tailwind.input.css;tailwind.config.js;Pages/**/*.cshtml" />
+  </ItemGroup>
+  <Target Name="BuildTailwindCss" BeforeTargets="BeforeBuild"
+          Condition="Exists('$(MSBuildProjectDirectory)/node_modules')"
+          Inputs="@(TailwindInput)" Outputs="wwwroot/css/app.css">
+    <Message Importance="high" Text="Building Tailwind CSS (app.css)..." />
+    <Exec Command="npm run css:build" WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
+
 </Project>
