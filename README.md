@@ -368,3 +368,9 @@ For Dota GC changes:
 ## License
 
 This project is licensed under the MIT License. See [`LICENSE`](LICENSE).
+
+## Collaboration and Support
+
+Contributions are welcome. If you want to improve compatibility, documentation, diagnostics, UI, Game Coordinator behavior, or platform support, please open a focused pull request with a clear description of the change and the validation performed.
+
+If you want to help maintain the project financially, donation and sponsorship information is available on the maintainer profile: [github.com/Hackerprod](https://github.com/Hackerprod/).
