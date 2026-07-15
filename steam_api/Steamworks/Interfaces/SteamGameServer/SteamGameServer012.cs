@@ -9,7 +9,7 @@ namespace SKYNET.Steamworks.Interfaces
     [Interface("SteamGameServer012")]
     public class SteamGameServer012 : ISteamInterface
     {
-        public bool InitGameServer(IntPtr _, uint unIP, int usGamePort, int usQueryPort, uint unFlags, uint nGameAppId, string pchVersionString)
+        public bool InitGameServer(IntPtr _, uint unIP, ushort usGamePort, ushort usQueryPort, uint unFlags, uint nGameAppId, string pchVersionString)
         {
             return SteamEmulator.SteamGameServer.InitGameServer(unIP, usGamePort, usQueryPort, unFlags, nGameAppId, pchVersionString);
         }
@@ -94,7 +94,7 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamGameServer.SetPasswordProtected(bPasswordProtected);
         }
 
-        public void SetSpectatorPort(IntPtr _, uint unSpectatorPort)
+        public void SetSpectatorPort(IntPtr _, ushort unSpectatorPort)
         {
             SteamEmulator.SteamGameServer.SetSpectatorPort((int)unSpectatorPort);
         }
@@ -129,7 +129,7 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamGameServer.SetRegion(pszRegion);
         }
 
-        public bool SendUserConnectAndAuthenticate(IntPtr _, uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, ulong pSteamIDUser)
+        public bool SendUserConnectAndAuthenticate(IntPtr _, uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, IntPtr pSteamIDUser)
         {
             return SteamEmulator.SteamGameServer.SendUserConnectAndAuthenticate(unIPClient, pvAuthBlob, cubAuthBlobSize, pSteamIDUser);
         }
@@ -194,14 +194,24 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamGameServer.GetPublicIP_old();
         }
 
-        public bool HandleIncomingPacket(IntPtr _, IntPtr pData, int cbData, uint srcIP, uint srcPort)
+        public bool HandleIncomingPacket(IntPtr _, IntPtr pData, int cbData, uint srcIP, ushort srcPort)
         {
             return SteamEmulator.SteamGameServer.HandleIncomingPacket(pData, cbData, srcIP, srcPort);
         }
 
-        public int GetNextOutgoingPacket(IntPtr _, IntPtr pOut, int cbMaxOut, uint pNetAdr, uint pPort)
+        public int GetNextOutgoingPacket(IntPtr _, IntPtr pOut, int cbMaxOut, IntPtr pNetAdr, IntPtr pPort)
         {
-            return SteamEmulator.SteamGameServer.GetNextOutgoingPacket(pOut, cbMaxOut, pNetAdr, pPort);
+            if (pNetAdr != IntPtr.Zero)
+            {
+                System.Runtime.InteropServices.Marshal.WriteInt32(pNetAdr, 0);
+            }
+
+            if (pPort != IntPtr.Zero)
+            {
+                System.Runtime.InteropServices.Marshal.WriteInt16(pPort, 0);
+            }
+
+            return SteamEmulator.SteamGameServer.GetNextOutgoingPacket(pOut, cbMaxOut, 0, 0);
         }
 
         public void EnableHeartbeats(IntPtr _, bool bActive)

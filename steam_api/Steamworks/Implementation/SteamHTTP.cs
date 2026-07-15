@@ -39,6 +39,11 @@ namespace SKYNET.Steamworks.Implementation
 
         public HTTPRequestHandle CreateHTTPRequest(uint eHTTPRequestMethod, string pchAbsoluteURL)
         {
+            return CreateHTTPRequest(unchecked((int)eHTTPRequestMethod), pchAbsoluteURL);
+        }
+
+        public HTTPRequestHandle CreateHTTPRequest(int eHTTPRequestMethod, string pchAbsoluteURL)
+        {
             var CreatedHandle = Handle;
             Handle++;
 

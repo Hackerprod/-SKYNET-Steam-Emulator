@@ -5,11 +5,10 @@ using HServerListRequest = System.IntPtr;
 
 namespace SKYNET.Steamworks.Types
 {
+    [StructLayout(LayoutKind.Sequential)]
     public struct ISteamMatchmakingServerListResponse
     {
-        public ServerRespondedDelegate ServerResponded;
-        public ServerFailedToRespondDelegate ServerFailedToRespond;
-        public RefreshCompleteDelegate RefreshComplete;
+        public IntPtr VTable;
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void ServerRespondedDelegate(IntPtr _, HServerListRequest hRequest, int iServer);

@@ -135,12 +135,12 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamRemoteStorage.UGCDownload(hContent, unPriority);
         }
 
-        public bool GetUGCDownloadProgress(IntPtr _, ulong hContent, int pnBytesDownloaded, int pnBytesExpected)
+        public bool GetUGCDownloadProgress(IntPtr _, ulong hContent, IntPtr pnBytesDownloaded, IntPtr pnBytesExpected)
         {
             return SteamEmulator.SteamRemoteStorage.GetUGCDownloadProgress(hContent, pnBytesDownloaded, pnBytesExpected);
         }
 
-        public bool GetUGCDetails(IntPtr _, ulong hContent, uint pnAppID, string ppchName, int pnFileSizeInBytes, ulong pSteamIDOwner)
+        public bool GetUGCDetails(IntPtr _, ulong hContent, IntPtr pnAppID, IntPtr ppchName, IntPtr pnFileSizeInBytes, IntPtr pSteamIDOwner)
         {
             return SteamEmulator.SteamRemoteStorage.GetUGCDetails(hContent, pnAppID, ppchName, pnFileSizeInBytes, pSteamIDOwner);
         }
@@ -155,7 +155,10 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamRemoteStorage.GetCachedUGCCount();
         }
 
-#if SERVER
+        public ulong GetCachedUGCHandle(IntPtr _, int iCachedContent)
+        {
+            return SteamEmulator.SteamRemoteStorage.GetCachedUGCHandle(iCachedContent);
+        }
 
         public void GetFileListFromServer(IntPtr _)
         {
@@ -186,8 +189,6 @@ namespace SKYNET.Steamworks.Interfaces
         {
             return SteamEmulator.SteamRemoteStorage.ResetFileRequestState();
         }
-
-#endif
 
         public ulong PublishWorkshopFile(IntPtr _, string pchFile, string pchPreviewFile, uint nConsumerAppId, string pchTitle, string pchDescription, int eVisibility, IntPtr pTags, int eWorkshopFileType)
         {

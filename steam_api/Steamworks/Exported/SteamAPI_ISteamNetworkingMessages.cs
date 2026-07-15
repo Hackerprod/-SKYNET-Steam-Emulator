@@ -49,7 +49,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr SteamAPI_ISteamNetworkingMessages_GetSessionConnectionInfo(IntPtr _, IntPtr identityRemote, IntPtr pConnectionInfo, IntPtr pQuickStatus)
+        public static int SteamAPI_ISteamNetworkingMessages_GetSessionConnectionInfo(IntPtr _, IntPtr identityRemote, IntPtr pConnectionInfo, IntPtr pQuickStatus)
         {
             Write("SteamAPI_ISteamNetworkingMessages_GetSessionConnectionInfo");
             return SteamEmulator.SteamNetworkingMessages.GetSessionConnectionInfo(identityRemote, pConnectionInfo, pQuickStatus);
@@ -61,4 +61,3 @@ namespace SKYNET.Steamworks.Exported
         }
     }
 }
-

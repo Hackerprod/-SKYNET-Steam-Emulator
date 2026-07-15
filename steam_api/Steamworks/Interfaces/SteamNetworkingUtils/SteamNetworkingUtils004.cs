@@ -1,4 +1,5 @@
 using System;
+using SKYNET.Steamworks;
 
 using SteamNetworkingPOPID = System.UInt32;
 using SteamNetworkingMicroseconds = System.Int64;
@@ -33,9 +34,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamNetworkingUtils.EstimatePingTimeFromLocalHost(remoteLocation);
         }
 
-        public void ConvertPingLocationToString(IntPtr _, IntPtr location, ref string pszBuf, int cchBufSize)
+        public void ConvertPingLocationToString(IntPtr _, IntPtr location, IntPtr pszBuf, int cchBufSize)
         {
-            SteamEmulator.SteamNetworkingUtils.ConvertPingLocationToString(location, ref pszBuf, cchBufSize);
+            SteamEmulator.SteamNetworkingUtils.ConvertPingLocationToString(location, pszBuf, cchBufSize);
         }
 
         public bool ParsePingLocationString(IntPtr _, string pszString, IntPtr result)
@@ -48,7 +49,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamNetworkingUtils.CheckPingDataUpToDate(flMaxAgeSeconds);
         }
 
-        public int GetPingToDataCenter(IntPtr _, SteamNetworkingPOPID popID, SteamNetworkingPOPID pViaRelayPoP)
+        public int GetPingToDataCenter(IntPtr _, SteamNetworkingPOPID popID, IntPtr pViaRelayPoP)
         {
             return SteamEmulator.SteamNetworkingUtils.GetPingToDataCenter(popID, pViaRelayPoP);
         }
@@ -63,7 +64,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamNetworkingUtils.GetPOPCount();
         }
 
-        public int GetPOPList(IntPtr _, SteamNetworkingPOPID list, int nListSz)
+        public int GetPOPList(IntPtr _, IntPtr list, int nListSz)
         {
             return SteamEmulator.SteamNetworkingUtils.GetPOPList(list, nListSz);
         }
@@ -93,22 +94,22 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamNetworkingUtils.SetConfigValue(eValue, eScopeType, scopeObj, eDataType, pArg);
         }
 
-        public int GetConfigValue(IntPtr _, int eValue, int eScopeType, IntPtr scopeObj, int pOutDataType, IntPtr pResult, IntPtr cbResult)
+        public int GetConfigValue(IntPtr _, int eValue, int eScopeType, IntPtr scopeObj, IntPtr pOutDataType, IntPtr pResult, IntPtr cbResult)
         {
             return SteamEmulator.SteamNetworkingUtils.GetConfigValue(eValue, eScopeType, scopeObj, pOutDataType, pResult, cbResult);
         }
 
-        public bool GetConfigValueInfo(IntPtr _, int eValue, string pOutName, int pOutDataType, int pOutScope, int pOutNextValue)
+        public IntPtr GetConfigValueInfo(IntPtr _, int eValue, IntPtr pOutDataType, IntPtr pOutScope)
         {
-            return SteamEmulator.SteamNetworkingUtils.GetConfigValueInfo(eValue, pOutName, pOutDataType, pOutScope, pOutNextValue);
+            return SteamEmulator.SteamNetworkingUtils.GetConfigValueInfo(eValue, pOutDataType, pOutScope);
         }
 
-        public int GetFirstConfigValue(IntPtr _)
+        public int IterateGenericEditableConfigValues(IntPtr _, int eCurrent, bool bEnumerateDevVars)
         {
             return SteamEmulator.SteamNetworkingUtils.GetFirstConfigValue();
         }
 
-        public void SteamNetworkingIPAddr_ToString(IntPtr _, IntPtr addr, string buf, IntPtr cbBuf, bool bWithPort)
+        public void SteamNetworkingIPAddr_ToString(IntPtr _, IntPtr addr, IntPtr buf, UIntPtr cbBuf, bool bWithPort)
         {
             SteamEmulator.SteamNetworkingUtils.SteamNetworkingIPAddr_ToString(addr, buf, cbBuf, bWithPort);
         }
@@ -118,7 +119,12 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamNetworkingUtils.SteamNetworkingIPAddr_ParseString(pAddr, pszStr);
         }
 
-        public void SteamNetworkingIdentity_ToString(IntPtr _, IntPtr identity, string buf, IntPtr cbBuf)
+        public int SteamNetworkingIPAddr_GetFakeIPType(IntPtr _, IntPtr addr)
+        {
+            return (int)SteamNetworkingFakeIPType.NotFake;
+        }
+
+        public void SteamNetworkingIdentity_ToString(IntPtr _, IntPtr identity, IntPtr buf, UIntPtr cbBuf)
         {
             SteamEmulator.SteamNetworkingUtils.SteamNetworkingIdentity_ToString(identity, buf, cbBuf);
         }

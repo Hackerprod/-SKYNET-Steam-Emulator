@@ -80,82 +80,117 @@ namespace SKYNET.Steamworks
         public float m_flScore;
 
         public uint m_unNumChildren;
+
+        public ulong m_ulTotalFilesSize;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public struct ControllerDigitalActionData_t
     {
+        [MarshalAs(UnmanagedType.I1)]
         public bool bState;
 
+        [MarshalAs(UnmanagedType.I1)]
         public bool bActive;
     };
 
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct ControllerAnalogActionData_t
     {
         public int eMode;
         public float x, y;
+        [MarshalAs(UnmanagedType.I1)]
         public bool bActive;
     };
 
+    [StructLayout(LayoutKind.Sequential)]
     public struct InputDigitalActionData_t
     {
+        [MarshalAs(UnmanagedType.I1)]
         public bool bState;
+        [MarshalAs(UnmanagedType.I1)]
         public bool bActive;
     };
 
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct InputAnalogActionData_t
     {
         public int eMode;
         public float x, y;
+        [MarshalAs(UnmanagedType.I1)]
         public bool bActive;
     };
+
+    [StructLayout(LayoutKind.Sequential)]
     public struct InputMotionData_t
     {
-        float rotQuatX;
-        float rotQuatY;
-        float rotQuatZ;
-        float rotQuatW;
+        public float rotQuatX;
+        public float rotQuatY;
+        public float rotQuatZ;
+        public float rotQuatW;
 
         // Positional acceleration
-        float posAccelX;
-        float posAccelY;
-        float posAccelZ;
+        public float posAccelX;
+        public float posAccelY;
+        public float posAccelZ;
 
         // Angular velocity
-        float rotVelX;
-        float rotVelY;
-        float rotVelZ;
+        public float rotVelX;
+        public float rotVelY;
+        public float rotVelZ;
+    };
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct ControllerMotionData_t
+    {
+        public float rotQuatX;
+        public float rotQuatY;
+        public float rotQuatZ;
+        public float rotQuatW;
+
+        public float posAccelX;
+        public float posAccelY;
+        public float posAccelZ;
+
+        public float rotVelX;
+        public float rotVelY;
+        public float rotVelZ;
     };
 
     public struct SteamItemDetails_t
     {
         SteamItemInstanceID_t m_itemId;
         SteamItemDef_t m_iDefinition;
-        uint m_unQuantity;
-        uint m_unFlags; // see ESteamItemFlags
+        ushort m_unQuantity;
+        ushort m_unFlags; // see ESteamItemFlags
     };
 
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct P2PSessionState_t
     {
         public byte m_bConnectionActive; 
         public byte m_bConnecting; 
-        public uint m_eP2PSessionError; 
-        public bool m_bUsingRelay;  
-        public uint m_nBytesQueuedForSend;
-        public uint m_nPacketsQueuedForSend;
+        public byte m_eP2PSessionError;
+        public byte m_bUsingRelay;
+        public int m_nBytesQueuedForSend;
+        public int m_nPacketsQueuedForSend;
         public uint m_nRemoteIP; 
-        public uint m_nRemotePort;
+        public ushort m_nRemotePort;
     };
 
 
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct SteamNetworkPingLocation_t
     {
-        public uint m_data;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 512)]
+        public byte[] m_data;
     };
 
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
     public struct SteamPartyBeaconLocation_t
     {
-        uint m_eType;
-        uint m_ulLocationID;
+        public uint m_eType;
+        public ulong m_ulLocationID;
     };
 
     public struct TicketData

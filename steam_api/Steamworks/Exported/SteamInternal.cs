@@ -28,7 +28,7 @@ namespace SKYNET.Steamworks.Exported
             BumpContextCounter("SteamInternal_SteamAPI_Init");
             if (SteamEmulator.SecureNetworking)
             {
-                Write("SecureNetworking requested; native SDR CA patching is enabled");
+                Write("SecureNetworking requested; SDR CA disk patching is enabled (memory patch disabled)");
             }
             return 0; // k_ESteamAPIInitResult_OK
         }
@@ -36,9 +36,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int SteamInternal_GameServer_Init_V2(uint unIP, ushort usGamePort, ushort usQueryPort, uint eServerMode, [MarshalAs(UnmanagedType.LPStr)] string pchVersionString, IntPtr pszInternalCheckInterfaceVersions, IntPtr pOutErrMsg)
         {
-            var unFlags = SteamEmulator.SecureNetworking && eServerMode == (uint)EServerMode.AuthenticationAndSecure
-                ? Constants.k_unServerFlagSecure
-                : 0;
+            var unFlags = SteamEmulator.VacSecureGameServer ? Constants.k_unServerFlagSecure : 0;
             var result = SteamEmulator.SteamGameServer.InitGameServer(unIP, usGamePort, usQueryPort, unFlags, SteamEmulator.AppID, pchVersionString);
             if (result)
             {
@@ -72,9 +70,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamInternal_GameServer_Init(uint unIP, int usPort, int usGamePort, uint usQueryPort, uint eServerMode, string pchVersionString)
         {
-            var unFlags = SteamEmulator.SecureNetworking && eServerMode == (int)EServerMode.AuthenticationAndSecure
-                ? Constants.k_unServerFlagSecure
-                : 0;
+            var unFlags = SteamEmulator.VacSecureGameServer ? Constants.k_unServerFlagSecure : 0;
             var result = SteamEmulator.SteamGameServer.InitGameServer(unIP, usPort, (int)usQueryPort, unFlags, SteamEmulator.AppID, pchVersionString);
             if (result)
             {
@@ -145,4 +141,3 @@ namespace SKYNET.Steamworks.Exported
         }
     }
 }
-

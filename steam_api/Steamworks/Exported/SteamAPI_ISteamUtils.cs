@@ -65,14 +65,14 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUtils_GetCSERIPPort(IntPtr _, uint unIP, uint usPort)
+        public static bool SteamAPI_ISteamUtils_GetCSERIPPort(IntPtr _, IntPtr unIP, IntPtr usPort)
         {
             Write("SteamAPI_ISteamUtils_GetCSERIPPort");
             return SteamEmulator.SteamUtils.GetCSERIPPort(unIP, usPort);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamUtils_GetCurrentBatteryPower(IntPtr _)
+        public static byte SteamAPI_ISteamUtils_GetCurrentBatteryPower(IntPtr _)
         {
             Write("SteamAPI_ISteamUtils_GetCurrentBatteryPower");
             return SteamEmulator.SteamUtils.GetCurrentBatteryPower();
@@ -251,4 +251,3 @@ namespace SKYNET.Steamworks.Exported
         }
     }
 }
-

@@ -37,7 +37,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamNetworkingSockets.AcceptConnection(hConn);
         }
 
-        public bool CloseConnection(IntPtr _, HSteamNetConnection hPeer, int nReason, char pszDebug, bool bEnableLinger)
+        public bool CloseConnection(IntPtr _, HSteamNetConnection hPeer, int nReason, string pszDebug, bool bEnableLinger)
         {
             return SteamEmulator.SteamNetworkingSockets.CloseConnection(hPeer, nReason, pszDebug, bEnableLinger);
         }
@@ -47,7 +47,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamNetworkingSockets.CloseListenSocket(hSocket);
         }
 
-        public bool SetConnectionUserData(IntPtr _, HSteamNetConnection hPeer, ulong nUserData)
+        public bool SetConnectionUserData(IntPtr _, HSteamNetConnection hPeer, long nUserData)
         {
             return SteamEmulator.SteamNetworkingSockets.SetConnectionUserData(hPeer, nUserData);
         }
@@ -57,22 +57,22 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamNetworkingSockets.GetConnectionUserData(hPeer);
         }
 
-        public void SetConnectionName(IntPtr _, HSteamNetConnection hPeer, char pszName)
+        public void SetConnectionName(IntPtr _, HSteamNetConnection hPeer, string pszName)
         {
             SteamEmulator.SteamNetworkingSockets.SetConnectionName(hPeer, pszName);
         }
 
-        public bool GetConnectionName(IntPtr _, HSteamNetConnection hPeer, char pszName, int nMaxLen)
+        public bool GetConnectionName(IntPtr _, HSteamNetConnection hPeer, IntPtr pszName, int nMaxLen)
         {
             return SteamEmulator.SteamNetworkingSockets.GetConnectionName(hPeer, pszName, nMaxLen);
         }
 
-        public int SendMessageToConnection(IntPtr _, HSteamNetConnection hConn, IntPtr pData, UInt32 cbData, int nSendFlags, Int64 pOutMessageNumber)
+        public int SendMessageToConnection(IntPtr _, HSteamNetConnection hConn, IntPtr pData, UInt32 cbData, int nSendFlags, IntPtr pOutMessageNumber)
         {
             return SteamEmulator.SteamNetworkingSockets.SendMessageToConnection(hConn, pData, cbData, nSendFlags, pOutMessageNumber);
         }
 
-        public void SendMessages(IntPtr _, int nMessages, IntPtr pMessages, Int64 pOutMessageNumberOrResult)
+        public void SendMessages(IntPtr _, int nMessages, IntPtr pMessages, IntPtr pOutMessageNumberOrResult)
         {
             SteamEmulator.SteamNetworkingSockets.SendMessages(nMessages, pMessages, pOutMessageNumberOrResult);
         }
@@ -91,12 +91,12 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamNetworkingSockets.GetConnectionInfo(hConn, pInfo);
         }
 
-        public bool GetQuickConnectionStatus(IntPtr _, HSteamNetConnection hConn, IntPtr pStats)
+        public int GetConnectionRealTimeStatus(IntPtr _, HSteamNetConnection hConn, IntPtr pStatus, int nLanes, IntPtr pLanes)
         {
-            return SteamEmulator.SteamNetworkingSockets.GetQuickConnectionStatus(hConn, pStats);
+            return SteamEmulator.SteamNetworkingSockets.GetConnectionRealTimeStatus(hConn, pStatus, nLanes, pLanes);
         }
 
-        public int GetDetailedConnectionStatus(IntPtr _, HSteamNetConnection hConn, char pszBuf, int cbBuf)
+        public int GetDetailedConnectionStatus(IntPtr _, HSteamNetConnection hConn, IntPtr pszBuf, int cbBuf)
         {
             return SteamEmulator.SteamNetworkingSockets.GetDetailedConnectionStatus(hConn, pszBuf, cbBuf);
         }
@@ -106,9 +106,14 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamNetworkingSockets.GetListenSocketAddress(hSocket, address);
         }
 
-        public bool CreateSocketPair(IntPtr _, HSteamNetConnection pOutConnection1, HSteamNetConnection pOutConnection2, bool bUseNetworkLoopback, IntPtr pIdentity1, IntPtr pIdentity2)
+        public bool CreateSocketPair(IntPtr _, IntPtr pOutConnection1, IntPtr pOutConnection2, bool bUseNetworkLoopback, IntPtr pIdentity1, IntPtr pIdentity2)
         {
             return SteamEmulator.SteamNetworkingSockets.CreateSocketPair(pOutConnection1, pOutConnection2, bUseNetworkLoopback, pIdentity1, pIdentity2);
+        }
+
+        public int ConfigureConnectionLanes(IntPtr _, HSteamNetConnection hConn, int nNumLanes, IntPtr pLanePriorities, IntPtr pLaneWeights)
+        {
+            return SteamEmulator.SteamNetworkingSockets.ConfigureConnectionLanes(hConn, nNumLanes, pLanePriorities, pLaneWeights);
         }
 
         public bool GetIdentity(IntPtr _, IntPtr pIdentity)
@@ -161,7 +166,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamNetworkingSockets.ConnectToHostedDedicatedServer(identityTarget, npublicPort, nOptions, pOptions);
         }
 
-        public int GetHostedDedicatedServerPort(IntPtr _)
+        public ushort GetHostedDedicatedServerPort(IntPtr _)
         {
             return SteamEmulator.SteamNetworkingSockets.GetHostedDedicatedServerPort();
         }
@@ -181,14 +186,14 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamNetworkingSockets.CreateHostedDedicatedServerListenSocket(npublicPort, nOptions, pOptions);
         }
 
-        public int GetGameCoordinatorServerLogin(IntPtr _, IntPtr pLoginInfo, int pcbSignedBlob, IntPtr pBlob)
+        public int GetGameCoordinatorServerLogin(IntPtr _, IntPtr pLoginInfo, IntPtr pcbSignedBlob, IntPtr pBlob)
         {
             return SteamEmulator.SteamNetworkingSockets.GetGameCoordinatorServerLogin(pLoginInfo, pcbSignedBlob, pBlob);
         }
 
-        public HSteamNetConnection ConnectP2PCustomSignaling(IntPtr _, IntPtr pSignaling, IntPtr pPeerIdentity, int nOptions, IntPtr pOptions)
+        public HSteamNetConnection ConnectP2PCustomSignaling(IntPtr _, IntPtr pSignaling, IntPtr pPeerIdentity, int nRemoteVirtualPort, int nOptions, IntPtr pOptions)
         {
-            return SteamEmulator.SteamNetworkingSockets.ConnectP2PCustomSignaling(pSignaling, pPeerIdentity, nOptions, pOptions);
+            return SteamEmulator.SteamNetworkingSockets.ConnectP2PCustomSignaling(pSignaling, pPeerIdentity, nRemoteVirtualPort, nOptions, pOptions);
         }
 
         public bool ReceivedP2PCustomSignal(IntPtr _, IntPtr pMsg, int cbMsg, IntPtr pContext)
@@ -196,12 +201,12 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamNetworkingSockets.ReceivedP2PCustomSignal(pMsg, cbMsg, pContext);
         }
 
-        public bool GetCertificateRequest(IntPtr _, int pcbBlob, IntPtr pBlob, string errMsg)
+        public bool GetCertificateRequest(IntPtr _, IntPtr pcbBlob, IntPtr pBlob, IntPtr errMsg)
         {
             return SteamEmulator.SteamNetworkingSockets.GetCertificateRequest(pcbBlob, pBlob, errMsg);
         }
 
-        public bool SetCertificate(IntPtr _, IntPtr pCertificate, int cbCertificate, string errMsg)
+        public bool SetCertificate(IntPtr _, IntPtr pCertificate, int cbCertificate, IntPtr errMsg)
         {
             return SteamEmulator.SteamNetworkingSockets.SetCertificate(pCertificate, cbCertificate, errMsg);
         }
@@ -231,7 +236,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamNetworkingSockets.CreateListenSocketP2PFakeIP(idxFakePort, nOptions, pOptions);
         }
 
-        public int GetRemoteFakeIPForConnection(IntPtr _, HSteamNetConnection hConn, SteamNetworkingIPAddr pOutAddr)
+        public int GetRemoteFakeIPForConnection(IntPtr _, HSteamNetConnection hConn, IntPtr pOutAddr)
         {
             return SteamEmulator.SteamNetworkingSockets.GetRemoteFakeIPForConnection(hConn, pOutAddr);
         }

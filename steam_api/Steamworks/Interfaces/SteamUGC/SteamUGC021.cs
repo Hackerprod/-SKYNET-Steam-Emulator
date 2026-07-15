@@ -12,8 +12,8 @@ namespace SKYNET.Steamworks.Interfaces
     public class SteamUGC021 : ISteamInterface
     {
         public UGCQueryHandle_t CreateQueryUserUGCRequest(IntPtr _, uint unAccountID, int eListType, int eMatchingUGCType, int eSortOrder, uint nCreatorAppID, uint nConsumerAppID, uint unPage) { return SteamEmulator.SteamUGC.CreateQueryUserUGCRequest(unAccountID, eListType, eMatchingUGCType, eSortOrder, nCreatorAppID, nConsumerAppID, unPage); }
-        public UGCQueryHandle_t CreateQueryAllUGCRequest(IntPtr _, int eQueryType, int eMatchingeMatchingUGCTypeFileType, uint nCreatorAppID, uint nConsumerAppID, uint unPage) { return SteamEmulator.SteamUGC.CreateQueryAllUGCRequest(eQueryType, eMatchingeMatchingUGCTypeFileType, nCreatorAppID, nConsumerAppID, unPage); }
-        public UGCQueryHandle_t CreateQueryAllUGCRequest(IntPtr _, int eQueryType, int eMatchingeMatchingUGCTypeFileType, uint nCreatorAppID, uint nConsumerAppID, IntPtr pchCursor)
+        public UGCQueryHandle_t CreateQueryAllUGCRequestPage(IntPtr _, int eQueryType, int eMatchingeMatchingUGCTypeFileType, uint nCreatorAppID, uint nConsumerAppID, uint unPage) { return SteamEmulator.SteamUGC.CreateQueryAllUGCRequest(eQueryType, eMatchingeMatchingUGCTypeFileType, nCreatorAppID, nConsumerAppID, unPage); }
+        public UGCQueryHandle_t CreateQueryAllUGCRequestCursor(IntPtr _, int eQueryType, int eMatchingeMatchingUGCTypeFileType, uint nCreatorAppID, uint nConsumerAppID, IntPtr pchCursor)
         {
             if (TryReadPageFromSmallPointer(pchCursor, out uint unPage))
             {
@@ -22,7 +22,7 @@ namespace SKYNET.Steamworks.Interfaces
 
             return SteamEmulator.SteamUGC.CreateQueryAllUGCRequest(eQueryType, eMatchingeMatchingUGCTypeFileType, nCreatorAppID, nConsumerAppID, ReadNativeString(pchCursor));
         }
-        public UGCQueryHandle_t CreateQueryUGCDetailsRequest(IntPtr _, ulong pvecPublishedFileID, uint unNumPublishedFileIDs) { return SteamEmulator.SteamUGC.CreateQueryUGCDetailsRequest(pvecPublishedFileID, unNumPublishedFileIDs); }
+        public UGCQueryHandle_t CreateQueryUGCDetailsRequest(IntPtr _, IntPtr pvecPublishedFileID, uint unNumPublishedFileIDs) { return SteamEmulator.SteamUGC.CreateQueryUGCDetailsRequest(0, unNumPublishedFileIDs); }
         public SteamAPICall_t SendQueryUGCRequest(IntPtr _, UGCQueryHandle_t handle) { return SteamEmulator.SteamUGC.SendQueryUGCRequest(handle); }
         public bool GetQueryUGCResult(IntPtr _, UGCQueryHandle_t handle, uint index, ref SteamUGCDetails_t pDetails) { return SteamEmulator.SteamUGC.GetQueryUGCResult(handle, index, ref pDetails); }
         public uint GetQueryUGCNumTags(IntPtr _, UGCQueryHandle_t handle, uint index) { return SteamEmulator.SteamUGC.GetQueryUGCNumTags(handle, index); }
@@ -36,7 +36,7 @@ namespace SKYNET.Steamworks.Interfaces
         public bool GetQueryUGCAdditionalPreview(IntPtr _, UGCQueryHandle_t handle, uint index, uint previewIndex, IntPtr pchURLOrVideoID, uint cchURLSize, IntPtr pchOriginalFileName, uint cchOriginalFileNameSize, IntPtr pPreviewType) { return SteamEmulator.SteamUGC.GetQueryUGCAdditionalPreview(handle, index, previewIndex, pchURLOrVideoID, cchURLSize, pchOriginalFileName, cchOriginalFileNameSize, pPreviewType); }
         public uint GetQueryUGCNumKeyValueTags(IntPtr _, UGCQueryHandle_t handle, uint index) { return SteamEmulator.SteamUGC.GetQueryUGCNumKeyValueTags(handle, index); }
         public bool GetQueryUGCKeyValueTag(IntPtr _, UGCQueryHandle_t handle, uint index, uint keyValueTagIndex, IntPtr pchKey, uint cchKeySize, IntPtr pchValue, uint cchValueSize) { return SteamEmulator.SteamUGC.GetQueryUGCKeyValueTag(handle, index, keyValueTagIndex, pchKey, cchKeySize, pchValue, cchValueSize); }
-        public bool GetQueryUGCKeyValueTag(IntPtr _, UGCQueryHandle_t handle, uint index, string pchKey, IntPtr pchValue, uint cchValueSize) { return SteamEmulator.SteamUGC.GetQueryUGCKeyValueTag(handle, index, pchKey, pchValue, cchValueSize); }
+        public bool GetQueryFirstUGCKeyValueTag(IntPtr _, UGCQueryHandle_t handle, uint index, string pchKey, IntPtr pchValue, uint cchValueSize) { return SteamEmulator.SteamUGC.GetQueryUGCKeyValueTag(handle, index, pchKey, pchValue, cchValueSize); }
         public uint GetNumSupportedGameVersions(IntPtr _, UGCQueryHandle_t handle, uint index) { return SteamEmulator.SteamUGC.GetNumSupportedGameVersions(handle, index); }
         public bool GetSupportedGameVersionData(IntPtr _, UGCQueryHandle_t handle, uint index, uint versionIndex, IntPtr pchGameBranchMin, IntPtr pchGameBranchMax, uint cchGameBranchSize) { return SteamEmulator.SteamUGC.GetSupportedGameVersionData(handle, index, versionIndex, pchGameBranchMin, pchGameBranchMax, cchGameBranchSize); }
         public uint GetQueryUGCContentDescriptors(IntPtr _, UGCQueryHandle_t handle, uint index, IntPtr pvecDescriptors, uint cMaxEntries) { return SteamEmulator.SteamUGC.GetQueryUGCContentDescriptors(handle, index, pvecDescriptors, cMaxEntries); }
@@ -59,8 +59,8 @@ namespace SKYNET.Steamworks.Interfaces
         public bool SetMatchAnyTag(IntPtr _, UGCQueryHandle_t handle, bool bMatchAnyTag) { return SteamEmulator.SteamUGC.SetMatchAnyTag(handle, bMatchAnyTag); }
         public bool SetSearchText(IntPtr _, UGCQueryHandle_t handle, string pSearchText) { return SteamEmulator.SteamUGC.SetSearchText(handle, pSearchText); }
         public bool SetRankedByTrendDays(IntPtr _, UGCQueryHandle_t handle, uint unDays) { return SteamEmulator.SteamUGC.SetRankedByTrendDays(handle, unDays); }
-        public bool SetTimeCreatedDateRange(IntPtr _, UGCQueryHandle_t handle, IntPtr rtStart, IntPtr rtEnd) { return SteamEmulator.SteamUGC.SetTimeCreatedDateRange(handle, rtStart, rtEnd); }
-        public bool SetTimeUpdatedDateRange(IntPtr _, UGCQueryHandle_t handle, IntPtr rtStart, IntPtr rtEnd) { return SteamEmulator.SteamUGC.SetTimeUpdatedDateRange(handle, rtStart, rtEnd); }
+        public bool SetTimeCreatedDateRange(IntPtr _, UGCQueryHandle_t handle, uint rtStart, uint rtEnd) { return SteamEmulator.SteamUGC.SetTimeCreatedDateRange(handle, new IntPtr(rtStart), new IntPtr(rtEnd)); }
+        public bool SetTimeUpdatedDateRange(IntPtr _, UGCQueryHandle_t handle, uint rtStart, uint rtEnd) { return SteamEmulator.SteamUGC.SetTimeUpdatedDateRange(handle, new IntPtr(rtStart), new IntPtr(rtEnd)); }
         public bool AddRequiredKeyValueTag(IntPtr _, UGCQueryHandle_t handle, string pKey, string pValue) { return SteamEmulator.SteamUGC.AddRequiredKeyValueTag(handle, pKey, pValue); }
         public SteamAPICall_t RequestUGCDetails(IntPtr _, ulong nPublishedFileID, uint unMaxAgeSeconds) { return SteamEmulator.SteamUGC.RequestUGCDetails(nPublishedFileID, unMaxAgeSeconds); }
         public SteamAPICall_t CreateItem(IntPtr _, uint nConsumerAppId, int eFileType) { return SteamEmulator.SteamUGC.CreateItem(nConsumerAppId, eFileType); }
@@ -86,7 +86,12 @@ namespace SKYNET.Steamworks.Interfaces
         public bool RemoveContentDescriptor(IntPtr _, UGCQueryHandle_t handle, int descid) { return SteamEmulator.SteamUGC.RemoveContentDescriptor(handle, descid); }
         public bool SetRequiredGameVersions(IntPtr _, UGCQueryHandle_t handle, string pszGameBranchMin, string pszGameBranchMax) { return SteamEmulator.SteamUGC.SetRequiredGameVersions(handle, pszGameBranchMin, pszGameBranchMax); }
         public SteamAPICall_t SubmitItemUpdate(IntPtr _, UGCQueryHandle_t handle, string pchChangeNote) { return SteamEmulator.SteamUGC.SubmitItemUpdate(handle, pchChangeNote); }
-        public int GetItemUpdateProgress(IntPtr _, UGCQueryHandle_t handle, ulong punBytesProcessed, ulong punBytesTotal) { return SteamEmulator.SteamUGC.GetItemUpdateProgress(handle, punBytesProcessed, punBytesTotal); }
+        public int GetItemUpdateProgress(IntPtr _, UGCUpdateHandle_t handle, IntPtr punBytesProcessed, IntPtr punBytesTotal)
+        {
+            WriteUInt64(punBytesProcessed, 0);
+            WriteUInt64(punBytesTotal, 0);
+            return SteamEmulator.SteamUGC.GetItemUpdateProgress(handle, 0, 0);
+        }
         public SteamAPICall_t SetUserItemVote(IntPtr _, ulong nPublishedFileID, bool bVoteUp) { return SteamEmulator.SteamUGC.SetUserItemVote(nPublishedFileID, bVoteUp); }
         public SteamAPICall_t GetUserItemVote(IntPtr _, ulong nPublishedFileID) { return SteamEmulator.SteamUGC.GetUserItemVote(nPublishedFileID); }
         public SteamAPICall_t AddItemToFavorites(IntPtr _, uint nAppId, ulong nPublishedFileID) { return SteamEmulator.SteamUGC.AddItemToFavorites(nAppId, nPublishedFileID); }
@@ -94,15 +99,20 @@ namespace SKYNET.Steamworks.Interfaces
         public SteamAPICall_t SubscribeItem(IntPtr _, PublishedFileId_t nPublishedFileID) { return SteamEmulator.SteamUGC.SubscribeItem(nPublishedFileID); }
         public SteamAPICall_t UnsubscribeItem(IntPtr _, PublishedFileId_t nPublishedFileID) { return SteamEmulator.SteamUGC.UnsubscribeItem(nPublishedFileID); }
         public uint GetNumSubscribedItems(IntPtr _, bool bIncludeLocallyDisabled) { return SteamEmulator.SteamUGC.GetNumSubscribedItems(bIncludeLocallyDisabled); }
-        public uint GetSubscribedItems(IntPtr _, ulong pvecPublishedFileID, uint cMaxEntries, bool bIncludeLocallyDisabled) { return SteamEmulator.SteamUGC.GetSubscribedItems(pvecPublishedFileID, cMaxEntries, bIncludeLocallyDisabled); }
+        public uint GetSubscribedItems(IntPtr _, IntPtr pvecPublishedFileID, uint cMaxEntries, bool bIncludeLocallyDisabled) { return SteamEmulator.SteamUGC.GetSubscribedItems(0, cMaxEntries, bIncludeLocallyDisabled); }
         public uint GetItemState(IntPtr _, ulong nPublishedFileID) { return SteamEmulator.SteamUGC.GetItemState(nPublishedFileID); }
         public bool GetItemInstallInfo(IntPtr _, ulong nPublishedFileID, IntPtr punSizeOnDisk, IntPtr pchFolder, uint cchFolderSize, IntPtr punTimeStamp) { return SteamEmulator.SteamUGC.GetItemInstallInfo(nPublishedFileID, punSizeOnDisk, pchFolder, cchFolderSize, punTimeStamp); }
-        public bool GetItemDownloadInfo(IntPtr _, ulong nPublishedFileID, ulong punBytesDownloaded, ulong punBytesTotal) { return SteamEmulator.SteamUGC.GetItemDownloadInfo(nPublishedFileID, punBytesDownloaded, punBytesTotal); }
+        public bool GetItemDownloadInfo(IntPtr _, ulong nPublishedFileID, IntPtr punBytesDownloaded, IntPtr punBytesTotal)
+        {
+            WriteUInt64(punBytesDownloaded, 0);
+            WriteUInt64(punBytesTotal, 0);
+            return SteamEmulator.SteamUGC.GetItemDownloadInfo(nPublishedFileID, 0, 0);
+        }
         public bool DownloadItem(IntPtr _, ulong nPublishedFileID, bool bHighPriority) { return SteamEmulator.SteamUGC.DownloadItem(nPublishedFileID, bHighPriority); }
         public bool BInitWorkshopForGameServer(IntPtr _, uint unWorkshopDepotID, string pszFolder) { return SteamEmulator.SteamUGC.BInitWorkshopForGameServer(unWorkshopDepotID, pszFolder); }
         public void SuspendDownloads(IntPtr _, bool bSuspend) { SteamEmulator.SteamUGC.SuspendDownloads(bSuspend); }
-        public SteamAPICall_t StartPlaytimeTracking(IntPtr _, PublishedFileId_t pvecPublishedFileID, uint unNumPublishedFileIDs) { return SteamEmulator.SteamUGC.StartPlaytimeTracking(pvecPublishedFileID, unNumPublishedFileIDs); }
-        public SteamAPICall_t StopPlaytimeTracking(IntPtr _, ulong pvecPublishedFileID, uint unNumPublishedFileIDs) { return SteamEmulator.SteamUGC.StopPlaytimeTracking(pvecPublishedFileID, unNumPublishedFileIDs); }
+        public SteamAPICall_t StartPlaytimeTracking(IntPtr _, IntPtr pvecPublishedFileID, uint unNumPublishedFileIDs) { return SteamEmulator.SteamUGC.StartPlaytimeTracking(0, unNumPublishedFileIDs); }
+        public SteamAPICall_t StopPlaytimeTracking(IntPtr _, IntPtr pvecPublishedFileID, uint unNumPublishedFileIDs) { return SteamEmulator.SteamUGC.StopPlaytimeTracking(0, unNumPublishedFileIDs); }
         public SteamAPICall_t StopPlaytimeTrackingForAllItems(IntPtr _) { return SteamEmulator.SteamUGC.StopPlaytimeTrackingForAllItems(); }
         public SteamAPICall_t AddDependency(IntPtr _, ulong nParentPublishedFileID, ulong nChildPublishedFileID) { return SteamEmulator.SteamUGC.AddDependency(nParentPublishedFileID, nChildPublishedFileID); }
         public SteamAPICall_t RemoveDependency(IntPtr _, ulong nParentPublishedFileID, ulong nChildPublishedFileID) { return SteamEmulator.SteamUGC.RemoveDependency(nParentPublishedFileID, nChildPublishedFileID); }
@@ -113,8 +123,19 @@ namespace SKYNET.Steamworks.Interfaces
         public bool ShowWorkshopEULA(IntPtr _) { return SteamEmulator.SteamUGC.ShowWorkshopEULA(); }
         public SteamAPICall_t GetWorkshopEULAStatus(IntPtr _) { return SteamEmulator.SteamUGC.GetWorkshopEULAStatus(); }
         public uint GetUserContentDescriptorPreferences(IntPtr _, IntPtr pvecDescriptors, uint cMaxEntries) { return SteamEmulator.SteamUGC.GetUserContentDescriptorPreferences(pvecDescriptors, cMaxEntries); }
-        public bool SetItemsDisabledLocally(IntPtr _, ulong pvecPublishedFileIDs, uint unNumPublishedFileIDs, bool bDisabledLocally) { return SteamEmulator.SteamUGC.SetItemsDisabledLocally(pvecPublishedFileIDs, unNumPublishedFileIDs, bDisabledLocally); }
-        public bool SetSubscriptionsLoadOrder(IntPtr _, ulong pvecPublishedFileIDs, uint unNumPublishedFileIDs) { return SteamEmulator.SteamUGC.SetSubscriptionsLoadOrder(pvecPublishedFileIDs, unNumPublishedFileIDs); }
+        public bool SetItemsDisabledLocally(IntPtr _, IntPtr pvecPublishedFileIDs, uint unNumPublishedFileIDs, bool bDisabledLocally) { return SteamEmulator.SteamUGC.SetItemsDisabledLocally(0, unNumPublishedFileIDs, bDisabledLocally); }
+        public bool SetSubscriptionsLoadOrder(IntPtr _, IntPtr pvecPublishedFileIDs, uint unNumPublishedFileIDs) { return SteamEmulator.SteamUGC.SetSubscriptionsLoadOrder(0, unNumPublishedFileIDs); }
+        public bool MarkDownloadedItemAsUnused(IntPtr _, ulong nPublishedFileID) { return false; }
+        public uint GetNumDownloadedItems(IntPtr _) { return 0; }
+        public uint GetDownloadedItems(IntPtr _, IntPtr pvecPublishedFileID, uint cMaxEntries) { return 0; }
+
+        private static void WriteUInt64(IntPtr destination, ulong value)
+        {
+            if (destination != IntPtr.Zero)
+            {
+                Marshal.WriteInt64(destination, unchecked((long)value));
+            }
+        }
 
         private static bool TryReadPageFromSmallPointer(IntPtr pointer, out uint page)
         {

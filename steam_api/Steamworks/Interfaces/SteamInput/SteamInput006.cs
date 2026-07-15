@@ -1,5 +1,7 @@
 ﻿using System;
 
+using SKYNET.Helpers;
+
 using InputHandle_t = System.UInt64;
 using InputActionSetHandle_t = System.UInt64;
 using InputDigitalActionHandle_t = System.UInt64;
@@ -7,7 +9,6 @@ using InputAnalogActionHandle_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("SteamInput005")]
     [Interface("SteamInput006")]
     public class SteamInput006 : ISteamInterface
     {
@@ -41,9 +42,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamInput.BNewDataAvailable();
         }
 
-        public int GetConnectedControllers(IntPtr _, ref InputHandle_t[] handlesOut)
+        public int GetConnectedControllers(IntPtr _, IntPtr handlesOut)
         {
-            return SteamEmulator.SteamInput.GetConnectedControllers(ref handlesOut);
+            return SteamEmulator.SteamInput.GetConnectedControllers(handlesOut);
         }
 
         public void EnableDeviceCallbacks(IntPtr _)
@@ -85,9 +86,9 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamInput.DeactivateAllActionSetLayers(inputHandle);
         }
 
-        public int GetActiveActionSetLayers(IntPtr _, InputHandle_t inputHandle, ref InputActionSetHandle_t[] handlesOut)
+        public int GetActiveActionSetLayers(IntPtr _, InputHandle_t inputHandle, IntPtr handlesOut)
         {
-            return SteamEmulator.SteamInput.GetActiveActionSetLayers(inputHandle, ref handlesOut);
+            return SteamEmulator.SteamInput.GetActiveActionSetLayers(inputHandle, handlesOut);
         }
 
         public InputDigitalActionHandle_t GetDigitalActionHandle(IntPtr _, string pszActionName)
@@ -95,59 +96,59 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamInput.GetDigitalActionHandle(pszActionName);
         }
 
-        public IntPtr GetDigitalActionData(IntPtr _, InputHandle_t inputHandle, InputDigitalActionHandle_t digitalActionHandle)
+        public InputDigitalActionData_t GetDigitalActionData(IntPtr _, InputHandle_t inputHandle, InputDigitalActionHandle_t digitalActionHandle)
         {
             return SteamEmulator.SteamInput.GetDigitalActionData(inputHandle, digitalActionHandle);
         }
 
-        public int GetDigitalActionOrigins(IntPtr _, InputHandle_t inputHandle, InputActionSetHandle_t actionSetHandle, InputDigitalActionHandle_t digitalActionHandle, ref int[] originsOut)
+        public int GetDigitalActionOrigins(IntPtr _, InputHandle_t inputHandle, InputActionSetHandle_t actionSetHandle, InputDigitalActionHandle_t digitalActionHandle, IntPtr originsOut)
         {
-            return SteamEmulator.SteamInput.GetDigitalActionOrigins(inputHandle, actionSetHandle, digitalActionHandle, ref originsOut);
+            return SteamEmulator.SteamInput.GetDigitalActionOrigins(inputHandle, actionSetHandle, digitalActionHandle, originsOut);
         }
 
-        public string GetStringForDigitalActionName(IntPtr _, InputDigitalActionHandle_t eActionHandle)
+        public IntPtr GetStringForDigitalActionName(IntPtr _, InputDigitalActionHandle_t eActionHandle)
         {
-            return SteamEmulator.SteamInput.GetStringForDigitalActionName(eActionHandle);
+            return NativeStringCache.ToUtf8Ptr(SteamEmulator.SteamInput.GetStringForDigitalActionName(eActionHandle));
         }
 
-        public IntPtr GetAnalogActionHandle(IntPtr _, string pszActionName)
+        public InputAnalogActionHandle_t GetAnalogActionHandle(IntPtr _, string pszActionName)
         {
             return SteamEmulator.SteamInput.GetAnalogActionHandle(pszActionName);
         }
 
-        public IntPtr GetAnalogActionData(IntPtr _, InputHandle_t inputHandle, InputAnalogActionHandle_t analogActionHandle)
+        public InputAnalogActionData_t GetAnalogActionData(IntPtr _, InputHandle_t inputHandle, InputAnalogActionHandle_t analogActionHandle)
         {
             return SteamEmulator.SteamInput.GetAnalogActionData(inputHandle, analogActionHandle);
         }
 
-        public int GetAnalogActionOrigins(IntPtr _, InputHandle_t inputHandle, InputActionSetHandle_t actionSetHandle, InputAnalogActionHandle_t analogActionHandle, ref int[] originsOut)
+        public int GetAnalogActionOrigins(IntPtr _, InputHandle_t inputHandle, InputActionSetHandle_t actionSetHandle, InputAnalogActionHandle_t analogActionHandle, IntPtr originsOut)
         {
-            return SteamEmulator.SteamInput.GetAnalogActionOrigins(inputHandle, actionSetHandle, analogActionHandle, ref originsOut);
+            return SteamEmulator.SteamInput.GetAnalogActionOrigins(inputHandle, actionSetHandle, analogActionHandle, originsOut);
         }
 
-        public string GetGlyphPNGForActionOrigin(IntPtr _, int eOrigin, int eSize, UInt32 unFlags)
+        public IntPtr GetGlyphPNGForActionOrigin(IntPtr _, int eOrigin, int eSize, UInt32 unFlags)
         {
-            return SteamEmulator.SteamInput.GetGlyphPNGForActionOrigin(eOrigin, eSize, unFlags);
+            return NativeStringCache.ToUtf8Ptr(SteamEmulator.SteamInput.GetGlyphPNGForActionOrigin(eOrigin, eSize, unFlags));
         }
 
-        public string GetGlyphSVGForActionOrigin(IntPtr _, int eOrigin, UInt32 unFlags)
+        public IntPtr GetGlyphSVGForActionOrigin(IntPtr _, int eOrigin, UInt32 unFlags)
         {
-            return SteamEmulator.SteamInput.GetGlyphSVGForActionOrigin(eOrigin, unFlags);
+            return NativeStringCache.ToUtf8Ptr(SteamEmulator.SteamInput.GetGlyphSVGForActionOrigin(eOrigin, unFlags));
         }
 
-        public string GetGlyphForActionOrigin(IntPtr _, int eOrigin)
+        public IntPtr GetGlyphForActionOrigin_Legacy(IntPtr _, int eOrigin)
         {
-            return SteamEmulator.SteamInput.GetGlyphForActionOrigin(eOrigin);
+            return NativeStringCache.ToUtf8Ptr(SteamEmulator.SteamInput.GetGlyphForActionOrigin(eOrigin));
         }
 
-        public string GetStringForActionOrigin(IntPtr _, int eOrigin)
+        public IntPtr GetStringForActionOrigin(IntPtr _, int eOrigin)
         {
-            return SteamEmulator.SteamInput.GetStringForActionOrigin(eOrigin);
+            return NativeStringCache.ToUtf8Ptr(SteamEmulator.SteamInput.GetStringForActionOrigin(eOrigin));
         }
 
-        public string GetStringForAnalogActionName(IntPtr _, InputAnalogActionHandle_t eActionHandle )
+        public IntPtr GetStringForAnalogActionName(IntPtr _, InputAnalogActionHandle_t eActionHandle )
         {
-            return SteamEmulator.SteamInput.GetStringForAnalogActionName(eActionHandle);
+            return NativeStringCache.ToUtf8Ptr(SteamEmulator.SteamInput.GetStringForAnalogActionName(eActionHandle));
         }
 
         public void StopAnalogActionMomentum(IntPtr _, InputHandle_t inputHandle, InputAnalogActionHandle_t eAction)
@@ -155,37 +156,37 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamInput.StopAnalogActionMomentum(inputHandle, eAction);
         }
 
-        public IntPtr GetMotionData(IntPtr _, InputHandle_t inputHandle)
+        public InputMotionData_t GetMotionData(IntPtr _, InputHandle_t inputHandle)
         {
             return SteamEmulator.SteamInput.GetMotionData(inputHandle);
         }
 
-        public void TriggerVibration(IntPtr _, InputHandle_t inputHandle, short usLeftSpeed, short usRightSpeed)
+        public void TriggerVibration(IntPtr _, InputHandle_t inputHandle, ushort usLeftSpeed, ushort usRightSpeed)
         {
             SteamEmulator.SteamInput.TriggerVibration(inputHandle, usLeftSpeed, usRightSpeed);
         }
 
-        public void TriggerVibrationExtended(IntPtr _, InputHandle_t inputHandle, short usLeftSpeed, short usRightSpeed, short usLeftTriggerSpeed, short usRightTriggerSpeed)
+        public void TriggerVibrationExtended(IntPtr _, InputHandle_t inputHandle, ushort usLeftSpeed, ushort usRightSpeed, ushort usLeftTriggerSpeed, ushort usRightTriggerSpeed)
         {
             SteamEmulator.SteamInput.TriggerVibrationExtended(inputHandle, usLeftSpeed, usRightSpeed, usLeftTriggerSpeed, usRightTriggerSpeed);
         }
 
-        public void TriggerSimpleHapticEvent(IntPtr _, InputHandle_t inputHandle, int eHapticLocation, int nIntensity, string nGainDB, int nOtherIntensity, string nOtherGainDB)
+        public void TriggerSimpleHapticEvent(IntPtr _, InputHandle_t inputHandle, int eHapticLocation, byte nIntensity, sbyte nGainDB, byte nOtherIntensity, sbyte nOtherGainDB)
         {
             SteamEmulator.SteamInput.TriggerSimpleHapticEvent(inputHandle, eHapticLocation, nIntensity, nGainDB, nOtherIntensity, nOtherGainDB);
         }
 
-        public void SetLEDColor(IntPtr _, InputHandle_t inputHandle, int nColorR, int nColorG, int nColorB, int nFlags)
+        public void SetLEDColor(IntPtr _, InputHandle_t inputHandle, byte nColorR, byte nColorG, byte nColorB, uint nFlags)
         {
             SteamEmulator.SteamInput.SetLEDColor(inputHandle, nColorR, nColorG, nColorB, nFlags);
         }
 
-        public void Legacy_TriggerHapticPulse(IntPtr _, InputHandle_t inputHandle, ESteamControllerPad eTargetPad, short usDurationMicroSec)
+        public void Legacy_TriggerHapticPulse(IntPtr _, InputHandle_t inputHandle, ESteamControllerPad eTargetPad, ushort usDurationMicroSec)
         {
             SteamEmulator.SteamInput.TriggerHapticPulse(inputHandle, eTargetPad, usDurationMicroSec);
         }
 
-        public void Legacy_TriggerRepeatedHapticPulse(IntPtr _, InputHandle_t inputHandle, ESteamControllerPad eTargetPad, short usDurationMicroSec, short usOffMicroSec, short unRepeat, int nFlags)
+        public void Legacy_TriggerRepeatedHapticPulse(IntPtr _, InputHandle_t inputHandle, ESteamControllerPad eTargetPad, ushort usDurationMicroSec, ushort usOffMicroSec, ushort unRepeat, uint nFlags)
         {
             SteamEmulator.SteamInput.TriggerRepeatedHapticPulse(inputHandle, eTargetPad, usDurationMicroSec, usOffMicroSec, unRepeat, nFlags);
         }
@@ -210,14 +211,14 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamInput.GetGamepadIndexForController(ulinputHandle);
         }
 
-        public string GetStringForXboxOrigin(IntPtr _, int eOrigin)
+        public IntPtr GetStringForXboxOrigin(IntPtr _, int eOrigin)
         {
-            return SteamEmulator.SteamInput.GetStringForXboxOrigin(eOrigin);
+            return NativeStringCache.ToUtf8Ptr(SteamEmulator.SteamInput.GetStringForXboxOrigin(eOrigin));
         }
 
-        public string GetGlyphForXboxOrigin(IntPtr _, int eOrigin)
+        public IntPtr GetGlyphForXboxOrigin(IntPtr _, int eOrigin)
         {
-            return SteamEmulator.SteamInput.GetGlyphForXboxOrigin(eOrigin);
+            return NativeStringCache.ToUtf8Ptr(SteamEmulator.SteamInput.GetGlyphForXboxOrigin(eOrigin));
         }
 
         public int GetActionOriginFromXboxOrigin(IntPtr _, InputHandle_t inputHandle, int eOrigin)
@@ -230,7 +231,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamInput.TranslateActionOrigin(eDestinationInputType, eSourceOrigin);
         }
 
-        public bool GetDeviceBindingRevision(IntPtr _, InputHandle_t inputHandle, int pMajor, int pMinor)
+        public bool GetDeviceBindingRevision(IntPtr _, InputHandle_t inputHandle, IntPtr pMajor, IntPtr pMinor)
         {
             return SteamEmulator.SteamInput.GetDeviceBindingRevision(inputHandle, pMajor, pMinor);
         }
@@ -243,6 +244,11 @@ namespace SKYNET.Steamworks.Interfaces
         public UInt16 GetSessionInputConfigurationSettings(IntPtr _)
         {
             return SteamEmulator.SteamInput.GetSessionInputConfigurationSettings();
+        }
+
+        public void SetDualSenseTriggerEffect(IntPtr _, InputHandle_t inputHandle, IntPtr pParam)
+        {
+            SteamEmulator.SteamInput.SetDualSenseTriggerEffect(inputHandle, pParam);
         }
 
     }

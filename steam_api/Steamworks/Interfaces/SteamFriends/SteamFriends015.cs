@@ -32,9 +32,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamFriends.Instance.GetFriendCount(iFriendFlags);
         }
 
-        public IntPtr GetFriendByIndex(IntPtr _, IntPtr pSteamID, int iFriend, int iFriendFlags)
+        public IntPtr GetFriendByIndex(IntPtr _, IntPtr ret, int iFriend, int iFriendFlags)
         {
-            return NativeSteamId.Write(pSteamID, SteamFriends.Instance.GetFriendByIndex(iFriend, iFriendFlags));
+            return NativeSteamId.Write(ret, SteamFriends.Instance.GetFriendByIndex(iFriend, iFriendFlags));
         }
 
         public EFriendRelationship GetFriendRelationship(IntPtr _, CSteamID steamIDFriend)
@@ -107,9 +107,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamFriends.Instance.GetClanCount();
         }
 
-        public IntPtr GetClanByIndex(IntPtr _, IntPtr pSteamID, int iClan)
+        public IntPtr GetClanByIndex(IntPtr _, IntPtr ret, int iClan)
         {
-            return NativeSteamId.Write(pSteamID, SteamFriends.Instance.GetClanByIndex(iClan));
+            return NativeSteamId.Write(ret, SteamFriends.Instance.GetClanByIndex(iClan));
         }
 
         public string GetClanName(IntPtr _, CSteamID steamIDClan)
@@ -122,9 +122,16 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamFriends.Instance.GetClanTag((ulong)steamIDClan);
         }
 
-        public bool GetClanActivityCounts(IntPtr _, CSteamID steamIDClan, int pnOnline, int pnInGame, int pnChatting)
+        public bool GetClanActivityCounts(IntPtr _, CSteamID steamIDClan, IntPtr pnOnline, IntPtr pnInGame, IntPtr pnChatting)
         {
-            return SteamFriends.Instance.GetClanActivityCounts((ulong)steamIDClan, ref pnOnline, ref pnInGame, ref pnChatting);
+            int online = 0;
+            int inGame = 0;
+            int chatting = 0;
+            bool result = SteamFriends.Instance.GetClanActivityCounts((ulong)steamIDClan, ref online, ref inGame, ref chatting);
+            WriteInt32(pnOnline, online);
+            WriteInt32(pnInGame, inGame);
+            WriteInt32(pnChatting, chatting);
+            return result;
         }
 
         public SteamAPICall_t DownloadClanActivityCounts(IntPtr _, IntPtr psteamIDClans, int cClansToRequest)
@@ -137,9 +144,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamFriends.Instance.GetFriendCountFromSource((ulong)steamIDSource);
         }
 
-        public IntPtr GetFriendFromSourceByIndex(IntPtr _, IntPtr pSteamID, CSteamID steamIDSource, int iFriend)
+        public IntPtr GetFriendFromSourceByIndex(IntPtr _, IntPtr ret, CSteamID steamIDSource, int iFriend)
         {
-            return NativeSteamId.Write(pSteamID, SteamFriends.Instance.GetFriendFromSourceByIndex((ulong)steamIDSource, iFriend));
+            return NativeSteamId.Write(ret, SteamFriends.Instance.GetFriendFromSourceByIndex((ulong)steamIDSource, iFriend));
         }
 
         public bool IsUserInSource(IntPtr _, CSteamID steamIDUser, CSteamID steamIDSource)
@@ -207,9 +214,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamFriends.Instance.RequestClanOfficerList((ulong)steamIDClan);
         }
 
-        public IntPtr GetClanOwner(IntPtr _, IntPtr pSteamID, CSteamID steamIDClan)
+        public IntPtr GetClanOwner(IntPtr _, IntPtr ret, CSteamID steamIDClan)
         {
-            return NativeSteamId.Write(pSteamID, SteamFriends.Instance.GetClanOwner((ulong)steamIDClan));
+            return NativeSteamId.Write(ret, SteamFriends.Instance.GetClanOwner((ulong)steamIDClan));
         }
 
         public int GetClanOfficerCount(IntPtr _, CSteamID steamIDClan)
@@ -217,9 +224,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamFriends.Instance.GetClanOfficerCount((ulong)steamIDClan);
         }
 
-        public IntPtr GetClanOfficerByIndex(IntPtr _, IntPtr pSteamID, CSteamID steamIDClan, int iOfficer)
+        public IntPtr GetClanOfficerByIndex(IntPtr _, IntPtr ret, CSteamID steamIDClan, int iOfficer)
         {
-            return NativeSteamId.Write(pSteamID, SteamFriends.Instance.GetClanOfficerByIndex((ulong)steamIDClan, iOfficer));
+            return NativeSteamId.Write(ret, SteamFriends.Instance.GetClanOfficerByIndex((ulong)steamIDClan, iOfficer));
         }
 
         public uint32 GetUserRestrictions(IntPtr _)
@@ -267,9 +274,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamFriends.Instance.GetCoplayFriendCount();
         }
 
-        public IntPtr GetCoplayFriend(IntPtr _, IntPtr pSteamID, int iCoplayFriend)
+        public IntPtr GetCoplayFriend(IntPtr _, IntPtr ret, int iCoplayFriend)
         {
-            return NativeSteamId.Write(pSteamID, SteamFriends.Instance.GetCoplayFriend(iCoplayFriend));
+            return NativeSteamId.Write(ret, SteamFriends.Instance.GetCoplayFriend(iCoplayFriend));
         }
 
         public int GetFriendCoplayTime(IntPtr _, CSteamID steamIDFriend)
@@ -297,9 +304,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamFriends.Instance.GetClanChatMemberCount((ulong)steamIDClan);
         }
 
-        public IntPtr GetChatMemberByIndex(IntPtr _, IntPtr pSteamID, CSteamID steamIDClan, int iUser)
+        public IntPtr GetChatMemberByIndex(IntPtr _, IntPtr ret, CSteamID steamIDClan, int iUser)
         {
-            return NativeSteamId.Write(pSteamID, SteamFriends.Instance.GetChatMemberByIndex((ulong)steamIDClan, iUser));
+            return NativeSteamId.Write(ret, SteamFriends.Instance.GetChatMemberByIndex((ulong)steamIDClan, iUser));
         }
 
         public bool SendClanChatMessage(IntPtr _, CSteamID steamIDClanChat, string pchText)
@@ -307,9 +314,13 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamFriends.Instance.SendClanChatMessage((ulong)steamIDClanChat, pchText);
         }
 
-        public int GetClanChatMessage(IntPtr _, CSteamID steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, EChatEntryType peChatEntryType, ref ulong[] psteamidChatter )
+        public int GetClanChatMessage(IntPtr _, CSteamID steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, IntPtr peChatEntryType, IntPtr psteamidChatter )
         {
-            return SteamFriends.Instance.GetClanChatMessage((ulong)steamIDClanChat, iMessage, prgchText, cchTextMax, (int)peChatEntryType, ref psteamidChatter);
+            ulong[] chatter = new ulong[1];
+            int result = SteamFriends.Instance.GetClanChatMessage((ulong)steamIDClanChat, iMessage, prgchText, cchTextMax, 0, ref chatter);
+            WriteInt32(peChatEntryType, 0);
+            WriteUInt64(psteamidChatter, chatter.Length > 0 ? chatter[0] : 0);
+            return result;
         }
 
         public bool IsClanChatAdmin(IntPtr _, CSteamID steamIDClanChat, CSteamID steamIDUser)
@@ -342,9 +353,11 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamFriends.Instance.ReplyToFriendMessage((ulong)steamIDFriend, pchMsgToSend);
         }
 
-        public int GetFriendMessage(IntPtr _, CSteamID steamIDFriend, int iMessageID, IntPtr pvData, int cubData, EChatEntryType peChatEntryType)
+        public int GetFriendMessage(IntPtr _, CSteamID steamIDFriend, int iMessageID, IntPtr pvData, int cubData, IntPtr peChatEntryType)
         {
-            return SteamFriends.Instance.GetFriendMessage((ulong)steamIDFriend, iMessageID, pvData, cubData, (int)peChatEntryType);
+            int result = SteamFriends.Instance.GetFriendMessage((ulong)steamIDFriend, iMessageID, pvData, cubData, 0);
+            WriteInt32(peChatEntryType, 0);
+            return result;
         }
 
         public SteamAPICall_t GetFollowerCount(IntPtr _, CSteamID steamID)
@@ -370,6 +383,22 @@ namespace SKYNET.Steamworks.Interfaces
         public bool IsClanOfficialGameGroup(IntPtr _, CSteamID steamIDClan)
         {
             return SteamFriends.Instance.IsClanOfficialGameGroup((ulong)steamIDClan);
+        }
+
+        private static void WriteInt32(IntPtr destination, int value)
+        {
+            if (destination != IntPtr.Zero)
+            {
+                System.Runtime.InteropServices.Marshal.WriteInt32(destination, value);
+            }
+        }
+
+        private static void WriteUInt64(IntPtr destination, ulong value)
+        {
+            if (destination != IntPtr.Zero)
+            {
+                System.Runtime.InteropServices.Marshal.WriteInt64(destination, unchecked((long)value));
+            }
         }
     }
 }

@@ -25,9 +25,16 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamClient.ConnectToGlobalUser(hSteamPipe);
         }
 
-        public HSteamUser CreateLocalUser(IntPtr _, HSteamPipe phSteamPipe, int eAccountType)
+        public HSteamUser CreateLocalUser(IntPtr _, IntPtr phSteamPipe, int eAccountType)
         {
-            return SteamEmulator.SteamClient.CreateLocalUser(phSteamPipe, eAccountType);
+            HSteamPipe pipe = 0;
+            HSteamUser user = SteamEmulator.SteamClient.CreateLocalUser(pipe, eAccountType);
+            if (phSteamPipe != IntPtr.Zero)
+            {
+                System.Runtime.InteropServices.Marshal.WriteInt32(phSteamPipe, unchecked((int)pipe));
+            }
+
+            return user;
         }
 
         public void ReleaseUser(IntPtr _, HSteamPipe hSteamPipe, HSteamUser hUser)
@@ -130,9 +137,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamClient.GetISteamHTTP(hSteamuser, hSteamPipe, pchVersion);
         }
 
-        public void DEPRECATED_GetISteamUnifiedMessages(IntPtr _, HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
+        public IntPtr DEPRECATED_GetISteamUnifiedMessages(IntPtr _, HSteamUser hSteamuser, HSteamPipe hSteamPipe, string pchVersion)
         {
-            SteamEmulator.SteamClient.DEPRECATED_GetISteamUnifiedMessages(hSteamuser, hSteamPipe, pchVersion);
+            return SteamEmulator.SteamClient.DEPRECATED_GetISteamUnifiedMessages(hSteamuser, hSteamPipe, pchVersion);
         }
 
         public IntPtr GetISteamController(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)

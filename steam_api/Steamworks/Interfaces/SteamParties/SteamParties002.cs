@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SKYNET.Steamworks;
 
 using SteamAPICall_t = System.UInt64;
 using PartyBeaconID_t = System.UInt64;
@@ -22,7 +23,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamParties.GetBeaconByIndex(unIndex);
         }
 
-        public bool GetBeaconDetails(IntPtr _, PartyBeaconID_t ulBeaconID, ulong pSteamIDBeaconOwner, IntPtr pLocation, string pchMetadata, int cchMetadata)
+        public bool GetBeaconDetails(IntPtr _, PartyBeaconID_t ulBeaconID, IntPtr pSteamIDBeaconOwner, IntPtr pLocation, IntPtr pchMetadata, int cchMetadata)
         {
             return SteamEmulator.SteamParties.GetBeaconDetails(ulBeaconID, pSteamIDBeaconOwner, pLocation, pchMetadata, cchMetadata);
         }
@@ -33,7 +34,7 @@ namespace SKYNET.Steamworks.Interfaces
         }
 
 
-        public bool GetNumAvailableBeaconLocations(IntPtr _, UInt32 puNumLocations)
+        public bool GetNumAvailableBeaconLocations(IntPtr _, IntPtr puNumLocations)
         {
             return SteamEmulator.SteamParties.GetNumAvailableBeaconLocations(puNumLocations);
         }
@@ -68,9 +69,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamParties.DestroyBeacon(ulBeacon);
         }
 
-        public bool GetBeaconLocationData(IntPtr _, IntPtr BeaconLocation, int eData, ref string pchDataStringOut, ref int cchDataStringOut)
+        public bool GetBeaconLocationData(IntPtr _, SteamPartyBeaconLocation_t BeaconLocation, int eData, IntPtr pchDataStringOut, int cchDataStringOut)
         {
-            return SteamEmulator.SteamParties.GetBeaconLocationData(BeaconLocation, eData, ref pchDataStringOut, ref cchDataStringOut);
+            return SteamEmulator.SteamParties.GetBeaconLocationData(BeaconLocation, eData, pchDataStringOut, cchDataStringOut);
         }
     }
 }

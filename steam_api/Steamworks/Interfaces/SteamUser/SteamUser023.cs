@@ -38,7 +38,7 @@ namespace SKYNET.Steamworks.Interfaces
 			SteamEmulator.SteamUser.TerminateGameConnection_DEPRECATED(unIPServer, usPortServer);
 		}
 
-		public void TrackAppUsageEvent(IntPtr _, UInt32 gameID, int eAppUsageEvent, string pchExtraInfo)
+		public void TrackAppUsageEvent(IntPtr _, ulong gameID, int eAppUsageEvent, string pchExtraInfo)
 		{
 			SteamEmulator.SteamUser.TrackAppUsageEvent(gameID, eAppUsageEvent, pchExtraInfo);
 		}
@@ -123,9 +123,8 @@ namespace SKYNET.Steamworks.Interfaces
 			return SteamEmulator.SteamUser.RequestEncryptedAppTicket(pDataToInclude, cbDataToInclude);
 		}
 
-		public bool GetEncryptedAppTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
+		public bool GetEncryptedAppTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, IntPtr pcbTicket)
 		{
-			pcbTicket = 0;
 			return SteamEmulator.SteamUser.GetEncryptedAppTicket(pTicket, cbMaxTicket, pcbTicket);
 		}
 
@@ -181,4 +180,3 @@ namespace SKYNET.Steamworks.Interfaces
 	}
 
 }
-

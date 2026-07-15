@@ -195,13 +195,12 @@ public sealed partial class SteamApiStateService
             server.IP = publicIp;
             var serverId = server.SteamId != 0 ? server.SteamId : (ulong)publicIp;
             server.SteamId = serverId;
-            server.Flags &= ~ServerFlagSecure;
-            server.GameTags = NormalizeGameServerTags(server.GameTags);
+            var secure = NormalizeGameServerSecurity(server);
 
             _state.GameServers[serverId] = server;
             _dotaDedicatedServers.ObserveRegistration(serverId, server);
             SaveState();
-            return new ApiGameServerResult { Success = true, PublicIP = publicIp, Secure = 0, SteamId = serverId };
+            return new ApiGameServerResult { Success = true, PublicIP = publicIp, Secure = secure, SteamId = serverId };
         }
     }
 
@@ -219,8 +218,7 @@ public sealed partial class SteamApiStateService
             server.IP = publicIp;
             var serverId = server.SteamId != 0 ? server.SteamId : (ulong)publicIp;
             server.SteamId = serverId;
-            server.Flags &= ~ServerFlagSecure;
-            server.GameTags = NormalizeGameServerTags(server.GameTags);
+            NormalizeGameServerSecurity(server);
             _state.GameServers[serverId] = server;
             _dotaDedicatedServers.ObserveRegistration(serverId, server);
             SaveState();
@@ -302,23 +300,40 @@ public sealed partial class SteamApiStateService
         });
     }
 
-    private static string NormalizeGameServerTags(string? gameTags)
+    private static byte NormalizeGameServerSecurity(ApiGameServer server)
+    {
+        var secure = server.Secure != 0 || (server.Flags & ServerFlagSecure) != 0;
+        if (secure)
+        {
+            server.Secure = 1;
+            server.Flags |= ServerFlagSecure;
+        }
+        else
+        {
+            server.Secure = 0;
+            server.Flags &= ~ServerFlagSecure;
+        }
+
+        server.GameTags = NormalizeGameServerTags(server.GameTags, secure);
+        return server.Secure;
+    }
+
+    private static string NormalizeGameServerTags(string? gameTags, bool secure)
     {
         if (string.IsNullOrWhiteSpace(gameTags))
         {
-            return "insecure";
+            return secure ? "secure" : "insecure";
         }
 
         var tags = gameTags
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Select(tag => tag.Equals("secure", StringComparison.OrdinalIgnoreCase) ? "insecure" : tag)
+            .Where(tag =>
+                !tag.Equals("secure", StringComparison.OrdinalIgnoreCase) &&
+                !tag.Equals("insecure", StringComparison.OrdinalIgnoreCase))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        if (!tags.Any(tag => tag.Equals("insecure", StringComparison.OrdinalIgnoreCase)))
-        {
-            tags.Add("insecure");
-        }
+        tags.Add(secure ? "secure" : "insecure");
 
         return string.Join(',', tags);
     }

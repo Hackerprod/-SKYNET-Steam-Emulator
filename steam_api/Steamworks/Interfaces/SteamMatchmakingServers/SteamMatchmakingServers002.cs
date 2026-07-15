@@ -71,17 +71,17 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamMatchMakingServers.RefreshServer(hRequest, iServer);
         }
 
-        public int PingServer(IntPtr _, uint unIP, uint usPort, IntPtr pRequestServersResponse)
+        public int PingServer(IntPtr _, uint unIP, ushort usPort, IntPtr pRequestServersResponse)
         {
             return (int)SteamEmulator.SteamMatchMakingServers.PingServer(unIP, usPort, pRequestServersResponse);
         }
 
-        public int PlayerDetails(IntPtr _, uint unIP, uint usPort, IntPtr pRequestServersResponse)
+        public int PlayerDetails(IntPtr _, uint unIP, ushort usPort, IntPtr pRequestServersResponse)
         {
             return (int)SteamEmulator.SteamMatchMakingServers.PlayerDetails(unIP, usPort, pRequestServersResponse);
         }
 
-        public int ServerRules(IntPtr _, uint unIP, uint usPort, IntPtr pRequestServersResponse)
+        public int ServerRules(IntPtr _, uint unIP, ushort usPort, IntPtr pRequestServersResponse)
         {
             return (int)SteamEmulator.SteamMatchMakingServers.ServerRules(unIP, usPort, pRequestServersResponse);
         }

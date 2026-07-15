@@ -12,39 +12,61 @@ namespace SKYNET.Managers
     {
         private static readonly ConcurrentDictionary<uint, TicketRecord> Tickets = new ConcurrentDictionary<uint, TicketRecord>();
         private static readonly ConcurrentDictionary<ulong, TicketData> ConnectedUsers = new ConcurrentDictionary<ulong, TicketData>();
+        private const uint SteamAppTicketGcLength = 20;
+        private const int SteamTicketMinSize = 4 + 8 + 8 + 4;
         private static uint CurrentTicket;
 
-        public static bool ConnectAndAuthenticate(uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, ulong pSteamIDUser)
+        public static bool ConnectAndAuthenticate(uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, IntPtr pSteamIDUser)
+        {
+            var approved = ConnectAndAuthenticate(unIPClient, pvAuthBlob, cubAuthBlobSize, out var steamIDUser);
+            if (approved && pSteamIDUser != IntPtr.Zero)
+            {
+                Marshal.WriteInt64(pSteamIDUser, unchecked((long)steamIDUser));
+            }
+
+            return approved;
+        }
+
+        public static bool ConnectAndAuthenticate(uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, out ulong steamIDUser)
         {
             var authBlob = pvAuthBlob == IntPtr.Zero || cubAuthBlobSize == 0
                 ? new byte[0]
                 : pvAuthBlob.GetBytes(cubAuthBlobSize);
+
+            steamIDUser = TryReadSteamIdFromAuthBlob(authBlob);
+            if (steamIDUser == 0)
+            {
+                steamIDUser = SteamEmulator.SteamID.SteamID;
+                Write($"ConnectAndAuthenticate auth blob did not contain a SteamID; falling back to local user {(CSteamID)steamIDUser}");
+            }
 
             // Approve the connecting user locally and immediately (Goldberg-style).
             // Gating this on a blocking server round-trip stalls Dota's client
             // connection handshake, which makes the joining player fail VAC/session
             // verification. On a trusted LAN every SKYNET user is authorised, so we
             // accept here and only notify the server asynchronously for presence.
-            ConnectedUsers[pSteamIDUser] = new TicketData
+            ConnectedUsers[steamIDUser] = new TicketData
             {
                 IPClient = unIPClient,
                 AuthBlob = pvAuthBlob,
                 BlobSize = cubAuthBlobSize,
-                SteamID = pSteamIDUser
+                SteamID = steamIDUser
             };
 
             CallbackManager.AddCallbackGameServer(new GSClientApprove_t
             {
-                SteamID = pSteamIDUser,
-                OwnerSteamID = pSteamIDUser
+                SteamID = steamIDUser,
+                OwnerSteamID = steamIDUser
             });
 
+            var approvedSteamID = steamIDUser;
             if (SkyNetApiClient.IsEnabled)
             {
-                WorkQueue.Enqueue("ConnectAndAuthenticate", () => SkyNetApiClient.ConnectAndAuthenticate(unIPClient, authBlob, pSteamIDUser),
-                    "ticket:connect:" + pSteamIDUser, true);
+                WorkQueue.Enqueue("ConnectAndAuthenticate", () => SkyNetApiClient.ConnectAndAuthenticate(unIPClient, authBlob, approvedSteamID),
+                    "ticket:connect:" + approvedSteamID, true);
             }
 
+            Write($"ConnectAndAuthenticate approved {(CSteamID)steamIDUser} blob={cubAuthBlobSize}");
             return true;
         }
 
@@ -71,22 +93,29 @@ namespace SKYNET.Managers
                 }
 
                 CurrentTicket++;
+                if (CurrentTicket == 0)
+                {
+                    CurrentTicket++;
+                }
 
                 var ticket = new LocalTicket
                 {
-                    AppID = SteamEmulator.AppID,
-                    Handle = CurrentTicket,
-                    TicketID = CSteamID.CreateOne().AccountID,
+                    GcTokenLength = SteamAppTicketGcLength,
+                    Token = ((ulong)CurrentTicket << 32) | (uint)Environment.TickCount,
                     UserSteamID = (ulong)(gameServer ? SteamEmulator.SteamID_GS : SteamEmulator.SteamID),
+                    TicketGeneratedDate = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds()
                 };
 
                 var size = Marshal.SizeOf(ticket);
-                pcbTicket = (uint)size;
-
-                if (pTicket != IntPtr.Zero && cbMaxTicket >= size)
+                if (pTicket == IntPtr.Zero || cbMaxTicket < size)
                 {
-                    Marshal.StructureToPtr(ticket, pTicket, false);
+                    Write($"GetAuthSessionTicket buffer too small cbMax={cbMaxTicket} needed={size}");
+                    pcbTicket = 0;
+                    return 0;
                 }
+
+                pcbTicket = (uint)size;
+                Marshal.StructureToPtr(ticket, pTicket, false);
 
                 Tickets[CurrentTicket] = new TicketRecord
                 {
@@ -110,6 +139,15 @@ namespace SKYNET.Managers
             var ticketBytes = pAuthTicket == IntPtr.Zero || cbAuthTicket <= 0
                 ? new byte[0]
                 : pAuthTicket.GetBytes((uint)cbAuthTicket);
+            var ticketSteamId = TryReadSteamIdFromAuthBlob(ticketBytes);
+            if (ticketSteamId != 0 && steamID != 0 && ticketSteamId != steamID)
+            {
+                Write($"BeginAuthSession rejected mismatched ticket steam={(CSteamID)ticketSteamId} expected={(CSteamID)steamID} size={cbAuthTicket}");
+                EmitValidateAuthTicket(steamID, ticketSteamId, EAuthSessionResponse.AuthTicketInvalid, gameServer);
+                return (int)EBeginAuthSessionResult.k_EBeginAuthSessionResultInvalidTicket;
+            }
+
+            var ownerSteamId = ticketSteamId != 0 ? ticketSteamId : steamID;
 
             // Validate locally and immediately (Goldberg-style). A blocking server
             // round-trip here delays the ValidateAuthTicketResponse callback past the
@@ -121,7 +159,8 @@ namespace SKYNET.Managers
                     null, true);
             }
 
-            EmitValidateAuthTicket(steamID, steamID, EAuthSessionResponse.OK, gameServer);
+            EmitValidateAuthTicket(steamID, ownerSteamId, EAuthSessionResponse.OK, gameServer);
+            Write($"BeginAuthSession approved {(CSteamID)steamID} owner={(CSteamID)ownerSteamId} size={cbAuthTicket}");
             return (int)EBeginAuthSessionResult.k_EBeginAuthSessionResultOK;
         }
 
@@ -201,6 +240,34 @@ namespace SKYNET.Managers
             }
         }
 
+        private static ulong TryReadSteamIdFromAuthBlob(byte[] authBlob)
+        {
+            if (authBlob == null || authBlob.Length < SteamTicketMinSize)
+            {
+                return 0;
+            }
+
+            var magic = BitConverter.ToUInt32(authBlob, 0);
+            if (magic == SteamAppTicketGcLength)
+            {
+                return BitConverter.ToUInt64(authBlob, 12);
+            }
+
+            // SmartSteamEmu ticket: "HEMU", version at +4, SteamID at +0x10.
+            if (magic == 0x554D4548 && authBlob.Length >= 0x18)
+            {
+                return BitConverter.ToUInt64(authBlob, 0x10);
+            }
+
+            // RevEmu ticket marker at +8 ("rev"), SteamID at +0x10.
+            if (authBlob.Length >= 0x18 && BitConverter.ToUInt32(authBlob, 0x08) == 0x00726576)
+            {
+                return BitConverter.ToUInt64(authBlob, 0x10);
+            }
+
+            return 0;
+        }
+
         private static byte[] EncodeFixed(string text, int size)
         {
             var bytes = new byte[size];
@@ -234,13 +301,13 @@ namespace SKYNET.Managers
             public ulong SteamID { get; set; }
         }
 
-        [StructLayout(LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
         private struct LocalTicket
         {
-            public uint AppID;
-            public uint Handle;
-            public uint TicketID;
+            public uint GcTokenLength;
+            public ulong Token;
             public ulong UserSteamID;
+            public uint TicketGeneratedDate;
         }
     }
 }

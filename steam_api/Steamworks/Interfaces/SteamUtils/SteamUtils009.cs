@@ -43,12 +43,12 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUtils.GetImageRGBA(iImage, pubDest, nDestBufferSize);
         }
 
-        public bool GetCSERIPPort(IntPtr _, uint unIP, uint usPort)
+        public bool GetCSERIPPort(IntPtr _, IntPtr unIP, IntPtr usPort)
         {
             return SteamEmulator.SteamUtils.GetCSERIPPort(unIP, usPort);
         }
 
-        public int GetCurrentBatteryPower(IntPtr _)
+        public byte GetCurrentBatteryPower(IntPtr _)
         {
             return SteamEmulator.SteamUtils.GetCurrentBatteryPower();
         }
@@ -63,9 +63,16 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamUtils.SetOverlayNotificationPosition(eNotificationPosition);
         }
 
-        public bool IsAPICallCompleted(IntPtr _, SteamAPICall_t hSteamAPICall, bool pbFailed)
+        public bool IsAPICallCompleted(IntPtr _, SteamAPICall_t hSteamAPICall, IntPtr pbFailed)
         {
-            return SteamEmulator.SteamUtils.IsAPICallCompleted(hSteamAPICall, ref pbFailed);
+            bool failed = false;
+            bool result = SteamEmulator.SteamUtils.IsAPICallCompleted(hSteamAPICall, ref failed);
+            if (pbFailed != IntPtr.Zero)
+            {
+                System.Runtime.InteropServices.Marshal.WriteByte(pbFailed, failed ? (byte)1 : (byte)0);
+            }
+
+            return result;
         }
 
         public int GetAPICallFailureReason(IntPtr _, SteamAPICall_t hSteamAPICall)

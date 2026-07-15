@@ -27,7 +27,6 @@ local LOBBY_SERVER_ASSIGN = 6
 local GAME_INIT = 0
 local GAME_WAIT_FOR_PLAYERS = 1
 local GAME_HERO_SELECTION = 2
-local GAME_DISCONNECT = 7
 
 local CONNECTED_REASON_HEARTBEAT = 1
 local CONNECTED_REASON_GAME_STATE = 2
@@ -1432,12 +1431,25 @@ local function connect_string(lobby)
     -- both and connects over whichever it can route to. When the host is multi-homed
     -- (WiFi + ZeroTier) advertise one address per interface so every peer reaches it.
     local endpoints = {}
+    local seen = {}
+    local function add_endpoint(ip)
+        if ip == nil or ip == "" or ip == "::1" or ip == "0.0.0.0" then
+            return
+        end
+
+        local endpoint = ip .. ":" .. tostring(port)
+        if seen[endpoint] == true then
+            return
+        end
+
+        seen[endpoint] = true
+        endpoints[#endpoints + 1] = endpoint
+    end
+
     local ips = lobby.server_ips
     if ips ~= nil and ips ~= "" then
         for ip in string.gmatch(ips, "%S+") do
-            if is_routable_ip(ip) then
-                endpoints[#endpoints + 1] = ip .. ":" .. tostring(port)
-            end
+            add_endpoint(ip)
         end
     end
 
@@ -1455,6 +1467,25 @@ local function connect_string(lobby)
     return first .. " " .. second
 end
 
+local function mark_lobby_members_connected(lobby)
+    for _, member in ipairs(member_order(lobby)) do
+        member.leaver = LEAVER_NONE
+        member.disconnected_at = nil
+        member.disconnect_reason = nil
+        member.connected_once = false
+    end
+end
+
+local function lobby_has_connected_player(lobby)
+    for _, member in ipairs(member_order(lobby)) do
+        if member.connected_once == true then
+            return true
+        end
+    end
+
+    return false
+end
+
 local function start_realtime_stats(lobby)
     if lobby.server_steam == nil or lobby.server_steam == "0" or lobby.realtime_sent == true then
         return
@@ -1466,6 +1497,20 @@ end
 
 local function same_running_server(lobby)
     return lobby ~= nil and lobby.state == LOBBY_RUN and tostring(lobby.server_steam or "0") == current_steam()
+end
+
+local function rebroadcast_running_lobby_to_members(lobby, reason)
+    if lobby == nil then
+        return true
+    end
+
+    refresh_lobby(lobby)
+    broadcast_lobby(lobby, tostring(lobby.server_steam or "0"), false)
+    publish_lobby(lobby)
+    runtime.Log(tostring(reason or "running_lobby") .. " rebroadcast RUN lobby=" .. tostring(lobby.id) ..
+        " server=" .. tostring(lobby.server_steam or "0") ..
+        " connect=" .. tostring(lobby.connect or ""))
+    return true
 end
 
 local function attach_server(lobby, mark_run)
@@ -1519,6 +1564,7 @@ local function attach_server(lobby, mark_run)
     end
     runtime.Log("attach_server endpoint lobby=" .. tostring(lobby.id) ..
         " ip=" .. tostring(lobby.server_ip or "") ..
+        " ips=" .. tostring(lobby.server_ips or "") ..
         " port=" .. tostring(lobby.server_port or 0) ..
         " public=" .. tostring(public_ip) ..
         " private=" .. tostring(private_ip) ..
@@ -1528,30 +1574,28 @@ local function attach_server(lobby, mark_run)
         ensure_match_id(lobby)
         lobby.state = LOBBY_RUN
         lobby.connect = connect_string(lobby)
+        runtime.Log("attach_server RUN lobby=" .. tostring(lobby.id) .. " connect=" .. tostring(lobby.connect or ""))
         lobby.game_state = GAME_INIT
         lobby.server_setup_ready = false
         lobby.lan_after_setup_count = 0
-        for _, member in ipairs(member_order(lobby)) do
-            member.leaver = LEAVER_NONE
-        end
+        mark_lobby_members_connected(lobby)
         if lobby.game_start_time == nil or lobby.game_start_time == 0 then
             lobby.game_start_time = PB.now()
         end
     elseif lobby.state ~= LOBBY_RUN then
         if lobby.dedicated == true then
-            -- CSODOTALobby.State enum is UI=0, READYUP=1, SERVERSETUP=2, RUN=3.
-            -- Our LOBBY_RUN constant is value 2 = the real SERVERSETUP state where
-            -- the captured GC publishes the connect string and clients dial the
-            -- server. A dedicated process has no client session and never emits
-            -- GCServerAvailable (4506), so we advance straight to that connect-
-            -- bearing state from GCGameServerInfo (4508). The subscribe+broadcast
-            -- path below still runs (mark_run stays false) so both the server gets
-            -- its lobby cache and the members receive the connect endpoint.
+            -- Current Dota's dedicated flow only starts loading players when the
+            -- first lobby cache it receives is already RUN and has a connect
+            -- endpoint. Publishing SERVERSETUP first leaves the client assigned
+            -- but never dialing the server, which later surfaces as a VAC popup.
             ensure_match_id(lobby)
             lobby.state = LOBBY_RUN
             lobby.connect = connect_string(lobby)
+            runtime.Log("attach_server dedicated RUN lobby=" .. tostring(lobby.id) .. " connect=" .. tostring(lobby.connect or ""))
             lobby.game_state = GAME_INIT
             lobby.server_setup_ready = false
+            lobby.lan_after_setup_count = 0
+            mark_lobby_members_connected(lobby)
             if lobby.game_start_time == nil or lobby.game_start_time == 0 then
                 lobby.game_start_time = PB.now()
             end
@@ -1667,8 +1711,9 @@ local function game_server_info()
         return true
     end
 
-    -- A dedicated process never sends GCServerAvailable (4506); the connect-bearing
-    -- transition is published from GCGameServerInfo (4508) inside attach_server.
+    -- Publish the connect-bearing RUN cache as soon as the dedicated reports
+    -- GCGameServerInfo (4508). Newer Dota leaves clients assigned but idle if
+    -- SERVERSETUP is broadcast first.
     return attach_server(lobby, false) or true
 end
 
@@ -1685,6 +1730,9 @@ local function lobby_initialized()
 
     if same_running_server(lobby) then
         runtime.Log("lobby_initialized ignored duplicate for lobby=" .. tostring(lobby.id) .. " server=" .. current_steam())
+        if lobby.dedicated == true then
+            return rebroadcast_running_lobby_to_members(lobby, "lobby_initialized")
+        end
         return true
     end
 
@@ -1766,6 +1814,9 @@ local function server_available()
 
     if same_running_server(lobby) then
         runtime.Log("server_available ignored duplicate for lobby=" .. tostring(lobby.id) .. " server=" .. current_steam())
+        if lobby.dedicated == true then
+            return rebroadcast_running_lobby_to_members(lobby, "server_available")
+        end
         return true
     end
 
@@ -1809,6 +1860,7 @@ local function connected_players()
 
         local member = lobby.members[steam]
         if member ~= nil then
+            member.connected_once = true
             local hero = runtime.ProtoVarint(player, 2, 1, 0)
             if hero ~= 0 and hero ~= (member.hero or 0) then
                 member.hero = hero
@@ -1852,32 +1904,39 @@ local function connected_players()
 
         local member = lobby.members[steam]
         if member ~= nil then
-            local previous_leaver = member.leaver or LEAVER_NONE
-            local previous_reason = member.disconnect_reason
-            local first_disconnect = member.disconnected_at == nil
-            local leaver_state = runtime.ProtoBytes(player, 3, 1)
-            local leaver = LEAVER_DISCONNECTED
-            if leaver_state ~= nil and leaver_state ~= "" then
-                leaver = runtime.ProtoVarint(leaver_state, 1, 1, LEAVER_DISCONNECTED)
-                if leaver == LEAVER_NONE then
-                    leaver = LEAVER_DISCONNECTED
+            if member.connected_once ~= true then
+                runtime.Log("player_disconnect_ignored_before_join lobby=" .. tostring(lobby.id) ..
+                    " steam=" .. steam .. " send_reason=" .. tostring(send_reason) ..
+                    " game_state=" .. tostring(logged_state))
+                member.last_seen = PB.now()
+            else
+                local previous_leaver = member.leaver or LEAVER_NONE
+                local previous_reason = member.disconnect_reason
+                local first_disconnect = member.disconnected_at == nil
+                local leaver_state = runtime.ProtoBytes(player, 3, 1)
+                local leaver = LEAVER_DISCONNECTED
+                if leaver_state ~= nil and leaver_state ~= "" then
+                    leaver = runtime.ProtoVarint(leaver_state, 1, 1, LEAVER_DISCONNECTED)
+                    if leaver == LEAVER_NONE then
+                        leaver = LEAVER_DISCONNECTED
+                    end
                 end
-            end
 
-            local disconnect_reason = runtime.ProtoVarint(player, 4, 1, 0)
-            member.leaver = leaver
-            member.disconnect_reason = disconnect_reason
-            -- Preserve the first disconnect instant. Repeated server reports
-            -- must not postpone the ten-minute reconnect timeout forever.
-            if first_disconnect then
-                member.disconnected_at = PB.now()
-            end
-            member.last_seen = PB.now()
-            if first_disconnect or previous_leaver ~= leaver or previous_reason ~= disconnect_reason then
-                changed = true
-                runtime.Log("player_disconnected lobby=" .. tostring(lobby.id) .. " steam=" .. steam ..
-                    " leaver=" .. tostring(leaver) .. " network_reason=" .. tostring(member.disconnect_reason) ..
-                    " send_reason=" .. tostring(send_reason))
+                local disconnect_reason = runtime.ProtoVarint(player, 4, 1, 0)
+                member.leaver = leaver
+                member.disconnect_reason = disconnect_reason
+                -- Preserve the first disconnect instant. Repeated server reports
+                -- must not postpone the ten-minute reconnect timeout forever.
+                if first_disconnect then
+                    member.disconnected_at = PB.now()
+                end
+                member.last_seen = PB.now()
+                if first_disconnect or previous_leaver ~= leaver or previous_reason ~= disconnect_reason then
+                    changed = true
+                    runtime.Log("player_disconnected lobby=" .. tostring(lobby.id) .. " steam=" .. steam ..
+                        " leaver=" .. tostring(leaver) .. " network_reason=" .. tostring(member.disconnect_reason) ..
+                        " send_reason=" .. tostring(send_reason))
+                end
             end
         end
     end
@@ -1893,11 +1952,6 @@ local function connected_players()
             " reason=" .. tostring(send_reason) .. " state=" .. tostring(logged_state) ..
             " count=" .. tostring(count))
         return attach_server(lobby, true) or true
-    end
-
-    if send_reason == CONNECTED_REASON_GAME_STATE and logged_state == GAME_DISCONNECT then
-        destroy_lobby(lobby, "game_server_disconnect")
-        return true
     end
 
     if lobby.game_state >= GAME_WAIT_FOR_PLAYERS then
@@ -1936,18 +1990,23 @@ local function player_failed_to_connect()
             local steam = gc.ReadFixed64AtString(field, index, "0")
             local member = steam ~= "0" and lobby.members[steam] or nil
             if member ~= nil then
-                local next_leaver = is_abandoned and LEAVER_ABANDONED or LEAVER_DISCONNECTED
-                if member.leaver ~= next_leaver or member.disconnected_at == nil then
-                    changed = true
-                end
-                member.leaver = next_leaver
-                member.disconnect_reason = 0
-                member.disconnected_at = member.disconnected_at or PB.now()
-                member.last_seen = PB.now()
-                if is_abandoned then
-                    abandoned = abandoned + 1
+                if member.connected_once ~= true and not is_abandoned then
+                    runtime.Log("player_failed_to_connect_ignored_before_join lobby=" .. tostring(lobby.id) ..
+                        " steam=" .. steam)
                 else
-                    failed = failed + 1
+                    local next_leaver = is_abandoned and LEAVER_ABANDONED or LEAVER_DISCONNECTED
+                    if member.leaver ~= next_leaver or member.disconnected_at == nil then
+                        changed = true
+                    end
+                    member.leaver = next_leaver
+                    member.disconnect_reason = 0
+                    member.disconnected_at = member.disconnected_at or PB.now()
+                    member.last_seen = PB.now()
+                    if is_abandoned then
+                        abandoned = abandoned + 1
+                    else
+                        failed = failed + 1
+                    end
                 end
             else
                 runtime.Log("player_failed_to_connect unknown member=" .. tostring(steam) ..
@@ -1977,10 +2036,16 @@ local function sign_out()
     local lobby = lobby_id ~= nil and state().lobbies[lobby_id] or nil
     local match_id = "0"
     local recipients = {}
+    local notify_clients = true
     if lobby ~= nil then
         match_id = ensure_match_id(lobby)
         for _, member in ipairs(member_order(lobby)) do
             recipients[#recipients + 1] = member.steam
+        end
+        if lobby.dedicated == true and not lobby_has_connected_player(lobby) then
+            notify_clients = false
+            runtime.Log("match_sign_out_suppressed_before_join lobby=" .. tostring(lobby.id) ..
+                " match=" .. tostring(match_id) .. " server=" .. current_steam())
         end
         refresh_lobby(lobby)
         broadcast_lobby(lobby, nil, true)
@@ -1992,7 +2057,7 @@ local function sign_out()
     local server_steam = lobby ~= nil and (lobby.server_steam or current_steam()) or current_steam()
     local response = gc.DotaStatsGameMatchSignOutResponse(tostring(match_id), game_mode, 1, game_start_time, tostring(server_steam))
     gc.Reply(MSG.GCGameMatchSignOutResponse, response)
-    if match_id ~= "0" then
+    if match_id ~= "0" and notify_clients == true then
         local signed_out = PB.vs(1, match_id)
         for _, recipient in ipairs(recipients) do
             queue_proto(recipient, MSG.GCToClientMatchSignedOut, signed_out)

@@ -9,7 +9,6 @@ using UGCUpdateHandle_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("STEAMUGC_INTERFACE_VERSION015")]
     public class SteamUGC015 : ISteamInterface
     {
         public UGCQueryHandle_t CreateQueryUserUGCRequest(IntPtr _, uint unAccountID, int eListType, int eMatchingUGCType, int eSortOrder, uint nCreatorAppID, uint nConsumerAppID, uint unPage)

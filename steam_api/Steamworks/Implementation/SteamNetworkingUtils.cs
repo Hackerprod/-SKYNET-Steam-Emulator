@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Threading;
 using SKYNET.Callback;
+using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Steamworks.Interfaces;
 
@@ -42,7 +43,7 @@ namespace SKYNET.Steamworks.Implementation
             Write("InitRelayNetworkAccess");
             if (SteamNetworkingSocketsSerialized.SecureCertMode)
             {
-                SteamNetworkingSocketsSerialized.EnsureSecureCertPatcherStarted("InitRelayNetworkAccess");
+                SteamNetworkingSocketsSerialized.EnsureSecureCertDiskPatched("InitRelayNetworkAccess");
             }
             else
             {
@@ -55,7 +56,7 @@ namespace SKYNET.Steamworks.Implementation
             Write("GetRelayNetworkStatus");
             if (SteamNetworkingSocketsSerialized.SecureCertMode)
             {
-                SteamNetworkingSocketsSerialized.EnsureSecureCertPatcherStarted("GetRelayNetworkStatus");
+                SteamNetworkingSocketsSerialized.EnsureSecureCertDiskPatched("GetRelayNetworkStatus");
             }
 
             SteamRelayNetworkStatus_t data = SteamNetworkingSocketsSerialized.BuildRelayNetworkStatus();
@@ -71,7 +72,9 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("GetLocalPingLocation");
             SteamNetworkPingLocation_t pingLocation = Marshal.PtrToStructure<SteamNetworkPingLocation_t>(result);
-            pingLocation.m_data = 20;
+            pingLocation.m_data = new byte[512];
+            pingLocation.m_data[0] = 20;
+            Marshal.StructureToPtr(pingLocation, result, false);
             return 2;
         }
 
@@ -87,10 +90,10 @@ namespace SKYNET.Steamworks.Implementation
             return 15;
         }
 
-        public void ConvertPingLocationToString(IntPtr location, ref string pszBuf, int cchBufSize)
+        public void ConvertPingLocationToString(IntPtr location, IntPtr pszBuf, int cchBufSize)
         {
             Write("ConvertPingLocationToString");
-            pszBuf = "us=8+5";
+            NativeStringCache.WriteUtf8Buffer(pszBuf, cchBufSize, "us=8+5");
         }
 
         public bool ParsePingLocationString(string pszString, IntPtr result)
@@ -104,7 +107,7 @@ namespace SKYNET.Steamworks.Implementation
             Write("CheckPingDataUpToDate");
             if (SteamNetworkingSocketsSerialized.SecureCertMode)
             {
-                SteamNetworkingSocketsSerialized.EnsureSecureCertPatcherStarted("CheckPingDataUpToDate");
+                SteamNetworkingSocketsSerialized.EnsureSecureCertDiskPatched("CheckPingDataUpToDate");
             }
             else
             {
@@ -113,9 +116,13 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public int GetPingToDataCenter(SteamNetworkingPOPID popID, SteamNetworkingPOPID pViaRelayPoP)
+        public int GetPingToDataCenter(SteamNetworkingPOPID popID, IntPtr pViaRelayPoP)
         {
             Write("GetPingToDataCenter");
+            if (pViaRelayPoP != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(pViaRelayPoP, 0);
+            }
             return 0;
         }
 
@@ -137,7 +144,7 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public int GetPOPList(SteamNetworkingPOPID list, int nListSz)
+        public int GetPOPList(IntPtr list, int nListSz)
         {
             Write("GetPOPList");
             return 0;
@@ -248,9 +255,13 @@ namespace SKYNET.Steamworks.Implementation
             return SetPointerConfigValue((int)ESteamNetworkingConfigValue.Callback_AuthStatusChanged, fnCallback);
         }
 
-        public int GetConfigValue(int eValue, int eScopeType, IntPtr scopeObj, int pOutDataType, IntPtr pResult, IntPtr cbResult)
+        public int GetConfigValue(int eValue, int eScopeType, IntPtr scopeObj, IntPtr pOutDataType, IntPtr pResult, IntPtr cbResult)
         {
             Write("GetConfigValue");
+            if (pOutDataType != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(pOutDataType, 0);
+            }
             return default;
         }
 
@@ -369,10 +380,18 @@ namespace SKYNET.Steamworks.Implementation
             return (int)EResult.k_EResultNoMatch;
         }
 
-        public bool GetConfigValueInfo(int eValue, string pOutName, int pOutDataType, int pOutScope, int pOutNextValue)
+        public IntPtr GetConfigValueInfo(int eValue, IntPtr pOutDataType, IntPtr pOutScope)
         {
             Write("GetConfigValueInfo");
-            return false;
+            if (pOutDataType != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(pOutDataType, 0);
+            }
+            if (pOutScope != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(pOutScope, 0);
+            }
+            return NativeStringCache.ToUtf8Ptr(string.Empty);
         }
 
         public int GetFirstConfigValue()
@@ -381,10 +400,10 @@ namespace SKYNET.Steamworks.Implementation
             return 0; //ESteamNetworkingConfigValue.k_ESteamNetworkingConfig_Invalid;
         }
 
-        public void SteamNetworkingIPAddr_ToString(IntPtr addr, string buf, IntPtr cbBuf, bool bWithPort)
+        public void SteamNetworkingIPAddr_ToString(IntPtr addr, IntPtr buf, UIntPtr cbBuf, bool bWithPort)
         {
             Write("SteamNetworkingIPAddr_ToString");
-            // TODO
+            NativeStringCache.WriteUtf8Buffer(buf, checked((int)cbBuf.ToUInt64()), string.Empty);
         }
 
         public bool SteamNetworkingIPAddr_ParseString(IntPtr pAddr, string pszStr)
@@ -393,9 +412,10 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public void SteamNetworkingIdentity_ToString(IntPtr identity, string buf, IntPtr cbBuf)
+        public void SteamNetworkingIdentity_ToString(IntPtr identity, IntPtr buf, UIntPtr cbBuf)
         {
             Write("SteamNetworkingIdentity_ToString");
+            NativeStringCache.WriteUtf8Buffer(buf, checked((int)cbBuf.ToUInt64()), string.Empty);
         }
 
         public bool SteamNetworkingIdentity_ParseString(IntPtr pIdentity, string pszStr)

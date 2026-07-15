@@ -45,12 +45,12 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUtils.GetImageRGBA(iImage, pubDest, nDestBufferSize);
         }
 
-        public bool GetCSERIPPort(IntPtr _, uint unIP, uint usPort)
+        public bool GetCSERIPPort(IntPtr _, IntPtr unIP, IntPtr usPort)
         {
             return SteamEmulator.SteamUtils.GetCSERIPPort(unIP, usPort);
         }
 
-        public int GetCurrentBatteryPower(IntPtr _)
+        public byte GetCurrentBatteryPower(IntPtr _)
         {
             return SteamEmulator.SteamUtils.GetCurrentBatteryPower();
         }

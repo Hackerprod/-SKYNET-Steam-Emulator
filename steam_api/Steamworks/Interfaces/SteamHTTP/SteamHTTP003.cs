@@ -12,7 +12,7 @@ namespace SKYNET.Steamworks.Interfaces
     [Interface("STEAMHTTP_INTERFACE_VERSION003")]
     public class SteamHTTP003 : ISteamInterface
     {
-        public HTTPRequestHandle CreateHTTPRequest(IntPtr _, uint eHTTPRequestMethod, string pchAbsoluteURL)
+        public HTTPRequestHandle CreateHTTPRequest(IntPtr _, int eHTTPRequestMethod, string pchAbsoluteURL)
         {
             return SteamEmulator.SteamHTTP.CreateHTTPRequest(eHTTPRequestMethod, pchAbsoluteURL);
         }

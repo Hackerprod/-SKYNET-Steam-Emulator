@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Runtime.InteropServices;
 using SKYNET.Managers;
 using SKYNET.Types;
 using SKYNET.Callback;
@@ -27,7 +29,11 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool InitGameServer(uint unIP, int usGamePort, int usQueryPort, uint unFlags, uint nGameAppId, string pchVersionString)
         {
-            if (!SteamEmulator.SecureNetworking)
+            if (ShouldReportSecure())
+            {
+                unFlags |= Constants.k_unServerFlagSecure;
+            }
+            else
             {
                 unFlags &= ~Constants.k_unServerFlagSecure;
             }
@@ -54,7 +60,7 @@ namespace SKYNET.Steamworks.Implementation
             ServerData.Port = usGamePort;
             ServerData.QueryPort = usQueryPort;
             ServerData.Flags = unFlags;
-            ServerData.Secure = 0;
+            ServerData.Secure = NormalizeSecure((byte)(IsSecureFlagSet(unFlags) ? 1 : 0));
             ServerData.AppId = nGameAppId;
             ServerData.VersionString = pchVersionString;
 
@@ -71,7 +77,7 @@ namespace SKYNET.Steamworks.Implementation
             // TODO: Necessary
             GSPolicyResponse_t Policy = new GSPolicyResponse_t()
             {
-                Secure = 0
+                Secure = ServerData.Secure
             };
 
             if (SkyNetApiClient.IsEnabled)
@@ -167,8 +173,9 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool BSecure()
         {
-            Write($"BSecure");
-            return ServerData.Secure != 0;
+            var secure = EnsureEffectiveSecure() != 0;
+            Write($"BSecure = {secure}");
+            return secure;
         }
 
         public CSteamID GetSteamID()
@@ -250,7 +257,7 @@ namespace SKYNET.Steamworks.Implementation
         public void SetGameTags(string pchGameTags)
         {
             Write($"SetGameTags (GameTags = {pchGameTags})");
-            ServerData.GameTags = NormalizeGameTags(pchGameTags);
+            ServerData.GameTags = NormalizeGameTags(pchGameTags, EnsureEffectiveSecure() != 0);
             SyncServerState();
         }
 
@@ -268,11 +275,19 @@ namespace SKYNET.Steamworks.Implementation
             SyncServerState();
         }
 
-        public bool SendUserConnectAndAuthenticate(uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, ulong pSteamIDUser)
+        public bool SendUserConnectAndAuthenticate(uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, IntPtr pSteamIDUser)
         {
             var IPAddress = Common.GetIPAddress(unIPClient);
-            Write($"SendUserConnectAndAuthenticate (SteamID = {new CSteamID(pSteamIDUser)} | {IPAddress})");
+            Write($"SendUserConnectAndAuthenticate (Output = 0x{pSteamIDUser.ToInt64():X}, IP = {IPAddress}, Blob = {cubAuthBlobSize})");
             return TicketManager.ConnectAndAuthenticate(unIPClient, pvAuthBlob, cubAuthBlobSize, pSteamIDUser);
+        }
+
+        public bool SendUserConnectAndAuthenticate(uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, out ulong steamIDUser)
+        {
+            var IPAddress = Common.GetIPAddress(unIPClient);
+            var approved = TicketManager.ConnectAndAuthenticate(unIPClient, pvAuthBlob, cubAuthBlobSize, out steamIDUser);
+            Write($"SendUserConnectAndAuthenticate (SteamID = {(CSteamID)steamIDUser} | {IPAddress}, Blob = {cubAuthBlobSize}) = {approved}");
+            return approved;
         }
 
         public CSteamID CreateUnauthenticatedUserConnection()
@@ -374,6 +389,20 @@ namespace SKYNET.Steamworks.Implementation
         public int GetNextOutgoingPacket(IntPtr pOut, int cbMaxOut, uint pNetAdr, uint pPort)
         {
             SteamEmulator.Write($"DEBUG", "GetNextOutgoingPacket");
+            return 0;
+        }
+
+        public int GetNextOutgoingPacket(IntPtr pOut, int cbMaxOut, IntPtr pNetAdr, IntPtr pPort)
+        {
+            SteamEmulator.Write($"DEBUG", "GetNextOutgoingPacket");
+            if (pNetAdr != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(pNetAdr, 0);
+            }
+            if (pPort != IntPtr.Zero)
+            {
+                Marshal.WriteInt16(pPort, 0);
+            }
             return 0;
         }
 
@@ -481,12 +510,49 @@ namespace SKYNET.Steamworks.Implementation
 
         private static byte NormalizeSecure(byte secure)
         {
-            return 0;
+            return ShouldReportSecure() ? (byte)1 : (byte)0;
+        }
+
+        private static bool ShouldReportSecure()
+        {
+            return SteamEmulator.VacSecureGameServer && !IsDedicatedInsecureMode();
+        }
+
+        private static bool IsDedicatedInsecureMode()
+        {
+            var role = Environment.GetEnvironmentVariable("SKYNET_PROCESS_ROLE");
+            if (!string.Equals(role, "dedicated", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            var configured = Environment.GetEnvironmentVariable("SKYNET_DEDICATED_INSECURE");
+            if (configured == "1" || configured?.Equals("true", StringComparison.OrdinalIgnoreCase) == true)
+            {
+                return true;
+            }
+
+            return Environment.CommandLine.IndexOf("-insecure", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private byte EnsureEffectiveSecure()
+        {
+            ServerData.Secure = NormalizeSecure(ServerData.Secure);
+            if (ServerData.Secure != 0)
+            {
+                ServerData.Flags |= Constants.k_unServerFlagSecure;
+            }
+            else
+            {
+                ServerData.Flags &= ~Constants.k_unServerFlagSecure;
+            }
+
+            return ServerData.Secure;
         }
 
         private void EmitSecurePolicy()
         {
-            ServerData.Secure = NormalizeSecure(ServerData.Secure);
+            EnsureEffectiveSecure();
             var steamId = (ulong)SteamEmulator.SteamID;
             CallbackManager.AddCallbackGameServer(new GSPolicyResponse_t
             {
@@ -505,22 +571,34 @@ namespace SKYNET.Steamworks.Implementation
             });
         }
 
-        private static string NormalizeGameTags(string gameTags)
+        private static string NormalizeGameTags(string gameTags, bool secure)
         {
             if (string.IsNullOrWhiteSpace(gameTags))
             {
-                return string.Empty;
+                return secure ? "secure" : string.Empty;
             }
 
-            return string.Equals(gameTags.Trim(), "secure", StringComparison.OrdinalIgnoreCase)
-                ? "insecure"
-                : gameTags;
+            var tags = gameTags
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(tag => tag.Trim())
+                .Where(tag => tag.Length != 0 &&
+                    !tag.Equals("secure", StringComparison.OrdinalIgnoreCase) &&
+                    !tag.Equals("insecure", StringComparison.OrdinalIgnoreCase))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (secure)
+            {
+                tags.Add("secure");
+            }
+
+            return string.Join(",", tags);
         }
 
-        public bool SendUserConnectAndAuthenticate_DEPRECATED(uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, ulong pSteamIDUser)
+        public bool SendUserConnectAndAuthenticate_DEPRECATED(uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, IntPtr pSteamIDUser)
         {
             Write($"SendUserConnectAndAuthenticate_DEPRECATED");
-            return true;
+            return SendUserConnectAndAuthenticate(unIPClient, pvAuthBlob, cubAuthBlobSize, pSteamIDUser);
         }
 
         public void SendUserDisconnect_DEPRECATED(ulong steamIDUser)
@@ -582,6 +660,15 @@ namespace SKYNET.Steamworks.Implementation
             }
 
             ServerData.Secure = NormalizeSecure(result.Secure);
+            if (ServerData.Secure != 0)
+            {
+                ServerData.Flags |= Constants.k_unServerFlagSecure;
+            }
+            else
+            {
+                ServerData.Flags &= ~Constants.k_unServerFlagSecure;
+            }
+            ServerData.GameTags = NormalizeGameTags(ServerData.GameTags, ServerData.Secure != 0);
         }
     }
 }

@@ -7,7 +7,7 @@ namespace SKYNET.Steamworks.Exported
 {
     using SteamAPICall_t = System.UInt64;
     using HSteamUser = System.UInt32;
-    using CGameID = System.UInt32;
+    using CGameID = System.UInt64;
     public class SteamAPI_ISteamUser
     {
         static SteamAPI_ISteamUser()
@@ -40,14 +40,14 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamUser_InitiateGameConnection(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, CGameID gameID,uint unIPServer, uint usPortServer, bool bSecure)
+        public static int SteamAPI_ISteamUser_InitiateGameConnection(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, ushort usPortServer, bool bSecure)
         {
             Write("SteamAPI_ISteamUser_InitiateGameConnection");
-            return SteamEmulator.SteamUser.InitiateGameConnection(pAuthBlob, cbMaxAuthBlob, steamIDGameServer, gameID, unIPServer, usPortServer, bSecure);
+            return SteamEmulator.SteamUser.InitiateGameConnection(pAuthBlob, cbMaxAuthBlob, steamIDGameServer, unIPServer, usPortServer, bSecure);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_ISteamUser_TerminateGameConnection(IntPtr _, uint unIPServer, uint usPortServer)
+        public static void SteamAPI_ISteamUser_TerminateGameConnection(IntPtr _, uint unIPServer, ushort usPortServer)
         {
             Write("SteamAPI_ISteamUser_TerminateGameConnection");
             SteamEmulator.SteamUser.TerminateGameConnection(unIPServer, usPortServer);
@@ -152,7 +152,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_ISteamUser_AdvertiseGame(IntPtr _, ulong steamIDGameServer, uint unIPServer, uint usPortServer)
+        public static void SteamAPI_ISteamUser_AdvertiseGame(IntPtr _, ulong steamIDGameServer, uint unIPServer, ushort usPortServer)
         {
             Write("SteamAPI_ISteamUser_AdvertiseGame");
             SteamEmulator.SteamUser.AdvertiseGame(steamIDGameServer, unIPServer, usPortServer);
@@ -166,7 +166,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUser_GetEncryptedAppTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
+        public static bool SteamAPI_ISteamUser_GetEncryptedAppTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, IntPtr pcbTicket)
         {
             Write("SteamAPI_ISteamUser_GetEncryptedAppTicket");
             return SteamEmulator.SteamUser.GetEncryptedAppTicket(pTicket, cbMaxTicket, pcbTicket);

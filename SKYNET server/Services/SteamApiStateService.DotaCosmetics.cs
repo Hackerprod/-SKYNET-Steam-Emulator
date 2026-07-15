@@ -400,7 +400,8 @@ public sealed partial class SteamApiStateService
         lock (_sync)
         {
             var match = _state.DotaMatches.Values
-                .Where(candidate => candidate.Players.Any(player => player.SteamId == steamId))
+                .Where(candidate => IsReconnectableDotaMatch(candidate) &&
+                                    candidate.Players.Any(player => player.SteamId == steamId))
                 .OrderByDescending(candidate => candidate.UpdatedAt)
                 .FirstOrDefault();
             if (match == null)
@@ -421,10 +422,30 @@ public sealed partial class SteamApiStateService
 
         lock (_sync)
         {
-            return _state.DotaMatches.TryGetValue(lobbyId, out var match)
+            return _state.DotaMatches.TryGetValue(lobbyId, out var match) && IsReconnectableDotaMatch(match)
                 ? SerializeDotaMatchForLua(match)
                 : string.Empty;
         }
+    }
+
+    private const int DotaLobbyStateRun = 2;
+
+    private bool IsReconnectableDotaMatch(ApiDotaMatch match)
+    {
+        if (match.State != DotaLobbyStateRun ||
+            string.IsNullOrWhiteSpace(match.Connect) ||
+            match.Players.Count == 0)
+        {
+            return false;
+        }
+
+        if (!match.Dedicated)
+        {
+            return true;
+        }
+
+        var status = _dotaDedicatedServers.GetStatus(match.LobbyId);
+        return status is not ("not_found" or "failed" or "stopped");
     }
 
     private static string SerializeDotaMatchForLua(ApiDotaMatch match) => JsonSerializer.Serialize(new

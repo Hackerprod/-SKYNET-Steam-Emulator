@@ -12,27 +12,27 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamGameServerStats.RequestUserStats(steamIDUser);
         }
 
-        public bool GetUserStat(IntPtr _, ulong steamIDUser, string pchName, int pData)
+        public bool GetUserStatInt32(IntPtr _, ulong steamIDUser, string pchName, IntPtr pData)
         {
-            return SteamEmulator.SteamGameServerStats.GetUserStat(steamIDUser, pchName, pData);
+            return SteamEmulator.SteamGameServerStats.GetUserStatInt32(steamIDUser, pchName, pData);
         }
 
-        public bool GetUserStat(IntPtr _, ulong steamIDUser, string pchName, float pData)
+        public bool GetUserStatFloat(IntPtr _, ulong steamIDUser, string pchName, IntPtr pData)
         {
-            return SteamEmulator.SteamGameServerStats.GetUserStat(steamIDUser, pchName, pData);
+            return SteamEmulator.SteamGameServerStats.GetUserStatFloat(steamIDUser, pchName, pData);
         }
 
-        public bool GetUserAchievement(IntPtr _, ulong steamIDUser, string pchName, bool pbAchieved)
+        public bool GetUserAchievement(IntPtr _, ulong steamIDUser, string pchName, IntPtr pbAchieved)
         {
             return SteamEmulator.SteamGameServerStats.GetUserAchievement(steamIDUser, pchName, pbAchieved);
         }
 
-        public bool SetUserStat(IntPtr _, ulong steamIDUser, string pchName, int nData)
+        public bool SetUserStatInt32(IntPtr _, ulong steamIDUser, string pchName, int nData)
         {
             return SteamEmulator.SteamGameServerStats.SetUserStat(steamIDUser, pchName, nData);
         }
 
-        public bool SetUserStat(IntPtr _, ulong steamIDUser, string pchName, float fData)
+        public bool SetUserStatFloat(IntPtr _, ulong steamIDUser, string pchName, float fData)
         {
             return SteamEmulator.SteamGameServerStats.SetUserStat(steamIDUser, pchName, fData);
         }

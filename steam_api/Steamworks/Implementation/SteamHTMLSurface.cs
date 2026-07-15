@@ -47,6 +47,11 @@ namespace SKYNET.Steamworks.Implementation
             Write("FileLoadDialogResponse");
         }
 
+        public void FileLoadDialogResponse(HHTMLBrowser unBrowserHandle, IntPtr pchSelectedFiles)
+        {
+            Write("FileLoadDialogResponse");
+        }
+
         public void Find(HHTMLBrowser unBrowserHandle, string pchSearchStr, bool bCurrentlyInFind, bool bReverse)
         {
             Write("Find");

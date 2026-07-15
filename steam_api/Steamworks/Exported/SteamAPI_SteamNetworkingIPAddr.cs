@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using SKYNET.Helpers;
 
 namespace SKYNET.Steamworks.Exported
 {
@@ -27,13 +28,13 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_SteamNetworkingIPAddr_SetIPv6(IntPtr _, int ipv6, int nPort)
+        public static void SteamAPI_SteamNetworkingIPAddr_SetIPv6(IntPtr _, IntPtr ipv6, ushort nPort)
         {
             Write($"SteamAPI_SteamNetworkingIPAddr_SetIPv6");
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_SteamNetworkingIPAddr_SetIPv4(IntPtr _, uint nIP, int nPort)
+        public static void SteamAPI_SteamNetworkingIPAddr_SetIPv4(IntPtr _, uint nIP, ushort nPort)
         {
             Write($"SteamAPI_SteamNetworkingIPAddr_SetIPv4");
         }
@@ -53,7 +54,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_SteamNetworkingIPAddr_SetIPv6LocalHost(IntPtr _, int nPort)
+        public static void SteamAPI_SteamNetworkingIPAddr_SetIPv6LocalHost(IntPtr _, ushort nPort)
         {
             Write($"SteamAPI_SteamNetworkingIPAddr_SetIPv6LocalHost");
         }
@@ -66,13 +67,14 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_SteamNetworkingIPAddr_ToString(IntPtr _, char buf, uint cbBuf, bool bWithPort)
+        public static void SteamAPI_SteamNetworkingIPAddr_ToString(IntPtr _, IntPtr buf, UIntPtr cbBuf, bool bWithPort)
         {
             Write($"SteamAPI_SteamNetworkingIPAddr_ToString");
+            NativeStringCache.WriteUtf8Buffer(buf, checked((int)cbBuf.ToUInt64()), string.Empty);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_SteamNetworkingIPAddr_ParseString(IntPtr _, char pszStr)
+        public static bool SteamAPI_SteamNetworkingIPAddr_ParseString(IntPtr _, string pszStr)
         {
             Write($"SteamAPI_SteamNetworkingIPAddr_ParseString");
             return false;

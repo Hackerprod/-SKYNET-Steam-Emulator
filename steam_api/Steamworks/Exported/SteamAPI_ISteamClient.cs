@@ -71,7 +71,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_ISteamClient_SetLocalIPBinding(IntPtr _, UInt32 unIP, ushort usPort)
+        public static void SteamAPI_ISteamClient_SetLocalIPBinding(IntPtr _, IntPtr unIP, ushort usPort)
         {
             Write($"SteamAPI_ISteamClient_SetLocalIPBinding");
             SteamEmulator.SteamClient.SetLocalIPBinding(unIP, usPort);

@@ -57,10 +57,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_ISteamNetworkingUtils_ConvertPingLocationToString(IntPtr _, IntPtr location, string pszBuf, int cchBufSize)
+        public static void SteamAPI_ISteamNetworkingUtils_ConvertPingLocationToString(IntPtr _, IntPtr location, IntPtr pszBuf, int cchBufSize)
         {
             Write("SteamAPI_ISteamNetworkingUtils_ConvertPingLocationToString");
-            //
+            SteamEmulator.SteamNetworkingUtils.ConvertPingLocationToString(location, pszBuf, cchBufSize);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -78,7 +78,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamNetworkingUtils_GetPingToDataCenter(IntPtr _, uint popID, uint pViaRelayPoP)
+        public static int SteamAPI_ISteamNetworkingUtils_GetPingToDataCenter(IntPtr _, uint popID, IntPtr pViaRelayPoP)
         {
             Write("SteamAPI_ISteamNetworkingUtils_GetPingToDataCenter");
             return SteamEmulator.SteamNetworkingUtils.GetPingToDataCenter(popID, pViaRelayPoP);
@@ -99,7 +99,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamNetworkingUtils_GetPOPList(IntPtr _, uint list, int nListSz)
+        public static int SteamAPI_ISteamNetworkingUtils_GetPOPList(IntPtr _, IntPtr list, int nListSz)
         {
             Write("SteamAPI_ISteamNetworkingUtils_GetPOPList");
             return SteamEmulator.SteamNetworkingUtils.GetPOPList(list, nListSz);
@@ -232,17 +232,17 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamNetworkingUtils_GetConfigValue(IntPtr _, int eValue, int eScopeType, IntPtr scopeObj, int pOutDataType, IntPtr pResult, IntPtr cbResult)
+        public static int SteamAPI_ISteamNetworkingUtils_GetConfigValue(IntPtr _, int eValue, int eScopeType, IntPtr scopeObj, IntPtr pOutDataType, IntPtr pResult, IntPtr cbResult)
         {
             Write("SteamAPI_ISteamNetworkingUtils_GetConfigValue");
             return SteamEmulator.SteamNetworkingUtils.GetConfigValue(eValue, eScopeType, scopeObj, pOutDataType, pResult, cbResult);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamNetworkingUtils_GetConfigValueInfo(IntPtr _, int eValue, string pOutName, int pOutDataType, int pOutScope, int pOutNextValue)
+        public static IntPtr SteamAPI_ISteamNetworkingUtils_GetConfigValueInfo(IntPtr _, int eValue, IntPtr pOutDataType, IntPtr pOutScope)
         {
             Write("SteamAPI_ISteamNetworkingUtils_GetConfigValueInfo");
-            return SteamEmulator.SteamNetworkingUtils.GetConfigValueInfo(eValue, pOutName, pOutDataType, pOutScope, pOutNextValue);
+            return SteamEmulator.SteamNetworkingUtils.GetConfigValueInfo(eValue, pOutDataType, pOutScope);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -253,10 +253,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_ISteamNetworkingUtils_SteamNetworkingIPAddr_ToString(IntPtr _, IntPtr addr, string buf, IntPtr cbBuf, bool bWithPort)
+        public static void SteamAPI_ISteamNetworkingUtils_SteamNetworkingIPAddr_ToString(IntPtr _, IntPtr addr, IntPtr buf, UIntPtr cbBuf, bool bWithPort)
         {
             Write("SteamAPI_ISteamNetworkingUtils_SteamNetworkingIPAddr_ToString");
-            //
+            SteamEmulator.SteamNetworkingUtils.SteamNetworkingIPAddr_ToString(addr, buf, cbBuf, bWithPort);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -267,10 +267,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_ISteamNetworkingUtils_SteamNetworkingIdentity_ToString(IntPtr _, IntPtr identity, string buf, IntPtr cbBuf)
+        public static void SteamAPI_ISteamNetworkingUtils_SteamNetworkingIdentity_ToString(IntPtr _, IntPtr identity, IntPtr buf, UIntPtr cbBuf)
         {
             Write("SteamAPI_ISteamNetworkingUtils_SteamNetworkingIdentity_ToString");
-            //
+            SteamEmulator.SteamNetworkingUtils.SteamNetworkingIdentity_ToString(identity, buf, cbBuf);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -286,4 +286,3 @@ namespace SKYNET.Steamworks.Exported
         }
     }
 }
-

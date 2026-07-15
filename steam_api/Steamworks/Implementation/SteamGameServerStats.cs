@@ -4,6 +4,7 @@ using SKYNET.Steamworks.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 using SteamAPICall_t = System.UInt64;
 
@@ -33,16 +34,40 @@ namespace SKYNET.Steamworks.Implementation
             return StateCache.GetAchievements(steamIDUser).Any(a => a.Name == pchName && a.Earned);
         }
 
+        public bool GetUserAchievement(ulong steamIDUser, string pchName, IntPtr pbAchieved)
+        {
+            Write($"GetUserAchievement (SteamID: {steamIDUser}, Name: {pchName})");
+            bool achieved = StateCache.GetAchievements(steamIDUser).Any(a => a.Name == pchName && a.Earned);
+            WriteBool(pbAchieved, achieved);
+            return true;
+        }
+
         public bool GetUserStat(ulong steamIDUser, string pchName, float pData)
         {
             Write($"GetUserStat ({steamIDUser}, {pchName})");
             return StateCache.GetStats(steamIDUser).Any(s => s.Name == pchName);
         }
 
+        public bool GetUserStatFloat(ulong steamIDUser, string pchName, IntPtr pData)
+        {
+            Write($"GetUserStatFloat ({steamIDUser}, {pchName})");
+            var stat = StateCache.GetStats(steamIDUser).FirstOrDefault(s => s.Name == pchName);
+            WriteSingle(pData, stat?.Data ?? 0);
+            return stat != null;
+        }
+
         public bool GetUserStat(ulong steamIDUser, string pchName, int pData)
         {
             Write($"GetUserStat ({steamIDUser}, {pchName})");
             return StateCache.GetStats(steamIDUser).Any(s => s.Name == pchName);
+        }
+
+        public bool GetUserStatInt32(ulong steamIDUser, string pchName, IntPtr pData)
+        {
+            Write($"GetUserStatInt32 ({steamIDUser}, {pchName})");
+            var stat = StateCache.GetStats(steamIDUser).FirstOrDefault(s => s.Name == pchName);
+            WriteInt32(pData, unchecked((int)(stat?.Data ?? 0)));
+            return stat != null;
         }
 
         public SteamAPICall_t RequestUserStats(ulong steamIDUser)
@@ -159,6 +184,31 @@ namespace SKYNET.Steamworks.Implementation
             var average = (uint)Math.Max(0, (int)(flCountThisSession / dSessionLength));
             StateCache.UpsertStat(steamIDUser, pchName, average, false);
             return true;
+        }
+
+        private static void WriteBool(IntPtr destination, bool value)
+        {
+            if (destination != IntPtr.Zero)
+            {
+                Marshal.WriteByte(destination, value ? (byte)1 : (byte)0);
+            }
+        }
+
+        private static void WriteInt32(IntPtr destination, int value)
+        {
+            if (destination != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(destination, value);
+            }
+        }
+
+        private static void WriteSingle(IntPtr destination, float value)
+        {
+            if (destination != IntPtr.Zero)
+            {
+                byte[] bytes = BitConverter.GetBytes(value);
+                Marshal.Copy(bytes, 0, destination, bytes.Length);
+            }
         }
     }
 }

@@ -4,7 +4,6 @@ using HHTMLBrowser = System.UInt32;
 namespace SKYNET.Steamworks.Interfaces
 {
     
-    [Interface("STEAMHTMLSURFACE_INTERFACE_VERSION_003")]
     [Interface("STEAMHTMLSURFACE_INTERFACE_VERSION_004")]
     public class SteamHTMLSurface004 : ISteamInterface
     {
@@ -183,7 +182,7 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamHTMLSurface.JSDialogResponse(unBrowserHandle, bResult);
         }
 
-        public void FileLoadDialogResponse(IntPtr _, HHTMLBrowser unBrowserHandle, string pchSelectedFiles)
+        public void FileLoadDialogResponse(IntPtr _, HHTMLBrowser unBrowserHandle, IntPtr pchSelectedFiles)
         {
             SteamEmulator.SteamHTMLSurface.FileLoadDialogResponse(unBrowserHandle, pchSelectedFiles);
         }

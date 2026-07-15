@@ -179,7 +179,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static HTTPRequestHandle SteamAPI_ISteamHTTP_CreateHTTPRequest(IntPtr _, uint eHTTPRequestMethod, string pchAbsoluteURL)
+        public static HTTPRequestHandle SteamAPI_ISteamHTTP_CreateHTTPRequest(IntPtr _, int eHTTPRequestMethod, string pchAbsoluteURL)
         {
             Write($"SteamAPI_ISteamHTTP_CreateHTTPRequest");
             return SteamEmulator.SteamHTTP.CreateHTTPRequest(eHTTPRequestMethod, pchAbsoluteURL);
@@ -198,4 +198,3 @@ namespace SKYNET.Steamworks.Exported
         }
     }
 }
-

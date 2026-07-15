@@ -1,4 +1,4 @@
-﻿using SKYNET;
+using SKYNET;
 using SKYNET.Managers;
 using SKYNET.Steamworks;
 using System;
@@ -17,17 +17,17 @@ namespace SKYNET.Helper
         public static void Load()
         {
             // Verify Paths
-            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "SKYNET"));
-            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "SKYNET", "Storage"));
-            modCommon.EnsureDirectoryExists(Path.Combine(modCommon.GetPath(), "SKYNET", "AvatarCache"));
+            Common.EnsureDirectoryExists(Path.Combine(Common.GetPath(), "SKYNET"));
+            Common.EnsureDirectoryExists(Path.Combine(Common.GetPath(), "SKYNET", "Storage"));
+            Common.EnsureDirectoryExists(Path.Combine(Common.GetPath(), "SKYNET", "AvatarCache"));
 
             try
             {
-                string fileName = Path.Combine(modCommon.GetPath(), "SKYNET", "steam_api.ini");
+                string fileName = Path.Combine(Common.GetPath(), "SKYNET", "steam_api.ini");
 
                 // Migrate an older "[SKYNET] steam_api.ini" to the new name so
                 // existing installs keep their configuration.
-                string legacyFileName = Path.Combine(modCommon.GetPath(), "SKYNET", "[SKYNET] steam_api.ini");
+                string legacyFileName = Path.Combine(Common.GetPath(), "SKYNET", "[SKYNET] steam_api.ini");
                 if (!File.Exists(fileName) && File.Exists(legacyFileName))
                 {
                     try { File.Move(legacyFileName, fileName); }
@@ -68,6 +68,9 @@ namespace SKYNET.Helper
                     config.AppendLine("# Enable SKYNET-signed SDR certificates and patch the native SDR CA.");
                     config.AppendLine("# Disabled by default for unauthenticated LAN play. Restart the game after changing it.");
                     config.AppendLine("SecureNetworking = false");
+                    config.AppendLine("# Advertise the dedicated server as Valve VAC-secure.");
+                    config.AppendLine("# Keep false unless the process is connected to real VAC policy.");
+                    config.AppendLine("VacSecureGameServer = false");
                     config.AppendLine("ServerUrl = http://127.0.0.1:27080/");
                     config.AppendLine("PollIntervalMs = 50");
                     config.AppendLine("HttpTimeoutMs = 8000");
@@ -117,6 +120,12 @@ namespace SKYNET.Helper
                             if (bool.TryParse(item.Value.ToString(), out bool secureNetworking))
                             {
                                 SteamEmulator.SecureNetworking = secureNetworking;
+                            }
+                            break;
+                        case "VacSecureGameServer":
+                            if (bool.TryParse(item.Value.ToString(), out bool vacSecureGameServer))
+                            {
+                                SteamEmulator.VacSecureGameServer = vacSecureGameServer;
                             }
                             break;
                         case "UseServerApi":
@@ -189,7 +198,7 @@ namespace SKYNET.Helper
 
                 if (SteamEmulator.ConsoleLog)
                 {
-                    modCommon.ActiveConsoleOutput();
+                    Common.ActiveConsoleOutput();
                 }
 
                 string data = $"Loaded fallback user data from file \n PersonaName: {SteamEmulator.PersonaName} \n SteamId:  {SteamEmulator.SteamID} \n Languaje: {SteamEmulator.Language} \n";
@@ -221,6 +230,7 @@ namespace SKYNET.Helper
 
             changed |= EnsureSetting("Network Settings", "PollIntervalMs", "50");
             changed |= EnsureSetting("Network Settings", "SecureNetworking", "false");
+            changed |= EnsureSetting("Network Settings", "VacSecureGameServer", "false");
             changed |= EnsureSetting("Network Settings", "HttpTimeoutMs", "8000");
             changed |= EnsureSetting("Network Settings", "DiscoveryPort", "27081");
             changed |= EnsureSetting("Network Settings", "UseActiveWebUser", "true");
@@ -311,8 +321,8 @@ namespace SKYNET.Helper
                 }
 
                 // DLC entries declared in an external plain-text file.
-                string dlcFile = Path.Combine(modCommon.GetPath(), "SKYNET", "DLC.txt");
-                string legacyDlcFile = Path.Combine(modCommon.GetPath(), "SKYNET", "[SKYNET] DLC.txt");
+                string dlcFile = Path.Combine(Common.GetPath(), "SKYNET", "DLC.txt");
+                string legacyDlcFile = Path.Combine(Common.GetPath(), "SKYNET", "[SKYNET] DLC.txt");
                 if (!File.Exists(dlcFile) && File.Exists(legacyDlcFile))
                 {
                     try { File.Move(legacyDlcFile, dlcFile); }
@@ -379,7 +389,7 @@ namespace SKYNET.Helper
 
         private static uint GenerateStableAccountId()
         {
-            var hash = ComputeHash($"{Environment.MachineName}|{Environment.UserName}|{modCommon.GetPath()}|SKYNET_ACCOUNT");
+            var hash = ComputeHash($"{Environment.MachineName}|{Environment.UserName}|{Common.GetPath()}|SKYNET_ACCOUNT");
             uint accountId = BitConverter.ToUInt32(hash, 0);
             if (accountId < 100000)
             {
@@ -391,7 +401,7 @@ namespace SKYNET.Helper
 
         private static string GenerateClientInstanceId()
         {
-            var hash = ComputeHash($"{Environment.MachineName}|{Environment.UserName}|{modCommon.GetPath()}|SKYNET_INSTANCE");
+            var hash = ComputeHash($"{Environment.MachineName}|{Environment.UserName}|{Common.GetPath()}|SKYNET_INSTANCE");
             return BitConverter.ToString(hash, 0, 16).Replace("-", "").ToLowerInvariant();
         }
 

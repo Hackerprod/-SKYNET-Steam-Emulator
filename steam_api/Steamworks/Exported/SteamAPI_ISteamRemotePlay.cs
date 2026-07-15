@@ -49,7 +49,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamRemotePlay_BGetSessionClientResolution(IntPtr _, uint unSessionID, int pnResolutionX, int pnResolutionY)
+        public static bool SteamAPI_ISteamRemotePlay_BGetSessionClientResolution(IntPtr _, uint unSessionID, IntPtr pnResolutionX, IntPtr pnResolutionY)
         {
             Write("SteamAPI_ISteamRemotePlay_BGetSessionClientResolution");
             return SteamEmulator.SteamRemotePlay.BGetSessionClientResolution(unSessionID, pnResolutionX, pnResolutionY);
@@ -124,4 +124,3 @@ namespace SKYNET.Steamworks.Exported
         }
     }
 }
-

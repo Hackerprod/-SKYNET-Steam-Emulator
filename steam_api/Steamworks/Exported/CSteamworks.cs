@@ -34,7 +34,7 @@ using AccountID_t = System.UInt32;
 using SteamLeaderboardEntries_t = System.UInt64;
 using ClientUnifiedMessageHandle = System.UInt64;
 using HServerListRequest = System.IntPtr;
-using CGameID = System.UInt32;
+using CGameID = System.UInt64;
 
 #endregion
 
@@ -512,7 +512,8 @@ namespace SKYNET.Steamworks.Exported
             IntPtr pchBetaName,
             int cchBetaName,
             IntPtr pchDescription,
-            int cchDescription)
+            int cchDescription,
+            IntPtr punLastUpdated)
         {
             return SteamEmulator.SteamApps.GetBetaInfo(
                 iBetaIndex,
@@ -521,7 +522,8 @@ namespace SKYNET.Steamworks.Exported
                 pchBetaName,
                 cchBetaName,
                 pchDescription,
-                cchDescription);
+                cchDescription,
+                punLastUpdated);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -1352,7 +1354,9 @@ namespace SKYNET.Steamworks.Exported
         public static bool ISteamGameServer_SendUserConnectAndAuthenticate(uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, ref ulong pSteamIDUser)
         //public static bool ISteamGameServer_SendUserConnectAndAuthenticate(uint unIPClient, ref byte[] pvAuthBlob, uint cubAuthBlobSize, ref ulong pSteamIDUser)
         {
-            return SteamEmulator.SteamGameServer.SendUserConnectAndAuthenticate(unIPClient, pvAuthBlob, cubAuthBlobSize, (ulong)pSteamIDUser);
+            var approved = SteamEmulator.SteamGameServer.SendUserConnectAndAuthenticate(unIPClient, pvAuthBlob, cubAuthBlobSize, out var steamIDUser);
+            pSteamIDUser = steamIDUser;
+            return approved;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -2040,7 +2044,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamMatchmaking_GetFavoriteGame(int iGame, ref AppId_t pnAppID, ref uint pnIP, ref uint pnConnPort, ref uint pnQueryPort, ref uint punFlags, ref uint pRTime32LastPlayedOnServer)
         {
-            return SteamEmulator.SteamMatchmaking.GetFavoriteGame(iGame, ref pnAppID, ref pnIP, ref pnConnPort, ref pnQueryPort, ref punFlags, pRTime32LastPlayedOnServer);
+            return SteamEmulator.SteamMatchmaking.GetFavoriteGame(iGame, ref pnAppID, ref pnIP, ref pnConnPort, ref pnQueryPort, ref punFlags, ref pRTime32LastPlayedOnServer);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -2198,7 +2202,9 @@ namespace SKYNET.Steamworks.Exported
         public static int ISteamMatchmaking_GetLobbyChatEntry(ulong steamIDLobby, int iChatID, ref ulong pSteamIDUser, IntPtr pvData, int cubData, ref EChatEntryType peChatEntryType)
         //public static int ISteamMatchmaking_GetLobbyChatEntry(ulong steamIDLobby, int iChatID, ref ulong pSteamIDUser, ref byte[] pvData, int cubData, ref EChatEntryType peChatEntryType)
         {
-            return SteamEmulator.SteamMatchmaking.GetLobbyChatEntry((ulong)steamIDLobby, iChatID, (ulong)pSteamIDUser, pvData, cubData, (int)peChatEntryType);
+            pSteamIDUser = 0;
+            peChatEntryType = 0;
+            return SteamEmulator.SteamMatchmaking.GetLobbyChatEntry((ulong)steamIDLobby, iChatID, IntPtr.Zero, pvData, cubData, IntPtr.Zero);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -3549,7 +3555,7 @@ namespace SKYNET.Steamworks.Exported
         public static bool ISteamUser_GetEncryptedAppTicket(IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
         //public static bool ISteamUser_GetEncryptedAppTicket(ref byte[] pTicket, int cbMaxTicket, ref uint pcbTicket)
         {
-            return SteamEmulator.SteamUser.GetEncryptedAppTicket(pTicket, cbMaxTicket, pcbTicket);
+            return SteamEmulator.SteamUser.GetEncryptedAppTicket(pTicket, cbMaxTicket, ref pcbTicket);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -3882,7 +3888,9 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamUtils_GetCSERIPPort(ref uint unIP, ref ushort usPort)
         {
-            return SteamEmulator.SteamUtils.GetCSERIPPort(unIP, usPort);
+            unIP = 0;
+            usPort = 0;
+            return false;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -4473,7 +4481,9 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamGameServerUtils_GetCSERIPPort(ref uint unIP, ref ushort usPort)
         {
-            return SteamEmulator.SteamUtils.GetCSERIPPort(unIP, usPort);
+            unIP = 0;
+            usPort = 0;
+            return false;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

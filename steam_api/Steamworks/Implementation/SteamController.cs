@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using SKYNET.Steamworks.Interfaces;
 
 using ControllerHandle_t = System.UInt64;
@@ -47,10 +48,15 @@ namespace SKYNET.Steamworks.Implementation
             Write("DeactivateAllActionSetLayers");
         }
 
+        public int GetActionOriginFromXboxOrigin(ControllerHandle_t controllerHandle, int eOrigin)
+        {
+            Write("GetActionOriginFromXboxOrigin");
+            return 0;
+        }
+
         public int GetActionOriginFromXboxOrigin_(ControllerHandle_t controllerHandle, int eOrigin)
         {
-            Write("GetActionOriginFromXboxOrigin_");
-            return 0;
+            return GetActionOriginFromXboxOrigin(controllerHandle, eOrigin);
         }
 
         public ControllerActionSetHandle_t GetActionSetHandle(string pszActionSetName)
@@ -74,14 +80,22 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public IntPtr GetAnalogActionData(ControllerHandle_t controllerHandle, ControllerAnalogActionHandle_t analogActionHandle)
+        public int GetActiveActionSetLayers(ControllerHandle_t controllerHandle, IntPtr handlesOut)
+        {
+            Write("GetActiveActionSetLayers");
+            return 0;
+        }
+
+        public ControllerAnalogActionData_t GetAnalogActionData(ControllerHandle_t controllerHandle, ControllerAnalogActionHandle_t analogActionHandle)
         {
             Write("GetAnalogActionData");
-            //ControllerAnalogActionData_t data = new ControllerAnalogActionData_t();
-            //data.eMode = 0;
-            //data.x = data.y = 0;
-            //data.bActive = false;
-            return IntPtr.Zero;
+            return new ControllerAnalogActionData_t
+            {
+                eMode = 0,
+                x = 0,
+                y = 0,
+                bActive = false
+            };
         }
 
         public ControllerAnalogActionHandle_t GetAnalogActionHandle(string pszActionName)
@@ -105,7 +119,19 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
+        public int GetAnalogActionOrigins(ControllerHandle_t controllerHandle, ControllerActionSetHandle_t actionSetHandle, ControllerAnalogActionHandle_t analogActionHandle, IntPtr originsOut)
+        {
+            Write("GetAnalogActionOrigins");
+            return 0;
+        }
+
         public int GetConnectedControllers(ControllerHandle_t handlesOut)
+        {
+            Write("GetConnectedControllers");
+            return 0;
+        }
+
+        public int GetConnectedControllers(IntPtr handlesOut)
         {
             Write("GetConnectedControllers");
             return 0;
@@ -114,6 +140,14 @@ namespace SKYNET.Steamworks.Implementation
         public bool GetControllerBindingRevision(ControllerHandle_t controllerHandle, int pMajor, int pMinor)
         {
             Write("GetControllerBindingRevision");
+            return false;
+        }
+
+        public bool GetControllerBindingRevision(ControllerHandle_t controllerHandle, IntPtr pMajor, IntPtr pMinor)
+        {
+            Write("GetControllerBindingRevision");
+            WriteInt32(pMajor, 0);
+            WriteInt32(pMinor, 0);
             return false;
         }
 
@@ -129,13 +163,14 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public IntPtr GetDigitalActionData(ControllerHandle_t controllerHandle, ControllerDigitalActionHandle_t digitalActionHandle)
+        public ControllerDigitalActionData_t GetDigitalActionData(ControllerHandle_t controllerHandle, ControllerDigitalActionHandle_t digitalActionHandle)
         {
             Write("GetDigitalActionData");
-            ControllerDigitalActionData_t digitalData = new ControllerDigitalActionData_t();
-            digitalData.bActive = false;
-            digitalData.bState = false;
-            return IntPtr.Zero;
+            return new ControllerDigitalActionData_t
+            {
+                bActive = false,
+                bState = false
+            };
         }
 
         public ControllerDigitalActionHandle_t GetDigitalActionHandle(string pszActionName)
@@ -154,6 +189,12 @@ namespace SKYNET.Steamworks.Implementation
         }
 
         public int GetDigitalActionOrigins(ControllerHandle_t controllerHandle, ControllerActionSetHandle_t actionSetHandle, ControllerDigitalActionHandle_t digitalActionHandle, int originsOut)
+        {
+            Write("GetDigitalActionOrigins");
+            return 0;
+        }
+
+        public int GetDigitalActionOrigins(ControllerHandle_t controllerHandle, ControllerActionSetHandle_t actionSetHandle, ControllerDigitalActionHandle_t digitalActionHandle, IntPtr originsOut)
         {
             Write("GetDigitalActionOrigins");
             return 0;
@@ -189,7 +230,7 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public IntPtr GetMotionData(ControllerHandle_t controllerHandle)
+        public ControllerMotionData_t GetMotionData(ControllerHandle_t controllerHandle)
         {
             Write("GetMotionData");
             return default;
@@ -229,6 +270,11 @@ namespace SKYNET.Steamworks.Implementation
             Write("SetLEDColor");
         }
 
+        public void SetLEDColor(ControllerHandle_t controllerHandle, byte nColorR, byte nColorG, byte nColorB, uint nFlags)
+        {
+            Write("SetLEDColor");
+        }
+
         public bool ShowBindingPanel(ControllerHandle_t controllerHandle)
         {
             Write("ShowBindingPanel");
@@ -257,7 +303,17 @@ namespace SKYNET.Steamworks.Implementation
             Write("TriggerHapticPulse");
         }
 
+        public void TriggerHapticPulse(ControllerHandle_t controllerHandle, int eTargetPad, ushort usDurationMicroSec)
+        {
+            Write("TriggerHapticPulse");
+        }
+
         public void TriggerRepeatedHapticPulse(ControllerHandle_t controllerHandle, int eTargetPad, short usDurationMicroSec, short usOffMicroSec, short unRepeat, int nFlags)
+        {
+            Write("TriggerRepeatedHapticPulse");
+        }
+
+        public void TriggerRepeatedHapticPulse(ControllerHandle_t controllerHandle, int eTargetPad, ushort usDurationMicroSec, ushort usOffMicroSec, ushort unRepeat, uint nFlags)
         {
             Write("TriggerRepeatedHapticPulse");
         }
@@ -265,6 +321,19 @@ namespace SKYNET.Steamworks.Implementation
         public void TriggerVibration(ControllerHandle_t controllerHandle, short usLeftSpeed, short usRightSpeed)
         {
             Write("TriggerVibration");
+        }
+
+        public void TriggerVibration(ControllerHandle_t controllerHandle, ushort usLeftSpeed, ushort usRightSpeed)
+        {
+            Write("TriggerVibration");
+        }
+
+        private static void WriteInt32(IntPtr destination, int value)
+        {
+            if (destination != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(destination, value);
+            }
         }
     }
 }

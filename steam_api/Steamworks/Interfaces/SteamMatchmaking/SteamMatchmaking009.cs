@@ -12,17 +12,17 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamMatchmaking.GetFavoriteGameCount();
         }
 
-        public bool GetFavoriteGame(IntPtr _, int iGame, ref uint pnAppID, ref uint pnIP, ref uint pnConnPort, ref uint pnQueryPort, ref uint punFlags, uint pRTime32LastPlayedOnServer)
+        public bool GetFavoriteGame(IntPtr _, int iGame, IntPtr pnAppID, IntPtr pnIP, IntPtr pnConnPort, IntPtr pnQueryPort, IntPtr punFlags, IntPtr pRTime32LastPlayedOnServer)
         {
-            return SteamEmulator.SteamMatchmaking.GetFavoriteGame(iGame, ref pnAppID, ref pnIP, ref pnConnPort, ref pnQueryPort, ref punFlags, pRTime32LastPlayedOnServer);
+            return SteamEmulator.SteamMatchmaking.GetFavoriteGame(iGame, pnAppID, pnIP, pnConnPort, pnQueryPort, punFlags, pRTime32LastPlayedOnServer);
         }
 
-        public int AddFavoriteGame(IntPtr _, uint nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags, uint rTime32LastPlayedOnServer)
+        public int AddFavoriteGame(IntPtr _, uint nAppID, uint nIP, ushort nConnPort, ushort nQueryPort, uint unFlags, uint rTime32LastPlayedOnServer)
         {
             return SteamEmulator.SteamMatchmaking.AddFavoriteGame(nAppID, nIP, nConnPort, nQueryPort, unFlags, rTime32LastPlayedOnServer);
         }
 
-        public bool RemoveFavoriteGame(IntPtr _, uint nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags)
+        public bool RemoveFavoriteGame(IntPtr _, uint nAppID, uint nIP, ushort nConnPort, ushort nQueryPort, uint unFlags)
         {
             return SteamEmulator.SteamMatchmaking.RemoveFavoriteGame(nAppID, nIP, nConnPort, nQueryPort, unFlags);
         }
@@ -67,9 +67,9 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamMatchmaking.AddRequestLobbyListCompatibleMembersFilter(steamIDLobby);
         }
 
-        public IntPtr GetLobbyByIndex(IntPtr _, IntPtr pSteamID, int iLobby)
+        public IntPtr GetLobbyByIndex(IntPtr _, IntPtr ret, int iLobby)
         {
-            return NativeSteamId.Write(pSteamID, SteamEmulator.SteamMatchmaking.GetLobbyByIndex(iLobby));
+            return NativeSteamId.Write(ret, SteamEmulator.SteamMatchmaking.GetLobbyByIndex(iLobby));
         }
 
         public ulong CreateLobby(IntPtr _, int eLobbyType, int cMaxMembers)
@@ -97,14 +97,14 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamMatchmaking.GetNumLobbyMembers(steamIDLobby);
         }
 
-        public IntPtr GetLobbyMemberByIndex(IntPtr _, IntPtr pSteamID, ulong steamIDLobby, int iMember)
+        public IntPtr GetLobbyMemberByIndex(IntPtr _, IntPtr ret, ulong steamIDLobby, int iMember)
         {
-            return NativeSteamId.Write(pSteamID, SteamEmulator.SteamMatchmaking.GetLobbyMemberByIndex(steamIDLobby, iMember));
+            return NativeSteamId.Write(ret, SteamEmulator.SteamMatchmaking.GetLobbyMemberByIndex(steamIDLobby, iMember));
         }
 
-        public string GetLobbyData(IntPtr _, ulong steamIDLobby, string pchKey)
+        public IntPtr GetLobbyData(IntPtr _, ulong steamIDLobby, string pchKey)
         {
-            return SteamEmulator.SteamMatchmaking.GetLobbyData(steamIDLobby, pchKey);
+            return NativeStringCache.ToUtf8Ptr(SteamEmulator.SteamMatchmaking.GetLobbyData(steamIDLobby, pchKey));
         }
 
         public bool SetLobbyData(IntPtr _, ulong steamIDLobby, string pchKey, string pchValue)
@@ -127,9 +127,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamMatchmaking.DeleteLobbyData(steamIDLobby, pchKey);
         }
 
-        public string GetLobbyMemberData(IntPtr _, ulong steamIDLobby, ulong steamIDUser, string pchKey)
+        public IntPtr GetLobbyMemberData(IntPtr _, ulong steamIDLobby, ulong steamIDUser, string pchKey)
         {
-            return SteamEmulator.SteamMatchmaking.GetLobbyMemberData(steamIDLobby, steamIDUser, pchKey);
+            return NativeStringCache.ToUtf8Ptr(SteamEmulator.SteamMatchmaking.GetLobbyMemberData(steamIDLobby, steamIDUser, pchKey));
         }
 
         public void SetLobbyMemberData(IntPtr _, ulong steamIDLobby, string pchKey, string pchValue)
@@ -142,7 +142,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamMatchmaking.SendLobbyChatMsg(steamIDLobby, pvMsgBody, cubMsgBody);
         }
 
-        public int GetLobbyChatEntry(ulong steamIDLobby, int iChatID, ulong pSteamIDUser, IntPtr pvData, int cubData, int peChatEntryType)
+        public int GetLobbyChatEntry(IntPtr _, ulong steamIDLobby, int iChatID, IntPtr pSteamIDUser, IntPtr pvData, int cubData, IntPtr peChatEntryType)
         {
             return SteamEmulator.SteamMatchmaking.GetLobbyChatEntry(steamIDLobby, iChatID, pSteamIDUser, pvData, cubData, peChatEntryType);
         }
@@ -152,14 +152,14 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamMatchmaking.RequestLobbyData(steamIDLobby);
         }
 
-        public void SetLobbyGameServer(IntPtr _, ulong steamIDLobby, uint unGameServerIP, uint unGameServerPort, ulong steamIDGameServer)
+        public void SetLobbyGameServer(IntPtr _, ulong steamIDLobby, uint unGameServerIP, ushort unGameServerPort, ulong steamIDGameServer)
         {
             SteamEmulator.SteamMatchmaking.SetLobbyGameServer(steamIDLobby, unGameServerIP, unGameServerPort, steamIDGameServer);
         }
 
-        public bool GetLobbyGameServer(IntPtr _, ulong steamIDLobby, ref uint punGameServerIP, ref uint punGameServerPort, ref ulong psteamIDGameServer)
+        public bool GetLobbyGameServer(IntPtr _, ulong steamIDLobby, IntPtr punGameServerIP, IntPtr punGameServerPort, IntPtr psteamIDGameServer)
         {
-            return SteamEmulator.SteamMatchmaking.GetLobbyGameServer(steamIDLobby, ref punGameServerIP, ref punGameServerPort, ref psteamIDGameServer);
+            return SteamEmulator.SteamMatchmaking.GetLobbyGameServer(steamIDLobby, punGameServerIP, punGameServerPort, psteamIDGameServer);
         }
 
         public bool SetLobbyMemberLimit(IntPtr _, ulong steamIDLobby, int cMaxMembers)
@@ -182,9 +182,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamMatchmaking.SetLobbyJoinable(steamIDLobby, bLobbyJoinable);
         }
 
-        public IntPtr GetLobbyOwner(IntPtr _, IntPtr pSteamID, ulong steamIDLobby)
+        public IntPtr GetLobbyOwner(IntPtr _, IntPtr ret, ulong steamIDLobby)
         {
-            return NativeSteamId.Write(pSteamID, SteamEmulator.SteamMatchmaking.GetLobbyOwner(steamIDLobby));
+            return NativeSteamId.Write(ret, SteamEmulator.SteamMatchmaking.GetLobbyOwner(steamIDLobby));
         }
 
         public bool SetLobbyOwner(IntPtr _, ulong steamIDLobby, ulong steamIDNewOwner)
@@ -196,12 +196,6 @@ namespace SKYNET.Steamworks.Interfaces
         {
             return SteamEmulator.SteamMatchmaking.SetLinkedLobby(steamIDLobby, steamIDLobbyDependent);
         }
-
-        public void CheckForPSNGameBootInvite(IntPtr _, int iGameBootAttributes)
-        {
-            SteamEmulator.SteamMatchmaking.CheckForPSNGameBootInvite(iGameBootAttributes);
-        }
-
 
     }
 }

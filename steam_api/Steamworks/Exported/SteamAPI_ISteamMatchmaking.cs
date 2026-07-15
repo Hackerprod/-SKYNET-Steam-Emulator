@@ -22,21 +22,21 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamMatchmaking_GetFavoriteGame(IntPtr _, int iGame, ref uint pnAppID, ref uint pnIP, ref uint pnConnPort, ref uint pnQueryPort, ref uint punFlags, uint pRTime32LastPlayedOnServer)
+        public static bool SteamAPI_ISteamMatchmaking_GetFavoriteGame(IntPtr _, int iGame, IntPtr pnAppID, IntPtr pnIP, IntPtr pnConnPort, IntPtr pnQueryPort, IntPtr punFlags, IntPtr pRTime32LastPlayedOnServer)
         {
             Write("SteamAPI_ISteamMatchmaking_GetFavoriteGame");
-            return SteamEmulator.SteamMatchmaking.GetFavoriteGame(iGame, ref pnAppID, ref pnIP, ref pnConnPort, ref pnQueryPort, ref punFlags, pRTime32LastPlayedOnServer);
+            return SteamEmulator.SteamMatchmaking.GetFavoriteGame(iGame, pnAppID, pnIP, pnConnPort, pnQueryPort, punFlags, pRTime32LastPlayedOnServer);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamMatchmaking_AddFavoriteGame(IntPtr _, uint nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags, uint rTime32LastPlayedOnServer)
+        public static int SteamAPI_ISteamMatchmaking_AddFavoriteGame(IntPtr _, uint nAppID, uint nIP, ushort nConnPort, ushort nQueryPort, uint unFlags, uint rTime32LastPlayedOnServer)
         {
             Write("SteamAPI_ISteamMatchmaking_AddFavoriteGame");
             return SteamEmulator.SteamMatchmaking.AddFavoriteGame(nAppID, nIP, nConnPort, nQueryPort, unFlags, rTime32LastPlayedOnServer);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamMatchmaking_RemoveFavoriteGame(IntPtr _, uint nAppID, uint nIP, uint nConnPort, uint nQueryPort, uint unFlags)
+        public static bool SteamAPI_ISteamMatchmaking_RemoveFavoriteGame(IntPtr _, uint nAppID, uint nIP, ushort nConnPort, ushort nQueryPort, uint unFlags)
         {
             Write("SteamAPI_ISteamMatchmaking_RemoveFavoriteGame");
             return SteamEmulator.SteamMatchmaking.RemoveFavoriteGame(nAppID, nIP, nConnPort, nQueryPort, unFlags);
@@ -204,7 +204,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamMatchmaking_GetLobbyChatEntry(IntPtr _, ulong steamIDLobby, int iChatID, ulong pSteamIDUser, IntPtr pvData, int cubData, int peChatEntryType)
+        public static int SteamAPI_ISteamMatchmaking_GetLobbyChatEntry(IntPtr _, ulong steamIDLobby, int iChatID, IntPtr pSteamIDUser, IntPtr pvData, int cubData, IntPtr peChatEntryType)
         {
             Write("SteamAPI_ISteamMatchmaking_GetLobbyChatEntry");
             return SteamEmulator.SteamMatchmaking.GetLobbyChatEntry(steamIDLobby, iChatID, pSteamIDUser, pvData, cubData, peChatEntryType);
@@ -218,17 +218,17 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_ISteamMatchmaking_SetLobbyGameServer(IntPtr _, ulong steamIDLobby, uint unGameServerIP, uint unGameServerPort, ulong steamIDGameServer)
+        public static void SteamAPI_ISteamMatchmaking_SetLobbyGameServer(IntPtr _, ulong steamIDLobby, uint unGameServerIP, ushort unGameServerPort, ulong steamIDGameServer)
         {
             Write("SteamAPI_ISteamMatchmaking_SetLobbyGameServer");
             SteamEmulator.SteamMatchmaking.SetLobbyGameServer(steamIDLobby, unGameServerIP, unGameServerPort, steamIDGameServer);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamMatchmaking_GetLobbyGameServer(IntPtr _, ulong steamIDLobby, ref uint punGameServerIP, ref uint punGameServerPort, ref ulong psteamIDGameServer)
+        public static bool SteamAPI_ISteamMatchmaking_GetLobbyGameServer(IntPtr _, ulong steamIDLobby, IntPtr punGameServerIP, IntPtr punGameServerPort, IntPtr psteamIDGameServer)
         {
             Write("SteamAPI_ISteamMatchmaking_GetLobbyGameServer");
-            return SteamEmulator.SteamMatchmaking.GetLobbyGameServer(steamIDLobby, ref punGameServerIP, ref punGameServerPort, ref psteamIDGameServer);
+            return SteamEmulator.SteamMatchmaking.GetLobbyGameServer(steamIDLobby, punGameServerIP, punGameServerPort, psteamIDGameServer);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -296,4 +296,3 @@ namespace SKYNET.Steamworks.Exported
         }
     }
 }
-

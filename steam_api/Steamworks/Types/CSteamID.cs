@@ -3,52 +3,42 @@ using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks
 {
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Size = 8)]
     public struct CSteamID : IEquatable<CSteamID>, IComparable<CSteamID>, IEquatable<ulong>, IComparable<ulong>
     {
         public ulong SteamID;
-        public uint AccountID;
-        public byte Universe;
-        public byte AccountType;
+
+        public uint AccountID => (uint)(SteamID & 0xFFFFFFFFul);
+        public byte Universe => (byte)((SteamID >> 56) & 0xFFul);
+        public byte AccountType => (byte)((SteamID >> 52) & 0xFul);
 
         public static CSteamID Invalid = (CSteamID)0;
 
         public CSteamID(uint accountId)
         {
-            this.AccountID = accountId;
-            this.Universe = (byte)EUniverse.k_EUniversePublic;
-            this.AccountType = (byte)EAccountType.k_EAccountTypeIndividual;
-
-            int instance = (AccountType == (byte)EAccountType.k_EAccountTypeClan || AccountType == (byte)EAccountType.k_EAccountTypeGameServer) ? 0 : 1;
-
-            this.SteamID = 0;
-            this.SteamID = (SteamID & ~(0xFFFFFFFFul << (ushort)0)) | (((ulong)(AccountID) & 0xFFFFFFFFul) << (ushort)0);
-            this.SteamID = (SteamID & ~(0xFFul << (ushort)56)) | (((ulong)(Universe) & 0xFFul) << (ushort)56);
-            this.SteamID = (SteamID & ~(0xFul << (ushort)52)) | (((ulong)(AccountType) & 0xFul) << (ushort)52);
-            this.SteamID = (SteamID & ~(0xFFFFFul << (ushort)32)) | (((ulong)(instance) & 0xFFFFFul) << (ushort)32);
+            SteamID = Build(accountId, EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeIndividual);
         }
 
         public CSteamID(ulong _steamID)
         {
-            this.SteamID = _steamID;
-            this.AccountID = (uint)(_steamID & 0xFFFFFFFFul);
-            this.Universe = (byte)(EUniverse)((_steamID >> 56) & 0xFFul);
-            this.AccountType = (byte)(EAccountType)((_steamID >> 52) & 0xFul);
+            SteamID = _steamID;
         }
 
         public CSteamID(uint _accountId, EUniverse _Universe, EAccountType _AccountType)
         {
-            this.AccountID = _accountId;
-            this.Universe = (byte)_Universe;
-            this.AccountType = (byte)_AccountType;
+            SteamID = Build(_accountId, _Universe, _AccountType);
+        }
 
-            int instance = (_AccountType == EAccountType.k_EAccountTypeClan || _AccountType == EAccountType.k_EAccountTypeGameServer) ? 0 : 1;
+        private static ulong Build(uint accountId, EUniverse universe, EAccountType accountType)
+        {
+            int instance = (accountType == EAccountType.k_EAccountTypeClan || accountType == EAccountType.k_EAccountTypeGameServer) ? 0 : 1;
 
-            this.SteamID = 0;
-            this.SteamID = (SteamID & ~(0xFFFFFFFFul << (ushort)0)) | (((ulong)(_accountId) & 0xFFFFFFFFul) << (ushort)0);
-            this.SteamID = (SteamID & ~(0xFFul << (ushort)56)) | (((ulong)(_Universe) & 0xFFul) << (ushort)56);
-            this.SteamID = (SteamID & ~(0xFul << (ushort)52)) | (((ulong)(_AccountType) & 0xFul) << (ushort)52);
-            this.SteamID = (SteamID & ~(0xFFFFFul << (ushort)32)) | (((ulong)(instance) & 0xFFFFFul) << (ushort)32);
+            ulong steamID = 0;
+            steamID |= (ulong)accountId;
+            steamID |= ((ulong)instance & 0xFFFFFul) << 32;
+            steamID |= ((ulong)accountType & 0xFul) << 52;
+            steamID |= ((ulong)universe & 0xFFul) << 56;
+            return steamID;
         }
 
         public static CSteamID CreateOne(bool GameServer = false)

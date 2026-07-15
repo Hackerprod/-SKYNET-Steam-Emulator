@@ -85,14 +85,14 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr SteamAPI_ISteamInput_GetAnalogActionData(IntPtr _, InputHandle_t inputHandle, InputAnalogActionHandle_t analogActionHandle)
+        public static InputAnalogActionData_t SteamAPI_ISteamInput_GetAnalogActionData(IntPtr _, InputHandle_t inputHandle, InputAnalogActionHandle_t analogActionHandle)
         {
             Write($"SteamAPI_ISteamInput_GetAnalogActionData");
             return SteamEmulator.SteamInput.GetAnalogActionData(inputHandle, analogActionHandle);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr SteamAPI_ISteamInput_GetAnalogActionHandle(IntPtr _, string pszActionName)
+        public static InputAnalogActionHandle_t SteamAPI_ISteamInput_GetAnalogActionHandle(IntPtr _, string pszActionName)
         {
             Write($"SteamAPI_ISteamInput_GetAnalogActionHandle");
             return SteamEmulator.SteamInput.GetAnalogActionHandle(pszActionName);
@@ -134,7 +134,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr SteamAPI_ISteamInput_GetDigitalActionData(IntPtr _, InputHandle_t inputHandle, InputDigitalActionHandle_t digitalActionHandle)
+        public static InputDigitalActionData_t SteamAPI_ISteamInput_GetDigitalActionData(IntPtr _, InputHandle_t inputHandle, InputDigitalActionHandle_t digitalActionHandle)
         {
             Write($"SteamAPI_ISteamInput_GetDigitalActionData");
             return SteamEmulator.SteamInput.GetDigitalActionData(inputHandle, digitalActionHandle);
@@ -197,7 +197,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr SteamAPI_ISteamInput_GetMotionData(IntPtr _, InputHandle_t inputHandle)
+        public static InputMotionData_t SteamAPI_ISteamInput_GetMotionData(IntPtr _, InputHandle_t inputHandle)
         {
             Write($"SteamAPI_ISteamInput_GetMotionData");
             return SteamEmulator.SteamInput.GetMotionData(inputHandle);
@@ -341,4 +341,3 @@ namespace SKYNET.Steamworks.Exported
         }
     }
 }
-

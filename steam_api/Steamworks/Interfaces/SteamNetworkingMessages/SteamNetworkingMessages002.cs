@@ -35,7 +35,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamNetworkingMessages.CloseChannelWithUser(identityRemote, nLocalChannel);
         }
 
-        public IntPtr GetSessionConnectionInfo(IntPtr _, IntPtr identityRemote, IntPtr pConnectionInfo, IntPtr pQuickStatus)
+        public int GetSessionConnectionInfo(IntPtr _, IntPtr identityRemote, IntPtr pConnectionInfo, IntPtr pQuickStatus)
         {
             return SteamEmulator.SteamNetworkingMessages.GetSessionConnectionInfo(identityRemote, pConnectionInfo, pQuickStatus);
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using SKYNET.Helpers;
 
 namespace SKYNET.Steamworks.Exported
 {
@@ -115,7 +116,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_SteamNetworkingIdentity_SetSteamID64(IntPtr _, uint steamID)
+        public static void SteamAPI_SteamNetworkingIdentity_SetSteamID64(IntPtr _, ulong steamID)
         {
             Write($"SteamAPI_SteamNetworkingIdentity_SetSteamID64");
         }
@@ -128,9 +129,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_SteamNetworkingIdentity_ToString(IntPtr _, string buf, uint cbBuf)
+        public static void SteamAPI_SteamNetworkingIdentity_ToString(IntPtr _, IntPtr buf, UIntPtr cbBuf)
         {
             Write($"SteamAPI_SteamNetworkingIdentity_ToString");
+            NativeStringCache.WriteUtf8Buffer(buf, checked((int)cbBuf.ToUInt64()), string.Empty);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

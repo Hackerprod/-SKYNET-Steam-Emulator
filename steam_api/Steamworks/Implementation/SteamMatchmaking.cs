@@ -246,7 +246,14 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool GetFavoriteGame(int iGame, ref uint pnAppID, ref uint pnIP, ref uint pnConnPort, ref uint pnQueryPort, ref uint punFlags, uint pRTime32LastPlayedOnServer)
+        public bool GetFavoriteGame(
+            int iGame,
+            IntPtr pnAppID,
+            IntPtr pnIP,
+            IntPtr pnConnPort,
+            IntPtr pnQueryPort,
+            IntPtr punFlags,
+            IntPtr pRTime32LastPlayedOnServer)
         {
             Write("GetFavoriteGame");
             try
@@ -256,11 +263,12 @@ namespace SKYNET.Steamworks.Implementation
                     if (i == iGame)
                     {
                         var game = FavoriteGames[i];
-                        pnAppID = game.AppID;
-                        pnIP = game.IP;
-                        pnConnPort = game.ConnPort;
-                        pnQueryPort = game.QueryPort;
-                        punFlags = game.Flags;
+                        WriteUInt32(pnAppID, game.AppID);
+                        WriteUInt32(pnIP, game.IP);
+                        WriteUInt16(pnConnPort, game.ConnPort);
+                        WriteUInt16(pnQueryPort, game.QueryPort);
+                        WriteUInt32(punFlags, game.Flags);
+                        WriteUInt32(pRTime32LastPlayedOnServer, game.Time32LastPlayedOnServer);
                         return true;
                     }
                 }
@@ -268,6 +276,26 @@ namespace SKYNET.Steamworks.Implementation
             catch 
             {
             }
+            return false;
+        }
+
+        public bool GetFavoriteGame(int iGame, ref uint pnAppID, ref uint pnIP, ref uint pnConnPort, ref uint pnQueryPort, ref uint punFlags, ref uint pRTime32LastPlayedOnServer)
+        {
+            for (int i = 0; i < FavoriteGames.Count; i++)
+            {
+                if (i == iGame)
+                {
+                    var game = FavoriteGames[i];
+                    pnAppID = game.AppID;
+                    pnIP = game.IP;
+                    pnConnPort = game.ConnPort;
+                    pnQueryPort = game.QueryPort;
+                    punFlags = game.Flags;
+                    pRTime32LastPlayedOnServer = game.Time32LastPlayedOnServer;
+                    return true;
+                }
+            }
+
             return false;
         }
 
@@ -304,10 +332,15 @@ namespace SKYNET.Steamworks.Implementation
             return Response;
         }
 
-        public int GetLobbyChatEntry(ulong steamIDLobby, int iChatID, ulong pSteamIDUser, IntPtr pvData, int cubData, int peChatEntryType)
+        public int GetLobbyChatEntry(ulong steamIDLobby, int iChatID, IntPtr pSteamIDUser, IntPtr pvData, int cubData, IntPtr peChatEntryType)
         {
             Write("GetLobbyChatEntry");
-            return 1;
+            NativeSteamId.Write(pSteamIDUser, CSteamID.Invalid);
+            if (peChatEntryType != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(peChatEntryType, 0);
+            }
+            return 0;
         }
 
         public string GetLobbyData(ulong steamIDLobby, string pchKey)
@@ -366,6 +399,18 @@ namespace SKYNET.Steamworks.Implementation
             }
             Write($"GetLobbyGameServer (Lobby SteamID: {steamIDLobby}, IP = {punGameServerIP}, Port = {punGameServerPort}, GameserverID = {psteamIDGameServer}) = {Result}");
             return Result;
+        }
+
+        public bool GetLobbyGameServer(ulong steamIDLobby, IntPtr punGameServerIP, IntPtr punGameServerPort, IntPtr psteamIDGameServer)
+        {
+            uint ip = 0;
+            uint port = 0;
+            ulong steamID = 0;
+            bool result = GetLobbyGameServer(steamIDLobby, ref ip, ref port, ref steamID);
+            WriteUInt32(punGameServerIP, ip);
+            WriteUInt16(punGameServerPort, port);
+            NativeSteamId.Write(psteamIDGameServer, new CSteamID(steamID));
+            return result;
         }
 
         public CSteamID GetLobbyMemberByIndex(ulong steamIDLobby, int iMember)
@@ -1053,6 +1098,22 @@ namespace SKYNET.Steamworks.Implementation
             else
             {
                 existing.m_Value = value;
+            }
+        }
+
+        private static void WriteUInt32(IntPtr destination, uint value)
+        {
+            if (destination != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(destination, unchecked((int)value));
+            }
+        }
+
+        private static void WriteUInt16(IntPtr destination, uint value)
+        {
+            if (destination != IntPtr.Zero)
+            {
+                Marshal.WriteInt16(destination, unchecked((short)value));
             }
         }
 

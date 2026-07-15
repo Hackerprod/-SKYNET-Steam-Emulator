@@ -1,4 +1,3 @@
-﻿using SKYNET.Callback;
 using SKYNET.Helpers;
 using SKYNET.Steamworks;
 using System;
@@ -8,44 +7,30 @@ using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Callback
 {
-    public class SteamCallback
+    public sealed class SteamCallback
     {
-        public const byte k_ECallbackFlagsRegistered = 1;
-        public const byte k_ECallbackFlagsGameServer = 2;
-
         public CallbackType CallbackType { get; set; }
-        public CallbackType BaseType { get { return ((int)CallbackType).GetCallbackType(); } }
-        public bool Completed { get; set; }
+        public CallbackType BaseType => ((int)CallbackType).GetCallbackType();
         public IntPtr Pointer { get; }
-        public CCallbackBase CallbackBase { get; }
         public SteamAPICall_t SteamAPICall { get; set; }
-        public bool HasGameserver => (CallbackBase.m_nCallbackFlags & CCallbackBase.k_ECallbackFlagsGameServer) != 0;
-        public bool HasResult { get; set; }
-        public DateTime Created { get; set; }
+        public bool HasGameserver => (CallbackBaseInvoker.GetCallbackFlags(Pointer) & CallbackConstants.GameServer) != 0;
+        public bool HasResult { get; }
+        public DateTime Created { get; }
 
-        private CCallResult CallResult { get; set; }
+        private bool VTableLogged { get; set; }
+        private bool TraceNativeDispatch => (int)CallbackType == 1296;
 
-        public SteamCallback(IntPtr _pointer, bool hasResult = false)
+        public SteamCallback(IntPtr pointer, bool hasResult = false)
+            : this(pointer, CallbackBaseInvoker.GetCallbackId(pointer), hasResult)
         {
-            Pointer = _pointer;
-            CallbackBase = _pointer.ToType<CCallbackBase>();
-            Created = DateTime.Now;
-            HasResult = hasResult;
-            CallbackType = (CallbackType)CallbackBase.m_iCallback;
-
-            CallResult = CallbackBase.CCallbackMgr.ToType<CCallResult>();
         }
 
-        public SteamCallback(IntPtr _pointer, int iCallback, bool hasResult = false)
+        public SteamCallback(IntPtr pointer, int iCallback, bool hasResult = false)
         {
-            Pointer = _pointer;
-            CallbackBase = _pointer.ToType<CCallbackBase>();
-            CallbackBase.m_iCallback = iCallback;
-            CallbackType = (CallbackType)iCallback;
-            Created = DateTime.Now;
+            Pointer = pointer;
             HasResult = hasResult;
-
-            CallResult = CallbackBase.CCallbackMgr.ToType<CCallResult>();
+            Created = DateTime.Now;
+            CallbackType = (CallbackType)iCallback;
         }
 
         public void Run(ICallbackData data)
@@ -84,31 +69,80 @@ namespace SKYNET.Callback
             }
         }
 
-        public void Run(IntPtr pvParam)
+        public bool Run(IntPtr pvParam)
         {
-            CallResult.m_RunCallback(Pointer, pvParam);
+            if (Pointer == IntPtr.Zero)
+            {
+                return false;
+            }
+
+            if (TraceNativeDispatch)
+            {
+                LogNativeState("RunCallback");
+            }
+
+            return CallbackBaseInvoker.RunCallback(Pointer, pvParam);
         }
 
-        public void Run(IntPtr pvParam, bool bIOFailure, ulong hSteamAPICall)
+        public bool Run(IntPtr pvParam, bool bIOFailure, ulong hSteamAPICall)
         {
-            ulong beforeApiCall = ReadCallResultHandle();
-            if (bIOFailure)
+            if (Pointer == IntPtr.Zero)
             {
-                CallResult.m_RunCallResult(Pointer, pvParam, bIOFailure, (ulong)hSteamAPICall);
+                return false;
             }
-            else
+
+            ulong beforeApiCall = 0;
+            if (TraceNativeDispatch)
             {
-                CallResult.m_RunCallback(Pointer, pvParam);
+                LogNativeState("RunCallResult");
+                beforeApiCall = ReadCallResultHandle();
             }
-            ulong afterApiCall = ReadCallResultHandle();
-            SteamEmulator.Write(
-                "CallbackManager",
-                $"RunCallResult ptr=0x{Pointer.ToInt64():X} callback={(int)CallbackType} handle={hSteamAPICall} objectHandleBefore={beforeApiCall} objectHandleAfter={afterApiCall} ioFailure={bIOFailure}");
+
+            bool invoked = CallbackBaseInvoker.RunCallResult(Pointer, pvParam, bIOFailure, hSteamAPICall);
+
+            if (TraceNativeDispatch)
+            {
+                ulong afterApiCall = ReadCallResultHandle();
+                SteamEmulator.Write(
+                    "CallbackManager",
+                    $"RunCallResult ptr=0x{Pointer.ToInt64():X} callback={(int)CallbackType} handle={hSteamAPICall} objectHandleBefore={beforeApiCall} objectHandleAfter={afterApiCall} ioFailure={bIOFailure} invoked={invoked}");
+            }
+
+            return invoked;
         }
 
         public int GetCallbackSizeBytes()
         {
-            return CallResult.m_GetCallbackSizeBytes(Pointer);
+            return CallbackBaseInvoker.GetCallbackSizeBytes(Pointer);
+        }
+
+        public void Register()
+        {
+            if (Pointer != IntPtr.Zero)
+            {
+                CallbackBaseInvoker.RegisterCallback(Pointer, (int)CallbackType);
+            }
+        }
+
+        public void Unregister()
+        {
+            if (Pointer != IntPtr.Zero)
+            {
+                CallbackBaseInvoker.UnregisterCallback(Pointer);
+            }
+        }
+
+        private void LogNativeState(string reason)
+        {
+            if (VTableLogged)
+            {
+                return;
+            }
+
+            VTableLogged = true;
+            SteamEmulator.Write(
+                "CallbackManager",
+                $"{reason} ptr=0x{Pointer.ToInt64():X} callback={(int)CallbackType} nativeCallback={CallbackBaseInvoker.GetCallbackId(Pointer)} flags={CallbackBaseInvoker.GetCallbackFlags(Pointer)} nativeSize={GetCallbackSizeBytes()} objectHandle={ReadCallResultHandle()}");
         }
 
         private ulong ReadCallResultHandle()
@@ -126,23 +160,6 @@ namespace SKYNET.Callback
             {
                 return 0;
             }
-        }
-
-        public void Update()
-        {
-            Marshal.StructureToPtr(CallbackBase, Pointer, false);
-        }
-
-        public void Register()
-        {
-            CallbackBase.m_nCallbackFlags |= k_ECallbackFlagsRegistered;
-            CallbackBase.m_iCallback = (int)CallbackType;
-            Update();
-        }
-        public void Unregister()
-        {
-            CallbackBase.m_nCallbackFlags &= unchecked((byte)~k_ECallbackFlagsRegistered);
-            Update();
         }
     }
 }

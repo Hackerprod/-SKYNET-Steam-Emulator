@@ -7,7 +7,7 @@ using uint16 = System.UInt16;
 using uint32 = System.UInt32;
 using AppId_t = System.UInt32;
 using HAuthTicket = System.UInt32;
-using CGameID = System.UInt32;
+using CGameID = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
@@ -29,9 +29,9 @@ namespace SKYNET.Steamworks.Interfaces
             return NativeSteamId.Write(pSteamID, SteamEmulator.SteamUser.GetSteamID());
         }
 
-        public int InitiateGameConnection(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, CGameID gameID,uint32 unIPServer, uint16 usPortServer, bool bSecure)
+        public int InitiateGameConnection(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint32 unIPServer, uint16 usPortServer, bool bSecure)
         {
-            return SteamEmulator.SteamUser.InitiateGameConnection(pAuthBlob, cbMaxAuthBlob, steamIDGameServer, gameID, unIPServer, usPortServer, bSecure);
+            return SteamEmulator.SteamUser.InitiateGameConnection(pAuthBlob, cbMaxAuthBlob, steamIDGameServer, unIPServer, usPortServer, bSecure);
         }
 
         public void TerminateGameConnection(IntPtr _, uint32 unIPServer, uint16 usPortServer)
@@ -119,7 +119,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUser.RequestEncryptedAppTicket(pDataToInclude, cbDataToInclude);
         }
 
-        public bool GetEncryptedAppTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
+        public bool GetEncryptedAppTicket(IntPtr _, IntPtr pTicket, int cbMaxTicket, IntPtr pcbTicket)
         {
             return SteamEmulator.SteamUser.GetEncryptedAppTicket(pTicket, cbMaxTicket, pcbTicket);
         }

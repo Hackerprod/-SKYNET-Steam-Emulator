@@ -109,9 +109,17 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamRemoteStorage.GetFileNameAndSize(iFile, ref pnFileSizeInBytes);
         }
 
-        public bool GetQuota(IntPtr _, ref ulong pnTotalBytes, ref ulong puAvailableBytes)
+        public bool GetQuota(IntPtr _, IntPtr pnTotalBytes, IntPtr puAvailableBytes)
         {
-            return SteamEmulator.SteamRemoteStorage.GetQuota(ref pnTotalBytes, ref puAvailableBytes);
+            if (pnTotalBytes != IntPtr.Zero)
+            {
+                System.Runtime.InteropServices.Marshal.WriteInt32(pnTotalBytes, 0);
+            }
+            if (puAvailableBytes != IntPtr.Zero)
+            {
+                System.Runtime.InteropServices.Marshal.WriteInt32(puAvailableBytes, 0);
+            }
+            return true;
         }
 
         public bool IsCloudEnabledForAccount(IntPtr _)
@@ -134,12 +142,12 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamRemoteStorage.UGCDownload(hContent, unPriority);
         }
 
-        public bool GetUGCDownloadProgress(IntPtr _, ulong hContent, int pnBytesDownloaded, int pnBytesExpected)
+        public bool GetUGCDownloadProgress(IntPtr _, ulong hContent, IntPtr pnBytesDownloaded, IntPtr pnBytesExpected)
         {
             return SteamEmulator.SteamRemoteStorage.GetUGCDownloadProgress(hContent, pnBytesDownloaded, pnBytesExpected);
         }
 
-        public bool GetUGCDetails(ulong hContent, uint pnAppID, string ppchName, int pnFileSizeInBytes, ulong pSteamIDOwner)
+        public bool GetUGCDetails(IntPtr _, ulong hContent, IntPtr pnAppID, IntPtr ppchName, IntPtr pnFileSizeInBytes, IntPtr pSteamIDOwner)
         {
             return SteamEmulator.SteamRemoteStorage.GetUGCDetails(hContent, pnAppID, ppchName, pnFileSizeInBytes, pSteamIDOwner);
         }
@@ -152,6 +160,41 @@ namespace SKYNET.Steamworks.Interfaces
         public int GetCachedUGCCount(IntPtr _)
         {
             return SteamEmulator.SteamRemoteStorage.GetCachedUGCCount();
+        }
+
+        public ulong GetCachedUGCHandle(IntPtr _, int iCachedContent)
+        {
+            return SteamEmulator.SteamRemoteStorage.GetCachedUGCHandle(iCachedContent);
+        }
+
+        public void GetFileListFromServer(IntPtr _)
+        {
+            SteamEmulator.SteamRemoteStorage.GetFileListFromServer();
+        }
+
+        public bool FileFetch(IntPtr _, string pchFile)
+        {
+            return SteamEmulator.SteamRemoteStorage.FileFetch(pchFile);
+        }
+
+        public bool FilePersist(IntPtr _, string pchFile)
+        {
+            return SteamEmulator.SteamRemoteStorage.FilePersist(pchFile);
+        }
+
+        public bool SynchronizeToClient(IntPtr _)
+        {
+            return SteamEmulator.SteamRemoteStorage.SynchronizeToClient();
+        }
+
+        public bool SynchronizeToServer(IntPtr _)
+        {
+            return SteamEmulator.SteamRemoteStorage.SynchronizeToServer();
+        }
+
+        public bool ResetFileRequestState(IntPtr _)
+        {
+            return SteamEmulator.SteamRemoteStorage.ResetFileRequestState();
         }
 
         public ulong PublishWorkshopFile(IntPtr _, string pchFile, string pchPreviewFile, uint nConsumerAppId, string pchTitle, string pchDescription, int eVisibility, IntPtr pTags, int eWorkshopFileType)

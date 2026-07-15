@@ -10,17 +10,17 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamAppList.GetNumInstalledApps();
         }
 
-        public uint GetInstalledApps(IntPtr _, uint pvecAppID, uint unMaxAppIDs)
+        public uint GetInstalledApps(IntPtr _, IntPtr pvecAppID, uint unMaxAppIDs)
         {
             return SteamEmulator.SteamAppList.GetInstalledApps(pvecAppID, unMaxAppIDs);
         }
 
-        public int GetAppName(uint nAppID, string pchName, int cchNameMax)  
+        public int GetAppName(IntPtr _, uint nAppID, IntPtr pchName, int cchNameMax)
         {
             return SteamEmulator.SteamAppList.GetAppName(nAppID, pchName, cchNameMax);
         }
 
-        public int GetAppInstallDir(IntPtr _, uint nAppID, string pchDirectory, int cchNameMax)  // returns -1 if no dir was found
+        public int GetAppInstallDir(IntPtr _, uint nAppID, IntPtr pchDirectory, int cchNameMax)
         {
             return SteamEmulator.SteamAppList.GetAppInstallDir(nAppID, pchDirectory, cchNameMax);
         }

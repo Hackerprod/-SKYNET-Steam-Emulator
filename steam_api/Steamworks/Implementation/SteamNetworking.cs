@@ -246,11 +246,11 @@ namespace SKYNET.Steamworks.Implementation
             pConnectionState.m_bConnectionActive = 1;
             pConnectionState.m_bConnecting = 0;
             pConnectionState.m_eP2PSessionError = 0;
-            pConnectionState.m_bUsingRelay = false;
+            pConnectionState.m_bUsingRelay = 0;
             pConnectionState.m_nBytesQueuedForSend = 0;
             pConnectionState.m_nPacketsQueuedForSend = 0;
             pConnectionState.m_nRemoteIP = NetworkManager.GetIPAddress(NetworkManager.GetIPAddress()); ;
-            pConnectionState.m_nRemotePort = 208802;
+            pConnectionState.m_nRemotePort = 27015;
 
             Marshal.StructureToPtr(pConnectionState, ptrConnectionState, false);
 
@@ -269,6 +269,12 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
+        public SNetListenSocket_t CreateListenSocket(int nVirtualP2PPort, SteamIPAddress_t nIP, ushort nPort, bool bAllowUseOfPacketRelay)
+        {
+            Write("CreateListenSocket");
+            return 0;
+        }
+
         public SNetSocket_t CreateP2PConnectionSocket(ulong steamIDTarget, int nVirtualPort, int nTimeoutSec, bool bAllowUseOfPacketRelay)
         {
             Write("CreateP2PConnectionSocket");
@@ -276,6 +282,12 @@ namespace SKYNET.Steamworks.Implementation
         }
 
         public SNetSocket_t CreateConnectionSocket(uint nIP, uint nPort, int nTimeoutSec)
+        {
+            Write("CreateConnectionSocket");
+            return 0;
+        }
+
+        public SNetSocket_t CreateConnectionSocket(SteamIPAddress_t nIP, ushort nPort, int nTimeoutSec)
         {
             Write("CreateConnectionSocket");
             return 0;
@@ -305,9 +317,23 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
+        public bool IsDataAvailableOnSocket(SNetSocket_t hSocket, IntPtr pcubMsgSize)
+        {
+            Write("IsDataAvailableOnSocket");
+            WriteUInt32(pcubMsgSize, 0);
+            return false;
+        }
+
         public bool RetrieveDataFromSocket(SNetSocket_t hSocket, IntPtr pubDest, uint cubDest, uint pcubMsgSize)
         {
             Write("RetrieveDataFromSocket");
+            return false;
+        }
+
+        public bool RetrieveDataFromSocket(SNetSocket_t hSocket, IntPtr pubDest, uint cubDest, IntPtr pcubMsgSize)
+        {
+            Write("RetrieveDataFromSocket");
+            WriteUInt32(pcubMsgSize, 0);
             return false;
         }
 
@@ -317,9 +343,25 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
+        public bool IsDataAvailable(SNetListenSocket_t hListenSocket, IntPtr pcubMsgSize, IntPtr phSocket)
+        {
+            Write("IsDataAvailable");
+            WriteUInt32(pcubMsgSize, 0);
+            WriteUInt32(phSocket, 0);
+            return false;
+        }
+
         public bool RetrieveData(SNetListenSocket_t hListenSocket, IntPtr pubDest, uint cubDest, uint pcubMsgSize, SNetSocket_t phSocket)
         {
             Write("RetrieveData");
+            return false;
+        }
+
+        public bool RetrieveData(SNetListenSocket_t hListenSocket, IntPtr pubDest, uint cubDest, IntPtr pcubMsgSize, IntPtr phSocket)
+        {
+            Write("RetrieveData");
+            WriteUInt32(pcubMsgSize, 0);
+            WriteUInt32(phSocket, 0);
             return false;
         }
 
@@ -329,9 +371,27 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
+        public bool GetSocketInfo(SNetSocket_t hSocket, IntPtr pSteamIDRemote, IntPtr peSocketStatus, IntPtr punIPRemote, IntPtr punPortRemote)
+        {
+            Write("GetSocketInfo");
+            WriteUInt64(pSteamIDRemote, 0);
+            WriteInt32(peSocketStatus, 0);
+            WriteSteamIPAddress(punIPRemote, default);
+            WriteUInt16(punPortRemote, 0);
+            return false;
+        }
+
         public bool GetListenSocketInfo(SNetListenSocket_t hListenSocket, uint pnIP, uint pnPort)
         {
             Write("GetListenSocketInfo");
+            return false;
+        }
+
+        public bool GetListenSocketInfo(SNetListenSocket_t hListenSocket, IntPtr pnIP, IntPtr pnPort)
+        {
+            Write("GetListenSocketInfo");
+            WriteSteamIPAddress(pnIP, default);
+            WriteUInt16(pnPort, 0);
             return false;
         }
 
@@ -353,6 +413,46 @@ namespace SKYNET.Steamworks.Implementation
             {
                 P2PIncoming.Add(p2p);
             });
+        }
+
+        private static void WriteInt32(IntPtr destination, int value)
+        {
+            if (destination != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(destination, value);
+            }
+        }
+
+        private static void WriteUInt16(IntPtr destination, ushort value)
+        {
+            if (destination != IntPtr.Zero)
+            {
+                Marshal.WriteInt16(destination, unchecked((short)value));
+            }
+        }
+
+        private static void WriteUInt32(IntPtr destination, uint value)
+        {
+            if (destination != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(destination, unchecked((int)value));
+            }
+        }
+
+        private static void WriteUInt64(IntPtr destination, ulong value)
+        {
+            if (destination != IntPtr.Zero)
+            {
+                Marshal.WriteInt64(destination, unchecked((long)value));
+            }
+        }
+
+        private static void WriteSteamIPAddress(IntPtr destination, SteamIPAddress_t value)
+        {
+            if (destination != IntPtr.Zero)
+            {
+                Marshal.StructureToPtr(value, destination, false);
+            }
         }
     }
 }

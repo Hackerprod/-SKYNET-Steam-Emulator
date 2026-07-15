@@ -22,7 +22,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamGameServer_InitGameServer(IntPtr _, uint unIP, int usGamePort, int usQueryPort, uint unFlags, AppId_t nGameAppId, string pchVersionString)
+        public static bool SteamAPI_ISteamGameServer_InitGameServer(IntPtr _, uint unIP, ushort usGamePort, ushort usQueryPort, uint unFlags, AppId_t nGameAppId, string pchVersionString)
         {
             Write("SteamAPI_ISteamGameServer_InitGameServer");
             return SteamEmulator.SteamGameServer.InitGameServer(unIP, usGamePort, usQueryPort, unFlags, nGameAppId, pchVersionString);
@@ -141,7 +141,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_ISteamGameServer_SetSpectatorPort(IntPtr _, int unSpectatorPort)
+        public static void SteamAPI_ISteamGameServer_SetSpectatorPort(IntPtr _, ushort unSpectatorPort)
         {
             Write("SteamAPI_ISteamGameServer_SetSpectatorPort");
             SteamEmulator.SteamGameServer.SetSpectatorPort(unSpectatorPort);
@@ -190,7 +190,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamGameServer_SendUserConnectAndAuthenticate(IntPtr _, uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, ulong pSteamIDUser)
+        public static bool SteamAPI_ISteamGameServer_SendUserConnectAndAuthenticate(IntPtr _, uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, IntPtr pSteamIDUser)
         {
             Write("SteamAPI_ISteamGameServer_SendUserConnectAndAuthenticate");
             return SteamEmulator.SteamGameServer.SendUserConnectAndAuthenticate(unIPClient, pvAuthBlob, cubAuthBlobSize, pSteamIDUser);
@@ -281,14 +281,14 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamGameServer_HandleIncomingPacket(IntPtr _, IntPtr pData, int cbData, uint srcIP, int srcPort)
+        public static bool SteamAPI_ISteamGameServer_HandleIncomingPacket(IntPtr _, IntPtr pData, int cbData, uint srcIP, ushort srcPort)
         {
             Write("SteamAPI_ISteamGameServer_HandleIncomingPacket");
-            return SteamEmulator.SteamGameServer.HandleIncomingPacket(pData, cbData, srcIP, (uint)srcPort);
+            return SteamEmulator.SteamGameServer.HandleIncomingPacket(pData, cbData, srcIP, srcPort);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamGameServer_GetNextOutgoingPacket(IntPtr _, IntPtr pOut, int cbMaxOut, uint pNetAdr, uint pPort)
+        public static int SteamAPI_ISteamGameServer_GetNextOutgoingPacket(IntPtr _, IntPtr pOut, int cbMaxOut, IntPtr pNetAdr, IntPtr pPort)
         {
             Write("SteamAPI_ISteamGameServer_GetNextOutgoingPacket");
             return SteamEmulator.SteamGameServer.GetNextOutgoingPacket(pOut, cbMaxOut, pNetAdr, pPort);

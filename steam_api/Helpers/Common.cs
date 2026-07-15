@@ -8,7 +8,7 @@ using SKYNET.Steamworks;
 
 namespace SKYNET
 {
-    public class modCommon
+    public static class Common
     {
         private struct LASTINPUTINFO
         {

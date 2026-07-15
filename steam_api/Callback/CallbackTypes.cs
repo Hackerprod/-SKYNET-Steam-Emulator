@@ -262,10 +262,14 @@ namespace SKYNET.Callback
         #endregion
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct GameOverlayActivated_t : ICallbackData
     {
         public byte Active; // m_bActive uint8
+        [MarshalAs(UnmanagedType.I1)]
+        public bool UserInitiated; // m_bUserInitiated bool
+        public uint AppID; // m_nAppID AppId_t
+        public uint OverlayPID; // m_dwOverlayPID uint32
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GameOverlayActivated_t));
@@ -277,12 +281,12 @@ namespace SKYNET.Callback
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     public struct GameServerChangeRequested_t : ICallbackData
     {
-        //public string ServerUTF8() => System.Text.Encoding.UTF8.GetString(m_rgchServer, 0, System.Array.IndexOf<byte>(m_rgchServer, 0));
+        public string ServerUTF8() => System.Text.Encoding.UTF8.GetString(m_rgchServer, 0, System.Array.IndexOf<byte>(m_rgchServer, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)] // byte[] m_rgchServer
-        public string m_rgchServer; // m_rgchServer char [64]
-        //public string PasswordUTF8() => System.Text.Encoding.UTF8.GetString(m_rgchPassword, 0, System.Array.IndexOf<byte>(m_rgchPassword, 0));
+        public byte[] m_rgchServer; // m_rgchServer char [64]
+        public string PasswordUTF8() => System.Text.Encoding.UTF8.GetString(m_rgchPassword, 0, System.Array.IndexOf<byte>(m_rgchPassword, 0));
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)] // byte[] m_rgchPassword
-        public string m_rgchPassword; // m_rgchPassword char [64]
+        public byte[] m_rgchPassword; // m_rgchPassword char [64]
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GameServerChangeRequested_t));
@@ -304,7 +308,7 @@ namespace SKYNET.Callback
         #endregion
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct AvatarImageLoaded_t : ICallbackData
     {
         public ulong SteamID; // m_steamID CSteamID
@@ -388,7 +392,7 @@ namespace SKYNET.Callback
         #endregion
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct GameConnectedChatLeave_t : ICallbackData
     {
         public ulong SteamIDClanChat; // m_steamIDClanChat CSteamID
@@ -418,7 +422,7 @@ namespace SKYNET.Callback
         #endregion
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct JoinClanChatRoomCompletionResult_t : ICallbackData
     {
         public ulong SteamIDClanChat; // m_steamIDClanChat CSteamID
@@ -431,7 +435,7 @@ namespace SKYNET.Callback
         #endregion
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct GameConnectedFriendChatMsg_t : ICallbackData
     {
         public ulong SteamIDUser; // m_steamIDUser CSteamID
@@ -590,12 +594,13 @@ namespace SKYNET.Callback
         #endregion
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct GamepadTextInputDismissed_t : ICallbackData
     {
         [MarshalAs(UnmanagedType.I1)]
         public bool Submitted; // m_bSubmitted bool
         public uint SubmittedText; // m_unSubmittedText uint32
+        public uint AppID; // m_unAppID AppId_t
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(GamepadTextInputDismissed_t));
@@ -808,6 +813,7 @@ namespace SKYNET.Callback
         public ulong SteamIDEndedSearch; // m_steamIDEndedSearch CSteamID
         public int SecondsRemainingEstimate; // m_nSecondsRemainingEstimate int32
         public int CPlayersSearching; // m_cPlayersSearching int32
+        private int _padding;
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(SearchForGameProgressCallback_t));
@@ -847,7 +853,7 @@ namespace SKYNET.Callback
         #endregion
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
     public struct RequestPlayersForGameResultCallback_t : ICallbackData
     {
         public EResult Result; // m_eResult EResult
@@ -889,7 +895,7 @@ namespace SKYNET.Callback
         #endregion
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
     public struct SubmitPlayerResultResultCallback_t : ICallbackData
     {
         public EResult Result; // m_eResult EResult
@@ -916,7 +922,7 @@ namespace SKYNET.Callback
         #endregion
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
     public struct JoinPartyCallback_t : ICallbackData
     {
         public EResult Result; // m_eResult EResult
@@ -1394,12 +1400,13 @@ namespace SKYNET.Callback
         #endregion
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct UserStatsReceived_t : ICallbackData
     {
         public ulong m_nGameID; // m_nGameID uint64
         public EResult m_eResult; // m_eResult EResult
         public CSteamID m_steamIDUser; // m_steamIDUser CSteamID
+        private int _padding;
 
         #region SteamCallback
         public static int _datasize = Marshal.SizeOf(typeof(UserStatsReceived_t));
@@ -1663,7 +1670,7 @@ namespace SKYNET.Callback
         #endregion
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct P2PSessionConnectFail_t : ICallbackData
     {
         public ulong SteamIDRemote; // m_steamIDRemote CSteamID
@@ -2853,7 +2860,7 @@ namespace SKYNET.Callback
         #endregion
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct GSClientDeny_t : ICallbackData
     {
         public ulong SteamID; // m_SteamID CSteamID
@@ -2869,7 +2876,7 @@ namespace SKYNET.Callback
         #endregion
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct GSClientKick_t : ICallbackData
     {
         public ulong SteamID; // m_SteamID CSteamID
@@ -2926,7 +2933,7 @@ namespace SKYNET.Callback
         #endregion
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPackSize)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct GSClientGroupStatus_t : ICallbackData
     {
         public ulong SteamIDUser; // m_SteamIDUser CSteamID

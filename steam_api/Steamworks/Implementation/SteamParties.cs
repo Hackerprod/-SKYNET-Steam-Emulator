@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using SKYNET.Steamworks.Interfaces;
 
 using SteamAPICall_t = System.UInt64;
@@ -52,16 +53,30 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
+        public bool GetBeaconDetails(PartyBeaconID_t ulBeaconID, IntPtr pSteamIDBeaconOwner, IntPtr pLocation, IntPtr pchMetadata, int cchMetadata)
+        {
+            if (pSteamIDBeaconOwner != IntPtr.Zero)
+            {
+                Marshal.WriteInt64(pSteamIDBeaconOwner, 0);
+            }
+            Write("GetBeaconDetails");
+            return false;
+        }
+
         public bool GetBeaconDetails(PartyBeaconID_t ulBeaconID, ulong pSteamIDBeaconOwner, IntPtr pLocation, string pchMetadata, int cchMetadata)
         {
-            Write("GetBeaconDetails");
+            return GetBeaconDetails(ulBeaconID, new IntPtr(unchecked((long)pSteamIDBeaconOwner)), pLocation, IntPtr.Zero, cchMetadata);
+        }
+
+        public bool GetBeaconLocationData(SteamPartyBeaconLocation_t BeaconLocation, int eData, IntPtr pchDataStringOut, int cchDataStringOut)
+        {
+            Write("GetBeaconLocationData");
             return false;
         }
 
         public bool GetBeaconLocationData(IntPtr BeaconLocation, int eData, ref string pchDataStringOut, ref int cchDataStringOut)
         {
-            Write("GetBeaconLocationData");
-            return false;
+            return GetBeaconLocationData(default(SteamPartyBeaconLocation_t), eData, IntPtr.Zero, cchDataStringOut);
         }
 
         public uint GetNumActiveBeacons()
@@ -70,10 +85,19 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public bool GetNumAvailableBeaconLocations(uint puNumLocations)
+        public bool GetNumAvailableBeaconLocations(IntPtr puNumLocations)
         {
+            if (puNumLocations != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(puNumLocations, 0);
+            }
             Write("GetNumAvailableBeaconLocations");
             return false;
+        }
+
+        public bool GetNumAvailableBeaconLocations(uint puNumLocations)
+        {
+            return GetNumAvailableBeaconLocations(IntPtr.Zero);
         }
 
         public SteamAPICall_t JoinParty(PartyBeaconID_t ulBeaconID)

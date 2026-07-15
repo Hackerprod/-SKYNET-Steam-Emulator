@@ -38,17 +38,15 @@ namespace SKYNET.Helpers
             return ((uint)address).Swap();
         }
 
-        public static bool IsGameServer(this CCallbackBase Base)
+        public static bool IsGameServerCallback(this IntPtr callback)
         {
-            bool GS = false;
             try
             {
-                GS = (Base.m_nCallbackFlags & CCallbackBase.k_ECallbackFlagsGameServer) != 0;
-                return GS;
+                return (CallbackBaseInvoker.GetCallbackFlags(callback) & CallbackConstants.GameServer) != 0;
             }
             catch (Exception)
             {
-                return GS;
+                return false;
             }
         }
 

@@ -48,7 +48,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_ISteamHTMLSurface_FileLoadDialogResponse(IntPtr _, HHTMLBrowser unBrowserHandle, string pchSelectedFiles)
+        public static void SteamAPI_ISteamHTMLSurface_FileLoadDialogResponse(IntPtr _, HHTMLBrowser unBrowserHandle, IntPtr pchSelectedFiles)
         {
             Write("SteamAPI_ISteamHTMLSurface_FileLoadDialogResponse");
         }

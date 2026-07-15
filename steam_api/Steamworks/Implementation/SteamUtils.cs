@@ -114,13 +114,21 @@ namespace SKYNET.Steamworks.Implementation
             return Result;
         }
 
-        public bool GetCSERIPPort(uint unIP, uint usPort)
+        public bool GetCSERIPPort(IntPtr unIP, IntPtr usPort)
         {
             Write("GetCSERIPPort");
+            if (unIP != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(unIP, 0);
+            }
+            if (usPort != IntPtr.Zero)
+            {
+                Marshal.WriteInt16(usPort, 0);
+            }
             return false;
         }
 
-        public int GetCurrentBatteryPower()
+        public byte GetCurrentBatteryPower()
         {
             Write("GetCurrentBatteryPower");
             return 100;

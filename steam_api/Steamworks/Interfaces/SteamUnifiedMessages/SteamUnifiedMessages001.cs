@@ -11,13 +11,13 @@ namespace SKYNET.Steamworks.Interfaces
     {
         private ClientUnifiedMessageHandle k_InvalidUnifiedMessageHandle = 0;
 
-        public ClientUnifiedMessageHandle SendMethod(IntPtr _, char pchServiceMethod, IntPtr pRequestBuffer, uint32 unRequestBufferSize, uint64 unContext)
+        public ClientUnifiedMessageHandle SendMethod(IntPtr _, string pchServiceMethod, IntPtr pRequestBuffer, uint32 unRequestBufferSize, uint64 unContext)
         {
             Write("ClientUnifiedMessageHandle");
             return k_InvalidUnifiedMessageHandle;
         }
 
-        public bool GetMethodResponseInfo(IntPtr _, ClientUnifiedMessageHandle hHandle, uint32 punResponseSize, EResult peResult)
+        public bool GetMethodResponseInfo(IntPtr _, ClientUnifiedMessageHandle hHandle, IntPtr punResponseSize, IntPtr peResult)
         {
             Write("GetMethodResponseInfo");
             return false;
@@ -35,7 +35,7 @@ namespace SKYNET.Steamworks.Interfaces
             return false;
         }
 
-        public bool SendNotification(IntPtr _, char pchServiceNotification, IntPtr pNotificationBuffer, uint32 unNotificationBufferSize)
+        public bool SendNotification(IntPtr _, string pchServiceNotification, IntPtr pNotificationBuffer, uint32 unNotificationBufferSize)
         {
             Write("SendNotification");
             return false;

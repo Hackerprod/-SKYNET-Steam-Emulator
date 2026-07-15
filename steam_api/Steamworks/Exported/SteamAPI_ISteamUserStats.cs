@@ -24,31 +24,45 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUserStats_GetStat(IntPtr _, string pchName, ref uint pData)
+        public static bool SteamAPI_ISteamUserStats_GetStatInt32(IntPtr _, string pchName, IntPtr pData)
         {
-            Write("SteamAPI_ISteamUserStats_GetStat");
-            return SteamEmulator.SteamUserStats.GetStat(pchName, ref pData);
+            Write("SteamAPI_ISteamUserStats_GetStatInt32");
+            return SteamEmulator.SteamUserStats.GetStatInt32(pchName, pData);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUserStats_SetStat(IntPtr _, string pchName, uint nData)
+        public static bool SteamAPI_ISteamUserStats_GetStatFloat(IntPtr _, string pchName, IntPtr pData)
         {
-            Write("SteamAPI_ISteamUserStats_SetStat");
-            return SteamEmulator.SteamUserStats.SetStat(pchName, nData);
+            Write("SteamAPI_ISteamUserStats_GetStatFloat");
+            return SteamEmulator.SteamUserStats.GetStatFloat(pchName, pData);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUserStats_UpdateAvgRateStat(IntPtr _, string pchName, uint flCountThisSession, double dSessionLength)
+        public static bool SteamAPI_ISteamUserStats_SetStatInt32(IntPtr _, string pchName, int nData)
+        {
+            Write("SteamAPI_ISteamUserStats_SetStatInt32");
+            return SteamEmulator.SteamUserStats.SetStat(pchName, unchecked((uint)nData));
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUserStats_SetStatFloat(IntPtr _, string pchName, float fData)
+        {
+            Write("SteamAPI_ISteamUserStats_SetStatFloat");
+            return SteamEmulator.SteamUserStats.SetStat(pchName, (uint)fData);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUserStats_UpdateAvgRateStat(IntPtr _, string pchName, float flCountThisSession, double dSessionLength)
         {
             Write("SteamAPI_ISteamUserStats_UpdateAvgRateStat");
             return SteamEmulator.SteamUserStats.UpdateAvgRateStat(pchName, flCountThisSession, dSessionLength);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUserStats_GetAchievement(IntPtr _, string pchName, ref bool pbAchieved)
+        public static bool SteamAPI_ISteamUserStats_GetAchievement(IntPtr _, string pchName, IntPtr pbAchieved)
         {
             Write("SteamAPI_ISteamUserStats_GetAchievement");
-            return SteamEmulator.SteamUserStats.GetAchievement(pchName, ref pbAchieved);
+            return SteamEmulator.SteamUserStats.GetAchievement(pchName, pbAchieved);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -66,10 +80,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUserStats_GetAchievementAndUnlockTime(IntPtr _, ref string pchName, ref bool pbAchieved, uint punUnlockTime)
+        public static bool SteamAPI_ISteamUserStats_GetAchievementAndUnlockTime(IntPtr _, string pchName, IntPtr pbAchieved, IntPtr punUnlockTime)
         {
             Write("SteamAPI_ISteamUserStats_GetAchievementAndUnlockTime");
-            return SteamEmulator.SteamUserStats.GetAchievementAndUnlockTime(pchName, ref pbAchieved, ref punUnlockTime);
+            return SteamEmulator.SteamUserStats.GetAchievementAndUnlockTime(pchName, pbAchieved, punUnlockTime);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -122,22 +136,29 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUserStats_GetUserStat(IntPtr _, ulong steamIDUser, string pchName, uint pData)
+        public static bool SteamAPI_ISteamUserStats_GetUserStatInt32(IntPtr _, ulong steamIDUser, string pchName, IntPtr pData)
         {
-            Write("SteamAPI_ISteamUserStats_GetUserStat");
-            return SteamEmulator.SteamUserStats.GetUserStat(steamIDUser, pchName, pData);
+            Write("SteamAPI_ISteamUserStats_GetUserStatInt32");
+            return SteamEmulator.SteamUserStats.GetUserStatInt32(steamIDUser, pchName, pData);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUserStats_GetUserStatFloat(IntPtr _, ulong steamIDUser, string pchName, IntPtr pData)
+        {
+            Write("SteamAPI_ISteamUserStats_GetUserStatFloat");
+            return SteamEmulator.SteamUserStats.GetUserStatFloat(steamIDUser, pchName, pData);
         }
 
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUserStats_GetUserAchievement(IntPtr _, ulong steamIDUser, string pchName, bool pbAchieved)
+        public static bool SteamAPI_ISteamUserStats_GetUserAchievement(IntPtr _, ulong steamIDUser, string pchName, IntPtr pbAchieved)
         {
             Write("SteamAPI_ISteamUserStats_GetUserAchievement");
             return SteamEmulator.SteamUserStats.GetUserAchievement(steamIDUser, pchName, pbAchieved);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUserStats_GetUserAchievementAndUnlockTime(IntPtr _, ulong steamIDUser, string pchName, bool pbAchieved, uint punUnlockTime)
+        public static bool SteamAPI_ISteamUserStats_GetUserAchievementAndUnlockTime(IntPtr _, ulong steamIDUser, string pchName, IntPtr pbAchieved, IntPtr punUnlockTime)
         {
             Write("SteamAPI_ISteamUserStats_GetUserAchievementAndUnlockTime");
             return SteamEmulator.SteamUserStats.GetUserAchievementAndUnlockTime(steamIDUser, pchName, pbAchieved, punUnlockTime);
@@ -214,10 +235,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static SteamAPICall_t SteamAPI_ISteamUserStats_UploadLeaderboardScore(IntPtr _, ulong hSteamLeaderboard, int eLeaderboardUploadScoreMethod, uint nScore, IntPtr pScoreDetails, int cScoreDetailsCount)
+        public static SteamAPICall_t SteamAPI_ISteamUserStats_UploadLeaderboardScore(IntPtr _, ulong hSteamLeaderboard, int eLeaderboardUploadScoreMethod, int nScore, IntPtr pScoreDetails, int cScoreDetailsCount)
         {
             Write("SteamAPI_ISteamUserStats_UploadLeaderboardScore");
-            return SteamEmulator.SteamUserStats.UploadLeaderboardScore(hSteamLeaderboard, eLeaderboardUploadScoreMethod, nScore, pScoreDetails, cScoreDetailsCount);
+            return SteamEmulator.SteamUserStats.UploadLeaderboardScore(hSteamLeaderboard, eLeaderboardUploadScoreMethod, unchecked((uint)nScore), pScoreDetails, cScoreDetailsCount);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -242,21 +263,21 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamUserStats_GetMostAchievedAchievementInfo(IntPtr _, string pchName, uint unNameBufLen, uint pflPercent, bool pbAchieved)
+        public static int SteamAPI_ISteamUserStats_GetMostAchievedAchievementInfo(IntPtr _, IntPtr pchName, uint unNameBufLen, IntPtr pflPercent, IntPtr pbAchieved)
         {
             Write("SteamAPI_ISteamUserStats_GetMostAchievedAchievementInfo");
             return SteamEmulator.SteamUserStats.GetMostAchievedAchievementInfo(pchName, unNameBufLen, pflPercent, pbAchieved);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamUserStats_GetNextMostAchievedAchievementInfo(IntPtr _, int iIteratorPrevious, string pchName, uint unNameBufLen, uint pflPercent, bool pbAchieved)
+        public static int SteamAPI_ISteamUserStats_GetNextMostAchievedAchievementInfo(IntPtr _, int iIteratorPrevious, IntPtr pchName, uint unNameBufLen, IntPtr pflPercent, IntPtr pbAchieved)
         {
             Write("SteamAPI_ISteamUserStats_GetNextMostAchievedAchievementInfo");
             return SteamEmulator.SteamUserStats.GetNextMostAchievedAchievementInfo(iIteratorPrevious, pchName, unNameBufLen, pflPercent, pbAchieved);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUserStats_GetAchievementAchievedPercent(IntPtr _, string pchName, uint pflPercent)
+        public static bool SteamAPI_ISteamUserStats_GetAchievementAchievedPercent(IntPtr _, string pchName, IntPtr pflPercent)
         {
             Write("SteamAPI_ISteamUserStats_GetAchievementAchievedPercent");
             return SteamEmulator.SteamUserStats.GetAchievementAchievedPercent(pchName, pflPercent);
@@ -270,24 +291,45 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUserStats_GetGlobalStat(IntPtr _, string pchStatName, uint pData)
+        public static bool SteamAPI_ISteamUserStats_GetGlobalStatInt64(IntPtr _, string pchStatName, IntPtr pData)
         {
-            Write("SteamAPI_ISteamUserStats_GetGlobalStat");
-            return SteamEmulator.SteamUserStats.GetGlobalStat(pchStatName, pData);
+            Write("SteamAPI_ISteamUserStats_GetGlobalStatInt64");
+            return SteamEmulator.SteamUserStats.GetGlobalStatInt64(pchStatName, pData);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static uint SteamAPI_ISteamUserStats_GetGlobalStatHistory(IntPtr _, string pchStatName, uint pData, uint cubData)
+        public static bool SteamAPI_ISteamUserStats_GetGlobalStatDouble(IntPtr _, string pchStatName, IntPtr pData)
         {
-            Write("SteamAPI_ISteamUserStats_GetGlobalStatHistory");
-            return SteamEmulator.SteamUserStats.GetGlobalStatHistory(pchStatName, pData, cubData);
+            Write("SteamAPI_ISteamUserStats_GetGlobalStatDouble");
+            return SteamEmulator.SteamUserStats.GetGlobalStatDouble(pchStatName, pData);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUserStats_GetAchievementProgressLimits(IntPtr _, string pchName, uint pnMinProgress, uint pnMaxProgress)
+        public static int SteamAPI_ISteamUserStats_GetGlobalStatHistoryInt64(IntPtr _, string pchStatName, IntPtr pData, uint cubData)
         {
-            Write("SteamAPI_ISteamUserStats_GetAchievementProgressLimits");
-            return SteamEmulator.SteamUserStats.GetAchievementProgressLimits(pchName, pnMinProgress, pnMaxProgress);
+            Write("SteamAPI_ISteamUserStats_GetGlobalStatHistoryInt64");
+            return SteamEmulator.SteamUserStats.GetGlobalStatHistoryInt64(pchStatName, pData, cubData);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_ISteamUserStats_GetGlobalStatHistoryDouble(IntPtr _, string pchStatName, IntPtr pData, uint cubData)
+        {
+            Write("SteamAPI_ISteamUserStats_GetGlobalStatHistoryDouble");
+            return SteamEmulator.SteamUserStats.GetGlobalStatHistoryDouble(pchStatName, pData, cubData);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUserStats_GetAchievementProgressLimitsInt32(IntPtr _, string pchName, IntPtr pnMinProgress, IntPtr pnMaxProgress)
+        {
+            Write("SteamAPI_ISteamUserStats_GetAchievementProgressLimitsInt32");
+            return SteamEmulator.SteamUserStats.GetAchievementProgressLimitsInt32(pchName, pnMinProgress, pnMaxProgress);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUserStats_GetAchievementProgressLimitsFloat(IntPtr _, string pchName, IntPtr pfMinProgress, IntPtr pfMaxProgress)
+        {
+            Write("SteamAPI_ISteamUserStats_GetAchievementProgressLimitsFloat");
+            return SteamEmulator.SteamUserStats.GetAchievementProgressLimitsFloat(pchName, pfMinProgress, pfMaxProgress);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -303,4 +345,3 @@ namespace SKYNET.Steamworks.Exported
         }
     }
 }
-

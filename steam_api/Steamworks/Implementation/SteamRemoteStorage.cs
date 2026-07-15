@@ -530,9 +530,45 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
+        public bool GetUGCDownloadProgress(UGCHandle_t hContent, IntPtr pnBytesDownloaded, IntPtr pnBytesExpected)
+        {
+            Write("GetUGCDownloadProgress");
+            if (pnBytesDownloaded != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(pnBytesDownloaded, 0);
+            }
+            if (pnBytesExpected != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(pnBytesExpected, 0);
+            }
+            return false;
+        }
+
         public bool GetUGCDetails(UGCHandle_t hContent, uint pnAppID, string ppchName, int pnFileSizeInBytes, ulong pSteamIDOwner)
         {
             Write("GetUGCDetails");
+            return false;
+        }
+
+        public bool GetUGCDetails(UGCHandle_t hContent, IntPtr pnAppID, IntPtr ppchName, IntPtr pnFileSizeInBytes, IntPtr pSteamIDOwner)
+        {
+            Write("GetUGCDetails");
+            if (pnAppID != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(pnAppID, unchecked((int)SteamEmulator.AppID));
+            }
+            if (ppchName != IntPtr.Zero)
+            {
+                Marshal.WriteIntPtr(ppchName, NativeStringCache.ToUtf8Ptr(string.Empty));
+            }
+            if (pnFileSizeInBytes != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(pnFileSizeInBytes, 0);
+            }
+            if (pSteamIDOwner != IntPtr.Zero)
+            {
+                Marshal.WriteInt64(pSteamIDOwner, unchecked((long)(ulong)SteamEmulator.SteamID));
+            }
             return false;
         }
 
@@ -581,6 +617,36 @@ namespace SKYNET.Steamworks.Implementation
         public void GetFileListFromServer()
         {
             Write("GetFileListFromServer");
+        }
+
+        public bool FileFetch(string pchFile)
+        {
+            Write("FileFetch");
+            return false;
+        }
+
+        public bool FilePersist(string pchFile)
+        {
+            Write("FilePersist");
+            return false;
+        }
+
+        public bool SynchronizeToClient()
+        {
+            Write("SynchronizeToClient");
+            return false;
+        }
+
+        public bool SynchronizeToServer()
+        {
+            Write("SynchronizeToServer");
+            return false;
+        }
+
+        public bool ResetFileRequestState()
+        {
+            Write("ResetFileRequestState");
+            return false;
         }
 
         public bool UpdatePublishedFileTitle(PublishedFileUpdateHandle_t updateHandle, string pchTitle)
@@ -740,6 +806,20 @@ namespace SKYNET.Steamworks.Implementation
             return "";
         }
 
+        public IntPtr GetLocalFileChange(int iFile, IntPtr pEChangeType, IntPtr pEFilePathType)
+        {
+            Write("GetLocalFileChange");
+            if (pEChangeType != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(pEChangeType, 0);
+            }
+            if (pEFilePathType != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(pEFilePathType, 0);
+            }
+            return NativeStringCache.ToUtf8Ptr(string.Empty);
+        }
+
         public bool BeginFileWriteBatch()
         {
             Write("BeginFileWriteBatch");
@@ -896,8 +976,5 @@ namespace SKYNET.Steamworks.Implementation
         }
     }
 }
-
-
-
 
 

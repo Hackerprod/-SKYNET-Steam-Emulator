@@ -8,7 +8,7 @@ using SKYNET.Steamworks.Interfaces;
 using SteamAPICall_t = System.UInt64;
 using HSteamUser = System.UInt32;
 using HAuthTicket = System.UInt32;
-using CGameID = System.UInt32;
+using CGameID = System.UInt64;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -282,10 +282,20 @@ namespace SKYNET.Steamworks.Implementation
             return k_uAPICallInvalid;
         }
 
-        public bool GetEncryptedAppTicket(IntPtr pTicket, int cbMaxTicket, uint pcbTicket)
+        public bool GetEncryptedAppTicket(IntPtr pTicket, int cbMaxTicket, IntPtr pcbTicket)
         {
             Write("GetEncryptedAppTicket");
+            if (pcbTicket != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(pcbTicket, 0);
+            }
             return false;
+        }
+
+        public bool GetEncryptedAppTicket(IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
+        {
+            pcbTicket = 0;
+            return GetEncryptedAppTicket(pTicket, cbMaxTicket, IntPtr.Zero);
         }
 
         public int GetGameBadgeLevel(int nSeries, bool bFoil)

@@ -44,10 +44,10 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public IntPtr GetSessionConnectionInfo(IntPtr identityRemote, IntPtr pConnectionInfo, IntPtr pQuickStatus)
+        public int GetSessionConnectionInfo(IntPtr identityRemote, IntPtr pConnectionInfo, IntPtr pQuickStatus)
         {
             Write("GetSessionConnectionInfo");
-            return IntPtr.Zero;
+            return 0;
         }
     }
 }

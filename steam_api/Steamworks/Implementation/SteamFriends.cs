@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -45,7 +46,6 @@ namespace SKYNET.Steamworks.Implementation
             Avatars = new ConcurrentDictionary<ulong, ImageAvatar>();
             AvatarsByHandle = new ConcurrentDictionary<int, ImageAvatar>();
             ImageIndex = 10;
-            EnsureDefaultAvatar();
         }
 
         public void Initialize()
@@ -140,22 +140,22 @@ namespace SKYNET.Steamworks.Implementation
                     break;
                 case "friendadd":
                     type = OverlayType.FriendAdd;
-                    SkyNetWorkQueue.Enqueue("Send friend request", () => SkyNetApiClient.SendFriendRequest(steamID),
+                    WorkQueue.Enqueue("Send friend request", () => SkyNetApiClient.SendFriendRequest(steamID),
                         "friends:request:" + steamID);
                     break;
                 case "friendremove":
                     type = OverlayType.FriendRemove;
-                    SkyNetWorkQueue.Enqueue("Remove friend or request", () => SkyNetApiClient.RemoveFriendOrRequest(steamID),
+                    WorkQueue.Enqueue("Remove friend or request", () => SkyNetApiClient.RemoveFriendOrRequest(steamID),
                         "friends:remove:" + steamID);
                     break;
                 case "friendrequestaccept":
                     type = OverlayType.FriendRequestAccept;
-                    SkyNetWorkQueue.Enqueue("Accept friend request", () => SkyNetApiClient.AcceptFriendRequest(steamID),
+                    WorkQueue.Enqueue("Accept friend request", () => SkyNetApiClient.AcceptFriendRequest(steamID),
                         "friends:accept:" + steamID);
                     break;
                 case "friendrequestignore":
                     type = OverlayType.FriendRequestIgnore;
-                    SkyNetWorkQueue.Enqueue("Ignore friend request", () => SkyNetApiClient.RemoveFriendOrRequest(steamID),
+                    WorkQueue.Enqueue("Ignore friend request", () => SkyNetApiClient.RemoveFriendOrRequest(steamID),
                         "friends:ignore:" + steamID);
                     break;
                 default:
@@ -245,11 +245,21 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
+        public int GetClanChatMessage(ulong steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, IntPtr peChatEntryType, IntPtr psteamidChatter)
+        {
+            Write($"GetClanChatMessage {steamIDClanChat}");
+            if (peChatEntryType != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(peChatEntryType, (int)EChatEntryType.ChatMsg);
+            }
+            NativeSteamId.Write(psteamidChatter, CSteamID.Invalid);
+            return 0;
+        }
+
         public int GetClanChatMessage(ulong steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, int peChatEntryType, ref ulong[] psteamidChatter)
         {
-            //psteamidChatter = 0;
-            Write($"GetClanChatMessage {steamIDClanChat}");
-            return 0;
+            peChatEntryType = (int)EChatEntryType.ChatMsg;
+            return GetClanChatMessage(steamIDClanChat, iMessage, prgchText, cchTextMax, IntPtr.Zero, IntPtr.Zero);
         }
 
         public int GetClanCount()
@@ -411,11 +421,19 @@ namespace SKYNET.Steamworks.Implementation
             return Result;
         }
 
+        public int GetFriendMessage(ulong steamIDFriend, int iMessageID, IntPtr pvData, int cubData, IntPtr peChatEntryType)
+        {
+            Write($"GetFriendMessage {steamIDFriend}");
+            if (peChatEntryType != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(peChatEntryType, (int)EChatEntryType.ChatMsg);
+            }
+            return 0;
+        }
+
         public int GetFriendMessage(ulong steamIDFriend, int iMessageID, IntPtr pvData, int cubData, int peChatEntryType)
         {
-            Write($"GetFriendMessage {steamIDFriend} {(EChatEntryType)peChatEntryType}");
-            peChatEntryType = (int)EChatEntryType.ChatMsg;
-            return 0;
+            return GetFriendMessage(steamIDFriend, iMessageID, pvData, cubData, IntPtr.Zero);
         }
         public string GetFriendPersonaName(ulong steamIDFriend)
         {
@@ -558,6 +576,20 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"GetFriendsGroupMembersCount {friendsGroupID}");
             return 0;
+        }
+
+        public void GetFriendsGroupMembersList(FriendsGroupID_t friendsGroupID, IntPtr pOutSteamIDMembers, int nMembersCount)
+        {
+            Write($"GetFriendsGroupMembersList {friendsGroupID}");
+            if (pOutSteamIDMembers == IntPtr.Zero || nMembersCount <= 0)
+            {
+                return;
+            }
+
+            for (int i = 0; i < nMembersCount; i++)
+            {
+                NativeSteamId.Write(IntPtr.Add(pOutSteamIDMembers, i * sizeof(ulong)), CSteamID.Invalid);
+            }
         }
 
         public void GetFriendsGroupMembersList(FriendsGroupID_t friendsGroupID, ref ulong[] pOutSteamIDMembers, int nMembersCount)
@@ -795,7 +827,7 @@ namespace SKYNET.Steamworks.Implementation
             SteamEmulator.PersonaName = pchPersonaName;
             if (SkyNetApiClient.IsEnabled)
             {
-                SkyNetWorkQueue.Enqueue("Update persona name", () =>
+                WorkQueue.Enqueue("Update persona name", () =>
                 {
                     if (!SkyNetApiClient.UpdatePersonaName(pchPersonaName))
                     {
@@ -876,7 +908,7 @@ namespace SKYNET.Steamworks.Implementation
             Write($"SetRichPresence (Key = {pchKey}, Value = {pchValue})");
             if (SkyNetApiClient.IsEnabled)
             {
-                SkyNetWorkQueue.Enqueue("SetRichPresence", () => SkyNetApiClient.SetRichPresence(pchKey, pchValue),
+                WorkQueue.Enqueue("SetRichPresence", () => SkyNetApiClient.SetRichPresence(pchKey, pchValue),
                     "presence:" + (pchKey ?? string.Empty));
             }
             return true;
@@ -908,7 +940,7 @@ namespace SKYNET.Steamworks.Implementation
             if (SkyNetApiClient.IsEnabled)
             {
                 SkyNetApiClient.QueueFriendsRefresh();
-                return SkyNetStateCache.GetFriends().FindAll(friend => MatchesFriendFlags(friend, friendFlags));
+                return StateCache.GetFriends().FindAll(friend => MatchesFriendFlags(friend, friendFlags));
             }
 
             return UserManager.GetFriends().FindAll(friend => MatchesFriendFlags(friend, friendFlags));
@@ -958,7 +990,7 @@ namespace SKYNET.Steamworks.Implementation
                 if (SkyNetApiClient.IsEnabled)
                 {
                     SkyNetApiClient.QueueSelfRefresh();
-                    if (SkyNetStateCache.TryGetSelf(out var self))
+                    if (StateCache.TryGetSelf(out var self))
                     {
                         return self;
                     }
@@ -975,7 +1007,7 @@ namespace SKYNET.Steamworks.Implementation
 
             if (SkyNetApiClient.IsEnabled)
             {
-                if (SkyNetStateCache.TryGetFriend(steamID, out var friend))
+                if (StateCache.TryGetFriend(steamID, out var friend))
                 {
                     return friend;
                 }

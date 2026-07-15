@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
+using SKYNET.Helpers;
+
 using ControllerHandle_t = System.UInt64;
 using ControllerActionSetHandle_t = System.UInt64;
 using ControllerDigitalActionHandle_t = System.UInt64;
@@ -47,10 +49,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamController_GetActionOriginFromXboxOrigin_(IntPtr _, ControllerHandle_t controllerHandle, int eOrigin)
+        public static int SteamAPI_ISteamController_GetActionOriginFromXboxOrigin(IntPtr _, ControllerHandle_t controllerHandle, int eOrigin)
         {
-            Write("SteamAPI_ISteamController_GetActionOriginFromXboxOrigin_");
-            return SteamEmulator.SteamController.GetActionOriginFromXboxOrigin_(controllerHandle, eOrigin);
+            Write("SteamAPI_ISteamController_GetActionOriginFromXboxOrigin");
+            return SteamEmulator.SteamController.GetActionOriginFromXboxOrigin(controllerHandle, eOrigin);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -61,14 +63,14 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamController_GetActiveActionSetLayers(IntPtr _, ControllerHandle_t controllerHandle, ControllerActionSetHandle_t handlesOut)
+        public static int SteamAPI_ISteamController_GetActiveActionSetLayers(IntPtr _, ControllerHandle_t controllerHandle, IntPtr handlesOut)
         {
             Write("SteamAPI_ISteamController_GetActiveActionSetLayers");
             return SteamEmulator.SteamController.GetActiveActionSetLayers(controllerHandle, handlesOut);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr SteamAPI_ISteamController_GetAnalogActionData(IntPtr _, uint controllerHandle, uint analogActionHandle)
+        public static ControllerAnalogActionData_t SteamAPI_ISteamController_GetAnalogActionData(IntPtr _, ControllerHandle_t controllerHandle, ControllerAnalogActionHandle_t analogActionHandle)
         {
             Write("SteamAPI_ISteamController_GetAnalogActionData");
             return SteamEmulator.SteamController.GetAnalogActionData(controllerHandle, analogActionHandle);
@@ -82,21 +84,21 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamController_GetAnalogActionOrigins(IntPtr _, ControllerHandle_t controllerHandle, ControllerActionSetHandle_t actionSetHandle, uint analogActionHandle, int originsOut)
+        public static int SteamAPI_ISteamController_GetAnalogActionOrigins(IntPtr _, ControllerHandle_t controllerHandle, ControllerActionSetHandle_t actionSetHandle, ControllerAnalogActionHandle_t analogActionHandle, IntPtr originsOut)
         {
             Write("SteamAPI_ISteamController_GetAnalogActionOrigins");
             return SteamEmulator.SteamController.GetAnalogActionOrigins(controllerHandle, actionSetHandle, analogActionHandle, originsOut);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamController_GetConnectedControllers(IntPtr _, ControllerHandle_t handlesOut)
+        public static int SteamAPI_ISteamController_GetConnectedControllers(IntPtr _, IntPtr handlesOut)
         {
             Write("SteamAPI_ISteamController_GetConnectedControllers");
             return SteamEmulator.SteamController.GetConnectedControllers(handlesOut);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamController_GetControllerBindingRevision(IntPtr _, ControllerHandle_t controllerHandle, int pMajor, int pMinor)
+        public static bool SteamAPI_ISteamController_GetControllerBindingRevision(IntPtr _, ControllerHandle_t controllerHandle, IntPtr pMajor, IntPtr pMinor)
         {
             Write("SteamAPI_ISteamController_GetControllerBindingRevision");
             return SteamEmulator.SteamController.GetControllerBindingRevision(controllerHandle, pMajor, pMinor);
@@ -117,7 +119,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr SteamAPI_ISteamController_GetDigitalActionData(IntPtr _, ControllerHandle_t controllerHandle, ControllerDigitalActionHandle_t digitalActionHandle)
+        public static ControllerDigitalActionData_t SteamAPI_ISteamController_GetDigitalActionData(IntPtr _, ControllerHandle_t controllerHandle, ControllerDigitalActionHandle_t digitalActionHandle)
         {
             Write("SteamAPI_ISteamController_GetDigitalActionData");
             return SteamEmulator.SteamController.GetDigitalActionData(controllerHandle, digitalActionHandle);
@@ -131,7 +133,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamController_GetDigitalActionOrigins(IntPtr _, ControllerHandle_t controllerHandle, ControllerActionSetHandle_t actionSetHandle, ControllerDigitalActionHandle_t digitalActionHandle, int originsOut)
+        public static int SteamAPI_ISteamController_GetDigitalActionOrigins(IntPtr _, ControllerHandle_t controllerHandle, ControllerActionSetHandle_t actionSetHandle, ControllerDigitalActionHandle_t digitalActionHandle, IntPtr originsOut)
         {
             Write("SteamAPI_ISteamController_GetDigitalActionOrigins");
             return SteamEmulator.SteamController.GetDigitalActionOrigins(controllerHandle, actionSetHandle, digitalActionHandle, originsOut);
@@ -145,17 +147,17 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_ISteamController_GetGlyphForActionOrigin(IntPtr _, int eOrigin)
+        public static IntPtr SteamAPI_ISteamController_GetGlyphForActionOrigin(IntPtr _, int eOrigin)
         {
             Write("SteamAPI_ISteamController_GetGlyphForActionOrigin");
-            return SteamEmulator.SteamController.GetGlyphForActionOrigin(eOrigin);
+            return NativeStringCache.ToUtf8Ptr(SteamEmulator.SteamController.GetGlyphForActionOrigin(eOrigin));
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_ISteamController_GetGlyphForXboxOrigin(IntPtr _, int eOrigin)
+        public static IntPtr SteamAPI_ISteamController_GetGlyphForXboxOrigin(IntPtr _, int eOrigin)
         {
             Write("SteamAPI_ISteamController_GetGlyphForXboxOrigin");
-            return SteamEmulator.SteamController.GetGlyphForXboxOrigin(eOrigin);
+            return NativeStringCache.ToUtf8Ptr(SteamEmulator.SteamController.GetGlyphForXboxOrigin(eOrigin));
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -166,24 +168,24 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr SteamAPI_ISteamController_GetMotionData(IntPtr _, ControllerHandle_t controllerHandle)
+        public static ControllerMotionData_t SteamAPI_ISteamController_GetMotionData(IntPtr _, ControllerHandle_t controllerHandle)
         {
             Write("SteamAPI_ISteamController_GetMotionData");
             return SteamEmulator.SteamController.GetMotionData(controllerHandle);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_ISteamController_GetStringForActionOrigin(IntPtr _, int eOrigin)
+        public static IntPtr SteamAPI_ISteamController_GetStringForActionOrigin(IntPtr _, int eOrigin)
         {
             Write("SteamAPI_ISteamController_GetStringForActionOrigin");
-            return SteamEmulator.SteamController.GetStringForActionOrigin(eOrigin);
+            return NativeStringCache.ToUtf8Ptr(SteamEmulator.SteamController.GetStringForActionOrigin(eOrigin));
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_ISteamController_GetStringForXboxOrigin(IntPtr _, int eOrigin)
+        public static IntPtr SteamAPI_ISteamController_GetStringForXboxOrigin(IntPtr _, int eOrigin)
         {
             Write("SteamAPI_ISteamController_GetStringForXboxOrigin");
-            return SteamEmulator.SteamController.GetStringForXboxOrigin(eOrigin);
+            return NativeStringCache.ToUtf8Ptr(SteamEmulator.SteamController.GetStringForXboxOrigin(eOrigin));
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -201,7 +203,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_ISteamController_SetLEDColor(IntPtr _, ControllerHandle_t controllerHandle, int nColorR, int nColorG, int nColorB, int nFlags)
+        public static void SteamAPI_ISteamController_SetLEDColor(IntPtr _, ControllerHandle_t controllerHandle, byte nColorR, byte nColorG, byte nColorB, uint nFlags)
         {
             Write("SteamAPI_ISteamController_SetLEDColor");
             SteamEmulator.SteamController.SetLEDColor(controllerHandle, nColorR, nColorG, nColorB, nFlags);
@@ -236,21 +238,21 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_ISteamController_TriggerHapticPulse(IntPtr _, ControllerHandle_t controllerHandle, int eTargetPad, short usDurationMicroSec)
+        public static void SteamAPI_ISteamController_TriggerHapticPulse(IntPtr _, ControllerHandle_t controllerHandle, int eTargetPad, ushort usDurationMicroSec)
         {
             Write("SteamAPI_ISteamController_TriggerHapticPulse");
             SteamEmulator.SteamController.TriggerHapticPulse(controllerHandle, eTargetPad, usDurationMicroSec);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_ISteamController_TriggerRepeatedHapticPulse(IntPtr _, ControllerHandle_t controllerHandle, short eTargetPad, short usDurationMicroSec, short usOffMicroSec, short unRepeat, int nFlags)
+        public static void SteamAPI_ISteamController_TriggerRepeatedHapticPulse(IntPtr _, ControllerHandle_t controllerHandle, int eTargetPad, ushort usDurationMicroSec, ushort usOffMicroSec, ushort unRepeat, uint nFlags)
         {
             Write("SteamAPI_ISteamController_TriggerRepeatedHapticPulse");
             SteamEmulator.SteamController.TriggerRepeatedHapticPulse(controllerHandle, eTargetPad, usDurationMicroSec, usOffMicroSec, unRepeat, nFlags);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_ISteamController_TriggerVibration(IntPtr _, ControllerHandle_t controllerHandle, short usLeftSpeed, short usRightSpeed)
+        public static void SteamAPI_ISteamController_TriggerVibration(IntPtr _, ControllerHandle_t controllerHandle, ushort usLeftSpeed, ushort usRightSpeed)
         {
             Write("SteamAPI_ISteamController_TriggerVibration");
             SteamEmulator.SteamController.TriggerVibration(controllerHandle, usLeftSpeed, usRightSpeed);

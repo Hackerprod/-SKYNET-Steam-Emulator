@@ -20,6 +20,7 @@ using SKYNET.Steamworks.Types;
 using SKYNET.Types;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using AppID = System.UInt32;
@@ -65,6 +66,10 @@ public class SteamEmulator
     // Enables SKYNET-issued SDR certificates and the native CA patch. Keep this
     // disabled for unauthenticated LAN transport unless secure SDR is required.
     public static bool SecureNetworking;
+    // Controls the SteamGameServer VAC-secure policy separately from SDR certs.
+    // SecureNetworking can be true while the game server is advertised as
+    // non-VAC-secure, which is required when Valve VAC is not present.
+    public static bool VacSecureGameServer;
     public static string ServerUrl;
     public static string AccessToken;
     public static string RefreshToken;
@@ -142,6 +147,7 @@ public class SteamEmulator
         ISteamHTTP = true;
         UseServerApi = true;
         SecureNetworking = false;
+        VacSecureGameServer = false;
         ServerUrl = "http://127.0.0.1:27080/";
         AccessToken = string.Empty;
         RefreshToken = string.Empty;
@@ -167,7 +173,14 @@ public class SteamEmulator
             Log.Initialize();
 
             Write("Initializing Steam emulator");
+            Write($"Process PID={Process.GetCurrentProcess().Id} Role={Environment.GetEnvironmentVariable("SKYNET_PROCESS_ROLE") ?? "client"} CommandLine={Environment.CommandLine}");
             Write($"Networking security mode: {(SecureNetworking ? "secure SDR certificate" : "insecure LAN (no SDR certificate)")}");
+
+            if (SecureNetworking)
+            {
+                bool diskPatched = SdrCertPatcher.EnsureDiskPatched();
+                Write($"SDR disk CA patch ready: {diskPatched}");
+            }
 
             //UserManager.Initialize();
             //NetworkManager.Initialize();
@@ -179,87 +192,86 @@ public class SteamEmulator
             SkyNetApiClient.Initialize();
             Write("SkyNetApiClient initialized");
 
-            // Note: the SDR cert patcher is started lazily from the networking
-            // interface (GetCertAsync/GetNetworkConfigJSON), not here. Spawning a
-            // thread during DLL init runs under the loader lock and deadlocks.
+            // Memory patching is disabled. Disk patching is checked before the
+            // networking interfaces ask for SDR config or a certificate.
 
             #region Interface Initialization
 
             // Client Interfaces
 
             Write("Creating client interfaces");
-            SteamClient = new SteamClient(); 
+            SteamClient = CreateInterface("SteamClient", () => new SteamClient());
 
-            SteamUser = new SKYNET.Steamworks.Implementation.SteamUser(); 
+            SteamUser = CreateInterface("SteamUser", () => new SKYNET.Steamworks.Implementation.SteamUser());
 
-            SteamFriends = new SteamFriends(); 
+            SteamFriends = CreateInterface("SteamFriends", () => new SteamFriends());
 
-            SteamUtils = new SteamUtils(); 
+            SteamUtils = CreateInterface("SteamUtils", () => new SteamUtils());
 
-            SteamMatchmaking = new SteamMatchmaking(); 
+            SteamMatchmaking = CreateInterface("SteamMatchmaking", () => new SteamMatchmaking());
 
-            SteamMatchMakingServers = new SteamMatchMakingServers();
+            SteamMatchMakingServers = CreateInterface("SteamMatchMakingServers", () => new SteamMatchMakingServers());
 
-            SteamUserStats = new SteamUserStats();
+            SteamUserStats = CreateInterface("SteamUserStats", () => new SteamUserStats());
 
-            SteamApps = new SteamApps();
+            SteamApps = CreateInterface("SteamApps", () => new SteamApps());
 
-            SteamNetworking = new SteamNetworking();
+            SteamNetworking = CreateInterface("SteamNetworking", () => new SteamNetworking());
 
-            SteamRemoteStorage = new SteamRemoteStorage();
+            SteamRemoteStorage = CreateInterface("SteamRemoteStorage", () => new SteamRemoteStorage());
 
-            SteamScreenshots = new SteamScreenshots();
+            SteamScreenshots = CreateInterface("SteamScreenshots", () => new SteamScreenshots());
 
-            SteamHTTP = new SteamHTTP();
+            SteamHTTP = CreateInterface("SteamHTTP", () => new SteamHTTP());
 
-            SteamController = new SteamController();
+            SteamController = CreateInterface("SteamController", () => new SteamController());
 
-            SteamUGC = new SteamUGC();
+            SteamUGC = CreateInterface("SteamUGC", () => new SteamUGC());
 
-            SteamAppList = new SteamAppList();
+            SteamAppList = CreateInterface("SteamAppList", () => new SteamAppList());
 
-            SteamMusic = new SteamMusic();
+            SteamMusic = CreateInterface("SteamMusic", () => new SteamMusic());
 
-            SteamMusicRemote = new SteamMusicRemote();
+            SteamMusicRemote = CreateInterface("SteamMusicRemote", () => new SteamMusicRemote());
 
-            SteamHTMLSurface = new SteamHTMLSurface();
+            SteamHTMLSurface = CreateInterface("SteamHTMLSurface", () => new SteamHTMLSurface());
 
-            SteamInventory = new SteamInventory();
+            SteamInventory = CreateInterface("SteamInventory", () => new SteamInventory());
 
-            SteamVideo = new SteamVideo();
+            SteamVideo = CreateInterface("SteamVideo", () => new SteamVideo());
 
-            SteamParentalSettings = new SteamParentalSettings();
+            SteamParentalSettings = CreateInterface("SteamParentalSettings", () => new SteamParentalSettings());
 
-            SteamNetworkingSockets = new SteamNetworkingSockets();
+            SteamNetworkingSockets = CreateInterface("SteamNetworkingSockets", () => new SteamNetworkingSockets());
 
-            SteamNetworkingSocketsSerialized = new SteamNetworkingSocketsSerialized();
+            SteamNetworkingSocketsSerialized = CreateInterface("SteamNetworkingSocketsSerialized", () => new SteamNetworkingSocketsSerialized());
 
-            SteamNetworkingMessages = new SteamNetworkingMessages();
+            SteamNetworkingMessages = CreateInterface("SteamNetworkingMessages", () => new SteamNetworkingMessages());
 
-            SteamGameCoordinator = new SteamGameCoordinator();
+            SteamGameCoordinator = CreateInterface("SteamGameCoordinator", () => new SteamGameCoordinator());
 
-            SteamNetworkingUtils = new SteamNetworkingUtils();
+            SteamNetworkingUtils = CreateInterface("SteamNetworkingUtils", () => new SteamNetworkingUtils());
 
-            SteamGameSearch = new SteamGameSearch();
+            SteamGameSearch = CreateInterface("SteamGameSearch", () => new SteamGameSearch());
 
-            SteamParties = new SteamParties();
+            SteamParties = CreateInterface("SteamParties", () => new SteamParties());
 
-            SteamRemotePlay = new SteamRemotePlay();
+            SteamRemotePlay = CreateInterface("SteamRemotePlay", () => new SteamRemotePlay());
 
-            SteamTimeline = new SteamTimeline();
+            SteamTimeline = CreateInterface("SteamTimeline", () => new SteamTimeline());
 
-            SteamTV = new SteamTV();
+            SteamTV = CreateInterface("SteamTV", () => new SteamTV());
 
-            SteamInput = new SteamInput();
+            SteamInput = CreateInterface("SteamInput", () => new SteamInput());
 
             // Server Interfaces
 
             Write("Creating server interfaces");
-            SteamGameServer = new SteamGameServer();
+            SteamGameServer = CreateInterface("SteamGameServer", () => new SteamGameServer());
 
-            SteamGameServerStats = new SteamGameServerStats();
+            SteamGameServerStats = CreateInterface("SteamGameServerStats", () => new SteamGameServerStats());
 
-            SteamMasterServerUpdater = new SteamMasterServerUpdater();
+            SteamMasterServerUpdater = CreateInterface("SteamMasterServerUpdater", () => new SteamMasterServerUpdater());
 
             #endregion
             
@@ -292,6 +304,22 @@ public class SteamEmulator
         }
         catch 
         {
+        }
+    }
+
+    private static T CreateInterface<T>(string name, Func<T> factory)
+    {
+        Write($"Creating {name}");
+        try
+        {
+            var instance = factory();
+            Write($"{name} created");
+            return instance;
+        }
+        catch (Exception ex)
+        {
+            Write($"{name} creation failed: {ex}");
+            throw;
         }
     }
 
@@ -408,6 +436,27 @@ public class SteamEmulator
             case "GetServerRealTime":
             case "IsMessageAvailable = False":
                 return true;
+        }
+
+        if (sender == "CallbackManager")
+        {
+            if (text.StartsWith("Added Callback 304 ", StringComparison.Ordinal) ||
+                text.StartsWith("Registered callback 304 ", StringComparison.Ordinal) ||
+                text.StartsWith("Added Callback 3406 ", StringComparison.Ordinal) ||
+                text.StartsWith("Registered callback 3406 ", StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+
+        if (sender == "SteamAPI")
+        {
+            if ((text.Contains("  3406 ") && text.Contains("DownloadItemResult")) ||
+                text == "SteamAPI_UnregisterCallback DownloadItemResult OK" ||
+                text == "SteamAPI_UnregisterCallback PersonaStateChange OK")
+            {
+                return true;
+            }
         }
 
         return text.Contains("GetPersonaState  = k_EPersonaStateOnline");

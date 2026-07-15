@@ -1,15 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Threading;
 
 namespace SKYNET.Managers
 {
     /// <summary>
     /// Patches the Steam Datagram (SDR) certificate authority public key inside
-    /// steamnetworkingsockets.dll, so certs signed by the emulator's CA are
-    /// accepted. The disk patch runs before the native DLL is loaded; the memory
-    /// patcher remains as a fallback when the module is already resident.
+    /// steamnetworkingsockets.dll on disk, so certs signed by the emulator's CA
+    /// are accepted. Memory patching is intentionally disabled; this mirrors the
+    /// old SKYNET NetworkingPatcher flow and lets us isolate whether disk patching
+    /// is enough for the current Dota build.
     ///
     /// The search keys are Valve's CA and the older SKYNET CA seen in existing
     /// patched installs. The replacement key is the emulator CA used by the
@@ -57,19 +56,9 @@ namespace SKYNET.Managers
         private const string StaleSkynetCaPublicKeyHex =
             "AE8DA5FECF4DDE11247217C047B8F469984982DC84E4562D0BF4586133988C84";
 
-        private static int Started;
-        private static int PatchSucceeded;
-        private static readonly ManualResetEventSlim PatchFinished = new ManualResetEventSlim(false);
-
         public static void Start()
         {
-            if (Interlocked.Exchange(ref Started, 1) == 1)
-            {
-                return;
-            }
-
-            var thread = new Thread(Run) { IsBackground = true, Name = "SdrCertPatcher" };
-            thread.Start();
+            Write("SDR memory CA patcher disabled; disk patch mode only");
         }
 
         public static bool EnsureDiskPatched()
@@ -77,7 +66,7 @@ namespace SKYNET.Managers
             string baseDirectory;
             try
             {
-                baseDirectory = global::Common.GetPath();
+                baseDirectory = global::SKYNET.Common.GetPath();
             }
             catch (Exception ex)
             {
@@ -130,75 +119,12 @@ namespace SKYNET.Managers
         }
 
         /// <summary>
-        /// Starts the background patcher and, when a caller is about to ask the
-        /// native networking library for a certificate, waits briefly for the
-        /// in-memory CA replacement.  The timeout is deliberately bounded: a
-        /// missing standalone networking module must never stall Dota startup.
+        /// Disk-only patch check. The memory patcher is disabled by design while
+        /// validating the old NetworkingPatcher-style flow.
         /// </summary>
         public static bool EnsurePatched(int timeoutMs)
         {
-            Start();
-
-            if (Volatile.Read(ref PatchSucceeded) != 0)
-            {
-                return true;
-            }
-
-            if (timeoutMs > 0)
-            {
-                PatchFinished.Wait(timeoutMs);
-            }
-
-            return Volatile.Read(ref PatchSucceeded) != 0;
-        }
-
-        private static void Run()
-        {
-            try
-            {
-                Write("SDR patcher thread started");
-                var pairs = BuildPatchPairs();
-                if (pairs == null)
-                {
-                    Write("SDR CA keys invalid in code, patcher aborted");
-                    return;
-                }
-
-                // Start polling before GetCertAsync.  The networking module may not be
-                // resident during Steam API initialization, but once it appears we patch
-                // it in tens of milliseconds rather than after a half-second race.
-                byte[] emuRaw = ParseHex(EmulatorCaPublicKeyHex);
-                string emuToken = emuRaw == null ? null : ToOpenSshToken(emuRaw);
-
-                for (int attempt = 0; attempt < 1200; attempt++)
-                {
-                    if (TryPatchLoadedModule(pairs, emuRaw, emuToken, out int patched, out bool alreadyPatched) && (patched > 0 || alreadyPatched))
-                    {
-                        Interlocked.Exchange(ref PatchSucceeded, 1);
-                        if (patched > 0)
-                        {
-                            Write($"SDR CA public key patched ({patched} occurrence(s))");
-                        }
-                        else
-                        {
-                            Write("SDR CA public key already patched in loaded module");
-                        }
-                        return;
-                    }
-
-                    Thread.Sleep(25);
-                }
-
-                Write("steamnetworkingsockets module not found or key pattern absent after timeout");
-            }
-            catch (Exception ex)
-            {
-                Write($"SDR patcher failed: {ex.Message}");
-            }
-            finally
-            {
-                PatchFinished.Set();
-            }
+            return EnsureDiskPatched();
         }
 
         private static List<KeyValuePair<byte[], byte[]>> BuildPatchPairs()
@@ -365,149 +291,6 @@ namespace SKYNET.Managers
             ms.Write(value, 0, value.Length);
         }
 
-        private static bool TryPatchLoadedModule(List<KeyValuePair<byte[], byte[]>> pairs, byte[] emuRaw, string emuToken, out int totalPatched, out bool alreadyPatched)
-        {
-            totalPatched = 0;
-            alreadyPatched = false;
-            bool foundEmulatorKey = false;
-            bool foundEmulatorId = false;
-            IntPtr module = IntPtr.Zero;
-            foreach (var name in TargetModules)
-            {
-                module = GetModuleHandle(name);
-                if (module != IntPtr.Zero)
-                {
-                    break;
-                }
-            }
-
-            if (module == IntPtr.Zero)
-            {
-                return false;
-            }
-
-            if (!GetModuleInformation(GetCurrentProcess(), module, out MODULEINFO info, (uint)Marshal.SizeOf<MODULEINFO>()))
-            {
-                return false;
-            }
-
-            long baseAddr = module.ToInt64();
-            long endAddr = baseAddr + info.SizeOfImage;
-            long cursor = baseAddr;
-
-            while (cursor < endAddr)
-            {
-                if (VirtualQuery((IntPtr)cursor, out MEMORY_BASIC_INFORMATION mbi, (uint)Marshal.SizeOf<MEMORY_BASIC_INFORMATION>()) == UIntPtr.Zero)
-                {
-                    break;
-                }
-
-                long regionBase = mbi.BaseAddress.ToInt64();
-                long regionSize = (long)mbi.RegionSize;
-                long next = regionBase + regionSize;
-                if (next <= cursor)
-                {
-                    break;
-                }
-
-                if (mbi.State == MEM_COMMIT && IsReadable(mbi.Protect))
-                {
-                    long scanStart = Math.Max(regionBase, baseAddr);
-                    long scanEnd = Math.Min(next, endAddr);
-                    totalPatched += ScanAndPatchRegion(scanStart, scanEnd - scanStart, pairs, emuRaw, emuToken, ref foundEmulatorKey, ref foundEmulatorId);
-                }
-
-                cursor = next;
-            }
-
-            alreadyPatched = foundEmulatorKey && foundEmulatorId;
-            return true;
-        }
-
-        private static int ScanAndPatchRegion(long start, long length, List<KeyValuePair<byte[], byte[]>> pairs, byte[] emuRaw, string emuToken, ref bool foundEmulatorKey, ref bool foundEmulatorId)
-        {
-            var buffer = new byte[length];
-            if (!ReadProcessMemory(GetCurrentProcess(), (IntPtr)start, buffer, (UIntPtr)length, out var read) || (long)read != length)
-            {
-                return 0;
-            }
-
-            if (!foundEmulatorKey && emuRaw != null && !string.IsNullOrEmpty(emuToken))
-            {
-                foundEmulatorKey = ContainsPattern(buffer, Ascii(emuToken)) || ContainsPattern(buffer, emuRaw);
-            }
-
-            if (!foundEmulatorId)
-            {
-                foundEmulatorId = ContainsPattern(buffer, Ascii(EmulatorCaKeyIdComment));
-            }
-
-            int patched = 0;
-            foreach (var pair in pairs)
-            {
-                patched += ScanAndPatchBuffer(buffer, start, pair.Key, pair.Value);
-            }
-
-            return patched;
-        }
-
-        private static int ScanAndPatchBuffer(byte[] buffer, long start, byte[] search, byte[] replacement)
-        {
-            if (buffer.Length < search.Length)
-            {
-                return 0;
-            }
-
-            int patched = 0;
-            int i = 0;
-            int limit = buffer.Length - search.Length;
-            while (i <= limit)
-            {
-                if (Matches(buffer, i, search))
-                {
-                    if (WriteBytes((IntPtr)(start + i), replacement))
-                    {
-                        patched++;
-                    }
-
-                    i += search.Length;
-                }
-                else
-                {
-                    i++;
-                }
-            }
-
-            return patched;
-        }
-
-        private static bool WriteBytes(IntPtr address, byte[] data)
-        {
-            if (!VirtualProtect(address, (UIntPtr)data.Length, PAGE_EXECUTE_READWRITE, out uint oldProtect))
-            {
-                return false;
-            }
-
-            try
-            {
-                if (!WriteProcessMemory(GetCurrentProcess(), address, data, (UIntPtr)data.Length, out var written) || (long)written != data.Length)
-                {
-                    return false;
-                }
-
-                FlushInstructionCache(GetCurrentProcess(), address, (UIntPtr)data.Length);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-            finally
-            {
-                VirtualProtect(address, (UIntPtr)data.Length, oldProtect, out _);
-            }
-        }
-
         private static bool Matches(byte[] haystack, int offset, byte[] needle)
         {
             for (int i = 0; i < needle.Length; i++)
@@ -519,17 +302,6 @@ namespace SKYNET.Managers
             }
 
             return true;
-        }
-
-        private static bool IsReadable(uint protect)
-        {
-            if ((protect & PAGE_GUARD) != 0 || (protect & PAGE_NOACCESS) != 0)
-            {
-                return false;
-            }
-
-            const uint readable = PAGE_READONLY | PAGE_READWRITE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | PAGE_WRITECOPY | PAGE_EXECUTE_WRITECOPY;
-            return (protect & readable) != 0;
         }
 
         private static byte[] ParseHex(string hex)
@@ -566,66 +338,5 @@ namespace SKYNET.Managers
         {
             SteamEmulator.Write("SdrCertPatcher", message);
         }
-
-        #region Native
-
-        private const uint MEM_COMMIT = 0x1000;
-        private const uint PAGE_NOACCESS = 0x01;
-        private const uint PAGE_READONLY = 0x02;
-        private const uint PAGE_READWRITE = 0x04;
-        private const uint PAGE_WRITECOPY = 0x08;
-        private const uint PAGE_EXECUTE_READ = 0x20;
-        private const uint PAGE_EXECUTE_READWRITE = 0x40;
-        private const uint PAGE_EXECUTE_WRITECOPY = 0x80;
-        private const uint PAGE_GUARD = 0x100;
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
-        private static extern IntPtr GetModuleHandle(string lpModuleName);
-
-        [DllImport("kernel32.dll")]
-        private static extern IntPtr GetCurrentProcess();
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool VirtualProtect(IntPtr lpAddress, UIntPtr dwSize, uint flNewProtect, out uint lpflOldProtect);
-
-        [DllImport("kernel32.dll")]
-        private static extern UIntPtr VirtualQuery(IntPtr lpAddress, out MEMORY_BASIC_INFORMATION lpBuffer, uint dwLength);
-
-        [DllImport("kernel32.dll")]
-        private static extern bool FlushInstructionCache(IntPtr hProcess, IntPtr lpBaseAddress, UIntPtr dwSize);
-
-        // Read/WriteProcessMemory fail gracefully (return false) on an invalid or
-        // just-unmapped page instead of raising an uncatchable AccessViolation the
-        // way Marshal.Copy does, which was crashing DLL load under SDR mode.
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, UIntPtr nSize, out UIntPtr lpNumberOfBytesRead);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, UIntPtr nSize, out UIntPtr lpNumberOfBytesWritten);
-
-        [DllImport("psapi.dll", SetLastError = true)]
-        private static extern bool GetModuleInformation(IntPtr hProcess, IntPtr hModule, out MODULEINFO lpmodinfo, uint cb);
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct MODULEINFO
-        {
-            public IntPtr lpBaseOfDll;
-            public uint SizeOfImage;
-            public IntPtr EntryPoint;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct MEMORY_BASIC_INFORMATION
-        {
-            public IntPtr BaseAddress;
-            public IntPtr AllocationBase;
-            public uint AllocationProtect;
-            public UIntPtr RegionSize;
-            public uint State;
-            public uint Protect;
-            public uint Type;
-        }
-
-        #endregion
     }
 }

@@ -38,6 +38,8 @@ namespace SKYNET.Steamworks.Implementation
         private static readonly TimeSpan CertCacheTtl = TimeSpan.FromMinutes(5);
         private static SteamNetworkingSocketsCert_t CachedCert;
         private static DateTime CachedCertUtc;
+        private static ulong CachedCertSteamId;
+        private static uint CachedCertAppId;
         private static int SecureCertPatcherStartLogged;
 
         public SteamNetworkingSocketsSerialized()
@@ -63,20 +65,61 @@ namespace SKYNET.Steamworks.Implementation
             {
                 Write("GetCertAsync: insecure LAN mode, returning successful empty certificate");
                 QueueCurrentNetworkStatusCallbacks();
-                return CallbackManager.AddCallbackResult(CreateEmptyCertResult(EResult.k_EResultOK));
+                return AddCertCallbackResult(CreateEmptyCertResult(EResult.k_EResultOK));
             }
 
             Write("GetCertAsync: secure SDR request queued");
 
-            EnsureSecureCertPatcherStarted("GetCertAsync", 750);
+            EnsureSecureCertDiskPatched("GetCertAsync", 750);
 
-            return WorkQueue.EnqueueCallbackResult(
+            return EnqueueCertCallbackResult(
                 CreateEmptyCertResult(EResult.k_EResultNoConnection),
                 () => BuildCertResult(),
-                false,
                 "GetCertAsync",
-                "networking:get-cert",
+                null,
                 true);
+        }
+
+        private static SteamAPICall_t AddCertCallbackResult(SteamNetworkingSocketsCert_t result)
+        {
+            var handle = CallbackManager.AddCallbackResult(result);
+            CallbackManager.AddCallback(result);
+            return handle;
+        }
+
+        private static SteamAPICall_t EnqueueCertCallbackResult(
+            SteamNetworkingSocketsCert_t pendingResult,
+            Func<SteamNetworkingSocketsCert_t> work,
+            string name,
+            string coalesceKey,
+            bool highPriority)
+        {
+            var handle = CallbackManager.AddCallbackResult(pendingResult, false);
+            var queued = WorkQueue.Enqueue(name, () =>
+            {
+                SteamNetworkingSocketsCert_t result = pendingResult;
+                var failed = false;
+                try
+                {
+                    result = work?.Invoke() ?? pendingResult;
+                }
+                catch (Exception ex)
+                {
+                    failed = true;
+                    SteamEmulator.Write("SteamNetworkingSocketsSerialized", $"{name ?? "GetCertAsync"} failed: {ex.Message}");
+                }
+
+                CallbackManager.CompleteCallbackResult(handle, result, failed);
+                CallbackManager.AddCallback(result);
+            }, coalesceKey, highPriority);
+
+            if (!queued)
+            {
+                CallbackManager.CompleteCallbackResult(handle, pendingResult, true);
+                CallbackManager.AddCallback(pendingResult);
+            }
+
+            return handle;
         }
 
         private static SteamNetworkingSocketsCert_t CreateEmptyCertResult(EResult result)
@@ -110,15 +153,18 @@ namespace SKYNET.Steamworks.Implementation
                 return empty;
             }
 
-            if (TryGetCachedCert(out var cached))
+            ulong expectedSteamId = GetExpectedSdrSteamId();
+            uint expectedAppId = GetExpectedSdrAppId();
+
+            if (TryGetCachedCert(expectedSteamId, expectedAppId, out var cached))
             {
-                Write("GetCertAsync: signed cert served from cache");
+                Write($"GetCertAsync: signed cert served from cache (steamId={expectedSteamId}, appId={expectedAppId})");
                 return cached;
             }
 
             try
             {
-                var dto = SkyNetApiClient.RequestSdrCert();
+                var dto = SkyNetApiClient.RequestSdrCert(expectedSteamId, expectedAppId);
                 if (dto == null)
                 {
                     Write("GetCertAsync: server returned no cert");
@@ -129,16 +175,18 @@ namespace SKYNET.Steamworks.Implementation
                 byte[] signatureBytes = FromBase64(dto.SignatureBase64);
                 byte[] privKeyBytes = FromBase64(dto.PrivateKeyBase64);
                 byte[] publicKeyBytes = FromBase64(dto.PublicKeyBase64);
+                byte[] callbackPrivKeyBytes = ExpandCallbackPrivateKey(privKeyBytes, publicKeyBytes);
 
                 if (certBytes.Length == 0 || certBytes.Length > 512 ||
-                    signatureBytes.Length != 64 || privKeyBytes.Length != 32)
+                    signatureBytes.Length != 64 ||
+                    publicKeyBytes.Length != 32 ||
+                    (privKeyBytes.Length != 32 && privKeyBytes.Length != 64) ||
+                    (callbackPrivKeyBytes.Length != 32 && callbackPrivKeyBytes.Length != 64))
                 {
-                    Write($"GetCertAsync: cert sizes invalid (cert={certBytes.Length}, sig={signatureBytes.Length}, key={privKeyBytes.Length})");
+                    Write($"GetCertAsync: cert sizes invalid (cert={certBytes.Length}, sig={signatureBytes.Length}, key={privKeyBytes.Length}, callbackKey={callbackPrivKeyBytes.Length}, pub={publicKeyBytes.Length})");
                     return empty;
                 }
 
-                ulong expectedSteamId = GetExpectedSdrSteamId();
-                uint expectedAppId = GetExpectedSdrAppId();
                 if (!TryValidateInnerCert(certBytes, publicKeyBytes, expectedSteamId, expectedAppId, out var validationError))
                 {
                     Write($"GetCertAsync: cert protobuf invalid ({validationError})");
@@ -163,16 +211,16 @@ namespace SKYNET.Steamworks.Implementation
                     m_caKeyID = dto.CaKeyId,
                     m_cbSignature = (uint)signatureBytes.Length,
                     m_signature = FitBuffer(signatureBytes, 128),
-                    m_cbPrivKey = (uint)privKeyBytes.Length,
-                    m_privKey = FitBuffer(privKeyBytes, 128)
+                    m_cbPrivKey = (uint)callbackPrivKeyBytes.Length,
+                    m_privKey = FitBuffer(callbackPrivKeyBytes, 128)
                 };
 
                 Write(
                     "GetCertAsync: signed cert issued " +
-                    $"(cert={certBytes.Length}, sig={signatureBytes.Length}, key={privKeyBytes.Length}, " +
+                    $"(cert={certBytes.Length}, sig={signatureBytes.Length}, key={privKeyBytes.Length}, callbackKey={callbackPrivKeyBytes.Length}, " +
                     $"caKeyId={dto.CaKeyId:X}, steamId={expectedSteamId}, appId={expectedAppId}, " +
                     $"certB64={Convert.ToBase64String(certBytes)}, sigB64={Convert.ToBase64String(signatureBytes)}, pub={FormatBytes(publicKeyBytes, 32)})");
-                CacheCert(cert);
+                CacheCert(cert, expectedSteamId, expectedAppId);
                 return cert;
             }
             catch (Exception ex)
@@ -182,19 +230,39 @@ namespace SKYNET.Steamworks.Implementation
             }
         }
 
-        private static bool TryGetCachedCert(out SteamNetworkingSocketsCert_t cert)
+        private static byte[] ExpandCallbackPrivateKey(byte[] privateKeyBytes, byte[] publicKeyBytes)
+        {
+            if (privateKeyBytes == null)
+            {
+                return new byte[0];
+            }
+
+            if (privateKeyBytes.Length == 32 && publicKeyBytes != null && publicKeyBytes.Length == 32)
+            {
+                var expanded = new byte[64];
+                Buffer.BlockCopy(publicKeyBytes, 0, expanded, 0, 32);
+                Buffer.BlockCopy(privateKeyBytes, 0, expanded, 32, 32);
+                return expanded;
+            }
+
+            return privateKeyBytes;
+        }
+
+        private static bool TryGetCachedCert(ulong steamId, uint appId, out SteamNetworkingSocketsCert_t cert)
         {
             lock (CertCacheLock)
             {
                 cert = CachedCert;
                 return CachedCertUtc != default(DateTime) &&
                     DateTime.UtcNow - CachedCertUtc < CertCacheTtl &&
+                    CachedCertSteamId == steamId &&
+                    CachedCertAppId == appId &&
                     CachedCert.m_eResult == EResult.k_EResultOK &&
                     CachedCert.m_cbCert > 0;
             }
         }
 
-        private static void CacheCert(SteamNetworkingSocketsCert_t cert)
+        private static void CacheCert(SteamNetworkingSocketsCert_t cert, ulong steamId, uint appId)
         {
             if (cert.m_eResult != EResult.k_EResultOK || cert.m_cbCert == 0)
             {
@@ -205,6 +273,8 @@ namespace SKYNET.Steamworks.Implementation
             {
                 CachedCert = cert;
                 CachedCertUtc = DateTime.UtcNow;
+                CachedCertSteamId = steamId;
+                CachedCertAppId = appId;
             }
         }
 
@@ -520,7 +590,7 @@ namespace SKYNET.Steamworks.Implementation
                 return 0;
             }
 
-            EnsureSecureCertPatcherStarted("GetNetworkConfigJSON");
+            EnsureSecureCertDiskPatched("GetNetworkConfigJSON");
             return WriteNetworkConfigJSON(buf, cbBuf);
         }
 
@@ -544,7 +614,7 @@ namespace SKYNET.Steamworks.Implementation
                 return 0;
             }
 
-            EnsureSecureCertPatcherStarted("GetNetworkConfigJSON(partner)");
+            EnsureSecureCertDiskPatched("GetNetworkConfigJSON(partner)");
             return WriteNetworkConfigJSON(buf, cbBuf);
         }
 
@@ -568,19 +638,17 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool BAllowDirectConnectToPeer(IntPtr identity)
         {
-            bool allow = !SecureCertMode;
-            Write($"BAllowDirectConnectToPeer = {allow}");
-            return allow;
+            Write("BAllowDirectConnectToPeer = True");
+            return true;
         }
 
         public int BeginAsyncRequestFakeIP(int nNumPorts)
         {
-            bool accepted = !SecureCertMode;
-            Write($"BeginAsyncRequestFakeIP ({nNumPorts}) = {accepted}");
+            Write($"BeginAsyncRequestFakeIP ({nNumPorts}) = True");
             // SteamNetworkingSocketsSerialized005 uses a 32-bit int here.
             // Returning an explicit 0/1 keeps the native x64 return register
             // defined, matching the Goldberg LAN implementation.
-            return accepted ? 1 : 0;
+            return 1;
         }
 
         private int WriteNetworkConfigJSON(IntPtr buf, uint cbBuf)
@@ -606,7 +674,7 @@ namespace SKYNET.Steamworks.Implementation
             return SteamHTTP.SdrConfigJson;
         }
 
-        internal static bool EnsureSecureCertPatcherStarted(string reason, int waitMs = 0)
+        internal static bool EnsureSecureCertDiskPatched(string reason, int waitMs = 0)
         {
             if (!SecureCertMode)
             {
@@ -615,13 +683,13 @@ namespace SKYNET.Steamworks.Implementation
 
             if (Interlocked.CompareExchange(ref SecureCertPatcherStartLogged, 1, 0) == 0)
             {
-                SteamEmulator.Write("SteamNetworkingSocketsSerialized", $"Starting SDR cert patcher ({reason})");
+                SteamEmulator.Write("SteamNetworkingSocketsSerialized", $"Ensuring SDR disk CA patch ({reason}); memory patch disabled");
             }
 
             bool patched = SdrCertPatcher.EnsurePatched(waitMs);
             if (waitMs > 0 && !patched)
             {
-                SteamEmulator.Write("SteamNetworkingSocketsSerialized", $"SDR CA patch was not ready after {waitMs}ms; background patch remains active");
+                SteamEmulator.Write("SteamNetworkingSocketsSerialized", $"SDR disk CA patch was not ready after {waitMs}ms; memory patch disabled");
             }
 
             return patched;

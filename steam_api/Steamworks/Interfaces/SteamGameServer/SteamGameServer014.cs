@@ -6,11 +6,10 @@ using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("SteamGameServer013")]
     [Interface("SteamGameServer014")]
     public class SteamGameServer014 : ISteamInterface
     {
-        public bool InitGameServer(IntPtr _, uint unIP, int usGamePort, int usQueryPort, uint unFlags, uint nGameAppId, string pchVersionString)
+        public bool InitGameServer(IntPtr _, uint unIP, ushort usGamePort, ushort usQueryPort, uint unFlags, uint nGameAppId, string pchVersionString)
         {
             return SteamEmulator.SteamGameServer.InitGameServer(unIP, usGamePort, usQueryPort, unFlags, nGameAppId, pchVersionString);
         }
@@ -95,7 +94,7 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamGameServer.SetPasswordProtected(bPasswordProtected);
         }
 
-        public void SetSpectatorPort(IntPtr _, int unSpectatorPort)
+        public void SetSpectatorPort(IntPtr _, ushort unSpectatorPort)
         {
             SteamEmulator.SteamGameServer.SetSpectatorPort(unSpectatorPort);
         }
@@ -180,14 +179,24 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamGameServer.GetPublicIP(arg0, arg1);
         }
 
-        public bool HandleIncomingPacket(IntPtr _, IntPtr pData, int cbData, uint srcIP, uint srcPort)
+        public bool HandleIncomingPacket(IntPtr _, IntPtr pData, int cbData, uint srcIP, ushort srcPort)
         {
             return SteamEmulator.SteamGameServer.HandleIncomingPacket(pData, cbData, srcIP, srcPort);
         }
 
-        public int GetNextOutgoingPacket(IntPtr _, IntPtr pOut, int cbMaxOut, uint pNetAdr, uint pPort)
+        public int GetNextOutgoingPacket(IntPtr _, IntPtr pOut, int cbMaxOut, IntPtr pNetAdr, IntPtr pPort)
         {
-            return SteamEmulator.SteamGameServer.GetNextOutgoingPacket(pOut, cbMaxOut, pNetAdr, pPort);
+            if (pNetAdr != IntPtr.Zero)
+            {
+                System.Runtime.InteropServices.Marshal.WriteInt32(pNetAdr, 0);
+            }
+
+            if (pPort != IntPtr.Zero)
+            {
+                System.Runtime.InteropServices.Marshal.WriteInt16(pPort, 0);
+            }
+
+            return SteamEmulator.SteamGameServer.GetNextOutgoingPacket(pOut, cbMaxOut, 0, 0);
         }
 
         public SteamAPICall_t AssociateWithClan(IntPtr _, ulong steamIDClan)
@@ -200,7 +209,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamGameServer.ComputeNewPlayerCompatibility(steamIDNewPlayer);
         }
 
-        public bool SendUserConnectAndAuthenticate_DEPRECATED(IntPtr _, uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, ulong pSteamIDUser)
+        public bool SendUserConnectAndAuthenticate(IntPtr _, uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, IntPtr pSteamIDUser)
         {
             return SteamEmulator.SteamGameServer.SendUserConnectAndAuthenticate_DEPRECATED(unIPClient, pvAuthBlob, cubAuthBlobSize, pSteamIDUser);
         }
@@ -210,7 +219,7 @@ namespace SKYNET.Steamworks.Interfaces
             return NativeSteamId.Write(pSteamID, SteamEmulator.SteamGameServer.CreateUnauthenticatedUserConnection());
         }
 
-        public void SendUserDisconnect_DEPRECATED(IntPtr _, ulong steamIDUser)
+        public void SendUserDisconnect(IntPtr _, ulong steamIDUser)
         {
             SteamEmulator.SteamGameServer.SendUserDisconnect_DEPRECATED(steamIDUser);
         }
@@ -230,15 +239,6 @@ namespace SKYNET.Steamworks.Interfaces
         {
             SteamEmulator.SteamGameServer.ForceMasterServerHeartbeat_DEPRECATED();
         }
-
-        // Inline functions 
-
-        public IntPtr SteamGameServer(IntPtr _)
-        {
-            SteamEmulator.Write("DEBUG", "SteamClient in SteamClient XD");
-            return InterfaceManager.FindOrCreateInterface("SteamGameServer014");
-        }
-
 
     }
 }

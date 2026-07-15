@@ -13,7 +13,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             Instance = this;
             InterfaceName = "SteamRemotePlay";
-            InterfaceVersion = "STEAMREMOTEPLAY_INTERFACE_VERSION003";
+            InterfaceVersion = "STEAMREMOTEPLAY_INTERFACE_VERSION004";
         }
 
         public uint GetSessionCount()
@@ -34,6 +34,36 @@ namespace SKYNET.Steamworks.Implementation
             return CSteamID.CreateOne();
         }
 
+        public bool BSessionRemotePlayTogether(RemotePlaySessionID_t unSessionID)
+        {
+            Write("BSessionRemotePlayTogether");
+            return false;
+        }
+
+        public uint GetSessionGuestID(RemotePlaySessionID_t unSessionID)
+        {
+            Write("GetSessionGuestID");
+            return 0;
+        }
+
+        public int GetSmallSessionAvatar(RemotePlaySessionID_t unSessionID)
+        {
+            Write("GetSmallSessionAvatar");
+            return 0;
+        }
+
+        public int GetMediumSessionAvatar(RemotePlaySessionID_t unSessionID)
+        {
+            Write("GetMediumSessionAvatar");
+            return 0;
+        }
+
+        public int GetLargeSessionAvatar(RemotePlaySessionID_t unSessionID)
+        {
+            Write("GetLargeSessionAvatar");
+            return 0;
+        }
+
         public string GetSessionClientName(RemotePlaySessionID_t unSessionID)
         {
             Write("GetSessionClientName");
@@ -46,9 +76,17 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public bool BGetSessionClientResolution(RemotePlaySessionID_t unSessionID, int pnResolutionX, int pnResolutionY)
+        public bool BGetSessionClientResolution(RemotePlaySessionID_t unSessionID, System.IntPtr pnResolutionX, System.IntPtr pnResolutionY)
         {
             Write("BGetSessionClientResolution");
+            if (pnResolutionX != System.IntPtr.Zero)
+            {
+                System.Runtime.InteropServices.Marshal.WriteInt32(pnResolutionX, 0);
+            }
+            if (pnResolutionY != System.IntPtr.Zero)
+            {
+                System.Runtime.InteropServices.Marshal.WriteInt32(pnResolutionY, 0);
+            }
             return default;
         }
 

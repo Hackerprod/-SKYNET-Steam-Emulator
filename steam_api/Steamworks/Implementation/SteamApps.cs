@@ -299,7 +299,8 @@ namespace SKYNET.Steamworks.Implementation
             IntPtr pchBetaName,
             int cchBetaName,
             IntPtr pchDescription,
-            int cchDescription)
+            int cchDescription,
+            IntPtr punLastUpdated)
         {
             if (iBetaIndex != 0)
             {
@@ -311,8 +312,29 @@ namespace SKYNET.Steamworks.Implementation
             WriteUInt32(punBuildID, unchecked((uint)GetAppBuildId()));
             WriteUtf8Buffer(pchBetaName, cchBetaName, "public");
             WriteUtf8Buffer(pchDescription, cchDescription, "Default branch");
+            WriteUInt32(punLastUpdated, 0);
             Write("GetBetaInfo (0) = public");
             return true;
+        }
+
+        public bool GetBetaInfo(
+            int iBetaIndex,
+            IntPtr punFlags,
+            IntPtr punBuildID,
+            IntPtr pchBetaName,
+            int cchBetaName,
+            IntPtr pchDescription,
+            int cchDescription)
+        {
+            return GetBetaInfo(
+                iBetaIndex,
+                punFlags,
+                punBuildID,
+                pchBetaName,
+                cchBetaName,
+                pchDescription,
+                cchDescription,
+                IntPtr.Zero);
         }
 
         public bool SetActiveBeta(string pchBetaName)

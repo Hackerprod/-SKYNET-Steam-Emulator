@@ -64,7 +64,7 @@ namespace SKYNET.Steamworks.Implementation
             return default;
         }
 
-        public bool CloseConnection(HSteamNetConnection hPeer, int nReason, char pszDebug, bool bEnableLinger)
+        public bool CloseConnection(HSteamNetConnection hPeer, int nReason, string pszDebug, bool bEnableLinger)
         {
             Write("CloseConnection");
             return false;
@@ -76,38 +76,49 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool SetConnectionUserData(HSteamNetConnection hPeer, ulong nUserData)
+        public bool SetConnectionUserData(HSteamNetConnection hPeer, long nUserData)
         {
             Write("SetConnectionUserData");
             return false;
         }
 
-        public uint GetConnectionUserData(HSteamNetConnection hPeer)
+        public long GetConnectionUserData(HSteamNetConnection hPeer)
         {
             Write("GetConnectionUserData");
             return 0;
         }
 
-        public void SetConnectionName(HSteamNetConnection hPeer, char pszName)
+        public void SetConnectionName(HSteamNetConnection hPeer, string pszName)
         {
             Write("SetConnectionName");
         }
 
-        public bool GetConnectionName(HSteamNetConnection hPeer, char pszName, int nMaxLen)
+        public bool GetConnectionName(HSteamNetConnection hPeer, IntPtr pszName, int nMaxLen)
         {
             Write("GetConnectionName");
             return false;
         }
 
-        public int SendMessageToConnection(HSteamNetConnection hConn, IntPtr pData, UInt32 cbData, int nSendFlags, Int64 pOutMessageNumber)
+        public int SendMessageToConnection(HSteamNetConnection hConn, IntPtr pData, UInt32 cbData, int nSendFlags, IntPtr pOutMessageNumber)
         {
             Write("SendMessageToConnection");
+            if (pOutMessageNumber != IntPtr.Zero)
+            {
+                Marshal.WriteInt64(pOutMessageNumber, 0);
+            }
             return default;
         }
 
-        public void SendMessages(int nMessages, IntPtr pMessages, Int64 pOutMessageNumberOrResult)
+        public void SendMessages(int nMessages, IntPtr pMessages, IntPtr pOutMessageNumberOrResult)
         {
             Write("SendMessages");
+            if (pOutMessageNumberOrResult != IntPtr.Zero)
+            {
+                for (int i = 0; i < nMessages; i++)
+                {
+                    Marshal.WriteInt64(pOutMessageNumberOrResult, i * sizeof(long), 0);
+                }
+            }
         }
 
         public int FlushMessagesOnConnection(HSteamNetConnection hConn)
@@ -128,13 +139,13 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool GetQuickConnectionStatus(HSteamNetConnection hConn, IntPtr pStats)
+        public int GetConnectionRealTimeStatus(HSteamNetConnection hConn, IntPtr pStatus, int nLanes, IntPtr pLanes)
         {
-            Write("GetQuickConnectionStatus");
-            return false;
+            Write("GetConnectionRealTimeStatus");
+            return (int)EResult.k_EResultOK;
         }
 
-        public int GetDetailedConnectionStatus(HSteamNetConnection hConn, char pszBuf, int cbBuf)
+        public int GetDetailedConnectionStatus(HSteamNetConnection hConn, IntPtr pszBuf, int cbBuf)
         {
             Write("GetDetailedConnectionStatus");
             return 0;
@@ -146,10 +157,16 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool CreateSocketPair(HSteamNetConnection pOutConnection1, uint pOutConnection2, bool bUseNetworkLoopback, IntPtr pIdentity1, IntPtr pIdentity2)
+        public bool CreateSocketPair(IntPtr pOutConnection1, IntPtr pOutConnection2, bool bUseNetworkLoopback, IntPtr pIdentity1, IntPtr pIdentity2)
         {
             Write("CreateSocketPair");
             return false;
+        }
+
+        public int ConfigureConnectionLanes(HSteamNetConnection hConn, int nNumLanes, IntPtr pLanePriorities, IntPtr pLaneWeights)
+        {
+            Write("ConfigureConnectionLanes");
+            return (int)EResult.k_EResultOK;
         }
 
         public bool GetIdentity(IntPtr pIdentity)
@@ -212,7 +229,7 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public int GetHostedDedicatedServerPort()
+        public ushort GetHostedDedicatedServerPort()
         {
             Write("GetHostedDedicatedServerPort");
             return 0;
@@ -236,14 +253,14 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        public int GetGameCoordinatorServerLogin(IntPtr pLoginInfo, int pcbSignedBlob, IntPtr pBlob)
+        public int GetGameCoordinatorServerLogin(IntPtr pLoginInfo, IntPtr pcbSignedBlob, IntPtr pBlob)
         {
             Write("GetGameCoordinatorServerLogin");
             // SteamDatagramGameCoordinatorServerLogin pLoginInfo
             return default;
         }
 
-        public HSteamNetConnection ConnectP2PCustomSignaling(IntPtr pSignaling, IntPtr pPeerIdentity, int nOptions, IntPtr pOptions)
+        public HSteamNetConnection ConnectP2PCustomSignaling(IntPtr pSignaling, IntPtr pPeerIdentity, int nRemoteVirtualPort, int nOptions, IntPtr pOptions)
         {
             Write("ConnectP2PCustomSignaling");
             return 0;
@@ -255,13 +272,13 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        public bool GetCertificateRequest(int pcbBlob, IntPtr pBlob, string errMsg)
+        public bool GetCertificateRequest(IntPtr pcbBlob, IntPtr pBlob, IntPtr errMsg)
         {
             Write("GetCertificateRequest");
             return false;
         }
 
-        public bool SetCertificate(IntPtr pCertificate, int cbCertificate, string errMsg)
+        public bool SetCertificate(IntPtr pCertificate, int cbCertificate, IntPtr errMsg)
         {
             Write($"SetCertificate {errMsg}");
             return false;
@@ -311,7 +328,7 @@ namespace SKYNET.Steamworks.Implementation
             return 0;
         }
 
-        internal int GetRemoteFakeIPForConnection(uint hConn, SteamNetworkingIPAddr pOutAddr)
+        internal int GetRemoteFakeIPForConnection(uint hConn, IntPtr pOutAddr)
         {
             Write("GetRemoteFakeIPForConnection");
             return (int)EResult.k_EResultOK;

@@ -153,10 +153,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamFriends_GetClanChatMessage(IntPtr _, ulong steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, int peChatEntryType, ref ulong[] psteamidChatter)
+        public static int SteamAPI_ISteamFriends_GetClanChatMessage(IntPtr _, ulong steamIDClanChat, int iMessage, IntPtr prgchText, int cchTextMax, IntPtr peChatEntryType, IntPtr psteamidChatter)
         {
             Write($"SteamAPI_ISteamFriends_GetClanChatMessage");
-            return SteamFriends.Instance.GetClanChatMessage(steamIDClanChat, iMessage, prgchText, cchTextMax, peChatEntryType, ref psteamidChatter);
+            return SteamFriends.Instance.GetClanChatMessage(steamIDClanChat, iMessage, prgchText, cchTextMax, peChatEntryType, psteamidChatter);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -272,7 +272,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamFriends_GetFriendMessage(IntPtr _, ulong steamIDFriend, int iMessageID, IntPtr pvData, int cubData, ref int peChatEntryType)
+        public static int SteamAPI_ISteamFriends_GetFriendMessage(IntPtr _, ulong steamIDFriend, int iMessageID, IntPtr pvData, int cubData, IntPtr peChatEntryType)
         {
             Write($"SteamAPI_ISteamFriends_GetFriendMessage");
             return SteamFriends.Instance.GetFriendMessage(steamIDFriend, iMessageID, pvData, cubData, peChatEntryType);
@@ -349,10 +349,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_ISteamFriends_GetFriendsGroupMembersList(IntPtr _, FriendsGroupID_t friendsGroupID, ref ulong[] pOutSteamIDMembers, int nMembersCount)
+        public static void SteamAPI_ISteamFriends_GetFriendsGroupMembersList(IntPtr _, FriendsGroupID_t friendsGroupID, IntPtr pOutSteamIDMembers, int nMembersCount)
         {
             Write($"SteamAPI_ISteamFriends_GetFriendsGroupMembersListint");
-            SteamFriends.Instance.GetFriendsGroupMembersList(friendsGroupID, ref pOutSteamIDMembers, nMembersCount);
+            SteamFriends.Instance.GetFriendsGroupMembersList(friendsGroupID, pOutSteamIDMembers, nMembersCount);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -584,4 +584,3 @@ namespace SKYNET.Steamworks.Exported
         }
     }
 }
-

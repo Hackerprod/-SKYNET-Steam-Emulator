@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 using SKYNET.Callback;
 using SKYNET.Helpers;
@@ -152,6 +153,22 @@ namespace SKYNET.Steamworks.Implementation
 
         }
 
+        public bool GetStatInt32(string pchName, IntPtr pData)
+        {
+            uint data = 0;
+            bool result = GetStat(pchName, ref data);
+            WriteInt32(pData, unchecked((int)data));
+            return result;
+        }
+
+        public bool GetStatFloat(string pchName, IntPtr pData)
+        {
+            float data = 0;
+            bool result = GetStat(pchName, ref data);
+            WriteSingle(pData, data);
+            return result;
+        }
+
         public bool SetStat(string pchName, uint nData)
         {
             Write($"SetStat (Name = {pchName}, Data = {nData})");
@@ -206,6 +223,14 @@ namespace SKYNET.Steamworks.Implementation
             });
             pbAchieved = achieved;
             return Result;
+        }
+
+        public bool GetAchievement(string pchName, IntPtr pbAchieved)
+        {
+            bool achieved = false;
+            bool result = GetAchievement(pchName, ref achieved);
+            WriteBool(pbAchieved, achieved);
+            return result;
         }
 
         public bool SetAchievement(string pchName)
@@ -274,6 +299,16 @@ namespace SKYNET.Steamworks.Implementation
             pbAchieved = Archived;
             punUnlockTime = UnlockTime;
             return Result;
+        }
+
+        public bool GetAchievementAndUnlockTime(string pchName, IntPtr pbAchieved, IntPtr punUnlockTime)
+        {
+            bool achieved = false;
+            uint unlockTime = 0;
+            bool result = GetAchievementAndUnlockTime(pchName, ref achieved, ref unlockTime);
+            WriteBool(pbAchieved, achieved);
+            WriteUInt32(punUnlockTime, unlockTime);
+            return result;
         }
 
         public bool StoreStats()
@@ -435,6 +470,38 @@ namespace SKYNET.Steamworks.Implementation
             return Result;
         }
 
+        public bool GetUserStatInt32(ulong steamIDUser, string pchName, IntPtr pData)
+        {
+            SyncUserFromCache(steamIDUser);
+            bool result = false;
+            uint data = 0;
+            if (PlayerStats.TryGetValue(steamIDUser, out var userStats))
+            {
+                var statsList = userStats.Find(n => n.Name == pchName);
+                data = (statsList == null) ? 0 : statsList.Data;
+                result = true;
+            }
+            WriteInt32(pData, unchecked((int)data));
+            Write($"GetUserStatInt32 (SteamID = {steamIDUser}, Name = {pchName}, Data = {data}) = {result}");
+            return result;
+        }
+
+        public bool GetUserStatFloat(ulong steamIDUser, string pchName, IntPtr pData)
+        {
+            SyncUserFromCache(steamIDUser);
+            bool result = false;
+            float data = 0;
+            if (PlayerStats.TryGetValue(steamIDUser, out var userStats))
+            {
+                var statsList = userStats.Find(n => n.Name == pchName);
+                data = (statsList == null) ? 0 : statsList.Data;
+                result = true;
+            }
+            WriteSingle(pData, data);
+            Write($"GetUserStatFloat (SteamID = {steamIDUser}, Name = {pchName}, Data = {data}) = {result}");
+            return result;
+        }
+
         public bool GetUserAchievement(ulong steamIDUser, string pchName, bool pbAchieved)
         {
             Write($"GetUserAchievement (SteamID: {steamIDUser}, Name: {pchName})");
@@ -452,7 +519,7 @@ namespace SKYNET.Steamworks.Implementation
                     if (achievement.Name == pchName)
                     {
                         Archived = achievement.Earned;
-                        pbAchieved = false;
+                        pbAchieved = Archived;
                         Result = true;
                         break;
                     }
@@ -461,10 +528,50 @@ namespace SKYNET.Steamworks.Implementation
             return Result;
         }
 
+        public bool GetUserAchievement(ulong steamIDUser, string pchName, IntPtr pbAchieved)
+        {
+            bool achieved = false;
+            bool result = GetUserAchievement(steamIDUser, pchName, achieved);
+            if (result)
+            {
+                var achievements = steamIDUser == SteamEmulator.SteamID
+                    ? Achievements
+                    : StateCache.GetAchievements(steamIDUser);
+                var achievement = achievements?.Find(a => a.Name == pchName);
+                achieved = achievement?.Earned ?? false;
+            }
+            WriteBool(pbAchieved, achieved);
+            return result;
+        }
+
         public bool GetUserAchievementAndUnlockTime(ulong steamIDUser, string pchName, bool pbAchieved, uint punUnlockTime)
         {
             Write($"GetUserAchievementAndUnlockTime");
             return false;
+        }
+
+        public bool GetUserAchievementAndUnlockTime(ulong steamIDUser, string pchName, IntPtr pbAchieved, IntPtr punUnlockTime)
+        {
+            Write($"GetUserAchievementAndUnlockTime");
+            SyncUserFromCache(steamIDUser);
+            bool result = false;
+            bool achieved = false;
+            uint unlockTime = 0;
+            var achievements = steamIDUser == SteamEmulator.SteamID
+                ? Achievements
+                : StateCache.GetAchievements(steamIDUser);
+
+            var achievement = achievements?.Find(a => a.Name == pchName);
+            if (achievement != null)
+            {
+                achieved = achievement.Earned;
+                unlockTime = (uint)(new DateTimeOffset(achievement.Date)).ToUnixTimeSeconds();
+                result = true;
+            }
+
+            WriteBool(pbAchieved, achieved);
+            WriteUInt32(punUnlockTime, unlockTime);
+            return result;
         }
 
         public bool ResetAllStats(bool bAchievementsToo)
@@ -647,15 +754,40 @@ namespace SKYNET.Steamworks.Implementation
             return -1;
         }
 
+        public int GetMostAchievedAchievementInfo(IntPtr pchName, uint unNameBufLen, IntPtr pflPercent, IntPtr pbAchieved)
+        {
+            Write($"GetMostAchievedAchievementInfo");
+            NativeStringCache.WriteUtf8Buffer(pchName, checked((int)unNameBufLen), string.Empty);
+            WriteSingle(pflPercent, 0);
+            WriteBool(pbAchieved, false);
+            return -1;
+        }
+
         public int GetNextMostAchievedAchievementInfo(int iIteratorPrevious, string pchName, uint unNameBufLen, float pflPercent, bool pbAchieved)
         {
             Write($"GetNextMostAchievedAchievementInfo");
             return -1;
         }
 
+        public int GetNextMostAchievedAchievementInfo(int iIteratorPrevious, IntPtr pchName, uint unNameBufLen, IntPtr pflPercent, IntPtr pbAchieved)
+        {
+            Write($"GetNextMostAchievedAchievementInfo");
+            NativeStringCache.WriteUtf8Buffer(pchName, checked((int)unNameBufLen), string.Empty);
+            WriteSingle(pflPercent, 0);
+            WriteBool(pbAchieved, false);
+            return -1;
+        }
+
         public bool GetAchievementAchievedPercent(string pchName, float pflPercent)
         {
             Write($"GetAchievementAchievedPercent");
+            return false;
+        }
+
+        public bool GetAchievementAchievedPercent(string pchName, IntPtr pflPercent)
+        {
+            Write($"GetAchievementAchievedPercent");
+            WriteSingle(pflPercent, 0);
             return false;
         }
 
@@ -691,15 +823,57 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
+        public bool GetGlobalStatInt64(string pchStatName, IntPtr pData)
+        {
+            Write($"GetGlobalStatInt64 {pchStatName}");
+            WriteInt64(pData, 0);
+            return false;
+        }
+
+        public bool GetGlobalStatDouble(string pchStatName, IntPtr pData)
+        {
+            Write($"GetGlobalStatDouble {pchStatName}");
+            WriteDouble(pData, 0);
+            return false;
+        }
+
         public uint GetGlobalStatHistory(string pchStatName, uint pData, uint cubData)
         {
             Write($"GetGlobalStatHistory {pchStatName}");
             return 0;
         }
 
+        public int GetGlobalStatHistoryInt64(string pchStatName, IntPtr pData, uint cubData)
+        {
+            Write($"GetGlobalStatHistoryInt64 {pchStatName}");
+            return 0;
+        }
+
+        public int GetGlobalStatHistoryDouble(string pchStatName, IntPtr pData, uint cubData)
+        {
+            Write($"GetGlobalStatHistoryDouble {pchStatName}");
+            return 0;
+        }
+
         public bool GetAchievementProgressLimits(string pchName, uint pnMinProgress, uint pnMaxProgress)
         {
             Write($"GetAchievementProgressLimits");
+            return false;
+        }
+
+        public bool GetAchievementProgressLimitsInt32(string pchName, IntPtr pnMinProgress, IntPtr pnMaxProgress)
+        {
+            Write($"GetAchievementProgressLimitsInt32");
+            WriteInt32(pnMinProgress, 0);
+            WriteInt32(pnMaxProgress, 0);
+            return false;
+        }
+
+        public bool GetAchievementProgressLimitsFloat(string pchName, IntPtr pfMinProgress, IntPtr pfMaxProgress)
+        {
+            Write($"GetAchievementProgressLimitsFloat");
+            WriteSingle(pfMinProgress, 0);
+            WriteSingle(pfMaxProgress, 0);
             return false;
         }
 
@@ -737,6 +911,53 @@ namespace SKYNET.Steamworks.Implementation
             if (steamIDUser == (ulong)SteamEmulator.SteamID)
             {
                 Achievements = StateCache.GetAchievements(steamIDUser);
+            }
+        }
+
+        private static void WriteBool(IntPtr destination, bool value)
+        {
+            if (destination != IntPtr.Zero)
+            {
+                Marshal.WriteByte(destination, value ? (byte)1 : (byte)0);
+            }
+        }
+
+        private static void WriteInt32(IntPtr destination, int value)
+        {
+            if (destination != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(destination, value);
+            }
+        }
+
+        private static void WriteUInt32(IntPtr destination, uint value)
+        {
+            WriteInt32(destination, unchecked((int)value));
+        }
+
+        private static void WriteInt64(IntPtr destination, long value)
+        {
+            if (destination != IntPtr.Zero)
+            {
+                Marshal.WriteInt64(destination, value);
+            }
+        }
+
+        private static void WriteSingle(IntPtr destination, float value)
+        {
+            if (destination != IntPtr.Zero)
+            {
+                byte[] bytes = BitConverter.GetBytes(value);
+                Marshal.Copy(bytes, 0, destination, bytes.Length);
+            }
+        }
+
+        private static void WriteDouble(IntPtr destination, double value)
+        {
+            if (destination != IntPtr.Zero)
+            {
+                byte[] bytes = BitConverter.GetBytes(value);
+                Marshal.Copy(bytes, 0, destination, bytes.Length);
             }
         }
 

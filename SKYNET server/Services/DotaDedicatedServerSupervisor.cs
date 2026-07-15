@@ -16,10 +16,12 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
     private readonly string _executablePath;
     private readonly string _workingDirectory;
     private readonly string _bindIp;
+    private readonly string _diagnosticsDirectory;
     private readonly int _portStart;
     private readonly int _tvPortOffset;
     private readonly TimeSpan _startupTimeout;
     private readonly bool _enabled;
+    private readonly bool _insecureMode;
     private readonly Dictionary<ulong, DedicatedReservation> _reservations = new();
 
     public DotaDedicatedServerSupervisor(
@@ -37,6 +39,7 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
             configuration.GetValue<string>("GameCoordinator:Dota:Dedicated:WorkingDirectory"),
             environment.ContentRootPath,
             Path.GetDirectoryName(_executablePath) ?? environment.ContentRootPath);
+        _diagnosticsDirectory = Path.GetFullPath(Path.Combine(environment.ContentRootPath, "..", ".tmp"));
         _bindIp = configuration.GetValue<string>("GameCoordinator:Dota:Dedicated:BindIp")?.Trim();
         if (string.IsNullOrWhiteSpace(_bindIp))
         {
@@ -44,7 +47,8 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
         }
         _portStart = Math.Clamp(configuration.GetValue("GameCoordinator:Dota:Dedicated:PortStart", 27025), 1024, 65534);
         _tvPortOffset = Math.Clamp(configuration.GetValue("GameCoordinator:Dota:Dedicated:TvPortOffset", 10000), 1, 30000);
-        _startupTimeout = TimeSpan.FromSeconds(Math.Clamp(configuration.GetValue("GameCoordinator:Dota:Dedicated:StartupTimeoutSeconds", 45), 10, 180));
+        _startupTimeout = TimeSpan.FromSeconds(Math.Clamp(configuration.GetValue("GameCoordinator:Dota:Dedicated:StartupTimeoutSeconds", 120), 10, 180));
+        _insecureMode = configuration.GetValue("GameCoordinator:Dota:Dedicated:InsecureMode", false);
     }
 
     public DedicatedLaunchResult Start(ulong lobbyId, string? requestedMap)
@@ -89,9 +93,15 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
                 FileName = _executablePath,
                 WorkingDirectory = _workingDirectory,
                 UseShellExecute = false,
-                CreateNoWindow = true
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
             };
             startInfo.ArgumentList.Add("-dedicated");
+            if (_insecureMode)
+            {
+                startInfo.ArgumentList.Add("-insecure");
+            }
             // Bind to every interface so clients reaching the host over any
             // network (ZeroTier, LAN, Wi-Fi) can connect. Only pin "-ip" when a
             // specific bind address is explicitly configured (and it is not the
@@ -105,29 +115,43 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
             startInfo.ArgumentList.Add(port.ToString(System.Globalization.CultureInfo.InvariantCulture));
             startInfo.ArgumentList.Add("+tv_port");
             startInfo.ArgumentList.Add((port + _tvPortOffset).ToString(System.Globalization.CultureInfo.InvariantCulture));
+            startInfo.ArgumentList.Add("+sv_lan");
+            startInfo.ArgumentList.Add("0");
             startInfo.ArgumentList.Add("+map");
             startInfo.ArgumentList.Add(map);
             startInfo.ArgumentList.Add("-console");
             startInfo.ArgumentList.Add("-vconsole");
-            startInfo.ArgumentList.Add("-condebug");
-            startInfo.ArgumentList.Add("-conclearlog");
             startInfo.ArgumentList.Add("-novid");
             startInfo.Environment["SKYNET_DEDICATED_LOBBY_ID"] = lobbyId.ToString(System.Globalization.CultureInfo.InvariantCulture);
             startInfo.Environment["SKYNET_DEDICATED_PORT"] = port.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            startInfo.Environment["SKYNET_PROCESS_ROLE"] = "dedicated";
+            startInfo.Environment["SKYNET_LOG_SUFFIX"] = $"dedicated_{lobbyId}_{port}";
+            startInfo.Environment["SKYNET_DEDICATED_INSECURE"] = _insecureMode ? "1" : "0";
 
             try
             {
+                Directory.CreateDirectory(_diagnosticsDirectory);
+                var outputPath = Path.Combine(_diagnosticsDirectory, $"dota_dedicated_{lobbyId}_{port}_stdout.log");
+                var errorPath = Path.Combine(_diagnosticsDirectory, $"dota_dedicated_{lobbyId}_{port}_stderr.log");
+                File.WriteAllText(outputPath, string.Empty);
+                File.WriteAllText(errorPath, string.Empty);
+
                 var process = Process.Start(startInfo);
                 if (process == null)
                 {
                     return DedicatedLaunchResult.Failed("Process.Start returned no dedicated process.");
                 }
 
+                process.OutputDataReceived += (_, args) => AppendProcessLine(outputPath, args.Data);
+                process.ErrorDataReceived += (_, args) => AppendProcessLine(errorPath, args.Data);
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+
                 var reservation = new DedicatedReservation(lobbyId, port, map, process, DateTime.UtcNow);
                 _reservations[lobbyId] = reservation;
                 _logger.LogInformation(
-                    "Started Dota dedicated server pid {ProcessId} for lobby {LobbyId} on port {Port} map {Map}",
-                    process.Id, lobbyId, port, map);
+                    "Started Dota dedicated server pid {ProcessId} for lobby {LobbyId} on port {Port} map {Map}. Args: {Arguments}. Stdout: {StdoutPath}. Stderr: {StderrPath}",
+                    process.Id, lobbyId, port, map, string.Join(" ", startInfo.ArgumentList), outputPath, errorPath);
                 return new DedicatedLaunchResult(true, port, reservation.State, string.Empty);
             }
             catch (Exception ex)
@@ -353,6 +377,22 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Could not stop dedicated Dota process for lobby {LobbyId}", reservation.LobbyId);
+        }
+    }
+
+    private static void AppendProcessLine(string path, string? line)
+    {
+        if (line == null)
+        {
+            return;
+        }
+
+        try
+        {
+            File.AppendAllText(path, line + Environment.NewLine);
+        }
+        catch
+        {
         }
     }
 

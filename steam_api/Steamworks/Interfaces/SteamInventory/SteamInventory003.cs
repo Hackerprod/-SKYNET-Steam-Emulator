@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 
 using SteamInventoryResult_t = System.UInt32;
 using SteamItemInstanceID_t = System.UInt64;
@@ -15,14 +16,16 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamInventory.GetResultStatus(resultHandle);
         }
 
-        public bool GetResultItems(IntPtr _, uint resultHandle, IntPtr pOutItemsArray, uint punOutItemsArraySize)
+        public bool GetResultItems(IntPtr _, uint resultHandle, IntPtr pOutItemsArray, IntPtr punOutItemsArraySize)
         {
-            return SteamEmulator.SteamInventory.GetResultItems(resultHandle, pOutItemsArray, punOutItemsArraySize);
+            WriteUInt32(punOutItemsArraySize, 0);
+            return SteamEmulator.SteamInventory.GetResultItems(resultHandle, pOutItemsArray, 0);
         }
 
-        public bool GetResultItemProperty(IntPtr _, uint resultHandle, uint unItemIndex, string pchPropertyName, IntPtr pchValueBuffer, uint punValueBufferSizeOut)
+        public bool GetResultItemProperty(IntPtr _, uint resultHandle, uint unItemIndex, string pchPropertyName, IntPtr pchValueBuffer, IntPtr punValueBufferSizeOut)
         {
-            return SteamEmulator.SteamInventory.GetResultItemProperty(resultHandle, unItemIndex, pchPropertyName, pchValueBuffer, punValueBufferSizeOut);
+            WriteUInt32(punValueBufferSizeOut, 0);
+            return SteamEmulator.SteamInventory.GetResultItemProperty(resultHandle, unItemIndex, pchPropertyName, pchValueBuffer, 0);
         }
 
         public uint GetResultTimestamp(IntPtr _, uint resultHandle)
@@ -40,59 +43,70 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamInventory.DestroyResult(resultHandle);
         }
 
-        public bool GetAllItems(IntPtr _, uint pResultHandle)
+        public bool GetAllItems(IntPtr _, IntPtr pResultHandle)
         {
-            return SteamEmulator.SteamInventory.GetAllItems(pResultHandle);
+            WriteInt32(pResultHandle, 0);
+            return SteamEmulator.SteamInventory.GetAllItems(0);
         }
 
-        public bool GetItemsByID(IntPtr _, uint pResultHandle, ref ulong pInstanceIDs, uint unCountInstanceIDs)
+        public bool GetItemsByID(IntPtr _, IntPtr pResultHandle, IntPtr pInstanceIDs, uint unCountInstanceIDs)
         {
-            return SteamEmulator.SteamInventory.GetItemsByID(pResultHandle, ref  pInstanceIDs, unCountInstanceIDs);
+            WriteInt32(pResultHandle, 0);
+            return false;
         }
 
-        public bool SerializeResult(IntPtr _, uint resultHandle, IntPtr pOutBuffer, uint punOutBufferSize)
+        public bool SerializeResult(IntPtr _, uint resultHandle, IntPtr pOutBuffer, IntPtr punOutBufferSize)
         {
-            return SteamEmulator.SteamInventory.SerializeResult(resultHandle, pOutBuffer, punOutBufferSize);
+            WriteUInt32(punOutBufferSize, 0);
+            return SteamEmulator.SteamInventory.SerializeResult(resultHandle, pOutBuffer, 0);
         }
 
-        public bool DeserializeResult(IntPtr _, uint pOutResultHandle, IntPtr pBuffer, uint unBufferSize, bool bRESERVED_MUST_BE_FALSE = false)
+        public bool DeserializeResult(IntPtr _, IntPtr pOutResultHandle, IntPtr pBuffer, uint unBufferSize, bool bRESERVED_MUST_BE_FALSE = false)
         {
-            return SteamEmulator.SteamInventory.DeserializeResult(pOutResultHandle, pBuffer, unBufferSize, false);
+            WriteInt32(pOutResultHandle, 0);
+            return false;
         }
 
-        public bool GenerateItems(IntPtr _, uint pResultHandle, IntPtr pArrayItemDefs, IntPtr punArrayQuantity, uint unArrayLength)
+        public bool GenerateItems(IntPtr _, IntPtr pResultHandle, IntPtr pArrayItemDefs, IntPtr punArrayQuantity, uint unArrayLength)
         {
-            return SteamEmulator.SteamInventory.GenerateItems(pResultHandle, pArrayItemDefs, punArrayQuantity, unArrayLength);
+            WriteInt32(pResultHandle, 0);
+            return SteamEmulator.SteamInventory.GenerateItems(0, pArrayItemDefs, punArrayQuantity, unArrayLength);
         }
 
-        public bool GrantPromoItems(IntPtr _, uint pResultHandle)
+        public bool GrantPromoItems(IntPtr _, IntPtr pResultHandle)
         {
-            return SteamEmulator.SteamInventory.GrantPromoItems(pResultHandle);
+            WriteInt32(pResultHandle, 0);
+            return SteamEmulator.SteamInventory.GrantPromoItems(0);
         }
 
-        public bool AddPromoItem(IntPtr _, uint pResultHandle, uint itemDef)
+        public bool AddPromoItem(IntPtr _, IntPtr pResultHandle, uint itemDef)
         {
-            return SteamEmulator.SteamInventory.AddPromoItem(pResultHandle, itemDef);
+            WriteInt32(pResultHandle, 0);
+            return SteamEmulator.SteamInventory.AddPromoItem(0, itemDef);
         }
 
-        public bool AddPromoItems(IntPtr _, uint pResultHandle, IntPtr pArrayItemDefs, uint unArrayLength)
+        public bool AddPromoItems(IntPtr _, IntPtr pResultHandle, IntPtr pArrayItemDefs, uint unArrayLength)
         {
-            return SteamEmulator.SteamInventory.AddPromoItems(pResultHandle, pArrayItemDefs, unArrayLength);
+            WriteInt32(pResultHandle, 0);
+            return SteamEmulator.SteamInventory.AddPromoItems(0, pArrayItemDefs, unArrayLength);
         }
 
-        public bool ConsumeItem(IntPtr _, uint pResultHandle, ulong itemConsume, uint unQuantity)
+        public bool ConsumeItem(IntPtr _, IntPtr pResultHandle, ulong itemConsume, uint unQuantity)
         {
-            return SteamEmulator.SteamInventory.ConsumeItem(pResultHandle, itemConsume, unQuantity);
+            WriteInt32(pResultHandle, 0);
+            return SteamEmulator.SteamInventory.ConsumeItem(0, itemConsume, unQuantity);
         }
 
-        public bool ExchangeItems(IntPtr _, ref SteamInventoryResult_t pResultHandle, ref SteamItemDef_t[] pArrayGenerate, ref uint[] punArrayGenerateQuantity, uint unArrayGenerateLength, ref SteamItemInstanceID_t[] pArrayDestroy, ref uint[] punArrayDestroyQuantity, uint unArrayDestroyLength)
+        public bool ExchangeItems(IntPtr _, IntPtr pResultHandle, IntPtr pArrayGenerate, IntPtr punArrayGenerateQuantity, uint unArrayGenerateLength, IntPtr pArrayDestroy, IntPtr punArrayDestroyQuantity, uint unArrayDestroyLength)
         {
-            return SteamEmulator.SteamInventory.ExchangeItems(ref pResultHandle, ref pArrayGenerate, ref punArrayGenerateQuantity, unArrayGenerateLength, ref pArrayDestroy, ref punArrayDestroyQuantity, unArrayDestroyLength);
+            WriteInt32(pResultHandle, 0);
+            return false;
         }
 
-        public bool TransferItemQuantity(IntPtr _, uint pResultHandle, ulong itemIdSource, uint unQuantity, ulong itemIdDest)
+        public bool TransferItemQuantity(IntPtr _, IntPtr pResultHandle, ulong itemIdSource, uint unQuantity, ulong itemIdDest)
         {
-            return SteamEmulator.SteamInventory.TransferItemQuantity(pResultHandle, itemIdSource, unQuantity, itemIdDest);
+            WriteInt32(pResultHandle, 0);
+            return SteamEmulator.SteamInventory.TransferItemQuantity(0, itemIdSource, unQuantity, itemIdDest);
         }
 
         public void SendItemDropHeartbeat(IntPtr _)
@@ -100,14 +114,16 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamInventory.SendItemDropHeartbeat();
         }
 
-        public bool TriggerItemDrop(IntPtr _, uint pResultHandle, uint dropListDefinition)
+        public bool TriggerItemDrop(IntPtr _, IntPtr pResultHandle, uint dropListDefinition)
         {
-            return SteamEmulator.SteamInventory.TriggerItemDrop(pResultHandle, dropListDefinition);
+            WriteInt32(pResultHandle, 0);
+            return SteamEmulator.SteamInventory.TriggerItemDrop(0, dropListDefinition);
         }
 
-        public bool TradeItems(IntPtr _, uint pResultHandle, ulong steamIDTradePartner, IntPtr pArrayGive, IntPtr pArrayGiveQuantity, uint nArrayGiveLength, IntPtr pArrayGet, IntPtr pArrayGetQuantity, uint nArrayGetLength )
+        public bool TradeItems(IntPtr _, IntPtr pResultHandle, ulong steamIDTradePartner, IntPtr pArrayGive, IntPtr pArrayGiveQuantity, uint nArrayGiveLength, IntPtr pArrayGet, IntPtr pArrayGetQuantity, uint nArrayGetLength )
     {
-            return SteamEmulator.SteamInventory.TradeItems(pResultHandle, steamIDTradePartner, pArrayGive, pArrayGiveQuantity, nArrayGiveLength, pArrayGet, pArrayGetQuantity, nArrayGetLength);
+            WriteInt32(pResultHandle, 0);
+            return SteamEmulator.SteamInventory.TradeItems(0, steamIDTradePartner, pArrayGive, pArrayGiveQuantity, nArrayGiveLength, pArrayGet, pArrayGetQuantity, nArrayGetLength);
         }
 
         public bool LoadItemDefinitions(IntPtr _)
@@ -115,14 +131,16 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamInventory.LoadItemDefinitions();
         }
 
-        public bool GetItemDefinitionIDs(IntPtr _, IntPtr pItemDefIDs, uint punItemDefIDsArraySize )
+        public bool GetItemDefinitionIDs(IntPtr _, IntPtr pItemDefIDs, IntPtr punItemDefIDsArraySize )
     {
-            return SteamEmulator.SteamInventory.GetItemDefinitionIDs(pItemDefIDs, punItemDefIDsArraySize);
+            WriteUInt32(punItemDefIDsArraySize, 0);
+            return SteamEmulator.SteamInventory.GetItemDefinitionIDs(pItemDefIDs, 0);
         }
 
-        public bool GetItemDefinitionProperty(IntPtr _, uint iDefinition, string pchPropertyName, IntPtr pchValueBuffer, uint punValueBufferSizeOut)
+        public bool GetItemDefinitionProperty(IntPtr _, uint iDefinition, string pchPropertyName, IntPtr pchValueBuffer, IntPtr punValueBufferSizeOut)
         {
-            return SteamEmulator.SteamInventory.GetItemDefinitionProperty(iDefinition, pchPropertyName, pchValueBuffer, punValueBufferSizeOut);
+            WriteUInt32(punValueBufferSizeOut, 0);
+            return SteamEmulator.SteamInventory.GetItemDefinitionProperty(iDefinition, pchPropertyName, pchValueBuffer, 0);
         }
 
         public ulong RequestEligiblePromoItemDefinitionsIDs(IntPtr _, ulong steamID)
@@ -130,9 +148,10 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamInventory.RequestEligiblePromoItemDefinitionsIDs(steamID);
         }
 
-        public bool GetEligiblePromoItemDefinitionIDs(IntPtr _, ulong steamID, IntPtr pItemDefIDs, uint punItemDefIDsArraySize )
+        public bool GetEligiblePromoItemDefinitionIDs(IntPtr _, ulong steamID, IntPtr pItemDefIDs, IntPtr punItemDefIDsArraySize )
     {
-            return SteamEmulator.SteamInventory.GetEligiblePromoItemDefinitionIDs(steamID, pItemDefIDs, punItemDefIDsArraySize);
+            WriteUInt32(punItemDefIDsArraySize, 0);
+            return SteamEmulator.SteamInventory.GetEligiblePromoItemDefinitionIDs(steamID, pItemDefIDs, 0);
         }
 
         public ulong StartPurchase(IntPtr _, IntPtr pArrayItemDefs, IntPtr punArrayQuantity, uint unArrayLength)
@@ -150,14 +169,14 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamInventory.GetNumItemsWithPrices();
         }
 
-        public bool GetItemsWithPrices(IntPtr _, IntPtr pArrayItemDefs, IntPtr pCurrentPrices, ulong pBasePrices, uint unArrayLength)
+        public bool GetItemsWithPrices(IntPtr _, IntPtr pArrayItemDefs, IntPtr pCurrentPrices, IntPtr pBasePrices, uint unArrayLength)
         {
-            return SteamEmulator.SteamInventory.GetItemsWithPrices(pArrayItemDefs, pCurrentPrices, pBasePrices, unArrayLength);
+            return SteamEmulator.SteamInventory.GetItemsWithPrices(pArrayItemDefs, pCurrentPrices, 0, unArrayLength);
         }
 
-        public bool GetItemPrice(IntPtr _, uint iDefinition, ulong pCurrentPrice, ulong pBasePrice)
+        public bool GetItemPrice(IntPtr _, uint iDefinition, IntPtr pCurrentPrice, IntPtr pBasePrice)
         {
-            return SteamEmulator.SteamInventory.GetItemPrice(iDefinition, pCurrentPrice, pBasePrice);
+            return SteamEmulator.SteamInventory.GetItemPrice(iDefinition, 0, 0);
         }
 
         public ulong StartUpdateProperties(IntPtr _)
@@ -170,34 +189,49 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamInventory.RemoveProperty(handle, nItemID, pchPropertyName);
         }
 
-        public bool SetProperty(IntPtr _, ulong handle, ulong nItemID, string pchPropertyName, string pchPropertyValue)
+        public bool SetPropertyString(IntPtr _, ulong handle, ulong nItemID, string pchPropertyName, string pchPropertyValue)
         {
             return SteamEmulator.SteamInventory.SetProperty(handle, nItemID, pchPropertyName, pchPropertyValue);
         }
 
-        public bool SetProperty(IntPtr _, ulong handle, ulong nItemID, string pchPropertyName, bool bValue)
+        public bool SetPropertyBool(IntPtr _, ulong handle, ulong nItemID, string pchPropertyName, bool bValue)
         {
             return SteamEmulator.SteamInventory.SetProperty(handle, nItemID, pchPropertyName, bValue);
         }
 
-        public bool SetProperty(IntPtr _, ulong handle, ulong nItemID, string pchPropertyName, long nValue)
+        public bool SetPropertyInt64(IntPtr _, ulong handle, ulong nItemID, string pchPropertyName, long nValue)
         {
             return SteamEmulator.SteamInventory.SetProperty(handle, nItemID, pchPropertyName, nValue);
         }
 
-        public bool SetProperty(IntPtr _, ulong handle, ulong nItemID, string pchPropertyName, float flValue)
+        public bool SetPropertyFloat(IntPtr _, ulong handle, ulong nItemID, string pchPropertyName, float flValue)
         {
             return SteamEmulator.SteamInventory.SetProperty(handle, nItemID, pchPropertyName, flValue);
         }
 
-        public bool SubmitUpdateProperties(IntPtr _, ulong handle, uint pResultHandle)
+        public bool SubmitUpdateProperties(IntPtr _, ulong handle, IntPtr pResultHandle)
         {
-            return SteamEmulator.SteamInventory.SubmitUpdateProperties(handle, pResultHandle);
+            WriteInt32(pResultHandle, 0);
+            return SteamEmulator.SteamInventory.SubmitUpdateProperties(handle, 0);
         }
 
-        public bool InspectItem(IntPtr _, uint pResultHandle, string pchItemToken)
+        public bool InspectItem(IntPtr _, IntPtr pResultHandle, string pchItemToken)
         {
-            return SteamEmulator.SteamInventory.InspectItem(pResultHandle, pchItemToken);
+            WriteInt32(pResultHandle, 0);
+            return SteamEmulator.SteamInventory.InspectItem(0, pchItemToken);
+        }
+
+        private static void WriteInt32(IntPtr destination, int value)
+        {
+            if (destination != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(destination, value);
+            }
+        }
+
+        private static void WriteUInt32(IntPtr destination, uint value)
+        {
+            WriteInt32(destination, unchecked((int)value));
         }
     }
 }

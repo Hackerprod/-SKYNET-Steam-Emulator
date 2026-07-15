@@ -17,7 +17,19 @@ namespace SKYNET.Helpers
         public static void Initialize()
         {
             var LogPath = Path.Combine(Common.GetPath(), "SKYNET");
-            fileName = Path.Combine(LogPath, "steam_api.log");
+            var suffix = Environment.GetEnvironmentVariable("SKYNET_LOG_SUFFIX");
+            var logName = "steam_api.log";
+            if (!string.IsNullOrWhiteSpace(suffix))
+            {
+                foreach (var invalid in Path.GetInvalidFileNameChars())
+                {
+                    suffix = suffix.Replace(invalid, '_');
+                }
+
+                logName = $"steam_api.{suffix}.log";
+            }
+
+            fileName = Path.Combine(LogPath, logName);
             Common.EnsureDirectoryExists(LogPath);
             Clean();
             Initialized = true;

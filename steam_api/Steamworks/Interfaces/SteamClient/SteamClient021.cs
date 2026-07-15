@@ -8,8 +8,6 @@ using SKYNET.Steamworks.Interfaces;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("SteamClient021")]
-    [Interface("SteamClient022")]
     [Interface("SteamClient023")]
     public class SteamClient021 : ISteamInterface
     {
@@ -49,7 +47,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamClient.GetISteamGameServer(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public void SetLocalIPBinding(IntPtr _, uint unIP, ushort usPort)
+        public void SetLocalIPBinding(IntPtr _, IntPtr unIP, ushort usPort)
         {
             SteamEmulator.SteamClient.SetLocalIPBinding(unIP, usPort);
         }
@@ -109,9 +107,9 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamClient.GetISteamScreenshots(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public IntPtr GetISteamGameSearch(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
+        public void RunFrame(IntPtr _)
         {
-            return SteamEmulator.SteamClient.GetISteamGameSearch(hSteamUser, hSteamPipe, pchVersion);
+            SteamEmulator.SteamClient.RunFrame();
         }
 
         public uint GetIPCCallCount(IntPtr _)
@@ -149,14 +147,24 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamClient.GetISteamMusic(hSteamUser, hSteamPipe, pchVersion);
         }
 
-        public IntPtr GetISteamMusicRemote(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
-        {
-            return SteamEmulator.SteamClient.GetISteamMusicRemote(hSteamUser, hSteamPipe, pchVersion);
-        }
-
         public IntPtr GetISteamHTMLSurface(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {
             return SteamEmulator.SteamClient.GetISteamHTMLSurface(hSteamUser, hSteamPipe, pchVersion);
+        }
+
+        public void DEPRECATED_Set_SteamAPI_CPostAPIResultInProcess(IntPtr _, IntPtr arg0)
+        {
+            SteamEmulator.SteamClient.DEPRECATED_Set_SteamAPI_CPostAPIResultInProcess(arg0);
+        }
+
+        public void DEPRECATED_Remove_SteamAPI_CPostAPIResultInProcess(IntPtr _, IntPtr arg0)
+        {
+            SteamEmulator.SteamClient.DEPRECATED_Remove_SteamAPI_CPostAPIResultInProcess(arg0);
+        }
+
+        public void Set_SteamAPI_CCheckCallbackRegisteredInProcess(IntPtr _, IntPtr arg0)
+        {
+            SteamEmulator.SteamClient.Set_SteamAPI_CCheckCallbackRegisteredInProcess(arg0);
         }
 
         public IntPtr GetISteamInventory(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)

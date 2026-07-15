@@ -744,6 +744,11 @@ public sealed partial class SteamApiStateService
         string privateIpValue,
         string fallbackIp)
     {
+        if (IsLoopbackClient(clientIp))
+        {
+            return "127.0.0.1";
+        }
+
         // Prefer a host-local interface on the same subnet as the requesting client.
         // A multi-homed host (WiFi + ZeroTier) must advertise the address that client
         // can actually route to, not a single hardcoded interface. This takes priority
@@ -794,17 +799,27 @@ public sealed partial class SteamApiStateService
     {
         var ordered = new List<string>();
 
-        void Add(string? value)
+        void Add(string? value, bool allowLoopback = false)
         {
             if (string.IsNullOrWhiteSpace(value) ||
                 !IPAddress.TryParse(value.Trim(), out var parsed) ||
-                parsed.AddressFamily != AddressFamily.InterNetwork ||
-                !IsUsableIPv4(ToUInt32(parsed)))
+                parsed.AddressFamily != AddressFamily.InterNetwork)
             {
                 return;
             }
 
-            var text = parsed.ToString();
+            var isLoopback = IPAddress.IsLoopback(parsed);
+            if (isLoopback && !allowLoopback)
+            {
+                return;
+            }
+
+            if (!isLoopback && !IsUsableIPv4(ToUInt32(parsed)))
+            {
+                return;
+            }
+
+            var text = isLoopback ? "127.0.0.1" : parsed.ToString();
             if (!ordered.Contains(text))
             {
                 ordered.Add(text);
@@ -812,6 +827,11 @@ public sealed partial class SteamApiStateService
         }
 
         // 1) Best single match (subnet-aware → configured → CMsgGameServerInfo chain).
+        if (IsLoopbackClient(clientIp))
+        {
+            Add("127.0.0.1", allowLoopback: true);
+        }
+
         Add(ResolveDotaGameServerConnectIp(clientIp, publicIpValue, privateIpValue, fallbackIp));
 
         // 2) The configured/advertised address so LAN peers always have it explicitly.
@@ -863,6 +883,17 @@ public sealed partial class SteamApiStateService
         }
 
         return result;
+    }
+
+    private static bool IsLoopbackClient(string? clientIp)
+    {
+        if (string.IsNullOrWhiteSpace(clientIp) ||
+            !IPAddress.TryParse(clientIp.Trim(), out var parsed))
+        {
+            return false;
+        }
+
+        return IPAddress.IsLoopback(parsed);
     }
 
     private bool TryGetConfiguredAdvertisedGameServerIp(out uint ip)

@@ -410,6 +410,7 @@ public sealed class ApiGameServer
     public int Port { get; set; }
     public int QueryPort { get; set; }
     public uint Flags { get; set; }
+    public byte Secure { get; set; }
     public string VersionString { get; set; } = string.Empty;
     public string Product { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;

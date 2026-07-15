@@ -470,6 +470,10 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
 
     public bool PracticeLobbyLaunch()
     {
+        ulong lobbyId = 0;
+        string map = string.Empty;
+        bool shouldStartDedicated = false;
+
         lock (PracticeLobbySync)
         {
             if (TryGetCurrentLobbyLocked(out var lobby, out _))
@@ -482,6 +486,35 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
                 RefreshLobbyVersion(lobby);
                 BroadcastLobbyUpdateLocked(lobby);
                 PublishLobbySnapshotLocked(lobby);
+
+                lobbyId = lobby.LobbyId;
+                map = string.IsNullOrWhiteSpace(lobby.CustomMapName) ? "dota" : lobby.CustomMapName;
+                shouldStartDedicated = !lobby.Lan;
+            }
+        }
+
+        if (shouldStartDedicated && lobbyId != 0)
+        {
+            var result = DedicatedServerStart?.Invoke(lobbyId, map);
+            lock (PracticeLobbySync)
+            {
+                if (PracticeLobbies.TryGetValue(lobbyId, out var lobby))
+                {
+                    if (result != null && result.Started)
+                    {
+                        lobby.ServerPort = (uint)result.Port;
+                        Console.WriteLine($"[SKYNET][dedicated] started lobby={lobbyId} port={result.Port} state={result.State}");
+                    }
+                    else
+                    {
+                        lobby.State = LobbyStateUi;
+                        Console.WriteLine($"[SKYNET][dedicated] start failed lobby={lobbyId}: {result?.Error ?? "supervisor unavailable"}");
+                    }
+
+                    RefreshLobbyVersion(lobby);
+                    BroadcastLobbyUpdateLocked(lobby);
+                    PublishLobbySnapshotLocked(lobby);
+                }
             }
         }
 

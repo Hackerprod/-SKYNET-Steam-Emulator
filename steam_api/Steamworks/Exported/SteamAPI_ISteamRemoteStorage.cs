@@ -194,14 +194,14 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamRemoteStorage_GetUGCDownloadProgress(IntPtr _, UGCHandle_t hContent, int pnBytesDownloaded, int pnBytesExpected)
+        public static bool SteamAPI_ISteamRemoteStorage_GetUGCDownloadProgress(IntPtr _, UGCHandle_t hContent, IntPtr pnBytesDownloaded, IntPtr pnBytesExpected)
         {
             Write("SteamAPI_ISteamRemoteStorage_GetUGCDownloadProgress");
             return SteamEmulator.SteamRemoteStorage.GetUGCDownloadProgress(hContent, pnBytesDownloaded, pnBytesExpected);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamRemoteStorage_GetUGCDetails(IntPtr _, UGCHandle_t hContent, uint pnAppID, string ppchName, int pnFileSizeInBytes, ulong pSteamIDOwner)
+        public static bool SteamAPI_ISteamRemoteStorage_GetUGCDetails(IntPtr _, UGCHandle_t hContent, IntPtr pnAppID, IntPtr ppchName, IntPtr pnFileSizeInBytes, IntPtr pSteamIDOwner)
         {
             Write("SteamAPI_ISteamRemoteStorage_GetUGCDetails");
             return SteamEmulator.SteamRemoteStorage.GetUGCDetails(hContent, pnAppID, ppchName, pnFileSizeInBytes, pSteamIDOwner);
@@ -416,4 +416,3 @@ namespace SKYNET.Steamworks.Exported
         }
     }
 }
-

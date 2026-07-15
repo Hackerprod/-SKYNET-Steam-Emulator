@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Interfaces
 {
@@ -15,7 +16,7 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamVideo.GetVideoURL(unVideoAppID);
         }
 
-        public bool IsBroadcasting(IntPtr _, int pnNumViewers)
+        public bool IsBroadcasting(IntPtr _, IntPtr pnNumViewers)
         {
             return SteamEmulator.SteamVideo.IsBroadcasting(pnNumViewers);
         }
@@ -25,7 +26,7 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamVideo.GetOPFSettings(unVideoAppID);
         }
 
-        public bool GetOPFStringForApp(IntPtr _, uint unVideoAppID, string pchBuffer, int pnBufferSize)
+        public bool GetOPFStringForApp(IntPtr _, uint unVideoAppID, IntPtr pchBuffer, IntPtr pnBufferSize)
         {
             return SteamEmulator.SteamVideo.GetOPFStringForApp(unVideoAppID, pchBuffer, pnBufferSize);
         }

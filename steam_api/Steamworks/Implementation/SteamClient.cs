@@ -61,9 +61,21 @@ namespace SKYNET.Steamworks.Implementation
             return InterfaceManager.FindOrCreateInterface(hSteamUser, hSteamPipe, pchVersion, true);
         }
 
+        public void SetLocalIPBinding(IntPtr unIP, ushort usPort)
+        {
+            if (unIP == IntPtr.Zero)
+            {
+                Write($"SetLocalIPBinding null:{usPort}");
+                return;
+            }
+
+            SteamIPAddress_t address = Marshal.PtrToStructure<SteamIPAddress_t>(unIP);
+            Write($"SetLocalIPBinding {address}:{usPort}");
+        }
+
         public void SetLocalIPBinding(UInt32 unIP, uint usPort)
         {
-            Write("SetLocalIPBinding");
+            Write($"SetLocalIPBinding legacy {unIP}:{usPort}");
         }
 
         public IntPtr GetISteamFriends(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)

@@ -6,7 +6,7 @@ using RemotePlaySessionID_t = System.UInt32;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("STEAMREMOTEPLAY_INTERFACE_VERSION003")]
+    [Interface("STEAMREMOTEPLAY_INTERFACE_VERSION004")]
     public class SteamRemotePlay003 : ISteamInterface
     {
         public uint GetSessionCount(IntPtr _)
@@ -19,14 +19,39 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamRemotePlay.GetSessionID(iSessionIndex);
         }
 
-        public IntPtr GetSessionSteamID(IntPtr _, IntPtr pSteamID, RemotePlaySessionID_t unSessionID)
+        public bool BSessionRemotePlayTogether(IntPtr _, RemotePlaySessionID_t unSessionID)
         {
-            return NativeSteamId.Write(pSteamID, SteamEmulator.SteamRemotePlay.GetSessionSteamID(unSessionID));
+            return SteamEmulator.SteamRemotePlay.BSessionRemotePlayTogether(unSessionID);
         }
 
-        public string GetSessionClientName(IntPtr _, RemotePlaySessionID_t unSessionID)
+        public IntPtr GetSessionSteamID(IntPtr _, IntPtr ret, RemotePlaySessionID_t unSessionID)
         {
-            return SteamEmulator.SteamRemotePlay.GetSessionClientName(unSessionID);
+            return NativeSteamId.Write(ret, SteamEmulator.SteamRemotePlay.GetSessionSteamID(unSessionID));
+        }
+
+        public uint GetSessionGuestID(IntPtr _, RemotePlaySessionID_t unSessionID)
+        {
+            return SteamEmulator.SteamRemotePlay.GetSessionGuestID(unSessionID);
+        }
+
+        public int GetSmallSessionAvatar(IntPtr _, RemotePlaySessionID_t unSessionID)
+        {
+            return SteamEmulator.SteamRemotePlay.GetSmallSessionAvatar(unSessionID);
+        }
+
+        public int GetMediumSessionAvatar(IntPtr _, RemotePlaySessionID_t unSessionID)
+        {
+            return SteamEmulator.SteamRemotePlay.GetMediumSessionAvatar(unSessionID);
+        }
+
+        public int GetLargeSessionAvatar(IntPtr _, RemotePlaySessionID_t unSessionID)
+        {
+            return SteamEmulator.SteamRemotePlay.GetLargeSessionAvatar(unSessionID);
+        }
+
+        public IntPtr GetSessionClientName(IntPtr _, RemotePlaySessionID_t unSessionID)
+        {
+            return NativeStringCache.ToUtf8Ptr(SteamEmulator.SteamRemotePlay.GetSessionClientName(unSessionID));
         }
 
         public int GetSessionClientFormFactor(IntPtr _, RemotePlaySessionID_t unSessionID)
@@ -34,7 +59,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamRemotePlay.GetSessionClientFormFactor(unSessionID);
         }
 
-        public bool BGetSessionClientResolution(IntPtr _, RemotePlaySessionID_t unSessionID, int pnResolutionX, int pnResolutionY)
+        public bool BGetSessionClientResolution(IntPtr _, RemotePlaySessionID_t unSessionID, IntPtr pnResolutionX, IntPtr pnResolutionY)
         {
             return SteamEmulator.SteamRemotePlay.BGetSessionClientResolution(unSessionID, pnResolutionX, pnResolutionY);
         }
