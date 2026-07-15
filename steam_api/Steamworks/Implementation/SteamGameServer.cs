@@ -74,18 +74,10 @@ namespace SKYNET.Steamworks.Implementation
 
             }
 
-            // TODO: Necessary
-            GSPolicyResponse_t Policy = new GSPolicyResponse_t()
-            {
-                Secure = ServerData.Secure
-            };
-
             if (SkyNetApiClient.IsEnabled)
             {
                 QueueRegisterGameServer();
             }
-
-            CallbackManager.AddCallbackGameServer(Policy);
 
             return true;
         }
@@ -553,21 +545,11 @@ namespace SKYNET.Steamworks.Implementation
         private void EmitSecurePolicy()
         {
             EnsureEffectiveSecure();
-            var steamId = (ulong)SteamEmulator.SteamID;
+            // Auth approval belongs to ticket validation paths.  Policy only reports
+            // whether Steam considers this game server VAC-secure.
             CallbackManager.AddCallbackGameServer(new GSPolicyResponse_t
             {
                 Secure = ServerData.Secure
-            });
-            CallbackManager.AddCallbackGameServer(new ValidateAuthTicketResponse_t
-            {
-                m_SteamID = steamId,
-                m_OwnerSteamID = steamId,
-                m_eAuthSessionResponse = EAuthSessionResponse.OK
-            });
-            CallbackManager.AddCallbackGameServer(new GSClientApprove_t
-            {
-                SteamID = steamId,
-                OwnerSteamID = steamId
             });
         }
 

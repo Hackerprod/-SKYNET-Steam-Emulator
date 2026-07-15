@@ -6,6 +6,7 @@ DOTA.state = DOTA.state or {
     seq = 0,
     match_seq = 0
 }
+DOTA.state.closed_lobbies_by_steam = DOTA.state.closed_lobbies_by_steam or {}
 
 local LOBBY_OBJECT_TYPE = 2004
 local LOBBY_INVITE_OBJECT_TYPE = 2013
@@ -22,6 +23,7 @@ local TEAM_NONE = 5
 local LOBBY_UI = 0
 local LOBBY_SERVER_SETUP = 1
 local LOBBY_RUN = 2
+local LOBBY_POSTGAME = 3
 local LOBBY_SERVER_ASSIGN = 6
 
 local GAME_INIT = 0
@@ -49,6 +51,7 @@ local JOIN_FULL = 9
 
 local MAX_MEMBERS = 20
 local LOBBY_TIMEOUT_SECONDS = 3600
+local POSTGAME_CLEANUP_SECONDS = 45
 local RECONNECT_TIMEOUT_SECONDS = 600
 local ACTIVE_EVENT_ID = 54
 
@@ -240,13 +243,19 @@ local function member_order(lobby)
 end
 
 local function lobby_object(lobby)
+    local running_with_direct_connect = (lobby.state or LOBBY_UI) == LOBBY_RUN and
+        lobby.connect ~= nil and lobby.connect ~= ""
+    -- Dota treats direct-connect RUN lobbies without Valve VAC policy as LAN
+    -- transport for UI/auth warning purposes.  Keep lobby.lan semantic state
+    -- unchanged; this only affects the serialized RUN cache sent to clients.
+    local encoded_lan = (lobby.lan or running_with_direct_connect) and 1 or 0
     local parts = {
         PB.vs(1, lobby.id),
         PB.v(3, lobby.game_mode or 1),
         PB.v(4, lobby.state or LOBBY_UI),
         PB.f64s(11, lobby.leader_steam),
         PB.v(12, 1),
-        PB.v(13, 0),
+        PB.v(13, lobby.allow_cheats and 1 or 0),
         PB.v(14, 0),
         PB.str(16, lobby.name or "Room 1"),
         PB.v(21, lobby.region or 0),
@@ -261,7 +270,7 @@ local function lobby_object(lobby)
         PB.v(48, 0),
         PB.v(51, 0),
         PB.v(53, lobby.dota_tv_delay or 0),
-        PB.v(57, lobby.lan and 1 or 0),
+        PB.v(57, encoded_lan),
         PB.bytes(62, selection_priority_rule(lobby)),
         PB.v(75, lobby.visibility or 0),
         PB.v(82, 0),
@@ -285,12 +294,20 @@ local function lobby_object(lobby)
         parts[#parts + 1] = PB.str(5, lobby.connect)
     end
 
+    if running_with_direct_connect then
+        parts[#parts + 1] = PB.v(65, 0)
+    end
+
     if lobby.server_steam ~= nil and lobby.server_steam ~= "0" then
         parts[#parts + 1] = PB.f64s(6, lobby.server_steam)
     end
 
     if lobby.match_id ~= nil and lobby.match_id ~= "0" then
         parts[#parts + 1] = PB.vs(30, lobby.match_id)
+    end
+
+    if lobby.match_outcome ~= nil and lobby.match_outcome ~= 0 then
+        parts[#parts + 1] = PB.v(70, lobby.match_outcome)
     end
 
     if (lobby.game_start_time or 0) ~= 0 then
@@ -482,6 +499,45 @@ local function queue_proto(steam, message_type, payload)
     end
 
     return gc.QueueToString(steam, message_type, payload)
+end
+
+local function remember_closed_lobby(steam, lobby_id)
+    steam = tostring(steam or "0")
+    lobby_id = tostring(lobby_id or "0")
+    if steam == "0" or lobby_id == "0" then
+        return
+    end
+
+    local pending = state().closed_lobbies_by_steam[steam]
+    if pending == nil then
+        pending = {}
+        state().closed_lobbies_by_steam[steam] = pending
+    end
+
+    for _, existing in ipairs(pending) do
+        if tostring(existing) == lobby_id then
+            return
+        end
+    end
+
+    pending[#pending + 1] = lobby_id
+end
+
+local function emit_pending_closed_lobbies()
+    local steam = current_steam()
+    local pending = state().closed_lobbies_by_steam[steam]
+    if pending == nil or #pending == 0 then
+        return false
+    end
+
+    for _, lobby_id in ipairs(pending) do
+        local owner = owner_soid(3, lobby_id)
+        gc.Proto(MSG.SOCacheUnsubscribed, PB.bytes(2, owner))
+        runtime.Log("emit_closed_lobby steam=" .. steam .. " lobby=" .. tostring(lobby_id))
+    end
+
+    state().closed_lobbies_by_steam[steam] = nil
+    return true
 end
 
 local function parse_json_table(json)
@@ -684,6 +740,23 @@ local function broadcast_lobby(lobby, except_steam, include_server)
     end
 end
 
+local function request_game_server_change(lobby)
+    if lobby == nil or lobby.connect == nil or lobby.connect == "" or gc.DotaRequestGameServerChange == nil then
+        return
+    end
+
+    local server = tostring(lobby.server_steam or "0")
+    for _, member in ipairs(member_order(lobby)) do
+        if member.steam ~= server then
+            local ok = gc.DotaRequestGameServerChange(member.steam, lobby.connect, "")
+            runtime.Log("game_server_change_requested lobby=" .. tostring(lobby.id) ..
+                " steam=" .. tostring(member.steam) ..
+                " connect=" .. tostring(lobby.connect) ..
+                " ok=" .. tostring(ok))
+        end
+    end
+end
+
 local function ensure_member(lobby, steam, account, name)
     local member = lobby.members[steam]
     if member ~= nil then
@@ -834,6 +907,7 @@ local function hydrate_persisted_match(match, require_current_member)
         name = "Recovered match",
         region = 0,
         lan = match.Dedicated ~= true,
+        allow_cheats = match.AllowCheats == true,
         dedicated = match.Dedicated == true,
         allow_spectating = false,
         dota_tv_delay = 0,
@@ -945,6 +1019,7 @@ local function destroy_lobby(lobby, reason)
     local unsubscribed = lobby_so_cache_unsubscribed(lobby)
     for _, member in ipairs(member_order(lobby)) do
         state().by_steam[member.steam] = nil
+        remember_closed_lobby(member.steam, lobby.id)
         queue_proto(member.steam, MSG.SOCacheUnsubscribed, unsubscribed)
     end
 
@@ -1066,6 +1141,8 @@ local function apply_details(lobby, details)
     end
 
     lobby.dota_tv_delay = runtime.ProtoVarint(details, 24, 1, lobby.dota_tv_delay or 0)
+    local allow_cheats = runtime.ProtoVarint(details, 10, 1, lobby.allow_cheats and 1 or 0)
+    lobby.allow_cheats = allow_cheats ~= 0
     local lan = runtime.ProtoVarint(details, 25, 1, lobby.lan and 1 or 0)
     lobby.lan = lan ~= 0
     lobby.custom_game_mode = runtime.ProtoString(details, 26)
@@ -1079,6 +1156,7 @@ local function apply_details(lobby, details)
 end
 
 local function create_lobby()
+    emit_pending_closed_lobbies()
     if state().by_steam[current_steam()] == nil then
         release_persisted_match(persisted_match_for_current(), "create_replaces_persisted_match")
     end
@@ -1095,6 +1173,7 @@ local function create_lobby()
         name = "Room 1",
         region = 0,
         lan = true,
+        allow_cheats = false,
         allow_spectating = false,
         dota_tv_delay = 0,
         visibility = 0,
@@ -1106,6 +1185,7 @@ local function create_lobby()
         server_port = 27015,
         connect = "",
         match_id = "0",
+        match_outcome = 0,
         game_start_time = 0,
         realtime_sent = false,
         last_activity = PB.now(),
@@ -1584,18 +1664,19 @@ local function attach_server(lobby, mark_run)
         end
     elseif lobby.state ~= LOBBY_RUN then
         if lobby.dedicated == true then
-            -- Current Dota's dedicated flow only starts loading players when the
-            -- first lobby cache it receives is already RUN and has a connect
-            -- endpoint. Publishing SERVERSETUP first leaves the client assigned
-            -- but never dialing the server, which later surfaces as a VAC popup.
+            -- Match the captured coordinator ordering: GameServerInfo attaches
+            -- the reserved dedicated server in SERVERSETUP, and the server's
+            -- LobbyInitialized edge promotes the lobby to RUN. Publishing RUN
+            -- directly from 4508 leaves current clients with an active match UI
+            -- but no actual NetChan dial to the dedicated process.
             ensure_match_id(lobby)
-            lobby.state = LOBBY_RUN
-            lobby.connect = connect_string(lobby)
-            runtime.Log("attach_server dedicated RUN lobby=" .. tostring(lobby.id) .. " connect=" .. tostring(lobby.connect or ""))
+            lobby.state = LOBBY_SERVER_SETUP
+            lobby.connect = ""
+            runtime.Log("attach_server dedicated SETUP lobby=" .. tostring(lobby.id) ..
+                " server=" .. tostring(lobby.server_steam or "0"))
             lobby.game_state = GAME_INIT
-            lobby.server_setup_ready = false
+            lobby.server_setup_ready = true
             lobby.lan_after_setup_count = 0
-            mark_lobby_members_connected(lobby)
             if lobby.game_start_time == nil or lobby.game_start_time == 0 then
                 lobby.game_start_time = PB.now()
             end
@@ -1616,6 +1697,8 @@ local function attach_server(lobby, mark_run)
             refresh_lobby(lobby)
             queue_proto(lobby.server_steam, MSG.SOCacheUpdated, lobby_server_multiple_objects(lobby))
             emit_pending_batch_player_resources(lobby)
+            broadcast_lobby(lobby, tostring(lobby.server_steam or "0"), false)
+            request_game_server_change(lobby)
         else
             refresh_lobby(lobby)
             queue_lobby_items_to_server(lobby)
@@ -1711,9 +1794,8 @@ local function game_server_info()
         return true
     end
 
-    -- Publish the connect-bearing RUN cache as soon as the dedicated reports
-    -- GCGameServerInfo (4508). Newer Dota leaves clients assigned but idle if
-    -- SERVERSETUP is broadcast first.
+    -- GameServerInfo binds the reserved dedicated process to this lobby. The
+    -- connect-bearing RUN cache is sent only after the server confirms setup.
     return attach_server(lobby, false) or true
 end
 
@@ -2047,15 +2129,32 @@ local function sign_out()
             runtime.Log("match_sign_out_suppressed_before_join lobby=" .. tostring(lobby.id) ..
                 " match=" .. tostring(match_id) .. " server=" .. current_steam())
         end
-        refresh_lobby(lobby)
-        broadcast_lobby(lobby, nil, true)
-        publish_lobby(lobby)
     end
 
     local game_mode = lobby ~= nil and (lobby.game_mode or 1) or 1
     local game_start_time = lobby ~= nil and (lobby.game_start_time or 0) or 0
     local server_steam = lobby ~= nil and (lobby.server_steam or current_steam()) or current_steam()
     local response = gc.DotaStatsGameMatchSignOutResponse(tostring(match_id), game_mode, 1, game_start_time, tostring(server_steam))
+    if lobby ~= nil and lobby.state == LOBBY_RUN then
+        local good_guys_win = gc.ReadVarint(3, 0) ~= 0
+        lobby.state = LOBBY_POSTGAME
+        lobby.game_state = GAME_INIT
+        lobby.match_outcome = good_guys_win and 2 or 3
+        lobby.signed_out = true
+        lobby.signed_out_at = PB.now()
+        lobby.last_activity = PB.now()
+        refresh_lobby(lobby)
+        broadcast_lobby(lobby, nil, true)
+        publish_lobby(lobby)
+        runtime.Log("match_sign_out_postgame lobby=" .. tostring(lobby.id) ..
+            " match=" .. tostring(match_id) ..
+            " outcome=" .. tostring(lobby.match_outcome))
+    elseif lobby ~= nil then
+        refresh_lobby(lobby)
+        broadcast_lobby(lobby, nil, true)
+        publish_lobby(lobby)
+    end
+
     gc.Reply(MSG.GCGameMatchSignOutResponse, response)
     if match_id ~= "0" and notify_clients == true then
         local signed_out = PB.vs(1, match_id)
@@ -2190,6 +2289,7 @@ function dota_lobby_handle(message_type)
 end
 
 function dota_lobby_on_client_hello()
+    local emitted_closed_lobby = emit_pending_closed_lobbies()
     local emitted_invite = emit_current_lobby_invites()
     local steam = current_steam()
     local lobby_id = state().by_steam[steam]
@@ -2199,7 +2299,7 @@ function dota_lobby_on_client_hello()
     end
     local member = lobby ~= nil and lobby.members[steam] or nil
     if lobby == nil or member == nil then
-        return emitted_invite
+        return emitted_closed_lobby or emitted_invite
     end
 
     member.last_seen = PB.now()
@@ -2235,9 +2335,15 @@ function dota_lobby_tick()
     local now = PB.now()
     local cutoff = now - LOBBY_TIMEOUT_SECONDS
     local expired = {}
+    local expired_reasons = {}
     for id, lobby in pairs(state().lobbies) do
-        if (lobby.last_activity or 0) < cutoff then
+        if lobby.signed_out == true and (lobby.signed_out_at or 0) > 0 and
+            now - lobby.signed_out_at >= POSTGAME_CLEANUP_SECONDS then
             expired[#expired + 1] = id
+            expired_reasons[id] = "postgame_cleanup"
+        elseif (lobby.last_activity or 0) < cutoff then
+            expired[#expired + 1] = id
+            expired_reasons[id] = "inactive_timeout"
         else
             local changed = false
             if lobby.dedicated == true and lobby.state == LOBBY_SERVER_ASSIGN and gc.DotaDedicatedServerStatus ~= nil then
@@ -2301,7 +2407,7 @@ function dota_lobby_tick()
     for _, id in ipairs(expired) do
         local lobby = state().lobbies[id]
         if lobby ~= nil then
-            destroy_lobby(lobby, "inactive_timeout")
+            destroy_lobby(lobby, expired_reasons[id] or "inactive_timeout")
         end
     end
 end
