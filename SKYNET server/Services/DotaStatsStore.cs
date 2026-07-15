@@ -18,6 +18,24 @@ public sealed class DotaStatsStore
     private readonly object _sync = new();
     private readonly string _dbPath;
     private readonly Func<uint, DotaStatsAccountIdentity?> _identityResolver;
+    private static readonly string[] ImportTableNames =
+    {
+        "profiles",
+        "profile_slots",
+        "featured_heroes",
+        "trophies",
+        "all_hero_order",
+        "matches",
+        "match_players",
+        "mvp_votes",
+        "global_stats",
+        "hero_stats",
+        "reports",
+        "match_comments",
+        "match_votes",
+        "social_feed",
+        "social_feed_comments"
+    };
 
     public DotaStatsStore(string dbPath, Func<uint, DotaStatsAccountIdentity?> identityResolver)
     {
@@ -27,6 +45,72 @@ public sealed class DotaStatsStore
             using var connection = SqliteResilience.OpenConnection(path);
             EnsureSchema(connection);
         });
+    }
+
+    public int ImportMissingFrom(string dbPath)
+    {
+        if (string.IsNullOrWhiteSpace(dbPath))
+        {
+            return 0;
+        }
+
+        var sourcePath = Path.GetFullPath(dbPath);
+        var targetPath = Path.GetFullPath(_dbPath);
+        if (sourcePath.Equals(targetPath, StringComparison.OrdinalIgnoreCase) ||
+            !File.Exists(sourcePath) ||
+            new FileInfo(sourcePath).Length == 0)
+        {
+            return 0;
+        }
+
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            using (var attach = connection.CreateCommand())
+            {
+                attach.CommandText = "ATTACH DATABASE $source AS legacy";
+                Add(attach, "$source", sourcePath);
+                attach.ExecuteNonQuery();
+            }
+
+            try
+            {
+                var imported = 0;
+                foreach (var table in ImportTableNames)
+                {
+                    if (!TableExists(connection, "legacy", table))
+                    {
+                        continue;
+                    }
+
+                    var targetColumns = ReadTableColumns(connection, "main", table);
+                    var sourceColumns = ReadTableColumns(connection, "legacy", table);
+                    var sourceColumnSet = sourceColumns.ToHashSet(StringComparer.OrdinalIgnoreCase);
+                    var columns = targetColumns
+                        .Where(column => sourceColumnSet.Contains(column))
+                        .ToArray();
+                    if (columns.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    var columnList = string.Join(", ", columns.Select(QuoteIdentifier));
+                    using var copy = connection.CreateCommand();
+                    copy.CommandText =
+                        $"INSERT OR IGNORE INTO {QuoteIdentifier(table)} ({columnList}) " +
+                        $"SELECT {columnList} FROM legacy.{QuoteIdentifier(table)}";
+                    imported += Math.Max(0, copy.ExecuteNonQuery());
+                }
+
+                return imported;
+            }
+            finally
+            {
+                using var detach = connection.CreateCommand();
+                detach.CommandText = "DETACH DATABASE legacy";
+                detach.ExecuteNonQuery();
+            }
+        }
     }
 
     public DotaStatsProfile EnsureProfile(ulong steamId, uint accountId, string personaName)
@@ -2190,6 +2274,38 @@ public sealed class DotaStatsStore
 
         var value = command.ExecuteScalar();
         return value == null || value == DBNull.Value ? 0 : Convert.ToInt64(value);
+    }
+
+    private static bool TableExists(SqliteConnection connection, string schema, string table)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = $"SELECT COUNT(*) FROM {QuoteIdentifier(schema)}.sqlite_master WHERE type = 'table' AND name = $name";
+        Add(command, "$name", table);
+        var value = command.ExecuteScalar();
+        return value != null && value != DBNull.Value && Convert.ToInt64(value) > 0;
+    }
+
+    private static IReadOnlyList<string> ReadTableColumns(SqliteConnection connection, string schema, string table)
+    {
+        var columns = new List<string>();
+        using var command = connection.CreateCommand();
+        command.CommandText = $"PRAGMA {QuoteIdentifier(schema)}.table_info({QuoteIdentifier(table)})";
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            var name = Convert.ToString(reader["name"]);
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                columns.Add(name);
+            }
+        }
+
+        return columns;
+    }
+
+    private static string QuoteIdentifier(string identifier)
+    {
+        return "\"" + identifier.Replace("\"", "\"\"", StringComparison.Ordinal) + "\"";
     }
 
     private static void EnsureColumn(SqliteConnection connection, string table, string column, string definition)

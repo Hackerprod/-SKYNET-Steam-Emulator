@@ -66,15 +66,22 @@ public sealed partial class SteamApiStateService
         _sessionTimeout = TimeSpan.FromMinutes(Math.Clamp(configuration.GetValue("Session:TimeoutMinutes", 30), 1, 1440));
         _presenceTimeout = TimeSpan.FromSeconds(Math.Clamp(configuration.GetValue("Presence:TimeoutSeconds", 90), 15, 3600));
         _advertisedGameServerIp = configuration.GetValue<string>("GameCoordinator:Dota:AdvertisedGameServerIp")?.Trim() ?? string.Empty;
-        _statePath = Path.Combine(hostEnvironment.ContentRootPath, "Data", "api-state.json");
+        var dataRoot = ResolveDataRoot(hostEnvironment.ContentRootPath, configuration);
+        var legacyDataRoot = Path.Combine(hostEnvironment.ContentRootPath, "Data");
+        _statePath = Path.Combine(dataRoot, "api-state.json");
         _dotaStatsStore = new DotaStatsStore(
-            Path.Combine(hostEnvironment.ContentRootPath, "Data", "skynet-dota-stats.db"),
+            Path.Combine(dataRoot, "skynet-dota-stats.db"),
             ResolveDotaStatsIdentity);
+        if (!Path.GetFullPath(dataRoot).Equals(Path.GetFullPath(legacyDataRoot), StringComparison.OrdinalIgnoreCase))
+        {
+            _dotaStatsStore.ImportMissingFrom(Path.Combine(legacyDataRoot, "skynet-dota-stats.db"));
+        }
+
         _dotaPartyStore = new DotaPartyStore(
-            Path.Combine(hostEnvironment.ContentRootPath, "Data", "skynet-dota-party.db"),
+            Path.Combine(dataRoot, "skynet-dota-party.db"),
             ResolveDotaStatsIdentity);
         _dotaLobbyInviteStore = new DotaLobbyInviteStore(
-            Path.Combine(hostEnvironment.ContentRootPath, "Data", "skynet-dota-lobby-invites.db"));
+            Path.Combine(dataRoot, "skynet-dota-lobby-invites.db"));
         CleanupOrphanStateTempFiles();
         LoadState();
         NormalizeState();
@@ -95,6 +102,7 @@ public sealed partial class SteamApiStateService
         DotaGcBackend.UserOnlineProvider = IsOnlineDotaUser;
         DotaGcBackend.GameServerConnectIpResolver = ResolveDotaGameServerConnectIp;
         DotaGcBackend.GameServerConnectIpsResolver = ResolveDotaGameServerConnectIps;
+        DotaGcBackend.GameServerChangeRequested = EnqueueGameServerChangeRequestedEvent;
         DotaGcBackend.DedicatedServerStart = (lobbyId, map) => _dotaDedicatedServers.Start(lobbyId, map);
         DotaGcBackend.DedicatedServerClaim = (gameServerSteamId, port) => _dotaDedicatedServers.ClaimLobby(gameServerSteamId, port);
         DotaGcBackend.DedicatedServerPortReserved = port => _dotaDedicatedServers.HasReservationForPort(port);
@@ -105,5 +113,36 @@ public sealed partial class SteamApiStateService
         DotaGcBackend.EquipmentJsonSink = SetDotaEquipmentJson;
         DotaGcBackend.CatalogItemJsonProvider = GetDotaCatalogItemJson;
         LuaGameCoordinatorBackend.PendingMessageQueued = EnqueueGcMessageEvent;
+    }
+
+    private static string ResolveDataRoot(string contentRootPath, IConfiguration configuration)
+    {
+        var configuredRoot = configuration.GetValue<string>("Data:Root")?.Trim();
+        if (string.IsNullOrWhiteSpace(configuredRoot))
+        {
+            configuredRoot = Environment.GetEnvironmentVariable("SKYNET_DATA_ROOT")?.Trim();
+        }
+
+        if (!string.IsNullOrWhiteSpace(configuredRoot))
+        {
+            return Path.GetFullPath(configuredRoot);
+        }
+
+        var root = new DirectoryInfo(Path.GetFullPath(contentRootPath));
+        for (var current = root; current != null; current = current.Parent)
+        {
+            if (File.Exists(Path.Combine(current.FullName, "SKYNET server.csproj")))
+            {
+                return Path.Combine(current.FullName, "Data");
+            }
+
+            var nestedProject = Path.Combine(current.FullName, "SKYNET server", "SKYNET server.csproj");
+            if (File.Exists(nestedProject))
+            {
+                return Path.Combine(current.FullName, "SKYNET server", "Data");
+            }
+        }
+
+        return Path.Combine(root.FullName, "Data");
     }
 }

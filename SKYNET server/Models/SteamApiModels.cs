@@ -9,6 +9,7 @@ public sealed class ApiSessionRequest
     public uint AppId { get; set; }
     public string PersonaName { get; set; } = string.Empty;
     public string ClientInstanceId { get; set; } = string.Empty;
+    public string ProcessRole { get; set; } = "client";
     public bool UseActiveWebUser { get; set; }
 }
 
@@ -199,6 +200,8 @@ public sealed class ApiEvent
     public ulong RemoteSteamId { get; set; }
     public int FriendRelationship { get; set; }
     public string RequestId { get; set; } = string.Empty;
+    public string Server { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
 }
 
 public sealed class ApiLobbyQueryRequest
@@ -638,6 +641,7 @@ public sealed class ApiSession
     public string RefreshToken { get; set; } = string.Empty;
     public ulong SteamId { get; set; }
     public string ClientInstanceId { get; set; } = string.Empty;
+    public string ProcessRole { get; set; } = "client";
     public string? RemoteIp { get; set; }
     public DateTime LastSeenUtc { get; set; } = DateTime.UtcNow;
     public bool WebSession { get; set; }
@@ -658,5 +662,7 @@ public sealed class ApiQueuedEvent
 {
     public long Sequence { get; set; }
     public ulong RecipientSteamId { get; set; }
+    public string RecipientProcessRole { get; set; } = string.Empty;
+    public string RecipientClientInstanceId { get; set; } = string.Empty;
     public ApiEvent Event { get; set; } = new();
 }

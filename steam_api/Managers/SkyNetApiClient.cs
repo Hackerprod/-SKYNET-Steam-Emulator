@@ -142,6 +142,7 @@ namespace SKYNET.Managers
                 AppId = SteamEmulator.AppID,
                 PersonaName = SteamEmulator.PersonaName,
                 ClientInstanceId = SteamEmulator.ClientInstanceId,
+                ProcessRole = GetProcessRole(),
                 UseActiveWebUser = SteamEmulator.UseActiveWebUser
             };
 
@@ -153,6 +154,18 @@ namespace SKYNET.Managers
 
             ApplySession(session);
             return true;
+        }
+
+        private static string GetProcessRole()
+        {
+            var role = Environment.GetEnvironmentVariable("SKYNET_PROCESS_ROLE");
+            if (string.Equals(role, "dedicated", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(role, "server", StringComparison.OrdinalIgnoreCase))
+            {
+                return "dedicated";
+            }
+
+            return "client";
         }
 
         // Tell the server we are going offline (game shutting down) so friends
@@ -1770,6 +1783,7 @@ namespace SKYNET.Managers
             public uint AppId { get; set; }
             public string PersonaName { get; set; }
             public string ClientInstanceId { get; set; }
+            public string ProcessRole { get; set; }
             public bool UseActiveWebUser { get; set; }
         }
 
@@ -1878,6 +1892,8 @@ namespace SKYNET.Managers
             public ulong RemoteSteamId { get; set; }
             public int FriendRelationship { get; set; }
             public string RequestId { get; set; }
+            public string Server { get; set; }
+            public string Password { get; set; }
         }
 
         public sealed class VoidDto

@@ -206,10 +206,21 @@ public sealed partial class SteamApiStateService
 
     private void EnqueueEvent(ulong recipientSteamId, ApiEvent evt)
     {
+        EnqueueEvent(recipientSteamId, evt, string.Empty, string.Empty);
+    }
+
+    private void EnqueueEvent(
+        ulong recipientSteamId,
+        ApiEvent evt,
+        string recipientProcessRole,
+        string recipientClientInstanceId)
+    {
         _events.Add(new ApiQueuedEvent
         {
             Sequence = _nextEventSequence++,
             RecipientSteamId = recipientSteamId,
+            RecipientProcessRole = recipientProcessRole ?? string.Empty,
+            RecipientClientInstanceId = recipientClientInstanceId ?? string.Empty,
             Event = evt
         });
 
@@ -234,6 +245,20 @@ public sealed partial class SteamApiStateService
 
         _gameCoordinatorTrace.Record("push", message.AppId, recipientSteamId, message.MessageType,
             GameCoordinatorTraceService.EstimatePayloadSize(message.PayloadBase64));
+    }
+
+    private void EnqueueGameServerChangeRequestedEvent(ulong recipientSteamId, string server, string password)
+    {
+        lock (_sync)
+        {
+            EnqueueEvent(recipientSteamId, new ApiEvent
+            {
+                Type = "game_server_change_requested",
+                SteamId = recipientSteamId,
+                Server = server ?? string.Empty,
+                Password = password ?? string.Empty
+            }, "client", string.Empty);
+        }
     }
 
     private void TrimQueuedEventsLocked()
@@ -389,6 +414,7 @@ public sealed partial class SteamApiStateService
         {
             pair.Value.WebSession = true;
             pair.Value.Persistent = true;
+            pair.Value.ProcessRole = "web";
             if (pair.Value.ExpiresAtUtc == DateTime.MinValue)
             {
                 pair.Value.ExpiresAtUtc = now.AddDays(30);
@@ -615,7 +641,9 @@ public sealed partial class SteamApiStateService
         Channel = evt.Channel,
         RemoteSteamId = evt.RemoteSteamId,
         FriendRelationship = evt.FriendRelationship,
-        RequestId = evt.RequestId
+        RequestId = evt.RequestId,
+        Server = evt.Server,
+        Password = evt.Password
     };
 
     private static ApiRemoteStorageFile CloneFile(ApiRemoteStorageFile file) => new()
@@ -746,6 +774,17 @@ public sealed partial class SteamApiStateService
     {
         if (IsLoopbackClient(clientIp))
         {
+            if (TryGetConfiguredAdvertisedGameServerIp(out var configuredForLocal))
+            {
+                return ToIPv4String(configuredForLocal);
+            }
+
+            var hostIp = EnumerateUsableHostIPv4().FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(hostIp))
+            {
+                return hostIp;
+            }
+
             return "127.0.0.1";
         }
 
@@ -827,11 +866,6 @@ public sealed partial class SteamApiStateService
         }
 
         // 1) Best single match (subnet-aware → configured → CMsgGameServerInfo chain).
-        if (IsLoopbackClient(clientIp))
-        {
-            Add("127.0.0.1", allowLoopback: true);
-        }
-
         Add(ResolveDotaGameServerConnectIp(clientIp, publicIpValue, privateIpValue, fallbackIp));
 
         // 2) The configured/advertised address so LAN peers always have it explicitly.
@@ -844,6 +878,11 @@ public sealed partial class SteamApiStateService
         foreach (var ip in EnumerateUsableHostIPv4())
         {
             Add(ip);
+        }
+
+        if (ordered.Count == 0 && IsLoopbackClient(clientIp))
+        {
+            Add("127.0.0.1", allowLoopback: true);
         }
 
         if (ordered.Count == 0)

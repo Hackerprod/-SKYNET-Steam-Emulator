@@ -40,7 +40,7 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
             environment.ContentRootPath,
             Path.GetDirectoryName(_executablePath) ?? environment.ContentRootPath);
         _diagnosticsDirectory = Path.GetFullPath(Path.Combine(environment.ContentRootPath, "..", ".tmp"));
-        _bindIp = configuration.GetValue<string>("GameCoordinator:Dota:Dedicated:BindIp")?.Trim();
+        _bindIp = configuration.GetValue<string>("GameCoordinator:Dota:Dedicated:BindIp")?.Trim() ?? string.Empty;
         if (string.IsNullOrWhiteSpace(_bindIp))
         {
             _bindIp = configuration.GetValue<string>("GameCoordinator:Dota:AdvertisedGameServerIp")?.Trim() ?? string.Empty;
@@ -102,11 +102,9 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
             {
                 startInfo.ArgumentList.Add("-insecure");
             }
-            // Bind to every interface so clients reaching the host over any
-            // network (ZeroTier, LAN, Wi-Fi) can connect. Only pin "-ip" when a
-            // specific bind address is explicitly configured (and it is not the
-            // catch-all 0.0.0.0); otherwise Source binds INADDR_ANY by default.
-            if (TryNormalizeIPv4(_bindIp, out var bindIp) && bindIp != "0.0.0.0")
+            // Bind explicitly. Recent Dota dedicated builds can otherwise pick a
+            // single interface, leaving advertised endpoints black-holed.
+            if (TryNormalizeIPv4(_bindIp, out var bindIp))
             {
                 startInfo.ArgumentList.Add("-ip");
                 startInfo.ArgumentList.Add(bindIp);
@@ -406,7 +404,7 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
     {
         normalized = string.Empty;
         if (!IPAddress.TryParse(value, out var parsed) || parsed.AddressFamily != AddressFamily.InterNetwork ||
-            IPAddress.IsLoopback(parsed) || parsed.Equals(IPAddress.Any))
+            IPAddress.IsLoopback(parsed))
         {
             return false;
         }

@@ -11,6 +11,7 @@ public sealed partial class SteamApiStateService
         {
             ExpireStaleSessionsLocked();
             var clientInstanceId = NormalizeClientInstanceId(request.ClientInstanceId, request.SteamId, request.AccountId);
+            var processRole = NormalizeProcessRole(request.ProcessRole);
             var activeWebUser = request.UseActiveWebUser ? GetActiveWebUserForIpLocked(clientIp) : null;
             if (request.UseActiveWebUser && activeWebUser == null)
             {
@@ -29,6 +30,7 @@ public sealed partial class SteamApiStateService
                 AccessToken = Guid.NewGuid().ToString("N"),
                 RefreshToken = Guid.NewGuid().ToString("N"),
                 ClientInstanceId = clientInstanceId,
+                ProcessRole = processRole,
                 RemoteIp = clientIp,
                 LastSeenUtc = DateTime.UtcNow
             };
@@ -399,7 +401,7 @@ public sealed partial class SteamApiStateService
             {
                 ExpireStaleSessionsLocked();
                 matched = _events
-                    .Where(e => e.Sequence > lastSeen && (e.RecipientSteamId == 0 || e.RecipientSteamId == session!.SteamId))
+                    .Where(e => e.Sequence > lastSeen && IsEventForSession(e, session!))
                     .OrderBy(e => e.Sequence)
                     .ToList();
 
@@ -434,6 +436,41 @@ public sealed partial class SteamApiStateService
         }
 
         return $"legacy:{(steamId != 0 ? steamId.ToString() : accountId.ToString())}";
+    }
+
+    private static string NormalizeProcessRole(string? processRole)
+    {
+        if (string.IsNullOrWhiteSpace(processRole))
+        {
+            return "client";
+        }
+
+        var normalized = processRole.Trim().ToLowerInvariant();
+        return normalized switch
+        {
+            "client" => "client",
+            "dedicated" => "dedicated",
+            "server" => "dedicated",
+            "web" => "web",
+            _ => "client"
+        };
+    }
+
+    private static bool IsEventForSession(ApiQueuedEvent queuedEvent, ApiSession session)
+    {
+        if (queuedEvent.RecipientSteamId != 0 && queuedEvent.RecipientSteamId != session.SteamId)
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(queuedEvent.RecipientProcessRole) &&
+            !string.Equals(queuedEvent.RecipientProcessRole, session.ProcessRole, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        return string.IsNullOrWhiteSpace(queuedEvent.RecipientClientInstanceId) ||
+            string.Equals(queuedEvent.RecipientClientInstanceId, session.ClientInstanceId, StringComparison.Ordinal);
     }
 
     private ulong ResolveSessionSteamIdLocked(ulong requestedSteamId, string clientInstanceId)

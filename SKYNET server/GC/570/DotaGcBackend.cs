@@ -28,6 +28,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
     public static Func<ulong, bool>? UserOnlineProvider { get; set; }
     public static Func<string, string, string, string, string>? GameServerConnectIpResolver { get; set; }
     public static Func<string, string, string, string, string>? GameServerConnectIpsResolver { get; set; }
+    public static Action<ulong, string, string>? GameServerChangeRequested { get; set; }
     public static Func<ulong, string, DotaDedicatedServerSupervisor.DedicatedLaunchResult>? DedicatedServerStart { get; set; }
     public static Func<ulong, uint, string>? DedicatedServerClaim { get; set; }
     public static Func<uint, bool>? DedicatedServerPortReserved { get; set; }
@@ -224,6 +225,18 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
     public bool DotaDedicatedServerPortReserved(uint reportedPort)
     {
         return DedicatedServerPortReserved?.Invoke(reportedPort) ?? false;
+    }
+
+    public bool DotaRequestGameServerChange(string steamId, string server, string password)
+    {
+        var recipient = ParseUInt64(steamId);
+        if (recipient == 0 || string.IsNullOrWhiteSpace(server))
+        {
+            return false;
+        }
+
+        GameServerChangeRequested?.Invoke(recipient, server, password ?? string.Empty);
+        return true;
     }
 
     public string DotaDedicatedServerStatus(string lobbyId)

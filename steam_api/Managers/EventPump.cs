@@ -3,6 +3,7 @@ using SKYNET.Helpers;
 using SKYNET.Network.Packets;
 using SKYNET.Steamworks;
 using System;
+using System.Text;
 using System.Threading;
 
 namespace SKYNET.Managers
@@ -13,13 +14,16 @@ namespace SKYNET.Managers
 
         public static void RunFrame(bool gameServer)
         {
-            if (gameServer || !SkyNetApiClient.IsEnabled)
+            if (gameServer || IsDedicatedProcess || !SkyNetApiClient.IsEnabled)
             {
                 return;
             }
 
             EnsureStarted();
         }
+
+        private static bool IsDedicatedProcess =>
+            string.Equals(Environment.GetEnvironmentVariable("SKYNET_PROCESS_ROLE"), "dedicated", StringComparison.OrdinalIgnoreCase);
 
         private static void EnsureStarted()
         {
@@ -112,6 +116,15 @@ namespace SKYNET.Managers
 
                 case "gc_message":
                     ApplyGCMessage(serverEvent);
+                    break;
+
+                case "game_server_change_requested":
+                    if (IsDedicatedProcess)
+                    {
+                        return;
+                    }
+
+                    EmitGameServerChangeRequested(serverEvent);
                     break;
             }
         }
@@ -213,6 +226,35 @@ namespace SKYNET.Managers
             catch
             {
             }
+        }
+
+        private static void EmitGameServerChangeRequested(SkyNetApiClient.ApiEvent serverEvent)
+        {
+            var server = (serverEvent.Server ?? string.Empty).Trim();
+            if (server.Length == 0)
+            {
+                return;
+            }
+
+            CallbackManager.AddCallback(new GameServerChangeRequested_t
+            {
+                m_rgchServer = FixedUtf8(server, 64),
+                m_rgchPassword = FixedUtf8(serverEvent.Password ?? string.Empty, 64)
+            });
+            SteamEmulator.Write("EventPump", $"GameServerChangeRequested server={server}");
+        }
+
+        private static byte[] FixedUtf8(string value, int size)
+        {
+            var buffer = new byte[size];
+            if (size <= 0 || string.IsNullOrEmpty(value))
+            {
+                return buffer;
+            }
+
+            var bytes = Encoding.UTF8.GetBytes(value);
+            Array.Copy(bytes, buffer, Math.Min(bytes.Length, size - 1));
+            return buffer;
         }
     }
 }

@@ -519,6 +519,7 @@ public sealed partial class SteamApiStateService
             SteamId = steamId,
             AccessToken = Guid.NewGuid().ToString("N"),
             RefreshToken = Guid.NewGuid().ToString("N"),
+            ProcessRole = "web",
             RemoteIp = remoteIp,
             LastSeenUtc = now,
             WebSession = true,
