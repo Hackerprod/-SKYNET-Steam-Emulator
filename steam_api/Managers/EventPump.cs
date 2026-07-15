@@ -101,13 +101,24 @@ namespace SKYNET.Managers
 
                 case "lobby_updated":
                 case "lobby_created":
+                    ApplyLobby(serverEvent, 0);
+                    break;
+
                 case "lobby_joined":
-                    ApplyLobby(serverEvent);
+                    ApplyLobby(serverEvent, (uint)EChatMemberStateChange.k_EChatMemberStateChangeEntered);
                     break;
 
                 case "lobby_left":
+                    // A member left; the lobby still exists with an updated roster.
+                    ApplyLobby(serverEvent, (uint)EChatMemberStateChange.k_EChatMemberStateChangeLeft);
+                    break;
+
                 case "lobby_removed":
                     RemoveLobby(serverEvent);
+                    break;
+
+                case "lobby_chat":
+                    ApplyLobbyChat(serverEvent);
                     break;
 
                 case "p2p_packet":
@@ -151,7 +162,7 @@ namespace SKYNET.Managers
             }
         }
 
-        private static void ApplyLobby(SkyNetApiClient.ApiEvent serverEvent)
+        private static void ApplyLobby(SkyNetApiClient.ApiEvent serverEvent, uint memberStateChange)
         {
             var lobby = serverEvent.Lobby == null ? null : SkyNetApiClient.MapLobbyForEvents(serverEvent.Lobby);
             if (lobby == null)
@@ -161,11 +172,48 @@ namespace SKYNET.Managers
 
             LobbyManager.UpsertLobby(lobby);
 
+            // A member joined/left: tell the game who changed so it can track the
+            // roster (LobbyChatUpdate) — this is what most games listen for.
+            if (memberStateChange != 0 && serverEvent.SteamId != 0)
+            {
+                CallbackManager.AddCallback(new LobbyChatUpdate_t
+                {
+                    m_ulSteamIDLobby = lobby.SteamID,
+                    m_ulSteamIDUserChanged = serverEvent.SteamId,
+                    m_ulSteamIDMakingChange = serverEvent.SteamId,
+                    m_rgfChatMemberStateChange = memberStateChange
+                });
+            }
+
+            // Lobby-level data change: Steam sets member == lobby.
             CallbackManager.AddCallback(new LobbyDataUpdate_t
             {
                 m_bSuccess = true,
                 m_ulSteamIDLobby = lobby.SteamID,
-                m_ulSteamIDMember = lobby.Owner
+                m_ulSteamIDMember = lobby.SteamID
+            });
+        }
+
+        private static void ApplyLobbyChat(SkyNetApiClient.ApiEvent serverEvent)
+        {
+            var lobbyId = serverEvent.LobbyId != 0 ? serverEvent.LobbyId : (serverEvent.Lobby?.SteamId ?? 0);
+            if (lobbyId == 0)
+            {
+                return;
+            }
+
+            var data = string.IsNullOrEmpty(serverEvent.PayloadBase64)
+                ? Array.Empty<byte>()
+                : Convert.FromBase64String(serverEvent.PayloadBase64);
+            var entryType = (byte)EChatEntryType.ChatMsg;
+            var chatId = LobbyManager.AppendChat(lobbyId, serverEvent.SteamId, data, entryType);
+
+            CallbackManager.AddCallback(new LobbyChatMsg_t
+            {
+                SteamIDLobby = lobbyId,
+                SteamIDUser = serverEvent.SteamId,
+                ChatEntryType = entryType,
+                ChatID = (uint)chatId
             });
         }
 

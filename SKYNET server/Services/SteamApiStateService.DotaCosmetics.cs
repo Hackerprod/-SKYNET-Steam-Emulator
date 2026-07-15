@@ -106,7 +106,8 @@ public sealed partial class SteamApiStateService
                 _state.DotaCosmetics.LastImportAt = DateTime.UtcNow;
                 _state.DotaCosmetics.LastImportStatus = $"OK: {items.Count} items, {heroIds.Count} heroes from {pakPath}";
                 TouchDotaEquipmentVersionLocked();
-                SaveState();
+                // The item catalog changed: persist it (routine flushes skip it).
+                RequestCatalogFlush();
             }
 
             return new ApiDotaItemImportResult

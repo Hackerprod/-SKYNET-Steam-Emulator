@@ -204,6 +204,24 @@ public sealed partial class SteamApiStateService
         });
     }
 
+    // Deliver a lobby event to its members only (not a global broadcast), so a
+    // client only ever hears about lobbies it belongs to. changedSteamId is the
+    // member the event is about (join/leave), enabling LobbyChatUpdate on clients.
+    private void EnqueueLobbyMembersEvent(ApiLobby lobby, string type, ulong changedSteamId = 0)
+    {
+        var clone = CloneLobby(lobby);
+        foreach (var member in lobby.Members)
+        {
+            EnqueueEvent(member.SteamId, new ApiEvent
+            {
+                Type = type,
+                LobbyId = lobby.SteamId,
+                SteamId = changedSteamId,
+                Lobby = clone,
+            });
+        }
+    }
+
     private void EnqueueEvent(ulong recipientSteamId, ApiEvent evt)
     {
         EnqueueEvent(recipientSteamId, evt, string.Empty, string.Empty);
@@ -349,31 +367,6 @@ public sealed partial class SteamApiStateService
             !IsSessionExpired(session, now));
     }
 
-    private void LoadState()
-    {
-        if (!File.Exists(_statePath))
-        {
-            _state = new ApiState();
-            return;
-        }
-
-        try
-        {
-            var json = File.ReadAllText(_statePath);
-            _state = string.IsNullOrWhiteSpace(json)
-                ? new ApiState()
-                : JsonSerializer.Deserialize<ApiState>(json, _jsonOptions) ?? new ApiState();
-        }
-        catch (JsonException)
-        {
-            _state = new ApiState();
-        }
-        catch (IOException)
-        {
-            _state = new ApiState();
-        }
-    }
-
     private void NormalizeState()
     {
         _state.Users ??= new Dictionary<ulong, ApiUser>();
@@ -489,79 +482,14 @@ public sealed partial class SteamApiStateService
         SaveState();
     }
 
-    // Remove atomic-write temp files left behind by force-killed previous runs.
-    // The write path names them "<state>.<pid>.<guid>.tmp"; a clean run deletes
-    // its own, but a hard kill between write and move orphans them (~10 MB each).
-    private void CleanupOrphanStateTempFiles()
-    {
-        try
-        {
-            var dir = Path.GetDirectoryName(_statePath)!;
-            if (!Directory.Exists(dir))
-            {
-                return;
-            }
-
-            foreach (var file in Directory.EnumerateFiles(dir, $"{Path.GetFileName(_statePath)}.*.tmp"))
-            {
-                try { File.Delete(file); } catch { /* locked/absent: best effort */ }
-            }
-        }
-        catch
-        {
-            // best effort; never block startup on cleanup
-        }
-    }
-
+    // Durable state now lives in app.db. Mutation sites still call SaveState();
+    // it just marks the state dirty and wakes the background flusher, which
+    // coalesces bursts and writes to SQLite off the request path (see
+    // SteamApiStateService.Persistence).
     private void SaveState()
     {
-        lock (_sync)
-        {
-            var stateDirectory = Path.GetDirectoryName(_statePath)!;
-            Directory.CreateDirectory(stateDirectory);
-
-            var tempPath = Path.Combine(
-                stateDirectory,
-                $"{Path.GetFileName(_statePath)}.{Environment.ProcessId}.{Guid.NewGuid():N}.tmp");
-
-            try
-            {
-                File.WriteAllText(tempPath, JsonSerializer.Serialize(_state, _jsonOptions), Encoding.UTF8);
-
-                for (var attempt = 0; ; attempt++)
-                {
-                    try
-                    {
-                        File.Move(tempPath, _statePath, true);
-                        break;
-                    }
-                    catch (Exception ex) when (IsTransientStateSaveException(ex) && attempt < 5)
-                    {
-                        System.Threading.Thread.Sleep(25 * (attempt + 1));
-                    }
-                }
-            }
-            finally
-            {
-                try
-                {
-                    if (File.Exists(tempPath))
-                    {
-                        File.Delete(tempPath);
-                    }
-                }
-                catch (IOException)
-                {
-                }
-                catch (UnauthorizedAccessException)
-                {
-                }
-            }
-        }
+        RequestStateFlush();
     }
-
-    private static bool IsTransientStateSaveException(Exception exception) =>
-        exception is IOException or UnauthorizedAccessException;
 
     private static ApiUser CloneUser(ApiUser user) => new()
     {

@@ -334,13 +334,30 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetLobbyChatEntry(ulong steamIDLobby, int iChatID, IntPtr pSteamIDUser, IntPtr pvData, int cubData, IntPtr peChatEntryType)
         {
-            Write("GetLobbyChatEntry");
-            NativeSteamId.Write(pSteamIDUser, CSteamID.Invalid);
+            if (!LobbyManager.TryGetChat(steamIDLobby, iChatID, out var sender, out var data, out var entryType))
+            {
+                NativeSteamId.Write(pSteamIDUser, CSteamID.Invalid);
+                if (peChatEntryType != IntPtr.Zero)
+                {
+                    Marshal.WriteInt32(peChatEntryType, 0);
+                }
+                return 0;
+            }
+
+            NativeSteamId.Write(pSteamIDUser, (CSteamID)sender);
             if (peChatEntryType != IntPtr.Zero)
             {
-                Marshal.WriteInt32(peChatEntryType, 0);
+                Marshal.WriteInt32(peChatEntryType, entryType);
             }
-            return 0;
+
+            var toCopy = Math.Min(cubData, data.Length);
+            if (pvData != IntPtr.Zero && toCopy > 0)
+            {
+                Marshal.Copy(data, 0, pvData, toCopy);
+            }
+
+            Write($"GetLobbyChatEntry (Lobby: {steamIDLobby}, id: {iChatID}) -> {toCopy} bytes from {sender}");
+            return toCopy;
         }
 
         public string GetLobbyData(ulong steamIDLobby, string pchKey)
@@ -673,7 +690,22 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool SendLobbyChatMsg(ulong steamIDLobby, IntPtr pvMsgBody, int cubMsgBody)
         {
-            Write("SendLobbyChatMsg");
+            if (pvMsgBody == IntPtr.Zero || cubMsgBody <= 0)
+            {
+                Write($"SendLobbyChatMsg (Lobby: {steamIDLobby}) empty body");
+                return false;
+            }
+
+            var body = pvMsgBody.GetBytes(cubMsgBody);
+            if (SkyNetApiClient.IsEnabled)
+            {
+                // Non-blocking: the server fans the message out to every member
+                // (including us) as a lobby_chat event, so we receive our own copy
+                // via LobbyChatMsg_t like real Steam. No local echo (would double it).
+                WorkQueue.Enqueue("SendLobbyChatMsg", () => SkyNetApiClient.SendLobbyChatMsg(steamIDLobby, body), null);
+            }
+
+            Write($"SendLobbyChatMsg (Lobby: {steamIDLobby}, {body.Length} bytes)");
             return true;
         }
 

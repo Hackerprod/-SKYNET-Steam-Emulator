@@ -242,6 +242,11 @@ public sealed class ApiLobbySettingsUpdateRequest
     public int? MaxMembers { get; set; }
 }
 
+public sealed class ApiLobbyChatRequest
+{
+    public string MessageBase64 { get; set; } = string.Empty;
+}
+
 public sealed class ApiLobbyGameServerUpdateRequest
 {
     public ulong SteamIdGameServer { get; set; }

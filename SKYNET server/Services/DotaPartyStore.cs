@@ -11,9 +11,9 @@ public sealed class DotaPartyStore
     public DotaPartyStore(string dbPath, Func<uint, DotaStatsAccountIdentity?> identityResolver)
     {
         _identityResolver = identityResolver;
-        _dbPath = SqliteResilience.PrepareDatabase(dbPath, path =>
+        _dbPath = AppDatabase.PrepareDatabase(dbPath, path =>
         {
-            using var connection = SqliteResilience.OpenConnection(path);
+            using var connection = AppDatabase.OpenConnection(path);
             EnsureSchema(connection);
         });
     }
@@ -452,7 +452,7 @@ public sealed class DotaPartyStore
 
     private SqliteConnection OpenConnection()
     {
-        var connection = SqliteResilience.OpenConnection(_dbPath);
+        var connection = AppDatabase.OpenConnection(_dbPath);
         EnsureSchema(connection);
         return connection;
     }

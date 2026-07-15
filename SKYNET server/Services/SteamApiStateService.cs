@@ -2,8 +2,10 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using SKYNET_server.GC.Dota2;
 using SKYNET_server.Models;
+using SKYNET_server.Persistence;
 
 namespace SKYNET_server.Services;
 
@@ -29,10 +31,10 @@ public sealed partial class SteamApiStateService
 
     private readonly object _sync = new();
     private readonly string _statePath;
-    private readonly JsonSerializerOptions _jsonOptions = new() { WriteIndented = true };
     private readonly Dictionary<string, ApiSession> _sessions = new(StringComparer.Ordinal);
     private readonly Dictionary<uint, ApiTicket> _tickets = new();
     private readonly List<ApiQueuedEvent> _events = new();
+    private readonly ILogger<SteamApiStateService> _logger;
     private readonly GameCoordinatorPluginRegistry _gameCoordinatorPlugins;
     private readonly GameCoordinatorTraceService _gameCoordinatorTrace;
     private readonly DotaStatsStore _dotaStatsStore;
@@ -58,34 +60,30 @@ public sealed partial class SteamApiStateService
         GameCoordinatorPluginRegistry gameCoordinatorPlugins,
         GameCoordinatorTraceService gameCoordinatorTrace,
         IConfiguration configuration,
-        DotaDedicatedServerSupervisor dotaDedicatedServers)
+        DotaDedicatedServerSupervisor dotaDedicatedServers,
+        IDbContextFactory<AppDbContext> dbContextFactory,
+        ILogger<SteamApiStateService> logger)
     {
+        _logger = logger;
         _gameCoordinatorPlugins = gameCoordinatorPlugins;
         _gameCoordinatorTrace = gameCoordinatorTrace;
         _dotaDedicatedServers = dotaDedicatedServers;
+        _dbFactory = dbContextFactory;
         _sessionTimeout = TimeSpan.FromMinutes(Math.Clamp(configuration.GetValue("Session:TimeoutMinutes", 30), 1, 1440));
         _presenceTimeout = TimeSpan.FromSeconds(Math.Clamp(configuration.GetValue("Presence:TimeoutSeconds", 90), 15, 3600));
         _advertisedGameServerIp = configuration.GetValue<string>("GameCoordinator:Dota:AdvertisedGameServerIp")?.Trim() ?? string.Empty;
         var dataRoot = ResolveDataRoot(hostEnvironment.ContentRootPath, configuration);
-        var legacyDataRoot = Path.Combine(hostEnvironment.ContentRootPath, "Data");
         _statePath = Path.Combine(dataRoot, "api-state.json");
-        _dotaStatsStore = new DotaStatsStore(
-            Path.Combine(dataRoot, "skynet-dota-stats.db"),
-            ResolveDotaStatsIdentity);
-        if (!Path.GetFullPath(dataRoot).Equals(Path.GetFullPath(legacyDataRoot), StringComparison.OrdinalIgnoreCase))
-        {
-            _dotaStatsStore.ImportMissingFrom(Path.Combine(legacyDataRoot, "skynet-dota-stats.db"));
-        }
-
-        _dotaPartyStore = new DotaPartyStore(
-            Path.Combine(dataRoot, "skynet-dota-party.db"),
-            ResolveDotaStatsIdentity);
-        _dotaLobbyInviteStore = new DotaLobbyInviteStore(
-            Path.Combine(dataRoot, "skynet-dota-lobby-invites.db"));
-        CleanupOrphanStateTempFiles();
-        LoadState();
+        // All Dota stores now share the consolidated app.db (their tables were
+        // copied in by the importer); they keep their raw SQL, just this file.
+        var appDbPath = Path.Combine(dataRoot, "app.db");
+        _dotaStatsStore = new DotaStatsStore(appDbPath, ResolveDotaStatsIdentity);
+        _dotaPartyStore = new DotaPartyStore(appDbPath, ResolveDotaStatsIdentity);
+        _dotaLobbyInviteStore = new DotaLobbyInviteStore(appDbPath);
+        InitializePersistence(dataRoot);
         NormalizeState();
-        SaveState();
+        StartBackgroundFlusher();
+        RequestStateFlush();
         EnsureDefaultAdminAccount();
         DotaGcBackend.StatsStore = _dotaStatsStore;
         DotaGcBackend.PartyStore = _dotaPartyStore;

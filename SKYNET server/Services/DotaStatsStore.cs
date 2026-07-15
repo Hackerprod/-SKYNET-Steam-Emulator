@@ -40,9 +40,9 @@ public sealed class DotaStatsStore
     public DotaStatsStore(string dbPath, Func<uint, DotaStatsAccountIdentity?> identityResolver)
     {
         _identityResolver = identityResolver;
-        _dbPath = SqliteResilience.PrepareDatabase(dbPath, path =>
+        _dbPath = AppDatabase.PrepareDatabase(dbPath, path =>
         {
-            using var connection = SqliteResilience.OpenConnection(path);
+            using var connection = AppDatabase.OpenConnection(path);
             EnsureSchema(connection);
         });
     }
@@ -945,7 +945,7 @@ public sealed class DotaStatsStore
 
     private SqliteConnection OpenConnection()
     {
-        var connection = SqliteResilience.OpenConnection(_dbPath);
+        var connection = AppDatabase.OpenConnection(_dbPath);
         EnsureSchema(connection);
         return connection;
     }

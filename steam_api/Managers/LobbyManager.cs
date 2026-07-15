@@ -1,6 +1,7 @@
 ﻿using SKYNET.Helpers;
 using SKYNET.Types;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,9 +11,69 @@ namespace SKYNET.Managers
     {
         public static List<SteamLobby> Lobbies;
 
+        // Per-lobby chat backlog. Filled from "lobby_chat" events on the pump
+        // thread; read by GetLobbyChatEntry on the game thread. The message index
+        // reported by LobbyChatMsg_t.m_iChatID indexes into this buffer.
+        private static readonly ConcurrentDictionary<ulong, ChatBuffer> ChatBuffers = new();
+
         static LobbyManager()
         {
             Lobbies = new List<SteamLobby>();
+        }
+
+        public static int AppendChat(ulong lobbyId, ulong sender, byte[] data, byte entryType)
+        {
+            return ChatBuffers.GetOrAdd(lobbyId, _ => new ChatBuffer()).Append(sender, data ?? Array.Empty<byte>(), entryType);
+        }
+
+        public static bool TryGetChat(ulong lobbyId, int chatId, out ulong sender, out byte[] data, out byte entryType)
+        {
+            if (ChatBuffers.TryGetValue(lobbyId, out var buffer))
+            {
+                return buffer.TryGet(chatId, out sender, out data, out entryType);
+            }
+
+            sender = 0;
+            data = Array.Empty<byte>();
+            entryType = 0;
+            return false;
+        }
+
+        public static void ClearChat(ulong lobbyId)
+        {
+            ChatBuffers.TryRemove(lobbyId, out _);
+        }
+
+        private sealed class ChatBuffer
+        {
+            private readonly object _sync = new();
+            private readonly List<(ulong Sender, byte[] Data, byte Type)> _entries = new();
+
+            public int Append(ulong sender, byte[] data, byte type)
+            {
+                lock (_sync)
+                {
+                    _entries.Add((sender, data, type));
+                    return _entries.Count - 1;
+                }
+            }
+
+            public bool TryGet(int index, out ulong sender, out byte[] data, out byte type)
+            {
+                lock (_sync)
+                {
+                    if (index >= 0 && index < _entries.Count)
+                    {
+                        (sender, data, type) = _entries[index];
+                        return true;
+                    }
+                }
+
+                sender = 0;
+                data = Array.Empty<byte>();
+                type = 0;
+                return false;
+            }
         }
 
         public static SteamLobby GetLobby(ulong lobbyID)

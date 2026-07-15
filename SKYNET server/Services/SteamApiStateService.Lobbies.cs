@@ -60,7 +60,7 @@ public sealed partial class SteamApiStateService
             owner.LobbyId = lobby.SteamId;
             _state.Lobbies[lobby.SteamId] = lobby;
             SaveState();
-            EnqueueLobbyEvent(lobby, "lobby_created", 0);
+            EnqueueLobbyMembersEvent(lobby, "lobby_created", session.SteamId);
             return CloneLobby(lobby);
         }
     }
@@ -90,7 +90,7 @@ public sealed partial class SteamApiStateService
             }
 
             SaveState();
-            EnqueueLobbyEvent(lobby, "lobby_joined", 0);
+            EnqueueLobbyMembersEvent(lobby, "lobby_joined", session.SteamId);
             return CloneLobby(lobby);
         }
     }
@@ -124,7 +124,40 @@ public sealed partial class SteamApiStateService
             }
 
             SaveState();
-            EnqueueEvent(0, new ApiEvent { Type = "lobby_left", LobbyId = lobbyId, SteamId = session.SteamId });
+            // Member already removed above, so this reaches the remaining members.
+            EnqueueLobbyMembersEvent(lobby, "lobby_left", session.SteamId);
+            return true;
+        }
+    }
+
+    // Relay a lobby chat message to every member (transient, not persisted). Any
+    // member may send; the payload is opaque bytes, so this works for any game.
+    public bool SendLobbyChatMessage(string token, ulong lobbyId, byte[] body)
+    {
+        lock (_sync)
+        {
+            if (!TryGetSession(token, out var session) || !_state.Lobbies.TryGetValue(lobbyId, out var lobby))
+            {
+                return false;
+            }
+
+            if (lobby.Members.All(m => m.SteamId != session.SteamId))
+            {
+                return false;
+            }
+
+            var payload = Convert.ToBase64String(body ?? Array.Empty<byte>());
+            foreach (var member in lobby.Members)
+            {
+                EnqueueEvent(member.SteamId, new ApiEvent
+                {
+                    Type = "lobby_chat",
+                    LobbyId = lobbyId,
+                    SteamId = session.SteamId,
+                    PayloadBase64 = payload,
+                });
+            }
+
             return true;
         }
     }
@@ -148,7 +181,7 @@ public sealed partial class SteamApiStateService
 
             lobby.LobbyData[key] = value;
             SaveState();
-            EnqueueLobbyEvent(lobby, "lobby_updated", 0);
+            EnqueueLobbyMembersEvent(lobby, "lobby_updated");
             return true;
         }
     }
@@ -166,7 +199,7 @@ public sealed partial class SteamApiStateService
             if (removed)
             {
                 SaveState();
-                EnqueueLobbyEvent(lobby, "lobby_updated", 0);
+                EnqueueLobbyMembersEvent(lobby, "lobby_updated");
             }
 
             return removed;
@@ -187,7 +220,7 @@ public sealed partial class SteamApiStateService
             if (request.OwnerSteamId.HasValue) lobby.OwnerSteamId = request.OwnerSteamId.Value;
             if (request.MaxMembers.HasValue) lobby.MaxMembers = request.MaxMembers.Value;
             SaveState();
-            EnqueueLobbyEvent(lobby, "lobby_updated", 0);
+            EnqueueLobbyMembersEvent(lobby, "lobby_updated");
             return true;
         }
     }
@@ -219,7 +252,7 @@ public sealed partial class SteamApiStateService
             }
 
             SaveState();
-            EnqueueLobbyEvent(lobby, "lobby_updated", 0);
+            EnqueueLobbyMembersEvent(lobby, "lobby_updated");
             return true;
         }
     }
@@ -240,7 +273,7 @@ public sealed partial class SteamApiStateService
                 Port = request.Port
             };
             SaveState();
-            EnqueueLobbyEvent(lobby, "lobby_updated", 0);
+            EnqueueLobbyMembersEvent(lobby, "lobby_updated");
             return true;
         }
     }

@@ -578,6 +578,23 @@ namespace SKYNET.Managers
             }) != null;
         }
 
+        // Relay a lobby chat message. The server fans it out to every member
+        // (including the sender) as a "lobby_chat" event. Called off the game
+        // thread via the work queue, so the blocking HTTP send never stalls it.
+        public static bool SendLobbyChatMsg(ulong lobbyId, byte[] body)
+        {
+            if (!IsEnabled)
+            {
+                return false;
+            }
+
+            EnsureSession();
+            return Send<VoidDto>(HttpMethod.Post, $"api/lobbies/{lobbyId}/chat", new SkyNetLobbyChatRequestDto
+            {
+                MessageBase64 = Convert.ToBase64String(body ?? Array.Empty<byte>())
+            }) != null;
+        }
+
         public static bool DeleteLobbyData(ulong lobbyId, string key)
         {
             if (!IsEnabled)
@@ -1923,6 +1940,11 @@ namespace SKYNET.Managers
         {
             public string Key { get; set; }
             public string Value { get; set; }
+        }
+
+        public sealed class SkyNetLobbyChatRequestDto
+        {
+            public string MessageBase64 { get; set; }
         }
 
         public sealed class SkyNetLobbyDeleteDataRequestDto

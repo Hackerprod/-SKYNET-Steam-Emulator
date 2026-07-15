@@ -1,5 +1,29 @@
+using Microsoft.EntityFrameworkCore;
 using SKYNET_server.Models;
+using SKYNET_server.Persistence;
 using SKYNET_server.Services;
+
+// One-shot legacy consolidation: `--import-legacy [--force]` migrates
+// api-state.json + the legacy Dota SQLite files into Data/app.db and exits.
+if (args.Contains("--import-legacy"))
+{
+    var dataDir = Path.Combine(Directory.GetCurrentDirectory(), "Data");
+    Directory.CreateDirectory(dataDir);
+    var importOptions = new DbContextOptionsBuilder<AppDbContext>()
+        .UseSqlite($"Data Source={Path.Combine(dataDir, "app.db")}")
+        .Options;
+    using var importContext = new AppDbContext(importOptions);
+    var report = LegacyStateImporter.Import(importContext, dataDir, args.Contains("--force"), Console.WriteLine);
+    Environment.ExitCode = report.AllMatched ? 0 : 1;
+    return;
+}
+
+// Self-check that a representative state survives a Save -> Load round-trip.
+if (args.Contains("--verify-persistence"))
+{
+    Environment.ExitCode = PersistenceRoundTripCheck.Run(Console.WriteLine) ? 0 : 1;
+    return;
+}
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,14 +34,47 @@ builder.Services.AddSingleton<LuaGameCoordinatorPlugin>();
 builder.Services.AddSingleton<IGameCoordinatorPlugin>(sp => sp.GetRequiredService<LuaGameCoordinatorPlugin>());
 builder.Services.AddSingleton<GameCoordinatorPluginRegistry>();
 builder.Services.AddSingleton<SdrCertificateService>();
+// Consolidated persistence store. A pooled factory is singleton-safe, so the
+// singleton state service can create short-lived contexts per operation.
+builder.Services.AddPooledDbContextFactory<AppDbContext>(options =>
+    options.UseSqlite($"Data Source={Path.Combine(builder.Environment.ContentRootPath, "Data", "app.db")}"));
 builder.Services.AddSingleton<SteamApiStateService>();
 builder.Services.AddHostedService<DiscoveryService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<DotaDedicatedServerSupervisor>());
 builder.Services.AddHostedService<GameCoordinatorTickService>();
 builder.Services.AddHostedService<PresenceSweepService>();
 builder.Services.AddHostedService<SKYNET_server.Services.Networking.SdrRelayService>();
+builder.Services.AddHostedService<DatabaseBackupService>();
 
 var app = builder.Build();
+
+// Prepare the consolidated SQLite store: apply migrations and enable WAL (kept
+// non-blocking for readers). The state service performs the one-time legacy
+// import and hydration on first construction.
+{
+    Directory.CreateDirectory(Path.Combine(app.Environment.ContentRootPath, "Data"));
+    using var db = app.Services.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext();
+    db.Database.Migrate();
+    db.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
+}
+
+app.Lifetime.ApplicationStopping.Register(() =>
+{
+    // Flush any pending in-memory changes, then checkpoint so a later force-kill
+    // never leaves a large -wal sidecar behind.
+    try { app.Services.GetRequiredService<SteamApiStateService>().FlushStateToDatabase(); }
+    catch { /* best effort */ }
+
+    try
+    {
+        using var db = app.Services.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext();
+        db.Database.ExecuteSqlRaw("PRAGMA wal_checkpoint(TRUNCATE);");
+    }
+    catch
+    {
+        // Best effort: a failed checkpoint is recovered automatically on next open.
+    }
+});
 
 if (!app.Environment.IsDevelopment())
 {
@@ -275,6 +332,16 @@ api.MapPut("/lobbies/{lobbyId}/member-data", (HttpRequest request, ulong lobbyId
 api.MapPut("/lobbies/{lobbyId}/gameserver", (HttpRequest request, ulong lobbyId, ApiLobbyGameServerUpdateRequest payload, SteamApiStateService state) =>
 {
     return state.UpdateLobbyGameServer(SteamApiStateService.GetBearerToken(request) ?? string.Empty, lobbyId, payload)
+        ? Results.Ok()
+        : Results.BadRequest();
+});
+
+api.MapPost("/lobbies/{lobbyId}/chat", (HttpRequest request, ulong lobbyId, ApiLobbyChatRequest payload, SteamApiStateService state) =>
+{
+    var body = string.IsNullOrEmpty(payload.MessageBase64)
+        ? Array.Empty<byte>()
+        : Convert.FromBase64String(payload.MessageBase64);
+    return state.SendLobbyChatMessage(SteamApiStateService.GetBearerToken(request) ?? string.Empty, lobbyId, body)
         ? Results.Ok()
         : Results.BadRequest();
 });
