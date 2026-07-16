@@ -27,6 +27,7 @@ public sealed partial class SteamApiStateService
             var session = new ApiSession
             {
                 SteamId = steamId,
+                AppId = user.AppId,
                 AccessToken = Guid.NewGuid().ToString("N"),
                 RefreshToken = Guid.NewGuid().ToString("N"),
                 ClientInstanceId = clientInstanceId,

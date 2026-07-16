@@ -107,9 +107,9 @@ namespace SKYNET.Managers
             });
         }
 
-        // The actual blocking handshake. Only ever called from the background
-        // worker above, never from the game thread.
-        private static bool EstablishSessionBlocking()
+        // The actual blocking handshake. Only call from background/non-game-thread
+        // paths; caller-facing APIs should use EnsureSession instead.
+        private static bool EstablishSessionBlocking(int timeoutMs = 0)
         {
             if (!IsEnabled)
             {
@@ -146,7 +146,8 @@ namespace SKYNET.Managers
                 UseActiveWebUser = SteamEmulator.UseActiveWebUser
             };
 
-            var session = Send<SkyNetSessionDto>(HttpMethod.Post, "api/auth/steam/session", request);
+            HttpStatusCode? sc;
+            var session = Send<SkyNetSessionDto>(HttpMethod.Post, "api/auth/steam/session", request, out sc, timeoutMs: timeoutMs);
             if (session == null)
             {
                 return false;
@@ -154,6 +155,16 @@ namespace SKYNET.Managers
 
             ApplySession(session);
             return true;
+        }
+
+        private static bool EnsureRemoteStorageSession(int timeoutMs = 0)
+        {
+            if (!IsEnabled)
+            {
+                return false;
+            }
+
+            return !string.IsNullOrWhiteSpace(SteamEmulator.AccessToken) || EstablishSessionBlocking(timeoutMs);
         }
 
         private static string GetProcessRole()
@@ -672,41 +683,66 @@ namespace SKYNET.Managers
             }) != null;
         }
 
-        public static bool UploadRemoteStorageFile(string fileName, byte[] content)
+        public static bool UploadRemoteStorageFile(string fileName, byte[] content, uint? syncPlatforms = null)
         {
             if (!IsEnabled)
             {
                 return false;
             }
 
-            EnsureSession();
-            return Send<VoidDto>(HttpMethod.Put, "api/storage/files", new ApiRemoteStorageFile
+            if (!EnsureRemoteStorageSession())
+            {
+                return false;
+            }
+
+            return Send<VoidDto>(HttpMethod.Put, "api/storage/files", new ApiRemoteStorageUploadRequest
             {
                 FileName = fileName,
-                ContentBase64 = Convert.ToBase64String(content ?? new byte[0])
+                ContentBase64 = Convert.ToBase64String(content ?? new byte[0]),
+                SyncPlatforms = syncPlatforms
             }) != null;
+        }
+
+        public static ApiRemoteStorageFile DownloadRemoteStorageFile(string fileName, out System.Net.HttpStatusCode? statusCode)
+        {
+            statusCode = null;
+            if (!IsEnabled)
+            {
+                return null;
+            }
+
+            if (!EnsureRemoteStorageSession())
+            {
+                return null;
+            }
+
+            return Send<ApiRemoteStorageFile>(
+                HttpMethod.Get,
+                $"api/storage/files/{Uri.EscapeDataString(fileName)}",
+                null,
+                out statusCode,
+                quietStatusCode: HttpStatusCode.NotFound);
         }
 
         public static ApiRemoteStorageFile DownloadRemoteStorageFile(string fileName)
         {
-            if (!IsEnabled)
-            {
-                return null;
-            }
-
-            EnsureSession();
-            return Send<ApiRemoteStorageFile>(HttpMethod.Get, $"api/storage/files/{Uri.EscapeDataString(fileName)}");
+            return DownloadRemoteStorageFile(fileName, out _);
         }
 
-        public static List<ApiRemoteStorageFileListItem> ListRemoteStorageFiles()
+        public static List<ApiRemoteStorageFileListItem> ListRemoteStorageFiles(int timeoutMs = 0)
         {
             if (!IsEnabled)
             {
                 return null;
             }
 
-            EnsureSession();
-            return Send<List<ApiRemoteStorageFileListItem>>(HttpMethod.Get, "api/storage/files");
+            if (!EnsureRemoteStorageSession(timeoutMs))
+            {
+                return null;
+            }
+
+            HttpStatusCode? sc;
+            return Send<List<ApiRemoteStorageFileListItem>>(HttpMethod.Get, "api/storage/files", null, out sc, timeoutMs: timeoutMs);
         }
 
         public static bool DeleteRemoteStorageFile(string fileName)
@@ -716,7 +752,11 @@ namespace SKYNET.Managers
                 return false;
             }
 
-            EnsureSession();
+            if (!EnsureRemoteStorageSession())
+            {
+                return false;
+            }
+
             return Send<VoidDto>(HttpMethod.Post, "api/storage/files/delete", new SkyNetRemoteStorageDeleteRequestDto
             {
                 FileName = fileName
@@ -730,7 +770,11 @@ namespace SKYNET.Managers
                 return null;
             }
 
-            EnsureSession();
+            if (!EnsureRemoteStorageSession())
+            {
+                return null;
+            }
+
             return Send<ApiRemoteStorageShare>(HttpMethod.Post, "api/storage/files/share", new SkyNetRemoteStorageDeleteRequestDto
             {
                 FileName = fileName
@@ -744,7 +788,11 @@ namespace SKYNET.Managers
                 return null;
             }
 
-            EnsureSession();
+            if (!EnsureRemoteStorageSession())
+            {
+                return null;
+            }
+
             return Send<ApiRemoteStorageQuota>(HttpMethod.Get, "api/storage/quota");
         }
 
@@ -1564,20 +1612,32 @@ namespace SKYNET.Managers
             return Serializer;
         }
 
-        private static T Send<T>(HttpMethod method, string path, object body = null, bool retryOnUnauthorized = true)
+        private static T Send<T>(HttpMethod method, string path, object body = null, bool retryOnUnauthorized = true, int timeoutMs = 0)
             where T : class
         {
             HttpStatusCode? statusCode;
-            return Send<T>(method, path, body, out statusCode, retryOnUnauthorized);
+            return Send<T>(method, path, body, out statusCode, retryOnUnauthorized, quietStatusCode: null, timeoutMs: timeoutMs);
         }
 
-        private static T Send<T>(HttpMethod method, string path, object body, out HttpStatusCode? statusCode, bool retryOnUnauthorized = true)
+        private static T Send<T>(
+            HttpMethod method,
+            string path,
+            object body,
+            out HttpStatusCode? statusCode,
+            bool retryOnUnauthorized = true,
+            HttpStatusCode? quietStatusCode = null,
+            int timeoutMs = 0)
             where T : class
         {
             statusCode = null;
+            System.Threading.CancellationTokenSource cts = null;
             try
             {
                 ConfigureClient();
+                if (timeoutMs > 0)
+                {
+                    cts = new System.Threading.CancellationTokenSource(timeoutMs);
+                }
                 using (var request = new HttpRequestMessage(method, path))
                 {
                     ApplyAuthorization(request);
@@ -1587,18 +1647,26 @@ namespace SKYNET.Managers
                         request.Content = new StringContent(body.ToJson(), Encoding.UTF8, "application/json");
                     }
 
-                    using (var response = GetClient().SendAsync(request).GetAwaiter().GetResult())
+                    var sendTask = cts != null
+                        ? GetClient().SendAsync(request, cts.Token)
+                        : GetClient().SendAsync(request);
+
+                    using (var response = sendTask.GetAwaiter().GetResult())
                     {
                         statusCode = response.StatusCode;
                         if (!response.IsSuccessStatusCode)
                         {
-                            SteamEmulator.Write("SkyNetApiClient", $"{method} {path} failed: HTTP {(int)response.StatusCode} {response.ReasonPhrase}");
+                            if (quietStatusCode != response.StatusCode)
+                            {
+                                SteamEmulator.Write("SkyNetApiClient", $"{method} {path} failed: HTTP {(int)response.StatusCode} {response.ReasonPhrase}");
+                            }
+
                             if (response.StatusCode == HttpStatusCode.Unauthorized)
                             {
                                 ResetSession();
                                 if (retryOnUnauthorized && !IsSessionEndpoint(path) && EnsureSession())
                                 {
-                                    return Send<T>(method, path, body, out statusCode, false);
+                                    return Send<T>(method, path, body, out statusCode, false, quietStatusCode, timeoutMs);
                                 }
                             }
 
@@ -1620,10 +1688,19 @@ namespace SKYNET.Managers
                     }
                 }
             }
+            catch (OperationCanceledException) when (cts != null && cts.IsCancellationRequested)
+            {
+                SteamEmulator.Write("SkyNetApiClient", $"{method} {path} timed out after {timeoutMs}ms");
+                return null;
+            }
             catch (Exception ex)
             {
                 SteamEmulator.Write("SkyNetApiClient", $"{method} {path} failed: {ex.Message}");
                 return null;
+            }
+            finally
+            {
+                cts?.Dispose();
             }
         }
 
@@ -1999,12 +2076,22 @@ namespace SKYNET.Managers
             public uint Port { get; set; }
         }
 
+        public sealed class ApiRemoteStorageUploadRequest
+        {
+            public string FileName { get; set; }
+            public string ContentBase64 { get; set; }
+            public uint? SyncPlatforms { get; set; }
+        }
+
         public sealed class ApiRemoteStorageFile
         {
             public string FileName { get; set; }
             public string ContentBase64 { get; set; }
             public int Size { get; set; }
             public uint Timestamp { get; set; }
+            public string Sha256 { get; set; }
+            public uint SyncPlatforms { get; set; }
+            public int Version { get; set; }
         }
 
         public sealed class ApiRemoteStorageFileListItem
@@ -2012,6 +2099,9 @@ namespace SKYNET.Managers
             public string FileName { get; set; }
             public int Size { get; set; }
             public uint Timestamp { get; set; }
+            public string Sha256 { get; set; }
+            public uint SyncPlatforms { get; set; }
+            public int Version { get; set; }
         }
 
         public sealed class SkyNetRemoteStorageDeleteRequestDto

@@ -376,6 +376,8 @@ public sealed partial class SteamApiStateService
         _state.Stats ??= new Dictionary<ulong, ApiStatsEnvelope>();
         _state.Lobbies ??= new Dictionary<ulong, ApiLobby>();
         _state.Files ??= new Dictionary<string, ApiRemoteStorageFile>(StringComparer.OrdinalIgnoreCase);
+        _state.Files = new Dictionary<string, ApiRemoteStorageFile>(_state.Files, StringComparer.OrdinalIgnoreCase);
+        _state.FileShares ??= new Dictionary<ulong, ApiRemoteStorageShareRecord>();
         _state.GameServers ??= new Dictionary<ulong, ApiGameServer>();
         // State files written before dedicated support used the host IP as key.
         // Several dedicated processes share an IP, so current entries are keyed
@@ -576,10 +578,17 @@ public sealed partial class SteamApiStateService
 
     private static ApiRemoteStorageFile CloneFile(ApiRemoteStorageFile file) => new()
     {
+        OwnerSteamId = file.OwnerSteamId,
+        AppId = file.AppId,
         FileName = file.FileName,
         ContentBase64 = file.ContentBase64,
         Size = file.Size,
-        Timestamp = file.Timestamp
+        Timestamp = file.Timestamp,
+        Sha256 = file.Sha256,
+        SyncPlatforms = file.SyncPlatforms,
+        Version = file.Version,
+        Persisted = file.Persisted,
+        DeletedAt = file.DeletedAt
     };
 
     private static ApiDotaItem CloneDotaItem(ApiDotaItem item) => new()
@@ -1038,5 +1047,38 @@ public sealed partial class SteamApiStateService
         var bytes = ip.GetAddressBytes();
         Array.Reverse(bytes);
         return BitConverter.ToUInt32(bytes, 0);
+    }
+
+    public static bool TryNormalizeRemotePath(string path, out string normalized)
+    {
+        normalized = string.Empty;
+        if (string.IsNullOrWhiteSpace(path)) return false;
+
+        if (path.Contains("..") || path.Contains(":") || Path.IsPathRooted(path))
+        {
+            return false;
+        }
+
+        var parts = path.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 0 || parts.Any(p => p == "." || p == ".."))
+        {
+            return false;
+        }
+
+        normalized = string.Join("/", parts).ToLowerInvariant();
+        return !string.IsNullOrWhiteSpace(normalized);
+    }
+
+    public static string MakeRemoteStorageKey(ulong ownerSteamId, uint appId, string normalizedName)
+    {
+        return $"{ownerSteamId}:{appId}:{normalizedName}";
+    }
+
+    public bool IsValidToken(string token)
+    {
+        lock (_sync)
+        {
+            return TryGetSession(token, out _);
+        }
     }
 }

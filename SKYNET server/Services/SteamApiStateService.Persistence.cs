@@ -21,6 +21,17 @@ public sealed partial class SteamApiStateService
         using var context = _dbFactory.CreateDbContext();
         context.Database.Migrate();
 
+        try
+        {
+            var migratedCount = context.RemoteFiles.Count(f => f.OwnerSteamId != 0);
+            var orphanedCount = context.RemoteFiles.Count(f => f.OwnerSteamId == 0);
+            _logger.LogInformation("Remote Storage DB Migration check: {Migrated} files scoped, {Orphaned} files orphaned.", migratedCount, orphanedCount);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to count migrated remote files.");
+        }
+
         if (!context.Users.Any() && File.Exists(_statePath))
         {
             _logger.LogInformation("app.db is empty; importing legacy state from {Path}.", _statePath);
@@ -35,6 +46,11 @@ public sealed partial class SteamApiStateService
         if (_state.Lobbies.Count > 0)
         {
             _nextLobbyId = Math.Max(_nextLobbyId, _state.Lobbies.Keys.Max() + 1);
+        }
+
+        if (context.RemoteFileShares.Any())
+        {
+            _nextFileShareHandle = Math.Max(_nextFileShareHandle, context.RemoteFileShares.Max(x => x.Handle) + 1);
         }
     }
 

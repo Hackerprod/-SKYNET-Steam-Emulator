@@ -138,11 +138,26 @@ public class LobbyGameServerValue
 
 public class RemoteFileRecord
 {
-    public string Key { get; set; } = string.Empty;
-    public string FileName { get; set; } = string.Empty;
+    public ulong OwnerSteamId { get; set; }
+    public uint AppId { get; set; }
+    public string NormalizedName { get; set; } = string.Empty;
+    public string OriginalName { get; set; } = string.Empty;
     public byte[] Content { get; set; } = Array.Empty<byte>();
     public int Size { get; set; }
     public uint Timestamp { get; set; }
+    public string Sha256 { get; set; } = string.Empty;
+    public long SyncPlatforms { get; set; }
+    public int Version { get; set; }
+    public bool Persisted { get; set; }
+    public DateTime? DeletedAt { get; set; }
+}
+
+public class RemoteFileShareRecord
+{
+    public ulong Handle { get; set; }
+    public ulong OwnerSteamId { get; set; }
+    public uint AppId { get; set; }
+    public string NormalizedName { get; set; } = string.Empty;
 }
 
 public class DotaItemRecord

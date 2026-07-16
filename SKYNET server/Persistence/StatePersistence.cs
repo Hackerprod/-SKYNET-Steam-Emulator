@@ -3,6 +3,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using SKYNET_server.Models;
 using SKYNET_server.Persistence.Entities;
+using SKYNET_server.Services;
 
 namespace SKYNET_server.Persistence;
 
@@ -187,13 +188,32 @@ public static class StatePersistence
 
         foreach (var (key, file) in state.Files)
         {
+            var normalizedName = SteamApiStateService.TryNormalizeRemotePath(file.FileName, out var norm) ? norm : (file.FileName ?? "").Replace('\\', '/').ToLowerInvariant();
             snapshot.RemoteFiles.Add(new RemoteFileRecord
             {
-                Key = key,
-                FileName = file.FileName,
+                OwnerSteamId = file.OwnerSteamId,
+                AppId = file.AppId,
+                NormalizedName = normalizedName,
+                OriginalName = file.FileName ?? string.Empty,
                 Content = SafeFromBase64(file.ContentBase64),
                 Size = file.Size,
                 Timestamp = file.Timestamp,
+                Sha256 = file.Sha256 ?? string.Empty,
+                SyncPlatforms = (long)file.SyncPlatforms,
+                Version = file.Version,
+                Persisted = file.Persisted,
+                DeletedAt = file.DeletedAt
+            });
+        }
+
+        foreach (var (handle, share) in state.FileShares)
+        {
+            snapshot.RemoteFileShares.Add(new RemoteFileShareRecord
+            {
+                Handle = handle,
+                OwnerSteamId = share.OwnerSteamId,
+                AppId = share.AppId,
+                NormalizedName = share.NormalizedName
             });
         }
 
@@ -323,6 +343,7 @@ public static class StatePersistence
             new("GameServers", snapshot.GameServers, () => context.GameServers.ExecuteDelete(), () => context.GameServers.AddRange(snapshot.GameServers)),
             new("Lobbies", snapshot.Lobbies, () => context.Lobbies.ExecuteDelete(), () => context.Lobbies.AddRange(snapshot.Lobbies)),
             new("RemoteFiles", snapshot.RemoteFiles, () => context.RemoteFiles.ExecuteDelete(), () => context.RemoteFiles.AddRange(snapshot.RemoteFiles)),
+            new("RemoteFileShares", snapshot.RemoteFileShares, () => context.RemoteFileShares.ExecuteDelete(), () => context.RemoteFileShares.AddRange(snapshot.RemoteFileShares)),
             new("DotaEquipment", snapshot.DotaEquipment, () => context.DotaEquipment.ExecuteDelete(), () => context.DotaEquipment.AddRange(snapshot.DotaEquipment)),
             // DotaMatchPlayers are cascade-deleted with their match and inserted via the Players navigation.
             new("DotaMatches", snapshot.DotaMatches, () => context.DotaMatches.ExecuteDelete(), () => context.DotaMatches.AddRange(snapshot.DotaMatches)),
@@ -510,12 +531,38 @@ public static class StatePersistence
 
         foreach (var f in context.RemoteFiles.AsNoTracking())
         {
-            state.Files[f.Key] = new ApiRemoteStorageFile
+            var key = SteamApiStateService.MakeRemoteStorageKey(f.OwnerSteamId, f.AppId, f.NormalizedName);
+            var content = f.Content ?? Array.Empty<byte>();
+            var sha256 = f.Sha256;
+            if (string.IsNullOrEmpty(sha256))
             {
-                FileName = f.FileName,
-                ContentBase64 = Convert.ToBase64String(f.Content),
+                sha256 = Convert.ToHexString(SHA256.HashData(content)).ToLowerInvariant();
+            }
+
+            state.Files[key] = new ApiRemoteStorageFile
+            {
+                OwnerSteamId = f.OwnerSteamId,
+                AppId = f.AppId,
+                FileName = f.OriginalName,
+                ContentBase64 = Convert.ToBase64String(content),
                 Size = f.Size,
                 Timestamp = f.Timestamp,
+                Sha256 = sha256,
+                SyncPlatforms = (uint)f.SyncPlatforms,
+                Version = f.Version,
+                Persisted = f.Persisted,
+                DeletedAt = f.DeletedAt
+            };
+        }
+
+        foreach (var s in context.RemoteFileShares.AsNoTracking())
+        {
+            state.FileShares[s.Handle] = new ApiRemoteStorageShareRecord
+            {
+                Handle = s.Handle,
+                OwnerSteamId = s.OwnerSteamId,
+                AppId = s.AppId,
+                NormalizedName = s.NormalizedName
             };
         }
 
@@ -705,6 +752,7 @@ public sealed class StateSnapshot
     public List<GameServerRecord> GameServers { get; } = new();
     public List<LobbyRecord> Lobbies { get; } = new();
     public List<RemoteFileRecord> RemoteFiles { get; } = new();
+    public List<RemoteFileShareRecord> RemoteFileShares { get; } = new();
     public List<DotaEquipmentRecord> DotaEquipment { get; } = new();
     public List<DotaMatchRecord> DotaMatches { get; } = new();
     public List<DotaHeroIdRecord> DotaHeroIds { get; } = new();

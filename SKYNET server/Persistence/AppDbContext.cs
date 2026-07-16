@@ -31,6 +31,7 @@ public sealed class AppDbContext : DbContext
     public DbSet<GameServerRecord> GameServers => Set<GameServerRecord>();
     public DbSet<LobbyRecord> Lobbies => Set<LobbyRecord>();
     public DbSet<RemoteFileRecord> RemoteFiles => Set<RemoteFileRecord>();
+    public DbSet<RemoteFileShareRecord> RemoteFileShares => Set<RemoteFileShareRecord>();
     public DbSet<DotaItemRecord> DotaItems => Set<DotaItemRecord>();
     public DbSet<DotaEquipmentRecord> DotaEquipment => Set<DotaEquipmentRecord>();
     public DbSet<DotaMatchRecord> DotaMatches => Set<DotaMatchRecord>();
@@ -57,7 +58,9 @@ public sealed class AppDbContext : DbContext
         modelBuilder.Entity<AchievementRecord>().HasKey(x => new { x.SteamId, x.Name });
         modelBuilder.Entity<WebAccountRecord>().HasKey(x => x.Username);
         modelBuilder.Entity<WebSessionRecord>().HasKey(x => x.AccessToken);
-        modelBuilder.Entity<RemoteFileRecord>().HasKey(x => x.Key);
+        modelBuilder.Entity<RemoteFileRecord>().HasKey(x => new { x.OwnerSteamId, x.AppId, x.NormalizedName });
+        modelBuilder.Entity<RemoteFileShareRecord>().HasKey(x => x.Handle);
+        modelBuilder.Entity<RemoteFileShareRecord>().Property(x => x.Handle).ValueGeneratedNever();
         modelBuilder.Entity<DotaItemRecord>().HasKey(x => x.DefIndex);
         modelBuilder.Entity<DotaEquipmentRecord>().HasKey(x => new { x.SteamId, x.HeroId, x.SlotId });
         modelBuilder.Entity<CosmeticSettingsRecord>().HasKey(x => x.Id);

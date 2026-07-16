@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SKYNET_server.Models;
+using SKYNET_server.Services;
 
 namespace SKYNET_server.Persistence;
 
@@ -84,7 +85,32 @@ public static class PersistenceRoundTripCheck
             GameServer = new ApiLobbyGameServer { SteamId = a, IP = 0x0A0B0C0D, Port = 27015 },
         };
 
-        state.Files["a/save.dat"] = new ApiRemoteStorageFile { FileName = "save.dat", ContentBase64 = Convert.ToBase64String(new byte[] { 9, 8, 7 }), Size = 3, Timestamp = 1234 };
+        var fileContent = new byte[] { 9, 8, 7 };
+        var fileSha = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(fileContent)).ToLowerInvariant();
+        var normalizedName = "a/save.dat";
+        var fileKey = SteamApiStateService.MakeRemoteStorageKey(a, 570, normalizedName);
+        state.Files[fileKey] = new ApiRemoteStorageFile
+        {
+            OwnerSteamId = a,
+            AppId = 570,
+            FileName = "a/save.dat",
+            ContentBase64 = Convert.ToBase64String(fileContent),
+            Size = fileContent.Length,
+            Timestamp = 1234,
+            Sha256 = fileSha,
+            SyncPlatforms = 0xFFFFFFFFU,
+            Version = 1,
+            Persisted = true,
+            DeletedAt = null
+        };
+
+        state.FileShares[80000000000000001UL] = new ApiRemoteStorageShareRecord
+        {
+            Handle = 80000000000000001UL,
+            OwnerSteamId = a,
+            AppId = 570,
+            NormalizedName = normalizedName
+        };
 
         state.DotaItems[101] = new ApiDotaItem { DefIndex = 101, Name = "Blade", Slot = "weapon", HeroNames = { "npc_dota_hero_axe" }, HeroIds = { 2 } };
 
@@ -118,6 +144,7 @@ public static class PersistenceRoundTripCheck
 
     private static bool Compare(ApiState original, ApiState loaded, Action<string> log)
     {
+        const ulong a = 76561197960287930UL;
         var failures = new List<string>();
 
         void Check(string name, bool ok)
@@ -144,7 +171,9 @@ public static class PersistenceRoundTripCheck
         Check("Lobby.Member.Data", lobby is not null && lobby.Members.Count == 1 && lobby.Members[0].Data.Count == 1 && lobby.Members[0].Data[0].Value == "1");
         Check("Lobby.GameServer", lobby?.GameServer is not null && lobby.GameServer.Port == 27015);
 
-        Check("RemoteFiles", loaded.Files.Count == 1 && loaded.Files["a/save.dat"].ContentBase64 == original.Files["a/save.dat"].ContentBase64);
+        var expectedKey = SteamApiStateService.MakeRemoteStorageKey(a, 570, "a/save.dat");
+        Check("RemoteFiles", loaded.Files.Count == 1 && loaded.Files[expectedKey].ContentBase64 == original.Files[expectedKey].ContentBase64);
+        Check("FileShares", loaded.FileShares.Count == 1 && loaded.FileShares[80000000000000001UL].NormalizedName == "a/save.dat");
         Check("DotaItems", loaded.DotaItems.Count == 1 && loaded.DotaItems[101].HeroNames.Count == 1 && loaded.DotaItems[101].HeroIds.Contains(2u));
         Check("DotaEquipment", loaded.DotaEquipment.TryGetValue(76561197960287930UL, out var eq) && eq.Count == 1 && eq[0].ItemId == 555);
 

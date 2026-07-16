@@ -305,10 +305,24 @@ public sealed class ApiLobbyGameServer
 
 public sealed class ApiRemoteStorageFile
 {
+    public ulong OwnerSteamId { get; set; }
+    public uint AppId { get; set; }
     public string FileName { get; set; } = string.Empty;
     public string ContentBase64 { get; set; } = string.Empty;
     public int Size { get; set; }
     public uint Timestamp { get; set; }
+    public string Sha256 { get; set; } = string.Empty;
+    public uint SyncPlatforms { get; set; }
+    public int Version { get; set; }
+    public bool Persisted { get; set; }
+    public DateTime? DeletedAt { get; set; }
+}
+
+public sealed class ApiRemoteStorageUploadRequest
+{
+    public string FileName { get; set; } = string.Empty;
+    public string ContentBase64 { get; set; } = string.Empty;
+    public uint? SyncPlatforms { get; set; }
 }
 
 public sealed class ApiRemoteStorageFileListItem
@@ -316,6 +330,8 @@ public sealed class ApiRemoteStorageFileListItem
     public string FileName { get; set; } = string.Empty;
     public int Size { get; set; }
     public uint Timestamp { get; set; }
+    public string Sha256 { get; set; } = string.Empty;
+    public int Version { get; set; }
 }
 
 public sealed class ApiRemoteStorageDeleteRequest
@@ -645,6 +661,7 @@ public sealed class ApiState
     public Dictionary<ulong, ApiStatsEnvelope> Stats { get; set; } = new();
     public Dictionary<ulong, ApiLobby> Lobbies { get; set; } = new();
     public Dictionary<string, ApiRemoteStorageFile> Files { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    public Dictionary<ulong, ApiRemoteStorageShareRecord> FileShares { get; set; } = new();
     public Dictionary<ulong, ApiGameServer> GameServers { get; set; } = new();
     public Dictionary<string, ApiWebAccount> WebAccounts { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public Dictionary<string, ApiSession> WebSessions { get; set; } = new(StringComparer.Ordinal);
@@ -657,11 +674,20 @@ public sealed class ApiState
     public ApiDotaCosmeticSettings DotaCosmetics { get; set; } = new();
 }
 
+public sealed class ApiRemoteStorageShareRecord
+{
+    public ulong Handle { get; set; }
+    public ulong OwnerSteamId { get; set; }
+    public uint AppId { get; set; }
+    public string NormalizedName { get; set; } = string.Empty;
+}
+
 public sealed class ApiSession
 {
     public string AccessToken { get; set; } = string.Empty;
     public string RefreshToken { get; set; } = string.Empty;
     public ulong SteamId { get; set; }
+    public uint AppId { get; set; }
     public string ClientInstanceId { get; set; } = string.Empty;
     public string ProcessRole { get; set; } = "client";
     public string? RemoteIp { get; set; }

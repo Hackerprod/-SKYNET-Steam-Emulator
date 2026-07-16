@@ -393,41 +393,60 @@ api.MapPost("/lobbies/{lobbyId}/chat", (HttpRequest request, ulong lobbyId, ApiL
         : Results.BadRequest();
 });
 
-api.MapPut("/storage/files", (HttpRequest request, ApiRemoteStorageFile payload, SteamApiStateService state) =>
+api.MapPut("/storage/files", (HttpRequest request, ApiRemoteStorageUploadRequest payload, SteamApiStateService state) =>
 {
-    return state.PutFile(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload)
+    var token = SteamApiStateService.GetBearerToken(request) ?? string.Empty;
+    return state.PutFile(token, payload)
         ? Results.Ok()
         : Results.Unauthorized();
 });
 
 api.MapGet("/storage/files", (HttpRequest request, SteamApiStateService state) =>
 {
-    var files = state.ListFiles(SteamApiStateService.GetBearerToken(request) ?? string.Empty);
+    var token = SteamApiStateService.GetBearerToken(request) ?? string.Empty;
+    var files = state.ListFiles(token);
     return files == null ? Results.Unauthorized() : Results.Ok(files);
 });
 
 api.MapGet("/storage/files/{*fileName}", (HttpRequest request, string fileName, SteamApiStateService state) =>
 {
-    var file = state.GetFile(SteamApiStateService.GetBearerToken(request) ?? string.Empty, fileName);
+    var token = SteamApiStateService.GetBearerToken(request) ?? string.Empty;
+    if (!state.IsValidToken(token))
+    {
+        return Results.Unauthorized();
+    }
+    var file = state.GetFile(token, fileName);
     return file == null ? Results.NotFound() : Results.Ok(file);
 });
 
 api.MapPost("/storage/files/delete", (HttpRequest request, ApiRemoteStorageDeleteRequest payload, SteamApiStateService state) =>
 {
-    return state.DeleteFile(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload.FileName)
+    var token = SteamApiStateService.GetBearerToken(request) ?? string.Empty;
+    if (!state.IsValidToken(token))
+    {
+        return Results.Unauthorized();
+    }
+    return state.DeleteFile(token, payload.FileName)
         ? Results.Ok()
         : Results.NotFound();
 });
 
 api.MapPost("/storage/files/share", (HttpRequest request, ApiRemoteStorageDeleteRequest payload, SteamApiStateService state) =>
 {
-    var result = state.ShareFile(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload.FileName);
+    var token = SteamApiStateService.GetBearerToken(request) ?? string.Empty;
+    if (!state.IsValidToken(token))
+    {
+        return Results.Unauthorized();
+    }
+    var result = state.ShareFile(token, payload.FileName);
     return result == null ? Results.NotFound() : Results.Ok(result);
 });
 
 api.MapGet("/storage/quota", (HttpRequest request, SteamApiStateService state) =>
 {
-    return Results.Ok(state.GetQuota(SteamApiStateService.GetBearerToken(request) ?? string.Empty));
+    var token = SteamApiStateService.GetBearerToken(request) ?? string.Empty;
+    var quota = state.GetQuota(token);
+    return quota == null ? Results.Unauthorized() : Results.Ok(quota);
 });
 
 api.MapPost("/auth/tickets/session", (ApiAuthTicketRequest payload, SteamApiStateService state) =>

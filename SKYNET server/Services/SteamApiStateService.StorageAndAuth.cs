@@ -1,4 +1,5 @@
 using System.Net;
+using System.Security.Cryptography;
 using SKYNET_server.Models;
 
 namespace SKYNET_server.Services;
@@ -7,18 +8,58 @@ public sealed partial class SteamApiStateService
 {
     private const uint ServerFlagSecure = 0x02;
 
-    public bool PutFile(string token, ApiRemoteStorageFile file)
+    public bool PutFile(string token, ApiRemoteStorageUploadRequest file)
     {
         lock (_sync)
         {
-            if (!TryGetSession(token, out _))
+            if (!TryGetSession(token, out var session))
             {
                 return false;
             }
 
-            file.Size = string.IsNullOrWhiteSpace(file.ContentBase64) ? 0 : Convert.FromBase64String(file.ContentBase64).Length;
-            file.Timestamp = ToUnixTime(DateTime.UtcNow);
-            _state.Files[file.FileName] = file;
+            if (!TryNormalizeRemotePath(file.FileName, out var normalized))
+            {
+                return false;
+            }
+
+            var key = MakeRemoteStorageKey(session!.SteamId, session.AppId, normalized);
+            byte[] contentBytes;
+            try
+            {
+                contentBytes = string.IsNullOrWhiteSpace(file.ContentBase64)
+                    ? Array.Empty<byte>()
+                    : Convert.FromBase64String(file.ContentBase64);
+            }
+            catch (FormatException)
+            {
+                return false;
+            }
+
+            var sha256 = Convert.ToHexString(SHA256.HashData(contentBytes)).ToLowerInvariant();
+            var version = 1;
+            var syncPlatforms = file.SyncPlatforms ?? 0xFFFFFFFFU;
+            if (_state.Files.TryGetValue(key, out var existing))
+            {
+                version = existing.Version + 1;
+                syncPlatforms = file.SyncPlatforms ?? existing.SyncPlatforms;
+            }
+
+            var storageFile = new ApiRemoteStorageFile
+            {
+                OwnerSteamId = session.SteamId,
+                AppId = session.AppId,
+                FileName = file.FileName,
+                ContentBase64 = Convert.ToBase64String(contentBytes),
+                Size = contentBytes.Length,
+                Timestamp = ToUnixTime(DateTime.UtcNow),
+                Sha256 = sha256,
+                SyncPlatforms = syncPlatforms,
+                Version = version,
+                Persisted = true,
+                DeletedAt = null
+            };
+
+            _state.Files[key] = storageFile;
             SaveState();
             return true;
         }
@@ -28,7 +69,23 @@ public sealed partial class SteamApiStateService
     {
         lock (_sync)
         {
-            return _state.Files.TryGetValue(fileName, out var file) ? CloneFile(file) : null;
+            if (!TryGetSession(token, out var session))
+            {
+                return null;
+            }
+
+            if (!TryNormalizeRemotePath(fileName, out var normalized))
+            {
+                return null;
+            }
+
+            var key = MakeRemoteStorageKey(session!.SteamId, session.AppId, normalized);
+            if (_state.Files.TryGetValue(key, out var file) && file.DeletedAt == null)
+            {
+                return CloneFile(file);
+            }
+
+            return null;
         }
     }
 
@@ -36,14 +93,22 @@ public sealed partial class SteamApiStateService
     {
         lock (_sync)
         {
-            if (!TryGetSession(token, out _))
+            if (!TryGetSession(token, out var session))
             {
                 return null;
             }
 
             return _state.Files.Values
+                .Where(f => f.OwnerSteamId == session!.SteamId && f.AppId == session.AppId && f.DeletedAt == null)
                 .OrderBy(f => f.FileName)
-                .Select(f => new ApiRemoteStorageFileListItem { FileName = f.FileName, Size = f.Size, Timestamp = f.Timestamp })
+                .Select(f => new ApiRemoteStorageFileListItem
+                {
+                    FileName = f.FileName,
+                    Size = f.Size,
+                    Timestamp = f.Timestamp,
+                    Sha256 = f.Sha256,
+                    Version = f.Version
+                })
                 .ToList();
         }
     }
@@ -52,13 +117,27 @@ public sealed partial class SteamApiStateService
     {
         lock (_sync)
         {
-            var removed = _state.Files.Remove(fileName);
-            if (removed)
+            if (!TryGetSession(token, out var session))
             {
-                SaveState();
+                return false;
             }
 
-            return removed;
+            if (!TryNormalizeRemotePath(fileName, out var normalized))
+            {
+                return false;
+            }
+
+            var key = MakeRemoteStorageKey(session!.SteamId, session.AppId, normalized);
+            if (!_state.Files.TryGetValue(key, out var existing) || existing.DeletedAt != null)
+            {
+                return false;
+            }
+
+            existing.DeletedAt = DateTime.UtcNow;
+            existing.Version++;
+            existing.Timestamp = ToUnixTime(DateTime.UtcNow);
+            SaveState();
+            return true;
         }
     }
 
@@ -66,24 +145,55 @@ public sealed partial class SteamApiStateService
     {
         lock (_sync)
         {
-            if (!_state.Files.ContainsKey(fileName))
+            if (!TryGetSession(token, out var session))
             {
                 return null;
             }
 
+            if (!TryNormalizeRemotePath(fileName, out var normalized))
+            {
+                return null;
+            }
+
+            var key = MakeRemoteStorageKey(session!.SteamId, session.AppId, normalized);
+            if (!_state.Files.TryGetValue(key, out var file) || file.DeletedAt != null)
+            {
+                return null;
+            }
+
+            var handle = ++_nextFileShareHandle;
+            var share = new ApiRemoteStorageShareRecord
+            {
+                Handle = handle,
+                OwnerSteamId = session.SteamId,
+                AppId = session.AppId,
+                NormalizedName = normalized
+            };
+
+            _state.FileShares[handle] = share;
+            SaveState();
+
             return new ApiRemoteStorageShare
             {
-                Handle = ++_nextFileShareHandle,
+                Handle = handle,
                 Result = ResultOk
             };
         }
     }
 
-    public ApiRemoteStorageQuota GetQuota(string token)
+    public ApiRemoteStorageQuota? GetQuota(string token)
     {
         lock (_sync)
         {
-            var used = (ulong)_state.Files.Values.Sum(f => (long)f.Size);
+            if (!TryGetSession(token, out var session))
+            {
+                return null;
+            }
+
+            var used = (ulong)_state.Files.Values
+                .Where(f => f.OwnerSteamId == session!.SteamId && f.AppId == session.AppId && f.DeletedAt == null)
+                .Sum(f => (long)f.Size);
+
             const ulong total = 1024UL * 1024UL * 1024UL;
             return new ApiRemoteStorageQuota
             {
