@@ -92,11 +92,14 @@ namespace SKYNET.Steamworks.Implementation
             string value;
             if (string.IsNullOrEmpty(pchPropertyName))
             {
+                // Null/empty name => comma-separated list of property names.
                 value = string.Join(",", props.Keys);
             }
             else if (!props.TryGetValue(pchPropertyName, out value))
             {
-                value = string.Empty;
+                // Unknown property => false, like GetItemDefinitionProperty.
+                WriteU32(punValueBufferSizeOut, 0);
+                return false;
             }
 
             return WriteStringOut(value, pchValueBuffer, punValueBufferSizeOut);
@@ -123,8 +126,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             EnsureInit();
             int h = InventoryManager.GetAllItems();
-            WriteResultHandle(pResultHandle, h);
-            return true;
+            return WriteResult(pResultHandle, h);
         }
 
         public bool GetItemsByID(IntPtr pResultHandle, IntPtr pInstanceIDs, uint unCountInstanceIDs)
@@ -132,8 +134,7 @@ namespace SKYNET.Steamworks.Implementation
             EnsureInit();
             var ids = ReadUInt64Array(pInstanceIDs, unCountInstanceIDs);
             int h = InventoryManager.GetItemsByID(ids);
-            WriteResultHandle(pResultHandle, h);
-            return true;
+            return WriteResult(pResultHandle, h);
         }
 
         // ===================== serialize =====================
@@ -164,18 +165,25 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public bool DeserializeResult(IntPtr pOutResultHandle, IntPtr pBuffer, uint unBufferSize)
+        public bool DeserializeResult(IntPtr pOutResultHandle, IntPtr pBuffer, uint unBufferSize, bool bReserved = false)
         {
             EnsureInit();
+            // The SDK requires the reserved flag to be false.
+            if (bReserved)
+            {
+                WriteResultHandle(pOutResultHandle, InventoryManager.ResultInvalid);
+                return false;
+            }
+
             byte[] blob = null;
             if (pBuffer != IntPtr.Zero && unBufferSize > 0)
             {
                 blob = new byte[unBufferSize];
                 Marshal.Copy(pBuffer, blob, 0, (int)unBufferSize);
             }
+            // ResultInvalid => corrupt/invalid buffer => false, per Steam contract.
             int h = InventoryManager.DeserializeResult(blob);
-            WriteResultHandle(pOutResultHandle, h);
-            return true;
+            return WriteResult(pOutResultHandle, h);
         }
 
         // ===================== mutations =====================
@@ -186,24 +194,21 @@ namespace SKYNET.Steamworks.Implementation
             var defs = ReadInt32Array(pArrayItemDefs, unArrayLength);
             var qty = ReadUInt32Array(punArrayQuantity, unArrayLength);
             int h = InventoryManager.Generate(defs, qty);
-            WriteResultHandle(pResultHandle, h);
-            return true;
+            return WriteResult(pResultHandle, h);
         }
 
         public bool GrantPromoItems(IntPtr pResultHandle)
         {
             EnsureInit();
             int h = InventoryManager.GrantPromoItems();
-            WriteResultHandle(pResultHandle, h);
-            return true;
+            return WriteResult(pResultHandle, h);
         }
 
         public bool AddPromoItem(IntPtr pResultHandle, int itemDef)
         {
             EnsureInit();
             int h = InventoryManager.AddPromoItem(itemDef);
-            WriteResultHandle(pResultHandle, h);
-            return true;
+            return WriteResult(pResultHandle, h);
         }
 
         public bool AddPromoItems(IntPtr pResultHandle, IntPtr pArrayItemDefs, uint unArrayLength)
@@ -211,16 +216,14 @@ namespace SKYNET.Steamworks.Implementation
             EnsureInit();
             var defs = ReadInt32Array(pArrayItemDefs, unArrayLength);
             int h = InventoryManager.AddPromoItems(defs);
-            WriteResultHandle(pResultHandle, h);
-            return true;
+            return WriteResult(pResultHandle, h);
         }
 
         public bool ConsumeItem(IntPtr pResultHandle, ulong itemConsume, uint unQuantity)
         {
             EnsureInit();
             int h = InventoryManager.ConsumeItem(itemConsume, unQuantity);
-            WriteResultHandle(pResultHandle, h);
-            return true;
+            return WriteResult(pResultHandle, h);
         }
 
         public bool ExchangeItems(IntPtr pResultHandle, IntPtr pArrayGenerate, IntPtr punArrayGenerateQuantity, uint unArrayGenerateLength, IntPtr pArrayDestroy, IntPtr punArrayDestroyQuantity, uint unArrayDestroyLength)
@@ -231,32 +234,28 @@ namespace SKYNET.Steamworks.Implementation
             var destroyIds = ReadUInt64Array(pArrayDestroy, unArrayDestroyLength);
             var destroyQty = ReadUInt32Array(punArrayDestroyQuantity, unArrayDestroyLength);
             int h = InventoryManager.ExchangeItems(genDefs, genQty, destroyIds, destroyQty);
-            WriteResultHandle(pResultHandle, h);
-            return true;
+            return WriteResult(pResultHandle, h);
         }
 
         public bool TransferItemQuantity(IntPtr pResultHandle, ulong itemIdSource, uint unQuantity, ulong itemIdDest)
         {
             EnsureInit();
             int h = InventoryManager.TransferItemQuantity(itemIdSource, unQuantity, itemIdDest);
-            WriteResultHandle(pResultHandle, h);
-            return true;
+            return WriteResult(pResultHandle, h);
         }
 
         public bool TriggerItemDrop(IntPtr pResultHandle, int dropListDefinition)
         {
             EnsureInit();
             int h = InventoryManager.TriggerItemDrop(dropListDefinition);
-            WriteResultHandle(pResultHandle, h);
-            return true;
+            return WriteResult(pResultHandle, h);
         }
 
         public bool TradeItems(IntPtr pResultHandle, ulong steamIDTradePartner, IntPtr pArrayGive, IntPtr pArrayGiveQuantity, uint nArrayGiveLength, IntPtr pArrayGet, IntPtr pArrayGetQuantity, uint nArrayGetLength)
         {
             EnsureInit();
-            // P2P trade is out of scope; acknowledge with a failed result handle.
-            int h = InventoryManager.DeserializeResult(null); // yields a Fail handle without items
-            WriteResultHandle(pResultHandle, h);
+            // P2P trade is out of scope: no result handle, report false.
+            WriteResultHandle(pResultHandle, InventoryManager.ResultInvalid);
             return false;
         }
 
@@ -264,8 +263,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             EnsureInit();
             int h = InventoryManager.GetItemsByID(Array.Empty<ulong>());
-            WriteResultHandle(pResultHandle, h);
-            return true;
+            return WriteResult(pResultHandle, h);
         }
 
         public void SendItemDropHeartbeat()
@@ -422,8 +420,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             EnsureInit();
             int h = InventoryManager.SubmitUpdateProperties(handle);
-            WriteResultHandle(pResultHandle, h);
-            return true;
+            return WriteResult(pResultHandle, h);
         }
 
         // ===================== marshalling helpers =====================
@@ -442,6 +439,14 @@ namespace SKYNET.Steamworks.Implementation
             {
                 Marshal.WriteInt32(destination, handle);
             }
+        }
+
+        // Writes the handle and reports success: false when the manager refused the
+        // op (disabled, invalid) by returning ResultInvalid.
+        private static bool WriteResult(IntPtr destination, int handle)
+        {
+            WriteResultHandle(destination, handle);
+            return handle != InventoryManager.ResultInvalid;
         }
 
         private static int[] ReadInt32Array(IntPtr source, uint length)

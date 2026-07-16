@@ -1946,7 +1946,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamInventory_DeserializeResult(IntPtr pOutResultHandle, IntPtr pBuffer, uint unBufferSize, bool bRESERVED_MUST_BE_FALSE)
         {
-            return SteamEmulator.SteamInventory.DeserializeResult(pOutResultHandle, pBuffer, unBufferSize);
+            return SteamEmulator.SteamInventory.DeserializeResult(pOutResultHandle, pBuffer, unBufferSize, bRESERVED_MUST_BE_FALSE);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -2025,6 +2025,102 @@ namespace SKYNET.Steamworks.Exported
         public static bool ISteamInventory_GetItemDefinitionProperty(SteamItemDef_t iDefinition, string pchPropertyName, IntPtr pchValueBuffer, IntPtr punValueBufferSize)
         {
             return SteamEmulator.SteamInventory.GetItemDefinitionProperty(iDefinition, pchPropertyName, pchValueBuffer, punValueBufferSize);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool ISteamInventory_GetResultItemProperty(SteamInventoryResult_t resultHandle, uint unItemIndex, string pchPropertyName, IntPtr pchValueBuffer, IntPtr punValueBufferSizeOut)
+        {
+            return SteamEmulator.SteamInventory.GetResultItemProperty(resultHandle, unItemIndex, pchPropertyName, pchValueBuffer, punValueBufferSizeOut);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static ulong ISteamInventory_RequestEligiblePromoItemDefinitionsIDs(ulong steamID)
+        {
+            return SteamEmulator.SteamInventory.RequestEligiblePromoItemDefinitionsIDs(steamID);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool ISteamInventory_GetEligiblePromoItemDefinitionIDs(ulong steamID, IntPtr pItemDefIDs, IntPtr punItemDefIDsArraySize)
+        {
+            return SteamEmulator.SteamInventory.GetEligiblePromoItemDefinitionIDs(steamID, pItemDefIDs, punItemDefIDsArraySize);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static ulong ISteamInventory_StartPurchase(IntPtr pArrayItemDefs, IntPtr punArrayQuantity, uint unArrayLength)
+        {
+            return SteamEmulator.SteamInventory.StartPurchase(pArrayItemDefs, punArrayQuantity, unArrayLength);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static ulong ISteamInventory_RequestPrices()
+        {
+            return SteamEmulator.SteamInventory.RequestPrices();
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static uint ISteamInventory_GetNumItemsWithPrices()
+        {
+            return SteamEmulator.SteamInventory.GetNumItemsWithPrices();
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool ISteamInventory_GetItemsWithPrices(IntPtr pArrayItemDefs, IntPtr pCurrentPrices, IntPtr pBasePrices, uint unArrayLength)
+        {
+            return SteamEmulator.SteamInventory.GetItemsWithPrices(pArrayItemDefs, pCurrentPrices, pBasePrices, unArrayLength);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool ISteamInventory_GetItemPrice(SteamItemDef_t iDefinition, IntPtr pCurrentPrice, IntPtr pBasePrice)
+        {
+            return SteamEmulator.SteamInventory.GetItemPrice(iDefinition, pCurrentPrice, pBasePrice);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static ulong ISteamInventory_StartUpdateProperties()
+        {
+            return SteamEmulator.SteamInventory.StartUpdateProperties();
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool ISteamInventory_RemoveProperty(ulong handle, SteamItemInstanceID_t nItemID, string pchPropertyName)
+        {
+            return SteamEmulator.SteamInventory.RemoveProperty(handle, nItemID, pchPropertyName);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool ISteamInventory_SetPropertyString(ulong handle, SteamItemInstanceID_t nItemID, string pchPropertyName, string pchPropertyValue)
+        {
+            return SteamEmulator.SteamInventory.SetPropertyString(handle, nItemID, pchPropertyName, pchPropertyValue);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool ISteamInventory_SetPropertyBool(ulong handle, SteamItemInstanceID_t nItemID, string pchPropertyName, [MarshalAs(UnmanagedType.U1)] bool bValue)
+        {
+            return SteamEmulator.SteamInventory.SetPropertyBool(handle, nItemID, pchPropertyName, bValue);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool ISteamInventory_SetPropertyInt64(ulong handle, SteamItemInstanceID_t nItemID, string pchPropertyName, long nValue)
+        {
+            return SteamEmulator.SteamInventory.SetPropertyInt64(handle, nItemID, pchPropertyName, nValue);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool ISteamInventory_SetPropertyFloat(ulong handle, SteamItemInstanceID_t nItemID, string pchPropertyName, float flValue)
+        {
+            return SteamEmulator.SteamInventory.SetPropertyFloat(handle, nItemID, pchPropertyName, flValue);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool ISteamInventory_SubmitUpdateProperties(ulong handle, IntPtr pResultHandle)
+        {
+            return SteamEmulator.SteamInventory.SubmitUpdateProperties(handle, pResultHandle);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool ISteamInventory_InspectItem(IntPtr pResultHandle, string pchItemToken)
+        {
+            return SteamEmulator.SteamInventory.InspectItem(pResultHandle, pchItemToken);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -4203,7 +4299,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamGameServerInventory_DeserializeResult(IntPtr pOutResultHandle, IntPtr pBuffer, uint unBufferSize, bool bRESERVED_MUST_BE_FALSE)
         {
-            return SteamEmulator.SteamInventory.DeserializeResult(pOutResultHandle, pBuffer, unBufferSize);
+            return SteamEmulator.SteamInventory.DeserializeResult(pOutResultHandle, pBuffer, unBufferSize, bRESERVED_MUST_BE_FALSE);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

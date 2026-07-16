@@ -48,7 +48,7 @@ namespace SKYNET.Managers
 
         private static int _nextResultHandle = 1;          // 0 is a valid SDK handle; we simply start at 1
         private static long _nextUpdateHandle = 1;
-        private static long _nextItemId = 1;               // persisted in meta.json
+        private static long _lastItemId = 0;               // last id issued; persisted in meta.json. Increment yields the next.
         private static volatile bool _definitionsLoaded;
         private static volatile bool _initialized;
 
@@ -70,7 +70,9 @@ namespace SKYNET.Managers
 
             _appId = appId;
             _owner = steamId;
-            _root = Path.Combine(Common.GetPath(), "SKYNET", "Inventory", appId.ToString());
+            // Per-user isolation: two accounts sharing the same install/appid must
+            // not see each other's items.
+            _root = Path.Combine(Common.GetPath(), "SKYNET", "Inventory", appId.ToString(), steamId.ToString());
 
             try
             {
@@ -113,9 +115,9 @@ namespace SKYNET.Managers
             }
 
             var meta = File.ReadAllText(MetaPath).FromJson<InventoryMetaDto>();
-            if (meta != null && meta.NextItemId > 0)
+            if (meta != null && meta.LastItemId > 0)
             {
-                _nextItemId = meta.NextItemId;
+                _lastItemId = meta.LastItemId;
             }
         }
 
@@ -123,7 +125,7 @@ namespace SKYNET.Managers
         {
             try
             {
-                AtomicWriteText(MetaPath, new InventoryMetaDto { NextItemId = Interlocked.Read(ref _nextItemId), Version = 1 }.ToJson());
+                AtomicWriteText(MetaPath, new InventoryMetaDto { LastItemId = Interlocked.Read(ref _lastItemId), Version = 1 }.ToJson());
             }
             catch (Exception ex)
             {
@@ -224,8 +226,8 @@ namespace SKYNET.Managers
 
         private static ulong NextItemId()
         {
-            var id = (ulong)Interlocked.Increment(ref _nextItemId);
-            return id;
+            // _lastItemId holds the last id issued; increment produces the next one.
+            return (ulong)Interlocked.Increment(ref _lastItemId);
         }
 
         private static int NextResultHandle()
@@ -299,6 +301,7 @@ namespace SKYNET.Managers
 
         public static int GetAllItems()
         {
+            if (!Enabled) return ResultInvalid;
             InventoryItem[] snapshot;
             lock (StoreLock)
             {
@@ -310,6 +313,7 @@ namespace SKYNET.Managers
 
         public static int GetItemsByID(ulong[] ids)
         {
+            if (!Enabled) return ResultInvalid;
             InventoryItem[] snapshot;
             lock (StoreLock)
             {
@@ -354,6 +358,7 @@ namespace SKYNET.Managers
 
         private static int GrantDefs(int[] defs, uint[] qtys, bool requirePromo)
         {
+            if (!Enabled) return ResultInvalid;
             if (defs == null || defs.Length == 0)
             {
                 return MakeResult(EResult.k_EResultOK, Array.Empty<InventoryItem>(), false);
@@ -396,6 +401,7 @@ namespace SKYNET.Managers
 
         public static int ConsumeItem(ulong itemId, uint quantity)
         {
+            if (!Enabled) return ResultInvalid;
             InventoryItem snapshot = null;
             EResult status = EResult.k_EResultFail;
             lock (StoreLock)
@@ -426,6 +432,7 @@ namespace SKYNET.Managers
 
         public static int TransferItemQuantity(ulong src, uint quantity, ulong dest)
         {
+            if (!Enabled) return ResultInvalid;
             EResult status = EResult.k_EResultFail;
             var affected = new List<InventoryItem>();
             lock (StoreLock)
@@ -477,6 +484,7 @@ namespace SKYNET.Managers
 
         public static int ExchangeItems(int[] genDefs, uint[] genQty, ulong[] destroyIds, uint[] destroyQty)
         {
+            if (!Enabled) return ResultInvalid;
             EResult status = EResult.k_EResultFail;
             var outItems = new List<InventoryItem>();
             lock (StoreLock)
@@ -542,6 +550,7 @@ namespace SKYNET.Managers
 
         public static int TriggerItemDrop(int dropListDef)
         {
+            if (!Enabled) return ResultInvalid;
             // Rate-limit per droplist: at most one drop per 60s.
             uint now = NowUnix();
             if (DropCooldowns.TryGetValue(dropListDef, out var last) && now - last < 60)
@@ -570,6 +579,7 @@ namespace SKYNET.Managers
 
         public static ulong StartUpdateProperties()
         {
+            if (!Enabled) return UpdateHandleInvalid;
             var handle = (ulong)Interlocked.Increment(ref _nextUpdateHandle);
             Updates[handle] = new PropertyUpdate();
             return handle;
@@ -597,6 +607,7 @@ namespace SKYNET.Managers
 
         public static int SubmitUpdateProperties(ulong handle)
         {
+            if (!Enabled) return ResultInvalid;
             if (!Updates.TryRemove(handle, out var u))
             {
                 return MakeResult(EResult.k_EResultInvalidParam, null, false);
@@ -631,6 +642,7 @@ namespace SKYNET.Managers
 
         public static bool LoadItemDefinitions()
         {
+            if (!Enabled) return false;
             WorkQueue.Enqueue("Inventory LoadItemDefinitions", () =>
             {
                 try
@@ -688,6 +700,7 @@ namespace SKYNET.Managers
 
         public static SteamAPICall_t RequestPrices()
         {
+            if (!Enabled) return 0; // k_uAPICallInvalid
             var currency = Encoding.ASCII.GetBytes((Currency ?? "USD").PadRight(4, '\0').Substring(0, 4));
             return CallbackManager.AddCallbackResult(new SteamInventoryRequestPricesResult_t
             {
@@ -732,6 +745,7 @@ namespace SKYNET.Managers
 
         public static SteamAPICall_t StartPurchase(int[] defs, uint[] qtys)
         {
+            if (!Enabled) return 0; // k_uAPICallInvalid
             ulong orderId = (ulong)DateTime.UtcNow.Ticks;
             ulong transId = orderId ^ 0x5A5A5A5AUL;
 
@@ -751,6 +765,7 @@ namespace SKYNET.Managers
 
         public static SteamAPICall_t RequestEligiblePromoItemDefinitionsIDs(ulong steamID)
         {
+            if (!Enabled) return 0; // k_uAPICallInvalid
             int count;
             lock (StoreLock)
             {
@@ -838,13 +853,21 @@ namespace SKYNET.Managers
 
         // Parses a signed blob into a NEW result handle. On any failure returns a
         // result handle with k_EResultFail (never a bare false), per SDK expectation.
+        // Returns a valid result handle for a well-formed, signed blob owned by the
+        // current user; ResultInvalid (-1) for anything invalid so the caller can
+        // report false, matching Steam's DeserializeResult contract.
         public static int DeserializeResult(byte[] blob)
         {
+            if (!Enabled)
+            {
+                return ResultInvalid;
+            }
+
             try
             {
                 if (blob == null || blob.Length < 4 + 2 + 4 + 8 + 8 + 4 + 32)
                 {
-                    return MakeResult(EResult.k_EResultFail, null, false);
+                    return ResultInvalid;
                 }
 
                 int macOffset = blob.Length - 32;
@@ -856,7 +879,7 @@ namespace SKYNET.Managers
                 var expected = ComputeHmac(body);
                 if (!ConstantTimeEquals(expected, mac))
                 {
-                    return MakeResult(EResult.k_EResultFail, null, false);
+                    return ResultInvalid;
                 }
 
                 using (var ms = new MemoryStream(body))
@@ -865,24 +888,24 @@ namespace SKYNET.Managers
                     var magic = rd.ReadBytes(4);
                     if (magic.Length != 4 || magic[0] != 'S' || magic[1] != 'K' || magic[2] != 'I' || magic[3] != 'V')
                     {
-                        return MakeResult(EResult.k_EResultFail, null, false);
+                        return ResultInvalid;
                     }
                     ushort ver = rd.ReadUInt16();
                     if (ver != SerializeVersion)
                     {
-                        return MakeResult(EResult.k_EResultFail, null, false);
+                        return ResultInvalid;
                     }
                     uint appId = rd.ReadUInt32();
                     if (appId != _appId)
                     {
-                        return MakeResult(EResult.k_EResultFail, null, false);
+                        return ResultInvalid;
                     }
                     ulong owner = rd.ReadUInt64();
                     uint ts = (uint)rd.ReadUInt64();
                     int count = rd.ReadInt32();
                     if (count < 0 || count > 100000)
                     {
-                        return MakeResult(EResult.k_EResultFail, null, false);
+                        return ResultInvalid;
                     }
 
                     var items = new InventoryItem[count];
@@ -914,7 +937,7 @@ namespace SKYNET.Managers
             catch (Exception ex)
             {
                 SteamEmulator.Write("InventoryManager", $"DeserializeResult error: {ex.Message}");
-                return MakeResult(EResult.k_EResultFail, null, false);
+                return ResultInvalid;
             }
         }
 
@@ -989,7 +1012,7 @@ namespace SKYNET.Managers
 
         public sealed class InventoryMetaDto
         {
-            public long NextItemId { get; set; }
+            public long LastItemId { get; set; }
             public int Version { get; set; }
         }
 
