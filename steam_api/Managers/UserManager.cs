@@ -16,13 +16,13 @@ namespace SKYNET.Managers
         public static event EventHandler<SteamPlayer> OnUserUpdated;
         public static event EventHandler<SteamPlayer> OnUserRemoved;
         public static EventHandler<AvatarReceivedEventArgs> OnAvatarReceived;
-        public static List<SteamPlayer> Users;
+        public static FastList<SteamPlayer> Users;
         public static Dictionary<ulong, Bitmap> UserAvatars;
         private static WebClient WebClient;
 
         static UserManager()
         {
-            Users = new List<SteamPlayer>();
+            Users = new FastList<SteamPlayer>(u => u.SteamID);
             UserAvatars = new Dictionary<ulong, Bitmap>();
             WebClient = new WebClient();
         }
@@ -34,22 +34,14 @@ namespace SKYNET.Managers
 
         public static SteamPlayer GetUser(ulong steamID)
         {
-            SteamPlayer user = default;
-            MutexHelper.Wait("Users", delegate
-            {
-                user = Users.Find(u => u.SteamID == steamID);
-            });
-            return user;
+            // O(1), lock-free: SteamID is the FastList key.
+            return Users.GetByKey(steamID);
         }
 
         public static SteamPlayer GetUser(uint accountID)
         {
-            SteamPlayer user = default;
-            MutexHelper.Wait("Users", delegate
-            {
-                user = Users.Find(u => u.AccountID == accountID);
-            });
-            return user;
+            // AccountID isn't the key; O(n) scan, but lock-free and safe to iterate.
+            return Users.Find(u => u.AccountID == accountID);
         }
         public static SteamPlayer GetUser(CSteamID steamID)
         {
@@ -168,12 +160,8 @@ namespace SKYNET.Managers
 
         public static SteamPlayer GetUserByAddress(string iPAddress)
         {
-            SteamPlayer player = null;
-            MutexHelper.Wait("Users", delegate
-            {
-                player = Users.Find(u => u.IPAddress == iPAddress);
-            });
-            return player;
+            // Lock-free scan by address (not the key).
+            return Users.Find(u => u.IPAddress == iPAddress);
         }
 
         public static void AvatarReceived(uint accountID, Bitmap avatar)

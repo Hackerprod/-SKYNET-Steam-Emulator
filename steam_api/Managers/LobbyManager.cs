@@ -9,7 +9,7 @@ namespace SKYNET.Managers
 {
     public class LobbyManager
     {
-        public static List<SteamLobby> Lobbies;
+        public static FastList<SteamLobby> Lobbies;
 
         // Per-lobby chat backlog. Filled from "lobby_chat" events on the pump
         // thread; read by GetLobbyChatEntry on the game thread. The message index
@@ -18,7 +18,7 @@ namespace SKYNET.Managers
 
         static LobbyManager()
         {
-            Lobbies = new List<SteamLobby>();
+            Lobbies = new FastList<SteamLobby>(l => l.SteamID);
         }
 
         public static int AppendChat(ulong lobbyId, ulong sender, byte[] data, byte entryType)
@@ -78,12 +78,8 @@ namespace SKYNET.Managers
 
         public static SteamLobby GetLobby(ulong lobbyID)
         {
-            SteamLobby lobby = null;
-            MutexHelper.Wait("Lobbies", delegate
-            {
-                lobby = Lobbies.Find(l => l.SteamID == lobbyID);
-            });
-            return lobby;
+            // O(1), lock-free: SteamID is the FastList key.
+            return Lobbies.GetByKey(lobbyID);
         }
 
         public static bool GetLobby(ulong lobbyID, out SteamLobby lobby)
@@ -138,26 +134,15 @@ namespace SKYNET.Managers
                 return;
             }
 
-            MutexHelper.Wait("Lobbies", delegate
-            {
-                var current = Lobbies.FindIndex(l => l.SteamID == updatedLobby.SteamID);
-                if (current >= 0)
-                {
-                    Lobbies[current] = updatedLobby;
-                }
-                else
-                {
-                    Lobbies.Add(updatedLobby);
-                }
-            });
+            // Add is an upsert keyed by SteamID — replaces an existing lobby or
+            // inserts a new one atomically, so no lock or find-index is needed.
+            Lobbies.Add(updatedLobby);
         }
 
         internal static void RemoveLobby(ulong lobbyId)
         {
-            MutexHelper.Wait("Lobbies", delegate
-            {
-                Lobbies.RemoveAll(l => l.SteamID == lobbyId);
-            });
+            // O(1), lock-free removal by key.
+            Lobbies.RemoveByKey(lobbyId);
         }
     }
 }

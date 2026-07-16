@@ -110,6 +110,13 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
             startInfo.ArgumentList.Add((port + _tvPortOffset).ToString(System.Globalization.CultureInfo.InvariantCulture));
             startInfo.ArgumentList.Add("+sv_lan");
             startInfo.ArgumentList.Add("0");
+            // Generous netchannel timeout. A peer with a weaker CPU or missing
+            // cosmetic assets can stall the client for 10-20s during the hero-select
+            // loadout (EconItemSearch / UGC image resolution), going silent on the
+            // wire; the default ~20s server timeout then drops it mid-load. Real
+            // matchmaking is lenient during loading, so widen the window.
+            startInfo.ArgumentList.Add("+cl_timeout");
+            startInfo.ArgumentList.Add("120");
             startInfo.ArgumentList.Add("+map");
             startInfo.ArgumentList.Add(map);
             startInfo.ArgumentList.Add("-console");

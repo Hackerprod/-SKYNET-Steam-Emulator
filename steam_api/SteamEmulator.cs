@@ -8,7 +8,7 @@
                                 ╚═════╝░╚═╝░░╚═╝░░░╚═╝░░░╚═╝░░╚══╝╚══════╝░░░╚═╝░░░   
 */
 
-#define FORCELOG 
+// #define FORCELOG   // debug-only: forces sync file+console log on EVERY Write (disk I/O per call). Leave off in prod.
 using SKYNET;
 using SKYNET.Helper;
 using SKYNET.Helpers;
@@ -385,6 +385,13 @@ public class SteamEmulator
 
     public static void Write(string sender, object msg)
     {
+        // Cheapest gate first: if nothing is being logged, do no work at all —
+        // no lock, no string build, no I/O. This is the hot production path.
+        if (!LogToFile && !LogToConsole)
+        {
+            return;
+        }
+
         if (ShouldSuppressHotLog(sender, msg))
         {
             return;

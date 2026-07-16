@@ -153,6 +153,7 @@
     <Compile Include="Helpers\Extensions.cs" />
     <Compile Include="Helpers\IntPtrExtentions.cs" />
     <Compile Include="Helpers\Log.cs" />
+    <Compile Include="Helpers\FastList.cs" />
     <Compile Include="Helpers\Common.cs" />
     <Compile Include="Managers\MemoryManager.cs" />
     <Compile Include="Helpers\NetworkHelper.cs" />
