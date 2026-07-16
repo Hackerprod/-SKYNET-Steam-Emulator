@@ -25,6 +25,42 @@ if (args.Contains("--verify-persistence"))
     return;
 }
 
+// Self-check that JSON with \uXXXX escapes (which crash MoonSharp's reader) is
+// normalized so the GC Lua can parse it.
+if (args.Contains("--verify-lua-json"))
+{
+    var ok = true;
+    try
+    {
+        // 1. \uXXXX escapes (non-ASCII + specials) must survive into Lua strings.
+        var escaped = System.Text.Json.JsonSerializer.Serialize(new { name = "Jörg <+&> 名前" });
+        var t1 = MoonSharp.Interpreter.Serialization.Json.JsonTableConverter.JsonToTable(
+            LuaGameCoordinatorRuntime.NormalizeJsonForLua(escaped)!);
+        Console.WriteLine($"[1] escapes: raw had \\u={escaped.Contains("\\u")}, name='{t1.Get("name").String}'");
+        ok &= t1.Get("name").String == "Jörg <+&> 名前";
+
+        // 2. nested null must become Lua nil (not a truthy JsonNull userdata).
+        var t2 = MoonSharp.Interpreter.Serialization.Json.JsonTableConverter.JsonToTable(
+            LuaGameCoordinatorRuntime.NormalizeJsonForLua("{\"record\":null,\"n\":5}")!);
+        Console.WriteLine($"[2] nested null -> record IsNil={t2.Get("record").IsNil()}");
+        ok &= t2.Get("record").IsNil();
+
+        // 3. top-level JSON null -> Lua nil.
+        var topNull = LuaGameCoordinatorRuntime.NormalizeJsonForLua("null");
+        Console.WriteLine($"[3] top-level null -> nil: {topNull is null}");
+        ok &= topNull is null;
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"EXCEPTION: {ex.GetType().Name}: {ex.Message}");
+        ok = false;
+    }
+
+    Console.WriteLine(ok ? "PASS" : "FAIL");
+    Environment.ExitCode = ok ? 0 : 1;
+    return;
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();

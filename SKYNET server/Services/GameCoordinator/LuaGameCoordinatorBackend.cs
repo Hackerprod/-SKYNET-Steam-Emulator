@@ -671,11 +671,95 @@ public sealed class LuaGameCoordinatorRuntime
         _trace?.Record("log", _context.AppId, _context.SteamId, 0, 0, message ?? string.Empty);
     }
 
+    // MoonSharp's JSON reader rejects JSON \uXXXX escapes (it expects Lua's
+    // \u{...} form), so any non-ASCII or specially-escaped character in the JSON
+    // (personas, item names, '<' '>' '+' '&' ...) crashes JsonToTable and, with
+    // it, the whole GC exchange (e.g. a client's GCClientHello). Normalize first:
+    // round-trip through System.Text.Json with relaxed escaping so those
+    // characters are emitted literally instead of as \uXXXX.
+    private static readonly System.Text.Json.JsonSerializerOptions LuaSafeJsonOptions = new()
+    {
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    };
+
     public MoonSharp.Interpreter.Table? JsonToTable(string json)
     {
-        return string.IsNullOrWhiteSpace(json)
+        var normalized = NormalizeJsonForLua(json);
+        return normalized is null
             ? null
-            : MoonSharp.Interpreter.Serialization.Json.JsonTableConverter.JsonToTable(json);
+            : MoonSharp.Interpreter.Serialization.Json.JsonTableConverter.JsonToTable(normalized);
+    }
+
+    /// <summary>
+    /// Makes a JSON payload safe for MoonSharp's reader: it removes \uXXXX escapes
+    /// (unsupported by MoonSharp, which expects Lua's \u{...}) and strips null
+    /// values (which otherwise become a *truthy* JsonNull userdata that crashes on
+    /// Lua field access, defeating `if x then` / `x == nil` guards). Returns null
+    /// when the payload should map to Lua nil (empty or the JSON literal null).
+    /// </summary>
+    public static string? NormalizeJsonForLua(string json)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            return null;
+        }
+
+        try
+        {
+            var node = System.Text.Json.Nodes.JsonNode.Parse(json);
+            if (node is null)
+            {
+                return null;
+            }
+
+            StripJsonNulls(node);
+            return node.ToJsonString(LuaSafeJsonOptions);
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            // Not parseable by System.Text.Json; hand the original to MoonSharp,
+            // which will surface its own error.
+            return json;
+        }
+    }
+
+    private static void StripJsonNulls(System.Text.Json.Nodes.JsonNode node)
+    {
+        if (node is System.Text.Json.Nodes.JsonObject obj)
+        {
+            var nullKeys = new List<string>();
+            foreach (var pair in obj)
+            {
+                if (pair.Value is null)
+                {
+                    nullKeys.Add(pair.Key);
+                }
+                else
+                {
+                    StripJsonNulls(pair.Value);
+                }
+            }
+
+            foreach (var key in nullKeys)
+            {
+                obj.Remove(key);
+            }
+        }
+        else if (node is System.Text.Json.Nodes.JsonArray arr)
+        {
+            for (var i = arr.Count - 1; i >= 0; i--)
+            {
+                var item = arr[i];
+                if (item is null)
+                {
+                    arr.RemoveAt(i);
+                }
+                else
+                {
+                    StripJsonNulls(item);
+                }
+            }
+        }
     }
 
     public string TableToJson(MoonSharp.Interpreter.Table? table)
