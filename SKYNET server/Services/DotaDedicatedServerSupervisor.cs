@@ -13,24 +13,22 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
 {
     private readonly object _sync = new();
     private readonly ILogger<DotaDedicatedServerSupervisor> _logger;
+    private readonly GameServerSettingsService _settings;
     private readonly string _executablePath;
     private readonly string _workingDirectory;
-    private readonly string _bindIp;
     private readonly string _diagnosticsDirectory;
-    private readonly int _portStart;
     private readonly int _tvPortOffset;
     private readonly TimeSpan _startupTimeout;
-    private readonly bool _enabled;
-    private readonly bool _insecureMode;
     private readonly Dictionary<ulong, DedicatedReservation> _reservations = new();
 
     public DotaDedicatedServerSupervisor(
         IHostEnvironment environment,
         IConfiguration configuration,
+        GameServerSettingsService settings,
         ILogger<DotaDedicatedServerSupervisor> logger)
     {
         _logger = logger;
-        _enabled = configuration.GetValue("GameCoordinator:Dota:Dedicated:Enabled", true);
+        _settings = settings;
         _executablePath = ResolvePath(
             configuration.GetValue<string>("GameCoordinator:Dota:Dedicated:ExecutablePath"),
             environment.ContentRootPath,
@@ -40,15 +38,8 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
             environment.ContentRootPath,
             Path.GetDirectoryName(_executablePath) ?? environment.ContentRootPath);
         _diagnosticsDirectory = Path.GetFullPath(Path.Combine(environment.ContentRootPath, "..", ".tmp"));
-        _bindIp = configuration.GetValue<string>("GameCoordinator:Dota:Dedicated:BindIp")?.Trim() ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(_bindIp))
-        {
-            _bindIp = configuration.GetValue<string>("GameCoordinator:Dota:AdvertisedGameServerIp")?.Trim() ?? string.Empty;
-        }
-        _portStart = Math.Clamp(configuration.GetValue("GameCoordinator:Dota:Dedicated:PortStart", 27025), 1024, 65534);
         _tvPortOffset = Math.Clamp(configuration.GetValue("GameCoordinator:Dota:Dedicated:TvPortOffset", 10000), 1, 30000);
         _startupTimeout = TimeSpan.FromSeconds(Math.Clamp(configuration.GetValue("GameCoordinator:Dota:Dedicated:StartupTimeoutSeconds", 120), 10, 180));
-        _insecureMode = configuration.GetValue("GameCoordinator:Dota:Dedicated:InsecureMode", false);
     }
 
     public DedicatedLaunchResult Start(ulong lobbyId, string? requestedMap)
@@ -58,6 +49,10 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
             return DedicatedLaunchResult.Failed("Lobby id is required.");
         }
 
+        // Read the live settings once per launch so an admin edit takes effect on
+        // the next dedicated server without a restart.
+        var settings = _settings.Current;
+
         lock (_sync)
         {
             SweepLocked(DateTime.UtcNow);
@@ -66,7 +61,7 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
                 return new DedicatedLaunchResult(true, existing.Port, existing.State, string.Empty);
             }
 
-            if (!_enabled)
+            if (!settings.DedicatedEnabled)
             {
                 return DedicatedLaunchResult.Failed("Dedicated servers are disabled by configuration.");
             }
@@ -81,7 +76,7 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
                 return DedicatedLaunchResult.Failed($"Dota dedicated working directory was not found at '{_workingDirectory}'.");
             }
 
-            var port = AllocatePortLocked();
+            var port = AllocatePortLocked(settings.DedicatedPortStart);
             if (port == 0)
             {
                 return DedicatedLaunchResult.Failed("No available UDP/TCP port was found for a dedicated server.");
@@ -98,13 +93,13 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
                 RedirectStandardError = true
             };
             startInfo.ArgumentList.Add("-dedicated");
-            if (_insecureMode)
-            {
-                startInfo.ArgumentList.Add("-insecure");
-            }
+            // Always insecure: the emulator cannot produce a valid VAC session, so a
+            // "secure" dedicated only ever yields the client VAC popup/block. Passing
+            // -insecure keeps dota2 from loading the VAC module at all.
+            startInfo.ArgumentList.Add("-insecure");
             // Bind explicitly. Recent Dota dedicated builds can otherwise pick a
             // single interface, leaving advertised endpoints black-holed.
-            if (TryNormalizeIPv4(_bindIp, out var bindIp))
+            if (TryNormalizeIPv4(settings.DedicatedBindIp, out var bindIp))
             {
                 startInfo.ArgumentList.Add("-ip");
                 startInfo.ArgumentList.Add(bindIp);
@@ -124,7 +119,7 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
             startInfo.Environment["SKYNET_DEDICATED_PORT"] = port.ToString(System.Globalization.CultureInfo.InvariantCulture);
             startInfo.Environment["SKYNET_PROCESS_ROLE"] = "dedicated";
             startInfo.Environment["SKYNET_LOG_SUFFIX"] = $"dedicated_{lobbyId}_{port}";
-            startInfo.Environment["SKYNET_DEDICATED_INSECURE"] = _insecureMode ? "1" : "0";
+            startInfo.Environment["SKYNET_DEDICATED_INSECURE"] = "1";
 
             try
             {
@@ -318,9 +313,9 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
         }
     }
 
-    private int AllocatePortLocked()
+    private int AllocatePortLocked(int portStart)
     {
-        for (var port = _portStart; port <= Math.Min(65534, _portStart + 256); port++)
+        for (var port = portStart; port <= Math.Min(65534, portStart + 256); port++)
         {
             if (_reservations.Values.Any(reservation => reservation.IsLive && reservation.Port == port))
             {

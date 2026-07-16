@@ -124,6 +124,23 @@ public sealed class ApiAdminOverview
     public ApiDotaCosmeticSummary DotaCosmetics { get; set; } = new();
     public List<ApiDotaMatch> DotaMatches { get; set; } = new();
     public DateTime ServerStartTime { get; set; }
+    public ApiGameServerSettings GameServerSettings { get; set; } = new();
+    public List<string> HostAddresses { get; set; } = new();
+}
+
+public sealed class ApiGameServerSettings
+{
+    public string AdvertisedGameServerIp { get; set; } = string.Empty;
+    public bool DedicatedEnabled { get; set; } = true;
+    public string DedicatedBindIp { get; set; } = "0.0.0.0";
+    public int DedicatedPortStart { get; set; } = 27025;
+}
+
+public sealed class ApiGameServerSettingsResult
+{
+    public bool Success { get; set; }
+    public string Message { get; set; } = string.Empty;
+    public ApiGameServerSettings Settings { get; set; } = new();
 }
 
 public sealed class ApiFriendRequest

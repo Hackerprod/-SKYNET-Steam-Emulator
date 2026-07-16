@@ -269,10 +269,46 @@ public sealed partial class SteamApiStateService
                     .Take(12)
                     .Select(CloneDotaMatch)
                     .ToList(),
-                ServerStartTime = _serverStartTime
+                ServerStartTime = _serverStartTime,
+                GameServerSettings = MapGameServerSettings(_gameServerSettings.Current),
+                HostAddresses = GameServerSettingsService.GetHostIPv4Addresses().ToList()
             };
         }
     }
+
+    public ApiGameServerSettingsResult UpdateGameServerSettings(string token, ApiGameServerSettings request)
+    {
+        lock (_sync)
+        {
+            if (!IsWebAdmin(token))
+            {
+                return new ApiGameServerSettingsResult { Success = false, Message = "Not authorized." };
+            }
+        }
+
+        var (ok, message, applied) = _gameServerSettings.Apply(new GameServerSettings
+        {
+            AdvertisedGameServerIp = request.AdvertisedGameServerIp ?? string.Empty,
+            DedicatedEnabled = request.DedicatedEnabled,
+            DedicatedBindIp = request.DedicatedBindIp ?? string.Empty,
+            DedicatedPortStart = request.DedicatedPortStart
+        });
+
+        return new ApiGameServerSettingsResult
+        {
+            Success = ok,
+            Message = message,
+            Settings = MapGameServerSettings(applied)
+        };
+    }
+
+    private static ApiGameServerSettings MapGameServerSettings(GameServerSettings settings) => new()
+    {
+        AdvertisedGameServerIp = settings.AdvertisedGameServerIp,
+        DedicatedEnabled = settings.DedicatedEnabled,
+        DedicatedBindIp = settings.DedicatedBindIp,
+        DedicatedPortStart = settings.DedicatedPortStart
+    };
 
     public List<ApiUser> GetWebUsers(string token)
     {

@@ -64,6 +64,18 @@ public class IndexModel : PageModel
     [BindProperty]
     public ulong ToggleAdminSteamId { get; set; }
 
+    [BindProperty]
+    public string GsAdvertisedIp { get; set; } = string.Empty;
+
+    [BindProperty]
+    public bool GsDedicatedEnabled { get; set; }
+
+    [BindProperty]
+    public string GsBindIp { get; set; } = "0.0.0.0";
+
+    [BindProperty]
+    public int GsPortStart { get; set; } = 27025;
+
     [TempData]
     public string StatusMessage { get; set; } = string.Empty;
 
@@ -141,6 +153,19 @@ public class IndexModel : PageModel
             "User deleted.");
     }
 
+    public IActionResult OnPostGameServerSettings()
+    {
+        var token = GetToken();
+        var result = _state.UpdateGameServerSettings(token, new ApiGameServerSettings
+        {
+            AdvertisedGameServerIp = GsAdvertisedIp ?? string.Empty,
+            DedicatedEnabled = GsDedicatedEnabled,
+            DedicatedBindIp = string.IsNullOrWhiteSpace(GsBindIp) ? "0.0.0.0" : GsBindIp,
+            DedicatedPortStart = GsPortStart
+        });
+        return AjaxResult(result.Success, result.Message);
+    }
+
     public IActionResult OnPostToggleAdmin()
     {
         var token = GetToken();
@@ -164,6 +189,10 @@ public class IndexModel : PageModel
         Overview = overview;
         Cosmetics = _state.GetDotaCosmeticsOverview(token, ItemSearch, null, 120) ?? new ApiDotaCosmeticOverview();
         DotaPath = string.IsNullOrWhiteSpace(overview.DotaCosmetics.DotaPath) ? DotaPath : overview.DotaCosmetics.DotaPath;
+        GsAdvertisedIp = overview.GameServerSettings.AdvertisedGameServerIp;
+        GsDedicatedEnabled = overview.GameServerSettings.DedicatedEnabled;
+        GsBindIp = overview.GameServerSettings.DedicatedBindIp;
+        GsPortStart = overview.GameServerSettings.DedicatedPortStart;
         EquipmentSteamId = overview.Users.FirstOrDefault()?.SteamId ?? 0;
         ResetTargetSteamId = overview.Users.FirstOrDefault()?.SteamId ?? 0;
         return Page();

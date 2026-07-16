@@ -68,9 +68,6 @@ namespace SKYNET.Helper
                     config.AppendLine("# Enable SKYNET-signed SDR certificates and patch the native SDR CA.");
                     config.AppendLine("# Disabled by default for unauthenticated LAN play. Restart the game after changing it.");
                     config.AppendLine("SecureNetworking = false");
-                    config.AppendLine("# Advertise the dedicated server as Valve VAC-secure.");
-                    config.AppendLine("# Keep false unless the process is connected to real VAC policy.");
-                    config.AppendLine("VacSecureGameServer = false");
                     config.AppendLine("ServerUrl = http://127.0.0.1:27080/");
                     config.AppendLine("PollIntervalMs = 50");
                     config.AppendLine("HttpTimeoutMs = 8000");
@@ -120,12 +117,6 @@ namespace SKYNET.Helper
                             if (bool.TryParse(item.Value.ToString(), out bool secureNetworking))
                             {
                                 SteamEmulator.SecureNetworking = secureNetworking;
-                            }
-                            break;
-                        case "VacSecureGameServer":
-                            if (bool.TryParse(item.Value.ToString(), out bool vacSecureGameServer))
-                            {
-                                SteamEmulator.VacSecureGameServer = vacSecureGameServer;
                             }
                             break;
                         case "UseServerApi":
@@ -230,7 +221,6 @@ namespace SKYNET.Helper
 
             changed |= EnsureSetting("Network Settings", "PollIntervalMs", "50");
             changed |= EnsureSetting("Network Settings", "SecureNetworking", "false");
-            changed |= EnsureSetting("Network Settings", "VacSecureGameServer", "false");
             changed |= EnsureSetting("Network Settings", "HttpTimeoutMs", "8000");
             changed |= EnsureSetting("Network Settings", "DiscoveryPort", "27081");
             changed |= EnsureSetting("Network Settings", "UseActiveWebUser", "true");
@@ -238,6 +228,7 @@ namespace SKYNET.Helper
             changed |= MigrateSetting("Network Settings", "PollIntervalMs", "1000", "50");
             changed |= MigrateSetting("Network Settings", "HttpTimeoutMs", "2000", "8000");
             changed |= MigrateSetting("Network Settings", "BroadCastPort", "28025", "28032");
+            changed |= RemoveSetting("Network Settings", "VacSecureGameServer");
             changed |= RemoveSetting("Network Settings", "ServerIP");
             changed |= RemoveSetting("Network Settings", "AccessToken");
             changed |= RemoveSetting("Network Settings", "RefreshToken");

@@ -66,10 +66,6 @@ public class SteamEmulator
     // Enables SKYNET-issued SDR certificates and the native CA patch. Keep this
     // disabled for unauthenticated LAN transport unless secure SDR is required.
     public static bool SecureNetworking;
-    // Controls the SteamGameServer VAC-secure policy separately from SDR certs.
-    // SecureNetworking can be true while the game server is advertised as
-    // non-VAC-secure, which is required when Valve VAC is not present.
-    public static bool VacSecureGameServer;
     public static string ServerUrl;
     public static string AccessToken;
     public static string RefreshToken;
@@ -147,7 +143,6 @@ public class SteamEmulator
         ISteamHTTP = true;
         UseServerApi = true;
         SecureNetworking = false;
-        VacSecureGameServer = false;
         ServerUrl = "http://127.0.0.1:27080/";
         AccessToken = string.Empty;
         RefreshToken = string.Empty;

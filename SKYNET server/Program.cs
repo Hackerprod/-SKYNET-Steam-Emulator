@@ -65,6 +65,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
 builder.Services.AddSingleton<GameCoordinatorTraceService>();
+builder.Services.AddSingleton<GameServerSettingsService>();
 builder.Services.AddSingleton<DotaDedicatedServerSupervisor>();
 builder.Services.AddSingleton<LuaGameCoordinatorPlugin>();
 builder.Services.AddSingleton<IGameCoordinatorPlugin>(sp => sp.GetRequiredService<LuaGameCoordinatorPlugin>());

@@ -36,7 +36,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int SteamInternal_GameServer_Init_V2(uint unIP, ushort usGamePort, ushort usQueryPort, uint eServerMode, [MarshalAs(UnmanagedType.LPStr)] string pchVersionString, IntPtr pszInternalCheckInterfaceVersions, IntPtr pOutErrMsg)
         {
-            var unFlags = SteamEmulator.VacSecureGameServer ? Constants.k_unServerFlagSecure : 0;
+            uint unFlags = 0; // Always insecure; InitGameServer enforces this too.
             var result = SteamEmulator.SteamGameServer.InitGameServer(unIP, usGamePort, usQueryPort, unFlags, SteamEmulator.AppID, pchVersionString);
             if (result)
             {
@@ -70,7 +70,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamInternal_GameServer_Init(uint unIP, int usPort, int usGamePort, uint usQueryPort, uint eServerMode, string pchVersionString)
         {
-            var unFlags = SteamEmulator.VacSecureGameServer ? Constants.k_unServerFlagSecure : 0;
+            uint unFlags = 0; // Always insecure; InitGameServer enforces this too.
             var result = SteamEmulator.SteamGameServer.InitGameServer(unIP, usPort, (int)usQueryPort, unFlags, SteamEmulator.AppID, pchVersionString);
             if (result)
             {

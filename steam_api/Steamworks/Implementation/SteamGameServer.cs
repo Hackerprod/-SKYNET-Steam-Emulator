@@ -507,24 +507,10 @@ namespace SKYNET.Steamworks.Implementation
 
         private static bool ShouldReportSecure()
         {
-            return SteamEmulator.VacSecureGameServer && !IsDedicatedInsecureMode();
-        }
-
-        private static bool IsDedicatedInsecureMode()
-        {
-            var role = Environment.GetEnvironmentVariable("SKYNET_PROCESS_ROLE");
-            if (!string.Equals(role, "dedicated", StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
-
-            var configured = Environment.GetEnvironmentVariable("SKYNET_DEDICATED_INSECURE");
-            if (configured == "1" || configured?.Equals("true", StringComparison.OrdinalIgnoreCase) == true)
-            {
-                return true;
-            }
-
-            return Environment.CommandLine.IndexOf("-insecure", StringComparison.OrdinalIgnoreCase) >= 0;
+            // The emulator can never produce a valid VAC session, so a "secure" game
+            // server only ever yields the client VAC popup/block. Always report
+            // insecure — the dedicated is also launched with -insecure to match.
+            return false;
         }
 
         private byte EnsureEffectiveSecure()

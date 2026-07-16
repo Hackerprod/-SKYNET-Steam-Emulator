@@ -41,7 +41,7 @@ public sealed partial class SteamApiStateService
     private readonly DotaPartyStore _dotaPartyStore;
     private readonly DotaLobbyInviteStore _dotaLobbyInviteStore;
     private readonly DotaDedicatedServerSupervisor _dotaDedicatedServers;
-    private readonly string _advertisedGameServerIp;
+    private readonly GameServerSettingsService _gameServerSettings;
     // Auth session lifetime and the (much shorter) presence window used to
     // derive online/offline. Both configurable via appsettings:
     //   "Session:TimeoutMinutes" (default 30), "Presence:TimeoutSeconds" (default 90).
@@ -61,6 +61,7 @@ public sealed partial class SteamApiStateService
         GameCoordinatorTraceService gameCoordinatorTrace,
         IConfiguration configuration,
         DotaDedicatedServerSupervisor dotaDedicatedServers,
+        GameServerSettingsService gameServerSettings,
         IDbContextFactory<AppDbContext> dbContextFactory,
         ILogger<SteamApiStateService> logger)
     {
@@ -68,10 +69,10 @@ public sealed partial class SteamApiStateService
         _gameCoordinatorPlugins = gameCoordinatorPlugins;
         _gameCoordinatorTrace = gameCoordinatorTrace;
         _dotaDedicatedServers = dotaDedicatedServers;
+        _gameServerSettings = gameServerSettings;
         _dbFactory = dbContextFactory;
         _sessionTimeout = TimeSpan.FromMinutes(Math.Clamp(configuration.GetValue("Session:TimeoutMinutes", 30), 1, 1440));
         _presenceTimeout = TimeSpan.FromSeconds(Math.Clamp(configuration.GetValue("Presence:TimeoutSeconds", 90), 15, 3600));
-        _advertisedGameServerIp = configuration.GetValue<string>("GameCoordinator:Dota:AdvertisedGameServerIp")?.Trim() ?? string.Empty;
         var dataRoot = ResolveDataRoot(hostEnvironment.ContentRootPath, configuration);
         _statePath = Path.Combine(dataRoot, "api-state.json");
         // All Dota stores now share the consolidated app.db (their tables were

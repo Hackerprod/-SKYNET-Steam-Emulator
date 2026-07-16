@@ -866,13 +866,14 @@ public sealed partial class SteamApiStateService
     private bool TryGetConfiguredAdvertisedGameServerIp(out uint ip)
     {
         ip = 0;
-        if (string.IsNullOrWhiteSpace(_advertisedGameServerIp) ||
-            string.Equals(_advertisedGameServerIp, "auto", StringComparison.OrdinalIgnoreCase))
+        var advertised = _gameServerSettings.Current.AdvertisedGameServerIp;
+        if (string.IsNullOrWhiteSpace(advertised) ||
+            string.Equals(advertised, "auto", StringComparison.OrdinalIgnoreCase))
         {
             return false;
         }
 
-        if (!IPAddress.TryParse(_advertisedGameServerIp, out var parsed) ||
+        if (!IPAddress.TryParse(advertised, out var parsed) ||
             parsed.AddressFamily != AddressFamily.InterNetwork)
         {
             return false;

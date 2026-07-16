@@ -213,6 +213,50 @@
             </form>
         </div>
     </section>
+
+    <section class="rounded-2xl border border-skynet-border bg-skynet-card">
+        <div class="border-b border-skynet-border px-5 py-4">
+            <h2 class="text-sm font-black uppercase tracking-widest text-white">Network / Game Server</h2>
+            <p class="mt-1 text-xs text-skynet-muted">IP the dedicated server advertises to clients and how it binds. Applied live; also saved to appsettings.json. Set the advertised IP to the address every player can route to (e.g. your ZeroTier IP), not your local WiFi/LAN IP.</p>
+        </div>
+        <form method="post" asp-page-handler="GameServerSettings" OnComplete="onGameServerSettings" class="p-5 space-y-5">
+            <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                    <label asp-for="GsAdvertisedIp" class="block text-[10px] font-black uppercase tracking-widest text-skynet-muted">Advertised IP <span class="text-skynet-muted/60 normal-case tracking-normal">(empty = auto per client subnet)</span></label>
+                    <input asp-for="GsAdvertisedIp" list="hostAddressList" autocomplete="off" class="mt-2 w-full px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border font-mono transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="10.0.0.1" />
+                    <datalist id="hostAddressList">
+                        @foreach (var addr in Model.Overview.HostAddresses)
+                        {
+                            <option value="@addr"></option>
+                        }
+                    </datalist>
+                    @if (Model.Overview.HostAddresses.Count > 0)
+                    {
+                        <div class="mt-2 flex flex-wrap gap-2">
+                            @foreach (var addr in Model.Overview.HostAddresses)
+                            {
+                                <button type="button" onclick="document.getElementById('GsAdvertisedIp').value='@addr'" class="rounded-md border border-skynet-border bg-skynet-black px-2 py-1 text-[11px] font-mono text-skynet-muted hover:border-skynet-accent hover:text-skynet-accent transition">@addr</button>
+                            }
+                        </div>
+                    }
+                </div>
+                <div>
+                    <label asp-for="GsBindIp" class="block text-[10px] font-black uppercase tracking-widest text-skynet-muted">Bind IP <span class="text-skynet-muted/60 normal-case tracking-normal">(0.0.0.0 = all interfaces)</span></label>
+                    <input asp-for="GsBindIp" autocomplete="off" class="mt-2 w-full px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border font-mono transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="0.0.0.0" />
+                    <label asp-for="GsPortStart" class="mt-4 block text-[10px] font-black uppercase tracking-widest text-skynet-muted">Port start</label>
+                    <input asp-for="GsPortStart" type="number" min="1024" max="65534" class="mt-2 w-full px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border font-mono transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="27025" />
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-6">
+                <label class="flex items-center gap-2 text-sm text-skynet-muted cursor-pointer">
+                    <input asp-for="GsDedicatedEnabled" class="h-4 w-4 rounded border-skynet-border bg-skynet-black text-skynet-accent focus:ring-skynet-accent" />
+                    <span>Dedicated enabled</span>
+                </label>
+                <span class="text-xs text-skynet-muted/60">Dedicated always runs <span class="font-mono">-insecure</span> (VAC disabled) — the emulator has no valid VAC session.</span>
+                <button type="submit" class="ml-auto rounded-lg bg-skynet-accent px-5 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-blue-600 transition-all">Save</button>
+            </div>
+        </form>
+    </section>
 </div>
 
 <script>
@@ -271,6 +315,13 @@
             }
         } else {
             showToast(data && data.message ? data.message : 'Could not update admin status.', 'error');
+        }
+    }
+    function onGameServerSettings(data, form) {
+        if (data && data.success) {
+            showToast(data.message || 'Game server settings saved.', 'success');
+        } else {
+            showToast(data && data.message ? data.message : 'Could not save settings.', 'error');
         }
     }
     function onAdminDeleteUser(data, form) {
