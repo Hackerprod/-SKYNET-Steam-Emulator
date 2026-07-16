@@ -55,11 +55,17 @@ namespace SKYNET.Steamworks.Implementation
         private readonly HashSet<string> BatchUploads = new HashSet<string>(StringComparer.Ordinal);
         private readonly HashSet<string> BatchDeletes = new HashSet<string>(StringComparer.Ordinal);
 
+        // At most one in-flight async read per file. FileReadAsync rejects a second
+        // read of the same file until its FileReadAsyncComplete clears the entry.
+        private readonly ConcurrentDictionary<string, byte> ActiveAsyncReads =
+            new ConcurrentDictionary<string, byte>(StringComparer.Ordinal);
+
         private sealed class AsyncReadState
         {
-            public string FullPath;
+            public string NormalizedName;
             public uint Offset;
-            public uint BytesToRead;
+            public byte[] Bytes;
+            public EResult Result;
         }
 
         public SteamRemoteStorage()
@@ -251,45 +257,111 @@ namespace SKYNET.Steamworks.Implementation
 
         public SteamAPICall_t FileReadAsync(string pchFile, uint nOffset, uint cubToRead)
         {
-            Write($"FileReadAsync {pchFile}");
+            Write($"FileReadAsync {pchFile}, offset {nOffset}, {cubToRead} bytes");
             SteamAPICall_t APICall = k_uAPICallInvalid;
             MutexHelper.Wait("FileReadAsync", delegate
             {
+                string reserved = null;
                 try
                 {
-                    RemoteStorageFileReadAsyncComplete_t data = new RemoteStorageFileReadAsyncComplete_t();
-                    data.m_eResult = EResult.k_EResultFail;
+                    // [1] Zero-length reads are invalid.
+                    if (cubToRead == 0)
+                    {
+                        Write($"FileReadAsync {pchFile} = invalid (cubToRead == 0)");
+                        return;
+                    }
 
-                    if (!TryGetStorageFilePath(pchFile, out _, out var fullPath))
+                    if (!ValidateFileArgs(pchFile, 0, IntPtr.Zero, checkBuffer: false) ||
+                        cubToRead > int.MaxValue)
+                    {
+                        Write($"FileReadAsync {pchFile} = invalid args");
+                        return;
+                    }
+
+                    // [2] Path must be valid.
+                    if (!TryGetStorageFilePath(pchFile, out var normalizedKey, out var fullPath))
                     {
                         Write($"FileReadAsync rejected invalid path {pchFile}");
                         return;
                     }
 
-                    EnsureRemoteFileCached(pchFile);
-                    if (File.Exists(fullPath))
+                    // [3] Only one async read per file may be in flight.
+                    if (!ActiveAsyncReads.TryAdd(normalizedKey, 0))
                     {
-                        var info = new FileInfo(fullPath);
-                        uint available = (uint)Math.Max(0, info.Length - nOffset);
-                        uint toRead = Math.Min(cubToRead, available);
-                        data.m_nOffset = nOffset;
-                        data.m_cubRead = toRead;
-                        data.m_eResult = EResult.k_EResultOK;
-                        data.m_hFileReadAsync = (ulong)CSteamID.CreateOne();
+                        Write($"FileReadAsync {pchFile} = invalid (read already in progress)");
+                        return;
+                    }
+                    reserved = normalizedKey;
 
-                        AsyncFilesRead[data.m_hFileReadAsync] = new AsyncReadState
-                        {
-                            FullPath = fullPath,
-                            Offset = nOffset,
-                            BytesToRead = toRead,
-                        };
+                    // [4] File must exist locally (pull it down first if the cache knows it).
+                    EnsureRemoteFileCached(pchFile);
+                    if (!File.Exists(fullPath))
+                    {
+                        Write($"FileReadAsync {pchFile} = invalid (file not found)");
+                        return;
                     }
 
-                    APICall = CallbackManager.AddCallbackResult(data);
+                    long fileSize = new FileInfo(fullPath).Length;
+
+                    // [5] Offset and range must lie inside the file.
+                    if (nOffset >= fileSize || cubToRead > fileSize - nOffset)
+                    {
+                        Write($"FileReadAsync {pchFile} = invalid (offset {nOffset} + {cubToRead} > size {fileSize})");
+                        return;
+                    }
+
+                    // Eager read of exactly the requested slice.
+                    var slice = new byte[(int)cubToRead];
+                    int total = 0;
+                    using (var fs = new FileStream(fullPath, FileMode.Open, FileAccess.Read, System.IO.FileShare.Read))
+                    {
+                        fs.Seek(nOffset, SeekOrigin.Begin);
+                        while (total < slice.Length)
+                        {
+                            int read = fs.Read(slice, total, slice.Length - total);
+                            if (read <= 0) break;
+                            total += read;
+                        }
+                    }
+
+                    if (total != slice.Length)
+                    {
+                        Write($"FileReadAsync {pchFile} = invalid (short read {total}/{slice.Length})");
+                        return;
+                    }
+
+                    var handle = (ulong)CSteamID.CreateOne();
+                    AsyncFilesRead[handle] = new AsyncReadState
+                    {
+                        NormalizedName = normalizedKey,
+                        Offset = nOffset,
+                        Bytes = slice,
+                        Result = EResult.k_EResultOK,
+                    };
+
+                    APICall = CallbackManager.AddCallbackResult(new RemoteStorageFileReadAsyncComplete_t
+                    {
+                        m_hFileReadAsync = handle,
+                        m_eResult = EResult.k_EResultOK,
+                        m_nOffset = nOffset,
+                        m_cubRead = cubToRead,
+                    });
+
+                    // Ownership of the active-read reservation passed to the handle;
+                    // FileReadAsyncComplete clears it. Do not release it in finally.
+                    reserved = null;
                 }
-                catch
+                catch (Exception ex)
                 {
-                    Write($"Error reading file {pchFile}");
+                    Write($"FileReadAsync {pchFile} {ex}");
+                }
+                finally
+                {
+                    // Release the reservation on any early-return failure path.
+                    if (reserved != null)
+                    {
+                        ActiveAsyncReads.TryRemove(reserved, out _);
+                    }
                 }
             });
             return APICall;
@@ -306,48 +378,32 @@ namespace SKYNET.Steamworks.Implementation
                 return false;
             }
 
+            // Clear the per-file active-read guard now that this read is finishing,
+            // whatever the buffer outcome.
+            ActiveAsyncReads.TryRemove(state.NormalizedName, out _);
+
+            // A null destination is a caller error; the handle is still consumed.
+            if (pvBuffer == IntPtr.Zero)
+            {
+                return false;
+            }
+
             bool ok = false;
             MutexHelper.Wait("FileReadAsyncComplete", delegate
             {
                 try
                 {
-                    if (!File.Exists(state.FullPath))
+                    var bytes = state.Bytes ?? Array.Empty<byte>();
+                    int count = (int)Math.Min(cubToRead, (uint)bytes.Length);
+                    if (count > 0)
                     {
-                        return;
-                    }
-
-                    // Read starts at the offset captured in FileReadAsync, not 0.
-                    int count = (int)Math.Min(cubToRead, state.BytesToRead);
-                    if (count <= 0 || pvBuffer == IntPtr.Zero)
-                    {
-                        ok = true;
-                        return;
-                    }
-
-                    var chunk = new byte[count];
-                    int read;
-                    using (var fs = new FileStream(state.FullPath, FileMode.Open, FileAccess.Read, System.IO.FileShare.Read))
-                    {
-                        int available = (int)Math.Max(0, Math.Min(count, fs.Length - state.Offset));
-                        if (available <= 0)
-                        {
-                            ok = true;
-                            return;
-                        }
-
-                        fs.Seek(state.Offset, SeekOrigin.Begin);
-                        read = fs.Read(chunk, 0, available);
-                    }
-
-                    if (read > 0)
-                    {
-                        Marshal.Copy(chunk, 0, pvBuffer, read);
+                        Marshal.Copy(bytes, 0, pvBuffer, count);
                     }
                     ok = true;
                 }
                 catch (Exception ex)
                 {
-                    Write($"FileReadAsyncComplete {state.FullPath} {ex}");
+                    Write($"FileReadAsyncComplete {state.NormalizedName} {ex}");
                 }
             });
             return ok;
