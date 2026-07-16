@@ -53,10 +53,8 @@ local MAX_MEMBERS = 20
 local LOBBY_TIMEOUT_SECONDS = 3600
 local POSTGAME_CLEANUP_SECONDS = 45
 local RECONNECT_TIMEOUT_SECONDS = 600
-local ACTIVE_EVENT_ID = 54
 
 local DISABLED_RANDOM_HERO_BITS = { 0, 194756608, 1780819944 }
-local LOBBY_EVENT_IDS = { 19, 26, 39, ACTIVE_EVENT_ID, 57 }
 local LOBBY_SELECTION_PRIORITY_ID = 8821
 local LOBBY_STARTUP_HERO_IDS = {
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
@@ -213,22 +211,46 @@ local function selection_priority_rule(lobby)
     return PB.cat(PB.v(1, LOBBY_SELECTION_PRIORITY_ID), PB.bytes(2, choice))
 end
 
-local function lobby_team_details(index)
-    if index == 1 then
-        return PB.cat(
-            PB.str(1, "SKYNET"),
-            PB.bytes(3, ""),
-            PB.v(4, 7733573),
-            PB.vs(5, "3255294647392078090"),
-            PB.vs(6, "7163376947542189088"),
-            PB.vs(7, "7954877705993612385"),
-            PB.v(8, 0),
-            PB.bytes(20, ""),
-            PB.bytes(21, "")
-        )
+local function numeric_or_zero(value)
+    return tonumber(value or 0) or 0
+end
+
+local function string_or_empty(value)
+    if value == nil then
+        return ""
     end
 
-    return PB.v(8, 0)
+    return tostring(value)
+end
+
+local function lobby_team_details(lobby, index)
+    local details = lobby.team_details ~= nil and lobby.team_details[index] or nil
+    if details == nil then
+        return nil
+    end
+
+    local parts = {}
+    local name = string_or_empty(details.name)
+    local tag = string_or_empty(details.tag)
+    local team_id = numeric_or_zero(details.team_id)
+    local logo = string_or_empty(details.logo)
+    local base_logo = string_or_empty(details.base_logo)
+    local banner_logo = string_or_empty(details.banner_logo)
+    local complete = details.complete == true or numeric_or_zero(details.complete) ~= 0
+
+    if name ~= "" then parts[#parts + 1] = PB.str(1, name) end
+    if tag ~= "" then parts[#parts + 1] = PB.bytes(3, tag) end
+    if team_id ~= 0 then parts[#parts + 1] = PB.v(4, team_id) end
+    if logo ~= "" and logo ~= "0" then parts[#parts + 1] = PB.vs(5, logo) end
+    if base_logo ~= "" and base_logo ~= "0" then parts[#parts + 1] = PB.vs(6, base_logo) end
+    if banner_logo ~= "" and banner_logo ~= "0" then parts[#parts + 1] = PB.vs(7, banner_logo) end
+    if complete then parts[#parts + 1] = PB.v(8, 1) end
+
+    if #parts == 0 then
+        return nil
+    end
+
+    return PB.cat(table.unpack(parts))
 end
 
 local function member_order(lobby)
@@ -284,10 +306,18 @@ local function lobby_object(lobby)
     }
 
     if (lobby.state or LOBBY_UI) ~= LOBBY_UI then
-        parts[#parts + 1] = PB.bytes(17, lobby_team_details(1))
-        parts[#parts + 1] = PB.bytes(17, lobby_team_details(2))
-        parts[#parts + 1] = PB.v(103, ACTIVE_EVENT_ID)
-        parts[#parts + 1] = PB.v(104, ACTIVE_EVENT_ID)
+        for index = 1, 2 do
+            local details = lobby_team_details(lobby, index)
+            if details ~= nil then
+                parts[#parts + 1] = PB.bytes(17, details)
+            end
+        end
+
+        local active_event_id = numeric_or_zero(lobby.active_event_id)
+        if active_event_id ~= 0 then
+            parts[#parts + 1] = PB.v(103, active_event_id)
+            parts[#parts + 1] = PB.v(104, active_event_id)
+        end
     end
 
     if lobby.connect ~= nil and lobby.connect ~= "" then
@@ -387,13 +417,31 @@ local function lobby_broadcast_object(lobby)
 end
 
 local function lobby_event_points(lobby, event_id)
+    local configured = lobby.event_points ~= nil and lobby.event_points[event_id] or nil
     local parts = { PB.v(1, event_id) }
     for _, member in ipairs(member_order(lobby)) do
+        local account = member.account or 0
+        local member_points = nil
+        if configured ~= nil then
+            member_points = configured[account] or configured[tostring(account)]
+        end
+
+        local points = 0
+        local premium_points = 0
+        local owned = false
+        if type(member_points) == "table" then
+            points = numeric_or_zero(member_points.points)
+            premium_points = numeric_or_zero(member_points.premium_points)
+            owned = member_points.owned == true
+        elseif member_points ~= nil then
+            points = numeric_or_zero(member_points)
+        end
+
         parts[#parts + 1] = PB.bytes(2, PB.cat(
-            PB.v(1, member.account or 0),
-            PB.v(2, 0),
-            PB.v(3, 0),
-            PB.v(4, 1),
+            PB.v(1, account),
+            PB.v(2, points),
+            PB.v(3, premium_points),
+            PB.v(4, owned and 1 or 0),
             PB.v(7, 0),
             PB.vs(12, "0"),
             PB.v(26, 0),
@@ -435,8 +483,11 @@ local function lobby_member_summary_object(lobby)
 
     parts[#parts + 1] = PB.f32(2, 0)
     if (lobby.state or LOBBY_UI) ~= LOBBY_UI then
-        for _, event_id in ipairs(LOBBY_EVENT_IDS) do
-            parts[#parts + 1] = PB.bytes(3, lobby_event_points(lobby, event_id))
+        for _, event_id in ipairs(lobby.event_ids or {}) do
+            local numeric_event_id = numeric_or_zero(event_id)
+            if numeric_event_id ~= 0 then
+                parts[#parts + 1] = PB.bytes(3, lobby_event_points(lobby, numeric_event_id))
+            end
         end
     end
 
@@ -1186,6 +1237,10 @@ local function create_lobby()
         connect = "",
         match_id = "0",
         match_outcome = 0,
+        team_details = {},
+        active_event_id = 0,
+        event_ids = {},
+        event_points = {},
         game_start_time = 0,
         realtime_sent = false,
         last_activity = PB.now(),

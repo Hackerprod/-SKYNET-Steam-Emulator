@@ -1,0 +1,9 @@
+# Runtime data and local SQLite stores are not source.
+api-state.json
+api-state.json.imported
+sdr-ca.json
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+backups/

@@ -67,6 +67,9 @@ builder.Services.AddRazorPages();
 builder.Services.AddSingleton<GameCoordinatorTraceService>();
 builder.Services.AddSingleton<GameServerSettingsService>();
 builder.Services.AddSingleton<DotaDedicatedServerSupervisor>();
+builder.Services.AddSingleton<SteamDB>();
+builder.Services.AddSingleton<DotaDB>();
+builder.Services.AddSingleton<DedicatedServerService>();
 builder.Services.AddSingleton<LuaGameCoordinatorPlugin>();
 builder.Services.AddSingleton<IGameCoordinatorPlugin>(sp => sp.GetRequiredService<LuaGameCoordinatorPlugin>());
 builder.Services.AddSingleton<GameCoordinatorPluginRegistry>();
@@ -84,6 +87,13 @@ builder.Services.AddHostedService<SKYNET_server.Services.Networking.SdrRelayServ
 builder.Services.AddHostedService<DatabaseBackupService>();
 
 var app = builder.Build();
+
+// Hot-GC migration stores. These are separate from the legacy consolidated app.db
+// so Lua/JS GC logic can depend on stable Steam/Dota/dedicated facades while the
+// current backend continues to run.
+_ = app.Services.GetRequiredService<SteamDB>();
+_ = app.Services.GetRequiredService<DotaDB>();
+_ = app.Services.GetRequiredService<DedicatedServerService>();
 
 // Prepare the consolidated SQLite store: apply migrations and enable WAL (kept
 // non-blocking for readers). The state service performs the one-time legacy

@@ -17,15 +17,28 @@ public sealed class LuaGameCoordinatorPlugin : IGameCoordinatorPlugin
         UserData.RegisterType<LuaGameCoordinatorBackend>();
         UserData.RegisterType<LuaGameCoordinatorRuntime>();
         UserData.RegisterType<DotaGcBackend>();
+        UserData.RegisterType<LuaSteamDB>();
+        UserData.RegisterType<LuaDotaDB>();
+        UserData.RegisterType<LuaDedicatedServerService>();
     }
+
+    private readonly SteamDB _steamDb;
+    private readonly DotaDB _dotaDb;
+    private readonly DedicatedServerService _dedicatedServerService;
 
     public LuaGameCoordinatorPlugin(
         IHostEnvironment hostEnvironment,
         ILogger<LuaGameCoordinatorPlugin> logger,
-        GameCoordinatorTraceService trace)
+        GameCoordinatorTraceService trace,
+        SteamDB steamDb,
+        DotaDB dotaDb,
+        DedicatedServerService dedicatedServerService)
     {
         _logger = logger;
         _trace = trace;
+        _steamDb = steamDb;
+        _dotaDb = dotaDb;
+        _dedicatedServerService = dedicatedServerService;
         _gcRoot = ResolveGcRoot(hostEnvironment.ContentRootPath);
         _logger.LogInformation("GC root resolved to {GCRoot}", _gcRoot);
     }
@@ -57,6 +70,7 @@ public sealed class LuaGameCoordinatorPlugin : IGameCoordinatorPlugin
                 var script = cacheEntry.Script;
                 script.Globals["gc"] = UserData.Create(backend);
                 script.Globals["runtime"] = UserData.Create(runtime);
+                SetDatabaseGlobals(script, context);
 
                 var handler = script.Globals.Get("handle");
                 if (handler.Type != DataType.Function)
@@ -134,6 +148,7 @@ public sealed class LuaGameCoordinatorPlugin : IGameCoordinatorPlugin
 
                     script.Globals["gc"] = UserData.Create(backend);
                     script.Globals["runtime"] = UserData.Create(runtime);
+                    SetDatabaseGlobals(script, context);
                     script.Call(handler);
                 }
             }
@@ -187,12 +202,27 @@ public sealed class LuaGameCoordinatorPlugin : IGameCoordinatorPlugin
             script.Globals["include"] = (Func<string, DynValue>)(relativePath => Include(script, scriptRoot, relativePath));
             script.Globals["gc"] = UserData.Create(backend);
             script.Globals["runtime"] = UserData.Create(runtime);
+            SetDatabaseGlobals(script, runtime.Context);
             script.DoString(File.ReadAllText(scriptPath), null, scriptPath);
             cached = new CachedLuaScript(script, latestWriteUtc);
             _scriptCache[appId] = cached;
             _logger.LogInformation("GC Lua script loaded for app {AppId} from {ScriptRoot}", appId, scriptRoot);
             return cached;
         }
+    }
+
+    private void SetDatabaseGlobals(Script script, GameCoordinatorContext context)
+    {
+        var steamDb = UserData.Create(_steamDb.ForLua(context));
+        var dotaDb = UserData.Create(_dotaDb.ForLua(context));
+        var dedicatedServerService = UserData.Create(_dedicatedServerService.ForLua(context));
+
+        script.Globals["SteamDB"] = steamDb;
+        script.Globals["steamDB"] = steamDb;
+        script.Globals["DotaDB"] = dotaDb;
+        script.Globals["dotaDB"] = dotaDb;
+        script.Globals["DedicatedServerService"] = dedicatedServerService;
+        script.Globals["dedicatedServerService"] = dedicatedServerService;
     }
 
     private static DateTime GetScriptTreeStamp(string scriptRoot)

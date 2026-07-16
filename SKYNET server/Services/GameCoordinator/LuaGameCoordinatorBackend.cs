@@ -633,6 +633,8 @@ public sealed class LuaGameCoordinatorRuntime
         _trace = trace;
     }
 
+    public GameCoordinatorContext Context => _context;
+
     public string SessionKey => $"{_context.AppId}:{_context.SteamId}";
 
     public string Fixture(string relativePath)

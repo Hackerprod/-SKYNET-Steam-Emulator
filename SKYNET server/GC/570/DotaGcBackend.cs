@@ -10,8 +10,6 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
     private static readonly Dictionary<ulong, ulong> PracticeLobbyBySteamId = new();
     private static readonly Dictionary<ulong, ulong> PracticeLobbyByServerSteamId = new();
     private static readonly Dictionary<ulong, Queue<ApiGCMessage>> PendingGcMessages = new();
-    private static readonly object ObservedFixtureSync = new();
-    private static readonly Dictionary<string, int> ObservedFixtureIndexes = new(StringComparer.Ordinal);
     private static long SteamObjectCounter = Environment.TickCount64 & 0xFFFFFF;
     private static ulong MatchIdCounter = (ulong)DateTimeOffset.UtcNow.ToUnixTimeSeconds() * 5UL;
     private static readonly TimeSpan PracticeLobbyTimeout = TimeSpan.FromSeconds(45);
@@ -276,23 +274,6 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
         lock (PracticeLobbySync)
         {
             ExpireInactiveSessionsLocked(activeSteamIds);
-        }
-    }
-
-    public int NextObservedIndex(string bucket, int count)
-    {
-        if (count <= 1)
-        {
-            return 1;
-        }
-
-        string key = $"{SteamId}:{bucket ?? string.Empty}";
-        lock (ObservedFixtureSync)
-        {
-            ObservedFixtureIndexes.TryGetValue(key, out int current);
-            int next = (current % count) + 1;
-            ObservedFixtureIndexes[key] = next;
-            return next;
         }
     }
 
