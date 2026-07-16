@@ -134,8 +134,7 @@ namespace SKYNET.Steamworks.Implementation
         public void StartVoiceRecording()
         {
             Write("StartVoiceRecording");
-            AudioManager.StartVoiceRecording();
-            Recording = true;
+            Recording = AudioManager.StartVoiceRecording();
         }
 
         public void StopVoiceRecording()
@@ -150,19 +149,38 @@ namespace SKYNET.Steamworks.Implementation
             var Result = EVoiceResult.k_EVoiceResultNotRecording;
             pcbCompressed = 0;
             pcbUncompressed_Deprecated = 0;
-            if (Recording)
+            try
             {
-                if (AudioManager.GetAvailableVoice(out var Compressed, out var Uncompressed))
+                if (Recording)
                 {
-                    pcbCompressed = Compressed;
-                    pcbUncompressed_Deprecated = Uncompressed;
-                    Result = EVoiceResult.k_EVoiceResultOK;
+                    if (AudioManager.GetAvailableVoice(out var Compressed, out var Uncompressed))
+                    {
+                        pcbCompressed = Compressed;
+                        pcbUncompressed_Deprecated = Uncompressed;
+                        Result = EVoiceResult.k_EVoiceResultOK;
+                    }
+                    else
+                        Result = EVoiceResult.k_EVoiceResultNoData;
                 }
-                else
-                    Result = EVoiceResult.k_EVoiceResultNoData;
+            }
+            catch (Exception ex)
+            {
+                Write($"GetAvailableVoice failed: {ex.GetType().Name}: {ex.Message}");
+                Result = EVoiceResult.k_EVoiceResultNotRecording;
             }
             //Write($"GetAvailableVoice (Compressed = {pcbCompressed}, Uncompressed = {pcbUncompressed_Deprecated}) = {Result}");
             return Result;
+        }
+
+        public EVoiceResult GetAvailableVoice(IntPtr pcbCompressed, IntPtr pcbUncompressed_Deprecated, uint nUncompressedVoiceDesiredSampleRate)
+        {
+            // Native callers may pass NULL for deprecated output pointers; write only when present.
+            uint compressed;
+            uint uncompressed;
+            var result = GetAvailableVoice(out compressed, out uncompressed, nUncompressedVoiceDesiredSampleRate);
+            WriteUInt32(pcbCompressed, compressed);
+            WriteUInt32(pcbUncompressed_Deprecated, uncompressed);
+            return result;
         }
 
         public EVoiceResult GetVoice(bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, out uint nBytesWritten, bool bWantUncompressed, IntPtr pUncompressedDestBuffer, uint cbUncompressedDestBufferSize, out uint nUncompressBytesWritten, uint nUncompressedVoiceDesiredSampleRate)
@@ -170,33 +188,58 @@ namespace SKYNET.Steamworks.Implementation
             var Result = EVoiceResult.k_EVoiceResultNotRecording;
             nUncompressBytesWritten = 0;
             nBytesWritten = 0;
-            if (Recording)
+            try
             {
-                if (AudioManager.GetVoice(out byte[] buffer))
+                if (Recording)
                 {
-                    // Compressed 
-                    if (bWantCompressed)
+                    uint maxBytes = Math.Max(bWantCompressed ? cbDestBufferSize : 0, bWantUncompressed ? cbUncompressedDestBufferSize : 0);
+                    if (AudioManager.GetVoice(maxBytes, out byte[] buffer))
                     {
-                        var Size = cbDestBufferSize < buffer.Length ? cbDestBufferSize : (uint)buffer.Length;
-                        Marshal.Copy(buffer, 0, pDestBuffer, (int)Size);
-                        nBytesWritten = Size;
-                    }
+                        // Compressed 
+                        if (bWantCompressed)
+                        {
+                            var Size = cbDestBufferSize < buffer.Length ? cbDestBufferSize : (uint)buffer.Length;
+                            if (Size > 0 && pDestBuffer != IntPtr.Zero)
+                            {
+                                Marshal.Copy(buffer, 0, pDestBuffer, (int)Size);
+                                nBytesWritten = Size;
+                            }
+                        }
 
-                    // Uncompressed
-                    if (bWantUncompressed)
-                    {
-                        var Size = cbUncompressedDestBufferSize < buffer.Length ? cbUncompressedDestBufferSize : (uint)buffer.Length;
-                        Marshal.Copy(buffer, 0, pUncompressedDestBuffer, (int)Size);
-                        nUncompressBytesWritten = Size;
-                    }
+                        // Uncompressed
+                        if (bWantUncompressed)
+                        {
+                            var Size = cbUncompressedDestBufferSize < buffer.Length ? cbUncompressedDestBufferSize : (uint)buffer.Length;
+                            if (Size > 0 && pUncompressedDestBuffer != IntPtr.Zero)
+                            {
+                                Marshal.Copy(buffer, 0, pUncompressedDestBuffer, (int)Size);
+                                nUncompressBytesWritten = Size;
+                            }
+                        }
 
-                    Result = EVoiceResult.k_EVoiceResultOK;
+                        Result = EVoiceResult.k_EVoiceResultOK;
+                    }
+                    else
+                        Result = EVoiceResult.k_EVoiceResultNoData;
                 }
-                else
-                    Result = EVoiceResult.k_EVoiceResultNoData;
+            }
+            catch (Exception ex)
+            {
+                Write($"GetVoice failed: {ex.GetType().Name}: {ex.Message}");
+                Result = EVoiceResult.k_EVoiceResultNotRecording;
             }
             //Write($"GetVoice (BytesWritte = {nBytesWritten}) = {Result}");
             return Result;
+        }
+
+        public EVoiceResult GetVoice(bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, IntPtr nBytesWritten, bool bWantUncompressed, IntPtr pUncompressedDestBuffer, uint cbUncompressedDestBufferSize, IntPtr nUncompressBytesWritten, uint nUncompressedVoiceDesiredSampleRate)
+        {
+            uint compressedBytes;
+            uint uncompressedBytes;
+            var result = GetVoice(bWantCompressed, pDestBuffer, cbDestBufferSize, out compressedBytes, bWantUncompressed, pUncompressedDestBuffer, cbUncompressedDestBufferSize, out uncompressedBytes, nUncompressedVoiceDesiredSampleRate);
+            WriteUInt32(nBytesWritten, compressedBytes);
+            WriteUInt32(nUncompressBytesWritten, uncompressedBytes);
+            return result;
         }
 
         public EVoiceResult DecompressVoice(IntPtr pCompressed, uint cbCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, out uint nBytesWritten, uint nDesiredSampleRate)
@@ -208,11 +251,14 @@ namespace SKYNET.Steamworks.Implementation
                 try
                 {
                     var Size = cbCompressed > cbDestBufferSize ? cbDestBufferSize : cbCompressed;
-                    byte[] buffer = new byte[Size];
-                    Marshal.Copy(pCompressed, buffer, 0, (int)Size);
-                    Marshal.Copy(buffer, 0, pDestBuffer, (int)Size);
-                    nBytesWritten = Size;
-                    Result = EVoiceResult.k_EVoiceResultOK;
+                    if (Size > 0 && pCompressed != IntPtr.Zero && pDestBuffer != IntPtr.Zero)
+                    {
+                        byte[] buffer = new byte[Size];
+                        Marshal.Copy(pCompressed, buffer, 0, (int)Size);
+                        Marshal.Copy(buffer, 0, pDestBuffer, (int)Size);
+                        nBytesWritten = Size;
+                        Result = EVoiceResult.k_EVoiceResultOK;
+                    }
                 }
                 catch 
                 {
@@ -220,6 +266,22 @@ namespace SKYNET.Steamworks.Implementation
             }
             Write($"DecompressVoice = {Result}");
             return Result;
+        }
+
+        public EVoiceResult DecompressVoice(IntPtr pCompressed, uint cbCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, IntPtr nBytesWritten, uint nDesiredSampleRate)
+        {
+            uint written;
+            var result = DecompressVoice(pCompressed, cbCompressed, pDestBuffer, cbDestBufferSize, out written, nDesiredSampleRate);
+            WriteUInt32(nBytesWritten, written);
+            return result;
+        }
+
+        private static void WriteUInt32(IntPtr target, uint value)
+        {
+            if (target != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(target, unchecked((int)value));
+            }
         }
 
         public uint GetVoiceOptimalSampleRate()

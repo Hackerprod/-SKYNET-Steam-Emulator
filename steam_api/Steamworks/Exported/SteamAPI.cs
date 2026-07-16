@@ -36,6 +36,12 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_CheckCallbackRegistered_t(int iCallbackNum)
+        {
+            Write($"SteamAPI_CheckCallbackRegistered_t {iCallbackNum}");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_Shutdown(IntPtr pContextInitData)
         {
             Write("SteamAPI_Shutdown");

@@ -24,7 +24,7 @@ namespace SKYNET.Steamworks.Exported
         public static void SteamAPI_ISteamController_ActivateActionSet(IntPtr _, ControllerHandle_t controllerHandle, ControllerActionSetHandle_t actionSetHandle)
         {
             Write("SteamAPI_ISteamController_ActivateActionSet");
-            SteamEmulator.SteamController.ActivateActionSet(controllerHandle, controllerHandle);
+            SteamEmulator.SteamController.ActivateActionSet(controllerHandle, actionSetHandle);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -77,10 +77,10 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static ControllerActionSetHandle_t GetAnalogActionHandle(IntPtr _, string pszActionName)
+        public static ControllerAnalogActionHandle_t SteamAPI_ISteamController_GetAnalogActionHandle(IntPtr _, string pszActionName)
         {
             Write("SteamAPI_ISteamController_GetAnalogActionHandle");
-            return SteamEmulator.SteamController.GetActionSetHandle(pszActionName);
+            return SteamEmulator.SteamController.GetAnalogActionHandle(pszActionName);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -214,6 +214,20 @@ namespace SKYNET.Steamworks.Exported
         {
             Write("SteamAPI_ISteamController_ShowBindingPanel");
             return SteamEmulator.SteamController.ShowBindingPanel(controllerHandle);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamController_ShowDigitalActionOrigins(IntPtr _, ControllerHandle_t controllerHandle, ControllerDigitalActionHandle_t digitalActionHandle, float flScale, float flXPosition, float flYPosition)
+        {
+            Write("SteamAPI_ISteamController_ShowDigitalActionOrigins");
+            return SteamEmulator.SteamController.ShowDigitalActionOrigins(controllerHandle, digitalActionHandle, flScale, flXPosition, flYPosition);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamController_ShowAnalogActionOrigins(IntPtr _, ControllerHandle_t controllerHandle, ControllerAnalogActionHandle_t analogActionHandle, float flScale, float flXPosition, float flYPosition)
+        {
+            Write("SteamAPI_ISteamController_ShowAnalogActionOrigins");
+            return SteamEmulator.SteamController.ShowAnalogActionOrigins(controllerHandle, analogActionHandle, flScale, flXPosition, flYPosition);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

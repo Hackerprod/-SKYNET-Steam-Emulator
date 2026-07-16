@@ -71,6 +71,7 @@ public class SteamEmulator
     public static string RefreshToken;
     public static string ClientInstanceId;
     public static bool UseActiveWebUser;
+    public static bool EnableVoiceCapture;
     public static int PollIntervalMs;
     public static int HttpTimeoutMs;
     public static int DiscoveryPort;
@@ -148,6 +149,7 @@ public class SteamEmulator
         RefreshToken = string.Empty;
         ClientInstanceId = string.Empty;
         UseActiveWebUser = true;
+        EnableVoiceCapture = true;
         PollIntervalMs = 50;
         HttpTimeoutMs = 8000;
         DiscoveryPort = 27081;

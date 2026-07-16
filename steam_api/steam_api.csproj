@@ -138,6 +138,7 @@
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamUser.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamUserStats.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_ISteamUtils.cs" />
+    <Compile Include="Steamworks\Exported\SteamAPI_ISteamVideo.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_SteamNetworkingConfigValue.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI_SteamNetworkingIdentity.cs" />
     <Compile Include="Steamworks\Exported\SteamAPI.cs" />

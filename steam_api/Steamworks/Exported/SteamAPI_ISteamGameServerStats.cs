@@ -44,6 +44,20 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamGameServerStats_GetUserStat(IntPtr _, ulong steamIDUser, string pchName, IntPtr pData)
+        {
+            Write("SteamAPI_ISteamGameServerStats_GetUserStat");
+            return SteamEmulator.SteamGameServerStats.GetUserStatInt32(steamIDUser, pchName, pData);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamGameServerStats_GetUserStat0(IntPtr _, ulong steamIDUser, string pchName, IntPtr pData)
+        {
+            Write("SteamAPI_ISteamGameServerStats_GetUserStat0");
+            return SteamEmulator.SteamGameServerStats.GetUserStatFloat(steamIDUser, pchName, pData);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static SteamAPICall_t SteamAPI_ISteamGameServerStats_RequestUserStats(IntPtr _, ulong steamIDUser)
         {
             Write("SteamAPI_ISteamGameServerStats_RequestUserStats");
@@ -68,6 +82,20 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamAPI_ISteamGameServerStats_SetUserStatFloat(IntPtr _, ulong steamIDUser, string pchName, float fData)
         {
             Write("SteamAPI_ISteamGameServerStats_SetUserStatFloat");
+            return SteamEmulator.SteamGameServerStats.SetUserStat(steamIDUser, pchName, fData);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamGameServerStats_SetUserStat(IntPtr _, ulong steamIDUser, string pchName, int nData)
+        {
+            Write("SteamAPI_ISteamGameServerStats_SetUserStat");
+            return SteamEmulator.SteamGameServerStats.SetUserStat(steamIDUser, pchName, nData);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamGameServerStats_SetUserStat0(IntPtr _, ulong steamIDUser, string pchName, float fData)
+        {
+            Write("SteamAPI_ISteamGameServerStats_SetUserStat0");
             return SteamEmulator.SteamGameServerStats.SetUserStat(steamIDUser, pchName, fData);
         }
 

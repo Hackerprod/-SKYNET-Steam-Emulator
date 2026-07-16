@@ -87,11 +87,8 @@ namespace SKYNET.Steamworks
     [StructLayout(LayoutKind.Sequential)]
     public struct ControllerDigitalActionData_t
     {
-        [MarshalAs(UnmanagedType.I1)]
-        public bool bState;
-
-        [MarshalAs(UnmanagedType.I1)]
-        public bool bActive;
+        public byte bState;
+        public byte bActive;
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -99,17 +96,14 @@ namespace SKYNET.Steamworks
     {
         public int eMode;
         public float x, y;
-        [MarshalAs(UnmanagedType.I1)]
-        public bool bActive;
+        public byte bActive;
     };
 
     [StructLayout(LayoutKind.Sequential)]
     public struct InputDigitalActionData_t
     {
-        [MarshalAs(UnmanagedType.I1)]
-        public bool bState;
-        [MarshalAs(UnmanagedType.I1)]
-        public bool bActive;
+        public byte bState;
+        public byte bActive;
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -117,8 +111,7 @@ namespace SKYNET.Steamworks
     {
         public int eMode;
         public float x, y;
-        [MarshalAs(UnmanagedType.I1)]
-        public bool bActive;
+        public byte bActive;
     };
 
     [StructLayout(LayoutKind.Sequential)]
