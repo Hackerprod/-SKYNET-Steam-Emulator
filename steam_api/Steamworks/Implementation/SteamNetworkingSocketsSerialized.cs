@@ -148,7 +148,7 @@ namespace SKYNET.Steamworks.Implementation
                 return CreateEmptyCertResult(EResult.k_EResultOK);
             }
 
-            if (!SkyNetApiClient.IsEnabled)
+            if (!APIClient.IsEnabled)
             {
                 return empty;
             }
@@ -164,7 +164,7 @@ namespace SKYNET.Steamworks.Implementation
 
             try
             {
-                var dto = SkyNetApiClient.RequestSdrCert(expectedSteamId, expectedAppId);
+                var dto = APIClient.RequestSdrCert(expectedSteamId, expectedAppId);
                 if (dto == null)
                 {
                     Write("GetCertAsync: server returned no cert");

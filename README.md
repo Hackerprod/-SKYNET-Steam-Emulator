@@ -275,7 +275,7 @@ Do not persist server-issued access or refresh tokens in the INI. They are runti
 
 ## API Surface
 
-The server exposes a broad `/api` contract consumed by `SkyNetApiClient` in the DLL. Major groups:
+The server exposes a broad `/api` contract consumed by `APIClient` in the DLL. Major groups:
 
 - `/api/auth/steam/session`
 - `/api/users`, `/api/users/me`, `/api/users/{steamId}`
@@ -353,7 +353,7 @@ For `steam_api` changes:
 
 For `SKYNET server` changes:
 
-- keep API DTOs aligned with `SkyNetApiClient`
+- keep API DTOs aligned with `APIClient`
 - document new endpoints or changed payloads
 - include migration notes for config/state changes
 - keep UI changes self-contained and rebuild CSS when needed

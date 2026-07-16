@@ -14,7 +14,7 @@ namespace SKYNET.Managers
 
         public static void RunFrame(bool gameServer)
         {
-            if (gameServer || IsDedicatedProcess || !SkyNetApiClient.IsEnabled)
+            if (gameServer || IsDedicatedProcess || !APIClient.IsEnabled)
             {
                 return;
             }
@@ -46,13 +46,13 @@ namespace SKYNET.Managers
             {
                 try
                 {
-                    if (!SkyNetApiClient.IsEnabled)
+                    if (!APIClient.IsEnabled)
                     {
                         Thread.Sleep(250);
                         continue;
                     }
 
-                    var envelope = SkyNetApiClient.PollEvents(1000);
+                    var envelope = APIClient.PollEvents(1000);
                     if (envelope?.Events != null)
                     {
                         foreach (var serverEvent in envelope.Events)
@@ -68,7 +68,7 @@ namespace SKYNET.Managers
             }
         }
 
-        private static void ApplyEvent(SkyNetApiClient.ApiEvent serverEvent)
+        private static void ApplyEvent(APIClient.ApiEvent serverEvent)
         {
             if (serverEvent == null || string.IsNullOrWhiteSpace(serverEvent.Type))
             {
@@ -140,7 +140,7 @@ namespace SKYNET.Managers
             }
         }
 
-        private static void EmitPersonaStateChange(SkyNetApiClient.ApiEvent serverEvent)
+        private static void EmitPersonaStateChange(APIClient.ApiEvent serverEvent)
         {
             var steamId = serverEvent.SteamId != 0
                 ? serverEvent.SteamId
@@ -158,13 +158,13 @@ namespace SKYNET.Managers
 
             if ((callback.m_nChangeFlags & (int)EPersonaChange.k_EPersonaChangeAvatar) != 0)
             {
-                ThreadPool.QueueUserWorkItem(_ => SkyNetApiClient.RefreshAvatar(steamId));
+                ThreadPool.QueueUserWorkItem(_ => APIClient.RefreshAvatar(steamId));
             }
         }
 
-        private static void ApplyLobby(SkyNetApiClient.ApiEvent serverEvent, uint memberStateChange)
+        private static void ApplyLobby(APIClient.ApiEvent serverEvent, uint memberStateChange)
         {
-            var lobby = serverEvent.Lobby == null ? null : SkyNetApiClient.MapLobbyForEvents(serverEvent.Lobby);
+            var lobby = serverEvent.Lobby == null ? null : APIClient.MapLobbyForEvents(serverEvent.Lobby);
             if (lobby == null)
             {
                 return;
@@ -194,7 +194,7 @@ namespace SKYNET.Managers
             });
         }
 
-        private static void ApplyLobbyChat(SkyNetApiClient.ApiEvent serverEvent)
+        private static void ApplyLobbyChat(APIClient.ApiEvent serverEvent)
         {
             var lobbyId = serverEvent.LobbyId != 0 ? serverEvent.LobbyId : (serverEvent.Lobby?.SteamId ?? 0);
             if (lobbyId == 0)
@@ -217,7 +217,7 @@ namespace SKYNET.Managers
             });
         }
 
-        private static void RemoveLobby(SkyNetApiClient.ApiEvent serverEvent)
+        private static void RemoveLobby(APIClient.ApiEvent serverEvent)
         {
             var lobbyId = serverEvent.Lobby?.SteamId ?? serverEvent.LobbyId;
             if (lobbyId == 0)
@@ -235,7 +235,7 @@ namespace SKYNET.Managers
             });
         }
 
-        private static void ApplyP2PPacket(SkyNetApiClient.ApiEvent serverEvent)
+        private static void ApplyP2PPacket(APIClient.ApiEvent serverEvent)
         {
             if (SteamEmulator.SteamNetworking == null || string.IsNullOrWhiteSpace(serverEvent.PayloadBase64))
             {
@@ -256,7 +256,7 @@ namespace SKYNET.Managers
             });
         }
 
-        private static void ApplyGCMessage(SkyNetApiClient.ApiEvent serverEvent)
+        private static void ApplyGCMessage(APIClient.ApiEvent serverEvent)
         {
             if (SteamEmulator.SteamGameCoordinator == null || string.IsNullOrWhiteSpace(serverEvent.PayloadBase64))
             {
@@ -276,7 +276,7 @@ namespace SKYNET.Managers
             }
         }
 
-        private static void EmitGameServerChangeRequested(SkyNetApiClient.ApiEvent serverEvent)
+        private static void EmitGameServerChangeRequested(APIClient.ApiEvent serverEvent)
         {
             var server = (serverEvent.Server ?? string.Empty).Trim();
             if (server.Length == 0)

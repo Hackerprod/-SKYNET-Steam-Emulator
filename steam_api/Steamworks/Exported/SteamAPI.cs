@@ -45,7 +45,7 @@ namespace SKYNET.Steamworks.Exported
         public static void SteamAPI_Shutdown(IntPtr pContextInitData)
         {
             Write("SteamAPI_Shutdown");
-            SkyNetApiClient.GoOffline();
+            APIClient.GoOffline();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

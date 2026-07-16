@@ -83,9 +83,9 @@ namespace SKYNET.Steamworks.Implementation
                 () =>
                 {
                     var result = EResult.k_EResultFail;
-                    if (SkyNetApiClient.IsEnabled)
+                    if (APIClient.IsEnabled)
                     {
-                        var envelope = SkyNetApiClient.RequestGameServerUserStats(steamIDUser);
+                        var envelope = APIClient.RequestGameServerUserStats(steamIDUser);
                         if (envelope != null)
                         {
                             StateCache.ApplyStats(steamIDUser, envelope.Stats);
@@ -140,16 +140,16 @@ namespace SKYNET.Steamworks.Implementation
                 () =>
                 {
                     var result = EResult.k_EResultFail;
-                    if (SkyNetApiClient.IsEnabled)
+                    if (APIClient.IsEnabled)
                     {
-                        result = SkyNetApiClient.StoreGameServerUserStats(
+                        result = APIClient.StoreGameServerUserStats(
                             steamIDUser,
-                            StateCache.GetStats(steamIDUser).ConvertAll(s => new SkyNetApiClient.ApiStat
+                            StateCache.GetStats(steamIDUser).ConvertAll(s => new APIClient.ApiStat
                             {
                                 Name = s.Name,
                                 Data = s.Data
                             }),
-                            StateCache.GetAchievements(steamIDUser).ConvertAll(a => new SkyNetApiClient.ApiAchievement
+                            StateCache.GetAchievements(steamIDUser).ConvertAll(a => new APIClient.ApiAchievement
                             {
                                 Name = a.Name,
                                 Earned = a.Earned,

@@ -110,7 +110,7 @@ namespace SKYNET.Steamworks.Implementation
 
         private bool TryQueueServerResponses(uint requestMsg, byte[] requestBody, ulong sourceJobId, bool gameServer)
         {
-            if (!SkyNetApiClient.IsEnabled)
+            if (!APIClient.IsEnabled)
             {
                 Write($"GC server disabled; no local fallback (MsgType = {requestMsg})");
                 return false;
@@ -119,7 +119,7 @@ namespace SKYNET.Steamworks.Implementation
             var body = requestBody ?? Array.Empty<byte>();
             return WorkQueue.Enqueue($"GC exchange {requestMsg}", () =>
             {
-                var response = SkyNetApiClient.ExchangeGCMessage(SteamEmulator.AppID, requestMsg, body, sourceJobId, gameServer);
+                var response = APIClient.ExchangeGCMessage(SteamEmulator.AppID, requestMsg, body, sourceJobId, gameServer);
                 if (response == null)
                 {
                     Write($"GC server exchange unavailable; no local fallback (MsgType = {requestMsg})");
@@ -134,7 +134,7 @@ namespace SKYNET.Steamworks.Implementation
             }, highPriority: true);
         }
 
-        private bool QueueServerMessages(SkyNetApiClient.ApiGCExchangeResponse response, uint requestMsg, bool gameServer)
+        private bool QueueServerMessages(APIClient.ApiGCExchangeResponse response, uint requestMsg, bool gameServer)
         {
             bool queued = false;
             if (response != null && response.Messages != null)
@@ -174,7 +174,7 @@ namespace SKYNET.Steamworks.Implementation
 
         private bool TryPollServerMessages()
         {
-            if (!SkyNetApiClient.IsEnabled)
+            if (!APIClient.IsEnabled)
             {
                 return false;
             }
@@ -203,7 +203,7 @@ namespace SKYNET.Steamworks.Implementation
             {
                 try
                 {
-                    QueueServerMessages(SkyNetApiClient.PollGCMessages(SteamEmulator.AppID, true), 0, true);
+                    QueueServerMessages(APIClient.PollGCMessages(SteamEmulator.AppID, true), 0, true);
                 }
                 catch (Exception ex)
                 {

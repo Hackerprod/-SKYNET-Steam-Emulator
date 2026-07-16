@@ -53,11 +53,11 @@ namespace SKYNET.Steamworks.Implementation
             {
                 Write($"RequestCurrentStats");
                 var requestSucceeded = true;
-                if (SkyNetApiClient.IsEnabled)
+                if (APIClient.IsEnabled)
                 {
                     WorkQueue.Enqueue("RequestCurrentStats", () =>
                     {
-                        var ok = SkyNetApiClient.RefreshCurrentStats(true);
+                        var ok = APIClient.RefreshCurrentStats(true);
                         SyncSelfFromCache(false);
                         CallbackManager.AddCallback(new UserStatsReceived_t
                         {
@@ -317,12 +317,12 @@ namespace SKYNET.Steamworks.Implementation
             {
                 Write($"StoreStats");
                 var stored = true;
-                if (SkyNetApiClient.IsEnabled)
+                if (APIClient.IsEnabled)
                 {
                     SyncSelfFromCache(false);
                     WorkQueue.Enqueue("StoreStats", () =>
                     {
-                        var ok = SkyNetApiClient.StoreStats();
+                        var ok = APIClient.StoreStats();
                         CallbackManager.AddCallback(new UserStatsStored_t
                         {
                             m_nGameID = SteamEmulator.AppID,
@@ -417,7 +417,7 @@ namespace SKYNET.Steamworks.Implementation
             try
             {
                 Write($"RequestUserStats {steamIDUser}");
-                if (SkyNetApiClient.IsEnabled)
+                if (APIClient.IsEnabled)
                 {
                     return WorkQueue.EnqueueCallbackResult(new UserStatsReceived_t
                     {
@@ -426,7 +426,7 @@ namespace SKYNET.Steamworks.Implementation
                         m_steamIDUser = (CSteamID)steamIDUser
                     }, () =>
                     {
-                        var ok = SkyNetApiClient.RefreshStatsForUser(steamIDUser, true);
+                        var ok = APIClient.RefreshStatsForUser(steamIDUser, true);
                         SyncUserFromCache(steamIDUser, false);
                         return new UserStatsReceived_t
                         {
@@ -580,10 +580,10 @@ namespace SKYNET.Steamworks.Implementation
             PlayerStats.Clear();
             if (bAchievementsToo)
                 Achievements.Clear();
-            StateCache.ApplyStats((ulong)SteamEmulator.SteamID, new List<SkyNetApiClient.ApiStat>());
+            StateCache.ApplyStats((ulong)SteamEmulator.SteamID, new List<APIClient.ApiStat>());
             if (bAchievementsToo)
             {
-                StateCache.ApplyAchievements((ulong)SteamEmulator.SteamID, new List<SkyNetApiClient.ApiAchievement>());
+                StateCache.ApplyAchievements((ulong)SteamEmulator.SteamID, new List<APIClient.ApiAchievement>());
             }
             return true;
         }
@@ -717,13 +717,13 @@ namespace SKYNET.Steamworks.Implementation
         {
             try
             {
-                if (SkyNetApiClient.IsEnabled)
+                if (APIClient.IsEnabled)
                 {
-                    WorkQueue.Enqueue("Refresh current players", () => SkyNetApiClient.RefreshCurrentStats(),
+                    WorkQueue.Enqueue("Refresh current players", () => APIClient.RefreshCurrentStats(),
                         "stats:current-players");
                 }
 
-                var UsersOnline = SkyNetApiClient.IsEnabled ? StateCache.GetCurrentPlayers() : UserManager.Users.Count;
+                var UsersOnline = APIClient.IsEnabled ? StateCache.GetCurrentPlayers() : UserManager.Users.Count;
                 NumberOfCurrentPlayers_t data = new NumberOfCurrentPlayers_t()
                 {
                     m_bSuccess = 1,
@@ -796,9 +796,9 @@ namespace SKYNET.Steamworks.Implementation
             try
             {
                 Write($"RequestGlobalStats {nHistoryDays} days");
-                if (SkyNetApiClient.IsEnabled)
+                if (APIClient.IsEnabled)
                 {
-                    WorkQueue.Enqueue("RequestGlobalStats", () => SkyNetApiClient.RefreshCurrentStats(true),
+                    WorkQueue.Enqueue("RequestGlobalStats", () => APIClient.RefreshCurrentStats(true),
                         "stats:global", true);
                 }
 
@@ -879,9 +879,9 @@ namespace SKYNET.Steamworks.Implementation
 
         private void SyncSelfFromCache(bool refresh = false)
         {
-            if (refresh && SkyNetApiClient.IsEnabled)
+            if (refresh && APIClient.IsEnabled)
             {
-                WorkQueue.Enqueue("Sync self stats", () => SkyNetApiClient.RefreshCurrentStats(),
+                WorkQueue.Enqueue("Sync self stats", () => APIClient.RefreshCurrentStats(),
                     "stats:self");
             }
 
@@ -891,19 +891,19 @@ namespace SKYNET.Steamworks.Implementation
 
         private void SyncUserFromCache(ulong steamIDUser, bool refresh = false)
         {
-            if (!SkyNetApiClient.IsEnabled)
+            if (!APIClient.IsEnabled)
             {
                 return;
             }
 
             if (refresh && steamIDUser == (ulong)SteamEmulator.SteamID)
             {
-                WorkQueue.Enqueue("Sync current user stats", () => SkyNetApiClient.RefreshCurrentStats(),
+                WorkQueue.Enqueue("Sync current user stats", () => APIClient.RefreshCurrentStats(),
                     "stats:self");
             }
             else if (refresh)
             {
-                WorkQueue.Enqueue("Sync user stats", () => SkyNetApiClient.RefreshStatsForUser(steamIDUser),
+                WorkQueue.Enqueue("Sync user stats", () => APIClient.RefreshStatsForUser(steamIDUser),
                     "stats:user:" + steamIDUser);
             }
 

@@ -63,9 +63,9 @@ namespace SKYNET.Steamworks.Implementation
                 return false;
             }
             byte[] bytes = pubData.GetBytes(cubData);
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
-                return SkyNetApiClient.SendP2PPacket(steamIDRemote, bytes, eP2PSendType, nChannel);
+                return APIClient.SendP2PPacket(steamIDRemote, bytes, eP2PSendType, nChannel);
             }
 
             NetworkManager.SendP2PTo(steamIDRemote, bytes, eP2PSendType, nChannel);

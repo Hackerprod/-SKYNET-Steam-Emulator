@@ -60,9 +60,9 @@ namespace SKYNET.Managers
             });
 
             var approvedSteamID = steamIDUser;
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
-                WorkQueue.Enqueue("ConnectAndAuthenticate", () => SkyNetApiClient.ConnectAndAuthenticate(unIPClient, authBlob, approvedSteamID),
+                WorkQueue.Enqueue("ConnectAndAuthenticate", () => APIClient.ConnectAndAuthenticate(unIPClient, authBlob, approvedSteamID),
                     "ticket:connect:" + approvedSteamID, true);
             }
 
@@ -86,9 +86,9 @@ namespace SKYNET.Managers
                 // here delays it enough that Dota fails the session (VAC). Generate it
                 // locally (Goldberg-style) and register it with the server in the
                 // background so cross-user tracking still works.
-                if (SkyNetApiClient.IsEnabled)
+                if (APIClient.IsEnabled)
                 {
-                    WorkQueue.Enqueue("CreateAuthSessionTicket", () => SkyNetApiClient.CreateAuthSessionTicket(gameServer, cbMaxTicket),
+                    WorkQueue.Enqueue("CreateAuthSessionTicket", () => APIClient.CreateAuthSessionTicket(gameServer, cbMaxTicket),
                         null, true);
                 }
 
@@ -153,9 +153,9 @@ namespace SKYNET.Managers
             // round-trip here delays the ValidateAuthTicketResponse callback past the
             // point Dota expects it, so the session is treated as unverified (VAC).
             // The server is still notified asynchronously so it can track the session.
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
-                WorkQueue.Enqueue("ValidateAuthSessionTicket", () => SkyNetApiClient.ValidateAuthSessionTicket(ticketBytes, steamID, gameServer),
+                WorkQueue.Enqueue("ValidateAuthSessionTicket", () => APIClient.ValidateAuthSessionTicket(ticketBytes, steamID, gameServer),
                     null, true);
             }
 
@@ -166,9 +166,9 @@ namespace SKYNET.Managers
 
         public static void EndAuthSession(ulong steamID, bool gameServer = false)
         {
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
-                WorkQueue.Enqueue("EndAuthSession", () => SkyNetApiClient.EndAuthSession(steamID, gameServer),
+                WorkQueue.Enqueue("EndAuthSession", () => APIClient.EndAuthSession(steamID, gameServer),
                     "ticket:end:" + steamID + ":" + (gameServer ? "gs" : "client"));
             }
 
@@ -177,9 +177,9 @@ namespace SKYNET.Managers
 
         public static void CancelAuthTicket(uint hAuthTicket, bool gameServer = false)
         {
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
-                WorkQueue.Enqueue("CancelAuthTicket", () => SkyNetApiClient.CancelAuthTicket(hAuthTicket, gameServer),
+                WorkQueue.Enqueue("CancelAuthTicket", () => APIClient.CancelAuthTicket(hAuthTicket, gameServer),
                     "ticket:cancel:" + hAuthTicket + ":" + (gameServer ? "gs" : "client"));
             }
 

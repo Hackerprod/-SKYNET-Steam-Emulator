@@ -185,9 +185,9 @@ public class SteamEmulator
             InterfaceManager.Initialize();
             Write("InterfaceManager initialized");
 
-            Write("Initializing SkyNetApiClient");
-            SkyNetApiClient.Initialize();
-            Write("SkyNetApiClient initialized");
+            Write("Initializing APIClient");
+            APIClient.Initialize();
+            Write("APIClient initialized");
 
             // Memory patching is disabled. Disk patching is checked before the
             // networking interfaces ask for SDR config or a certificate.

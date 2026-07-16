@@ -34,20 +34,20 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool BLoggedOn()
         {
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
                 // Report the cached connection state without blocking. If we are
                 // not connected yet, the handshake is kicked off in background and
                 // the connected callback fires from OnServerSessionConnected().
-                bool connected = SkyNetApiClient.IsConnected;
+                bool connected = APIClient.IsConnected;
                 if (connected)
                 {
-                    SkyNetApiClient.QueueSelfRefresh();
+                    APIClient.QueueSelfRefresh();
                     QueueSteamServersConnected();
                 }
                 else
                 {
-                    SkyNetApiClient.EnsureSession();
+                    APIClient.EnsureSession();
                 }
 
                 Write($"BLoggedOn = {connected}");
@@ -79,17 +79,17 @@ namespace SKYNET.Steamworks.Implementation
 
         public CSteamID GetSteamID()
         {
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
-                if (!SkyNetApiClient.IsConnected)
+                if (!APIClient.IsConnected)
                 {
-                    SkyNetApiClient.EnsureSession();
+                    APIClient.EnsureSession();
                     Write("GetSteamID unavailable: no active server session");
                     return CSteamID.Invalid;
                 }
 
                 // Connected: return the cached identity and refresh in background.
-                SkyNetApiClient.QueueSelfRefresh();
+                APIClient.QueueSelfRefresh();
             }
 
             var SteamId = SteamEmulator.SteamID;
@@ -368,7 +368,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetPlayerSteamLevel()
         {
-            SkyNetApiClient.QueueSelfRefresh();
+            APIClient.QueueSelfRefresh();
             int level = StateCache.GetSelfPlayerLevel();
             Write($"GetPlayerSteamLevel {level}");
             return level == 0 ? 100 : level;

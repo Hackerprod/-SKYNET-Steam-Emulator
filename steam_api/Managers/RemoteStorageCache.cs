@@ -134,7 +134,7 @@ namespace SKYNET.Steamworks.Implementation
         /// <summary>
         /// Merges a server manifest. A null list means the fetch failed.
         /// </summary>
-        public static void MergeRemoteList(List<SkyNetApiClient.ApiRemoteStorageFileListItem> files)
+        public static void MergeRemoteList(List<APIClient.ApiRemoteStorageFileListItem> files)
         {
             if (files == null)
             {
@@ -283,6 +283,23 @@ namespace SKYNET.Steamworks.Implementation
                     existing.MissingUntil = DateTime.MinValue;
                     return existing;
                 });
+        }
+
+        /// <summary>
+        /// FileForget: stop syncing with the cloud but keep the local copy.
+        /// Clears the persisted flag without touching hydration or missing state.
+        /// </summary>
+        public static void SetForgotten(string normalizedName)
+        {
+            if (string.IsNullOrEmpty(normalizedName))
+            {
+                return;
+            }
+
+            if (Entries.TryGetValue(normalizedName, out var existing))
+            {
+                existing.IsPersisted = false;
+            }
         }
 
         public static void SetSyncPlatforms(string normalizedName, uint syncPlatforms)

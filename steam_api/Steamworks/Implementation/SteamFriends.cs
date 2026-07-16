@@ -71,7 +71,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public string GetPersonaName()
         {
-            SkyNetApiClient.QueueSelfRefresh();
+            APIClient.QueueSelfRefresh();
             string PersonaName = SteamEmulator.PersonaName;
             Write($"GetPersonaName {PersonaName}");
             return PersonaName;
@@ -140,22 +140,22 @@ namespace SKYNET.Steamworks.Implementation
                     break;
                 case "friendadd":
                     type = OverlayType.FriendAdd;
-                    WorkQueue.Enqueue("Send friend request", () => SkyNetApiClient.SendFriendRequest(steamID),
+                    WorkQueue.Enqueue("Send friend request", () => APIClient.SendFriendRequest(steamID),
                         "friends:request:" + steamID);
                     break;
                 case "friendremove":
                     type = OverlayType.FriendRemove;
-                    WorkQueue.Enqueue("Remove friend or request", () => SkyNetApiClient.RemoveFriendOrRequest(steamID),
+                    WorkQueue.Enqueue("Remove friend or request", () => APIClient.RemoveFriendOrRequest(steamID),
                         "friends:remove:" + steamID);
                     break;
                 case "friendrequestaccept":
                     type = OverlayType.FriendRequestAccept;
-                    WorkQueue.Enqueue("Accept friend request", () => SkyNetApiClient.AcceptFriendRequest(steamID),
+                    WorkQueue.Enqueue("Accept friend request", () => APIClient.AcceptFriendRequest(steamID),
                         "friends:accept:" + steamID);
                     break;
                 case "friendrequestignore":
                     type = OverlayType.FriendRequestIgnore;
-                    WorkQueue.Enqueue("Ignore friend request", () => SkyNetApiClient.RemoveFriendOrRequest(steamID),
+                    WorkQueue.Enqueue("Ignore friend request", () => APIClient.RemoveFriendOrRequest(steamID),
                         "friends:ignore:" + steamID);
                     break;
                 default:
@@ -360,9 +360,9 @@ namespace SKYNET.Steamworks.Implementation
             int Result = 0;
             if (iFriendFlags != (int)EFriendFlags.k_EFriendFlagNone)
             {
-                if (SkyNetApiClient.IsEnabled)
+                if (APIClient.IsEnabled)
                 {
-                    SkyNetApiClient.QueueFriendsRefresh();
+                    APIClient.QueueFriendsRefresh();
                 }
                 MutexHelper.Wait("Users", delegate
                 {
@@ -782,11 +782,11 @@ namespace SKYNET.Steamworks.Implementation
             bool queued = false;
             if (steamIDUser == (ulong)SteamEmulator.SteamID)
             {
-                SkyNetApiClient.QueueSelfRefresh();
+                APIClient.QueueSelfRefresh();
             }
             else
             {
-                queued = SkyNetApiClient.QueueUserProfileRefresh(steamIDUser, false);
+                queued = APIClient.QueueUserProfileRefresh(steamIDUser, false);
             }
 
             var User = GetUser(steamIDUser);
@@ -825,11 +825,11 @@ namespace SKYNET.Steamworks.Implementation
 
             APICall = CallbackManager.AddCallbackResult(data);
             SteamEmulator.PersonaName = pchPersonaName;
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
                 WorkQueue.Enqueue("Update persona name", () =>
                 {
-                    if (!SkyNetApiClient.UpdatePersonaName(pchPersonaName))
+                    if (!APIClient.UpdatePersonaName(pchPersonaName))
                     {
                         Write($"SetPersonaName backend update failed for {pchPersonaName}");
                     }
@@ -906,9 +906,9 @@ namespace SKYNET.Steamworks.Implementation
         public bool SetRichPresence(string pchKey, string pchValue)
         {
             Write($"SetRichPresence (Key = {pchKey}, Value = {pchValue})");
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
-                WorkQueue.Enqueue("SetRichPresence", () => SkyNetApiClient.SetRichPresence(pchKey, pchValue),
+                WorkQueue.Enqueue("SetRichPresence", () => APIClient.SetRichPresence(pchKey, pchValue),
                     "presence:" + (pchKey ?? string.Empty));
             }
             return true;
@@ -937,9 +937,9 @@ namespace SKYNET.Steamworks.Implementation
 
         private List<SteamPlayer> GetFriends(int friendFlags)
         {
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
-                SkyNetApiClient.QueueFriendsRefresh();
+                APIClient.QueueFriendsRefresh();
                 return StateCache.GetFriends().FindAll(friend => MatchesFriendFlags(friend, friendFlags));
             }
 
@@ -987,9 +987,9 @@ namespace SKYNET.Steamworks.Implementation
         {
             if (steamID == (ulong)SteamEmulator.SteamID)
             {
-                if (SkyNetApiClient.IsEnabled)
+                if (APIClient.IsEnabled)
                 {
-                    SkyNetApiClient.QueueSelfRefresh();
+                    APIClient.QueueSelfRefresh();
                     if (StateCache.TryGetSelf(out var self))
                     {
                         return self;
@@ -1005,14 +1005,14 @@ namespace SKYNET.Steamworks.Implementation
                 };
             }
 
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
                 if (StateCache.TryGetFriend(steamID, out var friend))
                 {
                     return friend;
                 }
 
-                SkyNetApiClient.QueueUserProfileRefresh(steamID);
+                APIClient.QueueUserProfileRefresh(steamID);
                 return new SteamPlayer
                 {
                     AccountID = new CSteamID(steamID).AccountID,
@@ -1124,7 +1124,7 @@ namespace SKYNET.Steamworks.Implementation
                         // Disk is only a fast first frame. Revalidate every
                         // process lifetime so changed/default avatars cannot
                         // remain pinned forever.
-                        SkyNetApiClient.RefreshAvatar(steamIDFriend);
+                        APIClient.RefreshAvatar(steamIDFriend);
                     }
                     catch (Exception ex)
                     {

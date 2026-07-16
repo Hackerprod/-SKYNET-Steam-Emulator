@@ -62,7 +62,7 @@ namespace SKYNET.Managers
             }
         }
 
-        public static void ApplySelf(SkyNetApiClient.ApiUser user)
+        public static void ApplySelf(APIClient.ApiUser user)
         {
             if (user == null)
             {
@@ -91,7 +91,7 @@ namespace SKYNET.Managers
             }
         }
 
-        public static void ApplyFriends(IEnumerable<SkyNetApiClient.ApiUser> friends)
+        public static void ApplyFriends(IEnumerable<APIClient.ApiUser> friends)
         {
             if (friends == null)
             {
@@ -115,7 +115,7 @@ namespace SKYNET.Managers
             }
         }
 
-        public static void UpsertUser(SkyNetApiClient.ApiUser user)
+        public static void UpsertUser(APIClient.ApiUser user)
         {
             if (user == null)
             {
@@ -127,7 +127,7 @@ namespace SKYNET.Managers
             UserManager.ReplaceUsers(GetFriends());
         }
 
-        public static void ApplyStats(ulong steamId, IEnumerable<SkyNetApiClient.ApiStat> stats)
+        public static void ApplyStats(ulong steamId, IEnumerable<APIClient.ApiStat> stats)
         {
             var mapped = stats == null
                 ? new List<PlayerStat>()
@@ -146,7 +146,7 @@ namespace SKYNET.Managers
             }
         }
 
-        public static void ApplyAchievements(ulong steamId, IEnumerable<SkyNetApiClient.ApiAchievement> achievements)
+        public static void ApplyAchievements(ulong steamId, IEnumerable<APIClient.ApiAchievement> achievements)
         {
             var mapped = achievements == null
                 ? new List<Achievement>()
@@ -336,7 +336,7 @@ namespace SKYNET.Managers
             EventCursor = cursor ?? string.Empty;
         }
 
-        public static void UpsertFriendFromEvent(SkyNetApiClient.ApiEvent serverEvent)
+        public static void UpsertFriendFromEvent(APIClient.ApiEvent serverEvent)
         {
             if (serverEvent == null)
             {
@@ -403,7 +403,7 @@ namespace SKYNET.Managers
             UserManager.ReplaceUsers(GetFriends());
         }
 
-        private static SteamPlayer MapUser(SkyNetApiClient.ApiUser user)
+        private static SteamPlayer MapUser(APIClient.ApiUser user)
         {
             var steamId = user.SteamId != 0
                 ? user.SteamId

@@ -95,7 +95,7 @@
     <Compile Include="Managers\NetworkManager.cs" />
     <Compile Include="Managers\OverlayManager.cs" />
     <Compile Include="Managers\SdrCertPatcher.cs" />
-    <Compile Include="Managers\SkyNetApiClient.cs" />
+    <Compile Include="Managers\APIClient.cs" />
     <Compile Include="Managers\RemoteStorageCache.cs" />
     <Compile Include="Managers\EventPump.cs" />
     <Compile Include="Managers\StateCache.cs" />

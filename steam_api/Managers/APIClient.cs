@@ -19,7 +19,7 @@ using System.Web.Script.Serialization;
 
 namespace SKYNET.Managers
 {
-    public static class SkyNetApiClient
+    public static class APIClient
     {
         private static readonly object ClientLock = new object();
         private static readonly TimeSpan RefreshWindow = TimeSpan.FromSeconds(15);
@@ -98,7 +98,7 @@ namespace SKYNET.Managers
                 }
                 catch (Exception ex)
                 {
-                    SteamEmulator.Write("SkyNetApiClient", $"Session handshake failed: {ex.Message}");
+                    SteamEmulator.Write("APIClient", $"Session handshake failed: {ex.Message}");
                 }
                 finally
                 {
@@ -1025,7 +1025,7 @@ namespace SKYNET.Managers
                 if (sendType == 0 || sendType == 1 || queuedCount > MaxP2PQueue * 2)
                 {
                     Interlocked.Decrement(ref P2PQueueCount);
-                    SteamEmulator.Write("SkyNetApiClient", $"Dropping P2P packet because queue is saturated (RemoteSteamId = {remoteSteamId}, SendType = {sendType}, Queue = {queuedCount})");
+                    SteamEmulator.Write("APIClient", $"Dropping P2P packet because queue is saturated (RemoteSteamId = {remoteSteamId}, SendType = {sendType}, Queue = {queuedCount})");
                     return sendType == 0 || sendType == 1;
                 }
             }
@@ -1303,7 +1303,7 @@ namespace SKYNET.Managers
                             var returnedSteamId = steamIdHeaders.FirstOrDefault();
                             if (!ulong.TryParse(returnedSteamId, out var parsedSteamId) || parsedSteamId != steamId)
                             {
-                                SteamEmulator.Write("SkyNetApiClient", $"Rejected avatar identity mismatch requested={steamId} returned={returnedSteamId}");
+                                SteamEmulator.Write("APIClient", $"Rejected avatar identity mismatch requested={steamId} returned={returnedSteamId}");
                                 return false;
                             }
                         }
@@ -1332,7 +1332,7 @@ namespace SKYNET.Managers
             }
             catch (Exception ex)
             {
-                SteamEmulator.Write("SkyNetApiClient", $"RefreshAvatar {ex.Message}");
+                SteamEmulator.Write("APIClient", $"RefreshAvatar {ex.Message}");
                 return false;
             }
         }
@@ -1362,7 +1362,7 @@ namespace SKYNET.Managers
             }
             catch (Exception ex)
             {
-                SteamEmulator.Write("SkyNetApiClient", $"UploadSelfAvatar {ex.Message}");
+                SteamEmulator.Write("APIClient", $"UploadSelfAvatar {ex.Message}");
                 return false;
             }
         }
@@ -1658,7 +1658,7 @@ namespace SKYNET.Managers
                         {
                             if (quietStatusCode != response.StatusCode)
                             {
-                                SteamEmulator.Write("SkyNetApiClient", $"{method} {path} failed: HTTP {(int)response.StatusCode} {response.ReasonPhrase}");
+                                SteamEmulator.Write("APIClient", $"{method} {path} failed: HTTP {(int)response.StatusCode} {response.ReasonPhrase}");
                             }
 
                             if (response.StatusCode == HttpStatusCode.Unauthorized)
@@ -1690,12 +1690,12 @@ namespace SKYNET.Managers
             }
             catch (OperationCanceledException) when (cts != null && cts.IsCancellationRequested)
             {
-                SteamEmulator.Write("SkyNetApiClient", $"{method} {path} timed out after {timeoutMs}ms");
+                SteamEmulator.Write("APIClient", $"{method} {path} timed out after {timeoutMs}ms");
                 return null;
             }
             catch (Exception ex)
             {
-                SteamEmulator.Write("SkyNetApiClient", $"{method} {path} failed: {ex.Message}");
+                SteamEmulator.Write("APIClient", $"{method} {path} failed: {ex.Message}");
                 return null;
             }
             finally
@@ -1799,7 +1799,7 @@ namespace SKYNET.Managers
                 }
                 catch (Exception ex)
                 {
-                    SteamEmulator.Write("SkyNetApiClient", $"P2P dispatch failed: {ex.Message}");
+                    SteamEmulator.Write("APIClient", $"P2P dispatch failed: {ex.Message}");
                     Thread.Sleep(100);
                 }
             }
@@ -1817,7 +1817,7 @@ namespace SKYNET.Managers
             {
                 SteamEmulator.ServerUrl = discovered;
                 Configured = false;
-                SteamEmulator.Write("SkyNetApiClient", $"Discovered SKYNET server at {discovered}");
+                SteamEmulator.Write("APIClient", $"Discovered SKYNET server at {discovered}");
             }
         }
 

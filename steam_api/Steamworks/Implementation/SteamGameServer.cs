@@ -74,7 +74,7 @@ namespace SKYNET.Steamworks.Implementation
 
             }
 
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
                 QueueRegisterGameServer();
             }
@@ -116,7 +116,7 @@ namespace SKYNET.Steamworks.Implementation
             CallbackManager.ResetGameServerConnectionReplay();
 
             LoggedIn = true;
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
                 QueueLogOnGameServer(pszToken, false);
             }
@@ -131,7 +131,7 @@ namespace SKYNET.Steamworks.Implementation
             CallbackManager.ResetGameServerConnectionReplay();
 
             LoggedIn = true;
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
                 QueueLogOnGameServer(string.Empty, true);
             }
@@ -143,9 +143,9 @@ namespace SKYNET.Steamworks.Implementation
         public void LogOff()
         {
             Write($"LogOff");
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
-                WorkQueue.Enqueue("GameServer logoff", () => SkyNetApiClient.LogOffGameServer(), "gameserver:logoff");
+                WorkQueue.Enqueue("GameServer logoff", () => APIClient.LogOffGameServer(), "gameserver:logoff");
             }
 
             LoggedIn = false;
@@ -291,9 +291,9 @@ namespace SKYNET.Steamworks.Implementation
         public void SendUserDisconnect(ulong steamIDUser)
         {
             Write($"SendUserDisconnect (SteamID = {steamIDUser})");
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
-                WorkQueue.Enqueue("GameServer user disconnect", () => SkyNetApiClient.DisconnectGameServerUser(steamIDUser),
+                WorkQueue.Enqueue("GameServer user disconnect", () => APIClient.DisconnectGameServerUser(steamIDUser),
                     "gameserver:user-disconnect:" + steamIDUser, true);
             }
             TicketManager.RemoveTicket(steamIDUser);
@@ -302,9 +302,9 @@ namespace SKYNET.Steamworks.Implementation
         public bool BUpdateUserData(ulong steamIDUser, string pchPlayerName, uint uScore)
         {
             Write($"BUpdateUserData (SteamID = {steamIDUser}, PlayerName = {pchPlayerName})");
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
-                WorkQueue.Enqueue("GameServer user data", () => SkyNetApiClient.UpdateGameServerUserData(steamIDUser, pchPlayerName, uScore),
+                WorkQueue.Enqueue("GameServer user data", () => APIClient.UpdateGameServerUserData(steamIDUser, pchPlayerName, uScore),
                     "gameserver:user-data:" + steamIDUser);
             }
 
@@ -449,11 +449,11 @@ namespace SKYNET.Steamworks.Implementation
                 return ServerData.IP;
             }
 
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
                 WorkQueue.Enqueue("GameServer public ip", () =>
                 {
-                    var ip = SkyNetApiClient.GetGameServerPublicIP();
+                    var ip = APIClient.GetGameServerPublicIP();
                     if (ip != 0)
                     {
                         ServerData.IP = ip;
@@ -477,9 +477,9 @@ namespace SKYNET.Steamworks.Implementation
         public void ForceHeartbeat()
         {
             Write($"ForceHeartbeat");
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
-                WorkQueue.Enqueue("GameServer heartbeat", () => SkyNetApiClient.HeartbeatGameServer(ServerData),
+                WorkQueue.Enqueue("GameServer heartbeat", () => APIClient.HeartbeatGameServer(ServerData),
                     "gameserver:heartbeat");
             }
         }
@@ -586,9 +586,9 @@ namespace SKYNET.Steamworks.Implementation
 
         private void SyncServerState()
         {
-            if (LoggedIn && SkyNetApiClient.IsEnabled)
+            if (LoggedIn && APIClient.IsEnabled)
             {
-                WorkQueue.Enqueue("GameServer state", () => SkyNetApiClient.UpdateGameServerState(ServerData),
+                WorkQueue.Enqueue("GameServer state", () => APIClient.UpdateGameServerState(ServerData),
                     "gameserver:state");
             }
         }
@@ -597,7 +597,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             WorkQueue.Enqueue("GameServer register", () =>
             {
-                var result = SkyNetApiClient.RegisterGameServer(ServerData);
+                var result = APIClient.RegisterGameServer(ServerData);
                 ApplyServerResult(result);
             }, "gameserver:register", true);
         }
@@ -606,7 +606,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             WorkQueue.Enqueue("GameServer logon", () =>
             {
-                var result = SkyNetApiClient.LogOnGameServer(ServerData, token, anonymous);
+                var result = APIClient.LogOnGameServer(ServerData, token, anonymous);
                 ApplyServerResult(result);
                 if (result != null && !result.Success)
                 {
@@ -615,7 +615,7 @@ namespace SKYNET.Steamworks.Implementation
             }, "gameserver:logon", true);
         }
 
-        private void ApplyServerResult(SkyNetApiClient.ApiGameServerResult result)
+        private void ApplyServerResult(APIClient.ApiGameServerResult result)
         {
             if (result == null)
             {

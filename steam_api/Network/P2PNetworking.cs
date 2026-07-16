@@ -26,7 +26,7 @@ namespace SKYNET.Network
 
         public static void Initialize()
         {
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
                 Write("Skipping direct P2P socket initialization because server API mode is enabled");
                 return;
@@ -114,9 +114,9 @@ namespace SKYNET.Network
 
         public static bool SendP2PTo(ulong steamIDRemote, byte[] bytes, int eP2PSendType, int nChannel)
         {
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
-                return SkyNetApiClient.SendP2PPacket(steamIDRemote, bytes, eP2PSendType, nChannel);
+                return APIClient.SendP2PPacket(steamIDRemote, bytes, eP2PSendType, nChannel);
             }
 
             try

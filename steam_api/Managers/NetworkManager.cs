@@ -24,7 +24,7 @@ namespace SKYNET.Managers
 
         public static void Initialize()
         {
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
                 Write("Skipping LAN network initialization because server API mode is enabled");
                 return;
@@ -841,9 +841,9 @@ namespace SKYNET.Managers
 
         public static void SendP2PTo(ulong steamIDRemote, byte[] bytes, int eP2PSendType, int nChannel)
         {
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
-                SkyNetApiClient.SendP2PPacket(steamIDRemote, bytes, eP2PSendType, nChannel);
+                APIClient.SendP2PPacket(steamIDRemote, bytes, eP2PSendType, nChannel);
                 return;
             }
 

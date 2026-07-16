@@ -1,4 +1,4 @@
-using SKYNET.Callback;
+﻿using SKYNET.Callback;
 using SKYNET.Helpers;
 using SKYNET.Managers;
 using SKYNET.Steamworks.Interfaces;
@@ -25,15 +25,42 @@ namespace SKYNET.Steamworks.Implementation
         public string StoragePath;
         public string AvatarCachePath;
         private List<string> StorageFiles;
-        private List<SkyNetApiClient.ApiRemoteStorageFileListItem> RemoteStorageFiles;
+        private List<APIClient.ApiRemoteStorageFileListItem> RemoteStorageFiles;
         private ConcurrentDictionary<ulong, string> SharedFiles;
         private int LastFile;
-        private Dictionary<ulong, string> AsyncFilesRead;
+        private ConcurrentDictionary<ulong, AsyncReadState> AsyncFilesRead;
         private ConcurrentDictionary<ulong, PendingWriteStream> PendingWriteStreams;
         private static readonly TimeSpan MissingRemoteFileWindow = TimeSpan.FromMinutes(5);
         private static readonly TimeSpan MissingRemoteFileWindowShort = TimeSpan.FromSeconds(30);
         private ulong CachedQuotaTotalBytes = 1024UL * 1024UL * 1024UL;
         private ulong CachedQuotaAvailableBytes = 1024UL * 1024UL * 1024UL;
+
+        // Steam limits: k_cchFilenameMax and the 100 MiB per-write ceiling.
+        private const int MaxFilenameLength = 260;
+        private const int MaxFileSize = 100 * 1024 * 1024;
+        // k_ERemoteStoragePlatformAll
+        private const int SyncPlatformAll = unchecked((int)0xffffffff);
+
+        // Files whose latest local version has been queued for cloud upload but
+        // not yet confirmed persisted. FilePersisted reports false while queued.
+        private readonly ConcurrentDictionary<string, byte> PendingUploads =
+            new ConcurrentDictionary<string, byte>(StringComparer.Ordinal);
+        private readonly ConcurrentDictionary<string, byte> PendingDeletes =
+            new ConcurrentDictionary<string, byte>(StringComparer.Ordinal);
+
+        // In-memory write batching. Between Begin/EndFileWriteBatch, writes and
+        // deletes are only recorded here; the actual cloud sync flushes on End.
+        private bool IsBatchActive;
+        private readonly object BatchLock = new object();
+        private readonly HashSet<string> BatchUploads = new HashSet<string>(StringComparer.Ordinal);
+        private readonly HashSet<string> BatchDeletes = new HashSet<string>(StringComparer.Ordinal);
+
+        private sealed class AsyncReadState
+        {
+            public string FullPath;
+            public uint Offset;
+            public uint BytesToRead;
+        }
 
         public SteamRemoteStorage()
         {
@@ -43,9 +70,9 @@ namespace SKYNET.Steamworks.Implementation
             StoragePath = Path.Combine(Common.GetPath(), "SKYNET", "Storage", "Remote");
             AvatarCachePath = Path.Combine(Common.GetPath(), "SKYNET", "Images", "AvatarCache");
             StorageFiles = new List<string>();
-            RemoteStorageFiles = new List<SkyNetApiClient.ApiRemoteStorageFileListItem>();
+            RemoteStorageFiles = new List<APIClient.ApiRemoteStorageFileListItem>();
             SharedFiles = new ConcurrentDictionary<ulong, string>();
-            AsyncFilesRead = new Dictionary<ulong, string>();
+            AsyncFilesRead = new ConcurrentDictionary<ulong, AsyncReadState>();
             PendingWriteStreams = new ConcurrentDictionary<ulong, PendingWriteStream>();
             LastFile = 0;
 
@@ -53,13 +80,13 @@ namespace SKYNET.Steamworks.Implementation
             RemoteStorageCache.Initialize(StoragePath);
 
             // Fetch server manifest in the background with a tight timeout.
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
                 WorkQueue.Enqueue(
                     "RemoteStorage manifest-init",
                     () =>
                     {
-                        var files = SkyNetApiClient.ListRemoteStorageFiles(timeoutMs: 1500);
+                        var files = APIClient.ListRemoteStorageFiles(timeoutMs: 1500);
                         RemoteStorageCache.MergeRemoteList(files);
                     },
                     coalesceKey: "storage:manifest-init",
@@ -74,19 +101,36 @@ namespace SKYNET.Steamworks.Implementation
             {
                 try
                 {
+                    if (!ValidateFileArgs(pchFile, cubData, pvData, checkBuffer: true) || cubData <= 0)
+                    {
+                        Write($"FileWrite rejected invalid args {pchFile} ({cubData} bytes)");
+                        return;
+                    }
+
                     if (!TryGetStorageFilePath(pchFile, out var normalizedKey, out var fullPath))
                     {
                         Write($"FileWrite rejected invalid path {pchFile}");
                         return;
                     }
 
-                    Common.EnsureDirectoryExists(fullPath, true);
                     byte[] buffer = pvData.GetBytes(cubData);
-                    File.WriteAllBytes(fullPath, buffer);
+
+                    if (!TryReserveQuota(fullPath, buffer.Length))
+                    {
+                        Write($"FileWrite {pchFile} rejected: quota exceeded ({buffer.Length} bytes, {CachedQuotaAvailableBytes} available)");
+                        return;
+                    }
+
+                    Common.EnsureDirectoryExists(fullPath, true);
+                    if (!AtomicWrite(fullPath, buffer))
+                    {
+                        return;
+                    }
+
                     // Update cache immediately on the game thread; do not wait for WorkQueue.
                     RemoteStorageCache.SetHydrated(normalizedKey, pchFile, buffer.Length, sha256: null);
                     Result = true;
-                    QueueRemoteUpload(pchFile, buffer);
+                    QueueOrBatchUpload(normalizedKey, pchFile, buffer);
                     Write($"FileWrite {pchFile}, {buffer.Length} bytes");
                 }
                 catch (Exception ex)
@@ -148,28 +192,59 @@ namespace SKYNET.Steamworks.Implementation
             SteamAPICall_t APICall = k_uAPICallInvalid;
             try
             {
+                if (!ValidateFileArgs(pchFile, checked((int)cubData), pvData, checkBuffer: true) || cubData == 0)
+                {
+                    Write($"FileWriteAsync rejected invalid args {pchFile} ({cubData} bytes)");
+                    return CallbackManager.AddCallbackResult(new RemoteStorageFileWriteAsyncComplete_t
+                    {
+                        m_eResult = EResult.k_EResultInvalidParam,
+                    });
+                }
+
                 if (!TryGetStorageFilePath(pchFile, out var normalizedKey, out var fullPath))
                 {
                     Write($"FileWriteAsync rejected invalid path {pchFile}");
-                    return APICall;
+                    return CallbackManager.AddCallbackResult(new RemoteStorageFileWriteAsyncComplete_t
+                    {
+                        m_eResult = EResult.k_EResultInvalidParam,
+                    });
+                }
+
+                byte[] bytes = pvData.GetBytes(cubData);
+
+                if (!TryReserveQuota(fullPath, bytes.Length))
+                {
+                    Write($"FileWriteAsync {pchFile} rejected: quota exceeded");
+                    return CallbackManager.AddCallbackResult(new RemoteStorageFileWriteAsyncComplete_t
+                    {
+                        m_eResult = EResult.k_EResultLimitExceeded,
+                    });
                 }
 
                 Common.EnsureDirectoryExists(fullPath, true);
-                byte[] bytes = pvData.GetBytes(cubData);
-                File.WriteAllBytes(fullPath, bytes);
-                RemoteStorageCache.SetHydrated(normalizedKey, pchFile, bytes.Length, sha256: null);
-                QueueRemoteUpload(pchFile, bytes);
+                if (!AtomicWrite(fullPath, bytes))
+                {
+                    return CallbackManager.AddCallbackResult(new RemoteStorageFileWriteAsyncComplete_t
+                    {
+                        m_eResult = EResult.k_EResultIOFailure,
+                    });
+                }
 
-                RemoteStorageFileWriteAsyncComplete_t data = new RemoteStorageFileWriteAsyncComplete_t()
+                RemoteStorageCache.SetHydrated(normalizedKey, pchFile, bytes.Length, sha256: null);
+                QueueOrBatchUpload(normalizedKey, pchFile, bytes);
+
+                APICall = CallbackManager.AddCallbackResult(new RemoteStorageFileWriteAsyncComplete_t
                 {
                     m_eResult = EResult.k_EResultOK,
-                };
-
-                APICall = CallbackManager.AddCallbackResult(data);
+                });
             }
-            catch
+            catch (Exception ex)
             {
-                Write($"Error writing file {pchFile}");
+                Write($"Error writing file {pchFile} {ex}");
+                APICall = CallbackManager.AddCallbackResult(new RemoteStorageFileWriteAsyncComplete_t
+                {
+                    m_eResult = EResult.k_EResultIOFailure,
+                });
             }
             return APICall;
         }
@@ -195,15 +270,19 @@ namespace SKYNET.Steamworks.Implementation
                     if (File.Exists(fullPath))
                     {
                         var info = new FileInfo(fullPath);
+                        uint available = (uint)Math.Max(0, info.Length - nOffset);
+                        uint toRead = Math.Min(cubToRead, available);
                         data.m_nOffset = nOffset;
-                        data.m_cubRead = (uint)Math.Min((long)cubToRead, Math.Max(0, info.Length - nOffset));
+                        data.m_cubRead = toRead;
                         data.m_eResult = EResult.k_EResultOK;
                         data.m_hFileReadAsync = (ulong)CSteamID.CreateOne();
 
-                        if (!AsyncFilesRead.ContainsKey(data.m_hFileReadAsync))
+                        AsyncFilesRead[data.m_hFileReadAsync] = new AsyncReadState
                         {
-                            AsyncFilesRead.Add(data.m_hFileReadAsync, fullPath);
-                        }
+                            FullPath = fullPath,
+                            Offset = nOffset,
+                            BytesToRead = toRead,
+                        };
                     }
 
                     APICall = CallbackManager.AddCallbackResult(data);
@@ -220,78 +299,148 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write("FileReadAsyncComplete");
 
-            if (AsyncFilesRead.ContainsKey(hReadCall))
-            {
-                MutexHelper.Wait("FileReadAsyncComplete", delegate
-                {
-                    string fullPath = AsyncFilesRead[hReadCall];
-                    byte[] bytes = default;
-                    if (File.Exists(fullPath))
-                    {
-                        try
-                        {
-                            bytes = File.ReadAllBytes(fullPath);
-                            if (pvBuffer == IntPtr.Zero)
-                            {
-                                return;
-                            }
-
-                            Marshal.Copy(bytes, 0, pvBuffer, Math.Min((int)cubToRead, bytes.Length));
-                        }
-                        catch (Exception ex)
-                        {
-                            Write($"FileRead {fullPath} {ex}");
-                        }
-                    }
-                });
-                return true;
-            }
-            else
+            // Consume the handle exactly once: a completed async read is invalid
+            // to re-complete, and leaving it mapped would leak.
+            if (!AsyncFilesRead.TryRemove(hReadCall, out var state))
             {
                 return false;
             }
+
+            bool ok = false;
+            MutexHelper.Wait("FileReadAsyncComplete", delegate
+            {
+                try
+                {
+                    if (!File.Exists(state.FullPath))
+                    {
+                        return;
+                    }
+
+                    // Read starts at the offset captured in FileReadAsync, not 0.
+                    int count = (int)Math.Min(cubToRead, state.BytesToRead);
+                    if (count <= 0 || pvBuffer == IntPtr.Zero)
+                    {
+                        ok = true;
+                        return;
+                    }
+
+                    var chunk = new byte[count];
+                    int read;
+                    using (var fs = new FileStream(state.FullPath, FileMode.Open, FileAccess.Read, System.IO.FileShare.Read))
+                    {
+                        int available = (int)Math.Max(0, Math.Min(count, fs.Length - state.Offset));
+                        if (available <= 0)
+                        {
+                            ok = true;
+                            return;
+                        }
+
+                        fs.Seek(state.Offset, SeekOrigin.Begin);
+                        read = fs.Read(chunk, 0, available);
+                    }
+
+                    if (read > 0)
+                    {
+                        Marshal.Copy(chunk, 0, pvBuffer, read);
+                    }
+                    ok = true;
+                }
+                catch (Exception ex)
+                {
+                    Write($"FileReadAsyncComplete {state.FullPath} {ex}");
+                }
+            });
+            return ok;
         }
 
         public bool FileForget(string pchFile)
         {
             Write($"FileForget {pchFile}");
-            if (!TryGetStorageFilePath(pchFile, out _, out var fullPath))
+            if (!ValidateFileArgs(pchFile, 0, IntPtr.Zero, checkBuffer: false))
             {
                 return false;
             }
 
-            return File.Exists(fullPath);
+            if (!TryGetStorageFilePath(pchFile, out var normKey, out var fullPath))
+            {
+                return false;
+            }
+
+            var entry = RemoteStorageCache.GetEntry(normKey);
+            bool existsLocal = File.Exists(fullPath);
+            bool existsRemote = entry != null && entry.IsPersisted;
+            if (!existsLocal && !existsRemote)
+            {
+                return false;
+            }
+
+            // Forget = stop syncing with the cloud, but keep the local file.
+            RemoteStorageCache.SetForgotten(normKey);
+            PendingUploads.TryRemove(normKey, out _);
+
+            if (APIClient.IsEnabled && existsRemote)
+            {
+                WorkQueue.Enqueue("Forget remote storage file", () => APIClient.DeleteRemoteStorageFile(pchFile),
+                    "storage:forget:" + normKey);
+            }
+
+            return true;
         }
 
         public bool FileDelete(string pchFile)
         {
             Write($"FileDelete {pchFile}");
+            if (!ValidateFileArgs(pchFile, 0, IntPtr.Zero, checkBuffer: false))
+            {
+                return false;
+            }
+
             if (!TryGetStorageFilePath(pchFile, out var normKey, out var fullPath))
             {
                 Write($"FileDelete rejected invalid path {pchFile}");
                 return false;
             }
 
-            if (File.Exists(fullPath))
+            var entry = RemoteStorageCache.GetEntry(normKey);
+            bool existsLocal = File.Exists(fullPath);
+            bool existsRemote = entry != null && entry.IsPersisted;
+
+            // Steam FileDelete returns false when the file did not exist at all.
+            if (!existsLocal && !existsRemote)
             {
+                Write($"FileDelete {pchFile} = false (not found)");
+                return false;
+            }
+
+            if (existsLocal)
+            {
+                long freed = 0;
                 try
                 {
+                    freed = new FileInfo(fullPath).Length;
                     File.Delete(fullPath);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    Write($"FileDelete {pchFile} {ex}");
                     return false;
                 }
+                ReleaseQuota(freed);
             }
 
             RemoteStorageCache.SetDeletedLocally(normKey, MissingRemoteFileWindow);
 
-            if (SkyNetApiClient.IsEnabled)
+            lock (BatchLock)
             {
-                WorkQueue.Enqueue("Delete remote storage file", () => SkyNetApiClient.DeleteRemoteStorageFile(pchFile),
-                    "storage:delete:" + normKey);
+                if (IsBatchActive)
+                {
+                    BatchDeletes.Add(normKey);
+                    BatchUploads.Remove(normKey);
+                    return true;
+                }
             }
 
+            QueueRemoteDelete(normKey, pchFile);
             return true;
         }
 
@@ -328,9 +477,9 @@ namespace SKYNET.Steamworks.Implementation
                     () =>
                     {
                         var data = pending;
-                        if (SkyNetApiClient.IsEnabled)
+                        if (APIClient.IsEnabled)
                         {
-                            var share = SkyNetApiClient.ShareRemoteStorageFile(pchFile);
+                            var share = APIClient.ShareRemoteStorageFile(pchFile);
                             if (share != null)
                             {
                                 data.m_eResult = share.Result;
@@ -448,7 +597,7 @@ namespace SKYNET.Steamworks.Implementation
                 return false;
             }
 
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
                 var entry = RemoteStorageCache.GetEntry(normalizedKey);
 
@@ -485,13 +634,27 @@ namespace SKYNET.Steamworks.Implementation
                 return false;
             }
 
-            if (!SkyNetApiClient.IsEnabled)
+            if (!APIClient.IsEnabled)
             {
                 return File.Exists(fullPath);
             }
 
+            // A queued upload or delete means the cloud copy is not up to date.
+            if (PendingUploads.ContainsKey(normalizedKey) || PendingDeletes.ContainsKey(normalizedKey))
+            {
+                return false;
+            }
+
+            lock (BatchLock)
+            {
+                if (BatchUploads.Contains(normalizedKey) || BatchDeletes.Contains(normalizedKey))
+                {
+                    return false;
+                }
+            }
+
             var entry = RemoteStorageCache.GetEntry(normalizedKey);
-            return entry != null && entry.IsPersisted;
+            return File.Exists(fullPath) && entry != null && entry.IsPersisted;
         }
 
         public int GetFileSize(string pchFile)
@@ -548,12 +711,13 @@ namespace SKYNET.Steamworks.Implementation
                 return unchecked((int)entry.SyncPlatforms);
             }
 
-            return unchecked((int)0xffffffff);
+            // Default: k_ERemoteStoragePlatformAll.
+            return SyncPlatformAll;
         }
 
         public int GetFileCount()
         {
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
                 QueueRemoteFileList();
                 RefreshLocalFileList();
@@ -568,7 +732,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public string GetFileNameAndSize(int iFile, ref int pnFileSizeInBytes)
         {
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
                 if (RemoteStorageFiles == null || RemoteStorageFiles.Count == 0)
                 {
@@ -628,11 +792,11 @@ namespace SKYNET.Steamworks.Implementation
             pnTotalBytes = CachedQuotaTotalBytes;
             puAvailableBytes = CachedQuotaAvailableBytes;
 
-            if (SkyNetApiClient.IsEnabled)
+            if (APIClient.IsEnabled)
             {
                 WorkQueue.Enqueue("Refresh remote storage quota", () =>
                     {
-                        var quota = SkyNetApiClient.GetRemoteStorageQuota();
+                        var quota = APIClient.GetRemoteStorageQuota();
                         if (quota != null)
                         {
                             CachedQuotaTotalBytes = quota.TotalBytes;
@@ -967,12 +1131,57 @@ namespace SKYNET.Steamworks.Implementation
         public bool BeginFileWriteBatch()
         {
             Write("BeginFileWriteBatch");
+            lock (BatchLock)
+            {
+                if (IsBatchActive)
+                {
+                    Write("BeginFileWriteBatch = false (batch already active)");
+                    return false;
+                }
+
+                IsBatchActive = true;
+                BatchUploads.Clear();
+                BatchDeletes.Clear();
+            }
             return true;
         }
 
         public bool EndFileWriteBatch()
         {
             Write("EndFileWriteBatch");
+            List<string> uploads;
+            List<string> deletes;
+            lock (BatchLock)
+            {
+                if (!IsBatchActive)
+                {
+                    Write("EndFileWriteBatch = false (no active batch)");
+                    return false;
+                }
+
+                uploads = BatchUploads.ToList();
+                deletes = BatchDeletes.ToList();
+                IsBatchActive = false;
+                BatchUploads.Clear();
+                BatchDeletes.Clear();
+            }
+
+            foreach (var normKey in deletes)
+            {
+                var original = RemoteStorageCache.GetEntry(normKey)?.OriginalName ?? normKey;
+                QueueRemoteDelete(normKey, original);
+            }
+
+            foreach (var normKey in uploads)
+            {
+                if (!TryReadLocalByKey(normKey, out var originalName, out var bytes))
+                {
+                    continue;
+                }
+
+                QueueRemoteUpload(normKey, originalName, bytes);
+            }
+
             return true;
         }
 
@@ -983,7 +1192,7 @@ namespace SKYNET.Steamworks.Implementation
                 return false;
             }
 
-            if (File.Exists(fullPath) || !SkyNetApiClient.IsEnabled)
+            if (File.Exists(fullPath) || !APIClient.IsEnabled)
             {
                 return File.Exists(fullPath);
             }
@@ -1011,42 +1220,174 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
-        private void QueueRemoteUpload(string fileName, byte[] content)
+        // Strict argument validation shared by write/delete/forget entry points.
+        private bool ValidateFileArgs(string pchFile, int cubData, IntPtr pvData, bool checkBuffer)
         {
-            if (!SkyNetApiClient.IsEnabled)
+            if (string.IsNullOrEmpty(pchFile)) return false;
+            if (pchFile.Length > MaxFilenameLength) return false;
+            if (pchFile.IndexOfAny(Path.GetInvalidPathChars()) >= 0) return false;
+            if (cubData < 0) return false;
+            if (cubData > MaxFileSize) return false;
+            if (checkBuffer && cubData > 0 && pvData == IntPtr.Zero) return false;
+            return true;
+        }
+
+        // Atomic write: stage into a sibling .tmp then replace, so a crash mid-write
+        // never leaves a half-written destination. Cleans up the temp on failure.
+        private static bool AtomicWrite(string fullPath, byte[] buffer)
+        {
+            var tempPath = fullPath + "." + Guid.NewGuid().ToString("N") + ".tmp";
+            try
+            {
+                File.WriteAllBytes(tempPath, buffer);
+                if (File.Exists(fullPath))
+                {
+                    try
+                    {
+                        File.Replace(tempPath, fullPath, null);
+                    }
+                    catch (IOException)
+                    {
+                        // Replace can fail on some filesystems; fall back to delete+move.
+                        File.Delete(fullPath);
+                        File.Move(tempPath, fullPath);
+                    }
+                }
+                else
+                {
+                    File.Move(tempPath, fullPath);
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                try { if (File.Exists(tempPath)) File.Delete(tempPath); } catch { }
+                SteamEmulator.Write("SteamRemoteStorage", $"AtomicWrite failed {fullPath} {ex.Message}");
+                return false;
+            }
+        }
+
+        // Reserve quota for a write of newSize replacing whatever is on disk now.
+        // Returns false (write rejected) when the delta would overflow the quota.
+        private bool TryReserveQuota(string fullPath, long newSize)
+        {
+            long prevSize = 0;
+            try { if (File.Exists(fullPath)) prevSize = new FileInfo(fullPath).Length; } catch { }
+            long diff = newSize - prevSize;
+            if (diff > 0 && (ulong)diff > CachedQuotaAvailableBytes)
+            {
+                return false;
+            }
+
+            if (diff > 0)
+            {
+                CachedQuotaAvailableBytes -= (ulong)diff;
+            }
+            else
+            {
+                ReleaseQuota(-diff);
+            }
+            return true;
+        }
+
+        private void ReleaseQuota(long bytes)
+        {
+            if (bytes <= 0) return;
+            var restored = CachedQuotaAvailableBytes + (ulong)bytes;
+            CachedQuotaAvailableBytes = restored > CachedQuotaTotalBytes ? CachedQuotaTotalBytes : restored;
+        }
+
+        // Route a completed write either into the open batch or straight to upload.
+        private void QueueOrBatchUpload(string normalizedKey, string fileName, byte[] content)
+        {
+            lock (BatchLock)
+            {
+                if (IsBatchActive)
+                {
+                    BatchUploads.Add(normalizedKey);
+                    BatchDeletes.Remove(normalizedKey);
+                    return;
+                }
+            }
+
+            QueueRemoteUpload(normalizedKey, fileName, content);
+        }
+
+        private bool TryReadLocalByKey(string normalizedKey, out string originalName, out byte[] bytes)
+        {
+            bytes = null;
+            originalName = RemoteStorageCache.GetEntry(normalizedKey)?.OriginalName ?? normalizedKey;
+            if (!TryGetStorageFilePath(originalName, out _, out var fullPath) || !File.Exists(fullPath))
+            {
+                return false;
+            }
+
+            try { bytes = File.ReadAllBytes(fullPath); return true; }
+            catch { return false; }
+        }
+
+        private void QueueRemoteDelete(string normalizedKey, string fileName)
+        {
+            PendingUploads.TryRemove(normalizedKey, out _);
+            if (!APIClient.IsEnabled)
             {
                 return;
             }
 
-            var normalizedKey = NormalizeRemoteFileName(fileName);
+            PendingDeletes[normalizedKey] = 1;
+            WorkQueue.Enqueue("Delete remote storage file", () =>
+            {
+                try { APIClient.DeleteRemoteStorageFile(fileName); }
+                finally { PendingDeletes.TryRemove(normalizedKey, out _); }
+            }, "storage:delete:" + normalizedKey);
+        }
+
+        private void QueueRemoteUpload(string normalizedKey, string fileName, byte[] content)
+        {
+            if (!APIClient.IsEnabled)
+            {
+                PendingUploads.TryRemove(normalizedKey, out _);
+                return;
+            }
+
             var entry = RemoteStorageCache.GetEntry(normalizedKey);
             uint? syncPlatforms = entry != null && entry.HasSyncPlatforms
                 ? entry.SyncPlatforms
                 : (uint?)null;
             var copy = content == null ? new byte[0] : (byte[])content.Clone();
+
+            PendingUploads[normalizedKey] = 1;
+            PendingDeletes.TryRemove(normalizedKey, out _);
             WorkQueue.Enqueue("RemoteStorage upload", () =>
             {
-                if (SkyNetApiClient.UploadRemoteStorageFile(fileName, copy, syncPlatforms))
+                try
                 {
-                    RemoteStorageCache.SetPersisted(normalizedKey);
+                    if (APIClient.UploadRemoteStorageFile(fileName, copy, syncPlatforms))
+                    {
+                        RemoteStorageCache.SetPersisted(normalizedKey);
+                    }
+                    else
+                    {
+                        Write($"Remote upload failed {fileName}");
+                    }
                 }
-                else
+                finally
                 {
-                    Write($"Remote upload failed {fileName}");
+                    PendingUploads.TryRemove(normalizedKey, out _);
                 }
             }, "remote-storage:upload:" + normalizedKey);
         }
 
         private void QueueRemoteFileList()
         {
-            if (!SkyNetApiClient.IsEnabled)
+            if (!APIClient.IsEnabled)
             {
                 return;
             }
 
             WorkQueue.Enqueue("RemoteStorage list", () =>
             {
-                var files = SkyNetApiClient.ListRemoteStorageFiles();
+                var files = APIClient.ListRemoteStorageFiles();
                 RemoteStorageCache.MergeRemoteList(files);
                 if (files != null)
                 {
@@ -1062,7 +1403,7 @@ namespace SKYNET.Steamworks.Implementation
                 try
                 {
                     System.Net.HttpStatusCode? statusCode;
-                    var file = SkyNetApiClient.DownloadRemoteStorageFile(fileName, out statusCode);
+                    var file = APIClient.DownloadRemoteStorageFile(fileName, out statusCode);
 
                     if (statusCode == System.Net.HttpStatusCode.NotFound)
                     {
