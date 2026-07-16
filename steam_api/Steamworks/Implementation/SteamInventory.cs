@@ -1,272 +1,536 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
+using System.Text;
+using SKYNET.Managers;
+using SKYNET.Steamworks;
 using SKYNET.Steamworks.Interfaces;
 
-using SteamItemInstanceID_t = System.UInt64;
-using SteamInventoryResult_t = System.UInt32;
-using SteamItemDef_t = System.UInt32;
+using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Implementation
 {
+    // ISteamInventory implementation. All out-pointers are IntPtr and honour the
+    // two-call sizing contract; the authoritative store lives in InventoryManager.
+    // Result handles are int (SDK), invalid = -1. Item instance ids are ulong.
     public class SteamInventory : ISteamInterface
     {
         public static SteamInventory Instance;
+
+        private static readonly int ItemDetailsSize = Marshal.SizeOf(typeof(SteamItemDetails_t));
 
         public SteamInventory()
         {
             Instance = this;
             InterfaceName = "SteamInventory";
             InterfaceVersion = "STEAMINVENTORY_INTERFACE_V003";
+            if (ItemDetailsSize != 16)
+            {
+                Write($"WARNING: SteamItemDetails_t marshals to {ItemDetailsSize} bytes, expected 16");
+            }
+            EnsureInit();
         }
 
-        public bool AddPromoItem(uint pResultHandle, uint itemDef)
+        private static void EnsureInit()
         {
-            Write($"AddPromoItem");
-            return false;
+            InventoryManager.Initialize(SteamEmulator.AppID, (ulong)SteamEmulator.SteamID);
         }
 
-        public bool AddPromoItems(uint pResultHandle, IntPtr pArrayItemDefs, uint unArrayLength)
+        // ===================== results =====================
+
+        public int GetResultStatus(int resultHandle)
         {
-            Write($"AddPromoItems");
-            return false;
+            return (int)InventoryManager.GetStatus(resultHandle);
         }
 
-        public bool CheckResultSteamID(uint resultHandle, ulong steamIDExpected)
+        public bool GetResultItems(int resultHandle, IntPtr pOutItemsArray, IntPtr punOutItemsArraySize)
         {
-            Write($"CheckResultSteamID");
-            return false;
-        }
+            var result = InventoryManager.GetResult(resultHandle);
+            if (result == null)
+            {
+                return false;
+            }
 
-        public bool ConsumeItem(uint pResultHandle, SteamItemInstanceID_t itemConsume, uint unQuantity)
-        {
-            Write($"ConsumeItem");
-            return false;
-        }
+            int count = result.Items.Length;
+            if (pOutItemsArray == IntPtr.Zero)
+            {
+                WriteU32(punOutItemsArraySize, count);
+                return true;
+            }
 
-        public bool DeserializeResult(uint pOutResultHandle, IntPtr pBuffer, uint unBufferSize, [MarshalAs(UnmanagedType.U1)] bool bRESERVED_MUST_BE_FALSE)
-        {
-            Write($"DeserializeResult");
-            return false;
-        }
+            int capacity = punOutItemsArraySize == IntPtr.Zero ? count : Marshal.ReadInt32(punOutItemsArraySize);
+            if (capacity < count)
+            {
+                WriteU32(punOutItemsArraySize, count);
+                return false;
+            }
 
-        public void DestroyResult(uint resultHandle)
-        {
-            Write($"DestroyResult");
-        }
-
-        public bool ExchangeItems(ref SteamInventoryResult_t pResultHandle, ref SteamItemDef_t[] pArrayGenerate, ref uint[] punArrayGenerateQuantity, uint unArrayGenerateLength, ref SteamItemInstanceID_t[] pArrayDestroy, ref uint[] punArrayDestroyQuantity, uint unArrayDestroyLength)
-        {
-            Write($"ExchangeItems");
-            return false;
-        }
-
-        public bool GenerateItems(uint pResultHandle, IntPtr pArrayItemDefs, IntPtr punArrayQuantity, uint unArrayLength)
-        {
-            Write($"GenerateItems");
-            return false;
-        }
-
-        public bool GetAllItems(uint pResultHandle)
-        {
-            Write($"GetAllItems");
-            return false;
-        }
-
-        public bool GetEligiblePromoItemDefinitionIDs(ulong steamID, IntPtr pItemDefIDs, uint punItemDefIDsArraySize)
-        {
-            Write($"GetEligiblePromoItemDefinitionIDs");
-            return false;
-        }
-
-        public bool GetItemDefinitionIDs(IntPtr pItemDefIDs, uint punItemDefIDsArraySize)
-        {
-            Write($"GetItemDefinitionIDs");
-            return false;
-        }
-
-        public bool GetItemDefinitionProperty(uint iDefinition, string pchPropertyName, IntPtr pchValueBuffer, uint punValueBufferSizeOut)
-        {
-            Write($"GetItemDefinitionProperty");
-            return false;
-        }
-
-        public bool GetItemPrice(uint iDefinition, ulong pCurrentPrice, ulong pBasePrice)
-        {
-            Write($"GetItemPrice");
-            return false;
-        }
-
-        public bool GetItemsByID(uint pResultHandle, ref SteamItemInstanceID_t pInstanceIDs, uint unCountInstanceIDs)
-        {
-            Write($"GetItemsByID");
-            return false;
-        }
-
-        public bool GetItemsWithPrices(IntPtr pArrayItemDefs, IntPtr pCurrentPrices, ulong pBasePrices, uint unArrayLength)
-        {
-            Write($"GetItemsWithPrices");
-            return false;
-        }
-
-        public uint GetNumItemsWithPrices()
-        {
-            Write($"GetNumItemsWithPrices");
-            return 0;
-        }
-
-        public bool GetResultItemProperty(uint resultHandle, uint unItemIndex, string pchPropertyName, IntPtr pchValueBuffer, uint punValueBufferSizeOut)
-        {
-            Write($"GetResultItemProperty");
-            return false;
-        }
-
-        public bool GetResultItems(uint resultHandle, IntPtr pOutItemsArray, uint punOutItemsArraySize)
-        {
-            Write($"GetResultItems");
-            return false;
-        }
-
-        public int GetResultStatus(uint resultHandle)
-        {
-            Write($"GetResultStatus");
-            return (int)EResult.k_EResultOK;
-        }
-
-        public uint GetResultTimestamp(uint resultHandle)
-        {
-            Write($"GetResultTimestamp");
-            return 0;
-        }
-
-        public bool GrantPromoItems(uint pResultHandle)
-        {
-            Write($"GrantPromoItems");
-            return false;
-        }
-
-        public bool InspectItem(uint pResultHandle, string pchItemToken)
-        {
-            Write($"InspectItem");
-            return false;
-        }
-
-        public bool LoadItemDefinitions()
-        {
-            Write($"LoadItemDefinitions");
+            for (int i = 0; i < count; i++)
+            {
+                var it = result.Items[i];
+                var d = new SteamItemDetails_t
+                {
+                    m_itemId = it.ItemId,
+                    m_iDefinition = it.DefId,
+                    m_unQuantity = (ushort)Math.Min(it.Quantity, ushort.MaxValue),
+                    m_unFlags = it.Flags,
+                };
+                Marshal.StructureToPtr(d, IntPtr.Add(pOutItemsArray, i * ItemDetailsSize), false);
+            }
+            WriteU32(punOutItemsArraySize, count);
             return true;
         }
 
-        public bool RemoveProperty(ulong handle, ulong nItemID, string pchPropertyName)
+        public bool GetResultItemProperty(int resultHandle, uint unItemIndex, string pchPropertyName, IntPtr pchValueBuffer, IntPtr punValueBufferSizeOut)
         {
-            Write($"RemoveProperty");
+            var result = InventoryManager.GetResult(resultHandle);
+            if (result == null || unItemIndex >= (uint)result.Items.Length)
+            {
+                return false;
+            }
+
+            var props = result.Items[unItemIndex].Properties;
+            string value;
+            if (string.IsNullOrEmpty(pchPropertyName))
+            {
+                value = string.Join(",", props.Keys);
+            }
+            else if (!props.TryGetValue(pchPropertyName, out value))
+            {
+                value = string.Empty;
+            }
+
+            return WriteStringOut(value, pchValueBuffer, punValueBufferSizeOut);
+        }
+
+        public uint GetResultTimestamp(int resultHandle)
+        {
+            return InventoryManager.GetResultTimestamp(resultHandle);
+        }
+
+        public bool CheckResultSteamID(int resultHandle, ulong steamIDExpected)
+        {
+            return InventoryManager.CheckResultSteamID(resultHandle, steamIDExpected);
+        }
+
+        public void DestroyResult(int resultHandle)
+        {
+            InventoryManager.DestroyResult(resultHandle);
+        }
+
+        // ===================== read =====================
+
+        public bool GetAllItems(IntPtr pResultHandle)
+        {
+            EnsureInit();
+            int h = InventoryManager.GetAllItems();
+            WriteResultHandle(pResultHandle, h);
+            return true;
+        }
+
+        public bool GetItemsByID(IntPtr pResultHandle, IntPtr pInstanceIDs, uint unCountInstanceIDs)
+        {
+            EnsureInit();
+            var ids = ReadUInt64Array(pInstanceIDs, unCountInstanceIDs);
+            int h = InventoryManager.GetItemsByID(ids);
+            WriteResultHandle(pResultHandle, h);
+            return true;
+        }
+
+        // ===================== serialize =====================
+
+        public bool SerializeResult(int resultHandle, IntPtr pOutBuffer, IntPtr punOutBufferSize)
+        {
+            var blob = InventoryManager.SerializeResult(resultHandle);
+            if (blob == null)
+            {
+                return false;
+            }
+
+            if (pOutBuffer == IntPtr.Zero)
+            {
+                WriteU32(punOutBufferSize, blob.Length);
+                return true;
+            }
+
+            int capacity = punOutBufferSize == IntPtr.Zero ? blob.Length : Marshal.ReadInt32(punOutBufferSize);
+            if (capacity < blob.Length)
+            {
+                WriteU32(punOutBufferSize, blob.Length);
+                return false;
+            }
+
+            Marshal.Copy(blob, 0, pOutBuffer, blob.Length);
+            WriteU32(punOutBufferSize, blob.Length);
+            return true;
+        }
+
+        public bool DeserializeResult(IntPtr pOutResultHandle, IntPtr pBuffer, uint unBufferSize)
+        {
+            EnsureInit();
+            byte[] blob = null;
+            if (pBuffer != IntPtr.Zero && unBufferSize > 0)
+            {
+                blob = new byte[unBufferSize];
+                Marshal.Copy(pBuffer, blob, 0, (int)unBufferSize);
+            }
+            int h = InventoryManager.DeserializeResult(blob);
+            WriteResultHandle(pOutResultHandle, h);
+            return true;
+        }
+
+        // ===================== mutations =====================
+
+        public bool GenerateItems(IntPtr pResultHandle, IntPtr pArrayItemDefs, IntPtr punArrayQuantity, uint unArrayLength)
+        {
+            EnsureInit();
+            var defs = ReadInt32Array(pArrayItemDefs, unArrayLength);
+            var qty = ReadUInt32Array(punArrayQuantity, unArrayLength);
+            int h = InventoryManager.Generate(defs, qty);
+            WriteResultHandle(pResultHandle, h);
+            return true;
+        }
+
+        public bool GrantPromoItems(IntPtr pResultHandle)
+        {
+            EnsureInit();
+            int h = InventoryManager.GrantPromoItems();
+            WriteResultHandle(pResultHandle, h);
+            return true;
+        }
+
+        public bool AddPromoItem(IntPtr pResultHandle, int itemDef)
+        {
+            EnsureInit();
+            int h = InventoryManager.AddPromoItem(itemDef);
+            WriteResultHandle(pResultHandle, h);
+            return true;
+        }
+
+        public bool AddPromoItems(IntPtr pResultHandle, IntPtr pArrayItemDefs, uint unArrayLength)
+        {
+            EnsureInit();
+            var defs = ReadInt32Array(pArrayItemDefs, unArrayLength);
+            int h = InventoryManager.AddPromoItems(defs);
+            WriteResultHandle(pResultHandle, h);
+            return true;
+        }
+
+        public bool ConsumeItem(IntPtr pResultHandle, ulong itemConsume, uint unQuantity)
+        {
+            EnsureInit();
+            int h = InventoryManager.ConsumeItem(itemConsume, unQuantity);
+            WriteResultHandle(pResultHandle, h);
+            return true;
+        }
+
+        public bool ExchangeItems(IntPtr pResultHandle, IntPtr pArrayGenerate, IntPtr punArrayGenerateQuantity, uint unArrayGenerateLength, IntPtr pArrayDestroy, IntPtr punArrayDestroyQuantity, uint unArrayDestroyLength)
+        {
+            EnsureInit();
+            var genDefs = ReadInt32Array(pArrayGenerate, unArrayGenerateLength);
+            var genQty = ReadUInt32Array(punArrayGenerateQuantity, unArrayGenerateLength);
+            var destroyIds = ReadUInt64Array(pArrayDestroy, unArrayDestroyLength);
+            var destroyQty = ReadUInt32Array(punArrayDestroyQuantity, unArrayDestroyLength);
+            int h = InventoryManager.ExchangeItems(genDefs, genQty, destroyIds, destroyQty);
+            WriteResultHandle(pResultHandle, h);
+            return true;
+        }
+
+        public bool TransferItemQuantity(IntPtr pResultHandle, ulong itemIdSource, uint unQuantity, ulong itemIdDest)
+        {
+            EnsureInit();
+            int h = InventoryManager.TransferItemQuantity(itemIdSource, unQuantity, itemIdDest);
+            WriteResultHandle(pResultHandle, h);
+            return true;
+        }
+
+        public bool TriggerItemDrop(IntPtr pResultHandle, int dropListDefinition)
+        {
+            EnsureInit();
+            int h = InventoryManager.TriggerItemDrop(dropListDefinition);
+            WriteResultHandle(pResultHandle, h);
+            return true;
+        }
+
+        public bool TradeItems(IntPtr pResultHandle, ulong steamIDTradePartner, IntPtr pArrayGive, IntPtr pArrayGiveQuantity, uint nArrayGiveLength, IntPtr pArrayGet, IntPtr pArrayGetQuantity, uint nArrayGetLength)
+        {
+            EnsureInit();
+            // P2P trade is out of scope; acknowledge with a failed result handle.
+            int h = InventoryManager.DeserializeResult(null); // yields a Fail handle without items
+            WriteResultHandle(pResultHandle, h);
             return false;
         }
 
-        public ulong RequestEligiblePromoItemDefinitionsIDs(ulong steamID)
+        public bool InspectItem(IntPtr pResultHandle, string pchItemToken)
         {
-            Write($"RequestEligiblePromoItemDefinitionsIDs");
-            return 0;
-        }
-
-        public ulong RequestPrices()
-        {
-            Write($"RequestPrices");
-            return 0;
+            EnsureInit();
+            int h = InventoryManager.GetItemsByID(Array.Empty<ulong>());
+            WriteResultHandle(pResultHandle, h);
+            return true;
         }
 
         public void SendItemDropHeartbeat()
         {
-            Write($"SendItemDropHeartbeat");
         }
 
-        public bool SerializeResult(uint resultHandle, IntPtr pOutBuffer, uint punOutBufferSize)
+        // ===================== definitions =====================
+
+        public bool LoadItemDefinitions()
         {
-            Write($"SerializeResult");
-            return false;
+            EnsureInit();
+            return InventoryManager.LoadItemDefinitions();
         }
 
-        public bool SetPropertyBool(IntPtr handle, uint nItemID, string pchPropertyName, [MarshalAs(UnmanagedType.U1)] bool bValue)
+        public bool GetItemDefinitionIDs(IntPtr pItemDefIDs, IntPtr punItemDefIDsArraySize)
         {
-            Write($"SetPropertyBool");
-            return false;
+            EnsureInit();
+            return WriteInt32ArrayOut(InventoryManager.GetDefinitionIds(), pItemDefIDs, punItemDefIDsArraySize);
         }
 
-        public bool SetPropertyFloat(IntPtr handle, uint nItemID, string pchPropertyName, float flValue)
+        public bool GetItemDefinitionProperty(int iDefinition, string pchPropertyName, IntPtr pchValueBuffer, IntPtr punValueBufferSizeOut)
         {
-            Write($"SetPropertyFloat");
-            return false;
+            EnsureInit();
+            if (!InventoryManager.TryGetDefinitionProperty(iDefinition, pchPropertyName, out var value))
+            {
+                WriteU32(punValueBufferSizeOut, 0);
+                return false;
+            }
+            return WriteStringOut(value, pchValueBuffer, punValueBufferSizeOut);
         }
 
-        public bool SetPropertyInt64(IntPtr handle, uint nItemID, string pchPropertyName, long nValue)
+        public SteamAPICall_t RequestEligiblePromoItemDefinitionsIDs(ulong steamID)
         {
-            Write($"SetPropertyInt64");
-            return false;
+            EnsureInit();
+            return InventoryManager.RequestEligiblePromoItemDefinitionsIDs(steamID);
         }
 
-        public bool SetPropertyString(IntPtr handle, uint nItemID, string pchPropertyName, string pchPropertyValue)
+        public bool GetEligiblePromoItemDefinitionIDs(ulong steamID, IntPtr pItemDefIDs, IntPtr punItemDefIDsArraySize)
         {
-            Write($"SetPropertyString");
-            return false;
+            EnsureInit();
+            return WriteInt32ArrayOut(InventoryManager.GetPromoDefinitionIds(), pItemDefIDs, punItemDefIDsArraySize);
         }
 
-        public ulong StartPurchase(IntPtr pArrayItemDefs, IntPtr punArrayQuantity, uint unArrayLength)
+        // ===================== prices =====================
+
+        public SteamAPICall_t RequestPrices()
         {
-            Write($"StartPurchase");
-            return 0;
+            EnsureInit();
+            return InventoryManager.RequestPrices();
         }
+
+        public SteamAPICall_t StartPurchase(IntPtr pArrayItemDefs, IntPtr punArrayQuantity, uint unArrayLength)
+        {
+            EnsureInit();
+            var defs = ReadInt32Array(pArrayItemDefs, unArrayLength);
+            var qty = ReadUInt32Array(punArrayQuantity, unArrayLength);
+            return InventoryManager.StartPurchase(defs, qty);
+        }
+
+        public uint GetNumItemsWithPrices()
+        {
+            EnsureInit();
+            return InventoryManager.GetNumItemsWithPrices();
+        }
+
+        // v003: separate current + base price arrays.
+        public bool GetItemsWithPrices(IntPtr pArrayItemDefs, IntPtr pCurrentPrices, IntPtr pBasePrices, uint unArrayLength)
+        {
+            EnsureInit();
+            var priced = InventoryManager.GetPricedDefinitions();
+            int n = Math.Min((int)unArrayLength, priced.Length);
+            for (int i = 0; i < n; i++)
+            {
+                if (pArrayItemDefs != IntPtr.Zero) Marshal.WriteInt32(IntPtr.Add(pArrayItemDefs, i * 4), priced[i].DefId);
+                if (pCurrentPrices != IntPtr.Zero) Marshal.WriteInt64(IntPtr.Add(pCurrentPrices, i * 8), (long)priced[i].PriceCents);
+                if (pBasePrices != IntPtr.Zero) Marshal.WriteInt64(IntPtr.Add(pBasePrices, i * 8), (long)priced[i].PriceCents);
+            }
+            return true;
+        }
+
+        // v002: single prices array.
+        public bool GetItemsWithPricesV2(IntPtr pArrayItemDefs, IntPtr pPrices, uint unArrayLength)
+        {
+            EnsureInit();
+            var priced = InventoryManager.GetPricedDefinitions();
+            int n = Math.Min((int)unArrayLength, priced.Length);
+            for (int i = 0; i < n; i++)
+            {
+                if (pArrayItemDefs != IntPtr.Zero) Marshal.WriteInt32(IntPtr.Add(pArrayItemDefs, i * 4), priced[i].DefId);
+                if (pPrices != IntPtr.Zero) Marshal.WriteInt64(IntPtr.Add(pPrices, i * 8), (long)priced[i].PriceCents);
+            }
+            return true;
+        }
+
+        // v003: current + base out-pointers.
+        public bool GetItemPrice(int iDefinition, IntPtr pCurrentPrice, IntPtr pBasePrice)
+        {
+            EnsureInit();
+            if (!InventoryManager.TryGetItemPrice(iDefinition, out var current, out var basePrice))
+            {
+                return false;
+            }
+            if (pCurrentPrice != IntPtr.Zero) Marshal.WriteInt64(pCurrentPrice, (long)current);
+            if (pBasePrice != IntPtr.Zero) Marshal.WriteInt64(pBasePrice, (long)basePrice);
+            return true;
+        }
+
+        // v002: single price out-pointer.
+        public bool GetItemPriceV2(int iDefinition, IntPtr pPrice)
+        {
+            EnsureInit();
+            if (!InventoryManager.TryGetItemPrice(iDefinition, out var current, out _))
+            {
+                return false;
+            }
+            if (pPrice != IntPtr.Zero) Marshal.WriteInt64(pPrice, (long)current);
+            return true;
+        }
+
+        // ===================== property updates =====================
 
         public ulong StartUpdateProperties()
         {
-            Write($"StartUpdateProperties");
-            return 0;
+            EnsureInit();
+            return InventoryManager.StartUpdateProperties();
         }
 
-        public bool SubmitUpdateProperties(ulong handle, uint pResultHandle)
+        public bool RemoveProperty(ulong handle, ulong nItemID, string pchPropertyName)
         {
-            Write($"SubmitUpdateProperties");
-            return false;
+            return InventoryManager.RemoveProperty(handle, nItemID, pchPropertyName);
         }
 
-        public bool TradeItems(uint pResultHandle, ulong steamIDTradePartner, IntPtr pArrayGive, IntPtr pArrayGiveQuantity, uint nArrayGiveLength, IntPtr pArrayGet, IntPtr pArrayGetQuantity, uint nArrayGetLength)
+        public bool SetPropertyString(ulong handle, ulong nItemID, string pchPropertyName, string pchPropertyValue)
         {
-            Write($"TradeItems");
-            return false;
+            return InventoryManager.SetProperty(handle, nItemID, pchPropertyName, pchPropertyValue);
         }
 
-        public bool TransferItemQuantity(uint pResultHandle, ulong itemIdSource, uint unQuantity, ulong itemIdDest)
+        public bool SetPropertyBool(ulong handle, ulong nItemID, string pchPropertyName, bool bValue)
         {
-            Write($"TransferItemQuantity");
-            return false;
+            return InventoryManager.SetProperty(handle, nItemID, pchPropertyName, bValue ? "true" : "false");
         }
 
-        public bool TriggerItemDrop(uint pResultHandle, uint dropListDefinition)
+        public bool SetPropertyInt64(ulong handle, ulong nItemID, string pchPropertyName, long nValue)
         {
-            Write($"TriggerItemDrop");
-            return false;
+            return InventoryManager.SetProperty(handle, nItemID, pchPropertyName, nValue.ToString(System.Globalization.CultureInfo.InvariantCulture));
         }
 
-        public bool SetProperty(ulong handle, ulong nItemID, string pchPropertyName, string pchPropertyValue)
+        public bool SetPropertyFloat(ulong handle, ulong nItemID, string pchPropertyName, float flValue)
         {
-            Write($"SetProperty");
-            return false;
+            return InventoryManager.SetProperty(handle, nItemID, pchPropertyName, flValue.ToString(System.Globalization.CultureInfo.InvariantCulture));
         }
 
-        public bool SetProperty(ulong handle, ulong nItemID, string pchPropertyName, bool bValue)
+        public bool SubmitUpdateProperties(ulong handle, IntPtr pResultHandle)
         {
-            Write($"SetProperty");
-            return false;
+            EnsureInit();
+            int h = InventoryManager.SubmitUpdateProperties(handle);
+            WriteResultHandle(pResultHandle, h);
+            return true;
         }
 
-        public bool SetProperty(ulong handle, ulong nItemID, string pchPropertyName, long nValue)
+        // ===================== marshalling helpers =====================
+
+        private static void WriteU32(IntPtr destination, int value)
         {
-            Write($"SetProperty");
-            return false;
+            if (destination != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(destination, value);
+            }
         }
 
-        public bool SetProperty(ulong handle, ulong nItemID, string pchPropertyName, float fValue)
+        private static void WriteResultHandle(IntPtr destination, int handle)
         {
-            Write($"SetProperty");
-            return false;
+            if (destination != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(destination, handle);
+            }
+        }
+
+        private static int[] ReadInt32Array(IntPtr source, uint length)
+        {
+            if (source == IntPtr.Zero || length == 0)
+            {
+                return Array.Empty<int>();
+            }
+            var a = new int[length];
+            Marshal.Copy(source, a, 0, (int)length);
+            return a;
+        }
+
+        private static uint[] ReadUInt32Array(IntPtr source, uint length)
+        {
+            var signed = ReadInt32Array(source, length);
+            var a = new uint[signed.Length];
+            for (int i = 0; i < signed.Length; i++)
+            {
+                a[i] = unchecked((uint)signed[i]);
+            }
+            return a;
+        }
+
+        private static ulong[] ReadUInt64Array(IntPtr source, uint length)
+        {
+            if (source == IntPtr.Zero || length == 0)
+            {
+                return Array.Empty<ulong>();
+            }
+            var signed = new long[length];
+            Marshal.Copy(source, signed, 0, (int)length);
+            var a = new ulong[length];
+            for (int i = 0; i < signed.Length; i++)
+            {
+                a[i] = unchecked((ulong)signed[i]);
+            }
+            return a;
+        }
+
+        private static bool WriteInt32ArrayOut(int[] values, IntPtr pOut, IntPtr punSize)
+        {
+            int count = values.Length;
+            if (pOut == IntPtr.Zero)
+            {
+                WriteU32(punSize, count);
+                return true;
+            }
+
+            int capacity = punSize == IntPtr.Zero ? count : Marshal.ReadInt32(punSize);
+            if (capacity < count)
+            {
+                WriteU32(punSize, count);
+                return false;
+            }
+
+            if (count > 0)
+            {
+                Marshal.Copy(values, 0, pOut, count);
+            }
+            WriteU32(punSize, count);
+            return true;
+        }
+
+        private static bool WriteStringOut(string value, IntPtr buffer, IntPtr punSize)
+        {
+            var bytes = Encoding.UTF8.GetBytes(value ?? string.Empty);
+            int need = bytes.Length + 1; // include null terminator
+
+            if (buffer == IntPtr.Zero)
+            {
+                WriteU32(punSize, need);
+                return true;
+            }
+
+            int capacity = punSize == IntPtr.Zero ? 0 : Marshal.ReadInt32(punSize);
+            if (capacity < need)
+            {
+                WriteU32(punSize, need);
+                return false;
+            }
+
+            if (bytes.Length > 0)
+            {
+                Marshal.Copy(bytes, 0, buffer, bytes.Length);
+            }
+            Marshal.WriteByte(buffer, bytes.Length, 0);
+            WriteU32(punSize, need);
+            return true;
         }
     }
 }

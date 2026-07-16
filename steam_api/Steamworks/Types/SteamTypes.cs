@@ -150,12 +150,15 @@ namespace SKYNET.Steamworks
         public float rotVelZ;
     };
 
+    // Layout must match the native SDK struct exactly: 8+4+2+2 = 16 bytes with
+    // natural alignment. InventoryTests asserts Marshal.SizeOf == 16.
+    [StructLayout(LayoutKind.Sequential)]
     public struct SteamItemDetails_t
     {
-        SteamItemInstanceID_t m_itemId;
-        SteamItemDef_t m_iDefinition;
-        ushort m_unQuantity;
-        ushort m_unFlags; // see ESteamItemFlags
+        public SteamItemInstanceID_t m_itemId;      // ulong (8)
+        public int m_iDefinition;                   // SteamItemDef_t (4)
+        public ushort m_unQuantity;                 // (2)
+        public ushort m_unFlags;                    // ESteamItemFlags (2)
     };
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]

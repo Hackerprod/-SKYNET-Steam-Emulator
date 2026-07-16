@@ -20,10 +20,10 @@ using HAuthTicket = System.UInt32;
 using HHTMLBrowser = System.UInt32;
 using HTTPRequestHandle = System.UInt32;
 using HTTPCookieContainerHandle = System.UInt32;
-using SteamInventoryResult_t = System.UInt32;
+using SteamInventoryResult_t = System.Int32;
 using SteamItemInstanceID_t = System.UInt64;
 using UGCHandle_t = System.UInt64;
-using SteamItemDef_t = System.UInt32;
+using SteamItemDef_t = System.Int32;
 using HServerQuery = System.UInt16;
 using SNetSocket_t = System.UInt32;
 using SNetListenSocket_t = System.UInt32;
@@ -1902,8 +1902,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamInventory_GetResultItems(SteamInventoryResult_t resultHandle, IntPtr pOutItemsArray, ref uint punOutItemsArraySize)
-        //public static bool ISteamInventory_GetResultItems(SteamInventoryResult_t resultHandle, ref SteamItemDetails_t[] pOutItemsArray, ref uint punOutItemsArraySize)
+        public static bool ISteamInventory_GetResultItems(SteamInventoryResult_t resultHandle, IntPtr pOutItemsArray, IntPtr punOutItemsArraySize)
         {
             return SteamEmulator.SteamInventory.GetResultItems(resultHandle, pOutItemsArray, punOutItemsArraySize);
         }
@@ -1917,7 +1916,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamInventory_CheckResultSteamID(SteamInventoryResult_t resultHandle, ulong steamIDExpected)
         {
-            return SteamEmulator.SteamInventory.CheckResultSteamID(resultHandle, (ulong)steamIDExpected);
+            return SteamEmulator.SteamInventory.CheckResultSteamID(resultHandle, steamIDExpected);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -1927,74 +1926,69 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamInventory_GetAllItems(ref SteamInventoryResult_t pResultHandle)
+        public static bool ISteamInventory_GetAllItems(IntPtr pResultHandle)
         {
             return SteamEmulator.SteamInventory.GetAllItems(pResultHandle);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamInventory_GetItemsByID(ref SteamInventoryResult_t pResultHandle, ref SteamItemInstanceID_t pInstanceIDs, uint unCountInstanceIDs)
-        //public static bool ISteamInventory_GetItemsByID(ref SteamInventoryResult_t pResultHandle, ref SteamItemInstanceID_t[] pInstanceIDs, uint unCountInstanceIDs)
+        public static bool ISteamInventory_GetItemsByID(IntPtr pResultHandle, IntPtr pInstanceIDs, uint unCountInstanceIDs)
         {
-            return SteamEmulator.SteamInventory.GetItemsByID(pResultHandle, ref pInstanceIDs, unCountInstanceIDs);
+            return SteamEmulator.SteamInventory.GetItemsByID(pResultHandle, pInstanceIDs, unCountInstanceIDs);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamInventory_SerializeResult(SteamInventoryResult_t resultHandle, IntPtr pOutBuffer, ref uint punOutBufferSize)
-        //public static bool ISteamInventory_SerializeResult(SteamInventoryResult_t resultHandle, ref byte[] pOutBuffer, ref uint punOutBufferSize)
+        public static bool ISteamInventory_SerializeResult(SteamInventoryResult_t resultHandle, IntPtr pOutBuffer, IntPtr punOutBufferSize)
         {
             return SteamEmulator.SteamInventory.SerializeResult(resultHandle, pOutBuffer, punOutBufferSize);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamInventory_DeserializeResult(ref SteamInventoryResult_t pOutResultHandle, IntPtr pBuffer, uint unBufferSize, bool bRESERVED_MUST_BE_FALSE)
-        //public static bool ISteamInventory_DeserializeResult(ref SteamInventoryResult_t pOutResultHandle, ref byte[] pBuffer, uint unBufferSize, bool bRESERVED_MUST_BE_FALSE)
+        public static bool ISteamInventory_DeserializeResult(IntPtr pOutResultHandle, IntPtr pBuffer, uint unBufferSize, bool bRESERVED_MUST_BE_FALSE)
         {
-            return SteamEmulator.SteamInventory.DeserializeResult(pOutResultHandle, pBuffer, unBufferSize, bRESERVED_MUST_BE_FALSE);
+            return SteamEmulator.SteamInventory.DeserializeResult(pOutResultHandle, pBuffer, unBufferSize);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamInventory_GenerateItems(ref SteamInventoryResult_t pResultHandle, IntPtr pArrayItemDefs, IntPtr punArrayQuantity, uint unArrayLength)
-        //public static bool ISteamInventory_GenerateItems(ref SteamInventoryResult_t pResultHandle, ref SteamItemDef_t[] pArrayItemDefs, ref uint[] punArrayQuantity, uint unArrayLength)
+        public static bool ISteamInventory_GenerateItems(IntPtr pResultHandle, IntPtr pArrayItemDefs, IntPtr punArrayQuantity, uint unArrayLength)
         {
             return SteamEmulator.SteamInventory.GenerateItems(pResultHandle, pArrayItemDefs, punArrayQuantity, unArrayLength);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamInventory_GrantPromoItems(ref SteamInventoryResult_t pResultHandle)
+        public static bool ISteamInventory_GrantPromoItems(IntPtr pResultHandle)
         {
             return SteamEmulator.SteamInventory.GrantPromoItems(pResultHandle);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamInventory_AddPromoItem(ref SteamInventoryResult_t pResultHandle, SteamItemDef_t itemDef)
+        public static bool ISteamInventory_AddPromoItem(IntPtr pResultHandle, SteamItemDef_t itemDef)
         {
             return SteamEmulator.SteamInventory.AddPromoItem(pResultHandle, itemDef);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamInventory_AddPromoItems(ref SteamInventoryResult_t pResultHandle, IntPtr pArrayItemDefs, uint unArrayLength)
-        //public static bool ISteamInventory_AddPromoItems(ref SteamInventoryResult_t pResultHandle, ref SteamItemDef_t[] pArrayItemDefs, uint unArrayLength)
+        public static bool ISteamInventory_AddPromoItems(IntPtr pResultHandle, IntPtr pArrayItemDefs, uint unArrayLength)
         {
             return SteamEmulator.SteamInventory.AddPromoItems(pResultHandle, pArrayItemDefs, unArrayLength);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamInventory_ConsumeItem(ref SteamInventoryResult_t pResultHandle, SteamItemInstanceID_t itemConsume, uint unQuantity)
+        public static bool ISteamInventory_ConsumeItem(IntPtr pResultHandle, SteamItemInstanceID_t itemConsume, uint unQuantity)
         {
             return SteamEmulator.SteamInventory.ConsumeItem(pResultHandle, itemConsume, unQuantity);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamInventory_ExchangeItems(ref SteamInventoryResult_t pResultHandle, ref SteamItemDef_t[] pArrayGenerate, ref uint[] punArrayGenerateQuantity, uint unArrayGenerateLength, ref SteamItemInstanceID_t[] pArrayDestroy, ref uint[] punArrayDestroyQuantity, uint unArrayDestroyLength)
+        public static bool ISteamInventory_ExchangeItems(IntPtr pResultHandle, IntPtr pArrayGenerate, IntPtr punArrayGenerateQuantity, uint unArrayGenerateLength, IntPtr pArrayDestroy, IntPtr punArrayDestroyQuantity, uint unArrayDestroyLength)
         {
-            return SteamEmulator.SteamInventory.ExchangeItems(ref pResultHandle, ref pArrayGenerate, ref punArrayGenerateQuantity, unArrayGenerateLength, ref pArrayDestroy, ref punArrayDestroyQuantity, unArrayDestroyLength);
+            return SteamEmulator.SteamInventory.ExchangeItems(pResultHandle, pArrayGenerate, punArrayGenerateQuantity, unArrayGenerateLength, pArrayDestroy, punArrayDestroyQuantity, unArrayDestroyLength);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamInventory_TransferItemQuantity(ref SteamInventoryResult_t pResultHandle, SteamItemInstanceID_t itemIdSource, uint unQuantity, SteamItemInstanceID_t itemIdDest)
+        public static bool ISteamInventory_TransferItemQuantity(IntPtr pResultHandle, SteamItemInstanceID_t itemIdSource, uint unQuantity, SteamItemInstanceID_t itemIdDest)
         {
-            return SteamEmulator.SteamInventory.TransferItemQuantity(pResultHandle, (uint)itemIdSource, unQuantity, (uint)itemIdDest);
+            return SteamEmulator.SteamInventory.TransferItemQuantity(pResultHandle, itemIdSource, unQuantity, itemIdDest);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -2004,16 +1998,15 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamInventory_TriggerItemDrop(ref SteamInventoryResult_t pResultHandle, SteamItemDef_t dropListDefinition)
+        public static bool ISteamInventory_TriggerItemDrop(IntPtr pResultHandle, SteamItemDef_t dropListDefinition)
         {
             return SteamEmulator.SteamInventory.TriggerItemDrop(pResultHandle, dropListDefinition);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamInventory_TradeItems(ref SteamInventoryResult_t pResultHandle, ulong steamIDTradePartner, IntPtr pArrayGive, IntPtr pArrayGiveQuantity, uint nArrayGiveLength, IntPtr pArrayGet, IntPtr pArrayGetQuantity, uint nArrayGetLength)
-        //public static bool ISteamInventory_TradeItems(ref SteamInventoryResult_t pResultHandle, ulong steamIDTradePartner, ref SteamItemInstanceID_t[] pArrayGive, ref uint[] pArrayGiveQuantity, uint nArrayGiveLength, ref SteamItemInstanceID_t[] pArrayGet, ref uint[] pArrayGetQuantity, uint nArrayGetLength)
+        public static bool ISteamInventory_TradeItems(IntPtr pResultHandle, ulong steamIDTradePartner, IntPtr pArrayGive, IntPtr pArrayGiveQuantity, uint nArrayGiveLength, IntPtr pArrayGet, IntPtr pArrayGetQuantity, uint nArrayGetLength)
         {
-            return SteamEmulator.SteamInventory.TradeItems(pResultHandle, (ulong)steamIDTradePartner, pArrayGive, pArrayGiveQuantity, nArrayGiveLength, pArrayGet, pArrayGetQuantity, nArrayGetLength);
+            return SteamEmulator.SteamInventory.TradeItems(pResultHandle, steamIDTradePartner, pArrayGive, pArrayGiveQuantity, nArrayGiveLength, pArrayGet, pArrayGetQuantity, nArrayGetLength);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -2023,14 +2016,13 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamInventory_GetItemDefinitionIDs(IntPtr pItemDefIDs, ref uint punItemDefIDsArraySize)
-        //public static bool ISteamInventory_GetItemDefinitionIDs(ref SteamItemDef_t[] pItemDefIDs, ref uint punItemDefIDsArraySize)
+        public static bool ISteamInventory_GetItemDefinitionIDs(IntPtr pItemDefIDs, IntPtr punItemDefIDsArraySize)
         {
             return SteamEmulator.SteamInventory.GetItemDefinitionIDs(pItemDefIDs, punItemDefIDsArraySize);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamInventory_GetItemDefinitionProperty(SteamItemDef_t iDefinition, string pchPropertyName, IntPtr pchValueBuffer, ref uint punValueBufferSize)
+        public static bool ISteamInventory_GetItemDefinitionProperty(SteamItemDef_t iDefinition, string pchPropertyName, IntPtr pchValueBuffer, IntPtr punValueBufferSize)
         {
             return SteamEmulator.SteamInventory.GetItemDefinitionProperty(iDefinition, pchPropertyName, pchValueBuffer, punValueBufferSize);
         }
@@ -4167,8 +4159,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamGameServerInventory_GetResultItems(SteamInventoryResult_t resultHandle, IntPtr pOutItemsArray, ref uint punOutItemsArraySize)
-        //public static bool ISteamGameServerInventory_GetResultItems(SteamInventoryResult_t resultHandle, ref SteamItemDetails_t[] pOutItemsArray, ref uint punOutItemsArraySize)
+        public static bool ISteamGameServerInventory_GetResultItems(SteamInventoryResult_t resultHandle, IntPtr pOutItemsArray, IntPtr punOutItemsArraySize)
         {
             return SteamEmulator.SteamInventory.GetResultItems(resultHandle, pOutItemsArray, punOutItemsArraySize);
         }
@@ -4182,7 +4173,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamGameServerInventory_CheckResultSteamID(SteamInventoryResult_t resultHandle, ulong steamIDExpected)
         {
-            return SteamEmulator.SteamInventory.CheckResultSteamID(resultHandle, (ulong)steamIDExpected);
+            return SteamEmulator.SteamInventory.CheckResultSteamID(resultHandle, steamIDExpected);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -4192,75 +4183,69 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamGameServerInventory_GetAllItems(ref SteamInventoryResult_t pResultHandle)
+        public static bool ISteamGameServerInventory_GetAllItems(IntPtr pResultHandle)
         {
             return SteamEmulator.SteamInventory.GetAllItems(pResultHandle);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamGameServerInventory_GetItemsByID(ref SteamInventoryResult_t pResultHandle, ref SteamItemInstanceID_t pInstanceIDs, uint unCountInstanceIDs)
-        //public static bool ISteamGameServerInventory_GetItemsByID(ref SteamInventoryResult_t pResultHandle, ref SteamItemInstanceID_t[] pInstanceIDs, uint unCountInstanceIDs)
+        public static bool ISteamGameServerInventory_GetItemsByID(IntPtr pResultHandle, IntPtr pInstanceIDs, uint unCountInstanceIDs)
         {
-            return SteamEmulator.SteamInventory.GetItemsByID(pResultHandle, ref pInstanceIDs, unCountInstanceIDs);
+            return SteamEmulator.SteamInventory.GetItemsByID(pResultHandle, pInstanceIDs, unCountInstanceIDs);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamGameServerInventory_SerializeResult(SteamInventoryResult_t resultHandle, IntPtr pOutBuffer, ref uint punOutBufferSize)
-        //public static bool ISteamGameServerInventory_SerializeResult(SteamInventoryResult_t resultHandle, ref byte[] pOutBuffer, ref uint punOutBufferSize)
+        public static bool ISteamGameServerInventory_SerializeResult(SteamInventoryResult_t resultHandle, IntPtr pOutBuffer, IntPtr punOutBufferSize)
         {
             return SteamEmulator.SteamInventory.SerializeResult(resultHandle, pOutBuffer, punOutBufferSize);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamGameServerInventory_DeserializeResult(ref SteamInventoryResult_t pOutResultHandle, IntPtr pBuffer, uint unBufferSize, bool bRESERVED_MUST_BE_FALSE)
-        //public static bool ISteamGameServerInventory_DeserializeResult(ref SteamInventoryResult_t pOutResultHandle, ref byte[] pBuffer, uint unBufferSize, bool bRESERVED_MUST_BE_FALSE)
+        public static bool ISteamGameServerInventory_DeserializeResult(IntPtr pOutResultHandle, IntPtr pBuffer, uint unBufferSize, bool bRESERVED_MUST_BE_FALSE)
         {
-            return SteamEmulator.SteamInventory.DeserializeResult(pOutResultHandle, pBuffer, unBufferSize, bRESERVED_MUST_BE_FALSE);
+            return SteamEmulator.SteamInventory.DeserializeResult(pOutResultHandle, pBuffer, unBufferSize);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamGameServerInventory_GenerateItems(ref SteamInventoryResult_t pResultHandle, IntPtr pArrayItemDefs, IntPtr punArrayQuantity, uint unArrayLength)
-        //public static bool ISteamGameServerInventory_GenerateItems(ref SteamInventoryResult_t pResultHandle, ref SteamItemDef_t[] pArrayItemDefs, ref uint[] punArrayQuantity, uint unArrayLength)
+        public static bool ISteamGameServerInventory_GenerateItems(IntPtr pResultHandle, IntPtr pArrayItemDefs, IntPtr punArrayQuantity, uint unArrayLength)
         {
             return SteamEmulator.SteamInventory.GenerateItems(pResultHandle, pArrayItemDefs, punArrayQuantity, unArrayLength);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamGameServerInventory_GrantPromoItems(ref SteamInventoryResult_t pResultHandle)
+        public static bool ISteamGameServerInventory_GrantPromoItems(IntPtr pResultHandle)
         {
             return SteamEmulator.SteamInventory.GrantPromoItems(pResultHandle);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamGameServerInventory_AddPromoItem(ref SteamInventoryResult_t pResultHandle, SteamItemDef_t itemDef)
+        public static bool ISteamGameServerInventory_AddPromoItem(IntPtr pResultHandle, SteamItemDef_t itemDef)
         {
             return SteamEmulator.SteamInventory.AddPromoItem(pResultHandle, itemDef);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamGameServerInventory_AddPromoItems(ref SteamInventoryResult_t pResultHandle, IntPtr pArrayItemDefs, uint unArrayLength)
-        //public static bool ISteamGameServerInventory_AddPromoItems(ref SteamInventoryResult_t pResultHandle, ref SteamItemDef_t[] pArrayItemDefs, uint unArrayLength)
+        public static bool ISteamGameServerInventory_AddPromoItems(IntPtr pResultHandle, IntPtr pArrayItemDefs, uint unArrayLength)
         {
             return SteamEmulator.SteamInventory.AddPromoItems(pResultHandle, pArrayItemDefs, unArrayLength);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamGameServerInventory_ConsumeItem(ref SteamInventoryResult_t pResultHandle, SteamItemInstanceID_t itemConsume, uint unQuantity)
+        public static bool ISteamGameServerInventory_ConsumeItem(IntPtr pResultHandle, SteamItemInstanceID_t itemConsume, uint unQuantity)
         {
             return SteamEmulator.SteamInventory.ConsumeItem(pResultHandle, itemConsume, unQuantity);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamGameServerInventory_ExchangeItems(ref SteamInventoryResult_t pResultHandle, ref SteamItemDef_t[] pArrayGenerate, ref uint[] punArrayGenerateQuantity, uint unArrayGenerateLength, ref SteamItemInstanceID_t[] pArrayDestroy, ref uint[] punArrayDestroyQuantity, uint unArrayDestroyLength)
-        //public static bool ISteamGameServerInventory_ExchangeItems(ref SteamInventoryResult_t pResultHandle, ref SteamItemDef_t[] pArrayGenerate, ref uint[] punArrayGenerateQuantity, uint unArrayGenerateLength, ref SteamItemInstanceID_t[] pArrayDestroy, ref uint[] punArrayDestroyQuantity, uint unArrayDestroyLength)
+        public static bool ISteamGameServerInventory_ExchangeItems(IntPtr pResultHandle, IntPtr pArrayGenerate, IntPtr punArrayGenerateQuantity, uint unArrayGenerateLength, IntPtr pArrayDestroy, IntPtr punArrayDestroyQuantity, uint unArrayDestroyLength)
         {
-            return SteamEmulator.SteamInventory.ExchangeItems(ref pResultHandle, ref pArrayGenerate, ref punArrayGenerateQuantity, unArrayGenerateLength, ref pArrayDestroy, ref punArrayDestroyQuantity, unArrayDestroyLength);
+            return SteamEmulator.SteamInventory.ExchangeItems(pResultHandle, pArrayGenerate, punArrayGenerateQuantity, unArrayGenerateLength, pArrayDestroy, punArrayDestroyQuantity, unArrayDestroyLength);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamGameServerInventory_TransferItemQuantity(ref SteamInventoryResult_t pResultHandle, SteamItemInstanceID_t itemIdSource, uint unQuantity, SteamItemInstanceID_t itemIdDest)
+        public static bool ISteamGameServerInventory_TransferItemQuantity(IntPtr pResultHandle, SteamItemInstanceID_t itemIdSource, uint unQuantity, SteamItemInstanceID_t itemIdDest)
         {
-            return SteamEmulator.SteamInventory.TransferItemQuantity(pResultHandle, (uint)itemIdSource, unQuantity, (uint)itemIdDest);
+            return SteamEmulator.SteamInventory.TransferItemQuantity(pResultHandle, itemIdSource, unQuantity, itemIdDest);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -4270,14 +4255,13 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamGameServerInventory_TriggerItemDrop(ref SteamInventoryResult_t pResultHandle, SteamItemDef_t dropListDefinition)
+        public static bool ISteamGameServerInventory_TriggerItemDrop(IntPtr pResultHandle, SteamItemDef_t dropListDefinition)
         {
             return SteamEmulator.SteamInventory.TriggerItemDrop(pResultHandle, dropListDefinition);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamGameServerInventory_TradeItems(uint pResultHandle, ulong steamIDTradePartner, IntPtr pArrayGive, IntPtr pArrayGiveQuantity, uint nArrayGiveLength, IntPtr pArrayGet, IntPtr pArrayGetQuantity, uint nArrayGetLength)
-        //public static bool ISteamGameServerInventory_TradeItems(ref SteamInventoryResult_t pResultHandle, ulong steamIDTradePartner, ref SteamItemInstanceID_t[] pArrayGive, ref uint[] pArrayGiveQuantity, uint nArrayGiveLength, ref SteamItemInstanceID_t[] pArrayGet, ref uint[] pArrayGetQuantity, uint nArrayGetLength)
+        public static bool ISteamGameServerInventory_TradeItems(IntPtr pResultHandle, ulong steamIDTradePartner, IntPtr pArrayGive, IntPtr pArrayGiveQuantity, uint nArrayGiveLength, IntPtr pArrayGet, IntPtr pArrayGetQuantity, uint nArrayGetLength)
         {
             return SteamEmulator.SteamInventory.TradeItems(pResultHandle, steamIDTradePartner, pArrayGive, pArrayGiveQuantity, nArrayGiveLength, pArrayGet, pArrayGetQuantity, nArrayGetLength);
         }
@@ -4289,14 +4273,13 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamGameServerInventory_GetItemDefinitionIDs(IntPtr pItemDefIDs, ref uint punItemDefIDsArraySize)
-        //public static bool ISteamGameServerInventory_GetItemDefinitionIDs(ref SteamItemDef_t[] pItemDefIDs, ref uint punItemDefIDsArraySize)
+        public static bool ISteamGameServerInventory_GetItemDefinitionIDs(IntPtr pItemDefIDs, IntPtr punItemDefIDsArraySize)
         {
             return SteamEmulator.SteamInventory.GetItemDefinitionIDs(pItemDefIDs, punItemDefIDsArraySize);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamGameServerInventory_GetItemDefinitionProperty(SteamItemDef_t iDefinition, string pchPropertyName, IntPtr pchValueBuffer, ref uint punValueBufferSize)
+        public static bool ISteamGameServerInventory_GetItemDefinitionProperty(SteamItemDef_t iDefinition, string pchPropertyName, IntPtr pchValueBuffer, IntPtr punValueBufferSize)
         {
             return SteamEmulator.SteamInventory.GetItemDefinitionProperty(iDefinition, pchPropertyName, pchValueBuffer, punValueBufferSize);
         }

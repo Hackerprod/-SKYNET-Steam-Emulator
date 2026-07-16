@@ -94,9 +94,11 @@
     <Compile Include="Managers\LobbyManager.cs" />
     <Compile Include="Managers\NetworkManager.cs" />
     <Compile Include="Managers\OverlayManager.cs" />
+    <Compile Include="Overlay\Core\**\*.cs" />
     <Compile Include="Managers\SdrCertPatcher.cs" />
     <Compile Include="Managers\APIClient.cs" />
     <Compile Include="Managers\RemoteStorageCache.cs" />
+    <Compile Include="Managers\Inventory\InventoryManager.cs" />
     <Compile Include="Managers\EventPump.cs" />
     <Compile Include="Managers\StateCache.cs" />
     <Compile Include="Managers\WorkQueue.cs" />

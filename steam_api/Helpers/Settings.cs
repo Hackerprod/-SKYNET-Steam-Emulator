@@ -80,6 +80,17 @@ namespace SKYNET.Helper
                     config.AppendLine("EnableVoiceCapture = true");
                     config.AppendLine();
 
+                    config.AppendLine("[Inventory]");
+                    config.AppendLine("# ISteamInventory emulation (local-first store under SKYNET/Inventory/<appid>).");
+                    config.AppendLine("Enabled = true");
+                    config.AppendLine("# StartPurchase grants items locally (no real payment path).");
+                    config.AppendLine("AutoGrantPurchases = true");
+                    config.AppendLine("AutoGrantPromos = true");
+                    config.AppendLine("# GenerateItems is a sandbox-only debug call; off by default.");
+                    config.AppendLine("AllowGenerate = false");
+                    config.AppendLine("Currency = USD");
+                    config.AppendLine();
+
                     // Log Configuration
 
                     config.AppendLine("[Log Settings]");
@@ -107,6 +118,13 @@ namespace SKYNET.Helper
 
                 LoadDLCs();
                 SteamEmulator.EnableVoiceCapture = GetBool("Audio Settings", "EnableVoiceCapture", true);
+
+                InventoryManager.ApplyConfig(
+                    GetBool("Inventory", "Enabled", true),
+                    GetBool("Inventory", "AutoGrantPurchases", true),
+                    GetBool("Inventory", "AutoGrantPromos", true),
+                    GetBool("Inventory", "AllowGenerate", false),
+                    GetString("Inventory", "Currency", "USD"));
 
                 SteamEmulator.SendLog = (bool)IniParser["Log Settings"]["File"];
                 SteamEmulator.LogToFile = SteamEmulator.SendLog;
@@ -231,6 +249,11 @@ namespace SKYNET.Helper
             changed |= EnsureSetting("Network Settings", "UseActiveWebUser", "true");
             changed |= EnsureSetting("Network Settings", "BroadCastPort", "28032");
             changed |= EnsureSetting("Audio Settings", "EnableVoiceCapture", "true");
+            changed |= EnsureSetting("Inventory", "Enabled", "true");
+            changed |= EnsureSetting("Inventory", "AutoGrantPurchases", "true");
+            changed |= EnsureSetting("Inventory", "AutoGrantPromos", "true");
+            changed |= EnsureSetting("Inventory", "AllowGenerate", "false");
+            changed |= EnsureSetting("Inventory", "Currency", "USD");
             changed |= MigrateSetting("Network Settings", "PollIntervalMs", "1000", "50");
             changed |= MigrateSetting("Network Settings", "HttpTimeoutMs", "2000", "8000");
             changed |= MigrateSetting("Network Settings", "BroadCastPort", "28025", "28032");
