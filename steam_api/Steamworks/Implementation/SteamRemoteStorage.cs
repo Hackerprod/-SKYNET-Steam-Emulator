@@ -1458,32 +1458,78 @@ namespace SKYNET.Steamworks.Implementation
             {
                 try
                 {
-                    System.Net.HttpStatusCode? statusCode;
-                    var file = APIClient.DownloadRemoteStorageFile(fileName, out statusCode);
+                    var outcome = APIClient.DownloadRemoteStorageFile(fileName, out var file);
 
-                    if (statusCode == System.Net.HttpStatusCode.NotFound)
+                    switch (outcome)
                     {
-                        // Server confirmed 404. Use a TTL, not a permanent miss.
-                        RemoteStorageCache.MarkMissing(remoteKey, MissingRemoteFileWindow);
-                        Write($"Remote fetch: file not found on server {fileName}");
-                        return;
+                        case APIClient.RemoteStorageDownloadResult.NotFound:
+                            // Clean miss, logged once per TTL (this runs when the 404 is
+                            // received; IsKnownMissing suppresses re-fetches until it expires).
+                            Write($"RemoteStorage miss {fileName}");
+                            RemoteStorageCache.MarkMissing(remoteKey, MissingRemoteFileWindow);
+                            return;
+
+                        case APIClient.RemoteStorageDownloadResult.Unauthorized:
+                            // Auth problem: short throttle only; do not blacklist as absent.
+                            Write($"RemoteStorage fetch unauthorized {fileName}");
+                            RemoteStorageCache.MarkMissing(remoteKey, MissingRemoteFileWindowShort);
+                            return;
+
+                        case APIClient.RemoteStorageDownloadResult.Unavailable:
+                        case APIClient.RemoteStorageDownloadResult.Error:
+                            // Server down / timeout / 5xx: short TTL so we retry soon.
+                            Write($"RemoteStorage fetch error ({outcome}) {fileName}");
+                            RemoteStorageCache.MarkMissing(remoteKey, MissingRemoteFileWindowShort);
+                            return;
+
+                        case APIClient.RemoteStorageDownloadResult.Ok:
+                            break;
                     }
 
                     if (file == null || string.IsNullOrWhiteSpace(file.ContentBase64))
                     {
-                        // Transient error. Retry after the window.
-                        RemoteStorageCache.MarkMissing(remoteKey, MissingRemoteFileWindow);
+                        // Ok status but empty body: treat as a transient error, short TTL.
+                        Write($"RemoteStorage fetch empty payload {fileName}");
+                        RemoteStorageCache.MarkMissing(remoteKey, MissingRemoteFileWindowShort);
                         return;
                     }
 
-                    Common.EnsureDirectoryExists(fullPath, true);
-                    File.WriteAllBytes(fullPath, Convert.FromBase64String(file.ContentBase64));
-                    RemoteStorageCache.SetHydrated(remoteKey, fileName, file.Size, file.Sha256);
+                    byte[] fileBytes;
+                    try
+                    {
+                        fileBytes = Convert.FromBase64String(file.ContentBase64);
+                    }
+                    catch (FormatException ex)
+                    {
+                        // Corrupt base64: log the real error, short TTL so a re-uploaded
+                        // fixed version is not blocked for the full window.
+                        Write($"RemoteStorage fetch corrupt base64 {fileName}: {ex.Message}");
+                        RemoteStorageCache.MarkMissing(remoteKey, MissingRemoteFileWindowShort);
+                        return;
+                    }
+
+                    try
+                    {
+                        Common.EnsureDirectoryExists(fullPath, true);
+                        if (AtomicWrite(fullPath, fileBytes))
+                        {
+                            RemoteStorageCache.SetHydrated(remoteKey, fileName, file.Size, file.Sha256);
+                        }
+                        else
+                        {
+                            RemoteStorageCache.MarkMissing(remoteKey, MissingRemoteFileWindowShort);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        RemoteStorageCache.MarkMissing(remoteKey, MissingRemoteFileWindowShort);
+                        Write($"RemoteStorage fetch write failed {fileName} {ex.Message}");
+                    }
                 }
                 catch (Exception ex)
                 {
-                    RemoteStorageCache.MarkMissing(remoteKey, MissingRemoteFileWindow);
-                    Write($"Remote fetch failed {fileName} {ex.Message}");
+                    RemoteStorageCache.MarkMissing(remoteKey, MissingRemoteFileWindowShort);
+                    Write($"RemoteStorage fetch failed {fileName} {ex.Message}");
                 }
             }, "remote-storage:fetch:" + remoteKey);
         }

@@ -703,30 +703,66 @@ namespace SKYNET.Managers
             }) != null;
         }
 
-        public static ApiRemoteStorageFile DownloadRemoteStorageFile(string fileName, out System.Net.HttpStatusCode? statusCode)
+        // Semantic outcome of a remote storage download, so callers can log a
+        // miss (404) quietly and only treat real failures as errors.
+        public enum RemoteStorageDownloadResult
         {
-            statusCode = null;
+            Ok,
+            NotFound,
+            Unauthorized,
+            Unavailable,
+            Error
+        }
+
+        public static RemoteStorageDownloadResult DownloadRemoteStorageFile(
+            string fileName,
+            out ApiRemoteStorageFile file,
+            int timeoutMs = 0)
+        {
+            file = null;
+
             if (!IsEnabled)
             {
-                return null;
+                return RemoteStorageDownloadResult.Unavailable;
             }
 
-            if (!EnsureRemoteStorageSession())
+            // No session: server down, discovery failed, or auth timed out. This
+            // is not "unauthorized" — it is transient unavailability.
+            if (!EnsureRemoteStorageSession(timeoutMs))
             {
-                return null;
+                return RemoteStorageDownloadResult.Unavailable;
             }
 
-            return Send<ApiRemoteStorageFile>(
+            var result = Send<ApiRemoteStorageFile>(
                 HttpMethod.Get,
                 $"api/storage/files/{Uri.EscapeDataString(fileName)}",
                 null,
-                out statusCode,
-                quietStatusCode: HttpStatusCode.NotFound);
-        }
+                out var statusCode,
+                quietStatusCode: HttpStatusCode.NotFound,
+                timeoutMs: timeoutMs);
 
-        public static ApiRemoteStorageFile DownloadRemoteStorageFile(string fileName)
-        {
-            return DownloadRemoteStorageFile(fileName, out _);
+            // 404: the file simply is not on the server. Not an error.
+            if (statusCode == HttpStatusCode.NotFound)
+            {
+                return RemoteStorageDownloadResult.NotFound;
+            }
+
+            // 401: session was rejected even after the auto-retry inside Send.
+            if (statusCode == HttpStatusCode.Unauthorized)
+            {
+                SteamEmulator.Write("APIClient", $"RemoteStorage download unauthorized (401) for: {fileName}");
+                return RemoteStorageDownloadResult.Unauthorized;
+            }
+
+            if (result != null)
+            {
+                file = result;
+                return RemoteStorageDownloadResult.Ok;
+            }
+
+            // Null status = timeout/connection failure; non-2xx server error; or a
+            // 2xx with an empty/invalid body. All are real errors.
+            return RemoteStorageDownloadResult.Error;
         }
 
         public static List<ApiRemoteStorageFileListItem> ListRemoteStorageFiles(int timeoutMs = 0)
