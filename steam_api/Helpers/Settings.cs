@@ -76,6 +76,10 @@ namespace SKYNET.Helper
                     config.AppendLine("BroadCastPort = 28032");
                     config.AppendLine();
 
+                    config.AppendLine("[Audio Settings]");
+                    config.AppendLine("EnableVoiceCapture = true");
+                    config.AppendLine();
+
                     // Log Configuration
 
                     config.AppendLine("[Log Settings]");
@@ -102,6 +106,7 @@ namespace SKYNET.Helper
                             SteamEmulator.AppID = appId;
 
                 LoadDLCs();
+                SteamEmulator.EnableVoiceCapture = GetBool("Audio Settings", "EnableVoiceCapture", true);
 
                 SteamEmulator.SendLog = (bool)IniParser["Log Settings"]["File"];
                 SteamEmulator.LogToFile = SteamEmulator.SendLog;
@@ -225,6 +230,7 @@ namespace SKYNET.Helper
             changed |= EnsureSetting("Network Settings", "DiscoveryPort", "27081");
             changed |= EnsureSetting("Network Settings", "UseActiveWebUser", "true");
             changed |= EnsureSetting("Network Settings", "BroadCastPort", "28032");
+            changed |= EnsureSetting("Audio Settings", "EnableVoiceCapture", "true");
             changed |= MigrateSetting("Network Settings", "PollIntervalMs", "1000", "50");
             changed |= MigrateSetting("Network Settings", "HttpTimeoutMs", "2000", "8000");
             changed |= MigrateSetting("Network Settings", "BroadCastPort", "28025", "28032");

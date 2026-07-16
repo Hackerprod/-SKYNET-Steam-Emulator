@@ -94,7 +94,7 @@ namespace SKYNET.Steamworks.Implementation
                 eMode = 0,
                 x = 0,
                 y = 0,
-                bActive = false
+                bActive = 0
             };
         }
 
@@ -168,8 +168,8 @@ namespace SKYNET.Steamworks.Implementation
             Write("GetDigitalActionData");
             return new ControllerDigitalActionData_t
             {
-                bActive = false,
-                bState = false
+                bActive = 0,
+                bState = 0
             };
         }
 

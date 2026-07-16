@@ -4,9 +4,9 @@ using System.Text;
 
 namespace SKYNET.Wave.Native
 {
-    internal delegate void waveOutProc(IntPtr hdrvr,int uMsg,int dwUser,int dwParam1,int dwParam2);
+    internal delegate void waveOutProc(IntPtr hdrvr, int uMsg, IntPtr dwUser, IntPtr dwParam1, IntPtr dwParam2);
 
-    internal delegate void waveInProc(IntPtr hdrvr,int uMsg,int dwUser,int dwParam1,int dwParam2);
+    internal delegate void waveInProc(IntPtr hdrvr, int uMsg, IntPtr dwUser, IntPtr dwParam1, IntPtr dwParam2);
 
     internal class WavMethods
     {
@@ -23,7 +23,10 @@ namespace SKYNET.Wave.Native
         public static extern int waveInGetNumDevs();
 
 		[DllImport("winmm.dll")]
-		public static extern int waveInOpen(out IntPtr hWaveOut,int uDeviceID,WAVEFORMATEX lpFormat,waveInProc dwCallback,int dwInstance,int dwFlags);
+		public static extern int waveInOpen(out IntPtr hWaveOut, int uDeviceID, WAVEFORMATEX lpFormat, waveInProc dwCallback, IntPtr dwInstance, int dwFlags);
+
+        [DllImport("winmm.dll", EntryPoint = "waveInOpen")]
+        public static extern int waveInOpenNoCallback(out IntPtr hWaveOut, int uDeviceID, WAVEFORMATEX lpFormat, IntPtr dwCallback, IntPtr dwInstance, int dwFlags);
 
 		[DllImport("winmm.dll")]
 		public static extern int waveInPrepareHeader(IntPtr hWaveOut,IntPtr lpWaveOutHdr,int uSize);
@@ -56,7 +59,7 @@ namespace SKYNET.Wave.Native
 		public static extern int waveOutGetVolume(IntPtr hWaveOut,out int dwVolume);
 
 		[DllImport("winmm.dll")]
-		public static extern int waveOutOpen(out IntPtr hWaveOut,int uDeviceID,WAVEFORMATEX lpFormat,waveOutProc dwCallback,int dwInstance,int dwFlags);
+		public static extern int waveOutOpen(out IntPtr hWaveOut, int uDeviceID, WAVEFORMATEX lpFormat, waveOutProc dwCallback, IntPtr dwInstance, int dwFlags);
         
         [DllImport("winmm.dll")]
 		public static extern int waveOutPause(IntPtr hWaveOut);
@@ -106,7 +109,7 @@ namespace SKYNET.Wave.Native
         public uint dwFlags;
         public uint dwLoops;
         public IntPtr lpNext;
-        public uint reserved;
+        public IntPtr reserved;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -150,6 +153,7 @@ namespace SKYNET.Wave.Native
         public const int MM_WIM_CLOSE = 0x3BF;
         public const int MM_WIM_DATA = 0x3C0;
 
+        public const int CALLBACK_NULL = 0x00000000;
         public const int CALLBACK_FUNCTION = 0x00030000;
 
         public const int WAVERR_STILLPLAYING = 0x21;

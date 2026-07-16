@@ -1,89 +1,100 @@
-﻿using SKYNET.Wave;
+using SKYNET.Wave;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Windows.Forms;
 
 namespace SKYNET.Managers
 {
     public class AudioManager
     {
         public static bool Recording;
-        public static int SampleRate = 48000; // 22050
+        public static int SampleRate = 48000;
         public static int InputDeviceID;
+        internal static bool VoiceCaptureEnabled => SteamEmulator.EnableVoiceCapture;
 
+        private static readonly object SyncRoot = new object();
+        private static readonly List<byte> AvailableBuffer = new List<byte>();
         private static WaveIn recorder;
-        private static List<byte> Buffer;
-        private static List<byte> AvailableBuffer;
+        private static bool disabledLogged;
+
         private static bool Initialized => recorder != null;
 
-
-        public static void Initialize()
+        public static bool Initialize()
         {
-            ThreadPool.QueueUserWorkItem(InitializeInternal);
-        }
-
-        private static void InitializeInternal(object state)
-        {
-            Buffer = new List<byte>();
-            AvailableBuffer = new List<byte>();
-
-            try
+            if (!VoiceCaptureEnabled)
             {
-                var InDevice = WaveIn.Devices[InputDeviceID];
-                recorder = new WaveIn(InDevice, SampleRate, 16, 1, 400);
-                recorder.BufferFull += OnDataAvailable;
-                Write($"Audio system initialized in device \"{InDevice.Name}\", sample rate {SampleRate}");
+                WriteDisabledOnce();
+                return false;
             }
-            catch (System.Exception)
+
+            lock (SyncRoot)
             {
-                Write($"Error initializing audio in device ID {InputDeviceID}, sample rate {SampleRate}");
+                return EnsureInitialized();
             }
         }
 
-        private static void OnDataAvailable(byte[] buffer)
+        internal static bool StartVoiceRecording()
         {
-            try { Buffer.AddRange(buffer); } catch { }
-        }
-
-        internal static void StartVoiceRecording()
-        {
-            if (!Recording)
+            lock (SyncRoot)
             {
-                if (Initialized)
+                if (!VoiceCaptureEnabled)
                 {
-                    try
+                    Recording = false;
+                    WriteDisabledOnce();
+                    return false;
+                }
+
+                if (Recording)
+                {
+                    return true;
+                }
+
+                if (!EnsureInitialized())
+                {
+                    Recording = false;
+                    return false;
+                }
+
+                try
+                {
+                    Recording = recorder.Start();
+                    if (Recording)
                     {
-                        recorder.Start();
-                        Recording = true;
+                        Write("StartVoiceRecording");
                     }
-                    catch { }
+                    return Recording;
                 }
-                else
+                catch (Exception ex)
                 {
-                    Initialize();
+                    Recording = false;
+                    Write($"Error starting voice recording: {ex.GetType().Name}: {ex.Message}");
+                    return false;
                 }
-                Write("StartVoiceRecording");
             }
         }
 
         internal static void StopVoiceRecording()
         {
-            if (Recording)
+            lock (SyncRoot)
             {
-                if (Initialized)
+                if (!VoiceCaptureEnabled)
+                {
+                    Recording = false;
+                    return;
+                }
+
+                if (Recording && Initialized)
                 {
                     try
                     {
                         recorder.Stop();
-                        Recording = false;
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        Write($"Error stopping voice recording: {ex.GetType().Name}: {ex.Message}");
+                    }
                 }
-                else
-                {
-                    Initialize();
-                }
+
+                Recording = false;
                 Write("StopVoiceRecording");
             }
         }
@@ -93,31 +104,116 @@ namespace SKYNET.Managers
             compressed = 0;
             unCompressed = 0;
 
-            try { AvailableBuffer.AddRange(Buffer); } catch { }
+            lock (SyncRoot)
+            {
+                if (!VoiceCaptureEnabled || !Recording)
+                {
+                    return false;
+                }
 
-            try { Buffer.Clear(); } catch { }
+                DrainRecorder();
 
-            compressed = (uint)AvailableBuffer.Count();
-            unCompressed = (uint)AvailableBuffer.Count();
-
-            return AvailableBuffer.Count != 0;
+                compressed = (uint)AvailableBuffer.Count;
+                unCompressed = (uint)AvailableBuffer.Count;
+                return AvailableBuffer.Count != 0;
+            }
         }
 
-        internal static bool GetVoice(out byte[] buffer)
+        internal static bool GetVoice(uint maxBytes, out byte[] buffer)
         {
-            byte[] bytes = default;
+            lock (SyncRoot)
+            {
+                if (!VoiceCaptureEnabled || !Recording || maxBytes == 0)
+                {
+                    buffer = Array.Empty<byte>();
+                    return false;
+                }
 
-            try { bytes = AvailableBuffer.ToArray(); } catch { }
+                DrainRecorder();
 
-            buffer = bytes != null ? bytes : new byte[0] ;
+                if (AvailableBuffer.Count == 0)
+                {
+                    buffer = Array.Empty<byte>();
+                    return false;
+                }
 
-            try { AvailableBuffer.Clear(); } catch { }
-            return buffer.Length != 0;
+                int bytesToRead = (int)Math.Min(maxBytes, (uint)AvailableBuffer.Count);
+                buffer = AvailableBuffer.GetRange(0, bytesToRead).ToArray();
+                AvailableBuffer.RemoveRange(0, bytesToRead);
+                return true;
+            }
         }
 
-        private static void Write(string v)
+        private static bool EnsureInitialized()
         {
-            SteamEmulator.Write("AudioManager", v);
+            if (Initialized)
+            {
+                return true;
+            }
+
+            try
+            {
+                var devices = WaveIn.Devices;
+                if (devices.Length == 0)
+                {
+                    Write("No audio input devices available");
+                    return false;
+                }
+
+                var deviceIndex = InputDeviceID;
+                if (deviceIndex < 0 || deviceIndex >= devices.Length)
+                {
+                    Write($"Input device ID {InputDeviceID} unavailable, using device 0");
+                    deviceIndex = 0;
+                }
+
+                var inDevice = devices[deviceIndex];
+                recorder = new WaveIn(inDevice, SampleRate, 16, 1, GetDefaultBufferSize());
+                AvailableBuffer.Clear();
+                Write($"Audio system initialized in device \"{inDevice.Name}\", sample rate {SampleRate}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                recorder = null;
+                Write($"Error initializing audio in device ID {InputDeviceID}, sample rate {SampleRate}: {ex.GetType().Name}: {ex.Message}");
+                return false;
+            }
+        }
+
+        private static void DrainRecorder()
+        {
+            if (!Initialized)
+            {
+                return;
+            }
+
+            byte[] data = recorder.ReadAvailable();
+            if (data.Length > 0)
+            {
+                AvailableBuffer.AddRange(data);
+            }
+        }
+
+        private static int GetDefaultBufferSize()
+        {
+            return Math.Max(400, (SampleRate / 50) * 2);
+        }
+
+        private static void Write(string value)
+        {
+            SteamEmulator.Write("AudioManager", value);
+        }
+
+        private static void WriteDisabledOnce()
+        {
+            if (disabledLogged)
+            {
+                return;
+            }
+
+            disabledLogged = true;
+            Write("Voice capture disabled by configuration");
         }
     }
 }

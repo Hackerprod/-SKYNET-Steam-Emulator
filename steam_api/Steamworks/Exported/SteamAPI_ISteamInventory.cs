@@ -241,6 +241,34 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamInventory_SetProperty(IntPtr _, IntPtr handle, uint nItemID, string pchPropertyName, string pchPropertyValue)
+        {
+            Write("SteamAPI_ISteamInventory_SetProperty");
+            return SteamEmulator.SteamInventory.SetPropertyString(handle, nItemID, pchPropertyName, pchPropertyValue);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamInventory_SetProperty0(IntPtr _, IntPtr handle, uint nItemID, string pchPropertyName, [MarshalAs(UnmanagedType.U1)] bool bValue)
+        {
+            Write("SteamAPI_ISteamInventory_SetProperty0");
+            return SteamEmulator.SteamInventory.SetPropertyBool(handle, nItemID, pchPropertyName, bValue);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamInventory_SetProperty1(IntPtr _, IntPtr handle, uint nItemID, string pchPropertyName, long nValue)
+        {
+            Write("SteamAPI_ISteamInventory_SetProperty1");
+            return SteamEmulator.SteamInventory.SetPropertyInt64(handle, nItemID, pchPropertyName, nValue);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamInventory_SetProperty2(IntPtr _, IntPtr handle, uint nItemID, string pchPropertyName, float flValue)
+        {
+            Write("SteamAPI_ISteamInventory_SetProperty2");
+            return SteamEmulator.SteamInventory.SetPropertyFloat(handle, nItemID, pchPropertyName, flValue);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static SteamAPICall_t SteamAPI_ISteamInventory_StartPurchase(IntPtr _, IntPtr pArrayItemDefs, IntPtr punArrayQuantity, uint unArrayLength)
         {
             Write("SteamAPI_ISteamInventory_StartPurchase");

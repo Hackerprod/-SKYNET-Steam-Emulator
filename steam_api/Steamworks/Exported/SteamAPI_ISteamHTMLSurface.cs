@@ -19,7 +19,14 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_ISteamHTMLSurface_SteamAPI_ISteamHTMLSurface_AddHeader(IntPtr _, HHTMLBrowser unBrowserHandle, string pchKey, string pchValue)
         {
+            SteamAPI_ISteamHTMLSurface_AddHeader(_, unBrowserHandle, pchKey, pchValue);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamHTMLSurface_AddHeader(IntPtr _, HHTMLBrowser unBrowserHandle, string pchKey, string pchValue)
+        {
             Write("SteamAPI_ISteamHTMLSurface_AddHeader");
+            SteamEmulator.SteamHTMLSurface.AddHeader(unBrowserHandle, pchKey, pchValue);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -94,6 +101,13 @@ namespace SKYNET.Steamworks.Exported
         public static void SteamAPI_ISteamHTMLSurface_KeyDown(IntPtr _, HHTMLBrowser unBrowserHandle, int nNativeKeyCode, IntPtr IntPtr, bool bIsSystemKey = false)
         {
             Write("SteamAPI_ISteamHTMLSurface_KeyDown");
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamHTMLSurface_KeyChar(IntPtr _, HHTMLBrowser unBrowserHandle, uint cUnicodeChar, int eHTMLKeyModifiers)
+        {
+            Write("SteamAPI_ISteamHTMLSurface_KeyChar");
+            SteamEmulator.SteamHTMLSurface.KeyChar(unBrowserHandle, cUnicodeChar, eHTMLKeyModifiers);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

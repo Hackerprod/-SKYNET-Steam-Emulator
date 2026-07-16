@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading;
 using System.Runtime.InteropServices;
 
 using SKYNET.Wave.Native;
@@ -39,7 +37,7 @@ namespace SKYNET.Wave
 
             public WAVEHDR Header
             {
-                get{ return (WAVEHDR)m_HeaderHandle.Target; }
+                get{ return Marshal.PtrToStructure<WAVEHDR>(m_HeaderHandle.AddrOfPinnedObject()); }
             }
 
             public GCHandle DataHandle
@@ -66,7 +64,6 @@ namespace SKYNET.Wave
         private IntPtr           m_pWavDevHandle = IntPtr.Zero;
         private int              m_BlockSize     = 0;
         private List<BufferItem> m_pBuffers      = null;
-        private waveInProc       m_pWaveInProc   = null;
         private bool             m_IsRecording   = false;
         private bool             m_IsDisposed    = false;
 
@@ -102,13 +99,15 @@ namespace SKYNET.Wave
             format.nBlockAlign     = (ushort)m_BlockSize;
             format.wBitsPerSample  = (ushort)m_BitsPerSample;
             format.cbSize          = 0; 
-            // We must delegate reference, otherwise GC will collect it.
-            m_pWaveInProc = new waveInProc(this.OnWaveInProc);
-            int result = WavMethods.waveInOpen(out m_pWavDevHandle,m_pInDevice.Index,format,m_pWaveInProc,0,WavConstants.CALLBACK_FUNCTION);
+            // Unity embeds Mono, and native WinMM callbacks can re-enter managed code on
+            // an unmanaged audio thread. Polling completed buffers avoids that ABI hazard.
+            int result = WavMethods.waveInOpenNoCallback(out m_pWavDevHandle, m_pInDevice.Index, format, IntPtr.Zero, IntPtr.Zero, WavConstants.CALLBACK_NULL);
 
             if (result != (int)MMSYSERR.NOERROR)
             {
                 SteamEmulator.Write("AudioManager", $"Failed to open wav device, error: {(MMSYSERR)result}");
+                m_pWavDevHandle = IntPtr.Zero;
+                throw new InvalidOperationException($"waveInOpen failed: {(MMSYSERR)result}");
             }
 
             EnsureBuffers();
@@ -131,16 +130,25 @@ namespace SKYNET.Wave
 
             try{
                 // If recording, we need to reset wav device first.
-                WavMethods.waveInReset(m_pWavDevHandle);
+                if (m_pWavDevHandle != IntPtr.Zero)
+                {
+                    WavMethods.waveInReset(m_pWavDevHandle);
+                }
                 
                 // If there are unprepared wav headers, we need to unprepare these.
                 foreach(BufferItem item in m_pBuffers){
-                    WavMethods.waveInUnprepareHeader(m_pWavDevHandle,item.HeaderHandle.AddrOfPinnedObject(),Marshal.SizeOf(item.Header));
+                    if (m_pWavDevHandle != IntPtr.Zero)
+                    {
+                        WavMethods.waveInUnprepareHeader(m_pWavDevHandle,item.HeaderHandle.AddrOfPinnedObject(),Marshal.SizeOf(item.Header));
+                    }
                     item.Dispose();
                 }
                 
                 // Close input device.
-                WavMethods.waveInClose(m_pWavDevHandle);
+                if (m_pWavDevHandle != IntPtr.Zero)
+                {
+                    WavMethods.waveInClose(m_pWavDevHandle);
+                }
 
                 m_pInDevice     = null;
                 m_pWavDevHandle = IntPtr.Zero;
@@ -149,17 +157,25 @@ namespace SKYNET.Wave
             }
         }
 
-        public void Start()
+        public bool Start()
         {
             if(m_IsRecording){
-                return;
+                return true;
             }
-            m_IsRecording = true;
+
+            if (m_pWavDevHandle == IntPtr.Zero)
+            {
+                return false;
+            }
 
             int result = WavMethods.waveInStart(m_pWavDevHandle);
             if(result != (int)MMSYSERR.NOERROR){
                 SteamEmulator.Write("AudioManager", $"Failed to start wav device, error: {(MMSYSERR)result}");
+                return false;
             }
+
+            m_IsRecording = true;
+            return true;
         }
 
         public void Stop()
@@ -168,6 +184,11 @@ namespace SKYNET.Wave
                 return;
             }
             m_IsRecording = false;
+
+            if (m_pWavDevHandle == IntPtr.Zero)
+            {
+                return;
+            }
             
             int result = WavMethods.waveInStop(m_pWavDevHandle);
             if(result != (int)MMSYSERR.NOERROR){
@@ -175,38 +196,45 @@ namespace SKYNET.Wave
             }
         }
 
-        private void OnWaveInProc(IntPtr hdrvr,int uMsg,int dwUser,int dwParam1,int dwParam2)
-        {   
-            // NOTE: MSDN warns, we may not call any wav related methods here.
+        public byte[] ReadAvailable()
+        {
+            List<byte> bytes = null;
 
             try{
-                if(uMsg == WavConstants.MM_WIM_DATA){ 
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(this.ProcessFirstBuffer));
-                }
-            }
-            catch{
-            }
-        }
-
-        private void ProcessFirstBuffer(object state)
-        {
-            try{            
                 lock(m_pBuffers){
-                    BufferItem item = m_pBuffers[0];
+                    foreach(BufferItem item in m_pBuffers){
+                        WAVEHDR header = item.Header;
+                        if((header.dwFlags & WavConstants.WHDR_DONE) == 0){
+                            continue;
+                        }
 
-                    // Raise BufferFull event.
-                    OnBufferFull(item.Data);
+                        int bytesRecorded = (int)Math.Min(header.dwBytesRecorded,(uint)item.Data.Length);
+                        if(bytesRecorded > 0){
+                            if(bytes == null){
+                                bytes = new List<byte>();
+                            }
 
-                    // Clean up.
-                    WavMethods.waveInUnprepareHeader(m_pWavDevHandle,item.HeaderHandle.AddrOfPinnedObject(),Marshal.SizeOf(item.Header));                    
-                    m_pBuffers.Remove(item);
-                    item.Dispose();
+                            byte[] data = item.Data;
+                            for(int i = 0;i < bytesRecorded;i++){
+                                bytes.Add(data[i]);
+                            }
+                        }
+
+                        header.dwBytesRecorded = 0;
+                        header.dwFlags &= ~((uint)WavConstants.WHDR_DONE);
+                        Marshal.StructureToPtr(header,item.HeaderHandle.AddrOfPinnedObject(),false);
+
+                        int result = WavMethods.waveInAddBuffer(m_pWavDevHandle,item.HeaderHandle.AddrOfPinnedObject(),Marshal.SizeOf(header));
+                        if(result != (int)MMSYSERR.NOERROR){
+                            SteamEmulator.Write("AudioManager", $"Error reusing wave in buffer, error: {(MMSYSERR)result}");
+                        }
+                    }
                 }
-
-                EnsureBuffers();
             }
             catch{
             }
+
+            return bytes != null ? bytes.ToArray() : Array.Empty<byte>();
         }
 
         private void EnsureBuffers()
@@ -225,7 +253,7 @@ namespace SKYNET.Wave
                     wavHeader.dwFlags         = 0;
                     wavHeader.dwLoops         = 0;
                     wavHeader.lpNext          = IntPtr.Zero;
-                    wavHeader.reserved        = 0;
+                    wavHeader.reserved        = IntPtr.Zero;
                     GCHandle headerHandle = GCHandle.Alloc(wavHeader,GCHandleType.Pinned);
                     int result = 0;        
                     result = WavMethods.waveInPrepareHeader(m_pWavDevHandle,headerHandle.AddrOfPinnedObject(),Marshal.SizeOf(wavHeader));

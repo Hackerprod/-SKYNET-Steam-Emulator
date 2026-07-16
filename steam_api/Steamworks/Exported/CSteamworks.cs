@@ -3477,23 +3477,21 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static EVoiceResult ISteamUser_GetAvailableVoice(ref uint pcbCompressed, ref uint pcbUncompressed, uint nUncompressedVoiceDesiredSampleRate)
+        public static EVoiceResult ISteamUser_GetAvailableVoice(IntPtr pcbCompressed, IntPtr pcbUncompressed, uint nUncompressedVoiceDesiredSampleRate)
         {
-            return (EVoiceResult)SteamEmulator.SteamUser.GetAvailableVoice(out pcbCompressed, out pcbUncompressed, nUncompressedVoiceDesiredSampleRate);
+            return (EVoiceResult)SteamEmulator.SteamUser.GetAvailableVoice(pcbCompressed, pcbUncompressed, nUncompressedVoiceDesiredSampleRate);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static EVoiceResult ISteamUser_GetVoice(bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, bool bWantUncompressed, IntPtr pUncompressedDestBuffer, uint cbUncompressedDestBufferSize, ref uint nUncompressBytesWritten, uint nUncompressedVoiceDesiredSampleRate)
-        //public static EVoiceResult ISteamUser_GetVoice(bool bWantCompressed, ref byte[] pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, bool bWantUncompressed, ref byte[] pUncompressedDestBuffer, uint cbUncompressedDestBufferSize, ref uint nUncompressBytesWritten, uint nUncompressedVoiceDesiredSampleRate)
+        public static EVoiceResult ISteamUser_GetVoice(bool bWantCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, IntPtr nBytesWritten, bool bWantUncompressed, IntPtr pUncompressedDestBuffer, uint cbUncompressedDestBufferSize, IntPtr nUncompressBytesWritten, uint nUncompressedVoiceDesiredSampleRate)
         {
-            return (EVoiceResult)SteamEmulator.SteamUser.GetVoice(bWantCompressed, pDestBuffer, cbDestBufferSize, out nBytesWritten, bWantUncompressed, pUncompressedDestBuffer, cbUncompressedDestBufferSize, out nUncompressBytesWritten, nUncompressedVoiceDesiredSampleRate);
+            return (EVoiceResult)SteamEmulator.SteamUser.GetVoice(bWantCompressed, pDestBuffer, cbDestBufferSize, nBytesWritten, bWantUncompressed, pUncompressedDestBuffer, cbUncompressedDestBufferSize, nUncompressBytesWritten, nUncompressedVoiceDesiredSampleRate);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static EVoiceResult ISteamUser_DecompressVoice(IntPtr pCompressed, uint cbCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, uint nDesiredSampleRate)
-        //public static EVoiceResult ISteamUser_DecompressVoice(ref byte[] pCompressed, uint cbCompressed, ref byte[] pDestBuffer, uint cbDestBufferSize, ref uint nBytesWritten, uint nDesiredSampleRate)
+        public static EVoiceResult ISteamUser_DecompressVoice(IntPtr pCompressed, uint cbCompressed, IntPtr pDestBuffer, uint cbDestBufferSize, IntPtr nBytesWritten, uint nDesiredSampleRate)
         {
-            return (EVoiceResult)SteamEmulator.SteamUser.DecompressVoice(pCompressed, cbCompressed, pDestBuffer, cbDestBufferSize, out nBytesWritten, nDesiredSampleRate);
+            return (EVoiceResult)SteamEmulator.SteamUser.DecompressVoice(pCompressed, cbCompressed, pDestBuffer, cbDestBufferSize, nBytesWritten, nDesiredSampleRate);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
