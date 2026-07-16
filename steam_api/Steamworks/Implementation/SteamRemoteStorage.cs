@@ -85,19 +85,11 @@ namespace SKYNET.Steamworks.Implementation
             // Populate cache from disk immediately (no network, no blocking).
             RemoteStorageCache.Initialize(StoragePath);
 
-            // Fetch server manifest in the background with a tight timeout.
-            if (APIClient.IsEnabled)
-            {
-                WorkQueue.Enqueue(
-                    "RemoteStorage manifest-init",
-                    () =>
-                    {
-                        var files = APIClient.ListRemoteStorageFiles(timeoutMs: 1500);
-                        RemoteStorageCache.MergeRemoteList(files);
-                    },
-                    coalesceKey: "storage:manifest-init",
-                    highPriority: true);
-            }
+            // Do not start background workers or HTTP from the constructor.
+            // Dota creates Steam interfaces while the native loader/CLR startup
+            // path is still sensitive; work queued here can freeze before the
+            // game window exists. Remote manifest refresh is triggered lazily by
+            // Remote Storage calls such as FileExists/GetFileCount.
         }
 
         public bool FileWrite(string pchFile, IntPtr pvData, int cubData)
