@@ -7,7 +7,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
 using SKYNET.Callback;
 using SKYNET.Helpers;
 using SKYNET.Managers;
@@ -86,6 +85,7 @@ namespace SKYNET.Steamworks.Implementation
         public void ActivateGameOverlay(string friendsGroupID)
         {
             Write($"ActivateGameOverlay {friendsGroupID}");
+            OpenOverlayDialog(friendsGroupID);
         }
 
         public void ActivateGameOverlayInviteDialog(ulong steamIDLobby)
@@ -93,8 +93,7 @@ namespace SKYNET.Steamworks.Implementation
             try
             {
                 Write($"ActivateGameOverlayInviteDialog (Lobby SteamID = {steamIDLobby})");
-                OverlayType type = OverlayType.LobbyInvite;
-                // TODO: Show Overlay
+                OverlayManager.ShowInvite(steamIDLobby);
             }
             catch (Exception ex)
             {
@@ -105,68 +104,112 @@ namespace SKYNET.Steamworks.Implementation
         public void ActivateGameOverlayInviteDialogConnectString(string pchConnectString)
         {
             Write($"ActivateGameOverlayInviteDialogConnectString (URI = {pchConnectString})");
+            OverlayManager.ShowInvite(0, pchConnectString);
         }
 
         public void ActivateGameOverlayRemotePlayTogetherInviteDialog(ulong steamIDLobby)
         {
             Write($"ActivateGameOverlayRemotePlayTogetherInviteDialog (Lobby SteamID = {steamIDLobby})");
+            OverlayManager.ShowInvite(steamIDLobby);
         }
 
         public void ActivateGameOverlayToStore(uint nAppID, int eFlag)
         {
             Write($"ActivateGameOverlayToStore (AppID = {nAppID}, Flag = {eFlag})");
+            OverlayManager.ShowStore(nAppID, eFlag);
         }
 
         public void ActivateGameOverlayToUser(string friendsGroupID, ulong steamID)
         {
             Write($"ActivateGameOverlayToUser (GroupID = {friendsGroupID}, SteamID = {(CSteamID)steamID})");
-            OverlayType type = default;
-            switch (friendsGroupID)
+            switch ((friendsGroupID ?? string.Empty).ToLowerInvariant())
             {
                 case "steamid":
-                    type = OverlayType.SteamProfile;
+                    OverlayManager.ShowUser("profile", steamID);
                     break;
                 case "chat":
-                    type = OverlayType.Chat;
+                    OverlayManager.ShowUser("chat", steamID);
                     break;
                 case "jointrade":
-                    type = OverlayType.JoinTrade;
+                    OverlayManager.ShowUser("profile", steamID);
                     break;
                 case "stats":
-                    type = OverlayType.Stats;
+                    OverlayManager.ShowUser("stats", steamID);
                     break;
                 case "achievements":
-                    type = OverlayType.Achievements;
+                    OverlayManager.ShowUser("achievements", steamID);
                     break;
                 case "friendadd":
-                    type = OverlayType.FriendAdd;
                     WorkQueue.Enqueue("Send friend request", () => APIClient.SendFriendRequest(steamID),
                         "friends:request:" + steamID);
+                    OverlayManager.ShowUser("profile", steamID);
                     break;
                 case "friendremove":
-                    type = OverlayType.FriendRemove;
                     WorkQueue.Enqueue("Remove friend or request", () => APIClient.RemoveFriendOrRequest(steamID),
                         "friends:remove:" + steamID);
+                    OverlayManager.ShowUser("profile", steamID);
                     break;
                 case "friendrequestaccept":
-                    type = OverlayType.FriendRequestAccept;
                     WorkQueue.Enqueue("Accept friend request", () => APIClient.AcceptFriendRequest(steamID),
                         "friends:accept:" + steamID);
+                    OverlayManager.ShowUser("profile", steamID);
                     break;
                 case "friendrequestignore":
-                    type = OverlayType.FriendRequestIgnore;
                     WorkQueue.Enqueue("Ignore friend request", () => APIClient.RemoveFriendOrRequest(steamID),
                         "friends:ignore:" + steamID);
+                    OverlayManager.ShowUser("profile", steamID);
                     break;
                 default:
+                    OverlayManager.ShowUser("profile", steamID);
                     break;
             }
-            // TODO: Show Overlay
         }
 
         public void ActivateGameOverlayToWebPage(string pchURL, int eMode)
         {
             Write($"ActivateGameOverlayToWebPage {pchURL}");
+            OverlayManager.ShowWebPage(pchURL, eMode);
+        }
+
+        private void OpenOverlayDialog(string dialog)
+        {
+            var normalized = (dialog ?? string.Empty).Trim().ToLowerInvariant();
+            switch (normalized)
+            {
+                case "friends":
+                case "players":
+                case "chatroomgroup":
+                    OverlayManager.ShowPeople("People");
+                    break;
+
+                case "settings":
+                    OverlayManager.ShowSettings();
+                    break;
+
+                case "stats":
+                    OverlayManager.ShowUser("stats", (ulong)SteamEmulator.SteamID);
+                    break;
+
+                case "achievements":
+                    OverlayManager.ShowUser("achievements", (ulong)SteamEmulator.SteamID);
+                    break;
+
+                case "community":
+                case "officialgamegroup":
+                    OverlayManager.ShowHome("SKYNETEMU");
+                    break;
+
+                default:
+                    if (normalized.StartsWith("chatroomgroup/", StringComparison.Ordinal))
+                    {
+                        OverlayManager.ShowPeople("People");
+                    }
+                    else
+                    {
+                        OverlayManager.ShowHome("SKYNETEMU");
+                    }
+                    break;
+            }
         }
 
         public void ClearRichPresence()
@@ -1044,6 +1087,63 @@ namespace SKYNET.Steamworks.Implementation
                 return avatar.GetImage();
             }
             return EnsureDefaultAvatar().GetImage();
+        }
+
+        public bool TryGetAvatarBitmap(ulong steamID, out Bitmap bitmap)
+        {
+            bitmap = null;
+
+            if (steamID == 65535)
+            {
+                steamID = (ulong)SteamEmulator.SteamID;
+            }
+
+            if (steamID == 0 || steamID == ulong.MaxValue)
+            {
+                return false;
+            }
+
+            if (Avatars.TryGetValue(steamID, out var avatar))
+            {
+                var bytes = avatar.GetImage();
+                if (bytes != null && bytes.Length > 0)
+                {
+                    try
+                    {
+                        using (var ms = new MemoryStream(bytes))
+                        using (var loaded = Image.FromStream(ms))
+                        {
+                            bitmap = new Bitmap(loaded);
+                        }
+                        return true;
+                    }
+                    catch
+                    {
+                        bitmap = null;
+                    }
+                }
+            }
+
+            if (TryLoadCachedAvatar(steamID, out var cachedAvatar))
+            {
+                try
+                {
+                    using (var cacheCopy = new Bitmap(cachedAvatar))
+                    {
+                        AddOrUpdateAvatar(cacheCopy, steamID);
+                    }
+                    bitmap = cachedAvatar;
+                    return true;
+                }
+                catch
+                {
+                    cachedAvatar.Dispose();
+                    bitmap = null;
+                }
+            }
+
+            RequestAvatar(steamID);
+            return false;
         }
 
         public (int, int) GetImageSize(int index)

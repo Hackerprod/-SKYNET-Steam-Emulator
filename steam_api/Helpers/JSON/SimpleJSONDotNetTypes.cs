@@ -77,7 +77,7 @@ namespace SKYNET.Helpers.JSON
             else if (type == typeof(DateTime))
             {
                 stringBuilder.Append('"');
-                stringBuilder.Append(((DateTime)item).ToString(System.Globalization.CultureInfo.InvariantCulture));
+                stringBuilder.Append(((DateTime)item).ToUniversalTime().ToString("O", System.Globalization.CultureInfo.InvariantCulture));
                 stringBuilder.Append('"');
             }
             else if (type.IsEnum)

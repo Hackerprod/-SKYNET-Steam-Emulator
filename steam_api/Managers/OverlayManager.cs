@@ -1,72 +1,849 @@
-﻿using SKYNET.Helpers;
+using Overlay.Core;
+using SKYNET.Callback;
+using SKYNET.Helpers;
+using SKYNET.Types;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace SKYNET.Managers
 {
     public class OverlayManager
     {
         public static Direct3DVersion version;
+
+        private static readonly object Sync = new object();
+        private static readonly ManualResetEventSlim InitializationCompleted = new ManualResetEventSlim(true);
+        private static OverlayService Service;
+        private static bool Initialized;
+        private static bool Initializing;
+
         public static void Initialize()
         {
-            ThreadPool.QueueUserWorkItem(InitializeInternal);
+            ThreadPool.QueueUserWorkItem(_ => EnsureInitialized());
         }
 
-        private static void InitializeInternal(object state)
+        public static bool IsOverlayEnabled()
         {
-            version = Direct3DVersion.Unknown;
+            return true;
+        }
 
-            IntPtr d3D9Loaded = IntPtr.Zero;
-            IntPtr d3D10Loaded = IntPtr.Zero;
-            IntPtr d3D10_1Loaded = IntPtr.Zero;
-            IntPtr d3D11Loaded = IntPtr.Zero;
-            IntPtr d3D11_1Loaded = IntPtr.Zero;
+        public static bool ShowHome(string title = null)
+        {
+            QueueIdentityRefresh();
+            QueueStatsRefresh(GetCurrentSteamId());
 
-            int delayTime = 100;
-            int retryCount = 0;
-
-            while (d3D9Loaded == IntPtr.Zero && d3D10Loaded == IntPtr.Zero && d3D10_1Loaded == IntPtr.Zero && d3D11Loaded == IntPtr.Zero && d3D11_1Loaded == IntPtr.Zero)
+            var request = new OverlayRequest
             {
-                retryCount++;
-                d3D9Loaded = NativeMethods.GetModuleHandle("d3d9.dll");
-                d3D10Loaded = NativeMethods.GetModuleHandle("d3d10.dll");
-                d3D10_1Loaded = NativeMethods.GetModuleHandle("d3d10_1.dll");
-                d3D11Loaded = NativeMethods.GetModuleHandle("d3d11.dll");
-                d3D11_1Loaded = NativeMethods.GetModuleHandle("d3d11_1.dll");
-                Thread.Sleep(delayTime);
+                Kind = OverlayKind.Home,
+                Title = title ?? "SKYNETEMU",
+                User = BuildCurrentUser(),
+                Users = BuildPeopleList(),
+                Stats = BuildStats(GetCurrentSteamId()),
+                Achievements = BuildAchievements(GetCurrentSteamId()),
+                Summary = BuildHomeSummary(),
+                Activities = BuildHomeActivities()
+            };
 
-                if (retryCount * delayTime > 5000)
+            return Show(request);
+        }
+
+        public static bool ShowPeople(string title = null)
+        {
+            APIClient.QueueFriendsRefresh();
+
+            return Show(new OverlayRequest
+            {
+                Kind = OverlayKind.People,
+                Title = title ?? "People",
+                User = BuildCurrentUser(),
+                Users = BuildPeopleList()
+            });
+        }
+
+        public static bool ShowInvite(ulong lobbyId, string connectString = null)
+        {
+            APIClient.QueueFriendsRefresh();
+
+            return Show(new OverlayRequest
+            {
+                Kind = OverlayKind.Invite,
+                Title = "Invite Friends",
+                SessionId = lobbyId == 0 ? (ulong?)null : lobbyId,
+                Message = string.IsNullOrWhiteSpace(connectString) ? null : connectString,
+                User = BuildCurrentUser(),
+                Users = BuildPeopleList().Where(u => u.HasFriend).ToList(),
+                Metadata = new Dictionary<string, string>
                 {
-                    Write("Unsupported Direct3D version, or Direct3D DLL not loaded within 5 seconds.");
-                    return;
+                    ["connect"] = connectString ?? string.Empty
+                }
+            });
+        }
+
+        public static bool ShowStore(uint appId, int flag)
+        {
+            var effectiveAppId = appId == 0 ? SteamEmulator.AppID : appId;
+
+            return Show(new OverlayRequest
+            {
+                Kind = OverlayKind.Store,
+                Title = effectiveAppId == 0 ? "Store" : $"Store - App {effectiveAppId}",
+                AppId = effectiveAppId == 0 ? (uint?)null : effectiveAppId,
+                User = BuildCurrentUser(),
+                StoreItems = new List<OverlayStoreItem>(),
+                Metadata = new Dictionary<string, string>
+                {
+                    ["storeFlag"] = flag.ToString()
+                }
+            });
+        }
+
+        public static bool ShowWebPage(string url, int mode)
+        {
+            return Show(new OverlayRequest
+            {
+                Kind = OverlayKind.WebPage,
+                Title = "Web Page",
+                Url = NormalizeUrl(url),
+                User = BuildCurrentUser(),
+                Metadata = new Dictionary<string, string>
+                {
+                    ["mode"] = mode.ToString()
+                }
+            });
+        }
+
+        public static bool ShowUser(string dialog, ulong steamId)
+        {
+            var effectiveSteamId = steamId == 0 ? GetCurrentSteamId() : steamId;
+            var normalized = (dialog ?? string.Empty).Trim().ToLowerInvariant();
+            OverlayKind kind;
+            string title;
+
+            switch (normalized)
+            {
+                case "chat":
+                    kind = OverlayKind.UserChat;
+                    title = "Chat";
+                    break;
+                case "stats":
+                    kind = OverlayKind.UserStats;
+                    title = "Stats";
+                    break;
+                case "achievements":
+                    kind = OverlayKind.UserAchievements;
+                    title = "Achievements";
+                    break;
+                default:
+                    kind = OverlayKind.UserProfile;
+                    title = "User Profile";
+                    break;
+            }
+
+            QueueUserRefresh(effectiveSteamId);
+            QueueStatsRefresh(effectiveSteamId);
+
+            var user = BuildUser(effectiveSteamId);
+            if (user != null && !string.IsNullOrWhiteSpace(user.PersonaName))
+            {
+                title = user.PersonaName;
+            }
+
+            return Show(new OverlayRequest
+            {
+                Kind = kind,
+                Title = title,
+                UserId = effectiveSteamId,
+                AppId = SteamEmulator.AppID,
+                User = user,
+                Stats = BuildStats(effectiveSteamId),
+                Achievements = BuildAchievements(effectiveSteamId),
+                Metadata = new Dictionary<string, string>
+                {
+                    ["dialog"] = normalized,
+                    ["steamId"] = effectiveSteamId.ToString()
+                }
+            });
+        }
+
+        public static bool ShowSettings()
+        {
+            return Show(new OverlayRequest
+            {
+                Kind = OverlayKind.Settings,
+                Title = "Settings",
+                User = BuildCurrentUser(),
+                Metadata = BuildSettingsMetadata()
+            });
+        }
+
+        public static bool Hide()
+        {
+            try
+            {
+                if (!EnsureInitialized())
+                {
+                    return false;
+                }
+
+                Service.Hide();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Write($"Hide failed: {ex}");
+                return false;
+            }
+        }
+
+        public static bool Show(OverlayRequest request)
+        {
+            try
+            {
+                if (request == null)
+                {
+                    return false;
+                }
+
+                if (!EnsureInitialized())
+                {
+                    return false;
+                }
+
+                Service.Show(request);
+                Write($"Show {request.Kind} title={request.Title ?? string.Empty}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Write($"Show failed: {ex}");
+                return false;
+            }
+        }
+
+        private static bool EnsureInitialized()
+        {
+            bool waitForCurrentInitialization = false;
+
+            lock (Sync)
+            {
+                if (Initialized && Service != null)
+                {
+                    return true;
+                }
+
+                if (Initializing)
+                {
+                    waitForCurrentInitialization = true;
+                }
+                else
+                {
+                    Initializing = true;
+                    InitializationCompleted.Reset();
                 }
             }
 
-            if (d3D11_1Loaded != IntPtr.Zero)
+            if (waitForCurrentInitialization)
             {
-                Write("Autodetect found Direct3D 11.1");
-                version = Direct3DVersion.Direct3D11_1;
+                return WaitForInitialization();
             }
-            if (d3D11Loaded != IntPtr.Zero)
+
+            try
             {
-                Write("Autodetect found Direct3D 11");
-                version = Direct3DVersion.Direct3D11;
+                version = DetectDirect3DVersion();
+                var target = ResolveTargetWindowHandle();
+                var overlay = new OverlayService();
+                overlay.OverlayActivated += OnOverlayActivated;
+                overlay.Initialize(new OverlayOptions
+                {
+                    TargetWindowHandle = target,
+                    FollowTargetWindow = target != IntPtr.Zero,
+                    TopMost = true,
+                    DimBackground = true,
+                    Margin = 48
+                });
+
+                lock (Sync)
+                {
+                    Service = overlay;
+                    Initialized = true;
+                    Initializing = false;
+                    InitializationCompleted.Set();
+                }
+
+                Write($"Overlay initialized target=0x{target.ToInt64():X} d3d={version}");
+                return true;
             }
-            if (d3D10_1Loaded != IntPtr.Zero)
+            catch (Exception ex)
             {
-                Write("Autodetect found Direct3D 10.1");
-                version = Direct3DVersion.Direct3D10_1;
+                lock (Sync)
+                {
+                    Service = null;
+                    Initialized = false;
+                    Initializing = false;
+                    InitializationCompleted.Set();
+                }
+
+                Write($"Overlay initialization failed: {ex}");
+                return false;
             }
-            if (d3D10Loaded != IntPtr.Zero)
+        }
+
+        private static bool WaitForInitialization()
+        {
+            if (!InitializationCompleted.Wait(TimeSpan.FromMilliseconds(1500)))
             {
-                Write("Autodetect found Direct3D 10");
-                version = Direct3DVersion.Direct3D10;
+                return false;
             }
-            if (d3D9Loaded != IntPtr.Zero)
+
+            lock (Sync)
             {
-                Write("Autodetect found Direct3D 9");
-                version = Direct3DVersion.Direct3D9;
+                return Initialized && Service != null;
+            }
+        }
+
+        private static void OnOverlayActivated(object sender, OverlayActivatedEventArgs e)
+        {
+            SteamEmulator.GameOverlay = e.Active;
+            CallbackManager.AddCallback(new GameOverlayActivated_t
+            {
+                Active = e.Active ? (byte)1 : (byte)0,
+                UserInitiated = e.UserInitiated,
+                AppID = SteamEmulator.AppID,
+                OverlayPID = (uint)Process.GetCurrentProcess().Id
+            });
+        }
+
+        private static IntPtr ResolveTargetWindowHandle()
+        {
+            try
+            {
+                var process = Process.GetCurrentProcess();
+                for (int i = 0; i < 20; i++)
+                {
+                    process.Refresh();
+                    if (process.MainWindowHandle != IntPtr.Zero)
+                    {
+                        return process.MainWindowHandle;
+                    }
+
+                    Thread.Sleep(50);
+                }
+
+                return SKYNET.Helpers.NativeMethods.GetForegroundWindow();
+            }
+            catch
+            {
+                return IntPtr.Zero;
+            }
+        }
+
+        private static Direct3DVersion DetectDirect3DVersion()
+        {
+            if (SKYNET.Helpers.NativeMethods.GetModuleHandle("d3d11.dll") != IntPtr.Zero ||
+                SKYNET.Helpers.NativeMethods.GetModuleHandle("d3d11_1.dll") != IntPtr.Zero)
+            {
+                return Direct3DVersion.Direct3D11;
+            }
+
+            if (SKYNET.Helpers.NativeMethods.GetModuleHandle("d3d10.dll") != IntPtr.Zero ||
+                SKYNET.Helpers.NativeMethods.GetModuleHandle("d3d10_1.dll") != IntPtr.Zero)
+            {
+                return Direct3DVersion.Direct3D10;
+            }
+
+            if (SKYNET.Helpers.NativeMethods.GetModuleHandle("d3d9.dll") != IntPtr.Zero)
+            {
+                return Direct3DVersion.Direct3D9;
+            }
+
+            return Direct3DVersion.Unknown;
+        }
+
+        private static string NormalizeUrl(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                return null;
+            }
+
+            var value = url.Trim();
+            if (value.StartsWith("www.", StringComparison.OrdinalIgnoreCase))
+            {
+                value = "https://" + value;
+            }
+
+            if (!Uri.TryCreate(value, UriKind.Absolute, out var uri))
+            {
+                return value;
+            }
+
+            return uri.ToString();
+        }
+
+        private static void QueueIdentityRefresh()
+        {
+            APIClient.QueueSelfRefresh();
+            APIClient.QueueFriendsRefresh();
+        }
+
+        private static void QueueUserRefresh(ulong steamId)
+        {
+            if (steamId == 0)
+            {
+                return;
+            }
+
+            if (steamId == GetCurrentSteamId())
+            {
+                APIClient.QueueSelfRefresh();
+                return;
+            }
+
+            APIClient.QueueUserProfileRefresh(steamId, true);
+        }
+
+        private static void QueueStatsRefresh(ulong steamId)
+        {
+            if (steamId == 0)
+            {
+                return;
+            }
+
+            ThreadPool.QueueUserWorkItem(_ =>
+            {
+                try
+                {
+                    if (steamId == GetCurrentSteamId())
+                    {
+                        APIClient.RefreshCurrentStats();
+                    }
+                    else
+                    {
+                        APIClient.RefreshStatsForUser(steamId);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Write($"Stats refresh failed for {steamId}: {ex.Message}");
+                }
+            });
+        }
+
+        private static OverlayUser BuildCurrentUser()
+        {
+            if (StateCache.TryGetSelf(out var self))
+            {
+                return ToOverlayUser(self);
+            }
+
+            var steamId = GetCurrentSteamId();
+            if (steamId == 0)
+            {
+                return null;
+            }
+
+            return new OverlayUser
+            {
+                SteamId = steamId,
+                AccountId = GetCurrentAccountId(),
+                PersonaName = SteamEmulator.PersonaName ?? string.Empty,
+                AppId = SteamEmulator.AppID,
+                PersonaState = 1,
+                HasFriend = true,
+                FriendRelationship = 3,
+                IsSelf = true,
+                AvatarPng = TryGetAvatarPng(steamId),
+                Status = SteamEmulator.AppID == 0 ? "Online" : $"Playing App {SteamEmulator.AppID}"
+            };
+        }
+
+        private static OverlayUser BuildUser(ulong steamId)
+        {
+            if (steamId == 0)
+            {
+                return null;
+            }
+
+            if (steamId == GetCurrentSteamId())
+            {
+                return BuildCurrentUser();
+            }
+
+            if (StateCache.TryGetFriend(steamId, out var friend))
+            {
+                return ToOverlayUser(friend);
+            }
+
+            return new OverlayUser
+            {
+                SteamId = steamId,
+                AccountId = steamId.GetAccountID(),
+                PersonaState = 0,
+                IsSelf = false,
+                Status = APIClient.IsUserProfileKnownMissing(steamId) ? "Profile not found" : "Profile pending"
+            };
+        }
+
+        private static List<OverlayUser> BuildPeopleList()
+        {
+            var users = StateCache.GetFriends()
+                .Select(ToOverlayUser)
+                .Where(u => u != null)
+                .OrderByDescending(u => u.PersonaState != 0)
+                .ThenBy(u => u.PersonaName)
+                .ThenBy(u => u.SteamId)
+                .ToList();
+
+            var self = BuildCurrentUser();
+            if (self != null && users.All(u => u.SteamId != self.SteamId))
+            {
+                users.Insert(0, self);
+            }
+
+            return users;
+        }
+
+        private static List<OverlayStat> BuildStats(ulong steamId)
+        {
+            if (steamId == 0)
+            {
+                return new List<OverlayStat>();
+            }
+
+            return StateCache.GetStats(steamId)
+                .Where(s => !string.IsNullOrWhiteSpace(s.Name))
+                .OrderBy(s => s.Name)
+                .Select(s => new OverlayStat
+                {
+                    Name = s.Name,
+                    Value = s.Data,
+                    DisplayValue = s.Data.ToString()
+                })
+                .ToList();
+        }
+
+        private static List<OverlayAchievement> BuildAchievements(ulong steamId)
+        {
+            if (steamId == 0)
+            {
+                return new List<OverlayAchievement>();
+            }
+
+            return StateCache.GetAchievements(steamId)
+                .Where(a => !string.IsNullOrWhiteSpace(a.Name))
+                .OrderByDescending(a => a.Earned)
+                .ThenBy(a => a.Name)
+                .Select(a => new OverlayAchievement
+                {
+                    Name = a.Name,
+                    Earned = a.Earned,
+                    Date = a.Date,
+                    Progress = a.Progress,
+                    MaxProgress = a.MaxProgress
+                })
+                .ToList();
+        }
+
+        private static List<OverlaySummaryItem> BuildHomeSummary()
+        {
+            var steamId = GetCurrentSteamId();
+            var friends = StateCache.GetFriends();
+            var stats = BuildStats(steamId);
+            var achievements = BuildAchievements(steamId);
+            var currentPlayers = StateCache.GetCurrentPlayers();
+            var level = StateCache.GetSelfPlayerLevel();
+
+            return new List<OverlaySummaryItem>
+            {
+                new OverlaySummaryItem
+                {
+                    Label = "AppID",
+                    Value = SteamEmulator.AppID == 0 ? "Unknown" : SteamEmulator.AppID.ToString(),
+                    Tone = "accent"
+                },
+                new OverlaySummaryItem
+                {
+                    Label = "Friends",
+                    Value = friends.Count.ToString(),
+                    Tone = friends.Count > 0 ? "success" : "warning"
+                },
+                new OverlaySummaryItem
+                {
+                    Label = "Current Players",
+                    Value = currentPlayers.ToString(),
+                    Tone = currentPlayers > 0 ? "success" : "accent"
+                },
+                new OverlaySummaryItem
+                {
+                    Label = "Player Level",
+                    Value = level.ToString(),
+                    Tone = level > 0 ? "success" : "accent"
+                },
+                new OverlaySummaryItem
+                {
+                    Label = "Stats",
+                    Value = stats.Count.ToString(),
+                    Tone = stats.Count > 0 ? "success" : "accent"
+                },
+                new OverlaySummaryItem
+                {
+                    Label = "Achievements",
+                    Value = achievements.Count(a => a.Earned) + "/" + achievements.Count,
+                    Tone = achievements.Any(a => a.Earned) ? "success" : "accent"
+                }
+            };
+        }
+
+        private static List<OverlayActivityItem> BuildHomeActivities()
+        {
+            var activities = new List<OverlayActivityItem>();
+            var self = BuildCurrentUser();
+            if (self != null)
+            {
+                activities.Add(new OverlayActivityItem
+                {
+                    Title = string.IsNullOrWhiteSpace(self.PersonaName) ? self.SteamId.ToString() : self.PersonaName,
+                    Detail = self.Status,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            foreach (var user in BuildPeopleList().Where(u => u.SteamId != self?.SteamId).Take(6))
+            {
+                activities.Add(new OverlayActivityItem
+                {
+                    Title = string.IsNullOrWhiteSpace(user.PersonaName) ? user.SteamId.ToString() : user.PersonaName,
+                    Detail = user.Status,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            return activities;
+        }
+
+        private static Dictionary<string, string> BuildSettingsMetadata()
+        {
+            return new Dictionary<string, string>
+            {
+                ["AppID"] = SteamEmulator.AppID.ToString(),
+                ["SteamID"] = GetCurrentSteamId().ToString(),
+                ["AccountID"] = GetCurrentAccountId().ToString(),
+                ["Persona"] = SteamEmulator.PersonaName ?? string.Empty,
+                ["Language"] = SteamEmulator.Language ?? string.Empty,
+                ["Server URL"] = SteamEmulator.ServerUrl ?? string.Empty,
+                ["Server API"] = SteamEmulator.UseServerApi.ToString(),
+                ["Secure Networking"] = SteamEmulator.SecureNetworking.ToString(),
+                ["Voice Capture"] = SteamEmulator.EnableVoiceCapture.ToString(),
+                ["HTTP Timeout"] = SteamEmulator.HttpTimeoutMs.ToString(),
+                ["Poll Interval"] = SteamEmulator.PollIntervalMs.ToString()
+            };
+        }
+
+        private static OverlayUser ToOverlayUser(SteamPlayer player)
+        {
+            if (player == null)
+            {
+                return null;
+            }
+
+            var isSelf = player.SteamID == GetCurrentSteamId();
+            var localAppId = SteamEmulator.AppID;
+            var appId = isSelf && localAppId != 0 ? localAppId : player.GameID;
+            var lobbyId = isSelf &&
+                          player.GameID != 0 &&
+                          localAppId != 0 &&
+                          player.GameID != localAppId
+                ? 0
+                : player.LobbyID;
+
+            return new OverlayUser
+            {
+                SteamId = player.SteamID,
+                AccountId = player.AccountID,
+                PersonaName = player.PersonaName ?? string.Empty,
+                AppId = appId,
+                LobbyId = lobbyId,
+                PersonaState = player.PersonaState,
+                HasFriend = player.HasFriend,
+                FriendRelationship = player.FriendRelationship,
+                IsSelf = isSelf,
+                AvatarPng = TryGetAvatarPng(player.SteamID),
+                RichPresence = new Dictionary<string, string>(player.RichPresence ?? new Dictionary<string, string>()),
+                Status = BuildStatus(player, appId, lobbyId)
+            };
+        }
+
+        private static byte[] TryGetAvatarPng(ulong steamId)
+        {
+            if (steamId == 0 || steamId == ulong.MaxValue || SteamEmulator.SteamFriends == null)
+            {
+                return new byte[0];
+            }
+
+            try
+            {
+                if (!SteamEmulator.SteamFriends.TryGetAvatarBitmap(steamId, out var bitmap) || bitmap == null)
+                {
+                    return new byte[0];
+                }
+
+                using (bitmap)
+                using (var stream = new MemoryStream())
+                {
+                    if (IsPlaceholderAvatar(bitmap))
+                    {
+                        return new byte[0];
+                    }
+
+                    bitmap.Save(stream, ImageFormat.Png);
+                    return stream.ToArray();
+                }
+            }
+            catch (Exception ex)
+            {
+                Write($"Avatar load failed for {steamId}: {ex.Message}");
+                return new byte[0];
+            }
+        }
+
+        private static bool IsPlaceholderAvatar(Bitmap bitmap)
+        {
+            if (bitmap == null || bitmap.Width <= 0 || bitmap.Height <= 0)
+            {
+                return true;
+            }
+
+            var stepX = Math.Max(1, bitmap.Width / 8);
+            var stepY = Math.Max(1, bitmap.Height / 8);
+            Color? first = null;
+            var samples = 0;
+            var uniform = 0;
+            var dark = 0;
+            var transparent = 0;
+
+            for (var y = 0; y < bitmap.Height; y += stepY)
+            {
+                for (var x = 0; x < bitmap.Width; x += stepX)
+                {
+                    var color = bitmap.GetPixel(x, y);
+                    samples++;
+
+                    if (color.A < 8)
+                    {
+                        transparent++;
+                    }
+
+                    if (color.R <= 40 && color.G <= 40 && color.B <= 40)
+                    {
+                        dark++;
+                    }
+
+                    if (!first.HasValue)
+                    {
+                        first = color;
+                    }
+                    else if (Math.Abs(first.Value.R - color.R) <= 3 &&
+                             Math.Abs(first.Value.G - color.G) <= 3 &&
+                             Math.Abs(first.Value.B - color.B) <= 3 &&
+                             Math.Abs(first.Value.A - color.A) <= 3)
+                    {
+                        uniform++;
+                    }
+                }
+            }
+
+            if (samples == 0)
+            {
+                return true;
+            }
+
+            return transparent == samples ||
+                   (dark >= samples * 0.95 && uniform >= (samples - 1) * 0.90);
+        }
+
+        private static string BuildStatus(SteamPlayer player, uint appId, ulong lobbyId)
+        {
+            if (player == null)
+            {
+                return string.Empty;
+            }
+
+            if (player.RichPresence != null &&
+                player.RichPresence.TryGetValue("status", out var richStatus) &&
+                !string.IsNullOrWhiteSpace(richStatus))
+            {
+                return richStatus;
+            }
+
+            if (player.RichPresence != null &&
+                player.RichPresence.TryGetValue("steam_display", out var display) &&
+                !string.IsNullOrWhiteSpace(display))
+            {
+                return display;
+            }
+
+            if (appId != 0)
+            {
+                var gameStatus = appId == SteamEmulator.AppID
+                    ? "In game"
+                    : $"Playing App {appId}";
+
+                if (lobbyId != 0)
+                {
+                    gameStatus += $" - Lobby {lobbyId}";
+                }
+
+                return gameStatus;
+            }
+
+            switch (player.PersonaState)
+            {
+                case 1:
+                    return "Online";
+                case 2:
+                    return "Busy";
+                case 3:
+                    return "Away";
+                case 4:
+                    return "Snooze";
+                case 5:
+                    return "Looking to trade";
+                case 6:
+                    return "Looking to play";
+                case 7:
+                    return "Invisible";
+                default:
+                    return "Offline";
+            }
+        }
+
+        private static ulong GetCurrentSteamId()
+        {
+            try
+            {
+                return (ulong)SteamEmulator.SteamID;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        private static uint GetCurrentAccountId()
+        {
+            try
+            {
+                return SteamEmulator.SteamID.GetAccountID();
+            }
+            catch
+            {
+                return 0;
             }
         }
 
@@ -85,6 +862,5 @@ namespace SKYNET.Managers
             Direct3D11,
             Direct3D11_1,
         }
-
     }
 }

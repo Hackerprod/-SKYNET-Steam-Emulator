@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SKYNET_server.Json;
 using SKYNET_server.Models;
 using SKYNET_server.Persistence;
 using SKYNET_server.Services;
@@ -63,7 +64,10 @@ if (args.Contains("--verify-lua-json"))
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages()
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new FlexibleDateTimeJsonConverter()));
+builder.Services.ConfigureHttpJsonOptions(options =>
+    options.SerializerOptions.Converters.Add(new FlexibleDateTimeJsonConverter()));
 builder.Services.AddSingleton<GameCoordinatorTraceService>();
 builder.Services.AddSingleton<GameServerSettingsService>();
 builder.Services.AddSingleton<DotaDedicatedServerSupervisor>();

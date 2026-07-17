@@ -201,7 +201,7 @@ namespace SKYNET.Steamworks.Implementation
         public bool IsOverlayEnabled()
         {
             Write("IsOverlayEnabled");
-            return true;
+            return OverlayManager.IsOverlayEnabled();
         }
 
         public bool BOverlayNeedsPresent()
