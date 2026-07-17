@@ -28,7 +28,7 @@ namespace SKYNET.Steamworks.Exported
             BumpContextCounter("SteamInternal_SteamAPI_Init");
             if (SteamEmulator.SecureNetworking)
             {
-                Write("SecureNetworking requested; SDR CA disk patching is enabled (memory patch disabled)");
+                Write("SecureNetworking requested; SDR CA memory patching is enabled");
             }
             return 0; // k_ESteamAPIInitResult_OK
         }

@@ -175,8 +175,11 @@ public class SteamEmulator
 
             if (SecureNetworking)
             {
-                bool diskPatched = SdrCertPatcher.EnsureDiskPatched();
-                Write($"SDR disk CA patch ready: {diskPatched}");
+                // In-memory SDR CA patch. Start() only announces it — NO module or
+                // thread work on the init thread (that deadlocks Dota's startup at
+                // ~30MB on the loader lock). The actual patch runs later from a game
+                // thread on the first SDR cert request (GetCertAsync).
+                SdrCertPatcher.Start();
             }
 
             //UserManager.Initialize();

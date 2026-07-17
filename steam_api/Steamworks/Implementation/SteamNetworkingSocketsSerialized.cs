@@ -70,7 +70,7 @@ namespace SKYNET.Steamworks.Implementation
 
             Write("GetCertAsync: secure SDR request queued");
 
-            EnsureSecureCertDiskPatched("GetCertAsync", 750);
+            EnsureSecureCertMemoryPatched("GetCertAsync");
 
             return EnqueueCertCallbackResult(
                 CreateEmptyCertResult(EResult.k_EResultNoConnection),
@@ -590,7 +590,7 @@ namespace SKYNET.Steamworks.Implementation
                 return 0;
             }
 
-            EnsureSecureCertDiskPatched("GetNetworkConfigJSON");
+            EnsureSecureCertMemoryPatched("GetNetworkConfigJSON");
             return WriteNetworkConfigJSON(buf, cbBuf);
         }
 
@@ -614,7 +614,7 @@ namespace SKYNET.Steamworks.Implementation
                 return 0;
             }
 
-            EnsureSecureCertDiskPatched("GetNetworkConfigJSON(partner)");
+            EnsureSecureCertMemoryPatched("GetNetworkConfigJSON(partner)");
             return WriteNetworkConfigJSON(buf, cbBuf);
         }
 
@@ -674,7 +674,7 @@ namespace SKYNET.Steamworks.Implementation
             return SteamHTTP.SdrConfigJson;
         }
 
-        internal static bool EnsureSecureCertDiskPatched(string reason, int waitMs = 0)
+        internal static bool EnsureSecureCertMemoryPatched(string reason)
         {
             if (!SecureCertMode)
             {
@@ -683,13 +683,15 @@ namespace SKYNET.Steamworks.Implementation
 
             if (Interlocked.CompareExchange(ref SecureCertPatcherStartLogged, 1, 0) == 0)
             {
-                SteamEmulator.Write("SteamNetworkingSocketsSerialized", $"Ensuring SDR disk CA patch ({reason}); memory patch disabled");
+                SteamEmulator.Write("SteamNetworkingSocketsSerialized", $"Ensuring SDR memory CA patch ({reason})");
             }
 
-            bool patched = SdrCertPatcher.EnsurePatched(waitMs);
-            if (waitMs > 0 && !patched)
+            // Inline attempt on the current (game/interface) thread — the module is
+            // mapped by now and the loader lock is free here, so this is safe.
+            bool patched = SdrCertPatcher.TryPatchNow();
+            if (!patched)
             {
-                SteamEmulator.Write("SteamNetworkingSocketsSerialized", $"SDR disk CA patch was not ready after {waitMs}ms; memory patch disabled");
+                SteamEmulator.Write("SteamNetworkingSocketsSerialized", "SDR memory CA patch not ready yet (module not mapped)");
             }
 
             return patched;

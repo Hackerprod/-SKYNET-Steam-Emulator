@@ -256,7 +256,6 @@ namespace SKYNET.Steamworks.Implementation
         public int GetGameCoordinatorServerLogin(IntPtr pLoginInfo, IntPtr pcbSignedBlob, IntPtr pBlob)
         {
             Write("GetGameCoordinatorServerLogin");
-            // SteamDatagramGameCoordinatorServerLogin pLoginInfo
             return default;
         }
 

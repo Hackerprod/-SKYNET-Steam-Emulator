@@ -27,9 +27,6 @@ namespace SKYNET.Steamworks.Implementation
         {
             Write($"RequestLANServerList");
             var response = pRequestServersResponse.ToType<ISteamMatchmakingServerListResponse>();
-            //response.RefreshComplete(IntPtr.Zero, EMatchMakingServerResponse.eServerResponded);
-            //response.m_RefreshComplete(IntPtr.Zero, EMatchMakingServerResponse.eServerResponded);
-            //response.m_ServerResponded(IntPtr.Zero, 225);
             return IntPtr.Zero;
         }
 

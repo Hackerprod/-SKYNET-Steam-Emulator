@@ -43,7 +43,7 @@ namespace SKYNET.Steamworks.Implementation
             Write("InitRelayNetworkAccess");
             if (SteamNetworkingSocketsSerialized.SecureCertMode)
             {
-                SteamNetworkingSocketsSerialized.EnsureSecureCertDiskPatched("InitRelayNetworkAccess");
+                SteamNetworkingSocketsSerialized.EnsureSecureCertMemoryPatched("InitRelayNetworkAccess");
             }
             else
             {
@@ -56,7 +56,7 @@ namespace SKYNET.Steamworks.Implementation
             Write("GetRelayNetworkStatus");
             if (SteamNetworkingSocketsSerialized.SecureCertMode)
             {
-                SteamNetworkingSocketsSerialized.EnsureSecureCertDiskPatched("GetRelayNetworkStatus");
+                SteamNetworkingSocketsSerialized.EnsureSecureCertMemoryPatched("GetRelayNetworkStatus");
             }
 
             SteamRelayNetworkStatus_t data = SteamNetworkingSocketsSerialized.BuildRelayNetworkStatus();
@@ -107,7 +107,7 @@ namespace SKYNET.Steamworks.Implementation
             Write("CheckPingDataUpToDate");
             if (SteamNetworkingSocketsSerialized.SecureCertMode)
             {
-                SteamNetworkingSocketsSerialized.EnsureSecureCertDiskPatched("CheckPingDataUpToDate");
+                SteamNetworkingSocketsSerialized.EnsureSecureCertMemoryPatched("CheckPingDataUpToDate");
             }
             else
             {
