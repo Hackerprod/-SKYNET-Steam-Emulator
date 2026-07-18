@@ -83,9 +83,16 @@ namespace SKYNET.Steamworks.Implementation
             {
                 if (!APIClient.IsConnected)
                 {
-                    APIClient.EnsureSession();
-                    Write("GetSteamID unavailable: no active server session");
-                    return CSteamID.Invalid;
+                    // Try a short blocking handshake first so early pollers (Unity /
+                    // Steamworks.NET) get the real SteamID instead of caching 0 and
+                    // losing the avatar. Falls back to the async path if it can't
+                    // connect in time.
+                    if (!APIClient.EnsureSessionBlocking(600))
+                    {
+                        APIClient.EnsureSession();
+                        Write("GetSteamID unavailable: no active server session");
+                        return CSteamID.Invalid;
+                    }
                 }
 
                 // Connected: return the cached identity and refresh in background.

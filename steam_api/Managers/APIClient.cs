@@ -21,12 +21,9 @@ namespace SKYNET.Managers
 {
     public static class APIClient
     {
-        private static readonly object ClientLock = new object();
         private static readonly TimeSpan RefreshWindow = TimeSpan.FromSeconds(15);
         private static readonly TimeSpan MissingUserProfileWindow = TimeSpan.FromMinutes(5);
-        private static HttpClient Client;
         private static JavaScriptSerializer Serializer;
-        private static bool Configured;
         private static readonly ConcurrentDictionary<ulong, DateTime> MissingUserProfiles = new ConcurrentDictionary<ulong, DateTime>();
         private static readonly ConcurrentDictionary<ulong, byte> PendingUserProfileRefreshes = new ConcurrentDictionary<ulong, byte>();
         private static int FriendsRefreshQueued;
@@ -51,6 +48,15 @@ namespace SKYNET.Managers
 
         public static void Initialize()
         {
+            // Start the server session handshake as early as possible. Unity /
+            // Steamworks.NET games poll GetSteamID in a brief early window and cache
+            // whatever they get, so connecting here (during the rest of the game's
+            // startup) means the identity — and thus the avatar — is ready in time.
+            // Also warms up the HTTP stack so the first request isn't slow.
+            if (IsEnabled)
+            {
+                QueueSessionHandshake();
+            }
         }
 
         // Non-blocking on the caller (game) thread: returns whether a session
@@ -73,6 +79,40 @@ namespace SKYNET.Managers
             return false;
         }
 
+        // Serializes the blocking handshake so concurrent callers don't fire duplicate
+        // session POSTs.
+        private static readonly object HandshakeSyncLock = new object();
+
+        /// <summary>
+        /// Blocking session handshake with a short timeout, for game-thread callers
+        /// (e.g. GetSteamID) that need the identity on the first call. Unity /
+        /// Steamworks.NET games poll GetSteamID during a brief early window and cache
+        /// whatever they get, so the async handshake alone can arrive too late and the
+        /// game ends up with SteamID 0 (no avatar). Returns true if a session exists.
+        /// </summary>
+        public static bool EnsureSessionBlocking(int timeoutMs)
+        {
+            if (!IsEnabled)
+            {
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(SteamEmulator.AccessToken))
+            {
+                return true;
+            }
+
+            lock (HandshakeSyncLock)
+            {
+                if (!string.IsNullOrWhiteSpace(SteamEmulator.AccessToken))
+                {
+                    return true;
+                }
+
+                return EstablishSessionBlocking(timeoutMs);
+            }
+        }
+
         private static void QueueSessionHandshake()
         {
             if (!IsEnabled || !string.IsNullOrWhiteSpace(SteamEmulator.AccessToken))
@@ -91,6 +131,7 @@ namespace SKYNET.Managers
                 {
                     if (EstablishSessionBlocking())
                     {
+                        SteamEmulator.Write("APIClient", "Server session connected");
                         RefreshSelf(true);
                         RefreshFriends(true);
                         SteamEmulator.SteamUser?.OnServerSessionConnected();
@@ -125,15 +166,12 @@ namespace SKYNET.Managers
                 }
 
                 SteamEmulator.ServerUrl = discovered;
-                Configured = false;
             }
 
             if (!string.IsNullOrWhiteSpace(SteamEmulator.AccessToken))
             {
                 return true;
             }
-
-            ConfigureClient();
 
             var request = new SkyNetSessionRequestDto
             {
@@ -1321,49 +1359,40 @@ namespace SKYNET.Managers
 
             try
             {
-                ConfigureClient();
                 EnsureSession();
 
-                using (var request = new HttpRequestMessage(HttpMethod.Get, $"api/users/{steamId}/avatar"))
+                var response = HttpRequestSync("GET", $"api/users/{steamId}/avatar", null, applyAuth: true, timeoutMs: 0);
+                if (!response.IsSuccess)
                 {
-                    ApplyAuthorization(request);
-                    using (var response = GetClient().SendAsync(request).GetAwaiter().GetResult())
+                    return false;
+                }
+
+                var returnedSteamId = response.Headers?["X-SKYNET-Avatar-SteamId"];
+                if (!string.IsNullOrEmpty(returnedSteamId))
+                {
+                    if (!ulong.TryParse(returnedSteamId, out var parsedSteamId) || parsedSteamId != steamId)
                     {
-                        if (!response.IsSuccessStatusCode)
-                        {
-                            return false;
-                        }
-
-                        if (response.Headers.TryGetValues("X-SKYNET-Avatar-SteamId", out var steamIdHeaders))
-                        {
-                            var returnedSteamId = steamIdHeaders.FirstOrDefault();
-                            if (!ulong.TryParse(returnedSteamId, out var parsedSteamId) || parsedSteamId != steamId)
-                            {
-                                SteamEmulator.Write("APIClient", $"Rejected avatar identity mismatch requested={steamId} returned={returnedSteamId}");
-                                return false;
-                            }
-                        }
-
-                        var isDefault = response.Headers.TryGetValues("X-SKYNET-Avatar-Default", out var defaultHeaders) &&
-                            bool.TryParse(defaultHeaders.FirstOrDefault(), out var parsedDefault) && parsedDefault;
-
-                        var data = response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
-                        using (var stream = new MemoryStream(data))
-                        {
-                            var avatar = (Bitmap)Image.FromStream(stream);
-                            SteamEmulator.SteamFriends.AddOrUpdateAvatar(avatar, steamId);
-                            if (isDefault)
-                            {
-                                SteamEmulator.SteamFriends.RemoveCachedAvatar(steamId);
-                            }
-                            else
-                            {
-                                SteamEmulator.SteamFriends.StoreCachedAvatar(avatar, steamId);
-                            }
-                            avatar.Dispose();
-                            return true;
-                        }
+                        SteamEmulator.Write("APIClient", $"Rejected avatar identity mismatch requested={steamId} returned={returnedSteamId}");
+                        return false;
                     }
+                }
+
+                var isDefault = bool.TryParse(response.Headers?["X-SKYNET-Avatar-Default"], out var parsedDefault) && parsedDefault;
+
+                using (var stream = new MemoryStream(response.Body))
+                {
+                    var avatar = (Bitmap)Image.FromStream(stream);
+                    SteamEmulator.SteamFriends.AddOrUpdateAvatar(avatar, steamId);
+                    if (isDefault)
+                    {
+                        SteamEmulator.SteamFriends.RemoveCachedAvatar(steamId);
+                    }
+                    else
+                    {
+                        SteamEmulator.SteamFriends.StoreCachedAvatar(avatar, steamId);
+                    }
+                    avatar.Dispose();
+                    return true;
                 }
             }
             catch (Exception ex)
@@ -1382,7 +1411,6 @@ namespace SKYNET.Managers
 
             try
             {
-                ConfigureClient();
                 byte[] data;
                 using (var resized = ImageHelper.Resize(avatar, 184, 184))
                 using (var stream = new MemoryStream())
@@ -1588,53 +1616,9 @@ namespace SKYNET.Managers
                 StateCache.ApplySelf(session.User);
             }
 
-            ConfigureClient();
-
             if (SteamEmulator.SteamFriends != null)
             {
                 SteamEmulator.SteamFriends.SyncSelfAvatarWithServer();
-            }
-        }
-
-        private static void ConfigureClient()
-        {
-            if (!IsEnabled)
-            {
-                return;
-            }
-
-            lock (ClientLock)
-            {
-                if (!Uri.TryCreate(SteamEmulator.ServerUrl, UriKind.Absolute, out var baseAddress))
-                {
-                    return;
-                }
-
-                var client = GetClient();
-
-                if (!Configured || client.BaseAddress == null || client.BaseAddress != baseAddress)
-                {
-                    client.BaseAddress = baseAddress;
-                    client.Timeout = TimeSpan.FromMilliseconds(Math.Max(250, SteamEmulator.HttpTimeoutMs));
-                    Configured = true;
-                }
-
-            }
-        }
-
-        private static HttpClient GetClient()
-        {
-            lock (ClientLock)
-            {
-                if (Client == null)
-                {
-                    Client = new HttpClient(new HttpClientHandler { UseProxy = false })
-                    {
-                        Timeout = TimeSpan.FromMilliseconds(Math.Max(250, SteamEmulator.HttpTimeoutMs))
-                    };
-                }
-
-                return Client;
             }
         }
 
@@ -1666,65 +1650,47 @@ namespace SKYNET.Managers
             where T : class
         {
             statusCode = null;
-            System.Threading.CancellationTokenSource cts = null;
             try
             {
-                ConfigureClient();
-                if (timeoutMs > 0)
-                {
-                    cts = new System.Threading.CancellationTokenSource(timeoutMs);
-                }
-                using (var request = new HttpRequestMessage(method, path))
-                {
-                    ApplyAuthorization(request);
+                string json = body != null ? body.ToJson() : null;
+                var response = HttpRequestSync(method.Method, path, json, applyAuth: true, timeoutMs: timeoutMs);
+                statusCode = response.StatusCode;
 
-                    if (body != null)
+                if (!response.IsSuccess)
+                {
+                    if (quietStatusCode != response.StatusCode)
                     {
-                        request.Content = new StringContent(body.ToJson(), Encoding.UTF8, "application/json");
+                        SteamEmulator.Write("APIClient", $"{method} {path} failed: HTTP {(int)response.StatusCode}");
                     }
 
-                    var sendTask = cts != null
-                        ? GetClient().SendAsync(request, cts.Token)
-                        : GetClient().SendAsync(request);
-
-                    using (var response = sendTask.GetAwaiter().GetResult())
+                    if (response.StatusCode == HttpStatusCode.Unauthorized)
                     {
-                        statusCode = response.StatusCode;
-                        if (!response.IsSuccessStatusCode)
+                        ResetSession();
+                        if (retryOnUnauthorized && !IsSessionEndpoint(path) && EnsureSession())
                         {
-                            if (quietStatusCode != response.StatusCode)
-                            {
-                                SteamEmulator.Write("APIClient", $"{method} {path} failed: HTTP {(int)response.StatusCode} {response.ReasonPhrase}");
-                            }
-
-                            if (response.StatusCode == HttpStatusCode.Unauthorized)
-                            {
-                                ResetSession();
-                                if (retryOnUnauthorized && !IsSessionEndpoint(path) && EnsureSession())
-                                {
-                                    return Send<T>(method, path, body, out statusCode, false, quietStatusCode, timeoutMs);
-                                }
-                            }
-
-                            return null;
+                            return Send<T>(method, path, body, out statusCode, false, quietStatusCode, timeoutMs);
                         }
-
-                        if (typeof(T) == typeof(VoidDto))
-                        {
-                            return new VoidDto() as T;
-                        }
-
-                        var json = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                        if (string.IsNullOrWhiteSpace(json))
-                        {
-                            return null;
-                        }
-
-                        return GetSerializer().Deserialize<T>(json);
                     }
+
+                    return null;
                 }
+
+                if (typeof(T) == typeof(VoidDto))
+                {
+                    return new VoidDto() as T;
+                }
+
+                var text = response.Body != null && response.Body.Length > 0
+                    ? Encoding.UTF8.GetString(response.Body)
+                    : null;
+                if (string.IsNullOrWhiteSpace(text))
+                {
+                    return null;
+                }
+
+                return GetSerializer().Deserialize<T>(text);
             }
-            catch (OperationCanceledException) when (cts != null && cts.IsCancellationRequested)
+            catch (WebException wex) when (wex.Status == WebExceptionStatus.Timeout)
             {
                 SteamEmulator.Write("APIClient", $"{method} {path} timed out after {timeoutMs}ms");
                 return null;
@@ -1734,10 +1700,92 @@ namespace SKYNET.Managers
                 SteamEmulator.Write("APIClient", $"{method} {path} failed: {ex.Message}");
                 return null;
             }
-            finally
+        }
+
+        // ================= synchronous HTTP =================
+        // The Steamworks API is synchronous by contract (GetSteamID etc. must return a
+        // value now), so callers can't go async-all-the-way. Use HttpWebRequest, which
+        // blocks the CALLING thread with a truly synchronous GetResponse() — unlike
+        // HttpClient.SendAsync().GetAwaiter().GetResult(), it does not need a second
+        // thread-pool thread to run a continuation, so it never suffers thread-pool
+        // starvation in hosted/injected CLRs (e.g. inside Unity games).
+
+        private sealed class SyncHttpResponse
+        {
+            public HttpStatusCode StatusCode;
+            public byte[] Body;
+            public WebHeaderCollection Headers;
+            public bool IsSuccess => (int)StatusCode >= 200 && (int)StatusCode < 300;
+        }
+
+        private static SyncHttpResponse HttpRequestSync(string method, string path, string jsonBody, bool applyAuth, int timeoutMs)
+        {
+            var baseUrl = SteamEmulator.ServerUrl;
+            if (string.IsNullOrWhiteSpace(baseUrl))
             {
-                cts?.Dispose();
+                throw new InvalidOperationException("Server URL not configured");
             }
+
+            var url = baseUrl.TrimEnd('/') + "/" + path.TrimStart('/');
+            var request = (HttpWebRequest)WebRequest.Create(url);
+            request.Method = method;
+            request.Proxy = null; // no WPAD auto-detect
+            request.Accept = "application/json";
+            request.Timeout = timeoutMs > 0 ? timeoutMs : Math.Max(250, SteamEmulator.HttpTimeoutMs);
+            request.ReadWriteTimeout = request.Timeout;
+
+            if (applyAuth && !string.IsNullOrWhiteSpace(SteamEmulator.AccessToken))
+            {
+                request.Headers[HttpRequestHeader.Authorization] = "Bearer " + SteamEmulator.AccessToken;
+            }
+
+            if (jsonBody != null)
+            {
+                request.ContentType = "application/json";
+                var payload = Encoding.UTF8.GetBytes(jsonBody);
+                request.ContentLength = payload.Length;
+                using (var rs = request.GetRequestStream())
+                {
+                    rs.Write(payload, 0, payload.Length);
+                }
+            }
+
+            try
+            {
+                using (var response = (HttpWebResponse)request.GetResponse())
+                {
+                    return ReadSyncResponse(response);
+                }
+            }
+            catch (WebException wex) when (wex.Response is HttpWebResponse errorResponse)
+            {
+                // Non-2xx (e.g. 401/404): read the error body/status instead of throwing.
+                using (errorResponse)
+                {
+                    return ReadSyncResponse(errorResponse);
+                }
+            }
+        }
+
+        private static SyncHttpResponse ReadSyncResponse(HttpWebResponse response)
+        {
+            byte[] body;
+            using (var stream = response.GetResponseStream())
+            using (var ms = new MemoryStream())
+            {
+                if (stream != null)
+                {
+                    stream.CopyTo(ms);
+                }
+                body = ms.ToArray();
+            }
+
+            return new SyncHttpResponse
+            {
+                StatusCode = response.StatusCode,
+                Body = body,
+                Headers = response.Headers
+            };
         }
 
         private static void ReportCachedFriendsChanged()
@@ -1767,17 +1815,6 @@ namespace SKYNET.Managers
         {
             SteamEmulator.AccessToken = string.Empty;
             SteamEmulator.RefreshToken = string.Empty;
-        }
-
-        private static void ApplyAuthorization(HttpRequestMessage request)
-        {
-            request.Headers.Accept.Clear();
-            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-            if (!string.IsNullOrWhiteSpace(SteamEmulator.AccessToken))
-            {
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", SteamEmulator.AccessToken);
-            }
         }
 
         private static void StartP2PDispatcher()
@@ -1852,7 +1889,6 @@ namespace SKYNET.Managers
             if (!string.IsNullOrWhiteSpace(discovered))
             {
                 SteamEmulator.ServerUrl = discovered;
-                Configured = false;
                 SteamEmulator.Write("APIClient", $"Discovered SKYNET server at {discovered}");
             }
         }

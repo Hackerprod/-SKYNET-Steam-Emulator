@@ -169,6 +169,20 @@ public class SteamEmulator
 
             Log.Initialize();
 
+            // Pre-warm the CLR thread pool. Our sync-over-async HTTP calls
+            // (SendAsync().GetAwaiter().GetResult()) need a pool thread to run the
+            // continuation. In hosted/injected CLRs inside other runtimes (e.g. Unity
+            // games), the pool starts starved and grows slowly, which delayed the
+            // server session handshake by many seconds and left GetSteamID returning
+            // Invalid — so games never got their avatar. Only affects the emulator's
+            // own .NET pool, not the host's.
+            try
+            {
+                System.Threading.ThreadPool.GetMinThreads(out int curWorker, out int curIo);
+                System.Threading.ThreadPool.SetMinThreads(Math.Max(curWorker, 16), Math.Max(curIo, 16));
+            }
+            catch { /* best effort */ }
+
             Write("Initializing Steam emulator");
             Write($"Process PID={Process.GetCurrentProcess().Id} Role={Environment.GetEnvironmentVariable("SKYNET_PROCESS_ROLE") ?? "client"} CommandLine={Environment.CommandLine}");
             Write($"Networking security mode: {(SecureNetworking ? "secure SDR certificate" : "insecure LAN (no SDR certificate)")}");
