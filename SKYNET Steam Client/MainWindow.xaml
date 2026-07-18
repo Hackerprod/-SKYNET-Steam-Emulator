@@ -1,0 +1,239 @@
+<Window x:Class="SKYNET.Client.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SKYNET Steam Client" Height="740" Width="1120"
+        WindowStyle="None" ResizeMode="CanResize" WindowStartupLocation="CenterScreen"
+        Background="{StaticResource SkynetBlack}" Foreground="{StaticResource SkynetText}"
+        FontFamily="{StaticResource SkynetFont}" TextOptions.TextFormattingMode="Ideal"
+        UseLayoutRounding="True" MinWidth="880" MinHeight="560">
+
+    <Border BorderBrush="{StaticResource SkynetBorder}" BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="56" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- ===== Header ===== -->
+            <Border Grid.Row="0" Background="{StaticResource SkynetBlack}"
+                    BorderBrush="{StaticResource SkynetBorder}" BorderThickness="0,0,0,1"
+                    MouseLeftButtonDown="Header_Drag">
+                <Grid Margin="16,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Width="28" Height="28" CornerRadius="6" Background="White">
+                            <TextBlock Text="&#xf2db;" FontFamily="Segoe UI Symbol" Foreground="{StaticResource SkynetBlack}"
+                                       FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <TextBlock VerticalAlignment="Center" Margin="10,0,0,0" FontSize="16" FontWeight="Bold">
+                            <Run Text="SKYNET" Foreground="{StaticResource SkynetText}" /><Run Text="EMU" Foreground="{StaticResource SkynetAccent}" />
+                        </TextBlock>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="36,0,0,0">
+                        <TextBlock x:Name="NavDashboard" Text="DASHBOARD" Margin="12,0" FontSize="11" FontWeight="Bold" Cursor="Hand"
+                                   Foreground="{StaticResource SkynetAccent}" Tag="Dashboard" MouseLeftButtonDown="Nav_Click" />
+                        <TextBlock x:Name="NavUsers" Text="USERS" Margin="12,0" FontSize="11" FontWeight="Bold" Cursor="Hand"
+                                   Foreground="{StaticResource SkynetMuted}" Tag="Users" MouseLeftButtonDown="Nav_Click" />
+                        <TextBlock x:Name="NavStats" Text="STATS" Margin="12,0" FontSize="11" FontWeight="Bold" Cursor="Hand"
+                                   Foreground="{StaticResource SkynetMuted}" Tag="Stats" MouseLeftButtonDown="Nav_Click" />
+                    </StackPanel>
+
+                    <ContentControl Grid.Column="3" x:Name="UserPanelHost" VerticalAlignment="Center" Margin="0,0,12,0" />
+
+                    <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button Content="&#x2013;" Click="Minimize_Click" Width="34" Height="30"
+                                Background="Transparent" Foreground="{StaticResource SkynetMuted}" BorderThickness="0"
+                                FontSize="15" Cursor="Hand" />
+                        <Button Content="&#x2715;" Click="Close_Click" Width="34" Height="30"
+                                Background="Transparent" Foreground="{StaticResource SkynetMuted}" BorderThickness="0"
+                                FontSize="13" Cursor="Hand" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- ===== Views ===== -->
+            <Grid Grid.Row="1">
+
+                <!-- Dashboard -->
+                <Grid x:Name="DashboardView" Margin="28,22">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Border x:Name="LoginBanner" Grid.Row="0" Style="{StaticResource Card}" Margin="0,0,0,18"
+                            Background="#1A3B82F6" BorderBrush="{StaticResource SkynetAccent}" Visibility="Collapsed">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock x:Name="BannerTitle" Text="Not signed in" FontWeight="Bold" FontSize="14" />
+                                <TextBlock x:Name="BannerText" Foreground="{StaticResource SkynetMuted}" FontSize="12" Margin="0,2,0,0"
+                                           Text="Sign in on the SKYNET web to link this launcher to your account." />
+                            </StackPanel>
+                            <Button Grid.Column="1" x:Name="BannerButton" Content="OPEN WEB LOGIN" Style="{StaticResource AccentButton}"
+                                    Click="Login_Click" VerticalAlignment="Center" />
+                        </Grid>
+                    </Border>
+
+                    <Grid Grid.Row="1" Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="LIBRARY" FontSize="11" FontWeight="Bold" Foreground="{StaticResource SkynetMuted}" />
+                            <TextBlock x:Name="LibraryCount" Text="0 games" FontSize="20" FontWeight="Bold" Margin="0,2,0,0" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="+  ADD GAME" Style="{StaticResource AccentButton}"
+                                Click="AddGame_Click" VerticalAlignment="Center" />
+                    </Grid>
+
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <Grid>
+                            <TextBlock x:Name="EmptyState" Foreground="{StaticResource SkynetMuted}" FontSize="13"
+                                       HorizontalAlignment="Center" Margin="0,60,0,0" TextAlignment="Center"
+                                       Text="No games yet.&#x0a;Click ADD GAME and pick a game executable to get started." />
+                            <ItemsControl x:Name="GamesItems">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Style="{StaticResource Card}" Width="320" Margin="0,0,16,16">
+                                            <StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Border Width="48" Height="48" CornerRadius="8" Background="{StaticResource SkynetDark}"
+                                                            BorderBrush="{StaticResource SkynetBorder}" BorderThickness="1">
+                                                        <Grid>
+                                                            <TextBlock Text="{Binding Initial}" FontSize="20" FontWeight="Bold"
+                                                                       Foreground="{StaticResource SkynetMuted}"
+                                                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                       Visibility="{Binding NoIcon, Converter={StaticResource BoolToVis}}" />
+                                                            <Image Source="{Binding Icon}" Width="40" Height="40"
+                                                                   Visibility="{Binding HasIcon, Converter={StaticResource BoolToVis}}"
+                                                                   RenderOptions.BitmapScalingMode="HighQuality" />
+                                                        </Grid>
+                                                    </Border>
+                                                    <StackPanel Margin="12,0,0,0" VerticalAlignment="Center" Width="230">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14"
+                                                                       TextTrimming="CharacterEllipsis" />
+                                                            <!-- Running indicator (only visible while running) -->
+                                                            <Border Background="#1A22C55E" CornerRadius="4" Padding="6,2" Margin="8,0,0,0"
+                                                                    VerticalAlignment="Center"
+                                                                    Visibility="{Binding IsRunning, Converter={StaticResource BoolToVis}}">
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <Ellipse Width="7" Height="7" Fill="#FF22C55E" VerticalAlignment="Center" />
+                                                                    <TextBlock Text="RUNNING" FontSize="9" FontWeight="Bold" Foreground="#FF22C55E"
+                                                                               Margin="5,0,0,0" VerticalAlignment="Center" />
+                                                                </StackPanel>
+                                                            </Border>
+                                                        </StackPanel>
+                                                        <TextBlock Text="{Binding Subtitle}" Foreground="{StaticResource SkynetMuted}"
+                                                                   FontSize="11" Margin="0,3,0,0" />
+                                                    </StackPanel>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                                                    <Button Content="{Binding PlayLabel}" Click="PlayStop_Click"
+                                                            DataContext="{Binding}" Padding="22,9">
+                                                        <Button.Style>
+                                                            <Style TargetType="Button" BasedOn="{StaticResource AccentButton}">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                                                        <Setter Property="Background" Value="#FFDC2626" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Button.Style>
+                                                    </Button>
+                                                    <Button Content="SETTINGS" Style="{StaticResource GhostButton}"
+                                                            Click="Settings_Click" DataContext="{Binding}" Margin="10,0,0,0" />
+                                                    <Button Content="&#x2715;" Style="{StaticResource GhostButton}"
+                                                            Click="Remove_Click" DataContext="{Binding}" Margin="10,0,0,0" Padding="12,9" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+                    </ScrollViewer>
+                </Grid>
+
+                <!-- Users -->
+                <Grid x:Name="UsersView" Margin="28,22" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                        <TextBlock Text="COMMUNITY" FontSize="11" FontWeight="Bold" Foreground="{StaticResource SkynetMuted}" />
+                        <TextBlock x:Name="UsersCount" Text="Users" FontSize="20" FontWeight="Bold" Margin="0,2,0,0" />
+                    </StackPanel>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <Grid>
+                            <TextBlock x:Name="UsersEmpty" Foreground="{StaticResource SkynetMuted}" FontSize="13"
+                                       HorizontalAlignment="Center" Margin="0,60,0,0"
+                                       Text="No users to show." Visibility="Collapsed" />
+                            <ItemsControl x:Name="UsersItems">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Style="{StaticResource Card}" Width="250" Margin="0,0,16,16" Padding="14">
+                                            <StackPanel Orientation="Horizontal">
+                                                <Border Width="40" Height="40" CornerRadius="20" Background="{StaticResource SkynetDark}"
+                                                        BorderBrush="{StaticResource SkynetBorder}" BorderThickness="1" ClipToBounds="True">
+                                                    <Grid>
+                                                        <TextBlock Text="{Binding Initial}" FontWeight="Bold" Foreground="{StaticResource SkynetMuted}"
+                                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                   Visibility="{Binding NoAvatar, Converter={StaticResource BoolToVis}}" />
+                                                        <Image Source="{Binding Avatar}" Stretch="UniformToFill"
+                                                               Visibility="{Binding HasAvatar, Converter={StaticResource BoolToVis}}"
+                                                               RenderOptions.BitmapScalingMode="HighQuality" />
+                                                    </Grid>
+                                                </Border>
+                                                <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding DisplayName}" FontWeight="Bold" FontSize="13" />
+                                                    <TextBlock Text="{Binding StatusText}" FontSize="10" Foreground="{Binding StatusBrush}"
+                                                               Margin="0,2,0,0" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+                    </ScrollViewer>
+                </Grid>
+
+                <!-- Stats -->
+                <Grid x:Name="StatsView" Margin="28,22" Visibility="Collapsed">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Text="&#xf201;" FontFamily="Segoe UI Symbol" FontSize="34"
+                                   Foreground="{StaticResource SkynetBorder}" HorizontalAlignment="Center" />
+                        <TextBlock Text="Stats" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,12,0,0" />
+                        <TextBlock Text="Per-game achievements and playtime will appear here."
+                                   Foreground="{StaticResource SkynetMuted}" FontSize="12" HorizontalAlignment="Center" Margin="0,6,0,0" />
+                    </StackPanel>
+                </Grid>
+
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

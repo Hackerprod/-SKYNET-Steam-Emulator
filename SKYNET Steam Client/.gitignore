@@ -1,0 +1,11 @@
+# Build output
+bin/
+obj/
+
+# Emulator DLLs (built from the steam_api project; copied in at build/deploy time)
+payload/
+x64/
+x86/
+steam_api.dll
+steam_api.dll.config
+*.pdb
