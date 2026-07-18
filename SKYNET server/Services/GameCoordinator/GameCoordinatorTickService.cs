@@ -1,22 +1,24 @@
 namespace SKYNET_server.Services;
 
 /// <summary>
-/// Invokes the optional Lua `tick()` function of every loaded GC script on a fixed
-/// interval, so scripts can implement timers and proactive pushes (via gc.QueueTo).
-/// Ticking starts for an app after its first GC exchange loads the script.
+/// Invokes the optional `tick()` function of every loaded GC engine (Lua and JS)
+/// on a fixed interval, so scripts can implement timers and proactive pushes
+/// (via gc.QueueTo). Ticking starts for an app after its first GC exchange
+/// loads the script. Tick goes through GcEngineRouter, the same router that
+/// serves Exchange and Poll (regla 8 of the GC migration).
 /// </summary>
 public sealed class GameCoordinatorTickService : BackgroundService
 {
-    private readonly LuaGameCoordinatorPlugin _plugin;
+    private readonly GcEngineRouter _router;
     private readonly ILogger<GameCoordinatorTickService> _logger;
     private readonly TimeSpan _interval;
 
     public GameCoordinatorTickService(
-        LuaGameCoordinatorPlugin plugin,
+        GcEngineRouter router,
         IConfiguration configuration,
         ILogger<GameCoordinatorTickService> logger)
     {
-        _plugin = plugin;
+        _router = router;
         _logger = logger;
         var intervalMs = configuration.GetValue("GameCoordinator:TickIntervalMs", 1000);
         _interval = TimeSpan.FromMilliseconds(Math.Clamp(intervalMs, 100, 60000));
@@ -29,7 +31,7 @@ public sealed class GameCoordinatorTickService : BackgroundService
         {
             try
             {
-                _plugin.Tick();
+                _router.Tick();
             }
             catch (Exception ex)
             {

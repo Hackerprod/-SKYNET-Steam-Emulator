@@ -1,0 +1,11 @@
+{
+  "$comment": "Per-message GC engine routing (Fase B). Hot-reloaded by mtime: editing this file redirects message ids between the JS engine (gc-js bundle under Jint) and the legacy Lua/C# engine without restarting the server. Rollback: remove an id from migratedMessageIds, add it to disabledMessageIds, set jintEnabled=false, or export SKYNET_GC_JS_DISABLED=1.",
+  "jintEnabled": true,
+  "apps": {
+    "570": {
+      "pollEngine": "lua",
+      "migratedMessageIds": [],
+      "disabledMessageIds": []
+    }
+  }
+}
