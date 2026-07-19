@@ -190,9 +190,11 @@ export interface DotaProfileService {
 }
 
 export interface DotaSocialService {
+    emoticonAccess(): DotaEmoticonAccess;
     feed(accountId: number, selfOnly: boolean): DotaSocialFeedEvent[];
     comments(feedEventId: bigint): DotaSocialFeedComment[];
     postComment(feedEventId: bigint, comment: string): boolean;
+    postMatchComment(matchId: bigint, comment: string): boolean;
 }
 
 export interface DotaChatService {
@@ -601,6 +603,12 @@ export interface DotaSocialFeedEvent {
     readonly paramString: string;
 }
 
+export interface DotaEmoticonAccess {
+    readonly accountId: number;
+    readonly unlockedEmoticons: Uint8Array;
+    readonly updatedAt: number;
+}
+
 export interface DotaSocialFeedComment {
     readonly feedEventId: bigint;
     readonly commenterAccountId: number;
@@ -935,6 +943,10 @@ class GcDotaProfileService implements DotaProfileService {
 }
 
 class GcDotaSocialService implements DotaSocialService {
+    emoticonAccess(): DotaEmoticonAccess {
+        return dotaSocialEmoticonAccess() as DotaEmoticonAccess;
+    }
+
     feed(accountId: number, selfOnly: boolean): DotaSocialFeedEvent[] {
         return dotaSocialFeed(accountId, selfOnly) as DotaSocialFeedEvent[];
     }
@@ -945,6 +957,10 @@ class GcDotaSocialService implements DotaSocialService {
 
     postComment(feedEventId: bigint, comment: string): boolean {
         return dotaSocialFeedPostComment(feedEventId, comment) as boolean;
+    }
+
+    postMatchComment(matchId: bigint, comment: string): boolean {
+        return dotaSocialMatchPostComment(matchId, comment) as boolean;
     }
 }
 

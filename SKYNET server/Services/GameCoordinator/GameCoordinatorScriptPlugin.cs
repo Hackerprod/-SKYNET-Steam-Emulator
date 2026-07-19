@@ -192,9 +192,11 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .RegisterHostFunction("gc", "dotaProfileSetHeroSticker", dispatcher.DotaProfileSetHeroSticker)
                 .RegisterHostFunction("gc", "dotaProfileOverworldState", dispatcher.DotaProfileOverworldState)
                 .RegisterHostFunction("gc", "dotaProfileMonsterHunterState", dispatcher.DotaProfileMonsterHunterState)
+                .RegisterHostFunction("gc", "dotaSocialEmoticonAccess", _ => dispatcher.RequireCurrent().DotaSocialEmoticonAccess())
                 .RegisterHostFunction("gc", "dotaSocialFeed", dispatcher.DotaSocialFeed)
                 .RegisterHostFunction("gc", "dotaSocialFeedComments", dispatcher.DotaSocialFeedComments)
                 .RegisterHostFunction("gc", "dotaSocialFeedPostComment", dispatcher.DotaSocialFeedPostComment)
+                .RegisterHostFunction("gc", "dotaSocialMatchPostComment", dispatcher.DotaSocialMatchPostComment)
                 .RegisterHostFunction("gc", "dotaChatJoinChannel", dispatcher.DotaChatJoinChannel)
                 .RegisterHostFunction("gc", "dotaChatChannel", dispatcher.DotaChatChannel)
                 .RegisterHostFunction("gc", "dotaChatLeaveChannel", dispatcher.DotaChatLeaveChannel)
@@ -462,6 +464,11 @@ internal sealed class ScriptHostDispatcher
     public TsValue? DotaSocialFeed(TsValue[] args)
     {
         return RequireCurrent().DotaSocialFeed(args);
+    }
+
+    public TsValue? DotaSocialMatchPostComment(TsValue[] args)
+    {
+        return RequireCurrent().DotaSocialMatchPostComment(args);
     }
 
     public TsValue? DotaSocialFeedComments(TsValue[] args)
@@ -1323,6 +1330,16 @@ internal sealed class ScriptExchangeHost
         return ToTsMonsterHunterState(DotaGcBackend.StatsStore?.GetMonsterHunterState(_context.AccountId) ?? new DotaStatsMonsterHunterState());
     }
 
+    public TsValue DotaSocialEmoticonAccess()
+    {
+        var access = DotaGcBackend.StatsStore?.GetEmoticonAccess(_context.AccountId) ?? new DotaStatsEmoticonAccess
+        {
+            AccountId = _context.AccountId,
+            UnlockedMask = Array.Empty<byte>()
+        };
+        return ToTsEmoticonAccess(access);
+    }
+
     public TsValue DotaSocialFeed(TsValue[] args)
     {
         if (args.Length < 2)
@@ -1366,6 +1383,23 @@ internal sealed class ScriptExchangeHost
         }
 
         return TsValue.FromBool(DotaGcBackend.StatsStore?.SaveSocialFeedComment(feedEventId, _context.AccountId, comment) ?? false);
+    }
+
+    public TsValue DotaSocialMatchPostComment(TsValue[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new InvalidOperationException("dotaSocialMatchPostComment(matchId, comment) requires two arguments");
+        }
+
+        var matchId = Convert.ToUInt64(ToInteger(args[0], "dotaSocialMatchPostComment.matchId").ToString());
+        var comment = ToString(args[1]).Trim();
+        if (matchId == 0 || comment.Length == 0)
+        {
+            return TsValue.FromBool(false);
+        }
+
+        return TsValue.FromBool(DotaGcBackend.StatsStore?.SaveSocialMatchComment(matchId, _context.AccountId, _context.PersonaName, comment) ?? false);
     }
 
     public TsValue DotaChatJoinChannel(TsValue[] args)
@@ -2420,6 +2454,15 @@ internal sealed class ScriptExchangeHost
         }
 
         return new TsArrayValue(array);
+    }
+
+    private static TsValue ToTsEmoticonAccess(DotaStatsEmoticonAccess access)
+    {
+        var value = new TsObject("DotaEmoticonAccess");
+        value.SetField("accountId", TsValue.FromInt32(unchecked((int)access.AccountId)));
+        value.SetField("unlockedEmoticons", TsValue.FromUint8Array(access.UnlockedMask));
+        value.SetField("updatedAt", TsValue.FromInt32(unchecked((int)access.UpdatedAt)));
+        return new TsObjectValue(value);
     }
 
     private static TsValue ToTsSocialFeedComments(ulong feedEventId, IEnumerable<DotaStatsComment> comments)

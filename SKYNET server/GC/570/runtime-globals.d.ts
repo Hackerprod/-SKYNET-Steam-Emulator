@@ -34,9 +34,11 @@ declare global {
     function dotaProfileSetHeroSticker(heroId: number, itemId: bigint): boolean;
     function dotaProfileOverworldState(overworldId: number): unknown;
     function dotaProfileMonsterHunterState(): unknown;
+    function dotaSocialEmoticonAccess(): unknown;
     function dotaSocialFeed(accountId: number, selfOnly: boolean): unknown;
     function dotaSocialFeedComments(feedEventId: bigint): unknown;
     function dotaSocialFeedPostComment(feedEventId: bigint, comment: string): boolean;
+    function dotaSocialMatchPostComment(matchId: bigint, comment: string): boolean;
     function dotaChatJoinChannel(channelName: string, channelType: number): unknown;
     function dotaChatChannel(channelId: bigint): unknown;
     function dotaChatLeaveChannel(channelId: bigint): boolean;

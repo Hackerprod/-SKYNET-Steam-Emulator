@@ -4,6 +4,8 @@ namespace SKYNET_server.Services;
 
 public sealed class DotaStatsStore
 {
+    private const int DefaultEmoticonAccessMaskBytes = 72;
+
     private static readonly uint[] AllHeroChallengeHeroIds =
     {
         1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
@@ -33,6 +35,7 @@ public sealed class DotaStatsStore
         "reports",
         "match_comments",
         "match_votes",
+        "emoticon_access",
         "social_feed",
         "social_feed_comments",
         "match_signout_permission_requests",
@@ -1365,6 +1368,62 @@ public sealed class DotaStatsStore
         }
     }
 
+    public DotaStatsEmoticonAccess GetEmoticonAccess(uint accountId)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            EnsureProfileLocked(connection, 0, accountId, string.Empty);
+            using var command = connection.CreateCommand();
+            command.CommandText = """
+                SELECT account_id, unlocked_mask, updated_at
+                FROM emoticon_access
+                WHERE account_id = $account_id
+                """;
+            Add(command, "$account_id", accountId);
+            using var reader = command.ExecuteReader();
+            if (reader.Read())
+            {
+                return new DotaStatsEmoticonAccess
+                {
+                    AccountId = U32(reader, "account_id"),
+                    UnlockedMask = Blob(reader, "unlocked_mask"),
+                    UpdatedAt = U32(reader, "updated_at")
+                };
+            }
+
+            var access = new DotaStatsEmoticonAccess
+            {
+                AccountId = accountId,
+                UnlockedMask = CreateDefaultEmoticonAccessMask(),
+                UpdatedAt = Now()
+            };
+            SaveEmoticonAccessLocked(connection, access);
+            return access;
+        }
+    }
+
+    public bool SaveEmoticonAccess(uint accountId, byte[] unlockedMask)
+    {
+        if (accountId == 0 || unlockedMask == null)
+        {
+            return false;
+        }
+
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            EnsureProfileLocked(connection, 0, accountId, string.Empty);
+            SaveEmoticonAccessLocked(connection, new DotaStatsEmoticonAccess
+            {
+                AccountId = accountId,
+                UnlockedMask = unlockedMask.ToArray(),
+                UpdatedAt = Now()
+            });
+            return true;
+        }
+    }
+
     public IReadOnlyList<DotaStatsComment> GetSocialMatchComments(ulong matchId)
     {
         lock (_sync)
@@ -1982,6 +2041,12 @@ public sealed class DotaStatsStore
                 vote INTEGER NOT NULL,
                 timestamp INTEGER NOT NULL,
                 PRIMARY KEY (match_id, account_id)
+            );
+
+            CREATE TABLE IF NOT EXISTS emoticon_access (
+                account_id INTEGER PRIMARY KEY,
+                unlocked_mask BLOB NOT NULL,
+                updated_at INTEGER NOT NULL
             );
 
             CREATE TABLE IF NOT EXISTS social_feed (
@@ -3045,6 +3110,29 @@ public sealed class DotaStatsStore
         command.ExecuteNonQuery();
     }
 
+    private static void SaveEmoticonAccessLocked(SqliteConnection connection, DotaStatsEmoticonAccess access)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            INSERT INTO emoticon_access (account_id, unlocked_mask, updated_at)
+            VALUES ($account_id, $unlocked_mask, $updated_at)
+            ON CONFLICT(account_id) DO UPDATE SET
+                unlocked_mask = excluded.unlocked_mask,
+                updated_at = excluded.updated_at
+            """;
+        Add(command, "$account_id", access.AccountId);
+        Add(command, "$unlocked_mask", access.UnlockedMask.ToArray());
+        Add(command, "$updated_at", access.UpdatedAt);
+        command.ExecuteNonQuery();
+    }
+
+    private static byte[] CreateDefaultEmoticonAccessMask()
+    {
+        var mask = new byte[DefaultEmoticonAccessMaskBytes];
+        Array.Fill(mask, (byte)0xFF);
+        return mask;
+    }
+
     private static (uint Tier, uint Score) CalculateRank(uint mmr)
     {
         if (mmr == 0)
@@ -3198,6 +3286,7 @@ public sealed class DotaStatsStore
     private static ulong U64(SqliteDataReader reader, string name) => Convert.ToUInt64(reader[name]);
     private static double Dbl(SqliteDataReader reader, string name) => Convert.ToDouble(reader[name]);
     private static string Str(SqliteDataReader reader, string name) => Convert.ToString(reader[name]) ?? string.Empty;
+    private static byte[] Blob(SqliteDataReader reader, string name) => reader[name] is byte[] bytes ? bytes.ToArray() : Array.Empty<byte>();
     private static uint Now() => (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
     private static double Avg(double existing, double value) => existing == 0 ? value : (existing + value) / 2.0;
     private static double Round2(double value) => Math.Round(value, 2);
@@ -3590,6 +3679,13 @@ public sealed class DotaStatsOverworldState
 public sealed class DotaStatsMonsterHunterState
 {
     public uint UnlockedCount { get; init; }
+}
+
+public sealed class DotaStatsEmoticonAccess
+{
+    public uint AccountId { get; init; }
+    public byte[] UnlockedMask { get; init; } = Array.Empty<byte>();
+    public uint UpdatedAt { get; init; }
 }
 
 public sealed class DotaStatsComment

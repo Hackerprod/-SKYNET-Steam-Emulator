@@ -39,6 +39,7 @@ public static class GcScriptSelfCheck
 
         DotaGcBackend.StatsStore = new DotaStatsStore(selfCheckDb, ResolveIdentity);
         DotaGcBackend.GuildStore = new DotaGuildStore(selfCheckDb, ResolveIdentity);
+        SeedSocialMatchData(DotaGcBackend.StatsStore, context);
 
         var ok = true;
         ok &= ExpectSequence(plugin, context, 4006, new uint[] { 4009, 4004, 4009 }, write);
@@ -55,6 +56,8 @@ public static class GcScriptSelfCheck
         ok &= ExpectResponse(plugin, context, 7072, 7087, 1, write);
         ok &= ExpectResponse(plugin, context, 7078, 7079, 1, write);
         ok &= ExpectResponse(plugin, context, 7082, 7083, 1, write);
+        ok &= ExpectResponse(plugin, context, 7095, 7096, 1, write);
+        ok &= ExpectSocialMatchDetails(plugin, context, 90000000000042UL, write);
         ok &= ExpectResponse(plugin, context, 7200, 7201, 1, write);
         ok &= ExpectResponse(plugin, context, 7274, 7275, 1, write);
         ok &= ExpectResponse(plugin, context, 7381, 7382, 1, write);
@@ -62,6 +65,7 @@ public static class GcScriptSelfCheck
         ok &= ExpectResponse(plugin, context, 7408, 7409, 1, write);
         ok &= ExpectResponse(plugin, context, 7427, 7428, 1, write);
         ok &= ExpectHandled(plugin, context, 7497, 0, write);
+        ok &= ExpectResponse(plugin, context, 7503, 7504, 1, write);
         ok &= ExpectResponse(plugin, context, 7531, 7382, 1, write);
         ok &= ExpectResponse(plugin, context, 7536, 7537, 1, write);
         ok &= ExpectResponse(plugin, context, 7541, 7542, 1, write);
@@ -84,6 +88,7 @@ public static class GcScriptSelfCheck
         ok &= ExpectResponse(plugin, context, 8006, 8007, 1, write);
         ok &= ExpectResponse(plugin, context, 8009, 8010, 1, write);
         ok &= ExpectResponse(plugin, context, 8016, 8017, 1, write);
+        ok &= ExpectSocialMatchPostComment(plugin, context, 90000000000042UL, write);
         ok &= ExpectHandled(plugin, context, 8041, 0, write);
         ok &= ExpectResponse(plugin, context, 8034, 8035, 1, write);
         ok &= ExpectResponse(plugin, context, 8073, 8074, 1, write);
@@ -222,6 +227,114 @@ public static class GcScriptSelfCheck
         var ok = !response.Handled && response.Messages.Count == 0;
         write($"{requestType} -> handled={response.Handled}, messages={response.Messages.Count}, ok={ok}");
         return ok;
+    }
+
+    private static bool ExpectSocialMatchDetails(
+        GameCoordinatorScriptPlugin plugin,
+        GameCoordinatorContext context,
+        ulong matchId,
+        Action<string> write)
+    {
+        var response = plugin.Exchange(context, Request(7095, Serialize(new CMsgGCMatchDetailsRequest { MatchId = matchId })));
+        var details = response.Messages.Count == 1 && response.Messages[0].MessageType == 7096
+            ? Deserialize<CMsgGCMatchDetailsResponse>(response.Messages[0].PayloadBase64)
+            : null;
+        var ok = response.Handled
+            && details != null
+            && details.Result == 1
+            && details.Match != null
+            && details.Match.MatchId == matchId
+            && details.Match.Players.Count == 1
+            && details.Match.Players[0].AccountId == context.AccountId;
+        write(
+            $"social match details -> handled={response.Handled}, result={details?.Result}, " +
+            $"match={details?.Match?.MatchId}, players={details?.Match?.Players.Count}, " +
+            $"account={details?.Match?.Players.FirstOrDefault()?.AccountId}, ok={ok}");
+        return ok;
+    }
+
+    private static bool ExpectSocialMatchPostComment(
+        GameCoordinatorScriptPlugin plugin,
+        GameCoordinatorContext context,
+        ulong matchId,
+        Action<string> write)
+    {
+        var request = new CMsgClientToGCSocialFeedPostCommentRequest
+        {
+            EventId = matchId,
+            Comment = "self-check social match comment"
+        };
+        var response = plugin.Exchange(context, Request(8016, Serialize(request)));
+        var result = response.Messages.Count == 1 && response.Messages[0].MessageType == 8017
+            ? Deserialize<CMsgGCToClientSocialFeedPostCommentResponse>(response.Messages[0].PayloadBase64)
+            : null;
+        var comments = DotaGcBackend.StatsStore?.GetSocialMatchComments(matchId) ?? Array.Empty<DotaStatsComment>();
+        var ok = response.Handled
+            && result != null
+            && result.Success
+            && comments.Any(comment =>
+                comment.AccountId == context.AccountId &&
+                comment.Comment == "self-check social match comment");
+        write($"social match post comment -> handled={response.Handled}, persisted={comments.Count}, ok={ok}");
+        return ok;
+    }
+
+    private static void SeedSocialMatchData(DotaStatsStore store, GameCoordinatorContext context)
+    {
+        var match = new DotaStatsMatch
+        {
+            MatchId = 90000000000042UL,
+            OwnerSteamId = context.SteamId,
+            ServerSteamId = 85568392920047069UL,
+            StartTime = (uint)DateTimeOffset.UtcNow.AddMinutes(-40).ToUnixTimeSeconds(),
+            Duration = 1800,
+            GameMode = 22,
+            LobbyType = 7,
+            GoodGuysWin = true,
+            MatchFlags = 0,
+            RadiantScore = 42,
+            DireScore = 31,
+            Cluster = 227,
+            FirstBloodTime = 82
+        };
+        match.Players.Add(new DotaStatsMatchPlayer
+        {
+            MatchId = match.MatchId,
+            AccountId = context.AccountId,
+            SteamId = context.SteamId,
+            PersonaName = context.PersonaName,
+            Team = 0,
+            PlayerSlot = 0,
+            HeroId = 1,
+            Kills = 10,
+            Deaths = 2,
+            Assists = 14,
+            Winner = true,
+            GoodGuys = true,
+            Gold = 1200,
+            GoldSpent = 17500,
+            Gpm = 560,
+            Xpm = 720,
+            LastHits = 210,
+            Denies = 12,
+            HeroDamage = 26000,
+            TowerDamage = 4200,
+            HeroHealing = 0,
+            Level = 24,
+            NetWorth = 21000,
+            Items = new List<uint> { 50, 63, 116, 147, 160, 168 },
+            StartTime = match.StartTime,
+            Duration = match.Duration,
+            GameMode = match.GameMode,
+            LobbyType = match.LobbyType,
+            GoodGuysWin = match.GoodGuysWin,
+            MatchFlags = match.MatchFlags,
+            RadiantScore = match.RadiantScore,
+            DireScore = match.DireScore,
+            Cluster = match.Cluster,
+            FirstBloodTime = match.FirstBloodTime
+        });
+        store.RecordMatch(match);
     }
 
     private static ApiGCExchangeRequest Request(uint messageType)

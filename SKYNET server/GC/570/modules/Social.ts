@@ -1,10 +1,14 @@
-import { DotaSocialFeedComment, DotaSocialFeedEvent, gc, HandlerContext, RawMessageContext } from "../framework/gc";
+import { DotaSocialFeedComment, DotaSocialFeedEvent, gc, HandlerContext } from "../framework/gc";
 import {
     CMsgClientToGCFindTopSourceTVGames,
+    CMsgClientToGCEmoticonDataRequest,
     CMsgClientToGCSocialFeedPostCommentRequest,
     CMsgDOTAJoinChatChannel,
     CMsgDOTAJoinChatChannelResponse,
     CMsgDOTAJoinChatChannelResponse_Result,
+    CMsgGCMatchDetailsRequest,
+    CMsgGCMatchDetailsResponse,
+    CMsgGCToClientEmoticonData,
     CMsgGCToClientFindTopSourceTVGamesResponse,
     CMsgGCToClientSocialFeedPostCommentResponse,
     CMsgGCNotificationsRequest,
@@ -22,6 +26,10 @@ import {
     Proto,
     Routes
 } from "../generated/dota";
+import { mapMatchDetails } from "./shared/matchMapping";
+
+const SOCIAL_SUCCESS = 1;
+const SOCIAL_NOT_FOUND = 0;
 
 export function registerSocial(): void {
     const social = new Social();
@@ -36,10 +44,11 @@ export class Social {
         gc.on(Routes.Notifications, (ctx) => {
             return this.notifications(ctx);
         });
-        gc.onMessage(Msg.ClientToGCEmoticonDataRequest, (ctx) => this.emoticonData(ctx));
+        gc.on(Routes.EmoticonData, (ctx) => this.emoticonData(ctx));
         gc.on(Routes.FindTopSourceTvGames, (ctx) => {
             return this.findTopSourceTvGames(ctx);
         });
+        gc.on(Routes.MatchDetails, (ctx) => this.socialMatchDetails(ctx));
         gc.on(Routes.RequestSocialFeed, (ctx) => this.requestSocialFeed(ctx));
         gc.on(Routes.RequestSocialFeedComments, (ctx) => this.requestSocialFeedComments(ctx));
         gc.on(Routes.SocialFeedPostComment, (ctx) => this.socialFeedPostComment(ctx));
@@ -105,9 +114,15 @@ export class Social {
         });
         return true;
     }
-    emoticonData(ctx: RawMessageContext): boolean {
-        ctx.logger.info("Social: EmoticonData deferred until TS can read real user emoticon unlock state");
-        return false;
+    emoticonData(ctx: HandlerContext<CMsgClientToGCEmoticonDataRequest, CMsgGCToClientEmoticonData>): boolean {
+        const access = ctx.services.social.emoticonAccess();
+        ctx.reply({
+            emoticonAccess: {
+                accountId: access.accountId,
+                unlockedEmoticons: access.unlockedEmoticons
+            }
+        });
+        return true;
     }
     findTopSourceTvGames(
         ctx: HandlerContext<CMsgClientToGCFindTopSourceTVGames, CMsgGCToClientFindTopSourceTVGamesResponse>
@@ -124,11 +139,32 @@ export class Social {
         });
         return true;
     }
-    socialMatchDetails(): boolean {
-        return false;
+    socialMatchDetails(ctx: HandlerContext<CMsgGCMatchDetailsRequest, CMsgGCMatchDetailsResponse>): boolean {
+        const match = ctx.services.stats.getMatchDetails(ctx.request.matchId ?? 0n);
+        if (match === null) {
+            ctx.reply({ result: SOCIAL_NOT_FOUND, vote: 0 });
+            return true;
+        }
+
+        ctx.reply({
+            result: SOCIAL_SUCCESS,
+            match: mapMatchDetails(match),
+            vote: 0
+        });
+        return true;
     }
-    socialMatchPostComment(): boolean {
-        return false;
+
+    socialMatchPostComment(
+        ctx: HandlerContext<CMsgClientToGCSocialFeedPostCommentRequest, CMsgGCToClientSocialFeedPostCommentResponse>
+    ): boolean {
+        const targetId = ctx.request.eventId ?? 0n;
+        const comment = ctx.request.comment ?? "";
+        ctx.reply({
+            success:
+                ctx.services.social.postMatchComment(targetId, comment) ||
+                ctx.services.social.postComment(targetId, comment)
+        });
+        return true;
     }
     requestSocialFeed(ctx: HandlerContext<CMsgSocialFeedRequest, CMsgSocialFeedResponse>): boolean {
         const accountId = ctx.request.accountId ?? ctx.accountId;
@@ -153,10 +189,7 @@ export class Social {
     socialFeedPostComment(
         ctx: HandlerContext<CMsgClientToGCSocialFeedPostCommentRequest, CMsgGCToClientSocialFeedPostCommentResponse>
     ): boolean {
-        ctx.reply({
-            success: ctx.services.social.postComment(ctx.request.eventId ?? 0n, ctx.request.comment ?? "")
-        });
-        return true;
+        return this.socialMatchPostComment(ctx);
     }
 }
 
