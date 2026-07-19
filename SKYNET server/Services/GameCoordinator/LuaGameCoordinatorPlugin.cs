@@ -39,7 +39,7 @@ public sealed class LuaGameCoordinatorPlugin : IGameCoordinatorPlugin
         _steamDb = steamDb;
         _dotaDb = dotaDb;
         _dedicatedServerService = dedicatedServerService;
-        _gcRoot = GcPaths.ResolveGcRoot(hostEnvironment.ContentRootPath);
+        _gcRoot = ResolveGcRoot(hostEnvironment.ContentRootPath);
         _logger.LogInformation("GC root resolved to {GCRoot}", _gcRoot);
     }
 
@@ -103,10 +103,6 @@ public sealed class LuaGameCoordinatorPlugin : IGameCoordinatorPlugin
         }
     }
 
-    // Legacy Lua/C# poll path. Reached only through GcEngineRouter.Poll (the
-    // routing table decides lua vs js per app); the DotaGcBackend.Poll branch
-    // disappears when the lobby/session state it serves migrates to the JS
-    // engine (Fase 4/5 of the GC migration).
     public ApiGCExchangeResponse Poll(GameCoordinatorContext context)
     {
         var response = context.AppId == 570
@@ -246,6 +242,35 @@ public sealed class LuaGameCoordinatorPlugin : IGameCoordinatorPlugin
     private string GetScriptRoot(uint appId)
     {
         return Path.Combine(_gcRoot, appId.ToString());
+    }
+
+    private static string ResolveGcRoot(string contentRootPath)
+    {
+        var configuredRoot = Environment.GetEnvironmentVariable("SKYNET_GC_ROOT");
+        if (IsValidGcRoot(configuredRoot))
+        {
+            return Path.GetFullPath(configuredRoot!);
+        }
+
+        var current = new DirectoryInfo(contentRootPath);
+        while (current != null)
+        {
+            var candidate = Path.Combine(current.FullName, "GC");
+            if (IsValidGcRoot(candidate))
+            {
+                return candidate;
+            }
+
+            current = current.Parent;
+        }
+
+        return Path.Combine(contentRootPath, "GC");
+    }
+
+    private static bool IsValidGcRoot(string? path)
+    {
+        return !string.IsNullOrWhiteSpace(path)
+            && File.Exists(Path.Combine(path, "570", "main.lua"));
     }
 
     private static string ResolveScriptPath(string scriptRoot, string relativePath)

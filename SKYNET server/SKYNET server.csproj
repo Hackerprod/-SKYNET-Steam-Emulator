@@ -14,9 +14,6 @@
     <Content Update="GC\**\*.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="GC\**\*.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Update="GC\**\fixtures\**\*">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Content>
@@ -30,7 +27,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Jint" Version="4.13.0" />
     <PackageReference Include="MoonSharp" Version="2.0.0" />
     <PackageReference Include="protobuf-net" Version="3.2.56" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />

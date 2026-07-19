@@ -75,11 +75,7 @@ builder.Services.AddSingleton<SteamDB>();
 builder.Services.AddSingleton<DotaDB>();
 builder.Services.AddSingleton<DedicatedServerService>();
 builder.Services.AddSingleton<LuaGameCoordinatorPlugin>();
-builder.Services.AddSingleton<JintGcEngine>();
-builder.Services.AddSingleton<GcRoutingTable>();
-builder.Services.AddSingleton<GcClientVersionCache>();
-builder.Services.AddSingleton<GcEngineRouter>();
-builder.Services.AddSingleton<IGameCoordinatorPlugin>(sp => sp.GetRequiredService<GcEngineRouter>());
+builder.Services.AddSingleton<IGameCoordinatorPlugin>(sp => sp.GetRequiredService<LuaGameCoordinatorPlugin>());
 builder.Services.AddSingleton<GameCoordinatorPluginRegistry>();
 builder.Services.AddSingleton<SdrCertificateService>();
 // Consolidated persistence store. A pooled factory is singleton-safe, so the
