@@ -188,6 +188,10 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .RegisterHostFunction("gc", "dotaSocialFeed", dispatcher.DotaSocialFeed)
                 .RegisterHostFunction("gc", "dotaSocialFeedComments", dispatcher.DotaSocialFeedComments)
                 .RegisterHostFunction("gc", "dotaSocialFeedPostComment", dispatcher.DotaSocialFeedPostComment)
+                .RegisterHostFunction("gc", "dotaChatJoinChannel", dispatcher.DotaChatJoinChannel)
+                .RegisterHostFunction("gc", "dotaChatChannel", dispatcher.DotaChatChannel)
+                .RegisterHostFunction("gc", "dotaChatLeaveChannel", dispatcher.DotaChatLeaveChannel)
+                .RegisterHostFunction("gc", "dotaChatBroadcast", dispatcher.DotaChatBroadcast)
                 .RegisterHostFunction("gc", "dotaLookupAccountName", dispatcher.DotaLookupAccountName)
                 .RegisterHostFunction("gc", "dotaEventPoints", dispatcher.DotaEventPoints)
                 .RegisterHostFunction("gc", "dotaHeroStandings", dispatcher.DotaHeroStandings)
@@ -419,6 +423,26 @@ internal sealed class ScriptHostDispatcher
     public TsValue? DotaSocialFeedPostComment(TsValue[] args)
     {
         return RequireCurrent().DotaSocialFeedPostComment(args);
+    }
+
+    public TsValue? DotaChatJoinChannel(TsValue[] args)
+    {
+        return RequireCurrent().DotaChatJoinChannel(args);
+    }
+
+    public TsValue? DotaChatChannel(TsValue[] args)
+    {
+        return RequireCurrent().DotaChatChannel(args);
+    }
+
+    public TsValue? DotaChatLeaveChannel(TsValue[] args)
+    {
+        return RequireCurrent().DotaChatLeaveChannel(args);
+    }
+
+    public TsValue? DotaChatBroadcast(TsValue[] args)
+    {
+        return RequireCurrent().DotaChatBroadcast(args);
     }
 
     public TsValue? DotaLookupAccountName(TsValue[] args)
@@ -1185,6 +1209,81 @@ internal sealed class ScriptExchangeHost
         }
 
         return TsValue.FromBool(DotaGcBackend.StatsStore?.SaveSocialFeedComment(feedEventId, _context.AccountId, comment) ?? false);
+    }
+
+    public TsValue DotaChatJoinChannel(TsValue[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new InvalidOperationException("dotaChatJoinChannel(channelName, channelType) requires two arguments");
+        }
+
+        var channelName = ToString(args[0]);
+        var channelType = Convert.ToUInt32(ToNumber(args[1], "dotaChatJoinChannel.channelType"));
+        var snapshot = DotaGcBackend.ChatStore.Join(channelName, channelType, _context.SteamId, _context.AccountId, _context.PersonaName);
+        return snapshot == null ? TsValue.Null : ToTsChatChannel(snapshot);
+    }
+
+    public TsValue DotaChatChannel(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaChatChannel(channelId) requires one argument");
+        }
+
+        var channelId = Convert.ToUInt64(ToInteger(args[0], "dotaChatChannel.channelId").ToString());
+        var snapshot = DotaGcBackend.ChatStore.Get(channelId, _context.SteamId);
+        return snapshot == null ? TsValue.Null : ToTsChatChannel(snapshot);
+    }
+
+    public TsValue DotaChatLeaveChannel(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaChatLeaveChannel(channelId) requires one argument");
+        }
+
+        var channelId = Convert.ToUInt64(ToInteger(args[0], "dotaChatLeaveChannel.channelId").ToString());
+        return TsValue.FromBool(DotaGcBackend.ChatStore.Leave(channelId, _context.SteamId));
+    }
+
+    public TsValue DotaChatBroadcast(TsValue[] args)
+    {
+        if (args.Length < 3)
+        {
+            throw new InvalidOperationException("dotaChatBroadcast(channelId, messageType, payload) requires three arguments");
+        }
+
+        var channelId = Convert.ToUInt64(ToInteger(args[0], "dotaChatBroadcast.channelId").ToString());
+        var messageType = Convert.ToUInt32(ToNumber(args[1], "dotaChatBroadcast.messageType"));
+        var payloadBase64 = Convert.ToBase64String(ToBytes(args[2], "dotaChatBroadcast.payload"));
+        var includeSelf = args.Length < 4 || ToBool(args[3], "dotaChatBroadcast.includeSelf");
+        var delivered = 0;
+        foreach (var memberSteamId in DotaGcBackend.ChatStore.GetMemberSteamIds(channelId))
+        {
+            var message = new ApiGCMessage
+            {
+                AppId = _context.AppId,
+                MessageType = messageType,
+                PayloadBase64 = payloadBase64,
+                Protobuf = true
+            };
+            if (memberSteamId == _context.SteamId)
+            {
+                if (includeSelf)
+                {
+                    Response.Messages.Add(message);
+                    delivered++;
+                }
+            }
+            else if (DotaGcBackend.PendingMessageQueued != null)
+            {
+                DotaGcBackend.PendingMessageQueued.Invoke(memberSteamId, message);
+                delivered++;
+            }
+        }
+
+        return TsValue.FromInt32(delivered);
     }
 
     public TsValue DotaLookupAccountName(TsValue[] args)
@@ -2035,6 +2134,31 @@ internal sealed class ScriptExchangeHost
         value.SetField("lapHeroesRemaining", TsValue.FromInt32(unchecked((int)progress.LapHeroesRemaining)));
         value.SetField("previousHeroGames", TsValue.FromInt32(unchecked((int)progress.PreviousHeroGames)));
         value.SetField("profileName", TsValue.FromString(progress.ProfileName ?? string.Empty));
+        return new TsObjectValue(value);
+    }
+
+    private static TsValue ToTsChatChannel(DotaChatChannelSnapshot snapshot)
+    {
+        var members = new TsArray();
+        foreach (var member in snapshot.Members)
+        {
+            var memberValue = new TsObject("DotaChatMember");
+            memberValue.SetField("steamId", TsValue.FromUInt64(member.SteamId));
+            memberValue.SetField("accountId", TsValue.FromInt32(unchecked((int)member.AccountId)));
+            memberValue.SetField("personaName", TsValue.FromString(member.PersonaName ?? string.Empty));
+            memberValue.SetField("channelUserId", TsValue.FromInt32(unchecked((int)member.ChannelUserId)));
+            members.Add(new TsObjectValue(memberValue));
+        }
+
+        var value = new TsObject("DotaChatChannel");
+        value.SetField("channelId", TsValue.FromUInt64(snapshot.ChannelId));
+        value.SetField("channelName", TsValue.FromString(snapshot.ChannelName ?? string.Empty));
+        value.SetField("channelType", TsValue.FromInt32(unchecked((int)snapshot.ChannelType)));
+        value.SetField("maxMembers", TsValue.FromInt32(unchecked((int)snapshot.MaxMembers)));
+        value.SetField("isMember", TsValue.FromBool(snapshot.SelfIsMember));
+        value.SetField("channelUserId", TsValue.FromInt32(unchecked((int)snapshot.SelfChannelUserId)));
+        value.SetField("justJoined", TsValue.FromBool(snapshot.SelfJustJoined));
+        value.SetField("members", new TsArrayValue(members));
         return new TsObjectValue(value);
     }
 

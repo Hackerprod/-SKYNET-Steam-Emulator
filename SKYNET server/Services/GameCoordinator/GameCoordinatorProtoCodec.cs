@@ -149,6 +149,11 @@ public sealed class GameCoordinatorProtoCodec
 
         foreach (var supplied in fields.Keys)
         {
+            if (fields[supplied] is TsVoid)
+            {
+                continue;
+            }
+
             if (!consumed.Contains(supplied))
             {
                 throw new InvalidOperationException(
@@ -503,7 +508,8 @@ public sealed class GameCoordinatorProtoCodec
         {
             GetFieldName(property),
             char.ToLowerInvariant(property.Name[0]) + property.Name[1..],
-            property.Name
+            property.Name,
+            SnakeToCamel(property.Name)
         };
         return aliases.Distinct(StringComparer.Ordinal).ToList();
     }

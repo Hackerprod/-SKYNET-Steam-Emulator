@@ -4,6 +4,7 @@ import {
     CMsgClientToGCSocialFeedPostCommentRequest,
     CMsgDOTAJoinChatChannel,
     CMsgDOTAJoinChatChannelResponse,
+    CMsgDOTAJoinChatChannelResponse_Result,
     CMsgGCToClientFindTopSourceTVGamesResponse,
     CMsgGCToClientSocialFeedPostCommentResponse,
     CMsgGCNotificationsRequest,
@@ -18,12 +19,9 @@ import {
     CMsgSocialFeedResponse_FeedEvent,
     CMsgSocialFeedResponse_Result,
     Msg,
+    Proto,
     Routes
 } from "../generated/dota";
-
-const JOIN_CHAT_SUCCESS = 0;
-const JOIN_CHAT_RESPONSE_JOINED = 1;
-const DEFAULT_CHAT_MAX_MEMBERS = 250;
 
 export function registerSocial(): void {
     const social = new Social();
@@ -50,24 +48,51 @@ export class Social {
     joinChatChannel(ctx: HandlerContext<CMsgDOTAJoinChatChannel, CMsgDOTAJoinChatChannelResponse>): boolean {
         const channelName = normalizeChannelName(ctx.request.channelName);
         const channelType = ctx.request.channelType ?? 0;
+        const channel = ctx.services.chat.join(channelName, channelType);
+
+        if (channel === null) {
+            ctx.reply({
+                response: 0,
+                channelName,
+                channelType,
+                result: CMsgDOTAJoinChatChannelResponse_Result.ChannelFull
+            });
+            return true;
+        }
 
         ctx.reply({
-            response: JOIN_CHAT_RESPONSE_JOINED,
-            channelName,
-            channelId: buildStableChatChannelId(channelName, channelType),
-            maxMembers: DEFAULT_CHAT_MAX_MEMBERS,
-            members: [
-                {
-                    steamId: ctx.steamId,
-                    personaName: ctx.personaName,
-                    channelUserId: ctx.accountId,
-                    status: 0
-                }
-            ],
-            channelType,
-            result: JOIN_CHAT_SUCCESS,
-            channelUserId: ctx.accountId
+            response: 0,
+            channelName: channel.channelName,
+            channelId: channel.channelId,
+            maxMembers: channel.maxMembers,
+            members: channel.members.map((member) => ({
+                steamId: member.steamId,
+                personaName: member.personaName,
+                channelUserId: member.channelUserId,
+                status: 0
+            })),
+            channelType: channel.channelType,
+            result: CMsgDOTAJoinChatChannelResponse_Result.JoinSuccess,
+            gcInitiatedJoin: false,
+            channelUserId: channel.channelUserId,
+            welcomeMessage: "",
+            specialPrivileges: 0
         });
+
+        if (channel.justJoined) {
+            ctx.services.chat.broadcast(
+                channel.channelId,
+                Msg.GCOtherJoinedChannel,
+                ctx.encode(Proto.CMsgDOTAOtherJoinedChatChannel, {
+                    channelId: channel.channelId,
+                    personaName: ctx.personaName,
+                    steamId: ctx.steamId,
+                    channelUserId: channel.channelUserId
+                }),
+                false
+            );
+        }
+
         return true;
     }
 
@@ -182,56 +207,4 @@ function normalizeChannelName(channelName: string | undefined): string {
     }
 
     return trimmed;
-}
-
-function buildStableChatChannelId(channelName: string, channelType: number): bigint {
-    const bytes = toUtf8Bytes(channelType + ":" + channelName.toLowerCase());
-    const limit = 18446744073709551616n;
-    let hash = 14695981039346656037n;
-    for (let i = 0; i < bytes.length; i++) {
-        hash = hash ^ BigInt(bytes[i]);
-        hash = (hash * 1099511628211n) % limit;
-    }
-
-    if (hash === 0n) {
-        return 1n;
-    }
-
-    return hash;
-}
-
-function toUtf8Bytes(value: string): Uint8Array {
-    const bytes: number[] = [];
-    for (let i = 0; i < value.length; i++) {
-        let codePoint = value.charCodeAt(i);
-        if (codePoint >= 0xd800 && codePoint <= 0xdbff && i + 1 < value.length) {
-            const next = value.charCodeAt(i + 1);
-            if (next >= 0xdc00 && next <= 0xdfff) {
-                codePoint = 0x10000 + (codePoint - 0xd800) * 0x400 + (next - 0xdc00);
-                i++;
-            }
-        }
-
-        appendUtf8(bytes, codePoint);
-    }
-
-    return new Uint8Array(bytes);
-}
-
-function appendUtf8(bytes: number[], codePoint: number): void {
-    if (codePoint <= 0x7f) {
-        bytes.push(codePoint);
-    } else if (codePoint <= 0x7ff) {
-        bytes.push(0xc0 | (codePoint >> 6));
-        bytes.push(0x80 | (codePoint & 0x3f));
-    } else if (codePoint <= 0xffff) {
-        bytes.push(0xe0 | (codePoint >> 12));
-        bytes.push(0x80 | ((codePoint >> 6) & 0x3f));
-        bytes.push(0x80 | (codePoint & 0x3f));
-    } else {
-        bytes.push(0xf0 | (codePoint >> 18));
-        bytes.push(0x80 | ((codePoint >> 12) & 0x3f));
-        bytes.push(0x80 | ((codePoint >> 6) & 0x3f));
-        bytes.push(0x80 | (codePoint & 0x3f));
-    }
 }
