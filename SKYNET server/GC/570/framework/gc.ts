@@ -105,6 +105,24 @@ export interface DotaStatsService {
     getPlayerStats(accountId: number): DotaPlayerStats;
     getRank(accountId: number): DotaRank;
     getTeammateStats(accountId: number): DotaTeammateStats[];
+    getMatchHistory(
+        accountId: number,
+        startAtMatchId: bigint,
+        requested: number,
+        heroId: number,
+        includePractice: boolean
+    ): DotaMatchPlayer[];
+    getMatchDetails(matchId: bigint): DotaMatch | null;
+    getHeroStatsHistory(accountId: number, heroId: number): DotaMatchPlayer[];
+    getShowcaseStats(accountId: number): DotaShowcaseStats;
+    getRecentAccomplishments(accountId: number): DotaPlayerRecentAccomplishments;
+    getHeroRecentAccomplishments(accountId: number, heroId: number): DotaHeroRecentAccomplishments;
+    hasMvpVote(matchId: bigint): boolean;
+    voteForMvp(matchId: bigint, votedAccountId: number): boolean;
+    finalizeMvpVote(matchId: bigint): boolean;
+    submitLobbyMvpVote(targetAccountId: number): DotaLobbyMvpVoteResult;
+    recordSignOutMvpStats(matchId: bigint, players: DotaSignOutMvpPlayer[]): boolean;
+    rerollPlayerChallenge(): boolean;
 }
 
 export interface DotaAccountName {
@@ -326,6 +344,125 @@ export interface DotaTeammateStats {
     readonly performance: number;
 }
 
+export interface DotaMatch {
+    readonly matchId: bigint;
+    readonly ownerSteamId: bigint;
+    readonly serverSteamId: bigint;
+    readonly startTime: number;
+    readonly duration: number;
+    readonly gameMode: number;
+    readonly lobbyType: number;
+    readonly goodGuysWin: boolean;
+    readonly matchFlags: number;
+    readonly radiantScore: number;
+    readonly direScore: number;
+    readonly cluster: number;
+    readonly firstBloodTime: number;
+    readonly players: DotaMatchPlayer[];
+}
+
+export interface DotaMatchPlayer {
+    readonly matchId: bigint;
+    readonly accountId: number;
+    readonly steamId: bigint;
+    readonly personaName: string;
+    readonly team: number;
+    readonly playerSlot: number;
+    readonly heroId: number;
+    readonly kills: number;
+    readonly deaths: number;
+    readonly assists: number;
+    readonly winner: boolean;
+    readonly goodGuys: boolean;
+    readonly gold: number;
+    readonly goldSpent: number;
+    readonly gpm: number;
+    readonly xpm: number;
+    readonly lastHits: number;
+    readonly denies: number;
+    readonly heroDamage: number;
+    readonly towerDamage: number;
+    readonly heroHealing: number;
+    readonly level: number;
+    readonly netWorth: number;
+    readonly supportGold: number;
+    readonly claimedFarmGold: number;
+    readonly bountyRunes: number;
+    readonly outpostsCaptured: number;
+    readonly selectedFacet: number;
+    readonly leaverStatus: number;
+    readonly items: number[];
+    readonly startTime: number;
+    readonly duration: number;
+    readonly gameMode: number;
+    readonly lobbyType: number;
+    readonly goodGuysWin: boolean;
+    readonly matchFlags: number;
+    readonly radiantScore: number;
+    readonly direScore: number;
+    readonly cluster: number;
+    readonly firstBloodTime: number;
+}
+
+export interface DotaShowcaseStats {
+    readonly gamesWon: number;
+    readonly commendCount: number;
+    readonly mvpCount: number;
+}
+
+export interface DotaPlayerRecentAccomplishments {
+    readonly recentOutcomes: DotaRecentMatchOutcomes;
+    readonly totalRecord: DotaPlayerMatchRecord;
+    readonly predictionStreak: number;
+    readonly plusPredictionStreak: number;
+    readonly recentCommends: DotaPlayerRecentCommends;
+    readonly firstMatchTimestamp: number;
+    readonly lastMatch: DotaPlayerRecentMatchInfo | null;
+    readonly recentMvps: DotaRecentMatchOutcomes;
+}
+
+export interface DotaHeroRecentAccomplishments {
+    readonly recentOutcomes: DotaRecentMatchOutcomes;
+    readonly totalRecord: DotaPlayerMatchRecord;
+    readonly lastMatch: DotaPlayerRecentMatchInfo | null;
+}
+
+export interface DotaRecentMatchOutcomes {
+    readonly outcomes: number;
+    readonly matchCount: number;
+}
+
+export interface DotaPlayerMatchRecord {
+    readonly wins: number;
+    readonly losses: number;
+}
+
+export interface DotaPlayerRecentCommends {
+    readonly commends: number;
+    readonly matchCount: number;
+}
+
+export interface DotaPlayerRecentMatchInfo {
+    readonly matchId: bigint;
+    readonly timestamp: number;
+    readonly duration: number;
+    readonly win: boolean;
+    readonly heroId: number;
+    readonly kills: number;
+    readonly deaths: number;
+    readonly assists: number;
+}
+
+export interface DotaLobbyMvpVoteResult {
+    readonly targetAccountId: number;
+    readonly result: number;
+}
+
+export interface DotaSignOutMvpPlayer {
+    readonly accountId?: number;
+    readonly rank?: number;
+}
+
 function currentSteamId(): bigint {
     return steamId();
 }
@@ -443,6 +580,60 @@ class GcDotaStatsService implements DotaStatsService {
 
     getTeammateStats(accountId: number): DotaTeammateStats[] {
         return dotaTeammateStats(accountId) as DotaTeammateStats[];
+    }
+
+    getMatchHistory(
+        accountId: number,
+        startAtMatchId: bigint,
+        requested: number,
+        heroId: number,
+        includePractice: boolean
+    ): DotaMatchPlayer[] {
+        return dotaMatchHistory(accountId, startAtMatchId, requested, heroId, includePractice) as DotaMatchPlayer[];
+    }
+
+    getMatchDetails(matchId: bigint): DotaMatch | null {
+        return dotaMatchDetails(matchId) as DotaMatch | null;
+    }
+
+    getHeroStatsHistory(accountId: number, heroId: number): DotaMatchPlayer[] {
+        return dotaHeroStatsHistory(accountId, heroId) as DotaMatchPlayer[];
+    }
+
+    getShowcaseStats(accountId: number): DotaShowcaseStats {
+        return dotaShowcaseStats(accountId) as DotaShowcaseStats;
+    }
+
+    getRecentAccomplishments(accountId: number): DotaPlayerRecentAccomplishments {
+        return dotaRecentAccomplishments(accountId) as DotaPlayerRecentAccomplishments;
+    }
+
+    getHeroRecentAccomplishments(accountId: number, heroId: number): DotaHeroRecentAccomplishments {
+        return dotaHeroRecentAccomplishments(accountId, heroId) as DotaHeroRecentAccomplishments;
+    }
+
+    hasMvpVote(matchId: bigint): boolean {
+        return dotaHasMvpVote(matchId);
+    }
+
+    voteForMvp(matchId: bigint, votedAccountId: number): boolean {
+        return dotaVoteForMvp(matchId, votedAccountId);
+    }
+
+    finalizeMvpVote(matchId: bigint): boolean {
+        return dotaFinalizeMvpVote(matchId);
+    }
+
+    submitLobbyMvpVote(targetAccountId: number): DotaLobbyMvpVoteResult {
+        return dotaSubmitLobbyMvpVote(targetAccountId) as DotaLobbyMvpVoteResult;
+    }
+
+    recordSignOutMvpStats(matchId: bigint, players: DotaSignOutMvpPlayer[]): boolean {
+        return dotaRecordSignOutMvpStats(matchId, players);
+    }
+
+    rerollPlayerChallenge(): boolean {
+        return dotaRerollPlayerChallenge();
     }
 }
 

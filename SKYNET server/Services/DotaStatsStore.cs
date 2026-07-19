@@ -595,6 +595,43 @@ public sealed class DotaStatsStore
         }
     }
 
+    public DotaStatsAllHeroProgress? RerollAllHeroChallenge(uint accountId)
+    {
+        if (accountId == 0)
+        {
+            return null;
+        }
+
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            using var transaction = connection.BeginTransaction();
+            EnsureProfileLocked(connection, 0, accountId, string.Empty, transaction);
+            var progress = ReadAllHeroProgressLocked(connection, transaction, accountId);
+            if (progress.HeroIds.Count <= 1)
+            {
+                transaction.Commit();
+                return progress;
+            }
+
+            var currentIndex = progress.HeroIds.IndexOf(progress.CurrentHeroId);
+            if (currentIndex < 0)
+            {
+                currentIndex = 0;
+            }
+
+            var nextIndex = (currentIndex + 1) % progress.HeroIds.Count;
+            progress.PreviousHeroId = progress.CurrentHeroId;
+            progress.PreviousHeroGames = progress.CurrentHeroGames;
+            progress.CurrentHeroId = progress.HeroIds[nextIndex];
+            progress.NextHeroId = progress.HeroIds[(nextIndex + 1) % progress.HeroIds.Count];
+            progress.CurrentHeroGames = 0;
+            SaveAllHeroProgressLocked(connection, transaction, progress);
+            transaction.Commit();
+            return progress;
+        }
+    }
+
     public void RecordMatch(DotaStatsMatch match)
     {
         if (match.MatchId == 0)

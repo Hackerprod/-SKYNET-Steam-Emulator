@@ -37,6 +37,24 @@ declare global {
     function dotaPlayerStats(accountId: number): unknown;
     function dotaRank(accountId: number): unknown;
     function dotaTeammateStats(accountId: number): unknown;
+    function dotaMatchHistory(
+        accountId: number,
+        startAtMatchId: bigint,
+        requested: number,
+        heroId: number,
+        includePractice: boolean
+    ): unknown;
+    function dotaMatchDetails(matchId: bigint): unknown;
+    function dotaHeroStatsHistory(accountId: number, heroId: number): unknown;
+    function dotaShowcaseStats(accountId: number): unknown;
+    function dotaRecentAccomplishments(accountId: number): unknown;
+    function dotaHeroRecentAccomplishments(accountId: number, heroId: number): unknown;
+    function dotaHasMvpVote(matchId: bigint): boolean;
+    function dotaVoteForMvp(matchId: bigint, votedAccountId: number): boolean;
+    function dotaFinalizeMvpVote(matchId: bigint): boolean;
+    function dotaSubmitLobbyMvpVote(targetAccountId: number): unknown;
+    function dotaRecordSignOutMvpStats(matchId: bigint, players: unknown[]): boolean;
+    function dotaRerollPlayerChallenge(): boolean;
 }
 
 export {};

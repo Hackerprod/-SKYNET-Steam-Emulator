@@ -40,12 +40,17 @@ public static class GcScriptSelfCheck
         ok &= ExpectResponse(plugin, context, 7009, 7010, 1, write);
         ok &= ExpectResponse(plugin, context, 7274, 7275, 1, write);
         ok &= ExpectResponse(plugin, context, 7387, 7388, 1, write);
+        ok &= ExpectResponse(plugin, context, 7408, 7409, 1, write);
         ok &= ExpectResponse(plugin, context, 7427, 7428, 1, write);
         ok &= ExpectResponse(plugin, context, 7521, 7522, 1, write);
         ok &= ExpectResponse(plugin, context, 7527, 7528, 1, write);
         ok &= ExpectResponse(plugin, context, 7534, 7535, 1, write);
         ok &= ExpectResponse(plugin, context, 7538, 7539, 1, write);
+        ok &= ExpectResponse(plugin, context, 7584, 7586, 1, write);
         ok &= ExpectResponse(plugin, context, 7606, 7607, 1, write);
+        ok &= ExpectResponse(plugin, context, 8082, 8083, 1, write);
+        ok &= ExpectResponse(plugin, context, 8111, 8112, 1, write);
+        ok &= ExpectResponse(plugin, context, 8113, 8114, 1, write);
         ok &= ExpectResponse(plugin, context, 8006, 8007, 1, write);
         ok &= ExpectResponse(plugin, context, 8009, 8010, 1, write);
         ok &= ExpectResponse(plugin, context, 8016, 8017, 1, write);
@@ -57,10 +62,14 @@ public static class GcScriptSelfCheck
         ok &= ExpectResponse(plugin, context, 8274, 8275, 1, write);
         ok &= ExpectResponse(plugin, context, 8303, 8304, 1, write);
         ok &= ExpectResponse(plugin, context, 8305, 8306, 1, write);
+        ok &= ExpectResponse(plugin, context, 8332, 8333, 1, write);
+        ok &= ExpectResponse(plugin, context, 8334, 8335, 1, write);
+        ok &= ExpectResponse(plugin, context, 8349, 8350, 1, write);
         ok &= ExpectResponse(plugin, context, 8793, 8794, 1, write);
         ok &= ExpectResponse(plugin, context, 8798, 8799, 1, write);
         ok &= ExpectResponse(plugin, context, 8800, 8801, 1, write);
         ok &= ExpectResponse(plugin, context, 8879, 8880, 1, write);
+        ok &= ExpectResponse(plugin, context, 8886, 8887, 1, write);
         ok &= ExpectUnhandled(plugin, context, 999999, write);
 
         foreach (var entry in trace.GetSince(0))

@@ -77,6 +77,27 @@
         "responseProto": "CMsgGCGetHeroStandingsResponse"
     },
     {
+        "name": "GetHeroStatsHistory",
+        "requestMessage": "GCGetHeroStatsHistory",
+        "requestProto": "CMsgGCGetHeroStatsHistory",
+        "responseMessage": "GCGetHeroStatsHistoryResponse",
+        "responseProto": "CMsgGCGetHeroStatsHistoryResponse"
+    },
+    {
+        "name": "GetPlayerMatchHistory",
+        "requestMessage": "DOTAGetPlayerMatchHistory",
+        "requestProto": "CMsgDOTAGetPlayerMatchHistory",
+        "responseMessage": "DOTAGetPlayerMatchHistoryResponse",
+        "responseProto": "CMsgDOTAGetPlayerMatchHistoryResponse"
+    },
+    {
+        "name": "MatchDetails",
+        "requestMessage": "GCMatchDetailsRequest",
+        "requestProto": "CMsgGCMatchDetailsRequest",
+        "responseMessage": "GCMatchDetailsResponse",
+        "responseProto": "CMsgGCMatchDetailsResponse"
+    },
+    {
         "name": "LookupAccountName",
         "requestMessage": "ClientToGCLookupAccountName",
         "requestProto": "CMsgClientToGCLookupAccountName",
@@ -110,6 +131,62 @@
         "requestProto": "CMsgClientToGCRankRequest",
         "responseMessage": "GCToClientRankResponse",
         "responseProto": "CMsgGCToClientRankResponse"
+    },
+    {
+        "name": "ShowcaseGetUserData",
+        "requestMessage": "ClientToGCShowcaseGetUserData",
+        "requestProto": "CMsgClientToGCShowcaseGetUserData",
+        "responseMessage": "ClientToGCShowcaseGetUserDataResponse",
+        "responseProto": "CMsgClientToGCShowcaseGetUserDataResponse"
+    },
+    {
+        "name": "RequestPlayerRecentAccomplishments",
+        "requestMessage": "ClientToGCRequestPlayerRecentAccomplishments",
+        "requestProto": "CMsgClientToGCRequestPlayerRecentAccomplishments",
+        "responseMessage": "ClientToGCRequestPlayerRecentAccomplishmentsResponse",
+        "responseProto": "CMsgClientToGCRequestPlayerRecentAccomplishmentsResponse"
+    },
+    {
+        "name": "RequestPlayerHeroRecentAccomplishments",
+        "requestMessage": "ClientToGCRequestPlayerHeroRecentAccomplishments",
+        "requestProto": "CMsgClientToGCRequestPlayerHeroRecentAccomplishments",
+        "responseMessage": "ClientToGCRequestPlayerHeroRecentAccomplishmentsResponse",
+        "responseProto": "CMsgClientToGCRequestPlayerHeroRecentAccomplishmentsResponse"
+    },
+    {
+        "name": "HasPlayerVotedForMvp",
+        "requestMessage": "ClientToGCHasPlayerVotedForMVP",
+        "requestProto": "CMsgClientToGCHasPlayerVotedForMVP",
+        "responseMessage": "ClientToGCHasPlayerVotedForMVPResponse",
+        "responseProto": "CMsgClientToGCHasPlayerVotedForMVPResponse"
+    },
+    {
+        "name": "VoteForMvp",
+        "requestMessage": "ClientToGCVoteForMVP",
+        "requestProto": "CMsgClientToGCVoteForMVP",
+        "responseMessage": "ClientToGCVoteForMVPResponse",
+        "responseProto": "CMsgClientToGCVoteForMVPResponse"
+    },
+    {
+        "name": "MvpVoteTimeout",
+        "requestMessage": "ClientToGCMVPVoteTimeout",
+        "requestProto": "CMsgClientToGCMVPVoteTimeout",
+        "responseMessage": "ClientToGCMVPVoteTimeoutResponse",
+        "responseProto": "CMsgClientToGCMVPVoteTimeoutResponse"
+    },
+    {
+        "name": "SubmitLobbyMvpVote",
+        "requestMessage": "GCSubmitLobbyMVPVote",
+        "requestProto": "CMsgDOTASubmitLobbyMVPVote",
+        "responseMessage": "GCSubmitLobbyMVPVoteResponse",
+        "responseProto": "CMsgDOTASubmitLobbyMVPVoteResponse"
+    },
+    {
+        "name": "RerollPlayerChallenge",
+        "requestMessage": "ClientToGCRerollPlayerChallenge",
+        "requestProto": "CMsgClientToGCRerollPlayerChallenge",
+        "responseMessage": "GCRerollPlayerChallengeResponse",
+        "responseProto": "CMsgGCRerollPlayerChallengeResponse"
     },
     {
         "name": "GetCurrentPrivateCoachingSession",

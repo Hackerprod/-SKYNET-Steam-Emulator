@@ -129,6 +129,11 @@ public sealed class GameCoordinatorProtoCodec
                 consumed.Add(alias);
             }
 
+            if (fieldValue is TsVoid or TsNull)
+            {
+                continue;
+            }
+
             try
             {
                 ApplyProperty(instance, property, fieldValue);

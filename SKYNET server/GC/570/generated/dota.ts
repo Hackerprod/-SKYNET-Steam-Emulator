@@ -24947,6 +24947,18 @@ export const Routes = {
         responseId: Msg.GCGetHeroStandingsResponse,
         response: Proto.CMsgGCGetHeroStandingsResponse
     } as GcRoute<CMsgGCGetHeroStandings, CMsgGCGetHeroStandingsResponse>,
+    GetHeroStatsHistory: {
+        requestId: Msg.GCGetHeroStatsHistory,
+        request: Proto.CMsgGCGetHeroStatsHistory,
+        responseId: Msg.GCGetHeroStatsHistoryResponse,
+        response: Proto.CMsgGCGetHeroStatsHistoryResponse
+    } as GcRoute<CMsgGCGetHeroStatsHistory, CMsgGCGetHeroStatsHistoryResponse>,
+    GetPlayerMatchHistory: {
+        requestId: Msg.DOTAGetPlayerMatchHistory,
+        request: Proto.CMsgDOTAGetPlayerMatchHistory,
+        responseId: Msg.DOTAGetPlayerMatchHistoryResponse,
+        response: Proto.CMsgDOTAGetPlayerMatchHistoryResponse
+    } as GcRoute<CMsgDOTAGetPlayerMatchHistory, CMsgDOTAGetPlayerMatchHistoryResponse>,
     GetProfileCard: {
         requestId: Msg.ClientToGCGetProfileCard,
         request: Proto.CMsgClientToGCGetProfileCard,
@@ -24971,6 +24983,12 @@ export const Routes = {
         responseId: Msg.ClientToGCGetTrophyListResponse,
         response: Proto.CMsgClientToGCGetTrophyListResponse
     } as GcRoute<CMsgClientToGCGetTrophyList, CMsgClientToGCGetTrophyListResponse>,
+    HasPlayerVotedForMvp: {
+        requestId: Msg.ClientToGCHasPlayerVotedForMVP,
+        request: Proto.CMsgClientToGCHasPlayerVotedForMVP,
+        responseId: Msg.ClientToGCHasPlayerVotedForMVPResponse,
+        response: Proto.CMsgClientToGCHasPlayerVotedForMVPResponse
+    } as GcRoute<CMsgClientToGCHasPlayerVotedForMVP, CMsgClientToGCHasPlayerVotedForMVPResponse>,
     HeroGlobalData: {
         requestId: Msg.HeroGlobalDataRequest,
         request: Proto.CMsgHeroGlobalDataRequest,
@@ -24989,6 +25007,18 @@ export const Routes = {
         responseId: Msg.ClientToGCLookupAccountNameResponse,
         response: Proto.CMsgClientToGCLookupAccountNameResponse
     } as GcRoute<CMsgClientToGCLookupAccountName, CMsgClientToGCLookupAccountNameResponse>,
+    MatchDetails: {
+        requestId: Msg.GCMatchDetailsRequest,
+        request: Proto.CMsgGCMatchDetailsRequest,
+        responseId: Msg.GCMatchDetailsResponse,
+        response: Proto.CMsgGCMatchDetailsResponse
+    } as GcRoute<CMsgGCMatchDetailsRequest, CMsgGCMatchDetailsResponse>,
+    MvpVoteTimeout: {
+        requestId: Msg.ClientToGCMVPVoteTimeout,
+        request: Proto.CMsgClientToGCMVPVoteTimeout,
+        responseId: Msg.ClientToGCMVPVoteTimeoutResponse,
+        response: Proto.CMsgClientToGCMVPVoteTimeoutResponse
+    } as GcRoute<CMsgClientToGCMVPVoteTimeout, CMsgClientToGCMVPVoteTimeoutResponse>,
     Notifications: {
         requestId: Msg.GCNotificationsRequest,
         request: Proto.CMsgGCNotificationsRequest,
@@ -25019,6 +25049,18 @@ export const Routes = {
         responseId: Msg.GCToClientRankResponse,
         response: Proto.CMsgGCToClientRankResponse
     } as GcRoute<CMsgClientToGCRankRequest, CMsgGCToClientRankResponse>,
+    RequestPlayerHeroRecentAccomplishments: {
+        requestId: Msg.ClientToGCRequestPlayerHeroRecentAccomplishments,
+        request: Proto.CMsgClientToGCRequestPlayerHeroRecentAccomplishments,
+        responseId: Msg.ClientToGCRequestPlayerHeroRecentAccomplishmentsResponse,
+        response: Proto.CMsgClientToGCRequestPlayerHeroRecentAccomplishmentsResponse
+    } as GcRoute<CMsgClientToGCRequestPlayerHeroRecentAccomplishments, CMsgClientToGCRequestPlayerHeroRecentAccomplishmentsResponse>,
+    RequestPlayerRecentAccomplishments: {
+        requestId: Msg.ClientToGCRequestPlayerRecentAccomplishments,
+        request: Proto.CMsgClientToGCRequestPlayerRecentAccomplishments,
+        responseId: Msg.ClientToGCRequestPlayerRecentAccomplishmentsResponse,
+        response: Proto.CMsgClientToGCRequestPlayerRecentAccomplishmentsResponse
+    } as GcRoute<CMsgClientToGCRequestPlayerRecentAccomplishments, CMsgClientToGCRequestPlayerRecentAccomplishmentsResponse>,
     RequestSocialFeed: {
         requestId: Msg.ClientToGCRequestSocialFeed,
         request: Proto.CMsgSocialFeedRequest,
@@ -25037,6 +25079,12 @@ export const Routes = {
         responseId: Msg.GCRequestStoreSalesDataResponse,
         response: Proto.CMsgGCRequestStoreSalesDataResponse
     } as GcRoute<CMsgGCRequestStoreSalesData, CMsgGCRequestStoreSalesDataResponse>,
+    RerollPlayerChallenge: {
+        requestId: Msg.ClientToGCRerollPlayerChallenge,
+        request: Proto.CMsgClientToGCRerollPlayerChallenge,
+        responseId: Msg.GCRerollPlayerChallengeResponse,
+        response: Proto.CMsgGCRerollPlayerChallengeResponse
+    } as GcRoute<CMsgClientToGCRerollPlayerChallenge, CMsgGCRerollPlayerChallengeResponse>,
     SetItemStyle: {
         requestId: Msg.ClientToGCSetItemStyle,
         request: Proto.CMsgClientToGCSetItemStyle,
@@ -25049,16 +25097,34 @@ export const Routes = {
         responseId: Msg.GCToClientProfileCardUpdated,
         response: Proto.CMsgDOTAProfileCard
     } as GcRoute<CMsgClientToGCSetProfileCardSlots, CMsgDOTAProfileCard>,
+    ShowcaseGetUserData: {
+        requestId: Msg.ClientToGCShowcaseGetUserData,
+        request: Proto.CMsgClientToGCShowcaseGetUserData,
+        responseId: Msg.ClientToGCShowcaseGetUserDataResponse,
+        response: Proto.CMsgClientToGCShowcaseGetUserDataResponse
+    } as GcRoute<CMsgClientToGCShowcaseGetUserData, CMsgClientToGCShowcaseGetUserDataResponse>,
     SocialFeedPostComment: {
         requestId: Msg.ClientToGCSocialFeedPostCommentRequest,
         request: Proto.CMsgClientToGCSocialFeedPostCommentRequest,
         responseId: Msg.GCToClientSocialFeedPostCommentResponse,
         response: Proto.CMsgGCToClientSocialFeedPostCommentResponse
     } as GcRoute<CMsgClientToGCSocialFeedPostCommentRequest, CMsgGCToClientSocialFeedPostCommentResponse>,
+    SubmitLobbyMvpVote: {
+        requestId: Msg.GCSubmitLobbyMVPVote,
+        request: Proto.CMsgDOTASubmitLobbyMVPVote,
+        responseId: Msg.GCSubmitLobbyMVPVoteResponse,
+        response: Proto.CMsgDOTASubmitLobbyMVPVoteResponse
+    } as GcRoute<CMsgDOTASubmitLobbyMVPVote, CMsgDOTASubmitLobbyMVPVoteResponse>,
     TeammateStats: {
         requestId: Msg.ClientToGCTeammateStatsRequest,
         request: Proto.CMsgClientToGCTeammateStatsRequest,
         responseId: Msg.ClientToGCTeammateStatsResponse,
         response: Proto.CMsgClientToGCTeammateStatsResponse
     } as GcRoute<CMsgClientToGCTeammateStatsRequest, CMsgClientToGCTeammateStatsResponse>,
+    VoteForMvp: {
+        requestId: Msg.ClientToGCVoteForMVP,
+        request: Proto.CMsgClientToGCVoteForMVP,
+        responseId: Msg.ClientToGCVoteForMVPResponse,
+        response: Proto.CMsgClientToGCVoteForMVPResponse
+    } as GcRoute<CMsgClientToGCVoteForMVP, CMsgClientToGCVoteForMVPResponse>,
 } as const;
