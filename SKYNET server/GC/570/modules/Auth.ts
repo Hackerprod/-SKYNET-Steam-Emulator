@@ -1,6 +1,7 @@
 import { gc, HandlerContext } from "../framework/gc";
 import { CMsgClientHello, CMsgClientWelcome, GCConnectionStatus, Msg, Proto, Routes } from "../generated/dota";
 import { buildEconSoCacheSubscribed } from "./Items";
+import { emitCurrentParty } from "./Party";
 
 const Welcome = {
     Version: 20,
@@ -89,5 +90,7 @@ export class Auth {
             status: GCConnectionStatus.HaveSession,
             clientSessionNeed: sessionNeed
         });
+
+        emitCurrentParty(ctx);
     }
 }

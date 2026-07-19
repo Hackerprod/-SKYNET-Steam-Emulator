@@ -25007,6 +25007,12 @@ export const Routes = {
         responseId: Msg.HeroGlobalDataResponse,
         response: Proto.CMsgHeroGlobalDataResponse
     } as GcRoute<CMsgHeroGlobalDataRequest, CMsgHeroGlobalDataResponse>,
+    InviteToParty: {
+        requestId: Msg.GCInviteToParty,
+        request: Proto.CMsgInviteToParty,
+        responseId: Msg.GCInvitationCreated,
+        response: Proto.CMsgInvitationCreated
+    } as GcRoute<CMsgInviteToParty, CMsgInvitationCreated>,
     JoinChatChannel: {
         requestId: Msg.GCJoinChatChannel,
         request: Proto.CMsgDOTAJoinChatChannel,
@@ -25043,6 +25049,12 @@ export const Routes = {
         responseId: Msg.GCNotificationsResponse,
         response: Proto.CMsgGCNotificationsResponse
     } as GcRoute<CMsgGCNotificationsRequest, CMsgGCNotificationsResponse>,
+    PartyReadyCheck: {
+        requestId: Msg.PartyReadyCheckRequest,
+        request: Proto.CMsgPartyReadyCheckRequest,
+        responseId: Msg.PartyReadyCheckResponse,
+        response: Proto.CMsgPartyReadyCheckResponse
+    } as GcRoute<CMsgPartyReadyCheckRequest, CMsgPartyReadyCheckResponse>,
     PlayerStats: {
         requestId: Msg.ClientToGCPlayerStatsRequest,
         request: Proto.CMsgClientToGCPlayerStatsRequest,

@@ -64,6 +64,26 @@ declare global {
     function dotaRecordSpectatorCount(spectatorCount: number): boolean;
     function dotaRecordLiveScoreboard(snapshot: unknown): boolean;
     function dotaSavePlayerReport(report: unknown): boolean;
+    function dotaPartyCurrent(): unknown;
+    function dotaPartyById(partyId: bigint): unknown;
+    function dotaPartyEnsureCurrent(ping: unknown): unknown;
+    function dotaPartyAddMember(partyId: bigint, ping: unknown, isCoach: boolean): unknown;
+    function dotaPartyRemoveMember(partyId: bigint, steamId: bigint): unknown;
+    function dotaPartyDelete(partyId: bigint): boolean;
+    function dotaPartySetLeader(partyId: bigint, leaderSteamId: bigint): unknown;
+    function dotaPartySetCoach(partyId: bigint, steamId: bigint, isCoach: boolean): unknown;
+    function dotaPartySetPing(partyId: bigint, steamId: bigint, ping: unknown): unknown;
+    function dotaPartyStartReadyCheck(partyId: bigint, durationSeconds: number): unknown;
+    function dotaPartyAcknowledgeReadyCheck(partyId: bigint, readyStatus: number): unknown;
+    function dotaPartyCreateInvite(partyId: bigint, targetSteamId: bigint, teamId: number, asCoach: boolean): unknown;
+    function dotaPartyTakeInvite(partyId: bigint): unknown;
+    function dotaPartyInvitesForTarget(targetSteamId: bigint): unknown;
+    function dotaPartyDeleteInvitesForTarget(targetSteamId: bigint): unknown;
+    function dotaPartyDeleteInvitesForParty(partyId: bigint): unknown;
+    function dotaPartyPruneInvitesCreatedBefore(cutoff: number): unknown;
+    function dotaPartyUserExists(steamId: bigint): boolean;
+    function dotaPartyUserOnline(steamId: bigint): boolean;
+    function dotaQueueGcMessage(steamId: bigint, messageType: number, payload: Uint8Array, protobuf?: boolean): boolean;
 }
 
 export {};

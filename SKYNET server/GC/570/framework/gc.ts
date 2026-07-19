@@ -4,6 +4,18 @@ export type HandlerResult = void | boolean | Promise<void | boolean>;
 export type RouteHandler<TRequest, TResponse> = (ctx: HandlerContext<TRequest, TResponse>) => HandlerResult;
 export type RawMessageHandler = (ctx: RawMessageContext) => HandlerResult;
 
+export interface GcContextBase {
+    readonly steamId: bigint;
+    readonly accountId: number;
+    readonly personaName: string;
+    readonly services: GcServices;
+    readonly clock: Clock;
+    readonly logger: Logger;
+    readonly signal: AbortSignal;
+    send<TMessage>(messageType: number, proto: ProtoDescriptor<TMessage>, message: TMessage): void;
+    encode<TMessage>(proto: ProtoDescriptor<TMessage>, message: TMessage): Uint8Array;
+}
+
 export interface HandlerContext<TRequest, TResponse> {
     readonly route: GcRoute<TRequest, TResponse>;
     readonly request: TRequest;
@@ -51,6 +63,7 @@ export interface Logger {
 export interface GcServices {
     readonly items: DotaItemService;
     readonly match: DotaMatchService;
+    readonly party: DotaPartyService;
     readonly profiles: DotaProfileService;
     readonly social: DotaSocialService;
     readonly stats: DotaStatsService;
@@ -84,6 +97,81 @@ export interface DotaEquipment {
     readonly defIndex: number;
     readonly itemId: bigint;
     readonly style: number;
+}
+
+export interface DotaPartyService {
+    getCurrent(): DotaPartyState | null;
+    getById(partyId: bigint): DotaPartyState | null;
+    ensureCurrent(ping: DotaPartyPingData): DotaPartyState;
+    addMember(partyId: bigint, ping: DotaPartyPingData, isCoach: boolean): DotaPartyState | null;
+    removeMember(partyId: bigint, steamId: bigint): DotaPartyState | null;
+    deleteParty(partyId: bigint): boolean;
+    setLeader(partyId: bigint, leaderSteamId: bigint): DotaPartyState | null;
+    setMemberCoach(partyId: bigint, steamId: bigint, isCoach: boolean): DotaPartyState | null;
+    setMemberPing(partyId: bigint, steamId: bigint, ping: DotaPartyPingData): DotaPartyState | null;
+    startReadyCheck(partyId: bigint, durationSeconds: number): DotaPartyState | null;
+    acknowledgeReadyCheck(partyId: bigint, readyStatus: number): DotaPartyState | null;
+    createInvite(
+        partyId: bigint,
+        targetSteamId: bigint,
+        teamId: number,
+        asCoach: boolean
+    ): DotaPartyInviteMutation | null;
+    takeInvite(partyId: bigint): DotaPartyInvite | null;
+    getInvitesForTarget(targetSteamId: bigint): DotaPartyInvite[];
+    deleteInvitesForTarget(targetSteamId: bigint): DotaPartyInvite[];
+    deleteInvitesForParty(partyId: bigint): DotaPartyInvite[];
+    pruneInvitesCreatedBefore(cutoff: number): DotaPartyInvite[];
+    userExists(steamId: bigint): boolean;
+    userOnline(steamId: bigint): boolean;
+    queueMessage(steamId: bigint, messageType: number, payload: Uint8Array, protobuf?: boolean): boolean;
+}
+
+export interface DotaPartyState {
+    readonly partyId: bigint;
+    readonly leaderSteamId: bigint;
+    readonly state: number;
+    readonly permanent: boolean;
+    readonly readyStartTimestamp: number;
+    readonly readyFinishTimestamp: number;
+    readonly readyInitiatorAccountId: number;
+    readonly members: DotaPartyMember[];
+}
+
+export interface DotaPartyMember {
+    readonly steamId: bigint;
+    readonly accountId: number;
+    readonly personaName: string;
+    readonly position: number;
+    readonly isCoach: boolean;
+    readonly isPlusSubscriber: boolean;
+    readonly regionCodes: number[];
+    readonly regionPings: number[];
+    readonly regionPingFailedBitmask: number;
+    readonly readyStatus: number;
+}
+
+export interface DotaPartyInvite {
+    readonly inviteGid: bigint;
+    readonly partyId: bigint;
+    readonly targetSteamId: bigint;
+    readonly senderSteamId: bigint;
+    readonly senderName: string;
+    readonly teamId: number;
+    readonly asCoach: boolean;
+    readonly lowPriorityStatus: boolean;
+    readonly createdAt: number;
+}
+
+export interface DotaPartyInviteMutation {
+    readonly invite: DotaPartyInvite;
+    readonly replaced: DotaPartyInvite | null;
+}
+
+export interface DotaPartyPingData {
+    readonly regionCodes: number[];
+    readonly regionPings: number[];
+    readonly regionPingFailedBitmask: number;
 }
 
 export interface DotaProfileService {
@@ -680,6 +768,93 @@ class GcDotaMatchService implements DotaMatchService {
     }
 }
 
+class GcDotaPartyService implements DotaPartyService {
+    getCurrent(): DotaPartyState | null {
+        return dotaPartyCurrent() as DotaPartyState | null;
+    }
+
+    getById(partyId: bigint): DotaPartyState | null {
+        return dotaPartyById(partyId) as DotaPartyState | null;
+    }
+
+    ensureCurrent(ping: DotaPartyPingData): DotaPartyState {
+        return dotaPartyEnsureCurrent(ping) as DotaPartyState;
+    }
+
+    addMember(partyId: bigint, ping: DotaPartyPingData, isCoach: boolean): DotaPartyState | null {
+        return dotaPartyAddMember(partyId, ping, isCoach) as DotaPartyState | null;
+    }
+
+    removeMember(partyId: bigint, steamId: bigint): DotaPartyState | null {
+        return dotaPartyRemoveMember(partyId, steamId) as DotaPartyState | null;
+    }
+
+    deleteParty(partyId: bigint): boolean {
+        return dotaPartyDelete(partyId);
+    }
+
+    setLeader(partyId: bigint, leaderSteamId: bigint): DotaPartyState | null {
+        return dotaPartySetLeader(partyId, leaderSteamId) as DotaPartyState | null;
+    }
+
+    setMemberCoach(partyId: bigint, steamId: bigint, isCoach: boolean): DotaPartyState | null {
+        return dotaPartySetCoach(partyId, steamId, isCoach) as DotaPartyState | null;
+    }
+
+    setMemberPing(partyId: bigint, steamId: bigint, ping: DotaPartyPingData): DotaPartyState | null {
+        return dotaPartySetPing(partyId, steamId, ping) as DotaPartyState | null;
+    }
+
+    startReadyCheck(partyId: bigint, durationSeconds: number): DotaPartyState | null {
+        return dotaPartyStartReadyCheck(partyId, durationSeconds) as DotaPartyState | null;
+    }
+
+    acknowledgeReadyCheck(partyId: bigint, readyStatus: number): DotaPartyState | null {
+        return dotaPartyAcknowledgeReadyCheck(partyId, readyStatus) as DotaPartyState | null;
+    }
+
+    createInvite(
+        partyId: bigint,
+        targetSteamId: bigint,
+        teamId: number,
+        asCoach: boolean
+    ): DotaPartyInviteMutation | null {
+        return dotaPartyCreateInvite(partyId, targetSteamId, teamId, asCoach) as DotaPartyInviteMutation | null;
+    }
+
+    takeInvite(partyId: bigint): DotaPartyInvite | null {
+        return dotaPartyTakeInvite(partyId) as DotaPartyInvite | null;
+    }
+
+    getInvitesForTarget(targetSteamId: bigint): DotaPartyInvite[] {
+        return dotaPartyInvitesForTarget(targetSteamId) as DotaPartyInvite[];
+    }
+
+    deleteInvitesForTarget(targetSteamId: bigint): DotaPartyInvite[] {
+        return dotaPartyDeleteInvitesForTarget(targetSteamId) as DotaPartyInvite[];
+    }
+
+    deleteInvitesForParty(partyId: bigint): DotaPartyInvite[] {
+        return dotaPartyDeleteInvitesForParty(partyId) as DotaPartyInvite[];
+    }
+
+    pruneInvitesCreatedBefore(cutoff: number): DotaPartyInvite[] {
+        return dotaPartyPruneInvitesCreatedBefore(cutoff) as DotaPartyInvite[];
+    }
+
+    userExists(steamId: bigint): boolean {
+        return dotaPartyUserExists(steamId);
+    }
+
+    userOnline(steamId: bigint): boolean {
+        return dotaPartyUserOnline(steamId);
+    }
+
+    queueMessage(steamId: bigint, messageType: number, payload: Uint8Array, protobuf = true): boolean {
+        return dotaQueueGcMessage(steamId, messageType, payload, protobuf);
+    }
+}
+
 class GcDotaStatsService implements DotaStatsService {
     lookupAccountName(accountId: number): DotaAccountName {
         return dotaLookupAccountName(accountId) as DotaAccountName;
@@ -767,6 +942,7 @@ class GcDotaStatsService implements DotaStatsService {
 class GcServiceContainer implements GcServices {
     items: DotaItemService;
     match: DotaMatchService;
+    party: DotaPartyService;
     profiles: DotaProfileService;
     social: DotaSocialService;
     stats: DotaStatsService;
@@ -774,6 +950,7 @@ class GcServiceContainer implements GcServices {
     constructor() {
         this.items = new GcDotaItemService();
         this.match = new GcDotaMatchService();
+        this.party = new GcDotaPartyService();
         this.profiles = new GcDotaProfileService();
         this.social = new GcDotaSocialService();
         this.stats = new GcDotaStatsService();

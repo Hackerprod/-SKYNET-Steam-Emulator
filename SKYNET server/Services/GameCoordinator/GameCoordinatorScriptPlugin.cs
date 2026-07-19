@@ -215,7 +215,27 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .RegisterHostFunction("gc", "dotaRecordMatchStateHistory", dispatcher.DotaRecordMatchStateHistory)
                 .RegisterHostFunction("gc", "dotaRecordSpectatorCount", dispatcher.DotaRecordSpectatorCount)
                 .RegisterHostFunction("gc", "dotaRecordLiveScoreboard", dispatcher.DotaRecordLiveScoreboard)
-                .RegisterHostFunction("gc", "dotaSavePlayerReport", dispatcher.DotaSavePlayerReport);
+                .RegisterHostFunction("gc", "dotaSavePlayerReport", dispatcher.DotaSavePlayerReport)
+                .RegisterHostFunction("gc", "dotaPartyCurrent", _ => dispatcher.RequireCurrent().DotaPartyCurrent())
+                .RegisterHostFunction("gc", "dotaPartyById", dispatcher.DotaPartyById)
+                .RegisterHostFunction("gc", "dotaPartyEnsureCurrent", dispatcher.DotaPartyEnsureCurrent)
+                .RegisterHostFunction("gc", "dotaPartyAddMember", dispatcher.DotaPartyAddMember)
+                .RegisterHostFunction("gc", "dotaPartyRemoveMember", dispatcher.DotaPartyRemoveMember)
+                .RegisterHostFunction("gc", "dotaPartyDelete", dispatcher.DotaPartyDelete)
+                .RegisterHostFunction("gc", "dotaPartySetLeader", dispatcher.DotaPartySetLeader)
+                .RegisterHostFunction("gc", "dotaPartySetCoach", dispatcher.DotaPartySetCoach)
+                .RegisterHostFunction("gc", "dotaPartySetPing", dispatcher.DotaPartySetPing)
+                .RegisterHostFunction("gc", "dotaPartyStartReadyCheck", dispatcher.DotaPartyStartReadyCheck)
+                .RegisterHostFunction("gc", "dotaPartyAcknowledgeReadyCheck", dispatcher.DotaPartyAcknowledgeReadyCheck)
+                .RegisterHostFunction("gc", "dotaPartyCreateInvite", dispatcher.DotaPartyCreateInvite)
+                .RegisterHostFunction("gc", "dotaPartyTakeInvite", dispatcher.DotaPartyTakeInvite)
+                .RegisterHostFunction("gc", "dotaPartyInvitesForTarget", dispatcher.DotaPartyInvitesForTarget)
+                .RegisterHostFunction("gc", "dotaPartyDeleteInvitesForTarget", dispatcher.DotaPartyDeleteInvitesForTarget)
+                .RegisterHostFunction("gc", "dotaPartyDeleteInvitesForParty", dispatcher.DotaPartyDeleteInvitesForParty)
+                .RegisterHostFunction("gc", "dotaPartyPruneInvitesCreatedBefore", dispatcher.DotaPartyPruneInvitesCreatedBefore)
+                .RegisterHostFunction("gc", "dotaPartyUserExists", dispatcher.DotaPartyUserExists)
+                .RegisterHostFunction("gc", "dotaPartyUserOnline", dispatcher.DotaPartyUserOnline)
+                .RegisterHostFunction("gc", "dotaQueueGcMessage", dispatcher.DotaQueueGcMessage);
 
             foreach (var sourceFile in EnumerateRuntimeScriptFiles(scriptRoot))
             {
@@ -540,6 +560,101 @@ internal sealed class ScriptHostDispatcher
     {
         return RequireCurrent().DotaSavePlayerReport(args);
     }
+
+    public TsValue? DotaPartyById(TsValue[] args)
+    {
+        return RequireCurrent().DotaPartyById(args);
+    }
+
+    public TsValue? DotaPartyEnsureCurrent(TsValue[] args)
+    {
+        return RequireCurrent().DotaPartyEnsureCurrent(args);
+    }
+
+    public TsValue? DotaPartyAddMember(TsValue[] args)
+    {
+        return RequireCurrent().DotaPartyAddMember(args);
+    }
+
+    public TsValue? DotaPartyRemoveMember(TsValue[] args)
+    {
+        return RequireCurrent().DotaPartyRemoveMember(args);
+    }
+
+    public TsValue? DotaPartyDelete(TsValue[] args)
+    {
+        return RequireCurrent().DotaPartyDelete(args);
+    }
+
+    public TsValue? DotaPartySetLeader(TsValue[] args)
+    {
+        return RequireCurrent().DotaPartySetLeader(args);
+    }
+
+    public TsValue? DotaPartySetCoach(TsValue[] args)
+    {
+        return RequireCurrent().DotaPartySetCoach(args);
+    }
+
+    public TsValue? DotaPartySetPing(TsValue[] args)
+    {
+        return RequireCurrent().DotaPartySetPing(args);
+    }
+
+    public TsValue? DotaPartyStartReadyCheck(TsValue[] args)
+    {
+        return RequireCurrent().DotaPartyStartReadyCheck(args);
+    }
+
+    public TsValue? DotaPartyAcknowledgeReadyCheck(TsValue[] args)
+    {
+        return RequireCurrent().DotaPartyAcknowledgeReadyCheck(args);
+    }
+
+    public TsValue? DotaPartyCreateInvite(TsValue[] args)
+    {
+        return RequireCurrent().DotaPartyCreateInvite(args);
+    }
+
+    public TsValue? DotaPartyTakeInvite(TsValue[] args)
+    {
+        return RequireCurrent().DotaPartyTakeInvite(args);
+    }
+
+    public TsValue? DotaPartyInvitesForTarget(TsValue[] args)
+    {
+        return RequireCurrent().DotaPartyInvitesForTarget(args);
+    }
+
+    public TsValue? DotaPartyDeleteInvitesForTarget(TsValue[] args)
+    {
+        return RequireCurrent().DotaPartyDeleteInvitesForTarget(args);
+    }
+
+    public TsValue? DotaPartyDeleteInvitesForParty(TsValue[] args)
+    {
+        return RequireCurrent().DotaPartyDeleteInvitesForParty(args);
+    }
+
+    public TsValue? DotaPartyPruneInvitesCreatedBefore(TsValue[] args)
+    {
+        return RequireCurrent().DotaPartyPruneInvitesCreatedBefore(args);
+    }
+
+    public TsValue? DotaPartyUserExists(TsValue[] args)
+    {
+        return RequireCurrent().DotaPartyUserExists(args);
+    }
+
+    public TsValue? DotaPartyUserOnline(TsValue[] args)
+    {
+        return RequireCurrent().DotaPartyUserOnline(args);
+    }
+
+    public TsValue? DotaQueueGcMessage(TsValue[] args)
+    {
+        return RequireCurrent().DotaQueueGcMessage(args);
+    }
 }
 
 internal sealed class ScriptExchangeHost
@@ -628,6 +743,263 @@ internal sealed class ScriptExchangeHost
             Protobuf = protobuf
         });
         return TsValue.FromBool(true);
+    }
+
+    public TsValue DotaPartyCurrent()
+    {
+        return ToTsPartyState(DotaGcBackend.PartyStore?.GetPartyByMember(_context.SteamId));
+    }
+
+    public TsValue DotaPartyById(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaPartyById(partyId) requires one argument");
+        }
+
+        var partyId = Convert.ToUInt64(ToInteger(args[0], "dotaPartyById.partyId").ToString());
+        return ToTsPartyState(DotaGcBackend.PartyStore?.GetParty(partyId));
+    }
+
+    public TsValue DotaPartyEnsureCurrent(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaPartyEnsureCurrent(ping) requires one argument");
+        }
+
+        var store = DotaGcBackend.PartyStore ?? throw new InvalidOperationException("Dota party store is not initialized.");
+        return ToTsPartyState(store.EnsureParty(_context.SteamId, _context.AccountId, _context.PersonaName, ToPartyPingData(args[0], "dotaPartyEnsureCurrent.ping")));
+    }
+
+    public TsValue DotaPartyAddMember(TsValue[] args)
+    {
+        if (args.Length < 3)
+        {
+            throw new InvalidOperationException("dotaPartyAddMember(partyId, ping, isCoach) requires three arguments");
+        }
+
+        var partyId = Convert.ToUInt64(ToInteger(args[0], "dotaPartyAddMember.partyId").ToString());
+        var ping = ToPartyPingData(args[1], "dotaPartyAddMember.ping");
+        var isCoach = ToBool(args[2], "dotaPartyAddMember.isCoach");
+        return ToTsPartyState(DotaGcBackend.PartyStore?.AddMember(partyId, _context.SteamId, _context.AccountId, _context.PersonaName, ping, isCoach));
+    }
+
+    public TsValue DotaPartyRemoveMember(TsValue[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new InvalidOperationException("dotaPartyRemoveMember(partyId, steamId) requires two arguments");
+        }
+
+        var partyId = Convert.ToUInt64(ToInteger(args[0], "dotaPartyRemoveMember.partyId").ToString());
+        var steamId = Convert.ToUInt64(ToInteger(args[1], "dotaPartyRemoveMember.steamId").ToString());
+        return ToTsPartyState(DotaGcBackend.PartyStore?.RemoveMember(partyId, steamId));
+    }
+
+    public TsValue DotaPartyDelete(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaPartyDelete(partyId) requires one argument");
+        }
+
+        var partyId = Convert.ToUInt64(ToInteger(args[0], "dotaPartyDelete.partyId").ToString());
+        DotaGcBackend.PartyStore?.DeleteParty(partyId);
+        return TsValue.FromBool(DotaGcBackend.PartyStore != null);
+    }
+
+    public TsValue DotaPartySetLeader(TsValue[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new InvalidOperationException("dotaPartySetLeader(partyId, leaderSteamId) requires two arguments");
+        }
+
+        var partyId = Convert.ToUInt64(ToInteger(args[0], "dotaPartySetLeader.partyId").ToString());
+        var leaderSteamId = Convert.ToUInt64(ToInteger(args[1], "dotaPartySetLeader.leaderSteamId").ToString());
+        return ToTsPartyState(DotaGcBackend.PartyStore?.SetLeader(partyId, leaderSteamId));
+    }
+
+    public TsValue DotaPartySetCoach(TsValue[] args)
+    {
+        if (args.Length < 3)
+        {
+            throw new InvalidOperationException("dotaPartySetCoach(partyId, steamId, isCoach) requires three arguments");
+        }
+
+        var partyId = Convert.ToUInt64(ToInteger(args[0], "dotaPartySetCoach.partyId").ToString());
+        var steamId = Convert.ToUInt64(ToInteger(args[1], "dotaPartySetCoach.steamId").ToString());
+        var isCoach = ToBool(args[2], "dotaPartySetCoach.isCoach");
+        return ToTsPartyState(DotaGcBackend.PartyStore?.SetMemberCoach(partyId, steamId, isCoach));
+    }
+
+    public TsValue DotaPartySetPing(TsValue[] args)
+    {
+        if (args.Length < 3)
+        {
+            throw new InvalidOperationException("dotaPartySetPing(partyId, steamId, ping) requires three arguments");
+        }
+
+        var partyId = Convert.ToUInt64(ToInteger(args[0], "dotaPartySetPing.partyId").ToString());
+        var steamId = Convert.ToUInt64(ToInteger(args[1], "dotaPartySetPing.steamId").ToString());
+        var ping = ToPartyPingData(args[2], "dotaPartySetPing.ping");
+        return ToTsPartyState(DotaGcBackend.PartyStore?.SetMemberPing(partyId, steamId, ping));
+    }
+
+    public TsValue DotaPartyStartReadyCheck(TsValue[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new InvalidOperationException("dotaPartyStartReadyCheck(partyId, durationSeconds) requires two arguments");
+        }
+
+        var partyId = Convert.ToUInt64(ToInteger(args[0], "dotaPartyStartReadyCheck.partyId").ToString());
+        var durationSeconds = Convert.ToUInt32(ToNumber(args[1], "dotaPartyStartReadyCheck.durationSeconds"));
+        return ToTsPartyState(DotaGcBackend.PartyStore?.StartReadyCheck(partyId, _context.AccountId, durationSeconds));
+    }
+
+    public TsValue DotaPartyAcknowledgeReadyCheck(TsValue[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new InvalidOperationException("dotaPartyAcknowledgeReadyCheck(partyId, readyStatus) requires two arguments");
+        }
+
+        var partyId = Convert.ToUInt64(ToInteger(args[0], "dotaPartyAcknowledgeReadyCheck.partyId").ToString());
+        var readyStatus = Convert.ToUInt32(ToNumber(args[1], "dotaPartyAcknowledgeReadyCheck.readyStatus"));
+        return ToTsPartyState(DotaGcBackend.PartyStore?.AcknowledgeReadyCheck(partyId, _context.SteamId, readyStatus));
+    }
+
+    public TsValue DotaPartyCreateInvite(TsValue[] args)
+    {
+        if (args.Length < 4)
+        {
+            throw new InvalidOperationException("dotaPartyCreateInvite(partyId, targetSteamId, teamId, asCoach) requires four arguments");
+        }
+
+        var store = DotaGcBackend.PartyStore;
+        if (store == null)
+        {
+            return TsValue.Null;
+        }
+
+        var partyId = Convert.ToUInt64(ToInteger(args[0], "dotaPartyCreateInvite.partyId").ToString());
+        var targetSteamId = Convert.ToUInt64(ToInteger(args[1], "dotaPartyCreateInvite.targetSteamId").ToString());
+        var teamId = Convert.ToUInt32(ToNumber(args[2], "dotaPartyCreateInvite.teamId"));
+        var asCoach = ToBool(args[3], "dotaPartyCreateInvite.asCoach");
+        var invite = store.CreateInvite(partyId, targetSteamId, _context.SteamId, _context.PersonaName, teamId, asCoach, out var replaced);
+
+        var value = new TsObject("DotaPartyInviteMutation");
+        value.SetField("invite", ToTsPartyInvite(invite));
+        value.SetField("replaced", ToTsPartyInvite(replaced));
+        return new TsObjectValue(value);
+    }
+
+    public TsValue DotaPartyTakeInvite(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaPartyTakeInvite(partyId) requires one argument");
+        }
+
+        var partyId = Convert.ToUInt64(ToInteger(args[0], "dotaPartyTakeInvite.partyId").ToString());
+        return ToTsPartyInvite(DotaGcBackend.PartyStore?.TakeInvite(partyId, _context.SteamId, PartyInviteCutoff()));
+    }
+
+    public TsValue DotaPartyInvitesForTarget(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaPartyInvitesForTarget(targetSteamId) requires one argument");
+        }
+
+        var targetSteamId = Convert.ToUInt64(ToInteger(args[0], "dotaPartyInvitesForTarget.targetSteamId").ToString());
+        return ToTsPartyInvites(DotaGcBackend.PartyStore?.GetInvitesForTarget(targetSteamId, PartyInviteCutoff()) ?? Array.Empty<DotaPartyInvite>());
+    }
+
+    public TsValue DotaPartyDeleteInvitesForTarget(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaPartyDeleteInvitesForTarget(targetSteamId) requires one argument");
+        }
+
+        var targetSteamId = Convert.ToUInt64(ToInteger(args[0], "dotaPartyDeleteInvitesForTarget.targetSteamId").ToString());
+        return ToTsPartyInvites(DotaGcBackend.PartyStore?.DeleteInvitesForTarget(targetSteamId) ?? Array.Empty<DotaPartyInvite>());
+    }
+
+    public TsValue DotaPartyDeleteInvitesForParty(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaPartyDeleteInvitesForParty(partyId) requires one argument");
+        }
+
+        var partyId = Convert.ToUInt64(ToInteger(args[0], "dotaPartyDeleteInvitesForParty.partyId").ToString());
+        return ToTsPartyInvites(DotaGcBackend.PartyStore?.DeleteInvitesForParty(partyId) ?? Array.Empty<DotaPartyInvite>());
+    }
+
+    public TsValue DotaPartyPruneInvitesCreatedBefore(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaPartyPruneInvitesCreatedBefore(cutoff) requires one argument");
+        }
+
+        var cutoff = Convert.ToUInt32(ToNumber(args[0], "dotaPartyPruneInvitesCreatedBefore.cutoff"));
+        return ToTsPartyInvites(DotaGcBackend.PartyStore?.PruneInvitesCreatedBefore(cutoff) ?? Array.Empty<DotaPartyInvite>());
+    }
+
+    public TsValue DotaPartyUserExists(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaPartyUserExists(steamId) requires one argument");
+        }
+
+        var steamId = Convert.ToUInt64(ToInteger(args[0], "dotaPartyUserExists.steamId").ToString());
+        return TsValue.FromBool(DotaGcBackend.UserExistsProvider?.Invoke(steamId) ?? true);
+    }
+
+    public TsValue DotaPartyUserOnline(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaPartyUserOnline(steamId) requires one argument");
+        }
+
+        var steamId = Convert.ToUInt64(ToInteger(args[0], "dotaPartyUserOnline.steamId").ToString());
+        return TsValue.FromBool(DotaGcBackend.UserOnlineProvider?.Invoke(steamId) ?? true);
+    }
+
+    public TsValue DotaQueueGcMessage(TsValue[] args)
+    {
+        if (args.Length < 3)
+        {
+            throw new InvalidOperationException("dotaQueueGcMessage(steamId, messageType, payload, protobuf?) requires at least three arguments");
+        }
+
+        var steamId = Convert.ToUInt64(ToInteger(args[0], "dotaQueueGcMessage.steamId").ToString());
+        var messageType = Convert.ToUInt32(ToNumber(args[1], "dotaQueueGcMessage.messageType"));
+        var payload = ToBytes(args[2], "dotaQueueGcMessage.payload");
+        var protobuf = args.Length < 4 || ToBool(args[3], "dotaQueueGcMessage.protobuf");
+        var message = new ApiGCMessage
+        {
+            AppId = _context.AppId,
+            MessageType = messageType,
+            PayloadBase64 = Convert.ToBase64String(payload),
+            Protobuf = protobuf
+        };
+
+        if (steamId == 0 || steamId == _context.SteamId)
+        {
+            Response.Messages.Add(message);
+            return TsValue.FromBool(true);
+        }
+
+        DotaGcBackend.PendingMessageQueued?.Invoke(steamId, message);
+        return TsValue.FromBool(DotaGcBackend.PendingMessageQueued != null);
     }
 
     public TsValue DotaInventory()
@@ -1784,6 +2156,101 @@ internal sealed class ScriptExchangeHost
         }
 
         return new TsArrayValue(array);
+    }
+
+    private static TsValue ToTsPartyState(DotaPartyState? party)
+    {
+        if (party == null)
+        {
+            return TsValue.Null;
+        }
+
+        var value = new TsObject("DotaPartyState");
+        value.SetField("partyId", TsValue.FromUInt64(party.PartyId));
+        value.SetField("leaderSteamId", TsValue.FromUInt64(party.LeaderSteamId));
+        value.SetField("state", TsValue.FromInt32(unchecked((int)party.State)));
+        value.SetField("permanent", TsValue.FromBool(party.Permanent));
+        value.SetField("readyStartTimestamp", TsValue.FromInt32(unchecked((int)party.ReadyStartTimestamp)));
+        value.SetField("readyFinishTimestamp", TsValue.FromInt32(unchecked((int)party.ReadyFinishTimestamp)));
+        value.SetField("readyInitiatorAccountId", TsValue.FromInt32(unchecked((int)party.ReadyInitiatorAccountId)));
+        value.SetField("members", ToTsPartyMembers(party.Members));
+        return new TsObjectValue(value);
+    }
+
+    private static TsValue ToTsPartyMembers(IEnumerable<DotaPartyMember> members)
+    {
+        var array = new TsArray();
+        foreach (var member in members)
+        {
+            var value = new TsObject("DotaPartyMember");
+            value.SetField("steamId", TsValue.FromUInt64(member.SteamId));
+            value.SetField("accountId", TsValue.FromInt32(unchecked((int)member.AccountId)));
+            value.SetField("personaName", TsValue.FromString(member.PersonaName ?? string.Empty));
+            value.SetField("position", TsValue.FromInt32(member.Position));
+            value.SetField("isCoach", TsValue.FromBool(member.IsCoach));
+            value.SetField("isPlusSubscriber", TsValue.FromBool(member.IsPlusSubscriber));
+            value.SetField("regionCodes", ToTsUInt32Array(member.RegionCodes));
+            value.SetField("regionPings", ToTsUInt32Array(member.RegionPings));
+            value.SetField("regionPingFailedBitmask", TsValue.FromInt32(unchecked((int)member.RegionPingFailedBitmask)));
+            value.SetField("readyStatus", TsValue.FromInt32(unchecked((int)member.ReadyStatus)));
+            array.Add(new TsObjectValue(value));
+        }
+
+        return new TsArrayValue(array);
+    }
+
+    private static TsValue ToTsPartyInvite(DotaPartyInvite? invite)
+    {
+        if (invite == null)
+        {
+            return TsValue.Null;
+        }
+
+        var value = new TsObject("DotaPartyInvite");
+        value.SetField("inviteGid", TsValue.FromUInt64(invite.InviteGid));
+        value.SetField("partyId", TsValue.FromUInt64(invite.PartyId));
+        value.SetField("targetSteamId", TsValue.FromUInt64(invite.TargetSteamId));
+        value.SetField("senderSteamId", TsValue.FromUInt64(invite.SenderSteamId));
+        value.SetField("senderName", TsValue.FromString(invite.SenderName ?? string.Empty));
+        value.SetField("teamId", TsValue.FromInt32(unchecked((int)invite.TeamId)));
+        value.SetField("asCoach", TsValue.FromBool(invite.AsCoach));
+        value.SetField("lowPriorityStatus", TsValue.FromBool(invite.LowPriorityStatus));
+        value.SetField("createdAt", TsValue.FromInt32(unchecked((int)invite.CreatedAt)));
+        return new TsObjectValue(value);
+    }
+
+    private static TsValue ToTsPartyInvites(IEnumerable<DotaPartyInvite> invites)
+    {
+        var array = new TsArray();
+        foreach (var invite in invites)
+        {
+            array.Add(ToTsPartyInvite(invite));
+        }
+
+        return new TsArrayValue(array);
+    }
+
+    private static DotaPartyPingData ToPartyPingData(TsValue value, string path)
+    {
+        if (value is TsNull or TsVoid)
+        {
+            return new DotaPartyPingData();
+        }
+
+        var obj = RequireObject(value, path);
+        return new DotaPartyPingData
+        {
+            RegionCodes = UInt32ArrayField(obj, "regionCodes", path),
+            RegionPings = UInt32ArrayField(obj, "regionPings", path),
+            RegionPingFailedBitmask = U32Field(obj, "regionPingFailedBitmask", path)
+        };
+    }
+
+    private static uint PartyInviteCutoff()
+    {
+        const uint partyInviteLifetimeSeconds = 600;
+        var now = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        return now > partyInviteLifetimeSeconds ? now - partyInviteLifetimeSeconds : 0;
     }
 
     private static TsValue ToTsUInt32Array(IEnumerable<uint> values)

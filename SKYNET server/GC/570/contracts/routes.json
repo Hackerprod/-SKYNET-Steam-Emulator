@@ -7,6 +7,20 @@
         "responseProto": "CMsgClientWelcome"
     },
     {
+        "name": "InviteToParty",
+        "requestMessage": "GCInviteToParty",
+        "requestProto": "CMsgInviteToParty",
+        "responseMessage": "GCInvitationCreated",
+        "responseProto": "CMsgInvitationCreated"
+    },
+    {
+        "name": "PartyReadyCheck",
+        "requestMessage": "PartyReadyCheckRequest",
+        "requestProto": "CMsgPartyReadyCheckRequest",
+        "responseMessage": "PartyReadyCheckResponse",
+        "responseProto": "CMsgPartyReadyCheckResponse"
+    },
+    {
         "name": "RequestStoreSalesData",
         "requestMessage": "GCRequestStoreSalesData",
         "requestProto": "CMsgGCRequestStoreSalesData",

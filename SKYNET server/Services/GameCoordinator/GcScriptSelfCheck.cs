@@ -36,6 +36,7 @@ public static class GcScriptSelfCheck
         ok &= ExpectResponse(plugin, context, 2569, 2570, 1, write);
         ok &= ExpectResponse(plugin, context, 2577, 2578, 1, write);
         ok &= ExpectHandled(plugin, context, 2617, 0, write);
+        ok &= ExpectResponse(plugin, context, 4501, 4502, 1, write);
         ok &= ExpectHandled(plugin, context, 4523, 0, write);
         ok &= ExpectResponse(plugin, context, 7009, 7010, 1, write);
         ok &= ExpectResponse(plugin, context, 7026, 7546, 1, write);
@@ -67,6 +68,7 @@ public static class GcScriptSelfCheck
         ok &= ExpectResponse(plugin, context, 8073, 8074, 1, write);
         ok &= ExpectResponse(plugin, context, 8124, 8125, 1, write);
         ok &= ExpectHandled(plugin, context, 8255, 0, write);
+        ok &= ExpectResponse(plugin, context, 8262, 8263, 1, write);
         ok &= ExpectResponse(plugin, context, 8268, 8269, 1, write);
         ok &= ExpectResponse(plugin, context, 8270, 8271, 1, write);
         ok &= ExpectResponse(plugin, context, 8274, 8275, 1, write);
