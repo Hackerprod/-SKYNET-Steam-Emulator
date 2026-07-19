@@ -238,9 +238,16 @@ public sealed class GameCoordinatorProtoCodec
             return Convert.FromBase64String(stringValue.Value);
         }
 
+        if (value is TsUint8ArrayValue bytesValue)
+        {
+            var copy = new byte[bytesValue.Length];
+            Array.Copy(bytesValue.Value, copy, copy.Length);
+            return copy;
+        }
+
         if (value is not TsArrayValue arrayValue)
         {
-            throw new InvalidOperationException("Expected byte array or base64 string");
+            throw new InvalidOperationException("Expected Uint8Array, byte array, or base64 string");
         }
 
         var bytes = new byte[arrayValue.Value.Count];
@@ -350,13 +357,9 @@ public sealed class GameCoordinatorProtoCodec
 
         if (value is byte[] bytes)
         {
-            var byteArray = new TsArray(bytes.Length);
-            foreach (var b in bytes)
-            {
-                byteArray.Add(TsValue.FromInt32(b));
-            }
-
-            return new TsArrayValue(byteArray);
+            var copy = new byte[bytes.Length];
+            Array.Copy(bytes, copy, copy.Length);
+            return new TsUint8ArrayValue(copy);
         }
 
         if (value is string stringValue)

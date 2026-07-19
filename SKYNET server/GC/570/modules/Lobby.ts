@@ -1,64 +1,112 @@
-import { Messages } from "../Messages";
+import { gc } from "../framework/gc";
+import { Msg } from "../generated/dota";
+
+export function registerLobby(): Lobby {
+    const lobby = new Lobby();
+    lobby.register();
+    return lobby;
+}
 
 export class Lobby {
-    msg: Messages;
-
-    constructor() {
-        this.msg = new Messages();
+    register(): void {
+        gc.onMessage(Msg.GCPracticeLobbyCreate as number, () => this.createLobby());
+        gc.onMessage(Msg.GCAbandonCurrentGame as number, () => this.abandonCurrentGame());
+        gc.onMessage(Msg.GCPracticeLobbyLeave as number, () => this.leaveLobby());
+        gc.onMessage(Msg.GCPracticeLobbyJoin as number, () => this.joinLobby());
+        gc.onMessage(Msg.GCInviteToLobby as number, () => this.inviteToLobby());
+        gc.onMessage(Msg.GCLobbyInviteResponse as number, () => this.lobbyInviteResponse());
+        gc.onMessage(Msg.GCPracticeLobbyList as number, () => this.practiceLobbyList());
+        gc.onMessage(Msg.GCFriendPracticeLobbyListRequest as number, () => this.friendPracticeLobbyList());
+        gc.onMessage(Msg.GCLobbyList as number, () => this.lobbyList());
+        gc.onMessage(Msg.GCPracticeLobbySetDetails as number, () => this.setDetails());
+        gc.onMessage(Msg.GCPracticeLobbySetTeamSlot as number, () => this.setTeamSlot());
+        gc.onMessage(Msg.GCPracticeLobbySetCoach as number, () => this.setCoach());
+        gc.onMessage(Msg.GCApplyTeamToPracticeLobby as number, () => this.applyTeam());
+        gc.onMessage(Msg.GCPracticeLobbyLaunch as number, () => this.launchLobby());
+        gc.onMessage(Msg.GCGameServerHello as number, () => this.gameServerHello());
+        gc.onMessage(Msg.GCGameServerInfo as number, () => this.gameServerInfo());
+        gc.onMessage(Msg.GCLANServerAvailable as number, () => this.lanServerAvailable());
+        gc.onMessage(Msg.GCServerAvailable as number, () => this.serverAvailable());
+        gc.onMessage(Msg.GCConnectedPlayers as number, () => this.connectedPlayers());
+        gc.onMessage(Msg.GCPlayerFailedToConnect as number, () => this.playerFailedToConnect());
+        gc.onMessage(Msg.GCGameMatchSignOut as number, () => this.signOut());
+        gc.onMessage(Msg.GCGameBotMatchSignOut as number, () => this.signOut());
+        gc.onMessage(Msg.ServerToGCRequestBatchPlayerResources as number, () => this.requestBatchPlayerResources());
+        gc.onMessage(Msg.ServerToGCRequestPlayerRecentAccomplishments as number, () => this.recentAccomplishments());
+        gc.onMessage(Msg.ServerToGCLobbyInitialized as number, () => this.lobbyInitialized());
     }
 
-    handle(type: int32): boolean {
-        if (type == this.msg.GCPracticeLobbyCreate()) return this.createLobby();
-        if (type == this.msg.GCAbandonCurrentGame()) return this.abandonCurrentGame();
-        if (type == this.msg.GCPracticeLobbyLeave()) return this.leaveLobby();
-        if (type == this.msg.GCPracticeLobbyJoin()) return this.joinLobby();
-        if (type == this.msg.GCInviteToLobby()) return this.inviteToLobby();
-        if (type == this.msg.GCLobbyInviteResponse()) return this.lobbyInviteResponse();
-        if (type == this.msg.GCPracticeLobbyList()) return this.practiceLobbyList();
-        if (type == this.msg.GCFriendPracticeLobbyListRequest()) return this.friendPracticeLobbyList();
-        if (type == this.msg.GCLobbyList()) return this.lobbyList();
-        if (type == this.msg.GCPracticeLobbySetDetails()) return this.setDetails();
-        if (type == this.msg.GCPracticeLobbySetTeamSlot()) return this.setTeamSlot();
-        if (type == this.msg.GCPracticeLobbySetCoach()) return this.setCoach();
-        if (type == this.msg.GCApplyTeamToPracticeLobby()) return this.applyTeam();
-        if (type == this.msg.GCPracticeLobbyLaunch()) return this.launchLobby();
-        if (type == this.msg.GCGameServerHello()) return this.gameServerHello();
-        if (type == this.msg.GCGameServerInfo()) return this.gameServerInfo();
-        if (type == this.msg.GCLANServerAvailable()) return this.lanServerAvailable();
-        if (type == this.msg.GCServerAvailable()) return this.serverAvailable();
-        if (type == this.msg.GCConnectedPlayers()) return this.connectedPlayers();
-        if (type == this.msg.GCPlayerFailedToConnect()) return this.playerFailedToConnect();
-        if (type == this.msg.GCGameMatchSignOut()) return this.signOut();
-        if (type == this.msg.GCGameMatchSignOut2()) return this.signOut();
-        if (type == this.msg.GCRequestBatchPlayerResources()) return this.requestBatchPlayerResources();
-        if (type == this.msg.ServerToGCRequestPlayerRecentAccomplishments()) return this.recentAccomplishments();
-        if (type == this.msg.ServerToGCLobbyInitialized()) return this.lobbyInitialized();
+    createLobby(): boolean {
         return false;
     }
-
-    createLobby(): boolean { return false; }
-    abandonCurrentGame(): boolean { return false; }
-    leaveLobby(): boolean { return false; }
-    joinLobby(): boolean { return false; }
-    inviteToLobby(): boolean { return false; }
-    lobbyInviteResponse(): boolean { return false; }
-    practiceLobbyList(): boolean { return false; }
-    friendPracticeLobbyList(): boolean { return false; }
-    lobbyList(): boolean { return false; }
-    setDetails(): boolean { return false; }
-    setTeamSlot(): boolean { return false; }
-    setCoach(): boolean { return false; }
-    applyTeam(): boolean { return false; }
-    launchLobby(): boolean { return false; }
-    gameServerHello(): boolean { return false; }
-    gameServerInfo(): boolean { return false; }
-    lanServerAvailable(): boolean { return false; }
-    serverAvailable(): boolean { return false; }
-    connectedPlayers(): boolean { return false; }
-    playerFailedToConnect(): boolean { return false; }
-    signOut(): boolean { return false; }
-    requestBatchPlayerResources(): boolean { return false; }
-    recentAccomplishments(): boolean { return false; }
-    lobbyInitialized(): boolean { return false; }
-    tick(): void { }
+    abandonCurrentGame(): boolean {
+        return false;
+    }
+    leaveLobby(): boolean {
+        return false;
+    }
+    joinLobby(): boolean {
+        return false;
+    }
+    inviteToLobby(): boolean {
+        return false;
+    }
+    lobbyInviteResponse(): boolean {
+        return false;
+    }
+    practiceLobbyList(): boolean {
+        return false;
+    }
+    friendPracticeLobbyList(): boolean {
+        return false;
+    }
+    lobbyList(): boolean {
+        return false;
+    }
+    setDetails(): boolean {
+        return false;
+    }
+    setTeamSlot(): boolean {
+        return false;
+    }
+    setCoach(): boolean {
+        return false;
+    }
+    applyTeam(): boolean {
+        return false;
+    }
+    launchLobby(): boolean {
+        return false;
+    }
+    gameServerHello(): boolean {
+        return false;
+    }
+    gameServerInfo(): boolean {
+        return false;
+    }
+    lanServerAvailable(): boolean {
+        return false;
+    }
+    serverAvailable(): boolean {
+        return false;
+    }
+    connectedPlayers(): boolean {
+        return false;
+    }
+    playerFailedToConnect(): boolean {
+        return false;
+    }
+    signOut(): boolean {
+        return false;
+    }
+    requestBatchPlayerResources(): boolean {
+        return false;
+    }
+    recentAccomplishments(): boolean {
+        return false;
+    }
+    lobbyInitialized(): boolean {
+        return false;
+    }
+    tick(): void {}
 }

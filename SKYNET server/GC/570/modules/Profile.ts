@@ -1,48 +1,81 @@
-import { Messages } from "../Messages";
+import { gc } from "../framework/gc";
+import { Msg } from "../generated/dota";
+
+export function registerProfile(): void {
+    const profile = new Profile();
+    profile.register();
+}
 
 export class Profile {
-    msg: Messages;
-
-    constructor() {
-        this.msg = new Messages();
+    register(): void {
+        gc.onMessage(Msg.ClientToGCGetProfileCard as number, () => this.getProfileCard());
+        gc.onMessage(Msg.ClientToGCGetProfileCardStats as number, () => this.getProfileCardStats());
+        gc.onMessage(Msg.ClientToGCSetProfileCardSlots as number, () => this.setProfileCardSlots());
+        gc.onMessage(Msg.ClientToGCGetProfileTickets as number, () => this.getProfileTickets());
+        gc.onMessage(Msg.ClientToGCGetQuestProgress as number, () => this.getQuestProgress());
+        gc.onMessage(Msg.ClientToGCLatestConductScorecardRequest as number, () => this.latestConductScorecard());
+        gc.onMessage(Msg.ClientToGCMyTeamInfoRequest as number, () => this.myTeamInfo());
+        gc.onMessage(Msg.DOTAGetPeriodicResource as number, () => this.getPeriodicResource());
+        gc.onMessage(Msg.ProfileRequest as number, () => this.profileRequest());
+        gc.onMessage(Msg.ProfileUpdate as number, () => this.profileUpdate());
+        gc.onMessage(Msg.ClientToGCGetTrophyList as number, () => this.getTrophyList());
+        gc.onMessage(Msg.ClientToGCGetAllHeroOrder as number, () => this.getAllHeroOrder());
+        gc.onMessage(Msg.ClientToGCGetAllHeroProgress as number, () => this.getAllHeroProgress());
+        gc.onMessage(Msg.ClientToGCGetBattleReportInfo as number, () => this.getBattleReportInfo());
+        gc.onMessage(Msg.ClientToGCGetHeroStickers as number, () => this.getHeroStickers());
+        gc.onMessage(Msg.ClientToGCOverworldGetUserData as number, () => this.overworldGetUserData());
+        gc.onMessage(Msg.ClientToGCMonsterHunterGetUserData as number, () => this.monsterHunterGetUserData());
     }
 
-    handle(type: int32): boolean {
-        if (type == this.msg.ClientToGCGetProfileCard()) return this.getProfileCard();
-        if (type == this.msg.ClientToGCGetProfileCardStats()) return this.getProfileCardStats();
-        if (type == this.msg.ClientToGCSetProfileCardSlots()) return this.setProfileCardSlots();
-        if (type == this.msg.ClientToGCGetProfileTickets()) return this.getProfileTickets();
-        if (type == this.msg.ClientToGCGetQuestProgress()) return this.getQuestProgress();
-        if (type == this.msg.ClientToGCLatestConductScorecardRequest()) return this.latestConductScorecard();
-        if (type == this.msg.ClientToGCMyTeamInfoRequest()) return this.myTeamInfo();
-        if (type == this.msg.DOTAGetPeriodicResource()) return this.getPeriodicResource();
-        if (type == this.msg.ProfileRequest()) return this.profileRequest();
-        if (type == this.msg.ProfileUpdate()) return this.profileUpdate();
-        if (type == this.msg.ClientToGCGetTrophyList()) return this.getTrophyList();
-        if (type == this.msg.ClientToGCGetAllHeroOrder()) return this.getAllHeroOrder();
-        if (type == this.msg.ClientToGCGetAllHeroProgress()) return this.getAllHeroProgress();
-        if (type == this.msg.ClientToGCGetBattleReportInfo()) return this.getBattleReportInfo();
-        if (type == this.msg.ClientToGCGetHeroStickers()) return this.getHeroStickers();
-        if (type == this.msg.ClientToGCOverworldGetUserData()) return this.overworldGetUserData();
-        if (type == this.msg.ClientToGCMonsterHunterGetUserData()) return this.monsterHunterGetUserData();
+    getProfileCard(): boolean {
         return false;
     }
-
-    getProfileCard(): boolean { return false; }
-    getProfileCardStats(): boolean { return false; }
-    setProfileCardSlots(): boolean { return false; }
-    getProfileTickets(): boolean { return false; }
-    getQuestProgress(): boolean { return false; }
-    latestConductScorecard(): boolean { return false; }
-    myTeamInfo(): boolean { return false; }
-    getPeriodicResource(): boolean { return false; }
-    profileRequest(): boolean { return false; }
-    profileUpdate(): boolean { return false; }
-    getTrophyList(): boolean { return false; }
-    getAllHeroOrder(): boolean { return false; }
-    getAllHeroProgress(): boolean { return false; }
-    getBattleReportInfo(): boolean { return false; }
-    getHeroStickers(): boolean { return false; }
-    overworldGetUserData(): boolean { return false; }
-    monsterHunterGetUserData(): boolean { return false; }
+    getProfileCardStats(): boolean {
+        return false;
+    }
+    setProfileCardSlots(): boolean {
+        return false;
+    }
+    getProfileTickets(): boolean {
+        return false;
+    }
+    getQuestProgress(): boolean {
+        return false;
+    }
+    latestConductScorecard(): boolean {
+        return false;
+    }
+    myTeamInfo(): boolean {
+        return false;
+    }
+    getPeriodicResource(): boolean {
+        return false;
+    }
+    profileRequest(): boolean {
+        return false;
+    }
+    profileUpdate(): boolean {
+        return false;
+    }
+    getTrophyList(): boolean {
+        return false;
+    }
+    getAllHeroOrder(): boolean {
+        return false;
+    }
+    getAllHeroProgress(): boolean {
+        return false;
+    }
+    getBattleReportInfo(): boolean {
+        return false;
+    }
+    getHeroStickers(): boolean {
+        return false;
+    }
+    overworldGetUserData(): boolean {
+        return false;
+    }
+    monsterHunterGetUserData(): boolean {
+        return false;
+    }
 }

@@ -1,0 +1,58 @@
+[
+    {
+        "name": "ClientHello",
+        "requestMessage": "GCClientHello",
+        "requestProto": "CMsgClientHello",
+        "responseMessage": "GCClientWelcome",
+        "responseProto": "CMsgClientWelcome"
+    },
+    {
+        "name": "RequestStoreSalesData",
+        "requestMessage": "GCRequestStoreSalesData",
+        "requestProto": "CMsgGCRequestStoreSalesData",
+        "responseMessage": "GCRequestStoreSalesDataResponse",
+        "responseProto": "CMsgGCRequestStoreSalesDataResponse"
+    },
+    {
+        "name": "Notifications",
+        "requestMessage": "GCNotificationsRequest",
+        "requestProto": "CMsgGCNotificationsRequest",
+        "responseMessage": "GCNotificationsResponse",
+        "responseProto": "CMsgGCNotificationsResponse"
+    },
+    {
+        "name": "JoinChatChannel",
+        "requestMessage": "GCJoinChatChannel",
+        "requestProto": "CMsgDOTAJoinChatChannel",
+        "responseMessage": "GCJoinChatChannelResponse",
+        "responseProto": "CMsgDOTAJoinChatChannelResponse"
+    },
+    {
+        "name": "FindTopSourceTvGames",
+        "requestMessage": "ClientToGCFindTopSourceTVGames",
+        "requestProto": "CMsgClientToGCFindTopSourceTVGames",
+        "responseMessage": "GCToClientFindTopSourceTVGamesResponse",
+        "responseProto": "CMsgGCToClientFindTopSourceTVGamesResponse"
+    },
+    {
+        "name": "GetCurrentPrivateCoachingSession",
+        "requestMessage": "ClientToGCGetCurrentPrivateCoachingSession",
+        "requestProto": "CMsgClientToGCGetCurrentPrivateCoachingSession",
+        "responseMessage": "ClientToGCGetCurrentPrivateCoachingSessionResponse",
+        "responseProto": "CMsgClientToGCGetCurrentPrivateCoachingSessionResponse"
+    },
+    {
+        "name": "GetAvailablePrivateCoachingSessions",
+        "requestMessage": "ClientToGCGetAvailablePrivateCoachingSessions",
+        "requestProto": "CMsgClientToGCGetAvailablePrivateCoachingSessions",
+        "responseMessage": "ClientToGCGetAvailablePrivateCoachingSessionsResponse",
+        "responseProto": "CMsgClientToGCGetAvailablePrivateCoachingSessionsResponse"
+    },
+    {
+        "name": "GetAvailablePrivateCoachingSessionsSummary",
+        "requestMessage": "ClientToGCGetAvailablePrivateCoachingSessionsSummary",
+        "requestProto": "CMsgClientToGCGetAvailablePrivateCoachingSessionsSummary",
+        "responseMessage": "ClientToGCGetAvailablePrivateCoachingSessionsSummaryResponse",
+        "responseProto": "CMsgClientToGCGetAvailablePrivateCoachingSessionsSummaryResponse"
+    }
+]

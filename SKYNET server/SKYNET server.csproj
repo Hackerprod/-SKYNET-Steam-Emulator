@@ -8,6 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="GC\**\tools\**\*.cs" />
+    <Content Remove="GC\**\tools\**\bin\**\*" />
+    <Content Remove="GC\**\tools\**\obj\**\*" />
+    <None Remove="GC\**\tools\**\bin\**\*" />
+    <None Remove="GC\**\tools\**\obj\**\*" />
     <Content Update="GC\**\*.lua">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

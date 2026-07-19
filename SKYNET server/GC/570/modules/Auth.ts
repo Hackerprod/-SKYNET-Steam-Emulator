@@ -1,85 +1,91 @@
-import { Messages } from "../Messages";
-import { gc } from "../framework/gc";
-import { ConnectionStatus, Msg, Proto, Routes, Welcome } from "../generated/dota";
+import { gc, HandlerContext } from "../framework/gc";
+import { CMsgClientHello, CMsgClientWelcome, GCConnectionStatus, Msg, Proto, Routes } from "../generated/dota";
+
+const Welcome = {
+    Version: 20,
+    OwnerSteamId: 1,
+    DotaServiceGame: 0,
+    DotaServiceEcon: 1,
+    TypeDotaAccount: 2002,
+    TypeDotaPlus: 2012
+} as const;
+
+export function registerAuth(): void {
+    const auth = new Auth();
+    auth.register();
+}
 
 export class Auth {
-    msg: Messages;
-
-    constructor() {
-        this.msg = new Messages();
+    register(): void {
+        gc.on(Routes.ClientHello, (ctx) => {
+            this.handleClientHello(ctx);
+        });
     }
 
-    handle(type: int32): boolean {
-        if (type == this.msg.GCClientHello()) return this.handleClientHello();
-        return false;
-    }
+    handleClientHello(ctx: HandlerContext<CMsgClientHello, CMsgClientWelcome>): void {
+        let version: number = Welcome.Version;
+        if (ctx.request.version) {
+            version = ctx.request.version as number;
+        }
 
-    handleClientHello(): boolean {
-        return gc.on(Routes.ClientHello, ctx => {
-            let version: int32 = Welcome.Version;
-            if (ctx.request.version) {
-                version = ctx.request.version as int32;
-            }
+        let sessionNeed: number = 0;
+        if (ctx.request.clientSessionNeed) {
+            sessionNeed = ctx.request.clientSessionNeed as number;
+        }
 
-            let sessionNeed: int32 = 0;
-            if (ctx.request.clientSessionNeed) {
-                sessionNeed = ctx.request.clientSessionNeed as int32;
-            }
+        ctx.send(Msg.GCClientConnectionStatus as number, Proto.CMsgConnectionStatus, {
+            status: GCConnectionStatus.NoSessionInLogonQueue,
+            clientSessionNeed: sessionNeed
+        });
 
-            ctx.send(Msg.GCClientConnectionStatus as int32, Proto.CMsgConnectionStatus, {
-                status: ConnectionStatus.NoSessionInLogonQueue,
-                clientSessionNeed: sessionNeed
-            });
+        const gameAccount = ctx.encode(Proto.CSODOTAGameAccountClient, {
+            accountId: ctx.accountId
+        });
 
-            const gameAccount = ctx.encode(Proto.CSODOTAGameAccountClient, {
-                accountId: ctx.accountId
-            });
+        const plusAccount = ctx.encode(Proto.CSODOTAGameAccountPlus, {
+            accountId: ctx.accountId
+        });
 
-            const plusAccount = ctx.encode(Proto.CSODOTAGameAccountPlus, {
-                accountId: ctx.accountId
-            });
+        const dotaWelcome = ctx.encode(Proto.CMsgDOTAWelcome, {
+            allow3rdPartyMatchHistory: true,
+            gcSocacheFileVersion: Welcome.Version,
+            activeEvent: 0,
+            activeEventForDisplay: 0
+        });
 
-            const dotaWelcome = ctx.encode(Proto.CMsgDOTAWelcome, {
-                allow3rdPartyMatchHistory: true,
-                gcSocacheFileVersion: Welcome.Version,
-                activeEvent: 0,
-                activeEventForDisplay: 0
-            });
-
-            ctx.send(Msg.GCClientWelcome as int32, Proto.CMsgClientWelcome, {
-                version: version,
-                gameData: dotaWelcome,
-                outofdateSubscribedCaches: [
-                    {
-                        objects: [
-                            {
-                                typeId: Welcome.TypeDotaAccount,
-                                objectData: [gameAccount]
-                            },
-                            {
-                                typeId: Welcome.TypeDotaPlus,
-                                objectData: [plusAccount]
-                            }
-                        ],
-                        version: Welcome.Version,
-                        ownerSoid: {
-                            type: Welcome.OwnerSteamId,
-                            id: ctx.steamId
+        ctx.send(Msg.GCClientWelcome as number, Proto.CMsgClientWelcome, {
+            version: version,
+            gameData: dotaWelcome,
+            outofdateSubscribedCaches: [
+                {
+                    objects: [
+                        {
+                            typeId: Welcome.TypeDotaAccount,
+                            objectData: [gameAccount]
                         },
-                        serviceId: Welcome.DotaServiceGame,
-                        serviceList: [Welcome.DotaServiceEcon],
-                        syncVersion: 1
-                    }
-                ],
-                gcSocacheFileVersion: Welcome.Version,
-                rtime32GcWelcomeTimestamp: now() as int32,
-                currency: 0
-            });
+                        {
+                            typeId: Welcome.TypeDotaPlus,
+                            objectData: [plusAccount]
+                        }
+                    ],
+                    version: 20n,
+                    ownerSoid: {
+                        type: Welcome.OwnerSteamId,
+                        id: ctx.steamId
+                    },
+                    serviceId: Welcome.DotaServiceGame,
+                    serviceList: [Welcome.DotaServiceEcon],
+                    syncVersion: 1n
+                }
+            ],
+            gcSocacheFileVersion: Welcome.Version,
+            rtime32GcWelcomeTimestamp: ctx.clock.now(),
+            currency: 0
+        });
 
-            ctx.send(Msg.GCClientConnectionStatus as int32, Proto.CMsgConnectionStatus, {
-                status: ConnectionStatus.HaveSession,
-                clientSessionNeed: sessionNeed
-            });
+        ctx.send(Msg.GCClientConnectionStatus as number, Proto.CMsgConnectionStatus, {
+            status: GCConnectionStatus.HaveSession,
+            clientSessionNeed: sessionNeed
         });
     }
 }

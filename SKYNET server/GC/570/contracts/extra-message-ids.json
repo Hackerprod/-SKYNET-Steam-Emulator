@@ -1,0 +1,14 @@
+{
+    "GCClientWelcome": 4004,
+    "GCGameServerWelcome": 4005,
+    "GCClientHello": 4006,
+    "GCGameServerHello": 4007,
+    "GCClientConnectionStatus": 4009,
+    "SOSingleObject": 21,
+    "SOSingleObjectDestroyed": 23,
+    "SOCacheSubscribed": 24,
+    "SOCacheUnsubscribed": 25,
+    "SOCacheUpdated": 26,
+    "SOCacheSubscriptionRefresh": 28,
+    "SOCacheSubscribedUpToDate": 29
+}

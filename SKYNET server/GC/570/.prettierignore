@@ -1,0 +1,4 @@
+captures/
+generated/
+tools/GcTsContractGenerator/bin/
+tools/GcTsContractGenerator/obj/

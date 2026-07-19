@@ -1,24 +1,37 @@
-import { Messages } from "../Messages";
+import { gc } from "../framework/gc";
+import { Msg } from "../generated/dota";
+
+export function registerGuilds(): void {
+    const guilds = new Guilds();
+    guilds.register();
+}
 
 export class Guilds {
-    msg: Messages;
-
-    constructor() {
-        this.msg = new Messages();
+    register(): void {
+        gc.onMessage(Msg.ClientToGCRequestGuildData as number, () => this.requestGuildData());
+        gc.onMessage(Msg.ClientToGCRequestGuildMembership as number, () => this.requestGuildMembership());
+        gc.onMessage(Msg.ClientToGCRequestReporterUpdates as number, () => this.unknown8716());
+        gc.onMessage(Msg.ClientToGCRequestAccountGuildPersonaInfo as number, () =>
+            this.requestAccountGuildPersonaInfo()
+        );
+        gc.onMessage(Msg.ClientToGCRequestAccountGuildPersonaInfoBatch as number, () =>
+            this.requestAccountGuildPersonaInfoBatch()
+        );
     }
 
-    handle(type: int32): boolean {
-        if (type == this.msg.ClientToGCRequestGuildData()) return this.requestGuildData();
-        if (type == this.msg.ClientToGCRequestGuildMembership()) return this.requestGuildMembership();
-        if (type == this.msg.ClientToGCUnknown8716()) return this.unknown8716();
-        if (type == this.msg.ClientToGCRequestAccountGuildPersonaInfo()) return this.requestAccountGuildPersonaInfo();
-        if (type == this.msg.ClientToGCRequestAccountGuildPersonaInfoBatch()) return this.requestAccountGuildPersonaInfoBatch();
+    requestGuildData(): boolean {
         return false;
     }
-
-    requestGuildData(): boolean { return false; }
-    requestGuildMembership(): boolean { return false; }
-    unknown8716(): boolean { return false; }
-    requestAccountGuildPersonaInfo(): boolean { return false; }
-    requestAccountGuildPersonaInfoBatch(): boolean { return false; }
+    requestGuildMembership(): boolean {
+        return false;
+    }
+    unknown8716(): boolean {
+        return false;
+    }
+    requestAccountGuildPersonaInfo(): boolean {
+        return false;
+    }
+    requestAccountGuildPersonaInfoBatch(): boolean {
+        return false;
+    }
 }

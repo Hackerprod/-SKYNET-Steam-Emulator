@@ -1,0 +1,21 @@
+{
+    "private": true,
+    "name": "gc-570-scripts",
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "typecheck": "tsc --noEmit",
+        "lint": "eslint .",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "boundaries": "powershell -ExecutionPolicy Bypass -File tools/verify-gc-ts-boundaries.ps1",
+        "test": "npm run typecheck && npm run lint && npm run format:check && npm run boundaries"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.0.0",
+        "eslint": "^9.0.0",
+        "prettier": "^3.0.0",
+        "typescript-eslint": "^8.0.0",
+        "typescript": "^5.5.0"
+    }
+}

@@ -50,8 +50,10 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 cacheEntry.Dispatcher.Current = host;
                 try
                 {
-                    var result = cacheEntry.Runtime.Invoke("handle");
-                    var handled = result is TsBoolValue boolValue && boolValue.Value;
+                    var handled = cacheEntry.Runtime
+                        .InvokeAsync<bool>(context.AppId.ToString(), "handle")
+                        .GetAwaiter()
+                        .GetResult();
                     if (!handled)
                     {
                         _trace.Record("unhandled", context.AppId, context.SteamId, request.MessageType, 0);
@@ -120,7 +122,10 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                     cacheEntry.Dispatcher.Current = host;
                     try
                     {
-                        cacheEntry.Runtime.Invoke("tick");
+                        cacheEntry.Runtime
+                            .InvokeAsync<object?>(appId.ToString(), "tick")
+                            .GetAwaiter()
+                            .GetResult();
                     }
                     catch (InvalidOperationException ex) when (ex.Message.Contains("Function 'tick' not found", StringComparison.Ordinal))
                     {
@@ -151,7 +156,6 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
 
             var dispatcher = new ScriptHostDispatcher();
             var builder = new TypeSharpRuntimeBuilder()
-                .AddSourceDirectory(scriptRoot)
                 .RegisterHostFunction("gc", "messageType", _ => dispatcher.RequireCurrent().MessageType())
                 .RegisterHostFunction("gc", "body", _ => dispatcher.RequireCurrent().Body())
                 .RegisterHostFunction("gc", "appId", _ => dispatcher.RequireCurrent().AppId())
@@ -163,6 +167,11 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .RegisterHostFunction("gc", "decode", dispatcher.Decode)
                 .RegisterHostFunction("gc", "encode", dispatcher.Encode)
                 .RegisterHostFunction("gc", "send", dispatcher.Send);
+
+            foreach (var sourceFile in EnumerateRuntimeScriptFiles(scriptRoot))
+            {
+                builder.AddSourceFile(sourceFile);
+            }
 
             var runtime = builder.BuildAsync().GetAwaiter().GetResult();
             if (_cache.TryGetValue(appId, out var old))
@@ -179,11 +188,34 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
 
     private static DateTime GetScriptTreeStamp(string scriptRoot)
     {
-        return Directory
-            .EnumerateFiles(scriptRoot, "*.ts", SearchOption.AllDirectories)
+        return EnumerateRuntimeScriptFiles(scriptRoot)
             .Select(File.GetLastWriteTimeUtc)
             .DefaultIfEmpty(DateTime.MinValue)
             .Max();
+    }
+
+    private static IEnumerable<string> EnumerateRuntimeScriptFiles(string scriptRoot)
+    {
+        var main = Path.Combine(scriptRoot, "main.ts");
+        if (File.Exists(main))
+        {
+            yield return main;
+        }
+
+        foreach (var directoryName in new[] { "framework", "generated", "modules" })
+        {
+            var directory = Path.Combine(scriptRoot, directoryName);
+            if (!Directory.Exists(directory))
+            {
+                continue;
+            }
+
+            foreach (var file in Directory.EnumerateFiles(directory, "*.ts", SearchOption.AllDirectories)
+                         .Where(path => !path.EndsWith(".d.ts", StringComparison.OrdinalIgnoreCase)))
+            {
+                yield return file;
+            }
+        }
     }
 
     private string GetMainScriptPath(uint appId)
@@ -345,8 +377,8 @@ internal sealed class ScriptExchangeHost
             throw new InvalidOperationException("send(messageType, payload, protobuf?) requires at least two arguments");
         }
 
-        var messageType = Convert.ToUInt32(ToNumber(args[0]));
-        var payload = ToBytes(args[1]);
+        var messageType = Convert.ToUInt32(ToNumber(args[0], "send.messageType"));
+        var payload = ToBytes(args[1], "send.payload");
         var protobuf = args.Length < 3 || args[2] is not TsBoolValue boolValue || boolValue.Value;
         Response.Messages.Add(new ApiGCMessage
         {
@@ -360,31 +392,34 @@ internal sealed class ScriptExchangeHost
 
     private static TsValue ToArray(byte[] bytes)
     {
-        var array = new TsArray(bytes.Length);
-        foreach (var value in bytes)
-        {
-            array.Add(TsValue.FromInt32(value));
-        }
-
-        return new TsArrayValue(array);
+        var copy = new byte[bytes.Length];
+        Array.Copy(bytes, copy, copy.Length);
+        return new TsUint8ArrayValue(copy);
     }
 
-    private static byte[] ToBytes(TsValue value)
+    private static byte[] ToBytes(TsValue value, string path = "value")
     {
         if (value is TsStringValue stringValue)
         {
             return Convert.FromBase64String(stringValue.Value);
         }
 
+        if (value is TsUint8ArrayValue bytesValue)
+        {
+            var copy = new byte[bytesValue.Length];
+            Array.Copy(bytesValue.Value, copy, copy.Length);
+            return copy;
+        }
+
         if (value is not TsArrayValue arrayValue)
         {
-            throw new InvalidOperationException("Expected byte array");
+            throw new InvalidOperationException($"{path}: expected Uint8Array, byte array, or base64 string; got {value.ValueType}");
         }
 
         var bytes = new byte[arrayValue.Value.Count];
         for (var i = 0; i < bytes.Length; i++)
         {
-            bytes[i] = Convert.ToByte(ToNumber(arrayValue.Value.Get(i)));
+            bytes[i] = Convert.ToByte(ToNumber(arrayValue.Value.Get(i), $"{path}[{i}]"));
         }
 
         return bytes;
@@ -395,7 +430,7 @@ internal sealed class ScriptExchangeHost
         return value is TsStringValue stringValue ? stringValue.Value : value.ToString() ?? string.Empty;
     }
 
-    private static double ToNumber(TsValue value)
+    private static double ToNumber(TsValue value, string path = "value")
     {
         return value switch
         {
@@ -406,7 +441,7 @@ internal sealed class ScriptExchangeHost
             TsFloat64Value float64Value => float64Value.Value,
             TsDecimalValue decimalValue => (double)decimalValue.Value,
             TsStringValue stringValue when double.TryParse(stringValue.Value, out var parsed) => parsed,
-            _ => throw new InvalidOperationException($"Expected numeric value, got {value.ValueType}")
+            _ => throw new InvalidOperationException($"{path}: expected numeric value, got {value.ValueType}")
         };
     }
 }

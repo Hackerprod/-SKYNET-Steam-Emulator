@@ -1,44 +1,45 @@
-import { Messages } from "../Messages";
-import { gc } from "../framework/gc";
-import { Routes } from "../generated/dota";
+import { gc, HandlerContext, RawMessageContext } from "../framework/gc";
+import { CMsgGCRequestStoreSalesData, CMsgGCRequestStoreSalesDataResponse, Msg, Routes } from "../generated/dota";
+
+export function registerEconomy(): void {
+    const economy = new Economy();
+    economy.register();
+}
 
 export class Economy {
-    msg: Messages;
-
-    constructor() {
-        this.msg = new Messages();
+    register(): void {
+        gc.on(Routes.RequestStoreSalesData, (ctx) => {
+            this.requestStoreSalesData(ctx);
+        });
+        gc.onMessage(Msg.ClientToGCCancelUnfinalizedTransactions as number, (ctx) =>
+            this.cancelUnfinalizedTransactions(ctx)
+        );
+        gc.onMessage(Msg.ClientToGCAggregateMetrics as number, (ctx) => this.aggregateMetrics(ctx));
     }
 
-    handle(type: int32): boolean {
-        if (type == this.msg.GCRequestStoreSalesData()) return this.requestStoreSalesData();
-        if (type == this.msg.ClientToGCCancelUnfinalizedTransactions()) return this.cancelUnfinalizedTransactions();
-        if (type == this.msg.ClientToGCAggregateMetrics()) return this.aggregateMetrics();
-        return false;
-    }
+    private requestStoreSalesData(
+        ctx: HandlerContext<CMsgGCRequestStoreSalesData, CMsgGCRequestStoreSalesDataResponse>
+    ): void {
+        let version: number = 0;
+        if (ctx.request.version) {
+            version = ctx.request.version as number;
+        }
 
-    private requestStoreSalesData(): boolean {
-        return gc.on(Routes.RequestStoreSalesData, ctx => {
-            let version: int32 = 0;
-            if (ctx.request.version) {
-                version = ctx.request.version as int32;
-            }
+        const expiration = Math.floor(ctx.clock.now() + 86400) as number;
 
-            const expiration = Math.floor(now() + 86400) as int32;
-
-            ctx.reply({
-                version: version,
-                expirationTime: expiration
-            });
+        ctx.reply({
+            version: version,
+            expirationTime: expiration
         });
     }
 
-    private cancelUnfinalizedTransactions(): boolean {
-        log("Economy: CancelUnfinalizedTransactions ignored");
+    private cancelUnfinalizedTransactions(ctx: RawMessageContext): boolean {
+        ctx.logger.info("Economy: CancelUnfinalizedTransactions ignored");
         return true;
     }
 
-    private aggregateMetrics(): boolean {
-        log("Economy: AggregateMetrics ignored");
+    private aggregateMetrics(ctx: RawMessageContext): boolean {
+        ctx.logger.info("Economy: AggregateMetrics ignored");
         return true;
     }
 }

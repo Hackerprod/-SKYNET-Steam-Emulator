@@ -1,20 +1,25 @@
-import { Messages } from "../Messages";
+import { gc } from "../framework/gc";
+import { Msg } from "../generated/dota";
+
+export function registerItems(): void {
+    const items = new Items();
+    items.register();
+}
 
 export class Items {
-    msg: Messages;
-
-    constructor() {
-        this.msg = new Messages();
+    register(): void {
+        gc.onMessage(Msg.ClientToGCEquipItems as number, () => this.equipItems());
+        gc.onMessage(Msg.ClientToGCSetItemStyle as number, () => this.setItemStyle());
+        gc.onMessage(Msg.SOCacheSubscriptionRefresh as number, () => this.cacheSubscriptionRefresh());
     }
 
-    handle(type: int32): boolean {
-        if (type == this.msg.ClientToGCEquipItems()) return this.equipItems();
-        if (type == this.msg.ClientToGCSetItemStyle()) return this.setItemStyle();
-        if (type == this.msg.SOCacheSubscriptionRefresh()) return this.cacheSubscriptionRefresh();
+    equipItems(): boolean {
         return false;
     }
-
-    equipItems(): boolean { return false; }
-    setItemStyle(): boolean { return false; }
-    cacheSubscriptionRefresh(): boolean { return false; }
+    setItemStyle(): boolean {
+        return false;
+    }
+    cacheSubscriptionRefresh(): boolean {
+        return false;
+    }
 }

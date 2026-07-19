@@ -1,33 +1,51 @@
-import { Messages } from "../Messages";
+import { gc } from "../framework/gc";
+import { Msg } from "../generated/dota";
+
+export function registerParty(): Party {
+    const party = new Party();
+    party.register();
+    return party;
+}
 
 export class Party {
-    msg: Messages;
-
-    constructor() {
-        this.msg = new Messages();
+    register(): void {
+        gc.onMessage(Msg.GCInviteToParty as number, () => this.inviteToParty());
+        gc.onMessage(Msg.GCPartyInviteResponse as number, () => this.inviteResponse());
+        gc.onMessage(Msg.ClientToGCPingData as number, () => this.pingData());
+        gc.onMessage(Msg.ClientToGCSetPartyLeader as number, () => this.setLeader());
+        gc.onMessage(Msg.GCLeaveParty as number, () => this.leave());
+        gc.onMessage(Msg.GCKickFromParty as number, () => this.kick());
+        gc.onMessage(Msg.GCPartyMemberSetCoach as number, () => this.setCoach());
+        gc.onMessage(Msg.PartyReadyCheckRequest as number, () => this.readyCheckRequest());
+        gc.onMessage(Msg.PartyReadyCheckAcknowledge as number, () => this.readyCheckAcknowledge());
     }
 
-    handle(type: int32): boolean {
-        if (type == this.msg.GCInviteToParty()) return this.inviteToParty();
-        if (type == this.msg.GCPartyInviteResponse()) return this.inviteResponse();
-        if (type == this.msg.ClientToGCPingData()) return this.pingData();
-        if (type == this.msg.ClientToGCSetPartyLeader()) return this.setLeader();
-        if (type == this.msg.GCLeaveParty()) return this.leave();
-        if (type == this.msg.GCKickFromParty()) return this.kick();
-        if (type == this.msg.GCPartyMemberSetCoach()) return this.setCoach();
-        if (type == this.msg.PartyReadyCheckRequest()) return this.readyCheckRequest();
-        if (type == this.msg.PartyReadyCheckAcknowledge()) return this.readyCheckAcknowledge();
+    inviteToParty(): boolean {
         return false;
     }
-
-    inviteToParty(): boolean { return false; }
-    inviteResponse(): boolean { return false; }
-    pingData(): boolean { return false; }
-    setLeader(): boolean { return false; }
-    leave(): boolean { return false; }
-    kick(): boolean { return false; }
-    setCoach(): boolean { return false; }
-    readyCheckRequest(): boolean { return false; }
-    readyCheckAcknowledge(): boolean { return false; }
-    tick(): void { }
+    inviteResponse(): boolean {
+        return false;
+    }
+    pingData(): boolean {
+        return false;
+    }
+    setLeader(): boolean {
+        return false;
+    }
+    leave(): boolean {
+        return false;
+    }
+    kick(): boolean {
+        return false;
+    }
+    setCoach(): boolean {
+        return false;
+    }
+    readyCheckRequest(): boolean {
+        return false;
+    }
+    readyCheckAcknowledge(): boolean {
+        return false;
+    }
+    tick(): void {}
 }
