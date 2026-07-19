@@ -24905,6 +24905,18 @@ export const Routes = {
         responseId: Msg.GCToClientFindTopSourceTVGamesResponse,
         response: Proto.CMsgGCToClientFindTopSourceTVGamesResponse
     } as GcRoute<CMsgClientToGCFindTopSourceTVGames, CMsgGCToClientFindTopSourceTVGamesResponse>,
+    GetAllHeroOrder: {
+        requestId: Msg.ClientToGCGetAllHeroOrder,
+        request: Proto.CMsgClientToGCGetAllHeroOrder,
+        responseId: Msg.ClientToGCGetAllHeroOrderResponse,
+        response: Proto.CMsgClientToGCGetAllHeroOrderResponse
+    } as GcRoute<CMsgClientToGCGetAllHeroOrder, CMsgClientToGCGetAllHeroOrderResponse>,
+    GetAllHeroProgress: {
+        requestId: Msg.ClientToGCGetAllHeroProgress,
+        request: Proto.CMsgClientToGCGetAllHeroProgress,
+        responseId: Msg.ClientToGCGetAllHeroProgressResponse,
+        response: Proto.CMsgClientToGCGetAllHeroProgressResponse
+    } as GcRoute<CMsgClientToGCGetAllHeroProgress, CMsgClientToGCGetAllHeroProgressResponse>,
     GetAvailablePrivateCoachingSessions: {
         requestId: Msg.ClientToGCGetAvailablePrivateCoachingSessions,
         request: Proto.CMsgClientToGCGetAvailablePrivateCoachingSessions,
@@ -24923,6 +24935,30 @@ export const Routes = {
         responseId: Msg.ClientToGCGetCurrentPrivateCoachingSessionResponse,
         response: Proto.CMsgClientToGCGetCurrentPrivateCoachingSessionResponse
     } as GcRoute<CMsgClientToGCGetCurrentPrivateCoachingSession, CMsgClientToGCGetCurrentPrivateCoachingSessionResponse>,
+    GetProfileCard: {
+        requestId: Msg.ClientToGCGetProfileCard,
+        request: Proto.CMsgClientToGCGetProfileCard,
+        responseId: Msg.ClientToGCGetProfileCardResponse,
+        response: Proto.CMsgDOTAProfileCard
+    } as GcRoute<CMsgClientToGCGetProfileCard, CMsgDOTAProfileCard>,
+    GetProfileCardStats: {
+        requestId: Msg.ClientToGCGetProfileCardStats,
+        request: Proto.CMsgClientToGCGetProfileCardStats,
+        responseId: Msg.ClientToGCGetProfileCardStatsResponse,
+        response: Proto.CMsgDOTAProfileCard
+    } as GcRoute<CMsgClientToGCGetProfileCardStats, CMsgDOTAProfileCard>,
+    GetProfileTickets: {
+        requestId: Msg.ClientToGCGetProfileTickets,
+        request: Proto.CMsgClientToGCGetProfileTickets,
+        responseId: Msg.ClientToGCGetProfileTicketsResponse,
+        response: Proto.CMsgDOTAProfileTickets
+    } as GcRoute<CMsgClientToGCGetProfileTickets, CMsgDOTAProfileTickets>,
+    GetTrophyList: {
+        requestId: Msg.ClientToGCGetTrophyList,
+        request: Proto.CMsgClientToGCGetTrophyList,
+        responseId: Msg.ClientToGCGetTrophyListResponse,
+        response: Proto.CMsgClientToGCGetTrophyListResponse
+    } as GcRoute<CMsgClientToGCGetTrophyList, CMsgClientToGCGetTrophyListResponse>,
     JoinChatChannel: {
         requestId: Msg.GCJoinChatChannel,
         request: Proto.CMsgDOTAJoinChatChannel,
@@ -24935,6 +24971,18 @@ export const Routes = {
         responseId: Msg.GCNotificationsResponse,
         response: Proto.CMsgGCNotificationsResponse
     } as GcRoute<CMsgGCNotificationsRequest, CMsgGCNotificationsResponse>,
+    ProfileRequest: {
+        requestId: Msg.ProfileRequest,
+        request: Proto.CMsgProfileRequest,
+        responseId: Msg.ProfileResponse,
+        response: Proto.CMsgProfileResponse
+    } as GcRoute<CMsgProfileRequest, CMsgProfileResponse>,
+    ProfileUpdate: {
+        requestId: Msg.ProfileUpdate,
+        request: Proto.CMsgProfileUpdate,
+        responseId: Msg.ProfileUpdateResponse,
+        response: Proto.CMsgProfileUpdateResponse
+    } as GcRoute<CMsgProfileUpdate, CMsgProfileUpdateResponse>,
     RequestSocialFeed: {
         requestId: Msg.ClientToGCRequestSocialFeed,
         request: Proto.CMsgSocialFeedRequest,
@@ -24959,6 +25007,12 @@ export const Routes = {
         responseId: Msg.ClientToGCSetItemStyleResponse,
         response: Proto.CMsgClientToGCSetItemStyleResponse
     } as GcRoute<CMsgClientToGCSetItemStyle, CMsgClientToGCSetItemStyleResponse>,
+    SetProfileCardSlots: {
+        requestId: Msg.ClientToGCSetProfileCardSlots,
+        request: Proto.CMsgClientToGCSetProfileCardSlots,
+        responseId: Msg.GCToClientProfileCardUpdated,
+        response: Proto.CMsgDOTAProfileCard
+    } as GcRoute<CMsgClientToGCSetProfileCardSlots, CMsgDOTAProfileCard>,
     SocialFeedPostComment: {
         requestId: Msg.ClientToGCSocialFeedPostCommentRequest,
         request: Proto.CMsgClientToGCSocialFeedPostCommentRequest,

@@ -177,7 +177,10 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .RegisterHostFunction("gc", "dotaCatalogItem", dispatcher.DotaCatalogItem)
                 .RegisterHostFunction("gc", "dotaEquipItem", dispatcher.DotaEquipItem)
                 .RegisterHostFunction("gc", "dotaSetItemStyle", dispatcher.DotaSetItemStyle)
-                .RegisterHostFunction("gc", "dotaQueueCurrentLobbyServer", dispatcher.DotaQueueCurrentLobbyServer);
+                .RegisterHostFunction("gc", "dotaQueueCurrentLobbyServer", dispatcher.DotaQueueCurrentLobbyServer)
+                .RegisterHostFunction("gc", "dotaProfile", dispatcher.DotaProfile)
+                .RegisterHostFunction("gc", "dotaSaveProfileSlots", dispatcher.DotaSaveProfileSlots)
+                .RegisterHostFunction("gc", "dotaSaveProfileUpdate", dispatcher.DotaSaveProfileUpdate);
 
             foreach (var sourceFile in EnumerateRuntimeScriptFiles(scriptRoot))
             {
@@ -332,6 +335,21 @@ internal sealed class ScriptHostDispatcher
     {
         return RequireCurrent().DotaQueueCurrentLobbyServer(args);
     }
+
+    public TsValue? DotaProfile(TsValue[] args)
+    {
+        return RequireCurrent().DotaProfile(args);
+    }
+
+    public TsValue? DotaSaveProfileSlots(TsValue[] args)
+    {
+        return RequireCurrent().DotaSaveProfileSlots(args);
+    }
+
+    public TsValue? DotaSaveProfileUpdate(TsValue[] args)
+    {
+        return RequireCurrent().DotaSaveProfileUpdate(args);
+    }
 }
 
 internal sealed class ScriptExchangeHost
@@ -479,6 +497,258 @@ internal sealed class ScriptExchangeHost
         var messageType = Convert.ToUInt32(ToNumber(args[0], "dotaQueueCurrentLobbyServer.messageType"));
         var payload = ToBytes(args[1], "dotaQueueCurrentLobbyServer.payload");
         return TsValue.FromBool(DotaGcBackend.QueueCurrentLobbyServerProto(_context.SteamId, _context.AppId, messageType, payload));
+    }
+
+    public TsValue DotaProfile(TsValue[] args)
+    {
+        var accountId = args.Length > 0
+            ? Convert.ToUInt32(ToNumber(args[0], "dotaProfile.accountId"))
+            : _context.AccountId;
+        if (accountId == 0)
+        {
+            accountId = _context.AccountId;
+        }
+
+        return ToTsProfileSnapshot(accountId);
+    }
+
+    public TsValue DotaSaveProfileSlots(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaSaveProfileSlots(slots) requires one argument");
+        }
+
+        var slots = new List<DotaStatsProfileSlot>();
+        if (args[0] is not TsArrayValue arrayValue)
+        {
+            throw new InvalidOperationException("dotaSaveProfileSlots.slots: expected array");
+        }
+
+        for (var i = 0; i < arrayValue.Value.Count; i++)
+        {
+            if (arrayValue.Value.Get(i) is not TsObjectValue slotValue)
+            {
+                throw new InvalidOperationException($"dotaSaveProfileSlots.slots[{i}]: expected object");
+            }
+
+            var slot = slotValue.Value;
+            var slotId = Convert.ToUInt32(ToNumber(slot.GetField("slotId"), $"dotaSaveProfileSlots.slots[{i}].slotId"));
+            if (slotId == 0)
+            {
+                continue;
+            }
+
+            slots.Add(new DotaStatsProfileSlot
+            {
+                AccountId = _context.AccountId,
+                SlotId = slotId,
+                SlotType = Convert.ToUInt32(ToNumber(slot.GetField("slotType"), $"dotaSaveProfileSlots.slots[{i}].slotType")),
+                SlotValue = Convert.ToUInt64(ToInteger(slot.GetField("slotValue"), $"dotaSaveProfileSlots.slots[{i}].slotValue").ToString())
+            });
+        }
+
+        DotaGcBackend.StatsStore?.SaveProfileSlots(_context.AccountId, slots);
+        return TsValue.FromBool(true);
+    }
+
+    public TsValue DotaSaveProfileUpdate(TsValue[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new InvalidOperationException("dotaSaveProfileUpdate(backgroundItemId, featuredHeroIds) requires two arguments");
+        }
+
+        var backgroundItemId = Convert.ToUInt64(ToInteger(args[0], "dotaSaveProfileUpdate.backgroundItemId").ToString());
+        if (args[1] is not TsArrayValue arrayValue)
+        {
+            throw new InvalidOperationException("dotaSaveProfileUpdate.featuredHeroIds: expected array");
+        }
+
+        var featuredHeroIds = new List<uint>();
+        for (var i = 0; i < arrayValue.Value.Count; i++)
+        {
+            var heroId = Convert.ToUInt32(ToNumber(arrayValue.Value.Get(i), $"dotaSaveProfileUpdate.featuredHeroIds[{i}]"));
+            if (heroId != 0)
+            {
+                featuredHeroIds.Add(heroId);
+            }
+        }
+
+        DotaGcBackend.StatsStore?.SaveProfileUpdate(_context.AccountId, backgroundItemId, featuredHeroIds);
+        return TsValue.FromBool(true);
+    }
+
+    private TsValue ToTsProfileSnapshot(uint requestedAccountId)
+    {
+        var store = DotaGcBackend.StatsStore;
+        var profile = store == null
+            ? DefaultProfile(requestedAccountId)
+            : requestedAccountId == _context.AccountId
+                ? store.EnsureProfile(_context.SteamId, _context.AccountId, _context.PersonaName)
+                : store.GetProfile(requestedAccountId);
+
+        var global = store?.GetGlobalStats(profile.AccountId) ?? new DotaStatsGlobalStats { AccountId = profile.AccountId };
+        var conduct = store?.GetConduct(profile.AccountId) ?? new DotaStatsConduct { AccountId = profile.AccountId, RawBehaviorScore = 10000 };
+        var value = new TsObject("DotaProfileSnapshot");
+        value.SetField("accountId", TsValue.FromInt32(unchecked((int)profile.AccountId)));
+        value.SetField("steamId", TsValue.FromUInt64(profile.SteamId));
+        value.SetField("personaName", TsValue.FromString(profile.PersonaName ?? string.Empty));
+        value.SetField("rankTier", TsValue.FromInt32(unchecked((int)profile.RankTier)));
+        value.SetField("rankTierScore", TsValue.FromInt32(unchecked((int)profile.RankTierScore)));
+        value.SetField("leaderboardRank", TsValue.FromInt32(unchecked((int)profile.LeaderboardRank)));
+        value.SetField("badgePoints", TsValue.FromInt32(unchecked((int)profile.BadgePoints)));
+        value.SetField("eventPoints", TsValue.FromInt32(unchecked((int)profile.EventPoints)));
+        value.SetField("activeEventId", TsValue.FromInt32(57));
+        value.SetField("lifetimeGames", TsValue.FromInt32(unchecked((int)profile.LifetimeGames)));
+        value.SetField("level", TsValue.FromInt32(unchecked((int)profile.Level)));
+        value.SetField("isPlusSubscriber", TsValue.FromBool(false));
+        value.SetField("plusOriginalStartDate", TsValue.FromInt32(0));
+        value.SetField("firstMatchTime", TsValue.FromInt32(unchecked((int)(store?.GetFirstMatchTime(profile.AccountId) ?? 0))));
+        value.SetField("mvpCount", TsValue.FromInt32(unchecked((int)(store?.GetMvpCount(profile.AccountId) ?? 0))));
+        value.SetField("globalStats", ToTsGlobalStats(global));
+        value.SetField("conduct", ToTsConduct(conduct));
+        value.SetField("slots", ToTsProfileSlots(store?.GetProfileSlots(profile.AccountId) ?? Array.Empty<DotaStatsProfileSlot>()));
+        value.SetField("heroes", ToTsHeroStats(store?.GetHeroStandings(profile.AccountId) ?? Array.Empty<DotaStatsHeroStats>()));
+        value.SetField("trophies", ToTsTrophies(store?.GetTrophies(profile.AccountId) ?? Array.Empty<DotaStatsTrophy>()));
+        value.SetField("featuredHeroIds", ToTsUInt32Array(store?.GetFeaturedHeroes(profile.AccountId) ?? Array.Empty<uint>()));
+        value.SetField("recentMatches", ToTsRecentMatches(store?.GetRecentMatches(profile.AccountId, 8) ?? Array.Empty<DotaStatsMatchPlayer>()));
+        value.SetField("allHeroProgress", ToTsAllHeroProgress(store?.GetAllHeroProgress(profile.AccountId) ?? DefaultAllHeroProgress(profile.AccountId, profile.PersonaName ?? string.Empty)));
+        return new TsObjectValue(value);
+    }
+
+    private static DotaStatsProfile DefaultProfile(uint accountId) => new()
+    {
+        AccountId = accountId,
+        PersonaName = accountId == 0 ? string.Empty : $"User{accountId}",
+        Level = 1
+    };
+
+    private static DotaStatsAllHeroProgress DefaultAllHeroProgress(uint accountId, string personaName) => new()
+    {
+        AccountId = accountId,
+        HeroIds = new List<uint>(),
+        ProfileName = personaName ?? string.Empty
+    };
+
+    private static TsValue ToTsGlobalStats(DotaStatsGlobalStats stats)
+    {
+        var value = new TsObject("DotaGlobalStats");
+        value.SetField("gamesWon", TsValue.FromInt32(unchecked((int)stats.GamesWon)));
+        value.SetField("gamesLost", TsValue.FromInt32(unchecked((int)stats.GamesLost)));
+        value.SetField("matchCount", TsValue.FromInt32(unchecked((int)stats.MatchCount)));
+        return new TsObjectValue(value);
+    }
+
+    private static TsValue ToTsConduct(DotaStatsConduct conduct)
+    {
+        var value = new TsObject("DotaConduct");
+        value.SetField("commendCount", TsValue.FromInt32(unchecked((int)conduct.CommendCount)));
+        value.SetField("rawBehaviorScore", TsValue.FromInt32(unchecked((int)conduct.RawBehaviorScore)));
+        return new TsObjectValue(value);
+    }
+
+    private static TsValue ToTsProfileSlots(IEnumerable<DotaStatsProfileSlot> slots)
+    {
+        var array = new TsArray();
+        foreach (var slot in slots)
+        {
+            var value = new TsObject("DotaProfileSlot");
+            value.SetField("slotId", TsValue.FromInt32(unchecked((int)slot.SlotId)));
+            value.SetField("slotType", TsValue.FromInt32(unchecked((int)slot.SlotType)));
+            value.SetField("slotValue", TsValue.FromUInt64(slot.SlotValue));
+            array.Add(new TsObjectValue(value));
+        }
+
+        return new TsArrayValue(array);
+    }
+
+    private static TsValue ToTsHeroStats(IEnumerable<DotaStatsHeroStats> heroes)
+    {
+        var array = new TsArray();
+        foreach (var hero in heroes)
+        {
+            var value = new TsObject("DotaHeroStats");
+            value.SetField("heroId", TsValue.FromInt32(unchecked((int)hero.HeroId)));
+            value.SetField("wins", TsValue.FromInt32(unchecked((int)hero.Wins)));
+            value.SetField("losses", TsValue.FromInt32(unchecked((int)hero.Losses)));
+            value.SetField("bestWinStreak", TsValue.FromInt32(unchecked((int)hero.BestWinStreak)));
+            array.Add(new TsObjectValue(value));
+        }
+
+        return new TsArrayValue(array);
+    }
+
+    private static TsValue ToTsTrophies(IEnumerable<DotaStatsTrophy> trophies)
+    {
+        var array = new TsArray();
+        foreach (var trophy in trophies)
+        {
+            var value = new TsObject("DotaTrophy");
+            value.SetField("trophyId", TsValue.FromInt32(unchecked((int)trophy.TrophyId)));
+            value.SetField("trophyScore", TsValue.FromInt32(unchecked((int)trophy.TrophyScore)));
+            value.SetField("lastUpdated", TsValue.FromInt32(unchecked((int)trophy.LastUpdated)));
+            array.Add(new TsObjectValue(value));
+        }
+
+        return new TsArrayValue(array);
+    }
+
+    private static TsValue ToTsRecentMatches(IEnumerable<DotaStatsMatchPlayer> matches)
+    {
+        var array = new TsArray();
+        foreach (var match in matches)
+        {
+            var value = new TsObject("DotaRecentMatch");
+            value.SetField("matchId", TsValue.FromUInt64(match.MatchId));
+            value.SetField("startTime", TsValue.FromInt32(unchecked((int)match.StartTime)));
+            value.SetField("duration", TsValue.FromInt32(unchecked((int)match.Duration)));
+            value.SetField("heroId", TsValue.FromInt32(unchecked((int)match.HeroId)));
+            value.SetField("kills", TsValue.FromInt32(unchecked((int)match.Kills)));
+            value.SetField("deaths", TsValue.FromInt32(unchecked((int)match.Deaths)));
+            value.SetField("assists", TsValue.FromInt32(unchecked((int)match.Assists)));
+            value.SetField("winner", TsValue.FromBool(match.Winner));
+            value.SetField("gameMode", TsValue.FromInt32(unchecked((int)match.GameMode)));
+            value.SetField("lobbyType", TsValue.FromInt32(unchecked((int)match.LobbyType)));
+            value.SetField("playerSlot", TsValue.FromInt32(unchecked((int)match.PlayerSlot)));
+            value.SetField("team", TsValue.FromInt32(unchecked((int)match.Team)));
+            array.Add(new TsObjectValue(value));
+        }
+
+        return new TsArrayValue(array);
+    }
+
+    private static TsValue ToTsAllHeroProgress(DotaStatsAllHeroProgress progress)
+    {
+        var value = new TsObject("DotaAllHeroProgress");
+        value.SetField("accountId", TsValue.FromInt32(unchecked((int)progress.AccountId)));
+        value.SetField("heroIds", ToTsUInt32Array(progress.HeroIds));
+        value.SetField("currentHeroId", TsValue.FromInt32(unchecked((int)progress.CurrentHeroId)));
+        value.SetField("nextHeroId", TsValue.FromInt32(unchecked((int)progress.NextHeroId)));
+        value.SetField("previousHeroId", TsValue.FromInt32(unchecked((int)progress.PreviousHeroId)));
+        value.SetField("startHeroId", TsValue.FromInt32(unchecked((int)progress.StartHeroId)));
+        value.SetField("lapsCompleted", TsValue.FromInt32(unchecked((int)progress.LapsCompleted)));
+        value.SetField("currentHeroGames", TsValue.FromInt32(unchecked((int)progress.CurrentHeroGames)));
+        value.SetField("currentLapStarted", TsValue.FromInt32(unchecked((int)progress.CurrentLapStarted)));
+        value.SetField("currentLapGames", TsValue.FromInt32(unchecked((int)progress.CurrentLapGames)));
+        value.SetField("bestLapGames", TsValue.FromInt32(unchecked((int)progress.BestLapGames)));
+        value.SetField("bestLapTime", TsValue.FromInt32(unchecked((int)progress.BestLapTime)));
+        value.SetField("lapHeroesCompleted", TsValue.FromInt32(unchecked((int)progress.LapHeroesCompleted)));
+        value.SetField("lapHeroesRemaining", TsValue.FromInt32(unchecked((int)progress.LapHeroesRemaining)));
+        value.SetField("previousHeroGames", TsValue.FromInt32(unchecked((int)progress.PreviousHeroGames)));
+        value.SetField("profileName", TsValue.FromString(progress.ProfileName ?? string.Empty));
+        return new TsObjectValue(value);
+    }
+
+    private static TsValue ToTsUInt32Array(IEnumerable<uint> values)
+    {
+        var array = new TsArray();
+        foreach (var value in values)
+        {
+            array.Add(TsValue.FromInt32(unchecked((int)value)));
+        }
+
+        return new TsArrayValue(array);
     }
 
     private static TsValue ToArray(byte[] bytes)

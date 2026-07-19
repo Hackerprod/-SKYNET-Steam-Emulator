@@ -24,6 +24,9 @@ declare global {
     function dotaEquipItem(itemId: bigint, heroId: number, slotId: number, style: number): unknown;
     function dotaSetItemStyle(itemId: bigint, style: number): unknown;
     function dotaQueueCurrentLobbyServer(messageType: number, payload: Uint8Array): boolean;
+    function dotaProfile(accountId: number): unknown;
+    function dotaSaveProfileSlots(slots: unknown[]): boolean;
+    function dotaSaveProfileUpdate(backgroundItemId: bigint, featuredHeroIds: number[]): boolean;
 }
 
 export {};

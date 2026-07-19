@@ -96,5 +96,68 @@
         "requestProto": "CMsgClientToGCSetItemStyle",
         "responseMessage": "ClientToGCSetItemStyleResponse",
         "responseProto": "CMsgClientToGCSetItemStyleResponse"
+    },
+    {
+        "name": "GetProfileCard",
+        "requestMessage": "ClientToGCGetProfileCard",
+        "requestProto": "CMsgClientToGCGetProfileCard",
+        "responseMessage": "ClientToGCGetProfileCardResponse",
+        "responseProto": "CMsgDOTAProfileCard"
+    },
+    {
+        "name": "GetProfileCardStats",
+        "requestMessage": "ClientToGCGetProfileCardStats",
+        "requestProto": "CMsgClientToGCGetProfileCardStats",
+        "responseMessage": "ClientToGCGetProfileCardStatsResponse",
+        "responseProto": "CMsgDOTAProfileCard"
+    },
+    {
+        "name": "SetProfileCardSlots",
+        "requestMessage": "ClientToGCSetProfileCardSlots",
+        "requestProto": "CMsgClientToGCSetProfileCardSlots",
+        "responseMessage": "GCToClientProfileCardUpdated",
+        "responseProto": "CMsgDOTAProfileCard"
+    },
+    {
+        "name": "GetProfileTickets",
+        "requestMessage": "ClientToGCGetProfileTickets",
+        "requestProto": "CMsgClientToGCGetProfileTickets",
+        "responseMessage": "ClientToGCGetProfileTicketsResponse",
+        "responseProto": "CMsgDOTAProfileTickets"
+    },
+    {
+        "name": "ProfileRequest",
+        "requestMessage": "ProfileRequest",
+        "requestProto": "CMsgProfileRequest",
+        "responseMessage": "ProfileResponse",
+        "responseProto": "CMsgProfileResponse"
+    },
+    {
+        "name": "ProfileUpdate",
+        "requestMessage": "ProfileUpdate",
+        "requestProto": "CMsgProfileUpdate",
+        "responseMessage": "ProfileUpdateResponse",
+        "responseProto": "CMsgProfileUpdateResponse"
+    },
+    {
+        "name": "GetTrophyList",
+        "requestMessage": "ClientToGCGetTrophyList",
+        "requestProto": "CMsgClientToGCGetTrophyList",
+        "responseMessage": "ClientToGCGetTrophyListResponse",
+        "responseProto": "CMsgClientToGCGetTrophyListResponse"
+    },
+    {
+        "name": "GetAllHeroOrder",
+        "requestMessage": "ClientToGCGetAllHeroOrder",
+        "requestProto": "CMsgClientToGCGetAllHeroOrder",
+        "responseMessage": "ClientToGCGetAllHeroOrderResponse",
+        "responseProto": "CMsgClientToGCGetAllHeroOrderResponse"
+    },
+    {
+        "name": "GetAllHeroProgress",
+        "requestMessage": "ClientToGCGetAllHeroProgress",
+        "requestProto": "CMsgClientToGCGetAllHeroProgress",
+        "responseMessage": "ClientToGCGetAllHeroProgressResponse",
+        "responseProto": "CMsgClientToGCGetAllHeroProgressResponse"
     }
 ]

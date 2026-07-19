@@ -240,7 +240,7 @@ export class Items {
     }
 }
 
-function buildEconItem(
+export function buildEconItem(
     inventory: DotaRuntimeInventory,
     item: DotaCatalogItem,
     equipment: DotaEquipment[]
@@ -325,7 +325,7 @@ function containsNumber(values: number[], value: number): boolean {
     return false;
 }
 
-function equipmentForDefIndex(inventory: DotaRuntimeInventory, defIndex: number): DotaEquipment[] {
+export function equipmentForDefIndex(inventory: DotaRuntimeInventory, defIndex: number): DotaEquipment[] {
     const result: DotaEquipment[] = [];
     for (let i = 0; i < inventory.equipment.length; i++) {
         const item = inventory.equipment[i];

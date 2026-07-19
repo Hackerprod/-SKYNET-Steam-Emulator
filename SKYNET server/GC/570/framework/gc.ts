@@ -50,6 +50,7 @@ export interface Logger {
 
 export interface GcServices {
     readonly items: DotaItemService;
+    readonly profiles: DotaProfileService;
 }
 
 export interface DotaItemService {
@@ -80,6 +81,102 @@ export interface DotaEquipment {
     readonly defIndex: number;
     readonly itemId: bigint;
     readonly style: number;
+}
+
+export interface DotaProfileService {
+    get(accountId: number): DotaProfileSnapshot;
+    saveCardSlots(slots: DotaProfileSlot[]): void;
+    saveProfileUpdate(backgroundItemId: bigint, featuredHeroIds: number[]): void;
+}
+
+export interface DotaProfileSnapshot {
+    readonly accountId: number;
+    readonly steamId: bigint;
+    readonly personaName: string;
+    readonly rankTier: number;
+    readonly rankTierScore: number;
+    readonly leaderboardRank: number;
+    readonly badgePoints: number;
+    readonly eventPoints: number;
+    readonly activeEventId: number;
+    readonly lifetimeGames: number;
+    readonly level: number;
+    readonly isPlusSubscriber: boolean;
+    readonly plusOriginalStartDate: number;
+    readonly firstMatchTime: number;
+    readonly mvpCount: number;
+    readonly globalStats: DotaGlobalStats;
+    readonly conduct: DotaConduct;
+    readonly slots: DotaProfileSlot[];
+    readonly heroes: DotaHeroStats[];
+    readonly trophies: DotaTrophy[];
+    readonly featuredHeroIds: number[];
+    readonly recentMatches: DotaRecentMatch[];
+    readonly allHeroProgress: DotaAllHeroProgress;
+}
+
+export interface DotaGlobalStats {
+    readonly gamesWon: number;
+    readonly gamesLost: number;
+    readonly matchCount: number;
+}
+
+export interface DotaConduct {
+    readonly commendCount: number;
+    readonly rawBehaviorScore: number;
+}
+
+export interface DotaProfileSlot {
+    readonly slotId: number;
+    readonly slotType: number;
+    readonly slotValue: bigint;
+}
+
+export interface DotaHeroStats {
+    readonly heroId: number;
+    readonly wins: number;
+    readonly losses: number;
+    readonly bestWinStreak: number;
+}
+
+export interface DotaTrophy {
+    readonly trophyId: number;
+    readonly trophyScore: number;
+    readonly lastUpdated: number;
+}
+
+export interface DotaRecentMatch {
+    readonly matchId: bigint;
+    readonly startTime: number;
+    readonly duration: number;
+    readonly heroId: number;
+    readonly kills: number;
+    readonly deaths: number;
+    readonly assists: number;
+    readonly winner: boolean;
+    readonly gameMode: number;
+    readonly lobbyType: number;
+    readonly playerSlot: number;
+    readonly team: number;
+}
+
+export interface DotaAllHeroProgress {
+    readonly accountId: number;
+    readonly heroIds: number[];
+    readonly currentHeroId: number;
+    readonly nextHeroId: number;
+    readonly previousHeroId: number;
+    readonly startHeroId: number;
+    readonly lapsCompleted: number;
+    readonly currentHeroGames: number;
+    readonly currentLapStarted: number;
+    readonly currentLapGames: number;
+    readonly bestLapGames: number;
+    readonly bestLapTime: number;
+    readonly lapHeroesCompleted: number;
+    readonly lapHeroesRemaining: number;
+    readonly previousHeroGames: number;
+    readonly profileName: string;
 }
 
 function currentSteamId(): bigint {
@@ -144,11 +241,27 @@ class GcDotaItemService implements DotaItemService {
     }
 }
 
+class GcDotaProfileService implements DotaProfileService {
+    get(accountId: number): DotaProfileSnapshot {
+        return dotaProfile(accountId) as DotaProfileSnapshot;
+    }
+
+    saveCardSlots(slots: DotaProfileSlot[]): void {
+        dotaSaveProfileSlots(slots);
+    }
+
+    saveProfileUpdate(backgroundItemId: bigint, featuredHeroIds: number[]): void {
+        dotaSaveProfileUpdate(backgroundItemId, featuredHeroIds);
+    }
+}
+
 class GcServiceContainer implements GcServices {
     items: DotaItemService;
+    profiles: DotaProfileService;
 
     constructor() {
         this.items = new GcDotaItemService();
+        this.profiles = new GcDotaProfileService();
     }
 }
 
