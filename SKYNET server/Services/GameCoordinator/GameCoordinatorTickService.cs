@@ -1,22 +1,21 @@
 namespace SKYNET_server.Services;
 
 /// <summary>
-/// Invokes the optional Lua `tick()` function of every loaded GC script on a fixed
-/// interval, so scripts can implement timers and proactive pushes (via gc.QueueTo).
-/// Ticking starts for an app after its first GC exchange loads the script.
+/// Invokes optional GC plugin timers on a fixed interval, so script backends can
+/// implement proactive pushes after an app has been loaded by its first exchange.
 /// </summary>
 public sealed class GameCoordinatorTickService : BackgroundService
 {
-    private readonly LuaGameCoordinatorPlugin _plugin;
+    private readonly IReadOnlyList<IGameCoordinatorTicker> _tickers;
     private readonly ILogger<GameCoordinatorTickService> _logger;
     private readonly TimeSpan _interval;
 
     public GameCoordinatorTickService(
-        LuaGameCoordinatorPlugin plugin,
+        IEnumerable<IGameCoordinatorPlugin> plugins,
         IConfiguration configuration,
         ILogger<GameCoordinatorTickService> logger)
     {
-        _plugin = plugin;
+        _tickers = plugins.OfType<IGameCoordinatorTicker>().ToList();
         _logger = logger;
         var intervalMs = configuration.GetValue("GameCoordinator:TickIntervalMs", 1000);
         _interval = TimeSpan.FromMilliseconds(Math.Clamp(intervalMs, 100, 60000));
@@ -29,7 +28,10 @@ public sealed class GameCoordinatorTickService : BackgroundService
         {
             try
             {
-                _plugin.Tick();
+                foreach (var ticker in _tickers)
+                {
+                    ticker.Tick();
+                }
             }
             catch (Exception ex)
             {

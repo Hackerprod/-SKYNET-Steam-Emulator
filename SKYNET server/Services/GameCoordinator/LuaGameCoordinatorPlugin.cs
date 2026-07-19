@@ -4,7 +4,7 @@ using SKYNET_server.Models;
 
 namespace SKYNET_server.Services;
 
-public sealed class LuaGameCoordinatorPlugin : IGameCoordinatorPlugin
+public sealed class LuaGameCoordinatorPlugin : IGameCoordinatorPlugin, IGameCoordinatorTicker
 {
     private readonly ILogger<LuaGameCoordinatorPlugin> _logger;
     private readonly GameCoordinatorTraceService _trace;
@@ -45,7 +45,13 @@ public sealed class LuaGameCoordinatorPlugin : IGameCoordinatorPlugin
 
     public bool CanHandle(uint appId)
     {
-        return File.Exists(GetMainScriptPath(appId));
+        var scriptRoot = GetScriptRoot(appId);
+        if (File.Exists(Path.Combine(scriptRoot, "main.ts")))
+        {
+            return false;
+        }
+
+        return File.Exists(Path.Combine(scriptRoot, "main.lua"));
     }
 
     public ApiGCExchangeResponse Exchange(GameCoordinatorContext context, ApiGCExchangeRequest request)
@@ -270,7 +276,8 @@ public sealed class LuaGameCoordinatorPlugin : IGameCoordinatorPlugin
     private static bool IsValidGcRoot(string? path)
     {
         return !string.IsNullOrWhiteSpace(path)
-            && File.Exists(Path.Combine(path, "570", "main.lua"));
+            && (File.Exists(Path.Combine(path, "570", "main.ts"))
+                || File.Exists(Path.Combine(path, "570", "main.lua")));
     }
 
     private static string ResolveScriptPath(string scriptRoot, string relativePath)

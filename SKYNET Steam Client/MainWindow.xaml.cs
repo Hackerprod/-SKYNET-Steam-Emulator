@@ -100,7 +100,18 @@ public partial class MainWindow : Window
     private async Task RefreshSessionAsync()
     {
         _session = await App.Server.ResolveSessionAsync(App.Store.Config);
+        // Persist a server URL that discovery may have updated.
+        App.Store.Save();
         BuildUserPanel(_session);
+    }
+
+    private void Options_Click(object sender, RoutedEventArgs e)
+    {
+        var win = new Views.OptionsWindow(App.Store.Config) { Owner = this };
+        if (win.ShowDialog() == true)
+        {
+            _ = RefreshSessionAsync();
+        }
     }
 
     private void BuildUserPanel(SessionResult session)
@@ -120,8 +131,8 @@ public partial class MainWindow : Window
         if (session.Status == SessionStatus.ServerUnavailable)
         {
             BannerTitle.Text = "Server unavailable";
-            BannerText.Text = $"Could not reach the SKYNET server at {App.Store.Config.ServerUrl}. Start the server, then retry.";
-            BannerButton.Content = "RETRY";
+            BannerText.Text = $"Could not reach the SKYNET server at {App.Store.Config.ServerUrl}. Set the server address or auto-detect it.";
+            BannerButton.Content = "SERVER OPTIONS";
         }
         else
         {
@@ -191,9 +202,10 @@ public partial class MainWindow : Window
 
     private void Login_Click(object sender, RoutedEventArgs e)
     {
+        // Server unreachable -> open options so the user can set/detect the address.
         if (_session?.Status == SessionStatus.ServerUnavailable)
         {
-            _ = RefreshSessionAsync();
+            Options_Click(sender, e);
             return;
         }
         OpenWeb("Auth/Login");

@@ -22,6 +22,11 @@ public interface IGameCoordinatorPlugin
     ApiGCExchangeResponse Poll(GameCoordinatorContext context);
 }
 
+public interface IGameCoordinatorTicker
+{
+    void Tick();
+}
+
 public interface ILuaGameCoordinatorBackend
 {
     ApiGCExchangeResponse Response { get; }

@@ -325,6 +325,12 @@ __pycache__/
 /*.zip
 /*.rar
 
+# Legacy Dota GC implementation kept locally only while the TypeScript GC replaces it.
+/SKYNET server/GC/570/*.lua
+/SKYNET server/GC/570/DotaGcBackend*.cs
+/SKYNET server/GC/570/captures/
+/SKYNET server/GC/570/fixtures/
+
 # Local notes and scratch files
 /SKYNET server/UI.txt
 *.bak

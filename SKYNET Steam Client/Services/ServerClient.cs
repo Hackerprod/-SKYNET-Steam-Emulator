@@ -32,8 +32,54 @@ public sealed class ServerClient
 
     public string LoginUrl => _baseUrl + "Auth/Login";
 
+    public string BaseUrl => _baseUrl;
+
+    /// <summary>True if the given base URL answers an HTTP request quickly.</summary>
+    public async Task<bool> IsReachableAsync(string baseUrl, int timeoutMs = 700)
+    {
+        try
+        {
+            var url = baseUrl.EndsWith("/") ? baseUrl : baseUrl + "/";
+            using var cts = new System.Threading.CancellationTokenSource(timeoutMs);
+            using var resp = await _http.GetAsync(url, cts.Token).ConfigureAwait(false);
+            return true; // any HTTP status means the server is there
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Makes sure we point at a live server: keeps the configured URL if it answers,
+    /// otherwise (when enabled) auto-discovers by broadcast and persists the result.
+    /// Returns the reachable base URL, or null if none was found.
+    /// </summary>
+    public async Task<string?> EnsureServerAsync(AppConfig app)
+    {
+        Configure(app.ServerUrl);
+        if (await IsReachableAsync(app.ServerUrl).ConfigureAwait(false))
+            return _baseUrl;
+
+        if (!app.AutoDiscoverServer)
+            return null;
+
+        var discovered = await Task.Run(() => ServerDiscovery.Discover(app.DiscoveryPort)).ConfigureAwait(false);
+        if (string.IsNullOrWhiteSpace(discovered))
+            return null;
+
+        if (!await IsReachableAsync(discovered!).ConfigureAwait(false))
+            return null;
+
+        app.ServerUrl = discovered!;
+        Configure(discovered!);
+        return _baseUrl;
+    }
+
     public async Task<SessionResult> ResolveSessionAsync(AppConfig app)
     {
+        await EnsureServerAsync(app).ConfigureAwait(false);
+
         var request = new SessionRequestDto
         {
             ClientInstanceId = app.ClientInstanceId,

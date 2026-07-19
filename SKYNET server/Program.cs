@@ -74,6 +74,8 @@ builder.Services.AddSingleton<DotaDedicatedServerSupervisor>();
 builder.Services.AddSingleton<SteamDB>();
 builder.Services.AddSingleton<DotaDB>();
 builder.Services.AddSingleton<DedicatedServerService>();
+builder.Services.AddSingleton<GameCoordinatorScriptPlugin>();
+builder.Services.AddSingleton<IGameCoordinatorPlugin>(sp => sp.GetRequiredService<GameCoordinatorScriptPlugin>());
 builder.Services.AddSingleton<LuaGameCoordinatorPlugin>();
 builder.Services.AddSingleton<IGameCoordinatorPlugin>(sp => sp.GetRequiredService<LuaGameCoordinatorPlugin>());
 builder.Services.AddSingleton<GameCoordinatorPluginRegistry>();

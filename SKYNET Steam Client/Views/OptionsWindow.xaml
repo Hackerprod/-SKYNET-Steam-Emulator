@@ -1,0 +1,70 @@
+<Window x:Class="SKYNET.Client.Views.OptionsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Options" Height="Auto" Width="480" SizeToContent="Height"
+        WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterOwner"
+        Background="Transparent" AllowsTransparency="True"
+        Foreground="{StaticResource SkynetText}" FontFamily="{StaticResource SkynetFont}">
+
+    <Window.Resources>
+        <Style TargetType="TextBlock" x:Key="Label">
+            <Setter Property="Foreground" Value="{StaticResource SkynetMuted}" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Margin" Value="0,14,0,5" />
+        </Style>
+    </Window.Resources>
+
+    <Border Background="{StaticResource SkynetCard}" BorderBrush="{StaticResource SkynetBorder}"
+            BorderThickness="1" CornerRadius="12">
+        <StackPanel>
+            <!-- Title bar -->
+            <Border Background="{StaticResource SkynetBlack}" CornerRadius="12,12,0,0"
+                    BorderBrush="{StaticResource SkynetBorder}" BorderThickness="0,0,0,1"
+                    MouseLeftButtonDown="Bar_Drag" Padding="18,14">
+                <Grid>
+                    <TextBlock Text="OPTIONS" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" />
+                    <Button Content="&#x2715;" Click="Cancel_Click" HorizontalAlignment="Right" Width="30" Height="26"
+                            Background="Transparent" Foreground="{StaticResource SkynetMuted}" BorderThickness="0"
+                            FontSize="13" Cursor="Hand" />
+                </Grid>
+            </Border>
+
+            <StackPanel Margin="22,6,22,18">
+                <TextBlock Text="SERVER URL" Style="{StaticResource Label}" Margin="0,10,0,5" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="TServerUrl" Style="{StaticResource Field}" />
+                    <Button Grid.Column="1" x:Name="DetectBtn" Content="DETECT" Style="{StaticResource GhostButton}"
+                            Click="Detect_Click" Margin="8,0,0,0" />
+                </Grid>
+                <TextBlock x:Name="DetectStatus" Foreground="{StaticResource SkynetMuted}" FontSize="11" Margin="0,6,0,0" />
+
+                <Grid Margin="0,4,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="DISCOVERY PORT" Style="{StaticResource Label}" />
+                        <TextBox x:Name="TDiscoveryPort" Style="{StaticResource Field}" Width="120" HorizontalAlignment="Left" />
+                    </StackPanel>
+                    <CheckBox x:Name="CAutoDiscover" Grid.Column="2" Content="Auto-discover on start"
+                              Foreground="{StaticResource SkynetText}" VerticalAlignment="Bottom" Margin="0,0,0,10" FontSize="12" />
+                </Grid>
+            </StackPanel>
+
+            <Border Background="{StaticResource SkynetBlack}" CornerRadius="0,0,12,12"
+                    BorderBrush="{StaticResource SkynetBorder}" BorderThickness="0,1,0,0" Padding="18,12">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="CANCEL" Style="{StaticResource GhostButton}" Click="Cancel_Click" Margin="0,0,10,0" />
+                    <Button Content="SAVE" Style="{StaticResource AccentButton}" Click="Save_Click" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </Border>
+</Window>
