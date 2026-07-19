@@ -8,30 +8,28 @@ export function registerStats(): void {
 
 export class Stats {
     register(): void {
-        gc.onMessage(Msg.ClientToGCLookupAccountName as number, () => this.lookupAccountName());
-        gc.onMessage(Msg.DOTAGetEventPoints as number, () => this.getEventPoints());
-        gc.onMessage(Msg.GCMatchmakingStatsRequest as number, () => this.matchmakingStats());
-        gc.onMessage(Msg.GCGetHeroStandings as number, () => this.getHeroStandings());
-        gc.onMessage(Msg.GCGetHeroStatsHistory as number, () => this.getHeroStatsHistory());
-        gc.onMessage(Msg.DOTAGetPlayerMatchHistory as number, () => this.getPlayerMatchHistory());
-        gc.onMessage(Msg.GCMatchDetailsRequest as number, () => this.matchDetails());
-        gc.onMessage(Msg.ClientToGCPlayerStatsRequest as number, () => this.playerStats());
-        gc.onMessage(Msg.HeroGlobalDataRequest as number, () => this.heroGlobalData());
-        gc.onMessage(Msg.ClientToGCTeammateStatsRequest as number, () => this.teammateStats());
-        gc.onMessage(Msg.ClientToGCRankRequest as number, () => this.rankRequest());
-        gc.onMessage(Msg.ClientToGCShowcaseGetUserData as number, () => this.showcaseGetUserData());
-        gc.onMessage(Msg.ClientToGCRequestPlayerRecentAccomplishments as number, () =>
-            this.clientRecentAccomplishments()
-        );
-        gc.onMessage(Msg.ClientToGCRequestPlayerHeroRecentAccomplishments as number, () =>
+        gc.onMessage(Msg.ClientToGCLookupAccountName, () => this.lookupAccountName());
+        gc.onMessage(Msg.DOTAGetEventPoints, () => this.getEventPoints());
+        gc.onMessage(Msg.GCMatchmakingStatsRequest, () => this.matchmakingStats());
+        gc.onMessage(Msg.GCGetHeroStandings, () => this.getHeroStandings());
+        gc.onMessage(Msg.GCGetHeroStatsHistory, () => this.getHeroStatsHistory());
+        gc.onMessage(Msg.DOTAGetPlayerMatchHistory, () => this.getPlayerMatchHistory());
+        gc.onMessage(Msg.GCMatchDetailsRequest, () => this.matchDetails());
+        gc.onMessage(Msg.ClientToGCPlayerStatsRequest, () => this.playerStats());
+        gc.onMessage(Msg.HeroGlobalDataRequest, () => this.heroGlobalData());
+        gc.onMessage(Msg.ClientToGCTeammateStatsRequest, () => this.teammateStats());
+        gc.onMessage(Msg.ClientToGCRankRequest, () => this.rankRequest());
+        gc.onMessage(Msg.ClientToGCShowcaseGetUserData, () => this.showcaseGetUserData());
+        gc.onMessage(Msg.ClientToGCRequestPlayerRecentAccomplishments, () => this.clientRecentAccomplishments());
+        gc.onMessage(Msg.ClientToGCRequestPlayerHeroRecentAccomplishments, () =>
             this.clientHeroRecentAccomplishments()
         );
-        gc.onMessage(Msg.ClientToGCHasPlayerVotedForMVP as number, () => this.hasPlayerVotedForMvp());
-        gc.onMessage(Msg.ClientToGCVoteForMVP as number, () => this.voteForMvp());
-        gc.onMessage(Msg.ClientToGCMVPVoteTimeout as number, () => this.mvpVoteTimeout());
-        gc.onMessage(Msg.GCSubmitLobbyMVPVote as number, () => this.submitLobbyMvpVote());
-        gc.onMessage(Msg.SignOutMVPStats as number, () => this.signOutMvpStats());
-        gc.onMessage(Msg.ClientToGCRerollPlayerChallenge as number, () => this.rerollPlayerChallenge());
+        gc.onMessage(Msg.ClientToGCHasPlayerVotedForMVP, () => this.hasPlayerVotedForMvp());
+        gc.onMessage(Msg.ClientToGCVoteForMVP, () => this.voteForMvp());
+        gc.onMessage(Msg.ClientToGCMVPVoteTimeout, () => this.mvpVoteTimeout());
+        gc.onMessage(Msg.GCSubmitLobbyMVPVote, () => this.submitLobbyMvpVote());
+        gc.onMessage(Msg.SignOutMVPStats, () => this.signOutMvpStats());
+        gc.onMessage(Msg.ClientToGCRerollPlayerChallenge, () => this.rerollPlayerChallenge());
     }
 
     lookupAccountName(): boolean {

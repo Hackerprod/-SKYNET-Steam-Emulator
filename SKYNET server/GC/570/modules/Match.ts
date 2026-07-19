@@ -8,16 +8,16 @@ export function registerMatch(): void {
 
 export class Match {
     register(): void {
-        gc.onMessage(Msg.GCGameMatchSignOutPermissionRequest as number, () => this.signOutPermission());
-        gc.onMessage(Msg.GCGameBotMatchSignOutPermissionRequest as number, () => this.signOutPermission());
-        gc.onMessage(Msg.GCSetMatchHistoryAccess as number, () => this.setMatchHistoryAccess());
-        gc.onMessage(Msg.ServerToGCRequestStatus as number, () => this.serverStatus());
-        gc.onMessage(Msg.GCLeaverDetected as number, () => this.leaverDetected());
-        gc.onMessage(Msg.ServerToGCRealtimeStats as number, () => this.realtimeStats());
-        gc.onMessage(Msg.ServerToGCMatchStateHistory as number, () => this.matchStateHistory());
-        gc.onMessage(Msg.ServerGCUpdateSpectatorCount as number, () => this.updateSpectatorCount());
-        gc.onMessage(Msg.GCLiveScoreboardUpdate as number, () => this.liveScoreboardUpdate());
-        gc.onMessage(Msg.GCSubmitPlayerReport as number, () => this.submitPlayerReport());
+        gc.onMessage(Msg.GCGameMatchSignOutPermissionRequest, () => this.signOutPermission());
+        gc.onMessage(Msg.GCGameBotMatchSignOutPermissionRequest, () => this.signOutPermission());
+        gc.onMessage(Msg.GCSetMatchHistoryAccess, () => this.setMatchHistoryAccess());
+        gc.onMessage(Msg.ServerToGCRequestStatus, () => this.serverStatus());
+        gc.onMessage(Msg.GCLeaverDetected, () => this.leaverDetected());
+        gc.onMessage(Msg.ServerToGCRealtimeStats, () => this.realtimeStats());
+        gc.onMessage(Msg.ServerToGCMatchStateHistory, () => this.matchStateHistory());
+        gc.onMessage(Msg.ServerGCUpdateSpectatorCount, () => this.updateSpectatorCount());
+        gc.onMessage(Msg.GCLiveScoreboardUpdate, () => this.liveScoreboardUpdate());
+        gc.onMessage(Msg.GCSubmitPlayerReport, () => this.submitPlayerReport());
     }
 
     signOutPermission(): boolean {

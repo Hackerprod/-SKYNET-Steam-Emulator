@@ -19,6 +19,11 @@ declare global {
     function encode<TMessage = unknown>(typeName: string, value: TMessage): Uint8Array;
     function send(messageType: number, payload: Uint8Array, protobuf?: boolean): boolean;
     function log(message: string): void;
+    function dotaInventory(): unknown;
+    function dotaCatalogItem(defIndex: number): unknown;
+    function dotaEquipItem(itemId: bigint, heroId: number, slotId: number, style: number): unknown;
+    function dotaSetItemStyle(itemId: bigint, style: number): unknown;
+    function dotaQueueCurrentLobbyServer(messageType: number, payload: Uint8Array): boolean;
 }
 
 export {};

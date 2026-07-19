@@ -2742,6 +2742,42 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
         PendingMessageQueued?.Invoke(recipientSteamId, message);
     }
 
+    public static bool QueueCurrentLobbyServerProto(ulong senderSteamId, uint appId, uint messageType, byte[] payload)
+    {
+        if (senderSteamId == 0 || payload.Length == 0)
+        {
+            return false;
+        }
+
+        lock (PracticeLobbySync)
+        {
+            if (!PracticeLobbyBySteamId.TryGetValue(senderSteamId, out var lobbyId) ||
+                !PracticeLobbies.TryGetValue(lobbyId, out var lobby) ||
+                lobby.ServerSteamId == 0)
+            {
+                return false;
+            }
+
+            var message = new ApiGCMessage
+            {
+                AppId = appId,
+                MessageType = messageType,
+                PayloadBase64 = Encode(payload),
+                Protobuf = true
+            };
+
+            if (!PendingGcMessages.TryGetValue(lobby.ServerSteamId, out var queue))
+            {
+                queue = new Queue<ApiGCMessage>();
+                PendingGcMessages[lobby.ServerSteamId] = queue;
+            }
+
+            queue.Enqueue(message);
+            PendingMessageQueued?.Invoke(lobby.ServerSteamId, message);
+            return true;
+        }
+    }
+
     private void AttachServerToLobbyLocked(PracticeLobbyState lobby, bool markRun)
     {
         if (SteamId != 0)

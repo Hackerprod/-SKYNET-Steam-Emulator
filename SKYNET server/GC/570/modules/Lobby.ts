@@ -9,31 +9,31 @@ export function registerLobby(): Lobby {
 
 export class Lobby {
     register(): void {
-        gc.onMessage(Msg.GCPracticeLobbyCreate as number, () => this.createLobby());
-        gc.onMessage(Msg.GCAbandonCurrentGame as number, () => this.abandonCurrentGame());
-        gc.onMessage(Msg.GCPracticeLobbyLeave as number, () => this.leaveLobby());
-        gc.onMessage(Msg.GCPracticeLobbyJoin as number, () => this.joinLobby());
-        gc.onMessage(Msg.GCInviteToLobby as number, () => this.inviteToLobby());
-        gc.onMessage(Msg.GCLobbyInviteResponse as number, () => this.lobbyInviteResponse());
-        gc.onMessage(Msg.GCPracticeLobbyList as number, () => this.practiceLobbyList());
-        gc.onMessage(Msg.GCFriendPracticeLobbyListRequest as number, () => this.friendPracticeLobbyList());
-        gc.onMessage(Msg.GCLobbyList as number, () => this.lobbyList());
-        gc.onMessage(Msg.GCPracticeLobbySetDetails as number, () => this.setDetails());
-        gc.onMessage(Msg.GCPracticeLobbySetTeamSlot as number, () => this.setTeamSlot());
-        gc.onMessage(Msg.GCPracticeLobbySetCoach as number, () => this.setCoach());
-        gc.onMessage(Msg.GCApplyTeamToPracticeLobby as number, () => this.applyTeam());
-        gc.onMessage(Msg.GCPracticeLobbyLaunch as number, () => this.launchLobby());
-        gc.onMessage(Msg.GCGameServerHello as number, () => this.gameServerHello());
-        gc.onMessage(Msg.GCGameServerInfo as number, () => this.gameServerInfo());
-        gc.onMessage(Msg.GCLANServerAvailable as number, () => this.lanServerAvailable());
-        gc.onMessage(Msg.GCServerAvailable as number, () => this.serverAvailable());
-        gc.onMessage(Msg.GCConnectedPlayers as number, () => this.connectedPlayers());
-        gc.onMessage(Msg.GCPlayerFailedToConnect as number, () => this.playerFailedToConnect());
-        gc.onMessage(Msg.GCGameMatchSignOut as number, () => this.signOut());
-        gc.onMessage(Msg.GCGameBotMatchSignOut as number, () => this.signOut());
-        gc.onMessage(Msg.ServerToGCRequestBatchPlayerResources as number, () => this.requestBatchPlayerResources());
-        gc.onMessage(Msg.ServerToGCRequestPlayerRecentAccomplishments as number, () => this.recentAccomplishments());
-        gc.onMessage(Msg.ServerToGCLobbyInitialized as number, () => this.lobbyInitialized());
+        gc.onMessage(Msg.GCPracticeLobbyCreate, () => this.createLobby());
+        gc.onMessage(Msg.GCAbandonCurrentGame, () => this.abandonCurrentGame());
+        gc.onMessage(Msg.GCPracticeLobbyLeave, () => this.leaveLobby());
+        gc.onMessage(Msg.GCPracticeLobbyJoin, () => this.joinLobby());
+        gc.onMessage(Msg.GCInviteToLobby, () => this.inviteToLobby());
+        gc.onMessage(Msg.GCLobbyInviteResponse, () => this.lobbyInviteResponse());
+        gc.onMessage(Msg.GCPracticeLobbyList, () => this.practiceLobbyList());
+        gc.onMessage(Msg.GCFriendPracticeLobbyListRequest, () => this.friendPracticeLobbyList());
+        gc.onMessage(Msg.GCLobbyList, () => this.lobbyList());
+        gc.onMessage(Msg.GCPracticeLobbySetDetails, () => this.setDetails());
+        gc.onMessage(Msg.GCPracticeLobbySetTeamSlot, () => this.setTeamSlot());
+        gc.onMessage(Msg.GCPracticeLobbySetCoach, () => this.setCoach());
+        gc.onMessage(Msg.GCApplyTeamToPracticeLobby, () => this.applyTeam());
+        gc.onMessage(Msg.GCPracticeLobbyLaunch, () => this.launchLobby());
+        gc.onMessage(Msg.GCGameServerHello, () => this.gameServerHello());
+        gc.onMessage(Msg.GCGameServerInfo, () => this.gameServerInfo());
+        gc.onMessage(Msg.GCLANServerAvailable, () => this.lanServerAvailable());
+        gc.onMessage(Msg.GCServerAvailable, () => this.serverAvailable());
+        gc.onMessage(Msg.GCConnectedPlayers, () => this.connectedPlayers());
+        gc.onMessage(Msg.GCPlayerFailedToConnect, () => this.playerFailedToConnect());
+        gc.onMessage(Msg.GCGameMatchSignOut, () => this.signOut());
+        gc.onMessage(Msg.GCGameBotMatchSignOut, () => this.signOut());
+        gc.onMessage(Msg.ServerToGCRequestBatchPlayerResources, () => this.requestBatchPlayerResources());
+        gc.onMessage(Msg.ServerToGCRequestPlayerRecentAccomplishments, () => this.recentAccomplishments());
+        gc.onMessage(Msg.ServerToGCLobbyInitialized, () => this.lobbyInitialized());
     }
 
     createLobby(): boolean {

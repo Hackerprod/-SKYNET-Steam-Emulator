@@ -8,13 +8,11 @@ export function registerGuilds(): void {
 
 export class Guilds {
     register(): void {
-        gc.onMessage(Msg.ClientToGCRequestGuildData as number, () => this.requestGuildData());
-        gc.onMessage(Msg.ClientToGCRequestGuildMembership as number, () => this.requestGuildMembership());
-        gc.onMessage(Msg.ClientToGCRequestReporterUpdates as number, () => this.unknown8716());
-        gc.onMessage(Msg.ClientToGCRequestAccountGuildPersonaInfo as number, () =>
-            this.requestAccountGuildPersonaInfo()
-        );
-        gc.onMessage(Msg.ClientToGCRequestAccountGuildPersonaInfoBatch as number, () =>
+        gc.onMessage(Msg.ClientToGCRequestGuildData, () => this.requestGuildData());
+        gc.onMessage(Msg.ClientToGCRequestGuildMembership, () => this.requestGuildMembership());
+        gc.onMessage(Msg.ClientToGCRequestReporterUpdates, () => this.unknown8716());
+        gc.onMessage(Msg.ClientToGCRequestAccountGuildPersonaInfo, () => this.requestAccountGuildPersonaInfo());
+        gc.onMessage(Msg.ClientToGCRequestAccountGuildPersonaInfoBatch, () =>
             this.requestAccountGuildPersonaInfoBatch()
         );
     }

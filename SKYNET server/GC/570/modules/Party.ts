@@ -9,15 +9,15 @@ export function registerParty(): Party {
 
 export class Party {
     register(): void {
-        gc.onMessage(Msg.GCInviteToParty as number, () => this.inviteToParty());
-        gc.onMessage(Msg.GCPartyInviteResponse as number, () => this.inviteResponse());
-        gc.onMessage(Msg.ClientToGCPingData as number, () => this.pingData());
-        gc.onMessage(Msg.ClientToGCSetPartyLeader as number, () => this.setLeader());
-        gc.onMessage(Msg.GCLeaveParty as number, () => this.leave());
-        gc.onMessage(Msg.GCKickFromParty as number, () => this.kick());
-        gc.onMessage(Msg.GCPartyMemberSetCoach as number, () => this.setCoach());
-        gc.onMessage(Msg.PartyReadyCheckRequest as number, () => this.readyCheckRequest());
-        gc.onMessage(Msg.PartyReadyCheckAcknowledge as number, () => this.readyCheckAcknowledge());
+        gc.onMessage(Msg.GCInviteToParty, () => this.inviteToParty());
+        gc.onMessage(Msg.GCPartyInviteResponse, () => this.inviteResponse());
+        gc.onMessage(Msg.ClientToGCPingData, () => this.pingData());
+        gc.onMessage(Msg.ClientToGCSetPartyLeader, () => this.setLeader());
+        gc.onMessage(Msg.GCLeaveParty, () => this.leave());
+        gc.onMessage(Msg.GCKickFromParty, () => this.kick());
+        gc.onMessage(Msg.GCPartyMemberSetCoach, () => this.setCoach());
+        gc.onMessage(Msg.PartyReadyCheckRequest, () => this.readyCheckRequest());
+        gc.onMessage(Msg.PartyReadyCheckAcknowledge, () => this.readyCheckAcknowledge());
     }
 
     inviteToParty(): boolean {

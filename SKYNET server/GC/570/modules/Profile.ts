@@ -8,23 +8,23 @@ export function registerProfile(): void {
 
 export class Profile {
     register(): void {
-        gc.onMessage(Msg.ClientToGCGetProfileCard as number, () => this.getProfileCard());
-        gc.onMessage(Msg.ClientToGCGetProfileCardStats as number, () => this.getProfileCardStats());
-        gc.onMessage(Msg.ClientToGCSetProfileCardSlots as number, () => this.setProfileCardSlots());
-        gc.onMessage(Msg.ClientToGCGetProfileTickets as number, () => this.getProfileTickets());
-        gc.onMessage(Msg.ClientToGCGetQuestProgress as number, () => this.getQuestProgress());
-        gc.onMessage(Msg.ClientToGCLatestConductScorecardRequest as number, () => this.latestConductScorecard());
-        gc.onMessage(Msg.ClientToGCMyTeamInfoRequest as number, () => this.myTeamInfo());
-        gc.onMessage(Msg.DOTAGetPeriodicResource as number, () => this.getPeriodicResource());
-        gc.onMessage(Msg.ProfileRequest as number, () => this.profileRequest());
-        gc.onMessage(Msg.ProfileUpdate as number, () => this.profileUpdate());
-        gc.onMessage(Msg.ClientToGCGetTrophyList as number, () => this.getTrophyList());
-        gc.onMessage(Msg.ClientToGCGetAllHeroOrder as number, () => this.getAllHeroOrder());
-        gc.onMessage(Msg.ClientToGCGetAllHeroProgress as number, () => this.getAllHeroProgress());
-        gc.onMessage(Msg.ClientToGCGetBattleReportInfo as number, () => this.getBattleReportInfo());
-        gc.onMessage(Msg.ClientToGCGetHeroStickers as number, () => this.getHeroStickers());
-        gc.onMessage(Msg.ClientToGCOverworldGetUserData as number, () => this.overworldGetUserData());
-        gc.onMessage(Msg.ClientToGCMonsterHunterGetUserData as number, () => this.monsterHunterGetUserData());
+        gc.onMessage(Msg.ClientToGCGetProfileCard, () => this.getProfileCard());
+        gc.onMessage(Msg.ClientToGCGetProfileCardStats, () => this.getProfileCardStats());
+        gc.onMessage(Msg.ClientToGCSetProfileCardSlots, () => this.setProfileCardSlots());
+        gc.onMessage(Msg.ClientToGCGetProfileTickets, () => this.getProfileTickets());
+        gc.onMessage(Msg.ClientToGCGetQuestProgress, () => this.getQuestProgress());
+        gc.onMessage(Msg.ClientToGCLatestConductScorecardRequest, () => this.latestConductScorecard());
+        gc.onMessage(Msg.ClientToGCMyTeamInfoRequest, () => this.myTeamInfo());
+        gc.onMessage(Msg.DOTAGetPeriodicResource, () => this.getPeriodicResource());
+        gc.onMessage(Msg.ProfileRequest, () => this.profileRequest());
+        gc.onMessage(Msg.ProfileUpdate, () => this.profileUpdate());
+        gc.onMessage(Msg.ClientToGCGetTrophyList, () => this.getTrophyList());
+        gc.onMessage(Msg.ClientToGCGetAllHeroOrder, () => this.getAllHeroOrder());
+        gc.onMessage(Msg.ClientToGCGetAllHeroProgress, () => this.getAllHeroProgress());
+        gc.onMessage(Msg.ClientToGCGetBattleReportInfo, () => this.getBattleReportInfo());
+        gc.onMessage(Msg.ClientToGCGetHeroStickers, () => this.getHeroStickers());
+        gc.onMessage(Msg.ClientToGCOverworldGetUserData, () => this.overworldGetUserData());
+        gc.onMessage(Msg.ClientToGCMonsterHunterGetUserData, () => this.monsterHunterGetUserData());
     }
 
     getProfileCard(): boolean {

@@ -35,6 +35,34 @@
         "responseProto": "CMsgGCToClientFindTopSourceTVGamesResponse"
     },
     {
+        "name": "EmoticonData",
+        "requestMessage": "ClientToGCEmoticonDataRequest",
+        "requestProto": "CMsgClientToGCEmoticonDataRequest",
+        "responseMessage": "GCToClientEmoticonData",
+        "responseProto": "CMsgGCToClientEmoticonData"
+    },
+    {
+        "name": "RequestSocialFeed",
+        "requestMessage": "ClientToGCRequestSocialFeed",
+        "requestProto": "CMsgSocialFeedRequest",
+        "responseMessage": "ClientToGCRequestSocialFeedResponse",
+        "responseProto": "CMsgSocialFeedResponse"
+    },
+    {
+        "name": "RequestSocialFeedComments",
+        "requestMessage": "ClientToGCRequestSocialFeedComments",
+        "requestProto": "CMsgSocialFeedCommentsRequest",
+        "responseMessage": "ClientToGCRequestSocialFeedCommentsResponse",
+        "responseProto": "CMsgSocialFeedCommentsResponse"
+    },
+    {
+        "name": "SocialFeedPostComment",
+        "requestMessage": "ClientToGCSocialFeedPostCommentRequest",
+        "requestProto": "CMsgClientToGCSocialFeedPostCommentRequest",
+        "responseMessage": "GCToClientSocialFeedPostCommentResponse",
+        "responseProto": "CMsgGCToClientSocialFeedPostCommentResponse"
+    },
+    {
         "name": "GetCurrentPrivateCoachingSession",
         "requestMessage": "ClientToGCGetCurrentPrivateCoachingSession",
         "requestProto": "CMsgClientToGCGetCurrentPrivateCoachingSession",
@@ -54,5 +82,19 @@
         "requestProto": "CMsgClientToGCGetAvailablePrivateCoachingSessionsSummary",
         "responseMessage": "ClientToGCGetAvailablePrivateCoachingSessionsSummaryResponse",
         "responseProto": "CMsgClientToGCGetAvailablePrivateCoachingSessionsSummaryResponse"
+    },
+    {
+        "name": "EquipItems",
+        "requestMessage": "ClientToGCEquipItems",
+        "requestProto": "CMsgClientToGCEquipItems",
+        "responseMessage": "ClientToGCEquipItemsResponse",
+        "responseProto": "CMsgClientToGCEquipItemsResponse"
+    },
+    {
+        "name": "SetItemStyle",
+        "requestMessage": "ClientToGCSetItemStyle",
+        "requestProto": "CMsgClientToGCSetItemStyle",
+        "responseMessage": "ClientToGCSetItemStyleResponse",
+        "responseProto": "CMsgClientToGCSetItemStyleResponse"
     }
 ]

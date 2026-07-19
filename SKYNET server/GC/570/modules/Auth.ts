@@ -1,5 +1,6 @@
 import { gc, HandlerContext } from "../framework/gc";
 import { CMsgClientHello, CMsgClientWelcome, GCConnectionStatus, Msg, Proto, Routes } from "../generated/dota";
+import { buildEconSoCacheSubscribed } from "./Items";
 
 const Welcome = {
     Version: 20,
@@ -33,7 +34,7 @@ export class Auth {
             sessionNeed = ctx.request.clientSessionNeed as number;
         }
 
-        ctx.send(Msg.GCClientConnectionStatus as number, Proto.CMsgConnectionStatus, {
+        ctx.send(Msg.GCClientConnectionStatus, Proto.CMsgConnectionStatus, {
             status: GCConnectionStatus.NoSessionInLogonQueue,
             clientSessionNeed: sessionNeed
         });
@@ -53,7 +54,7 @@ export class Auth {
             activeEventForDisplay: 0
         });
 
-        ctx.send(Msg.GCClientWelcome as number, Proto.CMsgClientWelcome, {
+        ctx.send(Msg.GCClientWelcome, Proto.CMsgClientWelcome, {
             version: version,
             gameData: dotaWelcome,
             outofdateSubscribedCaches: [
@@ -76,14 +77,15 @@ export class Auth {
                     serviceId: Welcome.DotaServiceGame,
                     serviceList: [Welcome.DotaServiceEcon],
                     syncVersion: 1n
-                }
+                },
+                buildEconSoCacheSubscribed(ctx)
             ],
             gcSocacheFileVersion: Welcome.Version,
             rtime32GcWelcomeTimestamp: ctx.clock.now(),
             currency: 0
         });
 
-        ctx.send(Msg.GCClientConnectionStatus as number, Proto.CMsgConnectionStatus, {
+        ctx.send(Msg.GCClientConnectionStatus, Proto.CMsgConnectionStatus, {
             status: GCConnectionStatus.HaveSession,
             clientSessionNeed: sessionNeed
         });

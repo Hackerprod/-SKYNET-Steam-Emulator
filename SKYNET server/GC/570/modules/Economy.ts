@@ -11,10 +11,8 @@ export class Economy {
         gc.on(Routes.RequestStoreSalesData, (ctx) => {
             this.requestStoreSalesData(ctx);
         });
-        gc.onMessage(Msg.ClientToGCCancelUnfinalizedTransactions as number, (ctx) =>
-            this.cancelUnfinalizedTransactions(ctx)
-        );
-        gc.onMessage(Msg.ClientToGCAggregateMetrics as number, (ctx) => this.aggregateMetrics(ctx));
+        gc.onMessage(Msg.ClientToGCCancelUnfinalizedTransactions, (ctx) => this.cancelUnfinalizedTransactions(ctx));
+        gc.onMessage(Msg.ClientToGCAggregateMetrics, (ctx) => this.aggregateMetrics(ctx));
     }
 
     private requestStoreSalesData(

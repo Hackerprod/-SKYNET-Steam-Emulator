@@ -32,9 +32,13 @@ public static class GcScriptSelfCheck
         var ok = true;
         ok &= ExpectSequence(plugin, context, 4006, new uint[] { 4009, 4004, 4009 }, write);
         ok &= ExpectResponse(plugin, context, 2536, 2537, 1, write);
+        ok &= ExpectResponse(plugin, context, 2569, 2570, 1, write);
+        ok &= ExpectResponse(plugin, context, 2577, 2578, 1, write);
         ok &= ExpectHandled(plugin, context, 2617, 0, write);
         ok &= ExpectHandled(plugin, context, 4523, 0, write);
+        ok &= ExpectResponse(plugin, context, 7009, 7010, 1, write);
         ok &= ExpectResponse(plugin, context, 7427, 7428, 1, write);
+        ok &= ExpectResponse(plugin, context, 8009, 8010, 1, write);
         ok &= ExpectResponse(plugin, context, 8793, 8794, 1, write);
         ok &= ExpectResponse(plugin, context, 8798, 8799, 1, write);
         ok &= ExpectResponse(plugin, context, 8800, 8801, 1, write);

@@ -622,6 +622,7 @@ public sealed class ApiDotaRuntimeInventory
 {
     public ulong SteamId { get; set; }
     public List<ApiDotaItem> Items { get; set; } = new();
+    public List<ApiDotaItem> OwnedItems { get; set; } = new();
     public List<ApiDotaEquipment> Equipment { get; set; } = new();
     public ulong Version { get; set; }
 }

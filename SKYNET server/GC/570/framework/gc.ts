@@ -10,8 +10,10 @@ export interface HandlerContext<TRequest, TResponse> {
     readonly steamId: bigint;
     readonly accountId: number;
     readonly personaName: string;
+    readonly services: GcServices;
     readonly clock: Clock;
     readonly logger: Logger;
+    readonly signal: AbortSignal;
     reply(response: TResponse): void;
     send<TMessage>(messageType: number, proto: ProtoDescriptor<TMessage>, message: TMessage): void;
     encode<TMessage>(proto: ProtoDescriptor<TMessage>, message: TMessage): Uint8Array;
@@ -23,11 +25,19 @@ export interface RawMessageContext {
     readonly steamId: bigint;
     readonly accountId: number;
     readonly personaName: string;
+    readonly services: GcServices;
     readonly clock: Clock;
     readonly logger: Logger;
+    readonly signal: AbortSignal;
     send<TMessage>(messageType: number, proto: ProtoDescriptor<TMessage>, message: TMessage): void;
     encode<TMessage>(proto: ProtoDescriptor<TMessage>, message: TMessage): Uint8Array;
     decode<TMessage>(proto: ProtoDescriptor<TMessage>): TMessage;
+}
+
+export interface AbortSignal {
+    readonly aborted: boolean;
+    readonly reason: string | null;
+    throwIfAborted(): void;
 }
 
 export interface Clock {
@@ -36,6 +46,40 @@ export interface Clock {
 
 export interface Logger {
     info(message: string): void;
+}
+
+export interface GcServices {
+    readonly items: DotaItemService;
+}
+
+export interface DotaItemService {
+    getInventory(): DotaRuntimeInventory;
+    getCatalogItem(defIndex: number): DotaCatalogItem | null;
+    equipItem(itemId: bigint, heroId: number, slotId: number, style: number): DotaEquipment[];
+    setItemStyle(itemId: bigint, style: number): DotaEquipment[];
+    queueCurrentLobbyServer(messageType: number, payload: Uint8Array): boolean;
+}
+
+export interface DotaRuntimeInventory {
+    readonly steamId: bigint;
+    readonly version: bigint;
+    readonly ownedItems: DotaCatalogItem[];
+    readonly equipment: DotaEquipment[];
+}
+
+export interface DotaCatalogItem {
+    readonly defIndex: number;
+    readonly name: string;
+    readonly qualityId: number;
+}
+
+export interface DotaEquipment {
+    readonly steamId: bigint;
+    readonly heroId: number;
+    readonly slotId: number;
+    readonly defIndex: number;
+    readonly itemId: bigint;
+    readonly style: number;
 }
 
 function currentSteamId(): bigint {
@@ -62,14 +106,62 @@ class GcLogger {
     }
 }
 
+class GcAbortSignal implements AbortSignal {
+    aborted: boolean;
+    reason: string | null;
+
+    constructor() {
+        this.aborted = false;
+        this.reason = null;
+    }
+
+    throwIfAborted(): void {
+        if (this.aborted) {
+            throw new Error("Operation was aborted");
+        }
+    }
+}
+
+class GcDotaItemService implements DotaItemService {
+    getInventory(): DotaRuntimeInventory {
+        return dotaInventory() as DotaRuntimeInventory;
+    }
+
+    getCatalogItem(defIndex: number): DotaCatalogItem | null {
+        return dotaCatalogItem(defIndex) as DotaCatalogItem | null;
+    }
+
+    equipItem(itemId: bigint, heroId: number, slotId: number, style: number): DotaEquipment[] {
+        return dotaEquipItem(itemId, heroId, slotId, style) as DotaEquipment[];
+    }
+
+    setItemStyle(itemId: bigint, style: number): DotaEquipment[] {
+        return dotaSetItemStyle(itemId, style) as DotaEquipment[];
+    }
+
+    queueCurrentLobbyServer(messageType: number, payload: Uint8Array): boolean {
+        return dotaQueueCurrentLobbyServer(messageType, payload) as boolean;
+    }
+}
+
+class GcServiceContainer implements GcServices {
+    items: DotaItemService;
+
+    constructor() {
+        this.items = new GcDotaItemService();
+    }
+}
+
 class GcHandlerContext<TRequest, TResponse> implements HandlerContext<TRequest, TResponse> {
     route: GcRoute<TRequest, TResponse>;
     request: TRequest;
     steamId: bigint;
     accountId: number;
     personaName: string;
+    services: GcServices;
     clock: Clock;
     logger: Logger;
+    signal: AbortSignal;
 
     constructor(route: GcRoute<TRequest, TResponse>) {
         this.route = route;
@@ -77,8 +169,10 @@ class GcHandlerContext<TRequest, TResponse> implements HandlerContext<TRequest, 
         this.steamId = currentSteamId();
         this.accountId = currentAccountId();
         this.personaName = currentPersonaName();
+        this.services = new GcServiceContainer();
         this.clock = new GcClock();
         this.logger = new GcLogger();
+        this.signal = new GcAbortSignal();
     }
 
     reply(response: TResponse): void {
@@ -100,8 +194,10 @@ class GcRawMessageContext implements RawMessageContext {
     steamId: bigint;
     accountId: number;
     personaName: string;
+    services: GcServices;
     clock: Clock;
     logger: Logger;
+    signal: AbortSignal;
 
     constructor(currentMessageType: number) {
         this.messageType = currentMessageType;
@@ -109,8 +205,10 @@ class GcRawMessageContext implements RawMessageContext {
         this.steamId = currentSteamId();
         this.accountId = currentAccountId();
         this.personaName = currentPersonaName();
+        this.services = new GcServiceContainer();
         this.clock = new GcClock();
         this.logger = new GcLogger();
+        this.signal = new GcAbortSignal();
     }
 
     send<TMessage>(messageType: number, proto: ProtoDescriptor<TMessage>, message: TMessage): void {
@@ -136,66 +234,94 @@ const emptyRoute: GcRoute<unknown, unknown> = {
 const unregisteredRouteHandler: RouteHandler<unknown, unknown> = () => false;
 const unregisteredRawHandler: RawMessageHandler = () => false;
 
+interface RegisteredHandler {
+    readonly messageId: number;
+    readonly raw: boolean;
+    readonly route: GcRoute<unknown, unknown>;
+    readonly routeHandler: RouteHandler<unknown, unknown>;
+    readonly rawHandler: RawMessageHandler;
+    readonly source: string;
+}
+
 class GcRouter {
-    messageIds: number[];
-    routes: GcRoute<unknown, unknown>[];
-    routeHandlers: RouteHandler<unknown, unknown>[];
-    rawHandlers: RawMessageHandler[];
-    isRawMessage: boolean[];
-    count: number;
+    handlers: Map<number, RegisteredHandler>;
 
     constructor() {
-        this.messageIds = [];
-        this.routes = [];
-        this.routeHandlers = [];
-        this.rawHandlers = [];
-        this.isRawMessage = [];
-        this.count = 0;
+        this.handlers = new Map<number, RegisteredHandler>();
     }
 
     on<TRequest, TResponse>(route: GcRoute<TRequest, TResponse>, handler: RouteHandler<TRequest, TResponse>): void {
-        const index = this.count;
-        this.messageIds[index] = route.requestId;
-        this.routes[index] = route as GcRoute<unknown, unknown>;
-        this.routeHandlers[index] = handler as RouteHandler<unknown, unknown>;
-        this.rawHandlers[index] = unregisteredRawHandler;
-        this.isRawMessage[index] = false;
-        this.count = this.count + 1;
+        this.register({
+            messageId: route.requestId,
+            raw: false,
+            route: route as GcRoute<unknown, unknown>,
+            routeHandler: handler as RouteHandler<unknown, unknown>,
+            rawHandler: unregisteredRawHandler,
+            source: route.request.name
+        });
     }
 
     onMessage(messageId: number, handler: RawMessageHandler): void {
-        const index = this.count;
-        this.messageIds[index] = messageId;
-        this.routes[index] = emptyRoute;
-        this.routeHandlers[index] = unregisteredRouteHandler;
-        this.rawHandlers[index] = handler;
-        this.isRawMessage[index] = true;
-        this.count = this.count + 1;
+        this.register({
+            messageId,
+            raw: true,
+            route: emptyRoute,
+            routeHandler: unregisteredRouteHandler,
+            rawHandler: handler,
+            source: "raw message " + messageId
+        });
     }
 
     async dispatch(): Promise<boolean> {
         const current = messageType();
-
-        for (let i = 0; i < this.count; i = i + 1) {
-            if (this.messageIds[i] === current) {
-                let result: HandlerResult = true;
-                if (this.isRawMessage[i]) {
-                    const handler = this.rawHandlers[i];
-                    result = handler(this.createRawContext(current));
-                } else {
-                    const handler = this.routeHandlers[i];
-                    result = handler(this.createContext(this.routes[i]));
-                }
-
-                const resolved = await result;
-                if (resolved === false) {
-                    return false;
-                }
-                return true;
-            }
+        if (!this.handlers.has(current)) {
+            return false;
         }
 
-        return false;
+        const registration = this.handlers.get(current) as RegisteredHandler;
+        try {
+            let result: HandlerResult = true;
+            if (registration.raw) {
+                result = registration.rawHandler(this.createRawContext(current));
+            } else {
+                result = registration.routeHandler(this.createContext(registration.route));
+            }
+
+            const resolved = await result;
+            if (resolved === false) {
+                return false;
+            }
+            return true;
+        } catch (error) {
+            this.logDispatchError(current, registration, String(error));
+            throw error;
+        }
+    }
+
+    private register(registration: RegisteredHandler): void {
+        if (this.handlers.has(registration.messageId)) {
+            throw new Error(
+                "Duplicate GC handler for message " +
+                    registration.messageId +
+                    " while registering " +
+                    registration.source
+            );
+        }
+
+        this.handlers.set(registration.messageId, registration);
+    }
+
+    private logDispatchError(messageId: number, registration: RegisteredHandler, error: string): void {
+        log(
+            "GC handler failed. messageId=" +
+                messageId +
+                " source=" +
+                registration.source +
+                " steamId=" +
+                currentSteamId() +
+                " error=" +
+                error
+        );
     }
 
     createContext<TRequest, TResponse>(route: GcRoute<TRequest, TResponse>): HandlerContext<TRequest, TResponse> {

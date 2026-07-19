@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Numerics;
 using System.Reflection;
 using ProtoBuf;
 using TypeSharp.VM.Memory;
@@ -275,7 +276,9 @@ public sealed class GameCoordinatorProtoCodec
 
         if (targetType.IsEnum)
         {
-            result = Enum.ToObject(targetType, Convert.ToInt32(ReadNumber(value)));
+            var underlyingType = Enum.GetUnderlyingType(targetType);
+            var enumValue = ConvertInteger(ReadInteger(value), underlyingType);
+            result = Enum.ToObject(targetType, enumValue);
             return true;
         }
 
@@ -295,25 +298,25 @@ public sealed class GameCoordinatorProtoCodec
 
         if (targetType == typeof(uint))
         {
-            result = Convert.ToUInt32(ReadNumber(value));
+            result = ConvertInteger(ReadInteger(value), targetType);
             return true;
         }
 
         if (targetType == typeof(int))
         {
-            result = Convert.ToInt32(ReadNumber(value));
+            result = ConvertInteger(ReadInteger(value), targetType);
             return true;
         }
 
         if (targetType == typeof(ulong))
         {
-            result = Convert.ToUInt64(ReadNumber(value));
+            result = ConvertInteger(ReadInteger(value), targetType);
             return true;
         }
 
         if (targetType == typeof(long))
         {
-            result = Convert.ToInt64(ReadNumber(value));
+            result = ConvertInteger(ReadInteger(value), targetType);
             return true;
         }
 
@@ -340,12 +343,51 @@ public sealed class GameCoordinatorProtoCodec
             TsInt32Value int32Value => int32Value.Value,
             TsInt64Value int64Value => int64Value.Value,
             TsUInt64Value uint64Value => uint64Value.Value,
+            TsBigIntValue bigIntValue => (decimal)bigIntValue.Value,
             TsFloat32Value float32Value => (decimal)float32Value.Value,
             TsFloat64Value float64Value => (decimal)float64Value.Value,
             TsDecimalValue decimalValue => decimalValue.Value,
             TsStringValue stringValue when decimal.TryParse(stringValue.Value, out var parsed) => parsed,
             _ => throw new InvalidOperationException($"Expected numeric value, got {value.ValueType}")
         };
+    }
+
+    private static BigInteger ReadInteger(TsValue value)
+    {
+        return value switch
+        {
+            TsInt32Value int32Value => int32Value.Value,
+            TsInt64Value int64Value => int64Value.Value,
+            TsUInt64Value uint64Value => uint64Value.Value,
+            TsBigIntValue bigIntValue => bigIntValue.Value,
+            TsFloat32Value float32Value => new BigInteger(float32Value.Value),
+            TsFloat64Value float64Value => new BigInteger(float64Value.Value),
+            TsDecimalValue decimalValue => new BigInteger(decimalValue.Value),
+            TsStringValue stringValue when BigInteger.TryParse(stringValue.Value, out var parsed) => parsed,
+            _ => throw new InvalidOperationException($"Expected integer value, got {value.ValueType}")
+        };
+    }
+
+    private static object ConvertInteger(BigInteger value, Type targetType)
+    {
+        if (targetType == typeof(byte)) return CheckedInteger<byte>(value, byte.MinValue, byte.MaxValue);
+        if (targetType == typeof(sbyte)) return CheckedInteger<sbyte>(value, sbyte.MinValue, sbyte.MaxValue);
+        if (targetType == typeof(short)) return CheckedInteger<short>(value, short.MinValue, short.MaxValue);
+        if (targetType == typeof(ushort)) return CheckedInteger<ushort>(value, ushort.MinValue, ushort.MaxValue);
+        if (targetType == typeof(int)) return CheckedInteger<int>(value, int.MinValue, int.MaxValue);
+        if (targetType == typeof(uint)) return CheckedInteger<uint>(value, uint.MinValue, uint.MaxValue);
+        if (targetType == typeof(long)) return CheckedInteger<long>(value, long.MinValue, long.MaxValue);
+        if (targetType == typeof(ulong)) return CheckedInteger<ulong>(value, ulong.MinValue, ulong.MaxValue);
+        throw new InvalidOperationException($"Unsupported integer target type {targetType.FullName}");
+    }
+
+    private static T CheckedInteger<T>(BigInteger value, BigInteger min, BigInteger max)
+        where T : struct, IConvertible
+    {
+        if (value < min || value > max)
+            throw new OverflowException($"Integer value {value} is outside the range of {typeof(T).Name}");
+
+        return (T)Convert.ChangeType(value.ToString(), typeof(T), System.Globalization.CultureInfo.InvariantCulture);
     }
 
     private static TsValue ToTsValue(object? value)

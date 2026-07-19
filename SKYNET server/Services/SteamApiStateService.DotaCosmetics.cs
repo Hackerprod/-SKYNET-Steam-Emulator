@@ -189,11 +189,20 @@ public sealed partial class SteamApiStateService
             var equipment = _state.DotaEquipment.TryGetValue(steamId, out var equipped)
                 ? equipped.Select(CloneDotaEquipment).ToList()
                 : new List<ApiDotaEquipment>();
+            var ownedItems = equipment
+                .Where(item => item.DefIndex != 0)
+                .Select(item => item.DefIndex)
+                .Distinct()
+                .Select(defIndex => _state.DotaItems.TryGetValue(defIndex, out var catalogItem) ? CloneDotaItem(catalogItem) : null)
+                .OfType<ApiDotaItem>()
+                .OrderBy(item => item.DefIndex)
+                .ToList();
 
             return new ApiDotaRuntimeInventory
             {
                 SteamId = steamId,
                 Items = items,
+                OwnedItems = ownedItems,
                 Equipment = equipment,
                 Version = BuildDotaInventoryVersionLocked()
             };

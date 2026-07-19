@@ -1,4 +1,5 @@
 using SKYNET_server.Models;
+using SKYNET_server.GC.Dota2;
 using TypeSharp.Hosting;
 using TypeSharp.VM.Memory;
 
@@ -156,6 +157,11 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
 
             var dispatcher = new ScriptHostDispatcher();
             var builder = new TypeSharpRuntimeBuilder()
+                .ConfigureLimits(options =>
+                {
+                    options.MaximumInstructions = 25_000_000;
+                    options.MaximumMemoryBytes = 256 * 1024 * 1024;
+                })
                 .RegisterHostFunction("gc", "messageType", _ => dispatcher.RequireCurrent().MessageType())
                 .RegisterHostFunction("gc", "body", _ => dispatcher.RequireCurrent().Body())
                 .RegisterHostFunction("gc", "appId", _ => dispatcher.RequireCurrent().AppId())
@@ -166,7 +172,12 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .RegisterHostFunction("gc", "log", dispatcher.Log)
                 .RegisterHostFunction("gc", "decode", dispatcher.Decode)
                 .RegisterHostFunction("gc", "encode", dispatcher.Encode)
-                .RegisterHostFunction("gc", "send", dispatcher.Send);
+                .RegisterHostFunction("gc", "send", dispatcher.Send)
+                .RegisterHostFunction("gc", "dotaInventory", _ => dispatcher.RequireCurrent().DotaInventory())
+                .RegisterHostFunction("gc", "dotaCatalogItem", dispatcher.DotaCatalogItem)
+                .RegisterHostFunction("gc", "dotaEquipItem", dispatcher.DotaEquipItem)
+                .RegisterHostFunction("gc", "dotaSetItemStyle", dispatcher.DotaSetItemStyle)
+                .RegisterHostFunction("gc", "dotaQueueCurrentLobbyServer", dispatcher.DotaQueueCurrentLobbyServer);
 
             foreach (var sourceFile in EnumerateRuntimeScriptFiles(scriptRoot))
             {
@@ -301,6 +312,26 @@ internal sealed class ScriptHostDispatcher
     {
         return RequireCurrent().Send(args);
     }
+
+    public TsValue? DotaEquipItem(TsValue[] args)
+    {
+        return RequireCurrent().DotaEquipItem(args);
+    }
+
+    public TsValue? DotaCatalogItem(TsValue[] args)
+    {
+        return RequireCurrent().DotaCatalogItem(args);
+    }
+
+    public TsValue? DotaSetItemStyle(TsValue[] args)
+    {
+        return RequireCurrent().DotaSetItemStyle(args);
+    }
+
+    public TsValue? DotaQueueCurrentLobbyServer(TsValue[] args)
+    {
+        return RequireCurrent().DotaQueueCurrentLobbyServer(args);
+    }
 }
 
 internal sealed class ScriptExchangeHost
@@ -390,6 +421,66 @@ internal sealed class ScriptExchangeHost
         return TsValue.FromBool(true);
     }
 
+    public TsValue DotaInventory()
+    {
+        return ToTsInventory(DotaGcBackend.InventoryProvider?.Invoke(_context.SteamId));
+    }
+
+    public TsValue DotaCatalogItem(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaCatalogItem(defIndex) requires one argument");
+        }
+
+        var defIndex = Convert.ToUInt32(ToNumber(args[0], "dotaCatalogItem.defIndex"));
+        var catalog = DotaGcBackend.InventoryProvider?.Invoke(_context.SteamId);
+        var item = catalog?.Items.FirstOrDefault(candidate => candidate.DefIndex == defIndex);
+        return item == null ? TsValue.Null : ToTsCatalogItem(item);
+    }
+
+    public TsValue DotaEquipItem(TsValue[] args)
+    {
+        if (args.Length < 4)
+        {
+            throw new InvalidOperationException("dotaEquipItem(itemId, heroId, slotId, style) requires four arguments");
+        }
+
+        var itemId = Convert.ToUInt64(ToInteger(args[0], "dotaEquipItem.itemId").ToString());
+        var heroId = Convert.ToUInt32(ToNumber(args[1], "dotaEquipItem.heroId"));
+        var slotId = Convert.ToUInt32(ToNumber(args[2], "dotaEquipItem.slotId"));
+        var style = Convert.ToUInt32(ToNumber(args[3], "dotaEquipItem.style"));
+        var changed = DotaGcBackend.EquipItemSink?.Invoke(_context.SteamId, itemId, heroId, slotId, style)
+            ?? new List<ApiDotaEquipment>();
+        return ToTsEquipmentList(changed);
+    }
+
+    public TsValue DotaSetItemStyle(TsValue[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new InvalidOperationException("dotaSetItemStyle(itemId, style) requires two arguments");
+        }
+
+        var itemId = Convert.ToUInt64(ToInteger(args[0], "dotaSetItemStyle.itemId").ToString());
+        var style = Convert.ToUInt32(ToNumber(args[1], "dotaSetItemStyle.style"));
+        var changed = DotaGcBackend.SetItemStyleSink?.Invoke(_context.SteamId, itemId, style)
+            ?? new List<ApiDotaEquipment>();
+        return ToTsEquipmentList(changed);
+    }
+
+    public TsValue DotaQueueCurrentLobbyServer(TsValue[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new InvalidOperationException("dotaQueueCurrentLobbyServer(messageType, payload) requires two arguments");
+        }
+
+        var messageType = Convert.ToUInt32(ToNumber(args[0], "dotaQueueCurrentLobbyServer.messageType"));
+        var payload = ToBytes(args[1], "dotaQueueCurrentLobbyServer.payload");
+        return TsValue.FromBool(DotaGcBackend.QueueCurrentLobbyServerProto(_context.SteamId, _context.AppId, messageType, payload));
+    }
+
     private static TsValue ToArray(byte[] bytes)
     {
         var copy = new byte[bytes.Length];
@@ -443,5 +534,71 @@ internal sealed class ScriptExchangeHost
             TsStringValue stringValue when double.TryParse(stringValue.Value, out var parsed) => parsed,
             _ => throw new InvalidOperationException($"{path}: expected numeric value, got {value.ValueType}")
         };
+    }
+
+    private static System.Numerics.BigInteger ToInteger(TsValue value, string path)
+    {
+        return value switch
+        {
+            TsInt32Value int32Value => int32Value.Value,
+            TsInt64Value int64Value => int64Value.Value,
+            TsUInt64Value uint64Value => uint64Value.Value,
+            TsBigIntValue bigIntValue => bigIntValue.Value,
+            TsFloat32Value float32Value => new System.Numerics.BigInteger(float32Value.Value),
+            TsFloat64Value float64Value => new System.Numerics.BigInteger(float64Value.Value),
+            TsDecimalValue decimalValue => new System.Numerics.BigInteger(decimalValue.Value),
+            TsStringValue stringValue when System.Numerics.BigInteger.TryParse(stringValue.Value, out var parsed) => parsed,
+            _ => throw new InvalidOperationException($"{path}: expected integer value, got {value.ValueType}")
+        };
+    }
+
+    private static TsValue ToTsInventory(ApiDotaRuntimeInventory? inventory)
+    {
+        inventory ??= new ApiDotaRuntimeInventory();
+
+        var value = new TsObject("DotaRuntimeInventory");
+        value.SetField("steamId", TsValue.FromUInt64(inventory.SteamId));
+        value.SetField("version", TsValue.FromUInt64(inventory.Version));
+        value.SetField("ownedItems", ToTsCatalogItems(inventory.OwnedItems));
+        value.SetField("equipment", ToTsEquipmentList(inventory.Equipment));
+        return new TsObjectValue(value);
+    }
+
+    private static TsValue ToTsCatalogItems(IEnumerable<ApiDotaItem> items)
+    {
+        var array = new TsArray();
+        foreach (var item in items)
+        {
+            array.Add(ToTsCatalogItem(item));
+        }
+
+        return new TsArrayValue(array);
+    }
+
+    private static TsObjectValue ToTsCatalogItem(ApiDotaItem item)
+    {
+        var value = new TsObject("DotaCatalogItem");
+        value.SetField("defIndex", TsValue.FromInt32(unchecked((int)item.DefIndex)));
+        value.SetField("name", TsValue.FromString(item.Name ?? string.Empty));
+        value.SetField("qualityId", TsValue.FromInt32(unchecked((int)item.QualityId)));
+        return new TsObjectValue(value);
+    }
+
+    private static TsValue ToTsEquipmentList(IEnumerable<ApiDotaEquipment> equipment)
+    {
+        var array = new TsArray();
+        foreach (var item in equipment)
+        {
+            var value = new TsObject("DotaEquipment");
+            value.SetField("steamId", TsValue.FromUInt64(item.SteamId));
+            value.SetField("heroId", TsValue.FromInt32(unchecked((int)item.HeroId)));
+            value.SetField("slotId", TsValue.FromInt32(unchecked((int)item.SlotId)));
+            value.SetField("defIndex", TsValue.FromInt32(unchecked((int)item.DefIndex)));
+            value.SetField("itemId", TsValue.FromUInt64(item.ItemId));
+            value.SetField("style", TsValue.FromInt32(unchecked((int)item.Style)));
+            array.Add(new TsObjectValue(value));
+        }
+
+        return new TsArrayValue(array);
     }
 }

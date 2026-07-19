@@ -64,6 +64,8 @@ builder.AppendLine();
 builder.AppendLine("export interface EmptyRequest {");
 builder.AppendLine("}");
 builder.AppendLine();
+builder.AppendLine("export type MessageId = number;");
+builder.AppendLine();
 
 foreach (var type in protoTypes)
 {
@@ -75,12 +77,17 @@ foreach (var enumType in enums)
     WriteEnumObject(builder, enumType);
 }
 
-builder.AppendLine("export const Msg = {");
+builder.AppendLine("export const Msg: {");
+foreach (var entry in messages.OrderBy(entry => entry.Value).ThenBy(entry => entry.Key, StringComparer.Ordinal))
+{
+    builder.AppendLine($"    {entry.Key}: MessageId;");
+}
+builder.AppendLine("} = {");
 foreach (var entry in messages.OrderBy(entry => entry.Value).ThenBy(entry => entry.Key, StringComparer.Ordinal))
 {
     builder.AppendLine($"    {entry.Key}: {entry.Value},");
 }
-builder.AppendLine("} as const;");
+builder.AppendLine("};");
 builder.AppendLine();
 
 builder.AppendLine("export const Proto = {");
