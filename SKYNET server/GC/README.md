@@ -1,125 +1,337 @@
-# Game Coordinator plugins
+# Game Coordinator Scripts
 
-The DLL must stay generic. Game-specific GC behavior lives here, under one
-folder per Steam AppID:
+Game Coordinator behavior lives in this folder, separated by app id. The current
+development model is TypeScript-first: game-specific message handling belongs in
+`GC/<appid>/main.ts` and its modules, while the native DLL stays generic and only
+forwards Game Coordinator traffic to the server.
 
 ```text
 GC/
   570/
-    main.lua
-    messages.lua
-    fixtures/
-    captures/
+    main.ts
+    framework/
+      gc.ts
+    modules/
+      Auth.ts
+      Items.ts
+      Profile.ts
+      Social.ts
+      Stats.ts
+      ...
+    contracts/
+      routes.json
+      extra-message-ids.json
+    generated/
+      dota.ts
+    runtime-globals.d.ts
+    package.json
+    tsconfig.json
 ```
 
-`main.lua` (and every `.lua` it includes) is compiled once and cached; any edit
-to a `.lua` file under the app folder triggers a reload on the next message, so
-changes are hot-reloaded while the server and the game stay running.
-The server exposes two globals to Lua:
+`GC/570` is the Dota 2 coordinator. Older `.lua` files still exist while the
+migration finishes, but new work should target the TypeScript pipeline unless a
+task explicitly says otherwise.
 
-- `gc`: current exchange context and reply helpers.
-- `runtime`: fixture, protobuf, state and utility helpers.
+## Runtime Flow
 
-For AppID `570`, `gc` is backed by `DotaGcBackend` while the updated protobuf
-surface is still being migrated. For other AppIDs, `gc` is a generic backend
-that can reply with captured fixtures or manually encoded payloads.
+At runtime the flow is:
 
-## Lua flow
+1. The client or dedicated server sends a GC message through the emulator DLL.
+2. The server receives it through the Game Coordinator exchange endpoint.
+3. `GameCoordinatorScriptPlugin` locates the app script folder, compiles the
+   TypeScript source with TypeSharp, and caches the runtime.
+4. `main.ts` exports `handle()`, which calls `gc.dispatch()`.
+5. `gc.dispatch()` looks up the registered handler by message id.
+6. For typed routes, the framework decodes the request protobuf into
+   `ctx.request`.
+7. The handler reads data, updates state when needed, and replies with
+   `ctx.reply(...)` or `ctx.send(...)`.
+8. The server returns the queued response messages to the DLL.
 
-```lua
-include("messages.lua")
+The script cache is invalidated when files under the app folder change. That
+keeps the development loop hot: edit TypeScript, send the next GC message, and
+the server reloads the script.
 
-function handle()
-    if gc.MessageType == MSG.SomeRequest then
-        return gc.Reply(MSG.SomeResponse, runtime.Fixture("fixtures/server_1234_0001.bin"))
-    end
+## Entry Point
 
-    return false
-end
+`GC/570/main.ts` is intentionally small. It imports module registration
+functions, registers all handlers once, and exports `handle()`:
+
+```ts
+import { gc } from "./framework/gc";
+import { registerAuth } from "./modules/Auth";
+import { registerSocial } from "./modules/Social";
+
+registerAuth();
+registerSocial();
+
+export async function handle(): Promise<boolean> {
+    return await gc.dispatch();
+}
 ```
 
-Returning `false` makes the DLL log the unhandled message. Returning `true`
-acknowledges it.
+A module should expose a `registerX()` function and keep the message logic in a
+small class or focused functions:
 
-## Lua API surface
+```ts
+import { gc, HandlerContext } from "../framework/gc";
+import { CMsgSomeRequest, CMsgSomeResponse, Routes } from "../generated/dota";
 
-Request parsing (`gc`, operates on the incoming message body):
+export function registerExample(): void {
+    const example = new Example();
+    example.register();
+}
 
-- `gc.ReadVarint(field, default)` / `gc.ReadVarintAt(field, occurrence, default)`
-- `gc.ReadString(field)` / `gc.ReadStringAt(field, occurrence)`
-- `gc.ReadBytes(field)` / `gc.ReadBytesAt(field, occurrence)` (base64)
-- `gc.FieldCount(field)` counts repeated-field occurrences.
+class Example {
+    register(): void {
+        gc.on(Routes.SomeRoute, ctx => this.someRoute(ctx));
+    }
 
-Payload building (`gc`, all return base64 you can nest with `Concat`):
-
-- `gc.FieldVarint(field, value)`, `gc.FieldFixed64(field, value)`
-- `gc.FieldString(field, text)`, `gc.FieldBytes(field, payloadBase64)`
-- `gc.Concat(a, b, ...)`, `gc.Result(code)`
-
-Nested payload parsing (`runtime`, operates on any base64 payload, e.g. the
-result of `gc.ReadBytes` for an embedded message):
-
-- `runtime.ProtoVarint(payload, field, occurrence, default)`
-- `runtime.ProtoString(payload, field, occurrence)`
-- `runtime.ProtoBytes(payload, field, occurrence)`
-- `runtime.ProtoCount(payload, field)`
-
-Persistent state (survives script reloads; values are strings — serialize
-tables yourself):
-
-- `runtime.SessionGet/SessionSet/SessionDelete(key)` scoped per (AppId, SteamId).
-- `runtime.StoreGet/StoreSet/StoreDelete(scope, key)` for app-wide state.
-
-Async delivery:
-
-- `gc.QueueTo(steamId, msgType, payloadBase64, protobuf)` pushes to a client
-  through the `/api/events` channel (`gc_message` events).
-- `gc.QueueToPoll(steamId, msgType, payloadBase64, protobuf)` targets a game
-  server; game servers do not run the event pump and drain
-  `/gamecoordinator/poll` instead. Do not use both for the same recipient or the
-  message is delivered twice.
-
-## tick()
-
-If the script defines a global `tick()` function, the server calls it on a
-fixed interval (`GameCoordinator:TickIntervalMs` in appsettings, default
-1000ms, clamped to 100..60000). Ticking starts after the app's first GC
-exchange loads the script. During a tick `gc` has no request body
-(`MessageType` is 0, `SteamId` is 0) — use it for timers and proactive pushes
-via `gc.QueueTo`, tracking recipients yourself in `runtime.Store*`.
-
-```lua
-function tick()
-    local ids = runtime.StoreGet("app", "known_players")
-    for steamId in string.gmatch(ids, "[^,]+") do
-        -- e.g. periodic GCClientConnectionStatus
-    end
-end
+    private someRoute(ctx: HandlerContext<CMsgSomeRequest, CMsgSomeResponse>): boolean {
+        ctx.reply({
+            result: 0
+        });
+        return true;
+    }
+}
 ```
+
+## What `ctx` Is
+
+`ctx` is the per-message handler context created by `framework/gc.ts`. It is the
+main API a TypeScript developer should use inside business modules.
+
+For `gc.on(Routes.X, handler)`, `ctx` is a typed
+`HandlerContext<TRequest, TResponse>`:
+
+- `ctx.route`: the generated route descriptor.
+- `ctx.request`: decoded protobuf request, strongly typed from
+  `generated/dota.ts`.
+- `ctx.steamId`: current user SteamID as `bigint`.
+- `ctx.accountId`: current Dota account id as `number`.
+- `ctx.personaName`: current user display name.
+- `ctx.services`: typed server-backed services for data access and state
+  changes.
+- `ctx.clock.now()`: current Unix timestamp in seconds.
+- `ctx.logger.info(message)`: GC script logging.
+- `ctx.signal`: cancellation surface for future async work.
+- `ctx.reply(response)`: encode and send the route response type.
+- `ctx.send(messageType, proto, message)`: send another protobuf message.
+- `ctx.encode(proto, message)`: encode a nested protobuf payload to
+  `Uint8Array`.
+
+For messages that do not have a generated request/response route yet,
+`gc.onMessage(id, handler)` creates a `RawMessageContext`. It has the same
+identity, service, logging and sending helpers, plus:
+
+- `ctx.messageType`: incoming message id.
+- `ctx.payload`: raw request body as `Uint8Array`.
+- `ctx.decode(proto)`: decode the payload manually with a generated protobuf
+  descriptor.
+
+Prefer `gc.on(Routes.X, ...)` over `gc.onMessage(...)`. Raw handlers are a
+temporary bridge while a protobuf route is missing or being investigated.
+
+## Services
+
+Business modules should not call host globals such as `send`, `decode`, `body`,
+`messageType`, or `now` directly. Use `ctx` and `ctx.services` instead.
+
+Current services include:
+
+- `ctx.services.items`
+  - `getInventory()`
+  - `getCatalogItem(defIndex)`
+  - `equipItem(itemId, heroId, slotId, style)`
+  - `setItemStyle(itemId, style)`
+  - `queueCurrentLobbyServer(messageType, payload)`
+- `ctx.services.profiles`
+  - `get(accountId)`
+  - `saveCardSlots(slots)`
+  - `saveProfileUpdate(backgroundItemId, featuredHeroIds)`
+- `ctx.services.social`
+  - `feed(accountId, selfOnly)`
+  - `comments(feedEventId)`
+  - `postComment(feedEventId, comment)`
+- `ctx.services.stats`
+  - `getEventPoints(accountId, eventId)`
+  - `getHeroStandings(accountId)`
+  - `getRank(accountId)`
+
+The services are implemented in the C# host, but TypeScript modules should see
+plain TypeScript-friendly DTOs: `number`, `bigint`, `boolean`, `string`,
+`Uint8Array`, arrays, and objects. Do not pass C# domain objects directly into
+script code.
+
+If a module needs new server data, add a typed service method to
+`framework/gc.ts`, add the host global declaration in `runtime-globals.d.ts`,
+and implement a C# host function in `GameCoordinatorScriptPlugin`. Keep the
+state/data access in C# services and keep the message decision logic in
+TypeScript.
+
+## Responding To A Call
+
+Use `ctx.reply(...)` for the normal route response:
+
+```ts
+gc.on(Routes.RequestSocialFeed, ctx => {
+    const events = ctx.services.social.feed(ctx.request.accountId ?? ctx.accountId, ctx.request.selfOnly ?? false);
+
+    ctx.reply({
+        result: CMsgSocialFeedResponse_Result.Success,
+        feedEvents: events.map(event => ({
+            feedEventId: event.feedEventId,
+            accountId: event.accountId,
+            timestamp: event.timestamp,
+            commentCount: event.commentCount
+        }))
+    });
+
+    return true;
+});
+```
+
+Use `ctx.send(...)` when the flow requires additional messages, such as a
+connection status message before or after a main response:
+
+```ts
+ctx.send(Msg.GCClientConnectionStatus, Proto.CMsgConnectionStatus, {
+    status: GCConnectionStatus.HaveSession,
+    clientSessionNeed: sessionNeed
+});
+```
+
+Return values matter:
+
+- `true` or `void`: the message was handled.
+- `false`: the message is intentionally unhandled and can fall back to another
+  handler path or be logged as unhandled.
+- `Promise<boolean | void>`: supported; `handle()` awaits `gc.dispatch()`.
+
+## Adding A New Typed Handler
+
+Use this workflow when migrating a message or adding a new response:
+
+1. Confirm the protobuf request and response types exist under
+   `SKYNET server/Services/GameCoordinator/Generated`.
+2. Add a route to `GC/570/contracts/routes.json`:
+
+   ```json
+   {
+       "name": "SomeRoute",
+       "requestMessage": "ClientToGCSomeRequest",
+       "requestProto": "CMsgSomeRequest",
+       "responseMessage": "GCToClientSomeResponse",
+       "responseProto": "CMsgSomeResponse"
+   }
+   ```
+
+3. Regenerate TypeScript contracts:
+
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File "SKYNET server\GC\570\tools\generate-dota-contracts.ps1"
+   ```
+
+4. Register the route in the appropriate module with `gc.on(Routes.SomeRoute,
+   ...)`.
+5. Use `ctx.request`, `ctx.services`, `ctx.reply`, `ctx.send`, and generated
+   enums/types from `generated/dota.ts`.
+6. Add the route to `GcScriptSelfCheck` if it should always be covered by the
+   script runtime.
+7. Run validation.
+
+## Validation
+
+For TypeScript-only GC changes:
+
+```powershell
+Push-Location "SKYNET server\GC\570"
+npm test
+Pop-Location
+
+dotnet build "SKYNET server\SKYNET server.csproj" -c Debug --no-restore /nodeReuse:false
+dotnet run --project "SKYNET server\SKYNET server.csproj" -c Debug --no-build -- --verify-gc-ts
+```
+
+`npm test` runs:
+
+- TypeScript type checking.
+- ESLint.
+- Prettier check.
+- Boundary checks that prevent business modules from bypassing the framework.
+
+`--verify-gc-ts` performs an exchange-level smoke test against known Dota GC
+messages and verifies that the expected protobuf responses are emitted.
+
+## Rules For Good Handlers
+
+- Do not hardcode raw protobuf bytes in TypeScript.
+- Do not build protobuf payloads by hand when a generated type exists.
+- Do not call host globals directly from business modules.
+- Do not add C# bridge logic that owns GC business decisions just to make a TS
+  handler pass.
+- Keep C# host functions as typed data/service boundaries.
+- Keep per-message logic readable in TypeScript.
+- Keep request parsing and response construction close to the handler.
+- Prefer generated enum constants over magic numbers.
+- Add a real data service when data is dynamic; do not create fixtures for
+  player profiles, social feed, inventory, stats, lobbies, or matches.
+
+## Async And Tick
+
+Handlers can be async:
+
+```ts
+gc.on(Routes.SomeRoute, async ctx => {
+    const profile = ctx.services.profiles.get(ctx.accountId);
+    ctx.reply({ profile });
+    return true;
+});
+```
+
+If `main.ts` exports `tick()`, the server calls it on a fixed interval
+(`GameCoordinator:TickIntervalMs` in appsettings, default 1000ms, clamped to
+100..60000). Use ticks for coordinator timers and proactive messages. During a
+tick there is no request body, so do not read `ctx.request`; track recipients in
+server state or explicit services.
 
 ## GC Console
 
-`/Admin/GcConsole` (admin login required) shows live GC traffic: incoming
-messages, replies, async pushes, `runtime.Log` output, unhandled messages and
-script errors. Keep it open next to the game while editing Lua to close the
-edit-and-see loop.
+`/Admin/GcConsole` shows live GC traffic:
 
-## NetHook workflow
+- incoming messages
+- replies
+- queued async pushes
+- script logs
+- unhandled messages
+- script errors
+
+Keep it open while implementing a flow. It is the fastest way to confirm whether
+Dota sent the message you expected and whether the TypeScript runtime handled it.
+
+## Capture Workflow
+
+Captures are evidence, not implementation. When a message flow is unclear:
 
 1. Capture a clean Steam/Dota session with NetHook2.
-2. Export or inspect it with NetHookAnalyzer.
-3. Import the capture into this plugin folder:
+2. Inspect it with NetHookAnalyzer.
+3. Identify message ids, protobuf types, response order and required fields.
+4. Update protobuf contracts if needed.
+5. Implement a typed handler in TypeScript.
+
+The old importer can still normalize NetHook dumps:
 
 ```powershell
 .\SKYNET server\GC\tools\Import-NetHook.ps1 -InputPath "D:\Path\To\NetHookDump" -AppId 570
 ```
 
-The importer creates:
+It may create Lua fixture files and route hints. Treat those outputs as research
+material only; do not copy binary fixture behavior into the TypeScript runtime.
 
-- `GC/570/captures/nethook_*.json`: normalized capture index.
-- `GC/570/fixtures/nethook/*.bin`: replayable payload bodies.
-- `GC/570/routes.generated.lua`: observed request/response fixture index.
+## Legacy Lua
 
-Review `routes.generated.lua` before including it from `main.lua`; captures are
-evidence, not automatically trusted behavior.
-
+Lua files such as `main.lua`, `messages.lua`, `dota_stats.lua`, and
+`routes.generated.lua` are legacy migration references. They can help compare
+old behavior, but they are not the target architecture. New or migrated GC logic
+should be implemented in TypeScript modules using the generated contracts and
+the `ctx` framework.
