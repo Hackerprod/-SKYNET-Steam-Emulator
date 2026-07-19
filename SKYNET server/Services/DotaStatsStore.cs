@@ -42,7 +42,12 @@ public sealed class DotaStatsStore
         "match_realtime_stats",
         "match_state_history",
         "match_spectator_counts",
-        "live_scoreboard_updates"
+        "live_scoreboard_updates",
+        "quest_progress",
+        "periodic_resources",
+        "hero_stickers",
+        "overworld_state",
+        "monster_hunter_state"
     };
 
     public DotaStatsStore(string dbPath, Func<uint, DotaStatsAccountIdentity?> identityResolver)
@@ -1119,6 +1124,216 @@ public sealed class DotaStatsStore
         }
     }
 
+    public IReadOnlyList<DotaStatsQuestProgress> GetQuestProgress(uint accountId, IReadOnlyList<uint> questIds)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            EnsureProfileLocked(connection, 0, accountId, string.Empty);
+
+            var requested = questIds.Where(id => id != 0).Distinct().ToHashSet();
+            var byQuest = new Dictionary<uint, DotaStatsQuestProgress>();
+            using var command = connection.CreateCommand();
+            command.CommandText = requested.Count == 0
+                ? """
+                    SELECT quest_id, challenge_id, time_completed, attempts, hero_id, template_id, quest_rank
+                    FROM quest_progress
+                    WHERE account_id = $account_id
+                    ORDER BY quest_id, challenge_id
+                    """
+                : $"""
+                    SELECT quest_id, challenge_id, time_completed, attempts, hero_id, template_id, quest_rank
+                    FROM quest_progress
+                    WHERE account_id = $account_id
+                      AND quest_id IN ({string.Join(", ", requested.Select((_, index) => "$quest_" + index.ToString(System.Globalization.CultureInfo.InvariantCulture)))})
+                    ORDER BY quest_id, challenge_id
+                    """;
+            Add(command, "$account_id", accountId);
+            var parameterIndex = 0;
+            foreach (var questId in requested)
+            {
+                Add(command, "$quest_" + parameterIndex.ToString(System.Globalization.CultureInfo.InvariantCulture), questId);
+                parameterIndex++;
+            }
+
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                var questId = U32(reader, "quest_id");
+                if (!byQuest.TryGetValue(questId, out var progress))
+                {
+                    progress = new DotaStatsQuestProgress { QuestId = questId };
+                    byQuest.Add(questId, progress);
+                }
+
+                progress.CompletedChallenges.Add(new DotaStatsQuestChallenge
+                {
+                    ChallengeId = U32(reader, "challenge_id"),
+                    TimeCompleted = U32(reader, "time_completed"),
+                    Attempts = U32(reader, "attempts"),
+                    HeroId = U32(reader, "hero_id"),
+                    TemplateId = U32(reader, "template_id"),
+                    QuestRank = U32(reader, "quest_rank")
+                });
+            }
+
+            foreach (var questId in requested)
+            {
+                byQuest.TryAdd(questId, new DotaStatsQuestProgress { QuestId = questId });
+            }
+
+            return byQuest.Values.OrderBy(quest => quest.QuestId).ToList();
+        }
+    }
+
+    public DotaStatsPeriodicResource GetPeriodicResource(uint accountId, uint resourceId)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            EnsureProfileLocked(connection, 0, accountId, string.Empty);
+            using var command = connection.CreateCommand();
+            command.CommandText = """
+                SELECT account_id, resource_id, resource_max, resource_used
+                FROM periodic_resources
+                WHERE account_id = $account_id AND resource_id = $resource_id
+                """;
+            Add(command, "$account_id", accountId);
+            Add(command, "$resource_id", resourceId);
+            using var reader = command.ExecuteReader();
+            return reader.Read()
+                ? new DotaStatsPeriodicResource
+                {
+                    AccountId = U32(reader, "account_id"),
+                    ResourceId = U32(reader, "resource_id"),
+                    ResourceMax = U32(reader, "resource_max"),
+                    ResourceUsed = U32(reader, "resource_used")
+                }
+                : new DotaStatsPeriodicResource { AccountId = accountId, ResourceId = resourceId };
+        }
+    }
+
+    public IReadOnlyList<DotaStatsHeroSticker> GetHeroStickers(uint accountId)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            EnsureProfileLocked(connection, 0, accountId, string.Empty);
+            var result = new List<DotaStatsHeroSticker>();
+            using var command = connection.CreateCommand();
+            command.CommandText = """
+                SELECT hero_id, item_def_id, quality, source_item_id
+                FROM hero_stickers
+                WHERE account_id = $account_id
+                ORDER BY hero_id
+                """;
+            Add(command, "$account_id", accountId);
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                result.Add(new DotaStatsHeroSticker
+                {
+                    HeroId = U32(reader, "hero_id"),
+                    ItemDefId = U32(reader, "item_def_id"),
+                    Quality = U32(reader, "quality"),
+                    SourceItemId = U64(reader, "source_item_id")
+                });
+            }
+
+            return result;
+        }
+    }
+
+    public bool SetHeroSticker(uint accountId, uint heroId, ulong itemId)
+    {
+        if (accountId == 0 || heroId == 0)
+        {
+            return false;
+        }
+
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            EnsureProfileLocked(connection, 0, accountId, string.Empty);
+            if (itemId == 0)
+            {
+                using var delete = connection.CreateCommand();
+                delete.CommandText = "DELETE FROM hero_stickers WHERE account_id = $account_id AND hero_id = $hero_id";
+                Add(delete, "$account_id", accountId);
+                Add(delete, "$hero_id", heroId);
+                delete.ExecuteNonQuery();
+                return true;
+            }
+
+            var itemDefId = (uint)Math.Min(itemId & 0xffffffffUL, uint.MaxValue);
+            using var command = connection.CreateCommand();
+            command.CommandText = """
+                INSERT INTO hero_stickers (account_id, hero_id, item_def_id, quality, source_item_id, updated_at)
+                VALUES ($account_id, $hero_id, $item_def_id, $quality, $source_item_id, $updated_at)
+                ON CONFLICT(account_id, hero_id) DO UPDATE SET
+                    item_def_id = excluded.item_def_id,
+                    quality = excluded.quality,
+                    source_item_id = excluded.source_item_id,
+                    updated_at = excluded.updated_at
+                """;
+            Add(command, "$account_id", accountId);
+            Add(command, "$hero_id", heroId);
+            Add(command, "$item_def_id", itemDefId);
+            Add(command, "$quality", 0);
+            Add(command, "$source_item_id", itemId);
+            Add(command, "$updated_at", Now());
+            command.ExecuteNonQuery();
+            return true;
+        }
+    }
+
+    public DotaStatsOverworldState GetOverworldState(uint accountId, uint overworldId)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            EnsureProfileLocked(connection, 0, accountId, string.Empty);
+            using var command = connection.CreateCommand();
+            command.CommandText = """
+                SELECT overworld_id, current_node_id, last_related_hero_id, overworld_version
+                FROM overworld_state
+                WHERE account_id = $account_id AND overworld_id = $overworld_id
+                """;
+            Add(command, "$account_id", accountId);
+            Add(command, "$overworld_id", overworldId);
+            using var reader = command.ExecuteReader();
+            return reader.Read()
+                ? new DotaStatsOverworldState
+                {
+                    OverworldId = U32(reader, "overworld_id"),
+                    CurrentNodeId = U32(reader, "current_node_id"),
+                    LastRelatedHeroId = U32(reader, "last_related_hero_id"),
+                    OverworldVersion = U32(reader, "overworld_version")
+                }
+                : new DotaStatsOverworldState { OverworldId = overworldId, OverworldVersion = 1 };
+        }
+    }
+
+    public DotaStatsMonsterHunterState GetMonsterHunterState(uint accountId)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            EnsureProfileLocked(connection, 0, accountId, string.Empty);
+            using var command = connection.CreateCommand();
+            command.CommandText = """
+                SELECT unlocked_count
+                FROM monster_hunter_state
+                WHERE account_id = $account_id
+                """;
+            Add(command, "$account_id", accountId);
+            using var reader = command.ExecuteReader();
+            return reader.Read()
+                ? new DotaStatsMonsterHunterState { UnlockedCount = U32(reader, "unlocked_count") }
+                : new DotaStatsMonsterHunterState();
+        }
+    }
+
     public bool SaveSocialMatchComment(ulong matchId, uint accountId, string personaName, string comment)
     {
         lock (_sync)
@@ -1704,6 +1919,54 @@ public sealed class DotaStatsStore
                 created_at INTEGER NOT NULL
             );
 
+            CREATE TABLE IF NOT EXISTS quest_progress (
+                account_id INTEGER NOT NULL,
+                quest_id INTEGER NOT NULL,
+                challenge_id INTEGER NOT NULL,
+                time_completed INTEGER NOT NULL DEFAULT 0,
+                attempts INTEGER NOT NULL DEFAULT 0,
+                hero_id INTEGER NOT NULL DEFAULT 0,
+                template_id INTEGER NOT NULL DEFAULT 0,
+                quest_rank INTEGER NOT NULL DEFAULT 0,
+                updated_at INTEGER NOT NULL,
+                PRIMARY KEY (account_id, quest_id, challenge_id)
+            );
+
+            CREATE TABLE IF NOT EXISTS periodic_resources (
+                account_id INTEGER NOT NULL,
+                resource_id INTEGER NOT NULL,
+                resource_max INTEGER NOT NULL DEFAULT 0,
+                resource_used INTEGER NOT NULL DEFAULT 0,
+                updated_at INTEGER NOT NULL,
+                PRIMARY KEY (account_id, resource_id)
+            );
+
+            CREATE TABLE IF NOT EXISTS hero_stickers (
+                account_id INTEGER NOT NULL,
+                hero_id INTEGER NOT NULL,
+                item_def_id INTEGER NOT NULL DEFAULT 0,
+                quality INTEGER NOT NULL DEFAULT 0,
+                source_item_id INTEGER NOT NULL DEFAULT 0,
+                updated_at INTEGER NOT NULL,
+                PRIMARY KEY (account_id, hero_id)
+            );
+
+            CREATE TABLE IF NOT EXISTS overworld_state (
+                account_id INTEGER NOT NULL,
+                overworld_id INTEGER NOT NULL,
+                current_node_id INTEGER NOT NULL DEFAULT 0,
+                last_related_hero_id INTEGER NOT NULL DEFAULT 0,
+                overworld_version INTEGER NOT NULL DEFAULT 1,
+                updated_at INTEGER NOT NULL,
+                PRIMARY KEY (account_id, overworld_id)
+            );
+
+            CREATE TABLE IF NOT EXISTS monster_hunter_state (
+                account_id INTEGER PRIMARY KEY,
+                unlocked_count INTEGER NOT NULL DEFAULT 0,
+                updated_at INTEGER NOT NULL
+            );
+
             CREATE TABLE IF NOT EXISTS match_comments (
                 match_id INTEGER NOT NULL,
                 account_id INTEGER NOT NULL,
@@ -1749,6 +2012,11 @@ public sealed class DotaStatsStore
         EnsureColumn(connection, "reports", "game_time", "INTEGER NOT NULL DEFAULT 0");
         EnsureColumn(connection, "reports", "debug_slot", "INTEGER NOT NULL DEFAULT 0");
         EnsureColumn(connection, "reports", "debug_match_id", "INTEGER NOT NULL DEFAULT 0");
+        EnsureColumn(connection, "periodic_resources", "resource_max", "INTEGER NOT NULL DEFAULT 0");
+        EnsureColumn(connection, "periodic_resources", "resource_used", "INTEGER NOT NULL DEFAULT 0");
+        EnsureColumn(connection, "hero_stickers", "quality", "INTEGER NOT NULL DEFAULT 0");
+        EnsureColumn(connection, "hero_stickers", "source_item_id", "INTEGER NOT NULL DEFAULT 0");
+        EnsureColumn(connection, "overworld_state", "overworld_version", "INTEGER NOT NULL DEFAULT 1");
     }
 
     private DotaStatsProfile EnsureProfileLocked(SqliteConnection connection, ulong steamId, uint accountId, string personaName, SqliteTransaction? transaction = null)
@@ -3277,6 +3545,51 @@ public sealed class DotaStatsConduct
     public uint OldRawBehaviorScore { get; init; }
     public uint Date { get; init; }
     public uint BehaviorRating { get; init; }
+}
+
+public sealed class DotaStatsQuestProgress
+{
+    public uint QuestId { get; init; }
+    public List<DotaStatsQuestChallenge> CompletedChallenges { get; } = new();
+}
+
+public sealed class DotaStatsQuestChallenge
+{
+    public uint ChallengeId { get; init; }
+    public uint TimeCompleted { get; init; }
+    public uint Attempts { get; init; }
+    public uint HeroId { get; init; }
+    public uint TemplateId { get; init; }
+    public uint QuestRank { get; init; }
+}
+
+public sealed class DotaStatsPeriodicResource
+{
+    public uint AccountId { get; init; }
+    public uint ResourceId { get; init; }
+    public uint ResourceMax { get; init; }
+    public uint ResourceUsed { get; init; }
+}
+
+public sealed class DotaStatsHeroSticker
+{
+    public uint HeroId { get; init; }
+    public uint ItemDefId { get; init; }
+    public uint Quality { get; init; }
+    public ulong SourceItemId { get; init; }
+}
+
+public sealed class DotaStatsOverworldState
+{
+    public uint OverworldId { get; init; }
+    public uint CurrentNodeId { get; init; }
+    public uint LastRelatedHeroId { get; init; }
+    public uint OverworldVersion { get; init; } = 1;
+}
+
+public sealed class DotaStatsMonsterHunterState
+{
+    public uint UnlockedCount { get; init; }
 }
 
 public sealed class DotaStatsComment

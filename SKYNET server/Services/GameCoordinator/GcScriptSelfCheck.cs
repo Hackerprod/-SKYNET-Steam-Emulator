@@ -63,15 +63,24 @@ public static class GcScriptSelfCheck
         ok &= ExpectResponse(plugin, context, 7427, 7428, 1, write);
         ok &= ExpectHandled(plugin, context, 7497, 0, write);
         ok &= ExpectResponse(plugin, context, 7531, 7382, 1, write);
+        ok &= ExpectResponse(plugin, context, 7536, 7537, 1, write);
+        ok &= ExpectResponse(plugin, context, 7541, 7542, 1, write);
+        ok &= ExpectResponse(plugin, context, 7543, 7544, 1, write);
+        ok &= ExpectResponse(plugin, context, 7550, 7551, 1, write);
+        ok &= ExpectResponse(plugin, context, 7552, 7553, 1, write);
         ok &= ExpectResponse(plugin, context, 7521, 7522, 1, write);
         ok &= ExpectResponse(plugin, context, 7527, 7528, 1, write);
         ok &= ExpectResponse(plugin, context, 7534, 7535, 1, write);
         ok &= ExpectResponse(plugin, context, 7538, 7539, 1, write);
         ok &= ExpectResponse(plugin, context, 7584, 7586, 1, write);
         ok &= ExpectResponse(plugin, context, 7606, 7607, 1, write);
+        ok &= ExpectResponse(plugin, context, 8078, 8079, 1, write);
         ok &= ExpectResponse(plugin, context, 8082, 8083, 1, write);
+        ok &= ExpectResponse(plugin, context, 8095, 8096, 1, write);
         ok &= ExpectResponse(plugin, context, 8111, 8112, 1, write);
         ok &= ExpectResponse(plugin, context, 8113, 8114, 1, write);
+        ok &= ExpectResponse(plugin, context, 8137, 8136, 1, write);
+        ok &= ExpectResponse(plugin, context, 8211, 8212, 1, write);
         ok &= ExpectResponse(plugin, context, 8006, 8007, 1, write);
         ok &= ExpectResponse(plugin, context, 8009, 8010, 1, write);
         ok &= ExpectResponse(plugin, context, 8016, 8017, 1, write);
@@ -99,8 +108,12 @@ public static class GcScriptSelfCheck
         ok &= ExpectResponse(plugin, context, 8793, 8794, 1, write);
         ok &= ExpectResponse(plugin, context, 8798, 8799, 1, write);
         ok &= ExpectResponse(plugin, context, 8800, 8801, 1, write);
+        ok &= ExpectResponse(plugin, context, 8851, 8852, 1, write);
+        ok &= ExpectResponse(plugin, context, 8853, 8854, 1, write);
         ok &= ExpectResponse(plugin, context, 8879, 8880, 1, write);
         ok &= ExpectResponse(plugin, context, 8886, 8887, 1, write);
+        ok &= ExpectResponse(plugin, context, 8944, 8945, 1, write);
+        ok &= ExpectResponse(plugin, context, 9023, 9024, 1, write);
         ok &= ExpectUnhandled(plugin, context, 999999, write);
 
         foreach (var entry in trace.GetSince(0))

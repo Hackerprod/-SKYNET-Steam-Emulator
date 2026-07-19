@@ -185,6 +185,13 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .RegisterHostFunction("gc", "dotaProfile", dispatcher.DotaProfile)
                 .RegisterHostFunction("gc", "dotaSaveProfileSlots", dispatcher.DotaSaveProfileSlots)
                 .RegisterHostFunction("gc", "dotaSaveProfileUpdate", dispatcher.DotaSaveProfileUpdate)
+                .RegisterHostFunction("gc", "dotaProfileConductScorecard", dispatcher.DotaProfileConductScorecard)
+                .RegisterHostFunction("gc", "dotaProfileQuestProgress", dispatcher.DotaProfileQuestProgress)
+                .RegisterHostFunction("gc", "dotaProfilePeriodicResource", dispatcher.DotaProfilePeriodicResource)
+                .RegisterHostFunction("gc", "dotaProfileHeroStickers", dispatcher.DotaProfileHeroStickers)
+                .RegisterHostFunction("gc", "dotaProfileSetHeroSticker", dispatcher.DotaProfileSetHeroSticker)
+                .RegisterHostFunction("gc", "dotaProfileOverworldState", dispatcher.DotaProfileOverworldState)
+                .RegisterHostFunction("gc", "dotaProfileMonsterHunterState", dispatcher.DotaProfileMonsterHunterState)
                 .RegisterHostFunction("gc", "dotaSocialFeed", dispatcher.DotaSocialFeed)
                 .RegisterHostFunction("gc", "dotaSocialFeedComments", dispatcher.DotaSocialFeedComments)
                 .RegisterHostFunction("gc", "dotaSocialFeedPostComment", dispatcher.DotaSocialFeedPostComment)
@@ -415,6 +422,41 @@ internal sealed class ScriptHostDispatcher
     public TsValue? DotaSaveProfileUpdate(TsValue[] args)
     {
         return RequireCurrent().DotaSaveProfileUpdate(args);
+    }
+
+    public TsValue? DotaProfileConductScorecard(TsValue[] args)
+    {
+        return RequireCurrent().DotaProfileConductScorecard();
+    }
+
+    public TsValue? DotaProfileQuestProgress(TsValue[] args)
+    {
+        return RequireCurrent().DotaProfileQuestProgress(args);
+    }
+
+    public TsValue? DotaProfilePeriodicResource(TsValue[] args)
+    {
+        return RequireCurrent().DotaProfilePeriodicResource(args);
+    }
+
+    public TsValue? DotaProfileHeroStickers(TsValue[] args)
+    {
+        return RequireCurrent().DotaProfileHeroStickers();
+    }
+
+    public TsValue? DotaProfileSetHeroSticker(TsValue[] args)
+    {
+        return RequireCurrent().DotaProfileSetHeroSticker(args);
+    }
+
+    public TsValue? DotaProfileOverworldState(TsValue[] args)
+    {
+        return RequireCurrent().DotaProfileOverworldState(args);
+    }
+
+    public TsValue? DotaProfileMonsterHunterState(TsValue[] args)
+    {
+        return RequireCurrent().DotaProfileMonsterHunterState();
     }
 
     public TsValue? DotaSocialFeed(TsValue[] args)
@@ -1206,6 +1248,79 @@ internal sealed class ScriptExchangeHost
 
         DotaGcBackend.StatsStore?.SaveProfileUpdate(_context.AccountId, backgroundItemId, featuredHeroIds);
         return TsValue.FromBool(true);
+    }
+
+    public TsValue DotaProfileConductScorecard()
+    {
+        return ToTsConductScorecard(
+            DotaGcBackend.StatsStore?.GetConduct(_context.AccountId)
+                ?? new DotaStatsConduct { AccountId = _context.AccountId, RawBehaviorScore = 10000, OldRawBehaviorScore = 10000 });
+    }
+
+    public TsValue DotaProfileQuestProgress(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaProfileQuestProgress(questIds) requires one argument");
+        }
+
+        return ToTsQuestProgress(
+            DotaGcBackend.StatsStore?.GetQuestProgress(_context.AccountId, UInt32Array(args[0], "dotaProfileQuestProgress.questIds"))
+                ?? Array.Empty<DotaStatsQuestProgress>());
+    }
+
+    public TsValue DotaProfilePeriodicResource(TsValue[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new InvalidOperationException("dotaProfilePeriodicResource(accountId, resourceId) requires two arguments");
+        }
+
+        var accountId = Convert.ToUInt32(ToNumber(args[0], "dotaProfilePeriodicResource.accountId"));
+        if (accountId == 0)
+        {
+            accountId = _context.AccountId;
+        }
+
+        var resourceId = Convert.ToUInt32(ToNumber(args[1], "dotaProfilePeriodicResource.resourceId"));
+        return ToTsPeriodicResource(
+            DotaGcBackend.StatsStore?.GetPeriodicResource(accountId, resourceId)
+                ?? new DotaStatsPeriodicResource { AccountId = accountId, ResourceId = resourceId });
+    }
+
+    public TsValue DotaProfileHeroStickers()
+    {
+        return ToTsHeroStickers(DotaGcBackend.StatsStore?.GetHeroStickers(_context.AccountId) ?? Array.Empty<DotaStatsHeroSticker>());
+    }
+
+    public TsValue DotaProfileSetHeroSticker(TsValue[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new InvalidOperationException("dotaProfileSetHeroSticker(heroId, itemId) requires two arguments");
+        }
+
+        var heroId = Convert.ToUInt32(ToNumber(args[0], "dotaProfileSetHeroSticker.heroId"));
+        var itemId = Convert.ToUInt64(ToInteger(args[1], "dotaProfileSetHeroSticker.itemId").ToString());
+        return TsValue.FromBool(DotaGcBackend.StatsStore?.SetHeroSticker(_context.AccountId, heroId, itemId) ?? false);
+    }
+
+    public TsValue DotaProfileOverworldState(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaProfileOverworldState(overworldId) requires one argument");
+        }
+
+        var overworldId = Convert.ToUInt32(ToNumber(args[0], "dotaProfileOverworldState.overworldId"));
+        return ToTsOverworldState(
+            DotaGcBackend.StatsStore?.GetOverworldState(_context.AccountId, overworldId)
+                ?? new DotaStatsOverworldState { OverworldId = overworldId });
+    }
+
+    public TsValue DotaProfileMonsterHunterState()
+    {
+        return ToTsMonsterHunterState(DotaGcBackend.StatsStore?.GetMonsterHunterState(_context.AccountId) ?? new DotaStatsMonsterHunterState());
     }
 
     public TsValue DotaSocialFeed(TsValue[] args)
@@ -2492,6 +2607,104 @@ internal sealed class ScriptExchangeHost
         return new TsObjectValue(value);
     }
 
+    private static TsValue ToTsConductScorecard(DotaStatsConduct conduct)
+    {
+        var value = new TsObject("DotaConductScorecard");
+        value.SetField("accountId", ToTsUInt32(conduct.AccountId));
+        value.SetField("matchId", TsValue.FromUInt64(conduct.MatchId));
+        value.SetField("seqNum", TsValue.FromInt32(0));
+        value.SetField("reasons", ToTsUInt32(conduct.ReportsCount == 0 ? 0u : 1u));
+        value.SetField("matchesInReport", ToTsUInt32(conduct.MatchesInReport));
+        value.SetField("matchesClean", ToTsUInt32(conduct.MatchesClean));
+        value.SetField("matchesReported", ToTsUInt32(conduct.MatchesReported));
+        value.SetField("matchesAbandoned", ToTsUInt32(conduct.MatchesAbandoned));
+        value.SetField("reportsCount", ToTsUInt32(conduct.ReportsCount));
+        value.SetField("reportsParties", ToTsUInt32(conduct.ReportsParties));
+        value.SetField("commendCount", ToTsUInt32(conduct.CommendCount));
+        value.SetField("date", ToTsUInt32(conduct.Date));
+        value.SetField("rawBehaviorScore", ToTsUInt32(conduct.RawBehaviorScore));
+        value.SetField("oldRawBehaviorScore", ToTsUInt32(conduct.OldRawBehaviorScore));
+        value.SetField("commsReports", ToTsUInt32(conduct.CommsReports));
+        value.SetField("commsParties", ToTsUInt32(conduct.CommsReports));
+        value.SetField("behaviorRating", ToTsUInt32(conduct.BehaviorRating));
+        return new TsObjectValue(value);
+    }
+
+    private static TsValue ToTsQuestProgress(IEnumerable<DotaStatsQuestProgress> quests)
+    {
+        var array = new TsArray();
+        foreach (var quest in quests)
+        {
+            var value = new TsObject("DotaQuestProgress");
+            value.SetField("questId", ToTsUInt32(quest.QuestId));
+            value.SetField("completedChallenges", ToTsQuestChallenges(quest.CompletedChallenges));
+            array.Add(new TsObjectValue(value));
+        }
+
+        return new TsArrayValue(array);
+    }
+
+    private static TsValue ToTsQuestChallenges(IEnumerable<DotaStatsQuestChallenge> challenges)
+    {
+        var array = new TsArray();
+        foreach (var challenge in challenges)
+        {
+            var value = new TsObject("DotaQuestChallenge");
+            value.SetField("challengeId", ToTsUInt32(challenge.ChallengeId));
+            value.SetField("timeCompleted", ToTsUInt32(challenge.TimeCompleted));
+            value.SetField("attempts", ToTsUInt32(challenge.Attempts));
+            value.SetField("heroId", ToTsUInt32(challenge.HeroId));
+            value.SetField("templateId", ToTsUInt32(challenge.TemplateId));
+            value.SetField("questRank", ToTsUInt32(challenge.QuestRank));
+            array.Add(new TsObjectValue(value));
+        }
+
+        return new TsArrayValue(array);
+    }
+
+    private static TsValue ToTsPeriodicResource(DotaStatsPeriodicResource resource)
+    {
+        var value = new TsObject("DotaPeriodicResource");
+        value.SetField("accountId", ToTsUInt32(resource.AccountId));
+        value.SetField("resourceId", ToTsUInt32(resource.ResourceId));
+        value.SetField("resourceMax", ToTsUInt32(resource.ResourceMax));
+        value.SetField("resourceUsed", ToTsUInt32(resource.ResourceUsed));
+        return new TsObjectValue(value);
+    }
+
+    private static TsValue ToTsHeroStickers(IEnumerable<DotaStatsHeroSticker> stickers)
+    {
+        var array = new TsArray();
+        foreach (var sticker in stickers)
+        {
+            var value = new TsObject("DotaHeroSticker");
+            value.SetField("heroId", ToTsUInt32(sticker.HeroId));
+            value.SetField("itemDefId", ToTsUInt32(sticker.ItemDefId));
+            value.SetField("quality", ToTsUInt32(sticker.Quality));
+            value.SetField("sourceItemId", TsValue.FromUInt64(sticker.SourceItemId));
+            array.Add(new TsObjectValue(value));
+        }
+
+        return new TsArrayValue(array);
+    }
+
+    private static TsValue ToTsOverworldState(DotaStatsOverworldState state)
+    {
+        var value = new TsObject("DotaOverworldState");
+        value.SetField("overworldId", ToTsUInt32(state.OverworldId));
+        value.SetField("currentNodeId", ToTsUInt32(state.CurrentNodeId));
+        value.SetField("lastRelatedHeroId", ToTsUInt32(state.LastRelatedHeroId));
+        value.SetField("overworldVersion", ToTsUInt32(state.OverworldVersion));
+        return new TsObjectValue(value);
+    }
+
+    private static TsValue ToTsMonsterHunterState(DotaStatsMonsterHunterState state)
+    {
+        var value = new TsObject("DotaMonsterHunterState");
+        value.SetField("unlockedCount", ToTsUInt32(state.UnlockedCount));
+        return new TsObjectValue(value);
+    }
+
     private static TsValue ToTsGuildInfo(DotaGuildInfoSnapshot info)
     {
         var value = new TsObject("DotaGuildInfo");
@@ -2660,6 +2873,27 @@ internal sealed class ScriptExchangeHost
     private static TsValue ToTsUInt32(uint value)
     {
         return value <= int.MaxValue ? TsValue.FromInt32(unchecked((int)value)) : TsValue.FromInt64(value);
+    }
+
+    private static List<uint> UInt32Array(TsValue value, string path)
+    {
+        if (value is TsNull or TsVoid)
+        {
+            return new List<uint>();
+        }
+
+        if (value is not TsArrayValue arrayValue)
+        {
+            throw new InvalidOperationException($"{path}: expected array, got {value.ValueType}");
+        }
+
+        var result = new List<uint>();
+        for (var i = 0; i < arrayValue.Value.Count; i++)
+        {
+            result.Add(Convert.ToUInt32(ToNumber(arrayValue.Value.Get(i), $"{path}[{i}]")));
+        }
+
+        return result;
     }
 
     private static List<ulong> UInt64Array(TsValue value, string path)

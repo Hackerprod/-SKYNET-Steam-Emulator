@@ -27,6 +27,13 @@ declare global {
     function dotaProfile(accountId: number): unknown;
     function dotaSaveProfileSlots(slots: unknown[]): boolean;
     function dotaSaveProfileUpdate(backgroundItemId: bigint, featuredHeroIds: number[]): boolean;
+    function dotaProfileConductScorecard(): unknown;
+    function dotaProfileQuestProgress(questIds: number[]): unknown;
+    function dotaProfilePeriodicResource(accountId: number, resourceId: number): unknown;
+    function dotaProfileHeroStickers(): unknown;
+    function dotaProfileSetHeroSticker(heroId: number, itemId: bigint): boolean;
+    function dotaProfileOverworldState(overworldId: number): unknown;
+    function dotaProfileMonsterHunterState(): unknown;
     function dotaSocialFeed(accountId: number, selfOnly: boolean): unknown;
     function dotaSocialFeedComments(feedEventId: bigint): unknown;
     function dotaSocialFeedPostComment(feedEventId: bigint, comment: string): boolean;

@@ -180,6 +180,13 @@ export interface DotaProfileService {
     get(accountId: number): DotaProfileSnapshot;
     saveCardSlots(slots: DotaProfileSlot[]): void;
     saveProfileUpdate(backgroundItemId: bigint, featuredHeroIds: number[]): void;
+    getConductScorecard(): DotaConductScorecard;
+    getQuestProgress(questIds: number[]): DotaQuestProgress[];
+    getPeriodicResource(accountId: number, resourceId: number): DotaPeriodicResource;
+    getHeroStickers(): DotaHeroSticker[];
+    setHeroSticker(heroId: number, itemId: bigint): boolean;
+    getOverworldState(overworldId: number): DotaOverworldState;
+    getMonsterHunterState(): DotaMonsterHunterState;
 }
 
 export interface DotaSocialService {
@@ -466,6 +473,65 @@ export interface DotaGlobalStats {
 export interface DotaConduct {
     readonly commendCount: number;
     readonly rawBehaviorScore: number;
+}
+
+export interface DotaConductScorecard {
+    readonly accountId: number;
+    readonly matchId: bigint;
+    readonly seqNum: number;
+    readonly reasons: number;
+    readonly matchesInReport: number;
+    readonly matchesClean: number;
+    readonly matchesReported: number;
+    readonly matchesAbandoned: number;
+    readonly reportsCount: number;
+    readonly reportsParties: number;
+    readonly commendCount: number;
+    readonly date: number;
+    readonly rawBehaviorScore: number;
+    readonly oldRawBehaviorScore: number;
+    readonly commsReports: number;
+    readonly commsParties: number;
+    readonly behaviorRating: number;
+}
+
+export interface DotaQuestProgress {
+    readonly questId: number;
+    readonly completedChallenges: DotaQuestChallenge[];
+}
+
+export interface DotaQuestChallenge {
+    readonly challengeId: number;
+    readonly timeCompleted: number;
+    readonly attempts: number;
+    readonly heroId: number;
+    readonly templateId: number;
+    readonly questRank: number;
+}
+
+export interface DotaPeriodicResource {
+    readonly accountId: number;
+    readonly resourceId: number;
+    readonly resourceMax: number;
+    readonly resourceUsed: number;
+}
+
+export interface DotaHeroSticker {
+    readonly heroId: number;
+    readonly itemDefId: number;
+    readonly quality: number;
+    readonly sourceItemId: bigint;
+}
+
+export interface DotaOverworldState {
+    readonly overworldId: number;
+    readonly currentNodeId: number;
+    readonly lastRelatedHeroId: number;
+    readonly overworldVersion: number;
+}
+
+export interface DotaMonsterHunterState {
+    readonly unlockedCount: number;
 }
 
 export interface DotaProfileSlot {
@@ -837,6 +903,34 @@ class GcDotaProfileService implements DotaProfileService {
 
     saveProfileUpdate(backgroundItemId: bigint, featuredHeroIds: number[]): void {
         dotaSaveProfileUpdate(backgroundItemId, featuredHeroIds);
+    }
+
+    getConductScorecard(): DotaConductScorecard {
+        return dotaProfileConductScorecard() as DotaConductScorecard;
+    }
+
+    getQuestProgress(questIds: number[]): DotaQuestProgress[] {
+        return dotaProfileQuestProgress(questIds) as DotaQuestProgress[];
+    }
+
+    getPeriodicResource(accountId: number, resourceId: number): DotaPeriodicResource {
+        return dotaProfilePeriodicResource(accountId, resourceId) as DotaPeriodicResource;
+    }
+
+    getHeroStickers(): DotaHeroSticker[] {
+        return dotaProfileHeroStickers() as DotaHeroSticker[];
+    }
+
+    setHeroSticker(heroId: number, itemId: bigint): boolean {
+        return dotaProfileSetHeroSticker(heroId, itemId) as boolean;
+    }
+
+    getOverworldState(overworldId: number): DotaOverworldState {
+        return dotaProfileOverworldState(overworldId) as DotaOverworldState;
+    }
+
+    getMonsterHunterState(): DotaMonsterHunterState {
+        return dotaProfileMonsterHunterState() as DotaMonsterHunterState;
     }
 }
 

@@ -1,25 +1,70 @@
 import {
     DotaHeroStats,
+    DotaHeroSticker,
+    DotaMatchPlayer,
     DotaProfileSnapshot,
     DotaProfileSlot,
+    DotaQuestProgress,
     DotaRecentMatch,
     HandlerContext,
+    RawMessageContext,
     gc
 } from "../framework/gc";
 import {
+    CMsgBattleReport,
+    CMsgBattleReportAggregateStats,
+    CMsgBattleReportAggregateStats_CMsgBattleReportAggregate,
+    CMsgBattleReportAggregateStats_CMsgBattleReportStat,
+    CMsgBattleReportGame,
+    CMsgBattleReportInfo,
+    CMsgClientToGCAcknowledgeBattleReport,
+    CMsgClientToGCAcknowledgeBattleReportResponse,
+    CMsgClientToGCAcknowledgeBattleReportResponse_EResponse,
+    CMsgClientToGCGetBattleReport,
+    CMsgClientToGCGetBattleReportAggregateStats,
+    CMsgClientToGCGetBattleReportAggregateStatsResponse,
+    CMsgClientToGCGetBattleReportAggregateStatsResponse_EResponse,
+    CMsgClientToGCGetBattleReportInfo,
+    CMsgClientToGCGetBattleReportInfoResponse,
+    CMsgClientToGCGetBattleReportInfoResponse_EResponse,
+    CMsgClientToGCGetBattleReportMatchHistory,
+    CMsgClientToGCGetBattleReportMatchHistoryResponse,
+    CMsgClientToGCGetBattleReportMatchHistoryResponse_EResponse,
+    CMsgClientToGCGetBattleReportResponse,
+    CMsgClientToGCGetBattleReportResponse_EResponse,
     CMsgClientToGCGetAllHeroProgress,
     CMsgClientToGCGetAllHeroProgressResponse,
     CMsgClientToGCGetAllHeroOrder,
     CMsgClientToGCGetAllHeroOrderResponse,
+    CMsgClientToGCGetHeroStickers,
+    CMsgClientToGCGetHeroStickersResponse,
+    CMsgClientToGCGetHeroStickersResponse_EResponse,
     CMsgClientToGCGetProfileCard,
     CMsgClientToGCGetProfileCardStats,
     CMsgClientToGCGetProfileTickets,
+    CMsgClientToGCGetQuestProgress,
+    CMsgClientToGCGetQuestProgressResponse,
+    CMsgClientToGCMonsterHunterGetUserData,
+    CMsgClientToGCMonsterHunterGetUserDataResponse,
+    CMsgClientToGCMonsterHunterGetUserDataResponse_EResponse,
+    CMsgClientToGCOverworldGetUserData,
+    CMsgClientToGCOverworldGetUserDataResponse,
+    CMsgClientToGCOverworldGetUserDataResponse_EResponse,
+    CMsgClientToGCSetHeroSticker,
+    CMsgClientToGCSetHeroStickerResponse,
+    CMsgClientToGCSetHeroStickerResponse_EResponse,
     CMsgClientToGCGetTrophyList,
     CMsgClientToGCGetTrophyListResponse,
     CMsgClientToGCSetProfileCardSlots,
+    CMsgDOTAGetPeriodicResource,
+    CMsgDOTAGetPeriodicResourceResponse,
     CMsgDOTAProfileCard,
     CMsgDOTAProfileCard_Slot,
     CMsgDOTAProfileTickets,
+    CMsgDOTATeamsInfo,
+    CMsgPlayerConductScorecard,
+    CMsgPlayerConductScorecardRequest,
+    CMsgStickerHero,
     CMsgProfileRequest,
     CMsgProfileResponse,
     CMsgProfileResponse_EResponse,
@@ -31,6 +76,7 @@ import {
     CMsgRecentMatchInfo,
     CMsgSuccessfulHero,
     Msg,
+    Proto,
     Routes
 } from "../generated/dota";
 import { buildEconItem, equipmentForDefIndex } from "./Items";
@@ -43,6 +89,10 @@ const PROFILE_SLOT_EMOTICON = 5;
 const PROFILE_SLOT_TEAM = 6;
 const MATCH_OUTCOME_RADIANT_WIN = 2;
 const MATCH_OUTCOME_DIRE_WIN = 3;
+const BATTLE_REPORT_WINDOW_SECONDS = 30 * 24 * 60 * 60;
+const BATTLE_REPORT_MATCH_LIMIT = 100;
+const TEAM_RADIANT = 2;
+const TEAM_DIRE = 3;
 
 export function registerProfile(): void {
     const profile = new Profile();
@@ -60,14 +110,19 @@ export class Profile {
         gc.on(Routes.GetTrophyList, (ctx) => this.getTrophyList(ctx));
         gc.on(Routes.GetAllHeroOrder, (ctx) => this.getAllHeroOrder(ctx));
         gc.on(Routes.GetAllHeroProgress, (ctx) => this.getAllHeroProgress(ctx));
-        gc.onMessage(Msg.ClientToGCGetQuestProgress, () => false);
-        gc.onMessage(Msg.ClientToGCLatestConductScorecardRequest, () => false);
-        gc.onMessage(Msg.ClientToGCMyTeamInfoRequest, () => false);
-        gc.onMessage(Msg.DOTAGetPeriodicResource, () => false);
-        gc.onMessage(Msg.ClientToGCGetBattleReportInfo, () => false);
-        gc.onMessage(Msg.ClientToGCGetHeroStickers, () => false);
-        gc.onMessage(Msg.ClientToGCOverworldGetUserData, () => false);
-        gc.onMessage(Msg.ClientToGCMonsterHunterGetUserData, () => false);
+        gc.on(Routes.GetQuestProgress, (ctx) => this.getQuestProgress(ctx));
+        gc.on(Routes.LatestConductScorecard, (ctx) => this.latestConductScorecard(ctx));
+        gc.onMessage(Msg.ClientToGCMyTeamInfoRequest, (ctx) => this.myTeamInfo(ctx));
+        gc.on(Routes.GetPeriodicResource, (ctx) => this.getPeriodicResource(ctx));
+        gc.on(Routes.GetBattleReport, (ctx) => this.getBattleReport(ctx));
+        gc.on(Routes.GetBattleReportAggregateStats, (ctx) => this.getBattleReportAggregateStats(ctx));
+        gc.on(Routes.GetBattleReportInfo, (ctx) => this.getBattleReportInfo(ctx));
+        gc.on(Routes.GetBattleReportMatchHistory, (ctx) => this.getBattleReportMatchHistory(ctx));
+        gc.on(Routes.AcknowledgeBattleReport, (ctx) => this.acknowledgeBattleReport(ctx));
+        gc.on(Routes.SetHeroSticker, (ctx) => this.setHeroSticker(ctx));
+        gc.on(Routes.GetHeroStickers, (ctx) => this.getHeroStickers(ctx));
+        gc.on(Routes.OverworldGetUserData, (ctx) => this.overworldGetUserData(ctx));
+        gc.on(Routes.MonsterHunterGetUserData, (ctx) => this.monsterHunterGetUserData(ctx));
     }
 
     private getProfileCard(ctx: HandlerContext<CMsgClientToGCGetProfileCard, CMsgDOTAProfileCard>): boolean {
@@ -165,6 +220,347 @@ export class Profile {
         });
         return true;
     }
+
+    private getQuestProgress(
+        ctx: HandlerContext<CMsgClientToGCGetQuestProgress, CMsgClientToGCGetQuestProgressResponse>
+    ): boolean {
+        ctx.reply({
+            success: true,
+            quests: mapQuestProgress(ctx.services.profiles.getQuestProgress(ctx.request.questIds ?? []))
+        });
+        return true;
+    }
+
+    private latestConductScorecard(
+        ctx: HandlerContext<CMsgPlayerConductScorecardRequest, CMsgPlayerConductScorecard>
+    ): boolean {
+        ctx.reply(ctx.services.profiles.getConductScorecard());
+        return true;
+    }
+
+    private myTeamInfo(ctx: RawMessageContext): boolean {
+        const response: CMsgDOTATeamsInfo = { teams: [] };
+        ctx.send(Msg.GCToClientTeamsInfo, Proto.CMsgDOTATeamsInfo, response);
+        return true;
+    }
+
+    private getPeriodicResource(
+        ctx: HandlerContext<CMsgDOTAGetPeriodicResource, CMsgDOTAGetPeriodicResourceResponse>
+    ): boolean {
+        const resource = ctx.services.profiles.getPeriodicResource(
+            requestedAccountId(ctx.request.accountId, ctx.accountId),
+            ctx.request.periodicResourceId ?? 0
+        );
+        ctx.reply({
+            periodicResourceMax: resource.resourceMax,
+            periodicResourceUsed: resource.resourceUsed
+        });
+        return true;
+    }
+
+    private getBattleReport(
+        ctx: HandlerContext<CMsgClientToGCGetBattleReport, CMsgClientToGCGetBattleReportResponse>
+    ): boolean {
+        const matches = battleReportMatches(ctx, ctx.request.accountId, ctx.request.timestamp, ctx.request.duration);
+        ctx.reply({
+            response: CMsgClientToGCGetBattleReportResponse_EResponse.Success,
+            report: buildBattleReport(matches),
+            aggregateStats: buildBattleReportAggregateStats(matches, ctx.request.accountId ?? ctx.accountId, []),
+            info: buildBattleReportInfo(matches, ctx.clock.now())
+        });
+        return true;
+    }
+
+    private getBattleReportAggregateStats(
+        ctx: HandlerContext<
+            CMsgClientToGCGetBattleReportAggregateStats,
+            CMsgClientToGCGetBattleReportAggregateStatsResponse
+        >
+    ): boolean {
+        const matches = battleReportMatches(ctx, ctx.accountId, ctx.request.timestamp, ctx.request.duration);
+        ctx.reply({
+            response: CMsgClientToGCGetBattleReportAggregateStatsResponse_EResponse.Success,
+            aggregateStats: buildBattleReportAggregateStats(matches, ctx.accountId, ctx.request.aggregateKeys ?? [])
+        });
+        return true;
+    }
+
+    private getBattleReportInfo(
+        ctx: HandlerContext<CMsgClientToGCGetBattleReportInfo, CMsgClientToGCGetBattleReportInfoResponse>
+    ): boolean {
+        const matches = battleReportMatches(ctx, ctx.request.accountId, undefined, undefined);
+        ctx.reply({
+            response: CMsgClientToGCGetBattleReportInfoResponse_EResponse.Success,
+            battleReportInfoList: {
+                battleReportInfo: matches.length === 0 ? [] : [buildBattleReportInfo(matches, ctx.clock.now())]
+            }
+        });
+        return true;
+    }
+
+    private getBattleReportMatchHistory(
+        ctx: HandlerContext<
+            CMsgClientToGCGetBattleReportMatchHistory,
+            CMsgClientToGCGetBattleReportMatchHistoryResponse
+        >
+    ): boolean {
+        const matches = battleReportMatches(ctx, ctx.request.accountId, ctx.request.timestamp, ctx.request.duration);
+        ctx.reply({
+            response: CMsgClientToGCGetBattleReportMatchHistoryResponse_EResponse.Success,
+            games: { games: mapBattleReportGames(matches) }
+        });
+        return true;
+    }
+
+    private acknowledgeBattleReport(
+        ctx: HandlerContext<CMsgClientToGCAcknowledgeBattleReport, CMsgClientToGCAcknowledgeBattleReportResponse>
+    ): boolean {
+        ctx.reply({ response: CMsgClientToGCAcknowledgeBattleReportResponse_EResponse.Success });
+        return true;
+    }
+
+    private setHeroSticker(
+        ctx: HandlerContext<CMsgClientToGCSetHeroSticker, CMsgClientToGCSetHeroStickerResponse>
+    ): boolean {
+        const success = ctx.services.profiles.setHeroSticker(ctx.request.heroId ?? 0, ctx.request.newItemId ?? 0n);
+        ctx.reply({
+            response: success
+                ? CMsgClientToGCSetHeroStickerResponse_EResponse.Success
+                : CMsgClientToGCSetHeroStickerResponse_EResponse.InternalError
+        });
+        return true;
+    }
+
+    private getHeroStickers(
+        ctx: HandlerContext<CMsgClientToGCGetHeroStickers, CMsgClientToGCGetHeroStickersResponse>
+    ): boolean {
+        ctx.reply({
+            response: CMsgClientToGCGetHeroStickersResponse_EResponse.Success,
+            stickerHeroes: { heroes: mapHeroStickers(ctx.services.profiles.getHeroStickers()) }
+        });
+        return true;
+    }
+
+    private overworldGetUserData(
+        ctx: HandlerContext<CMsgClientToGCOverworldGetUserData, CMsgClientToGCOverworldGetUserDataResponse>
+    ): boolean {
+        const state = ctx.services.profiles.getOverworldState(ctx.request.overworldId ?? 0);
+        ctx.reply({
+            response: CMsgClientToGCOverworldGetUserDataResponse_EResponse.Success,
+            userData: {
+                tokenInventory: { tokenCounts: [] },
+                overworldNodes: [],
+                overworldPaths: [],
+                currentNodeId: state.currentNodeId,
+                minigameData: [],
+                lastRelatedHeroId: state.lastRelatedHeroId,
+                overworldVersion: state.overworldVersion
+            }
+        });
+        return true;
+    }
+
+    private monsterHunterGetUserData(
+        ctx: HandlerContext<CMsgClientToGCMonsterHunterGetUserData, CMsgClientToGCMonsterHunterGetUserDataResponse>
+    ): boolean {
+        const state = ctx.services.profiles.getMonsterHunterState();
+        ctx.reply({
+            response: CMsgClientToGCMonsterHunterGetUserDataResponse_EResponse.Success,
+            userData: {
+                materialInventory: { materialCounts: [] },
+                heroCodex: [],
+                unlockedCount: state.unlockedCount
+            }
+        });
+        return true;
+    }
+}
+
+function mapQuestProgress(progress: DotaQuestProgress[]): CMsgClientToGCGetQuestProgressResponse["quests"] {
+    return progress.map((quest) => ({
+        questId: quest.questId,
+        completedChallenges: quest.completedChallenges.map((challenge) => ({
+            challengeId: challenge.challengeId,
+            timeCompleted: challenge.timeCompleted,
+            attempts: challenge.attempts,
+            heroId: challenge.heroId,
+            templateId: challenge.templateId,
+            questRank: challenge.questRank
+        }))
+    }));
+}
+
+function battleReportMatches<TRequest, TResponse>(
+    ctx: HandlerContext<TRequest, TResponse>,
+    accountIdValue: number | undefined,
+    timestamp: number | undefined,
+    duration: number | undefined
+): DotaMatchPlayer[] {
+    const accountId = requestedAccountId(accountIdValue, ctx.accountId);
+    const matches = ctx.services.stats.getMatchHistory(accountId, 0n, BATTLE_REPORT_MATCH_LIMIT, 0, true);
+    if (timestamp === undefined || timestamp === 0) {
+        return matches;
+    }
+
+    const windowDuration = duration === undefined || duration === 0 ? BATTLE_REPORT_WINDOW_SECONDS : duration;
+    const windowEnd = timestamp + windowDuration;
+    return matches.filter((match) => match.startTime >= timestamp && match.startTime <= windowEnd);
+}
+
+function buildBattleReport(matches: DotaMatchPlayer[]): CMsgBattleReport {
+    return {
+        games: mapBattleReportGames(matches),
+        highlights: { highlights: [] }
+    };
+}
+
+function mapBattleReportGames(matches: DotaMatchPlayer[]): CMsgBattleReportGame[] {
+    return matches.map((match) => ({
+        heroId: match.heroId,
+        kills: match.kills,
+        deaths: match.deaths,
+        assists: match.assists,
+        lastHits: match.lastHits,
+        gpm: match.gpm,
+        xpm: match.xpm,
+        role: roleFromPlayerSlot(match.playerSlot),
+        outcome: match.winner ? 0 : 1,
+        laneOutcome: -1,
+        ranked: false,
+        matchId: match.matchId,
+        predictedPosition: roleFromPlayerSlot(match.playerSlot),
+        secondsDead: 0,
+        winningTeam: match.goodGuysWin ? TEAM_RADIANT : TEAM_DIRE,
+        partyGame: false,
+        startTime: match.startTime,
+        denies: match.denies,
+        playerSlot: match.playerSlot,
+        supportGold: match.supportGold,
+        heroDamage: match.heroDamage,
+        heroHealing: match.heroHealing,
+        towerDamage: match.towerDamage,
+        duration: match.duration,
+        gameMode: match.gameMode,
+        lobbyType: match.lobbyType,
+        item0: match.items[0] ?? 0,
+        item1: match.items[1] ?? 0,
+        item2: match.items[2] ?? 0,
+        item3: match.items[3] ?? 0,
+        item4: match.items[4] ?? 0,
+        item5: match.items[5] ?? 0,
+        selectedFacet: match.selectedFacet
+    }));
+}
+
+function buildBattleReportInfo(matches: DotaMatchPlayer[], now: number): CMsgBattleReportInfo {
+    const latest = matches.length === 0 ? null : matches[0];
+    return {
+        timestamp: latest?.startTime ?? now,
+        duration: BATTLE_REPORT_WINDOW_SECONDS,
+        acknowledged: false,
+        featuredHeroId: latest?.heroId ?? 0,
+        featuredPosition: latest === null ? 0 : roleFromPlayerSlot(latest.playerSlot),
+        gamesPlayed: matches.length,
+        medalCounts: []
+    };
+}
+
+function buildBattleReportAggregateStats(
+    matches: DotaMatchPlayer[],
+    accountId: number,
+    keys: readonly { readonly heroId?: number; readonly predictedPosition?: number }[]
+): CMsgBattleReportAggregateStats {
+    const aggregateKeys =
+        keys.length === 0
+            ? uniqueBattleReportKeys(matches)
+            : keys.map((key) => ({
+                  heroId: key.heroId ?? 0,
+                  predictedPosition: key.predictedPosition ?? -1
+              }));
+
+    return {
+        result: aggregateKeys.map((key) =>
+            buildBattleReportAggregate(matches, accountId, key.heroId, key.predictedPosition)
+        )
+    };
+}
+
+function uniqueBattleReportKeys(
+    matches: DotaMatchPlayer[]
+): { readonly heroId: number; readonly predictedPosition: number }[] {
+    const seen = new Set<string>();
+    const result: { heroId: number; predictedPosition: number }[] = [];
+    for (const match of matches) {
+        const key = `${match.heroId}:${roleFromPlayerSlot(match.playerSlot)}`;
+        if (!seen.has(key)) {
+            seen.add(key);
+            result.push({ heroId: match.heroId, predictedPosition: roleFromPlayerSlot(match.playerSlot) });
+        }
+    }
+
+    return result;
+}
+
+function buildBattleReportAggregate(
+    matches: DotaMatchPlayer[],
+    accountId: number,
+    heroId: number,
+    predictedPosition: number
+): CMsgBattleReportAggregateStats_CMsgBattleReportAggregate {
+    const filtered = matches.filter(
+        (match) =>
+            match.accountId === accountId &&
+            (heroId === 0 || match.heroId === heroId) &&
+            (predictedPosition < 0 || roleFromPlayerSlot(match.playerSlot) === predictedPosition)
+    );
+
+    return {
+        heroId,
+        predictedPosition,
+        gameCount: filtered.length,
+        winCount: filtered.filter((match) => match.winner).length,
+        laneWinCount: 0,
+        kills: stat(filtered.map((match) => match.kills)),
+        deaths: stat(filtered.map((match) => match.deaths)),
+        assists: stat(filtered.map((match) => match.assists)),
+        lastHits: stat(filtered.map((match) => match.lastHits)),
+        denies: stat(filtered.map((match) => match.denies)),
+        gpm: stat(filtered.map((match) => match.gpm)),
+        xpm: stat(filtered.map((match) => match.xpm)),
+        supportGold: stat(filtered.map((match) => match.supportGold)),
+        heroDamage: stat(filtered.map((match) => match.heroDamage)),
+        heroHealing: stat(filtered.map((match) => match.heroHealing)),
+        towerDamage: stat(filtered.map((match) => match.towerDamage)),
+        duration: stat(filtered.map((match) => match.duration))
+    };
+}
+
+function stat(values: number[]): CMsgBattleReportAggregateStats_CMsgBattleReportStat {
+    if (values.length === 0) {
+        return { mean: 0, stdev: 0 };
+    }
+
+    const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+    const variance = values.reduce((sum, value) => sum + (value - mean) * (value - mean), 0) / values.length;
+    return { mean, stdev: Math.sqrt(variance) };
+}
+
+function roleFromPlayerSlot(playerSlot: number): number {
+    const slot = playerSlot % 5;
+    if (slot < 0 || slot > 4) {
+        return -1;
+    }
+
+    return slot;
+}
+
+function mapHeroStickers(stickers: DotaHeroSticker[]): CMsgStickerHero[] {
+    return stickers.map((sticker) => ({
+        heroId: sticker.heroId,
+        itemDefId: sticker.itemDefId,
+        quality: sticker.quality,
+        sourceItemId: sticker.sourceItemId
+    }));
 }
 
 function buildProfileResponse<TRequest, TResponse>(
