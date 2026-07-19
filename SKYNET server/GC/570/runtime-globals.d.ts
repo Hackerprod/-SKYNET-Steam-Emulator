@@ -30,6 +30,15 @@ declare global {
     function dotaSocialFeed(accountId: number, selfOnly: boolean): unknown;
     function dotaSocialFeedComments(feedEventId: bigint): unknown;
     function dotaSocialFeedPostComment(feedEventId: bigint, comment: string): boolean;
+    function dotaChatJoinChannel(channelName: string, channelType: number): unknown;
+    function dotaChatChannel(channelId: bigint): unknown;
+    function dotaChatLeaveChannel(channelId: bigint): boolean;
+    function dotaChatBroadcast(
+        channelId: bigint,
+        messageType: number,
+        payload: Uint8Array,
+        includeSelf: boolean
+    ): number;
     function dotaLookupAccountName(accountId: number): unknown;
     function dotaEventPoints(accountId: number, eventId: number): unknown;
     function dotaHeroStandings(accountId: number): unknown;

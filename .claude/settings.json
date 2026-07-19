@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(graphify query *)",
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\(JSON.stringify\\(p.scripts,null,2\\)\\); console.log\\('pm:', p.packageManager||'n/a'\\)\")"
+    ]
+  }
+}

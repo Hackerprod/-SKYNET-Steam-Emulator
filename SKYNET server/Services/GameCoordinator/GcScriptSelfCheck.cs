@@ -38,6 +38,7 @@ public static class GcScriptSelfCheck
         ok &= ExpectHandled(plugin, context, 2617, 0, write);
         ok &= ExpectHandled(plugin, context, 4523, 0, write);
         ok &= ExpectResponse(plugin, context, 7009, 7010, 1, write);
+        ok &= ExpectChatFlow(plugin, context, write);
         ok &= ExpectResponse(plugin, context, 7274, 7275, 1, write);
         ok &= ExpectResponse(plugin, context, 7387, 7388, 1, write);
         ok &= ExpectResponse(plugin, context, 7408, 7409, 1, write);
@@ -126,6 +127,48 @@ public static class GcScriptSelfCheck
         return ok;
     }
 
+    private static bool ExpectChatFlow(
+        GameCoordinatorScriptPlugin plugin,
+        GameCoordinatorContext context,
+        Action<string> write)
+    {
+        var joinResponse = plugin.Exchange(context, Request(7009));
+        var joinOk = joinResponse.Handled
+            && joinResponse.Messages.Count == 1
+            && joinResponse.Messages[0].MessageType == 7010;
+        if (!joinOk)
+        {
+            write($"chat flow -> join handled={joinResponse.Handled}, messages={joinResponse.Messages.Count}, ok=False");
+            return false;
+        }
+
+        var join = Deserialize<CMsgDOTAJoinChatChannelResponse>(joinResponse.Messages[0].PayloadBase64);
+        var channelId = join.ChannelId;
+        joinOk = channelId != 0 && join.Members.Count == 1 && join.Members[0].SteamId == context.SteamId;
+
+        var chatBody = Serialize(new CMsgDOTAChatMessage { ChannelId = channelId, Text = "hello" });
+        var chatResponse = plugin.Exchange(context, Request(7273, chatBody));
+        var echo = chatResponse.Messages.Count == 1 && chatResponse.Messages[0].MessageType == 7273
+            ? Deserialize<CMsgDOTAChatMessage>(chatResponse.Messages[0].PayloadBase64)
+            : null;
+        var chatOk = chatResponse.Handled
+            && echo != null
+            && echo.ChannelId == channelId
+            && echo.Text == "hello"
+            && echo.PersonaName == context.PersonaName
+            && echo.AccountId == context.AccountId;
+
+        var leaveResponse = plugin.Exchange(context, Request(7272, Serialize(new CMsgDOTALeaveChatChannel { ChannelId = channelId })));
+        var leaveOk = leaveResponse.Handled && leaveResponse.Messages.Count == 0;
+
+        var afterLeaveResponse = plugin.Exchange(context, Request(7273, chatBody));
+        var afterLeaveOk = afterLeaveResponse.Handled && afterLeaveResponse.Messages.Count == 0;
+
+        var ok = joinOk && chatOk && leaveOk && afterLeaveOk;
+        write($"chat flow -> join={joinOk}, echo={chatOk}, leave={leaveOk}, afterLeave={afterLeaveOk}, ok={ok}");
+        return ok;
+    }
+
     private static bool ExpectUnhandled(
         GameCoordinatorScriptPlugin plugin,
         GameCoordinatorContext context,
@@ -148,6 +191,26 @@ public static class GcScriptSelfCheck
             SteamId = TestSteamId,
             GameServer = false
         };
+    }
+
+    private static ApiGCExchangeRequest Request(uint messageType, byte[] body)
+    {
+        var request = Request(messageType);
+        request.BodyBase64 = Convert.ToBase64String(body);
+        return request;
+    }
+
+    private static byte[] Serialize<TMessage>(TMessage message)
+    {
+        using var stream = new MemoryStream();
+        ProtoBuf.Serializer.Serialize(stream, message);
+        return stream.ToArray();
+    }
+
+    private static TMessage Deserialize<TMessage>(string? payloadBase64)
+    {
+        using var stream = new MemoryStream(Convert.FromBase64String(payloadBase64 ?? string.Empty));
+        return ProtoBuf.Serializer.Deserialize<TMessage>(stream);
     }
 
     private static string ResolveContentRoot(string start)

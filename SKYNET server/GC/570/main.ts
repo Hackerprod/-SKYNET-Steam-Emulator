@@ -1,5 +1,6 @@
 import { gc } from "./framework/gc";
 import { registerAuth } from "./modules/Auth";
+import { registerChat } from "./modules/Chat";
 import { registerCoaching } from "./modules/Coaching";
 import { registerEconomy } from "./modules/Economy";
 import { registerGuilds } from "./modules/Guilds";
@@ -23,6 +24,7 @@ registerMatch();
 registerGuilds();
 registerCoaching();
 registerSocial();
+registerChat();
 
 export async function handle(): Promise<boolean> {
     return await gc.dispatch();

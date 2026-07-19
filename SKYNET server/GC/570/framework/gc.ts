@@ -52,6 +52,7 @@ export interface GcServices {
     readonly items: DotaItemService;
     readonly profiles: DotaProfileService;
     readonly social: DotaSocialService;
+    readonly chat: DotaChatService;
     readonly stats: DotaStatsService;
 }
 
@@ -95,6 +96,31 @@ export interface DotaSocialService {
     feed(accountId: number, selfOnly: boolean): DotaSocialFeedEvent[];
     comments(feedEventId: bigint): DotaSocialFeedComment[];
     postComment(feedEventId: bigint, comment: string): boolean;
+}
+
+export interface DotaChatService {
+    join(channelName: string, channelType: number): DotaChatChannel | null;
+    get(channelId: bigint): DotaChatChannel | null;
+    leave(channelId: bigint): boolean;
+    broadcast(channelId: bigint, messageType: number, payload: Uint8Array, includeSelf?: boolean): number;
+}
+
+export interface DotaChatChannel {
+    readonly channelId: bigint;
+    readonly channelName: string;
+    readonly channelType: number;
+    readonly maxMembers: number;
+    readonly isMember: boolean;
+    readonly channelUserId: number;
+    readonly justJoined: boolean;
+    readonly members: DotaChatMember[];
+}
+
+export interface DotaChatMember {
+    readonly steamId: bigint;
+    readonly accountId: number;
+    readonly personaName: string;
+    readonly channelUserId: number;
 }
 
 export interface DotaStatsService {
@@ -553,6 +579,24 @@ class GcDotaSocialService implements DotaSocialService {
     }
 }
 
+class GcDotaChatService implements DotaChatService {
+    join(channelName: string, channelType: number): DotaChatChannel | null {
+        return dotaChatJoinChannel(channelName, channelType) as DotaChatChannel | null;
+    }
+
+    get(channelId: bigint): DotaChatChannel | null {
+        return dotaChatChannel(channelId) as DotaChatChannel | null;
+    }
+
+    leave(channelId: bigint): boolean {
+        return dotaChatLeaveChannel(channelId) as boolean;
+    }
+
+    broadcast(channelId: bigint, messageType: number, payload: Uint8Array, includeSelf: boolean = true): number {
+        return dotaChatBroadcast(channelId, messageType, payload, includeSelf) as number;
+    }
+}
+
 class GcDotaStatsService implements DotaStatsService {
     lookupAccountName(accountId: number): DotaAccountName {
         return dotaLookupAccountName(accountId) as DotaAccountName;
@@ -641,12 +685,14 @@ class GcServiceContainer implements GcServices {
     items: DotaItemService;
     profiles: DotaProfileService;
     social: DotaSocialService;
+    chat: DotaChatService;
     stats: DotaStatsService;
 
     constructor() {
         this.items = new GcDotaItemService();
         this.profiles = new GcDotaProfileService();
         this.social = new GcDotaSocialService();
+        this.chat = new GcDotaChatService();
         this.stats = new GcDotaStatsService();
     }
 }
