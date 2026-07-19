@@ -77,6 +77,34 @@
         "responseProto": "CMsgGCGetHeroStandingsResponse"
     },
     {
+        "name": "LookupAccountName",
+        "requestMessage": "ClientToGCLookupAccountName",
+        "requestProto": "CMsgClientToGCLookupAccountName",
+        "responseMessage": "ClientToGCLookupAccountNameResponse",
+        "responseProto": "CMsgClientToGCLookupAccountNameResponse"
+    },
+    {
+        "name": "PlayerStats",
+        "requestMessage": "ClientToGCPlayerStatsRequest",
+        "requestProto": "CMsgClientToGCPlayerStatsRequest",
+        "responseMessage": "GCToClientPlayerStatsResponse",
+        "responseProto": "CMsgGCToClientPlayerStatsResponse"
+    },
+    {
+        "name": "HeroGlobalData",
+        "requestMessage": "HeroGlobalDataRequest",
+        "requestProto": "CMsgHeroGlobalDataRequest",
+        "responseMessage": "HeroGlobalDataResponse",
+        "responseProto": "CMsgHeroGlobalDataResponse"
+    },
+    {
+        "name": "TeammateStats",
+        "requestMessage": "ClientToGCTeammateStatsRequest",
+        "requestProto": "CMsgClientToGCTeammateStatsRequest",
+        "responseMessage": "ClientToGCTeammateStatsResponse",
+        "responseProto": "CMsgClientToGCTeammateStatsResponse"
+    },
+    {
         "name": "RankRequest",
         "requestMessage": "ClientToGCRankRequest",
         "requestProto": "CMsgClientToGCRankRequest",

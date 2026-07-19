@@ -98,9 +98,18 @@ export interface DotaSocialService {
 }
 
 export interface DotaStatsService {
+    lookupAccountName(accountId: number): DotaAccountName;
     getEventPoints(accountId: number, eventId: number): DotaEventPoints;
     getHeroStandings(accountId: number): DotaHeroStanding[];
+    getHeroGlobalData(accountId: number, heroId: number): DotaHeroGlobalData;
+    getPlayerStats(accountId: number): DotaPlayerStats;
     getRank(accountId: number): DotaRank;
+    getTeammateStats(accountId: number): DotaTeammateStats[];
+}
+
+export interface DotaAccountName {
+    readonly accountId: number;
+    readonly accountName: string;
 }
 
 export interface DotaProfileSnapshot {
@@ -227,6 +236,31 @@ export interface DotaEventPoints {
     readonly activeSeasonId: number;
 }
 
+export interface DotaPlayerStats {
+    readonly accountId: number;
+    readonly matchCount: number;
+    readonly meanGpm: number;
+    readonly meanXppm: number;
+    readonly meanLasthits: number;
+    readonly rampages: number;
+    readonly tripleKills: number;
+    readonly firstBloodClaimed: number;
+    readonly firstBloodGiven: number;
+    readonly couriersKilled: number;
+    readonly aegisesSnatched: number;
+    readonly cheesesEaten: number;
+    readonly creepsStacked: number;
+    readonly fightScore: number;
+    readonly farmScore: number;
+    readonly supportScore: number;
+    readonly pushScore: number;
+    readonly versatilityScore: number;
+    readonly meanNetworth: number;
+    readonly meanDamage: number;
+    readonly meanHeals: number;
+    readonly rapiersPurchased: number;
+}
+
 export interface DotaHeroStanding {
     readonly heroId: number;
     readonly wins: number;
@@ -253,12 +287,43 @@ export interface DotaHeroStanding {
     readonly avgDenies: number;
 }
 
+export interface DotaHeroGlobalData {
+    readonly heroId: number;
+    readonly heroDataPerChunk: DotaHeroGlobalDataChunk[];
+}
+
+export interface DotaHeroGlobalDataChunk {
+    readonly rankChunk: number;
+    readonly heroAverages: DotaGlobalHeroAverages;
+}
+
+export interface DotaGlobalHeroAverages {
+    readonly lastRun: number;
+    readonly avgGoldPerMin: number;
+    readonly avgXpPerMin: number;
+    readonly avgKills: number;
+    readonly avgDeaths: number;
+    readonly avgAssists: number;
+    readonly avgLastHits: number;
+    readonly avgDenies: number;
+    readonly avgNetWorth: number;
+}
+
 export interface DotaRank {
     readonly result: number;
     readonly rankValue: number;
     readonly rankData1: number;
     readonly rankData2: number;
     readonly rankData3: number;
+}
+
+export interface DotaTeammateStats {
+    readonly accountId: number;
+    readonly games: number;
+    readonly wins: number;
+    readonly mostRecentGameTimestamp: number;
+    readonly mostRecentGameMatchId: bigint;
+    readonly performance: number;
 }
 
 function currentSteamId(): bigint {
@@ -352,6 +417,10 @@ class GcDotaSocialService implements DotaSocialService {
 }
 
 class GcDotaStatsService implements DotaStatsService {
+    lookupAccountName(accountId: number): DotaAccountName {
+        return dotaLookupAccountName(accountId) as DotaAccountName;
+    }
+
     getEventPoints(accountId: number, eventId: number): DotaEventPoints {
         return dotaEventPoints(accountId, eventId) as DotaEventPoints;
     }
@@ -360,8 +429,20 @@ class GcDotaStatsService implements DotaStatsService {
         return dotaHeroStandings(accountId) as DotaHeroStanding[];
     }
 
+    getHeroGlobalData(accountId: number, heroId: number): DotaHeroGlobalData {
+        return dotaHeroGlobalData(accountId, heroId) as DotaHeroGlobalData;
+    }
+
+    getPlayerStats(accountId: number): DotaPlayerStats {
+        return dotaPlayerStats(accountId) as DotaPlayerStats;
+    }
+
     getRank(accountId: number): DotaRank {
         return dotaRank(accountId) as DotaRank;
+    }
+
+    getTeammateStats(accountId: number): DotaTeammateStats[] {
+        return dotaTeammateStats(accountId) as DotaTeammateStats[];
     }
 }
 

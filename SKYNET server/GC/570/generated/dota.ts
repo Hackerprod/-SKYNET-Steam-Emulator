@@ -24971,18 +24971,36 @@ export const Routes = {
         responseId: Msg.ClientToGCGetTrophyListResponse,
         response: Proto.CMsgClientToGCGetTrophyListResponse
     } as GcRoute<CMsgClientToGCGetTrophyList, CMsgClientToGCGetTrophyListResponse>,
+    HeroGlobalData: {
+        requestId: Msg.HeroGlobalDataRequest,
+        request: Proto.CMsgHeroGlobalDataRequest,
+        responseId: Msg.HeroGlobalDataResponse,
+        response: Proto.CMsgHeroGlobalDataResponse
+    } as GcRoute<CMsgHeroGlobalDataRequest, CMsgHeroGlobalDataResponse>,
     JoinChatChannel: {
         requestId: Msg.GCJoinChatChannel,
         request: Proto.CMsgDOTAJoinChatChannel,
         responseId: Msg.GCJoinChatChannelResponse,
         response: Proto.CMsgDOTAJoinChatChannelResponse
     } as GcRoute<CMsgDOTAJoinChatChannel, CMsgDOTAJoinChatChannelResponse>,
+    LookupAccountName: {
+        requestId: Msg.ClientToGCLookupAccountName,
+        request: Proto.CMsgClientToGCLookupAccountName,
+        responseId: Msg.ClientToGCLookupAccountNameResponse,
+        response: Proto.CMsgClientToGCLookupAccountNameResponse
+    } as GcRoute<CMsgClientToGCLookupAccountName, CMsgClientToGCLookupAccountNameResponse>,
     Notifications: {
         requestId: Msg.GCNotificationsRequest,
         request: Proto.CMsgGCNotificationsRequest,
         responseId: Msg.GCNotificationsResponse,
         response: Proto.CMsgGCNotificationsResponse
     } as GcRoute<CMsgGCNotificationsRequest, CMsgGCNotificationsResponse>,
+    PlayerStats: {
+        requestId: Msg.ClientToGCPlayerStatsRequest,
+        request: Proto.CMsgClientToGCPlayerStatsRequest,
+        responseId: Msg.GCToClientPlayerStatsResponse,
+        response: Proto.CMsgGCToClientPlayerStatsResponse
+    } as GcRoute<CMsgClientToGCPlayerStatsRequest, CMsgGCToClientPlayerStatsResponse>,
     ProfileRequest: {
         requestId: Msg.ProfileRequest,
         request: Proto.CMsgProfileRequest,
@@ -25037,4 +25055,10 @@ export const Routes = {
         responseId: Msg.GCToClientSocialFeedPostCommentResponse,
         response: Proto.CMsgGCToClientSocialFeedPostCommentResponse
     } as GcRoute<CMsgClientToGCSocialFeedPostCommentRequest, CMsgGCToClientSocialFeedPostCommentResponse>,
+    TeammateStats: {
+        requestId: Msg.ClientToGCTeammateStatsRequest,
+        request: Proto.CMsgClientToGCTeammateStatsRequest,
+        responseId: Msg.ClientToGCTeammateStatsResponse,
+        response: Proto.CMsgClientToGCTeammateStatsResponse
+    } as GcRoute<CMsgClientToGCTeammateStatsRequest, CMsgClientToGCTeammateStatsResponse>,
 } as const;

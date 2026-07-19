@@ -32,6 +32,7 @@ public static class GcScriptSelfCheck
         var ok = true;
         ok &= ExpectSequence(plugin, context, 4006, new uint[] { 4009, 4004, 4009 }, write);
         ok &= ExpectResponse(plugin, context, 2536, 2537, 1, write);
+        ok &= ExpectResponse(plugin, context, 2581, 2582, 1, write);
         ok &= ExpectResponse(plugin, context, 2569, 2570, 1, write);
         ok &= ExpectResponse(plugin, context, 2577, 2578, 1, write);
         ok &= ExpectHandled(plugin, context, 2617, 0, write);
@@ -45,12 +46,15 @@ public static class GcScriptSelfCheck
         ok &= ExpectResponse(plugin, context, 7534, 7535, 1, write);
         ok &= ExpectResponse(plugin, context, 7538, 7539, 1, write);
         ok &= ExpectResponse(plugin, context, 7606, 7607, 1, write);
+        ok &= ExpectResponse(plugin, context, 8006, 8007, 1, write);
         ok &= ExpectResponse(plugin, context, 8009, 8010, 1, write);
         ok &= ExpectResponse(plugin, context, 8016, 8017, 1, write);
         ok &= ExpectResponse(plugin, context, 8034, 8035, 1, write);
         ok &= ExpectResponse(plugin, context, 8073, 8074, 1, write);
+        ok &= ExpectResponse(plugin, context, 8124, 8125, 1, write);
         ok &= ExpectResponse(plugin, context, 8268, 8269, 1, write);
         ok &= ExpectResponse(plugin, context, 8270, 8271, 1, write);
+        ok &= ExpectResponse(plugin, context, 8274, 8275, 1, write);
         ok &= ExpectResponse(plugin, context, 8303, 8304, 1, write);
         ok &= ExpectResponse(plugin, context, 8305, 8306, 1, write);
         ok &= ExpectResponse(plugin, context, 8793, 8794, 1, write);

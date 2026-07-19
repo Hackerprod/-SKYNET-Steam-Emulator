@@ -1,12 +1,20 @@
 import { DotaHeroStanding, HandlerContext, gc } from "../framework/gc";
 import {
+    CMsgClientToGCLookupAccountName,
+    CMsgClientToGCLookupAccountNameResponse,
+    CMsgClientToGCPlayerStatsRequest,
     CMsgClientToGCRankRequest,
+    CMsgClientToGCTeammateStatsRequest,
+    CMsgClientToGCTeammateStatsResponse,
     CMsgDOTAGetEventPoints,
     CMsgDOTAGetEventPointsResponse,
     CMsgGCGetHeroStandings,
     CMsgGCGetHeroStandingsResponse,
     CMsgGCGetHeroStandingsResponse_Hero,
+    CMsgGCToClientPlayerStatsResponse,
     CMsgGCToClientRankResponse,
+    CMsgHeroGlobalDataRequest,
+    CMsgHeroGlobalDataResponse,
     Msg,
     Routes
 } from "../generated/dota";
@@ -18,16 +26,16 @@ export function registerStats(): void {
 
 export class Stats {
     register(): void {
-        gc.onMessage(Msg.ClientToGCLookupAccountName, () => this.lookupAccountName());
+        gc.on(Routes.LookupAccountName, (ctx) => this.lookupAccountName(ctx));
         gc.on(Routes.GetEventPoints, (ctx) => this.getEventPoints(ctx));
         gc.onMessage(Msg.GCMatchmakingStatsRequest, () => this.matchmakingStats());
         gc.on(Routes.GetHeroStandings, (ctx) => this.getHeroStandings(ctx));
         gc.onMessage(Msg.GCGetHeroStatsHistory, () => this.getHeroStatsHistory());
         gc.onMessage(Msg.DOTAGetPlayerMatchHistory, () => this.getPlayerMatchHistory());
         gc.onMessage(Msg.GCMatchDetailsRequest, () => this.matchDetails());
-        gc.onMessage(Msg.ClientToGCPlayerStatsRequest, () => this.playerStats());
-        gc.onMessage(Msg.HeroGlobalDataRequest, () => this.heroGlobalData());
-        gc.onMessage(Msg.ClientToGCTeammateStatsRequest, () => this.teammateStats());
+        gc.on(Routes.PlayerStats, (ctx) => this.playerStats(ctx));
+        gc.on(Routes.HeroGlobalData, (ctx) => this.heroGlobalData(ctx));
+        gc.on(Routes.TeammateStats, (ctx) => this.teammateStats(ctx));
         gc.on(Routes.RankRequest, (ctx) => this.rankRequest(ctx));
         gc.onMessage(Msg.ClientToGCShowcaseGetUserData, () => this.showcaseGetUserData());
         gc.onMessage(Msg.ClientToGCRequestPlayerRecentAccomplishments, () => this.clientRecentAccomplishments());
@@ -42,8 +50,11 @@ export class Stats {
         gc.onMessage(Msg.ClientToGCRerollPlayerChallenge, () => this.rerollPlayerChallenge());
     }
 
-    lookupAccountName(): boolean {
-        return false;
+    lookupAccountName(
+        ctx: HandlerContext<CMsgClientToGCLookupAccountName, CMsgClientToGCLookupAccountNameResponse>
+    ): boolean {
+        ctx.reply(ctx.services.stats.lookupAccountName(ctx.request.accountId ?? ctx.accountId));
+        return true;
     }
     getEventPoints(ctx: HandlerContext<CMsgDOTAGetEventPoints, CMsgDOTAGetEventPointsResponse>): boolean {
         const points = ctx.services.stats.getEventPoints(
@@ -85,17 +96,42 @@ export class Stats {
     retrieveMatchVote(): boolean {
         return false;
     }
-    playerStats(): boolean {
-        return false;
+    playerStats(ctx: HandlerContext<CMsgClientToGCPlayerStatsRequest, CMsgGCToClientPlayerStatsResponse>): boolean {
+        ctx.reply(ctx.services.stats.getPlayerStats(ctx.request.accountId ?? ctx.accountId));
+        return true;
     }
     heroTimedStats(): boolean {
         return false;
     }
-    heroGlobalData(): boolean {
-        return false;
+    heroGlobalData(ctx: HandlerContext<CMsgHeroGlobalDataRequest, CMsgHeroGlobalDataResponse>): boolean {
+        const data = ctx.services.stats.getHeroGlobalData(ctx.accountId, ctx.request.heroId ?? 0);
+        ctx.reply({
+            heroId: data.heroId,
+            heroDataPerChunk: data.heroDataPerChunk.map((chunk) => ({
+                rankChunk: chunk.rankChunk,
+                heroAverages: {
+                    lastRun: chunk.heroAverages.lastRun,
+                    avgGoldPerMin: chunk.heroAverages.avgGoldPerMin,
+                    avgXpPerMin: chunk.heroAverages.avgXpPerMin,
+                    avgKills: chunk.heroAverages.avgKills,
+                    avgDeaths: chunk.heroAverages.avgDeaths,
+                    avgAssists: chunk.heroAverages.avgAssists,
+                    avgLastHits: chunk.heroAverages.avgLastHits,
+                    avgDenies: chunk.heroAverages.avgDenies,
+                    avgNetWorth: chunk.heroAverages.avgNetWorth
+                }
+            }))
+        });
+        return true;
     }
-    teammateStats(): boolean {
-        return false;
+    teammateStats(
+        ctx: HandlerContext<CMsgClientToGCTeammateStatsRequest, CMsgClientToGCTeammateStatsResponse>
+    ): boolean {
+        ctx.reply({
+            success: true,
+            teammateStats: ctx.services.stats.getTeammateStats(ctx.accountId)
+        });
+        return true;
     }
     rankRequest(ctx: HandlerContext<CMsgClientToGCRankRequest, CMsgGCToClientRankResponse>): boolean {
         ctx.reply(ctx.services.stats.getRank(ctx.accountId));

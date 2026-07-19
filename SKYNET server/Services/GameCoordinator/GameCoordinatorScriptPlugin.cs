@@ -8,6 +8,7 @@ namespace SKYNET_server.Services;
 public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameCoordinatorTicker
 {
     private const long ScriptMemoryLimitBytes = 768L * 1024 * 1024;
+    private const long ScriptMaximumInstructions = 100_000_000;
     private static readonly TimeSpan ScriptExecutionTimeout = TimeSpan.FromSeconds(120);
     private readonly ILogger<GameCoordinatorScriptPlugin> _logger;
     private readonly GameCoordinatorTraceService _trace;
@@ -162,7 +163,7 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .ConfigureLimits(options =>
                 {
                     options.ExecutionTimeout = ScriptExecutionTimeout;
-                    options.MaximumInstructions = 25_000_000;
+                    options.MaximumInstructions = ScriptMaximumInstructions;
                     options.MaximumMemoryBytes = ScriptMemoryLimitBytes;
                 })
                 .RegisterHostFunction("gc", "messageType", _ => dispatcher.RequireCurrent().MessageType())
@@ -187,9 +188,13 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .RegisterHostFunction("gc", "dotaSocialFeed", dispatcher.DotaSocialFeed)
                 .RegisterHostFunction("gc", "dotaSocialFeedComments", dispatcher.DotaSocialFeedComments)
                 .RegisterHostFunction("gc", "dotaSocialFeedPostComment", dispatcher.DotaSocialFeedPostComment)
+                .RegisterHostFunction("gc", "dotaLookupAccountName", dispatcher.DotaLookupAccountName)
                 .RegisterHostFunction("gc", "dotaEventPoints", dispatcher.DotaEventPoints)
                 .RegisterHostFunction("gc", "dotaHeroStandings", dispatcher.DotaHeroStandings)
-                .RegisterHostFunction("gc", "dotaRank", dispatcher.DotaRank);
+                .RegisterHostFunction("gc", "dotaHeroGlobalData", dispatcher.DotaHeroGlobalData)
+                .RegisterHostFunction("gc", "dotaPlayerStats", dispatcher.DotaPlayerStats)
+                .RegisterHostFunction("gc", "dotaRank", dispatcher.DotaRank)
+                .RegisterHostFunction("gc", "dotaTeammateStats", dispatcher.DotaTeammateStats);
 
             foreach (var sourceFile in EnumerateRuntimeScriptFiles(scriptRoot))
             {
@@ -375,6 +380,11 @@ internal sealed class ScriptHostDispatcher
         return RequireCurrent().DotaSocialFeedPostComment(args);
     }
 
+    public TsValue? DotaLookupAccountName(TsValue[] args)
+    {
+        return RequireCurrent().DotaLookupAccountName(args);
+    }
+
     public TsValue? DotaEventPoints(TsValue[] args)
     {
         return RequireCurrent().DotaEventPoints(args);
@@ -385,9 +395,24 @@ internal sealed class ScriptHostDispatcher
         return RequireCurrent().DotaHeroStandings(args);
     }
 
+    public TsValue? DotaHeroGlobalData(TsValue[] args)
+    {
+        return RequireCurrent().DotaHeroGlobalData(args);
+    }
+
+    public TsValue? DotaPlayerStats(TsValue[] args)
+    {
+        return RequireCurrent().DotaPlayerStats(args);
+    }
+
     public TsValue? DotaRank(TsValue[] args)
     {
         return RequireCurrent().DotaRank(args);
+    }
+
+    public TsValue? DotaTeammateStats(TsValue[] args)
+    {
+        return RequireCurrent().DotaTeammateStats(args);
     }
 }
 
@@ -664,6 +689,26 @@ internal sealed class ScriptExchangeHost
         return TsValue.FromBool(DotaGcBackend.StatsStore?.SaveSocialFeedComment(feedEventId, _context.AccountId, comment) ?? false);
     }
 
+    public TsValue DotaLookupAccountName(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaLookupAccountName(accountId) requires one argument");
+        }
+
+        var accountId = Convert.ToUInt32(ToNumber(args[0], "dotaLookupAccountName.accountId"));
+        if (accountId == 0)
+        {
+            accountId = _context.AccountId;
+        }
+
+        var profile = GetStatsProfile(accountId);
+        var value = new TsObject("DotaAccountName");
+        value.SetField("accountId", TsValue.FromInt32(unchecked((int)profile.AccountId)));
+        value.SetField("accountName", TsValue.FromString(profile.PersonaName ?? string.Empty));
+        return new TsObjectValue(value);
+    }
+
     public TsValue DotaEventPoints(TsValue[] args)
     {
         if (args.Length < 2)
@@ -710,6 +755,39 @@ internal sealed class ScriptExchangeHost
         return ToTsHeroStandings(DotaGcBackend.StatsStore?.GetHeroStandings(accountId) ?? Array.Empty<DotaStatsHeroStats>());
     }
 
+    public TsValue DotaHeroGlobalData(TsValue[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new InvalidOperationException("dotaHeroGlobalData(accountId, heroId) requires two arguments");
+        }
+
+        var accountId = Convert.ToUInt32(ToNumber(args[0], "dotaHeroGlobalData.accountId"));
+        if (accountId == 0)
+        {
+            accountId = _context.AccountId;
+        }
+
+        var heroId = Convert.ToUInt32(ToNumber(args[1], "dotaHeroGlobalData.heroId"));
+        var standings = DotaGcBackend.StatsStore?.GetHeroStandings(accountId) ?? Array.Empty<DotaStatsHeroStats>();
+        var hero = standings.FirstOrDefault(item => item.HeroId == heroId);
+        return ToTsHeroGlobalData(heroId, hero, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+    }
+
+    public TsValue DotaPlayerStats(TsValue[] args)
+    {
+        var accountId = args.Length > 0
+            ? Convert.ToUInt32(ToNumber(args[0], "dotaPlayerStats.accountId"))
+            : _context.AccountId;
+        if (accountId == 0)
+        {
+            accountId = _context.AccountId;
+        }
+
+        var stats = DotaGcBackend.StatsStore?.GetGlobalStats(accountId) ?? new DotaStatsGlobalStats { AccountId = accountId };
+        return ToTsPlayerStats(stats);
+    }
+
     public TsValue DotaRank(TsValue[] args)
     {
         var accountId = args.Length > 0
@@ -728,6 +806,19 @@ internal sealed class ScriptExchangeHost
         value.SetField("rankData2", TsValue.FromInt32(unchecked((int)profile.RankTierScore)));
         value.SetField("rankData3", TsValue.FromInt32(unchecked((int)profile.LeaderboardRank)));
         return new TsObjectValue(value);
+    }
+
+    public TsValue DotaTeammateStats(TsValue[] args)
+    {
+        var accountId = args.Length > 0
+            ? Convert.ToUInt32(ToNumber(args[0], "dotaTeammateStats.accountId"))
+            : _context.AccountId;
+        if (accountId == 0)
+        {
+            accountId = _context.AccountId;
+        }
+
+        return ToTsTeammateStats(DotaGcBackend.StatsStore?.GetTeammateStats(accountId) ?? Array.Empty<DotaStatsTeammate>());
     }
 
     private DotaStatsProfile GetStatsProfile(uint accountId)
@@ -791,6 +882,36 @@ internal sealed class ScriptExchangeHost
         HeroIds = new List<uint>(),
         ProfileName = personaName ?? string.Empty
     };
+
+    private static TsValue ToTsPlayerStats(DotaStatsGlobalStats stats)
+    {
+        static double Score(double value, double divisor = 1.0) => 0.5 + Math.Min(1.0, value / divisor) / 2.0;
+
+        var value = new TsObject("DotaPlayerStats");
+        value.SetField("accountId", TsValue.FromInt32(unchecked((int)stats.AccountId)));
+        value.SetField("matchCount", TsValue.FromInt32(unchecked((int)stats.MatchCount)));
+        value.SetField("meanGpm", TsValue.FromFloat64(stats.MediaGpm));
+        value.SetField("meanXppm", TsValue.FromFloat64(stats.MediaXpm));
+        value.SetField("meanLasthits", TsValue.FromFloat64(stats.MediaLastHits));
+        value.SetField("rampages", TsValue.FromInt32(unchecked((int)stats.Rampages)));
+        value.SetField("tripleKills", TsValue.FromInt32(unchecked((int)stats.TripleKills)));
+        value.SetField("firstBloodClaimed", TsValue.FromInt32(unchecked((int)stats.FirstBloodsReceived)));
+        value.SetField("firstBloodGiven", TsValue.FromInt32(unchecked((int)stats.FirstBloodsGiven)));
+        value.SetField("couriersKilled", TsValue.FromInt32(unchecked((int)stats.CouriersKilled)));
+        value.SetField("aegisesSnatched", TsValue.FromInt32(unchecked((int)stats.AegisesSnatched)));
+        value.SetField("cheesesEaten", TsValue.FromInt32(unchecked((int)stats.CheesesEaten)));
+        value.SetField("creepsStacked", TsValue.FromInt32(unchecked((int)stats.CreepsStacked)));
+        value.SetField("fightScore", TsValue.FromFloat64(Score(stats.AvgFightScore)));
+        value.SetField("farmScore", TsValue.FromFloat64(Score(stats.AvgFarmScore, 500.0)));
+        value.SetField("supportScore", TsValue.FromFloat64(Score(stats.AvgSupportScore, 10000.0)));
+        value.SetField("pushScore", TsValue.FromFloat64(Score(stats.AvgPushScore, 2500.0)));
+        value.SetField("versatilityScore", TsValue.FromFloat64(Score(stats.PlayedHeroCount, 123.0)));
+        value.SetField("meanNetworth", TsValue.FromFloat64(stats.MeanNetworth));
+        value.SetField("meanDamage", TsValue.FromFloat64(stats.MeanDamage));
+        value.SetField("meanHeals", TsValue.FromFloat64(stats.MeanHeals));
+        value.SetField("rapiersPurchased", TsValue.FromInt32(unchecked((int)stats.RapiersPurchased)));
+        return new TsObjectValue(value);
+    }
 
     private static TsValue ToTsGlobalStats(DotaStatsGlobalStats stats)
     {
@@ -970,6 +1091,51 @@ internal sealed class ScriptExchangeHost
             value.SetField("healingPeak", TsValue.FromInt32(unchecked((int)hero.HealingPeak)));
             value.SetField("avgLasthits", TsValue.FromFloat64(hero.AvgLastHits));
             value.SetField("avgDenies", TsValue.FromFloat64(hero.AvgDenies));
+            array.Add(new TsObjectValue(value));
+        }
+
+        return new TsArrayValue(array);
+    }
+
+    private static TsValue ToTsHeroGlobalData(uint heroId, DotaStatsHeroStats? hero, long timestamp)
+    {
+        var value = new TsObject("DotaHeroGlobalData");
+        value.SetField("heroId", TsValue.FromInt32(unchecked((int)heroId)));
+
+        var chunk = new TsObject("DotaHeroGlobalDataChunk");
+        chunk.SetField("rankChunk", TsValue.FromInt32(0));
+
+        var averages = new TsObject("DotaGlobalHeroAverages");
+        averages.SetField("lastRun", TsValue.FromInt32(unchecked((int)timestamp)));
+        averages.SetField("avgGoldPerMin", TsValue.FromInt32(hero == null ? 0 : unchecked((int)Math.Round(hero.AvgGpm))));
+        averages.SetField("avgXpPerMin", TsValue.FromInt32(hero == null ? 0 : unchecked((int)Math.Round(hero.AvgXpm))));
+        averages.SetField("avgKills", TsValue.FromInt32(hero == null ? 0 : unchecked((int)Math.Round(hero.AvgKills))));
+        averages.SetField("avgDeaths", TsValue.FromInt32(hero == null ? 0 : unchecked((int)Math.Round(hero.AvgDeaths))));
+        averages.SetField("avgAssists", TsValue.FromInt32(hero == null ? 0 : unchecked((int)Math.Round(hero.AvgAssists))));
+        averages.SetField("avgLastHits", TsValue.FromInt32(hero == null ? 0 : unchecked((int)Math.Round(hero.AvgLastHits))));
+        averages.SetField("avgDenies", TsValue.FromInt32(hero == null ? 0 : unchecked((int)Math.Round(hero.AvgDenies))));
+        averages.SetField("avgNetWorth", TsValue.FromInt32(hero == null ? 0 : unchecked((int)hero.NetworthPeak)));
+        chunk.SetField("heroAverages", new TsObjectValue(averages));
+
+        var chunks = new TsArray();
+        chunks.Add(new TsObjectValue(chunk));
+        value.SetField("heroDataPerChunk", new TsArrayValue(chunks));
+        return new TsObjectValue(value);
+    }
+
+    private static TsValue ToTsTeammateStats(IEnumerable<DotaStatsTeammate> teammates)
+    {
+        var array = new TsArray();
+        foreach (var teammate in teammates)
+        {
+            var value = new TsObject("DotaTeammateStats");
+            value.SetField("accountId", TsValue.FromInt32(unchecked((int)teammate.AccountId)));
+            value.SetField("games", TsValue.FromInt32(unchecked((int)teammate.Games)));
+            value.SetField("wins", TsValue.FromInt32(unchecked((int)teammate.Wins)));
+            value.SetField("mostRecentGameTimestamp", TsValue.FromInt32(unchecked((int)teammate.MostRecentGameTimestamp)));
+            value.SetField("mostRecentGameMatchId", TsValue.FromUInt64(teammate.MostRecentGameMatchId));
+            var performance = teammate.Games == 0 ? 0.0 : teammate.Wins * 100.0 / teammate.Games;
+            value.SetField("performance", TsValue.FromFloat64(performance));
             array.Add(new TsObjectValue(value));
         }
 

@@ -30,9 +30,13 @@ declare global {
     function dotaSocialFeed(accountId: number, selfOnly: boolean): unknown;
     function dotaSocialFeedComments(feedEventId: bigint): unknown;
     function dotaSocialFeedPostComment(feedEventId: bigint, comment: string): boolean;
+    function dotaLookupAccountName(accountId: number): unknown;
     function dotaEventPoints(accountId: number, eventId: number): unknown;
     function dotaHeroStandings(accountId: number): unknown;
+    function dotaHeroGlobalData(accountId: number, heroId: number): unknown;
+    function dotaPlayerStats(accountId: number): unknown;
     function dotaRank(accountId: number): unknown;
+    function dotaTeammateStats(accountId: number): unknown;
 }
 
 export {};
