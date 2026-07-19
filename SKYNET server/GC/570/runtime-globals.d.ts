@@ -27,6 +27,9 @@ declare global {
     function dotaProfile(accountId: number): unknown;
     function dotaSaveProfileSlots(slots: unknown[]): boolean;
     function dotaSaveProfileUpdate(backgroundItemId: bigint, featuredHeroIds: number[]): boolean;
+    function dotaSocialFeed(accountId: number, selfOnly: boolean): unknown;
+    function dotaSocialFeedComments(feedEventId: bigint): unknown;
+    function dotaSocialFeedPostComment(feedEventId: bigint, comment: string): boolean;
 }
 
 export {};

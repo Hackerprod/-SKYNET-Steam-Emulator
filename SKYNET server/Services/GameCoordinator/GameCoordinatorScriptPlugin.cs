@@ -7,6 +7,7 @@ namespace SKYNET_server.Services;
 
 public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameCoordinatorTicker
 {
+    private const long ScriptMemoryLimitBytes = 768L * 1024 * 1024;
     private readonly ILogger<GameCoordinatorScriptPlugin> _logger;
     private readonly GameCoordinatorTraceService _trace;
     private readonly string _gcRoot;
@@ -160,7 +161,7 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .ConfigureLimits(options =>
                 {
                     options.MaximumInstructions = 25_000_000;
-                    options.MaximumMemoryBytes = 256 * 1024 * 1024;
+                    options.MaximumMemoryBytes = ScriptMemoryLimitBytes;
                 })
                 .RegisterHostFunction("gc", "messageType", _ => dispatcher.RequireCurrent().MessageType())
                 .RegisterHostFunction("gc", "body", _ => dispatcher.RequireCurrent().Body())
@@ -180,7 +181,10 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .RegisterHostFunction("gc", "dotaQueueCurrentLobbyServer", dispatcher.DotaQueueCurrentLobbyServer)
                 .RegisterHostFunction("gc", "dotaProfile", dispatcher.DotaProfile)
                 .RegisterHostFunction("gc", "dotaSaveProfileSlots", dispatcher.DotaSaveProfileSlots)
-                .RegisterHostFunction("gc", "dotaSaveProfileUpdate", dispatcher.DotaSaveProfileUpdate);
+                .RegisterHostFunction("gc", "dotaSaveProfileUpdate", dispatcher.DotaSaveProfileUpdate)
+                .RegisterHostFunction("gc", "dotaSocialFeed", dispatcher.DotaSocialFeed)
+                .RegisterHostFunction("gc", "dotaSocialFeedComments", dispatcher.DotaSocialFeedComments)
+                .RegisterHostFunction("gc", "dotaSocialFeedPostComment", dispatcher.DotaSocialFeedPostComment);
 
             foreach (var sourceFile in EnumerateRuntimeScriptFiles(scriptRoot))
             {
@@ -349,6 +353,21 @@ internal sealed class ScriptHostDispatcher
     public TsValue? DotaSaveProfileUpdate(TsValue[] args)
     {
         return RequireCurrent().DotaSaveProfileUpdate(args);
+    }
+
+    public TsValue? DotaSocialFeed(TsValue[] args)
+    {
+        return RequireCurrent().DotaSocialFeed(args);
+    }
+
+    public TsValue? DotaSocialFeedComments(TsValue[] args)
+    {
+        return RequireCurrent().DotaSocialFeedComments(args);
+    }
+
+    public TsValue? DotaSocialFeedPostComment(TsValue[] args)
+    {
+        return RequireCurrent().DotaSocialFeedPostComment(args);
     }
 }
 
@@ -579,6 +598,51 @@ internal sealed class ScriptExchangeHost
         return TsValue.FromBool(true);
     }
 
+    public TsValue DotaSocialFeed(TsValue[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new InvalidOperationException("dotaSocialFeed(accountId, selfOnly) requires two arguments");
+        }
+
+        var accountId = Convert.ToUInt32(ToNumber(args[0], "dotaSocialFeed.accountId"));
+        if (accountId == 0)
+        {
+            accountId = _context.AccountId;
+        }
+
+        var selfOnly = ToBool(args[1], "dotaSocialFeed.selfOnly");
+        return ToTsSocialFeed(DotaGcBackend.StatsStore?.GetSocialFeed(accountId, selfOnly) ?? Array.Empty<DotaStatsSocialFeedEvent>());
+    }
+
+    public TsValue DotaSocialFeedComments(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaSocialFeedComments(feedEventId) requires one argument");
+        }
+
+        var feedEventId = Convert.ToUInt64(ToInteger(args[0], "dotaSocialFeedComments.feedEventId").ToString());
+        return ToTsSocialFeedComments(feedEventId, DotaGcBackend.StatsStore?.GetSocialFeedComments(feedEventId) ?? Array.Empty<DotaStatsComment>());
+    }
+
+    public TsValue DotaSocialFeedPostComment(TsValue[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new InvalidOperationException("dotaSocialFeedPostComment(feedEventId, comment) requires two arguments");
+        }
+
+        var feedEventId = Convert.ToUInt64(ToInteger(args[0], "dotaSocialFeedPostComment.feedEventId").ToString());
+        var comment = ToString(args[1]).Trim();
+        if (feedEventId == 0 || comment.Length == 0)
+        {
+            return TsValue.FromBool(false);
+        }
+
+        return TsValue.FromBool(DotaGcBackend.StatsStore?.SaveSocialFeedComment(feedEventId, _context.AccountId, comment) ?? false);
+    }
+
     private TsValue ToTsProfileSnapshot(uint requestedAccountId)
     {
         var store = DotaGcBackend.StatsStore;
@@ -740,6 +804,46 @@ internal sealed class ScriptExchangeHost
         return new TsObjectValue(value);
     }
 
+    private static TsValue ToTsSocialFeed(IEnumerable<DotaStatsSocialFeedEvent> events)
+    {
+        var array = new TsArray();
+        foreach (var item in events)
+        {
+            var value = new TsObject("DotaSocialFeedEvent");
+            value.SetField("feedEventId", TsValue.FromUInt64(item.FeedEventId));
+            value.SetField("accountId", TsValue.FromInt32(unchecked((int)item.AccountId)));
+            value.SetField("timestamp", TsValue.FromInt32(unchecked((int)item.Timestamp)));
+            value.SetField("commentCount", TsValue.FromInt32(unchecked((int)item.CommentCount)));
+            value.SetField("eventType", TsValue.FromInt32(unchecked((int)item.EventType)));
+            value.SetField("eventSubType", TsValue.FromInt32(unchecked((int)item.EventSubType)));
+            value.SetField("paramBigInt1", TsValue.FromUInt64(item.ParamBigInt1));
+            value.SetField("paramInt1", TsValue.FromInt32(unchecked((int)item.ParamInt1)));
+            value.SetField("paramInt2", TsValue.FromInt32(unchecked((int)item.ParamInt2)));
+            value.SetField("paramInt3", TsValue.FromInt32(unchecked((int)item.ParamInt3)));
+            value.SetField("paramString", TsValue.FromString(item.ParamString ?? string.Empty));
+            array.Add(new TsObjectValue(value));
+        }
+
+        return new TsArrayValue(array);
+    }
+
+    private static TsValue ToTsSocialFeedComments(ulong feedEventId, IEnumerable<DotaStatsComment> comments)
+    {
+        var array = new TsArray();
+        foreach (var comment in comments)
+        {
+            var value = new TsObject("DotaSocialFeedComment");
+            value.SetField("feedEventId", TsValue.FromUInt64(feedEventId));
+            value.SetField("commenterAccountId", TsValue.FromInt32(unchecked((int)comment.AccountId)));
+            value.SetField("personaName", TsValue.FromString(comment.PersonaName ?? string.Empty));
+            value.SetField("commentText", TsValue.FromString(comment.Comment ?? string.Empty));
+            value.SetField("timestamp", TsValue.FromInt32(unchecked((int)comment.Timestamp)));
+            array.Add(new TsObjectValue(value));
+        }
+
+        return new TsArrayValue(array);
+    }
+
     private static TsValue ToTsUInt32Array(IEnumerable<uint> values)
     {
         var array = new TsArray();
@@ -803,6 +907,18 @@ internal sealed class ScriptExchangeHost
             TsDecimalValue decimalValue => (double)decimalValue.Value,
             TsStringValue stringValue when double.TryParse(stringValue.Value, out var parsed) => parsed,
             _ => throw new InvalidOperationException($"{path}: expected numeric value, got {value.ValueType}")
+        };
+    }
+
+    private static bool ToBool(TsValue value, string path)
+    {
+        return value switch
+        {
+            TsBoolValue boolValue => boolValue.Value,
+            TsInt32Value int32Value => int32Value.Value != 0,
+            TsInt64Value int64Value => int64Value.Value != 0,
+            TsUInt64Value uint64Value => uint64Value.Value != 0,
+            _ => throw new InvalidOperationException($"{path}: expected boolean value, got {value.ValueType}")
         };
     }
 

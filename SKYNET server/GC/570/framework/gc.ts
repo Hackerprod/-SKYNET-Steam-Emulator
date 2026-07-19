@@ -51,6 +51,7 @@ export interface Logger {
 export interface GcServices {
     readonly items: DotaItemService;
     readonly profiles: DotaProfileService;
+    readonly social: DotaSocialService;
 }
 
 export interface DotaItemService {
@@ -87,6 +88,12 @@ export interface DotaProfileService {
     get(accountId: number): DotaProfileSnapshot;
     saveCardSlots(slots: DotaProfileSlot[]): void;
     saveProfileUpdate(backgroundItemId: bigint, featuredHeroIds: number[]): void;
+}
+
+export interface DotaSocialService {
+    feed(accountId: number, selfOnly: boolean): DotaSocialFeedEvent[];
+    comments(feedEventId: bigint): DotaSocialFeedComment[];
+    postComment(feedEventId: bigint, comment: string): boolean;
 }
 
 export interface DotaProfileSnapshot {
@@ -179,6 +186,28 @@ export interface DotaAllHeroProgress {
     readonly profileName: string;
 }
 
+export interface DotaSocialFeedEvent {
+    readonly feedEventId: bigint;
+    readonly accountId: number;
+    readonly timestamp: number;
+    readonly commentCount: number;
+    readonly eventType: number;
+    readonly eventSubType: number;
+    readonly paramBigInt1: bigint;
+    readonly paramInt1: number;
+    readonly paramInt2: number;
+    readonly paramInt3: number;
+    readonly paramString: string;
+}
+
+export interface DotaSocialFeedComment {
+    readonly feedEventId: bigint;
+    readonly commenterAccountId: number;
+    readonly personaName: string;
+    readonly commentText: string;
+    readonly timestamp: number;
+}
+
 function currentSteamId(): bigint {
     return steamId();
 }
@@ -255,13 +284,29 @@ class GcDotaProfileService implements DotaProfileService {
     }
 }
 
+class GcDotaSocialService implements DotaSocialService {
+    feed(accountId: number, selfOnly: boolean): DotaSocialFeedEvent[] {
+        return dotaSocialFeed(accountId, selfOnly) as DotaSocialFeedEvent[];
+    }
+
+    comments(feedEventId: bigint): DotaSocialFeedComment[] {
+        return dotaSocialFeedComments(feedEventId) as DotaSocialFeedComment[];
+    }
+
+    postComment(feedEventId: bigint, comment: string): boolean {
+        return dotaSocialFeedPostComment(feedEventId, comment) as boolean;
+    }
+}
+
 class GcServiceContainer implements GcServices {
     items: DotaItemService;
     profiles: DotaProfileService;
+    social: DotaSocialService;
 
     constructor() {
         this.items = new GcDotaItemService();
         this.profiles = new GcDotaProfileService();
+        this.social = new GcDotaSocialService();
     }
 }
 

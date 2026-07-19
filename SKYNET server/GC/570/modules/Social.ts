@@ -1,12 +1,22 @@
-import { gc, HandlerContext, RawMessageContext } from "../framework/gc";
+import { DotaSocialFeedComment, DotaSocialFeedEvent, gc, HandlerContext, RawMessageContext } from "../framework/gc";
 import {
     CMsgClientToGCFindTopSourceTVGames,
+    CMsgClientToGCSocialFeedPostCommentRequest,
     CMsgDOTAJoinChatChannel,
     CMsgDOTAJoinChatChannelResponse,
     CMsgGCToClientFindTopSourceTVGamesResponse,
+    CMsgGCToClientSocialFeedPostCommentResponse,
     CMsgGCNotificationsRequest,
     CMsgGCNotificationsResponse,
     CMsgGCNotificationsUpdate_EResult,
+    CMsgSocialFeedCommentsRequest,
+    CMsgSocialFeedCommentsResponse,
+    CMsgSocialFeedCommentsResponse_FeedComment,
+    CMsgSocialFeedCommentsResponse_Result,
+    CMsgSocialFeedRequest,
+    CMsgSocialFeedResponse,
+    CMsgSocialFeedResponse_FeedEvent,
+    CMsgSocialFeedResponse_Result,
     Msg,
     Routes
 } from "../generated/dota";
@@ -32,9 +42,9 @@ export class Social {
         gc.on(Routes.FindTopSourceTvGames, (ctx) => {
             return this.findTopSourceTvGames(ctx);
         });
-        gc.onMessage(Msg.ClientToGCRequestSocialFeed, () => this.requestSocialFeed());
-        gc.onMessage(Msg.ClientToGCRequestSocialFeedComments, () => this.requestSocialFeedComments());
-        gc.onMessage(Msg.ClientToGCSocialFeedPostCommentRequest, () => this.socialFeedPostComment());
+        gc.on(Routes.RequestSocialFeed, (ctx) => this.requestSocialFeed(ctx));
+        gc.on(Routes.RequestSocialFeedComments, (ctx) => this.requestSocialFeedComments(ctx));
+        gc.on(Routes.SocialFeedPostComment, (ctx) => this.socialFeedPostComment(ctx));
     }
 
     joinChatChannel(ctx: HandlerContext<CMsgDOTAJoinChatChannel, CMsgDOTAJoinChatChannelResponse>): boolean {
@@ -95,15 +105,70 @@ export class Social {
     socialMatchPostComment(): boolean {
         return false;
     }
-    requestSocialFeed(): boolean {
-        return false;
+    requestSocialFeed(ctx: HandlerContext<CMsgSocialFeedRequest, CMsgSocialFeedResponse>): boolean {
+        const accountId = ctx.request.accountId ?? ctx.accountId;
+        ctx.reply({
+            result: CMsgSocialFeedResponse_Result.Success,
+            feedEvents: mapSocialFeedEvents(ctx.services.social.feed(accountId, ctx.request.selfOnly ?? false))
+        });
+        return true;
     }
-    requestSocialFeedComments(): boolean {
-        return false;
+
+    requestSocialFeedComments(
+        ctx: HandlerContext<CMsgSocialFeedCommentsRequest, CMsgSocialFeedCommentsResponse>
+    ): boolean {
+        const feedEventId = ctx.request.feedEventId ?? 0n;
+        ctx.reply({
+            result: CMsgSocialFeedCommentsResponse_Result.Success,
+            feedComments: mapSocialFeedComments(ctx.services.social.comments(feedEventId))
+        });
+        return true;
     }
-    socialFeedPostComment(): boolean {
-        return false;
+
+    socialFeedPostComment(
+        ctx: HandlerContext<CMsgClientToGCSocialFeedPostCommentRequest, CMsgGCToClientSocialFeedPostCommentResponse>
+    ): boolean {
+        ctx.reply({
+            success: ctx.services.social.postComment(ctx.request.eventId ?? 0n, ctx.request.comment ?? "")
+        });
+        return true;
     }
+}
+
+function mapSocialFeedEvents(events: DotaSocialFeedEvent[]): CMsgSocialFeedResponse_FeedEvent[] {
+    const mapped: CMsgSocialFeedResponse_FeedEvent[] = [];
+    for (let i = 0; i < events.length; i++) {
+        const item = events[i];
+        mapped.push({
+            feedEventId: item.feedEventId,
+            accountId: item.accountId,
+            timestamp: item.timestamp,
+            commentCount: item.commentCount,
+            eventType: item.eventType,
+            eventSubType: item.eventSubType,
+            paramBigInt1: item.paramBigInt1,
+            paramInt1: item.paramInt1,
+            paramInt2: item.paramInt2,
+            paramInt3: item.paramInt3,
+            paramString: item.paramString
+        });
+    }
+
+    return mapped;
+}
+
+function mapSocialFeedComments(comments: DotaSocialFeedComment[]): CMsgSocialFeedCommentsResponse_FeedComment[] {
+    const mapped: CMsgSocialFeedCommentsResponse_FeedComment[] = [];
+    for (let i = 0; i < comments.length; i++) {
+        const comment = comments[i];
+        mapped.push({
+            commenterAccountId: comment.commenterAccountId,
+            timestamp: comment.timestamp,
+            commentText: comment.commentText
+        });
+    }
+
+    return mapped;
 }
 
 function normalizeChannelName(channelName: string | undefined): string {
