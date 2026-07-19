@@ -28,9 +28,8 @@ GC/
     tsconfig.json
 ```
 
-`GC/570` is the Dota 2 coordinator. Older `.lua` files still exist while the
-migration finishes, but new work should target the TypeScript pipeline unless a
-task explicitly says otherwise.
+`GC/570` is the Dota 2 coordinator. New work should target the TypeScript
+pipeline unless a task explicitly says otherwise.
 
 ## Runtime Flow
 
@@ -325,13 +324,5 @@ The old importer can still normalize NetHook dumps:
 .\SKYNET server\GC\tools\Import-NetHook.ps1 -InputPath "D:\Path\To\NetHookDump" -AppId 570
 ```
 
-It may create Lua fixture files and route hints. Treat those outputs as research
-material only; do not copy binary fixture behavior into the TypeScript runtime.
-
-## Legacy Lua
-
-Lua files such as `main.lua`, `messages.lua`, `dota_stats.lua`, and
-`routes.generated.lua` are legacy migration references. They can help compare
-old behavior, but they are not the target architecture. New or migrated GC logic
-should be implemented in TypeScript modules using the generated contracts and
-the `ctx` framework.
+Treat importer outputs as research material only; do not copy binary fixture
+behavior into the TypeScript runtime.
