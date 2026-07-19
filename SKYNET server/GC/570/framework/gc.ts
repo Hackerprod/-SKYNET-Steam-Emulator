@@ -50,6 +50,7 @@ export interface Logger {
 
 export interface GcServices {
     readonly items: DotaItemService;
+    readonly match: DotaMatchService;
     readonly profiles: DotaProfileService;
     readonly social: DotaSocialService;
     readonly stats: DotaStatsService;
@@ -95,6 +96,94 @@ export interface DotaSocialService {
     feed(accountId: number, selfOnly: boolean): DotaSocialFeedEvent[];
     comments(feedEventId: bigint): DotaSocialFeedComment[];
     postComment(feedEventId: bigint, comment: string): boolean;
+}
+
+export interface DotaMatchService {
+    recordSignOutPermission(request: DotaMatchSignOutPermissionAudit): boolean;
+    setHistoryAccess(allow: boolean): boolean;
+    recordServerStatus(response: number): boolean;
+    recordLeaver(event: DotaLeaverEvent): boolean;
+    recordRealtimeStats(snapshot: DotaRealtimeStatsSnapshot): boolean;
+    recordMatchStateHistory(history: DotaMatchStateHistorySnapshot): boolean;
+    recordSpectatorCount(spectatorCount: number): boolean;
+    recordLiveScoreboard(snapshot: DotaLiveScoreboardSnapshot): boolean;
+    savePlayerReport(report: DotaPlayerReport): boolean;
+}
+
+export interface DotaMatchSignOutPermissionAudit {
+    readonly serverVersion: number;
+    readonly localAttempt: number;
+    readonly totalAttempt: number;
+    readonly secondsWaited: number;
+    readonly permissionGranted: boolean;
+    readonly abandonSignout: boolean;
+    readonly retryDelaySeconds: number;
+}
+
+export interface DotaLeaverEvent {
+    readonly leaverSteamId: bigint;
+    readonly leaverStatus: number;
+    readonly lobbyState: number;
+    readonly gameState: number;
+    readonly leaverDetected: boolean;
+    readonly firstBloodHappened: boolean;
+    readonly discardMatchResults: boolean;
+    readonly massDisconnect: boolean;
+    readonly serverCluster: number;
+    readonly disconnectReason: number;
+}
+
+export interface DotaRealtimeStatsSnapshot {
+    readonly matchId: bigint;
+    readonly serverSteamId: bigint;
+    readonly timestamp: number;
+    readonly gameTime: number;
+    readonly gameState: number;
+    readonly gameMode: number;
+    readonly lobbyType: number;
+    readonly leagueId: number;
+    readonly radiantScore: number;
+    readonly direScore: number;
+    readonly playerCount: number;
+    readonly buildingCount: number;
+    readonly deltaFrame: boolean;
+    readonly payloadSize: number;
+}
+
+export interface DotaMatchStateHistorySnapshot {
+    readonly matchId: bigint;
+    readonly radiantWon: boolean;
+    readonly mmr: number;
+    readonly stateCount: number;
+    readonly lastGameTime: number;
+    readonly radiantKills: number;
+    readonly direKills: number;
+    readonly payloadSize: number;
+}
+
+export interface DotaLiveScoreboardSnapshot {
+    readonly matchId: bigint;
+    readonly tournamentId: number;
+    readonly tournamentGameId: number;
+    readonly duration: number;
+    readonly hltvDelay: number;
+    readonly leagueId: number;
+    readonly radiantScore: number;
+    readonly direScore: number;
+    readonly playerCount: number;
+    readonly roshanRespawnTimer: number;
+    readonly payloadSize: number;
+}
+
+export interface DotaPlayerReport {
+    readonly targetAccountId: number;
+    readonly lobbyId: bigint;
+    readonly reportFlags: number;
+    readonly reportReasons: number[];
+    readonly comment: string;
+    readonly gameTime: number;
+    readonly debugSlot: number;
+    readonly debugMatchId: bigint;
 }
 
 export interface DotaStatsService {
@@ -553,6 +642,44 @@ class GcDotaSocialService implements DotaSocialService {
     }
 }
 
+class GcDotaMatchService implements DotaMatchService {
+    recordSignOutPermission(request: DotaMatchSignOutPermissionAudit): boolean {
+        return dotaRecordMatchSignOutPermission(request);
+    }
+
+    setHistoryAccess(allow: boolean): boolean {
+        return dotaSetMatchHistoryAccess(allow);
+    }
+
+    recordServerStatus(response: number): boolean {
+        return dotaRecordServerStatus(response);
+    }
+
+    recordLeaver(event: DotaLeaverEvent): boolean {
+        return dotaRecordLeaver(event);
+    }
+
+    recordRealtimeStats(snapshot: DotaRealtimeStatsSnapshot): boolean {
+        return dotaRecordRealtimeStats(snapshot);
+    }
+
+    recordMatchStateHistory(history: DotaMatchStateHistorySnapshot): boolean {
+        return dotaRecordMatchStateHistory(history);
+    }
+
+    recordSpectatorCount(spectatorCount: number): boolean {
+        return dotaRecordSpectatorCount(spectatorCount);
+    }
+
+    recordLiveScoreboard(snapshot: DotaLiveScoreboardSnapshot): boolean {
+        return dotaRecordLiveScoreboard(snapshot);
+    }
+
+    savePlayerReport(report: DotaPlayerReport): boolean {
+        return dotaSavePlayerReport(report);
+    }
+}
+
 class GcDotaStatsService implements DotaStatsService {
     lookupAccountName(accountId: number): DotaAccountName {
         return dotaLookupAccountName(accountId) as DotaAccountName;
@@ -639,12 +766,14 @@ class GcDotaStatsService implements DotaStatsService {
 
 class GcServiceContainer implements GcServices {
     items: DotaItemService;
+    match: DotaMatchService;
     profiles: DotaProfileService;
     social: DotaSocialService;
     stats: DotaStatsService;
 
     constructor() {
         this.items = new GcDotaItemService();
+        this.match = new GcDotaMatchService();
         this.profiles = new GcDotaProfileService();
         this.social = new GcDotaSocialService();
         this.stats = new GcDotaStatsService();

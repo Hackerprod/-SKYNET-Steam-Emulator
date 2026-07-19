@@ -34,7 +34,15 @@ public sealed class DotaStatsStore
         "match_comments",
         "match_votes",
         "social_feed",
-        "social_feed_comments"
+        "social_feed_comments",
+        "match_signout_permission_requests",
+        "match_history_access",
+        "server_status_requests",
+        "match_leaver_events",
+        "match_realtime_stats",
+        "match_state_history",
+        "match_spectator_counts",
+        "live_scoreboard_updates"
     };
 
     public DotaStatsStore(string dbPath, Func<uint, DotaStatsAccountIdentity?> identityResolver)
@@ -679,23 +687,313 @@ public sealed class DotaStatsStore
 
     public void SaveReport(ulong reporterSteamId, uint reporterAccountId, uint targetAccountId, ulong lobbyId, uint reportFlags, string comment)
     {
+        TrySavePlayerReport(new DotaStatsPlayerReport
+        {
+            ReporterSteamId = reporterSteamId,
+            ReporterAccountId = reporterAccountId,
+            TargetAccountId = targetAccountId,
+            LobbyId = lobbyId,
+            ReportFlags = reportFlags,
+            Comment = comment ?? string.Empty
+        });
+    }
+
+    public bool TrySavePlayerReport(DotaStatsPlayerReport report)
+    {
         lock (_sync)
         {
             using var connection = OpenConnection();
-            EnsureProfileLocked(connection, reporterSteamId, reporterAccountId, string.Empty);
+            if (report.ReporterAccountId == 0 || report.TargetAccountId == 0)
+            {
+                return false;
+            }
+
+            EnsureProfileLocked(connection, report.ReporterSteamId, report.ReporterAccountId, string.Empty);
+            var reasonsCsv = Csv(report.ReportReasons);
             using var command = connection.CreateCommand();
             command.CommandText = """
-                INSERT INTO reports (reporter_steam_id, reporter_account_id, target_account_id, lobby_id, report_flags, comment, created_at)
-                VALUES ($reporter_steam_id, $reporter_account_id, $target_account_id, $lobby_id, $report_flags, $comment, $created_at)
+                INSERT INTO reports (
+                    reporter_steam_id, reporter_account_id, target_account_id, lobby_id, report_flags,
+                    report_reasons_csv, comment, game_time, debug_slot, debug_match_id, created_at
+                )
+                VALUES (
+                    $reporter_steam_id, $reporter_account_id, $target_account_id, $lobby_id, $report_flags,
+                    $report_reasons_csv, $comment, $game_time, $debug_slot, $debug_match_id, $created_at
+                )
                 """;
-            Add(command, "$reporter_steam_id", reporterSteamId);
-            Add(command, "$reporter_account_id", reporterAccountId);
-            Add(command, "$target_account_id", targetAccountId);
-            Add(command, "$lobby_id", lobbyId);
-            Add(command, "$report_flags", reportFlags);
-            Add(command, "$comment", comment ?? string.Empty);
+            Add(command, "$reporter_steam_id", report.ReporterSteamId);
+            Add(command, "$reporter_account_id", report.ReporterAccountId);
+            Add(command, "$target_account_id", report.TargetAccountId);
+            Add(command, "$lobby_id", report.LobbyId);
+            Add(command, "$report_flags", report.ReportFlags);
+            Add(command, "$report_reasons_csv", reasonsCsv);
+            Add(command, "$comment", report.Comment ?? string.Empty);
+            Add(command, "$game_time", report.GameTime);
+            Add(command, "$debug_slot", report.DebugSlot);
+            Add(command, "$debug_match_id", report.DebugMatchId);
             Add(command, "$created_at", Now());
             command.ExecuteNonQuery();
+            return true;
+        }
+    }
+
+    public bool RecordMatchSignOutPermission(DotaStatsMatchSignOutPermissionAudit request)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            using var command = connection.CreateCommand();
+            command.CommandText = """
+                INSERT INTO match_signout_permission_requests (
+                    server_steam_id, server_version, local_attempt, total_attempt, seconds_waited,
+                    permission_granted, abandon_signout, retry_delay_seconds, created_at
+                )
+                VALUES (
+                    $server_steam_id, $server_version, $local_attempt, $total_attempt, $seconds_waited,
+                    $permission_granted, $abandon_signout, $retry_delay_seconds, $created_at
+                )
+                """;
+            Add(command, "$server_steam_id", request.ServerSteamId);
+            Add(command, "$server_version", request.ServerVersion);
+            Add(command, "$local_attempt", request.LocalAttempt);
+            Add(command, "$total_attempt", request.TotalAttempt);
+            Add(command, "$seconds_waited", request.SecondsWaited);
+            Add(command, "$permission_granted", request.PermissionGranted ? 1 : 0);
+            Add(command, "$abandon_signout", request.AbandonSignout ? 1 : 0);
+            Add(command, "$retry_delay_seconds", request.RetryDelaySeconds);
+            Add(command, "$created_at", Now());
+            command.ExecuteNonQuery();
+            return true;
+        }
+    }
+
+    public bool SetMatchHistoryAccess(ulong steamId, uint accountId, bool allow)
+    {
+        if (accountId == 0)
+        {
+            return false;
+        }
+
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            EnsureProfileLocked(connection, steamId, accountId, string.Empty);
+            using var command = connection.CreateCommand();
+            command.CommandText = """
+                INSERT INTO match_history_access (account_id, steam_id, allow_3rd_party, updated_at)
+                VALUES ($account_id, $steam_id, $allow_3rd_party, $updated_at)
+                ON CONFLICT(account_id) DO UPDATE SET
+                    steam_id = excluded.steam_id,
+                    allow_3rd_party = excluded.allow_3rd_party,
+                    updated_at = excluded.updated_at
+                """;
+            Add(command, "$account_id", accountId);
+            Add(command, "$steam_id", steamId);
+            Add(command, "$allow_3rd_party", allow ? 1 : 0);
+            Add(command, "$updated_at", Now());
+            command.ExecuteNonQuery();
+            return true;
+        }
+    }
+
+    public bool RecordServerStatusRequest(ulong serverSteamId, uint response)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            using var command = connection.CreateCommand();
+            command.CommandText = """
+                INSERT INTO server_status_requests (server_steam_id, response, created_at)
+                VALUES ($server_steam_id, $response, $created_at)
+                """;
+            Add(command, "$server_steam_id", serverSteamId);
+            Add(command, "$response", response);
+            Add(command, "$created_at", Now());
+            command.ExecuteNonQuery();
+            return true;
+        }
+    }
+
+    public bool RecordLeaverDetected(DotaStatsLeaverEvent leaver)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            using var transaction = connection.BeginTransaction();
+            using (var command = connection.CreateCommand())
+            {
+                command.Transaction = transaction;
+                command.CommandText = """
+                    INSERT INTO match_leaver_events (
+                        server_steam_id, leaver_steam_id, leaver_account_id, leaver_status, lobby_state,
+                        game_state, leaver_detected, first_blood_happened, discard_match_results,
+                        mass_disconnect, server_cluster, disconnect_reason, created_at
+                    )
+                    VALUES (
+                        $server_steam_id, $leaver_steam_id, $leaver_account_id, $leaver_status, $lobby_state,
+                        $game_state, $leaver_detected, $first_blood_happened, $discard_match_results,
+                        $mass_disconnect, $server_cluster, $disconnect_reason, $created_at
+                    )
+                    """;
+                Add(command, "$server_steam_id", leaver.ServerSteamId);
+                Add(command, "$leaver_steam_id", leaver.LeaverSteamId);
+                Add(command, "$leaver_account_id", leaver.LeaverAccountId);
+                Add(command, "$leaver_status", leaver.LeaverStatus);
+                Add(command, "$lobby_state", leaver.LobbyState);
+                Add(command, "$game_state", leaver.GameState);
+                Add(command, "$leaver_detected", leaver.LeaverDetected ? 1 : 0);
+                Add(command, "$first_blood_happened", leaver.FirstBloodHappened ? 1 : 0);
+                Add(command, "$discard_match_results", leaver.DiscardMatchResults ? 1 : 0);
+                Add(command, "$mass_disconnect", leaver.MassDisconnect ? 1 : 0);
+                Add(command, "$server_cluster", leaver.ServerCluster);
+                Add(command, "$disconnect_reason", leaver.DisconnectReason);
+                Add(command, "$created_at", Now());
+                command.ExecuteNonQuery();
+            }
+
+            if (leaver.LeaverSteamId != 0 && leaver.LeaverStatus != 0)
+            {
+                using var update = connection.CreateCommand();
+                update.Transaction = transaction;
+                update.CommandText = """
+                    UPDATE match_players
+                    SET leaver_status = $leaver_status
+                    WHERE steam_id = $leaver_steam_id
+                      AND match_id = (
+                          SELECT MAX(match_id)
+                          FROM match_players
+                          WHERE steam_id = $leaver_steam_id
+                      )
+                    """;
+                Add(update, "$leaver_status", leaver.LeaverStatus);
+                Add(update, "$leaver_steam_id", leaver.LeaverSteamId);
+                update.ExecuteNonQuery();
+            }
+
+            transaction.Commit();
+            return true;
+        }
+    }
+
+    public bool RecordRealtimeStats(DotaStatsRealtimeStatsSnapshot snapshot)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            using var command = connection.CreateCommand();
+            command.CommandText = """
+                INSERT INTO match_realtime_stats (
+                    server_steam_id, match_id, timestamp, game_time, game_state, game_mode, lobby_type,
+                    league_id, radiant_score, dire_score, player_count, building_count, delta_frame,
+                    payload_size, created_at
+                )
+                VALUES (
+                    $server_steam_id, $match_id, $timestamp, $game_time, $game_state, $game_mode, $lobby_type,
+                    $league_id, $radiant_score, $dire_score, $player_count, $building_count, $delta_frame,
+                    $payload_size, $created_at
+                )
+                """;
+            AddRealtimeStatsParameters(command, snapshot);
+            command.ExecuteNonQuery();
+            return true;
+        }
+    }
+
+    public bool RecordMatchStateHistory(DotaStatsMatchStateHistorySnapshot history)
+    {
+        if (history.MatchId == 0)
+        {
+            return false;
+        }
+
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            using var command = connection.CreateCommand();
+            command.CommandText = """
+                INSERT INTO match_state_history (
+                    match_id, radiant_won, mmr, state_count, last_game_time,
+                    radiant_kills, dire_kills, payload_size, created_at
+                )
+                VALUES (
+                    $match_id, $radiant_won, $mmr, $state_count, $last_game_time,
+                    $radiant_kills, $dire_kills, $payload_size, $created_at
+                )
+                ON CONFLICT(match_id) DO UPDATE SET
+                    radiant_won = excluded.radiant_won,
+                    mmr = excluded.mmr,
+                    state_count = excluded.state_count,
+                    last_game_time = excluded.last_game_time,
+                    radiant_kills = excluded.radiant_kills,
+                    dire_kills = excluded.dire_kills,
+                    payload_size = excluded.payload_size,
+                    created_at = excluded.created_at
+                """;
+            Add(command, "$match_id", history.MatchId);
+            Add(command, "$radiant_won", history.RadiantWon ? 1 : 0);
+            Add(command, "$mmr", history.Mmr);
+            Add(command, "$state_count", history.StateCount);
+            Add(command, "$last_game_time", history.LastGameTime);
+            Add(command, "$radiant_kills", history.RadiantKills);
+            Add(command, "$dire_kills", history.DireKills);
+            Add(command, "$payload_size", history.PayloadSize);
+            Add(command, "$created_at", Now());
+            command.ExecuteNonQuery();
+            return true;
+        }
+    }
+
+    public bool RecordSpectatorCount(ulong serverSteamId, uint spectatorCount)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            using var command = connection.CreateCommand();
+            command.CommandText = """
+                INSERT INTO match_spectator_counts (server_steam_id, spectator_count, created_at)
+                VALUES ($server_steam_id, $spectator_count, $created_at)
+                """;
+            Add(command, "$server_steam_id", serverSteamId);
+            Add(command, "$spectator_count", spectatorCount);
+            Add(command, "$created_at", Now());
+            command.ExecuteNonQuery();
+            return true;
+        }
+    }
+
+    public bool RecordLiveScoreboard(DotaStatsLiveScoreboardSnapshot snapshot)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            using var command = connection.CreateCommand();
+            command.CommandText = """
+                INSERT INTO live_scoreboard_updates (
+                    server_steam_id, match_id, tournament_id, tournament_game_id, duration, hltv_delay,
+                    league_id, radiant_score, dire_score, player_count, roshan_respawn_timer,
+                    payload_size, created_at
+                )
+                VALUES (
+                    $server_steam_id, $match_id, $tournament_id, $tournament_game_id, $duration, $hltv_delay,
+                    $league_id, $radiant_score, $dire_score, $player_count, $roshan_respawn_timer,
+                    $payload_size, $created_at
+                )
+                """;
+            Add(command, "$server_steam_id", snapshot.ServerSteamId);
+            Add(command, "$match_id", snapshot.MatchId);
+            Add(command, "$tournament_id", snapshot.TournamentId);
+            Add(command, "$tournament_game_id", snapshot.TournamentGameId);
+            Add(command, "$duration", snapshot.Duration);
+            Add(command, "$hltv_delay", snapshot.HltvDelay);
+            Add(command, "$league_id", snapshot.LeagueId);
+            Add(command, "$radiant_score", snapshot.RadiantScore);
+            Add(command, "$dire_score", snapshot.DireScore);
+            Add(command, "$player_count", snapshot.PlayerCount);
+            Add(command, "$roshan_respawn_timer", snapshot.RoshanRespawnTimer);
+            Add(command, "$payload_size", snapshot.PayloadSize);
+            Add(command, "$created_at", Now());
+            command.ExecuteNonQuery();
+            return true;
         }
     }
 
@@ -1204,7 +1502,110 @@ public sealed class DotaStatsStore
                 target_account_id INTEGER NOT NULL,
                 lobby_id INTEGER NOT NULL,
                 report_flags INTEGER NOT NULL,
+                report_reasons_csv TEXT NOT NULL DEFAULT '',
                 comment TEXT NOT NULL,
+                game_time INTEGER NOT NULL DEFAULT 0,
+                debug_slot INTEGER NOT NULL DEFAULT 0,
+                debug_match_id INTEGER NOT NULL DEFAULT 0,
+                created_at INTEGER NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS match_signout_permission_requests (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                server_steam_id INTEGER NOT NULL,
+                server_version INTEGER NOT NULL,
+                local_attempt INTEGER NOT NULL,
+                total_attempt INTEGER NOT NULL,
+                seconds_waited INTEGER NOT NULL,
+                permission_granted INTEGER NOT NULL,
+                abandon_signout INTEGER NOT NULL,
+                retry_delay_seconds INTEGER NOT NULL,
+                created_at INTEGER NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS match_history_access (
+                account_id INTEGER PRIMARY KEY,
+                steam_id INTEGER NOT NULL,
+                allow_3rd_party INTEGER NOT NULL,
+                updated_at INTEGER NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS server_status_requests (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                server_steam_id INTEGER NOT NULL,
+                response INTEGER NOT NULL,
+                created_at INTEGER NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS match_leaver_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                server_steam_id INTEGER NOT NULL,
+                leaver_steam_id INTEGER NOT NULL,
+                leaver_account_id INTEGER NOT NULL,
+                leaver_status INTEGER NOT NULL,
+                lobby_state INTEGER NOT NULL,
+                game_state INTEGER NOT NULL,
+                leaver_detected INTEGER NOT NULL,
+                first_blood_happened INTEGER NOT NULL,
+                discard_match_results INTEGER NOT NULL,
+                mass_disconnect INTEGER NOT NULL,
+                server_cluster INTEGER NOT NULL,
+                disconnect_reason INTEGER NOT NULL,
+                created_at INTEGER NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS match_realtime_stats (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                server_steam_id INTEGER NOT NULL,
+                match_id INTEGER NOT NULL,
+                timestamp INTEGER NOT NULL,
+                game_time INTEGER NOT NULL,
+                game_state INTEGER NOT NULL,
+                game_mode INTEGER NOT NULL,
+                lobby_type INTEGER NOT NULL,
+                league_id INTEGER NOT NULL,
+                radiant_score INTEGER NOT NULL,
+                dire_score INTEGER NOT NULL,
+                player_count INTEGER NOT NULL,
+                building_count INTEGER NOT NULL,
+                delta_frame INTEGER NOT NULL,
+                payload_size INTEGER NOT NULL,
+                created_at INTEGER NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS match_state_history (
+                match_id INTEGER PRIMARY KEY,
+                radiant_won INTEGER NOT NULL,
+                mmr INTEGER NOT NULL,
+                state_count INTEGER NOT NULL,
+                last_game_time INTEGER NOT NULL,
+                radiant_kills INTEGER NOT NULL,
+                dire_kills INTEGER NOT NULL,
+                payload_size INTEGER NOT NULL,
+                created_at INTEGER NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS match_spectator_counts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                server_steam_id INTEGER NOT NULL,
+                spectator_count INTEGER NOT NULL,
+                created_at INTEGER NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS live_scoreboard_updates (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                server_steam_id INTEGER NOT NULL,
+                match_id INTEGER NOT NULL,
+                tournament_id INTEGER NOT NULL,
+                tournament_game_id INTEGER NOT NULL,
+                duration INTEGER NOT NULL,
+                hltv_delay INTEGER NOT NULL,
+                league_id INTEGER NOT NULL,
+                radiant_score INTEGER NOT NULL,
+                dire_score INTEGER NOT NULL,
+                player_count INTEGER NOT NULL,
+                roshan_respawn_timer INTEGER NOT NULL,
+                payload_size INTEGER NOT NULL,
                 created_at INTEGER NOT NULL
             );
 
@@ -1249,6 +1650,10 @@ public sealed class DotaStatsStore
             """;
         command.ExecuteNonQuery();
         EnsureColumn(connection, "match_players", "mvp", "INTEGER NOT NULL DEFAULT 0");
+        EnsureColumn(connection, "reports", "report_reasons_csv", "TEXT NOT NULL DEFAULT ''");
+        EnsureColumn(connection, "reports", "game_time", "INTEGER NOT NULL DEFAULT 0");
+        EnsureColumn(connection, "reports", "debug_slot", "INTEGER NOT NULL DEFAULT 0");
+        EnsureColumn(connection, "reports", "debug_match_id", "INTEGER NOT NULL DEFAULT 0");
     }
 
     private DotaStatsProfile EnsureProfileLocked(SqliteConnection connection, ulong steamId, uint accountId, string personaName, SqliteTransaction? transaction = null)
@@ -1529,6 +1934,25 @@ public sealed class DotaStatsStore
         Add(command, "$heals", player.Heals);
         Add(command, "$rapiers_purchased", player.RapiersPurchased);
         Add(command, "$mvp", player.Mvp ? 1 : 0);
+    }
+
+    private static void AddRealtimeStatsParameters(SqliteCommand command, DotaStatsRealtimeStatsSnapshot snapshot)
+    {
+        Add(command, "$server_steam_id", snapshot.ServerSteamId);
+        Add(command, "$match_id", snapshot.MatchId);
+        Add(command, "$timestamp", snapshot.Timestamp);
+        Add(command, "$game_time", snapshot.GameTime);
+        Add(command, "$game_state", snapshot.GameState);
+        Add(command, "$game_mode", snapshot.GameMode);
+        Add(command, "$lobby_type", snapshot.LobbyType);
+        Add(command, "$league_id", snapshot.LeagueId);
+        Add(command, "$radiant_score", snapshot.RadiantScore);
+        Add(command, "$dire_score", snapshot.DireScore);
+        Add(command, "$player_count", snapshot.PlayerCount);
+        Add(command, "$building_count", snapshot.BuildingCount);
+        Add(command, "$delta_frame", snapshot.DeltaFrame ? 1 : 0);
+        Add(command, "$payload_size", snapshot.PayloadSize);
+        Add(command, "$created_at", Now());
     }
 
     private static void UpsertGlobalStatsLocked(SqliteConnection connection, SqliteTransaction transaction, DotaStatsMatch match, DotaStatsMatchPlayer player, bool playedHeroBefore)
@@ -2442,6 +2866,94 @@ public sealed class DotaStatsProfileSlot
     public uint SlotId { get; init; }
     public uint SlotType { get; init; }
     public ulong SlotValue { get; init; }
+}
+
+public sealed class DotaStatsMatchSignOutPermissionAudit
+{
+    public ulong ServerSteamId { get; init; }
+    public uint ServerVersion { get; init; }
+    public uint LocalAttempt { get; init; }
+    public uint TotalAttempt { get; init; }
+    public uint SecondsWaited { get; init; }
+    public bool PermissionGranted { get; init; }
+    public bool AbandonSignout { get; init; }
+    public uint RetryDelaySeconds { get; init; }
+}
+
+public sealed class DotaStatsLeaverEvent
+{
+    public ulong ServerSteamId { get; init; }
+    public ulong LeaverSteamId { get; init; }
+    public uint LeaverAccountId { get; init; }
+    public uint LeaverStatus { get; init; }
+    public uint LobbyState { get; init; }
+    public uint GameState { get; init; }
+    public bool LeaverDetected { get; init; }
+    public bool FirstBloodHappened { get; init; }
+    public bool DiscardMatchResults { get; init; }
+    public bool MassDisconnect { get; init; }
+    public uint ServerCluster { get; init; }
+    public uint DisconnectReason { get; init; }
+}
+
+public sealed class DotaStatsRealtimeStatsSnapshot
+{
+    public ulong ServerSteamId { get; init; }
+    public ulong MatchId { get; init; }
+    public uint Timestamp { get; init; }
+    public uint GameTime { get; init; }
+    public uint GameState { get; init; }
+    public uint GameMode { get; init; }
+    public uint LobbyType { get; init; }
+    public uint LeagueId { get; init; }
+    public uint RadiantScore { get; init; }
+    public uint DireScore { get; init; }
+    public uint PlayerCount { get; init; }
+    public uint BuildingCount { get; init; }
+    public bool DeltaFrame { get; init; }
+    public uint PayloadSize { get; init; }
+}
+
+public sealed class DotaStatsMatchStateHistorySnapshot
+{
+    public ulong MatchId { get; init; }
+    public bool RadiantWon { get; init; }
+    public uint Mmr { get; init; }
+    public uint StateCount { get; init; }
+    public uint LastGameTime { get; init; }
+    public uint RadiantKills { get; init; }
+    public uint DireKills { get; init; }
+    public uint PayloadSize { get; init; }
+}
+
+public sealed class DotaStatsLiveScoreboardSnapshot
+{
+    public ulong ServerSteamId { get; init; }
+    public ulong MatchId { get; init; }
+    public uint TournamentId { get; init; }
+    public uint TournamentGameId { get; init; }
+    public uint Duration { get; init; }
+    public uint HltvDelay { get; init; }
+    public uint LeagueId { get; init; }
+    public uint RadiantScore { get; init; }
+    public uint DireScore { get; init; }
+    public uint PlayerCount { get; init; }
+    public uint RoshanRespawnTimer { get; init; }
+    public uint PayloadSize { get; init; }
+}
+
+public sealed class DotaStatsPlayerReport
+{
+    public ulong ReporterSteamId { get; init; }
+    public uint ReporterAccountId { get; init; }
+    public uint TargetAccountId { get; init; }
+    public ulong LobbyId { get; init; }
+    public uint ReportFlags { get; init; }
+    public List<uint> ReportReasons { get; init; } = new();
+    public string Comment { get; init; } = string.Empty;
+    public uint GameTime { get; init; }
+    public uint DebugSlot { get; init; }
+    public ulong DebugMatchId { get; init; }
 }
 
 public sealed class DotaStatsGlobalStats

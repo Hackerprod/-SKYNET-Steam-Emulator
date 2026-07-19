@@ -55,6 +55,15 @@ declare global {
     function dotaSubmitLobbyMvpVote(targetAccountId: number): unknown;
     function dotaRecordSignOutMvpStats(matchId: bigint, players: unknown[]): boolean;
     function dotaRerollPlayerChallenge(): boolean;
+    function dotaRecordMatchSignOutPermission(request: unknown): boolean;
+    function dotaSetMatchHistoryAccess(allow: boolean): boolean;
+    function dotaRecordServerStatus(response: number): boolean;
+    function dotaRecordLeaver(event: unknown): boolean;
+    function dotaRecordRealtimeStats(snapshot: unknown): boolean;
+    function dotaRecordMatchStateHistory(history: unknown): boolean;
+    function dotaRecordSpectatorCount(spectatorCount: number): boolean;
+    function dotaRecordLiveScoreboard(snapshot: unknown): boolean;
+    function dotaSavePlayerReport(report: unknown): boolean;
 }
 
 export {};
