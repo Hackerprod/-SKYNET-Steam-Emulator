@@ -62,6 +62,14 @@ if (args.Contains("--verify-lua-json"))
     return;
 }
 
+// Self-check that TypeScript GC scripts load and answer representative Dota
+// messages through the production script plugin and protobuf codec.
+if (args.Contains("--verify-gc-ts"))
+{
+    Environment.ExitCode = GcScriptSelfCheck.Run(Console.WriteLine) ? 0 : 1;
+    return;
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages()

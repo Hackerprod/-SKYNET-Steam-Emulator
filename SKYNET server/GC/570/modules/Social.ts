@@ -1,4 +1,6 @@
 import { Messages } from "../Messages";
+import { gc } from "../framework/gc";
+import { NotificationResult, Routes } from "../generated/dota";
 
 export class Social {
     msg: Messages;
@@ -21,8 +23,20 @@ export class Social {
     }
 
     joinChatChannel(): boolean { return false; }
-    notifications(): boolean { return false; }
-    emoticonData(): boolean { return false; }
+    notifications(): boolean {
+        return gc.on(Routes.Notifications, ctx => {
+            ctx.reply({
+                update: {
+                    result: NotificationResult.Success,
+                    notifications: []
+                }
+            });
+        });
+    }
+    emoticonData(): boolean {
+        log("Social: EmoticonData deferred until TS can read real user emoticon unlock state");
+        return false;
+    }
     findTopSourceTvGames(): boolean { return false; }
     socialMatchDetails(): boolean { return false; }
     socialMatchPostComment(): boolean { return false; }

@@ -1,4 +1,6 @@
 import { Messages } from "../Messages";
+import { gc } from "../framework/gc";
+import { CoachingResponse, Routes } from "../generated/dota";
 
 export class Coaching {
     msg: Messages;
@@ -14,7 +16,33 @@ export class Coaching {
         return false;
     }
 
-    getCurrentPrivateCoachingSession(): boolean { return false; }
-    getAvailablePrivateCoachingSessions(): boolean { return false; }
-    getAvailablePrivateCoachingSessionsSummary(): boolean { return false; }
+    getCurrentPrivateCoachingSession(): boolean {
+        return gc.on(Routes.GetCurrentPrivateCoachingSession, ctx => {
+            ctx.reply({
+                result: CoachingResponse.Success
+            });
+        });
+    }
+
+    getAvailablePrivateCoachingSessions(): boolean {
+        return gc.on(Routes.GetAvailablePrivateCoachingSessions, ctx => {
+            ctx.reply({
+                result: CoachingResponse.Success,
+                availableSessionsList: {
+                    availableCoachingSessions: []
+                }
+            });
+        });
+    }
+
+    getAvailablePrivateCoachingSessionsSummary(): boolean {
+        return gc.on(Routes.GetAvailablePrivateCoachingSessionsSummary, ctx => {
+            ctx.reply({
+                result: CoachingResponse.Success,
+                coachingSessionSummary: {
+                    coachingSessionCount: 0
+                }
+            });
+        });
+    }
 }

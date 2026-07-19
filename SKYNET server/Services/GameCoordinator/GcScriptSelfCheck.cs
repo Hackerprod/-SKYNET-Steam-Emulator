@@ -1,0 +1,156 @@
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging.Abstractions;
+using SKYNET_server.Models;
+
+namespace SKYNET_server.Services;
+
+public static class GcScriptSelfCheck
+{
+    private const uint DotaAppId = 570;
+    private const ulong TestSteamId = 76561197960287930UL;
+
+    public static bool Run(Action<string> write)
+    {
+        var contentRoot = ResolveContentRoot(Directory.GetCurrentDirectory());
+        write($"GC self-check content root: {contentRoot}");
+
+        var trace = new GameCoordinatorTraceService();
+        var plugin = new GameCoordinatorScriptPlugin(
+            new SelfCheckEnvironment(contentRoot),
+            NullLogger<GameCoordinatorScriptPlugin>.Instance,
+            trace);
+
+        var context = new GameCoordinatorContext
+        {
+            AppId = DotaAppId,
+            SteamId = TestSteamId,
+            AccountId = 15892202,
+            PersonaName = "GcScriptSelfCheck",
+            ClientIp = "127.0.0.1"
+        };
+
+        var ok = true;
+        ok &= ExpectSequence(plugin, context, 4006, new uint[] { 4009, 4004, 4009 }, write);
+        ok &= ExpectResponse(plugin, context, 2536, 2537, 1, write);
+        ok &= ExpectHandled(plugin, context, 2617, 0, write);
+        ok &= ExpectHandled(plugin, context, 4523, 0, write);
+        ok &= ExpectResponse(plugin, context, 7427, 7428, 1, write);
+        ok &= ExpectResponse(plugin, context, 8793, 8794, 1, write);
+        ok &= ExpectResponse(plugin, context, 8798, 8799, 1, write);
+        ok &= ExpectResponse(plugin, context, 8800, 8801, 1, write);
+        ok &= ExpectUnhandled(plugin, context, 999999, write);
+
+        foreach (var entry in trace.GetSince(0))
+        {
+            write($"trace {entry.Kind} app={entry.AppId} msg={entry.MessageType} size={entry.Size} {entry.Detail}");
+        }
+
+        write(ok ? "PASS" : "FAIL");
+        return ok;
+    }
+
+    private static bool ExpectSequence(
+        GameCoordinatorScriptPlugin plugin,
+        GameCoordinatorContext context,
+        uint requestType,
+        uint[] expectedResponseTypes,
+        Action<string> write)
+    {
+        var response = plugin.Exchange(context, Request(requestType));
+        var actual = response.Messages.Select(message => message.MessageType).ToArray();
+        var ok = response.Handled
+            && actual.Length == expectedResponseTypes.Length
+            && actual.SequenceEqual(expectedResponseTypes)
+            && response.Messages.All(message => message.Protobuf);
+        write($"{requestType} -> handled={response.Handled}, messages=[{string.Join(",", actual)}], ok={ok}");
+        return ok;
+    }
+
+    private static bool ExpectResponse(
+        GameCoordinatorScriptPlugin plugin,
+        GameCoordinatorContext context,
+        uint requestType,
+        uint expectedResponseType,
+        int expectedCount,
+        Action<string> write)
+    {
+        var response = plugin.Exchange(context, Request(requestType));
+        var matching = response.Messages.Count(message => message.MessageType == expectedResponseType && message.Protobuf);
+        var ok = response.Handled && response.Messages.Count == expectedCount && matching == expectedCount;
+        write($"{requestType} -> handled={response.Handled}, messages={response.Messages.Count}, expected={expectedResponseType}, ok={ok}");
+        return ok;
+    }
+
+    private static bool ExpectHandled(
+        GameCoordinatorScriptPlugin plugin,
+        GameCoordinatorContext context,
+        uint requestType,
+        int expectedCount,
+        Action<string> write)
+    {
+        var response = plugin.Exchange(context, Request(requestType));
+        var ok = response.Handled && response.Messages.Count == expectedCount;
+        write($"{requestType} -> handled={response.Handled}, messages={response.Messages.Count}, ok={ok}");
+        return ok;
+    }
+
+    private static bool ExpectUnhandled(
+        GameCoordinatorScriptPlugin plugin,
+        GameCoordinatorContext context,
+        uint requestType,
+        Action<string> write)
+    {
+        var response = plugin.Exchange(context, Request(requestType));
+        var ok = !response.Handled && response.Messages.Count == 0;
+        write($"{requestType} -> handled={response.Handled}, messages={response.Messages.Count}, ok={ok}");
+        return ok;
+    }
+
+    private static ApiGCExchangeRequest Request(uint messageType)
+    {
+        return new ApiGCExchangeRequest
+        {
+            AppId = DotaAppId,
+            MessageType = messageType,
+            BodyBase64 = string.Empty,
+            SteamId = TestSteamId,
+            GameServer = false
+        };
+    }
+
+    private static string ResolveContentRoot(string start)
+    {
+        var current = new DirectoryInfo(start);
+        while (current != null)
+        {
+            if (File.Exists(Path.Combine(current.FullName, "GC", "570", "main.ts")))
+            {
+                return current.FullName;
+            }
+
+            var nested = Path.Combine(current.FullName, "SKYNET server");
+            if (File.Exists(Path.Combine(nested, "GC", "570", "main.ts")))
+            {
+                return nested;
+            }
+
+            current = current.Parent;
+        }
+
+        return start;
+    }
+
+    private sealed class SelfCheckEnvironment : IHostEnvironment
+    {
+        public SelfCheckEnvironment(string contentRootPath)
+        {
+            ContentRootPath = contentRootPath;
+            ContentRootFileProvider = new PhysicalFileProvider(contentRootPath);
+        }
+
+        public string EnvironmentName { get; set; } = Environments.Development;
+        public string ApplicationName { get; set; } = "SKYNET server";
+        public string ContentRootPath { get; set; }
+        public IFileProvider ContentRootFileProvider { get; set; }
+    }
+}
