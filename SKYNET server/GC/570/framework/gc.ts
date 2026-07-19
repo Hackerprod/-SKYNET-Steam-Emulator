@@ -52,6 +52,7 @@ export interface GcServices {
     readonly items: DotaItemService;
     readonly profiles: DotaProfileService;
     readonly social: DotaSocialService;
+    readonly stats: DotaStatsService;
 }
 
 export interface DotaItemService {
@@ -94,6 +95,12 @@ export interface DotaSocialService {
     feed(accountId: number, selfOnly: boolean): DotaSocialFeedEvent[];
     comments(feedEventId: bigint): DotaSocialFeedComment[];
     postComment(feedEventId: bigint, comment: string): boolean;
+}
+
+export interface DotaStatsService {
+    getEventPoints(accountId: number, eventId: number): DotaEventPoints;
+    getHeroStandings(accountId: number): DotaHeroStanding[];
+    getRank(accountId: number): DotaRank;
 }
 
 export interface DotaProfileSnapshot {
@@ -208,6 +215,52 @@ export interface DotaSocialFeedComment {
     readonly timestamp: number;
 }
 
+export interface DotaEventPoints {
+    readonly accountId: number;
+    readonly eventId: number;
+    readonly totalPoints: number;
+    readonly totalPremiumPoints: number;
+    readonly points: number;
+    readonly premiumPoints: number;
+    readonly owned: boolean;
+    readonly auditAction: number;
+    readonly activeSeasonId: number;
+}
+
+export interface DotaHeroStanding {
+    readonly heroId: number;
+    readonly wins: number;
+    readonly losses: number;
+    readonly winStreak: number;
+    readonly bestWinStreak: number;
+    readonly avgKills: number;
+    readonly avgDeaths: number;
+    readonly avgAssists: number;
+    readonly avgGpm: number;
+    readonly avgXpm: number;
+    readonly bestKills: number;
+    readonly bestAssists: number;
+    readonly bestGpm: number;
+    readonly bestXpm: number;
+    readonly performance: number;
+    readonly networthPeak: number;
+    readonly lasthitPeak: number;
+    readonly denyPeak: number;
+    readonly damagePeak: number;
+    readonly longestGamePeak: number;
+    readonly healingPeak: number;
+    readonly avgLasthits: number;
+    readonly avgDenies: number;
+}
+
+export interface DotaRank {
+    readonly result: number;
+    readonly rankValue: number;
+    readonly rankData1: number;
+    readonly rankData2: number;
+    readonly rankData3: number;
+}
+
 function currentSteamId(): bigint {
     return steamId();
 }
@@ -298,15 +351,31 @@ class GcDotaSocialService implements DotaSocialService {
     }
 }
 
+class GcDotaStatsService implements DotaStatsService {
+    getEventPoints(accountId: number, eventId: number): DotaEventPoints {
+        return dotaEventPoints(accountId, eventId) as DotaEventPoints;
+    }
+
+    getHeroStandings(accountId: number): DotaHeroStanding[] {
+        return dotaHeroStandings(accountId) as DotaHeroStanding[];
+    }
+
+    getRank(accountId: number): DotaRank {
+        return dotaRank(accountId) as DotaRank;
+    }
+}
+
 class GcServiceContainer implements GcServices {
     items: DotaItemService;
     profiles: DotaProfileService;
     social: DotaSocialService;
+    stats: DotaStatsService;
 
     constructor() {
         this.items = new GcDotaItemService();
         this.profiles = new GcDotaProfileService();
         this.social = new GcDotaSocialService();
+        this.stats = new GcDotaStatsService();
     }
 }
 

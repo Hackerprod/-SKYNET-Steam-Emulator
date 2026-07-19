@@ -1,5 +1,15 @@
-import { gc } from "../framework/gc";
-import { Msg } from "../generated/dota";
+import { DotaHeroStanding, HandlerContext, gc } from "../framework/gc";
+import {
+    CMsgClientToGCRankRequest,
+    CMsgDOTAGetEventPoints,
+    CMsgDOTAGetEventPointsResponse,
+    CMsgGCGetHeroStandings,
+    CMsgGCGetHeroStandingsResponse,
+    CMsgGCGetHeroStandingsResponse_Hero,
+    CMsgGCToClientRankResponse,
+    Msg,
+    Routes
+} from "../generated/dota";
 
 export function registerStats(): void {
     const stats = new Stats();
@@ -9,16 +19,16 @@ export function registerStats(): void {
 export class Stats {
     register(): void {
         gc.onMessage(Msg.ClientToGCLookupAccountName, () => this.lookupAccountName());
-        gc.onMessage(Msg.DOTAGetEventPoints, () => this.getEventPoints());
+        gc.on(Routes.GetEventPoints, (ctx) => this.getEventPoints(ctx));
         gc.onMessage(Msg.GCMatchmakingStatsRequest, () => this.matchmakingStats());
-        gc.onMessage(Msg.GCGetHeroStandings, () => this.getHeroStandings());
+        gc.on(Routes.GetHeroStandings, (ctx) => this.getHeroStandings(ctx));
         gc.onMessage(Msg.GCGetHeroStatsHistory, () => this.getHeroStatsHistory());
         gc.onMessage(Msg.DOTAGetPlayerMatchHistory, () => this.getPlayerMatchHistory());
         gc.onMessage(Msg.GCMatchDetailsRequest, () => this.matchDetails());
         gc.onMessage(Msg.ClientToGCPlayerStatsRequest, () => this.playerStats());
         gc.onMessage(Msg.HeroGlobalDataRequest, () => this.heroGlobalData());
         gc.onMessage(Msg.ClientToGCTeammateStatsRequest, () => this.teammateStats());
-        gc.onMessage(Msg.ClientToGCRankRequest, () => this.rankRequest());
+        gc.on(Routes.RankRequest, (ctx) => this.rankRequest(ctx));
         gc.onMessage(Msg.ClientToGCShowcaseGetUserData, () => this.showcaseGetUserData());
         gc.onMessage(Msg.ClientToGCRequestPlayerRecentAccomplishments, () => this.clientRecentAccomplishments());
         gc.onMessage(Msg.ClientToGCRequestPlayerHeroRecentAccomplishments, () =>
@@ -35,14 +45,33 @@ export class Stats {
     lookupAccountName(): boolean {
         return false;
     }
-    getEventPoints(): boolean {
-        return false;
+    getEventPoints(ctx: HandlerContext<CMsgDOTAGetEventPoints, CMsgDOTAGetEventPointsResponse>): boolean {
+        const points = ctx.services.stats.getEventPoints(
+            ctx.request.accountId ?? ctx.accountId,
+            ctx.request.eventId ?? 0
+        );
+        ctx.reply({
+            totalPoints: points.totalPoints,
+            totalPremiumPoints: points.totalPremiumPoints,
+            eventId: points.eventId,
+            points: points.points,
+            premiumPoints: points.premiumPoints,
+            completedActions: [],
+            accountId: points.accountId,
+            owned: points.owned,
+            auditAction: points.auditAction,
+            activeSeasonId: points.activeSeasonId
+        });
+        return true;
     }
     matchmakingStats(): boolean {
         return false;
     }
-    getHeroStandings(): boolean {
-        return false;
+    getHeroStandings(ctx: HandlerContext<CMsgGCGetHeroStandings, CMsgGCGetHeroStandingsResponse>): boolean {
+        ctx.reply({
+            standings: mapHeroStandings(ctx.services.stats.getHeroStandings(ctx.accountId))
+        });
+        return true;
     }
     getHeroStatsHistory(): boolean {
         return false;
@@ -68,8 +97,9 @@ export class Stats {
     teammateStats(): boolean {
         return false;
     }
-    rankRequest(): boolean {
-        return false;
+    rankRequest(ctx: HandlerContext<CMsgClientToGCRankRequest, CMsgGCToClientRankResponse>): boolean {
+        ctx.reply(ctx.services.stats.getRank(ctx.accountId));
+        return true;
     }
     showcaseGetUserData(): boolean {
         return false;
@@ -98,4 +128,38 @@ export class Stats {
     rerollPlayerChallenge(): boolean {
         return false;
     }
+}
+
+function mapHeroStandings(heroes: DotaHeroStanding[]): CMsgGCGetHeroStandingsResponse_Hero[] {
+    const mapped: CMsgGCGetHeroStandingsResponse_Hero[] = [];
+    for (let i = 0; i < heroes.length; i++) {
+        const hero = heroes[i];
+        mapped.push({
+            heroId: hero.heroId,
+            wins: hero.wins,
+            losses: hero.losses,
+            winStreak: hero.winStreak,
+            bestWinStreak: hero.bestWinStreak,
+            avgKills: hero.avgKills,
+            avgDeaths: hero.avgDeaths,
+            avgAssists: hero.avgAssists,
+            avgGpm: hero.avgGpm,
+            avgXpm: hero.avgXpm,
+            bestKills: hero.bestKills,
+            bestAssists: hero.bestAssists,
+            bestGpm: hero.bestGpm,
+            bestXpm: hero.bestXpm,
+            performance: hero.performance,
+            networthPeak: hero.networthPeak,
+            lasthitPeak: hero.lasthitPeak,
+            denyPeak: hero.denyPeak,
+            damagePeak: hero.damagePeak,
+            longestGamePeak: hero.longestGamePeak,
+            healingPeak: hero.healingPeak,
+            avgLasthits: hero.avgLasthits,
+            avgDenies: hero.avgDenies
+        });
+    }
+
+    return mapped;
 }

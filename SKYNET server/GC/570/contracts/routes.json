@@ -63,6 +63,27 @@
         "responseProto": "CMsgGCToClientSocialFeedPostCommentResponse"
     },
     {
+        "name": "GetEventPoints",
+        "requestMessage": "DOTAGetEventPoints",
+        "requestProto": "CMsgDOTAGetEventPoints",
+        "responseMessage": "DOTAGetEventPointsResponse",
+        "responseProto": "CMsgDOTAGetEventPointsResponse"
+    },
+    {
+        "name": "GetHeroStandings",
+        "requestMessage": "GCGetHeroStandings",
+        "requestProto": "CMsgGCGetHeroStandings",
+        "responseMessage": "GCGetHeroStandingsResponse",
+        "responseProto": "CMsgGCGetHeroStandingsResponse"
+    },
+    {
+        "name": "RankRequest",
+        "requestMessage": "ClientToGCRankRequest",
+        "requestProto": "CMsgClientToGCRankRequest",
+        "responseMessage": "GCToClientRankResponse",
+        "responseProto": "CMsgGCToClientRankResponse"
+    },
+    {
         "name": "GetCurrentPrivateCoachingSession",
         "requestMessage": "ClientToGCGetCurrentPrivateCoachingSession",
         "requestProto": "CMsgClientToGCGetCurrentPrivateCoachingSession",

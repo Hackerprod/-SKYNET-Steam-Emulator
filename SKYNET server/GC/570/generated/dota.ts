@@ -24935,6 +24935,18 @@ export const Routes = {
         responseId: Msg.ClientToGCGetCurrentPrivateCoachingSessionResponse,
         response: Proto.CMsgClientToGCGetCurrentPrivateCoachingSessionResponse
     } as GcRoute<CMsgClientToGCGetCurrentPrivateCoachingSession, CMsgClientToGCGetCurrentPrivateCoachingSessionResponse>,
+    GetEventPoints: {
+        requestId: Msg.DOTAGetEventPoints,
+        request: Proto.CMsgDOTAGetEventPoints,
+        responseId: Msg.DOTAGetEventPointsResponse,
+        response: Proto.CMsgDOTAGetEventPointsResponse
+    } as GcRoute<CMsgDOTAGetEventPoints, CMsgDOTAGetEventPointsResponse>,
+    GetHeroStandings: {
+        requestId: Msg.GCGetHeroStandings,
+        request: Proto.CMsgGCGetHeroStandings,
+        responseId: Msg.GCGetHeroStandingsResponse,
+        response: Proto.CMsgGCGetHeroStandingsResponse
+    } as GcRoute<CMsgGCGetHeroStandings, CMsgGCGetHeroStandingsResponse>,
     GetProfileCard: {
         requestId: Msg.ClientToGCGetProfileCard,
         request: Proto.CMsgClientToGCGetProfileCard,
@@ -24983,6 +24995,12 @@ export const Routes = {
         responseId: Msg.ProfileUpdateResponse,
         response: Proto.CMsgProfileUpdateResponse
     } as GcRoute<CMsgProfileUpdate, CMsgProfileUpdateResponse>,
+    RankRequest: {
+        requestId: Msg.ClientToGCRankRequest,
+        request: Proto.CMsgClientToGCRankRequest,
+        responseId: Msg.GCToClientRankResponse,
+        response: Proto.CMsgGCToClientRankResponse
+    } as GcRoute<CMsgClientToGCRankRequest, CMsgGCToClientRankResponse>,
     RequestSocialFeed: {
         requestId: Msg.ClientToGCRequestSocialFeed,
         request: Proto.CMsgSocialFeedRequest,

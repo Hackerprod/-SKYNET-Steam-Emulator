@@ -37,6 +37,8 @@ public static class GcScriptSelfCheck
         ok &= ExpectHandled(plugin, context, 2617, 0, write);
         ok &= ExpectHandled(plugin, context, 4523, 0, write);
         ok &= ExpectResponse(plugin, context, 7009, 7010, 1, write);
+        ok &= ExpectResponse(plugin, context, 7274, 7275, 1, write);
+        ok &= ExpectResponse(plugin, context, 7387, 7388, 1, write);
         ok &= ExpectResponse(plugin, context, 7427, 7428, 1, write);
         ok &= ExpectResponse(plugin, context, 7521, 7522, 1, write);
         ok &= ExpectResponse(plugin, context, 7527, 7528, 1, write);
@@ -54,6 +56,7 @@ public static class GcScriptSelfCheck
         ok &= ExpectResponse(plugin, context, 8793, 8794, 1, write);
         ok &= ExpectResponse(plugin, context, 8798, 8799, 1, write);
         ok &= ExpectResponse(plugin, context, 8800, 8801, 1, write);
+        ok &= ExpectResponse(plugin, context, 8879, 8880, 1, write);
         ok &= ExpectUnhandled(plugin, context, 999999, write);
 
         foreach (var entry in trace.GetSince(0))
