@@ -189,6 +189,55 @@
         "responseProto": "CMsgGCRerollPlayerChallengeResponse"
     },
     {
+        "name": "GameMatchSignOutPermission",
+        "requestMessage": "GCGameMatchSignOutPermissionRequest",
+        "requestProto": "CMsgGameMatchSignOutPermissionRequest",
+        "responseMessage": "GCGameMatchSignOutPermissionResponse",
+        "responseProto": "CMsgGameMatchSignOutPermissionResponse"
+    },
+    {
+        "name": "GameBotMatchSignOutPermission",
+        "requestMessage": "GCGameBotMatchSignOutPermissionRequest",
+        "requestProto": "CMsgGameMatchSignOutPermissionRequest",
+        "responseMessage": "GCGameMatchSignOutPermissionResponse",
+        "responseProto": "CMsgGameMatchSignOutPermissionResponse"
+    },
+    {
+        "name": "SetMatchHistoryAccess",
+        "requestMessage": "GCSetMatchHistoryAccess",
+        "requestProto": "CMsgDOTASetMatchHistoryAccess",
+        "responseMessage": "GCSetMatchHistoryAccessResponse",
+        "responseProto": "CMsgDOTASetMatchHistoryAccessResponse"
+    },
+    {
+        "name": "ServerStatus",
+        "requestMessage": "ServerToGCRequestStatus",
+        "requestProto": "CMsgServerToGCRequestStatus",
+        "responseMessage": "ServerToGCRequestStatusResponse",
+        "responseProto": "CMsgServerToGCRequestStatusResponse"
+    },
+    {
+        "name": "LeaverDetected",
+        "requestMessage": "GCLeaverDetected",
+        "requestProto": "CMsgLeaverDetected",
+        "responseMessage": "GCLeaverDetectedResponse",
+        "responseProto": "CMsgLeaverDetectedResponse"
+    },
+    {
+        "name": "SubmitPlayerReport",
+        "requestMessage": "GCSubmitPlayerReport",
+        "requestProto": "CMsgDOTASubmitPlayerReport",
+        "responseMessage": "GCSubmitPlayerReportResponse",
+        "responseProto": "CMsgDOTASubmitPlayerReportResponse"
+    },
+    {
+        "name": "SubmitPlayerReportV2",
+        "requestMessage": "GCSubmitPlayerReportV2",
+        "requestProto": "CMsgDOTASubmitPlayerReportV2",
+        "responseMessage": "GCSubmitPlayerReportResponseV2",
+        "responseProto": "CMsgDOTASubmitPlayerReportResponseV2"
+    },
+    {
         "name": "GetCurrentPrivateCoachingSession",
         "requestMessage": "ClientToGCGetCurrentPrivateCoachingSession",
         "requestProto": "CMsgClientToGCGetCurrentPrivateCoachingSession",

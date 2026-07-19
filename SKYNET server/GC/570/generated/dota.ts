@@ -24905,6 +24905,18 @@ export const Routes = {
         responseId: Msg.GCToClientFindTopSourceTVGamesResponse,
         response: Proto.CMsgGCToClientFindTopSourceTVGamesResponse
     } as GcRoute<CMsgClientToGCFindTopSourceTVGames, CMsgGCToClientFindTopSourceTVGamesResponse>,
+    GameBotMatchSignOutPermission: {
+        requestId: Msg.GCGameBotMatchSignOutPermissionRequest,
+        request: Proto.CMsgGameMatchSignOutPermissionRequest,
+        responseId: Msg.GCGameMatchSignOutPermissionResponse,
+        response: Proto.CMsgGameMatchSignOutPermissionResponse
+    } as GcRoute<CMsgGameMatchSignOutPermissionRequest, CMsgGameMatchSignOutPermissionResponse>,
+    GameMatchSignOutPermission: {
+        requestId: Msg.GCGameMatchSignOutPermissionRequest,
+        request: Proto.CMsgGameMatchSignOutPermissionRequest,
+        responseId: Msg.GCGameMatchSignOutPermissionResponse,
+        response: Proto.CMsgGameMatchSignOutPermissionResponse
+    } as GcRoute<CMsgGameMatchSignOutPermissionRequest, CMsgGameMatchSignOutPermissionResponse>,
     GetAllHeroOrder: {
         requestId: Msg.ClientToGCGetAllHeroOrder,
         request: Proto.CMsgClientToGCGetAllHeroOrder,
@@ -25001,6 +25013,12 @@ export const Routes = {
         responseId: Msg.GCJoinChatChannelResponse,
         response: Proto.CMsgDOTAJoinChatChannelResponse
     } as GcRoute<CMsgDOTAJoinChatChannel, CMsgDOTAJoinChatChannelResponse>,
+    LeaverDetected: {
+        requestId: Msg.GCLeaverDetected,
+        request: Proto.CMsgLeaverDetected,
+        responseId: Msg.GCLeaverDetectedResponse,
+        response: Proto.CMsgLeaverDetectedResponse
+    } as GcRoute<CMsgLeaverDetected, CMsgLeaverDetectedResponse>,
     LookupAccountName: {
         requestId: Msg.ClientToGCLookupAccountName,
         request: Proto.CMsgClientToGCLookupAccountName,
@@ -25085,12 +25103,24 @@ export const Routes = {
         responseId: Msg.GCRerollPlayerChallengeResponse,
         response: Proto.CMsgGCRerollPlayerChallengeResponse
     } as GcRoute<CMsgClientToGCRerollPlayerChallenge, CMsgGCRerollPlayerChallengeResponse>,
+    ServerStatus: {
+        requestId: Msg.ServerToGCRequestStatus,
+        request: Proto.CMsgServerToGCRequestStatus,
+        responseId: Msg.ServerToGCRequestStatusResponse,
+        response: Proto.CMsgServerToGCRequestStatusResponse
+    } as GcRoute<CMsgServerToGCRequestStatus, CMsgServerToGCRequestStatusResponse>,
     SetItemStyle: {
         requestId: Msg.ClientToGCSetItemStyle,
         request: Proto.CMsgClientToGCSetItemStyle,
         responseId: Msg.ClientToGCSetItemStyleResponse,
         response: Proto.CMsgClientToGCSetItemStyleResponse
     } as GcRoute<CMsgClientToGCSetItemStyle, CMsgClientToGCSetItemStyleResponse>,
+    SetMatchHistoryAccess: {
+        requestId: Msg.GCSetMatchHistoryAccess,
+        request: Proto.CMsgDOTASetMatchHistoryAccess,
+        responseId: Msg.GCSetMatchHistoryAccessResponse,
+        response: Proto.CMsgDOTASetMatchHistoryAccessResponse
+    } as GcRoute<CMsgDOTASetMatchHistoryAccess, CMsgDOTASetMatchHistoryAccessResponse>,
     SetProfileCardSlots: {
         requestId: Msg.ClientToGCSetProfileCardSlots,
         request: Proto.CMsgClientToGCSetProfileCardSlots,
@@ -25115,6 +25145,18 @@ export const Routes = {
         responseId: Msg.GCSubmitLobbyMVPVoteResponse,
         response: Proto.CMsgDOTASubmitLobbyMVPVoteResponse
     } as GcRoute<CMsgDOTASubmitLobbyMVPVote, CMsgDOTASubmitLobbyMVPVoteResponse>,
+    SubmitPlayerReport: {
+        requestId: Msg.GCSubmitPlayerReport,
+        request: Proto.CMsgDOTASubmitPlayerReport,
+        responseId: Msg.GCSubmitPlayerReportResponse,
+        response: Proto.CMsgDOTASubmitPlayerReportResponse
+    } as GcRoute<CMsgDOTASubmitPlayerReport, CMsgDOTASubmitPlayerReportResponse>,
+    SubmitPlayerReportV2: {
+        requestId: Msg.GCSubmitPlayerReportV2,
+        request: Proto.CMsgDOTASubmitPlayerReportV2,
+        responseId: Msg.GCSubmitPlayerReportResponseV2,
+        response: Proto.CMsgDOTASubmitPlayerReportResponseV2
+    } as GcRoute<CMsgDOTASubmitPlayerReportV2, CMsgDOTASubmitPlayerReportResponseV2>,
     TeammateStats: {
         requestId: Msg.ClientToGCTeammateStatsRequest,
         request: Proto.CMsgClientToGCTeammateStatsRequest,

@@ -210,7 +210,16 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .RegisterHostFunction("gc", "dotaFinalizeMvpVote", dispatcher.DotaFinalizeMvpVote)
                 .RegisterHostFunction("gc", "dotaSubmitLobbyMvpVote", dispatcher.DotaSubmitLobbyMvpVote)
                 .RegisterHostFunction("gc", "dotaRecordSignOutMvpStats", dispatcher.DotaRecordSignOutMvpStats)
-                .RegisterHostFunction("gc", "dotaRerollPlayerChallenge", dispatcher.DotaRerollPlayerChallenge);
+                .RegisterHostFunction("gc", "dotaRerollPlayerChallenge", dispatcher.DotaRerollPlayerChallenge)
+                .RegisterHostFunction("gc", "dotaRecordMatchSignOutPermission", dispatcher.DotaRecordMatchSignOutPermission)
+                .RegisterHostFunction("gc", "dotaSetMatchHistoryAccess", dispatcher.DotaSetMatchHistoryAccess)
+                .RegisterHostFunction("gc", "dotaRecordServerStatus", dispatcher.DotaRecordServerStatus)
+                .RegisterHostFunction("gc", "dotaRecordLeaver", dispatcher.DotaRecordLeaver)
+                .RegisterHostFunction("gc", "dotaRecordRealtimeStats", dispatcher.DotaRecordRealtimeStats)
+                .RegisterHostFunction("gc", "dotaRecordMatchStateHistory", dispatcher.DotaRecordMatchStateHistory)
+                .RegisterHostFunction("gc", "dotaRecordSpectatorCount", dispatcher.DotaRecordSpectatorCount)
+                .RegisterHostFunction("gc", "dotaRecordLiveScoreboard", dispatcher.DotaRecordLiveScoreboard)
+                .RegisterHostFunction("gc", "dotaSavePlayerReport", dispatcher.DotaSavePlayerReport);
 
             foreach (var sourceFile in EnumerateRuntimeScriptFiles(scriptRoot))
             {
@@ -509,6 +518,51 @@ internal sealed class ScriptHostDispatcher
     public TsValue? DotaRerollPlayerChallenge(TsValue[] args)
     {
         return RequireCurrent().DotaRerollPlayerChallenge();
+    }
+
+    public TsValue? DotaRecordMatchSignOutPermission(TsValue[] args)
+    {
+        return RequireCurrent().DotaRecordMatchSignOutPermission(args);
+    }
+
+    public TsValue? DotaSetMatchHistoryAccess(TsValue[] args)
+    {
+        return RequireCurrent().DotaSetMatchHistoryAccess(args);
+    }
+
+    public TsValue? DotaRecordServerStatus(TsValue[] args)
+    {
+        return RequireCurrent().DotaRecordServerStatus(args);
+    }
+
+    public TsValue? DotaRecordLeaver(TsValue[] args)
+    {
+        return RequireCurrent().DotaRecordLeaver(args);
+    }
+
+    public TsValue? DotaRecordRealtimeStats(TsValue[] args)
+    {
+        return RequireCurrent().DotaRecordRealtimeStats(args);
+    }
+
+    public TsValue? DotaRecordMatchStateHistory(TsValue[] args)
+    {
+        return RequireCurrent().DotaRecordMatchStateHistory(args);
+    }
+
+    public TsValue? DotaRecordSpectatorCount(TsValue[] args)
+    {
+        return RequireCurrent().DotaRecordSpectatorCount(args);
+    }
+
+    public TsValue? DotaRecordLiveScoreboard(TsValue[] args)
+    {
+        return RequireCurrent().DotaRecordLiveScoreboard(args);
+    }
+
+    public TsValue? DotaSavePlayerReport(TsValue[] args)
+    {
+        return RequireCurrent().DotaSavePlayerReport(args);
     }
 }
 
@@ -1185,6 +1239,182 @@ internal sealed class ScriptExchangeHost
         return TsValue.FromBool(progress != null);
     }
 
+    public TsValue DotaRecordMatchSignOutPermission(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaRecordMatchSignOutPermission(request) requires one argument");
+        }
+
+        var request = RequireObject(args[0], "dotaRecordMatchSignOutPermission.request");
+        return TsValue.FromBool(DotaGcBackend.StatsStore?.RecordMatchSignOutPermission(new DotaStatsMatchSignOutPermissionAudit
+        {
+            ServerSteamId = _context.SteamId,
+            ServerVersion = U32Field(request, "serverVersion", "dotaRecordMatchSignOutPermission.request"),
+            LocalAttempt = U32Field(request, "localAttempt", "dotaRecordMatchSignOutPermission.request"),
+            TotalAttempt = U32Field(request, "totalAttempt", "dotaRecordMatchSignOutPermission.request"),
+            SecondsWaited = U32Field(request, "secondsWaited", "dotaRecordMatchSignOutPermission.request"),
+            PermissionGranted = BoolField(request, "permissionGranted", "dotaRecordMatchSignOutPermission.request"),
+            AbandonSignout = BoolField(request, "abandonSignout", "dotaRecordMatchSignOutPermission.request"),
+            RetryDelaySeconds = U32Field(request, "retryDelaySeconds", "dotaRecordMatchSignOutPermission.request")
+        }) ?? false);
+    }
+
+    public TsValue DotaSetMatchHistoryAccess(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaSetMatchHistoryAccess(allow) requires one argument");
+        }
+
+        var allow = ToBool(args[0], "dotaSetMatchHistoryAccess.allow");
+        return TsValue.FromBool(DotaGcBackend.StatsStore?.SetMatchHistoryAccess(_context.SteamId, _context.AccountId, allow) ?? false);
+    }
+
+    public TsValue DotaRecordServerStatus(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaRecordServerStatus(response) requires one argument");
+        }
+
+        var response = Convert.ToUInt32(ToNumber(args[0], "dotaRecordServerStatus.response"));
+        return TsValue.FromBool(DotaGcBackend.StatsStore?.RecordServerStatusRequest(_context.SteamId, response) ?? false);
+    }
+
+    public TsValue DotaRecordLeaver(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaRecordLeaver(event) requires one argument");
+        }
+
+        var eventValue = RequireObject(args[0], "dotaRecordLeaver.event");
+        var leaverSteamId = U64Field(eventValue, "leaverSteamId", "dotaRecordLeaver.event");
+        return TsValue.FromBool(DotaGcBackend.StatsStore?.RecordLeaverDetected(new DotaStatsLeaverEvent
+        {
+            ServerSteamId = _context.SteamId,
+            LeaverSteamId = leaverSteamId,
+            LeaverAccountId = SteamIdToAccountId(leaverSteamId),
+            LeaverStatus = U32Field(eventValue, "leaverStatus", "dotaRecordLeaver.event"),
+            LobbyState = U32Field(eventValue, "lobbyState", "dotaRecordLeaver.event"),
+            GameState = U32Field(eventValue, "gameState", "dotaRecordLeaver.event"),
+            LeaverDetected = BoolField(eventValue, "leaverDetected", "dotaRecordLeaver.event"),
+            FirstBloodHappened = BoolField(eventValue, "firstBloodHappened", "dotaRecordLeaver.event"),
+            DiscardMatchResults = BoolField(eventValue, "discardMatchResults", "dotaRecordLeaver.event"),
+            MassDisconnect = BoolField(eventValue, "massDisconnect", "dotaRecordLeaver.event"),
+            ServerCluster = U32Field(eventValue, "serverCluster", "dotaRecordLeaver.event"),
+            DisconnectReason = U32Field(eventValue, "disconnectReason", "dotaRecordLeaver.event")
+        }) ?? false);
+    }
+
+    public TsValue DotaRecordRealtimeStats(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaRecordRealtimeStats(snapshot) requires one argument");
+        }
+
+        var snapshot = RequireObject(args[0], "dotaRecordRealtimeStats.snapshot");
+        return TsValue.FromBool(DotaGcBackend.StatsStore?.RecordRealtimeStats(new DotaStatsRealtimeStatsSnapshot
+        {
+            ServerSteamId = U64Field(snapshot, "serverSteamId", "dotaRecordRealtimeStats.snapshot", _context.SteamId),
+            MatchId = U64Field(snapshot, "matchId", "dotaRecordRealtimeStats.snapshot"),
+            Timestamp = U32Field(snapshot, "timestamp", "dotaRecordRealtimeStats.snapshot"),
+            GameTime = U32Field(snapshot, "gameTime", "dotaRecordRealtimeStats.snapshot"),
+            GameState = U32Field(snapshot, "gameState", "dotaRecordRealtimeStats.snapshot"),
+            GameMode = U32Field(snapshot, "gameMode", "dotaRecordRealtimeStats.snapshot"),
+            LobbyType = U32Field(snapshot, "lobbyType", "dotaRecordRealtimeStats.snapshot"),
+            LeagueId = U32Field(snapshot, "leagueId", "dotaRecordRealtimeStats.snapshot"),
+            RadiantScore = U32Field(snapshot, "radiantScore", "dotaRecordRealtimeStats.snapshot"),
+            DireScore = U32Field(snapshot, "direScore", "dotaRecordRealtimeStats.snapshot"),
+            PlayerCount = U32Field(snapshot, "playerCount", "dotaRecordRealtimeStats.snapshot"),
+            BuildingCount = U32Field(snapshot, "buildingCount", "dotaRecordRealtimeStats.snapshot"),
+            DeltaFrame = BoolField(snapshot, "deltaFrame", "dotaRecordRealtimeStats.snapshot"),
+            PayloadSize = U32Field(snapshot, "payloadSize", "dotaRecordRealtimeStats.snapshot")
+        }) ?? false);
+    }
+
+    public TsValue DotaRecordMatchStateHistory(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaRecordMatchStateHistory(history) requires one argument");
+        }
+
+        var history = RequireObject(args[0], "dotaRecordMatchStateHistory.history");
+        return TsValue.FromBool(DotaGcBackend.StatsStore?.RecordMatchStateHistory(new DotaStatsMatchStateHistorySnapshot
+        {
+            MatchId = U64Field(history, "matchId", "dotaRecordMatchStateHistory.history"),
+            RadiantWon = BoolField(history, "radiantWon", "dotaRecordMatchStateHistory.history"),
+            Mmr = U32Field(history, "mmr", "dotaRecordMatchStateHistory.history"),
+            StateCount = U32Field(history, "stateCount", "dotaRecordMatchStateHistory.history"),
+            LastGameTime = U32Field(history, "lastGameTime", "dotaRecordMatchStateHistory.history"),
+            RadiantKills = U32Field(history, "radiantKills", "dotaRecordMatchStateHistory.history"),
+            DireKills = U32Field(history, "direKills", "dotaRecordMatchStateHistory.history"),
+            PayloadSize = U32Field(history, "payloadSize", "dotaRecordMatchStateHistory.history")
+        }) ?? false);
+    }
+
+    public TsValue DotaRecordSpectatorCount(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaRecordSpectatorCount(spectatorCount) requires one argument");
+        }
+
+        var spectatorCount = Convert.ToUInt32(ToNumber(args[0], "dotaRecordSpectatorCount.spectatorCount"));
+        return TsValue.FromBool(DotaGcBackend.StatsStore?.RecordSpectatorCount(_context.SteamId, spectatorCount) ?? false);
+    }
+
+    public TsValue DotaRecordLiveScoreboard(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaRecordLiveScoreboard(snapshot) requires one argument");
+        }
+
+        var snapshot = RequireObject(args[0], "dotaRecordLiveScoreboard.snapshot");
+        return TsValue.FromBool(DotaGcBackend.StatsStore?.RecordLiveScoreboard(new DotaStatsLiveScoreboardSnapshot
+        {
+            ServerSteamId = _context.SteamId,
+            MatchId = U64Field(snapshot, "matchId", "dotaRecordLiveScoreboard.snapshot"),
+            TournamentId = U32Field(snapshot, "tournamentId", "dotaRecordLiveScoreboard.snapshot"),
+            TournamentGameId = U32Field(snapshot, "tournamentGameId", "dotaRecordLiveScoreboard.snapshot"),
+            Duration = U32Field(snapshot, "duration", "dotaRecordLiveScoreboard.snapshot"),
+            HltvDelay = U32Field(snapshot, "hltvDelay", "dotaRecordLiveScoreboard.snapshot"),
+            LeagueId = U32Field(snapshot, "leagueId", "dotaRecordLiveScoreboard.snapshot"),
+            RadiantScore = U32Field(snapshot, "radiantScore", "dotaRecordLiveScoreboard.snapshot"),
+            DireScore = U32Field(snapshot, "direScore", "dotaRecordLiveScoreboard.snapshot"),
+            PlayerCount = U32Field(snapshot, "playerCount", "dotaRecordLiveScoreboard.snapshot"),
+            RoshanRespawnTimer = U32Field(snapshot, "roshanRespawnTimer", "dotaRecordLiveScoreboard.snapshot"),
+            PayloadSize = U32Field(snapshot, "payloadSize", "dotaRecordLiveScoreboard.snapshot")
+        }) ?? false);
+    }
+
+    public TsValue DotaSavePlayerReport(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaSavePlayerReport(report) requires one argument");
+        }
+
+        var report = RequireObject(args[0], "dotaSavePlayerReport.report");
+        return TsValue.FromBool(DotaGcBackend.StatsStore?.TrySavePlayerReport(new DotaStatsPlayerReport
+        {
+            ReporterSteamId = _context.SteamId,
+            ReporterAccountId = _context.AccountId,
+            TargetAccountId = U32Field(report, "targetAccountId", "dotaSavePlayerReport.report"),
+            LobbyId = U64Field(report, "lobbyId", "dotaSavePlayerReport.report"),
+            ReportFlags = U32Field(report, "reportFlags", "dotaSavePlayerReport.report"),
+            ReportReasons = UInt32ArrayField(report, "reportReasons", "dotaSavePlayerReport.report"),
+            Comment = StringField(report, "comment", "dotaSavePlayerReport.report"),
+            GameTime = U32Field(report, "gameTime", "dotaSavePlayerReport.report"),
+            DebugSlot = U32Field(report, "debugSlot", "dotaSavePlayerReport.report"),
+            DebugMatchId = U64Field(report, "debugMatchId", "dotaSavePlayerReport.report")
+        }) ?? false);
+    }
+
     private DotaStatsProfile GetStatsProfile(uint accountId)
     {
         var store = DotaGcBackend.StatsStore;
@@ -1689,6 +1919,76 @@ internal sealed class ScriptExchangeHost
         }
 
         return new TsArrayValue(array);
+    }
+
+    private static TsObject RequireObject(TsValue value, string path)
+    {
+        if (value is TsObjectValue objectValue)
+        {
+            return objectValue.Value;
+        }
+
+        throw new InvalidOperationException($"{path}: expected object, got {value.ValueType}");
+    }
+
+    private static uint U32Field(TsObject value, string fieldName, string path, uint defaultValue = 0)
+    {
+        var field = value.GetField(fieldName);
+        return field is TsNull or TsVoid
+            ? defaultValue
+            : Convert.ToUInt32(ToNumber(field, $"{path}.{fieldName}"));
+    }
+
+    private static ulong U64Field(TsObject value, string fieldName, string path, ulong defaultValue = 0)
+    {
+        var field = value.GetField(fieldName);
+        return field is TsNull or TsVoid
+            ? defaultValue
+            : Convert.ToUInt64(ToInteger(field, $"{path}.{fieldName}").ToString());
+    }
+
+    private static bool BoolField(TsObject value, string fieldName, string path, bool defaultValue = false)
+    {
+        var field = value.GetField(fieldName);
+        return field is TsNull or TsVoid
+            ? defaultValue
+            : ToBool(field, $"{path}.{fieldName}");
+    }
+
+    private static string StringField(TsObject value, string fieldName, string path, string defaultValue = "")
+    {
+        var field = value.GetField(fieldName);
+        return field is TsNull or TsVoid
+            ? defaultValue
+            : ToString(field);
+    }
+
+    private static List<uint> UInt32ArrayField(TsObject value, string fieldName, string path)
+    {
+        var field = value.GetField(fieldName);
+        if (field is TsNull or TsVoid)
+        {
+            return new List<uint>();
+        }
+
+        if (field is not TsArrayValue arrayValue)
+        {
+            throw new InvalidOperationException($"{path}.{fieldName}: expected array, got {field.ValueType}");
+        }
+
+        var result = new List<uint>(arrayValue.Value.Count);
+        for (var i = 0; i < arrayValue.Value.Count; i++)
+        {
+            result.Add(Convert.ToUInt32(ToNumber(arrayValue.Value.Get(i), $"{path}.{fieldName}[{i}]")));
+        }
+
+        return result;
+    }
+
+    private static uint SteamIdToAccountId(ulong steamId)
+    {
+        const ulong accountIdBase = 76561197960265728UL;
+        return steamId >= accountIdBase ? unchecked((uint)(steamId - accountIdBase)) : unchecked((uint)steamId);
     }
 
     private static TsValue ToArray(byte[] bytes)
