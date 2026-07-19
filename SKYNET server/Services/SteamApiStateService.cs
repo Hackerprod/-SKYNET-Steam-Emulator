@@ -40,6 +40,7 @@ public sealed partial class SteamApiStateService
     private readonly DotaStatsStore _dotaStatsStore;
     private readonly DotaPartyStore _dotaPartyStore;
     private readonly DotaLobbyInviteStore _dotaLobbyInviteStore;
+    private readonly DotaGuildStore _dotaGuildStore;
     private readonly DotaDedicatedServerSupervisor _dotaDedicatedServers;
     private readonly GameServerSettingsService _gameServerSettings;
     // Auth session lifetime and the (much shorter) presence window used to
@@ -81,6 +82,7 @@ public sealed partial class SteamApiStateService
         _dotaStatsStore = new DotaStatsStore(appDbPath, ResolveDotaStatsIdentity);
         _dotaPartyStore = new DotaPartyStore(appDbPath, ResolveDotaStatsIdentity);
         _dotaLobbyInviteStore = new DotaLobbyInviteStore(appDbPath);
+        _dotaGuildStore = new DotaGuildStore(appDbPath, ResolveDotaStatsIdentity);
         InitializePersistence(dataRoot);
         NormalizeState();
         StartBackgroundFlusher();
@@ -89,6 +91,7 @@ public sealed partial class SteamApiStateService
         DotaGcBackend.StatsStore = _dotaStatsStore;
         DotaGcBackend.PartyStore = _dotaPartyStore;
         DotaGcBackend.LobbyInviteStore = _dotaLobbyInviteStore;
+        DotaGcBackend.GuildStore = _dotaGuildStore;
         DotaGcBackend.PendingMessageQueued = EnqueueGcMessageEvent;
         DotaGcBackend.InventoryProvider = GetDotaRuntimeInventory;
         DotaGcBackend.EquipItemSink = EquipDotaItemFromGameCoordinator;

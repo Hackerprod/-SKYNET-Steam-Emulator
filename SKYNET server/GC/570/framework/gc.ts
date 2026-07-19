@@ -67,6 +67,7 @@ export interface GcServices {
     readonly profiles: DotaProfileService;
     readonly social: DotaSocialService;
     readonly chat: DotaChatService;
+    readonly guilds: DotaGuildService;
     readonly stats: DotaStatsService;
 }
 
@@ -210,6 +211,103 @@ export interface DotaChatMember {
     readonly accountId: number;
     readonly personaName: string;
     readonly channelUserId: number;
+}
+
+export interface DotaGuildService {
+    ensureCurrent(): DotaGuild;
+    getMembership(accountId?: number): DotaGuildMembership;
+    getGuild(guildId: number): DotaGuild | null;
+    getPersonaInfo(accountId: number): DotaGuildPersona[];
+    getEventData(guildId: number, eventId: number): DotaGuildEventData;
+    getReporterUpdates(): DotaReporterUpdates;
+    acknowledgeReporterUpdates(matchIds: bigint[]): boolean;
+}
+
+export interface DotaGuild {
+    readonly guildId: number;
+    readonly info: DotaGuildInfo;
+    readonly roles: DotaGuildRole[];
+    readonly members: DotaGuildMember[];
+    readonly invites: DotaGuildInvite[];
+}
+
+export interface DotaGuildInfo {
+    readonly guildName: string;
+    readonly guildTag: string;
+    readonly createdTimestamp: number;
+    readonly guildLanguage: number;
+    readonly guildFlags: number;
+    readonly guildLogo: bigint;
+    readonly guildRegion: number;
+    readonly guildChatGroupId: bigint;
+    readonly guildDescription: string;
+    readonly defaultChatChannelId: bigint;
+    readonly guildPrimaryColor: number;
+    readonly guildSecondaryColor: number;
+    readonly guildPattern: number;
+    readonly guildRefreshTimeOffset: number;
+    readonly guildRequiredRankTier: number;
+    readonly guildMotdTimestamp: number;
+    readonly guildMotd: string;
+}
+
+export interface DotaGuildRole {
+    readonly roleId: number;
+    readonly roleName: string;
+    readonly roleFlags: number;
+    readonly roleOrder: number;
+}
+
+export interface DotaGuildMember {
+    readonly accountId: number;
+    readonly roleId: number;
+    readonly joinedTimestamp: number;
+    readonly lastActiveTimestamp: number;
+}
+
+export interface DotaGuildInvite {
+    readonly guildId: number;
+    readonly requesterAccountId: number;
+    readonly targetAccountId: number;
+    readonly timestampSent: number;
+}
+
+export interface DotaGuildMembership {
+    readonly guildIds: number[];
+    readonly invites: DotaGuildInvite[];
+}
+
+export interface DotaGuildPersona {
+    readonly guildId: number;
+    readonly guildTag: string;
+    readonly guildFlags: number;
+}
+
+export interface DotaGuildEventData {
+    readonly guildId: number;
+    readonly eventId: number;
+    readonly isMember: boolean;
+    readonly guildPoints: number;
+    readonly contractsRefreshedTimestamp: number;
+    readonly completedChallengeCount: number;
+    readonly challengesRefreshTimestamp: number;
+    readonly guildWeeklyPercentile: number;
+    readonly guildWeeklyLastTimestamp: number;
+    readonly lastWeeklyClaimTime: number;
+    readonly guildCurrentPercentile: number;
+}
+
+export interface DotaReporterUpdates {
+    readonly updates: DotaReporterUpdate[];
+    readonly numReported: number;
+    readonly numNoActionTaken: number;
+}
+
+export interface DotaReporterUpdate {
+    readonly matchId: bigint;
+    readonly heroId: number;
+    readonly reportReason: number;
+    readonly timestamp: number;
 }
 
 export interface DotaMatchService {
@@ -774,6 +872,36 @@ class GcDotaChatService implements DotaChatService {
     }
 }
 
+class GcDotaGuildService implements DotaGuildService {
+    ensureCurrent(): DotaGuild {
+        return dotaGuildEnsureCurrent() as DotaGuild;
+    }
+
+    getMembership(accountId: number = 0): DotaGuildMembership {
+        return dotaGuildMembership(accountId) as DotaGuildMembership;
+    }
+
+    getGuild(guildId: number): DotaGuild | null {
+        return dotaGuild(guildId) as DotaGuild | null;
+    }
+
+    getPersonaInfo(accountId: number): DotaGuildPersona[] {
+        return dotaGuildPersonaInfo(accountId) as DotaGuildPersona[];
+    }
+
+    getEventData(guildId: number, eventId: number): DotaGuildEventData {
+        return dotaGuildEventData(guildId, eventId) as DotaGuildEventData;
+    }
+
+    getReporterUpdates(): DotaReporterUpdates {
+        return dotaReporterUpdates() as DotaReporterUpdates;
+    }
+
+    acknowledgeReporterUpdates(matchIds: bigint[]): boolean {
+        return dotaAcknowledgeReporterUpdates(matchIds);
+    }
+}
+
 class GcDotaMatchService implements DotaMatchService {
     recordSignOutPermission(request: DotaMatchSignOutPermissionAudit): boolean {
         return dotaRecordMatchSignOutPermission(request);
@@ -990,6 +1118,7 @@ class GcServiceContainer implements GcServices {
     profiles: DotaProfileService;
     social: DotaSocialService;
     chat: DotaChatService;
+    guilds: DotaGuildService;
     stats: DotaStatsService;
 
     constructor() {
@@ -999,6 +1128,7 @@ class GcServiceContainer implements GcServices {
         this.profiles = new GcDotaProfileService();
         this.social = new GcDotaSocialService();
         this.chat = new GcDotaChatService();
+        this.guilds = new GcDotaGuildService();
         this.stats = new GcDotaStatsService();
     }
 }

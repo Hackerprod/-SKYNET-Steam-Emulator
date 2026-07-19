@@ -737,6 +737,94 @@ public sealed class DotaStatsStore
         }
     }
 
+    public DotaStatsReporterUpdateSummary GetReporterUpdates(uint reporterAccountId, int limit = 50)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            var totalReports = (uint)ScalarLong(
+                connection,
+                null,
+                "SELECT COUNT(*) FROM reports WHERE reporter_account_id = $reporter_account_id",
+                ("$reporter_account_id", reporterAccountId));
+
+            using var command = connection.CreateCommand();
+            command.CommandText = """
+                SELECT
+                    CASE WHEN r.debug_match_id != 0 THEN r.debug_match_id ELSE r.lobby_id END AS match_id,
+                    COALESCE(mp.hero_id, 0) AS hero_id,
+                    r.report_reasons_csv,
+                    r.report_flags,
+                    r.created_at
+                FROM reports r
+                LEFT JOIN match_players mp ON mp.match_id = r.debug_match_id AND mp.account_id = r.target_account_id
+                WHERE r.reporter_account_id = $reporter_account_id
+                  AND NOT EXISTS (
+                      SELECT 1
+                      FROM reporter_update_acks a
+                      WHERE a.account_id = r.reporter_account_id
+                        AND a.match_id = CASE WHEN r.debug_match_id != 0 THEN r.debug_match_id ELSE r.lobby_id END
+                  )
+                ORDER BY r.created_at DESC, r.id DESC
+                LIMIT $limit
+                """;
+            Add(command, "$reporter_account_id", reporterAccountId);
+            Add(command, "$limit", Math.Clamp(limit, 1, 200));
+
+            var updates = new List<DotaStatsReporterUpdate>();
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                updates.Add(new DotaStatsReporterUpdate
+                {
+                    MatchId = unchecked((ulong)reader.GetInt64(0)),
+                    HeroId = unchecked((uint)reader.GetInt64(1)),
+                    ReportReason = FirstCsvUInt32(reader.GetString(2), unchecked((uint)reader.GetInt64(3))),
+                    Timestamp = unchecked((uint)reader.GetInt64(4))
+                });
+            }
+
+            return new DotaStatsReporterUpdateSummary
+            {
+                Updates = updates,
+                NumReported = totalReports,
+                NumNoActionTaken = totalReports
+            };
+        }
+    }
+
+    public bool AcknowledgeReporterUpdates(uint accountId, IEnumerable<ulong> matchIds)
+    {
+        var normalized = matchIds.Where(matchId => matchId != 0).Distinct().ToList();
+        if (normalized.Count == 0)
+        {
+            return true;
+        }
+
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            using var transaction = connection.BeginTransaction();
+            foreach (var matchId in normalized)
+            {
+                using var command = connection.CreateCommand();
+                command.Transaction = transaction;
+                command.CommandText = """
+                    INSERT INTO reporter_update_acks (account_id, match_id, acknowledged_at)
+                    VALUES ($account_id, $match_id, $acknowledged_at)
+                    ON CONFLICT(account_id, match_id) DO UPDATE SET acknowledged_at = excluded.acknowledged_at
+                    """;
+                Add(command, "$account_id", accountId);
+                Add(command, "$match_id", matchId);
+                Add(command, "$acknowledged_at", Now());
+                command.ExecuteNonQuery();
+            }
+
+            transaction.Commit();
+            return true;
+        }
+    }
+
     public bool RecordMatchSignOutPermission(DotaStatsMatchSignOutPermissionAudit request)
     {
         lock (_sync)
@@ -1508,6 +1596,13 @@ public sealed class DotaStatsStore
                 debug_slot INTEGER NOT NULL DEFAULT 0,
                 debug_match_id INTEGER NOT NULL DEFAULT 0,
                 created_at INTEGER NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS reporter_update_acks (
+                account_id INTEGER NOT NULL,
+                match_id INTEGER NOT NULL,
+                acknowledged_at INTEGER NOT NULL,
+                PRIMARY KEY (account_id, match_id)
             );
 
             CREATE TABLE IF NOT EXISTS match_signout_permission_requests (
@@ -2796,6 +2891,22 @@ public sealed class DotaStatsStore
 
     private static string Csv(IEnumerable<uint> values) => string.Join(",", values ?? Array.Empty<uint>());
 
+    private static uint FirstCsvUInt32(string csv, uint fallback)
+    {
+        if (!string.IsNullOrWhiteSpace(csv))
+        {
+            foreach (var part in csv.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                if (uint.TryParse(part, out var value))
+                {
+                    return value;
+                }
+            }
+        }
+
+        return fallback;
+    }
+
     private static List<uint> ParseCsvU32(string csv)
     {
         var result = new List<uint>();
@@ -2954,6 +3065,21 @@ public sealed class DotaStatsPlayerReport
     public uint GameTime { get; init; }
     public uint DebugSlot { get; init; }
     public ulong DebugMatchId { get; init; }
+}
+
+public sealed class DotaStatsReporterUpdateSummary
+{
+    public List<DotaStatsReporterUpdate> Updates { get; init; } = new();
+    public uint NumReported { get; init; }
+    public uint NumNoActionTaken { get; init; }
+}
+
+public sealed class DotaStatsReporterUpdate
+{
+    public ulong MatchId { get; init; }
+    public uint HeroId { get; init; }
+    public uint ReportReason { get; init; }
+    public uint Timestamp { get; init; }
 }
 
 public sealed class DotaStatsGlobalStats

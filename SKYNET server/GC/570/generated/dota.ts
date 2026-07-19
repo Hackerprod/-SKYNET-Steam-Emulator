@@ -24995,6 +24995,45 @@ export const Routes = {
         responseId: Msg.ClientToGCGetTrophyListResponse,
         response: Proto.CMsgClientToGCGetTrophyListResponse
     } as GcRoute<CMsgClientToGCGetTrophyList, CMsgClientToGCGetTrophyListResponse>,
+    RequestAccountGuildEventData: {
+        requestId: Msg.ClientToGCRequestAccountGuildEventData,
+        request: Proto.CMsgClientToGCRequestAccountGuildEventData,
+        responseId: Msg.ClientToGCRequestAccountGuildEventDataResponse,
+        response: Proto.CMsgClientToGCRequestAccountGuildEventDataResponse
+    } as GcRoute<CMsgClientToGCRequestAccountGuildEventData, CMsgClientToGCRequestAccountGuildEventDataResponse>,
+    RequestAccountGuildPersonaInfo: {
+        requestId: Msg.ClientToGCRequestAccountGuildPersonaInfo,
+        request: Proto.CMsgClientToGCRequestAccountGuildPersonaInfo,
+        responseId: Msg.ClientToGCRequestAccountGuildPersonaInfoResponse,
+        response: Proto.CMsgClientToGCRequestAccountGuildPersonaInfoResponse
+    } as GcRoute<CMsgClientToGCRequestAccountGuildPersonaInfo, CMsgClientToGCRequestAccountGuildPersonaInfoResponse>,
+    RequestAccountGuildPersonaInfoBatch: {
+        requestId: Msg.ClientToGCRequestAccountGuildPersonaInfoBatch,
+        request: Proto.CMsgClientToGCRequestAccountGuildPersonaInfoBatch,
+        responseId: Msg.ClientToGCRequestAccountGuildPersonaInfoBatchResponse,
+        response: Proto.CMsgClientToGCRequestAccountGuildPersonaInfoBatchResponse
+    } as GcRoute<
+        CMsgClientToGCRequestAccountGuildPersonaInfoBatch,
+        CMsgClientToGCRequestAccountGuildPersonaInfoBatchResponse
+    >,
+    RequestGuildData: {
+        requestId: Msg.ClientToGCRequestGuildData,
+        request: Proto.CMsgClientToGCRequestGuildData,
+        responseId: Msg.ClientToGCRequestGuildDataResponse,
+        response: Proto.CMsgClientToGCRequestGuildDataResponse
+    } as GcRoute<CMsgClientToGCRequestGuildData, CMsgClientToGCRequestGuildDataResponse>,
+    RequestGuildMembership: {
+        requestId: Msg.ClientToGCRequestGuildMembership,
+        request: Proto.CMsgClientToGCRequestGuildMembership,
+        responseId: Msg.ClientToGCRequestGuildMembershipResponse,
+        response: Proto.CMsgClientToGCRequestGuildMembershipResponse
+    } as GcRoute<CMsgClientToGCRequestGuildMembership, CMsgClientToGCRequestGuildMembershipResponse>,
+    RequestReporterUpdates: {
+        requestId: Msg.ClientToGCRequestReporterUpdates,
+        request: Proto.CMsgClientToGCRequestReporterUpdates,
+        responseId: Msg.ClientToGCRequestReporterUpdatesResponse,
+        response: Proto.CMsgClientToGCRequestReporterUpdatesResponse
+    } as GcRoute<CMsgClientToGCRequestReporterUpdates, CMsgClientToGCRequestReporterUpdatesResponse>,
     HasPlayerVotedForMvp: {
         requestId: Msg.ClientToGCHasPlayerVotedForMVP,
         request: Proto.CMsgClientToGCHasPlayerVotedForMVP,

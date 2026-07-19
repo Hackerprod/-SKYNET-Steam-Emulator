@@ -192,6 +192,13 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .RegisterHostFunction("gc", "dotaChatChannel", dispatcher.DotaChatChannel)
                 .RegisterHostFunction("gc", "dotaChatLeaveChannel", dispatcher.DotaChatLeaveChannel)
                 .RegisterHostFunction("gc", "dotaChatBroadcast", dispatcher.DotaChatBroadcast)
+                .RegisterHostFunction("gc", "dotaGuildEnsureCurrent", dispatcher.DotaGuildEnsureCurrent)
+                .RegisterHostFunction("gc", "dotaGuildMembership", dispatcher.DotaGuildMembership)
+                .RegisterHostFunction("gc", "dotaGuild", dispatcher.DotaGuild)
+                .RegisterHostFunction("gc", "dotaGuildPersonaInfo", dispatcher.DotaGuildPersonaInfo)
+                .RegisterHostFunction("gc", "dotaGuildEventData", dispatcher.DotaGuildEventData)
+                .RegisterHostFunction("gc", "dotaReporterUpdates", dispatcher.DotaReporterUpdates)
+                .RegisterHostFunction("gc", "dotaAcknowledgeReporterUpdates", dispatcher.DotaAcknowledgeReporterUpdates)
                 .RegisterHostFunction("gc", "dotaLookupAccountName", dispatcher.DotaLookupAccountName)
                 .RegisterHostFunction("gc", "dotaEventPoints", dispatcher.DotaEventPoints)
                 .RegisterHostFunction("gc", "dotaHeroStandings", dispatcher.DotaHeroStandings)
@@ -443,6 +450,41 @@ internal sealed class ScriptHostDispatcher
     public TsValue? DotaChatBroadcast(TsValue[] args)
     {
         return RequireCurrent().DotaChatBroadcast(args);
+    }
+
+    public TsValue? DotaGuildEnsureCurrent(TsValue[] args)
+    {
+        return RequireCurrent().DotaGuildEnsureCurrent();
+    }
+
+    public TsValue? DotaGuildMembership(TsValue[] args)
+    {
+        return RequireCurrent().DotaGuildMembership(args);
+    }
+
+    public TsValue? DotaGuild(TsValue[] args)
+    {
+        return RequireCurrent().DotaGuild(args);
+    }
+
+    public TsValue? DotaGuildPersonaInfo(TsValue[] args)
+    {
+        return RequireCurrent().DotaGuildPersonaInfo(args);
+    }
+
+    public TsValue? DotaGuildEventData(TsValue[] args)
+    {
+        return RequireCurrent().DotaGuildEventData(args);
+    }
+
+    public TsValue? DotaReporterUpdates(TsValue[] args)
+    {
+        return RequireCurrent().DotaReporterUpdates();
+    }
+
+    public TsValue? DotaAcknowledgeReporterUpdates(TsValue[] args)
+    {
+        return RequireCurrent().DotaAcknowledgeReporterUpdates(args);
     }
 
     public TsValue? DotaLookupAccountName(TsValue[] args)
@@ -1284,6 +1326,86 @@ internal sealed class ScriptExchangeHost
         }
 
         return TsValue.FromInt32(delivered);
+    }
+
+    public TsValue DotaGuildEnsureCurrent()
+    {
+        var store = DotaGcBackend.GuildStore ?? throw new InvalidOperationException("Dota guild store is not initialized.");
+        return ToTsGuild(store.EnsureCurrentMembership(_context.SteamId, _context.AccountId, _context.PersonaName));
+    }
+
+    public TsValue DotaGuildMembership(TsValue[] args)
+    {
+        var accountId = args.Length > 0
+            ? Convert.ToUInt32(ToNumber(args[0], "dotaGuildMembership.accountId"))
+            : _context.AccountId;
+        if (accountId == 0)
+        {
+            accountId = _context.AccountId;
+        }
+
+        var store = DotaGcBackend.GuildStore ?? throw new InvalidOperationException("Dota guild store is not initialized.");
+        return ToTsGuildMembership(store.GetMembership(accountId));
+    }
+
+    public TsValue DotaGuild(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaGuild(guildId) requires one argument");
+        }
+
+        var guildId = Convert.ToUInt32(ToNumber(args[0], "dotaGuild.guildId"));
+        if (guildId == 0)
+        {
+            return TsValue.Null;
+        }
+
+        var store = DotaGcBackend.GuildStore ?? throw new InvalidOperationException("Dota guild store is not initialized.");
+        return ToTsGuild(store.GetGuild(guildId));
+    }
+
+    public TsValue DotaGuildPersonaInfo(TsValue[] args)
+    {
+        var accountId = args.Length > 0
+            ? Convert.ToUInt32(ToNumber(args[0], "dotaGuildPersonaInfo.accountId"))
+            : _context.AccountId;
+        if (accountId == 0)
+        {
+            accountId = _context.AccountId;
+        }
+
+        var store = DotaGcBackend.GuildStore ?? throw new InvalidOperationException("Dota guild store is not initialized.");
+        return ToTsGuildPersonaInfos(store.GetPersonaInfo(accountId));
+    }
+
+    public TsValue DotaGuildEventData(TsValue[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new InvalidOperationException("dotaGuildEventData(guildId, eventId) requires two arguments");
+        }
+
+        var guildId = Convert.ToUInt32(ToNumber(args[0], "dotaGuildEventData.guildId"));
+        var eventId = Convert.ToUInt32(ToNumber(args[1], "dotaGuildEventData.eventId"));
+        var store = DotaGcBackend.GuildStore ?? throw new InvalidOperationException("Dota guild store is not initialized.");
+        return ToTsGuildEventData(store.GetEventData(guildId, eventId, _context.AccountId));
+    }
+
+    public TsValue DotaReporterUpdates()
+    {
+        var summary = DotaGcBackend.StatsStore?.GetReporterUpdates(_context.AccountId) ?? new DotaStatsReporterUpdateSummary();
+        return ToTsReporterUpdates(summary);
+    }
+
+    public TsValue DotaAcknowledgeReporterUpdates(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaAcknowledgeReporterUpdates(matchIds) requires one argument");
+        }
+
+        return TsValue.FromBool(DotaGcBackend.StatsStore?.AcknowledgeReporterUpdates(_context.AccountId, UInt64Array(args[0], "dotaAcknowledgeReporterUpdates.matchIds")) ?? false);
     }
 
     public TsValue DotaLookupAccountName(TsValue[] args)
@@ -2354,6 +2476,153 @@ internal sealed class ScriptExchangeHost
         return new TsArrayValue(array);
     }
 
+    private static TsValue ToTsGuild(DotaGuildSnapshot? guild)
+    {
+        if (guild == null)
+        {
+            return TsValue.Null;
+        }
+
+        var value = new TsObject("DotaGuild");
+        value.SetField("guildId", ToTsUInt32(guild.GuildId));
+        value.SetField("info", ToTsGuildInfo(guild.Info));
+        value.SetField("roles", ToTsGuildRoles(guild.Roles));
+        value.SetField("members", ToTsGuildMembers(guild.Members));
+        value.SetField("invites", ToTsGuildInvites(guild.Invites));
+        return new TsObjectValue(value);
+    }
+
+    private static TsValue ToTsGuildInfo(DotaGuildInfoSnapshot info)
+    {
+        var value = new TsObject("DotaGuildInfo");
+        value.SetField("guildName", TsValue.FromString(info.GuildName));
+        value.SetField("guildTag", TsValue.FromString(info.GuildTag));
+        value.SetField("createdTimestamp", ToTsUInt32(info.CreatedTimestamp));
+        value.SetField("guildLanguage", ToTsUInt32(info.GuildLanguage));
+        value.SetField("guildFlags", ToTsUInt32(info.GuildFlags));
+        value.SetField("guildLogo", TsValue.FromUInt64(info.GuildLogo));
+        value.SetField("guildRegion", ToTsUInt32(info.GuildRegion));
+        value.SetField("guildChatGroupId", TsValue.FromUInt64(info.GuildChatGroupId));
+        value.SetField("guildDescription", TsValue.FromString(info.GuildDescription));
+        value.SetField("defaultChatChannelId", TsValue.FromUInt64(info.DefaultChatChannelId));
+        value.SetField("guildPrimaryColor", ToTsUInt32(info.GuildPrimaryColor));
+        value.SetField("guildSecondaryColor", ToTsUInt32(info.GuildSecondaryColor));
+        value.SetField("guildPattern", ToTsUInt32(info.GuildPattern));
+        value.SetField("guildRefreshTimeOffset", ToTsUInt32(info.GuildRefreshTimeOffset));
+        value.SetField("guildRequiredRankTier", ToTsUInt32(info.GuildRequiredRankTier));
+        value.SetField("guildMotdTimestamp", ToTsUInt32(info.GuildMotdTimestamp));
+        value.SetField("guildMotd", TsValue.FromString(info.GuildMotd));
+        return new TsObjectValue(value);
+    }
+
+    private static TsValue ToTsGuildRoles(IEnumerable<DotaGuildRoleSnapshot> roles)
+    {
+        var array = new TsArray();
+        foreach (var role in roles)
+        {
+            var value = new TsObject("DotaGuildRole");
+            value.SetField("roleId", ToTsUInt32(role.RoleId));
+            value.SetField("roleName", TsValue.FromString(role.RoleName));
+            value.SetField("roleFlags", ToTsUInt32(role.RoleFlags));
+            value.SetField("roleOrder", ToTsUInt32(role.RoleOrder));
+            array.Add(new TsObjectValue(value));
+        }
+
+        return new TsArrayValue(array);
+    }
+
+    private static TsValue ToTsGuildMembers(IEnumerable<DotaGuildMemberSnapshot> members)
+    {
+        var array = new TsArray();
+        foreach (var member in members)
+        {
+            var value = new TsObject("DotaGuildMember");
+            value.SetField("accountId", ToTsUInt32(member.AccountId));
+            value.SetField("roleId", ToTsUInt32(member.RoleId));
+            value.SetField("joinedTimestamp", ToTsUInt32(member.JoinedTimestamp));
+            value.SetField("lastActiveTimestamp", ToTsUInt32(member.LastActiveTimestamp));
+            array.Add(new TsObjectValue(value));
+        }
+
+        return new TsArrayValue(array);
+    }
+
+    private static TsValue ToTsGuildInvites(IEnumerable<DotaGuildInviteSnapshot> invites)
+    {
+        var array = new TsArray();
+        foreach (var invite in invites)
+        {
+            var value = new TsObject("DotaGuildInvite");
+            value.SetField("guildId", ToTsUInt32(invite.GuildId));
+            value.SetField("requesterAccountId", ToTsUInt32(invite.RequesterAccountId));
+            value.SetField("targetAccountId", ToTsUInt32(invite.TargetAccountId));
+            value.SetField("timestampSent", ToTsUInt32(invite.TimestampSent));
+            array.Add(new TsObjectValue(value));
+        }
+
+        return new TsArrayValue(array);
+    }
+
+    private static TsValue ToTsGuildMembership(DotaGuildMembershipSnapshot membership)
+    {
+        var value = new TsObject("DotaGuildMembership");
+        value.SetField("guildIds", ToTsUInt32Array(membership.GuildIds));
+        value.SetField("invites", ToTsGuildInvites(membership.Invites));
+        return new TsObjectValue(value);
+    }
+
+    private static TsValue ToTsGuildPersonaInfos(IEnumerable<DotaGuildPersonaSnapshot> personaInfos)
+    {
+        var array = new TsArray();
+        foreach (var info in personaInfos)
+        {
+            var value = new TsObject("DotaGuildPersona");
+            value.SetField("guildId", ToTsUInt32(info.GuildId));
+            value.SetField("guildTag", TsValue.FromString(info.GuildTag));
+            value.SetField("guildFlags", ToTsUInt32(info.GuildFlags));
+            array.Add(new TsObjectValue(value));
+        }
+
+        return new TsArrayValue(array);
+    }
+
+    private static TsValue ToTsGuildEventData(DotaGuildEventDataSnapshot eventData)
+    {
+        var value = new TsObject("DotaGuildEventData");
+        value.SetField("guildId", ToTsUInt32(eventData.GuildId));
+        value.SetField("eventId", ToTsUInt32(eventData.EventId));
+        value.SetField("isMember", TsValue.FromBool(eventData.IsMember));
+        value.SetField("guildPoints", ToTsUInt32(eventData.GuildPoints));
+        value.SetField("contractsRefreshedTimestamp", ToTsUInt32(eventData.ContractsRefreshedTimestamp));
+        value.SetField("completedChallengeCount", ToTsUInt32(eventData.CompletedChallengeCount));
+        value.SetField("challengesRefreshTimestamp", ToTsUInt32(eventData.ChallengesRefreshTimestamp));
+        value.SetField("guildWeeklyPercentile", ToTsUInt32(eventData.GuildWeeklyPercentile));
+        value.SetField("guildWeeklyLastTimestamp", ToTsUInt32(eventData.GuildWeeklyLastTimestamp));
+        value.SetField("lastWeeklyClaimTime", ToTsUInt32(eventData.LastWeeklyClaimTime));
+        value.SetField("guildCurrentPercentile", ToTsUInt32(eventData.GuildCurrentPercentile));
+        return new TsObjectValue(value);
+    }
+
+    private static TsValue ToTsReporterUpdates(DotaStatsReporterUpdateSummary summary)
+    {
+        var updates = new TsArray();
+        foreach (var item in summary.Updates)
+        {
+            var update = new TsObject("DotaReporterUpdate");
+            update.SetField("matchId", TsValue.FromUInt64(item.MatchId));
+            update.SetField("heroId", ToTsUInt32(item.HeroId));
+            update.SetField("reportReason", ToTsUInt32(item.ReportReason));
+            update.SetField("timestamp", ToTsUInt32(item.Timestamp));
+            updates.Add(new TsObjectValue(update));
+        }
+
+        var value = new TsObject("DotaReporterUpdates");
+        value.SetField("updates", new TsArrayValue(updates));
+        value.SetField("numReported", ToTsUInt32(summary.NumReported));
+        value.SetField("numNoActionTaken", ToTsUInt32(summary.NumNoActionTaken));
+        return new TsObjectValue(value);
+    }
+
     private static DotaPartyPingData ToPartyPingData(TsValue value, string path)
     {
         if (value is TsNull or TsVoid)
@@ -2382,10 +2651,36 @@ internal sealed class ScriptExchangeHost
         var array = new TsArray();
         foreach (var value in values)
         {
-            array.Add(TsValue.FromInt32(unchecked((int)value)));
+            array.Add(ToTsUInt32(value));
         }
 
         return new TsArrayValue(array);
+    }
+
+    private static TsValue ToTsUInt32(uint value)
+    {
+        return value <= int.MaxValue ? TsValue.FromInt32(unchecked((int)value)) : TsValue.FromInt64(value);
+    }
+
+    private static List<ulong> UInt64Array(TsValue value, string path)
+    {
+        if (value is TsNull or TsVoid)
+        {
+            return new List<ulong>();
+        }
+
+        if (value is not TsArrayValue arrayValue)
+        {
+            throw new InvalidOperationException($"{path}: expected array, got {value.ValueType}");
+        }
+
+        var result = new List<ulong>();
+        for (var i = 0; i < arrayValue.Value.Count; i++)
+        {
+            result.Add(Convert.ToUInt64(ToInteger(arrayValue.Value.Get(i), $"{path}[{i}]").ToString()));
+        }
+
+        return result;
     }
 
     private static TsObject RequireObject(TsValue value, string path)

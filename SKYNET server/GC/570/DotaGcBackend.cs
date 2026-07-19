@@ -35,6 +35,7 @@ public sealed partial class DotaGcBackend : ILuaGameCoordinatorBackend
     public static DotaStatsStore? StatsStore { get; set; }
     public static DotaPartyStore? PartyStore { get; set; }
     public static DotaLobbyInviteStore? LobbyInviteStore { get; set; }
+    public static DotaGuildStore? GuildStore { get; set; }
     public static DotaChatStore ChatStore { get; set; } = new();
 
     // Dumb-storage primitives for the Lua-owned equip logic: resolve item ids,

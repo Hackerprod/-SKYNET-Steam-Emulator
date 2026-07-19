@@ -39,6 +39,13 @@ declare global {
         payload: Uint8Array,
         includeSelf: boolean
     ): number;
+    function dotaGuildEnsureCurrent(): unknown;
+    function dotaGuildMembership(accountId: number): unknown;
+    function dotaGuild(guildId: number): unknown;
+    function dotaGuildPersonaInfo(accountId: number): unknown;
+    function dotaGuildEventData(guildId: number, eventId: number): unknown;
+    function dotaReporterUpdates(): unknown;
+    function dotaAcknowledgeReporterUpdates(matchIds: bigint[]): boolean;
     function dotaLookupAccountName(accountId: number): unknown;
     function dotaEventPoints(accountId: number, eventId: number): unknown;
     function dotaHeroStandings(accountId: number): unknown;

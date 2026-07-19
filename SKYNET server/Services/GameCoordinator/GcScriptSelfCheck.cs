@@ -1,5 +1,6 @@
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging.Abstractions;
+using SKYNET_server.GC.Dota2;
 using SKYNET_server.Models;
 
 namespace SKYNET_server.Services;
@@ -28,6 +29,16 @@ public static class GcScriptSelfCheck
             PersonaName = "GcScriptSelfCheck",
             ClientIp = "127.0.0.1"
         };
+        var selfCheckDb = Path.Combine(Path.GetTempPath(), "skynet-gc-selfcheck", Guid.NewGuid().ToString("N"), "app.db");
+        DotaStatsAccountIdentity? ResolveIdentity(uint accountId)
+        {
+            return accountId == context.AccountId
+                ? new DotaStatsAccountIdentity(context.AccountId, context.SteamId, context.PersonaName)
+                : null;
+        }
+
+        DotaGcBackend.StatsStore = new DotaStatsStore(selfCheckDb, ResolveIdentity);
+        DotaGcBackend.GuildStore = new DotaGuildStore(selfCheckDb, ResolveIdentity);
 
         var ok = true;
         ok &= ExpectSequence(plugin, context, 4006, new uint[] { 4009, 4004, 4009 }, write);
@@ -78,6 +89,13 @@ public static class GcScriptSelfCheck
         ok &= ExpectResponse(plugin, context, 8332, 8333, 1, write);
         ok &= ExpectResponse(plugin, context, 8334, 8335, 1, write);
         ok &= ExpectResponse(plugin, context, 8349, 8350, 1, write);
+        ok &= ExpectResponse(plugin, context, 8676, 8677, 1, write);
+        ok &= ExpectResponse(plugin, context, 8673, 8674, 1, write);
+        ok &= ExpectResponse(plugin, context, 8687, 8688, 1, write);
+        ok &= ExpectResponse(plugin, context, 8716, 8717, 1, write);
+        ok &= ExpectHandled(plugin, context, 8718, 0, write);
+        ok &= ExpectResponse(plugin, context, 8727, 8728, 1, write);
+        ok &= ExpectResponse(plugin, context, 8729, 8730, 1, write);
         ok &= ExpectResponse(plugin, context, 8793, 8794, 1, write);
         ok &= ExpectResponse(plugin, context, 8798, 8799, 1, write);
         ok &= ExpectResponse(plugin, context, 8800, 8801, 1, write);
