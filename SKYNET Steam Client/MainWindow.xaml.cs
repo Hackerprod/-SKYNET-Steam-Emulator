@@ -119,14 +119,11 @@ public partial class MainWindow : Window
         if (session.Status == SessionStatus.Authenticated && session.User != null)
         {
             LoginBanner.Visibility = Visibility.Collapsed;
-            UserPanelHost.Content = BuildUserBadge(session.User);
+            PopulateProfileCard(session.User);
             return;
         }
 
-        var login = new Button { Content = "LOGIN", Style = (Style)FindResource("AccentButton") };
-        login.Click += Login_Click;
-        UserPanelHost.Content = login;
-
+        PlayerProfileCard.Visibility = Visibility.Collapsed;
         LoginBanner.Visibility = Visibility.Visible;
         if (session.Status == SessionStatus.ServerUnavailable)
         {
@@ -142,52 +139,33 @@ public partial class MainWindow : Window
         }
     }
 
-    private FrameworkElement BuildUserBadge(WebUser user)
+    private void PopulateProfileCard(WebUser user)
     {
-        var panel = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+        PlayerProfileCard.Visibility = Visibility.Visible;
+        ProfileDisplayName.Text = user.DisplayName;
 
-        var name = new StackPanel { VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 10, 0) };
-        name.Children.Add(new TextBlock
-        {
-            Text = user.DisplayName,
-            FontWeight = FontWeights.Bold,
-            FontSize = 12,
-            HorizontalAlignment = HorizontalAlignment.Right,
-            Foreground = (Brush)FindResource("SkynetText")
-        });
-        name.Children.Add(new TextBlock
-        {
-            Text = user.Online ? "ONLINE" : "OFFLINE",
-            FontSize = 9,
-            HorizontalAlignment = HorizontalAlignment.Right,
-            Foreground = (Brush)FindResource(user.Online ? "SkynetAccent" : "SkynetMuted")
-        });
-        panel.Children.Add(name);
+        var isOnline = user.Online;
+        ProfileStatusText.Text = isOnline ? "ONLINE" : "OFFLINE";
+        ProfileStatusText.Foreground = (Brush)FindResource(isOnline ? "SkynetAccent" : "SkynetMuted");
+        ProfileStatusDot.Fill = (Brush)FindResource(isOnline ? "SkynetAccent" : "SkynetMuted");
 
         var avatarSrc = Images.FromBytes(user.AvatarPng);
-        var avatar = new Border
-        {
-            Width = 34,
-            Height = 34,
-            CornerRadius = new CornerRadius(17),
-            Background = (Brush)FindResource("SkynetDark"),
-            BorderBrush = (Brush)FindResource("SkynetBorder"),
-            BorderThickness = new Thickness(1),
-            ClipToBounds = true
-        };
         if (avatarSrc != null)
-            avatar.Child = new Image { Source = avatarSrc, Stretch = Stretch.UniformToFill };
-        else
-            avatar.Child = new TextBlock
+        {
+            ProfileAvatarBorder.Background = new ImageBrush(avatarSrc)
             {
-                Text = string.IsNullOrEmpty(user.DisplayName) ? "?" : user.DisplayName.Substring(0, 1).ToUpperInvariant(),
-                FontWeight = FontWeights.Bold,
-                Foreground = (Brush)FindResource("SkynetMuted"),
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center
+                Stretch = Stretch.UniformToFill
             };
-        panel.Children.Add(avatar);
-        return panel;
+            ProfileAvatarInitial.Visibility = Visibility.Collapsed;
+        }
+        else
+        {
+            ProfileAvatarBorder.Background = (Brush)FindResource("SkynetDark");
+            ProfileAvatarInitial.Text = string.IsNullOrEmpty(user.DisplayName)
+                ? "?"
+                : user.DisplayName.Substring(0, 1).ToUpperInvariant();
+            ProfileAvatarInitial.Visibility = Visibility.Visible;
+        }
     }
 
     // ================= window chrome =================
@@ -270,7 +248,7 @@ public partial class MainWindow : Window
         return 0;
     }
 
-    private void PlayStop_Click(object sender, RoutedEventArgs e)
+    private async void PlayStop_Click(object sender, RoutedEventArgs e)
     {
         if ((sender as FrameworkElement)?.DataContext is not GameCardVm vm) return;
 
@@ -291,6 +269,7 @@ public partial class MainWindow : Window
             return;
         }
 
+        await RefreshSessionAsync();
         var result = App.Launcher.Launch(vm.Game, App.Store.Config, _session?.User);
         App.Store.Save();
         if (!result.Success)

@@ -7,8 +7,11 @@
         FontFamily="{StaticResource SkynetFont}" TextOptions.TextFormattingMode="Ideal"
         UseLayoutRounding="True" MinWidth="880" MinHeight="560">
 
-    <Border BorderBrush="{StaticResource SkynetBorder}" BorderThickness="1">
-        <Grid>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="6" />
+    </WindowChrome.WindowChrome>
+
+    <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="56" />
                 <RowDefinition Height="*" />
@@ -16,14 +19,12 @@
 
             <!-- ===== Header ===== -->
             <Border Grid.Row="0" Background="{StaticResource SkynetBlack}"
-                    BorderBrush="{StaticResource SkynetBorder}" BorderThickness="0,0,0,1"
                     MouseLeftButtonDown="Header_Drag">
                 <Grid Margin="16,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
@@ -46,9 +47,7 @@
                                    Foreground="{StaticResource SkynetMuted}" Tag="Stats" MouseLeftButtonDown="Nav_Click" />
                     </StackPanel>
 
-                    <ContentControl Grid.Column="3" x:Name="UserPanelHost" VerticalAlignment="Center" Margin="0,0,12,0" />
-
-                    <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
                         <Button Content="&#x2699;" Click="Options_Click" Width="34" Height="30" ToolTip="Options"
                                 Background="Transparent" Foreground="{StaticResource SkynetMuted}" BorderThickness="0"
                                 FontSize="15" Cursor="Hand" />
@@ -68,6 +67,7 @@
                 <!-- Dashboard -->
                 <Grid x:Name="DashboardView" Margin="28,22">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
@@ -90,7 +90,55 @@
                         </Grid>
                     </Border>
 
-                    <Grid Grid.Row="1" Margin="0,0,0,16">
+                    <Border x:Name="PlayerProfileCard" Grid.Row="1" CornerRadius="14" Margin="0,0,0,18"
+                            BorderBrush="{StaticResource SkynetBorder}" BorderThickness="1"
+                            Padding="0" ClipToBounds="True" Visibility="Collapsed">
+                        <Grid>
+                            <Grid.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#FF111111" Offset="0" />
+                                    <GradientStop Color="#FF0D1B2A" Offset="0.5" />
+                                    <GradientStop Color="#FF111111" Offset="1" />
+                                </LinearGradientBrush>
+                            </Grid.Background>
+
+                            <Grid Margin="30,26,30,24">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Grid Grid.Column="0" Width="76" Height="76">
+                                    <Border Width="76" Height="76" CornerRadius="38"
+                                            Background="{StaticResource SkynetAccent}" Opacity="0.25" />
+                                    <Border x:Name="ProfileAvatarBorder" Width="70" Height="70" CornerRadius="35"
+                                            BorderBrush="{StaticResource SkynetAccent}" BorderThickness="2.5"
+                                            Background="{StaticResource SkynetDark}"
+                                            HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock x:Name="ProfileAvatarInitial" Text="?" FontSize="28" FontWeight="Bold"
+                                                   Foreground="{StaticResource SkynetMuted}" HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" />
+                                    </Border>
+                                    <Border x:Name="ProfileOnlineDot" Width="16" Height="16" CornerRadius="8"
+                                            Background="#FF111111" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                            BorderThickness="0">
+                                        <Ellipse x:Name="ProfileStatusDot" Width="10" Height="10"
+                                                 Fill="{StaticResource SkynetAccent}" HorizontalAlignment="Center"
+                                                 VerticalAlignment="Center" />
+                                    </Border>
+                                </Grid>
+
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="24,0,0,0">
+                                    <TextBlock x:Name="ProfileDisplayName" Text="" FontSize="24" FontWeight="Bold"
+                                               Foreground="{StaticResource SkynetText}" />
+                                    <TextBlock x:Name="ProfileStatusText" Text="" FontSize="12" FontWeight="SemiBold"
+                                               Foreground="{StaticResource SkynetAccent}" Margin="0,4,0,0" />
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <Grid Grid.Row="2" Margin="0,0,0,16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
@@ -103,7 +151,7 @@
                                 Click="AddGame_Click" VerticalAlignment="Center" />
                     </Grid>
 
-                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                         <Grid>
                             <TextBlock x:Name="EmptyState" Foreground="{StaticResource SkynetMuted}" FontSize="13"
                                        HorizontalAlignment="Center" Margin="0,60,0,0" TextAlignment="Center"
@@ -200,16 +248,12 @@
                                     <DataTemplate>
                                         <Border Style="{StaticResource Card}" Width="250" Margin="0,0,16,16" Padding="14">
                                             <StackPanel Orientation="Horizontal">
-                                                <Border Width="40" Height="40" CornerRadius="20" Background="{StaticResource SkynetDark}"
-                                                        BorderBrush="{StaticResource SkynetBorder}" BorderThickness="1" ClipToBounds="True">
-                                                    <Grid>
-                                                        <TextBlock Text="{Binding Initial}" FontWeight="Bold" Foreground="{StaticResource SkynetMuted}"
-                                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                                   Visibility="{Binding NoAvatar, Converter={StaticResource BoolToVis}}" />
-                                                        <Image Source="{Binding Avatar}" Stretch="UniformToFill"
-                                                               Visibility="{Binding HasAvatar, Converter={StaticResource BoolToVis}}"
-                                                               RenderOptions.BitmapScalingMode="HighQuality" />
-                                                    </Grid>
+                                                <Border Width="40" Height="40" CornerRadius="20"
+                                                        BorderBrush="{StaticResource SkynetBorder}" BorderThickness="1"
+                                                        Background="{Binding AvatarBrush, FallbackValue={StaticResource SkynetDark}}">
+                                                    <TextBlock Text="{Binding Initial}" FontWeight="Bold" Foreground="{StaticResource SkynetMuted}"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Visibility="{Binding NoAvatar, Converter={StaticResource BoolToVis}}" />
                                                 </Border>
                                                 <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
                                                     <TextBlock Text="{Binding DisplayName}" FontWeight="Bold" FontSize="13" />
@@ -238,5 +282,4 @@
 
             </Grid>
         </Grid>
-    </Border>
 </Window>

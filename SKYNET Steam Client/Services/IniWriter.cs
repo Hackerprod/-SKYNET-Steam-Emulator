@@ -22,6 +22,8 @@ public static class IniWriter
     public static void Write(GameEntry game, AppConfig app, WebUser? user)
     {
         var s = game.Ini;
+        var serverUrl = ResolveServerUrl(s, app);
+        s.ServerUrl = serverUrl;
         var sb = new StringBuilder();
 
         sb.AppendLine("[User Settings]");
@@ -43,7 +45,7 @@ public static class IniWriter
         sb.AppendLine($"UseServerApi = {B(s.UseServerApi)}");
         sb.AppendLine($"BroadCastPort = {N(s.BroadCastPort)}");
         sb.AppendLine($"SecureNetworking = {B(s.SecureNetworking)}");
-        sb.AppendLine($"ServerUrl = {s.ServerUrl}");
+        sb.AppendLine($"ServerUrl = {serverUrl}");
         sb.AppendLine($"PollIntervalMs = {N(s.PollIntervalMs)}");
         sb.AppendLine($"HttpTimeoutMs = {N(s.HttpTimeoutMs)}");
         sb.AppendLine($"DiscoveryPort = {N(s.DiscoveryPort)}");
@@ -67,5 +69,39 @@ public static class IniWriter
 
         Directory.CreateDirectory(SkynetDir(game));
         File.WriteAllText(IniPath(game), sb.ToString(), new UTF8Encoding(false));
+    }
+
+    private static string ResolveServerUrl(GameIniSettings settings, AppConfig app)
+    {
+        var appUrl = NormalizeUrl(app.ServerUrl);
+        var gameUrl = NormalizeUrl(settings.ServerUrl);
+        if (string.IsNullOrWhiteSpace(gameUrl))
+            return appUrl;
+
+        // The launcher resolves/discovers the real backend before launch. The
+        // injected emulator only reads steam_api.ini, so a copied launcher must not
+        // keep a per-game localhost default when the app-level server already points
+        // to the host machine.
+        if (IsLoopbackUrl(gameUrl) && !IsLoopbackUrl(appUrl))
+            return appUrl;
+
+        return gameUrl;
+    }
+
+    private static string NormalizeUrl(string? url)
+    {
+        var trimmed = (url ?? string.Empty).Trim();
+        if (trimmed.Length == 0)
+            return "http://127.0.0.1:27080/";
+
+        return trimmed.EndsWith("/", StringComparison.Ordinal) ? trimmed : trimmed + "/";
+    }
+
+    private static bool IsLoopbackUrl(string url)
+    {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+            return false;
+
+        return uri.IsLoopback;
     }
 }

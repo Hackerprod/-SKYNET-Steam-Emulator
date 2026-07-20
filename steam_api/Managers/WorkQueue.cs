@@ -15,13 +15,15 @@ namespace SKYNET.Managers
     /// </summary>
     public static class WorkQueue
     {
-        private const int WorkerCount = 3;
+        private const int NormalWorkerCount = 3;
+        private const int HighPriorityWorkerCount = 2;
         private const int MaxQueuedItems = 4096;
 
         private static readonly ConcurrentQueue<WorkItem> HighPriority = new ConcurrentQueue<WorkItem>();
         private static readonly ConcurrentQueue<WorkItem> NormalPriority = new ConcurrentQueue<WorkItem>();
         private static readonly ConcurrentDictionary<string, byte> CoalescedKeys = new ConcurrentDictionary<string, byte>(StringComparer.Ordinal);
-        private static readonly SemaphoreSlim Signal = new SemaphoreSlim(0);
+        private static readonly SemaphoreSlim HighPrioritySignal = new SemaphoreSlim(0);
+        private static readonly SemaphoreSlim NormalPrioritySignal = new SemaphoreSlim(0);
 
         private static int started;
         private static int queuedCount;
@@ -65,13 +67,14 @@ namespace SKYNET.Managers
             if (highPriority)
             {
                 HighPriority.Enqueue(item);
+                HighPrioritySignal.Release();
             }
             else
             {
                 NormalPriority.Enqueue(item);
+                NormalPrioritySignal.Release();
             }
 
-            Signal.Release();
             return true;
         }
 
@@ -119,7 +122,17 @@ namespace SKYNET.Managers
                 return;
             }
 
-            for (var i = 0; i < WorkerCount; i++)
+            for (var i = 0; i < HighPriorityWorkerCount; i++)
+            {
+                var thread = new Thread(HighPriorityWorkerLoop)
+                {
+                    IsBackground = true,
+                    Name = "SKYNET WorkQueue High " + (i + 1)
+                };
+                thread.Start();
+            }
+
+            for (var i = 0; i < NormalWorkerCount; i++)
             {
                 var thread = new Thread(WorkerLoop)
                 {
@@ -130,42 +143,50 @@ namespace SKYNET.Managers
             }
         }
 
-        private static void WorkerLoop()
+        private static void HighPriorityWorkerLoop()
         {
             while (true)
             {
-                Signal.Wait();
+                HighPrioritySignal.Wait();
 
-                while (TryDequeue(out var item))
+                while (HighPriority.TryDequeue(out var item))
                 {
-                    try
-                    {
-                        item.Work();
-                    }
-                    catch (Exception ex)
-                    {
-                        SteamEmulator.Write("WorkQueue", $"{item.Name} failed: {ex.Message}");
-                    }
-                    finally
-                    {
-                        Interlocked.Decrement(ref queuedCount);
-                        if (!string.IsNullOrEmpty(item.CoalesceKey))
-                        {
-                            CoalescedKeys.TryRemove(item.CoalesceKey, out _);
-                        }
-                    }
+                    RunItem(item);
                 }
             }
         }
 
-        private static bool TryDequeue(out WorkItem item)
+        private static void WorkerLoop()
         {
-            if (HighPriority.TryDequeue(out item))
+            while (true)
             {
-                return true;
-            }
+                NormalPrioritySignal.Wait();
 
-            return NormalPriority.TryDequeue(out item);
+                while (NormalPriority.TryDequeue(out var item))
+                {
+                    RunItem(item);
+                }
+            }
+        }
+
+        private static void RunItem(WorkItem item)
+        {
+            try
+            {
+                item.Work();
+            }
+            catch (Exception ex)
+            {
+                SteamEmulator.Write("WorkQueue", $"{item.Name} failed: {ex.Message}");
+            }
+            finally
+            {
+                Interlocked.Decrement(ref queuedCount);
+                if (!string.IsNullOrEmpty(item.CoalesceKey))
+                {
+                    CoalescedKeys.TryRemove(item.CoalesceKey, out _);
+                }
+            }
         }
 
         private sealed class WorkItem

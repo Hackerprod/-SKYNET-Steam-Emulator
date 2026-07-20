@@ -168,6 +168,9 @@ public class SteamEmulator
             Settings.Load();
 
             Log.Initialize();
+            Write(
+                "Config",
+                $"Server API enabled={UseServerApi} url={ServerUrl} timeoutMs={HttpTimeoutMs} discoveryPort={DiscoveryPort} activeWeb={UseActiveWebUser}");
 
             // Pre-warm the CLR thread pool. Our sync-over-async HTTP calls
             // (SendAsync().GetAwaiter().GetResult()) need a pool thread to run the

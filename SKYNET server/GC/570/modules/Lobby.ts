@@ -173,6 +173,7 @@ interface LobbyState {
     matchId: bigint;
     gameStartTime: number;
     realtimeStatsStartStopSent: boolean;
+    playerItemsServerSteamId: bigint;
     members: LobbyMemberState[];
 }
 
@@ -787,6 +788,7 @@ function createLobbyState(ctx: HandlerContext<CMsgPracticeLobbyCreate, CMsgGener
         matchId: 0n,
         gameStartTime: 0,
         realtimeStatsStartStopSent: false,
+        playerItemsServerSteamId: 0n,
         members: []
     };
 
@@ -1072,7 +1074,12 @@ function refreshLobby(lobby: LobbyState, now: number): void {
 }
 
 function attachServer(ctx: RawMessageContext, lobby: LobbyState, markRun: boolean): void {
+    const previousServerSteamId = lobby.serverSteamId;
     lobby.serverSteamId = ctx.steamId;
+    if (previousServerSteamId !== 0n && previousServerSteamId !== ctx.steamId) {
+        lobby.playerItemsServerSteamId = 0n;
+    }
+
     store.byServer.set(ctx.steamId, lobby.lobbyId);
     if (lobby.serverPort === 0) {
         lobby.serverPort = DEFAULT_PORT;
@@ -1095,11 +1102,17 @@ function attachServer(ctx: RawMessageContext, lobby: LobbyState, markRun: boolea
     }
 
     refreshLobby(lobby, ctx.clock.now());
-    if (!markRun) {
-        // Player owner/econ caches are a setup contract. The server consumes
-        // them before RUN so hero cosmetics and global loadout effects are
-        // available when heroes spawn; the RUN edge only updates lobby state.
+    if (lobby.playerItemsServerSteamId !== lobby.serverSteamId) {
+        // Player cosmetics reach the game server as two owner-scoped SO cache
+        // subscriptions: service 0 announces the player owner and service 1
+        // carries the equipped CSOEconItem objects. Hero items and global
+        // loadout effects are both normal econ items; their equippedState
+        // (class/slot) tells Dota where to render them. Dedicated servers get
+        // this during GameServerInfo before RUN; listen/local servers may first
+        // become addressable on LANServerAvailable/ServerAvailable, so send it
+        // once to the first SteamID that actually owns the match.
         sendLobbyPlayerItemsToServer(ctx, lobby);
+        lobby.playerItemsServerSteamId = lobby.serverSteamId;
     }
     broadcastLobby(ctx, lobby, 0n, true);
     sendTo(ctx, lobby.serverSteamId, Msg.SOCacheSubscribed, buildLobbySoCacheSubscribed(ctx, lobby));

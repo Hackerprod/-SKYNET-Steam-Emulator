@@ -15,11 +15,15 @@ public sealed class UserItemVm
         DisplayName = string.IsNullOrWhiteSpace(user.DisplayName) ? "Player" : user.DisplayName;
         IsOnline = user.Online;
         Avatar = Images.FromBytes(user.AvatarPng);
+        AvatarBrush = Avatar != null
+            ? new ImageBrush(Avatar) { Stretch = Stretch.UniformToFill }
+            : null;
     }
 
     public string DisplayName { get; }
     public bool IsOnline { get; }
     public ImageSource? Avatar { get; }
+    public ImageBrush? AvatarBrush { get; }
     public bool HasAvatar => Avatar != null;
     public bool NoAvatar => Avatar == null;
     public string Initial => DisplayName.Substring(0, 1).ToUpperInvariant();

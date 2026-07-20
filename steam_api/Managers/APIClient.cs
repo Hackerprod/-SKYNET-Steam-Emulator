@@ -40,6 +40,7 @@ namespace SKYNET.Managers
         private const int MaxP2PBatch = 64;
         private static readonly ConcurrentQueue<SkyNetP2PPacketSendDto> P2PQueue = new ConcurrentQueue<SkyNetP2PPacketSendDto>();
         private static readonly AutoResetEvent P2PQueueSignal = new AutoResetEvent(false);
+        private const int MinimumGcExchangeTimeoutMs = 30000;
         private static int P2PQueueCount;
         private static int P2PDispatcherStarted;
 
@@ -55,6 +56,7 @@ namespace SKYNET.Managers
             // Also warms up the HTTP stack so the first request isn't slow.
             if (IsEnabled)
             {
+                DiscoverServerIfNeeded();
                 QueueSessionHandshake();
             }
         }
@@ -166,6 +168,10 @@ namespace SKYNET.Managers
                 }
 
                 SteamEmulator.ServerUrl = discovered;
+            }
+            else
+            {
+                DiscoverServerIfNeeded();
             }
 
             if (!string.IsNullOrWhiteSpace(SteamEmulator.AccessToken))
@@ -1162,7 +1168,7 @@ namespace SKYNET.Managers
                 SourceJobId = sourceJobId,
                 SteamId = (ulong)(gameServerMessage ? SteamEmulator.SteamID_GS : SteamEmulator.SteamID),
                 GameServer = gameServerMessage
-            });
+            }, timeoutMs: Math.Max(MinimumGcExchangeTimeoutMs, SteamEmulator.HttpTimeoutMs));
         }
 
         private static bool IsGameServerGCMessage(uint messageType)
@@ -1650,10 +1656,11 @@ namespace SKYNET.Managers
             where T : class
         {
             statusCode = null;
+            var effectiveTimeoutMs = EffectiveTimeoutMs(timeoutMs);
             try
             {
                 string json = body != null ? body.ToJson() : null;
-                var response = HttpRequestSync(method.Method, path, json, applyAuth: true, timeoutMs: timeoutMs);
+                var response = HttpRequestSync(method.Method, path, json, applyAuth: true, timeoutMs: effectiveTimeoutMs);
                 statusCode = response.StatusCode;
 
                 if (!response.IsSuccess)
@@ -1692,7 +1699,7 @@ namespace SKYNET.Managers
             }
             catch (WebException wex) when (wex.Status == WebExceptionStatus.Timeout)
             {
-                SteamEmulator.Write("APIClient", $"{method} {path} timed out after {timeoutMs}ms");
+                SteamEmulator.Write("APIClient", $"{method} {path} timed out after {effectiveTimeoutMs}ms");
                 return null;
             }
             catch (Exception ex)
@@ -1731,7 +1738,7 @@ namespace SKYNET.Managers
             request.Method = method;
             request.Proxy = null; // no WPAD auto-detect
             request.Accept = "application/json";
-            request.Timeout = timeoutMs > 0 ? timeoutMs : Math.Max(250, SteamEmulator.HttpTimeoutMs);
+            request.Timeout = EffectiveTimeoutMs(timeoutMs);
             request.ReadWriteTimeout = request.Timeout;
 
             if (applyAuth && !string.IsNullOrWhiteSpace(SteamEmulator.AccessToken))
@@ -1876,6 +1883,11 @@ namespace SKYNET.Managers
                     Thread.Sleep(100);
                 }
             }
+        }
+
+        private static int EffectiveTimeoutMs(int timeoutMs)
+        {
+            return timeoutMs > 0 ? timeoutMs : Math.Max(250, SteamEmulator.HttpTimeoutMs);
         }
 
         private static void DiscoverServerIfNeeded()
