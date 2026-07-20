@@ -14,12 +14,12 @@ public sealed class LaunchResult
 }
 
 /// <summary>
-/// Launches a game with the SKYNET emulator injected into the process at start, with
-/// nothing written into the game folder. The game exe is created suspended, our
-/// emulator DLL (staged in a private folder under %AppData%) is injected via
+/// Launches a game with the SKYNET emulator injected into the process at start,
+/// with nothing written into the game folder. The game exe is created suspended,
+/// the emulator DLL from the launcher's payload folder is injected via
 /// CreateRemoteThread(LoadLibraryW), then the process is resumed. Because the game
 /// loads steam_api64.dll dynamically by bare name, the loader returns our
-/// already-loaded module for its later LoadLibrary("steam_api64.dll") — so the game
+/// already-loaded module for its later LoadLibrary("steam_api64.dll"), so the game
 /// uses our emulator without the original file ever being touched. See DllInjector.
 ///
 /// RecoverOrphans still runs on startup to clean up any DLL swap left by an older
@@ -38,12 +38,6 @@ public sealed class GameLauncher
         return Path.Combine(AppContext.BaseDirectory, rel);
     }
 
-    private static string TargetDllName(GameArch arch) =>
-        arch == GameArch.X64 ? "steam_api64.dll" : "steam_api.dll";
-
-    /// <summary>Private root our emulator DLL is injected from (not the game folder).</summary>
-    private static string InjectDir => Path.Combine(ConfigStore.RootDir, "inject");
-
     public event Action<GameEntry>? GameExited;
 
     public LaunchResult Launch(GameEntry game, AppConfig app, WebUser? user, string? extraArgs = null)
@@ -59,9 +53,9 @@ public sealed class GameLauncher
         if (!File.Exists(payload))
             return LaunchResult.Fail($"Emulator payload missing:\n{payload}");
 
-        // The emulator resolves steam_api.ini / logs from the game process's own exe
-        // folder (Common.GetPath uses MainModule), so writing the ini next to the game
-        // exe works even though the DLL is injected from a private path.
+        // The emulator resolves steam_api.ini / logs from the game process's own
+        // exe folder (Common.GetPath uses MainModule), so the payload DLL can stay
+        // in the launcher's payload directory while per-game config lives with the game.
         try
         {
             IniWriter.Write(game, app, user);
@@ -71,25 +65,6 @@ public sealed class GameLauncher
             return LaunchResult.Fail($"Failed to write steam_api.ini:\n{ex.Message}");
         }
 
-        // Stage our emulator DLL in a private folder with the exact base name the game
-        // will request (so the loader hands our already-loaded module back to it).
-        string stageDir = string.Empty;
-        string injectDll;
-        try
-        {
-            Directory.CreateDirectory(InjectDir);
-            stageDir = Path.Combine(InjectDir, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString("x") + "-" + Guid.NewGuid().ToString("N"));
-            Directory.CreateDirectory(stageDir);
-            injectDll = Path.Combine(stageDir, TargetDllName(arch));
-            File.Copy(payload, injectDll, overwrite: false);
-            var payloadConfig = payload + ".config";
-            if (File.Exists(payloadConfig)) File.Copy(payloadConfig, injectDll + ".config", overwrite: true);
-        }
-        catch (Exception ex)
-        {
-            return LaunchResult.Fail($"Failed to stage emulator DLL:\n{ex.Message}");
-        }
-
         Process proc;
         try
         {
@@ -97,17 +72,12 @@ public sealed class GameLauncher
             var args = string.Join(" ",
                 new[] { game.LaunchArguments, extraArgs }.Where(a => !string.IsNullOrWhiteSpace(a)));
 
-            proc = DllInjector.LaunchAndInject(game.ExecutablePath, injectDll, args, workDir);
+            proc = DllInjector.LaunchAndInject(game.ExecutablePath, payload, args, workDir);
             proc.EnableRaisingEvents = true;
-            proc.Exited += (_, _) =>
-            {
-                TryDeleteDirectory(stageDir);
-                GameExited?.Invoke(game);
-            };
+            proc.Exited += (_, _) => GameExited?.Invoke(game);
         }
         catch (Exception ex)
         {
-            TryDeleteDirectory(stageDir);
             return LaunchResult.Fail($"Failed to inject emulator into the game:\n{ex.Message}");
         }
 
@@ -140,8 +110,6 @@ public sealed class GameLauncher
     /// </summary>
     public void RecoverOrphans(IEnumerable<GameEntry> games)
     {
-        CleanupStaleInjectionPayloads();
-
         foreach (var game in games)
         {
             if (string.IsNullOrWhiteSpace(game.ExeFolder)) continue;
@@ -152,29 +120,5 @@ public sealed class GameLauncher
                     TryRestore(target);
             }
         }
-    }
-
-    private static void CleanupStaleInjectionPayloads()
-    {
-        try
-        {
-            if (!Directory.Exists(InjectDir)) return;
-
-            foreach (var dir in Directory.EnumerateDirectories(InjectDir))
-            {
-                TryDeleteDirectory(dir);
-            }
-        }
-        catch { /* best-effort */ }
-    }
-
-    private static void TryDeleteDirectory(string path)
-    {
-        try
-        {
-            if (!string.IsNullOrWhiteSpace(path) && Directory.Exists(path))
-                Directory.Delete(path, recursive: true);
-        }
-        catch { /* still mapped by a live process; next launcher start retries */ }
     }
 }
