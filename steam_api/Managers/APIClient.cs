@@ -49,17 +49,11 @@ namespace SKYNET.Managers
 
         public static void Initialize()
         {
-            // Start the server session handshake as early as possible. Unity /
-            // Steamworks.NET games poll GetSteamID in a brief early window and cache
-            // whatever they get, so connecting here (during the rest of the game's
-            // startup) means the identity — and thus the avatar — is ready in time.
-            // Also warms up the HTTP stack so the first request isn't slow.
-            if (IsEnabled)
-            {
-                // Keep DLL load/startup non-blocking. Discovery and reachability
-                // checks run inside the queued handshake, not on Dota's early init path.
-                QueueSessionHandshake();
-            }
+            // Do not create worker threads or touch HTTP from SteamEmulator.Initialize.
+            // Dota may load/call steam_api while native module initialization is still
+            // sensitive; even "background" managed work can stall that path. Session
+            // startup is deliberately demand-driven from normal Steamworks calls such
+            // as BLoggedOn/GetSteamID or dedicated server registration/logon.
         }
 
         // Non-blocking on the caller (game) thread: returns whether a session
@@ -128,7 +122,7 @@ namespace SKYNET.Managers
                 return;
             }
 
-            ThreadPool.QueueUserWorkItem(_ =>
+            if (!StartBackgroundWorker("SKYNET API session handshake", () =>
             {
                 try
                 {
@@ -148,7 +142,44 @@ namespace SKYNET.Managers
                 {
                     Interlocked.Exchange(ref SessionHandshakeRunning, 0);
                 }
-            });
+            }))
+            {
+                Interlocked.Exchange(ref SessionHandshakeRunning, 0);
+            }
+        }
+
+        // Dota can call into steam_api while its own startup is still fragile.
+        // Starting API work on dedicated background threads avoids depending on
+        // the CLR thread pool during that early phase, while still keeping all
+        // network/discovery work off the game thread.
+        private static bool StartBackgroundWorker(string name, Action action)
+        {
+            try
+            {
+                var thread = new Thread(() =>
+                {
+                    try
+                    {
+                        action();
+                    }
+                    catch (Exception ex)
+                    {
+                        SteamEmulator.Write("APIClient", $"{name} failed: {ex}");
+                    }
+                })
+                {
+                    IsBackground = true,
+                    Name = name
+                };
+
+                thread.Start();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                SteamEmulator.Write("APIClient", $"Could not start {name}: {ex}");
+                return false;
+            }
         }
 
         // The actual blocking handshake. Only call from background/non-game-thread
@@ -323,7 +354,7 @@ namespace SKYNET.Managers
                 return;
             }
 
-            ThreadPool.QueueUserWorkItem(state =>
+            if (!StartBackgroundWorker("SKYNET self refresh", () =>
             {
                 try
                 {
@@ -340,7 +371,10 @@ namespace SKYNET.Managers
                 {
                     Interlocked.Exchange(ref SelfRefreshQueued, 0);
                 }
-            });
+            }))
+            {
+                Interlocked.Exchange(ref SelfRefreshQueued, 0);
+            }
         }
 
         public static void QueueFriendsRefresh(bool force = false)
@@ -360,7 +394,7 @@ namespace SKYNET.Managers
                 return;
             }
 
-            ThreadPool.QueueUserWorkItem(state =>
+            if (!StartBackgroundWorker("SKYNET friends refresh", () =>
             {
                 try
                 {
@@ -373,7 +407,10 @@ namespace SKYNET.Managers
                 {
                     Interlocked.Exchange(ref FriendsRefreshQueued, 0);
                 }
-            });
+            }))
+            {
+                Interlocked.Exchange(ref FriendsRefreshQueued, 0);
+            }
         }
 
         public static bool QueueUserProfileRefresh(ulong steamId, bool refreshFriends = false)
@@ -404,7 +441,7 @@ namespace SKYNET.Managers
                 return false;
             }
 
-            ThreadPool.QueueUserWorkItem(state =>
+            if (!StartBackgroundWorker("SKYNET user profile refresh", () =>
             {
                 try
                 {
@@ -427,7 +464,10 @@ namespace SKYNET.Managers
                 {
                     PendingUserProfileRefreshes.TryRemove(steamId, out _);
                 }
-            });
+            }))
+            {
+                PendingUserProfileRefreshes.TryRemove(steamId, out _);
+            }
 
             return true;
         }

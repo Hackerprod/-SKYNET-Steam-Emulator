@@ -16,9 +16,11 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
     private readonly GameServerSettingsService _settings;
     private readonly string _executablePath;
     private readonly string _workingDirectory;
+    private readonly string _payloadDllPath;
     private readonly string _diagnosticsDirectory;
     private readonly int _tvPortOffset;
     private readonly TimeSpan _startupTimeout;
+    private readonly bool _showWindow;
     private readonly Dictionary<ulong, DedicatedReservation> _reservations = new();
 
     public DotaDedicatedServerSupervisor(
@@ -37,9 +39,14 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
             configuration.GetValue<string>("GameCoordinator:Dota:Dedicated:WorkingDirectory"),
             environment.ContentRootPath,
             Path.GetDirectoryName(_executablePath) ?? environment.ContentRootPath);
+        _payloadDllPath = ResolvePath(
+            configuration.GetValue<string>("GameCoordinator:Dota:Dedicated:PayloadDllPath"),
+            environment.ContentRootPath,
+            Path.Combine("..", "SKYNET Steam Client", "payload", "x64", "steam_api64.dll"));
         _diagnosticsDirectory = Path.GetFullPath(Path.Combine(environment.ContentRootPath, "..", ".tmp"));
         _tvPortOffset = Math.Clamp(configuration.GetValue("GameCoordinator:Dota:Dedicated:TvPortOffset", 10000), 1, 30000);
         _startupTimeout = TimeSpan.FromSeconds(Math.Clamp(configuration.GetValue("GameCoordinator:Dota:Dedicated:StartupTimeoutSeconds", 120), 10, 180));
+        _showWindow = configuration.GetValue("GameCoordinator:Dota:Dedicated:ShowWindow", true);
     }
 
     public DedicatedLaunchResult Start(ulong lobbyId, string? requestedMap)
@@ -76,6 +83,11 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
                 return DedicatedLaunchResult.Failed($"Dota dedicated working directory was not found at '{_workingDirectory}'.");
             }
 
+            if (!File.Exists(_payloadDllPath))
+            {
+                return DedicatedLaunchResult.Failed($"Dota dedicated emulator payload was not found at '{_payloadDllPath}'.");
+            }
+
             var port = AllocatePortLocked(settings.DedicatedPortStart);
             if (port == 0)
             {
@@ -83,75 +95,73 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
             }
 
             var map = NormalizeMap(requestedMap);
-            var startInfo = new ProcessStartInfo
+            var arguments = new List<string>
             {
-                FileName = _executablePath,
-                WorkingDirectory = _workingDirectory,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true
+                "-dedicated"
             };
-            startInfo.ArgumentList.Add("-dedicated");
             // Always insecure: the emulator cannot produce a valid VAC session, so a
             // "secure" dedicated only ever yields the client VAC popup/block. Passing
             // -insecure keeps dota2 from loading the VAC module at all.
-            startInfo.ArgumentList.Add("-insecure");
+            arguments.Add("-insecure");
             // Bind explicitly. Recent Dota dedicated builds can otherwise pick a
             // single interface, leaving advertised endpoints black-holed.
             if (TryNormalizeIPv4(settings.DedicatedBindIp, out var bindIp))
             {
-                startInfo.ArgumentList.Add("-ip");
-                startInfo.ArgumentList.Add(bindIp);
+                arguments.Add("-ip");
+                arguments.Add(bindIp);
             }
-            startInfo.ArgumentList.Add("-port");
-            startInfo.ArgumentList.Add(port.ToString(System.Globalization.CultureInfo.InvariantCulture));
-            startInfo.ArgumentList.Add("+tv_port");
-            startInfo.ArgumentList.Add((port + _tvPortOffset).ToString(System.Globalization.CultureInfo.InvariantCulture));
-            startInfo.ArgumentList.Add("+sv_lan");
-            startInfo.ArgumentList.Add("0");
+            arguments.Add("-port");
+            arguments.Add(port.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            arguments.Add("+tv_port");
+            arguments.Add((port + _tvPortOffset).ToString(System.Globalization.CultureInfo.InvariantCulture));
+            arguments.Add("+sv_lan");
+            arguments.Add("0");
             // Generous netchannel timeout. A peer with a weaker CPU or missing
             // cosmetic assets can stall the client for 10-20s during the hero-select
             // loadout (EconItemSearch / UGC image resolution), going silent on the
             // wire; the default ~20s server timeout then drops it mid-load. Real
             // matchmaking is lenient during loading, so widen the window.
-            startInfo.ArgumentList.Add("+cl_timeout");
-            startInfo.ArgumentList.Add("120");
-            startInfo.ArgumentList.Add("+map");
-            startInfo.ArgumentList.Add(map);
-            startInfo.ArgumentList.Add("-console");
-            startInfo.ArgumentList.Add("-vconsole");
-            startInfo.ArgumentList.Add("-novid");
-            startInfo.Environment["SKYNET_DEDICATED_LOBBY_ID"] = lobbyId.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            startInfo.Environment["SKYNET_DEDICATED_PORT"] = port.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            startInfo.Environment["SKYNET_PROCESS_ROLE"] = "dedicated";
-            startInfo.Environment["SKYNET_LOG_SUFFIX"] = $"dedicated_{lobbyId}_{port}";
-            startInfo.Environment["SKYNET_DEDICATED_INSECURE"] = "1";
+            arguments.Add("+cl_timeout");
+            arguments.Add("120");
+            arguments.Add("+map");
+            arguments.Add(map);
+            arguments.Add("-console");
+            arguments.Add("-vconsole");
+            arguments.Add("-novid");
+
+            var environmentVariables = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["SKYNET_DEDICATED_LOBBY_ID"] = lobbyId.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                ["SKYNET_DEDICATED_PORT"] = port.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                ["SKYNET_PROCESS_ROLE"] = "dedicated",
+                ["SKYNET_LOG_SUFFIX"] = $"dedicated_{lobbyId}_{port}",
+                ["SKYNET_DEDICATED_INSECURE"] = "1"
+            };
 
             try
             {
                 Directory.CreateDirectory(_diagnosticsDirectory);
                 var outputPath = Path.Combine(_diagnosticsDirectory, $"dota_dedicated_{lobbyId}_{port}_stdout.log");
                 var errorPath = Path.Combine(_diagnosticsDirectory, $"dota_dedicated_{lobbyId}_{port}_stderr.log");
-                File.WriteAllText(outputPath, string.Empty);
+                // The dedicated process is injected before it runs so it uses the
+                // launcher's payload DLL, not any stale steam_api64.dll beside Dota.
+                // steam_api resolves its ini and SKYNET logs from Dota's exe folder,
+                // while the executable bytes remain untouched on disk.
+                var process = InjectedProcessLauncher.Launch(
+                    _executablePath,
+                    _payloadDllPath,
+                    arguments,
+                    _workingDirectory,
+                    environmentVariables,
+                    _showWindow);
+                File.WriteAllText(outputPath, $"Launched through payload injection: {_payloadDllPath}{Environment.NewLine}");
                 File.WriteAllText(errorPath, string.Empty);
-
-                var process = Process.Start(startInfo);
-                if (process == null)
-                {
-                    return DedicatedLaunchResult.Failed("Process.Start returned no dedicated process.");
-                }
-
-                process.OutputDataReceived += (_, args) => AppendProcessLine(outputPath, args.Data);
-                process.ErrorDataReceived += (_, args) => AppendProcessLine(errorPath, args.Data);
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
 
                 var reservation = new DedicatedReservation(lobbyId, port, map, process, DateTime.UtcNow);
                 _reservations[lobbyId] = reservation;
                 _logger.LogInformation(
-                    "Started Dota dedicated server pid {ProcessId} for lobby {LobbyId} on port {Port} map {Map}. Args: {Arguments}. Stdout: {StdoutPath}. Stderr: {StderrPath}",
-                    process.Id, lobbyId, port, map, string.Join(" ", startInfo.ArgumentList), outputPath, errorPath);
+                    "Started Dota dedicated server pid {ProcessId} for lobby {LobbyId} on port {Port} map {Map}. Payload: {Payload}. Args: {Arguments}. Stdout: {StdoutPath}. Stderr: {StderrPath}",
+                    process.Id, lobbyId, port, map, _payloadDllPath, string.Join(" ", arguments), outputPath, errorPath);
                 return new DedicatedLaunchResult(true, port, reservation.State, string.Empty);
             }
             catch (Exception ex)
@@ -377,22 +387,6 @@ public sealed class DotaDedicatedServerSupervisor : BackgroundService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Could not stop dedicated Dota process for lobby {LobbyId}", reservation.LobbyId);
-        }
-    }
-
-    private static void AppendProcessLine(string path, string? line)
-    {
-        if (line == null)
-        {
-            return;
-        }
-
-        try
-        {
-            File.AppendAllText(path, line + Environment.NewLine);
-        }
-        catch
-        {
         }
     }
 
