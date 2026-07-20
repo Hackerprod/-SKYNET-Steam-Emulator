@@ -8,8 +8,8 @@ namespace SKYNET.Client.Services;
 /// <summary>
 /// Launches a process suspended and injects a DLL into it before it runs, using the
 /// classic VirtualAllocEx + CreateRemoteThread(LoadLibraryW) technique. Nothing on the
-/// game's disk is touched: our steam_api DLL lives in a private folder and is loaded
-/// from there.
+/// game's disk is touched: our steam_api DLL is loaded from the launcher's payload
+/// folder.
 ///
 /// Why this makes the game use OUR steam_api: the game loads steam_api64.dll
 /// dynamically by bare name. Windows' loader returns an already-loaded module with the
@@ -24,7 +24,12 @@ public static class DllInjector
         if (!File.Exists(exePath)) throw new FileNotFoundException("Executable not found", exePath);
         if (!File.Exists(dllPath)) throw new FileNotFoundException("Injection DLL not found", dllPath);
 
-        var si = new STARTUPINFO { cb = Marshal.SizeOf<STARTUPINFO>() };
+        var si = new STARTUPINFO
+        {
+            cb = Marshal.SizeOf<STARTUPINFO>(),
+            dwFlags = STARTF_USESHOWWINDOW,
+            wShowWindow = SW_SHOWNORMAL
+        };
         var pi = new PROCESS_INFORMATION();
 
         // CreateProcess wants a mutable command line; arg0 should be the exe.
@@ -41,6 +46,7 @@ public static class DllInjector
         try
         {
             InjectInto(pi.hProcess, dllPath);
+            AllowSetForegroundWindow(pi.dwProcessId);
             if (ResumeThread(pi.hThread) == unchecked((uint)-1))
                 throw new Win32Exception(Marshal.GetLastWin32Error(), "ResumeThread failed");
 
@@ -119,6 +125,9 @@ public static class DllInjector
         public short wShowWindow, cbReserved2; public IntPtr lpReserved2, hStdInput, hStdOutput, hStdError;
     }
 
+    private const int STARTF_USESHOWWINDOW = 0x00000001;
+    private const short SW_SHOWNORMAL = 1;
+
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     private static extern bool CreateProcess(string? lpApplicationName, StringBuilder lpCommandLine,
         IntPtr lpProcessAttributes, IntPtr lpThreadAttributes, bool bInheritHandles, uint dwCreationFlags,
@@ -157,4 +166,7 @@ public static class DllInjector
 
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern bool CloseHandle(IntPtr hObject);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool AllowSetForegroundWindow(uint dwProcessId);
 }

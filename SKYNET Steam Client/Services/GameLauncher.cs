@@ -75,6 +75,7 @@ public sealed class GameLauncher
             proc = DllInjector.LaunchAndInject(game.ExecutablePath, payload, args, workDir);
             proc.EnableRaisingEvents = true;
             proc.Exited += (_, _) => GameExited?.Invoke(game);
+            GameWindowActivator.BringToFrontWhenReady(proc);
         }
         catch (Exception ex)
         {
