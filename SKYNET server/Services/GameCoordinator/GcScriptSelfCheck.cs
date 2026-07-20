@@ -95,6 +95,7 @@ public static class GcScriptSelfCheck
         ok &= ExpectApplyTeamFlow(plugin, context, write);
         ok &= ExpectLaunchFlow(plugin, context, write);
         ok &= ExpectDedicatedAttachFlow(plugin, serverContext, queuedMessages, write);
+        ok &= ExpectEquipVisibleCatalogItemFlow(plugin, context, serverContext.SteamId, queuedMessages, write);
         ok &= ExpectConnectedPlayersFlow(plugin, context, serverContext, queuedMessages, write);
         ok &= ExpectResponse(plugin, context, 7026, 7546, 1, write);
         ok &= ExpectResponse(plugin, context, 7072, 7087, 1, write);
@@ -163,7 +164,6 @@ public static class GcScriptSelfCheck
         ok &= ExpectResponse(plugin, context, 8886, 8887, 1, write);
         ok &= ExpectResponse(plugin, context, 8944, 8945, 1, write);
         ok &= ExpectResponse(plugin, context, 9023, 9024, 1, write);
-        ok &= ExpectEquipVisibleCatalogItemFlow(plugin, context, serverContext.SteamId, queuedMessages, write);
         ok &= ExpectUnhandled(plugin, context, 999999, write);
 
         foreach (var entry in trace.GetSince(0))
@@ -261,12 +261,13 @@ public static class GcScriptSelfCheck
         var items = econType?.ObjectDatas.Select(DeserializeBytes<CSOEconItem>).ToArray() ?? Array.Empty<CSOEconItem>();
         var equippedItem = items.FirstOrDefault(item => item.DefIndex == 1001);
         var unequippedItem = items.FirstOrDefault(item => item.DefIndex == 1002);
+        var globalItem = items.FirstOrDefault(item => item.DefIndex == 1003);
         var expectedEconAccountId = AccountIdFromSteamId(context.SteamId);
         var ok = response.Handled
             && welcome != null
             && econCache != null
             && econCache.OwnerSoid?.Id == context.SteamId
-            && items.Length == 2
+            && items.Length == 3
             && equippedItem != null
             && equippedItem.AccountId == expectedEconAccountId
             && equippedItem.EquippedStates.Count == 1
@@ -274,14 +275,20 @@ public static class GcScriptSelfCheck
             && equippedItem.EquippedStates[0].NewSlot == 3
             && equippedItem.Flags == 0
             && unequippedItem != null
-            && unequippedItem.EquippedStates.Count == 0;
+            && unequippedItem.EquippedStates.Count == 0
+            && globalItem != null
+            && globalItem.EquippedStates.Count == 1
+            && globalItem.EquippedStates[0].NewClass == 1000
+            && globalItem.EquippedStates[0].NewSlot == 14;
         write(
             $"welcome inventory flow -> handled={response.Handled}, items={items.Length}, " +
             $"equippedDef={equippedItem?.DefIndex}, equippedStates={equippedItem?.EquippedStates.Count}, " +
             $"accountId={equippedItem?.AccountId}, class={equippedItem?.EquippedStates.FirstOrDefault()?.NewClass}, " +
             $"slot={equippedItem?.EquippedStates.FirstOrDefault()?.NewSlot}, flags={equippedItem?.Flags}, " +
             $"expectedAccountId={expectedEconAccountId}, owner={econCache?.OwnerSoid?.Id}, " +
-            $"expectedOwner={context.SteamId}, unequippedDef={unequippedItem?.DefIndex}, ok={ok}");
+            $"expectedOwner={context.SteamId}, unequippedDef={unequippedItem?.DefIndex}, " +
+            $"globalDef={globalItem?.DefIndex}, globalClass={globalItem?.EquippedStates.FirstOrDefault()?.NewClass}, " +
+            $"globalSlot={globalItem?.EquippedStates.FirstOrDefault()?.NewSlot}, ok={ok}");
         return ok;
     }
 
@@ -526,15 +533,25 @@ public static class GcScriptSelfCheck
             ? null
             : Deserialize<CMsgGCToServerRealtimeStatsStartStop>(realtimeStatsMessage.PayloadBase64);
         var serverItems = ServerEconItems(infoResponse.Messages, queuedMessages, serverContext.SteamId);
+        var serverOwnerCaches = ServerOwnerGameCaches(infoResponse.Messages, queuedMessages, serverContext.SteamId);
+        var serverHeroItem = serverItems.FirstOrDefault(item => item.DefIndex == 1001);
+        var serverGlobalItem = serverItems.FirstOrDefault(item => item.DefIndex == 1003);
         var radiant = lobby?.TeamDetails.Count > 0 ? lobby.TeamDetails[0] : null;
         var ok = infoResponse.Handled
             && availableResponse.Handled
             && realtimeStats?.Delayed == true
-            && serverItems.Length == 1
-            && serverItems[0].DefIndex == 1001
-            && serverItems[0].EquippedStates.Count == 1
-            && serverItems[0].EquippedStates[0].NewClass == 1
-            && serverItems[0].EquippedStates[0].NewSlot == 3
+            && serverOwnerCaches.Length == 1
+            && serverOwnerCaches[0].ServiceId == 0
+            && (serverOwnerCaches[0].ServiceLists?.Contains(1u) ?? false)
+            && serverItems.Length == 2
+            && serverHeroItem != null
+            && serverHeroItem.EquippedStates.Count == 1
+            && serverHeroItem.EquippedStates[0].NewClass == 1
+            && serverHeroItem.EquippedStates[0].NewSlot == 3
+            && serverGlobalItem != null
+            && serverGlobalItem.EquippedStates.Count == 1
+            && serverGlobalItem.EquippedStates[0].NewClass == 1000
+            && serverGlobalItem.EquippedStates[0].NewSlot == 14
             && lobby != null
             && lobby.state == CSODOTALobby.State.Run
             && lobby.ServerId == serverContext.SteamId
@@ -545,7 +562,12 @@ public static class GcScriptSelfCheck
         write(
             $"dedicated attach flow -> infoHandled={infoResponse.Handled}, availableHandled={availableResponse.Handled}, " +
             $"queued={queuedMessages.Count}, state={lobby?.state}, connect={lobby?.Connect}, " +
-            $"serverItems={serverItems.Length}, realtimeDelayed={realtimeStats?.Delayed}, ok={ok}");
+            $"serverOwnerCaches={serverOwnerCaches.Length}, serverItems={serverItems.Length}, " +
+            $"heroClass={serverHeroItem?.EquippedStates.FirstOrDefault()?.NewClass}, " +
+            $"heroSlot={serverHeroItem?.EquippedStates.FirstOrDefault()?.NewSlot}, " +
+            $"globalClass={serverGlobalItem?.EquippedStates.FirstOrDefault()?.NewClass}, " +
+            $"globalSlot={serverGlobalItem?.EquippedStates.FirstOrDefault()?.NewSlot}, " +
+            $"realtimeDelayed={realtimeStats?.Delayed}, ok={ok}");
         return ok;
     }
 
@@ -898,6 +920,19 @@ public static class GcScriptSelfCheck
         return result.ToArray();
     }
 
+    private static CMsgSOCacheSubscribed[] ServerOwnerGameCaches(
+        IEnumerable<ApiGCMessage> directMessages,
+        IEnumerable<(ulong SteamId, ApiGCMessage Message)> queuedMessages,
+        ulong serverSteamId)
+    {
+        return directMessages
+            .Concat(queuedMessages.Where(item => item.SteamId == serverSteamId).Select(item => item.Message))
+            .Where(message => message.MessageType == 24)
+            .Select(message => Deserialize<CMsgSOCacheSubscribed>(message.PayloadBase64))
+            .Where(cache => cache.ServiceId == 0 && cache.OwnerSoid?.Type == 1 && cache.OwnerSoid.Id != serverSteamId)
+            .ToArray();
+    }
+
     private static CSOEconItem[] ServerSingleEconItems(
         IEnumerable<(ulong SteamId, ApiGCMessage Message)> queuedMessages,
         ulong serverSteamId)
@@ -944,6 +979,13 @@ public static class GcScriptSelfCheck
             HeroIds = new List<uint> { 1 },
             HeroNames = new List<string> { "npc_dota_hero_antimage" }
         };
+        private readonly ApiDotaItem _globalItem = new()
+        {
+            DefIndex = 1003,
+            Name = "Self-check global terrain",
+            Slot = "terrain",
+            QualityId = 6
+        };
         private readonly Dictionary<ulong, List<ApiDotaEquipment>> _equipment = new();
 
         public ApiDotaRuntimeInventory GetInventory(ulong steamId)
@@ -952,8 +994,8 @@ public static class GcScriptSelfCheck
             {
                 SteamId = steamId,
                 Version = _version,
-                Items = new List<ApiDotaItem> { CloneItem(_itemA), CloneItem(_itemB) },
-                OwnedItems = new List<ApiDotaItem> { CloneItem(_itemA) },
+                Items = new List<ApiDotaItem> { CloneItem(_itemA), CloneItem(_itemB), CloneItem(_globalItem) },
+                OwnedItems = new List<ApiDotaItem> { CloneItem(_itemA), CloneItem(_globalItem) },
                 Equipment = GetEquipment(steamId).Select(CloneEquipment).ToList()
             };
         }
@@ -1048,6 +1090,18 @@ public static class GcScriptSelfCheck
                     ItemId = BuildDotaItemInstanceId(steamId, _itemA.DefIndex),
                     Style = 0,
                     UpdatedAt = DateTime.UtcNow
+                },
+                new()
+                {
+                    SteamId = steamId,
+                    HeroId = 1000,
+                    HeroName = "hero_1000",
+                    Slot = "terrain",
+                    SlotId = 14,
+                    DefIndex = _globalItem.DefIndex,
+                    ItemId = BuildDotaItemInstanceId(steamId, _globalItem.DefIndex),
+                    Style = 0,
+                    UpdatedAt = DateTime.UtcNow
                 }
             };
             _equipment[steamId] = equipment;
@@ -1061,7 +1115,7 @@ public static class GcScriptSelfCheck
                 return 0;
             }
 
-            foreach (var item in new[] { _itemA, _itemB })
+            foreach (var item in new[] { _itemA, _itemB, _globalItem })
             {
                 if (BuildDotaItemInstanceId(steamId, item.DefIndex) == itemId)
                 {
@@ -1082,6 +1136,11 @@ public static class GcScriptSelfCheck
             if (_itemB.DefIndex == defIndex)
             {
                 return _itemB;
+            }
+
+            if (_globalItem.DefIndex == defIndex)
+            {
+                return _globalItem;
             }
 
             return null;

@@ -68,7 +68,7 @@ import {
     ProtoDescriptor,
     Routes
 } from "../generated/dota";
-import { buildEconSoCacheSubscribedForInventory } from "./InventorySos";
+import { buildEconSoCacheSubscribedForInventory, buildGameOwnerSoCacheSubscribedForInventory } from "./InventorySos";
 import { normalizeConduct } from "./shared/conduct";
 
 const LOBBY_OBJECT_TYPE_ID = 2004;
@@ -1095,7 +1095,12 @@ function attachServer(ctx: RawMessageContext, lobby: LobbyState, markRun: boolea
     }
 
     refreshLobby(lobby, ctx.clock.now());
-    sendLobbyPlayerItemsToServer(ctx, lobby);
+    if (!markRun) {
+        // Player owner/econ caches are a setup contract. The server consumes
+        // them before RUN so hero cosmetics and global loadout effects are
+        // available when heroes spawn; the RUN edge only updates lobby state.
+        sendLobbyPlayerItemsToServer(ctx, lobby);
+    }
     broadcastLobby(ctx, lobby, 0n, true);
     sendTo(ctx, lobby.serverSteamId, Msg.SOCacheSubscribed, buildLobbySoCacheSubscribed(ctx, lobby));
     publishLobby(ctx.services.lobby, lobby);
@@ -1165,8 +1170,23 @@ function sendLobbyPlayerItemsToServer(ctx: RawMessageContext, lobby: LobbyState)
     for (let i = 0; i < lobby.members.length; i++) {
         const member = lobby.members[i];
         const inventory = ctx.services.items.getInventory(member.steamId);
-        const payload = buildEconSoCacheSubscribedForInventory(ctx, inventory, { onlyEquipped: true });
-        sendTo(ctx, lobby.serverSteamId, Msg.SOCacheSubscribed, payload);
+        const ownerSync = inventory.version === 0n ? 1n : inventory.version;
+        sendTo(
+            ctx,
+            lobby.serverSteamId,
+            Msg.SOCacheSubscribed,
+            buildGameOwnerSoCacheSubscribedForInventory(inventory, ownerSync)
+        );
+        sendTo(
+            ctx,
+            lobby.serverSteamId,
+            Msg.SOCacheSubscribed,
+            buildEconSoCacheSubscribedForInventory(ctx, inventory, {
+                onlyEquipped: true,
+                econObjectsOnly: true,
+                syncVersion: ownerSync
+            })
+        );
     }
 }
 
@@ -1246,7 +1266,9 @@ function buildLobbySoCacheSubscribed(ctx: GcContextBase, lobby: LobbyState): CMs
     return {
         objects: [
             subscribedType(LOBBY_OBJECT_TYPE_ID, [ctx.encode(Proto.CSODOTALobby, buildLobbyObject(lobby))]),
-            subscribedType(LOBBY_INVITE_OBJECT_TYPE_ID, [ctx.encode(Proto.CSODOTALobbyInvite, buildLobbyInviteObject())]),
+            subscribedType(LOBBY_INVITE_OBJECT_TYPE_ID, [
+                ctx.encode(Proto.CSODOTALobbyInvite, buildLobbyInviteObject())
+            ]),
             subscribedType(LOBBY_STATIC_OBJECT_TYPE_ID, [
                 ctx.encode(Proto.CSODOTAStaticLobby, buildStaticLobbyObject(lobby))
             ]),

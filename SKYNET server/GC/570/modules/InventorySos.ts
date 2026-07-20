@@ -23,9 +23,12 @@ const DEFAULT_QUALITY = 6;
 const DEFAULT_FLAGS = 0;
 const DEFAULT_ORIGIN = 2;
 const STYLE_NONE = 0;
+const WELCOME_VERSION = 20n;
 
 interface EconSoCacheOptions {
     readonly onlyEquipped?: boolean;
+    readonly econObjectsOnly?: boolean;
+    readonly syncVersion?: bigint;
 }
 
 export function buildEconSoCacheSubscribed(ctx: GcContextBase): CMsgSOCacheSubscribed {
@@ -54,37 +57,37 @@ export function buildEconSoCacheSubscribedForInventory(
         );
     }
 
+    const objects =
+        options.econObjectsOnly === true
+            ? []
+            : [
+                  // Keep both account objects under the same SO type. The old Lua GC
+                  // sent this pair before item type 1; current Dota accepts the econ
+                  // item list only after the account owner cache is established.
+                  {
+                      typeId: GAME_ACCOUNT_TYPE_ID,
+                      objectData: [ctx.encode(Proto.CSOEconGameAccountClient, buildEconGameAccount())]
+                  },
+                  {
+                      typeId: GAME_ACCOUNT_TYPE_ID,
+                      objectData: [
+                          ctx.encode(
+                              Proto.CSODOTAGameAccountClient,
+                              buildDotaGameAccount(steamIdToAccountId(inventory.steamId))
+                          )
+                      ]
+                  },
+                  {
+                      typeId: ITEM_SCHEMA_TYPE_ID
+                  }
+              ];
+    objects.push({
+        typeId: ECON_ITEM_TYPE_ID,
+        objectData: itemObjects
+    });
+
     return {
-        objects: [
-            // Keep both account objects under the same SO type. The old Lua GC
-            // sent this pair before item type 1; current Dota accepts the econ
-            // item list only after the account owner cache is established.
-            {
-                typeId: GAME_ACCOUNT_TYPE_ID,
-                objectData: [ctx.encode(Proto.CSOEconGameAccountClient, buildEconGameAccount())]
-            },
-            {
-                typeId: GAME_ACCOUNT_TYPE_ID,
-                objectData: [
-                    ctx.encode(
-                        Proto.CSODOTAGameAccountClient,
-                        buildDotaGameAccount(steamIdToAccountId(inventory.steamId))
-                    )
-                ]
-            },
-            {
-                typeId: ITEM_SCHEMA_TYPE_ID
-            },
-            // Type 1 is the econ item object list. This is the list that must
-            // also be sent to a lobby game server, targeted at the server
-            // SteamID, before RUN so the server can spawn hero cosmetics. The
-            // server path passes onlyEquipped=true to keep this list limited to
-            // loadout objects, matching the validated legacy coordinator flow.
-            {
-                typeId: ECON_ITEM_TYPE_ID,
-                objectData: itemObjects
-            }
-        ],
+        objects,
         version: inventory.version,
         ownerSoid: {
             type: OWNER_TYPE_STEAM_ID,
@@ -92,7 +95,29 @@ export function buildEconSoCacheSubscribedForInventory(
         },
         serviceId: DOTA_SERVICE_ECON,
         serviceList: [DOTA_SERVICE_GAME],
-        syncVersion: 1n
+        syncVersion: options.syncVersion ?? 1n
+    };
+}
+
+export function buildGameOwnerSoCacheSubscribedForInventory(
+    inventory: DotaRuntimeInventory,
+    syncVersion: bigint
+): CMsgSOCacheSubscribed {
+    return {
+        // Dedicated/listen servers expect the player owner cache under service 0
+        // before the service 1 econ item cache. The legacy GC sent this as a
+        // separate SOCacheSubscribed targeted at the server SteamID; keeping the
+        // owner/econ caches split prevents global loadout objects from changing
+        // how the game server interprets hero equippedState entries.
+        objects: [],
+        version: WELCOME_VERSION,
+        ownerSoid: {
+            type: OWNER_TYPE_STEAM_ID,
+            id: inventory.steamId
+        },
+        serviceId: DOTA_SERVICE_GAME,
+        serviceList: [DOTA_SERVICE_ECON],
+        syncVersion
     };
 }
 
