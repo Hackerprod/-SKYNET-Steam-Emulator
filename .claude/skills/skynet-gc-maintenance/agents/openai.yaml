@@ -1,4 +1,0 @@
-interface:
-  display_name: "SKYNET GC Maintenance"
-  short_description: "Maintain and capture SKYNET GC flows"
-  default_prompt: "Use $skynet-gc-maintenance to capture, compare, implement, and validate Dota Game Coordinator behavior for SKYNET."

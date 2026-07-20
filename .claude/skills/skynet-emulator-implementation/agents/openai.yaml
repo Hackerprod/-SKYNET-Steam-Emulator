@@ -1,4 +1,0 @@
-interface:
-  display_name: "SKYNET Emulator Implementation"
-  short_description: "Build, deploy, and verify SKYNET changes"
-  default_prompt: "Use $skynet-emulator-implementation to modify SKYNET server or DLL code with backup, deployment, Dota launch, screenshot inspection, and log validation."

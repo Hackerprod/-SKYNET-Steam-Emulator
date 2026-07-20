@@ -1,5 +1,0 @@
-{
-  "ok": false,
-  "error": "CsRinError",
-  "message": "Error de navegación al acceder a https://cs.rin.ru/forum/ucp.php?mode=login: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://cs.rin.ru/forum/ucp.php?mode=login\", waiting until \"domcontentloaded\"\n"
-}
