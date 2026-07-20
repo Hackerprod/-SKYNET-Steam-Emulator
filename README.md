@@ -4,7 +4,7 @@
 
 SKYNET Steam Emulator is not a standalone "fake Steam client" in the old LAN-only sense. The current architecture is split into two cooperating components:
 
-- `steam_api/` - a drop-in Steam API DLL replacement that exposes Steamworks-style interfaces, callbacks, call results, auth tickets, networking helpers, and game-facing state.
+- `steam_api/` - a Steam API DLL emulator packaged as launcher payloads. The launcher injects the payload DLL into the game process at startup instead of replacing files in the game folder.
 - `SKYNET server/` - an ASP.NET Core backend that owns identity, session state, friends, avatars, lobbies, stats, remote storage, auth validation, game server state, P2P relay queues, SDR certificate issuance, and Game Coordinator routing.
 
 The DLL stays close to the native Steamworks ABI while the backend provides a central authority for state that multiple clients and game servers can share.
@@ -27,7 +27,7 @@ Important boundaries:
 | Steam API ABI | Versioned Steamworks interfaces, exported entrypoints, native-compatible structure layout, and C-style callback dispatch. |
 | Backend authority | Server-owned identity, session, friends, avatars, stats, achievements, lobbies, storage, tickets, and game server state. |
 | Callback system | Explicit separation between callbacks, call results, registered listeners, and manual dispatch paths. |
-| Dota 2 GC | Lua-backed Game Coordinator plugins under `SKYNET server/GC/570`, with hot reload and trace tooling. |
+| Dota 2 GC | TypeScript-backed Game Coordinator modules under `SKYNET server/GC/570`, with hot reload and trace tooling. |
 | SDR certificates | Local CA/certificate issuance for SteamNetworkingSockets testing, with disk-based CA patch flow. |
 | P2P relay | Backend queued/batched P2P packet relay for cross-client synchronization. |
 | Web UI | Razor-based server UI with Tailwind-generated CSS and local static assets. |
@@ -41,7 +41,7 @@ flowchart LR
     DLL["steam_api64.dll<br/>SKYNET Steam API emulator"]
     API["SKYNET server<br/>ASP.NET Core API + Razor UI"]
     State["SteamApiStateService<br/>sessions, users, lobbies, stats"]
-    GC["Lua Game Coordinator<br/>GC/570"]
+    GC["TypeScript Game Coordinator<br/>GC/570"]
     SDR["SDR certificate service<br/>CA + cert issuing"]
     DS["Dedicated server supervisor<br/>Dota server process"]
 
@@ -58,12 +58,12 @@ flowchart LR
 
 Runtime flow:
 
-1. The game loads the replacement `steam_api64.dll`.
-2. The DLL loads `SKYNET/steam_api.ini`, initializes Steamworks interfaces, and starts the server API client.
+1. The SKYNET launcher starts the game suspended and injects the matching payload DLL from `SKYNET Steam Client/payload/<arch>`.
+2. The injected DLL loads `SKYNET/steam_api.ini`, initializes Steamworks interfaces, and starts the server API client.
 3. The DLL creates or resumes a session through `POST /api/auth/steam/session`.
 4. Steamworks calls are answered locally when safe, or resolved through the backend when shared state is required.
 5. Server events feed Steam-style callbacks back into the game process.
-6. Dota GC messages are forwarded to the server, handled by the Lua/Dota backend, and returned as GC replies or queued async pushes.
+6. Dota GC messages are forwarded to the server, handled by the TypeScript Dota coordinator, and returned as GC replies or queued async pushes.
 
 ## Repository Layout
 
@@ -81,7 +81,7 @@ Runtime flow:
 |-- steam_api_native_proxy/        Native proxy/jump sources for DLL forwarding experiments
 |
 |-- SKYNET server/                 ASP.NET Core backend and admin UI
-|   |-- GC/570/                    Dota 2 Game Coordinator plugin and Lua routing
+|   |-- GC/570/                    Dota 2 TypeScript Game Coordinator runtime
 |   |-- Models/                    API DTOs and UI models
 |   |-- Pages/                     Razor pages
 |   |-- Services/                  State service, GC runtime, discovery, SDR, supervisors
@@ -116,8 +116,15 @@ Key services include:
 - `DiscoveryService` - UDP discovery on port `27081`
 - `SdrCertificateService` - SKYNET-signed SDR certificate generation
 - `SdrRelayService` - UDP relay support for SteamNetworkingSockets experiments
-- `LuaGameCoordinatorPlugin` - app-specific GC dispatch and hot-reloaded Lua runtime
+- `GameCoordinatorScriptPlugin` - app-specific GC dispatch and hot-reloaded TypeScript runtime
 - `DotaDedicatedServerSupervisor` - dedicated Dota server launch/claim flow for non-local lobby testing
+
+Durable server data is split by ownership:
+
+- `SKYNET server/Data/steam.db` owns generic Steam/server state: users, web accounts, sessions, friends, avatars, Steam stats/achievements, remote storage, app/server state, and other data that is not tied to a specific game coordinator.
+- `SKYNET server/Data/dota.db` owns Dota/app 570 state: lobbies, game servers, Dota profiles/presence, cosmetics/items/equipment, matches, parties, guilds, reports, and GC-specific support tables.
+
+`app.db`, `SteamDB.db`, `dedicated-server.db`, and older `skynet-dota-*.db` files are legacy migration inputs only. They should not be reintroduced as active runtime databases.
 
 ### Dota 2 Game Coordinator
 
@@ -127,19 +134,18 @@ Dota-specific GC behavior lives under:
 SKYNET server/GC/570/
 ```
 
-The DLL should not grow Dota-specific gameplay logic unless it is truly transport related. GC behavior belongs in server-side Lua/C# so it can be traced, replayed, hot-reloaded, and compared with captures.
+The DLL should not grow Dota-specific gameplay logic unless it is truly transport related. GC behavior belongs in server-side TypeScript and typed host services so it can be traced, replayed, hot-reloaded, and compared with captures.
 
 The GC runtime supports:
 
-- `main.lua` entrypoint
-- `messages.lua` message IDs
-- generated route fixtures
+- `main.ts` entrypoint
+- generated route descriptors and protobuf TypeScript contracts
 - persistent runtime state
-- async `gc.QueueTo(...)` and game-server poll delivery
+- async sends and game-server poll delivery
 - `/Admin/GcConsole` for live GC traces
-- NetHook import workflow through `SKYNET server/GC/tools/Import-NetHook.ps1`
+- NetHook forensic decoding through `DeveloperTools/NetHookGcJson`
 
-See [`SKYNET server/GC/README.md`](SKYNET%20server/GC/README.md) for the Lua API and capture workflow.
+See [`SKYNET server/GC/README.md`](SKYNET%20server/GC/README.md) for the TypeScript API and capture workflow.
 
 ## Requirements
 
@@ -197,6 +203,13 @@ Use the Visual Studio Build Tools MSBuild so DllExport can emit native exports:
 $msbuild = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\MSBuild\Current\Bin\amd64\MSBuild.exe"
 
 & $msbuild "steam_api\steam_api.csproj" `
+  /t:Restore `
+  /p:Configuration=Release `
+  /p:Platform="AnyCPU" `
+  /p:RuntimeIdentifier=win-x64 `
+  "/p:SolutionDir=$PWD\"
+
+& $msbuild "steam_api\steam_api.csproj" `
   /t:Rebuild `
   /p:Configuration=Release `
   /p:Platform="AnyCPU" `
@@ -204,12 +217,19 @@ $msbuild = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\MSBuild
   /p:PlatformTarget=x64 `
   /p:DllExportPlatform=x64 `
   /p:DllExportOurILAsm=true `
-  "/p:SolutionDir=C:\SERVER\SKYNET Steam Emulator\\" `
+  "/p:SolutionDir=$PWD\" `
   /m:1 `
   /v:minimal
 ```
 
-Before deploying a DLL into a game folder, verify that it is the fresh x64 artifact and that native exports are present.
+After rebuilding `steam_api`, sync the fresh artifact into the launcher payload that will be injected:
+
+```powershell
+Copy-Item "steam_api\bin\Release\steam_api.dll" "SKYNET Steam Client\payload\x64\steam_api64.dll" -Force
+dotnet build "SKYNET Steam Client\SKYNET Steam Client.csproj" -c Debug
+```
+
+Do not validate the normal launcher flow by copying `steam_api64.dll` into Dota's game folder. That path is only for explicit direct-Dota or original-Steam comparison work.
 
 ## Configuration
 
@@ -230,7 +250,7 @@ Common settings:
 | `Sdr:RelayPort` | UDP relay port for SDR experiments. |
 | `Session:TimeoutMinutes` | Web/API session lifetime. |
 | `Presence:*` | Online/offline sweep behavior. |
-| `GameCoordinator:TickIntervalMs` | Lua GC tick interval. |
+| `GameCoordinator:TickIntervalMs` | TypeScript GC tick interval. |
 | `GameCoordinator:Dota:AdvertisedGameServerIp` | Address advertised to clients for Dota dedicated servers. |
 | `GameCoordinator:Dota:Dedicated:*` | Dota dedicated server launch, port, timeout, and insecure-mode settings. |
 
@@ -323,12 +343,13 @@ GCToClientMatchSignedOut
 When changing ABI, callback, auth, networking, lobby, or GC behavior, validate more than compilation:
 
 1. Build the affected surface.
-2. Deploy the correct x64 DLL if `steam_api` changed.
-3. Start the server and verify `http://127.0.0.1:27080/`.
-4. Launch the game in a controlled test mode.
-5. Inspect the UI state and screenshots when relevant.
-6. Read DLL, Dota, and server logs.
-7. Confirm that callbacks, call results, GC messages, and auth state reached the expected code paths.
+2. Rebuild `steam_api` and sync the correct payload DLL if DLL-side code changed.
+3. Build the launcher so the payload is present beside the launcher executable.
+4. Start the server and verify `http://127.0.0.1:27080/` when the flow requires backend connectivity.
+5. Launch the game through the SKYNET launcher with the configured launch parameters.
+6. Inspect the UI state and screenshots when relevant.
+7. Read DLL, Dota, and server logs.
+8. Confirm that callbacks, call results, GC messages, and auth state reached the expected code paths.
 
 ## Development Notes
 

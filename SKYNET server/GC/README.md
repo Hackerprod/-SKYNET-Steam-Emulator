@@ -143,19 +143,98 @@ Current services include:
   - `getCatalogItem(defIndex)`
   - `equipItem(itemId, heroId, slotId, style)`
   - `setItemStyle(itemId, style)`
-  - `queueCurrentLobbyServer(messageType, payload)`
+- `ctx.services.lobby`
+  - `queueMessage(steamId, messageType, payload, protobuf)`
+  - `publishSnapshot(snapshot)`
+  - `removeSnapshot(lobbyId)`
+  - `startDedicatedServer(lobbyId, map)`
+  - `releaseDedicatedServer(lobbyId, reason)`
+  - `resolveGameServerConnectIp(publicIp, privateIp, fallbackIp)`
+  - `resolveGameServerConnectIps(publicIp, privateIp, fallbackIp)`
+- `ctx.services.teams`
+  - `get(teamId)`
+  - `getForAccount(accountId)`
 - `ctx.services.profiles`
   - `get(accountId)`
   - `saveCardSlots(slots)`
   - `saveProfileUpdate(backgroundItemId, featuredHeroIds)`
+  - `getConductScorecard()`
+  - `getQuestProgress(questIds)`
+  - `getPeriodicResource(accountId, resourceId)`
+  - `getHeroStickers()`
+  - `setHeroSticker(heroId, itemId)`
+  - `getOverworldState(overworldId)`
+  - `getMonsterHunterState()`
 - `ctx.services.social`
+  - `emoticonAccess()`
   - `feed(accountId, selfOnly)`
   - `comments(feedEventId)`
   - `postComment(feedEventId, comment)`
+  - `postMatchComment(matchId, comment)`
+- `ctx.services.chat`
+  - `join(channelName, channelType)`
+  - `get(channelId)`
+  - `leave(channelId)`
+  - `broadcast(channelId, messageType, payload, includeSelf)`
+- `ctx.services.guilds`
+  - `ensureCurrent()`
+  - `getMembership(accountId)`
+  - `getGuild(guildId)`
+  - `getPersonaInfo(accountId)`
+  - `getEventData(guildId, eventId)`
+  - `getReporterUpdates()`
+  - `acknowledgeReporterUpdates(matchIds)`
+- `ctx.services.match`
+  - `recordSignOutPermission(request)`
+  - `setHistoryAccess(allow)`
+  - `recordServerStatus(response)`
+  - `recordLeaver(event)`
+  - `recordRealtimeStats(snapshot)`
+  - `recordMatchStateHistory(history)`
+  - `recordSpectatorCount(spectatorCount)`
+  - `recordLiveScoreboard(snapshot)`
+  - `savePlayerReport(report)`
+- `ctx.services.party`
+  - `getCurrent()`
+  - `getById(partyId)`
+  - `ensureCurrent(ping)`
+  - `addMember(partyId, ping, isCoach)`
+  - `removeMember(partyId, steamId)`
+  - `deleteParty(partyId)`
+  - `setLeader(partyId, leaderSteamId)`
+  - `setMemberCoach(partyId, steamId, isCoach)`
+  - `setMemberPing(partyId, steamId, ping)`
+  - `startReadyCheck(partyId, durationSeconds)`
+  - `acknowledgeReadyCheck(partyId, readyStatus)`
+  - `createInvite(partyId, targetSteamId, teamId, asCoach)`
+  - `takeInvite(partyId)`
+  - `getInvitesForTarget(targetSteamId)`
+  - `deleteInvitesForTarget(targetSteamId)`
+  - `deleteInvitesForParty(partyId)`
+  - `pruneInvitesCreatedBefore(cutoff)`
+  - `userExists(steamId)`
+  - `userOnline(steamId)`
+  - `queueMessage(steamId, messageType, payload, protobuf)`
 - `ctx.services.stats`
+  - `lookupAccountName(accountId)`
   - `getEventPoints(accountId, eventId)`
   - `getHeroStandings(accountId)`
+  - `getHeroGlobalData(accountId, heroId)`
+  - `getPlayerStats(accountId)`
   - `getRank(accountId)`
+  - `getTeammateStats(accountId)`
+  - `getMatchHistory(accountId, startAtMatchId, requested, heroId, includePractice)`
+  - `getMatchDetails(matchId)`
+  - `getHeroStatsHistory(accountId, heroId)`
+  - `getShowcaseStats(accountId)`
+  - `getRecentAccomplishments(accountId)`
+  - `getHeroRecentAccomplishments(accountId, heroId)`
+  - `hasMvpVote(matchId)`
+  - `voteForMvp(matchId, votedAccountId)`
+  - `finalizeMvpVote(matchId)`
+  - `submitLobbyMvpVote(targetAccountId)`
+  - `recordSignOutMvpStats(matchId, players)`
+  - `rerollPlayerChallenge()`
 
 The services are implemented in the C# host, but TypeScript modules should see
 plain TypeScript-friendly DTOs: `number`, `bigint`, `boolean`, `string`,
@@ -261,6 +340,17 @@ dotnet run --project "SKYNET server\SKYNET server.csproj" -c Debug --no-build --
 
 `--verify-gc-ts` performs an exchange-level smoke test against known Dota GC
 messages and verifies that the expected protobuf responses are emitted.
+
+## Local Tools
+
+Tools currently used by the TypeScript GC workflow:
+
+- `SKYNET server/GC/570/tools/generate-dota-contracts.ps1`: regenerates `generated/dota.ts` from route contracts and server protobufs.
+- `SKYNET server/GC/570/tools/verify-gc-ts-boundaries.ps1`: checks that business modules go through `ctx`/services instead of bypassing the framework.
+- `DeveloperTools/NetHookGcJson`: decodes NetHook GC captures into reports, timelines, message indexes, job correlations, and per-record JSON.
+- `DeveloperTools/DecodeGcBody`: decodes an individual GC message body when focused inspection is faster than a whole-capture run.
+
+`Tools/` may contain local binaries such as NetHook2, SDK drops, and helper bundles. It is ignored by git; document reusable commands here or in skills, not by relying on local binaries being committed.
 
 ## Rules For Good Handlers
 
