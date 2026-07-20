@@ -32,6 +32,8 @@ public static class DotaGcRuntimeServices
     public static DotaLobbyInviteStore? LobbyInviteStore { get; set; }
     public static DotaGuildStore? GuildStore { get; set; }
     public static DotaChatStore ChatStore { get; set; } = new();
+    public static Func<uint, string>? TeamJsonProvider { get; set; }
+    public static Func<uint, string>? TeamsForAccountJsonProvider { get; set; }
 
     public static Func<ulong, ulong, uint>? ItemDefResolver { get; set; }
     public static Func<ulong, string>? EquipmentJsonProvider { get; set; }

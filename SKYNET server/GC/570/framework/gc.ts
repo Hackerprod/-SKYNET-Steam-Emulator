@@ -41,6 +41,7 @@ export interface RawMessageContext {
     readonly clock: Clock;
     readonly logger: Logger;
     readonly signal: AbortSignal;
+    reply<TMessage>(messageType: number, proto: ProtoDescriptor<TMessage>, message: TMessage): void;
     send<TMessage>(messageType: number, proto: ProtoDescriptor<TMessage>, message: TMessage): void;
     encode<TMessage>(proto: ProtoDescriptor<TMessage>, message: TMessage): Uint8Array;
     decode<TMessage>(proto: ProtoDescriptor<TMessage>): TMessage;
@@ -70,6 +71,7 @@ export interface GcServices {
     readonly guilds: DotaGuildService;
     readonly stats: DotaStatsService;
     readonly lobby: DotaLobbyService;
+    readonly teams: DotaTeamService;
 }
 
 export interface DotaItemService {
@@ -86,6 +88,7 @@ export interface DotaLobbyService {
     startDedicatedServer(lobbyId: bigint, map: string): DotaDedicatedLaunchResult | null;
     releaseDedicatedServer(lobbyId: bigint, reason: string): boolean;
     resolveGameServerConnectIp(publicIp: string, privateIp: string, fallbackIp: string): string;
+    resolveGameServerConnectIps(publicIp: string, privateIp: string, fallbackIp: string): string;
 }
 
 export interface DotaDedicatedLaunchResult {
@@ -115,6 +118,30 @@ export interface DotaLobbyMatchPlayer {
     readonly slot: number;
     readonly coachTeam: number;
     readonly heroId: number;
+}
+
+export interface DotaTeamService {
+    get(teamId: number): DotaTeam | null;
+    getForAccount(accountId?: number): DotaTeam[];
+}
+
+export interface DotaTeam {
+    readonly teamId: number;
+    readonly name: string;
+    readonly tag: string;
+    readonly role: number | null;
+    readonly logo: bigint;
+    readonly baseLogo: bigint;
+    readonly bannerLogo: bigint;
+    readonly logoUrl: string;
+    readonly abbreviation: string;
+    readonly countryCode: string;
+    readonly url: string;
+    readonly wins: number;
+    readonly losses: number;
+    readonly gamesPlayedTotal: number;
+    readonly gamesPlayedMatchmaking: number;
+    readonly region: number;
 }
 
 export interface DotaRuntimeInventory {
@@ -960,6 +987,22 @@ class GcDotaLobbyService implements DotaLobbyService {
     resolveGameServerConnectIp(publicIp: string, privateIp: string, fallbackIp: string): string {
         return dotaResolveGameServerConnectIp(publicIp, privateIp, fallbackIp);
     }
+
+    resolveGameServerConnectIps(publicIp: string, privateIp: string, fallbackIp: string): string {
+        return dotaResolveGameServerConnectIps(publicIp, privateIp, fallbackIp);
+    }
+}
+
+class GcDotaTeamService implements DotaTeamService {
+    get(teamId: number): DotaTeam | null {
+        return dotaTeam(teamId) as DotaTeam | null;
+    }
+
+    getForAccount(accountId?: number): DotaTeam[] {
+        return accountId === undefined
+            ? (dotaTeamsForAccount() as DotaTeam[])
+            : (dotaTeamsForAccount(accountId) as DotaTeam[]);
+    }
 }
 
 class GcDotaProfileService implements DotaProfileService {
@@ -1293,6 +1336,7 @@ class GcServiceContainer implements GcServices {
     guilds: DotaGuildService;
     stats: DotaStatsService;
     lobby: DotaLobbyService;
+    teams: DotaTeamService;
 
     constructor() {
         this.items = new GcDotaItemService();
@@ -1304,6 +1348,7 @@ class GcServiceContainer implements GcServices {
         this.guilds = new GcDotaGuildService();
         this.stats = new GcDotaStatsService();
         this.lobby = new GcDotaLobbyService();
+        this.teams = new GcDotaTeamService();
     }
 }
 
@@ -1331,7 +1376,7 @@ class GcHandlerContext<TRequest, TResponse> implements HandlerContext<TRequest, 
     }
 
     reply(response: TResponse): void {
-        send(this.route.responseId, encode(this.route.response.name, response), true);
+        reply(this.route.responseId, encode(this.route.response.name, response), true);
     }
 
     send<TMessage>(messageType: number, proto: ProtoDescriptor<TMessage>, message: TMessage): void {
@@ -1364,6 +1409,10 @@ class GcRawMessageContext implements RawMessageContext {
         this.clock = new GcClock();
         this.logger = new GcLogger();
         this.signal = new GcAbortSignal();
+    }
+
+    reply<TMessage>(messageType: number, proto: ProtoDescriptor<TMessage>, message: TMessage): void {
+        reply(messageType, encode(proto.name, message), true);
     }
 
     send<TMessage>(messageType: number, proto: ProtoDescriptor<TMessage>, message: TMessage): void {

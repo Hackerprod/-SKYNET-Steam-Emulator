@@ -18,6 +18,7 @@ declare global {
     function decode<TMessage = unknown>(typeName: string, payload: Uint8Array): TMessage;
     function encode<TMessage = unknown>(typeName: string, value: TMessage): Uint8Array;
     function send(messageType: number, payload: Uint8Array, protobuf?: boolean): boolean;
+    function reply(messageType: number, payload: Uint8Array, protobuf?: boolean): boolean;
     function log(message: string): void;
     function dotaInventory(steamId?: bigint): unknown;
     function dotaCatalogItem(defIndex: number): unknown;
@@ -28,6 +29,7 @@ declare global {
     function dotaStartDedicatedServer(lobbyId: bigint, map: string): unknown;
     function dotaReleaseDedicatedServer(lobbyId: bigint, reason: string): boolean;
     function dotaResolveGameServerConnectIp(publicIp: string, privateIp: string, fallbackIp: string): string;
+    function dotaResolveGameServerConnectIps(publicIp: string, privateIp: string, fallbackIp: string): string;
     function dotaProfile(accountId: number): unknown;
     function dotaSaveProfileSlots(slots: unknown[]): boolean;
     function dotaSaveProfileUpdate(backgroundItemId: bigint, featuredHeroIds: number[]): boolean;
@@ -59,6 +61,8 @@ declare global {
     function dotaGuildEventData(guildId: number, eventId: number): unknown;
     function dotaReporterUpdates(): unknown;
     function dotaAcknowledgeReporterUpdates(matchIds: bigint[]): boolean;
+    function dotaTeam(teamId: number): unknown;
+    function dotaTeamsForAccount(accountId?: number): unknown;
     function dotaLookupAccountName(accountId: number): unknown;
     function dotaEventPoints(accountId: number, eventId: number): unknown;
     function dotaHeroStandings(accountId: number): unknown;

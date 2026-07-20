@@ -40,6 +40,7 @@ public sealed partial class SteamApiStateService
     private readonly DotaPartyStore _dotaPartyStore;
     private readonly DotaLobbyInviteStore _dotaLobbyInviteStore;
     private readonly DotaGuildStore _dotaGuildStore;
+    private readonly DotaDB _dotaDb;
     private readonly DotaDedicatedServerSupervisor _dotaDedicatedServers;
     private readonly GameServerSettingsService _gameServerSettings;
     // Auth session lifetime and the (much shorter) presence window used to
@@ -62,6 +63,7 @@ public sealed partial class SteamApiStateService
         IConfiguration configuration,
         DotaDedicatedServerSupervisor dotaDedicatedServers,
         GameServerSettingsService gameServerSettings,
+        DotaDB dotaDb,
         IDbContextFactory<AppDbContext> dbContextFactory,
         ILogger<SteamApiStateService> logger)
     {
@@ -70,6 +72,7 @@ public sealed partial class SteamApiStateService
         _gameCoordinatorTrace = gameCoordinatorTrace;
         _dotaDedicatedServers = dotaDedicatedServers;
         _gameServerSettings = gameServerSettings;
+        _dotaDb = dotaDb;
         _dbFactory = dbContextFactory;
         _sessionTimeout = TimeSpan.FromMinutes(Math.Clamp(configuration.GetValue("Session:TimeoutMinutes", 30), 1, 1440));
         _presenceTimeout = TimeSpan.FromSeconds(Math.Clamp(configuration.GetValue("Presence:TimeoutSeconds", 90), 15, 3600));
@@ -91,6 +94,8 @@ public sealed partial class SteamApiStateService
         DotaGcRuntimeServices.PartyStore = _dotaPartyStore;
         DotaGcRuntimeServices.LobbyInviteStore = _dotaLobbyInviteStore;
         DotaGcRuntimeServices.GuildStore = _dotaGuildStore;
+        DotaGcRuntimeServices.TeamJsonProvider = teamId => _dotaDb.GetTeam(teamId.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        DotaGcRuntimeServices.TeamsForAccountJsonProvider = accountId => _dotaDb.GetTeamsForAccount(accountId);
         DotaGcRuntimeServices.PendingMessageQueued = EnqueueGcMessageEvent;
         DotaGcRuntimeServices.InventoryProvider = GetDotaRuntimeInventory;
         DotaGcRuntimeServices.EquipItemSink = EquipDotaItemFromGameCoordinator;

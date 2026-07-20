@@ -64,9 +64,9 @@ builder.Services.AddHostedService<DatabaseBackupService>();
 
 var app = builder.Build();
 
-// Hot-GC migration stores. These are separate from the legacy consolidated app.db
-// so Lua/JS GC logic can depend on stable Steam/Dota/dedicated facades while the
-// current backend continues to run.
+// Hot-GC stores. These are separate from the consolidated app.db so TypeScript
+// GC logic can depend on stable Steam/Dota/dedicated facades while the current
+// backend continues to run.
 _ = app.Services.GetRequiredService<SteamDB>();
 _ = app.Services.GetRequiredService<DotaDB>();
 _ = app.Services.GetRequiredService<DedicatedServerService>();

@@ -1,4 +1,5 @@
 using SKYNET_server.Models;
+using System.Text.Json;
 using TypeSharp.Hosting;
 using TypeSharp.VM.Memory;
 
@@ -176,6 +177,7 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .RegisterHostFunction("gc", "decode", dispatcher.Decode)
                 .RegisterHostFunction("gc", "encode", dispatcher.Encode)
                 .RegisterHostFunction("gc", "send", dispatcher.Send)
+                .RegisterHostFunction("gc", "reply", dispatcher.Reply)
                 .RegisterHostFunction("gc", "dotaInventory", dispatcher.DotaInventory)
                 .RegisterHostFunction("gc", "dotaCatalogItem", dispatcher.DotaCatalogItem)
                 .RegisterHostFunction("gc", "dotaEquipItem", dispatcher.DotaEquipItem)
@@ -206,6 +208,8 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .RegisterHostFunction("gc", "dotaGuildEventData", dispatcher.DotaGuildEventData)
                 .RegisterHostFunction("gc", "dotaReporterUpdates", dispatcher.DotaReporterUpdates)
                 .RegisterHostFunction("gc", "dotaAcknowledgeReporterUpdates", dispatcher.DotaAcknowledgeReporterUpdates)
+                .RegisterHostFunction("gc", "dotaTeam", dispatcher.DotaTeam)
+                .RegisterHostFunction("gc", "dotaTeamsForAccount", dispatcher.DotaTeamsForAccount)
                 .RegisterHostFunction("gc", "dotaLookupAccountName", dispatcher.DotaLookupAccountName)
                 .RegisterHostFunction("gc", "dotaEventPoints", dispatcher.DotaEventPoints)
                 .RegisterHostFunction("gc", "dotaHeroStandings", dispatcher.DotaHeroStandings)
@@ -258,7 +262,8 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .RegisterHostFunction("gc", "dotaRemoveMatchSnapshot", dispatcher.DotaRemoveMatchSnapshot)
                 .RegisterHostFunction("gc", "dotaStartDedicatedServer", dispatcher.DotaStartDedicatedServer)
                 .RegisterHostFunction("gc", "dotaReleaseDedicatedServer", dispatcher.DotaReleaseDedicatedServer)
-                .RegisterHostFunction("gc", "dotaResolveGameServerConnectIp", dispatcher.DotaResolveGameServerConnectIp);
+                .RegisterHostFunction("gc", "dotaResolveGameServerConnectIp", dispatcher.DotaResolveGameServerConnectIp)
+                .RegisterHostFunction("gc", "dotaResolveGameServerConnectIps", dispatcher.DotaResolveGameServerConnectIps);
 
             foreach (var sourceFile in EnumerateRuntimeScriptFiles(scriptRoot))
             {
@@ -392,6 +397,11 @@ internal sealed class ScriptHostDispatcher
     public TsValue? Send(TsValue[] args)
     {
         return RequireCurrent().Send(args);
+    }
+
+    public TsValue? Reply(TsValue[] args)
+    {
+        return RequireCurrent().Reply(args);
     }
 
     public TsValue? DotaEquipItem(TsValue[] args)
@@ -537,6 +547,16 @@ internal sealed class ScriptHostDispatcher
     public TsValue? DotaAcknowledgeReporterUpdates(TsValue[] args)
     {
         return RequireCurrent().DotaAcknowledgeReporterUpdates(args);
+    }
+
+    public TsValue? DotaTeam(TsValue[] args)
+    {
+        return RequireCurrent().DotaTeam(args);
+    }
+
+    public TsValue? DotaTeamsForAccount(TsValue[] args)
+    {
+        return RequireCurrent().DotaTeamsForAccount(args);
     }
 
     public TsValue? DotaLookupAccountName(TsValue[] args)
@@ -798,6 +818,11 @@ internal sealed class ScriptHostDispatcher
     {
         return RequireCurrent().DotaResolveGameServerConnectIp(args);
     }
+
+    public TsValue? DotaResolveGameServerConnectIps(TsValue[] args)
+    {
+        return RequireCurrent().DotaResolveGameServerConnectIps(args);
+    }
 }
 
 internal sealed class ScriptExchangeHost
@@ -875,17 +900,42 @@ internal sealed class ScriptExchangeHost
             throw new InvalidOperationException("send(messageType, payload, protobuf?) requires at least two arguments");
         }
 
-        var messageType = Convert.ToUInt32(ToNumber(args[0], "send.messageType"));
-        var payload = ToBytes(args[1], "send.payload");
+        AddMessage(args, replyToCurrentJob: false, "send");
+        return TsValue.FromBool(true);
+    }
+
+    public TsValue? Reply(TsValue[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new InvalidOperationException("reply(messageType, payload, protobuf?) requires at least two arguments");
+        }
+
+        AddMessage(args, replyToCurrentJob: true, "reply");
+        return TsValue.FromBool(true);
+    }
+
+    private void AddMessage(TsValue[] args, bool replyToCurrentJob, string functionName)
+    {
+        var messageType = Convert.ToUInt32(ToNumber(args[0], $"{functionName}.messageType"));
+        var payload = ToBytes(args[1], $"{functionName}.payload");
         var protobuf = args.Length < 3 || args[2] is not TsBoolValue boolValue || boolValue.Value;
+        var sourceJobId = _request.SourceJobId;
+        var targetJobId = replyToCurrentJob
+            && sourceJobId.HasValue
+            && sourceJobId.Value != 0
+            && sourceJobId.Value != ulong.MaxValue
+                ? sourceJobId.Value
+                : (ulong?)null;
+
         Response.Messages.Add(new ApiGCMessage
         {
             AppId = _context.AppId,
             MessageType = messageType,
             PayloadBase64 = Convert.ToBase64String(payload),
-            Protobuf = protobuf
+            Protobuf = protobuf,
+            TargetJobId = targetJobId
         });
-        return TsValue.FromBool(true);
     }
 
     public TsValue DotaPartyCurrent()
@@ -1223,6 +1273,54 @@ internal sealed class ScriptExchangeHost
             privateIp,
             fallbackIp) ?? fallbackIp;
         return TsValue.FromString(resolved);
+    }
+
+    public TsValue DotaResolveGameServerConnectIps(TsValue[] args)
+    {
+        if (args.Length < 3)
+        {
+            throw new InvalidOperationException("dotaResolveGameServerConnectIps(publicIp, privateIp, fallbackIp) requires three arguments");
+        }
+
+        var publicIp = ToString(args[0]);
+        var privateIp = ToString(args[1]);
+        var fallbackIp = ToString(args[2]);
+        var resolved = DotaGcRuntimeServices.GameServerConnectIpsResolver?.Invoke(
+            _context.ClientIp,
+            publicIp,
+            privateIp,
+            fallbackIp);
+        if (string.IsNullOrWhiteSpace(resolved))
+        {
+            resolved = BuildDefaultConnectIps(publicIp, privateIp, fallbackIp);
+        }
+
+        return TsValue.FromString(resolved);
+    }
+
+    private static string BuildDefaultConnectIps(string publicIp, string privateIp, string fallbackIp)
+    {
+        var ordered = new List<string>();
+        void Add(string value)
+        {
+            var trimmed = (value ?? string.Empty).Trim();
+            if (trimmed.Length == 0 || ordered.Contains(trimmed, StringComparer.Ordinal))
+            {
+                return;
+            }
+
+            ordered.Add(trimmed);
+        }
+
+        Add(publicIp);
+        Add(privateIp);
+        Add(fallbackIp);
+        if (ordered.Count == 0)
+        {
+            ordered.Add("127.0.0.1");
+        }
+
+        return string.Join(' ', ordered.Take(2));
     }
 
     public TsValue DotaInventory(TsValue[] args)
@@ -1659,6 +1757,27 @@ internal sealed class ScriptExchangeHost
         }
 
         return TsValue.FromBool(DotaGcRuntimeServices.StatsStore?.AcknowledgeReporterUpdates(_context.AccountId, UInt64Array(args[0], "dotaAcknowledgeReporterUpdates.matchIds")) ?? false);
+    }
+
+    public TsValue DotaTeam(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaTeam(teamId) requires one argument");
+        }
+
+        var teamId = Convert.ToUInt32(ToNumber(args[0], "dotaTeam.teamId"));
+        var json = DotaGcRuntimeServices.TeamJsonProvider?.Invoke(teamId) ?? "{}";
+        return ToTsDotaTeam(json, null);
+    }
+
+    public TsValue DotaTeamsForAccount(TsValue[] args)
+    {
+        var accountId = args.Length > 0
+            ? Convert.ToUInt32(ToNumber(args[0], "dotaTeamsForAccount.accountId"))
+            : _context.AccountId;
+        var json = DotaGcRuntimeServices.TeamsForAccountJsonProvider?.Invoke(accountId) ?? "[]";
+        return ToTsDotaTeams(json);
     }
 
     public TsValue DotaLookupAccountName(TsValue[] args)
@@ -2981,6 +3100,138 @@ internal sealed class ScriptExchangeHost
         value.SetField("numReported", ToTsUInt32(summary.NumReported));
         value.SetField("numNoActionTaken", ToTsUInt32(summary.NumNoActionTaken));
         return new TsObjectValue(value);
+    }
+
+    private static TsValue ToTsDotaTeams(string teamsJson)
+    {
+        var teams = new TsArray();
+        using var document = JsonDocument.Parse(string.IsNullOrWhiteSpace(teamsJson) ? "[]" : teamsJson);
+        if (document.RootElement.ValueKind != JsonValueKind.Array)
+        {
+            return new TsArrayValue(teams);
+        }
+
+        foreach (var row in document.RootElement.EnumerateArray())
+        {
+            var role = JsonUInt32(row, "role", 0);
+            teams.Add(ToTsDotaTeam(row, role));
+        }
+
+        return new TsArrayValue(teams);
+    }
+
+    private static TsValue ToTsDotaTeam(string teamJson, uint? role)
+    {
+        using var document = JsonDocument.Parse(string.IsNullOrWhiteSpace(teamJson) ? "{}" : teamJson);
+        return ToTsDotaTeam(document.RootElement, role);
+    }
+
+    private static TsValue ToTsDotaTeam(JsonElement row, uint? role)
+    {
+        var teamId = JsonUInt32(row, "teamId", 0);
+        if (teamId == 0)
+        {
+            return TsValue.Null;
+        }
+
+        var details = ParseTeamDetails(row);
+        var value = new TsObject("DotaTeam");
+        value.SetField("teamId", ToTsUInt32(teamId));
+        value.SetField("name", TsValue.FromString(JsonString(row, "name", details.Name)));
+        value.SetField("tag", TsValue.FromString(JsonString(row, "tag", details.Tag)));
+        value.SetField("role", role.HasValue ? ToTsUInt32(role.Value) : TsValue.Null);
+        value.SetField("logo", TsValue.FromUInt64(details.Logo));
+        value.SetField("baseLogo", TsValue.FromUInt64(details.BaseLogo));
+        value.SetField("bannerLogo", TsValue.FromUInt64(details.BannerLogo));
+        value.SetField("logoUrl", TsValue.FromString(details.LogoUrl));
+        value.SetField("abbreviation", TsValue.FromString(details.Abbreviation));
+        value.SetField("countryCode", TsValue.FromString(details.CountryCode));
+        value.SetField("url", TsValue.FromString(details.Url));
+        value.SetField("wins", ToTsUInt32(details.Wins));
+        value.SetField("losses", ToTsUInt32(details.Losses));
+        value.SetField("gamesPlayedTotal", ToTsUInt32(details.GamesPlayedTotal));
+        value.SetField("gamesPlayedMatchmaking", ToTsUInt32(details.GamesPlayedMatchmaking));
+        value.SetField("region", ToTsUInt32(details.Region));
+        return new TsObjectValue(value);
+    }
+
+    private static DotaTeamDetails ParseTeamDetails(JsonElement row)
+    {
+        var raw = JsonString(row, "teamJson", "{}");
+        using var document = JsonDocument.Parse(string.IsNullOrWhiteSpace(raw) ? "{}" : raw);
+        var details = document.RootElement.ValueKind == JsonValueKind.Object ? document.RootElement : default;
+        return new DotaTeamDetails
+        {
+            Name = JsonString(details, "name", JsonString(row, "name", string.Empty)),
+            Tag = JsonString(details, "tag", JsonString(row, "tag", string.Empty)),
+            Logo = JsonUInt64(details, "teamLogo", JsonUInt64(details, "logo", JsonUInt64(details, "ugcLogo", 0))),
+            BaseLogo = JsonUInt64(details, "teamBaseLogo", JsonUInt64(details, "baseLogo", JsonUInt64(details, "ugcBaseLogo", 0))),
+            BannerLogo = JsonUInt64(details, "teamBannerLogo", JsonUInt64(details, "bannerLogo", JsonUInt64(details, "ugcBannerLogo", 0))),
+            LogoUrl = JsonString(details, "teamLogoUrl", JsonString(details, "urlLogo", string.Empty)),
+            Abbreviation = JsonString(details, "teamAbbreviation", JsonString(details, "abbreviation", string.Empty)),
+            CountryCode = JsonString(details, "countryCode", string.Empty),
+            Url = JsonString(details, "url", string.Empty),
+            Wins = JsonUInt32(details, "wins", 0),
+            Losses = JsonUInt32(details, "losses", 0),
+            GamesPlayedTotal = JsonUInt32(details, "gamesPlayedTotal", 0),
+            GamesPlayedMatchmaking = JsonUInt32(details, "gamesPlayedMatchmaking", 0),
+            Region = JsonUInt32(details, "region", 0)
+        };
+    }
+
+    private readonly record struct DotaTeamDetails(
+        string Name,
+        string Tag,
+        ulong Logo,
+        ulong BaseLogo,
+        ulong BannerLogo,
+        string LogoUrl,
+        string Abbreviation,
+        string CountryCode,
+        string Url,
+        uint Wins,
+        uint Losses,
+        uint GamesPlayedTotal,
+        uint GamesPlayedMatchmaking,
+        uint Region);
+
+    private static string JsonString(JsonElement element, string propertyName, string defaultValue)
+    {
+        return element.ValueKind == JsonValueKind.Object &&
+               element.TryGetProperty(propertyName, out var property) &&
+               property.ValueKind == JsonValueKind.String
+            ? property.GetString() ?? defaultValue
+            : defaultValue;
+    }
+
+    private static uint JsonUInt32(JsonElement element, string propertyName, uint defaultValue)
+    {
+        if (element.ValueKind != JsonValueKind.Object || !element.TryGetProperty(propertyName, out var property))
+        {
+            return defaultValue;
+        }
+
+        return property.ValueKind switch
+        {
+            JsonValueKind.Number when property.TryGetUInt32(out var number) => number,
+            JsonValueKind.String when uint.TryParse(property.GetString(), out var number) => number,
+            _ => defaultValue
+        };
+    }
+
+    private static ulong JsonUInt64(JsonElement element, string propertyName, ulong defaultValue)
+    {
+        if (element.ValueKind != JsonValueKind.Object || !element.TryGetProperty(propertyName, out var property))
+        {
+            return defaultValue;
+        }
+
+        return property.ValueKind switch
+        {
+            JsonValueKind.Number when property.TryGetUInt64(out var number) => number,
+            JsonValueKind.String when ulong.TryParse(property.GetString(), out var number) => number,
+            _ => defaultValue
+        };
     }
 
     private static DotaPartyPingData ToPartyPingData(TsValue value, string path)
