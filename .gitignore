@@ -352,6 +352,9 @@ __pycache__/
 .vscode/
 .agents/
 skills-lock.json
+.claude/
+GC-JS-Migration-Roadmap.md
+graphify-out/
 
 # Repository-local agent and SDK artifacts
 /.github/
