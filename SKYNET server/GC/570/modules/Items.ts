@@ -1,22 +1,11 @@
-import {
-    DotaCatalogItem,
-    DotaEquipment,
-    DotaRuntimeInventory,
-    HandlerContext,
-    RawMessageContext,
-    gc
-} from "../framework/gc";
+import { DotaEquipment, DotaRuntimeInventory, HandlerContext, RawMessageContext, gc } from "../framework/gc";
 import {
     CMsgClientToGCEquipItems,
     CMsgClientToGCEquipItemsResponse,
     CMsgClientToGCSetItemStyle,
     CMsgClientToGCSetItemStyleResponse,
-    CMsgSOCacheSubscribed,
     CMsgSOCacheSubscriptionRefresh,
-    CSODOTAGameAccountClient,
     CSOEconItem,
-    CSOEconGameAccountClient,
-    CSOEconItemEquipped,
     CMsgSOMultipleObjects_SingleObject,
     CMsgSOSingleObject,
     CMsgClientToGCSetItemStyleResponse_ESetStyle,
@@ -24,69 +13,22 @@ import {
     Proto,
     Routes
 } from "../generated/dota";
+import {
+    ECON_ITEM_TYPE_ID,
+    ECON_SERVICE_ID,
+    OWNER_TYPE_STEAM_ID,
+    buildDotaItemInstanceId,
+    buildEconItem,
+    equipmentForDefIndex
+} from "./InventorySos";
+import { queueCurrentLobbyServer as queueCurrentLobbyServerMessage } from "./Lobby";
 
-const ECON_ITEM_TYPE_ID = 1;
-const OWNER_TYPE_STEAM_ID = 1;
-const ECON_SERVICE_ID = 1;
-const DOTA_SERVICE_GAME = 0;
-const DOTA_SERVICE_ECON = 1;
-const GAME_ACCOUNT_TYPE_ID = 7;
-const ITEM_SCHEMA_TYPE_ID = 2010;
-const DEFAULT_INVENTORY_POSITION = 1;
-const DEFAULT_QUANTITY = 1;
-const DEFAULT_LEVEL = 1;
-const DEFAULT_QUALITY = 6;
-const DEFAULT_ORIGIN = 2;
 const STYLE_NONE = 0;
 const STYLE_DEFAULT_SENTINEL = 255;
 
 export function registerItems(): void {
     const items = new Items();
     items.register();
-}
-
-export function buildEconSoCacheSubscribed<TRequest, TResponse>(
-    ctx: HandlerContext<TRequest, TResponse>
-): CMsgSOCacheSubscribed {
-    const inventory = ctx.services.items.getInventory();
-    const itemObjects: Uint8Array[] = [];
-    for (let i = 0; i < inventory.ownedItems.length; i++) {
-        const item = inventory.ownedItems[i];
-        itemObjects.push(
-            ctx.encode(
-                Proto.CSOEconItem,
-                buildEconItem(inventory, item, equipmentForDefIndex(inventory, item.defIndex))
-            )
-        );
-    }
-
-    return {
-        objects: [
-            {
-                typeId: GAME_ACCOUNT_TYPE_ID,
-                objectData: [ctx.encode(Proto.CSOEconGameAccountClient, buildEconGameAccount())]
-            },
-            {
-                typeId: GAME_ACCOUNT_TYPE_ID,
-                objectData: [ctx.encode(Proto.CSODOTAGameAccountClient, buildDotaGameAccount(ctx.accountId))]
-            },
-            {
-                typeId: ITEM_SCHEMA_TYPE_ID
-            },
-            {
-                typeId: ECON_ITEM_TYPE_ID,
-                objectData: itemObjects
-            }
-        ],
-        version: inventory.version,
-        ownerSoid: {
-            type: OWNER_TYPE_STEAM_ID,
-            id: ctx.steamId
-        },
-        serviceId: DOTA_SERVICE_ECON,
-        serviceList: [DOTA_SERVICE_GAME],
-        syncVersion: 1n
-    };
 }
 
 export class Items {
@@ -181,13 +123,15 @@ export class Items {
                 const equipment = equipmentForDefIndex(inventory, defIndex);
                 const itemId = buildDotaItemInstanceId(inventory.steamId, item.defIndex);
                 if (equipment.length === 0) {
-                    ctx.services.items.queueCurrentLobbyServer(
+                    queueCurrentLobbyServer(
+                        ctx,
                         Msg.SOSingleObjectDestroyed,
                         ctx.encode(Proto.CMsgSOSingleObject, this.buildSingleObject(ctx, inventory, { id: itemId }))
                     );
                 }
 
-                ctx.services.items.queueCurrentLobbyServer(
+                queueCurrentLobbyServer(
+                    ctx,
                     Msg.SOSingleObject,
                     ctx.encode(
                         Proto.CMsgSOSingleObject,
@@ -240,53 +184,12 @@ export class Items {
     }
 }
 
-export function buildEconItem(
-    inventory: DotaRuntimeInventory,
-    item: DotaCatalogItem,
-    equipment: DotaEquipment[]
-): CSOEconItem {
-    const equippedState: CSOEconItemEquipped[] = [];
-    let selectedStyle = STYLE_NONE;
-    for (let i = 0; i < equipment.length; i++) {
-        const equipped = equipment[i];
-        selectedStyle = equipped.style;
-        equippedState.push({
-            newClass: equipped.heroId,
-            newSlot: equipped.slotId
-        });
-    }
-
-    return {
-        id: buildDotaItemInstanceId(inventory.steamId, item.defIndex),
-        accountId: steamIdToAccountId(inventory.steamId),
-        inventory: inventoryPosition(inventory, item.defIndex),
-        defIndex: item.defIndex,
-        quantity: DEFAULT_QUANTITY,
-        level: DEFAULT_LEVEL,
-        quality: item.qualityId === 0 ? DEFAULT_QUALITY : item.qualityId,
-        origin: DEFAULT_ORIGIN,
-        style: selectedStyle,
-        equippedState
-    };
-}
-
-function buildEconGameAccount(): CSOEconGameAccountClient {
-    return {
-        additionalBackpackSlots: 0,
-        trialAccount: false,
-        eligibleForOnlinePlay: true,
-        needToChooseMostHelpfulFriend: false,
-        inCoachesList: false,
-        tradeBanExpiration: 0,
-        duelBanExpiration: 0,
-        madeFirstPurchase: false
-    };
-}
-
-function buildDotaGameAccount(accountId: number): CSODOTAGameAccountClient {
-    return {
-        accountId
-    };
+function queueCurrentLobbyServer<TRequest, TResponse>(
+    ctx: HandlerContext<TRequest, TResponse>,
+    messageType: number,
+    payload: Uint8Array
+): boolean {
+    return queueCurrentLobbyServerMessage(ctx, messageType, payload);
 }
 
 function appendEquipment(left: DotaEquipment[], right: DotaEquipment[]): DotaEquipment[] {
@@ -323,43 +226,4 @@ function containsNumber(values: number[], value: number): boolean {
     }
 
     return false;
-}
-
-export function equipmentForDefIndex(inventory: DotaRuntimeInventory, defIndex: number): DotaEquipment[] {
-    const result: DotaEquipment[] = [];
-    for (let i = 0; i < inventory.equipment.length; i++) {
-        const item = inventory.equipment[i];
-        if (item.defIndex === defIndex) {
-            result.push(item);
-        }
-    }
-
-    return result;
-}
-
-function inventoryPosition(inventory: DotaRuntimeInventory, defIndex: number): number {
-    let position = DEFAULT_INVENTORY_POSITION;
-    for (let i = 0; i < inventory.ownedItems.length; i++) {
-        if (inventory.ownedItems[i].defIndex === defIndex) {
-            return position;
-        }
-
-        position++;
-    }
-
-    return DEFAULT_INVENTORY_POSITION;
-}
-
-function buildDotaItemInstanceId(steamIdValue: bigint, defIndex: number): bigint {
-    const accountBits = steamIdValue & 0xffffffffn;
-    return 0x7000000000000000n | (accountBits << 20n) | BigInt(defIndex);
-}
-
-function steamIdToAccountId(steamIdValue: bigint): number {
-    const base = 76561197960265728n;
-    if (steamIdValue >= base) {
-        return Number(steamIdValue - base);
-    }
-
-    return Number(steamIdValue & 0xffffffffn);
 }

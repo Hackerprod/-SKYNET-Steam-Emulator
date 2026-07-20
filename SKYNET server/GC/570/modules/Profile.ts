@@ -79,7 +79,7 @@ import {
     Proto,
     Routes
 } from "../generated/dota";
-import { buildEconItem, equipmentForDefIndex } from "./Items";
+import { buildEconItem, equipmentForDefIndex } from "./InventorySos";
 
 const PROFILE_SLOT_STAT = 1;
 const PROFILE_SLOT_TROPHY = 2;

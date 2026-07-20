@@ -1,6 +1,7 @@
 import { gc, HandlerContext } from "../framework/gc";
 import { CMsgClientHello, CMsgClientWelcome, GCConnectionStatus, Msg, Proto, Routes } from "../generated/dota";
-import { buildEconSoCacheSubscribed } from "./Items";
+import { buildEconSoCacheSubscribed } from "./InventorySos";
+import { emitCurrentLobby } from "./Lobby";
 import { emitCurrentParty } from "./Party";
 
 const Welcome = {
@@ -92,5 +93,6 @@ export class Auth {
         });
 
         emitCurrentParty(ctx);
+        emitCurrentLobby(ctx);
     }
 }

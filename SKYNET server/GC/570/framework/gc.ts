@@ -69,14 +69,52 @@ export interface GcServices {
     readonly chat: DotaChatService;
     readonly guilds: DotaGuildService;
     readonly stats: DotaStatsService;
+    readonly lobby: DotaLobbyService;
 }
 
 export interface DotaItemService {
-    getInventory(): DotaRuntimeInventory;
+    getInventory(steamId?: bigint): DotaRuntimeInventory;
     getCatalogItem(defIndex: number): DotaCatalogItem | null;
     equipItem(itemId: bigint, heroId: number, slotId: number, style: number): DotaEquipment[];
     setItemStyle(itemId: bigint, style: number): DotaEquipment[];
-    queueCurrentLobbyServer(messageType: number, payload: Uint8Array): boolean;
+}
+
+export interface DotaLobbyService {
+    queueMessage(steamId: bigint, messageType: number, payload: Uint8Array, protobuf?: boolean): boolean;
+    publishSnapshot(snapshot: DotaLobbyMatchSnapshot): boolean;
+    removeSnapshot(lobbyId: bigint): boolean;
+    startDedicatedServer(lobbyId: bigint, map: string): DotaDedicatedLaunchResult | null;
+    releaseDedicatedServer(lobbyId: bigint, reason: string): boolean;
+    resolveGameServerConnectIp(publicIp: string, privateIp: string, fallbackIp: string): string;
+}
+
+export interface DotaDedicatedLaunchResult {
+    readonly started: boolean;
+    readonly port: number;
+    readonly state: string;
+    readonly error: string;
+}
+
+export interface DotaLobbyMatchSnapshot {
+    readonly lobbyId: bigint;
+    readonly matchId: bigint;
+    readonly serverSteamId: bigint;
+    readonly connect: string;
+    readonly state: number;
+    readonly gameState: number;
+    readonly gameStartTime: number;
+    readonly dedicated: boolean;
+    readonly players: DotaLobbyMatchPlayer[];
+}
+
+export interface DotaLobbyMatchPlayer {
+    readonly steamId: bigint;
+    readonly accountId: number;
+    readonly personaName: string;
+    readonly team: number;
+    readonly slot: number;
+    readonly coachTeam: number;
+    readonly heroId: number;
 }
 
 export interface DotaRuntimeInventory {
@@ -879,8 +917,10 @@ class GcAbortSignal implements AbortSignal {
 }
 
 class GcDotaItemService implements DotaItemService {
-    getInventory(): DotaRuntimeInventory {
-        return dotaInventory() as DotaRuntimeInventory;
+    getInventory(steamId?: bigint): DotaRuntimeInventory {
+        return steamId === undefined
+            ? (dotaInventory() as DotaRuntimeInventory)
+            : (dotaInventory(steamId) as DotaRuntimeInventory);
     }
 
     getCatalogItem(defIndex: number): DotaCatalogItem | null {
@@ -894,9 +934,31 @@ class GcDotaItemService implements DotaItemService {
     setItemStyle(itemId: bigint, style: number): DotaEquipment[] {
         return dotaSetItemStyle(itemId, style) as DotaEquipment[];
     }
+}
 
-    queueCurrentLobbyServer(messageType: number, payload: Uint8Array): boolean {
-        return dotaQueueCurrentLobbyServer(messageType, payload) as boolean;
+class GcDotaLobbyService implements DotaLobbyService {
+    queueMessage(steamId: bigint, messageType: number, payload: Uint8Array, protobuf = true): boolean {
+        return dotaQueueGcMessage(steamId, messageType, payload, protobuf);
+    }
+
+    publishSnapshot(snapshot: DotaLobbyMatchSnapshot): boolean {
+        return dotaPublishMatchSnapshot(snapshot);
+    }
+
+    removeSnapshot(lobbyId: bigint): boolean {
+        return dotaRemoveMatchSnapshot(lobbyId);
+    }
+
+    startDedicatedServer(lobbyId: bigint, map: string): DotaDedicatedLaunchResult | null {
+        return dotaStartDedicatedServer(lobbyId, map) as DotaDedicatedLaunchResult | null;
+    }
+
+    releaseDedicatedServer(lobbyId: bigint, reason: string): boolean {
+        return dotaReleaseDedicatedServer(lobbyId, reason);
+    }
+
+    resolveGameServerConnectIp(publicIp: string, privateIp: string, fallbackIp: string): string {
+        return dotaResolveGameServerConnectIp(publicIp, privateIp, fallbackIp);
     }
 }
 
@@ -1230,6 +1292,7 @@ class GcServiceContainer implements GcServices {
     chat: DotaChatService;
     guilds: DotaGuildService;
     stats: DotaStatsService;
+    lobby: DotaLobbyService;
 
     constructor() {
         this.items = new GcDotaItemService();
@@ -1240,6 +1303,7 @@ class GcServiceContainer implements GcServices {
         this.chat = new GcDotaChatService();
         this.guilds = new GcDotaGuildService();
         this.stats = new GcDotaStatsService();
+        this.lobby = new GcDotaLobbyService();
     }
 }
 

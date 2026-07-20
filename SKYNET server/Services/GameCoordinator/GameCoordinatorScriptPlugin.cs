@@ -177,7 +177,7 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .RegisterHostFunction("gc", "decode", dispatcher.Decode)
                 .RegisterHostFunction("gc", "encode", dispatcher.Encode)
                 .RegisterHostFunction("gc", "send", dispatcher.Send)
-                .RegisterHostFunction("gc", "dotaInventory", _ => dispatcher.RequireCurrent().DotaInventory())
+                .RegisterHostFunction("gc", "dotaInventory", dispatcher.DotaInventory)
                 .RegisterHostFunction("gc", "dotaCatalogItem", dispatcher.DotaCatalogItem)
                 .RegisterHostFunction("gc", "dotaEquipItem", dispatcher.DotaEquipItem)
                 .RegisterHostFunction("gc", "dotaSetItemStyle", dispatcher.DotaSetItemStyle)
@@ -255,7 +255,12 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .RegisterHostFunction("gc", "dotaPartyPruneInvitesCreatedBefore", dispatcher.DotaPartyPruneInvitesCreatedBefore)
                 .RegisterHostFunction("gc", "dotaPartyUserExists", dispatcher.DotaPartyUserExists)
                 .RegisterHostFunction("gc", "dotaPartyUserOnline", dispatcher.DotaPartyUserOnline)
-                .RegisterHostFunction("gc", "dotaQueueGcMessage", dispatcher.DotaQueueGcMessage);
+                .RegisterHostFunction("gc", "dotaQueueGcMessage", dispatcher.DotaQueueGcMessage)
+                .RegisterHostFunction("gc", "dotaPublishMatchSnapshot", dispatcher.DotaPublishMatchSnapshot)
+                .RegisterHostFunction("gc", "dotaRemoveMatchSnapshot", dispatcher.DotaRemoveMatchSnapshot)
+                .RegisterHostFunction("gc", "dotaStartDedicatedServer", dispatcher.DotaStartDedicatedServer)
+                .RegisterHostFunction("gc", "dotaReleaseDedicatedServer", dispatcher.DotaReleaseDedicatedServer)
+                .RegisterHostFunction("gc", "dotaResolveGameServerConnectIp", dispatcher.DotaResolveGameServerConnectIp);
 
             foreach (var sourceFile in EnumerateRuntimeScriptFiles(scriptRoot))
             {
@@ -399,6 +404,11 @@ internal sealed class ScriptHostDispatcher
     public TsValue? DotaCatalogItem(TsValue[] args)
     {
         return RequireCurrent().DotaCatalogItem(args);
+    }
+
+    public TsValue? DotaInventory(TsValue[] args)
+    {
+        return RequireCurrent().DotaInventory(args);
     }
 
     public TsValue? DotaSetItemStyle(TsValue[] args)
@@ -770,6 +780,31 @@ internal sealed class ScriptHostDispatcher
     {
         return RequireCurrent().DotaQueueGcMessage(args);
     }
+
+    public TsValue? DotaPublishMatchSnapshot(TsValue[] args)
+    {
+        return RequireCurrent().DotaPublishMatchSnapshot(args);
+    }
+
+    public TsValue? DotaRemoveMatchSnapshot(TsValue[] args)
+    {
+        return RequireCurrent().DotaRemoveMatchSnapshot(args);
+    }
+
+    public TsValue? DotaStartDedicatedServer(TsValue[] args)
+    {
+        return RequireCurrent().DotaStartDedicatedServer(args);
+    }
+
+    public TsValue? DotaReleaseDedicatedServer(TsValue[] args)
+    {
+        return RequireCurrent().DotaReleaseDedicatedServer(args);
+    }
+
+    public TsValue? DotaResolveGameServerConnectIp(TsValue[] args)
+    {
+        return RequireCurrent().DotaResolveGameServerConnectIp(args);
+    }
 }
 
 internal sealed class ScriptExchangeHost
@@ -1117,9 +1152,97 @@ internal sealed class ScriptExchangeHost
         return TsValue.FromBool(DotaGcBackend.PendingMessageQueued != null);
     }
 
-    public TsValue DotaInventory()
+    public TsValue DotaPublishMatchSnapshot(TsValue[] args)
     {
-        return ToTsInventory(DotaGcBackend.InventoryProvider?.Invoke(_context.SteamId));
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaPublishMatchSnapshot(snapshot) requires one argument");
+        }
+
+        if (DotaGcBackend.MatchSnapshotSink == null)
+        {
+            return TsValue.FromBool(false);
+        }
+
+        DotaGcBackend.MatchSnapshotSink(ToDotaMatchSnapshot(args[0], "dotaPublishMatchSnapshot.snapshot"));
+        return TsValue.FromBool(true);
+    }
+
+    public TsValue DotaRemoveMatchSnapshot(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaRemoveMatchSnapshot(lobbyId) requires one argument");
+        }
+
+        var lobbyId = Convert.ToUInt64(ToInteger(args[0], "dotaRemoveMatchSnapshot.lobbyId").ToString());
+        return TsValue.FromBool(DotaGcBackend.MatchSnapshotDeleteSink?.Invoke(lobbyId) ?? false);
+    }
+
+    public TsValue DotaStartDedicatedServer(TsValue[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new InvalidOperationException("dotaStartDedicatedServer(lobbyId, map) requires two arguments");
+        }
+
+        var lobbyId = Convert.ToUInt64(ToInteger(args[0], "dotaStartDedicatedServer.lobbyId").ToString());
+        var map = ToString(args[1]);
+        var result = DotaGcBackend.DedicatedServerStart?.Invoke(lobbyId, map);
+        if (result == null)
+        {
+            return TsValue.Null;
+        }
+
+        var value = new TsObject("DotaDedicatedLaunchResult");
+        value.SetField("started", TsValue.FromBool(result.Started));
+        value.SetField("port", TsValue.FromInt32(result.Port));
+        value.SetField("state", TsValue.FromString(result.State.ToString()));
+        value.SetField("error", TsValue.FromString(result.Error ?? string.Empty));
+        return new TsObjectValue(value);
+    }
+
+    public TsValue DotaReleaseDedicatedServer(TsValue[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new InvalidOperationException("dotaReleaseDedicatedServer(lobbyId, reason) requires two arguments");
+        }
+
+        var lobbyId = Convert.ToUInt64(ToInteger(args[0], "dotaReleaseDedicatedServer.lobbyId").ToString());
+        var reason = ToString(args[1]);
+        return TsValue.FromBool(DotaGcBackend.DedicatedServerRelease?.Invoke(lobbyId, reason) ?? false);
+    }
+
+    public TsValue DotaResolveGameServerConnectIp(TsValue[] args)
+    {
+        if (args.Length < 3)
+        {
+            throw new InvalidOperationException("dotaResolveGameServerConnectIp(publicIp, privateIp, fallbackIp) requires three arguments");
+        }
+
+        var publicIp = ToString(args[0]);
+        var privateIp = ToString(args[1]);
+        var fallbackIp = ToString(args[2]);
+        var resolved = DotaGcBackend.GameServerConnectIpResolver?.Invoke(
+            _context.ClientIp,
+            publicIp,
+            privateIp,
+            fallbackIp) ?? fallbackIp;
+        return TsValue.FromString(resolved);
+    }
+
+    public TsValue DotaInventory(TsValue[] args)
+    {
+        var steamId = args.Length > 0
+            ? Convert.ToUInt64(ToInteger(args[0], "dotaInventory.steamId").ToString())
+            : _context.SteamId;
+        if (steamId == 0)
+        {
+            steamId = _context.SteamId;
+        }
+
+        return ToTsInventory(DotaGcBackend.InventoryProvider?.Invoke(steamId));
     }
 
     public TsValue DotaCatalogItem(TsValue[] args)
@@ -3028,6 +3151,52 @@ internal sealed class ScriptExchangeHost
     {
         const ulong accountIdBase = 76561197960265728UL;
         return steamId >= accountIdBase ? unchecked((uint)(steamId - accountIdBase)) : unchecked((uint)steamId);
+    }
+
+    private static ApiDotaMatch ToDotaMatchSnapshot(TsValue source, string path)
+    {
+        var value = RequireObject(source, path);
+        var snapshot = new ApiDotaMatch
+        {
+            LobbyId = U64Field(value, "lobbyId", path),
+            MatchId = U64Field(value, "matchId", path),
+            ServerSteamId = U64Field(value, "serverSteamId", path),
+            Connect = StringField(value, "connect", path),
+            State = U32Field(value, "state", path),
+            GameState = U32Field(value, "gameState", path),
+            GameStartTime = U32Field(value, "gameStartTime", path),
+            Dedicated = BoolField(value, "dedicated", path),
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        var playersValue = value.GetField("players");
+        if (playersValue is TsNull or TsVoid)
+        {
+            return snapshot;
+        }
+
+        if (playersValue is not TsArrayValue players)
+        {
+            throw new InvalidOperationException($"{path}.players: expected array, got {playersValue.ValueType}");
+        }
+
+        for (var i = 0; i < players.Value.Count; i++)
+        {
+            var playerPath = $"{path}.players[{i}]";
+            var player = RequireObject(players.Value.Get(i), playerPath);
+            snapshot.Players.Add(new ApiDotaMatchPlayer
+            {
+                SteamId = U64Field(player, "steamId", playerPath),
+                AccountId = U32Field(player, "accountId", playerPath),
+                PersonaName = StringField(player, "personaName", playerPath),
+                Team = U32Field(player, "team", playerPath),
+                Slot = U32Field(player, "slot", playerPath),
+                CoachTeam = U32Field(player, "coachTeam", playerPath),
+                HeroId = U32Field(player, "heroId", playerPath)
+            });
+        }
+
+        return snapshot;
     }
 
     private static TsValue ToArray(byte[] bytes)
