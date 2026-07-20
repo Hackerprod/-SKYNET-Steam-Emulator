@@ -889,6 +889,101 @@ public sealed partial class SteamApiStateService
 
     private static ulong WelcomeVersionSeed() => 20;
 
+    public static bool RunDotaCosmeticParserSelfCheck(Action<string>? write = null)
+    {
+        var heroIds = new Dictionary<string, uint>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["npc_dota_hero_phantom_assassin"] = 44
+        };
+
+        const string itemsText = """
+            "items"
+            {
+                "10001"
+                {
+                    "name" "Self Check Hero Weapon"
+                    "prefab" "wearable"
+                    "item_slot" "weapon"
+                    "item_quality" "immortal"
+                    "used_by_heroes"
+                    {
+                        "npc_dota_hero_phantom_assassin" "1"
+                    }
+                }
+                "10002"
+                {
+                    "name" "Self Check Courier"
+                    "prefab" "courier"
+                    "item_quality" "mythical"
+                }
+                "10003"
+                {
+                    "name" "Self Check Terrain"
+                    "prefab" "terrain"
+                    "item_quality" "unique"
+                }
+                "10004"
+                {
+                    "name" "Self Check Teleport Effect"
+                    "prefab" "teleport_effect"
+                    "item_quality" "rare"
+                }
+                "10010"
+                {
+                    "name" "Self Check Loading Screen"
+                    "prefab" "loading_screen"
+                    "item_slot" "head"
+                }
+                "10005"
+                {
+                    "name" "Self Check Tool"
+                    "prefab" "tool"
+                }
+                "10006"
+                {
+                    "name" "Self Check Bundle"
+                    "prefab" "bundle"
+                }
+                "10007"
+                {
+                    "name" "Self Check Gem"
+                    "prefab" "socket_gem"
+                }
+                "10008"
+                {
+                    "name" "Self Check League"
+                    "prefab" "league"
+                }
+                "10009"
+                {
+                    "name" "Self Check Default Courier"
+                    "prefab" "courier"
+                }
+            }
+            """;
+
+        var parsed = DotaItemsGameParser.ParseItems(itemsText, heroIds).ToDictionary(item => item.DefIndex);
+        var ok = Expect(parsed.ContainsKey(10001) && parsed[10001].HeroIds.SequenceEqual(new uint[] { 44 }) && parsed[10001].Slot == "weapon", "hero wearable imported with slot and hero id", write)
+                 & Expect(parsed.ContainsKey(10002) && parsed[10002].HeroIds.Count == 0 && parsed[10002].Slot == "courier", "global courier imported without hero binding", write)
+                 & Expect(parsed.ContainsKey(10003) && parsed[10003].Slot == "terrain", "global terrain imported from prefab", write)
+                 & Expect(parsed.ContainsKey(10004) && parsed[10004].Slot == "teleport_effect", "global effect imported from prefab", write)
+                 & Expect(parsed.ContainsKey(10010) && parsed[10010].Slot == "loading_screen", "global prefab overrides misleading hero slot", write)
+                 & Expect(!parsed.ContainsKey(10005), "tools excluded", write)
+                 & Expect(!parsed.ContainsKey(10006), "bundles excluded", write)
+                 & Expect(!parsed.ContainsKey(10007), "socket gems excluded", write)
+                 & Expect(!parsed.ContainsKey(10008), "league entries excluded", write)
+                 & Expect(!parsed.ContainsKey(10009), "default global cosmetics excluded", write);
+
+        write?.Invoke(ok ? "Dota cosmetic parser self-check passed." : "Dota cosmetic parser self-check failed.");
+        return ok;
+    }
+
+    private static bool Expect(bool condition, string message, Action<string>? write)
+    {
+        write?.Invoke($"{(condition ? "OK" : "FAIL")}: {message}");
+        return condition;
+    }
+
     private static class VpkTextReader
     {
         private const uint Signature = 0x55AA1234;
@@ -1144,10 +1239,19 @@ public sealed partial class SteamApiStateService
 
                 var isDefault = name.Contains("default", StringComparison.OrdinalIgnoreCase) ||
                                 prefab.Contains("default_item", StringComparison.OrdinalIgnoreCase);
-                var isTool = prefab.Contains("tool", StringComparison.OrdinalIgnoreCase) ||
-                             slot.Contains("tool", StringComparison.OrdinalIgnoreCase);
+                var normalizedPrefab = NormalizeImportedSlot(prefab);
+                var isBundle = IsBundlePrefab(normalizedPrefab);
+                var isTool = IsBlockedPrefab(normalizedPrefab) || IsBlockedSlot(slot);
 
-                if (isTool || isDefault)
+                // Dota has two catalog families that both become type 1
+                // CSOEconItem objects. Hero cosmetics declare used_by_heroes
+                // and a hero slot. Account/global loadout cosmetics such as
+                // couriers, terrains, HUDs, announcers, and effects do not
+                // declare used_by_heroes; their equipable slot is identified by
+                // prefab/item_slot instead. Keep both families in the owned
+                // catalog so the TS GC can send the complete SO cache to the
+                // client and to the dedicated server.
+                if (isDefault || isTool || isBundle || !IsEquipableCosmetic(normalizedPrefab, slot, heroIdList))
                 {
                     continue;
                 }
@@ -1163,7 +1267,7 @@ public sealed partial class SteamApiStateService
                     Rarity = rarity,
                     RarityId = RarityIds.TryGetValue(rarity, out var rarityId) ? rarityId : 0,
                     ImageInventory = imageInventory,
-                    IsBundle = prefab.Contains("bundle", StringComparison.OrdinalIgnoreCase),
+                    IsBundle = isBundle,
                     IsDefault = isDefault,
                     IsTool = isTool,
                     HeroNames = heroNames,
@@ -1180,6 +1284,15 @@ public sealed partial class SteamApiStateService
 
         public static string InferItemSlot(string slot, string name, string prefab, string imageInventory)
         {
+            var normalizedPrefab = NormalizeImportedSlot(prefab ?? string.Empty);
+            if (GlobalLoadoutPrefabSlots.TryGetValue(normalizedPrefab, out var globalSlot))
+            {
+                var normalizedSlot = NormalizeImportedSlot(slot);
+                return !string.IsNullOrWhiteSpace(normalizedSlot) && GlobalLoadoutSlots.Contains(normalizedSlot)
+                    ? normalizedSlot
+                    : globalSlot;
+            }
+
             if (!string.IsNullOrWhiteSpace(slot))
             {
                 return NormalizeImportedSlot(slot);
@@ -1261,15 +1374,142 @@ public sealed partial class SteamApiStateService
             "misc",
             "taunt",
             "summon",
+            "mount",
             "ability2",
             "ability",
+            "ability1",
+            "ability3",
+            "ability4",
+            "ability_ultimate",
             "armor",
             "neck",
             "legs",
             "tail",
             "costume",
-            "voice"
+            "voice",
+            "announcer",
+            "mega_kills",
+            "courier",
+            "courier_effect",
+            "ward",
+            "terrain",
+            "weather",
+            "hud_skin",
+            "loading_screen",
+            "cursor_pack",
+            "music",
+            "emblem",
+            "versus_screen",
+            "teleport_effect",
+            "blink_effect",
+            "streak_effect",
+            "map_effect",
+            "death_effect",
+            "head_effect",
+            "radiantcreeps",
+            "direcreeps",
+            "radiantsiegecreeps",
+            "diresiegecreeps",
+            "radianttowers",
+            "diretowers",
+            "roshan",
+            "tormentor",
+            "ancient",
+            "summons",
+            "heroic_statue",
+            "pet_effigy",
+            "multikill_banner"
         };
+
+        private static readonly Dictionary<string, string> GlobalLoadoutPrefabSlots = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["announcer"] = "announcer",
+            ["courier"] = "courier",
+            ["courier_wearable"] = "courier",
+            ["courier_effect"] = "courier_effect",
+            ["cursor_pack"] = "cursor_pack",
+            ["death_effect"] = "death_effect",
+            ["direcreeps"] = "direcreeps",
+            ["diresiegecreeps"] = "diresiegecreeps",
+            ["diretowers"] = "diretowers",
+            ["emblem"] = "emblem",
+            ["head_effect"] = "head_effect",
+            ["hud_skin"] = "hud_skin",
+            ["loading_screen"] = "loading_screen",
+            ["map_effect"] = "map_effect",
+            ["music"] = "music",
+            ["radiantcreeps"] = "radiantcreeps",
+            ["radiantsiegecreeps"] = "radiantsiegecreeps",
+            ["radianttowers"] = "radianttowers",
+            ["roshan"] = "roshan",
+            ["streak_effect"] = "streak_effect",
+            ["terrain"] = "terrain",
+            ["tormentor"] = "tormentor",
+            ["versus_screen"] = "versus_screen",
+            ["ward"] = "ward",
+            ["weather"] = "weather",
+            ["teleport_effect"] = "teleport_effect",
+            ["blink_effect"] = "blink_effect"
+        };
+
+        private static readonly HashSet<string> BlockedPrefabs = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "autograph_rune",
+            "battle_pass",
+            "compendium",
+            "dynamic_recipe",
+            "emoticon_tool",
+            "event_game",
+            "fantasy_ticket",
+            "gift",
+            "key",
+            "league",
+            "misc_tool",
+            "pennant",
+            "player_card",
+            "recipe",
+            "retired_treasure_chest",
+            "socket_gem",
+            "sticker",
+            "sticker_capsule",
+            "tool",
+            "treasure_chest"
+        };
+
+        private static readonly HashSet<string> BlockedSlots = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "tool",
+            "socket_gem"
+        };
+
+        private static readonly HashSet<string> GlobalLoadoutSlots = new(KnownSlotNames.Where(slot =>
+            GlobalLoadoutPrefabSlots.ContainsValue(slot) ||
+            slot is "ancient" or "heroic_statue" or "multikill_banner" or "pet_effigy" or "summons"), StringComparer.OrdinalIgnoreCase);
+
+        private static bool IsEquipableCosmetic(string normalizedPrefab, string slot, List<uint> heroIds)
+        {
+            if (GlobalLoadoutPrefabSlots.ContainsKey(normalizedPrefab) || GlobalLoadoutSlots.Contains(slot))
+            {
+                return true;
+            }
+
+            return heroIds.Count > 0 && !string.IsNullOrWhiteSpace(slot);
+        }
+
+        private static bool IsBundlePrefab(string normalizedPrefab)
+        {
+            return normalizedPrefab.Contains("bundle", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsBlockedPrefab(string normalizedPrefab)
+        {
+            return BlockedPrefabs.Contains(normalizedPrefab);
+        }
+
+        private static bool IsBlockedSlot(string slot)
+        {
+            return BlockedSlots.Contains(slot);
+        }
 
         private static List<string> ParseUsedByHeroes(string block)
         {

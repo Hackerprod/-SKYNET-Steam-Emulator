@@ -34,6 +34,14 @@ if (args.Contains("--verify-gc-ts"))
     return;
 }
 
+// Self-check that Dota's item importer keeps equipable hero/global cosmetics
+// while dropping tools, bundles, treasures, gems, and other non-loadout entries.
+if (args.Contains("--verify-dota-cosmetics"))
+{
+    Environment.ExitCode = SteamApiStateService.RunDotaCosmeticParserSelfCheck(Console.WriteLine) ? 0 : 1;
+    return;
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages()
