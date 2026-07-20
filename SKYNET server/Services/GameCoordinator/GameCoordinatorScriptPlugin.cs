@@ -1463,7 +1463,7 @@ internal sealed class ScriptExchangeHost
     {
         return ToTsConductScorecard(
             DotaGcRuntimeServices.StatsStore?.GetConduct(_context.AccountId)
-                ?? new DotaStatsConduct { AccountId = _context.AccountId, RawBehaviorScore = 10000, OldRawBehaviorScore = 10000 });
+                ?? new DotaStatsConduct { AccountId = _context.AccountId });
     }
 
     public TsValue DotaProfileQuestProgress(TsValue[] args)
@@ -2301,7 +2301,7 @@ internal sealed class ScriptExchangeHost
                 : store.GetProfile(requestedAccountId);
 
         var global = store?.GetGlobalStats(profile.AccountId) ?? new DotaStatsGlobalStats { AccountId = profile.AccountId };
-        var conduct = store?.GetConduct(profile.AccountId) ?? new DotaStatsConduct { AccountId = profile.AccountId, RawBehaviorScore = 10000 };
+        var conduct = store?.GetConduct(profile.AccountId) ?? new DotaStatsConduct { AccountId = profile.AccountId };
         var value = new TsObject("DotaProfileSnapshot");
         value.SetField("accountId", TsValue.FromInt32(unchecked((int)profile.AccountId)));
         value.SetField("steamId", TsValue.FromUInt64(profile.SteamId));
@@ -2387,6 +2387,9 @@ internal sealed class ScriptExchangeHost
         var value = new TsObject("DotaConduct");
         value.SetField("commendCount", TsValue.FromInt32(unchecked((int)conduct.CommendCount)));
         value.SetField("rawBehaviorScore", TsValue.FromInt32(unchecked((int)conduct.RawBehaviorScore)));
+        value.SetField("reportsCount", TsValue.FromInt32(unchecked((int)conduct.ReportsCount)));
+        value.SetField("matchesAbandoned", TsValue.FromInt32(unchecked((int)conduct.MatchesAbandoned)));
+        value.SetField("commsReports", TsValue.FromInt32(unchecked((int)conduct.CommsReports)));
         return new TsObjectValue(value);
     }
 
@@ -3521,6 +3524,7 @@ internal sealed class ScriptExchangeHost
         var value = new TsObject("DotaRuntimeInventory");
         value.SetField("steamId", TsValue.FromUInt64(inventory.SteamId));
         value.SetField("version", TsValue.FromUInt64(inventory.Version));
+        value.SetField("catalogItems", ToTsCatalogItems(inventory.Items));
         value.SetField("ownedItems", ToTsCatalogItems(inventory.OwnedItems));
         value.SetField("equipment", ToTsEquipmentList(inventory.Equipment));
         return new TsObjectValue(value);

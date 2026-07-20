@@ -69,6 +69,7 @@ import {
     Routes
 } from "../generated/dota";
 import { buildEconSoCacheSubscribedForInventory } from "./InventorySos";
+import { normalizeConduct } from "./shared/conduct";
 
 const LOBBY_OBJECT_TYPE_ID = 2004;
 const LOBBY_INVITE_OBJECT_TYPE_ID = 2013;
@@ -648,6 +649,7 @@ export class Lobby {
         const results: CMsgServerToGCRequestBatchPlayerResourcesResponse_Result[] = [];
         for (let i = 0; i < accountIds.length; i++) {
             const profile = ctx.services.profiles.get(accountIds[i]);
+            const conduct = normalizeConduct(profile.conduct);
             results.push({
                 accountId: accountIds[i],
                 rank: profile.rankTier,
@@ -655,12 +657,12 @@ export class Lobby {
                 lowPriority: false,
                 isNewPlayer: profile.lifetimeGames < 10,
                 isGuidePlayer: false,
-                commLevel: profile.conduct.rawBehaviorScore,
-                behaviorLevel: profile.conduct.rawBehaviorScore,
+                commLevel: conduct.rawBehaviorScore,
+                behaviorLevel: conduct.rawBehaviorScore,
                 wins: profile.globalStats.gamesWon,
                 losses: profile.globalStats.gamesLost,
-                commScore: profile.conduct.rawBehaviorScore,
-                behaviorScore: profile.conduct.rawBehaviorScore,
+                commScore: conduct.rawBehaviorScore,
+                behaviorScore: conduct.rawBehaviorScore,
                 rankUncertainty: 0
             });
         }
@@ -1155,10 +1157,15 @@ function sendLobbyPlayerItemsToServer(ctx: RawMessageContext, lobby: LobbyState)
         return;
     }
 
+    // Dedicated/listen servers need every player's econ owner cache, not just
+    // the lobby cache. Target this SOCacheSubscribed at the server SteamID so
+    // the server owns each member's CSOEconItem list before RUN/hero spawn.
+    // Without this step items can appear equipped in the client UI while the
+    // in-game hero uses defaults because the server never saw equippedState.
     for (let i = 0; i < lobby.members.length; i++) {
         const member = lobby.members[i];
         const inventory = ctx.services.items.getInventory(member.steamId);
-        const payload = buildEconSoCacheSubscribedForInventory(ctx, inventory);
+        const payload = buildEconSoCacheSubscribedForInventory(ctx, inventory, { onlyEquipped: true });
         sendTo(ctx, lobby.serverSteamId, Msg.SOCacheSubscribed, payload);
     }
 }

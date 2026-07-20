@@ -147,6 +147,7 @@ export interface DotaTeam {
 export interface DotaRuntimeInventory {
     readonly steamId: bigint;
     readonly version: bigint;
+    readonly catalogItems?: DotaCatalogItem[];
     readonly ownedItems: DotaCatalogItem[];
     readonly equipment: DotaEquipment[];
 }
@@ -540,6 +541,9 @@ export interface DotaGlobalStats {
 export interface DotaConduct {
     readonly commendCount: number;
     readonly rawBehaviorScore: number;
+    readonly reportsCount?: number;
+    readonly matchesAbandoned?: number;
+    readonly commsReports?: number;
 }
 
 export interface DotaConductScorecard {

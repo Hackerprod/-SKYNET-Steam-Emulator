@@ -72,10 +72,15 @@ public static class GcScriptSelfCheck
               ]
               """
             : "[]";
+        var inventoryFixture = new SelfCheckInventoryFixture();
+        DotaGcRuntimeServices.InventoryProvider = inventoryFixture.GetInventory;
+        DotaGcRuntimeServices.EquipItemSink = inventoryFixture.EquipItem;
+        DotaGcRuntimeServices.SetItemStyleSink = inventoryFixture.SetItemStyle;
         SeedSocialMatchData(DotaGcRuntimeServices.StatsStore, context);
 
         var ok = true;
         ok &= ExpectSequence(plugin, context, 4006, new uint[] { 4009, 4004, 4009 }, write);
+        ok &= ExpectWelcomeInventoryFlow(plugin, context, write);
         ok &= ExpectResponse(plugin, context, 2536, 2537, 1, write);
         ok &= ExpectResponse(plugin, context, 2581, 2582, 1, write);
         ok &= ExpectResponse(plugin, context, 2569, 2570, 1, write);
@@ -158,6 +163,7 @@ public static class GcScriptSelfCheck
         ok &= ExpectResponse(plugin, context, 8886, 8887, 1, write);
         ok &= ExpectResponse(plugin, context, 8944, 8945, 1, write);
         ok &= ExpectResponse(plugin, context, 9023, 9024, 1, write);
+        ok &= ExpectEquipVisibleCatalogItemFlow(plugin, context, serverContext.SteamId, queuedMessages, write);
         ok &= ExpectUnhandled(plugin, context, 999999, write);
 
         foreach (var entry in trace.GetSince(0))
@@ -239,6 +245,43 @@ public static class GcScriptSelfCheck
             .Select(message => $"{message.MessageType}:{(message.TargetJobId.HasValue ? message.TargetJobId.Value.ToString() : "-")}");
         write(
             $"{requestType} -> handled={response.Handled}, messages=[{string.Join(",", actual)}], expected={expectedResponseType}:{sourceJobId}, ok={ok}");
+        return ok;
+    }
+
+    private static bool ExpectWelcomeInventoryFlow(
+        GameCoordinatorScriptPlugin plugin,
+        GameCoordinatorContext context,
+        Action<string> write)
+    {
+        var response = plugin.Exchange(context, Request(4006));
+        var welcomeMessage = response.Messages.FirstOrDefault(message => message.MessageType == 4004);
+        var welcome = welcomeMessage == null ? null : Deserialize<CMsgClientWelcome>(welcomeMessage.PayloadBase64);
+        var econCache = welcome?.OutofdateSubscribedCaches.FirstOrDefault(cache => cache.ServiceId == 1);
+        var econType = econCache?.Objects.FirstOrDefault(item => item.TypeId == 1);
+        var items = econType?.ObjectDatas.Select(DeserializeBytes<CSOEconItem>).ToArray() ?? Array.Empty<CSOEconItem>();
+        var equippedItem = items.FirstOrDefault(item => item.DefIndex == 1001);
+        var unequippedItem = items.FirstOrDefault(item => item.DefIndex == 1002);
+        var expectedEconAccountId = AccountIdFromSteamId(context.SteamId);
+        var ok = response.Handled
+            && welcome != null
+            && econCache != null
+            && econCache.OwnerSoid?.Id == context.SteamId
+            && items.Length == 2
+            && equippedItem != null
+            && equippedItem.AccountId == expectedEconAccountId
+            && equippedItem.EquippedStates.Count == 1
+            && equippedItem.EquippedStates[0].NewClass == 1
+            && equippedItem.EquippedStates[0].NewSlot == 3
+            && equippedItem.Flags == 0
+            && unequippedItem != null
+            && unequippedItem.EquippedStates.Count == 0;
+        write(
+            $"welcome inventory flow -> handled={response.Handled}, items={items.Length}, " +
+            $"equippedDef={equippedItem?.DefIndex}, equippedStates={equippedItem?.EquippedStates.Count}, " +
+            $"accountId={equippedItem?.AccountId}, class={equippedItem?.EquippedStates.FirstOrDefault()?.NewClass}, " +
+            $"slot={equippedItem?.EquippedStates.FirstOrDefault()?.NewSlot}, flags={equippedItem?.Flags}, " +
+            $"expectedAccountId={expectedEconAccountId}, owner={econCache?.OwnerSoid?.Id}, " +
+            $"expectedOwner={context.SteamId}, unequippedDef={unequippedItem?.DefIndex}, ok={ok}");
         return ok;
     }
 
@@ -482,10 +525,16 @@ public static class GcScriptSelfCheck
         var realtimeStats = realtimeStatsMessage == null
             ? null
             : Deserialize<CMsgGCToServerRealtimeStatsStartStop>(realtimeStatsMessage.PayloadBase64);
+        var serverItems = ServerEconItems(infoResponse.Messages, queuedMessages, serverContext.SteamId);
         var radiant = lobby?.TeamDetails.Count > 0 ? lobby.TeamDetails[0] : null;
         var ok = infoResponse.Handled
             && availableResponse.Handled
             && realtimeStats?.Delayed == true
+            && serverItems.Length == 1
+            && serverItems[0].DefIndex == 1001
+            && serverItems[0].EquippedStates.Count == 1
+            && serverItems[0].EquippedStates[0].NewClass == 1
+            && serverItems[0].EquippedStates[0].NewSlot == 3
             && lobby != null
             && lobby.state == CSODOTALobby.State.Run
             && lobby.ServerId == serverContext.SteamId
@@ -496,7 +545,67 @@ public static class GcScriptSelfCheck
         write(
             $"dedicated attach flow -> infoHandled={infoResponse.Handled}, availableHandled={availableResponse.Handled}, " +
             $"queued={queuedMessages.Count}, state={lobby?.state}, connect={lobby?.Connect}, " +
-            $"realtimeDelayed={realtimeStats?.Delayed}, ok={ok}");
+            $"serverItems={serverItems.Length}, realtimeDelayed={realtimeStats?.Delayed}, ok={ok}");
+        return ok;
+    }
+
+    private static bool ExpectEquipVisibleCatalogItemFlow(
+        GameCoordinatorScriptPlugin plugin,
+        GameCoordinatorContext context,
+        ulong serverSteamId,
+        List<(ulong SteamId, ApiGCMessage Message)> queuedMessages,
+        Action<string> write)
+    {
+        const ulong sourceJobId = 63;
+        queuedMessages.Clear();
+
+        var equip = new CMsgClientToGCEquipItems();
+        equip.Equips.Add(new CMsgAdjustItemEquippedState
+        {
+            ItemId = BuildDotaItemInstanceId(context.SteamId, 1002),
+            NewClass = 1,
+            NewSlot = 4,
+            StyleIndex = 0
+        });
+
+        var response = plugin.Exchange(context, Request(2569, Serialize(equip), sourceJobId: sourceJobId));
+        var updateMessage = response.Messages.FirstOrDefault(message => message.MessageType == 26);
+        var replyMessage = response.Messages.FirstOrDefault(message => message.MessageType == 2570);
+        var update = updateMessage == null
+            ? null
+            : Deserialize<CMsgSOMultipleObjects>(updateMessage.PayloadBase64);
+        var updatedItem = update?.ObjectsModifieds
+            .Where(item => item.TypeId == 1)
+            .Select(item => DeserializeBytes<CSOEconItem>(item.ObjectData))
+            .FirstOrDefault(item => item.DefIndex == 1002);
+        var reply = replyMessage == null
+            ? null
+            : Deserialize<CMsgClientToGCEquipItemsResponse>(replyMessage.PayloadBase64);
+        var serverItem = ServerSingleEconItems(queuedMessages, serverSteamId)
+            .FirstOrDefault(item => item.DefIndex == 1002);
+        var expectedAccountId = AccountIdFromSteamId(context.SteamId);
+        var ok = response.Handled
+            && updateMessage?.TargetJobId == null
+            && replyMessage?.TargetJobId == sourceJobId
+            && update?.OwnerSoid?.Id == context.SteamId
+            && update.ServiceId == 1
+            && updatedItem != null
+            && updatedItem.AccountId == expectedAccountId
+            && updatedItem.EquippedStates.Count == 1
+            && updatedItem.EquippedStates[0].NewClass == 1
+            && updatedItem.EquippedStates[0].NewSlot == 4
+            && serverItem != null
+            && serverItem.EquippedStates.Count == 1
+            && serverItem.EquippedStates[0].NewClass == 1
+            && serverItem.EquippedStates[0].NewSlot == 4
+            && reply?.SoCacheVersionId > 4242;
+
+        write(
+            $"equip visible catalog item flow -> handled={response.Handled}, " +
+            $"clientDef={updatedItem?.DefIndex}, clientClass={updatedItem?.EquippedStates.FirstOrDefault()?.NewClass}, " +
+            $"clientSlot={updatedItem?.EquippedStates.FirstOrDefault()?.NewSlot}, accountId={updatedItem?.AccountId}, " +
+            $"serverDef={serverItem?.DefIndex}, serverClass={serverItem?.EquippedStates.FirstOrDefault()?.NewClass}, " +
+            $"serverSlot={serverItem?.EquippedStates.FirstOrDefault()?.NewSlot}, version={reply?.SoCacheVersionId}, ok={ok}");
         return ok;
     }
 
@@ -757,9 +866,281 @@ public static class GcScriptSelfCheck
         return null;
     }
 
+    private static CSOEconItem[] ServerEconItems(
+        IEnumerable<ApiGCMessage> directMessages,
+        IEnumerable<(ulong SteamId, ApiGCMessage Message)> queuedMessages,
+        ulong serverSteamId)
+    {
+        var messages = directMessages
+            .Concat(queuedMessages.Where(item => item.SteamId == serverSteamId).Select(item => item.Message))
+            .Where(message => message.MessageType == 24);
+        var result = new List<CSOEconItem>();
+        foreach (var message in messages)
+        {
+            var cache = Deserialize<CMsgSOCacheSubscribed>(message.PayloadBase64);
+            if (cache.ServiceId != 1)
+            {
+                continue;
+            }
+
+            var itemType = cache.Objects.FirstOrDefault(item => item.TypeId == 1);
+            if (itemType == null)
+            {
+                continue;
+            }
+
+            foreach (var payload in itemType.ObjectDatas)
+            {
+                result.Add(DeserializeBytes<CSOEconItem>(payload));
+            }
+        }
+
+        return result.ToArray();
+    }
+
+    private static CSOEconItem[] ServerSingleEconItems(
+        IEnumerable<(ulong SteamId, ApiGCMessage Message)> queuedMessages,
+        ulong serverSteamId)
+    {
+        var result = new List<CSOEconItem>();
+        foreach (var message in queuedMessages.Where(item => item.SteamId == serverSteamId).Select(item => item.Message))
+        {
+            if (message.MessageType != 21)
+            {
+                continue;
+            }
+
+            var single = Deserialize<CMsgSOSingleObject>(message.PayloadBase64);
+            if (single.ServiceId != 1 || single.TypeId != 1 || single.ObjectData.Length == 0)
+            {
+                continue;
+            }
+
+            result.Add(DeserializeBytes<CSOEconItem>(single.ObjectData));
+        }
+
+        return result.ToArray();
+    }
+
+    private sealed class SelfCheckInventoryFixture
+    {
+        private const uint UnequipSlot = 65535;
+        private ulong _version = 4242;
+        private readonly ApiDotaItem _itemA = new()
+        {
+            DefIndex = 1001,
+            Name = "Self-check equipped item",
+            Slot = "weapon",
+            QualityId = 6,
+            HeroIds = new List<uint> { 1 },
+            HeroNames = new List<string> { "npc_dota_hero_antimage" }
+        };
+        private readonly ApiDotaItem _itemB = new()
+        {
+            DefIndex = 1002,
+            Name = "Self-check visible inventory item",
+            Slot = "head",
+            QualityId = 6,
+            HeroIds = new List<uint> { 1 },
+            HeroNames = new List<string> { "npc_dota_hero_antimage" }
+        };
+        private readonly Dictionary<ulong, List<ApiDotaEquipment>> _equipment = new();
+
+        public ApiDotaRuntimeInventory GetInventory(ulong steamId)
+        {
+            return new ApiDotaRuntimeInventory
+            {
+                SteamId = steamId,
+                Version = _version,
+                Items = new List<ApiDotaItem> { CloneItem(_itemA), CloneItem(_itemB) },
+                OwnedItems = new List<ApiDotaItem> { CloneItem(_itemA) },
+                Equipment = GetEquipment(steamId).Select(CloneEquipment).ToList()
+            };
+        }
+
+        public List<ApiDotaEquipment> EquipItem(ulong steamId, ulong itemId, uint heroId, uint slotId, uint style)
+        {
+            var defIndex = ResolveDefIndex(steamId, itemId);
+            if (defIndex == 0 && itemId != 0)
+            {
+                return new List<ApiDotaEquipment>();
+            }
+
+            var equipment = GetEquipment(steamId);
+            var isUnequip = slotId == UnequipSlot;
+            var removed = equipment
+                .Where(existing =>
+                    (isUnequip && defIndex != 0 && existing.HeroId == heroId && existing.DefIndex == defIndex) ||
+                    (!isUnequip && existing.HeroId == heroId && existing.SlotId == slotId) ||
+                    (!isUnequip && defIndex != 0 && existing.HeroId == heroId && existing.DefIndex == defIndex))
+                .Select(CloneEquipment)
+                .ToList();
+            equipment.RemoveAll(existing =>
+                (isUnequip && defIndex != 0 && existing.HeroId == heroId && existing.DefIndex == defIndex) ||
+                (!isUnequip && existing.HeroId == heroId && existing.SlotId == slotId) ||
+                (!isUnequip && defIndex != 0 && existing.HeroId == heroId && existing.DefIndex == defIndex));
+
+            if (defIndex == 0 || isUnequip)
+            {
+                if (removed.Count > 0)
+                {
+                    _version++;
+                }
+
+                return removed;
+            }
+
+            var catalogItem = ItemForDefIndex(defIndex);
+            var equipped = new ApiDotaEquipment
+            {
+                SteamId = steamId,
+                HeroId = heroId,
+                HeroName = catalogItem?.HeroNames.FirstOrDefault() ?? $"hero_{heroId}",
+                Slot = catalogItem?.Slot ?? $"slot_{slotId}",
+                SlotId = slotId,
+                DefIndex = defIndex,
+                ItemId = BuildDotaItemInstanceId(steamId, defIndex),
+                Style = style == 255 ? 0 : style,
+                UpdatedAt = DateTime.UtcNow
+            };
+            equipment.Add(equipped);
+            removed.Add(CloneEquipment(equipped));
+            _version++;
+            return removed;
+        }
+
+        public List<ApiDotaEquipment> SetItemStyle(ulong steamId, ulong itemId, uint style)
+        {
+            var defIndex = ResolveDefIndex(steamId, itemId);
+            var changed = new List<ApiDotaEquipment>();
+            foreach (var equipped in GetEquipment(steamId).Where(item => item.DefIndex == defIndex))
+            {
+                equipped.Style = style == 255 ? 0 : style;
+                equipped.UpdatedAt = DateTime.UtcNow;
+                changed.Add(CloneEquipment(equipped));
+            }
+
+            if (changed.Count > 0)
+            {
+                _version++;
+            }
+
+            return changed;
+        }
+
+        private List<ApiDotaEquipment> GetEquipment(ulong steamId)
+        {
+            if (_equipment.TryGetValue(steamId, out var equipment))
+            {
+                return equipment;
+            }
+
+            equipment = new List<ApiDotaEquipment>
+            {
+                new()
+                {
+                    SteamId = steamId,
+                    HeroId = 1,
+                    HeroName = "npc_dota_hero_antimage",
+                    Slot = "weapon",
+                    SlotId = 3,
+                    DefIndex = _itemA.DefIndex,
+                    ItemId = BuildDotaItemInstanceId(steamId, _itemA.DefIndex),
+                    Style = 0,
+                    UpdatedAt = DateTime.UtcNow
+                }
+            };
+            _equipment[steamId] = equipment;
+            return equipment;
+        }
+
+        private uint ResolveDefIndex(ulong steamId, ulong itemId)
+        {
+            if (itemId == 0)
+            {
+                return 0;
+            }
+
+            foreach (var item in new[] { _itemA, _itemB })
+            {
+                if (BuildDotaItemInstanceId(steamId, item.DefIndex) == itemId)
+                {
+                    return item.DefIndex;
+                }
+            }
+
+            return 0;
+        }
+
+        private ApiDotaItem? ItemForDefIndex(uint defIndex)
+        {
+            if (_itemA.DefIndex == defIndex)
+            {
+                return _itemA;
+            }
+
+            if (_itemB.DefIndex == defIndex)
+            {
+                return _itemB;
+            }
+
+            return null;
+        }
+    }
+
+    private static ApiDotaItem CloneItem(ApiDotaItem item)
+    {
+        return new ApiDotaItem
+        {
+            DefIndex = item.DefIndex,
+            Name = item.Name,
+            Prefab = item.Prefab,
+            Slot = item.Slot,
+            Quality = item.Quality,
+            QualityId = item.QualityId,
+            Rarity = item.Rarity,
+            RarityId = item.RarityId,
+            ImageInventory = item.ImageInventory,
+            IsDefault = item.IsDefault,
+            IsTool = item.IsTool,
+            IsBundle = item.IsBundle,
+            HeroIds = item.HeroIds.ToList(),
+            HeroNames = item.HeroNames.ToList()
+        };
+    }
+
+    private static ApiDotaEquipment CloneEquipment(ApiDotaEquipment equipment)
+    {
+        return new ApiDotaEquipment
+        {
+            SteamId = equipment.SteamId,
+            HeroId = equipment.HeroId,
+            HeroName = equipment.HeroName,
+            Slot = equipment.Slot,
+            SlotId = equipment.SlotId,
+            DefIndex = equipment.DefIndex,
+            ItemId = equipment.ItemId,
+            Style = equipment.Style,
+            UpdatedAt = equipment.UpdatedAt
+        };
+    }
+
     private static uint IpToUInt32(byte a, byte b, byte c, byte d)
     {
         return (uint)(a | (b << 8) | (c << 16) | (d << 24));
+    }
+
+    private static ulong BuildDotaItemInstanceId(ulong steamId, uint defIndex)
+    {
+        var accountBits = steamId & 0xFFFFFFFFUL;
+        return 0x7000000000000000UL | (accountBits << 20) | defIndex;
+    }
+
+    private static uint AccountIdFromSteamId(ulong steamId)
+    {
+        return steamId >= 76561197960265728UL
+            ? unchecked((uint)(steamId - 76561197960265728UL))
+            : unchecked((uint)steamId);
     }
 
     private static byte[] Serialize<TMessage>(TMessage message)

@@ -20,8 +20,13 @@ const DEFAULT_INVENTORY_POSITION = 1;
 const DEFAULT_QUANTITY = 1;
 const DEFAULT_LEVEL = 1;
 const DEFAULT_QUALITY = 6;
+const DEFAULT_FLAGS = 0;
 const DEFAULT_ORIGIN = 2;
 const STYLE_NONE = 0;
+
+interface EconSoCacheOptions {
+    readonly onlyEquipped?: boolean;
+}
 
 export function buildEconSoCacheSubscribed(ctx: GcContextBase): CMsgSOCacheSubscribed {
     return buildEconSoCacheSubscribedForInventory(ctx, ctx.services.items.getInventory());
@@ -29,21 +34,31 @@ export function buildEconSoCacheSubscribed(ctx: GcContextBase): CMsgSOCacheSubsc
 
 export function buildEconSoCacheSubscribedForInventory(
     ctx: GcContextBase,
-    inventory: DotaRuntimeInventory
+    inventory: DotaRuntimeInventory,
+    options: EconSoCacheOptions = {}
 ): CMsgSOCacheSubscribed {
+    // This is the authoritative econ snapshot Dota consumes for cosmetics.
+    // The emulator grants the imported Dota catalog as the player's owned econ
+    // inventory. Dota's armory reads these CSOEconItem objects to decide which
+    // cosmetics are equipable, and reads equippedState to render the selected
+    // loadout in hero preview and in-game.
     const itemObjects: Uint8Array[] = [];
-    for (let i = 0; i < inventory.ownedItems.length; i++) {
-        const item = inventory.ownedItems[i];
+    const items = econItemsForCache(inventory, options.onlyEquipped === true);
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i];
         itemObjects.push(
             ctx.encode(
                 Proto.CSOEconItem,
-                buildEconItem(inventory, item, equipmentForDefIndex(inventory, item.defIndex))
+                buildEconItem(inventory, item, equipmentForDefIndex(inventory, item.defIndex), i + 1)
             )
         );
     }
 
     return {
         objects: [
+            // Keep both account objects under the same SO type. The old Lua GC
+            // sent this pair before item type 1; current Dota accepts the econ
+            // item list only after the account owner cache is established.
             {
                 typeId: GAME_ACCOUNT_TYPE_ID,
                 objectData: [ctx.encode(Proto.CSOEconGameAccountClient, buildEconGameAccount())]
@@ -60,6 +75,11 @@ export function buildEconSoCacheSubscribedForInventory(
             {
                 typeId: ITEM_SCHEMA_TYPE_ID
             },
+            // Type 1 is the econ item object list. This is the list that must
+            // also be sent to a lobby game server, targeted at the server
+            // SteamID, before RUN so the server can spawn hero cosmetics. The
+            // server path passes onlyEquipped=true to keep this list limited to
+            // loadout objects, matching the validated legacy coordinator flow.
             {
                 typeId: ECON_ITEM_TYPE_ID,
                 objectData: itemObjects
@@ -79,13 +99,17 @@ export function buildEconSoCacheSubscribedForInventory(
 export function buildEconItem(
     inventory: DotaRuntimeInventory,
     item: DotaCatalogItem,
-    equipment: DotaEquipment[]
+    equipment: DotaEquipment[],
+    position?: number
 ): CSOEconItem {
     const equippedState: CSOEconItemEquipped[] = [];
     let selectedStyle = STYLE_NONE;
     for (let i = 0; i < equipment.length; i++) {
         const equipped = equipment[i];
         selectedStyle = equipped.style;
+        // newClass/newSlot is the loadout binding. If this array is missing or
+        // points at the wrong hero/slot, Dota still sees the item in inventory
+        // but does not render it on the hero in-game.
         equippedState.push({
             newClass: equipped.heroId,
             newSlot: equipped.slotId
@@ -93,17 +117,43 @@ export function buildEconItem(
     }
 
     return {
+        // Item IDs must be stable across the client and dedicated server. The
+        // equipment request sends item_id, the GC resolves it back to defIndex,
+        // then this deterministic ID lets SO updates replace the same object.
         id: buildDotaItemInstanceId(inventory.steamId, item.defIndex),
         accountId: steamIdToAccountId(inventory.steamId),
-        inventory: inventoryPosition(inventory, item.defIndex),
+        inventory: position ?? inventoryPosition(inventory, item.defIndex),
         defIndex: item.defIndex,
         quantity: DEFAULT_QUANTITY,
         level: DEFAULT_LEVEL,
         quality: item.qualityId === 0 ? DEFAULT_QUALITY : item.qualityId,
+        flags: DEFAULT_FLAGS,
         origin: DEFAULT_ORIGIN,
+        // style is duplicated at item level because Dota reads it separately
+        // from equippedState when applying cosmetic variants.
         style: selectedStyle,
         equippedState
     };
+}
+
+function econItemsForCache(inventory: DotaRuntimeInventory, onlyEquipped: boolean): DotaCatalogItem[] {
+    const allItems =
+        inventory.catalogItems !== undefined && inventory.catalogItems.length > 0
+            ? inventory.catalogItems
+            : inventory.ownedItems;
+    if (!onlyEquipped) {
+        return allItems;
+    }
+
+    const result: DotaCatalogItem[] = [];
+    for (let i = 0; i < allItems.length; i++) {
+        const item = allItems[i];
+        if (equipmentForDefIndex(inventory, item.defIndex).length > 0) {
+            result.push(item);
+        }
+    }
+
+    return result;
 }
 
 export function equipmentForDefIndex(inventory: DotaRuntimeInventory, defIndex: number): DotaEquipment[] {
@@ -143,9 +193,13 @@ function buildDotaGameAccount(accountId: number): CSODOTAGameAccountClient {
 }
 
 function inventoryPosition(inventory: DotaRuntimeInventory, defIndex: number): number {
+    const items =
+        inventory.catalogItems !== undefined && inventory.catalogItems.length > 0
+            ? inventory.catalogItems
+            : inventory.ownedItems;
     let position = DEFAULT_INVENTORY_POSITION;
-    for (let i = 0; i < inventory.ownedItems.length; i++) {
-        if (inventory.ownedItems[i].defIndex === defIndex) {
+    for (let i = 0; i < items.length; i++) {
+        if (items[i].defIndex === defIndex) {
             return position;
         }
 

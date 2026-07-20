@@ -54,7 +54,13 @@ export class Items {
 
         const inventory = ctx.services.items.getInventory();
         if (changed.length > 0) {
+            // Equipping is not complete after persistence. The local client must
+            // receive an econ SO delta so its armory/loadout cache reflects the
+            // new CSOEconItem.equippedState immediately.
             this.sendClientItemChanges(ctx, inventory, changed);
+            // If the player is already tied to a lobby game server, the same
+            // item objects must be queued to that server SteamID. The dedicated
+            // server uses this cache to render cosmetics once heroes spawn.
             this.queueServerItemChanges(ctx, inventory, changed);
         }
 
@@ -69,6 +75,9 @@ export class Items {
         const inventory = ctx.services.items.getInventory();
 
         if (changed.length > 0) {
+            // Style changes affect the same CSOEconItem object as equip changes.
+            // Send one update to the owner client and one to the current game
+            // server so both caches agree on the selected variant.
             this.sendClientItemChanges(ctx, inventory, changed);
             this.queueServerItemChanges(ctx, inventory, changed);
         }
@@ -99,6 +108,9 @@ export class Items {
             return;
         }
 
+        // Client-facing delta: CMsgSOMultipleObjects with type 1 objects. This
+        // mirrors the initial econ SOCacheSubscribed shape without resending the
+        // entire inventory.
         ctx.send(Msg.SOCacheUpdated, Proto.CMsgSOMultipleObjects, {
             objectsModified,
             version: inventory.version,
@@ -123,14 +135,20 @@ export class Items {
                 const equipment = equipmentForDefIndex(inventory, defIndex);
                 const itemId = buildDotaItemInstanceId(inventory.steamId, item.defIndex);
                 if (equipment.length === 0) {
-                    queueCurrentLobbyServer(
+                    // Unequip path for the server cache. Destroying the previous
+                    // object prevents a stale hero/slot binding from surviving
+                    // when the replacement item arrives or the slot becomes empty.
+                    queueCurrentLobbyServerMessage(
                         ctx,
                         Msg.SOSingleObjectDestroyed,
                         ctx.encode(Proto.CMsgSOSingleObject, this.buildSingleObject(ctx, inventory, { id: itemId }))
                     );
                 }
 
-                queueCurrentLobbyServer(
+                // Server-facing delta: a single type 1 CSOEconItem targeted at
+                // the active lobby server SteamID. This is what makes equipped
+                // cosmetics visible in-game, not just in the client's loadout UI.
+                queueCurrentLobbyServerMessage(
                     ctx,
                     Msg.SOSingleObject,
                     ctx.encode(
@@ -182,14 +200,6 @@ export class Items {
             serviceId: ECON_SERVICE_ID
         };
     }
-}
-
-function queueCurrentLobbyServer<TRequest, TResponse>(
-    ctx: HandlerContext<TRequest, TResponse>,
-    messageType: number,
-    payload: Uint8Array
-): boolean {
-    return queueCurrentLobbyServerMessage(ctx, messageType, payload);
 }
 
 function appendEquipment(left: DotaEquipment[], right: DotaEquipment[]): DotaEquipment[] {
