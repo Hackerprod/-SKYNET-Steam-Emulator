@@ -56,7 +56,8 @@ namespace SKYNET.Managers
             // Also warms up the HTTP stack so the first request isn't slow.
             if (IsEnabled)
             {
-                DiscoverServerIfNeeded();
+                // Keep DLL load/startup non-blocking. Discovery and reachability
+                // checks run inside the queued handshake, not on Dota's early init path.
                 QueueSessionHandshake();
             }
         }
