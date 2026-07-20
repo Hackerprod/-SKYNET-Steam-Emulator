@@ -23,7 +23,6 @@ declare global {
     function dotaCatalogItem(defIndex: number): unknown;
     function dotaEquipItem(itemId: bigint, heroId: number, slotId: number, style: number): unknown;
     function dotaSetItemStyle(itemId: bigint, style: number): unknown;
-    function dotaQueueCurrentLobbyServer(messageType: number, payload: Uint8Array): boolean;
     function dotaPublishMatchSnapshot(snapshot: unknown): boolean;
     function dotaRemoveMatchSnapshot(lobbyId: bigint): boolean;
     function dotaStartDedicatedServer(lobbyId: bigint, map: string): unknown;

@@ -318,11 +318,5 @@ Captures are evidence, not implementation. When a message flow is unclear:
 4. Update protobuf contracts if needed.
 5. Implement a typed handler in TypeScript.
 
-The old importer can still normalize NetHook dumps:
-
-```powershell
-.\SKYNET server\GC\tools\Import-NetHook.ps1 -InputPath "D:\Path\To\NetHookDump" -AppId 570
-```
-
-Treat importer outputs as research material only; do not copy binary fixture
-behavior into the TypeScript runtime.
+Keep raw captures outside the repository. They are research material only; do
+not copy binary fixture behavior into the TypeScript runtime.

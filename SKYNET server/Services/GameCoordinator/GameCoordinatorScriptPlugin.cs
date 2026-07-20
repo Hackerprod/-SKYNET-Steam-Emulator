@@ -1,5 +1,4 @@
 using SKYNET_server.Models;
-using SKYNET_server.GC.Dota2;
 using TypeSharp.Hosting;
 using TypeSharp.VM.Memory;
 
@@ -181,7 +180,6 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .RegisterHostFunction("gc", "dotaCatalogItem", dispatcher.DotaCatalogItem)
                 .RegisterHostFunction("gc", "dotaEquipItem", dispatcher.DotaEquipItem)
                 .RegisterHostFunction("gc", "dotaSetItemStyle", dispatcher.DotaSetItemStyle)
-                .RegisterHostFunction("gc", "dotaQueueCurrentLobbyServer", dispatcher.DotaQueueCurrentLobbyServer)
                 .RegisterHostFunction("gc", "dotaProfile", dispatcher.DotaProfile)
                 .RegisterHostFunction("gc", "dotaSaveProfileSlots", dispatcher.DotaSaveProfileSlots)
                 .RegisterHostFunction("gc", "dotaSaveProfileUpdate", dispatcher.DotaSaveProfileUpdate)
@@ -414,11 +412,6 @@ internal sealed class ScriptHostDispatcher
     public TsValue? DotaSetItemStyle(TsValue[] args)
     {
         return RequireCurrent().DotaSetItemStyle(args);
-    }
-
-    public TsValue? DotaQueueCurrentLobbyServer(TsValue[] args)
-    {
-        return RequireCurrent().DotaQueueCurrentLobbyServer(args);
     }
 
     public TsValue? DotaProfile(TsValue[] args)
@@ -897,7 +890,7 @@ internal sealed class ScriptExchangeHost
 
     public TsValue DotaPartyCurrent()
     {
-        return ToTsPartyState(DotaGcBackend.PartyStore?.GetPartyByMember(_context.SteamId));
+        return ToTsPartyState(DotaGcRuntimeServices.PartyStore?.GetPartyByMember(_context.SteamId));
     }
 
     public TsValue DotaPartyById(TsValue[] args)
@@ -908,7 +901,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var partyId = Convert.ToUInt64(ToInteger(args[0], "dotaPartyById.partyId").ToString());
-        return ToTsPartyState(DotaGcBackend.PartyStore?.GetParty(partyId));
+        return ToTsPartyState(DotaGcRuntimeServices.PartyStore?.GetParty(partyId));
     }
 
     public TsValue DotaPartyEnsureCurrent(TsValue[] args)
@@ -918,7 +911,7 @@ internal sealed class ScriptExchangeHost
             throw new InvalidOperationException("dotaPartyEnsureCurrent(ping) requires one argument");
         }
 
-        var store = DotaGcBackend.PartyStore ?? throw new InvalidOperationException("Dota party store is not initialized.");
+        var store = DotaGcRuntimeServices.PartyStore ?? throw new InvalidOperationException("Dota party store is not initialized.");
         return ToTsPartyState(store.EnsureParty(_context.SteamId, _context.AccountId, _context.PersonaName, ToPartyPingData(args[0], "dotaPartyEnsureCurrent.ping")));
     }
 
@@ -932,7 +925,7 @@ internal sealed class ScriptExchangeHost
         var partyId = Convert.ToUInt64(ToInteger(args[0], "dotaPartyAddMember.partyId").ToString());
         var ping = ToPartyPingData(args[1], "dotaPartyAddMember.ping");
         var isCoach = ToBool(args[2], "dotaPartyAddMember.isCoach");
-        return ToTsPartyState(DotaGcBackend.PartyStore?.AddMember(partyId, _context.SteamId, _context.AccountId, _context.PersonaName, ping, isCoach));
+        return ToTsPartyState(DotaGcRuntimeServices.PartyStore?.AddMember(partyId, _context.SteamId, _context.AccountId, _context.PersonaName, ping, isCoach));
     }
 
     public TsValue DotaPartyRemoveMember(TsValue[] args)
@@ -944,7 +937,7 @@ internal sealed class ScriptExchangeHost
 
         var partyId = Convert.ToUInt64(ToInteger(args[0], "dotaPartyRemoveMember.partyId").ToString());
         var steamId = Convert.ToUInt64(ToInteger(args[1], "dotaPartyRemoveMember.steamId").ToString());
-        return ToTsPartyState(DotaGcBackend.PartyStore?.RemoveMember(partyId, steamId));
+        return ToTsPartyState(DotaGcRuntimeServices.PartyStore?.RemoveMember(partyId, steamId));
     }
 
     public TsValue DotaPartyDelete(TsValue[] args)
@@ -955,8 +948,8 @@ internal sealed class ScriptExchangeHost
         }
 
         var partyId = Convert.ToUInt64(ToInteger(args[0], "dotaPartyDelete.partyId").ToString());
-        DotaGcBackend.PartyStore?.DeleteParty(partyId);
-        return TsValue.FromBool(DotaGcBackend.PartyStore != null);
+        DotaGcRuntimeServices.PartyStore?.DeleteParty(partyId);
+        return TsValue.FromBool(DotaGcRuntimeServices.PartyStore != null);
     }
 
     public TsValue DotaPartySetLeader(TsValue[] args)
@@ -968,7 +961,7 @@ internal sealed class ScriptExchangeHost
 
         var partyId = Convert.ToUInt64(ToInteger(args[0], "dotaPartySetLeader.partyId").ToString());
         var leaderSteamId = Convert.ToUInt64(ToInteger(args[1], "dotaPartySetLeader.leaderSteamId").ToString());
-        return ToTsPartyState(DotaGcBackend.PartyStore?.SetLeader(partyId, leaderSteamId));
+        return ToTsPartyState(DotaGcRuntimeServices.PartyStore?.SetLeader(partyId, leaderSteamId));
     }
 
     public TsValue DotaPartySetCoach(TsValue[] args)
@@ -981,7 +974,7 @@ internal sealed class ScriptExchangeHost
         var partyId = Convert.ToUInt64(ToInteger(args[0], "dotaPartySetCoach.partyId").ToString());
         var steamId = Convert.ToUInt64(ToInteger(args[1], "dotaPartySetCoach.steamId").ToString());
         var isCoach = ToBool(args[2], "dotaPartySetCoach.isCoach");
-        return ToTsPartyState(DotaGcBackend.PartyStore?.SetMemberCoach(partyId, steamId, isCoach));
+        return ToTsPartyState(DotaGcRuntimeServices.PartyStore?.SetMemberCoach(partyId, steamId, isCoach));
     }
 
     public TsValue DotaPartySetPing(TsValue[] args)
@@ -994,7 +987,7 @@ internal sealed class ScriptExchangeHost
         var partyId = Convert.ToUInt64(ToInteger(args[0], "dotaPartySetPing.partyId").ToString());
         var steamId = Convert.ToUInt64(ToInteger(args[1], "dotaPartySetPing.steamId").ToString());
         var ping = ToPartyPingData(args[2], "dotaPartySetPing.ping");
-        return ToTsPartyState(DotaGcBackend.PartyStore?.SetMemberPing(partyId, steamId, ping));
+        return ToTsPartyState(DotaGcRuntimeServices.PartyStore?.SetMemberPing(partyId, steamId, ping));
     }
 
     public TsValue DotaPartyStartReadyCheck(TsValue[] args)
@@ -1006,7 +999,7 @@ internal sealed class ScriptExchangeHost
 
         var partyId = Convert.ToUInt64(ToInteger(args[0], "dotaPartyStartReadyCheck.partyId").ToString());
         var durationSeconds = Convert.ToUInt32(ToNumber(args[1], "dotaPartyStartReadyCheck.durationSeconds"));
-        return ToTsPartyState(DotaGcBackend.PartyStore?.StartReadyCheck(partyId, _context.AccountId, durationSeconds));
+        return ToTsPartyState(DotaGcRuntimeServices.PartyStore?.StartReadyCheck(partyId, _context.AccountId, durationSeconds));
     }
 
     public TsValue DotaPartyAcknowledgeReadyCheck(TsValue[] args)
@@ -1018,7 +1011,7 @@ internal sealed class ScriptExchangeHost
 
         var partyId = Convert.ToUInt64(ToInteger(args[0], "dotaPartyAcknowledgeReadyCheck.partyId").ToString());
         var readyStatus = Convert.ToUInt32(ToNumber(args[1], "dotaPartyAcknowledgeReadyCheck.readyStatus"));
-        return ToTsPartyState(DotaGcBackend.PartyStore?.AcknowledgeReadyCheck(partyId, _context.SteamId, readyStatus));
+        return ToTsPartyState(DotaGcRuntimeServices.PartyStore?.AcknowledgeReadyCheck(partyId, _context.SteamId, readyStatus));
     }
 
     public TsValue DotaPartyCreateInvite(TsValue[] args)
@@ -1028,7 +1021,7 @@ internal sealed class ScriptExchangeHost
             throw new InvalidOperationException("dotaPartyCreateInvite(partyId, targetSteamId, teamId, asCoach) requires four arguments");
         }
 
-        var store = DotaGcBackend.PartyStore;
+        var store = DotaGcRuntimeServices.PartyStore;
         if (store == null)
         {
             return TsValue.Null;
@@ -1054,7 +1047,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var partyId = Convert.ToUInt64(ToInteger(args[0], "dotaPartyTakeInvite.partyId").ToString());
-        return ToTsPartyInvite(DotaGcBackend.PartyStore?.TakeInvite(partyId, _context.SteamId, PartyInviteCutoff()));
+        return ToTsPartyInvite(DotaGcRuntimeServices.PartyStore?.TakeInvite(partyId, _context.SteamId, PartyInviteCutoff()));
     }
 
     public TsValue DotaPartyInvitesForTarget(TsValue[] args)
@@ -1065,7 +1058,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var targetSteamId = Convert.ToUInt64(ToInteger(args[0], "dotaPartyInvitesForTarget.targetSteamId").ToString());
-        return ToTsPartyInvites(DotaGcBackend.PartyStore?.GetInvitesForTarget(targetSteamId, PartyInviteCutoff()) ?? Array.Empty<DotaPartyInvite>());
+        return ToTsPartyInvites(DotaGcRuntimeServices.PartyStore?.GetInvitesForTarget(targetSteamId, PartyInviteCutoff()) ?? Array.Empty<DotaPartyInvite>());
     }
 
     public TsValue DotaPartyDeleteInvitesForTarget(TsValue[] args)
@@ -1076,7 +1069,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var targetSteamId = Convert.ToUInt64(ToInteger(args[0], "dotaPartyDeleteInvitesForTarget.targetSteamId").ToString());
-        return ToTsPartyInvites(DotaGcBackend.PartyStore?.DeleteInvitesForTarget(targetSteamId) ?? Array.Empty<DotaPartyInvite>());
+        return ToTsPartyInvites(DotaGcRuntimeServices.PartyStore?.DeleteInvitesForTarget(targetSteamId) ?? Array.Empty<DotaPartyInvite>());
     }
 
     public TsValue DotaPartyDeleteInvitesForParty(TsValue[] args)
@@ -1087,7 +1080,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var partyId = Convert.ToUInt64(ToInteger(args[0], "dotaPartyDeleteInvitesForParty.partyId").ToString());
-        return ToTsPartyInvites(DotaGcBackend.PartyStore?.DeleteInvitesForParty(partyId) ?? Array.Empty<DotaPartyInvite>());
+        return ToTsPartyInvites(DotaGcRuntimeServices.PartyStore?.DeleteInvitesForParty(partyId) ?? Array.Empty<DotaPartyInvite>());
     }
 
     public TsValue DotaPartyPruneInvitesCreatedBefore(TsValue[] args)
@@ -1098,7 +1091,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var cutoff = Convert.ToUInt32(ToNumber(args[0], "dotaPartyPruneInvitesCreatedBefore.cutoff"));
-        return ToTsPartyInvites(DotaGcBackend.PartyStore?.PruneInvitesCreatedBefore(cutoff) ?? Array.Empty<DotaPartyInvite>());
+        return ToTsPartyInvites(DotaGcRuntimeServices.PartyStore?.PruneInvitesCreatedBefore(cutoff) ?? Array.Empty<DotaPartyInvite>());
     }
 
     public TsValue DotaPartyUserExists(TsValue[] args)
@@ -1109,7 +1102,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var steamId = Convert.ToUInt64(ToInteger(args[0], "dotaPartyUserExists.steamId").ToString());
-        return TsValue.FromBool(DotaGcBackend.UserExistsProvider?.Invoke(steamId) ?? true);
+        return TsValue.FromBool(DotaGcRuntimeServices.UserExistsProvider?.Invoke(steamId) ?? true);
     }
 
     public TsValue DotaPartyUserOnline(TsValue[] args)
@@ -1120,7 +1113,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var steamId = Convert.ToUInt64(ToInteger(args[0], "dotaPartyUserOnline.steamId").ToString());
-        return TsValue.FromBool(DotaGcBackend.UserOnlineProvider?.Invoke(steamId) ?? true);
+        return TsValue.FromBool(DotaGcRuntimeServices.UserOnlineProvider?.Invoke(steamId) ?? true);
     }
 
     public TsValue DotaQueueGcMessage(TsValue[] args)
@@ -1148,8 +1141,8 @@ internal sealed class ScriptExchangeHost
             return TsValue.FromBool(true);
         }
 
-        DotaGcBackend.PendingMessageQueued?.Invoke(steamId, message);
-        return TsValue.FromBool(DotaGcBackend.PendingMessageQueued != null);
+        DotaGcRuntimeServices.PendingMessageQueued?.Invoke(steamId, message);
+        return TsValue.FromBool(DotaGcRuntimeServices.PendingMessageQueued != null);
     }
 
     public TsValue DotaPublishMatchSnapshot(TsValue[] args)
@@ -1159,12 +1152,12 @@ internal sealed class ScriptExchangeHost
             throw new InvalidOperationException("dotaPublishMatchSnapshot(snapshot) requires one argument");
         }
 
-        if (DotaGcBackend.MatchSnapshotSink == null)
+        if (DotaGcRuntimeServices.MatchSnapshotSink == null)
         {
             return TsValue.FromBool(false);
         }
 
-        DotaGcBackend.MatchSnapshotSink(ToDotaMatchSnapshot(args[0], "dotaPublishMatchSnapshot.snapshot"));
+        DotaGcRuntimeServices.MatchSnapshotSink(ToDotaMatchSnapshot(args[0], "dotaPublishMatchSnapshot.snapshot"));
         return TsValue.FromBool(true);
     }
 
@@ -1176,7 +1169,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var lobbyId = Convert.ToUInt64(ToInteger(args[0], "dotaRemoveMatchSnapshot.lobbyId").ToString());
-        return TsValue.FromBool(DotaGcBackend.MatchSnapshotDeleteSink?.Invoke(lobbyId) ?? false);
+        return TsValue.FromBool(DotaGcRuntimeServices.MatchSnapshotDeleteSink?.Invoke(lobbyId) ?? false);
     }
 
     public TsValue DotaStartDedicatedServer(TsValue[] args)
@@ -1188,7 +1181,7 @@ internal sealed class ScriptExchangeHost
 
         var lobbyId = Convert.ToUInt64(ToInteger(args[0], "dotaStartDedicatedServer.lobbyId").ToString());
         var map = ToString(args[1]);
-        var result = DotaGcBackend.DedicatedServerStart?.Invoke(lobbyId, map);
+        var result = DotaGcRuntimeServices.DedicatedServerStart?.Invoke(lobbyId, map);
         if (result == null)
         {
             return TsValue.Null;
@@ -1211,7 +1204,7 @@ internal sealed class ScriptExchangeHost
 
         var lobbyId = Convert.ToUInt64(ToInteger(args[0], "dotaReleaseDedicatedServer.lobbyId").ToString());
         var reason = ToString(args[1]);
-        return TsValue.FromBool(DotaGcBackend.DedicatedServerRelease?.Invoke(lobbyId, reason) ?? false);
+        return TsValue.FromBool(DotaGcRuntimeServices.DedicatedServerRelease?.Invoke(lobbyId, reason) ?? false);
     }
 
     public TsValue DotaResolveGameServerConnectIp(TsValue[] args)
@@ -1224,7 +1217,7 @@ internal sealed class ScriptExchangeHost
         var publicIp = ToString(args[0]);
         var privateIp = ToString(args[1]);
         var fallbackIp = ToString(args[2]);
-        var resolved = DotaGcBackend.GameServerConnectIpResolver?.Invoke(
+        var resolved = DotaGcRuntimeServices.GameServerConnectIpResolver?.Invoke(
             _context.ClientIp,
             publicIp,
             privateIp,
@@ -1242,7 +1235,7 @@ internal sealed class ScriptExchangeHost
             steamId = _context.SteamId;
         }
 
-        return ToTsInventory(DotaGcBackend.InventoryProvider?.Invoke(steamId));
+        return ToTsInventory(DotaGcRuntimeServices.InventoryProvider?.Invoke(steamId));
     }
 
     public TsValue DotaCatalogItem(TsValue[] args)
@@ -1253,7 +1246,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var defIndex = Convert.ToUInt32(ToNumber(args[0], "dotaCatalogItem.defIndex"));
-        var catalog = DotaGcBackend.InventoryProvider?.Invoke(_context.SteamId);
+        var catalog = DotaGcRuntimeServices.InventoryProvider?.Invoke(_context.SteamId);
         var item = catalog?.Items.FirstOrDefault(candidate => candidate.DefIndex == defIndex);
         return item == null ? TsValue.Null : ToTsCatalogItem(item);
     }
@@ -1269,7 +1262,7 @@ internal sealed class ScriptExchangeHost
         var heroId = Convert.ToUInt32(ToNumber(args[1], "dotaEquipItem.heroId"));
         var slotId = Convert.ToUInt32(ToNumber(args[2], "dotaEquipItem.slotId"));
         var style = Convert.ToUInt32(ToNumber(args[3], "dotaEquipItem.style"));
-        var changed = DotaGcBackend.EquipItemSink?.Invoke(_context.SteamId, itemId, heroId, slotId, style)
+        var changed = DotaGcRuntimeServices.EquipItemSink?.Invoke(_context.SteamId, itemId, heroId, slotId, style)
             ?? new List<ApiDotaEquipment>();
         return ToTsEquipmentList(changed);
     }
@@ -1283,21 +1276,9 @@ internal sealed class ScriptExchangeHost
 
         var itemId = Convert.ToUInt64(ToInteger(args[0], "dotaSetItemStyle.itemId").ToString());
         var style = Convert.ToUInt32(ToNumber(args[1], "dotaSetItemStyle.style"));
-        var changed = DotaGcBackend.SetItemStyleSink?.Invoke(_context.SteamId, itemId, style)
+        var changed = DotaGcRuntimeServices.SetItemStyleSink?.Invoke(_context.SteamId, itemId, style)
             ?? new List<ApiDotaEquipment>();
         return ToTsEquipmentList(changed);
-    }
-
-    public TsValue DotaQueueCurrentLobbyServer(TsValue[] args)
-    {
-        if (args.Length < 2)
-        {
-            throw new InvalidOperationException("dotaQueueCurrentLobbyServer(messageType, payload) requires two arguments");
-        }
-
-        var messageType = Convert.ToUInt32(ToNumber(args[0], "dotaQueueCurrentLobbyServer.messageType"));
-        var payload = ToBytes(args[1], "dotaQueueCurrentLobbyServer.payload");
-        return TsValue.FromBool(DotaGcBackend.QueueCurrentLobbyServerProto(_context.SteamId, _context.AppId, messageType, payload));
     }
 
     public TsValue DotaProfile(TsValue[] args)
@@ -1349,7 +1330,7 @@ internal sealed class ScriptExchangeHost
             });
         }
 
-        DotaGcBackend.StatsStore?.SaveProfileSlots(_context.AccountId, slots);
+        DotaGcRuntimeServices.StatsStore?.SaveProfileSlots(_context.AccountId, slots);
         return TsValue.FromBool(true);
     }
 
@@ -1376,14 +1357,14 @@ internal sealed class ScriptExchangeHost
             }
         }
 
-        DotaGcBackend.StatsStore?.SaveProfileUpdate(_context.AccountId, backgroundItemId, featuredHeroIds);
+        DotaGcRuntimeServices.StatsStore?.SaveProfileUpdate(_context.AccountId, backgroundItemId, featuredHeroIds);
         return TsValue.FromBool(true);
     }
 
     public TsValue DotaProfileConductScorecard()
     {
         return ToTsConductScorecard(
-            DotaGcBackend.StatsStore?.GetConduct(_context.AccountId)
+            DotaGcRuntimeServices.StatsStore?.GetConduct(_context.AccountId)
                 ?? new DotaStatsConduct { AccountId = _context.AccountId, RawBehaviorScore = 10000, OldRawBehaviorScore = 10000 });
     }
 
@@ -1395,7 +1376,7 @@ internal sealed class ScriptExchangeHost
         }
 
         return ToTsQuestProgress(
-            DotaGcBackend.StatsStore?.GetQuestProgress(_context.AccountId, UInt32Array(args[0], "dotaProfileQuestProgress.questIds"))
+            DotaGcRuntimeServices.StatsStore?.GetQuestProgress(_context.AccountId, UInt32Array(args[0], "dotaProfileQuestProgress.questIds"))
                 ?? Array.Empty<DotaStatsQuestProgress>());
     }
 
@@ -1414,13 +1395,13 @@ internal sealed class ScriptExchangeHost
 
         var resourceId = Convert.ToUInt32(ToNumber(args[1], "dotaProfilePeriodicResource.resourceId"));
         return ToTsPeriodicResource(
-            DotaGcBackend.StatsStore?.GetPeriodicResource(accountId, resourceId)
+            DotaGcRuntimeServices.StatsStore?.GetPeriodicResource(accountId, resourceId)
                 ?? new DotaStatsPeriodicResource { AccountId = accountId, ResourceId = resourceId });
     }
 
     public TsValue DotaProfileHeroStickers()
     {
-        return ToTsHeroStickers(DotaGcBackend.StatsStore?.GetHeroStickers(_context.AccountId) ?? Array.Empty<DotaStatsHeroSticker>());
+        return ToTsHeroStickers(DotaGcRuntimeServices.StatsStore?.GetHeroStickers(_context.AccountId) ?? Array.Empty<DotaStatsHeroSticker>());
     }
 
     public TsValue DotaProfileSetHeroSticker(TsValue[] args)
@@ -1432,7 +1413,7 @@ internal sealed class ScriptExchangeHost
 
         var heroId = Convert.ToUInt32(ToNumber(args[0], "dotaProfileSetHeroSticker.heroId"));
         var itemId = Convert.ToUInt64(ToInteger(args[1], "dotaProfileSetHeroSticker.itemId").ToString());
-        return TsValue.FromBool(DotaGcBackend.StatsStore?.SetHeroSticker(_context.AccountId, heroId, itemId) ?? false);
+        return TsValue.FromBool(DotaGcRuntimeServices.StatsStore?.SetHeroSticker(_context.AccountId, heroId, itemId) ?? false);
     }
 
     public TsValue DotaProfileOverworldState(TsValue[] args)
@@ -1444,18 +1425,18 @@ internal sealed class ScriptExchangeHost
 
         var overworldId = Convert.ToUInt32(ToNumber(args[0], "dotaProfileOverworldState.overworldId"));
         return ToTsOverworldState(
-            DotaGcBackend.StatsStore?.GetOverworldState(_context.AccountId, overworldId)
+            DotaGcRuntimeServices.StatsStore?.GetOverworldState(_context.AccountId, overworldId)
                 ?? new DotaStatsOverworldState { OverworldId = overworldId });
     }
 
     public TsValue DotaProfileMonsterHunterState()
     {
-        return ToTsMonsterHunterState(DotaGcBackend.StatsStore?.GetMonsterHunterState(_context.AccountId) ?? new DotaStatsMonsterHunterState());
+        return ToTsMonsterHunterState(DotaGcRuntimeServices.StatsStore?.GetMonsterHunterState(_context.AccountId) ?? new DotaStatsMonsterHunterState());
     }
 
     public TsValue DotaSocialEmoticonAccess()
     {
-        var access = DotaGcBackend.StatsStore?.GetEmoticonAccess(_context.AccountId) ?? new DotaStatsEmoticonAccess
+        var access = DotaGcRuntimeServices.StatsStore?.GetEmoticonAccess(_context.AccountId) ?? new DotaStatsEmoticonAccess
         {
             AccountId = _context.AccountId,
             UnlockedMask = Array.Empty<byte>()
@@ -1477,7 +1458,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var selfOnly = ToBool(args[1], "dotaSocialFeed.selfOnly");
-        return ToTsSocialFeed(DotaGcBackend.StatsStore?.GetSocialFeed(accountId, selfOnly) ?? Array.Empty<DotaStatsSocialFeedEvent>());
+        return ToTsSocialFeed(DotaGcRuntimeServices.StatsStore?.GetSocialFeed(accountId, selfOnly) ?? Array.Empty<DotaStatsSocialFeedEvent>());
     }
 
     public TsValue DotaSocialFeedComments(TsValue[] args)
@@ -1488,7 +1469,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var feedEventId = Convert.ToUInt64(ToInteger(args[0], "dotaSocialFeedComments.feedEventId").ToString());
-        return ToTsSocialFeedComments(feedEventId, DotaGcBackend.StatsStore?.GetSocialFeedComments(feedEventId) ?? Array.Empty<DotaStatsComment>());
+        return ToTsSocialFeedComments(feedEventId, DotaGcRuntimeServices.StatsStore?.GetSocialFeedComments(feedEventId) ?? Array.Empty<DotaStatsComment>());
     }
 
     public TsValue DotaSocialFeedPostComment(TsValue[] args)
@@ -1505,7 +1486,7 @@ internal sealed class ScriptExchangeHost
             return TsValue.FromBool(false);
         }
 
-        return TsValue.FromBool(DotaGcBackend.StatsStore?.SaveSocialFeedComment(feedEventId, _context.AccountId, comment) ?? false);
+        return TsValue.FromBool(DotaGcRuntimeServices.StatsStore?.SaveSocialFeedComment(feedEventId, _context.AccountId, comment) ?? false);
     }
 
     public TsValue DotaSocialMatchPostComment(TsValue[] args)
@@ -1522,7 +1503,7 @@ internal sealed class ScriptExchangeHost
             return TsValue.FromBool(false);
         }
 
-        return TsValue.FromBool(DotaGcBackend.StatsStore?.SaveSocialMatchComment(matchId, _context.AccountId, _context.PersonaName, comment) ?? false);
+        return TsValue.FromBool(DotaGcRuntimeServices.StatsStore?.SaveSocialMatchComment(matchId, _context.AccountId, _context.PersonaName, comment) ?? false);
     }
 
     public TsValue DotaChatJoinChannel(TsValue[] args)
@@ -1534,7 +1515,7 @@ internal sealed class ScriptExchangeHost
 
         var channelName = ToString(args[0]);
         var channelType = Convert.ToUInt32(ToNumber(args[1], "dotaChatJoinChannel.channelType"));
-        var snapshot = DotaGcBackend.ChatStore.Join(channelName, channelType, _context.SteamId, _context.AccountId, _context.PersonaName);
+        var snapshot = DotaGcRuntimeServices.ChatStore.Join(channelName, channelType, _context.SteamId, _context.AccountId, _context.PersonaName);
         return snapshot == null ? TsValue.Null : ToTsChatChannel(snapshot);
     }
 
@@ -1546,7 +1527,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var channelId = Convert.ToUInt64(ToInteger(args[0], "dotaChatChannel.channelId").ToString());
-        var snapshot = DotaGcBackend.ChatStore.Get(channelId, _context.SteamId);
+        var snapshot = DotaGcRuntimeServices.ChatStore.Get(channelId, _context.SteamId);
         return snapshot == null ? TsValue.Null : ToTsChatChannel(snapshot);
     }
 
@@ -1558,7 +1539,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var channelId = Convert.ToUInt64(ToInteger(args[0], "dotaChatLeaveChannel.channelId").ToString());
-        return TsValue.FromBool(DotaGcBackend.ChatStore.Leave(channelId, _context.SteamId));
+        return TsValue.FromBool(DotaGcRuntimeServices.ChatStore.Leave(channelId, _context.SteamId));
     }
 
     public TsValue DotaChatBroadcast(TsValue[] args)
@@ -1573,7 +1554,7 @@ internal sealed class ScriptExchangeHost
         var payloadBase64 = Convert.ToBase64String(ToBytes(args[2], "dotaChatBroadcast.payload"));
         var includeSelf = args.Length < 4 || ToBool(args[3], "dotaChatBroadcast.includeSelf");
         var delivered = 0;
-        foreach (var memberSteamId in DotaGcBackend.ChatStore.GetMemberSteamIds(channelId))
+        foreach (var memberSteamId in DotaGcRuntimeServices.ChatStore.GetMemberSteamIds(channelId))
         {
             var message = new ApiGCMessage
             {
@@ -1590,9 +1571,9 @@ internal sealed class ScriptExchangeHost
                     delivered++;
                 }
             }
-            else if (DotaGcBackend.PendingMessageQueued != null)
+            else if (DotaGcRuntimeServices.PendingMessageQueued != null)
             {
-                DotaGcBackend.PendingMessageQueued.Invoke(memberSteamId, message);
+                DotaGcRuntimeServices.PendingMessageQueued.Invoke(memberSteamId, message);
                 delivered++;
             }
         }
@@ -1602,7 +1583,7 @@ internal sealed class ScriptExchangeHost
 
     public TsValue DotaGuildEnsureCurrent()
     {
-        var store = DotaGcBackend.GuildStore ?? throw new InvalidOperationException("Dota guild store is not initialized.");
+        var store = DotaGcRuntimeServices.GuildStore ?? throw new InvalidOperationException("Dota guild store is not initialized.");
         return ToTsGuild(store.EnsureCurrentMembership(_context.SteamId, _context.AccountId, _context.PersonaName));
     }
 
@@ -1616,7 +1597,7 @@ internal sealed class ScriptExchangeHost
             accountId = _context.AccountId;
         }
 
-        var store = DotaGcBackend.GuildStore ?? throw new InvalidOperationException("Dota guild store is not initialized.");
+        var store = DotaGcRuntimeServices.GuildStore ?? throw new InvalidOperationException("Dota guild store is not initialized.");
         return ToTsGuildMembership(store.GetMembership(accountId));
     }
 
@@ -1633,7 +1614,7 @@ internal sealed class ScriptExchangeHost
             return TsValue.Null;
         }
 
-        var store = DotaGcBackend.GuildStore ?? throw new InvalidOperationException("Dota guild store is not initialized.");
+        var store = DotaGcRuntimeServices.GuildStore ?? throw new InvalidOperationException("Dota guild store is not initialized.");
         return ToTsGuild(store.GetGuild(guildId));
     }
 
@@ -1647,7 +1628,7 @@ internal sealed class ScriptExchangeHost
             accountId = _context.AccountId;
         }
 
-        var store = DotaGcBackend.GuildStore ?? throw new InvalidOperationException("Dota guild store is not initialized.");
+        var store = DotaGcRuntimeServices.GuildStore ?? throw new InvalidOperationException("Dota guild store is not initialized.");
         return ToTsGuildPersonaInfos(store.GetPersonaInfo(accountId));
     }
 
@@ -1660,13 +1641,13 @@ internal sealed class ScriptExchangeHost
 
         var guildId = Convert.ToUInt32(ToNumber(args[0], "dotaGuildEventData.guildId"));
         var eventId = Convert.ToUInt32(ToNumber(args[1], "dotaGuildEventData.eventId"));
-        var store = DotaGcBackend.GuildStore ?? throw new InvalidOperationException("Dota guild store is not initialized.");
+        var store = DotaGcRuntimeServices.GuildStore ?? throw new InvalidOperationException("Dota guild store is not initialized.");
         return ToTsGuildEventData(store.GetEventData(guildId, eventId, _context.AccountId));
     }
 
     public TsValue DotaReporterUpdates()
     {
-        var summary = DotaGcBackend.StatsStore?.GetReporterUpdates(_context.AccountId) ?? new DotaStatsReporterUpdateSummary();
+        var summary = DotaGcRuntimeServices.StatsStore?.GetReporterUpdates(_context.AccountId) ?? new DotaStatsReporterUpdateSummary();
         return ToTsReporterUpdates(summary);
     }
 
@@ -1677,7 +1658,7 @@ internal sealed class ScriptExchangeHost
             throw new InvalidOperationException("dotaAcknowledgeReporterUpdates(matchIds) requires one argument");
         }
 
-        return TsValue.FromBool(DotaGcBackend.StatsStore?.AcknowledgeReporterUpdates(_context.AccountId, UInt64Array(args[0], "dotaAcknowledgeReporterUpdates.matchIds")) ?? false);
+        return TsValue.FromBool(DotaGcRuntimeServices.StatsStore?.AcknowledgeReporterUpdates(_context.AccountId, UInt64Array(args[0], "dotaAcknowledgeReporterUpdates.matchIds")) ?? false);
     }
 
     public TsValue DotaLookupAccountName(TsValue[] args)
@@ -1743,7 +1724,7 @@ internal sealed class ScriptExchangeHost
             accountId = _context.AccountId;
         }
 
-        return ToTsHeroStandings(DotaGcBackend.StatsStore?.GetHeroStandings(accountId) ?? Array.Empty<DotaStatsHeroStats>());
+        return ToTsHeroStandings(DotaGcRuntimeServices.StatsStore?.GetHeroStandings(accountId) ?? Array.Empty<DotaStatsHeroStats>());
     }
 
     public TsValue DotaHeroGlobalData(TsValue[] args)
@@ -1760,7 +1741,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var heroId = Convert.ToUInt32(ToNumber(args[1], "dotaHeroGlobalData.heroId"));
-        var standings = DotaGcBackend.StatsStore?.GetHeroStandings(accountId) ?? Array.Empty<DotaStatsHeroStats>();
+        var standings = DotaGcRuntimeServices.StatsStore?.GetHeroStandings(accountId) ?? Array.Empty<DotaStatsHeroStats>();
         var hero = standings.FirstOrDefault(item => item.HeroId == heroId);
         return ToTsHeroGlobalData(heroId, hero, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
     }
@@ -1775,7 +1756,7 @@ internal sealed class ScriptExchangeHost
             accountId = _context.AccountId;
         }
 
-        var stats = DotaGcBackend.StatsStore?.GetGlobalStats(accountId) ?? new DotaStatsGlobalStats { AccountId = accountId };
+        var stats = DotaGcRuntimeServices.StatsStore?.GetGlobalStats(accountId) ?? new DotaStatsGlobalStats { AccountId = accountId };
         return ToTsPlayerStats(stats);
     }
 
@@ -1809,7 +1790,7 @@ internal sealed class ScriptExchangeHost
             accountId = _context.AccountId;
         }
 
-        return ToTsTeammateStats(DotaGcBackend.StatsStore?.GetTeammateStats(accountId) ?? Array.Empty<DotaStatsTeammate>());
+        return ToTsTeammateStats(DotaGcRuntimeServices.StatsStore?.GetTeammateStats(accountId) ?? Array.Empty<DotaStatsTeammate>());
     }
 
     public TsValue DotaMatchHistory(TsValue[] args)
@@ -1829,7 +1810,7 @@ internal sealed class ScriptExchangeHost
         var requested = Convert.ToUInt32(ToNumber(args[2], "dotaMatchHistory.requested"));
         var heroId = Convert.ToUInt32(ToNumber(args[3], "dotaMatchHistory.heroId"));
         var includePractice = ToBool(args[4], "dotaMatchHistory.includePractice");
-        return ToTsMatchPlayers(DotaGcBackend.StatsStore?.GetMatchHistory(accountId, startAtMatchId, requested, heroId, includePractice) ?? Array.Empty<DotaStatsMatchPlayer>());
+        return ToTsMatchPlayers(DotaGcRuntimeServices.StatsStore?.GetMatchHistory(accountId, startAtMatchId, requested, heroId, includePractice) ?? Array.Empty<DotaStatsMatchPlayer>());
     }
 
     public TsValue DotaMatchDetails(TsValue[] args)
@@ -1840,7 +1821,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var matchId = Convert.ToUInt64(ToInteger(args[0], "dotaMatchDetails.matchId").ToString());
-        var match = DotaGcBackend.StatsStore?.GetMatch(matchId);
+        var match = DotaGcRuntimeServices.StatsStore?.GetMatch(matchId);
         return match == null ? TsValue.Null : ToTsMatch(match);
     }
 
@@ -1858,7 +1839,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var heroId = Convert.ToUInt32(ToNumber(args[1], "dotaHeroStatsHistory.heroId"));
-        return ToTsMatchPlayers(DotaGcBackend.StatsStore?.GetRecentMatches(accountId, 20, heroId) ?? Array.Empty<DotaStatsMatchPlayer>());
+        return ToTsMatchPlayers(DotaGcRuntimeServices.StatsStore?.GetRecentMatches(accountId, 20, heroId) ?? Array.Empty<DotaStatsMatchPlayer>());
     }
 
     public TsValue DotaShowcaseStats(TsValue[] args)
@@ -1871,7 +1852,7 @@ internal sealed class ScriptExchangeHost
             accountId = _context.AccountId;
         }
 
-        var store = DotaGcBackend.StatsStore;
+        var store = DotaGcRuntimeServices.StatsStore;
         var global = store?.GetGlobalStats(accountId) ?? new DotaStatsGlobalStats { AccountId = accountId };
         var conduct = store?.GetConduct(accountId) ?? new DotaStatsConduct { AccountId = accountId };
         var value = new TsObject("DotaShowcaseStats");
@@ -1919,7 +1900,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var matchId = Convert.ToUInt64(ToInteger(args[0], "dotaHasMvpVote.matchId").ToString());
-        return TsValue.FromBool(DotaGcBackend.StatsStore?.HasMvpVote(matchId, _context.AccountId) ?? false);
+        return TsValue.FromBool(DotaGcRuntimeServices.StatsStore?.HasMvpVote(matchId, _context.AccountId) ?? false);
     }
 
     public TsValue DotaVoteForMvp(TsValue[] args)
@@ -1931,7 +1912,7 @@ internal sealed class ScriptExchangeHost
 
         var matchId = Convert.ToUInt64(ToInteger(args[0], "dotaVoteForMvp.matchId").ToString());
         var votedAccountId = Convert.ToUInt32(ToNumber(args[1], "dotaVoteForMvp.votedAccountId"));
-        return TsValue.FromBool(DotaGcBackend.StatsStore?.SaveMvpVote(matchId, _context.AccountId, votedAccountId) ?? false);
+        return TsValue.FromBool(DotaGcRuntimeServices.StatsStore?.SaveMvpVote(matchId, _context.AccountId, votedAccountId) ?? false);
     }
 
     public TsValue DotaFinalizeMvpVote(TsValue[] args)
@@ -1942,7 +1923,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var matchId = Convert.ToUInt64(ToInteger(args[0], "dotaFinalizeMvpVote.matchId").ToString());
-        return TsValue.FromBool(DotaGcBackend.StatsStore?.FinalizeMvpVotes(matchId) ?? false);
+        return TsValue.FromBool(DotaGcRuntimeServices.StatsStore?.FinalizeMvpVotes(matchId) ?? false);
     }
 
     public TsValue DotaSubmitLobbyMvpVote(TsValue[] args)
@@ -1953,11 +1934,11 @@ internal sealed class ScriptExchangeHost
         }
 
         var targetAccountId = Convert.ToUInt32(ToNumber(args[0], "dotaSubmitLobbyMvpVote.targetAccountId"));
-        var latestMatchId = DotaGcBackend.StatsStore?.GetRecentMatches(_context.AccountId, 1).FirstOrDefault()?.MatchId ?? 0;
-        var ok = latestMatchId != 0 && (DotaGcBackend.StatsStore?.SaveMvpVote(latestMatchId, _context.AccountId, targetAccountId) ?? false);
+        var latestMatchId = DotaGcRuntimeServices.StatsStore?.GetRecentMatches(_context.AccountId, 1).FirstOrDefault()?.MatchId ?? 0;
+        var ok = latestMatchId != 0 && (DotaGcRuntimeServices.StatsStore?.SaveMvpVote(latestMatchId, _context.AccountId, targetAccountId) ?? false);
         if (ok)
         {
-            DotaGcBackend.StatsStore?.FinalizeMvpVotes(latestMatchId);
+            DotaGcRuntimeServices.StatsStore?.FinalizeMvpVotes(latestMatchId);
         }
 
         var value = new TsObject("DotaLobbyMvpVoteResult");
@@ -1996,12 +1977,12 @@ internal sealed class ScriptExchangeHost
             }
         }
 
-        return TsValue.FromBool(DotaGcBackend.StatsStore?.SetMatchMvps(matchId, winners) ?? false);
+        return TsValue.FromBool(DotaGcRuntimeServices.StatsStore?.SetMatchMvps(matchId, winners) ?? false);
     }
 
     public TsValue DotaRerollPlayerChallenge()
     {
-        var progress = DotaGcBackend.StatsStore?.RerollAllHeroChallenge(_context.AccountId);
+        var progress = DotaGcRuntimeServices.StatsStore?.RerollAllHeroChallenge(_context.AccountId);
         return TsValue.FromBool(progress != null);
     }
 
@@ -2013,7 +1994,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var request = RequireObject(args[0], "dotaRecordMatchSignOutPermission.request");
-        return TsValue.FromBool(DotaGcBackend.StatsStore?.RecordMatchSignOutPermission(new DotaStatsMatchSignOutPermissionAudit
+        return TsValue.FromBool(DotaGcRuntimeServices.StatsStore?.RecordMatchSignOutPermission(new DotaStatsMatchSignOutPermissionAudit
         {
             ServerSteamId = _context.SteamId,
             ServerVersion = U32Field(request, "serverVersion", "dotaRecordMatchSignOutPermission.request"),
@@ -2034,7 +2015,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var allow = ToBool(args[0], "dotaSetMatchHistoryAccess.allow");
-        return TsValue.FromBool(DotaGcBackend.StatsStore?.SetMatchHistoryAccess(_context.SteamId, _context.AccountId, allow) ?? false);
+        return TsValue.FromBool(DotaGcRuntimeServices.StatsStore?.SetMatchHistoryAccess(_context.SteamId, _context.AccountId, allow) ?? false);
     }
 
     public TsValue DotaRecordServerStatus(TsValue[] args)
@@ -2045,7 +2026,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var response = Convert.ToUInt32(ToNumber(args[0], "dotaRecordServerStatus.response"));
-        return TsValue.FromBool(DotaGcBackend.StatsStore?.RecordServerStatusRequest(_context.SteamId, response) ?? false);
+        return TsValue.FromBool(DotaGcRuntimeServices.StatsStore?.RecordServerStatusRequest(_context.SteamId, response) ?? false);
     }
 
     public TsValue DotaRecordLeaver(TsValue[] args)
@@ -2057,7 +2038,7 @@ internal sealed class ScriptExchangeHost
 
         var eventValue = RequireObject(args[0], "dotaRecordLeaver.event");
         var leaverSteamId = U64Field(eventValue, "leaverSteamId", "dotaRecordLeaver.event");
-        return TsValue.FromBool(DotaGcBackend.StatsStore?.RecordLeaverDetected(new DotaStatsLeaverEvent
+        return TsValue.FromBool(DotaGcRuntimeServices.StatsStore?.RecordLeaverDetected(new DotaStatsLeaverEvent
         {
             ServerSteamId = _context.SteamId,
             LeaverSteamId = leaverSteamId,
@@ -2082,7 +2063,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var snapshot = RequireObject(args[0], "dotaRecordRealtimeStats.snapshot");
-        return TsValue.FromBool(DotaGcBackend.StatsStore?.RecordRealtimeStats(new DotaStatsRealtimeStatsSnapshot
+        return TsValue.FromBool(DotaGcRuntimeServices.StatsStore?.RecordRealtimeStats(new DotaStatsRealtimeStatsSnapshot
         {
             ServerSteamId = U64Field(snapshot, "serverSteamId", "dotaRecordRealtimeStats.snapshot", _context.SteamId),
             MatchId = U64Field(snapshot, "matchId", "dotaRecordRealtimeStats.snapshot"),
@@ -2109,7 +2090,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var history = RequireObject(args[0], "dotaRecordMatchStateHistory.history");
-        return TsValue.FromBool(DotaGcBackend.StatsStore?.RecordMatchStateHistory(new DotaStatsMatchStateHistorySnapshot
+        return TsValue.FromBool(DotaGcRuntimeServices.StatsStore?.RecordMatchStateHistory(new DotaStatsMatchStateHistorySnapshot
         {
             MatchId = U64Field(history, "matchId", "dotaRecordMatchStateHistory.history"),
             RadiantWon = BoolField(history, "radiantWon", "dotaRecordMatchStateHistory.history"),
@@ -2130,7 +2111,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var spectatorCount = Convert.ToUInt32(ToNumber(args[0], "dotaRecordSpectatorCount.spectatorCount"));
-        return TsValue.FromBool(DotaGcBackend.StatsStore?.RecordSpectatorCount(_context.SteamId, spectatorCount) ?? false);
+        return TsValue.FromBool(DotaGcRuntimeServices.StatsStore?.RecordSpectatorCount(_context.SteamId, spectatorCount) ?? false);
     }
 
     public TsValue DotaRecordLiveScoreboard(TsValue[] args)
@@ -2141,7 +2122,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var snapshot = RequireObject(args[0], "dotaRecordLiveScoreboard.snapshot");
-        return TsValue.FromBool(DotaGcBackend.StatsStore?.RecordLiveScoreboard(new DotaStatsLiveScoreboardSnapshot
+        return TsValue.FromBool(DotaGcRuntimeServices.StatsStore?.RecordLiveScoreboard(new DotaStatsLiveScoreboardSnapshot
         {
             ServerSteamId = _context.SteamId,
             MatchId = U64Field(snapshot, "matchId", "dotaRecordLiveScoreboard.snapshot"),
@@ -2166,7 +2147,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var report = RequireObject(args[0], "dotaSavePlayerReport.report");
-        return TsValue.FromBool(DotaGcBackend.StatsStore?.TrySavePlayerReport(new DotaStatsPlayerReport
+        return TsValue.FromBool(DotaGcRuntimeServices.StatsStore?.TrySavePlayerReport(new DotaStatsPlayerReport
         {
             ReporterSteamId = _context.SteamId,
             ReporterAccountId = _context.AccountId,
@@ -2183,7 +2164,7 @@ internal sealed class ScriptExchangeHost
 
     private DotaStatsProfile GetStatsProfile(uint accountId)
     {
-        var store = DotaGcBackend.StatsStore;
+        var store = DotaGcRuntimeServices.StatsStore;
         return store == null
             ? DefaultProfile(accountId)
             : accountId == _context.AccountId
@@ -2193,7 +2174,7 @@ internal sealed class ScriptExchangeHost
 
     private TsValue ToTsProfileSnapshot(uint requestedAccountId)
     {
-        var store = DotaGcBackend.StatsStore;
+        var store = DotaGcRuntimeServices.StatsStore;
         var profile = store == null
             ? DefaultProfile(requestedAccountId)
             : requestedAccountId == _context.AccountId
@@ -2439,7 +2420,7 @@ internal sealed class ScriptExchangeHost
 
     private TsValue ToTsPlayerRecentAccomplishments(uint accountId)
     {
-        var store = DotaGcBackend.StatsStore;
+        var store = DotaGcRuntimeServices.StatsStore;
         var stats = store?.GetGlobalStats(accountId) ?? new DotaStatsGlobalStats { AccountId = accountId };
         var conduct = store?.GetConduct(accountId) ?? new DotaStatsConduct { AccountId = accountId };
         var matchCount = store?.GetMatchCount(accountId) ?? 0;
@@ -2459,7 +2440,7 @@ internal sealed class ScriptExchangeHost
 
     private TsValue ToTsHeroRecentAccomplishments(uint accountId, uint heroId)
     {
-        var store = DotaGcBackend.StatsStore;
+        var store = DotaGcRuntimeServices.StatsStore;
         var hero = store?.GetHeroStandings(accountId).FirstOrDefault(item => item.HeroId == heroId);
         var recent = store?.GetRecentMatches(accountId, 1, heroId).FirstOrDefault();
         var matchCount = store?.GetMatchCount(accountId, heroId) ?? 0;

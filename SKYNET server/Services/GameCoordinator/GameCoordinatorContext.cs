@@ -27,11 +27,6 @@ public interface IGameCoordinatorTicker
     void Tick();
 }
 
-public interface ILuaGameCoordinatorBackend
-{
-    ApiGCExchangeResponse Response { get; }
-}
-
 public static class GameCoordinatorPendingMessages
 {
     private const int MaxQueuedPerRecipient = 256;

@@ -1,6 +1,5 @@
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging.Abstractions;
-using SKYNET_server.GC.Dota2;
 using SKYNET_server.Models;
 
 namespace SKYNET_server.Services;
@@ -37,9 +36,9 @@ public static class GcScriptSelfCheck
                 : null;
         }
 
-        DotaGcBackend.StatsStore = new DotaStatsStore(selfCheckDb, ResolveIdentity);
-        DotaGcBackend.GuildStore = new DotaGuildStore(selfCheckDb, ResolveIdentity);
-        SeedSocialMatchData(DotaGcBackend.StatsStore, context);
+        DotaGcRuntimeServices.StatsStore = new DotaStatsStore(selfCheckDb, ResolveIdentity);
+        DotaGcRuntimeServices.GuildStore = new DotaGuildStore(selfCheckDb, ResolveIdentity);
+        SeedSocialMatchData(DotaGcRuntimeServices.StatsStore, context);
 
         var ok = true;
         ok &= ExpectSequence(plugin, context, 4006, new uint[] { 4009, 4004, 4009 }, write);
@@ -268,7 +267,7 @@ public static class GcScriptSelfCheck
         var result = response.Messages.Count == 1 && response.Messages[0].MessageType == 8017
             ? Deserialize<CMsgGCToClientSocialFeedPostCommentResponse>(response.Messages[0].PayloadBase64)
             : null;
-        var comments = DotaGcBackend.StatsStore?.GetSocialMatchComments(matchId) ?? Array.Empty<DotaStatsComment>();
+        var comments = DotaGcRuntimeServices.StatsStore?.GetSocialMatchComments(matchId) ?? Array.Empty<DotaStatsComment>();
         var ok = response.Handled
             && result != null
             && result.Success

@@ -3,7 +3,6 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
-using SKYNET_server.GC.Dota2;
 using SKYNET_server.Models;
 
 namespace SKYNET_server.Services;
@@ -318,11 +317,6 @@ public sealed partial class SteamApiStateService
         {
             _state.ActiveWebSteamId = 0;
             activeWebSessionCleared = true;
-        }
-
-        if (expired.Count > 0)
-        {
-            DotaGcBackend.ExpireInactiveSessions(_sessions.Values.Select(session => session.SteamId).ToHashSet());
         }
 
         if (expired.Count > 0 || stalePersistent.Count > 0 || activeWebSessionCleared)

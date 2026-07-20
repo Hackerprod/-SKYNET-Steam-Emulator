@@ -10,11 +10,6 @@ public sealed class DotaDB : ScriptDatabase
         InitializeDatabase();
     }
 
-    public LuaDotaDB ForLua(GameCoordinatorContext context)
-    {
-        return new LuaDotaDB(this, context);
-    }
-
     protected override void Initialize()
     {
         using var connection = OpenConnection();
@@ -485,46 +480,4 @@ public sealed class DotaDB : ScriptDatabase
             ("$scope", scope ?? string.Empty),
             ("$key", key ?? string.Empty))?.ToString() ?? "null";
     }
-}
-
-public sealed class LuaDotaDB
-{
-    private readonly DotaDB _db;
-    private readonly GameCoordinatorContext _context;
-
-    public LuaDotaDB(DotaDB db, GameCoordinatorContext context)
-    {
-        _db = db;
-        _context = context;
-    }
-
-    public string Path => _db.DatabasePath;
-
-    public string EnsureCurrentProfile() => _db.EnsureProfile(_context.AccountId, SteamId(), _context.PersonaName);
-    public string CurrentProfileJson() => EnsureCurrentProfile();
-    public string EnsureProfile(uint accountId, string steamId, string personaName) => _db.EnsureProfile(accountId, steamId, personaName);
-    public string GetProfile(uint accountId) => _db.GetProfile(accountId);
-    public string UpsertProfileJson(uint accountId, string steamId, string personaName, string profileJson) =>
-        _db.UpsertProfileJson(accountId, steamId, personaName, profileJson);
-    public string UpsertTeamJson(string teamId, string name, string tag, string teamJson) => _db.UpsertTeam(teamId, name, tag, teamJson);
-    public string GetTeam(string teamId) => _db.GetTeam(teamId);
-    public bool AddTeamMember(string teamId, uint accountId, uint role) => _db.AddTeamMember(teamId, accountId, role);
-    public string GetTeamsForAccount(uint accountId) => _db.GetTeamsForAccount(accountId);
-    public string GetCurrentTeams() => _db.GetTeamsForAccount(_context.AccountId);
-    public string SetQuestProgressJson(uint accountId, uint questId, string progressJson) => _db.SetQuestProgress(accountId, questId, progressJson);
-    public string GetQuestProgressJson(uint accountId) => _db.GetQuestProgress(accountId);
-    public string GetCurrentQuestProgressJson() => _db.GetQuestProgress(_context.AccountId);
-    public string SetPeriodicResourceJson(uint accountId, string resourceKey, uint maxValue, uint usedValue, string resourceJson) =>
-        _db.SetPeriodicResource(accountId, resourceKey, maxValue, usedValue, resourceJson);
-    public string GetPeriodicResourceJson(uint accountId, string resourceKey) => _db.GetPeriodicResource(accountId, resourceKey);
-    public string SetHeroStickersJson(uint accountId, uint heroId, string stickersJson) => _db.SetHeroStickers(accountId, heroId, stickersJson);
-    public string GetHeroStickersJson(uint accountId, uint heroId) => _db.GetHeroStickers(accountId, heroId);
-    public string UpsertMatchJson(string matchId, string lobbyId, uint ownerAccountId, string matchJson) =>
-        _db.UpsertMatch(matchId, lobbyId, ownerAccountId, matchJson);
-    public string GetMatchJson(string matchId) => _db.GetMatch(matchId);
-    public string GetRecentMatchesJson(uint accountId, int limit) => _db.GetRecentMatches(accountId, limit);
-    public string SetValue(string scope, string key, string valueJson) => _db.SetValue(scope, key, valueJson);
-    public string GetValue(string scope, string key) => _db.GetValue(scope, key);
-
-    private string SteamId() => _context.SteamId.ToString(System.Globalization.CultureInfo.InvariantCulture);
 }

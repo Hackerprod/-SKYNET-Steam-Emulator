@@ -19,11 +19,6 @@ public sealed class DedicatedServerService : ScriptDatabase
         InitializeDatabase();
     }
 
-    public LuaDedicatedServerService ForLua(GameCoordinatorContext context)
-    {
-        return new LuaDedicatedServerService(this, context);
-    }
-
     protected override void Initialize()
     {
         using var connection = OpenConnection();
@@ -235,26 +230,4 @@ public sealed class DedicatedServerService : ScriptDatabase
             _logger.LogWarning(ex, "Could not record dedicated server event {EventType} for lobby {LobbyId}", eventType, lobbyId);
         }
     }
-}
-
-public sealed class LuaDedicatedServerService
-{
-    private readonly DedicatedServerService _service;
-    private readonly GameCoordinatorContext _context;
-
-    public LuaDedicatedServerService(DedicatedServerService service, GameCoordinatorContext context)
-    {
-        _service = service;
-        _context = context;
-    }
-
-    public string Path => _service.DatabasePath;
-    public string CurrentSteamId => _context.SteamId.ToString(System.Globalization.CultureInfo.InvariantCulture);
-
-    public string Start(string lobbyId, string map) => _service.Start(lobbyId, map);
-    public string Claim(string gameServerSteamId, uint reportedPort) => _service.Claim(gameServerSteamId, reportedPort);
-    public bool HasReservationForPort(uint port) => _service.HasReservationForPort(port);
-    public string GetStatus(string lobbyId) => _service.GetStatus(lobbyId);
-    public bool Release(string lobbyId, string reason) => _service.Release(lobbyId, reason);
-    public string History(string lobbyId = "", int limit = 50) => _service.History(lobbyId, limit);
 }

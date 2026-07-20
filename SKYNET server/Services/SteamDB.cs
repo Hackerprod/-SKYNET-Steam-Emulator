@@ -10,11 +10,6 @@ public sealed class SteamDB : ScriptDatabase
         InitializeDatabase();
     }
 
-    public LuaSteamDB ForLua(GameCoordinatorContext context)
-    {
-        return new LuaSteamDB(this, context);
-    }
-
     protected override void Initialize()
     {
         using var connection = OpenConnection();
@@ -269,36 +264,4 @@ public sealed class SteamDB : ScriptDatabase
             ("$scope", scope ?? string.Empty),
             ("$key", key ?? string.Empty))?.ToString() ?? "null";
     }
-}
-
-public sealed class LuaSteamDB
-{
-    private readonly SteamDB _db;
-    private readonly GameCoordinatorContext _context;
-
-    public LuaSteamDB(SteamDB db, GameCoordinatorContext context)
-    {
-        _db = db;
-        _context = context;
-    }
-
-    public string Path => _db.DatabasePath;
-
-    public string CurrentUserJson() => _db.UpsertUser(SteamId(), _context.AccountId, _context.AppId, _context.PersonaName);
-    public string EnsureCurrentUser() => CurrentUserJson();
-    public string UpsertUser(string steamId, uint accountId, uint appId, string personaName) => _db.UpsertUser(steamId, accountId, appId, personaName);
-    public string GetUser(string steamId) => _db.GetUser(steamId);
-    public string GetUserByAccountId(uint accountId) => _db.GetUserByAccountId(accountId);
-    public bool UserExists(string steamId) => _db.UserExists(steamId);
-    public string TouchCurrentSession(string clientInstanceId = "", string processRole = "client") =>
-        _db.TouchSession(SteamId(), clientInstanceId, processRole, _context.ClientIp);
-    public string GetPresence(string steamId) => _db.GetPresence(steamId);
-    public string SetPresence(string steamId, int personaState, string gameState, uint heroId, string richPresenceJson) =>
-        _db.SetPresence(steamId, personaState, gameState, heroId, richPresenceJson);
-    public bool AddFriend(string steamId, string friendSteamId) => _db.AddFriend(steamId, friendSteamId);
-    public string GetFriends(string steamId) => _db.GetFriends(steamId);
-    public string SetValue(string scope, string key, string valueJson) => _db.SetValue(scope, key, valueJson);
-    public string GetValue(string scope, string key) => _db.GetValue(scope, key);
-
-    private string SteamId() => _context.SteamId.ToString(System.Globalization.CultureInfo.InvariantCulture);
 }

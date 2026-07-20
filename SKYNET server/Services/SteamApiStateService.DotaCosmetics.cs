@@ -273,7 +273,7 @@ public sealed partial class SteamApiStateService
                 return false;
             }
 
-            // MoonSharp serializes an empty Lua table as "{}"; treat it as an empty list.
+            // Older script runtimes persisted an empty equipment table as "{}"; treat it as an empty list.
             var trimmed = string.IsNullOrWhiteSpace(json) ? "[]" : json.Trim();
             if (trimmed == "{}")
             {
