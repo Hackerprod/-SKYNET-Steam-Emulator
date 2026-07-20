@@ -3,27 +3,27 @@ using Microsoft.EntityFrameworkCore;
 namespace SKYNET_server.Persistence;
 
 /// <summary>
-/// Periodically snapshots app.db with <c>VACUUM INTO</c> — a consistent,
-/// compacted copy safe to take while the database is in use — under
-/// Data/backups, keeping the most recent N files and pruning the rest.
-/// Replaces the ad-hoc *.bak copies that used to litter the Data folder.
-/// Configurable via "Backup:IntervalHours" and "Backup:Retention".
+/// Periodically snapshots steam.db and dota.db with VACUUM INTO: compact,
+/// consistent copies that are safe to take while SQLite is in WAL mode.
 /// </summary>
 public sealed class DatabaseBackupService : BackgroundService
 {
-    private readonly IDbContextFactory<AppDbContext> _factory;
+    private readonly IDbContextFactory<SteamDbContext> _steamFactory;
+    private readonly IDbContextFactory<DotaDbContext> _dotaFactory;
     private readonly ILogger<DatabaseBackupService> _logger;
     private readonly string _backupDir;
     private readonly TimeSpan _interval;
     private readonly int _retention;
 
     public DatabaseBackupService(
-        IDbContextFactory<AppDbContext> factory,
+        IDbContextFactory<SteamDbContext> steamFactory,
+        IDbContextFactory<DotaDbContext> dotaFactory,
         IHostEnvironment environment,
         IConfiguration configuration,
         ILogger<DatabaseBackupService> logger)
     {
-        _factory = factory;
+        _steamFactory = steamFactory;
+        _dotaFactory = dotaFactory;
         _logger = logger;
         _backupDir = Path.Combine(environment.ContentRootPath, "Data", "backups");
         _interval = TimeSpan.FromHours(Math.Clamp(configuration.GetValue("Backup:IntervalHours", 6.0), 0.25, 168.0));
@@ -32,7 +32,6 @@ public sealed class DatabaseBackupService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // Let startup migration/import settle before the first snapshot.
         try
         {
             await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
@@ -72,23 +71,30 @@ public sealed class DatabaseBackupService : BackgroundService
     private void Backup()
     {
         Directory.CreateDirectory(_backupDir);
-        var target = Path.Combine(_backupDir, $"app-{DateTime.UtcNow:yyyyMMdd-HHmmss}.db");
-
-        // VACUUM INTO takes a string literal, not a parameter. The path is derived
-        // from a timestamp under our own folder, but escape quotes defensively.
-        var literal = "'" + target.Replace("'", "''") + "'";
-
-        using var db = _factory.CreateDbContext();
-        db.Database.ExecuteSqlRaw($"VACUUM INTO {literal};");
-        _logger.LogInformation("Database backup written to {Path}", target);
-
-        Prune();
+        var stamp = DateTime.UtcNow.ToString("yyyyMMdd-HHmmss");
+        BackupOne(_steamFactory.CreateDbContext(), Path.Combine(_backupDir, $"steam-{stamp}.db"));
+        BackupOne(_dotaFactory.CreateDbContext(), Path.Combine(_backupDir, $"dota-{stamp}.db"));
+        Prune("steam-*.db");
+        Prune("dota-*.db");
     }
 
-    private void Prune()
+    private void BackupOne(DbContext db, string target)
+    {
+        using (db)
+        {
+            var literal = "'" + target.Replace("'", "''") + "'";
+#pragma warning disable EF1002
+            db.Database.ExecuteSqlRaw($"VACUUM INTO {literal};");
+#pragma warning restore EF1002
+        }
+
+        _logger.LogInformation("Database backup written to {Path}", target);
+    }
+
+    private void Prune(string pattern)
     {
         var stale = new DirectoryInfo(_backupDir)
-            .GetFiles("app-*.db")
+            .GetFiles(pattern)
             .OrderByDescending(f => f.Name)
             .Skip(_retention)
             .ToList();

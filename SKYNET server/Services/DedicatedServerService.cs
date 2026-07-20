@@ -12,7 +12,7 @@ public sealed class DedicatedServerService : ScriptDatabase
         IConfiguration configuration,
         DotaDedicatedServerSupervisor supervisor,
         ILogger<DedicatedServerService> logger)
-        : base(environment, configuration, "dedicated-server.db")
+        : base(environment, configuration, "dota.db")
     {
         _supervisor = supervisor;
         _logger = logger;

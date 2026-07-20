@@ -3,7 +3,8 @@ using Microsoft.Data.Sqlite;
 namespace SKYNET_server.Services;
 
 /// <summary>
-/// Opens connections to the consolidated app.db for the raw-SQL Dota stores.
+/// Opens connections to dota.db for raw-SQL Dota stores that sit behind typed
+/// repository classes.
 /// The database is created and set to WAL once at startup (see Program.cs), so
 /// connections here only need a busy timeout and foreign-key enforcement — no
 /// journal-mode toggling or sidecar juggling. Replaces the old SqliteResilience.

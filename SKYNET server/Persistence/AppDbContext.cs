@@ -8,15 +8,13 @@ using SKYNET_server.Persistence.Entities;
 namespace SKYNET_server.Persistence;
 
 /// <summary>
-/// Single embedded SQLite store for all durable server state. Replaces the
-/// monolithic api-state.json and the per-feature SQLite stores. Ephemeral
-/// data (presence, in-flight game sessions, queues) is not persisted here.
+/// Durable Steam/server state. This database owns identity, authentication,
+/// relationships, generic Steam stats, remote storage, and web/server state.
+/// Game Coordinator data belongs in <see cref="DotaDbContext"/>.
 /// </summary>
-public sealed class AppDbContext : DbContext
+public sealed class SteamDbContext : DbContext
 {
-    private static readonly JsonSerializerOptions JsonOpts = new();
-
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    public SteamDbContext(DbContextOptions<SteamDbContext> options) : base(options)
     {
     }
 
@@ -28,23 +26,12 @@ public sealed class AppDbContext : DbContext
     public DbSet<AchievementRecord> Achievements => Set<AchievementRecord>();
     public DbSet<WebAccountRecord> WebAccounts => Set<WebAccountRecord>();
     public DbSet<WebSessionRecord> WebSessions => Set<WebSessionRecord>();
-    public DbSet<GameServerRecord> GameServers => Set<GameServerRecord>();
-    public DbSet<LobbyRecord> Lobbies => Set<LobbyRecord>();
     public DbSet<RemoteFileRecord> RemoteFiles => Set<RemoteFileRecord>();
     public DbSet<RemoteFileShareRecord> RemoteFileShares => Set<RemoteFileShareRecord>();
-    public DbSet<DotaItemRecord> DotaItems => Set<DotaItemRecord>();
-    public DbSet<DotaEquipmentRecord> DotaEquipment => Set<DotaEquipmentRecord>();
-    public DbSet<DotaMatchRecord> DotaMatches => Set<DotaMatchRecord>();
-    public DbSet<DotaMatchPlayerRecord> DotaMatchPlayers => Set<DotaMatchPlayerRecord>();
-    public DbSet<CosmeticSettingsRecord> CosmeticSettings => Set<CosmeticSettingsRecord>();
-    public DbSet<DotaHeroIdRecord> DotaHeroIds => Set<DotaHeroIdRecord>();
-    public DbSet<DotaHeroSlotRecord> DotaHeroSlots => Set<DotaHeroSlotRecord>();
     public DbSet<AppStateRecord> AppState => Set<AppStateRecord>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
-        // SQLite stores INTEGER as signed 64-bit; map ulong through long so Steam
-        // IDs and other 64-bit unsigned values round-trip without EF warnings.
         configurationBuilder.Properties<ulong>().HaveConversion<UlongToLongConverter>();
     }
 
@@ -61,18 +48,48 @@ public sealed class AppDbContext : DbContext
         modelBuilder.Entity<RemoteFileRecord>().HasKey(x => new { x.OwnerSteamId, x.AppId, x.NormalizedName });
         modelBuilder.Entity<RemoteFileShareRecord>().HasKey(x => x.Handle);
         modelBuilder.Entity<RemoteFileShareRecord>().Property(x => x.Handle).ValueGeneratedNever();
+        modelBuilder.Entity<AppStateRecord>().HasKey(x => x.Id);
+
+        modelBuilder.Entity<WebAccountRecord>().HasIndex(x => x.SteamId);
+        modelBuilder.Entity<WebSessionRecord>().HasIndex(x => x.SteamId);
+        modelBuilder.Entity<FriendRequestRecord>().HasIndex(x => x.ToSteamId);
+        modelBuilder.Entity<FriendRequestRecord>().HasIndex(x => x.FromSteamId);
+    }
+}
+
+/// <summary>
+/// Durable Dota Game Coordinator state. This database owns Dota lobbies, game
+/// servers, cosmetics, live-match cache, and GC/user state that is specific to
+/// app 570. Steam identity and relationships are resolved through steam.db.
+/// </summary>
+public sealed class DotaDbContext : DbContext
+{
+    public DotaDbContext(DbContextOptions<DotaDbContext> options) : base(options)
+    {
+    }
+
+    public DbSet<GameServerRecord> GameServers => Set<GameServerRecord>();
+    public DbSet<LobbyRecord> Lobbies => Set<LobbyRecord>();
+    public DbSet<DotaItemRecord> DotaItems => Set<DotaItemRecord>();
+    public DbSet<DotaEquipmentRecord> DotaEquipment => Set<DotaEquipmentRecord>();
+    public DbSet<DotaMatchRecord> DotaMatches => Set<DotaMatchRecord>();
+    public DbSet<DotaMatchPlayerRecord> DotaMatchPlayers => Set<DotaMatchPlayerRecord>();
+    public DbSet<CosmeticSettingsRecord> CosmeticSettings => Set<CosmeticSettingsRecord>();
+    public DbSet<DotaHeroIdRecord> DotaHeroIds => Set<DotaHeroIdRecord>();
+    public DbSet<DotaHeroSlotRecord> DotaHeroSlots => Set<DotaHeroSlotRecord>();
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.Properties<ulong>().HaveConversion<UlongToLongConverter>();
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
         modelBuilder.Entity<DotaItemRecord>().HasKey(x => x.DefIndex);
         modelBuilder.Entity<DotaEquipmentRecord>().HasKey(x => new { x.SteamId, x.HeroId, x.SlotId });
         modelBuilder.Entity<CosmeticSettingsRecord>().HasKey(x => x.Id);
         modelBuilder.Entity<DotaHeroIdRecord>().HasKey(x => x.Name);
         modelBuilder.Entity<DotaHeroSlotRecord>().HasKey(x => new { x.HeroName, x.SlotName });
-        modelBuilder.Entity<AppStateRecord>().HasKey(x => x.Id);
-
-        // Secondary indexes for the non-key columns we look rows up by.
-        modelBuilder.Entity<WebAccountRecord>().HasIndex(x => x.SteamId);
-        modelBuilder.Entity<WebSessionRecord>().HasIndex(x => x.SteamId);
-        modelBuilder.Entity<FriendRequestRecord>().HasIndex(x => x.ToSteamId);
-        modelBuilder.Entity<FriendRequestRecord>().HasIndex(x => x.FromSteamId);
         modelBuilder.Entity<DotaMatchPlayerRecord>().HasIndex(x => x.SteamId);
 
         modelBuilder.Entity<GameServerRecord>(b =>
@@ -110,14 +127,19 @@ public sealed class AppDbContext : DbContext
             b.Property(x => x.Equipment).HasJsonConversion();
         });
     }
+}
 
-    private sealed class UlongToLongConverter : ValueConverter<ulong, long>
+internal sealed class UlongToLongConverter : ValueConverter<ulong, long>
+{
+    public UlongToLongConverter()
+        : base(v => unchecked((long)v), v => unchecked((ulong)v))
     {
-        public UlongToLongConverter()
-            : base(v => unchecked((long)v), v => unchecked((ulong)v))
-        {
-        }
     }
+}
+
+internal static class DbContextJsonConversion
+{
+    private static readonly JsonSerializerOptions JsonOpts = new();
 
     internal static ValueConverter<T, string> JsonConverter<T>() => new(
         v => JsonSerializer.Serialize(v, JsonOpts),
@@ -135,7 +157,7 @@ internal static class PropertyBuilderJsonExtensions
     public static Microsoft.EntityFrameworkCore.Metadata.Builders.PropertyBuilder<T> HasJsonConversion<T>(
         this Microsoft.EntityFrameworkCore.Metadata.Builders.PropertyBuilder<T> builder)
     {
-        builder.HasConversion(AppDbContext.JsonConverter<T>(), AppDbContext.JsonComparer<T>());
+        builder.HasConversion(DbContextJsonConversion.JsonConverter<T>(), DbContextJsonConversion.JsonComparer<T>());
         return builder;
     }
 }

@@ -4,18 +4,19 @@ using SKYNET_server.Models;
 using SKYNET_server.Persistence;
 using SKYNET_server.Services;
 
-// One-shot legacy consolidation: `--import-legacy [--force]` migrates
-// api-state.json + the legacy Dota SQLite files into Data/app.db and exits.
-if (args.Contains("--import-legacy"))
+// One-shot split migration: app.db/api-state.json/older feature DBs are copied
+// into steam.db and dota.db, then archived so only the split stores remain live.
+if (args.Contains("--migrate-db-split"))
 {
-    var dataDir = Path.Combine(Directory.GetCurrentDirectory(), "Data");
-    Directory.CreateDirectory(dataDir);
-    var importOptions = new DbContextOptionsBuilder<AppDbContext>()
-        .UseSqlite($"Data Source={Path.Combine(dataDir, "app.db")}")
-        .Options;
-    using var importContext = new AppDbContext(importOptions);
-    var report = LegacyStateImporter.Import(importContext, dataDir, args.Contains("--force"), Console.WriteLine);
-    Environment.ExitCode = report.AllMatched ? 0 : 1;
+    var migrationConfiguration = new ConfigurationBuilder()
+        .AddJsonFile("appsettings.json", optional: true)
+        .AddJsonFile("appsettings.Development.json", optional: true)
+        .AddEnvironmentVariables()
+        .AddCommandLine(args)
+        .Build();
+    var dataDir = DatabaseSplitMigrator.ResolveDataRoot(Directory.GetCurrentDirectory(), migrationConfiguration);
+    DatabaseSplitMigrator.Migrate(dataDir, args.Contains("--force"), Console.WriteLine);
+    Environment.ExitCode = 0;
     return;
 }
 
@@ -51,17 +52,17 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 builder.Services.AddSingleton<GameCoordinatorTraceService>();
 builder.Services.AddSingleton<GameServerSettingsService>();
 builder.Services.AddSingleton<DotaDedicatedServerSupervisor>();
-builder.Services.AddSingleton<SteamDB>();
 builder.Services.AddSingleton<DotaDB>();
 builder.Services.AddSingleton<DedicatedServerService>();
 builder.Services.AddSingleton<GameCoordinatorScriptPlugin>();
 builder.Services.AddSingleton<IGameCoordinatorPlugin>(sp => sp.GetRequiredService<GameCoordinatorScriptPlugin>());
 builder.Services.AddSingleton<GameCoordinatorPluginRegistry>();
 builder.Services.AddSingleton<SdrCertificateService>();
-// Consolidated persistence store. A pooled factory is singleton-safe, so the
-// singleton state service can create short-lived contexts per operation.
-builder.Services.AddPooledDbContextFactory<AppDbContext>(options =>
-    options.UseSqlite($"Data Source={Path.Combine(builder.Environment.ContentRootPath, "Data", "app.db")}"));
+var dataRoot = DatabaseSplitMigrator.ResolveDataRoot(builder.Environment.ContentRootPath, builder.Configuration);
+builder.Services.AddPooledDbContextFactory<SteamDbContext>(options =>
+    options.UseSqlite($"Data Source={Path.Combine(dataRoot, "steam.db")}"));
+builder.Services.AddPooledDbContextFactory<DotaDbContext>(options =>
+    options.UseSqlite($"Data Source={Path.Combine(dataRoot, "dota.db")}"));
 builder.Services.AddSingleton<SteamApiStateService>();
 builder.Services.AddHostedService<DiscoveryService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<DotaDedicatedServerSupervisor>());
@@ -72,22 +73,22 @@ builder.Services.AddHostedService<DatabaseBackupService>();
 
 var app = builder.Build();
 
-// Hot-GC stores. These are separate from the consolidated app.db so TypeScript
-// GC logic can depend on stable Steam/Dota/dedicated facades while the current
-// backend continues to run.
-_ = app.Services.GetRequiredService<SteamDB>();
+// Prepare split SQLite stores before any facade touches them. app.db and older
+// per-feature DBs are migration inputs only and are archived on successful copy.
+{
+    Directory.CreateDirectory(dataRoot);
+    DatabaseSplitMigrator.Migrate(dataRoot, force: false, m => app.Logger.LogInformation("{MigrationMessage}", m));
+
+    using var steam = app.Services.GetRequiredService<IDbContextFactory<SteamDbContext>>().CreateDbContext();
+    using var dota = app.Services.GetRequiredService<IDbContextFactory<DotaDbContext>>().CreateDbContext();
+    steam.Database.EnsureCreated();
+    dota.Database.EnsureCreated();
+    steam.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
+    dota.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
+}
+
 _ = app.Services.GetRequiredService<DotaDB>();
 _ = app.Services.GetRequiredService<DedicatedServerService>();
-
-// Prepare the consolidated SQLite store: apply migrations and enable WAL (kept
-// non-blocking for readers). The state service performs the one-time legacy
-// import and hydration on first construction.
-{
-    Directory.CreateDirectory(Path.Combine(app.Environment.ContentRootPath, "Data"));
-    using var db = app.Services.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext();
-    db.Database.Migrate();
-    db.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
-}
 
 app.Lifetime.ApplicationStopping.Register(() =>
 {
@@ -98,8 +99,10 @@ app.Lifetime.ApplicationStopping.Register(() =>
 
     try
     {
-        using var db = app.Services.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext();
-        db.Database.ExecuteSqlRaw("PRAGMA wal_checkpoint(TRUNCATE);");
+        using var steam = app.Services.GetRequiredService<IDbContextFactory<SteamDbContext>>().CreateDbContext();
+        using var dota = app.Services.GetRequiredService<IDbContextFactory<DotaDbContext>>().CreateDbContext();
+        steam.Database.ExecuteSqlRaw("PRAGMA wal_checkpoint(TRUNCATE);");
+        dota.Database.ExecuteSqlRaw("PRAGMA wal_checkpoint(TRUNCATE);");
     }
     catch
     {

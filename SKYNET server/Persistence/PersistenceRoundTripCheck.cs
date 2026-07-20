@@ -6,7 +6,7 @@ namespace SKYNET_server.Persistence;
 
 /// <summary>
 /// Self-check that a representative <see cref="ApiState"/> survives a
-/// Save -> Load round-trip through app.db unchanged. Guards against the main
+/// Save -> Load round-trip through steam.db and dota.db unchanged. Guards against the main
 /// risk of the hand-written mapping in <see cref="StatePersistence"/>: a field
 /// or aggregate silently dropped when a model class gains/loses a property.
 /// Run with `--verify-persistence`.
@@ -15,33 +15,38 @@ public static class PersistenceRoundTripCheck
 {
     public static bool Run(Action<string> log)
     {
-        var dbPath = Path.Combine(Path.GetTempPath(), $"skynet-roundtrip-{Guid.NewGuid():N}.db");
+        var dir = Path.Combine(Path.GetTempPath(), $"skynet-roundtrip-{Guid.NewGuid():N}");
+        var steamPath = Path.Combine(dir, "steam.db");
+        var dotaPath = Path.Combine(dir, "dota.db");
         try
         {
-            var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseSqlite($"Data Source={dbPath}").Options;
+            Directory.CreateDirectory(dir);
+            var steamOptions = new DbContextOptionsBuilder<SteamDbContext>()
+                .UseSqlite($"Data Source={steamPath}").Options;
+            var dotaOptions = new DbContextOptionsBuilder<DotaDbContext>()
+                .UseSqlite($"Data Source={dotaPath}").Options;
 
             var original = BuildSampleState();
-            using (var ctx = new AppDbContext(options))
+            using (var steam = new SteamDbContext(steamOptions))
+            using (var dota = new DotaDbContext(dotaOptions))
             {
-                ctx.Database.Migrate();
-                StatePersistence.Save(ctx, original, includeCatalog: true);
+                steam.Database.EnsureCreated();
+                dota.Database.EnsureCreated();
+                StatePersistence.Save(steam, dota, original, includeCatalog: true);
             }
 
             ApiState loaded;
-            using (var ctx = new AppDbContext(options))
+            using (var steam = new SteamDbContext(steamOptions))
+            using (var dota = new DotaDbContext(dotaOptions))
             {
-                loaded = StatePersistence.Load(ctx);
+                loaded = StatePersistence.Load(steam, dota);
             }
 
             return Compare(original, loaded, log);
         }
         finally
         {
-            foreach (var suffix in new[] { "", "-wal", "-shm" })
-            {
-                try { File.Delete(dbPath + suffix); } catch { /* best effort */ }
-            }
+            try { Directory.Delete(dir, recursive: true); } catch { /* best effort */ }
         }
     }
 

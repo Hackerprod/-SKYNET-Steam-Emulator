@@ -478,7 +478,7 @@ public sealed partial class SteamApiStateService
         SaveState();
     }
 
-    // Durable state now lives in app.db. Mutation sites still call SaveState();
+    // Durable state now lives in steam.db/dota.db. Mutation sites still call SaveState();
     // it just marks the state dirty and wakes the background flusher, which
     // coalesces bursts and writes to SQLite off the request path (see
     // SteamApiStateService.Persistence).

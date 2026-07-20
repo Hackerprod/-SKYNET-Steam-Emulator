@@ -64,7 +64,8 @@ public sealed partial class SteamApiStateService
         DotaDedicatedServerSupervisor dotaDedicatedServers,
         GameServerSettingsService gameServerSettings,
         DotaDB dotaDb,
-        IDbContextFactory<AppDbContext> dbContextFactory,
+        IDbContextFactory<SteamDbContext> steamDbContextFactory,
+        IDbContextFactory<DotaDbContext> dotaDbContextFactory,
         ILogger<SteamApiStateService> logger)
     {
         _logger = logger;
@@ -73,18 +74,20 @@ public sealed partial class SteamApiStateService
         _dotaDedicatedServers = dotaDedicatedServers;
         _gameServerSettings = gameServerSettings;
         _dotaDb = dotaDb;
-        _dbFactory = dbContextFactory;
+        _steamDbFactory = steamDbContextFactory;
+        _dotaDbFactory = dotaDbContextFactory;
         _sessionTimeout = TimeSpan.FromMinutes(Math.Clamp(configuration.GetValue("Session:TimeoutMinutes", 30), 1, 1440));
         _presenceTimeout = TimeSpan.FromSeconds(Math.Clamp(configuration.GetValue("Presence:TimeoutSeconds", 90), 15, 3600));
         var dataRoot = ResolveDataRoot(hostEnvironment.ContentRootPath, configuration);
         _statePath = Path.Combine(dataRoot, "api-state.json");
-        // All Dota stores now share the consolidated app.db (their tables were
-        // copied in by the importer); they keep their raw SQL, just this file.
-        var appDbPath = Path.Combine(dataRoot, "app.db");
-        _dotaStatsStore = new DotaStatsStore(appDbPath, ResolveDotaStatsIdentity);
-        _dotaPartyStore = new DotaPartyStore(appDbPath, ResolveDotaStatsIdentity);
-        _dotaLobbyInviteStore = new DotaLobbyInviteStore(appDbPath);
-        _dotaGuildStore = new DotaGuildStore(appDbPath, ResolveDotaStatsIdentity);
+        // Dota GC stores live in dota.db. Steam identity, auth, friends, generic
+        // stats, and remote storage live in steam.db and are resolved through
+        // SteamApiStateService instead of being duplicated into Dota state.
+        var dotaDbPath = Path.Combine(dataRoot, "dota.db");
+        _dotaStatsStore = new DotaStatsStore(dotaDbPath, ResolveDotaStatsIdentity);
+        _dotaPartyStore = new DotaPartyStore(dotaDbPath, ResolveDotaStatsIdentity);
+        _dotaLobbyInviteStore = new DotaLobbyInviteStore(dotaDbPath);
+        _dotaGuildStore = new DotaGuildStore(dotaDbPath, ResolveDotaStatsIdentity);
         InitializePersistence(dataRoot);
         NormalizeState();
         StartBackgroundFlusher();

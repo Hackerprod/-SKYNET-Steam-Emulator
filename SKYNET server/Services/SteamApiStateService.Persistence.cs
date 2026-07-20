@@ -5,7 +5,8 @@ namespace SKYNET_server.Services;
 
 public sealed partial class SteamApiStateService
 {
-    private IDbContextFactory<AppDbContext> _dbFactory = null!;
+    private IDbContextFactory<SteamDbContext> _steamDbFactory = null!;
+    private IDbContextFactory<DotaDbContext> _dotaDbFactory = null!;
     private readonly ManualResetEventSlim _flushSignal = new(false);
     private readonly object _flushIoLock = new();
     private Dictionary<string, string> _lastFlushHashes = new(StringComparer.Ordinal);
@@ -13,18 +14,21 @@ public sealed partial class SteamApiStateService
     private int _catalogPending;
     private int _flusherStarted;
 
-    // Load the durable state from app.db, importing the legacy stores on first
-    // run. Replaces the old JSON load. Presence, tickets and event queues are not
-    // persisted, so they start empty and are rebuilt at runtime.
+    // Load durable state from steam.db and dota.db. app.db/api-state.json are
+    // treated only as one-time migration sources and are archived after import.
+    // Presence, tickets and event queues are not persisted, so they start empty
+    // and are rebuilt at runtime.
     private void InitializePersistence(string dataRoot)
     {
-        using var context = _dbFactory.CreateDbContext();
-        context.Database.Migrate();
+        using var steam = _steamDbFactory.CreateDbContext();
+        using var dota = _dotaDbFactory.CreateDbContext();
+        steam.Database.EnsureCreated();
+        dota.Database.EnsureCreated();
 
         try
         {
-            var migratedCount = context.RemoteFiles.Count(f => f.OwnerSteamId != 0);
-            var orphanedCount = context.RemoteFiles.Count(f => f.OwnerSteamId == 0);
+            var migratedCount = steam.RemoteFiles.Count(f => f.OwnerSteamId != 0);
+            var orphanedCount = steam.RemoteFiles.Count(f => f.OwnerSteamId == 0);
             _logger.LogInformation("Remote Storage DB Migration check: {Migrated} files scoped, {Orphaned} files orphaned.", migratedCount, orphanedCount);
         }
         catch (Exception ex)
@@ -32,14 +36,14 @@ public sealed partial class SteamApiStateService
             _logger.LogWarning(ex, "Failed to count migrated remote files.");
         }
 
-        if (!context.Users.Any() && File.Exists(_statePath))
+        if (!steam.Users.Any() && File.Exists(_statePath))
         {
-            _logger.LogInformation("app.db is empty; importing legacy state from {Path}.", _statePath);
-            LegacyStateImporter.Import(context, dataRoot, force: false, m => _logger.LogInformation("{ImportMessage}", m));
+            _logger.LogInformation("steam.db is empty; importing legacy state from {Path}.", _statePath);
+            DatabaseSplitMigrator.ImportJson(steam, dota, _statePath, includeCatalog: true, m => _logger.LogInformation("{ImportMessage}", m));
             ArchiveLegacyStateFile();
         }
 
-        _state = StatePersistence.Load(context);
+        _state = StatePersistence.Load(steam, dota);
 
         // Derive the in-memory id counter from what is already persisted so a
         // restart never hands out a lobby id that still exists on disk.
@@ -48,14 +52,14 @@ public sealed partial class SteamApiStateService
             _nextLobbyId = Math.Max(_nextLobbyId, _state.Lobbies.Keys.Max() + 1);
         }
 
-        if (context.RemoteFileShares.Any())
+        if (steam.RemoteFileShares.Any())
         {
-            _nextFileShareHandle = Math.Max(_nextFileShareHandle, context.RemoteFileShares.Max(x => x.Handle) + 1);
+            _nextFileShareHandle = Math.Max(_nextFileShareHandle, steam.RemoteFileShares.Max(x => x.Handle) + 1);
         }
     }
 
     // After the one-time import, rename the JSON so it is not re-read and does
-    // not confuse app.db as the source of truth. Rename back to re-import.
+    // not confuse steam.db/dota.db as the source of truth. Rename back to re-import.
     private void ArchiveLegacyStateFile()
     {
         try
@@ -75,7 +79,7 @@ public sealed partial class SteamApiStateService
 
     // Called from the ~54 mutation sites (via SaveState). Non-blocking: marks the
     // durable state dirty and wakes the background flusher, which coalesces bursts
-    // and writes to app.db off the request path.
+    // and writes to steam.db/dota.db off the request path.
     private void RequestStateFlush()
     {
         Interlocked.Exchange(ref _flushPending, 1);
@@ -134,7 +138,7 @@ public sealed partial class SteamApiStateService
                     Interlocked.Exchange(ref _catalogPending, 1);
                 }
 
-                _logger.LogWarning(ex, "State flush to app.db failed (attempt {Attempt}); retrying.", consecutiveFailures);
+                _logger.LogWarning(ex, "State flush to steam.db/dota.db failed (attempt {Attempt}); retrying.", consecutiveFailures);
                 Thread.Sleep(Math.Min(30_000, 500 * (1 << Math.Min(consecutiveFailures, 6))));
                 _flushSignal.Set();
             }
@@ -153,8 +157,9 @@ public sealed partial class SteamApiStateService
 
         lock (_flushIoLock)
         {
-            using var context = _dbFactory.CreateDbContext();
-            _lastFlushHashes = StatePersistence.Write(context, snapshot, _lastFlushHashes);
+            using var steam = _steamDbFactory.CreateDbContext();
+            using var dota = _dotaDbFactory.CreateDbContext();
+            _lastFlushHashes = StatePersistence.Write(steam, dota, snapshot, _lastFlushHashes);
         }
     }
 

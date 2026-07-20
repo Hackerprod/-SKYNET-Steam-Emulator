@@ -37,7 +37,7 @@ public static class GcScriptSelfCheck
             ClientIp = "192.168.212.252"
         };
         var queuedMessages = new List<(ulong SteamId, ApiGCMessage Message)>();
-        var selfCheckDb = Path.Combine(Path.GetTempPath(), "skynet-gc-selfcheck", Guid.NewGuid().ToString("N"), "app.db");
+        var selfCheckDb = Path.Combine(Path.GetTempPath(), "skynet-gc-selfcheck", Guid.NewGuid().ToString("N"), "dota.db");
         DotaStatsAccountIdentity? ResolveIdentity(uint accountId)
         {
             return accountId == context.AccountId

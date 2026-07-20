@@ -9,8 +9,8 @@ namespace SKYNET_server.Persistence;
 
 /// <summary>
 /// Maps between the in-memory <see cref="ApiState"/> working model and the
-/// relational app.db tables. Both directions live here so the importer and the
-/// runtime service share one proven mapping.
+/// relational steam.db/dota.db tables. Both directions live here so migration
+/// and runtime share one proven mapping.
 ///
 /// The write path is split so the caller can build the entity snapshot under its
 /// lock (fast, in-memory) and do the database I/O outside the lock. Each table is
@@ -25,9 +25,9 @@ public static class StatePersistence
     private static readonly JsonSerializerOptions JsonOpts = new();
 
     /// <summary>Full write (used by the importer and round-trip check).</summary>
-    public static void Save(AppDbContext context, ApiState state, bool includeCatalog)
+    public static void Save(SteamDbContext steam, DotaDbContext dota, ApiState state, bool includeCatalog)
     {
-        Write(context, BuildSnapshot(state, includeCatalog), previous: null);
+        Write(steam, dota, BuildSnapshot(state, includeCatalog), previous: null);
     }
 
     /// <summary>
@@ -323,43 +323,71 @@ public static class StatePersistence
     }
 
     /// <summary>
-    /// Writes the snapshot to app.db, rewriting only the tables whose content
+    /// Writes the snapshot to steam.db and dota.db, rewriting only the tables whose content
     /// changed vs. <paramref name="previous"/>. Returns the new per-table hashes
     /// for the caller to remember. Pass <c>null</c> to force a full write.
     /// </summary>
     public static Dictionary<string, string> Write(
-        AppDbContext context, StateSnapshot snapshot, IReadOnlyDictionary<string, string>? previous)
+        SteamDbContext steam, DotaDbContext dota, StateSnapshot snapshot, IReadOnlyDictionary<string, string>? previous)
     {
-        var tables = new List<TableWrite>
+        var steamTables = new List<TableWrite>
         {
-            new("Users", snapshot.Users, () => context.Users.ExecuteDelete(), () => context.Users.AddRange(snapshot.Users)),
-            new("Friends", snapshot.Friends, () => context.Friends.ExecuteDelete(), () => context.Friends.AddRange(snapshot.Friends)),
-            new("FriendRequests", snapshot.FriendRequests, () => context.FriendRequests.ExecuteDelete(), () => context.FriendRequests.AddRange(snapshot.FriendRequests)),
-            new("Avatars", snapshot.Avatars, () => context.Avatars.ExecuteDelete(), () => context.Avatars.AddRange(snapshot.Avatars)),
-            new("Stats", snapshot.Stats, () => context.Stats.ExecuteDelete(), () => context.Stats.AddRange(snapshot.Stats)),
-            new("Achievements", snapshot.Achievements, () => context.Achievements.ExecuteDelete(), () => context.Achievements.AddRange(snapshot.Achievements)),
-            new("WebAccounts", snapshot.WebAccounts, () => context.WebAccounts.ExecuteDelete(), () => context.WebAccounts.AddRange(snapshot.WebAccounts)),
-            new("WebSessions", snapshot.WebSessions, () => context.WebSessions.ExecuteDelete(), () => context.WebSessions.AddRange(snapshot.WebSessions)),
-            new("GameServers", snapshot.GameServers, () => context.GameServers.ExecuteDelete(), () => context.GameServers.AddRange(snapshot.GameServers)),
-            new("Lobbies", snapshot.Lobbies, () => context.Lobbies.ExecuteDelete(), () => context.Lobbies.AddRange(snapshot.Lobbies)),
-            new("RemoteFiles", snapshot.RemoteFiles, () => context.RemoteFiles.ExecuteDelete(), () => context.RemoteFiles.AddRange(snapshot.RemoteFiles)),
-            new("RemoteFileShares", snapshot.RemoteFileShares, () => context.RemoteFileShares.ExecuteDelete(), () => context.RemoteFileShares.AddRange(snapshot.RemoteFileShares)),
-            new("DotaEquipment", snapshot.DotaEquipment, () => context.DotaEquipment.ExecuteDelete(), () => context.DotaEquipment.AddRange(snapshot.DotaEquipment)),
+            new("steam.Users", snapshot.Users, () => steam.Users.ExecuteDelete(), () => steam.Users.AddRange(snapshot.Users)),
+            new("steam.Friends", snapshot.Friends, () => steam.Friends.ExecuteDelete(), () => steam.Friends.AddRange(snapshot.Friends)),
+            new("steam.FriendRequests", snapshot.FriendRequests, () => steam.FriendRequests.ExecuteDelete(), () => steam.FriendRequests.AddRange(snapshot.FriendRequests)),
+            new("steam.Avatars", snapshot.Avatars, () => steam.Avatars.ExecuteDelete(), () => steam.Avatars.AddRange(snapshot.Avatars)),
+            new("steam.Stats", snapshot.Stats, () => steam.Stats.ExecuteDelete(), () => steam.Stats.AddRange(snapshot.Stats)),
+            new("steam.Achievements", snapshot.Achievements, () => steam.Achievements.ExecuteDelete(), () => steam.Achievements.AddRange(snapshot.Achievements)),
+            new("steam.WebAccounts", snapshot.WebAccounts, () => steam.WebAccounts.ExecuteDelete(), () => steam.WebAccounts.AddRange(snapshot.WebAccounts)),
+            new("steam.WebSessions", snapshot.WebSessions, () => steam.WebSessions.ExecuteDelete(), () => steam.WebSessions.AddRange(snapshot.WebSessions)),
+            new("steam.RemoteFiles", snapshot.RemoteFiles, () => steam.RemoteFiles.ExecuteDelete(), () => steam.RemoteFiles.AddRange(snapshot.RemoteFiles)),
+            new("steam.RemoteFileShares", snapshot.RemoteFileShares, () => steam.RemoteFileShares.ExecuteDelete(), () => steam.RemoteFileShares.AddRange(snapshot.RemoteFileShares)),
+            new("steam.AppState", new[] { snapshot.AppState }, () => steam.AppState.ExecuteDelete(), () => steam.AppState.Add(snapshot.AppState)),
+        };
+
+        var dotaTables = new List<TableWrite>
+        {
+            new("dota.GameServers", snapshot.GameServers, () => dota.GameServers.ExecuteDelete(), () => dota.GameServers.AddRange(snapshot.GameServers)),
+            new("dota.Lobbies", snapshot.Lobbies, () => dota.Lobbies.ExecuteDelete(), () => dota.Lobbies.AddRange(snapshot.Lobbies)),
+            new("dota.DotaEquipment", snapshot.DotaEquipment, () => dota.DotaEquipment.ExecuteDelete(), () => dota.DotaEquipment.AddRange(snapshot.DotaEquipment)),
             // DotaMatchPlayers are cascade-deleted with their match and inserted via the Players navigation.
-            new("DotaMatches", snapshot.DotaMatches, () => context.DotaMatches.ExecuteDelete(), () => context.DotaMatches.AddRange(snapshot.DotaMatches)),
-            new("DotaHeroIds", snapshot.DotaHeroIds, () => context.DotaHeroIds.ExecuteDelete(), () => context.DotaHeroIds.AddRange(snapshot.DotaHeroIds)),
-            new("DotaHeroSlots", snapshot.DotaHeroSlots, () => context.DotaHeroSlots.ExecuteDelete(), () => context.DotaHeroSlots.AddRange(snapshot.DotaHeroSlots)),
-            new("CosmeticSettings", new[] { snapshot.Cosmetics }, () => context.CosmeticSettings.ExecuteDelete(), () => context.CosmeticSettings.Add(snapshot.Cosmetics)),
-            new("AppState", new[] { snapshot.AppState }, () => context.AppState.ExecuteDelete(), () => context.AppState.Add(snapshot.AppState)),
+            new("dota.DotaMatches", snapshot.DotaMatches, () => dota.DotaMatches.ExecuteDelete(), () => dota.DotaMatches.AddRange(snapshot.DotaMatches)),
+            new("dota.DotaHeroIds", snapshot.DotaHeroIds, () => dota.DotaHeroIds.ExecuteDelete(), () => dota.DotaHeroIds.AddRange(snapshot.DotaHeroIds)),
+            new("dota.DotaHeroSlots", snapshot.DotaHeroSlots, () => dota.DotaHeroSlots.ExecuteDelete(), () => dota.DotaHeroSlots.AddRange(snapshot.DotaHeroSlots)),
+            new("dota.CosmeticSettings", new[] { snapshot.Cosmetics }, () => dota.CosmeticSettings.ExecuteDelete(), () => dota.CosmeticSettings.Add(snapshot.Cosmetics)),
         };
 
         if (snapshot.IncludeCatalog)
         {
-            tables.Add(new("DotaItems", snapshot.DotaItems, () => context.DotaItems.ExecuteDelete(), () => context.DotaItems.AddRange(snapshot.DotaItems)));
+            dotaTables.Add(new("dota.DotaItems", snapshot.DotaItems, () => dota.DotaItems.ExecuteDelete(), () => dota.DotaItems.AddRange(snapshot.DotaItems)));
         }
 
         var hashes = new Dictionary<string, string>(StringComparer.Ordinal);
-        using var tx = context.Database.BeginTransaction();
+        using var steamTx = steam.Database.BeginTransaction();
+        using var dotaTx = dota.Database.BeginTransaction();
+        var wroteSteam = WriteTables(steamTables, previous, hashes);
+        var wroteDota = WriteTables(dotaTables, previous, hashes);
+
+        if (wroteSteam)
+        {
+            steam.SaveChanges();
+        }
+
+        if (wroteDota)
+        {
+            dota.SaveChanges();
+        }
+
+        steamTx.Commit();
+        dotaTx.Commit();
+        return hashes;
+    }
+
+    private static bool WriteTables(
+        IEnumerable<TableWrite> tables,
+        IReadOnlyDictionary<string, string>? previous,
+        Dictionary<string, string> hashes)
+    {
         var wrote = false;
         foreach (var table in tables)
         {
@@ -375,21 +403,15 @@ public static class StatePersistence
             wrote = true;
         }
 
-        if (wrote)
-        {
-            context.SaveChanges();
-        }
-
-        tx.Commit();
-        return hashes;
+        return wrote;
     }
 
     /// <summary>Reads the durable tables back into a fresh <see cref="ApiState"/>.</summary>
-    public static ApiState Load(AppDbContext context)
+    public static ApiState Load(SteamDbContext steam, DotaDbContext dota)
     {
         var state = new ApiState();
 
-        foreach (var u in context.Users.AsNoTracking())
+        foreach (var u in steam.Users.AsNoTracking())
         {
             state.Users[u.SteamId] = new ApiUser
             {
@@ -401,7 +423,7 @@ public static class StatePersistence
             };
         }
 
-        foreach (var e in context.Friends.AsNoTracking())
+        foreach (var e in steam.Friends.AsNoTracking())
         {
             if (!state.FriendLinks.TryGetValue(e.SteamId, out var set))
             {
@@ -412,7 +434,7 @@ public static class StatePersistence
             set.Add(e.FriendSteamId);
         }
 
-        state.FriendRequests = context.FriendRequests.AsNoTracking().Select(r => new ApiFriendRequest
+        state.FriendRequests = steam.FriendRequests.AsNoTracking().Select(r => new ApiFriendRequest
         {
             Id = r.Id,
             FromSteamId = r.FromSteamId,
@@ -422,17 +444,17 @@ public static class StatePersistence
             RespondedAt = r.RespondedAt,
         }).ToList();
 
-        foreach (var a in context.Avatars.AsNoTracking())
+        foreach (var a in steam.Avatars.AsNoTracking())
         {
             state.Avatars[a.SteamId] = Convert.ToBase64String(a.Content);
         }
 
-        foreach (var s in context.Stats.AsNoTracking())
+        foreach (var s in steam.Stats.AsNoTracking())
         {
             Envelope(state, s.SteamId).Stats.Add(new ApiStat { Name = s.Name, Data = s.Data });
         }
 
-        foreach (var a in context.Achievements.AsNoTracking())
+        foreach (var a in steam.Achievements.AsNoTracking())
         {
             Envelope(state, a.SteamId).Achievements.Add(new ApiAchievement
             {
@@ -444,7 +466,7 @@ public static class StatePersistence
             });
         }
 
-        foreach (var w in context.WebAccounts.AsNoTracking())
+        foreach (var w in steam.WebAccounts.AsNoTracking())
         {
             state.WebAccounts[w.Username] = new ApiWebAccount
             {
@@ -457,7 +479,7 @@ public static class StatePersistence
             };
         }
 
-        foreach (var s in context.WebSessions.AsNoTracking())
+        foreach (var s in steam.WebSessions.AsNoTracking())
         {
             state.WebSessions[s.AccessToken] = new ApiSession
             {
@@ -474,7 +496,7 @@ public static class StatePersistence
             };
         }
 
-        foreach (var g in context.GameServers.AsNoTracking())
+        foreach (var g in dota.GameServers.AsNoTracking())
         {
             state.GameServers[g.SteamId] = new ApiGameServer
             {
@@ -504,7 +526,7 @@ public static class StatePersistence
             };
         }
 
-        foreach (var l in context.Lobbies.AsNoTracking())
+        foreach (var l in dota.Lobbies.AsNoTracking())
         {
             state.Lobbies[l.SteamId] = new ApiLobby
             {
@@ -529,7 +551,7 @@ public static class StatePersistence
             };
         }
 
-        foreach (var f in context.RemoteFiles.AsNoTracking())
+        foreach (var f in steam.RemoteFiles.AsNoTracking())
         {
             var key = SteamApiStateService.MakeRemoteStorageKey(f.OwnerSteamId, f.AppId, f.NormalizedName);
             var content = f.Content ?? Array.Empty<byte>();
@@ -555,7 +577,7 @@ public static class StatePersistence
             };
         }
 
-        foreach (var s in context.RemoteFileShares.AsNoTracking())
+        foreach (var s in steam.RemoteFileShares.AsNoTracking())
         {
             state.FileShares[s.Handle] = new ApiRemoteStorageShareRecord
             {
@@ -566,7 +588,7 @@ public static class StatePersistence
             };
         }
 
-        foreach (var i in context.DotaItems.AsNoTracking())
+        foreach (var i in dota.DotaItems.AsNoTracking())
         {
             state.DotaItems[i.DefIndex] = new ApiDotaItem
             {
@@ -587,7 +609,7 @@ public static class StatePersistence
             };
         }
 
-        foreach (var e in context.DotaEquipment.AsNoTracking())
+        foreach (var e in dota.DotaEquipment.AsNoTracking())
         {
             if (!state.DotaEquipment.TryGetValue(e.SteamId, out var list))
             {
@@ -609,7 +631,7 @@ public static class StatePersistence
             });
         }
 
-        foreach (var m in context.DotaMatches.AsNoTracking().Include(x => x.Players))
+        foreach (var m in dota.DotaMatches.AsNoTracking().Include(x => x.Players))
         {
             state.DotaMatches[m.LobbyId] = new ApiDotaMatch
             {
@@ -636,12 +658,12 @@ public static class StatePersistence
             };
         }
 
-        foreach (var h in context.DotaHeroIds.AsNoTracking())
+        foreach (var h in dota.DotaHeroIds.AsNoTracking())
         {
             state.DotaHeroIds[h.Name] = h.HeroId;
         }
 
-        foreach (var s in context.DotaHeroSlots.AsNoTracking())
+        foreach (var s in dota.DotaHeroSlots.AsNoTracking())
         {
             if (!state.DotaHeroSlots.TryGetValue(s.HeroName, out var slots))
             {
@@ -652,7 +674,7 @@ public static class StatePersistence
             slots[s.SlotName] = s.SlotId;
         }
 
-        var cosmetics = context.CosmeticSettings.AsNoTracking().FirstOrDefault();
+        var cosmetics = dota.CosmeticSettings.AsNoTracking().FirstOrDefault();
         if (cosmetics is not null)
         {
             state.DotaCosmetics = new ApiDotaCosmeticSettings
@@ -664,7 +686,7 @@ public static class StatePersistence
             };
         }
 
-        var appState = context.AppState.AsNoTracking().FirstOrDefault();
+        var appState = steam.AppState.AsNoTracking().FirstOrDefault();
         if (appState is not null)
         {
             state.ActiveWebSteamId = appState.ActiveWebSteamId;

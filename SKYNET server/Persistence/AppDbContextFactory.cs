@@ -3,19 +3,24 @@ using Microsoft.EntityFrameworkCore.Design;
 
 namespace SKYNET_server.Persistence;
 
-/// <summary>
-/// Design-time factory so `dotnet ef` can build the model and generate
-/// migrations without booting the whole web host. The runtime registration
-/// (connection string, pooling, migrate-on-start) lives in Program.cs.
-/// </summary>
-public sealed class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
+public sealed class SteamDbContextFactory : IDesignTimeDbContextFactory<SteamDbContext>
 {
-    public AppDbContext CreateDbContext(string[] args)
+    public SteamDbContext CreateDbContext(string[] args)
     {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlite("Data Source=Data/app.db")
+        var options = new DbContextOptionsBuilder<SteamDbContext>()
+            .UseSqlite("Data Source=Data/steam.db")
             .Options;
+        return new SteamDbContext(options);
+    }
+}
 
-        return new AppDbContext(options);
+public sealed class DotaDbContextFactory : IDesignTimeDbContextFactory<DotaDbContext>
+{
+    public DotaDbContext CreateDbContext(string[] args)
+    {
+        var options = new DbContextOptionsBuilder<DotaDbContext>()
+            .UseSqlite("Data Source=Data/dota.db")
+            .Options;
+        return new DotaDbContext(options);
     }
 }
