@@ -38,6 +38,7 @@ import {
     CMsgDOTAGetPlayerMatchHistory,
     CMsgDOTAGetPlayerMatchHistoryResponse,
     CMsgDOTAGetPlayerMatchHistoryResponse_Match,
+    CMsgDOTAMatchmakingStatsResponse,
     CMsgDOTASDOHeroStatsHistory,
     CMsgDOTASubmitLobbyMVPVote,
     CMsgDOTASubmitLobbyMVPVoteResponse,
@@ -77,7 +78,7 @@ export class Stats {
     register(): void {
         gc.on(Routes.LookupAccountName, (ctx) => this.lookupAccountName(ctx));
         gc.on(Routes.GetEventPoints, (ctx) => this.getEventPoints(ctx));
-        gc.onMessage(Msg.GCMatchmakingStatsRequest, () => this.matchmakingStats());
+        gc.onMessage(Msg.GCMatchmakingStatsRequest, (ctx) => this.matchmakingStats(ctx));
         gc.on(Routes.GetHeroStandings, (ctx) => this.getHeroStandings(ctx));
         gc.on(Routes.GetHeroStatsHistory, (ctx) => this.getHeroStatsHistory(ctx));
         gc.on(Routes.GetPlayerMatchHistory, (ctx) => this.getPlayerMatchHistory(ctx));
@@ -123,8 +124,17 @@ export class Stats {
         return true;
     }
 
-    matchmakingStats(): boolean {
-        return false;
+    matchmakingStats(ctx: RawMessageContext): boolean {
+        ctx.reply<CMsgDOTAMatchmakingStatsResponse>(
+            Msg.GCMatchmakingStatsResponse,
+            Proto.CMsgDOTAMatchmakingStatsResponse,
+            {
+                matchgroupsVersion: 0,
+                legacySearchingPlayersByGroupSource2: [],
+                matchGroups: []
+            }
+        );
+        return true;
     }
 
     getHeroStandings(ctx: HandlerContext<CMsgGCGetHeroStandings, CMsgGCGetHeroStandingsResponse>): boolean {

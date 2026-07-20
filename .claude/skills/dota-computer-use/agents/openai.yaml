@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dota Computer Use"
+  short_description: "Control Dota 2 with stable UI coordinates"
+  default_prompt: "Use $dota-computer-use to launch and control Dota 2 for SKYNET runtime validation."

@@ -11,6 +11,7 @@ import { registerParty } from "./modules/Party";
 import { registerProfile } from "./modules/Profile";
 import { registerSocial } from "./modules/Social";
 import { registerStats } from "./modules/Stats";
+import { registerWeekendTourney } from "./modules/WeekendTourney";
 
 const lobby = registerLobby();
 const party = registerParty();
@@ -25,6 +26,7 @@ registerGuilds();
 registerCoaching();
 registerSocial();
 registerChat();
+registerWeekendTourney();
 
 export async function handle(): Promise<boolean> {
     return await gc.dispatch();

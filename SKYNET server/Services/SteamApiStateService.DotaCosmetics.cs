@@ -14,9 +14,9 @@ public sealed partial class SteamApiStateService
         PropertyNameCaseInsensitive = true
     };
 
-    // Lua-facing shape of one equipment entry. ItemId/SteamId/UpdatedAt are
-    // intentionally absent: they are recomputed server-side on save so Lua never
-    // handles 64-bit values that lose precision as doubles.
+    // Script-facing shape of one equipment entry. ItemId/SteamId/UpdatedAt are
+    // intentionally absent: they are recomputed server-side on save so scripts
+    // never handle persistence-owned values directly.
     private sealed class DotaEquipmentJsonEntry
     {
         public uint HeroId { get; set; }
@@ -419,7 +419,7 @@ public sealed partial class SteamApiStateService
                 return string.Empty;
             }
 
-            return SerializeDotaMatchForLua(match);
+            return SerializeDotaMatchForScript(match);
         }
     }
 
@@ -433,7 +433,7 @@ public sealed partial class SteamApiStateService
         lock (_sync)
         {
             return _state.DotaMatches.TryGetValue(lobbyId, out var match) && IsReconnectableDotaMatch(match)
-                ? SerializeDotaMatchForLua(match)
+                ? SerializeDotaMatchForScript(match)
                 : string.Empty;
         }
     }
@@ -458,7 +458,7 @@ public sealed partial class SteamApiStateService
         return status is not ("not_found" or "failed" or "stopped");
     }
 
-    private static string SerializeDotaMatchForLua(ApiDotaMatch match) => JsonSerializer.Serialize(new
+    private static string SerializeDotaMatchForScript(ApiDotaMatch match) => JsonSerializer.Serialize(new
     {
         LobbyId = match.LobbyId.ToString(System.Globalization.CultureInfo.InvariantCulture),
         MatchId = match.MatchId.ToString(System.Globalization.CultureInfo.InvariantCulture),

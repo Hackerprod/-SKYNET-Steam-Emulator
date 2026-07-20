@@ -25,6 +25,9 @@ import {
     CMsgClientToGCRequestAccountGuildPersonaInfoBatchResponse_EResponse,
     CMsgClientToGCRequestAccountGuildPersonaInfoResponse,
     CMsgClientToGCRequestAccountGuildPersonaInfoResponse_EResponse,
+    CMsgClientToGCRequestActiveGuildChallenge,
+    CMsgClientToGCRequestActiveGuildChallengeResponse,
+    CMsgClientToGCRequestActiveGuildChallengeResponse_EResponse,
     CMsgClientToGCRequestGuildData,
     CMsgClientToGCRequestGuildDataResponse,
     CMsgClientToGCRequestGuildDataResponse_EResponse,
@@ -56,6 +59,8 @@ const REPORTER_UPDATES_SUCCESS = CMsgClientToGCRequestReporterUpdatesResponse_ER
 const EVENT_DATA_SUCCESS = CMsgClientToGCRequestAccountGuildEventDataResponse_EResponse.Success;
 const EVENT_DATA_INVALID_GUILD = CMsgClientToGCRequestAccountGuildEventDataResponse_EResponse.InvalidGuild;
 const EVENT_DATA_NOT_MEMBER = CMsgClientToGCRequestAccountGuildEventDataResponse_EResponse.NotMember;
+const ACTIVE_CHALLENGE_SUCCESS = CMsgClientToGCRequestActiveGuildChallengeResponse_EResponse.Success;
+const ACTIVE_CHALLENGE_INVALID_GUILD = CMsgClientToGCRequestActiveGuildChallengeResponse_EResponse.InvalidGuild;
 
 export function registerGuilds(): void {
     const guilds = new Guilds();
@@ -70,6 +75,7 @@ export class Guilds {
         gc.on(Routes.RequestAccountGuildPersonaInfo, (ctx) => this.requestAccountGuildPersonaInfo(ctx));
         gc.on(Routes.RequestAccountGuildPersonaInfoBatch, (ctx) => this.requestAccountGuildPersonaInfoBatch(ctx));
         gc.on(Routes.RequestAccountGuildEventData, (ctx) => this.requestAccountGuildEventData(ctx));
+        gc.onMessage(Msg.ClientToGCRequestActiveGuildChallenge, (ctx) => this.requestActiveGuildChallenge(ctx));
         gc.onMessage(Msg.ClientToGCAcknowledgeReporterUpdates, (ctx) => this.acknowledgeReporterUpdates(ctx));
     }
 
@@ -195,6 +201,29 @@ export class Guilds {
             eventId: eventData.eventId,
             eventData: mapEventData(eventData)
         });
+        return true;
+    }
+
+    private requestActiveGuildChallenge(ctx: RawMessageContext): boolean {
+        const request = ctx.decode<CMsgClientToGCRequestActiveGuildChallenge>(
+            Proto.CMsgClientToGCRequestActiveGuildChallenge
+        );
+        const guildId = request.guildId ?? ctx.services.guilds.ensureCurrent().guildId;
+        const guild = ctx.services.guilds.getGuild(guildId);
+        if (guild === null) {
+            ctx.reply<CMsgClientToGCRequestActiveGuildChallengeResponse>(
+                Msg.ClientToGCRequestActiveGuildChallengeResponse,
+                Proto.CMsgClientToGCRequestActiveGuildChallengeResponse,
+                { result: ACTIVE_CHALLENGE_INVALID_GUILD }
+            );
+            return true;
+        }
+
+        ctx.reply<CMsgClientToGCRequestActiveGuildChallengeResponse>(
+            Msg.ClientToGCRequestActiveGuildChallengeResponse,
+            Proto.CMsgClientToGCRequestActiveGuildChallengeResponse,
+            { result: ACTIVE_CHALLENGE_SUCCESS }
+        );
         return true;
     }
 

@@ -29,6 +29,10 @@ public sealed partial class SteamApiStateService
             {
                 existingUser = EnsureUser(account.SteamId, SteamIdToAccountId(account.SteamId), DefaultAppId, account.Username);
             }
+            else if (!string.Equals(existingUser.PersonaName, account.Username, StringComparison.Ordinal))
+            {
+                existingUser.PersonaName = account.Username;
+            }
 
             account.LastLoginAt = DateTime.UtcNow;
             _state.ActiveWebSteamId = account.SteamId;

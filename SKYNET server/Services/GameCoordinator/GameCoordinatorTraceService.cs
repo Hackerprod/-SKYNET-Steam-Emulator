@@ -1,8 +1,8 @@
 namespace SKYNET_server.Services;
 
 /// <summary>
-/// In-memory ring buffer with recent GC activity (exchanges, pushes, Lua logs and
-/// errors) consumed by the admin GC console page.
+/// In-memory ring buffer with recent GC activity (exchanges, pushes, script logs
+/// and errors) consumed by the admin GC console page.
 /// </summary>
 public sealed class GameCoordinatorTraceService
 {

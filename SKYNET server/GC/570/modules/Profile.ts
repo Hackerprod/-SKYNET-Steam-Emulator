@@ -6,6 +6,7 @@ import {
     DotaProfileSlot,
     DotaQuestProgress,
     DotaRecentMatch,
+    DotaTeam,
     HandlerContext,
     RawMessageContext,
     gc
@@ -61,6 +62,7 @@ import {
     CMsgDOTAProfileCard,
     CMsgDOTAProfileCard_Slot,
     CMsgDOTAProfileTickets,
+    CMsgDOTATeamInfo,
     CMsgDOTATeamsInfo,
     CMsgPlayerConductScorecard,
     CMsgPlayerConductScorecardRequest,
@@ -80,6 +82,7 @@ import {
     Routes
 } from "../generated/dota";
 import { buildEconItem, equipmentForDefIndex } from "./InventorySos";
+import { normalizeConductScorecard } from "./shared/conduct";
 
 const PROFILE_SLOT_STAT = 1;
 const PROFILE_SLOT_TROPHY = 2;
@@ -234,13 +237,13 @@ export class Profile {
     private latestConductScorecard(
         ctx: HandlerContext<CMsgPlayerConductScorecardRequest, CMsgPlayerConductScorecard>
     ): boolean {
-        ctx.reply(ctx.services.profiles.getConductScorecard());
+        ctx.reply(normalizeConductScorecard(ctx.services.profiles.getConductScorecard()));
         return true;
     }
 
     private myTeamInfo(ctx: RawMessageContext): boolean {
-        const response: CMsgDOTATeamsInfo = { teams: [] };
-        ctx.send(Msg.GCToClientTeamsInfo, Proto.CMsgDOTATeamsInfo, response);
+        const response: CMsgDOTATeamsInfo = { teams: mapTeams(ctx.services.teams.getForAccount(ctx.accountId)) };
+        ctx.reply(Msg.GCToClientTeamsInfo, Proto.CMsgDOTATeamsInfo, response);
         return true;
     }
 
@@ -766,6 +769,32 @@ function buildSuccessfulHeroes(snapshot: DotaProfileSnapshot): CMsgSuccessfulHer
     }
 
     return heroes;
+}
+
+function mapTeams(source: DotaTeam[]): CMsgDOTATeamInfo[] {
+    const teams: CMsgDOTATeamInfo[] = [];
+    for (let i = 0; i < source.length; i++) {
+        const team = source[i];
+        teams.push({
+            teamId: team.teamId,
+            name: team.name,
+            tag: team.tag,
+            ugcLogo: team.logo,
+            ugcBaseLogo: team.baseLogo,
+            ugcBannerLogo: team.bannerLogo,
+            urlLogo: team.logoUrl,
+            abbreviation: team.abbreviation,
+            countryCode: team.countryCode,
+            url: team.url,
+            wins: team.wins,
+            losses: team.losses,
+            gamesPlayedTotal: team.gamesPlayedTotal,
+            gamesPlayedMatchmaking: team.gamesPlayedMatchmaking,
+            region: team.region
+        });
+    }
+
+    return teams;
 }
 
 function normalizeProfileSlots(

@@ -24,6 +24,13 @@ public sealed partial class SteamApiStateService
             var user = activeWebUser != null
                 ? EnsureUser(steamId, activeWebUser.AccountId, request.AppId != 0 ? request.AppId : activeWebUser.AppId, activeWebUser.PersonaName)
                 : EnsureUser(steamId, SteamIdToAccountId(steamId), request.AppId, request.PersonaName);
+            var changedUser = false;
+            if (activeWebUser != null && !string.Equals(user.PersonaName, activeWebUser.PersonaName, StringComparison.Ordinal))
+            {
+                user.PersonaName = activeWebUser.PersonaName;
+                changedUser = true;
+            }
+
             var session = new ApiSession
             {
                 SteamId = steamId,
@@ -38,6 +45,11 @@ public sealed partial class SteamApiStateService
 
             _sessions[session.AccessToken] = session;
             MarkUserOnlineLocked(steamId);
+            if (changedUser)
+            {
+                SaveState();
+            }
+
             return new ApiSessionResult
             {
                 AccessToken = session.AccessToken,
@@ -515,7 +527,19 @@ public sealed partial class SteamApiStateService
             return null;
         }
 
-        return _state.Users.TryGetValue(session.SteamId, out var user) ? user : null;
+        if (!_state.Users.TryGetValue(session.SteamId, out var user))
+        {
+            return null;
+        }
+
+        var account = _state.WebAccounts.Values.FirstOrDefault(item => item.SteamId == session.SteamId);
+        if (account != null && !string.Equals(user.PersonaName, account.Username, StringComparison.Ordinal))
+        {
+            user.PersonaName = account.Username;
+            SaveState();
+        }
+
+        return user;
     }
 
     private uint NextAvailableAccountIdLocked()
