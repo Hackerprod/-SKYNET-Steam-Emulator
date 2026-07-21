@@ -9,6 +9,7 @@ namespace SKYNET_server.Services;
 public sealed partial class SteamApiStateService
 {
     private const uint DotaUnequipSlot = 0xFFFF;
+    private const uint DotaGlobalLoadoutClass = 1000;
 
     private static readonly JsonSerializerOptions DotaEquipmentJsonOptions = SkynetJsonSerializerOptions.CreateCompatible();
 
@@ -613,8 +614,10 @@ public sealed partial class SteamApiStateService
             var normalized = new List<ApiDotaEquipment>();
             foreach (var equipped in pair.Value.Where(item => item != null))
             {
-                if (equipped.DefIndex != 0 && _state.DotaItems.TryGetValue(equipped.DefIndex, out var catalogItem))
+                ApiDotaItem? catalogItem = null;
+                if (equipped.DefIndex != 0 && _state.DotaItems.TryGetValue(equipped.DefIndex, out var foundCatalogItem))
                 {
+                    catalogItem = foundCatalogItem;
                     catalogItem.Slot = DotaItemsGameParser.InferItemSlot(catalogItem.Slot, catalogItem.Name, catalogItem.Prefab, catalogItem.ImageInventory);
                     if (!string.IsNullOrWhiteSpace(catalogItem.Slot) &&
                         (string.IsNullOrWhiteSpace(equipped.Slot) || equipped.Slot.StartsWith("slot_", StringComparison.OrdinalIgnoreCase)))
@@ -631,7 +634,7 @@ public sealed partial class SteamApiStateService
                 }
 
                 if (!equipped.Slot.StartsWith("slot_", StringComparison.OrdinalIgnoreCase) &&
-                    ShouldResolveDotaSlotId(equipped))
+                    ShouldResolveDotaSlotId(equipped, catalogItem))
                 {
                     equipped.SlotId = ResolveDotaSlotId(equipped.HeroId, equipped.HeroName, equipped.Slot);
                 }
@@ -780,22 +783,27 @@ public sealed partial class SteamApiStateService
         return GuessDotaSlotId(normalizedSlot);
     }
 
-    private static bool ShouldResolveDotaSlotId(ApiDotaEquipment equipped)
+    private static bool ShouldResolveDotaSlotId(ApiDotaEquipment equipped, ApiDotaItem? catalogItem)
     {
-        if (equipped.HeroId != 0 || equipped.SlotId == 0)
+        if (equipped.SlotId == 0)
         {
             return true;
         }
 
-        // Global loadout items such as terrain/map, announcers, couriers and
-        // other account-wide cosmetics arrive from Dota with HeroId/Class 0 and
-        // a concrete SlotId chosen by the client. The imported item catalog can
-        // provide a readable slot name, but it does not define a hero slot table
-        // for class 0. Re-resolving those names would collapse the original slot
-        // to a guess (often 0), so after a restart the CSOEconItem.equippedState
-        // no longer matches what Dota equipped. Preserve the client-provided
-        // global SlotId and use the slot name only for grouping/admin display.
-        return false;
+        if (equipped.HeroId == DotaGlobalLoadoutClass ||
+            catalogItem is { HeroIds.Count: 0 })
+        {
+            // Dota sends account/global cosmetics as CSOEconItem.equipped_state
+            // pairs too. The old GC stored that pair exactly: new_class/new_slot
+            // was written into Mongo and replayed into the owner/server SO cache
+            // after restart. For terrains, couriers, announcers, effects, etc.
+            // new_class is the global loadout class (1000) and new_slot is chosen
+            // by the client. The catalog slot name is useful for display, but it
+            // is not a hero ItemSlots entry and must never replace new_slot.
+            return false;
+        }
+
+        return true;
     }
 
     private IEnumerable<string> ResolveDotaSlotHeroNames(uint heroId, string heroName)
@@ -985,6 +993,7 @@ public sealed partial class SteamApiStateService
                  & Expect(parsed.ContainsKey(10003) && parsed[10003].Slot == "terrain", "global terrain imported from prefab", write)
                  & Expect(parsed.ContainsKey(10004) && parsed[10004].Slot == "teleport_effect", "global effect imported from prefab", write)
                  & Expect(parsed.ContainsKey(10010) && parsed[10010].Slot == "loading_screen", "global prefab overrides misleading hero slot", write)
+                 & Expect(!ShouldResolveDotaSlotId(new ApiDotaEquipment { HeroId = DotaGlobalLoadoutClass, SlotId = 14, Slot = "terrain", DefIndex = 10003 }, parsed[10003]), "global equipped_state slot preserved on reload", write)
                  & Expect(!parsed.ContainsKey(10005), "tools excluded", write)
                  & Expect(!parsed.ContainsKey(10006), "bundles excluded", write)
                  & Expect(!parsed.ContainsKey(10007), "socket gems excluded", write)

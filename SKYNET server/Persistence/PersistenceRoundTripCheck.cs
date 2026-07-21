@@ -127,8 +127,8 @@ public static class PersistenceRoundTripCheck
         state.DotaEquipment[a] = new List<ApiDotaEquipment>
         {
             new() { SteamId = a, HeroId = 2, SlotId = 1, DefIndex = 101, ItemId = 555, Slot = "weapon", HeroName = "axe", UpdatedAt = DateTime.UtcNow },
-            new() { SteamId = a, HeroId = 0, SlotId = 0, DefIndex = 102, ItemId = 556, Slot = "terrain", HeroName = "global", UpdatedAt = DateTime.UtcNow },
-            new() { SteamId = a, HeroId = 0, SlotId = 0, DefIndex = 103, ItemId = 557, Slot = "map", HeroName = "global", UpdatedAt = DateTime.UtcNow },
+            new() { SteamId = a, HeroId = 1000, SlotId = 14, DefIndex = 102, ItemId = 556, Slot = "terrain", HeroName = "hero_1000", UpdatedAt = DateTime.UtcNow },
+            new() { SteamId = a, HeroId = 1000, SlotId = 15, DefIndex = 103, ItemId = 557, Slot = "map", HeroName = "hero_1000", UpdatedAt = DateTime.UtcNow },
         };
 
         state.DotaMatches[lobbyId] = new ApiDotaMatch
@@ -209,8 +209,8 @@ public static class PersistenceRoundTripCheck
         Check("DotaEquipment", loaded.DotaEquipment.TryGetValue(76561197960287930UL, out var eq) &&
                                eq.Count == 3 &&
                                eq.Any(item => item.ItemId == 555 && item.HeroId == 2) &&
-                               eq.Any(item => item.DefIndex == 102 && item.HeroId == 0) &&
-                               eq.Any(item => item.DefIndex == 103 && item.HeroId == 0));
+                               eq.Any(item => item.DefIndex == 102 && item.HeroId == 1000 && item.SlotId == 14) &&
+                               eq.Any(item => item.DefIndex == 103 && item.HeroId == 1000 && item.SlotId == 15));
 
         var match = loaded.DotaMatches.Values.FirstOrDefault();
         Check("DotaMatch", match is not null && match.MatchId == 7777 && match.Players.Count == 1);
