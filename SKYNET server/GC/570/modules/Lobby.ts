@@ -1601,13 +1601,31 @@ function buildMatchSnapshot(lobby: LobbyState): DotaLobbyMatchSnapshot {
 }
 
 function listLobbies(region: number, gameMode: number, requesterSteamId: bigint): CMsgPracticeLobbyListResponseEntry[] {
+    const exact = collectLobbies(region, gameMode, requesterSteamId, true);
+    if (exact.length > 0 || (region === 0 && gameMode === 0)) {
+        return exact;
+    }
+
+    // Older clients can send a stale browse region after the creator changes
+    // location. Steam still exposes public practice lobbies in that case so
+    // friends can find each other; the region remains metadata used at launch,
+    // not a hard discovery failure when no exact match exists.
+    return collectLobbies(0, gameMode, requesterSteamId, false);
+}
+
+function collectLobbies(
+    region: number,
+    gameMode: number,
+    requesterSteamId: bigint,
+    strictRegion: boolean
+): CMsgPracticeLobbyListResponseEntry[] {
     const result: CMsgPracticeLobbyListResponseEntry[] = [];
     store.lobbies.forEach((lobby) => {
         if (lobby.state !== LOBBY_UI) {
             return;
         }
 
-        if (region !== 0 && lobby.serverRegion !== region) {
+        if (strictRegion && region !== 0 && lobby.serverRegion !== region) {
             return;
         }
 

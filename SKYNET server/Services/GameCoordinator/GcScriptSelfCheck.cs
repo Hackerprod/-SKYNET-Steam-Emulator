@@ -36,13 +36,29 @@ public static class GcScriptSelfCheck
             PersonaName = "GcScriptSelfCheck Dedicated",
             ClientIp = "192.168.212.252"
         };
+        var friendContext = new GameCoordinatorContext
+        {
+            AppId = DotaAppId,
+            SteamId = 76561197960287931UL,
+            AccountId = 15892203,
+            PersonaName = "GcScriptFriend",
+            ClientIp = "192.168.212.253"
+        };
         var queuedMessages = new List<(ulong SteamId, ApiGCMessage Message)>();
         var selfCheckDb = Path.Combine(Path.GetTempPath(), "skynet-gc-selfcheck", Guid.NewGuid().ToString("N"), "dota.db");
         DotaStatsAccountIdentity? ResolveIdentity(uint accountId)
         {
-            return accountId == context.AccountId
-                ? new DotaStatsAccountIdentity(context.AccountId, context.SteamId, context.PersonaName)
-                : null;
+            if (accountId == context.AccountId)
+            {
+                return new DotaStatsAccountIdentity(context.AccountId, context.SteamId, context.PersonaName);
+            }
+
+            if (accountId == friendContext.AccountId)
+            {
+                return new DotaStatsAccountIdentity(friendContext.AccountId, friendContext.SteamId, friendContext.PersonaName);
+            }
+
+            return null;
         }
 
         DotaGcRuntimeServices.StatsStore = new DotaStatsStore(selfCheckDb, ResolveIdentity);
@@ -89,9 +105,10 @@ public static class GcScriptSelfCheck
         ok &= ExpectResponse(plugin, context, 4501, 4502, 1, write);
         ok &= ExpectHandled(plugin, context, 4523, 0, write);
         ok &= ExpectResponse(plugin, context, 7009, 7010, 1, write);
-        ok &= ExpectChatFlow(plugin, context, write);
+        ok &= ExpectChatFlow(plugin, context, friendContext, queuedMessages, write);
         ok &= ExpectGameServerWelcomeFlow(plugin, serverContext, write);
         ok &= ExpectCreateLobbyFlow(plugin, context, write);
+        ok &= ExpectLobbyDiscoveryFlow(plugin, friendContext, write);
         ok &= ExpectLobbyInviteFlow(plugin, context, queuedMessages, write);
         ok &= ExpectApplyTeamFlow(plugin, context, write);
         ok &= ExpectLaunchFlow(plugin, context, write);
@@ -449,6 +466,8 @@ public static class GcScriptSelfCheck
     private static bool ExpectChatFlow(
         GameCoordinatorScriptPlugin plugin,
         GameCoordinatorContext context,
+        GameCoordinatorContext friendContext,
+        List<(ulong SteamId, ApiGCMessage Message)> queuedMessages,
         Action<string> write)
     {
         var joinResponse = plugin.Exchange(context, Request(7009));
@@ -476,8 +495,98 @@ public static class GcScriptSelfCheck
         var afterLeaveResponse = plugin.Exchange(context, Request(7273, chatBody));
         var afterLeaveOk = afterLeaveResponse.Handled && afterLeaveResponse.Messages.Count == 0;
 
-        var ok = joinOk && chatOk && leaveOk && afterLeaveOk;
-        write($"chat flow -> join={joinOk}, noSelfEcho={chatOk}, leave={leaveOk}, afterLeave={afterLeaveOk}, ok={ok}");
+        queuedMessages.Clear();
+        var privateInvite = plugin.Exchange(
+            context,
+            Request(8084, Serialize(new CMsgClientToGCPrivateChatInvite
+            {
+                PrivateChatChannelName = "private_selfcheck",
+                InvitedAccountId = friendContext.AccountId
+            })));
+        var privateInviteReply = privateInvite.Messages.FirstOrDefault(message => message.MessageType == 8091);
+        var privateInviteQueued = queuedMessages.FirstOrDefault(message =>
+            message.SteamId == friendContext.SteamId && message.Message.MessageType == 8091);
+        var privateInviteLocal = privateInviteReply == null
+            ? null
+            : Deserialize<CMsgGCToClientPrivateChatResponse>(privateInviteReply.PayloadBase64);
+        var privateInviteRemote = privateInviteQueued.Message == null
+            ? null
+            : Deserialize<CMsgGCToClientPrivateChatResponse>(privateInviteQueued.Message.PayloadBase64);
+        var privateInviteOk = privateInvite.Handled
+            && privateInviteLocal?.result == CMsgGCToClientPrivateChatResponse.Result.Success
+            && privateInviteLocal.PrivateChatChannelName == "private_selfcheck"
+            && privateInviteLocal.Username == friendContext.PersonaName
+            && privateInviteRemote?.result == CMsgGCToClientPrivateChatResponse.Result.Success
+            && privateInviteRemote.PrivateChatChannelName == "private_selfcheck"
+            && privateInviteRemote.Username == context.PersonaName;
+
+        var privateJoin = plugin.Exchange(
+            friendContext,
+            RequestFor(
+                friendContext,
+                7009,
+                Serialize(new CMsgDOTAJoinChatChannel
+                {
+                    ChannelName = "private_selfcheck",
+                    ChannelType = DOTAChatChannelTypet.DOTAChannelTypeWhisper
+                })));
+        var privateJoinResponse = privateJoin.Messages.FirstOrDefault(message => message.MessageType == 7010);
+        var privateJoinBody = privateJoinResponse == null
+            ? null
+            : Deserialize<CMsgDOTAJoinChatChannelResponse>(privateJoinResponse.PayloadBase64);
+        queuedMessages.Clear();
+        var privateMessage = plugin.Exchange(
+            friendContext,
+            RequestFor(
+                friendContext,
+                7273,
+                Serialize(new CMsgDOTAChatMessage { ChannelId = privateJoinBody?.ChannelId ?? 0UL, Text = "privado" })));
+        var deliveredPrivate = queuedMessages.FirstOrDefault(message =>
+            message.SteamId == context.SteamId && message.Message.MessageType == 7273);
+        var deliveredPrivateBody = deliveredPrivate.Message == null
+            ? null
+            : Deserialize<CMsgDOTAChatMessage>(deliveredPrivate.Message.PayloadBase64);
+        var privateMessageOk = privateJoinBody?.ChannelId > 0
+            && privateMessage.Handled
+            && privateMessage.Messages.Count == 0
+            && deliveredPrivateBody?.Text == "privado"
+            && deliveredPrivateBody.PersonaName == friendContext.PersonaName
+            && deliveredPrivateBody.AccountId == friendContext.AccountId;
+
+        var ok = joinOk && chatOk && leaveOk && afterLeaveOk && privateInviteOk && privateMessageOk;
+        write(
+            $"chat flow -> join={joinOk}, noSelfEcho={chatOk}, leave={leaveOk}, afterLeave={afterLeaveOk}, " +
+            $"privateInvite={privateInviteOk}, privateMessage={privateMessageOk}, ok={ok}");
+        return ok;
+    }
+
+    private static bool ExpectLobbyDiscoveryFlow(
+        GameCoordinatorScriptPlugin plugin,
+        GameCoordinatorContext friendContext,
+        Action<string> write)
+    {
+        var response = plugin.Exchange(
+            friendContext,
+            RequestFor(
+                friendContext,
+                7042,
+                Serialize(new CMsgPracticeLobbyList
+                {
+                    Region = 2,
+                    GameMode = (DOTAGameMode)1
+                })));
+        var listMessage = response.Messages.FirstOrDefault(message => message.MessageType == 7043);
+        var list = listMessage == null ? null : Deserialize<CMsgPracticeLobbyListResponse>(listMessage.PayloadBase64);
+        var lobby = list?.Lobbies.FirstOrDefault();
+        var ok = response.Handled
+            && listMessage != null
+            && list?.Lobbies.Count > 0
+            && lobby?.Name == "Sala 1"
+            && lobby.LeaderAccountId == 15892202
+            && lobby.Members.Any(member => member.AccountId == 15892202 && member.PlayerName == "GcScriptSelfCheck");
+        write(
+            $"lobby discovery flow -> handled={response.Handled}, lobbies={list?.Lobbies.Count}, " +
+            $"leader={lobby?.LeaderAccountId}, name={lobby?.Name}, ok={ok}");
         return ok;
     }
 

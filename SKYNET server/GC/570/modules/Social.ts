@@ -27,6 +27,7 @@ import {
     Routes
 } from "../generated/dota";
 import { mapMatchDetails } from "./shared/matchMapping";
+import { bindPrivateChatRuntimeChannel } from "./Chat";
 
 const SOCIAL_SUCCESS = 1;
 const SOCIAL_NOT_FOUND = 0;
@@ -68,6 +69,12 @@ export class Social {
             });
             return true;
         }
+
+        bindPrivateChatRuntimeChannel(channel.channelName, channel.channelId, {
+            steamId: ctx.steamId,
+            accountId: ctx.accountId,
+            personaName: ctx.personaName
+        });
 
         ctx.reply({
             response: 0,
