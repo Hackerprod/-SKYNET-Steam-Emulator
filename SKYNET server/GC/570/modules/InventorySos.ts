@@ -78,7 +78,8 @@ export function buildEconSoCacheSubscribedForInventory(
                       ]
                   },
                   {
-                      typeId: ITEM_SCHEMA_TYPE_ID
+                      typeId: ITEM_SCHEMA_TYPE_ID,
+                      objectData: []
                   }
               ];
     objects.push({

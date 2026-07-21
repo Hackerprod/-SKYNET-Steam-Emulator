@@ -72,11 +72,12 @@ import { buildEconSoCacheSubscribedForInventory, buildGameOwnerSoCacheSubscribed
 import { normalizeConduct } from "./shared/conduct";
 
 const LOBBY_OBJECT_TYPE_ID = 2004;
-const LOBBY_INVITE_OBJECT_TYPE_ID = 2013;
+const LOBBY_INVITE_OBJECT_TYPE_ID = 2011;
 const LOBBY_STATIC_OBJECT_TYPE_ID = 2014;
 const LOBBY_SERVER_OBJECT_TYPE_ID = 2015;
 const LOBBY_SERVER_STATIC_OBJECT_TYPE_ID = 2016;
 const LOBBY_OWNER_TYPE = 3;
+const LOBBY_INVITE_OWNER_TYPE = 4;
 const LOBBY_SERVICE_ID = 0;
 const WELCOME_VERSION = 20;
 // Dedicated servers accept the GC welcome only when it carries the current
@@ -186,6 +187,14 @@ interface LobbyMemberState {
     coachTeam: number;
     heroId: number;
     leaverStatus: number;
+    partyId: bigint;
+    channel: number;
+    canEarnRewards: boolean;
+    isPlusSubscriber: boolean;
+    metaLevel: number;
+    metaXp: number;
+    rankTier: number;
+    leaderboardRank: number;
     connectedOnce: boolean;
     lastSeen: number;
 }
@@ -278,7 +287,7 @@ export class Lobby {
         leaveCurrent(ctx, 0n);
         const lobby = createLobbyState(ctx);
         applyCreateRequest(lobby, ctx.request);
-        const member = ensureMember(lobby, ctx.steamId, ctx.accountId, ctx.personaName, ctx.clock.now());
+        const member = ensureMember(lobby, ctx.steamId, ctx.accountId, ctx.personaName, ctx.clock.now(), ctx);
         member.team = TEAM_GOOD;
         member.slot = 1;
         member.coachTeam = TEAM_NONE;
@@ -316,7 +325,7 @@ export class Lobby {
             result = JOIN_FULL;
         } else {
             leaveCurrent(ctx, lobby.lobbyId);
-            const member = ensureMember(lobby, ctx.steamId, ctx.accountId, ctx.personaName, ctx.clock.now());
+            const member = ensureMember(lobby, ctx.steamId, ctx.accountId, ctx.personaName, ctx.clock.now(), ctx);
             if (member.steamId !== lobby.leaderSteamId) {
                 member.team = TEAM_POOL;
                 member.slot = 0;
@@ -793,7 +802,7 @@ function createLobbyState(ctx: HandlerContext<CMsgPracticeLobbyCreate, CMsgGener
     };
 
     store.lobbies.set(lobby.lobbyId, lobby);
-    ensureMember(lobby, ctx.steamId, ctx.accountId, ctx.personaName, now);
+    ensureMember(lobby, ctx.steamId, ctx.accountId, ctx.personaName, now, ctx);
     return lobby;
 }
 
@@ -937,7 +946,7 @@ function joinLobbyState(ctx: RawMessageContext, lobby: LobbyState, passKey: stri
     }
 
     leaveCurrent(ctx, lobby.lobbyId);
-    const member = ensureMember(lobby, ctx.steamId, ctx.accountId, ctx.personaName, ctx.clock.now());
+    const member = ensureMember(lobby, ctx.steamId, ctx.accountId, ctx.personaName, ctx.clock.now(), ctx);
     if (member.steamId !== lobby.leaderSteamId) {
         member.team = TEAM_POOL;
         member.slot = 0;
@@ -977,11 +986,19 @@ function ensureMember(
     steamId: bigint,
     accountId: number,
     personaName: string,
-    now: number
+    now: number,
+    ctx: GcContextBase
 ): LobbyMemberState {
+    const profile = ctx.services.profiles.get(accountId);
+    const party = ctx.services.party.getCurrent();
     const existing = findMember(lobby, steamId);
     if (existing !== null) {
         existing.personaName = personaName === "" ? existing.personaName : personaName;
+        existing.partyId = party?.partyId ?? existing.partyId;
+        existing.isPlusSubscriber = profile.isPlusSubscriber;
+        existing.metaLevel = profile.level;
+        existing.rankTier = profile.rankTier;
+        existing.leaderboardRank = profile.leaderboardRank;
         existing.lastSeen = now;
         store.bySteam.set(steamId, lobby.lobbyId);
         return existing;
@@ -996,6 +1013,14 @@ function ensureMember(
         coachTeam: TEAM_NONE,
         heroId: 0,
         leaverStatus: LEAVER_DISCONNECTED,
+        partyId: party?.partyId ?? 0n,
+        channel: 6,
+        canEarnRewards: true,
+        isPlusSubscriber: profile.isPlusSubscriber,
+        metaLevel: profile.level,
+        metaXp: profile.badgePoints,
+        rankTier: profile.rankTier,
+        leaderboardRank: profile.leaderboardRank,
         connectedOnce: false,
         lastSeen: now
     };
@@ -1279,9 +1304,6 @@ function buildLobbySoCacheSubscribed(ctx: GcContextBase, lobby: LobbyState): CMs
     return {
         objects: [
             subscribedType(LOBBY_OBJECT_TYPE_ID, [ctx.encode(Proto.CSODOTALobby, buildLobbyObject(lobby))]),
-            subscribedType(LOBBY_INVITE_OBJECT_TYPE_ID, [
-                ctx.encode(Proto.CSODOTALobbyInvite, buildLobbyInviteObject())
-            ]),
             subscribedType(LOBBY_STATIC_OBJECT_TYPE_ID, [
                 ctx.encode(Proto.CSODOTAStaticLobby, buildStaticLobbyObject(lobby))
             ]),
@@ -1397,7 +1419,15 @@ function buildLobbyMembers(lobby: LobbyState): CSODOTALobbyMember[] {
             team: member.team,
             slot: member.slot,
             leaverStatus: member.leaverStatus,
-            coachTeam: member.coachTeam === TEAM_NONE ? undefined : member.coachTeam
+            coachTeam: member.coachTeam,
+            leaverActions: 0,
+            customGameProductIds: [],
+            liveSpectatorTeam: TEAM_NONE,
+            pendingAwards: [],
+            pendingAwardsOnVictory: [],
+            reportsAvailable: 0,
+            liveSpectatorAccountId: 0,
+            commsReportsAvailable: 0
         });
     }
 
@@ -1407,14 +1437,13 @@ function buildLobbyMembers(lobby: LobbyState): CSODOTALobbyMember[] {
 function buildStaticLobbyObject(lobby: LobbyState): CSODOTAStaticLobby {
     return {
         allMembers: lobby.members.map((member) => ({
-            name: member.personaName
+            name: member.personaName,
+            partyId: member.partyId,
+            channel: member.channel,
+            cameraman: false
         })),
         isPlayerDraft: false
     };
-}
-
-function buildLobbyInviteObject(): CSODOTALobbyInvite {
-    return {};
 }
 
 function buildServerLobbyObject(lobby: LobbyState): CSODOTAServerLobby {
@@ -1427,10 +1456,21 @@ function buildServerStaticLobbyObject(lobby: LobbyState): CSODOTAServerStaticLob
     return {
         allMembers: lobby.members.map((member) => ({
             steamId: member.steamId,
+            rankTier: member.rankTier,
+            leaderboardRank: member.leaderboardRank === 0 ? -1 : member.leaderboardRank,
+            laneSelectionFlags: 0,
+            rankMmrBoostType: 0,
+            coachRating: 0,
+            coachedAccountIds: [],
             wasMvpLastGame: false,
-            isPlusSubscriber: true,
+            canEarnRewards: member.canEarnRewards,
+            isPlusSubscriber: member.isPlusSubscriber,
             favoriteTeamPacked: 0n,
             isSteamChina: false,
+            title: 0,
+            disabledRandomHeroBits: [],
+            disabledHeroId: [],
+            enabledHeroId: [],
             bannedHeroIds: DEFAULT_SERVER_STATIC_BANNED_HERO_IDS
         })),
         postPatchStrategyTimeBuffer: 0
@@ -1635,14 +1675,14 @@ function buildInviteSubscribed(ctx: GcContextBase, invite: LobbyInviteState): CM
             }
         ],
         version: invite.inviteId,
-        ownerSoid: { type: LOBBY_OWNER_TYPE, id: invite.lobbyId },
+        ownerSoid: { type: LOBBY_INVITE_OWNER_TYPE, id: invite.lobbyId },
         serviceId: LOBBY_SERVICE_ID,
         syncVersion: invite.inviteId
     };
 }
 
 function buildInviteUnsubscribed(lobbyId: bigint): CMsgSOCacheUnsubscribed {
-    return { ownerSoid: { type: LOBBY_OWNER_TYPE, id: lobbyId } };
+    return { ownerSoid: { type: LOBBY_INVITE_OWNER_TYPE, id: lobbyId } };
 }
 
 function buildInviteObject(invite: LobbyInviteState): CSODOTALobbyInvite {

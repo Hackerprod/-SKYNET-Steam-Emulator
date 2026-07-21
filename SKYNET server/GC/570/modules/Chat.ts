@@ -23,22 +23,31 @@ export class Chat {
             return true;
         }
 
-        const message: CMsgDOTAChatMessage = {
+        const text = request.text ?? "";
+        let message: CMsgDOTAChatMessage = {
             accountId: ctx.accountId,
             channelId,
             personaName: ctx.personaName,
-            text: request.text ?? "",
+            text,
             timestamp: ctx.clock.now(),
             channelUserId: channel.channelUserId,
-            coinFlip: request.coinFlip,
-            diceRoll: request.diceRoll,
             shareProfileAccountId: request.shareProfileAccountId,
             sharePartyId: request.sharePartyId,
             shareLobbyId: request.shareLobbyId,
             chatWheelMessage: request.chatWheelMessage
         };
 
-        ctx.services.chat.broadcast(channelId, Msg.GCChatMessage, ctx.encode(Proto.CMsgDOTAChatMessage, message));
+        // Dota locally echoes the sender's normal channel text. The GC only
+        // fans the sanitized message out to other channel members. Command
+        // result payloads are preserved only for explicit command messages so
+        // decoded default dice/coin fields cannot turn plain chat into /roll.
+        if (text.trim().startsWith("/roll")) {
+            message = { ...message, diceRoll: request.diceRoll };
+        } else if (text.trim().startsWith("/flip")) {
+            message = { ...message, coinFlip: request.coinFlip };
+        }
+
+        ctx.services.chat.broadcast(channelId, Msg.GCChatMessage, ctx.encode(Proto.CMsgDOTAChatMessage, message), false);
         return true;
     }
 

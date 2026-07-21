@@ -92,6 +92,7 @@ public static class GcScriptSelfCheck
         ok &= ExpectChatFlow(plugin, context, write);
         ok &= ExpectGameServerWelcomeFlow(plugin, serverContext, write);
         ok &= ExpectCreateLobbyFlow(plugin, context, write);
+        ok &= ExpectLobbyInviteFlow(plugin, context, queuedMessages, write);
         ok &= ExpectApplyTeamFlow(plugin, context, write);
         ok &= ExpectLaunchFlow(plugin, context, write);
         ok &= ExpectDedicatedAttachFlow(plugin, serverContext, queuedMessages, write);
@@ -258,6 +259,7 @@ public static class GcScriptSelfCheck
         var welcome = welcomeMessage == null ? null : Deserialize<CMsgClientWelcome>(welcomeMessage.PayloadBase64);
         var econCache = welcome?.OutofdateSubscribedCaches.FirstOrDefault(cache => cache.ServiceId == 1);
         var econType = econCache?.Objects.FirstOrDefault(item => item.TypeId == 1);
+        var schemaType = econCache?.Objects.FirstOrDefault(item => item.TypeId == 2010);
         var items = econType?.ObjectDatas.Select(DeserializeBytes<CSOEconItem>).ToArray() ?? Array.Empty<CSOEconItem>();
         var equippedItem = items.FirstOrDefault(item => item.DefIndex == 1001);
         var unequippedItem = items.FirstOrDefault(item => item.DefIndex == 1002);
@@ -267,6 +269,8 @@ public static class GcScriptSelfCheck
             && welcome != null
             && econCache != null
             && econCache.OwnerSoid?.Id == context.SteamId
+            && schemaType != null
+            && schemaType.ObjectDatas.Count == 0
             && items.Length == 3
             && equippedItem != null
             && equippedItem.AccountId == expectedEconAccountId
@@ -285,7 +289,7 @@ public static class GcScriptSelfCheck
             $"equippedDef={equippedItem?.DefIndex}, equippedStates={equippedItem?.EquippedStates.Count}, " +
             $"accountId={equippedItem?.AccountId}, class={equippedItem?.EquippedStates.FirstOrDefault()?.NewClass}, " +
             $"slot={equippedItem?.EquippedStates.FirstOrDefault()?.NewSlot}, flags={equippedItem?.Flags}, " +
-            $"expectedAccountId={expectedEconAccountId}, owner={econCache?.OwnerSoid?.Id}, " +
+            $"expectedAccountId={expectedEconAccountId}, owner={econCache?.OwnerSoid?.Id}, schemaObjects={schemaType?.ObjectDatas.Count}, " +
             $"expectedOwner={context.SteamId}, unequippedDef={unequippedItem?.DefIndex}, " +
             $"globalDef={globalItem?.DefIndex}, globalClass={globalItem?.EquippedStates.FirstOrDefault()?.NewClass}, " +
             $"globalSlot={globalItem?.EquippedStates.FirstOrDefault()?.NewSlot}, ok={ok}");
@@ -336,7 +340,7 @@ public static class GcScriptSelfCheck
             && response.Messages[1].TargetJobId == null
             && response.Messages[2].TargetJobId == sourceJobId
             && subscribe != null
-            && subscribeTypes.SequenceEqual([2004, 2013, 2014, 2015, 2016])
+            && subscribeTypes.SequenceEqual([2004, 2014, 2015, 2016])
             && singleObject?.TypeId == 2004
             && result?.Eresult == 1
             && subscribedLobby?.LobbyId == singleLobby?.LobbyId
@@ -348,10 +352,13 @@ public static class GcScriptSelfCheck
             && extraMessage.Contents.SequenceEqual(new byte[] { 8, 0 })
             && staticLobby?.AllMembers.Count == 1
             && staticLobby.AllMembers[0].Name == context.PersonaName
+            && staticLobby.AllMembers[0].Channel == 6
+            && staticLobby.AllMembers[0].PartyId == 0UL
             && serverLobby?.AllMembers.Count == 1
             && serverStaticLobby?.AllMembers.Count == 1
             && serverStaticMember?.SteamId == context.SteamId
-            && serverStaticMember.IsPlusSubscriber
+            && serverStaticMember.CanEarnRewards
+            && !serverStaticMember.IsPlusSubscriber
             && serverStaticMember.FavoriteTeamPacked == 0UL
             && serverStaticMember.BannedHeroIds.SequenceEqual([75, 0, 0, 0]);
         var actual = response.Messages
@@ -364,9 +371,51 @@ public static class GcScriptSelfCheck
             $"seriesType={subscribedLobby?.SeriesType}, teamDetails={subscribedLobby?.TeamDetails.Count}, " +
             $"extraMsg={extraMessage?.Id}:{(extraMessage?.Contents is null ? "" : Convert.ToHexString(extraMessage.Contents))}, " +
             $"staticMembers={staticLobby?.AllMembers.Count}, staticName={staticLobby?.AllMembers.FirstOrDefault()?.Name}, " +
+            $"staticChannel={staticLobby?.AllMembers.FirstOrDefault()?.Channel}, staticParty={staticLobby?.AllMembers.FirstOrDefault()?.PartyId}, " +
             $"serverLobbyMembers={serverLobby?.AllMembers.Count}, serverStaticMembers={serverStaticLobby?.AllMembers.Count}, " +
-            $"serverStaticSteamId={serverStaticMember?.SteamId}, plus={serverStaticMember?.IsPlusSubscriber}, " +
+            $"serverStaticSteamId={serverStaticMember?.SteamId}, rewards={serverStaticMember?.CanEarnRewards}, plus={serverStaticMember?.IsPlusSubscriber}, " +
             $"result={result?.Eresult}, ok={ok}");
+        return ok;
+    }
+
+    private static bool ExpectLobbyInviteFlow(
+        GameCoordinatorScriptPlugin plugin,
+        GameCoordinatorContext context,
+        List<(ulong SteamId, ApiGCMessage Message)> queuedMessages,
+        Action<string> write)
+    {
+        const ulong inviteeSteamId = 76561197960287931UL;
+        queuedMessages.Clear();
+
+        var response = plugin.Exchange(context, Request(4512, Serialize(new CMsgInviteToLobby { SteamId = inviteeSteamId })));
+        var reply = response.Messages.FirstOrDefault(message => message.MessageType == 4502);
+        var created = reply == null ? null : Deserialize<CMsgInvitationCreated>(reply.PayloadBase64);
+        var queued = queuedMessages.FirstOrDefault(message => message.SteamId == inviteeSteamId && message.Message.MessageType == 24);
+        var inviteCache = queued.Message == null ? null : Deserialize<CMsgSOCacheSubscribed>(queued.Message.PayloadBase64);
+        var inviteType = inviteCache?.Objects.FirstOrDefault(item => item.TypeId == 2011);
+        var invitePayload = inviteType?.ObjectDatas.FirstOrDefault();
+        var invite = invitePayload is { Length: > 0 } ? DeserializeBytes<CSODOTALobbyInvite>(invitePayload) : null;
+        var inviteMember = invite?.Members.FirstOrDefault();
+
+        var ok = response.Handled
+            && created?.GroupId > 0
+            && created.SteamId == inviteeSteamId
+            && !created.UserOffline
+            && queued.Message != null
+            && inviteCache?.OwnerSoid?.Type == 4
+            && inviteCache.OwnerSoid.Id == created.GroupId
+            && inviteType != null
+            && invite?.GroupId == created.GroupId
+            && invite.SenderId == context.SteamId
+            && invite.SenderName == context.PersonaName
+            && invite.InviteGid > 0
+            && inviteMember?.SteamId == context.SteamId
+            && inviteMember.Name == context.PersonaName;
+
+        write(
+            $"lobby invite flow -> handled={response.Handled}, queued={queued.Message != null}, " +
+            $"replyGroup={created?.GroupId}, ownerType={inviteCache?.OwnerSoid?.Type}, ownerId={inviteCache?.OwnerSoid?.Id}, " +
+            $"type={inviteType?.TypeId}, sender={invite?.SenderId}, member={inviteMember?.SteamId}:{inviteMember?.Name}, ok={ok}");
         return ok;
     }
 
@@ -418,15 +467,8 @@ public static class GcScriptSelfCheck
 
         var chatBody = Serialize(new CMsgDOTAChatMessage { ChannelId = channelId, Text = "hello" });
         var chatResponse = plugin.Exchange(context, Request(7273, chatBody));
-        var echo = chatResponse.Messages.Count == 1 && chatResponse.Messages[0].MessageType == 7273
-            ? Deserialize<CMsgDOTAChatMessage>(chatResponse.Messages[0].PayloadBase64)
-            : null;
         var chatOk = chatResponse.Handled
-            && echo != null
-            && echo.ChannelId == channelId
-            && echo.Text == "hello"
-            && echo.PersonaName == context.PersonaName
-            && echo.AccountId == context.AccountId;
+            && chatResponse.Messages.Count == 0;
 
         var leaveResponse = plugin.Exchange(context, Request(7272, Serialize(new CMsgDOTALeaveChatChannel { ChannelId = channelId })));
         var leaveOk = leaveResponse.Handled && leaveResponse.Messages.Count == 0;
@@ -435,7 +477,7 @@ public static class GcScriptSelfCheck
         var afterLeaveOk = afterLeaveResponse.Handled && afterLeaveResponse.Messages.Count == 0;
 
         var ok = joinOk && chatOk && leaveOk && afterLeaveOk;
-        write($"chat flow -> join={joinOk}, echo={chatOk}, leave={leaveOk}, afterLeave={afterLeaveOk}, ok={ok}");
+        write($"chat flow -> join={joinOk}, noSelfEcho={chatOk}, leave={leaveOk}, afterLeave={afterLeaveOk}, ok={ok}");
         return ok;
     }
 
