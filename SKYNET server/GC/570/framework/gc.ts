@@ -519,6 +519,7 @@ export interface DotaProfileSnapshot {
     readonly accountId: number;
     readonly steamId: bigint;
     readonly personaName: string;
+    readonly backgroundItemDefIndex: number;
     readonly rankTier: number;
     readonly rankTierScore: number;
     readonly leaderboardRank: number;

@@ -139,6 +139,7 @@ public static class GcScriptSelfCheck
         ok &= ExpectResponse(plugin, context, 7527, 7528, 1, write);
         ok &= ExpectResponse(plugin, context, 7534, 7535, 1, write);
         ok &= ExpectResponse(plugin, context, 7538, 7539, 1, write);
+        ok &= ExpectProfileCardAndUpdateFlow(plugin, context, write);
         ok &= ExpectResponse(plugin, context, 7584, 7586, 1, write);
         ok &= ExpectResponse(plugin, context, 7606, 7607, 1, write);
         ok &= ExpectResponse(plugin, context, 8078, 8079, 1, write);
@@ -800,6 +801,64 @@ public static class GcScriptSelfCheck
             $"clientSlot={updatedItem?.EquippedStates.FirstOrDefault()?.NewSlot}, accountId={updatedItem?.AccountId}, " +
             $"serverDef={serverItem?.DefIndex}, serverClass={serverItem?.EquippedStates.FirstOrDefault()?.NewClass}, " +
             $"serverSlot={serverItem?.EquippedStates.FirstOrDefault()?.NewSlot}, version={reply?.SoCacheVersionId}, ok={ok}");
+        return ok;
+    }
+
+    private static bool ExpectProfileCardAndUpdateFlow(
+        GameCoordinatorScriptPlugin plugin,
+        GameCoordinatorContext context,
+        Action<string> write)
+    {
+        var backgroundItemId = BuildDotaItemInstanceId(context.SteamId, 1003);
+        var update = new CMsgProfileUpdate
+        {
+            BackgroundItemId = backgroundItemId,
+            FeaturedHeroIds = new[] { 1 }
+        };
+        var updateResponse = plugin.Exchange(context, Request(8270, Serialize(update), sourceJobId: 8270));
+        var updateReply = updateResponse.Messages.FirstOrDefault(message => message.MessageType == 8271);
+        var updateBody = updateReply == null
+            ? null
+            : Deserialize<CMsgProfileUpdateResponse>(updateReply.PayloadBase64);
+
+        var profileResponse = plugin.Exchange(
+            context,
+            Request(8268, Serialize(new CMsgProfileRequest { AccountId = context.AccountId }), sourceJobId: 8268));
+        var profileReply = profileResponse.Messages.FirstOrDefault(message => message.MessageType == 8269);
+        var profile = profileReply == null
+            ? null
+            : Deserialize<CMsgProfileResponse>(profileReply.PayloadBase64);
+
+        var cardResponse = plugin.Exchange(
+            context,
+            Request(7534, Serialize(new CMsgClientToGCGetProfileCard { AccountId = context.AccountId }), sourceJobId: 7534));
+        var cardReply = cardResponse.Messages.FirstOrDefault(message => message.MessageType == 7535);
+        var card = cardReply == null
+            ? null
+            : Deserialize<CMsgDOTAProfileCard>(cardReply.PayloadBase64);
+
+        var featuredHero = profile?.FeaturedHeroes.FirstOrDefault(hero => hero.HeroId == 1);
+        var featuredItem = featuredHero?.EquippedEconItems.FirstOrDefault(item => item.DefIndex == 1001);
+        var ok = updateResponse.Handled
+            && updateReply?.TargetJobId == 8270
+            && updateBody?.result == CMsgProfileUpdateResponse.Result.Success
+            && profileResponse.Handled
+            && profileReply?.TargetJobId == 8268
+            && profile?.Result == CMsgProfileResponse.EResponse.keSuccess
+            && profile.BackgroundItem?.DefIndex == 1003
+            && featuredHero?.ManuallySet == true
+            && featuredItem != null
+            && featuredItem.EquippedStates.Count == 1
+            && featuredItem.EquippedStates[0].NewClass == 1
+            && cardResponse.Handled
+            && cardReply?.TargetJobId == 7534
+            && card?.AccountId == context.AccountId
+            && card.BadgePoints == 110;
+
+        write(
+            $"profile legacy flow -> update={updateResponse.Handled}, backgroundDef={profile?.BackgroundItem?.DefIndex}, " +
+            $"featuredHero={featuredHero?.HeroId}, featuredItem={featuredItem?.DefIndex}, " +
+            $"badgePoints={card?.BadgePoints}, ok={ok}");
         return ok;
     }
 

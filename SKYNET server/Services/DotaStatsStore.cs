@@ -526,18 +526,23 @@ public sealed class DotaStatsStore
         }
     }
 
-    public void SaveProfileUpdate(uint accountId, ulong backgroundItemId, IReadOnlyList<uint> featuredHeroIds)
+    public void SaveProfileUpdate(uint accountId, ulong? backgroundItemId, IReadOnlyList<uint> featuredHeroIds)
     {
         lock (_sync)
         {
             using var connection = OpenConnection();
             EnsureProfileLocked(connection, 0, accountId, string.Empty);
             using var transaction = connection.BeginTransaction();
-            using (var command = connection.CreateCommand())
+            // ProfileUpdate always carries featured heroes, but the background
+            // is changed only after the GC resolves the submitted item id to an
+            // owned defIndex. Invalid or absent background items leave the
+            // previous background intact, matching the legacy GC flow.
+            if (backgroundItemId.HasValue)
             {
+                using var command = connection.CreateCommand();
                 command.Transaction = transaction;
                 command.CommandText = "UPDATE profiles SET background_item_id = $background_item_id, updated_at = $updated_at WHERE account_id = $account_id";
-                Add(command, "$background_item_id", backgroundItemId);
+                Add(command, "$background_item_id", backgroundItemId.Value);
                 Add(command, "$updated_at", Now());
                 Add(command, "$account_id", accountId);
                 command.ExecuteNonQuery();

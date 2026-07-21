@@ -1371,6 +1371,69 @@ internal sealed class ScriptExchangeHost
         return ToTsEquipmentList(changed);
     }
 
+    private static ulong ResolveStoredDotaItemDefIndex(ulong steamId, ulong itemId)
+    {
+        if (itemId == 0)
+        {
+            return 0;
+        }
+
+        var inventory = DotaGcRuntimeServices.InventoryProvider?.Invoke(steamId);
+        if (inventory == null)
+        {
+            return itemId;
+        }
+
+        foreach (var item in inventory.Items.Concat(inventory.OwnedItems))
+        {
+            if (item.DefIndex == itemId)
+            {
+                return item.DefIndex;
+            }
+
+            if (BuildDotaItemInstanceId(steamId, item.DefIndex) == itemId)
+            {
+                return item.DefIndex;
+            }
+        }
+
+        return itemId <= uint.MaxValue ? itemId : 0;
+    }
+
+    private static ulong? ResolveOwnedDotaItemDefIndex(ulong steamId, ulong itemId)
+    {
+        if (itemId == 0)
+        {
+            return null;
+        }
+
+        var inventory = DotaGcRuntimeServices.InventoryProvider?.Invoke(steamId);
+        if (inventory == null)
+        {
+            return itemId <= uint.MaxValue ? itemId : null;
+        }
+
+        // The profile update protobuf carries an econ item instance id. The
+        // legacy GC accepts it only if it belongs to the caller, then persists
+        // the item's defIndex so future profile responses can rebuild the full
+        // CSOEconItem from the current inventory.
+        foreach (var item in inventory.Items.Concat(inventory.OwnedItems))
+        {
+            if (item.DefIndex == itemId || BuildDotaItemInstanceId(steamId, item.DefIndex) == itemId)
+            {
+                return item.DefIndex;
+            }
+        }
+
+        return null;
+    }
+
+    private static ulong BuildDotaItemInstanceId(ulong steamId, uint defIndex)
+    {
+        var accountBits = steamId & 0xffffffffUL;
+        return 0x7000000000000000UL | (accountBits << 20) | defIndex;
+    }
+
     public TsValue DotaSetItemStyle(TsValue[] args)
     {
         if (args.Length < 2)
@@ -1446,6 +1509,7 @@ internal sealed class ScriptExchangeHost
         }
 
         var backgroundItemId = Convert.ToUInt64(ToInteger(args[0], "dotaSaveProfileUpdate.backgroundItemId").ToString());
+        var backgroundItemDefIndex = ResolveOwnedDotaItemDefIndex(_context.SteamId, backgroundItemId);
         if (args[1] is not TsArrayValue arrayValue)
         {
             throw new InvalidOperationException("dotaSaveProfileUpdate.featuredHeroIds: expected array");
@@ -1461,7 +1525,7 @@ internal sealed class ScriptExchangeHost
             }
         }
 
-        DotaGcRuntimeServices.StatsStore?.SaveProfileUpdate(_context.AccountId, backgroundItemId, featuredHeroIds);
+        DotaGcRuntimeServices.StatsStore?.SaveProfileUpdate(_context.AccountId, backgroundItemDefIndex, featuredHeroIds);
         return TsValue.FromBool(true);
     }
 
@@ -2329,6 +2393,9 @@ internal sealed class ScriptExchangeHost
         value.SetField("accountId", TsValue.FromInt32(unchecked((int)profile.AccountId)));
         value.SetField("steamId", TsValue.FromUInt64(profile.SteamId));
         value.SetField("personaName", TsValue.FromString(profile.PersonaName ?? string.Empty));
+        value.SetField(
+            "backgroundItemDefIndex",
+            TsValue.FromInt32(unchecked((int)ResolveStoredDotaItemDefIndex(profile.SteamId, profile.BackgroundItemId))));
         value.SetField("rankTier", TsValue.FromInt32(unchecked((int)profile.RankTier)));
         value.SetField("rankTierScore", TsValue.FromInt32(unchecked((int)profile.RankTierScore)));
         value.SetField("leaderboardRank", TsValue.FromInt32(unchecked((int)profile.LeaderboardRank)));

@@ -1,11 +1,13 @@
 import {
     DotaHeroStats,
     DotaHeroSticker,
+    DotaCatalogItem,
     DotaMatchPlayer,
     DotaProfileSnapshot,
     DotaProfileSlot,
     DotaQuestProgress,
     DotaRecentMatch,
+    DotaRuntimeInventory,
     DotaTeam,
     HandlerContext,
     RawMessageContext,
@@ -77,6 +79,7 @@ import {
     CMsgProfileUpdateResponse_Result,
     CMsgRecentMatchInfo,
     CMsgSuccessfulHero,
+    CSOEconItem,
     Msg,
     Proto,
     Routes
@@ -570,8 +573,10 @@ function buildProfileResponse<TRequest, TResponse>(
     ctx: HandlerContext<TRequest, TResponse>,
     snapshot: DotaProfileSnapshot
 ): CMsgProfileResponse {
+    const backgroundItem = buildProfileBackgroundItem(ctx, snapshot);
     if (snapshot.recentMatches.length > 0) {
         return {
+            ...(backgroundItem === null ? {} : { backgroundItem }),
             featuredHeroes: buildFeaturedHeroes(ctx, snapshot),
             recentMatches: buildRecentMatches(snapshot),
             successfulHeroes: buildSuccessfulHeroes(snapshot),
@@ -581,6 +586,7 @@ function buildProfileResponse<TRequest, TResponse>(
     }
 
     return {
+        ...(backgroundItem === null ? {} : { backgroundItem }),
         featuredHeroes: buildFeaturedHeroes(ctx, snapshot),
         recentMatches: [],
         successfulHeroes: buildSuccessfulHeroes(snapshot),
@@ -592,7 +598,7 @@ function buildProfileCard(snapshot: DotaProfileSnapshot): CMsgDOTAProfileCard {
     return {
         accountId: snapshot.accountId,
         slots: buildProfileCardSlots(snapshot),
-        badgePoints: snapshot.badgePoints,
+        badgePoints: profileBadgePoints(snapshot),
         eventId: snapshot.activeEventId,
         rankTier: snapshot.rankTier,
         leaderboardRank: snapshot.leaderboardRank,
@@ -617,6 +623,27 @@ function buildProfileCardSlots(snapshot: DotaProfileSnapshot): CMsgDOTAProfileCa
     }
 
     return slots;
+}
+
+function buildProfileBackgroundItem<TRequest, TResponse>(
+    ctx: HandlerContext<TRequest, TResponse>,
+    snapshot: DotaProfileSnapshot
+): CSOEconItem | null {
+    if (snapshot.backgroundItemDefIndex === 0) {
+        return null;
+    }
+
+    // ProfileUpdate sends an item instance id, but the legacy GC persists the
+    // profile background by defIndex. Rebuild the econ item from the owner's
+    // inventory here so the profile response carries the complete SO item data
+    // instead of echoing a bare id that the client cannot render.
+    const inventory = ctx.services.items.getInventory(snapshot.steamId);
+    const catalogItem = inventoryItemByDefIndex(inventory, snapshot.backgroundItemDefIndex);
+    if (catalogItem === null) {
+        return null;
+    }
+
+    return buildEconItem(inventory, catalogItem, equipmentForDefIndex(inventory, snapshot.backgroundItemDefIndex));
 }
 
 function buildProfileCardSlot(
@@ -723,6 +750,20 @@ function buildFeaturedHeroes<TRequest, TResponse>(
     return featuredHeroes;
 }
 
+function inventoryItemByDefIndex(inventory: DotaRuntimeInventory, defIndex: number): DotaCatalogItem | null {
+    const catalogItems =
+        inventory.catalogItems !== undefined && inventory.catalogItems.length > 0
+            ? inventory.catalogItems
+            : inventory.ownedItems;
+    for (let i = 0; i < catalogItems.length; i++) {
+        if (catalogItems[i].defIndex === defIndex) {
+            return catalogItems[i];
+        }
+    }
+
+    return null;
+}
+
 function buildRecentMatches(snapshot: DotaProfileSnapshot): CMsgProfileResponse_MatchInfo[] {
     const recentMatches: CMsgProfileResponse_MatchInfo[] = [];
     for (let i = 0; i < snapshot.recentMatches.length; i++) {
@@ -757,14 +798,18 @@ function buildRecentMatchDetails(match: DotaRecentMatch): CMsgRecentMatchInfo {
 
 function buildSuccessfulHeroes(snapshot: DotaProfileSnapshot): CMsgSuccessfulHero[] {
     const heroes: CMsgSuccessfulHero[] = [];
-    const count = snapshot.heroes.length < 5 ? snapshot.heroes.length : 5;
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < snapshot.heroes.length && heroes.length < 3; i++) {
         const hero = snapshot.heroes[i];
         const total = hero.wins + hero.losses;
+        if (total === 0 || hero.wins <= hero.losses) {
+            continue;
+        }
+
+        const percent = (hero.wins * 100) / total;
         heroes.push({
             heroId: hero.heroId,
-            winPercent: total === 0 ? 0 : (hero.wins * 100) / total,
-            longestStreak: hero.bestWinStreak
+            winPercent: percent === 100 ? 1000 : percent / 100 + 0.001,
+            longestStreak: hero.wins
         });
     }
 
@@ -869,4 +914,49 @@ function findTrophyScore(snapshot: DotaProfileSnapshot, trophyId: number): numbe
     }
 
     return 0;
+}
+
+function profileBadgePoints(snapshot: DotaProfileSnapshot): number {
+    let points = 0;
+    for (let i = 0; i < snapshot.trophies.length; i++) {
+        const trophy = snapshot.trophies[i];
+        points += trophyBadgePoints(trophy.trophyId, trophy.trophyScore);
+    }
+
+    return points === 0 ? snapshot.badgePoints : points;
+}
+
+function trophyBadgePoints(trophyId: number, trophyScore: number): number {
+    if (trophyId === 28) {
+        return allHeroLevelBadgePoints(trophyScore);
+    }
+
+    if (trophyId === 4) {
+        return allHeroChallengeBadgePoints(trophyScore);
+    }
+
+    return 0;
+}
+
+function allHeroLevelBadgePoints(score: number): number {
+    let bonus = 0;
+    if (score >= 1) bonus = 100;
+    if (score >= 5) bonus += 200;
+    if (score >= 10) bonus += 300;
+    if (score >= 25) bonus += 400;
+    if (score >= 50) bonus += 500;
+    if (score >= 100) bonus += 600;
+    if (score >= 250) bonus += 700;
+    if (score >= 500) bonus += 800;
+    if (score >= 750) bonus += 900;
+    if (score >= 1000) bonus += 1000;
+    return score * 10 + bonus;
+}
+
+function allHeroChallengeBadgePoints(score: number): number {
+    let bonus = 0;
+    if (score >= 1) bonus = 200;
+    if (score >= 5) bonus += 300;
+    if (score >= 10) bonus += 400;
+    return score + bonus;
 }
