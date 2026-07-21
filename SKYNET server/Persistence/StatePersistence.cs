@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using SKYNET_server.Json;
 using SKYNET_server.Models;
 using SKYNET_server.Persistence.Entities;
 using SKYNET_server.Services;
@@ -22,7 +23,7 @@ namespace SKYNET_server.Persistence;
 /// </summary>
 public static class StatePersistence
 {
-    private static readonly JsonSerializerOptions JsonOpts = new();
+    private static readonly JsonSerializerOptions JsonOpts = SkynetJsonSerializerOptions.CreateCompatible();
 
     /// <summary>Full write (used by the importer and round-trip check).</summary>
     public static void Save(SteamDbContext steam, DotaDbContext dota, ApiState state, bool includeCatalog)
@@ -217,12 +218,12 @@ public static class StatePersistence
             });
         }
 
-        var equipKeys = new HashSet<(ulong, uint, uint)>();
+        var equipKeys = new HashSet<(ulong, uint, uint, uint)>();
         foreach (var list in state.DotaEquipment.Values)
         {
             foreach (var eq in list)
             {
-                if (!equipKeys.Add((eq.SteamId, eq.HeroId, eq.SlotId)))
+                if (!equipKeys.Add((eq.SteamId, eq.HeroId, eq.SlotId, eq.DefIndex)))
                 {
                     continue;
                 }

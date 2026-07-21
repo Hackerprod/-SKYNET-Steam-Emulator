@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using SKYNET_server.Json;
 using SKYNET_server.Models;
 
 namespace SKYNET_server.Services;
@@ -9,10 +10,7 @@ public sealed partial class SteamApiStateService
 {
     private const uint DotaUnequipSlot = 0xFFFF;
 
-    private static readonly JsonSerializerOptions DotaEquipmentJsonOptions = new()
-    {
-        PropertyNameCaseInsensitive = true
-    };
+    private static readonly JsonSerializerOptions DotaEquipmentJsonOptions = SkynetJsonSerializerOptions.CreateCompatible();
 
     // Script-facing shape of one equipment entry. ItemId/SteamId/UpdatedAt are
     // intentionally absent: they are recomputed server-side on save so scripts
@@ -632,7 +630,8 @@ public sealed partial class SteamApiStateService
                     equipped.Slot = $"slot_{equipped.SlotId}";
                 }
 
-                if (!equipped.Slot.StartsWith("slot_", StringComparison.OrdinalIgnoreCase))
+                if (!equipped.Slot.StartsWith("slot_", StringComparison.OrdinalIgnoreCase) &&
+                    ShouldResolveDotaSlotId(equipped))
                 {
                     equipped.SlotId = ResolveDotaSlotId(equipped.HeroId, equipped.HeroName, equipped.Slot);
                 }
@@ -779,6 +778,24 @@ public sealed partial class SteamApiStateService
         }
 
         return GuessDotaSlotId(normalizedSlot);
+    }
+
+    private static bool ShouldResolveDotaSlotId(ApiDotaEquipment equipped)
+    {
+        if (equipped.HeroId != 0 || equipped.SlotId == 0)
+        {
+            return true;
+        }
+
+        // Global loadout items such as terrain/map, announcers, couriers and
+        // other account-wide cosmetics arrive from Dota with HeroId/Class 0 and
+        // a concrete SlotId chosen by the client. The imported item catalog can
+        // provide a readable slot name, but it does not define a hero slot table
+        // for class 0. Re-resolving those names would collapse the original slot
+        // to a guess (often 0), so after a restart the CSOEconItem.equippedState
+        // no longer matches what Dota equipped. Preserve the client-provided
+        // global SlotId and use the slot name only for grouping/admin display.
+        return false;
     }
 
     private IEnumerable<string> ResolveDotaSlotHeroNames(uint heroId, string heroName)

@@ -475,7 +475,7 @@ public sealed partial class SteamApiStateService
     // Persist state on demand (e.g. on graceful shutdown).
     public void FlushState()
     {
-        SaveState();
+        FlushStateToDatabase();
     }
 
     // Durable state now lives in steam.db/dota.db. Mutation sites still call SaveState();

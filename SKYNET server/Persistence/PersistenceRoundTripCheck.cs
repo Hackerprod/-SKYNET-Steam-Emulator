@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.Sqlite;
 using SKYNET_server.Models;
 using SKYNET_server.Services;
 
@@ -32,7 +33,9 @@ public static class PersistenceRoundTripCheck
             {
                 steam.Database.EnsureCreated();
                 dota.Database.EnsureCreated();
+                DatabaseSchemaMaintenance.EnsureCurrent(steam, dota);
                 StatePersistence.Save(steam, dota, original, includeCatalog: true);
+                WriteLegacyJsonShapes(dota);
             }
 
             ApiState loaded;
@@ -42,7 +45,7 @@ public static class PersistenceRoundTripCheck
                 loaded = StatePersistence.Load(steam, dota);
             }
 
-            return Compare(original, loaded, log);
+            return Compare(original, loaded, log) && VerifySchemaMaintenance(log);
         }
         finally
         {
@@ -118,10 +121,14 @@ public static class PersistenceRoundTripCheck
         };
 
         state.DotaItems[101] = new ApiDotaItem { DefIndex = 101, Name = "Blade", Slot = "weapon", HeroNames = { "npc_dota_hero_axe" }, HeroIds = { 2 } };
+        state.DotaItems[102] = new ApiDotaItem { DefIndex = 102, Name = "Terrain", Slot = "terrain", Prefab = "terrain" };
+        state.DotaItems[103] = new ApiDotaItem { DefIndex = 103, Name = "Map", Slot = "map", Prefab = "map" };
 
         state.DotaEquipment[a] = new List<ApiDotaEquipment>
         {
             new() { SteamId = a, HeroId = 2, SlotId = 1, DefIndex = 101, ItemId = 555, Slot = "weapon", HeroName = "axe", UpdatedAt = DateTime.UtcNow },
+            new() { SteamId = a, HeroId = 0, SlotId = 0, DefIndex = 102, ItemId = 556, Slot = "terrain", HeroName = "global", UpdatedAt = DateTime.UtcNow },
+            new() { SteamId = a, HeroId = 0, SlotId = 0, DefIndex = 103, ItemId = 557, Slot = "map", HeroName = "global", UpdatedAt = DateTime.UtcNow },
         };
 
         state.DotaMatches[lobbyId] = new ApiDotaMatch
@@ -145,6 +152,25 @@ public static class PersistenceRoundTripCheck
         state.DotaCosmetics = new ApiDotaCosmeticSettings { DotaPath = "C:/dota", LastImportStatus = "OK", EquipmentVersion = 3 };
 
         return state;
+    }
+
+    private static void WriteLegacyJsonShapes(DotaDbContext dota)
+    {
+        const ulong a = 76561197960287930UL;
+        const ulong lobbyId = 90000000000000123UL;
+        var updatedAt = DateTime.UtcNow.ToString("O", System.Globalization.CultureInfo.InvariantCulture);
+        var membersJson = """
+            [{"SteamId":"76561197960287930","Data":{"slot":"1"}}]
+            """;
+        var gameServerJson = """
+            {"SteamId":"76561197960287930","IP":"168496141","Port":"27015"}
+            """;
+        var equipmentJson = $$"""
+            [{"SteamId":"{{a}}","HeroId":"2","HeroName":"axe","Slot":"weapon","SlotId":"1","DefIndex":"101","ItemId":"555","Style":null,"UpdatedAt":"{{updatedAt}}","IgnoredByCurrentModel":"legacy"}]
+            """;
+
+        dota.Database.ExecuteSqlRaw("UPDATE Lobbies SET Members = {0}, GameServer = {1} WHERE SteamId = {2};", membersJson, gameServerJson, unchecked((long)lobbyId));
+        dota.Database.ExecuteSqlRaw("UPDATE DotaMatchPlayers SET Equipment = {0} WHERE LobbyId = {1} AND SteamId = {2};", equipmentJson, unchecked((long)lobbyId), unchecked((long)a));
     }
 
     private static bool Compare(ApiState original, ApiState loaded, Action<string> log)
@@ -179,8 +205,12 @@ public static class PersistenceRoundTripCheck
         var expectedKey = SteamApiStateService.MakeRemoteStorageKey(a, 570, "a/save.dat");
         Check("RemoteFiles", loaded.Files.Count == 1 && loaded.Files[expectedKey].ContentBase64 == original.Files[expectedKey].ContentBase64);
         Check("FileShares", loaded.FileShares.Count == 1 && loaded.FileShares[80000000000000001UL].NormalizedName == "a/save.dat");
-        Check("DotaItems", loaded.DotaItems.Count == 1 && loaded.DotaItems[101].HeroNames.Count == 1 && loaded.DotaItems[101].HeroIds.Contains(2u));
-        Check("DotaEquipment", loaded.DotaEquipment.TryGetValue(76561197960287930UL, out var eq) && eq.Count == 1 && eq[0].ItemId == 555);
+        Check("DotaItems", loaded.DotaItems.Count == 3 && loaded.DotaItems[101].HeroNames.Count == 1 && loaded.DotaItems[101].HeroIds.Contains(2u));
+        Check("DotaEquipment", loaded.DotaEquipment.TryGetValue(76561197960287930UL, out var eq) &&
+                               eq.Count == 3 &&
+                               eq.Any(item => item.ItemId == 555 && item.HeroId == 2) &&
+                               eq.Any(item => item.DefIndex == 102 && item.HeroId == 0) &&
+                               eq.Any(item => item.DefIndex == 103 && item.HeroId == 0));
 
         var match = loaded.DotaMatches.Values.FirstOrDefault();
         Check("DotaMatch", match is not null && match.MatchId == 7777 && match.Players.Count == 1);
@@ -197,5 +227,92 @@ public static class PersistenceRoundTripCheck
 
         log($"Persistence round-trip: FAIL. Mismatched: {string.Join(", ", failures)}");
         return false;
+    }
+
+    private static bool VerifySchemaMaintenance(Action<string> log)
+    {
+        var dir = Path.Combine(Path.GetTempPath(), $"skynet-schema-{Guid.NewGuid():N}");
+        try
+        {
+            Directory.CreateDirectory(dir);
+            var steamOptions = new DbContextOptionsBuilder<SteamDbContext>()
+                .UseSqlite($"Data Source={Path.Combine(dir, "steam.db")}").Options;
+            var dotaOptions = new DbContextOptionsBuilder<DotaDbContext>()
+                .UseSqlite($"Data Source={Path.Combine(dir, "dota.db")}").Options;
+
+            using var steam = new SteamDbContext(steamOptions);
+            using var dota = new DotaDbContext(dotaOptions);
+            steam.Database.EnsureCreated();
+            dota.Database.EnsureCreated();
+            RecreateOldDotaEquipmentSchema(dota);
+            DatabaseSchemaMaintenance.EnsureCurrent(steam, dota);
+
+            var ok = GetPrimaryKeyColumns(dota, "DotaEquipment")
+                .SequenceEqual(new[] { "SteamId", "HeroId", "SlotId", "DefIndex" }, StringComparer.OrdinalIgnoreCase);
+            log(ok ? "Schema maintenance: PASS." : "Schema maintenance: FAIL.");
+            return ok;
+        }
+        finally
+        {
+            try { Directory.Delete(dir, recursive: true); } catch { /* best effort */ }
+        }
+    }
+
+    private static void RecreateOldDotaEquipmentSchema(DotaDbContext dota)
+    {
+        dota.Database.ExecuteSqlRaw("DROP TABLE DotaEquipment;");
+        dota.Database.ExecuteSqlRaw("""
+            CREATE TABLE DotaEquipment (
+                SteamId INTEGER NOT NULL,
+                HeroId INTEGER NOT NULL,
+                SlotId INTEGER NOT NULL,
+                HeroName TEXT NOT NULL,
+                Slot TEXT NOT NULL,
+                DefIndex INTEGER NOT NULL,
+                ItemId INTEGER NOT NULL,
+                Style INTEGER NOT NULL,
+                UpdatedAt TEXT NOT NULL,
+                CONSTRAINT PK_DotaEquipment PRIMARY KEY (SteamId, HeroId, SlotId)
+            );
+            """);
+        dota.Database.ExecuteSqlRaw("""
+            INSERT INTO DotaEquipment (SteamId, HeroId, SlotId, HeroName, Slot, DefIndex, ItemId, Style, UpdatedAt)
+            VALUES (76561197960287930, 0, 0, 'global', 'terrain', 102, 556, 0, '2026-01-01T00:00:00Z');
+            """);
+    }
+
+    private static List<string> GetPrimaryKeyColumns(DbContext context, string tableName)
+    {
+        var connection = (SqliteConnection)context.Database.GetDbConnection();
+        var closeWhenDone = connection.State == System.Data.ConnectionState.Closed;
+        if (closeWhenDone)
+        {
+            connection.Open();
+        }
+
+        try
+        {
+            using var command = connection.CreateCommand();
+            command.CommandText = $"PRAGMA table_info(\"{tableName.Replace("\"", "\"\"")}\");";
+            using var reader = command.ExecuteReader();
+            var columns = new List<(int Order, string Name)>();
+            while (reader.Read())
+            {
+                var pkOrder = reader.GetInt32(reader.GetOrdinal("pk"));
+                if (pkOrder > 0)
+                {
+                    columns.Add((pkOrder, reader.GetString(reader.GetOrdinal("name"))));
+                }
+            }
+
+            return columns.OrderBy(column => column.Order).Select(column => column.Name).ToList();
+        }
+        finally
+        {
+            if (closeWhenDone)
+            {
+                connection.Close();
+            }
+        }
     }
 }

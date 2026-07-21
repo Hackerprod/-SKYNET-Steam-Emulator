@@ -1,15 +1,12 @@
 using System.Text.Json;
 using Microsoft.Data.Sqlite;
+using SKYNET_server.Json;
 
 namespace SKYNET_server.Services;
 
 public abstract class ScriptDatabase
 {
-    protected static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        WriteIndented = false
-    };
+    protected static readonly JsonSerializerOptions JsonOptions = CreateJsonOptions();
 
     protected ScriptDatabase(IHostEnvironment environment, IConfiguration configuration, string fileName)
     {
@@ -21,6 +18,14 @@ public abstract class ScriptDatabase
     public string DatabasePath { get; }
 
     protected abstract void Initialize();
+
+    private static JsonSerializerOptions CreateJsonOptions()
+    {
+        var options = SkynetJsonSerializerOptions.CreateCompatible();
+        options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.WriteIndented = false;
+        return options;
+    }
 
     protected void InitializeDatabase()
     {

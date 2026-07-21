@@ -46,9 +46,9 @@ if (args.Contains("--verify-dota-cosmetics"))
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages()
-    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new FlexibleDateTimeJsonConverter()));
+    .AddJsonOptions(options => SkynetJsonSerializerOptions.AddCompatibilityConverters(options.JsonSerializerOptions));
 builder.Services.ConfigureHttpJsonOptions(options =>
-    options.SerializerOptions.Converters.Add(new FlexibleDateTimeJsonConverter()));
+    SkynetJsonSerializerOptions.AddCompatibilityConverters(options.SerializerOptions));
 builder.Services.AddSingleton<GameCoordinatorTraceService>();
 builder.Services.AddSingleton<GameServerSettingsService>();
 builder.Services.AddSingleton<DotaDedicatedServerSupervisor>();
@@ -83,6 +83,7 @@ var app = builder.Build();
     using var dota = app.Services.GetRequiredService<IDbContextFactory<DotaDbContext>>().CreateDbContext();
     steam.Database.EnsureCreated();
     dota.Database.EnsureCreated();
+    DatabaseSchemaMaintenance.EnsureCurrent(steam, dota);
     steam.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
     dota.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
 }

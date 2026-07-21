@@ -3,6 +3,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using SKYNET_server.Json;
 using SKYNET_server.Persistence.Entities;
 
 namespace SKYNET_server.Persistence;
@@ -86,7 +87,7 @@ public sealed class DotaDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DotaItemRecord>().HasKey(x => x.DefIndex);
-        modelBuilder.Entity<DotaEquipmentRecord>().HasKey(x => new { x.SteamId, x.HeroId, x.SlotId });
+        modelBuilder.Entity<DotaEquipmentRecord>().HasKey(x => new { x.SteamId, x.HeroId, x.SlotId, x.DefIndex });
         modelBuilder.Entity<CosmeticSettingsRecord>().HasKey(x => x.Id);
         modelBuilder.Entity<DotaHeroIdRecord>().HasKey(x => x.Name);
         modelBuilder.Entity<DotaHeroSlotRecord>().HasKey(x => new { x.HeroName, x.SlotName });
@@ -139,7 +140,7 @@ internal sealed class UlongToLongConverter : ValueConverter<ulong, long>
 
 internal static class DbContextJsonConversion
 {
-    private static readonly JsonSerializerOptions JsonOpts = new();
+    private static readonly JsonSerializerOptions JsonOpts = SkynetJsonSerializerOptions.CreateCompatible();
 
     internal static ValueConverter<T, string> JsonConverter<T>() => new(
         v => JsonSerializer.Serialize(v, JsonOpts),

@@ -24,6 +24,7 @@ public sealed partial class SteamApiStateService
         using var dota = _dotaDbFactory.CreateDbContext();
         steam.Database.EnsureCreated();
         dota.Database.EnsureCreated();
+        DatabaseSchemaMaintenance.EnsureCurrent(steam, dota);
 
         try
         {
