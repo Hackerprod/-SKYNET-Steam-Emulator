@@ -264,10 +264,19 @@ export interface DotaSocialService {
 }
 
 export interface DotaChatService {
+    all(): DotaChatChannelSummary[];
     join(channelName: string, channelType: number): DotaChatChannel | null;
     get(channelId: bigint): DotaChatChannel | null;
     leave(channelId: bigint): boolean;
     broadcast(channelId: bigint, messageType: number, payload: Uint8Array, includeSelf?: boolean): number;
+}
+
+export interface DotaChatChannelSummary {
+    readonly channelId: bigint;
+    readonly channelName: string;
+    readonly channelType: number;
+    readonly maxMembers: number;
+    readonly numMembers: number;
 }
 
 export interface DotaChatChannel {
@@ -1074,6 +1083,10 @@ class GcDotaSocialService implements DotaSocialService {
 }
 
 class GcDotaChatService implements DotaChatService {
+    all(): DotaChatChannelSummary[] {
+        return dotaChatChannels() as DotaChatChannelSummary[];
+    }
+
     join(channelName: string, channelType: number): DotaChatChannel | null {
         return dotaChatJoinChannel(channelName, channelType) as DotaChatChannel | null;
     }

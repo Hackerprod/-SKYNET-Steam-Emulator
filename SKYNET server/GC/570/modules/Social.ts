@@ -77,21 +77,19 @@ export class Social {
         });
 
         ctx.reply({
-            response: 0,
+            response: 1,
             channelName: channel.channelName,
             channelId: channel.channelId,
             maxMembers: channel.maxMembers,
-            members: channel.members.map((member) => ({
-                steamId: member.steamId,
-                personaName: member.personaName,
-                channelUserId: member.channelUserId,
+            members: [{
+                steamId: ctx.steamId,
+                personaName: ctx.personaName,
+                channelUserId: channel.channelUserId,
                 status: 0
-            })),
+            }],
             channelType: channel.channelType,
             result: CMsgDOTAJoinChatChannelResponse_Result.JoinSuccess,
-            gcInitiatedJoin: false,
             channelUserId: channel.channelUserId,
-            welcomeMessage: "",
             specialPrivileges: 0
         });
 

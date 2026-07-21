@@ -197,6 +197,7 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .RegisterHostFunction("gc", "dotaSocialFeedComments", dispatcher.DotaSocialFeedComments)
                 .RegisterHostFunction("gc", "dotaSocialFeedPostComment", dispatcher.DotaSocialFeedPostComment)
                 .RegisterHostFunction("gc", "dotaSocialMatchPostComment", dispatcher.DotaSocialMatchPostComment)
+                .RegisterHostFunction("gc", "dotaChatChannels", dispatcher.DotaChatChannels)
                 .RegisterHostFunction("gc", "dotaChatJoinChannel", dispatcher.DotaChatJoinChannel)
                 .RegisterHostFunction("gc", "dotaChatChannel", dispatcher.DotaChatChannel)
                 .RegisterHostFunction("gc", "dotaChatLeaveChannel", dispatcher.DotaChatLeaveChannel)
@@ -497,6 +498,11 @@ internal sealed class ScriptHostDispatcher
     public TsValue? DotaChatJoinChannel(TsValue[] args)
     {
         return RequireCurrent().DotaChatJoinChannel(args);
+    }
+
+    public TsValue? DotaChatChannels(TsValue[] args)
+    {
+        return RequireCurrent().DotaChatChannels();
     }
 
     public TsValue? DotaChatChannel(TsValue[] args)
@@ -1615,6 +1621,23 @@ internal sealed class ScriptExchangeHost
         var channelType = Convert.ToUInt32(ToNumber(args[1], "dotaChatJoinChannel.channelType"));
         var snapshot = DotaGcRuntimeServices.ChatStore.Join(channelName, channelType, _context.SteamId, _context.AccountId, _context.PersonaName);
         return snapshot == null ? TsValue.Null : ToTsChatChannel(snapshot);
+    }
+
+    public TsValue DotaChatChannels()
+    {
+        var channels = new TsArray();
+        foreach (var channel in DotaGcRuntimeServices.ChatStore.All())
+        {
+            var value = new TsObject("DotaChatChannelSummary");
+            value.SetField("channelId", TsValue.FromUInt64(channel.ChannelId));
+            value.SetField("channelName", TsValue.FromString(channel.ChannelName));
+            value.SetField("channelType", TsValue.FromInt32(unchecked((int)channel.ChannelType)));
+            value.SetField("maxMembers", TsValue.FromInt32(unchecked((int)channel.MaxMembers)));
+            value.SetField("numMembers", TsValue.FromInt32(unchecked((int)channel.NumMembers)));
+            channels.Add(new TsObjectValue(value));
+        }
+
+        return new TsArrayValue(channels);
     }
 
     public TsValue DotaChatChannel(TsValue[] args)

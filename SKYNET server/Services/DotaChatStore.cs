@@ -2,7 +2,9 @@ namespace SKYNET_server.Services;
 
 public sealed class DotaChatStore
 {
-    public const uint MaxMembers = 200;
+    private const uint RegionalMaxMembers = 2000;
+    private const uint GuildMaxMembers = 50;
+    private const uint DefaultMaxMembers = 500;
 
     private readonly object _sync = new();
     private readonly Dictionary<(uint ChannelType, string NameKey), ChatChannel> _channelsByKey = new();
@@ -21,7 +23,8 @@ public sealed class DotaChatStore
                 {
                     Id = _nextChannelId++,
                     Name = name,
-                    ChannelType = channelType
+                    ChannelType = channelType,
+                    MaxMembers = ResolveMaxMembers(channelType)
                 };
                 _channelsByKey[key] = channel;
                 _channelsById[channel.Id] = channel;
@@ -30,7 +33,7 @@ public sealed class DotaChatStore
             var justJoined = false;
             if (!channel.Members.TryGetValue(steamId, out var member))
             {
-                if (channel.Members.Count >= MaxMembers)
+                if (channel.Members.Count >= channel.MaxMembers)
                 {
                     return null;
                 }
@@ -57,6 +60,24 @@ public sealed class DotaChatStore
             return _channelsById.TryGetValue(channelId, out var channel)
                 ? Snapshot(channel, steamId)
                 : null;
+        }
+    }
+
+    public List<DotaChatChannelSummary> All()
+    {
+        lock (_sync)
+        {
+            return _channelsById.Values
+                .OrderBy(channel => channel.Id)
+                .Select(channel => new DotaChatChannelSummary
+                {
+                    ChannelId = channel.Id,
+                    ChannelName = channel.Name,
+                    ChannelType = channel.ChannelType,
+                    MaxMembers = channel.MaxMembers,
+                    NumMembers = (uint)channel.Members.Count
+                })
+                .ToList();
         }
     }
 
@@ -103,7 +124,7 @@ public sealed class DotaChatStore
             ChannelId = channel.Id,
             ChannelName = channel.Name,
             ChannelType = channel.ChannelType,
-            MaxMembers = MaxMembers,
+            MaxMembers = channel.MaxMembers,
             SelfIsMember = selfMember != null,
             SelfChannelUserId = selfMember?.ChannelUserId ?? 0,
             SelfJustJoined = selfJustJoined,
@@ -124,8 +145,19 @@ public sealed class DotaChatStore
         public ulong Id { get; init; }
         public string Name { get; init; } = string.Empty;
         public uint ChannelType { get; init; }
+        public uint MaxMembers { get; init; }
         public uint NextChannelUserId { get; set; }
         public Dictionary<ulong, ChatMember> Members { get; } = new();
+    }
+
+    private static uint ResolveMaxMembers(uint channelType)
+    {
+        return channelType switch
+        {
+            0 => RegionalMaxMembers,
+            5 => GuildMaxMembers,
+            _ => DefaultMaxMembers
+        };
     }
 
     private sealed class ChatMember
@@ -147,6 +179,15 @@ public sealed class DotaChatChannelSnapshot
     public uint SelfChannelUserId { get; init; }
     public bool SelfJustJoined { get; init; }
     public List<DotaChatMemberSnapshot> Members { get; init; } = new();
+}
+
+public sealed class DotaChatChannelSummary
+{
+    public ulong ChannelId { get; init; }
+    public string ChannelName { get; init; } = string.Empty;
+    public uint ChannelType { get; init; }
+    public uint MaxMembers { get; init; }
+    public uint NumMembers { get; init; }
 }
 
 public sealed class DotaChatMemberSnapshot

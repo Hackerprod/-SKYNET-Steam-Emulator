@@ -13,8 +13,6 @@ import {
     Proto
 } from "../generated/dota";
 
-const DEFAULT_PUBLIC_CHANNEL_NAME = "regional";
-const DEFAULT_PUBLIC_CHANNEL_TYPE = 1;
 const PRIVATE_CHAT_CHANNEL_TYPE = 7;
 
 interface PrivateChatMember {
@@ -30,9 +28,6 @@ interface PrivateChatChannel {
     admins: number[];
 }
 
-const publicChannels: { name: string; type: number; members: number }[] = [
-    { name: DEFAULT_PUBLIC_CHANNEL_NAME, type: DEFAULT_PUBLIC_CHANNEL_TYPE, members: 0 }
-];
 const privateChats = new Map<string, PrivateChatChannel>();
 const privateChatsById = new Map<number, PrivateChatChannel>();
 const privateChatsByRuntimeChannelId = new Map<bigint, PrivateChatChannel>();
@@ -55,10 +50,10 @@ export class Chat {
     }
 
     requestChatChannelList(ctx: RawMessageContext): boolean {
-        const channels = publicChannels.map((channel) => ({
-            channelName: channel.name,
-            numMembers: channel.members,
-            channelType: channel.type
+        const channels = ctx.services.chat.all().map((channel) => ({
+            channelName: channel.channelName,
+            numMembers: channel.numMembers,
+            channelType: channel.channelType
         }));
         privateChats.forEach((channel) => {
             if (hasPrivateMember(channel, ctx.accountId)) {
@@ -107,6 +102,7 @@ export class Chat {
             text,
             timestamp: ctx.clock.now(),
             channelUserId: channel.channelUserId,
+            badgeLevel: 37,
             shareProfileAccountId: request.shareProfileAccountId,
             sharePartyId: request.sharePartyId,
             shareLobbyId: request.shareLobbyId,
@@ -246,6 +242,7 @@ export class Chat {
             text,
             timestamp: ctx.clock.now(),
             privateChatChannelId,
+            badgeLevel: 37,
             chatFlags: request.chatFlags,
             chatWheelMessage: request.chatWheelMessage
         };
@@ -335,7 +332,6 @@ export class Chat {
             return true;
         }
 
-        ctx.services.chat.leave(channelId);
         ctx.services.chat.broadcast(
             channelId,
             Msg.GCOtherLeftChannel,
@@ -344,8 +340,9 @@ export class Chat {
                 steamId: ctx.steamId,
                 channelUserId: channel.channelUserId
             }),
-            false
+            true
         );
+        ctx.services.chat.leave(channelId);
         return true;
     }
 }

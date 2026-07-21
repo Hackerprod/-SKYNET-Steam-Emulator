@@ -482,7 +482,23 @@ public static class GcScriptSelfCheck
 
         var join = Deserialize<CMsgDOTAJoinChatChannelResponse>(joinResponse.Messages[0].PayloadBase64);
         var channelId = join.ChannelId;
-        joinOk = channelId != 0 && join.Members.Count == 1 && join.Members[0].SteamId == context.SteamId;
+        joinOk = channelId != 0
+            && join.Response == 1
+            && join.Members.Count == 1
+            && join.Members[0].SteamId == context.SteamId
+            && join.Members[0].ChannelUserId == join.ChannelUserId;
+
+        var listResponse = plugin.Exchange(context, Request(7060));
+        var listBody = listResponse.Messages.Count == 0
+            ? null
+            : Deserialize<CMsgDOTARequestChatChannelListResponse>(listResponse.Messages[0].PayloadBase64);
+        var listOk = listResponse.Handled
+            && listResponse.Messages.Count == 1
+            && listResponse.Messages[0].MessageType == 7061
+            && listBody?.Channels.Any(channel =>
+                channel.ChannelName == join.ChannelName
+                && channel.ChannelType == join.ChannelType
+                && channel.NumMembers == 1) == true;
 
         var chatBody = Serialize(new CMsgDOTAChatMessage { ChannelId = channelId, Text = "hello" });
         var chatResponse = plugin.Exchange(context, Request(7273, chatBody));
@@ -490,7 +506,12 @@ public static class GcScriptSelfCheck
             && chatResponse.Messages.Count == 0;
 
         var leaveResponse = plugin.Exchange(context, Request(7272, Serialize(new CMsgDOTALeaveChatChannel { ChannelId = channelId })));
-        var leaveOk = leaveResponse.Handled && leaveResponse.Messages.Count == 0;
+        var leftMessage = leaveResponse.Messages.FirstOrDefault(message => message.MessageType == 7014);
+        var leftBody = leftMessage == null ? null : Deserialize<CMsgDOTAOtherLeftChatChannel>(leftMessage.PayloadBase64);
+        var leaveOk = leaveResponse.Handled
+            && leaveResponse.Messages.Count == 1
+            && leftBody?.SteamId == context.SteamId
+            && leftBody.ChannelUserId == join.ChannelUserId;
 
         var afterLeaveResponse = plugin.Exchange(context, Request(7273, chatBody));
         var afterLeaveOk = afterLeaveResponse.Handled && afterLeaveResponse.Messages.Count == 0;
@@ -553,9 +574,9 @@ public static class GcScriptSelfCheck
             && deliveredPrivateBody.PersonaName == friendContext.PersonaName
             && deliveredPrivateBody.AccountId == friendContext.AccountId;
 
-        var ok = joinOk && chatOk && leaveOk && afterLeaveOk && privateInviteOk && privateMessageOk;
+        var ok = joinOk && listOk && chatOk && leaveOk && afterLeaveOk && privateInviteOk && privateMessageOk;
         write(
-            $"chat flow -> join={joinOk}, noSelfEcho={chatOk}, leave={leaveOk}, afterLeave={afterLeaveOk}, " +
+            $"chat flow -> join={joinOk}, list={listOk}, noSelfEcho={chatOk}, leave={leaveOk}, afterLeave={afterLeaveOk}, " +
             $"privateInvite={privateInviteOk}, privateMessage={privateMessageOk}, ok={ok}");
         return ok;
     }

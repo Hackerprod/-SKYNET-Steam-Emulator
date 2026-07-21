@@ -45,6 +45,7 @@ declare global {
     function dotaSocialFeedComments(feedEventId: bigint): unknown;
     function dotaSocialFeedPostComment(feedEventId: bigint, comment: string): boolean;
     function dotaSocialMatchPostComment(matchId: bigint, comment: string): boolean;
+    function dotaChatChannels(): unknown;
     function dotaChatJoinChannel(channelName: string, channelType: number): unknown;
     function dotaChatChannel(channelId: bigint): unknown;
     function dotaChatLeaveChannel(channelId: bigint): boolean;
