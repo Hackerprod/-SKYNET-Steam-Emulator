@@ -8,15 +8,23 @@ import {
     Proto
 } from "../generated/dota";
 import { normalizeConduct } from "./shared/conduct";
+import {
+    DOTA_SO_ECON_GAME_ACCOUNT_CLIENT,
+    DOTA_SO_ECON_ITEM,
+    DOTA_SO_PLAYER_CHALLENGE,
+    DOTA_SO_SERVICE_ECON,
+    DOTA_SO_SERVICE_GAME,
+    SO_OWNER_STEAM_ID
+} from "./shared/soIds";
 
-export const ECON_ITEM_TYPE_ID = 1;
-export const OWNER_TYPE_STEAM_ID = 1;
-export const ECON_SERVICE_ID = 1;
+export const ECON_ITEM_TYPE_ID = DOTA_SO_ECON_ITEM;
+export const OWNER_TYPE_STEAM_ID = SO_OWNER_STEAM_ID;
+export const ECON_SERVICE_ID = DOTA_SO_SERVICE_ECON;
 
-const DOTA_SERVICE_GAME = 0;
-const DOTA_SERVICE_ECON = 1;
-const GAME_ACCOUNT_TYPE_ID = 7;
-const ITEM_SCHEMA_TYPE_ID = 2010;
+const DOTA_SERVICE_GAME = DOTA_SO_SERVICE_GAME;
+const DOTA_SERVICE_ECON = DOTA_SO_SERVICE_ECON;
+const GAME_ACCOUNT_TYPE_ID = DOTA_SO_ECON_GAME_ACCOUNT_CLIENT;
+const ITEM_SCHEMA_TYPE_ID = DOTA_SO_PLAYER_CHALLENGE;
 const DEFAULT_INVENTORY_POSITION = 1;
 const DEFAULT_QUANTITY = 1;
 const DEFAULT_LEVEL = 1;

@@ -77,16 +77,27 @@ import {
 } from "../generated/dota";
 import { buildEconSoCacheSubscribedForInventory, buildGameOwnerSoCacheSubscribedForInventory } from "./InventorySos";
 import { normalizeConduct } from "./shared/conduct";
+import {
+    DOTA_GC_SOCACHE_FILE_VERSION,
+    DOTA_SO_LOBBY,
+    DOTA_SO_SERVER_LOBBY,
+    DOTA_SO_SERVER_STATIC_LOBBY,
+    DOTA_SO_SERVICE_GAME,
+    DOTA_SO_STATIC_LOBBY,
+    DOTA_SO_WORKING_LOBBY_INVITE_CACHE,
+    SO_OWNER_INVITE,
+    SO_OWNER_LOBBY_GROUP
+} from "./shared/soIds";
 
-const LOBBY_OBJECT_TYPE_ID = 2004;
-const LOBBY_INVITE_OBJECT_TYPE_ID = 2013;
-const LOBBY_STATIC_OBJECT_TYPE_ID = 2014;
-const LOBBY_SERVER_OBJECT_TYPE_ID = 2015;
-const LOBBY_SERVER_STATIC_OBJECT_TYPE_ID = 2016;
-const LOBBY_OWNER_TYPE = 3;
-const LOBBY_INVITE_OWNER_TYPE = 4;
-const LOBBY_SERVICE_ID = 0;
-const WELCOME_VERSION = 20;
+const LOBBY_OBJECT_TYPE_ID = DOTA_SO_LOBBY;
+const LOBBY_INVITE_OBJECT_TYPE_ID = DOTA_SO_WORKING_LOBBY_INVITE_CACHE;
+const LOBBY_STATIC_OBJECT_TYPE_ID = DOTA_SO_STATIC_LOBBY;
+const LOBBY_SERVER_OBJECT_TYPE_ID = DOTA_SO_SERVER_LOBBY;
+const LOBBY_SERVER_STATIC_OBJECT_TYPE_ID = DOTA_SO_SERVER_STATIC_LOBBY;
+const LOBBY_OWNER_TYPE = SO_OWNER_LOBBY_GROUP;
+const LOBBY_INVITE_OWNER_TYPE = SO_OWNER_INVITE;
+const LOBBY_SERVICE_ID = DOTA_SO_SERVICE_GAME;
+const WELCOME_VERSION = DOTA_GC_SOCACHE_FILE_VERSION;
 // Dedicated servers accept the GC welcome only when it carries the current
 // server-side welcome version observed from the working coordinator flow.
 const GAME_SERVER_WELCOME_VERSION = 6860;
