@@ -1,5 +1,7 @@
-import { DotaSocialFeedComment, DotaSocialFeedEvent, gc, HandlerContext } from "../framework/gc";
+import { DotaSocialFeedComment, DotaSocialFeedEvent, gc, HandlerContext, RawMessageContext } from "../framework/gc";
 import {
+    CMsgClientToGCSocialMatchDetailsRequest,
+    CMsgClientToGCSocialMatchPostCommentRequest,
     CMsgClientToGCFindTopSourceTVGames,
     CMsgClientToGCEmoticonDataRequest,
     CMsgClientToGCSocialFeedPostCommentRequest,
@@ -8,9 +10,14 @@ import {
     CMsgDOTAJoinChatChannelResponse_Result,
     CMsgGCMatchDetailsRequest,
     CMsgGCMatchDetailsResponse,
+    CMsgGCToClientSocialMatchDetailsResponse,
+    CMsgGCToClientSocialMatchDetailsResponse_Comment,
+    CMsgGCToClientSocialMatchPostCommentResponse,
     CMsgGCToClientEmoticonData,
     CMsgGCToClientFindTopSourceTVGamesResponse,
     CMsgGCToClientSocialFeedPostCommentResponse,
+    CMsgGenericResult,
+    CMsgGCNotificationsMarkReadRequest,
     CMsgGCNotificationsRequest,
     CMsgGCNotificationsResponse,
     CMsgGCNotificationsUpdate_EResult,
@@ -45,11 +52,14 @@ export class Social {
         gc.on(Routes.Notifications, (ctx) => {
             return this.notifications(ctx);
         });
+        gc.onMessage(Msg.GCNotificationsMarkReadRequest, (ctx) => this.notificationsMarkRead(ctx));
         gc.on(Routes.EmoticonData, (ctx) => this.emoticonData(ctx));
         gc.on(Routes.FindTopSourceTvGames, (ctx) => {
             return this.findTopSourceTvGames(ctx);
         });
         gc.on(Routes.MatchDetails, (ctx) => this.socialMatchDetails(ctx));
+        gc.onMessage(Msg.ClientToGCSocialMatchDetailsRequest, (ctx) => this.legacySocialMatchDetails(ctx));
+        gc.onMessage(Msg.ClientToGCSocialMatchPostCommentRequest, (ctx) => this.legacySocialMatchPostComment(ctx));
         gc.on(Routes.RequestSocialFeed, (ctx) => this.requestSocialFeed(ctx));
         gc.on(Routes.RequestSocialFeedComments, (ctx) => this.requestSocialFeedComments(ctx));
         gc.on(Routes.SocialFeedPostComment, (ctx) => this.socialFeedPostComment(ctx));
@@ -81,12 +91,14 @@ export class Social {
             channelName: channel.channelName,
             channelId: channel.channelId,
             maxMembers: channel.maxMembers,
-            members: [{
-                steamId: ctx.steamId,
-                personaName: ctx.personaName,
-                channelUserId: channel.channelUserId,
-                status: 0
-            }],
+            members: [
+                {
+                    steamId: ctx.steamId,
+                    personaName: ctx.personaName,
+                    channelUserId: channel.channelUserId,
+                    status: 0
+                }
+            ],
             channelType: channel.channelType,
             result: CMsgDOTAJoinChatChannelResponse_Result.JoinSuccess,
             channelUserId: channel.channelUserId,
@@ -119,6 +131,13 @@ export class Social {
         });
         return true;
     }
+
+    notificationsMarkRead(ctx: RawMessageContext): boolean {
+        ctx.decode(Proto.CMsgGCNotificationsMarkReadRequest) as CMsgGCNotificationsMarkReadRequest;
+        ctx.reply<CMsgGenericResult>(Msg.GCGenericResult, Proto.CMsgGenericResult, { eresult: 2 });
+        return true;
+    }
+
     emoticonData(ctx: HandlerContext<CMsgClientToGCEmoticonDataRequest, CMsgGCToClientEmoticonData>): boolean {
         const access = ctx.services.social.emoticonAccess();
         ctx.reply({
@@ -156,6 +175,35 @@ export class Social {
             match: mapMatchDetails(match),
             vote: 0
         });
+        return true;
+    }
+
+    legacySocialMatchDetails(ctx: RawMessageContext): boolean {
+        const request = ctx.decode(
+            Proto.CMsgClientToGCSocialMatchDetailsRequest
+        ) as CMsgClientToGCSocialMatchDetailsRequest;
+        ctx.reply<CMsgGCToClientSocialMatchDetailsResponse>(
+            Msg.GCToClientSocialMatchDetailsResponse,
+            Proto.CMsgGCToClientSocialMatchDetailsResponse,
+            {
+                success: true,
+                comments: mapLegacySocialMatchComments(ctx.services.social.matchComments(request.matchId ?? 0n))
+            }
+        );
+        return true;
+    }
+
+    legacySocialMatchPostComment(ctx: RawMessageContext): boolean {
+        const request = ctx.decode(
+            Proto.CMsgClientToGCSocialMatchPostCommentRequest
+        ) as CMsgClientToGCSocialMatchPostCommentRequest;
+        ctx.reply<CMsgGCToClientSocialMatchPostCommentResponse>(
+            Msg.GCToClientSocialMatchPostCommentResponse,
+            Proto.CMsgGCToClientSocialMatchPostCommentResponse,
+            {
+                success: ctx.services.social.postMatchComment(request.matchId ?? 0n, request.comment ?? "")
+            }
+        );
         return true;
     }
 
@@ -228,6 +276,23 @@ function mapSocialFeedComments(comments: DotaSocialFeedComment[]): CMsgSocialFee
             commenterAccountId: comment.commenterAccountId,
             timestamp: comment.timestamp,
             commentText: comment.commentText
+        });
+    }
+
+    return mapped;
+}
+
+function mapLegacySocialMatchComments(
+    comments: DotaSocialFeedComment[]
+): CMsgGCToClientSocialMatchDetailsResponse_Comment[] {
+    const mapped: CMsgGCToClientSocialMatchDetailsResponse_Comment[] = [];
+    for (let i = 0; i < comments.length; i++) {
+        const comment = comments[i];
+        mapped.push({
+            accountId: comment.commenterAccountId,
+            comment: comment.commentText,
+            personaName: comment.personaName,
+            timestamp: comment.timestamp
         });
     }
 

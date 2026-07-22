@@ -196,6 +196,7 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .RegisterHostFunction("gc", "dotaSocialFeed", dispatcher.DotaSocialFeed)
                 .RegisterHostFunction("gc", "dotaSocialFeedComments", dispatcher.DotaSocialFeedComments)
                 .RegisterHostFunction("gc", "dotaSocialFeedPostComment", dispatcher.DotaSocialFeedPostComment)
+                .RegisterHostFunction("gc", "dotaSocialMatchComments", dispatcher.DotaSocialMatchComments)
                 .RegisterHostFunction("gc", "dotaSocialMatchPostComment", dispatcher.DotaSocialMatchPostComment)
                 .RegisterHostFunction("gc", "dotaChatChannels", dispatcher.DotaChatChannels)
                 .RegisterHostFunction("gc", "dotaChatJoinChannel", dispatcher.DotaChatJoinChannel)
@@ -207,10 +208,25 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .RegisterHostFunction("gc", "dotaGuild", dispatcher.DotaGuild)
                 .RegisterHostFunction("gc", "dotaGuildPersonaInfo", dispatcher.DotaGuildPersonaInfo)
                 .RegisterHostFunction("gc", "dotaGuildEventData", dispatcher.DotaGuildEventData)
+                .RegisterHostFunction("gc", "dotaGuildInvite", dispatcher.DotaGuildInvite)
+                .RegisterHostFunction("gc", "dotaGuildDeclineInvite", dispatcher.DotaGuildDeclineInvite)
+                .RegisterHostFunction("gc", "dotaGuildCancelInvite", dispatcher.DotaGuildCancelInvite)
+                .RegisterHostFunction("gc", "dotaGuildAcceptInvite", dispatcher.DotaGuildAcceptInvite)
+                .RegisterHostFunction("gc", "dotaGuildLeave", dispatcher.DotaGuildLeave)
                 .RegisterHostFunction("gc", "dotaReporterUpdates", dispatcher.DotaReporterUpdates)
                 .RegisterHostFunction("gc", "dotaAcknowledgeReporterUpdates", dispatcher.DotaAcknowledgeReporterUpdates)
                 .RegisterHostFunction("gc", "dotaTeam", dispatcher.DotaTeam)
                 .RegisterHostFunction("gc", "dotaTeamsForAccount", dispatcher.DotaTeamsForAccount)
+                .RegisterHostFunction("gc", "dotaNextTeamId", dispatcher.DotaNextTeamId)
+                .RegisterHostFunction("gc", "dotaUpsertTeam", dispatcher.DotaUpsertTeam)
+                .RegisterHostFunction("gc", "dotaAddTeamMember", dispatcher.DotaAddTeamMember)
+                .RegisterHostFunction("gc", "dotaRemoveTeamMember", dispatcher.DotaRemoveTeamMember)
+                .RegisterHostFunction("gc", "dotaRemoveTeam", dispatcher.DotaRemoveTeam)
+                .RegisterHostFunction("gc", "dotaTeamNameAvailable", dispatcher.DotaTeamNameAvailable)
+                .RegisterHostFunction("gc", "dotaTeamTagAvailable", dispatcher.DotaTeamTagAvailable)
+                .RegisterHostFunction("gc", "dotaTeamPlayerInfo", dispatcher.DotaTeamPlayerInfo)
+                .RegisterHostFunction("gc", "dotaUpsertTeamPlayerInfo", dispatcher.DotaUpsertTeamPlayerInfo)
+                .RegisterHostFunction("gc", "dotaDeleteTeamPlayerInfo", dispatcher.DotaDeleteTeamPlayerInfo)
                 .RegisterHostFunction("gc", "dotaLookupAccountName", dispatcher.DotaLookupAccountName)
                 .RegisterHostFunction("gc", "dotaEventPoints", dispatcher.DotaEventPoints)
                 .RegisterHostFunction("gc", "dotaHeroStandings", dispatcher.DotaHeroStandings)
@@ -221,6 +237,7 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .RegisterHostFunction("gc", "dotaMatchHistory", dispatcher.DotaMatchHistory)
                 .RegisterHostFunction("gc", "dotaMatchDetails", dispatcher.DotaMatchDetails)
                 .RegisterHostFunction("gc", "dotaHeroStatsHistory", dispatcher.DotaHeroStatsHistory)
+                .RegisterHostFunction("gc", "dotaMatchVotes", dispatcher.DotaMatchVotes)
                 .RegisterHostFunction("gc", "dotaShowcaseStats", dispatcher.DotaShowcaseStats)
                 .RegisterHostFunction("gc", "dotaRecentAccomplishments", dispatcher.DotaRecentAccomplishments)
                 .RegisterHostFunction("gc", "dotaHeroRecentAccomplishments", dispatcher.DotaHeroRecentAccomplishments)
@@ -260,6 +277,7 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .RegisterHostFunction("gc", "dotaPartyUserOnline", dispatcher.DotaPartyUserOnline)
                 .RegisterHostFunction("gc", "dotaQueueGcMessage", dispatcher.DotaQueueGcMessage)
                 .RegisterHostFunction("gc", "dotaPublishMatchSnapshot", dispatcher.DotaPublishMatchSnapshot)
+                .RegisterHostFunction("gc", "dotaListMatchSnapshots", dispatcher.DotaListMatchSnapshots)
                 .RegisterHostFunction("gc", "dotaRemoveMatchSnapshot", dispatcher.DotaRemoveMatchSnapshot)
                 .RegisterHostFunction("gc", "dotaStartDedicatedServer", dispatcher.DotaStartDedicatedServer)
                 .RegisterHostFunction("gc", "dotaReleaseDedicatedServer", dispatcher.DotaReleaseDedicatedServer)
@@ -490,6 +508,11 @@ internal sealed class ScriptHostDispatcher
         return RequireCurrent().DotaSocialFeedComments(args);
     }
 
+    public TsValue? DotaSocialMatchComments(TsValue[] args)
+    {
+        return RequireCurrent().DotaSocialMatchComments(args);
+    }
+
     public TsValue? DotaSocialFeedPostComment(TsValue[] args)
     {
         return RequireCurrent().DotaSocialFeedPostComment(args);
@@ -545,6 +568,31 @@ internal sealed class ScriptHostDispatcher
         return RequireCurrent().DotaGuildEventData(args);
     }
 
+    public TsValue? DotaGuildInvite(TsValue[] args)
+    {
+        return RequireCurrent().DotaGuildInvite(args);
+    }
+
+    public TsValue? DotaGuildDeclineInvite(TsValue[] args)
+    {
+        return RequireCurrent().DotaGuildDeclineInvite(args);
+    }
+
+    public TsValue? DotaGuildCancelInvite(TsValue[] args)
+    {
+        return RequireCurrent().DotaGuildCancelInvite(args);
+    }
+
+    public TsValue? DotaGuildAcceptInvite(TsValue[] args)
+    {
+        return RequireCurrent().DotaGuildAcceptInvite(args);
+    }
+
+    public TsValue? DotaGuildLeave(TsValue[] args)
+    {
+        return RequireCurrent().DotaGuildLeave(args);
+    }
+
     public TsValue? DotaReporterUpdates(TsValue[] args)
     {
         return RequireCurrent().DotaReporterUpdates();
@@ -563,6 +611,56 @@ internal sealed class ScriptHostDispatcher
     public TsValue? DotaTeamsForAccount(TsValue[] args)
     {
         return RequireCurrent().DotaTeamsForAccount(args);
+    }
+
+    public TsValue? DotaNextTeamId(TsValue[] args)
+    {
+        return RequireCurrent().DotaNextTeamId();
+    }
+
+    public TsValue? DotaUpsertTeam(TsValue[] args)
+    {
+        return RequireCurrent().DotaUpsertTeam(args);
+    }
+
+    public TsValue? DotaAddTeamMember(TsValue[] args)
+    {
+        return RequireCurrent().DotaAddTeamMember(args);
+    }
+
+    public TsValue? DotaRemoveTeamMember(TsValue[] args)
+    {
+        return RequireCurrent().DotaRemoveTeamMember(args);
+    }
+
+    public TsValue? DotaRemoveTeam(TsValue[] args)
+    {
+        return RequireCurrent().DotaRemoveTeam(args);
+    }
+
+    public TsValue? DotaTeamNameAvailable(TsValue[] args)
+    {
+        return RequireCurrent().DotaTeamNameAvailable(args);
+    }
+
+    public TsValue? DotaTeamTagAvailable(TsValue[] args)
+    {
+        return RequireCurrent().DotaTeamTagAvailable(args);
+    }
+
+    public TsValue? DotaTeamPlayerInfo(TsValue[] args)
+    {
+        return RequireCurrent().DotaTeamPlayerInfo(args);
+    }
+
+    public TsValue? DotaUpsertTeamPlayerInfo(TsValue[] args)
+    {
+        return RequireCurrent().DotaUpsertTeamPlayerInfo(args);
+    }
+
+    public TsValue? DotaDeleteTeamPlayerInfo(TsValue[] args)
+    {
+        return RequireCurrent().DotaDeleteTeamPlayerInfo(args);
     }
 
     public TsValue? DotaLookupAccountName(TsValue[] args)
@@ -613,6 +711,11 @@ internal sealed class ScriptHostDispatcher
     public TsValue? DotaHeroStatsHistory(TsValue[] args)
     {
         return RequireCurrent().DotaHeroStatsHistory(args);
+    }
+
+    public TsValue? DotaMatchVotes(TsValue[] args)
+    {
+        return RequireCurrent().DotaMatchVotes(args);
     }
 
     public TsValue? DotaShowcaseStats(TsValue[] args)
@@ -803,6 +906,11 @@ internal sealed class ScriptHostDispatcher
     public TsValue? DotaPublishMatchSnapshot(TsValue[] args)
     {
         return RequireCurrent().DotaPublishMatchSnapshot(args);
+    }
+
+    public TsValue? DotaListMatchSnapshots(TsValue[] args)
+    {
+        return RequireCurrent().DotaListMatchSnapshots();
     }
 
     public TsValue? DotaRemoveMatchSnapshot(TsValue[] args)
@@ -1215,6 +1323,17 @@ internal sealed class ScriptExchangeHost
 
         DotaGcRuntimeServices.MatchSnapshotSink(ToDotaMatchSnapshot(args[0], "dotaPublishMatchSnapshot.snapshot"));
         return TsValue.FromBool(true);
+    }
+
+    public TsValue DotaListMatchSnapshots()
+    {
+        var array = new TsArray();
+        foreach (var snapshot in DotaGcRuntimeServices.MatchSnapshotsProvider?.Invoke() ?? Array.Empty<ApiDotaMatch>())
+        {
+            array.Add(ToTsDotaMatchSnapshot(snapshot));
+        }
+
+        return new TsArrayValue(array);
     }
 
     public TsValue DotaRemoveMatchSnapshot(TsValue[] args)
@@ -1640,6 +1759,17 @@ internal sealed class ScriptExchangeHost
         return ToTsSocialFeedComments(feedEventId, DotaGcRuntimeServices.StatsStore?.GetSocialFeedComments(feedEventId) ?? Array.Empty<DotaStatsComment>());
     }
 
+    public TsValue DotaSocialMatchComments(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaSocialMatchComments(matchId) requires one argument");
+        }
+
+        var matchId = Convert.ToUInt64(ToInteger(args[0], "dotaSocialMatchComments.matchId").ToString());
+        return ToTsSocialFeedComments(matchId, DotaGcRuntimeServices.StatsStore?.GetSocialMatchComments(matchId) ?? Array.Empty<DotaStatsComment>());
+    }
+
     public TsValue DotaSocialFeedPostComment(TsValue[] args)
     {
         if (args.Length < 2)
@@ -1830,6 +1960,68 @@ internal sealed class ScriptExchangeHost
         return ToTsGuildEventData(store.GetEventData(guildId, eventId, _context.AccountId));
     }
 
+    public TsValue DotaGuildInvite(TsValue[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new InvalidOperationException("dotaGuildInvite(guildId, targetAccountId) requires two arguments");
+        }
+
+        var guildId = Convert.ToUInt32(ToNumber(args[0], "dotaGuildInvite.guildId"));
+        var targetAccountId = Convert.ToUInt32(ToNumber(args[1], "dotaGuildInvite.targetAccountId"));
+        var store = DotaGcRuntimeServices.GuildStore ?? throw new InvalidOperationException("Dota guild store is not initialized.");
+        return TsValue.FromInt32((int)store.Invite(guildId, _context.AccountId, targetAccountId));
+    }
+
+    public TsValue DotaGuildDeclineInvite(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaGuildDeclineInvite(guildId) requires one argument");
+        }
+
+        var guildId = Convert.ToUInt32(ToNumber(args[0], "dotaGuildDeclineInvite.guildId"));
+        var store = DotaGcRuntimeServices.GuildStore ?? throw new InvalidOperationException("Dota guild store is not initialized.");
+        return TsValue.FromInt32((int)store.DeclineInvite(guildId, _context.AccountId));
+    }
+
+    public TsValue DotaGuildCancelInvite(TsValue[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new InvalidOperationException("dotaGuildCancelInvite(guildId, targetAccountId) requires two arguments");
+        }
+
+        var guildId = Convert.ToUInt32(ToNumber(args[0], "dotaGuildCancelInvite.guildId"));
+        var targetAccountId = Convert.ToUInt32(ToNumber(args[1], "dotaGuildCancelInvite.targetAccountId"));
+        var store = DotaGcRuntimeServices.GuildStore ?? throw new InvalidOperationException("Dota guild store is not initialized.");
+        return TsValue.FromInt32((int)store.CancelInvite(guildId, _context.AccountId, targetAccountId));
+    }
+
+    public TsValue DotaGuildAcceptInvite(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaGuildAcceptInvite(guildId) requires one argument");
+        }
+
+        var guildId = Convert.ToUInt32(ToNumber(args[0], "dotaGuildAcceptInvite.guildId"));
+        var store = DotaGcRuntimeServices.GuildStore ?? throw new InvalidOperationException("Dota guild store is not initialized.");
+        return TsValue.FromInt32((int)store.AcceptInvite(guildId, _context.AccountId));
+    }
+
+    public TsValue DotaGuildLeave(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaGuildLeave(guildId) requires one argument");
+        }
+
+        var guildId = Convert.ToUInt32(ToNumber(args[0], "dotaGuildLeave.guildId"));
+        var store = DotaGcRuntimeServices.GuildStore ?? throw new InvalidOperationException("Dota guild store is not initialized.");
+        return TsValue.FromInt32((int)store.Leave(guildId, _context.AccountId));
+    }
+
     public TsValue DotaReporterUpdates()
     {
         var summary = DotaGcRuntimeServices.StatsStore?.GetReporterUpdates(_context.AccountId) ?? new DotaStatsReporterUpdateSummary();
@@ -1865,6 +2057,127 @@ internal sealed class ScriptExchangeHost
             : _context.AccountId;
         var json = DotaGcRuntimeServices.TeamsForAccountJsonProvider?.Invoke(accountId) ?? "[]";
         return ToTsDotaTeams(json);
+    }
+
+    public TsValue DotaNextTeamId()
+    {
+        var raw = DotaGcRuntimeServices.NextTeamIdProvider?.Invoke() ?? "1000000";
+        return TsValue.FromInt32(unchecked((int)Convert.ToUInt32(raw)));
+    }
+
+    public TsValue DotaUpsertTeam(TsValue[] args)
+    {
+        if (args.Length < 4)
+        {
+            throw new InvalidOperationException("dotaUpsertTeam(teamId, name, tag, teamJson) requires four arguments");
+        }
+
+        var teamId = Convert.ToUInt32(ToNumber(args[0], "dotaUpsertTeam.teamId")).ToString(System.Globalization.CultureInfo.InvariantCulture);
+        var name = ToString(args[1]);
+        var tag = ToString(args[2]);
+        var teamJson = ToString(args[3]);
+        var json = DotaGcRuntimeServices.TeamUpsertSink?.Invoke(teamId, name, tag, teamJson) ?? "{}";
+        return ToTsDotaTeam(json, null);
+    }
+
+    public TsValue DotaAddTeamMember(TsValue[] args)
+    {
+        if (args.Length < 3)
+        {
+            throw new InvalidOperationException("dotaAddTeamMember(teamId, accountId, role) requires three arguments");
+        }
+
+        var teamId = Convert.ToUInt32(ToNumber(args[0], "dotaAddTeamMember.teamId")).ToString(System.Globalization.CultureInfo.InvariantCulture);
+        var accountId = Convert.ToUInt32(ToNumber(args[1], "dotaAddTeamMember.accountId"));
+        var role = Convert.ToUInt32(ToNumber(args[2], "dotaAddTeamMember.role"));
+        return TsValue.FromBool(DotaGcRuntimeServices.TeamMemberUpsertSink?.Invoke(teamId, accountId, role) ?? false);
+    }
+
+    public TsValue DotaRemoveTeamMember(TsValue[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new InvalidOperationException("dotaRemoveTeamMember(teamId, accountId) requires two arguments");
+        }
+
+        var teamId = Convert.ToUInt32(ToNumber(args[0], "dotaRemoveTeamMember.teamId")).ToString(System.Globalization.CultureInfo.InvariantCulture);
+        var accountId = Convert.ToUInt32(ToNumber(args[1], "dotaRemoveTeamMember.accountId"));
+        return TsValue.FromBool(DotaGcRuntimeServices.TeamMemberRemoveSink?.Invoke(teamId, accountId) ?? false);
+    }
+
+    public TsValue DotaRemoveTeam(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaRemoveTeam(teamId) requires one argument");
+        }
+
+        var teamId = Convert.ToUInt32(ToNumber(args[0], "dotaRemoveTeam.teamId")).ToString(System.Globalization.CultureInfo.InvariantCulture);
+        return TsValue.FromBool(DotaGcRuntimeServices.TeamRemoveSink?.Invoke(teamId) ?? false);
+    }
+
+    public TsValue DotaTeamNameAvailable(TsValue[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new InvalidOperationException("dotaTeamNameAvailable(name, exceptTeamId) requires two arguments");
+        }
+
+        return TsValue.FromBool(DotaGcRuntimeServices.TeamNameAvailableProvider?.Invoke(ToString(args[0]), ToString(args[1])) ?? false);
+    }
+
+    public TsValue DotaTeamTagAvailable(TsValue[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new InvalidOperationException("dotaTeamTagAvailable(tag, exceptTeamId) requires two arguments");
+        }
+
+        return TsValue.FromBool(DotaGcRuntimeServices.TeamTagAvailableProvider?.Invoke(ToString(args[0]), ToString(args[1])) ?? false);
+    }
+
+    public TsValue DotaTeamPlayerInfo(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaTeamPlayerInfo(accountId) requires one argument");
+        }
+
+        var accountId = Convert.ToUInt32(ToNumber(args[0], "dotaTeamPlayerInfo.accountId"));
+        var json = DotaGcRuntimeServices.TeamPlayerInfoProvider?.Invoke(accountId) ?? "{}";
+        return ToTsDotaPlayerInfo(json);
+    }
+
+    public TsValue DotaUpsertTeamPlayerInfo(TsValue[] args)
+    {
+        if (args.Length < 7)
+        {
+            throw new InvalidOperationException("dotaUpsertTeamPlayerInfo(accountId, name, countryCode, fantasyRole, teamId, sponsor, realName) requires seven arguments");
+        }
+
+        var accountId = Convert.ToUInt32(ToNumber(args[0], "dotaUpsertTeamPlayerInfo.accountId"));
+        var fantasyRole = Convert.ToUInt32(ToNumber(args[3], "dotaUpsertTeamPlayerInfo.fantasyRole"));
+        var teamId = Convert.ToUInt32(ToNumber(args[4], "dotaUpsertTeamPlayerInfo.teamId")).ToString(System.Globalization.CultureInfo.InvariantCulture);
+        var json = DotaGcRuntimeServices.TeamPlayerInfoUpsertSink?.Invoke(
+            accountId,
+            ToString(args[1]),
+            ToString(args[2]),
+            fantasyRole,
+            teamId,
+            ToString(args[5]),
+            ToString(args[6])) ?? "{}";
+        return ToTsDotaPlayerInfo(json);
+    }
+
+    public TsValue DotaDeleteTeamPlayerInfo(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaDeleteTeamPlayerInfo(accountId) requires one argument");
+        }
+
+        var accountId = Convert.ToUInt32(ToNumber(args[0], "dotaDeleteTeamPlayerInfo.accountId"));
+        return TsValue.FromBool(DotaGcRuntimeServices.TeamPlayerInfoDeleteSink?.Invoke(accountId) ?? false);
     }
 
     public TsValue DotaLookupAccountName(TsValue[] args)
@@ -2046,6 +2359,23 @@ internal sealed class ScriptExchangeHost
 
         var heroId = Convert.ToUInt32(ToNumber(args[1], "dotaHeroStatsHistory.heroId"));
         return ToTsMatchPlayers(DotaGcRuntimeServices.StatsStore?.GetRecentMatches(accountId, 20, heroId) ?? Array.Empty<DotaStatsMatchPlayer>());
+    }
+
+    public TsValue DotaMatchVotes(TsValue[] args)
+    {
+        if (args.Length < 1)
+        {
+            throw new InvalidOperationException("dotaMatchVotes(matchId) requires one argument");
+        }
+
+        var matchId = Convert.ToUInt64(ToInteger(args[0], "dotaMatchVotes.matchId").ToString());
+        var summary = DotaGcRuntimeServices.StatsStore?.GetMatchVotes(matchId, _context.AccountId) ?? new DotaStatsVoteSummary();
+        var result = new TsObject("DotaMatchVoteSummary");
+        result.SetField("success", TsValue.FromBool(summary.Success));
+        result.SetField("vote", ToTsUInt32(summary.Vote));
+        result.SetField("positiveVotes", ToTsUInt32(summary.PositiveVotes));
+        result.SetField("negativeVotes", ToTsUInt32(summary.NegativeVotes));
+        return new TsObjectValue(result);
     }
 
     public TsValue DotaShowcaseStats(TsValue[] args)
@@ -3245,6 +3575,62 @@ internal sealed class ScriptExchangeHost
         value.SetField("gamesPlayedTotal", ToTsUInt32(details.GamesPlayedTotal));
         value.SetField("gamesPlayedMatchmaking", ToTsUInt32(details.GamesPlayedMatchmaking));
         value.SetField("region", ToTsUInt32(details.Region));
+        value.SetField("members", ToTsDotaTeamMembers(row));
+        return new TsObjectValue(value);
+    }
+
+    private static TsValue ToTsDotaTeamMembers(JsonElement row)
+    {
+        var result = new TsArray();
+        if (!row.TryGetProperty("members", out var members))
+        {
+            return new TsArrayValue(result);
+        }
+
+        if (members.ValueKind == JsonValueKind.String)
+        {
+            using var document = JsonDocument.Parse(string.IsNullOrWhiteSpace(members.GetString()) ? "[]" : members.GetString()!);
+            AddDotaTeamMembers(result, document.RootElement);
+            return new TsArrayValue(result);
+        }
+
+        AddDotaTeamMembers(result, members);
+        return new TsArrayValue(result);
+    }
+
+    private static void AddDotaTeamMembers(TsArray result, JsonElement members)
+    {
+        if (members.ValueKind != JsonValueKind.Array)
+        {
+            return;
+        }
+
+        foreach (var member in members.EnumerateArray())
+        {
+            var value = new TsObject("DotaTeamMember");
+            value.SetField("accountId", ToTsUInt32(JsonUInt32(member, "accountId", 0)));
+            value.SetField("role", ToTsUInt32(JsonUInt32(member, "role", 0)));
+            result.Add(new TsObjectValue(value));
+        }
+    }
+
+    private static TsValue ToTsDotaPlayerInfo(string playerInfoJson)
+    {
+        using var document = JsonDocument.Parse(string.IsNullOrWhiteSpace(playerInfoJson) ? "{}" : playerInfoJson);
+        var row = document.RootElement;
+        if (row.ValueKind != JsonValueKind.Object || JsonUInt32(row, "accountId", 0) == 0)
+        {
+            return TsValue.Null;
+        }
+
+        var value = new TsObject("DotaTeamPlayerInfo");
+        value.SetField("accountId", ToTsUInt32(JsonUInt32(row, "accountId", 0)));
+        value.SetField("name", TsValue.FromString(JsonString(row, "name", string.Empty)));
+        value.SetField("countryCode", TsValue.FromString(JsonString(row, "countryCode", string.Empty)));
+        value.SetField("fantasyRole", ToTsUInt32(JsonUInt32(row, "fantasyRole", 0)));
+        value.SetField("teamId", ToTsUInt32(JsonUInt32(row, "teamId", 0)));
+        value.SetField("sponsor", TsValue.FromString(JsonString(row, "sponsor", string.Empty)));
+        value.SetField("realName", TsValue.FromString(JsonString(row, "realName", string.Empty)));
         return new TsObjectValue(value);
     }
 
@@ -3522,6 +3908,37 @@ internal sealed class ScriptExchangeHost
         }
 
         return snapshot;
+    }
+
+    private static TsValue ToTsDotaMatchSnapshot(ApiDotaMatch snapshot)
+    {
+        var value = new TsObject("DotaLobbyMatchSnapshot");
+        value.SetField("lobbyId", TsValue.FromUInt64(snapshot.LobbyId));
+        value.SetField("matchId", TsValue.FromUInt64(snapshot.MatchId));
+        value.SetField("serverSteamId", TsValue.FromUInt64(snapshot.ServerSteamId));
+        value.SetField("connect", TsValue.FromString(snapshot.Connect ?? string.Empty));
+        value.SetField("state", TsValue.FromInt32(unchecked((int)snapshot.State)));
+        value.SetField("gameState", TsValue.FromInt32(unchecked((int)snapshot.GameState)));
+        value.SetField("gameStartTime", TsValue.FromInt32(unchecked((int)snapshot.GameStartTime)));
+        value.SetField("dedicated", TsValue.FromBool(snapshot.Dedicated));
+        value.SetField("updatedAtUnix", TsValue.FromInt32(unchecked((int)new DateTimeOffset(snapshot.UpdatedAt).ToUnixTimeSeconds())));
+
+        var players = new TsArray();
+        foreach (var player in snapshot.Players)
+        {
+            var item = new TsObject("DotaLobbyMatchPlayer");
+            item.SetField("steamId", TsValue.FromUInt64(player.SteamId));
+            item.SetField("accountId", TsValue.FromInt32(unchecked((int)player.AccountId)));
+            item.SetField("personaName", TsValue.FromString(player.PersonaName ?? string.Empty));
+            item.SetField("team", TsValue.FromInt32(unchecked((int)player.Team)));
+            item.SetField("slot", TsValue.FromInt32(unchecked((int)player.Slot)));
+            item.SetField("coachTeam", TsValue.FromInt32(unchecked((int)player.CoachTeam)));
+            item.SetField("heroId", TsValue.FromInt32(unchecked((int)player.HeroId)));
+            players.Add(new TsObjectValue(item));
+        }
+
+        value.SetField("players", new TsArrayValue(players));
+        return new TsObjectValue(value);
     }
 
     private static TsValue ToArray(byte[] bytes)

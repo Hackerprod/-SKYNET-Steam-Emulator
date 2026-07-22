@@ -16,6 +16,7 @@ public static class DotaGcRuntimeServices
     public static Action<ApiDotaMatch>? MatchSnapshotSink { get; set; }
     public static Func<ulong, string>? MatchSnapshotJsonProvider { get; set; }
     public static Func<ulong, string>? MatchSnapshotByLobbyJsonProvider { get; set; }
+    public static Func<IReadOnlyList<ApiDotaMatch>>? MatchSnapshotsProvider { get; set; }
     public static Func<ulong, bool>? MatchSnapshotDeleteSink { get; set; }
     public static Func<ulong, bool>? UserExistsProvider { get; set; }
     public static Func<ulong, bool>? UserOnlineProvider { get; set; }
@@ -34,6 +35,16 @@ public static class DotaGcRuntimeServices
     public static DotaChatStore ChatStore { get; set; } = new();
     public static Func<uint, string>? TeamJsonProvider { get; set; }
     public static Func<uint, string>? TeamsForAccountJsonProvider { get; set; }
+    public static Func<string>? NextTeamIdProvider { get; set; }
+    public static Func<string, string, string, string, string>? TeamUpsertSink { get; set; }
+    public static Func<string, uint, uint, bool>? TeamMemberUpsertSink { get; set; }
+    public static Func<string, uint, bool>? TeamMemberRemoveSink { get; set; }
+    public static Func<string, bool>? TeamRemoveSink { get; set; }
+    public static Func<string, string, bool>? TeamNameAvailableProvider { get; set; }
+    public static Func<string, string, bool>? TeamTagAvailableProvider { get; set; }
+    public static Func<uint, string>? TeamPlayerInfoProvider { get; set; }
+    public static Func<uint, string, string, uint, string, string, string, string>? TeamPlayerInfoUpsertSink { get; set; }
+    public static Func<uint, bool>? TeamPlayerInfoDeleteSink { get; set; }
 
     public static Func<ulong, ulong, uint>? ItemDefResolver { get; set; }
     public static Func<ulong, string>? EquipmentJsonProvider { get; set; }

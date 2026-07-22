@@ -15,6 +15,11 @@ import {
     CMsgClientWelcome,
     CMsgConnectedPlayers,
     CMsgDOTAPlayerFailedToConnect,
+    CMsgDOTADestroyLobbyRequest,
+    CMsgDOTADestroyLobbyResponse,
+    CMsgDOTADestroyLobbyResponse_Result,
+    CMsgDOTAPopup,
+    CMsgDOTAPopup_PopupID,
     CMsgFriendPracticeLobbyListRequest,
     CMsgFriendPracticeLobbyListResponse,
     CMsgGCToClientMatchSignedOut,
@@ -29,6 +34,8 @@ import {
     CMsgLobbyInviteResponse,
     CMsgLobbyList,
     CMsgLobbyListResponse,
+    CMsgPracticeLobbyKick,
+    CMsgPracticeLobbyKickFromTeam,
     CMsgPracticeLobbyCreate,
     CMsgPracticeLobbyJoin,
     CMsgPracticeLobbyJoinResponse,
@@ -72,7 +79,7 @@ import { buildEconSoCacheSubscribedForInventory, buildGameOwnerSoCacheSubscribed
 import { normalizeConduct } from "./shared/conduct";
 
 const LOBBY_OBJECT_TYPE_ID = 2004;
-const LOBBY_INVITE_OBJECT_TYPE_ID = 2011;
+const LOBBY_INVITE_OBJECT_TYPE_ID = 2013;
 const LOBBY_STATIC_OBJECT_TYPE_ID = 2014;
 const LOBBY_SERVER_OBJECT_TYPE_ID = 2015;
 const LOBBY_SERVER_STATIC_OBJECT_TYPE_ID = 2016;
@@ -121,6 +128,9 @@ const DEFAULT_CM_PICK = 0;
 const LOBBY_EXTRA_MESSAGE_ID = 8821;
 const LOBBY_EXTRA_MESSAGE_CONTENTS = new Uint8Array([8, 0]);
 const DEFAULT_SERVER_STATIC_BANNED_HERO_IDS = [75, 0, 0, 0];
+// The generated Msg map does not expose legacy popup 7102, but the proto does.
+// Lobby kick uses it exactly like the old GC before unsubscribing the target.
+const DOTA_POPUP_MESSAGE_ID = 7102;
 const SUCCESS = 1;
 const FAILURE = 0;
 
@@ -187,14 +197,6 @@ interface LobbyMemberState {
     coachTeam: number;
     heroId: number;
     leaverStatus: number;
-    partyId: bigint;
-    channel: number;
-    canEarnRewards: boolean;
-    isPlusSubscriber: boolean;
-    metaLevel: number;
-    metaXp: number;
-    rankTier: number;
-    leaderboardRank: number;
     connectedOnce: boolean;
     lastSeen: number;
 }
@@ -269,6 +271,13 @@ export class Lobby {
         gc.on(Routes.PracticeLobbySetTeamSlot, (ctx) => this.setTeamSlot(ctx));
         gc.on(Routes.PracticeLobbySetCoach, (ctx) => this.setCoach(ctx));
         gc.on(Routes.ApplyTeamToPracticeLobby, (ctx) => this.applyTeam(ctx));
+        gc.onMessage(Msg.GCPracticeLobbyKick, (ctx) => this.kickLobbyMember(ctx));
+        gc.onMessage(Msg.GCPracticeLobbyKickFromTeam, (ctx) => this.kickLobbyMemberFromTeam(ctx));
+        gc.onMessage(Msg.GCBalancedShuffleLobby, (ctx) => this.balancedShuffleLobby(ctx));
+        gc.onMessage(Msg.GCFlipLobbyTeams, (ctx) => this.flipLobbyTeams(ctx));
+        gc.onMessage(Msg.GCClearPracticeLobbyTeam, (ctx) => this.clearPracticeLobbyTeam(ctx));
+        gc.onMessage(Msg.DestroyLobbyRequest, (ctx) => this.destroyLobbyRequest(ctx));
+        gc.onMessage(Msg.ClientToGCRequestSteamDatagramTicket, (ctx) => this.steamDatagramTicket(ctx));
         gc.on(Routes.PracticeLobbyLaunch, (ctx) => this.launchLobby(ctx));
         gc.onMessage(Msg.GCGameServerHello, (ctx) => this.gameServerHello(ctx));
         gc.onMessage(Msg.GCGameServerInfo, (ctx) => this.gameServerInfo(ctx));
@@ -305,7 +314,12 @@ export class Lobby {
     }
 
     private leaveLobby(ctx: RawMessageContext): boolean {
-        leaveCurrent(ctx, 0n);
+        if (currentLobby(ctx.steamId) === null) {
+            leavePublishedLobbyState(ctx);
+        } else {
+            leaveCurrent(ctx, 0n);
+        }
+
         return true;
     }
 
@@ -333,10 +347,14 @@ export class Lobby {
             }
 
             refreshLobby(lobby, ctx.clock.now());
-            subscribeToLobby(ctx, ctx.steamId, lobby);
+            subscribeToLobbyObjectOnly(ctx, ctx.steamId, lobby);
+            ctx.reply({ result: JOIN_SUCCESS });
+            // Joiner already got the full lobby via subscribe + single object;
+            // notify the existing members (incl. leader) so they see the new
+            // player. Excluding the joiner avoids a redundant 26 on top of 24/21.
             broadcastLobby(ctx, lobby, ctx.steamId, false);
             publishLobby(ctx.services.lobby, lobby);
-            result = JOIN_SUCCESS;
+            return true;
         }
 
         ctx.reply({ result });
@@ -386,21 +404,21 @@ export class Lobby {
     }
 
     private practiceLobbyList(ctx: HandlerContext<CMsgPracticeLobbyList, CMsgPracticeLobbyListResponse>): boolean {
-        ctx.reply({ lobbies: listLobbies(ctx.request.region ?? 0, ctx.request.gameMode ?? 0, ctx.steamId) });
+        ctx.reply({ lobbies: listLobbies(ctx.services.lobby, ctx.request.region ?? 0, ctx.request.gameMode ?? 0, ctx.steamId) });
         return true;
     }
 
     private friendPracticeLobbyList(
         ctx: HandlerContext<CMsgFriendPracticeLobbyListRequest, CMsgFriendPracticeLobbyListResponse>
     ): boolean {
-        ctx.reply({ lobbies: listLobbies(0, 0, ctx.steamId) });
+        ctx.reply({ lobbies: listLobbies(ctx.services.lobby, 0, 0, ctx.steamId) });
         return true;
     }
 
     private lobbyList(ctx: RawMessageContext): boolean {
         const request = ctx.decode(Proto.CMsgLobbyList) as CMsgLobbyList;
         ctx.reply<CMsgLobbyListResponse>(Msg.GCLobbyListResponse, Proto.CMsgLobbyListResponse, {
-            lobbies: listLobbies(request.serverRegion ?? 0, request.gameMode ?? 0, ctx.steamId)
+            lobbies: listLobbies(ctx.services.lobby, request.serverRegion ?? 0, request.gameMode ?? 0, ctx.steamId)
         });
         return true;
     }
@@ -483,6 +501,99 @@ export class Lobby {
         }
 
         ctx.reply({ eresult: SUCCESS });
+        return true;
+    }
+
+    private kickLobbyMember(ctx: RawMessageContext): boolean {
+        const request = ctx.decode(Proto.CMsgPracticeLobbyKick) as CMsgPracticeLobbyKick;
+        kickMemberByAccountId(ctx, request.accountId ?? 0);
+        return true;
+    }
+
+    private kickLobbyMemberFromTeam(ctx: RawMessageContext): boolean {
+        const request = ctx.decode(Proto.CMsgPracticeLobbyKickFromTeam) as CMsgPracticeLobbyKickFromTeam;
+        kickMemberByAccountId(ctx, request.accountId ?? 0);
+        return true;
+    }
+
+    private balancedShuffleLobby(ctx: RawMessageContext): boolean {
+        const lobby = currentLobby(ctx.steamId);
+        if (lobby === null) {
+            return true;
+        }
+
+        shuffleLobbyTeams(lobby);
+        refreshLobby(lobby, ctx.clock.now());
+        broadcastLobby(ctx, lobby, 0n, false);
+        publishLobby(ctx.services.lobby, lobby);
+        return true;
+    }
+
+    private flipLobbyTeams(ctx: RawMessageContext): boolean {
+        const lobby = currentLobby(ctx.steamId);
+        if (lobby === null) {
+            return true;
+        }
+
+        flipLobbyTeams(lobby);
+        refreshLobby(lobby, ctx.clock.now());
+        broadcastLobby(ctx, lobby, 0n, false);
+        publishLobby(ctx.services.lobby, lobby);
+        return true;
+    }
+
+    private clearPracticeLobbyTeam(ctx: RawMessageContext): boolean {
+        const lobby = currentLobby(ctx.steamId);
+        const member = lobby === null ? null : findMember(lobby, ctx.steamId);
+        if (lobby === null || member === null) {
+            return true;
+        }
+
+        clearTeamDetailForMember(lobby, member);
+        refreshLobby(lobby, ctx.clock.now());
+        broadcastLobby(ctx, lobby, 0n, false);
+        publishLobby(ctx.services.lobby, lobby);
+        return true;
+    }
+
+    private destroyLobbyRequest(ctx: RawMessageContext): boolean {
+        ctx.decode(Proto.CMsgDOTADestroyLobbyRequest) as CMsgDOTADestroyLobbyRequest;
+        const lobby = currentLobby(ctx.steamId);
+        ctx.reply<CMsgDOTADestroyLobbyResponse>(Msg.DestroyLobbyResponse, Proto.CMsgDOTADestroyLobbyResponse, {
+            result:
+                lobby === null
+                    ? CMsgDOTADestroyLobbyResponse_Result.ErrorUnknown
+                    : CMsgDOTADestroyLobbyResponse_Result.Success
+        });
+
+        if (lobby !== null) {
+            destroyLobby(lobby, ctx, "destroy-request");
+        }
+
+        return true;
+    }
+
+    private steamDatagramTicket(ctx: RawMessageContext): boolean {
+        const request = ctx.decode(Proto.CMsgClientToGCRequestSteamDatagramTicket);
+        const serverSteamId = request.serverSteamId ?? 0n;
+        const lobby = serverSteamId === 0n ? null : serverLobby(serverSteamId);
+        ctx.logger.info(
+            "Lobby: SteamDatagramTicket request server=" +
+                serverSteamId +
+                " found=" +
+                (lobby === null ? "false" : "true")
+        );
+        // Legacy GC acknowledged the request through logging only. Current
+        // clients also have an explicit response proto, so send an empty ticket
+        // response to close the request without claiming SDR auth we do not own.
+        ctx.reply(
+            Msg.ClientToGCRequestSteamDatagramTicketResponse,
+            Proto.CMsgClientToGCRequestSteamDatagramTicketResponse,
+            {
+                serializedTicket: new Uint8Array(0),
+                message: lobby === null ? "server_not_found" : "ok"
+            }
+        );
         return true;
     }
 
@@ -811,6 +922,10 @@ function applyCreateRequest(lobby: LobbyState, request: CMsgPracticeLobbyCreate)
     const details = request.lobbyDetails;
     if (details !== undefined) {
         applyDetails(lobby, details);
+    } else {
+        // Always guarantee 2 team_details entries even when the create
+        // request carries no lobby_details, matching the legacy GC.
+        lobby.teamDetails = normalizeLobbyTeamDetails(lobby.teamDetails);
     }
 
     normalizeLobbyLocation(lobby);
@@ -819,7 +934,10 @@ function applyCreateRequest(lobby: LobbyState, request: CMsgPracticeLobbyCreate)
 
 function applyDetails(lobby: LobbyState, details: CMsgPracticeLobbySetDetails): void {
     lobby.gameName = details.gameName ?? lobby.gameName;
-    lobby.teamDetails = details.teamDetails ?? lobby.teamDetails;
+    // Dota's client indexes team_details[0]/[1] directly for team banners;
+    // the legacy GC always guarantees exactly 2 entries after applying
+    // details (padding with empty/incomplete ones), never an empty array.
+    lobby.teamDetails = normalizeLobbyTeamDetails(details.teamDetails ?? lobby.teamDetails);
     lobby.serverRegion = details.serverRegion ?? lobby.serverRegion;
     lobby.gameMode = details.gameMode ?? lobby.gameMode;
     lobby.cmPick = details.cmPick ?? lobby.cmPick;
@@ -954,7 +1072,7 @@ function joinLobbyState(ctx: RawMessageContext, lobby: LobbyState, passKey: stri
     }
 
     refreshLobby(lobby, ctx.clock.now());
-    subscribeToLobby(ctx, ctx.steamId, lobby);
+    subscribeToLobbyObjectOnly(ctx, ctx.steamId, lobby);
     broadcastLobby(ctx, lobby, ctx.steamId, false);
     publishLobby(ctx.services.lobby, lobby);
     return true;
@@ -963,6 +1081,10 @@ function joinLobbyState(ctx: RawMessageContext, lobby: LobbyState, passKey: stri
 function currentLobby(steamId: bigint): LobbyState | null {
     const lobbyId = store.bySteam.get(steamId);
     return lobbyId === undefined ? null : (store.lobbies.get(lobbyId) ?? null);
+}
+
+export function isSteamIdInLobby(steamId: bigint): boolean {
+    return currentLobby(steamId) !== null;
 }
 
 function serverLobby(steamId: bigint): LobbyState | null {
@@ -987,18 +1109,11 @@ function ensureMember(
     accountId: number,
     personaName: string,
     now: number,
-    ctx: GcContextBase
+    _ctx: GcContextBase
 ): LobbyMemberState {
-    const profile = ctx.services.profiles.get(accountId);
-    const party = ctx.services.party.getCurrent();
     const existing = findMember(lobby, steamId);
     if (existing !== null) {
         existing.personaName = personaName === "" ? existing.personaName : personaName;
-        existing.partyId = party?.partyId ?? existing.partyId;
-        existing.isPlusSubscriber = profile.isPlusSubscriber;
-        existing.metaLevel = profile.level;
-        existing.rankTier = profile.rankTier;
-        existing.leaderboardRank = profile.leaderboardRank;
         existing.lastSeen = now;
         store.bySteam.set(steamId, lobby.lobbyId);
         return existing;
@@ -1013,14 +1128,6 @@ function ensureMember(
         coachTeam: TEAM_NONE,
         heroId: 0,
         leaverStatus: LEAVER_DISCONNECTED,
-        partyId: party?.partyId ?? 0n,
-        channel: 6,
-        canEarnRewards: true,
-        isPlusSubscriber: profile.isPlusSubscriber,
-        metaLevel: profile.level,
-        metaXp: profile.badgePoints,
-        rankTier: profile.rankTier,
-        leaderboardRank: profile.leaderboardRank,
         connectedOnce: false,
         lastSeen: now
     };
@@ -1050,6 +1157,97 @@ function slotOccupied(lobby: LobbyState, steamId: bigint, team: number, slot: nu
     return false;
 }
 
+function kickMemberByAccountId(ctx: RawMessageContext, accountId: number): void {
+    const lobby = currentLobby(ctx.steamId);
+    if (lobby === null || accountId === 0) {
+        return;
+    }
+
+    const member = findMemberByAccountId(lobby, accountId);
+    if (member === null) {
+        return;
+    }
+
+    removeLobbyMember(ctx, lobby, member, true);
+    refreshLobby(lobby, ctx.clock.now());
+    broadcastLobby(ctx, lobby, member.steamId, false);
+    publishLobby(ctx.services.lobby, lobby);
+}
+
+function findMemberByAccountId(lobby: LobbyState, accountId: number): LobbyMemberState | null {
+    for (let i = 0; i < lobby.members.length; i++) {
+        if (lobby.members[i].accountId === accountId) {
+            return lobby.members[i];
+        }
+    }
+
+    return null;
+}
+
+function removeLobbyMember(ctx: GcContextBase, lobby: LobbyState, member: LobbyMemberState, kicked: boolean): void {
+    lobby.members = lobby.members.filter((candidate) => candidate.steamId !== member.steamId);
+    store.bySteam.delete(member.steamId);
+
+    if (kicked) {
+        sendTo(ctx, member.steamId, DOTA_POPUP_MESSAGE_ID, {
+            id: CMsgDOTAPopup_PopupID.KickedFromLobby,
+            customText: lobby.gameName
+        } as CMsgDOTAPopup);
+    }
+
+    sendTo(ctx, member.steamId, Msg.SOCacheUnsubscribed, buildLobbySoCacheUnsubscribed(lobby));
+}
+
+function shuffleLobbyTeams(lobby: LobbyState): void {
+    const candidates = lobby.members.filter(
+        (member) => member.coachTeam === TEAM_NONE && (member.team === TEAM_GOOD || member.team === TEAM_BAD)
+    );
+    const ordered = candidates.slice().sort((left, right) => {
+        if (left.slot !== right.slot) {
+            return left.slot - right.slot;
+        }
+
+        return left.accountId - right.accountId;
+    });
+
+    for (let i = 0; i < ordered.length; i++) {
+        ordered[i].team = i % 2 === 0 ? TEAM_GOOD : TEAM_BAD;
+        ordered[i].slot = Math.floor(i / 2) + 1;
+    }
+
+    clearTeamDetail(lobby, TEAM_GOOD);
+    clearTeamDetail(lobby, TEAM_BAD);
+}
+
+function flipLobbyTeams(lobby: LobbyState): void {
+    for (let i = 0; i < lobby.members.length; i++) {
+        const member = lobby.members[i];
+        if (member.team === TEAM_GOOD) {
+            member.team = TEAM_BAD;
+        } else if (member.team === TEAM_BAD) {
+            member.team = TEAM_GOOD;
+        }
+    }
+
+    lobby.teamDetails = normalizeLobbyTeamDetails(lobby.teamDetails);
+    const radiant = { ...lobby.teamDetails[0] };
+    lobby.teamDetails[0] = { ...lobby.teamDetails[1] };
+    lobby.teamDetails[1] = radiant;
+}
+
+function clearTeamDetailForMember(lobby: LobbyState, member: LobbyMemberState): void {
+    clearTeamDetail(lobby, member.team);
+}
+
+function clearTeamDetail(lobby: LobbyState, team: number): void {
+    lobby.teamDetails = normalizeLobbyTeamDetails(lobby.teamDetails);
+    if (team === TEAM_GOOD) {
+        lobby.teamDetails[0] = emptyLobbyTeamDetail();
+    } else if (team === TEAM_BAD) {
+        lobby.teamDetails[1] = emptyLobbyTeamDetail();
+    }
+}
+
 function leaveCurrent(ctx: GcContextBase, keepLobbyId: bigint): void {
     const lobby = currentLobby(ctx.steamId);
     if (lobby === null || lobby.lobbyId === keepLobbyId) {
@@ -1062,12 +1260,26 @@ function leaveCurrent(ctx: GcContextBase, keepLobbyId: bigint): void {
         return;
     }
 
-    lobby.members = lobby.members.filter((member) => member.steamId !== ctx.steamId);
-    store.bySteam.delete(ctx.steamId);
-    sendTo(ctx, ctx.steamId, Msg.SOCacheUnsubscribed, buildLobbySoCacheUnsubscribed(lobby));
+    const member = findMember(lobby, ctx.steamId);
+    if (member !== null) {
+        removeLobbyMember(ctx, lobby, member, false);
+    }
     refreshLobby(lobby, ctx.clock.now());
     broadcastLobby(ctx, lobby, ctx.steamId, false);
     publishLobby(ctx.services.lobby, lobby);
+}
+
+function leavePublishedLobbyState(ctx: GcContextBase): void {
+    const snapshots = ctx.services.lobby.listSnapshots();
+    for (let i = 0; i < snapshots.length; i++) {
+        const snapshot = snapshots[i];
+        if (snapshot.state !== LOBBY_UI || !snapshot.players.some((player) => player.steamId === ctx.steamId)) {
+            continue;
+        }
+
+        ctx.send(Msg.SOCacheUnsubscribed, Proto.CMsgSOCacheUnsubscribed, buildLobbySoCacheUnsubscribedForId(snapshot.lobbyId));
+        ctx.services.lobby.removeSnapshot(snapshot.lobbyId);
+    }
 }
 
 function destroyLobby(lobby: LobbyState, ctx: GcContextBase | undefined, reason: string): void {
@@ -1304,6 +1516,12 @@ function buildLobbySoCacheSubscribed(ctx: GcContextBase, lobby: LobbyState): CMs
     return {
         objects: [
             subscribedType(LOBBY_OBJECT_TYPE_ID, [ctx.encode(Proto.CSODOTALobby, buildLobbyObject(lobby))]),
+            // Practice lobby caches include an empty lobby-invite SO bucket.
+            // Dota uses the same type id for pending lobby invites targeted
+            // at owner type 4, so both flows must stay on 2013.
+            subscribedType(LOBBY_INVITE_OBJECT_TYPE_ID, [
+                ctx.encode(Proto.CSODOTALobbyInvite, buildLobbyInviteObject())
+            ]),
             subscribedType(LOBBY_STATIC_OBJECT_TYPE_ID, [
                 ctx.encode(Proto.CSODOTAStaticLobby, buildStaticLobbyObject(lobby))
             ]),
@@ -1319,9 +1537,26 @@ function buildLobbySoCacheSubscribed(ctx: GcContextBase, lobby: LobbyState): CMs
     };
 }
 
-function buildLobbySoCacheUnsubscribed(lobby: LobbyState): CMsgSOCacheUnsubscribed {
+function buildLobbyObjectOnlySubscribed(ctx: GcContextBase, lobby: LobbyState): CMsgSOCacheSubscribed {
+    // Joining an existing practice lobby follows the legacy GC wire flow:
+    // the joining client receives a cache subscription containing only the
+    // mutable lobby object (2004), then a single-object create for the same
+    // object. Static lobby/server buckets are sent when the lobby is created,
+    // but not during join; sending them here makes this client build unstable.
     return {
+        objects: [subscribedType(LOBBY_OBJECT_TYPE_ID, [ctx.encode(Proto.CSODOTALobby, buildLobbyObject(lobby))])],
+        version: lobby.version,
         ownerSoid: { type: LOBBY_OWNER_TYPE, id: lobby.lobbyId }
+    };
+}
+
+function buildLobbySoCacheUnsubscribed(lobby: LobbyState): CMsgSOCacheUnsubscribed {
+    return buildLobbySoCacheUnsubscribedForId(lobby.lobbyId);
+}
+
+function buildLobbySoCacheUnsubscribedForId(lobbyId: bigint): CMsgSOCacheUnsubscribed {
+    return {
+        ownerSoid: { type: LOBBY_OWNER_TYPE, id: lobbyId }
     };
 }
 
@@ -1335,6 +1570,9 @@ function buildLobbySingleObject(ctx: GcContextBase, lobby: LobbyState): CMsgSOSi
 }
 
 function buildLobbyMultipleObjects(ctx: GcContextBase, lobby: LobbyState): CMsgSOMultipleObjects {
+    // Existing lobby members are notified like the legacy GC: UpdateMultiple
+    // carries only CSODOTALobby (2004). Member names and server-static data are
+    // part of the create-time SO cache, not the join-time update.
     const objectsModified: CMsgSOMultipleObjects_SingleObject[] = [
         {
             typeId: LOBBY_OBJECT_TYPE_ID,
@@ -1419,15 +1657,7 @@ function buildLobbyMembers(lobby: LobbyState): CSODOTALobbyMember[] {
             team: member.team,
             slot: member.slot,
             leaverStatus: member.leaverStatus,
-            coachTeam: member.coachTeam,
-            leaverActions: 0,
-            customGameProductIds: [],
-            liveSpectatorTeam: TEAM_NONE,
-            pendingAwards: [],
-            pendingAwardsOnVictory: [],
-            reportsAvailable: 0,
-            liveSpectatorAccountId: 0,
-            commsReportsAvailable: 0
+            coachTeam: member.coachTeam === TEAM_NONE ? undefined : member.coachTeam
         });
     }
 
@@ -1437,13 +1667,14 @@ function buildLobbyMembers(lobby: LobbyState): CSODOTALobbyMember[] {
 function buildStaticLobbyObject(lobby: LobbyState): CSODOTAStaticLobby {
     return {
         allMembers: lobby.members.map((member) => ({
-            name: member.personaName,
-            partyId: member.partyId,
-            channel: member.channel,
-            cameraman: false
+            name: member.personaName
         })),
         isPlayerDraft: false
     };
+}
+
+function buildLobbyInviteObject(): CSODOTALobbyInvite {
+    return {};
 }
 
 function buildServerLobbyObject(lobby: LobbyState): CSODOTAServerLobby {
@@ -1456,21 +1687,10 @@ function buildServerStaticLobbyObject(lobby: LobbyState): CSODOTAServerStaticLob
     return {
         allMembers: lobby.members.map((member) => ({
             steamId: member.steamId,
-            rankTier: member.rankTier,
-            leaderboardRank: member.leaderboardRank === 0 ? -1 : member.leaderboardRank,
-            laneSelectionFlags: 0,
-            rankMmrBoostType: 0,
-            coachRating: 0,
-            coachedAccountIds: [],
             wasMvpLastGame: false,
-            canEarnRewards: member.canEarnRewards,
-            isPlusSubscriber: member.isPlusSubscriber,
+            isPlusSubscriber: true,
             favoriteTeamPacked: 0n,
             isSteamChina: false,
-            title: 0,
-            disabledRandomHeroBits: [],
-            disabledHeroId: [],
-            enabledHeroId: [],
             bannedHeroIds: DEFAULT_SERVER_STATIC_BANNED_HERO_IDS
         })),
         postPatchStrategyTimeBuffer: 0
@@ -1498,6 +1718,11 @@ function broadcastLobby(ctx: GcContextBase, lobby: LobbyState, exceptSteamId: bi
 
     for (let i = 0; i < lobby.members.length; i++) {
         const steamId = lobby.members[i].steamId;
+        // Notify every subscribed member except the caller-designated one.
+        // The leader is a lobby SO-cache subscriber too, so mutations the
+        // leader triggers (rename, slot, apply-team) MUST reach the leader;
+        // callers exclude only the acting client via exceptSteamId when the
+        // acting client already received the state through subscribe/reply.
         if (steamId !== exceptSteamId) {
             sendTo(ctx, steamId, Msg.SOCacheUpdated, payload);
         }
@@ -1509,6 +1734,11 @@ function subscribeToLobby(ctx: GcContextBase, steamId: bigint, lobby: LobbyState
     sendTo(ctx, steamId, Msg.SOSingleObject, buildLobbySingleObject(ctx, lobby));
 }
 
+function subscribeToLobbyObjectOnly(ctx: GcContextBase, steamId: bigint, lobby: LobbyState): void {
+    sendTo(ctx, steamId, Msg.SOCacheSubscribed, buildLobbyObjectOnlySubscribed(ctx, lobby));
+    sendTo(ctx, steamId, Msg.SOSingleObject, buildLobbySingleObject(ctx, lobby));
+}
+
 type LobbyOutboundMessage =
     | CMsgSOCacheSubscribed
     | CMsgSOCacheUnsubscribed
@@ -1516,6 +1746,7 @@ type LobbyOutboundMessage =
     | CMsgSOMultipleObjects
     | CMsgGCToClientMatchSignedOut
     | CMsgInvitationCreated
+    | CMsgDOTAPopup
     | CMsgGenericResult;
 
 function sendTo(ctx: GcContextBase, steamId: bigint, messageType: number, message: LobbyOutboundMessage): boolean {
@@ -1533,6 +1764,10 @@ function sendTo(ctx: GcContextBase, steamId: bigint, messageType: number, messag
 
     if (messageType === Msg.SOCacheUpdated) {
         return sendTyped(ctx, steamId, messageType, Proto.CMsgSOMultipleObjects, message as CMsgSOMultipleObjects);
+    }
+
+    if (messageType === DOTA_POPUP_MESSAGE_ID) {
+        return sendTyped(ctx, steamId, messageType, Proto.CMsgDOTAPopup, message as CMsgDOTAPopup);
     }
 
     if (messageType === Msg.GCToClientMatchSignedOut) {
@@ -1600,26 +1835,22 @@ function buildMatchSnapshot(lobby: LobbyState): DotaLobbyMatchSnapshot {
     };
 }
 
-function listLobbies(region: number, gameMode: number, requesterSteamId: bigint): CMsgPracticeLobbyListResponseEntry[] {
-    const exact = collectLobbies(region, gameMode, requesterSteamId, true);
-    if (exact.length > 0 || (region === 0 && gameMode === 0)) {
-        return exact;
-    }
-
-    // Older clients can send a stale browse region after the creator changes
-    // location. Steam still exposes public practice lobbies in that case so
-    // friends can find each other; the region remains metadata used at launch,
-    // not a hard discovery failure when no exact match exists.
-    return collectLobbies(0, gameMode, requesterSteamId, false);
+function listLobbies(
+    _service: DotaLobbyService,
+    region: number,
+    gameMode: number,
+    _requesterSteamId: bigint
+): CMsgPracticeLobbyListResponseEntry[] {
+    return collectLobbies(region, gameMode, true);
 }
 
 function collectLobbies(
     region: number,
     gameMode: number,
-    requesterSteamId: bigint,
     strictRegion: boolean
 ): CMsgPracticeLobbyListResponseEntry[] {
     const result: CMsgPracticeLobbyListResponseEntry[] = [];
+    const seen = new Set<bigint>();
     store.lobbies.forEach((lobby) => {
         if (lobby.state !== LOBBY_UI) {
             return;
@@ -1633,38 +1864,28 @@ function collectLobbies(
             return;
         }
 
+        seen.add(lobby.lobbyId);
+        // Lobby browse responses intentionally keep the same compact shape as
+        // the legacy GC. Dota only needs these fields to render/join a public
+        // practice lobby; extra entry metadata has caused inconsistent browse
+        // behavior between clients.
         result.push({
             id: lobby.lobbyId,
-            members: lobby.members.map((member) => ({
-                accountId: member.accountId,
-                playerName: member.personaName
-            })),
-            requiresPassKey: lobby.passKey !== "",
             leaderAccountId: lobby.leaderAccountId,
             name: lobby.gameName,
-            customGameMode: lobby.customGameMode,
             gameMode: lobby.gameMode,
-            friendPresent: findMember(lobby, requesterSteamId) !== null,
             players: lobby.members.length,
-            customMapName: lobby.customMapName,
-            maxPlayerCount: maxPlayerCount(lobby),
             serverRegion: lobby.serverRegion,
-            leagueId: lobby.leagueId,
-            lanHostPingLocation: "",
-            minPlayerCount: lobby.customMinPlayers,
-            penaltiesEnabled: lobby.customGamePenalties ?? false
+            requiresPassKey: lobby.passKey !== "",
+            leagueId: 0
         });
     });
 
+    // Public lobby browse is memory-owned like the legacy GC. Persisted match
+    // snapshots are for reconnect/running-game recovery; advertising them as
+    // practice lobbies creates ghost entries that cannot be joined because no
+    // live lobby object exists in the TS store.
     return result;
-}
-
-function maxPlayerCount(lobby: LobbyState): number {
-    if (lobby.customMaxPlayers > 0) {
-        return lobby.customMaxPlayers;
-    }
-
-    return 10;
 }
 
 function createInvite(lobby: LobbyState, ctx: GcContextBase, targetSteamId: bigint): LobbyInviteState {

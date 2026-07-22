@@ -84,6 +84,7 @@ export interface DotaItemService {
 export interface DotaLobbyService {
     queueMessage(steamId: bigint, messageType: number, payload: Uint8Array, protobuf?: boolean): boolean;
     publishSnapshot(snapshot: DotaLobbyMatchSnapshot): boolean;
+    listSnapshots(): DotaLobbyMatchSnapshot[];
     removeSnapshot(lobbyId: bigint): boolean;
     startDedicatedServer(lobbyId: bigint, map: string): DotaDedicatedLaunchResult | null;
     releaseDedicatedServer(lobbyId: bigint, reason: string): boolean;
@@ -107,6 +108,7 @@ export interface DotaLobbyMatchSnapshot {
     readonly gameState: number;
     readonly gameStartTime: number;
     readonly dedicated: boolean;
+    readonly updatedAtUnix?: number;
     readonly players: DotaLobbyMatchPlayer[];
 }
 
@@ -123,6 +125,16 @@ export interface DotaLobbyMatchPlayer {
 export interface DotaTeamService {
     get(teamId: number): DotaTeam | null;
     getForAccount(accountId?: number): DotaTeam[];
+    nextTeamId(): number;
+    upsert(team: DotaTeamUpsert): DotaTeam | null;
+    addMember(teamId: number, accountId: number, role: number): boolean;
+    removeMember(teamId: number, accountId: number): boolean;
+    remove(teamId: number): boolean;
+    nameAvailable(name: string, exceptTeamId?: number): boolean;
+    tagAvailable(tag: string, exceptTeamId?: number): boolean;
+    getPlayerInfo(accountId: number): DotaTeamPlayerInfo | null;
+    savePlayerInfo(info: DotaTeamPlayerInfoUpsert): DotaTeamPlayerInfo | null;
+    deletePlayerInfo(accountId: number): boolean;
 }
 
 export interface DotaTeam {
@@ -142,6 +154,46 @@ export interface DotaTeam {
     readonly gamesPlayedTotal: number;
     readonly gamesPlayedMatchmaking: number;
     readonly region: number;
+    readonly members: DotaTeamMember[];
+}
+
+export interface DotaTeamMember {
+    readonly accountId: number;
+    readonly role: number;
+}
+
+export interface DotaTeamUpsert {
+    readonly teamId: number;
+    readonly name: string;
+    readonly tag: string;
+    readonly logo: bigint;
+    readonly baseLogo: bigint;
+    readonly bannerLogo: bigint;
+    readonly sponsorLogo: bigint;
+    readonly countryCode: string;
+    readonly url: string;
+    readonly pickupTeam: boolean;
+    readonly abbreviation: string;
+}
+
+export interface DotaTeamPlayerInfo {
+    readonly accountId: number;
+    readonly name: string;
+    readonly countryCode: string;
+    readonly fantasyRole: number;
+    readonly teamId: number;
+    readonly sponsor: string;
+    readonly realName: string;
+}
+
+export interface DotaTeamPlayerInfoUpsert {
+    readonly accountId: number;
+    readonly name: string;
+    readonly countryCode: string;
+    readonly fantasyRole: number;
+    readonly teamId: number;
+    readonly sponsor: string;
+    readonly realName: string;
 }
 
 export interface DotaRuntimeInventory {
@@ -259,6 +311,7 @@ export interface DotaSocialService {
     emoticonAccess(): DotaEmoticonAccess;
     feed(accountId: number, selfOnly: boolean): DotaSocialFeedEvent[];
     comments(feedEventId: bigint): DotaSocialFeedComment[];
+    matchComments(matchId: bigint): DotaSocialFeedComment[];
     postComment(feedEventId: bigint, comment: string): boolean;
     postMatchComment(matchId: bigint, comment: string): boolean;
 }
@@ -303,6 +356,11 @@ export interface DotaGuildService {
     getGuild(guildId: number): DotaGuild | null;
     getPersonaInfo(accountId: number): DotaGuildPersona[];
     getEventData(guildId: number, eventId: number): DotaGuildEventData;
+    invite(guildId: number, targetAccountId: number): number;
+    declineInvite(guildId: number): number;
+    cancelInvite(guildId: number, targetAccountId: number): number;
+    acceptInvite(guildId: number): number;
+    leave(guildId: number): number;
     getReporterUpdates(): DotaReporterUpdates;
     acknowledgeReporterUpdates(matchIds: bigint[]): boolean;
 }
@@ -499,6 +557,7 @@ export interface DotaStatsService {
     ): DotaMatchPlayer[];
     getMatchDetails(matchId: bigint): DotaMatch | null;
     getHeroStatsHistory(accountId: number, heroId: number): DotaMatchPlayer[];
+    getMatchVotes(matchId: bigint): DotaMatchVoteSummary;
     getShowcaseStats(accountId: number): DotaShowcaseStats;
     getRecentAccomplishments(accountId: number): DotaPlayerRecentAccomplishments;
     getHeroRecentAccomplishments(accountId: number, heroId: number): DotaHeroRecentAccomplishments;
@@ -513,6 +572,13 @@ export interface DotaStatsService {
 export interface DotaAccountName {
     readonly accountId: number;
     readonly accountName: string;
+}
+
+export interface DotaMatchVoteSummary {
+    readonly success: boolean;
+    readonly vote: number;
+    readonly positiveVotes: number;
+    readonly negativeVotes: number;
 }
 
 export interface DotaProfileSnapshot {
@@ -986,6 +1052,10 @@ class GcDotaLobbyService implements DotaLobbyService {
         return dotaPublishMatchSnapshot(snapshot);
     }
 
+    listSnapshots(): DotaLobbyMatchSnapshot[] {
+        return dotaListMatchSnapshots() as DotaLobbyMatchSnapshot[];
+    }
+
     removeSnapshot(lobbyId: bigint): boolean {
         return dotaRemoveMatchSnapshot(lobbyId);
     }
@@ -1017,6 +1087,81 @@ class GcDotaTeamService implements DotaTeamService {
             ? (dotaTeamsForAccount() as DotaTeam[])
             : (dotaTeamsForAccount(accountId) as DotaTeam[]);
     }
+
+    nextTeamId(): number {
+        return dotaNextTeamId();
+    }
+
+    upsert(team: DotaTeamUpsert): DotaTeam | null {
+        return dotaUpsertTeam(team.teamId, team.name, team.tag, stringifyHostJson(toTeamJson(team))) as DotaTeam | null;
+    }
+
+    addMember(teamId: number, accountId: number, role: number): boolean {
+        return dotaAddTeamMember(teamId, accountId, role);
+    }
+
+    removeMember(teamId: number, accountId: number): boolean {
+        return dotaRemoveTeamMember(teamId, accountId);
+    }
+
+    remove(teamId: number): boolean {
+        return dotaRemoveTeam(teamId);
+    }
+
+    nameAvailable(name: string, exceptTeamId: number = 0): boolean {
+        return dotaTeamNameAvailable(name, String(exceptTeamId));
+    }
+
+    tagAvailable(tag: string, exceptTeamId: number = 0): boolean {
+        return dotaTeamTagAvailable(tag, String(exceptTeamId));
+    }
+
+    getPlayerInfo(accountId: number): DotaTeamPlayerInfo | null {
+        return dotaTeamPlayerInfo(accountId) as DotaTeamPlayerInfo | null;
+    }
+
+    savePlayerInfo(info: DotaTeamPlayerInfoUpsert): DotaTeamPlayerInfo | null {
+        return dotaUpsertTeamPlayerInfo(
+            info.accountId,
+            info.name,
+            info.countryCode,
+            info.fantasyRole,
+            info.teamId,
+            info.sponsor,
+            info.realName
+        ) as DotaTeamPlayerInfo | null;
+    }
+
+    deletePlayerInfo(accountId: number): boolean {
+        return dotaDeleteTeamPlayerInfo(accountId);
+    }
+}
+
+function toTeamJson(team: DotaTeamUpsert): unknown {
+    return {
+        name: team.name,
+        tag: team.tag,
+        logo: team.logo,
+        teamLogo: team.logo,
+        baseLogo: team.baseLogo,
+        teamBaseLogo: team.baseLogo,
+        bannerLogo: team.bannerLogo,
+        teamBannerLogo: team.bannerLogo,
+        sponsorLogo: team.sponsorLogo,
+        countryCode: team.countryCode,
+        url: team.url,
+        pickupTeam: team.pickupTeam,
+        abbreviation: team.abbreviation,
+        region: 0,
+        wins: 0,
+        losses: 0,
+        gamesPlayedTotal: 0,
+        gamesPlayedMatchmaking: 0
+    };
+}
+
+function stringifyHostJson(value: unknown): string {
+    return JSON.stringify(value, (_key, field) => (typeof field === "bigint" ? field.toString() : field));
 }
 
 class GcDotaProfileService implements DotaProfileService {
@@ -1074,6 +1219,10 @@ class GcDotaSocialService implements DotaSocialService {
         return dotaSocialFeedComments(feedEventId) as DotaSocialFeedComment[];
     }
 
+    matchComments(matchId: bigint): DotaSocialFeedComment[] {
+        return dotaSocialMatchComments(matchId) as DotaSocialFeedComment[];
+    }
+
     postComment(feedEventId: bigint, comment: string): boolean {
         return dotaSocialFeedPostComment(feedEventId, comment) as boolean;
     }
@@ -1124,6 +1273,26 @@ class GcDotaGuildService implements DotaGuildService {
 
     getEventData(guildId: number, eventId: number): DotaGuildEventData {
         return dotaGuildEventData(guildId, eventId) as DotaGuildEventData;
+    }
+
+    invite(guildId: number, targetAccountId: number): number {
+        return dotaGuildInvite(guildId, targetAccountId);
+    }
+
+    declineInvite(guildId: number): number {
+        return dotaGuildDeclineInvite(guildId);
+    }
+
+    cancelInvite(guildId: number, targetAccountId: number): number {
+        return dotaGuildCancelInvite(guildId, targetAccountId);
+    }
+
+    acceptInvite(guildId: number): number {
+        return dotaGuildAcceptInvite(guildId);
+    }
+
+    leave(guildId: number): number {
+        return dotaGuildLeave(guildId);
     }
 
     getReporterUpdates(): DotaReporterUpdates {
@@ -1305,6 +1474,10 @@ class GcDotaStatsService implements DotaStatsService {
 
     getHeroStatsHistory(accountId: number, heroId: number): DotaMatchPlayer[] {
         return dotaHeroStatsHistory(accountId, heroId) as DotaMatchPlayer[];
+    }
+
+    getMatchVotes(matchId: bigint): DotaMatchVoteSummary {
+        return dotaMatchVotes(matchId) as DotaMatchVoteSummary;
     }
 
     getShowcaseStats(accountId: number): DotaShowcaseStats {

@@ -1,6 +1,6 @@
 import { gc, HandlerContext } from "../framework/gc";
 import { CMsgClientHello, CMsgClientWelcome, GCConnectionStatus, Msg, Proto, Routes } from "../generated/dota";
-import { buildEconSoCacheSubscribed } from "./InventorySos";
+import { buildDotaGameAccount, buildEconSoCacheSubscribed } from "./InventorySos";
 import { emitCurrentLobby } from "./Lobby";
 import { emitCurrentParty } from "./Party";
 
@@ -46,9 +46,7 @@ export class Auth {
             clientSessionNeed: sessionNeed
         });
 
-        const gameAccount = ctx.encode(Proto.CSODOTAGameAccountClient, {
-            accountId: ctx.accountId
-        });
+        const gameAccount = ctx.encode(Proto.CSODOTAGameAccountClient, buildDotaGameAccount(ctx));
 
         const plusAccount = ctx.encode(Proto.CSODOTAGameAccountPlus, {
             accountId: ctx.accountId

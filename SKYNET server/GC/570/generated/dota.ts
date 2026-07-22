@@ -4143,6 +4143,15 @@ export interface CMsgClientToGCSocialFeedPostMessageRequest {
     readonly matchTimestamp?: number;
 }
 
+export interface CMsgClientToGCSocialMatchDetailsRequest {
+    readonly matchId?: bigint;
+}
+
+export interface CMsgClientToGCSocialMatchPostCommentRequest {
+    readonly matchId?: bigint;
+    readonly comment?: string;
+}
+
 export interface CMsgClientToGCStartWatchingOverwatch {
     readonly overwatchReplayId?: bigint;
     readonly targetPlayerSlot?: number;
@@ -7494,6 +7503,10 @@ export interface CMsgGCGetHeroStatsHistoryResponse {
     readonly result?: number;
 }
 
+export interface CMsgGCGetHeroTimedStats {
+    readonly heroId?: number;
+}
+
 export interface CMsgGCGetHeroTimedStatsResponse {
     readonly heroId?: number;
     readonly rankChunkedStats?: CMsgGCGetHeroTimedStatsResponse_RankChunkedStats[];
@@ -8441,6 +8454,22 @@ export interface CMsgGCToClientSocialFeedPostCommentResponse {
 }
 
 export interface CMsgGCToClientSocialFeedPostMessageResponse {
+    readonly success?: boolean;
+}
+
+export interface CMsgGCToClientSocialMatchDetailsResponse {
+    readonly success?: boolean;
+    readonly comments?: CMsgGCToClientSocialMatchDetailsResponse_Comment[];
+}
+
+export interface CMsgGCToClientSocialMatchDetailsResponse_Comment {
+    readonly accountId?: number;
+    readonly comment?: string;
+    readonly personaName?: string;
+    readonly timestamp?: number;
+}
+
+export interface CMsgGCToClientSocialMatchPostCommentResponse {
     readonly success?: boolean;
 }
 
@@ -10197,6 +10226,13 @@ export interface CMsgMatchTips_SingleTip {
     readonly eventId?: number;
 }
 
+export interface CMsgMatchVoteResponse {
+    readonly eresult?: number;
+    readonly vote?: number;
+    readonly positiveVotes?: number;
+    readonly negativeVotes?: number;
+}
+
 export interface CMsgMatchmakingMatchGroupInfo {
     readonly playersSearching?: number;
     readonly autoRegionSelectPingPenalty?: number;
@@ -11044,6 +11080,11 @@ export interface CMsgResetStrangeGemCountResponse {
 export interface CMsgResponseTeamFanfare {
     readonly fanfareGoodguys?: number;
     readonly fanfareBadguys?: number;
+}
+
+export interface CMsgRetrieveMatchVote {
+    readonly matchId?: bigint;
+    readonly incremental?: number;
 }
 
 export interface CMsgRoadToTIAssignedQuest {
@@ -20672,6 +20713,8 @@ export const Msg: {
     GCPracticeLobbyJoinBroadcastChannel: MessageId;
     GCTournamentItemEvent: MessageId;
     GCTournamentItemEventResponse: MessageId;
+    RetrieveMatchVote: MessageId;
+    RetrieveMatchVoteResponse: MessageId;
     TeamFanfare: MessageId;
     ResponseTeamFanfare: MessageId;
     GCEditTeamDetails: MessageId;
@@ -20930,6 +20973,10 @@ export const Msg: {
     ClientToGCFriendsPlayedCustomGameRequest: MessageId;
     GCToClientFriendsPlayedCustomGameResponse: MessageId;
     GCTopCustomGamesList: MessageId;
+    ClientToGCSocialMatchPostCommentRequest: MessageId;
+    GCToClientSocialMatchPostCommentResponse: MessageId;
+    ClientToGCSocialMatchDetailsRequest: MessageId;
+    GCToClientSocialMatchDetailsResponse: MessageId;
     ClientToGCSetPartyOpen: MessageId;
     ClientToGCMergePartyInvite: MessageId;
     GCToClientMergeGroupInviteReply: MessageId;
@@ -21099,6 +21146,8 @@ export const Msg: {
     PurchaseItemWithEventPointsResponse: MessageId;
     ServerToGCMatchPlayerItemPurchaseHistory: MessageId;
     GCToGCGrantPlusHeroMatchResults: MessageId;
+    GCGetHeroTimedStats: MessageId;
+    GCGetHeroTimedStatsResponse: MessageId;
     ServerToGCMatchStateHistory: MessageId;
     PurchaseHeroRandomRelic: MessageId;
     PurchaseHeroRandomRelicResponse: MessageId;
@@ -21872,6 +21921,8 @@ export const Msg: {
     GCPracticeLobbyJoinBroadcastChannel: 7149,
     GCTournamentItemEvent: 7150,
     GCTournamentItemEventResponse: 7151,
+    RetrieveMatchVote: 7154,
+    RetrieveMatchVoteResponse: 7155,
     TeamFanfare: 7156,
     ResponseTeamFanfare: 7157,
     GCEditTeamDetails: 7166,
@@ -22130,6 +22181,10 @@ export const Msg: {
     ClientToGCFriendsPlayedCustomGameRequest: 8020,
     GCToClientFriendsPlayedCustomGameResponse: 8021,
     GCTopCustomGamesList: 8024,
+    ClientToGCSocialMatchPostCommentRequest: 8025,
+    GCToClientSocialMatchPostCommentResponse: 8026,
+    ClientToGCSocialMatchDetailsRequest: 8027,
+    GCToClientSocialMatchDetailsResponse: 8028,
     ClientToGCSetPartyOpen: 8029,
     ClientToGCMergePartyInvite: 8030,
     GCToClientMergeGroupInviteReply: 8031,
@@ -22299,6 +22354,8 @@ export const Msg: {
     PurchaseItemWithEventPointsResponse: 8249,
     ServerToGCMatchPlayerItemPurchaseHistory: 8250,
     GCToGCGrantPlusHeroMatchResults: 8251,
+    GCGetHeroTimedStats: 8252,
+    GCGetHeroTimedStatsResponse: 8253,
     ServerToGCMatchStateHistory: 8255,
     PurchaseHeroRandomRelic: 8258,
     PurchaseHeroRandomRelicResponse: 8259,
@@ -23501,6 +23558,8 @@ export const Proto = {
     CMsgClientToGCShowcaseSubmitReportResponse: { name: "CMsgClientToGCShowcaseSubmitReportResponse" } as ProtoDescriptor<CMsgClientToGCShowcaseSubmitReportResponse>,
     CMsgClientToGCSocialFeedPostCommentRequest: { name: "CMsgClientToGCSocialFeedPostCommentRequest" } as ProtoDescriptor<CMsgClientToGCSocialFeedPostCommentRequest>,
     CMsgClientToGCSocialFeedPostMessageRequest: { name: "CMsgClientToGCSocialFeedPostMessageRequest" } as ProtoDescriptor<CMsgClientToGCSocialFeedPostMessageRequest>,
+    CMsgClientToGCSocialMatchDetailsRequest: { name: "CMsgClientToGCSocialMatchDetailsRequest" } as ProtoDescriptor<CMsgClientToGCSocialMatchDetailsRequest>,
+    CMsgClientToGCSocialMatchPostCommentRequest: { name: "CMsgClientToGCSocialMatchPostCommentRequest" } as ProtoDescriptor<CMsgClientToGCSocialMatchPostCommentRequest>,
     CMsgClientToGCStartWatchingOverwatch: { name: "CMsgClientToGCStartWatchingOverwatch" } as ProtoDescriptor<CMsgClientToGCStartWatchingOverwatch>,
     CMsgClientToGCStopWatchingOverwatch: { name: "CMsgClientToGCStopWatchingOverwatch" } as ProtoDescriptor<CMsgClientToGCStopWatchingOverwatch>,
     CMsgClientToGCSubmitCoachTeammateRating: { name: "CMsgClientToGCSubmitCoachTeammateRating" } as ProtoDescriptor<CMsgClientToGCSubmitCoachTeammateRating>,
@@ -23955,6 +24014,7 @@ export const Proto = {
     CMsgGCGetHeroStandingsResponse_Hero: { name: "Hero" } as ProtoDescriptor<CMsgGCGetHeroStandingsResponse_Hero>,
     CMsgGCGetHeroStatsHistory: { name: "CMsgGCGetHeroStatsHistory" } as ProtoDescriptor<CMsgGCGetHeroStatsHistory>,
     CMsgGCGetHeroStatsHistoryResponse: { name: "CMsgGCGetHeroStatsHistoryResponse" } as ProtoDescriptor<CMsgGCGetHeroStatsHistoryResponse>,
+    CMsgGCGetHeroTimedStats: { name: "CMsgGCGetHeroTimedStats" } as ProtoDescriptor<CMsgGCGetHeroTimedStats>,
     CMsgGCGetHeroTimedStatsResponse: { name: "CMsgGCGetHeroTimedStatsResponse" } as ProtoDescriptor<CMsgGCGetHeroTimedStatsResponse>,
     CMsgGCGetHeroTimedStatsResponse_RankChunkedStats: { name: "RankChunkedStats" } as ProtoDescriptor<CMsgGCGetHeroTimedStatsResponse_RankChunkedStats>,
     CMsgGCGetHeroTimedStatsResponse_TimedStatsContainer: { name: "TimedStatsContainer" } as ProtoDescriptor<CMsgGCGetHeroTimedStatsResponse_TimedStatsContainer>,
@@ -24123,6 +24183,9 @@ export const Proto = {
     CMsgGCToClientRoadToTIQuestDataUpdated: { name: "CMsgGCToClientRoadToTIQuestDataUpdated" } as ProtoDescriptor<CMsgGCToClientRoadToTIQuestDataUpdated>,
     CMsgGCToClientSocialFeedPostCommentResponse: { name: "CMsgGCToClientSocialFeedPostCommentResponse" } as ProtoDescriptor<CMsgGCToClientSocialFeedPostCommentResponse>,
     CMsgGCToClientSocialFeedPostMessageResponse: { name: "CMsgGCToClientSocialFeedPostMessageResponse" } as ProtoDescriptor<CMsgGCToClientSocialFeedPostMessageResponse>,
+    CMsgGCToClientSocialMatchDetailsResponse: { name: "CMsgGCToClientSocialMatchDetailsResponse" } as ProtoDescriptor<CMsgGCToClientSocialMatchDetailsResponse>,
+    CMsgGCToClientSocialMatchDetailsResponse_Comment: { name: "Comment" } as ProtoDescriptor<CMsgGCToClientSocialMatchDetailsResponse_Comment>,
+    CMsgGCToClientSocialMatchPostCommentResponse: { name: "CMsgGCToClientSocialMatchPostCommentResponse" } as ProtoDescriptor<CMsgGCToClientSocialMatchPostCommentResponse>,
     CMsgGCToClientSteamDatagramTicket: { name: "CMsgGCToClientSteamDatagramTicket" } as ProtoDescriptor<CMsgGCToClientSteamDatagramTicket>,
     CMsgGCToClientStoreTransactionCompleted: { name: "CMsgGCToClientStoreTransactionCompleted" } as ProtoDescriptor<CMsgGCToClientStoreTransactionCompleted>,
     CMsgGCToClientTopFriendMatchesResponse: { name: "CMsgGCToClientTopFriendMatchesResponse" } as ProtoDescriptor<CMsgGCToClientTopFriendMatchesResponse>,
@@ -24369,6 +24432,7 @@ export const Proto = {
     CMsgMatchStateSteamMLEntry: { name: "CMsgMatchStateSteamMLEntry" } as ProtoDescriptor<CMsgMatchStateSteamMLEntry>,
     CMsgMatchTips: { name: "CMsgMatchTips" } as ProtoDescriptor<CMsgMatchTips>,
     CMsgMatchTips_SingleTip: { name: "SingleTip" } as ProtoDescriptor<CMsgMatchTips_SingleTip>,
+    CMsgMatchVoteResponse: { name: "CMsgMatchVoteResponse" } as ProtoDescriptor<CMsgMatchVoteResponse>,
     CMsgMatchmakingMatchGroupInfo: { name: "CMsgMatchmakingMatchGroupInfo" } as ProtoDescriptor<CMsgMatchmakingMatchGroupInfo>,
     CMsgMonsterHunterCodexUpdateData: { name: "CMsgMonsterHunterCodexUpdateData" } as ProtoDescriptor<CMsgMonsterHunterCodexUpdateData>,
     CMsgMonsterHunterCodexUpdateData_KillInfo: { name: "KillInfo" } as ProtoDescriptor<CMsgMonsterHunterCodexUpdateData_KillInfo>,
@@ -24500,6 +24564,7 @@ export const Proto = {
     CMsgResetStrangeGemCount: { name: "CMsgResetStrangeGemCount" } as ProtoDescriptor<CMsgResetStrangeGemCount>,
     CMsgResetStrangeGemCountResponse: { name: "CMsgResetStrangeGemCountResponse" } as ProtoDescriptor<CMsgResetStrangeGemCountResponse>,
     CMsgResponseTeamFanfare: { name: "CMsgResponseTeamFanfare" } as ProtoDescriptor<CMsgResponseTeamFanfare>,
+    CMsgRetrieveMatchVote: { name: "CMsgRetrieveMatchVote" } as ProtoDescriptor<CMsgRetrieveMatchVote>,
     CMsgRoadToTIAssignedQuest: { name: "CMsgRoadToTIAssignedQuest" } as ProtoDescriptor<CMsgRoadToTIAssignedQuest>,
     CMsgRoadToTIUserData: { name: "CMsgRoadToTIUserData" } as ProtoDescriptor<CMsgRoadToTIUserData>,
     CMsgSDOAssert: { name: "CMsgSDOAssert" } as ProtoDescriptor<CMsgSDOAssert>,

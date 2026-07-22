@@ -2,13 +2,28 @@ import { DotaEquipment, DotaRuntimeInventory, HandlerContext, RawMessageContext,
 import {
     CMsgClientToGCEquipItems,
     CMsgClientToGCEquipItemsResponse,
+    CMsgClientToGCUnlockCrate,
+    CMsgClientToGCUnlockCrateResponse,
+    CMsgClientToGCUnlockItemStyle,
+    CMsgClientToGCUnlockItemStyleResponse,
+    CMsgClientToGCUnlockItemStyleResponse_EUnlockStyle,
+    CMsgClientToGCUnpackBundle,
+    CMsgClientToGCUnpackBundleResponse,
+    CMsgClientToGCUnpackBundleResponse_EUnpackBundle,
     CMsgClientToGCSetItemStyle,
     CMsgClientToGCSetItemStyleResponse,
+    CMsgDOTARedeemItem,
+    CMsgDOTARedeemItemResponse,
+    CMsgDOTARedeemItemResponse_EResultCode,
+    CMsgGenericResult,
     CMsgSOCacheSubscriptionRefresh,
     CSOEconItem,
     CMsgSOMultipleObjects_SingleObject,
     CMsgSOSingleObject,
+    CMsgSetItemPositions,
+    CMsgUseItem,
     CMsgClientToGCSetItemStyleResponse_ESetStyle,
+    EGCMsgUseItemResponse,
     Msg,
     Proto,
     Routes
@@ -25,6 +40,9 @@ import { queueCurrentLobbyServer as queueCurrentLobbyServerMessage } from "./Lob
 
 const STYLE_NONE = 0;
 const STYLE_DEFAULT_SENTINEL = 255;
+// DeleteItem's old GC reply is the legacy generic-result envelope, not the
+// newer GCGenericResult alias exposed in the generated Msg table.
+const LEGACY_GENERIC_RESULT_MESSAGE_ID = 7001;
 
 export function registerItems(): void {
     const items = new Items();
@@ -36,6 +54,13 @@ export class Items {
         gc.on(Routes.EquipItems, (ctx) => this.equipItems(ctx));
         gc.on(Routes.SetItemStyle, (ctx) => this.setItemStyle(ctx));
         gc.onMessage(Msg.SOCacheSubscriptionRefresh, (ctx) => this.cacheSubscriptionRefresh(ctx));
+        gc.onMessage(Msg.GCDelete, (ctx) => this.deleteItem(ctx));
+        gc.onMessage(Msg.GCUseItemRequest, (ctx) => this.useItem(ctx));
+        gc.onMessage(Msg.GCSetItemPositions, (ctx) => this.setItemPositions(ctx));
+        gc.onMessage(Msg.ClientToGCUnlockItemStyle, (ctx) => this.unlockItemStyle(ctx));
+        gc.onMessage(Msg.ClientToGCUnlockCrate, (ctx) => this.unlockCrate(ctx));
+        gc.onMessage(Msg.ClientToGCUnpackBundle, (ctx) => this.unpackBundle(ctx));
+        gc.onMessage(Msg.DOTARedeemItem, (ctx) => this.redeemItem(ctx));
     }
 
     private equipItems(ctx: HandlerContext<CMsgClientToGCEquipItems, CMsgClientToGCEquipItemsResponse>): boolean {
@@ -95,6 +120,89 @@ export class Items {
         const request = ctx.decode(Proto.CMsgSOCacheSubscriptionRefresh) as CMsgSOCacheSubscriptionRefresh;
         const owner = request.ownerSoid;
         ctx.logger.info("SOCacheSubscriptionRefresh ownerType=" + (owner?.type ?? 0) + " ownerId=" + (owner?.id ?? 0n));
+        return true;
+    }
+
+    private deleteItem(ctx: RawMessageContext): boolean {
+        const itemId = readLegacyDeleteItemId(ctx.payload);
+        ctx.logger.info("Items: DeleteItem itemId=" + itemId + " ignored=open-catalog");
+        ctx.reply<CMsgGenericResult>(LEGACY_GENERIC_RESULT_MESSAGE_ID, Proto.CMsgGenericResult, { eresult: 1 });
+        return true;
+    }
+
+    private useItem(ctx: RawMessageContext): boolean {
+        const request = ctx.decode(Proto.CMsgUseItem) as CMsgUseItem;
+        ctx.logger.info("Items: UseItem itemId=" + (request.itemId ?? 0n));
+        ctx.reply<CMsgGenericResult>(Msg.GCUseItemResponse, Proto.CMsgGenericResult, {
+            eresult: EGCMsgUseItemResponse.GCMsgUseItemResponseItemUsed
+        });
+        return true;
+    }
+
+    private setItemPositions(ctx: RawMessageContext): boolean {
+        const request = ctx.decode(Proto.CMsgSetItemPositions) as CMsgSetItemPositions;
+        const positions = request.itemPositions ?? [];
+        ctx.logger.info("Items: SetItemPositions count=" + positions.length + " ignored=open-catalog");
+        return true;
+    }
+
+    private unlockItemStyle(ctx: RawMessageContext): boolean {
+        const request = ctx.decode(Proto.CMsgClientToGCUnlockItemStyle) as CMsgClientToGCUnlockItemStyle;
+        ctx.reply<CMsgClientToGCUnlockItemStyleResponse>(
+            Msg.ClientToGCUnlockItemStyleResponse,
+            Proto.CMsgClientToGCUnlockItemStyleResponse,
+            {
+                itemId: request.itemToUnlock ?? 0n,
+                styleIndex: normalizeStyle(request.styleIndex ?? STYLE_NONE),
+                response: CMsgClientToGCUnlockItemStyleResponse_EUnlockStyle.KUnlockStyleSucceeded
+            }
+        );
+        return true;
+    }
+
+    private unlockCrate(ctx: RawMessageContext): boolean {
+        const request = ctx.decode(Proto.CMsgClientToGCUnlockCrate) as CMsgClientToGCUnlockCrate;
+        ctx.logger.info(
+            "Items: UnlockCrate crateItemId=" + (request.crateItemId ?? 0n) + " keyItemId=" + (request.keyItemId ?? 0n)
+        );
+        ctx.reply<CMsgClientToGCUnlockCrateResponse>(
+            Msg.ClientToGCUnlockCrateResponse,
+            Proto.CMsgClientToGCUnlockCrateResponse,
+            {
+                result: 0,
+                grantedItems: []
+            }
+        );
+        return true;
+    }
+
+    private unpackBundle(ctx: RawMessageContext): boolean {
+        const request = ctx.decode(Proto.CMsgClientToGCUnpackBundle) as CMsgClientToGCUnpackBundle;
+        ctx.logger.info("Items: UnpackBundle itemId=" + (request.itemId ?? 0n));
+        ctx.reply<CMsgClientToGCUnpackBundleResponse>(
+            Msg.ClientToGCUnpackBundleResponse,
+            Proto.CMsgClientToGCUnpackBundleResponse,
+            {
+                response: CMsgClientToGCUnpackBundleResponse_EUnpackBundle.KUnpackBundleSucceeded,
+                unpackedItemIds: [],
+                unpackedItemDefIndexes: []
+            }
+        );
+        return true;
+    }
+
+    private redeemItem(ctx: RawMessageContext): boolean {
+        const request = ctx.decode(Proto.CMsgDOTARedeemItem) as CMsgDOTARedeemItem;
+        ctx.logger.info(
+            "Items: RedeemItem purchaseDef=" +
+                (request.purchaseDef ?? 0) +
+                " currencyId=" +
+                (request.currencyId ?? 0n) +
+                " ignored=open-catalog"
+        );
+        ctx.reply<CMsgDOTARedeemItemResponse>(Msg.DOTARedeemItemResponse, Proto.CMsgDOTARedeemItemResponse, {
+            response: CMsgDOTARedeemItemResponse_EResultCode.KSucceeded
+        });
         return true;
     }
 
@@ -226,6 +334,27 @@ function distinctChangedDefIndexes(changed: DotaEquipment[]): number[] {
     }
 
     return result;
+}
+
+function readLegacyDeleteItemId(payload: Uint8Array): bigint {
+    if (payload.length >= 26) {
+        return readUInt64LittleEndian(payload, 18);
+    }
+
+    if (payload.length >= 8) {
+        return readUInt64LittleEndian(payload, 0);
+    }
+
+    return 0n;
+}
+
+function readUInt64LittleEndian(payload: Uint8Array, offset: number): bigint {
+    let value = 0n;
+    for (let i = 0; i < 8; i++) {
+        value |= BigInt(payload[offset + i]) << BigInt(i * 8);
+    }
+
+    return value;
 }
 
 function containsNumber(values: number[], value: number): boolean {

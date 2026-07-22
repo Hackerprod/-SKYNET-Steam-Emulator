@@ -99,6 +99,17 @@ public sealed partial class SteamApiStateService
         DotaGcRuntimeServices.GuildStore = _dotaGuildStore;
         DotaGcRuntimeServices.TeamJsonProvider = teamId => _dotaDb.GetTeam(teamId.ToString(System.Globalization.CultureInfo.InvariantCulture));
         DotaGcRuntimeServices.TeamsForAccountJsonProvider = accountId => _dotaDb.GetTeamsForAccount(accountId);
+        DotaGcRuntimeServices.NextTeamIdProvider = () => _dotaDb.NextTeamId();
+        DotaGcRuntimeServices.TeamUpsertSink = (teamId, name, tag, teamJson) => _dotaDb.UpsertTeam(teamId, name, tag, teamJson);
+        DotaGcRuntimeServices.TeamMemberUpsertSink = (teamId, accountId, role) => _dotaDb.AddTeamMember(teamId, accountId, role);
+        DotaGcRuntimeServices.TeamMemberRemoveSink = (teamId, accountId) => _dotaDb.RemoveTeamMember(teamId, accountId);
+        DotaGcRuntimeServices.TeamRemoveSink = teamId => _dotaDb.RemoveTeam(teamId);
+        DotaGcRuntimeServices.TeamNameAvailableProvider = (name, exceptTeamId) => _dotaDb.IsTeamNameAvailable(name, exceptTeamId);
+        DotaGcRuntimeServices.TeamTagAvailableProvider = (tag, exceptTeamId) => _dotaDb.IsTeamTagAvailable(tag, exceptTeamId);
+        DotaGcRuntimeServices.TeamPlayerInfoProvider = accountId => _dotaDb.GetPlayerInfo(accountId);
+        DotaGcRuntimeServices.TeamPlayerInfoUpsertSink = (accountId, name, countryCode, fantasyRole, teamId, sponsor, realName) =>
+            _dotaDb.UpsertPlayerInfo(accountId, name, countryCode, fantasyRole, teamId, sponsor, realName);
+        DotaGcRuntimeServices.TeamPlayerInfoDeleteSink = accountId => _dotaDb.DeletePlayerInfo(accountId);
         DotaGcRuntimeServices.PendingMessageQueued = EnqueueGcMessageEvent;
         DotaGcRuntimeServices.InventoryProvider = GetDotaRuntimeInventory;
         DotaGcRuntimeServices.EquipItemSink = EquipDotaItemFromGameCoordinator;
@@ -106,6 +117,7 @@ public sealed partial class SteamApiStateService
         DotaGcRuntimeServices.MatchSnapshotSink = UpsertDotaMatchSnapshot;
         DotaGcRuntimeServices.MatchSnapshotJsonProvider = GetDotaActiveMatchJson;
         DotaGcRuntimeServices.MatchSnapshotByLobbyJsonProvider = GetDotaMatchByLobbyJson;
+        DotaGcRuntimeServices.MatchSnapshotsProvider = GetDotaPublishedMatches;
         DotaGcRuntimeServices.MatchSnapshotDeleteSink = RemoveDotaMatchSnapshot;
         DotaGcRuntimeServices.UserExistsProvider = IsKnownDotaUser;
         DotaGcRuntimeServices.UserOnlineProvider = IsOnlineDotaUser;

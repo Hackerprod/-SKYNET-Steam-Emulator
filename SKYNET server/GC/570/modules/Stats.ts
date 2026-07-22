@@ -47,19 +47,24 @@ import {
     CMsgGCGetHeroStandingsResponse_Hero,
     CMsgGCGetHeroStatsHistory,
     CMsgGCGetHeroStatsHistoryResponse,
+    CMsgGCGetHeroTimedStats,
+    CMsgGCGetHeroTimedStatsResponse,
     CMsgGCToClientPlayerStatsResponse,
     CMsgGCToClientRankResponse,
     CMsgGCRerollPlayerChallengeResponse,
     CMsgHeroGlobalDataRequest,
     CMsgHeroGlobalDataResponse,
+    CMsgMatchVoteResponse,
     CMsgPlayerHeroRecentAccomplishments,
     CMsgPlayerMatchRecord,
     CMsgPlayerRecentAccomplishments,
     CMsgPlayerRecentCommends,
     CMsgPlayerRecentMatchInfo,
     CMsgPlayerRecentMatchOutcomes,
+    CMsgRetrieveMatchVote,
     CMsgShowcase,
     CMsgShowcaseItem,
+    DOTAMatchVote,
     Msg,
     Proto,
     Routes
@@ -82,7 +87,9 @@ export class Stats {
         gc.on(Routes.GetHeroStandings, (ctx) => this.getHeroStandings(ctx));
         gc.on(Routes.GetHeroStatsHistory, (ctx) => this.getHeroStatsHistory(ctx));
         gc.on(Routes.GetPlayerMatchHistory, (ctx) => this.getPlayerMatchHistory(ctx));
+        gc.onMessage(Msg.RetrieveMatchVote, (ctx) => this.retrieveMatchVote(ctx));
         gc.on(Routes.PlayerStats, (ctx) => this.playerStats(ctx));
+        gc.onMessage(Msg.GCGetHeroTimedStats, (ctx) => this.heroTimedStats(ctx));
         gc.on(Routes.HeroGlobalData, (ctx) => this.heroGlobalData(ctx));
         gc.on(Routes.TeammateStats, (ctx) => this.teammateStats(ctx));
         gc.on(Routes.RankRequest, (ctx) => this.rankRequest(ctx));
@@ -172,8 +179,16 @@ export class Stats {
         return true;
     }
 
-    retrieveMatchVote(): boolean {
-        return false;
+    retrieveMatchVote(ctx: RawMessageContext): boolean {
+        const request = ctx.decode(Proto.CMsgRetrieveMatchVote) as CMsgRetrieveMatchVote;
+        const votes = ctx.services.stats.getMatchVotes(request.matchId ?? 0n);
+        ctx.reply<CMsgMatchVoteResponse>(Msg.RetrieveMatchVoteResponse, Proto.CMsgMatchVoteResponse, {
+            eresult: votes.success ? 0 : 1,
+            vote: mapMatchVote(votes.vote),
+            positiveVotes: votes.positiveVotes,
+            negativeVotes: votes.negativeVotes
+        });
+        return true;
     }
 
     playerStats(ctx: HandlerContext<CMsgClientToGCPlayerStatsRequest, CMsgGCToClientPlayerStatsResponse>): boolean {
@@ -181,8 +196,17 @@ export class Stats {
         return true;
     }
 
-    heroTimedStats(): boolean {
-        return false;
+    heroTimedStats(ctx: RawMessageContext): boolean {
+        const request = ctx.decode(Proto.CMsgGCGetHeroTimedStats) as CMsgGCGetHeroTimedStats;
+        ctx.reply<CMsgGCGetHeroTimedStatsResponse>(
+            Msg.GCGetHeroTimedStatsResponse,
+            Proto.CMsgGCGetHeroTimedStatsResponse,
+            {
+                heroId: request.heroId ?? 0,
+                rankChunkedStats: []
+            }
+        );
+        return true;
     }
 
     heroGlobalData(ctx: HandlerContext<CMsgHeroGlobalDataRequest, CMsgHeroGlobalDataResponse>): boolean {
@@ -325,6 +349,14 @@ export class Stats {
 function requestedAccountId(value: number | undefined, fallback: number): number {
     const accountId = value ?? 0;
     return accountId === 0 ? fallback : accountId;
+}
+
+function mapMatchVote(vote: number): number {
+    if (vote === DOTAMatchVote.Positive || vote === DOTAMatchVote.Negative) {
+        return vote;
+    }
+
+    return DOTAMatchVote.Invalid;
 }
 
 function mapHeroStandings(heroes: DotaHeroStanding[]): CMsgGCGetHeroStandingsResponse_Hero[] {

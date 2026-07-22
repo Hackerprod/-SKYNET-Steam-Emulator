@@ -99,6 +99,155 @@ public sealed class DotaGuildStore
         }
     }
 
+    public DotaGuildMutationResult Invite(uint guildId, uint requesterAccountId, uint targetAccountId)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            var guild = ReadGuildLocked(connection, guildId);
+            if (guild == null)
+            {
+                return DotaGuildMutationResult.InvalidGuild;
+            }
+
+            if (!HasMemberLocked(connection, guildId, requesterAccountId))
+            {
+                return DotaGuildMutationResult.RequesterNotMember;
+            }
+
+            if (HasMemberLocked(connection, guildId, targetAccountId))
+            {
+                return DotaGuildMutationResult.AlreadyMember;
+            }
+
+            if (HasInviteLocked(connection, guildId, targetAccountId))
+            {
+                return DotaGuildMutationResult.AlreadyInvited;
+            }
+
+            if (guild.Members.Count >= 50)
+            {
+                return DotaGuildMutationResult.GuildFull;
+            }
+
+            using var command = connection.CreateCommand();
+            command.CommandText = """
+                INSERT INTO dota_guild_invites (guild_id, target_account_id, requester_account_id, timestamp_sent)
+                VALUES ($guild_id, $target_account_id, $requester_account_id, $timestamp_sent)
+                """;
+            Add(command, "$guild_id", guildId);
+            Add(command, "$target_account_id", targetAccountId);
+            Add(command, "$requester_account_id", requesterAccountId);
+            Add(command, "$timestamp_sent", Now());
+            command.ExecuteNonQuery();
+            return DotaGuildMutationResult.Success;
+        }
+    }
+
+    public DotaGuildMutationResult DeclineInvite(uint guildId, uint targetAccountId)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            if (ReadGuildLocked(connection, guildId) == null)
+            {
+                return DotaGuildMutationResult.InvalidGuild;
+            }
+
+            if (!HasInviteLocked(connection, guildId, targetAccountId))
+            {
+                return DotaGuildMutationResult.NoInviteFound;
+            }
+
+            DeleteInviteLocked(connection, null, guildId, targetAccountId);
+            return DotaGuildMutationResult.Success;
+        }
+    }
+
+    public DotaGuildMutationResult CancelInvite(uint guildId, uint requesterAccountId, uint targetAccountId)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            if (ReadGuildLocked(connection, guildId) == null)
+            {
+                return DotaGuildMutationResult.InvalidGuild;
+            }
+
+            if (!HasMemberLocked(connection, guildId, requesterAccountId))
+            {
+                return DotaGuildMutationResult.NoPermissions;
+            }
+
+            if (!HasInviteLocked(connection, guildId, targetAccountId))
+            {
+                return DotaGuildMutationResult.NoInviteFound;
+            }
+
+            DeleteInviteLocked(connection, null, guildId, targetAccountId);
+            return DotaGuildMutationResult.Success;
+        }
+    }
+
+    public DotaGuildMutationResult AcceptInvite(uint guildId, uint targetAccountId)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            var guild = ReadGuildLocked(connection, guildId);
+            if (guild == null)
+            {
+                return DotaGuildMutationResult.InvalidGuild;
+            }
+
+            if (guild.Members.Count >= 50)
+            {
+                return DotaGuildMutationResult.GuildFull;
+            }
+
+            if (!HasInviteLocked(connection, guildId, targetAccountId))
+            {
+                return DotaGuildMutationResult.NoInviteFound;
+            }
+
+            if (HasMemberLocked(connection, guildId, targetAccountId))
+            {
+                return DotaGuildMutationResult.AlreadyMember;
+            }
+
+            using var transaction = connection.BeginTransaction();
+            var now = Now();
+            UpsertMemberLocked(connection, transaction, guildId, targetAccountId, DefaultMemberRoleId, now, now);
+            DeleteInviteLocked(connection, transaction, guildId, targetAccountId);
+            transaction.Commit();
+            return DotaGuildMutationResult.Success;
+        }
+    }
+
+    public DotaGuildMutationResult Leave(uint guildId, uint accountId)
+    {
+        lock (_sync)
+        {
+            using var connection = OpenConnection();
+            if (ReadGuildLocked(connection, guildId) == null)
+            {
+                return DotaGuildMutationResult.InvalidGuild;
+            }
+
+            if (!HasMemberLocked(connection, guildId, accountId))
+            {
+                return DotaGuildMutationResult.NotMember;
+            }
+
+            using var command = connection.CreateCommand();
+            command.CommandText = "DELETE FROM dota_guild_members WHERE guild_id = $guild_id AND account_id = $account_id";
+            Add(command, "$guild_id", guildId);
+            Add(command, "$account_id", accountId);
+            command.ExecuteNonQuery();
+            return DotaGuildMutationResult.Success;
+        }
+    }
+
     public List<DotaGuildPersonaSnapshot> GetPersonaInfo(uint accountId)
     {
         lock (_sync)
@@ -480,6 +629,36 @@ public sealed class DotaGuildStore
         command.ExecuteNonQuery();
     }
 
+    private static bool HasMemberLocked(SqliteConnection connection, uint guildId, uint accountId)
+    {
+        return ScalarLong(connection, null,
+            "SELECT COUNT(*) FROM dota_guild_members WHERE guild_id = $guild_id AND account_id = $account_id",
+            ("$guild_id", guildId),
+            ("$account_id", accountId)) > 0;
+    }
+
+    private static bool HasInviteLocked(SqliteConnection connection, uint guildId, uint targetAccountId)
+    {
+        return ScalarLong(connection, null,
+            "SELECT COUNT(*) FROM dota_guild_invites WHERE guild_id = $guild_id AND target_account_id = $target_account_id",
+            ("$guild_id", guildId),
+            ("$target_account_id", targetAccountId)) > 0;
+    }
+
+    private static void DeleteInviteLocked(
+        SqliteConnection connection,
+        SqliteTransaction? transaction,
+        uint guildId,
+        uint targetAccountId)
+    {
+        using var command = connection.CreateCommand();
+        command.Transaction = transaction;
+        command.CommandText = "DELETE FROM dota_guild_invites WHERE guild_id = $guild_id AND target_account_id = $target_account_id";
+        Add(command, "$guild_id", guildId);
+        Add(command, "$target_account_id", targetAccountId);
+        command.ExecuteNonQuery();
+    }
+
     private static uint NextIdLocked(
         SqliteConnection connection,
         SqliteTransaction transaction,
@@ -639,4 +818,18 @@ public sealed class DotaGuildEventDataSnapshot
     public uint GuildWeeklyLastTimestamp { get; init; }
     public uint LastWeeklyClaimTime { get; init; }
     public uint GuildCurrentPercentile { get; init; }
+}
+
+public enum DotaGuildMutationResult
+{
+    Success = 1,
+    InternalError = 0,
+    InvalidGuild = 5,
+    NoInviteFound = 6,
+    GuildFull = 7,
+    RequesterNotMember = 8,
+    AlreadyMember = 9,
+    AlreadyInvited = 10,
+    NoPermissions = 11,
+    NotMember = 12
 }

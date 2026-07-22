@@ -11,6 +11,7 @@ import { registerParty } from "./modules/Party";
 import { registerProfile } from "./modules/Profile";
 import { registerSocial } from "./modules/Social";
 import { registerStats } from "./modules/Stats";
+import { registerTeams } from "./modules/Teams";
 import { registerWeekendTourney } from "./modules/WeekendTourney";
 
 const lobby = registerLobby();
@@ -22,6 +23,7 @@ registerStats();
 registerProfile();
 registerEconomy();
 registerMatch();
+registerTeams();
 registerGuilds();
 registerCoaching();
 registerSocial();

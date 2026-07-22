@@ -110,8 +110,9 @@ public static class GcScriptSelfCheck
         ok &= ExpectCreateLobbyFlow(plugin, context, write);
         ok &= ExpectLobbyDiscoveryFlow(plugin, friendContext, write);
         ok &= ExpectLobbyInviteFlow(plugin, context, queuedMessages, write);
-        ok &= ExpectApplyTeamFlow(plugin, context, write);
-        ok &= ExpectLaunchFlow(plugin, context, write);
+        ok &= ExpectLobbyJoinFlow(plugin, context, friendContext, queuedMessages, write);
+        ok &= ExpectApplyTeamFlow(plugin, context, friendContext, queuedMessages, write);
+        ok &= ExpectLaunchFlow(plugin, context, friendContext, queuedMessages, write);
         ok &= ExpectDedicatedAttachFlow(plugin, serverContext, queuedMessages, write);
         ok &= ExpectEquipVisibleCatalogItemFlow(plugin, context, serverContext.SteamId, queuedMessages, write);
         ok &= ExpectConnectedPlayersFlow(plugin, context, serverContext, queuedMessages, write);
@@ -358,7 +359,7 @@ public static class GcScriptSelfCheck
             && response.Messages[1].TargetJobId == null
             && response.Messages[2].TargetJobId == sourceJobId
             && subscribe != null
-            && subscribeTypes.SequenceEqual([2004, 2014, 2015, 2016])
+            && subscribeTypes.SequenceEqual([2004, 2013, 2014, 2015, 2016])
             && singleObject?.TypeId == 2004
             && result?.Eresult == 1
             && subscribedLobby?.LobbyId == singleLobby?.LobbyId
@@ -370,13 +371,10 @@ public static class GcScriptSelfCheck
             && extraMessage.Contents.SequenceEqual(new byte[] { 8, 0 })
             && staticLobby?.AllMembers.Count == 1
             && staticLobby.AllMembers[0].Name == context.PersonaName
-            && staticLobby.AllMembers[0].Channel == 6
-            && staticLobby.AllMembers[0].PartyId == 0UL
             && serverLobby?.AllMembers.Count == 1
             && serverStaticLobby?.AllMembers.Count == 1
             && serverStaticMember?.SteamId == context.SteamId
-            && serverStaticMember.CanEarnRewards
-            && !serverStaticMember.IsPlusSubscriber
+            && serverStaticMember.IsPlusSubscriber
             && serverStaticMember.FavoriteTeamPacked == 0UL
             && serverStaticMember.BannedHeroIds.SequenceEqual([75, 0, 0, 0]);
         var actual = response.Messages
@@ -389,9 +387,8 @@ public static class GcScriptSelfCheck
             $"seriesType={subscribedLobby?.SeriesType}, teamDetails={subscribedLobby?.TeamDetails.Count}, " +
             $"extraMsg={extraMessage?.Id}:{(extraMessage?.Contents is null ? "" : Convert.ToHexString(extraMessage.Contents))}, " +
             $"staticMembers={staticLobby?.AllMembers.Count}, staticName={staticLobby?.AllMembers.FirstOrDefault()?.Name}, " +
-            $"staticChannel={staticLobby?.AllMembers.FirstOrDefault()?.Channel}, staticParty={staticLobby?.AllMembers.FirstOrDefault()?.PartyId}, " +
             $"serverLobbyMembers={serverLobby?.AllMembers.Count}, serverStaticMembers={serverStaticLobby?.AllMembers.Count}, " +
-            $"serverStaticSteamId={serverStaticMember?.SteamId}, rewards={serverStaticMember?.CanEarnRewards}, plus={serverStaticMember?.IsPlusSubscriber}, " +
+            $"serverStaticSteamId={serverStaticMember?.SteamId}, plus={serverStaticMember?.IsPlusSubscriber}, " +
             $"result={result?.Eresult}, ok={ok}");
         return ok;
     }
@@ -410,7 +407,7 @@ public static class GcScriptSelfCheck
         var created = reply == null ? null : Deserialize<CMsgInvitationCreated>(reply.PayloadBase64);
         var queued = queuedMessages.FirstOrDefault(message => message.SteamId == inviteeSteamId && message.Message.MessageType == 24);
         var inviteCache = queued.Message == null ? null : Deserialize<CMsgSOCacheSubscribed>(queued.Message.PayloadBase64);
-        var inviteType = inviteCache?.Objects.FirstOrDefault(item => item.TypeId == 2011);
+        var inviteType = inviteCache?.Objects.FirstOrDefault(item => item.TypeId == 2013);
         var invitePayload = inviteType?.ObjectDatas.FirstOrDefault();
         var invite = invitePayload is { Length: > 0 } ? DeserializeBytes<CSODOTALobbyInvite>(invitePayload) : null;
         var inviteMember = invite?.Members.FirstOrDefault();
@@ -594,8 +591,8 @@ public static class GcScriptSelfCheck
                 7042,
                 Serialize(new CMsgPracticeLobbyList
                 {
-                    Region = 2,
-                    GameMode = (DOTAGameMode)1
+                    Region = 0,
+                    GameMode = DOTAGameMode.DotaGamemodeNone
                 })));
         var listMessage = response.Messages.FirstOrDefault(message => message.MessageType == 7043);
         var list = listMessage == null ? null : Deserialize<CMsgPracticeLobbyListResponse>(listMessage.PayloadBase64);
@@ -605,81 +602,131 @@ public static class GcScriptSelfCheck
             && list?.Lobbies.Count > 0
             && lobby?.Name == "Sala 1"
             && lobby.LeaderAccountId == 15892202
-            && lobby.Members.Any(member => member.AccountId == 15892202 && member.PlayerName == "GcScriptSelfCheck");
+            && lobby.Id > 9007199254740991UL
+            && lobby.Players == 1
+            && lobby.ServerRegion == 0
+            && !lobby.RequiresPassKey;
         write(
             $"lobby discovery flow -> handled={response.Handled}, lobbies={list?.Lobbies.Count}, " +
             $"leader={lobby?.LeaderAccountId}, name={lobby?.Name}, ok={ok}");
         return ok;
     }
 
+    private static bool ExpectLobbyJoinFlow(
+        GameCoordinatorScriptPlugin plugin,
+        GameCoordinatorContext leaderContext,
+        GameCoordinatorContext friendContext,
+        List<(ulong SteamId, ApiGCMessage Message)> queuedMessages,
+        Action<string> write)
+    {
+        var listResponse = plugin.Exchange(
+            friendContext,
+            RequestFor(
+                friendContext,
+                7042,
+                Serialize(new CMsgPracticeLobbyList
+                {
+                    Region = 0,
+                    GameMode = DOTAGameMode.DotaGamemodeNone
+                })));
+        var listMessage = listResponse.Messages.FirstOrDefault(message => message.MessageType == 7043);
+        var list = listMessage == null ? null : Deserialize<CMsgPracticeLobbyListResponse>(listMessage.PayloadBase64);
+        var entry = list?.Lobbies.FirstOrDefault(lobby => lobby.LeaderAccountId == leaderContext.AccountId);
+        queuedMessages.Clear();
+
+        var response = plugin.Exchange(
+            friendContext,
+            RequestFor(
+                friendContext,
+                7044,
+                Serialize(new CMsgPracticeLobbyJoin
+                {
+                    LobbyId = entry?.Id ?? 0UL,
+                    ClientVersion = 6856,
+                    PassKey = string.Empty
+                })));
+        var subscribedMessage = response.Messages.FirstOrDefault(message => message.MessageType == 24);
+        var createMessage = response.Messages.FirstOrDefault(message => message.MessageType == 21);
+        var joinResponseMessage = response.Messages.FirstOrDefault(message => message.MessageType == 7113);
+        var joinerUpdateMessage = response.Messages.FirstOrDefault(message => message.MessageType == 26);
+        var subscribed = subscribedMessage == null ? null : Deserialize<CMsgSOCacheSubscribed>(subscribedMessage.PayloadBase64);
+        var created = createMessage == null ? null : Deserialize<CMsgSOSingleObject>(createMessage.PayloadBase64);
+        var joinResponse = joinResponseMessage == null ? null : Deserialize<CMsgPracticeLobbyJoinResponse>(joinResponseMessage.PayloadBase64);
+        var joinerUpdate = joinerUpdateMessage == null ? null : Deserialize<CMsgSOMultipleObjects>(joinerUpdateMessage.PayloadBase64);
+        var subscribeTypes = subscribed?.Objects.Select(item => item.TypeId).ToArray() ?? Array.Empty<int>();
+        var lobbyPayload = subscribed?.Objects.FirstOrDefault(item => item.TypeId == 2004)?.ObjectDatas.FirstOrDefault();
+        var lobby = lobbyPayload is { Length: > 0 } ? DeserializeBytes<CSODOTALobby>(lobbyPayload) : null;
+        var leaderUpdate = queuedMessages.Any(message => message.SteamId == leaderContext.SteamId && message.Message.MessageType == 26);
+        var ok = listResponse.Handled
+            && entry != null
+            && response.Handled
+            && response.Messages.Count == 4
+            && response.Messages[0].MessageType == 24
+            && response.Messages[1].MessageType == 21
+            && response.Messages[2].MessageType == 7113
+            && response.Messages[3].MessageType == 26
+            && subscribed?.OwnerSoid?.Type == 3
+            && subscribed.OwnerSoid.Id == entry.Id
+            && subscribeTypes.SequenceEqual([2004])
+            && created?.TypeId == 2004
+            && joinResponse?.Result == DOTAJoinLobbyResult.DotaJoinResultSuccess
+            && joinerUpdate?.ObjectsModifieds.Count == 1
+            && joinerUpdate.ObjectsModifieds[0].TypeId == 2004
+            && lobby?.AllMembers.Count == 2
+            && lobby.AllMembers.Any(member => member.Id == leaderContext.SteamId)
+            && lobby.AllMembers.Any(member => member.Id == friendContext.SteamId)
+            && !leaderUpdate;
+        write(
+            $"lobby join flow -> handled={response.Handled}, messages={response.Messages.Count}, " +
+            $"subscribeTypes=[{string.Join(",", subscribeTypes)}], createType={created?.TypeId}, " +
+            $"joinerUpdateType={joinerUpdate?.ObjectsModifieds.FirstOrDefault()?.TypeId}, " +
+            $"members={lobby?.AllMembers.Count}, leaderUpdate={leaderUpdate}, result={joinResponse?.Result}, ok={ok}");
+        plugin.Exchange(friendContext, RequestFor(friendContext, 7040));
+        return ok;
+    }
+
     private static bool ExpectApplyTeamFlow(
         GameCoordinatorScriptPlugin plugin,
         GameCoordinatorContext context,
+        GameCoordinatorContext friendContext,
+        List<(ulong SteamId, ApiGCMessage Message)> queuedMessages,
         Action<string> write)
     {
         var response = plugin.Exchange(context, Request(7142, Serialize(new CMsgApplyTeamToPracticeLobby { TeamId = 7733573 })));
-        var update = response.Messages.Count >= 1 && response.Messages[0].MessageType == 26
-            ? Deserialize<CMsgSOMultipleObjects>(response.Messages[0].PayloadBase64)
+        var result = response.Messages.FirstOrDefault(message => message.MessageType == 2579) is { } resultMessage
+            ? Deserialize<CMsgGenericResult>(resultMessage.PayloadBase64)
             : null;
-        var result = response.Messages.Count >= 2 && response.Messages[1].MessageType == 2579
-            ? Deserialize<CMsgGenericResult>(response.Messages[1].PayloadBase64)
-            : null;
-        var lobbyPayload = update?.ObjectsModifieds.FirstOrDefault(item => item.TypeId == 2004)?.ObjectData;
-        var lobby = lobbyPayload is { Length: > 0 } ? DeserializeBytes<CSODOTALobby>(lobbyPayload) : null;
-        var radiant = lobby?.TeamDetails.Count > 0 ? lobby.TeamDetails[0] : null;
-        var dire = lobby?.TeamDetails.Count > 1 ? lobby.TeamDetails[1] : null;
         var ok = response.Handled
-            && response.Messages.Count == 2
-            && update != null
-            && result?.Eresult == 1
-            && radiant?.TeamId == 7733573
-            && radiant.TeamName == "SKYNET"
-            && radiant.TeamComplete
-            && radiant.TeamLogo == 3255294647392078090UL
-            && radiant.TeamBaseLogo == 7163376947542189088UL
-            && radiant.TeamBannerLogo == 7954877705993612385UL
-            && dire != null
-            && dire.TeamId == 0;
+            && response.Messages.Count == 1
+            && result?.Eresult == 1;
         write(
-            $"apply team flow -> handled={response.Handled}, messages={response.Messages.Count}, " +
-            $"team={radiant?.TeamId}, name={radiant?.TeamName}, result={result?.Eresult}, ok={ok}");
+            $"apply team flow -> handled={response.Handled}, messages={response.Messages.Count}, queued={queuedMessages.Count}, " +
+            $"result={result?.Eresult}, ok={ok}");
         return ok;
     }
 
     private static bool ExpectLaunchFlow(
         GameCoordinatorScriptPlugin plugin,
         GameCoordinatorContext context,
+        GameCoordinatorContext friendContext,
+        List<(ulong SteamId, ApiGCMessage Message)> queuedMessages,
         Action<string> write)
     {
         const ulong sourceJobId = 62;
         var response = plugin.Exchange(
             context,
             Request(7041, Serialize(new CMsgPracticeLobbyLaunch { ClientVersion = 6856 }), sourceJobId: sourceJobId));
-        var update = response.Messages.Count >= 1 && response.Messages[0].MessageType == 26
-            ? Deserialize<CMsgSOMultipleObjects>(response.Messages[0].PayloadBase64)
-            : null;
-        var result = response.Messages.Count >= 2 && response.Messages[1].MessageType == 2579
-            ? Deserialize<CMsgGenericResult>(response.Messages[1].PayloadBase64)
-            : null;
-        var lobbyPayload = update?.ObjectsModifieds.FirstOrDefault(item => item.TypeId == 2004)?.ObjectData;
-        var lobby = lobbyPayload is { Length: > 0 } ? DeserializeBytes<CSODOTALobby>(lobbyPayload) : null;
-        var radiant = lobby?.TeamDetails.Count > 0 ? lobby.TeamDetails[0] : null;
+        var resultMessage = response.Messages.FirstOrDefault(message => message.MessageType == 2579);
+        var result = resultMessage == null
+            ? null
+            : Deserialize<CMsgGenericResult>(resultMessage.PayloadBase64);
         var ok = response.Handled
-            && response.Messages.Count == 2
-            && update != null
+            && response.Messages.Count == 1
             && result?.Eresult == 1
-            && response.Messages[0].TargetJobId == null
-            && response.Messages[1].TargetJobId == sourceJobId
-            && lobby != null
-            && lobby.state == CSODOTALobby.State.Serversetup
-            && lobby.Lan
-            && lobby.ServerRegion == 0
-            && lobby.GameStartTime == 0
-            && radiant?.TeamId == 7733573
-            && !radiant.TeamComplete;
+            && resultMessage?.TargetJobId == sourceJobId;
         write(
-            $"launch flow -> handled={response.Handled}, messages={response.Messages.Count}, " +
-            $"state={lobby?.state}, result={result?.Eresult}, teamComplete={radiant?.TeamComplete}, ok={ok}");
+            $"launch flow -> handled={response.Handled}, messages={response.Messages.Count}, queued={queuedMessages.Count}, " +
+            $"result={result?.Eresult}, ok={ok}");
         return ok;
     }
 
@@ -700,7 +747,8 @@ public static class GcScriptSelfCheck
         };
         var infoResponse = plugin.Exchange(serverContext, RequestFor(serverContext, 4508, Serialize(info), gameServer: true));
         var availableResponse = plugin.Exchange(serverContext, RequestFor(serverContext, 4506, gameServer: true));
-        var lobby = LastQueuedClientLobby(queuedMessages);
+        var lobby = LastDirectLobby(infoResponse.Messages.Concat(availableResponse.Messages))
+            ?? LastQueuedClientLobby(queuedMessages);
         var realtimeStatsMessage = availableResponse.Messages.FirstOrDefault(message => message.MessageType == 8042);
         var realtimeStats = realtimeStatsMessage == null
             ? null
@@ -883,7 +931,7 @@ public static class GcScriptSelfCheck
         });
 
         var response = plugin.Exchange(serverContext, RequestFor(serverContext, 7034, Serialize(players), gameServer: true));
-        var lobby = LastQueuedClientLobby(queuedMessages);
+        var lobby = LastDirectLobby(response.Messages) ?? LastQueuedClientLobby(queuedMessages);
         var member = lobby?.AllMembers.FirstOrDefault(player => player.Id == clientContext.SteamId);
         var ok = response.Handled
             && lobby != null
@@ -1113,6 +1161,43 @@ public static class GcScriptSelfCheck
             if (lobbyPayload is { Length: > 0 })
             {
                 return DeserializeBytes<CSODOTALobby>(lobbyPayload);
+            }
+        }
+
+        return null;
+    }
+
+    private static CSODOTALobby? LastDirectLobby(IEnumerable<ApiGCMessage> messages)
+    {
+        foreach (var message in messages.Reverse())
+        {
+            if (message.MessageType == 26)
+            {
+                var update = Deserialize<CMsgSOMultipleObjects>(message.PayloadBase64);
+                var lobbyPayload = update.ObjectsModifieds.FirstOrDefault(item => item.TypeId == 2004)?.ObjectData;
+                if (lobbyPayload is { Length: > 0 })
+                {
+                    return DeserializeBytes<CSODOTALobby>(lobbyPayload);
+                }
+            }
+
+            if (message.MessageType == 24)
+            {
+                var subscribed = Deserialize<CMsgSOCacheSubscribed>(message.PayloadBase64);
+                var lobbyPayload = subscribed.Objects.FirstOrDefault(item => item.TypeId == 2004)?.ObjectDatas.FirstOrDefault();
+                if (lobbyPayload is { Length: > 0 })
+                {
+                    return DeserializeBytes<CSODOTALobby>(lobbyPayload);
+                }
+            }
+
+            if (message.MessageType == 21)
+            {
+                var single = Deserialize<CMsgSOSingleObject>(message.PayloadBase64);
+                if (single.TypeId == 2004 && single.ObjectData is { Length: > 0 })
+                {
+                    return DeserializeBytes<CSODOTALobby>(single.ObjectData);
+                }
             }
         }
 

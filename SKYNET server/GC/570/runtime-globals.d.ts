@@ -25,6 +25,7 @@ declare global {
     function dotaEquipItem(itemId: bigint, heroId: number, slotId: number, style: number): unknown;
     function dotaSetItemStyle(itemId: bigint, style: number): unknown;
     function dotaPublishMatchSnapshot(snapshot: unknown): boolean;
+    function dotaListMatchSnapshots(): unknown;
     function dotaRemoveMatchSnapshot(lobbyId: bigint): boolean;
     function dotaStartDedicatedServer(lobbyId: bigint, map: string): unknown;
     function dotaReleaseDedicatedServer(lobbyId: bigint, reason: string): boolean;
@@ -44,6 +45,7 @@ declare global {
     function dotaSocialFeed(accountId: number, selfOnly: boolean): unknown;
     function dotaSocialFeedComments(feedEventId: bigint): unknown;
     function dotaSocialFeedPostComment(feedEventId: bigint, comment: string): boolean;
+    function dotaSocialMatchComments(matchId: bigint): unknown;
     function dotaSocialMatchPostComment(matchId: bigint, comment: string): boolean;
     function dotaChatChannels(): unknown;
     function dotaChatJoinChannel(channelName: string, channelType: number): unknown;
@@ -60,10 +62,33 @@ declare global {
     function dotaGuild(guildId: number): unknown;
     function dotaGuildPersonaInfo(accountId: number): unknown;
     function dotaGuildEventData(guildId: number, eventId: number): unknown;
+    function dotaGuildInvite(guildId: number, targetAccountId: number): number;
+    function dotaGuildDeclineInvite(guildId: number): number;
+    function dotaGuildCancelInvite(guildId: number, targetAccountId: number): number;
+    function dotaGuildAcceptInvite(guildId: number): number;
+    function dotaGuildLeave(guildId: number): number;
     function dotaReporterUpdates(): unknown;
     function dotaAcknowledgeReporterUpdates(matchIds: bigint[]): boolean;
     function dotaTeam(teamId: number): unknown;
     function dotaTeamsForAccount(accountId?: number): unknown;
+    function dotaNextTeamId(): number;
+    function dotaUpsertTeam(teamId: number, name: string, tag: string, teamJson: string): unknown;
+    function dotaAddTeamMember(teamId: number, accountId: number, role: number): boolean;
+    function dotaRemoveTeamMember(teamId: number, accountId: number): boolean;
+    function dotaRemoveTeam(teamId: number): boolean;
+    function dotaTeamNameAvailable(name: string, exceptTeamId: string): boolean;
+    function dotaTeamTagAvailable(tag: string, exceptTeamId: string): boolean;
+    function dotaTeamPlayerInfo(accountId: number): unknown;
+    function dotaUpsertTeamPlayerInfo(
+        accountId: number,
+        name: string,
+        countryCode: string,
+        fantasyRole: number,
+        teamId: number,
+        sponsor: string,
+        realName: string
+    ): unknown;
+    function dotaDeleteTeamPlayerInfo(accountId: number): boolean;
     function dotaLookupAccountName(accountId: number): unknown;
     function dotaEventPoints(accountId: number, eventId: number): unknown;
     function dotaHeroStandings(accountId: number): unknown;
@@ -80,6 +105,7 @@ declare global {
     ): unknown;
     function dotaMatchDetails(matchId: bigint): unknown;
     function dotaHeroStatsHistory(accountId: number, heroId: number): unknown;
+    function dotaMatchVotes(matchId: bigint): unknown;
     function dotaShowcaseStats(accountId: number): unknown;
     function dotaRecentAccomplishments(accountId: number): unknown;
     function dotaHeroRecentAccomplishments(accountId: number, heroId: number): unknown;

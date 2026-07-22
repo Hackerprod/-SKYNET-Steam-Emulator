@@ -7,6 +7,7 @@ import {
     CSOEconItemEquipped,
     Proto
 } from "../generated/dota";
+import { normalizeConduct } from "./shared/conduct";
 
 export const ECON_ITEM_TYPE_ID = 1;
 export const OWNER_TYPE_STEAM_ID = 1;
@@ -73,7 +74,7 @@ export function buildEconSoCacheSubscribedForInventory(
                       objectData: [
                           ctx.encode(
                               Proto.CSODOTAGameAccountClient,
-                              buildDotaGameAccount(steamIdToAccountId(inventory.steamId))
+                              buildDotaGameAccount(ctx, steamIdToAccountId(inventory.steamId))
                           )
                       ]
                   },
@@ -212,9 +213,24 @@ function buildEconGameAccount(): CSOEconGameAccountClient {
     };
 }
 
-function buildDotaGameAccount(accountId: number): CSODOTAGameAccountClient {
+export function buildDotaGameAccount(ctx: GcContextBase, accountId = ctx.accountId): CSODOTAGameAccountClient {
+    const snapshot = ctx.services.profiles.get(accountId);
+    const conduct = normalizeConduct(snapshot.conduct);
+    const conductSequence =
+        (conduct.reportsCount ?? 0) +
+        (conduct.matchesAbandoned ?? 0) +
+        conduct.commendCount +
+        (conduct.commsReports ?? 0);
+
     return {
-        accountId
+        accountId,
+        // Dota reads conduct from both the explicit 8096 scorecard response and
+        // this account SO cache. Keep the SO cache tied to the persisted report
+        // counters so fresh accounts publish 10000, while reports, abandons and
+        // commends move the same value the scorecard exposes.
+        playerBehaviorSeqNumLastReport: conductSequence,
+        playerBehaviorScoreLastReport: conduct.rawBehaviorScore,
+        playerBehaviorReportOldData: false
     };
 }
 
