@@ -778,8 +778,11 @@ export class Lobby {
                 lowPriority: false,
                 isNewPlayer: profile.lifetimeGames < 10,
                 isGuidePlayer: false,
-                commLevel: conduct.rawBehaviorScore,
-                behaviorLevel: conduct.rawBehaviorScore,
+                // comm_level / behavior_level are small tier indices, not the
+                // raw score. The legacy GC left them unset; feeding the raw
+                // 10000 here made the client clamp it to the max tier (shown as
+                // "11"). Publish only the raw score fields, which carry the
+                // 0-10000 value the client actually displays.
                 wins: profile.globalStats.gamesWon,
                 losses: profile.globalStats.gamesLost,
                 commScore: conduct.rawBehaviorScore,
