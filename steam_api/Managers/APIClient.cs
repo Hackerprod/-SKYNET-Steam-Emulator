@@ -1174,7 +1174,10 @@ namespace SKYNET.Managers
             }) != null;
         }
 
-        public static bool SendP2PPacket(ulong remoteSteamId, byte[] buffer, int sendType, int channel)
+        // All Steam networking interfaces share the server relay, but transport
+        // metadata keeps legacy ISteamNetworking packets isolated from the modern
+        // Messages/Sockets APIs at the receiving client.
+        public static bool SendP2PPacket(ulong remoteSteamId, byte[] buffer, int sendType, int channel, string transport = "legacy", int virtualPort = 0)
         {
             if (!IsEnabled)
             {
@@ -1199,7 +1202,9 @@ namespace SKYNET.Managers
                 RemoteSteamId = remoteSteamId,
                 BufferBase64 = Convert.ToBase64String(buffer ?? new byte[0]),
                 SendType = sendType,
-                Channel = channel
+                Channel = channel,
+                Transport = transport ?? "legacy",
+                VirtualPort = virtualPort
             });
             P2PQueueSignal.Set();
             return true;
@@ -2152,6 +2157,8 @@ namespace SKYNET.Managers
             public ulong? TargetJobId { get; set; }
             public bool Protobuf { get; set; }
             public int Channel { get; set; }
+            public string Transport { get; set; }
+            public int VirtualPort { get; set; }
             public ulong RemoteSteamId { get; set; }
             public int FriendRelationship { get; set; }
             public string RequestId { get; set; }
@@ -2449,6 +2456,8 @@ namespace SKYNET.Managers
             public string BufferBase64 { get; set; }
             public int SendType { get; set; }
             public int Channel { get; set; }
+            public string Transport { get; set; }
+            public int VirtualPort { get; set; }
         }
 
         public sealed class SkyNetP2PPacketBatchDto

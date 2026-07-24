@@ -215,6 +215,8 @@ public sealed class ApiEvent
     public ulong? TargetJobId { get; set; }
     public bool Protobuf { get; set; }
     public int Channel { get; set; }
+    public string Transport { get; set; } = "legacy";
+    public int VirtualPort { get; set; }
     public ulong RemoteSteamId { get; set; }
     public int FriendRelationship { get; set; }
     public string RequestId { get; set; } = string.Empty;
@@ -518,6 +520,8 @@ public sealed class ApiP2PPacketSend
     public string BufferBase64 { get; set; } = string.Empty;
     public int SendType { get; set; }
     public int Channel { get; set; }
+    public string Transport { get; set; } = "legacy";
+    public int VirtualPort { get; set; }
 }
 
 public sealed class ApiP2PPacketBatch

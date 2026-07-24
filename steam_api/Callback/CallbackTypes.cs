@@ -2776,43 +2776,40 @@ namespace SKYNET.Callback
         #endregion
     }
 
-    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //public struct SteamNetworkingMessagesSessionRequest_t : ICallbackData
-    //{
-    //    public NetIdentity DentityRemote; // m_identityRemote SteamNetworkingIdentity
+    // These use the SteamNetworking SDK ABI definitions.  They are dispatched
+    // through the normal callback queue and also to configured native global
+    // callbacks, so games can use either registration model.
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    public struct SteamNetworkingMessagesSessionRequest_t : ICallbackData
+    {
+        public SteamNetworkingIdentity_t m_identityRemote;
 
-    //    #region SteamCallback
-    //    public static int _datasize = Marshal.SizeOf(typeof(SteamNetworkingMessagesSessionRequest_t));
-    //    public int DataSize => _datasize;
-    //    public CallbackType CallbackType => CallbackType.SteamNetworkingMessagesSessionRequest;
-    //    #endregion
-    //}
+        public static int _datasize = Marshal.SizeOf(typeof(SteamNetworkingMessagesSessionRequest_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamNetworkingMessagesSessionRequest;
+    }
 
-    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //public struct SteamNetworkingMessagesSessionFailed_t : ICallbackData
-    //{
-    //    public ConnectionInfo Nfo; // m_info SteamNetConnectionInfo_t
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    public struct SteamNetworkingMessagesSessionFailed_t : ICallbackData
+    {
+        public SteamNetConnectionInfo_t m_info;
 
-    //    #region SteamCallback
-    //    public static int _datasize = Marshal.SizeOf(typeof(SteamNetworkingMessagesSessionFailed_t));
-    //    public int DataSize => _datasize;
-    //    public CallbackType CallbackType => CallbackType.SteamNetworkingMessagesSessionFailed;
-    //    #endregion
-    //}
+        public static int _datasize = Marshal.SizeOf(typeof(SteamNetworkingMessagesSessionFailed_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamNetworkingMessagesSessionFailed;
+    }
 
-    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //public struct SteamNetConnectionStatusChangedCallback_t : ICallbackData
-    //{
-    //    public Connection Conn; // m_hConn HSteamNetConnection
-    //    public ConnectionInfo Nfo; // m_info SteamNetConnectionInfo_t
-    //    public ConnectionState OldState; // m_eOldState ESteamNetworkingConnectionState
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    public struct SteamNetConnectionStatusChangedCallback_t : ICallbackData
+    {
+        public uint m_hConn;
+        public SteamNetConnectionInfo_t m_info;
+        public ConnectionState m_eOldState;
 
-    //    #region SteamCallback
-    //    public static int _datasize = Marshal.SizeOf(typeof(SteamNetConnectionStatusChangedCallback_t));
-    //    public int DataSize => _datasize;
-    //    public CallbackType CallbackType => CallbackType.SteamNetConnectionStatusChangedCallback;
-    //    #endregion
-    //}
+        public static int _datasize = Marshal.SizeOf(typeof(SteamNetConnectionStatusChangedCallback_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamNetConnectionStatusChangedCallback;
+    }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     public struct SteamNetAuthenticationStatus_t : ICallbackData

@@ -17,7 +17,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_SteamNetworkingIdentity_Clear(IntPtr _)
         {
-            Write($"SteamAPI_SteamNetworkingIdentity_Clear");
+            SteamNetworkingIdentityInterop.Clear(_);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -51,8 +51,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static ulong SteamAPI_SteamNetworkingIdentity_GetSteamID64(IntPtr _)
         {
-            Write($"SteamAPI_SteamNetworkingIdentity_GetSteamID64");
-            return 0;
+            return SteamNetworkingIdentityInterop.TryReadSteamId(_, out var steamId) ? steamId : 0;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -65,15 +64,16 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_SteamNetworkingIdentity_IsEqualTo(IntPtr _, IntPtr x)
         {
-            Write($"SteamAPI_SteamNetworkingIdentity_IsEqualTo");
-            return false;
+            return SteamNetworkingIdentityInterop.TryReadSteamId(_, out var first) &&
+                   SteamNetworkingIdentityInterop.TryReadSteamId(x, out var second) &&
+                   first == second;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_SteamNetworkingIdentity_IsInvalid(IntPtr _)
         {
-            Write($"SteamAPI_SteamNetworkingIdentity_IsInvalid");
-            return false;
+            ulong ignoredSteamId;
+            return !SteamNetworkingIdentityInterop.TryReadSteamId(_, out ignoredSteamId);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -86,7 +86,12 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_SteamNetworkingIdentity_ParseString(IntPtr _, string pszStr)
         {
-            Write($"SteamAPI_SteamNetworkingIdentity_GetSteamID64");
+            if (!SteamNetworkingIdentityInterop.TryParseSteamId(pszStr, out var steamId))
+            {
+                SteamNetworkingIdentityInterop.Clear(_);
+                return false;
+            }
+            SteamNetworkingIdentityInterop.WriteSteamId(_, steamId);
             return true;
         }
 
@@ -118,7 +123,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_SteamNetworkingIdentity_SetSteamID64(IntPtr _, ulong steamID)
         {
-            Write($"SteamAPI_SteamNetworkingIdentity_SetSteamID64");
+            SteamNetworkingIdentityInterop.WriteSteamId(_, steamID);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -131,8 +136,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_SteamNetworkingIdentity_ToString(IntPtr _, IntPtr buf, UIntPtr cbBuf)
         {
-            Write($"SteamAPI_SteamNetworkingIdentity_ToString");
-            NativeStringCache.WriteUtf8Buffer(buf, checked((int)cbBuf.ToUInt64()), string.Empty);
+            NativeStringCache.WriteUtf8Buffer(buf, checked((int)cbBuf.ToUInt64()), SteamNetworkingIdentityInterop.Format(_));
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

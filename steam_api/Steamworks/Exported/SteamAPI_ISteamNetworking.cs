@@ -320,7 +320,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_SteamNetworkingMessage_t_Release(IntPtr _)
         {
-            Write("SteamAPI_SteamNetworkingMessage_t_Release");
+            SteamNetworkingMessageStore.Release(_);
         }
 
         #endregion

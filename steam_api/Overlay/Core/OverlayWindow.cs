@@ -734,7 +734,7 @@ internal sealed class OverlayWindow : Form
                 {
                     sending = false;
                     sent = success;
-                    invite.Text = success ? "Invitation Sent" : "Retry Invite";
+                    invite.Text = success ? "Invited" : "Retry Invite";
                     invite.ForeColor = success ? Theme.Success : Theme.TextTitle;
                     invite.FlatAppearance.BorderColor = success ? Theme.Success : Theme.Accent;
                     invite.Cursor = success ? Cursors.Default : Cursors.Hand;

@@ -367,7 +367,7 @@ public sealed partial class SteamApiStateService
     {
         lock (_sync)
         {
-            if (!TryGetSession(token, out var session))
+            if (request == null || request.RemoteSteamId == 0 || !TryGetSession(token, out var session))
             {
                 return false;
             }
@@ -387,12 +387,14 @@ public sealed partial class SteamApiStateService
                 return false;
             }
 
-            foreach (var packet in request.Packets ?? new List<ApiP2PPacketSend>())
+            foreach (var packet in request?.Packets ?? new List<ApiP2PPacketSend>())
             {
-                if (packet?.RemoteSteamId != 0)
+                if (packet == null || packet.RemoteSteamId == 0)
                 {
-                    EnqueueP2PLocked(session!, packet);
+                    continue;
                 }
+
+                EnqueueP2PLocked(session!, packet);
             }
 
             return true;
@@ -406,7 +408,9 @@ public sealed partial class SteamApiStateService
             Type = "p2p_packet",
             RemoteSteamId = session.SteamId,
             PayloadBase64 = request.BufferBase64,
-            Channel = request.Channel
+            Channel = request.Channel,
+            Transport = string.IsNullOrWhiteSpace(request.Transport) ? "legacy" : request.Transport,
+            VirtualPort = request.VirtualPort
         });
     }
 

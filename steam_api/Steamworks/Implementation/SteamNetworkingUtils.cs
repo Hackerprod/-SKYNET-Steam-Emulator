@@ -34,8 +34,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public IntPtr AllocateMessage(int cbAllocateBuffer)
         {
-            Write("AllocateMessage");
-            return IntPtr.Zero;
+            return SteamNetworkingMessageStore.AllocateOutbound(cbAllocateBuffer);
         }
 
         public void InitRelayNetworkAccess()
@@ -300,6 +299,28 @@ namespace SKYNET.Steamworks.Implementation
             });
         }
 
+        internal void NotifyConnectionStateChange(uint connection, SteamNetConnectionInfo_t info, ConnectionState oldState)
+        {
+            var callback = new SteamNetConnectionStatusChangedCallback_t
+            {
+                m_hConn = connection,
+                m_info = info,
+                m_eOldState = oldState
+            };
+            CallbackManager.AddCallback(callback);
+            ThreadPool.QueueUserWorkItem(_ => InvokeNativeCallback(_connectionStatusCallback, callback, nameof(SteamNetConnectionStatusChangedCallback_t)));
+        }
+
+        internal void NotifyMessagesSessionRequest(ulong remoteSteamId)
+        {
+            var callback = new SteamNetworkingMessagesSessionRequest_t
+            {
+                m_identityRemote = SteamNetworkingIdentity_t.FromSteamId(remoteSteamId)
+            };
+            CallbackManager.AddCallback(callback);
+            ThreadPool.QueueUserWorkItem(_ => InvokeNativeCallback(_messagesSessionRequestCallback, callback, nameof(SteamNetworkingMessagesSessionRequest_t)));
+        }
+
         private bool SetPointerConfigValue(int eValue, IntPtr callback)
         {
             switch ((ESteamNetworkingConfigValue)eValue)
@@ -414,14 +435,18 @@ namespace SKYNET.Steamworks.Implementation
 
         public void SteamNetworkingIdentity_ToString(IntPtr identity, IntPtr buf, UIntPtr cbBuf)
         {
-            Write("SteamNetworkingIdentity_ToString");
-            NativeStringCache.WriteUtf8Buffer(buf, checked((int)cbBuf.ToUInt64()), string.Empty);
+            NativeStringCache.WriteUtf8Buffer(buf, checked((int)cbBuf.ToUInt64()), SteamNetworkingIdentityInterop.Format(identity));
         }
 
         public bool SteamNetworkingIdentity_ParseString(IntPtr pIdentity, string pszStr)
         {
-            Write("SteamNetworkingIdentity_ParseString");
-            return false;
+            if (!SteamNetworkingIdentityInterop.TryParseSteamId(pszStr, out var steamId))
+            {
+                SteamNetworkingIdentityInterop.Clear(pIdentity);
+                return false;
+            }
+            SteamNetworkingIdentityInterop.WriteSteamId(pIdentity, steamId);
+            return true;
         }
     }
 }

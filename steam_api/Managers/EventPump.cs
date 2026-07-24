@@ -310,7 +310,12 @@ namespace SKYNET.Managers
 
         private static void ApplyP2PPacket(APIClient.ApiEvent serverEvent)
         {
-            if (SteamEmulator.SteamNetworking == null || string.IsNullOrWhiteSpace(serverEvent.PayloadBase64))
+            var transport = string.IsNullOrWhiteSpace(serverEvent.Transport) ? "legacy" : serverEvent.Transport;
+            var socketControl = string.Equals(transport, "sockets_open", StringComparison.Ordinal) ||
+                                string.Equals(transport, "sockets_accept", StringComparison.Ordinal) ||
+                                string.Equals(transport, "sockets_reject", StringComparison.Ordinal) ||
+                                string.Equals(transport, "sockets_close", StringComparison.Ordinal);
+            if (string.IsNullOrWhiteSpace(serverEvent.PayloadBase64) && !socketControl)
             {
                 return;
             }
@@ -318,6 +323,26 @@ namespace SKYNET.Managers
             var remoteSteamId = serverEvent.RemoteSteamId != 0
                 ? serverEvent.RemoteSteamId
                 : serverEvent.SteamId;
+
+            if (string.Equals(transport, "messages", StringComparison.Ordinal))
+            {
+                SteamEmulator.SteamNetworkingMessages?.ProcessMessage(remoteSteamId, serverEvent.Channel, Convert.FromBase64String(serverEvent.PayloadBase64));
+                return;
+            }
+
+            if (transport.StartsWith("sockets_", StringComparison.Ordinal))
+            {
+                var payload = string.IsNullOrEmpty(serverEvent.PayloadBase64)
+                    ? Array.Empty<byte>()
+                    : Convert.FromBase64String(serverEvent.PayloadBase64);
+                SteamEmulator.SteamNetworkingSockets?.ProcessRelayPacket(transport, remoteSteamId, serverEvent.VirtualPort, payload);
+                return;
+            }
+
+            if (SteamEmulator.SteamNetworking == null)
+            {
+                return;
+            }
 
             SteamEmulator.SteamNetworking.ProcessP2PPacket(new NET_P2PPacket
             {

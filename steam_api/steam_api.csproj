@@ -190,6 +190,7 @@
     <Compile Include="Steamworks\Types\ISteamMatchmakingServerListResponse.cs" />
     <Compile Include="Steamworks\Types\SteamIPAddress_t.cs" />
     <Compile Include="Steamworks\Types\SteamNetworkingIPAddr.cs" />
+    <Compile Include="Steamworks\Types\SteamNetworkingNativeTypes.cs" />
     <Compile Include="Steamworks\Types\CSteamID.cs" />
     <Compile Include="Steamworks\Helpers\InterfaceAttribute.cs" />
     <Compile Include="Managers\CallbackManager.cs" />
