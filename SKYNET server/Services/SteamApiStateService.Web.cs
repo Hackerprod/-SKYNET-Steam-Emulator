@@ -48,12 +48,12 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public ApiWebLoginResult? RegisterWeb(string username, string personaName, string password, string? remoteIp)
+    public ApiWebLoginResult? RegisterWeb(string username, string password, string? remoteIp)
     {
         lock (_sync)
         {
             var key = NormalizeUsername(username);
-            if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(personaName) || string.IsNullOrWhiteSpace(password))
+            if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(password))
             {
                 return null;
             }
@@ -65,10 +65,11 @@ public sealed partial class SteamApiStateService
 
             var accountId = AllocateAccountIdLocked();
             var steamId = ToSteamId(accountId);
-            var user = EnsureUser(steamId, accountId, DefaultAppId, personaName.Trim());
+            var initialPersonaName = username.Trim();
+            var user = EnsureUser(steamId, accountId, DefaultAppId, initialPersonaName);
             var account = new ApiWebAccount
             {
-                Username = username.Trim(),
+                Username = initialPersonaName,
                 PasswordHash = HashPassword(password),
                 SteamId = steamId,
                 IsAdmin = false,
@@ -292,7 +293,7 @@ public sealed partial class SteamApiStateService
 
         var (ok, message, applied) = _gameServerSettings.Apply(new GameServerSettings
         {
-            AdvertisedGameServerIp = request.AdvertisedGameServerIp ?? string.Empty,
+            AdvertisedServerIp = request.AdvertisedServerIp ?? string.Empty,
             DedicatedEnabled = request.DedicatedEnabled,
             DedicatedBindIp = request.DedicatedBindIp ?? string.Empty,
             DedicatedPortStart = request.DedicatedPortStart
@@ -308,7 +309,7 @@ public sealed partial class SteamApiStateService
 
     private static ApiGameServerSettings MapGameServerSettings(GameServerSettings settings) => new()
     {
-        AdvertisedGameServerIp = settings.AdvertisedGameServerIp,
+        AdvertisedServerIp = settings.AdvertisedServerIp,
         DedicatedEnabled = settings.DedicatedEnabled,
         DedicatedBindIp = settings.DedicatedBindIp,
         DedicatedPortStart = settings.DedicatedPortStart

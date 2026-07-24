@@ -64,16 +64,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool BIsSubscribedApp(uint appID)
         {
-            bool result;
-            if (appID == SteamEmulator.AppID)
-            {
-                result = true;
-            }
-            else
-            {
-                result = DLCManager.IsOwned(appID);
-            }
-
+            bool result = AppEntitlementManager.HasLicense(appID);
             Write($"BIsSubscribedApp (AppID = {appID}) = {result}");
             return result;
         }
@@ -186,13 +177,35 @@ namespace SKYNET.Steamworks.Implementation
 
         public UInt32 GetInstalledDepots(uint appID, IntPtr pvecDepots, uint cMaxDepots)
         {
-            Write($"GetInstalledDepots {appID}, {cMaxDepots}");
-            return 0;
+            IReadOnlyList<uint> depots = AppContentManager.GetInstalledDepots(appID);
+            uint count = (uint)Math.Min(depots.Count, cMaxDepots);
+
+            if (pvecDepots != IntPtr.Zero && count > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    Marshal.WriteInt32(pvecDepots, i * sizeof(uint), unchecked((int)depots[i]));
+                }
+            }
+
+            Write($"GetInstalledDepots {appID}, max={cMaxDepots} = {count}");
+            return count;
         }
 
         public UInt32 GetAppInstallDir(uint appID, IntPtr pchFolder, uint cchFolderBufferSize)
         {
-            string installed_path = Common.GetPath();
+            string installed_path;
+            if (!AppContentManager.TryGetAppInstallPath(appID, out installed_path))
+            {
+                installed_path = Common.GetPath();
+            }
+
+            if (string.IsNullOrEmpty(installed_path))
+            {
+                Write($"GetAppInstallDir {appID} = <disabled>");
+                return 0;
+            }
+
             uint copied = (uint)WriteUtf8Buffer(pchFolder, cchFolderBufferSize, installed_path);
             Write($"GetAppInstallDir {appID} = {installed_path} ({copied} bytes)");
             return copied;
@@ -200,7 +213,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool BIsAppInstalled(uint appID)
         {
-            bool installed = appID == SteamEmulator.AppID;
+            bool installed = AppContentManager.IsAppInstalled(appID);
             Write($"BIsAppInstalled {appID} = {installed}");
             return installed;
         }
@@ -219,10 +232,12 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool GetDlcDownloadProgress(uint nAppID, IntPtr punBytesDownloaded, IntPtr punBytesTotal)
         {
-            Write($"GetDlcDownloadProgress (AppID = {nAppID})");
-            WriteUInt64(punBytesDownloaded, 0);
-            WriteUInt64(punBytesTotal, 0);
-            return false;
+            bool installed = DLCManager.IsInstalled(nAppID);
+            ulong bytesTotal = installed ? GetInstalledContentSize(nAppID) : 0;
+            WriteUInt64(punBytesDownloaded, bytesTotal);
+            WriteUInt64(punBytesTotal, bytesTotal);
+            Write($"GetDlcDownloadProgress (AppID = {nAppID}) installed={installed} bytes={bytesTotal}");
+            return installed;
         }
 
 
@@ -388,6 +403,34 @@ namespace SKYNET.Steamworks.Implementation
             {
                 Marshal.WriteInt64(destination, unchecked((long)value));
             }
+        }
+
+        private static ulong GetInstalledContentSize(uint appID)
+        {
+            if (!AppContentManager.TryGetAppInstallPath(appID, out string path) || string.IsNullOrEmpty(path) || !System.IO.Directory.Exists(path))
+            {
+                return 0;
+            }
+
+            ulong total = 0;
+            try
+            {
+                foreach (string file in System.IO.Directory.GetFiles(path, "*", System.IO.SearchOption.AllDirectories))
+                {
+                    try
+                    {
+                        total += unchecked((ulong)new System.IO.FileInfo(file).Length);
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+            catch
+            {
+            }
+
+            return total;
         }
     }
 }

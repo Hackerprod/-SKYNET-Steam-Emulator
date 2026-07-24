@@ -89,6 +89,8 @@
     <Compile Include="Helpers\Wave\WavNative.cs" />
     <Compile Include="Helpers\Wave\WaveIn.cs" />
     <Compile Include="Helpers\Wave\WavInDevice.cs" />
+    <Compile Include="Managers\AppContentManager.cs" />
+    <Compile Include="Managers\AppEntitlementManager.cs" />
     <Compile Include="Managers\AudioManager.cs" />
     <Compile Include="Managers\DLCManager.cs" />
     <Compile Include="Managers\LobbyManager.cs" />

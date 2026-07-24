@@ -158,7 +158,7 @@ public class IndexModel : PageModel
         var token = GetToken();
         var result = _state.UpdateGameServerSettings(token, new ApiGameServerSettings
         {
-            AdvertisedGameServerIp = GsAdvertisedIp ?? string.Empty,
+            AdvertisedServerIp = GsAdvertisedIp ?? string.Empty,
             DedicatedEnabled = GsDedicatedEnabled,
             DedicatedBindIp = string.IsNullOrWhiteSpace(GsBindIp) ? "0.0.0.0" : GsBindIp,
             DedicatedPortStart = GsPortStart
@@ -189,7 +189,7 @@ public class IndexModel : PageModel
         Overview = overview;
         Cosmetics = _state.GetDotaCosmeticsOverview(token, ItemSearch, null, 120) ?? new ApiDotaCosmeticOverview();
         DotaPath = string.IsNullOrWhiteSpace(overview.DotaCosmetics.DotaPath) ? DotaPath : overview.DotaCosmetics.DotaPath;
-        GsAdvertisedIp = overview.GameServerSettings.AdvertisedGameServerIp;
+        GsAdvertisedIp = overview.GameServerSettings.AdvertisedServerIp;
         GsDedicatedEnabled = overview.GameServerSettings.DedicatedEnabled;
         GsBindIp = overview.GameServerSettings.DedicatedBindIp;
         GsPortStart = overview.GameServerSettings.DedicatedPortStart;

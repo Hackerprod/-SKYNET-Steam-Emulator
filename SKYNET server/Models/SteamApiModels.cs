@@ -130,7 +130,7 @@ public sealed class ApiAdminOverview
 
 public sealed class ApiGameServerSettings
 {
-    public string AdvertisedGameServerIp { get; set; } = string.Empty;
+    public string AdvertisedServerIp { get; set; } = string.Empty;
     public bool DedicatedEnabled { get; set; } = true;
     public string DedicatedBindIp { get; set; } = "0.0.0.0";
     public int DedicatedPortStart { get; set; } = 27025;
@@ -226,10 +226,34 @@ public sealed class ApiLobbyQueryRequest
     public uint AppId { get; set; }
     public int Distance { get; set; }
     public int SlotsAvailable { get; set; }
+    public int ResultCount { get; set; }
     public string? KeyToMatch { get; set; }
     public int ValueToMatch { get; set; }
     public int ComparisonType { get; set; }
     public string? StringValueToMatch { get; set; }
+    public List<ApiLobbyNumericalFilter> NumericalFilters { get; set; } = new();
+    public List<ApiLobbyStringFilter> StringFilters { get; set; } = new();
+    public List<ApiLobbyNearValueFilter> NearValueFilters { get; set; } = new();
+}
+
+public sealed class ApiLobbyNumericalFilter
+{
+    public string? KeyToMatch { get; set; }
+    public int ValueToMatch { get; set; }
+    public int ComparisonType { get; set; }
+}
+
+public sealed class ApiLobbyStringFilter
+{
+    public string? KeyToMatch { get; set; }
+    public string? ValueToMatch { get; set; }
+    public int ComparisonType { get; set; }
+}
+
+public sealed class ApiLobbyNearValueFilter
+{
+    public string? KeyToMatch { get; set; }
+    public int ValueToBeCloseTo { get; set; }
 }
 
 public sealed class ApiCreateLobbyRequest

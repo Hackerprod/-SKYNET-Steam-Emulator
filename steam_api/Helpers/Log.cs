@@ -33,12 +33,11 @@ namespace SKYNET.Helpers
             Common.EnsureDirectoryExists(LogPath);
             Clean();
             Initialized = true;
+            FlushBuffered();
         }
 
         internal static void AppEnd(string formatted)
         {
-            if (!Initialized) return;
-
             try
             {
                 lock (file_lock)
@@ -49,21 +48,35 @@ namespace SKYNET.Helpers
                     }
 
                     buffered.Add(formatted);
-                    if (File.Exists(fileName))
+
+                    if (!Initialized)
                     {
-                        File.AppendAllLines(fileName, buffered);
+                        lastMsg = formatted;
+                        return;
                     }
-                    else
-                    {
-                        File.WriteAllLines(fileName, buffered);
-                    }
-                    buffered.Clear();
-                    lastMsg = formatted;
+
+                    FlushBuffered();
                 }
             }
             catch 
             {
             }
+        }
+
+        private static void FlushBuffered()
+        {
+            if (!Initialized || buffered.Count == 0) return;
+
+            if (File.Exists(fileName))
+            {
+                File.AppendAllLines(fileName, buffered);
+            }
+            else
+            {
+                File.WriteAllLines(fileName, buffered);
+            }
+            lastMsg = buffered[buffered.Count - 1];
+            buffered.Clear();
         }
 
         private static void EnsurePathExists()

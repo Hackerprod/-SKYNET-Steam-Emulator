@@ -2,6 +2,7 @@ using SKYNET.Callback;
 using SKYNET.Steamworks;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 
 using SteamAPICall_t = System.UInt64;
@@ -22,6 +23,8 @@ namespace SKYNET.Managers
         private static readonly ConcurrentQueue<WorkItem> HighPriority = new ConcurrentQueue<WorkItem>();
         private static readonly ConcurrentQueue<WorkItem> NormalPriority = new ConcurrentQueue<WorkItem>();
         private static readonly ConcurrentDictionary<string, byte> CoalescedKeys = new ConcurrentDictionary<string, byte>(StringComparer.Ordinal);
+        private static readonly Dictionary<string, PendingCoalescedWork> PendingCoalesced = new Dictionary<string, PendingCoalescedWork>(StringComparer.Ordinal);
+        private static readonly object CoalesceGate = new object();
         private static readonly SemaphoreSlim HighPrioritySignal = new SemaphoreSlim(0);
         private static readonly SemaphoreSlim NormalPrioritySignal = new SemaphoreSlim(0);
 
@@ -31,17 +34,43 @@ namespace SKYNET.Managers
 
         public static bool Enqueue(string name, Action work, string coalesceKey = null, bool highPriority = false)
         {
+            return Enqueue(name, work, coalesceKey, highPriority, out _);
+        }
+
+        private static bool Enqueue(string name, Action work, string coalesceKey, bool highPriority, out bool coalesced)
+        {
             if (work == null)
             {
+                coalesced = false;
                 return false;
             }
 
             EnsureStarted();
 
-            if (!string.IsNullOrEmpty(coalesceKey) && !CoalescedKeys.TryAdd(coalesceKey, 0))
+            if (!string.IsNullOrEmpty(coalesceKey))
             {
-                return true;
+                lock (CoalesceGate)
+                {
+                    if (CoalescedKeys.ContainsKey(coalesceKey))
+                    {
+                        // Coalescing must collapse repeated work without losing the
+                        // newest state. Keep only the latest pending operation for
+                        // the key and run it after the current operation completes.
+                        PendingCoalesced[coalesceKey] = new PendingCoalescedWork
+                        {
+                            Name = name,
+                            Work = work,
+                            HighPriority = highPriority
+                        };
+                        coalesced = true;
+                        return true;
+                    }
+
+                    CoalescedKeys[coalesceKey] = 0;
+                }
             }
+
+            coalesced = false;
 
             var nextCount = Interlocked.Increment(ref queuedCount);
             if (nextCount > MaxQueuedItems && !highPriority)
@@ -49,31 +78,18 @@ namespace SKYNET.Managers
                 Interlocked.Decrement(ref queuedCount);
                 if (!string.IsNullOrEmpty(coalesceKey))
                 {
-                    CoalescedKeys.TryRemove(coalesceKey, out _);
+                    lock (CoalesceGate)
+                    {
+                        CoalescedKeys.TryRemove(coalesceKey, out _);
+                        PendingCoalesced.Remove(coalesceKey);
+                    }
                 }
 
                 SteamEmulator.Write("WorkQueue", $"Dropped work item because queue is saturated (Name = {name}, Queue = {nextCount})");
                 return false;
             }
 
-            var item = new WorkItem
-            {
-                Id = Interlocked.Increment(ref nextItemId),
-                Name = string.IsNullOrWhiteSpace(name) ? "work" : name,
-                Work = work,
-                CoalesceKey = coalesceKey
-            };
-
-            if (highPriority)
-            {
-                HighPriority.Enqueue(item);
-                HighPrioritySignal.Release();
-            }
-            else
-            {
-                NormalPriority.Enqueue(item);
-                NormalPrioritySignal.Release();
-            }
+            QueueItem(CreateWorkItem(name, work, coalesceKey), highPriority);
 
             return true;
         }
@@ -84,7 +100,8 @@ namespace SKYNET.Managers
             bool gameServer = false,
             string name = null,
             string coalesceKey = null,
-            bool highPriority = true)
+            bool highPriority = true,
+            TimeSpan? completionDelay = null)
         {
             var handle = gameServer
                 ? CallbackManager.AddCallbackResultGameServer(pendingResult, false)
@@ -104,12 +121,16 @@ namespace SKYNET.Managers
                     SteamEmulator.Write("WorkQueue", $"{name ?? "callback work"} failed: {ex.Message}");
                 }
 
-                CallbackManager.CompleteCallbackResult(handle, result, failed);
-            }, coalesceKey, highPriority);
+                CallbackManager.CompleteCallbackResult(handle, result, failed, completionDelay);
+            }, coalesceKey, highPriority, out var coalesced);
 
             if (!queued)
             {
                 CallbackManager.CompleteCallbackResult(handle, pendingResult, true);
+            }
+            else if (coalesced)
+            {
+                CallbackManager.CompleteCallbackResult(handle, pendingResult, false);
             }
 
             return handle;
@@ -184,8 +205,50 @@ namespace SKYNET.Managers
                 Interlocked.Decrement(ref queuedCount);
                 if (!string.IsNullOrEmpty(item.CoalesceKey))
                 {
-                    CoalescedKeys.TryRemove(item.CoalesceKey, out _);
+                    PendingCoalescedWork pending = null;
+                    lock (CoalesceGate)
+                    {
+                        if (PendingCoalesced.TryGetValue(item.CoalesceKey, out pending))
+                        {
+                            PendingCoalesced.Remove(item.CoalesceKey);
+                        }
+                        else
+                        {
+                            CoalescedKeys.TryRemove(item.CoalesceKey, out _);
+                        }
+                    }
+
+                    if (pending != null)
+                    {
+                        Interlocked.Increment(ref queuedCount);
+                        QueueItem(CreateWorkItem(pending.Name, pending.Work, item.CoalesceKey), pending.HighPriority);
+                    }
                 }
+            }
+        }
+
+        private static WorkItem CreateWorkItem(string name, Action work, string coalesceKey)
+        {
+            return new WorkItem
+            {
+                Id = Interlocked.Increment(ref nextItemId),
+                Name = string.IsNullOrWhiteSpace(name) ? "work" : name,
+                Work = work,
+                CoalesceKey = coalesceKey
+            };
+        }
+
+        private static void QueueItem(WorkItem item, bool highPriority)
+        {
+            if (highPriority)
+            {
+                HighPriority.Enqueue(item);
+                HighPrioritySignal.Release();
+            }
+            else
+            {
+                NormalPriority.Enqueue(item);
+                NormalPrioritySignal.Release();
             }
         }
 
@@ -195,6 +258,13 @@ namespace SKYNET.Managers
             public string Name;
             public string CoalesceKey;
             public Action Work;
+        }
+
+        private sealed class PendingCoalescedWork
+        {
+            public string Name;
+            public Action Work;
+            public bool HighPriority;
         }
     }
 }

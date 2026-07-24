@@ -6,6 +6,9 @@ namespace SKYNET.Steamworks.Implementation
     {
         public static SteamMusic Instance;
 
+        private bool IsPlaying;
+        private float Volume = 1.0f;
+
         public SteamMusic()
         {
             Instance = this;
@@ -22,29 +25,33 @@ namespace SKYNET.Steamworks.Implementation
         public bool BIsPlaying()
         {
             Write($"BIsPlaying");
-            return true;
+            return IsPlaying;
         }
 
         public int GetPlaybackStatus()
         {
             Write($"GetPlaybackStatus");
-            return (int)AudioPlayback_Status.AudioPlayback_Undefined;
+            return (int)(IsPlaying
+                ? AudioPlayback_Status.AudioPlayback_Playing
+                : AudioPlayback_Status.AudioPlayback_Idle);
         }
 
         public float GetVolume()
         {
             Write($"GetVolume");
-            return 0;
+            return Volume;
         }
 
         public void Pause()
         {
             Write($"Pause");
+            IsPlaying = false;
         }
 
         public void Play()
         {
             Write($"Play");
+            IsPlaying = true;
         }
 
         public void PlayNext()
@@ -59,7 +66,20 @@ namespace SKYNET.Steamworks.Implementation
 
         public void SetVolume(float flVolume)
         {
-            Write($"SetVolume");
+            Write($"SetVolume {flVolume}");
+            if (flVolume < 0)
+            {
+                Volume = 0;
+                return;
+            }
+
+            if (flVolume > 1)
+            {
+                Volume = 1;
+                return;
+            }
+
+            Volume = flVolume;
         }
     }
 }

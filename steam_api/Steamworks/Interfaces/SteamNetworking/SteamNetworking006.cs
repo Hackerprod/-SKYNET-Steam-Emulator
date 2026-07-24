@@ -8,7 +8,7 @@ namespace SKYNET.Steamworks.Interfaces
     {
         public bool SendP2PPacket(IntPtr _, ulong steamIDRemote, IntPtr pubData, uint cubData, int eP2PSendType, int nChannel = 0)
         {
-            return SteamEmulator.SteamNetworking.SendP2PPacket(steamIDRemote, pubData, cubData, eP2PSendType, 0);
+            return SteamEmulator.SteamNetworking.SendP2PPacket(steamIDRemote, pubData, cubData, eP2PSendType, nChannel);
         }
 
         public bool IsP2PPacketAvailable(IntPtr _, ref uint pcubMsgSize, int nChannel)

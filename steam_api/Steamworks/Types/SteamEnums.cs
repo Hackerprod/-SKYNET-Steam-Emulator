@@ -6,6 +6,14 @@ using System.Threading.Tasks;
 
 namespace SKYNET.Steamworks
 {
+    public enum EGameIDType : byte
+    {
+        k_EGameIDTypeApp = 0,
+        k_EGameIDTypeGameApp = 1,
+        k_EGameIDTypeShortcut = 2,
+        k_EGameIDTypeP2P = 3,
+    }
+
     public enum EItemState
     {
         k_EItemStateNone = 0,   // item not tracked on client

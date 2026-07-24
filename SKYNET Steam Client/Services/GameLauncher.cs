@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Security.Cryptography;
 using SKYNET.Client.Models;
 
 namespace SKYNET.Client.Services;
@@ -16,11 +17,15 @@ public sealed class LaunchResult
 /// <summary>
 /// Launches a game with the SKYNET emulator injected into the process at start,
 /// with nothing written into the game folder. The game exe is created suspended,
-/// the emulator DLL from the launcher's payload folder is injected via
+/// the emulator DLL shipped in the launcher's payload folder is copied to an
+/// isolated per-build shadow path and injected via
 /// CreateRemoteThread(LoadLibraryW), then the process is resumed. Because the game
 /// loads steam_api64.dll dynamically by bare name, the loader returns our
 /// already-loaded module for its later LoadLibrary("steam_api64.dll"), so the game
 /// uses our emulator without the original file ever being touched. See DllInjector.
+/// The shadow path keeps Windows' loader lock away from the launcher's payload,
+/// so rebuilding the client can refresh its bundled DLL while a launched game is
+/// still running.
 ///
 /// RecoverOrphans still runs on startup to clean up any DLL swap left by an older
 /// version of this launcher.
@@ -72,7 +77,8 @@ public sealed class GameLauncher
             var args = string.Join(" ",
                 new[] { game.LaunchArguments, extraArgs }.Where(a => !string.IsNullOrWhiteSpace(a)));
 
-            proc = DllInjector.LaunchAndInject(game.ExecutablePath, payload, args, workDir);
+            var injectablePayload = PrepareInjectablePayload(payload);
+            proc = DllInjector.LaunchAndInject(game.ExecutablePath, injectablePayload, args, workDir);
             proc.EnableRaisingEvents = true;
             proc.Exited += (_, _) => GameExited?.Invoke(game);
             GameWindowActivator.BringToFrontWhenReady(proc);
@@ -84,6 +90,72 @@ public sealed class GameLauncher
 
         game.LastPlayedUtc = DateTimeOffset.UtcNow;
         return LaunchResult.Ok(proc);
+    }
+
+    private static string PrepareInjectablePayload(string payload)
+    {
+        var payloadBytes = File.ReadAllBytes(payload);
+        var hash = ComputePayloadHash(payloadBytes);
+        var shadowRoot = Path.Combine(Path.GetTempPath(), "SKYNETSteamClient", "payload-shadow");
+        var shadowDir = Path.Combine(shadowRoot, hash);
+        var shadowPath = Path.Combine(shadowDir, Path.GetFileName(payload));
+
+        Directory.CreateDirectory(shadowDir);
+        if (!File.Exists(shadowPath) || new FileInfo(shadowPath).Length != payloadBytes.Length)
+        {
+            File.WriteAllBytes(shadowPath, payloadBytes);
+        }
+
+        CleanupPayloadShadows(shadowRoot, hash);
+        return shadowPath;
+    }
+
+    private static string ComputePayloadHash(byte[] payloadBytes)
+    {
+        using var sha256 = SHA256.Create();
+        var hashBytes = sha256.ComputeHash(payloadBytes);
+        return BitConverter.ToString(hashBytes, 0, 8).Replace("-", string.Empty).ToLowerInvariant();
+    }
+
+    private static void CleanupPayloadShadows(string shadowRoot, string activeHash)
+    {
+        try
+        {
+            if (!Directory.Exists(shadowRoot))
+            {
+                return;
+            }
+
+            foreach (var directory in Directory.GetDirectories(shadowRoot))
+            {
+                if (string.Equals(Path.GetFileName(directory), activeHash, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                TryDeleteOldShadow(directory);
+            }
+        }
+        catch
+        {
+        }
+    }
+
+    private static void TryDeleteOldShadow(string directory)
+    {
+        try
+        {
+            var age = DateTime.UtcNow - Directory.GetLastWriteTimeUtc(directory);
+            if (age < TimeSpan.FromDays(1))
+            {
+                return;
+            }
+
+            Directory.Delete(directory, recursive: true);
+        }
+        catch
+        {
+        }
     }
 
     /// <summary>Restores the original DLL and removes our footprint. Safe to call twice.</summary>

@@ -7,6 +7,16 @@ namespace SKYNET.Steamworks.Implementation
     {
         public static SteamMusicRemote Instance;
 
+        private bool IsRegistered;
+        private bool IsActive;
+        private bool CurrentEntryAvailable;
+        private int CurrentQueueEntryId;
+        private int CurrentPlaylistEntryId;
+        private int PlaybackStatus = (int)AudioPlayback_Status.AudioPlayback_Idle;
+        private float Volume = 1.0f;
+        private string Name = string.Empty;
+        private string DisplayName = string.Empty;
+
         public SteamMusicRemote()
         {
             Instance = this;
@@ -16,194 +26,281 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool RegisterSteamMusicRemote(string pchName)
         {
-            Write($"RegisterSteamMusicRemote");
-            return false;
+            Write($"RegisterSteamMusicRemote {pchName}");
+
+            if (string.IsNullOrWhiteSpace(pchName))
+            {
+                return false;
+            }
+
+            Name = pchName;
+            DisplayName = pchName;
+            IsRegistered = true;
+            return true;
         }
 
         public bool DeregisterSteamMusicRemote()
         {
             Write($"DeregisterSteamMusicRemote");
-            return false;
+            IsRegistered = false;
+            IsActive = false;
+            CurrentEntryAvailable = false;
+            CurrentQueueEntryId = 0;
+            CurrentPlaylistEntryId = 0;
+            PlaybackStatus = (int)AudioPlayback_Status.AudioPlayback_Idle;
+            Name = string.Empty;
+            DisplayName = string.Empty;
+            return true;
         }
 
         public bool BIsCurrentMusicRemote()
         {
             Write($"BIsCurrentMusicRemote");
-            return false;
+            return IsRegistered && IsActive;
         }
 
         public bool BActivationSuccess(bool bValue)
         {
-            Write($"xxx");
-            return false;
+            Write($"BActivationSuccess {bValue}");
+            IsActive = IsRegistered && bValue;
+            return IsRegistered;
         }
 
         public bool SetDisplayName(string pchDisplayName)
         {
-            Write($"SetDisplayName");
-            return false;
+            Write($"SetDisplayName {pchDisplayName}");
+
+            if (!IsRegistered || string.IsNullOrWhiteSpace(pchDisplayName))
+            {
+                return false;
+            }
+
+            DisplayName = pchDisplayName;
+            return true;
         }
 
         public bool SetPNGIcon_64x64(IntPtr pvBuffer, uint cbBufferLength)
         {
-            Write($"xxx");
-            return false;
+            Write($"SetPNGIcon_64x64 {cbBufferLength}");
+            return IsRegistered && pvBuffer != IntPtr.Zero && cbBufferLength > 0;
         }
 
         public bool EnablePlayPrevious(bool bValue)
         {
-            Write($"EnablePlayPrevious");
-            return false;
+            Write($"EnablePlayPrevious {bValue}");
+            return IsRegistered;
         }
 
         public bool EnablePlayNext(bool bValue)
         {
-            Write($"EnablePlayNext");
-            return false;
+            Write($"EnablePlayNext {bValue}");
+            return IsRegistered;
         }
 
         public bool EnableShuffled(bool bValue)
         {
-            Write($"EnableShuffled");
-            return false;
+            Write($"EnableShuffled {bValue}");
+            return IsRegistered;
         }
 
         public bool EnableLooped(bool bValue)
         {
-            Write($"EnableLooped");
-            return false;
+            Write($"EnableLooped {bValue}");
+            return IsRegistered;
         }
 
         public bool EnableQueue(bool bValue)
         {
-            Write($"EnableQueue");
-            return false;
+            Write($"EnableQueue {bValue}");
+            return IsRegistered;
         }
 
         public bool EnablePlaylists(bool bValue)
         {
-            Write($"EnablePlaylists");
-            return false;
+            Write($"EnablePlaylists {bValue}");
+            return IsRegistered;
         }
 
         public bool UpdatePlaybackStatus(int nStatus)
         {
-            Write($"UpdatePlaybackStatus");
-            return false;
+            Write($"UpdatePlaybackStatus {nStatus}");
+
+            if (!IsRegistered)
+            {
+                return false;
+            }
+
+            PlaybackStatus = nStatus;
+            return true;
         }
 
         public bool UpdateShuffled(bool bValue)
         {
-            Write($"UpdateShuffled");
-            return false;
+            Write($"UpdateShuffled {bValue}");
+            return IsRegistered;
         }
 
         public bool UpdateLooped(bool bValue)
         {
-            Write($"UpdateLooped");
-            return false;
+            Write($"UpdateLooped {bValue}");
+            return IsRegistered;
         }
 
         public bool UpdateVolume(float flValue)
         {
-            Write($"UpdateVolume");
-            return false;
+            Write($"UpdateVolume {flValue}");
+
+            if (!IsRegistered)
+            {
+                return false;
+            }
+
+            Volume = ClampVolume(flValue);
+            return true;
         }
 
         public bool CurrentEntryWillChange()
         {
             Write($"CurrentEntryWillChange");
-            return false;
+            return IsRegistered;
         }
 
         public bool CurrentEntryIsAvailable(bool bAvailable)
         {
-            Write($"CurrentEntryIsAvailable");
-            return false;
+            Write($"CurrentEntryIsAvailable {bAvailable}");
+
+            if (!IsRegistered)
+            {
+                return false;
+            }
+
+            CurrentEntryAvailable = bAvailable;
+            return true;
         }
 
         public bool UpdateCurrentEntryText(string pchText)
         {
-            Write($"UpdateCurrentEntryText");
-            return false;
+            Write($"UpdateCurrentEntryText {pchText}");
+            return IsRegistered;
         }
 
         public bool UpdateCurrentEntryElapsedSeconds(int nValue)
         {
-            Write($"UpdateCurrentEntryElapsedSeconds");
-            return false;
+            Write($"UpdateCurrentEntryElapsedSeconds {nValue}");
+            return IsRegistered && nValue >= 0;
         }
 
         public bool UpdateCurrentEntryCoverArt(IntPtr pvBuffer, uint cbBufferLength)
         {
-            Write($"UpdateCurrentEntryCoverArt");
-            return false;
+            Write($"UpdateCurrentEntryCoverArt {cbBufferLength}");
+            return IsRegistered && pvBuffer != IntPtr.Zero && cbBufferLength > 0;
         }
 
         public bool CurrentEntryDidChange()
         {
             Write($"CurrentEntryDidChange");
-            return false;
+            return IsRegistered;
         }
 
         public bool QueueWillChange()
         {
             Write($"QueueWillChange");
-            return false;
+            return IsRegistered;
         }
 
         public bool ResetQueueEntries()
         {
             Write($"ResetQueueEntries");
-            return false;
+            if (!IsRegistered)
+            {
+                return false;
+            }
+
+            CurrentQueueEntryId = 0;
+            return true;
         }
 
         public bool SetQueueEntry(int nID, int nPosition, string pchEntryText)
         {
-            Write($"SetQueueEntry");
-            return false;
+            Write($"SetQueueEntry {nID} {nPosition} {pchEntryText}");
+            return IsRegistered && nID >= 0 && nPosition >= 0;
         }
 
         public bool SetCurrentQueueEntry(int nID)
         {
-            Write($"SetCurrentQueueEntry");
-            return false;
+            Write($"SetCurrentQueueEntry {nID}");
+
+            if (!IsRegistered || nID < 0)
+            {
+                return false;
+            }
+
+            CurrentQueueEntryId = nID;
+            return true;
         }
 
         public bool QueueDidChange()
         {
             Write($"QueueDidChange");
-            return false;
+            return IsRegistered;
         }
 
         public bool PlaylistWillChange()
         {
             Write($"PlaylistWillChange");
-            return false;
+            return IsRegistered;
         }
 
         public bool ResetPlaylistEntries()
         {
             Write($"ResetPlaylistEntries");
-            return false;
+            if (!IsRegistered)
+            {
+                return false;
+            }
+
+            CurrentPlaylistEntryId = 0;
+            return true;
         }
 
         public bool SetPlaylistEntry(int nID, int nPosition, string pchEntryText)
         {
-            Write($"SetPlaylistEntry");
-            return false;
+            Write($"SetPlaylistEntry {nID} {nPosition} {pchEntryText}");
+            return IsRegistered && nID >= 0 && nPosition >= 0;
         }
 
         public bool SetCurrentPlaylistEntry(int nID)
         {
-            Write($"SetCurrentPlaylistEntry");
-            return false;
+            Write($"SetCurrentPlaylistEntry {nID}");
+
+            if (!IsRegistered || nID < 0)
+            {
+                return false;
+            }
+
+            CurrentPlaylistEntryId = nID;
+            return true;
         }
 
         public bool PlaylistDidChange()
         {
             Write($"PlaylistDidChange");
-            return false;
+            return IsRegistered;
+        }
+
+        private static float ClampVolume(float value)
+        {
+            if (value < 0)
+            {
+                return 0;
+            }
+
+            if (value > 1)
+            {
+                return 1;
+            }
+
+            return value;
         }
     }
 }

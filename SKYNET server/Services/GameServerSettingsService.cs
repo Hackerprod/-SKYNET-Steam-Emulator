@@ -13,8 +13,8 @@ namespace SKYNET_server.Services;
 /// </summary>
 public sealed record GameServerSettings
 {
-    /// <summary>IPv4 advertised to clients as the dedicated endpoint. Empty/"auto" = derive per client subnet.</summary>
-    public string AdvertisedGameServerIp { get; init; } = string.Empty;
+    /// <summary>Central IPv4 advertised to game clients. Empty/"auto" = derive per client subnet.</summary>
+    public string AdvertisedServerIp { get; init; } = string.Empty;
 
     public bool DedicatedEnabled { get; init; } = true;
 
@@ -33,7 +33,8 @@ public sealed record GameServerSettings
 /// </summary>
 public sealed class GameServerSettingsService
 {
-    private const string AdvertisedIpKey = "AdvertisedGameServerIp";
+    private const string ServerSectionKey = "Server";
+    private const string AdvertisedIpKey = "AdvertisedIp";
 
     private readonly object _sync = new();
     private readonly string _appSettingsPath;
@@ -49,7 +50,7 @@ public sealed class GameServerSettingsService
         _appSettingsPath = Path.Combine(environment.ContentRootPath, "appsettings.json");
         _current = Normalize(new GameServerSettings
         {
-            AdvertisedGameServerIp = configuration.GetValue<string>("GameCoordinator:Dota:AdvertisedGameServerIp") ?? string.Empty,
+            AdvertisedServerIp = configuration.GetValue<string>("Server:AdvertisedIp") ?? string.Empty,
             DedicatedEnabled = configuration.GetValue("GameCoordinator:Dota:Dedicated:Enabled", true),
             DedicatedBindIp = configuration.GetValue<string>("GameCoordinator:Dota:Dedicated:BindIp") ?? "0.0.0.0",
             DedicatedPortStart = configuration.GetValue("GameCoordinator:Dota:Dedicated:PortStart", 27025)
@@ -66,7 +67,7 @@ public sealed class GameServerSettingsService
     /// </summary>
     public (bool Success, string Message, GameServerSettings Settings) Apply(GameServerSettings incoming)
     {
-        var advertised = (incoming.AdvertisedGameServerIp ?? string.Empty).Trim();
+        var advertised = (incoming.AdvertisedServerIp ?? string.Empty).Trim();
         if (advertised.Length != 0 &&
             !string.Equals(advertised, "auto", StringComparison.OrdinalIgnoreCase) &&
             !IsIPv4(advertised))
@@ -86,7 +87,7 @@ public sealed class GameServerSettingsService
 
         var normalized = Normalize(incoming with
         {
-            AdvertisedGameServerIp = advertised,
+            AdvertisedServerIp = advertised,
             DedicatedBindIp = bind
         });
 
@@ -101,7 +102,7 @@ public sealed class GameServerSettingsService
 
     private static GameServerSettings Normalize(GameServerSettings settings) => settings with
     {
-        AdvertisedGameServerIp = (settings.AdvertisedGameServerIp ?? string.Empty).Trim(),
+        AdvertisedServerIp = (settings.AdvertisedServerIp ?? string.Empty).Trim(),
         DedicatedBindIp = string.IsNullOrWhiteSpace(settings.DedicatedBindIp) ? "0.0.0.0" : settings.DedicatedBindIp.Trim(),
         DedicatedPortStart = Math.Clamp(settings.DedicatedPortStart, 1024, 65534)
     };
@@ -114,9 +115,10 @@ public sealed class GameServerSettingsService
                 ? JsonNode.Parse(File.ReadAllText(_appSettingsPath)) as JsonObject ?? new JsonObject()
                 : new JsonObject();
 
-            var dota = EnsureObject(EnsureObject(root, "GameCoordinator"), "Dota");
-            dota[AdvertisedIpKey] = settings.AdvertisedGameServerIp;
+            var server = EnsureObject(root, ServerSectionKey);
+            server[AdvertisedIpKey] = settings.AdvertisedServerIp;
 
+            var dota = EnsureObject(EnsureObject(root, "GameCoordinator"), "Dota");
             var dedicated = EnsureObject(dota, "Dedicated");
             dedicated["Enabled"] = settings.DedicatedEnabled;
             dedicated["BindIp"] = settings.DedicatedBindIp;

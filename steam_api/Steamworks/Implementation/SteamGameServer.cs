@@ -344,8 +344,9 @@ namespace SKYNET.Steamworks.Implementation
 
         public int UserHasLicenseForApp(ulong steamID, uint appID)
         {
-            Write($"UserHasLicenseForApp (SteamID = {steamID}, AppID = {appID})");
-            return (int)EUserHasLicenseForAppResult.k_EUserHasLicenseResultHasLicense; 
+            var result = AppEntitlementManager.GetLicenseResult(appID);
+            Write($"UserHasLicenseForApp (SteamID = {steamID}, AppID = {appID}) = {result}");
+            return (int)result;
         }
 
         public bool RequestUserGroupStatus(ulong steamIDUser, ulong steamIDGroup)

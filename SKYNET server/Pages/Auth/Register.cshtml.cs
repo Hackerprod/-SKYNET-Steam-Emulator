@@ -13,9 +13,6 @@ public class RegisterModel : PageModel
     public string Username { get; set; } = string.Empty;
 
     [BindProperty]
-    public string PersonaName { get; set; } = string.Empty;
-
-    [BindProperty]
     public string Password { get; set; } = string.Empty;
 
     [BindProperty]
@@ -48,7 +45,7 @@ public class RegisterModel : PageModel
             return Page();
         }
 
-        var result = _state.RegisterWeb(Username, PersonaName, Password, SteamApiStateService.GetClientIp(Request));
+        var result = _state.RegisterWeb(Username, Password, SteamApiStateService.GetClientIp(Request));
         if (result == null)
         {
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")

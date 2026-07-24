@@ -432,11 +432,10 @@ namespace SKYNET.Steamworks.Implementation
         public bool GetFriendGamePlayed(ulong steamIDFriend, ref FriendGameInfo_t pFriendGameInfo)
         {
             bool Result = false;
+            pFriendGameInfo = default(FriendGameInfo_t);
             if (steamIDFriend == SteamEmulator.SteamID)
             {
-                pFriendGameInfo.GameID = SteamEmulator.AppID;
-                pFriendGameInfo.GameIP = 0;
-                pFriendGameInfo.GamePort = 0;
+                pFriendGameInfo.GameID = CreateGameId(SteamEmulator.AppID);
                 Result = true;
             }
             else
@@ -445,16 +444,11 @@ namespace SKYNET.Steamworks.Implementation
                 if (friend == null || friend.GameID == 0)
                 {
                     // No live game (offline / not playing) -> not "in game".
-                    pFriendGameInfo.GameID = 0;
-                    pFriendGameInfo.GameIP = 0;
-                    pFriendGameInfo.GamePort = 0;
                     Result = false;
                 }
                 else
                 {
-                    pFriendGameInfo.GameID = friend.GameID;
-                    pFriendGameInfo.GameIP = 0;
-                    pFriendGameInfo.GamePort = 0;
+                    pFriendGameInfo.GameID = CreateGameId(friend.GameID);
                     pFriendGameInfo.steamIDLobby = friend.LobbyID;
                     Result = true;
                 }
@@ -462,6 +456,12 @@ namespace SKYNET.Steamworks.Implementation
 
             Write($"GetFriendGamePlayed (SteamID = {steamIDFriend}) = {Result}");
             return Result;
+        }
+
+        private static ulong CreateGameId(uint appId)
+        {
+            return ((ulong)appId & 0xFFFFFFUL) |
+                   ((ulong)EGameIDType.k_EGameIDTypeGameApp << 24);
         }
 
         public int GetFriendMessage(ulong steamIDFriend, int iMessageID, IntPtr pvData, int cubData, IntPtr peChatEntryType)
@@ -666,7 +666,11 @@ namespace SKYNET.Steamworks.Implementation
             {
                 RequestAvatar((ulong)steamIDFriend);
             }
-            return EnsureDefaultAvatar().Small;
+
+            // Steam returns -1 while the avatar is being fetched. A valid
+            // placeholder handle makes games render it permanently instead of
+            // waiting for AvatarImageLoaded_t and requesting the real handle.
+            return -1;
         }
 
         public int GetMediumFriendAvatar(ulong steamIDFriend)
@@ -683,7 +687,7 @@ namespace SKYNET.Steamworks.Implementation
             {
                 RequestAvatar(steamIDFriend);
             }
-            return EnsureDefaultAvatar().Medium;
+            return -1;
         }
 
         public int GetLargeFriendAvatar(ulong steamIDFriend)
@@ -700,7 +704,7 @@ namespace SKYNET.Steamworks.Implementation
             {
                 RequestAvatar(steamIDFriend);
             }
-            return EnsureDefaultAvatar().Large;
+            return -1;
         }
 
         public int GetNumChatsWithUnreadPriorityMessages()

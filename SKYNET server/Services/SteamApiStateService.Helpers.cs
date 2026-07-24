@@ -689,7 +689,7 @@ public sealed partial class SteamApiStateService
 
     private uint ResolveGameServerPublicIp(uint candidate)
     {
-        if (TryGetConfiguredAdvertisedGameServerIp(out var configured))
+        if (TryGetConfiguredAdvertisedServerIp(out var configured))
         {
             return configured;
         }
@@ -705,7 +705,7 @@ public sealed partial class SteamApiStateService
     {
         if (IsLoopbackClient(clientIp))
         {
-            if (TryGetConfiguredAdvertisedGameServerIp(out var configuredForLocal))
+            if (TryGetConfiguredAdvertisedServerIp(out var configuredForLocal))
             {
                 return ToIPv4String(configuredForLocal);
             }
@@ -729,7 +729,7 @@ public sealed partial class SteamApiStateService
             return sameSubnetHostIp;
         }
 
-        if (TryGetConfiguredAdvertisedGameServerIp(out var configured))
+        if (TryGetConfiguredAdvertisedServerIp(out var configured))
         {
             return ToIPv4String(configured);
         }
@@ -800,7 +800,7 @@ public sealed partial class SteamApiStateService
         Add(ResolveDotaGameServerConnectIp(clientIp, publicIpValue, privateIpValue, fallbackIp));
 
         // 2) The configured/advertised address so LAN peers always have it explicitly.
-        if (TryGetConfiguredAdvertisedGameServerIp(out var configured))
+        if (TryGetConfiguredAdvertisedServerIp(out var configured))
         {
             Add(ToIPv4String(configured));
         }
@@ -866,10 +866,10 @@ public sealed partial class SteamApiStateService
         return IPAddress.IsLoopback(parsed);
     }
 
-    private bool TryGetConfiguredAdvertisedGameServerIp(out uint ip)
+    private bool TryGetConfiguredAdvertisedServerIp(out uint ip)
     {
         ip = 0;
-        var advertised = _gameServerSettings.Current.AdvertisedGameServerIp;
+        var advertised = _gameServerSettings.Current.AdvertisedServerIp;
         if (string.IsNullOrWhiteSpace(advertised) ||
             string.Equals(advertised, "auto", StringComparison.OrdinalIgnoreCase))
         {
@@ -1024,12 +1024,19 @@ public sealed partial class SteamApiStateService
 
     private static bool CompareNumber(int left, int right, int comparisonType) => comparisonType switch
     {
-        -2 => left < right,
-        -1 => left <= right,
+        -2 => left <= right,
+        -1 => left < right,
         0 => left == right,
-        1 => left >= right,
-        2 => left > right,
+        1 => left > right,
+        2 => left >= right,
+        3 => left != right,
         _ => left == right
+    };
+
+    private static bool CompareString(string left, string right, int comparisonType) => comparisonType switch
+    {
+        3 => !string.Equals(left, right, StringComparison.OrdinalIgnoreCase),
+        _ => string.Equals(left, right, StringComparison.OrdinalIgnoreCase)
     };
 
     private static ulong ToSteamId(uint accountId) => 76561197960265728UL + accountId;

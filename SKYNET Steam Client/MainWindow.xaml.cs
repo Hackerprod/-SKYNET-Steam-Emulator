@@ -186,7 +186,7 @@ public partial class MainWindow : Window
             Options_Click(sender, e);
             return;
         }
-        OpenWeb("Auth/Login");
+        OpenWeb("login");
         _ = RecheckAfterDelay();
     }
 

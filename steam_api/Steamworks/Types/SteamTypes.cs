@@ -9,9 +9,11 @@ using SteamItemDef_t = System.UInt32;
 
 namespace SKYNET.Steamworks
 {
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
     public struct FriendGameInfo_t
     {
-        public uint GameID;
+        // CGameID is a 64-bit Steam value, not an AppID-sized integer.
+        public ulong GameID;
         public uint GameIP;
         public ushort GamePort;
         public ushort QueryPort;

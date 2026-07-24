@@ -25,15 +25,9 @@
             }
 
             <form method="post" OnComplete="onAuthComplete" class="space-y-4">
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label asp-for="Username" class="block text-xs font-medium text-skynet-muted uppercase tracking-widest mb-2">Username</label>
-                        <input asp-for="Username" autocomplete="username" class="w-full px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="johndoe">
-                    </div>
-                    <div>
-                        <label asp-for="PersonaName" class="block text-xs font-medium text-skynet-muted uppercase tracking-widest mb-2">Display name</label>
-                        <input asp-for="PersonaName" class="w-full px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="John">
-                    </div>
+                <div>
+                    <label asp-for="Username" class="block text-xs font-medium text-skynet-muted uppercase tracking-widest mb-2">Username</label>
+                    <input asp-for="Username" autocomplete="username" class="w-full px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="johndoe">
                 </div>
                 <div>
                     <label asp-for="Password" class="block text-xs font-medium text-skynet-muted uppercase tracking-widest mb-2">Password</label>

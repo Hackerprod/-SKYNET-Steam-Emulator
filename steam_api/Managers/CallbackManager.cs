@@ -111,7 +111,11 @@ namespace SKYNET.Managers
             return AddCallResult(data, true, readyToCall, false);
         }
 
-        public static bool CompleteCallbackResult(SteamAPICall_t handle, ICallbackData data, bool ioFailure = false)
+        public static bool CompleteCallbackResult(
+            SteamAPICall_t handle,
+            ICallbackData data,
+            bool ioFailure = false,
+            TimeSpan? deliveryDelay = null)
         {
             if (data == null)
             {
@@ -131,7 +135,7 @@ namespace SKYNET.Managers
                 record.Payload = Serialize(data);
                 record.Data = data;
                 record.Ready = true;
-                record.DueUtc = now;
+                record.DueUtc = now + (deliveryDelay ?? TimeSpan.Zero);
                 record.ReadyUtc = now;
                 record.IOFailure = ioFailure;
                 record.LastFailureReason = ioFailure
@@ -140,7 +144,11 @@ namespace SKYNET.Managers
                 record.ToDelete = false;
                 record.CompletedNotificationSent = false;
 
-                Write($"Completed CallbackResult {handle} callback={record.CallbackId} size={record.Payload.Length} failed={ioFailure}");
+                // Steam publishes both the call result and the matching callback. Some
+                // clients use the latter to refresh cached state before reading the result.
+                AddDirectCallback(data, record.GameServer, true, deliveryDelay ?? TimeSpan.Zero);
+
+                Write($"Completed CallbackResult {handle} callback={record.CallbackId} size={record.Payload.Length} failed={ioFailure} delay={(deliveryDelay ?? TimeSpan.Zero).TotalMilliseconds}ms");
                 return true;
             }
         }
@@ -414,7 +422,7 @@ namespace SKYNET.Managers
             }
         }
 
-        private static void AddDirectCallback(ICallbackData data, bool gameServer, bool readyToCall)
+        private static void AddDirectCallback(ICallbackData data, bool gameServer, bool readyToCall, TimeSpan? deliveryDelay = null)
         {
             if (data == null)
             {
@@ -434,7 +442,7 @@ namespace SKYNET.Managers
                     SteamPipe = gameServer ? SteamEmulator.HSteamPipe_GS : SteamEmulator.HSteamPipe,
                     SteamUser = gameServer ? SteamEmulator.HSteamUser_GS : SteamEmulator.HSteamUser,
                     CreatedUtc = now,
-                    DueUtc = now + (readyToCall ? DefaultCallbackDelay : TimeSpan.Zero)
+                    DueUtc = now + (readyToCall ? deliveryDelay ?? DefaultCallbackDelay : TimeSpan.Zero)
                 };
 
                 if (!PendingDirectCallbacks.TryGetValue(key, out var pendingList))

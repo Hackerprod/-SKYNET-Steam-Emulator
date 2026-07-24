@@ -596,10 +596,24 @@ namespace SKYNET.Managers
                 AppId = appId,
                 Distance = filter?.Distance ?? 0,
                 SlotsAvailable = filter?.SlotsAvailable ?? 0,
-                KeyToMatch = filter?.KeyToMatch,
-                ValueToMatch = filter?.ValueToMatch ?? 0,
-                ComparisonType = filter == null ? 0 : (int)filter.ComparisonType,
-                StringValueToMatch = filter?.StringValueToMatch
+                ResultCount = filter?.ResultCount ?? 0,
+                NumericalFilters = filter?.NumericalFilters?.Select(item => new SkyNetLobbyNumericalFilterDto
+                {
+                    KeyToMatch = item.KeyToMatch,
+                    ValueToMatch = item.ValueToMatch,
+                    ComparisonType = (int)item.ComparisonType
+                }).ToList() ?? new List<SkyNetLobbyNumericalFilterDto>(),
+                StringFilters = filter?.StringFilters?.Select(item => new SkyNetLobbyStringFilterDto
+                {
+                    KeyToMatch = item.KeyToMatch,
+                    ValueToMatch = item.ValueToMatch,
+                    ComparisonType = (int)item.ComparisonType
+                }).ToList() ?? new List<SkyNetLobbyStringFilterDto>(),
+                NearValueFilters = filter?.NearValueFilters?.Select(item => new SkyNetLobbyNearValueFilterDto
+                {
+                    KeyToMatch = item.KeyToMatch,
+                    ValueToBeCloseTo = item.ValueToBeCloseTo
+                }).ToList() ?? new List<SkyNetLobbyNearValueFilterDto>()
             });
 
             return response == null ? null : MapLobbies(response);
@@ -2124,10 +2138,34 @@ namespace SKYNET.Managers
             public uint AppId { get; set; }
             public int Distance { get; set; }
             public int SlotsAvailable { get; set; }
+            public int ResultCount { get; set; }
             public string KeyToMatch { get; set; }
             public int ValueToMatch { get; set; }
             public int ComparisonType { get; set; }
             public string StringValueToMatch { get; set; }
+            public List<SkyNetLobbyNumericalFilterDto> NumericalFilters { get; set; }
+            public List<SkyNetLobbyStringFilterDto> StringFilters { get; set; }
+            public List<SkyNetLobbyNearValueFilterDto> NearValueFilters { get; set; }
+        }
+
+        public sealed class SkyNetLobbyNumericalFilterDto
+        {
+            public string KeyToMatch { get; set; }
+            public int ValueToMatch { get; set; }
+            public int ComparisonType { get; set; }
+        }
+
+        public sealed class SkyNetLobbyStringFilterDto
+        {
+            public string KeyToMatch { get; set; }
+            public string ValueToMatch { get; set; }
+            public int ComparisonType { get; set; }
+        }
+
+        public sealed class SkyNetLobbyNearValueFilterDto
+        {
+            public string KeyToMatch { get; set; }
+            public int ValueToBeCloseTo { get; set; }
         }
 
         public sealed class SkyNetCreateLobbyRequestDto

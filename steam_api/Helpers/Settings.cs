@@ -104,6 +104,10 @@ namespace SKYNET.Helper
                 IniParser = new INIParser();
                 IniParser.Load(fileName);
                 bool configChanged = EnsureMissingDefaults();
+                SteamEmulator.SendLog = GetBool("Log Settings", "File", false);
+                SteamEmulator.LogToFile = SteamEmulator.SendLog;
+                SteamEmulator.ConsoleLog = GetBool("Log Settings", "Console", false);
+                SteamEmulator.LogToConsole = SteamEmulator.ConsoleLog;
 
                 SteamEmulator.PersonaName = GetString("User Settings", "FallbackPersonaName", Environment.UserName);
                 SteamEmulator.Language = (string)IniParser["Game Settings"]["Languaje"];
@@ -117,6 +121,7 @@ namespace SKYNET.Helper
                             SteamEmulator.AppID = appId;
 
                 LoadDLCs();
+                LoadAppContent();
                 SteamEmulator.EnableVoiceCapture = GetBool("Audio Settings", "EnableVoiceCapture", true);
 
                 InventoryManager.ApplyConfig(
@@ -125,12 +130,6 @@ namespace SKYNET.Helper
                     GetBool("Inventory", "AutoGrantPromos", true),
                     GetBool("Inventory", "AllowGenerate", false),
                     GetString("Inventory", "Currency", "USD"));
-
-                SteamEmulator.SendLog = (bool)IniParser["Log Settings"]["File"];
-                SteamEmulator.LogToFile = SteamEmulator.SendLog;
-
-                SteamEmulator.ConsoleLog = (bool)IniParser["Log Settings"]["Console"];
-                SteamEmulator.LogToConsole = SteamEmulator.ConsoleLog;
 
                 foreach (var item in IniParser["Network Settings"].Settings)
                 {
@@ -388,6 +387,168 @@ namespace SKYNET.Helper
             {
                 DLCManager.AddOrUpdate(appId, name == null ? string.Empty : name.Trim(), true);
             }
+        }
+
+        /// <summary>
+        /// Loads generic Steam content metadata used by ISteamApps after DLC
+        /// ownership checks: installed apps, app install paths, and depots.
+        /// Files live under the per-game SKYNET directory so the injected
+        /// launcher payload remains reusable across games:
+        ///  - installed_app_ids.txt: one AppID per line.
+        ///  - app_paths.txt: AppID = absolute path, or path relative to the game exe folder.
+        ///  - depots.txt: either DepotID per line, or AppID = DepotID[, DepotID...].
+        ///  - DLC/<AppID>/ directories are automatically exposed as install paths.
+        /// </summary>
+        private static void LoadAppContent()
+        {
+            try
+            {
+                AppContentManager.Clear();
+                AppContentManager.MarkInstalled(SteamEmulator.AppID);
+
+                string skynetPath = Path.Combine(Common.GetPath(), "SKYNET");
+                LoadInstalledAppIds(Path.Combine(skynetPath, "installed_app_ids.txt"));
+                LoadAppPaths(Path.Combine(skynetPath, "app_paths.txt"));
+                LoadDlcDirectories(Path.Combine(skynetPath, "DLC"));
+                LoadDepots(Path.Combine(skynetPath, "depots.txt"));
+
+                SteamEmulator.Write(
+                    "Settings",
+                    $"Loaded app content config: Apps = {AppContentManager.InstalledAppCount}, Paths = {AppContentManager.AppPathCount}, Depots = {AppContentManager.DepotCount}");
+            }
+            catch (Exception ex)
+            {
+                SteamEmulator.Write("Settings", $"Failed to load app content config: {ex.Message}");
+            }
+        }
+
+        private static void LoadInstalledAppIds(string fileName)
+        {
+            foreach (string line in ReadConfigLines(fileName))
+            {
+                string appIdText = SplitOptionalValue(line, out _);
+                if (uint.TryParse(appIdText, out uint appId))
+                {
+                    AppContentManager.MarkInstalled(appId);
+                }
+            }
+        }
+
+        private static void LoadAppPaths(string fileName)
+        {
+            foreach (string line in ReadConfigLines(fileName))
+            {
+                int separator = line.IndexOf('=');
+                if (separator <= 0)
+                {
+                    continue;
+                }
+
+                string appIdText = line.Substring(0, separator).Trim();
+                string pathText = line.Substring(separator + 1).Trim();
+                if (!uint.TryParse(appIdText, out uint appId))
+                {
+                    continue;
+                }
+
+                string resolvedPath = ResolveConfiguredPath(pathText);
+                AppContentManager.SetAppInstallPath(appId, resolvedPath);
+            }
+        }
+
+        private static void LoadDlcDirectories(string dlcRoot)
+        {
+            if (!Directory.Exists(dlcRoot))
+            {
+                return;
+            }
+
+            foreach (string directory in Directory.GetDirectories(dlcRoot))
+            {
+                string name = Path.GetFileName(directory);
+                if (uint.TryParse(name, out uint appId))
+                {
+                    AppContentManager.SetAppInstallPath(appId, directory);
+                }
+            }
+        }
+
+        private static void LoadDepots(string fileName)
+        {
+            foreach (string line in ReadConfigLines(fileName))
+            {
+                int separator = line.IndexOf('=');
+                if (separator <= 0)
+                {
+                    if (uint.TryParse(line.Trim(), out uint depotId))
+                    {
+                        AppContentManager.AddGlobalDepot(depotId);
+                    }
+                    continue;
+                }
+
+                string appIdText = line.Substring(0, separator).Trim();
+                if (!uint.TryParse(appIdText, out uint appId))
+                {
+                    continue;
+                }
+
+                foreach (string depotText in line.Substring(separator + 1).Split(new[] { ',', ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    if (uint.TryParse(depotText.Trim(), out uint depotId))
+                    {
+                        AppContentManager.AddAppDepot(appId, depotId);
+                    }
+                }
+            }
+        }
+
+        private static IEnumerable<string> ReadConfigLines(string fileName)
+        {
+            if (!File.Exists(fileName))
+            {
+                yield break;
+            }
+
+            foreach (string rawLine in File.ReadAllLines(fileName))
+            {
+                string line = rawLine.Trim().TrimStart('\uFEFF').Trim();
+                if (line.Length == 0 || line[0] == '#' || line[0] == ';')
+                {
+                    continue;
+                }
+
+                yield return line;
+            }
+        }
+
+        private static string SplitOptionalValue(string line, out string value)
+        {
+            value = string.Empty;
+            int separator = line.IndexOf('=');
+            if (separator <= 0)
+            {
+                return line.Trim();
+            }
+
+            value = line.Substring(separator + 1).Trim();
+            return line.Substring(0, separator).Trim();
+        }
+
+        private static string ResolveConfiguredPath(string pathText)
+        {
+            if (string.IsNullOrWhiteSpace(pathText))
+            {
+                return string.Empty;
+            }
+
+            string expanded = Environment.ExpandEnvironmentVariables(pathText.Trim());
+            if (Path.IsPathRooted(expanded))
+            {
+                return Path.GetFullPath(expanded);
+            }
+
+            return Path.GetFullPath(Path.Combine(Common.GetPath(), expanded));
         }
 
         private static string GetString(string section, string key, string fallback)

@@ -104,6 +104,10 @@ namespace SKYNET.Managers
                     ApplyLobby(serverEvent, 0);
                     break;
 
+                case "lobby_member_updated":
+                    ApplyLobby(serverEvent, 0, serverEvent.SteamId);
+                    break;
+
                 case "lobby_joined":
                     ApplyLobby(serverEvent, (uint)EChatMemberStateChange.k_EChatMemberStateChangeEntered);
                     break;
@@ -119,6 +123,10 @@ namespace SKYNET.Managers
 
                 case "lobby_chat":
                     ApplyLobbyChat(serverEvent);
+                    break;
+
+                case "lobby_game_created":
+                    ApplyLobbyGameCreated(serverEvent);
                     break;
 
                 case "p2p_packet":
@@ -162,7 +170,7 @@ namespace SKYNET.Managers
             }
         }
 
-        private static void ApplyLobby(APIClient.ApiEvent serverEvent, uint memberStateChange)
+        private static void ApplyLobby(APIClient.ApiEvent serverEvent, uint memberStateChange, ulong dataSubjectSteamId = 0)
         {
             var lobby = serverEvent.Lobby == null ? null : APIClient.MapLobbyForEvents(serverEvent.Lobby);
             if (lobby == null)
@@ -185,12 +193,31 @@ namespace SKYNET.Managers
                 });
             }
 
-            // Lobby-level data change: Steam sets member == lobby.
+            // Lobby-level data changes use the lobby ID as the callback subject.
+            // Member data updates instead identify the affected member.
             CallbackManager.AddCallback(new LobbyDataUpdate_t
             {
                 m_bSuccess = true,
                 m_ulSteamIDLobby = lobby.SteamID,
-                m_ulSteamIDMember = lobby.SteamID
+                m_ulSteamIDMember = dataSubjectSteamId != 0 ? dataSubjectSteamId : lobby.SteamID
+            });
+        }
+
+        private static void ApplyLobbyGameCreated(APIClient.ApiEvent serverEvent)
+        {
+            var lobby = serverEvent.Lobby == null ? null : APIClient.MapLobbyForEvents(serverEvent.Lobby);
+            if (lobby == null || !lobby.Gameserver.Filled)
+            {
+                return;
+            }
+
+            LobbyManager.UpsertLobby(lobby);
+            CallbackManager.AddCallback(new LobbyGameCreated_t
+            {
+                m_ulSteamIDLobby = lobby.SteamID,
+                m_ulSteamIDGameServer = lobby.Gameserver.SteamID,
+                m_unIP = lobby.Gameserver.IP,
+                m_usPort = (ushort)lobby.Gameserver.Port
             });
         }
 

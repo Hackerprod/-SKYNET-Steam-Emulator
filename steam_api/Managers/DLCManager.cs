@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using SKYNET.Types;
 
 namespace SKYNET.Managers
@@ -187,6 +188,34 @@ namespace SKYNET.Managers
                 var entry = Store[index];
                 appId = entry.AppId;
                 available = entry.Available;
+                name = entry.Name ?? string.Empty;
+                return true;
+            }
+        }
+
+        public static IReadOnlyList<uint> GetInstalledAppIds()
+        {
+            lock (Sync)
+            {
+                return Store
+                    .Where(d => d.AppId != 0 && d.Installed && IsInstalledLocked(d.AppId))
+                    .Select(d => d.AppId)
+                    .ToArray();
+            }
+        }
+
+        public static bool TryGetName(uint appId, out string name)
+        {
+            name = string.Empty;
+
+            lock (Sync)
+            {
+                var entry = Store.Find(d => d.AppId == appId);
+                if (entry == null)
+                {
+                    return false;
+                }
+
                 name = entry.Name ?? string.Empty;
                 return true;
             }

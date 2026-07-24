@@ -8,8 +8,8 @@ namespace SKYNET.Client.Services;
 /// <summary>
 /// Launches a process suspended and injects a DLL into it before it runs, using the
 /// classic VirtualAllocEx + CreateRemoteThread(LoadLibraryW) technique. Nothing on the
-/// game's disk is touched: our steam_api DLL is loaded from the launcher's payload
-/// folder.
+/// game's disk is touched: our steam_api DLL is loaded from the path prepared by
+/// GameLauncher, normally a per-build shadow copy of the launcher's payload.
 ///
 /// Why this makes the game use OUR steam_api: the game loads steam_api64.dll
 /// dynamically by bare name. Windows' loader returns an already-loaded module with the
