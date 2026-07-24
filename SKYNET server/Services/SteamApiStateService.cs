@@ -43,6 +43,7 @@ public sealed partial class SteamApiStateService
     private readonly DotaDB _dotaDb;
     private readonly DotaDedicatedServerSupervisor _dotaDedicatedServers;
     private readonly GameServerSettingsService _gameServerSettings;
+    private readonly GameCatalogService _gameCatalog;
     // Auth session lifetime and the (much shorter) presence window used to
     // derive online/offline. Both configurable via appsettings:
     //   "Session:TimeoutMinutes" (default 30), "Presence:TimeoutSeconds" (default 90).
@@ -63,6 +64,7 @@ public sealed partial class SteamApiStateService
         IConfiguration configuration,
         DotaDedicatedServerSupervisor dotaDedicatedServers,
         GameServerSettingsService gameServerSettings,
+        GameCatalogService gameCatalog,
         DotaDB dotaDb,
         IDbContextFactory<SteamDbContext> steamDbContextFactory,
         IDbContextFactory<DotaDbContext> dotaDbContextFactory,
@@ -73,6 +75,7 @@ public sealed partial class SteamApiStateService
         _gameCoordinatorTrace = gameCoordinatorTrace;
         _dotaDedicatedServers = dotaDedicatedServers;
         _gameServerSettings = gameServerSettings;
+        _gameCatalog = gameCatalog;
         _dotaDb = dotaDb;
         _steamDbFactory = steamDbContextFactory;
         _dotaDbFactory = dotaDbContextFactory;

@@ -146,6 +146,66 @@ public sealed partial class SteamApiStateService
         }
     }
 
+    // Lobby invitations are distinct from game connect-string invitations. The
+    // recipient receives LobbyInvite_t now; accepting it later is handled by its
+    // own Steam client, which then raises GameLobbyJoinRequested_t to the game.
+    public bool InviteUserToLobby(string token, ulong lobbyId, ulong inviteeSteamId)
+    {
+        lock (_sync)
+        {
+            if (!TryGetSession(token, out var session) || session == null ||
+                inviteeSteamId == 0 || inviteeSteamId == session.SteamId ||
+                !_state.Lobbies.TryGetValue(lobbyId, out var lobby) ||
+                !IsLobbyAliveLocked(lobby) ||
+                lobby.Members.All(member => member.SteamId != session.SteamId) ||
+                !_state.Users.ContainsKey(inviteeSteamId) ||
+                !AreFriendsLocked(session.SteamId, inviteeSteamId))
+            {
+                return false;
+            }
+
+            EnqueueEvent(inviteeSteamId, new ApiEvent
+            {
+                Type = "lobby_invite",
+                SteamId = session.SteamId,
+                PersonaName = _state.Users.TryGetValue(session.SteamId, out var inviter) ? inviter.PersonaName : string.Empty,
+                LobbyId = lobby.SteamId,
+                AppId = lobby.AppId,
+                GameName = _gameCatalog.GetName(lobby.AppId)
+            }, "client", string.Empty);
+            return true;
+        }
+    }
+
+    // ISteamFriends::InviteUserToGame is the non-lobby counterpart. Keep its
+    // connect string opaque: Steam only transports it, while the game owns its
+    // format and decides how to connect after the recipient accepts the invite.
+    public bool InviteUserToGame(string token, ulong inviteeSteamId, string? connectString)
+    {
+        lock (_sync)
+        {
+            if (!TryGetSession(token, out var session) || session == null ||
+                inviteeSteamId == 0 || inviteeSteamId == session.SteamId ||
+                string.IsNullOrWhiteSpace(connectString) ||
+                !_state.Users.ContainsKey(inviteeSteamId) ||
+                !AreFriendsLocked(session.SteamId, inviteeSteamId))
+            {
+                return false;
+            }
+
+            EnqueueEvent(inviteeSteamId, new ApiEvent
+            {
+                Type = "game_invite",
+                SteamId = session.SteamId,
+                PersonaName = _state.Users.TryGetValue(session.SteamId, out var user) ? user.PersonaName : string.Empty,
+                AppId = user?.AppId ?? 0,
+                GameName = _gameCatalog.GetName(user?.AppId ?? 0),
+                PayloadBase64 = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(connectString))
+            }, "client", string.Empty);
+            return true;
+        }
+    }
+
     public bool LeaveLobby(string token, ulong lobbyId)
     {
         lock (_sync)

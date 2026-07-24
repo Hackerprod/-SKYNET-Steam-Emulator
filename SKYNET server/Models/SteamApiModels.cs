@@ -198,6 +198,7 @@ public sealed class ApiEvent
     public uint AccountId { get; set; }
     public string PersonaName { get; set; } = string.Empty;
     public uint AppId { get; set; }
+    public string GameName { get; set; } = string.Empty;
     public ulong LobbyId { get; set; }
     public int PersonaState { get; set; }
     public int ChangeFlags { get; set; }
@@ -234,6 +235,12 @@ public sealed class ApiLobbyQueryRequest
     public List<ApiLobbyNumericalFilter> NumericalFilters { get; set; } = new();
     public List<ApiLobbyStringFilter> StringFilters { get; set; } = new();
     public List<ApiLobbyNearValueFilter> NearValueFilters { get; set; } = new();
+}
+
+public sealed class ApiGameInfo
+{
+    public uint AppId { get; set; }
+    public string Name { get; set; } = string.Empty;
 }
 
 public sealed class ApiLobbyNumericalFilter
@@ -293,6 +300,17 @@ public sealed class ApiLobbyGameServerUpdateRequest
     public ulong SteamIdGameServer { get; set; }
     public uint IP { get; set; }
     public uint Port { get; set; }
+}
+
+public sealed class ApiLobbyInviteRequest
+{
+    public ulong InviteeSteamId { get; set; }
+}
+
+public sealed class ApiGameInviteRequest
+{
+    public ulong InviteeSteamId { get; set; }
+    public string ConnectString { get; set; } = string.Empty;
 }
 
 public sealed class ApiLobby

@@ -9,6 +9,11 @@ public sealed class OverlayRequest
     public string Title { get; set; }
     public string Url { get; set; }
     public string Message { get; set; }
+    public string PrimaryActionText { get; set; }
+    public string SecondaryActionText { get; set; }
+    public Action PrimaryAction { get; set; }
+    public Action SecondaryAction { get; set; }
+    public Action<OverlayUser, Action<bool>> InviteUserAction { get; set; }
     public Dictionary<string, string> Metadata { get; set; }
     public OverlayUser User { get; set; }
     public List<OverlayUser> Users { get; set; } = new List<OverlayUser>();

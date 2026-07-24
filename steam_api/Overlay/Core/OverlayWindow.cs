@@ -327,12 +327,17 @@ internal sealed class OverlayWindow : Form
 
     private void BuildInvite(FlowLayoutPanel body, OverlayRequest request)
     {
-        AddSectionLabel(body, "INVITE");
-        AddInfoCard(body,
-            request.SessionId.HasValue ? "Lobby " + request.SessionId.Value : "No lobby handle",
-            string.IsNullOrWhiteSpace(request.Message) ? "The game did not provide a connect string." : request.Message,
-            Theme.Accent);
-        BuildPeople(body, request, "AVAILABLE FRIENDS");
+        AddSectionLabel(body, "AVAILABLE FRIENDS");
+        if (request.Users.Count == 0)
+        {
+            AddEmpty(body, "No friends are available to invite.");
+            return;
+        }
+
+        foreach (var user in request.Users)
+        {
+            AddInviteUserRow(body, user, request.InviteUserAction);
+        }
     }
 
     private void BuildStats(FlowLayoutPanel body, OverlayRequest request)
@@ -416,9 +421,29 @@ internal sealed class OverlayWindow : Form
 
     private void BuildConfirm(FlowLayoutPanel body, OverlayRequest request)
     {
-        AddSectionLabel(body, "CONFIRM");
-        AddTitle(body, request.Title ?? "Confirm Action", 20f);
-        AddEmpty(body, request.Message ?? "The game requested confirmation.");
+        AddSectionLabel(body, "INVITATION");
+        AddInvitationCard(body, request.User, request.Message ?? "You received an invitation.");
+
+        if (request.PrimaryAction == null && request.SecondaryAction == null)
+        {
+            return;
+        }
+
+        var actions = new FlowLayoutPanel
+        {
+            Width = GetContentWidth(),
+            Height = 42,
+            FlowDirection = FlowDirection.LeftToRight,
+            WrapContents = false,
+            Margin = new Padding(0, 8, 0, 0)
+        };
+
+        AddActionButton(actions, request.PrimaryActionText ?? "Confirm", Theme.Accent, request.PrimaryAction, true);
+        if (request.SecondaryAction != null)
+        {
+            AddActionButton(actions, request.SecondaryActionText ?? "Dismiss", Theme.TextMuted, request.SecondaryAction, false);
+        }
+        body.Controls.Add(actions);
     }
 
     private void AddSummaryGrid(FlowLayoutPanel body, List<OverlaySummaryItem> items)
@@ -627,6 +652,129 @@ internal sealed class OverlayWindow : Form
         body.Controls.Add(row);
     }
 
+    private void AddInviteUserRow(FlowLayoutPanel body, OverlayUser user, Action<OverlayUser, Action<bool>> inviteAction)
+    {
+        var width = GetContentWidth();
+        var row = new RoundedPanel
+        {
+            Radius = 9,
+            FillColor = Theme.BgPanel,
+            BorderColor = Theme.Border,
+            Width = width,
+            Height = 72,
+            Margin = new Padding(0, 0, 0, 8)
+        };
+
+        row.Controls.Add(new AvatarControl
+        {
+            Bounds = new Rectangle(14, 12, 48, 48),
+            DisplayName = DisplayName(user, user.SteamId.ToString()),
+            AvatarPng = user.AvatarPng,
+            Online = user.PersonaState != 0
+        });
+
+        row.Controls.Add(new Label
+        {
+            Text = DisplayName(user, user.SteamId.ToString()),
+            ForeColor = Theme.TextTitle,
+            Font = new Font(Theme.FontName, 11f, FontStyle.Bold, GraphicsUnit.Point),
+            AutoSize = false,
+            AutoEllipsis = true,
+            UseMnemonic = false,
+            Location = new Point(76, 14),
+            Size = new Size(Math.Max(120, width - 220), 23)
+        });
+
+        row.Controls.Add(new Label
+        {
+            Text = string.IsNullOrWhiteSpace(user.Status) ? (user.PersonaState != 0 ? "Online" : "Offline") : user.Status,
+            ForeColor = user.PersonaState != 0 ? Theme.Success : Theme.TextMuted,
+            Font = new Font(Theme.FontName, 9f, FontStyle.Regular, GraphicsUnit.Point),
+            AutoSize = false,
+            AutoEllipsis = true,
+            UseMnemonic = false,
+            Location = new Point(76, 38),
+            Size = new Size(Math.Max(120, width - 220), 20)
+        });
+
+        var sending = false;
+        var sent = false;
+        var invite = new Button
+        {
+            Text = inviteAction == null ? "Unavailable" : "Invite",
+            Enabled = inviteAction != null,
+            Width = 102,
+            Height = 32,
+            FlatStyle = FlatStyle.Flat,
+            ForeColor = Theme.TextTitle,
+            BackColor = Theme.BgDark,
+            Font = new Font(Theme.FontName, 9f, FontStyle.Bold, GraphicsUnit.Point),
+            Location = new Point(width - 118, 20),
+            Cursor = inviteAction == null ? Cursors.Default : Cursors.Hand
+        };
+        invite.FlatAppearance.BorderColor = Theme.Accent;
+        invite.FlatAppearance.MouseOverBackColor = Theme.BgCard;
+        invite.Click += (sender, args) =>
+        {
+            if (inviteAction == null || sending || sent)
+            {
+                return;
+            }
+
+            sending = true;
+            invite.Text = "Sending...";
+            inviteAction(user, success =>
+            {
+                if (IsDisposed || !IsHandleCreated)
+                {
+                    return;
+                }
+
+                BeginInvoke((MethodInvoker)(() =>
+                {
+                    sending = false;
+                    sent = success;
+                    invite.Text = success ? "Invitation Sent" : "Retry Invite";
+                    invite.ForeColor = success ? Theme.Success : Theme.TextTitle;
+                    invite.FlatAppearance.BorderColor = success ? Theme.Success : Theme.Accent;
+                    invite.Cursor = success ? Cursors.Default : Cursors.Hand;
+                }));
+            });
+        };
+        row.Controls.Add(invite);
+        body.Controls.Add(row);
+    }
+
+    private void AddActionButton(FlowLayoutPanel actions, string text, Color color, Action action, bool primary)
+    {
+        if (action == null)
+        {
+            return;
+        }
+
+        var button = new Button
+        {
+            Text = text,
+            Width = primary ? 140 : 110,
+            Height = 34,
+            FlatStyle = FlatStyle.Flat,
+            ForeColor = Theme.TextTitle,
+            BackColor = Theme.BgDark,
+            Font = new Font(Theme.FontName, 9f, FontStyle.Bold, GraphicsUnit.Point),
+            Margin = new Padding(0, 0, 8, 0),
+            Cursor = Cursors.Hand
+        };
+        button.FlatAppearance.BorderColor = color;
+        button.FlatAppearance.MouseOverBackColor = Theme.BgPanel;
+        button.Click += (sender, args) =>
+        {
+            button.Enabled = false;
+            action();
+            HideOverlay();
+        };
+        actions.Controls.Add(button);
+    }
+
     private void AddInfoCard(FlowLayoutPanel body, string title, string detail, Color accent)
     {
         var width = GetContentWidth();
@@ -660,6 +808,40 @@ internal sealed class OverlayWindow : Form
             UseMnemonic = false,
             Location = new Point(16, 32),
             Size = new Size(Math.Max(160, width - 40), 20)
+        });
+        body.Controls.Add(card);
+    }
+
+    private void AddInvitationCard(FlowLayoutPanel body, OverlayUser user, string message)
+    {
+        var width = GetContentWidth();
+        var card = new RoundedPanel
+        {
+            Radius = 9,
+            FillColor = Theme.BgPanel,
+            BorderColor = Theme.Border,
+            Width = width,
+            Height = 76,
+            Margin = new Padding(0, 0, 0, 8)
+        };
+
+        card.Controls.Add(new AvatarControl
+        {
+            Bounds = new Rectangle(14, 14, 48, 48),
+            DisplayName = DisplayName(user, "Friend"),
+            AvatarPng = user?.AvatarPng,
+            Online = user?.PersonaState != 0
+        });
+        card.Controls.Add(new Label
+        {
+            Text = message ?? string.Empty,
+            ForeColor = Theme.TextBody,
+            Font = new Font(Theme.FontName, 10f, FontStyle.Regular, GraphicsUnit.Point),
+            AutoSize = false,
+            AutoEllipsis = true,
+            UseMnemonic = false,
+            Location = new Point(76, 27),
+            Size = new Size(Math.Max(140, width - 96), 24)
         });
         body.Controls.Add(card);
     }

@@ -129,6 +129,14 @@ namespace SKYNET.Managers
                     ApplyLobbyGameCreated(serverEvent);
                     break;
 
+                case "lobby_invite":
+                    ApplyLobbyInvite(serverEvent);
+                    break;
+
+                case "game_invite":
+                    ApplyGameInvite(serverEvent);
+                    break;
+
                 case "p2p_packet":
                     ApplyP2PPacket(serverEvent);
                     break;
@@ -219,6 +227,44 @@ namespace SKYNET.Managers
                 m_unIP = lobby.Gameserver.IP,
                 m_usPort = (ushort)lobby.Gameserver.Port
             });
+        }
+
+        private static void ApplyLobbyInvite(APIClient.ApiEvent serverEvent)
+        {
+            if (serverEvent.LobbyId == 0 || serverEvent.SteamId == 0)
+            {
+                return;
+            }
+
+            // The invite callback is delivered immediately. Joining is deferred
+            // until the player accepts in the Steam overlay, matching Steam's
+            // lobby flow rather than silently adding the player to the lobby.
+            CallbackManager.AddCallback(new LobbyInvite_t
+            {
+                SteamIDUser = serverEvent.SteamId,
+                SteamIDLobby = serverEvent.LobbyId,
+                GameID = ((ulong)serverEvent.AppId & 0xFFFFFFUL) |
+                         ((ulong)EGameIDType.k_EGameIDTypeGameApp << 24)
+            });
+            OverlayManager.ShowLobbyInvite(serverEvent.SteamId, serverEvent.LobbyId, serverEvent.PersonaName, serverEvent.GameName);
+        }
+
+        private static void ApplyGameInvite(APIClient.ApiEvent serverEvent)
+        {
+            if (serverEvent.SteamId == 0 || string.IsNullOrWhiteSpace(serverEvent.PayloadBase64))
+            {
+                return;
+            }
+
+            try
+            {
+                var connectString = Encoding.UTF8.GetString(Convert.FromBase64String(serverEvent.PayloadBase64));
+                OverlayManager.ShowGameInvite(serverEvent.SteamId, connectString, serverEvent.PersonaName, serverEvent.GameName);
+            }
+            catch (FormatException)
+            {
+                SteamEmulator.Write("EventPump", "Discarded game invite with invalid connect-string payload.");
+            }
         }
 
         private static void ApplyLobbyChat(APIClient.ApiEvent serverEvent)

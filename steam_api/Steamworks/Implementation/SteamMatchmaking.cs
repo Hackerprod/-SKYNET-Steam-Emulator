@@ -511,8 +511,9 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool InviteUserToLobby(ulong steamIDLobby, ulong steamIDInvitee)
         {
-            Write("InviteUserToLobby");
-            return true;
+            var result = APIClient.InviteUserToLobby(steamIDLobby, steamIDInvitee);
+            Write($"InviteUserToLobby (Lobby SteamID: {steamIDLobby}, Invitee SteamID: {steamIDInvitee}) = {result}");
+            return result;
         }
 
         public SteamAPICall_t JoinLobby(ulong steamIDLobby)

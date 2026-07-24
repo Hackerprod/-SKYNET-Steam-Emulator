@@ -70,18 +70,93 @@ namespace SKYNET.Managers
         {
             APIClient.QueueFriendsRefresh();
 
+            var hasLobby = lobbyId != 0;
+            var hasConnectString = !string.IsNullOrWhiteSpace(connectString);
+
             return Show(new OverlayRequest
             {
                 Kind = OverlayKind.Invite,
                 Title = "Invite Friends",
-                SessionId = lobbyId == 0 ? (ulong?)null : lobbyId,
-                Message = string.IsNullOrWhiteSpace(connectString) ? null : connectString,
+                SessionId = hasLobby ? lobbyId : (ulong?)null,
+                Message = hasConnectString ? connectString : null,
                 User = BuildCurrentUser(),
                 Users = BuildPeopleList().Where(u => u.HasFriend).ToList(),
+                InviteUserAction = hasLobby || hasConnectString
+                    ? (friend, complete) => QueueInvite(hasLobby ? lobbyId : 0, friend, hasLobby ? null : connectString, complete)
+                    : null,
                 Metadata = new Dictionary<string, string>
                 {
                     ["connect"] = connectString ?? string.Empty
                 }
+            });
+        }
+
+        // Steam delivers LobbyInvite_t when an invitation arrives. The overlay
+        // owns the explicit accept action, then posts GameLobbyJoinRequested_t so
+        // the game retains authority over whether and how it joins the lobby.
+        public static void ShowLobbyInvite(ulong inviterSteamId, ulong lobbyId, string inviterName, string gameName)
+        {
+            if (lobbyId == 0)
+            {
+                return;
+            }
+
+            APIClient.QueueFriendsRefresh();
+            var inviter = BuildInviteSender(inviterSteamId, inviterName);
+            var displayName = string.IsNullOrWhiteSpace(inviter?.PersonaName) ? "A friend" : inviter.PersonaName;
+            var displayGameName = string.IsNullOrWhiteSpace(gameName) ? "a game" : gameName;
+
+            Show(new OverlayRequest
+            {
+                Kind = OverlayKind.ConfirmAction,
+                Title = "Lobby Invitation",
+                Message = displayName + " invited you to play " + displayGameName + ".",
+                User = inviter,
+                PrimaryActionText = "Join Lobby",
+                PrimaryAction = () =>
+                {
+                    CallbackManager.AddCallback(new GameLobbyJoinRequested_t
+                    {
+                        m_steamIDLobby = lobbyId,
+                        m_steamIDFriend = inviterSteamId
+                    });
+                    Write($"Accepted lobby invite lobby={lobbyId} inviter={inviterSteamId}");
+                },
+                SecondaryActionText = "Dismiss",
+                SecondaryAction = () => Write($"Dismissed lobby invite lobby={lobbyId} inviter={inviterSteamId}")
+            });
+        }
+
+        public static void ShowGameInvite(ulong inviterSteamId, string connectString, string inviterName, string gameName)
+        {
+            if (string.IsNullOrWhiteSpace(connectString))
+            {
+                return;
+            }
+
+            APIClient.QueueFriendsRefresh();
+            var inviter = BuildInviteSender(inviterSteamId, inviterName);
+            var displayName = string.IsNullOrWhiteSpace(inviter?.PersonaName) ? "A friend" : inviter.PersonaName;
+            var displayGameName = string.IsNullOrWhiteSpace(gameName) ? "a game" : gameName;
+
+            Show(new OverlayRequest
+            {
+                Kind = OverlayKind.ConfirmAction,
+                Title = "Game Invitation",
+                Message = displayName + " invited you to play " + displayGameName + ".",
+                User = inviter,
+                PrimaryActionText = "Join Game",
+                PrimaryAction = () =>
+                {
+                    CallbackManager.AddCallback(new GameRichPresenceJoinRequested_t
+                    {
+                        SteamIDFriend = inviterSteamId,
+                        Connect = EncodeConnectString(connectString)
+                    });
+                    Write($"Accepted game invite inviter={inviterSteamId}");
+                },
+                SecondaryActionText = "Dismiss",
+                SecondaryAction = () => Write($"Dismissed game invite inviter={inviterSteamId}")
             });
         }
 
@@ -490,6 +565,18 @@ namespace SKYNET.Managers
             };
         }
 
+        private static OverlayUser BuildInviteSender(ulong steamId, string personaName)
+        {
+            var sender = BuildUser(steamId) ?? new OverlayUser { SteamId = steamId };
+            if (!string.IsNullOrWhiteSpace(personaName))
+            {
+                sender.PersonaName = personaName;
+            }
+
+            sender.AvatarPng ??= TryGetAvatarPng(steamId);
+            return sender;
+        }
+
         private static List<OverlayUser> BuildPeopleList()
         {
             var users = StateCache.GetFriends()
@@ -850,6 +937,48 @@ namespace SKYNET.Managers
         private static void Write(object msg)
         {
             SteamEmulator.Write("OverlayManager", msg);
+        }
+
+        private static void QueueInvite(ulong lobbyId, OverlayUser friend, string connectString, Action<bool> complete)
+        {
+            if (friend == null || friend.SteamId == 0)
+            {
+                complete?.Invoke(false);
+                return;
+            }
+
+            var thread = new Thread(() =>
+            {
+                var success = false;
+                try
+                {
+                    success = lobbyId != 0
+                        ? APIClient.InviteUserToLobby(lobbyId, friend.SteamId)
+                        : APIClient.InviteUserToGame(friend.SteamId, connectString);
+                    Write($"Invite {(lobbyId != 0 ? "lobby=" + lobbyId : "game")} friend={friend.SteamId} success={success}");
+                }
+                catch (Exception ex)
+                {
+                    Write($"Invite dispatch failed for friend={friend.SteamId}: {ex.Message}");
+                }
+                finally
+                {
+                    complete?.Invoke(success);
+                }
+            })
+            {
+                IsBackground = true,
+                Name = "SKYNET overlay invite"
+            };
+            thread.Start();
+        }
+
+        private static byte[] EncodeConnectString(string connectString)
+        {
+            var bytes = System.Text.Encoding.UTF8.GetBytes(connectString ?? string.Empty);
+            var buffer = new byte[256];
+            Array.Copy(bytes, buffer, Math.Min(bytes.Length, buffer.Length - 1));
+            return buffer;
         }
 
         public enum Direct3DVersion

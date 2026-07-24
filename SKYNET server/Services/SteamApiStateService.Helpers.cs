@@ -547,6 +547,7 @@ public sealed partial class SteamApiStateService
         AccountId = evt.AccountId,
         PersonaName = evt.PersonaName,
         AppId = evt.AppId,
+        GameName = evt.GameName,
         LobbyId = evt.LobbyId,
         PersonaState = evt.PersonaState,
         ChangeFlags = evt.ChangeFlags,

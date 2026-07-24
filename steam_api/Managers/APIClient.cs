@@ -650,6 +650,35 @@ namespace SKYNET.Managers
             return MapLobby(response);
         }
 
+        public static bool InviteUserToLobby(ulong lobbyId, ulong inviteeSteamId)
+        {
+            if (!IsEnabled || lobbyId == 0 || inviteeSteamId == 0)
+            {
+                return false;
+            }
+
+            EnsureSession();
+            return Send<VoidDto>(HttpMethod.Post, $"api/lobbies/{lobbyId}/invites", new SkyNetLobbyInviteRequestDto
+            {
+                InviteeSteamId = inviteeSteamId
+            }) != null;
+        }
+
+        public static bool InviteUserToGame(ulong inviteeSteamId, string connectString)
+        {
+            if (!IsEnabled || inviteeSteamId == 0 || string.IsNullOrWhiteSpace(connectString))
+            {
+                return false;
+            }
+
+            EnsureSession();
+            return Send<VoidDto>(HttpMethod.Post, "api/game-invites", new SkyNetGameInviteRequestDto
+            {
+                InviteeSteamId = inviteeSteamId,
+                ConnectString = connectString
+            }) != null;
+        }
+
         public static bool LeaveLobby(ulong lobbyId)
         {
             if (!IsEnabled)
@@ -2106,6 +2135,7 @@ namespace SKYNET.Managers
             public uint AccountId { get; set; }
             public string PersonaName { get; set; }
             public uint AppId { get; set; }
+            public string GameName { get; set; }
             public ulong LobbyId { get; set; }
             public int PersonaState { get; set; }
             public int ChangeFlags { get; set; }
@@ -2146,6 +2176,17 @@ namespace SKYNET.Managers
             public List<SkyNetLobbyNumericalFilterDto> NumericalFilters { get; set; }
             public List<SkyNetLobbyStringFilterDto> StringFilters { get; set; }
             public List<SkyNetLobbyNearValueFilterDto> NearValueFilters { get; set; }
+        }
+
+        public sealed class SkyNetLobbyInviteRequestDto
+        {
+            public ulong InviteeSteamId { get; set; }
+        }
+
+        public sealed class SkyNetGameInviteRequestDto
+        {
+            public ulong InviteeSteamId { get; set; }
+            public string ConnectString { get; set; }
         }
 
         public sealed class SkyNetLobbyNumericalFilterDto

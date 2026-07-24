@@ -51,6 +51,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     SkynetJsonSerializerOptions.AddCompatibilityConverters(options.SerializerOptions));
 builder.Services.AddSingleton<GameCoordinatorTraceService>();
 builder.Services.AddSingleton<GameServerSettingsService>();
+builder.Services.AddSingleton<GameCatalogService>();
 builder.Services.AddSingleton<DotaDedicatedServerSupervisor>();
 builder.Services.AddSingleton<DotaDB>();
 builder.Services.AddSingleton<DedicatedServerService>();
@@ -327,6 +328,23 @@ api.MapPost("/lobbies/{lobbyId}/join", (HttpRequest request, ulong lobbyId, Stea
 {
     var lobby = state.JoinLobby(SteamApiStateService.GetBearerToken(request) ?? string.Empty, lobbyId);
     return lobby == null ? Results.BadRequest() : Results.Ok(lobby);
+});
+
+api.MapGet("/apps/{appId}", (uint appId, GameCatalogService catalog) =>
+    Results.Ok(catalog.Get(appId)));
+
+api.MapPost("/lobbies/{lobbyId}/invites", (HttpRequest request, ulong lobbyId, ApiLobbyInviteRequest payload, SteamApiStateService state) =>
+{
+    return state.InviteUserToLobby(SteamApiStateService.GetBearerToken(request) ?? string.Empty, lobbyId, payload.InviteeSteamId)
+        ? Results.Ok()
+        : Results.BadRequest();
+});
+
+api.MapPost("/game-invites", (HttpRequest request, ApiGameInviteRequest payload, SteamApiStateService state) =>
+{
+    return state.InviteUserToGame(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload.InviteeSteamId, payload.ConnectString)
+        ? Results.Ok()
+        : Results.BadRequest();
 });
 
 api.MapPost("/lobbies/{lobbyId}/leave", (HttpRequest request, ulong lobbyId, SteamApiStateService state) =>

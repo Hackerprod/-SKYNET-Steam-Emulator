@@ -740,8 +740,9 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool InviteUserToGame(ulong steamIDFriend, string pchConnectString)
         {
-            Write($"InviteUserToGame {steamIDFriend} {pchConnectString}");
-            return false;
+            var result = APIClient.InviteUserToGame(steamIDFriend, pchConnectString);
+            Write($"InviteUserToGame (Friend SteamID: {steamIDFriend}) = {result}");
+            return result;
         }
 
         public bool IsClanChatAdmin(ulong steamIDClanChat, ulong steamIDUser)
