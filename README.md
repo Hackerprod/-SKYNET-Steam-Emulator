@@ -251,7 +251,7 @@ Common settings:
 | `Session:TimeoutMinutes` | Web/API session lifetime. |
 | `Presence:*` | Online/offline sweep behavior. |
 | `GameCoordinator:TickIntervalMs` | TypeScript GC tick interval. |
-| `GameCoordinator:Dota:AdvertisedGameServerIp` | Address advertised to clients for Dota dedicated servers. |
+| `Server:AdvertisedIp` | Central address advertised to game clients when a server-owned endpoint must be published. |
 | `GameCoordinator:Dota:Dedicated:*` | Dota dedicated server launch, port, timeout, and insecure-mode settings. |
 
 ### DLL configuration
