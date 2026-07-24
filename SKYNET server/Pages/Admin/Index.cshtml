@@ -218,10 +218,10 @@
                         <input asp-for="DotaClientVersion" type="number" min="1" class="h-11 w-full px-4 rounded-lg text-sm bg-skynet-black border border-skynet-border font-mono transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="6860" />
                         <button type="submit" class="h-11 w-36 shrink-0 whitespace-nowrap rounded-lg bg-skynet-accent px-5 text-xs font-black uppercase tracking-widest text-white hover:bg-blue-600 transition-all">Save Version</button>
                     </form>
-                    <form method="post" asp-page-handler="AutoDetectDotaClientVersion" OnComplete="onDotaClientVersionSaved" class="w-36 shrink-0">
-                        <button type="submit" class="h-11 w-full whitespace-nowrap rounded-lg border border-skynet-border px-5 text-xs font-black uppercase tracking-widest text-white hover:border-skynet-accent hover:text-skynet-accent transition-all">Auto Detect</button>
-                    </form>
                 </div>
+                <form method="post" asp-page-handler="AutoDetectDotaClientVersion" OnComplete="onDotaClientVersionSaved" class="mt-3 w-36">
+                    <button type="submit" class="h-11 w-full whitespace-nowrap rounded-lg border border-skynet-border px-5 text-xs font-black uppercase tracking-widest text-white hover:border-skynet-accent hover:text-skynet-accent transition-all">Auto Detect</button>
+                </form>
             </div>
         </div>
     </section>
