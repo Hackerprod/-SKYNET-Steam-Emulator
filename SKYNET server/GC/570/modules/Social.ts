@@ -87,7 +87,7 @@ export class Social {
         });
 
         ctx.reply({
-            response: 1,
+            response: 0,
             channelName: channel.channelName,
             channelId: channel.channelId,
             maxMembers: channel.maxMembers,

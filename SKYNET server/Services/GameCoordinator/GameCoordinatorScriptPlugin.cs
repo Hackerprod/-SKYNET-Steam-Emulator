@@ -83,7 +83,7 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
         {
             _logger.LogError(ex, "GC script failed for app {AppId}, message {MessageType}",
                 context.AppId, request.MessageType);
-            _trace.Record("error", context.AppId, context.SteamId, request.MessageType, 0, ex.Message);
+            _trace.Record("error", context.AppId, context.SteamId, request.MessageType, 0, ex.ToString());
             return new ApiGCExchangeResponse { Handled = false };
         }
     }

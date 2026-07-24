@@ -245,7 +245,7 @@ export function registerLobby(): Lobby {
     return lobby;
 }
 
-export function emitCurrentLobby<TRequest, TResponse>(ctx: HandlerContext<TRequest, TResponse>): void {
+export function emitCurrentLobby(ctx: GcContextBase): void {
     const lobby = currentLobby(ctx.steamId);
     if (lobby !== null) {
         subscribeToLobby(ctx, ctx.steamId, lobby);
@@ -360,9 +360,9 @@ export class Lobby {
             refreshLobby(lobby, ctx.clock.now());
             subscribeToLobbyObjectOnly(ctx, ctx.steamId, lobby);
             ctx.reply({ result: JOIN_SUCCESS });
-            // Joiner already got the full lobby via subscribe + single object;
-            // notify the existing members (incl. leader) so they see the new
-            // player. Excluding the joiner avoids a redundant 26 on top of 24/21.
+            // The joiner receives the full lobby in SOCacheSubscribed and the
+            // join result; existing members receive the lobby mutation as
+            // SOCacheUpdated so the host view changes without re-subscribing.
             broadcastLobby(ctx, lobby, ctx.steamId, false);
             publishLobby(ctx.services.lobby, lobby);
             return true;
@@ -1390,6 +1390,8 @@ function updateServerInfo(lobby: LobbyState, ctx: RawMessageContext, request: CM
 
 function buildConnectString(services: DotaLobbyService, lobby: LobbyState): string {
     const fallback = lobby.serverPrivateIp === "" ? "127.0.0.1" : lobby.serverPrivateIp;
+    // The advertised endpoint is resolved by the server runtime from the central
+    // Server:AdvertisedIp setting; the GC only passes the game-reported values.
     const ips = services.resolveGameServerConnectIps(lobby.serverPublicIp, lobby.serverPrivateIp, fallback).split(" ");
     const endpoints: string[] = [];
     for (let i = 0; i < ips.length; i++) {
@@ -1745,12 +1747,10 @@ function broadcastLobby(ctx: GcContextBase, lobby: LobbyState, exceptSteamId: bi
 
 function subscribeToLobby(ctx: GcContextBase, steamId: bigint, lobby: LobbyState): void {
     sendTo(ctx, steamId, Msg.SOCacheSubscribed, buildLobbySoCacheSubscribed(ctx, lobby));
-    sendTo(ctx, steamId, Msg.SOSingleObject, buildLobbySingleObject(ctx, lobby));
 }
 
 function subscribeToLobbyObjectOnly(ctx: GcContextBase, steamId: bigint, lobby: LobbyState): void {
     sendTo(ctx, steamId, Msg.SOCacheSubscribed, buildLobbyObjectOnlySubscribed(ctx, lobby));
-    sendTo(ctx, steamId, Msg.SOSingleObject, buildLobbySingleObject(ctx, lobby));
 }
 
 type LobbyOutboundMessage =
@@ -1956,7 +1956,7 @@ function buildInviteObject(invite: LobbyInviteState): CSODOTALobbyInvite {
     };
 }
 
-function emitCurrentLobbyInvites<TRequest, TResponse>(ctx: HandlerContext<TRequest, TResponse>): void {
+function emitCurrentLobbyInvites(ctx: GcContextBase): void {
     store.invites.forEach((invite) => {
         if (invite.targetSteamId === ctx.steamId) {
             sendInvite(ctx, invite);

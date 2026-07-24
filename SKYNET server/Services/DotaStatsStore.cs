@@ -55,7 +55,7 @@ public sealed class DotaStatsStore
 
     public DotaStatsStore(string dbPath, Func<uint, DotaStatsAccountIdentity?> identityResolver)
     {
-        _identityResolver = identityResolver;
+        _identityResolver = identityResolver ?? (_ => null);
         _dbPath = AppDatabase.PrepareDatabase(dbPath, path =>
         {
             using var connection = AppDatabase.OpenConnection(path);
@@ -2130,8 +2130,12 @@ public sealed class DotaStatsStore
             accountId = 100000;
         }
 
-        var resolved = _identityResolver(accountId);
-        steamId = resolved?.SteamId != 0 ? resolved!.SteamId : steamId != 0 ? steamId : ToSteamId(accountId);
+        var resolved = _identityResolver?.Invoke(accountId);
+        steamId = resolved is { SteamId: not 0 }
+            ? resolved.SteamId
+            : steamId != 0
+                ? steamId
+                : ToSteamId(accountId);
         personaName = !string.IsNullOrWhiteSpace(personaName)
             ? personaName.Trim()
             : !string.IsNullOrWhiteSpace(resolved?.PersonaName)

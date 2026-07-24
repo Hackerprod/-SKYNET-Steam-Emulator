@@ -15,6 +15,7 @@ import {
     CMsgInviteToParty,
     CMsgKickFromParty,
     CMsgLeaveParty,
+    CMsgGCToClientRequestMMInfo,
     CMsgPartyInviteResponse,
     CMsgPartyReadyCheckAcknowledge,
     CMsgPartyReadyCheckRequest,
@@ -80,6 +81,7 @@ export class Party {
         gc.on(Routes.InviteToParty, (ctx) => this.inviteToParty(ctx));
         gc.on(Routes.PartyReadyCheck, (ctx) => this.readyCheckRequest(ctx));
         gc.onMessage(Msg.GCPartyInviteResponse, (ctx) => this.inviteResponse(ctx));
+        gc.onMessage(Msg.ClientToGCMMInfo, (ctx) => this.clientMmInfo(ctx));
         gc.onMessage(Msg.ClientToGCPingData, (ctx) => this.pingData(ctx));
         gc.onMessage(Msg.ClientToGCSetPartyLeader, (ctx) => this.setLeader(ctx));
         gc.onMessage(Msg.GCLeaveParty, (ctx) => this.leave(ctx));
@@ -102,6 +104,11 @@ export class Party {
             return true;
         }
 
+        ctx.send<CMsgGCToClientRequestMMInfo>(
+            Msg.GCToClientRequestMMInfo,
+            Proto.CMsgGCToClientRequestMMInfo,
+            {}
+        );
         queuePartySubscribe(ctx, ctx.steamId, party);
         queuePartyUpdate(ctx, party);
 
@@ -127,6 +134,11 @@ export class Party {
             steamId: targetSteamId,
             userOffline: !ctx.services.party.userOnline(targetSteamId)
         });
+        return true;
+    }
+
+    private clientMmInfo(ctx: RawMessageContext): boolean {
+        ctx.decode(Proto.CMsgClientToGCMMInfo);
         return true;
     }
 
@@ -328,13 +340,6 @@ function queuePartySubscribe(ctx: PartyContext, targetSteamId: bigint, party: Do
                 objectData: [ctx.encode(Proto.CSODOTAParty, buildPartyObject(party))]
             }
         ],
-        version: objectVersion(ctx),
-        ownerSoid: partyOwner(party.partyId)
-    });
-
-    queueMessage(ctx, targetSteamId, Msg.SOSingleObject, Proto.CMsgSOSingleObject, {
-        typeId: PARTY_OBJECT_TYPE_ID,
-        objectData: ctx.encode(Proto.CSODOTAParty, buildPartyObject(party)),
         version: objectVersion(ctx),
         ownerSoid: partyOwner(party.partyId)
     });

@@ -325,11 +325,8 @@ public static class GcScriptSelfCheck
         var subscribe = response.Messages.Count >= 1 && response.Messages[0].MessageType == 24
             ? Deserialize<CMsgSOCacheSubscribed>(response.Messages[0].PayloadBase64)
             : null;
-        var singleObject = response.Messages.Count >= 2 && response.Messages[1].MessageType == 21
-            ? Deserialize<CMsgSOSingleObject>(response.Messages[1].PayloadBase64)
-            : null;
-        var result = response.Messages.Count >= 3 && response.Messages[2].MessageType == 7055
-            ? Deserialize<CMsgGenericResult>(response.Messages[2].PayloadBase64)
+        var result = response.Messages.Count >= 2 && response.Messages[1].MessageType == 7055
+            ? Deserialize<CMsgGenericResult>(response.Messages[1].PayloadBase64)
             : null;
         var subscribedLobbyPayload = subscribe?.Objects.FirstOrDefault(item => item.TypeId == 2004)?.ObjectDatas.FirstOrDefault();
         var staticLobbyPayload = subscribe?.Objects.FirstOrDefault(item => item.TypeId == 2014)?.ObjectDatas.FirstOrDefault();
@@ -347,26 +344,20 @@ public static class GcScriptSelfCheck
         var serverStaticLobby = serverStaticLobbyPayload is { Length: > 0 }
             ? DeserializeBytes<CSODOTAServerStaticLobby>(serverStaticLobbyPayload)
             : null;
-        var singleLobby = singleObject?.ObjectData is { Length: > 0 }
-            ? DeserializeBytes<CSODOTALobby>(singleObject.ObjectData)
-            : null;
         var subscribeTypes = subscribe?.Objects.Select(item => item.TypeId).ToArray() ?? Array.Empty<int>();
         var extraMessage = subscribedLobby?.ExtraMessages.FirstOrDefault();
         var serverStaticMember = serverStaticLobby?.AllMembers.FirstOrDefault();
         var ok = response.Handled
-            && response.Messages.Count == 3
+            && response.Messages.Count == 2
             && response.Messages[0].TargetJobId == null
-            && response.Messages[1].TargetJobId == null
-            && response.Messages[2].TargetJobId == sourceJobId
+            && response.Messages[1].TargetJobId == sourceJobId
             && subscribe != null
             && subscribeTypes.SequenceEqual([2004, 2013, 2014, 2015, 2016])
-            && singleObject?.TypeId == 2004
             && result?.Eresult == 1
-            && subscribedLobby?.LobbyId == singleLobby?.LobbyId
             && subscribedLobby?.AllowSpectating == false
             && subscribedLobby?.LobbyId > 9007199254740991UL
             && subscribedLobby.SeriesType == 0
-            && subscribedLobby.TeamDetails.Count == 0
+            && subscribedLobby.TeamDetails.Count == 2
             && extraMessage?.Id == 8821
             && extraMessage.Contents.SequenceEqual(new byte[] { 8, 0 })
             && staticLobby?.AllMembers.Count == 1
@@ -381,9 +372,8 @@ public static class GcScriptSelfCheck
             .Select(message => $"{message.MessageType}:{(message.TargetJobId.HasValue ? message.TargetJobId.Value.ToString() : "-")}");
         write(
             $"create lobby flow -> handled={response.Handled}, messages=[{string.Join(",", actual)}], " +
-            $"singleType={singleObject?.TypeId}, subscribeTypes=[{string.Join(",", subscribeTypes)}], " +
+            $"subscribeTypes=[{string.Join(",", subscribeTypes)}], " +
             $"lobbyId={subscribedLobby?.LobbyId}, allowSpectating={subscribedLobby?.AllowSpectating}, " +
-            $"singleLobbyId={singleLobby?.LobbyId}, " +
             $"seriesType={subscribedLobby?.SeriesType}, teamDetails={subscribedLobby?.TeamDetails.Count}, " +
             $"extraMsg={extraMessage?.Id}:{(extraMessage?.Contents is null ? "" : Convert.ToHexString(extraMessage.Contents))}, " +
             $"staticMembers={staticLobby?.AllMembers.Count}, staticName={staticLobby?.AllMembers.FirstOrDefault()?.Name}, " +
@@ -481,7 +471,7 @@ public static class GcScriptSelfCheck
         var join = Deserialize<CMsgDOTAJoinChatChannelResponse>(joinResponse.Messages[0].PayloadBase64);
         var channelId = join.ChannelId;
         joinOk = channelId != 0
-            && join.Response == 1
+            && join.Response == 0
             && join.Members.Count == 1
             && join.Members[0].SteamId == context.SteamId
             && join.Members[0].ChannelUserId == join.ChannelUserId;
@@ -646,41 +636,35 @@ public static class GcScriptSelfCheck
                     PassKey = string.Empty
                 })));
         var subscribedMessage = response.Messages.FirstOrDefault(message => message.MessageType == 24);
-        var createMessage = response.Messages.FirstOrDefault(message => message.MessageType == 21);
         var joinResponseMessage = response.Messages.FirstOrDefault(message => message.MessageType == 7113);
-        var joinerUpdateMessage = response.Messages.FirstOrDefault(message => message.MessageType == 26);
         var subscribed = subscribedMessage == null ? null : Deserialize<CMsgSOCacheSubscribed>(subscribedMessage.PayloadBase64);
-        var created = createMessage == null ? null : Deserialize<CMsgSOSingleObject>(createMessage.PayloadBase64);
         var joinResponse = joinResponseMessage == null ? null : Deserialize<CMsgPracticeLobbyJoinResponse>(joinResponseMessage.PayloadBase64);
-        var joinerUpdate = joinerUpdateMessage == null ? null : Deserialize<CMsgSOMultipleObjects>(joinerUpdateMessage.PayloadBase64);
         var subscribeTypes = subscribed?.Objects.Select(item => item.TypeId).ToArray() ?? Array.Empty<int>();
         var lobbyPayload = subscribed?.Objects.FirstOrDefault(item => item.TypeId == 2004)?.ObjectDatas.FirstOrDefault();
         var lobby = lobbyPayload is { Length: > 0 } ? DeserializeBytes<CSODOTALobby>(lobbyPayload) : null;
-        var leaderUpdate = queuedMessages.Any(message => message.SteamId == leaderContext.SteamId && message.Message.MessageType == 26);
+        var leaderUpdateMessage = queuedMessages.FirstOrDefault(message => message.SteamId == leaderContext.SteamId && message.Message.MessageType == 26);
+        var leaderUpdate = leaderUpdateMessage.Message == null ? null : Deserialize<CMsgSOMultipleObjects>(leaderUpdateMessage.Message.PayloadBase64);
         var ok = listResponse.Handled
             && entry != null
             && response.Handled
-            && response.Messages.Count == 4
+            && response.Messages.Count == 2
             && response.Messages[0].MessageType == 24
-            && response.Messages[1].MessageType == 21
-            && response.Messages[2].MessageType == 7113
-            && response.Messages[3].MessageType == 26
+            && response.Messages[1].MessageType == 7113
             && subscribed?.OwnerSoid?.Type == 3
             && subscribed.OwnerSoid.Id == entry.Id
             && subscribeTypes.SequenceEqual([2004])
-            && created?.TypeId == 2004
             && joinResponse?.Result == DOTAJoinLobbyResult.DotaJoinResultSuccess
-            && joinerUpdate?.ObjectsModifieds.Count == 1
-            && joinerUpdate.ObjectsModifieds[0].TypeId == 2004
+            && leaderUpdate?.ObjectsModifieds.Count == 1
+            && leaderUpdate.ObjectsModifieds[0].TypeId == 2004
             && lobby?.AllMembers.Count == 2
             && lobby.AllMembers.Any(member => member.Id == leaderContext.SteamId)
             && lobby.AllMembers.Any(member => member.Id == friendContext.SteamId)
-            && !leaderUpdate;
+            && leaderUpdateMessage.Message != null;
         write(
             $"lobby join flow -> handled={response.Handled}, messages={response.Messages.Count}, " +
-            $"subscribeTypes=[{string.Join(",", subscribeTypes)}], createType={created?.TypeId}, " +
-            $"joinerUpdateType={joinerUpdate?.ObjectsModifieds.FirstOrDefault()?.TypeId}, " +
-            $"members={lobby?.AllMembers.Count}, leaderUpdate={leaderUpdate}, result={joinResponse?.Result}, ok={ok}");
+            $"subscribeTypes=[{string.Join(",", subscribeTypes)}], " +
+            $"leaderUpdateType={leaderUpdate?.ObjectsModifieds.FirstOrDefault()?.TypeId}, " +
+            $"members={lobby?.AllMembers.Count}, leaderUpdate={leaderUpdateMessage.Message != null}, result={joinResponse?.Result}, ok={ok}");
         plugin.Exchange(friendContext, RequestFor(friendContext, 7040));
         return ok;
     }
@@ -696,12 +680,18 @@ public static class GcScriptSelfCheck
         var result = response.Messages.FirstOrDefault(message => message.MessageType == 2579) is { } resultMessage
             ? Deserialize<CMsgGenericResult>(resultMessage.PayloadBase64)
             : null;
+        var updateMessage = response.Messages.FirstOrDefault(message => message.MessageType == 26);
+        var update = updateMessage == null ? null : Deserialize<CMsgSOMultipleObjects>(updateMessage.PayloadBase64);
         var ok = response.Handled
-            && response.Messages.Count == 1
+            && response.Messages.Count == 2
+            && response.Messages[0].MessageType == 26
+            && response.Messages[1].MessageType == 2579
+            && update?.ObjectsModifieds.Count == 1
+            && update.ObjectsModifieds[0].TypeId == 2004
             && result?.Eresult == 1;
         write(
             $"apply team flow -> handled={response.Handled}, messages={response.Messages.Count}, queued={queuedMessages.Count}, " +
-            $"result={result?.Eresult}, ok={ok}");
+            $"updateType={update?.ObjectsModifieds.FirstOrDefault()?.TypeId}, result={result?.Eresult}, ok={ok}");
         return ok;
     }
 
@@ -720,13 +710,19 @@ public static class GcScriptSelfCheck
         var result = resultMessage == null
             ? null
             : Deserialize<CMsgGenericResult>(resultMessage.PayloadBase64);
+        var updateMessage = response.Messages.FirstOrDefault(message => message.MessageType == 26);
+        var update = updateMessage == null ? null : Deserialize<CMsgSOMultipleObjects>(updateMessage.PayloadBase64);
         var ok = response.Handled
-            && response.Messages.Count == 1
+            && response.Messages.Count == 2
+            && response.Messages[0].MessageType == 26
+            && response.Messages[1].MessageType == 2579
+            && update?.ObjectsModifieds.Count == 1
+            && update.ObjectsModifieds[0].TypeId == 2004
             && result?.Eresult == 1
             && resultMessage?.TargetJobId == sourceJobId;
         write(
             $"launch flow -> handled={response.Handled}, messages={response.Messages.Count}, queued={queuedMessages.Count}, " +
-            $"result={result?.Eresult}, ok={ok}");
+            $"updateType={update?.ObjectsModifieds.FirstOrDefault()?.TypeId}, result={result?.Eresult}, ok={ok}");
         return ok;
     }
 

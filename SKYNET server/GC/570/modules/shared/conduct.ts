@@ -14,7 +14,17 @@ export function behaviorScore(value: number | undefined, hasConductSignals = fal
     return clamp(value, MIN_BEHAVIOR_SCORE, BASE_BEHAVIOR_SCORE);
 }
 
-export function normalizeConduct(conduct: DotaConduct): DotaConduct {
+export function normalizeConduct(conduct: DotaConduct | null | undefined): DotaConduct {
+    if (conduct === null || conduct === undefined) {
+        return {
+            commendCount: 0,
+            rawBehaviorScore: BASE_BEHAVIOR_SCORE,
+            reportsCount: 0,
+            matchesAbandoned: 0,
+            commsReports: 0
+        };
+    }
+
     const hasConductSignals =
         optionalCount(conduct.reportsCount) > 0 ||
         optionalCount(conduct.matchesAbandoned) > 0 ||

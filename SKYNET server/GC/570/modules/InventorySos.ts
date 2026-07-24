@@ -223,7 +223,7 @@ function buildEconGameAccount(): CSOEconGameAccountClient {
 
 export function buildDotaGameAccount(ctx: GcContextBase, accountId = ctx.accountId): CSODOTAGameAccountClient {
     const snapshot = ctx.services.profiles.get(accountId);
-    const conduct = normalizeConduct(snapshot.conduct);
+    const conduct = normalizeConduct(snapshot?.conduct);
     const conductSequence =
         (conduct.reportsCount ?? 0) +
         (conduct.matchesAbandoned ?? 0) +

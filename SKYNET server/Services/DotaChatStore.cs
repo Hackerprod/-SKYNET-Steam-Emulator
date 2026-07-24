@@ -4,7 +4,7 @@ public sealed class DotaChatStore
 {
     private const uint RegionalMaxMembers = 2000;
     private const uint GuildMaxMembers = 50;
-    private const uint DefaultMaxMembers = 500;
+    private const uint DefaultMaxMembers = 200;
 
     private readonly object _sync = new();
     private readonly Dictionary<(uint ChannelType, string NameKey), ChatChannel> _channelsByKey = new();

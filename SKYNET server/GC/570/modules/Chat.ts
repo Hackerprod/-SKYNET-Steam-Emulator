@@ -95,14 +95,18 @@ export class Chat {
         }
 
         const text = request.text ?? "";
+        // Real GC fans out the sender's own event/badge state (event_id, badge_level,
+        // event_level) and does not echo timestamp/channel_user_id. See capture
+        // "Dump Sala - Chat - Invites" GCChatMessage 608/609/616.
+        const sender = ctx.services.profiles.get(ctx.accountId);
         let message: CMsgDOTAChatMessage = {
             accountId: ctx.accountId,
             channelId,
             personaName: ctx.personaName,
             text,
-            timestamp: ctx.clock.now(),
-            channelUserId: channel.channelUserId,
-            badgeLevel: 37,
+            eventId: sender.activeEventId,
+            badgeLevel: sender.level,
+            eventLevel: sender.level,
             shareProfileAccountId: request.shareProfileAccountId,
             sharePartyId: request.sharePartyId,
             shareLobbyId: request.shareLobbyId,
@@ -236,13 +240,16 @@ export class Chat {
         }
 
         const text = request.text ?? "";
+        const sender = ctx.services.profiles.get(ctx.accountId);
         let message: CMsgDOTAChatMessage = {
             accountId: ctx.accountId,
             personaName: ctx.personaName,
             text,
             timestamp: ctx.clock.now(),
             privateChatChannelId,
-            badgeLevel: 37,
+            eventId: sender.activeEventId,
+            badgeLevel: sender.level,
+            eventLevel: sender.level,
             chatFlags: request.chatFlags,
             chatWheelMessage: request.chatWheelMessage
         };

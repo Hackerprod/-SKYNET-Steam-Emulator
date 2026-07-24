@@ -1,5 +1,5 @@
-import { gc, HandlerContext } from "../framework/gc";
-import { CMsgClientHello, CMsgClientWelcome, GCConnectionStatus, Msg, Proto, Routes } from "../generated/dota";
+import { gc, RawMessageContext } from "../framework/gc";
+import { GCConnectionStatus, Msg, Proto } from "../generated/dota";
 import { buildDotaGameAccount, buildEconSoCacheSubscribed } from "./InventorySos";
 import { emitCurrentLobby } from "./Lobby";
 import { emitCurrentParty } from "./Party";
@@ -20,21 +20,14 @@ export function registerAuth(): void {
 
 export class Auth {
     register(): void {
-        gc.on(Routes.ClientHello, (ctx) => {
+        gc.onMessage(Msg.GCClientHello, (ctx) => {
             this.handleClientHello(ctx);
         });
     }
 
-    handleClientHello(ctx: HandlerContext<CMsgClientHello, CMsgClientWelcome>): void {
+    handleClientHello(ctx: RawMessageContext): void {
         let version: number = Welcome.Version;
-        if (ctx.request.version) {
-            version = ctx.request.version as number;
-        }
-
         let sessionNeed: number = 0;
-        if (ctx.request.clientSessionNeed) {
-            sessionNeed = ctx.request.clientSessionNeed as number;
-        }
 
         // ClientHello opens the GC session in three packets: first we tell the
         // client it is out of the logon queue, then we send the welcome payload
