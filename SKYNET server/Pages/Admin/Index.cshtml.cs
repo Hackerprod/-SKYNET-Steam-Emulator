@@ -126,7 +126,7 @@ public class IndexModel : PageModel
     public IActionResult OnPostAutoDetectDotaClientVersion()
     {
         var result = _state.AutoDetectDotaClientVersion(GetToken());
-        return AjaxResult(result.Success, result.Success
+        return DotaClientVersionResult(result, result.Success
             ? $"ClientVersion set to {result.ClientVersion}."
             : $"Could not detect ClientVersion: {result.Message}");
     }
@@ -134,7 +134,7 @@ public class IndexModel : PageModel
     public IActionResult OnPostSetDotaClientVersion()
     {
         var result = _state.SetDotaClientVersion(GetToken(), DotaClientVersion);
-        return AjaxResult(result.Success, result.Success
+        return DotaClientVersionResult(result, result.Success
             ? $"ClientVersion set to {result.ClientVersion}."
             : $"Could not save ClientVersion: {result.Message}");
     }
@@ -224,6 +224,17 @@ public class IndexModel : PageModel
     {
         if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             return new JsonResult(new { success, message });
+        StatusMessage = message;
+        return RedirectToPage();
+    }
+
+    private IActionResult DotaClientVersionResult(ApiDotaClientVersionResult result, string message)
+    {
+        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        {
+            return new JsonResult(new { success = result.Success, message, clientVersion = result.ClientVersion });
+        }
+
         StatusMessage = message;
         return RedirectToPage();
     }
