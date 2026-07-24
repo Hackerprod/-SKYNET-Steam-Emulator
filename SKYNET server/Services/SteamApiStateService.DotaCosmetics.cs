@@ -95,6 +95,7 @@ public sealed partial class SteamApiStateService
             var heroIds = DotaItemsGameParser.ParseHeroIds(heroesText);
             var heroSlots = DotaItemsGameParser.ParseHeroSlots(heroesText);
             var items = DotaItemsGameParser.ParseItems(itemsText, heroIds);
+            var versionDetected = DotaSteamInfReader.TryReadClientVersion(importPath, out var detectedClientVersion, out var steamInfPath, out var versionError);
 
             lock (_sync)
             {
@@ -102,8 +103,14 @@ public sealed partial class SteamApiStateService
                 _state.DotaHeroIds = heroIds;
                 _state.DotaHeroSlots = heroSlots;
                 _state.DotaCosmetics.DotaPath = importPath;
+                if (_state.DotaCosmetics.ClientVersion == 0 && versionDetected)
+                {
+                    _state.DotaCosmetics.ClientVersion = detectedClientVersion;
+                }
                 _state.DotaCosmetics.LastImportAt = DateTime.UtcNow;
-                _state.DotaCosmetics.LastImportStatus = $"OK: {items.Count} items, {heroIds.Count} heroes from {pakPath}";
+                _state.DotaCosmetics.LastImportStatus = versionDetected
+                    ? $"OK: {items.Count} items, {heroIds.Count} heroes from {pakPath}; ClientVersion={_state.DotaCosmetics.ClientVersion} ({steamInfPath})"
+                    : $"OK: {items.Count} items, {heroIds.Count} heroes from {pakPath}; ClientVersion not configured ({versionError})";
                 TouchDotaEquipmentVersionLocked();
                 // The item catalog changed: persist it (routine flushes skip it).
                 RequestCatalogFlush();
@@ -445,6 +452,103 @@ public sealed partial class SteamApiStateService
                 ? SerializeDotaMatchForScript(match)
                 : string.Empty;
         }
+    }
+
+    public ApiDotaClientVersionResult AutoDetectDotaClientVersion(string token)
+    {
+        string dotaPath;
+        lock (_sync)
+        {
+            if (!IsWebAdmin(token))
+            {
+                return new ApiDotaClientVersionResult { Message = "Not authorized." };
+            }
+
+            dotaPath = _state.DotaCosmetics.DotaPath;
+        }
+
+        if (!DotaSteamInfReader.TryReadClientVersion(dotaPath, out var clientVersion, out var steamInfPath, out var error))
+        {
+            return new ApiDotaClientVersionResult { SteamInfPath = steamInfPath, Message = error };
+        }
+
+        lock (_sync)
+        {
+            _state.DotaCosmetics.ClientVersion = clientVersion;
+            SaveState();
+        }
+
+        return new ApiDotaClientVersionResult
+        {
+            Success = true,
+            ClientVersion = clientVersion,
+            SteamInfPath = steamInfPath,
+            Message = "ClientVersion detected and saved."
+        };
+    }
+
+    public ApiDotaClientVersionResult SetDotaClientVersion(string token, uint clientVersion)
+    {
+        if (clientVersion == 0)
+        {
+            return new ApiDotaClientVersionResult { Message = "ClientVersion must be greater than zero." };
+        }
+
+        lock (_sync)
+        {
+            if (!IsWebAdmin(token))
+            {
+                return new ApiDotaClientVersionResult { Message = "Not authorized." };
+            }
+
+            _state.DotaCosmetics.ClientVersion = clientVersion;
+            SaveState();
+            return new ApiDotaClientVersionResult
+            {
+                Success = true,
+                ClientVersion = clientVersion,
+                Message = "ClientVersion saved."
+            };
+        }
+    }
+
+    private uint GetConfiguredDotaClientVersion()
+    {
+        lock (_sync)
+        {
+            return _state.DotaCosmetics.ClientVersion;
+        }
+    }
+
+    private void DetectDotaClientVersionIfUnset()
+    {
+        string dotaPath;
+        lock (_sync)
+        {
+            if (_state.DotaCosmetics.ClientVersion != 0 || string.IsNullOrWhiteSpace(_state.DotaCosmetics.DotaPath))
+            {
+                return;
+            }
+
+            dotaPath = _state.DotaCosmetics.DotaPath;
+        }
+
+        if (!DotaSteamInfReader.TryReadClientVersion(dotaPath, out var clientVersion, out var steamInfPath, out _))
+        {
+            return;
+        }
+
+        lock (_sync)
+        {
+            if (_state.DotaCosmetics.ClientVersion != 0)
+            {
+                return;
+            }
+
+            _state.DotaCosmetics.ClientVersion = clientVersion;
+        }
+
+        _logger.LogInformation("Dota ClientVersion {ClientVersion} initialized from {SteamInfPath}", clientVersion, steamInfPath);
     }
 
     private IReadOnlyList<ApiDotaMatch> GetDotaPublishedMatches()

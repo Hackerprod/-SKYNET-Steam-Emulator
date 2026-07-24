@@ -34,6 +34,9 @@ public class IndexModel : PageModel
     [BindProperty]
     public string DotaPath { get; set; } = @"D:\Games\Steam\steamapps\common\dota 2 beta";
 
+    [BindProperty]
+    public uint DotaClientVersion { get; set; }
+
     [BindProperty(SupportsGet = true)]
     public string ItemSearch { get; set; } = string.Empty;
 
@@ -120,6 +123,22 @@ public class IndexModel : PageModel
         return AjaxResult(result.Success, result.Success ? $"Catalog updated: {result.ItemCount} items, {result.HeroCount} heroes." : $"Could not import catalog: {result.Message}");
     }
 
+    public IActionResult OnPostAutoDetectDotaClientVersion()
+    {
+        var result = _state.AutoDetectDotaClientVersion(GetToken());
+        return AjaxResult(result.Success, result.Success
+            ? $"ClientVersion set to {result.ClientVersion}."
+            : $"Could not detect ClientVersion: {result.Message}");
+    }
+
+    public IActionResult OnPostSetDotaClientVersion()
+    {
+        var result = _state.SetDotaClientVersion(GetToken(), DotaClientVersion);
+        return AjaxResult(result.Success, result.Success
+            ? $"ClientVersion set to {result.ClientVersion}."
+            : $"Could not save ClientVersion: {result.Message}");
+    }
+
     public IActionResult OnPostEquipDotaItem()
     {
         var token = GetToken();
@@ -189,6 +208,7 @@ public class IndexModel : PageModel
         Overview = overview;
         Cosmetics = _state.GetDotaCosmeticsOverview(token, ItemSearch, null, 120) ?? new ApiDotaCosmeticOverview();
         DotaPath = string.IsNullOrWhiteSpace(overview.DotaCosmetics.DotaPath) ? DotaPath : overview.DotaCosmetics.DotaPath;
+        DotaClientVersion = overview.DotaCosmetics.ClientVersion;
         GsAdvertisedIp = overview.GameServerSettings.AdvertisedServerIp;
         GsDedicatedEnabled = overview.GameServerSettings.DedicatedEnabled;
         GsBindIp = overview.GameServerSettings.DedicatedBindIp;

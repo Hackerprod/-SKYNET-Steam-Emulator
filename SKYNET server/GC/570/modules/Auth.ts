@@ -26,7 +26,7 @@ export class Auth {
     }
 
     handleClientHello(ctx: RawMessageContext): void {
-        let version: number = Welcome.Version;
+        const version = ctx.services.build.clientVersion();
         let sessionNeed: number = 0;
 
         // ClientHello opens the GC session in three packets: first we tell the

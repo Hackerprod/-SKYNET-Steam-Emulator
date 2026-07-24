@@ -50,4 +50,5 @@ public static class DotaGcRuntimeServices
     public static Func<ulong, string>? EquipmentJsonProvider { get; set; }
     public static Func<ulong, string, bool>? EquipmentJsonSink { get; set; }
     public static Func<uint, string>? CatalogItemJsonProvider { get; set; }
+    public static Func<uint>? ClientVersionProvider { get; set; }
 }

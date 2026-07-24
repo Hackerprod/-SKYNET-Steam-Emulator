@@ -149,7 +149,7 @@ public static class PersistenceRoundTripCheck
 
         state.DotaHeroIds["npc_dota_hero_axe"] = 2;
         state.DotaHeroSlots["axe"] = new Dictionary<string, uint>(StringComparer.OrdinalIgnoreCase) { ["weapon"] = 1 };
-        state.DotaCosmetics = new ApiDotaCosmeticSettings { DotaPath = "C:/dota", LastImportStatus = "OK", EquipmentVersion = 3 };
+        state.DotaCosmetics = new ApiDotaCosmeticSettings { DotaPath = "C:/dota", ClientVersion = 6860, LastImportStatus = "OK", EquipmentVersion = 3 };
 
         return state;
     }
@@ -217,7 +217,7 @@ public static class PersistenceRoundTripCheck
         Check("DotaMatch.Player.Equipment", match is not null && match.Players[0].Equipment.Count == 1 && match.Players[0].Equipment[0].DefIndex == 101);
         Check("DotaHeroIds", loaded.DotaHeroIds.TryGetValue("npc_dota_hero_axe", out var hid) && hid == 2);
         Check("DotaHeroSlots", loaded.DotaHeroSlots.TryGetValue("axe", out var slots) && slots.TryGetValue("weapon", out var sid) && sid == 1);
-        Check("Cosmetics", loaded.DotaCosmetics.EquipmentVersion == 3 && loaded.DotaCosmetics.DotaPath == "C:/dota");
+        Check("Cosmetics", loaded.DotaCosmetics.EquipmentVersion == 3 && loaded.DotaCosmetics.DotaPath == "C:/dota" && loaded.DotaCosmetics.ClientVersion == 6860);
 
         if (failures.Count == 0)
         {

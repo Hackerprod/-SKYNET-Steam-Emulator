@@ -93,6 +93,7 @@ public sealed partial class SteamApiStateService
         _dotaGuildStore = new DotaGuildStore(dotaDbPath, ResolveDotaStatsIdentity);
         InitializePersistence(dataRoot);
         NormalizeState();
+        DetectDotaClientVersionIfUnset();
         StartBackgroundFlusher();
         RequestStateFlush();
         EnsureDefaultAdminAccount();
@@ -136,6 +137,7 @@ public sealed partial class SteamApiStateService
         DotaGcRuntimeServices.EquipmentJsonProvider = GetDotaEquipmentJson;
         DotaGcRuntimeServices.EquipmentJsonSink = SetDotaEquipmentJson;
         DotaGcRuntimeServices.CatalogItemJsonProvider = GetDotaCatalogItemJson;
+        DotaGcRuntimeServices.ClientVersionProvider = GetConfiguredDotaClientVersion;
     }
 
     private static string ResolveDataRoot(string contentRootPath, IConfiguration configuration)

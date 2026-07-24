@@ -62,6 +62,7 @@ export interface Logger {
 }
 
 export interface GcServices {
+    readonly build: DotaBuildService;
     readonly items: DotaItemService;
     readonly match: DotaMatchService;
     readonly party: DotaPartyService;
@@ -110,6 +111,10 @@ export interface DotaLobbyMatchSnapshot {
     readonly dedicated: boolean;
     readonly updatedAtUnix?: number;
     readonly players: DotaLobbyMatchPlayer[];
+}
+
+export interface DotaBuildService {
+    clientVersion(): number;
 }
 
 export interface DotaLobbyMatchPlayer {
@@ -1043,6 +1048,12 @@ class GcDotaItemService implements DotaItemService {
     }
 }
 
+class GcDotaBuildService implements DotaBuildService {
+    clientVersion(): number {
+        return dotaClientVersion();
+    }
+}
+
 class GcDotaLobbyService implements DotaLobbyService {
     queueMessage(steamId: bigint, messageType: number, payload: Uint8Array, protobuf = true): boolean {
         return dotaQueueGcMessage(steamId, messageType, payload, protobuf);
@@ -1518,6 +1529,7 @@ class GcDotaStatsService implements DotaStatsService {
 }
 
 class GcServiceContainer implements GcServices {
+    build: DotaBuildService;
     items: DotaItemService;
     match: DotaMatchService;
     party: DotaPartyService;
@@ -1530,6 +1542,7 @@ class GcServiceContainer implements GcServices {
     teams: DotaTeamService;
 
     constructor() {
+        this.build = new GcDotaBuildService();
         this.items = new GcDotaItemService();
         this.match = new GcDotaMatchService();
         this.party = new GcDotaPartyService();

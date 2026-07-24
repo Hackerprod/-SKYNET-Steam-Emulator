@@ -241,6 +241,7 @@ public class CosmeticSettingsRecord
 {
     public int Id { get; set; } = 1;
     public string DotaPath { get; set; } = string.Empty;
+    public uint ClientVersion { get; set; }
     public DateTime LastImportAt { get; set; }
     public string LastImportStatus { get; set; } = string.Empty;
     public ulong EquipmentVersion { get; set; }

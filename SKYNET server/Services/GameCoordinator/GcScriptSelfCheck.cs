@@ -92,6 +92,7 @@ public static class GcScriptSelfCheck
         DotaGcRuntimeServices.InventoryProvider = inventoryFixture.GetInventory;
         DotaGcRuntimeServices.EquipItemSink = inventoryFixture.EquipItem;
         DotaGcRuntimeServices.SetItemStyleSink = inventoryFixture.SetItemStyle;
+        DotaGcRuntimeServices.ClientVersionProvider = () => 6860;
         SeedSocialMatchData(DotaGcRuntimeServices.StatsStore, context);
 
         var ok = true;

@@ -180,6 +180,7 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .RegisterHostFunction("gc", "reply", dispatcher.Reply)
                 .RegisterHostFunction("gc", "dotaInventory", dispatcher.DotaInventory)
                 .RegisterHostFunction("gc", "dotaCatalogItem", dispatcher.DotaCatalogItem)
+                .RegisterHostFunction("gc", "dotaClientVersion", dispatcher.DotaClientVersion)
                 .RegisterHostFunction("gc", "dotaEquipItem", dispatcher.DotaEquipItem)
                 .RegisterHostFunction("gc", "dotaSetItemStyle", dispatcher.DotaSetItemStyle)
                 .RegisterHostFunction("gc", "dotaProfile", dispatcher.DotaProfile)
@@ -436,6 +437,11 @@ internal sealed class ScriptHostDispatcher
     public TsValue? DotaInventory(TsValue[] args)
     {
         return RequireCurrent().DotaInventory(args);
+    }
+
+    public TsValue? DotaClientVersion(TsValue[] args)
+    {
+        return RequireCurrent().DotaClientVersion();
     }
 
     public TsValue? DotaSetItemStyle(TsValue[] args)
@@ -1459,6 +1465,11 @@ internal sealed class ScriptExchangeHost
         }
 
         return ToTsInventory(DotaGcRuntimeServices.InventoryProvider?.Invoke(steamId));
+    }
+
+    public TsValue DotaClientVersion()
+    {
+        return TsValue.FromInt64(DotaGcRuntimeServices.ClientVersionProvider?.Invoke() ?? 0);
     }
 
     public TsValue DotaCatalogItem(TsValue[] args)

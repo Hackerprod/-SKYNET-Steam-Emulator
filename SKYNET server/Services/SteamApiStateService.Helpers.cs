@@ -647,6 +647,7 @@ public sealed partial class SteamApiStateService
         HeroCount = _state.DotaHeroIds.Count,
         EquippedCount = _state.DotaEquipment.Values.Sum(items => items.Count),
         DotaPath = _state.DotaCosmetics.DotaPath,
+        ClientVersion = _state.DotaCosmetics.ClientVersion,
         LastImportAt = _state.DotaCosmetics.LastImportAt,
         LastImportStatus = _state.DotaCosmetics.LastImportStatus
     };

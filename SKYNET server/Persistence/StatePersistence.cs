@@ -289,6 +289,7 @@ public static class StatePersistence
         {
             Id = 1,
             DotaPath = state.DotaCosmetics.DotaPath,
+            ClientVersion = state.DotaCosmetics.ClientVersion,
             LastImportAt = state.DotaCosmetics.LastImportAt,
             LastImportStatus = state.DotaCosmetics.LastImportStatus,
             EquipmentVersion = state.DotaCosmetics.EquipmentVersion,
@@ -681,6 +682,7 @@ public static class StatePersistence
             state.DotaCosmetics = new ApiDotaCosmeticSettings
             {
                 DotaPath = cosmetics.DotaPath,
+                ClientVersion = cosmetics.ClientVersion,
                 LastImportAt = cosmetics.LastImportAt,
                 LastImportStatus = cosmetics.LastImportStatus,
                 EquipmentVersion = cosmetics.EquipmentVersion,

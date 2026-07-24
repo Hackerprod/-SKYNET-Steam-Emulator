@@ -8,7 +8,7 @@ internal static class DatabaseSchemaMaintenance
     private const string SteamComponent = "steam-core";
     private const string DotaComponent = "dota-core";
     private const int SteamVersion = 1;
-    private const int DotaVersion = 1;
+    private const int DotaVersion = 2;
 
     public static void EnsureCurrent(SteamDbContext steam, DotaDbContext dota)
     {
@@ -31,6 +31,7 @@ internal static class DatabaseSchemaMaintenance
         if (GetVersion(context, DotaComponent) < DotaVersion)
         {
             EnsureDotaEquipmentKey(context);
+            EnsureDotaCosmeticClientVersion(context);
             SetVersion(context, DotaComponent, DotaVersion);
         }
     }
@@ -159,6 +160,31 @@ internal static class DatabaseSchemaMaintenance
         }
     }
 
+    private static void EnsureDotaCosmeticClientVersion(DotaDbContext context)
+    {
+        var connection = (SqliteConnection)context.Database.GetDbConnection();
+        var closeWhenDone = connection.State == System.Data.ConnectionState.Closed;
+        if (closeWhenDone)
+        {
+            connection.Open();
+        }
+
+        try
+        {
+            if (TableExists(connection, "CosmeticSettings") && !ColumnExists(connection, "CosmeticSettings", "ClientVersion"))
+            {
+                Execute(connection, null, "ALTER TABLE CosmeticSettings ADD COLUMN ClientVersion INTEGER NOT NULL DEFAULT 0;");
+            }
+        }
+        finally
+        {
+            if (closeWhenDone)
+            {
+                connection.Close();
+            }
+        }
+    }
+
     private static bool TableExists(SqliteConnection connection, string tableName)
     {
         using var command = connection.CreateCommand();
@@ -183,6 +209,22 @@ internal static class DatabaseSchemaMaintenance
         }
 
         return columns.OrderBy(column => column.Order).Select(column => column.Name).ToList();
+    }
+
+    private static bool ColumnExists(SqliteConnection connection, string tableName, string columnName)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = $"PRAGMA table_info({QuoteIdentifier(tableName)});";
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            if (string.Equals(reader.GetString(reader.GetOrdinal("name")), columnName, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static void Execute(SqliteConnection connection, SqliteTransaction? transaction, string sql)

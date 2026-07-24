@@ -616,6 +616,7 @@ public sealed class ApiDotaEquipment
 public sealed class ApiDotaCosmeticSettings
 {
     public string DotaPath { get; set; } = string.Empty;
+    public uint ClientVersion { get; set; }
     public DateTime LastImportAt { get; set; }
     public string LastImportStatus { get; set; } = string.Empty;
     public ulong EquipmentVersion { get; set; }
@@ -627,6 +628,7 @@ public sealed class ApiDotaCosmeticSummary
     public int HeroCount { get; set; }
     public int EquippedCount { get; set; }
     public string DotaPath { get; set; } = string.Empty;
+    public uint ClientVersion { get; set; }
     public DateTime LastImportAt { get; set; }
     public string LastImportStatus { get; set; } = string.Empty;
 }
@@ -642,6 +644,14 @@ public sealed class ApiDotaCosmeticOverview
 public sealed class ApiDotaImportRequest
 {
     public string DotaPath { get; set; } = string.Empty;
+}
+
+public sealed class ApiDotaClientVersionResult
+{
+    public bool Success { get; set; }
+    public uint ClientVersion { get; set; }
+    public string SteamInfPath { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
 }
 
 public sealed class ApiDotaItemImportResult

@@ -98,9 +98,6 @@ const LOBBY_OWNER_TYPE = SO_OWNER_LOBBY_GROUP;
 const LOBBY_INVITE_OWNER_TYPE = SO_OWNER_INVITE;
 const LOBBY_SERVICE_ID = DOTA_SO_SERVICE_GAME;
 const WELCOME_VERSION = DOTA_GC_SOCACHE_FILE_VERSION;
-// Dedicated servers accept the GC welcome only when it carries the current
-// server-side welcome version observed from the working coordinator flow.
-const GAME_SERVER_WELCOME_VERSION = 6860;
 
 const TEAM_GOOD = 0;
 const TEAM_BAD = 1;
@@ -656,7 +653,7 @@ export class Lobby {
 
     private gameServerHello(ctx: RawMessageContext): boolean {
         ctx.reply<CMsgClientWelcome>(Msg.GCGameServerWelcome, Proto.CMsgClientWelcome, {
-            version: GAME_SERVER_WELCOME_VERSION,
+            version: ctx.services.build.clientVersion(),
             gcSocacheFileVersion: WELCOME_VERSION
         });
         return true;
