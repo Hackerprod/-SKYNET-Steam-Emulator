@@ -208,19 +208,19 @@
 
         <div class="p-5 space-y-4">
             <form method="post" asp-page-handler="ImportDotaItems" OnComplete="onDotaCatalogImport" class="flex gap-3">
-                <input asp-for="DotaPath" class="flex-1 px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="Dota 2 path" />
-                <button type="submit" class="shrink-0 rounded-lg bg-skynet-accent px-5 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-blue-600 transition-all">Update DB</button>
+                <input asp-for="DotaPath" class="h-11 flex-1 px-4 rounded-lg text-sm bg-skynet-black border border-skynet-border transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="Dota 2 path" />
+                <button type="submit" class="h-11 shrink-0 rounded-lg bg-skynet-accent px-5 text-xs font-black uppercase tracking-widest text-white hover:bg-blue-600 transition-all">Update DB</button>
             </form>
-            <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto_auto]">
+            <div class="grid grid-cols-[minmax(0,1fr)_9rem_9rem] gap-3">
                 <form method="post" asp-page-handler="SetDotaClientVersion" OnComplete="onDotaClientVersionSaved" class="contents">
                     <div>
                         <label asp-for="DotaClientVersion" class="block text-[10px] font-black uppercase tracking-widest text-skynet-muted">Client Version</label>
-                        <input asp-for="DotaClientVersion" type="number" min="1" class="mt-2 w-full px-4 py-3 rounded-lg text-sm bg-skynet-black border border-skynet-border font-mono transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="6860" />
+                        <input asp-for="DotaClientVersion" type="number" min="1" class="mt-2 h-11 w-full px-4 rounded-lg text-sm bg-skynet-black border border-skynet-border font-mono transition-all focus:border-skynet-accent focus:outline-none focus:shadow-[0_0_0_1px_rgba(59,130,246,0.2)] text-gray-200" placeholder="6860" />
                     </div>
-                    <button type="submit" class="self-end rounded-lg bg-skynet-accent px-5 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-blue-600 transition-all">Save Version</button>
+                    <button type="submit" class="h-11 w-full self-end whitespace-nowrap rounded-lg bg-skynet-accent px-5 text-xs font-black uppercase tracking-widest text-white hover:bg-blue-600 transition-all">Save Version</button>
                 </form>
-                <form method="post" asp-page-handler="AutoDetectDotaClientVersion" OnComplete="onDotaClientVersionSaved" class="self-end">
-                    <button type="submit" class="rounded-lg border border-skynet-border px-5 py-3 text-xs font-black uppercase tracking-widest text-white hover:border-skynet-accent hover:text-skynet-accent transition-all">Auto Detect</button>
+                <form method="post" asp-page-handler="AutoDetectDotaClientVersion" OnComplete="onDotaClientVersionSaved" class="w-full self-end">
+                    <button type="submit" class="h-11 w-full whitespace-nowrap rounded-lg border border-skynet-border px-5 text-xs font-black uppercase tracking-widest text-white hover:border-skynet-accent hover:text-skynet-accent transition-all">Auto Detect</button>
                 </form>
             </div>
         </div>
