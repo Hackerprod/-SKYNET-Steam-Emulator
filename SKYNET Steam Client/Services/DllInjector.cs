@@ -18,8 +18,18 @@ namespace SKYNET.Client.Services;
 /// </summary>
 public static class DllInjector
 {
-    /// <summary>Launches <paramref name="exePath"/> suspended, injects <paramref name="dllPath"/>, resumes.</summary>
-    public static Process LaunchAndInject(string exePath, string dllPath, string arguments, string workingDir)
+    /// <summary>
+    /// Launches a game with the payload resolved before Steam API calls begin. Dynamic
+    /// consumers remain suspended while the payload is injected. Static import
+    /// consumers have their import descriptor rebound before Windows starts loading
+    /// the initial image, avoiding a loader race and any game-folder replacement.
+    /// </summary>
+    public static Process LaunchAndInject(
+        string exePath,
+        string dllPath,
+        string arguments,
+        string workingDir,
+        string? staticImportModuleName = null)
     {
         if (!File.Exists(exePath)) throw new FileNotFoundException("Executable not found", exePath);
         if (!File.Exists(dllPath)) throw new FileNotFoundException("Injection DLL not found", dllPath);
@@ -37,14 +47,26 @@ public static class DllInjector
         var cmd = new StringBuilder(cmdLine, Math.Max(cmdLine.Length + 1, 260));
 
         const uint CREATE_SUSPENDED = 0x00000004;
+        var rebindsStaticImport = !string.IsNullOrWhiteSpace(staticImportModuleName);
+        var creationFlags = CREATE_SUSPENDED;
         if (!CreateProcess(exePath, cmd, IntPtr.Zero, IntPtr.Zero, false,
-                CREATE_SUSPENDED, IntPtr.Zero, workingDir, ref si, out pi))
+                creationFlags, IntPtr.Zero, workingDir, ref si, out pi))
         {
             throw new Win32Exception(Marshal.GetLastWin32Error(), "CreateProcess failed");
         }
 
         try
         {
+            if (rebindsStaticImport)
+            {
+                var process = Process.GetProcessById((int)pi.dwProcessId);
+                SteamStaticImportRebinder.Rebind(pi.hProcess, exePath, dllPath, staticImportModuleName!);
+                AllowSetForegroundWindow(pi.dwProcessId);
+                if (ResumeThread(pi.hThread) == unchecked((uint)-1))
+                    throw new Win32Exception(Marshal.GetLastWin32Error(), "ResumeThread failed");
+                return process;
+            }
+
             InjectInto(pi.hProcess, dllPath);
             AllowSetForegroundWindow(pi.dwProcessId);
             if (ResumeThread(pi.hThread) == unchecked((uint)-1))
@@ -92,8 +114,17 @@ public static class DllInjector
 
             try
             {
-                const uint INFINITE = 0xFFFFFFFF;
-                WaitForSingleObject(hThread, INFINITE);
+                const uint WAIT_OBJECT_0 = 0;
+                const uint WAIT_TIMEOUT = 0x00000102;
+                const uint WAIT_FAILED = 0xFFFFFFFF;
+                const uint INJECTION_TIMEOUT_MS = 15000;
+                var waitResult = WaitForSingleObject(hThread, INJECTION_TIMEOUT_MS);
+                if (waitResult == WAIT_TIMEOUT)
+                    throw new TimeoutException($"Timed out after {INJECTION_TIMEOUT_MS} ms while loading '{dllPath}' into the target process.");
+                if (waitResult == WAIT_FAILED)
+                    throw new Win32Exception(Marshal.GetLastWin32Error(), "WaitForSingleObject failed while injecting the payload.");
+                if (waitResult != WAIT_OBJECT_0)
+                    throw new InvalidOperationException($"Unexpected wait result 0x{waitResult:X8} while injecting the payload.");
                 // LoadLibraryW returns the module handle (nonzero) on success. On x64
                 // the 32-bit exit code is truncated, so treat 0 as the only failure.
                 GetExitCodeThread(hThread, out uint exit);

@@ -9,9 +9,15 @@ public sealed class LaunchResult
     public bool Success { get; set; }
     public string? Error { get; set; }
     public Process? Process { get; set; }
+    public bool UsedStaticImportRedirection { get; set; }
 
     public static LaunchResult Fail(string error) => new() { Success = false, Error = error };
-    public static LaunchResult Ok(Process p) => new() { Success = true, Process = p };
+    public static LaunchResult Ok(Process p, bool usedStaticImportRedirection) => new()
+    {
+        Success = true,
+        Process = p,
+        UsedStaticImportRedirection = usedStaticImportRedirection
+    };
 }
 
 /// <summary>
@@ -70,6 +76,8 @@ public sealed class GameLauncher
             return LaunchResult.Fail($"Failed to write steam_api.ini:\n{ex.Message}");
         }
 
+        var steamImportName = Path.GetFileName(payload);
+        var hasStaticSteamImport = PeImports.ImportsModule(game.ExecutablePath, steamImportName);
         Process proc;
         try
         {
@@ -78,7 +86,12 @@ public sealed class GameLauncher
                 new[] { game.LaunchArguments, extraArgs }.Where(a => !string.IsNullOrWhiteSpace(a)));
 
             var injectablePayload = PrepareInjectablePayload(payload);
-            proc = DllInjector.LaunchAndInject(game.ExecutablePath, injectablePayload, args, workDir);
+            proc = DllInjector.LaunchAndInject(
+                game.ExecutablePath,
+                injectablePayload,
+                args,
+                workDir,
+                hasStaticSteamImport ? steamImportName : null);
             proc.EnableRaisingEvents = true;
             proc.Exited += (_, _) => GameExited?.Invoke(game);
             GameWindowActivator.BringToFrontWhenReady(proc);
@@ -89,7 +102,7 @@ public sealed class GameLauncher
         }
 
         game.LastPlayedUtc = DateTimeOffset.UtcNow;
-        return LaunchResult.Ok(proc);
+        return LaunchResult.Ok(proc, hasStaticSteamImport);
     }
 
     private static string PrepareInjectablePayload(string payload)
@@ -98,7 +111,8 @@ public sealed class GameLauncher
         var hash = ComputePayloadHash(payloadBytes);
         var shadowRoot = Path.Combine(Path.GetTempPath(), "SKYNETSteamClient", "payload-shadow");
         var shadowDir = Path.Combine(shadowRoot, hash);
-        var shadowPath = Path.Combine(shadowDir, Path.GetFileName(payload));
+        var payloadFileName = Path.GetFileName(payload);
+        var shadowPath = Path.Combine(shadowDir, payloadFileName);
 
         Directory.CreateDirectory(shadowDir);
         if (!File.Exists(shadowPath) || new FileInfo(shadowPath).Length != payloadBytes.Length)

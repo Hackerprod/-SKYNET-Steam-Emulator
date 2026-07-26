@@ -43,10 +43,10 @@ public partial class App : Application
         // Headless launch mode for automated testing:
         //   "SKYNET Steam Client.exe" --launch <gameId|exePath>
         // Launches the game (injected), waits for it to exit, restores, then quits.
-        var launchTarget = ParseLaunchArg(e.Args);
-        if (launchTarget != null)
+        var launchRequest = ParseLaunchArgs(e.Args);
+        if (launchRequest.Target != null)
         {
-            RunHeadless(launchTarget);
+            RunHeadless(launchRequest.Target, launchRequest.ExtraArguments);
             return;
         }
 
@@ -54,12 +54,60 @@ public partial class App : Application
         win.Show();
     }
 
-    private static string? ParseLaunchArg(string[] args)
+    private static (string? Target, string? ExtraArguments) ParseLaunchArgs(string[] args)
     {
         for (int i = 0; i < args.Length; i++)
+        {
             if (string.Equals(args[i], "--launch", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
-                return args[i + 1];
-        return null;
+            {
+                var separator = Array.FindIndex(
+                    args,
+                    i + 2,
+                    argument => string.Equals(argument, "--", StringComparison.Ordinal));
+                var extraArguments = separator >= 0
+                    ? string.Join(" ", args.Skip(separator + 1).Select(QuoteProcessArgument))
+                    : null;
+                return (args[i + 1], extraArguments);
+            }
+        }
+        return (null, null);
+    }
+
+    private static string QuoteProcessArgument(string value)
+    {
+        value ??= string.Empty;
+        if (value.Length > 0 && !value.Any(character => char.IsWhiteSpace(character) || character == '"'))
+        {
+            return value;
+        }
+
+        var result = new System.Text.StringBuilder(value.Length + 2);
+        result.Append('"');
+        var backslashes = 0;
+        foreach (var character in value)
+        {
+            if (character == '\\')
+            {
+                backslashes++;
+                continue;
+            }
+
+            if (character == '"')
+            {
+                result.Append('\\', backslashes * 2 + 1);
+                result.Append('"');
+                backslashes = 0;
+                continue;
+            }
+
+            result.Append('\\', backslashes);
+            backslashes = 0;
+            result.Append(character);
+        }
+
+        result.Append('\\', backslashes * 2);
+        result.Append('"');
+        return result.ToString();
     }
 
     private static void HeadlessLog(string msg)
@@ -73,7 +121,7 @@ public partial class App : Application
         catch { }
     }
 
-    private async void RunHeadless(string target)
+    private async void RunHeadless(string target, string? extraArguments)
     {
         try
         {
@@ -96,7 +144,7 @@ public partial class App : Application
             }
             catch (Exception ex) { HeadlessLog($"session error: {ex.Message}"); }
 
-            var result = Launcher.Launch(game, Store.Config, user);
+            var result = Launcher.Launch(game, Store.Config, user, extraArguments);
             Store.Save();
             if (!result.Success)
             {
@@ -106,6 +154,8 @@ public partial class App : Application
             }
 
             HeadlessLog($"launched pid={result.Process!.Id}; waiting for exit...");
+            if (result.UsedStaticImportRedirection)
+                HeadlessLog("static Steam API import redirected to the injected payload.");
             await Task.Run(() => result.Process.WaitForExit());
             HeadlessLog("game exited; original DLL restored.");
             Shutdown(0);
@@ -133,9 +183,29 @@ public partial class App : Application
             {
                 Name = Path.GetFileNameWithoutExtension(target),
                 ExecutablePath = target,
+                AppId = ReadSteamAppId(Path.GetDirectoryName(target)),
                 Arch = PeArch.Detect(target)
             };
 
         return null;
+    }
+
+    private static uint ReadSteamAppId(string? directory)
+    {
+        if (string.IsNullOrWhiteSpace(directory))
+            return 0;
+
+        try
+        {
+            var path = Path.Combine(directory, "steam_appid.txt");
+            return File.Exists(path) &&
+                   uint.TryParse(File.ReadAllText(path).Trim(), out var appId)
+                ? appId
+                : 0;
+        }
+        catch
+        {
+            return 0;
+        }
     }
 }
