@@ -21,31 +21,27 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static uint SteamAPI_SteamNetworkingIdentity_GetGenericBytes(IntPtr _, int cbLen)
+        public static IntPtr SteamAPI_SteamNetworkingIdentity_GetGenericBytes(IntPtr _, IntPtr cbLen)
         {
-            Write($"SteamAPI_SteamNetworkingIdentity_GetGenericBytes");
-            return 0;
+            return SteamNetworkingIdentityInterop.GetDataPointer(_, NetIdentityType.GenericBytes, cbLen);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_SteamNetworkingIdentity_GetGenericString(IntPtr _)
+        public static IntPtr SteamAPI_SteamNetworkingIdentity_GetGenericString(IntPtr _)
         {
-            Write($"SteamAPI_SteamNetworkingIdentity_GetGenericString");
-            return "";
+            return SteamNetworkingIdentityInterop.GetDataPointer(_, NetIdentityType.GenericString);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static IntPtr SteamAPI_SteamNetworkingIdentity_GetIPAddr(IntPtr _)
         {
-            Write($"SteamAPI_SteamNetworkingIdentity_GetIPAddr");
-            return default;
+            return SteamNetworkingIdentityInterop.GetDataPointer(_, NetIdentityType.IPAddress);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static IntPtr SteamAPI_SteamNetworkingIdentity_GetSteamID(IntPtr _)
+        public static ulong SteamAPI_SteamNetworkingIdentity_GetSteamID(IntPtr _)
         {
-            Write($"SteamAPI_SteamNetworkingIdentity_GetSteamID");
-            return default;
+            return SteamNetworkingIdentityInterop.TryReadSteamId(_, out var steamId) ? steamId : 0;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -55,69 +51,90 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_SteamNetworkingIdentity_GetXboxPairwiseID(IntPtr _)
+        public static IntPtr SteamAPI_SteamNetworkingIdentity_GetXboxPairwiseID(IntPtr _)
         {
-            Write($"SteamAPI_SteamNetworkingIdentity_GetXboxPairwiseID");
-            return "";
+            return SteamNetworkingIdentityInterop.GetDataPointer(_, NetIdentityType.XboxPairwiseID);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_SteamNetworkingIdentity_IsEqualTo(IntPtr _, IntPtr x)
         {
-            return SteamNetworkingIdentityInterop.TryReadSteamId(_, out var first) &&
-                   SteamNetworkingIdentityInterop.TryReadSteamId(x, out var second) &&
-                   first == second;
+            return SteamNetworkingIdentityInterop.Equals(_, x);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_SteamNetworkingIdentity_IsInvalid(IntPtr _)
         {
-            ulong ignoredSteamId;
-            return !SteamNetworkingIdentityInterop.TryReadSteamId(_, out ignoredSteamId);
+            return SteamNetworkingIdentityInterop.IsInvalid(_);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_SteamNetworkingIdentity_IsLocalHost(IntPtr _)
         {
-            Write($"SteamAPI_SteamNetworkingIdentity_IsLocalHost");
-            return true;
+            return SteamNetworkingIdentityInterop.IsLocalHost(_);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_SteamNetworkingIdentity_ParseString(IntPtr _, string pszStr)
         {
-            if (!SteamNetworkingIdentityInterop.TryParseSteamId(pszStr, out var steamId))
+            if (!SteamNetworkingIdentityInterop.TryParse(pszStr, (UIntPtr)SteamNetworkingIdentityInterop.Size, out var identity))
             {
                 SteamNetworkingIdentityInterop.Clear(_);
                 return false;
             }
-            SteamNetworkingIdentityInterop.WriteSteamId(_, steamId);
+
+            SteamNetworkingIdentityInterop.Write(_, identity);
             return true;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_SteamNetworkingIdentity_SetGenericBytes(IntPtr _, IntPtr data, uint cbLen)
         {
-            Write($"SteamAPI_SteamNetworkingIdentity_SetGenericBytes");
-            return false;
+            if (cbLen > SteamNetworkingIdentityInterop.DataCapacity || (cbLen > 0 && data == IntPtr.Zero))
+            {
+                return false;
+            }
+
+            var bytes = new byte[cbLen];
+            if (bytes.Length > 0)
+            {
+                Marshal.Copy(data, bytes, 0, bytes.Length);
+            }
+            return SteamNetworkingIdentityInterop.SetBytes(_, NetIdentityType.GenericBytes, bytes, nullTerminate: false, requireContent: false);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_SteamNetworkingIdentity_SetGenericString(IntPtr _, string pszString)
+        {
+            return SteamNetworkingIdentityInterop.SetBytes(
+                _,
+                NetIdentityType.GenericString,
+                System.Text.Encoding.UTF8.GetBytes(pszString ?? string.Empty),
+                nullTerminate: true,
+                requireContent: false);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_SteamNetworkingIdentity_SetIPAddr(IntPtr _, IntPtr addr)
         {
-            Write($"SteamAPI_SteamNetworkingIdentity_SetIPAddr");
+            if (_ == IntPtr.Zero || addr == IntPtr.Zero)
+            {
+                return;
+            }
+
+            SteamNetworkingIdentityInterop.Write(_, SteamNetworkingIdentityInterop.FromIpAddress(SteamNetworkingIPAddrInterop.Read(addr)));
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_SteamNetworkingIdentity_SetLocalHost(IntPtr _)
         {
-            Write($"SteamAPI_SteamNetworkingIdentity_SetLocalHost");
+            SteamNetworkingIdentityInterop.Write(_, SteamNetworkingIdentityInterop.LocalHost());
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static void SteamAPI_SteamNetworkingIdentity_SetSteamID(IntPtr _, IntPtr steamID)
+        public static void SteamAPI_SteamNetworkingIdentity_SetSteamID(IntPtr _, ulong steamID)
         {
-            Write($"SteamAPI_SteamNetworkingIdentity_SetSteamID");
+            SteamNetworkingIdentityInterop.WriteSteamId(_, steamID);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -129,8 +146,12 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_SteamNetworkingIdentity_SetXboxPairwiseID(IntPtr _, string pszString)
         {
-            Write($"SteamAPI_SteamNetworkingIdentity_SetXboxPairwiseID");
-            return false;
+            return SteamNetworkingIdentityInterop.SetBytes(
+                _,
+                NetIdentityType.XboxPairwiseID,
+                System.Text.Encoding.UTF8.GetBytes(pszString ?? string.Empty),
+                nullTerminate: true,
+                requireContent: true);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -140,10 +161,9 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_SteamNetworkingIdentityRender_c_str(IntPtr _)
+        public static IntPtr SteamAPI_SteamNetworkingIdentityRender_c_str(IntPtr _)
         {
-            Write($"SteamAPI_SteamNetworkingIdentity_GetSteamID64");
-            return "";
+            return _;
         }
 
         private static void Write(string msg)

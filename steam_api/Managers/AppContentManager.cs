@@ -172,6 +172,13 @@ namespace SKYNET.Managers
                 }
             }
 
+            if (AppManifestManager.TryGet(appId, out AppManifestInfo manifest) &&
+                !string.IsNullOrWhiteSpace(manifest.InstallDirectory))
+            {
+                path = manifest.InstallDirectory;
+                return true;
+            }
+
             string detectedDlcPath = Path.Combine(Common.GetPath(), "SKYNET", "DLC", appId.ToString());
             if (Directory.Exists(detectedDlcPath))
             {
@@ -185,6 +192,31 @@ namespace SKYNET.Managers
                 return true;
             }
 
+            return false;
+        }
+
+        public static int GetAppBuildId(uint appId)
+        {
+            if (appId == SteamEmulator.AppID && SteamEmulator.AppBuildIdOverride > 0)
+            {
+                return SteamEmulator.AppBuildIdOverride;
+            }
+
+            return AppManifestManager.TryGet(appId, out AppManifestInfo manifest)
+                ? manifest.BuildId
+                : 0;
+        }
+
+        public static bool TryGetAppName(uint appId, out string name)
+        {
+            if (AppManifestManager.TryGet(appId, out AppManifestInfo manifest) &&
+                !string.IsNullOrWhiteSpace(manifest.Name))
+            {
+                name = manifest.Name;
+                return true;
+            }
+
+            name = string.Empty;
             return false;
         }
 

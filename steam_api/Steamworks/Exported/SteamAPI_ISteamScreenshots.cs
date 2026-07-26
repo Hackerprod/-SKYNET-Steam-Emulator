@@ -32,14 +32,14 @@ namespace SKYNET.Steamworks.Exported
         public static void SteamAPI_ISteamScreenshots_TriggerScreenshot(IntPtr _)
         {
             Write("SteamAPI_ISteamScreenshots_TriggerScreenshot");
-            //
+            SteamEmulator.SteamScreenshots.TriggerScreenshot();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_ISteamScreenshots_HookScreenshots(IntPtr _, bool bHook)
         {
             Write("SteamAPI_ISteamScreenshots_HookScreenshots");
-            //
+            SteamEmulator.SteamScreenshots.HookScreenshots(bHook);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -57,7 +57,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamScreenshots_TagPublishedFile(IntPtr _, uint hScreenshot, uint unPublishedFileID)
+        public static bool SteamAPI_ISteamScreenshots_TagPublishedFile(IntPtr _, uint hScreenshot, ulong unPublishedFileID)
         {
             Write("SteamAPI_ISteamScreenshots_TagPublishedFile");
             return SteamEmulator.SteamScreenshots.TagPublishedFile(hScreenshot, unPublishedFileID);

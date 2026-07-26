@@ -126,7 +126,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUtils.GetEnteredGamepadTextLength();
         }
 
-        public bool GetEnteredGamepadTextInput(IntPtr _, string pchText, uint cchText)
+        public bool GetEnteredGamepadTextInput(IntPtr _, IntPtr pchText, uint cchText)
         {
             return SteamEmulator.SteamUtils.GetEnteredGamepadTextInput(pchText, cchText);
         }

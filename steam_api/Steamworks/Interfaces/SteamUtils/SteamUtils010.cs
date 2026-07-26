@@ -128,8 +128,7 @@ namespace SKYNET.Steamworks.Interfaces
 
         public bool GetEnteredGamepadTextInput(IntPtr _, IntPtr pchText, uint cchText)
         {
-            NativeStringCache.WriteUtf8Buffer(pchText, checked((int)cchText), string.Empty);
-            return SteamEmulator.SteamUtils.GetEnteredGamepadTextInput(string.Empty, cchText);
+            return SteamEmulator.SteamUtils.GetEnteredGamepadTextInput(pchText, cchText);
         }
 
         public IntPtr GetSteamUILanguage(IntPtr _)
@@ -195,7 +194,12 @@ namespace SKYNET.Steamworks.Interfaces
 
         public bool ShowFloatingGamepadTextInput(IntPtr _, int eKeyboardMode, int nTextFieldXPosition, int nTextFieldYPosition, int nTextFieldWidth, int nTextFieldHeight)
         {
-            return false;
+            return SteamEmulator.SteamUtils.ShowFloatingGamepadTextInput(
+                eKeyboardMode,
+                nTextFieldXPosition,
+                nTextFieldYPosition,
+                nTextFieldWidth,
+                nTextFieldHeight);
         }
 
         public void SetGameLauncherMode(IntPtr _, bool bLauncherMode)
@@ -204,7 +208,7 @@ namespace SKYNET.Steamworks.Interfaces
 
         public bool DismissFloatingGamepadTextInput(IntPtr _)
         {
-            return false;
+            return SteamEmulator.SteamUtils.DismissFloatingGamepadTextInput();
         }
 
         public bool DismissGamepadTextInput(IntPtr _)

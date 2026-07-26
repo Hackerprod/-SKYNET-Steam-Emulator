@@ -47,7 +47,9 @@ namespace SKYNET.Steamworks.Implementation
             internal uint Handle;
             internal uint ListenSocket;
             internal ulong RemoteSteamId;
+            internal SteamNetworkingIdentity_t RemoteIdentity;
             internal int VirtualPort;
+            internal uint PeerConnectionId;
             internal ConnectionState State;
             internal long UserData;
             internal string Name = string.Empty;
@@ -143,6 +145,7 @@ namespace SKYNET.Steamworks.Implementation
                 {
                     Handle = AllocateHandleLocked(),
                     RemoteSteamId = remoteSteamId,
+                    RemoteIdentity = SteamNetworkingIdentity_t.FromSteamId(remoteSteamId),
                     VirtualPort = nVirtualPort,
                     State = ConnectionState.Connecting
                 };
@@ -150,7 +153,12 @@ namespace SKYNET.Steamworks.Implementation
             }
 
             NotifyStateChange(connection, ConnectionState.None);
-            SendFrame(remoteSteamId, nVirtualPort, TransportOpen, Array.Empty<byte>());
+            SendFrame(
+                remoteSteamId,
+                nVirtualPort,
+                TransportOpen,
+                Array.Empty<byte>(),
+                sourceConnectionId: connection.Handle);
             return connection.Handle;
         }
 
@@ -182,7 +190,13 @@ namespace SKYNET.Steamworks.Implementation
             NotifyStateChange(connection, oldState);
             if (connection.LoopbackPeer == 0)
             {
-                SendFrame(connection.RemoteSteamId, connection.VirtualPort, TransportAccept, Array.Empty<byte>());
+                SendFrame(
+                    connection.RemoteSteamId,
+                    connection.VirtualPort,
+                    TransportAccept,
+                    Array.Empty<byte>(),
+                    sourceConnectionId: connection.Handle,
+                    targetConnectionId: connection.PeerConnectionId);
             }
             return (int)EResult.k_EResultOK;
         }
@@ -211,7 +225,13 @@ namespace SKYNET.Steamworks.Implementation
             }
             else
             {
-                SendFrame(connection.RemoteSteamId, connection.VirtualPort, TransportClose, Array.Empty<byte>());
+                SendFrame(
+                    connection.RemoteSteamId,
+                    connection.VirtualPort,
+                    TransportClose,
+                    Array.Empty<byte>(),
+                    sourceConnectionId: connection.Handle,
+                    targetConnectionId: connection.PeerConnectionId);
             }
 
             return true;
@@ -243,7 +263,13 @@ namespace SKYNET.Steamworks.Implementation
 
             foreach (var connection in affected)
             {
-                SendFrame(connection.RemoteSteamId, connection.VirtualPort, TransportClose, Array.Empty<byte>());
+                SendFrame(
+                    connection.RemoteSteamId,
+                    connection.VirtualPort,
+                    TransportClose,
+                    Array.Empty<byte>(),
+                    sourceConnectionId: connection.Handle,
+                    targetConnectionId: connection.PeerConnectionId);
             }
             return true;
         }
@@ -336,7 +362,14 @@ namespace SKYNET.Steamworks.Implementation
                 return (int)EResult.k_EResultOK;
             }
 
-            return SendFrame(connection.RemoteSteamId, connection.VirtualPort, TransportData, payload, nSendFlags)
+            return SendFrame(
+                    connection.RemoteSteamId,
+                    connection.VirtualPort,
+                    TransportData,
+                    payload,
+                    nSendFlags,
+                    connection.Handle,
+                    connection.PeerConnectionId)
                 ? (int)EResult.k_EResultOK
                 : (int)EResult.k_EResultNoConnection;
         }
@@ -455,7 +488,7 @@ namespace SKYNET.Steamworks.Implementation
                 }
             }
 
-            var text = "SKYNET P2P: " + connection.State + " remote=" + connection.RemoteSteamId + " port=" + connection.VirtualPort;
+            var text = "SKYNET P2P: " + connection.State + " remote=" + FormatIdentity(connection.RemoteIdentity) + " port=" + connection.VirtualPort;
             NativeStringCache.WriteUtf8Buffer(pszBuf, cbBuf, text);
             return text.Length + 1 > cbBuf ? text.Length + 1 : 0;
         }
@@ -490,8 +523,24 @@ namespace SKYNET.Steamworks.Implementation
             SocketConnection second;
             lock (_gate)
             {
-                first = new SocketConnection { Handle = AllocateHandleLocked(), State = ConnectionState.Connected, RemoteSteamId = (ulong)SteamEmulator.SteamID };
-                second = new SocketConnection { Handle = AllocateHandleLocked(), State = ConnectionState.Connected, RemoteSteamId = (ulong)SteamEmulator.SteamID };
+                first = new SocketConnection
+                {
+                    Handle = AllocateHandleLocked(),
+                    State = ConnectionState.Connected,
+                    RemoteIdentity = pIdentity1 == IntPtr.Zero
+                        ? SteamNetworkingIdentityInterop.LocalHost()
+                        : SteamNetworkingIdentityInterop.Read(pIdentity1)
+                };
+                second = new SocketConnection
+                {
+                    Handle = AllocateHandleLocked(),
+                    State = ConnectionState.Connected,
+                    RemoteIdentity = pIdentity2 == IntPtr.Zero
+                        ? SteamNetworkingIdentityInterop.LocalHost()
+                        : SteamNetworkingIdentityInterop.Read(pIdentity2)
+                };
+                first.RemoteSteamId = ReadSteamId(first.RemoteIdentity);
+                second.RemoteSteamId = ReadSteamId(second.RemoteIdentity);
                 first.LoopbackPeer = second.Handle;
                 second.LoopbackPeer = first.Handle;
                 _connections.Add(first.Handle, first);
@@ -625,36 +674,63 @@ namespace SKYNET.Steamworks.Implementation
         internal int GetRemoteFakeIPForConnection(uint hConn, IntPtr pOutAddr) => (int)EResult.k_EResultNoMatch;
         internal IntPtr CreateFakeUDPPort(int idxFakeServerPort) => IntPtr.Zero;
 
-        internal void ProcessRelayPacket(string transport, ulong remoteSteamId, int virtualPort, byte[] payload)
+        internal void ProcessRelayPacket(
+            string transport,
+            ulong remoteSteamId,
+            int virtualPort,
+            uint sourceConnectionId,
+            uint targetConnectionId,
+            byte[] payload)
         {
             switch (transport)
             {
                 case TransportOpen:
-                    ProcessOpen(remoteSteamId, virtualPort);
+                    ProcessOpen(remoteSteamId, virtualPort, sourceConnectionId);
                     break;
                 case TransportAccept:
-                    ProcessAccept(remoteSteamId, virtualPort);
+                    ProcessAccept(remoteSteamId, virtualPort, sourceConnectionId, targetConnectionId);
                     break;
                 case TransportReject:
-                    ProcessClosed(remoteSteamId, virtualPort, (int)NetConnectionEnd.Remote_Timeout, "Remote listener rejected the connection");
+                    ProcessClosed(
+                        remoteSteamId,
+                        virtualPort,
+                        sourceConnectionId,
+                        targetConnectionId,
+                        (int)NetConnectionEnd.Remote_Timeout,
+                        "Remote listener rejected the connection");
                     break;
                 case TransportClose:
-                    ProcessClosed(remoteSteamId, virtualPort, (int)NetConnectionEnd.Remote_Timeout, "Remote closed the connection");
+                    ProcessClosed(
+                        remoteSteamId,
+                        virtualPort,
+                        sourceConnectionId,
+                        targetConnectionId,
+                        (int)NetConnectionEnd.Remote_Timeout,
+                        "Remote closed the connection");
                     break;
                 case TransportData:
-                    ProcessData(remoteSteamId, virtualPort, payload ?? Array.Empty<byte>());
+                    ProcessData(
+                        remoteSteamId,
+                        virtualPort,
+                        sourceConnectionId,
+                        targetConnectionId,
+                        payload ?? Array.Empty<byte>());
                     break;
             }
         }
 
-        private void ProcessOpen(ulong remoteSteamId, int virtualPort)
+        private void ProcessOpen(ulong remoteSteamId, int virtualPort, uint sourceConnectionId)
         {
             SocketConnection connection = null;
             lock (_gate)
             {
                 foreach (var existing in _connections.Values)
                 {
-                    if (existing.RemoteSteamId == remoteSteamId && existing.VirtualPort == virtualPort && existing.ListenSocket != 0 && !IsTerminal(existing.State))
+                    if (existing.RemoteSteamId == remoteSteamId &&
+                        existing.VirtualPort == virtualPort &&
+                        existing.ListenSocket != 0 &&
+                        !IsTerminal(existing.State) &&
+                        (sourceConnectionId == 0 || existing.PeerConnectionId == sourceConnectionId))
                     {
                         return;
                     }
@@ -677,7 +753,9 @@ namespace SKYNET.Steamworks.Implementation
                         Handle = AllocateHandleLocked(),
                         ListenSocket = listener.Handle,
                         RemoteSteamId = remoteSteamId,
+                        RemoteIdentity = SteamNetworkingIdentity_t.FromSteamId(remoteSteamId),
                         VirtualPort = virtualPort,
+                        PeerConnectionId = sourceConnectionId,
                         State = ConnectionState.Connecting
                     };
                     _connections.Add(connection.Handle, connection);
@@ -686,23 +764,40 @@ namespace SKYNET.Steamworks.Implementation
 
             if (connection == null)
             {
-                SendFrame(remoteSteamId, virtualPort, TransportReject, Array.Empty<byte>());
+                SendFrame(
+                    remoteSteamId,
+                    virtualPort,
+                    TransportReject,
+                    Array.Empty<byte>(),
+                    targetConnectionId: sourceConnectionId);
                 return;
             }
 
             NotifyStateChange(connection, ConnectionState.None);
         }
 
-        private void ProcessAccept(ulong remoteSteamId, int virtualPort)
+        private void ProcessAccept(
+            ulong remoteSteamId,
+            int virtualPort,
+            uint sourceConnectionId,
+            uint targetConnectionId)
         {
             SocketConnection connection = null;
             lock (_gate)
             {
                 foreach (var candidate in _connections.Values)
                 {
-                    if (candidate.RemoteSteamId == remoteSteamId && candidate.VirtualPort == virtualPort && candidate.ListenSocket == 0 && candidate.State == ConnectionState.Connecting)
+                    if (candidate.RemoteSteamId == remoteSteamId &&
+                        candidate.VirtualPort == virtualPort &&
+                        candidate.ListenSocket == 0 &&
+                        candidate.State == ConnectionState.Connecting &&
+                        (targetConnectionId == 0 || candidate.Handle == targetConnectionId))
                     {
                         connection = candidate;
+                        if (sourceConnectionId != 0)
+                        {
+                            candidate.PeerConnectionId = sourceConnectionId;
+                        }
                         candidate.State = ConnectionState.Connected;
                         break;
                     }
@@ -715,14 +810,26 @@ namespace SKYNET.Steamworks.Implementation
             }
         }
 
-        private void ProcessClosed(ulong remoteSteamId, int virtualPort, int reason, string debug)
+        private void ProcessClosed(
+            ulong remoteSteamId,
+            int virtualPort,
+            uint sourceConnectionId,
+            uint targetConnectionId,
+            int reason,
+            string debug)
         {
             List<SocketConnection> changed = new List<SocketConnection>();
             lock (_gate)
             {
                 foreach (var connection in _connections.Values)
                 {
-                    if (connection.RemoteSteamId == remoteSteamId && connection.VirtualPort == virtualPort && !IsTerminal(connection.State))
+                    if (MatchesRelayConnection(
+                            connection,
+                            remoteSteamId,
+                            virtualPort,
+                            sourceConnectionId,
+                            targetConnectionId) &&
+                        !IsTerminal(connection.State))
                     {
                         var oldState = connection.State;
                         connection.State = ConnectionState.ClosedByPeer;
@@ -735,14 +842,25 @@ namespace SKYNET.Steamworks.Implementation
             }
         }
 
-        private void ProcessData(ulong remoteSteamId, int virtualPort, byte[] payload)
+        private void ProcessData(
+            ulong remoteSteamId,
+            int virtualPort,
+            uint sourceConnectionId,
+            uint targetConnectionId,
+            byte[] payload)
         {
             SocketConnection connection = null;
             lock (_gate)
             {
                 foreach (var candidate in _connections.Values)
                 {
-                    if (candidate.RemoteSteamId == remoteSteamId && candidate.VirtualPort == virtualPort && !IsTerminal(candidate.State))
+                    if (MatchesRelayConnection(
+                            candidate,
+                            remoteSteamId,
+                            virtualPort,
+                            sourceConnectionId,
+                            targetConnectionId) &&
+                        !IsTerminal(candidate.State))
                     {
                         connection = candidate;
                         break;
@@ -780,16 +898,58 @@ namespace SKYNET.Steamworks.Implementation
             while (count < maxMessages && connection.Incoming.TryDequeue(out var packet))
             {
                 Interlocked.Decrement(ref connection.IncomingCount);
-                var message = SteamNetworkingMessageStore.CreateReceived(packet.Payload, connection.RemoteSteamId, connection.Handle, 0, connection.UserData, packet.MessageNumber);
+                var message = SteamNetworkingMessageStore.CreateReceived(packet.Payload, connection.RemoteIdentity, connection.Handle, 0, connection.UserData, packet.MessageNumber);
                 Marshal.WriteIntPtr(output, count * IntPtr.Size, message);
                 count++;
             }
             return count;
         }
 
-        private bool SendFrame(ulong remoteSteamId, int virtualPort, string transport, byte[] payload, int sendFlags = 0)
+        private bool SendFrame(
+            ulong remoteSteamId,
+            int virtualPort,
+            string transport,
+            byte[] payload,
+            int sendFlags = 0,
+            uint sourceConnectionId = 0,
+            uint targetConnectionId = 0)
         {
-            return remoteSteamId != 0 && APIClient.SendP2PPacket(remoteSteamId, payload, sendFlags, 0, transport, virtualPort);
+            return remoteSteamId != 0 &&
+                APIClient.SendP2PPacket(
+                    remoteSteamId,
+                    payload,
+                    sendFlags,
+                    0,
+                    transport,
+                    virtualPort,
+                    sourceConnectionId,
+                    targetConnectionId);
+        }
+
+        private static bool MatchesRelayConnection(
+            SocketConnection connection,
+            ulong remoteSteamId,
+            int virtualPort,
+            uint sourceConnectionId,
+            uint targetConnectionId)
+        {
+            if (connection.RemoteSteamId != remoteSteamId ||
+                connection.VirtualPort != virtualPort)
+            {
+                return false;
+            }
+
+            // Connection IDs were added after the original relay contract.
+            // Zero keeps interoperability with older clients while non-zero IDs
+            // make concurrent connections between the same peers unambiguous.
+            if (targetConnectionId != 0 && connection.Handle != targetConnectionId)
+            {
+                return false;
+            }
+
+            return sourceConnectionId == 0 ||
+                connection.PeerConnectionId == 0 ||
+                connection.PeerConnectionId == sourceConnectionId;
         }
 
         private void QueueLoopback(uint targetHandle, byte[] payload)
@@ -836,7 +996,34 @@ namespace SKYNET.Steamworks.Implementation
 
         private static SteamNetConnectionInfo_t CreateInfo(SocketConnection connection)
         {
-            return SteamNetworkingMessages.CreateConnectionInfo(connection.RemoteSteamId, connection.State, connection.ListenSocket, connection.UserData, connection.EndReason, connection.Debug);
+            return SteamNetworkingMessages.CreateConnectionInfo(connection.RemoteIdentity, connection.State, connection.ListenSocket, connection.UserData, connection.EndReason, connection.Debug);
+        }
+
+        private static ulong ReadSteamId(SteamNetworkingIdentity_t identity)
+        {
+            if ((NetIdentityType)identity.m_eType != NetIdentityType.SteamID ||
+                identity.m_cbSize != sizeof(ulong) ||
+                identity.m_data == null ||
+                identity.m_data.Length < sizeof(ulong))
+            {
+                return 0;
+            }
+
+            return BitConverter.ToUInt64(identity.m_data, 0);
+        }
+
+        private static string FormatIdentity(SteamNetworkingIdentity_t identity)
+        {
+            var buffer = Marshal.AllocHGlobal(SteamNetworkingIdentityInterop.Size);
+            try
+            {
+                SteamNetworkingIdentityInterop.Write(buffer, identity);
+                return SteamNetworkingIdentityInterop.Format(buffer);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(buffer);
+            }
         }
 
         private bool HasConnection(uint handle)

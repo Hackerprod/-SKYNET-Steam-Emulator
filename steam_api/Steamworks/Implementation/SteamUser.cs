@@ -18,6 +18,12 @@ namespace SKYNET.Steamworks.Implementation
 
         private bool Recording;
         private bool SteamServersConnectedQueued;
+        private readonly object EncryptedTicketGate = new object();
+        private byte[] EncryptedAppTicket = Array.Empty<byte>();
+        private bool EncryptedTicketRequestPending;
+        private DateTime LastEncryptedTicketRequestUtc = DateTime.MinValue;
+        private EDurationControlOnlineState DurationControlOnlineState =
+            EDurationControlOnlineState.k_EDurationControlOnlineState_Offline;
 
         public SteamUser()
         {
@@ -36,10 +42,11 @@ namespace SKYNET.Steamworks.Implementation
         {
             if (APIClient.IsEnabled)
             {
-                // Report the cached connection state without blocking. If we are
-                // not connected yet, the handshake is kicked off in background and
-                // the connected callback fires from OnServerSessionConnected().
-                bool connected = APIClient.IsConnected;
+                // Some Steamworks titles treat the first false response as a terminal
+                // login failure. Complete the initial session bootstrap within the
+                // shared, bounded identity timeout; later calls remain cache-based.
+                bool connected = APIClient.IsConnected ||
+                    APIClient.EnsureSessionBlocking(APIClient.InitialSessionTimeoutMs);
                 if (connected)
                 {
                     APIClient.QueueSelfRefresh();
@@ -87,7 +94,7 @@ namespace SKYNET.Steamworks.Implementation
                     // Steamworks.NET) get the real SteamID instead of caching 0 and
                     // losing the avatar. Falls back to the async path if it can't
                     // connect in time.
-                    if (!APIClient.EnsureSessionBlocking(600))
+                    if (!APIClient.EnsureSessionBlocking(APIClient.InitialSessionTimeoutMs))
                     {
                         APIClient.EnsureSession();
                         Write("GetSteamID unavailable: no active server session");
@@ -338,34 +345,142 @@ namespace SKYNET.Steamworks.Implementation
 
         public void AdvertiseGame(ulong steamIDGameServer, uint unIPServer, uint usPortServer)
         {
-            Write("AdvertiseGame");
+            var port = usPortServer > ushort.MaxValue ? ushort.MaxValue : (ushort)usPortServer;
+            APIClient.AdvertiseGameServer(steamIDGameServer, unIPServer, port);
+            Write($"AdvertiseGame server={steamIDGameServer} ip={unIPServer} port={port}");
         }
 
         public SteamAPICall_t RequestEncryptedAppTicket(IntPtr pDataToInclude, int cbDataToInclude)
         {
-            Write("RequestEncryptedAppTicket");
-            // EncryptedAppTicketResponse_t
-            MutexHelper.Wait("RequestEncryptedAppTicket", delegate
+            Write($"RequestEncryptedAppTicket size={cbDataToInclude}");
+            if (cbDataToInclude < 0 || cbDataToInclude > 64 * 1024 ||
+                (cbDataToInclude > 0 && pDataToInclude == IntPtr.Zero))
             {
+                return CallbackManager.AddCallbackResult(new EncryptedAppTicketResponse_t
+                {
+                    m_eResult = EResult.k_EResultInvalidParam
+                });
+            }
 
-            });
-            return k_uAPICallInvalid;
+            var now = DateTime.UtcNow;
+            lock (EncryptedTicketGate)
+            {
+                if (EncryptedTicketRequestPending)
+                {
+                    return CallbackManager.AddCallbackResult(new EncryptedAppTicketResponse_t
+                    {
+                        m_eResult = EResult.k_EResultDuplicateRequest
+                    });
+                }
+
+                if (now - LastEncryptedTicketRequestUtc < TimeSpan.FromSeconds(60))
+                {
+                    return CallbackManager.AddCallbackResult(new EncryptedAppTicketResponse_t
+                    {
+                        m_eResult = EResult.k_EResultLimitExceeded
+                    });
+                }
+
+                EncryptedTicketRequestPending = true;
+                LastEncryptedTicketRequestUtc = now;
+            }
+
+            var userData = new byte[cbDataToInclude];
+            if (userData.Length > 0)
+            {
+                Marshal.Copy(pDataToInclude, userData, 0, userData.Length);
+            }
+
+            var call = CallbackManager.AddCallbackResult(
+                new EncryptedAppTicketResponse_t { m_eResult = EResult.k_EResultPending },
+                readyToCall: false);
+            WorkQueue.Enqueue("Request encrypted app ticket", () =>
+            {
+                var result = EResult.k_EResultNoConnection;
+                byte[] ticket = null;
+                try
+                {
+                    var response = APIClient.RequestEncryptedAppTicket(userData);
+                    if (response != null && Enum.IsDefined(typeof(EResult), response.Result))
+                    {
+                        result = (EResult)response.Result;
+                        if (result == EResult.k_EResultOK &&
+                            !string.IsNullOrWhiteSpace(response.TicketBase64))
+                        {
+                            ticket = Convert.FromBase64String(response.TicketBase64);
+                            if (ticket.Length == 0)
+                            {
+                                result = EResult.k_EResultDataCorruption;
+                            }
+                        }
+                    }
+                }
+                catch (FormatException ex)
+                {
+                    Write($"Encrypted app ticket response was malformed: {ex.Message}");
+                    result = EResult.k_EResultDataCorruption;
+                }
+                finally
+                {
+                    lock (EncryptedTicketGate)
+                    {
+                        if (result == EResult.k_EResultOK && ticket != null)
+                        {
+                            EncryptedAppTicket = ticket;
+                        }
+                        EncryptedTicketRequestPending = false;
+                    }
+                }
+
+                var completion = new EncryptedAppTicketResponse_t { m_eResult = result };
+                NativeCallbackQueue.Enqueue(() =>
+                    CallbackManager.CompleteCallbackResult(call, completion));
+            }, highPriority: true);
+            return call;
         }
 
         public bool GetEncryptedAppTicket(IntPtr pTicket, int cbMaxTicket, IntPtr pcbTicket)
         {
             Write("GetEncryptedAppTicket");
-            if (pcbTicket != IntPtr.Zero)
+            if (pcbTicket == IntPtr.Zero)
             {
-                Marshal.WriteInt32(pcbTicket, 0);
+                return false;
             }
-            return false;
+
+            byte[] ticket;
+            lock (EncryptedTicketGate)
+            {
+                ticket = (byte[])EncryptedAppTicket.Clone();
+            }
+
+            Marshal.WriteInt32(pcbTicket, ticket.Length);
+            if (ticket.Length == 0 || pTicket == IntPtr.Zero ||
+                cbMaxTicket < 0 || cbMaxTicket < ticket.Length)
+            {
+                return false;
+            }
+
+            Marshal.Copy(ticket, 0, pTicket, ticket.Length);
+            return true;
         }
 
         public bool GetEncryptedAppTicket(IntPtr pTicket, int cbMaxTicket, ref uint pcbTicket)
         {
-            pcbTicket = 0;
-            return GetEncryptedAppTicket(pTicket, cbMaxTicket, IntPtr.Zero);
+            byte[] ticket;
+            lock (EncryptedTicketGate)
+            {
+                ticket = (byte[])EncryptedAppTicket.Clone();
+            }
+
+            pcbTicket = checked((uint)ticket.Length);
+            if (ticket.Length == 0 || pTicket == IntPtr.Zero ||
+                cbMaxTicket < 0 || cbMaxTicket < ticket.Length)
+            {
+                return false;
+            }
+
+            Marshal.Copy(ticket, 0, pTicket, ticket.Length);
+            return true;
         }
 
         public int GetGameBadgeLevel(int nSeries, bool bFoil)
@@ -379,7 +494,7 @@ namespace SKYNET.Steamworks.Implementation
             APIClient.QueueSelfRefresh();
             int level = StateCache.GetSelfPlayerLevel();
             Write($"GetPlayerSteamLevel {level}");
-            return level == 0 ? 100 : level;
+            return Math.Max(0, level);
         }
 
         public SteamAPICall_t RequestStoreAuthURL(string pchRedirectURL)
@@ -423,14 +538,31 @@ namespace SKYNET.Steamworks.Implementation
         public SteamAPICall_t GetDurationControl()
         {
             Write("GetDurationControl");
-            // DurationControl_t
-            return k_uAPICallInvalid;
+            return CallbackManager.AddCallbackResult(new DurationControl_t
+            {
+                Result = EResult.k_EResultOK,
+                Appid = SteamEmulator.AppID,
+                Applicable = false,
+                CsecsLast5h = 0,
+                Progress = DurationControlProgress.Progress_Full,
+                Notification = DurationControlNotification.None,
+                CsecsToday = 0,
+                CsecsRemaining = 0
+            });
         }
 
         public bool BSetDurationControlOnlineState(int eNewState)
         {
-            Write("BSetDurationControlOnlineState");
-            return false;
+            if (!Enum.IsDefined(typeof(EDurationControlOnlineState), eNewState) ||
+                eNewState == (int)EDurationControlOnlineState.k_EDurationControlOnlineState_Invalid)
+            {
+                Write($"BSetDurationControlOnlineState invalid={eNewState}");
+                return false;
+            }
+
+            DurationControlOnlineState = (EDurationControlOnlineState)eNewState;
+            Write($"BSetDurationControlOnlineState {DurationControlOnlineState}");
+            return true;
         }
 
         public int InitiateGameConnection_DEPRECATED(IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, uint unIPServer, ushort usPortServer, bool bSecure)

@@ -7,8 +7,10 @@ namespace SKYNET.Types
         public GameServerData()
         {
             KeyValues = new ConcurrentDictionary<string, string>();
+            Players = new ConcurrentDictionary<ulong, GameServerPlayerData>();
         }
 
+        public ulong SteamId { get; set; }
         public uint IP { get; set; }
         public int Port { get; set; }
         public int QueryPort { get; set; }
@@ -30,6 +32,30 @@ namespace SKYNET.Types
         public string GameTags { get; set; }
         public string GameData { get; set; }
         public string Region { get; set; }
+        public bool LoggedOn { get; set; }
+        public bool AdvertiseActive { get; set; } = true;
         public ConcurrentDictionary<string, string> KeyValues { get; set; }
+        public ConcurrentDictionary<ulong, GameServerPlayerData> Players { get; set; }
+    }
+
+    public sealed class GameServerPlayerData
+    {
+        public ulong SteamId { get; set; }
+        public string Name { get; set; }
+        public int Score { get; set; }
+        public float TimePlayedSeconds { get; set; }
+        public long ConnectedAtUtcTicks { get; set; }
+
+        public float GetTimePlayedSeconds()
+        {
+            if (ConnectedAtUtcTicks <= 0)
+            {
+                return TimePlayedSeconds;
+            }
+
+            var connectedAt = new System.DateTime(ConnectedAtUtcTicks, System.DateTimeKind.Utc);
+            var elapsed = (float)(System.DateTime.UtcNow - connectedAt).TotalSeconds;
+            return System.Math.Max(TimePlayedSeconds, elapsed);
+        }
     }
 }

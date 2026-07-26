@@ -6,13 +6,18 @@ using SteamAPICall_t = System.UInt64;
 namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("STEAMUSERSTATS_INTERFACE_VERSION011")]
+    [MsvcVTableOverload("GetStatInt32", "GetStatFloat")]
+    [MsvcVTableOverload("SetStatInt32", "SetStatFloat")]
+    [MsvcVTableOverload("GetUserStatInt32", "GetUserStatFloat")]
+    [MsvcVTableOverload("GetGlobalStatInt64", "GetGlobalStatDouble")]
+    [MsvcVTableOverload("GetGlobalStatHistoryInt64", "GetGlobalStatHistoryDouble")]
     public class SteamUserStats011Legacy : ISteamInterface
     {
         public bool RequestCurrentStats(IntPtr _) => SteamEmulator.SteamUserStats.RequestCurrentStats();
         public bool GetStatInt32(IntPtr _, string pchName, IntPtr pData) => SteamEmulator.SteamUserStats.GetStatInt32(pchName, pData);
         public bool GetStatFloat(IntPtr _, string pchName, IntPtr pData) => SteamEmulator.SteamUserStats.GetStatFloat(pchName, pData);
         public bool SetStatInt32(IntPtr _, string pchName, int nData) => SteamEmulator.SteamUserStats.SetStat(pchName, (uint)nData);
-        public bool SetStatFloat(IntPtr _, string pchName, float fData) => SteamEmulator.SteamUserStats.SetStat(pchName, (uint)fData);
+        public bool SetStatFloat(IntPtr _, string pchName, float fData) => SteamEmulator.SteamUserStats.SetStat(pchName, fData);
         public bool UpdateAvgRateStat(IntPtr _, string pchName, float flCountThisSession, double dSessionLength) => SteamEmulator.SteamUserStats.UpdateAvgRateStat(pchName, flCountThisSession, dSessionLength);
         public bool GetAchievement(IntPtr _, string pchName, IntPtr pbAchieved) => SteamEmulator.SteamUserStats.GetAchievement(pchName, pbAchieved);
         public bool SetAchievement(IntPtr _, string pchName) => SteamEmulator.SteamUserStats.SetAchievement(pchName);
@@ -39,7 +44,7 @@ namespace SKYNET.Steamworks.Interfaces
         public SteamAPICall_t DownloadLeaderboardEntries(IntPtr _, ulong hSteamLeaderboard, int eLeaderboardDataRequest, int nRangeStart, int nRangeEnd) => SteamEmulator.SteamUserStats.DownloadLeaderboardEntries(hSteamLeaderboard, eLeaderboardDataRequest, nRangeStart, nRangeEnd);
         public SteamAPICall_t DownloadLeaderboardEntriesForUsers(IntPtr _, ulong hSteamLeaderboard, IntPtr prgUsers, int cUsers) => SteamEmulator.SteamUserStats.DownloadLeaderboardEntriesForUsers(hSteamLeaderboard, prgUsers, cUsers);
         public bool GetDownloadedLeaderboardEntry(IntPtr _, ulong hSteamLeaderboardEntries, int index, IntPtr pLeaderboardEntry, IntPtr pDetails, int cDetailsMax) => SteamEmulator.SteamUserStats.GetDownloadedLeaderboardEntry(hSteamLeaderboardEntries, index, pLeaderboardEntry, pDetails, cDetailsMax);
-        public SteamAPICall_t UploadLeaderboardScore(IntPtr _, ulong hSteamLeaderboard, int eLeaderboardUploadScoreMethod, int nScore, IntPtr pScoreDetails, int cScoreDetailsCount) => SteamEmulator.SteamUserStats.UploadLeaderboardScore(hSteamLeaderboard, eLeaderboardUploadScoreMethod, (uint)nScore, pScoreDetails, cScoreDetailsCount);
+        public SteamAPICall_t UploadLeaderboardScore(IntPtr _, ulong hSteamLeaderboard, int eLeaderboardUploadScoreMethod, int nScore, IntPtr pScoreDetails, int cScoreDetailsCount) => SteamEmulator.SteamUserStats.UploadLeaderboardScore(hSteamLeaderboard, eLeaderboardUploadScoreMethod, nScore, pScoreDetails, cScoreDetailsCount);
         public SteamAPICall_t AttachLeaderboardUGC(IntPtr _, ulong hSteamLeaderboard, ulong hUGC) => SteamEmulator.SteamUserStats.AttachLeaderboardUGC(hSteamLeaderboard, hUGC);
         public SteamAPICall_t GetNumberOfCurrentPlayers(IntPtr _) => SteamEmulator.SteamUserStats.GetNumberOfCurrentPlayers();
         public SteamAPICall_t RequestGlobalAchievementPercentages(IntPtr _) => SteamEmulator.SteamUserStats.RequestGlobalAchievementPercentages();

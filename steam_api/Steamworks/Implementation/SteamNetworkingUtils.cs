@@ -423,14 +423,22 @@ namespace SKYNET.Steamworks.Implementation
 
         public void SteamNetworkingIPAddr_ToString(IntPtr addr, IntPtr buf, UIntPtr cbBuf, bool bWithPort)
         {
-            Write("SteamNetworkingIPAddr_ToString");
-            NativeStringCache.WriteUtf8Buffer(buf, checked((int)cbBuf.ToUInt64()), string.Empty);
+            var value = addr == IntPtr.Zero
+                ? string.Empty
+                : SteamNetworkingIPAddrInterop.Format(SteamNetworkingIPAddrInterop.Read(addr), bWithPort);
+            NativeStringCache.WriteUtf8Buffer(buf, checked((int)cbBuf.ToUInt64()), value);
         }
 
         public bool SteamNetworkingIPAddr_ParseString(IntPtr pAddr, string pszStr)
         {
-            Write("SteamNetworkingIPAddr_ParseString");
-            return false;
+            if (!SteamNetworkingIPAddrInterop.TryParse(pszStr, out var address))
+            {
+                SteamNetworkingIPAddrInterop.Clear(pAddr);
+                return false;
+            }
+
+            SteamNetworkingIPAddrInterop.Write(pAddr, address);
+            return true;
         }
 
         public void SteamNetworkingIdentity_ToString(IntPtr identity, IntPtr buf, UIntPtr cbBuf)
@@ -440,12 +448,16 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool SteamNetworkingIdentity_ParseString(IntPtr pIdentity, string pszStr)
         {
-            if (!SteamNetworkingIdentityInterop.TryParseSteamId(pszStr, out var steamId))
+            if (!SteamNetworkingIdentityInterop.TryParse(
+                    pszStr,
+                    (UIntPtr)SteamNetworkingIdentityInterop.Size,
+                    out var identity))
             {
                 SteamNetworkingIdentityInterop.Clear(pIdentity);
                 return false;
             }
-            SteamNetworkingIdentityInterop.WriteSteamId(pIdentity, steamId);
+
+            SteamNetworkingIdentityInterop.Write(pIdentity, identity);
             return true;
         }
     }

@@ -62,7 +62,7 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamAPI_ISteamUserStats_SetStatFloat(IntPtr _, string pchName, float fData)
         {
             Write("SteamAPI_ISteamUserStats_SetStatFloat");
-            return SteamEmulator.SteamUserStats.SetStat(pchName, (uint)fData);
+            return SteamEmulator.SteamUserStats.SetStat(pchName, fData);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -76,7 +76,7 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamAPI_ISteamUserStats_SetStat0(IntPtr _, string pchName, float fData)
         {
             Write("SteamAPI_ISteamUserStats_SetStat0");
-            return SteamEmulator.SteamUserStats.SetStat(pchName, (uint)fData);
+            return SteamEmulator.SteamUserStats.SetStat(pchName, fData);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -280,7 +280,7 @@ namespace SKYNET.Steamworks.Exported
         public static SteamAPICall_t SteamAPI_ISteamUserStats_UploadLeaderboardScore(IntPtr _, ulong hSteamLeaderboard, int eLeaderboardUploadScoreMethod, int nScore, IntPtr pScoreDetails, int cScoreDetailsCount)
         {
             Write("SteamAPI_ISteamUserStats_UploadLeaderboardScore");
-            return SteamEmulator.SteamUserStats.UploadLeaderboardScore(hSteamLeaderboard, eLeaderboardUploadScoreMethod, unchecked((uint)nScore), pScoreDetails, cScoreDetailsCount);
+            return SteamEmulator.SteamUserStats.UploadLeaderboardScore(hSteamLeaderboard, eLeaderboardUploadScoreMethod, nScore, pScoreDetails, cScoreDetailsCount);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

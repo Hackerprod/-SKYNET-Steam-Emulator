@@ -41,7 +41,7 @@ namespace SKYNET.Steamworks.Interfaces
             return false;
         }
 
-        private void Write(object msg)
+        private new void Write(object msg)
         {
             SteamEmulator.Write("SteamUnifiedMessages001", msg);
         }

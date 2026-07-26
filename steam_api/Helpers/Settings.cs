@@ -49,6 +49,8 @@ namespace SKYNET.Helper
                     config.AppendLine("[Game Settings]");
                     config.AppendLine($"Languaje = english");
                     config.AppendLine($"AppId = 570");
+                    config.AppendLine("# Optional build override. Zero reads appmanifest_<appid>.acf and otherwise reports no Steam build.");
+                    config.AppendLine("BuildId = 0");
                     config.AppendLine("# Report every DLC as owned and installed (default). Set to false and list the");
                     config.AppendLine("# owned DLC in the [DLC] section below (or in a \"DLC.txt\" file) to restrict.");
                     config.AppendLine("UnlockAllDLC = true");
@@ -91,6 +93,17 @@ namespace SKYNET.Helper
                     config.AppendLine("Currency = USD");
                     config.AppendLine();
 
+                    config.AppendLine("[Workshop]");
+                    config.AppendLine("# Optional root containing <AppId>/<PublishedFileId> Workshop folders.");
+                    config.AppendLine("ContentRoot =");
+                    config.AppendLine();
+
+                    config.AppendLine("[Music]");
+                    config.AppendLine("# Local Steam Music library. Relative paths resolve from the game directory.");
+                    config.AppendLine("Enabled = true");
+                    config.AppendLine("LibraryRoot =");
+                    config.AppendLine();
+
                     // Log Configuration
 
                     config.AppendLine("[Log Settings]");
@@ -119,6 +132,7 @@ namespace SKYNET.Helper
                     if (item.Key == "AppId")
                         if (uint.TryParse((string)item.Value, out uint appId))
                             SteamEmulator.AppID = appId;
+                SteamEmulator.AppBuildIdOverride = GetNonNegativeInt("Game Settings", "BuildId", 0);
 
                 LoadDLCs();
                 LoadAppContent();
@@ -130,6 +144,11 @@ namespace SKYNET.Helper
                     GetBool("Inventory", "AutoGrantPromos", true),
                     GetBool("Inventory", "AllowGenerate", false),
                     GetString("Inventory", "Currency", "USD"));
+                SteamEmulator.WorkshopContentRoot = ResolveConfiguredPath(
+                    GetString("Workshop", "ContentRoot", string.Empty));
+                SteamEmulator.MusicEnabled = GetBool("Music", "Enabled", true);
+                SteamEmulator.MusicLibraryRoot = ResolveConfiguredPath(
+                    GetString("Music", "LibraryRoot", string.Empty));
 
                 foreach (var item in IniParser["Network Settings"].Settings)
                 {
@@ -228,6 +247,7 @@ namespace SKYNET.Helper
         {
             bool changed = false;
             changed |= EnsureSetting("Game Settings", "UnlockAllDLC", "true");
+            changed |= EnsureSetting("Game Settings", "BuildId", "0");
             changed |= EnsureSetting("User Settings", "ClientInstanceId", GenerateClientInstanceId());
             changed |= MigrateSettingName("User Settings", "PersonaName", "FallbackPersonaName", Environment.UserName);
             changed |= MigrateSettingName("User Settings", "AccountId", "FallbackAccountId", GenerateStableAccountId().ToString());
@@ -253,6 +273,9 @@ namespace SKYNET.Helper
             changed |= EnsureSetting("Inventory", "AutoGrantPromos", "true");
             changed |= EnsureSetting("Inventory", "AllowGenerate", "false");
             changed |= EnsureSetting("Inventory", "Currency", "USD");
+            changed |= EnsureSetting("Workshop", "ContentRoot", string.Empty);
+            changed |= EnsureSetting("Music", "Enabled", "true");
+            changed |= EnsureSetting("Music", "LibraryRoot", string.Empty);
             changed |= MigrateSetting("Network Settings", "PollIntervalMs", "1000", "50");
             changed |= MigrateSetting("Network Settings", "HttpTimeoutMs", "2000", "8000");
             changed |= MigrateSetting("Network Settings", "BroadCastPort", "28025", "28032");
@@ -561,6 +584,17 @@ namespace SKYNET.Helper
         {
             var value = IniParser[section][key];
             if (value != null && uint.TryParse(value.ToString(), out var parsed))
+            {
+                return parsed;
+            }
+
+            return fallback;
+        }
+
+        private static int GetNonNegativeInt(string section, string key, int fallback)
+        {
+            var value = IniParser[section][key];
+            if (value != null && int.TryParse(value.ToString(), out var parsed) && parsed >= 0)
             {
                 return parsed;
             }

@@ -171,6 +171,7 @@ namespace SKYNET.Managers
         public static void RunCallbacks(bool gameServer = false)
         {
             EventPump.RunFrame(gameServer);
+            NativeCallbackQueue.Drain(gameServer);
             var invocations = DrainForFrame(gameServer, SteamEmulator.HSteamPipe, SteamEmulator.HSteamUser);
             InvokeCallbacks(invocations);
         }
@@ -183,6 +184,7 @@ namespace SKYNET.Managers
         {
             bool gameServer = hSteamPipe == SteamEmulator.HSteamPipe_GS;
             EventPump.RunFrame(gameServer);
+            NativeCallbackQueue.Drain(gameServer);
             var invocations = DrainForFrame(gameServer, hSteamPipe, gameServer ? SteamEmulator.HSteamUser_GS : SteamEmulator.HSteamUser);
             InvokeCallbacks(invocations);
         }

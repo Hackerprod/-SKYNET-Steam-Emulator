@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using SKYNET.Callback;
 using SKYNET.Helpers;
 using SKYNET.Managers;
@@ -20,7 +21,6 @@ namespace SKYNET.Steamworks.Implementation
 
         private List<UGC> UGCQueries;
         private UGCQueryHandle_t Handle;
-        private List<PublishedFileId_t> subscribed;
 
         public SteamUGC()
         {
@@ -28,7 +28,7 @@ namespace SKYNET.Steamworks.Implementation
             InterfaceName = "SteamUGC";
             InterfaceVersion = "STEAMUGC_INTERFACE_VERSION021";
             UGCQueries = new List<UGC>();
-            subscribed = new List<PublishedFileId_t>();
+            WorkshopManager.Initialize();
         }
 
         public UGCQueryHandle_t CreateQueryUserUGCRequest(uint unAccountID, int eListType, int eMatchingUGCType, int eSortOrder, uint nCreatorAppID, uint nConsumerAppID, uint unPage)
@@ -49,10 +49,30 @@ namespace SKYNET.Steamworks.Implementation
             return CreateOne();
         }
 
-        public UGCQueryHandle_t CreateQueryUGCDetailsRequest(ulong pvecPublishedFileID, uint unNumPublishedFileIDs)
+        public UGCQueryHandle_t CreateQueryUGCDetailsRequest(IntPtr pvecPublishedFileID, uint unNumPublishedFileIDs)
         {
             Write("CreateQueryUGCDetailsRequest");
-            return CreateOne();
+            if (pvecPublishedFileID == IntPtr.Zero || unNumPublishedFileIDs == 0)
+            {
+                return ulong.MaxValue;
+            }
+
+            var handle = CreateOne();
+            MutexHelper.Wait("UGCQueries", delegate
+            {
+                var request = UGCQueries.Find(query => query.Handle == handle);
+                if (request == null)
+                {
+                    return;
+                }
+
+                for (uint index = 0; index < unNumPublishedFileIDs; index++)
+                {
+                    var offset = checked((int)((ulong)index * sizeof(ulong)));
+                    request.return_only.Add(unchecked((ulong)Marshal.ReadInt64(pvecPublishedFileID, offset)));
+                }
+            });
+            return handle;
         }
 
         public SteamAPICall_t SendQueryUGCRequest(UGCQueryHandle_t handle)
@@ -68,7 +88,10 @@ namespace SKYNET.Steamworks.Implementation
                     {
                         if (request.ReturnAll)
                         {
-                            request.results = subscribed;
+                            request.results = WorkshopManager
+                                .GetSubscriptions(includeLocallyDisabled: false)
+                                .Select(subscription => subscription.PublishedFileId)
+                                .ToList();
                         }
 
                         if (request.return_only.Any())
@@ -113,15 +136,12 @@ namespace SKYNET.Steamworks.Implementation
 
             if (UGC != null && (index < UGC.results.Count))
             {
-                foreach (var item in UGC.results)
-                {
-                    //set_details(item, pDetails);
-                    pDetails.m_eResult = EResult.k_EResultOK;
-                    pDetails.m_nPublishedFileId = item;
-                    pDetails.m_eFileType = EWorkshopFileType.k_EWorkshopFileTypeCommunity;
-                    pDetails.m_nCreatorAppID = SteamEmulator.AppID;
-                    pDetails.m_nConsumerAppID = SteamEmulator.AppID;
-                }
+                var publishedFileId = UGC.results[(int)index];
+                WorkshopManager.TryGetItem(publishedFileId, out var item);
+                pDetails = CreateDetails(
+                    item,
+                    publishedFileId,
+                    item == null ? EResult.k_EResultFileNotFound : EResult.k_EResultOK);
                 Result = true;
             }
 
@@ -378,8 +398,37 @@ namespace SKYNET.Steamworks.Implementation
         public SteamAPICall_t RequestUGCDetails(ulong nPublishedFileID, uint unMaxAgeSeconds)
         {
             Write("RequestUGCDetails");
-            // SteamUGCRequestUGCDetailsResult_t
-            return k_uAPICallInvalid;
+            var cached = WorkshopManager.TryGetItem(nPublishedFileID, out var cachedItem);
+            var pending = new SteamUGCRequestUGCDetailsResult_t
+            {
+                Details = CreateDetails(
+                    cachedItem,
+                    nPublishedFileID,
+                    EResult.k_EResultPending),
+                CachedData = cached
+            };
+
+            return WorkQueue.EnqueueCallbackResult(
+                pending,
+                () =>
+                {
+                    var item = cachedItem;
+                    if (item == null)
+                    {
+                        item = APIClient.GetWorkshopItem(nPublishedFileID);
+                    }
+
+                    return new SteamUGCRequestUGCDetailsResult_t
+                    {
+                        Details = CreateDetails(
+                            item,
+                            nPublishedFileID,
+                            item == null ? EResult.k_EResultFileNotFound : EResult.k_EResultOK),
+                        CachedData = cached
+                    };
+                },
+                name: $"Request Workshop details {nPublishedFileID}",
+                highPriority: true);
         }
 
         public SteamAPICall_t CreateItem(uint nConsumerAppId, int eFileType)
@@ -577,98 +626,157 @@ namespace SKYNET.Steamworks.Implementation
         public SteamAPICall_t SubscribeItem(PublishedFileId_t nPublishedFileID) 
         {
             Write("SubscribeItem");
-            SteamAPICall_t APICall = k_uAPICallInvalid;
-            MutexHelper.Wait("SubscribeItem", delegate
+            var pending = new RemoteStorageSubscribePublishedFileResult_t
             {
-                try
+                m_eResult = EResult.k_EResultPending,
+                m_nPublishedFileId = nPublishedFileID
+            };
+            return WorkQueue.EnqueueCallbackResult(
+                pending,
+                () =>
                 {
-                    subscribed.Add(nPublishedFileID);
-                    //RemoteStorageSubscribePublishedFileResult_t data = new RemoteStorageSubscribePublishedFileResult_t()
-                    //{
-                    //    m_eResult = EResult.k_EResultOK,
-                    //    m_nPublishedFileId = nPublishedFileID
-                    //};
-                    //APICall = CallbackManager.AddCallbackResult(data, RemoteStorageSubscribePublishedFileResult_t.k_iCallback);
-                }
-                catch (Exception ex)
-                {
-                    Write($"SubscribeItem {ex}");
-                }
-            });
+                    var localItem = WorkshopManager.TryReadInstalledItem(nPublishedFileID);
+                    if (localItem != null && APIClient.PutWorkshopItem(localItem) == null)
+                    {
+                        return new RemoteStorageSubscribePublishedFileResult_t
+                        {
+                            m_eResult = EResult.k_EResultNoConnection,
+                            m_nPublishedFileId = nPublishedFileID
+                        };
+                    }
 
-            return APICall;
+                    var response = APIClient.SubscribeWorkshopItem(nPublishedFileID);
+                    if (response?.Success != true || response.Subscription == null)
+                    {
+                        return new RemoteStorageSubscribePublishedFileResult_t
+                        {
+                            m_eResult = response == null
+                                ? EResult.k_EResultNoConnection
+                                : EResult.k_EResultFileNotFound,
+                            m_nPublishedFileId = nPublishedFileID
+                        };
+                    }
+
+                    WorkshopManager.UpsertSubscription(response.Subscription);
+                    if (WorkshopManager.TryGetInstallInfo(nPublishedFileID, out _))
+                    {
+                        NativeCallbackQueue.Enqueue(() =>
+                            CallbackManager.AddCallback(new ItemInstalled_t
+                             {
+                                 m_unAppID = SteamEmulator.AppID,
+                                 m_nPublishedFileId = nPublishedFileID,
+                                 // Emulator-managed Workshop content is not backed
+                                 // by SteamPipe UGC or depot manifests.
+                                 m_hLegacyContent = 0,
+                                 m_unManifestID = 0
+                             }));
+                    }
+
+                    return new RemoteStorageSubscribePublishedFileResult_t
+                    {
+                        m_eResult = EResult.k_EResultOK,
+                        m_nPublishedFileId = nPublishedFileID
+                    };
+                },
+                name: $"Subscribe Workshop item {nPublishedFileID}",
+                highPriority: true);
         }
 
         public SteamAPICall_t UnsubscribeItem(PublishedFileId_t nPublishedFileID) 
         {
             Write("UnsubscribeItem");
-            SteamAPICall_t APICall = k_uAPICallInvalid;
-            MutexHelper.Wait("UnsubscribeItem", delegate
+            var pending = new RemoteStorageUnsubscribePublishedFileResult_t
             {
-                try
+                m_eResult = EResult.k_EResultPending,
+                m_nPublishedFileId = nPublishedFileID
+            };
+            return WorkQueue.EnqueueCallbackResult(
+                pending,
+                () =>
                 {
-                    if (subscribed.Contains(nPublishedFileID))
+                    var response = APIClient.UnsubscribeWorkshopItem(nPublishedFileID);
+                    if (response?.Success != true)
                     {
-                        subscribed.Remove(nPublishedFileID);
+                        return new RemoteStorageUnsubscribePublishedFileResult_t
+                        {
+                            m_eResult = response == null
+                                ? EResult.k_EResultNoConnection
+                                : EResult.k_EResultFail,
+                            m_nPublishedFileId = nPublishedFileID
+                        };
                     }
 
-                    RemoteStorageUnsubscribePublishedFileResult_t data = new RemoteStorageUnsubscribePublishedFileResult_t()
+                    WorkshopManager.RemoveSubscription(nPublishedFileID);
+                    return new RemoteStorageUnsubscribePublishedFileResult_t
                     {
                         m_eResult = EResult.k_EResultOK,
                         m_nPublishedFileId = nPublishedFileID
                     };
-                    APICall = CallbackManager.AddCallbackResult(data);
-                }
-                catch (Exception ex)
-                {
-                    Write($"SubscribeItem {ex}");
-                }
-            });
-
-            return k_uAPICallInvalid;
+                },
+                name: $"Unsubscribe Workshop item {nPublishedFileID}",
+                highPriority: true);
         }
 
         public uint GetNumSubscribedItems() 
         {
             Write("GetNumSubscribedItems");
-            return (uint)subscribed.Count();
+            return checked((uint)WorkshopManager.GetSubscriptions(false).Length);
         }
 
         public uint GetNumSubscribedItems(bool bIncludeLocallyDisabled)
         {
             Write("GetNumSubscribedItems");
-            return GetNumSubscribedItems();
+            return checked((uint)WorkshopManager.GetSubscriptions(bIncludeLocallyDisabled).Length);
         }
 
-        public uint GetSubscribedItems(ulong pvecPublishedFileID, uint cMaxEntries) 
+        public uint GetSubscribedItems(IntPtr pvecPublishedFileID, uint cMaxEntries)
         {
             Write("GetSubscribedItems");
-            uint MaxEntries = cMaxEntries;
-            MutexHelper.Wait("GetSubscribedItems", delegate
+            if (pvecPublishedFileID == IntPtr.Zero || cMaxEntries == 0)
             {
-                if (MaxEntries > subscribed.Count())
-                {
-                    MaxEntries = (uint)subscribed.Count();
-                }
-            });
-            cMaxEntries = MaxEntries;
-            return MaxEntries;
+                return 0;
+            }
+
+            var subscriptions = WorkshopManager.GetSubscriptions(false);
+            var count = Math.Min((ulong)cMaxEntries, (ulong)subscriptions.Length);
+            for (ulong index = 0; index < count; index++)
+            {
+                var offset = checked((int)(index * sizeof(ulong)));
+                Marshal.WriteInt64(
+                    pvecPublishedFileID,
+                    offset,
+                    unchecked((long)subscriptions[index].PublishedFileId));
+            }
+
+            return checked((uint)count);
         }
 
-        public uint GetSubscribedItems(ulong pvecPublishedFileID, uint cMaxEntries, bool bIncludeLocallyDisabled)
+        public uint GetSubscribedItems(IntPtr pvecPublishedFileID, uint cMaxEntries, bool bIncludeLocallyDisabled)
         {
             Write("GetSubscribedItems");
-            return GetSubscribedItems(pvecPublishedFileID, cMaxEntries);
+            if (pvecPublishedFileID == IntPtr.Zero || cMaxEntries == 0)
+            {
+                return 0;
+            }
+
+            var subscriptions = WorkshopManager.GetSubscriptions(bIncludeLocallyDisabled);
+            var count = Math.Min((ulong)cMaxEntries, (ulong)subscriptions.Length);
+            for (ulong index = 0; index < count; index++)
+            {
+                var offset = checked((int)(index * sizeof(ulong)));
+                Marshal.WriteInt64(
+                    pvecPublishedFileID,
+                    offset,
+                    unchecked((long)subscriptions[index].PublishedFileId));
+            }
+
+            return checked((uint)count);
         }
 
         public uint GetItemState(ulong nPublishedFileID)
         {
             Write("GetItemState");
-            MutexHelper.Wait("GetItemState", delegate
-            {
-                // TODO
-            });
-            return (uint)EItemState.k_EItemStateSubscribed;
+            return WorkshopManager.GetItemState(nPublishedFileID);
         }
 
         public bool GetItemInstallInfo(ulong nPublishedFileID, ulong punSizeOnDisk, string pchFolder, uint cchFolderSize, uint punTimeStamp)
@@ -679,11 +787,37 @@ namespace SKYNET.Steamworks.Implementation
         public bool GetItemInstallInfo(ulong nPublishedFileID, IntPtr punSizeOnDisk, IntPtr pchFolder, uint cchFolderSize, IntPtr punTimeStamp)
         {
             Write("GetItemInstallInfo");
-            MutexHelper.Wait("GetItemInstallInfo", delegate
+            if (pchFolder == IntPtr.Zero ||
+                cchFolderSize == 0 ||
+                cchFolderSize > int.MaxValue ||
+                !WorkshopManager.TryGetInstallInfo(nPublishedFileID, out var info))
             {
-                // TODO
-            });
-            return false;
+                return false;
+            }
+
+            var requiredFolderBytes = Encoding.UTF8.GetByteCount(info.Folder ?? string.Empty) + 1;
+            if (requiredFolderBytes > cchFolderSize)
+            {
+                return false;
+            }
+
+            if (!NativeStringCache.WriteUtf8Buffer(
+                    pchFolder,
+                    checked((int)cchFolderSize),
+                    info.Folder))
+            {
+                return false;
+            }
+
+            if (punSizeOnDisk != IntPtr.Zero)
+            {
+                Marshal.WriteInt64(punSizeOnDisk, unchecked((long)info.SizeOnDisk));
+            }
+            if (punTimeStamp != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(punTimeStamp, unchecked((int)info.Timestamp));
+            }
+            return true;
         }
 
         public bool GetItemDownloadInfo(ulong nPublishedFileID, ulong punBytesDownloaded, ulong punBytesTotal)
@@ -904,13 +1038,66 @@ namespace SKYNET.Steamworks.Implementation
             }
         }
 
+        private static SteamUGCDetails_t CreateDetails(
+            APIClient.SkyNetWorkshopItemDto item,
+            ulong publishedFileId,
+            EResult result)
+        {
+            var fileType = item != null && Enum.IsDefined(typeof(EWorkshopFileType), item.FileType)
+                ? (EWorkshopFileType)item.FileType
+                : EWorkshopFileType.k_EWorkshopFileTypeCommunity;
+            var visibility = item != null &&
+                             Enum.IsDefined(typeof(ERemoteStoragePublishedFileVisibility), item.Visibility)
+                ? (ERemoteStoragePublishedFileVisibility)item.Visibility
+                : ERemoteStoragePublishedFileVisibility.k_ERemoteStoragePublishedFileVisibilityPublic;
+            return new SteamUGCDetails_t
+            {
+                m_nPublishedFileId = publishedFileId,
+                m_eResult = result,
+                m_eFileType = fileType,
+                m_nCreatorAppID = item?.CreatorAppId ?? SteamEmulator.AppID,
+                m_nConsumerAppID = item?.ConsumerAppId ?? SteamEmulator.AppID,
+                m_rgchTitle = item?.Title ?? string.Empty,
+                m_rgchDescription = item?.Description ?? string.Empty,
+                m_ulSteamIDOwner = item?.OwnerSteamId ?? 0,
+                m_rtimeCreated = item?.TimeCreated ?? 0,
+                m_rtimeUpdated = item?.TimeUpdated ?? 0,
+                m_rtimeAddedToUserList = 0,
+                m_eVisibility = visibility,
+                m_bBanned = item?.Banned ?? false,
+                m_bAcceptedForUse = item?.AcceptedForUse ?? false,
+                m_bTagsTruncated = false,
+                m_rgchTags = item?.Tags ?? string.Empty,
+                m_hFile = 0,
+                m_hPreviewFile = 0,
+                m_pchFileName = item?.FileName ?? string.Empty,
+                m_nFileSize = ClampToInt(item?.FileSize ?? 0),
+                m_nPreviewFileSize = 0,
+                m_rgchURL = item?.PreviewUrl ?? string.Empty,
+                m_unVotesUp = item?.VotesUp ?? 0,
+                m_unVotesDown = item?.VotesDown ?? 0,
+                m_flScore = item?.Score ?? 0f,
+                m_unNumChildren = 0,
+                m_ulTotalFilesSize = ToUnsignedSize(item?.TotalFilesSize ?? 0)
+            };
+        }
+
+        private static int ClampToInt(long value)
+        {
+            return value <= 0 ? 0 : value >= int.MaxValue ? int.MaxValue : (int)value;
+        }
+
+        private static ulong ToUnsignedSize(long value)
+        {
+            return value <= 0 ? 0UL : (ulong)value;
+        }
+
         internal class UGC
         {
             public UGCQueryHandle_t Handle;
             public List<PublishedFileId_t> return_only;
             public List<PublishedFileId_t> results;
             public bool ReturnAll;
-            public bool ReturnOnly;
 
             public UGC()
             {

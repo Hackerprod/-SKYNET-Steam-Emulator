@@ -6,9 +6,6 @@ namespace SKYNET.Steamworks.Implementation
     {
         public static SteamMusic Instance;
 
-        private bool IsPlaying;
-        private float Volume = 1.0f;
-
         public SteamMusic()
         {
             Instance = this;
@@ -19,67 +16,55 @@ namespace SKYNET.Steamworks.Implementation
         public bool BIsEnabled()
         {
             Write($"BIsEnabled");
-            return true;
+            return SKYNET.Managers.MusicPlayerManager.IsEnabled;
         }
 
         public bool BIsPlaying()
         {
             Write($"BIsPlaying");
-            return IsPlaying;
+            return SKYNET.Managers.MusicPlayerManager.IsPlaying;
         }
 
         public int GetPlaybackStatus()
         {
             Write($"GetPlaybackStatus");
-            return (int)(IsPlaying
-                ? AudioPlayback_Status.AudioPlayback_Playing
-                : AudioPlayback_Status.AudioPlayback_Idle);
+            return (int)SKYNET.Managers.MusicPlayerManager.PlaybackStatus;
         }
 
         public float GetVolume()
         {
             Write($"GetVolume");
-            return Volume;
+            return SKYNET.Managers.MusicPlayerManager.Volume;
         }
 
         public void Pause()
         {
             Write($"Pause");
-            IsPlaying = false;
+            SKYNET.Managers.MusicPlayerManager.Pause();
         }
 
         public void Play()
         {
             Write($"Play");
-            IsPlaying = true;
+            SKYNET.Managers.MusicPlayerManager.Play();
         }
 
         public void PlayNext()
         {
             Write($"PlayNext");
+            SKYNET.Managers.MusicPlayerManager.PlayNext();
         }
 
         public void PlayPrevious()
         {
             Write($"PlayPrevious");
+            SKYNET.Managers.MusicPlayerManager.PlayPrevious();
         }
 
         public void SetVolume(float flVolume)
         {
             Write($"SetVolume {flVolume}");
-            if (flVolume < 0)
-            {
-                Volume = 0;
-                return;
-            }
-
-            if (flVolume > 1)
-            {
-                Volume = 1;
-                return;
-            }
-
-            Volume = flVolume;
+            SKYNET.Managers.MusicPlayerManager.SetVolume(flVolume);
         }
     }
 }

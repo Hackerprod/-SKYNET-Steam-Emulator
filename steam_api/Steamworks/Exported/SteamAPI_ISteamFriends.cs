@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using SKYNET.Steamworks.Implementation;
 
 using SteamAPICall_t = System.UInt64;
-using FriendsGroupID_t = System.UInt16;
+using FriendsGroupID_t = System.Int16;
 using System.Threading.Tasks;
 using SKYNET.Helpers;
 
@@ -335,7 +335,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int SteamAPI_ISteamFriends_GetFriendsGroupIDByIndex(IntPtr _, int iFG)
+        public static FriendsGroupID_t SteamAPI_ISteamFriends_GetFriendsGroupIDByIndex(IntPtr _, int iFG)
         {
             Write($"SteamAPI_ISteamFriends_GetFriendsGroupIDByIndex");
             return SteamFriends.Instance.GetFriendsGroupIDByIndex(iFG);

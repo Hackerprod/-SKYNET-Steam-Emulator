@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
+using SKYNET.Steamworks.Interfaces;
 
 namespace SKYNET.Managers
 {
@@ -319,7 +320,7 @@ namespace SKYNET.Managers
                     }
                     catch (Exception ex)
                     {
-                        ErrorMessage += $"Error Injecting Delegate {new_delegates[i]}\n";
+                        ErrorMessage += $"Error Injecting Delegate {new_delegates[i]}: {ex.Message}\n";
                         successResult = false;
                     }
                 }
@@ -418,7 +419,71 @@ namespace SKYNET.Managers
             var all_methods = new List<MethodInfo>(t.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly));
             all_methods.RemoveAll(x => x.Name.StartsWith("get_") || x.Name.StartsWith("set_"));
             all_methods.Sort((left, right) => left.MetadataToken.CompareTo(right.MetadataToken));
+            ApplyMsvcOverloadLayout(t, all_methods);
             return all_methods;
+        }
+
+        private static void ApplyMsvcOverloadLayout(Type interfaceType, List<MethodInfo> methods)
+        {
+            var claimedMethods = new HashSet<MethodInfo>();
+
+            // C# overloads retain their C++ name, so they can be identified
+            // without extra metadata.
+            foreach (var overloadGroup in methods.GroupBy(method => method.Name).Where(group => group.Count() > 1))
+            {
+                ReverseMethodsAtTheirDeclaredSlots(interfaceType, methods, overloadGroup.ToArray(), claimedMethods);
+            }
+
+            // STEAM_FLAT_NAME gives C/C# overloads distinct names. Interface
+            // classes declare the original overload set explicitly here.
+            foreach (var overload in interfaceType.GetCustomAttributes<MsvcVTableOverloadAttribute>())
+            {
+                if (overload.MethodNames.Length < 2)
+                {
+                    throw new InvalidOperationException(
+                        $"{interfaceType.FullName} has an MSVC overload group with fewer than two methods.");
+                }
+
+                var groupMethods = new MethodInfo[overload.MethodNames.Length];
+                for (var i = 0; i < overload.MethodNames.Length; i++)
+                {
+                    string methodName = overload.MethodNames[i];
+                    var matches = methods.Where(method => method.Name == methodName).ToArray();
+                    if (matches.Length != 1)
+                    {
+                        throw new InvalidOperationException(
+                            $"{interfaceType.FullName} MSVC overload member '{methodName}' resolved to {matches.Length} methods.");
+                    }
+
+                    groupMethods[i] = matches[0];
+                }
+
+                ReverseMethodsAtTheirDeclaredSlots(interfaceType, methods, groupMethods, claimedMethods);
+            }
+        }
+
+        private static void ReverseMethodsAtTheirDeclaredSlots(
+            Type interfaceType,
+            List<MethodInfo> methods,
+            MethodInfo[] overloadGroup,
+            HashSet<MethodInfo> claimedMethods)
+        {
+            if (overloadGroup.Any(method => !claimedMethods.Add(method)))
+            {
+                throw new InvalidOperationException(
+                    $"{interfaceType.FullName} defines overlapping MSVC overload groups.");
+            }
+
+            int[] slots = overloadGroup
+                .Select(method => methods.IndexOf(method))
+                .OrderBy(slot => slot)
+                .ToArray();
+
+            MethodInfo[] reversed = overloadGroup.Reverse().ToArray();
+            for (var i = 0; i < slots.Length; i++)
+            {
+                methods[slots[i]] = reversed[i];
+            }
         }
 
         /// <summary>

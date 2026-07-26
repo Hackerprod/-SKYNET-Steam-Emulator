@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using SKYNET.Managers;
 using SKYNET.Types;
 using SKYNET.Callback;
@@ -17,14 +18,25 @@ namespace SKYNET.Steamworks.Implementation
         public static SteamGameServer Instance;
 
         public GameServerData ServerData;
-        public bool LoggedIn;
+        public volatile bool LoggedIn;
+        private readonly object _heartbeatGate = new object();
+        private Timer _heartbeatTimer;
+        private bool _heartbeatsEnabled = true;
+        private int _heartbeatIntervalMs = 20000;
+        private volatile bool _anonymousLogOn = true;
+        private string _logOnToken = string.Empty;
 
         public SteamGameServer()
         {
+            Instance?.StopHeartbeatTimer();
             Instance = this;
             InterfaceName = "SteamGameServer";
             InterfaceVersion = "SteamGameServer015";
-            ServerData = new GameServerData();
+            ServerData = new GameServerData
+            {
+                SteamId = (ulong)SteamEmulator.SteamID_GS,
+                AdvertiseActive = true
+            };
         }
 
         public bool InitGameServer(uint unIP, int usGamePort, int usQueryPort, uint unFlags, uint nGameAppId, string pchVersionString)
@@ -63,6 +75,8 @@ namespace SKYNET.Steamworks.Implementation
             ServerData.Secure = NormalizeSecure((byte)(IsSecureFlagSet(unFlags) ? 1 : 0));
             ServerData.AppId = nGameAppId;
             ServerData.VersionString = pchVersionString;
+            ServerData.SteamId = (ulong)SteamEmulator.SteamID_GS;
+            ServerData.LoggedOn = false;
 
             var lobby = LobbyManager.GetLobbyByOwner((ulong)SteamEmulator.SteamID);
             if (lobby != null)
@@ -112,17 +126,21 @@ namespace SKYNET.Steamworks.Implementation
 
         public void LogOn(string pszToken)
         {
-            Write($"LogOn (Token = {pszToken})");
+            Write("LogOn");
             CallbackManager.ResetGameServerConnectionReplay();
 
+            _logOnToken = pszToken ?? string.Empty;
+            _anonymousLogOn = false;
             LoggedIn = true;
+            ServerData.LoggedOn = true;
             if (APIClient.IsEnabled)
             {
-                QueueLogOnGameServer(pszToken, false);
+                QueueLogOnGameServer(_logOnToken, false);
             }
 
-            EmitSecurePolicy();
+            StartHeartbeatTimer();
             CallbackManager.AddCallbackGameServer(new SteamServersConnected_t());
+            EmitSecurePolicy();
         }
 
         public void LogOnAnonymous()
@@ -130,25 +148,38 @@ namespace SKYNET.Steamworks.Implementation
             Write($"LogOnAnonymous");
             CallbackManager.ResetGameServerConnectionReplay();
 
+            _logOnToken = string.Empty;
+            _anonymousLogOn = true;
             LoggedIn = true;
+            ServerData.LoggedOn = true;
             if (APIClient.IsEnabled)
             {
                 QueueLogOnGameServer(string.Empty, true);
             }
 
-            EmitSecurePolicy();
+            StartHeartbeatTimer();
             CallbackManager.AddCallbackGameServer(new SteamServersConnected_t());
+            EmitSecurePolicy();
         }
 
         public void LogOff()
         {
             Write($"LogOff");
+            StopHeartbeatTimer();
+            var serverId = ServerData.SteamId != 0
+                ? ServerData.SteamId
+                : (ulong)SteamEmulator.SteamID_GS;
             if (APIClient.IsEnabled)
             {
-                WorkQueue.Enqueue("GameServer logoff", () => APIClient.LogOffGameServer(), "gameserver:logoff");
+                WorkQueue.Enqueue(
+                    "GameServer logoff",
+                    () => APIClient.LogOffGameServer(serverId),
+                    "gameserver:logoff:" + serverId,
+                    true);
             }
 
             LoggedIn = false;
+            ServerData.LoggedOn = false;
 
             SteamServersDisconnected_t data = new SteamServersDisconnected_t()
             {
@@ -242,7 +273,10 @@ namespace SKYNET.Steamworks.Implementation
         public void SetKeyValue(string pKey, string pValue)
         {
             Write($"SetKeyValue (Key = {pKey}, Value = {pValue})");
-            ServerData.KeyValues.TryAdd(pKey, pValue);
+            if (!string.IsNullOrWhiteSpace(pKey))
+            {
+                ServerData.KeyValues[pKey] = pValue ?? string.Empty;
+            }
             SyncServerState();
         }
 
@@ -271,7 +305,13 @@ namespace SKYNET.Steamworks.Implementation
         {
             var IPAddress = Common.GetIPAddress(unIPClient);
             Write($"SendUserConnectAndAuthenticate (Output = 0x{pSteamIDUser.ToInt64():X}, IP = {IPAddress}, Blob = {cubAuthBlobSize})");
-            return TicketManager.ConnectAndAuthenticate(unIPClient, pvAuthBlob, cubAuthBlobSize, pSteamIDUser);
+            var approved = TicketManager.ConnectAndAuthenticate(unIPClient, pvAuthBlob, cubAuthBlobSize, pSteamIDUser);
+            if (approved && pSteamIDUser != IntPtr.Zero)
+            {
+                TrackConnectedPlayer(unchecked((ulong)Marshal.ReadInt64(pSteamIDUser)));
+            }
+
+            return approved;
         }
 
         public bool SendUserConnectAndAuthenticate(uint unIPClient, IntPtr pvAuthBlob, uint cubAuthBlobSize, out ulong steamIDUser)
@@ -279,13 +319,20 @@ namespace SKYNET.Steamworks.Implementation
             var IPAddress = Common.GetIPAddress(unIPClient);
             var approved = TicketManager.ConnectAndAuthenticate(unIPClient, pvAuthBlob, cubAuthBlobSize, out steamIDUser);
             Write($"SendUserConnectAndAuthenticate (SteamID = {(CSteamID)steamIDUser} | {IPAddress}, Blob = {cubAuthBlobSize}) = {approved}");
+            if (approved)
+            {
+                TrackConnectedPlayer(steamIDUser);
+            }
+
             return approved;
         }
 
         public CSteamID CreateUnauthenticatedUserConnection()
         {
             Write($"CreateUnauthenticatedUserConnection");
-            return CSteamID.CreateUnauthenticatedUser();
+            var steamId = CSteamID.CreateUnauthenticatedUser();
+            TrackConnectedPlayer((ulong)steamId);
+            return steamId;
         }
 
         public void SendUserDisconnect(ulong steamIDUser)
@@ -297,17 +344,36 @@ namespace SKYNET.Steamworks.Implementation
                     "gameserver:user-disconnect:" + steamIDUser, true);
             }
             TicketManager.RemoveTicket(steamIDUser);
+            ServerData.Players.TryRemove(steamIDUser, out _);
+            SyncServerState();
         }
 
         public bool BUpdateUserData(ulong steamIDUser, string pchPlayerName, uint uScore)
         {
             Write($"BUpdateUserData (SteamID = {steamIDUser}, PlayerName = {pchPlayerName})");
+            ServerData.Players.AddOrUpdate(
+                steamIDUser,
+                id => new GameServerPlayerData
+                {
+                    SteamId = id,
+                    Name = pchPlayerName ?? string.Empty,
+                    Score = unchecked((int)uScore),
+                    ConnectedAtUtcTicks = DateTime.UtcNow.Ticks
+                },
+                (_, player) =>
+                {
+                    player.Name = pchPlayerName ?? string.Empty;
+                    player.Score = unchecked((int)uScore);
+                    return player;
+                });
+
             if (APIClient.IsEnabled)
             {
                 WorkQueue.Enqueue("GameServer user data", () => APIClient.UpdateGameServerUserData(steamIDUser, pchPlayerName, uScore),
                     "gameserver:user-data:" + steamIDUser);
             }
 
+            SyncServerState();
             return true;
         }
 
@@ -320,6 +386,7 @@ namespace SKYNET.Steamworks.Implementation
         public void SetAdvertiseServerActive(bool bActive)
         {
             Write($"SetAdvertiseServerActive (Active = {bActive})");
+            ServerData.AdvertiseActive = bActive;
             SyncServerState();
         }
 
@@ -468,21 +535,31 @@ namespace SKYNET.Steamworks.Implementation
         public void EnableHeartbeats(bool bActive)
         {
             Write($"EnableHeartbeats (Active = {bActive})");
+            _heartbeatsEnabled = bActive;
+            if (bActive)
+            {
+                StartHeartbeatTimer();
+            }
+            else
+            {
+                StopHeartbeatTimer();
+            }
         }
 
         public void SetHeartbeatInterval(int iHeartbeatInterval)
         {
             Write($"SetHeartbeatInterval (HeartbeatInterval = {iHeartbeatInterval})");
+            _heartbeatIntervalMs = Math.Max(1000, iHeartbeatInterval);
+            if (LoggedIn && _heartbeatsEnabled)
+            {
+                StartHeartbeatTimer();
+            }
         }
 
         public void ForceHeartbeat()
         {
             Write($"ForceHeartbeat");
-            if (APIClient.IsEnabled)
-            {
-                WorkQueue.Enqueue("GameServer heartbeat", () => APIClient.HeartbeatGameServer(ServerData),
-                    "gameserver:heartbeat");
-            }
+            QueueHeartbeat();
         }
         public SteamAPICall_t AssociateWithClan(ulong steamIDClan)
         {
@@ -628,6 +705,12 @@ namespace SKYNET.Steamworks.Implementation
                 ServerData.IP = result.PublicIP;
             }
 
+            if (result.SteamId != 0)
+            {
+                ServerData.SteamId = result.SteamId;
+                SteamEmulator.SteamID_GS = (CSteamID)result.SteamId;
+            }
+
             ServerData.Secure = NormalizeSecure(result.Secure);
             if (ServerData.Secure != 0)
             {
@@ -638,6 +721,89 @@ namespace SKYNET.Steamworks.Implementation
                 ServerData.Flags &= ~Constants.k_unServerFlagSecure;
             }
             ServerData.GameTags = NormalizeGameTags(ServerData.GameTags, ServerData.Secure != 0);
+        }
+
+        public void Shutdown()
+        {
+            if (LoggedIn)
+            {
+                LogOff();
+            }
+            else
+            {
+                StopHeartbeatTimer();
+            }
+
+            ServerData.Players.Clear();
+            _logOnToken = string.Empty;
+            _anonymousLogOn = true;
+            SteamEmulator.SteamID_GS = CSteamID.CreateOne(true);
+        }
+
+        private void QueueHeartbeat()
+        {
+            if (!LoggedIn || !_heartbeatsEnabled || !APIClient.IsEnabled)
+            {
+                return;
+            }
+
+            WorkQueue.Enqueue(
+                "GameServer heartbeat",
+                () =>
+                {
+                    if (!APIClient.HeartbeatGameServer(ServerData) && LoggedIn)
+                    {
+                        var result = APIClient.LogOnGameServer(
+                            ServerData,
+                            _logOnToken,
+                            _anonymousLogOn);
+                        ApplyServerResult(result);
+                    }
+                },
+                "gameserver:heartbeat",
+                true);
+        }
+
+        private void StartHeartbeatTimer()
+        {
+            if (!LoggedIn || !_heartbeatsEnabled)
+            {
+                return;
+            }
+
+            lock (_heartbeatGate)
+            {
+                _heartbeatTimer?.Dispose();
+                _heartbeatTimer = new Timer(
+                    _ => QueueHeartbeat(),
+                    null,
+                    _heartbeatIntervalMs,
+                    _heartbeatIntervalMs);
+            }
+        }
+
+        private void StopHeartbeatTimer()
+        {
+            lock (_heartbeatGate)
+            {
+                _heartbeatTimer?.Dispose();
+                _heartbeatTimer = null;
+            }
+        }
+
+        private void TrackConnectedPlayer(ulong steamId)
+        {
+            if (steamId == 0)
+            {
+                return;
+            }
+
+            ServerData.Players.TryAdd(steamId, new GameServerPlayerData
+            {
+                SteamId = steamId,
+                ConnectedAtUtcTicks = DateTime.UtcNow.Ticks
+            });
+            SyncServerState();
         }
     }
 }

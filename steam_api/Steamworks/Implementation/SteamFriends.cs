@@ -15,7 +15,7 @@ using SKYNET.Types;
 using SKYNET.Steamworks.Interfaces;
 
 using SteamAPICall_t = System.UInt64;
-using FriendsGroupID_t = System.UInt16;
+using FriendsGroupID_t = System.Int16;
 using SKYNET.Network.Packets;
 
 namespace SKYNET.Steamworks.Implementation
@@ -269,11 +269,11 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool GetClanActivityCounts(ulong steamIDClan, ref int online, ref int in_game, ref int chatting)
         {
-            Write($"ActivateGameOverlay {steamIDClan}");
+            Write($"GetClanActivityCounts {steamIDClan}");
             online = 0;
             in_game = 0;
             chatting = 0;
-            return true;
+            return false;
         }
 
         public CSteamID GetClanByIndex(int iClan)
@@ -419,14 +419,19 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetFriendCountFromSource(ulong steamIDSource)
         {
-            Write($"GetFriendCountFromSource {steamIDSource}");
-            return 0;
+            var count = GetVisibleSourceMembers(steamIDSource).Count;
+            Write($"GetFriendCountFromSource {steamIDSource} = {count}");
+            return count;
         }
 
         public CSteamID GetFriendFromSourceByIndex(ulong steamIDSource, int iFriend)
         {
-            Write($"GetFriendFromSourceByIndex {steamIDSource} {iFriend}");
-            return CSteamID.Invalid;
+            var members = GetVisibleSourceMembers(steamIDSource);
+            var result = iFriend >= 0 && iFriend < members.Count
+                ? (CSteamID)members[iFriend]
+                : CSteamID.Invalid;
+            Write($"GetFriendFromSourceByIndex {steamIDSource} {iFriend} = {result}");
+            return result;
         }
 
         public bool GetFriendGamePlayed(ulong steamIDFriend, ref FriendGameInfo_t pFriendGameInfo)
@@ -435,7 +440,12 @@ namespace SKYNET.Steamworks.Implementation
             pFriendGameInfo = default(FriendGameInfo_t);
             if (steamIDFriend == SteamEmulator.SteamID)
             {
+                StateCache.TryGetSelf(out var self);
                 pFriendGameInfo.GameID = CreateGameId(SteamEmulator.AppID);
+                pFriendGameInfo.GameIP = self?.GameServerIP ?? 0;
+                pFriendGameInfo.GamePort = self?.GameServerPort ?? 0;
+                pFriendGameInfo.QueryPort = self?.GameServerPort ?? 0;
+                pFriendGameInfo.steamIDLobby = self?.LobbyID ?? 0;
                 Result = true;
             }
             else
@@ -449,6 +459,9 @@ namespace SKYNET.Steamworks.Implementation
                 else
                 {
                     pFriendGameInfo.GameID = CreateGameId(friend.GameID);
+                    pFriendGameInfo.GameIP = friend.GameServerIP;
+                    pFriendGameInfo.GamePort = friend.GameServerPort;
+                    pFriendGameInfo.QueryPort = friend.GameServerPort;
                     pFriendGameInfo.steamIDLobby = friend.LobbyID;
                     Result = true;
                 }
@@ -612,7 +625,7 @@ namespace SKYNET.Steamworks.Implementation
         public FriendsGroupID_t GetFriendsGroupIDByIndex(int iFG)
         {
             Write($"GetFriendsGroupIDByIndex {iFG}");
-            return (int)0;
+            return -1;
         }
 
         public int GetFriendsGroupMembersCount(FriendsGroupID_t friendsGroupID)
@@ -649,7 +662,10 @@ namespace SKYNET.Steamworks.Implementation
         public int GetFriendSteamLevel(ulong steamIDFriend)
         {
             Write($"GetFriendSteamLevel {steamIDFriend}");
-            return 100;
+            APIClient.QueueUserProfileRefresh(steamIDFriend);
+            return StateCache.TryGetFriend(steamIDFriend, out var friend)
+                ? Math.Max(0, friend.PlayerLevel)
+                : 0;
         }
 
         public int GetSmallFriendAvatar(ulong steamIDFriend)
@@ -778,15 +794,19 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool IsUserInSource(ulong steamIDUser, ulong steamIDSource)
         {
-            Write($"IsUserInSource {steamIDUser}");
-            return false;
+            var result = GetVisibleSourceMembers(steamIDSource).Contains(steamIDUser);
+            Write($"IsUserInSource user={steamIDUser} source={steamIDSource} = {result}");
+            return result;
         }
 
         public SteamAPICall_t JoinClanChatRoom(ulong steamIDClan)
         {
             Write($"JoinClanChatRoom {steamIDClan}");
-            // JoinClanChatRoomCompletionResult_t
-            return k_uAPICallInvalid;
+            return CallbackManager.AddCallbackResult(new JoinClanChatRoomCompletionResult_t
+            {
+                SteamIDClanChat = steamIDClan,
+                ChatRoomEnterResponse = EChatRoomEnterResponse.k_EChatRoomEnterResponseDoesntExist
+            });
         }
 
         public bool LeaveClanChatRoom(ulong steamIDClan)
@@ -977,6 +997,25 @@ namespace SKYNET.Steamworks.Implementation
             }
         }
         */
+
+        private static List<ulong> GetVisibleSourceMembers(ulong sourceSteamId)
+        {
+            var lobby = LobbyManager.GetLobby(sourceSteamId) ??
+                        LobbyManager.GetLobbyByGameserver(sourceSteamId);
+            if (lobby?.Members == null)
+            {
+                return new List<ulong>();
+            }
+
+            var members = lobby.Members
+                .Where(member => member != null && member.m_SteamID != 0)
+                .Select(member => member.m_SteamID)
+                .Distinct()
+                .ToList();
+            return members.Contains((ulong)SteamEmulator.SteamID)
+                ? members
+                : new List<ulong>();
+        }
 
         private List<SteamPlayer> GetFriends()
         {
@@ -1195,6 +1234,22 @@ namespace SKYNET.Steamworks.Implementation
             AvatarsByHandle[avatar.Small] = avatar;
             AvatarsByHandle[avatar.Medium] = avatar;
             AvatarsByHandle[avatar.Large] = avatar;
+        }
+
+        /// <summary>
+        /// Registers a non-avatar Steam image and returns a 64x64 handle consumable
+        /// through ISteamUtils GetImageSize/GetImageRGBA.
+        /// </summary>
+        public int RegisterImage(Bitmap image)
+        {
+            if (image == null)
+            {
+                return 0;
+            }
+
+            var registered = new ImageAvatar(image, AllocateImageHandle);
+            RegisterAvatarHandles(registered);
+            return registered.Medium;
         }
 
         private void RequestAvatar(ulong steamIDFriend)

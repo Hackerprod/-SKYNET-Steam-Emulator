@@ -20,6 +20,14 @@ namespace SKYNET.Steamworks.Implementation
         private List<Leaderboard> Leaderboards;
         private List<Achievement> Achievements;
         private ConcurrentDictionary<ulong, List<PlayerStat>> PlayerStats;
+        private readonly object StatsGate = new object();
+        private readonly object AchievementGate = new object();
+        private readonly object LeaderboardGate = new object();
+        private readonly ConcurrentDictionary<ulong, LeaderboardEntryData[]> DownloadedLeaderboardEntries =
+            new ConcurrentDictionary<ulong, LeaderboardEntryData[]>();
+        private readonly ConcurrentQueue<ulong> DownloadedLeaderboardEntryOrder = new ConcurrentQueue<ulong>();
+        private long NextLocalLeaderboardHandle;
+        private long NextLeaderboardEntriesHandle;
 
         public SteamUserStats()
         {
@@ -33,12 +41,18 @@ namespace SKYNET.Steamworks.Implementation
 
         internal void SetLeaderboards(List<Leaderboard> leaderboards)
         {
-            Leaderboards = leaderboards;
+            lock (LeaderboardGate)
+            {
+                Leaderboards = leaderboards ?? new List<Leaderboard>();
+            }
         }
 
         internal void SetAchievements(List<Achievement> achievements)
         {
-            Achievements = achievements;
+            lock (AchievementGate)
+            {
+                Achievements = achievements ?? new List<Achievement>();
+            }
         }
 
         internal void SetPlayerStats(ulong steamID, List<PlayerStat> playerStats)
@@ -92,7 +106,7 @@ namespace SKYNET.Steamworks.Implementation
             uint Data = 0;
             try
             {
-                MutexHelper.Wait("UserStats", delegate
+                lock (StatsGate)
                 {
                     if (PlayerStats.TryGetValue((ulong)SteamEmulator.SteamID, out var userStats))
                     {
@@ -103,11 +117,18 @@ namespace SKYNET.Steamworks.Implementation
                             Result = true;
                         }
                     }
-                });
+
+                    if (!Result && StatDefinitionManager.TryGetIntDefault(pchName, out var defaultValue))
+                    {
+                        Data = unchecked((uint)defaultValue);
+                        Result = true;
+                    }
+                }
                 pData = Data;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Write($"GetStat ({pchName}) failed: {ex.Message}");
             }
             Write($"GetStat (Name = {pchName}, out Data = {pData}) = {Result}");
             return Result;
@@ -117,36 +138,32 @@ namespace SKYNET.Steamworks.Implementation
         {
             SyncSelfFromCache();
             bool Result = false;
-            var Data = pData;
+            var Data = 0f;
             PlayerStat playerStat = null;
-            MutexHelper.Wait("UserStats", delegate
+            lock (StatsGate)
             {
                 if (PlayerStats.TryGetValue((ulong)SteamEmulator.SteamID, out var playerStats))
                 {
                     playerStat = playerStats.Find(n => n.Name == pchName);
                     if (playerStat == null)
                     {
-                        playerStat = new PlayerStat();
-                        playerStat.Name = pchName;
-                        playerStat.Data = 0;
-
-                        playerStats.Add(playerStat);
+                        if (StatDefinitionManager.TryGetFloatDefault(pchName, out var defaultValue))
+                        {
+                            Data = defaultValue;
+                            Result = true;
+                        }
                     }
-                    Data = playerStat.Data;
-                    Result = true;
+                    else
+                    {
+                        Data = DecodeFloatStat(playerStat.Data);
+                        Result = true;
+                    }
                 }
                 else
                 {
-                    playerStats = new List<PlayerStat>();
-
-                    playerStat = new PlayerStat();
-                    playerStat.Name = pchName;
-                    playerStat.Data = 0;
-
-                    playerStats.Add(playerStat);
-                    PlayerStats.TryAdd((ulong)SteamEmulator.SteamID, playerStats);
+                    Result = StatDefinitionManager.TryGetFloatDefault(pchName, out Data);
                 }
-            });
+            }
             pData = Data;
             Write($"GetStat (Name = {pchName}, out Data = {pData}) = {Result}");
             return Result;
@@ -195,10 +212,44 @@ namespace SKYNET.Steamworks.Implementation
             return Result;
         }
 
+        public bool SetStat(string pchName, float fData)
+        {
+            if (string.IsNullOrWhiteSpace(pchName) || float.IsNaN(fData) || float.IsInfinity(fData))
+            {
+                return false;
+            }
+
+            return SetStat(pchName, EncodeFloatStat(fData));
+        }
+
         public bool UpdateAvgRateStat(string pchName, float flCountThisSession, double dSessionLength)
         {
-            Write($"UpdateAvgRateStat {pchName}");
-            return false;
+            Write($"UpdateAvgRateStat ({pchName}, Count = {flCountThisSession}, Seconds = {dSessionLength})");
+            if (string.IsNullOrWhiteSpace(pchName) ||
+                float.IsNaN(flCountThisSession) ||
+                float.IsInfinity(flCountThisSession) ||
+                double.IsNaN(dSessionLength) ||
+                double.IsInfinity(dSessionLength) ||
+                dSessionLength <= 0)
+            {
+                return false;
+            }
+
+            var countName = AverageRateInternalName(pchName, "count");
+            var durationName = AverageRateInternalName(pchName, "duration");
+            var previousCount = ReadFloatStatOrDefault(countName);
+            var previousDuration = ReadFloatStatOrDefault(durationName);
+            var totalCount = previousCount + flCountThisSession;
+            var totalDuration = previousDuration + dSessionLength;
+            if (totalDuration <= 0 || totalCount < float.MinValue || totalCount > float.MaxValue ||
+                totalDuration > float.MaxValue)
+            {
+                return false;
+            }
+
+            return SetStat(countName, (float)totalCount) &&
+                SetStat(durationName, (float)totalDuration) &&
+                SetStat(pchName, (float)(totalCount / totalDuration));
         }
 
         public bool GetAchievement(string pchName, ref bool pbAchieved)
@@ -207,20 +258,20 @@ namespace SKYNET.Steamworks.Implementation
             SyncSelfFromCache();
             var Result = false;
             var achieved = false;
-            MutexHelper.Wait("Achievements", delegate
+            lock (AchievementGate)
             {
                 var achievement = Achievements.Find(a => a.Name == pchName);
                 if (achievement == null)
                 {
-                    achieved = true;
-                    Result = false;
+                    achieved = false;
+                    Result = AchievementDefinitionManager.HasDefinition(pchName);
                 }
                 else
                 {
                     achieved = achievement.Earned;
                     Result = true;
                 }
-            });
+            }
             pbAchieved = achieved;
             return Result;
         }
@@ -236,9 +287,14 @@ namespace SKYNET.Steamworks.Implementation
         public bool SetAchievement(string pchName)
         {
             Write($"SetAchievement {pchName}");
+            if (!AchievementDefinitionManager.IsKnownOrUnconfigured(pchName))
+            {
+                return false;
+            }
+
             SyncSelfFromCache();
             var Result = false;
-            MutexHelper.Wait("Achievements", delegate
+            lock (AchievementGate)
             {
                 var achievement = Achievements.Find(a => a.Name == pchName);
                 if (achievement == null)
@@ -246,14 +302,19 @@ namespace SKYNET.Steamworks.Implementation
                     achievement = new Achievement()
                     {
                         Name = pchName,
-                        Date = DateTime.Now,
+                        Date = DateTime.UtcNow,
                         Earned = true
                     };
                     Achievements.Add(achievement);
-                    // TODO: Show Overlay with Achievement
                     Result = true;
                 }
-            });
+                else
+                {
+                    achievement.Earned = true;
+                    achievement.Date = DateTime.UtcNow;
+                    Result = true;
+                }
+            }
 
             if (Result)
             {
@@ -266,8 +327,13 @@ namespace SKYNET.Steamworks.Implementation
         public bool ClearAchievement(string pchName)
         {
             Write($"ClearAchievement {pchName}");
+            if (!AchievementDefinitionManager.IsKnownOrUnconfigured(pchName))
+            {
+                return false;
+            }
+
             SyncSelfFromCache();
-            MutexHelper.Wait("Achievements", delegate
+            lock (AchievementGate)
             {
                 var achievement = Achievements.Find(a => a.Name == pchName);
                 if (achievement != null)
@@ -275,7 +341,7 @@ namespace SKYNET.Steamworks.Implementation
                     achievement.Earned = false;
                     achievement.Progress = 0;
                 }
-            });
+            }
             StateCache.SetLocalAchievement(pchName, false);
             return true;
         }
@@ -286,7 +352,7 @@ namespace SKYNET.Steamworks.Implementation
             var Result = false;
             var Archived = false;
             uint UnlockTime = 0;
-            MutexHelper.Wait("Achievements", delegate
+            lock (AchievementGate)
             {
                 var achievement = Achievements.Find(a => a.Name == pchName);
                 if (achievement != null)
@@ -295,7 +361,11 @@ namespace SKYNET.Steamworks.Implementation
                     UnlockTime = (uint)(new DateTimeOffset(achievement.Date)).ToUnixTimeSeconds();
                     Result = true;
                 }
-            });
+                else
+                {
+                    Result = AchievementDefinitionManager.HasDefinition(pchName);
+                }
+            }
             pbAchieved = Archived;
             punUnlockTime = UnlockTime;
             return Result;
@@ -349,65 +419,96 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetAchievementIcon(string pchName)
         {
-            Write($"GetAchievementIcon");
-            return 0;
+            var achieved = false;
+            GetAchievement(pchName, ref achieved);
+            var handle = AchievementDefinitionManager.GetIcon(pchName, achieved);
+            Write($"GetAchievementIcon ({pchName}) = {handle}");
+            return handle;
         }
 
         public string GetAchievementDisplayAttribute(string pchName, string pchKey)
         {
-            Write($"GetAchievementDisplayAttribute");
-            return "";
+            Write($"GetAchievementDisplayAttribute ({pchName}, {pchKey})");
+            return AchievementDefinitionManager.GetDisplayAttribute(pchName, pchKey);
         }
 
         public bool IndicateAchievementProgress(string pchName, uint nCurProgress, uint nMaxProgress)
         {
             Write($"IndicateAchievementProgress");
-            var Result = false;
-            var Archived = false;
+            if (nMaxProgress == 0 || nCurProgress > nMaxProgress ||
+                !AchievementDefinitionManager.IsKnownOrUnconfigured(pchName))
+            {
+                return false;
+            }
 
-            MutexHelper.Wait("Achievements", delegate
+            SyncSelfFromCache();
+            lock (AchievementGate)
             {
                 var achievement = Achievements.Find(a => a.Name == pchName);
-                if (achievement != null)
+                if (achievement == null)
                 {
-                    achievement.Progress = nCurProgress;
-                    achievement.MaxProgress = nMaxProgress;
-                    Archived = achievement.Earned;
-                    Result = true;
+                    achievement = new Achievement
+                    {
+                        Name = pchName,
+                        Date = DateTime.MinValue,
+                        Earned = false
+                    };
+                    Achievements.Add(achievement);
                 }
-            });
+
+                achievement.Progress = nCurProgress;
+                achievement.MaxProgress = nMaxProgress;
+            }
 
             UserAchievementStored_t data = new UserAchievementStored_t()
             {
                 m_nGameID = SteamEmulator.AppID,
                 m_bGroupAchievement = false,
                 m_rgchAchievementName = Encoding.UTF8.GetBytes(pchName),
-                m_nCurProgress = Archived ? nCurProgress : 0,
-                m_nMaxProgress = Archived ? nMaxProgress : 0
+                m_nCurProgress = nCurProgress,
+                m_nMaxProgress = nMaxProgress
             };
 
             CallbackManager.AddCallback(data);
-
-            return Result;
+            return true;
         }
 
         public uint GetNumAchievements()
         {
-            var achievements = (uint)Achievements.Count;
+            uint achievements;
+            if (AchievementDefinitionManager.Count > 0)
+            {
+                achievements = (uint)AchievementDefinitionManager.Count;
+            }
+            else
+            {
+                lock (AchievementGate)
+                {
+                    achievements = (uint)Achievements.Count;
+                }
+            }
+
             Write($"GetNumAchievements {achievements}");
             return achievements;
         }
 
         public string GetAchievementName(uint iAchievement)
         {
-            string achievementName = "";
-            try
+            string achievementName;
+            if (AchievementDefinitionManager.Count > 0)
             {
-                if (Achievements.Count <= iAchievement)
-                    return "";
-                achievementName = Achievements[(int)iAchievement].Name;
+                achievementName = AchievementDefinitionManager.GetName(iAchievement);
             }
-            catch { }
+            else
+            {
+                lock (AchievementGate)
+                {
+                    achievementName = iAchievement < Achievements.Count
+                        ? Achievements[(int)iAchievement].Name
+                        : string.Empty;
+                }
+            }
+
             Write($"GetAchievementName {iAchievement} {achievementName}");
             return achievementName;
         }
@@ -478,7 +579,7 @@ namespace SKYNET.Steamworks.Implementation
             if (PlayerStats.TryGetValue(steamIDUser, out var userStats))
             {
                 var statsList = userStats.Find(n => n.Name == pchName);
-                data = (statsList == null) ? 0 : statsList.Data;
+                data = statsList == null ? 0 : statsList.Data;
                 result = true;
             }
             WriteInt32(pData, unchecked((int)data));
@@ -494,7 +595,7 @@ namespace SKYNET.Steamworks.Implementation
             if (PlayerStats.TryGetValue(steamIDUser, out var userStats))
             {
                 var statsList = userStats.Find(n => n.Name == pchName);
-                data = (statsList == null) ? 0 : statsList.Data;
+                data = statsList == null ? 0 : DecodeFloatStat(statsList.Data);
                 result = true;
             }
             WriteSingle(pData, data);
@@ -579,7 +680,12 @@ namespace SKYNET.Steamworks.Implementation
             Write($"ResetAllStats");
             PlayerStats.Clear();
             if (bAchievementsToo)
-                Achievements.Clear();
+            {
+                lock (AchievementGate)
+                {
+                    Achievements.Clear();
+                }
+            }
             StateCache.ApplyStats((ulong)SteamEmulator.SteamID, new List<APIClient.ApiStat>());
             if (bAchievementsToo)
             {
@@ -590,36 +696,41 @@ namespace SKYNET.Steamworks.Implementation
 
         public SteamAPICall_t FindOrCreateLeaderboard(string pchLeaderboardName, ELeaderboardSortMethod eLeaderboardSortMethod, ELeaderboardDisplayType eLeaderboardDisplayType)
         {
-            try
+            var name = (pchLeaderboardName ?? string.Empty).Trim();
+            Write($"FindOrCreateLeaderboard (Name = {name}, SortMethod = {eLeaderboardSortMethod}, DisplayType = {eLeaderboardDisplayType})");
+            if (!IsValidLeaderboardRequest(name, eLeaderboardSortMethod, eLeaderboardDisplayType))
             {
-                Write($"FindOrCreateLeaderboard (Name = {pchLeaderboardName}, SortMethod = {(ELeaderboardSortMethod)eLeaderboardSortMethod}, DisplayType = {(ELeaderboardDisplayType)eLeaderboardDisplayType})");
+                return CallbackManager.AddCallbackResult(new LeaderboardFindResult_t());
+            }
 
-                Leaderboard leaderboard = Leaderboards.Find( l => l.Name == pchLeaderboardName);
-
-                if (leaderboard == null)
+            if (!APIClient.IsEnabled)
+            {
+                var local = GetOrCreateLocalLeaderboard(name, eLeaderboardSortMethod, eLeaderboardDisplayType);
+                return CallbackManager.AddCallbackResult(new LeaderboardFindResult_t
                 {
-                    leaderboard = new Leaderboard()
+                    SteamLeaderboard = local.SteamLeaderboard,
+                    LeaderboardFound = 1
+                });
+            }
+
+            return WorkQueue.EnqueueCallbackResult(
+                new LeaderboardFindResult_t(),
+                () =>
+                {
+                    var leaderboard = APIClient.FindOrCreateLeaderboard(name, eLeaderboardSortMethod, eLeaderboardDisplayType);
+                    if (leaderboard == null)
                     {
-                        Name = pchLeaderboardName,
-                        ShortMethod = (ELeaderboardSortMethod)eLeaderboardSortMethod,
-                        DisplayType = (ELeaderboardDisplayType)eLeaderboardDisplayType
+                        return new LeaderboardFindResult_t();
+                    }
+
+                    CacheLeaderboard(leaderboard);
+                    return new LeaderboardFindResult_t
+                    {
+                        SteamLeaderboard = leaderboard.SteamLeaderboard,
+                        LeaderboardFound = 1
                     };
-                    Leaderboards.Add(leaderboard);
-                }
-
-                //LeaderboardFindResult_t data = new LeaderboardFindResult_t()
-                //{
-                //    m_bLeaderboardFound = 1,
-                //    m_hSteamLeaderboard = default
-                //};
-
-                //return CallbackManager.AddCallbackResult(data, LeaderboardFindResult_t.k_iCallback);
-            }
-            catch (Exception ex)
-            {
-                Write($"FindOrCreateLeaderboard {ex}");
-            }
-            return k_uAPICallInvalid;
+                },
+                name: "Find or create leaderboard");
         }
 
         public SteamAPICall_t FindLeaderboard(string pchLeaderboardName)
@@ -658,53 +769,165 @@ namespace SKYNET.Steamworks.Implementation
 
         public string GetLeaderboardName(ulong hSteamLeaderboard)
         {
-            Write($"GetLeaderboardName");
-            return "";
+            var leaderboard = FindCachedLeaderboard(hSteamLeaderboard);
+            Write($"GetLeaderboardName ({hSteamLeaderboard}) = {leaderboard?.Name ?? string.Empty}");
+            return leaderboard?.Name ?? string.Empty;
         }
 
         public int GetLeaderboardEntryCount(ulong hSteamLeaderboard)
         {
-            Write($"GetLeaderboardEntryCount");
-            return 0;
+            var count = FindCachedLeaderboard(hSteamLeaderboard)?.EntryCount ?? 0;
+            Write($"GetLeaderboardEntryCount ({hSteamLeaderboard}) = {count}");
+            return count;
         }
 
         public int GetLeaderboardSortMethod(ulong hSteamLeaderboard)
         {
-            Write($"GetLeaderboardSortMethod");
-            return default;
+            return (int)(FindCachedLeaderboard(hSteamLeaderboard)?.ShortMethod ??
+                ELeaderboardSortMethod.k_ELeaderboardSortMethodNone);
         }
 
         public int GetLeaderboardDisplayType(ulong hSteamLeaderboard)
         {
-            Write($"GetLeaderboardDisplayType");
-            return 0;
+            return (int)(FindCachedLeaderboard(hSteamLeaderboard)?.DisplayType ??
+                ELeaderboardDisplayType.k_ELeaderboardDisplayTypeNone);
         }
 
         public SteamAPICall_t DownloadLeaderboardEntries(ulong hSteamLeaderboard, int eLeaderboardDataRequest, int nRangeStart, int nRangeEnd)
         {
-            Write($"DownloadLeaderboardEntries");
-            // LeaderboardScoresDownloaded_t
-            return k_uAPICallInvalid;
+            Write($"DownloadLeaderboardEntries ({hSteamLeaderboard}, {eLeaderboardDataRequest}, {nRangeStart}, {nRangeEnd})");
+            return QueueLeaderboardEntriesDownload(
+                hSteamLeaderboard,
+                eLeaderboardDataRequest,
+                nRangeStart,
+                nRangeEnd,
+                null);
         }
 
         public SteamAPICall_t DownloadLeaderboardEntriesForUsers(ulong hSteamLeaderboard, IntPtr prgUsers, int cUsers)
         {
-            Write($"DownloadLeaderboardEntriesForUsers");
-            // LeaderboardScoresDownloaded_t
-            return k_uAPICallInvalid;
+            Write($"DownloadLeaderboardEntriesForUsers ({hSteamLeaderboard}, {cUsers})");
+            if (cUsers < 0 || cUsers > 1000 || (cUsers > 0 && prgUsers == IntPtr.Zero))
+            {
+                return CallbackManager.AddCallbackResult(new LeaderboardScoresDownloaded_t
+                {
+                    SteamLeaderboard = hSteamLeaderboard
+                });
+            }
+
+            var users = new ulong[cUsers];
+            for (var index = 0; index < cUsers; index++)
+            {
+                users[index] = unchecked((ulong)Marshal.ReadInt64(prgUsers, index * sizeof(ulong)));
+            }
+
+            return QueueLeaderboardEntriesDownload(
+                hSteamLeaderboard,
+                (int)ELeaderboardDataRequest.k_ELeaderboardDataRequestUsers,
+                0,
+                Math.Max(0, cUsers - 1),
+                users);
         }
 
         public bool GetDownloadedLeaderboardEntry(ulong hSteamLeaderboardEntries, int index, IntPtr pLeaderboardEntry, IntPtr pDetails, int cDetailsMax)
         {
-            Write($"GetDownloadedLeaderboardEntry");
-            return false;
+            if (pLeaderboardEntry == IntPtr.Zero ||
+                index < 0 ||
+                cDetailsMax < 0 ||
+                !DownloadedLeaderboardEntries.TryGetValue(hSteamLeaderboardEntries, out var entries) ||
+                index >= entries.Length)
+            {
+                return false;
+            }
+
+            var entry = entries[index];
+            Marshal.StructureToPtr(new NativeLeaderboardEntry
+            {
+                SteamIdUser = entry.SteamId,
+                GlobalRank = entry.GlobalRank,
+                Score = entry.Score,
+                DetailsCount = entry.Details?.Length ?? 0,
+                UgcHandle = entry.UgcHandle
+            }, pLeaderboardEntry, false);
+
+            if (pDetails != IntPtr.Zero && cDetailsMax > 0)
+            {
+                var count = Math.Min(cDetailsMax, entry.Details?.Length ?? 0);
+                for (var detailIndex = 0; detailIndex < count; detailIndex++)
+                {
+                    Marshal.WriteInt32(pDetails, detailIndex * sizeof(int), entry.Details[detailIndex]);
+                }
+            }
+
+            return true;
         }
 
-        public SteamAPICall_t UploadLeaderboardScore(ulong hSteamLeaderboard, int eLeaderboardUploadScoreMethod, uint nScore, IntPtr pScoreDetails, int cScoreDetailsCount)
+        public SteamAPICall_t UploadLeaderboardScore(ulong hSteamLeaderboard, int eLeaderboardUploadScoreMethod, int nScore, IntPtr pScoreDetails, int cScoreDetailsCount)
         {
-            Write($"UploadLeaderboardScore");
-            // LeaderboardScoreUploaded_t
-            return k_uAPICallInvalid;
+            Write($"UploadLeaderboardScore ({hSteamLeaderboard}, {eLeaderboardUploadScoreMethod}, {nScore})");
+            if (hSteamLeaderboard == 0 ||
+                eLeaderboardUploadScoreMethod is < 1 or > 2 ||
+                cScoreDetailsCount < 0 ||
+                cScoreDetailsCount > 64 ||
+                (cScoreDetailsCount > 0 && pScoreDetails == IntPtr.Zero))
+            {
+                return CallbackManager.AddCallbackResult(new LeaderboardScoreUploaded_t
+                {
+                    SteamLeaderboard = hSteamLeaderboard,
+                    Score = nScore
+                });
+            }
+
+            var details = new int[cScoreDetailsCount];
+            if (cScoreDetailsCount > 0)
+            {
+                Marshal.Copy(pScoreDetails, details, 0, cScoreDetailsCount);
+            }
+
+            if (!APIClient.IsEnabled)
+            {
+                return CallbackManager.AddCallbackResult(new LeaderboardScoreUploaded_t
+                {
+                    Success = 0,
+                    SteamLeaderboard = hSteamLeaderboard,
+                    Score = nScore
+                });
+            }
+
+            return WorkQueue.EnqueueCallbackResult(
+                new LeaderboardScoreUploaded_t
+                {
+                    SteamLeaderboard = hSteamLeaderboard,
+                    Score = nScore
+                },
+                () =>
+                {
+                    var result = APIClient.UploadLeaderboardScore(
+                        hSteamLeaderboard,
+                        eLeaderboardUploadScoreMethod,
+                        nScore,
+                        details);
+                    if (result == null)
+                    {
+                        return new LeaderboardScoreUploaded_t
+                        {
+                            SteamLeaderboard = hSteamLeaderboard,
+                            Score = nScore
+                        };
+                    }
+
+                    RefreshCachedLeaderboard(hSteamLeaderboard);
+                    return new LeaderboardScoreUploaded_t
+                    {
+                        Success = result.Success ? (byte)1 : (byte)0,
+                        SteamLeaderboard = hSteamLeaderboard,
+                        Score = result.Score,
+                        ScoreChanged = result.ScoreChanged ? (byte)1 : (byte)0,
+                        GlobalRankNew = result.GlobalRankNew,
+                        GlobalRankPrevious = result.GlobalRankPrevious
+                    };
+                },
+                name: "Upload leaderboard score");
         }
 
         public SteamAPICall_t AttachLeaderboardUGC(ulong hSteamLeaderboard, ulong hUGC)
@@ -877,6 +1100,189 @@ namespace SKYNET.Steamworks.Implementation
             return false;
         }
 
+        private float ReadFloatStatOrDefault(string name)
+        {
+            var value = 0f;
+            return GetStat(name, ref value) ? value : 0f;
+        }
+
+        private static string AverageRateInternalName(string name, string component) =>
+            "__skynet_avg_" + component + "::" + name;
+
+        private static uint EncodeFloatStat(float value) =>
+            BitConverter.ToUInt32(BitConverter.GetBytes(value), 0);
+
+        private static float DecodeFloatStat(uint value)
+        {
+            // Builds before typed stat support stored a numeric cast instead of the
+            // IEEE-754 payload. Preserve those ordinary positive values while new
+            // writes retain the exact float, including fractional and negative data.
+            if (value != 0 && (value & 0x7F800000u) == 0)
+            {
+                return value;
+            }
+
+            return BitConverter.ToSingle(BitConverter.GetBytes(value), 0);
+        }
+
+        private SteamAPICall_t QueueLeaderboardEntriesDownload(
+            ulong leaderboardHandle,
+            int dataRequest,
+            int rangeStart,
+            int rangeEnd,
+            ulong[] users)
+        {
+            var pending = new LeaderboardScoresDownloaded_t
+            {
+                SteamLeaderboard = leaderboardHandle
+            };
+            if (leaderboardHandle == 0 || dataRequest is < 0 or > 3)
+            {
+                return CallbackManager.AddCallbackResult(pending);
+            }
+
+            if (!APIClient.IsEnabled)
+            {
+                var entriesHandle = StoreDownloadedLeaderboardEntries(Array.Empty<LeaderboardEntryData>());
+                pending.SteamLeaderboardEntries = entriesHandle;
+                return CallbackManager.AddCallbackResult(pending);
+            }
+
+            return WorkQueue.EnqueueCallbackResult(
+                pending,
+                () =>
+                {
+                    var result = APIClient.QueryLeaderboardEntries(
+                        leaderboardHandle,
+                        dataRequest,
+                        rangeStart,
+                        rangeEnd,
+                        users);
+                    if (result == null)
+                    {
+                        throw new InvalidOperationException("Leaderboard entry query failed");
+                    }
+
+                    CacheLeaderboard(result.Leaderboard);
+                    foreach (var entry in result.Entries)
+                    {
+                        APIClient.QueueUserProfileRefresh(entry.SteamId);
+                    }
+
+                    var entriesHandle = StoreDownloadedLeaderboardEntries(result.Entries);
+                    return new LeaderboardScoresDownloaded_t
+                    {
+                        SteamLeaderboard = leaderboardHandle,
+                        SteamLeaderboardEntries = entriesHandle,
+                        CEntryCount = result.Entries.Length
+                    };
+                },
+                name: "Download leaderboard entries");
+        }
+
+        private ulong StoreDownloadedLeaderboardEntries(LeaderboardEntryData[] entries)
+        {
+            var handle = unchecked((ulong)System.Threading.Interlocked.Increment(ref NextLeaderboardEntriesHandle));
+            DownloadedLeaderboardEntries[handle] = entries ?? Array.Empty<LeaderboardEntryData>();
+            DownloadedLeaderboardEntryOrder.Enqueue(handle);
+
+            while (DownloadedLeaderboardEntries.Count > 256 &&
+                DownloadedLeaderboardEntryOrder.TryDequeue(out var expiredHandle))
+            {
+                DownloadedLeaderboardEntries.TryRemove(expiredHandle, out _);
+            }
+
+            return handle;
+        }
+
+        private Leaderboard GetOrCreateLocalLeaderboard(
+            string name,
+            ELeaderboardSortMethod sortMethod,
+            ELeaderboardDisplayType displayType)
+        {
+            lock (LeaderboardGate)
+            {
+                var leaderboard = Leaderboards.Find(item =>
+                    string.Equals(item.Name, name, StringComparison.Ordinal));
+                if (leaderboard != null)
+                {
+                    return leaderboard;
+                }
+
+                leaderboard = new Leaderboard
+                {
+                    SteamLeaderboard = unchecked((ulong)System.Threading.Interlocked.Increment(
+                        ref NextLocalLeaderboardHandle)),
+                    Name = name,
+                    ShortMethod = sortMethod,
+                    DisplayType = displayType
+                };
+                Leaderboards.Add(leaderboard);
+                return leaderboard;
+            }
+        }
+
+        private void CacheLeaderboard(Leaderboard leaderboard)
+        {
+            if (leaderboard == null || leaderboard.SteamLeaderboard == 0)
+            {
+                return;
+            }
+
+            lock (LeaderboardGate)
+            {
+                var index = Leaderboards.FindIndex(item =>
+                    item.SteamLeaderboard == leaderboard.SteamLeaderboard ||
+                    string.Equals(item.Name, leaderboard.Name, StringComparison.Ordinal));
+                if (index >= 0)
+                {
+                    Leaderboards[index] = leaderboard;
+                }
+                else
+                {
+                    Leaderboards.Add(leaderboard);
+                }
+            }
+        }
+
+        private Leaderboard FindCachedLeaderboard(ulong handle)
+        {
+            lock (LeaderboardGate)
+            {
+                return Leaderboards.Find(item => item.SteamLeaderboard == handle);
+            }
+        }
+
+        private void RefreshCachedLeaderboard(ulong handle)
+        {
+            var leaderboard = APIClient.GetLeaderboard(handle);
+            if (leaderboard != null)
+            {
+                CacheLeaderboard(leaderboard);
+            }
+        }
+
+        private static bool IsValidLeaderboardRequest(
+            string name,
+            ELeaderboardSortMethod sortMethod,
+            ELeaderboardDisplayType displayType)
+        {
+            return name.Length is > 0 and <= 128 &&
+                sortMethod is ELeaderboardSortMethod.k_ELeaderboardSortMethodAscending
+                    or ELeaderboardSortMethod.k_ELeaderboardSortMethodDescending &&
+                (int)displayType is >= 0 and <= 3;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+        private struct NativeLeaderboardEntry
+        {
+            public ulong SteamIdUser;
+            public int GlobalRank;
+            public int Score;
+            public int DetailsCount;
+            public ulong UgcHandle;
+        }
+
         private void SyncSelfFromCache(bool refresh = false)
         {
             if (refresh && APIClient.IsEnabled)
@@ -886,7 +1292,7 @@ namespace SKYNET.Steamworks.Implementation
             }
 
             SyncUserFromCache((ulong)SteamEmulator.SteamID, false);
-            Achievements = StateCache.GetAchievements((ulong)SteamEmulator.SteamID);
+            SetAchievements(StateCache.GetAchievements((ulong)SteamEmulator.SteamID));
         }
 
         private void SyncUserFromCache(ulong steamIDUser, bool refresh = false)
@@ -910,7 +1316,7 @@ namespace SKYNET.Steamworks.Implementation
             PlayerStats[steamIDUser] = StateCache.GetStats(steamIDUser);
             if (steamIDUser == (ulong)SteamEmulator.SteamID)
             {
-                Achievements = StateCache.GetAchievements(steamIDUser);
+                SetAchievements(StateCache.GetAchievements(steamIDUser));
             }
         }
 

@@ -183,6 +183,13 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SteamAPI_ISteamGameServer_SetAdvertiseServerActive(IntPtr _, bool bActive)
+        {
+            Write("SteamAPI_ISteamGameServer_SetAdvertiseServerActive");
+            SteamEmulator.SteamGameServer.SetAdvertiseServerActive(bActive);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_ISteamGameServer_SetRegion(IntPtr _, string pszRegion)
         {
             Write("SteamAPI_ISteamGameServer_SetRegion");
@@ -361,8 +368,7 @@ namespace SKYNET.Steamworks.Exported
         public static void SteamGameServer_Shutdown()
         {
             Write("SteamGameServer_Shutdown");
-            SteamEmulator.SteamID_GS = CSteamID.CreateOne(true);
-            SteamGameServer.Instance.LoggedIn = false;
+            SteamEmulator.SteamGameServer.Shutdown();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

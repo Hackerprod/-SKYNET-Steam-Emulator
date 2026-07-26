@@ -243,8 +243,9 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetAppBuildId()
         {
-            Write("GetAppBuildId");
-            return 10;
+            int buildId = AppContentManager.GetAppBuildId(SteamEmulator.AppID);
+            Write($"GetAppBuildId = {buildId}");
+            return buildId;
         }
 
         public void RequestAllProofOfPurchaseKeys()
@@ -274,9 +275,10 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetLaunchCommandLine(IntPtr pszCommandLine, int cubCommandLine)
         {
-            Write("GetLaunchCommandLine");
-            WriteUtf8Buffer(pszCommandLine, cubCommandLine, string.Empty);
-            return 0;
+            var arguments = GetProcessLaunchArguments();
+            var copied = WriteUtf8Buffer(pszCommandLine, cubCommandLine, arguments);
+            Write($"GetLaunchCommandLine = {copied} bytes");
+            return copied;
         }
 
         public bool SetDlcContext(uint nAppID)
@@ -369,6 +371,49 @@ namespace SKYNET.Steamworks.Implementation
         private static int WriteUtf8Buffer(IntPtr destination, uint destinationSize, string value)
         {
             return WriteUtf8Buffer(destination, destinationSize > int.MaxValue ? int.MaxValue : (int)destinationSize, value);
+        }
+
+        private static string GetProcessLaunchArguments()
+        {
+            var commandLine = Environment.CommandLine ?? string.Empty;
+            var index = 0;
+            while (index < commandLine.Length && char.IsWhiteSpace(commandLine[index]))
+            {
+                index++;
+            }
+
+            if (index >= commandLine.Length)
+            {
+                return string.Empty;
+            }
+
+            if (commandLine[index] == '"')
+            {
+                index++;
+                while (index < commandLine.Length)
+                {
+                    if (commandLine[index] == '"')
+                    {
+                        index++;
+                        break;
+                    }
+                    index++;
+                }
+            }
+            else
+            {
+                while (index < commandLine.Length && !char.IsWhiteSpace(commandLine[index]))
+                {
+                    index++;
+                }
+            }
+
+            while (index < commandLine.Length && char.IsWhiteSpace(commandLine[index]))
+            {
+                index++;
+            }
+
+            return index < commandLine.Length ? commandLine.Substring(index) : string.Empty;
         }
 
         private static int WriteUtf8Buffer(IntPtr destination, int destinationSize, string value)

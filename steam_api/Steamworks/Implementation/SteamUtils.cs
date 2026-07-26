@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Text;
 using SKYNET.Callback;
 using SKYNET.Helpers;
 using SKYNET.Managers;
@@ -14,6 +15,10 @@ namespace SKYNET.Steamworks.Implementation
         public static SteamUtils Instance;
 
         public DateTime ActiveTime;
+        private readonly object TextInputGate = new object();
+        private string EnteredGamepadText = string.Empty;
+        private bool HasEnteredGamepadText;
+        private bool GamepadTextInputPending;
 
         public SteamUtils()
         {
@@ -26,13 +31,18 @@ namespace SKYNET.Steamworks.Implementation
         public uint GetSecondsSinceAppActive()
         {
             Write("GetSecondsSinceAppActive");
-            return (uint)(DateTime.Now - ActiveTime).Seconds;
+            return checked((uint)Math.Min(
+                uint.MaxValue,
+                Math.Max(0, (DateTime.Now - ActiveTime).TotalSeconds)));
         }
 
         public uint GetSecondsSinceComputerActive()
         {
             Write("GetSecondsSinceComputerActive");
-            return (uint)Common.GetInactiveTimeSpan().Value.Seconds;
+            var inactive = Common.GetInactiveTimeSpan();
+            return inactive.HasValue
+                ? checked((uint)Math.Min(uint.MaxValue, Math.Max(0, inactive.Value.TotalSeconds)))
+                : 0;
         }
 
         public int GetConnectedUniverse()
@@ -66,7 +76,7 @@ namespace SKYNET.Steamworks.Implementation
                 {
                     var (width, height) = SteamFriends.Instance.GetImageSize(iImage);
 
-                    if (width != 0 | height != 0)
+                    if (width > 0 && height > 0)
                     {
                         Width  = width;
                         Height = height;
@@ -94,15 +104,14 @@ namespace SKYNET.Steamworks.Implementation
                 try
                 {
                     var avatar = SteamFriends.Instance.GetImageAvatar(iImage);
-                    if (avatar != null)
+                    if (avatar != null && pubDest != IntPtr.Zero && nDestBufferSize >= 0)
                     {
                         byte[] bytes = avatar.GetImage(iImage);
-                        if (nDestBufferSize > bytes.Length)
+                        if (bytes != null && bytes.Length > 0 && nDestBufferSize >= bytes.Length)
                         {
-                            nDestBufferSize = bytes.Length;
+                            Marshal.Copy(bytes, 0, pubDest, bytes.Length);
+                            Result = true;
                         }
-                        Marshal.Copy(bytes, 0, pubDest, nDestBufferSize);
-                        Result = true;
                     }
                 }
                 catch (Exception ex)
@@ -130,8 +139,34 @@ namespace SKYNET.Steamworks.Implementation
 
         public byte GetCurrentBatteryPower()
         {
-            Write("GetCurrentBatteryPower");
-            return 100;
+            try
+            {
+                var status = System.Windows.Forms.SystemInformation.PowerStatus;
+                if (status.PowerLineStatus == System.Windows.Forms.PowerLineStatus.Online ||
+                    status.BatteryChargeStatus == System.Windows.Forms.BatteryChargeStatus.NoSystemBattery)
+                {
+                    Write("GetCurrentBatteryPower AC");
+                    return byte.MaxValue;
+                }
+
+                var percentage = status.BatteryLifePercent;
+                if (float.IsNaN(percentage) || float.IsInfinity(percentage) || percentage < 0)
+                {
+                    Write("GetCurrentBatteryPower unknown");
+                    return byte.MaxValue;
+                }
+
+                var result = checked((byte)Math.Round(
+                    Math.Min(1.0f, percentage) * 100.0f,
+                    MidpointRounding.AwayFromZero));
+                Write($"GetCurrentBatteryPower {result}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Write($"GetCurrentBatteryPower unavailable: {ex.Message}");
+                return byte.MaxValue;
+            }
         }
 
         public uint GetAppID()
@@ -143,7 +178,15 @@ namespace SKYNET.Steamworks.Implementation
 
         public void SetOverlayNotificationPosition(int eNotificationPosition)
         {
-            Write("SetOverlayNotificationPosition");
+            if (!Enum.IsDefined(typeof(ENotificationPosition), eNotificationPosition))
+            {
+                SteamClient.ReportWarning(1, $"Ignored invalid overlay notification position {eNotificationPosition}.");
+                return;
+            }
+
+            var position = (ENotificationPosition)eNotificationPosition;
+            OverlayManager.SetNotificationPosition(position);
+            Write($"SetOverlayNotificationPosition {position}");
         }
 
         public bool IsAPICallCompleted(SteamAPICall_t hSteamAPICall, ref bool pbFailed)
@@ -190,12 +233,14 @@ namespace SKYNET.Steamworks.Implementation
         public uint GetIPCCallCount()
         {
             Write("GetIPCCallCount");
-            return (uint)new Random().Next(100, 200);
+            // The emulator does not communicate with a local Steam client over IPC.
+            // Server HTTP traffic is not Steam IPC and must not be reported as such.
+            return 0;
         }
 
         public void SetWarningMessageHook(IntPtr pFunction)
         {
-            Write("SetWarningMessageHook");
+            SteamEmulator.SteamClient.SetWarningMessageHook(pFunction);
         }
 
         public bool IsOverlayEnabled()
@@ -220,19 +265,109 @@ namespace SKYNET.Steamworks.Implementation
         public bool ShowGamepadTextInput(int eInputMode, int eLineInputMode, string pchDescription, uint unCharMax, string pchExistingText)
         {
             Write("ShowGamepadTextInput");
-            return false;
+            if (unCharMax == 0)
+            {
+                return false;
+            }
+
+            lock (TextInputGate)
+            {
+                if (GamepadTextInputPending)
+                {
+                    return false;
+                }
+                GamepadTextInputPending = true;
+                HasEnteredGamepadText = false;
+                EnteredGamepadText = string.Empty;
+            }
+
+            var shown = OverlayManager.ShowTextInput(
+                pchDescription,
+                unCharMax,
+                pchExistingText,
+                multiline: eLineInputMode == 1,
+                password: eInputMode == 1,
+                completed: (submitted, text) =>
+                {
+                    uint submittedBytes = 0;
+                    lock (TextInputGate)
+                    {
+                        GamepadTextInputPending = false;
+                        HasEnteredGamepadText = submitted;
+                        EnteredGamepadText = submitted ? text ?? string.Empty : string.Empty;
+                        if (submitted)
+                        {
+                            submittedBytes = checked((uint)Encoding.UTF8.GetByteCount(EnteredGamepadText) + 1);
+                        }
+                    }
+
+                    CallbackManager.AddCallback(new GamepadTextInputDismissed_t
+                    {
+                        Submitted = submitted,
+                        SubmittedText = submittedBytes,
+                        AppID = SteamEmulator.AppID
+                    });
+                });
+
+            if (!shown)
+            {
+                lock (TextInputGate)
+                {
+                    GamepadTextInputPending = false;
+                }
+            }
+            return shown;
         }
 
         public uint GetEnteredGamepadTextLength()
         {
             Write("GetEnteredGamepadTextLength");
-            return 0;
+            lock (TextInputGate)
+            {
+                return HasEnteredGamepadText
+                    ? checked((uint)Encoding.UTF8.GetByteCount(EnteredGamepadText) + 1)
+                    : 0;
+            }
         }
 
-        public bool GetEnteredGamepadTextInput(string pchText, uint cchText)
+        public bool GetEnteredGamepadTextInput(IntPtr pchText, uint cchText)
         {
             Write("GetEnteredGamepadTextInput");
-            return false;
+            lock (TextInputGate)
+            {
+                if (!HasEnteredGamepadText || pchText == IntPtr.Zero)
+                {
+                    return false;
+                }
+
+                var required = checked((uint)Encoding.UTF8.GetByteCount(EnteredGamepadText) + 1);
+                if (cchText != required || cchText > int.MaxValue)
+                {
+                    return false;
+                }
+
+                NativeStringCache.WriteUtf8Buffer(pchText, checked((int)cchText), EnteredGamepadText);
+                return true;
+            }
+        }
+
+        public bool ShowFloatingGamepadTextInput(
+            int keyboardMode,
+            int textFieldX,
+            int textFieldY,
+            int textFieldWidth,
+            int textFieldHeight)
+        {
+            Write("ShowFloatingGamepadTextInput");
+            return OverlayManager.ShowFloatingTextInput(
+                keyboardMode,
+                () => CallbackManager.AddCallback(new FloatingGamepadTextInputDismissed_t()));
+        }
+
+        public bool DismissFloatingGamepadTextInput()
+        {
+            Write("DismissFloatingGamepadTextInput");
+            return OverlayManager.DismissFloatingTextInput();
         }
 
         public string GetSteamUILanguage()
@@ -249,7 +384,10 @@ namespace SKYNET.Steamworks.Implementation
 
         public void SetOverlayNotificationInset(int nHorizontalInset, int nVerticalInset)
         {
-            Write("SetOverlayNotificationInset");
+            OverlayManager.SetNotificationInset(nHorizontalInset, nVerticalInset);
+            Write(
+                $"SetOverlayNotificationInset " +
+                $"{Math.Max(0, nHorizontalInset)},{Math.Max(0, nVerticalInset)}");
         }
 
         public bool IsSteamInBigPictureMode()

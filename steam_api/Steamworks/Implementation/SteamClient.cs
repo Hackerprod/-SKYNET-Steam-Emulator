@@ -11,6 +11,9 @@ namespace SKYNET.Steamworks.Implementation
 {
     public class SteamClient : ISteamInterface
     {
+        private static readonly object WarningHookGate = new object();
+        private static SteamApiWarningMessageHook warningHook;
+
         public static SteamClient Instance;
 
         public SteamClient()
@@ -158,14 +161,57 @@ namespace SKYNET.Steamworks.Implementation
 
         public void SetWarningMessageHook(IntPtr pFunctionPtr)
         {
+            lock (WarningHookGate)
+            {
+                if (pFunctionPtr == IntPtr.Zero)
+                {
+                    warningHook = null;
+                    Write("SetWarningMessageHook cleared");
+                    return;
+                }
+
+                try
+                {
+                    warningHook = Marshal.GetDelegateForFunctionPointer<SteamApiWarningMessageHook>(pFunctionPtr);
+                    Write("SetWarningMessageHook registered");
+                }
+                catch (Exception ex)
+                {
+                    warningHook = null;
+                    Write($"SetWarningMessageHook rejected: {ex.Message}");
+                }
+            }
+        }
+
+        public static void ReportWarning(int severity, string message)
+        {
+            SteamApiWarningMessageHook callback;
+            lock (WarningHookGate)
+            {
+                callback = warningHook;
+            }
+
+            if (callback == null)
+            {
+                return;
+            }
+
             try
             {
-                //SteamAPIWarningMessageHook_t pFunction = Marshal.PtrToStructure<SteamAPIWarningMessageHook_t>(pFunctionPtr);
-                Write($"SetWarningMessageHook");
+                callback(
+                    Math.Max(0, severity),
+                    SKYNET.Helpers.NativeStringCache.ToUtf8Ptr(message ?? string.Empty));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Write($"SetWarningMessageHook");
+                lock (WarningHookGate)
+                {
+                    if (ReferenceEquals(warningHook, callback))
+                    {
+                        warningHook = null;
+                    }
+                }
+                SteamEmulator.Write("Steam warning hook", ex);
             }
         }
 
@@ -174,6 +220,9 @@ namespace SKYNET.Steamworks.Implementation
             Write("BShutdownIfAllPipesClosed");
             return false;
         }
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate void SteamApiWarningMessageHook(int severity, IntPtr debugText);
 
         public IntPtr GetISteamHTTP(HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
         {

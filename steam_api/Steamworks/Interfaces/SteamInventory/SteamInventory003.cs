@@ -9,6 +9,7 @@ using SteamItemDef_t = System.Int32;
 namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("STEAMINVENTORY_INTERFACE_V003")]
+    [MsvcVTableOverload("SetPropertyString", "SetPropertyBool", "SetPropertyInt64", "SetPropertyFloat")]
     public class SteamInventory003 : ISteamInterface
     {
         public int GetResultStatus(IntPtr _, SteamInventoryResult_t resultHandle)

@@ -28,6 +28,13 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamRemotePlay_BSessionRemotePlayTogether(IntPtr _, uint unSessionID)
+        {
+            Write("SteamAPI_ISteamRemotePlay_BSessionRemotePlayTogether");
+            return SteamEmulator.SteamRemotePlay.BSessionRemotePlayTogether(unSessionID);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static ulong SteamAPI_ISteamRemotePlay_GetSessionSteamID(IntPtr _, uint unSessionID)
         {
             Write("SteamAPI_ISteamRemotePlay_IntPtrGetSessionSteamID");
@@ -35,10 +42,39 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static string SteamAPI_ISteamRemotePlay_GetSessionClientName(IntPtr _, uint unSessionID)
+        public static uint SteamAPI_ISteamRemotePlay_GetSessionGuestID(IntPtr _, uint unSessionID)
         {
-            Write("SteamAPI_ISteamRemotePlay_stringGetSessionClientName");
-            return SteamEmulator.SteamRemotePlay.GetSessionClientName(unSessionID);
+            Write("SteamAPI_ISteamRemotePlay_GetSessionGuestID");
+            return SteamEmulator.SteamRemotePlay.GetSessionGuestID(unSessionID);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_ISteamRemotePlay_GetSmallSessionAvatar(IntPtr _, uint unSessionID)
+        {
+            Write("SteamAPI_ISteamRemotePlay_GetSmallSessionAvatar");
+            return SteamEmulator.SteamRemotePlay.GetSmallSessionAvatar(unSessionID);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_ISteamRemotePlay_GetMediumSessionAvatar(IntPtr _, uint unSessionID)
+        {
+            Write("SteamAPI_ISteamRemotePlay_GetMediumSessionAvatar");
+            return SteamEmulator.SteamRemotePlay.GetMediumSessionAvatar(unSessionID);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static int SteamAPI_ISteamRemotePlay_GetLargeSessionAvatar(IntPtr _, uint unSessionID)
+        {
+            Write("SteamAPI_ISteamRemotePlay_GetLargeSessionAvatar");
+            return SteamEmulator.SteamRemotePlay.GetLargeSessionAvatar(unSessionID);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static IntPtr SteamAPI_ISteamRemotePlay_GetSessionClientName(IntPtr _, uint unSessionID)
+        {
+            Write("SteamAPI_ISteamRemotePlay_GetSessionClientName");
+            return SKYNET.Helpers.NativeStringCache.ToUtf8Ptr(
+                SteamEmulator.SteamRemotePlay.GetSessionClientName(unSessionID));
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

@@ -1,4 +1,5 @@
 ﻿using SKYNET.Managers;
+using SKYNET.Helpers;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -25,14 +26,14 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamAPI_Init()
         {
             Write($"SteamAPI_Init");
-            return true;
+            return InitializeClientApi(IntPtr.Zero) == 0;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static int SteamAPI_InitFlat(IntPtr pOutErrMsg)
         {
             Write($"SteamAPI_InitFlat");
-            return 0; // k_ESteamAPIInitResult_OK
+            return InitializeClientApi(pOutErrMsg);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -46,6 +47,7 @@ namespace SKYNET.Steamworks.Exported
         {
             Write("SteamAPI_Shutdown");
             APIClient.GoOffline();
+            SteamEmulator.ShutdownServices();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -135,8 +137,31 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamAPI_InitAnonymousUser()
         {
             Write("SteamAPI_InitAnonymousUser");
-            SteamAPI_Init();
-            return true;
+            return SteamAPI_Init();
+        }
+
+        internal static int InitializeClientApi(IntPtr pOutErrMsg)
+        {
+            const int SteamApiInitOk = 0;
+            const int SteamApiInitNoSteamClient = 2;
+            const int SteamErrorMessageCapacity = 1024;
+
+            if (APIClient.EnsureInitialSession())
+            {
+                NativeStringCache.WriteUtf8Buffer(
+                    pOutErrMsg,
+                    SteamErrorMessageCapacity,
+                    string.Empty);
+                return SteamApiInitOk;
+            }
+
+            const string error = "Could not establish a session with the configured SKYNET Steam server.";
+            NativeStringCache.WriteUtf8Buffer(
+                pOutErrMsg,
+                SteamErrorMessageCapacity,
+                error);
+            Write(error);
+            return SteamApiInitNoSteamClient;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -150,7 +175,7 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamAPI_RestartAppIfNecessary(uint appId)
         {
             Write($"SteamAPI_RestartAppIfNecessary called {appId}");
-            SteamEmulator.AppID = appId;
+            SteamEmulator.ApplyAppIdHint(appId, nameof(SteamAPI_RestartAppIfNecessary));
             return false;
         }
 
@@ -260,8 +285,8 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_RestartApp(uint appid)
         {
-            Write($"SteamAPI_RestartApp");
-            SteamEmulator.AppID = appid;
+            Write($"SteamAPI_RestartApp {appid}");
+            SteamEmulator.ApplyAppIdHint(appid, nameof(SteamAPI_RestartApp));
             return false;
         }
 

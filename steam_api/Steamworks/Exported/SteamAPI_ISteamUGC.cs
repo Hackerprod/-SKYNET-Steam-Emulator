@@ -33,7 +33,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static UGCQueryHandle_t SteamAPI_ISteamUGC_CreateQueryUGCDetailsRequest(IntPtr _, PublishedFileId_t pvecPublishedFileID, uint unNumPublishedFileIDs)
+        public static UGCQueryHandle_t SteamAPI_ISteamUGC_CreateQueryUGCDetailsRequest(IntPtr _, IntPtr pvecPublishedFileID, uint unNumPublishedFileIDs)
         {
             Write("SteamAPI_ISteamUGC_CreateQueryUGCDetailsRequest");
             return SteamEmulator.SteamUGC.CreateQueryUGCDetailsRequest(pvecPublishedFileID, unNumPublishedFileIDs);
@@ -495,7 +495,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static uint SteamAPI_ISteamUGC_GetSubscribedItems(IntPtr _, PublishedFileId_t pvecPublishedFileID, uint cMaxEntries, bool bIncludeLocallyDisabled) // all subscribed item PublishFileIDs 
+        public static uint SteamAPI_ISteamUGC_GetSubscribedItems(IntPtr _, IntPtr pvecPublishedFileID, uint cMaxEntries, bool bIncludeLocallyDisabled) // all subscribed item PublishFileIDs
         {
             Write("SteamAPI_ISteamUGC_GetSubscribedItems");
             return SteamEmulator.SteamUGC.GetSubscribedItems(pvecPublishedFileID, cMaxEntries, bIncludeLocallyDisabled);

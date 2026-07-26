@@ -54,7 +54,7 @@ namespace SKYNET.Steamworks.Interfaces
 
         public void EnableActionEventCallbacks(IntPtr _, IntPtr pCallback)
         {
-            SteamEmulator.SteamInput.EnableDeviceCallbacks();
+            SteamEmulator.SteamInput.EnableActionEventCallbacks(pCallback);
         }
 
         public InputActionSetHandle_t GetActionSetHandle(IntPtr _, string pszActionSetName)

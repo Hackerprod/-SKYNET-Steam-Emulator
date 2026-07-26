@@ -9,6 +9,8 @@ using UGCUpdateHandle_t = System.UInt64;
 namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("STEAMUGC_INTERFACE_VERSION021")]
+    [MsvcVTableOverload("CreateQueryAllUGCRequestPage", "CreateQueryAllUGCRequestCursor")]
+    [MsvcVTableOverload("GetQueryUGCKeyValueTag", "GetQueryFirstUGCKeyValueTag")]
     public class SteamUGC021 : ISteamInterface
     {
         public UGCQueryHandle_t CreateQueryUserUGCRequest(IntPtr _, uint unAccountID, int eListType, int eMatchingUGCType, int eSortOrder, uint nCreatorAppID, uint nConsumerAppID, uint unPage) { return SteamEmulator.SteamUGC.CreateQueryUserUGCRequest(unAccountID, eListType, eMatchingUGCType, eSortOrder, nCreatorAppID, nConsumerAppID, unPage); }
@@ -22,7 +24,7 @@ namespace SKYNET.Steamworks.Interfaces
 
             return SteamEmulator.SteamUGC.CreateQueryAllUGCRequest(eQueryType, eMatchingeMatchingUGCTypeFileType, nCreatorAppID, nConsumerAppID, ReadNativeString(pchCursor));
         }
-        public UGCQueryHandle_t CreateQueryUGCDetailsRequest(IntPtr _, IntPtr pvecPublishedFileID, uint unNumPublishedFileIDs) { return SteamEmulator.SteamUGC.CreateQueryUGCDetailsRequest(0, unNumPublishedFileIDs); }
+        public UGCQueryHandle_t CreateQueryUGCDetailsRequest(IntPtr _, IntPtr pvecPublishedFileID, uint unNumPublishedFileIDs) { return SteamEmulator.SteamUGC.CreateQueryUGCDetailsRequest(pvecPublishedFileID, unNumPublishedFileIDs); }
         public SteamAPICall_t SendQueryUGCRequest(IntPtr _, UGCQueryHandle_t handle) { return SteamEmulator.SteamUGC.SendQueryUGCRequest(handle); }
         public bool GetQueryUGCResult(IntPtr _, UGCQueryHandle_t handle, uint index, ref SteamUGCDetails_t pDetails) { return SteamEmulator.SteamUGC.GetQueryUGCResult(handle, index, ref pDetails); }
         public uint GetQueryUGCNumTags(IntPtr _, UGCQueryHandle_t handle, uint index) { return SteamEmulator.SteamUGC.GetQueryUGCNumTags(handle, index); }
@@ -99,7 +101,7 @@ namespace SKYNET.Steamworks.Interfaces
         public SteamAPICall_t SubscribeItem(IntPtr _, PublishedFileId_t nPublishedFileID) { return SteamEmulator.SteamUGC.SubscribeItem(nPublishedFileID); }
         public SteamAPICall_t UnsubscribeItem(IntPtr _, PublishedFileId_t nPublishedFileID) { return SteamEmulator.SteamUGC.UnsubscribeItem(nPublishedFileID); }
         public uint GetNumSubscribedItems(IntPtr _, bool bIncludeLocallyDisabled) { return SteamEmulator.SteamUGC.GetNumSubscribedItems(bIncludeLocallyDisabled); }
-        public uint GetSubscribedItems(IntPtr _, IntPtr pvecPublishedFileID, uint cMaxEntries, bool bIncludeLocallyDisabled) { return SteamEmulator.SteamUGC.GetSubscribedItems(0, cMaxEntries, bIncludeLocallyDisabled); }
+        public uint GetSubscribedItems(IntPtr _, IntPtr pvecPublishedFileID, uint cMaxEntries, bool bIncludeLocallyDisabled) { return SteamEmulator.SteamUGC.GetSubscribedItems(pvecPublishedFileID, cMaxEntries, bIncludeLocallyDisabled); }
         public uint GetItemState(IntPtr _, ulong nPublishedFileID) { return SteamEmulator.SteamUGC.GetItemState(nPublishedFileID); }
         public bool GetItemInstallInfo(IntPtr _, ulong nPublishedFileID, IntPtr punSizeOnDisk, IntPtr pchFolder, uint cchFolderSize, IntPtr punTimeStamp) { return SteamEmulator.SteamUGC.GetItemInstallInfo(nPublishedFileID, punSizeOnDisk, pchFolder, cchFolderSize, punTimeStamp); }
         public bool GetItemDownloadInfo(IntPtr _, ulong nPublishedFileID, IntPtr punBytesDownloaded, IntPtr punBytesTotal)

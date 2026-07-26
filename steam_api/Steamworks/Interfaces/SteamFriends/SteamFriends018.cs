@@ -1,7 +1,7 @@
 using System;
 using SKYNET.Steamworks.Implementation;
 using SteamAPICall_t = System.UInt64;
-using FriendsGroupID_t = System.UInt16;
+using FriendsGroupID_t = System.Int16;
 using SKYNET.Helpers;
 using SKYNET.Steamworks.Types;
 

@@ -211,15 +211,48 @@ namespace SKYNET.Managers
         private static void AtomicWriteText(string path, string content)
         {
             var temp = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
-            File.WriteAllText(temp, content, new UTF8Encoding(false));
-            if (File.Exists(path))
+            try
             {
-                File.Replace(temp, path, null);
+                File.WriteAllText(temp, content, new UTF8Encoding(false));
+                if (File.Exists(path))
+                {
+                    try
+                    {
+                        File.Replace(temp, path, null);
+                    }
+                    catch (PlatformNotSupportedException)
+                    {
+                        ReplaceByCopy(temp, path);
+                    }
+                    catch (IOException)
+                    {
+                        ReplaceByCopy(temp, path);
+                    }
+                }
+                else
+                {
+                    File.Move(temp, path);
+                }
             }
-            else
+            finally
             {
-                File.Move(temp, path);
+                if (File.Exists(temp))
+                {
+                    try
+                    {
+                        File.Delete(temp);
+                    }
+                    catch
+                    {
+                    }
+                }
             }
+        }
+
+        private static void ReplaceByCopy(string temporary, string destination)
+        {
+            File.Copy(temporary, destination, true);
+            File.Delete(temporary);
         }
 
         // ================= id / handle allocation =================
@@ -258,11 +291,13 @@ namespace SKYNET.Managers
             };
             Results[handle] = result;
 
-            CallbackManager.AddCallback(new SteamInventoryResultReady_t { Handle = handle, Result = status });
             if (fullUpdate && status == EResult.k_EResultOK)
             {
+                // Steam guarantees that a full refresh notification is delivered
+                // immediately before the matching result-ready notification.
                 CallbackManager.AddCallback(new SteamInventoryFullUpdate_t { Handle = handle });
             }
+            CallbackManager.AddCallback(new SteamInventoryResultReady_t { Handle = handle, Result = status });
             return handle;
         }
 

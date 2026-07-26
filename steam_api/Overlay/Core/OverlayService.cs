@@ -86,6 +86,17 @@ public sealed class OverlayService
         }));
     }
 
+    public bool DismissTextInput()
+    {
+        if (!IsOverlayVisible || _window == null || _window.IsDisposed)
+        {
+            return false;
+        }
+
+        _window.BeginInvoke((MethodInvoker)_window.HideOverlay);
+        return true;
+    }
+
     // Called when the window hides itself (Esc, close button, dim click)
     private void OnWindowHidden()
     {

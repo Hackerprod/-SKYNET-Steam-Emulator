@@ -335,7 +335,13 @@ namespace SKYNET.Managers
                 var payload = string.IsNullOrEmpty(serverEvent.PayloadBase64)
                     ? Array.Empty<byte>()
                     : Convert.FromBase64String(serverEvent.PayloadBase64);
-                SteamEmulator.SteamNetworkingSockets?.ProcessRelayPacket(transport, remoteSteamId, serverEvent.VirtualPort, payload);
+                SteamEmulator.SteamNetworkingSockets?.ProcessRelayPacket(
+                    transport,
+                    remoteSteamId,
+                    serverEvent.VirtualPort,
+                    serverEvent.SourceConnectionId,
+                    serverEvent.TargetConnectionId,
+                    payload);
                 return;
             }
 

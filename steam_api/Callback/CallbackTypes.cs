@@ -5,6 +5,7 @@ using SKYNET.Steamworks;
 
 using PublishedFileId_t = System.UInt64;
 using SteamAPICall_t = System.UInt64;
+using UGCHandle_t = System.UInt64;
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
 
@@ -229,25 +230,23 @@ namespace SKYNET.Callback
         #endregion
     }
 
-    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //public struct DurationControl_t : ICallbackData
-    //{
-    //    public EResult Result; // m_eResult EResult
-    //    public AppId Appid; // m_appid AppId_t
-    //    [MarshalAs(UnmanagedType.I1)]
-    //    public bool Applicable; // m_bApplicable bool
-    //    public int CsecsLast5h; // m_csecsLast5h int32
-    //    public DurationControlProgress Progress; // m_progress EDurationControlProgress
-    //    public DurationControlNotification Otification; // m_notification EDurationControlNotification
-    //    public int CsecsToday; // m_csecsToday int32
-    //    public int CsecsRemaining; // m_csecsRemaining int32
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    public struct DurationControl_t : ICallbackData
+    {
+        public EResult Result;
+        public uint Appid;
+        [MarshalAs(UnmanagedType.I1)]
+        public bool Applicable;
+        public int CsecsLast5h;
+        public DurationControlProgress Progress;
+        public DurationControlNotification Notification;
+        public int CsecsToday;
+        public int CsecsRemaining;
 
-    //    #region SteamCallback
-    //    public static int _datasize = Marshal.SizeOf(typeof(DurationControl_t));
-    //    public int DataSize => _datasize;
-    //    public CallbackType CallbackType => CallbackType.DurationControl;
-    //    #endregion
-    //}
+        public static int _datasize = Marshal.SizeOf(typeof(DurationControl_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.DurationControl;
+    }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     public struct PersonaStateChange_t : ICallbackData
@@ -1059,18 +1058,16 @@ namespace SKYNET.Callback
         #endregion
     }
 
-    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //public struct RemoteStorageSubscribePublishedFileResult_t : ICallbackData
-    //{
-    //    public EResult Result; // m_eResult EResult
-    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    public struct RemoteStorageSubscribePublishedFileResult_t : ICallbackData
+    {
+        public EResult m_eResult;
+        public PublishedFileId_t m_nPublishedFileId;
 
-    //    #region SteamCallback
-    //    public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageSubscribePublishedFileResult_t));
-    //    public int DataSize => _datasize;
-    //    public CallbackType CallbackType => CallbackType.RemoteStorageSubscribePublishedFileResult;
-    //    #endregion
-    //}
+        public static int _datasize = Marshal.SizeOf(typeof(RemoteStorageSubscribePublishedFileResult_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.RemoteStorageSubscribePublishedFileResult;
+    }
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //public struct RemoteStorageEnumerateUserSubscribedFilesResult_t : ICallbackData
@@ -2045,18 +2042,18 @@ namespace SKYNET.Callback
     //    #endregion
     //}
 
-    //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
-    //public struct ItemInstalled_t : ICallbackData
-    //{
-    //    public AppId AppID; // m_unAppID AppId_t
-    //    public PublishedFileId PublishedFileId; // m_nPublishedFileId PublishedFileId_t
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    public struct ItemInstalled_t : ICallbackData
+    {
+        public uint m_unAppID;
+        public PublishedFileId_t m_nPublishedFileId;
+        public UGCHandle_t m_hLegacyContent;
+        public ulong m_unManifestID;
 
-    //    #region SteamCallback
-    //    public static int _datasize = Marshal.SizeOf(typeof(ItemInstalled_t));
-    //    public int DataSize => _datasize;
-    //    public CallbackType CallbackType => CallbackType.ItemInstalled;
-    //    #endregion
-    //}
+        public static int _datasize = Marshal.SizeOf(typeof(ItemInstalled_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.ItemInstalled;
+    }
 
     //[StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     //public struct DownloadItemResult_t : ICallbackData
@@ -2304,7 +2301,7 @@ namespace SKYNET.Callback
     public struct HTML_NeedsPaint_t : ICallbackData
     {
         public uint UnBrowserHandle; // unBrowserHandle HHTMLBrowser
-        public string PBGRA; // pBGRA const char *
+        public IntPtr PBGRA; // pBGRA const char *
         public uint UnWide; // unWide uint32
         public uint UnTall; // unTall uint32
         public uint UnUpdateX; // unUpdateX uint32
@@ -2776,6 +2773,34 @@ namespace SKYNET.Callback
         #endregion
     }
 
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    public struct SteamRemotePlayTogetherGuestInvite_t : ICallbackData
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024)]
+        public byte[] ConnectURL; // m_szConnectURL char[1024]
+
+        #region SteamCallback
+        public static int _datasize = Marshal.SizeOf(typeof(SteamRemotePlayTogetherGuestInvite_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamRemotePlayTogetherGuestInvite;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    public struct SteamRemotePlaySessionAvatarLoaded_t : ICallbackData
+    {
+        public uint SessionID; // m_unSessionID RemotePlaySessionID_t
+        public int Image; // m_iImage
+        public int Wide; // m_iWide
+        public int Tall; // m_iTall
+
+        #region SteamCallback
+        public static int _datasize = Marshal.SizeOf(typeof(SteamRemotePlaySessionAvatarLoaded_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamRemotePlaySessionAvatarLoaded;
+        #endregion
+    }
+
     // These use the SteamNetworking SDK ABI definitions.  They are dispatched
     // through the normal callback queue and also to configured native global
     // callbacks, so games can use either registration model.
@@ -2787,6 +2812,33 @@ namespace SKYNET.Callback
         public static int _datasize = Marshal.SizeOf(typeof(SteamNetworkingMessagesSessionRequest_t));
         public int DataSize => _datasize;
         public CallbackType CallbackType => CallbackType.SteamNetworkingMessagesSessionRequest;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    public struct SteamTimelineGamePhaseRecordingExists_t : ICallbackData
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
+        public byte[] PhaseId;
+        public ulong RecordingMilliseconds;
+        public ulong LongestClipMilliseconds;
+        public uint ClipCount;
+        public uint ScreenshotCount;
+
+        public static int _datasize = Marshal.SizeOf(typeof(SteamTimelineGamePhaseRecordingExists_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamTimelineGamePhaseRecordingExists;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    public struct SteamTimelineEventRecordingExists_t : ICallbackData
+    {
+        public ulong EventId;
+        [MarshalAs(UnmanagedType.I1)]
+        public bool RecordingExists;
+
+        public static int _datasize = Marshal.SizeOf(typeof(SteamTimelineEventRecordingExists_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SteamTimelineEventRecordingExists;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]

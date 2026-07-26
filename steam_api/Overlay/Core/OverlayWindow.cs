@@ -17,6 +17,8 @@ internal sealed class OverlayWindow : Form
     private readonly RoundedPanel _card;
     private readonly Label _titleLabel;
     private readonly Panel _contentHost;
+    private OverlayRequest _activeRequest;
+    private bool _textInputCompleted;
 
     public OverlayWindow(OverlayOptions options)
     {
@@ -122,6 +124,9 @@ internal sealed class OverlayWindow : Form
     public void ShowOverlay(OverlayRequest request)
     {
         request ??= new OverlayRequest { Kind = OverlayKind.Home, Title = "SKYNETEMU" };
+        CancelActiveTextInput();
+        _activeRequest = request;
+        _textInputCompleted = false;
 
         PositionOverTarget();
         _card.PerformLayout();
@@ -143,6 +148,8 @@ internal sealed class OverlayWindow : Form
 
     public void HideOverlay()
     {
+        CancelActiveTextInput();
+        _activeRequest = null;
         _positionTimer.Stop();
         Hide();
         Hidden?.Invoke();
@@ -184,6 +191,12 @@ internal sealed class OverlayWindow : Form
             case OverlayKind.ConfirmAction:
                 BuildConfirm(body, request);
                 break;
+            case OverlayKind.TextInput:
+                BuildTextInput(body, request);
+                break;
+            case OverlayKind.Timeline:
+                BuildTimeline(body, request);
+                break;
             default:
                 BuildHome(body, request);
                 break;
@@ -206,6 +219,28 @@ internal sealed class OverlayWindow : Form
         }
 
         foreach (var activity in request.Activities.Take(8))
+        {
+            AddInfoCard(body, activity.Title, activity.Detail, Theme.Accent);
+        }
+    }
+
+    private void BuildTimeline(FlowLayoutPanel body, OverlayRequest request)
+    {
+        AddSectionLabel(body, "TIMELINE");
+        AddTitle(body, request.Title ?? "Timeline", 20f);
+        if (!string.IsNullOrWhiteSpace(request.Message))
+        {
+            AddInfoCard(body, request.Message, string.Empty, Theme.TextMuted);
+        }
+        AddSummaryGrid(body, request.Summary);
+        AddSectionLabel(body, "DETAILS");
+        if (request.Activities == null || request.Activities.Count == 0)
+        {
+            AddEmpty(body, "No timeline details are available.");
+            return;
+        }
+
+        foreach (var activity in request.Activities.Take(64))
         {
             AddInfoCard(body, activity.Title, activity.Detail, Theme.Accent);
         }
@@ -444,6 +479,121 @@ internal sealed class OverlayWindow : Form
             AddActionButton(actions, request.SecondaryActionText ?? "Dismiss", Theme.TextMuted, request.SecondaryAction, false);
         }
         body.Controls.Add(actions);
+    }
+
+    private void BuildTextInput(FlowLayoutPanel body, OverlayRequest request)
+    {
+        AddSectionLabel(body, "TEXT INPUT");
+        if (!string.IsNullOrWhiteSpace(request.Message))
+        {
+            AddTitle(body, request.Message, 16f);
+        }
+
+        var maximumLength = request.TextInputMaxLength == 0
+            ? 1
+            : (int)Math.Min(request.TextInputMaxLength, 1024 * 1024);
+        var input = new TextBox
+        {
+            Width = GetContentWidth(),
+            Height = request.TextInputMultiline ? 150 : 38,
+            Multiline = request.TextInputMultiline,
+            ScrollBars = request.TextInputMultiline ? ScrollBars.Vertical : ScrollBars.None,
+            MaxLength = maximumLength,
+            Text = (request.InitialText ?? string.Empty).Substring(
+                0,
+                Math.Min((request.InitialText ?? string.Empty).Length, maximumLength)),
+            UseSystemPasswordChar = request.TextInputPassword,
+            ForeColor = Theme.TextTitle,
+            BackColor = Theme.BgDark,
+            BorderStyle = BorderStyle.FixedSingle,
+            Font = new Font(Theme.FontName, 11f, FontStyle.Regular, GraphicsUnit.Point),
+            Margin = new Padding(0, 4, 0, 12)
+        };
+        if (request.TextInputNumeric)
+        {
+            input.KeyPress += (sender, args) =>
+            {
+                if (!char.IsControl(args.KeyChar) && !char.IsDigit(args.KeyChar) &&
+                    args.KeyChar != '-' && args.KeyChar != '.' && args.KeyChar != ',')
+                {
+                    args.Handled = true;
+                }
+            };
+        }
+        body.Controls.Add(input);
+
+        var actions = new FlowLayoutPanel
+        {
+            Width = GetContentWidth(),
+            Height = 42,
+            FlowDirection = FlowDirection.LeftToRight,
+            WrapContents = false,
+            Margin = new Padding(0, 4, 0, 0)
+        };
+        var submit = CreateTextInputButton("Submit", Theme.Accent);
+        var cancel = CreateTextInputButton("Cancel", Theme.TextMuted);
+        submit.Click += (sender, args) =>
+        {
+            CompleteTextInput(true, input.Text);
+            HideOverlay();
+        };
+        cancel.Click += (sender, args) =>
+        {
+            CompleteTextInput(false, string.Empty);
+            HideOverlay();
+        };
+        actions.Controls.Add(submit);
+        actions.Controls.Add(cancel);
+        body.Controls.Add(actions);
+
+        input.KeyDown += (sender, args) =>
+        {
+            if (!request.TextInputMultiline && args.KeyCode == Keys.Enter)
+            {
+                args.SuppressKeyPress = true;
+                submit.PerformClick();
+            }
+        };
+        BeginInvoke((MethodInvoker)(() =>
+        {
+            input.Focus();
+            input.SelectionStart = input.TextLength;
+        }));
+    }
+
+    private Button CreateTextInputButton(string text, Color borderColor)
+    {
+        var button = new Button
+        {
+            Text = text,
+            Width = 120,
+            Height = 34,
+            FlatStyle = FlatStyle.Flat,
+            ForeColor = Theme.TextTitle,
+            BackColor = Theme.BgDark,
+            Font = new Font(Theme.FontName, 9f, FontStyle.Bold, GraphicsUnit.Point),
+            Margin = new Padding(0, 0, 8, 0),
+            Cursor = Cursors.Hand
+        };
+        button.FlatAppearance.BorderColor = borderColor;
+        button.FlatAppearance.MouseOverBackColor = Theme.BgPanel;
+        return button;
+    }
+
+    private void CompleteTextInput(bool submitted, string text)
+    {
+        if (_activeRequest?.Kind != OverlayKind.TextInput || _textInputCompleted)
+        {
+            return;
+        }
+
+        _textInputCompleted = true;
+        _activeRequest.TextInputCompleted?.Invoke(submitted, text ?? string.Empty);
+    }
+
+    private void CancelActiveTextInput()
+    {
+        CompleteTextInput(false, string.Empty);
     }
 
     private void AddSummaryGrid(FlowLayoutPanel body, List<OverlaySummaryItem> items)
@@ -1000,6 +1150,7 @@ internal sealed class OverlayWindow : Form
             OverlayKind.Settings => "Settings",
             OverlayKind.ConfirmAction => request.Title ?? "Confirm Action",
             OverlayKind.UserProfile => request.Title ?? "User Profile",
+            OverlayKind.Timeline => request.Title ?? "Timeline",
             _ => "Home"
         };
     }

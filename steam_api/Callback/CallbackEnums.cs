@@ -283,5 +283,9 @@ namespace SKYNET.Callback
         ActiveBeaconsUpdated = 5306,
         SteamRemotePlaySessionConnected = 5701,
         SteamRemotePlaySessionDisconnected = 5702,
+        SteamRemotePlayTogetherGuestInvite = 5703,
+        SteamRemotePlaySessionAvatarLoaded = 5704,
+        SteamTimelineGamePhaseRecordingExists = 6001,
+        SteamTimelineEventRecordingExists = 6002,
     }
 }

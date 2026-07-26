@@ -9,7 +9,11 @@ namespace SKYNET.Types
         public string PersonaName { get; set; }
         public uint GameID { get; set; }
         public ulong LobbyID { get; set; }
+        public ulong GameServerSteamID { get; set; }
+        public uint GameServerIP { get; set; }
+        public ushort GameServerPort { get; set; }
         public int PersonaState { get; set; }
+        public int PlayerLevel { get; set; }
         public bool HasFriend { get; set; }
         public int FriendRelationship { get; set; }
         public string IPAddress { get; set; }

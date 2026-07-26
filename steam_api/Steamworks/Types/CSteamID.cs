@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 namespace SKYNET.Steamworks
 {
     [StructLayout(LayoutKind.Sequential, Size = 8)]
     public struct CSteamID : IEquatable<CSteamID>, IComparable<CSteamID>, IEquatable<ulong>, IComparable<ulong>
     {
+        private static readonly RandomNumberGenerator Random = RandomNumberGenerator.Create();
+        private static readonly object RandomGate = new object();
         public ulong SteamID;
 
         public uint AccountID => (uint)(SteamID & 0xFFFFFFFFul);
@@ -43,11 +46,22 @@ namespace SKYNET.Steamworks
 
         public static CSteamID CreateOne(bool GameServer = false)
         {
-            if (GameServer)
+            var bytes = new byte[4];
+            lock (RandomGate)
             {
-                return new CSteamID((uint)new Random().Next(1000, 9999), EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeGameServer);
+                Random.GetBytes(bytes);
             }
-            return new CSteamID((uint)new Random().Next(1000, 9999), EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeIndividual);
+
+            var accountId = BitConverter.ToUInt32(bytes, 0);
+            if (accountId == 0)
+            {
+                accountId = 1;
+            }
+
+            var accountType = GameServer
+                ? EAccountType.k_EAccountTypeGameServer
+                : EAccountType.k_EAccountTypeIndividual;
+            return new CSteamID(accountId, EUniverse.k_EUniversePublic, accountType);
         }
 
         public override int GetHashCode()
@@ -63,6 +77,11 @@ namespace SKYNET.Steamworks
         public bool Equals(CSteamID other)
         {
             return this.SteamID == other.SteamID;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is CSteamID other && Equals(other);
         }
 
         public static bool operator ==(CSteamID x, CSteamID y)

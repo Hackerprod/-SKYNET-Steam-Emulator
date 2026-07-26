@@ -5,6 +5,8 @@ using SteamAPICall_t = System.UInt64;
 namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("SteamGameServerStats001")]
+    [MsvcVTableOverload("GetUserStatInt32", "GetUserStatFloat")]
+    [MsvcVTableOverload("SetUserStatInt32", "SetUserStatFloat")]
     public class SteamGameServerStats001 : ISteamInterface
     {
         public SteamAPICall_t RequestUserStats(IntPtr _, ulong steamIDUser)

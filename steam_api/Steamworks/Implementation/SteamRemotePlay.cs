@@ -8,6 +8,11 @@ namespace SKYNET.Steamworks.Implementation
     {
         public static SteamRemotePlay Instance;
         private uint nextCursorId = 1;
+        private const int MaximumCursorDimension = 4096;
+        private const int MaximumCursorCount = 64;
+        private readonly object cursorGate = new object();
+        private readonly System.Collections.Generic.Dictionary<uint, RemoteCursor> cursors =
+            new System.Collections.Generic.Dictionary<uint, RemoteCursor>();
 
         public SteamRemotePlay()
         {
@@ -31,7 +36,7 @@ namespace SKYNET.Steamworks.Implementation
         public CSteamID GetSessionSteamID(RemotePlaySessionID_t unSessionID)
         {
             Write("GetSessionSteamID");
-            return CSteamID.CreateOne();
+            return CSteamID.Invalid;
         }
 
         public bool BSessionRemotePlayTogether(RemotePlaySessionID_t unSessionID)
@@ -92,7 +97,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public bool BSendRemotePlayTogetherInvite(ulong steamIDFriend)
         {
-            Write("BSendRemotePlayTogetherInvite");
+            Write($"BSendRemotePlayTogetherInvite unavailable friend={steamIDFriend}");
             return false;
         }
 
@@ -132,12 +137,77 @@ namespace SKYNET.Steamworks.Implementation
         public uint CreateMouseCursor(int nWidth, int nHeight, int nHotX, int nHotY, System.IntPtr pBGRA, int nPitch)
         {
             Write("CreateMouseCursor");
-            return nextCursorId++;
+            if (nWidth <= 0 || nHeight <= 0 ||
+                nWidth > MaximumCursorDimension || nHeight > MaximumCursorDimension ||
+                nHotX < 0 || nHotX >= nWidth || nHotY < 0 || nHotY >= nHeight ||
+                pBGRA == System.IntPtr.Zero || nPitch < checked(nWidth * 4))
+            {
+                return 0;
+            }
+
+            int byteCount;
+            try
+            {
+                byteCount = checked(nPitch * nHeight);
+            }
+            catch (System.OverflowException)
+            {
+                return 0;
+            }
+
+            var pixels = new byte[byteCount];
+            System.Runtime.InteropServices.Marshal.Copy(pBGRA, pixels, 0, pixels.Length);
+            lock (cursorGate)
+            {
+                if (cursors.Count >= MaximumCursorCount)
+                {
+                    var oldest = uint.MaxValue;
+                    foreach (var cursorId in cursors.Keys)
+                    {
+                        if (cursorId < oldest)
+                        {
+                            oldest = cursorId;
+                        }
+                    }
+                    if (oldest != uint.MaxValue)
+                    {
+                        cursors.Remove(oldest);
+                    }
+                }
+
+                var id = nextCursorId++;
+                if (id == 0)
+                {
+                    id = nextCursorId++;
+                }
+                cursors[id] = new RemoteCursor(nWidth, nHeight, nHotX, nHotY, nPitch, pixels);
+                return id;
+            }
         }
 
         public void SetMouseCursor(RemotePlaySessionID_t unSessionID, uint unCursorID)
         {
             Write("SetMouseCursor");
+        }
+
+        private sealed class RemoteCursor
+        {
+            public RemoteCursor(int width, int height, int hotX, int hotY, int pitch, byte[] pixels)
+            {
+                Width = width;
+                Height = height;
+                HotX = hotX;
+                HotY = hotY;
+                Pitch = pitch;
+                Pixels = pixels;
+            }
+
+            public int Width { get; }
+            public int Height { get; }
+            public int HotX { get; }
+            public int HotY { get; }
+            public int Pitch { get; }
+            public byte[] Pixels { get; }
         }
     }
 }

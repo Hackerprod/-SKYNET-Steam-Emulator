@@ -17,74 +17,84 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_SteamNetworkingIPAddr_Clear(IntPtr _)
         {
-            Write($"SteamAPI_SteamNetworkingIPAddr_Clear");
+            SteamNetworkingIPAddrInterop.Clear(_);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_SteamNetworkingIPAddr_IsIPv6AllZeros(IntPtr _)
         {
-            Write($"SteamAPI_SteamNetworkingIPAddr_IsIPv6AllZeros");
-            return false;
+            return SteamNetworkingIPAddrInterop.IsIPv6AllZeros(_);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_SteamNetworkingIPAddr_SetIPv6(IntPtr _, IntPtr ipv6, ushort nPort)
         {
-            Write($"SteamAPI_SteamNetworkingIPAddr_SetIPv6");
+            if (_ == IntPtr.Zero || ipv6 == IntPtr.Zero)
+            {
+                return;
+            }
+
+            var bytes = new byte[16];
+            Marshal.Copy(ipv6, bytes, 0, bytes.Length);
+            SteamNetworkingIPAddrInterop.Write(_, new SteamNetworkingIPAddr { m_ipv6 = bytes, m_port = nPort });
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_SteamNetworkingIPAddr_SetIPv4(IntPtr _, uint nIP, ushort nPort)
         {
-            Write($"SteamAPI_SteamNetworkingIPAddr_SetIPv4");
+            SteamNetworkingIPAddrInterop.Write(_, SteamNetworkingIPAddrInterop.FromIPv4(nIP, nPort));
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_SteamNetworkingIPAddr_IsIPv4(IntPtr _)
         {
-            Write($"SteamAPI_SteamNetworkingIPAddr_IsIPv4");
-            return true;
+            return _ != IntPtr.Zero && SteamNetworkingIPAddrInterop.IsIPv4(SteamNetworkingIPAddrInterop.Read(_));
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static uint SteamAPI_SteamNetworkingIPAddr_GetIPv4(IntPtr _)
         {
-            Write($"SteamAPI_SteamNetworkingIPAddr_GetIPv4");
-            return 0;
+            return _ == IntPtr.Zero ? 0 : SteamNetworkingIPAddrInterop.GetIPv4(SteamNetworkingIPAddrInterop.Read(_));
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_SteamNetworkingIPAddr_SetIPv6LocalHost(IntPtr _, ushort nPort)
         {
-            Write($"SteamAPI_SteamNetworkingIPAddr_SetIPv6LocalHost");
+            SteamNetworkingIPAddrInterop.Write(_, SteamNetworkingIPAddrInterop.LocalHost(nPort));
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_SteamNetworkingIPAddr_IsLocalHost(IntPtr _)
         {
-            Write($"SteamAPI_SteamNetworkingIPAddr_IsLocalHost");
-            return true;
+            return SteamNetworkingIPAddrInterop.IsLocalHost(_);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_SteamNetworkingIPAddr_ToString(IntPtr _, IntPtr buf, UIntPtr cbBuf, bool bWithPort)
         {
-            Write($"SteamAPI_SteamNetworkingIPAddr_ToString");
-            NativeStringCache.WriteUtf8Buffer(buf, checked((int)cbBuf.ToUInt64()), string.Empty);
+            var value = _ == IntPtr.Zero
+                ? string.Empty
+                : SteamNetworkingIPAddrInterop.Format(SteamNetworkingIPAddrInterop.Read(_), bWithPort);
+            NativeStringCache.WriteUtf8Buffer(buf, checked((int)cbBuf.ToUInt64()), value);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_SteamNetworkingIPAddr_ParseString(IntPtr _, string pszStr)
         {
-            Write($"SteamAPI_SteamNetworkingIPAddr_ParseString");
-            return false;
+            if (!SteamNetworkingIPAddrInterop.TryParse(pszStr, out var address))
+            {
+                SteamNetworkingIPAddrInterop.Clear(_);
+                return false;
+            }
+
+            SteamNetworkingIPAddrInterop.Write(_, address);
+            return true;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_SteamNetworkingIPAddr_IsEqualTo(IntPtr _, IntPtr x)
         {
-            Write($"SteamAPI_SteamNetworkingIPAddr_IsEqualTo");
-            return false;
+            return SteamNetworkingIPAddrInterop.Equals(_, x);
         }
 
         private static void Write(string msg)

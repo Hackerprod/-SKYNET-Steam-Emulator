@@ -69,7 +69,7 @@ namespace SKYNET.Network
             }
             catch (Exception exception)
             {
-                //ILog.Write("EndAccept: Error accepting client.", exception);
+                SteamEmulator.Write("TCPServer accept", exception);
             }
             try
             {
@@ -81,9 +81,9 @@ namespace SKYNET.Network
             catch (ObjectDisposedException)
             {
             }
-            catch (Exception exception2)
+            catch (Exception exception)
             {
-                //ILog.Write("EndAccept: Error accepting client.", exception2);
+                SteamEmulator.Write("TCPServer continue accept", exception);
             }
         }
 

@@ -10,7 +10,7 @@ using AppId_t = System.UInt32;
 using SteamAPICall_t = System.UInt64;
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
-using FriendsGroupID_t = System.UInt16;
+using FriendsGroupID_t = System.Int16;
 using SteamLeaderboard_t = System.UInt64;
 using DepotId_t = System.UInt32;
 using PublishedFileId_t = System.UInt64;
@@ -24,7 +24,7 @@ using SteamInventoryResult_t = System.Int32;
 using SteamItemInstanceID_t = System.UInt64;
 using UGCHandle_t = System.UInt64;
 using SteamItemDef_t = System.Int32;
-using HServerQuery = System.UInt16;
+using HServerQuery = System.Int32;
 using SNetSocket_t = System.UInt32;
 using SNetListenSocket_t = System.UInt32;
 using UGCFileWriteStreamHandle_t = System.UInt64;
@@ -62,6 +62,7 @@ namespace SKYNET.Steamworks.Exported
         {
             Write("Shutdown");
             APIClient.GoOffline();
+            SteamEmulator.ShutdownServices();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -75,7 +76,7 @@ namespace SKYNET.Steamworks.Exported
         public static bool RestartAppIfNecessary(AppId_t unOwnAppID)
         {
             Write("RestartAppIfNecessary");
-            SteamEmulator.AppID = unOwnAppID;
+            SteamEmulator.ApplyAppIdHint(unOwnAppID, nameof(RestartAppIfNecessary));
             return false;
         }
 
@@ -248,7 +249,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void GameServer_Shutdown()
         {
-            //SteamEmulator.SteamGameServer.Shutdown();
+            SteamEmulator.SteamGameServer.Shutdown();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -864,7 +865,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static int ISteamFriends_GetFriendsGroupIDByIndex(int iFG)
+        public static FriendsGroupID_t ISteamFriends_GetFriendsGroupIDByIndex(int iFG)
         {
             return SteamFriends.Instance.GetFriendsGroupIDByIndex(iFG);
         }
@@ -3208,7 +3209,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static ulong ISteamUGC_CreateQueryUGCDetailsRequest(PublishedFileId_t pvecPublishedFileID, uint unNumPublishedFileIDs)
+        public static ulong ISteamUGC_CreateQueryUGCDetailsRequest(IntPtr pvecPublishedFileID, uint unNumPublishedFileIDs)
         //public static ulong ISteamUGC_CreateQueryUGCDetailsRequest(ref PublishedFileId_t[] pvecPublishedFileID, uint unNumPublishedFileIDs)
         {
             return SteamEmulator.SteamUGC.CreateQueryUGCDetailsRequest(pvecPublishedFileID, unNumPublishedFileIDs);
@@ -3443,7 +3444,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static uint ISteamUGC_GetSubscribedItems(PublishedFileId_t pvecPublishedFileID, uint cMaxEntries)
+        public static uint ISteamUGC_GetSubscribedItems(IntPtr pvecPublishedFileID, uint cMaxEntries)
         //public static uint ISteamUGC_GetSubscribedItems(ref PublishedFileId_t[] pvecPublishedFileID, uint cMaxEntries)
         {
             return SteamEmulator.SteamUGC.GetSubscribedItems(pvecPublishedFileID, cMaxEntries);
@@ -3692,7 +3693,7 @@ namespace SKYNET.Steamworks.Exported
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool ISteamUserStats_SetStat_(string pchName, float fData)
         {
-            return SteamEmulator.SteamUserStats.SetStat(pchName, (uint)fData);
+            return SteamEmulator.SteamUserStats.SetStat(pchName, fData);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -3854,7 +3855,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static ulong ISteamUserStats_UploadLeaderboardScore(SteamLeaderboard_t hSteamLeaderboard, ELeaderboardUploadScoreMethod eLeaderboardUploadScoreMethod, uint nScore, IntPtr pScoreDetails, int cScoreDetailsCount)
+        public static ulong ISteamUserStats_UploadLeaderboardScore(SteamLeaderboard_t hSteamLeaderboard, ELeaderboardUploadScoreMethod eLeaderboardUploadScoreMethod, int nScore, IntPtr pScoreDetails, int cScoreDetailsCount)
         //public static ulong ISteamUserStats_UploadLeaderboardScore(SteamLeaderboard_t hSteamLeaderboard, ELeaderboardUploadScoreMethod eLeaderboardUploadScoreMethod, int nScore, ref int[] pScoreDetails, int cScoreDetailsCount)
         {
             return SteamEmulator.SteamUserStats.UploadLeaderboardScore(hSteamLeaderboard, (int)eLeaderboardUploadScoreMethod, nScore, pScoreDetails, cScoreDetailsCount);
@@ -4064,7 +4065,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamUtils_GetEnteredGamepadTextInput(string pchText, uint cchText)
+        public static bool ISteamUtils_GetEnteredGamepadTextInput(IntPtr pchText, uint cchText)
         {
             return SteamEmulator.SteamUtils.GetEnteredGamepadTextInput(pchText, cchText);
         }
@@ -4648,7 +4649,7 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool ISteamGameServerUtils_GetEnteredGamepadTextInput(string pchText, uint cchText)
+        public static bool ISteamGameServerUtils_GetEnteredGamepadTextInput(IntPtr pchText, uint cchText)
         {
             return SteamEmulator.SteamUtils.GetEnteredGamepadTextInput(pchText, cchText);
         }

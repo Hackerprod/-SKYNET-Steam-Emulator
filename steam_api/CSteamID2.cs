@@ -264,22 +264,35 @@ namespace SKYNET.Steamworks.Types
 
         public int CompareTo(CSteamID2 other)
         {
-            return this.m_steamid.m_unAll64Bits.CompareTo(other.m_steamid.m_unAll64Bits);
+            return ReferenceEquals(other, null)
+                ? 1
+                : this.m_steamid.m_unAll64Bits.CompareTo(other.m_steamid.m_unAll64Bits);
         }
 
         public bool Equals(CSteamID2 other)
         {
-            return this.m_steamid.m_unAll64Bits == other.m_steamid.m_unAll64Bits;
+            return !ReferenceEquals(other, null) &&
+                   this.m_steamid.m_unAll64Bits == other.m_steamid.m_unAll64Bits;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is CSteamID2 other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return m_steamid.m_unAll64Bits.GetHashCode();
         }
 
         public static bool operator ==(CSteamID2 x, CSteamID2 y)
         {
-            return x.m_steamid.m_unAll64Bits == y.m_steamid.m_unAll64Bits;
+            return ReferenceEquals(x, y) || (!ReferenceEquals(x, null) && x.Equals(y));
         }
 
         public static bool operator !=(CSteamID2 x, CSteamID2 y)
         {
-            return !(x.m_steamid.m_unAll64Bits == y.m_steamid.m_unAll64Bits);
+            return !(x == y);
         }
 
         //public static explicit operator CSteamID2(ulong value)
@@ -314,22 +327,22 @@ namespace SKYNET.Steamworks.Types
 
         public static bool operator ==(CSteamID2 x, ulong y)
         {
-            return x.m_steamid.m_unAll64Bits == y;
+            return !ReferenceEquals(x, null) && x.m_steamid.m_unAll64Bits == y;
         }
 
         public static bool operator !=(CSteamID2 x, ulong y)
         {
-            return !(x.m_steamid.m_unAll64Bits == y);
+            return !(x == y);
         }
 
         public static bool operator ==(ulong y, CSteamID2 x)
         {
-            return x.m_steamid.m_unAll64Bits == y;
+            return x == y;
         }
 
         public static bool operator !=(ulong y, CSteamID2 x)
         {
-            return !(x.m_steamid.m_unAll64Bits == y);
+            return !(x == y);
         }
 
         //internal static CSteamID2 GenerateGameServer()

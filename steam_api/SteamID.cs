@@ -327,8 +327,10 @@ namespace SteamworksNET
         public static bool operator >(ulong y, CSteamID x) { return y > x.m_steamid.m_unAll64Bits; }
         public bool Equals(ulong other) { return this.m_steamid.m_unAll64Bits == other; }
         public int CompareTo(ulong other) { return this.m_steamid.m_unAll64Bits.CompareTo(other); }
-        public int CompareTo(CSteamID other) { return this.m_steamid.m_unAll64Bits.CompareTo(other.m_steamid.m_unAll64Bits); }
-        public bool Equals(CSteamID other) {  return this.m_steamid.m_unAll64Bits == other.m_steamid.m_unAll64Bits; }
+        public int CompareTo(CSteamID other) { return other == null ? 1 : this.m_steamid.m_unAll64Bits.CompareTo(other.m_steamid.m_unAll64Bits); }
+        public bool Equals(CSteamID other) { return other != null && this.m_steamid.m_unAll64Bits == other.m_steamid.m_unAll64Bits; }
+        public override bool Equals(object obj) { return obj is CSteamID other && Equals(other); }
+        public override int GetHashCode() { return m_steamid.m_unAll64Bits.GetHashCode(); }
 
         public static explicit operator ulong(CSteamID that) { return that.m_steamid.m_unAll64Bits; }
         public static explicit operator string(CSteamID that) { return (string)that; }

@@ -41,6 +41,7 @@ public class SteamEmulator
     public static CSteamID SteamID;
     public static CSteamID SteamID_GS;
     public static uint AppID;
+    public static int AppBuildIdOverride;
     public static List<DLC> DLCs;
     public static bool UnlockAllDLC;
 
@@ -75,6 +76,9 @@ public class SteamEmulator
     public static int PollIntervalMs;
     public static int HttpTimeoutMs;
     public static int DiscoveryPort;
+    public static string WorkshopContentRoot;
+    public static bool MusicEnabled;
+    public static string MusicLibraryRoot;
 
     public static int BroadCastPort = 28032;
 
@@ -137,6 +141,7 @@ public class SteamEmulator
         SteamID = CSteamID.Invalid;
         SteamID_GS = CSteamID.CreateOne(true); 
         AppID = 0;
+        AppBuildIdOverride = 0;
         DLCs = new List<DLC>();
         UnlockAllDLC = true;
         LogToFile = true;
@@ -153,6 +158,15 @@ public class SteamEmulator
         PollIntervalMs = 50;
         HttpTimeoutMs = 8000;
         DiscoveryPort = 27081;
+        WorkshopContentRoot = string.Empty;
+        MusicEnabled = true;
+        MusicLibraryRoot = string.Empty;
+    }
+
+    public static void ShutdownServices()
+    {
+        MusicPlayerManager.Shutdown();
+        SteamHTMLSurface?.Shutdown();
     }
 
     public static void Initialize()
@@ -315,13 +329,39 @@ public class SteamEmulator
             string appid_Path = Path.Combine(Common.GetPath(), "steam_appid.txt");
             if (File.Exists(appid_Path))
             {
-                string content = File.ReadAllText(appid_Path);
-                uint.TryParse(content, out AppID);
+                string content = File.ReadAllText(appid_Path).Trim();
+                if (uint.TryParse(content, out var appId) && appId != 0)
+                {
+                    AppID = appId;
+                }
             }
         }
-        catch 
+        catch
         {
         }
+    }
+
+    /// <summary>
+    /// Applies an AppID supplied by a Steam bootstrap API. AppID zero is
+    /// k_uAppIdInvalid, which tells Steam to use steam_appid.txt or the launch
+    /// context; it must never erase an AppID already resolved from those sources.
+    /// </summary>
+    public static void ApplyAppIdHint(uint appId, string source)
+    {
+        if (appId == 0)
+        {
+            Write($"{source} supplied k_uAppIdInvalid; preserving AppID {AppID}");
+            return;
+        }
+
+        if (AppID == appId)
+        {
+            return;
+        }
+
+        var previousAppId = AppID;
+        AppID = appId;
+        Write($"{source} resolved AppID {appId} (previous {previousAppId})");
     }
 
     private static T CreateInterface<T>(string name, Func<T> factory)

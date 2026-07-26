@@ -19,8 +19,6 @@ namespace SKYNET
 
         private static bool ConsoleEnabled;
 
-        private static bool SettingsLoaded;
-
         public static bool LogToFile { get; set; }
 
         public static DateTime LoadTime { get; set; } = DateTime.Now;
@@ -88,14 +86,9 @@ namespace SKYNET
 
         public static string GetPath()
         {
-            try
+            using (Process currentProcess = Process.GetCurrentProcess())
             {
-                Process currentProcess = Process.GetCurrentProcess();
                 return new FileInfo(currentProcess.MainModule.FileName).Directory?.FullName;
-            }
-            finally
-            {
-                Process currentProcess = null;
             }
         }
 

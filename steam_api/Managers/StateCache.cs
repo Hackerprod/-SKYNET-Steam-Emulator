@@ -386,6 +386,9 @@ namespace SKYNET.Managers
                     : (existing?.PersonaName ?? string.Empty),
                 GameID = serverEvent.AppId,
                 LobbyID = serverEvent.LobbyId,
+                GameServerSteamID = serverEvent.GameServerSteamId,
+                GameServerIP = serverEvent.GameServerIp,
+                GameServerPort = serverEvent.GameServerPort,
                 PersonaState = serverEvent.PersonaState,
                 HasFriend = relationship == (int)EFriendRelationship.k_EFriendRelationshipFriend,
                 FriendRelationship = relationship,
@@ -416,7 +419,11 @@ namespace SKYNET.Managers
                 PersonaName = user.PersonaName ?? string.Empty,
                 GameID = user.AppId,
                 LobbyID = user.LobbyId,
+                GameServerSteamID = user.GameServerSteamId,
+                GameServerIP = user.GameServerIp,
+                GameServerPort = user.GameServerPort,
                 PersonaState = user.PersonaState,
+                PlayerLevel = user.PlayerLevel,
                 FriendRelationship = user.FriendRelationship != 0
                     ? user.FriendRelationship
                     : (user.HasFriend || steamId == (ulong)SteamEmulator.SteamID
@@ -442,7 +449,11 @@ namespace SKYNET.Managers
                 PersonaName = player.PersonaName,
                 GameID = player.GameID,
                 LobbyID = player.LobbyID,
+                GameServerSteamID = player.GameServerSteamID,
+                GameServerIP = player.GameServerIP,
+                GameServerPort = player.GameServerPort,
                 PersonaState = player.PersonaState,
+                PlayerLevel = player.PlayerLevel,
                 HasFriend = player.HasFriend,
                 FriendRelationship = player.FriendRelationship,
                 IPAddress = player.IPAddress,

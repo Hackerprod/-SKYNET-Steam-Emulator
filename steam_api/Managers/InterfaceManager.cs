@@ -33,7 +33,13 @@ namespace SKYNET.Managers
                 {
                     foreach (var attribute in type.GetCustomAttributes<InterfaceAttribute>())
                     {
-                        interfaceTypes.TryAdd(attribute.Name, type);
+                        interfaceTypes.AddOrUpdate(
+                            attribute.Name,
+                            type,
+                            (_, existing) =>
+                                IsGeneratedInterface(existing) && !IsGeneratedInterface(type)
+                                    ? type
+                                    : existing);
                     }
                 }
             }
@@ -247,6 +253,11 @@ namespace SKYNET.Managers
             return false;
 
             #endregion
+        }
+
+        private static bool IsGeneratedInterface(Type type)
+        {
+            return type?.Name.EndsWith("Generated", StringComparison.Ordinal) == true;
         }
 
         private static void SetInterfaceName(string pszVersion, Type type)

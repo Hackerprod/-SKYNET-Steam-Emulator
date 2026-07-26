@@ -12,5 +12,7 @@ public enum OverlayKind
     WebPage,
     Invite,
     ConfirmAction,
-    Settings
+    TextInput,
+    Settings,
+    Timeline
 }

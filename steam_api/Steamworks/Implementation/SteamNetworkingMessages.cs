@@ -238,10 +238,27 @@ namespace SKYNET.Steamworks.Implementation
 
         internal static SteamNetConnectionInfo_t CreateConnectionInfo(ulong remoteSteamId, ConnectionState state, uint listenSocket, long userData, int endReason, string debug)
         {
-            var description = "SKYNET P2P " + remoteSteamId;
+            return CreateConnectionInfo(
+                SteamNetworkingIdentity_t.FromSteamId(remoteSteamId),
+                state,
+                listenSocket,
+                userData,
+                endReason,
+                debug);
+        }
+
+        internal static SteamNetConnectionInfo_t CreateConnectionInfo(
+            SteamNetworkingIdentity_t remoteIdentity,
+            ConnectionState state,
+            uint listenSocket,
+            long userData,
+            int endReason,
+            string debug)
+        {
+            var description = "SKYNET P2P " + FormatIdentity(remoteIdentity);
             return new SteamNetConnectionInfo_t
             {
-                m_identityRemote = SteamNetworkingIdentity_t.FromSteamId(remoteSteamId),
+                m_identityRemote = SteamNetworkingIdentityInterop.Clone(remoteIdentity),
                 m_nUserData = userData,
                 m_hListenSocket = listenSocket,
                 m_addrRemote = new SteamNetworkingIPAddr { m_ipv6 = new byte[16] },
@@ -251,6 +268,20 @@ namespace SKYNET.Steamworks.Implementation
                 m_szConnectionDescription = FixedUtf8(description, 128),
                 reserved = new uint[63]
             };
+        }
+
+        private static string FormatIdentity(SteamNetworkingIdentity_t identity)
+        {
+            var buffer = Marshal.AllocHGlobal(SteamNetworkingIdentityInterop.Size);
+            try
+            {
+                SteamNetworkingIdentityInterop.Write(buffer, identity);
+                return SteamNetworkingIdentityInterop.Format(buffer);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(buffer);
+            }
         }
 
         internal static byte[] FixedUtf8(string value, int size)

@@ -13,6 +13,12 @@ public sealed class OverlayRequest
     public string SecondaryActionText { get; set; }
     public Action PrimaryAction { get; set; }
     public Action SecondaryAction { get; set; }
+    public Action<bool, string> TextInputCompleted { get; set; }
+    public string InitialText { get; set; }
+    public uint TextInputMaxLength { get; set; }
+    public bool TextInputMultiline { get; set; }
+    public bool TextInputPassword { get; set; }
+    public bool TextInputNumeric { get; set; }
     public Action<OverlayUser, Action<bool>> InviteUserAction { get; set; }
     public Dictionary<string, string> Metadata { get; set; }
     public OverlayUser User { get; set; }

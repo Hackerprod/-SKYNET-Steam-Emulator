@@ -19,7 +19,7 @@ namespace SKYNET.Steamworks.Interfaces
         public bool BNewDataAvailable(IntPtr _) => SteamEmulator.SteamInput.BNewDataAvailable();
         public int GetConnectedControllers(IntPtr _, IntPtr handlesOut) => SteamEmulator.SteamInput.GetConnectedControllers(handlesOut);
         public void EnableDeviceCallbacks(IntPtr _) => SteamEmulator.SteamInput.EnableDeviceCallbacks();
-        public void EnableActionEventCallbacks(IntPtr _, IntPtr pCallback) => SteamEmulator.SteamInput.EnableDeviceCallbacks();
+        public void EnableActionEventCallbacks(IntPtr _, IntPtr pCallback) => SteamEmulator.SteamInput.EnableActionEventCallbacks(pCallback);
         public InputActionSetHandle_t GetActionSetHandle(IntPtr _, string pszActionSetName) => SteamEmulator.SteamInput.GetActionSetHandle(pszActionSetName);
         public void ActivateActionSet(IntPtr _, InputHandle_t inputHandle, InputActionSetHandle_t actionSetHandle) => SteamEmulator.SteamInput.ActivateActionSet(inputHandle, actionSetHandle);
         public InputActionSetHandle_t GetCurrentActionSet(IntPtr _, InputHandle_t inputHandle) => SteamEmulator.SteamInput.GetCurrentActionSet(inputHandle);

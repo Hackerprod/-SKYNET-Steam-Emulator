@@ -5,6 +5,7 @@ using SKYNET.Types;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -32,6 +33,12 @@ namespace SKYNET.Managers
         private static readonly ConcurrentDictionary<string, string> PendingPresence = new ConcurrentDictionary<string, string>();
         private static readonly AutoResetEvent PresenceSignal = new AutoResetEvent(false);
         private static int PresenceDispatcherStarted;
+        private static SkyNetGameServerPresenceUpdateDto PendingGameServerPresence;
+
+        // SteamAPI_Init is allowed to perform a bounded client bootstrap. Reuse
+        // the operator-configured HTTP timeout rather than introducing a second,
+        // arbitrary timing policy for early identity and metadata calls.
+        public static int InitialSessionTimeoutMs => Math.Max(250, SteamEmulator.HttpTimeoutMs);
 
         // True once a server session token exists. Safe to read on the game
         // thread without blocking; the handshake that sets it runs in background.
@@ -76,9 +83,14 @@ namespace SKYNET.Managers
             return false;
         }
 
-        // Serializes the blocking handshake so concurrent callers don't fire duplicate
-        // session POSTs.
-        private static readonly object HandshakeSyncLock = new object();
+        // Serializes every blocking handshake, including the background path.
+        // SemaphoreSlim gives callers a bounded wait; a monitor lock would not.
+        private static readonly SemaphoreSlim HandshakeGate = new SemaphoreSlim(1, 1);
+
+        public static bool EnsureInitialSession()
+        {
+            return !IsEnabled || IsConnected || EnsureSessionBlocking(InitialSessionTimeoutMs);
+        }
 
         /// <summary>
         /// Blocking session handshake with a short timeout, for game-thread callers
@@ -99,14 +111,33 @@ namespace SKYNET.Managers
                 return true;
             }
 
-            lock (HandshakeSyncLock)
+            return EstablishSessionSerialized(timeoutMs);
+        }
+
+        private static bool EstablishSessionSerialized(int timeoutMs)
+        {
+            int effectiveTimeoutMs = EffectiveTimeoutMs(timeoutMs);
+            var elapsed = Stopwatch.StartNew();
+            if (!HandshakeGate.Wait(effectiveTimeoutMs))
+            {
+                return IsConnected;
+            }
+
+            try
             {
                 if (!string.IsNullOrWhiteSpace(SteamEmulator.AccessToken))
                 {
                     return true;
                 }
 
-                return EstablishSessionBlocking(timeoutMs);
+                int remainingTimeoutMs = Math.Max(
+                    1,
+                    effectiveTimeoutMs - checked((int)Math.Min(int.MaxValue, elapsed.ElapsedMilliseconds)));
+                return EstablishSessionBlocking(remainingTimeoutMs);
+            }
+            finally
+            {
+                HandshakeGate.Release();
             }
         }
 
@@ -126,7 +157,7 @@ namespace SKYNET.Managers
             {
                 try
                 {
-                    if (EstablishSessionBlocking())
+                    if (EstablishSessionSerialized(0))
                     {
                         SteamEmulator.Write("APIClient", "Server session connected");
                         RefreshSelf(true);
@@ -240,7 +271,8 @@ namespace SKYNET.Managers
                 return false;
             }
 
-            return !string.IsNullOrWhiteSpace(SteamEmulator.AccessToken) || EstablishSessionBlocking(timeoutMs);
+            return !string.IsNullOrWhiteSpace(SteamEmulator.AccessToken) ||
+                EstablishSessionSerialized(timeoutMs);
         }
 
         private static string GetProcessRole()
@@ -977,6 +1009,23 @@ namespace SKYNET.Managers
             });
         }
 
+        public static SkyNetEncryptedAppTicketDto RequestEncryptedAppTicket(byte[] userData)
+        {
+            if (!IsEnabled || !EnsureSession())
+            {
+                return null;
+            }
+
+            return Send<SkyNetEncryptedAppTicketDto>(
+                HttpMethod.Post,
+                "api/auth/tickets/encrypted",
+                new SkyNetEncryptedAppTicketRequestDto
+                {
+                    AppId = SteamEmulator.AppID,
+                    UserDataBase64 = Convert.ToBase64String(userData ?? Array.Empty<byte>())
+                });
+        }
+
         public static SkyNetAuthValidateResultDto ValidateAuthSessionTicket(byte[] ticket, ulong steamId, bool gameServer)
         {
             if (!IsEnabled)
@@ -1072,15 +1121,15 @@ namespace SKYNET.Managers
             });
         }
 
-        public static bool LogOffGameServer()
+        public static bool LogOffGameServer(ulong steamId)
         {
-            if (!IsEnabled)
+            if (!IsEnabled || steamId == 0)
             {
                 return false;
             }
 
             EnsureSession();
-            return Send<VoidDto>(HttpMethod.Post, "api/gameservers/logoff") != null;
+            return Send<VoidDto>(HttpMethod.Delete, $"api/gameservers/{steamId}") != null;
         }
 
         public static bool UpdateGameServerState(GameServerData server)
@@ -1103,6 +1152,22 @@ namespace SKYNET.Managers
 
             EnsureSession();
             return Send<VoidDto>(HttpMethod.Post, "api/gameservers/heartbeat", MapGameServer(server)) != null;
+        }
+
+        public static List<GameServerData> ListGameServers(uint appId)
+        {
+            if (!IsEnabled)
+            {
+                return new List<GameServerData>();
+            }
+
+            EnsureSession();
+            var servers = Send<List<SkyNetGameServerDto>>(
+                HttpMethod.Get,
+                $"api/gameservers?appId={appId}");
+            return servers == null
+                ? new List<GameServerData>()
+                : servers.Select(MapGameServer).Where(server => server != null).ToList();
         }
 
         public static uint GetGameServerPublicIP()
@@ -1177,7 +1242,15 @@ namespace SKYNET.Managers
         // All Steam networking interfaces share the server relay, but transport
         // metadata keeps legacy ISteamNetworking packets isolated from the modern
         // Messages/Sockets APIs at the receiving client.
-        public static bool SendP2PPacket(ulong remoteSteamId, byte[] buffer, int sendType, int channel, string transport = "legacy", int virtualPort = 0)
+        public static bool SendP2PPacket(
+            ulong remoteSteamId,
+            byte[] buffer,
+            int sendType,
+            int channel,
+            string transport = "legacy",
+            int virtualPort = 0,
+            uint sourceConnectionId = 0,
+            uint targetConnectionId = 0)
         {
             if (!IsEnabled)
             {
@@ -1204,7 +1277,9 @@ namespace SKYNET.Managers
                 SendType = sendType,
                 Channel = channel,
                 Transport = transport ?? "legacy",
-                VirtualPort = virtualPort
+                VirtualPort = virtualPort,
+                SourceConnectionId = sourceConnectionId,
+                TargetConnectionId = targetConnectionId
             });
             P2PQueueSignal.Set();
             return true;
@@ -1342,6 +1417,199 @@ namespace SKYNET.Managers
             return stored;
         }
 
+        public static List<SkyNetWorkshopSubscriptionDto> GetWorkshopSubscriptions()
+        {
+            if (!IsEnabled || !EnsureSession())
+            {
+                return null;
+            }
+
+            return Send<List<SkyNetWorkshopSubscriptionDto>>(
+                HttpMethod.Get,
+                "api/workshop/subscriptions");
+        }
+
+        public static SkyNetWorkshopItemDto GetWorkshopItem(ulong publishedFileId)
+        {
+            if (!IsEnabled || publishedFileId == 0 || !EnsureSession())
+            {
+                return null;
+            }
+
+            HttpStatusCode? statusCode;
+            return Send<SkyNetWorkshopItemDto>(
+                HttpMethod.Get,
+                $"api/workshop/items/{publishedFileId}",
+                null,
+                out statusCode,
+                quietStatusCode: HttpStatusCode.NotFound);
+        }
+
+        public static SkyNetWorkshopItemDto PutWorkshopItem(SkyNetWorkshopItemDto item)
+        {
+            if (!IsEnabled || item == null || item.PublishedFileId == 0 || !EnsureSession())
+            {
+                return null;
+            }
+
+            return Send<SkyNetWorkshopItemDto>(
+                HttpMethod.Put,
+                $"api/workshop/items/{item.PublishedFileId}",
+                item);
+        }
+
+        public static SkyNetWorkshopMutationDto SubscribeWorkshopItem(ulong publishedFileId)
+        {
+            if (!IsEnabled || publishedFileId == 0 || !EnsureSession())
+            {
+                return null;
+            }
+
+            return Send<SkyNetWorkshopMutationDto>(
+                HttpMethod.Post,
+                $"api/workshop/items/{publishedFileId}/subscribe",
+                new VoidDto());
+        }
+
+        public static SkyNetWorkshopMutationDto UnsubscribeWorkshopItem(ulong publishedFileId)
+        {
+            if (!IsEnabled || publishedFileId == 0 || !EnsureSession())
+            {
+                return null;
+            }
+
+            return Send<SkyNetWorkshopMutationDto>(
+                HttpMethod.Delete,
+                $"api/workshop/items/{publishedFileId}/subscription");
+        }
+
+        public static Leaderboard FindOrCreateLeaderboard(
+            string name,
+            ELeaderboardSortMethod sortMethod,
+            ELeaderboardDisplayType displayType)
+        {
+            if (!IsEnabled)
+            {
+                return null;
+            }
+
+            EnsureSession();
+            var response = Send<SkyNetLeaderboardDto>(
+                HttpMethod.Post,
+                "api/leaderboards",
+                new SkyNetLeaderboardFindRequestDto
+                {
+                    Name = name,
+                    SortMethod = (int)sortMethod,
+                    DisplayType = (int)displayType
+                });
+            return MapLeaderboard(response);
+        }
+
+        public static Leaderboard GetLeaderboard(ulong leaderboardId)
+        {
+            if (!IsEnabled || leaderboardId == 0)
+            {
+                return null;
+            }
+
+            EnsureSession();
+            return MapLeaderboard(Send<SkyNetLeaderboardDto>(
+                HttpMethod.Get,
+                $"api/leaderboards/{leaderboardId}"));
+        }
+
+        public static LeaderboardEntriesData QueryLeaderboardEntries(
+            ulong leaderboardId,
+            int dataRequest,
+            int rangeStart,
+            int rangeEnd,
+            IEnumerable<ulong> users = null)
+        {
+            if (!IsEnabled || leaderboardId == 0)
+            {
+                return null;
+            }
+
+            EnsureSession();
+            var response = Send<SkyNetLeaderboardEntriesDto>(
+                HttpMethod.Post,
+                $"api/leaderboards/{leaderboardId}/entries",
+                new SkyNetLeaderboardEntriesRequestDto
+                {
+                    DataRequest = dataRequest,
+                    RangeStart = rangeStart,
+                    RangeEnd = rangeEnd,
+                    Users = users?.Where(id => id != 0).Distinct().ToList() ?? new List<ulong>()
+                });
+            if (response?.Leaderboard == null)
+            {
+                return null;
+            }
+
+            return new LeaderboardEntriesData
+            {
+                Leaderboard = MapLeaderboard(response.Leaderboard),
+                Entries = (response.Entries ?? new List<SkyNetLeaderboardEntryDto>())
+                    .Select(entry => new LeaderboardEntryData
+                    {
+                        SteamId = entry.SteamId,
+                        GlobalRank = entry.GlobalRank,
+                        Score = entry.Score,
+                        Details = (entry.Details ?? new List<int>()).ToArray(),
+                        UgcHandle = entry.UgcHandle
+                    })
+                    .ToArray()
+            };
+        }
+
+        public static LeaderboardScoreUploadData UploadLeaderboardScore(
+            ulong leaderboardId,
+            int uploadMethod,
+            int score,
+            IEnumerable<int> details)
+        {
+            if (!IsEnabled || leaderboardId == 0)
+            {
+                return null;
+            }
+
+            EnsureSession();
+            var response = Send<SkyNetLeaderboardScoreUploadResultDto>(
+                HttpMethod.Put,
+                $"api/leaderboards/{leaderboardId}/score",
+                new SkyNetLeaderboardScoreUploadRequestDto
+                {
+                    UploadMethod = uploadMethod,
+                    Score = score,
+                    Details = details?.Take(64).ToList() ?? new List<int>()
+                });
+            return response == null
+                ? null
+                : new LeaderboardScoreUploadData
+                {
+                    Success = response.Success,
+                    ScoreChanged = response.ScoreChanged,
+                    Score = response.Score,
+                    GlobalRankNew = response.GlobalRankNew,
+                    GlobalRankPrevious = response.GlobalRankPrevious
+                };
+        }
+
+        private static Leaderboard MapLeaderboard(SkyNetLeaderboardDto source)
+        {
+            return source == null
+                ? null
+                : new Leaderboard
+                {
+                    SteamLeaderboard = source.Id,
+                    Name = source.Name ?? string.Empty,
+                    ShortMethod = (ELeaderboardSortMethod)source.SortMethod,
+                    DisplayType = (ELeaderboardDisplayType)source.DisplayType,
+                    EntryCount = source.EntryCount
+                };
+        }
+
         public static bool UpdatePersonaName(string personaName)
         {
             if (!IsEnabled)
@@ -1380,6 +1648,24 @@ namespace SKYNET.Managers
             return true;
         }
 
+        public static bool AdvertiseGameServer(ulong steamId, uint ip, ushort port)
+        {
+            if (!IsEnabled)
+            {
+                return false;
+            }
+
+            Interlocked.Exchange(ref PendingGameServerPresence, new SkyNetGameServerPresenceUpdateDto
+            {
+                SteamId = steamId,
+                Ip = ip,
+                Port = port
+            });
+            StartPresenceDispatcher();
+            PresenceSignal.Set();
+            return true;
+        }
+
         private static void StartPresenceDispatcher()
         {
             if (Interlocked.Exchange(ref PresenceDispatcherStarted, 1) == 1)
@@ -1403,7 +1689,7 @@ namespace SKYNET.Managers
                 {
                     PresenceSignal.WaitOne(250);
 
-                    if (!IsEnabled || PendingPresence.IsEmpty)
+                    if (!IsEnabled || (PendingPresence.IsEmpty && PendingGameServerPresence == null))
                     {
                         continue;
                     }
@@ -1435,6 +1721,20 @@ namespace SKYNET.Managers
                         {
                             // Presence is ephemeral; drop on failure. The game
                             // re-sends it constantly, so it self-heals.
+                        }
+                    }
+
+                    var advertisedServer = Interlocked.Exchange(ref PendingGameServerPresence, null);
+                    if (advertisedServer != null)
+                    {
+                        try
+                        {
+                            Send<VoidDto>(HttpMethod.Put, "api/presence/game-server", advertisedServer);
+                        }
+                        catch
+                        {
+                            // Advertised game-server presence is ephemeral. A game
+                            // reconnect or disconnect call publishes the next state.
                         }
                     }
                 }
@@ -1589,12 +1889,13 @@ namespace SKYNET.Managers
 
             return new SkyNetGameServerDto
             {
-                SteamId = (ulong)SteamEmulator.SteamID_GS,
+                SteamId = server.SteamId != 0 ? server.SteamId : (ulong)SteamEmulator.SteamID_GS,
                 AppId = server.AppId,
                 IP = server.IP,
                 Port = server.Port,
                 QueryPort = server.QueryPort,
                 Flags = server.Flags,
+                Secure = server.Secure,
                 VersionString = server.VersionString,
                 Product = server.Product,
                 Description = server.Description,
@@ -1610,8 +1911,75 @@ namespace SKYNET.Managers
                 GameTags = server.GameTags,
                 GameData = server.GameData,
                 Region = server.Region,
-                KeyValues = server.KeyValues == null ? new Dictionary<string, string>() : new Dictionary<string, string>(server.KeyValues)
+                LoggedOn = server.LoggedOn,
+                AdvertiseActive = server.AdvertiseActive,
+                KeyValues = server.KeyValues == null
+                    ? new Dictionary<string, string>()
+                    : new Dictionary<string, string>(server.KeyValues),
+                Players = server.Players == null
+                    ? new List<SkyNetGameServerPlayerDto>()
+                    : server.Players.Values.Select(player => new SkyNetGameServerPlayerDto
+                    {
+                        SteamId = player.SteamId,
+                        Name = player.Name,
+                        Score = player.Score,
+                        TimePlayedSeconds = player.GetTimePlayedSeconds()
+                    }).ToList()
             };
+        }
+
+        private static GameServerData MapGameServer(SkyNetGameServerDto server)
+        {
+            if (server == null)
+            {
+                return null;
+            }
+
+            var mapped = new GameServerData
+            {
+                SteamId = server.SteamId,
+                AppId = server.AppId,
+                IP = server.IP,
+                Port = server.Port,
+                QueryPort = server.QueryPort,
+                Flags = server.Flags,
+                Secure = server.Secure,
+                VersionString = server.VersionString,
+                Product = server.Product,
+                Description = server.Description,
+                ModDir = server.ModDir,
+                Dedicated = server.Dedicated,
+                MaxPlayers = server.MaxPlayers,
+                BotPlayers = server.BotPlayers,
+                ServerName = server.ServerName,
+                MapName = server.MapName,
+                PasswordProtected = server.PasswordProtected,
+                SpectatorPort = server.SpectatorPort,
+                SpectatorServerName = server.SpectatorServerName,
+                GameTags = server.GameTags,
+                GameData = server.GameData,
+                Region = server.Region,
+                LoggedOn = server.LoggedOn,
+                AdvertiseActive = server.AdvertiseActive
+            };
+
+            foreach (var pair in server.KeyValues ?? new Dictionary<string, string>())
+            {
+                mapped.KeyValues[pair.Key] = pair.Value;
+            }
+
+            foreach (var player in server.Players ?? new List<SkyNetGameServerPlayerDto>())
+            {
+                mapped.Players[player.SteamId] = new GameServerPlayerData
+                {
+                    SteamId = player.SteamId,
+                    Name = player.Name,
+                    Score = player.Score,
+                    TimePlayedSeconds = player.TimePlayedSeconds
+                };
+            }
+
+            return mapped;
         }
 
         private static List<SteamLobby> MapLobbies(IEnumerable<SkyNetLobbyDto> lobbies)
@@ -1715,6 +2083,23 @@ namespace SKYNET.Managers
             {
                 SteamEmulator.SteamFriends.SyncSelfAvatarWithServer();
             }
+
+            WorkshopManager.ApplyServerSnapshot(
+                session.WorkshopSubscriptions,
+                (ulong)SteamEmulator.SteamID,
+                SteamEmulator.AppID);
+            AchievementDefinitionManager.Apply(
+                SteamEmulator.AppID,
+                session.AchievementDefinitions);
+            StatDefinitionManager.Apply(
+                SteamEmulator.AppID,
+                session.StatDefinitions);
+            SteamEmulator.Write(
+                "APIClient",
+                $"Session metadata applied: AppID={SteamEmulator.AppID}, " +
+                $"achievements={session.AchievementDefinitions?.Count ?? 0}, " +
+                $"stats={session.StatDefinitions?.Count ?? 0}/{StatDefinitionManager.Count}, " +
+                $"workshop={session.WorkshopSubscriptions?.Count ?? 0}");
         }
 
         private static JavaScriptSerializer GetSerializer()
@@ -1756,7 +2141,9 @@ namespace SKYNET.Managers
                 {
                     if (quietStatusCode != response.StatusCode)
                     {
-                        SteamEmulator.Write("APIClient", $"{method} {path} failed: HTTP {(int)response.StatusCode}");
+                        SteamEmulator.Write(
+                            "APIClient",
+                            $"{method} {path} failed: HTTP {(int)response.StatusCode}{DescribeErrorBody(response.Body)}");
                     }
 
                     if (response.StatusCode == HttpStatusCode.Unauthorized)
@@ -1796,6 +2183,41 @@ namespace SKYNET.Managers
                 SteamEmulator.Write("APIClient", $"{method} {path} failed: {ex.Message}");
                 return null;
             }
+        }
+
+        private static string DescribeErrorBody(byte[] body)
+        {
+            if (body == null || body.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            const int maxCharacters = 512;
+            var text = Encoding.UTF8.GetString(body);
+            var sanitized = new StringBuilder(Math.Min(text.Length, maxCharacters));
+            foreach (var character in text)
+            {
+                if (sanitized.Length >= maxCharacters)
+                {
+                    break;
+                }
+
+                if (character == '\r' || character == '\n' || character == '\t')
+                {
+                    sanitized.Append(' ');
+                }
+                else if (!char.IsControl(character))
+                {
+                    sanitized.Append(character);
+                }
+            }
+
+            if (sanitized.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            return $" response={sanitized}";
         }
 
         // ================= synchronous HTTP =================
@@ -2059,6 +2481,66 @@ namespace SKYNET.Managers
             public string AccessToken { get; set; }
             public string RefreshToken { get; set; }
             public ApiUser User { get; set; }
+            public List<SkyNetWorkshopSubscriptionDto> WorkshopSubscriptions { get; set; }
+            public List<SkyNetAchievementDefinitionDto> AchievementDefinitions { get; set; }
+            public List<SkyNetStatDefinitionDto> StatDefinitions { get; set; }
+        }
+
+        public sealed class SkyNetAchievementDefinitionDto
+        {
+            public string ApiName { get; set; }
+            public string DisplayName { get; set; }
+            public string Description { get; set; }
+            public bool Hidden { get; set; }
+            public string IconBase64 { get; set; }
+            public string LockedIconBase64 { get; set; }
+        }
+
+        public sealed class SkyNetStatDefinitionDto
+        {
+            public string Name { get; set; }
+            public string Type { get; set; }
+            public int DefaultInt { get; set; }
+            public float DefaultFloat { get; set; }
+        }
+
+        public sealed class SkyNetWorkshopItemDto
+        {
+            public ulong PublishedFileId { get; set; }
+            public uint CreatorAppId { get; set; }
+            public uint ConsumerAppId { get; set; }
+            public ulong OwnerSteamId { get; set; }
+            public int FileType { get; set; }
+            public string Title { get; set; }
+            public string Description { get; set; }
+            public string Tags { get; set; }
+            public string FileName { get; set; }
+            public string Metadata { get; set; }
+            public string PreviewUrl { get; set; }
+            public int Visibility { get; set; }
+            public bool Banned { get; set; }
+            public bool AcceptedForUse { get; set; }
+            public uint TimeCreated { get; set; }
+            public uint TimeUpdated { get; set; }
+            public long FileSize { get; set; }
+            public long TotalFilesSize { get; set; }
+            public uint VotesUp { get; set; }
+            public uint VotesDown { get; set; }
+            public float Score { get; set; }
+        }
+
+        public sealed class SkyNetWorkshopSubscriptionDto
+        {
+            public ulong PublishedFileId { get; set; }
+            public DateTime SubscribedAtUtc { get; set; }
+            public bool DisabledLocally { get; set; }
+            public SkyNetWorkshopItemDto Item { get; set; }
+        }
+
+        public sealed class SkyNetWorkshopMutationDto
+        {
+            public bool Success { get; set; }
+            public SkyNetWorkshopSubscriptionDto Subscription { get; set; }
         }
 
         public sealed class ApiUser
@@ -2068,6 +2550,9 @@ namespace SKYNET.Managers
             public string PersonaName { get; set; }
             public uint AppId { get; set; }
             public ulong LobbyId { get; set; }
+            public ulong GameServerSteamId { get; set; }
+            public uint GameServerIp { get; set; }
+            public ushort GameServerPort { get; set; }
             public bool HasFriend { get; set; }
             public int FriendRelationship { get; set; }
             public int PersonaState { get; set; }
@@ -2127,6 +2612,69 @@ namespace SKYNET.Managers
             public List<ApiAchievement> Achievements { get; set; }
         }
 
+        public sealed class SkyNetGameServerPresenceUpdateDto
+        {
+            public ulong SteamId { get; set; }
+            public uint Ip { get; set; }
+            public ushort Port { get; set; }
+        }
+
+        public sealed class SkyNetLeaderboardFindRequestDto
+        {
+            public string Name { get; set; }
+            public int SortMethod { get; set; }
+            public int DisplayType { get; set; }
+        }
+
+        public sealed class SkyNetLeaderboardDto
+        {
+            public ulong Id { get; set; }
+            public uint AppId { get; set; }
+            public string Name { get; set; }
+            public int SortMethod { get; set; }
+            public int DisplayType { get; set; }
+            public int EntryCount { get; set; }
+        }
+
+        public sealed class SkyNetLeaderboardEntriesRequestDto
+        {
+            public int DataRequest { get; set; }
+            public int RangeStart { get; set; }
+            public int RangeEnd { get; set; }
+            public List<ulong> Users { get; set; }
+        }
+
+        public sealed class SkyNetLeaderboardEntriesDto
+        {
+            public SkyNetLeaderboardDto Leaderboard { get; set; }
+            public List<SkyNetLeaderboardEntryDto> Entries { get; set; }
+        }
+
+        public sealed class SkyNetLeaderboardEntryDto
+        {
+            public ulong SteamId { get; set; }
+            public int GlobalRank { get; set; }
+            public int Score { get; set; }
+            public List<int> Details { get; set; }
+            public ulong UgcHandle { get; set; }
+        }
+
+        public sealed class SkyNetLeaderboardScoreUploadRequestDto
+        {
+            public int UploadMethod { get; set; }
+            public int Score { get; set; }
+            public List<int> Details { get; set; }
+        }
+
+        public sealed class SkyNetLeaderboardScoreUploadResultDto
+        {
+            public bool Success { get; set; }
+            public bool ScoreChanged { get; set; }
+            public int Score { get; set; }
+            public int GlobalRankNew { get; set; }
+            public int GlobalRankPrevious { get; set; }
+        }
+
         public sealed class ApiEventEnvelope
         {
             public string Cursor { get; set; }
@@ -2142,6 +2690,9 @@ namespace SKYNET.Managers
             public uint AppId { get; set; }
             public string GameName { get; set; }
             public ulong LobbyId { get; set; }
+            public ulong GameServerSteamId { get; set; }
+            public uint GameServerIp { get; set; }
+            public ushort GameServerPort { get; set; }
             public int PersonaState { get; set; }
             public int ChangeFlags { get; set; }
             public Dictionary<string, string> RichPresence { get; set; }
@@ -2159,6 +2710,8 @@ namespace SKYNET.Managers
             public int Channel { get; set; }
             public string Transport { get; set; }
             public int VirtualPort { get; set; }
+            public uint SourceConnectionId { get; set; }
+            public uint TargetConnectionId { get; set; }
             public ulong RemoteSteamId { get; set; }
             public int FriendRelationship { get; set; }
             public string RequestId { get; set; }
@@ -2347,6 +2900,18 @@ namespace SKYNET.Managers
             public uint TicketSize { get; set; }
         }
 
+        public sealed class SkyNetEncryptedAppTicketRequestDto
+        {
+            public uint AppId { get; set; }
+            public string UserDataBase64 { get; set; }
+        }
+
+        public sealed class SkyNetEncryptedAppTicketDto
+        {
+            public int Result { get; set; }
+            public string TicketBase64 { get; set; }
+        }
+
         public sealed class SkyNetAuthValidateRequestDto
         {
             public ulong SteamId { get; set; }
@@ -2432,6 +2997,7 @@ namespace SKYNET.Managers
             public int Port { get; set; }
             public int QueryPort { get; set; }
             public uint Flags { get; set; }
+            public byte Secure { get; set; }
             public string VersionString { get; set; }
             public string Product { get; set; }
             public string Description { get; set; }
@@ -2447,7 +3013,18 @@ namespace SKYNET.Managers
             public string GameTags { get; set; }
             public string GameData { get; set; }
             public string Region { get; set; }
+            public bool LoggedOn { get; set; }
+            public bool AdvertiseActive { get; set; }
             public Dictionary<string, string> KeyValues { get; set; }
+            public List<SkyNetGameServerPlayerDto> Players { get; set; }
+        }
+
+        public sealed class SkyNetGameServerPlayerDto
+        {
+            public ulong SteamId { get; set; }
+            public string Name { get; set; }
+            public int Score { get; set; }
+            public float TimePlayedSeconds { get; set; }
         }
 
         public sealed class SkyNetP2PPacketSendDto
@@ -2458,6 +3035,8 @@ namespace SKYNET.Managers
             public int Channel { get; set; }
             public string Transport { get; set; }
             public int VirtualPort { get; set; }
+            public uint SourceConnectionId { get; set; }
+            public uint TargetConnectionId { get; set; }
         }
 
         public sealed class SkyNetP2PPacketBatchDto

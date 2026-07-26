@@ -1,6 +1,7 @@
 using Overlay.Core;
 using SKYNET.Callback;
 using SKYNET.Helpers;
+using SKYNET.Steamworks;
 using SKYNET.Types;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,10 @@ namespace SKYNET.Managers
         private static OverlayService Service;
         private static bool Initialized;
         private static bool Initializing;
+        private static int FloatingTextInputActive;
+        private static ENotificationPosition NotificationPosition = ENotificationPosition.k_EPositionBottomRight;
+        private static int NotificationHorizontalInset;
+        private static int NotificationVerticalInset;
 
         public static void Initialize()
         {
@@ -31,6 +36,36 @@ namespace SKYNET.Managers
         public static bool IsOverlayEnabled()
         {
             return true;
+        }
+
+        public static void SetNotificationPosition(ENotificationPosition position)
+        {
+            lock (Sync)
+            {
+                NotificationPosition = position;
+            }
+        }
+
+        public static void SetNotificationInset(int horizontalInset, int verticalInset)
+        {
+            lock (Sync)
+            {
+                NotificationHorizontalInset = Math.Max(0, horizontalInset);
+                NotificationVerticalInset = Math.Max(0, verticalInset);
+            }
+        }
+
+        internal static void GetNotificationPlacement(
+            out ENotificationPosition position,
+            out int horizontalInset,
+            out int verticalInset)
+        {
+            lock (Sync)
+            {
+                position = NotificationPosition;
+                horizontalInset = NotificationHorizontalInset;
+                verticalInset = NotificationVerticalInset;
+            }
         }
 
         public static bool ShowHome(string title = null)
@@ -66,6 +101,23 @@ namespace SKYNET.Managers
             });
         }
 
+        public static bool ShowTimeline(
+            string title,
+            string message,
+            IEnumerable<OverlaySummaryItem> summary,
+            IEnumerable<OverlayActivityItem> activities)
+        {
+            return Show(new OverlayRequest
+            {
+                Kind = OverlayKind.Timeline,
+                Title = string.IsNullOrWhiteSpace(title) ? "Timeline" : title,
+                Message = message ?? string.Empty,
+                User = BuildCurrentUser(),
+                Summary = summary?.ToList() ?? new List<OverlaySummaryItem>(),
+                Activities = activities?.ToList() ?? new List<OverlayActivityItem>()
+            });
+        }
+
         public static bool ShowInvite(ulong lobbyId, string connectString = null)
         {
             APIClient.QueueFriendsRefresh();
@@ -89,6 +141,75 @@ namespace SKYNET.Managers
                     ["connect"] = connectString ?? string.Empty
                 }
             });
+        }
+
+        public static bool ShowTextInput(
+            string description,
+            uint maximumLength,
+            string existingText,
+            bool multiline,
+            bool password,
+            Action<bool, string> completed)
+        {
+            return Show(new OverlayRequest
+            {
+                Kind = OverlayKind.TextInput,
+                Title = "Text Input",
+                Message = description ?? string.Empty,
+                InitialText = existingText ?? string.Empty,
+                TextInputMaxLength = maximumLength,
+                TextInputMultiline = multiline,
+                TextInputPassword = password,
+                TextInputCompleted = completed
+            });
+        }
+
+        public static bool ShowFloatingTextInput(int keyboardMode, Action completed)
+        {
+            if (Interlocked.CompareExchange(ref FloatingTextInputActive, 1, 0) != 0)
+            {
+                return false;
+            }
+
+            var shown = Show(new OverlayRequest
+            {
+                Kind = OverlayKind.TextInput,
+                Title = "On-Screen Keyboard",
+                Message = "Enter text",
+                TextInputMaxLength = 4096,
+                TextInputMultiline = keyboardMode == 1,
+                TextInputNumeric = keyboardMode == 3,
+                TextInputCompleted = (submitted, text) =>
+                {
+                    Interlocked.Exchange(ref FloatingTextInputActive, 0);
+                    if (submitted && !string.IsNullOrEmpty(text))
+                    {
+                        KeyboardInputInjector.QueueText(ResolveTargetWindowHandle(), text);
+                    }
+                    completed?.Invoke();
+                }
+            });
+
+            if (!shown)
+            {
+                Interlocked.Exchange(ref FloatingTextInputActive, 0);
+            }
+            return shown;
+        }
+
+        public static bool DismissFloatingTextInput()
+        {
+            if (Interlocked.CompareExchange(ref FloatingTextInputActive, 0, 0) == 0)
+            {
+                return false;
+            }
+
+            OverlayService service;
+            lock (Sync)
+            {
+                service = Service;
+            }
+            return service != null && service.DismissTextInput();
         }
 
         // Steam delivers LobbyInvite_t when an invitation arrives. The overlay

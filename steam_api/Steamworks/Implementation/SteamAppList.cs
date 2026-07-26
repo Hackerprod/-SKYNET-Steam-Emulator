@@ -21,8 +21,9 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetAppBuildId(uint nAppID)
         {
-            Write($"GetAppBuildId {nAppID}");
-            return 10;
+            int buildId = AppContentManager.GetAppBuildId(nAppID);
+            Write($"GetAppBuildId {nAppID} = {buildId}");
+            return buildId;
         }
 
         public int GetAppInstallDir(uint nAppID, string pchDirectory, int cchNameMax)
@@ -100,6 +101,11 @@ namespace SKYNET.Steamworks.Implementation
 
         private static bool TryGetAppName(uint appId, out string name)
         {
+            if (AppContentManager.TryGetAppName(appId, out name))
+            {
+                return true;
+            }
+
             if (DLCManager.TryGetName(appId, out name) && !string.IsNullOrEmpty(name))
             {
                 return true;
@@ -107,8 +113,8 @@ namespace SKYNET.Steamworks.Implementation
 
             if (appId == SteamEmulator.AppID)
             {
-                name = $"App {appId}";
-                return true;
+                name = string.Empty;
+                return false;
             }
 
             name = string.Empty;

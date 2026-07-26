@@ -25,12 +25,18 @@ namespace SKYNET.Steamworks.Exported
         public static int SteamInternal_SteamAPI_Init(IntPtr pszInternalCheckInterfaceVersions, IntPtr pOutErrMsg)
         {
             Write($"SteamInternal_SteamAPI_Init");
-            BumpContextCounter("SteamInternal_SteamAPI_Init");
             if (SteamEmulator.SecureNetworking)
             {
                 Write("SecureNetworking requested; SDR CA memory patching is enabled");
             }
-            return 0; // k_ESteamAPIInitResult_OK
+
+            int result = SteamAPI.InitializeClientApi(pOutErrMsg);
+            if (result == 0)
+            {
+                BumpContextCounter("SteamInternal_SteamAPI_Init");
+            }
+
+            return result;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

@@ -26,7 +26,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUGC.CreateQueryAllUGCRequest(eQueryType, eMatchingeMatchingUGCTypeFileType, nCreatorAppID, nConsumerAppID, pchCursor);
         }
 
-        public UGCQueryHandle_t CreateQueryUGCDetailsRequest(IntPtr _, ulong pvecPublishedFileID, uint unNumPublishedFileIDs)
+        public UGCQueryHandle_t CreateQueryUGCDetailsRequest(IntPtr _, IntPtr pvecPublishedFileID, uint unNumPublishedFileIDs)
         {
             return SteamEmulator.SteamUGC.CreateQueryUGCDetailsRequest(pvecPublishedFileID, unNumPublishedFileIDs);
         }
@@ -351,7 +351,7 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUGC.GetNumSubscribedItems();
         }
 
-        public uint GetSubscribedItems(IntPtr _, ulong pvecPublishedFileID, uint cMaxEntries)
+        public uint GetSubscribedItems(IntPtr _, IntPtr pvecPublishedFileID, uint cMaxEntries)
         {
             return SteamEmulator.SteamUGC.GetSubscribedItems(pvecPublishedFileID, cMaxEntries);
         }

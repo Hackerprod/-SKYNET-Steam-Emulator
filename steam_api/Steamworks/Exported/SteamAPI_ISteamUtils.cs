@@ -162,10 +162,35 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUtils_GetEnteredGamepadTextInput(IntPtr _, string pchText, uint cchText)
+        public static bool SteamAPI_ISteamUtils_GetEnteredGamepadTextInput(IntPtr _, IntPtr pchText, uint cchText)
         {
             Write("SteamAPI_ISteamUtils_GetEnteredGamepadTextInput");
             return SteamEmulator.SteamUtils.GetEnteredGamepadTextInput(pchText, cchText);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUtils_ShowFloatingGamepadTextInput(
+            IntPtr _,
+            int eKeyboardMode,
+            int nTextFieldXPosition,
+            int nTextFieldYPosition,
+            int nTextFieldWidth,
+            int nTextFieldHeight)
+        {
+            Write("SteamAPI_ISteamUtils_ShowFloatingGamepadTextInput");
+            return SteamEmulator.SteamUtils.ShowFloatingGamepadTextInput(
+                eKeyboardMode,
+                nTextFieldXPosition,
+                nTextFieldYPosition,
+                nTextFieldWidth,
+                nTextFieldHeight);
+        }
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static bool SteamAPI_ISteamUtils_DismissFloatingGamepadTextInput(IntPtr _)
+        {
+            Write("SteamAPI_ISteamUtils_DismissFloatingGamepadTextInput");
+            return SteamEmulator.SteamUtils.DismissFloatingGamepadTextInput();
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

@@ -3,12 +3,14 @@ using System;
 namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("STEAMUGC_INTERFACE_VERSION014")]
+    [MsvcVTableOverload("CreateQueryAllUGCRequestPage", "CreateQueryAllUGCRequestCursor")]
+    [MsvcVTableOverload("GetQueryUGCKeyValueTag", "GetQueryFirstUGCKeyValueTag")]
     public class SteamUGC014Generated : ISteamInterface
     {
         public ulong CreateQueryUserUGCRequest(IntPtr _, uint arg0, int arg1, int arg2, int arg3, uint arg4, uint arg5, uint arg6) { return 0; }
         public ulong CreateQueryAllUGCRequestPage(IntPtr _, int arg0, int arg1, uint arg2, uint arg3, uint arg4) { return 0; }
         public ulong CreateQueryAllUGCRequestCursor(IntPtr _, int arg0, int arg1, uint arg2, uint arg3, IntPtr arg4) { return 0; }
-        public ulong CreateQueryUGCDetailsRequest(IntPtr _, IntPtr arg0, uint arg1) { return 0; }
+        public ulong CreateQueryUGCDetailsRequest(IntPtr _, IntPtr arg0, uint arg1) { return SteamEmulator.SteamUGC.CreateQueryUGCDetailsRequest(arg0, arg1); }
         public ulong SendQueryUGCRequest(IntPtr _, ulong arg0) { return 0; }
         public bool GetQueryUGCResult_old(IntPtr _, ulong arg0, uint arg1, IntPtr arg2) { return false; }
         public bool GetQueryUGCPreviewURL(IntPtr _, ulong arg0, uint arg1, IntPtr arg2, uint arg3) { return false; }
@@ -39,7 +41,7 @@ namespace SKYNET.Steamworks.Interfaces
         public bool SetSearchText(IntPtr _, ulong arg0, IntPtr arg1) { return false; }
         public bool SetRankedByTrendDays(IntPtr _, ulong arg0, uint arg1) { return false; }
         public bool AddRequiredKeyValueTag(IntPtr _, ulong arg0, IntPtr arg1, IntPtr arg2) { return false; }
-        public ulong RequestUGCDetails_old(IntPtr _, ulong arg0, uint arg1) { return 0; }
+        public ulong RequestUGCDetails_old(IntPtr _, ulong arg0, uint arg1) { return SteamEmulator.SteamUGC.RequestUGCDetails(arg0, arg1); }
         public ulong CreateItem(IntPtr _, uint arg0, int arg1) { return 0; }
         public ulong StartItemUpdate(IntPtr _, uint arg0, ulong arg1) { return 0; }
         public bool SetItemTitle(IntPtr _, ulong arg0, IntPtr arg1) { return false; }
@@ -67,10 +69,10 @@ namespace SKYNET.Steamworks.Interfaces
         public ulong RemoveItemFromFavorites(IntPtr _, uint arg0, ulong arg1) { return 0; }
         public ulong SubscribeItem(IntPtr _, ulong arg0) { return 0; }
         public ulong UnsubscribeItem(IntPtr _, ulong arg0) { return 0; }
-        public uint GetNumSubscribedItems(IntPtr _) { return 0; }
-        public uint GetSubscribedItems(IntPtr _, IntPtr arg0, uint arg1) { return 0; }
-        public uint GetItemState(IntPtr _, ulong arg0) { return 0; }
-        public bool GetItemInstallInfo(IntPtr _, ulong arg0, IntPtr arg1, IntPtr arg2, uint arg3, IntPtr arg4) { return false; }
+        public uint GetNumSubscribedItems(IntPtr _) { return SteamEmulator.SteamUGC.GetNumSubscribedItems(); }
+        public uint GetSubscribedItems(IntPtr _, IntPtr arg0, uint arg1) { return SteamEmulator.SteamUGC.GetSubscribedItems(arg0, arg1); }
+        public uint GetItemState(IntPtr _, ulong arg0) { return SteamEmulator.SteamUGC.GetItemState(arg0); }
+        public bool GetItemInstallInfo(IntPtr _, ulong arg0, IntPtr arg1, IntPtr arg2, uint arg3, IntPtr arg4) { return SteamEmulator.SteamUGC.GetItemInstallInfo(arg0, arg1, arg2, arg3, arg4); }
         public bool GetItemDownloadInfo(IntPtr _, ulong arg0, IntPtr arg1, IntPtr arg2) { return false; }
         public bool DownloadItem(IntPtr _, ulong arg0, bool arg1) { return false; }
         public bool BInitWorkshopForGameServer(IntPtr _, uint arg0, IntPtr arg1) { return false; }

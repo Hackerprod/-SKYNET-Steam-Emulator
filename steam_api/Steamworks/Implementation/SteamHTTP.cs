@@ -344,82 +344,6 @@ namespace SKYNET.Steamworks.Implementation
             return Result;
         }
 
-        void FinishWebRequest(IAsyncResult ar)
-        {
-            RequestState RequestState = (RequestState)ar.AsyncState;
-            HTTPRequestCompleted_t data = RequestState.HTTPRequest.HTTPRequestCompleted;
-            HTTPRequest request = GetHTTPRequest(RequestState.HTTPRequest.HTTPRequestHandle);
-
-            try
-            {
-
-                // Get the WebRequest from RequestState.  
-                var webRequest = RequestState.Request;
-                var webResponse = (HttpWebResponse)webRequest.EndGetResponse(ar);
-                //Stream ResponseStream = resp.GetResponseStream();
-                var reader = new StreamReader(webResponse.GetResponseStream());
-                var content = reader.ReadToEnd();
-
-                data.ContextValue = request.ContextValue;
-                data.RequestSuccessful = true;
-                data.StatusCode = (HTTPStatusCode)webResponse.StatusCode;
-                data.BodySize = (uint)content.Length;
-            }
-            catch (Exception ex)
-            {
-                data.ContextValue = request.ContextValue;
-                data.RequestSuccessful = false;
-                data.StatusCode = HTTPStatusCode.Code404NotFound;
-                data.BodySize = 0;
-            }
-
-            //if (CallbackManager.GetCallResult(RequestState.HTTPRequest.SteamAPICall, out var callback))
-            //{
-            //    callback.Data = data;
-            //    callback.ReadyToCall = true;
-            //}
-        }
-
-        private void SendRequest(object state)
-        {
-            Write("XxxxxxxxxxxxxxxxxxxxxxxxxxxxX");
-            RequestHTTPAPI RequestAPI = (RequestHTTPAPI)state;
-            HTTPRequestCompleted_t data = RequestAPI.HTTPRequestCompleted;
-            HTTPRequest request = GetHTTPRequest(RequestAPI.HTTPRequestHandle);
-            if (request == null) return;
-
-            try
-            {
-                WebRequest webrequest = WebRequest.Create(request.URL);
-                webrequest.Method = request.RequestMethod.ToString();
-                HttpWebResponse response = (HttpWebResponse)webrequest.BeginGetResponse(FinishWebRequest, RequestAPI);
-                StreamReader reader = new StreamReader(response.GetResponseStream());
-                string content = reader.ReadToEnd();
-                request.Response = content;
-                Write(content);
-
-                data.ContextValue = request.ContextValue;
-                data.RequestSuccessful = true;
-                data.StatusCode = (HTTPStatusCode)response.StatusCode;
-                data.BodySize = (uint)content.Length;
-            }
-            catch (Exception ex)
-            {
-                data.ContextValue = request.ContextValue;
-                data.RequestSuccessful = false;
-                data.StatusCode = HTTPStatusCode.Code404NotFound;
-                data.BodySize = 0;
-                Write(ex);
-            }
-
-            //if (CallbackManager.GetCallResult(RequestAPI.SteamAPICall, out var callback))
-            //{
-            //    callback.Data = data;
-            //    callback.ReadyToCall = true;
-            //}
-        }
-
-
         // Sends the HTTP request, will return false on a bad handle, otherwise use SteamCallHandle to wait on
         // asynchronous response via callback for completion, and listen for HTTPRequestHeadersReceived_t and 
         // HTTPRequestDataReceived_t callbacks while streaming.
@@ -660,7 +584,6 @@ namespace SKYNET.Steamworks.Implementation
         {
             public HTTPRequestHandle Handle;
             public ulong ContextValue;
-            public string Response;
             public HTTPMethod RequestMethod;
             public string URL;
             public uint TimeoutSeconds;
@@ -670,10 +593,5 @@ namespace SKYNET.Steamworks.Implementation
             public string ContentType;
         }
 
-        private class RequestState
-        {
-            public RequestHTTPAPI HTTPRequest;
-            public WebRequest Request;
-        }
     }
 }
