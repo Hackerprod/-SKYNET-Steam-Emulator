@@ -341,6 +341,9 @@ public sealed partial class SteamApiStateService
             clone.HeroId = 0;
             clone.AppId = 0;
             clone.LobbyId = 0;
+            clone.GameServerSteamId = 0;
+            clone.GameServerIp = 0;
+            clone.GameServerPort = 0;
             clone.RichPresence.Clear();
             return;
         }

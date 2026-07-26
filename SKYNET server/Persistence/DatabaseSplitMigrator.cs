@@ -8,7 +8,7 @@ namespace SKYNET_server.Persistence;
 /// <summary>
 /// One-time, idempotent split from the former mixed app.db into steam.db and
 /// dota.db. Runtime code must use only the split databases; app.db and older
-/// feature DBs are accepted only as migration inputs and archived on success.
+/// feature DBs are accepted only as migration inputs and removed on success.
 /// </summary>
 public static class DatabaseSplitMigrator
 {
@@ -118,7 +118,7 @@ public static class DatabaseSplitMigrator
             CopyTables(appPath, steamPath, SteamTables, createMissingFromSource: false, report, "app.db -> steam.db", log);
             CopyTables(appPath, dotaPath, DotaEfTables, createMissingFromSource: false, report, "app.db -> dota.db", log);
             CopyTables(appPath, dotaPath, DotaSqlTables, createMissingFromSource: true, report, "app.db raw Dota -> dota.db", log);
-            ArchiveWithSidecars(appPath, dataDir, "legacy");
+            DeleteWithSidecars(appPath);
         }
 
         foreach (var file in LegacyDotaDbFiles)
@@ -130,14 +130,16 @@ public static class DatabaseSplitMigrator
             }
 
             CopyTables(path, dotaPath, DotaSqlTables, createMissingFromSource: true, report, $"{file} -> dota.db", log);
-            ArchiveWithSidecars(path, dataDir, "legacy");
+            DeleteWithSidecars(path);
         }
 
         var jsonPath = Path.Combine(dataDir, "api-state.json");
         if (!steam.Users.Any() && File.Exists(jsonPath))
         {
-            ImportJson(steam, dota, jsonPath, includeCatalog: true, m => log(m));
-            ArchivePlainFile(jsonPath, dataDir, "legacy");
+            if (ImportJson(steam, dota, jsonPath, includeCatalog: true, m => log(m)))
+            {
+                DeleteFile(jsonPath);
+            }
         }
 
         report.Log(log);
@@ -161,7 +163,7 @@ public static class DatabaseSplitMigrator
         return Migrate(dataDir, force, log);
     }
 
-    public static void ImportJson(SteamDbContext steam, DotaDbContext dota, string jsonPath, bool includeCatalog, Action<string> log)
+    public static bool ImportJson(SteamDbContext steam, DotaDbContext dota, string jsonPath, bool includeCatalog, Action<string> log)
     {
         ApiState state;
         try
@@ -171,11 +173,12 @@ public static class DatabaseSplitMigrator
         catch (JsonException ex)
         {
             log($"api-state.json could not be parsed ({ex.Message}); JSON import aborted.");
-            return;
+            return false;
         }
 
         StatePersistence.Save(steam, dota, state, includeCatalog);
         log($"api-state.json imported into steam.db/dota.db: users={state.Users.Count}, lobbies={state.Lobbies.Count}, dotaItems={state.DotaItems.Count}.");
+        return true;
     }
 
     public static string ResolveDataRoot(string contentRootPath, IConfiguration configuration)
@@ -228,8 +231,8 @@ public static class DatabaseSplitMigrator
             return;
         }
 
-        ArchiveWithSidecars(path, Path.GetDirectoryName(path)!, "pre-split");
-        log($"{name} archived before split because its schema was not the current split schema.");
+        DeleteWithSidecars(path);
+        log($"{name} removed before split because its schema was not the current split schema.");
     }
 
     private static bool IsValidSteamDb(string path) =>
@@ -408,31 +411,26 @@ public static class DatabaseSplitMigrator
 
     private static string QuoteIdentifier(string identifier) => "\"" + identifier.Replace("\"", "\"\"") + "\"";
 
-    private static void ArchiveWithSidecars(string path, string dataDir, string reason)
+    private static void DeleteWithSidecars(string path)
     {
-        ArchivePlainFile(path, dataDir, reason);
-        ArchivePlainFile(path + "-wal", dataDir, reason);
-        ArchivePlainFile(path + "-shm", dataDir, reason);
+        DeleteFile(path);
+        DeleteFile(path + "-wal");
+        DeleteFile(path + "-shm");
     }
 
-    private static void ArchivePlainFile(string path, string dataDir, string reason)
+    private static void DeleteFile(string path)
     {
         if (!File.Exists(path))
         {
             return;
         }
 
-        var backupDir = Path.Combine(dataDir, "backups");
-        Directory.CreateDirectory(backupDir);
-        var stamp = DateTime.UtcNow.ToString("yyyyMMdd-HHmmss");
-        var fileName = Path.GetFileName(path);
-        var target = Path.Combine(backupDir, $"{Path.GetFileNameWithoutExtension(fileName)}-{reason}-{stamp}{Path.GetExtension(fileName)}");
         SqliteConnection.ClearAllPools();
         for (var attempt = 1; ; attempt++)
         {
             try
             {
-                File.Move(path, target, overwrite: true);
+                File.Delete(path);
                 return;
             }
             catch (IOException) when (attempt < 5)

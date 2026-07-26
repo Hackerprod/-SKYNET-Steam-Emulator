@@ -18,6 +18,66 @@ public sealed class ApiSessionResult
     public string AccessToken { get; set; } = string.Empty;
     public string RefreshToken { get; set; } = string.Empty;
     public ApiUser User { get; set; } = new();
+    public List<ApiWorkshopSubscription> WorkshopSubscriptions { get; set; } = new();
+    public List<ApiAchievementDefinition> AchievementDefinitions { get; set; } = new();
+    public List<ApiStatDefinition> StatDefinitions { get; set; } = new();
+}
+
+public sealed class ApiAchievementDefinition
+{
+    public string ApiName { get; set; } = string.Empty;
+    public string DisplayName { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public bool Hidden { get; set; }
+    public string IconBase64 { get; set; } = string.Empty;
+    public string LockedIconBase64 { get; set; } = string.Empty;
+}
+
+public sealed class ApiStatDefinition
+{
+    public string Name { get; set; } = string.Empty;
+    public string Type { get; set; } = "int";
+    public int DefaultInt { get; set; }
+    public float DefaultFloat { get; set; }
+}
+
+public sealed class ApiWorkshopItem
+{
+    public ulong PublishedFileId { get; set; }
+    public uint CreatorAppId { get; set; }
+    public uint ConsumerAppId { get; set; }
+    public ulong OwnerSteamId { get; set; }
+    public int FileType { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string Tags { get; set; } = string.Empty;
+    public string FileName { get; set; } = string.Empty;
+    public string Metadata { get; set; } = string.Empty;
+    public string PreviewUrl { get; set; } = string.Empty;
+    public int Visibility { get; set; }
+    public bool Banned { get; set; }
+    public bool AcceptedForUse { get; set; } = true;
+    public uint TimeCreated { get; set; }
+    public uint TimeUpdated { get; set; }
+    public long FileSize { get; set; }
+    public long TotalFilesSize { get; set; }
+    public uint VotesUp { get; set; }
+    public uint VotesDown { get; set; }
+    public float Score { get; set; }
+}
+
+public sealed class ApiWorkshopSubscription
+{
+    public ulong PublishedFileId { get; set; }
+    public DateTime SubscribedAtUtc { get; set; }
+    public bool DisabledLocally { get; set; }
+    public ApiWorkshopItem Item { get; set; } = new();
+}
+
+public sealed class ApiWorkshopMutationResult
+{
+    public bool Success { get; set; }
+    public ApiWorkshopSubscription? Subscription { get; set; }
 }
 
 public sealed class ApiAvatarContent
@@ -43,6 +103,9 @@ public sealed class ApiUser
     // HeroId is the hero the user is playing when in_match (0 otherwise).
     public string GameState { get; set; } = "offline";
     public uint HeroId { get; set; }
+    public ulong GameServerSteamId { get; set; }
+    public uint GameServerIp { get; set; }
+    public ushort GameServerPort { get; set; }
     public Dictionary<string, string> RichPresence { get; set; } = new();
 }
 
@@ -55,6 +118,13 @@ public sealed class ApiPresenceUpdate
 {
     public string Key { get; set; } = string.Empty;
     public string Value { get; set; } = string.Empty;
+}
+
+public sealed class ApiGameServerPresenceUpdate
+{
+    public ulong SteamId { get; set; }
+    public uint Ip { get; set; }
+    public ushort Port { get; set; }
 }
 
 public sealed class ApiAvatarUpdate
@@ -83,6 +153,74 @@ public sealed class ApiStatsEnvelope
     public List<ApiStat> Stats { get; set; } = new();
     public List<ApiAchievement> Achievements { get; set; } = new();
     public int CurrentPlayers { get; set; }
+}
+
+public sealed class ApiEncryptedAppTicketRequest
+{
+    public uint AppId { get; set; }
+    public string UserDataBase64 { get; set; } = string.Empty;
+}
+
+public sealed class ApiEncryptedAppTicketResponse
+{
+    public int Result { get; set; }
+    public string TicketBase64 { get; set; } = string.Empty;
+}
+
+public sealed class ApiLeaderboardFindRequest
+{
+    public string Name { get; set; } = string.Empty;
+    public int SortMethod { get; set; }
+    public int DisplayType { get; set; }
+}
+
+public sealed class ApiLeaderboard
+{
+    public ulong Id { get; set; }
+    public uint AppId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public int SortMethod { get; set; }
+    public int DisplayType { get; set; }
+    public int EntryCount { get; set; }
+}
+
+public sealed class ApiLeaderboardEntriesRequest
+{
+    public int DataRequest { get; set; }
+    public int RangeStart { get; set; }
+    public int RangeEnd { get; set; }
+    public List<ulong> Users { get; set; } = new();
+}
+
+public sealed class ApiLeaderboardEntries
+{
+    public ApiLeaderboard Leaderboard { get; set; } = new();
+    public List<ApiLeaderboardEntry> Entries { get; set; } = new();
+}
+
+public sealed class ApiLeaderboardEntry
+{
+    public ulong SteamId { get; set; }
+    public int GlobalRank { get; set; }
+    public int Score { get; set; }
+    public List<int> Details { get; set; } = new();
+    public ulong UgcHandle { get; set; }
+}
+
+public sealed class ApiLeaderboardScoreUploadRequest
+{
+    public int UploadMethod { get; set; }
+    public int Score { get; set; }
+    public List<int> Details { get; set; } = new();
+}
+
+public sealed class ApiLeaderboardScoreUploadResult
+{
+    public bool Success { get; set; }
+    public bool ScoreChanged { get; set; }
+    public int Score { get; set; }
+    public int GlobalRankNew { get; set; }
+    public int GlobalRankPrevious { get; set; }
 }
 
 public sealed class ApiWebAccount
@@ -200,6 +338,9 @@ public sealed class ApiEvent
     public uint AppId { get; set; }
     public string GameName { get; set; } = string.Empty;
     public ulong LobbyId { get; set; }
+    public ulong GameServerSteamId { get; set; }
+    public uint GameServerIp { get; set; }
+    public ushort GameServerPort { get; set; }
     public int PersonaState { get; set; }
     public int ChangeFlags { get; set; }
     public Dictionary<string, string> RichPresence { get; set; } = new();
@@ -217,6 +358,8 @@ public sealed class ApiEvent
     public int Channel { get; set; }
     public string Transport { get; set; } = "legacy";
     public int VirtualPort { get; set; }
+    public uint SourceConnectionId { get; set; }
+    public uint TargetConnectionId { get; set; }
     public ulong RemoteSteamId { get; set; }
     public int FriendRelationship { get; set; }
     public string RequestId { get; set; } = string.Empty;
@@ -511,7 +654,18 @@ public sealed class ApiGameServer
     public string GameTags { get; set; } = string.Empty;
     public string GameData { get; set; } = string.Empty;
     public string Region { get; set; } = string.Empty;
+    public bool LoggedOn { get; set; }
+    public bool AdvertiseActive { get; set; } = true;
     public Dictionary<string, string> KeyValues { get; set; } = new();
+    public List<ApiGameServerPlayer> Players { get; set; } = new();
+}
+
+public sealed class ApiGameServerPlayer
+{
+    public ulong SteamId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public int Score { get; set; }
+    public float TimePlayedSeconds { get; set; }
 }
 
 public sealed class ApiP2PPacketSend
@@ -522,6 +676,8 @@ public sealed class ApiP2PPacketSend
     public int Channel { get; set; }
     public string Transport { get; set; } = "legacy";
     public int VirtualPort { get; set; }
+    public uint SourceConnectionId { get; set; }
+    public uint TargetConnectionId { get; set; }
 }
 
 public sealed class ApiP2PPacketBatch

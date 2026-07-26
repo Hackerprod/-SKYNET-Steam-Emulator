@@ -44,11 +44,15 @@ public sealed partial class SteamApiStateService
     private readonly DotaDedicatedServerSupervisor _dotaDedicatedServers;
     private readonly GameServerSettingsService _gameServerSettings;
     private readonly GameCatalogService _gameCatalog;
+    private readonly GameAchievementCatalogService _achievementCatalog;
+    private readonly GameStatCatalogService _statCatalog;
     // Auth session lifetime and the (much shorter) presence window used to
     // derive online/offline. Both configurable via appsettings:
     //   "Session:TimeoutMinutes" (default 30), "Presence:TimeoutSeconds" (default 90).
     private readonly TimeSpan _sessionTimeout;
     private readonly TimeSpan _presenceTimeout;
+    private readonly TimeSpan _gameServerLeaseTimeout;
+    private readonly Dictionary<ulong, DateTime> _gameServerLeases = new();
     private static readonly DateTime _serverStartTime = DateTime.UtcNow;
 
     private ApiState _state = new();
@@ -65,6 +69,8 @@ public sealed partial class SteamApiStateService
         DotaDedicatedServerSupervisor dotaDedicatedServers,
         GameServerSettingsService gameServerSettings,
         GameCatalogService gameCatalog,
+        GameAchievementCatalogService achievementCatalog,
+        GameStatCatalogService statCatalog,
         DotaDB dotaDb,
         IDbContextFactory<SteamDbContext> steamDbContextFactory,
         IDbContextFactory<DotaDbContext> dotaDbContextFactory,
@@ -76,11 +82,15 @@ public sealed partial class SteamApiStateService
         _dotaDedicatedServers = dotaDedicatedServers;
         _gameServerSettings = gameServerSettings;
         _gameCatalog = gameCatalog;
+        _achievementCatalog = achievementCatalog;
+        _statCatalog = statCatalog;
         _dotaDb = dotaDb;
         _steamDbFactory = steamDbContextFactory;
         _dotaDbFactory = dotaDbContextFactory;
         _sessionTimeout = TimeSpan.FromMinutes(Math.Clamp(configuration.GetValue("Session:TimeoutMinutes", 30), 1, 1440));
         _presenceTimeout = TimeSpan.FromSeconds(Math.Clamp(configuration.GetValue("Presence:TimeoutSeconds", 90), 15, 3600));
+        _gameServerLeaseTimeout = TimeSpan.FromSeconds(
+            Math.Clamp(configuration.GetValue("GameServers:LeaseTimeoutSeconds", 90), 15, 3600));
         var dataRoot = ResolveDataRoot(hostEnvironment.ContentRootPath, configuration);
         _statePath = Path.Combine(dataRoot, "api-state.json");
         // Dota GC stores live in dota.db. Steam identity, auth, friends, generic

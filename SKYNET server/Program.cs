@@ -52,6 +52,10 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 builder.Services.AddSingleton<GameCoordinatorTraceService>();
 builder.Services.AddSingleton<GameServerSettingsService>();
 builder.Services.AddSingleton<GameCatalogService>();
+builder.Services.AddSingleton<GameAchievementCatalogService>();
+builder.Services.AddSingleton<GameStatCatalogService>();
+builder.Services.AddSingleton<EncryptedAppTicketKeyStore>();
+builder.Services.AddSingleton<EncryptedAppTicketService>();
 builder.Services.AddSingleton<DotaDedicatedServerSupervisor>();
 builder.Services.AddSingleton<DotaDB>();
 builder.Services.AddSingleton<DedicatedServerService>();
@@ -70,7 +74,6 @@ builder.Services.AddHostedService(sp => sp.GetRequiredService<DotaDedicatedServe
 builder.Services.AddHostedService<GameCoordinatorTickService>();
 builder.Services.AddHostedService<PresenceSweepService>();
 builder.Services.AddHostedService<SKYNET_server.Services.Networking.SdrRelayService>();
-builder.Services.AddHostedService<DatabaseBackupService>();
 
 var app = builder.Build();
 
@@ -255,6 +258,13 @@ api.MapPut("/presence", (HttpRequest request, ApiPresenceUpdate update, SteamApi
         : Results.Unauthorized();
 });
 
+api.MapPut("/presence/game-server", (HttpRequest request, ApiGameServerPresenceUpdate update, SteamApiStateService state) =>
+{
+    return state.SetAdvertisedGameServer(SteamApiStateService.GetBearerToken(request) ?? string.Empty, update)
+        ? Results.Ok()
+        : Results.Unauthorized();
+});
+
 api.MapGet("/users/{steamId}/avatar", (HttpRequest request, ulong steamId, SteamApiStateService state) =>
 {
     var avatar = state.GetAvatar(SteamApiStateService.GetBearerToken(request) ?? string.Empty, steamId);
@@ -299,6 +309,100 @@ api.MapPut("/stats/me", (HttpRequest request, ApiStoreStatsRequest payload, Stea
     return state.StoreStats(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload)
         ? Results.Ok()
         : Results.Unauthorized();
+});
+
+api.MapGet("/workshop/subscriptions", (HttpRequest request, SteamApiStateService state) =>
+{
+    var result = state.GetWorkshopSubscriptions(SteamApiStateService.GetBearerToken(request) ?? string.Empty);
+    return result == null ? Results.Unauthorized() : Results.Ok(result);
+});
+
+api.MapGet("/workshop/items/{publishedFileId}", (
+    HttpRequest request,
+    ulong publishedFileId,
+    SteamApiStateService state) =>
+{
+    var result = state.GetWorkshopItem(
+        SteamApiStateService.GetBearerToken(request) ?? string.Empty,
+        publishedFileId);
+    return result == null ? Results.NotFound() : Results.Ok(result);
+});
+
+api.MapPut("/workshop/items/{publishedFileId}", (
+    HttpRequest request,
+    ulong publishedFileId,
+    ApiWorkshopItem payload,
+    SteamApiStateService state) =>
+{
+    var result = state.PutWorkshopItem(
+        SteamApiStateService.GetBearerToken(request) ?? string.Empty,
+        publishedFileId,
+        payload);
+    return result == null ? Results.BadRequest() : Results.Ok(result);
+});
+
+api.MapPost("/workshop/items/{publishedFileId}/subscribe", (
+    HttpRequest request,
+    ulong publishedFileId,
+    SteamApiStateService state) =>
+{
+    var result = state.SubscribeWorkshopItem(
+        SteamApiStateService.GetBearerToken(request) ?? string.Empty,
+        publishedFileId);
+    return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+});
+
+api.MapDelete("/workshop/items/{publishedFileId}/subscription", (
+    HttpRequest request,
+    ulong publishedFileId,
+    SteamApiStateService state) =>
+{
+    var result = state.UnsubscribeWorkshopItem(
+        SteamApiStateService.GetBearerToken(request) ?? string.Empty,
+        publishedFileId);
+    return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+});
+
+api.MapPost("/leaderboards", (HttpRequest request, ApiLeaderboardFindRequest payload, SteamApiStateService state) =>
+{
+    var result = state.FindOrCreateLeaderboard(
+        SteamApiStateService.GetBearerToken(request) ?? string.Empty,
+        payload);
+    return result == null ? Results.BadRequest() : Results.Ok(result);
+});
+
+api.MapGet("/leaderboards/{leaderboardId}", (HttpRequest request, ulong leaderboardId, SteamApiStateService state) =>
+{
+    var result = state.GetLeaderboard(
+        SteamApiStateService.GetBearerToken(request) ?? string.Empty,
+        leaderboardId);
+    return result == null ? Results.NotFound() : Results.Ok(result);
+});
+
+api.MapPost("/leaderboards/{leaderboardId}/entries", (
+    HttpRequest request,
+    ulong leaderboardId,
+    ApiLeaderboardEntriesRequest payload,
+    SteamApiStateService state) =>
+{
+    var result = state.QueryLeaderboardEntries(
+        SteamApiStateService.GetBearerToken(request) ?? string.Empty,
+        leaderboardId,
+        payload);
+    return result == null ? Results.BadRequest() : Results.Ok(result);
+});
+
+api.MapPut("/leaderboards/{leaderboardId}/score", (
+    HttpRequest request,
+    ulong leaderboardId,
+    ApiLeaderboardScoreUploadRequest payload,
+    SteamApiStateService state) =>
+{
+    var result = state.UploadLeaderboardScore(
+        SteamApiStateService.GetBearerToken(request) ?? string.Empty,
+        leaderboardId,
+        payload);
+    return result == null ? Results.BadRequest() : Results.Ok(result);
 });
 
 api.MapGet("/events", (HttpRequest request, string? since, int? waitMs, SteamApiStateService state) =>
@@ -460,6 +564,47 @@ api.MapPost("/auth/tickets/session", (ApiAuthTicketRequest payload, SteamApiStat
     return Results.Ok(state.CreateTicket(payload));
 });
 
+api.MapPost("/auth/tickets/encrypted", (
+    HttpRequest request,
+    ApiEncryptedAppTicketRequest payload,
+    SteamApiStateService state,
+    EncryptedAppTicketService tickets) =>
+{
+    var token = SteamApiStateService.GetBearerToken(request) ?? string.Empty;
+    if (!state.TryResolveCurrentSessionIdentity(token, out var steamId, out var appId))
+    {
+        return Results.Unauthorized();
+    }
+
+    if (payload.AppId != appId)
+    {
+        return Results.BadRequest(new
+        {
+            Error = "app_id_mismatch",
+            RequestedAppId = payload.AppId,
+            SessionAppId = appId
+        });
+    }
+
+    byte[] userData;
+    try
+    {
+        userData = string.IsNullOrEmpty(payload.UserDataBase64)
+            ? Array.Empty<byte>()
+            : Convert.FromBase64String(payload.UserDataBase64);
+    }
+    catch (FormatException)
+    {
+        return Results.BadRequest(new
+        {
+            Error = "invalid_user_data",
+            Message = "UserDataBase64 must contain valid Base64."
+        });
+    }
+
+    return Results.Ok(tickets.Issue(steamId, appId, userData));
+});
+
 api.MapPost("/auth/tickets/validate", (ApiAuthValidateRequest payload, SteamApiStateService state) =>
 {
     return Results.Ok(state.ValidateTicket(payload));
@@ -507,12 +652,19 @@ api.MapPost("/auth/tickets/cancel", (ApiCancelAuthTicketRequest payload, SteamAp
     return Results.Ok();
 });
 
-api.MapPost("/gameservers/register", (ApiGameServerState payload, SteamApiStateService state) => Results.Ok(state.RegisterGameServer(payload)));
-api.MapPost("/gameservers/logon", (ApiGameServerState payload, SteamApiStateService state) => Results.Ok(state.LogOnGameServer(payload)));
-api.MapPost("/gameservers/logoff", (SteamApiStateService state) => { state.LogOffGameServer(); return Results.Ok(); });
-api.MapPut("/gameservers/state", (ApiGameServer payload, SteamApiStateService state) => state.UpdateGameServerState(payload) ? Results.Ok() : Results.BadRequest());
-api.MapPost("/gameservers/heartbeat", (ApiGameServer payload, SteamApiStateService state) => state.HeartbeatGameServer(payload) ? Results.Ok() : Results.BadRequest());
-api.MapGet("/gameservers/public-ip", (SteamApiStateService state) => Results.Ok(state.GetPublicIp()));
+api.MapPost("/gameservers/register", (HttpRequest request, ApiGameServerState payload, SteamApiStateService state) =>
+    Results.Ok(state.RegisterGameServer(payload, request.HttpContext.Connection.RemoteIpAddress?.ToString())));
+api.MapPost("/gameservers/logon", (HttpRequest request, ApiGameServerState payload, SteamApiStateService state) =>
+    Results.Ok(state.LogOnGameServer(payload, request.HttpContext.Connection.RemoteIpAddress?.ToString())));
+api.MapDelete("/gameservers/{steamId}", (ulong steamId, SteamApiStateService state) =>
+    state.LogOffGameServer(steamId) ? Results.Ok() : Results.NotFound());
+api.MapPut("/gameservers/state", (HttpRequest request, ApiGameServer payload, SteamApiStateService state) =>
+    state.UpdateGameServerState(payload, request.HttpContext.Connection.RemoteIpAddress?.ToString()) ? Results.Ok() : Results.BadRequest());
+api.MapPost("/gameservers/heartbeat", (HttpRequest request, ApiGameServer payload, SteamApiStateService state) =>
+    state.HeartbeatGameServer(payload, request.HttpContext.Connection.RemoteIpAddress?.ToString()) ? Results.Ok() : Results.BadRequest());
+api.MapGet("/gameservers", (uint? appId, SteamApiStateService state) => Results.Ok(state.ListGameServers(appId ?? 0)));
+api.MapGet("/gameservers/public-ip", (HttpRequest request, SteamApiStateService state) =>
+    Results.Ok(state.GetPublicIp(request.HttpContext.Connection.RemoteIpAddress?.ToString())));
 api.MapPost("/gameservers/users/disconnect", (ApiDisconnectGameServerUser payload, SteamApiStateService state) => state.DisconnectGameServerUser(payload.SteamId) ? Results.Ok() : Results.BadRequest());
 api.MapPut("/gameservers/users/data", (ApiGameServerUserData payload, SteamApiStateService state) => state.UpdateGameServerUserData(payload) ? Results.Ok() : Results.BadRequest());
 api.MapGet("/gameservers/stats/users/{steamId}", (ulong steamId, SteamApiStateService state) => Results.Ok(state.GetGameServerUserStats(steamId)));

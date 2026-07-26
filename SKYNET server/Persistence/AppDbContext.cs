@@ -25,6 +25,10 @@ public sealed class SteamDbContext : DbContext
     public DbSet<AvatarRecord> Avatars => Set<AvatarRecord>();
     public DbSet<StatRecord> Stats => Set<StatRecord>();
     public DbSet<AchievementRecord> Achievements => Set<AchievementRecord>();
+    public DbSet<LeaderboardRecord> Leaderboards => Set<LeaderboardRecord>();
+    public DbSet<LeaderboardScoreRecord> LeaderboardScores => Set<LeaderboardScoreRecord>();
+    public DbSet<WorkshopItemRecord> WorkshopItems => Set<WorkshopItemRecord>();
+    public DbSet<WorkshopSubscriptionRecord> WorkshopSubscriptions => Set<WorkshopSubscriptionRecord>();
     public DbSet<WebAccountRecord> WebAccounts => Set<WebAccountRecord>();
     public DbSet<WebSessionRecord> WebSessions => Set<WebSessionRecord>();
     public DbSet<RemoteFileRecord> RemoteFiles => Set<RemoteFileRecord>();
@@ -44,6 +48,26 @@ public sealed class SteamDbContext : DbContext
         modelBuilder.Entity<AvatarRecord>().HasKey(x => x.SteamId);
         modelBuilder.Entity<StatRecord>().HasKey(x => new { x.SteamId, x.Name });
         modelBuilder.Entity<AchievementRecord>().HasKey(x => new { x.SteamId, x.Name });
+        modelBuilder.Entity<LeaderboardRecord>().HasKey(x => x.Id);
+        modelBuilder.Entity<LeaderboardRecord>().Property(x => x.Id).ValueGeneratedOnAdd();
+        modelBuilder.Entity<LeaderboardRecord>().HasIndex(x => new { x.AppId, x.Name }).IsUnique();
+        modelBuilder.Entity<LeaderboardScoreRecord>().HasKey(x => new { x.LeaderboardId, x.SteamId });
+        modelBuilder.Entity<LeaderboardScoreRecord>().HasIndex(x => x.SteamId);
+        modelBuilder.Entity<LeaderboardScoreRecord>()
+            .HasOne<LeaderboardRecord>()
+            .WithMany()
+            .HasForeignKey(x => x.LeaderboardId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<WorkshopItemRecord>().HasKey(x => x.PublishedFileId);
+        modelBuilder.Entity<WorkshopItemRecord>().HasIndex(x => x.ConsumerAppId);
+        modelBuilder.Entity<WorkshopSubscriptionRecord>()
+            .HasKey(x => new { x.SteamId, x.AppId, x.PublishedFileId });
+        modelBuilder.Entity<WorkshopSubscriptionRecord>().HasIndex(x => x.PublishedFileId);
+        modelBuilder.Entity<WorkshopSubscriptionRecord>()
+            .HasOne<WorkshopItemRecord>()
+            .WithMany()
+            .HasForeignKey(x => x.PublishedFileId)
+            .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<WebAccountRecord>().HasKey(x => x.Username);
         modelBuilder.Entity<WebSessionRecord>().HasKey(x => x.AccessToken);
         modelBuilder.Entity<RemoteFileRecord>().HasKey(x => new { x.OwnerSteamId, x.AppId, x.NormalizedName });

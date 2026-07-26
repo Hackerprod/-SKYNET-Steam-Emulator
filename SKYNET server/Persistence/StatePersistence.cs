@@ -676,7 +676,9 @@ public static class StatePersistence
             slots[s.SlotName] = s.SlotId;
         }
 
-        var cosmetics = dota.CosmeticSettings.AsNoTracking().FirstOrDefault();
+        var cosmetics = dota.CosmeticSettings
+            .AsNoTracking()
+            .SingleOrDefault(record => record.Id == 1);
         if (cosmetics is not null)
         {
             state.DotaCosmetics = new ApiDotaCosmeticSettings
@@ -689,7 +691,9 @@ public static class StatePersistence
             };
         }
 
-        var appState = steam.AppState.AsNoTracking().FirstOrDefault();
+        var appState = steam.AppState
+            .AsNoTracking()
+            .SingleOrDefault(record => record.Id == 1);
         if (appState is not null)
         {
             state.ActiveWebSteamId = appState.ActiveWebSteamId;

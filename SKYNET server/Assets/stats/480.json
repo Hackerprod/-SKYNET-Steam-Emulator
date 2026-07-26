@@ -1,0 +1,32 @@
+[
+  {
+    "name": "NumGames",
+    "type": "int",
+    "defaultInt": 0
+  },
+  {
+    "name": "NumWins",
+    "type": "int",
+    "defaultInt": 0
+  },
+  {
+    "name": "NumLosses",
+    "type": "int",
+    "defaultInt": 0
+  },
+  {
+    "name": "FeetTraveled",
+    "type": "float",
+    "defaultFloat": 0
+  },
+  {
+    "name": "MaxFeetTraveled",
+    "type": "float",
+    "defaultFloat": 0
+  },
+  {
+    "name": "AverageSpeed",
+    "type": "avgrate",
+    "defaultFloat": 0
+  }
+]

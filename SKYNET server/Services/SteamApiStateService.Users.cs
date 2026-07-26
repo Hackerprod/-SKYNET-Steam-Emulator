@@ -54,7 +54,10 @@ public sealed partial class SteamApiStateService
             {
                 AccessToken = session.AccessToken,
                 RefreshToken = session.RefreshToken,
-                User = CloneUser(user)
+                User = CloneUser(user),
+                WorkshopSubscriptions = GetWorkshopSubscriptionsLocked(steamId, user.AppId),
+                AchievementDefinitions = _achievementCatalog.Get(user.AppId),
+                StatDefinitions = _statCatalog.Get(user.AppId)
             };
         }
     }
@@ -127,6 +130,7 @@ public sealed partial class SteamApiStateService
                         user.RichPresence.Clear();
                         user.HeroId = 0;
                         user.GameState = "offline";
+                        ClearAdvertisedGameServer(user);
                     }
 
                     EnqueueFriendEvents(user.SteamId, "persona_state_changed", PersonaChangeStatus);
@@ -169,6 +173,7 @@ public sealed partial class SteamApiStateService
                 user.GameState = "offline";
                 user.HeroId = 0;
                 user.RichPresence.Clear();
+                ClearAdvertisedGameServer(user);
                 EnqueueFriendEvents(steamId, "persona_state_changed", PersonaChangeStatus);
             }
 
@@ -241,6 +246,31 @@ public sealed partial class SteamApiStateService
             EnqueueFriendEvents(user.SteamId, "friend_presence_changed", PersonaChangeRichPresence);
             return true;
         }
+    }
+
+    public bool SetAdvertisedGameServer(string token, ApiGameServerPresenceUpdate update)
+    {
+        lock (_sync)
+        {
+            if (!TryGetUserByToken(token, out var user) || update == null)
+            {
+                return false;
+            }
+
+            var clear = update.Ip == 0 || update.Port == 0;
+            user.GameServerSteamId = clear ? 0 : update.SteamId;
+            user.GameServerIp = clear ? 0 : update.Ip;
+            user.GameServerPort = clear ? (ushort)0 : update.Port;
+            EnqueueFriendEvents(user.SteamId, "friend_presence_changed", PersonaChangeRichPresence);
+            return true;
+        }
+    }
+
+    private static void ClearAdvertisedGameServer(ApiUser user)
+    {
+        user.GameServerSteamId = 0;
+        user.GameServerIp = 0;
+        user.GameServerPort = 0;
     }
 
     public ApiAvatarContent GetAvatar(string token, ulong steamId)

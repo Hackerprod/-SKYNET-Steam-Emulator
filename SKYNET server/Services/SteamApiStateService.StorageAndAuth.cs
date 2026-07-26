@@ -296,53 +296,107 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public ApiGameServerResult RegisterGameServer(ApiGameServerState request)
+    public ApiGameServerResult RegisterGameServer(ApiGameServerState request, string? remoteIp = null)
     {
         lock (_sync)
         {
             var server = request.Server ?? new ApiGameServer();
-            var publicIp = ResolveGameServerPublicIp(server.IP);
+            var publicIp = ResolveGameServerPublicIp(server.IP, remoteIp);
             server.IP = publicIp;
-            var serverId = server.SteamId != 0 ? server.SteamId : (ulong)publicIp;
+            var serverId = server.SteamId != 0
+                ? server.SteamId
+                : CreateGameServerSteamId(request.Anonymous);
             server.SteamId = serverId;
+            server.LoggedOn = request.Server?.LoggedOn == true;
             var secure = NormalizeGameServerSecurity(server);
 
             _state.GameServers[serverId] = server;
+            _gameServerLeases[serverId] = DateTime.UtcNow;
             _dotaDedicatedServers.ObserveRegistration(serverId, server);
             SaveState();
             return new ApiGameServerResult { Success = true, PublicIP = publicIp, Secure = secure, SteamId = serverId };
         }
     }
 
-    public ApiGameServerResult LogOnGameServer(ApiGameServerState request) => RegisterGameServer(request);
+    public ApiGameServerResult LogOnGameServer(ApiGameServerState request, string? remoteIp = null) =>
+        RegisterGameServer(request, remoteIp);
 
-    public void LogOffGameServer()
+    public bool LogOffGameServer(ulong steamId)
     {
-    }
+        if (steamId == 0)
+        {
+            return false;
+        }
 
-    public bool UpdateGameServerState(ApiGameServer server)
-    {
         lock (_sync)
         {
-            var publicIp = ResolveGameServerPublicIp(server.IP);
+            _gameServerLeases.Remove(steamId);
+            var removed = _state.GameServers.Remove(steamId);
+            if (removed)
+            {
+                SaveState();
+            }
+
+            return removed;
+        }
+    }
+
+    public bool UpdateGameServerState(ApiGameServer server, string? remoteIp = null)
+    {
+        if (server == null)
+        {
+            return false;
+        }
+
+        lock (_sync)
+        {
+            var publicIp = ResolveGameServerPublicIp(server.IP, remoteIp);
             server.IP = publicIp;
             var serverId = server.SteamId != 0 ? server.SteamId : (ulong)publicIp;
             server.SteamId = serverId;
             NormalizeGameServerSecurity(server);
             _state.GameServers[serverId] = server;
+            _gameServerLeases[serverId] = DateTime.UtcNow;
             _dotaDedicatedServers.ObserveRegistration(serverId, server);
             SaveState();
             return true;
         }
     }
 
-    public bool HeartbeatGameServer(ApiGameServer server) => UpdateGameServerState(server);
+    public bool HeartbeatGameServer(ApiGameServer server, string? remoteIp = null) =>
+        RefreshGameServerLease(server, remoteIp);
 
-    public ApiGameServerPublicIp GetPublicIp()
+    public IReadOnlyList<ApiGameServer> ListGameServers(uint appId)
     {
         lock (_sync)
         {
-            var ip = ResolveGameServerPublicIp(_state.GameServers.Values.LastOrDefault()?.IP ?? 0);
+            var now = DateTime.UtcNow;
+            var expired = _gameServerLeases
+                .Where(pair => now - pair.Value > _gameServerLeaseTimeout)
+                .Select(pair => pair.Key)
+                .ToArray();
+
+            foreach (var steamId in expired)
+            {
+                _gameServerLeases.Remove(steamId);
+            }
+
+            return _gameServerLeases.Keys
+                .Where(steamId => _state.GameServers.TryGetValue(steamId, out var server) &&
+                    server.LoggedOn &&
+                    server.AdvertiseActive &&
+                    (appId == 0 || server.AppId == appId))
+                .Select(steamId => CloneGameServer(_state.GameServers[steamId]))
+                .OrderBy(server => server.SteamId)
+                .ToArray();
+        }
+    }
+
+    public ApiGameServerPublicIp GetPublicIp(string? remoteIp = null)
+    {
+        lock (_sync)
+        {
+            var ip = ResolveGameServerPublicIp(0, remoteIp);
             return new ApiGameServerPublicIp { PublicIP = ip };
         }
     }
@@ -360,6 +414,86 @@ public sealed partial class SteamApiStateService
             }
 
             return true;
+        }
+    }
+
+    private static ApiGameServer CloneGameServer(ApiGameServer server)
+    {
+        return new ApiGameServer
+        {
+            SteamId = server.SteamId,
+            AppId = server.AppId,
+            IP = server.IP,
+            Port = server.Port,
+            QueryPort = server.QueryPort,
+            Flags = server.Flags,
+            Secure = server.Secure,
+            VersionString = server.VersionString,
+            Product = server.Product,
+            Description = server.Description,
+            ModDir = server.ModDir,
+            Dedicated = server.Dedicated,
+            MaxPlayers = server.MaxPlayers,
+            BotPlayers = server.BotPlayers,
+            ServerName = server.ServerName,
+            MapName = server.MapName,
+            PasswordProtected = server.PasswordProtected,
+            SpectatorPort = server.SpectatorPort,
+            SpectatorServerName = server.SpectatorServerName,
+            GameTags = server.GameTags,
+            GameData = server.GameData,
+            Region = server.Region,
+            LoggedOn = server.LoggedOn,
+            AdvertiseActive = server.AdvertiseActive,
+            KeyValues = new Dictionary<string, string>(
+                server.KeyValues ?? new Dictionary<string, string>(),
+                StringComparer.OrdinalIgnoreCase),
+            Players = (server.Players ?? new List<ApiGameServerPlayer>()).Select(player => new ApiGameServerPlayer
+            {
+                SteamId = player.SteamId,
+                Name = player.Name,
+                Score = player.Score,
+                TimePlayedSeconds = player.TimePlayedSeconds
+            }).ToList()
+        };
+    }
+
+    private bool RefreshGameServerLease(ApiGameServer server, string? remoteIp)
+    {
+        if (server == null || server.SteamId == 0)
+        {
+            return false;
+        }
+
+        lock (_sync)
+        {
+            if (!_state.GameServers.TryGetValue(server.SteamId, out var registered))
+            {
+                return false;
+            }
+
+            server.IP = ResolveGameServerPublicIp(server.IP, remoteIp);
+            NormalizeGameServerSecurity(server);
+            _state.GameServers[server.SteamId] = server;
+            _gameServerLeases[server.SteamId] = DateTime.UtcNow;
+            _dotaDedicatedServers.ObserveRegistration(server.SteamId, server);
+            return true;
+        }
+    }
+
+    private ulong CreateGameServerSteamId(bool anonymous)
+    {
+        const ulong publicUniverse = 1UL << 56;
+        var accountType = (anonymous ? 4UL : 3UL) << 52;
+
+        while (true)
+        {
+            var accountId = (uint)RandomNumberGenerator.GetInt32(1, int.MaxValue);
+            var steamId = publicUniverse | accountType | accountId;
+            if (!_state.GameServers.ContainsKey(steamId))
+            {
+                return steamId;
+            }
         }
     }
 
@@ -410,7 +544,9 @@ public sealed partial class SteamApiStateService
             PayloadBase64 = request.BufferBase64,
             Channel = request.Channel,
             Transport = string.IsNullOrWhiteSpace(request.Transport) ? "legacy" : request.Transport,
-            VirtualPort = request.VirtualPort
+            VirtualPort = request.VirtualPort,
+            SourceConnectionId = request.SourceConnectionId,
+            TargetConnectionId = request.TargetConnectionId
         });
     }
 
@@ -482,6 +618,23 @@ public sealed partial class SteamApiStateService
             _state.Users.TryGetValue(steamId, out var user);
             appId = requestedAppId != 0 ? requestedAppId : user?.AppId ?? 0;
             return true;
+        }
+    }
+
+    public bool TryResolveCurrentSessionIdentity(string token, out ulong steamId, out uint appId)
+    {
+        lock (_sync)
+        {
+            steamId = 0;
+            appId = 0;
+            if (!TryGetSession(token, out var session))
+            {
+                return false;
+            }
+
+            steamId = session!.SteamId;
+            appId = session.AppId;
+            return steamId != 0 && appId != 0;
         }
     }
 

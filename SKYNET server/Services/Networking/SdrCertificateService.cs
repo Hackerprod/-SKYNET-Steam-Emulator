@@ -235,7 +235,19 @@ public sealed class SdrCertificateService
 
         public byte[] ToArray() => _buffer.ToArray();
 
-        private void WriteTag(int field, int wireType) => WriteRawVarint(((ulong)field << 3) | (ulong)wireType);
+        private void WriteTag(int field, int wireType)
+        {
+            if (field <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(field));
+            }
+            if ((uint)wireType > 5)
+            {
+                throw new ArgumentOutOfRangeException(nameof(wireType));
+            }
+
+            WriteRawVarint(((ulong)(uint)field << 3) | (uint)wireType);
+        }
 
         private void WriteRawVarint(ulong value)
         {

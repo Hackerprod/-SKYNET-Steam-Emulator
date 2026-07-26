@@ -7,25 +7,36 @@ namespace SKYNET_server.Services;
 
 public sealed class DiscoveryService : BackgroundService
 {
-    private const int DiscoveryPort = 27081;
     private const string DiscoveryRequest = "SKYNET_DISCOVER";
     private const string DiscoveryPrefix = "SKYNET_SERVER ";
 
     private readonly ILogger<DiscoveryService> _logger;
+    private readonly bool _enabled;
+    private readonly int _discoveryPort;
+    private readonly int _httpPort;
 
-    public DiscoveryService(ILogger<DiscoveryService> logger)
+    public DiscoveryService(ILogger<DiscoveryService> logger, IConfiguration configuration)
     {
         _logger = logger;
+        _enabled = configuration.GetValue("Discovery:Enabled", true);
+        _discoveryPort = Math.Clamp(configuration.GetValue("Discovery:Port", 27081), 1, ushort.MaxValue);
+        _httpPort = Math.Clamp(configuration.GetValue("Server:HttpPort", 27080), 1, ushort.MaxValue);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using var udp = new UdpClient(new IPEndPoint(IPAddress.Any, DiscoveryPort))
+        if (!_enabled)
+        {
+            _logger.LogInformation("SKYNET discovery is disabled");
+            return;
+        }
+
+        using var udp = new UdpClient(new IPEndPoint(IPAddress.Any, _discoveryPort))
         {
             EnableBroadcast = true
         };
 
-        _logger.LogInformation("SKYNET discovery listening on UDP {Port}", DiscoveryPort);
+        _logger.LogInformation("SKYNET discovery listening on UDP {Port}", _discoveryPort);
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -50,7 +61,7 @@ public sealed class DiscoveryService : BackgroundService
                 continue;
             }
 
-            var serverUrl = $"{DiscoveryPrefix}http://{SelectReplyAddress(result.RemoteEndPoint.Address)}:27080/";
+            var serverUrl = $"{DiscoveryPrefix}http://{SelectReplyAddress(result.RemoteEndPoint.Address)}:{_httpPort}/";
             var payload = Encoding.UTF8.GetBytes(serverUrl);
             try
             {

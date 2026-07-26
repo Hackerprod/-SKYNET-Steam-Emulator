@@ -57,6 +57,60 @@ public class AchievementRecord
     public uint MaxProgress { get; set; }
 }
 
+public class LeaderboardRecord
+{
+    public long Id { get; set; }
+    public uint AppId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public int SortMethod { get; set; }
+    public int DisplayType { get; set; }
+    public DateTime CreatedAtUtc { get; set; }
+}
+
+public class LeaderboardScoreRecord
+{
+    public long LeaderboardId { get; set; }
+    public ulong SteamId { get; set; }
+    public int Score { get; set; }
+    public string DetailsJson { get; set; } = "[]";
+    public ulong UgcHandle { get; set; }
+    public DateTime UpdatedAtUtc { get; set; }
+}
+
+public class WorkshopItemRecord
+{
+    public ulong PublishedFileId { get; set; }
+    public uint CreatorAppId { get; set; }
+    public uint ConsumerAppId { get; set; }
+    public ulong OwnerSteamId { get; set; }
+    public int FileType { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string Tags { get; set; } = string.Empty;
+    public string FileName { get; set; } = string.Empty;
+    public string Metadata { get; set; } = string.Empty;
+    public string PreviewUrl { get; set; } = string.Empty;
+    public int Visibility { get; set; }
+    public bool Banned { get; set; }
+    public bool AcceptedForUse { get; set; } = true;
+    public uint TimeCreated { get; set; }
+    public uint TimeUpdated { get; set; }
+    public long FileSize { get; set; }
+    public long TotalFilesSize { get; set; }
+    public uint VotesUp { get; set; }
+    public uint VotesDown { get; set; }
+    public float Score { get; set; }
+}
+
+public class WorkshopSubscriptionRecord
+{
+    public ulong SteamId { get; set; }
+    public uint AppId { get; set; }
+    public ulong PublishedFileId { get; set; }
+    public DateTime SubscribedAtUtc { get; set; }
+    public bool DisabledLocally { get; set; }
+}
+
 public class WebAccountRecord
 {
     public string Username { get; set; } = string.Empty;

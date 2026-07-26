@@ -1,0 +1,26 @@
+[
+  {
+    "apiName": "ACH_WIN_ONE_GAME",
+    "displayName": "Winner",
+    "description": "Win one game.",
+    "hidden": false
+  },
+  {
+    "apiName": "ACH_WIN_100_GAMES",
+    "displayName": "Champion",
+    "description": "Win 100 games.",
+    "hidden": false
+  },
+  {
+    "apiName": "ACH_TRAVEL_FAR_ACCUM",
+    "displayName": "Interstellar",
+    "description": "Accumulate one mile of distance.",
+    "hidden": false
+  },
+  {
+    "apiName": "ACH_TRAVEL_FAR_SINGLE",
+    "displayName": "Orbiter",
+    "description": "Travel 500 feet in one life.",
+    "hidden": false
+  }
+]

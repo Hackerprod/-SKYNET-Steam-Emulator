@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.Json;
 using SKYNET_server.Models;
@@ -42,7 +43,7 @@ public sealed partial class SteamApiStateService
         return IPAddress.IsLoopback(address) ? "127.0.0.1" : address.ToString();
     }
 
-    private bool TryGetSession(string token, out ApiSession? session)
+    private bool TryGetSession(string token, [NotNullWhen(true)] out ApiSession? session)
     {
         session = null;
         if (string.IsNullOrWhiteSpace(token))
@@ -183,6 +184,9 @@ public sealed partial class SteamApiStateService
                 PersonaName = user.PersonaName,
                 AppId = online == 1 ? user.AppId : 0,
                 LobbyId = online == 1 ? user.LobbyId : 0,
+                GameServerSteamId = online == 1 ? user.GameServerSteamId : 0,
+                GameServerIp = online == 1 ? user.GameServerIp : 0,
+                GameServerPort = online == 1 ? user.GameServerPort : (ushort)0,
                 PersonaState = online,
                 ChangeFlags = flags,
                 RichPresence = online == 1
@@ -500,6 +504,9 @@ public sealed partial class SteamApiStateService
         PlayerLevel = user.PlayerLevel,
         GameState = user.GameState,
         HeroId = user.HeroId,
+        GameServerSteamId = user.GameServerSteamId,
+        GameServerIp = user.GameServerIp,
+        GameServerPort = user.GameServerPort,
         RichPresence = new Dictionary<string, string>(user.RichPresence)
     };
 
@@ -549,6 +556,9 @@ public sealed partial class SteamApiStateService
         AppId = evt.AppId,
         GameName = evt.GameName,
         LobbyId = evt.LobbyId,
+        GameServerSteamId = evt.GameServerSteamId,
+        GameServerIp = evt.GameServerIp,
+        GameServerPort = evt.GameServerPort,
         PersonaState = evt.PersonaState,
         ChangeFlags = evt.ChangeFlags,
         RichPresence = new Dictionary<string, string>(evt.RichPresence ?? new Dictionary<string, string>()),
@@ -689,8 +699,29 @@ public sealed partial class SteamApiStateService
         return 0x7000000000000000UL | (accountBits << 20) | defIndex;
     }
 
-    private uint ResolveGameServerPublicIp(uint candidate)
+    private uint ResolveGameServerPublicIp(uint candidate, string? remoteIp = null)
     {
+        if (!string.IsNullOrWhiteSpace(remoteIp) &&
+            IPAddress.TryParse(remoteIp, out var parsedRemote))
+        {
+            if (parsedRemote.AddressFamily == AddressFamily.InterNetworkV6 &&
+                parsedRemote.IsIPv4MappedToIPv6)
+            {
+                parsedRemote = parsedRemote.MapToIPv4();
+            }
+
+            if (parsedRemote.AddressFamily == AddressFamily.InterNetwork &&
+                !IPAddress.IsLoopback(parsedRemote))
+            {
+                return ToUInt32(parsedRemote);
+            }
+        }
+
+        if (candidate != 0 && candidate != ToUInt32(IPAddress.Loopback))
+        {
+            return candidate;
+        }
+
         if (TryGetConfiguredAdvertisedServerIp(out var configured))
         {
             return configured;
