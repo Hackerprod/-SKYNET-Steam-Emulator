@@ -53,6 +53,7 @@ nunit-*.xml
 # Build Results of an ATL Project
 [Dd]ebugPS/
 [Rr]eleasePS/
+[Pp]ublish/
 dlldata.c
 
 # Benchmark Results
@@ -341,6 +342,9 @@ __pycache__/
 /SKYNET server/Data/api-state.json
 /Data/
 /SKYNET server/Data/sdr-ca.json
+/SKYNET server/Data/achievements/
+/SKYNET server/Data/stats/
+/SKYNET server/Data/encrypted-app-ticket-keys.ini
 # SQLite runtime databases and their journals/WAL
 *.db
 *.db-journal
