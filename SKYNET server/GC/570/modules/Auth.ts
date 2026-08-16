@@ -27,7 +27,7 @@ export class Auth {
 
     handleClientHello(ctx: RawMessageContext): void {
         const version = ctx.services.build.clientVersion();
-        let sessionNeed: number = 0;
+        const sessionNeed: number = 0;
 
         // ClientHello opens the GC session in three packets: first we tell the
         // client it is out of the logon queue, then we send the welcome payload

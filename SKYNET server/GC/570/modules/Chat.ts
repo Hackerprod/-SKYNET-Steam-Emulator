@@ -123,7 +123,12 @@ export class Chat {
             message = { ...message, coinFlip: request.coinFlip };
         }
 
-        ctx.services.chat.broadcast(channelId, Msg.GCChatMessage, ctx.encode(Proto.CMsgDOTAChatMessage, message), false);
+        ctx.services.chat.broadcast(
+            channelId,
+            Msg.GCChatMessage,
+            ctx.encode(Proto.CMsgDOTAChatMessage, message),
+            false
+        );
         return true;
     }
 
@@ -270,7 +275,12 @@ export class Chat {
         return true;
     }
 
-    private setPrivateAdmin(ctx: RawMessageContext, channelName: string, targetAccountId: number, admin: boolean): boolean {
+    private setPrivateAdmin(
+        ctx: RawMessageContext,
+        channelName: string,
+        targetAccountId: number,
+        admin: boolean
+    ): boolean {
         const channel = privateChats.get(channelName) ?? null;
         if (channel === null || !hasPrivateMember(channel, ctx.accountId) || !isPrivateAdmin(channel, ctx.accountId)) {
             this.sendPrivateChatResponse(

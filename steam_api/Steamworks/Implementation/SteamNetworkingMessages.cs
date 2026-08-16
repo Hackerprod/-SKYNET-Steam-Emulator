@@ -1,5 +1,6 @@
 using SKYNET.Callback;
 using SKYNET.Managers;
+using SKYNET.Protocol;
 using SKYNET.Steamworks.Interfaces;
 using System;
 using System.Collections.Concurrent;
@@ -75,7 +76,12 @@ namespace SKYNET.Steamworks.Implementation
 
             // APIClient copies payload and schedules HTTP work on its dedicated
             // dispatcher. This call therefore never waits for the relay.
-            return APIClient.SendP2PPacket(remoteSteamId, payload, nSendFlags, nRemoteChannel, "messages")
+            return APIClient.SendP2PPacket(
+                    remoteSteamId,
+                    payload,
+                    nSendFlags,
+                    nRemoteChannel,
+                    P2PTransportKind.Messages)
                 ? (int)EResult.k_EResultOK
                 : (int)EResult.k_EResultNoConnection;
         }

@@ -28,7 +28,11 @@ namespace SKYNET.Steamworks.Implementation
             InterfaceName = "SteamUGC";
             InterfaceVersion = "STEAMUGC_INTERFACE_VERSION021";
             UGCQueries = new List<UGC>();
-            WorkshopManager.Initialize();
+            // Steam exposes interface construction as a cheap vtable acquisition.
+            // Keep it side-effect free: the game can request SteamAPI interfaces
+            // while native startup is still sensitive to managed file IO/runtime
+            // initialization. WorkshopManager is identity-aware and loads lazily
+            // from the first UGC operation or from the server session snapshot.
         }
 
         public UGCQueryHandle_t CreateQueryUserUGCRequest(uint unAccountID, int eListType, int eMatchingUGCType, int eSortOrder, uint nCreatorAppID, uint nConsumerAppID, uint unPage)

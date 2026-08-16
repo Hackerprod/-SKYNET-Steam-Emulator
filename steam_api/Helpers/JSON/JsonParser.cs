@@ -117,6 +117,21 @@ namespace SKYNET.Helpers.JSON
 
         internal static object ParseValue(Type type, string json)
         {
+            if (string.IsNullOrEmpty(json))
+            {
+                return type.IsValueType && Nullable.GetUnderlyingType(type) == null
+                    ? Activator.CreateInstance(type)
+                    : null;
+            }
+
+            Type nullableType = Nullable.GetUnderlyingType(type);
+            if (json == "null")
+            {
+                return nullableType == null && type.IsValueType
+                    ? Activator.CreateInstance(type)
+                    : null;
+            }
+
             if (type == typeof(string))
             {
                 if (json.Length <= 2)
@@ -148,6 +163,12 @@ namespace SKYNET.Helpers.JSON
                 }
                 return parseStringBuilder.ToString();
             }
+
+            if (nullableType != null)
+            {
+                return ParseValue(nullableType, json);
+            }
+
             if (type.IsPrimitive)
             {
                 var result = Convert.ChangeType(json, type, System.Globalization.CultureInfo.InvariantCulture);
@@ -357,7 +378,7 @@ namespace SKYNET.Helpers.JSON
                 PropertyInfo propertyInfo;
                 if (nameToField.TryGetValue(key, out fieldInfo))
                     fieldInfo.SetValue(instance, ParseValue(fieldInfo.FieldType, value));
-                else if (nameToProperty.TryGetValue(key, out propertyInfo))
+                else if (nameToProperty.TryGetValue(key, out propertyInfo) && propertyInfo.CanWrite)
                     propertyInfo.SetValue(instance, ParseValue(propertyInfo.PropertyType, value), null);
             }
 
@@ -381,4 +402,3 @@ namespace SKYNET.Helpers.JSON
         public IgnoreDataMemberAttribute(string Name) { this.Name = Name; }
     }
 }
-

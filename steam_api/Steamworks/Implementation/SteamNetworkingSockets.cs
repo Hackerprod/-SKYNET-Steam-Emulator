@@ -1,5 +1,6 @@
 using SKYNET.Helpers;
 using SKYNET.Managers;
+using SKYNET.Protocol;
 using SKYNET.Steamworks.Interfaces;
 using System;
 using System.Collections.Concurrent;
@@ -20,11 +21,6 @@ namespace SKYNET.Steamworks.Implementation
     /// </summary>
     public class SteamNetworkingSockets : ISteamInterface
     {
-        private const string TransportOpen = "sockets_open";
-        private const string TransportAccept = "sockets_accept";
-        private const string TransportReject = "sockets_reject";
-        private const string TransportClose = "sockets_close";
-        private const string TransportData = "sockets_data";
         private const int MaxQueuedMessagesPerConnection = 2048;
 
         private readonly object _gate = new object();
@@ -156,7 +152,7 @@ namespace SKYNET.Steamworks.Implementation
             SendFrame(
                 remoteSteamId,
                 nVirtualPort,
-                TransportOpen,
+                P2PTransportKind.SocketsOpen,
                 Array.Empty<byte>(),
                 sourceConnectionId: connection.Handle);
             return connection.Handle;
@@ -193,7 +189,7 @@ namespace SKYNET.Steamworks.Implementation
                 SendFrame(
                     connection.RemoteSteamId,
                     connection.VirtualPort,
-                    TransportAccept,
+                    P2PTransportKind.SocketsAccept,
                     Array.Empty<byte>(),
                     sourceConnectionId: connection.Handle,
                     targetConnectionId: connection.PeerConnectionId);
@@ -228,7 +224,7 @@ namespace SKYNET.Steamworks.Implementation
                 SendFrame(
                     connection.RemoteSteamId,
                     connection.VirtualPort,
-                    TransportClose,
+                    P2PTransportKind.SocketsClose,
                     Array.Empty<byte>(),
                     sourceConnectionId: connection.Handle,
                     targetConnectionId: connection.PeerConnectionId);
@@ -266,7 +262,7 @@ namespace SKYNET.Steamworks.Implementation
                 SendFrame(
                     connection.RemoteSteamId,
                     connection.VirtualPort,
-                    TransportClose,
+                    P2PTransportKind.SocketsClose,
                     Array.Empty<byte>(),
                     sourceConnectionId: connection.Handle,
                     targetConnectionId: connection.PeerConnectionId);
@@ -365,7 +361,7 @@ namespace SKYNET.Steamworks.Implementation
             return SendFrame(
                     connection.RemoteSteamId,
                     connection.VirtualPort,
-                    TransportData,
+                    P2PTransportKind.SocketsData,
                     payload,
                     nSendFlags,
                     connection.Handle,
@@ -675,7 +671,7 @@ namespace SKYNET.Steamworks.Implementation
         internal IntPtr CreateFakeUDPPort(int idxFakeServerPort) => IntPtr.Zero;
 
         internal void ProcessRelayPacket(
-            string transport,
+            P2PTransportKind transport,
             ulong remoteSteamId,
             int virtualPort,
             uint sourceConnectionId,
@@ -684,13 +680,13 @@ namespace SKYNET.Steamworks.Implementation
         {
             switch (transport)
             {
-                case TransportOpen:
+                case P2PTransportKind.SocketsOpen:
                     ProcessOpen(remoteSteamId, virtualPort, sourceConnectionId);
                     break;
-                case TransportAccept:
+                case P2PTransportKind.SocketsAccept:
                     ProcessAccept(remoteSteamId, virtualPort, sourceConnectionId, targetConnectionId);
                     break;
-                case TransportReject:
+                case P2PTransportKind.SocketsReject:
                     ProcessClosed(
                         remoteSteamId,
                         virtualPort,
@@ -699,7 +695,7 @@ namespace SKYNET.Steamworks.Implementation
                         (int)NetConnectionEnd.Remote_Timeout,
                         "Remote listener rejected the connection");
                     break;
-                case TransportClose:
+                case P2PTransportKind.SocketsClose:
                     ProcessClosed(
                         remoteSteamId,
                         virtualPort,
@@ -708,7 +704,7 @@ namespace SKYNET.Steamworks.Implementation
                         (int)NetConnectionEnd.Remote_Timeout,
                         "Remote closed the connection");
                     break;
-                case TransportData:
+                case P2PTransportKind.SocketsData:
                     ProcessData(
                         remoteSteamId,
                         virtualPort,
@@ -767,7 +763,7 @@ namespace SKYNET.Steamworks.Implementation
                 SendFrame(
                     remoteSteamId,
                     virtualPort,
-                    TransportReject,
+                    P2PTransportKind.SocketsReject,
                     Array.Empty<byte>(),
                     targetConnectionId: sourceConnectionId);
                 return;
@@ -908,7 +904,7 @@ namespace SKYNET.Steamworks.Implementation
         private bool SendFrame(
             ulong remoteSteamId,
             int virtualPort,
-            string transport,
+            P2PTransportKind transport,
             byte[] payload,
             int sendFlags = 0,
             uint sourceConnectionId = 0,

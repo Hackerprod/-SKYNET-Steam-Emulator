@@ -1,5 +1,6 @@
 using System.Net;
 using System.Security.Cryptography;
+using SKYNET.Protocol;
 using SKYNET_server.Models;
 
 namespace SKYNET_server.Services;
@@ -497,45 +498,112 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public bool SendP2P(string token, ApiP2PPacketSend request)
-    {
-        lock (_sync)
-        {
-            if (request == null || request.RemoteSteamId == 0 || !TryGetSession(token, out var session))
-            {
-                return false;
-            }
-
-            EnqueueP2PLocked(session!, request);
-
-            return true;
-        }
-    }
-
-    public bool SendP2PBatch(string token, ApiP2PPacketBatch request)
+    public ApiP2PSendResult SendP2P(string token, ApiP2PPacketSend request)
     {
         lock (_sync)
         {
             if (!TryGetSession(token, out var session))
             {
-                return false;
+                return ApiP2PSendResult.Unauthorized;
             }
 
-            foreach (var packet in request?.Packets ?? new List<ApiP2PPacketSend>())
+            if (!TryValidateP2PRequest(request, out var transport, out var error))
             {
-                if (packet == null || packet.RemoteSteamId == 0)
-                {
-                    continue;
-                }
-
-                EnqueueP2PLocked(session!, packet);
+                _logger.LogWarning(
+                    "Rejected P2P frame from {SteamId} to {RemoteSteamId}: {Reason}",
+                    session!.SteamId,
+                    request?.RemoteSteamId ?? 0,
+                    error);
+                return ApiP2PSendResult.InvalidRequest;
             }
 
-            return true;
+            EnqueueP2PLocked(session!, request, transport);
+            return ApiP2PSendResult.Success;
         }
     }
 
-    private void EnqueueP2PLocked(ApiSession session, ApiP2PPacketSend request)
+    public ApiP2PSendResult SendP2PBatch(string token, ApiP2PPacketBatch request)
+    {
+        lock (_sync)
+        {
+            if (!TryGetSession(token, out var session))
+            {
+                return ApiP2PSendResult.Unauthorized;
+            }
+
+            if (request?.Packets == null ||
+                request.Packets.Count > P2PTransportProtocol.MaxBatchSize)
+            {
+                return ApiP2PSendResult.InvalidRequest;
+            }
+
+            var validated = new List<(ApiP2PPacketSend Packet, P2PTransportKind Transport)>(request.Packets.Count);
+            foreach (var packet in request.Packets)
+            {
+                if (!TryValidateP2PRequest(packet, out var transport, out var error))
+                {
+                    _logger.LogWarning(
+                        "Rejected P2P batch from {SteamId}: {Reason}",
+                        session!.SteamId,
+                        error);
+                    return ApiP2PSendResult.InvalidRequest;
+                }
+
+                validated.Add((packet, transport));
+            }
+
+            foreach (var item in validated)
+            {
+                EnqueueP2PLocked(session!, item.Packet, item.Transport);
+            }
+
+            return ApiP2PSendResult.Success;
+        }
+    }
+
+    private static bool TryValidateP2PRequest(
+        ApiP2PPacketSend request,
+        out P2PTransportKind transport,
+        out string error)
+    {
+        transport = P2PTransportKind.Legacy;
+        error = string.Empty;
+        if (request == null || request.RemoteSteamId == 0)
+        {
+            error = "A destination Steam ID is required.";
+            return false;
+        }
+
+        if (!P2PTransportProtocol.TryParse(
+                request.TransportVersion,
+                request.Transport,
+                out transport,
+                out error))
+        {
+            return false;
+        }
+
+        if (!P2PTransportProtocol.TryGetDecodedPayloadLength(request.BufferBase64, out var payloadLength))
+        {
+            error = "The P2P payload is not valid Base64.";
+            return false;
+        }
+
+        return P2PTransportProtocol.TryValidateFrame(
+            request.TransportVersion,
+            transport,
+            request.Channel,
+            request.VirtualPort,
+            request.SourceConnectionId,
+            request.TargetConnectionId,
+            payloadLength,
+            out error);
+    }
+
+    private void EnqueueP2PLocked(
+        ApiSession session,
+        ApiP2PPacketSend request,
+        P2PTransportKind transport)
     {
         EnqueueEvent(request.RemoteSteamId, new ApiEvent
         {
@@ -543,7 +611,8 @@ public sealed partial class SteamApiStateService
             RemoteSteamId = session.SteamId,
             PayloadBase64 = request.BufferBase64,
             Channel = request.Channel,
-            Transport = string.IsNullOrWhiteSpace(request.Transport) ? "legacy" : request.Transport,
+            TransportVersion = request.TransportVersion,
+            Transport = P2PTransportProtocol.ToWireValue(transport),
             VirtualPort = request.VirtualPort,
             SourceConnectionId = request.SourceConnectionId,
             TargetConnectionId = request.TargetConnectionId

@@ -9,6 +9,7 @@ public sealed class DiscoveryService : BackgroundService
 {
     private const string DiscoveryRequest = "SKYNET_DISCOVER";
     private const string DiscoveryPrefix = "SKYNET_SERVER ";
+    private const int SioUdpConnectionReset = unchecked((int)0x9800000C);
 
     private readonly ILogger<DiscoveryService> _logger;
     private readonly bool _enabled;
@@ -35,6 +36,7 @@ public sealed class DiscoveryService : BackgroundService
         {
             EnableBroadcast = true
         };
+        DisableWindowsUdpConnectionReset(udp.Client);
 
         _logger.LogInformation("SKYNET discovery listening on UDP {Port}", _discoveryPort);
 
@@ -48,6 +50,12 @@ public sealed class DiscoveryService : BackgroundService
             catch (OperationCanceledException)
             {
                 break;
+            }
+            catch (SocketException ex) when (ex.SocketErrorCode == SocketError.ConnectionReset)
+            {
+                // A client may close its UDP port before receiving our reply.
+                // That ICMP notification does not invalidate the listener.
+                continue;
             }
             catch (Exception ex)
             {
@@ -67,10 +75,40 @@ public sealed class DiscoveryService : BackgroundService
             {
                 await udp.SendAsync(payload, result.RemoteEndPoint, stoppingToken);
             }
+            catch (SocketException ex) when (ex.SocketErrorCode == SocketError.ConnectionReset)
+            {
+                // UDP has no session to recover; the next discovery request is
+                // independent and remains valid.
+            }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "SKYNET discovery response failed");
             }
+        }
+    }
+
+    private void DisableWindowsUdpConnectionReset(Socket socket)
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            return;
+        }
+
+        try
+        {
+            // SIO_UDP_CONNRESET=FALSE prevents an ICMP Port Unreachable response
+            // to one datagram from surfacing as an error on the shared listener.
+            socket.IOControl(SioUdpConnectionReset, new byte[sizeof(int)], null);
+        }
+        catch (SocketException ex)
+        {
+            // The targeted receive guard above preserves correct behavior when a
+            // Winsock provider does not support this optional control code.
+            _logger.LogDebug(ex, "Could not disable UDP connection-reset reporting");
+        }
+        catch (PlatformNotSupportedException ex)
+        {
+            _logger.LogDebug(ex, "UDP connection-reset control is not supported");
         }
     }
 

@@ -359,6 +359,7 @@ skills-lock.json
 .claude/
 GC-JS-Migration-Roadmap.md
 graphify-out/
+.codegraph/
 
 # Repository-local agent and SDK artifacts
 /.github/

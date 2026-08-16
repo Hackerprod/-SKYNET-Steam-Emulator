@@ -1,5 +1,6 @@
 using SKYNET.Helpers;
 using SKYNET.Helpers.JSON;
+using SKYNET.Protocol;
 using SKYNET.Steamworks;
 using SKYNET.Types;
 using System;
@@ -16,7 +17,6 @@ using System.Net.Http.Headers;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Web.Script.Serialization;
 
 namespace SKYNET.Managers
 {
@@ -24,7 +24,6 @@ namespace SKYNET.Managers
     {
         private static readonly TimeSpan RefreshWindow = TimeSpan.FromSeconds(15);
         private static readonly TimeSpan MissingUserProfileWindow = TimeSpan.FromMinutes(5);
-        private static JavaScriptSerializer Serializer;
         private static readonly ConcurrentDictionary<ulong, DateTime> MissingUserProfiles = new ConcurrentDictionary<ulong, DateTime>();
         private static readonly ConcurrentDictionary<ulong, byte> PendingUserProfileRefreshes = new ConcurrentDictionary<ulong, byte>();
         private static int FriendsRefreshQueued;
@@ -44,7 +43,6 @@ namespace SKYNET.Managers
         // thread without blocking; the handshake that sets it runs in background.
         public static bool IsConnected => IsEnabled && !string.IsNullOrWhiteSpace(SteamEmulator.AccessToken);
         private const int MaxP2PQueue = 2048;
-        private const int MaxP2PBatch = 64;
         private static readonly ConcurrentQueue<SkyNetP2PPacketSendDto> P2PQueue = new ConcurrentQueue<SkyNetP2PPacketSendDto>();
         private static readonly AutoResetEvent P2PQueueSignal = new AutoResetEvent(false);
         private const int MinimumGcExchangeTimeoutMs = 30000;
@@ -1247,13 +1245,34 @@ namespace SKYNET.Managers
             byte[] buffer,
             int sendType,
             int channel,
-            string transport = "legacy",
+            P2PTransportKind transport = P2PTransportKind.Legacy,
             int virtualPort = 0,
             uint sourceConnectionId = 0,
             uint targetConnectionId = 0)
         {
             if (!IsEnabled)
             {
+                return false;
+            }
+
+            var payload = buffer ?? new byte[0];
+            var validationError = remoteSteamId == 0
+                ? "A destination Steam ID is required."
+                : string.Empty;
+            if (remoteSteamId == 0 ||
+                !P2PTransportProtocol.TryValidateFrame(
+                    P2PTransportProtocol.CurrentVersion,
+                    transport,
+                    channel,
+                    virtualPort,
+                    sourceConnectionId,
+                    targetConnectionId,
+                    payload.Length,
+                    out validationError))
+            {
+                SteamEmulator.Write(
+                    "APIClient",
+                    $"Rejected invalid outgoing P2P frame ({transport}): {validationError}");
                 return false;
             }
 
@@ -1273,10 +1292,11 @@ namespace SKYNET.Managers
             P2PQueue.Enqueue(new SkyNetP2PPacketSendDto
             {
                 RemoteSteamId = remoteSteamId,
-                BufferBase64 = Convert.ToBase64String(buffer ?? new byte[0]),
+                BufferBase64 = Convert.ToBase64String(payload),
                 SendType = sendType,
                 Channel = channel,
-                Transport = transport ?? "legacy",
+                TransportVersion = P2PTransportProtocol.CurrentVersion,
+                Transport = P2PTransportProtocol.ToWireValue(transport),
                 VirtualPort = virtualPort,
                 SourceConnectionId = sourceConnectionId,
                 TargetConnectionId = targetConnectionId
@@ -2102,16 +2122,6 @@ namespace SKYNET.Managers
                 $"workshop={session.WorkshopSubscriptions?.Count ?? 0}");
         }
 
-        private static JavaScriptSerializer GetSerializer()
-        {
-            if (Serializer == null)
-            {
-                Serializer = new JavaScriptSerializer();
-            }
-
-            return Serializer;
-        }
-
         private static T Send<T>(HttpMethod method, string path, object body = null, bool retryOnUnauthorized = true, int timeoutMs = 0)
             where T : class
         {
@@ -2171,7 +2181,7 @@ namespace SKYNET.Managers
                     return null;
                 }
 
-                return GetSerializer().Deserialize<T>(text);
+                return text.FromJson<T>();
             }
             catch (WebException wex) when (wex.Status == WebExceptionStatus.Timeout)
             {
@@ -2368,8 +2378,8 @@ namespace SKYNET.Managers
                         continue;
                     }
 
-                    var batch = new List<SkyNetP2PPacketSendDto>(MaxP2PBatch);
-                    while (batch.Count < MaxP2PBatch && P2PQueue.TryDequeue(out var packet))
+                    var batch = new List<SkyNetP2PPacketSendDto>(P2PTransportProtocol.MaxBatchSize);
+                    while (batch.Count < P2PTransportProtocol.MaxBatchSize && P2PQueue.TryDequeue(out var packet))
                     {
                         Interlocked.Decrement(ref P2PQueueCount);
                         batch.Add(packet);
@@ -2708,6 +2718,7 @@ namespace SKYNET.Managers
             public ulong? TargetJobId { get; set; }
             public bool Protobuf { get; set; }
             public int Channel { get; set; }
+            public int TransportVersion { get; set; }
             public string Transport { get; set; }
             public int VirtualPort { get; set; }
             public uint SourceConnectionId { get; set; }
@@ -3033,6 +3044,7 @@ namespace SKYNET.Managers
             public string BufferBase64 { get; set; }
             public int SendType { get; set; }
             public int Channel { get; set; }
+            public int TransportVersion { get; set; }
             public string Transport { get; set; }
             public int VirtualPort { get; set; }
             public uint SourceConnectionId { get; set; }

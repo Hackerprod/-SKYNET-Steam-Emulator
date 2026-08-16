@@ -5,8 +5,8 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Web.Script.Serialization;
 using SKYNET.Callback;
+using SKYNET.Helpers.JSON;
 using SKYNET.Managers;
 using SKYNET.Steamworks.Interfaces;
 
@@ -249,7 +249,7 @@ namespace SKYNET.Steamworks.Implementation
                     return;
                 }
 
-                var records = new JavaScriptSerializer().Deserialize<List<ScreenshotRecord>>(File.ReadAllText(path));
+                var records = File.ReadAllText(path).FromJson<List<ScreenshotRecord>>();
                 if (records == null)
                 {
                     return;
@@ -278,7 +278,7 @@ namespace SKYNET.Steamworks.Implementation
                 {
                     var path = IndexPath();
                     var temporary = path + ".tmp";
-                    File.WriteAllText(temporary, new JavaScriptSerializer().Serialize(snapshot));
+                    File.WriteAllText(temporary, snapshot.ToJson());
                     if (File.Exists(path))
                     {
                         File.Replace(temporary, path, null);
