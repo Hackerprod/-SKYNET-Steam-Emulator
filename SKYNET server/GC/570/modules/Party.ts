@@ -104,11 +104,7 @@ export class Party {
             return true;
         }
 
-        ctx.send<CMsgGCToClientRequestMMInfo>(
-            Msg.GCToClientRequestMMInfo,
-            Proto.CMsgGCToClientRequestMMInfo,
-            {}
-        );
+        ctx.send<CMsgGCToClientRequestMMInfo>(Msg.GCToClientRequestMMInfo, Proto.CMsgGCToClientRequestMMInfo, {});
         queuePartySubscribe(ctx, ctx.steamId, party);
         queuePartyUpdate(ctx, party);
 

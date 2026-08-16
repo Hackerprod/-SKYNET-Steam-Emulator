@@ -58,11 +58,12 @@ public static class PersistenceRoundTripCheck
         const ulong a = 76561197960287930UL;
         const ulong b = 76561197960287931UL;
         const ulong lobbyId = 90000000000000123UL;
+        const uint sampleAppId = 570;
 
         var state = new ApiState { ActiveWebSteamId = a };
 
-        state.Users[a] = new ApiUser { SteamId = a, AccountId = 22222, PersonaName = "Alice", AppId = 570, PlayerLevel = 42 };
-        state.Users[b] = new ApiUser { SteamId = b, AccountId = 22223, PersonaName = "Bob", AppId = 570, PlayerLevel = 7 };
+        state.Users[a] = new ApiUser { SteamId = a, AccountId = 22222, PersonaName = "Alice", AppId = sampleAppId, PlayerLevel = 42 };
+        state.Users[b] = new ApiUser { SteamId = b, AccountId = 22223, PersonaName = "Bob", AppId = sampleAppId, PlayerLevel = 7 };
 
         state.FriendLinks[a] = new HashSet<ulong> { b };
         state.FriendLinks[b] = new HashSet<ulong> { a };
@@ -80,12 +81,12 @@ public static class PersistenceRoundTripCheck
         state.WebAccounts["alice"] = new ApiWebAccount { Username = "alice", PasswordHash = "hash", SteamId = a, IsAdmin = true, CreatedAt = DateTime.UtcNow, LastLoginAt = DateTime.UtcNow };
         state.WebSessions["token-1"] = new ApiSession { AccessToken = "token-1", RefreshToken = "r1", SteamId = a, ProcessRole = "web", WebSession = true, Persistent = true, ExpiresAtUtc = DateTime.UtcNow.AddDays(30) };
 
-        state.GameServers[a] = new ApiGameServer { SteamId = a, AppId = 570, ServerName = "srv", KeyValues = { ["k"] = "v", ["region"] = "sky" } };
+        state.GameServers[a] = new ApiGameServer { SteamId = a, AppId = sampleAppId, ServerName = "srv", KeyValues = { ["k"] = "v", ["region"] = "sky" } };
 
         state.Lobbies[lobbyId] = new ApiLobby
         {
             SteamId = lobbyId,
-            AppId = 570,
+            AppId = sampleAppId,
             OwnerSteamId = a,
             MaxMembers = 10,
             LobbyData = { ["name"] = "Room", ["mode"] = "ap" },
@@ -96,11 +97,11 @@ public static class PersistenceRoundTripCheck
         var fileContent = new byte[] { 9, 8, 7 };
         var fileSha = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(fileContent)).ToLowerInvariant();
         var normalizedName = "a/save.dat";
-        var fileKey = SteamApiStateService.MakeRemoteStorageKey(a, 570, normalizedName);
+        var fileKey = SteamApiStateService.MakeRemoteStorageKey(a, sampleAppId, normalizedName);
         state.Files[fileKey] = new ApiRemoteStorageFile
         {
             OwnerSteamId = a,
-            AppId = 570,
+            AppId = sampleAppId,
             FileName = "a/save.dat",
             ContentBase64 = Convert.ToBase64String(fileContent),
             Size = fileContent.Length,
@@ -116,7 +117,7 @@ public static class PersistenceRoundTripCheck
         {
             Handle = 80000000000000001UL,
             OwnerSteamId = a,
-            AppId = 570,
+            AppId = sampleAppId,
             NormalizedName = normalizedName
         };
 
@@ -176,6 +177,7 @@ public static class PersistenceRoundTripCheck
     private static bool Compare(ApiState original, ApiState loaded, Action<string> log)
     {
         const ulong a = 76561197960287930UL;
+        const uint sampleAppId = 570;
         var failures = new List<string>();
 
         void Check(string name, bool ok)
@@ -202,7 +204,7 @@ public static class PersistenceRoundTripCheck
         Check("Lobby.Member.Data", lobby is not null && lobby.Members.Count == 1 && lobby.Members[0].Data.Count == 1 && lobby.Members[0].Data[0].Value == "1");
         Check("Lobby.GameServer", lobby?.GameServer is not null && lobby.GameServer.Port == 27015);
 
-        var expectedKey = SteamApiStateService.MakeRemoteStorageKey(a, 570, "a/save.dat");
+        var expectedKey = SteamApiStateService.MakeRemoteStorageKey(a, sampleAppId, "a/save.dat");
         Check("RemoteFiles", loaded.Files.Count == 1 && loaded.Files[expectedKey].ContentBase64 == original.Files[expectedKey].ContentBase64);
         Check("FileShares", loaded.FileShares.Count == 1 && loaded.FileShares[80000000000000001UL].NormalizedName == "a/save.dat");
         Check("DotaItems", loaded.DotaItems.Count == 3 && loaded.DotaItems[101].HeroNames.Count == 1 && loaded.DotaItems[101].HeroIds.Contains(2u));

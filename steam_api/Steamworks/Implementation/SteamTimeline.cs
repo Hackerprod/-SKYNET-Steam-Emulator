@@ -4,8 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Web.Script.Serialization;
 using SKYNET.Callback;
+using SKYNET.Helpers.JSON;
 using SKYNET.Managers;
 using SKYNET.Steamworks.Interfaces;
 using Overlay.Core;
@@ -404,7 +404,7 @@ namespace SKYNET.Steamworks.Implementation
                     Directory.CreateDirectory(root);
                     var path = Path.Combine(root, sessionId + ".json");
                     var temporary = path + ".tmp";
-                    File.WriteAllText(temporary, new JavaScriptSerializer().Serialize(snapshot));
+                    File.WriteAllText(temporary, snapshot.ToJson());
                     if (File.Exists(path))
                     {
                         try

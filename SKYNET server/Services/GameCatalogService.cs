@@ -61,10 +61,7 @@ public sealed class GameCatalogService
             else
             {
                 File.WriteAllText(_catalogPath,
-                    "[Games]" + Environment.NewLine +
-                    "480 = Spacewar" + Environment.NewLine +
-                    "570 = Dota 2" + Environment.NewLine +
-                    "673950 = Farm Together" + Environment.NewLine);
+                    "[Games]" + Environment.NewLine);
             }
         }
         catch (Exception ex)

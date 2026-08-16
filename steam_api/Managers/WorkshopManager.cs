@@ -1,11 +1,11 @@
 using SKYNET.Helper;
 using SKYNET.Helpers;
+using SKYNET.Helpers.JSON;
 using SKYNET.Steamworks;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Web.Script.Serialization;
 
 namespace SKYNET.Managers
 {
@@ -220,9 +220,7 @@ namespace SKYNET.Managers
 
                 try
                 {
-                    var serializer = new JavaScriptSerializer { MaxJsonLength = 1024 * 1024 };
-                    var item = serializer.Deserialize<APIClient.SkyNetWorkshopItemDto>(
-                        File.ReadAllText(metadataPath));
+                    var item = File.ReadAllText(metadataPath).FromJson<APIClient.SkyNetWorkshopItemDto>();
                     if (item == null)
                     {
                         continue;
@@ -281,8 +279,7 @@ namespace SKYNET.Managers
 
             try
             {
-                var serializer = new JavaScriptSerializer { MaxJsonLength = 4 * 1024 * 1024 };
-                var snapshot = serializer.Deserialize<WorkshopSnapshot>(File.ReadAllText(path));
+                var snapshot = File.ReadAllText(path).FromJson<WorkshopSnapshot>();
                 if (snapshot == null ||
                     snapshot.SteamId != CurrentSteamId ||
                     snapshot.AppId != CurrentAppId ||
@@ -333,9 +330,8 @@ namespace SKYNET.Managers
                     Directory.CreateDirectory(directory);
                 }
 
-                var serializer = new JavaScriptSerializer { MaxJsonLength = 4 * 1024 * 1024 };
                 temporaryPath = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
-                File.WriteAllText(temporaryPath, serializer.Serialize(snapshot));
+                File.WriteAllText(temporaryPath, snapshot.ToJson());
                 if (File.Exists(path))
                 {
                     try

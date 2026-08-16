@@ -1538,13 +1538,13 @@ public static class GcScriptSelfCheck
         var current = new DirectoryInfo(start);
         while (current != null)
         {
-            if (File.Exists(Path.Combine(current.FullName, "GC", "570", "main.ts")))
+            if (GameCoordinatorAppCatalog.IsValidRoot(Path.Combine(current.FullName, "GC")))
             {
                 return current.FullName;
             }
 
             var nested = Path.Combine(current.FullName, "SKYNET server");
-            if (File.Exists(Path.Combine(nested, "GC", "570", "main.ts")))
+            if (GameCoordinatorAppCatalog.IsValidRoot(Path.Combine(nested, "GC")))
             {
                 return nested;
             }

@@ -3,7 +3,7 @@
 The server has two live SQLite databases:
 
 - `steam.db` owns Steam/server state: users, credentials, friendships, Steam stats, achievements, remote storage, web sessions, avatars, and generic server state.
-- `dota.db` owns app 570/Game Coordinator state: lobbies, game servers, Dota cosmetics, Dota equipment, Dota live-match cache, and Dota-specific user/game data.
+- `dota.db` owns Dota/Game Coordinator state: lobbies, game servers, Dota cosmetics, Dota equipment, Dota live-match cache, and Dota-specific user/game data.
 
 Game Coordinator code resolves Steam identity and relationships from `steam.db`; it does not duplicate that ownership in `dota.db`.
 

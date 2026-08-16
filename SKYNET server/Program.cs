@@ -698,16 +698,22 @@ api.MapPost("/dota/equipment/{steamId}/clear", (HttpRequest request, ulong steam
 
 api.MapPost("/network/p2p/send", (HttpRequest request, ApiP2PPacketSend payload, SteamApiStateService state) =>
 {
-    return state.SendP2P(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload)
-        ? Results.Ok()
-        : Results.Unauthorized();
+    return state.SendP2P(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload) switch
+    {
+        ApiP2PSendResult.Success => Results.Ok(),
+        ApiP2PSendResult.Unauthorized => Results.Unauthorized(),
+        _ => Results.BadRequest()
+    };
 });
 
 api.MapPost("/network/p2p/send-batch", (HttpRequest request, ApiP2PPacketBatch payload, SteamApiStateService state) =>
 {
-    return state.SendP2PBatch(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload)
-        ? Results.Ok()
-        : Results.Unauthorized();
+    return state.SendP2PBatch(SteamApiStateService.GetBearerToken(request) ?? string.Empty, payload) switch
+    {
+        ApiP2PSendResult.Success => Results.Ok(),
+        ApiP2PSendResult.Unauthorized => Results.Unauthorized(),
+        _ => Results.BadRequest()
+    };
 });
 
 api.MapPost("/gamecoordinator/messages", (HttpRequest request, ApiGCMessage payload, SteamApiStateService state) =>

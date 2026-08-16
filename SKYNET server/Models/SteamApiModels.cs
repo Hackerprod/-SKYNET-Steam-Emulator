@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using SKYNET.Protocol;
 
 namespace SKYNET_server.Models;
 
@@ -356,7 +357,8 @@ public sealed class ApiEvent
     public ulong? TargetJobId { get; set; }
     public bool Protobuf { get; set; }
     public int Channel { get; set; }
-    public string Transport { get; set; } = "legacy";
+    public int TransportVersion { get; set; }
+    public string Transport { get; set; } = P2PTransportProtocol.ToWireValue(P2PTransportKind.Legacy);
     public int VirtualPort { get; set; }
     public uint SourceConnectionId { get; set; }
     public uint TargetConnectionId { get; set; }
@@ -674,7 +676,8 @@ public sealed class ApiP2PPacketSend
     public string BufferBase64 { get; set; } = string.Empty;
     public int SendType { get; set; }
     public int Channel { get; set; }
-    public string Transport { get; set; } = "legacy";
+    public int TransportVersion { get; set; }
+    public string Transport { get; set; } = P2PTransportProtocol.ToWireValue(P2PTransportKind.Legacy);
     public int VirtualPort { get; set; }
     public uint SourceConnectionId { get; set; }
     public uint TargetConnectionId { get; set; }
@@ -683,6 +686,13 @@ public sealed class ApiP2PPacketSend
 public sealed class ApiP2PPacketBatch
 {
     public List<ApiP2PPacketSend> Packets { get; set; } = new();
+}
+
+public enum ApiP2PSendResult
+{
+    Success,
+    Unauthorized,
+    InvalidRequest
 }
 
 public sealed class ApiGCMessage

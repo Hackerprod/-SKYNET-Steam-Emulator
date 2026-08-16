@@ -1,0 +1,18 @@
+{
+    "appId": 570,
+    "name": "Dota 2",
+    "entryPoint": "main.ts",
+    "hostServices": ["dota"],
+    "protoContracts": {
+        "sources": [
+            {
+                "assembly": "server"
+            }
+        ]
+    },
+    "typeScript": {
+        "generatedContracts": "generated/dota.ts",
+        "extraMessageIds": "contracts/extra-message-ids.json",
+        "routes": "contracts/routes.json"
+    }
+}

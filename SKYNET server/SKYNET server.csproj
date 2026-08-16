@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\Shared\P2PTransportProtocol.cs" Link="Protocol\P2PTransportProtocol.cs" />
     <Compile Remove="GC\**\tools\**\*.cs" />
     <Content Remove="GC\**\tools\**\bin\**\*" />
     <Content Remove="GC\**\tools\**\obj\**\*" />

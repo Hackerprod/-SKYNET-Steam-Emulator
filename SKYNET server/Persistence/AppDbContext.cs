@@ -85,7 +85,7 @@ public sealed class SteamDbContext : DbContext
 /// <summary>
 /// Durable Dota Game Coordinator state. This database owns Dota lobbies, game
 /// servers, cosmetics, live-match cache, and GC/user state that is specific to
-/// app 570. Steam identity and relationships are resolved through steam.db.
+/// Dota 2. Steam identity and relationships are resolved through steam.db.
 /// </summary>
 public sealed class DotaDbContext : DbContext
 {

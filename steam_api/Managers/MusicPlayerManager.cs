@@ -6,8 +6,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using System.Web.Script.Serialization;
 using SKYNET.Callback;
+using SKYNET.Helpers.JSON;
 using SKYNET.Steamworks;
 
 namespace SKYNET.Managers
@@ -24,7 +24,6 @@ namespace SKYNET.Managers
         private static readonly object StateGate = new object();
         private static readonly ConcurrentQueue<Action> Commands = new ConcurrentQueue<Action>();
         private static readonly AutoResetEvent Signal = new AutoResetEvent(false);
-        private static readonly JavaScriptSerializer Serializer = new JavaScriptSerializer();
 
         private static Thread worker;
         private static List<string> tracks = new List<string>();
@@ -418,7 +417,7 @@ namespace SKYNET.Managers
                     return;
                 }
 
-                var state = Serializer.Deserialize<MusicState>(File.ReadAllText(path));
+                var state = File.ReadAllText(path).FromJson<MusicState>();
                 if (state == null)
                 {
                     return;
@@ -443,11 +442,11 @@ namespace SKYNET.Managers
                 var path = GetStatePath();
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
                 var temporary = path + ".tmp";
-                File.WriteAllText(temporary, Serializer.Serialize(new MusicState
+                File.WriteAllText(temporary, new MusicState
                 {
                     TrackIndex = currentIndex,
                     Volume = Volume
-                }));
+                }.ToJson());
 
                 if (File.Exists(path))
                 {

@@ -412,7 +412,9 @@ export class Lobby {
     }
 
     private practiceLobbyList(ctx: HandlerContext<CMsgPracticeLobbyList, CMsgPracticeLobbyListResponse>): boolean {
-        ctx.reply({ lobbies: listLobbies(ctx.services.lobby, ctx.request.region ?? 0, ctx.request.gameMode ?? 0, ctx.steamId) });
+        ctx.reply({
+            lobbies: listLobbies(ctx.services.lobby, ctx.request.region ?? 0, ctx.request.gameMode ?? 0, ctx.steamId)
+        });
         return true;
     }
 
@@ -1288,7 +1290,11 @@ function leavePublishedLobbyState(ctx: GcContextBase): void {
             continue;
         }
 
-        ctx.send(Msg.SOCacheUnsubscribed, Proto.CMsgSOCacheUnsubscribed, buildLobbySoCacheUnsubscribedForId(snapshot.lobbyId));
+        ctx.send(
+            Msg.SOCacheUnsubscribed,
+            Proto.CMsgSOCacheUnsubscribed,
+            buildLobbySoCacheUnsubscribedForId(snapshot.lobbyId)
+        );
         ctx.services.lobby.removeSnapshot(snapshot.lobbyId);
     }
 }
@@ -1573,15 +1579,6 @@ function buildLobbySoCacheUnsubscribedForId(lobbyId: bigint): CMsgSOCacheUnsubsc
     };
 }
 
-function buildLobbySingleObject(ctx: GcContextBase, lobby: LobbyState): CMsgSOSingleObject {
-    return {
-        typeId: LOBBY_OBJECT_TYPE_ID,
-        objectData: ctx.encode(Proto.CSODOTALobby, buildLobbyObject(lobby)),
-        version: lobby.version + 1n,
-        ownerSoid: { type: LOBBY_OWNER_TYPE, id: lobby.lobbyId }
-    };
-}
-
 function buildLobbyMultipleObjects(ctx: GcContextBase, lobby: LobbyState): CMsgSOMultipleObjects {
     // Existing lobby members are notified like the legacy GC: UpdateMultiple
     // carries only CSODOTALobby (2004). Member names and server-static data are
@@ -1855,11 +1852,7 @@ function listLobbies(
     return collectLobbies(region, gameMode, true);
 }
 
-function collectLobbies(
-    region: number,
-    gameMode: number,
-    strictRegion: boolean
-): CMsgPracticeLobbyListResponseEntry[] {
+function collectLobbies(region: number, gameMode: number, strictRegion: boolean): CMsgPracticeLobbyListResponseEntry[] {
     const result: CMsgPracticeLobbyListResponseEntry[] = [];
     const seen = new Set<bigint>();
     store.lobbies.forEach((lobby) => {

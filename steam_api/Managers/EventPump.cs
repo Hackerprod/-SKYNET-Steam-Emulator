@@ -1,6 +1,7 @@
 using SKYNET.Callback;
 using SKYNET.Helpers;
 using SKYNET.Network.Packets;
+using SKYNET.Protocol;
 using SKYNET.Steamworks;
 using System;
 using System.Text;
@@ -310,31 +311,51 @@ namespace SKYNET.Managers
 
         private static void ApplyP2PPacket(APIClient.ApiEvent serverEvent)
         {
-            var transport = string.IsNullOrWhiteSpace(serverEvent.Transport) ? "legacy" : serverEvent.Transport;
-            var socketControl = string.Equals(transport, "sockets_open", StringComparison.Ordinal) ||
-                                string.Equals(transport, "sockets_accept", StringComparison.Ordinal) ||
-                                string.Equals(transport, "sockets_reject", StringComparison.Ordinal) ||
-                                string.Equals(transport, "sockets_close", StringComparison.Ordinal);
-            if (string.IsNullOrWhiteSpace(serverEvent.PayloadBase64) && !socketControl)
+            if (!P2PTransportProtocol.TryParse(
+                    serverEvent.TransportVersion,
+                    serverEvent.Transport,
+                    out var transport,
+                    out var transportError))
             {
+                SteamEmulator.Write("EventPump", $"Dropping P2P frame: {transportError}");
+                return;
+            }
+
+            string validationError = null;
+            if (!P2PTransportProtocol.TryDecodePayload(serverEvent.PayloadBase64, out var payload) ||
+                !P2PTransportProtocol.TryValidateFrame(
+                    serverEvent.TransportVersion,
+                    transport,
+                    serverEvent.Channel,
+                    serverEvent.VirtualPort,
+                    serverEvent.SourceConnectionId,
+                    serverEvent.TargetConnectionId,
+                    payload.Length,
+                    out validationError))
+            {
+                SteamEmulator.Write(
+                    "EventPump",
+                    $"Dropping invalid P2P frame ({transport}): {validationError ?? "invalid Base64 payload"}");
                 return;
             }
 
             var remoteSteamId = serverEvent.RemoteSteamId != 0
                 ? serverEvent.RemoteSteamId
                 : serverEvent.SteamId;
-
-            if (string.Equals(transport, "messages", StringComparison.Ordinal))
+            if (remoteSteamId == 0)
             {
-                SteamEmulator.SteamNetworkingMessages?.ProcessMessage(remoteSteamId, serverEvent.Channel, Convert.FromBase64String(serverEvent.PayloadBase64));
+                SteamEmulator.Write("EventPump", $"Dropping P2P frame ({transport}) without a remote Steam ID");
                 return;
             }
 
-            if (transport.StartsWith("sockets_", StringComparison.Ordinal))
+            if (transport == P2PTransportKind.Messages)
             {
-                var payload = string.IsNullOrEmpty(serverEvent.PayloadBase64)
-                    ? Array.Empty<byte>()
-                    : Convert.FromBase64String(serverEvent.PayloadBase64);
+                SteamEmulator.SteamNetworkingMessages?.ProcessMessage(remoteSteamId, serverEvent.Channel, payload);
+                return;
+            }
+
+            if (P2PTransportProtocol.IsSockets(transport))
+            {
                 SteamEmulator.SteamNetworkingSockets?.ProcessRelayPacket(
                     transport,
                     remoteSteamId,
@@ -342,6 +363,12 @@ namespace SKYNET.Managers
                     serverEvent.SourceConnectionId,
                     serverEvent.TargetConnectionId,
                     payload);
+                return;
+            }
+
+            if (transport != P2PTransportKind.Legacy)
+            {
+                SteamEmulator.Write("EventPump", $"Dropping unhandled P2P transport: {transport}");
                 return;
             }
 
@@ -354,7 +381,7 @@ namespace SKYNET.Managers
             {
                 AccountID = ((ulong)SteamEmulator.SteamID).GetAccountID(),
                 Sender = remoteSteamId.GetAccountID(),
-                Buffer = serverEvent.PayloadBase64,
+                Buffer = Convert.ToBase64String(payload),
                 P2PSendType = 0,
                 Channel = serverEvent.Channel
             });

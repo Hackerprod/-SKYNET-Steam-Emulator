@@ -1,8 +1,8 @@
-﻿using SKYNET.Callback;
+using SKYNET.Callback;
+using SKYNET.Helpers.JSON;
 using SKYNET.Steamworks;
 using System;
 using System.Text;
-using System.Web.Script.Serialization;
 
 namespace SKYNET.Helpers
 {
@@ -81,7 +81,7 @@ namespace SKYNET.Helpers
             try
             {
                 string json = Encoding.Default.GetString(bytes);
-                T Body = new JavaScriptSerializer().Deserialize<T>(json);
+                T Body = json.FromJson<T>();
                 return (T)Body;
             }
             catch
@@ -94,7 +94,7 @@ namespace SKYNET.Helpers
         {
             try
             {
-                T Body = new JavaScriptSerializer().Deserialize<T>(json);
+                T Body = json.FromJson<T>();
                 return (T)Body;
             }
             catch
