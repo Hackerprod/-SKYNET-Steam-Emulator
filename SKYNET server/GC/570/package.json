@@ -9,7 +9,8 @@
         "format": "prettier --write .",
         "format:check": "prettier --check .",
         "boundaries": "powershell -ExecutionPolicy Bypass -File tools/verify-gc-ts-boundaries.ps1",
-        "test": "npm run typecheck && npm run lint && npm run format:check && npm run boundaries"
+        "test": "npm run typecheck && npm run lint && npm run format:check && npm run boundaries",
+        "generate": "powershell -ExecutionPolicy Bypass -File ../tools/generate-contracts.ps1 -AppId 570"
     },
     "devDependencies": {
         "@eslint/js": "^9.0.0",

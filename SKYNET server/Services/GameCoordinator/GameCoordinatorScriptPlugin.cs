@@ -13,6 +13,7 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
     private readonly ILogger<GameCoordinatorScriptPlugin> _logger;
     private readonly GameCoordinatorTraceService _trace;
     private readonly string _gcRoot;
+    private readonly GameCoordinatorAppCatalog _apps;
     private readonly GameCoordinatorProtoCodec _codec = new();
     private readonly object _cacheSync = new();
     private readonly Dictionary<uint, CachedScript> _cache = new();
@@ -24,21 +25,37 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
     {
         _logger = logger;
         _trace = trace;
-        _gcRoot = ResolveGcRoot(hostEnvironment.ContentRootPath);
+        _gcRoot = GameCoordinatorAppCatalog.ResolveRoot(hostEnvironment.ContentRootPath);
+        _apps = new GameCoordinatorAppCatalog(_gcRoot);
         _logger.LogInformation("GC script root resolved to {GCRoot}", _gcRoot);
     }
 
     public bool CanHandle(uint appId)
     {
-        return File.Exists(GetMainScriptPath(appId));
+        if (_apps.TryGetApp(appId, out _, out var error))
+        {
+            return true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(error))
+        {
+            _logger.LogWarning("GC app {AppId} is unavailable: {Reason}", appId, error);
+        }
+
+        return false;
     }
 
     public ApiGCExchangeResponse Exchange(GameCoordinatorContext context, ApiGCExchangeRequest request)
     {
-        var scriptRoot = GetScriptRoot(context.AppId);
-        var scriptPath = Path.Combine(scriptRoot, "main.ts");
-        if (!File.Exists(scriptPath))
+        if (!_apps.TryGetApp(context.AppId, out var app, out var catalogError))
         {
+            if (!string.IsNullOrWhiteSpace(catalogError))
+            {
+                _logger.LogWarning("GC app {AppId} cannot handle message {MessageType}: {Reason}",
+                    context.AppId, request.MessageType, catalogError);
+                _trace.Record("error", context.AppId, context.SteamId, request.MessageType, 0, catalogError);
+            }
+
             return new ApiGCExchangeResponse { Handled = false };
         }
 
@@ -47,7 +64,7 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
 
         try
         {
-            var cacheEntry = GetCachedScript(context.AppId, scriptRoot, scriptPath);
+            var cacheEntry = GetCachedScript(app);
             lock (cacheEntry.Sync)
             {
                 var host = new ScriptExchangeHost(context, request, _codec, _logger, _trace);
@@ -105,16 +122,19 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
 
         foreach (var appId in appIds)
         {
-            var scriptRoot = GetScriptRoot(appId);
-            var scriptPath = Path.Combine(scriptRoot, "main.ts");
-            if (!File.Exists(scriptPath))
+            if (!_apps.TryGetApp(appId, out var app, out var catalogError))
             {
+                if (!string.IsNullOrWhiteSpace(catalogError))
+                {
+                    _logger.LogWarning("GC app {AppId} tick skipped: {Reason}", appId, catalogError);
+                }
+
                 continue;
             }
 
             try
             {
-                var cacheEntry = GetCachedScript(appId, scriptRoot, scriptPath);
+                var cacheEntry = GetCachedScript(app);
                 lock (cacheEntry.Sync)
                 {
                     var host = new ScriptExchangeHost(
@@ -148,15 +168,19 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
         }
     }
 
-    private CachedScript GetCachedScript(uint appId, string scriptRoot, string scriptPath)
+    private CachedScript GetCachedScript(GameCoordinatorAppDefinition app)
     {
-        var latestWriteUtc = GetScriptTreeStamp(scriptRoot);
+        var appId = app.AppId;
+        var scriptRoot = app.RootPath;
+        var cacheKey = GetScriptCacheKey(app);
         lock (_cacheSync)
         {
-            if (_cache.TryGetValue(appId, out var cached) && cached.LastWriteUtc == latestWriteUtc)
+            if (_cache.TryGetValue(appId, out var cached) && cached.CacheKey == cacheKey)
             {
                 return cached;
             }
+
+            _codec.ConfigureApp(app, typeof(GameCoordinatorScriptPlugin).Assembly);
 
             var dispatcher = new ScriptHostDispatcher();
             var builder = new TypeSharpRuntimeBuilder()
@@ -177,115 +201,11 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 .RegisterHostFunction("gc", "decode", dispatcher.Decode)
                 .RegisterHostFunction("gc", "encode", dispatcher.Encode)
                 .RegisterHostFunction("gc", "send", dispatcher.Send)
-                .RegisterHostFunction("gc", "reply", dispatcher.Reply)
-                .RegisterHostFunction("gc", "dotaInventory", dispatcher.DotaInventory)
-                .RegisterHostFunction("gc", "dotaCatalogItem", dispatcher.DotaCatalogItem)
-                .RegisterHostFunction("gc", "dotaClientVersion", dispatcher.DotaClientVersion)
-                .RegisterHostFunction("gc", "dotaEquipItem", dispatcher.DotaEquipItem)
-                .RegisterHostFunction("gc", "dotaSetItemStyle", dispatcher.DotaSetItemStyle)
-                .RegisterHostFunction("gc", "dotaProfile", dispatcher.DotaProfile)
-                .RegisterHostFunction("gc", "dotaSaveProfileSlots", dispatcher.DotaSaveProfileSlots)
-                .RegisterHostFunction("gc", "dotaSaveProfileUpdate", dispatcher.DotaSaveProfileUpdate)
-                .RegisterHostFunction("gc", "dotaProfileConductScorecard", dispatcher.DotaProfileConductScorecard)
-                .RegisterHostFunction("gc", "dotaProfileQuestProgress", dispatcher.DotaProfileQuestProgress)
-                .RegisterHostFunction("gc", "dotaProfilePeriodicResource", dispatcher.DotaProfilePeriodicResource)
-                .RegisterHostFunction("gc", "dotaProfileHeroStickers", dispatcher.DotaProfileHeroStickers)
-                .RegisterHostFunction("gc", "dotaProfileSetHeroSticker", dispatcher.DotaProfileSetHeroSticker)
-                .RegisterHostFunction("gc", "dotaProfileOverworldState", dispatcher.DotaProfileOverworldState)
-                .RegisterHostFunction("gc", "dotaProfileMonsterHunterState", dispatcher.DotaProfileMonsterHunterState)
-                .RegisterHostFunction("gc", "dotaSocialEmoticonAccess", _ => dispatcher.RequireCurrent().DotaSocialEmoticonAccess())
-                .RegisterHostFunction("gc", "dotaSocialFeed", dispatcher.DotaSocialFeed)
-                .RegisterHostFunction("gc", "dotaSocialFeedComments", dispatcher.DotaSocialFeedComments)
-                .RegisterHostFunction("gc", "dotaSocialFeedPostComment", dispatcher.DotaSocialFeedPostComment)
-                .RegisterHostFunction("gc", "dotaSocialMatchComments", dispatcher.DotaSocialMatchComments)
-                .RegisterHostFunction("gc", "dotaSocialMatchPostComment", dispatcher.DotaSocialMatchPostComment)
-                .RegisterHostFunction("gc", "dotaChatChannels", dispatcher.DotaChatChannels)
-                .RegisterHostFunction("gc", "dotaChatJoinChannel", dispatcher.DotaChatJoinChannel)
-                .RegisterHostFunction("gc", "dotaChatChannel", dispatcher.DotaChatChannel)
-                .RegisterHostFunction("gc", "dotaChatLeaveChannel", dispatcher.DotaChatLeaveChannel)
-                .RegisterHostFunction("gc", "dotaChatBroadcast", dispatcher.DotaChatBroadcast)
-                .RegisterHostFunction("gc", "dotaGuildEnsureCurrent", dispatcher.DotaGuildEnsureCurrent)
-                .RegisterHostFunction("gc", "dotaGuildMembership", dispatcher.DotaGuildMembership)
-                .RegisterHostFunction("gc", "dotaGuild", dispatcher.DotaGuild)
-                .RegisterHostFunction("gc", "dotaGuildPersonaInfo", dispatcher.DotaGuildPersonaInfo)
-                .RegisterHostFunction("gc", "dotaGuildEventData", dispatcher.DotaGuildEventData)
-                .RegisterHostFunction("gc", "dotaGuildInvite", dispatcher.DotaGuildInvite)
-                .RegisterHostFunction("gc", "dotaGuildDeclineInvite", dispatcher.DotaGuildDeclineInvite)
-                .RegisterHostFunction("gc", "dotaGuildCancelInvite", dispatcher.DotaGuildCancelInvite)
-                .RegisterHostFunction("gc", "dotaGuildAcceptInvite", dispatcher.DotaGuildAcceptInvite)
-                .RegisterHostFunction("gc", "dotaGuildLeave", dispatcher.DotaGuildLeave)
-                .RegisterHostFunction("gc", "dotaReporterUpdates", dispatcher.DotaReporterUpdates)
-                .RegisterHostFunction("gc", "dotaAcknowledgeReporterUpdates", dispatcher.DotaAcknowledgeReporterUpdates)
-                .RegisterHostFunction("gc", "dotaTeam", dispatcher.DotaTeam)
-                .RegisterHostFunction("gc", "dotaTeamsForAccount", dispatcher.DotaTeamsForAccount)
-                .RegisterHostFunction("gc", "dotaNextTeamId", dispatcher.DotaNextTeamId)
-                .RegisterHostFunction("gc", "dotaUpsertTeam", dispatcher.DotaUpsertTeam)
-                .RegisterHostFunction("gc", "dotaAddTeamMember", dispatcher.DotaAddTeamMember)
-                .RegisterHostFunction("gc", "dotaRemoveTeamMember", dispatcher.DotaRemoveTeamMember)
-                .RegisterHostFunction("gc", "dotaRemoveTeam", dispatcher.DotaRemoveTeam)
-                .RegisterHostFunction("gc", "dotaTeamNameAvailable", dispatcher.DotaTeamNameAvailable)
-                .RegisterHostFunction("gc", "dotaTeamTagAvailable", dispatcher.DotaTeamTagAvailable)
-                .RegisterHostFunction("gc", "dotaTeamPlayerInfo", dispatcher.DotaTeamPlayerInfo)
-                .RegisterHostFunction("gc", "dotaUpsertTeamPlayerInfo", dispatcher.DotaUpsertTeamPlayerInfo)
-                .RegisterHostFunction("gc", "dotaDeleteTeamPlayerInfo", dispatcher.DotaDeleteTeamPlayerInfo)
-                .RegisterHostFunction("gc", "dotaLookupAccountName", dispatcher.DotaLookupAccountName)
-                .RegisterHostFunction("gc", "dotaEventPoints", dispatcher.DotaEventPoints)
-                .RegisterHostFunction("gc", "dotaHeroStandings", dispatcher.DotaHeroStandings)
-                .RegisterHostFunction("gc", "dotaHeroGlobalData", dispatcher.DotaHeroGlobalData)
-                .RegisterHostFunction("gc", "dotaPlayerStats", dispatcher.DotaPlayerStats)
-                .RegisterHostFunction("gc", "dotaRank", dispatcher.DotaRank)
-                .RegisterHostFunction("gc", "dotaTeammateStats", dispatcher.DotaTeammateStats)
-                .RegisterHostFunction("gc", "dotaMatchHistory", dispatcher.DotaMatchHistory)
-                .RegisterHostFunction("gc", "dotaMatchDetails", dispatcher.DotaMatchDetails)
-                .RegisterHostFunction("gc", "dotaHeroStatsHistory", dispatcher.DotaHeroStatsHistory)
-                .RegisterHostFunction("gc", "dotaMatchVotes", dispatcher.DotaMatchVotes)
-                .RegisterHostFunction("gc", "dotaShowcaseStats", dispatcher.DotaShowcaseStats)
-                .RegisterHostFunction("gc", "dotaRecentAccomplishments", dispatcher.DotaRecentAccomplishments)
-                .RegisterHostFunction("gc", "dotaHeroRecentAccomplishments", dispatcher.DotaHeroRecentAccomplishments)
-                .RegisterHostFunction("gc", "dotaHasMvpVote", dispatcher.DotaHasMvpVote)
-                .RegisterHostFunction("gc", "dotaVoteForMvp", dispatcher.DotaVoteForMvp)
-                .RegisterHostFunction("gc", "dotaFinalizeMvpVote", dispatcher.DotaFinalizeMvpVote)
-                .RegisterHostFunction("gc", "dotaSubmitLobbyMvpVote", dispatcher.DotaSubmitLobbyMvpVote)
-                .RegisterHostFunction("gc", "dotaRecordSignOutMvpStats", dispatcher.DotaRecordSignOutMvpStats)
-                .RegisterHostFunction("gc", "dotaRerollPlayerChallenge", dispatcher.DotaRerollPlayerChallenge)
-                .RegisterHostFunction("gc", "dotaRecordMatchSignOutPermission", dispatcher.DotaRecordMatchSignOutPermission)
-                .RegisterHostFunction("gc", "dotaSetMatchHistoryAccess", dispatcher.DotaSetMatchHistoryAccess)
-                .RegisterHostFunction("gc", "dotaRecordServerStatus", dispatcher.DotaRecordServerStatus)
-                .RegisterHostFunction("gc", "dotaRecordLeaver", dispatcher.DotaRecordLeaver)
-                .RegisterHostFunction("gc", "dotaRecordRealtimeStats", dispatcher.DotaRecordRealtimeStats)
-                .RegisterHostFunction("gc", "dotaRecordMatchStateHistory", dispatcher.DotaRecordMatchStateHistory)
-                .RegisterHostFunction("gc", "dotaRecordSpectatorCount", dispatcher.DotaRecordSpectatorCount)
-                .RegisterHostFunction("gc", "dotaRecordLiveScoreboard", dispatcher.DotaRecordLiveScoreboard)
-                .RegisterHostFunction("gc", "dotaSavePlayerReport", dispatcher.DotaSavePlayerReport)
-                .RegisterHostFunction("gc", "dotaPartyCurrent", _ => dispatcher.RequireCurrent().DotaPartyCurrent())
-                .RegisterHostFunction("gc", "dotaPartyById", dispatcher.DotaPartyById)
-                .RegisterHostFunction("gc", "dotaPartyEnsureCurrent", dispatcher.DotaPartyEnsureCurrent)
-                .RegisterHostFunction("gc", "dotaPartyAddMember", dispatcher.DotaPartyAddMember)
-                .RegisterHostFunction("gc", "dotaPartyRemoveMember", dispatcher.DotaPartyRemoveMember)
-                .RegisterHostFunction("gc", "dotaPartyDelete", dispatcher.DotaPartyDelete)
-                .RegisterHostFunction("gc", "dotaPartySetLeader", dispatcher.DotaPartySetLeader)
-                .RegisterHostFunction("gc", "dotaPartySetCoach", dispatcher.DotaPartySetCoach)
-                .RegisterHostFunction("gc", "dotaPartySetPing", dispatcher.DotaPartySetPing)
-                .RegisterHostFunction("gc", "dotaPartyStartReadyCheck", dispatcher.DotaPartyStartReadyCheck)
-                .RegisterHostFunction("gc", "dotaPartyAcknowledgeReadyCheck", dispatcher.DotaPartyAcknowledgeReadyCheck)
-                .RegisterHostFunction("gc", "dotaPartyCreateInvite", dispatcher.DotaPartyCreateInvite)
-                .RegisterHostFunction("gc", "dotaPartyTakeInvite", dispatcher.DotaPartyTakeInvite)
-                .RegisterHostFunction("gc", "dotaPartyInvitesForTarget", dispatcher.DotaPartyInvitesForTarget)
-                .RegisterHostFunction("gc", "dotaPartyDeleteInvitesForTarget", dispatcher.DotaPartyDeleteInvitesForTarget)
-                .RegisterHostFunction("gc", "dotaPartyDeleteInvitesForParty", dispatcher.DotaPartyDeleteInvitesForParty)
-                .RegisterHostFunction("gc", "dotaPartyPruneInvitesCreatedBefore", dispatcher.DotaPartyPruneInvitesCreatedBefore)
-                .RegisterHostFunction("gc", "dotaPartyUserExists", dispatcher.DotaPartyUserExists)
-                .RegisterHostFunction("gc", "dotaPartyUserOnline", dispatcher.DotaPartyUserOnline)
-                .RegisterHostFunction("gc", "dotaQueueGcMessage", dispatcher.DotaQueueGcMessage)
-                .RegisterHostFunction("gc", "dotaPublishMatchSnapshot", dispatcher.DotaPublishMatchSnapshot)
-                .RegisterHostFunction("gc", "dotaListMatchSnapshots", dispatcher.DotaListMatchSnapshots)
-                .RegisterHostFunction("gc", "dotaRemoveMatchSnapshot", dispatcher.DotaRemoveMatchSnapshot)
-                .RegisterHostFunction("gc", "dotaStartDedicatedServer", dispatcher.DotaStartDedicatedServer)
-                .RegisterHostFunction("gc", "dotaReleaseDedicatedServer", dispatcher.DotaReleaseDedicatedServer)
-                .RegisterHostFunction("gc", "dotaResolveGameServerConnectIp", dispatcher.DotaResolveGameServerConnectIp)
-                .RegisterHostFunction("gc", "dotaResolveGameServerConnectIps", dispatcher.DotaResolveGameServerConnectIps);
+                .RegisterHostFunction("gc", "reply", dispatcher.Reply);
 
-            foreach (var sourceFile in EnumerateRuntimeScriptFiles(scriptRoot))
+            RegisterAppHostServices(builder, dispatcher, app);
+
+            foreach (var sourceFile in EnumerateRuntimeScriptFiles(app))
             {
                 builder.AddSourceFile(sourceFile);
             }
@@ -296,32 +216,173 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                 old.Runtime.DisposeAsync().AsTask().GetAwaiter().GetResult();
             }
 
-            cached = new CachedScript(runtime, dispatcher, latestWriteUtc);
+            cached = new CachedScript(runtime, dispatcher, cacheKey);
             _cache[appId] = cached;
             _logger.LogInformation("GC script loaded for app {AppId} from {ScriptRoot}", appId, scriptRoot);
             return cached;
         }
     }
 
-    private static DateTime GetScriptTreeStamp(string scriptRoot)
+
+    private static void RegisterAppHostServices(
+        TypeSharpRuntimeBuilder builder,
+        ScriptHostDispatcher dispatcher,
+        GameCoordinatorAppDefinition app)
     {
-        return EnumerateRuntimeScriptFiles(scriptRoot)
-            .Select(File.GetLastWriteTimeUtc)
-            .DefaultIfEmpty(DateTime.MinValue)
-            .Max();
+        foreach (var serviceName in app.HostServices)
+        {
+            if (string.Equals(serviceName, DotaGcRuntimeServices.HostServiceName, StringComparison.OrdinalIgnoreCase))
+            {
+                if (app.AppId != DotaGcRuntimeServices.AppId)
+                {
+                    throw new InvalidOperationException(
+                        $"GC app {app.AppId} is not authorized for host service '{serviceName}' in {app.ManifestPath}");
+                }
+
+                RegisterDotaHostFunctions(builder, dispatcher);
+                continue;
+            }
+
+            throw new InvalidOperationException(
+                $"GC app {app.AppId} declares unsupported host service '{serviceName}' in {app.ManifestPath}");
+        }
     }
 
-    private static IEnumerable<string> EnumerateRuntimeScriptFiles(string scriptRoot)
+    private static void RegisterDotaHostFunctions(TypeSharpRuntimeBuilder builder, ScriptHostDispatcher dispatcher)
     {
-        var main = Path.Combine(scriptRoot, "main.ts");
-        if (File.Exists(main))
+        builder
+            .RegisterHostFunction("gc", "dotaInventory", dispatcher.DotaInventory)
+            .RegisterHostFunction("gc", "dotaCatalogItem", dispatcher.DotaCatalogItem)
+            .RegisterHostFunction("gc", "dotaClientVersion", dispatcher.DotaClientVersion)
+            .RegisterHostFunction("gc", "dotaEquipItem", dispatcher.DotaEquipItem)
+            .RegisterHostFunction("gc", "dotaSetItemStyle", dispatcher.DotaSetItemStyle)
+            .RegisterHostFunction("gc", "dotaProfile", dispatcher.DotaProfile)
+            .RegisterHostFunction("gc", "dotaSaveProfileSlots", dispatcher.DotaSaveProfileSlots)
+            .RegisterHostFunction("gc", "dotaSaveProfileUpdate", dispatcher.DotaSaveProfileUpdate)
+            .RegisterHostFunction("gc", "dotaProfileConductScorecard", dispatcher.DotaProfileConductScorecard)
+            .RegisterHostFunction("gc", "dotaProfileQuestProgress", dispatcher.DotaProfileQuestProgress)
+            .RegisterHostFunction("gc", "dotaProfilePeriodicResource", dispatcher.DotaProfilePeriodicResource)
+            .RegisterHostFunction("gc", "dotaProfileHeroStickers", dispatcher.DotaProfileHeroStickers)
+            .RegisterHostFunction("gc", "dotaProfileSetHeroSticker", dispatcher.DotaProfileSetHeroSticker)
+            .RegisterHostFunction("gc", "dotaProfileOverworldState", dispatcher.DotaProfileOverworldState)
+            .RegisterHostFunction("gc", "dotaProfileMonsterHunterState", dispatcher.DotaProfileMonsterHunterState)
+            .RegisterHostFunction("gc", "dotaSocialEmoticonAccess", _ => dispatcher.RequireCurrent().DotaSocialEmoticonAccess())
+            .RegisterHostFunction("gc", "dotaSocialFeed", dispatcher.DotaSocialFeed)
+            .RegisterHostFunction("gc", "dotaSocialFeedComments", dispatcher.DotaSocialFeedComments)
+            .RegisterHostFunction("gc", "dotaSocialFeedPostComment", dispatcher.DotaSocialFeedPostComment)
+            .RegisterHostFunction("gc", "dotaSocialMatchComments", dispatcher.DotaSocialMatchComments)
+            .RegisterHostFunction("gc", "dotaSocialMatchPostComment", dispatcher.DotaSocialMatchPostComment)
+            .RegisterHostFunction("gc", "dotaChatChannels", dispatcher.DotaChatChannels)
+            .RegisterHostFunction("gc", "dotaChatJoinChannel", dispatcher.DotaChatJoinChannel)
+            .RegisterHostFunction("gc", "dotaChatChannel", dispatcher.DotaChatChannel)
+            .RegisterHostFunction("gc", "dotaChatLeaveChannel", dispatcher.DotaChatLeaveChannel)
+            .RegisterHostFunction("gc", "dotaChatBroadcast", dispatcher.DotaChatBroadcast)
+            .RegisterHostFunction("gc", "dotaGuildEnsureCurrent", dispatcher.DotaGuildEnsureCurrent)
+            .RegisterHostFunction("gc", "dotaGuildMembership", dispatcher.DotaGuildMembership)
+            .RegisterHostFunction("gc", "dotaGuild", dispatcher.DotaGuild)
+            .RegisterHostFunction("gc", "dotaGuildPersonaInfo", dispatcher.DotaGuildPersonaInfo)
+            .RegisterHostFunction("gc", "dotaGuildEventData", dispatcher.DotaGuildEventData)
+            .RegisterHostFunction("gc", "dotaGuildInvite", dispatcher.DotaGuildInvite)
+            .RegisterHostFunction("gc", "dotaGuildDeclineInvite", dispatcher.DotaGuildDeclineInvite)
+            .RegisterHostFunction("gc", "dotaGuildCancelInvite", dispatcher.DotaGuildCancelInvite)
+            .RegisterHostFunction("gc", "dotaGuildAcceptInvite", dispatcher.DotaGuildAcceptInvite)
+            .RegisterHostFunction("gc", "dotaGuildLeave", dispatcher.DotaGuildLeave)
+            .RegisterHostFunction("gc", "dotaReporterUpdates", dispatcher.DotaReporterUpdates)
+            .RegisterHostFunction("gc", "dotaAcknowledgeReporterUpdates", dispatcher.DotaAcknowledgeReporterUpdates)
+            .RegisterHostFunction("gc", "dotaTeam", dispatcher.DotaTeam)
+            .RegisterHostFunction("gc", "dotaTeamsForAccount", dispatcher.DotaTeamsForAccount)
+            .RegisterHostFunction("gc", "dotaNextTeamId", dispatcher.DotaNextTeamId)
+            .RegisterHostFunction("gc", "dotaUpsertTeam", dispatcher.DotaUpsertTeam)
+            .RegisterHostFunction("gc", "dotaAddTeamMember", dispatcher.DotaAddTeamMember)
+            .RegisterHostFunction("gc", "dotaRemoveTeamMember", dispatcher.DotaRemoveTeamMember)
+            .RegisterHostFunction("gc", "dotaRemoveTeam", dispatcher.DotaRemoveTeam)
+            .RegisterHostFunction("gc", "dotaTeamNameAvailable", dispatcher.DotaTeamNameAvailable)
+            .RegisterHostFunction("gc", "dotaTeamTagAvailable", dispatcher.DotaTeamTagAvailable)
+            .RegisterHostFunction("gc", "dotaTeamPlayerInfo", dispatcher.DotaTeamPlayerInfo)
+            .RegisterHostFunction("gc", "dotaUpsertTeamPlayerInfo", dispatcher.DotaUpsertTeamPlayerInfo)
+            .RegisterHostFunction("gc", "dotaDeleteTeamPlayerInfo", dispatcher.DotaDeleteTeamPlayerInfo)
+            .RegisterHostFunction("gc", "dotaLookupAccountName", dispatcher.DotaLookupAccountName)
+            .RegisterHostFunction("gc", "dotaEventPoints", dispatcher.DotaEventPoints)
+            .RegisterHostFunction("gc", "dotaHeroStandings", dispatcher.DotaHeroStandings)
+            .RegisterHostFunction("gc", "dotaHeroGlobalData", dispatcher.DotaHeroGlobalData)
+            .RegisterHostFunction("gc", "dotaPlayerStats", dispatcher.DotaPlayerStats)
+            .RegisterHostFunction("gc", "dotaRank", dispatcher.DotaRank)
+            .RegisterHostFunction("gc", "dotaTeammateStats", dispatcher.DotaTeammateStats)
+            .RegisterHostFunction("gc", "dotaMatchHistory", dispatcher.DotaMatchHistory)
+            .RegisterHostFunction("gc", "dotaMatchDetails", dispatcher.DotaMatchDetails)
+            .RegisterHostFunction("gc", "dotaHeroStatsHistory", dispatcher.DotaHeroStatsHistory)
+            .RegisterHostFunction("gc", "dotaMatchVotes", dispatcher.DotaMatchVotes)
+            .RegisterHostFunction("gc", "dotaShowcaseStats", dispatcher.DotaShowcaseStats)
+            .RegisterHostFunction("gc", "dotaRecentAccomplishments", dispatcher.DotaRecentAccomplishments)
+            .RegisterHostFunction("gc", "dotaHeroRecentAccomplishments", dispatcher.DotaHeroRecentAccomplishments)
+            .RegisterHostFunction("gc", "dotaHasMvpVote", dispatcher.DotaHasMvpVote)
+            .RegisterHostFunction("gc", "dotaVoteForMvp", dispatcher.DotaVoteForMvp)
+            .RegisterHostFunction("gc", "dotaFinalizeMvpVote", dispatcher.DotaFinalizeMvpVote)
+            .RegisterHostFunction("gc", "dotaSubmitLobbyMvpVote", dispatcher.DotaSubmitLobbyMvpVote)
+            .RegisterHostFunction("gc", "dotaRecordSignOutMvpStats", dispatcher.DotaRecordSignOutMvpStats)
+            .RegisterHostFunction("gc", "dotaRerollPlayerChallenge", dispatcher.DotaRerollPlayerChallenge)
+            .RegisterHostFunction("gc", "dotaRecordMatchSignOutPermission", dispatcher.DotaRecordMatchSignOutPermission)
+            .RegisterHostFunction("gc", "dotaSetMatchHistoryAccess", dispatcher.DotaSetMatchHistoryAccess)
+            .RegisterHostFunction("gc", "dotaRecordServerStatus", dispatcher.DotaRecordServerStatus)
+            .RegisterHostFunction("gc", "dotaRecordLeaver", dispatcher.DotaRecordLeaver)
+            .RegisterHostFunction("gc", "dotaRecordRealtimeStats", dispatcher.DotaRecordRealtimeStats)
+            .RegisterHostFunction("gc", "dotaRecordMatchStateHistory", dispatcher.DotaRecordMatchStateHistory)
+            .RegisterHostFunction("gc", "dotaRecordSpectatorCount", dispatcher.DotaRecordSpectatorCount)
+            .RegisterHostFunction("gc", "dotaRecordLiveScoreboard", dispatcher.DotaRecordLiveScoreboard)
+            .RegisterHostFunction("gc", "dotaSavePlayerReport", dispatcher.DotaSavePlayerReport)
+            .RegisterHostFunction("gc", "dotaPartyCurrent", _ => dispatcher.RequireCurrent().DotaPartyCurrent())
+            .RegisterHostFunction("gc", "dotaPartyById", dispatcher.DotaPartyById)
+            .RegisterHostFunction("gc", "dotaPartyEnsureCurrent", dispatcher.DotaPartyEnsureCurrent)
+            .RegisterHostFunction("gc", "dotaPartyAddMember", dispatcher.DotaPartyAddMember)
+            .RegisterHostFunction("gc", "dotaPartyRemoveMember", dispatcher.DotaPartyRemoveMember)
+            .RegisterHostFunction("gc", "dotaPartyDelete", dispatcher.DotaPartyDelete)
+            .RegisterHostFunction("gc", "dotaPartySetLeader", dispatcher.DotaPartySetLeader)
+            .RegisterHostFunction("gc", "dotaPartySetCoach", dispatcher.DotaPartySetCoach)
+            .RegisterHostFunction("gc", "dotaPartySetPing", dispatcher.DotaPartySetPing)
+            .RegisterHostFunction("gc", "dotaPartyStartReadyCheck", dispatcher.DotaPartyStartReadyCheck)
+            .RegisterHostFunction("gc", "dotaPartyAcknowledgeReadyCheck", dispatcher.DotaPartyAcknowledgeReadyCheck)
+            .RegisterHostFunction("gc", "dotaPartyCreateInvite", dispatcher.DotaPartyCreateInvite)
+            .RegisterHostFunction("gc", "dotaPartyTakeInvite", dispatcher.DotaPartyTakeInvite)
+            .RegisterHostFunction("gc", "dotaPartyInvitesForTarget", dispatcher.DotaPartyInvitesForTarget)
+            .RegisterHostFunction("gc", "dotaPartyDeleteInvitesForTarget", dispatcher.DotaPartyDeleteInvitesForTarget)
+            .RegisterHostFunction("gc", "dotaPartyDeleteInvitesForParty", dispatcher.DotaPartyDeleteInvitesForParty)
+            .RegisterHostFunction("gc", "dotaPartyPruneInvitesCreatedBefore", dispatcher.DotaPartyPruneInvitesCreatedBefore)
+            .RegisterHostFunction("gc", "dotaPartyUserExists", dispatcher.DotaPartyUserExists)
+            .RegisterHostFunction("gc", "dotaPartyUserOnline", dispatcher.DotaPartyUserOnline)
+            .RegisterHostFunction("gc", "dotaQueueGcMessage", dispatcher.DotaQueueGcMessage)
+            .RegisterHostFunction("gc", "dotaPublishMatchSnapshot", dispatcher.DotaPublishMatchSnapshot)
+            .RegisterHostFunction("gc", "dotaListMatchSnapshots", dispatcher.DotaListMatchSnapshots)
+            .RegisterHostFunction("gc", "dotaRemoveMatchSnapshot", dispatcher.DotaRemoveMatchSnapshot)
+            .RegisterHostFunction("gc", "dotaStartDedicatedServer", dispatcher.DotaStartDedicatedServer)
+            .RegisterHostFunction("gc", "dotaReleaseDedicatedServer", dispatcher.DotaReleaseDedicatedServer)
+            .RegisterHostFunction("gc", "dotaResolveGameServerConnectIp", dispatcher.DotaResolveGameServerConnectIp)
+            .RegisterHostFunction("gc", "dotaResolveGameServerConnectIps", dispatcher.DotaResolveGameServerConnectIps);
+    }
+
+    private static string GetScriptCacheKey(GameCoordinatorAppDefinition app)
+    {
+        var fileIdentities = EnumerateRuntimeScriptFiles(app)
+            .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
+            .Select(path =>
+            {
+                var file = new FileInfo(path);
+                return string.Join(':', Path.GetRelativePath(app.RootPath, path), file.Length, file.LastWriteTimeUtc.Ticks);
+            });
+
+        return string.Join('|', new[] { app.RuntimeCacheKey }.Concat(fileIdentities));
+    }
+
+    private static IEnumerable<string> EnumerateRuntimeScriptFiles(GameCoordinatorAppDefinition app)
+    {
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (File.Exists(app.MainScriptPath) && seen.Add(Path.GetFullPath(app.MainScriptPath)))
         {
-            yield return main;
+            yield return app.MainScriptPath;
         }
 
         foreach (var directoryName in new[] { "framework", "generated", "modules" })
         {
-            var directory = Path.Combine(scriptRoot, directoryName);
+            var directory = Path.Combine(app.RootPath, directoryName);
             if (!Directory.Exists(directory))
             {
                 continue;
@@ -330,62 +391,28 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
             foreach (var file in Directory.EnumerateFiles(directory, "*.ts", SearchOption.AllDirectories)
                          .Where(path => !path.EndsWith(".d.ts", StringComparison.OrdinalIgnoreCase)))
             {
-                yield return file;
+                var fullPath = Path.GetFullPath(file);
+                if (seen.Add(fullPath))
+                {
+                    yield return fullPath;
+                }
             }
         }
     }
 
-    private string GetMainScriptPath(uint appId)
-    {
-        return Path.Combine(GetScriptRoot(appId), "main.ts");
-    }
-
-    private string GetScriptRoot(uint appId)
-    {
-        return Path.Combine(_gcRoot, appId.ToString());
-    }
-
-    private static string ResolveGcRoot(string contentRootPath)
-    {
-        var configuredRoot = Environment.GetEnvironmentVariable("SKYNET_GC_ROOT");
-        if (IsValidGcRoot(configuredRoot))
-        {
-            return Path.GetFullPath(configuredRoot!);
-        }
-
-        var current = new DirectoryInfo(contentRootPath);
-        while (current != null)
-        {
-            var candidate = Path.Combine(current.FullName, "GC");
-            if (IsValidGcRoot(candidate))
-            {
-                return candidate;
-            }
-
-            current = current.Parent;
-        }
-
-        return Path.Combine(contentRootPath, "GC");
-    }
-
-    private static bool IsValidGcRoot(string? path)
-    {
-        return !string.IsNullOrWhiteSpace(path)
-            && File.Exists(Path.Combine(path, "570", "main.ts"));
-    }
 
     private sealed class CachedScript
     {
-        public CachedScript(TypeSharpRuntime runtime, ScriptHostDispatcher dispatcher, DateTime lastWriteUtc)
+        public CachedScript(TypeSharpRuntime runtime, ScriptHostDispatcher dispatcher, string cacheKey)
         {
             Runtime = runtime;
             Dispatcher = dispatcher;
-            LastWriteUtc = lastWriteUtc;
+            CacheKey = cacheKey;
         }
 
         public TypeSharpRuntime Runtime { get; }
         public ScriptHostDispatcher Dispatcher { get; }
-        public DateTime LastWriteUtc { get; }
+        public string CacheKey { get; }
         public object Sync { get; } = new();
     }
 }
@@ -1000,7 +1027,7 @@ internal sealed class ScriptExchangeHost
             throw new InvalidOperationException("decode(typeName, payload) requires two arguments");
         }
 
-        return _codec.Decode(ToString(args[0]), ToBytes(args[1]));
+        return _codec.Decode(_context.AppId, ToString(args[0]), ToBytes(args[1]));
     }
 
     public TsValue? Encode(TsValue[] args)
@@ -1010,7 +1037,7 @@ internal sealed class ScriptExchangeHost
             throw new InvalidOperationException("encode(typeName, value) requires two arguments");
         }
 
-        return ToArray(_codec.Encode(ToString(args[0]), args[1]));
+        return ToArray(_codec.Encode(_context.AppId, ToString(args[0]), args[1]));
     }
 
     public TsValue? Send(TsValue[] args)

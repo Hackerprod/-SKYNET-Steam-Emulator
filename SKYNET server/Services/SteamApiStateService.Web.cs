@@ -10,7 +10,7 @@ public sealed partial class SteamApiStateService
     private const string DefaultAdminUsername = "Hackerprod";
     private const string DefaultAdminPassword = "Steam2026";
     private const uint DefaultAdminAccountId = 9931;
-    private const uint DefaultAppId = 570;
+    private const uint WebAccountAppId = 0;
     private const int PasswordIterations = 100_000;
     private static readonly TimeSpan WebSessionLifetime = TimeSpan.FromHours(12);
     private static readonly TimeSpan RememberedWebSessionLifetime = TimeSpan.FromDays(30);
@@ -27,7 +27,7 @@ public sealed partial class SteamApiStateService
 
             if (!_state.Users.TryGetValue(account.SteamId, out var existingUser))
             {
-                existingUser = EnsureUser(account.SteamId, SteamIdToAccountId(account.SteamId), DefaultAppId, account.Username);
+                existingUser = EnsureUser(account.SteamId, SteamIdToAccountId(account.SteamId), WebAccountAppId, account.Username);
             }
             else if (!string.Equals(existingUser.PersonaName, account.Username, StringComparison.Ordinal))
             {
@@ -66,7 +66,7 @@ public sealed partial class SteamApiStateService
             var accountId = AllocateAccountIdLocked();
             var steamId = ToSteamId(accountId);
             var initialPersonaName = username.Trim();
-            var user = EnsureUser(steamId, accountId, DefaultAppId, initialPersonaName);
+            var user = EnsureUser(steamId, accountId, WebAccountAppId, initialPersonaName);
             var account = new ApiWebAccount
             {
                 Username = initialPersonaName,
@@ -192,6 +192,8 @@ public sealed partial class SteamApiStateService
             var activeLobbies = _state.Lobbies.Values.Count(l => l.Members.Count > 0);
             var statCount = stats.Stats.Count;
             var achievementCount = stats.Achievements.Count;
+            var dashboardAppId = ResolveDashboardAppIdLocked(user);
+            var dashboardGameName = _gameCatalog.GetName(dashboardAppId);
 
             return new SteamUiSnapshot
             {
@@ -205,8 +207,8 @@ public sealed partial class SteamApiStateService
                 },
                 FeaturedGame = new SteamGame
                 {
-                    Name = "Dota 2",
-                    Genre = "MOBA",
+                    Name = dashboardGameName,
+                    Genre = "Steamworks",
                     Status = activeServers > 0 ? "Server online" : "Idle",
                     Description = "Emulated Steam API session backed by SKYNET server state.",
                     HoursPlayed = (int)(stats.Stats.FirstOrDefault(s => s.Name.Equals("playtime", StringComparison.OrdinalIgnoreCase))?.Data ?? 0),
@@ -225,8 +227,8 @@ public sealed partial class SteamApiStateService
                 {
                     new SteamGame
                     {
-                        Name = "Dota 2",
-                        Genre = "MOBA",
+                        Name = dashboardGameName,
+                        Genre = "Steamworks",
                         Status = activeServers > 0 ? "Ready" : "Waiting",
                         Description = "Steamworks emulation, GC routing and local profile state.",
                         HoursPlayed = (int)(stats.Stats.FirstOrDefault(s => s.Name.Equals("playtime", StringComparison.OrdinalIgnoreCase))?.Data ?? 0),
@@ -239,7 +241,7 @@ public sealed partial class SteamApiStateService
                 Achievements = stats.Achievements.Select(a => new SteamAchievement
                 {
                     Title = a.Name,
-                    Game = "Dota 2",
+                    Game = dashboardGameName,
                     Description = a.Earned ? "Unlocked" : "In progress",
                     Rarity = a.Earned ? "Unlocked" : "Locked",
                     Unlocked = a.Earned,
@@ -509,7 +511,7 @@ public sealed partial class SteamApiStateService
 
             var accountId = AllocateAccountIdLocked();
             var steamId = ToSteamId(accountId);
-            var user = EnsureUser(steamId, accountId, DefaultAppId, personaName.Trim());
+            var user = EnsureUser(steamId, accountId, WebAccountAppId, personaName.Trim());
             var account = new ApiWebAccount
             {
                 Username = username.Trim(),
@@ -536,7 +538,7 @@ public sealed partial class SteamApiStateService
             }
 
             var steamId = ToSteamId(DefaultAdminAccountId);
-            var user = EnsureUser(steamId, DefaultAdminAccountId, DefaultAppId, DefaultAdminUsername);
+            var user = EnsureUser(steamId, DefaultAdminAccountId, WebAccountAppId, DefaultAdminUsername);
             user.HasFriend = false;
             _state.WebAccounts[NormalizeUsername(DefaultAdminUsername)] = new ApiWebAccount
             {
@@ -604,6 +606,30 @@ public sealed partial class SteamApiStateService
         }
 
         return _state.Users.Values.OrderBy(u => u.PersonaName).FirstOrDefault();
+    }
+
+    private uint ResolveDashboardAppIdLocked(ApiUser? user)
+    {
+        if (user?.AppId > 0)
+        {
+            return user.AppId;
+        }
+
+        var lobbyAppId = _state.Lobbies.Values
+            .Where(lobby => lobby.AppId != 0 && lobby.Members.Count > 0)
+            .OrderBy(lobby => lobby.SteamId)
+            .Select(lobby => lobby.AppId)
+            .FirstOrDefault();
+        if (lobbyAppId != 0)
+        {
+            return lobbyAppId;
+        }
+
+        return _state.GameServers.Values
+            .Where(server => server.AppId != 0)
+            .OrderBy(server => server.SteamId)
+            .Select(server => server.AppId)
+            .FirstOrDefault();
     }
 
     private List<ApiUser> GetFriendUsersLocked(ulong steamId)

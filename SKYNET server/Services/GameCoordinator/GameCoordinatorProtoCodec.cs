@@ -8,84 +8,256 @@ namespace SKYNET_server.Services;
 
 public sealed class GameCoordinatorProtoCodec
 {
-    private readonly Dictionary<string, Type> _types = new(StringComparer.Ordinal);
+    private readonly object _sync = new();
+    private readonly Dictionary<uint, ProtoRegistry> _registries = new();
 
-    public GameCoordinatorProtoCodec()
+    public void ConfigureApp(GameCoordinatorAppDefinition app, Assembly defaultAssembly)
     {
-        RegisterGeneratedContracts(typeof(CMsgClientHello).Assembly);
+        var fingerprint = BuildFingerprint(app, defaultAssembly);
+        lock (_sync)
+        {
+            if (_registries.TryGetValue(app.AppId, out var existing) && existing.Fingerprint == fingerprint)
+            {
+                return;
+            }
+
+            _registries[app.AppId] = BuildRegistry(app, defaultAssembly, fingerprint);
+        }
     }
 
-    public TsValue Decode(string typeName, byte[] payload)
+    private static string BuildFingerprint(GameCoordinatorAppDefinition app, Assembly defaultAssembly)
     {
-        var type = Resolve(typeName);
+        var sourceIdentities = app.ProtoContracts.Sources.Select(source =>
+        {
+            var assembly = GameCoordinatorAppCatalog.ResolveContractAssembly(app, source, defaultAssembly);
+            return string.Join(':',
+                source.Assembly ?? string.Empty,
+                assembly.FullName ?? assembly.GetName().Name ?? string.Empty,
+                AssemblyFileIdentity(assembly));
+        });
+
+        return string.Join('|', new[] { app.RuntimeCacheKey }.Concat(sourceIdentities));
+    }
+
+    private static string AssemblyFileIdentity(Assembly assembly)
+    {
+        if (assembly.IsDynamic || string.IsNullOrWhiteSpace(assembly.Location) || !File.Exists(assembly.Location))
+        {
+            return "dynamic";
+        }
+
+        var file = new FileInfo(assembly.Location);
+        return string.Join(':', Path.GetFullPath(file.FullName), file.Length, file.LastWriteTimeUtc.Ticks);
+    }
+
+    public TsValue Decode(uint appId, string typeName, byte[] payload)
+    {
+        var type = Resolve(appId, typeName);
         using var stream = new MemoryStream(payload);
         var message = Serializer.NonGeneric.Deserialize(type, stream);
         return ToTsValue(message);
     }
 
-    public byte[] Encode(string typeName, TsValue value)
+    public byte[] Encode(uint appId, string typeName, TsValue value)
     {
-        var type = Resolve(typeName);
+        var type = Resolve(appId, typeName);
         var message = CreateFromTs(type, value);
         using var stream = new MemoryStream();
         Serializer.NonGeneric.Serialize(stream, message);
         return stream.ToArray();
     }
 
-    private void RegisterGeneratedContracts(Assembly assembly)
+    private ProtoRegistry BuildRegistry(GameCoordinatorAppDefinition app, Assembly defaultAssembly, string fingerprint)
     {
-        foreach (var type in assembly.GetTypes())
+        var contracts = new List<Type>();
+        foreach (var source in app.ProtoContracts.Sources)
         {
-            if (type.GetCustomAttribute<ProtoContractAttribute>() == null ||
-                type.FullName?.StartsWith("Google.Protobuf.", StringComparison.Ordinal) == true)
+            var assembly = GameCoordinatorAppCatalog.ResolveContractAssembly(app, source, defaultAssembly);
+            contracts.AddRange(GetLoadableTypes(assembly)
+                .Where(IsProtoContract)
+                .Where(type => type.FullName?.StartsWith("Google.Protobuf.", StringComparison.Ordinal) != true)
+                .Where(type => MatchesSource(type, source)));
+        }
+
+        var names = new Dictionary<string, List<Type>>(StringComparer.Ordinal);
+        foreach (var type in contracts.Distinct().OrderBy(type => GetCanonicalRuntimeName(type), StringComparer.Ordinal))
+        {
+            foreach (var name in GetRuntimeNames(type))
             {
+                if (!names.TryGetValue(name, out var candidates))
+                {
+                    candidates = new List<Type>();
+                    names[name] = candidates;
+                }
+
+                if (!candidates.Contains(type))
+                {
+                    candidates.Add(type);
+                }
+            }
+        }
+
+        var resolved = new Dictionary<string, Type>(StringComparer.Ordinal);
+        var ambiguous = new Dictionary<string, IReadOnlyList<Type>>(StringComparer.Ordinal);
+        foreach (var (name, candidates) in names)
+        {
+            if (candidates.Count == 1)
+            {
+                resolved[name] = candidates[0];
                 continue;
             }
 
-            Register(type);
+            ambiguous[name] = candidates
+                .OrderBy(type => GetCanonicalRuntimeName(type), StringComparer.Ordinal)
+                .ToList();
+        }
+
+        return new ProtoRegistry(fingerprint, resolved, ambiguous, contracts.Count);
+    }
+
+    private Type Resolve(uint appId, string typeName)
+    {
+        lock (_sync)
+        {
+            if (!_registries.TryGetValue(appId, out var registry))
+            {
+                throw new InvalidOperationException($"GC protobuf registry is not configured for app {appId}");
+            }
+
+            return registry.Resolve(appId, typeName);
         }
     }
 
-    private void Register(Type type)
+    private static IReadOnlyList<Type> GetLoadableTypes(Assembly assembly)
     {
-        _types[type.Name] = type;
+        try
+        {
+            return assembly.GetTypes();
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+            return ex.Types.Where(type => type != null).Cast<Type>().ToList();
+        }
+    }
+
+    private static bool IsProtoContract(Type type)
+    {
+        return type.GetCustomAttribute<ProtoContractAttribute>() != null;
+    }
+
+    private static bool MatchesSource(Type type, GameCoordinatorProtoContractSource source)
+    {
+        var aliases = GetTypeAliases(type).ToList();
+        return MatchesExactFilter(aliases, source.TypeNames)
+            && MatchesPrefixFilter(aliases, source.TypeNamePrefixes)
+            && MatchesPrefixFilter(GetContractNames(type), source.ContractNamePrefixes);
+    }
+
+    private static bool MatchesExactFilter(IReadOnlyList<string> aliases, IReadOnlyList<string> filters)
+    {
+        return filters.Count == 0 || aliases.Any(alias => filters.Contains(alias, StringComparer.Ordinal));
+    }
+
+    private static bool MatchesPrefixFilter(IEnumerable<string> aliases, IReadOnlyList<string> prefixes)
+    {
+        return prefixes.Count == 0 || aliases.Any(alias => prefixes.Any(prefix => alias.StartsWith(prefix, StringComparison.Ordinal)));
+    }
+
+    private static IEnumerable<string> GetRuntimeNames(Type type)
+    {
+        yield return GetCanonicalRuntimeName(type);
+
+        var dotted = GetCanonicalRuntimeName(type).Replace('+', '.');
+        if (!string.Equals(dotted, GetCanonicalRuntimeName(type), StringComparison.Ordinal))
+        {
+            yield return dotted;
+        }
+
+        yield return type.Name;
+
+        foreach (var contractName in GetContractNames(type))
+        {
+            yield return contractName;
+        }
+    }
+
+    private static IEnumerable<string> GetTypeAliases(Type type)
+    {
+        yield return GetCanonicalRuntimeName(type);
+        yield return GetCanonicalRuntimeName(type).Replace('+', '.');
+        yield return type.Name;
+        if (!string.IsNullOrWhiteSpace(type.FullName))
+        {
+            yield return type.FullName!;
+        }
+
+        foreach (var contractName in GetContractNames(type))
+        {
+            yield return contractName;
+        }
+    }
+
+    private static IEnumerable<string> GetContractNames(Type type)
+    {
         var contract = type.GetCustomAttribute<ProtoContractAttribute>();
         if (!string.IsNullOrWhiteSpace(contract?.Name))
         {
-            _types[contract.Name] = type;
-        }
-
-        foreach (var nested in type.GetNestedTypes(BindingFlags.Public))
-        {
-            RegisterNested(nested);
+            yield return contract.Name!;
         }
     }
 
-    private void RegisterNested(Type type)
+    private static string GetCanonicalRuntimeName(Type type)
     {
-        _types[type.Name] = type;
-        var contract = type.GetCustomAttribute<ProtoContractAttribute>();
-        if (!string.IsNullOrWhiteSpace(contract?.Name))
-        {
-            _types[contract.Name] = type;
-        }
-
-        foreach (var nested in type.GetNestedTypes(BindingFlags.Public))
-        {
-            RegisterNested(nested);
-        }
+        return type.FullName ?? type.AssemblyQualifiedName ?? type.Name;
     }
 
-    private Type Resolve(string typeName)
+    private sealed class ProtoRegistry
     {
-        if (_types.TryGetValue(typeName, out var type))
+        private readonly IReadOnlyDictionary<string, Type> _types;
+        private readonly IReadOnlyDictionary<string, IReadOnlyList<Type>> _ambiguous;
+        private readonly int _contractCount;
+
+        public ProtoRegistry(
+            string fingerprint,
+            IReadOnlyDictionary<string, Type> types,
+            IReadOnlyDictionary<string, IReadOnlyList<Type>> ambiguous,
+            int contractCount)
         {
-            return type;
+            Fingerprint = fingerprint;
+            _types = types;
+            _ambiguous = ambiguous;
+            _contractCount = contractCount;
         }
 
-        throw new InvalidOperationException($"GC proto type is not registered: {typeName}");
-    }
+        public string Fingerprint { get; }
 
+        public Type Resolve(uint appId, string typeName)
+        {
+            if (string.IsNullOrWhiteSpace(typeName))
+            {
+                throw new InvalidOperationException($"GC protobuf type name is empty for app {appId}");
+            }
+
+            if (_types.TryGetValue(typeName, out var type))
+            {
+                return type;
+            }
+
+            if (_ambiguous.TryGetValue(typeName, out var candidates))
+            {
+                var examples = string.Join(", ", candidates.Take(6).Select(GetCanonicalRuntimeName));
+                throw new InvalidOperationException(
+                    $"GC protobuf type '{typeName}' is ambiguous for app {appId}; use a canonical runtime name. Candidates: {examples}");
+            }
+
+            if (_contractCount == 0)
+            {
+                throw new InvalidOperationException($"GC app {appId} has no protobuf contract sources configured");
+            }
+
+            throw new InvalidOperationException($"GC protobuf type is not registered for app {appId}: {typeName}");
+        }
+    }
     private object CreateFromTs(Type type, TsValue value)
     {
         if (TryConvertScalar(value, type, out var scalar))

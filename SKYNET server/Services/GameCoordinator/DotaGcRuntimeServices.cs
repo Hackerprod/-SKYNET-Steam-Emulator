@@ -5,10 +5,13 @@ namespace SKYNET_server.Services;
 /// <summary>
 /// Host-side services exposed to the TypeScript Dota GC runtime.
 /// This class is deliberately limited to data stores and callbacks; protocol
-/// handling remains in GC/570 TypeScript modules.
+/// handling remains in the Dota app's TypeScript modules.
 /// </summary>
 public static class DotaGcRuntimeServices
 {
+    public const uint AppId = 570;
+    public const string HostServiceName = "dota";
+
     public static Action<ulong, ApiGCMessage>? PendingMessageQueued { get; set; }
     public static Func<ulong, ApiDotaRuntimeInventory>? InventoryProvider { get; set; }
     public static Func<ulong, ulong, uint, uint, uint, List<ApiDotaEquipment>>? EquipItemSink { get; set; }
