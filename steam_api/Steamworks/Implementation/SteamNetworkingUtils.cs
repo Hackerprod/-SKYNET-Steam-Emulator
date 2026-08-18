@@ -22,6 +22,91 @@ namespace SKYNET.Steamworks.Implementation
         private IntPtr _messagesSessionRequestCallback;
         private IntPtr _messagesSessionFailedCallback;
 
+        public float GetLocalPingLocation(IntPtr result)
+        {
+            Write("GetLocalPingLocation");
+
+            if (result == IntPtr.Zero)
+            {
+                return -1.0f;
+            }
+
+            var pingLocation = Marshal.PtrToStructure<SteamNetworkPingLocation_t>(result);
+            pingLocation.m_data = new byte[512];
+            pingLocation.m_data[0] = 20;
+
+            Marshal.StructureToPtr(pingLocation, result, false);
+            return 2;
+        }
+
+        public int EstimatePingTimeBetweenTwoLocations(
+            IntPtr location1,
+            IntPtr location2)
+        {
+            Write("EstimatePingTimeBetweenTwoLocations");
+            return 15;
+        }
+
+        public int EstimatePingTimeFromLocalHost(IntPtr remoteLocation)
+        {
+            Write("EstimatePingTimeFromLocalHost");
+            return 15;
+        }
+
+        public void ConvertPingLocationToString(
+            IntPtr location,
+            IntPtr pszBuf,
+            int cchBufSize)
+        {
+            Write("ConvertPingLocationToString");
+
+            NativeStringCache.WriteUtf8Buffer(
+                pszBuf,
+                cchBufSize,
+                "us=8+5"
+            );
+        }
+
+        public bool ParsePingLocationString(
+            string pszString,
+            IntPtr result)
+        {
+            Write($"ParsePingLocationString ({pszString})");
+            return true;
+        }
+
+        public int GetPOPCount()
+        {
+            Write("GetPOPCount");
+            return 0;
+        }
+
+        public int GetPOPList(IntPtr list, int nListSz)
+        {
+            Write("GetPOPList");
+            return 0;
+        }
+
+        public int GetPingToDataCenter(
+            SteamNetworkingPOPID popID,
+            IntPtr pViaRelayPoP)
+        {
+            Write($"GetPingToDataCenter pop=0x{popID:X8}");
+
+            if (pViaRelayPoP != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(pViaRelayPoP, 0);
+            }
+
+            return 0;
+        }
+
+        public int GetDirectPingToPOP(SteamNetworkingPOPID popID)
+        {
+            Write($"GetDirectPingToPOP pop=0x{popID:X8}");
+            return 0;
+        }
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void NativeStatusCallback(IntPtr status);
 
@@ -67,40 +152,6 @@ namespace SKYNET.Steamworks.Implementation
             return (int)ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Current;
         }
 
-        public float GetLocalPingLocation(IntPtr result)
-        {
-            Write("GetLocalPingLocation");
-            SteamNetworkPingLocation_t pingLocation = Marshal.PtrToStructure<SteamNetworkPingLocation_t>(result);
-            pingLocation.m_data = new byte[512];
-            pingLocation.m_data[0] = 20;
-            Marshal.StructureToPtr(pingLocation, result, false);
-            return 2;
-        }
-
-        public int EstimatePingTimeBetweenTwoLocations(IntPtr location1, IntPtr location2)
-        {
-            Write("EstimatePingTimeBetweenTwoLocations");
-            return 15;
-        }
-
-        public int EstimatePingTimeFromLocalHost(IntPtr remoteLocation)
-        {
-            Write("EstimatePingTimeFromLocalHost");
-            return 15;
-        }
-
-        public void ConvertPingLocationToString(IntPtr location, IntPtr pszBuf, int cchBufSize)
-        {
-            Write("ConvertPingLocationToString");
-            NativeStringCache.WriteUtf8Buffer(pszBuf, cchBufSize, "us=8+5");
-        }
-
-        public bool ParsePingLocationString(string pszString, IntPtr result)
-        {
-            Write("ParsePingLocationString");
-            return true;
-        }
-
         public bool CheckPingDataUpToDate(float flMaxAgeSeconds)
         {
             Write("CheckPingDataUpToDate");
@@ -115,39 +166,11 @@ namespace SKYNET.Steamworks.Implementation
             return true;
         }
 
-        public int GetPingToDataCenter(SteamNetworkingPOPID popID, IntPtr pViaRelayPoP)
-        {
-            Write("GetPingToDataCenter");
-            if (pViaRelayPoP != IntPtr.Zero)
-            {
-                Marshal.WriteInt32(pViaRelayPoP, 0);
-            }
-            return 0;
-        }
-
         //public int GetPingToDataCenter(IntPtr popID)
         //{
         //    Write("GetPingToDataCenter");
         //    return 0;
         //}
-
-        public int GetPOPCount()
-        {
-            Write("GetPOPCount");
-            return 0;
-        }
-
-        public int GetDirectPingToPOP(SteamNetworkingPOPID popID)
-        {
-            Write("GetDirectPingToPOP");
-            return 0;
-        }
-
-        public int GetPOPList(IntPtr list, int nListSz)
-        {
-            Write("GetPOPList");
-            return 0;
-        }
 
         public SteamNetworkingMicroseconds GetLocalTimestamp()
         {
