@@ -122,7 +122,7 @@ public sealed class SdrRelayService : BackgroundService
             return;
         }
 
-        // Пока сохраняем старый parsing request:
+        // Keep the existing request parsing layout:
         // 1 byte msg-id + 7 byte SDR header + fixed32 timestamp + fixed32 cookie.
         if (length < 1 + 7 + 4 + 4)
         {
