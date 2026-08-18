@@ -8,6 +8,7 @@ using System.Threading;
 using SKYNET.Callback;
 using SKYNET.Steamworks.Interfaces;
 using SKYNET.Managers;
+using System.Globalization;
 
 using SteamAPICall_t = System.UInt64;
 using HTTPRequestHandle = System.UInt32;
@@ -29,6 +30,7 @@ namespace SKYNET.Steamworks.Implementation
             InterfaceVersion = "STEAMHTTP_INTERFACE_VERSION003";
             HTTPRequests = new List<HTTPRequest>();
             Handle = 1;
+            Write($"SDR config path: {Path.Combine(AppContext.BaseDirectory, "SKYNET", "sdr-relays.ini")}");
         }
 
         public uint CreateCookieContainer(bool bAllowResponsesToModify)
@@ -263,6 +265,7 @@ namespace SKYNET.Steamworks.Implementation
                     Write($"SendHTTPRequest, Not found request for Handle: {hRequest}");
                     return false;
                 }
+
                 HTTPRequestCompleted_t data = new HTTPRequestCompleted_t()
                 {
                     Request = (uint)request.Handle,
@@ -278,24 +281,17 @@ namespace SKYNET.Steamworks.Implementation
                     HTTPRequestHandle = request.Handle,
                 };
 
-                bool blockSdrConfig = IsSdrConfigRequest(request.URL) &&
-                    !SteamNetworkingSocketsSerialized.SecureCertMode;
-                if (blockSdrConfig)
-                {
-                    request.ResponseBytes = Array.Empty<byte>();
-                    data.RequestSuccessful = false;
-                    data.StatusCode = HTTPStatusCode.Code404NotFound;
-                    Write("SendHTTPRequest: SDR config disabled in insecure LAN mode");
-                }
-                else
-                {
-                    request.ResponseBytes = BuildLocalResponseBytes(request);
-                }
-
+                request.ResponseBytes = BuildLocalResponseBytes(request);
                 request.ResponseHeaders = BuildLocalResponseHeaders(request);
                 data.BodySize = (uint)request.ResponseBytes.Length;
+
                 if (IsSdrConfigRequest(request.URL))
                 {
+                    Write(
+                        $"SendHTTPRequest: serving local SDR config, " +
+                        $"body={data.BodySize}"
+                    );
+
                     pCallHandle = WorkQueue.EnqueueCallbackResult(
                         data,
                         () =>
@@ -312,25 +308,20 @@ namespace SKYNET.Steamworks.Implementation
                 {
                     pCallHandle = CallbackManager.AddCallbackResult(data);
                 }
+
                 APIRequest.SteamAPICall = pCallHandle;
-                Write($"SendHTTPRequest prepared handle={hRequest} call={pCallHandle} url={request.URL} context={data.ContextValue} success={data.RequestSuccessful} status={(int)data.StatusCode} body={data.BodySize} preview={PreviewBody(request.ResponseBytes)} active=[{DescribeActiveHandles()}]");
 
-                //WebRequest webrequest = WebRequest.Create(request.URL);
-                //webrequest.Timeout = (int)(request.TimeoutSeconds != 0 ? request.TimeoutSeconds : 2);
-                //webrequest.ContentType = request.ContentType;
-                //webrequest.Method = request.RequestMethod.ToString();
-                //if (request.RequestMethod == HTTPMethod.POST)
-                //{
-                //    // TODO: Write raw into Request stream
-                //}
-
-                //RequestState RequestState = new RequestState()
-                //{
-                //    Request = webrequest,
-                //    HTTPRequest = APIRequest
-                //};
-
-                //webrequest.BeginGetResponse(FinishWebRequest, RequestState);
+                Write(
+                    $"SendHTTPRequest prepared handle={hRequest} " +
+                    $"call={pCallHandle} " +
+                    $"url={request.URL} " +
+                    $"context={data.ContextValue} " +
+                    $"success={data.RequestSuccessful} " +
+                    $"status={(int)data.StatusCode} " +
+                    $"body={data.BodySize} " +
+                    $"preview={PreviewBody(request.ResponseBytes)} " +
+                    $"active=[{DescribeActiveHandles()}]"
+                );
 
                 Result = true;
             }
@@ -340,7 +331,6 @@ namespace SKYNET.Steamworks.Implementation
             }
 
             Write($"SendHTTPRequest (HTTPRequestHandle = {hRequest}) = {Result}");
-
             return Result;
         }
 
@@ -499,9 +489,356 @@ namespace SKYNET.Steamworks.Implementation
             "Ij4IARIg/qqXwyx+W/aE34bxIPPEDHhdzs3ty5H8Ij5U52qjD1lFPmRVak2+lzZsUOyjHFDtoxxQ7qMcULLkHin1/UBs6o8bzTJAfHCetKqWilvc89+cwmkVh5wHJ9RqWyfqzo7fnYOObrz+5iPAN97T0Lohsu4GfzPTPftpcJ+OlmMgxUOjcW/YCg=="
         };
 
-        internal static readonly string SdrConfigJson = @"{""revision"":1783546117,""pops"":{""sky"":{""desc"":""SKYNET"",""geo"":[-118.25,34.05],""partners"":1,""tier"":0,""relays"":[{""ipv4"":""10.11.49.120"",""port_range"":[28009,28009]}]}},""certs"":[""" +
-            string.Join(@""",""", SdrConfigCerts) +
-            @"""],""p2p_share_ip"":{""cn"":20,""default"":40,""ru"":20},""relay_public_key"":""5AC884C1045BA0FF44142AC8DCA51B8A98C8F1CB4FEE36284AFBE92FCF594932"",""revoked_keys"":[],""typical_pings"":[],""success"":true}";
+        private sealed class SdrRelayEntry
+        {
+            public string PopId;
+            public string Address;
+            public int Port;
+            public string Description;
+            public double Longitude;
+            public double Latitude;
+            public int Partners;
+            public int Tier;
+        }
+
+        private sealed class SdrTypicalPingEntry
+        {
+            public string From;
+            public string To;
+            public int Ping;
+        }
+
+        private static string BuildSdrConfigJson()
+        {
+            string iniPath = Path.Combine(
+            AppContext.BaseDirectory,
+            "SKYNET",
+            "sdr-relays.ini"
+            );
+
+            if (!File.Exists(iniPath))
+            {
+                throw new FileNotFoundException(
+                    "SDR relay config not found",
+                    iniPath
+                );
+            }
+
+            var values = ParseIni(iniPath);
+
+            uint revision = 1786739253;
+
+            if (
+                values.TryGetValue("SDR", out var sdr) &&
+                sdr.TryGetValue("Revision", out var revisionText) &&
+                uint.TryParse(revisionText, out var parsedRevision)
+            )
+            {
+                revision = parsedRevision;
+            }
+
+            var relays = new List<SdrRelayEntry>();
+            var typicalPings = new List<SdrTypicalPingEntry>();
+
+            foreach (var section in values)
+            {
+                if (section.Key.StartsWith(
+                    "Relay.",
+                    StringComparison.OrdinalIgnoreCase))
+                {
+                    string popId =
+                        section.Key.Substring("Relay.".Length);
+
+                    var v = section.Value;
+
+                    relays.Add(new SdrRelayEntry
+                    {
+                        PopId = popId,
+
+                        Address =
+                            GetIni(v, "Address", "127.0.0.1"),
+
+                        Port =
+                            GetIniInt(v, "Port", 28009),
+
+                        Description =
+                            GetIni(v, "Description", popId),
+
+                        Longitude =
+                            GetIniDouble(v, "Longitude", 0),
+
+                        Latitude =
+                            GetIniDouble(v, "Latitude", 0),
+
+                        Partners =
+                            GetIniInt(v, "Partners", 1),
+
+                        Tier =
+                            GetIniInt(v, "Tier", 0)
+                    });
+
+                    continue;
+                }
+
+                if (section.Key.StartsWith(
+                    "TypicalPing.",
+                    StringComparison.OrdinalIgnoreCase))
+                {
+                    var v = section.Value;
+
+                    typicalPings.Add(new SdrTypicalPingEntry
+                    {
+                        From = GetIni(v, "From", ""),
+                        To = GetIni(v, "To", ""),
+                        Ping = GetIniInt(v, "Ping", 1)
+                    });
+                }
+            }
+
+            if (relays.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    "sdr-relays.ini contains no [Relay.*] sections"
+                );
+            }
+
+            var sb = new StringBuilder();
+
+            sb.Append("{\"revision\":");
+            sb.Append(revision);
+            sb.Append(",\"pops\":{");
+
+            for (int i = 0; i < relays.Count; i++)
+            {
+                if (i > 0)
+                {
+                    sb.Append(',');
+                }
+
+                var relay = relays[i];
+
+                sb.Append('"');
+                sb.Append(JsonEscape(relay.PopId));
+                sb.Append("\":{");
+
+                sb.Append("\"desc\":\"");
+                sb.Append(JsonEscape(relay.Description));
+                sb.Append("\",");
+
+                sb.Append("\"geo\":[");
+                sb.Append(
+                    relay.Longitude.ToString(
+                        CultureInfo.InvariantCulture));
+                sb.Append(',');
+                sb.Append(
+                    relay.Latitude.ToString(
+                        CultureInfo.InvariantCulture));
+                sb.Append("],");
+
+                sb.Append("\"partners\":");
+                sb.Append(relay.Partners);
+                sb.Append(',');
+
+                sb.Append("\"tier\":");
+                sb.Append(relay.Tier);
+                sb.Append(',');
+
+                sb.Append("\"relays\":[{");
+
+                sb.Append("\"ipv4\":\"");
+                sb.Append(JsonEscape(relay.Address));
+                sb.Append("\",");
+
+                sb.Append("\"port_range\":[");
+                sb.Append(relay.Port);
+                sb.Append(',');
+                sb.Append(relay.Port);
+                sb.Append("]}]}");
+            }
+
+            sb.Append("},");
+
+            sb.Append("\"certs\":[");
+            for (int i = 0; i < SdrConfigCerts.Length; i++)
+            {
+                if (i > 0)
+                {
+                    sb.Append(',');
+                }
+
+                sb.Append('"');
+                sb.Append(JsonEscape(SdrConfigCerts[i]));
+                sb.Append('"');
+            }
+            sb.Append("],");
+
+            sb.Append(
+                "\"p2p_share_ip\":{\"cn\":20,\"default\":40,\"ru\":20},"
+            );
+
+            sb.Append(
+                "\"relay_public_key\":\"5AC884C1045BA0FF44142AC8DCA51B8A98C8F1CB4FEE36284AFBE92FCF594932\","
+            );
+
+            sb.Append("\"revoked_keys\":[],");
+
+            sb.Append("\"typical_pings\":[");
+
+            bool firstPing = true;
+
+            foreach (var ping in typicalPings)
+            {
+                if (
+                    string.IsNullOrEmpty(ping.From) ||
+                    string.IsNullOrEmpty(ping.To))
+                {
+                    continue;
+                }
+
+                if (!firstPing)
+                {
+                    sb.Append(',');
+                }
+
+                firstPing = false;
+
+                sb.Append("[\"");
+                sb.Append(JsonEscape(ping.From));
+                sb.Append("\",\"");
+                sb.Append(JsonEscape(ping.To));
+                sb.Append("\",");
+                sb.Append(ping.Ping);
+                sb.Append(']');
+            }
+
+            sb.Append("],");
+            sb.Append("\"success\":true}");
+
+            return sb.ToString();
+        }
+
+        private static Dictionary<
+            string,
+            Dictionary<string, string>
+        > ParseIni(string path)
+        {
+            var result =
+                new Dictionary<
+                    string,
+                    Dictionary<string, string>
+                >(StringComparer.OrdinalIgnoreCase);
+
+            Dictionary<string, string> current = null;
+
+            foreach (string rawLine in File.ReadAllLines(path))
+            {
+                string line = rawLine.Trim();
+
+                if (
+                    line.Length == 0 ||
+                    line.StartsWith(";") ||
+                    line.StartsWith("#"))
+                {
+                    continue;
+                }
+
+                if (
+                    line.StartsWith("[") &&
+                    line.EndsWith("]"))
+                {
+                    string section =
+                        line.Substring(
+                            1,
+                            line.Length - 2
+                        ).Trim();
+
+                    current =
+                        new Dictionary<string, string>(
+                            StringComparer.OrdinalIgnoreCase
+                        );
+
+                    result[section] = current;
+                    continue;
+                }
+
+                if (current == null)
+                {
+                    continue;
+                }
+
+                int equals = line.IndexOf('=');
+
+                if (equals <= 0)
+                {
+                    continue;
+                }
+
+                string key =
+                    line.Substring(0, equals).Trim();
+
+                string value =
+                    line.Substring(equals + 1).Trim();
+
+                current[key] = value;
+            }
+
+            return result;
+        }
+
+        private static string GetIni(
+            Dictionary<string, string> values,
+            string key,
+            string fallback)
+        {
+            return values.TryGetValue(key, out var value)
+                ? value
+                : fallback;
+        }
+
+        private static int GetIniInt(
+            Dictionary<string, string> values,
+            string key,
+            int fallback)
+        {
+            return
+                values.TryGetValue(key, out var text) &&
+                int.TryParse(text, out var value)
+                    ? value
+                    : fallback;
+        }
+
+        private static double GetIniDouble(
+            Dictionary<string, string> values,
+            string key,
+            double fallback)
+        {
+            if (!values.TryGetValue(key, out var text))
+            {
+                return fallback;
+            }
+
+            return double.TryParse(
+                text,
+                NumberStyles.Float,
+                CultureInfo.InvariantCulture,
+                out var value)
+                    ? value
+                    : fallback;
+        }
+
+        private static string JsonEscape(string value)
+        {
+            if (value == null)
+            {
+                return "";
+            }
+
+            return value
+                .Replace("\\", "\\\\")
+                .Replace("\"", "\\\"");
+        }
+
+        internal static string SdrConfigJson => BuildSdrConfigJson();
 
         private static byte[] BuildLocalResponseBytes(HTTPRequest request)
         {
@@ -529,7 +866,7 @@ namespace SKYNET.Steamworks.Implementation
 
             if (url.IndexOf("events/ajaxgetpartnereventspageable", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                return "{\"success\":1,\"events\":[],\"results_html\":\"\",\"last_time\":0,\"more_events\":false,\"total_count\":0}";
+                return "{\"success\":0,\"skynet_test\":12345}";
             }
 
             if (url.IndexOf("proregistration/getdpcdata", StringComparison.OrdinalIgnoreCase) >= 0)
