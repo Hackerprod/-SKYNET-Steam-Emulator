@@ -362,7 +362,8 @@ graphify-out/
 .codegraph/
 
 # Repository-local agent and SDK artifacts
-/.github/
+/.github/*
+!/.github/ISSUE_TEMPLATE/
 /.codex/
 AGENTS.md
 /steam_api/AGENTS.md
@@ -415,3 +416,5 @@ FodyWeavers.xsd
 
 # Temp folder
 .temp
+.atl
+runtime

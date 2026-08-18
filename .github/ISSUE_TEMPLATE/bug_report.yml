@@ -1,0 +1,48 @@
+name: Bug report
+description: Report a reproducible problem with Dota 2 support or the SKYNET Server
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: input
+    id: app-id
+    attributes:
+      label: Affected AppID
+      description: Steam AppID this happens with (e.g. 570 for Dota 2)
+      placeholder: "570"
+    validations:
+      required: true
+  - type: input
+    id: revision
+    attributes:
+      label: SKYNET revision
+      description: Commit hash or branch/tag you're running
+      placeholder: "27f130f or master"
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Numbered steps, as exact as possible
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Relevant server/client logs (paste as text, not screenshots)
+      render: shell
+    validations:
+      required: false

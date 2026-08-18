@@ -1,0 +1,31 @@
+name: Feature request
+description: Suggest new functionality or improvements
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: input
+    id: app-id
+    attributes:
+      label: Related AppID (if applicable)
+      placeholder: "570"
+    validations:
+      required: false
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      description: What's missing or painful today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false
