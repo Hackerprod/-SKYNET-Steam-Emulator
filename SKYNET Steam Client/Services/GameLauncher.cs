@@ -82,8 +82,14 @@ public sealed class GameLauncher
         try
         {
             var workDir = string.IsNullOrWhiteSpace(game.ExeFolder) ? Path.GetDirectoryName(game.ExecutablePath)! : game.ExeFolder;
+            var insecureArg = !game.Ini.SecureNetworking &&
+                !ContainsArgument(game.LaunchArguments, "-insecure") &&
+                !ContainsArgument(extraArgs, "-insecure")
+                    ? "-insecure"
+                    : null;
             var args = string.Join(" ",
-                new[] { game.LaunchArguments, extraArgs }.Where(a => !string.IsNullOrWhiteSpace(a)));
+                new[] { game.LaunchArguments, insecureArg, extraArgs }
+                    .Where(a => !string.IsNullOrWhiteSpace(a)));
 
             var injectablePayload = PrepareInjectablePayload(payload);
             proc = DllInjector.LaunchAndInject(
@@ -103,6 +109,16 @@ public sealed class GameLauncher
 
         game.LastPlayedUtc = DateTimeOffset.UtcNow;
         return LaunchResult.Ok(proc, hasStaticSteamImport);
+    }
+
+    private static bool ContainsArgument(string? arguments, string expected)
+    {
+        if (string.IsNullOrWhiteSpace(arguments))
+            return false;
+
+        return arguments
+            .Split(new[] { ' ', '\t', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+            .Any(argument => string.Equals(argument, expected, StringComparison.OrdinalIgnoreCase));
     }
 
     private static string PrepareInjectablePayload(string payload)
