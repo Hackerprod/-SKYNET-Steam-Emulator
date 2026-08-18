@@ -342,6 +342,7 @@ __pycache__/
 /SKYNET server/Data/api-state.json
 /Data/
 /SKYNET server/Data/sdr-ca.json
+/SKYNET server/Data/sdr-relays.ini
 /SKYNET server/Data/achievements/
 /SKYNET server/Data/stats/
 /SKYNET server/Data/encrypted-app-ticket-keys.ini

@@ -63,6 +63,7 @@ builder.Services.AddSingleton<GameCoordinatorScriptPlugin>();
 builder.Services.AddSingleton<IGameCoordinatorPlugin>(sp => sp.GetRequiredService<GameCoordinatorScriptPlugin>());
 builder.Services.AddSingleton<GameCoordinatorPluginRegistry>();
 builder.Services.AddSingleton<SdrCertificateService>();
+builder.Services.AddSingleton<SKYNET_server.Services.Networking.SdrRelayConfigService>();
 var dataRoot = DatabaseSplitMigrator.ResolveDataRoot(builder.Environment.ContentRootPath, builder.Configuration);
 builder.Services.AddPooledDbContextFactory<SteamDbContext>(options =>
     options.UseSqlite($"Data Source={Path.Combine(dataRoot, "steam.db")}"));
@@ -82,6 +83,7 @@ var app = builder.Build();
 {
     Directory.CreateDirectory(dataRoot);
     DatabaseSplitMigrator.Migrate(dataRoot, force: false, m => app.Logger.LogInformation("{MigrationMessage}", m));
+    app.Services.GetRequiredService<SKYNET_server.Services.Networking.SdrRelayConfigService>().Generate();
 
     using var steam = app.Services.GetRequiredService<IDbContextFactory<SteamDbContext>>().CreateDbContext();
     using var dota = app.Services.GetRequiredService<IDbContextFactory<DotaDbContext>>().CreateDbContext();
