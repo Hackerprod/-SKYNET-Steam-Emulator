@@ -56,6 +56,10 @@
                     <CheckBox x:Name="CAutoDiscover" Grid.Column="2" Content="Auto-discover on start"
                               Foreground="{StaticResource SkynetText}" VerticalAlignment="Bottom" Margin="0,0,0,10" FontSize="12" />
                 </Grid>
+
+                <TextBlock Text="WINDOW" Style="{StaticResource Label}" />
+                <CheckBox x:Name="CCloseToTray" Content="Close button minimizes to tray instead of exiting"
+                          Foreground="{StaticResource SkynetText}" FontSize="12" />
             </StackPanel>
 
             <Border Background="{StaticResource SkynetBlack}" CornerRadius="0,0,12,12"

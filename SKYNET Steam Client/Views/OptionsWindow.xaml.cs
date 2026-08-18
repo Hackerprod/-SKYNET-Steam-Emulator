@@ -17,6 +17,7 @@ public partial class OptionsWindow : Window
         TServerUrl.Text = config.ServerUrl;
         TDiscoveryPort.Text = config.DiscoveryPort.ToString();
         CAutoDiscover.IsChecked = config.AutoDiscoverServer;
+        CCloseToTray.IsChecked = config.CloseMinimizesToTray;
     }
 
     private async void Detect_Click(object sender, RoutedEventArgs e)
@@ -56,6 +57,7 @@ public partial class OptionsWindow : Window
         if (int.TryParse(TDiscoveryPort.Text.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var port))
             _config.DiscoveryPort = port;
         _config.AutoDiscoverServer = CAutoDiscover.IsChecked == true;
+        _config.CloseMinimizesToTray = CCloseToTray.IsChecked == true;
 
         App.Store.Save();
         App.Server.Configure(_config.ServerUrl);

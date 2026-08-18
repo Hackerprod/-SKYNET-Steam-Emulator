@@ -10,6 +10,14 @@ public partial class App : Application
     public static ServerClient Server { get; } = new();
     public static GameLauncher Launcher { get; } = new();
 
+    /// <summary>Set right before a real shutdown, so MainWindow's Close button
+    /// knows to let the window close instead of hiding it to the tray.</summary>
+    public static bool IsExiting { get; private set; }
+
+    private SingleInstanceGuard? _singleInstance;
+    private TrayIconService? _tray;
+    private MainWindow? _mainWindow;
+
     public App()
     {
         AppDomain.CurrentDomain.UnhandledException += (_, ev) =>
@@ -50,8 +58,43 @@ public partial class App : Application
             return;
         }
 
-        var win = new MainWindow();
-        win.Show();
+        _singleInstance = new SingleInstanceGuard();
+        if (!_singleInstance.IsFirstInstance)
+        {
+            _singleInstance.SignalExistingInstance();
+            _singleInstance.Dispose();
+            Shutdown();
+            return;
+        }
+        _singleInstance.StartListening(() => Dispatcher.Invoke(RestoreMainWindow));
+
+        _mainWindow = new MainWindow();
+        _mainWindow.Show();
+
+        _tray = new TrayIconService();
+        _tray.OpenRequested += () => Dispatcher.Invoke(RestoreMainWindow);
+        _tray.ExitRequested += () => Dispatcher.Invoke(() =>
+        {
+            IsExiting = true;
+            Shutdown();
+        });
+
+        Exit += (_, _) =>
+        {
+            _tray?.Dispose();
+            _singleInstance?.Dispose();
+        };
+    }
+
+    private void RestoreMainWindow()
+    {
+        if (_mainWindow == null) return;
+
+        if (!_mainWindow.IsVisible) _mainWindow.Show();
+        if (_mainWindow.WindowState == WindowState.Minimized) _mainWindow.WindowState = WindowState.Normal;
+        _mainWindow.Topmost = true;
+        _mainWindow.Topmost = false;
+        _mainWindow.Activate();
     }
 
     private static (string? Target, string? ExtraArguments) ParseLaunchArgs(string[] args)

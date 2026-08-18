@@ -19,5 +19,9 @@ public sealed class AppConfig
     /// <summary>Stable per-machine client id sent when resolving the web session.</summary>
     public string ClientInstanceId { get; set; } = Guid.NewGuid().ToString("N");
 
+    /// <summary>When true, the window Close button hides to the tray instead of
+    /// exiting the app. Exit is still available from the tray icon menu.</summary>
+    public bool CloseMinimizesToTray { get; set; } = true;
+
     public List<GameEntry> Games { get; set; } = new();
 }
