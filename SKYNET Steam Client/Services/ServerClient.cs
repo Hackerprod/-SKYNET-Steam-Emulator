@@ -107,7 +107,8 @@ public sealed class ServerClient
                 // Having a resolved session means this machine is signed in and
                 // present -> show online. (The server's GameState stays "offline"
                 // until a game reports rich presence, which would read as offline here.)
-                Online = true
+                Online = true,
+                IsAdmin = dto.IsAdmin
             };
             user.AvatarPng = await FetchAvatarAsync(user.AccountId).ConfigureAwait(false);
             return SessionResult.Ok(user, dto.AccessToken);
@@ -151,6 +152,25 @@ public sealed class ServerClient
         return result;
     }
 
+    /// <summary>Admin overview (server status, users, lobbies, game servers, settings).
+    /// Returns null if unreachable or the token is not an admin session (server returns 403).</summary>
+    public async Task<AdminOverview?> GetAdminOverviewAsync(string? token)
+    {
+        if (string.IsNullOrWhiteSpace(token)) return null;
+        try
+        {
+            using var req = new HttpRequestMessage(HttpMethod.Get, _baseUrl + "api/admin/overview");
+            req.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            using var resp = await _http.SendAsync(req).ConfigureAwait(false);
+            if (!resp.IsSuccessStatusCode) return null;
+            return await resp.Content.ReadFromJsonAsync<AdminOverview>(Json).ConfigureAwait(false);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     public async Task<byte[]?> FetchAvatarAsync(uint accountId)
     {
         try
@@ -182,6 +202,7 @@ public sealed class ServerClient
         public string? AccessToken { get; set; }
         public string? RefreshToken { get; set; }
         public ApiUserDto? User { get; set; }
+        public bool IsAdmin { get; set; }
     }
 
     private sealed class ApiUserDto

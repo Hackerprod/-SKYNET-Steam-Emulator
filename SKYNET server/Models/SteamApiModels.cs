@@ -19,6 +19,7 @@ public sealed class ApiSessionResult
     public string AccessToken { get; set; } = string.Empty;
     public string RefreshToken { get; set; } = string.Empty;
     public ApiUser User { get; set; } = new();
+    public bool IsAdmin { get; set; }
     public List<ApiWorkshopSubscription> WorkshopSubscriptions { get; set; } = new();
     public List<ApiAchievementDefinition> AchievementDefinitions { get; set; } = new();
     public List<ApiStatDefinition> StatDefinitions { get; set; } = new();

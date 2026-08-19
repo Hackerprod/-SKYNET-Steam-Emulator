@@ -20,6 +20,7 @@ public sealed class WebUser
     public string? AvatarUrl { get; set; }
     public byte[]? AvatarPng { get; set; }
     public bool Online { get; set; }
+    public bool IsAdmin { get; set; }
 }
 
 public sealed class SessionResult

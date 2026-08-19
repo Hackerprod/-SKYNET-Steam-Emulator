@@ -261,26 +261,48 @@ public sealed partial class SteamApiStateService
                 return null;
             }
 
-            return new ApiAdminOverview
-            {
-                Users = _state.Users.Values.OrderBy(u => u.PersonaName).Select(CloneUser).ToList(),
-                Accounts = _state.WebAccounts.Values.OrderBy(a => a.Username).Select(CloneWebAccountView).ToList(),
-                Lobbies = _state.Lobbies.Values.OrderByDescending(l => l.Members.Count).Select(CloneLobby).ToList(),
-                GameServers = _state.GameServers.Values.ToList(),
-                FriendLinks = _state.FriendLinks.Values.Sum(links => links.Count),
-                PendingFriendRequests = _state.FriendRequests.Count(IsPending),
-                StatsProfiles = _state.Stats.Count,
-                DotaCosmetics = BuildDotaCosmeticSummaryLocked(),
-                DotaMatches = _state.DotaMatches.Values
-                    .OrderByDescending(match => match.UpdatedAt)
-                    .Take(12)
-                    .Select(CloneDotaMatch)
-                    .ToList(),
-                ServerStartTime = _serverStartTime,
-                GameServerSettings = MapGameServerSettings(_gameServerSettings.Current),
-                HostAddresses = GameServerSettingsService.GetHostIPv4Addresses().ToList()
-            };
+            return BuildAdminOverviewLocked();
         }
+    }
+
+    /// <summary>Same overview, but authorized by ANY valid session (web or client/DLL)
+    /// whose SteamId owns an admin web account. Used by the desktop client, which only
+    /// ever holds a regular client session token, never a browser cookie session.</summary>
+    public ApiAdminOverview? GetAdminOverviewForSession(string token)
+    {
+        lock (_sync)
+        {
+            if (!TryGetSession(token, out var session) ||
+                !_state.WebAccounts.Values.Any(a => a.SteamId == session.SteamId && a.IsAdmin))
+            {
+                return null;
+            }
+
+            return BuildAdminOverviewLocked();
+        }
+    }
+
+    private ApiAdminOverview BuildAdminOverviewLocked()
+    {
+        return new ApiAdminOverview
+        {
+            Users = _state.Users.Values.OrderBy(u => u.PersonaName).Select(CloneUser).ToList(),
+            Accounts = _state.WebAccounts.Values.OrderBy(a => a.Username).Select(CloneWebAccountView).ToList(),
+            Lobbies = _state.Lobbies.Values.OrderByDescending(l => l.Members.Count).Select(CloneLobby).ToList(),
+            GameServers = _state.GameServers.Values.ToList(),
+            FriendLinks = _state.FriendLinks.Values.Sum(links => links.Count),
+            PendingFriendRequests = _state.FriendRequests.Count(IsPending),
+            StatsProfiles = _state.Stats.Count,
+            DotaCosmetics = BuildDotaCosmeticSummaryLocked(),
+            DotaMatches = _state.DotaMatches.Values
+                .OrderByDescending(match => match.UpdatedAt)
+                .Take(12)
+                .Select(CloneDotaMatch)
+                .ToList(),
+            ServerStartTime = _serverStartTime,
+            GameServerSettings = MapGameServerSettings(_gameServerSettings.Current),
+            HostAddresses = GameServerSettingsService.GetHostIPv4Addresses().ToList()
+        };
     }
 
     public ApiGameServerSettingsResult UpdateGameServerSettings(string token, ApiGameServerSettings request)

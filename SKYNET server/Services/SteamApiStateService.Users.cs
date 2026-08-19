@@ -50,11 +50,14 @@ public sealed partial class SteamApiStateService
                 SaveState();
             }
 
+            var isAdmin = _state.WebAccounts.Values.Any(a => a.SteamId == steamId && a.IsAdmin);
+
             return new ApiSessionResult
             {
                 AccessToken = session.AccessToken,
                 RefreshToken = session.RefreshToken,
                 User = CloneUser(user),
+                IsAdmin = isAdmin,
                 WorkshopSubscriptions = GetWorkshopSubscriptionsLocked(steamId, user.AppId),
                 AchievementDefinitions = _achievementCatalog.Get(user.AppId),
                 StatDefinitions = _statCatalog.Get(user.AppId)

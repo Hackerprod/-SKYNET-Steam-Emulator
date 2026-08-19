@@ -42,14 +42,17 @@ public partial class MainWindow : Window
         DashboardView.Visibility = view == "Dashboard" ? Visibility.Visible : Visibility.Collapsed;
         UsersView.Visibility = view == "Users" ? Visibility.Visible : Visibility.Collapsed;
         StatsView.Visibility = view == "Stats" ? Visibility.Visible : Visibility.Collapsed;
+        AdminView.Visibility = view == "Admin" ? Visibility.Visible : Visibility.Collapsed;
 
         var accent = (Brush)FindResource("SkynetAccent");
         var muted = (Brush)FindResource("SkynetMuted");
         NavDashboard.Foreground = view == "Dashboard" ? accent : muted;
         NavUsers.Foreground = view == "Users" ? accent : muted;
         NavStats.Foreground = view == "Stats" ? accent : muted;
+        NavAdmin.Foreground = view == "Admin" ? accent : muted;
 
         if (view == "Users") _ = LoadUsersAsync();
+        if (view == "Admin") _ = LoadAdminAsync();
     }
 
     private async Task LoadUsersAsync()
@@ -72,6 +75,28 @@ public partial class MainWindow : Window
         UsersCount.Text = users.Count == 1 ? "1 user" : $"{users.Count} users";
         UsersEmpty.Visibility = users.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
     }
+
+    private async Task LoadAdminAsync()
+    {
+        if (_session?.Status != SessionStatus.Authenticated || string.IsNullOrEmpty(_session?.AccessToken))
+            await RefreshSessionAsync();
+
+        var overview = await App.Server.GetAdminOverviewAsync(_session?.AccessToken);
+        if (overview == null)
+        {
+            AdminDataPanel.Visibility = Visibility.Collapsed;
+            AdminEmpty.Visibility = Visibility.Visible;
+            return;
+        }
+
+        AdminDataPanel.DataContext = new AdminOverviewVm(overview);
+        AdminDataPanel.Visibility = Visibility.Visible;
+        AdminEmpty.Visibility = Visibility.Collapsed;
+    }
+
+    private void AdminRefresh_Click(object sender, RoutedEventArgs e) => _ = LoadAdminAsync();
+
+    private void AdminOpenPanel_Click(object sender, RoutedEventArgs e) => OpenWeb("admin");
 
     // ================= data =================
 
@@ -104,6 +129,9 @@ public partial class MainWindow : Window
         // Persist a server URL that discovery may have updated.
         App.Store.Save();
         BuildUserPanel(_session);
+        var isAdmin = _session.User?.IsAdmin == true;
+        NavAdmin.Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
+        if (!isAdmin && AdminView.Visibility == Visibility.Visible) SwitchView("Dashboard");
     }
 
     private void Options_Click(object sender, RoutedEventArgs e)

@@ -672,6 +672,12 @@ api.MapPut("/gameservers/users/data", (ApiGameServerUserData payload, SteamApiSt
 api.MapGet("/gameservers/stats/users/{steamId}", (ulong steamId, SteamApiStateService state) => Results.Ok(state.GetGameServerUserStats(steamId)));
 api.MapPut("/gameservers/stats/users/{steamId}", (ulong steamId, ApiStoreStatsRequest payload, SteamApiStateService state) => state.StoreGameServerUserStats(steamId, payload) ? Results.Ok() : Results.BadRequest());
 
+api.MapGet("/admin/overview", (HttpRequest request, SteamApiStateService state) =>
+{
+    var overview = state.GetAdminOverviewForSession(SteamApiStateService.GetBearerToken(request) ?? string.Empty);
+    return overview == null ? Results.Unauthorized() : Results.Ok(overview);
+});
+
 api.MapGet("/dota/cosmetics", (HttpRequest request, string? search, uint? heroId, int? take, SteamApiStateService state) =>
 {
     var overview = state.GetDotaCosmeticsOverview(SteamApiStateService.GetBearerToken(request) ?? string.Empty, search, heroId, take ?? 300);

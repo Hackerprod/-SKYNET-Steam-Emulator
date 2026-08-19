@@ -11,6 +11,17 @@
         <WindowChrome CaptionHeight="0" ResizeBorderThickness="6" />
     </WindowChrome.WindowChrome>
 
+    <Window.Resources>
+        <DataTemplate x:Key="AdminRowTemplate">
+            <Border Style="{StaticResource Card}" Padding="12" Margin="0,0,0,8">
+                <StackPanel>
+                    <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="12" />
+                    <TextBlock Text="{Binding Subtitle}" Foreground="{StaticResource SkynetMuted}" FontSize="11" Margin="0,2,0,0" />
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+    </Window.Resources>
+
     <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="56" />
@@ -45,6 +56,9 @@
                                    Foreground="{StaticResource SkynetMuted}" Tag="Users" MouseLeftButtonDown="Nav_Click" />
                         <TextBlock x:Name="NavStats" Text="STATS" Margin="12,0" FontSize="11" FontWeight="Bold" Cursor="Hand"
                                    Foreground="{StaticResource SkynetMuted}" Tag="Stats" MouseLeftButtonDown="Nav_Click" />
+                        <TextBlock x:Name="NavAdmin" Text="ADMIN" Margin="12,0" FontSize="11" FontWeight="Bold" Cursor="Hand"
+                                   Foreground="{StaticResource SkynetMuted}" Tag="Admin" MouseLeftButtonDown="Nav_Click"
+                                   Visibility="Collapsed" />
                     </StackPanel>
 
                     <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
@@ -278,6 +292,70 @@
                         <TextBlock Text="Per-game achievements and playtime will appear here."
                                    Foreground="{StaticResource SkynetMuted}" FontSize="12" HorizontalAlignment="Center" Margin="0,6,0,0" />
                     </StackPanel>
+                </Grid>
+
+                <!-- Admin -->
+                <Grid x:Name="AdminView" Margin="28,22" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="ADMIN" FontSize="11" FontWeight="Bold" Foreground="{StaticResource SkynetMuted}" />
+                            <TextBlock Text="Server overview" FontSize="20" FontWeight="Bold" Margin="0,2,0,0" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Content="REFRESH" Style="{StaticResource GhostButton}" Click="AdminRefresh_Click" Margin="0,0,10,0" />
+                            <Button Content="OPEN WEB PANEL" Style="{StaticResource AccentButton}" Click="AdminOpenPanel_Click" />
+                        </StackPanel>
+                    </Grid>
+
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <Grid>
+                            <TextBlock x:Name="AdminEmpty" Foreground="{StaticResource SkynetMuted}" FontSize="13"
+                                       HorizontalAlignment="Center" Margin="0,60,0,0"
+                                       Text="Could not load admin data. This account may not have admin permissions, or the server is unreachable."
+                                       TextWrapping="Wrap" MaxWidth="420" TextAlignment="Center" Visibility="Collapsed" />
+
+                            <StackPanel x:Name="AdminDataPanel" Visibility="Collapsed">
+                                <UniformGrid Columns="2" Margin="0,0,0,18">
+                                    <Border Style="{StaticResource Card}" Margin="0,0,12,0" Padding="16">
+                                        <StackPanel>
+                                            <TextBlock Text="SERVER" FontSize="11" FontWeight="Bold" Foreground="{StaticResource SkynetMuted}" />
+                                            <TextBlock Text="{Binding StartedAtText, StringFormat='Started: {0}'}" FontSize="12" Margin="0,8,0,0" />
+                                            <TextBlock Text="{Binding UptimeText, StringFormat='Uptime: {0}'}" FontSize="12" Margin="0,4,0,0" />
+                                            <TextBlock Text="{Binding HostAddressesText, StringFormat='Host addresses: {0}'}" FontSize="12"
+                                                       Margin="0,4,0,0" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{StaticResource Card}" Margin="12,0,0,0" Padding="16">
+                                        <StackPanel>
+                                            <TextBlock Text="NETWORK SETTINGS" FontSize="11" FontWeight="Bold" Foreground="{StaticResource SkynetMuted}" />
+                                            <TextBlock Text="{Binding AdvertisedIp, StringFormat='Advertised IP: {0}'}" FontSize="12" Margin="0,8,0,0" />
+                                            <TextBlock Text="{Binding DedicatedEnabled, StringFormat='Dedicated servers enabled: {0}'}" FontSize="12" Margin="0,4,0,0" />
+                                            <TextBlock Text="{Binding DedicatedBindIp, StringFormat='Dedicated bind IP: {0}'}" FontSize="12" Margin="0,4,0,0" />
+                                            <TextBlock Text="{Binding DedicatedPortStart, StringFormat='Dedicated port start: {0}'}" FontSize="12" Margin="0,4,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                </UniformGrid>
+
+                                <TextBlock Text="{Binding UsersCountText}" FontSize="14" FontWeight="Bold" Margin="0,0,0,8" />
+                                <ItemsControl ItemsSource="{Binding Users}" ItemTemplate="{StaticResource AdminRowTemplate}" Margin="0,0,0,18" />
+
+                                <TextBlock Text="{Binding LobbiesCountText}" FontSize="14" FontWeight="Bold" Margin="0,0,0,8" />
+                                <ItemsControl ItemsSource="{Binding Lobbies}" ItemTemplate="{StaticResource AdminRowTemplate}" Margin="0,0,0,18" />
+
+                                <TextBlock Text="{Binding GameServersCountText}" FontSize="14" FontWeight="Bold" Margin="0,0,0,8" />
+                                <ItemsControl ItemsSource="{Binding GameServers}" ItemTemplate="{StaticResource AdminRowTemplate}" />
+                            </StackPanel>
+                        </Grid>
+                    </ScrollViewer>
                 </Grid>
 
             </Grid>
