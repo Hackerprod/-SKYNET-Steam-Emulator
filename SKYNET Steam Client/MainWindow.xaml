@@ -156,12 +156,23 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" VerticalAlignment="Center">
                             <TextBlock Text="LIBRARY" FontSize="11" FontWeight="Bold" Foreground="{StaticResource SkynetMuted}" />
                             <TextBlock x:Name="LibraryCount" Text="0 games" FontSize="20" FontWeight="Bold" Margin="0,2,0,0" />
                         </StackPanel>
-                        <Button Grid.Column="1" Content="+  ADD GAME" Style="{StaticResource AccentButton}"
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+                            <ComboBox x:Name="SortModeCombo" Width="150" SelectionChanged="SortModeCombo_SelectionChanged">
+                                <ComboBoxItem Content="Recently played" Tag="RecentlyPlayed" />
+                                <ComboBoxItem Content="Name" Tag="Name" />
+                                <ComboBoxItem Content="Date added" Tag="DateAdded" />
+                                <ComboBoxItem Content="AppID" Tag="AppId" />
+                            </ComboBox>
+                            <Button x:Name="SortDirectionButton" Content="&#x2193;" Width="36" Height="36" Margin="8,0,0,0"
+                                    Style="{StaticResource GhostButton}" Click="SortDirection_Click" ToolTip="Toggle sort direction" />
+                        </StackPanel>
+                        <Button Grid.Column="2" Content="+  ADD GAME" Style="{StaticResource AccentButton}"
                                 Click="AddGame_Click" VerticalAlignment="Center" />
                     </Grid>
 

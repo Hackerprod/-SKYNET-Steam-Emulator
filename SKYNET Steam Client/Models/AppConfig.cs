@@ -23,5 +23,11 @@ public sealed class AppConfig
     /// exiting the app. Exit is still available from the tray icon menu.</summary>
     public bool CloseMinimizesToTray { get; set; } = true;
 
+    /// <summary>Library sort field: "RecentlyPlayed" (default), "Name", "DateAdded", or "AppId".</summary>
+    public string LibrarySortMode { get; set; } = "RecentlyPlayed";
+
+    /// <summary>Sort direction for <see cref="LibrarySortMode"/>.</summary>
+    public bool LibrarySortDescending { get; set; } = true;
+
     public List<GameEntry> Games { get; set; } = new();
 }

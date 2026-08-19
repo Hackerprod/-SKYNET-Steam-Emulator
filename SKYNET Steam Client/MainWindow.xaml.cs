@@ -16,6 +16,7 @@ public partial class MainWindow : Window
 {
     private readonly ObservableCollection<GameCardVm> _cards = new();
     private SessionResult? _session;
+    private bool _loadingSortUi;
 
     public MainWindow()
     {
@@ -23,6 +24,7 @@ public partial class MainWindow : Window
         GamesItems.ItemsSource = _cards;
         App.Launcher.GameExited += OnGameExited;
 
+        InitSortUi();
         LoadGames();
         Loaded += async (_, _) => await RefreshSessionAsync();
     }
@@ -103,9 +105,74 @@ public partial class MainWindow : Window
     private void LoadGames()
     {
         _cards.Clear();
-        foreach (var g in App.Store.Config.Games.OrderByDescending(g => g.LastPlayedUtc ?? g.AddedUtc))
+        foreach (var g in SortGames(App.Store.Config.Games))
             _cards.Add(new GameCardVm(g));
         SaveAndRefreshCounts();
+    }
+
+    private static IEnumerable<GameEntry> SortGames(IEnumerable<GameEntry> games)
+    {
+        var descending = App.Store.Config.LibrarySortDescending;
+        return App.Store.Config.LibrarySortMode switch
+        {
+            "Name" => descending
+                ? games.OrderByDescending(g => g.Name, StringComparer.OrdinalIgnoreCase)
+                : games.OrderBy(g => g.Name, StringComparer.OrdinalIgnoreCase),
+            "DateAdded" => descending
+                ? games.OrderByDescending(g => g.AddedUtc)
+                : games.OrderBy(g => g.AddedUtc),
+            "AppId" => descending
+                ? games.OrderByDescending(g => g.AppId)
+                : games.OrderBy(g => g.AppId),
+            _ => descending
+                ? games.OrderByDescending(g => g.LastPlayedUtc ?? g.AddedUtc)
+                : games.OrderBy(g => g.LastPlayedUtc ?? g.AddedUtc)
+        };
+    }
+
+    private void InitSortUi()
+    {
+        _loadingSortUi = true;
+        var mode = App.Store.Config.LibrarySortMode;
+        foreach (ComboBoxItem item in SortModeCombo.Items)
+        {
+            if (Equals(item.Tag, mode))
+            {
+                SortModeCombo.SelectedItem = item;
+                break;
+            }
+        }
+        SortModeCombo.SelectedItem ??= SortModeCombo.Items[0];
+        SortDirectionButton.Content = App.Store.Config.LibrarySortDescending ? "↓" : "↑";
+        _loadingSortUi = false;
+    }
+
+    private void SortModeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loadingSortUi || SortModeCombo.SelectedItem is not ComboBoxItem item) return;
+        App.Store.Config.LibrarySortMode = (string)item.Tag;
+        App.Store.Save();
+        ReorderCards();
+    }
+
+    private void SortDirection_Click(object sender, RoutedEventArgs e)
+    {
+        App.Store.Config.LibrarySortDescending = !App.Store.Config.LibrarySortDescending;
+        SortDirectionButton.Content = App.Store.Config.LibrarySortDescending ? "↓" : "↑";
+        App.Store.Save();
+        ReorderCards();
+    }
+
+    /// <summary>Re-sorts the existing card view models in place instead of rebuilding
+    /// them from config, so in-memory-only state (IsRunning/RunningProcess) survives
+    /// a sort change instead of resetting every card to "not running".</summary>
+    private void ReorderCards()
+    {
+        var byId = _cards.ToDictionary(c => c.Game.Id);
+        var orderedIds = SortGames(_cards.Select(c => c.Game)).Select(g => g.Id).ToList();
+        _cards.Clear();
+        foreach (var id in orderedIds)
+            _cards.Add(byId[id]);
     }
 
     private void SaveAndRefreshCounts()
