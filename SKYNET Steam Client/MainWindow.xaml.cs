@@ -23,6 +23,8 @@ public partial class MainWindow : Window
         InitializeComponent();
         GamesItems.ItemsSource = _cards;
         App.Launcher.GameExited += OnGameExited;
+        StateChanged += (_, _) => UpdateMaximizeGlyph();
+        UpdateMaximizeGlyph();
 
         InitSortUi();
         LoadGames();
@@ -268,11 +270,46 @@ public partial class MainWindow : Window
 
     private void Header_Drag(object sender, MouseButtonEventArgs e)
     {
-        if (e.ButtonState == MouseButtonState.Pressed) DragMove();
+        if (e.ClickCount == 2)
+        {
+            ToggleMaximizeRestore();
+            return;
+        }
+
+        if (e.ButtonState != MouseButtonState.Pressed) return;
+
+        if (WindowState == WindowState.Maximized)
+        {
+            // DragMove() on a maximized borderless window doesn't drag it like native
+            // chrome does -- it was left stuck maximized with no way to get it back.
+            // Restore first, repositioned so the window stays under the cursor, then drag.
+            var ratioX = e.GetPosition(this).X / ActualWidth;
+            var screenPoint = PointToScreen(e.GetPosition(this));
+
+            WindowState = WindowState.Normal;
+
+            Left = screenPoint.X - (Width * ratioX);
+            Top = screenPoint.Y - 10;
+        }
+
+        DragMove();
     }
 
     private void Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
+    private void MaximizeRestore_Click(object sender, RoutedEventArgs e) => ToggleMaximizeRestore();
     private void Close_Click(object sender, RoutedEventArgs e) => Close();
+
+    private void ToggleMaximizeRestore()
+    {
+        WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+    }
+
+    private void UpdateMaximizeGlyph()
+    {
+        var maximized = WindowState == WindowState.Maximized;
+        MaximizeRestoreButton.Content = maximized ? "❐" : "□";
+        MaximizeRestoreButton.ToolTip = maximized ? "Restore" : "Maximize";
+    }
 
     protected override void OnClosing(CancelEventArgs e)
     {

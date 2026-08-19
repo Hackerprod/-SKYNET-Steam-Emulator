@@ -68,6 +68,10 @@
                         <Button Content="&#x2013;" Click="Minimize_Click" Width="34" Height="30"
                                 Background="Transparent" Foreground="{StaticResource SkynetMuted}" BorderThickness="0"
                                 FontSize="15" Cursor="Hand" />
+                        <Button x:Name="MaximizeRestoreButton" Content="&#x25A1;" Click="MaximizeRestore_Click"
+                                Width="34" Height="30" ToolTip="Maximize"
+                                Background="Transparent" Foreground="{StaticResource SkynetMuted}" BorderThickness="0"
+                                FontSize="12" Cursor="Hand" />
                         <Button Content="&#x2715;" Click="Close_Click" Width="34" Height="30"
                                 Background="Transparent" Foreground="{StaticResource SkynetMuted}" BorderThickness="0"
                                 FontSize="13" Cursor="Hand" />
