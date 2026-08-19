@@ -683,7 +683,19 @@ public sealed class GameCoordinatorProtoCodec
             property.Name,
             SnakeToCamel(property.Name)
         };
-        return aliases.Distinct(StringComparer.Ordinal).ToList();
+
+        // Preserve the exact protobuf field name as a valid TypeScript alias.
+        var protoName =
+            property.GetCustomAttribute<ProtoMemberAttribute>()?.Name;
+
+        if (!string.IsNullOrWhiteSpace(protoName))
+        {
+            aliases.Add(protoName);
+        }
+
+        return aliases
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
     }
 
     private static string SnakeToCamel(string value)
