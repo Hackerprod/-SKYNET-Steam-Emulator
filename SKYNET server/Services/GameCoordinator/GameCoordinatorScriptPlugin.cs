@@ -3805,7 +3805,8 @@ internal sealed class ScriptExchangeHost
         var result = new List<uint>();
         for (var i = 0; i < arrayValue.Value.Count; i++)
         {
-            result.Add(Convert.ToUInt32(ToNumber(arrayValue.Value.Get(i), $"{path}[{i}]")));
+            var itemPath = $"{path}[{i}]";
+            result.Add(CheckedToUInt32(ToNumber(arrayValue.Value.Get(i), itemPath), itemPath));
         }
 
         return result;
@@ -3845,9 +3846,27 @@ internal sealed class ScriptExchangeHost
     private static uint U32Field(TsObject value, string fieldName, string path, uint defaultValue = 0)
     {
         var field = value.GetField(fieldName);
-        return field is TsNull or TsVoid
-            ? defaultValue
-            : Convert.ToUInt32(ToNumber(field, $"{path}.{fieldName}"));
+        if (field is TsNull or TsVoid)
+        {
+            return defaultValue;
+        }
+
+        var fieldPath = $"{path}.{fieldName}";
+        return CheckedToUInt32(ToNumber(field, fieldPath), fieldPath);
+    }
+
+    // Convert.ToUInt32(double) throws a bare OverflowException with no indication of
+    // which field or value caused it. Validate the range ourselves so an out-of-range
+    // realtime stat (e.g. a negative value meant for a signed field) reports exactly
+    // where it came from instead of crashing the whole GC request opaquely.
+    private static uint CheckedToUInt32(double value, string path)
+    {
+        if (double.IsNaN(value) || value < uint.MinValue || value > uint.MaxValue)
+        {
+            throw new InvalidOperationException($"{path}: value {value} is outside UInt32 range");
+        }
+
+        return Convert.ToUInt32(value);
     }
 
     private static ulong U64Field(TsObject value, string fieldName, string path, ulong defaultValue = 0)
@@ -3890,7 +3909,8 @@ internal sealed class ScriptExchangeHost
         var result = new List<uint>(arrayValue.Value.Count);
         for (var i = 0; i < arrayValue.Value.Count; i++)
         {
-            result.Add(Convert.ToUInt32(ToNumber(arrayValue.Value.Get(i), $"{path}.{fieldName}[{i}]")));
+            var itemPath = $"{path}.{fieldName}[{i}]";
+            result.Add(CheckedToUInt32(ToNumber(arrayValue.Value.Get(i), itemPath), itemPath));
         }
 
         return result;
