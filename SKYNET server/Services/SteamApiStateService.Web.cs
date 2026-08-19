@@ -67,12 +67,20 @@ public sealed partial class SteamApiStateService
             var steamId = ToSteamId(accountId);
             var initialPersonaName = username.Trim();
             var user = EnsureUser(steamId, accountId, WebAccountAppId, initialPersonaName);
+
+            // Bootstrap recovery: if the database currently has no admin account (fresh
+            // install, reset, migration, or the last admin being lost), the next person
+            // to register becomes admin instead of landing in a state nobody can manage.
+            // Checked against current state, not "first user since startup", so a
+            // restart can never accidentally promote someone once an admin exists.
+            var bootstrapAdmin = !_state.WebAccounts.Values.Any(a => a.IsAdmin);
+
             var account = new ApiWebAccount
             {
                 Username = initialPersonaName,
                 PasswordHash = HashPassword(password),
                 SteamId = steamId,
-                IsAdmin = false,
+                IsAdmin = bootstrapAdmin,
                 CreatedAt = DateTime.UtcNow,
                 LastLoginAt = DateTime.UtcNow
             };
@@ -86,7 +94,7 @@ public sealed partial class SteamApiStateService
             {
                 AccessToken = session.AccessToken,
                 User = CloneUser(user),
-                IsAdmin = false
+                IsAdmin = account.IsAdmin
             };
         }
     }
