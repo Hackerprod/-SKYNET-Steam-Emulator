@@ -23,7 +23,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using AppID = System.UInt32;
 using HSteamPipe = System.UInt32;
 using HSteamUser = System.UInt32;
 using System.Windows.Forms;
@@ -40,7 +39,16 @@ public class SteamEmulator
 
     public static CSteamID SteamID;
     public static CSteamID SteamID_GS;
-    public static uint AppID;
+    /// <summary>The game's real identity. Used for everything that talks to the
+    /// SKYNET server or partitions local state. Never expose this to the game process.</summary>
+    public static uint InternalAppId;
+
+    /// <summary>What Steamworks tells the game process about its own AppID.
+    /// Equal to InternalAppId unless CompatibilityAppId overrides it.</summary>
+    public static uint ReportedAppId;
+
+    /// <summary>Optional AppID compatibility override loaded from steam_api.ini.</summary>
+    public static uint CompatibilityAppId;
     public static int AppBuildIdOverride;
     public static List<DLC> DLCs;
     public static bool UnlockAllDLC;
@@ -140,7 +148,9 @@ public class SteamEmulator
         EmulatorPath = "";
         SteamID = CSteamID.Invalid;
         SteamID_GS = CSteamID.CreateOne(true); 
-        AppID = 0;
+        InternalAppId = 0;
+        ReportedAppId = 0;
+        CompatibilityAppId = 0;
         AppBuildIdOverride = 0;
         DLCs = new List<DLC>();
         UnlockAllDLC = true;
@@ -332,7 +342,8 @@ public class SteamEmulator
                 string content = File.ReadAllText(appid_Path).Trim();
                 if (uint.TryParse(content, out var appId) && appId != 0)
                 {
-                    AppID = appId;
+                    InternalAppId = appId;
+                    ReportedAppId = CompatibilityAppId != 0 ? CompatibilityAppId : appId;
                 }
             }
         }
@@ -350,17 +361,18 @@ public class SteamEmulator
     {
         if (appId == 0)
         {
-            Write($"{source} supplied k_uAppIdInvalid; preserving AppID {AppID}");
+            Write($"{source} supplied k_uAppIdInvalid; preserving AppID {InternalAppId}");
             return;
         }
 
-        if (AppID == appId)
+        if (InternalAppId == appId)
         {
             return;
         }
 
-        var previousAppId = AppID;
-        AppID = appId;
+        var previousAppId = InternalAppId;
+        InternalAppId = appId;
+        ReportedAppId = CompatibilityAppId != 0 ? CompatibilityAppId : appId;
         Write($"{source} resolved AppID {appId} (previous {previousAppId})");
     }
 

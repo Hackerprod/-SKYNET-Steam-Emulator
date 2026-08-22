@@ -317,7 +317,7 @@ namespace SKYNET.Steamworks.Implementation
             bool gameServer = SteamEmulator.SteamGameServer?.LoggedIn == true;
             return gameServer && SteamEmulator.SteamGameServer?.ServerData?.AppId != 0
                 ? SteamEmulator.SteamGameServer.ServerData.AppId
-                : SteamEmulator.AppID;
+                : SteamEmulator.InternalAppId;
         }
 
         private static bool TryValidateInnerCert(

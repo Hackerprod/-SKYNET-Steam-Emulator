@@ -388,7 +388,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             var snapshot = new TimelineSession
             {
-                AppId = SteamEmulator.AppID,
+                AppId = SteamEmulator.InternalAppId,
                 SessionId = sessionId,
                 GameMode = gameMode,
                 Tooltip = tooltip,
@@ -400,7 +400,7 @@ namespace SKYNET.Steamworks.Implementation
             {
                 try
                 {
-                    var root = Path.Combine(Common.GetPath(), "SKYNET", "Timeline", SteamEmulator.AppID.ToString());
+                    var root = Path.Combine(Common.GetPath(), "SKYNET", "Timeline", SteamEmulator.InternalAppId.ToString());
                     Directory.CreateDirectory(root);
                     var path = Path.Combine(root, sessionId + ".json");
                     var temporary = path + ".tmp";
@@ -429,7 +429,7 @@ namespace SKYNET.Steamworks.Implementation
                 {
                     SteamEmulator.Write("Timeline persistence", ex);
                 }
-            }, $"timeline:{SteamEmulator.AppID}:{sessionId}");
+            }, $"timeline:{SteamEmulator.InternalAppId}:{sessionId}");
         }
 
         private static long NowUnixMs()

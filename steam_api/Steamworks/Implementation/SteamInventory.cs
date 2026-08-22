@@ -32,7 +32,7 @@ namespace SKYNET.Steamworks.Implementation
 
         private static void EnsureInit()
         {
-            InventoryManager.Initialize(SteamEmulator.AppID, (ulong)SteamEmulator.SteamID);
+            InventoryManager.Initialize(SteamEmulator.InternalAppId, (ulong)SteamEmulator.SteamID);
         }
 
         // ===================== results =====================

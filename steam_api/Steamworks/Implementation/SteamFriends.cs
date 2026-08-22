@@ -441,7 +441,7 @@ namespace SKYNET.Steamworks.Implementation
             if (steamIDFriend == SteamEmulator.SteamID)
             {
                 StateCache.TryGetSelf(out var self);
-                pFriendGameInfo.GameID = CreateGameId(SteamEmulator.AppID);
+                pFriendGameInfo.GameID = CreateGameId(SteamEmulator.ReportedAppId);
                 pFriendGameInfo.GameIP = self?.GameServerIP ?? 0;
                 pFriendGameInfo.GamePort = self?.GameServerPort ?? 0;
                 pFriendGameInfo.QueryPort = self?.GameServerPort ?? 0;

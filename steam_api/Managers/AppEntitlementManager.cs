@@ -16,7 +16,7 @@ namespace SKYNET.Managers
                 return false;
             }
 
-            return appId == SteamEmulator.AppID
+            return appId == SteamEmulator.ReportedAppId
                 || DLCManager.IsOwned(appId)
                 || AppContentManager.IsAppInstalled(appId);
         }

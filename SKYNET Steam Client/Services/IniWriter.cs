@@ -38,6 +38,8 @@ public static class IniWriter
         sb.AppendLine("[Game Settings]");
         sb.AppendLine($"Languaje = {s.Language}");
         sb.AppendLine($"AppId = {game.AppId}");
+        if (game.CompatibilityAppId != 0)
+            sb.AppendLine($"CompatibilityAppId = {game.CompatibilityAppId}");
         sb.AppendLine($"UnlockAllDLC = {B(s.UnlockAllDlc)}");
         sb.AppendLine();
 

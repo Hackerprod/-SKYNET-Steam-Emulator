@@ -101,7 +101,7 @@ namespace SKYNET.Steamworks.Implementation
             bool handled = TryQueueServerResponses(gcMsg, requestData.Body, requestData.SourceJobId, gameServer);
             if (!handled)
             {
-                Write($"GC message queued without immediate server response (AppId = {SteamEmulator.AppID}, MsgType = {gcMsg}, BodySize = {requestData.Body.Length}, Body = {ToHex(requestData.Body, 64)})");
+                Write($"GC message queued without immediate server response (AppId = {SteamEmulator.InternalAppId}, MsgType = {gcMsg}, BodySize = {requestData.Body.Length}, Body = {ToHex(requestData.Body, 64)})");
             }
 
             Write($"SendMessage (MsgType = {gcMsg}, MsgSize = {cubData}) = k_EGCResultOK");
@@ -119,7 +119,7 @@ namespace SKYNET.Steamworks.Implementation
             var body = requestBody ?? Array.Empty<byte>();
             return WorkQueue.Enqueue($"GC exchange {requestMsg}", () =>
             {
-                var response = APIClient.ExchangeGCMessage(SteamEmulator.AppID, requestMsg, body, sourceJobId, gameServer);
+                var response = APIClient.ExchangeGCMessage(SteamEmulator.InternalAppId, requestMsg, body, sourceJobId, gameServer);
                 if (response == null)
                 {
                     Write($"GC server exchange unavailable; no local fallback (MsgType = {requestMsg})");
@@ -203,7 +203,7 @@ namespace SKYNET.Steamworks.Implementation
             {
                 try
                 {
-                    QueueServerMessages(APIClient.PollGCMessages(SteamEmulator.AppID, true), 0, true);
+                    QueueServerMessages(APIClient.PollGCMessages(SteamEmulator.InternalAppId, true), 0, true);
                 }
                 catch (Exception ex)
                 {

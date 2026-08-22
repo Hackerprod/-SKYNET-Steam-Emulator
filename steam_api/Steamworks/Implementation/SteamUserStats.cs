@@ -75,7 +75,7 @@ namespace SKYNET.Steamworks.Implementation
                         SyncSelfFromCache(false);
                         CallbackManager.AddCallback(new UserStatsReceived_t
                         {
-                            m_nGameID = SteamEmulator.AppID,
+                            m_nGameID = SteamEmulator.ReportedAppId,
                             m_eResult = ok ? EResult.k_EResultOK : EResult.k_EResultFail,
                             m_steamIDUser = SteamEmulator.SteamID
                         });
@@ -85,7 +85,7 @@ namespace SKYNET.Steamworks.Implementation
 
                 UserStatsReceived_t data = new UserStatsReceived_t()
                 {
-                    m_nGameID = SteamEmulator.AppID,
+                    m_nGameID = SteamEmulator.ReportedAppId,
                     m_eResult = requestSucceeded ? EResult.k_EResultOK : EResult.k_EResultFail,
                     m_steamIDUser = SteamEmulator.SteamID
                 };
@@ -395,7 +395,7 @@ namespace SKYNET.Steamworks.Implementation
                         var ok = APIClient.StoreStats();
                         CallbackManager.AddCallback(new UserStatsStored_t
                         {
-                            m_nGameID = SteamEmulator.AppID,
+                            m_nGameID = SteamEmulator.ReportedAppId,
                             m_eResult = ok ? EResult.k_EResultOK : EResult.k_EResultFail
                         });
                     }, "stats:store", true);
@@ -404,7 +404,7 @@ namespace SKYNET.Steamworks.Implementation
 
                 UserStatsStored_t data = new UserStatsStored_t()
                 {
-                    m_nGameID = SteamEmulator.AppID,
+                    m_nGameID = SteamEmulator.ReportedAppId,
                     m_eResult = stored ? EResult.k_EResultOK : EResult.k_EResultFail
                 };
                 CallbackManager.AddCallback(data);
@@ -462,7 +462,7 @@ namespace SKYNET.Steamworks.Implementation
 
             UserAchievementStored_t data = new UserAchievementStored_t()
             {
-                m_nGameID = SteamEmulator.AppID,
+                m_nGameID = SteamEmulator.ReportedAppId,
                 m_bGroupAchievement = false,
                 m_rgchAchievementName = Encoding.UTF8.GetBytes(pchName),
                 m_nCurProgress = nCurProgress,
@@ -522,7 +522,7 @@ namespace SKYNET.Steamworks.Implementation
                 {
                     return WorkQueue.EnqueueCallbackResult(new UserStatsReceived_t
                     {
-                        m_nGameID = SteamEmulator.AppID,
+                        m_nGameID = SteamEmulator.ReportedAppId,
                         m_eResult = EResult.k_EResultFail,
                         m_steamIDUser = (CSteamID)steamIDUser
                     }, () =>
@@ -531,7 +531,7 @@ namespace SKYNET.Steamworks.Implementation
                         SyncUserFromCache(steamIDUser, false);
                         return new UserStatsReceived_t
                         {
-                            m_nGameID = SteamEmulator.AppID,
+                            m_nGameID = SteamEmulator.ReportedAppId,
                             m_eResult = ok ? EResult.k_EResultOK : EResult.k_EResultFail,
                             m_steamIDUser = (CSteamID)steamIDUser
                         };
@@ -540,7 +540,7 @@ namespace SKYNET.Steamworks.Implementation
 
                 UserStatsReceived_t data = new UserStatsReceived_t()
                 {
-                    m_nGameID = SteamEmulator.AppID,
+                    m_nGameID = SteamEmulator.ReportedAppId,
                     m_eResult = EResult.k_EResultOK,
                     m_steamIDUser = (CSteamID)steamIDUser
                 };
@@ -1028,7 +1028,7 @@ namespace SKYNET.Steamworks.Implementation
                 GlobalStatsReceived_t data = new GlobalStatsReceived_t()
                 {
                     m_eResult = EResult.k_EResultOK,
-                    m_nGameID = SteamEmulator.AppID
+                    m_nGameID = SteamEmulator.ReportedAppId
                 };
                 return CallbackManager.AddCallbackResult(data);
             }

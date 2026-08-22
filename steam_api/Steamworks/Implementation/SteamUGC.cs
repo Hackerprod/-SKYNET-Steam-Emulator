@@ -667,7 +667,7 @@ namespace SKYNET.Steamworks.Implementation
                         NativeCallbackQueue.Enqueue(() =>
                             CallbackManager.AddCallback(new ItemInstalled_t
                              {
-                                 m_unAppID = SteamEmulator.AppID,
+                                  m_unAppID = SteamEmulator.ReportedAppId,
                                  m_nPublishedFileId = nPublishedFileID,
                                  // Emulator-managed Workshop content is not backed
                                  // by SteamPipe UGC or depot manifests.
@@ -1031,8 +1031,8 @@ namespace SKYNET.Steamworks.Implementation
                 pDetails.m_eResult = EResult.k_EResultOK;
                 pDetails.m_nPublishedFileId = id;
                 pDetails.m_eFileType = EWorkshopFileType.k_EWorkshopFileTypeCommunity;
-                pDetails.m_nCreatorAppID = SteamEmulator.AppID;
-                pDetails.m_nConsumerAppID = SteamEmulator.AppID;
+                pDetails.m_nCreatorAppID = SteamEmulator.ReportedAppId;
+                pDetails.m_nConsumerAppID = SteamEmulator.ReportedAppId;
 
                 Marshal.StructureToPtr(pDetails, ptrDetails, false);
             }
@@ -1059,8 +1059,8 @@ namespace SKYNET.Steamworks.Implementation
                 m_nPublishedFileId = publishedFileId,
                 m_eResult = result,
                 m_eFileType = fileType,
-                m_nCreatorAppID = item?.CreatorAppId ?? SteamEmulator.AppID,
-                m_nConsumerAppID = item?.ConsumerAppId ?? SteamEmulator.AppID,
+                m_nCreatorAppID = item?.CreatorAppId ?? SteamEmulator.ReportedAppId,
+                m_nConsumerAppID = item?.ConsumerAppId ?? SteamEmulator.ReportedAppId,
                 m_rgchTitle = item?.Title ?? string.Empty,
                 m_rgchDescription = item?.Description ?? string.Empty,
                 m_ulSteamIDOwner = item?.OwnerSteamId ?? 0,

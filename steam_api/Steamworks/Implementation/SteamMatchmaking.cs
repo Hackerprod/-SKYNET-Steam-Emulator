@@ -143,7 +143,7 @@ namespace SKYNET.Steamworks.Implementation
                         m_ulSteamIDLobby = 0
                     }, () =>
                     {
-                        var lobby = APIClient.CreateLobby(SteamEmulator.AppID, eLobbyType, cMaxMembers, lobbyData);
+                        var lobby = APIClient.CreateLobby(SteamEmulator.InternalAppId, eLobbyType, cMaxMembers, lobbyData);
                         if (lobby == null)
                         {
                             return new LobbyCreated_t
@@ -181,7 +181,7 @@ namespace SKYNET.Steamworks.Implementation
                 var LocalLobby = new SteamLobby()
                 {
                     Owner = (ulong)SteamEmulator.SteamID,
-                    AppID = SteamEmulator.AppID,
+                    AppID = SteamEmulator.InternalAppId,
                     SteamID = Common.GenerateSteamID(),
                     Type = (ELobbyType)eLobbyType,
                     MaxMembers = cMaxMembers,
@@ -331,7 +331,7 @@ namespace SKYNET.Steamworks.Implementation
                 var filterSnapshot = CloneFilter(filters);
                 WorkQueue.Enqueue("QueryLobbies index", () =>
                 {
-                    var lobbies = APIClient.QueryLobbies(SteamEmulator.AppID, filterSnapshot);
+                    var lobbies = APIClient.QueryLobbies(SteamEmulator.InternalAppId, filterSnapshot);
                     if (lobbies != null)
                     {
                         LobbyManager.UpdateLobbies(lobbies);
@@ -339,7 +339,7 @@ namespace SKYNET.Steamworks.Implementation
                 }, "lobby:query:index");
             }
 
-            SteamLobby lobby = LobbyManager.GetLobbyByIndex(SteamEmulator.AppID, iLobby);
+            SteamLobby lobby = LobbyManager.GetLobbyByIndex(SteamEmulator.InternalAppId, iLobby);
             if (lobby != null)
             {
                 Response = (CSteamID)lobby.SteamID;
@@ -677,7 +677,7 @@ namespace SKYNET.Steamworks.Implementation
                 filters = new FilterLobby();
                 return WorkQueue.EnqueueCallbackResult(new LobbyMatchList_t(), () =>
                 {
-                    var lobbies = APIClient.QueryLobbies(SteamEmulator.AppID, filterSnapshot) ?? new List<SteamLobby>();
+                    var lobbies = APIClient.QueryLobbies(SteamEmulator.InternalAppId, filterSnapshot) ?? new List<SteamLobby>();
                     LobbyManager.UpdateLobbies(lobbies);
                     return new LobbyMatchList_t
                     {
@@ -695,7 +695,7 @@ namespace SKYNET.Steamworks.Implementation
         {
             //SteamAPICall_t APICall = (SteamAPICall_t)state;
             //Thread.Sleep(3000);
-            //uint Lobbies = (uint)LobbyManager.GetLobbies(SteamEmulator.AppID).Count;
+            //uint Lobbies = (uint)LobbyManager.GetLobbies(SteamEmulator.InternalAppId).Count;
             //if (CallbackManager.GetCallResult(APICall, out var callback))
             //{
             //    LobbyMatchList_t data = new LobbyMatchList_t()
@@ -1066,7 +1066,7 @@ namespace SKYNET.Steamworks.Implementation
         //    Lobbies.TryAdd(id, new SteamLobby()
         //    {
         //        SteamID = id,
-        //        AppID = SteamEmulator.AppID,
+        //        AppID = SteamEmulator.InternalAppId,
         //        Joinable = true,
         //        MaxMembers = 20,
         //        Owner = (ulong)SteamEmulator.SteamID,

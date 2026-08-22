@@ -212,7 +212,7 @@ namespace SKYNET.Steamworks.Implementation
                 screenshots[handle] = new ScreenshotRecord
                 {
                     Handle = handle,
-                    AppId = SteamEmulator.AppID,
+                    AppId = SteamEmulator.InternalAppId,
                     Path = path,
                     ThumbnailPath = thumbnail,
                     Width = width,
@@ -292,7 +292,7 @@ namespace SKYNET.Steamworks.Implementation
                 {
                     SteamEmulator.Write("Screenshot index save", ex);
                 }
-            }, $"screenshots:{SteamEmulator.AppID}");
+            }, $"screenshots:{SteamEmulator.InternalAppId}");
         }
 
         private static void SaveRgb(string path, byte[] rgb, int width, int height)
@@ -363,7 +363,7 @@ namespace SKYNET.Steamworks.Implementation
 
         private static string ScreenshotRoot()
         {
-            var root = Path.Combine(Common.GetPath(), "SKYNET", "Screenshots", SteamEmulator.AppID.ToString());
+            var root = Path.Combine(Common.GetPath(), "SKYNET", "Screenshots", SteamEmulator.InternalAppId.ToString());
             Directory.CreateDirectory(root);
             return root;
         }

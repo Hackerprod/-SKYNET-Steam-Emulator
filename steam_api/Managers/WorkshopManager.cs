@@ -30,7 +30,7 @@ namespace SKYNET.Managers
 
         public static void Initialize()
         {
-            EnsureIdentity((ulong)SteamEmulator.SteamID, SteamEmulator.AppID);
+            EnsureIdentity((ulong)SteamEmulator.SteamID, SteamEmulator.InternalAppId);
         }
 
         public static void ApplyServerSnapshot(
@@ -61,7 +61,7 @@ namespace SKYNET.Managers
 
         public static APIClient.SkyNetWorkshopSubscriptionDto[] GetSubscriptions(bool includeLocallyDisabled)
         {
-            EnsureIdentity((ulong)SteamEmulator.SteamID, SteamEmulator.AppID);
+            EnsureIdentity((ulong)SteamEmulator.SteamID, SteamEmulator.InternalAppId);
             lock (Gate)
             {
                 return Subscriptions.Values
@@ -77,7 +77,7 @@ namespace SKYNET.Managers
             ulong publishedFileId,
             out APIClient.SkyNetWorkshopItemDto item)
         {
-            EnsureIdentity((ulong)SteamEmulator.SteamID, SteamEmulator.AppID);
+            EnsureIdentity((ulong)SteamEmulator.SteamID, SteamEmulator.InternalAppId);
             lock (Gate)
             {
                 if (Subscriptions.TryGetValue(publishedFileId, out var subscription) &&
@@ -94,12 +94,12 @@ namespace SKYNET.Managers
 
         public static void UpsertSubscription(APIClient.SkyNetWorkshopSubscriptionDto subscription)
         {
-            if (!IsValidSubscription(subscription, SteamEmulator.AppID))
+            if (!IsValidSubscription(subscription, SteamEmulator.InternalAppId))
             {
                 return;
             }
 
-            EnsureIdentity((ulong)SteamEmulator.SteamID, SteamEmulator.AppID);
+            EnsureIdentity((ulong)SteamEmulator.SteamID, SteamEmulator.InternalAppId);
             lock (Gate)
             {
                 Subscriptions[subscription.PublishedFileId] = CloneSubscription(subscription);
@@ -110,7 +110,7 @@ namespace SKYNET.Managers
 
         public static void RemoveSubscription(ulong publishedFileId)
         {
-            EnsureIdentity((ulong)SteamEmulator.SteamID, SteamEmulator.AppID);
+            EnsureIdentity((ulong)SteamEmulator.SteamID, SteamEmulator.InternalAppId);
             lock (Gate)
             {
                 if (Subscriptions.Remove(publishedFileId))
@@ -123,7 +123,7 @@ namespace SKYNET.Managers
 
         public static uint GetItemState(ulong publishedFileId)
         {
-            EnsureIdentity((ulong)SteamEmulator.SteamID, SteamEmulator.AppID);
+            EnsureIdentity((ulong)SteamEmulator.SteamID, SteamEmulator.InternalAppId);
             APIClient.SkyNetWorkshopSubscriptionDto subscription;
             lock (Gate)
             {
@@ -155,7 +155,7 @@ namespace SKYNET.Managers
 
         public static bool TryGetInstallInfo(ulong publishedFileId, out InstallInfo info)
         {
-            EnsureIdentity((ulong)SteamEmulator.SteamID, SteamEmulator.AppID);
+            EnsureIdentity((ulong)SteamEmulator.SteamID, SteamEmulator.InternalAppId);
 
             APIClient.SkyNetWorkshopItemDto item = null;
             lock (Gate)
@@ -227,8 +227,8 @@ namespace SKYNET.Managers
                     }
 
                     item.PublishedFileId = publishedFileId;
-                    item.CreatorAppId = item.CreatorAppId == 0 ? SteamEmulator.AppID : item.CreatorAppId;
-                    item.ConsumerAppId = SteamEmulator.AppID;
+                    item.CreatorAppId = item.CreatorAppId == 0 ? SteamEmulator.ReportedAppId : item.CreatorAppId;
+                    item.ConsumerAppId = SteamEmulator.ReportedAppId;
                     item.OwnerSteamId = item.OwnerSteamId == 0
                         ? (ulong)SteamEmulator.SteamID
                         : item.OwnerSteamId;
@@ -379,7 +379,7 @@ namespace SKYNET.Managers
 
         private static string ResolveInstallDirectory(ulong publishedFileId)
         {
-            var appId = SteamEmulator.AppID.ToString();
+            var appId = SteamEmulator.InternalAppId.ToString();
             var itemId = publishedFileId.ToString();
             var gamePath = Common.GetPath();
             var candidates = new List<string>();

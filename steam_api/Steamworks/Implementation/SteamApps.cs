@@ -243,7 +243,7 @@ namespace SKYNET.Steamworks.Implementation
 
         public int GetAppBuildId()
         {
-            int buildId = AppContentManager.GetAppBuildId(SteamEmulator.AppID);
+            int buildId = AppContentManager.GetAppBuildId(SteamEmulator.ReportedAppId);
             Write($"GetAppBuildId = {buildId}");
             return buildId;
         }

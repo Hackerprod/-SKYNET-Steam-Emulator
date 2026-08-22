@@ -111,7 +111,7 @@ namespace SKYNET.Steamworks.Implementation
                 return true;
             }
 
-            if (appId == SteamEmulator.AppID)
+            if (appId == SteamEmulator.ReportedAppId)
             {
                 name = string.Empty;
                 return false;

@@ -135,7 +135,7 @@ namespace SKYNET.Managers
                 return false;
             }
 
-            if (appId == SteamEmulator.AppID)
+            if (appId == SteamEmulator.ReportedAppId)
             {
                 return true;
             }
@@ -186,7 +186,7 @@ namespace SKYNET.Managers
                 return true;
             }
 
-            if (appId == SteamEmulator.AppID)
+            if (appId == SteamEmulator.ReportedAppId)
             {
                 path = Common.GetPath();
                 return true;
@@ -197,7 +197,7 @@ namespace SKYNET.Managers
 
         public static int GetAppBuildId(uint appId)
         {
-            if (appId == SteamEmulator.AppID && SteamEmulator.AppBuildIdOverride > 0)
+            if (appId == SteamEmulator.ReportedAppId && SteamEmulator.AppBuildIdOverride > 0)
             {
                 return SteamEmulator.AppBuildIdOverride;
             }
@@ -236,9 +236,9 @@ namespace SKYNET.Managers
         public static IReadOnlyList<uint> GetInstalledApps()
         {
             var apps = new SortedSet<uint>();
-            if (SteamEmulator.AppID != 0 && SteamEmulator.AppID != uint.MaxValue)
+            if (SteamEmulator.ReportedAppId != 0 && SteamEmulator.ReportedAppId != uint.MaxValue)
             {
-                apps.Add(SteamEmulator.AppID);
+                apps.Add(SteamEmulator.ReportedAppId);
             }
 
             lock (Sync)

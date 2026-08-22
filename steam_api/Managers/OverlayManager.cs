@@ -283,7 +283,7 @@ namespace SKYNET.Managers
 
         public static bool ShowStore(uint appId, int flag)
         {
-            var effectiveAppId = appId == 0 ? SteamEmulator.AppID : appId;
+            var effectiveAppId = appId == 0 ? SteamEmulator.ReportedAppId : appId;
 
             return Show(new OverlayRequest
             {
@@ -355,7 +355,7 @@ namespace SKYNET.Managers
                 Kind = kind,
                 Title = title,
                 UserId = effectiveSteamId,
-                AppId = SteamEmulator.AppID,
+                AppId = SteamEmulator.ReportedAppId,
                 User = user,
                 Stats = BuildStats(effectiveSteamId),
                 Achievements = BuildAchievements(effectiveSteamId),
@@ -510,7 +510,7 @@ namespace SKYNET.Managers
             {
                 Active = e.Active ? (byte)1 : (byte)0,
                 UserInitiated = e.UserInitiated,
-                AppID = SteamEmulator.AppID,
+                AppID = SteamEmulator.ReportedAppId,
                 OverlayPID = (uint)Process.GetCurrentProcess().Id
             });
         }
@@ -649,13 +649,13 @@ namespace SKYNET.Managers
                 SteamId = steamId,
                 AccountId = GetCurrentAccountId(),
                 PersonaName = SteamEmulator.PersonaName ?? string.Empty,
-                AppId = SteamEmulator.AppID,
+                AppId = SteamEmulator.ReportedAppId,
                 PersonaState = 1,
                 HasFriend = true,
                 FriendRelationship = 3,
                 IsSelf = true,
                 AvatarPng = TryGetAvatarPng(steamId),
-                Status = SteamEmulator.AppID == 0 ? "Online" : $"Playing App {SteamEmulator.AppID}"
+                Status = SteamEmulator.ReportedAppId == 0 ? "Online" : $"Playing App {SteamEmulator.ReportedAppId}"
             };
         }
 
@@ -772,7 +772,7 @@ namespace SKYNET.Managers
                 new OverlaySummaryItem
                 {
                     Label = "AppID",
-                    Value = SteamEmulator.AppID == 0 ? "Unknown" : SteamEmulator.AppID.ToString(),
+                    Value = SteamEmulator.ReportedAppId == 0 ? "Unknown" : SteamEmulator.ReportedAppId.ToString(),
                     Tone = "accent"
                 },
                 new OverlaySummaryItem
@@ -839,7 +839,7 @@ namespace SKYNET.Managers
         {
             return new Dictionary<string, string>
             {
-                ["AppID"] = SteamEmulator.AppID.ToString(),
+                ["AppID"] = SteamEmulator.ReportedAppId.ToString(),
                 ["SteamID"] = GetCurrentSteamId().ToString(),
                 ["AccountID"] = GetCurrentAccountId().ToString(),
                 ["Persona"] = SteamEmulator.PersonaName ?? string.Empty,
@@ -861,8 +861,8 @@ namespace SKYNET.Managers
             }
 
             var isSelf = player.SteamID == GetCurrentSteamId();
-            var localAppId = SteamEmulator.AppID;
-            var appId = isSelf && localAppId != 0 ? localAppId : player.GameID;
+            var localAppId = SteamEmulator.InternalAppId;
+            var appId = isSelf && localAppId != 0 ? SteamEmulator.ReportedAppId : player.GameID;
             var lobbyId = isSelf &&
                           player.GameID != 0 &&
                           localAppId != 0 &&
@@ -998,7 +998,7 @@ namespace SKYNET.Managers
 
             if (appId != 0)
             {
-                var gameStatus = appId == SteamEmulator.AppID
+                var gameStatus = appId == SteamEmulator.InternalAppId
                     ? "In game"
                     : $"Playing App {appId}";
 

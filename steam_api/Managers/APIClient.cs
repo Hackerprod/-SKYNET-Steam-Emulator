@@ -244,7 +244,7 @@ namespace SKYNET.Managers
             {
                 AccountId = SteamEmulator.SteamID.GetAccountID(),
                 SteamId = (ulong)SteamEmulator.SteamID,
-                AppId = SteamEmulator.AppID,
+                AppId = SteamEmulator.InternalAppId,
                 PersonaName = SteamEmulator.PersonaName,
                 ClientInstanceId = SteamEmulator.ClientInstanceId,
                 ProcessRole = GetProcessRole(),
@@ -1000,7 +1000,7 @@ namespace SKYNET.Managers
             EnsureSession();
             return Send<SkyNetAuthTicketDto>(HttpMethod.Post, "api/auth/tickets/session", new SkyNetAuthTicketRequestDto
             {
-                AppId = SteamEmulator.AppID,
+                AppId = SteamEmulator.InternalAppId,
                 SteamId = (ulong)(gameServer ? SteamEmulator.SteamID_GS : SteamEmulator.SteamID),
                 GameServer = gameServer,
                 TicketBufferSize = cbMaxTicket
@@ -1019,7 +1019,7 @@ namespace SKYNET.Managers
                 "api/auth/tickets/encrypted",
                 new SkyNetEncryptedAppTicketRequestDto
                 {
-                    AppId = SteamEmulator.AppID,
+                    AppId = SteamEmulator.InternalAppId,
                     UserDataBase64 = Convert.ToBase64String(userData ?? Array.Empty<byte>())
                 });
         }
@@ -1037,7 +1037,7 @@ namespace SKYNET.Managers
                 SteamId = steamId,
                 TicketBase64 = Convert.ToBase64String(ticket ?? new byte[0]),
                 GameServer = gameServer,
-                AppId = SteamEmulator.AppID
+                AppId = SteamEmulator.InternalAppId
             });
         }
 
@@ -1054,7 +1054,7 @@ namespace SKYNET.Managers
                 IpClient = ipClient,
                 SteamId = steamId,
                 AuthBlobBase64 = Convert.ToBase64String(authBlob ?? new byte[0]),
-                AppId = SteamEmulator.AppID
+                AppId = SteamEmulator.InternalAppId
             });
         }
 
@@ -2107,16 +2107,16 @@ namespace SKYNET.Managers
             WorkshopManager.ApplyServerSnapshot(
                 session.WorkshopSubscriptions,
                 (ulong)SteamEmulator.SteamID,
-                SteamEmulator.AppID);
+                SteamEmulator.InternalAppId);
             AchievementDefinitionManager.Apply(
-                SteamEmulator.AppID,
+                SteamEmulator.InternalAppId,
                 session.AchievementDefinitions);
             StatDefinitionManager.Apply(
-                SteamEmulator.AppID,
+                SteamEmulator.InternalAppId,
                 session.StatDefinitions);
             SteamEmulator.Write(
                 "APIClient",
-                $"Session metadata applied: AppID={SteamEmulator.AppID}, " +
+                $"Session metadata applied: AppID={SteamEmulator.InternalAppId}, " +
                 $"achievements={session.AchievementDefinitions?.Count ?? 0}, " +
                 $"stats={session.StatDefinitions?.Count ?? 0}/{StatDefinitionManager.Count}, " +
                 $"workshop={session.WorkshopSubscriptions?.Count ?? 0}");

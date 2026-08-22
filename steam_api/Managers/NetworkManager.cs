@@ -321,7 +321,7 @@ namespace SKYNET.Managers
                         CloseSocket(socket, (MessageType)message.MessageType);
                         return;
                     }
-                    if (lobbyListRequest.AppID != SteamEmulator.AppID)
+                    if (lobbyListRequest.AppID != SteamEmulator.InternalAppId)
                     {
                         CloseSocket(socket, (MessageType)message.MessageType);
                         return;
@@ -625,7 +625,7 @@ namespace SKYNET.Managers
         {
             NET_LobbyListRequest lobbyListRequest = new NET_LobbyListRequest()
             {
-                AppID = SteamEmulator.AppID,
+                AppID = SteamEmulator.InternalAppId,
                 RequestID = currentRequest
             };
 
@@ -644,7 +644,7 @@ namespace SKYNET.Managers
             {
                 PersonaName = SteamEmulator.PersonaName,
                 AccountID = (uint)SteamEmulator.SteamID.AccountID,
-                AppID = SteamEmulator.AppID
+                AppID = SteamEmulator.ReportedAppId
             };
 
             NetworkMessage message = CreateNetworkMessage(announce, MessageType.NET_Announce);

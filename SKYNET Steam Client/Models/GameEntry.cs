@@ -15,6 +15,10 @@ public sealed class GameEntry
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
     public string Name { get; set; } = "";
     public uint AppId { get; set; }
+
+    /// <summary>Optional AppID reported to the game via Steamworks. 0 reports AppId as-is.</summary>
+    public uint CompatibilityAppId { get; set; }
+
     public string ExecutablePath { get; set; } = "";
 
     /// <summary>Working directory; defaults to the exe folder when empty.</summary>

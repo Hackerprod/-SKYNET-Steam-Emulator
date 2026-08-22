@@ -911,7 +911,7 @@ namespace SKYNET.Steamworks.Implementation
             Write("GetUGCDetails");
             if (pnAppID != IntPtr.Zero)
             {
-                Marshal.WriteInt32(pnAppID, unchecked((int)SteamEmulator.AppID));
+                Marshal.WriteInt32(pnAppID, unchecked((int)SteamEmulator.ReportedAppId));
             }
             if (ppchName != IntPtr.Zero)
             {

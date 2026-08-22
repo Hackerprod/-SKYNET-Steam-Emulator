@@ -541,7 +541,7 @@ namespace SKYNET.Steamworks.Implementation
             return CallbackManager.AddCallbackResult(new DurationControl_t
             {
                 Result = EResult.k_EResultOK,
-                Appid = SteamEmulator.AppID,
+                Appid = SteamEmulator.ReportedAppId,
                 Applicable = false,
                 CsecsLast5h = 0,
                 Progress = DurationControlProgress.Progress_Full,

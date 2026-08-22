@@ -128,10 +128,17 @@ namespace SKYNET.Helper
                 var fallbackAccountId = GetUInt("User Settings", "FallbackAccountId", GenerateStableAccountId());
                 SteamEmulator.SteamID = new CSteamID(fallbackAccountId, Steamworks.EUniverse.k_EUniversePublic, EAccountType.k_EAccountTypeIndividual);
 
+                uint configuredAppId = SteamEmulator.InternalAppId;
                 foreach (var item in IniParser["Game Settings"].Settings)
                     if (item.Key == "AppId")
                         if (uint.TryParse((string)item.Value, out uint appId))
-                            SteamEmulator.AppID = appId;
+                            configuredAppId = appId;
+
+                SteamEmulator.CompatibilityAppId = GetUInt("Game Settings", "CompatibilityAppId", 0);
+                SteamEmulator.InternalAppId = configuredAppId;
+                SteamEmulator.ReportedAppId = SteamEmulator.CompatibilityAppId != 0
+                    ? SteamEmulator.CompatibilityAppId
+                    : configuredAppId;
                 SteamEmulator.AppBuildIdOverride = GetNonNegativeInt("Game Settings", "BuildId", 0);
 
                 LoadDLCs();
@@ -427,7 +434,7 @@ namespace SKYNET.Helper
             try
             {
                 AppContentManager.Clear();
-                AppContentManager.MarkInstalled(SteamEmulator.AppID);
+                AppContentManager.MarkInstalled(SteamEmulator.InternalAppId);
 
                 string skynetPath = Path.Combine(Common.GetPath(), "SKYNET");
                 LoadInstalledAppIds(Path.Combine(skynetPath, "installed_app_ids.txt"));

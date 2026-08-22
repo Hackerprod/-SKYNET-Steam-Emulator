@@ -236,7 +236,7 @@ namespace SKYNET.Steamworks.Exported
         public static bool GameServer_Init(uint unIP, ushort usSteamPort, ushort usGamePort, ushort usQueryPort, int eServerMode, string pchVersionString)
         {
             Write("GameServer_Init");
-            uint nGameAppId = SteamEmulator.AppID;
+            uint nGameAppId = SteamEmulator.InternalAppId;
             return SteamEmulator.SteamGameServer.InitGameServer(unIP, usGamePort, usQueryPort, (uint)eServerMode, nGameAppId, pchVersionString);
         }
 

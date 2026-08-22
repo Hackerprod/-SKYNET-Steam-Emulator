@@ -43,7 +43,7 @@ namespace SKYNET.Steamworks.Exported
         public static int SteamInternal_GameServer_Init_V2(uint unIP, ushort usGamePort, ushort usQueryPort, uint eServerMode, [MarshalAs(UnmanagedType.LPStr)] string pchVersionString, IntPtr pszInternalCheckInterfaceVersions, IntPtr pOutErrMsg)
         {
             uint unFlags = 0; // Always insecure; InitGameServer enforces this too.
-            var result = SteamEmulator.SteamGameServer.InitGameServer(unIP, usGamePort, usQueryPort, unFlags, SteamEmulator.AppID, pchVersionString);
+            var result = SteamEmulator.SteamGameServer.InitGameServer(unIP, usGamePort, usQueryPort, unFlags, SteamEmulator.InternalAppId, pchVersionString);
             if (result)
             {
                 BumpContextCounter("SteamInternal_GameServer_Init_V2");
@@ -77,7 +77,7 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamInternal_GameServer_Init(uint unIP, int usPort, int usGamePort, uint usQueryPort, uint eServerMode, string pchVersionString)
         {
             uint unFlags = 0; // Always insecure; InitGameServer enforces this too.
-            var result = SteamEmulator.SteamGameServer.InitGameServer(unIP, usPort, (int)usQueryPort, unFlags, SteamEmulator.AppID, pchVersionString);
+            var result = SteamEmulator.SteamGameServer.InitGameServer(unIP, usPort, (int)usQueryPort, unFlags, SteamEmulator.InternalAppId, pchVersionString);
             if (result)
             {
                 BumpContextCounter("SteamInternal_GameServer_Init");
