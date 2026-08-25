@@ -25,12 +25,15 @@ Important boundaries:
 | Area | What SKYNET Provides |
 | --- | --- |
 | Steam API ABI | Versioned Steamworks interfaces, exported entrypoints, native-compatible structure layout, and C-style callback dispatch. |
+| AppID compatibility override | Optional per-game `CompatibilityAppId` so a game can be reported a different AppID via Steamworks than the one SKYNET uses for its own server-side identity. |
 | Backend authority | Server-owned identity, session, friends, avatars, stats, achievements, lobbies, storage, tickets, and game server state. |
 | Callback system | Explicit separation between callbacks, call results, registered listeners, and manual dispatch paths. |
 | Dota 2 GC | TypeScript-backed Game Coordinator modules under `SKYNET server/GC/570`, with hot reload and trace tooling. |
 | SDR certificates | Local CA/certificate issuance for SteamNetworkingSockets testing, with disk-based CA patch flow. |
+| SDR relay | UDP router-ping relay plus automatic `sdr-relays.ini` generation, served to clients through `ISteamApps/GetSDRConfig` in both secure and insecure networking modes. |
 | P2P relay | Backend queued/batched P2P packet relay for cross-client synchronization. |
 | Web UI | Razor-based server UI with Tailwind-generated CSS and local static assets. |
+| Admin | Server status, users, lobbies, and game servers, available from both the web `/admin` page and a native Admin section in the desktop client (admin accounts only). |
 | Diagnostics | Logs, GC console, server traces, and runtime markers for Dota/client/server validation. |
 
 ## Architecture
@@ -78,14 +81,17 @@ Runtime flow:
 |   |-- Steamworks/Interfaces/     Versioned interface vtables
 |   +-- Steamworks/Types/          Native-facing structs, enums, handles, and IDs
 |
-|-- steam_api_native_proxy/        Native proxy/jump sources for DLL forwarding experiments
-|
 |-- SKYNET server/                 ASP.NET Core backend and admin UI
 |   |-- GC/570/                    Dota 2 TypeScript Game Coordinator runtime
 |   |-- Models/                    API DTOs and UI models
 |   |-- Pages/                     Razor pages
 |   |-- Services/                  State service, GC runtime, discovery, SDR, supervisors
 |   +-- wwwroot/                   Built CSS, fonts, and static UI assets
+|
+|-- SKYNET Steam Client/           WPF launcher/injector UI
+|   |-- Services/                  Game launch/injection, config, single-instance, tray
+|   |-- Views/                     Options and per-game settings windows
+|   +-- payload/                   steam_api DLLs injected into the game process
 |
 |-- LICENSE
 +-- README.md
@@ -116,6 +122,7 @@ Key services include:
 - `DiscoveryService` - UDP discovery on port `27081`
 - `SdrCertificateService` - SKYNET-signed SDR certificate generation
 - `SdrRelayService` - UDP relay support for SteamNetworkingSockets experiments
+- `SdrRelayConfigService` - generates `Data/sdr-relays.ini` on startup from configured relay nodes
 - `GameCoordinatorScriptPlugin` - app-specific GC dispatch and hot-reloaded TypeScript runtime
 - `DotaDedicatedServerSupervisor` - dedicated Dota server launch/claim flow for non-local lobby testing
 
@@ -125,6 +132,10 @@ Durable server data is split by ownership:
 - `SKYNET server/Data/dota.db` owns Dota/app 570 state: lobbies, game servers, Dota profiles/presence, cosmetics/items/equipment, matches, parties, guilds, reports, and GC-specific support tables.
 
 `app.db`, `SteamDB.db`, `dedicated-server.db`, and older `skynet-dota-*.db` files are legacy migration inputs only. They should not be reintroduced as active runtime databases.
+
+### `SKYNET Steam Client`
+
+The WPF launcher starts the game suspended, injects the matching payload DLL, and manages the local game library. It is single-instance: launching it again while it is already running restores and focuses the existing window instead of opening a second one. It can also minimize to a system tray icon (Open/Restore, Exit) instead of exiting on close, configurable from Options. The library can be sorted (recently played, name, date added, AppID; ascending/descending), with the choice persisted across launches. Admin accounts also get a native Admin section (server status, users, lobbies, game servers) alongside the web `/admin` page.
 
 ### Dota 2 Game Coordinator
 
@@ -155,7 +166,7 @@ See [`SKYNET server/GC/README.md`](SKYNET%20server/GC/README.md) for the TypeScr
 | .NET 8 SDK | Builds and runs `SKYNET server`. |
 | .NET Framework 4.7.2 Developer Pack | Required by `steam_api`. |
 | Visual Studio Build Tools / MSBuild | Required for Release DLL builds with DllExport. |
-| Node.js + npm | Optional, only needed when rebuilding Tailwind CSS assets. |
+| Node.js + npm | Optional. Needed to rebuild Tailwind CSS assets (`SKYNET server`) and to run typecheck/lint/format checks on the Dota GC TypeScript (`SKYNET server/GC/570`). |
 | Dota 2 install | Required only for Dota runtime validation. |
 
 ## Build
@@ -248,6 +259,8 @@ Common settings:
 | `Urls` | HTTP bind address. Default is `http://0.0.0.0:27080`. |
 | `Sdr:CaKeyId` | Key ID used by generated SDR certificates. |
 | `Sdr:RelayPort` | UDP relay port for SDR experiments. |
+| `Sdr:Relays` | Optional explicit relay node list for `sdr-relays.ini` generation. Defaults to a single relay from `Server:AdvertisedIp` + `Sdr:RelayPort` when unset. |
+| `Sdr:TypicalPings` | Optional inter-POP latency entries for `sdr-relays.ini`. Auto-chained between configured relays when unset. |
 | `Session:TimeoutMinutes` | Web/API session lifetime. |
 | `Presence:*` | Online/offline sweep behavior. |
 | `GameCoordinator:TickIntervalMs` | TypeScript GC tick interval. |
@@ -270,6 +283,7 @@ Important keys:
 | `User Settings` | `FallbackPersonaName` | Local persona fallback when no active server user exists. |
 | `User Settings` | `FallbackAccountId` | Stable fallback account ID. |
 | `Game Settings` | `AppId` | Steam AppID, defaulting to `570` for Dota testing. |
+| `Game Settings` | `CompatibilityAppId` | Optional AppID reported to the game via Steamworks when it differs from `AppId`. SKYNET's own server-side state (lobbies, stats, storage, GC routing) still keys off `AppId`. Unset/`0` means no override. |
 | `Network Settings` | `UseServerApi` | Enables backend-backed behavior. |
 | `Network Settings` | `ServerUrl` | API base URL, default `http://127.0.0.1:27080/`. |
 | `Network Settings` | `DiscoveryPort` | UDP discovery port, default `27081`. |
@@ -311,6 +325,10 @@ The server exposes a broad `/api` contract consumed by `APIClient` in the DLL. M
 - `/api/network/p2p/...`
 - `/api/gamecoordinator/...`
 - `/api/dota/...`
+- `/api/workshop/...`
+- `/api/leaderboards`
+- `/api/apps`
+- `/api/admin/overview` - admin-only server/users/lobbies/game-servers snapshot, consumed by both the web `/admin` page and the desktop client's Admin section
 
 The API is intentionally stateful: session tokens, active users, lobby ownership, pending events, and game server claims all affect responses.
 
