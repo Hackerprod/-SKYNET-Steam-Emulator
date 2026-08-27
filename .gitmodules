@@ -1,0 +1,4 @@
+[submodule "external/Ts.NET-Runtime"]
+	path = external/Ts.NET-Runtime
+	url = https://github.com/Hackerprod/Ts.NET-Runtime.git
+	branch = main

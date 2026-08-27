@@ -93,6 +93,9 @@ Runtime flow:
 |   |-- Views/                     Options and per-game settings windows
 |   +-- payload/                   steam_api DLLs injected into the game process
 |
+|-- external/
+|   +-- Ts.NET-Runtime/            Git submodule: TypeSharp host/VM that runs the GC TypeScript
+|
 |-- LICENSE
 +-- README.md
 ```
@@ -168,6 +171,30 @@ See [`SKYNET server/GC/README.md`](SKYNET%20server/GC/README.md) for the TypeScr
 | Visual Studio Build Tools / MSBuild | Required for Release DLL builds with DllExport. |
 | Node.js + npm | Optional. Needed to rebuild Tailwind CSS assets (`SKYNET server`) and to run typecheck/lint/format checks on the Dota GC TypeScript (`SKYNET server/GC/570`). |
 | Dota 2 install | Required only for Dota runtime validation. |
+
+## Getting the code
+
+`SKYNET server` depends on [Ts.NET-Runtime](https://github.com/Hackerprod/Ts.NET-Runtime) (the TypeSharp host/VM that runs the Dota GC TypeScript), pulled in as a git submodule under `external/Ts.NET-Runtime` rather than a copy, since both projects are developed in parallel and a change is sometimes needed on the runtime side to unblock work here.
+
+Clone with the submodule in one step:
+
+```powershell
+git clone --recurse-submodules https://github.com/Hackerprod/-SKYNET-Steam-Emulator.git
+```
+
+Already cloned without it? `dotnet restore`/`dotnet build` on `SKYNET server` will fail looking for `external/Ts.NET-Runtime` until you run:
+
+```powershell
+git submodule update --init --recursive
+```
+
+The submodule is pinned to a specific Ts.NET-Runtime commit for reproducible builds. To pull its latest `main` while co-developing both repos:
+
+```powershell
+git submodule update --remote external/Ts.NET-Runtime
+```
+
+then commit the resulting pointer bump in this repo once you've verified it still builds.
 
 ## Build
 

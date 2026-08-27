@@ -44,8 +44,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Ts.NET Runtime\src\TypeSharp.Hosting\TypeSharp.Hosting.csproj" />
-    <ProjectReference Include="..\..\Ts.NET Runtime\src\TypeSharp.VM\TypeSharp.VM.csproj" />
+    <ProjectReference Include="..\external\Ts.NET-Runtime\src\TypeSharp.Hosting\TypeSharp.Hosting.csproj" />
+    <ProjectReference Include="..\external\Ts.NET-Runtime\src\TypeSharp.VM\TypeSharp.VM.csproj" />
   </ItemGroup>
 
   <!--
