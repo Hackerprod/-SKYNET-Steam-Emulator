@@ -167,6 +167,8 @@
                             <TextBlock x:Name="LibraryCount" Text="0 games" FontSize="20" FontWeight="Bold" Margin="0,2,0,0" />
                         </StackPanel>
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+                            <TextBox x:Name="SearchBox" Width="180" Margin="0,0,8,0" Style="{StaticResource Field}"
+                                     ToolTip="Search by name or AppID" TextChanged="SearchBox_TextChanged" />
                             <ComboBox x:Name="SortModeCombo" Width="150" SelectionChanged="SortModeCombo_SelectionChanged">
                                 <ComboBoxItem Content="Recently played" Tag="RecentlyPlayed" />
                                 <ComboBoxItem Content="Name" Tag="Name" />

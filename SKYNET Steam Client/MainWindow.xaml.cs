@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.Win32;
@@ -15,13 +16,17 @@ namespace SKYNET.Client;
 public partial class MainWindow : Window
 {
     private readonly ObservableCollection<GameCardVm> _cards = new();
+    private readonly ICollectionView _cardsView;
+    private string _search = "";
     private SessionResult? _session;
     private bool _loadingSortUi;
 
     public MainWindow()
     {
         InitializeComponent();
-        GamesItems.ItemsSource = _cards;
+        _cardsView = CollectionViewSource.GetDefaultView(_cards);
+        _cardsView.Filter = FilterCard;
+        GamesItems.ItemsSource = _cardsView;
         App.Launcher.GameExited += OnGameExited;
         StateChanged += (_, _) => UpdateMaximizeGlyph();
         UpdateMaximizeGlyph();
@@ -180,7 +185,37 @@ public partial class MainWindow : Window
     private void SaveAndRefreshCounts()
     {
         LibraryCount.Text = _cards.Count == 1 ? "1 game" : $"{_cards.Count} games";
-        EmptyState.Visibility = _cards.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        UpdateEmptyState();
+    }
+
+    private void UpdateEmptyState()
+    {
+        if (_cards.Count == 0)
+        {
+            EmptyState.Text = "No games yet.\nClick ADD GAME and pick a game executable to get started.";
+            EmptyState.Visibility = Visibility.Visible;
+        }
+        else if (_cardsView.IsEmpty)
+        {
+            EmptyState.Text = "No games match your search.";
+            EmptyState.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            EmptyState.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private bool FilterCard(object o) =>
+        string.IsNullOrEmpty(_search) || o is not GameCardVm vm ||
+        vm.Name.IndexOf(_search, StringComparison.OrdinalIgnoreCase) >= 0 ||
+        vm.Game.AppId.ToString().IndexOf(_search, StringComparison.OrdinalIgnoreCase) >= 0;
+
+    private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        _search = SearchBox.Text.Trim();
+        _cardsView.Refresh();
+        UpdateEmptyState();
     }
 
     private void OnGameExited(GameEntry game)
