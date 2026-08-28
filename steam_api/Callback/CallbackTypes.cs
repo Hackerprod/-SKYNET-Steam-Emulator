@@ -1656,6 +1656,21 @@ namespace SKYNET.Callback
     //}
 
     [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
+    public struct SocketStatusCallback_t : ICallbackData
+    {
+        public uint m_hSocket;
+        public uint m_hListenSocket;
+        public ulong m_steamIDRemote;
+        public int m_eSNetSocketState;
+
+        #region SteamCallback
+        public static int _datasize = Marshal.SizeOf(typeof(SocketStatusCallback_t));
+        public int DataSize => _datasize;
+        public CallbackType CallbackType => CallbackType.SocketStatusCallback;
+        #endregion
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = Platform.StructPlatformPackSize)]
     public struct P2PSessionRequest_t : ICallbackData
     {
         public ulong m_steamIDRemote; // m_steamIDRemote CSteamID

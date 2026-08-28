@@ -22,10 +22,15 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamGameServer_InitGameServer(IntPtr _, uint unIP, ushort usGamePort, ushort usQueryPort, uint unFlags, AppId_t nGameAppId, string pchVersionString)
+        public static bool SteamAPI_ISteamGameServer_InitGameServer(IntPtr _, uint unIP, ushort usGamePort, ushort usQueryPort, uint unFlags, AppId_t nGameAppId, IntPtr pchVersionString)
         {
-            Write("SteamAPI_ISteamGameServer_InitGameServer");
-            return SteamEmulator.SteamGameServer.InitGameServer(unIP, usGamePort, usQueryPort, unFlags, nGameAppId, pchVersionString);
+            Write($"SteamAPI_ISteamGameServer_InitGameServer version=0x{pchVersionString.ToInt64():X}");
+            bool initialized = SteamEmulator.SteamGameServer.InitGameServer(unIP, usGamePort, usQueryPort, unFlags, nGameAppId, ReadAnsiArgument(pchVersionString));
+            if (initialized)
+            {
+                SteamAPI.PublishLegacyGameServerClient();
+            }
+            return initialized;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -351,17 +356,76 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamGameServer_Init(uint unIP, int usGamePort, int usQueryPort, uint unFlags, uint nGameAppId, string pchVersionString)
+        public static bool SteamGameServer_Init(uint unIP, ushort usGamePort, ushort usQueryPort, EServerMode eServerMode, IntPtr pchVersionString)
         {
-            Write("SteamGameServer_Init");
-            return SteamEmulator.SteamGameServer.InitGameServer(unIP, usGamePort, usQueryPort, unFlags, nGameAppId, pchVersionString);
+            Write($"SteamGameServer_Init IP={unIP} gamePort={usGamePort} queryPort={usQueryPort} mode={eServerMode} version=0x{pchVersionString.ToInt64():X}");
+            bool initialized = SteamEmulator.SteamGameServer.InitGameServer(
+                unIP,
+                usGamePort,
+                usQueryPort,
+                GetLegacyServerFlags(eServerMode),
+                SteamEmulator.InternalAppId,
+                ReadAnsiArgument(pchVersionString));
+            if (initialized)
+            {
+                SteamAPI.PublishLegacyGameServerClient();
+            }
+            return initialized;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamGameServer_InitSafe(uint unIP, ushort usSteamPort, ushort usGamePort, ushort usQueryPort, EServerMode eServerMode, string pchVersionString)
+        public static bool SteamGameServer_InitSafe(
+            uint unIP,
+            ushort usSteamPort,
+            ushort usGamePort,
+            ushort usSpectatorPort,
+            ushort usQueryPort,
+            EServerMode eServerMode,
+            IntPtr pchVersionString)
         {
-            Write("SteamGameServer_InitSafe");
-            return SteamEmulator.SteamGameServer.InitGameServer(unIP, usGamePort, usQueryPort, 0, (uint)eServerMode, pchVersionString);
+            Write($"SteamGameServer_InitSafe IP={unIP} steamPort={usSteamPort} gamePort={usGamePort} spectatorPort={usSpectatorPort} queryPort={usQueryPort} mode={eServerMode} version=0x{pchVersionString.ToInt64():X}");
+            bool initialized = SteamEmulator.SteamGameServer.InitGameServer(
+                unIP,
+                usGamePort,
+                usQueryPort,
+                GetLegacyServerFlags(eServerMode),
+                SteamEmulator.InternalAppId,
+                ReadAnsiArgument(pchVersionString));
+            SteamEmulator.SteamGameServer.SetSpectatorPort(usSpectatorPort);
+            if (initialized)
+            {
+                SteamAPI.PublishLegacyGameServerClient();
+            }
+            return initialized;
+        }
+
+        private static uint GetLegacyServerFlags(EServerMode serverMode)
+        {
+            return serverMode == EServerMode.AuthenticationAndSecure
+                ? Constants.k_unServerFlagSecure
+                : Constants.k_unServerFlagNone;
+        }
+
+        private static string ReadAnsiArgument(IntPtr value)
+        {
+            long address = value.ToInt64();
+            if (address == 0)
+            {
+                return string.Empty;
+            }
+            if (address > 0 && address < 0x10000)
+            {
+                return $"<invalid:0x{address:X}>";
+            }
+
+            try
+            {
+                return Marshal.PtrToStringAnsi(value) ?? string.Empty;
+            }
+            catch
+            {
+                return $"<invalid:0x{address:X}>";
+            }
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

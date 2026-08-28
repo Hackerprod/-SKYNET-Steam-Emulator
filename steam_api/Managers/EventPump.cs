@@ -366,6 +366,18 @@ namespace SKYNET.Managers
                 return;
             }
 
+            if (P2PTransportProtocol.IsLegacySockets(transport))
+            {
+                SteamEmulator.SteamNetworking?.ProcessRelaySocketPacket(
+                    transport,
+                    remoteSteamId,
+                    serverEvent.VirtualPort,
+                    serverEvent.SourceConnectionId,
+                    serverEvent.TargetConnectionId,
+                    payload);
+                return;
+            }
+
             if (transport != P2PTransportKind.Legacy)
             {
                 SteamEmulator.Write("EventPump", $"Dropping unhandled P2P transport: {transport}");

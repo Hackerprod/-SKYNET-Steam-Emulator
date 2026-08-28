@@ -153,7 +153,7 @@ namespace SKYNET.Callback
         LeaderboardUGCSet = 1111,
         // PS3TrophiesInstalled = 1112,
         GlobalStatsReceived = 1112,
-        // SocketStatusCallback = 1201,
+        SocketStatusCallback = 1201,
         P2PSessionRequest = 1202,
         P2PSessionConnectFail = 1203,
         SteamNetConnectionStatusChangedCallback = 1221,

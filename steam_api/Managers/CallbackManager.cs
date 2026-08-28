@@ -172,8 +172,10 @@ namespace SKYNET.Managers
         {
             EventPump.RunFrame(gameServer);
             NativeCallbackQueue.Drain(gameServer);
-            var invocations = DrainForFrame(gameServer, SteamEmulator.HSteamPipe, SteamEmulator.HSteamUser);
+            var frameUtc = DateTime.UtcNow;
+            var invocations = DrainForFrame(gameServer, SteamEmulator.HSteamPipe, SteamEmulator.HSteamUser, frameUtc);
             InvokeCallbacks(invocations);
+            ClearPendingDirectCallbacks(gameServer, frameUtc);
         }
 
         public static void ManualDispatchInit()
@@ -185,8 +187,10 @@ namespace SKYNET.Managers
             bool gameServer = hSteamPipe == SteamEmulator.HSteamPipe_GS;
             EventPump.RunFrame(gameServer);
             NativeCallbackQueue.Drain(gameServer);
-            var invocations = DrainForFrame(gameServer, hSteamPipe, gameServer ? SteamEmulator.HSteamUser_GS : SteamEmulator.HSteamUser);
+            var frameUtc = DateTime.UtcNow;
+            var invocations = DrainForFrame(gameServer, hSteamPipe, gameServer ? SteamEmulator.HSteamUser_GS : SteamEmulator.HSteamUser, frameUtc);
             InvokeCallbacks(invocations);
+            ClearPendingDirectCallbacks(gameServer, frameUtc);
         }
 
         public static bool ManualDispatchGetNextCallback(HSteamPipe hSteamPipe, ref CallbackMsg_t callbackMsg)
@@ -459,15 +463,12 @@ namespace SKYNET.Managers
             }
         }
 
-        private static List<CallbackInvocation> DrainForFrame(bool gameServer, HSteamPipe steamPipe, HSteamUser steamUser)
+        private static List<CallbackInvocation> DrainForFrame(bool gameServer, HSteamPipe steamPipe, HSteamUser steamUser, DateTime now)
         {
-            var now = DateTime.UtcNow;
             lock (Gate)
             {
                 RemoveDeletedAndExpired(now);
-                var invocations = DrainReadyRecords(gameServer, now);
-                ClearPendingDirectCallbacks(gameServer);
-                return invocations;
+                return DrainReadyRecords(gameServer, now);
             }
         }
 
@@ -643,11 +644,19 @@ namespace SKYNET.Managers
             });
         }
 
-        private static void ClearPendingDirectCallbacks(bool gameServer)
+        private static void ClearPendingDirectCallbacks(bool gameServer, DateTime createdThroughUtc)
         {
-            foreach (var key in PendingDirectCallbacks.Keys.Where(k => k.GameServer == gameServer).ToArray())
+            lock (Gate)
             {
-                PendingDirectCallbacks.Remove(key);
+                foreach (var key in PendingDirectCallbacks.Keys.Where(k => k.GameServer == gameServer).ToArray())
+                {
+                    var pendingCallbacks = PendingDirectCallbacks[key];
+                    pendingCallbacks.RemoveAll(pending => pending.CreatedUtc <= createdThroughUtc);
+                    if (pendingCallbacks.Count == 0)
+                    {
+                        PendingDirectCallbacks.Remove(key);
+                    }
+                }
             }
         }
 
@@ -671,6 +680,14 @@ namespace SKYNET.Managers
 
         private static CallbackRecord FindRecord(ulong apiCall)
         {
+            // Steam defines zero as k_uAPICallInvalid. Direct callbacks also use
+            // ApiCall == 0 internally, so looking up zero can otherwise return an
+            // unrelated direct callback and make an invalid handle appear valid.
+            if (apiCall == 0)
+            {
+                return null;
+            }
+
             return Records.LastOrDefault(r => r.ApiCall == apiCall);
         }
 

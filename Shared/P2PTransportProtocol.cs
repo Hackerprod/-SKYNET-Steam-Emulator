@@ -10,7 +10,12 @@ namespace SKYNET.Protocol
         SocketsAccept = 3,
         SocketsReject = 4,
         SocketsClose = 5,
-        SocketsData = 6
+        SocketsData = 6,
+        LegacySocketsOpen = 7,
+        LegacySocketsAccept = 8,
+        LegacySocketsReject = 9,
+        LegacySocketsClose = 10,
+        LegacySocketsData = 11
     }
 
     /// <summary>
@@ -43,6 +48,16 @@ namespace SKYNET.Protocol
                     return "sockets_close";
                 case P2PTransportKind.SocketsData:
                     return "sockets_data";
+                case P2PTransportKind.LegacySocketsOpen:
+                    return "legacy_sockets_open";
+                case P2PTransportKind.LegacySocketsAccept:
+                    return "legacy_sockets_accept";
+                case P2PTransportKind.LegacySocketsReject:
+                    return "legacy_sockets_reject";
+                case P2PTransportKind.LegacySocketsClose:
+                    return "legacy_sockets_close";
+                case P2PTransportKind.LegacySocketsData:
+                    return "legacy_sockets_data";
                 default:
                     throw new ArgumentOutOfRangeException(nameof(transport), transport, "Unknown P2P transport.");
             }
@@ -96,6 +111,21 @@ namespace SKYNET.Protocol
                     break;
                 case "sockets_data":
                     transport = P2PTransportKind.SocketsData;
+                    break;
+                case "legacy_sockets_open":
+                    transport = P2PTransportKind.LegacySocketsOpen;
+                    break;
+                case "legacy_sockets_accept":
+                    transport = P2PTransportKind.LegacySocketsAccept;
+                    break;
+                case "legacy_sockets_reject":
+                    transport = P2PTransportKind.LegacySocketsReject;
+                    break;
+                case "legacy_sockets_close":
+                    transport = P2PTransportKind.LegacySocketsClose;
+                    break;
+                case "legacy_sockets_data":
+                    transport = P2PTransportKind.LegacySocketsData;
                     break;
                 default:
                     error = "Unknown P2P transport.";
@@ -205,6 +235,35 @@ namespace SKYNET.Protocol
                         "Socket close and data frames require a source connection ID.",
                         out error);
 
+                case P2PTransportKind.LegacySocketsOpen:
+                    return ValidateSocketFrame(
+                        channel,
+                        sourceConnectionId != 0 && targetConnectionId == 0,
+                        "Legacy socket open frames require only a source connection ID.",
+                        out error);
+
+                case P2PTransportKind.LegacySocketsAccept:
+                    return ValidateSocketFrame(
+                        channel,
+                        sourceConnectionId != 0 && targetConnectionId != 0,
+                        "Legacy socket accept frames require source and target connection IDs.",
+                        out error);
+
+                case P2PTransportKind.LegacySocketsReject:
+                    return ValidateSocketFrame(
+                        channel,
+                        targetConnectionId != 0,
+                        "Legacy socket reject frames require a target connection ID.",
+                        out error);
+
+                case P2PTransportKind.LegacySocketsClose:
+                case P2PTransportKind.LegacySocketsData:
+                    return ValidateSocketFrame(
+                        channel,
+                        sourceConnectionId != 0,
+                        "Legacy socket close and data frames require a source connection ID.",
+                        out error);
+
                 default:
                     error = "Unknown P2P transport.";
                     return false;
@@ -287,10 +346,18 @@ namespace SKYNET.Protocol
                    transport <= P2PTransportKind.SocketsData;
         }
 
+        public static bool IsLegacySockets(P2PTransportKind transport)
+        {
+            return transport >= P2PTransportKind.LegacySocketsOpen &&
+                   transport <= P2PTransportKind.LegacySocketsData;
+        }
+
         public static bool IsSocketControl(P2PTransportKind transport)
         {
-            return transport >= P2PTransportKind.SocketsOpen &&
-                   transport <= P2PTransportKind.SocketsClose;
+            return (transport >= P2PTransportKind.SocketsOpen &&
+                    transport <= P2PTransportKind.SocketsClose) ||
+                   (transport >= P2PTransportKind.LegacySocketsOpen &&
+                    transport <= P2PTransportKind.LegacySocketsClose);
         }
 
         private static bool ValidateSocketFrame(

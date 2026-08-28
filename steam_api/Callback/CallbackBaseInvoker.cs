@@ -8,17 +8,19 @@ namespace SKYNET.Callback
 {
     internal static class CallbackBaseInvoker
     {
+        // MSVC reverses these two overloads in the vtable. This is the same
+        // overload-order rule used by MsvcVTableOverloadAttribute elsewhere.
         private const int RunCallResultVTableSlot = 0;
         private const int RunCallbackVTableSlot = 1;
         private const int GetCallbackSizeVTableSlot = 2;
-        private const int CallbackFlagsOffset64 = 8;
-        private const int CallbackIdOffset64 = 12;
 
         private static readonly object Gate = new object();
         private static readonly Dictionary<IntPtr, RunCallbackDelegate> RunCallbackDelegates = new Dictionary<IntPtr, RunCallbackDelegate>();
         private static readonly Dictionary<IntPtr, RunCallResultDelegate> RunCallResultDelegates = new Dictionary<IntPtr, RunCallResultDelegate>();
         private static readonly Dictionary<IntPtr, GetCallbackSizeDelegate> GetCallbackSizeDelegates = new Dictionary<IntPtr, GetCallbackSizeDelegate>();
-        private static bool unsupportedArchitectureLogged;
+        private static readonly Dictionary<IntPtr, RunCallbackThisCallDelegate> RunCallbackThisCallDelegates = new Dictionary<IntPtr, RunCallbackThisCallDelegate>();
+        private static readonly Dictionary<IntPtr, RunCallResultThisCallDelegate> RunCallResultThisCallDelegates = new Dictionary<IntPtr, RunCallResultThisCallDelegate>();
+        private static readonly Dictionary<IntPtr, GetCallbackSizeThisCallDelegate> GetCallbackSizeThisCallDelegates = new Dictionary<IntPtr, GetCallbackSizeThisCallDelegate>();
 
         public static bool RunCallback(IntPtr self, IntPtr pvParam)
         {
@@ -27,8 +29,14 @@ namespace SKYNET.Callback
                 return false;
             }
 
-            var invoker = GetDelegate(function, RunCallbackDelegates);
-            invoker(self, pvParam);
+            if (IntPtr.Size == 4)
+            {
+                GetDelegate(function, RunCallbackThisCallDelegates)(self, pvParam);
+            }
+            else
+            {
+                GetDelegate(function, RunCallbackDelegates)(self, pvParam);
+            }
             return true;
         }
 
@@ -39,8 +47,14 @@ namespace SKYNET.Callback
                 return false;
             }
 
-            var invoker = GetDelegate(function, RunCallResultDelegates);
-            invoker(self, pvParam, ioFailure ? (byte)1 : (byte)0, apiCall);
+            if (IntPtr.Size == 4)
+            {
+                GetDelegate(function, RunCallResultThisCallDelegates)(self, pvParam, ioFailure ? (byte)1 : (byte)0, apiCall);
+            }
+            else
+            {
+                GetDelegate(function, RunCallResultDelegates)(self, pvParam, ioFailure ? (byte)1 : (byte)0, apiCall);
+            }
             return true;
         }
 
@@ -51,8 +65,9 @@ namespace SKYNET.Callback
                 return 0;
             }
 
-            var invoker = GetDelegate(function, GetCallbackSizeDelegates);
-            return invoker(self);
+            return IntPtr.Size == 4
+                ? GetDelegate(function, GetCallbackSizeThisCallDelegates)(self)
+                : GetDelegate(function, GetCallbackSizeDelegates)(self);
         }
 
         public static int GetCallbackId(IntPtr self)
@@ -62,7 +77,7 @@ namespace SKYNET.Callback
                 return 0;
             }
 
-            return Marshal.ReadInt32(self, CallbackIdOffset64);
+            return Marshal.ReadInt32(self, IntPtr.Size + 4);
         }
 
         public static byte GetCallbackFlags(IntPtr self)
@@ -72,30 +87,30 @@ namespace SKYNET.Callback
                 return 0;
             }
 
-            return Marshal.ReadByte(self, CallbackFlagsOffset64);
+            return Marshal.ReadByte(self, IntPtr.Size);
         }
 
         public static void RegisterCallback(IntPtr self, int callbackId)
         {
-            if (!IsSupportedCallbackPointer(self))
+            if (!IsSupportedCallbackPointer(self) || IntPtr.Size == 4)
             {
                 return;
             }
 
             var flags = (byte)(GetCallbackFlags(self) | CallbackConstants.Registered);
-            Marshal.WriteByte(self, CallbackFlagsOffset64, flags);
-            Marshal.WriteInt32(self, CallbackIdOffset64, callbackId);
+            Marshal.WriteByte(self, IntPtr.Size, flags);
+            Marshal.WriteInt32(self, IntPtr.Size + 4, callbackId);
         }
 
         public static void UnregisterCallback(IntPtr self)
         {
-            if (!IsSupportedCallbackPointer(self))
+            if (!IsSupportedCallbackPointer(self) || IntPtr.Size == 4)
             {
                 return;
             }
 
             var flags = (byte)(GetCallbackFlags(self) & ~CallbackConstants.Registered);
-            Marshal.WriteByte(self, CallbackFlagsOffset64, flags);
+            Marshal.WriteByte(self, IntPtr.Size, flags);
         }
 
         private static bool TryGetVTableFunction(IntPtr self, int slot, out IntPtr function)
@@ -123,18 +138,7 @@ namespace SKYNET.Callback
                 return false;
             }
 
-            if (IntPtr.Size == 8)
-            {
-                return true;
-            }
-
-            if (!unsupportedArchitectureLogged)
-            {
-                unsupportedArchitectureLogged = true;
-                SteamEmulator.Write("CallbackManager", "CCallbackBase direct vtable dispatch is only enabled for x64");
-            }
-
-            return false;
+            return IntPtr.Size == 4 || IntPtr.Size == 8;
         }
 
         private static TDelegate GetDelegate<TDelegate>(IntPtr function, Dictionary<IntPtr, TDelegate> cache)
@@ -164,5 +168,18 @@ namespace SKYNET.Callback
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate int GetCallbackSizeDelegate(IntPtr self);
+
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        private delegate void RunCallbackThisCallDelegate(IntPtr self, IntPtr pvParam);
+
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        private delegate void RunCallResultThisCallDelegate(
+            IntPtr self,
+            IntPtr pvParam,
+            byte ioFailure,
+            SteamAPICall_t apiCall);
+
+        [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+        private delegate int GetCallbackSizeThisCallDelegate(IntPtr self);
     }
 }

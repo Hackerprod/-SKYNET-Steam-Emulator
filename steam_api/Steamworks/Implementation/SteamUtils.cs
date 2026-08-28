@@ -257,9 +257,16 @@ namespace SKYNET.Steamworks.Implementation
 
         public SteamAPICall_t CheckFileSignature(string szFileName)
         {
-            Write("CheckFileSignature");
-            // CheckFileSignature_t
-            return k_uAPICallInvalid;
+            Write($"CheckFileSignature ({szFileName ?? string.Empty})");
+
+            // This API is asynchronous. Returning k_uAPICallInvalid makes games
+            // poll handle zero, which is not a valid SteamAPICall_t. The emulator
+            // owns the supplied files, so report a successful signature check via
+            // the normal call-result path.
+            return CallbackManager.AddCallbackResult(new CheckFileSignature_t
+            {
+                CheckFileSignature = global::SKYNET.Steamworks.CheckFileSignature.ValidSignature
+            });
         }
 
         public bool ShowGamepadTextInput(int eInputMode, int eLineInputMode, string pchDescription, uint unCharMax, string pchExistingText)

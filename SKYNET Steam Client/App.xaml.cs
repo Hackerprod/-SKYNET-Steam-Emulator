@@ -242,7 +242,7 @@ public partial class App : Application
         {
             var path = Path.Combine(directory, "steam_appid.txt");
             return File.Exists(path) &&
-                   uint.TryParse(File.ReadAllText(path).Trim(), out var appId)
+                   uint.TryParse(File.ReadAllText(path).Trim('\0', ' ', '\t', '\r', '\n'), out var appId)
                 ? appId
                 : 0;
         }

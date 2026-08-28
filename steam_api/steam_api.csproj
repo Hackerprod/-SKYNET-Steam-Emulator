@@ -41,7 +41,7 @@
     <DllExportNamespace>System.Runtime.InteropServices</DllExportNamespace>
     <DllExportDDNSCecil>true</DllExportDDNSCecil>
     <DllExportSkipOnAnyCpu>false</DllExportSkipOnAnyCpu>
-    <DllExportPlatform>Auto</DllExportPlatform>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DllExportOrdinalsBase>1</DllExportOrdinalsBase>
     <DllExportGenExpLib>false</DllExportGenExpLib>
     <DllExportOurILAsm>false</DllExportOurILAsm>
@@ -174,6 +174,7 @@
     <Compile Include="Managers\MemoryManager.cs" />
     <Compile Include="Managers\MusicPlayerManager.cs" />
     <Compile Include="Helpers\NetworkHelper.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamClient\SteamClient009.cs" />
     <Compile Include="Steamworks\Interfaces\SteamClient\SteamClient017.cs" />
     <Compile Include="Steamworks\Interfaces\SteamClient\SteamClient018.cs" />
     <Compile Include="Steamworks\Interfaces\SteamClient\SteamClient019.cs" />
@@ -196,6 +197,7 @@
     <Compile Include="Steamworks\Interfaces\SteamRemotePlay\SteamRemotePlay003.cs" />
     <Compile Include="Steamworks\Interfaces\SteamTimeline\SteamTimeline004.cs" />
     <Compile Include="Steamworks\Interfaces\SteamUnifiedMessages\SteamUnifiedMessages001.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamUser\SteamUser013.cs" />
     <Compile Include="Steamworks\Interfaces\SteamUser\SteamUser020.cs" />
     <Compile Include="Steamworks\Interfaces\SteamUser\SteamUser023.cs" />
     <Compile Include="Steamworks\Types\ISteamMatchmakingServerListResponse.cs" />
@@ -248,9 +250,11 @@
     <Compile Include="Steamworks\Interfaces\SteamAppDisableUpdate001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamClient\SteamClient020.cs" />
     <Compile Include="Steamworks\Interfaces\SteamAppList\SteamAppList001.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamApps\SteamApps003.cs" />
     <Compile Include="Steamworks\Interfaces\SteamApps\SteamApps008.cs" />
     <Compile Include="Steamworks\Interfaces\SteamApps\SteamApps009.cs" />
     <Compile Include="Steamworks\Interfaces\SteamController\SteamController008.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamFriends\SteamFriends005.cs" />
     <Compile Include="Steamworks\Interfaces\SteamFriends\SteamFriends018.cs" />
     <Compile Include="Steamworks\Interfaces\SteamFriends\SteamFriends017.cs" />
     <Compile Include="Steamworks\Interfaces\SteamFriends\SteamFriends015.cs" />
@@ -258,6 +262,7 @@
     <Compile Include="Steamworks\Interfaces\SteamGameServer\SteamGameServer015.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameServer\SteamGameServer013.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameServer\SteamGameServer014.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamGameServer\SteamGameServer009.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameServer\SteamGameServer012.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameServerStats\SteamGameServerStats001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamGameStats\SteamGameStats001.cs" />
@@ -268,9 +273,11 @@
     <Compile Include="Steamworks\Interfaces\SteamInventory\SteamInventory002.cs" />
     <Compile Include="Steamworks\Interfaces\SteamInventory\SteamInventory003.cs" />
     <Compile Include="Steamworks\Interfaces\SteamMatchGameSearch\SteamMatchGameSearch001.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamMatchmaking\SteamMatchmaking007.cs" />
     <Compile Include="Steamworks\Interfaces\SteamMatchmaking\SteamMatchmaking008.cs" />
     <Compile Include="Steamworks\Interfaces\SteamMatchmaking\SteamMatchmaking009.cs" />
     <Compile Include="Steamworks\Interfaces\SteamMatchmakingServers\SteamMatchmakingServers002.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamMasterServerUpdater\SteamMasterServerUpdater001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamMusic\SteamMusic001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamMusicRemote\SteamMusicRemote001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamNetworkingSocketsSerialized\SteamNetworkingSocketsSerialized003.cs" />
@@ -278,14 +285,17 @@
     <Compile Include="Steamworks\Interfaces\SteamNetworkingSocketsSerialized\SteamNetworkingSocketsSerialized004.cs" />
     <Compile Include="Steamworks\Interfaces\SteamNetworkingSocketsSerialized\SteamNetworkingSocketsSerialized002.cs" />
     <Compile Include="Steamworks\Interfaces\SteamNetworking\SteamNetworking006.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamNetworking\SteamNetworking003.cs" />
     <Compile Include="Steamworks\Interfaces\SteamNetworking\SteamNetworking005.cs" />
     <Compile Include="Steamworks\Interfaces\SteamParentalSettings\SteamParentalSettings001.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamRemoteStorage\SteamRemoteStorage002.cs" />
     <Compile Include="Steamworks\Interfaces\SteamRemoteStorage\SteamRemoteStorage014.cs" />
     <Compile Include="Steamworks\Interfaces\SteamRemoteStorage\SteamRemoteStorage013.cs" />
     <Compile Include="Steamworks\Interfaces\SteamRemoteStorage\SteamRemoteStorage016.cs" />
     <Compile Include="Steamworks\Interfaces\SteamScreenshots\SteamScreenshots003.cs" />
     <Compile Include="Steamworks\Interfaces\SteamUGC\SteamUGC016.cs" />
     <Compile Include="Steamworks\Interfaces\SteamUGC\SteamUGC016Generated.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamUGC\SteamUGC017Generated.cs" />
     <Compile Include="Steamworks\Interfaces\SteamUGC\SteamUGC019.cs" />
     <Compile Include="Steamworks\Interfaces\SteamUGC\SteamUGC019Generated.cs" />
     <Compile Include="Steamworks\Interfaces\SteamUGC\SteamUGC020Generated.cs" />
@@ -298,9 +308,11 @@
     <Compile Include="Steamworks\Interfaces\SteamUGC\SteamUGC014Generated.cs" />
     <Compile Include="Steamworks\Interfaces\SteamUser\SteamUser021.cs" />
     <Compile Include="Steamworks\Interfaces\SteamUser\SteamUser019.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamUserStats\SteamUserStats007.cs" />
     <Compile Include="Steamworks\Interfaces\SteamUserStats\SteamUserStats012.cs" />
     <Compile Include="Steamworks\Interfaces\SteamUserStats\SteamUserStats011Legacy.cs" />
     <Compile Include="Steamworks\Interfaces\SteamUserStats\SteamUserStats012Legacy.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamUtils\SteamUtils004.cs" />
     <Compile Include="Steamworks\Interfaces\SteamUtils\SteamUtils010.cs" />
     <Compile Include="Steamworks\Interfaces\SteamUtils\SteamUtils009.cs" />
     <Compile Include="Steamworks\Interfaces\SteamVideo\SteamVideo002.cs" />
@@ -328,17 +340,17 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ImportGroup Label=".NET DllExport">
-    <Import Project="$(SolutionDir)packages\DllExport\tools\net.r_eg.DllExport.targets" Condition="Exists($([MSBuild]::Escape('$(SolutionDir)packages\DllExport\tools\net.r_eg.DllExport.targets')))" Label="8337224c9ad9e356" />
+    <Import Project="$(SolutionDir)..\packages\DllExport\tools\net.r_eg.DllExport.targets" Condition="Exists($([MSBuild]::Escape('$(SolutionDir)..\packages\DllExport\tools\net.r_eg.DllExport.targets')))" Label="8337224c9ad9e356" />
   </ImportGroup>
   <Target Name="DllExportRestorePkg" BeforeTargets="PrepareForBuild">
     <Error Condition="!Exists('$(SolutionDir)DllExport.bat')" Text="DllExport.bat is not found. Path: '$(SolutionDir)' - https://github.com/3F/DllExport" />
-    <Exec Condition="('$(DllExportModImported)' != 'true' Or !Exists('$(SolutionDir)packages\DllExport\tools\net.r_eg.DllExport.targets')) And Exists('$(SolutionDir)DllExport.bat')" Command=".\DllExport.bat -packages packages -dxp-version actual  -action Restore" WorkingDirectory="$(SolutionDir)" />
-    <MSBuild Condition="'$(DllExportModImported)' != 'true'" Projects="$(SolutionDir)packages\DllExport\tools\net.r_eg.DllExport.targets" Targets="DllExportMetaXBaseTarget" Properties="TargetFramework=$(TargetFramework)">
+    <Exec Condition="('$(DllExportModImported)' != 'true' Or !Exists('$(SolutionDir)..\packages\DllExport\tools\net.r_eg.DllExport.targets')) And Exists('$(SolutionDir)DllExport.bat')" Command=".\DllExport.bat -packages packages -dxp-version actual  -action Restore" WorkingDirectory="$(SolutionDir)" />
+    <MSBuild Condition="'$(DllExportModImported)' != 'true'" Projects="$(SolutionDir)..\packages\DllExport\tools\net.r_eg.DllExport.targets" Targets="DllExportMetaXBaseTarget" Properties="TargetFramework=$(TargetFramework)">
       <Output TaskParameter="TargetOutputs" PropertyName="DllExportMetaXBase" />
     </MSBuild>
     <ItemGroup>
       <Reference Include="DllExport, PublicKeyToken=8337224c9ad9e356">
-        <HintPath>$(SolutionDir)packages\DllExport\gcache\$(DllExportMetaXBase)\$(DllExportNamespace)\$(DllExportMetaLibName)</HintPath>
+        <HintPath>$(SolutionDir)..\packages\DllExport\gcache\$(DllExportMetaXBase)\$(DllExportNamespace)\$(DllExportMetaLibName)</HintPath>
         <Private>False</Private>
         <SpecificVersion>False</SpecificVersion>
       </Reference>

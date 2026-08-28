@@ -31,6 +31,22 @@
     <Using Include="System.IO" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SKYNET Injector Helper\SKYNET Injector Helper.csproj"
+                      ReferenceOutputAssembly="false" />
+    <Content Include="..\SKYNET Injector Helper\bin\$(Configuration)\net472\SKYNET Injector Helper.exe">
+      <Link>helpers\x86\SKYNET Injector Helper.exe</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="..\SKYNET Injector Helper\bin\$(Configuration)\net472\SKYNET Injector Helper.exe.config"
+             Condition="Exists('..\SKYNET Injector Helper\bin\$(Configuration)\net472\SKYNET Injector Helper.exe.config')">
+      <Link>helpers\x86\SKYNET Injector Helper.exe.config</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
   <!-- The emulator DLLs shipped as the injection payload. Copied next to the exe. -->
   <ItemGroup>
     <Content Include="payload\**">
