@@ -1,8 +1,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.5.2.0
+# Visual Studio Version 18
+VisualStudioVersion = 18.9.12105.275 stable
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "steam_api", "steam_api.csproj", "{95D4311C-50B7-C700-F565-202B2F945B01}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "steam_api", "steam_api.csproj", "{F296C00A-53B4-4A0D-977B-F1946B1ACCE2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -10,10 +10,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{95D4311C-50B7-C700-F565-202B2F945B01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{95D4311C-50B7-C700-F565-202B2F945B01}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{95D4311C-50B7-C700-F565-202B2F945B01}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{95D4311C-50B7-C700-F565-202B2F945B01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F296C00A-53B4-4A0D-977B-F1946B1ACCE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F296C00A-53B4-4A0D-977B-F1946B1ACCE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F296C00A-53B4-4A0D-977B-F1946B1ACCE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F296C00A-53B4-4A0D-977B-F1946B1ACCE2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

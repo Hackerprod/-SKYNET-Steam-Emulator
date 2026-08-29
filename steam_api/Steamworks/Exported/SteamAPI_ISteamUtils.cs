@@ -92,10 +92,16 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUtils_IsAPICallCompleted(IntPtr _, SteamAPICall_t hSteamAPICall, ref bool pbFailed)
+        public static bool SteamAPI_ISteamUtils_IsAPICallCompleted(IntPtr _, SteamAPICall_t hSteamAPICall, IntPtr pbFailed)
         {
             Write("SteamAPI_ISteamUtils_IsAPICallCompleted");
-            return SteamEmulator.SteamUtils.IsAPICallCompleted(hSteamAPICall, ref pbFailed);
+            bool failed = false;
+            bool result = SteamEmulator.SteamUtils.IsAPICallCompleted(hSteamAPICall, ref failed);
+            if (pbFailed != IntPtr.Zero)
+            {
+                Marshal.WriteByte(pbFailed, failed ? (byte)1 : (byte)0);
+            }
+            return result;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -106,10 +112,16 @@ namespace SKYNET.Steamworks.Exported
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ISteamUtils_GetAPICallResult(IntPtr _, SteamAPICall_t hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, ref bool pbFailed)
+        public static bool SteamAPI_ISteamUtils_GetAPICallResult(IntPtr _, SteamAPICall_t hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, IntPtr pbFailed)
         {
             Write("SteamAPI_ISteamUtils_GetAPICallResult");
-            return SteamEmulator.SteamUtils.GetAPICallResult(hSteamAPICall, pCallback, cubCallback, iCallbackExpected, ref pbFailed);
+            bool failed = false;
+            bool result = SteamEmulator.SteamUtils.GetAPICallResult(hSteamAPICall, pCallback, cubCallback, iCallbackExpected, ref failed);
+            if (pbFailed != IntPtr.Zero)
+            {
+                Marshal.WriteByte(pbFailed, failed ? (byte)1 : (byte)0);
+            }
+            return result;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]

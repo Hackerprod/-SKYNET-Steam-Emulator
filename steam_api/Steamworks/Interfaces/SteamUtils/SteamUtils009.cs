@@ -80,9 +80,15 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUtils.GetAPICallFailureReason(hSteamAPICall);
         }
 
-        public bool GetAPICallResult(IntPtr _, SteamAPICall_t hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, ref bool pbFailed)
+        public bool GetAPICallResult(IntPtr _, SteamAPICall_t hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, IntPtr pbFailed)
         {
-            return SteamEmulator.SteamUtils.GetAPICallResult(hSteamAPICall, pCallback, cubCallback, iCallbackExpected, ref pbFailed);
+            bool failed = false;
+            bool result = SteamEmulator.SteamUtils.GetAPICallResult(hSteamAPICall, pCallback, cubCallback, iCallbackExpected, ref failed);
+            if (pbFailed != IntPtr.Zero)
+            {
+                System.Runtime.InteropServices.Marshal.WriteByte(pbFailed, failed ? (byte)1 : (byte)0);
+            }
+            return result;
         }
 
         // Deprecated. Applications should use SteamAPI_RunCallbacks() instead. Game servers do not need to call this function.

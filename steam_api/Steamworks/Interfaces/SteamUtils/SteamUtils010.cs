@@ -81,9 +81,15 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamUtils.GetAPICallFailureReason(hSteamAPICall);
         }
 
-        public bool GetAPICallResult(IntPtr _, SteamAPICall_t hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, ref bool pbFailed)
+        public bool GetAPICallResult(IntPtr _, SteamAPICall_t hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, IntPtr pbFailed)
         {
-            return SteamEmulator.SteamUtils.GetAPICallResult(hSteamAPICall, pCallback, cubCallback, iCallbackExpected, ref pbFailed);
+            bool failed = false;
+            bool result = SteamEmulator.SteamUtils.GetAPICallResult(hSteamAPICall, pCallback, cubCallback, iCallbackExpected, ref failed);
+            if (pbFailed != IntPtr.Zero)
+            {
+                Marshal.WriteByte(pbFailed, failed ? (byte)1 : (byte)0);
+            }
+            return result;
         }
 
         public void RunFrame(IntPtr _)

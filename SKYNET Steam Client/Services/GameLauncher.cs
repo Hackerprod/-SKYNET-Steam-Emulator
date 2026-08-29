@@ -40,6 +40,7 @@ public sealed class GameLauncher
 {
     private const string BackupSuffix = ".skynet-orig";
     private const string MarkerSuffix = ".skynet-injected";
+    private const int PreviousPayloadShadowsToKeep = 3;
 
     private static string PayloadDll(GameArch arch)
     {
@@ -56,7 +57,10 @@ public sealed class GameLauncher
         if (!game.ExeExists)
             return LaunchResult.Fail($"Executable not found:\n{game.ExecutablePath}");
 
-        var arch = game.Arch != GameArch.Unknown ? game.Arch : PeArch.Detect(game.ExecutablePath);
+        // The PE header is authoritative. A stale/manual architecture selection
+        // must never make us inject an x86 DLL into an x64 executable (or vice versa).
+        var detectedArch = PeArch.Detect(game.ExecutablePath);
+        var arch = detectedArch != GameArch.Unknown ? detectedArch : game.Arch;
         if (arch == GameArch.Unknown)
             return LaunchResult.Fail("Could not determine game architecture (x86/x64).");
 
@@ -116,7 +120,7 @@ public sealed class GameLauncher
         if (string.IsNullOrWhiteSpace(arguments))
             return false;
 
-        return arguments
+        return arguments!
             .Split(new[] { ' ', '\t', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
             .Any(argument => string.Equals(argument, expected, StringComparison.OrdinalIgnoreCase));
     }
@@ -131,12 +135,32 @@ public sealed class GameLauncher
         var shadowPath = Path.Combine(shadowDir, payloadFileName);
 
         Directory.CreateDirectory(shadowDir);
-        if (!File.Exists(shadowPath) || new FileInfo(shadowPath).Length != payloadBytes.Length)
+        bool shadowMatches = false;
+        try
+        {
+            shadowMatches = File.Exists(shadowPath) &&
+                File.ReadAllBytes(shadowPath).SequenceEqual(payloadBytes);
+        }
+        catch
+        {
+            // A missing, unreadable, or partially replaced shadow must be rebuilt
+            // from the payload shipped next to this launcher.
+        }
+
+        if (!shadowMatches)
         {
             File.WriteAllBytes(shadowPath, payloadBytes);
         }
 
-        CleanupPayloadShadows(shadowRoot, hash);
+        try
+        {
+            Directory.SetLastWriteTimeUtc(shadowDir, DateTime.UtcNow);
+        }
+        catch
+        {
+        }
+
+        CleanupPayloadShadows(shadowRoot, hash, payloadFileName);
         return shadowPath;
     }
 
@@ -144,10 +168,10 @@ public sealed class GameLauncher
     {
         using var sha256 = SHA256.Create();
         var hashBytes = sha256.ComputeHash(payloadBytes);
-        return BitConverter.ToString(hashBytes, 0, 8).Replace("-", string.Empty).ToLowerInvariant();
+        return BitConverter.ToString(hashBytes).Replace("-", string.Empty).ToLowerInvariant();
     }
 
-    private static void CleanupPayloadShadows(string shadowRoot, string activeHash)
+    private static void CleanupPayloadShadows(string shadowRoot, string activeHash, string payloadFileName)
     {
         try
         {
@@ -156,14 +180,17 @@ public sealed class GameLauncher
                 return;
             }
 
-            foreach (var directory in Directory.GetDirectories(shadowRoot))
-            {
-                if (string.Equals(Path.GetFileName(directory), activeHash, StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
+            var shadows = Directory.GetDirectories(shadowRoot)
+                .Where(directory => File.Exists(Path.Combine(directory, payloadFileName)))
+                .OrderByDescending(directory =>
+                    string.Equals(Path.GetFileName(directory), activeHash, StringComparison.OrdinalIgnoreCase)
+                        ? DateTime.MaxValue
+                        : Directory.GetLastWriteTimeUtc(directory))
+                .ToArray();
 
-                TryDeleteOldShadow(directory);
+            foreach (var directory in shadows.Skip(PreviousPayloadShadowsToKeep + 1))
+            {
+                TryDeleteShadow(directory);
             }
         }
         catch
@@ -171,16 +198,10 @@ public sealed class GameLauncher
         }
     }
 
-    private static void TryDeleteOldShadow(string directory)
+    private static void TryDeleteShadow(string directory)
     {
         try
         {
-            var age = DateTime.UtcNow - Directory.GetLastWriteTimeUtc(directory);
-            if (age < TimeSpan.FromDays(1))
-            {
-                return;
-            }
-
             Directory.Delete(directory, recursive: true);
         }
         catch

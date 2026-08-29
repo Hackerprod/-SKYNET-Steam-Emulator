@@ -339,7 +339,7 @@ public class SteamEmulator
             string appid_Path = Path.Combine(Common.GetPath(), "steam_appid.txt");
             if (File.Exists(appid_Path))
             {
-                string content = File.ReadAllText(appid_Path).Trim();
+                string content = File.ReadAllText(appid_Path).Trim('\0', ' ', '\t', '\r', '\n');
                 if (uint.TryParse(content, out var appId) && appId != 0)
                 {
                     InternalAppId = appId;
@@ -546,6 +546,3 @@ public class SteamEmulator
         MessageBox.Show("DEBUG");
     }
 }
-
-
-

@@ -421,7 +421,7 @@ public partial class MainWindow : Window
         try
         {
             var txt = Path.Combine(Path.GetDirectoryName(exePath) ?? "", "steam_appid.txt");
-            if (File.Exists(txt) && uint.TryParse(File.ReadAllText(txt).Trim(), out var id)) return id;
+            if (File.Exists(txt) && uint.TryParse(File.ReadAllText(txt).Trim('\0', ' ', '\t', '\r', '\n'), out var id)) return id;
         }
         catch { }
         return 0;

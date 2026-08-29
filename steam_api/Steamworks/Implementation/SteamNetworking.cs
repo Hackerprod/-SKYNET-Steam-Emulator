@@ -3,17 +3,17 @@ using SKYNET.Helpers;
 //using SKYNET.IPC.Types;
 using SKYNET.Network.Packets;
 using SKYNET.Managers;
+using SKYNET.Protocol;
 using SKYNET.Steamworks.Interfaces;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
-using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using System.Text;
+using System.Threading;
 
 using SNetListenSocket_t = System.UInt32;
 using SNetSocket_t = System.UInt32;
-using System.Linq;
 
 namespace SKYNET.Steamworks.Implementation
 {
@@ -21,10 +21,42 @@ namespace SKYNET.Steamworks.Implementation
     {
         public static SteamNetworking Instance;
         private static List<ulong> P2PSession;
+        private const int SocketStateInvalid = 0;
+        private const int SocketStateConnected = 1;
+        private const int SocketStateInitiated = 10;
+        private const int SocketStateLocalDisconnect = 22;
+        private const int SocketStateTimeoutDuringConnect = 23;
+        private const int SocketStateRemoteEndDisconnected = 24;
+        private const int MaxQueuedSocketPackets = 2048;
+
+        private readonly object _socketGate = new object();
+        private readonly Dictionary<uint, LegacyListenSocket> _listenSockets = new Dictionary<uint, LegacyListenSocket>();
+        private readonly Dictionary<uint, LegacySocket> _sockets = new Dictionary<uint, LegacySocket>();
+        private int _nextSocketHandle;
 
         public List<NET_P2PPacket> P2PIncoming;
-        public Dictionary<SNetSocket_t, Socket> P2PSocket;
-        public Dictionary<SNetListenSocket_t, Socket> P2PListenSocket;
+
+        private sealed class LegacyListenSocket
+        {
+            internal uint Handle;
+            internal int VirtualPort;
+            internal uint IP;
+            internal ushort Port;
+        }
+
+        private sealed class LegacySocket
+        {
+            internal uint Handle;
+            internal uint ListenSocket;
+            internal ulong RemoteSteamId;
+            internal int VirtualPort;
+            internal uint PeerConnectionId;
+            internal uint RemoteIP = 0;
+            internal ushort RemotePort = 0;
+            internal int State;
+            internal readonly ConcurrentQueue<byte[]> Incoming = new ConcurrentQueue<byte[]>();
+            internal int IncomingCount;
+        }
 
         public SteamNetworking()
         {
@@ -32,8 +64,6 @@ namespace SKYNET.Steamworks.Implementation
             InterfaceName = "SteamNetworking";
             InterfaceVersion = "SteamNetworking006";
             P2PIncoming = new List<NET_P2PPacket>();
-            P2PSocket = new Dictionary<SNetListenSocket_t, Socket>();
-            P2PListenSocket = new Dictionary<SNetListenSocket_t, Socket>();
             P2PSession = new List<ulong>();
         }
 
@@ -174,146 +204,605 @@ namespace SKYNET.Steamworks.Implementation
 
         public SNetListenSocket_t CreateListenSocket(int nVirtualP2PPort, uint nIP, uint nPort, bool bAllowUseOfPacketRelay)
         {
-            Write("CreateListenSocket");
-            return 0;
+            return CreateLegacyListenSocket(nVirtualP2PPort, nIP, unchecked((ushort)nPort));
         }
 
         public SNetListenSocket_t CreateListenSocket(int nVirtualP2PPort, SteamIPAddress_t nIP, ushort nPort, bool bAllowUseOfPacketRelay)
         {
-            Write("CreateListenSocket");
-            return 0;
+            var address = nIP.ToIPAddress();
+            var ipv4 = address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork
+                ? NetworkManager.GetIPAddress(address)
+                : 0;
+            return CreateLegacyListenSocket(nVirtualP2PPort, ipv4, nPort);
         }
 
         public SNetSocket_t CreateP2PConnectionSocket(ulong steamIDTarget, int nVirtualPort, int nTimeoutSec, bool bAllowUseOfPacketRelay)
         {
-            Write("CreateP2PConnectionSocket");
-            return 0;
+            if (steamIDTarget == 0 || !APIClient.IsEnabled)
+            {
+                Write($"CreateP2PConnectionSocket rejected target={steamIDTarget} API={APIClient.IsEnabled}");
+                return 0;
+            }
+
+            LegacySocket socket;
+            lock (_socketGate)
+            {
+                socket = new LegacySocket
+                {
+                    Handle = AllocateSocketHandleLocked(),
+                    RemoteSteamId = steamIDTarget,
+                    VirtualPort = nVirtualPort,
+                    State = SocketStateInitiated
+                };
+                _sockets.Add(socket.Handle, socket);
+            }
+
+            Write($"CreateP2PConnectionSocket handle={socket.Handle} target={steamIDTarget} virtualPort={nVirtualPort}");
+            if (!SendSocketFrame(socket, P2PTransportKind.LegacySocketsOpen, Array.Empty<byte>()))
+            {
+                lock (_socketGate)
+                {
+                    socket.State = SocketStateTimeoutDuringConnect;
+                }
+                EmitSocketStatus(socket);
+            }
+            return socket.Handle;
         }
 
         public SNetSocket_t CreateConnectionSocket(uint nIP, uint nPort, int nTimeoutSec)
         {
-            Write("CreateConnectionSocket");
+            Write($"CreateConnectionSocket unsupported IP={nIP} port={nPort}");
             return 0;
         }
 
         public SNetSocket_t CreateConnectionSocket(SteamIPAddress_t nIP, ushort nPort, int nTimeoutSec)
         {
-            Write("CreateConnectionSocket");
+            Write($"CreateConnectionSocket unsupported IP={nIP} port={nPort}");
             return 0;
         }
 
         public bool DestroySocket(SNetSocket_t hSocket, bool bNotifyRemoteEnd)
         {
-            Write("DestroySocket");
-            return false;
+            LegacySocket socket;
+            lock (_socketGate)
+            {
+                if (!_sockets.TryGetValue(hSocket, out socket))
+                {
+                    return false;
+                }
+                socket.State = SocketStateLocalDisconnect;
+                _sockets.Remove(hSocket);
+            }
+
+            Write($"DestroySocket handle={hSocket}");
+            if (bNotifyRemoteEnd && socket.RemoteSteamId != 0)
+            {
+                SendSocketFrame(socket, P2PTransportKind.LegacySocketsClose, Array.Empty<byte>());
+            }
+            EmitSocketStatus(socket);
+            return true;
         }
 
         public bool DestroyListenSocket(SNetListenSocket_t hSocket, bool bNotifyRemoteEnd)
         {
-            Write("DestroyListenSocket");
-            return false;
+            var affected = new List<LegacySocket>();
+            lock (_socketGate)
+            {
+                if (!_listenSockets.Remove(hSocket))
+                {
+                    return false;
+                }
+
+                foreach (var pair in new List<KeyValuePair<uint, LegacySocket>>(_sockets))
+                {
+                    if (pair.Value.ListenSocket == hSocket)
+                    {
+                        pair.Value.State = SocketStateLocalDisconnect;
+                        affected.Add(pair.Value);
+                        _sockets.Remove(pair.Key);
+                    }
+                }
+            }
+
+            Write($"DestroyListenSocket handle={hSocket} connections={affected.Count}");
+            foreach (var socket in affected)
+            {
+                if (bNotifyRemoteEnd)
+                {
+                    SendSocketFrame(socket, P2PTransportKind.LegacySocketsClose, Array.Empty<byte>());
+                }
+                EmitSocketStatus(socket);
+            }
+            return true;
         }
 
         public bool SendDataOnSocket(SNetSocket_t hSocket, IntPtr pubData, uint cubData, bool bReliable)
         {
-            Write("SendDataOnSocket");
-            return false;
+            if ((cubData > 0 && pubData == IntPtr.Zero) || cubData > 1024 * 1024)
+            {
+                return false;
+            }
+
+            LegacySocket socket;
+            lock (_socketGate)
+            {
+                if (!_sockets.TryGetValue(hSocket, out socket) || socket.State != SocketStateConnected)
+                {
+                    return false;
+                }
+            }
+
+            var payload = new byte[cubData];
+            if (payload.Length > 0)
+            {
+                Marshal.Copy(pubData, payload, 0, payload.Length);
+            }
+            return SendSocketFrame(socket, P2PTransportKind.LegacySocketsData, payload, bReliable ? 2 : 0);
         }
 
         public bool IsDataAvailableOnSocket(SNetSocket_t hSocket, uint pcubMsgSize)
         {
-            Write("IsDataAvailableOnSocket");
-            return false;
+            lock (_socketGate)
+            {
+                return _sockets.TryGetValue(hSocket, out var socket) && socket.Incoming.TryPeek(out _);
+            }
         }
 
         public bool IsDataAvailableOnSocket(SNetSocket_t hSocket, IntPtr pcubMsgSize)
         {
-            Write("IsDataAvailableOnSocket");
-            WriteUInt32(pcubMsgSize, 0);
-            return false;
+            LegacySocket socket;
+            lock (_socketGate)
+            {
+                if (!_sockets.TryGetValue(hSocket, out socket) || !socket.Incoming.TryPeek(out var payload))
+                {
+                    WriteUInt32(pcubMsgSize, 0);
+                    return false;
+                }
+                WriteUInt32(pcubMsgSize, (uint)payload.Length);
+                return true;
+            }
         }
 
         public bool RetrieveDataFromSocket(SNetSocket_t hSocket, IntPtr pubDest, uint cubDest, uint pcubMsgSize)
         {
-            Write("RetrieveDataFromSocket");
-            return false;
+            return RetrieveDataFromSocket(hSocket, pubDest, cubDest, IntPtr.Zero);
         }
 
         public bool RetrieveDataFromSocket(SNetSocket_t hSocket, IntPtr pubDest, uint cubDest, IntPtr pcubMsgSize)
         {
-            Write("RetrieveDataFromSocket");
-            WriteUInt32(pcubMsgSize, 0);
-            return false;
+            LegacySocket socket;
+            lock (_socketGate)
+            {
+                if (!_sockets.TryGetValue(hSocket, out socket))
+                {
+                    WriteUInt32(pcubMsgSize, 0);
+                    return false;
+                }
+            }
+
+            if (!socket.Incoming.TryDequeue(out var payload))
+            {
+                WriteUInt32(pcubMsgSize, 0);
+                return false;
+            }
+
+            Interlocked.Decrement(ref socket.IncomingCount);
+            WriteUInt32(pcubMsgSize, (uint)payload.Length);
+            var copyLength = Math.Min(payload.Length, unchecked((int)cubDest));
+            if (copyLength > 0 && pubDest != IntPtr.Zero)
+            {
+                Marshal.Copy(payload, 0, pubDest, copyLength);
+            }
+            return true;
         }
 
         public bool IsDataAvailable(SNetListenSocket_t hListenSocket, uint pcubMsgSize, SNetSocket_t phSocket)
         {
-            Write("IsDataAvailable");
-            return false;
+            return TryFindSocketWithData(hListenSocket, out _, out _);
         }
 
         public bool IsDataAvailable(SNetListenSocket_t hListenSocket, IntPtr pcubMsgSize, IntPtr phSocket)
         {
-            Write("IsDataAvailable");
-            WriteUInt32(pcubMsgSize, 0);
-            WriteUInt32(phSocket, 0);
-            return false;
+            if (!TryFindSocketWithData(hListenSocket, out var socket, out var payload))
+            {
+                WriteUInt32(pcubMsgSize, 0);
+                WriteUInt32(phSocket, 0);
+                return false;
+            }
+            WriteUInt32(pcubMsgSize, (uint)payload.Length);
+            WriteUInt32(phSocket, socket.Handle);
+            return true;
         }
 
         public bool RetrieveData(SNetListenSocket_t hListenSocket, IntPtr pubDest, uint cubDest, uint pcubMsgSize, SNetSocket_t phSocket)
         {
-            Write("RetrieveData");
-            return false;
+            if (!TryFindSocketWithData(hListenSocket, out var socket, out _))
+            {
+                return false;
+            }
+            return RetrieveDataFromSocket(socket.Handle, pubDest, cubDest, IntPtr.Zero);
         }
 
         public bool RetrieveData(SNetListenSocket_t hListenSocket, IntPtr pubDest, uint cubDest, IntPtr pcubMsgSize, IntPtr phSocket)
         {
-            Write("RetrieveData");
-            WriteUInt32(pcubMsgSize, 0);
-            WriteUInt32(phSocket, 0);
-            return false;
+            if (!TryFindSocketWithData(hListenSocket, out var socket, out _))
+            {
+                WriteUInt32(pcubMsgSize, 0);
+                WriteUInt32(phSocket, 0);
+                return false;
+            }
+            WriteUInt32(phSocket, socket.Handle);
+            return RetrieveDataFromSocket(socket.Handle, pubDest, cubDest, pcubMsgSize);
         }
 
         public bool GetSocketInfo(SNetSocket_t hSocket, ulong pSteamIDRemote, int peSocketStatus, uint punIPRemote, uint punPortRemote)
         {
-            Write("GetSocketInfo");
-            return false;
+            lock (_socketGate)
+            {
+                return _sockets.ContainsKey(hSocket);
+            }
         }
 
         public bool GetSocketInfo(SNetSocket_t hSocket, IntPtr pSteamIDRemote, IntPtr peSocketStatus, IntPtr punIPRemote, IntPtr punPortRemote)
         {
-            Write("GetSocketInfo");
-            WriteUInt64(pSteamIDRemote, 0);
-            WriteInt32(peSocketStatus, 0);
-            WriteSteamIPAddress(punIPRemote, default);
-            WriteUInt16(punPortRemote, 0);
-            return false;
+            lock (_socketGate)
+            {
+                if (!_sockets.TryGetValue(hSocket, out var socket))
+                {
+                    WriteUInt64(pSteamIDRemote, 0);
+                    WriteInt32(peSocketStatus, SocketStateInvalid);
+                    WriteUInt32(punIPRemote, 0);
+                    WriteUInt16(punPortRemote, 0);
+                    return false;
+                }
+                WriteUInt64(pSteamIDRemote, socket.RemoteSteamId);
+                WriteInt32(peSocketStatus, socket.State);
+                WriteUInt32(punIPRemote, socket.RemoteIP);
+                WriteUInt16(punPortRemote, socket.RemotePort);
+                return true;
+            }
         }
 
         public bool GetListenSocketInfo(SNetListenSocket_t hListenSocket, uint pnIP, uint pnPort)
         {
-            Write("GetListenSocketInfo");
-            return false;
+            lock (_socketGate)
+            {
+                return _listenSockets.ContainsKey(hListenSocket);
+            }
         }
 
         public bool GetListenSocketInfo(SNetListenSocket_t hListenSocket, IntPtr pnIP, IntPtr pnPort)
         {
-            Write("GetListenSocketInfo");
-            WriteSteamIPAddress(pnIP, default);
-            WriteUInt16(pnPort, 0);
-            return false;
+            lock (_socketGate)
+            {
+                if (!_listenSockets.TryGetValue(hListenSocket, out var listener))
+                {
+                    WriteUInt32(pnIP, 0);
+                    WriteUInt16(pnPort, 0);
+                    return false;
+                }
+                WriteUInt32(pnIP, listener.IP);
+                WriteUInt16(pnPort, listener.Port);
+                return true;
+            }
         }
 
         public int GetSocketConnectionType(SNetSocket_t hSocket)
         {
-            Write("GetSocketConnectionType");
-            return default;
+            lock (_socketGate)
+            {
+                return _sockets.TryGetValue(hSocket, out var socket) && socket.State == SocketStateConnected
+                    ? (int)ESNetSocketConnectionType.k_ESNetSocketConnectionTypeUDPRelay
+                    : (int)ESNetSocketConnectionType.k_ESNetSocketConnectionTypeNotConnected;
+            }
         }
 
         public int GetMaxPacketSize(SNetSocket_t hSocket)
         {
-            Write("GetMaxPacketSize");
-            return 1500;
+            return 1200;
+        }
+
+        internal void ProcessRelaySocketPacket(
+            P2PTransportKind transport,
+            ulong remoteSteamId,
+            int virtualPort,
+            uint sourceConnectionId,
+            uint targetConnectionId,
+            byte[] payload)
+        {
+            switch (transport)
+            {
+                case P2PTransportKind.LegacySocketsOpen:
+                    ProcessSocketOpen(remoteSteamId, virtualPort, sourceConnectionId);
+                    break;
+                case P2PTransportKind.LegacySocketsAccept:
+                    ProcessSocketAccept(remoteSteamId, virtualPort, sourceConnectionId, targetConnectionId);
+                    break;
+                case P2PTransportKind.LegacySocketsReject:
+                    ProcessSocketClosed(remoteSteamId, virtualPort, sourceConnectionId, targetConnectionId, SocketStateTimeoutDuringConnect);
+                    break;
+                case P2PTransportKind.LegacySocketsClose:
+                    ProcessSocketClosed(remoteSteamId, virtualPort, sourceConnectionId, targetConnectionId, SocketStateRemoteEndDisconnected);
+                    break;
+                case P2PTransportKind.LegacySocketsData:
+                    ProcessSocketData(remoteSteamId, virtualPort, sourceConnectionId, targetConnectionId, payload ?? Array.Empty<byte>());
+                    break;
+            }
+        }
+
+        private SNetListenSocket_t CreateLegacyListenSocket(int virtualPort, uint ip, ushort port)
+        {
+            lock (_socketGate)
+            {
+                foreach (var existing in _listenSockets.Values)
+                {
+                    if (existing.VirtualPort == virtualPort && existing.IP == ip && existing.Port == port)
+                    {
+                        Write($"CreateListenSocket reused handle={existing.Handle} virtualPort={virtualPort} IP={ip} port={port}");
+                        return existing.Handle;
+                    }
+                }
+
+                var listener = new LegacyListenSocket
+                {
+                    Handle = AllocateSocketHandleLocked(),
+                    VirtualPort = virtualPort,
+                    IP = ip,
+                    Port = port
+                };
+                _listenSockets.Add(listener.Handle, listener);
+                Write($"CreateListenSocket handle={listener.Handle} virtualPort={virtualPort} IP={ip} port={port}");
+                return listener.Handle;
+            }
+        }
+
+        private void ProcessSocketOpen(ulong remoteSteamId, int virtualPort, uint sourceConnectionId)
+        {
+            LegacySocket socket = null;
+            lock (_socketGate)
+            {
+                foreach (var existing in _sockets.Values)
+                {
+                    if (existing.ListenSocket != 0 &&
+                        existing.RemoteSteamId == remoteSteamId &&
+                        existing.VirtualPort == virtualPort &&
+                        existing.PeerConnectionId == sourceConnectionId)
+                    {
+                        return;
+                    }
+                }
+
+                LegacyListenSocket listener = null;
+                foreach (var candidate in _listenSockets.Values)
+                {
+                    if (candidate.VirtualPort == virtualPort)
+                    {
+                        listener = candidate;
+                        break;
+                    }
+                }
+
+                if (listener != null)
+                {
+                    socket = new LegacySocket
+                    {
+                        Handle = AllocateSocketHandleLocked(),
+                        ListenSocket = listener.Handle,
+                        RemoteSteamId = remoteSteamId,
+                        VirtualPort = virtualPort,
+                        PeerConnectionId = sourceConnectionId,
+                        State = SocketStateConnected
+                    };
+                    _sockets.Add(socket.Handle, socket);
+                }
+            }
+
+            if (socket == null)
+            {
+                SendSocketFrame(
+                    remoteSteamId,
+                    virtualPort,
+                    P2PTransportKind.LegacySocketsReject,
+                    Array.Empty<byte>(),
+                    targetConnectionId: sourceConnectionId);
+                return;
+            }
+
+            Write($"Accepted legacy socket handle={socket.Handle} remote={remoteSteamId} virtualPort={virtualPort}");
+            SendSocketFrame(
+                remoteSteamId,
+                virtualPort,
+                P2PTransportKind.LegacySocketsAccept,
+                Array.Empty<byte>(),
+                sourceConnectionId: socket.Handle,
+                targetConnectionId: sourceConnectionId);
+            EmitSocketStatus(socket);
+        }
+
+        private void ProcessSocketAccept(ulong remoteSteamId, int virtualPort, uint sourceConnectionId, uint targetConnectionId)
+        {
+            LegacySocket socket = null;
+            lock (_socketGate)
+            {
+                if (_sockets.TryGetValue(targetConnectionId, out var candidate) &&
+                    candidate.ListenSocket == 0 &&
+                    candidate.RemoteSteamId == remoteSteamId &&
+                    candidate.VirtualPort == virtualPort &&
+                    candidate.State == SocketStateInitiated)
+                {
+                    candidate.PeerConnectionId = sourceConnectionId;
+                    candidate.State = SocketStateConnected;
+                    socket = candidate;
+                }
+            }
+
+            if (socket != null)
+            {
+                Write($"Connected legacy socket handle={socket.Handle} remote={remoteSteamId} virtualPort={virtualPort}");
+                EmitSocketStatus(socket);
+            }
+        }
+
+        private void ProcessSocketClosed(
+            ulong remoteSteamId,
+            int virtualPort,
+            uint sourceConnectionId,
+            uint targetConnectionId,
+            int state)
+        {
+            LegacySocket socket = null;
+            lock (_socketGate)
+            {
+                foreach (var candidate in _sockets.Values)
+                {
+                    if (MatchesSocket(candidate, remoteSteamId, virtualPort, sourceConnectionId, targetConnectionId))
+                    {
+                        candidate.State = state;
+                        socket = candidate;
+                        break;
+                    }
+                }
+            }
+
+            if (socket != null)
+            {
+                EmitSocketStatus(socket);
+            }
+        }
+
+        private void ProcessSocketData(
+            ulong remoteSteamId,
+            int virtualPort,
+            uint sourceConnectionId,
+            uint targetConnectionId,
+            byte[] payload)
+        {
+            LegacySocket socket = null;
+            lock (_socketGate)
+            {
+                foreach (var candidate in _sockets.Values)
+                {
+                    if (MatchesSocket(candidate, remoteSteamId, virtualPort, sourceConnectionId, targetConnectionId) &&
+                        candidate.State == SocketStateConnected)
+                    {
+                        socket = candidate;
+                        break;
+                    }
+                }
+            }
+
+            if (socket == null || Interlocked.Increment(ref socket.IncomingCount) > MaxQueuedSocketPackets)
+            {
+                if (socket != null)
+                {
+                    Interlocked.Decrement(ref socket.IncomingCount);
+                }
+                Write("Dropping legacy socket packet because the connection is unknown or its queue is full");
+                return;
+            }
+            socket.Incoming.Enqueue(payload);
+        }
+
+        private bool TryFindSocketWithData(uint listenSocket, out LegacySocket socket, out byte[] payload)
+        {
+            socket = null;
+            payload = null;
+            lock (_socketGate)
+            {
+                if (!_listenSockets.ContainsKey(listenSocket))
+                {
+                    return false;
+                }
+
+                foreach (var candidate in _sockets.Values)
+                {
+                    if (candidate.ListenSocket == listenSocket && candidate.Incoming.TryPeek(out payload))
+                    {
+                        socket = candidate;
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+
+        private bool SendSocketFrame(
+            LegacySocket socket,
+            P2PTransportKind transport,
+            byte[] payload,
+            int sendType = 0)
+        {
+            return SendSocketFrame(
+                socket.RemoteSteamId,
+                socket.VirtualPort,
+                transport,
+                payload,
+                sendType,
+                socket.Handle,
+                socket.PeerConnectionId);
+        }
+
+        private static bool SendSocketFrame(
+            ulong remoteSteamId,
+            int virtualPort,
+            P2PTransportKind transport,
+            byte[] payload,
+            int sendType = 0,
+            uint sourceConnectionId = 0,
+            uint targetConnectionId = 0)
+        {
+            return remoteSteamId != 0 && APIClient.SendP2PPacket(
+                remoteSteamId,
+                payload,
+                sendType,
+                0,
+                transport,
+                virtualPort,
+                sourceConnectionId,
+                targetConnectionId);
+        }
+
+        private static bool MatchesSocket(
+            LegacySocket socket,
+            ulong remoteSteamId,
+            int virtualPort,
+            uint sourceConnectionId,
+            uint targetConnectionId)
+        {
+            if (socket.RemoteSteamId != remoteSteamId || socket.VirtualPort != virtualPort)
+            {
+                return false;
+            }
+            if (targetConnectionId != 0 && socket.Handle != targetConnectionId)
+            {
+                return false;
+            }
+            return sourceConnectionId == 0 ||
+                   socket.PeerConnectionId == 0 ||
+                   socket.PeerConnectionId == sourceConnectionId;
+        }
+
+        private uint AllocateSocketHandleLocked()
+        {
+            while (true)
+            {
+                var handle = unchecked((uint)Interlocked.Increment(ref _nextSocketHandle));
+                if (handle != 0 && !_listenSockets.ContainsKey(handle) && !_sockets.ContainsKey(handle))
+                {
+                    return handle;
+                }
+            }
+        }
+
+        private static void EmitSocketStatus(LegacySocket socket)
+        {
+            CallbackManager.AddCallback(new SocketStatusCallback_t
+            {
+                m_hSocket = socket.Handle,
+                m_hListenSocket = socket.ListenSocket,
+                m_steamIDRemote = socket.RemoteSteamId,
+                m_eSNetSocketState = socket.State
+            });
         }
 
         public void AddP2PPacket(NET_P2PPacket p2p)

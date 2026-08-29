@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using SKYNET.Client.Models;
 
 namespace SKYNET.Client.Services;
 
@@ -34,6 +35,21 @@ public static class DllInjector
         if (!File.Exists(exePath)) throw new FileNotFoundException("Executable not found", exePath);
         if (!File.Exists(dllPath)) throw new FileNotFoundException("Injection DLL not found", dllPath);
 
+        var targetArch = PeArch.Detect(exePath);
+        var payloadArch = PeArch.Detect(dllPath);
+        if (targetArch == GameArch.Unknown)
+            throw new InvalidOperationException($"Could not determine the architecture of '{exePath}'.");
+        if (payloadArch == GameArch.Unknown)
+            throw new InvalidOperationException($"Could not determine the architecture of '{dllPath}'.");
+        if (targetArch != payloadArch)
+            throw new InvalidOperationException($"Payload architecture {payloadArch} does not match target architecture {targetArch}.");
+        if (targetArch == GameArch.X64 && IntPtr.Size != 8)
+            throw new InvalidOperationException("An x64 game requires the launcher to run as a 64-bit process.");
+
+        var rebindsStaticImport = !string.IsNullOrWhiteSpace(staticImportModuleName);
+        if (targetArch == GameArch.X86 && IntPtr.Size == 8 && !rebindsStaticImport)
+            return LaunchThroughX86Helper(exePath, dllPath, arguments, workingDir);
+
         var si = new STARTUPINFO
         {
             cb = Marshal.SizeOf<STARTUPINFO>(),
@@ -47,7 +63,6 @@ public static class DllInjector
         var cmd = new StringBuilder(cmdLine, Math.Max(cmdLine.Length + 1, 260));
 
         const uint CREATE_SUSPENDED = 0x00000004;
-        var rebindsStaticImport = !string.IsNullOrWhiteSpace(staticImportModuleName);
         var creationFlags = CREATE_SUSPENDED;
         if (!CreateProcess(exePath, cmd, IntPtr.Zero, IntPtr.Zero, false,
                 creationFlags, IntPtr.Zero, workingDir, ref si, out pi))
@@ -86,12 +101,70 @@ public static class DllInjector
         }
     }
 
+    private static Process LaunchThroughX86Helper(
+        string exePath,
+        string dllPath,
+        string arguments,
+        string workingDir)
+    {
+        var helperPath = Path.Combine(AppContext.BaseDirectory, "helpers", "x86", "SKYNET Injector Helper.exe");
+        if (!File.Exists(helperPath))
+            throw new FileNotFoundException("The x86 injector helper is missing", helperPath);
+
+        // Prefix the payload so an empty string is still a non-empty command-line
+        // argument. Without this, games with no launch arguments shift argv and the
+        // x86 helper receives only three values instead of four.
+        static string Encode(string value) => "B" + Convert.ToBase64String(Encoding.UTF8.GetBytes(value ?? string.Empty));
+        var helperArguments = string.Join(" ", new[]
+        {
+            Encode(Path.GetFullPath(exePath)),
+            Encode(Path.GetFullPath(dllPath)),
+            Encode(arguments),
+            Encode(workingDir)
+        });
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = helperPath,
+            Arguments = helperArguments,
+            WorkingDirectory = AppContext.BaseDirectory,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
+        };
+
+        using var helper = Process.Start(startInfo)
+            ?? throw new InvalidOperationException("Could not start the x86 injector helper.");
+        var standardOutputTask = helper.StandardOutput.ReadToEndAsync();
+        var standardErrorTask = helper.StandardError.ReadToEndAsync();
+        if (!helper.WaitForExit(30000))
+        {
+            try { helper.Kill(); } catch { }
+            throw new TimeoutException("The x86 injector helper did not finish within 30 seconds.");
+        }
+
+        var standardOutput = standardOutputTask.GetAwaiter().GetResult();
+        var standardError = standardErrorTask.GetAwaiter().GetResult();
+        var result = standardOutput.Trim();
+        if (helper.ExitCode != 0 || !result.StartsWith("OK ", StringComparison.Ordinal) ||
+            !uint.TryParse(result.Substring(3), out var processId))
+        {
+            var detail = string.IsNullOrWhiteSpace(standardError) ? result : standardError.Trim();
+            throw new InvalidOperationException($"The x86 injector helper failed:{Environment.NewLine}{detail}");
+        }
+
+        AllowSetForegroundWindow(processId);
+        return Process.GetProcessById((int)processId);
+    }
+
     private static void InjectInto(IntPtr hProcess, string dllPath)
     {
-        // kernel32 (and thus LoadLibraryW) sits at the same address in every process
-        // of the session, so our local address is valid in the remote process.
-        IntPtr hKernel = GetModuleHandle("kernel32.dll");
-        IntPtr loadLibrary = GetProcAddress(hKernel, "LoadLibraryW");
+        // Matching-architecture system DLLs share their mapping within the Windows
+        // session, including before a CREATE_SUSPENDED target has initialized enough
+        // for module enumeration. Cross-architecture x86 launches are delegated to
+        // the matching x86 helper before this method is reached.
+        var kernel = GetModuleHandle("kernel32.dll");
+        var loadLibrary = GetProcAddress(kernel, "LoadLibraryW");
         if (loadLibrary == IntPtr.Zero)
             throw new Win32Exception(Marshal.GetLastWin32Error(), "GetProcAddress(LoadLibraryW) failed");
 

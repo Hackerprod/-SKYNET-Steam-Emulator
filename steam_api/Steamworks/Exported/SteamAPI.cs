@@ -14,6 +14,20 @@ namespace SKYNET.Steamworks.Exported
 {
     public class SteamAPI
     {
+        private const uint PageExecuteReadWrite = 0x40;
+        private static readonly object LegacyGameServerExportSync = new object();
+        private static bool legacyGameServerExportPrepared;
+        private static IntPtr legacyGameServerExportSlot;
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Ansi, SetLastError = true)]
+        private static extern IntPtr GetModuleHandle(string lpModuleName);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Ansi, SetLastError = true)]
+        private static extern IntPtr GetProcAddress(IntPtr hModule, string lpProcName);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool VirtualProtect(IntPtr lpAddress, UIntPtr dwSize, uint flNewProtect, out uint lpflOldProtect);
+
         static SteamAPI()
         {
             if (!SteamEmulator.Initialized && !SteamEmulator.Initializing)
@@ -130,14 +144,17 @@ namespace SKYNET.Steamworks.Exported
         public static bool SteamAPI_InitSafe()
         {
             Write("SteamAPI_InitSafe");
-            return SteamAPI_Init();
+            // DllExport adds a CallConvCdecl modopt to exported method signatures.
+            // A managed call compiled before that rewrite no longer matches the
+            // rewritten signature and throws MissingMethodException at runtime.
+            return InitializeClientApi(IntPtr.Zero) == 0;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static bool SteamAPI_InitAnonymousUser()
         {
             Write("SteamAPI_InitAnonymousUser");
-            return SteamAPI_Init();
+            return InitializeClientApi(IntPtr.Zero) == 0;
         }
 
         internal static int InitializeClientApi(IntPtr pOutErrMsg)
@@ -148,6 +165,7 @@ namespace SKYNET.Steamworks.Exported
 
             if (APIClient.EnsureInitialSession())
             {
+                PrepareLegacyGameServerExport();
                 NativeStringCache.WriteUtf8Buffer(
                     pOutErrMsg,
                     SteamErrorMessageCapacity,
@@ -162,6 +180,102 @@ namespace SKYNET.Steamworks.Exported
                 error);
             Write(error);
             return SteamApiInitNoSteamClient;
+        }
+
+        /// <summary>
+        /// Left 4 Dead's Steamworks generation imports g_pSteamClientGameServer as
+        /// writable data. DllExport can only emit a method export, so for AppID 500
+        /// the exported thunk itself is used as the four-byte legacy pointer slot.
+        /// </summary>
+        internal static void PrepareLegacyGameServerExport()
+        {
+            if (SteamEmulator.InternalAppId != 500 || legacyGameServerExportPrepared)
+            {
+                return;
+            }
+
+            lock (LegacyGameServerExportSync)
+            {
+                if (legacyGameServerExportPrepared)
+                {
+                    return;
+                }
+
+                IntPtr module = GetModuleHandle("steam_api.dll");
+                IntPtr slot = module == IntPtr.Zero
+                    ? IntPtr.Zero
+                    : GetProcAddress(module, "g_pSteamClientGameServer");
+
+                if (slot == IntPtr.Zero)
+                {
+                    Write("Legacy g_pSteamClientGameServer export was not found");
+                    return;
+                }
+
+                IntPtr client = InterfaceManager.FindOrCreateInterface(
+                    SteamEmulator.HSteamUser_GS,
+                    SteamEmulator.HSteamPipe_GS,
+                    "SteamClient009",
+                    true);
+
+                if (client == IntPtr.Zero || !WriteLegacyGameServerExport(slot, client))
+                {
+                    Write($"Unable to prepare legacy g_pSteamClientGameServer export ({Marshal.GetLastWin32Error()})");
+                    return;
+                }
+
+                legacyGameServerExportSlot = slot;
+                legacyGameServerExportPrepared = true;
+                Write("Prepared legacy g_pSteamClientGameServer data export");
+            }
+        }
+
+        internal static void PublishLegacyGameServerClient()
+        {
+            if (SteamEmulator.InternalAppId != 500)
+            {
+                return;
+            }
+
+            PrepareLegacyGameServerExport();
+            if (!legacyGameServerExportPrepared)
+            {
+                return;
+            }
+
+            IntPtr client = InterfaceManager.FindOrCreateInterface(
+                SteamEmulator.HSteamUser_GS,
+                SteamEmulator.HSteamPipe_GS,
+                "SteamClient009",
+                true);
+
+            if (client == IntPtr.Zero || !WriteLegacyGameServerExport(legacyGameServerExportSlot, client))
+            {
+                Write("Unable to publish legacy g_pSteamClientGameServer interface");
+                return;
+            }
+
+            Write("Published legacy g_pSteamClientGameServer interface");
+        }
+
+        private static bool WriteLegacyGameServerExport(IntPtr slot, IntPtr value)
+        {
+            uint oldProtect;
+            if (!VirtualProtect(slot, (UIntPtr)IntPtr.Size, PageExecuteReadWrite, out oldProtect))
+            {
+                return false;
+            }
+
+            try
+            {
+                Marshal.WriteIntPtr(slot, value);
+                return true;
+            }
+            finally
+            {
+                uint ignored;
+                VirtualProtect(slot, (UIntPtr)IntPtr.Size, oldProtect, out ignored);
+            }
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -214,14 +328,22 @@ namespace SKYNET.Steamworks.Exported
         public static HSteamPipe GetHSteamPipe()
         {
             Write("GetHSteamPipe");
-            return SteamAPI_GetHSteamPipe();
+            if (SteamEmulator.HSteamPipe == 0)
+            {
+                SteamEmulator.CreateSteamPipe();
+            }
+            return SteamEmulator.HSteamPipe;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static HSteamUser GetHSteamUser()
         {
             Write("GetHSteamUser");
-            return SteamAPI_GetHSteamUser();
+            if (SteamEmulator.HSteamUser == 0)
+            {
+                SteamEmulator.CreateSteamUser();
+            }
+            return SteamEmulator.HSteamUser;
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -275,10 +397,16 @@ namespace SKYNET.Steamworks.Exported
 
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
-        public static bool SteamAPI_ManualDispatch_GetAPICallResult(HSteamPipe hSteamPipe, SteamAPICall_t hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, ref bool pbFailed)
+        public static bool SteamAPI_ManualDispatch_GetAPICallResult(HSteamPipe hSteamPipe, SteamAPICall_t hSteamAPICall, IntPtr pCallback, int cubCallback, int iCallbackExpected, IntPtr pbFailed)
         {
             Write($"SteamAPI_ManualDispatch_GetAPICallResult");
-            return CallbackManager.ManualDispatchGetAPICallResult(hSteamPipe, hSteamAPICall, pCallback, cubCallback, iCallbackExpected, ref pbFailed);
+            bool failed = false;
+            bool result = CallbackManager.ManualDispatchGetAPICallResult(hSteamPipe, hSteamAPICall, pCallback, cubCallback, iCallbackExpected, ref failed);
+            if (pbFailed != IntPtr.Zero)
+            {
+                Marshal.WriteByte(pbFailed, failed ? (byte)1 : (byte)0);
+            }
+            return result;
         }
 
 
@@ -298,13 +426,31 @@ namespace SKYNET.Steamworks.Exported
             Msg += $" {pchMsg}" + Environment.NewLine;
             Msg += " //////////////////////////////   End Mini Dump   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + Environment.NewLine;
             //Write(Msg);
-            Write("SteamAPI_SetMiniDumpComment");
+            Write($"SteamAPI_SetMiniDumpComment: {pchMsg ?? string.Empty}");
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SteamAPI_WriteMiniDump(UInt32 uStructuredExceptionCode, IntPtr pvExceptionInfo, UInt32 uBuildID)
         {
-            Write($"SteamAPI_WriteMiniDump");
+            IntPtr exceptionAddress = IntPtr.Zero;
+            try
+            {
+                if (pvExceptionInfo != IntPtr.Zero)
+                {
+                    IntPtr exceptionRecord = Marshal.ReadIntPtr(pvExceptionInfo);
+                    if (exceptionRecord != IntPtr.Zero)
+                    {
+                        exceptionAddress = Marshal.ReadIntPtr(exceptionRecord, 12);
+                    }
+                }
+            }
+            catch
+            {
+                // The process is already handling a native exception. Logging must
+                // never replace the original failure with a marshaling failure.
+            }
+
+            Write($"SteamAPI_WriteMiniDump code=0x{uStructuredExceptionCode:X8} address=0x{exceptionAddress.ToInt64():X} info=0x{pvExceptionInfo.ToInt64():X} build={uBuildID}");
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -747,7 +893,12 @@ namespace SKYNET.Steamworks.Exported
         public static IntPtr SteamClient()
         {
             Write($"SteamClient");
-            return InterfaceManager.FindOrCreateInterface("SteamClient023");
+            // The SteamClient() export has no version argument. Legacy steam_api
+            // wrappers therefore expect the exact client vtable that shipped with
+            // their game. Left 4 Dead (AppID 500) uses SteamClient009; returning the
+            // modern vtable shifts every slot after GetISteamMatchmaking.
+            string version = SteamEmulator.InternalAppId == 500 ? "SteamClient009" : "SteamClient023";
+            return InterfaceManager.FindOrCreateInterface(version);
         }
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
