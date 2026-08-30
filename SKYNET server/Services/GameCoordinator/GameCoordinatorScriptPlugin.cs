@@ -30,6 +30,12 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
         _logger.LogInformation("GC script root resolved to {GCRoot}", _gcRoot);
     }
 
+    /// <summary>Read-only view of the configured GC apps, for diagnostics (e.g. the MCP tools).</summary>
+    public IReadOnlyList<GameCoordinatorAppDefinition> ListApps() => _apps.ListApps();
+
+    /// <summary>Read-only lookup of a single configured GC app, for diagnostics (e.g. the MCP tools).</summary>
+    public bool TryGetApp(uint appId, out GameCoordinatorAppDefinition app) => _apps.TryGetApp(appId, out app);
+
     public bool CanHandle(uint appId)
     {
         if (_apps.TryGetApp(appId, out _, out var error))

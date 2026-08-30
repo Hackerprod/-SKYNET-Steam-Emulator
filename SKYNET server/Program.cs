@@ -1,8 +1,11 @@
 using Microsoft.EntityFrameworkCore;
+using ModelContextProtocol.AspNetCore;
 using SKYNET_server.Json;
 using SKYNET_server.Models;
 using SKYNET_server.Persistence;
 using SKYNET_server.Services;
+using SKYNET_server.Services.Diagnostics;
+using SKYNET_server.Services.Mcp;
 
 // One-shot split migration: app.db/api-state.json/older feature DBs are copied
 // into steam.db and dota.db, then archived so only the split stores remain live.
@@ -64,6 +67,14 @@ builder.Services.AddSingleton<IGameCoordinatorPlugin>(sp => sp.GetRequiredServic
 builder.Services.AddSingleton<GameCoordinatorPluginRegistry>();
 builder.Services.AddSingleton<SdrCertificateService>();
 builder.Services.AddSingleton<SKYNET_server.Services.Networking.SdrRelayConfigService>();
+
+// Read-only diagnostic MCP server (discussion #36): thin wrappers over the
+// state services above, gated by the same admin token as /api/admin/*.
+builder.Services.AddSingleton<InMemoryLogBufferProvider>();
+builder.Logging.Services.AddSingleton<Microsoft.Extensions.Logging.ILoggerProvider>(sp => sp.GetRequiredService<InMemoryLogBufferProvider>());
+builder.Services.AddMcpServer()
+    .WithHttpTransport()
+    .WithTools<SkynetDiagnosticsMcpTools>();
 var dataRoot = DatabaseSplitMigrator.ResolveDataRoot(builder.Environment.ContentRootPath, builder.Configuration);
 builder.Services.AddPooledDbContextFactory<SteamDbContext>(options =>
     options.UseSqlite($"Data Source={Path.Combine(dataRoot, "steam.db")}"));
@@ -77,6 +88,8 @@ builder.Services.AddHostedService<PresenceSweepService>();
 builder.Services.AddHostedService<SKYNET_server.Services.Networking.SdrRelayService>();
 
 var app = builder.Build();
+
+app.MapMcp("/mcp");
 
 // Prepare split SQLite stores before any facade touches them. app.db and older
 // per-feature DBs are migration inputs only and are archived on successful copy.
