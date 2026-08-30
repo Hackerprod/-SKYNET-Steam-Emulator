@@ -83,3 +83,4 @@ jobs:
             exit 1
           }
           Write-Output "No C# compile errors (the DllExport native-emit failure above, if any, is expected under dotnet build)."
+          exit 0
