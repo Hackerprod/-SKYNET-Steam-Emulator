@@ -365,6 +365,7 @@ graphify-out/
 # Repository-local agent and SDK artifacts
 /.github/*
 !/.github/ISSUE_TEMPLATE/
+!/.github/workflows/
 /.codex/
 AGENTS.md
 /steam_api/AGENTS.md

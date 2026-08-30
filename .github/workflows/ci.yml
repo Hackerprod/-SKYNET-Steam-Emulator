@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  server:
+    name: Build & self-check SKYNET server
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Build
+        run: dotnet build "SKYNET server/SKYNET server.csproj" -c Release
+
+      # Self-checks already used for local development (see Program.cs): each
+      # exits non-zero on failure, no server port is bound.
+      - name: Verify persistence round-trip
+        working-directory: SKYNET server
+        run: dotnet "bin/Release/net8.0/SKYNET server.dll" --verify-persistence
+
+      - name: Verify Game Coordinator TypeScript modules
+        working-directory: SKYNET server
+        run: dotnet "bin/Release/net8.0/SKYNET server.dll" --verify-gc-ts
+
+      - name: Verify Dota cosmetics parser
+        working-directory: SKYNET server
+        run: dotnet "bin/Release/net8.0/SKYNET server.dll" --verify-dota-cosmetics
+
+  client:
+    name: Build SKYNET Steam Client
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Build (also builds the x86 Injector Helper it references)
+        run: dotnet build "SKYNET Steam Client/SKYNET Steam Client.csproj" -c Release
+
+  steam_api:
+    name: Compile-check steam_api
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      # steam_api uses the 3F/DllExport MSBuild pipeline for native exports.
+      # DllExport's own targets are imported from "$(SolutionDir)..\packages\DllExport\..."
+      # (see steam_api.csproj), so SolutionDir must be the steam_api folder
+      # itself (where steam_api.sln already lives), not the repo root, for
+      # that path to resolve to the repo's actual packages/ dir - and
+      # DllExport's restore wizard needs that .sln to be findable at all.
+      # `dotnet build` runs CoreCompile fine (real C# errors surface here)
+      # but then fails at the native ILAsm/export step, which needs the
+      # full-framework MSBuild task host the dotnet CLI doesn't provide -
+      # that failure is expected and not a code regression. Only a real
+      # `error CS####` should fail this job.
+      - name: Compile-check (CoreCompile only, native export not expected to run)
+        shell: pwsh
+        run: |
+          $solutionDir = (Resolve-Path "steam_api").Path + "\"
+          $log = dotnet build "steam_api/steam_api.csproj" -c Release "-p:SolutionDir=$solutionDir" 2>&1 | Tee-Object -FilePath build.log
+          $log | Write-Output
+          $csErrors = Select-String -Path build.log -Pattern "error CS\d+"
+          if ($csErrors) {
+            Write-Error "C# compile errors found:`n$($csErrors -join "`n")"
+            exit 1
+          }
+          Write-Output "No C# compile errors (the DllExport native-emit failure above, if any, is expected under dotnet build)."
