@@ -292,6 +292,14 @@ public sealed partial class SteamApiStateService
 
     private ApiAdminOverview BuildAdminOverviewLocked()
     {
+        // Lobbies/game servers are only pruned as a side effect of a matchmaking
+        // browse call (QueryLobbies / ListGameServers). The admin panel doesn't go
+        // through either, so without this it lists every registration ever made,
+        // dead or alive, forever - the exact "stale entries never disappear" gap
+        // reported against this endpoint. Sweep both before listing.
+        PruneInactiveLobbiesLocked();
+        PruneExpiredGameServersLocked();
+
         return new ApiAdminOverview
         {
             Users = _state.Users.Values.OrderBy(u => u.PersonaName).Select(CloneUser).ToList(),

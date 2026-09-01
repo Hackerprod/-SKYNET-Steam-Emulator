@@ -371,16 +371,7 @@ public sealed partial class SteamApiStateService
     {
         lock (_sync)
         {
-            var now = DateTime.UtcNow;
-            var expired = _gameServerLeases
-                .Where(pair => now - pair.Value > _gameServerLeaseTimeout)
-                .Select(pair => pair.Key)
-                .ToArray();
-
-            foreach (var steamId in expired)
-            {
-                _gameServerLeases.Remove(steamId);
-            }
+            PruneExpiredGameServersLocked();
 
             return _gameServerLeases.Keys
                 .Where(steamId => _state.GameServers.TryGetValue(steamId, out var server) &&
@@ -391,6 +382,34 @@ public sealed partial class SteamApiStateService
                 .OrderBy(server => server.SteamId)
                 .ToArray();
         }
+    }
+
+    // A registration without a live lease is dead weight: every write path that
+    // upserts _state.GameServers stamps _gameServerLeases in the same call, so a
+    // GameServers entry with no matching (or expired) lease can only be a server
+    // that disappeared without calling LogOff (crash, alt-f4, killed process) -
+    // nothing else still wants it. Removing it here (not just filtering it out of
+    // ListGameServers, as before) keeps the admin overview and api-state.json from
+    // accumulating dead registrations forever.
+    private void PruneExpiredGameServersLocked()
+    {
+        var now = DateTime.UtcNow;
+        var stale = _state.GameServers.Keys
+            .Where(steamId => !_gameServerLeases.TryGetValue(steamId, out var leaseAt) || now - leaseAt > _gameServerLeaseTimeout)
+            .ToArray();
+
+        if (stale.Length == 0)
+        {
+            return;
+        }
+
+        foreach (var steamId in stale)
+        {
+            _gameServerLeases.Remove(steamId);
+            _state.GameServers.Remove(steamId);
+        }
+
+        SaveState();
     }
 
     public ApiGameServerPublicIp GetPublicIp(string? remoteIp = null)
