@@ -2810,6 +2810,7 @@ namespace SKYNET.Managers
         public sealed class InventoryDeserializedResultDto
         {
             public bool Success { get; set; }
+            public int Status { get; set; } = 1;
             public ulong SteamId { get; set; }
             public uint AppId { get; set; }
             public uint TimestampUnix { get; set; }

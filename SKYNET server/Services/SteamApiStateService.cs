@@ -105,6 +105,8 @@ public sealed partial class SteamApiStateService
         _dotaLobbyInviteStore = new DotaLobbyInviteStore(dotaDbPath);
         _dotaGuildStore = new DotaGuildStore(dotaDbPath, ResolveDotaStatsIdentity);
         InitializePersistence(dataRoot);
+        _state.InventoryDropCooldowns ??= new Dictionary<string, DateTime>(StringComparer.Ordinal);
+        _inventoryDropCooldowns = _state.InventoryDropCooldowns;
         _nextInventoryItemId = _state.Inventory.Keys.ToArray().DefaultIfEmpty(0UL).Max();
         NormalizeState();
         DetectDotaClientVersionIfUnset();

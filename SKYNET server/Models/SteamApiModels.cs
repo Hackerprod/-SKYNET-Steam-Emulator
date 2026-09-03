@@ -73,7 +73,9 @@ public sealed class ApiInventoryGenerateRequest
 public sealed class ApiInventoryPromoRequest
 {
     public int? DefId { get; set; }
-    public List<int> DefIds { get; set; } = new();
+    // Null means the caller used the single-item eligibility-check shape;
+    // an empty list is an explicit AddPromoItems request that grants nothing.
+    public List<int>? DefIds { get; set; }
 }
 
 public sealed class ApiInventoryConsumeRequest
@@ -124,6 +126,7 @@ public sealed class ApiInventoryDeserializeRequest
 public sealed class ApiInventoryDeserializedResult
 {
     public bool Success { get; set; }
+    public int Status { get; set; } = 1;
     public ulong SteamId { get; set; }
     public uint AppId { get; set; }
     public uint TimestampUnix { get; set; }
@@ -972,6 +975,7 @@ public sealed class ApiState
     public Dictionary<ulong, string> Avatars { get; set; } = new();
     public Dictionary<ulong, ApiStatsEnvelope> Stats { get; set; } = new();
     public Dictionary<ulong, ApiInventoryItem> Inventory { get; set; } = new();
+    public Dictionary<string, DateTime> InventoryDropCooldowns { get; set; } = new(StringComparer.Ordinal);
     public Dictionary<ulong, ApiLobby> Lobbies { get; set; } = new();
     public Dictionary<string, ApiRemoteStorageFile> Files { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public Dictionary<ulong, ApiRemoteStorageShareRecord> FileShares { get; set; } = new();

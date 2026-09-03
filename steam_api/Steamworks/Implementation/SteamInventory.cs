@@ -49,6 +49,10 @@ namespace SKYNET.Steamworks.Implementation
             {
                 return false;
             }
+            if (result.Status != EResult.k_EResultOK && result.Status != EResult.k_EResultExpired)
+            {
+                return false;
+            }
 
             int count = result.Items.Length;
             if (pOutItemsArray == IntPtr.Zero)

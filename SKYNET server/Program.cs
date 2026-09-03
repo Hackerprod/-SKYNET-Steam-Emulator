@@ -371,7 +371,7 @@ api.MapPost("/inventory/promo", (HttpRequest request, ApiInventoryPromoRequest p
 {
     var token = SteamApiStateService.GetBearerToken(request) ?? string.Empty;
     if (!state.IsValidToken(token)) return Results.Unauthorized();
-    var items = payload.DefIds != null && payload.DefIds.Count > 0
+    var items = payload.DefIds != null
         ? state.AddPromoItems(token, payload.DefIds.ToArray())
         : state.AddPromoItem(token, payload.DefId);
     return items == null ? Results.BadRequest() : Results.Ok(state.GetInventoryOperationResult(token, items));

@@ -309,7 +309,12 @@ public static class StatePersistence
             EquipmentVersion = state.DotaCosmetics.EquipmentVersion,
         };
 
-        snapshot.AppState = new AppStateRecord { Id = 1, ActiveWebSteamId = state.ActiveWebSteamId };
+        snapshot.AppState = new AppStateRecord
+        {
+            Id = 1,
+            ActiveWebSteamId = state.ActiveWebSteamId,
+            InventoryDropCooldownsJson = JsonSerializer.Serialize(state.InventoryDropCooldowns, JsonOpts),
+        };
 
         if (includeCatalog)
         {
@@ -726,6 +731,15 @@ public static class StatePersistence
         if (appState is not null)
         {
             state.ActiveWebSteamId = appState.ActiveWebSteamId;
+            try
+            {
+                state.InventoryDropCooldowns = JsonSerializer.Deserialize<Dictionary<string, DateTime>>(
+                    appState.InventoryDropCooldownsJson, JsonOpts) ?? new(StringComparer.Ordinal);
+            }
+            catch (JsonException)
+            {
+                state.InventoryDropCooldowns = new(StringComparer.Ordinal);
+            }
         }
 
         return state;

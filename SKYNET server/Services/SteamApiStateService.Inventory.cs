@@ -7,10 +7,13 @@ public sealed partial class SteamApiStateService
 {
     private const ushort InventoryConsumedFlag = 512;
     private const ushort InventoryRemovedFlag = 256;
+    private const int InventoryResultOk = 1;
+    private const int InventoryResultExpired = 27;
+    private static readonly TimeSpan InventoryBlobLifetime = TimeSpan.FromHours(1);
     private static readonly byte[] InventorySerializeMagic = { (byte)'S', (byte)'K', (byte)'I', (byte)'V' };
     private const ushort InventorySerializeVersion = 1;
     private readonly GameInventoryCatalogService _inventoryCatalog;
-    private readonly Dictionary<(ulong SteamId, uint AppId), DateTime> _inventoryDropCooldowns = new();
+    private Dictionary<string, DateTime> _inventoryDropCooldowns = new(StringComparer.Ordinal);
     private byte[] _inventorySigningKey = Array.Empty<byte>();
     private ulong _nextInventoryItemId;
 
@@ -72,7 +75,7 @@ public sealed partial class SteamApiStateService
         {
             if (!TryGetInventorySessionLocked(token, out var session, out var appId)) return new List<ApiInventoryItem>();
             var definitions = _inventoryCatalog.Get(appId);
-            var ids = defId.HasValue ? new[] { defId.Value } : definitions.Where(IsPromo).Select(item => item.DefId).ToArray();
+            var ids = defId.HasValue ? new[] { defId.Value } : definitions.Where(IsAutoPromo).Select(item => item.DefId).ToArray();
             var granted = GrantInventoryDefinitionsLocked(session!.SteamId, appId, ids, null, requirePromo: true);
             SaveState();
             return granted;
@@ -96,8 +99,8 @@ public sealed partial class SteamApiStateService
         {
             if (!TryGetInventorySessionLocked(token, out var session, out var appId)) return new List<ApiInventoryItem>();
 
-            var cooldownKey = (session!.SteamId, appId);
             var now = DateTime.UtcNow;
+            var cooldownKey = InventoryDropCooldownKey(session!.SteamId, appId);
             if (_inventoryDropCooldowns.TryGetValue(cooldownKey, out var lastDrop) &&
                 now - lastDrop < TimeSpan.FromSeconds(60))
             {
@@ -126,6 +129,7 @@ public sealed partial class SteamApiStateService
             var generated = GrantInventoryDefinitionsLocked(session.SteamId, appId,
                 new[] { candidates[index]!.DefId }, null, requirePromo: false)!;
             _inventoryDropCooldowns[cooldownKey] = now;
+            _state.InventoryDropCooldowns[cooldownKey] = now;
             SaveState();
             return generated;
         }
@@ -152,10 +156,11 @@ public sealed partial class SteamApiStateService
         {
             if (!TryGetInventorySessionLocked(token, out var session, out var appId)) return new List<ApiInventoryItem>();
             var consume = itemIds ?? Array.Empty<ulong>();
+            if (quantities == null || quantities.Length != consume.Length) return null;
             var required = new Dictionary<ulong, uint>();
             for (var i = 0; i < consume.Length; i++)
             {
-                var amount = quantities != null && i < quantities.Length ? quantities[i] : 1u;
+                var amount = quantities[i];
                 if (amount == 0) return null;
                 try
                 {
@@ -168,16 +173,29 @@ public sealed partial class SteamApiStateService
                     return null;
                 }
             }
-            if (quantities != null && quantities.Length > consume.Length) return null;
             if (defIds == null || defIds.Length != 1 || generatedQuantities == null ||
                 generatedQuantities.Length != 1 || generatedQuantities[0] != 1) return null;
             if (!CanGrantInventoryDefinitionsLocked(appId, defIds, generatedQuantities, requirePromo: false)) return null;
+            var outputDefinition = _inventoryCatalog.Get(appId).FirstOrDefault(definition => definition.DefId == defIds[0]);
+            if (outputDefinition == null || !TryGetExchangeRecipes(outputDefinition, out var recipes)) return null;
+            var suppliedRecipe = new Dictionary<int, uint>();
             foreach (var pair in required)
             {
                 if (!_state.Inventory.TryGetValue(pair.Key, out var item) || item.SteamId != session!.SteamId || item.AppId != appId ||
                     (item.Flags & (InventoryConsumedFlag | InventoryRemovedFlag)) != 0 || item.Quantity < pair.Value)
-                    return new List<ApiInventoryItem>();
+                    return null;
+                try
+                {
+                    suppliedRecipe[item.DefId] = suppliedRecipe.TryGetValue(item.DefId, out var current)
+                        ? checked(current + pair.Value)
+                        : pair.Value;
+                }
+                catch (OverflowException)
+                {
+                    return null;
+                }
             }
+            if (!recipes.Any(recipe => RecipesMatch(recipe, suppliedRecipe))) return null;
             foreach (var pair in required)
             {
                 var item = _state.Inventory[pair.Key];
@@ -255,9 +273,18 @@ public sealed partial class SteamApiStateService
             try
             {
                 var blob = Convert.FromBase64String(blobBase64);
-                if (!TryReadInventoryBlob(blob, out var appId, out var steamId, out var timestamp, out var items) ||
+                if (!TryReadInventoryBlob(blob, out var appId, out var steamId, out var timestamp, out var items, out var expired) ||
                     appId != sessionAppId || steamId != session!.SteamId) return null;
-                return new ApiInventoryDeserializedResult { Success = true, SteamId = steamId, AppId = appId, TimestampUnix = timestamp, Items = items, BlobBase64 = blobBase64 };
+                return new ApiInventoryDeserializedResult
+                {
+                    Success = !expired,
+                    Status = expired ? InventoryResultExpired : InventoryResultOk,
+                    SteamId = steamId,
+                    AppId = appId,
+                    TimestampUnix = timestamp,
+                    Items = items,
+                    BlobBase64 = blobBase64
+                };
             }
             catch (FormatException) { return null; }
             catch (EndOfStreamException) { return null; }
@@ -332,7 +359,12 @@ public sealed partial class SteamApiStateService
              rule.Trim().Equals("manual", StringComparison.OrdinalIgnoreCase) ||
              rule.Trim().StartsWith("owns:", StringComparison.OrdinalIgnoreCase) ||
              rule.Trim().StartsWith("ach:", StringComparison.OrdinalIgnoreCase) ||
-             rule.Trim().StartsWith("played:", StringComparison.OrdinalIgnoreCase)));
+              rule.Trim().StartsWith("played:", StringComparison.OrdinalIgnoreCase)));
+
+    private static bool IsAutoPromo(ApiInventoryItemDef definition) => IsPromo(definition) &&
+        (!definition.Properties.TryGetValue("promo", out var value) ||
+         !value.Split(';', StringSplitOptions.RemoveEmptyEntries)
+             .Any(rule => rule.Trim().Equals("manual", StringComparison.OrdinalIgnoreCase)));
 
     private static bool IsDropCandidate(ApiInventoryItemDef definition)
     {
@@ -346,6 +378,43 @@ public sealed partial class SteamApiStateService
             definition.Type.Equals("bundle", StringComparison.OrdinalIgnoreCase) ||
             definition.Type.Equals("generator", StringComparison.OrdinalIgnoreCase);
     }
+
+    private static string InventoryDropCooldownKey(ulong steamId, uint appId) => $"{steamId}:{appId}";
+
+    private static bool TryGetExchangeRecipes(ApiInventoryItemDef definition, out List<Dictionary<int, uint>> recipes)
+    {
+        recipes = new List<Dictionary<int, uint>>();
+        if (!definition.Properties.TryGetValue("exchange", out var raw) || string.IsNullOrWhiteSpace(raw))
+            definition.Properties.TryGetValue("recipe", out raw);
+        if (string.IsNullOrWhiteSpace(raw)) return false;
+
+        foreach (var rawRecipe in raw.Split(';', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var recipe = new Dictionary<int, uint>();
+            foreach (var rawComponent in rawRecipe.Split(',', StringSplitOptions.RemoveEmptyEntries))
+            {
+                var component = rawComponent.Trim();
+                var parts = component.Split(new[] { 'x', 'X' }, 2, StringSplitOptions.RemoveEmptyEntries);
+                if (!int.TryParse(parts[0].Trim(), out var defId) || defId == 0) return false;
+                var quantity = 1u;
+                if (parts.Length == 2 && (!uint.TryParse(parts[1].Trim(), out quantity) || quantity == 0)) return false;
+                try
+                {
+                    recipe[defId] = recipe.TryGetValue(defId, out var current) ? checked(current + quantity) : quantity;
+                }
+                catch (OverflowException)
+                {
+                    return false;
+                }
+            }
+            if (recipe.Count == 0) return false;
+            recipes.Add(recipe);
+        }
+        return recipes.Count > 0;
+    }
+
+    private static bool RecipesMatch(IReadOnlyDictionary<int, uint> expected, IReadOnlyDictionary<int, uint> supplied) =>
+        expected.Count == supplied.Count && expected.All(pair => supplied.TryGetValue(pair.Key, out var quantity) && quantity == pair.Value);
 
     private static ApiInventoryItem CloneInventoryItem(ApiInventoryItem item) => new()
     {
@@ -377,9 +446,9 @@ public sealed partial class SteamApiStateService
         return body.Concat(mac).ToArray();
     }
 
-    private bool TryReadInventoryBlob(byte[] blob, out uint appId, out ulong steamId, out uint timestamp, out List<ApiInventoryItem> items)
+    private bool TryReadInventoryBlob(byte[] blob, out uint appId, out ulong steamId, out uint timestamp, out List<ApiInventoryItem> items, out bool expired)
     {
-        appId = 0; steamId = 0; timestamp = 0; items = new List<ApiInventoryItem>();
+        appId = 0; steamId = 0; timestamp = 0; items = new List<ApiInventoryItem>(); expired = false;
         if (blob.Length < 4 + 2 + 4 + 8 + 8 + 4 + 32) return false;
         var bodyLength = blob.Length - 32;
         var body = blob[..bodyLength];
@@ -388,6 +457,8 @@ public sealed partial class SteamApiStateService
         using var reader = new BinaryReader(ms);
         if (!reader.ReadBytes(4).SequenceEqual(InventorySerializeMagic) || reader.ReadUInt16() != InventorySerializeVersion) return false;
         appId = reader.ReadUInt32(); steamId = reader.ReadUInt64(); timestamp = (uint)reader.ReadUInt64();
+        var now = (ulong)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        expired = now > (ulong)timestamp + (ulong)InventoryBlobLifetime.TotalSeconds;
         var count = reader.ReadInt32();
         if (count < 0 || count > 100000) return false;
         for (var i = 0; i < count; i++)

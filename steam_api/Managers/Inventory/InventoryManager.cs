@@ -237,7 +237,7 @@ namespace SKYNET.Managers
         {
             lock (StoreLock)
             {
-                if (Definitions.TryGetValue(def, out var definition) && !IsPromoEligible(definition))
+                if (Definitions.TryGetValue(def, out var definition) && !HasPromoRule(definition))
                 {
                     return MakeResult(EResult.k_EResultOK, Array.Empty<InventoryItem>(), false);
                 }
@@ -518,6 +518,10 @@ namespace SKYNET.Managers
             {
                 return null;
             }
+            if (!IsResultReady(r.Status))
+            {
+                return null;
+            }
             if (r.SerializedBlob != null)
             {
                 return r.SerializedBlob;
@@ -552,7 +556,7 @@ namespace SKYNET.Managers
             try
             {
                 var response = APIClient.DeserializeInventoryResult(Convert.ToBase64String(blob));
-                if (response == null || !response.Success)
+                if (response == null || (!response.Success && response.Status != (int)EResult.k_EResultExpired))
                 {
                     return MakeResult(EResult.k_EResultFail, null, false);
                 }
@@ -561,7 +565,7 @@ namespace SKYNET.Managers
                 Results[handle] = new InventoryResult
                 {
                     Handle = handle,
-                    Status = EResult.k_EResultOK,
+                    Status = (EResult)response.Status,
                     TimestampUnix = response.TimestampUnix,
                     OwnerSteamID = response.SteamId,
                     Items = items,
@@ -597,6 +601,11 @@ namespace SKYNET.Managers
             return (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
 
+        private static bool IsResultReady(EResult status)
+        {
+            return status == EResult.k_EResultOK || status == EResult.k_EResultExpired;
+        }
+
         private static bool IsPromoEligible(ItemDefinition definition)
         {
             if (!definition.Raw.TryGetValue("promo", out var value) || string.IsNullOrWhiteSpace(value))
@@ -606,7 +615,7 @@ namespace SKYNET.Managers
 
             var rules = value.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(rule => rule.Trim()).ToArray();
-            if (rules.Length == 0) return false;
+            if (rules.Length == 0 || rules.Any(rule => rule.Equals("manual", StringComparison.OrdinalIgnoreCase))) return false;
             if (rules.Any(rule => rule == "1" || rule.Equals("true", StringComparison.OrdinalIgnoreCase) || rule.Equals("yes", StringComparison.OrdinalIgnoreCase)))
             {
                 return true;
@@ -618,12 +627,16 @@ namespace SKYNET.Managers
                 .ToArray();
             if (ownershipRules.Length == 0)
             {
-                return rules.Any(rule => rule.Equals("manual", StringComparison.OrdinalIgnoreCase) ||
-                    rule.StartsWith("ach:", StringComparison.OrdinalIgnoreCase) ||
+                return rules.Any(rule => rule.StartsWith("ach:", StringComparison.OrdinalIgnoreCase) ||
                     rule.StartsWith("played:", StringComparison.OrdinalIgnoreCase));
             }
 
             return ownershipRules.Any(appId => uint.TryParse(appId, out var id) && AppEntitlementManager.HasLicense(id));
+        }
+
+        private static bool HasPromoRule(ItemDefinition definition)
+        {
+            return definition.Raw.TryGetValue("promo", out var value) && !string.IsNullOrWhiteSpace(value);
         }
 
         // ================= nested state =================

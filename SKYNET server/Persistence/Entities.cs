@@ -318,6 +318,7 @@ public class AppStateRecord
 {
     public int Id { get; set; } = 1;
     public ulong ActiveWebSteamId { get; set; }
+    public string InventoryDropCooldownsJson { get; set; } = "{}";
 }
 
 public class DotaHeroIdRecord

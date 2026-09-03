@@ -7,7 +7,7 @@ internal static class DatabaseSchemaMaintenance
 {
     private const string SteamComponent = "steam-core";
     private const string DotaComponent = "dota-core";
-    private const int SteamVersion = 4;
+    private const int SteamVersion = 5;
     private const int DotaVersion = 2;
 
     public static void EnsureCurrent(SteamDbContext steam, DotaDbContext dota)
@@ -24,6 +24,7 @@ internal static class DatabaseSchemaMaintenance
             EnsureSteamLeaderboards(context);
             EnsureSteamWorkshop(context);
             EnsureSteamInventory(context);
+            EnsureSteamAppState(context);
             SetVersion(context, SteamComponent, SteamVersion);
         }
     }
@@ -270,6 +271,24 @@ internal static class DatabaseSchemaMaintenance
             CREATE INDEX IF NOT EXISTS IX_InventoryItems_SteamId_AppId_DefId
             ON InventoryItems (SteamId, AppId, DefId);
             """);
+    }
+
+    private static void EnsureSteamAppState(SteamDbContext context)
+    {
+        var connection = (SqliteConnection)context.Database.GetDbConnection();
+        var closeWhenDone = connection.State == System.Data.ConnectionState.Closed;
+        if (closeWhenDone) connection.Open();
+        try
+        {
+            if (TableExists(connection, "AppState") && !ColumnExists(connection, "AppState", "InventoryDropCooldownsJson"))
+            {
+                Execute(connection, null, "ALTER TABLE AppState ADD COLUMN InventoryDropCooldownsJson TEXT NOT NULL DEFAULT '{}';");
+            }
+        }
+        finally
+        {
+            if (closeWhenDone) connection.Close();
+        }
     }
 
     private static void EnsureDotaCosmeticClientVersion(DotaDbContext context)
