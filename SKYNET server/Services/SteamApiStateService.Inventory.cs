@@ -10,6 +10,7 @@ public sealed partial class SteamApiStateService
     private static readonly byte[] InventorySerializeMagic = { (byte)'S', (byte)'K', (byte)'I', (byte)'V' };
     private const ushort InventorySerializeVersion = 1;
     private readonly GameInventoryCatalogService _inventoryCatalog;
+    private readonly Dictionary<(ulong SteamId, uint AppId), DateTime> _inventoryDropCooldowns = new();
     private byte[] _inventorySigningKey = Array.Empty<byte>();
     private ulong _nextInventoryItemId;
 
@@ -54,7 +55,7 @@ public sealed partial class SteamApiStateService
         }
     }
 
-    public List<ApiInventoryItem>? GenerateItems(string token, int[] defIds, uint[] quantities)
+    public List<ApiInventoryItem>? GenerateItems(string token, int[] defIds, uint[]? quantities)
     {
         lock (_sync)
         {
@@ -89,6 +90,47 @@ public sealed partial class SteamApiStateService
         }
     }
 
+    public List<ApiInventoryItem>? TriggerItemDrop(string token, int dropListDefinition)
+    {
+        lock (_sync)
+        {
+            if (!TryGetInventorySessionLocked(token, out var session, out var appId)) return new List<ApiInventoryItem>();
+
+            var cooldownKey = (session!.SteamId, appId);
+            var now = DateTime.UtcNow;
+            if (_inventoryDropCooldowns.TryGetValue(cooldownKey, out var lastDrop) &&
+                now - lastDrop < TimeSpan.FromSeconds(60))
+            {
+                return new List<ApiInventoryItem>();
+            }
+
+            var definitions = _inventoryCatalog.Get(appId);
+            var dropList = definitions.FirstOrDefault(definition => definition.DefId == dropListDefinition);
+            if (dropList == null ||
+                (!dropList.Properties.TryGetValue("droplist", out var rawDropList) &&
+                 !dropList.Properties.TryGetValue("bundle", out rawDropList)))
+            {
+                return new List<ApiInventoryItem>();
+            }
+
+            var candidates = rawDropList.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(value => value.Trim().Split(new[] { 'x' }, 2, StringSplitOptions.RemoveEmptyEntries)[0])
+                .Select(value => int.TryParse(value, out var defId) ? defId : 0)
+                .Where(defId => defId != 0)
+                .Select(defId => definitions.FirstOrDefault(definition => definition.DefId == defId))
+                .Where(definition => definition != null && IsDropCandidate(definition))
+                .ToArray();
+            if (candidates.Length == 0) return new List<ApiInventoryItem>();
+
+            var index = (int)((ulong)now.Ticks % (ulong)candidates.Length);
+            var generated = GrantInventoryDefinitionsLocked(session.SteamId, appId,
+                new[] { candidates[index]!.DefId }, null, requirePromo: false)!;
+            _inventoryDropCooldowns[cooldownKey] = now;
+            SaveState();
+            return generated;
+        }
+    }
+
     public bool ConsumeItem(string token, ulong itemId, uint quantity)
     {
         lock (_sync)
@@ -115,9 +157,20 @@ public sealed partial class SteamApiStateService
             {
                 var amount = quantities != null && i < quantities.Length ? quantities[i] : 1u;
                 if (amount == 0) return null;
-                required[consume[i]] = required.TryGetValue(consume[i], out var current) ? current + amount : amount;
+                try
+                {
+                    required[consume[i]] = required.TryGetValue(consume[i], out var current)
+                        ? checked(current + amount)
+                        : amount;
+                }
+                catch (OverflowException)
+                {
+                    return null;
+                }
             }
             if (quantities != null && quantities.Length > consume.Length) return null;
+            if (defIds == null || defIds.Length != 1 || generatedQuantities == null ||
+                generatedQuantities.Length != 1 || generatedQuantities[0] != 1) return null;
             if (!CanGrantInventoryDefinitionsLocked(appId, defIds, generatedQuantities, requirePromo: false)) return null;
             foreach (var pair in required)
             {
@@ -274,7 +327,25 @@ public sealed partial class SteamApiStateService
     }
 
     private static bool IsPromo(ApiInventoryItemDef definition) => definition.Properties.TryGetValue("promo", out var value) &&
-        (value == "1" || value.Equals("true", StringComparison.OrdinalIgnoreCase) || value.Equals("yes", StringComparison.OrdinalIgnoreCase));
+        (value == "1" || value.Equals("true", StringComparison.OrdinalIgnoreCase) || value.Equals("yes", StringComparison.OrdinalIgnoreCase) ||
+         value.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Any(rule =>
+             rule.Trim().Equals("manual", StringComparison.OrdinalIgnoreCase) ||
+             rule.Trim().StartsWith("owns:", StringComparison.OrdinalIgnoreCase) ||
+             rule.Trim().StartsWith("ach:", StringComparison.OrdinalIgnoreCase) ||
+             rule.Trim().StartsWith("played:", StringComparison.OrdinalIgnoreCase)));
+
+    private static bool IsDropCandidate(ApiInventoryItemDef definition)
+    {
+        if (definition.Properties.TryGetValue("droppable", out var value))
+        {
+            return value == "1" || value.Equals("true", StringComparison.OrdinalIgnoreCase) ||
+                value.Equals("yes", StringComparison.OrdinalIgnoreCase);
+        }
+
+        return definition.Type.Equals("item", StringComparison.OrdinalIgnoreCase) ||
+            definition.Type.Equals("bundle", StringComparison.OrdinalIgnoreCase) ||
+            definition.Type.Equals("generator", StringComparison.OrdinalIgnoreCase);
+    }
 
     private static ApiInventoryItem CloneInventoryItem(ApiInventoryItem item) => new()
     {

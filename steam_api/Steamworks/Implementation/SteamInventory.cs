@@ -169,21 +169,17 @@ namespace SKYNET.Steamworks.Implementation
         {
             EnsureInit();
             // The SDK requires the reserved flag to be false.
-            if (bReserved)
-            {
-                WriteResultHandle(pOutResultHandle, InventoryManager.ResultInvalid);
-                return false;
-            }
-
             byte[] blob = null;
             if (pBuffer != IntPtr.Zero && unBufferSize > 0)
             {
                 blob = new byte[unBufferSize];
                 Marshal.Copy(pBuffer, blob, 0, (int)unBufferSize);
             }
-            // ResultInvalid => corrupt/invalid buffer => false, per Steam contract.
-            int h = InventoryManager.DeserializeResult(blob);
-            return WriteResult(pOutResultHandle, h);
+            // Steam reports malformed, expired, or wrongly-owned blobs through the
+            // result status while returning true for a structurally valid call.
+            int h = InventoryManager.DeserializeResult(blob, bReserved);
+            WriteResultHandle(pOutResultHandle, h);
+            return true;
         }
 
         // ===================== mutations =====================
@@ -462,6 +458,10 @@ namespace SKYNET.Steamworks.Implementation
 
         private static uint[] ReadUInt32Array(IntPtr source, uint length)
         {
+            if (source == IntPtr.Zero)
+            {
+                return null;
+            }
             var signed = ReadInt32Array(source, length);
             var a = new uint[signed.Length];
             for (int i = 0; i < signed.Length; i++)

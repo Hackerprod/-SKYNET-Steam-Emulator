@@ -57,6 +57,7 @@ builder.Services.AddSingleton<GameServerSettingsService>();
 builder.Services.AddSingleton<GameCatalogService>();
 builder.Services.AddSingleton<GameAchievementCatalogService>();
 builder.Services.AddSingleton<GameStatCatalogService>();
+builder.Services.AddSingleton<GameInventoryCatalogService>();
 builder.Services.AddSingleton<EncryptedAppTicketKeyStore>();
 builder.Services.AddSingleton<EncryptedAppTicketService>();
 builder.Services.AddSingleton<DotaDedicatedServerSupervisor>();
@@ -326,7 +327,11 @@ api.MapPut("/stats/me", (HttpRequest request, ApiStoreStatsRequest payload, Stea
         : Results.Unauthorized();
 });
 
-api.MapGet("/inventory/definitions", (uint appId, GameInventoryCatalogService catalog) => Results.Ok(catalog.Get(appId)));
+api.MapGet("/inventory/definitions", (HttpRequest request, uint appId, GameInventoryCatalogService catalog, SteamApiStateService state) =>
+{
+    var token = SteamApiStateService.GetBearerToken(request) ?? string.Empty;
+    return state.IsValidToken(token) ? Results.Ok(catalog.Get(appId)) : Results.Unauthorized();
+});
 api.MapGet("/inventory/items", (HttpRequest request, SteamApiStateService state) =>
 {
     var token = SteamApiStateService.GetBearerToken(request) ?? string.Empty;
@@ -342,8 +347,24 @@ api.MapPost("/inventory/items/by-id", (HttpRequest request, ApiInventoryItemsReq
 api.MapPost("/inventory/generate", (HttpRequest request, ApiInventoryGenerateRequest payload, SteamApiStateService state) =>
 {
     var token = SteamApiStateService.GetBearerToken(request) ?? string.Empty;
+    if (!state.IsWebAdmin(token)) return Results.Unauthorized();
+    var items = state.GenerateItems(token, payload.DefIds?.ToArray() ?? Array.Empty<int>(),
+        payload.Quantities is { Count: > 0 } ? payload.Quantities.ToArray() : null);
+    return items == null ? Results.BadRequest() : Results.Ok(state.GetInventoryOperationResult(token, items));
+});
+api.MapPost("/inventory/purchase", (HttpRequest request, ApiInventoryGenerateRequest payload, SteamApiStateService state) =>
+{
+    var token = SteamApiStateService.GetBearerToken(request) ?? string.Empty;
     if (!state.IsValidToken(token)) return Results.Unauthorized();
-    var items = state.GenerateItems(token, payload.DefIds?.ToArray() ?? Array.Empty<int>(), payload.Quantities?.ToArray() ?? Array.Empty<uint>());
+    var items = state.GenerateItems(token, payload.DefIds?.ToArray() ?? Array.Empty<int>(),
+        payload.Quantities is { Count: > 0 } ? payload.Quantities.ToArray() : null);
+    return items == null ? Results.BadRequest() : Results.Ok(state.GetInventoryOperationResult(token, items));
+});
+api.MapPost("/inventory/drop", (HttpRequest request, int dropListDefinition, SteamApiStateService state) =>
+{
+    var token = SteamApiStateService.GetBearerToken(request) ?? string.Empty;
+    if (!state.IsValidToken(token)) return Results.Unauthorized();
+    var items = state.TriggerItemDrop(token, dropListDefinition);
     return items == null ? Results.BadRequest() : Results.Ok(state.GetInventoryOperationResult(token, items));
 });
 api.MapPost("/inventory/promo", (HttpRequest request, ApiInventoryPromoRequest payload, SteamApiStateService state) =>

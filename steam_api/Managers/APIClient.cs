@@ -1464,8 +1464,25 @@ namespace SKYNET.Managers
             return Send<InventoryOperationResultDto>(HttpMethod.Post, "api/inventory/generate", new InventoryGenerateRequestDto
             {
                 DefIds = defIds == null ? new List<int>() : defIds.ToList(),
-                Quantities = quantities == null ? new List<uint>() : quantities.ToList()
+                Quantities = quantities == null ? null : quantities.ToList()
             });
+        }
+
+        public static InventoryOperationResultDto PurchaseInventoryItems(int[] defIds, uint[] quantities)
+        {
+            if (!IsEnabled || !EnsureSession()) return null;
+            return Send<InventoryOperationResultDto>(HttpMethod.Post, "api/inventory/purchase", new InventoryGenerateRequestDto
+            {
+                DefIds = defIds == null ? new List<int>() : defIds.ToList(),
+                Quantities = quantities == null ? null : quantities.ToList()
+            });
+        }
+
+        public static InventoryOperationResultDto TriggerInventoryItemDrop(int dropListDefinition)
+        {
+            if (!IsEnabled || !EnsureSession()) return null;
+            return Send<InventoryOperationResultDto>(HttpMethod.Post,
+                $"api/inventory/drop?dropListDefinition={dropListDefinition}");
         }
 
         public static InventoryOperationResultDto AddInventoryPromoItem(int? defId)

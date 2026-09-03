@@ -39,7 +39,6 @@ namespace SKYNET.Managers
         // ---- Transient handles: concurrent ----
         private static readonly ConcurrentDictionary<int, InventoryResult> Results = new ConcurrentDictionary<int, InventoryResult>();
         private static readonly ConcurrentDictionary<ulong, PropertyUpdate> Updates = new ConcurrentDictionary<ulong, PropertyUpdate>();
-        private static readonly ConcurrentDictionary<int, uint> DropCooldowns = new ConcurrentDictionary<int, uint>();
 
         private static int _nextResultHandle = 1;          // 0 is a valid SDK handle; we simply start at 1
         private static long _nextUpdateHandle = 1;
@@ -231,17 +230,34 @@ namespace SKYNET.Managers
         public static int GrantPromoItems()
         {
             if (!AutoGrantPromos) return MakeResult(EResult.k_EResultFail, null, false);
-            return BeginServerResult("Inventory GrantPromoItems", () => APIClient.AddInventoryPromoItem(null), fullUpdate: true);
+            return BeginServerResult("Inventory GrantPromoItems", () => APIClient.AddInventoryPromoItems(GetPromoDefinitionIds()), fullUpdate: true);
         }
 
         public static int AddPromoItem(int def)
         {
+            lock (StoreLock)
+            {
+                if (Definitions.TryGetValue(def, out var definition) && !IsPromoEligible(definition))
+                {
+                    return MakeResult(EResult.k_EResultOK, Array.Empty<InventoryItem>(), false);
+                }
+            }
             return BeginServerResult("Inventory AddPromoItem", () => APIClient.AddInventoryPromoItem(def), fullUpdate: true);
         }
 
         public static int AddPromoItems(int[] defs)
         {
-            var copy = defs == null ? Array.Empty<int>() : defs.ToArray();
+            int[] copy;
+            lock (StoreLock)
+            {
+                copy = (defs ?? Array.Empty<int>())
+                    .Where(def => !Definitions.TryGetValue(def, out var definition) || IsPromoEligible(definition))
+                    .ToArray();
+            }
+            if (copy.Length == 0)
+            {
+                return MakeResult(EResult.k_EResultOK, Array.Empty<InventoryItem>(), false);
+            }
             return BeginServerResult("Inventory AddPromoItems", () => APIClient.AddInventoryPromoItems(copy), fullUpdate: true);
         }
 
@@ -270,28 +286,8 @@ namespace SKYNET.Managers
         public static int TriggerItemDrop(int dropListDef)
         {
             if (!Enabled) return ResultInvalid;
-            // Rate-limit per droplist: at most one drop per 60s.
-            uint now = NowUnix();
-            if (DropCooldowns.TryGetValue(dropListDef, out var last) && now - last < 60)
-            {
-                return MakeResult(EResult.k_EResultOK, Array.Empty<InventoryItem>(), false);
-            }
-            DropCooldowns[dropListDef] = now;
-
-            int[] pool;
-            lock (StoreLock)
-            {
-                pool = Definitions.TryGetValue(dropListDef, out var d)
-                    ? d.DropList.ToArray()
-                    : Array.Empty<int>();
-            }
-            if (pool.Length == 0)
-            {
-                return MakeResult(EResult.k_EResultOK, Array.Empty<InventoryItem>(), false);
-            }
-
-            int pick = pool[new Random(unchecked((int)(now ^ (uint)dropListDef))).Next(pool.Length)];
-            return GrantDefs(new[] { pick }, null, requirePromo: false);
+            return BeginServerResult("Inventory TriggerItemDrop",
+                () => APIClient.TriggerInventoryItemDrop(dropListDef), fullUpdate: true);
         }
 
         // ================= property updates =================
@@ -407,7 +403,7 @@ namespace SKYNET.Managers
         {
             lock (StoreLock)
             {
-                return Definitions.Values.Where(d => d.Promo).Select(d => d.DefId).ToArray();
+                return Definitions.Values.Where(IsPromoEligible).Select(d => d.DefId).ToArray();
             }
         }
 
@@ -488,7 +484,7 @@ namespace SKYNET.Managers
             if (AutoGrantPurchases && defs != null && defs.Length > 0)
             {
                 // Grant locally since there is no real payment path.
-                GrantDefs(defs, qtys, requirePromo: false);
+                BeginServerResult("Inventory StartPurchase", () => APIClient.PurchaseInventoryItems(defs, qtys), fullUpdate: true);
             }
 
             return CallbackManager.AddCallbackResult(new SteamInventoryStartPurchaseResult_t
@@ -505,7 +501,7 @@ namespace SKYNET.Managers
             int count;
             lock (StoreLock)
             {
-                count = Definitions.Values.Count(d => d.Promo);
+                count = Definitions.Values.Count(IsPromoEligible);
             }
             return CallbackManager.AddCallbackResult(new SteamInventoryEligiblePromoItemDefIDs_t
             {
@@ -542,21 +538,24 @@ namespace SKYNET.Managers
 
         // Parses a signed blob into a NEW result handle. On any failure returns a
         // result handle with k_EResultFail (never a bare false), per SDK expectation.
-        // Returns a valid result handle for a well-formed, signed blob owned by the
-        // current user; ResultInvalid (-1) for anything invalid so the caller can
-        // report false, matching Steam's DeserializeResult contract.
-        public static int DeserializeResult(byte[] blob)
+        public static int DeserializeResult(byte[] blob, bool reserved = false)
         {
-            if (!Enabled)
+            if (!Enabled || reserved)
             {
-                return ResultInvalid;
+                return MakeResult(EResult.k_EResultFail, null, false);
             }
 
-            if (blob == null || blob.Length == 0 || !APIClient.IsEnabled) return ResultInvalid;
+            if (blob == null || blob.Length == 0 || !APIClient.IsEnabled)
+            {
+                return MakeResult(EResult.k_EResultFail, null, false);
+            }
             try
             {
                 var response = APIClient.DeserializeInventoryResult(Convert.ToBase64String(blob));
-                if (response == null || !response.Success) return ResultInvalid;
+                if (response == null || !response.Success)
+                {
+                    return MakeResult(EResult.k_EResultFail, null, false);
+                }
                 var items = response.Items == null ? Array.Empty<InventoryItem>() : response.Items.Select(Map).ToArray();
                 var handle = NextResultHandle();
                 Results[handle] = new InventoryResult
@@ -574,7 +573,7 @@ namespace SKYNET.Managers
             catch (Exception ex)
             {
                 SteamEmulator.Write("InventoryManager", $"DeserializeResult error: {ex.Message}");
-                return ResultInvalid;
+                return MakeResult(EResult.k_EResultFail, null, false);
             }
         }
 
@@ -596,6 +595,35 @@ namespace SKYNET.Managers
         private static uint NowUnix()
         {
             return (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        }
+
+        private static bool IsPromoEligible(ItemDefinition definition)
+        {
+            if (!definition.Raw.TryGetValue("promo", out var value) || string.IsNullOrWhiteSpace(value))
+            {
+                return false;
+            }
+
+            var rules = value.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(rule => rule.Trim()).ToArray();
+            if (rules.Length == 0) return false;
+            if (rules.Any(rule => rule == "1" || rule.Equals("true", StringComparison.OrdinalIgnoreCase) || rule.Equals("yes", StringComparison.OrdinalIgnoreCase)))
+            {
+                return true;
+            }
+
+            var ownershipRules = rules
+                .Where(rule => rule.StartsWith("owns:", StringComparison.OrdinalIgnoreCase))
+                .Select(rule => rule.Substring("owns:".Length).Trim())
+                .ToArray();
+            if (ownershipRules.Length == 0)
+            {
+                return rules.Any(rule => rule.Equals("manual", StringComparison.OrdinalIgnoreCase) ||
+                    rule.StartsWith("ach:", StringComparison.OrdinalIgnoreCase) ||
+                    rule.StartsWith("played:", StringComparison.OrdinalIgnoreCase));
+            }
+
+            return ownershipRules.Any(appId => uint.TryParse(appId, out var id) && AppEntitlementManager.HasLicense(id));
         }
 
         // ================= nested state =================
