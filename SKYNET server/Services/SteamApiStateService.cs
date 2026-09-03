@@ -71,6 +71,7 @@ public sealed partial class SteamApiStateService
         GameCatalogService gameCatalog,
         GameAchievementCatalogService achievementCatalog,
         GameStatCatalogService statCatalog,
+        GameInventoryCatalogService inventoryCatalog,
         DotaDB dotaDb,
         IDbContextFactory<SteamDbContext> steamDbContextFactory,
         IDbContextFactory<DotaDbContext> dotaDbContextFactory,
@@ -84,6 +85,7 @@ public sealed partial class SteamApiStateService
         _gameCatalog = gameCatalog;
         _achievementCatalog = achievementCatalog;
         _statCatalog = statCatalog;
+        _inventoryCatalog = inventoryCatalog;
         _dotaDb = dotaDb;
         _steamDbFactory = steamDbContextFactory;
         _dotaDbFactory = dotaDbContextFactory;
@@ -92,6 +94,7 @@ public sealed partial class SteamApiStateService
         _gameServerLeaseTimeout = TimeSpan.FromSeconds(
             Math.Clamp(configuration.GetValue("GameServers:LeaseTimeoutSeconds", 90), 15, 3600));
         var dataRoot = ResolveDataRoot(hostEnvironment.ContentRootPath, configuration);
+        InitializeInventorySigningKey(dataRoot);
         _statePath = Path.Combine(dataRoot, "api-state.json");
         // Dota GC stores live in dota.db. Steam identity, auth, friends, generic
         // stats, and remote storage live in steam.db and are resolved through
@@ -102,6 +105,7 @@ public sealed partial class SteamApiStateService
         _dotaLobbyInviteStore = new DotaLobbyInviteStore(dotaDbPath);
         _dotaGuildStore = new DotaGuildStore(dotaDbPath, ResolveDotaStatsIdentity);
         InitializePersistence(dataRoot);
+        _nextInventoryItemId = _state.Inventory.Keys.ToArray().DefaultIfEmpty(0UL).Max();
         NormalizeState();
         DetectDotaClientVersionIfUnset();
         StartBackgroundFlusher();

@@ -1,13 +1,10 @@
 using SKYNET.Callback;
 using SKYNET.Helpers;
-using SKYNET.Helpers.JSON;
 using SKYNET.Steamworks;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 
@@ -16,11 +13,9 @@ using SteamAPICall_t = System.UInt64;
 namespace SKYNET.Managers
 {
     /// <summary>
-    /// Authoritative, local-first inventory store for ISteamInventory. Items live
-    /// in a plain Dictionary under a single lock (compound ops stay atomic);
-    /// transient result/update handles use concurrent maps. Persisted to disk so
-    /// inventories survive restarts. Server sync is optional and never blocks the
-    /// game thread.
+    /// Client-side result/cache bridge for server-authoritative ISteamInventory.
+    /// Inventory definitions and item ownership are fetched from SKYNET; this class
+    /// only retains transient result handles and the latest in-memory definitions.
     /// </summary>
     public static class InventoryManager
     {
@@ -48,14 +43,11 @@ namespace SKYNET.Managers
 
         private static int _nextResultHandle = 1;          // 0 is a valid SDK handle; we simply start at 1
         private static long _nextUpdateHandle = 1;
-        private static long _lastItemId = 0;               // last id issued; persisted in meta.json. Increment yields the next.
         private static volatile bool _definitionsLoaded;
         private static volatile bool _initialized;
 
         private static uint _appId;
         private static ulong _owner;
-        private static string _root;
-        private static byte[] _serializeSecret;
 
         public static bool DefinitionsLoaded => _definitionsLoaded;
 
@@ -72,21 +64,6 @@ namespace SKYNET.Managers
             _owner = steamId;
             // Per-user isolation: two accounts sharing the same install/appid must
             // not see each other's items.
-            _root = Path.Combine(Common.GetPath(), "SKYNET", "Inventory", appId.ToString(), steamId.ToString());
-
-            try
-            {
-                Common.EnsureDirectoryExists(_root);
-                LoadMeta();
-                LoadItems();
-                LoadDefinitionsFromDisk();
-                EnsureSecret();
-            }
-            catch (Exception ex)
-            {
-                SteamEmulator.Write("InventoryManager", $"Initialize error: {ex.Message}");
-            }
-
             _initialized = true;
         }
 
@@ -102,167 +79,6 @@ namespace SKYNET.Managers
             }
         }
 
-        private static string ItemsPath => Path.Combine(_root, "items.json");
-        private static string MetaPath => Path.Combine(_root, "meta.json");
-        private static string DefsPath => Path.Combine(_root, "defs.json");
-        private static string SecretPath => Path.Combine(Common.GetPath(), "SKYNET", "Inventory", "serialize.key");
-
-        private static void LoadMeta()
-        {
-            if (!File.Exists(MetaPath))
-            {
-                return;
-            }
-
-            var meta = File.ReadAllText(MetaPath).FromJson<InventoryMetaDto>();
-            if (meta != null && meta.LastItemId > 0)
-            {
-                _lastItemId = meta.LastItemId;
-            }
-        }
-
-        private static void PersistMeta()
-        {
-            try
-            {
-                AtomicWriteText(MetaPath, new InventoryMetaDto { LastItemId = Interlocked.Read(ref _lastItemId), Version = 1 }.ToJson());
-            }
-            catch (Exception ex)
-            {
-                SteamEmulator.Write("InventoryManager", $"PersistMeta error: {ex.Message}");
-            }
-        }
-
-        private static void LoadItems()
-        {
-            if (!File.Exists(ItemsPath))
-            {
-                return;
-            }
-
-            var dto = File.ReadAllText(ItemsPath).FromJson<InventoryItemsDto>();
-            if (dto?.Items == null)
-            {
-                return;
-            }
-
-            lock (StoreLock)
-            {
-                Items.Clear();
-                foreach (var it in dto.Items)
-                {
-                    if (it == null || it.ItemId == 0)
-                    {
-                        continue;
-                    }
-                    it.Properties = it.Properties ?? new Dictionary<string, string>(StringComparer.Ordinal);
-                    Items[it.ItemId] = it;
-                }
-            }
-        }
-
-        private static void PersistItems()
-        {
-            try
-            {
-                InventoryItemsDto dto;
-                lock (StoreLock)
-                {
-                    dto = new InventoryItemsDto { Items = Items.Values.ToList() };
-                }
-                AtomicWriteText(ItemsPath, dto.ToJson());
-                PersistMeta();
-            }
-            catch (Exception ex)
-            {
-                SteamEmulator.Write("InventoryManager", $"PersistItems error: {ex.Message}");
-            }
-        }
-
-        private static void LoadDefinitionsFromDisk()
-        {
-            if (!File.Exists(DefsPath))
-            {
-                return;
-            }
-
-            var dto = File.ReadAllText(DefsPath).FromJson<ItemDefinitionsDto>();
-            if (dto?.Definitions == null)
-            {
-                return;
-            }
-
-            lock (StoreLock)
-            {
-                Definitions.Clear();
-                foreach (var d in dto.Definitions)
-                {
-                    if (d == null)
-                    {
-                        continue;
-                    }
-                    d.Raw = d.Raw ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                    Definitions[d.DefId] = d;
-                }
-            }
-            _definitionsLoaded = true;
-        }
-
-        private static void AtomicWriteText(string path, string content)
-        {
-            var temp = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
-            try
-            {
-                File.WriteAllText(temp, content, new UTF8Encoding(false));
-                if (File.Exists(path))
-                {
-                    try
-                    {
-                        File.Replace(temp, path, null);
-                    }
-                    catch (PlatformNotSupportedException)
-                    {
-                        ReplaceByCopy(temp, path);
-                    }
-                    catch (IOException)
-                    {
-                        ReplaceByCopy(temp, path);
-                    }
-                }
-                else
-                {
-                    File.Move(temp, path);
-                }
-            }
-            finally
-            {
-                if (File.Exists(temp))
-                {
-                    try
-                    {
-                        File.Delete(temp);
-                    }
-                    catch
-                    {
-                    }
-                }
-            }
-        }
-
-        private static void ReplaceByCopy(string temporary, string destination)
-        {
-            File.Copy(temporary, destination, true);
-            File.Delete(temporary);
-        }
-
-        // ================= id / handle allocation =================
-
-        private static ulong NextItemId()
-        {
-            // _lastItemId holds the last id issued; increment produces the next one.
-            return (ulong)Interlocked.Increment(ref _lastItemId);
-        }
-
         private static int NextResultHandle()
         {
             // Skip the invalid sentinel; wrap safely.
@@ -273,6 +89,63 @@ namespace SKYNET.Managers
             }
             return h;
         }
+
+        private static int BeginServerResult(string name, Func<APIClient.SkyNetInventoryOperationResultDto> operation, bool fullUpdate)
+        {
+            if (!Enabled || !APIClient.IsEnabled || operation == null) return ResultInvalid;
+            var handle = NextResultHandle();
+            Results[handle] = new InventoryResult
+            {
+                Handle = handle,
+                Status = EResult.k_EResultPending,
+                TimestampUnix = NowUnix(),
+                OwnerSteamID = _owner,
+                Items = Array.Empty<InventoryItem>()
+            };
+
+            if (!WorkQueue.Enqueue(name, () =>
+            {
+                APIClient.SkyNetInventoryOperationResultDto response = null;
+                try { response = operation(); }
+                catch (Exception ex) { SteamEmulator.Write("InventoryManager", $"{name} error: {ex.Message}"); }
+                CompleteServerResult(handle, response, fullUpdate);
+            }, null, true))
+            {
+                CompleteServerResult(handle, null, fullUpdate: false);
+            }
+
+            return handle;
+        }
+
+        private static void CompleteServerResult(int handle, APIClient.SkyNetInventoryOperationResultDto response, bool fullUpdate)
+        {
+            if (!Results.TryGetValue(handle, out var result)) return;
+            var success = response != null && response.Success;
+            var items = response?.Items == null ? new List<InventoryItem>() : response.Items.Select(Map).ToList();
+            result.Status = success ? EResult.k_EResultOK : EResult.k_EResultFail;
+            result.TimestampUnix = response?.TimestampUnix ?? NowUnix();
+            result.OwnerSteamID = response?.OwnerSteamId ?? _owner;
+            result.Items = items.ToArray();
+            if (!string.IsNullOrWhiteSpace(response?.SerializedBlobBase64))
+            {
+                try { result.SerializedBlob = Convert.FromBase64String(response.SerializedBlobBase64); }
+                catch (FormatException) { result.SerializedBlob = null; }
+            }
+
+            if (fullUpdate && success)
+                CallbackManager.AddCallback(new SteamInventoryFullUpdate_t { Handle = handle });
+            CallbackManager.AddCallback(new SteamInventoryResultReady_t { Handle = handle, Result = result.Status });
+        }
+
+        private static InventoryItem Map(APIClient.ApiInventoryItem item) => new InventoryItem
+        {
+            ItemId = item.ItemId,
+            DefId = item.DefId,
+            Quantity = item.Quantity,
+            Flags = item.Flags,
+            AcquiredUnix = 0,
+            Properties = new Dictionary<string, string>(item.Properties ?? new Dictionary<string, string>(), StringComparer.Ordinal)
+        };
 
         // ================= result lifecycle =================
 
@@ -336,28 +209,12 @@ namespace SKYNET.Managers
 
         public static int GetAllItems()
         {
-            if (!Enabled) return ResultInvalid;
-            InventoryItem[] snapshot;
-            lock (StoreLock)
-            {
-                snapshot = Items.Values.Where(i => (i.Flags & (ushort)SteamItemFlags.Removed) == 0)
-                                       .Select(Clone).ToArray();
-            }
-            return MakeResult(EResult.k_EResultOK, snapshot, fullUpdate: true);
+            return BeginServerResult("Inventory GetAllItems", () => APIClient.GetInventoryItems(), fullUpdate: true);
         }
 
         public static int GetItemsByID(ulong[] ids)
         {
-            if (!Enabled) return ResultInvalid;
-            InventoryItem[] snapshot;
-            lock (StoreLock)
-            {
-                snapshot = (ids ?? Array.Empty<ulong>())
-                    .Where(id => Items.ContainsKey(id))
-                    .Select(id => Clone(Items[id]))
-                    .ToArray();
-            }
-            return MakeResult(EResult.k_EResultOK, snapshot, fullUpdate: false);
+            return BeginServerResult("Inventory GetItemsByID", () => APIClient.GetInventoryItemsById(ids), fullUpdate: false);
         }
 
         // ================= mutations =================
@@ -368,219 +225,46 @@ namespace SKYNET.Managers
             {
                 return MakeResult(EResult.k_EResultFail, null, false);
             }
-            return GrantDefs(defs, qtys, requirePromo: false);
+            return BeginServerResult("Inventory GenerateItems", () => APIClient.GenerateInventoryItems(defs, qtys), fullUpdate: true);
         }
 
         public static int GrantPromoItems()
         {
-            int[] promo;
-            lock (StoreLock)
-            {
-                promo = Definitions.Values.Where(d => d.Promo).Select(d => d.DefId).ToArray();
-            }
-            return GrantDefs(promo, null, requirePromo: true);
+            if (!AutoGrantPromos) return MakeResult(EResult.k_EResultFail, null, false);
+            return BeginServerResult("Inventory GrantPromoItems", () => APIClient.AddInventoryPromoItem(null), fullUpdate: true);
         }
 
         public static int AddPromoItem(int def)
         {
-            return GrantDefs(new[] { def }, null, requirePromo: true);
+            return BeginServerResult("Inventory AddPromoItem", () => APIClient.AddInventoryPromoItem(def), fullUpdate: true);
         }
 
         public static int AddPromoItems(int[] defs)
         {
-            return GrantDefs(defs, null, requirePromo: true);
+            var copy = defs == null ? Array.Empty<int>() : defs.ToArray();
+            return BeginServerResult("Inventory AddPromoItems", () => APIClient.AddInventoryPromoItems(copy), fullUpdate: true);
         }
 
         private static int GrantDefs(int[] defs, uint[] qtys, bool requirePromo)
         {
-            if (!Enabled) return ResultInvalid;
-            if (defs == null || defs.Length == 0)
-            {
-                return MakeResult(EResult.k_EResultOK, Array.Empty<InventoryItem>(), false);
-            }
-
-            var granted = new List<InventoryItem>();
-            lock (StoreLock)
-            {
-                for (int i = 0; i < defs.Length; i++)
-                {
-                    int def = defs[i];
-                    uint qty = qtys != null && i < qtys.Length ? qtys[i] : 1u;
-                    if (qty == 0)
-                    {
-                        qty = 1;
-                    }
-
-                    if (requirePromo && Definitions.TryGetValue(def, out var d) && !d.Promo)
-                    {
-                        continue;
-                    }
-
-                    var item = new InventoryItem
-                    {
-                        ItemId = NextItemId(),
-                        DefId = def,
-                        Quantity = qty,
-                        Flags = 0,
-                        AcquiredUnix = NowUnix(),
-                        Properties = new Dictionary<string, string>(StringComparer.Ordinal),
-                    };
-                    Items[item.ItemId] = item;
-                    granted.Add(Clone(item));
-                }
-            }
-
-            PersistItems();
-            return MakeResult(EResult.k_EResultOK, granted.ToArray(), fullUpdate: true);
+            return requirePromo
+                ? BeginServerResult("Inventory GrantPromoItems", () => APIClient.AddInventoryPromoItems(defs), fullUpdate: true)
+                : BeginServerResult("Inventory GenerateItems", () => APIClient.GenerateInventoryItems(defs, qtys), fullUpdate: true);
         }
 
         public static int ConsumeItem(ulong itemId, uint quantity)
         {
-            if (!Enabled) return ResultInvalid;
-            InventoryItem snapshot = null;
-            EResult status = EResult.k_EResultFail;
-            lock (StoreLock)
-            {
-                if (Items.TryGetValue(itemId, out var item))
-                {
-                    if (quantity == 0 || quantity >= item.Quantity)
-                    {
-                        item.Quantity = 0;
-                        item.Flags |= (ushort)SteamItemFlags.Consumed;
-                        Items.Remove(itemId);
-                    }
-                    else
-                    {
-                        item.Quantity -= quantity;
-                    }
-                    snapshot = Clone(item);
-                    status = EResult.k_EResultOK;
-                }
-            }
-
-            if (status == EResult.k_EResultOK)
-            {
-                PersistItems();
-            }
-            return MakeResult(status, snapshot == null ? Array.Empty<InventoryItem>() : new[] { snapshot }, fullUpdate: status == EResult.k_EResultOK);
+            return BeginServerResult("Inventory ConsumeItem", () => APIClient.ConsumeInventoryItem(itemId, quantity), fullUpdate: true);
         }
 
         public static int TransferItemQuantity(ulong src, uint quantity, ulong dest)
         {
-            if (!Enabled) return ResultInvalid;
-            EResult status = EResult.k_EResultFail;
-            var affected = new List<InventoryItem>();
-            lock (StoreLock)
-            {
-                if (Items.TryGetValue(src, out var s) && s.Quantity >= quantity && quantity > 0)
-                {
-                    s.Quantity -= quantity;
-                    if (dest == ItemInstanceInvalid || !Items.TryGetValue(dest, out var d))
-                    {
-                        // New stack from the source definition.
-                        d = new InventoryItem
-                        {
-                            ItemId = NextItemId(),
-                            DefId = s.DefId,
-                            Quantity = 0,
-                            AcquiredUnix = NowUnix(),
-                            Properties = new Dictionary<string, string>(StringComparer.Ordinal),
-                        };
-                        Items[d.ItemId] = d;
-                    }
-
-                    if (d.DefId == s.DefId)
-                    {
-                        d.Quantity += quantity;
-                        if (s.Quantity == 0)
-                        {
-                            Items.Remove(src);
-                        }
-                        affected.Add(Clone(d));
-                        if (Items.ContainsKey(src))
-                        {
-                            affected.Add(Clone(s));
-                        }
-                        status = EResult.k_EResultOK;
-                    }
-                    else
-                    {
-                        s.Quantity += quantity; // rollback
-                    }
-                }
-            }
-
-            if (status == EResult.k_EResultOK)
-            {
-                PersistItems();
-            }
-            return MakeResult(status, affected.ToArray(), fullUpdate: status == EResult.k_EResultOK);
+            return BeginServerResult("Inventory TransferItemQuantity", () => APIClient.TransferInventoryItem(src, quantity, dest), fullUpdate: true);
         }
 
         public static int ExchangeItems(int[] genDefs, uint[] genQty, ulong[] destroyIds, uint[] destroyQty)
         {
-            if (!Enabled) return ResultInvalid;
-            EResult status = EResult.k_EResultFail;
-            var outItems = new List<InventoryItem>();
-            lock (StoreLock)
-            {
-                // Validate all destroy inputs are present with enough quantity.
-                bool ok = true;
-                if (destroyIds != null)
-                {
-                    for (int i = 0; i < destroyIds.Length; i++)
-                    {
-                        uint need = destroyQty != null && i < destroyQty.Length ? destroyQty[i] : 1u;
-                        if (!Items.TryGetValue(destroyIds[i], out var it) || it.Quantity < need)
-                        {
-                            ok = false;
-                            break;
-                        }
-                    }
-                }
-
-                if (ok)
-                {
-                    if (destroyIds != null)
-                    {
-                        for (int i = 0; i < destroyIds.Length; i++)
-                        {
-                            uint need = destroyQty != null && i < destroyQty.Length ? destroyQty[i] : 1u;
-                            var it = Items[destroyIds[i]];
-                            it.Quantity = need >= it.Quantity ? 0 : it.Quantity - need;
-                            if (it.Quantity == 0)
-                            {
-                                Items.Remove(destroyIds[i]);
-                            }
-                        }
-                    }
-
-                    if (genDefs != null)
-                    {
-                        for (int i = 0; i < genDefs.Length; i++)
-                        {
-                            uint qty = genQty != null && i < genQty.Length ? genQty[i] : 1u;
-                            var item = new InventoryItem
-                            {
-                                ItemId = NextItemId(),
-                                DefId = genDefs[i],
-                                Quantity = qty == 0 ? 1u : qty,
-                                AcquiredUnix = NowUnix(),
-                                Properties = new Dictionary<string, string>(StringComparer.Ordinal),
-                            };
-                            Items[item.ItemId] = item;
-                            outItems.Add(Clone(item));
-                        }
-                    }
-                    status = EResult.k_EResultOK;
-                }
-            }
-
-            if (status == EResult.k_EResultOK)
-            {
-                PersistItems();
-            }
-            return MakeResult(status, outItems.ToArray(), fullUpdate: status == EResult.k_EResultOK);
+            return BeginServerResult("Inventory ExchangeItems", () => APIClient.ExchangeInventoryItems(destroyIds, destroyQty, genDefs, genQty), fullUpdate: true);
         }
 
         public static int TriggerItemDrop(int dropListDef)
@@ -669,7 +353,6 @@ namespace SKYNET.Managers
                 }
             }
 
-            PersistItems();
             return MakeResult(EResult.k_EResultOK, affected.ToArray(), fullUpdate: true);
         }
 
@@ -682,7 +365,25 @@ namespace SKYNET.Managers
             {
                 try
                 {
-                    LoadDefinitionsFromDisk();
+                    var definitions = APIClient.GetInventoryDefinitions(_appId);
+                    if (definitions != null)
+                    {
+                        lock (StoreLock)
+                        {
+                            Definitions.Clear();
+                            foreach (var definition in definitions)
+                            {
+                                var raw = new Dictionary<string, string>(definition.Properties ?? new Dictionary<string, string>(), StringComparer.OrdinalIgnoreCase)
+                                {
+                                    ["name"] = definition.Name ?? string.Empty,
+                                    ["type"] = definition.Type ?? string.Empty,
+                                    ["tradable"] = definition.Tradable ? "1" : "0",
+                                    ["marketable"] = definition.Marketable ? "1" : "0"
+                                };
+                                Definitions[definition.DefId] = new ItemDefinition { DefId = definition.DefId, Raw = raw };
+                            }
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -815,39 +516,6 @@ namespace SKYNET.Managers
             });
         }
 
-        // ================= serialize / deserialize (HMAC-signed) =================
-
-        private static readonly byte[] SerializeMagic = { (byte)'S', (byte)'K', (byte)'I', (byte)'V' };
-        private const ushort SerializeVersion = 1;
-
-        private static void EnsureSecret()
-        {
-            try
-            {
-                if (File.Exists(SecretPath))
-                {
-                    _serializeSecret = File.ReadAllBytes(SecretPath);
-                    if (_serializeSecret != null && _serializeSecret.Length == 32)
-                    {
-                        return;
-                    }
-                }
-
-                _serializeSecret = new byte[32];
-                using (var rng = RandomNumberGenerator.Create())
-                {
-                    rng.GetBytes(_serializeSecret);
-                }
-                Common.EnsureDirectoryExists(SecretPath, true);
-                File.WriteAllBytes(SecretPath, _serializeSecret);
-            }
-            catch (Exception ex)
-            {
-                SteamEmulator.Write("InventoryManager", $"EnsureSecret error: {ex.Message}");
-                _serializeSecret = _serializeSecret ?? new byte[32];
-            }
-        }
-
         public static byte[] SerializeResult(int handle)
         {
             if (!Results.TryGetValue(handle, out var r))
@@ -859,30 +527,16 @@ namespace SKYNET.Managers
                 return r.SerializedBlob;
             }
 
-            using (var ms = new MemoryStream())
-            using (var w = new BinaryWriter(ms))
+            var response = APIClient.SerializeInventoryResult(r.Items.Select(item => item.ItemId).ToArray());
+            if (response == null || string.IsNullOrWhiteSpace(response.BlobBase64)) return null;
+            try
             {
-                w.Write(SerializeMagic);
-                w.Write(SerializeVersion);
-                w.Write(_appId);
-                w.Write(r.OwnerSteamID);
-                w.Write((ulong)r.TimestampUnix);
-                w.Write(r.Items.Length);
-                foreach (var it in r.Items)
-                {
-                    w.Write(it.ItemId);
-                    w.Write(it.DefId);
-                    w.Write((ushort)Math.Min(it.Quantity, ushort.MaxValue));
-                    w.Write(it.Flags);
-                }
-
-                var body = ms.ToArray();
-                var mac = ComputeHmac(body);
-                var blob = new byte[body.Length + mac.Length];
-                Buffer.BlockCopy(body, 0, blob, 0, body.Length);
-                Buffer.BlockCopy(mac, 0, blob, body.Length, mac.Length);
-                r.SerializedBlob = blob;
-                return blob;
+                r.SerializedBlob = Convert.FromBase64String(response.BlobBase64);
+                return r.SerializedBlob;
+            }
+            catch (FormatException)
+            {
+                return null;
             }
         }
 
@@ -898,104 +552,30 @@ namespace SKYNET.Managers
                 return ResultInvalid;
             }
 
+            if (blob == null || blob.Length == 0 || !APIClient.IsEnabled) return ResultInvalid;
             try
             {
-                if (blob == null || blob.Length < 4 + 2 + 4 + 8 + 8 + 4 + 32)
+                var response = APIClient.DeserializeInventoryResult(Convert.ToBase64String(blob));
+                if (response == null || !response.Success) return ResultInvalid;
+                var items = response.Items == null ? Array.Empty<InventoryItem>() : response.Items.Select(Map).ToArray();
+                var handle = NextResultHandle();
+                Results[handle] = new InventoryResult
                 {
-                    return ResultInvalid;
-                }
-
-                int macOffset = blob.Length - 32;
-                var body = new byte[macOffset];
-                Buffer.BlockCopy(blob, 0, body, 0, macOffset);
-                var mac = new byte[32];
-                Buffer.BlockCopy(blob, macOffset, mac, 0, 32);
-
-                var expected = ComputeHmac(body);
-                if (!ConstantTimeEquals(expected, mac))
-                {
-                    return ResultInvalid;
-                }
-
-                using (var ms = new MemoryStream(body))
-                using (var rd = new BinaryReader(ms))
-                {
-                    var magic = rd.ReadBytes(4);
-                    if (magic.Length != 4 || magic[0] != 'S' || magic[1] != 'K' || magic[2] != 'I' || magic[3] != 'V')
-                    {
-                        return ResultInvalid;
-                    }
-                    ushort ver = rd.ReadUInt16();
-                    if (ver != SerializeVersion)
-                    {
-                        return ResultInvalid;
-                    }
-                    uint appId = rd.ReadUInt32();
-                    if (appId != _appId)
-                    {
-                        return ResultInvalid;
-                    }
-                    ulong owner = rd.ReadUInt64();
-                    uint ts = (uint)rd.ReadUInt64();
-                    int count = rd.ReadInt32();
-                    if (count < 0 || count > 100000)
-                    {
-                        return ResultInvalid;
-                    }
-
-                    var items = new InventoryItem[count];
-                    for (int i = 0; i < count; i++)
-                    {
-                        items[i] = new InventoryItem
-                        {
-                            ItemId = rd.ReadUInt64(),
-                            DefId = rd.ReadInt32(),
-                            Quantity = rd.ReadUInt16(),
-                            Flags = rd.ReadUInt16(),
-                            Properties = new Dictionary<string, string>(StringComparer.Ordinal),
-                        };
-                    }
-
-                    int handle = NextResultHandle();
-                    Results[handle] = new InventoryResult
-                    {
-                        Handle = handle,
-                        Status = EResult.k_EResultOK,
-                        TimestampUnix = ts,
-                        OwnerSteamID = owner,
-                        Items = items,
-                    };
-                    CallbackManager.AddCallback(new SteamInventoryResultReady_t { Handle = handle, Result = EResult.k_EResultOK });
-                    return handle;
-                }
+                    Handle = handle,
+                    Status = EResult.k_EResultOK,
+                    TimestampUnix = response.TimestampUnix,
+                    OwnerSteamID = response.SteamId,
+                    Items = items,
+                    SerializedBlob = string.IsNullOrWhiteSpace(response.BlobBase64) ? blob : Convert.FromBase64String(response.BlobBase64)
+                };
+                CallbackManager.AddCallback(new SteamInventoryResultReady_t { Handle = handle, Result = EResult.k_EResultOK });
+                return handle;
             }
             catch (Exception ex)
             {
                 SteamEmulator.Write("InventoryManager", $"DeserializeResult error: {ex.Message}");
                 return ResultInvalid;
             }
-        }
-
-        private static byte[] ComputeHmac(byte[] body)
-        {
-            using (var hmac = new HMACSHA256(_serializeSecret ?? new byte[32]))
-            {
-                return hmac.ComputeHash(body);
-            }
-        }
-
-        private static bool ConstantTimeEquals(byte[] a, byte[] b)
-        {
-            if (a.Length != b.Length)
-            {
-                return false;
-            }
-            int diff = 0;
-            for (int i = 0; i < a.Length; i++)
-            {
-                diff |= a[i] ^ b[i];
-            }
-            return diff == 0;
         }
 
         // ================= helpers =================
@@ -1043,23 +623,6 @@ namespace SKYNET.Managers
             public bool Remove;
         }
 
-        // ================= persistence DTOs =================
-
-        public sealed class InventoryMetaDto
-        {
-            public long LastItemId { get; set; }
-            public int Version { get; set; }
-        }
-
-        public sealed class InventoryItemsDto
-        {
-            public List<InventoryItem> Items { get; set; }
-        }
-
-        public sealed class ItemDefinitionsDto
-        {
-            public List<ItemDefinition> Definitions { get; set; }
-        }
     }
 
     // ================= model =================

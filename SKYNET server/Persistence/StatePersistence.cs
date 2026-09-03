@@ -102,6 +102,20 @@ public static class StatePersistence
             }
         }
 
+        foreach (var item in state.Inventory.Values.GroupBy(item => item.ItemId).Select(group => group.Last()))
+        {
+            snapshot.Inventory.Add(new InventoryItemRecord
+            {
+                ItemId = item.ItemId,
+                DefId = item.DefId,
+                SteamId = item.SteamId,
+                AppId = item.AppId,
+                Quantity = item.Quantity,
+                Flags = item.Flags,
+                Properties = new Dictionary<string, string>(item.Properties ?? new())
+            });
+        }
+
         foreach (var account in state.WebAccounts.Values.GroupBy(a => a.Username).Select(g => g.Last()))
         {
             snapshot.WebAccounts.Add(new WebAccountRecord
@@ -340,6 +354,7 @@ public static class StatePersistence
             new("steam.Avatars", snapshot.Avatars, () => steam.Avatars.ExecuteDelete(), () => steam.Avatars.AddRange(snapshot.Avatars)),
             new("steam.Stats", snapshot.Stats, () => steam.Stats.ExecuteDelete(), () => steam.Stats.AddRange(snapshot.Stats)),
             new("steam.Achievements", snapshot.Achievements, () => steam.Achievements.ExecuteDelete(), () => steam.Achievements.AddRange(snapshot.Achievements)),
+            new("steam.InventoryItems", snapshot.Inventory, () => steam.InventoryItems.ExecuteDelete(), () => steam.InventoryItems.AddRange(snapshot.Inventory)),
             new("steam.WebAccounts", snapshot.WebAccounts, () => steam.WebAccounts.ExecuteDelete(), () => steam.WebAccounts.AddRange(snapshot.WebAccounts)),
             new("steam.WebSessions", snapshot.WebSessions, () => steam.WebSessions.ExecuteDelete(), () => steam.WebSessions.AddRange(snapshot.WebSessions)),
             new("steam.RemoteFiles", snapshot.RemoteFiles, () => steam.RemoteFiles.ExecuteDelete(), () => steam.RemoteFiles.AddRange(snapshot.RemoteFiles)),
@@ -466,6 +481,20 @@ public static class StatePersistence
                 Progress = a.Progress,
                 MaxProgress = a.MaxProgress,
             });
+        }
+
+        foreach (var item in steam.InventoryItems.AsNoTracking())
+        {
+            state.Inventory[item.ItemId] = new ApiInventoryItem
+            {
+                ItemId = item.ItemId,
+                DefId = item.DefId,
+                SteamId = item.SteamId,
+                AppId = item.AppId,
+                Quantity = item.Quantity,
+                Flags = item.Flags,
+                Properties = new Dictionary<string, string>(item.Properties ?? new())
+            };
         }
 
         foreach (var w in steam.WebAccounts.AsNoTracking())
@@ -776,6 +805,7 @@ public sealed class StateSnapshot
     public List<AvatarRecord> Avatars { get; } = new();
     public List<StatRecord> Stats { get; } = new();
     public List<AchievementRecord> Achievements { get; } = new();
+    public List<InventoryItemRecord> Inventory { get; } = new();
     public List<WebAccountRecord> WebAccounts { get; } = new();
     public List<WebSessionRecord> WebSessions { get; } = new();
     public List<GameServerRecord> GameServers { get; } = new();

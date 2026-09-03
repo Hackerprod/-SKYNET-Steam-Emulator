@@ -57,6 +57,17 @@ public class AchievementRecord
     public uint MaxProgress { get; set; }
 }
 
+public class InventoryItemRecord
+{
+    public ulong ItemId { get; set; }
+    public int DefId { get; set; }
+    public ulong SteamId { get; set; }
+    public uint AppId { get; set; }
+    public uint Quantity { get; set; }
+    public ushort Flags { get; set; }
+    public Dictionary<string, string> Properties { get; set; } = new();
+}
+
 public class LeaderboardRecord
 {
     public long Id { get; set; }

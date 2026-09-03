@@ -25,6 +25,7 @@ public sealed class SteamDbContext : DbContext
     public DbSet<AvatarRecord> Avatars => Set<AvatarRecord>();
     public DbSet<StatRecord> Stats => Set<StatRecord>();
     public DbSet<AchievementRecord> Achievements => Set<AchievementRecord>();
+    public DbSet<InventoryItemRecord> InventoryItems => Set<InventoryItemRecord>();
     public DbSet<LeaderboardRecord> Leaderboards => Set<LeaderboardRecord>();
     public DbSet<LeaderboardScoreRecord> LeaderboardScores => Set<LeaderboardScoreRecord>();
     public DbSet<WorkshopItemRecord> WorkshopItems => Set<WorkshopItemRecord>();
@@ -48,6 +49,13 @@ public sealed class SteamDbContext : DbContext
         modelBuilder.Entity<AvatarRecord>().HasKey(x => x.SteamId);
         modelBuilder.Entity<StatRecord>().HasKey(x => new { x.SteamId, x.Name });
         modelBuilder.Entity<AchievementRecord>().HasKey(x => new { x.SteamId, x.Name });
+        modelBuilder.Entity<InventoryItemRecord>(b =>
+        {
+            b.HasKey(x => x.ItemId);
+            b.Property(x => x.Properties).HasJsonConversion();
+            b.HasIndex(x => new { x.SteamId, x.AppId });
+            b.HasIndex(x => new { x.SteamId, x.AppId, x.DefId });
+        });
         modelBuilder.Entity<LeaderboardRecord>().HasKey(x => x.Id);
         modelBuilder.Entity<LeaderboardRecord>().Property(x => x.Id).ValueGeneratedOnAdd();
         modelBuilder.Entity<LeaderboardRecord>().HasIndex(x => new { x.AppId, x.Name }).IsUnique();

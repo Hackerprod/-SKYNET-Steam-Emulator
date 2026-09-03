@@ -43,6 +43,94 @@ public sealed class ApiStatDefinition
     public float DefaultFloat { get; set; }
 }
 
+public sealed class ApiInventoryItemDef
+{
+    public int DefId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
+    public bool Tradable { get; set; }
+    public bool Marketable { get; set; }
+    public Dictionary<string, string> Properties { get; set; } = new();
+}
+
+public sealed class ApiInventoryItem
+{
+    public ulong ItemId { get; set; }
+    public int DefId { get; set; }
+    public ulong SteamId { get; set; }
+    public uint AppId { get; set; }
+    public uint Quantity { get; set; }
+    public ushort Flags { get; set; }
+    public Dictionary<string, string> Properties { get; set; } = new();
+}
+
+public sealed class ApiInventoryGenerateRequest
+{
+    public List<int> DefIds { get; set; } = new();
+    public List<uint> Quantities { get; set; } = new();
+}
+
+public sealed class ApiInventoryPromoRequest
+{
+    public int? DefId { get; set; }
+    public List<int> DefIds { get; set; } = new();
+}
+
+public sealed class ApiInventoryConsumeRequest
+{
+    public ulong ItemId { get; set; }
+    public uint Quantity { get; set; }
+}
+
+public sealed class ApiInventoryTransferRequest
+{
+    public ulong SourceItemId { get; set; }
+    public uint Quantity { get; set; }
+    public ulong DestinationItemId { get; set; }
+}
+
+public sealed class ApiInventoryExchangeRequest
+{
+    public List<ulong> ItemsToConsume { get; set; } = new();
+    public List<uint> QuantitiesToConsume { get; set; } = new();
+    public List<int> DefIdsToGenerate { get; set; } = new();
+    public List<uint> QuantitiesToGenerate { get; set; } = new();
+}
+
+public sealed class ApiInventoryItemsRequest
+{
+    public List<ulong> ItemIds { get; set; } = new();
+}
+
+public sealed class ApiInventoryOperationResult
+{
+    public bool Success { get; set; }
+    public List<ApiInventoryItem> Items { get; set; } = new();
+    public uint TimestampUnix { get; set; }
+    public ulong OwnerSteamId { get; set; }
+    public string SerializedBlobBase64 { get; set; } = string.Empty;
+}
+
+public sealed class ApiInventorySerializedResult
+{
+    public string BlobBase64 { get; set; } = string.Empty;
+}
+
+public sealed class ApiInventoryDeserializeRequest
+{
+    public string BlobBase64 { get; set; } = string.Empty;
+}
+
+public sealed class ApiInventoryDeserializedResult
+{
+    public bool Success { get; set; }
+    public ulong SteamId { get; set; }
+    public uint AppId { get; set; }
+    public uint TimestampUnix { get; set; }
+    public List<ApiInventoryItem> Items { get; set; } = new();
+    public string BlobBase64 { get; set; } = string.Empty;
+}
+
 public sealed class ApiWorkshopItem
 {
     public ulong PublishedFileId { get; set; }
@@ -883,6 +971,7 @@ public sealed class ApiState
     public List<ApiFriendRequest> FriendRequests { get; set; } = new();
     public Dictionary<ulong, string> Avatars { get; set; } = new();
     public Dictionary<ulong, ApiStatsEnvelope> Stats { get; set; } = new();
+    public Dictionary<ulong, ApiInventoryItem> Inventory { get; set; } = new();
     public Dictionary<ulong, ApiLobby> Lobbies { get; set; } = new();
     public Dictionary<string, ApiRemoteStorageFile> Files { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public Dictionary<ulong, ApiRemoteStorageShareRecord> FileShares { get; set; } = new();

@@ -326,6 +326,72 @@ api.MapPut("/stats/me", (HttpRequest request, ApiStoreStatsRequest payload, Stea
         : Results.Unauthorized();
 });
 
+api.MapGet("/inventory/definitions", (uint appId, GameInventoryCatalogService catalog) => Results.Ok(catalog.Get(appId)));
+api.MapGet("/inventory/items", (HttpRequest request, SteamApiStateService state) =>
+{
+    var token = SteamApiStateService.GetBearerToken(request) ?? string.Empty;
+    var items = state.GetAllItems(token);
+    return state.IsValidToken(token) ? Results.Ok(state.GetInventoryOperationResult(token, items)) : Results.Unauthorized();
+});
+api.MapPost("/inventory/items/by-id", (HttpRequest request, ApiInventoryItemsRequest payload, SteamApiStateService state) =>
+{
+    var token = SteamApiStateService.GetBearerToken(request) ?? string.Empty;
+    var items = state.GetItemsByID(token, payload.ItemIds?.ToArray() ?? Array.Empty<ulong>());
+    return state.IsValidToken(token) ? Results.Ok(state.GetInventoryOperationResult(token, items)) : Results.Unauthorized();
+});
+api.MapPost("/inventory/generate", (HttpRequest request, ApiInventoryGenerateRequest payload, SteamApiStateService state) =>
+{
+    var token = SteamApiStateService.GetBearerToken(request) ?? string.Empty;
+    if (!state.IsValidToken(token)) return Results.Unauthorized();
+    var items = state.GenerateItems(token, payload.DefIds?.ToArray() ?? Array.Empty<int>(), payload.Quantities?.ToArray() ?? Array.Empty<uint>());
+    return items == null ? Results.BadRequest() : Results.Ok(state.GetInventoryOperationResult(token, items));
+});
+api.MapPost("/inventory/promo", (HttpRequest request, ApiInventoryPromoRequest payload, SteamApiStateService state) =>
+{
+    var token = SteamApiStateService.GetBearerToken(request) ?? string.Empty;
+    if (!state.IsValidToken(token)) return Results.Unauthorized();
+    var items = payload.DefIds != null && payload.DefIds.Count > 0
+        ? state.AddPromoItems(token, payload.DefIds.ToArray())
+        : state.AddPromoItem(token, payload.DefId);
+    return items == null ? Results.BadRequest() : Results.Ok(state.GetInventoryOperationResult(token, items));
+});
+api.MapPost("/inventory/consume", (HttpRequest request, ApiInventoryConsumeRequest payload, SteamApiStateService state) =>
+{
+    var token = SteamApiStateService.GetBearerToken(request) ?? string.Empty;
+    if (!state.IsValidToken(token)) return Results.Unauthorized();
+    var success = state.ConsumeItem(token, payload.ItemId, payload.Quantity);
+    var items = success ? state.GetInactiveInventoryItems(token, new[] { payload.ItemId }) : new List<ApiInventoryItem>();
+    var result = state.GetInventoryOperationResult(token, items);
+    if (result != null) result.Success = success;
+    return Results.Ok(result);
+});
+api.MapPost("/inventory/transfer", (HttpRequest request, ApiInventoryTransferRequest payload, SteamApiStateService state) =>
+{
+    var token = SteamApiStateService.GetBearerToken(request) ?? string.Empty;
+    if (!state.IsValidToken(token)) return Results.Unauthorized();
+    var items = state.TransferItem(token, payload.SourceItemId, payload.Quantity, payload.DestinationItemId);
+    return items == null ? Results.BadRequest() : Results.Ok(state.GetInventoryOperationResult(token, items));
+});
+api.MapPost("/inventory/exchange", (HttpRequest request, ApiInventoryExchangeRequest payload, SteamApiStateService state) =>
+{
+    var token = SteamApiStateService.GetBearerToken(request) ?? string.Empty;
+    if (!state.IsValidToken(token)) return Results.Unauthorized();
+    var items = state.ExchangeItem(token, payload.ItemsToConsume?.ToArray() ?? Array.Empty<ulong>(), payload.QuantitiesToConsume?.ToArray() ?? Array.Empty<uint>(), payload.DefIdsToGenerate?.ToArray() ?? Array.Empty<int>(), payload.QuantitiesToGenerate?.ToArray() ?? Array.Empty<uint>());
+    return items == null ? Results.BadRequest() : Results.Ok(state.GetInventoryOperationResult(token, items));
+});
+api.MapPost("/inventory/serialize", (HttpRequest request, ApiInventoryItemsRequest payload, SteamApiStateService state) =>
+{
+    var token = SteamApiStateService.GetBearerToken(request) ?? string.Empty;
+    var result = state.SerializeInventoryResult(token, payload.ItemIds?.ToArray() ?? Array.Empty<ulong>());
+    return result == null ? Results.BadRequest() : Results.Ok(result);
+});
+api.MapPost("/inventory/deserialize", (HttpRequest request, ApiInventoryDeserializeRequest payload, SteamApiStateService state) =>
+{
+    var token = SteamApiStateService.GetBearerToken(request) ?? string.Empty;
+    var result = state.DeserializeInventoryResult(token, payload.BlobBase64);
+    return result == null ? Results.BadRequest() : Results.Ok(result);
+});
+
 api.MapGet("/workshop/subscriptions", (HttpRequest request, SteamApiStateService state) =>
 {
     var result = state.GetWorkshopSubscriptions(SteamApiStateService.GetBearerToken(request) ?? string.Empty);

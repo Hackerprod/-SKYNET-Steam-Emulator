@@ -7,7 +7,7 @@ internal static class DatabaseSchemaMaintenance
 {
     private const string SteamComponent = "steam-core";
     private const string DotaComponent = "dota-core";
-    private const int SteamVersion = 3;
+    private const int SteamVersion = 4;
     private const int DotaVersion = 2;
 
     public static void EnsureCurrent(SteamDbContext steam, DotaDbContext dota)
@@ -23,6 +23,7 @@ internal static class DatabaseSchemaMaintenance
         {
             EnsureSteamLeaderboards(context);
             EnsureSteamWorkshop(context);
+            EnsureSteamInventory(context);
             SetVersion(context, SteamComponent, SteamVersion);
         }
     }
@@ -245,6 +246,29 @@ internal static class DatabaseSchemaMaintenance
         context.Database.ExecuteSqlRaw("""
             CREATE INDEX IF NOT EXISTS IX_WorkshopSubscriptions_PublishedFileId
             ON WorkshopSubscriptions (PublishedFileId);
+            """);
+    }
+
+    private static void EnsureSteamInventory(SteamDbContext context)
+    {
+        context.Database.ExecuteSqlRaw("""
+            CREATE TABLE IF NOT EXISTS InventoryItems (
+                ItemId INTEGER NOT NULL CONSTRAINT PK_InventoryItems PRIMARY KEY,
+                DefId INTEGER NOT NULL,
+                SteamId INTEGER NOT NULL,
+                AppId INTEGER NOT NULL,
+                Quantity INTEGER NOT NULL,
+                Flags INTEGER NOT NULL,
+                Properties TEXT NOT NULL
+            );
+            """);
+        context.Database.ExecuteSqlRaw("""
+            CREATE INDEX IF NOT EXISTS IX_InventoryItems_SteamId_AppId
+            ON InventoryItems (SteamId, AppId);
+            """);
+        context.Database.ExecuteSqlRaw("""
+            CREATE INDEX IF NOT EXISTS IX_InventoryItems_SteamId_AppId_DefId
+            ON InventoryItems (SteamId, AppId, DefId);
             """);
     }
 

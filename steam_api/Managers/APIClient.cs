@@ -1437,6 +1437,96 @@ namespace SKYNET.Managers
             return stored;
         }
 
+        public static List<ApiInventoryItemDef> GetInventoryDefinitions(uint appId)
+        {
+            if (!IsEnabled || appId == 0 || !EnsureSession()) return null;
+            return Send<List<ApiInventoryItemDef>>(HttpMethod.Get, $"api/inventory/definitions?appId={appId}");
+        }
+
+        public static SkyNetInventoryOperationResultDto GetInventoryItems()
+        {
+            if (!IsEnabled || !EnsureSession()) return null;
+            return Send<SkyNetInventoryOperationResultDto>(HttpMethod.Get, "api/inventory/items");
+        }
+
+        public static SkyNetInventoryOperationResultDto GetInventoryItemsById(ulong[] itemIds)
+        {
+            if (!IsEnabled || !EnsureSession()) return null;
+            return Send<SkyNetInventoryOperationResultDto>(HttpMethod.Post, "api/inventory/items/by-id", new SkyNetInventoryItemsRequestDto
+            {
+                ItemIds = itemIds == null ? new List<ulong>() : itemIds.ToList()
+            });
+        }
+
+        public static SkyNetInventoryOperationResultDto GenerateInventoryItems(int[] defIds, uint[] quantities)
+        {
+            if (!IsEnabled || !EnsureSession()) return null;
+            return Send<SkyNetInventoryOperationResultDto>(HttpMethod.Post, "api/inventory/generate", new SkyNetInventoryGenerateRequestDto
+            {
+                DefIds = defIds == null ? new List<int>() : defIds.ToList(),
+                Quantities = quantities == null ? new List<uint>() : quantities.ToList()
+            });
+        }
+
+        public static SkyNetInventoryOperationResultDto AddInventoryPromoItem(int? defId)
+        {
+            if (!IsEnabled || !EnsureSession()) return null;
+            return Send<SkyNetInventoryOperationResultDto>(HttpMethod.Post, "api/inventory/promo", new SkyNetInventoryPromoRequestDto { DefId = defId });
+        }
+
+        public static SkyNetInventoryOperationResultDto AddInventoryPromoItems(int[] defIds)
+        {
+            if (!IsEnabled || !EnsureSession()) return null;
+            return Send<SkyNetInventoryOperationResultDto>(HttpMethod.Post, "api/inventory/promo", new SkyNetInventoryPromoRequestDto
+            {
+                DefIds = defIds == null ? new List<int>() : defIds.ToList()
+            });
+        }
+
+        public static SkyNetInventoryOperationResultDto ConsumeInventoryItem(ulong itemId, uint quantity)
+        {
+            if (!IsEnabled || !EnsureSession()) return null;
+            return Send<SkyNetInventoryOperationResultDto>(HttpMethod.Post, "api/inventory/consume", new SkyNetInventoryConsumeRequestDto { ItemId = itemId, Quantity = quantity });
+        }
+
+        public static SkyNetInventoryOperationResultDto TransferInventoryItem(ulong sourceItemId, uint quantity, ulong destinationItemId)
+        {
+            if (!IsEnabled || !EnsureSession()) return null;
+            return Send<SkyNetInventoryOperationResultDto>(HttpMethod.Post, "api/inventory/transfer", new SkyNetInventoryTransferRequestDto
+            {
+                SourceItemId = sourceItemId,
+                Quantity = quantity,
+                DestinationItemId = destinationItemId
+            });
+        }
+
+        public static SkyNetInventoryOperationResultDto ExchangeInventoryItems(ulong[] itemIds, uint[] quantities, int[] defIds, uint[] generatedQuantities)
+        {
+            if (!IsEnabled || !EnsureSession()) return null;
+            return Send<SkyNetInventoryOperationResultDto>(HttpMethod.Post, "api/inventory/exchange", new SkyNetInventoryExchangeRequestDto
+            {
+                ItemsToConsume = itemIds == null ? new List<ulong>() : itemIds.ToList(),
+                QuantitiesToConsume = quantities == null ? new List<uint>() : quantities.ToList(),
+                DefIdsToGenerate = defIds == null ? new List<int>() : defIds.ToList(),
+                QuantitiesToGenerate = generatedQuantities == null ? new List<uint>() : generatedQuantities.ToList()
+            });
+        }
+
+        public static SkyNetInventorySerializedResultDto SerializeInventoryResult(ulong[] itemIds)
+        {
+            if (!IsEnabled || !EnsureSession()) return null;
+            return Send<SkyNetInventorySerializedResultDto>(HttpMethod.Post, "api/inventory/serialize", new SkyNetInventoryItemsRequestDto
+            {
+                ItemIds = itemIds == null ? new List<ulong>() : itemIds.ToList()
+            });
+        }
+
+        public static SkyNetInventoryDeserializedResultDto DeserializeInventoryResult(string blobBase64)
+        {
+            if (!IsEnabled || !EnsureSession() || string.IsNullOrWhiteSpace(blobBase64)) return null;
+            return Send<SkyNetInventoryDeserializedResultDto>(HttpMethod.Post, "api/inventory/deserialize", new SkyNetInventoryDeserializeRequestDto { BlobBase64 = blobBase64 });
+        }
+
         public static List<SkyNetWorkshopSubscriptionDto> GetWorkshopSubscriptions()
         {
             if (!IsEnabled || !EnsureSession())
@@ -2620,6 +2710,94 @@ namespace SKYNET.Managers
             public ulong SteamId { get; set; }
             public List<ApiStat> Stats { get; set; }
             public List<ApiAchievement> Achievements { get; set; }
+        }
+
+        public sealed class ApiInventoryItemDef
+        {
+            public int DefId { get; set; }
+            public string Name { get; set; }
+            public string Type { get; set; }
+            public bool Tradable { get; set; }
+            public bool Marketable { get; set; }
+            public Dictionary<string, string> Properties { get; set; }
+        }
+
+        public sealed class ApiInventoryItem
+        {
+            public ulong ItemId { get; set; }
+            public int DefId { get; set; }
+            public ulong SteamId { get; set; }
+            public uint AppId { get; set; }
+            public uint Quantity { get; set; }
+            public ushort Flags { get; set; }
+            public Dictionary<string, string> Properties { get; set; }
+        }
+
+        public sealed class SkyNetInventoryOperationResultDto
+        {
+            public bool Success { get; set; }
+            public List<ApiInventoryItem> Items { get; set; }
+            public uint TimestampUnix { get; set; }
+            public ulong OwnerSteamId { get; set; }
+            public string SerializedBlobBase64 { get; set; }
+        }
+
+        public sealed class SkyNetInventoryGenerateRequestDto
+        {
+            public List<int> DefIds { get; set; }
+            public List<uint> Quantities { get; set; }
+        }
+
+        public sealed class SkyNetInventoryPromoRequestDto
+        {
+            public int? DefId { get; set; }
+            public List<int> DefIds { get; set; }
+        }
+
+        public sealed class SkyNetInventoryConsumeRequestDto
+        {
+            public ulong ItemId { get; set; }
+            public uint Quantity { get; set; }
+        }
+
+        public sealed class SkyNetInventoryTransferRequestDto
+        {
+            public ulong SourceItemId { get; set; }
+            public uint Quantity { get; set; }
+            public ulong DestinationItemId { get; set; }
+        }
+
+        public sealed class SkyNetInventoryExchangeRequestDto
+        {
+            public List<ulong> ItemsToConsume { get; set; }
+            public List<uint> QuantitiesToConsume { get; set; }
+            public List<int> DefIdsToGenerate { get; set; }
+            public List<uint> QuantitiesToGenerate { get; set; }
+        }
+
+        public sealed class SkyNetInventoryItemsRequestDto
+        {
+            public List<ulong> ItemIds { get; set; }
+        }
+
+        public sealed class SkyNetInventorySerializedResultDto
+        {
+            public string BlobBase64 { get; set; }
+        }
+
+        public sealed class SkyNetInventoryDeserializeRequestDto
+        {
+            public string BlobBase64 { get; set; }
+        }
+
+        public sealed class SkyNetInventoryDeserializedResultDto
+        {
+            public bool Success { get; set; }
+            public ulong SteamId { get; set; }
+            public uint AppId { get; set; }
+            public uint TimestampUnix { get; set; }
+            public List<ApiInventoryItem> Items { get; set; }
+            public string BlobBase64 { get; set; }
         }
 
         public sealed class SkyNetGameServerPresenceUpdateDto
