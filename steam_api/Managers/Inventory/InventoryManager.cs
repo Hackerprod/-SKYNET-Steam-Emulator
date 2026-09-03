@@ -251,7 +251,7 @@ namespace SKYNET.Managers
             lock (StoreLock)
             {
                 copy = (defs ?? Array.Empty<int>())
-                    .Where(def => !Definitions.TryGetValue(def, out var definition) || IsPromoEligible(definition))
+                    .Where(def => !Definitions.TryGetValue(def, out var definition) || HasPromoRule(definition))
                     .ToArray();
             }
             if (copy.Length == 0)
@@ -407,6 +407,14 @@ namespace SKYNET.Managers
             }
         }
 
+        public static int[] GetEligiblePromoDefinitionIds()
+        {
+            lock (StoreLock)
+            {
+                return Definitions.Values.Where(IsManualPromo).Select(d => d.DefId).ToArray();
+            }
+        }
+
         public static bool TryGetDefinitionProperty(int def, string propertyName, out string value)
         {
             value = string.Empty;
@@ -501,7 +509,7 @@ namespace SKYNET.Managers
             int count;
             lock (StoreLock)
             {
-                count = Definitions.Values.Count(IsPromoEligible);
+                count = Definitions.Values.Count(IsManualPromo);
             }
             return CallbackManager.AddCallbackResult(new SteamInventoryEligiblePromoItemDefIDs_t
             {
@@ -571,7 +579,7 @@ namespace SKYNET.Managers
                     Items = items,
                     SerializedBlob = string.IsNullOrWhiteSpace(response.BlobBase64) ? blob : Convert.FromBase64String(response.BlobBase64)
                 };
-                CallbackManager.AddCallback(new SteamInventoryResultReady_t { Handle = handle, Result = EResult.k_EResultOK });
+                CallbackManager.AddCallback(new SteamInventoryResultReady_t { Handle = handle, Result = (EResult)response.Status });
                 return handle;
             }
             catch (Exception ex)
@@ -637,6 +645,13 @@ namespace SKYNET.Managers
         private static bool HasPromoRule(ItemDefinition definition)
         {
             return definition.Raw.TryGetValue("promo", out var value) && !string.IsNullOrWhiteSpace(value);
+        }
+
+        private static bool IsManualPromo(ItemDefinition definition)
+        {
+            if (!HasPromoRule(definition)) return false;
+            return definition.Raw["promo"].Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
+                .Any(rule => rule.Trim().Equals("manual", StringComparison.OrdinalIgnoreCase));
         }
 
         // ================= nested state =================

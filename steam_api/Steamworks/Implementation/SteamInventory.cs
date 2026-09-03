@@ -304,7 +304,7 @@ namespace SKYNET.Steamworks.Implementation
         public bool GetEligiblePromoItemDefinitionIDs(ulong steamID, IntPtr pItemDefIDs, IntPtr punItemDefIDsArraySize)
         {
             EnsureInit();
-            return WriteInt32ArrayOut(InventoryManager.GetPromoDefinitionIds(), pItemDefIDs, punItemDefIDsArraySize);
+            return WriteInt32ArrayOut(InventoryManager.GetEligiblePromoDefinitionIds(), pItemDefIDs, punItemDefIDsArraySize);
         }
 
         // ===================== prices =====================

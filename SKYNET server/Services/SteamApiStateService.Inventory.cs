@@ -75,7 +75,7 @@ public sealed partial class SteamApiStateService
         {
             if (!TryGetInventorySessionLocked(token, out var session, out var appId)) return new List<ApiInventoryItem>();
             var definitions = _inventoryCatalog.Get(appId);
-            var ids = defId.HasValue ? new[] { defId.Value } : definitions.Where(IsAutoPromo).Select(item => item.DefId).ToArray();
+            var ids = defId.HasValue ? new[] { defId.Value } : definitions.Where(definition => IsAutoPromo(definition, session!.SteamId, appId)).Select(item => item.DefId).ToArray();
             var granted = GrantInventoryDefinitionsLocked(session!.SteamId, appId, ids, null, requirePromo: true);
             SaveState();
             return granted;
@@ -175,7 +175,7 @@ public sealed partial class SteamApiStateService
             }
             if (defIds == null || defIds.Length != 1 || generatedQuantities == null ||
                 generatedQuantities.Length != 1 || generatedQuantities[0] != 1) return null;
-            if (!CanGrantInventoryDefinitionsLocked(appId, defIds, generatedQuantities, requirePromo: false)) return null;
+            if (!CanGrantInventoryDefinitionsLocked(session!.SteamId, appId, defIds, generatedQuantities, requirePromo: false)) return null;
             var outputDefinition = _inventoryCatalog.Get(appId).FirstOrDefault(definition => definition.DefId == defIds[0]);
             if (outputDefinition == null || !TryGetExchangeRecipes(outputDefinition, out var recipes)) return null;
             var suppliedRecipe = new Dictionary<int, uint>();
@@ -196,15 +196,18 @@ public sealed partial class SteamApiStateService
                 }
             }
             if (!recipes.Any(recipe => RecipesMatch(recipe, suppliedRecipe))) return null;
+            var changed = new List<ApiInventoryItem>(required.Count + 1);
             foreach (var pair in required)
             {
                 var item = _state.Inventory[pair.Key];
                 item.Quantity -= pair.Value;
                 if (item.Quantity == 0) item.Flags |= InventoryConsumedFlag;
+                changed.Add(CloneInventoryItem(item));
             }
             var generated = GrantInventoryDefinitionsLocked(session!.SteamId, appId, defIds, generatedQuantities, requirePromo: false)!;
+            changed.AddRange(generated);
             SaveState();
-            return generated;
+            return changed;
         }
     }
 
@@ -326,7 +329,7 @@ public sealed partial class SteamApiStateService
     private List<ApiInventoryItem>? GrantInventoryDefinitionsLocked(ulong steamId, uint appId, IEnumerable<int>? defIds, IReadOnlyList<uint>? quantities, bool requirePromo)
     {
         var ids = (defIds ?? Array.Empty<int>()).ToArray();
-        if (!CanGrantInventoryDefinitionsLocked(appId, ids, quantities, requirePromo)) return null;
+        if (!CanGrantInventoryDefinitionsLocked(steamId, appId, ids, quantities, requirePromo)) return null;
 
         var generated = new List<ApiInventoryItem>(ids.Length);
         for (var i = 0; i < ids.Length; i++)
@@ -340,28 +343,65 @@ public sealed partial class SteamApiStateService
         return generated;
     }
 
-    private bool CanGrantInventoryDefinitionsLocked(uint appId, IEnumerable<int>? defIds, IReadOnlyList<uint>? quantities, bool requirePromo)
+    private bool CanGrantInventoryDefinitionsLocked(ulong steamId, uint appId, IEnumerable<int>? defIds, IReadOnlyList<uint>? quantities, bool requirePromo)
     {
         var ids = (defIds ?? Array.Empty<int>()).ToArray();
         if (quantities != null && quantities.Count != ids.Length) return false;
         var definitions = _inventoryCatalog.Get(appId).ToDictionary(item => item.DefId);
         for (var i = 0; i < ids.Length; i++)
         {
-            if (!definitions.TryGetValue(ids[i], out var definition) || (requirePromo && !IsPromo(definition))) return false;
+            if (!definitions.TryGetValue(ids[i], out var definition) || (requirePromo && !IsPromo(definition, steamId, appId))) return false;
             if (quantities != null && quantities[i] == 0) return false;
         }
         return true;
     }
 
-    private static bool IsPromo(ApiInventoryItemDef definition) => definition.Properties.TryGetValue("promo", out var value) &&
-        (value == "1" || value.Equals("true", StringComparison.OrdinalIgnoreCase) || value.Equals("yes", StringComparison.OrdinalIgnoreCase) ||
-         value.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Any(rule =>
-             rule.Trim().Equals("manual", StringComparison.OrdinalIgnoreCase) ||
-             rule.Trim().StartsWith("owns:", StringComparison.OrdinalIgnoreCase) ||
-             rule.Trim().StartsWith("ach:", StringComparison.OrdinalIgnoreCase) ||
-              rule.Trim().StartsWith("played:", StringComparison.OrdinalIgnoreCase)));
+    private bool IsPromo(ApiInventoryItemDef definition, ulong steamId, uint appId)
+    {
+        if (!definition.Properties.TryGetValue("promo", out var value) || string.IsNullOrWhiteSpace(value)) return false;
 
-    private static bool IsAutoPromo(ApiInventoryItemDef definition) => IsPromo(definition) &&
+        var rules = value.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(rule => rule.Trim()).ToArray();
+        var achievementRules = rules
+            .Where(rule => rule.StartsWith("ach:", StringComparison.OrdinalIgnoreCase))
+            .Select(rule => rule.Substring("ach:".Length).Trim())
+            .Where(name => name.Length > 0)
+            .ToArray();
+        if (achievementRules.Length > 0 && !achievementRules.Any(name => IsAchievementUnlockedLocked(steamId, appId, name)))
+        {
+            return false;
+        }
+
+        if (rules.Any(rule => rule == "1" || rule.Equals("true", StringComparison.OrdinalIgnoreCase) || rule.Equals("yes", StringComparison.OrdinalIgnoreCase)))
+        {
+            return true;
+        }
+
+        var ownershipRules = rules
+            .Where(rule => rule.StartsWith("owns:", StringComparison.OrdinalIgnoreCase))
+            .Select(rule => rule.Substring("owns:".Length).Trim())
+            .ToArray();
+        if (ownershipRules.Length == 0)
+        {
+            return rules.Any(rule => rule.Equals("manual", StringComparison.OrdinalIgnoreCase) ||
+                rule.StartsWith("ach:", StringComparison.OrdinalIgnoreCase) ||
+                rule.StartsWith("played:", StringComparison.OrdinalIgnoreCase));
+        }
+
+        return ownershipRules.Any(ownedAppId => uint.TryParse(ownedAppId, out _));
+    }
+
+    private bool IsAchievementUnlockedLocked(ulong steamId, uint appId, string apiName)
+    {
+        // steam.db stores achievement state by SteamID; the inventory session's
+        // AppID identifies which game's catalog/rules requested this check.
+        _ = appId;
+        return _state.Stats.TryGetValue(steamId, out var stats) &&
+            stats.Achievements.Any(achievement => achievement.Earned &&
+                achievement.Name.Equals(apiName, StringComparison.Ordinal));
+    }
+
+    private bool IsAutoPromo(ApiInventoryItemDef definition, ulong steamId, uint appId) => IsPromo(definition, steamId, appId) &&
         (!definition.Properties.TryGetValue("promo", out var value) ||
          !value.Split(';', StringSplitOptions.RemoveEmptyEntries)
              .Any(rule => rule.Trim().Equals("manual", StringComparison.OrdinalIgnoreCase)));
