@@ -86,8 +86,14 @@ public sealed class GameLauncher
         try
         {
             var workDir = string.IsNullOrWhiteSpace(game.ExeFolder) ? Path.GetDirectoryName(game.ExecutablePath)! : game.ExeFolder;
-            var insecureArg = !game.Ini.SecureNetworking &&
-                !ContainsArgument(game.LaunchArguments, "-insecure") &&
+            // Always insecure, regardless of the SecureNetworking game setting: that
+            // flag only gates the SDR CA certificate patch (steam_api's own concern),
+            // it has nothing to do with VAC. SteamGameServer.ShouldReportSecure() is
+            // hardcoded to false server-side - the emulator can never produce a valid
+            // VAC session - so a game launched without -insecure just ends up
+            // expecting a secure host that will never arrive, which is the
+            // "-insecure"/secure-host mismatch reported in game #21.
+            var insecureArg = !ContainsArgument(game.LaunchArguments, "-insecure") &&
                 !ContainsArgument(extraArgs, "-insecure")
                     ? "-insecure"
                     : null;
