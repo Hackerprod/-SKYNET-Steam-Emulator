@@ -11,17 +11,17 @@ namespace SKYNET.Managers
     public static class StatDefinitionManager
     {
         private static readonly object Gate = new object();
-        private static readonly Dictionary<string, APIClient.SkyNetStatDefinitionDto> Definitions =
-            new Dictionary<string, APIClient.SkyNetStatDefinitionDto>(StringComparer.Ordinal);
+        private static readonly Dictionary<string, APIClient.StatDefinitionDto> Definitions =
+            new Dictionary<string, APIClient.StatDefinitionDto>(StringComparer.Ordinal);
 
         public static void Apply(
             uint appId,
-            IEnumerable<APIClient.SkyNetStatDefinitionDto> definitions)
+            IEnumerable<APIClient.StatDefinitionDto> definitions)
         {
             lock (Gate)
             {
                 Definitions.Clear();
-                foreach (var definition in definitions ?? Enumerable.Empty<APIClient.SkyNetStatDefinitionDto>())
+                foreach (var definition in definitions ?? Enumerable.Empty<APIClient.StatDefinitionDto>())
                 {
                     var name = definition?.Name?.Trim();
                     if (!string.IsNullOrEmpty(name))

@@ -90,7 +90,7 @@ namespace SKYNET.Managers
             return h;
         }
 
-        private static int BeginServerResult(string name, Func<APIClient.SkyNetInventoryOperationResultDto> operation, bool fullUpdate)
+        private static int BeginServerResult(string name, Func<APIClient.InventoryOperationResultDto> operation, bool fullUpdate)
         {
             if (!Enabled || !APIClient.IsEnabled || operation == null) return ResultInvalid;
             var handle = NextResultHandle();
@@ -105,7 +105,7 @@ namespace SKYNET.Managers
 
             if (!WorkQueue.Enqueue(name, () =>
             {
-                APIClient.SkyNetInventoryOperationResultDto response = null;
+                APIClient.InventoryOperationResultDto response = null;
                 try { response = operation(); }
                 catch (Exception ex) { SteamEmulator.Write("InventoryManager", $"{name} error: {ex.Message}"); }
                 CompleteServerResult(handle, response, fullUpdate);
@@ -117,7 +117,7 @@ namespace SKYNET.Managers
             return handle;
         }
 
-        private static void CompleteServerResult(int handle, APIClient.SkyNetInventoryOperationResultDto response, bool fullUpdate)
+        private static void CompleteServerResult(int handle, APIClient.InventoryOperationResultDto response, bool fullUpdate)
         {
             if (!Results.TryGetValue(handle, out var result)) return;
             var success = response != null && response.Success;

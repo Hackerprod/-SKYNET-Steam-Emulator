@@ -16,8 +16,8 @@ namespace SKYNET.Managers
     public static class AchievementDefinitionManager
     {
         private static readonly object Gate = new object();
-        private static readonly Dictionary<string, APIClient.SkyNetAchievementDefinitionDto> Definitions =
-            new Dictionary<string, APIClient.SkyNetAchievementDefinitionDto>(StringComparer.Ordinal);
+        private static readonly Dictionary<string, APIClient.AchievementDefinitionDto> Definitions =
+            new Dictionary<string, APIClient.AchievementDefinitionDto>(StringComparer.Ordinal);
         private static readonly List<string> OrderedNames = new List<string>();
         private static readonly Dictionary<string, int> IconHandles =
             new Dictionary<string, int>(StringComparer.Ordinal);
@@ -25,7 +25,7 @@ namespace SKYNET.Managers
 
         public static void Apply(
             uint appId,
-            IEnumerable<APIClient.SkyNetAchievementDefinitionDto> definitions)
+            IEnumerable<APIClient.AchievementDefinitionDto> definitions)
         {
             lock (Gate)
             {
@@ -34,7 +34,7 @@ namespace SKYNET.Managers
                 OrderedNames.Clear();
                 IconHandles.Clear();
 
-                foreach (var definition in definitions ?? Enumerable.Empty<APIClient.SkyNetAchievementDefinitionDto>())
+                foreach (var definition in definitions ?? Enumerable.Empty<APIClient.AchievementDefinitionDto>())
                 {
                     var apiName = definition?.ApiName?.Trim();
                     if (string.IsNullOrEmpty(apiName))

@@ -32,7 +32,7 @@ namespace SKYNET.Managers
         private static readonly ConcurrentDictionary<string, string> PendingPresence = new ConcurrentDictionary<string, string>();
         private static readonly AutoResetEvent PresenceSignal = new AutoResetEvent(false);
         private static int PresenceDispatcherStarted;
-        private static SkyNetGameServerPresenceUpdateDto PendingGameServerPresence;
+        private static GameServerPresenceUpdateDto PendingGameServerPresence;
 
         // SteamAPI_Init is allowed to perform a bounded client bootstrap. Reuse
         // the operator-configured HTTP timeout rather than introducing a second,
@@ -43,7 +43,7 @@ namespace SKYNET.Managers
         // thread without blocking; the handshake that sets it runs in background.
         public static bool IsConnected => IsEnabled && !string.IsNullOrWhiteSpace(SteamEmulator.AccessToken);
         private const int MaxP2PQueue = 2048;
-        private static readonly ConcurrentQueue<SkyNetP2PPacketSendDto> P2PQueue = new ConcurrentQueue<SkyNetP2PPacketSendDto>();
+        private static readonly ConcurrentQueue<P2PPacketSendDto> P2PQueue = new ConcurrentQueue<P2PPacketSendDto>();
         private static readonly AutoResetEvent P2PQueueSignal = new AutoResetEvent(false);
         private const int MinimumGcExchangeTimeoutMs = 30000;
         private static int P2PQueueCount;
@@ -240,7 +240,7 @@ namespace SKYNET.Managers
                 return true;
             }
 
-            var request = new SkyNetSessionRequestDto
+            var request = new SessionRequestDto
             {
                 AccountId = SteamEmulator.SteamID.GetAccountID(),
                 SteamId = (ulong)SteamEmulator.SteamID,
@@ -252,7 +252,7 @@ namespace SKYNET.Managers
             };
 
             HttpStatusCode? sc;
-            var session = Send<SkyNetSessionDto>(HttpMethod.Post, "api/auth/steam/session", request, out sc, timeoutMs: timeoutMs);
+            var session = Send<SessionDto>(HttpMethod.Post, "api/auth/steam/session", request, out sc, timeoutMs: timeoutMs);
             if (session == null)
             {
                 return false;
@@ -556,7 +556,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            var ok = Send<VoidDto>(HttpMethod.Post, "api/friends/request", new SkyNetFriendActionRequestDto
+            var ok = Send<VoidDto>(HttpMethod.Post, "api/friends/request", new FriendActionRequestDto
             {
                 SteamId = steamId
             }) != null;
@@ -621,29 +621,29 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            var response = Send<List<SkyNetLobbyDto>>(HttpMethod.Post, "api/lobbies/query", new SkyNetLobbyQueryRequestDto
+            var response = Send<List<LobbyDto>>(HttpMethod.Post, "api/lobbies/query", new LobbyQueryRequestDto
             {
                 AppId = appId,
                 Distance = filter?.Distance ?? 0,
                 SlotsAvailable = filter?.SlotsAvailable ?? 0,
                 ResultCount = filter?.ResultCount ?? 0,
-                NumericalFilters = filter?.NumericalFilters?.Select(item => new SkyNetLobbyNumericalFilterDto
+                NumericalFilters = filter?.NumericalFilters?.Select(item => new LobbyNumericalFilterDto
                 {
                     KeyToMatch = item.KeyToMatch,
                     ValueToMatch = item.ValueToMatch,
                     ComparisonType = (int)item.ComparisonType
-                }).ToList() ?? new List<SkyNetLobbyNumericalFilterDto>(),
-                StringFilters = filter?.StringFilters?.Select(item => new SkyNetLobbyStringFilterDto
+                }).ToList() ?? new List<LobbyNumericalFilterDto>(),
+                StringFilters = filter?.StringFilters?.Select(item => new LobbyStringFilterDto
                 {
                     KeyToMatch = item.KeyToMatch,
                     ValueToMatch = item.ValueToMatch,
                     ComparisonType = (int)item.ComparisonType
-                }).ToList() ?? new List<SkyNetLobbyStringFilterDto>(),
-                NearValueFilters = filter?.NearValueFilters?.Select(item => new SkyNetLobbyNearValueFilterDto
+                }).ToList() ?? new List<LobbyStringFilterDto>(),
+                NearValueFilters = filter?.NearValueFilters?.Select(item => new LobbyNearValueFilterDto
                 {
                     KeyToMatch = item.KeyToMatch,
                     ValueToBeCloseTo = item.ValueToBeCloseTo
-                }).ToList() ?? new List<SkyNetLobbyNearValueFilterDto>()
+                }).ToList() ?? new List<LobbyNearValueFilterDto>()
             });
 
             return response == null ? null : MapLobbies(response);
@@ -657,7 +657,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            var response = Send<SkyNetLobbyDto>(HttpMethod.Post, "api/lobbies", new SkyNetCreateLobbyRequestDto
+            var response = Send<LobbyDto>(HttpMethod.Post, "api/lobbies", new CreateLobbyRequestDto
             {
                 AppId = appId,
                 LobbyType = lobbyType,
@@ -676,7 +676,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            var response = Send<SkyNetLobbyDto>(HttpMethod.Post, $"api/lobbies/{lobbyId}/join");
+            var response = Send<LobbyDto>(HttpMethod.Post, $"api/lobbies/{lobbyId}/join");
             return MapLobby(response);
         }
 
@@ -688,7 +688,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            return Send<VoidDto>(HttpMethod.Post, $"api/lobbies/{lobbyId}/invites", new SkyNetLobbyInviteRequestDto
+            return Send<VoidDto>(HttpMethod.Post, $"api/lobbies/{lobbyId}/invites", new LobbyInviteRequestDto
             {
                 InviteeSteamId = inviteeSteamId
             }) != null;
@@ -702,7 +702,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            return Send<VoidDto>(HttpMethod.Post, "api/game-invites", new SkyNetGameInviteRequestDto
+            return Send<VoidDto>(HttpMethod.Post, "api/game-invites", new GameInviteRequestDto
             {
                 InviteeSteamId = inviteeSteamId,
                 ConnectString = connectString
@@ -728,7 +728,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            var response = Send<SkyNetLobbyDto>(HttpMethod.Get, $"api/lobbies/{lobbyId}");
+            var response = Send<LobbyDto>(HttpMethod.Get, $"api/lobbies/{lobbyId}");
             return MapLobby(response);
         }
 
@@ -740,7 +740,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            return Send<VoidDto>(HttpMethod.Put, $"api/lobbies/{lobbyId}/data", new SkyNetLobbyDataUpdateRequestDto
+            return Send<VoidDto>(HttpMethod.Put, $"api/lobbies/{lobbyId}/data", new LobbyDataUpdateRequestDto
             {
                 Key = key,
                 Value = value
@@ -758,7 +758,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            return Send<VoidDto>(HttpMethod.Post, $"api/lobbies/{lobbyId}/chat", new SkyNetLobbyChatRequestDto
+            return Send<VoidDto>(HttpMethod.Post, $"api/lobbies/{lobbyId}/chat", new LobbyChatRequestDto
             {
                 MessageBase64 = Convert.ToBase64String(body ?? Array.Empty<byte>())
             }) != null;
@@ -772,7 +772,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            return Send<VoidDto>(HttpMethod.Post, $"api/lobbies/{lobbyId}/data/delete", new SkyNetLobbyDeleteDataRequestDto
+            return Send<VoidDto>(HttpMethod.Post, $"api/lobbies/{lobbyId}/data/delete", new LobbyDeleteDataRequestDto
             {
                 Key = key
             }) != null;
@@ -780,7 +780,7 @@ namespace SKYNET.Managers
 
         public static bool SetLobbyJoinable(ulong lobbyId, bool joinable)
         {
-            return UpdateLobbySettings(lobbyId, new SkyNetLobbySettingsUpdateRequestDto
+            return UpdateLobbySettings(lobbyId, new LobbySettingsUpdateRequestDto
             {
                 Joinable = joinable
             });
@@ -788,7 +788,7 @@ namespace SKYNET.Managers
 
         public static bool SetLobbyType(ulong lobbyId, int lobbyType)
         {
-            return UpdateLobbySettings(lobbyId, new SkyNetLobbySettingsUpdateRequestDto
+            return UpdateLobbySettings(lobbyId, new LobbySettingsUpdateRequestDto
             {
                 LobbyType = lobbyType
             });
@@ -796,7 +796,7 @@ namespace SKYNET.Managers
 
         public static bool SetLobbyOwner(ulong lobbyId, ulong ownerSteamId)
         {
-            return UpdateLobbySettings(lobbyId, new SkyNetLobbySettingsUpdateRequestDto
+            return UpdateLobbySettings(lobbyId, new LobbySettingsUpdateRequestDto
             {
                 OwnerSteamId = ownerSteamId
             });
@@ -804,7 +804,7 @@ namespace SKYNET.Managers
 
         public static bool SetLobbyMemberLimit(ulong lobbyId, int maxMembers)
         {
-            return UpdateLobbySettings(lobbyId, new SkyNetLobbySettingsUpdateRequestDto
+            return UpdateLobbySettings(lobbyId, new LobbySettingsUpdateRequestDto
             {
                 MaxMembers = maxMembers
             });
@@ -818,7 +818,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            return Send<VoidDto>(HttpMethod.Put, $"api/lobbies/{lobbyId}/member-data", new SkyNetLobbyDataUpdateRequestDto
+            return Send<VoidDto>(HttpMethod.Put, $"api/lobbies/{lobbyId}/member-data", new LobbyDataUpdateRequestDto
             {
                 Key = key,
                 Value = value
@@ -833,7 +833,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            return Send<VoidDto>(HttpMethod.Put, $"api/lobbies/{lobbyId}/gameserver", new SkyNetLobbyGameServerUpdateRequestDto
+            return Send<VoidDto>(HttpMethod.Put, $"api/lobbies/{lobbyId}/gameserver", new LobbyGameServerUpdateRequestDto
             {
                 IP = ip,
                 Port = port,
@@ -951,7 +951,7 @@ namespace SKYNET.Managers
                 return false;
             }
 
-            return Send<VoidDto>(HttpMethod.Post, "api/storage/files/delete", new SkyNetRemoteStorageDeleteRequestDto
+            return Send<VoidDto>(HttpMethod.Post, "api/storage/files/delete", new RemoteStorageDeleteRequestDto
             {
                 FileName = fileName
             }) != null;
@@ -969,7 +969,7 @@ namespace SKYNET.Managers
                 return null;
             }
 
-            return Send<ApiRemoteStorageShare>(HttpMethod.Post, "api/storage/files/share", new SkyNetRemoteStorageDeleteRequestDto
+            return Send<ApiRemoteStorageShare>(HttpMethod.Post, "api/storage/files/share", new RemoteStorageDeleteRequestDto
             {
                 FileName = fileName
             });
@@ -990,7 +990,7 @@ namespace SKYNET.Managers
             return Send<ApiRemoteStorageQuota>(HttpMethod.Get, "api/storage/quota");
         }
 
-        public static SkyNetAuthTicketDto CreateAuthSessionTicket(bool gameServer, int cbMaxTicket)
+        public static AuthTicketDto CreateAuthSessionTicket(bool gameServer, int cbMaxTicket)
         {
             if (!IsEnabled)
             {
@@ -998,7 +998,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            return Send<SkyNetAuthTicketDto>(HttpMethod.Post, "api/auth/tickets/session", new SkyNetAuthTicketRequestDto
+            return Send<AuthTicketDto>(HttpMethod.Post, "api/auth/tickets/session", new AuthTicketRequestDto
             {
                 AppId = SteamEmulator.InternalAppId,
                 SteamId = (ulong)(gameServer ? SteamEmulator.SteamID_GS : SteamEmulator.SteamID),
@@ -1007,24 +1007,24 @@ namespace SKYNET.Managers
             });
         }
 
-        public static SkyNetEncryptedAppTicketDto RequestEncryptedAppTicket(byte[] userData)
+        public static EncryptedAppTicketDto RequestEncryptedAppTicket(byte[] userData)
         {
             if (!IsEnabled || !EnsureSession())
             {
                 return null;
             }
 
-            return Send<SkyNetEncryptedAppTicketDto>(
+            return Send<EncryptedAppTicketDto>(
                 HttpMethod.Post,
                 "api/auth/tickets/encrypted",
-                new SkyNetEncryptedAppTicketRequestDto
+                new EncryptedAppTicketRequestDto
                 {
                     AppId = SteamEmulator.InternalAppId,
                     UserDataBase64 = Convert.ToBase64String(userData ?? Array.Empty<byte>())
                 });
         }
 
-        public static SkyNetAuthValidateResultDto ValidateAuthSessionTicket(byte[] ticket, ulong steamId, bool gameServer)
+        public static AuthValidateResultDto ValidateAuthSessionTicket(byte[] ticket, ulong steamId, bool gameServer)
         {
             if (!IsEnabled)
             {
@@ -1032,7 +1032,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            return Send<SkyNetAuthValidateResultDto>(HttpMethod.Post, "api/auth/tickets/validate", new SkyNetAuthValidateRequestDto
+            return Send<AuthValidateResultDto>(HttpMethod.Post, "api/auth/tickets/validate", new AuthValidateRequestDto
             {
                 SteamId = steamId,
                 TicketBase64 = Convert.ToBase64String(ticket ?? new byte[0]),
@@ -1041,7 +1041,7 @@ namespace SKYNET.Managers
             });
         }
 
-        public static SkyNetConnectAuthResultDto ConnectAndAuthenticate(uint ipClient, byte[] authBlob, ulong steamId)
+        public static ConnectAuthResultDto ConnectAndAuthenticate(uint ipClient, byte[] authBlob, ulong steamId)
         {
             if (!IsEnabled)
             {
@@ -1049,7 +1049,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            return Send<SkyNetConnectAuthResultDto>(HttpMethod.Post, "api/gameservers/users/connect", new SkyNetConnectAuthRequestDto
+            return Send<ConnectAuthResultDto>(HttpMethod.Post, "api/gameservers/users/connect", new ConnectAuthRequestDto
             {
                 IpClient = ipClient,
                 SteamId = steamId,
@@ -1066,7 +1066,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            return Send<VoidDto>(HttpMethod.Post, "api/auth/tickets/end-session", new SkyNetAuthEndSessionRequestDto
+            return Send<VoidDto>(HttpMethod.Post, "api/auth/tickets/end-session", new AuthEndSessionRequestDto
             {
                 SteamId = steamId,
                 GameServer = gameServer
@@ -1081,7 +1081,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            return Send<VoidDto>(HttpMethod.Post, "api/auth/tickets/cancel", new SkyNetCancelAuthTicketRequestDto
+            return Send<VoidDto>(HttpMethod.Post, "api/auth/tickets/cancel", new CancelAuthTicketRequestDto
             {
                 Handle = handle,
                 GameServer = gameServer
@@ -1096,7 +1096,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            return Send<ApiGameServerResult>(HttpMethod.Post, "api/gameservers/register", new SkyNetGameServerStateDto
+            return Send<ApiGameServerResult>(HttpMethod.Post, "api/gameservers/register", new GameServerStateDto
             {
                 Server = MapGameServer(server),
                 Anonymous = false
@@ -1111,7 +1111,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            return Send<ApiGameServerResult>(HttpMethod.Post, "api/gameservers/logon", new SkyNetGameServerStateDto
+            return Send<ApiGameServerResult>(HttpMethod.Post, "api/gameservers/logon", new GameServerStateDto
             {
                 Server = MapGameServer(server),
                 Token = token,
@@ -1160,7 +1160,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            var servers = Send<List<SkyNetGameServerDto>>(
+            var servers = Send<List<GameServerDto>>(
                 HttpMethod.Get,
                 $"api/gameservers?appId={appId}");
             return servers == null
@@ -1176,7 +1176,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            var response = Send<SkyNetGameServerPublicIpDto>(HttpMethod.Get, "api/gameservers/public-ip");
+            var response = Send<GameServerPublicIpDto>(HttpMethod.Get, "api/gameservers/public-ip");
             return response?.PublicIP ?? 0;
         }
 
@@ -1188,7 +1188,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            return Send<VoidDto>(HttpMethod.Post, "api/gameservers/users/disconnect", new SkyNetDisconnectGameServerUserDto
+            return Send<VoidDto>(HttpMethod.Post, "api/gameservers/users/disconnect", new DisconnectGameServerUserDto
             {
                 SteamId = steamId
             }) != null;
@@ -1202,7 +1202,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            return Send<VoidDto>(HttpMethod.Put, "api/gameservers/users/data", new SkyNetGameServerUserDataDto
+            return Send<VoidDto>(HttpMethod.Put, "api/gameservers/users/data", new GameServerUserDataDto
             {
                 SteamId = steamId,
                 PlayerName = playerName,
@@ -1289,7 +1289,7 @@ namespace SKYNET.Managers
                 }
             }
 
-            P2PQueue.Enqueue(new SkyNetP2PPacketSendDto
+            P2PQueue.Enqueue(new P2PPacketSendDto
             {
                 RemoteSteamId = remoteSteamId,
                 BufferBase64 = Convert.ToBase64String(payload),
@@ -1313,7 +1313,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            return Send<VoidDto>(HttpMethod.Post, "api/gamecoordinator/messages", new SkyNetGCMessageDto
+            return Send<VoidDto>(HttpMethod.Post, "api/gamecoordinator/messages", new GCMessageDto
             {
                 MessageType = messageType,
                 PayloadBase64 = Convert.ToBase64String(buffer ?? new byte[0])
@@ -1344,7 +1344,7 @@ namespace SKYNET.Managers
 
             EnsureSession();
             bool gameServerMessage = gameServerContext || IsGameServerGCMessage(messageType);
-            return Send<ApiGCExchangeResponse>(HttpMethod.Post, "api/gamecoordinator/exchange", new SkyNetGCExchangeRequestDto
+            return Send<ApiGCExchangeResponse>(HttpMethod.Post, "api/gamecoordinator/exchange", new GCExchangeRequestDto
             {
                 AppId = appId,
                 MessageType = messageType,
@@ -1393,7 +1393,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            return Send<ApiGCExchangeResponse>(HttpMethod.Post, "api/gamecoordinator/poll", new SkyNetGCPollRequestDto
+            return Send<ApiGCExchangeResponse>(HttpMethod.Post, "api/gamecoordinator/poll", new GCPollRequestDto
             {
                 AppId = appId,
                 SteamId = (ulong)(gameServer ? SteamEmulator.SteamID_GS : SteamEmulator.SteamID),
@@ -1443,56 +1443,56 @@ namespace SKYNET.Managers
             return Send<List<ApiInventoryItemDef>>(HttpMethod.Get, $"api/inventory/definitions?appId={appId}");
         }
 
-        public static SkyNetInventoryOperationResultDto GetInventoryItems()
+        public static InventoryOperationResultDto GetInventoryItems()
         {
             if (!IsEnabled || !EnsureSession()) return null;
-            return Send<SkyNetInventoryOperationResultDto>(HttpMethod.Get, "api/inventory/items");
+            return Send<InventoryOperationResultDto>(HttpMethod.Get, "api/inventory/items");
         }
 
-        public static SkyNetInventoryOperationResultDto GetInventoryItemsById(ulong[] itemIds)
+        public static InventoryOperationResultDto GetInventoryItemsById(ulong[] itemIds)
         {
             if (!IsEnabled || !EnsureSession()) return null;
-            return Send<SkyNetInventoryOperationResultDto>(HttpMethod.Post, "api/inventory/items/by-id", new SkyNetInventoryItemsRequestDto
+            return Send<InventoryOperationResultDto>(HttpMethod.Post, "api/inventory/items/by-id", new InventoryItemsRequestDto
             {
                 ItemIds = itemIds == null ? new List<ulong>() : itemIds.ToList()
             });
         }
 
-        public static SkyNetInventoryOperationResultDto GenerateInventoryItems(int[] defIds, uint[] quantities)
+        public static InventoryOperationResultDto GenerateInventoryItems(int[] defIds, uint[] quantities)
         {
             if (!IsEnabled || !EnsureSession()) return null;
-            return Send<SkyNetInventoryOperationResultDto>(HttpMethod.Post, "api/inventory/generate", new SkyNetInventoryGenerateRequestDto
+            return Send<InventoryOperationResultDto>(HttpMethod.Post, "api/inventory/generate", new InventoryGenerateRequestDto
             {
                 DefIds = defIds == null ? new List<int>() : defIds.ToList(),
                 Quantities = quantities == null ? new List<uint>() : quantities.ToList()
             });
         }
 
-        public static SkyNetInventoryOperationResultDto AddInventoryPromoItem(int? defId)
+        public static InventoryOperationResultDto AddInventoryPromoItem(int? defId)
         {
             if (!IsEnabled || !EnsureSession()) return null;
-            return Send<SkyNetInventoryOperationResultDto>(HttpMethod.Post, "api/inventory/promo", new SkyNetInventoryPromoRequestDto { DefId = defId });
+            return Send<InventoryOperationResultDto>(HttpMethod.Post, "api/inventory/promo", new InventoryPromoRequestDto { DefId = defId });
         }
 
-        public static SkyNetInventoryOperationResultDto AddInventoryPromoItems(int[] defIds)
+        public static InventoryOperationResultDto AddInventoryPromoItems(int[] defIds)
         {
             if (!IsEnabled || !EnsureSession()) return null;
-            return Send<SkyNetInventoryOperationResultDto>(HttpMethod.Post, "api/inventory/promo", new SkyNetInventoryPromoRequestDto
+            return Send<InventoryOperationResultDto>(HttpMethod.Post, "api/inventory/promo", new InventoryPromoRequestDto
             {
                 DefIds = defIds == null ? new List<int>() : defIds.ToList()
             });
         }
 
-        public static SkyNetInventoryOperationResultDto ConsumeInventoryItem(ulong itemId, uint quantity)
+        public static InventoryOperationResultDto ConsumeInventoryItem(ulong itemId, uint quantity)
         {
             if (!IsEnabled || !EnsureSession()) return null;
-            return Send<SkyNetInventoryOperationResultDto>(HttpMethod.Post, "api/inventory/consume", new SkyNetInventoryConsumeRequestDto { ItemId = itemId, Quantity = quantity });
+            return Send<InventoryOperationResultDto>(HttpMethod.Post, "api/inventory/consume", new InventoryConsumeRequestDto { ItemId = itemId, Quantity = quantity });
         }
 
-        public static SkyNetInventoryOperationResultDto TransferInventoryItem(ulong sourceItemId, uint quantity, ulong destinationItemId)
+        public static InventoryOperationResultDto TransferInventoryItem(ulong sourceItemId, uint quantity, ulong destinationItemId)
         {
             if (!IsEnabled || !EnsureSession()) return null;
-            return Send<SkyNetInventoryOperationResultDto>(HttpMethod.Post, "api/inventory/transfer", new SkyNetInventoryTransferRequestDto
+            return Send<InventoryOperationResultDto>(HttpMethod.Post, "api/inventory/transfer", new InventoryTransferRequestDto
             {
                 SourceItemId = sourceItemId,
                 Quantity = quantity,
@@ -1500,10 +1500,10 @@ namespace SKYNET.Managers
             });
         }
 
-        public static SkyNetInventoryOperationResultDto ExchangeInventoryItems(ulong[] itemIds, uint[] quantities, int[] defIds, uint[] generatedQuantities)
+        public static InventoryOperationResultDto ExchangeInventoryItems(ulong[] itemIds, uint[] quantities, int[] defIds, uint[] generatedQuantities)
         {
             if (!IsEnabled || !EnsureSession()) return null;
-            return Send<SkyNetInventoryOperationResultDto>(HttpMethod.Post, "api/inventory/exchange", new SkyNetInventoryExchangeRequestDto
+            return Send<InventoryOperationResultDto>(HttpMethod.Post, "api/inventory/exchange", new InventoryExchangeRequestDto
             {
                 ItemsToConsume = itemIds == null ? new List<ulong>() : itemIds.ToList(),
                 QuantitiesToConsume = quantities == null ? new List<uint>() : quantities.ToList(),
@@ -1512,34 +1512,34 @@ namespace SKYNET.Managers
             });
         }
 
-        public static SkyNetInventorySerializedResultDto SerializeInventoryResult(ulong[] itemIds)
+        public static InventorySerializedResultDto SerializeInventoryResult(ulong[] itemIds)
         {
             if (!IsEnabled || !EnsureSession()) return null;
-            return Send<SkyNetInventorySerializedResultDto>(HttpMethod.Post, "api/inventory/serialize", new SkyNetInventoryItemsRequestDto
+            return Send<InventorySerializedResultDto>(HttpMethod.Post, "api/inventory/serialize", new InventoryItemsRequestDto
             {
                 ItemIds = itemIds == null ? new List<ulong>() : itemIds.ToList()
             });
         }
 
-        public static SkyNetInventoryDeserializedResultDto DeserializeInventoryResult(string blobBase64)
+        public static InventoryDeserializedResultDto DeserializeInventoryResult(string blobBase64)
         {
             if (!IsEnabled || !EnsureSession() || string.IsNullOrWhiteSpace(blobBase64)) return null;
-            return Send<SkyNetInventoryDeserializedResultDto>(HttpMethod.Post, "api/inventory/deserialize", new SkyNetInventoryDeserializeRequestDto { BlobBase64 = blobBase64 });
+            return Send<InventoryDeserializedResultDto>(HttpMethod.Post, "api/inventory/deserialize", new InventoryDeserializeRequestDto { BlobBase64 = blobBase64 });
         }
 
-        public static List<SkyNetWorkshopSubscriptionDto> GetWorkshopSubscriptions()
+        public static List<WorkshopSubscriptionDto> GetWorkshopSubscriptions()
         {
             if (!IsEnabled || !EnsureSession())
             {
                 return null;
             }
 
-            return Send<List<SkyNetWorkshopSubscriptionDto>>(
+            return Send<List<WorkshopSubscriptionDto>>(
                 HttpMethod.Get,
                 "api/workshop/subscriptions");
         }
 
-        public static SkyNetWorkshopItemDto GetWorkshopItem(ulong publishedFileId)
+        public static WorkshopItemDto GetWorkshopItem(ulong publishedFileId)
         {
             if (!IsEnabled || publishedFileId == 0 || !EnsureSession())
             {
@@ -1547,7 +1547,7 @@ namespace SKYNET.Managers
             }
 
             HttpStatusCode? statusCode;
-            return Send<SkyNetWorkshopItemDto>(
+            return Send<WorkshopItemDto>(
                 HttpMethod.Get,
                 $"api/workshop/items/{publishedFileId}",
                 null,
@@ -1555,40 +1555,40 @@ namespace SKYNET.Managers
                 quietStatusCode: HttpStatusCode.NotFound);
         }
 
-        public static SkyNetWorkshopItemDto PutWorkshopItem(SkyNetWorkshopItemDto item)
+        public static WorkshopItemDto PutWorkshopItem(WorkshopItemDto item)
         {
             if (!IsEnabled || item == null || item.PublishedFileId == 0 || !EnsureSession())
             {
                 return null;
             }
 
-            return Send<SkyNetWorkshopItemDto>(
+            return Send<WorkshopItemDto>(
                 HttpMethod.Put,
                 $"api/workshop/items/{item.PublishedFileId}",
                 item);
         }
 
-        public static SkyNetWorkshopMutationDto SubscribeWorkshopItem(ulong publishedFileId)
+        public static WorkshopMutationDto SubscribeWorkshopItem(ulong publishedFileId)
         {
             if (!IsEnabled || publishedFileId == 0 || !EnsureSession())
             {
                 return null;
             }
 
-            return Send<SkyNetWorkshopMutationDto>(
+            return Send<WorkshopMutationDto>(
                 HttpMethod.Post,
                 $"api/workshop/items/{publishedFileId}/subscribe",
                 new VoidDto());
         }
 
-        public static SkyNetWorkshopMutationDto UnsubscribeWorkshopItem(ulong publishedFileId)
+        public static WorkshopMutationDto UnsubscribeWorkshopItem(ulong publishedFileId)
         {
             if (!IsEnabled || publishedFileId == 0 || !EnsureSession())
             {
                 return null;
             }
 
-            return Send<SkyNetWorkshopMutationDto>(
+            return Send<WorkshopMutationDto>(
                 HttpMethod.Delete,
                 $"api/workshop/items/{publishedFileId}/subscription");
         }
@@ -1604,10 +1604,10 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            var response = Send<SkyNetLeaderboardDto>(
+            var response = Send<LeaderboardDto>(
                 HttpMethod.Post,
                 "api/leaderboards",
-                new SkyNetLeaderboardFindRequestDto
+                new LeaderboardFindRequestDto
                 {
                     Name = name,
                     SortMethod = (int)sortMethod,
@@ -1624,7 +1624,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            return MapLeaderboard(Send<SkyNetLeaderboardDto>(
+            return MapLeaderboard(Send<LeaderboardDto>(
                 HttpMethod.Get,
                 $"api/leaderboards/{leaderboardId}"));
         }
@@ -1642,10 +1642,10 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            var response = Send<SkyNetLeaderboardEntriesDto>(
+            var response = Send<LeaderboardEntriesDto>(
                 HttpMethod.Post,
                 $"api/leaderboards/{leaderboardId}/entries",
-                new SkyNetLeaderboardEntriesRequestDto
+                new LeaderboardEntriesRequestDto
                 {
                     DataRequest = dataRequest,
                     RangeStart = rangeStart,
@@ -1660,7 +1660,7 @@ namespace SKYNET.Managers
             return new LeaderboardEntriesData
             {
                 Leaderboard = MapLeaderboard(response.Leaderboard),
-                Entries = (response.Entries ?? new List<SkyNetLeaderboardEntryDto>())
+                Entries = (response.Entries ?? new List<LeaderboardEntryDto>())
                     .Select(entry => new LeaderboardEntryData
                     {
                         SteamId = entry.SteamId,
@@ -1685,10 +1685,10 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            var response = Send<SkyNetLeaderboardScoreUploadResultDto>(
+            var response = Send<LeaderboardScoreUploadResultDto>(
                 HttpMethod.Put,
                 $"api/leaderboards/{leaderboardId}/score",
-                new SkyNetLeaderboardScoreUploadRequestDto
+                new LeaderboardScoreUploadRequestDto
                 {
                     UploadMethod = uploadMethod,
                     Score = score,
@@ -1706,7 +1706,7 @@ namespace SKYNET.Managers
                 };
         }
 
-        private static Leaderboard MapLeaderboard(SkyNetLeaderboardDto source)
+        private static Leaderboard MapLeaderboard(LeaderboardDto source)
         {
             return source == null
                 ? null
@@ -1728,7 +1728,7 @@ namespace SKYNET.Managers
             }
 
             EnsureSession();
-            var response = Send<ApiUser>(new HttpMethod("PATCH"), "api/users/me/persona", new SkyNetPersonaUpdateDto
+            var response = Send<ApiUser>(new HttpMethod("PATCH"), "api/users/me/persona", new PersonaUpdateDto
             {
                 PersonaName = personaName
             });
@@ -1765,7 +1765,7 @@ namespace SKYNET.Managers
                 return false;
             }
 
-            Interlocked.Exchange(ref PendingGameServerPresence, new SkyNetGameServerPresenceUpdateDto
+            Interlocked.Exchange(ref PendingGameServerPresence, new GameServerPresenceUpdateDto
             {
                 SteamId = steamId,
                 Ip = ip,
@@ -1821,7 +1821,7 @@ namespace SKYNET.Managers
 
                         try
                         {
-                            Send<VoidDto>(HttpMethod.Put, "api/presence", new SkyNetPresenceUpdateDto
+                            Send<VoidDto>(HttpMethod.Put, "api/presence", new PresenceUpdateDto
                             {
                                 Key = key,
                                 Value = value
@@ -1924,7 +1924,7 @@ namespace SKYNET.Managers
                     data = stream.ToArray();
                 }
 
-                return Send<VoidDto>(HttpMethod.Put, "api/users/me/avatar", new SkyNetAvatarUpdateDto
+                return Send<VoidDto>(HttpMethod.Put, "api/users/me/avatar", new AvatarUpdateDto
                 {
                     ContentBase64 = Convert.ToBase64String(data)
                 }) != null;
@@ -1979,7 +1979,7 @@ namespace SKYNET.Managers
             return true;
         }
 
-        private static bool UpdateLobbySettings(ulong lobbyId, SkyNetLobbySettingsUpdateRequestDto request)
+        private static bool UpdateLobbySettings(ulong lobbyId, LobbySettingsUpdateRequestDto request)
         {
             if (!IsEnabled)
             {
@@ -1990,14 +1990,14 @@ namespace SKYNET.Managers
             return Send<VoidDto>(HttpMethod.Put, $"api/lobbies/{lobbyId}/settings", request) != null;
         }
 
-        private static SkyNetGameServerDto MapGameServer(GameServerData server)
+        private static GameServerDto MapGameServer(GameServerData server)
         {
             if (server == null)
             {
                 return null;
             }
 
-            return new SkyNetGameServerDto
+            return new GameServerDto
             {
                 SteamId = server.SteamId != 0 ? server.SteamId : (ulong)SteamEmulator.SteamID_GS,
                 AppId = server.AppId,
@@ -2027,8 +2027,8 @@ namespace SKYNET.Managers
                     ? new Dictionary<string, string>()
                     : new Dictionary<string, string>(server.KeyValues),
                 Players = server.Players == null
-                    ? new List<SkyNetGameServerPlayerDto>()
-                    : server.Players.Values.Select(player => new SkyNetGameServerPlayerDto
+                    ? new List<GameServerPlayerDto>()
+                    : server.Players.Values.Select(player => new GameServerPlayerDto
                     {
                         SteamId = player.SteamId,
                         Name = player.Name,
@@ -2038,7 +2038,7 @@ namespace SKYNET.Managers
             };
         }
 
-        private static GameServerData MapGameServer(SkyNetGameServerDto server)
+        private static GameServerData MapGameServer(GameServerDto server)
         {
             if (server == null)
             {
@@ -2078,7 +2078,7 @@ namespace SKYNET.Managers
                 mapped.KeyValues[pair.Key] = pair.Value;
             }
 
-            foreach (var player in server.Players ?? new List<SkyNetGameServerPlayerDto>())
+            foreach (var player in server.Players ?? new List<GameServerPlayerDto>())
             {
                 mapped.Players[player.SteamId] = new GameServerPlayerData
                 {
@@ -2092,7 +2092,7 @@ namespace SKYNET.Managers
             return mapped;
         }
 
-        private static List<SteamLobby> MapLobbies(IEnumerable<SkyNetLobbyDto> lobbies)
+        private static List<SteamLobby> MapLobbies(IEnumerable<LobbyDto> lobbies)
         {
             var mapped = new List<SteamLobby>();
             if (lobbies == null)
@@ -2112,12 +2112,12 @@ namespace SKYNET.Managers
             return mapped;
         }
 
-        internal static SteamLobby MapLobbyForEvents(SkyNetLobbyDto lobby)
+        internal static SteamLobby MapLobbyForEvents(LobbyDto lobby)
         {
             return MapLobby(lobby);
         }
 
-        private static SteamLobby MapLobby(SkyNetLobbyDto lobby)
+        private static SteamLobby MapLobby(LobbyDto lobby)
         {
             if (lobby == null)
             {
@@ -2163,7 +2163,7 @@ namespace SKYNET.Managers
             return mapped;
         }
 
-        private static void ApplySession(SkyNetSessionDto session)
+        private static void ApplySession(SessionDto session)
         {
             SteamEmulator.AccessToken = session.AccessToken ?? string.Empty;
             SteamEmulator.RefreshToken = session.RefreshToken ?? string.Empty;
@@ -2468,7 +2468,7 @@ namespace SKYNET.Managers
                         continue;
                     }
 
-                    var batch = new List<SkyNetP2PPacketSendDto>(P2PTransportProtocol.MaxBatchSize);
+                    var batch = new List<P2PPacketSendDto>(P2PTransportProtocol.MaxBatchSize);
                     while (batch.Count < P2PTransportProtocol.MaxBatchSize && P2PQueue.TryDequeue(out var packet))
                     {
                         Interlocked.Decrement(ref P2PQueueCount);
@@ -2480,7 +2480,7 @@ namespace SKYNET.Managers
                         continue;
                     }
 
-                    if (Send<VoidDto>(HttpMethod.Post, "api/network/p2p/send-batch", new SkyNetP2PPacketBatchDto { Packets = batch }) == null)
+                    if (Send<VoidDto>(HttpMethod.Post, "api/network/p2p/send-batch", new P2PPacketBatchDto { Packets = batch }) == null)
                     {
                         foreach (var packet in batch)
                         {
@@ -2565,7 +2565,7 @@ namespace SKYNET.Managers
             }
         }
 
-        public sealed class SkyNetSessionRequestDto
+        public sealed class SessionRequestDto
         {
             public uint AccountId { get; set; }
             public ulong SteamId { get; set; }
@@ -2576,17 +2576,17 @@ namespace SKYNET.Managers
             public bool UseActiveWebUser { get; set; }
         }
 
-        public sealed class SkyNetSessionDto
+        public sealed class SessionDto
         {
             public string AccessToken { get; set; }
             public string RefreshToken { get; set; }
             public ApiUser User { get; set; }
-            public List<SkyNetWorkshopSubscriptionDto> WorkshopSubscriptions { get; set; }
-            public List<SkyNetAchievementDefinitionDto> AchievementDefinitions { get; set; }
-            public List<SkyNetStatDefinitionDto> StatDefinitions { get; set; }
+            public List<WorkshopSubscriptionDto> WorkshopSubscriptions { get; set; }
+            public List<AchievementDefinitionDto> AchievementDefinitions { get; set; }
+            public List<StatDefinitionDto> StatDefinitions { get; set; }
         }
 
-        public sealed class SkyNetAchievementDefinitionDto
+        public sealed class AchievementDefinitionDto
         {
             public string ApiName { get; set; }
             public string DisplayName { get; set; }
@@ -2596,7 +2596,7 @@ namespace SKYNET.Managers
             public string LockedIconBase64 { get; set; }
         }
 
-        public sealed class SkyNetStatDefinitionDto
+        public sealed class StatDefinitionDto
         {
             public string Name { get; set; }
             public string Type { get; set; }
@@ -2604,7 +2604,7 @@ namespace SKYNET.Managers
             public float DefaultFloat { get; set; }
         }
 
-        public sealed class SkyNetWorkshopItemDto
+        public sealed class WorkshopItemDto
         {
             public ulong PublishedFileId { get; set; }
             public uint CreatorAppId { get; set; }
@@ -2629,18 +2629,18 @@ namespace SKYNET.Managers
             public float Score { get; set; }
         }
 
-        public sealed class SkyNetWorkshopSubscriptionDto
+        public sealed class WorkshopSubscriptionDto
         {
             public ulong PublishedFileId { get; set; }
             public DateTime SubscribedAtUtc { get; set; }
             public bool DisabledLocally { get; set; }
-            public SkyNetWorkshopItemDto Item { get; set; }
+            public WorkshopItemDto Item { get; set; }
         }
 
-        public sealed class SkyNetWorkshopMutationDto
+        public sealed class WorkshopMutationDto
         {
             public bool Success { get; set; }
-            public SkyNetWorkshopSubscriptionDto Subscription { get; set; }
+            public WorkshopSubscriptionDto Subscription { get; set; }
         }
 
         public sealed class ApiUser
@@ -2660,23 +2660,23 @@ namespace SKYNET.Managers
             public Dictionary<string, string> RichPresence { get; set; }
         }
 
-        public sealed class SkyNetPersonaUpdateDto
+        public sealed class PersonaUpdateDto
         {
             public string PersonaName { get; set; }
         }
 
-        public sealed class SkyNetPresenceUpdateDto
+        public sealed class PresenceUpdateDto
         {
             public string Key { get; set; }
             public string Value { get; set; }
         }
 
-        public sealed class SkyNetAvatarUpdateDto
+        public sealed class AvatarUpdateDto
         {
             public string ContentBase64 { get; set; }
         }
 
-        public sealed class SkyNetFriendActionRequestDto
+        public sealed class FriendActionRequestDto
         {
             public ulong SteamId { get; set; }
             public string Identifier { get; set; }
@@ -2733,7 +2733,7 @@ namespace SKYNET.Managers
             public Dictionary<string, string> Properties { get; set; }
         }
 
-        public sealed class SkyNetInventoryOperationResultDto
+        public sealed class InventoryOperationResultDto
         {
             public bool Success { get; set; }
             public List<ApiInventoryItem> Items { get; set; }
@@ -2742,32 +2742,32 @@ namespace SKYNET.Managers
             public string SerializedBlobBase64 { get; set; }
         }
 
-        public sealed class SkyNetInventoryGenerateRequestDto
+        public sealed class InventoryGenerateRequestDto
         {
             public List<int> DefIds { get; set; }
             public List<uint> Quantities { get; set; }
         }
 
-        public sealed class SkyNetInventoryPromoRequestDto
+        public sealed class InventoryPromoRequestDto
         {
             public int? DefId { get; set; }
             public List<int> DefIds { get; set; }
         }
 
-        public sealed class SkyNetInventoryConsumeRequestDto
+        public sealed class InventoryConsumeRequestDto
         {
             public ulong ItemId { get; set; }
             public uint Quantity { get; set; }
         }
 
-        public sealed class SkyNetInventoryTransferRequestDto
+        public sealed class InventoryTransferRequestDto
         {
             public ulong SourceItemId { get; set; }
             public uint Quantity { get; set; }
             public ulong DestinationItemId { get; set; }
         }
 
-        public sealed class SkyNetInventoryExchangeRequestDto
+        public sealed class InventoryExchangeRequestDto
         {
             public List<ulong> ItemsToConsume { get; set; }
             public List<uint> QuantitiesToConsume { get; set; }
@@ -2775,22 +2775,22 @@ namespace SKYNET.Managers
             public List<uint> QuantitiesToGenerate { get; set; }
         }
 
-        public sealed class SkyNetInventoryItemsRequestDto
+        public sealed class InventoryItemsRequestDto
         {
             public List<ulong> ItemIds { get; set; }
         }
 
-        public sealed class SkyNetInventorySerializedResultDto
+        public sealed class InventorySerializedResultDto
         {
             public string BlobBase64 { get; set; }
         }
 
-        public sealed class SkyNetInventoryDeserializeRequestDto
+        public sealed class InventoryDeserializeRequestDto
         {
             public string BlobBase64 { get; set; }
         }
 
-        public sealed class SkyNetInventoryDeserializedResultDto
+        public sealed class InventoryDeserializedResultDto
         {
             public bool Success { get; set; }
             public ulong SteamId { get; set; }
@@ -2800,21 +2800,21 @@ namespace SKYNET.Managers
             public string BlobBase64 { get; set; }
         }
 
-        public sealed class SkyNetGameServerPresenceUpdateDto
+        public sealed class GameServerPresenceUpdateDto
         {
             public ulong SteamId { get; set; }
             public uint Ip { get; set; }
             public ushort Port { get; set; }
         }
 
-        public sealed class SkyNetLeaderboardFindRequestDto
+        public sealed class LeaderboardFindRequestDto
         {
             public string Name { get; set; }
             public int SortMethod { get; set; }
             public int DisplayType { get; set; }
         }
 
-        public sealed class SkyNetLeaderboardDto
+        public sealed class LeaderboardDto
         {
             public ulong Id { get; set; }
             public uint AppId { get; set; }
@@ -2824,7 +2824,7 @@ namespace SKYNET.Managers
             public int EntryCount { get; set; }
         }
 
-        public sealed class SkyNetLeaderboardEntriesRequestDto
+        public sealed class LeaderboardEntriesRequestDto
         {
             public int DataRequest { get; set; }
             public int RangeStart { get; set; }
@@ -2832,13 +2832,13 @@ namespace SKYNET.Managers
             public List<ulong> Users { get; set; }
         }
 
-        public sealed class SkyNetLeaderboardEntriesDto
+        public sealed class LeaderboardEntriesDto
         {
-            public SkyNetLeaderboardDto Leaderboard { get; set; }
-            public List<SkyNetLeaderboardEntryDto> Entries { get; set; }
+            public LeaderboardDto Leaderboard { get; set; }
+            public List<LeaderboardEntryDto> Entries { get; set; }
         }
 
-        public sealed class SkyNetLeaderboardEntryDto
+        public sealed class LeaderboardEntryDto
         {
             public ulong SteamId { get; set; }
             public int GlobalRank { get; set; }
@@ -2847,14 +2847,14 @@ namespace SKYNET.Managers
             public ulong UgcHandle { get; set; }
         }
 
-        public sealed class SkyNetLeaderboardScoreUploadRequestDto
+        public sealed class LeaderboardScoreUploadRequestDto
         {
             public int UploadMethod { get; set; }
             public int Score { get; set; }
             public List<int> Details { get; set; }
         }
 
-        public sealed class SkyNetLeaderboardScoreUploadResultDto
+        public sealed class LeaderboardScoreUploadResultDto
         {
             public bool Success { get; set; }
             public bool ScoreChanged { get; set; }
@@ -2890,7 +2890,7 @@ namespace SKYNET.Managers
             public bool AchievementEarned { get; set; }
             public uint AchievementProgress { get; set; }
             public uint AchievementMaxProgress { get; set; }
-            public SkyNetLobbyDto Lobby { get; set; }
+            public LobbyDto Lobby { get; set; }
             public string PayloadBase64 { get; set; }
             public uint MessageType { get; set; }
             public ulong? TargetJobId { get; set; }
@@ -2912,7 +2912,7 @@ namespace SKYNET.Managers
         {
         }
 
-        public sealed class SkyNetLobbyQueryRequestDto
+        public sealed class LobbyQueryRequestDto
         {
             public uint AppId { get; set; }
             public int Distance { get; set; }
@@ -2922,43 +2922,43 @@ namespace SKYNET.Managers
             public int ValueToMatch { get; set; }
             public int ComparisonType { get; set; }
             public string StringValueToMatch { get; set; }
-            public List<SkyNetLobbyNumericalFilterDto> NumericalFilters { get; set; }
-            public List<SkyNetLobbyStringFilterDto> StringFilters { get; set; }
-            public List<SkyNetLobbyNearValueFilterDto> NearValueFilters { get; set; }
+            public List<LobbyNumericalFilterDto> NumericalFilters { get; set; }
+            public List<LobbyStringFilterDto> StringFilters { get; set; }
+            public List<LobbyNearValueFilterDto> NearValueFilters { get; set; }
         }
 
-        public sealed class SkyNetLobbyInviteRequestDto
+        public sealed class LobbyInviteRequestDto
         {
             public ulong InviteeSteamId { get; set; }
         }
 
-        public sealed class SkyNetGameInviteRequestDto
+        public sealed class GameInviteRequestDto
         {
             public ulong InviteeSteamId { get; set; }
             public string ConnectString { get; set; }
         }
 
-        public sealed class SkyNetLobbyNumericalFilterDto
+        public sealed class LobbyNumericalFilterDto
         {
             public string KeyToMatch { get; set; }
             public int ValueToMatch { get; set; }
             public int ComparisonType { get; set; }
         }
 
-        public sealed class SkyNetLobbyStringFilterDto
+        public sealed class LobbyStringFilterDto
         {
             public string KeyToMatch { get; set; }
             public string ValueToMatch { get; set; }
             public int ComparisonType { get; set; }
         }
 
-        public sealed class SkyNetLobbyNearValueFilterDto
+        public sealed class LobbyNearValueFilterDto
         {
             public string KeyToMatch { get; set; }
             public int ValueToBeCloseTo { get; set; }
         }
 
-        public sealed class SkyNetCreateLobbyRequestDto
+        public sealed class CreateLobbyRequestDto
         {
             public uint AppId { get; set; }
             public int LobbyType { get; set; }
@@ -2966,23 +2966,23 @@ namespace SKYNET.Managers
             public Dictionary<string, string> LobbyData { get; set; }
         }
 
-        public sealed class SkyNetLobbyDataUpdateRequestDto
+        public sealed class LobbyDataUpdateRequestDto
         {
             public string Key { get; set; }
             public string Value { get; set; }
         }
 
-        public sealed class SkyNetLobbyChatRequestDto
+        public sealed class LobbyChatRequestDto
         {
             public string MessageBase64 { get; set; }
         }
 
-        public sealed class SkyNetLobbyDeleteDataRequestDto
+        public sealed class LobbyDeleteDataRequestDto
         {
             public string Key { get; set; }
         }
 
-        public sealed class SkyNetLobbySettingsUpdateRequestDto
+        public sealed class LobbySettingsUpdateRequestDto
         {
             public bool? Joinable { get; set; }
             public int? LobbyType { get; set; }
@@ -2990,14 +2990,14 @@ namespace SKYNET.Managers
             public int? MaxMembers { get; set; }
         }
 
-        public sealed class SkyNetLobbyGameServerUpdateRequestDto
+        public sealed class LobbyGameServerUpdateRequestDto
         {
             public ulong SteamIdGameServer { get; set; }
             public uint IP { get; set; }
             public uint Port { get; set; }
         }
 
-        public sealed class SkyNetLobbyDto
+        public sealed class LobbyDto
         {
             public ulong SteamId { get; set; }
             public uint AppId { get; set; }
@@ -3006,23 +3006,23 @@ namespace SKYNET.Managers
             public int MaxMembers { get; set; }
             public bool Joinable { get; set; }
             public Dictionary<string, string> LobbyData { get; set; }
-            public List<SkyNetLobbyMemberDto> Members { get; set; }
-            public SkyNetLobbyGameServerDto GameServer { get; set; }
+            public List<LobbyMemberDto> Members { get; set; }
+            public LobbyGameServerDto GameServer { get; set; }
         }
 
-        public sealed class SkyNetLobbyMemberDto
+        public sealed class LobbyMemberDto
         {
             public ulong SteamId { get; set; }
-            public List<SkyNetLobbyMetaDataDto> Data { get; set; }
+            public List<LobbyMetaDataDto> Data { get; set; }
         }
 
-        public sealed class SkyNetLobbyMetaDataDto
+        public sealed class LobbyMetaDataDto
         {
             public string Key { get; set; }
             public string Value { get; set; }
         }
 
-        public sealed class SkyNetLobbyGameServerDto
+        public sealed class LobbyGameServerDto
         {
             public ulong SteamId { get; set; }
             public uint IP { get; set; }
@@ -3057,7 +3057,7 @@ namespace SKYNET.Managers
             public int Version { get; set; }
         }
 
-        public sealed class SkyNetRemoteStorageDeleteRequestDto
+        public sealed class RemoteStorageDeleteRequestDto
         {
             public string FileName { get; set; }
         }
@@ -3074,7 +3074,7 @@ namespace SKYNET.Managers
             public ulong AvailableBytes { get; set; }
         }
 
-        public sealed class SkyNetAuthTicketRequestDto
+        public sealed class AuthTicketRequestDto
         {
             public uint AppId { get; set; }
             public ulong SteamId { get; set; }
@@ -3082,26 +3082,26 @@ namespace SKYNET.Managers
             public int TicketBufferSize { get; set; }
         }
 
-        public sealed class SkyNetAuthTicketDto
+        public sealed class AuthTicketDto
         {
             public uint Handle { get; set; }
             public string TicketBase64 { get; set; }
             public uint TicketSize { get; set; }
         }
 
-        public sealed class SkyNetEncryptedAppTicketRequestDto
+        public sealed class EncryptedAppTicketRequestDto
         {
             public uint AppId { get; set; }
             public string UserDataBase64 { get; set; }
         }
 
-        public sealed class SkyNetEncryptedAppTicketDto
+        public sealed class EncryptedAppTicketDto
         {
             public int Result { get; set; }
             public string TicketBase64 { get; set; }
         }
 
-        public sealed class SkyNetAuthValidateRequestDto
+        public sealed class AuthValidateRequestDto
         {
             public ulong SteamId { get; set; }
             public string TicketBase64 { get; set; }
@@ -3109,7 +3109,7 @@ namespace SKYNET.Managers
             public uint AppId { get; set; }
         }
 
-        public sealed class SkyNetAuthValidateResultDto
+        public sealed class AuthValidateResultDto
         {
             public int BeginAuthSessionResult { get; set; }
             public int AuthSessionResponse { get; set; }
@@ -3117,7 +3117,7 @@ namespace SKYNET.Managers
             public bool Success { get; set; }
         }
 
-        public sealed class SkyNetConnectAuthRequestDto
+        public sealed class ConnectAuthRequestDto
         {
             public uint IpClient { get; set; }
             public ulong SteamId { get; set; }
@@ -3125,7 +3125,7 @@ namespace SKYNET.Managers
             public uint AppId { get; set; }
         }
 
-        public sealed class SkyNetConnectAuthResultDto
+        public sealed class ConnectAuthResultDto
         {
             public bool Success { get; set; }
             public ulong SteamId { get; set; }
@@ -3134,21 +3134,21 @@ namespace SKYNET.Managers
             public string DenyMessage { get; set; }
         }
 
-        public sealed class SkyNetAuthEndSessionRequestDto
+        public sealed class AuthEndSessionRequestDto
         {
             public ulong SteamId { get; set; }
             public bool GameServer { get; set; }
         }
 
-        public sealed class SkyNetCancelAuthTicketRequestDto
+        public sealed class CancelAuthTicketRequestDto
         {
             public uint Handle { get; set; }
             public bool GameServer { get; set; }
         }
 
-        public sealed class SkyNetGameServerStateDto
+        public sealed class GameServerStateDto
         {
-            public SkyNetGameServerDto Server { get; set; }
+            public GameServerDto Server { get; set; }
             public string Token { get; set; }
             public bool Anonymous { get; set; }
         }
@@ -3161,24 +3161,24 @@ namespace SKYNET.Managers
             public ulong SteamId { get; set; }
         }
 
-        public sealed class SkyNetGameServerPublicIpDto
+        public sealed class GameServerPublicIpDto
         {
             public uint PublicIP { get; set; }
         }
 
-        public sealed class SkyNetGameServerUserDataDto
+        public sealed class GameServerUserDataDto
         {
             public ulong SteamId { get; set; }
             public string PlayerName { get; set; }
             public uint Score { get; set; }
         }
 
-        public sealed class SkyNetDisconnectGameServerUserDto
+        public sealed class DisconnectGameServerUserDto
         {
             public ulong SteamId { get; set; }
         }
 
-        public sealed class SkyNetGameServerDto
+        public sealed class GameServerDto
         {
             public ulong SteamId { get; set; }
             public uint AppId { get; set; }
@@ -3205,10 +3205,10 @@ namespace SKYNET.Managers
             public bool LoggedOn { get; set; }
             public bool AdvertiseActive { get; set; }
             public Dictionary<string, string> KeyValues { get; set; }
-            public List<SkyNetGameServerPlayerDto> Players { get; set; }
+            public List<GameServerPlayerDto> Players { get; set; }
         }
 
-        public sealed class SkyNetGameServerPlayerDto
+        public sealed class GameServerPlayerDto
         {
             public ulong SteamId { get; set; }
             public string Name { get; set; }
@@ -3216,7 +3216,7 @@ namespace SKYNET.Managers
             public float TimePlayedSeconds { get; set; }
         }
 
-        public sealed class SkyNetP2PPacketSendDto
+        public sealed class P2PPacketSendDto
         {
             public ulong RemoteSteamId { get; set; }
             public string BufferBase64 { get; set; }
@@ -3229,12 +3229,12 @@ namespace SKYNET.Managers
             public uint TargetConnectionId { get; set; }
         }
 
-        public sealed class SkyNetP2PPacketBatchDto
+        public sealed class P2PPacketBatchDto
         {
-            public List<SkyNetP2PPacketSendDto> Packets { get; set; }
+            public List<P2PPacketSendDto> Packets { get; set; }
         }
 
-        public sealed class SkyNetGCMessageDto
+        public sealed class GCMessageDto
         {
             public uint AppId { get; set; }
             public uint MessageType { get; set; }
@@ -3258,7 +3258,7 @@ namespace SKYNET.Managers
             public ulong CaKeyId { get; set; }
         }
 
-        public sealed class SkyNetGCExchangeRequestDto
+        public sealed class GCExchangeRequestDto
         {
             public uint AppId { get; set; }
             public uint MessageType { get; set; }
@@ -3268,7 +3268,7 @@ namespace SKYNET.Managers
             public bool GameServer { get; set; }
         }
 
-        public sealed class SkyNetGCPollRequestDto
+        public sealed class GCPollRequestDto
         {
             public uint AppId { get; set; }
             public ulong SteamId { get; set; }
@@ -3278,7 +3278,7 @@ namespace SKYNET.Managers
         public sealed class ApiGCExchangeResponse
         {
             public bool Handled { get; set; }
-            public List<SkyNetGCMessageDto> Messages { get; set; }
+            public List<GCMessageDto> Messages { get; set; }
         }
     }
 }

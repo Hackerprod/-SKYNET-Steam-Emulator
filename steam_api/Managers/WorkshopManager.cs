@@ -19,8 +19,8 @@ namespace SKYNET.Managers
     public static class WorkshopManager
     {
         private static readonly object Gate = new object();
-        private static readonly Dictionary<ulong, APIClient.SkyNetWorkshopSubscriptionDto> Subscriptions =
-            new Dictionary<ulong, APIClient.SkyNetWorkshopSubscriptionDto>();
+        private static readonly Dictionary<ulong, APIClient.WorkshopSubscriptionDto> Subscriptions =
+            new Dictionary<ulong, APIClient.WorkshopSubscriptionDto>();
         private static readonly Dictionary<ulong, InstallInfo> InstallInfoCache =
             new Dictionary<ulong, InstallInfo>();
 
@@ -34,7 +34,7 @@ namespace SKYNET.Managers
         }
 
         public static void ApplyServerSnapshot(
-            IEnumerable<APIClient.SkyNetWorkshopSubscriptionDto> subscriptions,
+            IEnumerable<APIClient.WorkshopSubscriptionDto> subscriptions,
             ulong steamId,
             uint appId)
         {
@@ -59,7 +59,7 @@ namespace SKYNET.Managers
             }
         }
 
-        public static APIClient.SkyNetWorkshopSubscriptionDto[] GetSubscriptions(bool includeLocallyDisabled)
+        public static APIClient.WorkshopSubscriptionDto[] GetSubscriptions(bool includeLocallyDisabled)
         {
             EnsureIdentity((ulong)SteamEmulator.SteamID, SteamEmulator.InternalAppId);
             lock (Gate)
@@ -75,7 +75,7 @@ namespace SKYNET.Managers
 
         public static bool TryGetItem(
             ulong publishedFileId,
-            out APIClient.SkyNetWorkshopItemDto item)
+            out APIClient.WorkshopItemDto item)
         {
             EnsureIdentity((ulong)SteamEmulator.SteamID, SteamEmulator.InternalAppId);
             lock (Gate)
@@ -92,7 +92,7 @@ namespace SKYNET.Managers
             return false;
         }
 
-        public static void UpsertSubscription(APIClient.SkyNetWorkshopSubscriptionDto subscription)
+        public static void UpsertSubscription(APIClient.WorkshopSubscriptionDto subscription)
         {
             if (!IsValidSubscription(subscription, SteamEmulator.InternalAppId))
             {
@@ -124,7 +124,7 @@ namespace SKYNET.Managers
         public static uint GetItemState(ulong publishedFileId)
         {
             EnsureIdentity((ulong)SteamEmulator.SteamID, SteamEmulator.InternalAppId);
-            APIClient.SkyNetWorkshopSubscriptionDto subscription;
+            APIClient.WorkshopSubscriptionDto subscription;
             lock (Gate)
             {
                 if (!Subscriptions.TryGetValue(publishedFileId, out subscription))
@@ -157,7 +157,7 @@ namespace SKYNET.Managers
         {
             EnsureIdentity((ulong)SteamEmulator.SteamID, SteamEmulator.InternalAppId);
 
-            APIClient.SkyNetWorkshopItemDto item = null;
+            APIClient.WorkshopItemDto item = null;
             lock (Gate)
             {
                 if (!Subscriptions.TryGetValue(publishedFileId, out var subscription) ||
@@ -202,7 +202,7 @@ namespace SKYNET.Managers
             return true;
         }
 
-        public static APIClient.SkyNetWorkshopItemDto TryReadInstalledItem(ulong publishedFileId)
+        public static APIClient.WorkshopItemDto TryReadInstalledItem(ulong publishedFileId)
         {
             var folder = ResolveInstallDirectory(publishedFileId);
             if (string.IsNullOrEmpty(folder))
@@ -220,7 +220,7 @@ namespace SKYNET.Managers
 
                 try
                 {
-                    var item = File.ReadAllText(metadataPath).FromJson<APIClient.SkyNetWorkshopItemDto>();
+                    var item = File.ReadAllText(metadataPath).FromJson<APIClient.WorkshopItemDto>();
                     if (item == null)
                     {
                         continue;
@@ -453,7 +453,7 @@ namespace SKYNET.Managers
         }
 
         private static bool IsValidSubscription(
-            APIClient.SkyNetWorkshopSubscriptionDto subscription,
+            APIClient.WorkshopSubscriptionDto subscription,
             uint appId)
         {
             return subscription != null &&
@@ -463,10 +463,10 @@ namespace SKYNET.Managers
                    subscription.Item.ConsumerAppId == appId;
         }
 
-        private static APIClient.SkyNetWorkshopSubscriptionDto CloneSubscription(
-            APIClient.SkyNetWorkshopSubscriptionDto value)
+        private static APIClient.WorkshopSubscriptionDto CloneSubscription(
+            APIClient.WorkshopSubscriptionDto value)
         {
-            return new APIClient.SkyNetWorkshopSubscriptionDto
+            return new APIClient.WorkshopSubscriptionDto
             {
                 PublishedFileId = value.PublishedFileId,
                 SubscribedAtUtc = value.SubscribedAtUtc,
@@ -475,14 +475,14 @@ namespace SKYNET.Managers
             };
         }
 
-        private static APIClient.SkyNetWorkshopItemDto CloneItem(APIClient.SkyNetWorkshopItemDto value)
+        private static APIClient.WorkshopItemDto CloneItem(APIClient.WorkshopItemDto value)
         {
             if (value == null)
             {
                 return null;
             }
 
-            return new APIClient.SkyNetWorkshopItemDto
+            return new APIClient.WorkshopItemDto
             {
                 PublishedFileId = value.PublishedFileId,
                 CreatorAppId = value.CreatorAppId,
@@ -540,7 +540,7 @@ namespace SKYNET.Managers
         {
             public ulong SteamId { get; set; }
             public uint AppId { get; set; }
-            public List<APIClient.SkyNetWorkshopSubscriptionDto> Subscriptions { get; set; }
+            public List<APIClient.WorkshopSubscriptionDto> Subscriptions { get; set; }
         }
     }
 }

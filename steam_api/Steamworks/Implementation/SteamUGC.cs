@@ -1043,7 +1043,7 @@ namespace SKYNET.Steamworks.Implementation
         }
 
         private static SteamUGCDetails_t CreateDetails(
-            APIClient.SkyNetWorkshopItemDto item,
+            APIClient.WorkshopItemDto item,
             ulong publishedFileId,
             EResult result)
         {
