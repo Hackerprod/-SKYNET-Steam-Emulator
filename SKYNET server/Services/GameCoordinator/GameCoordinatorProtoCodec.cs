@@ -58,6 +58,17 @@ public sealed class GameCoordinatorProtoCodec
         return ToTsValue(message);
     }
 
+    public string DecodeToJson(uint appId, string typeName, byte[] payload)
+    {
+        var type = Resolve(appId, typeName);
+        using var stream = new MemoryStream(payload);
+        var message = Serializer.NonGeneric.Deserialize(type, stream);
+        return System.Text.Json.JsonSerializer.Serialize(
+            message,
+            type,
+            new System.Text.Json.JsonSerializerOptions { WriteIndented = false });
+    }
+
     public byte[] Encode(uint appId, string typeName, TsValue value)
     {
         var type = Resolve(appId, typeName);

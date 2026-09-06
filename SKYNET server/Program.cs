@@ -53,6 +53,8 @@ builder.Services.AddRazorPages()
 builder.Services.ConfigureHttpJsonOptions(options =>
     SkynetJsonSerializerOptions.AddCompatibilityConverters(options.SerializerOptions));
 builder.Services.AddSingleton<GameCoordinatorTraceService>();
+builder.Services.AddSingleton<GameCoordinatorProtoCodec>();
+builder.Services.AddSingleton<GameCoordinatorMessageDecoder>();
 builder.Services.AddSingleton<GameServerSettingsService>();
 builder.Services.AddSingleton<GameCatalogService>();
 builder.Services.AddSingleton<GameAchievementCatalogService>();

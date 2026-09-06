@@ -5,7 +5,7 @@ using TypeSharp.VM.Memory;
 
 namespace SKYNET_server.Services;
 
-public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameCoordinatorTicker
+public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameCoordinatorTicker, IGameCoordinatorMessageTypeCatalog
 {
     private const long ScriptMemoryLimitBytes = 768L * 1024 * 1024;
     private const long ScriptMaximumInstructions = 100_000_000;
@@ -14,17 +14,19 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
     private readonly GameCoordinatorTraceService _trace;
     private readonly string _gcRoot;
     private readonly GameCoordinatorAppCatalog _apps;
-    private readonly GameCoordinatorProtoCodec _codec = new();
+    private readonly GameCoordinatorProtoCodec _codec;
     private readonly object _cacheSync = new();
     private readonly Dictionary<uint, CachedScript> _cache = new();
 
     public GameCoordinatorScriptPlugin(
         IHostEnvironment hostEnvironment,
         ILogger<GameCoordinatorScriptPlugin> logger,
-        GameCoordinatorTraceService trace)
+        GameCoordinatorTraceService trace,
+        GameCoordinatorProtoCodec? codec = null)
     {
         _logger = logger;
         _trace = trace;
+        _codec = codec ?? new GameCoordinatorProtoCodec();
         _gcRoot = GameCoordinatorAppCatalog.ResolveRoot(hostEnvironment.ContentRootPath);
         _apps = new GameCoordinatorAppCatalog(_gcRoot);
         _logger.LogInformation("GC script root resolved to {GCRoot}", _gcRoot);
@@ -51,6 +53,18 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
         return false;
     }
 
+    public bool TryDescribeMessageType(uint appId, uint messageType, out GcMessageTypeDescriptor descriptor)
+    {
+        if (_apps.TryGetApp(appId, out var app, out _)
+            && app.MessageTypes.TryGetValue(messageType, out descriptor))
+        {
+            return true;
+        }
+
+        descriptor = default;
+        return false;
+    }
+
     public ApiGCExchangeResponse Exchange(GameCoordinatorContext context, ApiGCExchangeRequest request)
     {
         if (!_apps.TryGetApp(context.AppId, out var app, out var catalogError))
@@ -64,9 +78,6 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
 
             return new ApiGCExchangeResponse { Handled = false };
         }
-
-        _trace.Record("in", context.AppId, context.SteamId, request.MessageType,
-            GameCoordinatorTraceService.EstimatePayloadSize(request.BodyBase64), context.PersonaName);
 
         try
         {
@@ -83,15 +94,7 @@ public sealed class GameCoordinatorScriptPlugin : IGameCoordinatorPlugin, IGameC
                         .GetResult();
                     if (!handled)
                     {
-                        _trace.Record("unhandled", context.AppId, context.SteamId, request.MessageType, 0);
                         return new ApiGCExchangeResponse { Handled = false };
-                    }
-
-                    foreach (var message in host.Response.Messages)
-                    {
-                        _trace.Record("out", context.AppId, context.SteamId, message.MessageType,
-                            GameCoordinatorTraceService.EstimatePayloadSize(message.PayloadBase64),
-                            message.TargetJobId == null ? string.Empty : $"job {message.TargetJobId}");
                     }
 
                     return host.Response;

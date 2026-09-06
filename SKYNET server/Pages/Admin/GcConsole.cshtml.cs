@@ -33,7 +33,35 @@ public class GcConsoleModel : PageModel
             return Unauthorized();
         }
 
-        return new JsonResult(new { entries = _trace.GetSince(since) });
+        var entries = _trace.GetSince(since).Select(entry => new
+        {
+            entry.Seq,
+            entry.TimestampUtc,
+            entry.Kind,
+            entry.AppId,
+            entry.SteamId,
+            entry.MessageType,
+            entry.Size,
+            entry.Detail,
+            entry.SourceJobId,
+            entry.TargetJobId,
+            entry.Protobuf,
+            entry.DecodedTypeName,
+            entry.DecodeError
+        });
+        return new JsonResult(new { entries });
+    }
+
+    public IActionResult OnGetEntryDetail(long seq)
+    {
+        if (!_state.IsWebAdmin(GetToken()))
+        {
+            return Unauthorized();
+        }
+
+        return _trace.TryGet(seq, out var entry)
+            ? new JsonResult(entry)
+            : NotFound();
     }
 
     public IActionResult OnGetLiveState()

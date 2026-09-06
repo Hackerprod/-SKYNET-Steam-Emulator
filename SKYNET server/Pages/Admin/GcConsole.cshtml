@@ -98,6 +98,32 @@
     .gc-on { color: #8be98b; font-weight: bold; }
     .gc-off { color: #888; }
     .gc-muted { color: #777; font-size: 0.75rem; }
+    .gc-inspectable { cursor: pointer; }
+    .gc-inspectable:hover { background: #1b2636; }
+    .gc-detail-panel {
+        display: none;
+        position: fixed;
+        z-index: 50;
+        inset: 8vh 8vw;
+        overflow-y: auto;
+        padding: 1rem;
+        border: 1px solid #333;
+        border-radius: 0.75rem;
+        background: #111;
+        color: #ededed;
+        box-shadow: 0 1rem 4rem #000;
+    }
+    .gc-detail-panel.open { display: block; }
+    .gc-detail-header { display: flex; justify-content: space-between; gap: 1rem; align-items: center; margin-bottom: 1rem; }
+    .gc-detail-header h2 { margin: 0; font-size: 1rem; }
+    .gc-detail-close { background: #161616; border: 1px solid #333; border-radius: 0.4rem; color: #ededed; padding: 0.25rem 0.6rem; cursor: pointer; }
+    .gc-detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.5rem 1rem; margin-bottom: 1rem; }
+    .gc-detail-field { color: #aaa; font-size: 0.75rem; }
+    .gc-detail-field strong { display: block; color: #ededed; font-size: 0.85rem; word-break: break-word; }
+    .gc-detail-section { margin-top: 1rem; }
+    .gc-detail-section h3 { color: #3b82f6; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; }
+    .gc-detail-pre { max-height: 28vh; overflow: auto; padding: 0.75rem; border: 1px solid #222; border-radius: 0.4rem; background: #0a0a0a; white-space: pre-wrap; word-break: break-word; font: 0.75rem Consolas, monospace; }
+    .gc-detail-pair { background: transparent; border: 0; color: #7ec8ff; cursor: pointer; padding: 0; font: inherit; text-decoration: underline; }
 </style>
 
 <div class="space-y-4">
@@ -143,19 +169,37 @@
     </table>
 </div>
 
+<div id="gcDetailPanel" class="gc-detail-panel" role="dialog" aria-modal="true" aria-labelledby="gcDetailTitle">
+    <div class="gc-detail-header">
+        <h2 id="gcDetailTitle">GC message detail</h2>
+        <button type="button" class="gc-detail-close" id="gcDetailClose">Close</button>
+    </div>
+    <div id="gcDetailContent"></div>
+</div>
+
 <script>
     (function () {
         var since = 0;
         var maxRows = 1000;
+        var entries = [];
         var rows = document.getElementById("gcRows");
         var wrap = document.getElementById("gcWrap");
         var pause = document.getElementById("gcPause");
         var autoScroll = document.getElementById("gcAutoScroll");
         var filter = document.getElementById("gcFilter");
         var status = document.getElementById("gcStatus");
+        var detailPanel = document.getElementById("gcDetailPanel");
+        var detailContent = document.getElementById("gcDetailContent");
 
         document.getElementById("gcClear").addEventListener("click", function () {
             rows.innerHTML = "";
+            entries = [];
+            closeDetail();
+        });
+
+        document.getElementById("gcDetailClose").addEventListener("click", closeDetail);
+        detailPanel.addEventListener("click", function (event) {
+            if (event.target === detailPanel) closeDetail();
         });
 
         filter.addEventListener("input", applyFilter);
@@ -169,7 +213,13 @@
         }
 
         function addEntry(entry) {
+            entries.push(entry);
             var tr = document.createElement("tr");
+            tr.dataset.seq = entry.seq;
+            if (entry.kind === "in" || entry.kind === "out" || entry.kind === "push") {
+                tr.className = "gc-inspectable";
+                tr.addEventListener("click", function () { showDetail(entry); });
+            }
             var time = new Date(entry.timestampUtc).toLocaleTimeString();
             var cells = [
                 time,
@@ -201,7 +251,129 @@
             rows.appendChild(tr);
             while (rows.children.length > maxRows) {
                 rows.removeChild(rows.firstChild);
+                entries.shift();
             }
+        }
+
+        function closeDetail() {
+            detailPanel.classList.remove("open");
+            detailContent.innerHTML = "";
+        }
+
+        function addField(container, label, value) {
+            var field = document.createElement("div");
+            field.className = "gc-detail-field";
+            field.textContent = label;
+            var strong = document.createElement("strong");
+            strong.textContent = value == null || value === "" ? "—" : value;
+            field.appendChild(strong);
+            container.appendChild(field);
+        }
+
+        function base64ToHex(value) {
+            if (!value) return "(empty payload)";
+            try {
+                var bytes = atob(value);
+                var lines = [];
+                for (var offset = 0; offset < bytes.length; offset += 16) {
+                    var hex = [];
+                    for (var i = offset; i < Math.min(offset + 16, bytes.length); i++) {
+                        hex.push(bytes.charCodeAt(i).toString(16).padStart(2, "0"));
+                    }
+                    lines.push(offset.toString(16).padStart(8, "0") + "  " + hex.join(" "));
+                }
+                return lines.join("\n");
+            } catch (_) {
+                return "(invalid base64 payload)";
+            }
+        }
+
+        function pairedEntry(entry) {
+            var jobId = entry.kind === "in" ? entry.sourceJobId : entry.targetJobId;
+            if (jobId == null) return null;
+            for (var i = 0; i < entries.length; i++) {
+                var candidate = entries[i];
+                if (candidate.seq === entry.seq) continue;
+                if (entry.kind === "in" && (candidate.kind === "out" || candidate.kind === "push") && candidate.targetJobId === jobId) return candidate;
+                if ((entry.kind === "out" || entry.kind === "push") && candidate.kind === "in" && candidate.sourceJobId === jobId) return candidate;
+            }
+            return null;
+        }
+
+        function showDetail(entry) {
+            fetch("?handler=EntryDetail&seq=" + encodeURIComponent(entry.seq), { credentials: "same-origin" })
+                .then(function (response) {
+                    if (response.status === 404) throw new Error("This entry is no longer in the trace buffer.");
+                    if (!response.ok) throw new Error("HTTP " + response.status);
+                    return response.json();
+                })
+                .then(function (data) {
+                    detailContent.innerHTML = "";
+                    var grid = document.createElement("div");
+                    grid.className = "gc-detail-grid";
+                    addField(grid, "Kind", data.kind);
+                    addField(grid, "AppId", data.appId);
+                    addField(grid, "SteamId", data.steamId);
+                    addField(grid, "MessageType", data.messageType);
+                    addField(grid, "SourceJobId", data.sourceJobId);
+                    addField(grid, "TargetJobId", data.targetJobId);
+                    addField(grid, "TimestampUtc", data.timestampUtc);
+                    addField(grid, "Size", data.size);
+                    addField(grid, "Protobuf", data.protobuf);
+                    detailContent.appendChild(grid);
+
+                    var payloadSection = document.createElement("div");
+                    payloadSection.className = "gc-detail-section";
+                    payloadSection.innerHTML = "<h3>Raw payload (base64)</h3>";
+                    var payload = document.createElement("pre");
+                    payload.className = "gc-detail-pre";
+                    payload.textContent = data.payloadBase64 || "(empty payload)";
+                    payloadSection.appendChild(payload);
+                    var hexTitle = document.createElement("h3");
+                    hexTitle.textContent = "Hex dump";
+                    payloadSection.appendChild(hexTitle);
+                    var hex = document.createElement("pre");
+                    hex.className = "gc-detail-pre";
+                    hex.textContent = base64ToHex(data.payloadBase64);
+                    payloadSection.appendChild(hex);
+                    detailContent.appendChild(payloadSection);
+
+                    var decodedSection = document.createElement("div");
+                    decodedSection.className = "gc-detail-section";
+                    decodedSection.innerHTML = "<h3>Decoded fields</h3>";
+                    if (data.decodedJson) {
+                        var decoded = document.createElement("pre");
+                        decoded.className = "gc-detail-pre";
+                        try { decoded.textContent = JSON.stringify(JSON.parse(data.decodedJson), null, 2); }
+                        catch (_) { decoded.textContent = data.decodedJson; }
+                        decodedSection.appendChild(decoded);
+                    } else {
+                        var reason = document.createElement("div");
+                        reason.className = "gc-muted";
+                        reason.textContent = data.decodeError || "No decode mapping for this MessageType.";
+                        decodedSection.appendChild(reason);
+                    }
+                    detailContent.appendChild(decodedSection);
+
+                    var pair = pairedEntry(data);
+                    if (pair) {
+                        var pairSection = document.createElement("div");
+                        pairSection.className = "gc-detail-section";
+                        pairSection.innerHTML = "<h3>Paired response/request</h3>";
+                        var pairButton = document.createElement("button");
+                        pairButton.className = "gc-detail-pair";
+                        pairButton.textContent = "Seq " + pair.seq + " · " + pair.kind + " · MessageType " + pair.messageType;
+                        pairButton.addEventListener("click", function () { showDetail(pair); });
+                        pairSection.appendChild(pairButton);
+                        detailContent.appendChild(pairSection);
+                    }
+
+                    detailPanel.classList.add("open");
+                })
+                .catch(function (error) {
+                    detailContent.textContent = error.message;
+                    detailPanel.classList.add("open");
+                });
         }
 
         function poll() {

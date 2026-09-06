@@ -145,9 +145,18 @@ public sealed class GameCoordinatorAppCatalog
     {
         var root = Path.GetFullPath(appRoot);
         var manifestPath = Path.Combine(root, ManifestFileName);
+        var messageTypesPath = Path.Combine(root, "contracts", "message-types.json");
         var manifest = File.Exists(manifestPath)
             ? JsonSerializer.Deserialize<GameCoordinatorAppManifest>(File.ReadAllText(manifestPath), JsonOptions) ?? new GameCoordinatorAppManifest()
             : new GameCoordinatorAppManifest();
+        var messageTypeEntries = File.Exists(messageTypesPath)
+            ? JsonSerializer.Deserialize<Dictionary<uint, GameCoordinatorMessageTypeManifestEntry>>(
+                File.ReadAllText(messageTypesPath), JsonOptions)
+                ?? new Dictionary<uint, GameCoordinatorMessageTypeManifestEntry>()
+            : new Dictionary<uint, GameCoordinatorMessageTypeManifestEntry>();
+        var messageTypes = messageTypeEntries.ToDictionary(
+            pair => pair.Key,
+            pair => new GcMessageTypeDescriptor(pair.Value.Name ?? string.Empty, pair.Value.ProtoType ?? string.Empty));
 
         if (manifest.AppId is { } manifestAppId && manifestAppId != appId)
         {
@@ -174,7 +183,8 @@ public sealed class GameCoordinatorAppCatalog
             manifestPath,
             hostServices,
             NormalizeProtoContracts(manifest.ProtoContracts),
-            manifest.TypeScript ?? new GameCoordinatorTypeScriptOptions());
+            manifest.TypeScript ?? new GameCoordinatorTypeScriptOptions(),
+            messageTypes);
     }
 
     public static Assembly ResolveContractAssembly(
@@ -291,7 +301,8 @@ public sealed record GameCoordinatorAppDefinition(
     string ManifestPath,
     IReadOnlyList<string> HostServices,
     GameCoordinatorProtoContractOptions ProtoContracts,
-    GameCoordinatorTypeScriptOptions TypeScript)
+    GameCoordinatorTypeScriptOptions TypeScript,
+    IReadOnlyDictionary<uint, GcMessageTypeDescriptor> MessageTypes)
 {
     public bool HasHostService(string serviceName)
     {
@@ -308,6 +319,7 @@ public sealed record GameCoordinatorAppDefinition(
                 AppId.ToString(CultureInfo.InvariantCulture),
                 EntryPoint,
                 FileIdentity(ManifestPath, includeContentHash: true),
+                FileIdentity(Path.Combine(RootPath, "contracts", "message-types.json"), includeContentHash: true),
                 hostServices,
                 contractSources,
                 TypeScript.GeneratedContracts ?? string.Empty,
@@ -372,4 +384,10 @@ public sealed class GameCoordinatorTypeScriptOptions
     public string? GeneratedContracts { get; set; }
     public string? ExtraMessageIds { get; set; }
     public string? Routes { get; set; }
+}
+
+public sealed class GameCoordinatorMessageTypeManifestEntry
+{
+    public string? Name { get; set; }
+    public string? ProtoType { get; set; }
 }
