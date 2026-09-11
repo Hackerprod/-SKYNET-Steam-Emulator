@@ -216,13 +216,17 @@ public sealed class GameLauncher
     }
 
     /// <summary>Restores the original DLL and removes our footprint. Safe to call twice.</summary>
-    private static void TryRestore(string targetDll)
+    private static bool TryRestore(string targetDll, out string? failure)
     {
         try
         {
             var backup = targetDll + BackupSuffix;
             var marker = targetDll + MarkerSuffix;
-            if (!File.Exists(marker) && !File.Exists(backup)) return;
+            if (!File.Exists(marker) && !File.Exists(backup))
+            {
+                failure = null;
+                return true;
+            }
 
             if (File.Exists(targetDll)) File.Delete(targetDll);
             var cfg = targetDll + ".config";
@@ -230,8 +234,14 @@ public sealed class GameLauncher
 
             if (File.Exists(backup)) File.Move(backup, targetDll);
             if (File.Exists(marker)) File.Delete(marker);
+            failure = null;
+            return true;
         }
-        catch { /* best-effort; recovered on next start */ }
+        catch (Exception ex)
+        {
+            failure = $"{targetDll}: {ex.Message}";
+            return false;
+        }
     }
 
     /// <summary>
@@ -239,6 +249,9 @@ public sealed class GameLauncher
     /// Call on startup (no game of ours is running then, so files are unlocked).
     /// </summary>
     public void RecoverOrphans(IEnumerable<GameEntry> games)
+        => RecoverOrphans(games, null);
+
+    public void RecoverOrphans(IEnumerable<GameEntry> games, ICollection<string>? failures)
     {
         foreach (var game in games)
         {
@@ -247,7 +260,10 @@ public sealed class GameLauncher
             {
                 var target = Path.Combine(game.ExeFolder, name);
                 if (File.Exists(target + MarkerSuffix) || File.Exists(target + BackupSuffix))
-                    TryRestore(target);
+                {
+                    if (!TryRestore(target, out var failure) && failure != null)
+                        failures?.Add(failure);
+                }
             }
         }
     }

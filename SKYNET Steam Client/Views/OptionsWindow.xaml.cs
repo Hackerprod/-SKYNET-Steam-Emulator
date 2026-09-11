@@ -64,6 +64,21 @@ public partial class OptionsWindow : Window
         DialogResult = true;
     }
 
+    private void ResetClient_Click(object sender, RoutedEventArgs e)
+    {
+        if (!Dialog.Confirm(this, "Reset client",
+                "Remove SKYNET Steam Client temporary data? Game files and SKYNET Server data will not be changed.",
+                "RESET CLIENT"))
+            return;
+
+        var removeConfiguration = Dialog.Confirm(this, "Remove settings?",
+            "Also remove launcher configuration and launcher.log? Choose CANCEL to keep settings.",
+            "REMOVE SETTINGS");
+        var report = App.ResetClientData(removeConfiguration);
+        Dialog.Info(this, "Reset complete", report);
+        App.ShutdownClient();
+    }
+
     private void Cancel_Click(object sender, RoutedEventArgs e) => DialogResult = false;
 
     private void Bar_Drag(object sender, MouseButtonEventArgs e)

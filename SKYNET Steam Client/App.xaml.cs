@@ -14,6 +14,50 @@ public partial class App : Application
     /// knows to let the window close instead of hiding it to the tray.</summary>
     public static bool IsExiting { get; private set; }
 
+    public static string ResetClientData(bool removeConfiguration)
+    {
+        var report = new List<string>();
+
+        TryDeleteDirectory(
+            Path.Combine(Path.GetTempPath(), "SKYNETSteamClient"),
+            "Temporary client data",
+            report);
+
+        if (removeConfiguration)
+        {
+            TryDeleteDirectory(ConfigStore.RootDir, "Client configuration and logs", report);
+        }
+        else
+        {
+            report.Add("Client configuration and logs: kept.");
+        }
+
+        return string.Join(Environment.NewLine, report);
+    }
+
+    public static void ShutdownClient()
+    {
+        IsExiting = true;
+        Current.Shutdown();
+    }
+
+    private static void TryDeleteDirectory(string path, string description, ICollection<string> report)
+    {
+        try
+        {
+            Directory.Delete(path, recursive: true);
+            report.Add($"{description}: removed.");
+        }
+        catch (DirectoryNotFoundException)
+        {
+            report.Add($"{description}: not found.");
+        }
+        catch (Exception ex)
+        {
+            report.Add($"{description}: cleanup failed; skipped. {ex.Message}");
+        }
+    }
+
     private SingleInstanceGuard? _singleInstance;
     private TrayIconService? _tray;
     private MainWindow? _mainWindow;

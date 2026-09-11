@@ -60,6 +60,12 @@
                 <TextBlock Text="WINDOW" Style="{StaticResource Label}" />
                 <CheckBox x:Name="CCloseToTray" Content="Close button minimizes to tray instead of exiting"
                           Foreground="{StaticResource SkynetText}" FontSize="12" />
+
+                <TextBlock Text="CLIENT DATA" Style="{StaticResource Label}" />
+                <TextBlock Text="Reset launcher temporary data. Game files and SKYNET Server data are never changed."
+                           Foreground="{StaticResource SkynetMuted}" FontSize="11" TextWrapping="Wrap" />
+                <Button Content="RESET CLIENT" Style="{StaticResource GhostButton}" Click="ResetClient_Click"
+                        HorizontalAlignment="Left" Margin="0,10,0,0" />
             </StackPanel>
 
             <Border Background="{StaticResource SkynetBlack}" CornerRadius="0,0,12,12"
