@@ -1368,8 +1368,17 @@ function attachServer(ctx: RawMessageContext, lobby: LobbyState, markRun: boolea
         sendLobbyPlayerItemsToServer(ctx, lobby);
         lobby.playerItemsServerSteamId = lobby.serverSteamId;
     }
-    broadcastLobby(ctx, lobby, 0n, true);
+    // The dedicated server must receive the full SO cache subscribe BEFORE any
+    // incremental update for the same owner - a client-side SO cache can't
+    // meaningfully apply an update to an object it hasn't subscribed to yet.
+    // The legacy (known-working) GC implementation always subscribed the server
+    // first; this used to broadcast the update first instead, which is the
+    // likely cause of dedicated servers rejecting remote client connections
+    // with NETWORK_DISCONNECT_REJECT_NOLOBBY despite the lobby/GC assignment
+    // otherwise working. The server already gets the complete state via the
+    // subscribe below, so it doesn't need the separate broadcast too.
     sendTo(ctx, lobby.serverSteamId, Msg.SOCacheSubscribed, buildLobbySoCacheSubscribed(ctx, lobby));
+    broadcastLobby(ctx, lobby, 0n, false);
     publishLobby(ctx.services.lobby, lobby);
 }
 
