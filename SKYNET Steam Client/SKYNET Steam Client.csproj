@@ -25,6 +25,10 @@
   <ItemGroup>
     <PackageReference Include="System.Text.Json" Version="8.0.5" />
     <PackageReference Include="System.Net.Http.Json" Version="8.0.0" />
+    <!-- x64 assembler/disassembler used to build the in-memory LoadLibrary redirect
+         hook (NativeApiRedirectHook.cs) - encodes and decodes real machine code
+         instead of hand-written opcode bytes. -->
+    <PackageReference Include="Iced" Version="1.21.0" />
   </ItemGroup>
 
   <ItemGroup>

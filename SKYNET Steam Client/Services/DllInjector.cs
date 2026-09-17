@@ -83,6 +83,26 @@ public static class DllInjector
             }
 
             InjectInto(pi.hProcess, dllPath);
+
+            // Best-effort: some loaders (Unity's native plugin loader among them)
+            // call LoadLibrary(Ex)W with a full path instead of a bare file name,
+            // which the module-name reuse above never sees. This additionally
+            // hooks LoadLibrary(Ex)W in the target so any call for a file whose
+            // NAME matches our payload gets redirected regardless of the requested
+            // directory. Failure here must not abort games this already worked
+            // for - it only widens coverage for the cases the plain hijack misses.
+            if (targetArch == GameArch.X64)
+            {
+                try
+                {
+                    NativeApiRedirectHook.Install(pi.hProcess, dllPath);
+                }
+                catch
+                {
+                    // Fall back to the bare-name hijack already performed above.
+                }
+            }
+
             AllowSetForegroundWindow(pi.dwProcessId);
             if (ResumeThread(pi.hThread) == unchecked((uint)-1))
                 throw new Win32Exception(Marshal.GetLastWin32Error(), "ResumeThread failed");
