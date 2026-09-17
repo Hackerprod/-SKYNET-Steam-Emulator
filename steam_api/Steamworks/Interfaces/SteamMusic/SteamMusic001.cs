@@ -4,6 +4,7 @@ using System;
 namespace SKYNET.Steamworks.Interfaces
 {
     [Interface("STEAMMUSIC_INTERFACE_VERSION001")]
+    [Interface("SteamMusic001")] // Dimraeth (Unity) requests this short form instead of Valve's official macro name.
     public class SteamMusic001 : ISteamInterface
     {
         public bool BIsEnabled(IntPtr _)
