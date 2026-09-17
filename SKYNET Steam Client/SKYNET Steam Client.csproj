@@ -23,32 +23,52 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="EasyHook" Version="2.7.7097" />
     <PackageReference Include="System.Text.Json" Version="8.0.5" />
     <PackageReference Include="System.Net.Http.Json" Version="8.0.0" />
-    <!-- x64 assembler/disassembler used to build the in-memory LoadLibrary redirect
-         hook (NativeApiRedirectHook.cs) - encodes and decodes real machine code
-         instead of hand-written opcode bytes. -->
-    <PackageReference Include="Iced" Version="1.21.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="System.IO" />
   </ItemGroup>
 
+  <!-- SKYNET Hook Bootstrap is its own SDK-style project nested under this one
+       for folder organization only - without this exclude, this project's own
+       implicit **/*.cs glob would also pick up the nested project's generated
+       obj\**\AssemblyInfo.cs / AssemblyAttributes.cs files and fail to build
+       with duplicate assembly attribute errors. -->
   <ItemGroup>
-    <ProjectReference Include="..\SKYNET Injector Helper\SKYNET Injector Helper.csproj"
-                      ReferenceOutputAssembly="false" />
-    <Content Include="..\SKYNET Injector Helper\bin\$(Configuration)\net472\SKYNET Injector Helper.exe">
-      <Link>helpers\x86\SKYNET Injector Helper.exe</Link>
+    <Compile Remove="SKYNET Hook Bootstrap\**" />
+    <EmbeddedResource Remove="SKYNET Hook Bootstrap\**" />
+    <None Remove="SKYNET Hook Bootstrap\**" />
+  </ItemGroup>
+
+  <!-- EasyHook injection payload (SKYNET Hook Bootstrap), built for both
+       architectures - RemoteHooking.CreateAndInject wants a path for each and
+       picks the right one for the target process itself. Two ProjectReference
+       entries with an explicit SetPlatform force both platform builds to run
+       every time the client builds, since a plain ProjectReference would only
+       build whichever single platform negotiation picks. -->
+  <ItemGroup>
+    <ProjectReference Include="SKYNET Hook Bootstrap\SKYNET Hook Bootstrap.csproj"
+                      ReferenceOutputAssembly="false" SetPlatform="Platform=x86" />
+    <ProjectReference Include="SKYNET Hook Bootstrap\SKYNET Hook Bootstrap.csproj"
+                      ReferenceOutputAssembly="false" SetPlatform="Platform=x64" />
+    <Content Include="SKYNET Hook Bootstrap\bin\$(Configuration)\x86\SKYNET.HookBootstrap.dll">
+      <Link>helpers\x86\SKYNET.HookBootstrap.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-    <Content Include="..\SKYNET Injector Helper\bin\$(Configuration)\net472\SKYNET Injector Helper.exe.config"
-             Condition="Exists('..\SKYNET Injector Helper\bin\$(Configuration)\net472\SKYNET Injector Helper.exe.config')">
-      <Link>helpers\x86\SKYNET Injector Helper.exe.config</Link>
+    <Content Include="SKYNET Hook Bootstrap\bin\$(Configuration)\x64\SKYNET.HookBootstrap.dll">
+      <Link>helpers\x64\SKYNET.HookBootstrap.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
+    <!-- EasyHook's own native helper binaries (EasyHook32/64.dll,
+         EasyHook32/64Svc.exe) are needed by the CALLING process, not the
+         injected payload - the EasyHook package's own content files already
+         copy them next to SKYNET Steam Client.exe itself, nothing extra
+         needed here. -->
   </ItemGroup>
 
   <!-- The emulator DLLs shipped as the injection payload. Copied next to the exe. -->

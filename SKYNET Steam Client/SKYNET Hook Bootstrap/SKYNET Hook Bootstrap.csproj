@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Minimal EasyHook injection payload. This is what actually gets loaded into a
+    launched game via RemoteHooking.CreateAndInject - kept deliberately small and
+    dependency-free (no WPF, nothing from SKYNET Steam Client) since it runs
+    inside the game's own process, not the launcher's. Its only job: load the
+    real steam_api payload, then install the LdrLoadDll hook so any later load of
+    a file whose name matches gets redirected to the copy already loaded here -
+    see EntryPoint.cs.
+
+    Built for both x86 and x64 (CreateAndInject wants a path for each - it picks
+    the right one for the target process's own bitness). Two platform-specific
+    output folders come out of the one project via the PlatformTarget switch
+    below, same idea as SKYNET Injector Helper's single-arch build but doubled.
+  -->
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net472</TargetFramework>
+    <Platforms>x86;x64</Platforms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>SKYNET.HookBootstrap</AssemblyName>
+    <RootNamespace>SKYNET.HookBootstrap</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>bin\$(Configuration)\$(Platform)\</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EasyHook" Version="2.7.7097" />
+  </ItemGroup>
+</Project>

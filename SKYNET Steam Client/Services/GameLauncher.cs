@@ -9,37 +9,24 @@ public sealed class LaunchResult
     public bool Success { get; set; }
     public string? Error { get; set; }
     public Process? Process { get; set; }
-    public bool UsedStaticImportRedirection { get; set; }
 
     public static LaunchResult Fail(string error) => new() { Success = false, Error = error };
-    public static LaunchResult Ok(Process p, bool usedStaticImportRedirection) => new()
-    {
-        Success = true,
-        Process = p,
-        UsedStaticImportRedirection = usedStaticImportRedirection
-    };
+    public static LaunchResult Ok(Process p) => new() { Success = true, Process = p };
 }
 
 /// <summary>
 /// Launches a game with the SKYNET emulator injected into the process at start,
-/// with nothing written into the game folder. The game exe is created suspended,
-/// the emulator DLL shipped in the launcher's payload folder is copied to an
-/// isolated per-build shadow path and injected via
-/// CreateRemoteThread(LoadLibraryW), then the process is resumed. Because the game
-/// loads steam_api64.dll dynamically by bare name, the loader returns our
-/// already-loaded module for its later LoadLibrary("steam_api64.dll"), so the game
-/// uses our emulator without the original file ever being touched. See DllInjector.
-/// The shadow path keeps Windows' loader lock away from the launcher's payload,
-/// so rebuilding the client can refresh its bundled DLL while a launched game is
-/// still running.
-///
-/// RecoverOrphans still runs on startup to clean up any DLL swap left by an older
-/// version of this launcher.
+/// with nothing written into the game folder. The emulator DLL shipped in the
+/// launcher's payload folder is copied to an isolated per-build shadow path, and
+/// EasyHook (see DllInjector) creates the game suspended and loads it before the
+/// game's own code - including the Windows loader's own static-import
+/// resolution - ever runs, so the game uses our emulator without the original
+/// file ever being touched. The shadow path keeps Windows' loader lock away from
+/// the launcher's payload, so rebuilding the client can refresh its bundled DLL
+/// while a launched game is still running.
 /// </summary>
 public sealed class GameLauncher
 {
-    private const string BackupSuffix = ".skynet-orig";
-    private const string MarkerSuffix = ".skynet-injected";
     private const int PreviousPayloadShadowsToKeep = 3;
 
     private static string PayloadDll(GameArch arch)
@@ -80,8 +67,6 @@ public sealed class GameLauncher
             return LaunchResult.Fail($"Failed to write steam_api.ini:\n{ex.Message}");
         }
 
-        var steamImportName = Path.GetFileName(payload);
-        var hasStaticSteamImport = PeImports.ImportsModule(game.ExecutablePath, steamImportName);
         Process proc;
         try
         {
@@ -106,8 +91,7 @@ public sealed class GameLauncher
                 game.ExecutablePath,
                 injectablePayload,
                 args,
-                workDir,
-                hasStaticSteamImport ? steamImportName : null);
+                workDir);
             proc.EnableRaisingEvents = true;
             proc.Exited += (_, _) => GameExited?.Invoke(game);
             GameWindowActivator.BringToFrontWhenReady(proc);
@@ -118,7 +102,7 @@ public sealed class GameLauncher
         }
 
         game.LastPlayedUtc = DateTimeOffset.UtcNow;
-        return LaunchResult.Ok(proc, hasStaticSteamImport);
+        return LaunchResult.Ok(proc);
     }
 
     private static bool ContainsArgument(string? arguments, string expected)
@@ -215,56 +199,4 @@ public sealed class GameLauncher
         }
     }
 
-    /// <summary>Restores the original DLL and removes our footprint. Safe to call twice.</summary>
-    private static bool TryRestore(string targetDll, out string? failure)
-    {
-        try
-        {
-            var backup = targetDll + BackupSuffix;
-            var marker = targetDll + MarkerSuffix;
-            if (!File.Exists(marker) && !File.Exists(backup))
-            {
-                failure = null;
-                return true;
-            }
-
-            if (File.Exists(targetDll)) File.Delete(targetDll);
-            var cfg = targetDll + ".config";
-            if (File.Exists(cfg)) File.Delete(cfg);
-
-            if (File.Exists(backup)) File.Move(backup, targetDll);
-            if (File.Exists(marker)) File.Delete(marker);
-            failure = null;
-            return true;
-        }
-        catch (Exception ex)
-        {
-            failure = $"{targetDll}: {ex.Message}";
-            return false;
-        }
-    }
-
-    /// <summary>
-    /// Restores any DLLs left injected by a previous run that crashed before exit.
-    /// Call on startup (no game of ours is running then, so files are unlocked).
-    /// </summary>
-    public void RecoverOrphans(IEnumerable<GameEntry> games)
-        => RecoverOrphans(games, null);
-
-    public void RecoverOrphans(IEnumerable<GameEntry> games, ICollection<string>? failures)
-    {
-        foreach (var game in games)
-        {
-            if (string.IsNullOrWhiteSpace(game.ExeFolder)) continue;
-            foreach (var name in new[] { "steam_api64.dll", "steam_api.dll" })
-            {
-                var target = Path.Combine(game.ExeFolder, name);
-                if (File.Exists(target + MarkerSuffix) || File.Exists(target + BackupSuffix))
-                {
-                    if (!TryRestore(target, out var failure) && failure != null)
-                        failures?.Add(failure);
-                }
-            }
-        }
-    }
 }

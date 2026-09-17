@@ -90,7 +90,6 @@ public partial class App : Application
 
         Store.Load();
         Server.Configure(Store.Config.ServerUrl);
-        Launcher.RecoverOrphans(Store.Config.Games);
 
         // Headless launch mode for automated testing:
         //   "SKYNET Steam Client.exe" --launch <gameId|exePath>
@@ -241,10 +240,8 @@ public partial class App : Application
             }
 
             HeadlessLog($"launched pid={result.Process!.Id}; waiting for exit...");
-            if (result.UsedStaticImportRedirection)
-                HeadlessLog("static Steam API import redirected to the injected payload.");
             await Task.Run(() => result.Process.WaitForExit());
-            HeadlessLog("game exited; original DLL restored.");
+            HeadlessLog("game exited.");
             Shutdown(0);
         }
         catch (Exception ex)
