@@ -14,7 +14,7 @@
 13|GetFriendsGroupIDByIndex|System.Int16|System.IntPtr,System.Int32
 14|GetFriendsGroupName|System.IntPtr|System.IntPtr,System.Int16
 15|GetFriendsGroupMembersCount|System.Int32|System.IntPtr,System.Int16
-16|GetFriendsGroupMembersList|System.Void|System.IntPtr,System.Int16,System.UInt64[]&,System.Int32
+16|GetFriendsGroupMembersList|System.Void|System.IntPtr,System.Int16,System.IntPtr,System.Int32
 17|HasFriend|System.Boolean|System.IntPtr,System.UInt64,System.Int32
 18|GetClanCount|System.Int32|System.IntPtr
 19|GetClanByIndex|System.IntPtr|System.IntPtr,System.IntPtr,System.Int32

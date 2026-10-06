@@ -1,0 +1,8 @@
+0|GetSessionCount|System.UInt32|System.IntPtr
+1|GetSessionID|System.UInt32|System.IntPtr,System.Int32
+2|GetSessionSteamID|System.IntPtr|System.IntPtr,System.IntPtr,System.UInt32
+3|GetSessionClientName|System.IntPtr|System.IntPtr,System.UInt32
+4|GetSessionClientFormFactor|System.Int32|System.IntPtr,System.UInt32
+5|BGetSessionClientResolution|System.Boolean|System.IntPtr,System.UInt32,System.IntPtr,System.IntPtr
+6|BStartRemotePlayTogether|System.Boolean|System.IntPtr,System.Boolean
+7|BSendRemotePlayTogetherInvite|System.Boolean|System.IntPtr,System.UInt64

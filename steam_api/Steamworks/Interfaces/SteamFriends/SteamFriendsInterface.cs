@@ -176,7 +176,7 @@ namespace SKYNET.Steamworks.Interfaces
         "GetFriendByIndex", "GetFriendRelationship", "GetFriendPersonaState", "GetFriendPersonaName",
         "GetFriendGamePlayed", "GetFriendPersonaNameHistory", "GetFriendSteamLevel", "GetPlayerNickname",
         "GetFriendsGroupCount", "GetFriendsGroupIDByIndex", "GetFriendsGroupName", "GetFriendsGroupMembersCount",
-        "GetFriendsGroupMembersList__V018", "HasFriend", "GetClanCount", "GetClanByIndex",
+        "GetFriendsGroupMembersList", "HasFriend", "GetClanCount", "GetClanByIndex",
         "GetClanName", "GetClanTag", "GetClanActivityCounts", "DownloadClanActivityCounts",
         "GetFriendCountFromSource", "GetFriendFromSourceByIndex", "IsUserInSource", "SetInGameVoiceSpeaking",
         "ActivateGameOverlay", "ActivateGameOverlayToUser", "ActivateGameOverlayToWebPage__V005", "ActivateGameOverlayToStore",
@@ -216,7 +216,7 @@ namespace SKYNET.Steamworks.Interfaces
         "GetPersonaName", "GetPersonaState", "GetFriendCount", "GetFriendByIndex",
         "GetFriendRelationship", "GetFriendPersonaState", "GetFriendPersonaName", "GetFriendGamePlayed",
         "GetFriendPersonaNameHistory", "GetFriendSteamLevel", "GetPlayerNickname", "GetFriendsGroupCount",
-        "GetFriendsGroupIDByIndex", "GetFriendsGroupName", "GetFriendsGroupMembersCount", "GetFriendsGroupMembersList__V018",
+        "GetFriendsGroupIDByIndex", "GetFriendsGroupName", "GetFriendsGroupMembersCount", "GetFriendsGroupMembersList",
         "HasFriend", "GetClanCount", "GetClanByIndex", "GetClanName",
         "GetClanTag", "GetClanActivityCounts", "DownloadClanActivityCounts", "GetFriendCountFromSource",
         "GetFriendFromSourceByIndex", "IsUserInSource", "SetInGameVoiceSpeaking", "ActivateGameOverlay",
@@ -441,12 +441,7 @@ namespace SKYNET.Steamworks.Interfaces
 
         public int GetFriendsGroupMembersCount(IntPtr _, FriendsGroupID_t friendsGroupID) { return SteamFriends.Instance.GetFriendsGroupMembersCount(friendsGroupID); }
 
-        public void GetFriendsGroupMembersList(IntPtr _, FriendsGroupID_t friendsGroupID, ref ulong[] pOutSteamIDMembers, int nMembersCount)
-        {
-            SteamFriends.Instance.GetFriendsGroupMembersList(friendsGroupID, ref pOutSteamIDMembers, nMembersCount);
-        }
-
-        public void GetFriendsGroupMembersList__V018(IntPtr _, FriendsGroupID_t friendsGroupID, IntPtr pOutSteamIDMembers, int nMembersCount) { SteamFriends.Instance.GetFriendsGroupMembersList(friendsGroupID, pOutSteamIDMembers, nMembersCount); }
+        public void GetFriendsGroupMembersList(IntPtr _, FriendsGroupID_t friendsGroupID, IntPtr pOutSteamIDMembers, int nMembersCount) { SteamFriends.Instance.GetFriendsGroupMembersList(friendsGroupID, pOutSteamIDMembers, nMembersCount); }
 
         public string GetClanTag__V015(IntPtr _, CSteamID steamIDClan)
         {

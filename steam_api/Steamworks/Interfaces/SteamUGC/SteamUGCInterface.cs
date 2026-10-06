@@ -8,6 +8,118 @@ using UGCUpdateHandle_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    [InterfaceLayout("STEAMUGC_INTERFACE_VERSION001",
+        "CreateQueryUserUGCRequest__V021", "CreateQueryAllUGCRequestPage__V021", "SendQueryUGCRequest__V021", "GetQueryUGCResult_old",
+        "ReleaseQueryUGCRequest__V021", "AddRequiredTag__V021", "AddExcludedTag__V021", "SetReturnLongDescription__V021",
+        "SetReturnTotalOnly__V021", "SetCloudFileNameFilter__V021", "SetMatchAnyTag__V021", "SetSearchText__V021",
+        "SetRankedByTrendDays__V021", "RequestUGCDetails__V001")]
+    [InterfaceLayout("STEAMUGC_INTERFACE_VERSION002",
+        "CreateQueryUserUGCRequest__V021", "CreateQueryAllUGCRequestPage__V021", "SendQueryUGCRequest__V021", "GetQueryUGCResult_old",
+        "ReleaseQueryUGCRequest__V021", "AddRequiredTag__V021", "AddExcludedTag__V021", "SetReturnLongDescription__V021",
+        "SetReturnTotalOnly__V021", "SetAllowCachedResponse__V021", "SetCloudFileNameFilter__V021", "SetMatchAnyTag__V021",
+        "SetSearchText__V021", "SetRankedByTrendDays__V021", "RequestUGCDetails__V021", "CreateItem__V021",
+        "StartItemUpdate__V021", "SetItemTitle__V021", "SetItemDescription__V021", "SetItemVisibility__V021",
+        "SetItemTags", "SetItemContent__V021", "SetItemPreview__V021", "SubmitItemUpdate__V021",
+        "GetItemUpdateProgress__V021", "SubscribeItem__V021", "UnsubscribeItem__V021", "GetNumSubscribedItems",
+        "GetSubscribedItems", "GetItemInstallInfo__V002", "GetItemUpdateInfo")]
+    [InterfaceLayout("STEAMUGC_INTERFACE_VERSION003",
+        "CreateQueryUserUGCRequest__V021", "CreateQueryAllUGCRequestPage__V021", "SendQueryUGCRequest__V021", "GetQueryUGCResult_old",
+        "ReleaseQueryUGCRequest__V021", "AddRequiredTag__V021", "AddExcludedTag__V021", "SetReturnLongDescription__V021",
+        "SetReturnTotalOnly__V021", "SetAllowCachedResponse__V021", "SetCloudFileNameFilter__V021", "SetMatchAnyTag__V021",
+        "SetSearchText__V021", "SetRankedByTrendDays__V021", "RequestUGCDetails__V021", "CreateItem__V021",
+        "StartItemUpdate__V021", "SetItemTitle__V021", "SetItemDescription__V021", "SetItemVisibility__V021",
+        "SetItemTags", "SetItemContent__V021", "SetItemPreview__V021", "SubmitItemUpdate__V021",
+        "GetItemUpdateProgress__V021", "SubscribeItem__V021", "UnsubscribeItem__V021", "GetNumSubscribedItems",
+        "GetSubscribedItems", "GetItemInstallInfo__V003", "GetItemUpdateInfo")]
+    [InterfaceLayout("STEAMUGC_INTERFACE_VERSION004",
+        "CreateQueryUserUGCRequest__V021", "CreateQueryAllUGCRequestPage__V021", "SendQueryUGCRequest__V021", "GetQueryUGCResult_old",
+        "ReleaseQueryUGCRequest__V021", "AddRequiredTag__V021", "AddExcludedTag__V021", "SetReturnLongDescription__V021",
+        "SetReturnTotalOnly__V021", "SetAllowCachedResponse__V021", "SetCloudFileNameFilter__V021", "SetMatchAnyTag__V021",
+        "SetSearchText__V021", "SetRankedByTrendDays__V021", "RequestUGCDetails__V021", "CreateItem__V021",
+        "StartItemUpdate__V021", "SetItemTitle__V021", "SetItemDescription__V021", "SetItemVisibility__V021",
+        "SetItemTags", "SetItemContent__V021", "SetItemPreview__V021", "SubmitItemUpdate__V021",
+        "GetItemUpdateProgress__V021", "SubscribeItem__V021", "UnsubscribeItem__V021", "GetNumSubscribedItems",
+        "GetSubscribedItems", "GetItemState", "GetItemInstallInfo", "GetItemDownloadInfo__V021",
+        "DownloadItem__V021")]
+    [InterfaceLayout("STEAMUGC_INTERFACE_VERSION005",
+        "CreateQueryUserUGCRequest__V021", "CreateQueryAllUGCRequestPage__V021", "CreateQueryUGCDetailsRequest__V021", "SendQueryUGCRequest__V021",
+        "GetQueryUGCResult_old", "GetQueryUGCPreviewURL__V021", "GetQueryUGCMetadata__V021", "GetQueryUGCChildren__V021",
+        "GetQueryUGCStatistic__V021", "GetQueryUGCNumAdditionalPreviews__V021", "GetQueryUGCAdditionalPreview__V005", "ReleaseQueryUGCRequest__V021",
+        "AddRequiredTag__V021", "AddExcludedTag__V021", "SetReturnLongDescription__V021", "SetReturnMetadata__V021",
+        "SetReturnChildren__V021", "SetReturnAdditionalPreviews__V021", "SetReturnTotalOnly__V021", "SetAllowCachedResponse__V021",
+        "SetCloudFileNameFilter__V021", "SetMatchAnyTag__V021", "SetSearchText__V021", "SetRankedByTrendDays__V021",
+        "RequestUGCDetails__V021", "CreateItem__V021", "StartItemUpdate__V021", "SetItemTitle__V021",
+        "SetItemDescription__V021", "SetItemMetadata__V021", "SetItemVisibility__V021", "SetItemTags",
+        "SetItemContent__V021", "SetItemPreview__V021", "SubmitItemUpdate__V021", "GetItemUpdateProgress__V021",
+        "AddItemToFavorites__V021", "RemoveItemFromFavorites__V021", "SubscribeItem__V021", "UnsubscribeItem__V021",
+        "GetNumSubscribedItems", "GetSubscribedItems", "GetItemState", "GetItemInstallInfo",
+        "GetItemDownloadInfo__V021", "DownloadItem__V021")]
+    [InterfaceLayout("STEAMUGC_INTERFACE_VERSION006",
+        "CreateQueryUserUGCRequest__V021", "CreateQueryAllUGCRequestPage__V021", "CreateQueryUGCDetailsRequest__V021", "SendQueryUGCRequest__V021",
+        "GetQueryUGCResult_old", "GetQueryUGCPreviewURL__V021", "GetQueryUGCMetadata__V021", "GetQueryUGCChildren__V021",
+        "GetQueryUGCStatistic__V021", "GetQueryUGCNumAdditionalPreviews__V021", "GetQueryUGCAdditionalPreview__V005", "ReleaseQueryUGCRequest__V021",
+        "AddRequiredTag__V021", "AddExcludedTag__V021", "SetReturnLongDescription__V021", "SetReturnMetadata__V021",
+        "SetReturnChildren__V021", "SetReturnAdditionalPreviews__V021", "SetReturnTotalOnly__V021", "SetLanguage__V021",
+        "SetAllowCachedResponse__V021", "SetCloudFileNameFilter__V021", "SetMatchAnyTag__V021", "SetSearchText__V021",
+        "SetRankedByTrendDays__V021", "RequestUGCDetails__V021", "CreateItem__V021", "StartItemUpdate__V021",
+        "SetItemTitle__V021", "SetItemDescription__V021", "SetItemUpdateLanguage__V021", "SetItemMetadata__V021",
+        "SetItemVisibility__V021", "SetItemTags", "SetItemContent__V021", "SetItemPreview__V021",
+        "SubmitItemUpdate__V021", "GetItemUpdateProgress__V021", "SetUserItemVote__V021", "GetUserItemVote__V021",
+        "AddItemToFavorites__V021", "RemoveItemFromFavorites__V021", "SubscribeItem__V021", "UnsubscribeItem__V021",
+        "GetNumSubscribedItems", "GetSubscribedItems", "GetItemState", "GetItemInstallInfo",
+        "GetItemDownloadInfo__V021", "DownloadItem__V021")]
+    [InterfaceLayout("STEAMUGC_INTERFACE_VERSION007",
+        "CreateQueryUserUGCRequest__V021", "CreateQueryAllUGCRequestPage__V021", "CreateQueryUGCDetailsRequest__V021", "SendQueryUGCRequest__V021",
+        "GetQueryUGCResult_old", "GetQueryUGCPreviewURL__V021", "GetQueryUGCMetadata__V021", "GetQueryUGCChildren__V021",
+        "GetQueryUGCStatistic__V021", "GetQueryUGCNumAdditionalPreviews__V021", "GetQueryUGCAdditionalPreview__V005", "GetQueryUGCNumKeyValueTags__V021",
+        "GetQueryUGCKeyValueTag__V021", "ReleaseQueryUGCRequest__V021", "AddRequiredTag__V021", "AddExcludedTag__V021",
+        "SetReturnKeyValueTags__V021", "SetReturnLongDescription__V021", "SetReturnMetadata__V021", "SetReturnChildren__V021",
+        "SetReturnAdditionalPreviews__V021", "SetReturnTotalOnly__V021", "SetLanguage__V021", "SetAllowCachedResponse__V021",
+        "SetCloudFileNameFilter__V021", "SetMatchAnyTag__V021", "SetSearchText__V021", "SetRankedByTrendDays__V021",
+        "AddRequiredKeyValueTag__V021", "RequestUGCDetails__V021", "CreateItem__V021", "StartItemUpdate__V021",
+        "SetItemTitle__V021", "SetItemDescription__V021", "SetItemUpdateLanguage__V021", "SetItemMetadata__V021",
+        "SetItemVisibility__V021", "SetItemTags", "SetItemContent__V021", "SetItemPreview__V021",
+        "RemoveItemKeyValueTags__V021", "AddItemKeyValueTag__V021", "SubmitItemUpdate__V021", "GetItemUpdateProgress__V021",
+        "SetUserItemVote__V021", "GetUserItemVote__V021", "AddItemToFavorites__V021", "RemoveItemFromFavorites__V021",
+        "SubscribeItem__V021", "UnsubscribeItem__V021", "GetNumSubscribedItems", "GetSubscribedItems",
+        "GetItemState", "GetItemInstallInfo", "GetItemDownloadInfo__V021", "DownloadItem__V021",
+        "BInitWorkshopForGameServer__V021", "SuspendDownloads__V021")]
+    [InterfaceLayout("STEAMUGC_INTERFACE_VERSION008",
+        "CreateQueryUserUGCRequest__V021", "CreateQueryAllUGCRequestPage__V021", "CreateQueryUGCDetailsRequest__V021", "SendQueryUGCRequest__V021",
+        "GetQueryUGCResult_old", "GetQueryUGCPreviewURL__V021", "GetQueryUGCMetadata__V021", "GetQueryUGCChildren__V021",
+        "GetQueryUGCStatistic__V021", "GetQueryUGCNumAdditionalPreviews__V021", "GetQueryUGCAdditionalPreview__V021", "GetQueryUGCNumKeyValueTags__V021",
+        "GetQueryUGCKeyValueTag__V021", "ReleaseQueryUGCRequest__V021", "AddRequiredTag__V021", "AddExcludedTag__V021",
+        "SetReturnKeyValueTags__V021", "SetReturnLongDescription__V021", "SetReturnMetadata__V021", "SetReturnChildren__V021",
+        "SetReturnAdditionalPreviews__V021", "SetReturnTotalOnly__V021", "SetLanguage__V021", "SetAllowCachedResponse__V021",
+        "SetCloudFileNameFilter__V021", "SetMatchAnyTag__V021", "SetSearchText__V021", "SetRankedByTrendDays__V021",
+        "AddRequiredKeyValueTag__V021", "RequestUGCDetails__V021", "CreateItem__V021", "StartItemUpdate__V021",
+        "SetItemTitle__V021", "SetItemDescription__V021", "SetItemUpdateLanguage__V021", "SetItemMetadata__V021",
+        "SetItemVisibility__V021", "SetItemTags", "SetItemContent__V021", "SetItemPreview__V021",
+        "RemoveItemKeyValueTags__V021", "AddItemKeyValueTag__V021", "AddItemPreviewFile__V021", "AddItemPreviewVideo__V021",
+        "UpdateItemPreviewFile__V021", "UpdateItemPreviewVideo__V021", "RemoveItemPreview__V021", "SubmitItemUpdate__V021",
+        "GetItemUpdateProgress__V021", "SetUserItemVote__V021", "GetUserItemVote__V021", "AddItemToFavorites__V021",
+        "RemoveItemFromFavorites__V021", "SubscribeItem__V021", "UnsubscribeItem__V021", "GetNumSubscribedItems",
+        "GetSubscribedItems", "GetItemState", "GetItemInstallInfo", "GetItemDownloadInfo__V021",
+        "DownloadItem__V021", "BInitWorkshopForGameServer__V021", "SuspendDownloads__V021", "StartPlaytimeTracking__V021",
+        "StopPlaytimeTracking__V021", "StopPlaytimeTrackingForAllItems__V021")]
+    [InterfaceLayout("STEAMUGC_INTERFACE_VERSION009",
+        "CreateQueryUserUGCRequest__V021", "CreateQueryAllUGCRequestPage__V021", "CreateQueryUGCDetailsRequest__V021", "SendQueryUGCRequest__V021",
+        "GetQueryUGCResult_old", "GetQueryUGCPreviewURL__V021", "GetQueryUGCMetadata__V021", "GetQueryUGCChildren__V021",
+        "GetQueryUGCStatistic__V021", "GetQueryUGCNumAdditionalPreviews__V021", "GetQueryUGCAdditionalPreview__V021", "GetQueryUGCNumKeyValueTags__V021",
+        "GetQueryUGCKeyValueTag__V021", "ReleaseQueryUGCRequest__V021", "AddRequiredTag__V021", "AddExcludedTag__V021",
+        "SetReturnOnlyIDs__V021", "SetReturnKeyValueTags__V021", "SetReturnLongDescription__V021", "SetReturnMetadata__V021",
+        "SetReturnChildren__V021", "SetReturnAdditionalPreviews__V021", "SetReturnTotalOnly__V021", "SetLanguage__V021",
+        "SetAllowCachedResponse__V021", "SetCloudFileNameFilter__V021", "SetMatchAnyTag__V021", "SetSearchText__V021",
+        "SetRankedByTrendDays__V021", "AddRequiredKeyValueTag__V021", "RequestUGCDetails__V021", "CreateItem__V021",
+        "StartItemUpdate__V021", "SetItemTitle__V021", "SetItemDescription__V021", "SetItemUpdateLanguage__V021",
+        "SetItemMetadata__V021", "SetItemVisibility__V021", "SetItemTags", "SetItemContent__V021",
+        "SetItemPreview__V021", "RemoveItemKeyValueTags__V021", "AddItemKeyValueTag__V021", "AddItemPreviewFile__V021",
+        "AddItemPreviewVideo__V021", "UpdateItemPreviewFile__V021", "UpdateItemPreviewVideo__V021", "RemoveItemPreview__V021",
+        "SubmitItemUpdate__V021", "GetItemUpdateProgress__V021", "SetUserItemVote__V021", "GetUserItemVote__V021",
+        "AddItemToFavorites__V021", "RemoveItemFromFavorites__V021", "SubscribeItem__V021", "UnsubscribeItem__V021",
+        "GetNumSubscribedItems", "GetSubscribedItems", "GetItemState", "GetItemInstallInfo",
+        "GetItemDownloadInfo__V021", "DownloadItem__V021", "BInitWorkshopForGameServer__V021", "SuspendDownloads__V021",
+        "StartPlaytimeTracking__V021", "StopPlaytimeTracking__V021", "StopPlaytimeTrackingForAllItems__V021")]
     [InterfaceLayout("STEAMUGC_INTERFACE_VERSION010",
         "CreateQueryUserUGCRequest", "CreateQueryAllUGCRequest", "CreateQueryUGCDetailsRequest", "SendQueryUGCRequest",
         "GetQueryUGCResult_old", "GetQueryUGCPreviewURL", "GetQueryUGCMetadata", "GetQueryUGCChildren",
@@ -48,6 +160,27 @@ namespace SKYNET.Steamworks.Interfaces
         "DownloadItem", "BInitWorkshopForGameServer", "SuspendDownloads", "StartPlaytimeTracking",
         "StopPlaytimeTracking", "StopPlaytimeTrackingForAllItems", "AddDependency", "RemoveDependency",
         "AddAppDependency", "RemoveAppDependency", "GetAppDependencies", "DeleteItem")]
+    [InterfaceLayout("STEAMUGC_INTERFACE_VERSION013",
+        "CreateQueryUserUGCRequest__V021", "CreateQueryAllUGCRequestCursor__V021", "CreateQueryAllUGCRequestPage__V021", "CreateQueryUGCDetailsRequest__V021",
+        "SendQueryUGCRequest__V021", "GetQueryUGCResult_old", "GetQueryUGCPreviewURL__V021", "GetQueryUGCMetadata__V021",
+        "GetQueryUGCChildren__V021", "GetQueryUGCStatistic__V021", "GetQueryUGCNumAdditionalPreviews__V021", "GetQueryUGCAdditionalPreview__V021",
+        "GetQueryUGCNumKeyValueTags__V021", "GetQueryUGCKeyValueTag__V013", "GetQueryUGCKeyValueTag__V021", "ReleaseQueryUGCRequest__V021",
+        "AddRequiredTag__V021", "AddExcludedTag__V021", "SetReturnOnlyIDs__V021", "SetReturnKeyValueTags__V021",
+        "SetReturnLongDescription__V021", "SetReturnMetadata__V021", "SetReturnChildren__V021", "SetReturnAdditionalPreviews__V021",
+        "SetReturnTotalOnly__V021", "SetReturnPlaytimeStats__V021", "SetLanguage__V021", "SetAllowCachedResponse__V021",
+        "SetCloudFileNameFilter__V021", "SetMatchAnyTag__V021", "SetSearchText__V021", "SetRankedByTrendDays__V021",
+        "AddRequiredKeyValueTag__V021", "RequestUGCDetails__V021", "CreateItem__V021", "StartItemUpdate__V021",
+        "SetItemTitle__V021", "SetItemDescription__V021", "SetItemUpdateLanguage__V021", "SetItemMetadata__V021",
+        "SetItemVisibility__V021", "SetItemTags", "SetItemContent__V021", "SetItemPreview__V021",
+        "SetAllowLegacyUpload__V021", "RemoveAllItemKeyValueTags__V021", "RemoveItemKeyValueTags__V021", "AddItemKeyValueTag__V021",
+        "AddItemPreviewFile__V021", "AddItemPreviewVideo__V021", "UpdateItemPreviewFile__V021", "UpdateItemPreviewVideo__V021",
+        "RemoveItemPreview__V021", "SubmitItemUpdate__V021", "GetItemUpdateProgress__V021", "SetUserItemVote__V021",
+        "GetUserItemVote__V021", "AddItemToFavorites__V021", "RemoveItemFromFavorites__V021", "SubscribeItem__V021",
+        "UnsubscribeItem__V021", "GetNumSubscribedItems", "GetSubscribedItems", "GetItemState",
+        "GetItemInstallInfo", "GetItemDownloadInfo__V021", "DownloadItem__V021", "BInitWorkshopForGameServer__V021",
+        "SuspendDownloads__V021", "StartPlaytimeTracking__V021", "StopPlaytimeTracking__V021", "StopPlaytimeTrackingForAllItems__V021",
+        "AddDependency__V021", "RemoveDependency__V021", "AddAppDependency__V021", "RemoveAppDependency__V021",
+        "GetAppDependencies__V021", "DeleteItem__V021")]
     [InterfaceLayout("STEAMUGC_INTERFACE_VERSION014",
         "CreateQueryUserUGCRequest", "CreateQueryAllUGCRequestCursor", "CreateQueryAllUGCRequestPage", "CreateQueryUGCDetailsRequest",
         "SendQueryUGCRequest", "GetQueryUGCResult_old", "GetQueryUGCPreviewURL", "GetQueryUGCMetadata",
@@ -138,6 +271,30 @@ namespace SKYNET.Steamworks.Interfaces
         "StopPlaytimeTrackingForAllItems", "AddDependency", "RemoveDependency", "AddAppDependency",
         "RemoveAppDependency", "GetAppDependencies", "DeleteItem", "ShowWorkshopEULA",
         "GetWorkshopEULAStatus")]
+    [InterfaceLayout("STEAMUGC_INTERFACE_VERSION018",
+        "CreateQueryUserUGCRequest__V021", "CreateQueryAllUGCRequestCursor__V021", "CreateQueryAllUGCRequestPage__V021", "CreateQueryUGCDetailsRequest__V021",
+        "SendQueryUGCRequest__V021", "GetQueryUGCResult_old", "GetQueryUGCNumTags__V021", "GetQueryUGCTag__V021",
+        "GetQueryUGCTagDisplayName__V021", "GetQueryUGCPreviewURL__V021", "GetQueryUGCMetadata__V021", "GetQueryUGCChildren__V021",
+        "GetQueryUGCStatistic__V021", "GetQueryUGCNumAdditionalPreviews__V021", "GetQueryUGCAdditionalPreview__V021", "GetQueryUGCNumKeyValueTags__V021",
+        "GetQueryFirstUGCKeyValueTag__V021", "GetQueryUGCKeyValueTag__V021", "GetQueryUGCContentDescriptors__V021", "ReleaseQueryUGCRequest__V021",
+        "AddRequiredTag__V021", "AddRequiredTagGroup__V021", "AddExcludedTag__V021", "SetReturnOnlyIDs__V021",
+        "SetReturnKeyValueTags__V021", "SetReturnLongDescription__V021", "SetReturnMetadata__V021", "SetReturnChildren__V021",
+        "SetReturnAdditionalPreviews__V021", "SetReturnTotalOnly__V021", "SetReturnPlaytimeStats__V021", "SetLanguage__V021",
+        "SetAllowCachedResponse__V021", "SetCloudFileNameFilter__V021", "SetMatchAnyTag__V021", "SetSearchText__V021",
+        "SetRankedByTrendDays__V021", "SetTimeCreatedDateRange__V021", "SetTimeUpdatedDateRange__V021", "AddRequiredKeyValueTag__V021",
+        "RequestUGCDetails__V021", "CreateItem__V021", "StartItemUpdate__V021", "SetItemTitle__V021",
+        "SetItemDescription__V021", "SetItemUpdateLanguage__V021", "SetItemMetadata__V021", "SetItemVisibility__V021",
+        "SetItemTags__V021", "SetItemContent__V021", "SetItemPreview__V021", "SetAllowLegacyUpload__V021",
+        "RemoveAllItemKeyValueTags__V021", "RemoveItemKeyValueTags__V021", "AddItemKeyValueTag__V021", "AddItemPreviewFile__V021",
+        "AddItemPreviewVideo__V021", "UpdateItemPreviewFile__V021", "UpdateItemPreviewVideo__V021", "RemoveItemPreview__V021",
+        "AddContentDescriptor__V021", "RemoveContentDescriptor__V021", "SubmitItemUpdate__V021", "GetItemUpdateProgress__V021",
+        "SetUserItemVote__V021", "GetUserItemVote__V021", "AddItemToFavorites__V021", "RemoveItemFromFavorites__V021",
+        "SubscribeItem__V021", "UnsubscribeItem__V021", "GetNumSubscribedItems", "GetSubscribedItems",
+        "GetItemState", "GetItemInstallInfo", "GetItemDownloadInfo__V021", "DownloadItem__V021",
+        "BInitWorkshopForGameServer__V021", "SuspendDownloads__V021", "StartPlaytimeTracking__V021", "StopPlaytimeTracking__V021",
+        "StopPlaytimeTrackingForAllItems__V021", "AddDependency__V021", "RemoveDependency__V021", "AddAppDependency__V021",
+        "RemoveAppDependency__V021", "GetAppDependencies__V021", "DeleteItem__V021", "ShowWorkshopEULA__V021",
+        "GetWorkshopEULAStatus__V021", "GetUserContentDescriptorPreferences__V021")]
     [InterfaceLayout("STEAMUGC_INTERFACE_VERSION019",
         "CreateQueryUserUGCRequest", "CreateQueryAllUGCRequestCursor", "CreateQueryAllUGCRequestPage", "CreateQueryUGCDetailsRequest",
         "SendQueryUGCRequest", "GetQueryUGCResult", "GetQueryUGCNumTags", "GetQueryUGCTag",
@@ -624,6 +781,46 @@ namespace SKYNET.Steamworks.Interfaces
         public ulong CreateQueryAllUGCRequest__V012(IntPtr _, int arg0, int arg1, uint arg2, uint arg3, IntPtr arg4) { return 0; }
 
         public ulong CreateQueryAllUGCRequest(IntPtr _, int arg0, int arg1, uint arg2, uint arg3, uint arg4) { return 0; }
+
+        public SteamAPICall_t RequestUGCDetails__V001(IntPtr _, ulong nPublishedFileID) { return SteamEmulator.SteamUGC.RequestUGCDetails(nPublishedFileID, 0); }
+
+        public bool GetItemInstallInfo__V002(IntPtr _, ulong nPublishedFileID, IntPtr punSizeOnDisk, IntPtr pchFolder, uint cchFolderSize) { return SteamEmulator.SteamUGC.GetItemInstallInfo(nPublishedFileID, punSizeOnDisk, pchFolder, cchFolderSize, IntPtr.Zero); }
+
+        public bool GetItemInstallInfo__V003(IntPtr _, ulong nPublishedFileID, IntPtr punSizeOnDisk, IntPtr pchFolder, uint cchFolderSize, IntPtr pbLegacyItem)
+        {
+            bool found = SteamEmulator.SteamUGC.GetItemInstallInfo(nPublishedFileID, punSizeOnDisk, pchFolder, cchFolderSize, IntPtr.Zero);
+            if (found && pbLegacyItem != IntPtr.Zero)
+            {
+                Marshal.WriteByte(pbLegacyItem, 0);
+            }
+
+            return found;
+        }
+
+        public bool GetItemUpdateInfo(IntPtr _, ulong nPublishedFileID, IntPtr pbNeedsUpdate, IntPtr pbIsDownloading, IntPtr punBytesDownloaded, IntPtr punBytesTotal)
+        {
+            LogStub("GetItemUpdateInfo");
+            return false;
+        }
+
+        public bool GetQueryUGCAdditionalPreview__V005(IntPtr _, ulong handle, uint index, uint previewIndex, IntPtr pchURLOrVideoID, uint cchURLSize, IntPtr pbIsImage) { return SteamEmulator.SteamUGC.GetQueryUGCAdditionalPreview(handle, index, previewIndex, pchURLOrVideoID, cchURLSize, IntPtr.Zero, 0, IntPtr.Zero); }
+
+        public bool GetQueryUGCKeyValueTag__V013(IntPtr _, ulong handle, uint index, string pchKey, IntPtr pchValue, uint cchValueSize) { return SteamEmulator.SteamUGC.GetQueryUGCKeyValueTag(handle, index, pchKey, pchValue, cchValueSize); }
+
+        private static readonly System.Collections.Generic.HashSet<string> _stubsLogged = new System.Collections.Generic.HashSet<string>();
+
+        private static void LogStub(string method)
+        {
+            lock (_stubsLogged)
+            {
+                if (!_stubsLogged.Add(method))
+                {
+                    return;
+                }
+            }
+
+            SteamEmulator.Write("SteamUGC", method + " not implemented");
+        }
 
         private static void WriteUInt64(IntPtr destination, ulong value)
         {

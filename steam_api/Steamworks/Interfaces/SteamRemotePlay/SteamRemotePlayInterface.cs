@@ -10,6 +10,9 @@ namespace SKYNET.Steamworks.Interfaces
     [InterfaceLayout("STEAMREMOTEPLAY_INTERFACE_VERSION001",
         "GetSessionCount", "GetSessionID", "GetSessionSteamID", "GetSessionClientName",
         "GetSessionClientFormFactor", "BGetSessionClientResolution", "BSendRemotePlayTogetherInvite")]
+    [InterfaceLayout("STEAMREMOTEPLAY_INTERFACE_VERSION002",
+        "GetSessionCount", "GetSessionID", "GetSessionSteamID", "GetSessionClientName",
+        "GetSessionClientFormFactor", "BGetSessionClientResolution", "BStartRemotePlayTogether", "BSendRemotePlayTogetherInvite")]
     [InterfaceLayout("STEAMREMOTEPLAY_INTERFACE_VERSION003",
         "GetSessionCount", "GetSessionID", "GetSessionSteamID", "GetSessionClientName",
         "GetSessionClientFormFactor", "BGetSessionClientResolution", "ShowRemotePlayTogetherUI", "BSendRemotePlayTogetherInvite",
@@ -77,6 +80,8 @@ namespace SKYNET.Steamworks.Interfaces
         {
             return SteamEmulator.SteamRemotePlay.BGetSessionClientResolution(unSessionID, pnResolutionX, pnResolutionY);
         }
+
+        public bool BStartRemotePlayTogether(IntPtr _, bool bShowOverlay) => SteamEmulator.SteamRemotePlay.ShowRemotePlayTogetherUI();
 
         public bool ShowRemotePlayTogetherUI(IntPtr _) => SteamEmulator.SteamRemotePlay.ShowRemotePlayTogetherUI();
 

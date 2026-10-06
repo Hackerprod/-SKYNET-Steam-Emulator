@@ -1,0 +1,14 @@
+0|CreateQueryUserUGCRequest|System.UInt64|System.IntPtr,System.UInt32,System.Int32,System.Int32,System.Int32,System.UInt32,System.UInt32,System.UInt32
+1|CreateQueryAllUGCRequestPage|System.UInt64|System.IntPtr,System.Int32,System.Int32,System.UInt32,System.UInt32,System.UInt32
+2|SendQueryUGCRequest|System.UInt64|System.IntPtr,System.UInt64
+3|GetQueryUGCResult_old|System.Boolean|System.IntPtr,System.UInt64,System.UInt32,System.IntPtr
+4|ReleaseQueryUGCRequest|System.Boolean|System.IntPtr,System.UInt64
+5|AddRequiredTag|System.Boolean|System.IntPtr,System.UInt64,System.String
+6|AddExcludedTag|System.Boolean|System.IntPtr,System.UInt64,System.String
+7|SetReturnLongDescription|System.Boolean|System.IntPtr,System.UInt64,System.Boolean
+8|SetReturnTotalOnly|System.Boolean|System.IntPtr,System.UInt64,System.Boolean
+9|SetCloudFileNameFilter|System.Boolean|System.IntPtr,System.UInt64,System.String
+10|SetMatchAnyTag|System.Boolean|System.IntPtr,System.UInt64,System.Boolean
+11|SetSearchText|System.Boolean|System.IntPtr,System.UInt64,System.String
+12|SetRankedByTrendDays|System.Boolean|System.IntPtr,System.UInt64,System.UInt32
+13|RequestUGCDetails|System.UInt64|System.IntPtr,System.UInt64

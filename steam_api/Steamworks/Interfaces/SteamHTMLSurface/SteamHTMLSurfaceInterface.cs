@@ -4,6 +4,25 @@ using HHTMLBrowser = System.UInt32;
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    [InterfaceLayout("STEAMHTMLSURFACE_INTERFACE_VERSION_001",
+        "Destructor", "Init", "Shutdown", "CreateBrowser", "RemoveBrowser",
+        "LoadURL", "SetSize", "StopLoad", "Reload",
+        "GoBack", "GoForward", "AddHeader", "ExecuteJavascript",
+        "MouseUp", "MouseDown", "MouseDoubleClick", "MouseMove",
+        "MouseWheel", "KeyDown", "KeyUp", "KeyChar",
+        "SetHorizontalScroll", "SetVerticalScroll", "SetKeyFocus", "ViewSource",
+        "CopyToClipboard", "PasteFromClipboard", "Find", "StopFind",
+        "GetLinkAtPosition", "AllowStartRequest", "JSDialogResponse", "FileLoadDialogResponse")]
+    [InterfaceLayout("STEAMHTMLSURFACE_INTERFACE_VERSION_002",
+        "Destructor", "Init", "Shutdown", "CreateBrowser", "RemoveBrowser",
+        "LoadURL", "SetSize", "StopLoad", "Reload",
+        "GoBack", "GoForward", "AddHeader", "ExecuteJavascript",
+        "MouseUp", "MouseDown", "MouseDoubleClick", "MouseMove",
+        "MouseWheel", "KeyDown", "KeyUp", "KeyChar",
+        "SetHorizontalScroll", "SetVerticalScroll", "SetKeyFocus", "ViewSource",
+        "CopyToClipboard", "PasteFromClipboard", "Find", "StopFind",
+        "GetLinkAtPosition", "SetCookie", "SetPageScaleFactor", "AllowStartRequest",
+        "JSDialogResponse", "FileLoadDialogResponse")]
     [InterfaceLayout("STEAMHTMLSURFACE_INTERFACE_VERSION_003",
         "Destructor", "Init", "Shutdown", "CreateBrowser", "RemoveBrowser",
         "LoadURL", "SetSize", "StopLoad", "Reload",
