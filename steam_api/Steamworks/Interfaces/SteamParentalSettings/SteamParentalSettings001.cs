@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("STEAMPARENTALSETTINGS_INTERFACE_VERSION001")]
+    [InterfaceLayout("STEAMPARENTALSETTINGS_INTERFACE_VERSION001",
+        "BIsParentalLockEnabled", "BIsParentalLockLocked", "BIsAppBlocked", "BIsAppInBlockList",
+        "BIsFeatureBlocked", "BIsFeatureInBlockList")]
     public class SteamParentalSettings001 : ISteamInterface
     {
         public bool BIsParentalLockEnabled(IntPtr _)

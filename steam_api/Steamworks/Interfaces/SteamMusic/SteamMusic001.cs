@@ -3,8 +3,14 @@ using System;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("STEAMMUSIC_INTERFACE_VERSION001")]
-    [Interface("SteamMusic001")] // Dimraeth (Unity) requests this short form instead of Valve's official macro name.
+    [InterfaceLayout("STEAMMUSIC_INTERFACE_VERSION001",
+        "BIsEnabled", "BIsPlaying", "GetPlaybackStatus", "Play",
+        "Pause", "PlayPrevious", "PlayNext", "SetVolume",
+        "GetVolume")]
+    [InterfaceLayout("SteamMusic001",
+        "BIsEnabled", "BIsPlaying", "GetPlaybackStatus", "Play",
+        "Pause", "PlayPrevious", "PlayNext", "SetVolume",
+        "GetVolume")] // Dimraeth (Unity) requests this short form instead of Valve's official macro name.
     public class SteamMusic001 : ISteamInterface
     {
         public bool BIsEnabled(IntPtr _)

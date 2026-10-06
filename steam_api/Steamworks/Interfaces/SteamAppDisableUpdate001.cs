@@ -1,6 +1,7 @@
 ﻿namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("SteamAppDisableUpdate001")]
+    [InterfaceLayout("SteamAppDisableUpdate001",
+        "SetAppUpdateDisabledSecondsRemaining")]
     public class SteamAppDisableUpdate001 : ISteamInterface
     {
         public void SetAppUpdateDisabledSecondsRemaining(System.IntPtr _, int seconds)

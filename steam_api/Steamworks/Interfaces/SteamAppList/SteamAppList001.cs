@@ -2,7 +2,9 @@ using System;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("STEAMAPPLIST_INTERFACE_VERSION001")]
+    [InterfaceLayout("STEAMAPPLIST_INTERFACE_VERSION001",
+        "GetNumInstalledApps", "GetInstalledApps", "GetAppName", "GetAppInstallDir",
+        "GetAppBuildId")]
     public class SteamAppList001 : ISteamInterface
     {
         public uint GetNumInstalledApps(IntPtr _)

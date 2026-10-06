@@ -2,7 +2,10 @@ using System;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("STEAMSCREENSHOTS_INTERFACE_VERSION003")]
+    [InterfaceLayout("STEAMSCREENSHOTS_INTERFACE_VERSION003",
+        "WriteScreenshot", "AddScreenshotToLibrary", "TriggerScreenshot", "HookScreenshots",
+        "SetLocation", "TagUser", "TagPublishedFile", "IsScreenshotsHooked",
+        "AddVRScreenshotToLibrary")]
     public class SteamScreenshots003 : ISteamInterface
     {
         public uint WriteScreenshot(IntPtr _, IntPtr pubRGB, uint cubRGB, int nWidth, int nHeight)

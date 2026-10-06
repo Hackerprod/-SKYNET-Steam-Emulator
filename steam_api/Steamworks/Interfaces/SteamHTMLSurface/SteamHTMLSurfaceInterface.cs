@@ -4,8 +4,38 @@ using HHTMLBrowser = System.UInt32;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("STEAMHTMLSURFACE_INTERFACE_VERSION_005")]
-    public class SteamHTMLSurface005 : ISteamInterface
+    [InterfaceLayout("STEAMHTMLSURFACE_INTERFACE_VERSION_003",
+        "Init", "Shutdown", "CreateBrowser", "RemoveBrowser",
+        "LoadURL", "SetSize", "StopLoad", "Reload",
+        "GoBack", "GoForward", "AddHeader", "ExecuteJavascript",
+        "MouseUp", "MouseDown", "MouseDoubleClick", "MouseMove",
+        "MouseWheel", "KeyDown", "KeyUp", "KeyChar",
+        "SetHorizontalScroll", "SetVerticalScroll", "SetKeyFocus", "ViewSource",
+        "CopyToClipboard", "PasteFromClipboard", "Find", "StopFind",
+        "GetLinkAtPosition", "SetCookie", "SetPageScaleFactor", "SetBackgroundMode",
+        "AllowStartRequest", "JSDialogResponse", "FileLoadDialogResponse")]
+    [InterfaceLayout("STEAMHTMLSURFACE_INTERFACE_VERSION_004",
+        "Init", "Shutdown", "CreateBrowser", "RemoveBrowser",
+        "LoadURL", "SetSize", "StopLoad", "Reload",
+        "GoBack", "GoForward", "AddHeader", "ExecuteJavascript",
+        "MouseUp", "MouseDown", "MouseDoubleClick", "MouseMove",
+        "MouseWheel", "KeyDown", "KeyUp", "KeyChar",
+        "SetHorizontalScroll", "SetVerticalScroll", "SetKeyFocus", "ViewSource",
+        "CopyToClipboard", "PasteFromClipboard", "Find", "StopFind",
+        "GetLinkAtPosition", "SetCookie", "SetPageScaleFactor", "SetBackgroundMode",
+        "SetDPIScalingFactor", "AllowStartRequest", "JSDialogResponse", "FileLoadDialogResponse")]
+    [InterfaceLayout("STEAMHTMLSURFACE_INTERFACE_VERSION_005",
+        "Init", "Shutdown", "CreateBrowser", "RemoveBrowser",
+        "LoadURL", "SetSize", "StopLoad", "Reload",
+        "GoBack", "GoForward", "AddHeader", "ExecuteJavascript",
+        "MouseUp", "MouseDown", "MouseDoubleClick", "MouseMove",
+        "MouseWheel", "KeyDown__V005", "KeyUp", "KeyChar",
+        "SetHorizontalScroll", "SetVerticalScroll", "SetKeyFocus", "ViewSource",
+        "CopyToClipboard", "PasteFromClipboard", "Find", "StopFind",
+        "GetLinkAtPosition", "SetCookie", "SetPageScaleFactor", "SetBackgroundMode",
+        "SetDPIScalingFactor", "OpenDeveloperTools", "AllowStartRequest", "JSDialogResponse",
+        "FileLoadDialogResponse")]
+    public class SteamHTMLSurfaceInterface : ISteamInterface
     {
         public bool Init(IntPtr _)
         {
@@ -92,7 +122,7 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamHTMLSurface.MouseWheel(unBrowserHandle, nDelta);
         }
 
-        public void KeyDown(IntPtr _, HHTMLBrowser unBrowserHandle, uint nNativeKeyCode, int eHTMLKeyModifiers, bool bIsSystemKey = false)
+        public void KeyDown__V005(IntPtr _, HHTMLBrowser unBrowserHandle, uint nNativeKeyCode, int eHTMLKeyModifiers, bool bIsSystemKey = false)
         {
             SteamEmulator.SteamHTMLSurface.KeyDown(unBrowserHandle, nNativeKeyCode, eHTMLKeyModifiers, false);
         }
@@ -190,6 +220,11 @@ namespace SKYNET.Steamworks.Interfaces
         public void FileLoadDialogResponse(IntPtr _, HHTMLBrowser unBrowserHandle, IntPtr pchSelectedFiles)
         {
             SteamEmulator.SteamHTMLSurface.FileLoadDialogResponse(unBrowserHandle, pchSelectedFiles);
+        }
+
+        public void KeyDown(IntPtr _, HHTMLBrowser unBrowserHandle, uint nNativeKeyCode, int eHTMLKeyModifiers)
+        {
+            SteamEmulator.SteamHTMLSurface.KeyDown(unBrowserHandle, nNativeKeyCode, eHTMLKeyModifiers);
         }
     }
 }

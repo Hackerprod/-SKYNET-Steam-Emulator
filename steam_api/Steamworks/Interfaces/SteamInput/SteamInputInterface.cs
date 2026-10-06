@@ -1,5 +1,4 @@
-﻿using System;
-
+using System;
 using SKYNET.Helpers;
 
 using InputHandle_t = System.UInt64;
@@ -9,8 +8,53 @@ using InputAnalogActionHandle_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("SteamInput006")]
-    public class SteamInput006 : ISteamInterface
+    [InterfaceLayout("SteamInput001",
+        "Init__V001", "Shutdown", "RunFrame__V001", "GetConnectedControllers__V001",
+        "GetActionSetHandle", "ActivateActionSet", "GetCurrentActionSet", "ActivateActionSetLayer",
+        "DeactivateActionSetLayer", "DeactivateAllActionSetLayers", "GetActiveActionSetLayers__V001", "GetDigitalActionHandle",
+        "GetDigitalActionData", "GetDigitalActionOrigins__V001", "GetAnalogActionHandle", "GetAnalogActionData",
+        "GetAnalogActionOrigins__V001", "GetGlyphForActionOrigin", "GetStringForActionOrigin__V001", "StopAnalogActionMomentum",
+        "GetMotionData", "TriggerVibration", "SetLEDColor", "TriggerHapticPulse",
+        "TriggerRepeatedHapticPulse", "ShowBindingPanel", "GetInputTypeForHandle", "GetControllerForGamepadIndex",
+        "GetGamepadIndexForController", "GetStringForXboxOrigin__V001", "GetGlyphForXboxOrigin__V001", "GetActionOriginFromXboxOrigin",
+        "TranslateActionOrigin", "GetDeviceBindingRevision", "GetRemotePlaySessionID")]
+    [InterfaceLayout("SteamInput002",
+        "Init__V001", "Shutdown", "RunFrame__V001", "GetConnectedControllers__V001",
+        "GetActionSetHandle", "ActivateActionSet", "GetCurrentActionSet", "ActivateActionSetLayer",
+        "DeactivateActionSetLayer", "DeactivateAllActionSetLayers", "GetActiveActionSetLayers__V001", "GetDigitalActionHandle",
+        "GetDigitalActionData", "GetDigitalActionOrigins__V001", "GetAnalogActionHandle", "GetAnalogActionData",
+        "GetAnalogActionOrigins__V001", "GetGlyphForActionOrigin", "GetStringForActionOrigin__V001", "StopAnalogActionMomentum",
+        "GetMotionData", "TriggerVibration", "SetLEDColor", "TriggerHapticPulse",
+        "TriggerRepeatedHapticPulse", "ShowBindingPanel", "GetInputTypeForHandle", "GetControllerForGamepadIndex",
+        "GetGamepadIndexForController", "GetStringForXboxOrigin__V001", "GetGlyphForXboxOrigin__V001", "GetActionOriginFromXboxOrigin",
+        "TranslateActionOrigin", "GetDeviceBindingRevision", "GetRemotePlaySessionID")]
+    [InterfaceLayout("SteamInput005",
+        "Init", "Shutdown", "SetInputActionManifestFilePath", "RunFrame",
+        "BWaitForData", "BNewDataAvailable", "GetConnectedControllers", "EnableDeviceCallbacks",
+        "EnableActionEventCallbacks", "GetActionSetHandle", "ActivateActionSet", "GetCurrentActionSet",
+        "ActivateActionSetLayer", "DeactivateActionSetLayer", "DeactivateAllActionSetLayers", "GetActiveActionSetLayers",
+        "GetDigitalActionHandle", "GetDigitalActionData", "GetDigitalActionOrigins", "GetStringForDigitalActionName",
+        "GetAnalogActionHandle", "GetAnalogActionData", "GetAnalogActionOrigins", "GetGlyphPNGForActionOrigin",
+        "GetGlyphSVGForActionOrigin", "GetGlyphForActionOrigin_Legacy", "GetStringForActionOrigin", "GetStringForAnalogActionName",
+        "StopAnalogActionMomentum", "GetMotionData", "TriggerVibration", "TriggerVibrationExtended",
+        "TriggerSimpleHapticEvent", "SetLEDColor", "Legacy_TriggerHapticPulse", "Legacy_TriggerRepeatedHapticPulse",
+        "ShowBindingPanel", "GetInputTypeForHandle", "GetControllerForGamepadIndex", "GetGamepadIndexForController",
+        "GetStringForXboxOrigin", "GetGlyphForXboxOrigin", "GetActionOriginFromXboxOrigin", "TranslateActionOrigin",
+        "GetDeviceBindingRevision", "GetRemotePlaySessionID", "GetSessionInputConfigurationSettings")]
+    [InterfaceLayout("SteamInput006",
+        "Init", "Shutdown", "SetInputActionManifestFilePath", "RunFrame",
+        "BWaitForData", "BNewDataAvailable", "GetConnectedControllers", "EnableDeviceCallbacks",
+        "EnableActionEventCallbacks", "GetActionSetHandle", "ActivateActionSet", "GetCurrentActionSet",
+        "ActivateActionSetLayer", "DeactivateActionSetLayer", "DeactivateAllActionSetLayers", "GetActiveActionSetLayers",
+        "GetDigitalActionHandle", "GetDigitalActionData", "GetDigitalActionOrigins", "GetStringForDigitalActionName",
+        "GetAnalogActionHandle", "GetAnalogActionData", "GetAnalogActionOrigins", "GetGlyphPNGForActionOrigin",
+        "GetGlyphSVGForActionOrigin", "GetGlyphForActionOrigin_Legacy", "GetStringForActionOrigin", "GetStringForAnalogActionName",
+        "StopAnalogActionMomentum", "GetMotionData", "TriggerVibration", "TriggerVibrationExtended",
+        "TriggerSimpleHapticEvent", "SetLEDColor", "Legacy_TriggerHapticPulse", "Legacy_TriggerRepeatedHapticPulse",
+        "ShowBindingPanel", "GetInputTypeForHandle", "GetControllerForGamepadIndex", "GetGamepadIndexForController",
+        "GetStringForXboxOrigin", "GetGlyphForXboxOrigin", "GetActionOriginFromXboxOrigin", "TranslateActionOrigin",
+        "GetDeviceBindingRevision", "GetRemotePlaySessionID", "GetSessionInputConfigurationSettings", "SetDualSenseTriggerEffect")]
+    public class SteamInputInterface : ISteamInterface
     {
         public bool Init(IntPtr _, bool bExplicitlyCallRunFrame)
         {
@@ -66,6 +110,7 @@ namespace SKYNET.Steamworks.Interfaces
         {
             SteamEmulator.SteamInput.ActivateActionSet(inputHandle, actionSetHandle);
         }
+
         public InputActionSetHandle_t GetCurrentActionSet(IntPtr _, InputHandle_t inputHandle)
         {
             return SteamEmulator.SteamInput.GetCurrentActionSet(inputHandle);
@@ -251,5 +296,64 @@ namespace SKYNET.Steamworks.Interfaces
             SteamEmulator.SteamInput.SetDualSenseTriggerEffect(inputHandle, pParam);
         }
 
+        public bool Init__V001(IntPtr _)
+        {
+            return SteamEmulator.SteamInput.Init();
+        }
+
+        public void RunFrame__V001(IntPtr _)
+        {
+            SteamEmulator.SteamInput.RunFrame();
+        }
+
+        public int GetConnectedControllers__V001(IntPtr _, ref InputHandle_t[] handlesOut)
+        {
+            return SteamEmulator.SteamInput.GetConnectedControllers(ref handlesOut);
+        }
+
+        public int GetActiveActionSetLayers__V001(IntPtr _, InputHandle_t inputHandle, ref InputActionSetHandle_t[] handlesOut)
+        {
+            return SteamEmulator.SteamInput.GetActiveActionSetLayers(inputHandle, ref handlesOut);
+        }
+
+        public int GetDigitalActionOrigins__V001(IntPtr _, InputHandle_t inputHandle, InputActionSetHandle_t actionSetHandle, InputDigitalActionHandle_t digitalActionHandle, ref int[] originsOut)
+        {
+            return SteamEmulator.SteamInput.GetDigitalActionOrigins(inputHandle, actionSetHandle, digitalActionHandle, ref originsOut);
+        }
+
+        public int GetAnalogActionOrigins__V001(IntPtr _, InputHandle_t inputHandle, InputActionSetHandle_t actionSetHandle, InputAnalogActionHandle_t analogActionHandle, ref int[] originsOut)
+        {
+            return SteamEmulator.SteamInput.GetAnalogActionOrigins(inputHandle, actionSetHandle, analogActionHandle, ref originsOut);
+        }
+
+        public string GetGlyphForActionOrigin(IntPtr _, int eOrigin)
+        {
+            return SteamEmulator.SteamInput.GetGlyphForActionOrigin(eOrigin);
+        }
+
+        public string GetStringForActionOrigin__V001(IntPtr _, int eOrigin)
+        {
+            return SteamEmulator.SteamInput.GetStringForActionOrigin(eOrigin);
+        }
+
+        public void TriggerHapticPulse(IntPtr _, InputHandle_t inputHandle, ESteamControllerPad eTargetPad, ushort usDurationMicroSec)
+        {
+            SteamEmulator.SteamInput.TriggerHapticPulse(inputHandle, eTargetPad, usDurationMicroSec);
+        }
+
+        public void TriggerRepeatedHapticPulse(IntPtr _, InputHandle_t inputHandle, ESteamControllerPad eTargetPad, ushort usDurationMicroSec, ushort usOffMicroSec, ushort unRepeat, uint nFlags)
+        {
+            SteamEmulator.SteamInput.TriggerRepeatedHapticPulse(inputHandle, eTargetPad, usDurationMicroSec, usOffMicroSec, unRepeat, nFlags);
+        }
+
+        public string GetStringForXboxOrigin__V001(IntPtr _, int eOrigin)
+        {
+            return SteamEmulator.SteamInput.GetStringForXboxOrigin(eOrigin);
+        }
+
+        public string GetGlyphForXboxOrigin__V001(IntPtr _, int eOrigin)
+        {
+            return SteamEmulator.SteamInput.GetGlyphForXboxOrigin(eOrigin);
+        }
     }
 }

@@ -10,7 +10,10 @@ using PartyBeaconID_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("SteamParties002")]
+    [InterfaceLayout("SteamParties002",
+        "GetNumActiveBeacons", "GetBeaconByIndex", "GetBeaconDetails", "JoinParty",
+        "GetNumAvailableBeaconLocations", "GetAvailableBeaconLocations", "CreateBeacon", "OnReservationCompleted",
+        "CancelReservation", "ChangeNumOpenSlots", "DestroyBeacon", "GetBeaconLocationData")]
     public class SteamParties002 : ISteamInterface
     {
         public UInt32 GetNumActiveBeacons(IntPtr _)

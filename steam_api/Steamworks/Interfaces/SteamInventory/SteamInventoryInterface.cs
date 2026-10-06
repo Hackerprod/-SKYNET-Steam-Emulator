@@ -4,11 +4,33 @@ using System.Runtime.InteropServices;
 using SteamItemInstanceID_t = System.UInt64;
 using SteamInventoryResult_t = System.Int32;
 using SteamItemDef_t = System.Int32;
+using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("STEAMINVENTORY_INTERFACE_V002")]
-    public class SteamInventory002 : ISteamInterface
+    [InterfaceLayout("STEAMINVENTORY_INTERFACE_V002",
+        "GetResultStatus", "GetResultItems", "GetResultItemProperty", "GetResultTimestamp",
+        "CheckResultSteamID", "DestroyResult", "GetAllItems", "GetItemsByID",
+        "SerializeResult", "DeserializeResult", "GenerateItems", "GrantPromoItems",
+        "AddPromoItem", "AddPromoItems", "ConsumeItem", "ExchangeItems",
+        "TransferItemQuantity", "SendItemDropHeartbeat", "TriggerItemDrop", "TradeItems",
+        "LoadItemDefinitions", "GetItemDefinitionIDs", "GetItemDefinitionProperty", "RequestEligiblePromoItemDefinitionsIDs",
+        "GetEligiblePromoItemDefinitionIDs", "StartPurchase", "RequestPrices", "GetNumItemsWithPrices",
+        "GetItemsWithPrices__V002", "GetItemPrice__V002", "StartUpdateProperties", "RemoveProperty",
+        "SetProperty__V002_Float", "SetProperty__V002_Int64", "SetProperty__V002_Bool", "SetProperty__V002_String",
+        "SubmitUpdateProperties")]
+    [InterfaceLayout("STEAMINVENTORY_INTERFACE_V003",
+        "GetResultStatus", "GetResultItems", "GetResultItemProperty", "GetResultTimestamp",
+        "CheckResultSteamID", "DestroyResult", "GetAllItems", "GetItemsByID",
+        "SerializeResult", "DeserializeResult", "GenerateItems", "GrantPromoItems",
+        "AddPromoItem", "AddPromoItems", "ConsumeItem", "ExchangeItems",
+        "TransferItemQuantity", "SendItemDropHeartbeat", "TriggerItemDrop", "TradeItems",
+        "LoadItemDefinitions", "GetItemDefinitionIDs", "GetItemDefinitionProperty", "RequestEligiblePromoItemDefinitionsIDs",
+        "GetEligiblePromoItemDefinitionIDs", "StartPurchase", "RequestPrices", "GetNumItemsWithPrices",
+        "GetItemsWithPrices", "GetItemPrice", "StartUpdateProperties", "RemoveProperty",
+        "SetPropertyFloat", "SetPropertyInt64", "SetPropertyBool", "SetPropertyString",
+        "SubmitUpdateProperties", "InspectItem")]
+    public class SteamInventoryInterface : ISteamInterface
     {
         public int GetResultStatus(IntPtr _, SteamInventoryResult_t resultHandle)
         {
@@ -150,16 +172,14 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamInventory.GetNumItemsWithPrices();
         }
 
-        // v002: single prices array (no separate base price).
-        public bool GetItemsWithPrices(IntPtr _, IntPtr pArrayItemDefs, IntPtr pPrices, uint unArrayLength)
+        public bool GetItemsWithPrices(IntPtr _, IntPtr pArrayItemDefs, IntPtr pCurrentPrices, IntPtr pBasePrices, uint unArrayLength)
         {
-            return SteamEmulator.SteamInventory.GetItemsWithPricesV2(pArrayItemDefs, pPrices, unArrayLength);
+            return SteamEmulator.SteamInventory.GetItemsWithPrices(pArrayItemDefs, pCurrentPrices, pBasePrices, unArrayLength);
         }
 
-        // v002: single price out-pointer.
-        public bool GetItemPrice(IntPtr _, SteamItemDef_t iDefinition, IntPtr pPrice)
+        public bool GetItemPrice(IntPtr _, SteamItemDef_t iDefinition, IntPtr pCurrentPrice, IntPtr pBasePrice)
         {
-            return SteamEmulator.SteamInventory.GetItemPriceV2(iDefinition, pPrice);
+            return SteamEmulator.SteamInventory.GetItemPrice(iDefinition, pCurrentPrice, pBasePrice);
         }
 
         public ulong StartUpdateProperties(IntPtr _)
@@ -172,29 +192,66 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamInventory.RemoveProperty(handle, nItemID, pchPropertyName);
         }
 
-        public bool SetProperty(IntPtr _, ulong handle, SteamItemInstanceID_t nItemID, string pchPropertyName, string pchPropertyValue)
+        public bool SetPropertyFloat(IntPtr _, ulong handle, SteamItemInstanceID_t nItemID, string pchPropertyName, float flValue)
         {
-            return SteamEmulator.SteamInventory.SetPropertyString(handle, nItemID, pchPropertyName, pchPropertyValue);
+            return SteamEmulator.SteamInventory.SetPropertyFloat(handle, nItemID, pchPropertyName, flValue);
         }
 
-        public bool SetProperty(IntPtr _, ulong handle, SteamItemInstanceID_t nItemID, string pchPropertyName, bool bValue)
-        {
-            return SteamEmulator.SteamInventory.SetPropertyBool(handle, nItemID, pchPropertyName, bValue);
-        }
-
-        public bool SetProperty(IntPtr _, ulong handle, SteamItemInstanceID_t nItemID, string pchPropertyName, long nValue)
+        public bool SetPropertyInt64(IntPtr _, ulong handle, SteamItemInstanceID_t nItemID, string pchPropertyName, long nValue)
         {
             return SteamEmulator.SteamInventory.SetPropertyInt64(handle, nItemID, pchPropertyName, nValue);
         }
 
-        public bool SetProperty(IntPtr _, ulong handle, SteamItemInstanceID_t nItemID, string pchPropertyName, float flValue)
+        public bool SetPropertyBool(IntPtr _, ulong handle, SteamItemInstanceID_t nItemID, string pchPropertyName, bool bValue)
         {
-            return SteamEmulator.SteamInventory.SetPropertyFloat(handle, nItemID, pchPropertyName, flValue);
+            return SteamEmulator.SteamInventory.SetPropertyBool(handle, nItemID, pchPropertyName, bValue);
+        }
+
+        public bool SetPropertyString(IntPtr _, ulong handle, SteamItemInstanceID_t nItemID, string pchPropertyName, string pchPropertyValue)
+        {
+            return SteamEmulator.SteamInventory.SetPropertyString(handle, nItemID, pchPropertyName, pchPropertyValue);
         }
 
         public bool SubmitUpdateProperties(IntPtr _, ulong handle, IntPtr pResultHandle)
         {
             return SteamEmulator.SteamInventory.SubmitUpdateProperties(handle, pResultHandle);
+        }
+
+        public bool InspectItem(IntPtr _, IntPtr pResultHandle, string pchItemToken)
+        {
+            return SteamEmulator.SteamInventory.InspectItem(pResultHandle, pchItemToken);
+        }
+
+        // v002: single prices array (no separate base price).
+        public bool GetItemsWithPrices__V002(IntPtr _, IntPtr pArrayItemDefs, IntPtr pPrices, uint unArrayLength)
+        {
+            return SteamEmulator.SteamInventory.GetItemsWithPricesV2(pArrayItemDefs, pPrices, unArrayLength);
+        }
+
+        // v002: single price out-pointer.
+        public bool GetItemPrice__V002(IntPtr _, SteamItemDef_t iDefinition, IntPtr pPrice)
+        {
+            return SteamEmulator.SteamInventory.GetItemPriceV2(iDefinition, pPrice);
+        }
+
+        public bool SetProperty__V002_Float(IntPtr _, ulong handle, SteamItemInstanceID_t nItemID, string pchPropertyName, float flValue)
+        {
+            return SteamEmulator.SteamInventory.SetPropertyFloat(handle, nItemID, pchPropertyName, flValue);
+        }
+
+        public bool SetProperty__V002_Int64(IntPtr _, ulong handle, SteamItemInstanceID_t nItemID, string pchPropertyName, long nValue)
+        {
+            return SteamEmulator.SteamInventory.SetPropertyInt64(handle, nItemID, pchPropertyName, nValue);
+        }
+
+        public bool SetProperty__V002_Bool(IntPtr _, ulong handle, SteamItemInstanceID_t nItemID, string pchPropertyName, bool bValue)
+        {
+            return SteamEmulator.SteamInventory.SetPropertyBool(handle, nItemID, pchPropertyName, bValue);
+        }
+
+        public bool SetProperty__V002_String(IntPtr _, ulong handle, SteamItemInstanceID_t nItemID, string pchPropertyName, string pchPropertyValue)
+        {
+            return SteamEmulator.SteamInventory.SetPropertyString(handle, nItemID, pchPropertyName, pchPropertyValue);
         }
     }
 }

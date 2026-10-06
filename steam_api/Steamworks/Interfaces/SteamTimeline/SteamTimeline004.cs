@@ -5,7 +5,12 @@ using TimelineEventHandle_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("STEAMTIMELINE_INTERFACE_V004")]
+    [InterfaceLayout("STEAMTIMELINE_INTERFACE_V004",
+        "SetTimelineTooltip", "ClearTimelineTooltip", "SetTimelineGameMode", "AddInstantaneousTimelineEvent",
+        "AddRangeTimelineEvent", "StartRangeTimelineEvent", "UpdateRangeTimelineEvent", "EndRangeTimelineEvent",
+        "RemoveTimelineEvent", "DoesEventRecordingExist", "StartGamePhase", "EndGamePhase",
+        "SetGamePhaseID", "DoesGamePhaseRecordingExist", "AddGamePhaseTag", "SetGamePhaseAttribute",
+        "OpenOverlayToGamePhase", "OpenOverlayToTimelineEvent")]
     public class SteamTimeline004 : ISteamInterface
     {
         public void SetTimelineTooltip(IntPtr _, string pchDescription, float flTimeDelta)

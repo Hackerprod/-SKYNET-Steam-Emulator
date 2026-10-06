@@ -3,7 +3,12 @@ using System;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("SteamMatchMakingServers002")]
+    [InterfaceLayout("SteamMatchMakingServers002",
+        "RequestInternetServerList", "RequestLANServerList", "RequestFriendsServerList", "RequestFavoritesServerList",
+        "RequestHistoryServerList", "RequestSpectatorServerList", "ReleaseRequest", "GetServerDetails",
+        "CancelQuery", "RefreshQuery", "IsRefreshing", "GetServerCount",
+        "RefreshServer", "PingServer", "PlayerDetails", "ServerRules",
+        "CancelServerQuery")]
     public class SteamMatchMakingServers002 : ISteamInterface
     {
         public IntPtr RequestInternetServerList(IntPtr _, uint iApp, IntPtr ppchFilters, uint nFilters, IntPtr pRequestServersResponse)

@@ -1,5 +1,4 @@
 using System;
-
 using SKYNET.Helpers;
 
 using ControllerHandle_t = System.UInt64;
@@ -9,8 +8,44 @@ using ControllerAnalogActionHandle_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("SteamController008")]
-    public class SteamController008 : ISteamInterface
+    [InterfaceLayout("SteamController005",
+        "Init", "Shutdown", "RunFrame", "GetConnectedControllers",
+        "ShowBindingPanel", "GetActionSetHandle", "ActivateActionSet", "GetCurrentActionSet",
+        "GetDigitalActionHandle", "GetDigitalActionData", "GetDigitalActionOrigins", "GetAnalogActionHandle",
+        "GetAnalogActionData", "GetAnalogActionOrigins", "StopAnalogActionMomentum", "TriggerHapticPulse",
+        "TriggerRepeatedHapticPulse", "TriggerVibration", "SetLEDColor", "GetGamepadIndexForController",
+        "GetControllerForGamepadIndex", "GetMotionData", "ShowDigitalActionOrigins", "ShowAnalogActionOrigins",
+        "GetStringForActionOrigin", "GetGlyphForActionOrigin")]
+    [InterfaceLayout("SteamController006",
+        "Init", "Shutdown", "RunFrame", "GetConnectedControllers",
+        "ShowBindingPanel", "GetActionSetHandle", "ActivateActionSet", "GetCurrentActionSet",
+        "ActivateActionSetLayer", "DeactivateActionSetLayer", "DeactivateAllActionSetLayers", "GetActiveActionSetLayers",
+        "GetDigitalActionHandle", "GetDigitalActionData", "GetDigitalActionOrigins", "GetAnalogActionHandle",
+        "GetAnalogActionData", "GetAnalogActionOrigins", "StopAnalogActionMomentum", "TriggerHapticPulse",
+        "TriggerRepeatedHapticPulse", "TriggerVibration", "SetLEDColor", "GetGamepadIndexForController",
+        "GetControllerForGamepadIndex", "GetMotionData", "ShowDigitalActionOrigins", "ShowAnalogActionOrigins",
+        "GetStringForActionOrigin", "GetGlyphForActionOrigin", "GetInputTypeForHandle")]
+    [InterfaceLayout("SteamController007",
+        "Init", "Shutdown", "RunFrame", "GetConnectedControllers",
+        "GetActionSetHandle", "ActivateActionSet", "GetCurrentActionSet", "ActivateActionSetLayer",
+        "DeactivateActionSetLayer", "DeactivateAllActionSetLayers", "GetActiveActionSetLayers", "GetDigitalActionHandle",
+        "GetDigitalActionData", "GetDigitalActionOrigins", "GetAnalogActionHandle", "GetAnalogActionData",
+        "GetAnalogActionOrigins", "GetGlyphForActionOrigin", "GetStringForActionOrigin", "StopAnalogActionMomentum",
+        "GetMotionData", "TriggerHapticPulse", "TriggerRepeatedHapticPulse", "TriggerVibration",
+        "SetLEDColor", "ShowBindingPanel", "GetInputTypeForHandle", "GetControllerForGamepadIndex",
+        "GetGamepadIndexForController", "GetStringForXboxOrigin", "GetGlyphForXboxOrigin", "GetActionOriginFromXboxOrigin_",
+        "TranslateActionOrigin", "GetControllerBindingRevision")]
+    [InterfaceLayout("SteamController008",
+        "Init", "Shutdown", "RunFrame", "GetConnectedControllers",
+        "GetActionSetHandle", "ActivateActionSet", "GetCurrentActionSet", "ActivateActionSetLayer",
+        "DeactivateActionSetLayer", "DeactivateAllActionSetLayers", "GetActiveActionSetLayers", "GetDigitalActionHandle",
+        "GetDigitalActionData", "GetDigitalActionOrigins", "GetAnalogActionHandle", "GetAnalogActionData",
+        "GetAnalogActionOrigins", "GetGlyphForActionOrigin", "GetStringForActionOrigin", "StopAnalogActionMomentum",
+        "GetMotionData", "TriggerHapticPulse", "TriggerRepeatedHapticPulse", "TriggerVibration",
+        "SetLEDColor", "ShowBindingPanel", "GetInputTypeForHandle", "GetControllerForGamepadIndex",
+        "GetGamepadIndexForController", "GetStringForXboxOrigin", "GetGlyphForXboxOrigin", "GetActionOriginFromXboxOrigin",
+        "TranslateActionOrigin", "GetControllerBindingRevision")]
+    public class SteamControllerInterface : ISteamInterface
     {
         public bool Init(IntPtr _)
         {
@@ -180,6 +215,18 @@ namespace SKYNET.Steamworks.Interfaces
         public bool GetControllerBindingRevision(IntPtr _, ControllerHandle_t controllerHandle, IntPtr pMajor, IntPtr pMinor)
         {
             return SteamEmulator.SteamController.GetControllerBindingRevision(controllerHandle, pMajor, pMinor);
+        }
+
+        public int GetActionOriginFromXboxOrigin_(IntPtr _, ControllerHandle_t controllerHandle, int eOrigin) => SteamEmulator.SteamController.GetActionOriginFromXboxOrigin_(controllerHandle, eOrigin);
+
+        public bool ShowDigitalActionOrigins(IntPtr _, ControllerHandle_t controllerHandle, ControllerDigitalActionHandle_t digitalActionHandle, float flScale, float flXPosition, float flYPosition)
+        {
+            return SteamEmulator.SteamController.ShowDigitalActionOrigins(controllerHandle, digitalActionHandle, flScale, flXPosition, flYPosition);
+        }
+
+        public bool ShowAnalogActionOrigins(IntPtr _, ControllerHandle_t controllerHandle, ControllerAnalogActionHandle_t analogActionHandle, float flScale, float flXPosition, float flYPosition)
+        {
+            return SteamEmulator.SteamController.ShowAnalogActionOrigins(controllerHandle, analogActionHandle, flScale, flXPosition, flYPosition);
         }
     }
 }

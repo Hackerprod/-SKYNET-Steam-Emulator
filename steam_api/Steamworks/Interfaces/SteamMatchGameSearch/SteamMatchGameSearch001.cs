@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("SteamMatchGameSearch001")]
+    [InterfaceLayout("SteamMatchGameSearch001",
+        "AddGameSearchParams", "SearchForGameWithLobby", "SearchForGameSolo", "AcceptGame",
+        "DeclineGame", "RetrieveConnectionDetails", "EndGameSearch", "SetGameHostParams",
+        "SetConnectionDetails", "RequestPlayersForGame", "HostConfirmGameStart", "CancelRequestPlayersForGame",
+        "SubmitPlayerResult", "EndGame")]
     public class SteamMatchGameSearch001 : ISteamInterface
     {
         public int AddGameSearchParams(IntPtr _, string pchKeyToFind, string pchValuesToFind)

@@ -3,12 +3,18 @@ using System.Runtime.InteropServices;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("STEAMVIDEO_INTERFACE_V002")]
-    [Interface("STEAMVIDEO_INTERFACE_V003")]
-    [Interface("STEAMVIDEO_INTERFACE_V004")]
-    [Interface("STEAMVIDEO_INTERFACE_V005")]
-    [Interface("STEAMVIDEO_INTERFACE_V006")]
-    [Interface("STEAMVIDEO_INTERFACE_V007")]
+    [InterfaceLayout("STEAMVIDEO_INTERFACE_V002",
+        "GetVideoURL", "IsBroadcasting", "GetOPFSettings", "GetOPFStringForApp")]
+    [InterfaceLayout("STEAMVIDEO_INTERFACE_V003",
+        "GetVideoURL", "IsBroadcasting", "GetOPFSettings", "GetOPFStringForApp")]
+    [InterfaceLayout("STEAMVIDEO_INTERFACE_V004",
+        "GetVideoURL", "IsBroadcasting", "GetOPFSettings", "GetOPFStringForApp")]
+    [InterfaceLayout("STEAMVIDEO_INTERFACE_V005",
+        "GetVideoURL", "IsBroadcasting", "GetOPFSettings", "GetOPFStringForApp")]
+    [InterfaceLayout("STEAMVIDEO_INTERFACE_V006",
+        "GetVideoURL", "IsBroadcasting", "GetOPFSettings", "GetOPFStringForApp")]
+    [InterfaceLayout("STEAMVIDEO_INTERFACE_V007",
+        "GetVideoURL", "IsBroadcasting", "GetOPFSettings", "GetOPFStringForApp")]
     public class SteamVideo002 : ISteamInterface
     {
         public void GetVideoURL(IntPtr _, uint unVideoAppID)

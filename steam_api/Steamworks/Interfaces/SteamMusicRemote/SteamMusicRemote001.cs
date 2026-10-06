@@ -2,7 +2,15 @@ using System;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("STEAMMUSICREMOTE_INTERFACE_VERSION001")]
+    [InterfaceLayout("STEAMMUSICREMOTE_INTERFACE_VERSION001",
+        "RegisterSteamMusicRemote", "DeregisterSteamMusicRemote", "BIsCurrentMusicRemote", "BActivationSuccess",
+        "SetDisplayName", "SetPNGIcon_64x64", "EnablePlayPrevious", "EnablePlayNext",
+        "EnableShuffled", "EnableLooped", "EnableQueue", "EnablePlaylists",
+        "UpdatePlaybackStatus", "UpdateShuffled", "UpdateLooped", "UpdateVolume",
+        "CurrentEntryWillChange", "CurrentEntryIsAvailable", "UpdateCurrentEntryText", "UpdateCurrentEntryElapsedSeconds",
+        "UpdateCurrentEntryCoverArt", "CurrentEntryDidChange", "QueueWillChange", "ResetQueueEntries",
+        "SetQueueEntry", "SetCurrentQueueEntry", "QueueDidChange", "PlaylistWillChange",
+        "ResetPlaylistEntries", "SetPlaylistEntry", "SetCurrentPlaylistEntry", "PlaylistDidChange")]
     public class SteamMusicRemote001 : ISteamInterface
     {
         public bool RegisterSteamMusicRemote(IntPtr _, string pchName)

@@ -5,7 +5,8 @@ using uint32 = System.UInt32;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("SteamGameCoordinator001")]
+    [InterfaceLayout("SteamGameCoordinator001",
+        "SendMessage", "IsMessageAvailable", "RetrieveMessage")]
     public class SteamGameCoordinator001 : ISteamInterface
     {
         public int SendMessage(IntPtr _, uint unMsgType, IntPtr pubData, uint cubData)

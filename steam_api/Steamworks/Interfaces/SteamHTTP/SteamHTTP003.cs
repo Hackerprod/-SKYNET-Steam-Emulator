@@ -8,8 +8,22 @@ using HTTPCookieContainerHandle = System.UInt32;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("STEAMHTTP_INTERFACE_VERSION002")]
-    [Interface("STEAMHTTP_INTERFACE_VERSION003")]
+    [InterfaceLayout("STEAMHTTP_INTERFACE_VERSION002",
+        "CreateHTTPRequest", "SetHTTPRequestContextValue", "SetHTTPRequestNetworkActivityTimeout", "SetHTTPRequestHeaderValue",
+        "SetHTTPRequestGetOrPostParameter", "SendHTTPRequest", "SendHTTPRequestAndStreamResponse", "DeferHTTPRequest",
+        "PrioritizeHTTPRequest", "GetHTTPResponseHeaderSize", "GetHTTPResponseHeaderValue", "GetHTTPResponseBodySize",
+        "GetHTTPResponseBodyData", "GetHTTPStreamingResponseBodyData", "ReleaseHTTPRequest", "GetHTTPDownloadProgressPct",
+        "SetHTTPRequestRawPostBody", "CreateCookieContainer", "ReleaseCookieContainer", "SetCookie",
+        "SetHTTPRequestCookieContainer", "SetHTTPRequestUserAgentInfo", "SetHTTPRequestRequiresVerifiedCertificate", "SetHTTPRequestAbsoluteTimeoutMS",
+        "GetHTTPRequestWasTimedOut")]
+    [InterfaceLayout("STEAMHTTP_INTERFACE_VERSION003",
+        "CreateHTTPRequest", "SetHTTPRequestContextValue", "SetHTTPRequestNetworkActivityTimeout", "SetHTTPRequestHeaderValue",
+        "SetHTTPRequestGetOrPostParameter", "SendHTTPRequest", "SendHTTPRequestAndStreamResponse", "DeferHTTPRequest",
+        "PrioritizeHTTPRequest", "GetHTTPResponseHeaderSize", "GetHTTPResponseHeaderValue", "GetHTTPResponseBodySize",
+        "GetHTTPResponseBodyData", "GetHTTPStreamingResponseBodyData", "ReleaseHTTPRequest", "GetHTTPDownloadProgressPct",
+        "SetHTTPRequestRawPostBody", "CreateCookieContainer", "ReleaseCookieContainer", "SetCookie",
+        "SetHTTPRequestCookieContainer", "SetHTTPRequestUserAgentInfo", "SetHTTPRequestRequiresVerifiedCertificate", "SetHTTPRequestAbsoluteTimeoutMS",
+        "GetHTTPRequestWasTimedOut")]
     public class SteamHTTP003 : ISteamInterface
     {
         public HTTPRequestHandle CreateHTTPRequest(IntPtr _, int eHTTPRequestMethod, string pchAbsoluteURL)

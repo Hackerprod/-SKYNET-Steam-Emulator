@@ -6,7 +6,9 @@ using ClientUnifiedMessageHandle = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
-    [Interface("STEAMUNIFIEDMESSAGES_INTERFACE_VERSION001")]
+    [InterfaceLayout("STEAMUNIFIEDMESSAGES_INTERFACE_VERSION001",
+        "SendMethod", "GetMethodResponseInfo", "GetMethodResponseData", "ReleaseMethod",
+        "SendNotification")]
     public class SteamUnifiedMessages001 : ISteamInterface
     {
         private ClientUnifiedMessageHandle k_InvalidUnifiedMessageHandle = 0;
