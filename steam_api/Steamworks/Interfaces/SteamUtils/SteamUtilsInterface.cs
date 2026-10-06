@@ -7,12 +7,54 @@ using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    [InterfaceLayout("SteamUtils002",
+        "GetSecondsSinceAppActive", "GetSecondsSinceComputerActive", "GetConnectedUniverse", "GetServerRealTime",
+        "GetIPCountry", "GetImageSize", "GetImageRGBA", "GetCSERIPPort",
+        "GetCurrentBatteryPower", "GetAppID", "SetOverlayNotificationPosition", "IsAPICallCompleted",
+        "GetAPICallFailureReason", "GetAPICallResult")]
+    [InterfaceLayout("SteamUtils003",
+        "GetSecondsSinceAppActive", "GetSecondsSinceComputerActive", "GetConnectedUniverse", "GetServerRealTime",
+        "GetIPCountry", "GetImageSize", "GetImageRGBA", "GetCSERIPPort",
+        "GetCurrentBatteryPower", "GetAppID", "SetOverlayNotificationPosition", "IsAPICallCompleted",
+        "GetAPICallFailureReason", "GetAPICallResult", "RunFrame", "GetIPCCallCount",
+        "SetWarningMessageHook", "IsOverlayEnabled")]
     [InterfaceLayout("SteamUtils004",
         "GetSecondsSinceAppActive", "GetSecondsSinceComputerActive", "GetConnectedUniverse", "GetServerRealTime",
         "GetIPCountry", "GetImageSize", "GetImageRGBA", "GetCSERIPPort",
         "GetCurrentBatteryPower", "GetAppID", "SetOverlayNotificationPosition", "IsAPICallCompleted",
         "GetAPICallFailureReason", "GetAPICallResult", "RunFrame", "GetIPCCallCount",
         "SetWarningMessageHook", "IsOverlayEnabled")]
+    [InterfaceLayout("SteamUtils005",
+        "GetSecondsSinceAppActive", "GetSecondsSinceComputerActive", "GetConnectedUniverse", "GetServerRealTime",
+        "GetIPCountry", "GetImageSize", "GetImageRGBA", "GetCSERIPPort",
+        "GetCurrentBatteryPower", "GetAppID", "SetOverlayNotificationPosition", "IsAPICallCompleted",
+        "GetAPICallFailureReason", "GetAPICallResult", "RunFrame", "GetIPCCallCount",
+        "SetWarningMessageHook", "IsOverlayEnabled", "BOverlayNeedsPresent", "CheckFileSignature",
+        "ShowGamepadTextInput__V005", "GetEnteredGamepadTextLength", "GetEnteredGamepadTextInput")]
+    [InterfaceLayout("SteamUtils006",
+        "GetSecondsSinceAppActive", "GetSecondsSinceComputerActive", "GetConnectedUniverse", "GetServerRealTime",
+        "GetIPCountry", "GetImageSize", "GetImageRGBA", "GetCSERIPPort",
+        "GetCurrentBatteryPower", "GetAppID", "SetOverlayNotificationPosition", "IsAPICallCompleted",
+        "GetAPICallFailureReason", "GetAPICallResult", "RunFrame", "GetIPCCallCount",
+        "SetWarningMessageHook", "IsOverlayEnabled", "BOverlayNeedsPresent", "CheckFileSignature",
+        "ShowGamepadTextInput__V005", "GetEnteredGamepadTextLength", "GetEnteredGamepadTextInput", "GetSteamUILanguage__V009",
+        "IsSteamRunningInVR")]
+    [InterfaceLayout("SteamUtils007",
+        "GetSecondsSinceAppActive", "GetSecondsSinceComputerActive", "GetConnectedUniverse", "GetServerRealTime",
+        "GetIPCountry", "GetImageSize", "GetImageRGBA", "GetCSERIPPort",
+        "GetCurrentBatteryPower", "GetAppID", "SetOverlayNotificationPosition", "IsAPICallCompleted",
+        "GetAPICallFailureReason", "GetAPICallResult", "RunFrame", "GetIPCCallCount",
+        "SetWarningMessageHook", "IsOverlayEnabled", "BOverlayNeedsPresent", "CheckFileSignature",
+        "ShowGamepadTextInput", "GetEnteredGamepadTextLength", "GetEnteredGamepadTextInput", "GetSteamUILanguage__V009",
+        "IsSteamRunningInVR", "SetOverlayNotificationInset")]
+    [InterfaceLayout("SteamUtils008",
+        "GetSecondsSinceAppActive", "GetSecondsSinceComputerActive", "GetConnectedUniverse", "GetServerRealTime",
+        "GetIPCountry", "GetImageSize", "GetImageRGBA", "GetCSERIPPort",
+        "GetCurrentBatteryPower", "GetAppID", "SetOverlayNotificationPosition", "IsAPICallCompleted",
+        "GetAPICallFailureReason", "GetAPICallResult", "RunFrame", "GetIPCCallCount",
+        "SetWarningMessageHook", "IsOverlayEnabled", "BOverlayNeedsPresent", "CheckFileSignature",
+        "ShowGamepadTextInput", "GetEnteredGamepadTextLength", "GetEnteredGamepadTextInput", "GetSteamUILanguage__V009",
+        "IsSteamRunningInVR", "SetOverlayNotificationInset", "IsSteamInBigPictureMode", "StartVRDashboard")]
     [InterfaceLayout("SteamUtils009",
         "GetSecondsSinceAppActive", "GetSecondsSinceComputerActive", "GetConnectedUniverse", "GetServerRealTime",
         "GetIPCountry", "GetImageSize", "GetImageRGBA", "GetCSERIPPort",
@@ -151,6 +193,11 @@ namespace SKYNET.Steamworks.Interfaces
         public SteamAPICall_t CheckFileSignature(IntPtr _, string szFileName)
         {
             return SteamEmulator.SteamUtils.CheckFileSignature(szFileName);
+        }
+
+        public bool ShowGamepadTextInput__V005(IntPtr _, int eInputMode, int eLineInputMode, string pchDescription, uint unCharMax)
+        {
+            return SteamEmulator.SteamUtils.ShowGamepadTextInput(eInputMode, eLineInputMode, pchDescription, unCharMax, string.Empty);
         }
 
         public bool ShowGamepadTextInput(IntPtr _, int eInputMode, int eLineInputMode, string pchDescription, uint unCharMax, string pchExistingText)

@@ -10,7 +10,7 @@ internal static class Program
 
     private static int Main(string[] args)
     {
-        if (args.Length < 3 || (args[0] != "generate" && args[0] != "verify" && args[0] != "verify-headers"))
+        if (args.Length < 3 || (args[0] != "generate" && args[0] != "verify" && args[0] != "verify-headers" && args[0] != "generate-new"))
         {
             Console.Error.WriteLine("usage: InterfaceLayoutCheck generate|verify <steam_api.dll> <goldenDir> [versionPrefix]");
             Console.Error.WriteLine("       InterfaceLayoutCheck verify-headers <steam_api.dll> <header-spec-dir> [versionPrefix]");
@@ -40,6 +40,22 @@ internal static class Program
         }
 
         if (mode == "verify-headers") return VerifyHeaders(actual, goldenDir, prefix);
+
+        if (mode == "generate-new")
+        {
+            int added = 0;
+            foreach (var kv in actual)
+            {
+                string file = Path.Combine(goldenDir, kv.Key + ".txt");
+                if (File.Exists(file)) continue;
+                var text = string.Join("\r\n", Lines(kv.Value).Select(Normalize)) + "\r\n";
+                File.WriteAllText(file, text);
+                Console.WriteLine("ADDED    " + kv.Key);
+                added++;
+            }
+            Console.WriteLine("generated " + added + " new golden files (run verify-headers first: goldens snapshot the current layout)");
+            return 0;
+        }
 
         if (mode == "generate")
         {

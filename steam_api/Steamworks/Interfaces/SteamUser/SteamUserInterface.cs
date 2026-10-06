@@ -9,12 +9,72 @@ using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    [InterfaceLayout("SteamUser009",
+        "GetHSteamUser", "BLoggedOn", "GetSteamID", "InitiateGameConnection__V009",
+        "TerminateGameConnection", "TrackAppUsageEvent", "RefreshSteam2Login")]
+    [InterfaceLayout("SteamUser010",
+        "GetHSteamUser", "BLoggedOn", "GetSteamID", "InitiateGameConnection",
+        "TerminateGameConnection", "TrackAppUsageEvent")]
+    [InterfaceLayout("SteamUser011",
+        "GetHSteamUser", "BLoggedOn", "GetSteamID", "InitiateGameConnection",
+        "TerminateGameConnection", "TrackAppUsageEvent", "GetUserDataFolder", "StartVoiceRecording",
+        "StopVoiceRecording", "GetCompressedVoice", "DecompressVoice__V013")]
+    [InterfaceLayout("SteamUser012",
+        "GetHSteamUser", "BLoggedOn", "GetSteamID", "InitiateGameConnection",
+        "TerminateGameConnection", "TrackAppUsageEvent", "GetUserDataFolder", "StartVoiceRecording",
+        "StopVoiceRecording", "GetCompressedVoice", "DecompressVoice__V013", "GetAuthSessionTicket",
+        "BeginAuthSession", "EndAuthSession", "CancelAuthTicket", "UserHasLicenseForApp")]
     [InterfaceLayout("SteamUser013",
         "GetHSteamUser", "BLoggedOn", "GetSteamID", "InitiateGameConnection",
         "TerminateGameConnection", "TrackAppUsageEvent", "GetUserDataFolder", "StartVoiceRecording",
         "StopVoiceRecording", "GetAvailableVoice__V013", "GetVoice__V013", "DecompressVoice__V013",
         "GetAuthSessionTicket", "BeginAuthSession", "EndAuthSession", "CancelAuthTicket",
         "UserHasLicenseForApp")]
+    [InterfaceLayout("SteamUser014",
+        "GetHSteamUser", "BLoggedOn", "GetSteamID", "InitiateGameConnection",
+        "TerminateGameConnection", "TrackAppUsageEvent", "GetUserDataFolder", "StartVoiceRecording",
+        "StopVoiceRecording", "GetAvailableVoice__V013", "GetVoice__V013", "DecompressVoice__V013",
+        "GetAuthSessionTicket", "BeginAuthSession", "EndAuthSession", "CancelAuthTicket",
+        "UserHasLicenseForApp", "BIsBehindNAT", "AdvertiseGame", "RequestEncryptedAppTicket",
+        "GetEncryptedAppTicket")]
+    [InterfaceLayout("SteamUser015",
+        "GetHSteamUser", "BLoggedOn", "GetSteamID", "InitiateGameConnection",
+        "TerminateGameConnection", "TrackAppUsageEvent", "GetUserDataFolder", "StartVoiceRecording",
+        "StopVoiceRecording", "GetAvailableVoice__V013", "GetVoice__V013", "DecompressVoice",
+        "GetVoiceOptimalSampleRate", "GetAuthSessionTicket", "BeginAuthSession", "EndAuthSession",
+        "CancelAuthTicket", "UserHasLicenseForApp", "BIsBehindNAT", "AdvertiseGame",
+        "RequestEncryptedAppTicket", "GetEncryptedAppTicket")]
+    [InterfaceLayout("SteamUser016",
+        "GetHSteamUser", "BLoggedOn", "GetSteamID", "InitiateGameConnection",
+        "TerminateGameConnection", "TrackAppUsageEvent", "GetUserDataFolder", "StartVoiceRecording",
+        "StopVoiceRecording", "GetAvailableVoice", "GetVoice", "DecompressVoice",
+        "GetVoiceOptimalSampleRate", "GetAuthSessionTicket", "BeginAuthSession", "EndAuthSession",
+        "CancelAuthTicket", "UserHasLicenseForApp", "BIsBehindNAT", "AdvertiseGame",
+        "RequestEncryptedAppTicket", "GetEncryptedAppTicket")]
+    [InterfaceLayout("SteamUser017",
+        "GetHSteamUser", "BLoggedOn", "GetSteamID", "InitiateGameConnection",
+        "TerminateGameConnection", "TrackAppUsageEvent", "GetUserDataFolder", "StartVoiceRecording",
+        "StopVoiceRecording", "GetAvailableVoice", "GetVoice", "DecompressVoice",
+        "GetVoiceOptimalSampleRate", "GetAuthSessionTicket", "BeginAuthSession", "EndAuthSession",
+        "CancelAuthTicket", "UserHasLicenseForApp", "BIsBehindNAT", "AdvertiseGame",
+        "RequestEncryptedAppTicket", "GetEncryptedAppTicket", "GetGameBadgeLevel", "GetPlayerSteamLevel")]
+    [InterfaceLayout("SteamUser018",
+        "GetHSteamUser", "BLoggedOn", "GetSteamID", "InitiateGameConnection",
+        "TerminateGameConnection", "TrackAppUsageEvent", "GetUserDataFolder", "StartVoiceRecording",
+        "StopVoiceRecording", "GetAvailableVoice", "GetVoice", "DecompressVoice",
+        "GetVoiceOptimalSampleRate", "GetAuthSessionTicket", "BeginAuthSession", "EndAuthSession",
+        "CancelAuthTicket", "UserHasLicenseForApp", "BIsBehindNAT", "AdvertiseGame",
+        "RequestEncryptedAppTicket", "GetEncryptedAppTicket", "GetGameBadgeLevel", "GetPlayerSteamLevel",
+        "RequestStoreAuthURL")]
+    [InterfaceLayout("SteamUser022",
+        "GetHSteamUser", "BLoggedOn", "GetSteamID", "InitiateGameConnection",
+        "TerminateGameConnection", "TrackAppUsageEvent", "GetUserDataFolder", "StartVoiceRecording",
+        "StopVoiceRecording", "GetAvailableVoice", "GetVoice", "DecompressVoice",
+        "GetVoiceOptimalSampleRate", "GetAuthSessionTicket__V023", "BeginAuthSession", "EndAuthSession",
+        "CancelAuthTicket", "UserHasLicenseForApp", "BIsBehindNAT", "AdvertiseGame",
+        "RequestEncryptedAppTicket", "GetEncryptedAppTicket", "GetGameBadgeLevel", "GetPlayerSteamLevel",
+        "RequestStoreAuthURL", "BIsPhoneVerified", "BIsTwoFactorEnabled", "BIsPhoneIdentifying",
+        "BIsPhoneRequiringVerification", "GetMarketEligibility", "GetDurationControl", "BSetDurationControlOnlineState")]
     [InterfaceLayout("SteamUser019",
         "GetHSteamUser", "BLoggedOn", "GetSteamID", "InitiateGameConnection",
         "TerminateGameConnection", "TrackAppUsageEvent", "GetUserDataFolder", "StartVoiceRecording",
@@ -55,6 +115,7 @@ namespace SKYNET.Steamworks.Interfaces
     public class SteamUserInterface : ISteamInterface
     {
         private const uint LegacyVoiceSampleRate = 11025;
+        private static bool _refreshSteam2LoginLogged;
 
         public HSteamUser GetHSteamUser(IntPtr _)
         {
@@ -197,6 +258,32 @@ namespace SKYNET.Steamworks.Interfaces
         {
             return (EUserHasLicenseForAppResult)SteamEmulator.SteamUser.UserHasLicenseForApp(steamID, appID);
         }
+
+        public int InitiateGameConnection__V009(IntPtr _, IntPtr pAuthBlob, int cbMaxAuthBlob, ulong steamIDGameServer, ulong gameID, uint unIPServer, ushort usPortServer, bool bSecure)
+        {
+            return SteamEmulator.SteamUser.InitiateGameConnection(pAuthBlob, cbMaxAuthBlob, steamIDGameServer, gameID, unIPServer, usPortServer, bSecure);
+        }
+
+        public void RefreshSteam2Login(IntPtr _)
+        {
+            if (!_refreshSteam2LoginLogged)
+            {
+                _refreshSteam2LoginLogged = true;
+                SteamEmulator.Write("SteamUser", "RefreshSteam2Login not implemented");
+            }
+        }
+
+        public EVoiceResult GetCompressedVoice(IntPtr _, IntPtr pDestBuffer, uint cbDestBufferSize, IntPtr nBytesWritten) =>
+            SteamEmulator.SteamUser.GetVoice(
+                true,
+                pDestBuffer,
+                cbDestBufferSize,
+                nBytesWritten,
+                false,
+                IntPtr.Zero,
+                0,
+                IntPtr.Zero,
+                LegacyVoiceSampleRate);
 
         public uint GetVoiceOptimalSampleRate(IntPtr _)
         {

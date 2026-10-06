@@ -1,0 +1,7 @@
+0|GetHSteamUser|System.UInt32|System.IntPtr
+1|BLoggedOn|System.Boolean|System.IntPtr
+2|GetSteamID|System.IntPtr|System.IntPtr,System.IntPtr
+3|InitiateGameConnection|System.Int32|System.IntPtr,System.IntPtr,System.Int32,System.UInt64,System.UInt64,System.UInt32,System.UInt16,System.Boolean
+4|TerminateGameConnection|System.Void|System.IntPtr,System.UInt32,System.UInt16
+5|TrackAppUsageEvent|System.Void|System.IntPtr,System.UInt64,System.Int32,System.String
+6|RefreshSteam2Login|System.Void|System.IntPtr

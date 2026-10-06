@@ -1,0 +1,14 @@
+0|GetSecondsSinceAppActive|System.UInt32|System.IntPtr
+1|GetSecondsSinceComputerActive|System.UInt32|System.IntPtr
+2|GetConnectedUniverse|System.Int32|System.IntPtr
+3|GetServerRealTime|System.UInt32|System.IntPtr
+4|GetIPCountry|System.String|System.IntPtr
+5|GetImageSize|System.Boolean|System.IntPtr,System.Int32,System.UInt32&,System.UInt32&
+6|GetImageRGBA|System.Boolean|System.IntPtr,System.Int32,System.IntPtr,System.Int32
+7|GetCSERIPPort|System.Boolean|System.IntPtr,System.IntPtr,System.IntPtr
+8|GetCurrentBatteryPower|System.Byte|System.IntPtr
+9|GetAppID|System.UInt32|System.IntPtr
+10|SetOverlayNotificationPosition|System.Void|System.IntPtr,System.Int32
+11|IsAPICallCompleted|System.Boolean|System.IntPtr,System.UInt64,System.IntPtr
+12|GetAPICallFailureReason|System.Int32|System.IntPtr,System.UInt64
+13|GetAPICallResult|System.Boolean|System.IntPtr,System.UInt64,System.IntPtr,System.Int32,System.Int32,System.IntPtr

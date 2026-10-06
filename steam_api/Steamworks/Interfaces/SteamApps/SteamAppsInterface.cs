@@ -5,9 +5,39 @@ using System;
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    [InterfaceLayout("STEAMAPPS_INTERFACE_VERSION001",
+        "GetAppData")]
+    [InterfaceLayout("STEAMAPPS_INTERFACE_VERSION002",
+        "BIsSubscribed", "BIsLowViolence", "BIsCybercafe", "BIsVACBanned",
+        "GetCurrentGameLanguage", "GetAvailableGameLanguages", "BIsSubscribedApp")]
     [InterfaceLayout("STEAMAPPS_INTERFACE_VERSION003",
         "BIsSubscribed", "BIsLowViolence", "BIsCybercafe", "BIsVACBanned",
         "GetCurrentGameLanguage", "GetAvailableGameLanguages", "BIsSubscribedApp", "BIsDlcInstalled")]
+    [InterfaceLayout("STEAMAPPS_INTERFACE_VERSION004",
+        "BIsSubscribed", "BIsLowViolence", "BIsCybercafe", "BIsVACBanned",
+        "GetCurrentGameLanguage", "GetAvailableGameLanguages", "BIsSubscribedApp", "BIsDlcInstalled",
+        "GetEarliestPurchaseUnixTime", "BIsSubscribedFromFreeWeekend", "GetDLCCount", "BGetDLCDataByIndex",
+        "InstallDLC", "UninstallDLC")]
+    [InterfaceLayout("STEAMAPPS_INTERFACE_VERSION005",
+        "BIsSubscribed", "BIsLowViolence", "BIsCybercafe", "BIsVACBanned",
+        "GetCurrentGameLanguage", "GetAvailableGameLanguages", "BIsSubscribedApp", "BIsDlcInstalled",
+        "GetEarliestPurchaseUnixTime", "BIsSubscribedFromFreeWeekend", "GetDLCCount", "BGetDLCDataByIndex",
+        "InstallDLC", "UninstallDLC", "RequestAppProofOfPurchaseKey", "GetCurrentBetaName",
+        "MarkContentCorrupt", "GetInstalledDepots__V005", "GetAppInstallDir", "BIsAppInstalled")]
+    [InterfaceLayout("STEAMAPPS_INTERFACE_VERSION006",
+        "BIsSubscribed", "BIsLowViolence", "BIsCybercafe", "BIsVACBanned",
+        "GetCurrentGameLanguage", "GetAvailableGameLanguages", "BIsSubscribedApp", "BIsDlcInstalled",
+        "GetEarliestPurchaseUnixTime", "BIsSubscribedFromFreeWeekend", "GetDLCCount", "BGetDLCDataByIndex",
+        "InstallDLC", "UninstallDLC", "RequestAppProofOfPurchaseKey", "GetCurrentBetaName",
+        "MarkContentCorrupt", "GetInstalledDepots", "GetAppInstallDir", "BIsAppInstalled",
+        "GetAppOwner", "GetLaunchQueryParam")]
+    [InterfaceLayout("STEAMAPPS_INTERFACE_VERSION007",
+        "BIsSubscribed", "BIsLowViolence", "BIsCybercafe", "BIsVACBanned",
+        "GetCurrentGameLanguage", "GetAvailableGameLanguages", "BIsSubscribedApp", "BIsDlcInstalled",
+        "GetEarliestPurchaseUnixTime", "BIsSubscribedFromFreeWeekend", "GetDLCCount", "BGetDLCDataByIndex",
+        "InstallDLC", "UninstallDLC", "RequestAppProofOfPurchaseKey", "GetCurrentBetaName",
+        "MarkContentCorrupt", "GetInstalledDepots", "GetAppInstallDir", "BIsAppInstalled",
+        "GetAppOwner", "GetLaunchQueryParam", "GetDlcDownloadProgress", "GetAppBuildId")]
     [InterfaceLayout("STEAMAPPS_INTERFACE_VERSION008",
         "BIsSubscribed", "BIsLowViolence", "BIsCybercafe", "BIsVACBanned",
         "GetCurrentGameLanguage", "GetAvailableGameLanguages", "BIsSubscribedApp", "BIsDlcInstalled",
@@ -30,6 +60,18 @@ namespace SKYNET.Steamworks.Interfaces
         "SetActiveBeta")]
     public class SteamAppsInterface : ISteamInterface
     {
+        private static bool _getAppDataLogged;
+
+        public int GetAppData(IntPtr _, uint appID, string key, IntPtr value, int valueMax)
+        {
+            if (!_getAppDataLogged)
+            {
+                _getAppDataLogged = true;
+                SteamEmulator.Write("SteamApps", "GetAppData not implemented");
+            }
+            return 0;
+        }
+
         public bool BIsSubscribed(IntPtr _) => SteamEmulator.SteamApps.BIsSubscribed();
 
         public bool BIsLowViolence(IntPtr _) => SteamEmulator.SteamApps.BIsLowViolence();
@@ -66,6 +108,8 @@ namespace SKYNET.Steamworks.Interfaces
         public bool GetCurrentBetaName(IntPtr _, IntPtr name, int nameLength) => SteamEmulator.SteamApps.GetCurrentBetaName(name, nameLength);
 
         public bool MarkContentCorrupt(IntPtr _, bool missingFilesOnly) => SteamEmulator.SteamApps.MarkContentCorrupt(missingFilesOnly);
+
+        public uint GetInstalledDepots__V005(IntPtr _, IntPtr depots, uint maxDepots) => SteamEmulator.SteamApps.GetInstalledDepots(SteamEmulator.ReportedAppId, depots, maxDepots);
 
         public uint GetInstalledDepots(IntPtr _, uint appID, IntPtr depots, uint maxDepots) => SteamEmulator.SteamApps.GetInstalledDepots(appID, depots, maxDepots);
 

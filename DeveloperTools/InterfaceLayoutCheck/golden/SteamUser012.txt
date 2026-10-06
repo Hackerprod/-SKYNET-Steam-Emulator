@@ -1,0 +1,16 @@
+0|GetHSteamUser|System.UInt32|System.IntPtr
+1|BLoggedOn|System.Boolean|System.IntPtr
+2|GetSteamID|System.IntPtr|System.IntPtr,System.IntPtr
+3|InitiateGameConnection|System.Int32|System.IntPtr,System.IntPtr,System.Int32,System.UInt64,System.UInt32,System.UInt16,System.Boolean
+4|TerminateGameConnection|System.Void|System.IntPtr,System.UInt32,System.UInt16
+5|TrackAppUsageEvent|System.Void|System.IntPtr,System.UInt64,System.Int32,System.String
+6|GetUserDataFolder|System.Boolean|System.IntPtr,System.IntPtr,System.Int32
+7|StartVoiceRecording|System.Void|System.IntPtr
+8|StopVoiceRecording|System.Void|System.IntPtr
+9|GetCompressedVoice|SKYNET.Steamworks.EVoiceResult|System.IntPtr,System.IntPtr,System.UInt32,System.IntPtr
+10|DecompressVoice|SKYNET.Steamworks.EVoiceResult|System.IntPtr,System.IntPtr,System.UInt32,System.IntPtr,System.UInt32,System.IntPtr
+11|GetAuthSessionTicket|System.UInt32|System.IntPtr,System.IntPtr,System.Int32,System.UInt32&
+12|BeginAuthSession|System.Int32|System.IntPtr,System.IntPtr,System.Int32,System.UInt64
+13|EndAuthSession|System.Void|System.IntPtr,System.UInt64
+14|CancelAuthTicket|System.Void|System.IntPtr,System.UInt32
+15|UserHasLicenseForApp|System.Int32|System.IntPtr,System.UInt64,System.UInt32
