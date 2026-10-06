@@ -1,0 +1,4 @@
+0|GSSendUserConnect|System.Boolean|System.IntPtr,System.UInt64,System.UInt32,System.UInt32
+1|GSSendUserDisconnect|System.Boolean|System.IntPtr,System.UInt64
+2|GSSendUserStatusResponse|System.Boolean|System.IntPtr,System.UInt64,System.Int32,System.Int32
+3|Obsolete_GSSetStatus|System.Boolean|System.IntPtr,System.Int32,System.UInt32,System.Int32,System.Int32,System.Int32,System.Int32,System.IntPtr,System.IntPtr,System.IntPtr,System.IntPtr

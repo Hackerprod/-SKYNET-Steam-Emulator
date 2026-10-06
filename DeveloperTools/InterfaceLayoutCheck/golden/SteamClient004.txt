@@ -1,0 +1,8 @@
+0|CreateGlobalInstance|System.UInt32|System.IntPtr
+1|ConnectToGlobalInstance|System.UInt32|System.IntPtr
+2|CreateLocalInstance|System.UInt32|System.IntPtr
+3|ReleaseInstance|System.Void|System.IntPtr,System.UInt32
+4|GetISteamUser|System.IntPtr|System.IntPtr,System.UInt32,System.String
+5|GetIVAC|System.IntPtr|System.IntPtr,System.UInt32
+6|GetISteamGameServer|System.IntPtr|System.IntPtr,System.UInt32,System.String
+7|SetLocalIPBinding|System.Void|System.IntPtr,System.UInt32,System.UInt16

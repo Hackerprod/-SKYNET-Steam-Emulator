@@ -1,0 +1,17 @@
+0|LogOn|System.Void|System.IntPtr
+1|LogOff|System.Void|System.IntPtr
+2|BLoggedOn|System.Boolean|System.IntPtr
+3|BSecure|System.Boolean|System.IntPtr
+4|GetSteamID|System.IntPtr|System.IntPtr,System.IntPtr
+5|GSGetSteam2GetEncryptionKeyToSendToNewClient|System.Boolean|System.IntPtr,System.IntPtr,System.IntPtr,System.UInt32
+6|GSSendUserConnect|System.Boolean|System.IntPtr,System.UInt32,System.UInt32,System.UInt16,System.IntPtr,System.UInt32
+7|GSRemoveUserConnect|System.Boolean|System.IntPtr,System.UInt32
+8|GSSendUserDisconnect|System.Boolean|System.IntPtr,System.UInt64,System.UInt32
+9|GSSetSpawnCount|System.Void|System.IntPtr,System.UInt32
+10|GSSetServerType|System.Boolean|System.IntPtr,System.Int32,System.UInt32,System.UInt32,System.UInt16,System.UInt16,System.UInt16,System.IntPtr,System.IntPtr,System.Boolean
+11|GSUpdateStatus|System.Boolean|System.IntPtr,System.Int32,System.Int32,System.Int32,System.IntPtr,System.IntPtr,System.IntPtr
+12|GSCreateUnauthenticatedUser|System.Boolean|System.IntPtr,System.IntPtr
+13|GSSetUserData|System.Boolean|System.IntPtr,System.UInt64,System.IntPtr,System.UInt32
+14|GSUpdateSpectatorPort|System.Void|System.IntPtr,System.UInt16
+15|GSSetGameType|System.Void|System.IntPtr,System.IntPtr
+16|GSGetUserAchievementStatus|System.Boolean|System.IntPtr,System.UInt64,System.IntPtr

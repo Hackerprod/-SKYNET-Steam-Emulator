@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using SKYNET.Helpers;
 using SKYNET.Managers;
@@ -8,6 +9,21 @@ using HAuthTicket = System.UInt32;
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    [InterfaceLayout("SteamGameServer001",
+        "GSSendUserConnect__V001", "GSSendUserDisconnect__V001", "GSSendUserStatusResponse", "Obsolete_GSSetStatus")]
+    [InterfaceLayout("SteamGameServer002",
+        "LogOn__V009", "LogOff", "BLoggedOn", "GSSetSpawnCount",
+        "GSGetSteam2GetEncryptionKeyToSendToNewClient", "GSSendSteam2UserConnect", "GSSendSteam3UserConnect", "GSRemoveUserConnect",
+        "GSSendUserDisconnect", "GSSendUserStatusResponse", "Obsolete_GSSetStatus", "GSUpdateStatus__V002",
+        "BSecure", "GetSteamID", "GSSetServerType__V002", "GSSetServerType2",
+        "GSUpdateStatus2", "GSCreateUnauthenticatedUser", "GSSetUserData", "GSUpdateSpectatorPort",
+        "GSSetGameType")]
+    [InterfaceLayout("SteamGameServer003",
+        "LogOn__V009", "LogOff", "BLoggedOn", "BSecure",
+        "GetSteamID", "GSGetSteam2GetEncryptionKeyToSendToNewClient", "GSSendUserConnect", "GSRemoveUserConnect",
+        "GSSendUserDisconnect", "GSSetSpawnCount", "GSSetServerType", "GSUpdateStatus",
+        "GSCreateUnauthenticatedUser", "GSSetUserData", "GSUpdateSpectatorPort", "GSSetGameType",
+        "GSGetUserAchievementStatus")]
     [InterfaceLayout("SteamGameServer004",
         "LogOn__V009", "LogOff", "BLoggedOn", "BSecure",
         "GetSteamID", "SendUserConnectAndAuthenticate__V004", "CreateUnauthenticatedUserConnection", "SendUserDisconnect",
@@ -478,6 +494,160 @@ namespace SKYNET.Steamworks.Interfaces
         {
             SteamEmulator.Write("SteamGameServer009", $"SetGameData value=0x{pchGameData.ToInt64():X}");
             SteamEmulator.SteamGameServer.SetGameData(ReadAnsi(pchGameData));
+        }
+
+        private static readonly HashSet<string> _stubsLogged = new HashSet<string>();
+
+        private static void LogStub(string method)
+        {
+            lock (_stubsLogged)
+            {
+                if (!_stubsLogged.Add(method))
+                {
+                    return;
+                }
+            }
+
+            SteamEmulator.Write("SteamGameServer", method + " not implemented");
+        }
+
+        public bool GSSendUserConnect__V001(IntPtr _, ulong steamID, uint unIPPublic, uint unk)
+        {
+            LogStub("GSSendUserConnect");
+            return false;
+        }
+
+        public bool GSSendUserConnect(IntPtr _, uint unUserID, uint unIPPublic, ushort usPort, IntPtr pvCookie, uint cubCookie)
+        {
+            return SteamEmulator.SteamGameServer.SendUserConnectAndAuthenticate(unIPPublic, pvCookie, cubCookie, out ulong _authenticatedUser);
+        }
+
+        public bool GSSendSteam3UserConnect(IntPtr _, ulong steamID, uint unIPPublic, IntPtr pvCookie, uint cubCookie)
+        {
+            return SteamEmulator.SteamGameServer.SendUserConnectAndAuthenticate(unIPPublic, pvCookie, cubCookie, out ulong _authenticatedUser);
+        }
+
+        public bool GSSendSteam2UserConnect(IntPtr _, uint unUserID, IntPtr pvRawKey, uint unKeyLen, uint unIPPublic, ushort usPort, IntPtr pvCookie, uint cubCookie)
+        {
+            LogStub("GSSendSteam2UserConnect");
+            return false;
+        }
+
+        public bool GSGetSteam2GetEncryptionKeyToSendToNewClient(IntPtr _, IntPtr pvEncryptionKey, IntPtr pcbEncryptionKey, uint cbMaxEncryptionKey)
+        {
+            LogStub("GSGetSteam2GetEncryptionKeyToSendToNewClient");
+            return false;
+        }
+
+        public bool GSRemoveUserConnect(IntPtr _, uint unUserID)
+        {
+            LogStub("GSRemoveUserConnect");
+            return false;
+        }
+
+        public void GSSetSpawnCount(IntPtr _, uint ucSpawn) => LogStub("GSSetSpawnCount");
+
+        public bool GSSendUserDisconnect__V001(IntPtr _, ulong steamID)
+        {
+            SteamEmulator.SteamGameServer.SendUserDisconnect(steamID);
+            return true;
+        }
+
+        public bool GSSendUserDisconnect(IntPtr _, ulong steamID, uint unUserID)
+        {
+            SteamEmulator.SteamGameServer.SendUserDisconnect(steamID);
+            return true;
+        }
+
+        public bool GSSendUserStatusResponse(IntPtr _, ulong steamID, int nSecondsConnected, int nSecondsSinceLast)
+        {
+            LogStub("GSSendUserStatusResponse");
+            return false;
+        }
+
+        public bool Obsolete_GSSetStatus(IntPtr _, int nAppIdServed, uint unServerFlags, int cPlayers, int cPlayersMax, int cBotPlayers, int unGamePort, IntPtr pchServerName, IntPtr pchGameDir, IntPtr pchMapName, IntPtr pchVersion)
+        {
+            if (!SteamEmulator.SteamGameServer.LoggedIn)
+            {
+                SteamEmulator.SteamGameServer.InitGameServer(0, unGamePort, unGamePort, unServerFlags, unchecked((uint)nAppIdServed), ReadAnsi(pchVersion));
+                SteamEmulator.SteamGameServer.SetModDir(ReadAnsi(pchGameDir));
+            }
+
+            SteamEmulator.SteamGameServer.SetMaxPlayerCount(cPlayersMax);
+            SteamEmulator.SteamGameServer.SetBotPlayerCount(cBotPlayers);
+            SteamEmulator.SteamGameServer.SetServerName(ReadAnsi(pchServerName));
+            SteamEmulator.SteamGameServer.SetMapName(ReadAnsi(pchMapName));
+            return true;
+        }
+
+        public bool GSUpdateStatus__V002(IntPtr _, int cPlayers, int cPlayersMax, int cBotPlayers, IntPtr pchServerName, IntPtr pchMapName)
+        {
+            SteamEmulator.SteamGameServer.SetMaxPlayerCount(cPlayersMax);
+            SteamEmulator.SteamGameServer.SetBotPlayerCount(cBotPlayers);
+            SteamEmulator.SteamGameServer.SetServerName(ReadAnsi(pchServerName));
+            SteamEmulator.SteamGameServer.SetMapName(ReadAnsi(pchMapName));
+            return true;
+        }
+
+        public bool GSUpdateStatus(IntPtr _, int cPlayers, int cPlayersMax, int cBotPlayers, IntPtr pchServerName, IntPtr pSpectatorServerName, IntPtr pchMapName)
+        {
+            UpdateServerStatus(_, cPlayers, cPlayersMax, cBotPlayers, pchServerName, pSpectatorServerName, pchMapName);
+            return true;
+        }
+
+        public bool GSUpdateStatus2(IntPtr _, int cPlayers, int cPlayersMax, int cBotPlayers, IntPtr pchServerName, IntPtr pSpectatorServerName, IntPtr pchMapName)
+        {
+            UpdateServerStatus(_, cPlayers, cPlayersMax, cBotPlayers, pchServerName, pSpectatorServerName, pchMapName);
+            return true;
+        }
+
+        public bool GSSetServerType(IntPtr _, int nGameAppId, uint unServerFlags, uint unGameIP, ushort unGamePort, ushort unSpectatorPort, ushort usQueryPort, IntPtr pchGameDir, IntPtr pchVersion, bool bLANMode)
+        {
+            return BSetServerType__V004(_, nGameAppId, unServerFlags, unGameIP, unGamePort, unSpectatorPort, usQueryPort, pchGameDir, pchVersion, bLANMode);
+        }
+
+        public bool GSSetServerType2(IntPtr _, int nGameAppId, uint unServerFlags, uint unGameIP, ushort unGamePort, ushort unSpectatorPort, ushort usQueryPort, IntPtr pchGameDir, IntPtr pchVersion, bool bLANMode)
+        {
+            return BSetServerType__V004(_, nGameAppId, unServerFlags, unGameIP, unGamePort, unSpectatorPort, usQueryPort, pchGameDir, pchVersion, bLANMode);
+        }
+
+        public bool GSSetServerType__V002(IntPtr _, int nGameAppId, uint unServerFlags, uint unGameIP, uint unGamePort, IntPtr pchGameDir, IntPtr pchVersion)
+        {
+            bool result = SteamEmulator.SteamGameServer.InitGameServer(
+                unGameIP,
+                unchecked((int)unGamePort),
+                unchecked((int)unGamePort),
+                unServerFlags,
+                unchecked((uint)nGameAppId),
+                ReadAnsi(pchVersion));
+            SteamEmulator.SteamGameServer.SetModDir(ReadAnsi(pchGameDir));
+            return result;
+        }
+
+        public bool GSCreateUnauthenticatedUser(IntPtr _, IntPtr pSteamID)
+        {
+            NativeSteamId.Write(pSteamID, SteamEmulator.SteamGameServer.CreateUnauthenticatedUserConnection());
+            return true;
+        }
+
+        public bool GSSetUserData(IntPtr _, ulong steamID, IntPtr pPlayerName, uint nFrags)
+        {
+            return SteamEmulator.SteamGameServer.BUpdateUserData(steamID, ReadAnsi(pPlayerName), nFrags);
+        }
+
+        public void GSUpdateSpectatorPort(IntPtr _, ushort unSpectatorPort)
+        {
+            SteamEmulator.SteamGameServer.SetSpectatorPort(unSpectatorPort);
+        }
+
+        public void GSSetGameType(IntPtr _, IntPtr pchType)
+        {
+            SetGameType(_, pchType);
+        }
+
+        public bool GSGetUserAchievementStatus(IntPtr _, ulong steamID, IntPtr pchAchievementName)
+        {
+            return BGetUserAchievementStatus(_, steamID, pchAchievementName);
         }
 
         private static string ReadAnsi(IntPtr value)

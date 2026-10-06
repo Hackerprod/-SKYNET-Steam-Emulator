@@ -3,6 +3,8 @@ using SKYNET.Steamworks.Implementation;
 using SKYNET.Steamworks.Types;
 using System.Runtime.InteropServices;
 using System;
+using System.Collections.Generic;
+using System.Text;
 
 using AppId_t = System.UInt32;
 using FriendsGroupID_t = System.Int16;
@@ -10,6 +12,23 @@ using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    [InterfaceLayout("SteamFriends001",
+        "GetPersonaName", "SetPersonaNameOld", "GetPersonaState", "SetPersonaState",
+        "AddFriend", "RemoveFriend", "HasFriend__V001", "GetFriendRelationship",
+        "GetFriendPersonaState", "Deprecated_GetFriendGamePlayed", "GetFriendPersonaName", "AddFriendByName",
+        "GetFriendCount__V001", "GetFriendByIndex__V001", "SendMsgToFriend", "SetFriendRegValue",
+        "GetFriendRegValue", "GetFriendPersonaNameHistory", "GetChatMessage", "SendMsgToFriend__V001",
+        "GetChatIDOfChatHistoryStart", "SetChatHistoryStart", "ClearChatHistory", "InviteFriendByEmail",
+        "GetBlockedFriendCount", "GetFriendGamePlayed__V001", "GetFriendGamePlayed2")]
+    [InterfaceLayout("SteamFriends002",
+        "GetPersonaName", "SetPersonaNameOld", "GetPersonaState", "SetPersonaState",
+        "GetFriendCount", "GetFriendByIndex", "GetFriendRelationship", "GetFriendPersonaState",
+        "GetFriendPersonaName", "SetFriendRegValue", "GetFriendRegValue", "GetFriendGamePlayed__V003",
+        "GetFriendPersonaNameHistory", "AddFriend", "RemoveFriend", "HasFriend",
+        "AddFriendByName", "InviteFriendByEmail", "GetChatMessage", "SendMsgToFriend",
+        "GetChatIDOfChatHistoryStart", "SetChatHistoryStart", "ClearChatHistory", "GetClanCount",
+        "GetClanByIndex", "GetClanName", "InviteFriendToClan", "AcknowledgeInviteToClan",
+        "GetFriendCountFromSource", "GetFriendFromSourceByIndex")]
     [InterfaceLayout("SteamFriends003",
         "GetPersonaName", "SetPersonaNameOld", "GetPersonaState", "GetFriendCount",
         "GetFriendByIndex", "GetFriendRelationship", "GetFriendPersonaState", "GetFriendPersonaName",
@@ -772,5 +791,138 @@ namespace SKYNET.Steamworks.Interfaces
         public IntPtr GetProfileItemPropertyString(IntPtr _, ulong steamID, int itemType, int prop) { return NativeStringCache.ToUtf8Ptr(SteamFriends.Instance.GetProfileItemPropertyString(steamID, itemType, prop)); }
 
         public uint GetProfileItemPropertyUint(IntPtr _, ulong steamID, int itemType, int prop) { return SteamFriends.Instance.GetProfileItemPropertyUint(steamID, itemType, prop); }
+
+        private static readonly HashSet<string> _stubsLogged = new HashSet<string>();
+
+        private static void LogStub(string method)
+        {
+            lock (_stubsLogged)
+            {
+                if (!_stubsLogged.Add(method))
+                {
+                    return;
+                }
+            }
+
+            SteamEmulator.Write("SteamFriends", method + " not implemented");
+        }
+
+        private static string ReadChatMessage(IntPtr pvMsgBody, int cubMsgBody)
+        {
+            if (pvMsgBody == IntPtr.Zero || cubMsgBody <= 0)
+            {
+                return string.Empty;
+            }
+
+            byte[] bytes = new byte[cubMsgBody];
+            Marshal.Copy(pvMsgBody, bytes, 0, cubMsgBody);
+            return Encoding.UTF8.GetString(bytes).TrimEnd('\0');
+        }
+
+        public void SetPersonaState(IntPtr _, int ePersonaState) => LogStub("SetPersonaState");
+
+        public bool AddFriend(IntPtr _, ulong steamIDFriend)
+        {
+            LogStub("AddFriend");
+            return false;
+        }
+
+        public bool RemoveFriend(IntPtr _, ulong steamIDFriend)
+        {
+            LogStub("RemoveFriend");
+            return false;
+        }
+
+        public bool HasFriend__V001(IntPtr _, ulong steamIDFriend) { return SteamFriends.Instance.HasFriend(steamIDFriend, (int)EFriendFlags.k_EFriendFlagImmediate); }
+
+        public int GetFriendCount__V001(IntPtr _) { return SteamFriends.Instance.GetFriendCount((int)EFriendFlags.k_EFriendFlagImmediate); }
+
+        public IntPtr GetFriendByIndex__V001(IntPtr _, IntPtr ret, int iFriend) { return NativeSteamId.Write(ret, SteamFriends.Instance.GetFriendByIndex(iFriend, (int)EFriendFlags.k_EFriendFlagImmediate)); }
+
+        public bool Deprecated_GetFriendGamePlayed(IntPtr _, ulong steamIDFriend, IntPtr pnGameID, IntPtr punGameIP, IntPtr pusGamePort)
+        {
+            FriendGameInfo_t info = default(FriendGameInfo_t);
+            bool result = SteamFriends.Instance.GetFriendGamePlayed(steamIDFriend, ref info);
+            WriteInt32(pnGameID, unchecked((int)info.GameID));
+            WriteInt32(punGameIP, unchecked((int)info.GameIP));
+            if (pusGamePort != IntPtr.Zero)
+            {
+                Marshal.WriteInt16(pusGamePort, unchecked((short)info.GamePort));
+            }
+            return result;
+        }
+
+        public bool GetFriendGamePlayed__V001(IntPtr _, ulong steamIDFriend, IntPtr pulGameID, IntPtr punGameIP, IntPtr pusGamePort)
+        {
+            return GetFriendGamePlayed__V003(_, steamIDFriend, pulGameID, punGameIP, pusGamePort, IntPtr.Zero);
+        }
+
+        public bool GetFriendGamePlayed2(IntPtr _, ulong steamIDFriend, IntPtr pulGameID, IntPtr punGameIP, IntPtr pusGamePort, IntPtr pusQueryPort)
+        {
+            return GetFriendGamePlayed__V003(_, steamIDFriend, pulGameID, punGameIP, pusGamePort, pusQueryPort);
+        }
+
+        public int AddFriendByName(IntPtr _, string pchEmailOrAccountName)
+        {
+            LogStub("AddFriendByName");
+            return 0;
+        }
+
+        public bool InviteFriendByEmail(IntPtr _, string pchEmailAccount)
+        {
+            LogStub("InviteFriendByEmail");
+            return false;
+        }
+
+        public int GetBlockedFriendCount(IntPtr _)
+        {
+            LogStub("GetBlockedFriendCount");
+            return 0;
+        }
+
+        public void SetFriendRegValue(IntPtr _, ulong steamIDFriend, string pchKey, string pchValue) => LogStub("SetFriendRegValue");
+
+        public IntPtr GetFriendRegValue(IntPtr _, ulong steamIDFriend, string pchKey)
+        {
+            LogStub("GetFriendRegValue");
+            return NativeStringCache.ToUtf8Ptr(string.Empty);
+        }
+
+        public int GetChatMessage(IntPtr _, ulong steamIDFriend, int iChatID, IntPtr pvData, int cubData, IntPtr peChatEntryType)
+        {
+            return SteamFriends.Instance.GetFriendMessage(steamIDFriend, iChatID, pvData, cubData, peChatEntryType);
+        }
+
+        public bool SendMsgToFriend(IntPtr _, ulong steamIDFriend, int eChatEntryType, IntPtr pvMsgBody, int cubMsgBody)
+        {
+            return SteamFriends.Instance.ReplyToFriendMessage(steamIDFriend, ReadChatMessage(pvMsgBody, cubMsgBody));
+        }
+
+        public void SendMsgToFriend__V001(IntPtr _, ulong steamIDFriend, int eChatEntryType, string pchMsgBody)
+        {
+            SteamFriends.Instance.ReplyToFriendMessage(steamIDFriend, pchMsgBody);
+        }
+
+        public int GetChatIDOfChatHistoryStart(IntPtr _, ulong steamIDFriend)
+        {
+            LogStub("GetChatIDOfChatHistoryStart");
+            return 0;
+        }
+
+        public void SetChatHistoryStart(IntPtr _, ulong steamIDFriend, int iChatID) => LogStub("SetChatHistoryStart");
+
+        public void ClearChatHistory(IntPtr _, ulong steamIDFriend) => LogStub("ClearChatHistory");
+
+        public bool InviteFriendToClan(IntPtr _, ulong steamIDFriend, ulong steamIDClan)
+        {
+            LogStub("InviteFriendToClan");
+            return false;
+        }
+
+        public bool AcknowledgeInviteToClan(IntPtr _, ulong steamIDClan, bool bAcceptOrDenyClanInvite)
+        {
+            LogStub("AcknowledgeInviteToClan");
+            return false;
+        }
     }
 }

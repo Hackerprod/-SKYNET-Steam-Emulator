@@ -1,4 +1,8 @@
+using SKYNET.Callback;
+using SKYNET.Helpers;
+using SKYNET.Managers;
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 using HSteamPipe = System.UInt32;
@@ -6,6 +10,36 @@ using HSteamUser = System.UInt32;
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    [InterfaceLayout("SteamClient001",
+        "CreateGlobalInstance", "ConnectToGlobalInstance", "CreateLocalInstance", "ReleaseInstance",
+        "GetISteamUser__V001", "GetIVAC", "BMainLoop", "Test_SetSpew",
+        "Test_SetSpewFunc", "Test_OverrideIPs", "Test_SetServerLoadState", "Test_SetStressMode",
+        "Test_GetStatsVConn")]
+    [InterfaceLayout("SteamClient002",
+        "CreateGlobalInstance", "ConnectToGlobalInstance", "CreateLocalInstance", "ReleaseInstance",
+        "GetISteamUser__V001", "GetIVAC", "BMainLoop", "Test_SetSpew",
+        "Test_SetSpewFunc", "Test_OverrideIPs", "Test_SetServerLoadState", "Test_SetStressMode",
+        "Test_GetStatsVConn", "Test_RemoveAllClients")]
+    [InterfaceLayout("SteamClient003",
+        "CreateGlobalInstance", "ConnectToGlobalInstance", "CreateLocalInstance", "ReleaseInstance",
+        "GetISteamUser__V001", "GetIVAC", "BMainLoop__V003", "Test_SetSpew",
+        "Test_SetSpewFunc", "Test_OverrideIPs", "Test_SetServerLoadState", "Test_SetStressMode",
+        "Test_GetStatsVConn", "Test_RemoveAllClients")]
+    [InterfaceLayout("SteamClient004",
+        "CreateGlobalInstance", "ConnectToGlobalInstance", "CreateLocalInstance", "ReleaseInstance",
+        "GetISteamUser__V001", "GetIVAC", "GetISteamGameServer__V004", "SetLocalIPBinding")]
+    [InterfaceLayout("SteamClient005",
+        "CreateSteamPipe", "BReleaseSteamPipe", "CreateGlobalUser", "ConnectToGlobalUser",
+        "CreateLocalUser__V007", "ReleaseUser", "GetISteamUser", "GetIVAC",
+        "GetISteamGameServer", "SetLocalIPBinding", "GetConnectedUniverse", "GetUniverseName",
+        "GetISteamFriends", "BGetCallback", "FreeLastCallback", "SetEUniverse")]
+    [InterfaceLayout("SteamClient006",
+        "CreateSteamPipe", "BReleaseSteamPipe", "CreateGlobalUser", "ConnectToGlobalUser",
+        "CreateLocalUser__V007", "ReleaseUser", "GetISteamUser", "GetIVAC",
+        "GetISteamGameServer", "SetLocalIPBinding", "GetUniverseName", "GetISteamFriends",
+        "GetISteamUtils", "GetISteamBilling_old", "GetISteamMatchmaking", "GetISteamApps",
+        "GetISteamContentServer", "GetISteamMasterServerUpdater", "GetISteamMatchmakingServers", "RunFrame",
+        "GetIPCCallCount")]
     [InterfaceLayout("SteamClient007",
         "CreateSteamPipe", "BReleaseSteamPipe", "ConnectToGlobalUser", "CreateLocalUser__V007",
         "ReleaseUser", "GetISteamUser", "GetISteamGameServer", "SetLocalIPBinding",
@@ -247,5 +281,114 @@ namespace SKYNET.Steamworks.Interfaces
         public IntPtr GetISteamParties(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion) => SteamEmulator.SteamClient.GetISteamParties(hSteamUser, hSteamPipe, pchVersion);
         public IntPtr GetISteamRemotePlay(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion) => SteamEmulator.SteamClient.GetISteamRemotePlay(hSteamUser, hSteamPipe, pchVersion);
         public void DestroyAllInterfaces(IntPtr _) => SteamEmulator.SteamClient.DestroyAllInterfaces();
+
+        private static readonly HashSet<string> _stubsLogged = new HashSet<string>();
+
+        private static void LogStub(string method)
+        {
+            lock (_stubsLogged)
+            {
+                if (!_stubsLogged.Add(method))
+                {
+                    return;
+                }
+            }
+
+            SteamEmulator.Write("SteamClient", method + " not implemented");
+        }
+
+        public HSteamUser CreateGlobalInstance(IntPtr _) => SteamEmulator.SteamClient.ConnectToGlobalUser(0);
+        public HSteamUser ConnectToGlobalInstance(IntPtr _) => SteamEmulator.SteamClient.ConnectToGlobalUser(0);
+        public HSteamUser CreateLocalInstance(IntPtr _) => SteamEmulator.SteamClient.CreateLocalUser(0, 1);
+        public void ReleaseInstance(IntPtr _, HSteamUser hSteamUser) => SteamEmulator.SteamClient.ReleaseUser(0, hSteamUser);
+        public IntPtr GetISteamUser__V001(IntPtr _, HSteamUser hSteamUser, string pchVersion) => SteamEmulator.SteamClient.GetISteamUser(hSteamUser, SteamEmulator.HSteamPipe, pchVersion);
+        public IntPtr GetISteamGameServer__V004(IntPtr _, HSteamUser hSteamUser, string pchVersion) => SteamEmulator.SteamClient.GetISteamGameServer(hSteamUser, SteamEmulator.HSteamPipe, pchVersion);
+
+        public IntPtr GetIVAC(IntPtr _, HSteamUser hSteamUser)
+        {
+            LogStub("GetIVAC");
+            return IntPtr.Zero;
+        }
+
+        public bool BMainLoop(IntPtr _, ulong time, bool unk)
+        {
+            LogStub("BMainLoop");
+            return false;
+        }
+
+        public bool BMainLoop__V003(IntPtr _, ulong time)
+        {
+            LogStub("BMainLoop");
+            return false;
+        }
+
+        public void Test_SetSpew(IntPtr _, string unk1, int unk2) => LogStub("Test_SetSpew");
+        public void Test_SetSpewFunc(IntPtr _, IntPtr unk) => LogStub("Test_SetSpewFunc");
+        public void Test_OverrideIPs(IntPtr _, uint unIPPublic, uint unIPPrivate) => LogStub("Test_OverrideIPs");
+        public void Test_SetServerLoadState(IntPtr _, bool unk1, bool unk2) => LogStub("Test_SetServerLoadState");
+        public void Test_SetStressMode(IntPtr _, bool unk) => LogStub("Test_SetStressMode");
+
+        public int Test_GetStatsVConn(IntPtr _)
+        {
+            LogStub("Test_GetStatsVConn");
+            return 0;
+        }
+
+        public void Test_RemoveAllClients(IntPtr _) => LogStub("Test_RemoveAllClients");
+
+        public HSteamUser CreateGlobalUser(IntPtr _, IntPtr phSteamPipe)
+        {
+            HSteamPipe pipe = SteamEmulator.CreateSteamPipe();
+            if (phSteamPipe != IntPtr.Zero)
+            {
+                Marshal.WriteInt32(phSteamPipe, unchecked((int)pipe));
+            }
+            return SteamEmulator.SteamClient.ConnectToGlobalUser(pipe);
+        }
+
+        public int GetConnectedUniverse(IntPtr _) => SteamEmulator.SteamUtils.GetConnectedUniverse();
+
+        public IntPtr GetUniverseName(IntPtr _, int eUniverse)
+        {
+            switch (eUniverse)
+            {
+                case 1:
+                    return NativeStringCache.ToUtf8Ptr("Public");
+                case 2:
+                    return NativeStringCache.ToUtf8Ptr("Beta");
+                case 3:
+                    return NativeStringCache.ToUtf8Ptr("Internal");
+                case 4:
+                    return NativeStringCache.ToUtf8Ptr("Dev");
+                default:
+                    return IntPtr.Zero;
+            }
+        }
+
+        public bool BGetCallback(IntPtr _, HSteamPipe hSteamPipe, IntPtr pCallbackMsg, IntPtr unk)
+        {
+            if (pCallbackMsg == IntPtr.Zero)
+            {
+                return false;
+            }
+
+            CallbackMsg_t message = Marshal.PtrToStructure<CallbackMsg_t>(pCallbackMsg);
+            bool result = CallbackManager.ManualDispatchGetNextCallback(hSteamPipe, ref message);
+            if (result)
+            {
+                Marshal.StructureToPtr(message, pCallbackMsg, false);
+            }
+            return result;
+        }
+
+        public void FreeLastCallback(IntPtr _, HSteamPipe hSteamPipe) => CallbackManager.ManualDispatchFreeLastCallback(hSteamPipe);
+
+        public void SetEUniverse(IntPtr _, int eUniverse) => LogStub("SetEUniverse");
+
+        public IntPtr GetISteamBilling_old(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion)
+        {
+            LogStub("GetISteamBilling_old");
+            return IntPtr.Zero;
+        }
     }
 }

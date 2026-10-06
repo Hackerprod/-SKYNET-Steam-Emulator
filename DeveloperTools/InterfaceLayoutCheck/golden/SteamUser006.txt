@@ -1,0 +1,12 @@
+0|GetHSteamUser|System.UInt32|System.IntPtr
+1|LogOn|System.Void|System.IntPtr,System.UInt64
+2|LogOff|System.Void|System.IntPtr
+3|BLoggedOn|System.Boolean|System.IntPtr
+4|GetSteamID|System.IntPtr|System.IntPtr,System.IntPtr
+5|SetRegistryString|System.Boolean|System.IntPtr,System.Int32,System.String,System.String
+6|GetRegistryString|System.Boolean|System.IntPtr,System.Int32,System.String,System.IntPtr,System.Int32
+7|SetRegistryInt|System.Boolean|System.IntPtr,System.Int32,System.String,System.Int32
+8|GetRegistryInt|System.Boolean|System.IntPtr,System.Int32,System.String,System.IntPtr
+9|InitiateGameConnection|System.Int32|System.IntPtr,System.IntPtr,System.Int32,System.UInt64,System.UInt64,System.UInt32,System.UInt16,System.Boolean
+10|TerminateGameConnection|System.Void|System.IntPtr,System.UInt32,System.UInt16
+11|TrackAppUsageEvent|System.Void|System.IntPtr,System.UInt64,System.Int32,System.String

@@ -7,6 +7,9 @@ using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    [InterfaceLayout("SteamUtils001",
+        "GetSecondsSinceAppActive", "GetSecondsSinceComputerActive", "GetConnectedUniverse", "GetServerRealTime",
+        "GetIPCountry", "GetImageSize", "GetImageRGBA")]
     [InterfaceLayout("SteamUtils002",
         "GetSecondsSinceAppActive", "GetSecondsSinceComputerActive", "GetConnectedUniverse", "GetServerRealTime",
         "GetIPCountry", "GetImageSize", "GetImageRGBA", "GetCSERIPPort",

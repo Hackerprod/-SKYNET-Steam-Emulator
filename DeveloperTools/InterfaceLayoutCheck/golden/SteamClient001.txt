@@ -1,0 +1,13 @@
+0|CreateGlobalInstance|System.UInt32|System.IntPtr
+1|ConnectToGlobalInstance|System.UInt32|System.IntPtr
+2|CreateLocalInstance|System.UInt32|System.IntPtr
+3|ReleaseInstance|System.Void|System.IntPtr,System.UInt32
+4|GetISteamUser|System.IntPtr|System.IntPtr,System.UInt32,System.String
+5|GetIVAC|System.IntPtr|System.IntPtr,System.UInt32
+6|BMainLoop|System.Boolean|System.IntPtr,System.UInt64,System.Boolean
+7|Test_SetSpew|System.Void|System.IntPtr,System.String,System.Int32
+8|Test_SetSpewFunc|System.Void|System.IntPtr,System.IntPtr
+9|Test_OverrideIPs|System.Void|System.IntPtr,System.UInt32,System.UInt32
+10|Test_SetServerLoadState|System.Void|System.IntPtr,System.Boolean,System.Boolean
+11|Test_SetStressMode|System.Void|System.IntPtr,System.Boolean
+12|Test_GetStatsVConn|System.Int32|System.IntPtr

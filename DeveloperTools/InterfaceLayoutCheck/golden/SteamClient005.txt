@@ -1,0 +1,16 @@
+0|CreateSteamPipe|System.UInt32|System.IntPtr
+1|BReleaseSteamPipe|System.Boolean|System.IntPtr,System.UInt32
+2|CreateGlobalUser|System.UInt32|System.IntPtr,System.IntPtr
+3|ConnectToGlobalUser|System.UInt32|System.IntPtr,System.UInt32
+4|CreateLocalUser|System.UInt32|System.IntPtr,System.IntPtr
+5|ReleaseUser|System.Void|System.IntPtr,System.UInt32,System.UInt32
+6|GetISteamUser|System.IntPtr|System.IntPtr,System.UInt32,System.UInt32,System.String
+7|GetIVAC|System.IntPtr|System.IntPtr,System.UInt32
+8|GetISteamGameServer|System.IntPtr|System.IntPtr,System.UInt32,System.UInt32,System.String
+9|SetLocalIPBinding|System.Void|System.IntPtr,System.UInt32,System.UInt16
+10|GetConnectedUniverse|System.Int32|System.IntPtr
+11|GetUniverseName|System.IntPtr|System.IntPtr,System.Int32
+12|GetISteamFriends|System.IntPtr|System.IntPtr,System.UInt32,System.UInt32,System.String
+13|BGetCallback|System.Boolean|System.IntPtr,System.UInt32,System.IntPtr,System.IntPtr
+14|FreeLastCallback|System.Void|System.IntPtr,System.UInt32
+15|SetEUniverse|System.Void|System.IntPtr,System.Int32

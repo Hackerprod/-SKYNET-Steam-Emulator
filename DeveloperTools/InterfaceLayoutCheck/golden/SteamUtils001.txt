@@ -1,0 +1,7 @@
+0|GetSecondsSinceAppActive|System.UInt32|System.IntPtr
+1|GetSecondsSinceComputerActive|System.UInt32|System.IntPtr
+2|GetConnectedUniverse|System.Int32|System.IntPtr
+3|GetServerRealTime|System.UInt32|System.IntPtr
+4|GetIPCountry|System.String|System.IntPtr
+5|GetImageSize|System.Boolean|System.IntPtr,System.Int32,System.UInt32&,System.UInt32&
+6|GetImageRGBA|System.Boolean|System.IntPtr,System.Int32,System.IntPtr,System.Int32

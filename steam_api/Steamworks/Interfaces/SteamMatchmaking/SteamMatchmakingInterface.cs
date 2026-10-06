@@ -6,6 +6,13 @@ using System.Collections.Generic;
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    [InterfaceLayout("SteamMatchMaking001",
+        "GetFavoriteGameCount", "GetFavoriteGame__V001", "AddFavoriteGame__V001", "RemoveFavoriteGame__V001",
+        "GetFavoriteGame2", "AddFavoriteGame2", "RemoveFavoriteGame2", "RequestLobbyList__V001",
+        "GetLobbyByIndex", "CreateLobby__V001", "JoinLobbyOld", "LeaveLobby",
+        "InviteUserToLobby", "GetNumLobbyMembers", "GetLobbyMemberByIndex", "GetLobbyData",
+        "SetLobbyData", "GetLobbyMemberData", "SetLobbyMemberData_OLD", "SendLobbyChatMsg",
+        "GetLobbyChatEntry", "RequestLobbyData")]
     [InterfaceLayout("SteamMatchMaking002",
         "GetFavoriteGameCount", "GetFavoriteGame", "AddFavoriteGame", "RemoveFavoriteGame",
         "RequestLobbyListOld", "GetLobbyByIndex", "CreateLobby__V002", "JoinLobbyOld",
@@ -338,6 +345,78 @@ namespace SKYNET.Steamworks.Interfaces
         {
             LogStub("GetLobbyDistance");
             return 0f;
+        }
+
+        private const int MatchMakingKeyValueFieldSize = 256;
+        private const uint MaxLegacyFilters = 256;
+
+        public bool GetFavoriteGame__V001(IntPtr _, int iGame, IntPtr pnAppID, IntPtr pnIP, IntPtr pnConnPort, IntPtr punFlags, IntPtr pRTime32LastPlayedOnServer)
+        {
+            return SteamEmulator.SteamMatchmaking.GetFavoriteGame(iGame, pnAppID, pnIP, pnConnPort, IntPtr.Zero, punFlags, pRTime32LastPlayedOnServer);
+        }
+
+        public int AddFavoriteGame__V001(IntPtr _, uint nAppID, uint nIP, ushort nConnPort, uint unFlags, uint rTime32LastPlayedOnServer)
+        {
+            return SteamEmulator.SteamMatchmaking.AddFavoriteGame(nAppID, nIP, nConnPort, 0, unFlags, rTime32LastPlayedOnServer);
+        }
+
+        public bool RemoveFavoriteGame__V001(IntPtr _, uint nAppID, uint nIP, ushort nConnPort, uint unFlags)
+        {
+            return SteamEmulator.SteamMatchmaking.RemoveFavoriteGame(nAppID, nIP, nConnPort, 0, unFlags);
+        }
+
+        public bool GetFavoriteGame2(IntPtr _, int iGame, IntPtr pnAppID, IntPtr pnIP, IntPtr pnConnPort, IntPtr pnQueryPort, IntPtr punFlags, IntPtr pRTime32LastPlayedOnServer)
+        {
+            return SteamEmulator.SteamMatchmaking.GetFavoriteGame(iGame, pnAppID, pnIP, pnConnPort, pnQueryPort, punFlags, pRTime32LastPlayedOnServer);
+        }
+
+        public int AddFavoriteGame2(IntPtr _, uint nAppID, uint nIP, ushort nConnPort, ushort nQueryPort, uint unFlags, uint rTime32LastPlayedOnServer)
+        {
+            return SteamEmulator.SteamMatchmaking.AddFavoriteGame(nAppID, nIP, nConnPort, nQueryPort, unFlags, rTime32LastPlayedOnServer);
+        }
+
+        public bool RemoveFavoriteGame2(IntPtr _, uint nAppID, uint nIP, ushort nConnPort, ushort nQueryPort, uint unFlags)
+        {
+            return SteamEmulator.SteamMatchmaking.RemoveFavoriteGame(nAppID, nIP, nConnPort, nQueryPort, unFlags);
+        }
+
+        public void RequestLobbyList__V001(IntPtr _, ulong ulGameID, IntPtr pFilters, uint nFilters)
+        {
+            if (pFilters != IntPtr.Zero)
+            {
+                uint count = Math.Min(nFilters, MaxLegacyFilters);
+                for (uint i = 0; i < count; i++)
+                {
+                    IntPtr entry = IntPtr.Add(pFilters, checked((int)i * MatchMakingKeyValueFieldSize * 2));
+                    string key = System.Runtime.InteropServices.Marshal.PtrToStringAnsi(entry, MatchMakingKeyValueFieldSize);
+                    string value = System.Runtime.InteropServices.Marshal.PtrToStringAnsi(IntPtr.Add(entry, MatchMakingKeyValueFieldSize), MatchMakingKeyValueFieldSize);
+                    SteamEmulator.SteamMatchmaking.AddRequestLobbyListStringFilter(TrimAtNull(key), TrimAtNull(value), LobbyComparisonEqual);
+                }
+            }
+
+            SteamEmulator.SteamMatchmaking.RequestLobbyListLegacy();
+        }
+
+        public void CreateLobby__V001(IntPtr _, ulong ulGameID, bool bPrivate)
+        {
+            SteamEmulator.SteamMatchmaking.CreateLobbyLegacy(bPrivate ? LobbyTypePrivate : LobbyTypePublic, LegacyLobbyMaxMembers);
+        }
+
+        public bool SetLobbyMemberData_OLD(IntPtr _, ulong steamIDLobby, string pchKey, string pchValue)
+        {
+            SteamEmulator.SteamMatchmaking.SetLobbyMemberData(steamIDLobby, pchKey, pchValue);
+            return true;
+        }
+
+        private static string TrimAtNull(string value)
+        {
+            if (value == null)
+            {
+                return string.Empty;
+            }
+
+            int end = value.IndexOf('\0');
+            return end < 0 ? value : value.Substring(0, end);
         }
     }
 }
