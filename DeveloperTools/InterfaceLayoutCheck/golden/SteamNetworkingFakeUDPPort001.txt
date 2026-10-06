@@ -1,0 +1,4 @@
+0|DestroyFakeUDPPort|System.Void|System.IntPtr
+1|SendMessageToFakeIP|System.Int32|System.IntPtr,System.IntPtr,System.IntPtr,System.UInt32,System.Int32
+2|ReceiveMessages|System.Int32|System.IntPtr,System.IntPtr,System.Int32
+3|ScheduleCleanup|System.Void|System.IntPtr,System.IntPtr

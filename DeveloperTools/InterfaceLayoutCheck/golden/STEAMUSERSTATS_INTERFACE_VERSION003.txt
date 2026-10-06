@@ -1,0 +1,13 @@
+0|RequestCurrentStats|System.Boolean|System.IntPtr
+1|GetStatFloat|System.Boolean|System.IntPtr,System.String,System.IntPtr
+2|GetStatInt32|System.Boolean|System.IntPtr,System.String,System.IntPtr
+3|SetStatFloat|System.Boolean|System.IntPtr,System.String,System.Single
+4|SetStatInt32|System.Boolean|System.IntPtr,System.String,System.Int32
+5|UpdateAvgRateStat|System.Boolean|System.IntPtr,System.String,System.Single,System.Double
+6|GetAchievement|System.Boolean|System.IntPtr,System.String,System.IntPtr
+7|SetAchievement|System.Boolean|System.IntPtr,System.String
+8|ClearAchievement|System.Boolean|System.IntPtr,System.String
+9|StoreStats|System.Boolean|System.IntPtr
+10|GetAchievementIcon|System.Int32|System.IntPtr,System.String
+11|GetAchievementDisplayAttribute|System.IntPtr|System.IntPtr,System.String,System.String
+12|IndicateAchievementProgress|System.Boolean|System.IntPtr,System.String,System.UInt32,System.UInt32

@@ -176,6 +176,7 @@
     <Compile Include="Helpers\NetworkHelper.cs" />
     <Compile Include="Steamworks\Interfaces\SteamController\SteamControllerInterface.cs" />
     <Compile Include="Steamworks\Interfaces\SteamInput\SteamInputInterface.cs" />
+    <Compile Include="Steamworks\Interfaces\SteamNetworkingFakeUDPPort\SteamNetworkingFakeUDPPort001.cs" />
     <Compile Include="Steamworks\Interfaces\SteamNetworkingMessages\SteamNetworkingMessages002.cs" />
     <Compile Include="Steamworks\Interfaces\SteamNetworkingSockets\SteamNetworkingSockets012.cs" />
     <Compile Include="Steamworks\Interfaces\SteamNetworkingUtils\SteamNetworkingUtilsInterface.cs" />

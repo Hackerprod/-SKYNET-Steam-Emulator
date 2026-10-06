@@ -154,6 +154,13 @@ namespace SKYNET.Managers
             return false;
         }
 
+        private static bool IsVersionOf(string pszVersion, string prefix)
+        {
+            return pszVersion.Length > prefix.Length
+                && pszVersion.StartsWith(prefix, StringComparison.Ordinal)
+                && char.IsDigit(pszVersion[prefix.Length]);
+        }
+
         private static void SetInterfaceName(string pszVersion)
         {
             if (pszVersion.StartsWith("SteamUtils"))
@@ -176,7 +183,7 @@ namespace SKYNET.Managers
                 SteamFriends.Instance.InterfaceName = pszVersion;
                 SteamFriends.Instance.InterfaceVersion = pszVersion;
             }
-            if (pszVersion.StartsWith("SteamMatchMaking"))
+            if (IsVersionOf(pszVersion, "SteamMatchMaking"))
             {
                 SteamEmulator.SteamMatchmaking.InterfaceName = pszVersion;
                 SteamEmulator.SteamMatchmaking.InterfaceVersion = pszVersion;
@@ -211,7 +218,7 @@ namespace SKYNET.Managers
                 SteamEmulator.SteamNetworkingSocketsSerialized.InterfaceName = pszVersion;
                 SteamEmulator.SteamNetworkingSocketsSerialized.InterfaceVersion = pszVersion;
             }
-            if (pszVersion.StartsWith("SteamNetworkingSockets"))
+            if (IsVersionOf(pszVersion, "SteamNetworkingSockets"))
             {
                 SteamEmulator.SteamNetworkingSockets.InterfaceName = pszVersion;
                 SteamEmulator.SteamNetworkingSockets.InterfaceVersion = pszVersion;
@@ -221,7 +228,7 @@ namespace SKYNET.Managers
                 SteamEmulator.SteamNetworkingUtils.InterfaceName = pszVersion;
                 SteamEmulator.SteamNetworkingUtils.InterfaceVersion = pszVersion;
             }
-            if (pszVersion.StartsWith("SteamNetworking"))
+            if (IsVersionOf(pszVersion, "SteamNetworking"))
             {
                 SteamEmulator.SteamNetworking.InterfaceName = pszVersion;
                 SteamEmulator.SteamNetworking.InterfaceVersion = pszVersion;

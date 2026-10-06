@@ -6,6 +6,20 @@ using SteamNetworkingMicroseconds = System.Int64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    [InterfaceLayout("SteamNetworkingUtils001",
+        "GetLocalPingLocation", "EstimatePingTimeBetweenTwoLocations", "EstimatePingTimeFromLocalHost", "ConvertPingLocationToString",
+        "ParsePingLocationString", "CheckPingDataUpToDate", "IsPingMeasurementInProgress", "GetPingToDataCenter",
+        "GetDirectPingToPOP", "GetPOPCount", "GetPOPList", "GetLocalTimestamp",
+        "SetDebugOutputFunction", "SetConfigValue", "GetConfigValue", "GetConfigValueInfo",
+        "GetFirstConfigValue", "SteamNetworkingIPAddr_ToString", "SteamNetworkingIPAddr_ParseString", "SteamNetworkingIdentity_ToString",
+        "SteamNetworkingIdentity_ParseString")]
+    [InterfaceLayout("SteamNetworkingUtils002",
+        "GetRelayNetworkStatus", "GetLocalPingLocation", "EstimatePingTimeBetweenTwoLocations", "EstimatePingTimeFromLocalHost",
+        "ConvertPingLocationToString", "ParsePingLocationString", "CheckPingDataUpToDate", "GetPingToDataCenter",
+        "GetDirectPingToPOP", "GetPOPCount", "GetPOPList", "GetLocalTimestamp",
+        "SetDebugOutputFunction", "SetConfigValue", "GetConfigValue", "GetConfigValueInfo",
+        "GetFirstConfigValue", "SteamNetworkingIPAddr_ToString", "SteamNetworkingIPAddr_ParseString", "SteamNetworkingIdentity_ToString",
+        "SteamNetworkingIdentity_ParseString")]
     [InterfaceLayout("SteamNetworkingUtils003",
         "AllocateMessage", "GetRelayNetworkStatus", "GetLocalPingLocation", "EstimatePingTimeBetweenTwoLocations",
         "EstimatePingTimeFromLocalHost", "ConvertPingLocationToString", "ParsePingLocationString", "CheckPingDataUpToDate",
@@ -23,6 +37,12 @@ namespace SKYNET.Steamworks.Interfaces
         "SteamNetworkingIdentity_ParseString")]
     public class SteamNetworkingUtilsInterface : ISteamInterface
     {
+        public bool IsPingMeasurementInProgress(IntPtr _)
+        {
+            SteamEmulator.Write("SteamNetworkingUtils", "IsPingMeasurementInProgress not implemented");
+            return false;
+        }
+
         public IntPtr AllocateMessage(IntPtr _, int cbAllocateBuffer)
         {
             return SteamEmulator.SteamNetworkingUtils.AllocateMessage(cbAllocateBuffer);

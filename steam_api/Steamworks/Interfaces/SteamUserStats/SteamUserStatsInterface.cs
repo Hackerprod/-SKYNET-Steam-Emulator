@@ -1,11 +1,52 @@
 using SKYNET.Helpers;
 using System.Runtime.InteropServices;
 using System;
+using System.Collections.Generic;
 
 using SteamAPICall_t = System.UInt64;
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    [InterfaceLayout("STEAMUSERSTATS_INTERFACE_VERSION001",
+        "GetNumStats", "GetStatName", "GetStatType", "GetNumAchievements__V001",
+        "GetAchievementName__V001", "GetNumGroupAchievements", "GetGroupAchievementName", "RequestCurrentStats__V001",
+        "GetStatFloat__V001", "GetStatInt32__V001", "SetStatFloat__V001", "SetStatInt32__V001",
+        "UpdateAvgRateStat__V001", "GetAchievement__V001", "GetGroupAchievement", "SetAchievement__V001",
+        "SetGroupAchievement", "StoreStats__V001", "ClearAchievement__V001", "ClearGroupAchievement",
+        "GetAchievementIcon__V001", "GetAchievementDisplayAttribute__V001")]
+    [InterfaceLayout("STEAMUSERSTATS_INTERFACE_VERSION002",
+        "GetNumStats", "GetStatName", "GetStatType", "GetNumAchievements__V001",
+        "GetAchievementName__V001", "RequestCurrentStats__V001", "GetStatFloat__V001", "GetStatInt32__V001",
+        "SetStatFloat__V001", "SetStatInt32__V001", "UpdateAvgRateStat__V001", "GetAchievement__V001",
+        "SetAchievement__V001", "ClearAchievement__V001", "StoreStats__V001", "GetAchievementIcon__V001",
+        "GetAchievementDisplayAttribute__V001", "IndicateAchievementProgress__V001")]
+    [InterfaceLayout("STEAMUSERSTATS_INTERFACE_VERSION003",
+        "RequestCurrentStats", "GetStatFloat", "GetStatInt32", "SetStatFloat",
+        "SetStatInt32", "UpdateAvgRateStat", "GetAchievement", "SetAchievement",
+        "ClearAchievement", "StoreStats", "GetAchievementIcon", "GetAchievementDisplayAttribute",
+        "IndicateAchievementProgress")]
+    [InterfaceLayout("STEAMUSERSTATS_INTERFACE_VERSION004",
+        "RequestCurrentStats", "GetStatFloat", "GetStatInt32", "SetStatFloat",
+        "SetStatInt32", "UpdateAvgRateStat", "GetAchievement", "SetAchievement",
+        "ClearAchievement", "StoreStats", "GetAchievementIcon", "GetAchievementDisplayAttribute",
+        "IndicateAchievementProgress", "RequestUserStats", "GetUserStatFloat", "GetUserStatInt32",
+        "GetUserAchievement")]
+    [InterfaceLayout("STEAMUSERSTATS_INTERFACE_VERSION005",
+        "RequestCurrentStats", "GetStatFloat", "GetStatInt32", "SetStatFloat",
+        "SetStatInt32", "UpdateAvgRateStat", "GetAchievement", "SetAchievement",
+        "ClearAchievement", "StoreStats", "GetAchievementIcon", "GetAchievementDisplayAttribute",
+        "IndicateAchievementProgress", "RequestUserStats", "GetUserStatFloat", "GetUserStatInt32",
+        "GetUserAchievement", "ResetAllStats", "FindOrCreateLeaderboard", "FindLeaderboard",
+        "GetLeaderboardName", "GetLeaderboardEntryCount", "GetLeaderboardSortMethod", "GetLeaderboardDisplayType",
+        "DownloadLeaderboardEntries", "GetDownloadedLeaderboardEntry", "UploadLeaderboardScore__V005")]
+    [InterfaceLayout("STEAMUSERSTATS_INTERFACE_VERSION006",
+        "RequestCurrentStats", "GetStatFloat", "GetStatInt32", "SetStatFloat",
+        "SetStatInt32", "UpdateAvgRateStat", "GetAchievement", "SetAchievement",
+        "ClearAchievement", "StoreStats", "GetAchievementIcon", "GetAchievementDisplayAttribute",
+        "IndicateAchievementProgress", "RequestUserStats", "GetUserStatFloat", "GetUserStatInt32",
+        "GetUserAchievement", "ResetAllStats", "FindOrCreateLeaderboard", "FindLeaderboard",
+        "GetLeaderboardName", "GetLeaderboardEntryCount", "GetLeaderboardSortMethod", "GetLeaderboardDisplayType",
+        "DownloadLeaderboardEntries", "GetDownloadedLeaderboardEntry", "UploadLeaderboardScore", "GetNumberOfCurrentPlayers")]
     [InterfaceLayout("STEAMUSERSTATS_INTERFACE_VERSION007",
         "RequestCurrentStats", "GetStatFloat", "GetStatInt32", "SetStatFloat",
         "SetStatInt32__V007", "UpdateAvgRateStat", "GetAchievement", "SetAchievement",
@@ -15,6 +56,36 @@ namespace SKYNET.Steamworks.Interfaces
         "FindOrCreateLeaderboard", "FindLeaderboard", "GetLeaderboardName", "GetLeaderboardEntryCount",
         "GetLeaderboardSortMethod", "GetLeaderboardDisplayType", "DownloadLeaderboardEntries", "GetDownloadedLeaderboardEntry",
         "UploadLeaderboardScore", "GetNumberOfCurrentPlayers")]
+    [InterfaceLayout("STEAMUSERSTATS_INTERFACE_VERSION008",
+        "RequestCurrentStats", "GetStatFloat", "GetStatInt32", "SetStatFloat",
+        "SetStatInt32", "UpdateAvgRateStat", "GetAchievement", "SetAchievement",
+        "ClearAchievement", "GetAchievementAndUnlockTime", "StoreStats", "GetAchievementIcon",
+        "GetAchievementDisplayAttribute", "IndicateAchievementProgress", "RequestUserStats", "GetUserStatFloat",
+        "GetUserStatInt32", "GetUserAchievement", "GetUserAchievementAndUnlockTime", "ResetAllStats",
+        "FindOrCreateLeaderboard", "FindLeaderboard", "GetLeaderboardName", "GetLeaderboardEntryCount",
+        "GetLeaderboardSortMethod", "GetLeaderboardDisplayType", "DownloadLeaderboardEntries", "GetDownloadedLeaderboardEntry",
+        "UploadLeaderboardScore", "AttachLeaderboardUGC", "GetNumberOfCurrentPlayers")]
+    [InterfaceLayout("STEAMUSERSTATS_INTERFACE_VERSION009",
+        "RequestCurrentStats", "GetStatFloat", "GetStatInt32", "SetStatFloat",
+        "SetStatInt32", "UpdateAvgRateStat", "GetAchievement", "SetAchievement",
+        "ClearAchievement", "GetAchievementAndUnlockTime", "StoreStats", "GetAchievementIcon",
+        "GetAchievementDisplayAttribute", "IndicateAchievementProgress", "RequestUserStats", "GetUserStatFloat",
+        "GetUserStatInt32", "GetUserAchievement", "GetUserAchievementAndUnlockTime", "ResetAllStats",
+        "FindOrCreateLeaderboard", "FindLeaderboard", "GetLeaderboardName", "GetLeaderboardEntryCount",
+        "GetLeaderboardSortMethod", "GetLeaderboardDisplayType", "DownloadLeaderboardEntries", "DownloadLeaderboardEntriesForUsers",
+        "GetDownloadedLeaderboardEntry", "UploadLeaderboardScore", "AttachLeaderboardUGC", "GetNumberOfCurrentPlayers")]
+    [InterfaceLayout("STEAMUSERSTATS_INTERFACE_VERSION010",
+        "RequestCurrentStats", "GetStatFloat", "GetStatInt32", "SetStatFloat",
+        "SetStatInt32", "UpdateAvgRateStat", "GetAchievement", "SetAchievement",
+        "ClearAchievement", "GetAchievementAndUnlockTime", "StoreStats", "GetAchievementIcon",
+        "GetAchievementDisplayAttribute", "IndicateAchievementProgress", "RequestUserStats", "GetUserStatFloat",
+        "GetUserStatInt32", "GetUserAchievement", "GetUserAchievementAndUnlockTime", "ResetAllStats",
+        "FindOrCreateLeaderboard", "FindLeaderboard", "GetLeaderboardName", "GetLeaderboardEntryCount",
+        "GetLeaderboardSortMethod", "GetLeaderboardDisplayType", "DownloadLeaderboardEntries", "DownloadLeaderboardEntriesForUsers",
+        "GetDownloadedLeaderboardEntry", "UploadLeaderboardScore", "AttachLeaderboardUGC", "GetNumberOfCurrentPlayers",
+        "RequestGlobalAchievementPercentages", "GetMostAchievedAchievementInfo", "GetNextMostAchievedAchievementInfo", "GetAchievementAchievedPercent",
+        "RequestGlobalStats", "GetGlobalStatDouble", "GetGlobalStatInt64", "GetGlobalStatHistoryDouble",
+        "GetGlobalStatHistoryInt64")]
     [InterfaceLayout("STEAMUSERSTATS_INTERFACE_VERSION011",
         "RequestCurrentStats", "GetStatFloat", "GetStatInt32", "SetStatFloat",
         "SetStatInt32", "UpdateAvgRateStat", "GetAchievement", "SetAchievement",
@@ -276,6 +347,91 @@ namespace SKYNET.Steamworks.Interfaces
         public bool GetAchievementProgressLimitsFloat(IntPtr _, string pchName, IntPtr pfMinProgress, IntPtr pfMaxProgress)
         {
             return SteamEmulator.SteamUserStats.GetAchievementProgressLimitsFloat(pchName, pfMinProgress, pfMaxProgress);
+        }
+
+        private static readonly HashSet<string> _stubsLogged = new HashSet<string>();
+
+        private static void LogStub(string method)
+        {
+            lock (_stubsLogged)
+            {
+                if (!_stubsLogged.Add(method))
+                {
+                    return;
+                }
+            }
+
+            SteamEmulator.Write("SteamUserStats", method + " not implemented");
+        }
+
+        // Steam2-era layouts (001/002): every method carries a leading CGameID. The emulator only serves the running app, so nGameID is ignored.
+        public bool RequestCurrentStats__V001(IntPtr _, ulong nGameID) => SteamEmulator.SteamUserStats.RequestCurrentStats();
+        public bool GetStatFloat__V001(IntPtr _, ulong nGameID, string pchName, IntPtr pData) => SteamEmulator.SteamUserStats.GetStatFloat(pchName, pData);
+        public bool GetStatInt32__V001(IntPtr _, ulong nGameID, string pchName, IntPtr pData) => SteamEmulator.SteamUserStats.GetStatInt32(pchName, pData);
+        public bool SetStatFloat__V001(IntPtr _, ulong nGameID, string pchName, float fData) => SteamEmulator.SteamUserStats.SetStat(pchName, fData);
+        public bool SetStatInt32__V001(IntPtr _, ulong nGameID, string pchName, int nData) => SteamEmulator.SteamUserStats.SetStat(pchName, unchecked((uint)nData));
+        public bool UpdateAvgRateStat__V001(IntPtr _, ulong nGameID, string pchName, float flCountThisSession, double dSessionLength) => SteamEmulator.SteamUserStats.UpdateAvgRateStat(pchName, flCountThisSession, dSessionLength);
+        public bool GetAchievement__V001(IntPtr _, ulong nGameID, string pchName, IntPtr pbAchieved) => SteamEmulator.SteamUserStats.GetAchievement(pchName, pbAchieved);
+        public bool SetAchievement__V001(IntPtr _, ulong nGameID, string pchName) => SteamEmulator.SteamUserStats.SetAchievement(pchName);
+        public bool ClearAchievement__V001(IntPtr _, ulong nGameID, string pchName) => SteamEmulator.SteamUserStats.ClearAchievement(pchName);
+        public bool StoreStats__V001(IntPtr _, ulong nGameID) => SteamEmulator.SteamUserStats.StoreStats();
+        public int GetAchievementIcon__V001(IntPtr _, ulong nGameID, string pchName) => SteamEmulator.SteamUserStats.GetAchievementIcon(pchName);
+        public IntPtr GetAchievementDisplayAttribute__V001(IntPtr _, ulong nGameID, string pchName, string pchKey) => NativeStringCache.ToUtf8Ptr(SteamEmulator.SteamUserStats.GetAchievementDisplayAttribute(pchName, pchKey));
+        public bool IndicateAchievementProgress__V001(IntPtr _, ulong nGameID, string pchName, uint nCurProgress, uint nMaxProgress) => SteamEmulator.SteamUserStats.IndicateAchievementProgress(pchName, nCurProgress, nMaxProgress);
+        public uint GetNumAchievements__V001(IntPtr _, ulong nGameID) => SteamEmulator.SteamUserStats.GetNumAchievements();
+        public IntPtr GetAchievementName__V001(IntPtr _, ulong nGameID, uint iAchievement) => NativeStringCache.ToUtf8Ptr(SteamEmulator.SteamUserStats.GetAchievementName(iAchievement));
+
+        public uint GetNumStats(IntPtr _, ulong nGameID)
+        {
+            LogStub("GetNumStats");
+            return 0;
+        }
+
+        public IntPtr GetStatName(IntPtr _, ulong nGameID, uint iStat)
+        {
+            LogStub("GetStatName");
+            return NativeStringCache.ToUtf8Ptr(string.Empty);
+        }
+
+        public int GetStatType(IntPtr _, ulong nGameID, string pchName)
+        {
+            LogStub("GetStatType");
+            return 0;
+        }
+
+        public uint GetNumGroupAchievements(IntPtr _, ulong nGameID)
+        {
+            LogStub("GetNumGroupAchievements");
+            return 0;
+        }
+
+        public IntPtr GetGroupAchievementName(IntPtr _, ulong nGameID, uint iAchievement)
+        {
+            LogStub("GetGroupAchievementName");
+            return NativeStringCache.ToUtf8Ptr(string.Empty);
+        }
+
+        public bool GetGroupAchievement(IntPtr _, ulong nGameID, string pchName, IntPtr pbAchieved)
+        {
+            LogStub("GetGroupAchievement");
+            return false;
+        }
+
+        public bool SetGroupAchievement(IntPtr _, ulong nGameID, string pchName)
+        {
+            LogStub("SetGroupAchievement");
+            return false;
+        }
+
+        public bool ClearGroupAchievement(IntPtr _, ulong nGameID, string pchName)
+        {
+            LogStub("ClearGroupAchievement");
+            return false;
+        }
+
+        public SteamAPICall_t UploadLeaderboardScore__V005(IntPtr _, ulong hSteamLeaderboard, int nScore, IntPtr pScoreDetails, int cScoreDetailsCount)
+        {
+            return SteamEmulator.SteamUserStats.UploadLeaderboardScore(hSteamLeaderboard, 1, nScore, pScoreDetails, cScoreDetailsCount);
         }
     }
 }

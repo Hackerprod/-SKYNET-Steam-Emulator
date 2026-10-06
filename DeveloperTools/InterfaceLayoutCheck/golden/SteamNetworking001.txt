@@ -1,0 +1,12 @@
+0|CreateListenSocket|System.UInt32|System.IntPtr,System.Int32,System.UInt32,System.UInt16
+1|CreateP2PConnectionSocket|System.UInt32|System.IntPtr,System.UInt64,System.Int32,System.Int32
+2|CreateConnectionSocket|System.UInt32|System.IntPtr,System.UInt32,System.UInt16,System.Int32
+3|DestroySocket|System.Boolean|System.IntPtr,System.UInt32,System.Boolean
+4|DestroyListenSocket|System.Boolean|System.IntPtr,System.UInt32,System.Boolean
+5|SendDataOnSocket|System.Boolean|System.IntPtr,System.UInt32,System.IntPtr,System.UInt32,System.Boolean
+6|IsDataAvailableOnSocket|System.Boolean|System.IntPtr,System.UInt32,System.IntPtr
+7|RetrieveDataFromSocket|System.Boolean|System.IntPtr,System.UInt32,System.IntPtr,System.UInt32,System.IntPtr
+8|IsDataAvailable|System.Boolean|System.IntPtr,System.UInt32,System.IntPtr,System.IntPtr
+9|RetrieveData|System.Boolean|System.IntPtr,System.UInt32,System.IntPtr,System.UInt32,System.IntPtr,System.IntPtr
+10|GetSocketInfo|System.Boolean|System.IntPtr,System.UInt32,System.IntPtr,System.IntPtr,System.IntPtr,System.IntPtr
+11|GetListenSocketInfo|System.Boolean|System.IntPtr,System.UInt32,System.IntPtr,System.IntPtr

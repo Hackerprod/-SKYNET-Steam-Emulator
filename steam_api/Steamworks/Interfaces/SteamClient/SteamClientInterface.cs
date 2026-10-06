@@ -6,6 +6,20 @@ using HSteamUser = System.UInt32;
 
 namespace SKYNET.Steamworks.Interfaces
 {
+    [InterfaceLayout("SteamClient007",
+        "CreateSteamPipe", "BReleaseSteamPipe", "ConnectToGlobalUser", "CreateLocalUser__V007",
+        "ReleaseUser", "GetISteamUser", "GetISteamGameServer", "SetLocalIPBinding",
+        "GetISteamFriends", "GetISteamUtils", "GetISteamMatchmaking", "GetISteamContentServer",
+        "GetISteamMasterServerUpdater", "GetISteamMatchmakingServers", "GetISteamGenericInterface", "RunFrame",
+        "GetIPCCallCount", "GetISteamUserStats", "GetISteamApps", "GetISteamNetworking",
+        "SetWarningMessageHook")]
+    [InterfaceLayout("SteamClient008",
+        "CreateSteamPipe", "BReleaseSteamPipe", "ConnectToGlobalUser", "CreateLocalUser",
+        "ReleaseUser", "GetISteamUser", "GetISteamGameServer", "SetLocalIPBinding",
+        "GetISteamFriends", "GetISteamUtils", "GetISteamMatchmaking", "GetISteamMasterServerUpdater",
+        "GetISteamMatchmakingServers", "GetISteamGenericInterface", "GetISteamUserStats", "GetISteamApps",
+        "GetISteamNetworking", "GetISteamRemoteStorage", "RunFrame", "GetIPCCallCount",
+        "SetWarningMessageHook")]
     [InterfaceLayout("SteamClient009",
         "CreateSteamPipe", "BReleaseSteamPipe", "ConnectToGlobalUser", "CreateLocalUser",
         "ReleaseUser", "GetISteamUser", "GetISteamGameServer", "SetLocalIPBinding",
@@ -13,6 +27,66 @@ namespace SKYNET.Steamworks.Interfaces
         "GetISteamMatchmakingServers", "GetISteamGenericInterface", "GetISteamUserStats", "GetISteamGameServerStats",
         "GetISteamApps", "GetISteamNetworking", "GetISteamRemoteStorage", "RunFrame",
         "GetIPCCallCount", "SetWarningMessageHook")]
+    [InterfaceLayout("SteamClient010",
+        "CreateSteamPipe", "BReleaseSteamPipe", "ConnectToGlobalUser", "CreateLocalUser",
+        "ReleaseUser", "GetISteamUser", "GetISteamGameServer", "SetLocalIPBinding",
+        "GetISteamFriends", "GetISteamUtils", "GetISteamMatchmaking", "GetISteamMasterServerUpdater",
+        "GetISteamMatchmakingServers", "GetISteamGenericInterface", "GetISteamUserStats", "GetISteamGameServerStats",
+        "GetISteamApps", "GetISteamNetworking", "GetISteamRemoteStorage", "RunFrame",
+        "GetIPCCallCount", "SetWarningMessageHook", "BShutdownIfAllPipesClosed", "GetISteamHTTP")]
+    [InterfaceLayout("SteamClient011",
+        "CreateSteamPipe", "BReleaseSteamPipe", "ConnectToGlobalUser", "CreateLocalUser",
+        "ReleaseUser", "GetISteamUser", "GetISteamGameServer", "SetLocalIPBinding",
+        "GetISteamFriends", "GetISteamUtils", "GetISteamMatchmaking", "GetISteamMasterServerUpdater",
+        "GetISteamMatchmakingServers", "GetISteamGenericInterface", "GetISteamUserStats", "GetISteamGameServerStats",
+        "GetISteamApps", "GetISteamNetworking", "GetISteamRemoteStorage", "GetISteamScreenshots",
+        "RunFrame", "GetIPCCallCount", "SetWarningMessageHook", "BShutdownIfAllPipesClosed",
+        "GetISteamHTTP")]
+    [InterfaceLayout("SteamClient012",
+        "CreateSteamPipe", "BReleaseSteamPipe", "ConnectToGlobalUser", "CreateLocalUser",
+        "ReleaseUser", "GetISteamUser", "GetISteamGameServer", "SetLocalIPBinding",
+        "GetISteamFriends", "GetISteamUtils", "GetISteamMatchmaking", "GetISteamMatchmakingServers",
+        "GetISteamGenericInterface", "GetISteamUserStats", "GetISteamGameServerStats", "GetISteamApps",
+        "GetISteamNetworking", "GetISteamRemoteStorage", "GetISteamScreenshots", "RunFrame",
+        "GetIPCCallCount", "SetWarningMessageHook", "BShutdownIfAllPipesClosed", "GetISteamHTTP",
+        "GetISteamUnifiedMessages", "GetISteamController", "GetISteamUGC")]
+    [InterfaceLayout("SteamClient013",
+        "CreateSteamPipe", "BReleaseSteamPipe", "ConnectToGlobalUser", "CreateLocalUser",
+        "ReleaseUser", "GetISteamUser", "GetISteamGameServer", "SetLocalIPBinding",
+        "GetISteamFriends", "GetISteamUtils", "GetISteamMatchmaking", "GetISteamMatchmakingServers",
+        "GetISteamGenericInterface", "GetISteamUserStats", "GetISteamGameServerStats", "GetISteamApps",
+        "GetISteamNetworking", "GetISteamRemoteStorage", "GetISteamScreenshots", "RunFrame",
+        "GetIPCCallCount", "SetWarningMessageHook", "BShutdownIfAllPipesClosed", "GetISteamHTTP",
+        "GetISteamUnifiedMessages", "GetISteamController", "GetISteamUGC", "GetISteamInventory",
+        "GetISteamVideo", "GetISteamAppList")]
+    [InterfaceLayout("SteamClient014",
+        "CreateSteamPipe", "BReleaseSteamPipe", "ConnectToGlobalUser", "CreateLocalUser",
+        "ReleaseUser", "GetISteamUser", "GetISteamGameServer", "SetLocalIPBinding",
+        "GetISteamFriends", "GetISteamUtils", "GetISteamMatchmaking", "GetISteamMatchmakingServers",
+        "GetISteamGenericInterface", "GetISteamUserStats", "GetISteamGameServerStats", "GetISteamApps",
+        "GetISteamNetworking", "GetISteamRemoteStorage", "GetISteamScreenshots", "RunFrame",
+        "GetIPCCallCount", "SetWarningMessageHook", "BShutdownIfAllPipesClosed", "GetISteamHTTP",
+        "GetISteamUnifiedMessages", "GetISteamController", "GetISteamUGC", "GetISteamAppList",
+        "GetISteamMusic")]
+    [InterfaceLayout("SteamClient015",
+        "CreateSteamPipe", "BReleaseSteamPipe", "ConnectToGlobalUser", "CreateLocalUser",
+        "ReleaseUser", "GetISteamUser", "GetISteamGameServer", "SetLocalIPBinding",
+        "GetISteamFriends", "GetISteamUtils", "GetISteamMatchmaking", "GetISteamMatchmakingServers",
+        "GetISteamGenericInterface", "GetISteamUserStats", "GetISteamGameServerStats", "GetISteamApps",
+        "GetISteamNetworking", "GetISteamRemoteStorage", "GetISteamScreenshots", "RunFrame",
+        "GetIPCCallCount", "SetWarningMessageHook", "BShutdownIfAllPipesClosed", "GetISteamHTTP",
+        "GetISteamUnifiedMessages", "GetISteamController", "GetISteamUGC", "GetISteamAppList",
+        "GetISteamMusic", "GetISteamMusicRemote")]
+    [InterfaceLayout("SteamClient016",
+        "CreateSteamPipe", "BReleaseSteamPipe", "ConnectToGlobalUser", "CreateLocalUser",
+        "ReleaseUser", "GetISteamUser", "GetISteamGameServer", "SetLocalIPBinding",
+        "GetISteamFriends", "GetISteamUtils", "GetISteamMatchmaking", "GetISteamMatchmakingServers",
+        "GetISteamGenericInterface", "GetISteamUserStats", "GetISteamGameServerStats", "GetISteamApps",
+        "GetISteamNetworking", "GetISteamRemoteStorage", "GetISteamScreenshots", "RunFrame",
+        "GetIPCCallCount", "SetWarningMessageHook", "BShutdownIfAllPipesClosed", "GetISteamHTTP",
+        "GetISteamUnifiedMessages", "GetISteamController", "GetISteamUGC", "GetISteamAppList",
+        "GetISteamMusic", "GetISteamMusicRemote", "GetISteamHTMLSurface", "Set_SteamAPI_CPostAPIResultInProcess",
+        "Remove_SteamAPI_CPostAPIResultInProcess", "Set_SteamAPI_CCheckCallbackRegisteredInProcess")]
     [InterfaceLayout("SteamClient017",
         "CreateSteamPipe", "BReleaseSteamPipe", "ConnectToGlobalUser", "CreateLocalUser__NoPipe",
         "ReleaseUser", "GetISteamUser", "GetISteamGameServer", "SetLocalIPBinding",
@@ -127,6 +201,8 @@ namespace SKYNET.Steamworks.Interfaces
             return SteamEmulator.SteamClient.CreateLocalUser(phSteamPipe, eAccountType);
         }
 
+        public HSteamUser CreateLocalUser__V007(IntPtr _, IntPtr phSteamPipe) => CreateLocalUser(_, phSteamPipe, 1);
+
         public void ReleaseUser(IntPtr _, HSteamPipe hSteamPipe, HSteamUser hUser) => SteamEmulator.SteamClient.ReleaseUser(hSteamPipe, hUser);
         public IntPtr GetISteamUser(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion) => SteamEmulator.SteamClient.GetISteamUser(hSteamUser, hSteamPipe, pchVersion);
         public IntPtr GetISteamGameServer(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion) => SteamEmulator.SteamClient.GetISteamGameServer(hSteamUser, hSteamPipe, pchVersion);
@@ -136,6 +212,7 @@ namespace SKYNET.Steamworks.Interfaces
         public IntPtr GetISteamUtils(IntPtr _, HSteamPipe hSteamPipe, string pchVersion) => SteamEmulator.SteamClient.GetISteamUtils(hSteamPipe, pchVersion);
         public IntPtr GetISteamMatchmaking(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion) => SteamEmulator.SteamClient.GetISteamMatchmaking(hSteamUser, hSteamPipe, pchVersion);
         public IntPtr GetISteamMasterServerUpdater(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion) => SteamEmulator.SteamClient.GetISteamMasterServerUpdater(hSteamUser, hSteamPipe, pchVersion);
+        public IntPtr GetISteamContentServer(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion) => SteamEmulator.SteamClient.GetISteamContentServer(hSteamUser, hSteamPipe, pchVersion);
         public IntPtr GetISteamMatchmakingServers(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion) => SteamEmulator.SteamClient.GetISteamMatchmakingServers(hSteamUser, hSteamPipe, pchVersion);
         public IntPtr GetISteamGenericInterface(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion) => SteamEmulator.SteamClient.GetISteamGenericInterface(hSteamUser, hSteamPipe, pchVersion);
         public IntPtr GetISteamUserStats(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion) => SteamEmulator.SteamClient.GetISteamUserStats(hSteamUser, hSteamPipe, pchVersion);
@@ -151,12 +228,15 @@ namespace SKYNET.Steamworks.Interfaces
         public bool BShutdownIfAllPipesClosed(IntPtr _) => SteamEmulator.SteamClient.BShutdownIfAllPipesClosed();
         public IntPtr GetISteamHTTP(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion) => SteamEmulator.SteamClient.GetISteamHTTP(hSteamUser, hSteamPipe, pchVersion);
         public IntPtr DEPRECATED_GetISteamUnifiedMessages(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion) => SteamEmulator.SteamClient.DEPRECATED_GetISteamUnifiedMessages(hSteamUser, hSteamPipe, pchVersion);
+        public IntPtr GetISteamUnifiedMessages(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion) => SteamEmulator.SteamClient.GetISteamUnifiedMessages(hSteamUser, hSteamPipe, pchVersion);
         public IntPtr GetISteamController(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion) => SteamEmulator.SteamClient.GetISteamController(hSteamUser, hSteamPipe, pchVersion);
         public IntPtr GetISteamUGC(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion) => SteamEmulator.SteamClient.GetISteamUGC(hSteamUser, hSteamPipe, pchVersion);
         public IntPtr GetISteamAppList(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion) => SteamEmulator.SteamClient.GetISteamAppList(hSteamUser, hSteamPipe, pchVersion);
         public IntPtr GetISteamMusic(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion) => SteamEmulator.SteamClient.GetISteamMusic(hSteamUser, hSteamPipe, pchVersion);
         public IntPtr GetISteamMusicRemote(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion) => SteamEmulator.SteamClient.GetISteamMusicRemote(hSteamUser, hSteamPipe, pchVersion);
         public IntPtr GetISteamHTMLSurface(IntPtr _, HSteamUser hSteamUser, HSteamPipe hSteamPipe, string pchVersion) => SteamEmulator.SteamClient.GetISteamHTMLSurface(hSteamUser, hSteamPipe, pchVersion);
+        public void Set_SteamAPI_CPostAPIResultInProcess(IntPtr _, IntPtr arg0) => SteamEmulator.SteamClient.Set_SteamAPI_CPostAPIResultInProcess(arg0);
+        public void Remove_SteamAPI_CPostAPIResultInProcess(IntPtr _, IntPtr arg0) => SteamEmulator.SteamClient.Remove_SteamAPI_CPostAPIResultInProcess(arg0);
         public void DEPRECATED_Set_SteamAPI_CPostAPIResultInProcess(IntPtr _, IntPtr arg0) => SteamEmulator.SteamClient.DEPRECATED_Set_SteamAPI_CPostAPIResultInProcess(arg0);
         public void DEPRECATED_Remove_SteamAPI_CPostAPIResultInProcess(IntPtr _, IntPtr arg0) => SteamEmulator.SteamClient.DEPRECATED_Remove_SteamAPI_CPostAPIResultInProcess(arg0);
         public void Set_SteamAPI_CCheckCallbackRegisteredInProcess(IntPtr _, IntPtr arg0) => SteamEmulator.SteamClient.Set_SteamAPI_CCheckCallbackRegisteredInProcess(arg0);
