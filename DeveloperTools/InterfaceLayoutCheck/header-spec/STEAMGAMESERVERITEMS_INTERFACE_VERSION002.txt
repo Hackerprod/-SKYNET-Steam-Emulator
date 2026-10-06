@@ -1,0 +1,14 @@
+# source: .tmp/goldberg_emulator/gse_fork/sdk/steam/isteamgameserveritems002.h (class ISteamGameServerItems002)
+# overload AddNewItemCriteria slots 6,7
+0|LoadItems_old|1|void|CSteamID ownerID
+1|GetItemCount_old|1|void|CSteamID ownerID
+2|GetItemIterative|8|bool|CSteamID ownerID, uint32 iIndex, uint64 *pulItemID, uint32 *punItemDefIndex, uint32 *punItemLevel, EItemQuality *peQuality, uint32 *punInventoryPos, uint32 *punAttributeCount
+3|GetItemByID|6|bool|uint64 ulItemID, uint32 *punItemDefIndex, uint32 *punItemLevel, EItemQuality *peQuality, uint32 *punInventoryPos, uint32 *punAttributeCount
+4|GetItemAttribute|4|bool|uint64 ulItemID, uint32 unAttributeIndex, uint32 *punAttributeDefIndex, float *pflAttributeValue
+5|CreateNewItemRequest|3|HNewItemRequest|CSteamID steamID, uint32 unItemLevel, EItemQuality eQuality
+6|AddNewItemCriteria|5|bool|HNewItemRequest handle, const char *pchField, EItemCriteriaOperator eOperator, float flValue, bool bRequired
+7|AddNewItemCriteria|5|bool|HNewItemRequest handle, const char *pchField, EItemCriteriaOperator eOperator, const char *pchValue, bool bRequired
+8|SendNewItemRequest_old|1|void|HNewItemRequest handle
+9|GrantItemToUser_old|2|void|uint64 ulItemID, CSteamID steamIDRecipient
+10|DeleteTemporaryItem_old|1|void|uint64 ulItemID
+11|DeleteAllTemporaryItems_old|0|void|

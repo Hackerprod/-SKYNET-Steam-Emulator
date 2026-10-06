@@ -1,0 +1,22 @@
+# source: .tmp/goldberg_emulator/gse_fork/sdk/steam/isteamgameserver002.h (class ISteamGameServer002)
+0|LogOn|0|void|
+1|LogOff|0|void|
+2|BLoggedOn|0|bool|
+3|GSSetSpawnCount|1|void|uint32 ucSpawn
+4|GSGetSteam2GetEncryptionKeyToSendToNewClient|3|bool|void *pvEncryptionKey, uint32 *pcbEncryptionKey, uint32 cbMaxEncryptionKey
+5|GSSendSteam2UserConnect|7|bool|uint32 unUserID, const void *pvRawKey, uint32 unKeyLen, uint32 unIPPublic, uint16 usPort, const void *pvCookie, uint32 cubCookie
+6|GSSendSteam3UserConnect|4|bool|CSteamID steamID, uint32 unIPPublic, const void *pvCookie, uint32 cubCookie
+7|GSRemoveUserConnect|1|bool|uint32 unUserID
+8|GSSendUserDisconnect|2|bool|CSteamID steamID, uint32 unUserID
+9|GSSendUserStatusResponse|3|bool|CSteamID steamID, int nSecondsConnected, int nSecondsSinceLast
+10|Obsolete_GSSetStatus|10|bool|int32 nAppIdServed, uint32 unServerFlags, int cPlayers, int cPlayersMax, int cBotPlayers, int unGamePort, const char *pchServerName, const char *pchGameDir, const char *pchMapName, const char *pchVersion
+11|GSUpdateStatus|5|bool|int cPlayers, int cPlayersMax, int cBotPlayers, const char *pchServerName, const char *pchMapName
+12|BSecure|0|bool|
+13|GetSteamID|0|CSteamID|
+14|GSSetServerType|6|bool|int32 nGameAppId, uint32 unServerFlags, uint32 unGameIP, uint32 unGamePort, const char *pchGameDir, const char *pchVersion
+15|GSSetServerType2|9|bool|int32 nGameAppId, uint32 unServerFlags, uint32 unGameIP, uint16 unGamePort, uint16 unSpectatorPort, uint16 usQueryPort, const char *pchGameDir, const char *pchVersion, bool bLANMode
+16|GSUpdateStatus2|6|bool|int cPlayers, int cPlayersMax, int cBotPlayers, const char *pchServerName, const char *pSpectatorServerName, const char *pchMapName
+17|GSCreateUnauthenticatedUser|1|bool|CSteamID *pSteamID
+18|GSSetUserData|3|bool|CSteamID steamID, const char *pPlayerName, uint32 nFrags
+19|GSUpdateSpectatorPort|1|void|uint16 unSpectatorPort
+20|GSSetGameType|1|void|const char *pchType

@@ -1,0 +1,14 @@
+# source: .tmp/goldberg_emulator/gse_fork/sdk/steam/isteamuser007.h (class ISteamUser007)
+0|GetHSteamUser|0|HSteamUser|
+1|LogOn|1|void|CSteamID steamID
+2|LogOff|0|void|
+3|BLoggedOn|0|bool|
+4|GetSteamID|0|CSteamID|
+5|SetRegistryString|3|bool|ERegistrySubTree eRegistrySubTree, const char *pchKey, const char *pchValue
+6|GetRegistryString|4|bool|ERegistrySubTree eRegistrySubTree, const char *pchKey, char *pchValue, int cbValue
+7|SetRegistryInt|3|bool|ERegistrySubTree eRegistrySubTree, const char *pchKey, int iValue
+8|GetRegistryInt|3|bool|ERegistrySubTree eRegistrySubTree, const char *pchKey, int *piValue
+9|InitiateGameConnection|9|int|void *pBlob, int cbMaxBlob, CSteamID steamID, CGameID gameID, uint32 unIPServer, uint16 usPortServer, bool bSecure, void *pvSteam2GetEncryptionKey, int cbSteam2GetEncryptionKey
+10|TerminateGameConnection|2|void|uint32 unIPServer, uint16 usPortServer
+11|TrackAppUsageEvent|3|void|CGameID gameID, int eAppUsageEvent, const char *pchExtraInfo
+12|RefreshSteam2Login|0|void|

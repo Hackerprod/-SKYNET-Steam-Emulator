@@ -1,0 +1,29 @@
+# source: .tmp/goldberg_emulator/gse_fork/sdk/steam/isteamfriends001.h (class ISteamFriends001)
+# overload SendMsgToFriend slots 14,19
+0|GetPersonaName|0|const char *|
+1|SetPersonaName_old|1|void|const char *pchPersonaName
+2|GetPersonaState|0|EPersonaState|
+3|SetPersonaState|1|void|EPersonaState ePersonaState
+4|AddFriend|1|bool|CSteamID steamIDFriend
+5|RemoveFriend|1|bool|CSteamID steamIDFriend
+6|HasFriend|1|bool|CSteamID steamIDFriend
+7|GetFriendRelationship|1|EFriendRelationship|CSteamID steamIDFriend
+8|GetFriendPersonaState|1|EPersonaState|CSteamID steamIDFriend
+9|Deprecated_GetFriendGamePlayed|4|bool|CSteamID steamIDFriend, int32 *pnGameID, uint32 *punGameIP, uint16 *pusGamePort
+10|GetFriendPersonaName|1|const char *|CSteamID steamIDFriend
+11|AddFriendByName|1|int32|const char *pchEmailOrAccountName
+12|GetFriendCount|0|int|
+13|GetFriendByIndex|1|CSteamID|int iFriend
+14|SendMsgToFriend|4|bool|CSteamID steamIDFriend, EChatEntryType eChatEntryType, const void *pvMsgBody, int cubMsgBody
+15|SetFriendRegValue|3|void|CSteamID steamIDFriend, const char *pchKey, const char *pchValue
+16|GetFriendRegValue|2|const char *|CSteamID steamIDFriend, const char *pchKey
+17|GetFriendPersonaNameHistory|2|const char *|CSteamID steamIDFriend, int iPersonaName
+18|GetChatMessage|5|int|CSteamID steamIDFriend, int iChatID, void *pvData, int cubData, EChatEntryType *peChatEntryType
+19|SendMsgToFriend|3|void|CSteamID steamIDFriend, EChatEntryType eChatEntryType, const char *pchMsgBody
+20|GetChatIDOfChatHistoryStart|1|int|CSteamID steamIDFriend
+21|SetChatHistoryStart|2|void|CSteamID steamIDFriend, int iChatID
+22|ClearChatHistory|1|void|CSteamID steamIDFriend
+23|InviteFriendByEmail|1|bool|const char *pchEmailAccount
+24|GetBlockedFriendCount|0|int|
+25|GetFriendGamePlayed|4|bool|CSteamID steamIDFriend, uint64 *pulGameID, uint32 *punGameIP, uint16 *pusGamePort
+26|GetFriendGamePlayed2|5|bool|CSteamID steamIDFriend, uint64 *pulGameID, uint32 *punGameIP, uint16 *pusGamePort, uint16 *pusQueryPort

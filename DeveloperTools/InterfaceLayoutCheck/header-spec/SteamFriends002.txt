@@ -1,0 +1,31 @@
+# source: .tmp/goldberg_emulator/gse_fork/sdk/steam/isteamfriends002.h (class ISteamFriends002)
+0|GetPersonaName|0|const char *|
+1|SetPersonaName_old|1|void|const char *pchPersonaName
+2|GetPersonaState|0|EPersonaState|
+3|SetPersonaState|1|void|EPersonaState ePersonaState
+4|GetFriendCount|1|int|int iFriendFlags
+5|GetFriendByIndex|2|CSteamID|int iFriend, int iFriendFlags
+6|GetFriendRelationship|1|EFriendRelationship|CSteamID steamIDFriend
+7|GetFriendPersonaState|1|EPersonaState|CSteamID steamIDFriend
+8|GetFriendPersonaName|1|const char *|CSteamID steamIDFriend
+9|SetFriendRegValue|3|void|CSteamID steamIDFriend, const char *pchKey, const char *pchValue
+10|GetFriendRegValue|2|const char *|CSteamID steamIDFriend, const char *pchKey
+11|GetFriendGamePlayed|5|bool|CSteamID steamIDFriend, uint64 *pulGameID, uint32 *punGameIP, uint16 *pusGamePort, uint16 *pusQueryPort
+12|GetFriendPersonaNameHistory|2|const char *|CSteamID steamIDFriend, int iPersonaName
+13|AddFriend|1|bool|CSteamID steamIDFriend
+14|RemoveFriend|1|bool|CSteamID steamIDFriend
+15|HasFriend|2|bool|CSteamID steamIDFriend, int iFriendFlags
+16|AddFriendByName|1|int32|const char *pchEmailOrAccountName
+17|InviteFriendByEmail|1|bool|const char *pchEmailAccount
+18|GetChatMessage|5|int|CSteamID steamIDFriend, int iChatID, void *pvData, int cubData, EChatEntryType *peChatEntryType
+19|SendMsgToFriend|4|bool|CSteamID steamIDFriend, EChatEntryType eChatEntryType, const void *pvMsgBody, int cubMsgBody
+20|GetChatIDOfChatHistoryStart|1|int|CSteamID steamIDFriend
+21|SetChatHistoryStart|2|void|CSteamID steamIDFriend, int iChatID
+22|ClearChatHistory|1|void|CSteamID steamIDFriend
+23|GetClanCount|0|int|
+24|GetClanByIndex|1|CSteamID|int iClan
+25|GetClanName|1|const char *|CSteamID steamIDClan
+26|InviteFriendToClan|2|bool|CSteamID steamIDFriend, CSteamID steamIDClan
+27|AcknowledgeInviteToClan|2|bool|CSteamID steamIDClan, bool bAcceptOrDenyClanInvite
+28|GetFriendCountFromSource|1|int|CSteamID steamIDSource
+29|GetFriendFromSourceByIndex|2|CSteamID|CSteamID steamIDSource, int iFriend

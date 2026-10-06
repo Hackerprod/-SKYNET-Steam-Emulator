@@ -1,0 +1,5 @@
+# source: .tmp/goldberg_emulator/gse_fork/sdk/steam/isteamgameserver001.h (class ISteamGameServer001)
+0|GSSendUserConnect|3|bool|CSteamID steamID, uint32 unIPPublic, uint32 unk
+1|GSSendUserDisconnect|1|bool|CSteamID steamID
+2|GSSendUserStatusResponse|3|bool|CSteamID steamID, int nSecondsConnected, int nSecondsSinceLast
+3|Obsolete_GSSetStatus|10|bool|int32 nAppIdServed, uint32 unServerFlags, int cPlayers, int cPlayersMax, int cBotPlayers, int unGamePort, const char *pchServerName, const char *pchGameDir, const char *pchMapName, const char *pchVersion

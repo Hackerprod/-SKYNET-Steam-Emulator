@@ -1,0 +1,14 @@
+# source: .tmp/goldberg_emulator/gse_fork/sdk/steam/isteamclient001.h (class ISteamClient001)
+0|CreateGlobalInstance|0|HSteamUser|
+1|ConnectToGlobalInstance|0|HSteamUser|
+2|CreateLocalInstance|0|HSteamUser|
+3|ReleaseInstance|1|void|HSteamUser hSteamUser
+4|GetISteamUser|2|ISteamUser *|HSteamUser hSteamUser, const char *pchVersion
+5|GetIVAC|1|void *|HSteamUser hSteamUser
+6|BMainLoop|2|bool|uint64 time, bool unk
+7|Test_SetSpew|2|void|const char *unk1, int unk2
+8|Test_SetSpewFunc|1|void|void *unk
+9|Test_OverrideIPs|2|void|uint32 unIPPublic, uint32 unIPPrivate
+10|Test_SetServerLoadState|2|void|bool unk1, bool unk2
+11|Test_SetStressMode|1|void|bool unk
+12|Test_GetStatsVConn|0|int|

@@ -1,0 +1,10 @@
+# source: .tmp/goldberg_emulator/gse_fork/sdk/steam/isteamuseritems003.h (class ISteamUserItems003)
+0|LoadItems|0|SteamAPICall_t|
+1|GetItemCount|0|SteamAPICall_t|
+2|GetItemIterative|8|bool|uint32 iIndex, uint64 *pulItemID, uint32 *punItemDefIndex, uint32 *punItemLevel, EItemQuality *peQuality, uint32 *punInventoryPos, uint32 *punQuantity, uint32 *punAttributeCount
+3|GetItemByID|7|bool|uint64 ulItemID, uint32 *punItemDefIndex, uint32 *punItemLevel, EItemQuality *peQuality, uint32 *punInventoryPos, uint32 *punQuantity, uint32 *punAttributeCount
+4|GetItemAttribute|4|bool|uint64 ulItemID, uint32 unAttributeIndex, uint32 *punAttributeDefIndex, float *pflAttributeValue
+5|UpdateInventoryPos|2|SteamAPICall_t|uint64 ulItemID, uint32 unNewInventoryPos
+6|DropItem_old2|1|SteamAPICall_t|uint64 ulItemID
+7|GetItemBlob|1|SteamAPICall_t|uint64 ulItemID
+8|SetItemBlob|3|SteamAPICall_t|uint64 ulItemID, const void *pubBlob, uint32 cubBlob

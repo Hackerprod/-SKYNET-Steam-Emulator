@@ -1,0 +1,9 @@
+# source: .tmp/goldberg_emulator/gse_fork/sdk/steam/isteamclient004.h (class ISteamClient004)
+0|CreateGlobalInstance|0|HSteamUser|
+1|ConnectToGlobalInstance|0|HSteamUser|
+2|CreateLocalInstance|0|HSteamUser|
+3|ReleaseInstance|1|void|HSteamUser hSteamUser
+4|GetISteamUser|2|ISteamUser *|HSteamUser hSteamUser, const char *pchVersion
+5|GetIVAC|1|void *|HSteamUser hSteamUser
+6|GetISteamGameServer|2|ISteamGameServer *|HSteamUser hSteamUser, const char *pchVersion
+7|SetLocalIPBinding|2|void|uint32 unIP, uint16 usPort

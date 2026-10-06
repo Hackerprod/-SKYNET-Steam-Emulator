@@ -1,0 +1,40 @@
+# source: .tmp/goldberg_emulator/gse_fork/sdk/steam/isteamuser005.h (class ISteamUser005)
+0|GetHSteamUser|0|HSteamUser|
+1|LogOn|1|void|CSteamID steamID
+2|LogOff|0|void|
+3|BLoggedOn|0|bool|
+4|GetLogonState|0|ELogonState|
+5|BConnected|0|bool|
+6|GetSteamID|0|CSteamID|
+7|IsVACBanned|1|bool|int nGameID
+8|RequireShowVACBannedMessage|1|bool|int nAppID
+9|AcknowledgeVACBanning|1|void|int nAppID
+10|SetSteam2Ticket|2|void|uint8 *pubTicket, int cubTicket
+11|AddServerNetAddress|2|void|uint32 unIP, uint16 unPort
+12|SetEmail|1|bool|const char *pchEmail
+13|SetRegistryString|3|bool|ERegistrySubTree eRegistrySubTree, const char *pchKey, const char *pchValue
+14|GetRegistryString|4|bool|ERegistrySubTree eRegistrySubTree, const char *pchKey, char *pchValue, int cbValue
+15|SetRegistryInt|3|bool|ERegistrySubTree eRegistrySubTree, const char *pchKey, int iValue
+16|GetRegistryInt|3|bool|ERegistrySubTree eRegistrySubTree, const char *pchKey, int *piValue
+17|InitiateGameConnection|7|int|void *pBlob, int cbMaxBlob, CSteamID steamID, CGameID gameID, uint32 unIPServer, uint16 usPortServer, bool bSecure
+18|TerminateGameConnection|2|void|uint32 unIPServer, uint16 usPortServer
+19|SetSelfAsPrimaryChatDestination|0|void|
+20|IsPrimaryChatDestination|0|bool|
+21|RequestLegacyCDKey|1|void|uint32 nAppID
+22|SendGuestPassByEmail|3|bool|const char *pchEmailAccount, GID_t gidGuestPassID, bool bResending
+23|SendGuestPassByAccountID|3|bool|uint32 uAccountID, GID_t gidGuestPassID, bool bResending
+24|AckGuestPass|1|bool|const char *pchGuestPassCode
+25|RedeemGuestPass|1|bool|const char *pchGuestPassCode
+26|GetGuestPassToGiveCount|0|uint32|
+27|GetGuestPassToRedeemCount|0|uint32|
+28|GetGuestPassLastUpdateTime|0|RTime32|
+29|GetGuestPassToGiveInfo|9|bool|uint32 nPassIndex, GID_t *pgidGuestPassID, PackageId_t *pnPackageID, RTime32 *pRTime32Created, RTime32 *pRTime32Expiration, RTime32 *pRTime32Sent, RTime32 *pRTime32Redeemed, char *pchRecipientAddress, int cRecipientAddressSize
+30|GetGuestPassToRedeemInfo|7|bool|uint32 nPassIndex, GID_t *pgidGuestPassID, PackageId_t *pnPackageID, RTime32 *pRTime32Created, RTime32 *pRTime32Expiration, RTime32 *pRTime32Sent, RTime32 *pRTime32Redeemed
+31|GetGuestPassToRedeemSenderAddress|3|bool|uint32 nPassIndex, char* pchSenderAddress, int cSenderAddressSize
+32|GetGuestPassToRedeemSenderName|3|bool|uint32 nPassIndex, char* pchSenderName, int cSenderNameSize
+33|AcknowledgeMessageByGID|1|void|const char *pchMessageGID
+34|SetLanguage|1|bool|const char *pchLanguage
+35|TrackAppUsageEvent|3|void|CGameID gameID, int eAppUsageEvent, const char *pchExtraInfo
+36|SetAccountName|1|void|const char *pchAccountName
+37|SetPassword|1|void|const char *pchPassword
+38|SetAccountCreationTime|1|void|RTime32 rt

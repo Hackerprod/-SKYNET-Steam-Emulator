@@ -1,0 +1,21 @@
+# source: .tmp/goldberg_emulator/gse_fork/sdk/steam/isteamgameserveritems003.h (class ISteamGameServerItems003)
+# overload AddNewItemCriteria slots 10,11
+0|LoadItems_old|1|void|CSteamID ownerID
+1|GetItemCount_old|1|void|CSteamID ownerID
+2|GetItemIterative|9|bool|CSteamID ownerID, uint32 iIndex, uint64 *pulItemID, uint32 *punItemDefIndex, uint32 *punItemLevel, EItemQuality *peQuality, uint32 *punInventoryPos, uint32 *punQuantity, uint32 *punAttributeCount
+3|GetItemByID|8|bool|uint64 ulItemID, CSteamID *pOwnerID, uint32 *punItemDefIndex, uint32 *punItemLevel, EItemQuality *peQuality, uint32 *punInventoryPos, uint32 *punQuantity, uint32 *punAttributeCount
+4|GetItemAttribute|4|bool|uint64 ulItemID, uint32 unAttributeIndex, uint32 *punAttributeDefIndex, float *pflAttributeValue
+5|CreateNewItemRequest|1|HNewItemRequest|CSteamID steamID
+6|AddNewItemLevel|2|bool|HNewItemRequest handle, uint32 unItemLevel
+7|AddNewItemQuality|2|bool|HNewItemRequest handle, EItemQuality eQuality
+8|SetNewItemInitialInventoryPos|2|bool|HNewItemRequest handle, uint32 unInventoryPos
+9|SetNewItemInitialQuantity|2|bool|HNewItemRequest handle, uint32 unQuantity
+10|AddNewItemCriteria|5|bool|HNewItemRequest handle, const char *pchField, EItemCriteriaOperator eOperator, float flValue, bool bRequired
+11|AddNewItemCriteria|5|bool|HNewItemRequest handle, const char *pchField, EItemCriteriaOperator eOperator, const char *pchValue, bool bRequired
+12|SendNewItemRequest_old|1|void|HNewItemRequest handle
+13|GrantItemToUser_old|2|void|uint64 ulItemID, CSteamID steamIDRecipient
+14|DeleteTemporaryItem_old|1|void|uint64 ulItemID
+15|DeleteAllTemporaryItems_old|0|void|
+16|UpdateQuantity|2|SteamAPICall_t|uint64 ulItemID, uint32 unNewQuantity
+17|GetItemBlob|1|SteamAPICall_t|uint64 ulItemID
+18|SetItemBlob|3|SteamAPICall_t|uint64 ulItemID, const void *pubBlob, uint32 cubBlob

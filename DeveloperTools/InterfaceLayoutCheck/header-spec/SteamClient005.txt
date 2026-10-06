@@ -1,0 +1,17 @@
+# source: .tmp/goldberg_emulator/gse_fork/sdk/steam/isteamclient005.h (class ISteamClient005)
+0|CreateSteamPipe|0|HSteamPipe|
+1|BReleaseSteamPipe|1|bool|HSteamPipe hSteamPipe
+2|CreateGlobalUser|1|HSteamUser|HSteamPipe *phSteamPipe
+3|ConnectToGlobalUser|1|HSteamUser|HSteamPipe hSteamPipe
+4|CreateLocalUser|1|HSteamUser|HSteamPipe *phSteamPipe
+5|ReleaseUser|2|void|HSteamPipe hSteamPipe, HSteamUser hUser
+6|GetISteamUser|3|ISteamUser *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+7|GetIVAC|1|void *|HSteamUser hSteamUser
+8|GetISteamGameServer|3|ISteamGameServer *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+9|SetLocalIPBinding|2|void|uint32 unIP, uint16 usPort
+10|GetConnectedUniverse|0|EUniverse|
+11|GetUniverseName|1|const char *|EUniverse eUniverse
+12|GetISteamFriends|3|ISteamFriends *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+13|BGetCallback|3|bool|HSteamPipe hSteamPipe, CallbackMsg_t *pCallbackMsg, int *unk
+14|FreeLastCallback|1|void|HSteamPipe hSteamPipe
+15|SetEUniverse|1|void|EUniverse universe

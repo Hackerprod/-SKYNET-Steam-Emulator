@@ -1,0 +1,2 @@
+# source: .tmp/goldberg_emulator/gse_fork/sdk/steam/isteamappdisableupdate.h (class ISteamAppDisableUpdate)
+0|SetAppUpdateDisabledSecondsRemaining|1|void|int32 nSeconds

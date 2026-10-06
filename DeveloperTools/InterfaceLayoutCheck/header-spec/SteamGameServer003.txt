@@ -1,0 +1,18 @@
+# source: .tmp/goldberg_emulator/gse_fork/sdk/steam/isteamgameserver003.h (class ISteamGameServer003)
+0|LogOn|0|void|
+1|LogOff|0|void|
+2|BLoggedOn|0|bool|
+3|BSecure|0|bool|
+4|GetSteamID|0|CSteamID|
+5|GSGetSteam2GetEncryptionKeyToSendToNewClient|3|bool|void *pvEncryptionKey, uint32 *pcbEncryptionKey, uint32 cbMaxEncryptionKey
+6|GSSendUserConnect|5|bool|uint32 unUserID, uint32 unIPPublic, uint16 usPort, const void *pvCookie, uint32 cubCookie
+7|GSRemoveUserConnect|1|bool|uint32 unUserID
+8|GSSendUserDisconnect|2|bool|CSteamID steamID, uint32 unUserID
+9|GSSetSpawnCount|1|void|uint32 ucSpawn
+10|GSSetServerType|9|bool|int32 nGameAppId, uint32 unServerFlags, uint32 unGameIP, uint16 unGamePort, uint16 unSpectatorPort, uint16 usQueryPort, const char *pchGameDir, const char *pchVersion, bool bLANMode
+11|GSUpdateStatus|6|bool|int cPlayers, int cPlayersMax, int cBotPlayers, const char *pchServerName, const char *pSpectatorServerName, const char *pchMapName
+12|GSCreateUnauthenticatedUser|1|bool|CSteamID *pSteamID
+13|GSSetUserData|3|bool|CSteamID steamID, const char *pPlayerName, uint32 nFrags
+14|GSUpdateSpectatorPort|1|void|uint16 unSpectatorPort
+15|GSSetGameType|1|void|const char *pchType
+16|GSGetUserAchievementStatus|2|bool|CSteamID steamID, const char *pchAchievementName

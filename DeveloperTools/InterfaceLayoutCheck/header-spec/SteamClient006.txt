@@ -1,0 +1,22 @@
+# source: .tmp/goldberg_emulator/gse_fork/sdk/steam/isteamclient006.h (class ISteamClient006)
+0|CreateSteamPipe|0|HSteamPipe|
+1|BReleaseSteamPipe|1|bool|HSteamPipe hSteamPipe
+2|CreateGlobalUser|1|HSteamUser|HSteamPipe *phSteamPipe
+3|ConnectToGlobalUser|1|HSteamUser|HSteamPipe hSteamPipe
+4|CreateLocalUser|1|HSteamUser|HSteamPipe *phSteamPipe
+5|ReleaseUser|2|void|HSteamPipe hSteamPipe, HSteamUser hUser
+6|GetISteamUser|3|ISteamUser *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+7|GetIVAC|1|void *|HSteamUser hSteamUser
+8|GetISteamGameServer|3|ISteamGameServer *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+9|SetLocalIPBinding|2|void|uint32 unIP, uint16 usPort
+10|GetUniverseName|1|const char *|EUniverse eUniverse
+11|GetISteamFriends|3|ISteamFriends *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+12|GetISteamUtils|2|ISteamUtils *|HSteamPipe hSteamPipe, const char *pchVersion
+13|GetISteamBilling_old|3|void *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+14|GetISteamMatchmaking|3|ISteamMatchmaking *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+15|GetISteamApps|3|ISteamApps *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+16|GetISteamContentServer|3|ISteamContentServer *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+17|GetISteamMasterServerUpdater|3|ISteamMasterServerUpdater *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+18|GetISteamMatchmakingServers|3|ISteamMatchmakingServers *|HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char *pchVersion
+19|RunFrame|0|void|
+20|GetIPCCallCount|0|uint32|

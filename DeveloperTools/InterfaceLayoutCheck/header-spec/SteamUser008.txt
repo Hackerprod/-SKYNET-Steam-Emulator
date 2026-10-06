@@ -1,0 +1,8 @@
+# source: .tmp/goldberg_emulator/gse_fork/sdk/steam/isteamuser008.h (class ISteamUser008)
+0|GetHSteamUser|0|HSteamUser|
+1|BLoggedOn|0|bool|
+2|GetSteamID|0|CSteamID|
+3|InitiateGameConnection|9|int|void *pBlob, int cbMaxBlob, CSteamID steamID, CGameID gameID, uint32 unIPServer, uint16 usPortServer, bool bSecure, void *pvSteam2GetEncryptionKey, int cbSteam2GetEncryptionKey
+4|TerminateGameConnection|2|void|uint32 unIPServer, uint16 usPortServer
+5|TrackAppUsageEvent|3|void|CGameID gameID, int eAppUsageEvent, const char *pchExtraInfo
+6|RefreshSteam2Login|0|void|

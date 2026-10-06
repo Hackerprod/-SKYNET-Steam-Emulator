@@ -1,0 +1,27 @@
+# source: .tmp/goldberg_emulator/gse_fork/sdk/steam/isteamuser004.h (class ISteamUser004)
+0|GetHSteamUser|0|HSteamUser|
+1|LogOn|1|void|CSteamID steamID
+2|LogOff|0|void|
+3|BLoggedOn|0|bool|
+4|GetLogonState|0|ELogonState|
+5|BConnected|0|bool|
+6|GetSteamID|0|CSteamID|
+7|IsVACBanned|1|bool|int nGameID
+8|RequireShowVACBannedMessage|1|bool|int nGameID
+9|AcknowledgeVACBanning|1|void|int nGameID
+10|NClientGameIDAdd|1|int|int nGameID
+11|RemoveClientGame|1|void|int nClientGameID
+12|SetClientGameServer|3|void|int nClientGameID, uint32 unIPServer, uint16 usPortServer
+13|SetSteam2Ticket|2|void|uint8 *pubTicket, int cubTicket
+14|AddServerNetAddress|2|void|uint32 unIP, uint16 unPort
+15|SetEmail|1|bool|const char *pchEmail
+16|GetSteamGameConnectToken|2|int|void *pBlob, int cbMaxBlob
+17|SetRegistryString|3|bool|ERegistrySubTree eRegistrySubTree, const char *pchKey, const char *pchValue
+18|GetRegistryString|4|bool|ERegistrySubTree eRegistrySubTree, const char *pchKey, char *pchValue, int cbValue
+19|SetRegistryInt|3|bool|ERegistrySubTree eRegistrySubTree, const char *pchKey, int iValue
+20|GetRegistryInt|3|bool|ERegistrySubTree eRegistrySubTree, const char *pchKey, int *piValue
+21|InitiateGameConnection|7|int|void *pBlob, int cbMaxBlob, CSteamID steamID, int nGameAppID, uint32 unIPServer, uint16 usPortServer, bool bSecure
+22|TerminateGameConnection|2|void|uint32 unIPServer, uint16 usPortServer
+23|SetSelfAsPrimaryChatDestination|0|void|
+24|IsPrimaryChatDestination|0|bool|
+25|RequestLegacyCDKey|1|void|uint32 iAppID

@@ -1,0 +1,31 @@
+# source: .tmp/goldberg_emulator/gse_fork/sdk/steam/isteamuser002.h (class ISteamUser002)
+0|Init|2|void|ICMCallback *cmcallback, ISteam2Auth *steam2auth
+1|ProcessCall|1|int|int unk
+2|LogOn_old|1|void|CSteamID &steamID
+3|LogOff|0|void|
+4|BLoggedOn|0|bool|
+5|GetLogonState|0|ELogonState|
+6|BConnected|0|bool|
+7|CreateAccount|6|int|const char *unk1, uint8 *unk2, uint8 *unk3, const char *unk4, int unk5, uint8 *unk6
+8|IsVACBanned|1|bool|int nGameID
+9|RequireShowVACBannedMessage|1|bool|int nGameID
+10|AcknowledgeVACBanning|1|void|int nGameID
+11|GSSendLogonRequest|1|bool|CSteamID &steamID
+12|GSSendDisconnect|1|bool|CSteamID &steamID
+13|GSSendStatusResponse|3|bool|CSteamID &steamID, int nSecondsConnected, int nSecondsSinceLast
+14|GSSetStatus|10|bool|int32 nAppIdServed, uint32 unServerFlags, int cPlayers, int cPlayersMax, int cBotPlayers, int unGamePort, const char *pchServerName, const char *pchGameDir, const char *pchMapName, const char *pchVersion
+15|NClientGameIDAdd|1|int|int nGameID
+16|RemoveClientGame|1|void|int nClientGameID
+17|SetClientGameServer|3|void|int nClientGameID, uint32 unIPServer, uint16 usPortServer
+18|Test_SuspendActivity|0|void|
+19|Test_ResumeActivity|0|void|
+20|Test_SendVACResponse|3|void|int nClientGameID, uint8 *pubResponse, int cubResponse
+21|Test_SetFakePrivateIP|1|void|uint32 unIPPrivate
+22|Test_SendBigMessage|0|void|
+23|Test_BBigMessageResponseReceived|0|bool|
+24|Test_SetPktLossPct|1|void|int nPct
+25|Test_SetForceTCP|1|void|bool bForceTCP
+26|Test_SetMaxUDPConnectionAttempts|1|void|int unk1
+27|Test_Heartbeat|0|void|
+28|Test_FakeDisconnect|0|void|
+29|Test_GetEUniverse|0|EUniverse|

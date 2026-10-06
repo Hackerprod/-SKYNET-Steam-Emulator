@@ -13,6 +13,10 @@ Sources (all under the repo root):
   * .tmp/SmokeAPI/res/steamworks/<sdk>/headers/steam/isteam*.h  one header per interface per SDK release
   * Tools/steamworks_sdk_164/sdk/public/steam/isteam*.h          SDK 1.64
   * .tmp/goldberg_emulator_ref/sdk_includes/isteam<name>.h       (current-version headers, treated as an SDK dir)
+  * .tmp/goldberg_emulator/gse_fork/sdk/steam/isteam*.h          gbe_fork sdk (per-version + current headers). LAST RESORT:
+    used only for versions no other source defines (so previously generated specs can never change); family prefixes
+    come from the defines of the other sources first (setdefault), then from these headers' own defines
+    (e.g. STEAMUSERITEMS_INTERFACE_VERSION -> STEAMUSERITEMS_INTERFACE_VERSION001, as Goldberg's getter spells it).
 A version string comes from `#define <STEM>_INTERFACE_VERSION[...] "<string>"`; the class is the one in the
 same header named like <STEM>. Every source defining a version is parsed; disagreements in the ordered
 method names are reported (the preferred source wins).
@@ -45,6 +49,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 GOLD_DIR = os.path.join(ROOT, "DeveloperTools", "InterfaceLayoutCheck", "golden")
 SPEC_DIR = os.path.join(ROOT, "DeveloperTools", "InterfaceLayoutCheck", "header-spec")
 GB_DIR = os.path.join(ROOT, ".tmp", "goldberg_emulator_ref", "sdk_includes")
+GSE_DIR = os.path.join(ROOT, ".tmp", "goldberg_emulator", "gse_fork", "sdk", "steam")  # gbe_fork sdk folder (last-resort source)
 
 DEFINES = {"_WIN32": 1, "WIN32": 1, "STEAM_WIN32": 1, "_MSC_VER": 1930, "__cplusplus": 201703,
            "VALVE_CALLBACK_PACK_SMALL": 1,
@@ -318,6 +323,7 @@ def sdk_dirs():
         ds.append((d, "sdk" + os.path.basename(os.path.dirname(os.path.dirname(d)))))
     ds.append((os.path.join(ROOT, "Tools", "steamworks_sdk_164", "sdk", "public", "steam"), "sdk164"))
     ds.append((GB_DIR, "goldberg-current"))
+    ds.append((GSE_DIR, "gse-current"))
     return ds
 
 
@@ -359,6 +365,22 @@ def discover():
                 warns.append("goldberg class %s has no known version family" % c)
                 continue
             sources[pre + m.group(2)].append((f, c, "goldberg-ver"))
+    # gbe_fork (gse_fork/sdk/steam) per-version headers: same naming, but ONLY a last-resort source
+    for f in sorted(glob.glob(os.path.join(GSE_DIR, "isteam*.h"))):
+        text = load(f)
+        for c in classes_in(text):
+            m = re.match(r"(I[A-Za-z]+?)(\d{3})$", c)
+            if not m:
+                continue
+            pre = family.get(m.group(1).lower())
+            if pre is None:
+                warns.append("gse_fork class %s has no known version family" % c)
+                continue
+            sources[pre + m.group(2)].append((f, c, "gse-ver"))
+    # gse_fork headers are used only for versions no other source defines, so existing specs never change
+    for ver in list(sources):
+        if any(not x[2].startswith("gse-") for x in sources[ver]):
+            sources[ver] = [x for x in sources[ver] if not x[2].startswith("gse-")]
     return sources, warns
 
 
@@ -412,6 +434,10 @@ def src_rank(src):
         return (0, 0, "")
     if tag == "goldberg-current":
         return (2, 0, "")
+    if tag == "gse-ver":
+        return (3, 0, "")
+    if tag == "gse-current":
+        return (3, 1, "")
     num = re.match(r"sdk(\d+)(\w*)", tag)
     return (1, -int(num.group(1)), num.group(2))
 

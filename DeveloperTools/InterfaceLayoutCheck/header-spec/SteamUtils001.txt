@@ -1,0 +1,8 @@
+# source: .tmp/goldberg_emulator/gse_fork/sdk/steam/isteamutils001.h (class ISteamUtils001)
+0|GetSecondsSinceAppActive|0|uint32|
+1|GetSecondsSinceComputerActive|0|uint32|
+2|GetConnectedUniverse|0|EUniverse|
+3|GetServerRealTime|0|uint32|
+4|GetIPCountry|0|const char *|
+5|GetImageSize|3|bool|int iImage, uint32 *pnWidth, uint32 *pnHeight
+6|GetImageRGBA|3|bool|int iImage, uint8 *pubDest, int nDestBufferSize

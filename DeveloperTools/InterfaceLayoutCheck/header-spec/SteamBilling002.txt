@@ -1,0 +1,44 @@
+# source: .tmp/goldberg_emulator/gse_fork/sdk/steam/isteambilling.h (class ISteamBilling)
+0|_unknown_fn_1|0|bool|
+1|_unknown_fn_2|0|bool|
+2|_unknown_fn_3|0|bool|
+3|_unknown_fn_4|0|bool|
+4|_unknown_fn_5|0|bool|
+5|_unknown_fn_6|0|bool|
+6|_unknown_fn_7|0|bool|
+7|_unknown_fn_8|0|bool|
+8|_unknown_fn_9|0|bool|
+9|_unknown_fn_10|0|bool|
+10|_unknown_fn_11|0|bool|
+11|_unknown_fn_12|0|bool|
+12|_unknown_fn_13|0|bool|
+13|_unknown_fn_14|0|bool|
+14|_unknown_fn_15|0|bool|
+15|_unknown_fn_16|0|bool|
+16|_unknown_fn_17|0|bool|
+17|_unknown_fn_18|0|bool|
+18|_unknown_fn_19|0|bool|
+19|_unknown_fn_20|0|int|
+20|_unknown_fn_21|0|int|
+21|_unknown_fn_22|0|int|
+22|_unknown_fn_23|0|int|
+23|_unknown_fn_24|0|int|
+24|_unknown_fn_25|0|int|
+25|_unknown_fn_26|0|int|
+26|_unknown_fn_27|0|const char*|
+27|_unknown_fn_28|0|int|
+28|_unknown_fn_29|0|int|
+29|_unknown_fn_30|0|int|
+30|_unknown_fn_31|0|int|
+31|_unknown_fn_32|0|int|
+32|_unknown_fn_33|0|int|
+33|_unknown_fn_34|0|int|
+34|_unknown_fn_35|0|int|
+35|_unknown_fn_36|0|int|
+36|_unknown_fn_37|0|int|
+37|_unknown_fn_38|0|const char*|
+38|_unknown_fn_39|0|int|
+39|_unknown_fn_40|0|int|
+40|_unknown_fn_41|0|bool|
+41|_unknown_fn_42|0|bool|
+42|_unknown_fn_43|0|bool|

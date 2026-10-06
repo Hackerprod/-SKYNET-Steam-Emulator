@@ -1,0 +1,21 @@
+# source: .tmp/goldberg_emulator/gse_fork/sdk/steam/isteamtimeline003.h (class ISteamTimeline003)
+0|SetTimelineTooltip|2|void|const char *pchDescription, float flTimeDelta
+1|ClearTimelineTooltip|1|void|float flTimeDelta
+2|SetTimelineGameMode|1|void|ETimelineGameMode eMode
+3|AddTimelineEvent|7|TimelineEventHandle_t|const char *pchTitle, const char *pchDescription, const char *pchIcon, uint32 unIconPriority, float flStartOffsetSeconds, float flDurationSeconds, ETimelineEventClipPriority ePossibleClip
+4|unknown_ret0_1|0|uint32|
+5|unknown_ret0_2|0|uint32|
+6|unknown_nop_3|0|void|
+7|RemoveTimelineEvent|1|void|TimelineEventHandle_t ulEvent
+8|unknown_nop_4|0|void|
+9|unknown_nop_5|0|void|
+10|unknown_nop_6|0|void|
+11|DoesEventRecordingExist|1|SteamAPICall_t|TimelineEventHandle_t ulEvent
+12|StartGamePhase|0|void|
+13|EndGamePhase|0|void|
+14|SetGamePhaseID|1|void|const char *pchPhaseID
+15|DoesGamePhaseRecordingExist|1|SteamAPICall_t|const char *pchPhaseID
+16|AddGamePhaseTag|4|void|const char *pchTagName, const char *pchTagIcon, const char *pchTagGroup, uint32 unPriority
+17|SetGamePhaseAttribute|3|void|const char *pchAttributeGroup, const char *pchAttributeValue, uint32 unPriority
+18|OpenOverlayToGamePhase|1|void|const char *pchPhaseID
+19|OpenOverlayToTimelineEvent|1|void|const TimelineEventHandle_t ulEvent
