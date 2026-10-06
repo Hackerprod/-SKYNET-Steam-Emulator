@@ -1,0 +1,41 @@
+# source: .tmp/ProtonLsteamclient/lsteamclient/steamworks_sdk_165/isteamutils.h (class ISteamUtils)
+0|GetSecondsSinceAppActive|0|uint32|
+1|GetSecondsSinceComputerActive|0|uint32|
+2|GetConnectedUniverse|0|EUniverse|
+3|GetServerRealTime|0|uint32|
+4|GetIPCountry|0|const char *|
+5|GetImageSize|3|bool|int iImage, uint32 *pnWidth, uint32 *pnHeight
+6|GetImageRGBA|3|bool|int iImage, uint8 *pubDest, int nDestBufferSize
+7|GetCurrentBatteryPower|0|uint8|
+8|GetAppID|0|uint32|
+9|SetOverlayNotificationPosition|1|void|ENotificationPosition eNotificationPosition
+10|IsAPICallCompleted|2|bool|SteamAPICall_t hSteamAPICall, bool *pbFailed
+11|GetAPICallFailureReason|1|ESteamAPICallFailure|SteamAPICall_t hSteamAPICall
+12|GetAPICallResult|5|bool|SteamAPICall_t hSteamAPICall, void *pCallback, int cubCallback, int iCallbackExpected, bool *pbFailed
+13|RunFrame|0|void|
+14|GetIPCCallCount|0|uint32|
+15|SetWarningMessageHook|1|void|SteamAPIWarningMessageHook_t pFunction
+16|IsOverlayEnabled|0|bool|
+17|BOverlayNeedsPresent|0|bool|
+18|CheckFileSignature|1|SteamAPICall_t|const char *szFileName
+19|ShowGamepadTextInput|5|bool|EGamepadTextInputMode eInputMode, EGamepadTextInputLineMode eLineInputMode, const char *pchDescription, uint32 unCharMax, const char *pchExistingText
+20|GetEnteredGamepadTextLength|0|uint32|
+21|GetEnteredGamepadTextInput|2|bool|char *pchText, uint32 cchText
+22|GetSteamUILanguage|0|const char *|
+23|IsSteamRunningInVR|0|bool|
+24|SetOverlayNotificationInset|2|void|int nHorizontalInset, int nVerticalInset
+25|IsSteamInBigPictureMode|0|bool|
+26|StartVRDashboard|0|void|
+27|IsVRHeadsetStreamingEnabled|0|bool|
+28|SetVRHeadsetStreamingEnabled|1|void|bool bEnabled
+29|IsSteamChinaLauncher|0|bool|
+30|InitFilterText|1|bool|uint32 unFilterOptions
+31|FilterText|5|int|ETextFilteringContext eContext, CSteamID sourceSteamID, const char *pchInputMessage, char *pchOutFilteredText, uint32 nByteSizeOutFilteredText
+32|GetIPv6ConnectivityState|1|ESteamIPv6ConnectivityState|ESteamIPv6ConnectivityProtocol eProtocol
+33|ShowFloatingGamepadTextInput|5|bool|EFloatingGamepadTextInputMode eKeyboardMode, int nTextFieldXPosition, int nTextFieldYPosition, int nTextFieldWidth, int nTextFieldHeight
+34|SetGameLauncherMode|1|void|bool bLauncherMode
+35|DismissFloatingGamepadTextInput|0|bool|
+36|DismissGamepadTextInput|0|bool|
+37|IsRunningOnSteamHardware|0|ESteamHardwareType|
+38|GetSteamHardwareDefaultConfig|0|ESteamHardwareDefaultConfig|
+39|IsRunningUnderProton|0|bool|

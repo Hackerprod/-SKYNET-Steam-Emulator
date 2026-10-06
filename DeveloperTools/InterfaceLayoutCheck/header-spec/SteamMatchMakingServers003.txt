@@ -1,0 +1,19 @@
+# source: .tmp/ProtonLsteamclient/lsteamclient/steamworks_sdk_165/isteammatchmaking.h (class ISteamMatchmakingServers)
+0|RequestInternetServerList|4|HServerListRequest|AppId_t iApp, MatchMakingKeyValuePair_t **ppchFilters, uint32 nFilters, ISteamMatchmakingServerListResponse *pRequestServersResponse
+1|RequestLANServerList|2|HServerListRequest|AppId_t iApp, ISteamMatchmakingServerListResponse *pRequestServersResponse
+2|RequestFriendsServerList|4|HServerListRequest|AppId_t iApp, MatchMakingKeyValuePair_t **ppchFilters, uint32 nFilters, ISteamMatchmakingServerListResponse *pRequestServersResponse
+3|RequestFavoritesServerList|4|HServerListRequest|AppId_t iApp, MatchMakingKeyValuePair_t **ppchFilters, uint32 nFilters, ISteamMatchmakingServerListResponse *pRequestServersResponse
+4|RequestHistoryServerList|4|HServerListRequest|AppId_t iApp, MatchMakingKeyValuePair_t **ppchFilters, uint32 nFilters, ISteamMatchmakingServerListResponse *pRequestServersResponse
+5|RequestSpectatorServerList|4|HServerListRequest|AppId_t iApp, MatchMakingKeyValuePair_t **ppchFilters, uint32 nFilters, ISteamMatchmakingServerListResponse *pRequestServersResponse
+6|ReleaseRequest|1|void|HServerListRequest hServerListRequest
+7|GetServerDetails|2|gameserveritem_t *|HServerListRequest hRequest, int iServer
+8|CancelQuery|1|void|HServerListRequest hRequest
+9|RefreshQuery|1|void|HServerListRequest hRequest
+10|IsRefreshing|1|bool|HServerListRequest hRequest
+11|GetServerCount|1|int|HServerListRequest hRequest
+12|RefreshServer|2|void|HServerListRequest hRequest, int iServer
+13|PingServer|3|HServerQuery|uint32 unIP, uint16 usPort, ISteamMatchmakingPingResponse *pRequestServersResponse
+14|PlayerDetails|3|HServerQuery|uint32 unIP, uint16 usPort, ISteamMatchmakingPlayersResponse *pRequestServersResponse
+15|ServerRules|3|HServerQuery|uint32 unIP, uint16 usPort, ISteamMatchmakingRulesResponse *pRequestServersResponse
+16|ServerFriends|3|HServerQuery|uint32 unIP, uint16 usPort, ISteamMatchmakingServerFriendsResponse *pRequestServersResponse
+17|CancelServerQuery|1|void|HServerQuery hServerQuery

@@ -1,0 +1,48 @@
+# source: .tmp/ProtonLsteamclient/lsteamclient/steamworks_sdk_165/isteamnetworkingsockets.h (class ISteamNetworkingSockets)
+0|CreateListenSocketIP|3|HSteamListenSocket|const SteamNetworkingIPAddr &localAddress, int nOptions, const SteamNetworkingConfigValue_t *pOptions
+1|ConnectByIPAddress|3|HSteamNetConnection|const SteamNetworkingIPAddr &address, int nOptions, const SteamNetworkingConfigValue_t *pOptions
+2|CreateListenSocketP2P|3|HSteamListenSocket|int nLocalVirtualPort, int nOptions, const SteamNetworkingConfigValue_t *pOptions
+3|ConnectP2P|4|HSteamNetConnection|const SteamNetworkingIdentity &identityRemote, int nRemoteVirtualPort, int nOptions, const SteamNetworkingConfigValue_t *pOptions
+4|AcceptConnection|1|EResult|HSteamNetConnection hConn
+5|CloseConnection|4|bool|HSteamNetConnection hPeer, int nReason, const char *pszDebug, bool bEnableLinger
+6|CloseListenSocket|1|bool|HSteamListenSocket hSocket
+7|SetConnectionUserData|2|bool|HSteamNetConnection hPeer, int64 nUserData
+8|GetConnectionUserData|1|int64|HSteamNetConnection hPeer
+9|SetConnectionName|2|void|HSteamNetConnection hPeer, const char *pszName
+10|GetConnectionName|3|bool|HSteamNetConnection hPeer, char *pszName, int nMaxLen
+11|SendMessageToConnection|5|EResult|HSteamNetConnection hConn, const void *pData, uint32 cbData, int nSendFlags, int64 *pOutMessageNumber
+12|SendMessages|4|void|int nMessages, SteamNetworkingMessage_t **pMessages, int64 *pOutMessageNumberOrResult, bool bDeleteFailedMessages
+13|FlushMessagesOnConnection|1|EResult|HSteamNetConnection hConn
+14|ReceiveMessagesOnConnection|3|int|HSteamNetConnection hConn, SteamNetworkingMessage_t **ppOutMessages, int nMaxMessages
+15|GetConnectionInfo|2|bool|HSteamNetConnection hConn, SteamNetConnectionInfo_t *pInfo
+16|GetConnectionRealTimeStatus|4|EResult|HSteamNetConnection hConn, SteamNetConnectionRealTimeStatus_t *pStatus, int nLanes, SteamNetConnectionRealTimeLaneStatus_t *pLanes
+17|GetDetailedConnectionStatus|3|int|HSteamNetConnection hConn, char *pszBuf, int cbBuf
+18|GetListenSocketAddress|2|bool|HSteamListenSocket hSocket, SteamNetworkingIPAddr *address
+19|CreateSocketPair|5|bool|HSteamNetConnection *pOutConnection1, HSteamNetConnection *pOutConnection2, bool bUseNetworkLoopback, const SteamNetworkingIdentity *pPeerIdentity1, const SteamNetworkingIdentity *pPeerIdentity2
+20|ConfigureConnectionLanes|4|EResult|HSteamNetConnection hConn, int nNumLanes, const int *pLanePriorities, const uint16 *pLaneWeights
+21|GetIdentity|1|bool|SteamNetworkingIdentity *pIdentity
+22|InitAuthentication|0|ESteamNetworkingAvailability|
+23|GetAuthenticationStatus|1|ESteamNetworkingAvailability|SteamNetAuthenticationStatus_t *pDetails
+24|CreatePollGroup|0|HSteamNetPollGroup|
+25|DestroyPollGroup|1|bool|HSteamNetPollGroup hPollGroup
+26|SetConnectionPollGroup|2|bool|HSteamNetConnection hConn, HSteamNetPollGroup hPollGroup
+27|ReceiveMessagesOnPollGroup|3|int|HSteamNetPollGroup hPollGroup, SteamNetworkingMessage_t **ppOutMessages, int nMaxMessages
+28|ReceivedRelayAuthTicket|3|bool|const void *pvTicket, int cbTicket, SteamDatagramRelayAuthTicket *pOutParsedTicket
+29|FindRelayAuthTicketForServer|3|int|const SteamNetworkingIdentity &identityGameServer, int nRemoteVirtualPort, SteamDatagramRelayAuthTicket *pOutParsedTicket
+30|ConnectToHostedDedicatedServer|4|HSteamNetConnection|const SteamNetworkingIdentity &identityTarget, int nRemoteVirtualPort, int nOptions, const SteamNetworkingConfigValue_t *pOptions
+31|GetHostedDedicatedServerPort|0|uint16|
+32|GetHostedDedicatedServerPOPID|0|SteamNetworkingPOPID|
+33|GetHostedDedicatedServerAddress|1|EResult|SteamDatagramHostedAddress *pRouting
+34|CreateHostedDedicatedServerListenSocket|3|HSteamListenSocket|int nLocalVirtualPort, int nOptions, const SteamNetworkingConfigValue_t *pOptions
+35|GetGameCoordinatorServerLogin|3|EResult|SteamDatagramGameCoordinatorServerLogin *pLoginInfo, int *pcbSignedBlob, void *pBlob
+36|ConnectP2PCustomSignaling|5|HSteamNetConnection|ISteamNetworkingConnectionSignaling *pSignaling, const SteamNetworkingIdentity *pPeerIdentity, int nRemoteVirtualPort, int nOptions, const SteamNetworkingConfigValue_t *pOptions
+37|ReceivedP2PCustomSignal|3|bool|const void *pMsg, int cbMsg, ISteamNetworkingSignalingRecvContext *pContext
+38|GetCertificateRequest|3|bool|int *pcbBlob, void *pBlob, SteamNetworkingErrMsg &errMsg
+39|SetCertificate|3|bool|const void *pCertificate, int cbCertificate, SteamNetworkingErrMsg &errMsg
+40|ResetIdentity|1|void|const SteamNetworkingIdentity *pIdentity
+41|RunCallbacks|0|void|
+42|BeginAsyncRequestFakeIP|1|bool|int nNumPorts
+43|GetFakeIP|2|void|int idxFirstPort, SteamNetworkingFakeIPResult_t *pInfo
+44|CreateListenSocketP2PFakeIP|3|HSteamListenSocket|int idxFakePort, int nOptions, const SteamNetworkingConfigValue_t *pOptions
+45|GetRemoteFakeIPForConnection|2|EResult|HSteamNetConnection hConn, SteamNetworkingIPAddr *pOutAddr
+46|CreateFakeUDPPort|1|ISteamNetworkingFakeUDPPort *|int idxFakeServerPort

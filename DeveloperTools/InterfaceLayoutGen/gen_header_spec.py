@@ -13,6 +13,12 @@ Sources (all under the repo root):
   * .tmp/SmokeAPI/res/steamworks/<sdk>/headers/steam/isteam*.h  one header per interface per SDK release
   * Tools/steamworks_sdk_164/sdk/public/steam/isteam*.h          SDK 1.64
   * .tmp/goldberg_emulator_ref/sdk_includes/isteam<name>.h       (current-version headers, treated as an SDK dir)
+  * .tmp/ProtonLsteamclient/lsteamclient/steamworks_sdk_<NNN[a-z]>/isteam*.h  Valve's own Proton repo, SDK 0.99u ... 1.65 (tags
+    protonNNN[x]). Policy: a version that any other source defines keeps EXACTLY its previously chosen source (so older
+    specs never change), EXCEPT when the newest SDK (proton165) defines the same version string with a method list that
+    strictly extends the chosen list (additive trailing methods, e.g. STEAMAPPS_INTERFACE_VERSION009 in SDK 1.65): then
+    the spec is regenerated from the 1.65 header and says so in a "# note:" line. Versions defined ONLY by Proton dirs
+    (newest SDK first) get their specs from them, parsed like any other source.
   * .tmp/goldberg_emulator/gse_fork/sdk/steam/isteam*.h          gbe_fork sdk (per-version + current headers). LAST RESORT:
     used only for versions no other source defines (so previously generated specs can never change); family prefixes
     come from the defines of the other sources first (setdefault), then from these headers' own defines
@@ -50,6 +56,8 @@ GOLD_DIR = os.path.join(ROOT, "DeveloperTools", "InterfaceLayoutCheck", "golden"
 SPEC_DIR = os.path.join(ROOT, "DeveloperTools", "InterfaceLayoutCheck", "header-spec")
 GB_DIR = os.path.join(ROOT, ".tmp", "goldberg_emulator_ref", "sdk_includes")
 GSE_DIR = os.path.join(ROOT, ".tmp", "goldberg_emulator", "gse_fork", "sdk", "steam")  # gbe_fork sdk folder (last-resort source)
+PROTON_DIR = os.path.join(ROOT, ".tmp", "ProtonLsteamclient", "lsteamclient")  # steamworks_sdk_<NNN[a-z]> dirs (Valve Proton)
+NEWEST_SDK_TAG = "proton165"  # newest SDK: may extend (never replace) an existing spec, see main()
 
 DEFINES = {"_WIN32": 1, "WIN32": 1, "STEAM_WIN32": 1, "_MSC_VER": 1930, "__cplusplus": 201703,
            "VALVE_CALLBACK_PACK_SMALL": 1,
@@ -324,6 +332,8 @@ def sdk_dirs():
     ds.append((os.path.join(ROOT, "Tools", "steamworks_sdk_164", "sdk", "public", "steam"), "sdk164"))
     ds.append((GB_DIR, "goldberg-current"))
     ds.append((GSE_DIR, "gse-current"))
+    for d in sorted(glob.glob(os.path.join(PROTON_DIR, "steamworks_sdk_*"))):  # AFTER the others: family setdefault order
+        ds.append((d, "proton" + os.path.basename(d)[len("steamworks_sdk_"):]))
     return ds
 
 
@@ -379,7 +389,7 @@ def discover():
             sources[pre + m.group(2)].append((f, c, "gse-ver"))
     # gse_fork headers are used only for versions no other source defines, so existing specs never change
     for ver in list(sources):
-        if any(not x[2].startswith("gse-") for x in sources[ver]):
+        if any(not x[2].startswith(("gse-", "proton")) for x in sources[ver]):
             sources[ver] = [x for x in sources[ver] if not x[2].startswith("gse-")]
     return sources, warns
 
@@ -438,6 +448,9 @@ def src_rank(src):
         return (3, 0, "")
     if tag == "gse-current":
         return (3, 1, "")
+    pm = re.match(r"proton(\d+)([a-z]*)$", tag)
+    if pm:  # last resort, newest SDK first (a later letter suffix is newer)
+        return (4, -int(pm.group(1)), -ord(pm.group(2)[0]) if pm.group(2) else 0)
     num = re.match(r"sdk(\d+)(\w*)", tag)
     return (1, -int(num.group(1)), num.group(2))
 
@@ -455,11 +468,13 @@ def main():
         for f in glob.glob(os.path.join(SPEC_DIR, "*.txt")):
             os.remove(f)
 
-    layouts, errors, disagree = {}, {}, {}
+    layouts, errors, disagree, extended = {}, {}, {}, {}
     for ver in sorted(sources):
         if args.only and ver.lower() != args.only.lower():
             continue
-        srcs = sorted(sources[ver], key=src_rank)  # per-version goldberg header first, then newest SDK first
+        legacy = [x for x in sources[ver] if not x[2].startswith("proton")]
+        proton = [x for x in sources[ver] if x[2].startswith("proton")]
+        srcs = sorted(legacy or proton, key=src_rank)  # per-version goldberg header first, then newest SDK first
         parsed = []  # (src, methods)
         for path, cls, tag in srcs:
             try:
@@ -468,6 +483,19 @@ def main():
                 errors.setdefault(ver, []).append("%s %s: %s" % (path, cls, ex))
         if not parsed:
             continue
+        if legacy:  # keep the previously chosen source unless SDK 1.65 strictly extends it
+            for path, cls, tag in (x for x in proton if x[2] == NEWEST_SDK_TAG):
+                try:
+                    ms = class_layout(load(path), cls, path)
+                except Exception as ex:  # noqa
+                    errors.setdefault(ver, []).append("%s %s: %s" % (path, cls, ex))
+                    continue
+                old_k, new_k = [slot_key(m) for m in parsed[0][1]], [slot_key(m) for m in ms]
+                if len(new_k) > len(old_k) and new_k[:len(old_k)] == old_k:
+                    extended[ver] = "regenerated from SDK 1.65 (%d -> %d slots, additive trailing methods; previous source %s)" % (
+                        len(old_k), len(new_k), os.path.relpath(parsed[0][0][0], ROOT).replace("\\", "/"))
+                    parsed.insert(0, ((path, cls, tag), ms))
+                break
         variants = collections.OrderedDict()
         for (path, cls, tag), ms in parsed:
             variants.setdefault(tuple(slot_key(m) for m in ms), []).append((path, cls, tag))
@@ -486,6 +514,8 @@ def main():
         others = sorted({rel(x[0]) for x in srcs[1:]} - {rel(srcs[0][0])})
         if others:
             hdr.append("# also: " + ", ".join(others[:6]) + (" (+%d more)" % (len(others) - 6) if len(others) > 6 else ""))
+        if ver in extended:
+            hdr.append("# note: " + extended[ver])
         for note in disagree.get(ver, (None, []))[1]:
             hdr.append("# WARNING sources disagree: " + note)
         groups = collections.defaultdict(list)

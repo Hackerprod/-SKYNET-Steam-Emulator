@@ -1,4 +1,6 @@
-# source: Tools/steamworks_sdk_164/sdk/public/steam/isteamapps.h (class ISteamApps)
+# source: .tmp/ProtonLsteamclient/lsteamclient/steamworks_sdk_165/isteamapps.h (class ISteamApps)
+# also: Tools/steamworks_sdk_164/sdk/public/steam/isteamapps.h
+# note: regenerated from SDK 1.65 (33 -> 35 slots, additive trailing methods; previous source Tools/steamworks_sdk_164/sdk/public/steam/isteamapps.h)
 0|BIsSubscribed|0|bool|
 1|BIsLowViolence|0|bool|
 2|BIsCybercafe|0|bool|
@@ -32,3 +34,5 @@
 30|GetNumBetas|2|int|int *pnAvailable, int *pnPrivate
 31|GetBetaInfo|8|bool|int iBetaIndex, uint32 *punFlags, uint32 *punBuildID, char *pchBetaName, int cchBetaName, char *pchDescription, int cchDescription, uint32 *punLastUpdated
 32|SetActiveBeta|1|bool|const char *pchBetaName
+33|SetGamePerformanceSetting|1|void|EGamePerformanceSetting setting
+34|SetGameRenderResolution|2|void|uint32 unWidth, uint32 unHeight
