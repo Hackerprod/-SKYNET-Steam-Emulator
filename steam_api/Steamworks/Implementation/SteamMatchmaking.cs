@@ -127,17 +127,41 @@ namespace SKYNET.Steamworks.Implementation
             });
         }
 
+        // Pre-SteamAPICall_t SDKs (ISteamMatchmaking 002-005) return void and only
+        // observe the result as a plain callback, never as a call result.
+        private static SteamAPICall_t SubmitResult(bool legacy, ICallbackData pendingResult, Func<ICallbackData> work, string name, TimeSpan? completionDelay = null)
+        {
+            if (legacy)
+            {
+                WorkQueue.EnqueueDirectCallback(pendingResult, work, name: name, completionDelay: completionDelay);
+                return 0;
+            }
+
+            return WorkQueue.EnqueueCallbackResult(pendingResult, work, name: name, completionDelay: completionDelay);
+        }
+
         public SteamAPICall_t CreateLobby(int eLobbyType, int cMaxMembers)
+        {
+            return CreateLobbyCore(eLobbyType, cMaxMembers, false);
+        }
+
+        public void CreateLobbyLegacy(int eLobbyType, int cMaxMembers)
+        {
+            CreateLobbyCore(eLobbyType, cMaxMembers, true);
+        }
+
+        private SteamAPICall_t CreateLobbyCore(int eLobbyType, int cMaxMembers, bool legacy)
         {
             Write($"CreateLobby {(ELobbyType)eLobbyType} limit {cMaxMembers} members");
             ulong callResult = 0;
+            var delivered = false;
             try
             {
                 if (APIClient.IsEnabled)
                 {
                     var lobbyData = DataAwaiting.ToDictionary(k => k.Key, v => v.Value);
                     DataAwaiting.Clear();
-                    return WorkQueue.EnqueueCallbackResult(new LobbyCreated_t
+                    return SubmitResult(legacy, new LobbyCreated_t
                     {
                         m_eResult = EResult.k_EResultFail,
                         m_ulSteamIDLobby = 0
@@ -175,7 +199,7 @@ namespace SKYNET.Steamworks.Implementation
                             m_eResult = EResult.k_EResultOK,
                             m_ulSteamIDLobby = lobby.SteamID
                         };
-                    }, name: "CreateLobby");
+                    }, "CreateLobby");
                 }
 
                 var LocalLobby = new SteamLobby()
@@ -211,7 +235,15 @@ namespace SKYNET.Steamworks.Implementation
                     m_ulSteamIDLobby = LocalLobby.SteamID
                 };
 
-                callResult = CallbackManager.AddCallbackResult(data);
+                if (legacy)
+                {
+                    CallbackManager.AddCallback(data);
+                    delivered = true;
+                }
+                else
+                {
+                    callResult = CallbackManager.AddCallbackResult(data);
+                }
 
                 LobbyEnter_t lobbyEnter = new LobbyEnter_t()
                 {
@@ -227,6 +259,14 @@ namespace SKYNET.Steamworks.Implementation
             }
             catch (Exception)
             {
+                if (legacy && !delivered)
+                {
+                    CallbackManager.AddCallback(new LobbyCreated_t
+                    {
+                        m_eResult = EResult.k_EResultFail,
+                        m_ulSteamIDLobby = 0
+                    });
+                }
             }
             return callResult;
         }
@@ -518,6 +558,16 @@ namespace SKYNET.Steamworks.Implementation
 
         public SteamAPICall_t JoinLobby(ulong steamIDLobby)
         {
+            return JoinLobbyCore(steamIDLobby, false);
+        }
+
+        public void JoinLobbyLegacy(ulong steamIDLobby)
+        {
+            JoinLobbyCore(steamIDLobby, true);
+        }
+
+        private SteamAPICall_t JoinLobbyCore(ulong steamIDLobby, bool legacy)
+        {
             Write($"JoinLobby (Lobby SteamID: {steamIDLobby})");
 
             SteamAPICall_t APICall = 0;
@@ -531,7 +581,7 @@ namespace SKYNET.Steamworks.Implementation
 
             if (APIClient.IsEnabled)
             {
-                return WorkQueue.EnqueueCallbackResult(data, () =>
+                return SubmitResult(legacy, data, () =>
                 {
                     var joinedLobby = APIClient.JoinLobby(steamIDLobby);
                     if (joinedLobby == null)
@@ -562,16 +612,29 @@ namespace SKYNET.Steamworks.Implementation
                     });
 
                     return joined;
-                }, name: "JoinLobby");
+                }, "JoinLobby");
             }
 
             if (GetLobby(steamIDLobby, out var lobby))
             {
+                if (legacy)
+                {
+                    NetworkManager.SendLobbyJoinRequest(0, lobby);
+                    CallbackManager.AddCallback(data);
+                    return 0;
+                }
+
                 APICall = CallbackManager.AddCallbackResult(data, false);
                 NetworkManager.SendLobbyJoinRequest(APICall, lobby);
             }
             else
             {
+                if (legacy)
+                {
+                    CallbackManager.AddCallback(data);
+                    return 0;
+                }
+
                 return CallbackManager.AddCallbackResult(data);
             }
 
@@ -669,13 +732,23 @@ namespace SKYNET.Steamworks.Implementation
 
         public SteamAPICall_t RequestLobbyList()
         {
+            return RequestLobbyListCore(false);
+        }
+
+        public void RequestLobbyListLegacy()
+        {
+            RequestLobbyListCore(true);
+        }
+
+        private SteamAPICall_t RequestLobbyListCore(bool legacy)
+        {
             Write($"RequestLobbyList");
             CurrentRequest++;
             if (APIClient.IsEnabled)
             {
                 var filterSnapshot = CloneFilter(filters);
                 filters = new FilterLobby();
-                return WorkQueue.EnqueueCallbackResult(new LobbyMatchList_t(), () =>
+                return SubmitResult(legacy, new LobbyMatchList_t(), () =>
                 {
                     var lobbies = APIClient.QueryLobbies(SteamEmulator.InternalAppId, filterSnapshot) ?? new List<SteamLobby>();
                     LobbyManager.UpdateLobbies(lobbies);
@@ -683,7 +756,13 @@ namespace SKYNET.Steamworks.Implementation
                     {
                         m_nLobbiesMatching = (uint)lobbies.Count
                     };
-                }, name: "RequestLobbyList", completionDelay: LobbySearchCompletionDelay);
+                }, "RequestLobbyList", LobbySearchCompletionDelay);
+            }
+
+            if (legacy)
+            {
+                CallbackManager.AddCallback(new LobbyMatchList_t());
+                return 0;
             }
 
             SteamAPICall_t APICall = CallbackManager.AddCallbackResult(new LobbyMatchList_t(), false);

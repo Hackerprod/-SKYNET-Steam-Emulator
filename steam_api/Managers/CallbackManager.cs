@@ -163,6 +163,11 @@ namespace SKYNET.Managers
             AddDirectCallback(data, true, readyToCall);
         }
 
+        public static void AddCallbackDelayed(ICallbackData data, bool gameServer, TimeSpan deliveryDelay)
+        {
+            AddDirectCallback(data, gameServer, true, deliveryDelay);
+        }
+
         public static void ResetGameServerConnectionReplay()
         {
             Interlocked.Exchange(ref gameServerConnectionReplayIssued, 0);

@@ -290,17 +290,17 @@ namespace SKYNET.Steamworks.Interfaces
 
         public void RequestLobbyListOld(IntPtr _)
         {
-            SteamEmulator.SteamMatchmaking.RequestLobbyList();
+            SteamEmulator.SteamMatchmaking.RequestLobbyListLegacy();
         }
 
         public void CreateLobby__V002(IntPtr _, bool bPrivate)
         {
-            SteamEmulator.SteamMatchmaking.CreateLobby(bPrivate ? LobbyTypePrivate : LobbyTypePublic, LegacyLobbyMaxMembers);
+            SteamEmulator.SteamMatchmaking.CreateLobbyLegacy(bPrivate ? LobbyTypePrivate : LobbyTypePublic, LegacyLobbyMaxMembers);
         }
 
         public void CreateLobbyOld(IntPtr _, int eLobbyType)
         {
-            SteamEmulator.SteamMatchmaking.CreateLobby(eLobbyType, LegacyLobbyMaxMembers);
+            SteamEmulator.SteamMatchmaking.CreateLobbyLegacy(eLobbyType, LegacyLobbyMaxMembers);
         }
 
         public ulong CreateLobby__V006(IntPtr _, int eLobbyType)
@@ -310,7 +310,7 @@ namespace SKYNET.Steamworks.Interfaces
 
         public void JoinLobbyOld(IntPtr _, ulong steamIDLobby)
         {
-            SteamEmulator.SteamMatchmaking.JoinLobby(steamIDLobby);
+            SteamEmulator.SteamMatchmaking.JoinLobbyLegacy(steamIDLobby);
         }
 
         public void AddRequestLobbyListFilter(IntPtr _, string pchKeyToMatch, string pchValueToMatch)

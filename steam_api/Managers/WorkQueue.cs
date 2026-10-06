@@ -136,6 +136,38 @@ namespace SKYNET.Managers
             return handle;
         }
 
+        public static void EnqueueDirectCallback(
+            ICallbackData pendingResult,
+            Func<ICallbackData> work,
+            bool gameServer = false,
+            string name = null,
+            string coalesceKey = null,
+            bool highPriority = true,
+            TimeSpan? completionDelay = null)
+        {
+            var delay = completionDelay ?? TimeSpan.Zero;
+
+            var queued = Enqueue(name, () =>
+            {
+                ICallbackData result = pendingResult;
+                try
+                {
+                    result = work?.Invoke() ?? pendingResult;
+                }
+                catch (Exception ex)
+                {
+                    SteamEmulator.Write("WorkQueue", $"{name ?? "callback work"} failed: {ex.Message}");
+                }
+
+                CallbackManager.AddCallbackDelayed(result, gameServer, delay);
+            }, coalesceKey, highPriority, out var coalesced);
+
+            if (!queued || coalesced)
+            {
+                CallbackManager.AddCallbackDelayed(pendingResult, gameServer, TimeSpan.Zero);
+            }
+        }
+
         private static void EnsureStarted()
         {
             if (Interlocked.Exchange(ref started, 1) == 1)
